@@ -1,0 +1,12 @@
+// Re-export all schemas from one place so Drizzle Kit can find them
+export * from './enums';
+export * from './organizations';
+export * from './academic';
+export * from './users';
+export * from './students';
+export * from './curriculum';
+export * from './instruments';
+export * from './items';
+export * from './assessments';
+export * from './responses';
+export * from './results';
