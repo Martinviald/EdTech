@@ -3,8 +3,41 @@ import { resolve } from 'path';
 import { createDbClient } from '../client';
 import { grades, subjects } from '../schema/academic';
 import { curricula } from '../schema/curriculum';
+import { organizations } from '../schema/organizations';
+import { orgMemberships, users } from '../schema/users';
 
 config({ path: resolve(__dirname, '../../../../.env') });
+
+// UUIDs determinísticos para el entorno demo. Permiten referenciar la org y los
+// usuarios desde código (tests, mock auth, scripts) sin tener que hacer lookups.
+// Nota: los UUIDs solo aceptan dígitos hex (0-9, a-f).
+export const DEMO_ORG_ID = 'dec00000-0000-0000-0000-000000000001';
+const DEMO_USER_IDS = {
+  admin: 'dec00000-0000-0000-0000-0000000000a1',
+  director: 'dec00000-0000-0000-0000-0000000000d1',
+  teacher: 'dec00000-0000-0000-0000-0000000000c1',
+} as const;
+
+export const DEMO_USERS = [
+  {
+    id: DEMO_USER_IDS.admin,
+    email: 'admin.demo@colegiodemo.cl',
+    name: 'Admin Demo',
+    role: 'school_admin' as const,
+  },
+  {
+    id: DEMO_USER_IDS.director,
+    email: 'director.demo@colegiodemo.cl',
+    name: 'Director Demo',
+    role: 'academic_director' as const,
+  },
+  {
+    id: DEMO_USER_IDS.teacher,
+    email: 'profesor.demo@colegiodemo.cl',
+    name: 'Profesor Demo',
+    role: 'teacher' as const,
+  },
+];
 
 async function main() {
   const databaseUrl = process.env.DATABASE_URL;
@@ -52,6 +85,48 @@ async function main() {
       { name: 'MINEDUC 2024', type: 'mineduc', isOfficial: true, version: '2024' },
       { name: 'DIA 2025', type: 'dia', isOfficial: true, version: '2025' },
     ])
+    .onConflictDoNothing();
+
+  // -------- Demo tenant para mock auth y validación end-to-end --------
+  // TODO: cuando llegue la HU del CSV de profesores, hacer org_memberships.user_id
+  // nullable + agregar columna `email` para soportar invitaciones pendientes.
+  // Por ahora users y memberships se crean juntos.
+  console.log('Seeding Colegio Demo...');
+  await db
+    .insert(organizations)
+    .values({
+      id: DEMO_ORG_ID,
+      type: 'school',
+      name: 'Colegio Demo',
+      rbd: '00000-0',
+    })
+    .onConflictDoNothing();
+
+  console.log('Seeding demo users...');
+  await db
+    .insert(users)
+    .values(
+      DEMO_USERS.map((u) => ({
+        id: u.id,
+        email: u.email,
+        name: u.name,
+        provider: 'google' as const,
+        providerId: `seed-${u.role}`,
+      })),
+    )
+    .onConflictDoNothing();
+
+  console.log('Seeding demo memberships...');
+  await db
+    .insert(orgMemberships)
+    .values(
+      DEMO_USERS.map((u) => ({
+        userId: u.id,
+        orgId: DEMO_ORG_ID,
+        role: u.role,
+        isActive: true,
+      })),
+    )
     .onConflictDoNothing();
 
   console.log('Seed completed.');
