@@ -24,12 +24,12 @@ Guía paso a paso para configurar el monorepo desde cero hasta tener `pnpm dev` 
 
 Asegúrate de tener instalado:
 
-| Herramienta | Versión mínima | Instalación |
-|---|---|---|
-| **Node.js** | 20.0.0+ | `brew install node` o [nvm](https://github.com/nvm-sh/nvm) |
-| **pnpm** | 9.0.0+ | `npm install -g pnpm` |
-| **PostgreSQL** | 14+ | `brew install postgresql@14` |
-| **Git** | 2.x | `brew install git` |
+| Herramienta    | Versión mínima | Instalación                                                |
+| -------------- | -------------- | ---------------------------------------------------------- |
+| **Node.js**    | 20.0.0+        | `brew install node` o [nvm](https://github.com/nvm-sh/nvm) |
+| **pnpm**       | 9.0.0+         | `npm install -g pnpm`                                      |
+| **PostgreSQL** | 14+            | `brew install postgresql@14`                               |
+| **Git**        | 2.x            | `brew install git`                                         |
 
 Verifica que todo esté disponible:
 
@@ -118,12 +118,15 @@ cp .env.example .env
 Edita `.env` y ajusta el `DATABASE_URL` según tu setup:
 
 **Para PostgreSQL local (Homebrew, sin password, usuario actual):**
+
 ```env
 DATABASE_URL=postgresql://TU_USUARIO@localhost:5432/soe_dev
 ```
+
 > Reemplaza `TU_USUARIO` con el resultado de `echo $USER` (en Mac suele ser tu nombre de usuario del sistema).
 
 **Para PostgreSQL con Docker:**
+
 ```env
 DATABASE_URL=postgresql://postgres:postgres@localhost:5432/soe_dev
 ```
@@ -141,6 +144,7 @@ pnpm --filter @soe/db db:generate
 ```
 
 Esto crea archivos SQL en `packages/db/drizzle/` basados en los schemas TypeScript.
+
 > Solo necesitas correr esto si cambias los schemas. Si ya existe el directorio `drizzle/`, puedes saltarlo.
 
 ### 6.2 Aplicar las migraciones a PostgreSQL
@@ -152,6 +156,7 @@ pnpm --filter @soe/db db:migrate
 Esto ejecuta los SQL contra la base de datos definida en `DATABASE_URL`.
 
 Output esperado:
+
 ```
 Running migrations...
 Migrations completed.
@@ -164,6 +169,7 @@ pnpm --filter @soe/db db:seed
 ```
 
 Esto carga:
+
 - **12 grades** (1° básico a 4° medio)
 - **5 subjects** (Lenguaje, Matemáticas, Ciencias, Historia, Inglés)
 - **2 curricula** (MINEDUC 2024, DIA 2025)
@@ -201,11 +207,11 @@ pnpm dev
 
 Esto arranca **3 procesos en paralelo** vía Turborepo:
 
-| Proceso | Qué hace | Puerto |
-|---|---|---|
-| `@soe/db:dev` | Watch de tipos del package db | — |
-| `@soe/web:dev` | Next.js dev server | `http://localhost:3000` |
-| `@soe/api:dev` | NestJS dev server | `http://localhost:4000` |
+| Proceso        | Qué hace                      | Puerto                  |
+| -------------- | ----------------------------- | ----------------------- |
+| `@soe/db:dev`  | Watch de tipos del package db | —                       |
+| `@soe/web:dev` | Next.js dev server            | `http://localhost:3000` |
+| `@soe/api:dev` | NestJS dev server             | `http://localhost:4000` |
 
 Espera a ver estos logs:
 
@@ -237,6 +243,7 @@ curl -o /dev/null -w "HTTP %{http_code}\n" http://localhost:3000
 ```
 
 O simplemente abre en tu navegador:
+
 - **Web:** http://localhost:3000
 - **API:** http://localhost:4000/api
 - **Health:** http://localhost:4000/api/health
@@ -301,6 +308,7 @@ pnpm --filter "@soe/db" build
 ### El API arranca pero los controllers tiran `Cannot read properties of undefined`
 
 Esto pasa si NestJS no tiene la metadata de decoradores (problema de DI). Asegúrate de:
+
 1. Usar `nest start --watch` (no `tsx watch`) en el script `dev` de la api
 2. Tener `experimentalDecorators` y `emitDecoratorMetadata` en `apps/api/tsconfig.json`
 
@@ -385,6 +393,7 @@ EdTech/
 ## Siguiente paso
 
 Una vez que tienes `pnpm dev` corriendo, el próximo hito del Sprint 0 es:
+
 - **H1.7** — SSO Google/Microsoft (NextAuth)
 - **H19.4** — Row-Level Security en PostgreSQL por `org_id`
 - **H19.10** — Componentes shadcn/ui base

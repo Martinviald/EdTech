@@ -37,10 +37,14 @@ yarn-error.log*
 coverage/
 .nyc_output/
 
-# Drizzle
-packages/db/drizzle/
+# Drizzle — ignora artefactos generados, versiona las migraciones (drizzle/migrations/)
+packages/db/drizzle/*
 !packages/db/drizzle/migrations/
 
 # Misc
 .cache/
 .eslintcache
+
+# Claude
+claude/
+.claude/

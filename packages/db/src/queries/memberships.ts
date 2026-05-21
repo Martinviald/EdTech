@@ -48,9 +48,7 @@ export async function findMembershipByEmail(
  * Lista todos los memberships activos para popular la UI del mock auth.
  * Solo debe llamarse cuando AUTH_MODE=mock; no exponer en producción.
  */
-export async function listActiveMembershipsForMock(
-  db: Database,
-): Promise<MembershipWithUser[]> {
+export async function listActiveMembershipsForMock(db: Database): Promise<MembershipWithUser[]> {
   return db
     .select({
       user: users,

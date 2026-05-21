@@ -57,12 +57,7 @@ export const TAXONOMY_NODE_TYPES = [
 ] as const;
 export type TaxonomyNodeType = (typeof TAXONOMY_NODE_TYPES)[number];
 
-export const PERFORMANCE_LEVELS = [
-  'insufficient',
-  'elementary',
-  'adequate',
-  'advanced',
-] as const;
+export const PERFORMANCE_LEVELS = ['insufficient', 'elementary', 'adequate', 'advanced'] as const;
 export type PerformanceLevel = (typeof PERFORMANCE_LEVELS)[number];
 
 export const ASSESSMENT_STATUS = [

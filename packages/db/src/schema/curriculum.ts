@@ -10,11 +10,7 @@ import {
   uuid,
 } from 'drizzle-orm/pg-core';
 import { relations } from 'drizzle-orm';
-import {
-  curriculumTypeEnum,
-  taxonomyMappingTypeEnum,
-  taxonomyNodeTypeEnum,
-} from './enums';
+import { curriculumTypeEnum, taxonomyMappingTypeEnum, taxonomyNodeTypeEnum } from './enums';
 import { organizations } from './organizations';
 import { grades, subjects } from './academic';
 
