@@ -6,6 +6,9 @@ import { authConfig } from '@/auth.config';
 // intentaría empaquetar postgres-js para edge runtime y rompería el build.
 export const { auth: middleware } = NextAuth(authConfig);
 
+// Matcher negado: protege TODAS las rutas excepto la home pública (/),
+// /login, /auth/*, /api/*, /styleguide (acceso del equipo de diseño),
+// archivos estáticos de Next y assets con extensión.
 export const config = {
-  matcher: ['/dashboard/:path*'],
+  matcher: ['/((?!$|login|auth|api|styleguide|_next/static|_next/image|favicon.ico|.*\\..*).*)'],
 };

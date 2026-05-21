@@ -13,11 +13,11 @@ export const authConfig: NextAuthConfig = {
   session: { strategy: 'jwt' },
   providers: [],
   callbacks: {
-    authorized({ auth, request: { nextUrl } }) {
-      const isLoggedIn = Boolean(auth?.user);
-      const isOnDashboard = nextUrl.pathname.startsWith('/dashboard');
-      if (isOnDashboard) return isLoggedIn;
-      return true;
+    authorized({ auth }) {
+      // El matcher del middleware (src/middleware.ts) excluye rutas públicas
+      // (`/`, `/login`, `/auth/*`, `/api/*`, `/styleguide`, assets). Cualquier
+      // ruta que llegue aquí es privada y requiere sesión.
+      return Boolean(auth?.user);
     },
   },
 };
