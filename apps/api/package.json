@@ -35,6 +35,7 @@
     "@types/jest": "^29.5.14",
     "@types/node": "^22.10.0",
     "@types/supertest": "^6.0.2",
+    "dotenv": "^16.4.7",
     "@typescript-eslint/eslint-plugin": "^8.18.1",
     "@typescript-eslint/parser": "^8.18.1",
     "eslint": "^9.17.0",
@@ -63,6 +64,9 @@
       "**/*.(t|j)s"
     ],
     "coverageDirectory": "../coverage",
-    "testEnvironment": "node"
+    "testEnvironment": "node",
+    "setupFiles": [
+      "<rootDir>/test-setup.ts"
+    ]
   }
 }
