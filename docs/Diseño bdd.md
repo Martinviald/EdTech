@@ -8,15 +8,15 @@
 
 ## Principios de diseño
 
-| # | Principio | Consecuencia práctica |
-|---|---|---|
-| 1 | **Multi-tenant desde el inicio** | `org_id` en todo lo sensible. Row-level isolation por colegio. |
-| 2 | **Taxonomía Universal desacoplada** | OAs, habilidades y contenidos viven en `taxonomy_nodes` (árbol polimórfico). DIA, SIMCE, PAES y Cambridge comparten la misma tabla. |
-| 3 | **Ítems polimórficos** | Un ítem es un ítem. `type` + `content JSONB` determinan si es alternativa, desarrollo, lectura oral, redacción o listening. Sin tablas separadas por tipo. |
-| 4 | **JSONB para lo variable, columnas para lo invariable** | Lo que siempre tiene los mismos campos → columnas. Lo que varía por tipo (contenido de pregunta, configuración de escala, parámetros IRT) → JSONB. |
-| 5 | **Soft deletes en datos de alumnos** | `deleted_at` en lugar de `DELETE`. Datos de evaluación son legalmente sensibles. |
-| 6 | **UUIDs como PKs** | Evita enumeración, facilita merges multi-tenant y exportaciones parciales. |
-| 7 | **Versionado de ítems** | `item_versions` guarda el historial completo. Los análisis longitudinales requieren saber exactamente qué se preguntó en cada año. |
+| #   | Principio                                               | Consecuencia práctica                                                                                                                                      |
+| --- | ------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 1   | **Multi-tenant desde el inicio**                        | `org_id` en todo lo sensible. Row-level isolation por colegio.                                                                                             |
+| 2   | **Taxonomía Universal desacoplada**                     | OAs, habilidades y contenidos viven en `taxonomy_nodes` (árbol polimórfico). DIA, SIMCE, PAES y Cambridge comparten la misma tabla.                        |
+| 3   | **Ítems polimórficos**                                  | Un ítem es un ítem. `type` + `content JSONB` determinan si es alternativa, desarrollo, lectura oral, redacción o listening. Sin tablas separadas por tipo. |
+| 4   | **JSONB para lo variable, columnas para lo invariable** | Lo que siempre tiene los mismos campos → columnas. Lo que varía por tipo (contenido de pregunta, configuración de escala, parámetros IRT) → JSONB.         |
+| 5   | **Soft deletes en datos de alumnos**                    | `deleted_at` en lugar de `DELETE`. Datos de evaluación son legalmente sensibles.                                                                           |
+| 6   | **UUIDs como PKs**                                      | Evita enumeración, facilita merges multi-tenant y exportaciones parciales.                                                                                 |
+| 7   | **Versionado de ítems**                                 | `item_versions` guarda el historial completo. Los análisis longitudinales requieren saber exactamente qué se preguntó en cada año.                         |
 
 ---
 
@@ -60,6 +60,7 @@
 ### 1. Multi-tenancy
 
 #### `organizations`
+
 Nodo raíz del tenant. La plataforma, fundaciones y colegios son todos `Organization`.
 
 ```
@@ -75,11 +76,13 @@ updated_at      timestamp   NOT NULL DEFAULT now()
 ```
 
 **Notas:**
+
 - Un colegio sin fundación tiene `parent_id = NULL`.
 - La jerarquía máxima es: `platform → foundation → school`.
 - `config` JSONB incluye: `defaultGradingScale`, `branding`, `timezone`, `allowedFeatures`.
 
 #### `academic_years`
+
 Año escolar por organización.
 
 ```
@@ -96,6 +99,7 @@ is_current      boolean     DEFAULT false
 ### 2. Estructura académica
 
 #### `grades`
+
 Niveles educativos (1° básico ... 4° medio). Tabla global de la plataforma, no por colegio.
 
 ```
@@ -108,6 +112,7 @@ order           integer     1..12 (para ordenar)
 ```
 
 #### `class_groups`
+
 Cursos concretos (1°A año 2026 en Colegio X).
 
 ```
@@ -119,6 +124,7 @@ name            text        e.g. "1°A", "3°B"
 ```
 
 #### `subjects`
+
 Asignaturas. Global de la plataforma.
 
 ```
@@ -130,6 +136,7 @@ mineduc_code    text        Código oficial MINEDUC si existe
 ```
 
 #### `subject_classes`
+
 Una asignatura siendo dictada en un curso específico.
 
 ```
@@ -142,6 +149,7 @@ UNIQUE(class_group_id, subject_id, academic_year_id)
 ```
 
 #### `teacher_assignments`
+
 Qué profesor dicta qué asignatura en qué curso.
 
 ```
@@ -158,6 +166,7 @@ UNIQUE(user_id, subject_class_id)
 ### 3. Usuarios y roles
 
 #### `users`
+
 Autenticación via SSO (Google / Microsoft). Sin contraseña propia.
 
 ```
@@ -173,6 +182,7 @@ deleted_at      timestamp
 ```
 
 #### `org_memberships`
+
 Un usuario puede tener roles distintos en distintas organizaciones.
 
 ```
@@ -191,6 +201,7 @@ UNIQUE(user_id, org_id, role)
 ```
 
 **Notas sobre `scope` JSONB:**
+
 ```json
 {
   "gradeIds": ["uuid-1", "uuid-2"],
@@ -198,6 +209,7 @@ UNIQUE(user_id, org_id, role)
   "classGroupIds": ["uuid-4", "uuid-5"]
 }
 ```
+
 Un `NULL` en cualquier campo significa "todos".
 
 ---
@@ -205,6 +217,7 @@ Un `NULL` en cualquier campo significa "todos".
 ### 4. Alumnos
 
 #### `students`
+
 Perfil del alumno. Separado de `users` porque no todos los alumnos tienen cuenta (básica sin digital).
 
 ```
@@ -224,16 +237,18 @@ INDEX(rut)
 ```
 
 **Notas sobre `profile` JSONB:**
+
 ```json
 {
   "nee": ["dislexia"],
   "careerInterest": "Ingeniería",
   "targetUniversity": "PUC",
-  "sensitiveNotes": "..."  // Solo accesible por roles autorizados
+  "sensitiveNotes": "..." // Solo accesible por roles autorizados
 }
 ```
 
 #### `student_enrollments`
+
 Matrícula por curso y año. Un alumno puede cambiar de colegio, repetir año, etc.
 
 ```
@@ -253,6 +268,7 @@ UNIQUE(student_id, academic_year_id)  -- un alumno, un curso por año
 ### 5. Taxonomía Universal ← PIEZA CENTRAL
 
 Diseñada para soportar en la misma estructura:
+
 - **MINEDUC**: OAs por asignatura, nivel y eje (Lectura, Escritura, Comunicación Oral)
 - **DIA**: Habilidades específicas de Diagnóstico Integral de Aprendizajes
 - **SIMCE**: Dominios y niveles de desempeño
@@ -261,6 +277,7 @@ Diseñada para soportar en la misma estructura:
 - **Custom**: Cualquier taxonomía que defina la plataforma o el colegio
 
 #### `curricula`
+
 El "sistema de clasificación" raíz.
 
 ```
@@ -276,6 +293,7 @@ metadata        jsonb       Info adicional del curriculum
 ```
 
 #### `taxonomy_nodes`
+
 Árbol jerárquico y polimórfico. Un nodo puede ser dominio, subdominio, OA, habilidad, contenido, tipo de texto, nivel de desempeño, etc.
 
 ```
@@ -300,6 +318,7 @@ INDEX(curriculum_id, grade_id, subject_id)
 ```
 
 **Ejemplos de árbol MINEDUC Lenguaje 3° básico:**
+
 ```
 [domain]      Lenguaje y Comunicación
   [axis]      Lectura
@@ -314,6 +333,7 @@ INDEX(curriculum_id, grade_id, subject_id)
 ```
 
 **Ejemplos de árbol Cambridge FCE:**
+
 ```
 [paper]       Reading and Use of English
   [skill]     Vocabulary
@@ -332,6 +352,7 @@ INDEX(curriculum_id, grade_id, subject_id)
 ```
 
 #### `taxonomy_mappings`
+
 Equivalencias entre nodos de distintos curricula. Permite cruzar SIMCE con MINEDUC.
 
 ```
@@ -350,6 +371,7 @@ UNIQUE(source_node_id, target_node_id)
 ### 6. Instrumentos
 
 #### `instruments`
+
 La definición de una prueba (no una aplicación específica).
 
 ```
@@ -374,6 +396,7 @@ created_at      timestamp   NOT NULL DEFAULT now()
 ```
 
 **`config` JSONB incluye:**
+
 ```json
 {
   "totalPoints": 45,
@@ -386,6 +409,7 @@ created_at      timestamp   NOT NULL DEFAULT now()
 ```
 
 #### `instrument_sections`
+
 Secciones de un instrumento (ej: Sección A, Sección Lectora, Writing Task 1).
 
 ```
@@ -403,6 +427,7 @@ config          jsonb       Configuración específica de sección
 ```
 
 #### `grading_scales`
+
 Escalas de conversión puntaje → nota. Configurable por colegio.
 
 ```
@@ -419,14 +444,15 @@ config          jsonb       Para escalas no lineales (PAES 100-1000, etc.)
 ```
 
 **`config` para escala PAES:**
+
 ```json
 {
   "minScore": 100,
   "maxScore": 1000,
   "conversionTable": [
-    {"rawPoints": 0, "scaledScore": 100},
-    {"rawPoints": 15, "scaledScore": 250},
-    {"rawPoints": 65, "scaledScore": 1000}
+    { "rawPoints": 0, "scaledScore": 100 },
+    { "rawPoints": 15, "scaledScore": 250 },
+    { "rawPoints": 65, "scaledScore": 1000 }
   ]
 }
 ```
@@ -436,6 +462,7 @@ config          jsonb       Para escalas no lineales (PAES 100-1000, etc.)
 ### 7. Banco de Ítems
 
 #### `items`
+
 Entidad central polimórfica. El `type` determina el schema del `content` JSONB.
 
 ```
@@ -466,15 +493,16 @@ INDEX(type, status)
 **Ejemplos de `content` JSONB por tipo:**
 
 `multiple_choice`:
+
 ```json
 {
   "stem": "¿Cuál es la idea principal del texto?",
   "imageUrl": null,
   "options": [
-    {"label": "A", "text": "Los animales migran...", "isCorrect": false},
-    {"label": "B", "text": "El agua es fundamental...", "isCorrect": true},
-    {"label": "C", "text": "Los bosques se talan...", "isCorrect": false},
-    {"label": "D", "text": "Los ríos nacen...", "isCorrect": false}
+    { "label": "A", "text": "Los animales migran...", "isCorrect": false },
+    { "label": "B", "text": "El agua es fundamental...", "isCorrect": true },
+    { "label": "C", "text": "Los bosques se talan...", "isCorrect": false },
+    { "label": "D", "text": "Los ríos nacen...", "isCorrect": false }
   ],
   "correctLabel": "B",
   "distractorNotes": {
@@ -485,6 +513,7 @@ INDEX(type, status)
 ```
 
 `oral_reading`:
+
 ```json
 {
   "textToRead": "El sol salió...",
@@ -495,6 +524,7 @@ INDEX(type, status)
 ```
 
 `open_ended`:
+
 ```json
 {
   "stem": "Explica con tus palabras por qué...",
@@ -505,6 +535,7 @@ INDEX(type, status)
 ```
 
 `writing`:
+
 ```json
 {
   "prompt": "Escribe un texto narrativo sobre...",
@@ -516,6 +547,7 @@ INDEX(type, status)
 ```
 
 `listening` (Cambridge):
+
 ```json
 {
   "audioUrl": "s3://bucket/audio/fce-part1.mp3",
@@ -527,6 +559,7 @@ INDEX(type, status)
 ```
 
 #### `item_taxonomy_tags`
+
 Etiquetado de ítems con nodos de la taxonomía (OA, habilidad, contenido, tipo de texto).
 
 ```
@@ -543,6 +576,7 @@ INDEX(node_id)
 ```
 
 #### `item_versions`
+
 Historial completo de cambios en ítems. Esencial para análisis longitudinal.
 
 ```
@@ -559,6 +593,7 @@ UNIQUE(item_id, version)
 ```
 
 #### `rubrics`
+
 Rúbricas para corrección de ítems de desarrollo, escritura y oralidad.
 
 ```
@@ -574,6 +609,7 @@ created_at      timestamp   NOT NULL DEFAULT now()
 ```
 
 #### `rubric_criteria`
+
 Criterios de una rúbrica (ej: "Vocabulario", "Coherencia", "Content").
 
 ```
@@ -587,6 +623,7 @@ taxonomy_node_id uuid       FK → taxonomy_nodes.id  NULLABLE (liga al currícu
 ```
 
 #### `rubric_levels`
+
 Niveles de cada criterio (qué significa cada puntaje).
 
 ```
@@ -604,6 +641,7 @@ UNIQUE(criterion_id, score)
 ### 8. Aplicación de Evaluaciones
 
 #### `assessments`
+
 Una aplicación concreta de un instrumento a uno o más cursos.
 
 ```
@@ -625,6 +663,7 @@ INDEX(instrument_id)
 ```
 
 #### `assessment_course_assignments`
+
 Qué cursos rinden esta evaluación.
 
 ```
@@ -634,6 +673,7 @@ PRIMARY KEY(assessment_id, class_group_id)
 ```
 
 #### `assessment_forms`
+
 Formas A/B/C de la misma evaluación (para evitar copia).
 
 ```
@@ -644,6 +684,7 @@ item_order      uuid[]      IDs de ítems en orden (puede variar por forma)
 ```
 
 #### `import_jobs`
+
 Jobs de importación asíncrona (CSV de Gradecam, archivo oficial DIA, etc.).
 
 ```
@@ -670,6 +711,7 @@ INDEX(assessment_id)
 ### 9. Respuestas
 
 #### `responses`
+
 La respuesta de un alumno a un ítem específico.
 
 ```
@@ -699,6 +741,7 @@ INDEX(student_id)
 `multiple_choice`: `{"selectedLabel": "B"}`
 
 `oral_reading`:
+
 ```json
 {
   "audioUrl": "s3://bucket/recordings/student123-item45.mp3",
@@ -709,6 +752,7 @@ INDEX(student_id)
 ```
 
 `open_ended` / `writing`:
+
 ```json
 {
   "text": "El texto habla sobre...",
@@ -718,6 +762,7 @@ INDEX(student_id)
 ```
 
 #### `ai_grading_jobs`
+
 Jobs de corrección asíncrona con IA (para desarrollo, escritura, oralidad).
 
 ```
@@ -745,6 +790,7 @@ INDEX(status)
 ### 10. Resultados y métricas
 
 #### `assessment_results`
+
 Resultado consolidado de un alumno en una evaluación.
 
 ```
@@ -767,6 +813,7 @@ INDEX(student_id)
 ```
 
 #### `skill_results`
+
 Resultado desagregado por nodo de taxonomía (OA, habilidad, contenido).
 **Esta es la tabla que alimenta todos los dashboards.**
 
@@ -794,6 +841,7 @@ INDEX(student_id, node_id)
 Ver sección 8 — `import_jobs` cubre todos los flujos de ingesta de F1.
 
 En F4 se agrega:
+
 - `ocr_scan_jobs` — procesamiento de hojas escaneadas con visión IA (SQS + Workers)
 
 ---
@@ -829,7 +877,9 @@ Los dashboards (H6.10, H6.11) muestran % de logro por alumno × habilidad × cur
 ## Implementación por fases
 
 ### F1 — Sprint 0-3 (Mínimo para demo)
+
 Tablas necesarias en orden de implementación:
+
 ```
 S0: organizations, academic_years, grades, subjects
     users, org_memberships
@@ -851,12 +901,14 @@ S4-S5: assessment_results, skill_results
 ```
 
 ### F2 — Benchmarking
+
 ```
 + Materializar skill_results como vista materializada PostgreSQL
 + taxonomy_mappings (para cruzar SIMCE con MINEDUC)
 ```
 
 ### F3 — SIMCE/PAES/Cambridge
+
 ```
 + rubrics, rubric_criteria, rubric_levels
 + item_versions (activar versionado)
@@ -864,6 +916,7 @@ S4-S5: assessment_results, skill_results
 ```
 
 ### F4 — OS Académico
+
 ```
 + planning_units (LMS: planificación clase a clase)
 + action_plans, action_plan_items (plan de reforzamiento)
@@ -872,6 +925,7 @@ S4-S5: assessment_results, skill_results
 ```
 
 ### F5 — Escalamiento
+
 ```
 + Migrar skill_results histórico a ClickHouse/Snowflake
 + Particionamiento de responses por org_id y año
@@ -892,4 +946,4 @@ Para que el sistema funcione desde el primer día, se necesita cargar:
 
 ---
 
-*Documento generado: 2026-05-16 · Revisar antes de implementar F3 (SIMCE/PAES) y F4 (LMS)*
+_Documento generado: 2026-05-16 · Revisar antes de implementar F3 (SIMCE/PAES) y F4 (LMS)_

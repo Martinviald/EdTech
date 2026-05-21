@@ -60,12 +60,8 @@
           "name": "academic_years_org_id_organizations_id_fk",
           "tableFrom": "academic_years",
           "tableTo": "organizations",
-          "columnsFrom": [
-            "org_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["org_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -197,12 +193,8 @@
           "name": "class_groups_org_id_organizations_id_fk",
           "tableFrom": "class_groups",
           "tableTo": "organizations",
-          "columnsFrom": [
-            "org_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["org_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -210,12 +202,8 @@
           "name": "class_groups_academic_year_id_academic_years_id_fk",
           "tableFrom": "class_groups",
           "tableTo": "academic_years",
-          "columnsFrom": [
-            "academic_year_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["academic_year_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -223,12 +211,8 @@
           "name": "class_groups_grade_id_grades_id_fk",
           "tableFrom": "class_groups",
           "tableTo": "grades",
-          "columnsFrom": [
-            "grade_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["grade_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -288,9 +272,7 @@
         "grades_code_unique": {
           "name": "grades_code_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "code"
-          ]
+          "columns": ["code"]
         }
       },
       "policies": {},
@@ -340,12 +322,8 @@
           "name": "subject_classes_class_group_id_class_groups_id_fk",
           "tableFrom": "subject_classes",
           "tableTo": "class_groups",
-          "columnsFrom": [
-            "class_group_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["class_group_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -353,12 +331,8 @@
           "name": "subject_classes_subject_id_subjects_id_fk",
           "tableFrom": "subject_classes",
           "tableTo": "subjects",
-          "columnsFrom": [
-            "subject_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["subject_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -366,12 +340,8 @@
           "name": "subject_classes_academic_year_id_academic_years_id_fk",
           "tableFrom": "subject_classes",
           "tableTo": "academic_years",
-          "columnsFrom": [
-            "academic_year_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["academic_year_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -381,11 +351,7 @@
         "subject_classes_class_group_id_subject_id_academic_year_id_unique": {
           "name": "subject_classes_class_group_id_subject_id_academic_year_id_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "class_group_id",
-            "subject_id",
-            "academic_year_id"
-          ]
+          "columns": ["class_group_id", "subject_id", "academic_year_id"]
         }
       },
       "policies": {},
@@ -435,9 +401,7 @@
         "subjects_code_unique": {
           "name": "subjects_code_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "code"
-          ]
+          "columns": ["code"]
         }
       },
       "policies": {},
@@ -501,12 +465,8 @@
           "name": "org_memberships_user_id_users_id_fk",
           "tableFrom": "org_memberships",
           "tableTo": "users",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -514,12 +474,8 @@
           "name": "org_memberships_org_id_organizations_id_fk",
           "tableFrom": "org_memberships",
           "tableTo": "organizations",
-          "columnsFrom": [
-            "org_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["org_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -529,11 +485,7 @@
         "org_memberships_user_id_org_id_role_unique": {
           "name": "org_memberships_user_id_org_id_role_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "user_id",
-            "org_id",
-            "role"
-          ]
+          "columns": ["user_id", "org_id", "role"]
         }
       },
       "policies": {},
@@ -584,12 +536,8 @@
           "name": "teacher_assignments_user_id_users_id_fk",
           "tableFrom": "teacher_assignments",
           "tableTo": "users",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -599,10 +547,7 @@
         "teacher_assignments_user_id_subject_class_id_unique": {
           "name": "teacher_assignments_user_id_subject_class_id_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "user_id",
-            "subject_class_id"
-          ]
+          "columns": ["user_id", "subject_class_id"]
         }
       },
       "policies": {},
@@ -685,9 +630,7 @@
         "users_email_unique": {
           "name": "users_email_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "email"
-          ]
+          "columns": ["email"]
         }
       },
       "policies": {},
@@ -751,12 +694,8 @@
           "name": "student_enrollments_student_id_students_id_fk",
           "tableFrom": "student_enrollments",
           "tableTo": "students",
-          "columnsFrom": [
-            "student_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["student_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -764,12 +703,8 @@
           "name": "student_enrollments_class_group_id_class_groups_id_fk",
           "tableFrom": "student_enrollments",
           "tableTo": "class_groups",
-          "columnsFrom": [
-            "class_group_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["class_group_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -777,12 +712,8 @@
           "name": "student_enrollments_academic_year_id_academic_years_id_fk",
           "tableFrom": "student_enrollments",
           "tableTo": "academic_years",
-          "columnsFrom": [
-            "academic_year_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["academic_year_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -792,10 +723,7 @@
         "student_enrollments_student_id_academic_year_id_unique": {
           "name": "student_enrollments_student_id_academic_year_id_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "student_id",
-            "academic_year_id"
-          ]
+          "columns": ["student_id", "academic_year_id"]
         }
       },
       "policies": {},
@@ -890,12 +818,8 @@
           "name": "students_org_id_organizations_id_fk",
           "tableFrom": "students",
           "tableTo": "organizations",
-          "columnsFrom": [
-            "org_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["org_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -903,12 +827,8 @@
           "name": "students_user_id_users_id_fk",
           "tableFrom": "students",
           "tableTo": "users",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -990,12 +910,8 @@
           "name": "curricula_org_id_organizations_id_fk",
           "tableFrom": "curricula",
           "tableTo": "organizations",
-          "columnsFrom": [
-            "org_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["org_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -1063,12 +979,8 @@
           "name": "taxonomy_mappings_source_node_id_taxonomy_nodes_id_fk",
           "tableFrom": "taxonomy_mappings",
           "tableTo": "taxonomy_nodes",
-          "columnsFrom": [
-            "source_node_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["source_node_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -1076,12 +988,8 @@
           "name": "taxonomy_mappings_target_node_id_taxonomy_nodes_id_fk",
           "tableFrom": "taxonomy_mappings",
           "tableTo": "taxonomy_nodes",
-          "columnsFrom": [
-            "target_node_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["target_node_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -1091,10 +999,7 @@
         "taxonomy_mappings_source_node_id_target_node_id_unique": {
           "name": "taxonomy_mappings_source_node_id_target_node_id_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "source_node_id",
-            "target_node_id"
-          ]
+          "columns": ["source_node_id", "target_node_id"]
         }
       },
       "policies": {},
@@ -1196,12 +1101,8 @@
           "name": "taxonomy_nodes_curriculum_id_curricula_id_fk",
           "tableFrom": "taxonomy_nodes",
           "tableTo": "curricula",
-          "columnsFrom": [
-            "curriculum_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["curriculum_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -1209,12 +1110,8 @@
           "name": "taxonomy_nodes_grade_id_grades_id_fk",
           "tableFrom": "taxonomy_nodes",
           "tableTo": "grades",
-          "columnsFrom": [
-            "grade_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["grade_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -1222,12 +1119,8 @@
           "name": "taxonomy_nodes_subject_id_subjects_id_fk",
           "tableFrom": "taxonomy_nodes",
           "tableTo": "subjects",
-          "columnsFrom": [
-            "subject_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["subject_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -1317,12 +1210,8 @@
           "name": "grading_scales_org_id_organizations_id_fk",
           "tableFrom": "grading_scales",
           "tableTo": "organizations",
-          "columnsFrom": [
-            "org_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["org_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -1402,12 +1291,8 @@
           "name": "instrument_sections_instrument_id_instruments_id_fk",
           "tableFrom": "instrument_sections",
           "tableTo": "instruments",
-          "columnsFrom": [
-            "instrument_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["instrument_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -1545,12 +1430,8 @@
           "name": "instruments_org_id_organizations_id_fk",
           "tableFrom": "instruments",
           "tableTo": "organizations",
-          "columnsFrom": [
-            "org_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["org_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -1558,12 +1439,8 @@
           "name": "instruments_curriculum_id_curricula_id_fk",
           "tableFrom": "instruments",
           "tableTo": "curricula",
-          "columnsFrom": [
-            "curriculum_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["curriculum_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -1571,12 +1448,8 @@
           "name": "instruments_subject_id_subjects_id_fk",
           "tableFrom": "instruments",
           "tableTo": "subjects",
-          "columnsFrom": [
-            "subject_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["subject_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -1584,12 +1457,8 @@
           "name": "instruments_grade_id_grades_id_fk",
           "tableFrom": "instruments",
           "tableTo": "grades",
-          "columnsFrom": [
-            "grade_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["grade_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -1597,12 +1466,8 @@
           "name": "instruments_grading_scale_id_grading_scales_id_fk",
           "tableFrom": "instruments",
           "tableTo": "grading_scales",
-          "columnsFrom": [
-            "grading_scale_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["grading_scale_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -1610,12 +1475,8 @@
           "name": "instruments_created_by_id_users_id_fk",
           "tableFrom": "instruments",
           "tableTo": "users",
-          "columnsFrom": [
-            "created_by_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["created_by_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -1686,12 +1547,8 @@
           "name": "item_taxonomy_tags_item_id_items_id_fk",
           "tableFrom": "item_taxonomy_tags",
           "tableTo": "items",
-          "columnsFrom": [
-            "item_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["item_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -1699,12 +1556,8 @@
           "name": "item_taxonomy_tags_node_id_taxonomy_nodes_id_fk",
           "tableFrom": "item_taxonomy_tags",
           "tableTo": "taxonomy_nodes",
-          "columnsFrom": [
-            "node_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["node_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -1714,10 +1567,7 @@
         "item_taxonomy_tags_item_id_node_id_unique": {
           "name": "item_taxonomy_tags_item_id_node_id_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "item_id",
-            "node_id"
-          ]
+          "columns": ["item_id", "node_id"]
         }
       },
       "policies": {},
@@ -1785,12 +1635,8 @@
           "name": "item_versions_item_id_items_id_fk",
           "tableFrom": "item_versions",
           "tableTo": "items",
-          "columnsFrom": [
-            "item_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["item_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -1798,12 +1644,8 @@
           "name": "item_versions_changed_by_id_users_id_fk",
           "tableFrom": "item_versions",
           "tableTo": "users",
-          "columnsFrom": [
-            "changed_by_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["changed_by_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -1813,10 +1655,7 @@
         "item_versions_item_id_version_unique": {
           "name": "item_versions_item_id_version_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "item_id",
-            "version"
-          ]
+          "columns": ["item_id", "version"]
         }
       },
       "policies": {},
@@ -1943,12 +1782,8 @@
           "name": "items_org_id_organizations_id_fk",
           "tableFrom": "items",
           "tableTo": "organizations",
-          "columnsFrom": [
-            "org_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["org_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -1956,12 +1791,8 @@
           "name": "items_instrument_id_instruments_id_fk",
           "tableFrom": "items",
           "tableTo": "instruments",
-          "columnsFrom": [
-            "instrument_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["instrument_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -1969,12 +1800,8 @@
           "name": "items_section_id_instrument_sections_id_fk",
           "tableFrom": "items",
           "tableTo": "instrument_sections",
-          "columnsFrom": [
-            "section_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["section_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -1982,12 +1809,8 @@
           "name": "items_created_by_id_users_id_fk",
           "tableFrom": "items",
           "tableTo": "users",
-          "columnsFrom": [
-            "created_by_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["created_by_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -2053,12 +1876,8 @@
           "name": "rubric_criteria_rubric_id_rubrics_id_fk",
           "tableFrom": "rubric_criteria",
           "tableTo": "rubrics",
-          "columnsFrom": [
-            "rubric_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["rubric_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -2066,12 +1885,8 @@
           "name": "rubric_criteria_taxonomy_node_id_taxonomy_nodes_id_fk",
           "tableFrom": "rubric_criteria",
           "tableTo": "taxonomy_nodes",
-          "columnsFrom": [
-            "taxonomy_node_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["taxonomy_node_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -2124,12 +1939,8 @@
           "name": "rubric_levels_criterion_id_rubric_criteria_id_fk",
           "tableFrom": "rubric_levels",
           "tableTo": "rubric_criteria",
-          "columnsFrom": [
-            "criterion_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["criterion_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -2139,10 +1950,7 @@
         "rubric_levels_criterion_id_score_unique": {
           "name": "rubric_levels_criterion_id_score_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "criterion_id",
-            "score"
-          ]
+          "columns": ["criterion_id", "score"]
         }
       },
       "policies": {},
@@ -2219,12 +2027,8 @@
           "name": "rubrics_org_id_organizations_id_fk",
           "tableFrom": "rubrics",
           "tableTo": "organizations",
-          "columnsFrom": [
-            "org_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["org_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -2232,12 +2036,8 @@
           "name": "rubrics_subject_id_subjects_id_fk",
           "tableFrom": "rubrics",
           "tableTo": "subjects",
-          "columnsFrom": [
-            "subject_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["subject_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -2245,12 +2045,8 @@
           "name": "rubrics_created_by_id_users_id_fk",
           "tableFrom": "rubrics",
           "tableTo": "users",
-          "columnsFrom": [
-            "created_by_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["created_by_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -2284,12 +2080,8 @@
           "name": "assessment_course_assignments_assessment_id_assessments_id_fk",
           "tableFrom": "assessment_course_assignments",
           "tableTo": "assessments",
-          "columnsFrom": [
-            "assessment_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["assessment_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -2297,12 +2089,8 @@
           "name": "assessment_course_assignments_class_group_id_class_groups_id_fk",
           "tableFrom": "assessment_course_assignments",
           "tableTo": "class_groups",
-          "columnsFrom": [
-            "class_group_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["class_group_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -2310,10 +2098,7 @@
       "compositePrimaryKeys": {
         "assessment_course_assignments_assessment_id_class_group_id_pk": {
           "name": "assessment_course_assignments_assessment_id_class_group_id_pk",
-          "columns": [
-            "assessment_id",
-            "class_group_id"
-          ]
+          "columns": ["assessment_id", "class_group_id"]
         }
       },
       "uniqueConstraints": {},
@@ -2364,12 +2149,8 @@
           "name": "assessment_forms_assessment_id_assessments_id_fk",
           "tableFrom": "assessment_forms",
           "tableTo": "assessments",
-          "columnsFrom": [
-            "assessment_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["assessment_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -2477,12 +2258,8 @@
           "name": "assessments_org_id_organizations_id_fk",
           "tableFrom": "assessments",
           "tableTo": "organizations",
-          "columnsFrom": [
-            "org_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["org_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -2490,12 +2267,8 @@
           "name": "assessments_instrument_id_instruments_id_fk",
           "tableFrom": "assessments",
           "tableTo": "instruments",
-          "columnsFrom": [
-            "instrument_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["instrument_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -2503,12 +2276,8 @@
           "name": "assessments_administered_by_id_users_id_fk",
           "tableFrom": "assessments",
           "tableTo": "users",
-          "columnsFrom": [
-            "administered_by_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["administered_by_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -2608,12 +2377,8 @@
           "name": "import_jobs_org_id_organizations_id_fk",
           "tableFrom": "import_jobs",
           "tableTo": "organizations",
-          "columnsFrom": [
-            "org_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["org_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -2621,12 +2386,8 @@
           "name": "import_jobs_assessment_id_assessments_id_fk",
           "tableFrom": "import_jobs",
           "tableTo": "assessments",
-          "columnsFrom": [
-            "assessment_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["assessment_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -2634,12 +2395,8 @@
           "name": "import_jobs_created_by_id_users_id_fk",
           "tableFrom": "import_jobs",
           "tableTo": "users",
-          "columnsFrom": [
-            "created_by_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["created_by_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -2748,12 +2505,8 @@
           "name": "ai_grading_jobs_response_id_responses_id_fk",
           "tableFrom": "ai_grading_jobs",
           "tableTo": "responses",
-          "columnsFrom": [
-            "response_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["response_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -2876,12 +2629,8 @@
           "name": "responses_assessment_id_assessments_id_fk",
           "tableFrom": "responses",
           "tableTo": "assessments",
-          "columnsFrom": [
-            "assessment_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["assessment_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -2889,12 +2638,8 @@
           "name": "responses_form_id_assessment_forms_id_fk",
           "tableFrom": "responses",
           "tableTo": "assessment_forms",
-          "columnsFrom": [
-            "form_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["form_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -2902,12 +2647,8 @@
           "name": "responses_student_id_students_id_fk",
           "tableFrom": "responses",
           "tableTo": "students",
-          "columnsFrom": [
-            "student_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["student_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -2915,12 +2656,8 @@
           "name": "responses_item_id_items_id_fk",
           "tableFrom": "responses",
           "tableTo": "items",
-          "columnsFrom": [
-            "item_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["item_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -2930,11 +2667,7 @@
         "responses_assessment_id_student_id_item_id_unique": {
           "name": "responses_assessment_id_student_id_item_id_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "assessment_id",
-            "student_id",
-            "item_id"
-          ]
+          "columns": ["assessment_id", "student_id", "item_id"]
         }
       },
       "policies": {},
@@ -3029,12 +2762,8 @@
           "name": "assessment_results_assessment_id_assessments_id_fk",
           "tableFrom": "assessment_results",
           "tableTo": "assessments",
-          "columnsFrom": [
-            "assessment_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["assessment_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -3042,12 +2771,8 @@
           "name": "assessment_results_student_id_students_id_fk",
           "tableFrom": "assessment_results",
           "tableTo": "students",
-          "columnsFrom": [
-            "student_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["student_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -3057,10 +2782,7 @@
         "assessment_results_assessment_id_student_id_unique": {
           "name": "assessment_results_assessment_id_student_id_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "assessment_id",
-            "student_id"
-          ]
+          "columns": ["assessment_id", "student_id"]
         }
       },
       "policies": {},
@@ -3144,12 +2866,8 @@
           "name": "skill_results_assessment_id_assessments_id_fk",
           "tableFrom": "skill_results",
           "tableTo": "assessments",
-          "columnsFrom": [
-            "assessment_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["assessment_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -3157,12 +2875,8 @@
           "name": "skill_results_student_id_students_id_fk",
           "tableFrom": "skill_results",
           "tableTo": "students",
-          "columnsFrom": [
-            "student_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["student_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -3170,12 +2884,8 @@
           "name": "skill_results_node_id_taxonomy_nodes_id_fk",
           "tableFrom": "skill_results",
           "tableTo": "taxonomy_nodes",
-          "columnsFrom": [
-            "node_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["node_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -3185,11 +2895,7 @@
         "skill_results_assessment_id_student_id_node_id_unique": {
           "name": "skill_results_assessment_id_student_id_node_id_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "assessment_id",
-            "student_id",
-            "node_id"
-          ]
+          "columns": ["assessment_id", "student_id", "node_id"]
         }
       },
       "policies": {},
@@ -3201,79 +2907,37 @@
     "public.assessment_mode": {
       "name": "assessment_mode",
       "schema": "public",
-      "values": [
-        "paper",
-        "digital",
-        "oral",
-        "mixed"
-      ]
+      "values": ["paper", "digital", "oral", "mixed"]
     },
     "public.assessment_status": {
       "name": "assessment_status",
       "schema": "public",
-      "values": [
-        "scheduled",
-        "in_progress",
-        "processing",
-        "completed",
-        "cancelled"
-      ]
+      "values": ["scheduled", "in_progress", "processing", "completed", "cancelled"]
     },
     "public.curriculum_type": {
       "name": "curriculum_type",
       "schema": "public",
-      "values": [
-        "mineduc",
-        "simce",
-        "paes",
-        "dia",
-        "cambridge",
-        "aptus",
-        "desafio",
-        "custom"
-      ]
+      "values": ["mineduc", "simce", "paes", "dia", "cambridge", "aptus", "desafio", "custom"]
     },
     "public.enrollment_status": {
       "name": "enrollment_status",
       "schema": "public",
-      "values": [
-        "active",
-        "transferred",
-        "graduated",
-        "withdrawn"
-      ]
+      "values": ["active", "transferred", "graduated", "withdrawn"]
     },
     "public.gender": {
       "name": "gender",
       "schema": "public",
-      "values": [
-        "M",
-        "F",
-        "X",
-        "unspecified"
-      ]
+      "values": ["M", "F", "X", "unspecified"]
     },
     "public.grading_scale_type": {
       "name": "grading_scale_type",
       "schema": "public",
-      "values": [
-        "linear_chilean",
-        "percentage",
-        "paes_scaled",
-        "irt_based",
-        "custom"
-      ]
+      "values": ["linear_chilean", "percentage", "paes_scaled", "irt_based", "custom"]
     },
     "public.import_job_status": {
       "name": "import_job_status",
       "schema": "public",
-      "values": [
-        "pending",
-        "processing",
-        "completed",
-        "failed",
-        "partial"
-      ]
+      "values": ["pending", "processing", "completed", "failed", "partial"]
     },
     "public.import_job_type": {
       "name": "import_job_type",
@@ -3290,53 +2954,27 @@
     "public.instrument_status": {
       "name": "instrument_status",
       "schema": "public",
-      "values": [
-        "draft",
-        "published",
-        "archived"
-      ]
+      "values": ["draft", "published", "archived"]
     },
     "public.instrument_type": {
       "name": "instrument_type",
       "schema": "public",
-      "values": [
-        "dia",
-        "simce",
-        "paes",
-        "cambridge_mock",
-        "aptus",
-        "desafio",
-        "pal",
-        "custom"
-      ]
+      "values": ["dia", "simce", "paes", "cambridge_mock", "aptus", "desafio", "pal", "custom"]
     },
     "public.item_source": {
       "name": "item_source",
       "schema": "public",
-      "values": [
-        "official",
-        "ai_generated",
-        "custom",
-        "imported"
-      ]
+      "values": ["official", "ai_generated", "custom", "imported"]
     },
     "public.item_status": {
       "name": "item_status",
       "schema": "public",
-      "values": [
-        "draft",
-        "review",
-        "published",
-        "deprecated"
-      ]
+      "values": ["draft", "review", "published", "deprecated"]
     },
     "public.item_tag_type": {
       "name": "item_tag_type",
       "schema": "public",
-      "values": [
-        "primary",
-        "secondary"
-      ]
+      "values": ["primary", "secondary"]
     },
     "public.item_type": {
       "name": "item_type",
@@ -3357,38 +2995,22 @@
     "public.org_type": {
       "name": "org_type",
       "schema": "public",
-      "values": [
-        "platform",
-        "foundation",
-        "school"
-      ]
+      "values": ["platform", "foundation", "school"]
     },
     "public.performance_level": {
       "name": "performance_level",
       "schema": "public",
-      "values": [
-        "insufficient",
-        "elementary",
-        "adequate",
-        "advanced"
-      ]
+      "values": ["insufficient", "elementary", "adequate", "advanced"]
     },
     "public.rubric_type": {
       "name": "rubric_type",
       "schema": "public",
-      "values": [
-        "analytic",
-        "holistic"
-      ]
+      "values": ["analytic", "holistic"]
     },
     "public.scored_by": {
       "name": "scored_by",
       "schema": "public",
-      "values": [
-        "auto",
-        "ai",
-        "human"
-      ]
+      "values": ["auto", "ai", "human"]
     },
     "public.section_type": {
       "name": "section_type",
@@ -3407,27 +3029,17 @@
     "public.sso_provider": {
       "name": "sso_provider",
       "schema": "public",
-      "values": [
-        "google",
-        "microsoft"
-      ]
+      "values": ["google", "microsoft"]
     },
     "public.tagged_by": {
       "name": "tagged_by",
       "schema": "public",
-      "values": [
-        "human",
-        "ai"
-      ]
+      "values": ["human", "ai"]
     },
     "public.taxonomy_mapping_type": {
       "name": "taxonomy_mapping_type",
       "schema": "public",
-      "values": [
-        "equivalent",
-        "subset",
-        "related"
-      ]
+      "values": ["equivalent", "subset", "related"]
     },
     "public.taxonomy_node_type": {
       "name": "taxonomy_node_type",

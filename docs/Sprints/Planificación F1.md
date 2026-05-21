@@ -10,37 +10,38 @@
 
 ## Vista resumen
 
-| Sprint | Semanas | Objetivo | Historias |
-|---|---|---|---|
-| S0 | 1-2 | Cimientos: stack, modelo de datos, auth | H19.11, H19.12, H1.7, H17.1, H19.4, H19.5, H19.10 |
-| S1 | 3-4 | Onboarding del colegio | H1.1, H1.2, H1.3, H1.4, H17.2, H17.3, H19.2 |
-| S2 | 5-6 | Banco de ítems + pautas DIA | H3.3, H3.10, H3.11, H3.12, H5.8 |
-| S3 | 7-8 | Ingesta y corrección DIA | H4.5, H4.6, H5.7, H16.3, H16.4 |
-| S4 | 9-10 | Dashboards core (directivo y profesor) | H6.1, H6.2, H6.3, H6.4, H6.5, H6.6, H6.7, H6.8, H6.9 |
-| S5 | 11-12 | Dashboards avanzados + flujo demo completo | H6.10, H6.11, H6.12, H6.18, H19.1 |
+| Sprint | Semanas | Objetivo                                   | Historias                                            |
+| ------ | ------- | ------------------------------------------ | ---------------------------------------------------- |
+| S0     | 1-2     | Cimientos: stack, modelo de datos, auth    | H19.11, H19.12, H1.7, H17.1, H19.4, H19.5, H19.10    |
+| S1     | 3-4     | Onboarding del colegio                     | H1.1, H1.2, H1.3, H1.4, H17.2, H17.3, H19.2          |
+| S2     | 5-6     | Banco de ítems + pautas DIA                | H3.3, H3.10, H3.11, H3.12, H5.8                      |
+| S3     | 7-8     | Ingesta y corrección DIA                   | H4.5, H4.6, H5.7, H16.3, H16.4                       |
+| S4     | 9-10    | Dashboards core (directivo y profesor)     | H6.1, H6.2, H6.3, H6.4, H6.5, H6.6, H6.7, H6.8, H6.9 |
+| S5     | 11-12   | Dashboards avanzados + flujo demo completo | H6.10, H6.11, H6.12, H6.18, H19.1                    |
 
 **Flujo demo F1 completo al final del Sprint 5:**
 Subir hojas DIA → corrección automática → dashboard habilidades → click en pregunta → distractores → comparar con diagnóstico anterior → exportar Excel/PDF
 
 ---
 
-## Sprint 0 — Cimientos arquitectónicos *(Semanas 1-2)*
+## Sprint 0 — Cimientos arquitectónicos _(Semanas 1-2)_
 
 **Objetivo:** repositorio listo, stack configurado, modelo de datos base y autenticación. Sin esto, nada más puede empezar.
 
 **Por qué va primero:** la Taxonomía Universal (H19.11) es la decisión de diseño más crítica de todo el proyecto. Si se hace mal aquí, F2-F5 requieren migraciones dolorosas. Vale la pena tomarse el tiempo extra para hacerla bien.
 
-| ID | Historia | Complejidad | Notas |
-|---|---|---|---|
-| **H19.11** | Taxonomía Universal en Drizzle: OAs, habilidades, contenidos MINEDUC con soporte futuro para SIMCE, PAES, Cambridge | ★★★★★ | Ancla arquitectónica. Diseñar con cuidado: entidades `Instrument`, `Domain`, `Skill`, `LearningObjective`, `Content` con relaciones polimórficas. |
-| **H19.12** | Infraestructura serverless Next.js: repo, CI/CD, entornos dev/staging/prod | ★★★ | Setup estándar pero crítico. Incluir configuración de Drizzle + PostgreSQL desde el día 1. |
-| **H1.7** | Autenticación con Google / Microsoft (SSO) | ★★★ | Usar NextAuth.js o Clerk. Modelar `User`, `Role`, `Permission` pensando en H1.3 (multi-rol). |
-| **H17.1** | UX simple: design system base (colores, tipografía, componentes core) | ★★ | Implementar el manual de marca. shadcn/ui como base recomendada. |
-| **H19.10** | Manual de marca implementado en la plataforma (coherencia visual) | ★★ | Tokens de diseño en Tailwind. Se trabaja junto con H17.1. |
-| **H19.4** | Estructura de privacidad: modelo de datos con aislamiento por colegio (tenant isolation) | ★★★ | Row-level security en PostgreSQL desde el inicio. No agregar esto después. |
-| **H19.5** | Backups automáticos y plan de recuperación | ★★ | Configurar pg_dump automático + alertas. |
+| ID         | Historia                                                                                                            | Complejidad | Notas                                                                                                                                             |
+| ---------- | ------------------------------------------------------------------------------------------------------------------- | ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **H19.11** | Taxonomía Universal en Drizzle: OAs, habilidades, contenidos MINEDUC con soporte futuro para SIMCE, PAES, Cambridge | ★★★★★       | Ancla arquitectónica. Diseñar con cuidado: entidades `Instrument`, `Domain`, `Skill`, `LearningObjective`, `Content` con relaciones polimórficas. |
+| **H19.12** | Infraestructura serverless Next.js: repo, CI/CD, entornos dev/staging/prod                                          | ★★★         | Setup estándar pero crítico. Incluir configuración de Drizzle + PostgreSQL desde el día 1.                                                        |
+| **H1.7**   | Autenticación con Google / Microsoft (SSO)                                                                          | ★★★         | Usar NextAuth.js o Clerk. Modelar `User`, `Role`, `Permission` pensando en H1.3 (multi-rol).                                                      |
+| **H17.1**  | UX simple: design system base (colores, tipografía, componentes core)                                               | ★★          | Implementar el manual de marca. shadcn/ui como base recomendada.                                                                                  |
+| **H19.10** | Manual de marca implementado en la plataforma (coherencia visual)                                                   | ★★          | Tokens de diseño en Tailwind. Se trabaja junto con H17.1.                                                                                         |
+| **H19.4**  | Estructura de privacidad: modelo de datos con aislamiento por colegio (tenant isolation)                            | ★★★         | Row-level security en PostgreSQL desde el inicio. No agregar esto después.                                                                        |
+| **H19.5**  | Backups automáticos y plan de recuperación                                                                          | ★★          | Configurar pg_dump automático + alertas.                                                                                                          |
 
 **División de trabajo sugerida:**
+
 - Dev 1: H19.11 + H19.4 (modelo de datos y arquitectura de datos)
 - Dev 2: H19.12 + H1.7 + H17.1 + H19.10 + H19.5 (infra y stack frontend)
 
@@ -48,23 +49,24 @@ Subir hojas DIA → corrección automática → dashboard habilidades → click 
 
 ---
 
-## Sprint 1 — Onboarding del colegio *(Semanas 3-4)*
+## Sprint 1 — Onboarding del colegio _(Semanas 3-4)_
 
 **Objetivo:** un administrador puede dar de alta un colegio, importar alumnos y crear cuentas de usuarios con sus roles.
 
 **Por qué va segundo:** si no hay colegio + alumnos + roles cargados, no hay nada que evaluar. Este sprint habilita todos los siguientes.
 
-| ID | Historia | Complejidad | Notas |
-|---|---|---|---|
-| **H1.1** | Alta de colegio: nombre, RBD, ciclos, niveles, cursos, asignaturas, comuna | ★★★ | Formulario multi-step. Las entidades `School`, `Cycle`, `Level`, `Course`, `Subject` deben estar bien normalizadas para F4 (multi-colegio). |
-| **H1.2** | Importar nómina de alumnos por curso (CSV + validación de RUT) | ★★★ | Importación idempotente (re-subir no duplica). Preview antes de confirmar. Validar RUT chileno. |
-| **H1.3** | Crear cuentas de profesores y directivos con roles | ★★ | Aprovechar el modelo `Role`/`Permission` de H1.7. |
-| **H1.4** | Asignar profesor a cursos y asignaturas | ★★ | Relación `TeacherAssignment`. Afecta qué data ve cada profesor. |
-| **H17.2** | Gestión del currículum MINEDUC (OAs por asignatura y nivel) | ★★★ | Cargar el currículum oficial MINEDUC como seed data usando la Taxonomía Universal de H19.11. Este es el "contenido maestro" sobre el que se etiquetan todas las preguntas. |
-| **H17.3** | Gestión de taxonomías (habilidades, contenidos, tipos de texto, niveles de desempeño) | ★★ | Panel de admin para ver/editar la taxonomía sin tocar la DB directamente. |
-| **H19.2** | Responsive: funciona en móvil, tablet y desktop | ★★ | Aplicar desde el inicio a todas las vistas. No es un sprint separado. |
+| ID        | Historia                                                                              | Complejidad | Notas                                                                                                                                                                      |
+| --------- | ------------------------------------------------------------------------------------- | ----------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **H1.1**  | Alta de colegio: nombre, RBD, ciclos, niveles, cursos, asignaturas, comuna            | ★★★         | Formulario multi-step. Las entidades `School`, `Cycle`, `Level`, `Course`, `Subject` deben estar bien normalizadas para F4 (multi-colegio).                                |
+| **H1.2**  | Importar nómina de alumnos por curso (CSV + validación de RUT)                        | ★★★         | Importación idempotente (re-subir no duplica). Preview antes de confirmar. Validar RUT chileno.                                                                            |
+| **H1.3**  | Crear cuentas de profesores y directivos con roles                                    | ★★          | Aprovechar el modelo `Role`/`Permission` de H1.7.                                                                                                                          |
+| **H1.4**  | Asignar profesor a cursos y asignaturas                                               | ★★          | Relación `TeacherAssignment`. Afecta qué data ve cada profesor.                                                                                                            |
+| **H17.2** | Gestión del currículum MINEDUC (OAs por asignatura y nivel)                           | ★★★         | Cargar el currículum oficial MINEDUC como seed data usando la Taxonomía Universal de H19.11. Este es el "contenido maestro" sobre el que se etiquetan todas las preguntas. |
+| **H17.3** | Gestión de taxonomías (habilidades, contenidos, tipos de texto, niveles de desempeño) | ★★          | Panel de admin para ver/editar la taxonomía sin tocar la DB directamente.                                                                                                  |
+| **H19.2** | Responsive: funciona en móvil, tablet y desktop                                       | ★★          | Aplicar desde el inicio a todas las vistas. No es un sprint separado.                                                                                                      |
 
 **División de trabajo sugerida:**
+
 - Dev 1: H1.1 + H1.2 + H1.4 (entidades del colegio y alumnos)
 - Dev 2: H1.3 + H17.2 + H17.3 + H19.2 (roles, currículum y responsive)
 
@@ -72,21 +74,22 @@ Subir hojas DIA → corrección automática → dashboard habilidades → click 
 
 ---
 
-## Sprint 2 — Banco de ítems + Pautas DIA *(Semanas 5-6)*
+## Sprint 2 — Banco de ítems + Pautas DIA _(Semanas 5-6)_
 
 **Objetivo:** la plataforma conoce las preguntas DIA, sus respuestas correctas y sus etiquetas de habilidad/OA. Es el motor de corrección del Sprint 3.
 
 **Por qué va aquí:** el banco de ítems y las pautas oficiales DIA son el "cerebro" que hace posible la corrección automática. Sin esto, el Sprint 3 no puede procesar nada.
 
-| ID | Historia | Complejidad | Notas |
-|---|---|---|---|
-| **H3.12** | Ingerir y mantener pautas oficiales DIA (claves de respuesta + mapeo OA/habilidad por ítem) | ★★★★ | **Crítico para el flujo demo.** Parsear el formato de la Agencia de Calidad. Modelar `EvaluationInstrument` → `Item` → `CorrectAnswer` + `ItemTag` (OA, habilidad, contenido). |
-| **H3.3** | Banco de ítems con metadata: OA, habilidad, contenido, nivel, tipo, parámetros IRT básicos | ★★★ | Usar IRT 2PL para F1 (dificultad + discriminación). El 3er parámetro (adivinación) puede esperar a F3. |
-| **H3.10** | Versionado de pruebas (trazabilidad de qué versión rindió cada curso) | ★★ | Tabla `EvaluationVersion`. Permite análisis longitudinal en F2+. |
-| **H3.11** | Etiquetar cada pregunta con OA/habilidad/contenido; sugerido por IA al subir | ★★★ | LLM para sugerir tags al admin. El admin confirma. Importante para reducir carga operativa. |
-| **H5.8** | Subir tabla de especificaciones desde Excel y vincularla a preguntas | ★★ | Parser de Excel genérico. Mapeo columna → campo de la tabla de specs. |
+| ID        | Historia                                                                                    | Complejidad | Notas                                                                                                                                                                          |
+| --------- | ------------------------------------------------------------------------------------------- | ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| **H3.12** | Ingerir y mantener pautas oficiales DIA (claves de respuesta + mapeo OA/habilidad por ítem) | ★★★★        | **Crítico para el flujo demo.** Parsear el formato de la Agencia de Calidad. Modelar `EvaluationInstrument` → `Item` → `CorrectAnswer` + `ItemTag` (OA, habilidad, contenido). |
+| **H3.3**  | Banco de ítems con metadata: OA, habilidad, contenido, nivel, tipo, parámetros IRT básicos  | ★★★         | Usar IRT 2PL para F1 (dificultad + discriminación). El 3er parámetro (adivinación) puede esperar a F3.                                                                         |
+| **H3.10** | Versionado de pruebas (trazabilidad de qué versión rindió cada curso)                       | ★★          | Tabla `EvaluationVersion`. Permite análisis longitudinal en F2+.                                                                                                               |
+| **H3.11** | Etiquetar cada pregunta con OA/habilidad/contenido; sugerido por IA al subir                | ★★★         | LLM para sugerir tags al admin. El admin confirma. Importante para reducir carga operativa.                                                                                    |
+| **H5.8**  | Subir tabla de especificaciones desde Excel y vincularla a preguntas                        | ★★          | Parser de Excel genérico. Mapeo columna → campo de la tabla de specs.                                                                                                          |
 
 **División de trabajo sugerida:**
+
 - Dev 1: H3.12 + H3.10 (pautas DIA y versionado — backend crítico)
 - Dev 2: H3.3 + H3.11 + H5.8 (banco de ítems y herramientas de etiquetado)
 
@@ -94,21 +97,22 @@ Subir hojas DIA → corrección automática → dashboard habilidades → click 
 
 ---
 
-## Sprint 3 — Ingesta y corrección DIA *(Semanas 7-8)*
+## Sprint 3 — Ingesta y corrección DIA _(Semanas 7-8)_
 
 **Objetivo:** un profesor sube las hojas de respuesta DIA de su curso y, en minutos, tiene los resultados de cada alumno calculados y almacenados.
 
 **Por qué es el sprint más importante:** este es el "Caballo de Troya". Es el dolor que tiene el colegio HOY (subir alumno por alumno, tabulación manual). Resolver esto ya justifica la plataforma.
 
-| ID | Historia | Complejidad | Notas |
-|---|---|---|---|
-| **H4.6** | Subir hojas de respuesta DIA en bloque (por curso, no alumno por alumno) | ★★★★ | UI de carga de archivo + procesamiento en background. Puede ser CSV exportado de Gradecam por ahora (el escaneo en video viene en F3). Mostrar progress bar. |
-| **H4.5** | Subir desde Excel/CSV resultados escaneados con otro sistema (Gradecam, ZipGrade) | ★★★ | Mismo parser que H4.6. Mapeo flexible de columnas. Preview antes de confirmar la carga. |
-| **H16.3** | Importar resultados de Gradecam / ZipGrade (integración de transición) | ★★ | Puede ser el mismo flujo que H4.5 con un template de Excel documentado. |
-| **H16.4** | Importar resultados oficiales DIA (archivo Agencia de Calidad cuando esté disponible) | ★★★ | Parser del formato oficial. Puede no estar disponible aún; tener el parser listo para cuando llegue. |
-| **H5.7** | Convertir puntaje a nota según escala configurable por colegio (60% exigencia, base 4.0) | ★★ | Configuración por colegio de la escala de conversión. Fórmula estándar + casos especiales. |
+| ID        | Historia                                                                                 | Complejidad | Notas                                                                                                                                                        |
+| --------- | ---------------------------------------------------------------------------------------- | ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| **H4.6**  | Subir hojas de respuesta DIA en bloque (por curso, no alumno por alumno)                 | ★★★★        | UI de carga de archivo + procesamiento en background. Puede ser CSV exportado de Gradecam por ahora (el escaneo en video viene en F3). Mostrar progress bar. |
+| **H4.5**  | Subir desde Excel/CSV resultados escaneados con otro sistema (Gradecam, ZipGrade)        | ★★★         | Mismo parser que H4.6. Mapeo flexible de columnas. Preview antes de confirmar la carga.                                                                      |
+| **H16.3** | Importar resultados de Gradecam / ZipGrade (integración de transición)                   | ★★          | Puede ser el mismo flujo que H4.5 con un template de Excel documentado.                                                                                      |
+| **H16.4** | Importar resultados oficiales DIA (archivo Agencia de Calidad cuando esté disponible)    | ★★★         | Parser del formato oficial. Puede no estar disponible aún; tener el parser listo para cuando llegue.                                                         |
+| **H5.7**  | Convertir puntaje a nota según escala configurable por colegio (60% exigencia, base 4.0) | ★★          | Configuración por colegio de la escala de conversión. Fórmula estándar + casos especiales.                                                                   |
 
 **División de trabajo sugerida:**
+
 - Dev 1: H4.6 + H5.7 (motor de procesamiento y cálculo de notas)
 - Dev 2: H4.5 + H16.3 + H16.4 (parsers de importación)
 
@@ -116,25 +120,26 @@ Subir hojas DIA → corrección automática → dashboard habilidades → click 
 
 ---
 
-## Sprint 4 — Dashboards core *(Semanas 9-10)*
+## Sprint 4 — Dashboards core _(Semanas 9-10)_
 
 **Objetivo:** directivos y profesores tienen un panel completo de resultados con filtros, comparaciones históricas y clasificación por nivel de desempeño.
 
 **Por qué aquí:** con los datos ya procesados en Sprint 3, este sprint construye la capa de visualización sobre ellos. Es el valor visible para el cliente.
 
-| ID | Historia | Complejidad | Notas |
-|---|---|---|---|
-| **H6.1** | Panel de resultados para directivo | ★★★ | Vista de aterrizaje post-login directivo. Cards resumen: últimas evaluaciones, alertas, % logro global. |
-| **H6.2** | Filtros: asignatura, nivel, curso, alumno, período | ★★★ | Filtros aplicados a toda la vista. State en URL para compartir/bookmarkear. |
-| **H6.3** | Comparación de generaciones en un mismo nivel (año actual vs años anteriores) | ★★★ | Serie de tiempo. Requiere que haya datos de al menos 2 períodos (puede mostrarse vacío el primer año). |
-| **H6.4** | Clasificar alumnos por nivel de desempeño (insuficiente / elemental / adecuado) | ★★ | Thresholds configurables por prueba/colegio. Vista de tabla con colores. |
-| **H6.5** | Métricas de desempeño por habilidad (no solo por prueba) | ★★★ | Agrupación de ítems por habilidad → % logro agregado. La Taxonomía Universal de H19.11 habilita esto directamente. |
-| **H6.6** | Progresión de resultados a lo largo del año | ★★★ | Gráfico de línea temporal. Por alumno, por curso, por habilidad. |
-| **H6.7** | Resultados de evaluaciones para el profesor (solo sus cursos) | ★★ | Mismo componente que H6.1 pero filtrado por el scope del profesor. |
-| **H6.8** | Métricas y KPIs del profesor | ★★ | % logro promedio del curso, alumnos críticos, evolución. |
-| **H6.9** | Reportes descargables básicos (PDF/Excel) de los resultados actuales | ★★ | Usar la misma lógica de export que H6.18 del Sprint 5. Puede ser un simple "exportar vista actual". |
+| ID       | Historia                                                                        | Complejidad | Notas                                                                                                              |
+| -------- | ------------------------------------------------------------------------------- | ----------- | ------------------------------------------------------------------------------------------------------------------ |
+| **H6.1** | Panel de resultados para directivo                                              | ★★★         | Vista de aterrizaje post-login directivo. Cards resumen: últimas evaluaciones, alertas, % logro global.            |
+| **H6.2** | Filtros: asignatura, nivel, curso, alumno, período                              | ★★★         | Filtros aplicados a toda la vista. State en URL para compartir/bookmarkear.                                        |
+| **H6.3** | Comparación de generaciones en un mismo nivel (año actual vs años anteriores)   | ★★★         | Serie de tiempo. Requiere que haya datos de al menos 2 períodos (puede mostrarse vacío el primer año).             |
+| **H6.4** | Clasificar alumnos por nivel de desempeño (insuficiente / elemental / adecuado) | ★★          | Thresholds configurables por prueba/colegio. Vista de tabla con colores.                                           |
+| **H6.5** | Métricas de desempeño por habilidad (no solo por prueba)                        | ★★★         | Agrupación de ítems por habilidad → % logro agregado. La Taxonomía Universal de H19.11 habilita esto directamente. |
+| **H6.6** | Progresión de resultados a lo largo del año                                     | ★★★         | Gráfico de línea temporal. Por alumno, por curso, por habilidad.                                                   |
+| **H6.7** | Resultados de evaluaciones para el profesor (solo sus cursos)                   | ★★          | Mismo componente que H6.1 pero filtrado por el scope del profesor.                                                 |
+| **H6.8** | Métricas y KPIs del profesor                                                    | ★★          | % logro promedio del curso, alumnos críticos, evolución.                                                           |
+| **H6.9** | Reportes descargables básicos (PDF/Excel) de los resultados actuales            | ★★          | Usar la misma lógica de export que H6.18 del Sprint 5. Puede ser un simple "exportar vista actual".                |
 
 **División de trabajo sugerida:**
+
 - Dev 1: H6.1 + H6.2 + H6.3 + H6.6 (filtros y comparativas — lógica de datos compleja)
 - Dev 2: H6.4 + H6.5 + H6.7 + H6.8 + H6.9 (clasificación, habilidades y reportes)
 
@@ -142,25 +147,27 @@ Subir hojas DIA → corrección automática → dashboard habilidades → click 
 
 ---
 
-## Sprint 5 — Dashboards avanzados + Flujo demo completo *(Semanas 11-12)*
+## Sprint 5 — Dashboards avanzados + Flujo demo completo _(Semanas 11-12)_
 
 **Objetivo:** completar las visualizaciones de mayor impacto en la demo y pulir el flujo de 5 minutos que convence al directivo.
 
 **Por qué al final:** estas son las historias de mayor "wow factor" en la demo. Deben estar sólidas y sin bugs antes de salir a vender.
 
-| ID | Historia | Complejidad | Notas |
-|---|---|---|---|
-| **H6.10** | Mapa de calor de % de logro por habilidad y asignatura | ★★★ | Tabla heatmap. Color por rango de logro. Lo que más le gusta a Vicente (referencia SEPA). Alto impacto visual en demo. |
-| **H6.11** | % de logro por alumno × pregunta × curso × habilidad × contenido (granularidad Gradecam++) | ★★★★ | Tabla cruzada con drill-down. Más compleja de construir pero es el diferenciador vs Gradecam. |
-| **H6.12** | Click en una pregunta → enunciado + alternativas + distribución de respuestas + análisis de distractores | ★★★ | Modal/panel lateral. Muestra cuántos alumnos eligieron cada alternativa. Requiere que las preguntas estén cargadas en el banco. |
-| **H6.18** | Exportar a Excel/PDF cualquier vista con los filtros aplicados | ★★★ | Export genérico que funciona en todos los dashboards. Compatible con flujos actuales del colegio. |
-| **H19.1** | Plataforma flexible: soporte para cualquier tipo de asignatura, prueba, tipo de pregunta, métrica | ★★ | No es una feature nueva: es una validación arquitectónica. Revisar que ninguna decisión de F1 esté hardcodeada para DIA. Documentar los puntos de extensión para SIMCE/PAES (F3). |
+| ID        | Historia                                                                                                 | Complejidad | Notas                                                                                                                                                                             |
+| --------- | -------------------------------------------------------------------------------------------------------- | ----------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **H6.10** | Mapa de calor de % de logro por habilidad y asignatura                                                   | ★★★         | Tabla heatmap. Color por rango de logro. Lo que más le gusta a Vicente (referencia SEPA). Alto impacto visual en demo.                                                            |
+| **H6.11** | % de logro por alumno × pregunta × curso × habilidad × contenido (granularidad Gradecam++)               | ★★★★        | Tabla cruzada con drill-down. Más compleja de construir pero es el diferenciador vs Gradecam.                                                                                     |
+| **H6.12** | Click en una pregunta → enunciado + alternativas + distribución de respuestas + análisis de distractores | ★★★         | Modal/panel lateral. Muestra cuántos alumnos eligieron cada alternativa. Requiere que las preguntas estén cargadas en el banco.                                                   |
+| **H6.18** | Exportar a Excel/PDF cualquier vista con los filtros aplicados                                           | ★★★         | Export genérico que funciona en todos los dashboards. Compatible con flujos actuales del colegio.                                                                                 |
+| **H19.1** | Plataforma flexible: soporte para cualquier tipo de asignatura, prueba, tipo de pregunta, métrica        | ★★          | No es una feature nueva: es una validación arquitectónica. Revisar que ninguna decisión de F1 esté hardcodeada para DIA. Documentar los puntos de extensión para SIMCE/PAES (F3). |
 
 **División de trabajo sugerida:**
+
 - Dev 1: H6.11 + H6.18 (tablas complejas y exports)
 - Dev 2: H6.10 + H6.12 + H19.1 (mapa de calor, análisis de distractores y validación arquitectónica)
 
 **Criterio de salida / Demo de F1:**
+
 1. Admin da de alta el colegio y sube nómina de alumnos (2 min)
 2. Encargado sube CSV con respuestas DIA del curso completo (1 min)
 3. Sistema procesa y genera resultados → dashboard habilidades específicas (H6.10, H6.11)
@@ -176,10 +183,10 @@ Todo el flujo: 5 minutos.
 
 Las siguientes historias de F1 son importantes pero no bloquean el flujo demo. Se pueden abordar en paralelo cuando haya capacidad, o en un Sprint 5-bis antes de lanzar:
 
-| ID | Historia | Razón para diferir |
-|---|---|---|
-| H19.4 | Cumplimiento normativo completo (Ley 19.628) | Los fundamentos van en S0; la documentación formal puede ir antes del lanzamiento comercial. |
-| H17.2 extendida | Currículum completo todas las asignaturas | En S1 se carga Lenguaje y Matemáticas. El resto puede agregarse iterativamente. |
+| ID              | Historia                                     | Razón para diferir                                                                           |
+| --------------- | -------------------------------------------- | -------------------------------------------------------------------------------------------- |
+| H19.4           | Cumplimiento normativo completo (Ley 19.628) | Los fundamentos van en S0; la documentación formal puede ir antes del lanzamiento comercial. |
+| H17.2 extendida | Currículum completo todas las asignaturas    | En S1 se carga Lenguaje y Matemáticas. El resto puede agregarse iterativamente.              |
 
 ---
 
@@ -202,12 +209,12 @@ No hay paralelismo entre sprints porque cada uno depende del anterior. Dentro de
 
 Estas 4 decisiones bloquean o afectan el arranque:
 
-| Decisión | Impacto | Plazo |
-|---|---|---|
-| **Modelo IRT F1**: ¿2PL (dificultad + discriminación) o 3PL (+ adivinación)? | Estructura de la tabla `Item`. Recomendación: 2PL en F1. | Antes de S2 |
-| **Formato import DIA**: ¿archivo oficial Agencia de Calidad o CSV manual del colegio? | Define H4.6 y H16.4. Si no hay archivo oficial aún, empezar con CSV manual. | Antes de S3 |
-| **Escala de conversión de notas**: ¿configurable por colegio o fija? | Define H5.7. Recomendación: configurable desde el inicio. | Antes de S3 |
-| **Proveedor de LLM para etiquetado IA**: ¿Claude API o GPT-4o? | Afecta H3.11. Recomendación: Claude API con prompt caching para reducir costos. | Antes de S2 |
+| Decisión                                                                              | Impacto                                                                         | Plazo       |
+| ------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------- | ----------- |
+| **Modelo IRT F1**: ¿2PL (dificultad + discriminación) o 3PL (+ adivinación)?          | Estructura de la tabla `Item`. Recomendación: 2PL en F1.                        | Antes de S2 |
+| **Formato import DIA**: ¿archivo oficial Agencia de Calidad o CSV manual del colegio? | Define H4.6 y H16.4. Si no hay archivo oficial aún, empezar con CSV manual.     | Antes de S3 |
+| **Escala de conversión de notas**: ¿configurable por colegio o fija?                  | Define H5.7. Recomendación: configurable desde el inicio.                       | Antes de S3 |
+| **Proveedor de LLM para etiquetado IA**: ¿Claude API o GPT-4o?                        | Afecta H3.11. Recomendación: Claude API con prompt caching para reducir costos. | Antes de S2 |
 
 ---
 
@@ -225,4 +232,4 @@ Para mantener el foco, estas capacidades quedan explícitamente fuera de F1:
 
 ---
 
-*Documento generado: 2026-05-16 · Actualizar al final de cada sprint con lo completado, lo diferido y las decisiones tomadas.*
+_Documento generado: 2026-05-16 · Actualizar al final de cada sprint con lo completado, lo diferido y las decisiones tomadas._

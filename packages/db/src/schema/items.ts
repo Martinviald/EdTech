@@ -32,16 +32,20 @@ export const items = pgTable('items', {
   position: integer('position').default(0).notNull(),
   type: itemTypeEnum('type').notNull(),
   content: jsonb('content').$type<Record<string, unknown>>().notNull().default({}),
-  scoringConfig: jsonb('scoring_config').$type<{
-    points?: number;
-    partialCredit?: boolean;
-    [k: string]: unknown;
-  }>().default({}),
-  irtParams: jsonb('irt_params').$type<{
-    a?: number;
-    b?: number;
-    c?: number;
-  }>().default({}),
+  scoringConfig: jsonb('scoring_config')
+    .$type<{
+      points?: number;
+      partialCredit?: boolean;
+      [k: string]: unknown;
+    }>()
+    .default({}),
+  irtParams: jsonb('irt_params')
+    .$type<{
+      a?: number;
+      b?: number;
+      c?: number;
+    }>()
+    .default({}),
   status: itemStatusEnum('status').default('draft').notNull(),
   version: integer('version').default(1).notNull(),
   source: itemSourceEnum('source').default('custom').notNull(),

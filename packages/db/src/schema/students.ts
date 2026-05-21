@@ -1,13 +1,4 @@
-import {
-  boolean,
-  date,
-  jsonb,
-  pgTable,
-  text,
-  timestamp,
-  unique,
-  uuid,
-} from 'drizzle-orm/pg-core';
+import { boolean, date, jsonb, pgTable, text, timestamp, unique, uuid } from 'drizzle-orm/pg-core';
 import { relations } from 'drizzle-orm';
 import { enrollmentStatusEnum, genderEnum } from './enums';
 import { organizations, academicYears } from './organizations';

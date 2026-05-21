@@ -42,7 +42,10 @@ export class PrivacyService {
     // SHA-256 sobre el UUID del alumno (no sobre el RUT real — no reversible).
     const anon = (salt: string): string =>
       'anon-' +
-      createHash('sha256').update(studentId + salt).digest('hex').slice(0, 16);
+      createHash('sha256')
+        .update(studentId + salt)
+        .digest('hex')
+        .slice(0, 16);
 
     await this.db.transaction(async (tx) => {
       await tx

@@ -24,7 +24,7 @@ const DEFAULT_MESSAGE = {
 
 export default async function AuthErrorPage({ searchParams }: { searchParams: SearchParams }) {
   const { error } = await searchParams;
-  const msg = error ? MESSAGES[error] ?? DEFAULT_MESSAGE : DEFAULT_MESSAGE;
+  const msg = error ? (MESSAGES[error] ?? DEFAULT_MESSAGE) : DEFAULT_MESSAGE;
 
   return (
     <main className="flex min-h-screen items-center justify-center bg-background px-4">

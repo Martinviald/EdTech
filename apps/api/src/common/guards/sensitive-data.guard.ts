@@ -1,9 +1,4 @@
-import {
-  CanActivate,
-  ExecutionContext,
-  ForbiddenException,
-  Injectable,
-} from '@nestjs/common';
+import { CanActivate, ExecutionContext, ForbiddenException, Injectable } from '@nestjs/common';
 import type { JwtPayload } from '../../auth/jwt-payload.types';
 
 /**
@@ -11,12 +6,7 @@ import type { JwtPayload } from '../../auth/jwt-payload.types';
  * `profile.sensitiveNotes`) a roles directivos. Un profesor estándar nunca
  * accede a estos campos (Ley 19.628 — datos sensibles de menores).
  */
-const SENSITIVE_ROLES = [
-  'school_admin',
-  'academic_director',
-  'eval_coordinator',
-  'platform_admin',
-];
+const SENSITIVE_ROLES = ['school_admin', 'academic_director', 'eval_coordinator', 'platform_admin'];
 
 @Injectable()
 export class SensitiveDataGuard implements CanActivate {

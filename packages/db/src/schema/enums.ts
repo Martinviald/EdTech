@@ -69,11 +69,7 @@ export const instrumentTypeEnum = pgEnum('instrument_type', [
   'custom',
 ]);
 
-export const instrumentStatusEnum = pgEnum('instrument_status', [
-  'draft',
-  'published',
-  'archived',
-]);
+export const instrumentStatusEnum = pgEnum('instrument_status', ['draft', 'published', 'archived']);
 
 export const sectionTypeEnum = pgEnum('section_type', [
   'multiple_choice',
@@ -99,12 +95,7 @@ export const itemTypeEnum = pgEnum('item_type', [
   'gap_fill',
 ]);
 
-export const itemStatusEnum = pgEnum('item_status', [
-  'draft',
-  'review',
-  'published',
-  'deprecated',
-]);
+export const itemStatusEnum = pgEnum('item_status', ['draft', 'review', 'published', 'deprecated']);
 
 export const itemSourceEnum = pgEnum('item_source', [
   'official',
@@ -132,12 +123,7 @@ export const assessmentStatusEnum = pgEnum('assessment_status', [
   'cancelled',
 ]);
 
-export const assessmentModeEnum = pgEnum('assessment_mode', [
-  'paper',
-  'digital',
-  'oral',
-  'mixed',
-]);
+export const assessmentModeEnum = pgEnum('assessment_mode', ['paper', 'digital', 'oral', 'mixed']);
 
 export const importJobTypeEnum = pgEnum('import_job_type', [
   'answer_sheet_csv',
