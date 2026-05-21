@@ -27,6 +27,10 @@
     "clean": {
       "cache": false
     },
+    "db:seed": {
+      "cache": false,
+      "env": ["DATABASE_URL"]
+    },
     "db:generate": {
       "cache": false,
       "env": ["DATABASE_URL"]

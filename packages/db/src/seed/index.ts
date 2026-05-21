@@ -4,18 +4,25 @@ import { createDbClient } from '../client';
 import { grades, subjects } from '../schema/academic';
 import { curricula } from '../schema/curriculum';
 import { organizations } from '../schema/organizations';
+import { students } from '../schema/students';
 import { orgMemberships, users } from '../schema/users';
 
 config({ path: resolve(__dirname, '../../../../.env') });
 
-// UUIDs determinísticos para el entorno demo. Permiten referenciar la org y los
-// usuarios desde código (tests, mock auth, scripts) sin tener que hacer lookups.
+// UUIDs determinísticos para el entorno demo.
+// Permiten referenciar org, usuarios y alumnos desde tests y mock auth sin lookups.
 // Nota: los UUIDs solo aceptan dígitos hex (0-9, a-f).
 export const DEMO_ORG_ID = 'dec00000-0000-0000-0000-000000000001';
 const DEMO_USER_IDS = {
   admin: 'dec00000-0000-0000-0000-0000000000a1',
   director: 'dec00000-0000-0000-0000-0000000000d1',
   teacher: 'dec00000-0000-0000-0000-0000000000c1',
+} as const;
+
+export const DEMO_STUDENT_IDS = {
+  juan: 'dec00000-0000-0000-0000-000000000051',
+  maria: 'dec00000-0000-0000-0000-000000000052',
+  pedro: 'dec00000-0000-0000-0000-000000000053',
 } as const;
 
 export const DEMO_USERS = [
@@ -127,6 +134,40 @@ async function main() {
         isActive: true,
       })),
     )
+    .onConflictDoNothing();
+
+  console.log('Seeding demo students...');
+  await db
+    .insert(students)
+    .values([
+      {
+        id: DEMO_STUDENT_IDS.juan,
+        orgId: DEMO_ORG_ID,
+        rut: '12345678-9',
+        firstName: 'Juan',
+        lastName: 'Pérez',
+        gender: 'M',
+        profile: { nee: ['dislexia'], sensitiveNotes: 'Apoyo psicopedagógico semanal' },
+      },
+      {
+        id: DEMO_STUDENT_IDS.maria,
+        orgId: DEMO_ORG_ID,
+        rut: '98765432-1',
+        firstName: 'María',
+        lastName: 'González',
+        gender: 'F',
+        profile: {},
+      },
+      {
+        id: DEMO_STUDENT_IDS.pedro,
+        orgId: DEMO_ORG_ID,
+        rut: '11111111-1',
+        firstName: 'Pedro',
+        lastName: 'Soto',
+        gender: 'M',
+        profile: {},
+      },
+    ])
     .onConflictDoNothing();
 
   console.log('Seed completed.');

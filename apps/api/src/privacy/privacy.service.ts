@@ -1,7 +1,7 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { createHash } from 'crypto';
 import { desc, eq } from 'drizzle-orm';
-import { auditLogs, students } from '@soe/db';
+import { auditLogs, students, withOrgContext } from '@soe/db';
 import { InjectDb, type Database } from '../database/database.types';
 
 /**
@@ -25,29 +25,29 @@ export class PrivacyService {
     studentId: string,
     requestedBy: { userId: string; orgId: string },
   ): Promise<void> {
-    const [student] = await this.db
-      .select({
-        id: students.id,
-        orgId: students.orgId,
-        isAnonymized: students.isAnonymized,
-      })
-      .from(students)
-      .where(eq(students.id, studentId));
+    await withOrgContext(this.db, requestedBy.orgId, async (tx) => {
+      const [student] = await tx
+        .select({
+          id: students.id,
+          orgId: students.orgId,
+          isAnonymized: students.isAnonymized,
+        })
+        .from(students)
+        .where(eq(students.id, studentId));
 
-    if (!student || student.orgId !== requestedBy.orgId) {
-      throw new NotFoundException('Alumno no encontrado');
-    }
-    if (student.isAnonymized) return; // operación idempotente
+      if (!student || student.orgId !== requestedBy.orgId) {
+        throw new NotFoundException('Alumno no encontrado');
+      }
+      if (student.isAnonymized) return; // operación idempotente
 
-    // SHA-256 sobre el UUID del alumno (no sobre el RUT real — no reversible).
-    const anon = (salt: string): string =>
-      'anon-' +
-      createHash('sha256')
-        .update(studentId + salt)
-        .digest('hex')
-        .slice(0, 16);
+      // SHA-256 sobre el UUID del alumno (no sobre el RUT real — no reversible).
+      const anon = (salt: string): string =>
+        'anon-' +
+        createHash('sha256')
+          .update(studentId + salt)
+          .digest('hex')
+          .slice(0, 16);
 
-    await this.db.transaction(async (tx) => {
       await tx
         .update(students)
         .set({
