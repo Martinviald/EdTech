@@ -28,7 +28,7 @@
     "db:seed": "tsx src/seed/index.ts",
     "lint": "echo 'lint: db ok'",
     "typecheck": "tsc --noEmit",
-    "clean": "rm -rf dist .turbo *.tsbuildinfo drizzle/"
+    "clean": "rm -rf dist .turbo *.tsbuildinfo"
   },
   "dependencies": {
     "@soe/types": "workspace:*",

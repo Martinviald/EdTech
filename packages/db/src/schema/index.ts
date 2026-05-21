@@ -10,3 +10,4 @@ export * from './items';
 export * from './assessments';
 export * from './responses';
 export * from './results';
+export * from './audit-logs';
