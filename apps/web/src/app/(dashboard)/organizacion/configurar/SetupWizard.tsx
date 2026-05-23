@@ -8,7 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { updateOrgProfile, setupAcademicYear } from './actions';
-import type { Grade, Organization, Subject } from '@soe/db';
+import type { Grade, Organization, Subject } from './types';
 
 // ── Tipos internos del wizard ─────────────────────────────────────────────────
 

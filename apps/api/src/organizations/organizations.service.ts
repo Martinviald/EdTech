@@ -5,7 +5,7 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { and, eq, inArray } from 'drizzle-orm';
+import { and, count, eq, inArray } from 'drizzle-orm';
 import {
   academicYears,
   classGroups,
@@ -56,6 +56,43 @@ export class OrganizationsService {
     });
 
     return this.getProfile(orgId);
+  }
+
+  async getOverview(orgId: string) {
+    const currentYear = new Date().getFullYear();
+
+    const [org] = await this.db
+      .select()
+      .from(organizations)
+      .where(and(eq(organizations.id, orgId), eq(organizations.type, 'school')));
+
+    if (!org) throw new NotFoundException('Colegio no encontrado');
+
+    const [academicYear] = await this.db
+      .select({ id: academicYears.id, year: academicYears.year })
+      .from(academicYears)
+      .where(and(eq(academicYears.orgId, orgId), eq(academicYears.year, currentYear)))
+      .limit(1);
+
+    const classGroupCount = academicYear
+      ? await this.db
+          .select({ total: count() })
+          .from(classGroups)
+          .where(
+            and(
+              eq(classGroups.orgId, orgId),
+              eq(classGroups.academicYearId, academicYear.id),
+            ),
+          )
+          .then((rows) => rows[0]?.total ?? 0)
+      : 0;
+
+    return {
+      org,
+      academicYear: academicYear ?? null,
+      classGroupCount,
+      isSetupComplete: !!academicYear && classGroupCount > 0,
+    };
   }
 
   async listGrades() {
