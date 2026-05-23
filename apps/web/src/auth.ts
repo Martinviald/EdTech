@@ -2,11 +2,9 @@ import NextAuth, { type NextAuthConfig, type User } from 'next-auth';
 import Credentials from 'next-auth/providers/credentials';
 import Google from 'next-auth/providers/google';
 import MicrosoftEntraID from 'next-auth/providers/microsoft-entra-id';
-import { eq } from 'drizzle-orm';
-import { findMembershipByEmail, schema } from '@soe/db';
 import type { USER_ROLES } from '@soe/types';
 import { authConfig } from '@/auth.config';
-import { db } from '@/lib/db';
+import { internalPost } from '@/lib/api';
 
 type UserRole = (typeof USER_ROLES)[number];
 
@@ -15,6 +13,12 @@ const authMode = process.env.AUTH_MODE === 'mock' ? 'mock' : 'sso';
 if (process.env.NODE_ENV === 'production' && authMode === 'mock') {
   throw new Error('AUTH_MODE=mock is forbidden in production');
 }
+
+type ValidateUserResponse = {
+  user: { id: string; email: string; name: string; avatarUrl: string | null; providerId: string };
+  membership: { userId: string; orgId: string; role: string; isActive: boolean };
+  organization: { id: string; name: string; type: string };
+};
 
 function ssoProviders() {
   return [
@@ -38,7 +42,7 @@ function mockProvider() {
     async authorize(credentials) {
       const email = credentials?.email;
       if (typeof email !== 'string' || !email) return null;
-      const result = await findMembershipByEmail(db, email);
+      const result = await internalPost<ValidateUserResponse>('/auth/validate-user', { email });
       if (!result) return null;
       return {
         id: result.user.id,
@@ -46,7 +50,7 @@ function mockProvider() {
         name: result.user.name,
         image: result.user.avatarUrl ?? undefined,
         orgId: result.membership.orgId,
-        role: result.membership.role,
+        role: result.membership.role as UserRole,
       } satisfies User;
     },
   });
@@ -58,39 +62,29 @@ const config: NextAuthConfig = {
   callbacks: {
     ...authConfig.callbacks,
     async signIn({ user, account, profile }) {
-      // Credentials (mock): authorize ya validó y cargó orgId/role.
       if (account?.provider === 'mock') return true;
 
-      // OAuth: validar whitelist contra org_memberships por email.
       const email = profile?.email ?? user.email;
       if (!email) return '/auth/error?error=EmailNotWhitelisted';
 
-      const result = await findMembershipByEmail(db, email);
+      const result = await internalPost<ValidateUserResponse>('/auth/validate-user', { email });
       if (!result) return '/auth/error?error=EmailNotWhitelisted';
 
-      // Mapeo del provider de Auth.js al enum DB ('google' | 'microsoft').
       const dbProvider: 'google' | 'microsoft' =
         account?.provider === 'microsoft-entra-id' ? 'microsoft' : 'google';
 
-      // First-login sync: actualizar el users row (creado en seed o por CSV)
-      // con los datos reales del proveedor.
       const avatarUrl =
         (profile as { picture?: string } | undefined)?.picture ?? user.image ?? null;
       const realName = profile?.name ?? user.name ?? result.user.name;
 
-      await db
-        .update(schema.users)
-        .set({
-          name: realName,
-          avatarUrl,
-          provider: dbProvider,
-          providerId: account?.providerAccountId ?? result.user.providerId,
-          lastLoginAt: new Date(),
-          updatedAt: new Date(),
-        })
-        .where(eq(schema.users.id, result.user.id));
+      await internalPost('/auth/sync-user', {
+        userId: result.user.id,
+        name: realName,
+        avatarUrl,
+        provider: dbProvider,
+        providerId: account?.providerAccountId ?? result.user.providerId,
+      });
 
-      // Inyectar claims que el callback `jwt` recoge en el primer call.
       user.id = result.user.id;
       user.orgId = result.membership.orgId;
       user.role = result.membership.role as UserRole;

@@ -1,21 +1,19 @@
 import 'server-only';
 import { cache } from 'react';
-import { eq } from 'drizzle-orm';
-import { schema } from '@soe/db';
-import { db } from '@/lib/db';
+import { apiGet } from '@/lib/api';
 
-export const getCurrentOrg = cache(async (orgId: string) => {
-  const [org] = await db
-    .select({
-      id: schema.organizations.id,
-      name: schema.organizations.name,
-      type: schema.organizations.type,
-    })
-    .from(schema.organizations)
-    .where(eq(schema.organizations.id, orgId))
-    .limit(1);
-  if (!org) throw new Error(`Organization ${orgId} not found`);
-  return org;
+type OrgProfile = {
+  id: string;
+  name: string;
+  type: string;
+  rbd: string | null;
+  commune: string | null;
+  region: string | null;
+  dependence: string | null;
+};
+
+export const getCurrentOrg = cache(async (_orgId: string) => {
+  return apiGet<OrgProfile>('/organizations/me');
 });
 
 export type CurrentOrg = Awaited<ReturnType<typeof getCurrentOrg>>;
