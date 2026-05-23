@@ -100,10 +100,10 @@ export const NAV_ITEMS: readonly NavItem[] = [
   },
   {
     href: '/organizacion',
-    label: 'Organización',
+    label: 'Mi Colegio',
     icon: Building2,
-    status: 'soon',
-    roles: ['school_admin', 'academic_director', 'platform_admin', 'foundation_director'],
+    status: 'live',
+    roles: ['school_admin', 'academic_director', 'platform_admin'],
   },
   {
     href: '/configuracion',

@@ -8,6 +8,7 @@ import { HealthModule } from './health/health.module';
 import { AuthModule } from './auth/auth.module';
 import { AuthGuard } from './auth/auth.guard';
 import { PrivacyModule } from './privacy/privacy.module';
+import { OrganizationsModule } from './organizations/organizations.module';
 
 @Module({
   imports: [
@@ -19,6 +20,7 @@ import { PrivacyModule } from './privacy/privacy.module';
     HealthModule,
     AuthModule,
     PrivacyModule,
+    OrganizationsModule,
   ],
   controllers: [AppController],
   providers: [

@@ -1,6 +1,6 @@
 import { boolean, date, integer, jsonb, pgTable, text, timestamp, uuid } from 'drizzle-orm/pg-core';
 import { relations } from 'drizzle-orm';
-import { orgTypeEnum } from './enums';
+import { orgTypeEnum, schoolDependenceEnum } from './enums';
 
 export const organizations = pgTable('organizations', {
   id: uuid('id').defaultRandom().primaryKey(),
@@ -8,6 +8,9 @@ export const organizations = pgTable('organizations', {
   parentId: uuid('parent_id'),
   name: text('name').notNull(),
   rbd: text('rbd'),
+  commune: text('commune'),
+  region: text('region'),
+  dependence: schoolDependenceEnum('dependence'),
   config: jsonb('config').$type<Record<string, unknown>>().default({}),
   deletedAt: timestamp('deleted_at'),
   createdAt: timestamp('created_at').defaultNow().notNull(),
