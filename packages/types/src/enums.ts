@@ -1,6 +1,14 @@
 export const ORG_TYPES = ['platform', 'foundation', 'school'] as const;
 export type OrgType = (typeof ORG_TYPES)[number];
 
+export const SCHOOL_DEPENDENCES = [
+  'municipal',
+  'particular_pagado',
+  'particular_subvencionado',
+  'delegada',
+] as const;
+export type SchoolDependence = (typeof SCHOOL_DEPENDENCES)[number];
+
 export const USER_ROLES = [
   'platform_admin',
   'foundation_director',

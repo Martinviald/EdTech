@@ -2,6 +2,13 @@ import { pgEnum } from 'drizzle-orm/pg-core';
 
 export const orgTypeEnum = pgEnum('org_type', ['platform', 'foundation', 'school']);
 
+export const schoolDependenceEnum = pgEnum('school_dependence', [
+  'municipal',
+  'particular_pagado',
+  'particular_subvencionado',
+  'delegada',
+]);
+
 export const userRoleEnum = pgEnum('user_role', [
   'platform_admin',
   'foundation_director',
