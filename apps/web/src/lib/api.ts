@@ -1,5 +1,6 @@
 import 'server-only';
 import { cookies } from 'next/headers';
+import { ApiConnectionError } from './errors';
 
 const API_BASE = process.env.API_URL;
 if (!API_BASE) throw new Error('API_URL is required');
@@ -32,10 +33,15 @@ async function request<T>(
     headers['x-internal-token'] = INTERNAL_API_SECRET!;
   }
 
-  const res = await fetch(`${API_URL}${path}`, {
-    ...options,
-    headers: { ...options.headers, ...headers },
-  });
+  let res: Response;
+  try {
+    res = await fetch(`${API_URL}${path}`, {
+      ...options,
+      headers: { ...options.headers, ...headers },
+    });
+  } catch {
+    throw new ApiConnectionError();
+  }
 
   if (!res.ok) {
     const body = await res.json().catch(() => ({}));
