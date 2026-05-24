@@ -5,64 +5,8 @@
     {
       "idx": 0,
       "version": "7",
-      "when": 1779037280329,
-      "tag": "0000_parallel_starjammers",
-      "breakpoints": true
-    },
-    {
-      "idx": 1,
-      "version": "7",
-      "when": 1779325022606,
-      "tag": "0001_worthless_gabe_jones",
-      "breakpoints": true
-    },
-    {
-      "idx": 2,
-      "version": "7",
-      "when": 1779552822064,
-      "tag": "0002_wooden_nemesis",
-      "breakpoints": true
-    },
-    {
-      "idx": 3,
-      "version": "7",
-      "when": 1779585180221,
-      "tag": "0003_taxonomy_nodes_code_uniq",
-      "breakpoints": true
-    },
-    {
-      "idx": 4,
-      "version": "7",
-      "when": 1779588329632,
-      "tag": "0004_curricula_official_uniq",
-      "breakpoints": true
-    },
-    {
-      "idx": 5,
-      "version": "7",
-      "when": 1779590560458,
-      "tag": "0005_platform_admins_table",
-      "breakpoints": true
-    },
-    {
-      "idx": 6,
-      "version": "7",
-      "when": 1779590819353,
-      "tag": "0006_pending_invitations",
-      "breakpoints": true
-    },
-    {
-      "idx": 7,
-      "version": "7",
-      "when": 1779594506856,
-      "tag": "0007_tough_clint_barton",
-      "breakpoints": true
-    },
-    {
-      "idx": 8,
-      "version": "7",
-      "when": 1779596566163,
-      "tag": "0008_students_unique_rut_and_fileurl_nullable",
+      "when": 1779597000140,
+      "tag": "0000_initial_schema_f1",
       "breakpoints": true
     }
   ]

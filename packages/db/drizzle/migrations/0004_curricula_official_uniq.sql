@@ -1,1 +1,0 @@
-CREATE UNIQUE INDEX "curricula_official_type_version_uniq" ON "curricula" USING btree ("type","version") WHERE "curricula"."is_official" = true AND "curricula"."org_id" IS NULL;
