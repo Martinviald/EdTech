@@ -11,6 +11,7 @@ import { PrivacyModule } from './privacy/privacy.module';
 import { OrganizationsModule } from './organizations/organizations.module';
 import { TaxonomiesModule } from './taxonomies/taxonomies.module';
 import { AdminModule } from './admin/admin.module';
+import { StaffModule } from './staff/staff.module';
 
 @Module({
   imports: [
@@ -25,6 +26,7 @@ import { AdminModule } from './admin/admin.module';
     OrganizationsModule,
     TaxonomiesModule,
     AdminModule,
+    StaffModule,
   ],
   controllers: [AppController],
   providers: [

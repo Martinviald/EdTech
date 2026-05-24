@@ -21,9 +21,10 @@ export const orgMemberships = pgTable(
   'org_memberships',
   {
     id: uuid('id').defaultRandom().primaryKey(),
-    userId: uuid('user_id')
-      .notNull()
-      .references(() => users.id, { onDelete: 'cascade' }),
+    // Nullable para soportar invitaciones pendientes (whitelisting de email
+    // antes del primer login SSO). Cuando el usuario invitado entra por
+    // primera vez, el callback signIn crea el `users` row y rellena este FK.
+    userId: uuid('user_id').references(() => users.id, { onDelete: 'cascade' }),
     orgId: uuid('org_id')
       .notNull()
       .references(() => organizations.id, { onDelete: 'cascade' }),
@@ -34,6 +35,14 @@ export const orgMemberships = pgTable(
       classGroupIds?: string[];
     }>(),
     isActive: boolean('is_active').default(true).notNull(),
+    // Solo presente cuando user_id IS NULL (invitación pendiente). Se limpia
+    // al promover. CHECK + partial unique parciales se agregan vía SQL manual
+    // en la migración 0005 (drizzle-kit no genera CHECK/partial WHERE).
+    email: text('email'),
+    invitedByUserId: uuid('invited_by_user_id').references(() => users.id, {
+      onDelete: 'set null',
+    }),
+    invitedAt: timestamp('invited_at'),
     createdAt: timestamp('created_at').defaultNow().notNull(),
   },
   (table) => [unique().on(table.userId, table.orgId, table.role)],
@@ -54,12 +63,22 @@ export const teacherAssignments = pgTable(
 );
 
 export const usersRelations = relations(users, ({ many }) => ({
-  memberships: many(orgMemberships),
+  memberships: many(orgMemberships, { relationName: 'membership_user' }),
+  invitedMemberships: many(orgMemberships, { relationName: 'membership_inviter' }),
   teacherAssignments: many(teacherAssignments),
 }));
 
 export const orgMembershipsRelations = relations(orgMemberships, ({ one }) => ({
-  user: one(users, { fields: [orgMemberships.userId], references: [users.id] }),
+  user: one(users, {
+    fields: [orgMemberships.userId],
+    references: [users.id],
+    relationName: 'membership_user',
+  }),
+  invitedBy: one(users, {
+    fields: [orgMemberships.invitedByUserId],
+    references: [users.id],
+    relationName: 'membership_inviter',
+  }),
   org: one(organizations, { fields: [orgMemberships.orgId], references: [organizations.id] }),
 }));
 
