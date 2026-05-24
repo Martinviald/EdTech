@@ -43,11 +43,11 @@ export default async function OrganizacionPage() {
           <h1 className="text-2xl font-semibold">{org.name}</h1>
           <p className="text-muted-foreground mt-1 text-sm">Perfil institucional</p>
         </div>
-        <Button asChild variant="outline">
-          <Link href={'/organizacion/configurar' as Route}>
-            {isSetupComplete ? 'Editar configuración' : 'Completar configuración'}
-          </Link>
-        </Button>
+        {!isSetupComplete && (
+          <Button asChild variant="outline">
+            <Link href={'/organizacion/configurar' as Route}>Completar configuración</Link>
+          </Button>
+        )}
       </div>
 
       {!isSetupComplete && (

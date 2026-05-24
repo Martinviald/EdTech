@@ -13,6 +13,9 @@ export default async function ConfigurarColegioPage() {
     redirect('/dashboard');
   }
 
+  const { isSetupComplete } = await apiGet<{ isSetupComplete: boolean }>('/organizations/me/overview');
+  if (isSetupComplete) redirect('/organizacion');
+
   const [org, grades, subjects] = await Promise.all([
     apiGet<Organization>('/organizations/me'),
     apiGet<Grade[]>('/organizations/grades'),
