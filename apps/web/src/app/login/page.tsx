@@ -1,7 +1,8 @@
-import { listActiveMembershipsForMock } from '@soe/db';
-import { db } from '@/lib/db';
+import { internalGet } from '@/lib/api';
 import { LoginButtons } from './LoginButtons';
 import { MockLoginForm } from './MockLoginForm';
+
+type MockUser = { email: string; name: string; role: string; orgName: string };
 
 export const dynamic = 'force-dynamic';
 
@@ -23,13 +24,7 @@ export default async function LoginPage() {
 }
 
 async function MockSection() {
-  const rows = await listActiveMembershipsForMock(db);
-  const users = rows.map((r) => ({
-    email: r.user.email,
-    name: r.user.name,
-    role: r.membership.role,
-    orgName: r.organization.name,
-  }));
+  const users = await internalGet<MockUser[]>('/auth/mock-users');
 
   return (
     <div className="flex flex-col gap-4">

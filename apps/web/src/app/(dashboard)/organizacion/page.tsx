@@ -1,10 +1,8 @@
 import Link from 'next/link';
 import type { Route } from 'next';
 import { redirect } from 'next/navigation';
-import { and, eq } from 'drizzle-orm';
-import { schema } from '@soe/db';
 import { auth } from '@/auth';
-import { db } from '@/lib/db';
+import { apiGet } from '@/lib/api';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 
@@ -15,49 +13,28 @@ const DEPENDENCE_LABELS: Record<string, string> = {
   delegada: 'Corporación Delegada',
 };
 
+type OrgOverview = {
+  org: {
+    id: string;
+    name: string;
+    rbd: string | null;
+    commune: string | null;
+    region: string | null;
+    dependence: string | null;
+  };
+  academicYear: { id: string; year: number } | null;
+  classGroupCount: number;
+  isSetupComplete: boolean;
+};
+
 export default async function OrganizacionPage() {
   const session = await auth();
   if (!session?.user?.orgId) redirect('/login');
 
-  const { orgId } = session.user;
+  const overview = await apiGet<OrgOverview>('/organizations/me/overview');
+  const { org, classGroupCount, isSetupComplete, academicYear } = overview;
+
   const currentYear = new Date().getFullYear();
-
-  const [org, academicYear] = await Promise.all([
-    db
-      .select()
-      .from(schema.organizations)
-      .where(eq(schema.organizations.id, orgId))
-      .limit(1)
-      .then((rows) => rows[0]),
-    db
-      .select({ id: schema.academicYears.id, year: schema.academicYears.year })
-      .from(schema.academicYears)
-      .where(
-        and(
-          eq(schema.academicYears.orgId, orgId),
-          eq(schema.academicYears.year, currentYear),
-        ),
-      )
-      .limit(1)
-      .then((rows) => rows[0] ?? null),
-  ]);
-
-  if (!org) redirect('/dashboard');
-
-  const classGroupCount = academicYear
-    ? await db
-        .select({ id: schema.classGroups.id })
-        .from(schema.classGroups)
-        .where(
-          and(
-            eq(schema.classGroups.orgId, orgId),
-            eq(schema.classGroups.academicYearId, academicYear.id),
-          ),
-        )
-        .then((rows) => rows.length)
-    : 0;
-
-  const isSetupComplete = !!academicYear && classGroupCount > 0;
 
   return (
     <div className="space-y-6">
@@ -66,11 +43,11 @@ export default async function OrganizacionPage() {
           <h1 className="text-2xl font-semibold">{org.name}</h1>
           <p className="text-muted-foreground mt-1 text-sm">Perfil institucional</p>
         </div>
-        <Button asChild variant="outline">
-          <Link href={'/organizacion/configurar' as Route}>
-            {isSetupComplete ? 'Editar configuración' : 'Completar configuración'}
-          </Link>
-        </Button>
+        {!isSetupComplete && (
+          <Button asChild variant="outline">
+            <Link href={'/organizacion/configurar' as Route}>Completar configuración</Link>
+          </Button>
+        )}
       </div>
 
       {!isSetupComplete && (
@@ -102,7 +79,9 @@ export default async function OrganizacionPage() {
 
         <Card>
           <CardHeader>
-            <CardTitle className="text-base">Año académico {currentYear}</CardTitle>
+            <CardTitle className="text-base">
+              Año académico {academicYear?.year ?? currentYear}
+            </CardTitle>
           </CardHeader>
           <CardContent className="space-y-2 text-sm">
             {isSetupComplete ? (

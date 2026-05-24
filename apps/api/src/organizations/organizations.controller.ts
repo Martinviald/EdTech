@@ -21,6 +21,13 @@ export class OrganizationsController {
     return this.organizationsService.getProfile(user.orgId);
   }
 
+  /** GET /api/organizations/me/overview — perfil + estado del setup del año académico. */
+  @Get('me/overview')
+  @Roles('school_admin', 'academic_director', 'platform_admin')
+  getOverview(@CurrentUser() user: JwtPayload) {
+    return this.organizationsService.getOverview(user.orgId);
+  }
+
   /** GET /api/organizations/grades — lista global de niveles educativos. */
   @Get('grades')
   @Roles('school_admin', 'academic_director', 'platform_admin')

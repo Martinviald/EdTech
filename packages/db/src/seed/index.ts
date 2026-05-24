@@ -6,6 +6,7 @@ import { curricula } from '../schema/curriculum';
 import { organizations } from '../schema/organizations';
 import { students } from '../schema/students';
 import { orgMemberships, users } from '../schema/users';
+import { seedMineducTaxonomy } from './mineduc-taxonomy';
 
 config({ path: resolve(__dirname, '../../../../.env') });
 
@@ -93,6 +94,8 @@ async function main() {
       { name: 'DIA 2025', type: 'dia', isOfficial: true, version: '2025' },
     ])
     .onConflictDoNothing();
+
+  await seedMineducTaxonomy(db);
 
   // -------- Demo tenant para mock auth y validación end-to-end --------
   // TODO: cuando llegue la HU del CSV de profesores, hacer org_memberships.user_id

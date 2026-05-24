@@ -1,0 +1,1 @@
+CREATE UNIQUE INDEX "taxonomy_nodes_curriculum_code_uniq" ON "taxonomy_nodes" USING btree ("curriculum_id","code") WHERE "taxonomy_nodes"."code" IS NOT NULL;
