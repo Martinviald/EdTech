@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
   Param,
   ParseUUIDPipe,
@@ -16,6 +17,9 @@ import { CurrentUser } from '../auth/current-user.decorator';
 import type { JwtPayload } from '../auth/jwt-payload.types';
 import { getEffectiveOrgId } from '../common/helpers/org-context.helper';
 import {
+  addSubjectToClassGroupSchema,
+  bulkAddSubjectsSchema,
+  createClassGroupSchema,
   updateOrganizationProfileSchema,
   academicSetupSchema,
 } from '@soe/types';
@@ -95,5 +99,102 @@ export class OrganizationsController {
     const dto = academicSetupSchema.parse(body);
     const effectiveOrgId = getEffectiveOrgId(user, id);
     return this.organizationsService.setupAcademicYear(id, effectiveOrgId, dto);
+  }
+
+  /** DELETE /api/organizations/:id — soft-delete del colegio. Solo platform_admin. */
+  @Delete(':id')
+  @Roles('platform_admin')
+  softDelete(@Param('id', ParseUUIDPipe) id: string) {
+    return this.organizationsService.softDelete(id);
+  }
+
+  /** POST /api/organizations/:id/restore — restaura un colegio soft-deleted. Solo platform_admin. */
+  @Post(':id/restore')
+  @Roles('platform_admin')
+  restore(@Param('id', ParseUUIDPipe) id: string) {
+    return this.organizationsService.restore(id);
+  }
+
+  // ── Asignaturas (subject_classes) ───────────────────────────────────
+
+  /** GET /api/organizations/:orgId/subject-matrix — cursos × asignaturas del año vigente. */
+  @Get(':orgId/subject-matrix')
+  @Roles('school_admin', 'academic_director', 'platform_admin')
+  getSubjectMatrix(
+    @Param('orgId', ParseUUIDPipe) orgId: string,
+    @CurrentUser() user: JwtPayload,
+  ) {
+    const effectiveOrgId = getEffectiveOrgId(user, orgId);
+    return this.organizationsService.getSubjectMatrix(effectiveOrgId);
+  }
+
+  /** POST /api/organizations/:orgId/subject-classes/bulk — agrega asignaturas a TODOS los cursos del año. */
+  @Post(':orgId/subject-classes/bulk')
+  @Roles('school_admin', 'academic_director', 'platform_admin')
+  bulkAddSubjects(
+    @Param('orgId', ParseUUIDPipe) orgId: string,
+    @Body() body: unknown,
+    @CurrentUser() user: JwtPayload,
+  ) {
+    const dto = bulkAddSubjectsSchema.parse(body);
+    const effectiveOrgId = getEffectiveOrgId(user, orgId);
+    return this.organizationsService.bulkAddSubjects(effectiveOrgId, dto);
+  }
+
+  /** POST /api/organizations/:orgId/class-groups/:classGroupId/subjects — agrega una asignatura a UN curso. */
+  @Post(':orgId/class-groups/:classGroupId/subjects')
+  @Roles('school_admin', 'academic_director', 'platform_admin')
+  addSubjectToClassGroup(
+    @Param('orgId', ParseUUIDPipe) orgId: string,
+    @Param('classGroupId', ParseUUIDPipe) classGroupId: string,
+    @Body() body: unknown,
+    @CurrentUser() user: JwtPayload,
+  ) {
+    const dto = addSubjectToClassGroupSchema.parse(body);
+    const effectiveOrgId = getEffectiveOrgId(user, orgId);
+    return this.organizationsService.addSubjectToClassGroup(
+      effectiveOrgId,
+      classGroupId,
+      dto.subjectId,
+    );
+  }
+
+  /** DELETE /api/organizations/:orgId/subject-classes/:subjectClassId — quita una asignatura de un curso. */
+  @Delete(':orgId/subject-classes/:subjectClassId')
+  @Roles('school_admin', 'academic_director', 'platform_admin')
+  removeSubjectClass(
+    @Param('orgId', ParseUUIDPipe) orgId: string,
+    @Param('subjectClassId', ParseUUIDPipe) subjectClassId: string,
+    @CurrentUser() user: JwtPayload,
+  ) {
+    const effectiveOrgId = getEffectiveOrgId(user, orgId);
+    return this.organizationsService.removeSubjectClass(effectiveOrgId, subjectClassId);
+  }
+
+  // ── Class groups (Fase C) ───────────────────────────────────────────
+
+  /** POST /api/organizations/:orgId/class-groups — crea un curso suelto en el año vigente. */
+  @Post(':orgId/class-groups')
+  @Roles('school_admin', 'academic_director', 'platform_admin')
+  createClassGroup(
+    @Param('orgId', ParseUUIDPipe) orgId: string,
+    @Body() body: unknown,
+    @CurrentUser() user: JwtPayload,
+  ) {
+    const dto = createClassGroupSchema.parse(body);
+    const effectiveOrgId = getEffectiveOrgId(user, orgId);
+    return this.organizationsService.createClassGroup(effectiveOrgId, dto);
+  }
+
+  /** DELETE /api/organizations/:orgId/class-groups/:classGroupId — borra un curso (valida sin datos). */
+  @Delete(':orgId/class-groups/:classGroupId')
+  @Roles('school_admin', 'academic_director', 'platform_admin')
+  deleteClassGroup(
+    @Param('orgId', ParseUUIDPipe) orgId: string,
+    @Param('classGroupId', ParseUUIDPipe) classGroupId: string,
+    @CurrentUser() user: JwtPayload,
+  ) {
+    const effectiveOrgId = getEffectiveOrgId(user, orgId);
+    return this.organizationsService.deleteClassGroup(effectiveOrgId, classGroupId);
   }
 }

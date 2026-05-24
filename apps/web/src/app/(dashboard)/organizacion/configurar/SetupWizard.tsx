@@ -7,8 +7,12 @@ import { toast } from 'sonner';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { updateOrgProfile, setupAcademicYear } from './actions';
+import {
+  updateOrgProfile as defaultUpdateOrgProfile,
+  setupAcademicYear as defaultSetupAcademicYear,
+} from './actions';
 import type { Grade, Organization, Subject } from './types';
+import type { AcademicSetupDto, UpdateOrganizationProfileDto } from '@soe/types';
 
 // ── Tipos internos del wizard ─────────────────────────────────────────────────
 
@@ -64,10 +68,29 @@ interface SetupWizardProps {
   org: Organization;
   grades: Grade[];
   subjects: Subject[];
+  /**
+   * Acciones inyectables para que el wizard pueda usarse desde el panel admin
+   * (que opera sobre cualquier org via path) sin duplicar la UI. Si se omiten,
+   * se usan las acciones del dashboard (op sobre la org del usuario).
+   */
+  actions?: {
+    updateOrgProfile: (dto: UpdateOrganizationProfileDto) => Promise<void>;
+    setupAcademicYear: (dto: AcademicSetupDto) => Promise<unknown>;
+  };
+  /** Ruta a la que se redirige al completar. Default: `/organizacion`. */
+  successRedirect?: string;
 }
 
-export function SetupWizard({ org, grades, subjects }: SetupWizardProps) {
+export function SetupWizard({
+  org,
+  grades,
+  subjects,
+  actions,
+  successRedirect = '/organizacion',
+}: SetupWizardProps) {
   const router = useRouter();
+  const updateOrgProfile = actions?.updateOrgProfile ?? defaultUpdateOrgProfile;
+  const setupAcademicYear = actions?.setupAcademicYear ?? defaultSetupAcademicYear;
   const [isPending, startTransition] = useTransition();
   const [step, setStep] = useState<Step>(1);
 
@@ -168,7 +191,7 @@ export function SetupWizard({ org, grades, subjects }: SetupWizardProps) {
         });
 
         toast.success('Colegio configurado correctamente');
-        router.push('/organizacion' as Route);
+        router.push(successRedirect as Route);
       } catch (err) {
         toast.error(err instanceof Error ? err.message : 'Error al guardar la configuración');
       }

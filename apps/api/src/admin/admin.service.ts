@@ -33,7 +33,7 @@ export class AdminService {
 
   async listOrganizations(query: ListOrganizationsQueryDto) {
     const where = and(
-      isNull(organizations.deletedAt),
+      query.includeDeleted ? undefined : isNull(organizations.deletedAt),
       eq(organizations.type, 'school'),
       query.q ? ilike(organizations.name, `%${query.q}%`) : undefined,
     );
@@ -48,6 +48,7 @@ export class AdminService {
           region: organizations.region,
           dependence: organizations.dependence,
           createdAt: organizations.createdAt,
+          deletedAt: organizations.deletedAt,
         })
         .from(organizations)
         .where(where)
@@ -102,10 +103,12 @@ export class AdminService {
   }
 
   async getOrganizationDetail(orgId: string) {
+    // No filtra por deletedAt: el panel admin necesita poder ver y restaurar
+    // colegios dados de baja.
     const [org] = await this.db
       .select()
       .from(organizations)
-      .where(and(eq(organizations.id, orgId), isNull(organizations.deletedAt)))
+      .where(eq(organizations.id, orgId))
       .limit(1);
     if (!org) throw new NotFoundException('Colegio no encontrado');
 
