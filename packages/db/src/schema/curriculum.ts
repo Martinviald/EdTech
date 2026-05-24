@@ -15,17 +15,28 @@ import { curriculumTypeEnum, taxonomyMappingTypeEnum, taxonomyNodeTypeEnum } fro
 import { organizations } from './organizations';
 import { grades, subjects } from './academic';
 
-export const curricula = pgTable('curricula', {
-  id: uuid('id').defaultRandom().primaryKey(),
-  name: text('name').notNull(),
-  type: curriculumTypeEnum('type').notNull(),
-  language: text('language').default('es').notNull(),
-  version: text('version'),
-  isOfficial: boolean('is_official').default(false).notNull(),
-  orgId: uuid('org_id').references(() => organizations.id),
-  metadata: jsonb('metadata').$type<Record<string, unknown>>().default({}),
-  createdAt: timestamp('created_at').defaultNow().notNull(),
-});
+export const curricula = pgTable(
+  'curricula',
+  {
+    id: uuid('id').defaultRandom().primaryKey(),
+    name: text('name').notNull(),
+    type: curriculumTypeEnum('type').notNull(),
+    language: text('language').default('es').notNull(),
+    version: text('version'),
+    isOfficial: boolean('is_official').default(false).notNull(),
+    orgId: uuid('org_id').references(() => organizations.id),
+    metadata: jsonb('metadata').$type<Record<string, unknown>>().default({}),
+    createdAt: timestamp('created_at').defaultNow().notNull(),
+  },
+  (table) => [
+    // Un (type, version) oficial debe ser único globalmente. Sin esto, el seed
+    // o la API podrían crear MINEDUC 2024 N veces. Partial index para no
+    // restringir los custom (que deben coexistir por org).
+    uniqueIndex('curricula_official_type_version_uniq')
+      .on(table.type, table.version)
+      .where(sql`${table.isOfficial} = true AND ${table.orgId} IS NULL`),
+  ],
+);
 
 export const taxonomyNodes = pgTable(
   'taxonomy_nodes',

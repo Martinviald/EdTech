@@ -18,6 +18,7 @@ export async function seedMineducTaxonomy(db: Database): Promise<void> {
     .select({ id: curricula.id })
     .from(curricula)
     .where(and(eq(curricula.type, 'mineduc'), eq(curricula.version, '2024')))
+    .orderBy(curricula.createdAt)
     .limit(1);
   if (!mineduc) {
     throw new Error('MINEDUC 2024 curriculum row missing — run base seed first');

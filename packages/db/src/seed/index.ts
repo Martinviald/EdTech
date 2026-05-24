@@ -1,5 +1,6 @@
 import { config } from 'dotenv';
 import { resolve } from 'path';
+import { sql } from 'drizzle-orm';
 import { createDbClient } from '../client';
 import { grades, subjects } from '../schema/academic';
 import { curricula } from '../schema/curriculum';
@@ -87,13 +88,19 @@ async function main() {
     .onConflictDoNothing();
 
   console.log('Seeding curricula...');
+  // El partial unique index curricula_official_type_version_uniq evita
+  // duplicar (type, version) cuando is_official=true AND org_id IS NULL.
+  // Sin `target` explícito el onConflictDoNothing no detectaría el constraint.
   await db
     .insert(curricula)
     .values([
       { name: 'MINEDUC 2024', type: 'mineduc', isOfficial: true, version: '2024' },
       { name: 'DIA 2025', type: 'dia', isOfficial: true, version: '2025' },
     ])
-    .onConflictDoNothing();
+    .onConflictDoNothing({
+      target: [curricula.type, curricula.version],
+      where: sql`${curricula.isOfficial} = true AND ${curricula.orgId} IS NULL`,
+    });
 
   await seedMineducTaxonomy(db);
 
