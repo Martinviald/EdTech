@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import type { Route } from 'next';
 import { redirect } from 'next/navigation';
+import { UsersRound } from 'lucide-react';
 import { auth } from '@/auth';
 import { apiGet } from '@/lib/api';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -61,7 +62,7 @@ export default async function OrganizacionPage() {
         </Card>
       )}
 
-      <div className="grid gap-4 md:grid-cols-2">
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
         <Card>
           <CardHeader>
             <CardTitle className="text-base">Información básica</CardTitle>
@@ -88,6 +89,31 @@ export default async function OrganizacionPage() {
               <Row label="Cursos configurados" value={String(classGroupCount)} />
             ) : (
               <p className="text-muted-foreground">Sin configurar</p>
+            )}
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <div className="flex items-center gap-2">
+              <UsersRound className="size-5 text-primary" aria-hidden />
+              <CardTitle className="text-base">Asignaciones docentes</CardTitle>
+            </div>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            <p className="text-sm text-muted-foreground">
+              Asigna profesores a los cursos y asignaturas del año académico.
+            </p>
+            {isSetupComplete ? (
+              <Button asChild variant="outline" size="sm">
+                <Link href={'/organizacion/asignaciones' as Route}>
+                  Gestionar asignaciones
+                </Link>
+              </Button>
+            ) : (
+              <p className="text-xs text-muted-foreground">
+                Configurá el año académico primero para habilitar las asignaciones.
+              </p>
             )}
           </CardContent>
         </Card>

@@ -8,7 +8,6 @@ import {
   School,
   Settings,
   ShieldCheck,
-  Upload,
   UserCog,
   Users,
   type LucideIcon,
@@ -96,13 +95,6 @@ export const NAV_ITEMS: readonly NavItem[] = [
       'coordinator',
       'platform_admin',
     ],
-  },
-  {
-    href: '/importar',
-    label: 'Importar',
-    icon: Upload,
-    status: 'live',
-    roles: ['school_admin', 'academic_director', 'platform_admin'],
   },
   {
     href: '/organizacion',
