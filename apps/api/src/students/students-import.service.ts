@@ -7,6 +7,7 @@ import {
   importJobs,
   studentEnrollments,
   students,
+  subjectClasses,
   withOrgContext,
 } from '@soe/db';
 import type { Grade } from '@soe/db';
@@ -124,6 +125,21 @@ export class StudentsImportService {
     const commitErrors: StudentImportError[] = [...errors];
 
     const jobId = await withOrgContext(this.db, orgId, async (tx) => {
+      // Asignaturas que la org ya tiene configuradas para el año vigente:
+      // se replican en cada class_group nuevo para que aparezcan en la vista de
+      // asignaciones (que parte desde subject_classes).
+      const configuredSubjectIds = await tx
+        .selectDistinct({ subjectId: subjectClasses.subjectId })
+        .from(subjectClasses)
+        .innerJoin(classGroups, eq(classGroups.id, subjectClasses.classGroupId))
+        .where(
+          and(
+            eq(classGroups.orgId, orgId),
+            eq(subjectClasses.academicYearId, academicYearId),
+          ),
+        )
+        .then((rows) => rows.map((r) => r.subjectId));
+
       const classGroupIdByLabel = new Map<string, string>();
       for (const [label, r] of preResolution.resolved.entries()) {
         if (r.existed) {
@@ -142,6 +158,16 @@ export class StudentsImportService {
         if (!createdRow) throw new Error('classGroup insert returned no row');
         classGroupIdByLabel.set(label, createdRow.id);
         classGroupsCreated++;
+
+        if (configuredSubjectIds.length > 0) {
+          await tx.insert(subjectClasses).values(
+            configuredSubjectIds.map((subjectId) => ({
+              classGroupId: createdRow.id,
+              subjectId,
+              academicYearId,
+            })),
+          );
+        }
       }
 
       for (const batch of chunk(validRows, 500)) {

@@ -1,10 +1,20 @@
-import { BookOpen } from 'lucide-react';
+import Link from 'next/link';
+import type { Route } from 'next';
+import { BookOpen, Upload } from 'lucide-react';
 import { redirect } from 'next/navigation';
+import type { UserRole } from '@soe/types';
 import { auth } from '@/auth';
 import { listClassGroupsForUser } from '@/lib/teacherAssignmentsApi';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { EmptyState } from '@/components/EmptyState';
+
+const IMPORT_ROLES: readonly UserRole[] = [
+  'school_admin',
+  'academic_director',
+  'platform_admin',
+];
 
 export default async function MyClassesPage() {
   const session = await auth();
@@ -50,14 +60,25 @@ export default async function MyClassesPage() {
   }
 
   const cards = [...grouped.values()];
+  const canImport = IMPORT_ROLES.includes(session.user.role);
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-semibold">Mis cursos</h1>
-        <p className="text-muted-foreground mt-1 text-sm">
-          Cursos y asignaturas que tienes asignadas en el año académico vigente.
-        </p>
+      <div className="flex flex-wrap items-start justify-between gap-3">
+        <div>
+          <h1 className="text-2xl font-semibold">Mis cursos</h1>
+          <p className="text-muted-foreground mt-1 text-sm">
+            Cursos y asignaturas que tienes asignadas en el año académico vigente.
+          </p>
+        </div>
+        {canImport ? (
+          <Button asChild variant="outline" size="sm">
+            <Link href={'/importar' as Route}>
+              <Upload className="mr-2 size-4" aria-hidden />
+              Importar alumnos
+            </Link>
+          </Button>
+        ) : null}
       </div>
 
       {cards.length === 0 ? (
@@ -86,9 +107,13 @@ export default async function MyClassesPage() {
                       className="flex items-center justify-between rounded-md border px-3 py-2 text-sm"
                     >
                       <span className="font-medium">{s.subjectName}</span>
-                      <Badge variant={s.role === 'primary' ? 'default' : 'secondary'}>
-                        {s.role === 'primary' ? 'Titular' : 'Asistente'}
-                      </Badge>
+                      {s.role === 'primary' ? (
+                        <Badge variant="default">Titular</Badge>
+                      ) : s.role === 'assistant' ? (
+                        <Badge variant="secondary">Asistente</Badge>
+                      ) : (
+                        <Badge variant="outline">Sin asignar</Badge>
+                      )}
                     </div>
                   ))
                 )}
