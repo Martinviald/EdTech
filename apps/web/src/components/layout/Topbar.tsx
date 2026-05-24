@@ -10,19 +10,20 @@ interface TopbarProps {
     email?: string | null;
     image?: string | null;
   };
-  role: UserRole;
+  roles: readonly UserRole[];
+  activeRole: UserRole;
 }
 
-export function Topbar({ org, user, role }: TopbarProps) {
+export function Topbar({ org, user, roles, activeRole }: TopbarProps) {
   return (
     <header className="sticky top-0 z-30 flex h-14 items-center gap-3 border-b bg-background/95 px-4 backdrop-blur supports-[backdrop-filter]:bg-background/80 md:px-6">
-      <MobileSidebar role={role} />
+      <MobileSidebar roles={roles} />
       <span className="hidden text-sm font-medium text-muted-foreground md:block" title={org.name}>
         {org.name}
       </span>
       <div className="flex-1" />
       <ThemeToggle />
-      <UserNav user={user} role={role} orgName={org.name} />
+      <UserNav user={user} roles={roles} activeRole={activeRole} orgName={org.name} />
     </header>
   );
 }

@@ -10,14 +10,21 @@ function makeService() {
 }
 
 function user(overrides: Partial<JwtPayload> = {}): JwtPayload {
+  const role = overrides.activeRole ?? overrides.role ?? 'school_admin';
+  // Si el fixture pide platform_admin sin setear isPlatformAdmin explícito,
+  // derivamos el flag — coherente con el invariante del AuthGuard.
+  const isPlatformAdmin =
+    overrides.isPlatformAdmin ?? (role === 'platform_admin');
   return {
     userId: 'u1',
     orgId: 'org-1',
-    role: 'school_admin',
     email: 'a@b.cl',
     name: 'Test',
-    isPlatformAdmin: false,
+    roles: [role],
+    activeRole: role,
+    role,
     ...overrides,
+    isPlatformAdmin,
   };
 }
 

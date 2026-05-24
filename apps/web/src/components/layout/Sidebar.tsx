@@ -8,12 +8,12 @@ import { SidebarNav, type SidebarVariant } from './SidebarNav';
 const STORAGE_KEY = 'soe:sidebar-collapsed';
 
 interface SidebarProps {
-  role: UserRole;
+  roles: readonly UserRole[];
   className?: string;
   variant?: SidebarVariant;
 }
 
-export function Sidebar({ role, className, variant }: SidebarProps) {
+export function Sidebar({ roles, className, variant }: SidebarProps) {
   const [collapsed, setCollapsed] = useState(false);
   const [hydrated, setHydrated] = useState(false);
 
@@ -38,7 +38,7 @@ export function Sidebar({ role, className, variant }: SidebarProps) {
         className,
       )}
     >
-      <SidebarNav role={role} collapsed={collapsed} onToggle={toggle} variant={variant} />
+      <SidebarNav roles={roles} collapsed={collapsed} onToggle={toggle} variant={variant} />
     </aside>
   );
 }

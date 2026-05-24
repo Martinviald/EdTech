@@ -157,8 +157,13 @@ export const ADMIN_NAV_ITEMS: readonly NavItem[] = [
   },
 ];
 
-export function visibleNavItems(role: UserRole): readonly NavItem[] {
-  return NAV_ITEMS.filter((item) => item.roles.includes(role));
+/**
+ * Items visibles para el usuario dado el conjunto de roles que tiene en su
+ * org. Unión: un item aparece si AL MENOS UNO de los roles del usuario está
+ * en `item.roles`. Coherente con la regla de autorización del backend.
+ */
+export function visibleNavItems(roles: readonly UserRole[]): readonly NavItem[] {
+  return NAV_ITEMS.filter((item) => item.roles.some((r) => roles.includes(r)));
 }
 
 export const ROLE_LABELS: Record<UserRole, string> = {

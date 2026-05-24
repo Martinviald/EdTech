@@ -19,9 +19,14 @@ export default async function AdminLayout({ children }: { children: React.ReactN
   return (
     <div className="flex h-screen bg-background">
       <SkipLink />
-      <Sidebar role="platform_admin" variant="admin" />
+      <Sidebar roles={['platform_admin']} variant="admin" />
       <div className="flex flex-1 flex-col overflow-hidden">
-        <Topbar org={orgPlaceholder} user={session.user} role={session.user.role} />
+        <Topbar
+          org={orgPlaceholder}
+          user={session.user}
+          roles={session.user.roles}
+          activeRole={session.user.activeRole}
+        />
         <main id="main-content" className="flex-1 overflow-y-auto p-6">
           {children}
         </main>

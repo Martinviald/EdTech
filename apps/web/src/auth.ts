@@ -2,11 +2,9 @@ import NextAuth, { type NextAuthConfig, type User } from 'next-auth';
 import Credentials from 'next-auth/providers/credentials';
 import Google from 'next-auth/providers/google';
 import MicrosoftEntraID from 'next-auth/providers/microsoft-entra-id';
-import type { USER_ROLES } from '@soe/types';
+import { pickDefaultActiveRole, USER_ROLES, type UserRole } from '@soe/types';
 import { authConfig } from '@/auth.config';
 import { internalPost } from '@/lib/api';
-
-type UserRole = (typeof USER_ROLES)[number];
 
 const authMode = process.env.AUTH_MODE === 'mock' ? 'mock' : 'sso';
 
@@ -24,6 +22,9 @@ type ValidateUserResponse = {
   } | null;
   isPlatformAdmin: boolean;
   isPending: boolean;
+  roles: UserRole[];
+  activeRole: UserRole;
+  /** @deprecated mantenido para no romper consumidores legacy. */
   membership: {
     id: string;
     userId: string | null;
@@ -31,6 +32,13 @@ type ValidateUserResponse = {
     role: string;
     isActive: boolean;
   } | null;
+  memberships: Array<{
+    id: string;
+    userId: string | null;
+    orgId: string | null;
+    role: UserRole;
+    isActive: boolean;
+  }>;
   organization: { id: string; name: string; type: string } | null;
 };
 
@@ -39,7 +47,16 @@ type PromoteInvitationResponse = {
   membershipId: string;
   orgId: string;
   role: string;
+  roles: UserRole[];
+  activeRole: UserRole;
 };
+
+function normalizeRoles(raw: unknown): UserRole[] {
+  if (!Array.isArray(raw)) return [];
+  return raw.filter((r): r is UserRole =>
+    typeof r === 'string' && (USER_ROLES as readonly string[]).includes(r),
+  );
+}
 
 function ssoProviders() {
   return [
@@ -65,15 +82,19 @@ function mockProvider() {
       if (typeof email !== 'string' || !email) return null;
       const result = await internalPost<ValidateUserResponse>('/auth/validate-user', { email });
       if (!result || !result.user) return null; // pending no soportado vía mock
+      const roles = result.roles?.length
+        ? result.roles
+        : ([result.isPlatformAdmin ? 'platform_admin' : 'teacher'] as UserRole[]);
+      const activeRole = result.activeRole ?? pickDefaultActiveRole(roles);
       return {
         id: result.user.id,
         email: result.user.email,
         name: result.user.name,
         image: result.user.avatarUrl ?? undefined,
         orgId: result.membership?.orgId ?? null,
-        role: (result.isPlatformAdmin
-          ? 'platform_admin'
-          : (result.membership?.role ?? 'teacher')) as UserRole,
+        roles,
+        activeRole,
+        role: activeRole,
         isPlatformAdmin: result.isPlatformAdmin,
       } satisfies User;
     },
@@ -114,9 +135,15 @@ const config: NextAuthConfig = {
             providerId: account?.providerAccountId ?? '',
           },
         );
+        const promotedRoles = promoted.roles?.length
+          ? promoted.roles
+          : ([promoted.role as UserRole]);
+        const promotedActiveRole = promoted.activeRole ?? pickDefaultActiveRole(promotedRoles);
         user.id = promoted.userId;
         user.orgId = promoted.orgId;
-        user.role = promoted.role as UserRole;
+        user.roles = promotedRoles;
+        user.activeRole = promotedActiveRole;
+        user.role = promotedActiveRole;
         user.isPlatformAdmin = false;
         return true;
       }
@@ -133,27 +160,59 @@ const config: NextAuthConfig = {
         providerId: account?.providerAccountId ?? result.user.providerId,
       });
 
+      const roles = result.roles?.length
+        ? result.roles
+        : ([result.isPlatformAdmin ? 'platform_admin' : 'teacher'] as UserRole[]);
+      const activeRole = result.activeRole ?? pickDefaultActiveRole(roles);
+
       user.id = result.user.id;
       user.orgId = result.membership?.orgId ?? null;
-      user.role = (result.isPlatformAdmin
-        ? 'platform_admin'
-        : (result.membership?.role ?? 'teacher')) as UserRole;
+      user.roles = roles;
+      user.activeRole = activeRole;
+      user.role = activeRole;
       user.isPlatformAdmin = result.isPlatformAdmin;
       return true;
     },
-    async jwt({ token, user }) {
+    async jwt({ token, user, trigger, session }) {
       if (user) {
         token.userId = user.id as string;
         token.orgId = (user.orgId ?? null) as string | null;
-        token.role = user.role as UserRole;
+        token.roles = user.roles ?? (user.role ? [user.role as UserRole] : []);
+        token.activeRole = user.activeRole ?? (user.role as UserRole | undefined);
+        token.role = token.activeRole;
         token.isPlatformAdmin = Boolean(user.isPlatformAdmin);
       }
+
+      // Refresh disparado por `useSession().update({ activeRole })` desde el
+      // RoleSwitcher. Validamos que el rol propuesto esté en token.roles —
+      // defensa en profundidad; el endpoint /auth/switch-role ya validó.
+      if (trigger === 'update' && session && typeof session === 'object') {
+        const candidate = (session as { activeRole?: unknown }).activeRole;
+        const valid = normalizeRoles(token.roles ?? []);
+        if (
+          typeof candidate === 'string' &&
+          (USER_ROLES as readonly string[]).includes(candidate) &&
+          valid.includes(candidate as UserRole)
+        ) {
+          token.activeRole = candidate as UserRole;
+          token.role = candidate as UserRole;
+        }
+      }
+
       return token;
     },
     async session({ session, token }) {
       if (typeof token.userId === 'string') session.user.id = token.userId;
       session.user.orgId = (token.orgId ?? null) as string | null;
-      if (token.role) session.user.role = token.role as UserRole;
+      const roles = normalizeRoles(token.roles ?? []);
+      const fallback = (token.role ?? token.activeRole) as UserRole | undefined;
+      const resolvedRoles = roles.length > 0 ? roles : fallback ? [fallback] : [];
+      session.user.roles = resolvedRoles;
+      const active = (token.activeRole ?? fallback) as UserRole | undefined;
+      if (active) {
+        session.user.activeRole = active;
+        session.user.role = active;
+      }
       session.user.isPlatformAdmin = Boolean(token.isPlatformAdmin);
       return session;
     },

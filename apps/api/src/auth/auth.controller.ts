@@ -1,6 +1,9 @@
 import { Body, Controller, ForbiddenException, Get, Headers, Post } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+import { switchRoleSchema } from '@soe/types';
 import { AuthService } from './auth.service';
+import { CurrentUser } from './current-user.decorator';
+import type { JwtPayload } from './jwt-payload.types';
 import { Public } from '../common/decorators/public.decorator';
 
 @Controller('auth')
@@ -73,5 +76,17 @@ export class AuthController {
     this.verifyInternalToken(token);
     const authMode = this.config.get<string>('AUTH_MODE');
     return this.authService.listMockUsers(authMode);
+  }
+
+  /**
+   * POST /api/auth/switch-role — cambia el rol activo del usuario.
+   * Requiere autenticación (no @Public). El AuthGuard valida el JWT y
+   * pasa el JwtPayload via @CurrentUser. El controller no re-emite el
+   * token; el frontend (NextAuth update()) lo persiste en el JWT.
+   */
+  @Post('switch-role')
+  switchRole(@Body() body: unknown, @CurrentUser() user: JwtPayload) {
+    const dto = switchRoleSchema.parse(body);
+    return this.authService.switchActiveRole(user, dto.role);
   }
 }

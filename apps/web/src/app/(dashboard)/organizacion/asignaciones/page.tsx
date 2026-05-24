@@ -1,4 +1,5 @@
 import { redirect } from 'next/navigation';
+import { ASSIGNMENTS_ROLES, canAccess } from '@soe/types';
 import { auth } from '@/auth';
 import {
   listAssignments,
@@ -8,12 +9,10 @@ import {
 import { AssignmentsTable } from './AssignmentsTable';
 import { CreateAssignmentDialog } from './CreateAssignmentDialog';
 
-const ALLOWED_ROLES = ['school_admin', 'academic_director', 'platform_admin'];
-
 export default async function AsignacionesPage() {
   const session = await auth();
   if (!session?.user?.orgId) redirect('/login');
-  if (!ALLOWED_ROLES.includes(session.user.role)) redirect('/organizacion');
+  if (!canAccess(session.user.roles, ASSIGNMENTS_ROLES)) redirect('/organizacion');
 
   const orgId = session.user.orgId;
 

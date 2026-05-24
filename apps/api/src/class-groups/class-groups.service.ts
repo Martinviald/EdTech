@@ -11,16 +11,31 @@ import {
   teacherAssignments,
   users,
 } from '@soe/db';
-import type {
-  ClassGroupDetailResponse,
-  ClassGroupSubject,
-  TeacherAssignmentRole,
+import {
+  TEACHER_ROLES,
+  type ClassGroupDetailResponse,
+  type ClassGroupSubject,
+  type TeacherAssignmentRole,
 } from '@soe/types';
 import type { JwtPayload } from '../auth/jwt-payload.types';
 import { InjectDb, type Database } from '../database/database.types';
 
-const TEACHER_ROLES = ['teacher', 'homeroom_teacher'];
 const TEACHER_ROLE_VALUES: readonly TeacherAssignmentRole[] = ['primary', 'assistant'];
+
+/**
+ * Decide si el usuario ve la pestaña "Mis cursos" (filtrada por sus
+ * asignaciones) o la vista administrativa (todos los cursos de la org).
+ *
+ * Esta es la ÚNICA excepción a la regla general de "guards autorizan por
+ * unión de roles": acá decidimos en base al `activeRole`, no a la unión.
+ * Motivo: un usuario que es teacher + academic_director debe poder alternar
+ * entre la vista de admin y la de profesor cambiando el rol activo, no
+ * estar forzado a una sola vista.
+ */
+function shouldShowTeacherView(user: JwtPayload): boolean {
+  if (user.isPlatformAdmin) return false;
+  return (TEACHER_ROLES as readonly string[]).includes(user.activeRole);
+}
 
 @Injectable()
 export class ClassGroupsService {
@@ -33,7 +48,7 @@ export class ClassGroupsService {
    *    una asignación activa, devolviendo una fila por (curso × asignatura).
    */
   async listForUser(orgId: string, user: JwtPayload) {
-    const isTeacherView = !user.isPlatformAdmin && TEACHER_ROLES.includes(user.role);
+    const isTeacherView = shouldShowTeacherView(user);
 
     if (isTeacherView) {
       return this.db
@@ -120,7 +135,7 @@ export class ClassGroupsService {
       throw new NotFoundException('Curso no encontrado');
     }
 
-    const isTeacherView = !user.isPlatformAdmin && TEACHER_ROLES.includes(user.role);
+    const isTeacherView = shouldShowTeacherView(user);
     if (isTeacherView) {
       const [assignment] = await this.db
         .select({ id: teacherAssignments.id })

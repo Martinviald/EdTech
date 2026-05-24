@@ -183,11 +183,13 @@ deleted_at      timestamp
 
 #### `org_memberships`
 
-Un usuario puede tener roles distintos en distintas organizaciones.
+Un usuario puede tener roles distintos en distintas organizaciones, y también
+**múltiples roles dentro de la misma organización**. El UNIQUE compuesto es
+sobre `(user_id, org_id, role)` — no sobre `(user_id, org_id)`.
 
 ```
 id              uuid        PK
-user_id         uuid        FK → users.id
+user_id         uuid        FK → users.id (nullable para invitaciones pendientes)
 org_id          uuid        FK → organizations.id
 role            enum        'platform_admin' | 'foundation_director' | 'school_admin'
                             | 'academic_director' | 'cycle_director' | 'dept_head'
@@ -195,10 +197,20 @@ role            enum        'platform_admin' | 'foundation_director' | 'school_a
                             | 'eval_coordinator' | 'guardian'
 scope           jsonb       Restricciones adicionales: qué cursos/asignaturas ve
 is_active       boolean     DEFAULT true
+email           text        Solo presente cuando user_id IS NULL (invitación pendiente)
+invited_by_user_id  uuid    FK → users.id
+invited_at      timestamp
 created_at      timestamp   NOT NULL DEFAULT now()
 
 UNIQUE(user_id, org_id, role)
 ```
+
+**Multi-rol y sesión:** al hacer login, `listActiveMembershipsByEmail` recupera
+todos los memberships activos del usuario en su org. El JWT se puebla con:
+- `roles: UserRole[]` — array de todos los roles del usuario.
+- `activeRole: UserRole` — el elegido (default = mayor jerarquía según `ROLE_HIERARCHY`).
+- Los guards autorizan por **unión** de `roles[]` (si alguno califica, pasa).
+- `POST /auth/switch-role` permite cambiar `activeRole` sin re-login.
 
 **Notas sobre `scope` JSONB:**
 
@@ -210,7 +222,8 @@ UNIQUE(user_id, org_id, role)
 }
 ```
 
-Un `NULL` en cualquier campo significa "todos".
+Un `NULL` en cualquier campo significa "todos". Cada membership tiene su propio
+scope, lo que permite asignar visibilidades distintas por rol.
 
 ---
 

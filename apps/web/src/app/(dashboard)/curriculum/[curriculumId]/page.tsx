@@ -4,10 +4,8 @@ import { notFound, redirect } from 'next/navigation';
 import { ChevronLeft } from 'lucide-react';
 import { auth } from '@/auth';
 import { apiGet } from '@/lib/api';
-import type { CurriculumTreeResponse } from '@soe/types';
+import { canAccess, CURRICULUM_ROLES, userHasRole, type CurriculumTreeResponse } from '@soe/types';
 import { TreeView } from './TreeView';
-
-const ALLOWED_ROLES = ['platform_admin', 'school_admin', 'academic_director'];
 
 export default async function CurriculumDetailPage({
   params,
@@ -16,7 +14,7 @@ export default async function CurriculumDetailPage({
 }) {
   const session = await auth();
   if (!session?.user) redirect('/login');
-  if (!ALLOWED_ROLES.includes(session.user.role)) redirect('/dashboard');
+  if (!canAccess(session.user.roles, CURRICULUM_ROLES)) redirect('/dashboard');
 
   const { curriculumId } = await params;
 
@@ -30,7 +28,7 @@ export default async function CurriculumDetailPage({
   const { curriculum, nodes } = data;
   const editable =
     !curriculum.isOfficial &&
-    (curriculum.orgId === session.user.orgId || session.user.role === 'platform_admin');
+    (curriculum.orgId === session.user.orgId || userHasRole(session.user.roles, 'platform_admin'));
 
   return (
     <div className="space-y-6">

@@ -2,19 +2,13 @@ import Link from 'next/link';
 import type { Route } from 'next';
 import { BookOpen, Upload } from 'lucide-react';
 import { redirect } from 'next/navigation';
-import type { UserRole } from '@soe/types';
+import { canAccess, IMPORT_ROLES } from '@soe/types';
 import { auth } from '@/auth';
 import { listClassGroupsForUser } from '@/lib/teacherAssignmentsApi';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { EmptyState } from '@/components/EmptyState';
-
-const IMPORT_ROLES: readonly UserRole[] = [
-  'school_admin',
-  'academic_director',
-  'platform_admin',
-];
 
 export default async function MyClassesPage() {
   const session = await auth();
@@ -60,7 +54,7 @@ export default async function MyClassesPage() {
   }
 
   const cards = [...grouped.values()];
-  const canImport = IMPORT_ROLES.includes(session.user.role);
+  const canImport = canAccess(session.user.roles, IMPORT_ROLES);
 
   return (
     <div className="space-y-6">
