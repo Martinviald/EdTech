@@ -7,9 +7,10 @@ import {
   text,
   timestamp,
   unique,
+  uniqueIndex,
   uuid,
 } from 'drizzle-orm/pg-core';
-import { relations } from 'drizzle-orm';
+import { relations, sql } from 'drizzle-orm';
 import { curriculumTypeEnum, taxonomyMappingTypeEnum, taxonomyNodeTypeEnum } from './enums';
 import { organizations } from './organizations';
 import { grades, subjects } from './academic';
@@ -26,23 +27,31 @@ export const curricula = pgTable('curricula', {
   createdAt: timestamp('created_at').defaultNow().notNull(),
 });
 
-export const taxonomyNodes = pgTable('taxonomy_nodes', {
-  id: uuid('id').defaultRandom().primaryKey(),
-  curriculumId: uuid('curriculum_id')
-    .notNull()
-    .references(() => curricula.id, { onDelete: 'cascade' }),
-  parentId: uuid('parent_id'),
-  type: taxonomyNodeTypeEnum('type').notNull(),
-  code: text('code'),
-  name: text('name').notNull(),
-  description: text('description'),
-  gradeId: uuid('grade_id').references(() => grades.id),
-  subjectId: uuid('subject_id').references(() => subjects.id),
-  order: integer('order').default(0).notNull(),
-  depth: integer('depth').default(0).notNull(),
-  metadata: jsonb('metadata').$type<Record<string, unknown>>().default({}),
-  createdAt: timestamp('created_at').defaultNow().notNull(),
-});
+export const taxonomyNodes = pgTable(
+  'taxonomy_nodes',
+  {
+    id: uuid('id').defaultRandom().primaryKey(),
+    curriculumId: uuid('curriculum_id')
+      .notNull()
+      .references(() => curricula.id, { onDelete: 'cascade' }),
+    parentId: uuid('parent_id'),
+    type: taxonomyNodeTypeEnum('type').notNull(),
+    code: text('code'),
+    name: text('name').notNull(),
+    description: text('description'),
+    gradeId: uuid('grade_id').references(() => grades.id),
+    subjectId: uuid('subject_id').references(() => subjects.id),
+    order: integer('order').default(0).notNull(),
+    depth: integer('depth').default(0).notNull(),
+    metadata: jsonb('metadata').$type<Record<string, unknown>>().default({}),
+    createdAt: timestamp('created_at').defaultNow().notNull(),
+  },
+  (table) => [
+    uniqueIndex('taxonomy_nodes_curriculum_code_uniq')
+      .on(table.curriculumId, table.code)
+      .where(sql`${table.code} IS NOT NULL`),
+  ],
+);
 
 export const taxonomyMappings = pgTable(
   'taxonomy_mappings',
