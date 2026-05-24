@@ -40,6 +40,10 @@ export const listOrganizationsQuerySchema = z.object({
   q: z.string().max(100).optional(),
   limit: z.coerce.number().int().min(1).max(100).default(50),
   offset: z.coerce.number().int().min(0).default(0),
+  includeDeleted: z
+    .union([z.boolean(), z.literal('true'), z.literal('false')])
+    .optional()
+    .transform((v) => v === true || v === 'true'),
 });
 
 export type AdminCreateOrganizationDto = z.infer<typeof adminCreateOrganizationSchema>;
