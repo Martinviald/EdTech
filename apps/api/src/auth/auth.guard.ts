@@ -50,12 +50,21 @@ export class AuthGuard implements CanActivate {
 
     if (!payload) throw new UnauthorizedException('Token inválido o expirado');
 
+    const role = payload['role'] as string;
+    const isPlatformAdmin = Boolean(payload['isPlatformAdmin']);
+
+    // Defensive: si el JWT pide rol platform_admin debe traer también el flag.
+    if (role === 'platform_admin' && !isPlatformAdmin) {
+      throw new UnauthorizedException('Token inconsistente');
+    }
+
     request.user = {
       userId: payload['userId'] as string,
-      orgId: payload['orgId'] as string,
-      role: payload['role'] as string,
+      orgId: (payload['orgId'] as string | null | undefined) ?? null,
+      role,
       email: payload['email'] as string,
       name: payload['name'] as string,
+      isPlatformAdmin,
     };
     return true;
   }

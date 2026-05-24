@@ -15,7 +15,14 @@ export class CurriculaService {
   constructor(@InjectDb() private readonly db: Database) {}
 
   async listVisible(user: JwtPayload, filters: { type?: string; isOfficial?: boolean } = {}) {
-    const conditions = [or(eq(curricula.isOfficial, true), eq(curricula.orgId, user.orgId))];
+    const conditions = [
+      user.isPlatformAdmin
+        ? // platform_admins ven todos los currícula
+          or(eq(curricula.isOfficial, true), eq(curricula.isOfficial, false))
+        : user.orgId
+          ? or(eq(curricula.isOfficial, true), eq(curricula.orgId, user.orgId))
+          : eq(curricula.isOfficial, true),
+    ];
 
     if (filters.type) {
       conditions.push(eq(curricula.type, filters.type as Curriculum['type']));
@@ -100,26 +107,26 @@ export class CurriculaService {
     return { curriculum, nodes };
   }
 
-  /** Verifica que el currículum sea visible para el usuario (oficial o de su org). */
+  /** Verifica que el currículum sea visible para el usuario (oficial, propio o platform_admin). */
   assertVisible(curriculum: Curriculum, user: JwtPayload) {
+    if (user.isPlatformAdmin) return;
     if (curriculum.isOfficial) return;
-    if (curriculum.orgId === user.orgId) return;
+    if (user.orgId && curriculum.orgId === user.orgId) return;
     throw new ForbiddenException('No tienes acceso a este currículum');
   }
 
   /**
    * Reglas de edición:
-   * - Currícula oficiales: solo platform_admin
-   * - Currícula custom: school_admin de la misma org o platform_admin
+   * - platform_admin: puede editar cualquier currículum.
+   * - Currícula oficiales (no admin): solo lectura.
+   * - Currícula custom: school_admin de la misma org.
    */
   assertEditable(curriculum: Curriculum, user: JwtPayload) {
+    if (user.isPlatformAdmin) return;
     if (curriculum.isOfficial) {
-      if (user.role !== 'platform_admin') {
-        throw new ForbiddenException('Los currícula oficiales son de solo lectura');
-      }
-      return;
+      throw new ForbiddenException('Los currícula oficiales son de solo lectura');
     }
-    if (curriculum.orgId !== user.orgId && user.role !== 'platform_admin') {
+    if (!user.orgId || curriculum.orgId !== user.orgId) {
       throw new ForbiddenException('Solo puedes editar currícula de tu propia organización');
     }
   }

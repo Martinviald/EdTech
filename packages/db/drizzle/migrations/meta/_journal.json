@@ -36,6 +36,13 @@
       "when": 1779588329632,
       "tag": "0004_curricula_official_uniq",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1779590560458,
+      "tag": "0005_platform_admins_table",
+      "breakpoints": true
     }
   ]
 }

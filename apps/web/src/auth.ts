@@ -16,8 +16,9 @@ if (process.env.NODE_ENV === 'production' && authMode === 'mock') {
 
 type ValidateUserResponse = {
   user: { id: string; email: string; name: string; avatarUrl: string | null; providerId: string };
-  membership: { userId: string; orgId: string; role: string; isActive: boolean };
-  organization: { id: string; name: string; type: string };
+  isPlatformAdmin: boolean;
+  membership: { userId: string; orgId: string | null; role: string; isActive: boolean } | null;
+  organization: { id: string; name: string; type: string } | null;
 };
 
 function ssoProviders() {
@@ -49,8 +50,11 @@ function mockProvider() {
         email: result.user.email,
         name: result.user.name,
         image: result.user.avatarUrl ?? undefined,
-        orgId: result.membership.orgId,
-        role: result.membership.role as UserRole,
+        orgId: result.membership?.orgId ?? null,
+        role: (result.isPlatformAdmin
+          ? 'platform_admin'
+          : (result.membership?.role ?? 'teacher')) as UserRole,
+        isPlatformAdmin: result.isPlatformAdmin,
       } satisfies User;
     },
   });
@@ -86,22 +90,27 @@ const config: NextAuthConfig = {
       });
 
       user.id = result.user.id;
-      user.orgId = result.membership.orgId;
-      user.role = result.membership.role as UserRole;
+      user.orgId = result.membership?.orgId ?? null;
+      user.role = (result.isPlatformAdmin
+        ? 'platform_admin'
+        : (result.membership?.role ?? 'teacher')) as UserRole;
+      user.isPlatformAdmin = result.isPlatformAdmin;
       return true;
     },
     async jwt({ token, user }) {
       if (user) {
         token.userId = user.id as string;
-        token.orgId = user.orgId as string;
+        token.orgId = (user.orgId ?? null) as string | null;
         token.role = user.role as UserRole;
+        token.isPlatformAdmin = Boolean(user.isPlatformAdmin);
       }
       return token;
     },
     async session({ session, token }) {
       if (typeof token.userId === 'string') session.user.id = token.userId;
-      if (typeof token.orgId === 'string') session.user.orgId = token.orgId;
+      session.user.orgId = (token.orgId ?? null) as string | null;
       if (token.role) session.user.role = token.role as UserRole;
+      session.user.isPlatformAdmin = Boolean(token.isPlatformAdmin);
       return session;
     },
   },

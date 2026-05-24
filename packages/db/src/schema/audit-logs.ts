@@ -8,9 +8,7 @@ export const auditLogs = pgTable('audit_logs', {
   userId: uuid('user_id')
     .notNull()
     .references(() => users.id),
-  orgId: uuid('org_id')
-    .notNull()
-    .references(() => organizations.id),
+  orgId: uuid('org_id').references(() => organizations.id),
   action: text('action').notNull(), // 'export_students' | 'export_results' | 'anonymize_student'
   resourceType: text('resource_type').notNull(), // 'students' | 'assessment_results' | 'skill_results'
   resourceFilter: jsonb('resource_filter').$type<Record<string, unknown>>(), // filtros aplicados en la exportación
