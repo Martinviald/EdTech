@@ -4,7 +4,7 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { and, eq, sql } from 'drizzle-orm';
+import { and, eq, inArray, sql } from 'drizzle-orm';
 import { itemTaxonomyTags, taxonomyNodes, type TaxonomyNode } from '@soe/db';
 import type {
   CreateTaxonomyNodeDto,
@@ -168,23 +168,27 @@ export class NodesService {
       );
     }
 
+    // taxonomy_nodes.parent_id no tiene FK con ON DELETE CASCADE, así que
+    // borrar solo el nodo raíz dejaría hijos huérfanos. Para cascade=true
+    // calculamos el subárbol completo y lo borramos explícitamente; para
+    // cascade=false aquí ya sabemos que childCount = 0, basta borrar el nodo.
     if (opts.cascade) {
-      // Borrado recursivo con CTE: recorre todos los descendientes y los elimina.
-      // Verifica primero que ninguno tenga tags referenciados (regla de integridad).
       const subtreeIds = await this.collectSubtreeIds(id);
       const [{ subTagCount }] = await this.db
         .select({ subTagCount: sql<number>`count(*)::int` })
         .from(itemTaxonomyTags)
-        .where(sql`${itemTaxonomyTags.nodeId} = ANY(${subtreeIds})`);
+        .where(inArray(itemTaxonomyTags.nodeId, subtreeIds));
 
       if (subTagCount > 0) {
         throw new ConflictException(
           `El subárbol contiene nodos con ítems etiquetados. Elimina los tags antes de borrar.`,
         );
       }
-    }
 
-    await this.db.delete(taxonomyNodes).where(eq(taxonomyNodes.id, id));
+      await this.db.delete(taxonomyNodes).where(inArray(taxonomyNodes.id, subtreeIds));
+    } else {
+      await this.db.delete(taxonomyNodes).where(eq(taxonomyNodes.id, id));
+    }
   }
 
   /**
