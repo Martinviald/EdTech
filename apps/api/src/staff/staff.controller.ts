@@ -1,14 +1,16 @@
 import {
+  BadRequestException,
   Body,
   Controller,
   Delete,
+  ForbiddenException,
   Get,
   HttpCode,
   Param,
   Post,
   UseGuards,
 } from '@nestjs/common';
-import { ForbiddenException } from '@nestjs/common';
+import { z } from 'zod';
 import { bulkInviteMembersSchema, inviteMemberSchema } from '@soe/types';
 import { CurrentUser } from '../auth/current-user.decorator';
 import type { JwtPayload } from '../auth/jwt-payload.types';
@@ -26,6 +28,16 @@ function requireOrgId(user: JwtPayload): string {
     throw new ForbiddenException('Sin organización activa');
   }
   return user.orgId;
+}
+
+const uuidSchema = z.string().uuid();
+
+function parseUuid(value: string, label: string): string {
+  const parsed = uuidSchema.safeParse(value);
+  if (!parsed.success) {
+    throw new BadRequestException(`${label} debe ser un UUID válido`);
+  }
+  return parsed.data;
 }
 
 @Controller('organizations/me/members')
@@ -67,6 +79,7 @@ export class StaffController {
     @CurrentUser() user: JwtPayload,
   ) {
     requireOrgId(user);
-    await this.staff.revoke(user, membershipId);
+    const id = parseUuid(membershipId, 'membershipId');
+    await this.staff.revoke(user, id);
   }
 }
