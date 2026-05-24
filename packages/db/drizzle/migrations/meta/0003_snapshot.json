@@ -1,6 +1,6 @@
 {
-  "id": "200a8fe1-f6bb-46b8-b8e3-3cbf60eeee34",
-  "prevId": "400d4a5e-2dee-443e-abfc-bd64d720f0ba",
+  "id": "471525ae-a2d4-4d99-8516-4195cb760a7a",
+  "prevId": "200a8fe1-f6bb-46b8-b8e3-3cbf60eeee34",
   "version": "7",
   "dialect": "postgresql",
   "tables": {
@@ -1216,7 +1216,30 @@
           "default": "now()"
         }
       },
-      "indexes": {},
+      "indexes": {
+        "taxonomy_nodes_curriculum_code_uniq": {
+          "name": "taxonomy_nodes_curriculum_code_uniq",
+          "columns": [
+            {
+              "expression": "curriculum_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "code",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": true,
+          "where": "\"taxonomy_nodes\".\"code\" IS NOT NULL",
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
       "foreignKeys": {
         "taxonomy_nodes_curriculum_id_curricula_id_fk": {
           "name": "taxonomy_nodes_curriculum_id_curricula_id_fk",

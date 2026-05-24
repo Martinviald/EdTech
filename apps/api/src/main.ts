@@ -5,7 +5,22 @@ import { ConfigService } from '@nestjs/config';
 import { AppModule } from './app.module';
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
+  const app = await NestFactory.create(AppModule, {
+    logger: ['log', 'warn', 'error', 'debug'],
+  });
+
+  // HTTP request logger (dev only)
+  if (process.env.NODE_ENV !== 'production') {
+    const httpLogger = new Logger('HTTP');
+    app.use((req: { method: string; url: string }, res: { statusCode: number; on: (e: string, cb: () => void) => void }, next: () => void) => {
+      const { method, url } = req;
+      const start = Date.now();
+      res.on('finish', () => {
+        httpLogger.log(`${method} ${url} → ${res.statusCode} (${Date.now() - start}ms)`);
+      });
+      next();
+    });
+  }
   const configService = app.get(ConfigService);
 
   app.useGlobalPipes(
