@@ -3,6 +3,7 @@ import {
   BookOpen,
   Building2,
   ClipboardList,
+  FolderTree,
   LayoutDashboard,
   Settings,
   Upload,
@@ -104,6 +105,13 @@ export const NAV_ITEMS: readonly NavItem[] = [
     icon: Building2,
     status: 'live',
     roles: ['school_admin', 'academic_director', 'platform_admin'],
+  },
+  {
+    href: '/curriculum',
+    label: 'Currículum',
+    icon: FolderTree,
+    status: 'live',
+    roles: ['platform_admin', 'school_admin', 'academic_director'],
   },
   {
     href: '/configuracion',
