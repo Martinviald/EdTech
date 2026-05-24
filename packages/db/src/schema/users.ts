@@ -55,7 +55,9 @@ export const teacherAssignments = pgTable(
     userId: uuid('user_id')
       .notNull()
       .references(() => users.id, { onDelete: 'cascade' }),
-    subjectClassId: uuid('subject_class_id').notNull(),
+    subjectClassId: uuid('subject_class_id')
+      .notNull()
+      .references(() => subjectClasses.id, { onDelete: 'cascade' }),
     role: text('role').notNull().default('primary'),
     createdAt: timestamp('created_at').defaultNow().notNull(),
   },

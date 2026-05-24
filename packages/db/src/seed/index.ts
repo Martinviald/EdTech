@@ -1,12 +1,12 @@
 import { config } from 'dotenv';
 import { resolve } from 'path';
-import { sql } from 'drizzle-orm';
+import { and, eq, sql } from 'drizzle-orm';
 import { createDbClient } from '../client';
-import { grades, subjects } from '../schema/academic';
+import { classGroups, grades, subjectClasses, subjects } from '../schema/academic';
 import { curricula } from '../schema/curriculum';
-import { organizations } from '../schema/organizations';
+import { academicYears, organizations } from '../schema/organizations';
 import { students } from '../schema/students';
-import { orgMemberships, users } from '../schema/users';
+import { orgMemberships, teacherAssignments, users } from '../schema/users';
 import { platformAdmins } from '../schema/platform-admins';
 import { seedMineducTaxonomy } from './mineduc-taxonomy';
 
@@ -27,6 +27,12 @@ export const DEMO_STUDENT_IDS = {
   maria: 'dec00000-0000-0000-0000-000000000052',
   pedro: 'dec00000-0000-0000-0000-000000000053',
 } as const;
+
+// Año académico + curso + asignaturas demo. Permiten que el seed deje una
+// asignación docente lista para probar el scoping por rol en /my-classes.
+export const DEMO_ACADEMIC_YEAR_ID = 'dec00000-0000-0000-0000-000000000071';
+export const DEMO_CLASS_GROUP_ID = 'dec00000-0000-0000-0000-000000000072';
+export const DEMO_SUBJECT_CLASS_LANG_ID = 'dec00000-0000-0000-0000-000000000073';
 
 // Platform admins: operadores de la plataforma con acceso global, sin membership de colegio.
 export const PLATFORM_ADMIN_USER_IDS = {
@@ -188,6 +194,93 @@ async function main() {
       })),
     )
     .onConflictDoNothing();
+
+  console.log('Seeding demo academic year + class group + subject classes...');
+  // Reutilizar el academic_year vigente si la org ya fue configurada vía wizard.
+  // Solo crear DEMO_ACADEMIC_YEAR_ID cuando la org está virgen para evitar
+  // dejar dos academic_years current en paralelo (que rompe el scoping del UI).
+  let demoAcademicYearId: string;
+  const [existingCurrentYear] = await db
+    .select({ id: academicYears.id })
+    .from(academicYears)
+    .where(and(eq(academicYears.orgId, DEMO_ORG_ID), eq(academicYears.isCurrent, true)))
+    .limit(1);
+
+  if (existingCurrentYear) {
+    demoAcademicYearId = existingCurrentYear.id;
+  } else {
+    await db
+      .insert(academicYears)
+      .values({
+        id: DEMO_ACADEMIC_YEAR_ID,
+        orgId: DEMO_ORG_ID,
+        year: 2026,
+        isCurrent: true,
+      })
+      .onConflictDoNothing();
+    demoAcademicYearId = DEMO_ACADEMIC_YEAR_ID;
+  }
+
+  // Asegurar que exista al menos un subject_class de Lenguaje en ese año para
+  // poder asignar al profesor demo. Si la org ya fue configurada vía wizard,
+  // usar el primer subject_class de Lenguaje existente; si no, crear el demo.
+  const [lang] = await db.select().from(subjects).where(eq(subjects.code, 'LANG'));
+  let demoSubjectClassId: string | null = null;
+  if (lang) {
+    const [existingSubjectClass] = await db
+      .select({ id: subjectClasses.id })
+      .from(subjectClasses)
+      .innerJoin(classGroups, eq(classGroups.id, subjectClasses.classGroupId))
+      .where(
+        and(
+          eq(classGroups.orgId, DEMO_ORG_ID),
+          eq(subjectClasses.academicYearId, demoAcademicYearId),
+          eq(subjectClasses.subjectId, lang.id),
+        ),
+      )
+      .limit(1);
+
+    if (existingSubjectClass) {
+      demoSubjectClassId = existingSubjectClass.id;
+    } else {
+      const [firstMedio] = await db.select().from(grades).where(eq(grades.code, '1ST_MEDIO'));
+      if (firstMedio) {
+        await db
+          .insert(classGroups)
+          .values({
+            id: DEMO_CLASS_GROUP_ID,
+            orgId: DEMO_ORG_ID,
+            academicYearId: demoAcademicYearId,
+            gradeId: firstMedio.id,
+            name: '1° Medio B',
+          })
+          .onConflictDoNothing();
+
+        await db
+          .insert(subjectClasses)
+          .values({
+            id: DEMO_SUBJECT_CLASS_LANG_ID,
+            classGroupId: DEMO_CLASS_GROUP_ID,
+            subjectId: lang.id,
+            academicYearId: demoAcademicYearId,
+          })
+          .onConflictDoNothing();
+        demoSubjectClassId = DEMO_SUBJECT_CLASS_LANG_ID;
+      }
+    }
+  }
+
+  if (demoSubjectClassId) {
+    console.log('Seeding demo teacher assignment...');
+    await db
+      .insert(teacherAssignments)
+      .values({
+        userId: DEMO_USER_IDS.teacher,
+        subjectClassId: demoSubjectClassId,
+        role: 'primary',
+      })
+      .onConflictDoNothing();
+  }
 
   console.log('Seeding demo students...');
   await db

@@ -6,3 +6,4 @@ export * from './taxonomy.schema';
 export * from './curriculum.schema';
 export * from './admin.schema';
 export * from './membership.schema';
+export * from './teacher-assignment.schema';

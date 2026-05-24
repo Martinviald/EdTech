@@ -1,4 +1,14 @@
-import { Body, Controller, Get, Param, Patch, Post, Query, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Param,
+  ParseUUIDPipe,
+  Patch,
+  Post,
+  Query,
+  UseGuards,
+} from '@nestjs/common';
 import { OrganizationsService } from './organizations.service';
 import { Roles } from '../common/decorators/roles.decorator';
 import { RolesGuard } from '../common/guards/roles.guard';
@@ -41,6 +51,28 @@ export class OrganizationsController {
   @Roles('school_admin', 'academic_director', 'platform_admin')
   listSubjects() {
     return this.organizationsService.listSubjects();
+  }
+
+  /** GET /api/organizations/:orgId/teachers — usuarios elegibles como profesores. */
+  @Get(':orgId/teachers')
+  @Roles('school_admin', 'academic_director', 'platform_admin')
+  listTeachers(
+    @Param('orgId', ParseUUIDPipe) orgId: string,
+    @CurrentUser() user: JwtPayload,
+  ) {
+    const effectiveOrgId = getEffectiveOrgId(user, orgId);
+    return this.organizationsService.listTeachers(effectiveOrgId);
+  }
+
+  /** GET /api/organizations/:orgId/subject-classes — subject_classes del año vigente. */
+  @Get(':orgId/subject-classes')
+  @Roles('school_admin', 'academic_director', 'platform_admin')
+  listSubjectClasses(
+    @Param('orgId', ParseUUIDPipe) orgId: string,
+    @CurrentUser() user: JwtPayload,
+  ) {
+    const effectiveOrgId = getEffectiveOrgId(user, orgId);
+    return this.organizationsService.listSubjectClasses(effectiveOrgId);
   }
 
   /** PATCH /api/organizations/:id — actualizar perfil del colegio. */
