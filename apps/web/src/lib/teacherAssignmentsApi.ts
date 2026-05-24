@@ -1,6 +1,10 @@
 import 'server-only';
 import { apiDelete, apiGet, apiPost } from './api';
-import type { CreateTeacherAssignmentDto, TeacherAssignmentSummary } from '@soe/types';
+import type {
+  ClassGroupDetailResponse,
+  CreateTeacherAssignmentDto,
+  TeacherAssignmentSummary,
+} from '@soe/types';
 
 export type OrgTeacher = {
   id: string;
@@ -60,4 +64,10 @@ export function listSubjectClasses(orgId: string) {
 
 export function listClassGroupsForUser(orgId: string) {
   return apiGet<ClassGroupForUser[]>(`/organizations/${orgId}/class-groups`);
+}
+
+export function getClassGroupDetail(orgId: string, classGroupId: string) {
+  return apiGet<ClassGroupDetailResponse>(
+    `/organizations/${orgId}/class-groups/${classGroupId}`,
+  );
 }

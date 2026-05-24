@@ -36,4 +36,32 @@ export class ClassGroupsController {
     const effectiveOrgId = getEffectiveOrgId(user, orgId);
     return this.service.listForUser(effectiveOrgId, user);
   }
+
+  /**
+   * GET /api/organizations/:orgId/class-groups/:classGroupId
+   * Detalle del curso: información básica, alumnos matriculados activos del
+   * año académico del curso y asignaturas con sus profesores asignados.
+   * Profesores solo pueden acceder a cursos donde tienen al menos una
+   * asignación.
+   */
+  @Get(':classGroupId')
+  @Roles(
+    'teacher',
+    'homeroom_teacher',
+    'eval_coordinator',
+    'coordinator',
+    'dept_head',
+    'cycle_director',
+    'academic_director',
+    'school_admin',
+    'platform_admin',
+  )
+  detail(
+    @Param('orgId', ParseUUIDPipe) orgId: string,
+    @Param('classGroupId', ParseUUIDPipe) classGroupId: string,
+    @CurrentUser() user: JwtPayload,
+  ) {
+    const effectiveOrgId = getEffectiveOrgId(user, orgId);
+    return this.service.getDetailForUser(effectiveOrgId, classGroupId, user);
+  }
 }

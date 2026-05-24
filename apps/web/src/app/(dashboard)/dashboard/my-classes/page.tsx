@@ -90,35 +90,41 @@ export default async function MyClassesPage() {
       ) : (
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
           {cards.map((c) => (
-            <Card key={c.classGroupId}>
-              <CardHeader>
-                <CardTitle className="text-base">
-                  {c.gradeShortName} · {c.className}
-                </CardTitle>
-                <p className="text-xs text-muted-foreground">Año {c.academicYear}</p>
-              </CardHeader>
-              <CardContent className="space-y-2">
-                {c.subjects.length === 0 ? (
-                  <p className="text-sm text-muted-foreground">Sin asignaturas asignadas.</p>
-                ) : (
-                  c.subjects.map((s) => (
-                    <div
-                      key={s.subjectClassId}
-                      className="flex items-center justify-between rounded-md border px-3 py-2 text-sm"
-                    >
-                      <span className="font-medium">{s.subjectName}</span>
-                      {s.role === 'primary' ? (
-                        <Badge variant="default">Titular</Badge>
-                      ) : s.role === 'assistant' ? (
-                        <Badge variant="secondary">Asistente</Badge>
-                      ) : (
-                        <Badge variant="outline">Sin asignar</Badge>
-                      )}
-                    </div>
-                  ))
-                )}
-              </CardContent>
-            </Card>
+            <Link
+              key={c.classGroupId}
+              href={`/dashboard/my-classes/${c.classGroupId}` as Route}
+              className="group block rounded-lg focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+            >
+              <Card className="h-full transition-colors group-hover:bg-muted/30">
+                <CardHeader>
+                  <CardTitle className="text-base">
+                    {c.gradeShortName} · {c.className}
+                  </CardTitle>
+                  <p className="text-xs text-muted-foreground">Año {c.academicYear}</p>
+                </CardHeader>
+                <CardContent className="space-y-2">
+                  {c.subjects.length === 0 ? (
+                    <p className="text-sm text-muted-foreground">Sin asignaturas asignadas.</p>
+                  ) : (
+                    c.subjects.map((s) => (
+                      <div
+                        key={s.subjectClassId}
+                        className="flex items-center justify-between rounded-md border px-3 py-2 text-sm"
+                      >
+                        <span className="font-medium">{s.subjectName}</span>
+                        {s.role === 'primary' ? (
+                          <Badge variant="default">Titular</Badge>
+                        ) : s.role === 'assistant' ? (
+                          <Badge variant="secondary">Asistente</Badge>
+                        ) : (
+                          <Badge variant="outline">Sin asignar</Badge>
+                        )}
+                      </div>
+                    ))
+                  )}
+                </CardContent>
+              </Card>
+            </Link>
           ))}
         </div>
       )}
