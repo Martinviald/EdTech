@@ -10,6 +10,7 @@ import { AuthGuard } from './auth/auth.guard';
 import { PrivacyModule } from './privacy/privacy.module';
 import { OrganizationsModule } from './organizations/organizations.module';
 import { TaxonomiesModule } from './taxonomies/taxonomies.module';
+import { AdminModule } from './admin/admin.module';
 
 @Module({
   imports: [
@@ -23,6 +24,7 @@ import { TaxonomiesModule } from './taxonomies/taxonomies.module';
     PrivacyModule,
     OrganizationsModule,
     TaxonomiesModule,
+    AdminModule,
   ],
   controllers: [AppController],
   providers: [

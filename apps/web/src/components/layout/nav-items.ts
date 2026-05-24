@@ -5,7 +5,9 @@ import {
   ClipboardList,
   FolderTree,
   LayoutDashboard,
+  School,
   Settings,
+  ShieldCheck,
   Upload,
   Users,
   type LucideIcon,
@@ -20,6 +22,8 @@ export type NavItem = {
   icon: LucideIcon;
   status: NavStatus;
   roles: readonly UserRole[];
+  /** Si true, solo se muestra cuando el usuario es platform_admin (independiente de role). */
+  requiresPlatformAdmin?: boolean;
 };
 
 const ALL_STAFF_ROLES = [
@@ -119,6 +123,37 @@ export const NAV_ITEMS: readonly NavItem[] = [
     icon: Settings,
     status: 'soon',
     roles: ALL_ROLES,
+  },
+];
+
+/**
+ * Items visibles únicamente cuando el usuario es platform_admin (vía tabla
+ * platform_admins, no por rol heredado). Se usan en el route group `(admin)`.
+ */
+export const ADMIN_NAV_ITEMS: readonly NavItem[] = [
+  {
+    href: '/admin',
+    label: 'Resumen',
+    icon: LayoutDashboard,
+    status: 'live',
+    roles: ['platform_admin'],
+    requiresPlatformAdmin: true,
+  },
+  {
+    href: '/admin/colegios',
+    label: 'Colegios',
+    icon: School,
+    status: 'live',
+    roles: ['platform_admin'],
+    requiresPlatformAdmin: true,
+  },
+  {
+    href: '/admin/equipo',
+    label: 'Equipo plataforma',
+    icon: ShieldCheck,
+    status: 'live',
+    roles: ['platform_admin'],
+    requiresPlatformAdmin: true,
   },
 ];
 

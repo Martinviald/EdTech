@@ -29,6 +29,13 @@
       "when": 1779585180221,
       "tag": "0003_taxonomy_nodes_code_uniq",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1779587670752,
+      "tag": "0004_platform_admins_table",
+      "breakpoints": true
     }
   ]
 }

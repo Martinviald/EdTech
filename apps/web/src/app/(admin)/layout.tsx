@@ -1,26 +1,27 @@
-import type { Route } from 'next';
 import { redirect } from 'next/navigation';
 import { auth } from '@/auth';
-import { getCurrentOrg } from '@/lib/getCurrentOrg';
 import { Sidebar } from '@/components/layout/Sidebar';
-import { SkipLink } from '@/components/layout/SkipLink';
 import { Topbar } from '@/components/layout/Topbar';
+import { SkipLink } from '@/components/layout/SkipLink';
 import { Toaster } from '@/components/ui/sonner';
 
-export default async function DashboardLayout({ children }: { children: React.ReactNode }) {
+export default async function AdminLayout({ children }: { children: React.ReactNode }) {
   const session = await auth();
   if (!session?.user) redirect('/login');
-  if (session.user.isPlatformAdmin && !session.user.orgId) redirect('/admin' as Route);
-  if (!session.user.orgId) redirect('/login');
+  if (!session.user.isPlatformAdmin) redirect('/dashboard');
 
-  const org = await getCurrentOrg(session.user.orgId);
+  const orgPlaceholder = {
+    id: '00000000-0000-0000-0000-000000000000',
+    name: 'Plataforma SOE',
+    type: 'platform' as const,
+  };
 
   return (
     <div className="flex h-screen bg-background">
       <SkipLink />
-      <Sidebar role={session.user.role} />
+      <Sidebar role="platform_admin" variant="admin" />
       <div className="flex flex-1 flex-col overflow-hidden">
-        <Topbar org={org} user={session.user} role={session.user.role} />
+        <Topbar org={orgPlaceholder} user={session.user} role={session.user.role} />
         <main id="main-content" className="flex-1 overflow-y-auto p-6">
           {children}
         </main>

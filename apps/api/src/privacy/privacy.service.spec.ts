@@ -14,7 +14,7 @@ const DEMO_STUDENT_IDS = {
   maria: 'dec00000-0000-0000-0000-000000000052',
 } as const;
 
-const REQUESTER = { userId: DEMO_ADMIN_USER_ID, orgId: DEMO_ORG_ID };
+const REQUESTER = { userId: DEMO_ADMIN_USER_ID, orgId: DEMO_ORG_ID, isPlatformAdmin: false };
 
 describe('PrivacyService', () => {
   let db: Database;
@@ -115,6 +115,7 @@ describe('PrivacyService', () => {
         service.anonymizeStudent(DEMO_STUDENT_IDS.maria, {
           userId: DEMO_ADMIN_USER_ID,
           orgId: 'aaaaaaaa-0000-0000-0000-000000000000',
+          isPlatformAdmin: false,
         }),
       ).rejects.toThrow(NotFoundException);
 

@@ -16,6 +16,7 @@ function user(overrides: Partial<JwtPayload> = {}): JwtPayload {
     role: 'school_admin',
     email: 'a@b.cl',
     name: 'Test',
+    isPlatformAdmin: false,
     ...overrides,
   };
 }

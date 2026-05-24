@@ -1,6 +1,11 @@
 import { ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
 import { eq } from 'drizzle-orm';
-import { findMembershipByEmail, listActiveMembershipsForMock, users } from '@soe/db';
+import {
+  findAuthContextByEmail,
+  listActiveMembershipsForMock,
+  listPlatformAdmins,
+  users,
+} from '@soe/db';
 import { InjectDb, type Database } from '../database/database.types';
 
 @Injectable()
@@ -8,27 +13,36 @@ export class AuthService {
   constructor(@InjectDb() private readonly db: Database) {}
 
   async validateUser(email: string) {
-    const result = await findMembershipByEmail(this.db, email);
-    if (!result) throw new NotFoundException('Usuario no encontrado o sin membresía activa');
+    const ctx = await findAuthContextByEmail(this.db, email);
+    if (!ctx) throw new NotFoundException('Usuario no encontrado o sin acceso activo');
+
     return {
       user: {
-        id: result.user.id,
-        email: result.user.email,
-        name: result.user.name,
-        avatarUrl: result.user.avatarUrl,
-        providerId: result.user.providerId,
+        id: ctx.user.id,
+        email: ctx.user.email,
+        name: ctx.user.name,
+        avatarUrl: ctx.user.avatarUrl,
+        providerId: ctx.user.providerId,
       },
-      membership: {
-        userId: result.membership.userId,
-        orgId: result.membership.orgId,
-        role: result.membership.role,
-        isActive: result.membership.isActive,
-      },
-      organization: {
-        id: result.organization.id,
-        name: result.organization.name,
-        type: result.organization.type,
-      },
+      isPlatformAdmin: ctx.isPlatformAdmin,
+      membership: ctx.membership
+        ? {
+            userId: ctx.membership.userId,
+            orgId: ctx.membership.orgId,
+            role: ctx.isPlatformAdmin ? 'platform_admin' : ctx.membership.role,
+            isActive: ctx.membership.isActive,
+          }
+        : ctx.isPlatformAdmin
+          ? {
+              userId: ctx.user.id,
+              orgId: null,
+              role: 'platform_admin' as const,
+              isActive: true,
+            }
+          : null,
+      organization: ctx.organization
+        ? { id: ctx.organization.id, name: ctx.organization.name, type: ctx.organization.type }
+        : null,
     };
   }
 
@@ -56,12 +70,29 @@ export class AuthService {
     if (authMode !== 'mock') {
       throw new ForbiddenException('Solo disponible en AUTH_MODE=mock');
     }
-    const rows = await listActiveMembershipsForMock(this.db);
-    return rows.map((r) => ({
+    const memberships = await listActiveMembershipsForMock(this.db);
+    const admins = await listPlatformAdmins(this.db);
+
+    const fromMemberships = memberships.map((r) => ({
       email: r.user.email,
       name: r.user.name,
       role: r.membership.role,
       orgName: r.organization.name,
+      isPlatformAdmin: false,
     }));
+
+    const adminEmails = new Set(fromMemberships.map((u) => u.email.toLowerCase()));
+    const fromAdmins = admins
+      .filter((a) => !adminEmails.has(a.user.email.toLowerCase()))
+      .map((a) => ({
+        email: a.user.email,
+        name: a.user.name,
+        role: 'platform_admin' as const,
+        orgName: null,
+        isPlatformAdmin: true,
+      }));
+
+    return [...fromAdmins, ...fromMemberships];
   }
 }
+

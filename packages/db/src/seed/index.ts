@@ -6,6 +6,7 @@ import { curricula } from '../schema/curriculum';
 import { organizations } from '../schema/organizations';
 import { students } from '../schema/students';
 import { orgMemberships, users } from '../schema/users';
+import { platformAdmins } from '../schema/platform-admins';
 import { seedMineducTaxonomy } from './mineduc-taxonomy';
 
 config({ path: resolve(__dirname, '../../../../.env') });
@@ -25,6 +26,27 @@ export const DEMO_STUDENT_IDS = {
   maria: 'dec00000-0000-0000-0000-000000000052',
   pedro: 'dec00000-0000-0000-0000-000000000053',
 } as const;
+
+// Platform admins: operadores de la plataforma con acceso global, sin membership de colegio.
+export const PLATFORM_ADMIN_USER_IDS = {
+  demoSuperAdmin: 'dec00000-0000-0000-0000-0000000000f1',
+  mvial: 'dec00000-0000-0000-0000-0000000000f2',
+} as const;
+
+const PLATFORM_ADMINS = [
+  {
+    id: PLATFORM_ADMIN_USER_IDS.demoSuperAdmin,
+    email: 'superadmin.demo@soe.cl',
+    name: 'Super Admin Demo',
+    notes: 'Cuenta demo de plataforma',
+  },
+  {
+    id: PLATFORM_ADMIN_USER_IDS.mvial,
+    email: 'mvial@cscj.cl',
+    name: 'Martín Vial',
+    notes: 'Founder / operador principal',
+  },
+];
 
 export const DEMO_USERS = [
   {
@@ -135,6 +157,30 @@ async function main() {
         orgId: DEMO_ORG_ID,
         role: u.role,
         isActive: true,
+      })),
+    )
+    .onConflictDoNothing();
+
+  console.log('Seeding platform admins...');
+  await db
+    .insert(users)
+    .values(
+      PLATFORM_ADMINS.map((a) => ({
+        id: a.id,
+        email: a.email,
+        name: a.name,
+        provider: 'google' as const,
+        providerId: `seed-platform-admin-${a.id.slice(-2)}`,
+      })),
+    )
+    .onConflictDoNothing();
+
+  await db
+    .insert(platformAdmins)
+    .values(
+      PLATFORM_ADMINS.map((a) => ({
+        userId: a.id,
+        notes: a.notes,
       })),
     )
     .onConflictDoNothing();
