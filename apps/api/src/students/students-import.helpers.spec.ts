@@ -85,6 +85,18 @@ describe('parseStudentRosterCsv', () => {
     expect(result.ok).toBe(true);
   });
 
+  it('decodifica CSVs guardados por Excel en Windows-1252', () => {
+    const csv = `RUT,Nombres,Apellidos,Curso
+12345678-5,María,Muñoz Pérez,1° Medio A`;
+    // Excel "Save as CSV" en Windows produce latin1/CP1252, no UTF-8.
+    const result = parseStudentRosterCsv(Buffer.from(csv, 'latin1'));
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    expect(result.rows[0]!.Nombres).toBe('María');
+    expect(result.rows[0]!.Apellidos).toBe('Muñoz Pérez');
+    expect(result.rows[0]!.Curso).toBe('1° Medio A');
+  });
+
   it('ignora filas vacías', () => {
     const csv = `RUT,Nombres,Apellidos,Curso
 12345678-5,Juan,Pérez,1° Medio A

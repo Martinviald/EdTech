@@ -24,9 +24,11 @@ type UploadedCsv = {
 
 const MAX_CSV_BYTES = 5 * 1024 * 1024; // 5 MB
 
+// `addFileTypeValidator` usa file-type library con magic bytes;
+// CSV es texto plano sin firma, así que la validación falla. La estructura
+// (headers, columnas) la valida `parseStudentRosterCsv` con un mensaje claro.
 const csvFilePipe = new ParseFilePipeBuilder()
   .addMaxSizeValidator({ maxSize: MAX_CSV_BYTES, message: 'El archivo excede el tamaño máximo (5 MB)' })
-  .addFileTypeValidator({ fileType: /(csv|plain|excel)/ })
   .build({ fileIsRequired: true });
 
 @Controller('students')
