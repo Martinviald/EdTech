@@ -44,6 +44,12 @@ export async function findAuthContextByEmail(
   const membership = await findMembershipByEmail(db, email);
   if (!membership) return null;
 
+  // Las invitaciones pendientes no tienen user todavía — no son contexto válido
+  // para callers que asumen `user` presente (callbacks de admin/RLS). El nuevo
+  // flujo de SSO usa findMembershipByEmail directamente para detectar pending
+  // y promoverlas vía /auth/promote-invitation.
+  if (membership.isPending) return null;
+
   return {
     user: membership.user,
     isPlatformAdmin: false,

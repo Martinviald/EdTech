@@ -127,9 +127,6 @@ async function main() {
   await seedMineducTaxonomy(db);
 
   // -------- Demo tenant para mock auth y validación end-to-end --------
-  // TODO: cuando llegue la HU del CSV de profesores, hacer org_memberships.user_id
-  // nullable + agregar columna `email` para soportar invitaciones pendientes.
-  // Por ahora users y memberships se crean juntos.
   console.log('Seeding Colegio Demo...');
   await db
     .insert(organizations)

@@ -43,6 +43,13 @@
       "when": 1779590560458,
       "tag": "0005_platform_admins_table",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1779590819353,
+      "tag": "0006_pending_invitations",
+      "breakpoints": true
     }
   ]
 }

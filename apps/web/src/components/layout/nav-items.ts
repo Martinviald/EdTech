@@ -9,6 +9,7 @@ import {
   Settings,
   ShieldCheck,
   Upload,
+  UserCog,
   Users,
   type LucideIcon,
 } from 'lucide-react';
@@ -116,6 +117,13 @@ export const NAV_ITEMS: readonly NavItem[] = [
     icon: FolderTree,
     status: 'live',
     roles: ['platform_admin', 'school_admin', 'academic_director'],
+  },
+  {
+    href: '/equipo',
+    label: 'Equipo',
+    icon: UserCog,
+    status: 'live',
+    roles: ['school_admin', 'platform_admin'],
   },
   {
     href: '/configuracion',

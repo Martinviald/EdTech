@@ -47,6 +47,25 @@ export class AuthController {
     return { ok: true };
   }
 
+  /** POST /api/auth/promote-invitation — convierte una invitación pendiente en miembro real. */
+  @Public()
+  @Post('promote-invitation')
+  async promoteInvitation(
+    @Headers('x-internal-token') token: string | undefined,
+    @Body()
+    body: {
+      membershipId: string;
+      email: string;
+      name: string;
+      avatarUrl: string | null;
+      provider: 'google' | 'microsoft';
+      providerId: string;
+    },
+  ) {
+    this.verifyInternalToken(token);
+    return this.authService.promoteInvitation(body);
+  }
+
   /** GET /api/auth/mock-users — lista usuarios para el login mock (AUTH_MODE=mock). */
   @Public()
   @Get('mock-users')
