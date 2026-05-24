@@ -3,17 +3,11 @@ import type { Route } from 'next';
 import { notFound, redirect } from 'next/navigation';
 import { ChevronLeft } from 'lucide-react';
 import { auth } from '@/auth';
-import { apiFetch } from '@/lib/api-client';
-import type { Curriculum, TaxonomyNode } from '@soe/db';
+import { apiGet } from '@/lib/api';
+import type { CurriculumTreeResponse } from '@soe/types';
 import { TreeView } from './TreeView';
 
 const ALLOWED_ROLES = ['platform_admin', 'school_admin', 'academic_director'];
-
-type TreeResponse = {
-  curriculum: Curriculum;
-  nodes: TaxonomyNode[];
-  tree: Array<TaxonomyNode & { children: unknown[] }>;
-};
 
 export default async function CurriculumDetailPage({
   params,
@@ -26,9 +20,9 @@ export default async function CurriculumDetailPage({
 
   const { curriculumId } = await params;
 
-  let data: TreeResponse;
+  let data: CurriculumTreeResponse;
   try {
-    data = await apiFetch<TreeResponse>(`/taxonomies/curricula/${curriculumId}/tree`);
+    data = await apiGet<CurriculumTreeResponse>(`/taxonomies/curricula/${curriculumId}/tree`);
   } catch {
     notFound();
   }

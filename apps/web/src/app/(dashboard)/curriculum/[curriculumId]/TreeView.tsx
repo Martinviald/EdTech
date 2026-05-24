@@ -4,8 +4,12 @@ import { useMemo, useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
 import { ChevronDown, ChevronRight, Pencil, Plus, Trash2 } from 'lucide-react';
-import type { TaxonomyNode } from '@soe/db';
-import type { CreateTaxonomyNodeDto, TaxonomyNodeType, UpdateTaxonomyNodeDto } from '@soe/types';
+import type {
+  CreateTaxonomyNodeDto,
+  TaxonomyNodeModel as TaxonomyNode,
+  TaxonomyNodeType,
+  UpdateTaxonomyNodeDto,
+} from '@soe/types';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import {

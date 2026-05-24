@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { TAXONOMY_NODE_TYPES } from '../enums';
+import { TAXONOMY_NODE_TYPES, type TaxonomyNodeType } from '../enums';
 
 // Replicado localmente desde packages/db/src/schema/enums.ts (curriculumTypeEnum).
 // TODO: unificar con CURRICULUM_TYPES en packages/types/src/enums.ts cuando H17.2 mergee
@@ -66,3 +66,45 @@ export type ListCurriculaQueryDto = z.infer<typeof listCurriculaQuerySchema>;
 export type CreateTaxonomyNodeDto = z.infer<typeof createTaxonomyNodeSchema>;
 export type UpdateTaxonomyNodeDto = z.infer<typeof updateTaxonomyNodeSchema>;
 export type ListTaxonomyNodesQueryDto = z.infer<typeof listTaxonomyNodesQuerySchema>;
+
+// ── Modelos (response shape de la API) ────────────────────────────────────────
+// El refactor "web-no-db-direct" impide importar tipos de Drizzle desde @soe/web.
+// Reflejamos aquí el shape devuelto por la API NestJS (que sí lee Drizzle).
+
+export type CurriculumModel = {
+  id: string;
+  name: string;
+  type: CurriculumType;
+  language: string;
+  version: string | null;
+  isOfficial: boolean;
+  orgId: string | null;
+  metadata: Record<string, unknown> | null;
+  createdAt: string | Date;
+};
+
+export type TaxonomyNodeModel = {
+  id: string;
+  curriculumId: string;
+  parentId: string | null;
+  type: TaxonomyNodeType;
+  code: string | null;
+  name: string;
+  description: string | null;
+  gradeId: string | null;
+  subjectId: string | null;
+  order: number;
+  depth: number;
+  metadata: Record<string, unknown> | null;
+  createdAt: string | Date;
+};
+
+export type TaxonomyTreeNodeModel = TaxonomyNodeModel & {
+  children: TaxonomyTreeNodeModel[];
+};
+
+export type CurriculumTreeResponse = {
+  curriculum: CurriculumModel;
+  nodes: TaxonomyNodeModel[];
+  tree: TaxonomyTreeNodeModel[];
+};

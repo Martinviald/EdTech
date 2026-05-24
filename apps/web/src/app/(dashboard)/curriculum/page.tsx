@@ -2,9 +2,9 @@ import Link from 'next/link';
 import type { Route } from 'next';
 import { redirect } from 'next/navigation';
 import { auth } from '@/auth';
-import { apiFetch } from '@/lib/api-client';
+import { apiGet } from '@/lib/api';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import type { Curriculum } from '@soe/db';
+import type { CurriculumModel } from '@soe/types';
 import { NewCurriculumButton } from './NewCurriculumButton';
 
 const TYPE_LABELS: Record<string, string> = {
@@ -25,7 +25,7 @@ export default async function CurriculumPage() {
   if (!session?.user) redirect('/login');
   if (!ALLOWED_ROLES.includes(session.user.role)) redirect('/dashboard');
 
-  const curricula = await apiFetch<Curriculum[]>('/taxonomies/curricula');
+  const curricula = await apiGet<CurriculumModel[]>('/taxonomies/curricula');
 
   const official = curricula.filter((c) => c.isOfficial);
   const custom = curricula.filter((c) => !c.isOfficial);
@@ -88,7 +88,7 @@ export default async function CurriculumPage() {
   );
 }
 
-function CurriculumCard({ curriculum, typeLabel }: { curriculum: Curriculum; typeLabel: string }) {
+function CurriculumCard({ curriculum, typeLabel }: { curriculum: CurriculumModel; typeLabel: string }) {
   return (
     <Link
       href={`/curriculum/${curriculum.id}` as Route}

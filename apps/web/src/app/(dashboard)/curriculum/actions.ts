@@ -8,44 +8,36 @@ import {
   updateTaxonomyNodeSchema,
   type CreateCurriculumDto,
   type CreateTaxonomyNodeDto,
+  type CurriculumModel,
+  type TaxonomyNodeModel,
   type UpdateCurriculumDto,
   type UpdateTaxonomyNodeDto,
 } from '@soe/types';
-import type { Curriculum, TaxonomyNode } from '@soe/db';
-import { apiFetch } from '@/lib/api-client';
+import { apiDelete, apiPatch, apiPost } from '@/lib/api';
 
 export async function createCurriculum(dto: CreateCurriculumDto) {
   const validated = createCurriculumSchema.parse(dto);
-  const created = await apiFetch<Curriculum>('/taxonomies/curricula', {
-    method: 'POST',
-    body: validated,
-  });
+  const created = await apiPost<CurriculumModel>('/taxonomies/curricula', validated);
   revalidatePath('/curriculum');
   return created;
 }
 
 export async function updateCurriculum(id: string, dto: UpdateCurriculumDto) {
   const validated = updateCurriculumSchema.parse(dto);
-  const updated = await apiFetch<Curriculum>(`/taxonomies/curricula/${id}`, {
-    method: 'PATCH',
-    body: validated,
-  });
+  const updated = await apiPatch<CurriculumModel>(`/taxonomies/curricula/${id}`, validated);
   revalidatePath('/curriculum');
   revalidatePath(`/curriculum/${id}`);
   return updated;
 }
 
 export async function deleteCurriculum(id: string) {
-  await apiFetch<void>(`/taxonomies/curricula/${id}`, { method: 'DELETE' });
+  await apiDelete(`/taxonomies/curricula/${id}`);
   revalidatePath('/curriculum');
 }
 
 export async function createTaxonomyNode(dto: CreateTaxonomyNodeDto) {
   const validated = createTaxonomyNodeSchema.parse(dto);
-  const created = await apiFetch<TaxonomyNode>('/taxonomies/nodes', {
-    method: 'POST',
-    body: validated,
-  });
+  const created = await apiPost<TaxonomyNodeModel>('/taxonomies/nodes', validated);
   revalidatePath(`/curriculum/${validated.curriculumId}`);
   return created;
 }
@@ -56,16 +48,13 @@ export async function updateTaxonomyNode(
   dto: UpdateTaxonomyNodeDto,
 ) {
   const validated = updateTaxonomyNodeSchema.parse(dto);
-  const updated = await apiFetch<TaxonomyNode>(`/taxonomies/nodes/${id}`, {
-    method: 'PATCH',
-    body: validated,
-  });
+  const updated = await apiPatch<TaxonomyNodeModel>(`/taxonomies/nodes/${id}`, validated);
   revalidatePath(`/curriculum/${curriculumId}`);
   return updated;
 }
 
 export async function deleteTaxonomyNode(id: string, curriculumId: string, cascade = false) {
   const qs = cascade ? '?cascade=true' : '';
-  await apiFetch<void>(`/taxonomies/nodes/${id}${qs}`, { method: 'DELETE' });
+  await apiDelete(`/taxonomies/nodes/${id}${qs}`);
   revalidatePath(`/curriculum/${curriculumId}`);
 }
