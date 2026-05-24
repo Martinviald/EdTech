@@ -12,6 +12,8 @@ import { OrganizationsModule } from './organizations/organizations.module';
 import { TaxonomiesModule } from './taxonomies/taxonomies.module';
 import { AdminModule } from './admin/admin.module';
 import { StaffModule } from './staff/staff.module';
+import { TeacherAssignmentsModule } from './teacher-assignments/teacher-assignments.module';
+import { ClassGroupsModule } from './class-groups/class-groups.module';
 
 @Module({
   imports: [
@@ -27,6 +29,8 @@ import { StaffModule } from './staff/staff.module';
     TaxonomiesModule,
     AdminModule,
     StaffModule,
+    TeacherAssignmentsModule,
+    ClassGroupsModule,
   ],
   controllers: [AppController],
   providers: [

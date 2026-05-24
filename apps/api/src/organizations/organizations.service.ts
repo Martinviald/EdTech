@@ -5,14 +5,16 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { and, count, eq, inArray } from 'drizzle-orm';
+import { and, count, desc, eq, inArray, isNull } from 'drizzle-orm';
 import {
   academicYears,
   classGroups,
   grades,
+  orgMemberships,
   organizations,
   subjectClasses,
   subjects,
+  users,
   withOrgContext,
 } from '@soe/db';
 import type { AcademicSetupDto, UpdateOrganizationProfileDto } from '@soe/types';
@@ -107,6 +109,89 @@ export class OrganizationsService {
       .select()
       .from(subjects)
       .orderBy(subjects.name);
+  }
+
+  /**
+   * Lista los usuarios elegibles para ser asignados como profesores en una org.
+   * Incluye memberships activas con rol docente; excluye invitaciones pendientes
+   * (user_id IS NULL) porque aún no tienen un usuario al cual asignar carga.
+   */
+  async listTeachers(orgId: string) {
+    return this.db
+      .select({
+        id: users.id,
+        name: users.name,
+        email: users.email,
+        role: orgMemberships.role,
+      })
+      .from(orgMemberships)
+      .innerJoin(users, eq(users.id, orgMemberships.userId))
+      .where(
+        and(
+          eq(orgMemberships.orgId, orgId),
+          eq(orgMemberships.isActive, true),
+          inArray(orgMemberships.role, ['teacher', 'homeroom_teacher', 'eval_coordinator']),
+          isNull(users.deletedAt),
+        ),
+      )
+      .orderBy(users.name);
+  }
+
+  /**
+   * Lista las subject_classes del año académico vigente de la org, con su
+   * class_group y subject expandidos. Si no hay año vigente, retorna vacío.
+   */
+  async listSubjectClasses(orgId: string) {
+    // Si por inconsistencia hay >1 academic_year con is_current=true, tomar el
+    // más reciente. En estado válido solo hay uno; el desempate evita que el
+    // resultado dependa del orden físico de las filas.
+    const [currentYear] = await this.db
+      .select({ id: academicYears.id, year: academicYears.year })
+      .from(academicYears)
+      .where(and(eq(academicYears.orgId, orgId), eq(academicYears.isCurrent, true)))
+      .orderBy(desc(academicYears.createdAt))
+      .limit(1);
+
+    if (!currentYear) return [];
+
+    const rows = await this.db
+      .select({
+        id: subjectClasses.id,
+        classGroupId: classGroups.id,
+        classGroupName: classGroups.name,
+        gradeShortName: grades.shortName,
+        gradeOrder: grades.order,
+        subjectId: subjects.id,
+        subjectName: subjects.name,
+        subjectShortName: subjects.shortName,
+      })
+      .from(subjectClasses)
+      .innerJoin(classGroups, eq(classGroups.id, subjectClasses.classGroupId))
+      .innerJoin(grades, eq(grades.id, classGroups.gradeId))
+      .innerJoin(subjects, eq(subjects.id, subjectClasses.subjectId))
+      .where(
+        and(
+          eq(classGroups.orgId, orgId),
+          eq(subjectClasses.academicYearId, currentYear.id),
+        ),
+      )
+      .orderBy(grades.order, classGroups.name, subjects.name);
+
+    return rows.map((r) => ({
+      id: r.id,
+      academicYear: currentYear.year,
+      classGroup: {
+        id: r.classGroupId,
+        name: r.classGroupName,
+        gradeShortName: r.gradeShortName,
+        gradeOrder: r.gradeOrder,
+      },
+      subject: {
+        id: r.subjectId,
+        name: r.subjectName,
+        shortName: r.subjectShortName,
+      },
+    }));
   }
 
   async setupAcademicYear(

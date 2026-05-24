@@ -62,10 +62,10 @@ export const NAV_ITEMS: readonly NavItem[] = [
     roles: ALL_ROLES,
   },
   {
-    href: '/cursos',
-    label: 'Cursos',
+    href: '/dashboard/my-classes',
+    label: 'Mis cursos',
     icon: BookOpen,
-    status: 'soon',
+    status: 'live',
     roles: ALL_STAFF_ROLES,
   },
   {
