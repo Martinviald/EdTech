@@ -5,28 +5,32 @@ import { organizations, academicYears } from './organizations';
 import { classGroups } from './academic';
 import { users } from './users';
 
-export const students = pgTable('students', {
-  id: uuid('id').defaultRandom().primaryKey(),
-  orgId: uuid('org_id')
-    .notNull()
-    .references(() => organizations.id, { onDelete: 'cascade' }),
-  userId: uuid('user_id').references(() => users.id),
-  rut: text('rut').notNull(),
-  firstName: text('first_name').notNull(),
-  lastName: text('last_name').notNull(),
-  birthDate: date('birth_date'),
-  gender: genderEnum('gender').default('unspecified'),
-  profile: jsonb('profile').$type<{
-    nee?: string[];
-    careerInterest?: string;
-    targetUniversity?: string;
-    sensitiveNotes?: string;
-  }>(),
-  isAnonymized: boolean('is_anonymized').default(false).notNull(),
-  deletedAt: timestamp('deleted_at'),
-  createdAt: timestamp('created_at').defaultNow().notNull(),
-  updatedAt: timestamp('updated_at').defaultNow().notNull(),
-});
+export const students = pgTable(
+  'students',
+  {
+    id: uuid('id').defaultRandom().primaryKey(),
+    orgId: uuid('org_id')
+      .notNull()
+      .references(() => organizations.id, { onDelete: 'cascade' }),
+    userId: uuid('user_id').references(() => users.id),
+    rut: text('rut').notNull(),
+    firstName: text('first_name').notNull(),
+    lastName: text('last_name').notNull(),
+    birthDate: date('birth_date'),
+    gender: genderEnum('gender').default('unspecified'),
+    profile: jsonb('profile').$type<{
+      nee?: string[];
+      careerInterest?: string;
+      targetUniversity?: string;
+      sensitiveNotes?: string;
+    }>(),
+    isAnonymized: boolean('is_anonymized').default(false).notNull(),
+    deletedAt: timestamp('deleted_at'),
+    createdAt: timestamp('created_at').defaultNow().notNull(),
+    updatedAt: timestamp('updated_at').defaultNow().notNull(),
+  },
+  (table) => [unique('students_org_rut_unique').on(table.orgId, table.rut)],
+);
 
 export const studentEnrollments = pgTable(
   'student_enrollments',

@@ -62,7 +62,7 @@ export const importJobs = pgTable('import_jobs', {
   assessmentId: uuid('assessment_id').references(() => assessments.id),
   type: importJobTypeEnum('type').notNull(),
   status: importJobStatusEnum('status').default('pending').notNull(),
-  fileUrl: text('file_url').notNull(),
+  fileUrl: text('file_url'),
   mappingConfig: jsonb('mapping_config').$type<Record<string, unknown>>().default({}),
   result: jsonb('result').$type<{
     rowsProcessed?: number;

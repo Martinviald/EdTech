@@ -101,7 +101,7 @@ export const NAV_ITEMS: readonly NavItem[] = [
     href: '/importar',
     label: 'Importar',
     icon: Upload,
-    status: 'soon',
+    status: 'live',
     roles: ['school_admin', 'academic_director', 'platform_admin'],
   },
   {

@@ -14,6 +14,7 @@ import { AdminModule } from './admin/admin.module';
 import { StaffModule } from './staff/staff.module';
 import { TeacherAssignmentsModule } from './teacher-assignments/teacher-assignments.module';
 import { ClassGroupsModule } from './class-groups/class-groups.module';
+import { StudentsModule } from './students/students.module';
 
 @Module({
   imports: [
@@ -31,6 +32,7 @@ import { ClassGroupsModule } from './class-groups/class-groups.module';
     StaffModule,
     TeacherAssignmentsModule,
     ClassGroupsModule,
+    StudentsModule,
   ],
   controllers: [AppController],
   providers: [

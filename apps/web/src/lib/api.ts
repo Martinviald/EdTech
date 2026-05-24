@@ -79,6 +79,42 @@ export function apiDelete<T = void>(path: string): Promise<T> {
   return request<T>(path, { method: 'DELETE', authenticated: true });
 }
 
+/**
+ * POST autenticado con `multipart/form-data`. No define Content-Type:
+ * fetch lo agrega con el boundary correcto cuando body es FormData.
+ */
+export async function apiPostFormData<T>(path: string, formData: FormData): Promise<T> {
+  const token = await getBearerToken();
+  let res: Response;
+  try {
+    res = await fetch(`${API_URL}${path}`, {
+      method: 'POST',
+      body: formData,
+      headers: { Authorization: `Bearer ${token}` },
+    });
+  } catch {
+    throw new ApiConnectionError();
+  }
+
+  if (!res.ok) {
+    const body = (await res.json().catch(() => ({}))) as {
+      message?: string;
+      newClassGroups?: unknown;
+      unknownGrades?: unknown;
+    };
+    const err = new Error(body.message ?? `API error ${res.status}`) as Error & {
+      status?: number;
+      details?: unknown;
+    };
+    err.status = res.status;
+    err.details = body;
+    throw err;
+  }
+
+  if (res.status === 204) return undefined as T;
+  return res.json() as Promise<T>;
+}
+
 // ── Llamadas internas sin Bearer (auth callbacks de NextAuth) ─────────────────
 
 export function internalGet<T>(path: string): Promise<T> {
