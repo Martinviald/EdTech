@@ -75,6 +75,10 @@ export function apiPatch<T>(path: string, body: unknown): Promise<T> {
   });
 }
 
+export function apiDelete<T = void>(path: string): Promise<T> {
+  return request<T>(path, { method: 'DELETE', authenticated: true });
+}
+
 // ── Llamadas internas sin Bearer (auth callbacks de NextAuth) ─────────────────
 
 export function internalGet<T>(path: string): Promise<T> {
