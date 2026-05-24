@@ -1,8 +1,10 @@
 import 'server-only';
 import { cookies } from 'next/headers';
 
-const API_URL = process.env.API_URL;
-if (!API_URL) throw new Error('API_URL is required');
+const API_BASE = process.env.API_URL;
+if (!API_BASE) throw new Error('API_URL is required');
+
+const API_URL = `${API_BASE}/api`;
 
 const INTERNAL_API_SECRET = process.env.INTERNAL_API_SECRET;
 if (!INTERNAL_API_SECRET) throw new Error('INTERNAL_API_SECRET is required');
