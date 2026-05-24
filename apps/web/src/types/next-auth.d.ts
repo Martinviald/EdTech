@@ -8,6 +8,9 @@ declare module 'next-auth' {
     user: {
       id: string;
       orgId: string | null;
+      roles: UserRole[];
+      activeRole: UserRole;
+      /** @deprecated mirror de activeRole durante la migración multi-rol. */
       role: UserRole;
       isPlatformAdmin: boolean;
     } & DefaultSession['user'];
@@ -15,6 +18,9 @@ declare module 'next-auth' {
 
   interface User {
     orgId?: string | null;
+    roles?: UserRole[];
+    activeRole?: UserRole;
+    /** @deprecated mirror de activeRole. */
     role?: UserRole;
     isPlatformAdmin?: boolean;
   }
@@ -24,6 +30,9 @@ declare module 'next-auth/jwt' {
   interface JWT {
     userId?: string;
     orgId?: string | null;
+    roles?: UserRole[];
+    activeRole?: UserRole;
+    /** @deprecated mirror de activeRole. */
     role?: UserRole;
     isPlatformAdmin?: boolean;
   }

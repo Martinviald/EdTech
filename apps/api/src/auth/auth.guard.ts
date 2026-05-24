@@ -4,6 +4,7 @@ import { Reflector } from '@nestjs/core';
 import { jwtDecrypt } from 'jose';
 import { hkdf } from 'crypto';
 import { promisify } from 'util';
+import { USER_ROLES, type UserRole } from '@soe/types';
 import { IS_PUBLIC_KEY } from '../common/decorators/public.decorator';
 
 const hkdfAsync = promisify(hkdf);
@@ -50,21 +51,47 @@ export class AuthGuard implements CanActivate {
 
     if (!payload) throw new UnauthorizedException('Token inválido o expirado');
 
-    const role = payload['role'] as string;
     const isPlatformAdmin = Boolean(payload['isPlatformAdmin']);
 
-    // Defensive: si el JWT pide rol platform_admin debe traer también el flag.
-    if (role === 'platform_admin' && !isPlatformAdmin) {
+    // Backward-compat: tokens viejos sólo traen `role` singular. Si no viene
+    // `roles[]`, construimos el array a partir de `role`. Si tampoco viene
+    // `activeRole`, lo derivamos de `role`. Una vez todos los tokens en
+    // circulación tengan `roles[]`, este fallback puede removerse.
+    const legacyRole = payload['role'] as string | undefined;
+    const rolesRaw = payload['roles'] as unknown;
+    const roles: UserRole[] = Array.isArray(rolesRaw)
+      ? rolesRaw.filter((r): r is UserRole =>
+          typeof r === 'string' && (USER_ROLES as readonly string[]).includes(r),
+        )
+      : legacyRole && (USER_ROLES as readonly string[]).includes(legacyRole)
+        ? [legacyRole as UserRole]
+        : [];
+
+    if (roles.length === 0) {
+      throw new UnauthorizedException('Token sin roles válidos');
+    }
+
+    const activeRoleRaw =
+      (payload['activeRole'] as string | undefined) ?? legacyRole ?? roles[0];
+    if (!(USER_ROLES as readonly string[]).includes(activeRoleRaw)) {
+      throw new UnauthorizedException('Token con activeRole inválido');
+    }
+    const activeRole = activeRoleRaw as UserRole;
+
+    // Defensive: si el rol activo es platform_admin debe traer también el flag.
+    if (activeRole === 'platform_admin' && !isPlatformAdmin) {
       throw new UnauthorizedException('Token inconsistente');
     }
 
     request.user = {
       userId: payload['userId'] as string,
       orgId: (payload['orgId'] as string | null | undefined) ?? null,
-      role,
       email: payload['email'] as string,
       name: payload['name'] as string,
       isPlatformAdmin,
+      roles,
+      activeRole,
+      role: activeRole,
     };
     return true;
   }

@@ -4,7 +4,7 @@ import { redirect } from 'next/navigation';
 import { auth } from '@/auth';
 import { apiGet } from '@/lib/api';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import type { CurriculumModel } from '@soe/types';
+import { canAccess, CURRICULUM_ROLES, userHasAnyRole, type CurriculumModel } from '@soe/types';
 import { NewCurriculumButton } from './NewCurriculumButton';
 
 const TYPE_LABELS: Record<string, string> = {
@@ -18,18 +18,16 @@ const TYPE_LABELS: Record<string, string> = {
   custom: 'Personalizado',
 };
 
-const ALLOWED_ROLES = ['platform_admin', 'school_admin', 'academic_director'];
-
 export default async function CurriculumPage() {
   const session = await auth();
   if (!session?.user) redirect('/login');
-  if (!ALLOWED_ROLES.includes(session.user.role)) redirect('/dashboard');
+  if (!canAccess(session.user.roles, CURRICULUM_ROLES)) redirect('/dashboard');
 
   const curricula = await apiGet<CurriculumModel[]>('/taxonomies/curricula');
 
   const official = curricula.filter((c) => c.isOfficial);
   const custom = curricula.filter((c) => !c.isOfficial);
-  const canCreate = session.user.role === 'platform_admin' || session.user.role === 'school_admin';
+  const canCreate = userHasAnyRole(session.user.roles, ['platform_admin', 'school_admin']);
 
   return (
     <div className="space-y-6">

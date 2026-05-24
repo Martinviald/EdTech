@@ -1,17 +1,15 @@
 import { redirect } from 'next/navigation';
-import type { MemberModel } from '@soe/types';
+import { canAccess, STAFF_MANAGEMENT_ROLES, type MemberModel } from '@soe/types';
 import { auth } from '@/auth';
 import { apiGet } from '@/lib/api';
 import { AddMemberDialog } from './AddMemberDialog';
 import { BulkImportDialog } from './BulkImportDialog';
 import { MembersTable } from './MembersTable';
 
-const ALLOWED_ROLES = ['school_admin', 'platform_admin'];
-
 export default async function EquipoPage() {
   const session = await auth();
   if (!session?.user) redirect('/login');
-  if (!ALLOWED_ROLES.includes(session.user.role)) redirect('/dashboard');
+  if (!canAccess(session.user.roles, STAFF_MANAGEMENT_ROLES)) redirect('/dashboard');
 
   const members = await apiGet<MemberModel[]>('/organizations/me/members');
 

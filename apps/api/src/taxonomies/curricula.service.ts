@@ -6,7 +6,7 @@ import {
 } from '@nestjs/common';
 import { and, eq, or } from 'drizzle-orm';
 import { curricula, taxonomyNodes, type Curriculum } from '@soe/db';
-import type { CreateCurriculumDto, UpdateCurriculumDto } from '@soe/types';
+import { userHasRole, type CreateCurriculumDto, type UpdateCurriculumDto } from '@soe/types';
 import type { JwtPayload } from '../auth/jwt-payload.types';
 import { InjectDb, type Database } from '../database/database.types';
 
@@ -46,7 +46,7 @@ export class CurriculaService {
   }
 
   async create(dto: CreateCurriculumDto, user: JwtPayload) {
-    if (dto.isOfficial && user.role !== 'platform_admin') {
+    if (dto.isOfficial && !userHasRole(user.roles, 'platform_admin')) {
       throw new ForbiddenException('Solo platform_admin puede crear currícula oficiales');
     }
 

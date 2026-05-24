@@ -1,16 +1,15 @@
 import { redirect } from 'next/navigation';
 import { Download } from 'lucide-react';
+import { canAccess, IMPORT_ROLES } from '@soe/types';
 import { auth } from '@/auth';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { StudentImportFlow } from '@/components/import/student-import-flow';
 
-const ALLOWED_ROLES = ['school_admin', 'academic_director', 'platform_admin'] as const;
-
 export default async function ImportarPage() {
   const session = await auth();
   if (!session?.user?.orgId) redirect('/login');
-  if (!ALLOWED_ROLES.includes(session.user.role as (typeof ALLOWED_ROLES)[number])) {
+  if (!canAccess(session.user.roles, IMPORT_ROLES)) {
     redirect('/dashboard');
   }
 

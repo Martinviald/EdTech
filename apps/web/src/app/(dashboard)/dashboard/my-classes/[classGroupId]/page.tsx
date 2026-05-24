@@ -2,10 +2,11 @@ import Link from 'next/link';
 import type { Route } from 'next';
 import { notFound, redirect } from 'next/navigation';
 import { BookOpen, ChevronLeft, GraduationCap, Users } from 'lucide-react';
-import type {
-  ClassGroupDetailResponse,
-  EnrollmentStatus,
-  UserRole,
+import {
+  canAccess,
+  CLASS_VIEWER_ROLES,
+  type ClassGroupDetailResponse,
+  type EnrollmentStatus,
 } from '@soe/types';
 import { auth } from '@/auth';
 import { getClassGroupDetail } from '@/lib/teacherAssignmentsApi';
@@ -20,18 +21,6 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-
-const ALLOWED_ROLES: readonly UserRole[] = [
-  'teacher',
-  'homeroom_teacher',
-  'eval_coordinator',
-  'coordinator',
-  'dept_head',
-  'cycle_director',
-  'academic_director',
-  'school_admin',
-  'platform_admin',
-];
 
 const ENROLLMENT_STATUS_LABEL: Record<EnrollmentStatus, string> = {
   active: 'Matriculado',
@@ -57,7 +46,7 @@ export default async function ClassGroupDetailPage({
 }) {
   const session = await auth();
   if (!session?.user?.orgId) redirect('/login');
-  if (!ALLOWED_ROLES.includes(session.user.role)) redirect('/dashboard');
+  if (!canAccess(session.user.roles, CLASS_VIEWER_ROLES)) redirect('/dashboard');
 
   const { classGroupId } = await params;
 

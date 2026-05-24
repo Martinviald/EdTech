@@ -18,9 +18,14 @@ export default async function DashboardLayout({ children }: { children: React.Re
   return (
     <div className="flex h-screen bg-background">
       <SkipLink />
-      <Sidebar role={session.user.role} />
+      <Sidebar roles={session.user.roles} />
       <div className="flex flex-1 flex-col overflow-hidden">
-        <Topbar org={org} user={session.user} role={session.user.role} />
+        <Topbar
+          org={org}
+          user={session.user}
+          roles={session.user.roles}
+          activeRole={session.user.activeRole}
+        />
         <main id="main-content" className="flex-1 overflow-y-auto p-6">
           {children}
         </main>

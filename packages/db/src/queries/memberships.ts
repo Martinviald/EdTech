@@ -19,25 +19,41 @@ export type PendingMembership = {
 
 export type MembershipLookup = MembershipWithUser | PendingMembership;
 
+export type MembershipsWithUser = {
+  user: typeof users.$inferSelect;
+  organization: typeof organizations.$inferSelect;
+  memberships: Array<typeof orgMemberships.$inferSelect>;
+  isPending: false;
+};
+
+export type PendingMemberships = {
+  user: null;
+  organization: typeof organizations.$inferSelect;
+  memberships: [typeof orgMemberships.$inferSelect];
+  isPending: true;
+};
+
+export type MembershipsLookup = MembershipsWithUser | PendingMemberships;
+
 /**
- * Lookup de whitelist para el flujo de SSO/Mock.
+ * Lookup multi-rol del usuario por email.
  *
- * Retorna:
- *  - Membership real (con `user`) si el email matchea un users.email activo (case-insensitive).
- *  - Membership pendiente (sin `user`) si hay un org_memberships con user_id NULL + email
- *    matcheando (case-insensitive). Este caso se genera por la HU de whitelist (Equipo).
- *  - null si ningún caso aplica.
+ * Retorna TODOS los memberships activos del usuario (no `.limit(1)`).
+ * Si por edge case hay memberships en más de una org, conservamos el criterio
+ * actual: tomamos la primera org encontrada y filtramos solo sus roles. El
+ * selector multi-org es una HU separada.
+ *
+ *  - Caso real: usuario con N memberships activos en una org → memberships[].
+ *  - Caso pending: invitación con user_id NULL → memberships con un único item.
+ *  - null si nada matchea.
  *
  * Soft-deleted users y memberships inactivos se excluyen.
- *
- * Cuando un usuario pertenece a varias organizaciones tomamos el primer registro:
- * el selector multi-org es una HU separada.
  */
-export async function findMembershipByEmail(
+export async function listActiveMembershipsByEmail(
   db: Database,
   email: string,
-): Promise<MembershipLookup | null> {
-  // 1) Match con user real
+): Promise<MembershipsLookup | null> {
+  // 1) Match con user real — traemos todos sus memberships activos.
   const realRows = await db
     .select({
       user: users,
@@ -53,14 +69,26 @@ export async function findMembershipByEmail(
         isNull(users.deletedAt),
         eq(orgMemberships.isActive, true),
       ),
-    )
-    .limit(1);
+    );
 
-  if (realRows[0]) {
-    return { ...realRows[0], isPending: false };
+  if (realRows.length > 0) {
+    const first = realRows[0]!;
+    // Si hubiera memberships en otras orgs por accidente, nos quedamos con
+    // los de la primera org encontrada — mismo criterio que el flujo legacy.
+    const targetOrgId = first.organization.id;
+    const sameOrg = realRows.filter((r) => r.organization.id === targetOrgId);
+    return {
+      user: first.user,
+      organization: first.organization,
+      memberships: sameOrg.map((r) => r.membership),
+      isPending: false,
+    };
   }
 
-  // 2) Match con invitación pendiente (user_id NULL + email guardado)
+  // 2) Match con invitación pendiente (user_id NULL + email guardado).
+  // Por construcción del partial unique, no debería haber duplicados por
+  // (org, email, role), pero podría haber distintos roles pending para el
+  // mismo email: el primer login promueve uno a la vez. Tomamos el primero.
   const pendingRows = await db
     .select({
       membership: orgMemberships,
@@ -78,10 +106,44 @@ export async function findMembershipByEmail(
     .limit(1);
 
   if (pendingRows[0]) {
-    return { ...pendingRows[0], user: null, isPending: true };
+    return {
+      user: null,
+      organization: pendingRows[0].organization,
+      memberships: [pendingRows[0].membership],
+      isPending: true,
+    };
   }
 
   return null;
+}
+
+/**
+ * @deprecated Usar `listActiveMembershipsByEmail` que retorna todos los
+ * memberships activos. Esta función toma sólo el primero (no determinista)
+ * y existe para callers legacy que aún no migraron al flujo multi-rol.
+ */
+export async function findMembershipByEmail(
+  db: Database,
+  email: string,
+): Promise<MembershipLookup | null> {
+  const lookup = await listActiveMembershipsByEmail(db, email);
+  if (!lookup) return null;
+
+  const first = lookup.memberships[0]!;
+  if (lookup.isPending) {
+    return {
+      user: null,
+      membership: first,
+      organization: lookup.organization,
+      isPending: true,
+    };
+  }
+  return {
+    user: lookup.user,
+    membership: first,
+    organization: lookup.organization,
+    isPending: false,
+  };
 }
 
 /**

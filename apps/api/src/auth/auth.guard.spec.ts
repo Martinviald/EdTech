@@ -9,9 +9,14 @@ import { AuthGuard } from './auth.guard';
 
 const hkdfAsync = promisify(hkdf);
 const TEST_SECRET = 'test-secret-for-unit-tests-minimum-32-chars';
+const COOKIE_SALT = 'authjs.session-token';
 
 async function deriveKey(secret: string): Promise<Uint8Array> {
-  const derived = await hkdfAsync('sha256', secret, '', 'Auth.js Generated Encryption Key ()', 64);
+  // Reproduce la derivación de NextAuth v5: salt = nombre de cookie,
+  // info = `Auth.js Generated Encryption Key (<salt>)`. El AuthGuard intenta
+  // las dos cookies (http / __Secure-); con que matchee una basta.
+  const info = `Auth.js Generated Encryption Key (${COOKIE_SALT})`;
+  const derived = await hkdfAsync('sha256', secret, COOKIE_SALT, info, 64);
   return new Uint8Array(derived);
 }
 

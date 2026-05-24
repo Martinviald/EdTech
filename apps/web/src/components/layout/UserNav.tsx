@@ -14,6 +14,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { ROLE_LABELS } from './nav-items';
+import { RoleSwitcher } from './RoleSwitcher';
 
 interface UserNavProps {
   user: {
@@ -21,11 +22,13 @@ interface UserNavProps {
     email?: string | null;
     image?: string | null;
   };
-  role: UserRole;
+  roles: readonly UserRole[];
+  activeRole: UserRole;
   orgName: string;
 }
 
-export function UserNav({ user, role, orgName }: UserNavProps) {
+export function UserNav({ user, roles, activeRole, orgName }: UserNavProps) {
+  const role = activeRole;
   const name = user.name ?? user.email ?? 'Usuario';
   const initials = getInitials(name);
 
@@ -66,6 +69,12 @@ export function UserNav({ user, role, orgName }: UserNavProps) {
           </p>
         </div>
         <DropdownMenuSeparator />
+        {roles.length > 1 ? (
+          <>
+            <RoleSwitcher roles={roles} activeRole={activeRole} />
+            <DropdownMenuSeparator />
+          </>
+        ) : null}
         <DropdownMenuItem disabled>
           <Settings className="size-4" aria-hidden />
           Configuración

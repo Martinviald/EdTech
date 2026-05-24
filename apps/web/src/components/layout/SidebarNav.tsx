@@ -18,7 +18,7 @@ import { ADMIN_NAV_ITEMS, visibleNavItems, type NavItem } from './nav-items';
 export type SidebarVariant = 'main' | 'admin';
 
 interface SidebarNavProps {
-  role: UserRole;
+  roles: readonly UserRole[];
   collapsed?: boolean;
   onNavigate?: () => void;
   onToggle?: () => void;
@@ -27,7 +27,7 @@ interface SidebarNavProps {
 }
 
 export function SidebarNav({
-  role,
+  roles,
   collapsed = false,
   onNavigate,
   onToggle,
@@ -35,7 +35,7 @@ export function SidebarNav({
 }: SidebarNavProps) {
   const pathname = usePathname();
   const items: readonly NavItem[] =
-    variant === 'admin' ? ADMIN_NAV_ITEMS : visibleNavItems(role);
+    variant === 'admin' ? ADMIN_NAV_ITEMS : visibleNavItems(roles);
   const activeHref = findActiveHref(pathname, items);
 
   return (
