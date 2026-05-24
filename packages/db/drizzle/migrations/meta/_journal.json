@@ -15,6 +15,13 @@
       "when": 1779325022606,
       "tag": "0001_worthless_gabe_jones",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1779553425703,
+      "tag": "0002_taxonomy_nodes_code_uniq",
+      "breakpoints": true
     }
   ]
 }
