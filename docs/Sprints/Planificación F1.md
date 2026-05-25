@@ -185,6 +185,7 @@ Las siguientes historias de F1 son importantes pero no bloquean el flujo demo. S
 
 | ID              | Historia                                     | Razón para diferir                                                                           |
 | --------------- | -------------------------------------------- | -------------------------------------------------------------------------------------------- |
+| H19.5           | Backups automáticos y plan de recuperación    | No bloquea desarrollo ni demo. Resolver antes del primer deploy a staging/producción.        |
 | H19.4           | Cumplimiento normativo completo (Ley 19.628) | Los fundamentos van en S0; la documentación formal puede ir antes del lanzamiento comercial. |
 | H17.2 extendida | Currículum completo todas las asignaturas    | En S1 se carga Lenguaje y Matemáticas. El resto puede agregarse iterativamente.              |
 
