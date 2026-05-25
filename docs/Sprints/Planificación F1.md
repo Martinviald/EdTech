@@ -10,14 +10,14 @@
 
 ## Vista resumen
 
-| Sprint | Semanas | Objetivo                                   | Historias                                            |
-| ------ | ------- | ------------------------------------------ | ---------------------------------------------------- |
-| S0     | 1-2     | Cimientos: stack, modelo de datos, auth    | H19.11, H19.12, H1.7, H17.1, H19.4, H19.5, H19.10    |
-| S1     | 3-4     | Onboarding del colegio                     | H1.1, H1.2, H1.3, H1.4, H17.2, H17.3, H19.2          |
-| S2     | 5-6     | Banco de ítems + pautas DIA                | H3.3, H3.10, H3.11, H3.12, H5.8                      |
-| S3     | 7-8     | Ingesta y corrección DIA                   | H4.5, H4.6, H5.7, H16.3, H16.4                       |
-| S4     | 9-10    | Dashboards core (directivo y profesor)     | H6.1, H6.2, H6.3, H6.4, H6.5, H6.6, H6.7, H6.8, H6.9 |
-| S5     | 11-12   | Dashboards avanzados + flujo demo completo | H6.10, H6.11, H6.12, H6.18, H19.1                    |
+| Sprint | Semanas | Objetivo                                   | Historias                                              | Progreso         |
+| ------ | ------- | ------------------------------------------ | ------------------------------------------------------ | ---------------- |
+| S0     | 1-2     | Cimientos: stack, modelo de datos, auth    | H19.11, H19.12, H1.7, H17.1, H19.4, H19.5, H19.10    | 6/7 ✅ (H19.5 ⏳) |
+| S1     | 3-4     | Onboarding del colegio                     | H1.1, H1.2, H1.3, H1.4, H17.2, H17.3, H19.2          | 7/7 ✅            |
+| S2     | 5-6     | Banco de ítems + pautas DIA                | H3.3, H3.10, H3.11, H3.12, H5.8                       | 0/5              |
+| S3     | 7-8     | Ingesta y corrección DIA                   | H4.5, H4.6, H5.7, H16.3, H16.4                        | 0/5              |
+| S4     | 9-10    | Dashboards core (directivo y profesor)     | H6.1, H6.2, H6.3, H6.4, H6.5, H6.6, H6.7, H6.8, H6.9| 0/9              |
+| S5     | 11-12   | Dashboards avanzados + flujo demo completo | H6.10, H6.11, H6.12, H6.18, H19.1                     | 0/5              |
 
 **Flujo demo F1 completo al final del Sprint 5:**
 Subir hojas DIA → corrección automática → dashboard habilidades → click en pregunta → distractores → comparar con diagnóstico anterior → exportar Excel/PDF
@@ -30,15 +30,15 @@ Subir hojas DIA → corrección automática → dashboard habilidades → click 
 
 **Por qué va primero:** la Taxonomía Universal (H19.11) es la decisión de diseño más crítica de todo el proyecto. Si se hace mal aquí, F2-F5 requieren migraciones dolorosas. Vale la pena tomarse el tiempo extra para hacerla bien.
 
-| ID         | Historia                                                                                                            | Complejidad | Notas                                                                                                                                             |
-| ---------- | ------------------------------------------------------------------------------------------------------------------- | ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **H19.11** | Taxonomía Universal en Drizzle: OAs, habilidades, contenidos MINEDUC con soporte futuro para SIMCE, PAES, Cambridge | ★★★★★       | Ancla arquitectónica. Diseñar con cuidado: entidades `Instrument`, `Domain`, `Skill`, `LearningObjective`, `Content` con relaciones polimórficas. |
-| **H19.12** | Infraestructura serverless Next.js: repo, CI/CD, entornos dev/staging/prod                                          | ★★★         | Setup estándar pero crítico. Incluir configuración de Drizzle + PostgreSQL desde el día 1.                                                        |
-| **H1.7**   | Autenticación con Google / Microsoft (SSO)                                                                          | ★★★         | Usar NextAuth.js o Clerk. Modelar `User`, `Role`, `Permission` pensando en H1.3 (multi-rol).                                                      |
-| **H17.1**  | UX simple: design system base (colores, tipografía, componentes core)                                               | ★★          | Implementar el manual de marca. shadcn/ui como base recomendada.                                                                                  |
-| **H19.10** | Manual de marca implementado en la plataforma (coherencia visual)                                                   | ★★          | Tokens de diseño en Tailwind. Se trabaja junto con H17.1.                                                                                         |
-| **H19.4**  | Estructura de privacidad: modelo de datos con aislamiento por colegio (tenant isolation)                            | ★★★         | Row-level security en PostgreSQL desde el inicio. No agregar esto después.                                                                        |
-| **H19.5**  | Backups automáticos y plan de recuperación                                                                          | ★★          | Configurar pg_dump automático + alertas.                                                                                                          |
+| ID         | Historia                                                                                                            | Complejidad | Estado | Notas                                                                                                                                             |
+| ---------- | ------------------------------------------------------------------------------------------------------------------- | ----------- | ------ | ------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **H19.11** | Taxonomía Universal en Drizzle: OAs, habilidades, contenidos MINEDUC con soporte futuro para SIMCE, PAES, Cambridge | ★★★★★       | ✅      | Tablas `curricula`, `taxonomy_nodes`, `taxonomy_mappings` en `packages/db/src/schema/curriculum.ts` con relaciones polimórficas y RLS.             |
+| **H19.12** | Infraestructura serverless Next.js: repo, CI/CD, entornos dev/staging/prod                                          | ★★★         | ✅      | Monorepo Turborepo + pnpm: `apps/api` (NestJS), `apps/web` (Next.js 15), `packages/db` (Drizzle), `packages/types`.                              |
+| **H1.7**   | Autenticación con Google / Microsoft (SSO)                                                                          | ★★★         | ✅      | NextAuth v5 con Google + Microsoft Entra ID + mock provider. Guards JWT, multi-rol con `roles[]` + `activeRole` + switch-role endpoint.            |
+| **H17.1**  | UX simple: design system base (colores, tipografía, componentes core)                                               | ★★          | ✅      | shadcn/ui en `apps/web/src/components/ui/`. Sidebar colapsable, Topbar, MobileSidebar, UserNav con RoleSwitcher.                                  |
+| **H19.10** | Manual de marca implementado en la plataforma (coherencia visual)                                                   | ★★          | ✅      | Tokens CSS light/dark en `globals.css`, config en `tailwind.config.ts`. Inter como fuente base.                                                   |
+| **H19.4**  | Estructura de privacidad: modelo de datos con aislamiento por colegio (tenant isolation)                            | ★★★         | ✅      | `withOrgContext`, `SensitiveDataGuard` (Ley 19.628), `RolesGuard` por unión, org_id obligatorio en queries. Tests en `privacy.service.spec.ts`.   |
+| **H19.5**  | Backups automáticos y plan de recuperación                                                                          | ★★          | ⏳      | Pendiente. No hay scripts de pg_dump ni configuración de backups en el repo.                                                                      |
 
 **División de trabajo sugerida:**
 
@@ -55,15 +55,15 @@ Subir hojas DIA → corrección automática → dashboard habilidades → click 
 
 **Por qué va segundo:** si no hay colegio + alumnos + roles cargados, no hay nada que evaluar. Este sprint habilita todos los siguientes.
 
-| ID        | Historia                                                                              | Complejidad | Notas                                                                                                                                                                      |
-| --------- | ------------------------------------------------------------------------------------- | ----------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **H1.1**  | Alta de colegio: nombre, RBD, ciclos, niveles, cursos, asignaturas, comuna            | ★★★         | Formulario multi-step. Las entidades `School`, `Cycle`, `Level`, `Course`, `Subject` deben estar bien normalizadas para F4 (multi-colegio).                                |
-| **H1.2**  | Importar nómina de alumnos por curso (CSV + validación de RUT)                        | ★★★         | Importación idempotente (re-subir no duplica). Preview antes de confirmar. Validar RUT chileno.                                                                            |
-| **H1.3**  | Crear cuentas de profesores y directivos con roles                                    | ★★          | Aprovechar el modelo `Role`/`Permission` de H1.7.                                                                                                                          |
-| **H1.4**  | Asignar profesor a cursos y asignaturas                                               | ★★          | Relación `TeacherAssignment`. Afecta qué data ve cada profesor.                                                                                                            |
-| **H17.2** | Gestión del currículum MINEDUC (OAs por asignatura y nivel)                           | ★★★         | Cargar el currículum oficial MINEDUC como seed data usando la Taxonomía Universal de H19.11. Este es el "contenido maestro" sobre el que se etiquetan todas las preguntas. |
-| **H17.3** | Gestión de taxonomías (habilidades, contenidos, tipos de texto, niveles de desempeño) | ★★          | Panel de admin para ver/editar la taxonomía sin tocar la DB directamente.                                                                                                  |
-| **H19.2** | Responsive: funciona en móvil, tablet y desktop                                       | ★★          | Aplicar desde el inicio a todas las vistas. No es un sprint separado.                                                                                                      |
+| ID        | Historia                                                                              | Complejidad | Estado | Notas                                                                                                                                                                      |
+| --------- | ------------------------------------------------------------------------------------- | ----------- | ------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **H1.1**  | Alta de colegio: nombre, RBD, ciclos, niveles, cursos, asignaturas, comuna            | ★★★         | ✅      | `organizations.controller.ts` con CRUD + setup wizard en `organizacion/configurar/`. Año académico, class groups, subject classes.                                         |
+| **H1.2**  | Importar nómina de alumnos por curso (CSV + validación de RUT)                        | ★★★         | ✅      | `students-import.service.ts` con preview/commit. Validación RUT (`normalizeRut`). Frontend en `/importar` con `student-import-flow.tsx`.                                   |
+| **H1.3**  | Crear cuentas de profesores y directivos con roles                                    | ★★          | ✅      | `staff.service.ts` con invite/bulk-invite/revoke. Multi-rol soportado (UNIQUE por terna). Frontend en `/equipo` con AddMemberDialog y BulkImportDialog.                   |
+| **H1.4**  | Asignar profesor a cursos y asignaturas                                               | ★★          | ✅      | `teacher-assignments.service.ts` con CRUD. Frontend en `organizacion/asignaciones/` con CreateAssignmentDialog y AssignmentsTable.                                         |
+| **H17.2** | Gestión del currículum MINEDUC (OAs por asignatura y nivel)                           | ★★★         | ✅      | Seed MINEDUC como taxonomía universal (`mineduc-taxonomy.ts` + `mineduc-2024.json`). Panel de gestión en `/curriculum`.                                                    |
+| **H17.3** | Gestión de taxonomías (habilidades, contenidos, tipos de texto, niveles de desempeño) | ★★          | ✅      | `curricula.controller.ts` + `nodes.controller.ts` con CRUD completo + tree builder. Frontend en `/curriculum/[curriculumId]` con TreeView interactivo.                     |
+| **H19.2** | Responsive: funciona en móvil, tablet y desktop                                       | ★★          | ✅      | `MobileSidebar.tsx` con Sheet, sidebar `hidden md:flex`, padding responsive en Topbar. Aplicado en todos los layouts.                                                      |
 
 **División de trabajo sugerida:**
 
