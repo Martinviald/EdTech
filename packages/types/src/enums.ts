@@ -1,6 +1,14 @@
 export const ORG_TYPES = ['platform', 'foundation', 'school'] as const;
 export type OrgType = (typeof ORG_TYPES)[number];
 
+export const SCHOOL_DEPENDENCES = [
+  'municipal',
+  'particular_pagado',
+  'particular_subvencionado',
+  'delegada',
+] as const;
+export type SchoolDependence = (typeof SCHOOL_DEPENDENCES)[number];
+
 export const USER_ROLES = [
   'platform_admin',
   'foundation_director',
@@ -15,6 +23,22 @@ export const USER_ROLES = [
   'guardian',
 ] as const;
 export type UserRole = (typeof USER_ROLES)[number];
+
+// Mayor a menor privilegio. Usado por pickDefaultActiveRole para decidir qué
+// rol mostrar por default cuando un usuario tiene múltiples memberships.
+export const ROLE_HIERARCHY = [
+  'platform_admin',
+  'school_admin',
+  'academic_director',
+  'cycle_director',
+  'eval_coordinator',
+  'dept_head',
+  'coordinator',
+  'homeroom_teacher',
+  'teacher',
+  'foundation_director',
+  'guardian',
+] as const satisfies readonly UserRole[];
 
 export const INSTRUMENT_TYPES = [
   'dia',

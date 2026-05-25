@@ -23,9 +23,20 @@ export class PrivacyService {
    */
   async anonymizeStudent(
     studentId: string,
-    requestedBy: { userId: string; orgId: string },
+    requestedBy: { userId: string; orgId: string | null; isPlatformAdmin: boolean },
   ): Promise<void> {
-    await withOrgContext(this.db, requestedBy.orgId, async (tx) => {
+    // platform_admin sin orgId target: necesitamos resolverlo desde el alumno.
+    let targetOrgId = requestedBy.orgId;
+    if (!targetOrgId) {
+      const [s] = await this.db
+        .select({ orgId: students.orgId })
+        .from(students)
+        .where(eq(students.id, studentId));
+      if (!s) throw new NotFoundException('Alumno no encontrado');
+      targetOrgId = s.orgId;
+    }
+
+    await withOrgContext(this.db, targetOrgId, async (tx) => {
       const [student] = await tx
         .select({
           id: students.id,
@@ -35,7 +46,8 @@ export class PrivacyService {
         .from(students)
         .where(eq(students.id, studentId));
 
-      if (!student || student.orgId !== requestedBy.orgId) {
+      if (!student) throw new NotFoundException('Alumno no encontrado');
+      if (!requestedBy.isPlatformAdmin && student.orgId !== requestedBy.orgId) {
         throw new NotFoundException('Alumno no encontrado');
       }
       if (student.isAnonymized) return; // operación idempotente
@@ -64,8 +76,8 @@ export class PrivacyService {
 
       await tx.insert(auditLogs).values({
         userId: requestedBy.userId,
-        orgId: requestedBy.orgId,
-        action: 'anonymize_student',
+        orgId: targetOrgId,
+        action: requestedBy.isPlatformAdmin ? 'admin.student.anonymize' : 'anonymize_student',
         resourceType: 'students',
         resourceFilter: { studentId },
         recordCount: 1,
@@ -89,13 +101,17 @@ export class PrivacyService {
     await this.db.insert(auditLogs).values(params);
   }
 
-  /** Lista los registros de auditoría de una organización, más recientes primero. */
-  async listAuditLogs(orgId: string, limit = 100) {
-    return this.db
+  /**
+   * Lista los registros de auditoría.
+   * Si orgId es null (platform_admin sin filtro), retorna todos los logs paginados.
+   */
+  async listAuditLogs(orgId: string | null, limit = 100) {
+    const query = this.db
       .select()
       .from(auditLogs)
-      .where(eq(auditLogs.orgId, orgId))
       .orderBy(desc(auditLogs.createdAt))
       .limit(limit);
+
+    return orgId ? query.where(eq(auditLogs.orgId, orgId)) : query;
   }
 }

@@ -2,18 +2,60 @@ import NextAuth, { type NextAuthConfig, type User } from 'next-auth';
 import Credentials from 'next-auth/providers/credentials';
 import Google from 'next-auth/providers/google';
 import MicrosoftEntraID from 'next-auth/providers/microsoft-entra-id';
-import { eq } from 'drizzle-orm';
-import { findMembershipByEmail, schema } from '@soe/db';
-import type { USER_ROLES } from '@soe/types';
+import { pickDefaultActiveRole, USER_ROLES, type UserRole } from '@soe/types';
 import { authConfig } from '@/auth.config';
-import { db } from '@/lib/db';
-
-type UserRole = (typeof USER_ROLES)[number];
+import { internalPost } from '@/lib/api';
 
 const authMode = process.env.AUTH_MODE === 'mock' ? 'mock' : 'sso';
 
 if (process.env.NODE_ENV === 'production' && authMode === 'mock') {
   throw new Error('AUTH_MODE=mock is forbidden in production');
+}
+
+type ValidateUserResponse = {
+  user: {
+    id: string;
+    email: string;
+    name: string;
+    avatarUrl: string | null;
+    providerId: string;
+  } | null;
+  isPlatformAdmin: boolean;
+  isPending: boolean;
+  roles: UserRole[];
+  activeRole: UserRole;
+  /** @deprecated mantenido para no romper consumidores legacy. */
+  membership: {
+    id: string;
+    userId: string | null;
+    orgId: string | null;
+    role: string;
+    isActive: boolean;
+  } | null;
+  memberships: Array<{
+    id: string;
+    userId: string | null;
+    orgId: string | null;
+    role: UserRole;
+    isActive: boolean;
+  }>;
+  organization: { id: string; name: string; type: string } | null;
+};
+
+type PromoteInvitationResponse = {
+  userId: string;
+  membershipId: string;
+  orgId: string;
+  role: string;
+  roles: UserRole[];
+  activeRole: UserRole;
+};
+
+function normalizeRoles(raw: unknown): UserRole[] {
+  if (!Array.isArray(raw)) return [];
+  return raw.filter((r): r is UserRole =>
+    typeof r === 'string' && (USER_ROLES as readonly string[]).includes(r),
+  );
 }
 
 function ssoProviders() {
@@ -38,15 +80,22 @@ function mockProvider() {
     async authorize(credentials) {
       const email = credentials?.email;
       if (typeof email !== 'string' || !email) return null;
-      const result = await findMembershipByEmail(db, email);
-      if (!result) return null;
+      const result = await internalPost<ValidateUserResponse>('/auth/validate-user', { email });
+      if (!result || !result.user) return null; // pending no soportado vía mock
+      const roles = result.roles?.length
+        ? result.roles
+        : ([result.isPlatformAdmin ? 'platform_admin' : 'teacher'] as UserRole[]);
+      const activeRole = result.activeRole ?? pickDefaultActiveRole(roles);
       return {
         id: result.user.id,
         email: result.user.email,
         name: result.user.name,
         image: result.user.avatarUrl ?? undefined,
-        orgId: result.membership.orgId,
-        role: result.membership.role,
+        orgId: result.membership?.orgId ?? null,
+        roles,
+        activeRole,
+        role: activeRole,
+        isPlatformAdmin: result.isPlatformAdmin,
       } satisfies User;
     },
   });
@@ -58,56 +107,113 @@ const config: NextAuthConfig = {
   callbacks: {
     ...authConfig.callbacks,
     async signIn({ user, account, profile }) {
-      // Credentials (mock): authorize ya validó y cargó orgId/role.
       if (account?.provider === 'mock') return true;
 
-      // OAuth: validar whitelist contra org_memberships por email.
       const email = profile?.email ?? user.email;
       if (!email) return '/auth/error?error=EmailNotWhitelisted';
 
-      const result = await findMembershipByEmail(db, email);
+      const result = await internalPost<ValidateUserResponse>('/auth/validate-user', { email });
       if (!result) return '/auth/error?error=EmailNotWhitelisted';
 
-      // Mapeo del provider de Auth.js al enum DB ('google' | 'microsoft').
       const dbProvider: 'google' | 'microsoft' =
         account?.provider === 'microsoft-entra-id' ? 'microsoft' : 'google';
 
-      // First-login sync: actualizar el users row (creado en seed o por CSV)
-      // con los datos reales del proveedor.
       const avatarUrl =
         (profile as { picture?: string } | undefined)?.picture ?? user.image ?? null;
+
+      // Caso A: invitación pendiente — crear users + rellenar user_id en el membership.
+      if (result.isPending && result.membership) {
+        const realName = profile?.name ?? user.name ?? email;
+        const promoted = await internalPost<PromoteInvitationResponse>(
+          '/auth/promote-invitation',
+          {
+            membershipId: result.membership.id,
+            email,
+            name: realName,
+            avatarUrl,
+            provider: dbProvider,
+            providerId: account?.providerAccountId ?? '',
+          },
+        );
+        const promotedRoles = promoted.roles?.length
+          ? promoted.roles
+          : ([promoted.role as UserRole]);
+        const promotedActiveRole = promoted.activeRole ?? pickDefaultActiveRole(promotedRoles);
+        user.id = promoted.userId;
+        user.orgId = promoted.orgId;
+        user.roles = promotedRoles;
+        user.activeRole = promotedActiveRole;
+        user.role = promotedActiveRole;
+        user.isPlatformAdmin = false;
+        return true;
+      }
+
+      // Caso B: user real (incluye platform_admin con o sin membership).
+      if (!result.user) return '/auth/error?error=EmailNotWhitelisted';
+
       const realName = profile?.name ?? user.name ?? result.user.name;
+      await internalPost('/auth/sync-user', {
+        userId: result.user.id,
+        name: realName,
+        avatarUrl,
+        provider: dbProvider,
+        providerId: account?.providerAccountId ?? result.user.providerId,
+      });
 
-      await db
-        .update(schema.users)
-        .set({
-          name: realName,
-          avatarUrl,
-          provider: dbProvider,
-          providerId: account?.providerAccountId ?? result.user.providerId,
-          lastLoginAt: new Date(),
-          updatedAt: new Date(),
-        })
-        .where(eq(schema.users.id, result.user.id));
+      const roles = result.roles?.length
+        ? result.roles
+        : ([result.isPlatformAdmin ? 'platform_admin' : 'teacher'] as UserRole[]);
+      const activeRole = result.activeRole ?? pickDefaultActiveRole(roles);
 
-      // Inyectar claims que el callback `jwt` recoge en el primer call.
       user.id = result.user.id;
-      user.orgId = result.membership.orgId;
-      user.role = result.membership.role as UserRole;
+      user.orgId = result.membership?.orgId ?? null;
+      user.roles = roles;
+      user.activeRole = activeRole;
+      user.role = activeRole;
+      user.isPlatformAdmin = result.isPlatformAdmin;
       return true;
     },
-    async jwt({ token, user }) {
+    async jwt({ token, user, trigger, session }) {
       if (user) {
         token.userId = user.id as string;
-        token.orgId = user.orgId as string;
-        token.role = user.role as UserRole;
+        token.orgId = (user.orgId ?? null) as string | null;
+        token.roles = user.roles ?? (user.role ? [user.role as UserRole] : []);
+        token.activeRole = user.activeRole ?? (user.role as UserRole | undefined);
+        token.role = token.activeRole;
+        token.isPlatformAdmin = Boolean(user.isPlatformAdmin);
       }
+
+      // Refresh disparado por `useSession().update({ activeRole })` desde el
+      // RoleSwitcher. Validamos que el rol propuesto esté en token.roles —
+      // defensa en profundidad; el endpoint /auth/switch-role ya validó.
+      if (trigger === 'update' && session && typeof session === 'object') {
+        const candidate = (session as { activeRole?: unknown }).activeRole;
+        const valid = normalizeRoles(token.roles ?? []);
+        if (
+          typeof candidate === 'string' &&
+          (USER_ROLES as readonly string[]).includes(candidate) &&
+          valid.includes(candidate as UserRole)
+        ) {
+          token.activeRole = candidate as UserRole;
+          token.role = candidate as UserRole;
+        }
+      }
+
       return token;
     },
     async session({ session, token }) {
       if (typeof token.userId === 'string') session.user.id = token.userId;
-      if (typeof token.orgId === 'string') session.user.orgId = token.orgId;
-      if (token.role) session.user.role = token.role as UserRole;
+      session.user.orgId = (token.orgId ?? null) as string | null;
+      const roles = normalizeRoles(token.roles ?? []);
+      const fallback = (token.role ?? token.activeRole) as UserRole | undefined;
+      const resolvedRoles = roles.length > 0 ? roles : fallback ? [fallback] : [];
+      session.user.roles = resolvedRoles;
+      const active = (token.activeRole ?? fallback) as UserRole | undefined;
+      if (active) {
+        session.user.activeRole = active;
+        session.user.role = active;
+      }
+      session.user.isPlatformAdmin = Boolean(token.isPlatformAdmin);
       return session;
     },
   },

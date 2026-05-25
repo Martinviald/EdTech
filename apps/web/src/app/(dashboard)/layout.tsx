@@ -1,3 +1,4 @@
+import type { Route } from 'next';
 import { redirect } from 'next/navigation';
 import { auth } from '@/auth';
 import { getCurrentOrg } from '@/lib/getCurrentOrg';
@@ -8,16 +9,23 @@ import { Toaster } from '@/components/ui/sonner';
 
 export default async function DashboardLayout({ children }: { children: React.ReactNode }) {
   const session = await auth();
-  if (!session?.user?.orgId) redirect('/login');
+  if (!session?.user) redirect('/login');
+  if (session.user.isPlatformAdmin && !session.user.orgId) redirect('/admin' as Route);
+  if (!session.user.orgId) redirect('/login');
 
   const org = await getCurrentOrg(session.user.orgId);
 
   return (
-    <div className="flex min-h-screen bg-background">
+    <div className="flex h-screen bg-background">
       <SkipLink />
-      <Sidebar role={session.user.role} />
-      <div className="flex min-h-screen flex-1 flex-col">
-        <Topbar org={org} user={session.user} role={session.user.role} />
+      <Sidebar roles={session.user.roles} />
+      <div className="flex flex-1 flex-col overflow-hidden">
+        <Topbar
+          org={org}
+          user={session.user}
+          roles={session.user.roles}
+          activeRole={session.user.activeRole}
+        />
         <main id="main-content" className="flex-1 overflow-y-auto p-6">
           {children}
         </main>

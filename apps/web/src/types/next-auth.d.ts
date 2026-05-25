@@ -7,21 +7,33 @@ declare module 'next-auth' {
   interface Session {
     user: {
       id: string;
-      orgId: string;
+      orgId: string | null;
+      roles: UserRole[];
+      activeRole: UserRole;
+      /** @deprecated mirror de activeRole durante la migración multi-rol. */
       role: UserRole;
+      isPlatformAdmin: boolean;
     } & DefaultSession['user'];
   }
 
   interface User {
-    orgId?: string;
+    orgId?: string | null;
+    roles?: UserRole[];
+    activeRole?: UserRole;
+    /** @deprecated mirror de activeRole. */
     role?: UserRole;
+    isPlatformAdmin?: boolean;
   }
 }
 
 declare module 'next-auth/jwt' {
   interface JWT {
     userId?: string;
-    orgId?: string;
+    orgId?: string | null;
+    roles?: UserRole[];
+    activeRole?: UserRole;
+    /** @deprecated mirror de activeRole. */
     role?: UserRole;
+    isPlatformAdmin?: boolean;
   }
 }

@@ -15,6 +15,7 @@ CREATE TYPE "public"."item_type" AS ENUM('multiple_choice', 'true_false', 'open_
 CREATE TYPE "public"."org_type" AS ENUM('platform', 'foundation', 'school');--> statement-breakpoint
 CREATE TYPE "public"."performance_level" AS ENUM('insufficient', 'elementary', 'adequate', 'advanced');--> statement-breakpoint
 CREATE TYPE "public"."rubric_type" AS ENUM('analytic', 'holistic');--> statement-breakpoint
+CREATE TYPE "public"."school_dependence" AS ENUM('municipal', 'particular_pagado', 'particular_subvencionado', 'delegada');--> statement-breakpoint
 CREATE TYPE "public"."scored_by" AS ENUM('auto', 'ai', 'human');--> statement-breakpoint
 CREATE TYPE "public"."section_type" AS ENUM('multiple_choice', 'open_ended', 'oral_reading', 'oral_expression', 'writing', 'listening', 'matching', 'mixed');--> statement-breakpoint
 CREATE TYPE "public"."sso_provider" AS ENUM('google', 'microsoft');--> statement-breakpoint
@@ -38,6 +39,9 @@ CREATE TABLE "organizations" (
 	"parent_id" uuid,
 	"name" text NOT NULL,
 	"rbd" text,
+	"commune" text,
+	"region" text,
+	"dependence" "school_dependence",
 	"config" jsonb DEFAULT '{}'::jsonb,
 	"deleted_at" timestamp,
 	"created_at" timestamp DEFAULT now() NOT NULL,
@@ -83,11 +87,14 @@ CREATE TABLE "subjects" (
 --> statement-breakpoint
 CREATE TABLE "org_memberships" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
-	"user_id" uuid NOT NULL,
+	"user_id" uuid,
 	"org_id" uuid NOT NULL,
 	"role" "user_role" NOT NULL,
 	"scope" jsonb,
 	"is_active" boolean DEFAULT true NOT NULL,
+	"email" text,
+	"invited_by_user_id" uuid,
+	"invited_at" timestamp,
 	"created_at" timestamp DEFAULT now() NOT NULL,
 	CONSTRAINT "org_memberships_user_id_org_id_role_unique" UNIQUE("user_id","org_id","role")
 );
@@ -136,9 +143,11 @@ CREATE TABLE "students" (
 	"birth_date" date,
 	"gender" "gender" DEFAULT 'unspecified',
 	"profile" jsonb,
+	"is_anonymized" boolean DEFAULT false NOT NULL,
 	"deleted_at" timestamp,
 	"created_at" timestamp DEFAULT now() NOT NULL,
-	"updated_at" timestamp DEFAULT now() NOT NULL
+	"updated_at" timestamp DEFAULT now() NOT NULL,
+	CONSTRAINT "students_org_rut_unique" UNIQUE("org_id","rut")
 );
 --> statement-breakpoint
 CREATE TABLE "curricula" (
@@ -335,7 +344,7 @@ CREATE TABLE "import_jobs" (
 	"assessment_id" uuid,
 	"type" "import_job_type" NOT NULL,
 	"status" "import_job_status" DEFAULT 'pending' NOT NULL,
-	"file_url" text NOT NULL,
+	"file_url" text,
 	"mapping_config" jsonb DEFAULT '{}'::jsonb,
 	"result" jsonb,
 	"error_log" jsonb,
@@ -411,6 +420,29 @@ CREATE TABLE "skill_results" (
 	CONSTRAINT "skill_results_assessment_id_student_id_node_id_unique" UNIQUE("assessment_id","student_id","node_id")
 );
 --> statement-breakpoint
+CREATE TABLE "audit_logs" (
+	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
+	"user_id" uuid NOT NULL,
+	"org_id" uuid,
+	"action" text NOT NULL,
+	"resource_type" text NOT NULL,
+	"resource_filter" jsonb,
+	"record_count" integer,
+	"ip_address" text,
+	"user_agent" text,
+	"created_at" timestamp DEFAULT now() NOT NULL
+);
+--> statement-breakpoint
+CREATE TABLE "platform_admins" (
+	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
+	"user_id" uuid NOT NULL,
+	"granted_by_user_id" uuid,
+	"granted_at" timestamp DEFAULT now() NOT NULL,
+	"revoked_at" timestamp,
+	"notes" text,
+	CONSTRAINT "platform_admins_user_id_unique" UNIQUE("user_id")
+);
+--> statement-breakpoint
 ALTER TABLE "academic_years" ADD CONSTRAINT "academic_years_org_id_organizations_id_fk" FOREIGN KEY ("org_id") REFERENCES "public"."organizations"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "class_groups" ADD CONSTRAINT "class_groups_org_id_organizations_id_fk" FOREIGN KEY ("org_id") REFERENCES "public"."organizations"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "class_groups" ADD CONSTRAINT "class_groups_academic_year_id_academic_years_id_fk" FOREIGN KEY ("academic_year_id") REFERENCES "public"."academic_years"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
@@ -420,7 +452,9 @@ ALTER TABLE "subject_classes" ADD CONSTRAINT "subject_classes_subject_id_subject
 ALTER TABLE "subject_classes" ADD CONSTRAINT "subject_classes_academic_year_id_academic_years_id_fk" FOREIGN KEY ("academic_year_id") REFERENCES "public"."academic_years"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "org_memberships" ADD CONSTRAINT "org_memberships_user_id_users_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."users"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "org_memberships" ADD CONSTRAINT "org_memberships_org_id_organizations_id_fk" FOREIGN KEY ("org_id") REFERENCES "public"."organizations"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "org_memberships" ADD CONSTRAINT "org_memberships_invited_by_user_id_users_id_fk" FOREIGN KEY ("invited_by_user_id") REFERENCES "public"."users"("id") ON DELETE set null ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "teacher_assignments" ADD CONSTRAINT "teacher_assignments_user_id_users_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."users"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "teacher_assignments" ADD CONSTRAINT "teacher_assignments_subject_class_id_subject_classes_id_fk" FOREIGN KEY ("subject_class_id") REFERENCES "public"."subject_classes"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "student_enrollments" ADD CONSTRAINT "student_enrollments_student_id_students_id_fk" FOREIGN KEY ("student_id") REFERENCES "public"."students"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "student_enrollments" ADD CONSTRAINT "student_enrollments_class_group_id_class_groups_id_fk" FOREIGN KEY ("class_group_id") REFERENCES "public"."class_groups"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "student_enrollments" ADD CONSTRAINT "student_enrollments_academic_year_id_academic_years_id_fk" FOREIGN KEY ("academic_year_id") REFERENCES "public"."academic_years"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
@@ -472,4 +506,10 @@ ALTER TABLE "assessment_results" ADD CONSTRAINT "assessment_results_assessment_i
 ALTER TABLE "assessment_results" ADD CONSTRAINT "assessment_results_student_id_students_id_fk" FOREIGN KEY ("student_id") REFERENCES "public"."students"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "skill_results" ADD CONSTRAINT "skill_results_assessment_id_assessments_id_fk" FOREIGN KEY ("assessment_id") REFERENCES "public"."assessments"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "skill_results" ADD CONSTRAINT "skill_results_student_id_students_id_fk" FOREIGN KEY ("student_id") REFERENCES "public"."students"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
-ALTER TABLE "skill_results" ADD CONSTRAINT "skill_results_node_id_taxonomy_nodes_id_fk" FOREIGN KEY ("node_id") REFERENCES "public"."taxonomy_nodes"("id") ON DELETE cascade ON UPDATE no action;
+ALTER TABLE "skill_results" ADD CONSTRAINT "skill_results_node_id_taxonomy_nodes_id_fk" FOREIGN KEY ("node_id") REFERENCES "public"."taxonomy_nodes"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "audit_logs" ADD CONSTRAINT "audit_logs_user_id_users_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."users"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "audit_logs" ADD CONSTRAINT "audit_logs_org_id_organizations_id_fk" FOREIGN KEY ("org_id") REFERENCES "public"."organizations"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "platform_admins" ADD CONSTRAINT "platform_admins_user_id_users_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."users"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "platform_admins" ADD CONSTRAINT "platform_admins_granted_by_user_id_users_id_fk" FOREIGN KEY ("granted_by_user_id") REFERENCES "public"."users"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
+CREATE UNIQUE INDEX "curricula_official_type_version_uniq" ON "curricula" USING btree ("type","version") WHERE "curricula"."is_official" = true AND "curricula"."org_id" IS NULL;--> statement-breakpoint
+CREATE UNIQUE INDEX "taxonomy_nodes_curriculum_code_uniq" ON "taxonomy_nodes" USING btree ("curriculum_id","code") WHERE "taxonomy_nodes"."code" IS NOT NULL;

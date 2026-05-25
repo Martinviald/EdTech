@@ -3,9 +3,12 @@ import {
   BookOpen,
   Building2,
   ClipboardList,
+  FolderTree,
   LayoutDashboard,
+  School,
   Settings,
-  Upload,
+  ShieldCheck,
+  UserCog,
   Users,
   type LucideIcon,
 } from 'lucide-react';
@@ -19,6 +22,8 @@ export type NavItem = {
   icon: LucideIcon;
   status: NavStatus;
   roles: readonly UserRole[];
+  /** Si true, solo se muestra cuando el usuario es platform_admin (independiente de role). */
+  requiresPlatformAdmin?: boolean;
 };
 
 const ALL_STAFF_ROLES = [
@@ -56,10 +61,10 @@ export const NAV_ITEMS: readonly NavItem[] = [
     roles: ALL_ROLES,
   },
   {
-    href: '/cursos',
-    label: 'Cursos',
+    href: '/dashboard/my-classes',
+    label: 'Mis cursos',
     icon: BookOpen,
-    status: 'soon',
+    status: 'live',
     roles: ALL_STAFF_ROLES,
   },
   {
@@ -92,18 +97,25 @@ export const NAV_ITEMS: readonly NavItem[] = [
     ],
   },
   {
-    href: '/importar',
-    label: 'Importar',
-    icon: Upload,
-    status: 'soon',
+    href: '/organizacion',
+    label: 'Mi Colegio',
+    icon: Building2,
+    status: 'live',
     roles: ['school_admin', 'academic_director', 'platform_admin'],
   },
   {
-    href: '/organizacion',
-    label: 'Organización',
-    icon: Building2,
-    status: 'soon',
-    roles: ['school_admin', 'academic_director', 'platform_admin', 'foundation_director'],
+    href: '/curriculum',
+    label: 'Currículum',
+    icon: FolderTree,
+    status: 'live',
+    roles: ['platform_admin', 'school_admin', 'academic_director'],
+  },
+  {
+    href: '/equipo',
+    label: 'Equipo',
+    icon: UserCog,
+    status: 'live',
+    roles: ['school_admin', 'platform_admin'],
   },
   {
     href: '/configuracion',
@@ -114,8 +126,44 @@ export const NAV_ITEMS: readonly NavItem[] = [
   },
 ];
 
-export function visibleNavItems(role: UserRole): readonly NavItem[] {
-  return NAV_ITEMS.filter((item) => item.roles.includes(role));
+/**
+ * Items visibles únicamente cuando el usuario es platform_admin (vía tabla
+ * platform_admins, no por rol heredado). Se usan en el route group `(admin)`.
+ */
+export const ADMIN_NAV_ITEMS: readonly NavItem[] = [
+  {
+    href: '/admin',
+    label: 'Resumen',
+    icon: LayoutDashboard,
+    status: 'live',
+    roles: ['platform_admin'],
+    requiresPlatformAdmin: true,
+  },
+  {
+    href: '/admin/colegios',
+    label: 'Colegios',
+    icon: School,
+    status: 'live',
+    roles: ['platform_admin'],
+    requiresPlatformAdmin: true,
+  },
+  {
+    href: '/admin/equipo',
+    label: 'Equipo plataforma',
+    icon: ShieldCheck,
+    status: 'live',
+    roles: ['platform_admin'],
+    requiresPlatformAdmin: true,
+  },
+];
+
+/**
+ * Items visibles para el usuario dado el conjunto de roles que tiene en su
+ * org. Unión: un item aparece si AL MENOS UNO de los roles del usuario está
+ * en `item.roles`. Coherente con la regla de autorización del backend.
+ */
+export function visibleNavItems(roles: readonly UserRole[]): readonly NavItem[] {
+  return NAV_ITEMS.filter((item) => item.roles.some((r) => roles.includes(r)));
 }
 
 export const ROLE_LABELS: Record<UserRole, string> = {

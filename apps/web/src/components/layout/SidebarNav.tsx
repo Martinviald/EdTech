@@ -13,23 +13,30 @@ import {
   TooltipTrigger,
 } from '@/components/ui/tooltip';
 import { cn } from '@/lib/utils';
-import { visibleNavItems, type NavItem } from './nav-items';
+import { ADMIN_NAV_ITEMS, visibleNavItems, type NavItem } from './nav-items';
+
+export type SidebarVariant = 'main' | 'admin';
 
 interface SidebarNavProps {
-  role: UserRole;
+  roles: readonly UserRole[];
   collapsed?: boolean;
   onNavigate?: () => void;
   onToggle?: () => void;
+  /** Cambia el set de items renderizados. 'main' = navegación normal, 'admin' = panel plataforma. */
+  variant?: SidebarVariant;
 }
 
 export function SidebarNav({
-  role,
+  roles,
   collapsed = false,
   onNavigate,
   onToggle,
+  variant = 'main',
 }: SidebarNavProps) {
   const pathname = usePathname();
-  const items = visibleNavItems(role);
+  const items: readonly NavItem[] =
+    variant === 'admin' ? ADMIN_NAV_ITEMS : visibleNavItems(roles);
+  const activeHref = findActiveHref(pathname, items);
 
   return (
     <TooltipProvider delayDuration={200} skipDelayDuration={100}>
@@ -53,7 +60,7 @@ export function SidebarNav({
             <NavRow
               key={item.href}
               item={item}
-              isActive={isActive(pathname, item.href)}
+              isActive={item.href === activeHref}
               collapsed={collapsed}
               onNavigate={onNavigate}
             />
@@ -86,10 +93,28 @@ export function SidebarNav({
   );
 }
 
-function isActive(pathname: string | null, href: string): boolean {
-  if (!pathname) return false;
-  if (pathname === href) return true;
-  return pathname.startsWith(`${href}/`);
+/**
+ * Devuelve el href del item con el match más específico respecto al pathname.
+ *
+ * Un item matchea si su href es igual al pathname o si es un prefijo de carpeta
+ * (pathname.startsWith(href + '/')). Cuando varios items matchean (e.g. /admin
+ * y /admin/colegios cuando estás en /admin/colegios), gana el href más largo —
+ * así sólo el item más específico queda marcado como activo.
+ */
+function findActiveHref(
+  pathname: string | null,
+  items: readonly NavItem[],
+): string | null {
+  if (!pathname) return null;
+  let best: NavItem | null = null;
+  for (const item of items) {
+    const matches = pathname === item.href || pathname.startsWith(`${item.href}/`);
+    if (!matches) continue;
+    if (!best || item.href.length > best.href.length) {
+      best = item;
+    }
+  }
+  return best?.href ?? null;
 }
 
 interface NavRowProps {

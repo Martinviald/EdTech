@@ -15,10 +15,10 @@ import {
 import { SidebarNav } from './SidebarNav';
 
 interface MobileSidebarProps {
-  role: UserRole;
+  roles: readonly UserRole[];
 }
 
-export function MobileSidebar({ role }: MobileSidebarProps) {
+export function MobileSidebar({ roles }: MobileSidebarProps) {
   const [open, setOpen] = useState(false);
 
   return (
@@ -38,7 +38,7 @@ export function MobileSidebar({ role }: MobileSidebarProps) {
           <SheetTitle>Menú principal</SheetTitle>
           <SheetDescription>Navegación principal de la plataforma</SheetDescription>
         </SheetHeader>
-        <SidebarNav role={role} onNavigate={() => setOpen(false)} />
+        <SidebarNav roles={roles} onNavigate={() => setOpen(false)} />
       </SheetContent>
     </Sheet>
   );
