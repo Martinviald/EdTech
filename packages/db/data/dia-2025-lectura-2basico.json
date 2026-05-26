@@ -1,0 +1,291 @@
+{
+  "instrument": {
+    "name": "DIA Lectura 2° Básico 2025 - Diagnóstico",
+    "subject": "Lenguaje y Comunicación",
+    "grade": "2° Básico",
+    "year": 2025,
+    "applicationPeriod": "diagnostico"
+  },
+  "items": [
+    {
+      "position": 1,
+      "correctKey": "B",
+      "alternatives": [
+        { "key": "A", "text": "El gato estaba durmiendo" },
+        { "key": "B", "text": "El gato estaba jugando" },
+        { "key": "C", "text": "El gato estaba comiendo" },
+        { "key": "D", "text": "El gato estaba corriendo" }
+      ],
+      "skill": "Localizar información explícita",
+      "oa": "OA 3",
+      "contentAxis": "Lectura",
+      "stem": "¿Qué hacía el gato en la historia?"
+    },
+    {
+      "position": 2,
+      "correctKey": "A",
+      "alternatives": [
+        { "key": "A", "text": "Porque estaba triste" },
+        { "key": "B", "text": "Porque estaba feliz" },
+        { "key": "C", "text": "Porque estaba enojado" },
+        { "key": "D", "text": "Porque estaba cansado" }
+      ],
+      "skill": "Interpretar y relacionar",
+      "oa": "OA 4",
+      "contentAxis": "Lectura",
+      "stem": "¿Por qué la niña lloró?"
+    },
+    {
+      "position": 3,
+      "correctKey": "C",
+      "alternatives": [
+        { "key": "A", "text": "Un cuento de hadas" },
+        { "key": "B", "text": "Una noticia" },
+        { "key": "C", "text": "Una carta" },
+        { "key": "D", "text": "Un poema" }
+      ],
+      "skill": "Reflexionar sobre el texto",
+      "oa": "OA 5",
+      "contentAxis": "Lectura",
+      "stem": "¿Qué tipo de texto es el anterior?"
+    },
+    {
+      "position": 4,
+      "correctKey": "D",
+      "alternatives": [
+        { "key": "A", "text": "En la mañana" },
+        { "key": "B", "text": "En la tarde" },
+        { "key": "C", "text": "En la mañana temprano" },
+        { "key": "D", "text": "En la noche" }
+      ],
+      "skill": "Localizar información explícita",
+      "oa": "OA 3",
+      "contentAxis": "Lectura",
+      "stem": "¿Cuándo ocurrió el evento?"
+    },
+    {
+      "position": 5,
+      "correctKey": "B",
+      "alternatives": [
+        { "key": "A", "text": "Alegría" },
+        { "key": "B", "text": "Tristeza" },
+        { "key": "C", "text": "Enojo" },
+        { "key": "D", "text": "Miedo" }
+      ],
+      "skill": "Interpretar y relacionar",
+      "oa": "OA 4",
+      "contentAxis": "Lectura",
+      "stem": "¿Qué sentimiento expresa el personaje principal?"
+    },
+    {
+      "position": 6,
+      "correctKey": "A",
+      "alternatives": [
+        { "key": "A", "text": "Informar sobre un evento" },
+        { "key": "B", "text": "Contar una historia" },
+        { "key": "C", "text": "Dar instrucciones" },
+        { "key": "D", "text": "Expresar sentimientos" }
+      ],
+      "skill": "Reflexionar sobre el texto",
+      "oa": "OA 5",
+      "contentAxis": "Lectura",
+      "stem": "¿Cuál es el propósito del texto?"
+    },
+    {
+      "position": 7,
+      "correctKey": "C",
+      "alternatives": [
+        { "key": "A", "text": "Pedro" },
+        { "key": "B", "text": "María" },
+        { "key": "C", "text": "Juan" },
+        { "key": "D", "text": "Ana" }
+      ],
+      "skill": "Localizar información explícita",
+      "oa": "OA 3",
+      "contentAxis": "Lectura",
+      "stem": "¿Quién es el personaje principal del texto?"
+    },
+    {
+      "position": 8,
+      "correctKey": "B",
+      "alternatives": [
+        { "key": "A", "text": "Que era un lugar frío" },
+        { "key": "B", "text": "Que era un lugar cálido" },
+        { "key": "C", "text": "Que era un lugar oscuro" },
+        { "key": "D", "text": "Que era un lugar ruidoso" }
+      ],
+      "skill": "Interpretar y relacionar",
+      "oa": "OA 4",
+      "contentAxis": "Lectura",
+      "stem": "¿Qué se puede inferir del lugar descrito?"
+    },
+    {
+      "position": 9,
+      "correctKey": "D",
+      "alternatives": [
+        { "key": "A", "text": "Informativo" },
+        { "key": "B", "text": "Instructivo" },
+        { "key": "C", "text": "Argumentativo" },
+        { "key": "D", "text": "Narrativo" }
+      ],
+      "skill": "Reflexionar sobre el texto",
+      "oa": "OA 5",
+      "contentAxis": "Lectura",
+      "stem": "¿A qué tipo de texto corresponde?"
+    },
+    {
+      "position": 10,
+      "correctKey": "A",
+      "alternatives": [
+        { "key": "A", "text": "Tres personajes" },
+        { "key": "B", "text": "Dos personajes" },
+        { "key": "C", "text": "Cuatro personajes" },
+        { "key": "D", "text": "Un personaje" }
+      ],
+      "skill": "Localizar información explícita",
+      "oa": "OA 3",
+      "contentAxis": "Lectura",
+      "stem": "¿Cuántos personajes aparecen en el texto?"
+    },
+    {
+      "position": 11,
+      "correctKey": "C",
+      "alternatives": [
+        { "key": "A", "text": "Porque quería jugar" },
+        { "key": "B", "text": "Porque tenía hambre" },
+        { "key": "C", "text": "Porque extrañaba a su mamá" },
+        { "key": "D", "text": "Porque estaba aburrido" }
+      ],
+      "skill": "Interpretar y relacionar",
+      "oa": "OA 4",
+      "contentAxis": "Lectura",
+      "stem": "¿Por qué el personaje se sentía solo?"
+    },
+    {
+      "position": 12,
+      "correctKey": "B",
+      "alternatives": [
+        { "key": "A", "text": "Es un texto muy largo" },
+        { "key": "B", "text": "Enseña un valor importante" },
+        { "key": "C", "text": "Tiene muchos dibujos" },
+        { "key": "D", "text": "Es difícil de leer" }
+      ],
+      "skill": "Reflexionar sobre el texto",
+      "oa": "OA 6",
+      "contentAxis": "Lectura",
+      "stem": "¿Qué opinas sobre el mensaje del texto?"
+    },
+    {
+      "position": 13,
+      "correctKey": "A",
+      "alternatives": [
+        { "key": "A", "text": "En el parque" },
+        { "key": "B", "text": "En la escuela" },
+        { "key": "C", "text": "En la casa" },
+        { "key": "D", "text": "En el hospital" }
+      ],
+      "skill": "Localizar información explícita",
+      "oa": "OA 3",
+      "contentAxis": "Lectura",
+      "stem": "¿Dónde ocurre la historia?"
+    },
+    {
+      "position": 14,
+      "correctKey": "D",
+      "alternatives": [
+        { "key": "A", "text": "Es un animal pequeño" },
+        { "key": "B", "text": "Es un animal grande" },
+        { "key": "C", "text": "Es un animal lento" },
+        { "key": "D", "text": "Es un animal rápido" }
+      ],
+      "skill": "Interpretar y relacionar",
+      "oa": "OA 4",
+      "contentAxis": "Lectura",
+      "stem": "¿Qué podemos concluir sobre el animal descrito?"
+    },
+    {
+      "position": 15,
+      "correctKey": "C",
+      "alternatives": [
+        { "key": "A", "text": "Me gustó porque es corto" },
+        { "key": "B", "text": "No me gustó porque es aburrido" },
+        { "key": "C", "text": "El título se relaciona con la historia" },
+        { "key": "D", "text": "El título no tiene relación" }
+      ],
+      "skill": "Reflexionar sobre el texto",
+      "oa": "OA 5",
+      "contentAxis": "Lectura",
+      "stem": "¿Qué relación tiene el título con el contenido?"
+    },
+    {
+      "position": 16,
+      "correctKey": "B",
+      "alternatives": [
+        { "key": "A", "text": "Un perro" },
+        { "key": "B", "text": "Un conejo" },
+        { "key": "C", "text": "Un pájaro" },
+        { "key": "D", "text": "Un pez" }
+      ],
+      "skill": "Localizar información explícita",
+      "oa": "OA 3",
+      "contentAxis": "Lectura",
+      "stem": "¿Qué animal encontró el protagonista?"
+    },
+    {
+      "position": 17,
+      "correctKey": "A",
+      "alternatives": [
+        { "key": "A", "text": "Era de noche y hacía frío" },
+        { "key": "B", "text": "Era de día y hacía calor" },
+        { "key": "C", "text": "Estaba lloviendo" },
+        { "key": "D", "text": "Estaba nevando" }
+      ],
+      "skill": "Interpretar y relacionar",
+      "oa": "OA 4",
+      "contentAxis": "Lectura",
+      "stem": "¿Cómo era el clima cuando ocurrió el evento?"
+    },
+    {
+      "position": 18,
+      "correctKey": "D",
+      "alternatives": [
+        { "key": "A", "text": "Para dar una receta" },
+        { "key": "B", "text": "Para explicar un juego" },
+        { "key": "C", "text": "Para describir un animal" },
+        { "key": "D", "text": "Para narrar una aventura" }
+      ],
+      "skill": "Reflexionar sobre el texto",
+      "oa": "OA 5",
+      "contentAxis": "Lectura",
+      "stem": "¿Para qué fue escrito este texto?"
+    },
+    {
+      "position": 19,
+      "correctKey": "C",
+      "alternatives": [
+        { "key": "A", "text": "La abuela" },
+        { "key": "B", "text": "El abuelo" },
+        { "key": "C", "text": "La mamá" },
+        { "key": "D", "text": "El papá" }
+      ],
+      "skill": "Localizar información explícita",
+      "oa": "OA 3",
+      "contentAxis": "Lectura",
+      "stem": "¿Quién ayudó al protagonista?"
+    },
+    {
+      "position": 20,
+      "correctKey": "B",
+      "alternatives": [
+        { "key": "A", "text": "Que debemos ser egoístas" },
+        { "key": "B", "text": "Que debemos ayudar a los demás" },
+        { "key": "C", "text": "Que debemos estar solos" },
+        { "key": "D", "text": "Que debemos correr rápido" }
+      ],
+      "skill": "Interpretar y relacionar",
+      "oa": "OA 6",
+      "contentAxis": "Lectura",
+      "stem": "¿Qué enseñanza nos deja el texto?"
+    }
+  ]
+}

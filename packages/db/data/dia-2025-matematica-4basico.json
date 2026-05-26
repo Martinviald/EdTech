@@ -1,0 +1,361 @@
+{
+  "instrument": {
+    "name": "DIA Matemática 4° Básico 2025 - Diagnóstico",
+    "subject": "Matemática",
+    "grade": "4° Básico",
+    "year": 2025,
+    "applicationPeriod": "diagnostico"
+  },
+  "items": [
+    {
+      "position": 1,
+      "correctKey": "C",
+      "alternatives": [
+        { "key": "A", "text": "120" },
+        { "key": "B", "text": "130" },
+        { "key": "C", "text": "125" },
+        { "key": "D", "text": "135" }
+      ],
+      "skill": "Resolver problemas",
+      "oa": "OA 1",
+      "contentAxis": "Números y operaciones",
+      "stem": "María tiene 75 láminas y le regalan 50 más. ¿Cuántas tiene en total?"
+    },
+    {
+      "position": 2,
+      "correctKey": "A",
+      "alternatives": [
+        { "key": "A", "text": "La imagen muestra 3/4 del círculo pintado" },
+        { "key": "B", "text": "La imagen muestra 1/2 del círculo pintado" },
+        { "key": "C", "text": "La imagen muestra 2/4 del círculo pintado" },
+        { "key": "D", "text": "La imagen muestra 1/4 del círculo pintado" }
+      ],
+      "skill": "Representar",
+      "oa": "OA 6",
+      "contentAxis": "Números y operaciones",
+      "stem": "¿Cuál de las siguientes afirmaciones describe correctamente la figura?"
+    },
+    {
+      "position": 3,
+      "correctKey": "B",
+      "alternatives": [
+        { "key": "A", "text": "Porque 4 × 3 = 12" },
+        { "key": "B", "text": "Porque 5 × 4 = 20" },
+        { "key": "C", "text": "Porque 3 × 5 = 20" },
+        { "key": "D", "text": "Porque 4 × 4 = 16" }
+      ],
+      "skill": "Argumentar y comunicar",
+      "oa": "OA 4",
+      "contentAxis": "Números y operaciones",
+      "stem": "¿Cuál es la justificación correcta para el resultado de 5 filas de 4?"
+    },
+    {
+      "position": 4,
+      "correctKey": "D",
+      "alternatives": [
+        { "key": "A", "text": "5 + 5 + 5 = 15" },
+        { "key": "B", "text": "3 × 3 = 9" },
+        { "key": "C", "text": "4 + 4 = 8" },
+        { "key": "D", "text": "6 × 3 = 18" }
+      ],
+      "skill": "Modelar",
+      "oa": "OA 3",
+      "contentAxis": "Números y operaciones",
+      "stem": "Si hay 3 bolsas con 6 manzanas cada una, ¿qué operación representa la situación?"
+    },
+    {
+      "position": 5,
+      "correctKey": "A",
+      "alternatives": [
+        { "key": "A", "text": "48" },
+        { "key": "B", "text": "52" },
+        { "key": "C", "text": "44" },
+        { "key": "D", "text": "56" }
+      ],
+      "skill": "Resolver problemas",
+      "oa": "OA 2",
+      "contentAxis": "Números y operaciones",
+      "stem": "Pedro tiene 96 figuritas y las reparte en partes iguales entre 2 amigos. ¿Cuántas recibe cada uno?"
+    },
+    {
+      "position": 6,
+      "correctKey": "C",
+      "alternatives": [
+        { "key": "A", "text": "Un triángulo" },
+        { "key": "B", "text": "Un círculo" },
+        { "key": "C", "text": "Un cuadrado" },
+        { "key": "D", "text": "Un rectángulo" }
+      ],
+      "skill": "Representar",
+      "oa": "OA 14",
+      "contentAxis": "Geometría",
+      "stem": "¿Qué figura tiene 4 lados iguales y 4 ángulos rectos?"
+    },
+    {
+      "position": 7,
+      "correctKey": "B",
+      "alternatives": [
+        { "key": "A", "text": "Tiene 3 caras" },
+        { "key": "B", "text": "Tiene 6 caras cuadradas" },
+        { "key": "C", "text": "Tiene 8 caras" },
+        { "key": "D", "text": "Tiene 4 caras triangulares" }
+      ],
+      "skill": "Argumentar y comunicar",
+      "oa": "OA 15",
+      "contentAxis": "Geometría",
+      "stem": "¿Cuál es una propiedad correcta del cubo?"
+    },
+    {
+      "position": 8,
+      "correctKey": "A",
+      "alternatives": [
+        { "key": "A", "text": "Un rectángulo de 3 cm × 5 cm tiene 15 cm² de área" },
+        { "key": "B", "text": "Un rectángulo de 3 cm × 5 cm tiene 16 cm de perímetro" },
+        { "key": "C", "text": "Un cuadrado de 4 cm tiene 12 cm² de área" },
+        { "key": "D", "text": "Un triángulo de base 6 y altura 4 tiene 24 cm² de área" }
+      ],
+      "skill": "Modelar",
+      "oa": "OA 16",
+      "contentAxis": "Geometría",
+      "stem": "¿Cuál de las siguientes operaciones calcula correctamente el área?"
+    },
+    {
+      "position": 9,
+      "correctKey": "D",
+      "alternatives": [
+        { "key": "A", "text": "200 g" },
+        { "key": "B", "text": "2 kg" },
+        { "key": "C", "text": "20 g" },
+        { "key": "D", "text": "2000 g" }
+      ],
+      "skill": "Resolver problemas",
+      "oa": "OA 19",
+      "contentAxis": "Medición",
+      "stem": "¿Cuántos gramos hay en 2 kilogramos?"
+    },
+    {
+      "position": 10,
+      "correctKey": "B",
+      "alternatives": [
+        { "key": "A", "text": "Una regla de 30 cm" },
+        { "key": "B", "text": "Un reloj" },
+        { "key": "C", "text": "Una balanza" },
+        { "key": "D", "text": "Un termómetro" }
+      ],
+      "skill": "Representar",
+      "oa": "OA 18",
+      "contentAxis": "Medición",
+      "stem": "¿Qué instrumento usarías para medir el tiempo que tardas en correr 100 metros?"
+    },
+    {
+      "position": 11,
+      "correctKey": "C",
+      "alternatives": [
+        { "key": "A", "text": "1 hora = 30 minutos" },
+        { "key": "B", "text": "1 hora = 100 minutos" },
+        { "key": "C", "text": "1 hora = 60 minutos" },
+        { "key": "D", "text": "1 hora = 45 minutos" }
+      ],
+      "skill": "Argumentar y comunicar",
+      "oa": "OA 18",
+      "contentAxis": "Medición",
+      "stem": "¿Cuál de las siguientes equivalencias es correcta?"
+    },
+    {
+      "position": 12,
+      "correctKey": "A",
+      "alternatives": [
+        { "key": "A", "text": "3 × 500 ml = 1500 ml" },
+        { "key": "B", "text": "3 × 500 ml = 1000 ml" },
+        { "key": "C", "text": "2 × 500 ml = 1500 ml" },
+        { "key": "D", "text": "3 × 500 ml = 2000 ml" }
+      ],
+      "skill": "Modelar",
+      "oa": "OA 19",
+      "contentAxis": "Medición",
+      "stem": "Si tengo 3 botellas de 500 ml, ¿cuántos ml tengo en total?"
+    },
+    {
+      "position": 13,
+      "correctKey": "B",
+      "alternatives": [
+        { "key": "A", "text": "5 estudiantes prefieren fútbol" },
+        { "key": "B", "text": "8 estudiantes prefieren básquetbol" },
+        { "key": "C", "text": "3 estudiantes prefieren tenis" },
+        { "key": "D", "text": "10 estudiantes prefieren natación" }
+      ],
+      "skill": "Resolver problemas",
+      "oa": "OA 22",
+      "contentAxis": "Datos y probabilidades",
+      "stem": "Según el gráfico de barras, ¿cuántos estudiantes prefieren básquetbol?"
+    },
+    {
+      "position": 14,
+      "correctKey": "C",
+      "alternatives": [
+        { "key": "A", "text": "Un gráfico circular" },
+        { "key": "B", "text": "Una tabla de frecuencia" },
+        { "key": "C", "text": "Un pictograma" },
+        { "key": "D", "text": "Un diagrama de puntos" }
+      ],
+      "skill": "Representar",
+      "oa": "OA 21",
+      "contentAxis": "Datos y probabilidades",
+      "stem": "¿Qué representación usa dibujos para mostrar cantidades?"
+    },
+    {
+      "position": 15,
+      "correctKey": "D",
+      "alternatives": [
+        { "key": "A", "text": "Porque hay más niños que niñas" },
+        { "key": "B", "text": "Porque los datos son iguales" },
+        { "key": "C", "text": "Porque la moda es 5" },
+        { "key": "D", "text": "Porque el dato que más se repite es 7" }
+      ],
+      "skill": "Argumentar y comunicar",
+      "oa": "OA 22",
+      "contentAxis": "Datos y probabilidades",
+      "stem": "¿Por qué la moda de los datos {3, 5, 7, 7, 7, 9} es 7?"
+    },
+    {
+      "position": 16,
+      "correctKey": "A",
+      "alternatives": [
+        { "key": "A", "text": "Lanzar un dado y obtener un número entre 1 y 6" },
+        { "key": "B", "text": "Lanzar un dado y obtener un 7" },
+        { "key": "C", "text": "Sacar una bola roja de una bolsa con solo bolas azules" },
+        { "key": "D", "text": "Que el sol salga por el oeste" }
+      ],
+      "skill": "Modelar",
+      "oa": "OA 23",
+      "contentAxis": "Datos y probabilidades",
+      "stem": "¿Cuál de los siguientes eventos es seguro?"
+    },
+    {
+      "position": 17,
+      "correctKey": "C",
+      "alternatives": [
+        { "key": "A", "text": "1200" },
+        { "key": "B", "text": "1500" },
+        { "key": "C", "text": "1350" },
+        { "key": "D", "text": "1450" }
+      ],
+      "skill": "Resolver problemas",
+      "oa": "OA 1",
+      "contentAxis": "Números y operaciones",
+      "stem": "¿Cuál es el resultado de 450 × 3?"
+    },
+    {
+      "position": 18,
+      "correctKey": "B",
+      "alternatives": [
+        { "key": "A", "text": "< (menor que)" },
+        { "key": "B", "text": "> (mayor que)" },
+        { "key": "C", "text": "= (igual a)" },
+        { "key": "D", "text": "No se puede comparar" }
+      ],
+      "skill": "Representar",
+      "oa": "OA 1",
+      "contentAxis": "Números y operaciones",
+      "stem": "¿Qué símbolo va entre 3.456 __ 3.256?"
+    },
+    {
+      "position": 19,
+      "correctKey": "A",
+      "alternatives": [
+        { "key": "A", "text": "La suma es conmutativa: 3 + 5 = 5 + 3" },
+        { "key": "B", "text": "La resta es conmutativa: 5 - 3 = 3 - 5" },
+        { "key": "C", "text": "La división es conmutativa: 6 ÷ 2 = 2 ÷ 6" },
+        { "key": "D", "text": "Ninguna operación es conmutativa" }
+      ],
+      "skill": "Argumentar y comunicar",
+      "oa": "OA 3",
+      "contentAxis": "Números y operaciones",
+      "stem": "¿Cuál de las siguientes afirmaciones es verdadera?"
+    },
+    {
+      "position": 20,
+      "correctKey": "D",
+      "alternatives": [
+        { "key": "A", "text": "3 + 3 + 3 + 3" },
+        { "key": "B", "text": "4 + 4 + 4" },
+        { "key": "C", "text": "12 × 1" },
+        { "key": "D", "text": "Todas las anteriores" }
+      ],
+      "skill": "Modelar",
+      "oa": "OA 3",
+      "contentAxis": "Números y operaciones",
+      "stem": "¿Cuál de las siguientes expresiones equivale a 12?"
+    },
+    {
+      "position": 21,
+      "correctKey": "B",
+      "alternatives": [
+        { "key": "A", "text": "15 cm" },
+        { "key": "B", "text": "20 cm" },
+        { "key": "C", "text": "25 cm" },
+        { "key": "D", "text": "10 cm" }
+      ],
+      "skill": "Resolver problemas",
+      "oa": "OA 16",
+      "contentAxis": "Geometría",
+      "stem": "¿Cuál es el perímetro de un cuadrado de 5 cm de lado?"
+    },
+    {
+      "position": 22,
+      "correctKey": "C",
+      "alternatives": [
+        { "key": "A", "text": "Trasladar la figura 3 cuadrados arriba" },
+        { "key": "B", "text": "Rotar la figura 90 grados" },
+        { "key": "C", "text": "Reflejar la figura en un eje vertical" },
+        { "key": "D", "text": "Reducir la figura a la mitad" }
+      ],
+      "skill": "Representar",
+      "oa": "OA 17",
+      "contentAxis": "Geometría",
+      "stem": "¿Qué transformación produce una imagen espejo?"
+    },
+    {
+      "position": 23,
+      "correctKey": "A",
+      "alternatives": [
+        { "key": "A", "text": "Porque un ángulo recto mide exactamente 90°" },
+        { "key": "B", "text": "Porque un ángulo recto mide menos de 90°" },
+        { "key": "C", "text": "Porque un ángulo recto mide más de 90°" },
+        { "key": "D", "text": "Porque un ángulo recto mide 180°" }
+      ],
+      "skill": "Argumentar y comunicar",
+      "oa": "OA 14",
+      "contentAxis": "Geometría",
+      "stem": "¿Por qué la esquina de un libro es un ángulo recto?"
+    },
+    {
+      "position": 24,
+      "correctKey": "D",
+      "alternatives": [
+        { "key": "A", "text": "A las 2:00 PM" },
+        { "key": "B", "text": "A las 2:30 PM" },
+        { "key": "C", "text": "A las 3:00 PM" },
+        { "key": "D", "text": "A las 3:30 PM" }
+      ],
+      "skill": "Resolver problemas",
+      "oa": "OA 18",
+      "contentAxis": "Medición",
+      "stem": "Si una película empieza a la 1:45 PM y dura 1 hora y 45 minutos, ¿a qué hora termina?"
+    },
+    {
+      "position": 25,
+      "correctKey": "B",
+      "alternatives": [
+        { "key": "A", "text": "Seguro" },
+        { "key": "B", "text": "Probable" },
+        { "key": "C", "text": "Imposible" },
+        { "key": "D", "text": "Igualmente probable" }
+      ],
+      "skill": "Modelar",
+      "oa": "OA 23",
+      "contentAxis": "Datos y probabilidades",
+      "stem": "Si una bolsa tiene 8 bolas rojas y 2 azules, ¿cómo se clasifica sacar una bola roja?"
+    }
+  ]
+}
