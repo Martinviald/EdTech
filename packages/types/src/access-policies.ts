@@ -56,3 +56,20 @@ export const TEACHER_ROLES: readonly UserRole[] = [
   'teacher',
   'homeroom_teacher',
 ];
+
+// Roles autorizados a crear/editar/eliminar escalas de notas del colegio
+// (H5.7). Lectura/preview se gobiernan con ANSWER_SHEET_IMPORT_ROLES.
+export const GRADING_SCALE_ROLES: readonly UserRole[] = [
+  'platform_admin',
+  'school_admin',
+  'academic_director',
+];
+
+// Roles que pueden importar/confirmar hojas de respuesta y por extensión
+// previsualizar una conversión de % → nota. Incluye al eval_coordinator.
+export const ANSWER_SHEET_IMPORT_ROLES: readonly UserRole[] = [
+  'platform_admin',
+  'school_admin',
+  'academic_director',
+  'eval_coordinator',
+];
