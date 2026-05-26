@@ -48,6 +48,27 @@ export const SENSITIVE_DATA_ROLES: readonly UserRole[] = [
   'eval_coordinator',
 ];
 
+// Roles autorizados a gestionar el banco de ítems y pautas de instrumentos.
+export const ITEM_BANK_ROLES: readonly UserRole[] = [
+  'platform_admin',
+  'school_admin',
+  'academic_director',
+  'eval_coordinator',
+];
+
+// Roles que pueden ver ítems (lectura) pero no editarlos.
+export const ITEM_VIEWER_ROLES: readonly UserRole[] = [
+  'platform_admin',
+  'school_admin',
+  'academic_director',
+  'cycle_director',
+  'dept_head',
+  'coordinator',
+  'eval_coordinator',
+  'teacher',
+  'homeroom_teacher',
+];
+
 // Roles de "profesor" — usados para la vista "Mis cursos" que es la única
 // excepción a la regla de unión: el isTeacherView se decide por activeRole,
 // no por la unión, para que un usuario teacher+academic_director pueda
