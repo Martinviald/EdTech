@@ -177,6 +177,27 @@ export const diaIngestionRequestSchema = z.object({
 
 export type DiaIngestionRequestDto = z.infer<typeof diaIngestionRequestSchema>;
 
+// ── DIA Ingestion Response Models ────────────────────────────────────────────
+
+export type DiaItemPreview = {
+  position: number;
+  type: string;
+  correctKey: string | null;
+  skill: string | null;
+  oa: string | null;
+  content: Record<string, unknown>;
+};
+
+export type DiaPreviewResponse = {
+  items: DiaItemPreview[];
+  warnings: string[];
+};
+
+export type DiaConfirmResponse = {
+  instrumentId: string;
+  itemsCreated: number;
+};
+
 // ── Spec Table Import ────────────────────────────────────────────────────────
 
 export const specTableMappingSchema = z.object({
@@ -185,6 +206,26 @@ export const specTableMappingSchema = z.object({
 });
 
 export type SpecTableMappingDto = z.infer<typeof specTableMappingSchema>;
+
+export type SpecTableUploadResponse = {
+  columns: string[];
+  preview: SpecTableRow[];
+  totalRows: number;
+};
+
+export type SpecTableRow = {
+  position?: number;
+  skill?: string;
+  oa?: string;
+  content?: string;
+  [key: string]: unknown;
+};
+
+export type SpecTableLinkResponse = {
+  linked: number;
+  warnings: string[];
+  errors: string[];
+};
 
 // ── Response Models (API shape) ──────────────────────────────────────────────
 
