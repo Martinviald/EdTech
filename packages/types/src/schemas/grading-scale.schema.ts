@@ -26,8 +26,19 @@ export const gradingScaleCreateSchema = z.object({
 
 export const gradingScaleUpdateSchema = gradingScaleCreateSchema.partial();
 
+export const gradingScaleListQuerySchema = z.object({
+  type: z.enum(GRADING_SCALE_TYPE_VALUES).optional(),
+  isGlobal: z
+    .union([z.boolean(), z.literal('true'), z.literal('false')])
+    .optional()
+    .transform((v) => (v === undefined ? undefined : v === true || v === 'true')),
+  page: z.coerce.number().int().min(1).default(1),
+  limit: z.coerce.number().int().min(1).max(100).default(20),
+});
+
 export type GradingScaleCreateDto = z.infer<typeof gradingScaleCreateSchema>;
 export type GradingScaleUpdateDto = z.infer<typeof gradingScaleUpdateSchema>;
+export type GradingScaleListQueryDto = z.infer<typeof gradingScaleListQuerySchema>;
 
 // ── Conversion Preview ───────────────────────────────────────────────────────
 // `POST /grading-scales/:id/preview` con un set de porcentajes devuelve las notas resultantes.
