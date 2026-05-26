@@ -77,3 +77,43 @@ export const TEACHER_ROLES: readonly UserRole[] = [
   'teacher',
   'homeroom_teacher',
 ];
+
+// Roles autorizados a importar hojas de respuesta (DIA, Gradecam, ZipGrade,
+// archivo oficial). Coincide con IMPORT_ROLES + eval_coordinator (la persona
+// que típicamente corre la corrección en el colegio).
+export const ANSWER_SHEET_IMPORT_ROLES: readonly UserRole[] = [
+  'platform_admin',
+  'school_admin',
+  'academic_director',
+  'eval_coordinator',
+];
+
+// Roles que pueden gestionar las escalas de notas del colegio.
+export const GRADING_SCALE_ROLES: readonly UserRole[] = [
+  'platform_admin',
+  'school_admin',
+  'academic_director',
+];
+
+// Roles que pueden ver los resultados consolidados de una evaluación.
+// Profesores ven sólo los resultados de sus cursos asignados — el scoping por
+// teacher_assignments lo aplica el service, no esta constante.
+export const RESULTS_VIEWER_ROLES: readonly UserRole[] = [
+  'platform_admin',
+  'school_admin',
+  'academic_director',
+  'cycle_director',
+  'dept_head',
+  'coordinator',
+  'eval_coordinator',
+  'teacher',
+  'homeroom_teacher',
+];
+
+// Roles que pueden gatillar el recálculo de resultados de una evaluación.
+export const RESULTS_RECALCULATE_ROLES: readonly UserRole[] = [
+  'platform_admin',
+  'school_admin',
+  'academic_director',
+  'eval_coordinator',
+];

@@ -11,3 +11,6 @@ export * from './student.schema';
 export * from './class-group.schema';
 export * from './instrument.schema';
 export * from './item.schema';
+export * from './answer-sheet.schema';
+export * from './grading-scale.schema';
+export * from './assessment-result.schema';
