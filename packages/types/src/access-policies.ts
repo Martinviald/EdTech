@@ -56,3 +56,22 @@ export const TEACHER_ROLES: readonly UserRole[] = [
   'teacher',
   'homeroom_teacher',
 ];
+
+// Roles autorizados a configurar escalas de notas (CRUD de grading_scales de
+// la propia organización). platform_admin además puede tocar las escalas
+// globales (orgId null).
+export const GRADING_SCALE_ROLES: readonly UserRole[] = [
+  'platform_admin',
+  'school_admin',
+  'academic_director',
+  'eval_coordinator',
+];
+
+// Roles autorizados a importar hojas de respuesta (CSV/Excel) y a leer
+// previsualizaciones e import_jobs asociados.
+export const ANSWER_SHEET_IMPORT_ROLES: readonly UserRole[] = [
+  'platform_admin',
+  'school_admin',
+  'academic_director',
+  'eval_coordinator',
+];

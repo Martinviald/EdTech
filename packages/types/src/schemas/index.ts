@@ -9,3 +9,4 @@ export * from './membership.schema';
 export * from './teacher-assignment.schema';
 export * from './student.schema';
 export * from './class-group.schema';
+export * from './grading-scale.schema';
