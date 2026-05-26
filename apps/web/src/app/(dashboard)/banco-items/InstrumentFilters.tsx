@@ -2,6 +2,7 @@
 
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useCallback } from 'react';
+import type { Route } from 'next';
 import { Input } from '@/components/ui/input';
 import {
   Select,
@@ -45,7 +46,7 @@ export function InstrumentFilters() {
         params.delete(key);
       }
       params.set('page', '1');
-      router.push(`/banco-items?${params.toString()}`);
+      router.push(`/banco-items?${params.toString()}` as Route);
     },
     [router, searchParams],
   );

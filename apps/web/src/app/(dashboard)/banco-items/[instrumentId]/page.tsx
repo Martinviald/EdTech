@@ -112,30 +112,6 @@ export default async function InstrumentDetailPage({ params }: PageProps) {
 
       {/* Metadata */}
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-        {instrument.subject && (
-          <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-xs font-medium text-muted-foreground">
-                Asignatura
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-sm font-medium">{instrument.subject.name}</p>
-            </CardContent>
-          </Card>
-        )}
-        {instrument.grade && (
-          <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-xs font-medium text-muted-foreground">
-                Nivel
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-sm font-medium">{instrument.grade.name}</p>
-            </CardContent>
-          </Card>
-        )}
         <Card>
           <CardHeader className="pb-2">
             <CardTitle className="text-xs font-medium text-muted-foreground">

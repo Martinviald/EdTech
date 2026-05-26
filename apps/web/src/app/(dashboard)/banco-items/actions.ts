@@ -6,10 +6,15 @@ import type {
   CreateInstrumentDto,
   UpdateInstrumentDto,
   InstrumentModel,
-  BulkCreateItemTagsDto,
-  RequestAiTaggingDto,
-  AiTaggingResponse,
+  BatchTagItemsDto,
+  AiTagRequestDto,
+  AiTagSuggestion,
 } from '@soe/types';
+
+/** Response shape from the AI tagging endpoint: suggestions grouped by itemId */
+export type AiTaggingResponse = {
+  suggestions: Record<string, AiTagSuggestion[]>;
+};
 
 export async function createInstrument(data: CreateInstrumentDto) {
   const result = await apiPost<InstrumentModel>('/instruments', data);
@@ -29,11 +34,11 @@ export async function deleteInstrument(id: string) {
   revalidatePath('/banco-items');
 }
 
-export async function requestAiTagging(data: RequestAiTaggingDto) {
+export async function requestAiTagging(data: AiTagRequestDto) {
   return apiPost<AiTaggingResponse>('/items/ai-tagging', data);
 }
 
-export async function confirmTags(data: BulkCreateItemTagsDto) {
+export async function confirmTags(data: BatchTagItemsDto) {
   const result = await apiPost<{ created: number }>('/items/tags/bulk', data);
   revalidatePath('/banco-items');
   return result;

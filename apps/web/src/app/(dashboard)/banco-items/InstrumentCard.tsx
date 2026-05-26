@@ -52,14 +52,7 @@ export function InstrumentCard({ instrument }: { instrument: InstrumentModel }) 
             </span>
             {instrument.year && <span>Ano {instrument.year}</span>}
           </div>
-          {instrument.subject && <div>Asignatura: {instrument.subject.name}</div>}
-          {instrument.grade && <div>Nivel: {instrument.grade.name}</div>}
           {instrument.version && <div>Version: {instrument.version}</div>}
-          {typeof instrument.itemCount === 'number' && (
-            <div className="mt-1 font-medium text-foreground">
-              {instrument.itemCount} {instrument.itemCount === 1 ? 'item' : 'items'}
-            </div>
-          )}
         </CardContent>
       </Card>
     </Link>

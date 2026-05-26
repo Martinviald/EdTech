@@ -29,6 +29,9 @@ import type {
 } from '@soe/types';
 import { requestAiTagging, confirmTags } from '../../actions';
 
+/** Local type that associates an AiTagSuggestion with its parent itemId */
+type FlatSuggestion = AiTagSuggestion & { itemId: string };
+
 type Step = 'select' | 'curriculum' | 'review' | 'done';
 
 function getContentPreview(content: Record<string, unknown>): string {
@@ -62,7 +65,7 @@ export function AiTaggingWizard({ instrumentId, items, curricula }: Props) {
   const [step, setStep] = useState<Step>('select');
   const [selectedItemIds, setSelectedItemIds] = useState<Set<string>>(new Set());
   const [curriculumId, setCurriculumId] = useState('');
-  const [suggestions, setSuggestions] = useState<AiTagSuggestion[]>([]);
+  const [suggestions, setSuggestions] = useState<FlatSuggestion[]>([]);
   const [accepted, setAccepted] = useState<Set<string>>(new Set());
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -107,10 +110,17 @@ export function AiTaggingWizard({ instrumentId, items, curricula }: Props) {
         itemIds: Array.from(selectedItemIds),
         curriculumId,
       });
-      setSuggestions(result.suggestions);
+      // Flatten the grouped suggestions (Record<itemId, AiTagSuggestion[]>) into FlatSuggestion[]
+      const flat: FlatSuggestion[] = [];
+      for (const [itemId, itemSuggestions] of Object.entries(result.suggestions)) {
+        for (const s of itemSuggestions) {
+          flat.push({ ...s, itemId });
+        }
+      }
+      setSuggestions(flat);
       // Pre-accept high-confidence suggestions
       const highConf = new Set<string>();
-      for (const s of result.suggestions) {
+      for (const s of flat) {
         if (s.confidence >= 0.8) {
           highConf.add(`${s.itemId}:${s.nodeId}`);
         }
@@ -356,9 +366,7 @@ export function AiTaggingWizard({ instrumentId, items, curricula }: Props) {
                               </span>
                               <span className="text-xs text-muted-foreground">&rarr;</span>
                               <span className="text-sm font-medium">
-                                {suggestion.nodeCode
-                                  ? `${suggestion.nodeCode}: ${suggestion.nodeName}`
-                                  : suggestion.nodeName}
+                                {suggestion.nodeName}
                               </span>
                               <span className="rounded bg-muted px-1.5 py-0.5 text-[10px] font-medium">
                                 {suggestion.nodeType}

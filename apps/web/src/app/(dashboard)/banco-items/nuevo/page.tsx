@@ -81,6 +81,7 @@ export default function NuevoInstrumentoPage() {
     const data: CreateInstrumentDto = {
       name: name.trim(),
       type: type as CreateInstrumentDto['type'],
+      status: 'draft' as const,
       isOfficial: false,
       year: year ? parseInt(year, 10) : undefined,
       version: version.trim() || undefined,

@@ -15,6 +15,11 @@ import { StaffModule } from './staff/staff.module';
 import { TeacherAssignmentsModule } from './teacher-assignments/teacher-assignments.module';
 import { ClassGroupsModule } from './class-groups/class-groups.module';
 import { StudentsModule } from './students/students.module';
+import { InstrumentsModule } from './instruments/instruments.module';
+import { ItemsModule } from './items/items.module';
+import { DiaIngestionModule } from './dia-ingestion/dia-ingestion.module';
+import { AiTaggingModule } from './ai-tagging/ai-tagging.module';
+import { SpecTablesModule } from './spec-tables/spec-tables.module';
 
 @Module({
   imports: [
@@ -33,6 +38,11 @@ import { StudentsModule } from './students/students.module';
     TeacherAssignmentsModule,
     ClassGroupsModule,
     StudentsModule,
+    InstrumentsModule,
+    ItemsModule,
+    DiaIngestionModule,
+    AiTaggingModule,
+    SpecTablesModule,
   ],
   controllers: [AppController],
   providers: [
