@@ -149,8 +149,9 @@ describe('GradingScalesService.getById', () => {
 
     const result = await svc.getById(makeUser(), 'scale-1');
     expect(result.id).toBe('scale-1');
-    expect(result.minGrade).toBe(1);
-    expect(result.maxGrade).toBe(7);
+    // El Model contract preserva los decimales de Drizzle como string.
+    expect(result.minGrade).toBe('1.00');
+    expect(result.maxGrade).toBe('7.00');
   });
 
   it('lanza NotFoundException si la escala pertenece a otra org', async () => {
