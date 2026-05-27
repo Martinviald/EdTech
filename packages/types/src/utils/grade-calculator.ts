@@ -15,6 +15,23 @@ export type GradingScaleParams = {
   passingGrade: number;
   passingThreshold: number; // 0..1
   config?: Record<string, unknown> | null;
+  // Thresholds opcionales explícitos para `percentageToPerformanceLevel`.
+  // Si se proveen tienen precedencia sobre `config.performanceThresholds`.
+  performanceThresholds?: {
+    elementary?: number;
+    adequate?: number;
+    advanced?: number;
+  };
+};
+
+// Escala por defecto cuando el instrumento no tiene grading_scale asignada.
+// Convención chilena: 1.0..7.0, aprobación con 60% de logro → 4.0.
+export const DEFAULT_GRADING_SCALE: GradingScaleParams = {
+  type: 'linear_chilean',
+  minGrade: 1,
+  maxGrade: 7,
+  passingGrade: 4,
+  passingThreshold: 0.6,
 };
 
 /**
@@ -72,16 +89,17 @@ function roundGrade(g: number): number {
  */
 export function percentageToPerformanceLevel(
   percentage: number,
-  scale?: Pick<GradingScaleParams, 'config'>,
+  scale?: Pick<GradingScaleParams, 'config' | 'performanceThresholds'>,
 ): PerformanceLevel {
   const p = Math.max(0, Math.min(1, percentage));
   const cfg = scale?.config as
     | { performanceThresholds?: { adequate?: number; elementary?: number; advanced?: number } }
     | undefined;
+  const direct = scale?.performanceThresholds;
   const thresholds = {
-    elementary: cfg?.performanceThresholds?.elementary ?? 0.4,
-    adequate: cfg?.performanceThresholds?.adequate ?? 0.7,
-    advanced: cfg?.performanceThresholds?.advanced ?? 0.85,
+    elementary: direct?.elementary ?? cfg?.performanceThresholds?.elementary ?? 0.4,
+    adequate: direct?.adequate ?? cfg?.performanceThresholds?.adequate ?? 0.7,
+    advanced: direct?.advanced ?? cfg?.performanceThresholds?.advanced ?? 0.85,
   };
   if (p < thresholds.elementary) return 'insufficient';
   if (p < thresholds.adequate) return 'elementary';
@@ -103,8 +121,11 @@ export type ResponseForCalculation = {
   itemId: string;
   isCorrect: boolean | null;
   rawScore: number | null;
+  // Opcional: si el flujo distingue ai/human/final, finalScore tiene precedencia
+  // sobre rawScore al calcular el total. Si no, se usa rawScore.
+  finalScore?: number | null;
   maxScore: number;
-  // Posición del ítem y nodos de taxonomía a los que está taggeado (para skill_results).
+  // Posición del ítem y nodos de taxonomía (para skill_results).
   itemPosition: number;
   taxonomyNodeIds: string[];
 };
