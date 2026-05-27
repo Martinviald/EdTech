@@ -14,8 +14,8 @@
 | ------ | ------- | ------------------------------------------ | ------------------------------------------------------ | ---------------- |
 | S0     | 1-2     | Cimientos: stack, modelo de datos, auth    | H19.11, H19.12, H1.7, H17.1, H19.4, H19.5, H19.10    | 6/7 ✅ (H19.5 ⏳) |
 | S1     | 3-4     | Onboarding del colegio                     | H1.1, H1.2, H1.3, H1.4, H17.2, H17.3, H19.2          | 7/7 ✅            |
-| S2     | 5-6     | Banco de ítems + pautas DIA                | H3.3, H3.10, H3.11, H3.12, H5.8                       | 0/5              |
-| S3     | 7-8     | Ingesta y corrección DIA                   | H4.5, H4.6, H5.7, H16.3, H16.4                        | 0/5              |
+| S2     | 5-6     | Banco de ítems + pautas DIA                | H3.3, H3.10, H3.11, H3.12, H5.8                       | 5/5 ✅            |
+| S3     | 7-8     | Ingesta y corrección DIA                   | H4.5, H4.6, H5.7, H16.3, H16.4                        | 5/5 ✅            |
 | S4     | 9-10    | Dashboards core (directivo y profesor)     | H6.1, H6.2, H6.3, H6.4, H6.5, H6.6, H6.7, H6.8, H6.9| 0/9              |
 | S5     | 11-12   | Dashboards avanzados + flujo demo completo | H6.10, H6.11, H6.12, H6.18, H19.1                     | 0/5              |
 
@@ -105,11 +105,11 @@ Subir hojas DIA → corrección automática → dashboard habilidades → click 
 
 | ID        | Historia                                                                                 | Complejidad | Notas                                                                                                                                                        |
 | --------- | ---------------------------------------------------------------------------------------- | ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| **H4.6**  | Subir hojas de respuesta DIA en bloque (por curso, no alumno por alumno)                 | ★★★★        | UI de carga de archivo + procesamiento en background. Puede ser CSV exportado de Gradecam por ahora (el escaneo en video viene en F3). Mostrar progress bar. |
-| **H4.5**  | Subir desde Excel/CSV resultados escaneados con otro sistema (Gradecam, ZipGrade)        | ★★★         | Mismo parser que H4.6. Mapeo flexible de columnas. Preview antes de confirmar la carga.                                                                      |
-| **H16.3** | Importar resultados de Gradecam / ZipGrade (integración de transición)                   | ★★          | Puede ser el mismo flujo que H4.5 con un template de Excel documentado.                                                                                      |
-| **H16.4** | Importar resultados oficiales DIA (archivo Agencia de Calidad cuando esté disponible)    | ★★★         | Parser del formato oficial. Puede no estar disponible aún; tener el parser listo para cuando llegue.                                                         |
-| **H5.7**  | Convertir puntaje a nota según escala configurable por colegio (60% exigencia, base 4.0) | ★★          | Configuración por colegio de la escala de conversión. Fórmula estándar + casos especiales.                                                                   |
+| **H4.6**  | Subir hojas de respuesta DIA en bloque (por curso, no alumno por alumno)                 | ★★★★        | ✅ `answer-sheets` module con flujo upload → preview → confirm. Parser DIA oficial + UI wizard en `/importar-resultados`.                                       |
+| **H4.5**  | Subir desde Excel/CSV resultados escaneados con otro sistema (Gradecam, ZipGrade)        | ★★★         | ✅ Parsers Gradecam y ZipGrade + parser generic_csv con `columnMapping`. Mismo flujo que H4.6.                                                                |
+| **H16.3** | Importar resultados de Gradecam / ZipGrade (integración de transición)                   | ★★          | ✅ Endpoint `/answer-sheets/templates` expone 4 plantillas (DIA, Gradecam, ZipGrade, genérico) con columnas requeridas/opcionales + CSV ejemplo inline.        |
+| **H16.4** | Importar resultados oficiales DIA (archivo Agencia de Calidad cuando esté disponible)    | ★★★         | ✅ `dia-official-parser.ts` para formato CSV documentado. Listo para conectar con archivo real de Agencia de Calidad cuando esté disponible.                  |
+| **H5.7**  | Convertir puntaje a nota según escala configurable por colegio (60% exigencia, base 4.0) | ★★          | ✅ `grading-scales` CRUD + calculador puro en `@soe/types/utils/grade-calculator.ts`. UI en `/configuracion/escalas`. Default `linear_chilean` 1-7 / 60% → 4.0. |
 
 **División de trabajo sugerida:**
 
