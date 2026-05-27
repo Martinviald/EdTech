@@ -73,11 +73,13 @@ export type GradingScaleListResponse = {
   limit: number;
 };
 
+export type GradingScalePreviewItem = {
+  percentage: number; // 0..1
+  grade: number; // valor numérico de la nota
+  isPassing: boolean;
+};
+
 export type GradingScalePreviewResponse = {
   scaleId: string;
-  rows: Array<{
-    percentage: number; // 0..1
-    grade: number; // valor numérico de la nota
-    isPassing: boolean;
-  }>;
+  rows: GradingScalePreviewItem[];
 };
