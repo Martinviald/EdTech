@@ -13,6 +13,7 @@ import {
   TooltipTrigger,
 } from '@/components/ui/tooltip';
 import { cn } from '@/lib/utils';
+import { BRAND } from '@/lib/brand';
 import { ADMIN_NAV_ITEMS, visibleNavItems, type NavItem } from './nav-items';
 
 export type SidebarVariant = 'main' | 'admin';
@@ -47,9 +48,11 @@ export function SidebarNav({
             collapsed ? 'justify-center px-2' : 'px-4',
           )}
         >
-          <GraduationCap className="size-6 shrink-0 text-primary" aria-hidden />
+          <span className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-primary text-primary-foreground">
+            <GraduationCap className="size-5" aria-hidden />
+          </span>
           {!collapsed ? (
-            <span className="text-sm font-semibold tracking-tight">SOE</span>
+            <span className="text-base font-semibold tracking-tight">{BRAND.name}</span>
           ) : null}
         </div>
         <nav

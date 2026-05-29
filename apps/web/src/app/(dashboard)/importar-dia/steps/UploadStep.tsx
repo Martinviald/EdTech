@@ -7,7 +7,7 @@ import type { DiaIngestionRequestDto } from '@soe/types';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
+import { Field } from '@/components/patterns';
 import { FileDropzone } from '../components/FileDropzone';
 
 interface UploadStepProps {
@@ -126,8 +126,7 @@ export function UploadStep({ onSubmit, isPending }: UploadStepProps) {
         </CardHeader>
         <CardContent>
           <div className="grid gap-4 sm:grid-cols-2">
-            <div className="sm:col-span-2">
-              <Label htmlFor="dia-name">Nombre del instrumento</Label>
+            <Field label="Nombre del instrumento" htmlFor="dia-name" required className="sm:col-span-2">
               <Input
                 id="dia-name"
                 placeholder="DIA Lectura 2o Basico 2025"
@@ -135,9 +134,8 @@ export function UploadStep({ onSubmit, isPending }: UploadStepProps) {
                 onChange={(e) => setName(e.target.value)}
                 disabled={isPending}
               />
-            </div>
-            <div>
-              <Label htmlFor="dia-year">Anio</Label>
+            </Field>
+            <Field label="Año" htmlFor="dia-year" required>
               <Input
                 id="dia-year"
                 type="number"
@@ -147,9 +145,8 @@ export function UploadStep({ onSubmit, isPending }: UploadStepProps) {
                 onChange={(e) => setYear(e.target.value)}
                 disabled={isPending}
               />
-            </div>
-            <div>
-              <Label htmlFor="dia-version">Version (opcional)</Label>
+            </Field>
+            <Field label="Versión" htmlFor="dia-version" hint="Opcional">
               <Input
                 id="dia-version"
                 placeholder="v1"
@@ -157,9 +154,8 @@ export function UploadStep({ onSubmit, isPending }: UploadStepProps) {
                 onChange={(e) => setVersion(e.target.value)}
                 disabled={isPending}
               />
-            </div>
-            <div>
-              <Label htmlFor="dia-curriculum">ID Curriculum</Label>
+            </Field>
+            <Field label="ID Currículum" htmlFor="dia-curriculum" required>
               <Input
                 id="dia-curriculum"
                 placeholder="UUID del curriculum"
@@ -167,9 +163,8 @@ export function UploadStep({ onSubmit, isPending }: UploadStepProps) {
                 onChange={(e) => setCurriculumId(e.target.value)}
                 disabled={isPending}
               />
-            </div>
-            <div>
-              <Label htmlFor="dia-subject">ID Asignatura</Label>
+            </Field>
+            <Field label="ID Asignatura" htmlFor="dia-subject" required>
               <Input
                 id="dia-subject"
                 placeholder="UUID de la asignatura"
@@ -177,9 +172,8 @@ export function UploadStep({ onSubmit, isPending }: UploadStepProps) {
                 onChange={(e) => setSubjectId(e.target.value)}
                 disabled={isPending}
               />
-            </div>
-            <div>
-              <Label htmlFor="dia-grade">ID Nivel</Label>
+            </Field>
+            <Field label="ID Nivel" htmlFor="dia-grade" required>
               <Input
                 id="dia-grade"
                 placeholder="UUID del nivel"
@@ -187,7 +181,7 @@ export function UploadStep({ onSubmit, isPending }: UploadStepProps) {
                 onChange={(e) => setGradeId(e.target.value)}
                 disabled={isPending}
               />
-            </div>
+            </Field>
           </div>
         </CardContent>
       </Card>
