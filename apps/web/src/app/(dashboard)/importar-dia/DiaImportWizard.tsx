@@ -8,13 +8,17 @@ import type {
   DiaConfirmResponse,
 } from '@soe/types';
 import { previewDiaImport, confirmDiaImport } from './actions';
-import { UploadStep } from './steps/UploadStep';
+import { UploadStep, type CatalogOptions } from './steps/UploadStep';
 import { PreviewStep } from './steps/PreviewStep';
 import { ConfirmStep } from './steps/ConfirmStep';
 
 type Step = 'upload' | 'preview' | 'confirm';
 
-export function DiaImportWizard() {
+interface DiaImportWizardProps {
+  catalogOptions: CatalogOptions;
+}
+
+export function DiaImportWizard({ catalogOptions }: DiaImportWizardProps) {
   const [step, setStep] = useState<Step>('upload');
   const [isPending, startTransition] = useTransition();
   const [fileData, setFileData] = useState<unknown>(null);
@@ -61,7 +65,7 @@ export function DiaImportWizard() {
   return (
     <div className="space-y-4">
       {step === 'upload' && (
-        <UploadStep onSubmit={handleUpload} isPending={isPending} />
+        <UploadStep onSubmit={handleUpload} isPending={isPending} catalogOptions={catalogOptions} />
       )}
       {step === 'preview' && previewResult && (
         <PreviewStep
