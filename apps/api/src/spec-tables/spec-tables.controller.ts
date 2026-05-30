@@ -79,6 +79,7 @@ export class SpecTablesController {
     return {
       columns: parsed.columns,
       preview: parsed.rows.slice(0, 5),
+      fileData: parsed.rows,
       totalRows: parsed.totalRows,
     };
   }

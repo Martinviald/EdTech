@@ -101,6 +101,20 @@ export function AiTaggingWizard({ instrumentId, items, curricula }: Props) {
     });
   }, []);
 
+  // Acepta o limpia TODAS las sugerencias de una vez. Como toggle nunca queda
+  // deshabilitado: si ya están todas aceptadas, las deselecciona; si no, las
+  // marca todas. Las aceptadas se envían a /ai-tagging/confirm en handleConfirm.
+  const allAccepted =
+    suggestions.length > 0 && accepted.size === suggestions.length;
+
+  const toggleAllAccepted = useCallback(() => {
+    setAccepted((prev) =>
+      prev.size === suggestions.length
+        ? new Set()
+        : new Set(suggestions.map((s) => `${s.itemId}:${s.nodeId}`)),
+    );
+  }, [suggestions]);
+
   async function handleRequestTagging() {
     if (!curriculumId || selectedItemIds.size === 0) return;
     setLoading(true);
@@ -341,10 +355,19 @@ export function AiTaggingWizard({ instrumentId, items, curricula }: Props) {
               </p>
             ) : (
               <>
-                <p className="text-sm text-muted-foreground">
-                  {suggestions.length} sugerencias generadas. Las de alta confianza estan
-                  pre-aceptadas. Revisa y confirma.
-                </p>
+                <div className="flex items-center justify-between gap-3">
+                  <p className="text-sm text-muted-foreground">
+                    {suggestions.length} sugerencias generadas. Las de alta confianza estan
+                    pre-aceptadas. Revisa y confirma.
+                  </p>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={toggleAllAccepted}
+                  >
+                    {allAccepted ? 'Quitar todas' : 'Aceptar todas'}
+                  </Button>
+                </div>
                 <div className="space-y-3">
                   {suggestions.map((suggestion) => {
                     const key = `${suggestion.itemId}:${suggestion.nodeId}`;
