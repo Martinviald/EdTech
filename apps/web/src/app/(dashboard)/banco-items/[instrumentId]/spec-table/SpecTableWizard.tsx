@@ -8,10 +8,19 @@ import type {
   SpecTableUploadResponse,
   SpecTableLinkResponse,
   SpecTableMappingDto,
+  CurriculumModel,
 } from '@soe/types';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { Label } from '@/components/ui/label';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import {
   Table,
   TableBody,
@@ -35,13 +44,15 @@ const ACCEPTED_TYPES = {
 
 interface SpecTableWizardProps {
   instrumentId: string;
+  curricula: CurriculumModel[];
 }
 
-export function SpecTableWizard({ instrumentId }: SpecTableWizardProps) {
+export function SpecTableWizard({ instrumentId, curricula }: SpecTableWizardProps) {
   const [step, setStep] = useState<Step>('upload');
   const [isPending, startTransition] = useTransition();
   const [uploadResult, setUploadResult] = useState<SpecTableUploadResponse | null>(null);
   const [linkResult, setLinkResult] = useState<SpecTableLinkResponse | null>(null);
+  const [curriculumId, setCurriculumId] = useState('');
 
   const handleFileAccept = useCallback(
     (file: File) => {
@@ -63,8 +74,16 @@ export function SpecTableWizard({ instrumentId }: SpecTableWizardProps) {
   );
 
   const handleLink = (columnMapping: Record<string, string>) => {
+    if (!uploadResult) return;
+    if (!curriculumId) {
+      toast.error('Selecciona un currículo de referencia');
+      return;
+    }
+
     const mapping: SpecTableMappingDto = {
       instrumentId,
+      curriculumId,
+      fileData: uploadResult.fileData,
       columnMapping,
     };
 
@@ -84,6 +103,7 @@ export function SpecTableWizard({ instrumentId }: SpecTableWizardProps) {
     setStep('upload');
     setUploadResult(null);
     setLinkResult(null);
+    setCurriculumId('');
   };
 
   return (
@@ -97,6 +117,9 @@ export function SpecTableWizard({ instrumentId }: SpecTableWizardProps) {
       {step === 'map' && uploadResult && (
         <MapSection
           uploadResult={uploadResult}
+          curricula={curricula}
+          curriculumId={curriculumId}
+          onCurriculumChange={setCurriculumId}
           onLink={handleLink}
           onCancel={handleReset}
           isPending={isPending}
@@ -181,11 +204,17 @@ function UploadSection({
 
 function MapSection({
   uploadResult,
+  curricula,
+  curriculumId,
+  onCurriculumChange,
   onLink,
   onCancel,
   isPending,
 }: {
   uploadResult: SpecTableUploadResponse;
+  curricula: CurriculumModel[];
+  curriculumId: string;
+  onCurriculumChange: (id: string) => void;
   onLink: (mapping: Record<string, string>) => void;
   onCancel: () => void;
   isPending: boolean;
@@ -194,6 +223,39 @@ function MapSection({
 
   return (
     <div className="space-y-4">
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-base">Currículo de referencia</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="max-w-sm space-y-1.5">
+            <Label className="text-sm">
+              Currículo <span className="text-destructive">*</span>
+            </Label>
+            <Select
+              value={curriculumId}
+              onValueChange={onCurriculumChange}
+              disabled={isPending}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Seleccionar currículo" />
+              </SelectTrigger>
+              <SelectContent>
+                {curricula.map((c) => (
+                  <SelectItem key={c.id} value={c.id}>
+                    {c.name} ({c.type})
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <p className="text-muted-foreground text-xs">
+              Los OA y habilidades de la tabla se vincularán contra la taxonomía de
+              este currículo.
+            </p>
+          </div>
+        </CardContent>
+      </Card>
+
       <Card>
         <CardHeader>
           <CardTitle className="text-base">Vista previa del archivo</CardTitle>
@@ -249,6 +311,25 @@ function MapSection({
   );
 }
 
+/** Etiqueta legible para cada tipo de nodo taxonómico. */
+function nodeTypeLabel(type: string): string {
+  switch (type) {
+    case 'skill':
+      return 'Habilidad';
+    case 'objective':
+    case 'learning_objective':
+      return 'OA';
+    case 'content':
+      return 'Contenido';
+    case 'axis':
+      return 'Eje';
+    case 'domain':
+      return 'Dominio';
+    default:
+      return type;
+  }
+}
+
 function DoneSection({
   result,
   onReset,
@@ -256,44 +337,133 @@ function DoneSection({
   result: SpecTableLinkResponse;
   onReset: () => void;
 }) {
+  const linkedItems = result.linkedItems ?? [];
+  const unlinkedItems = result.unlinkedItems ?? [];
+  const hasUnlinked = unlinkedItems.length > 0;
   const hasErrors = result.errors.length > 0;
+  const isPartial = hasUnlinked || hasErrors;
 
   return (
     <div className="space-y-4">
+      {/* Resumen */}
       <Card
         className={cn(
-          hasErrors
+          isPartial
             ? 'border-amber-200 bg-amber-50 dark:border-amber-900 dark:bg-amber-950/20'
             : 'border-emerald-200 bg-emerald-50 dark:border-emerald-900 dark:bg-emerald-950/20',
         )}
       >
         <CardContent className="flex items-start gap-3 pt-6">
-          {hasErrors ? (
+          {isPartial ? (
             <AlertCircle className="mt-0.5 h-5 w-5 text-amber-600 dark:text-amber-400" />
           ) : (
             <CheckCircle2 className="mt-0.5 h-5 w-5 text-emerald-600 dark:text-emerald-400" />
           )}
           <div className="space-y-1 text-sm">
             <p className="font-medium">
-              {hasErrors ? 'Vinculacion parcial' : 'Vinculacion completada'}
+              {isPartial ? 'Vinculación parcial' : 'Vinculación completada'}
             </p>
-            <p className="text-muted-foreground">
-              {result.linked} item{result.linked === 1 ? '' : 's'} vinculado
-              {result.linked === 1 ? '' : 's'} correctamente.
-            </p>
+            <div className="flex flex-wrap items-center gap-2">
+              <Badge className="bg-emerald-600 hover:bg-emerald-600">
+                {linkedItems.length} vinculado{linkedItems.length === 1 ? '' : 's'}
+              </Badge>
+              {hasUnlinked && (
+                <Badge variant="outline" className="border-amber-400 text-amber-700 dark:text-amber-300">
+                  {unlinkedItems.length} sin vincular
+                </Badge>
+              )}
+            </div>
           </div>
         </CardContent>
       </Card>
 
-      {hasErrors && (
+      {/* Ítems vinculados */}
+      {linkedItems.length > 0 && (
         <Card>
           <CardHeader>
-            <CardTitle className="text-sm">
-              Errores ({result.errors.length})
+            <CardTitle className="flex items-center gap-2 text-sm">
+              <CheckCircle2 className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
+              Ítems vinculados ({linkedItems.length})
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <ul className="list-disc space-y-1 pl-5 text-sm text-muted-foreground">
+            <div className="max-h-72 overflow-auto rounded border">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead className="w-20">Pregunta</TableHead>
+                    <TableHead>Nodos taxonómicos</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {linkedItems.map((item) => (
+                    <TableRow key={`linked-${item.position}`}>
+                      <TableCell className="font-medium">{item.position}</TableCell>
+                      <TableCell>
+                        <div className="flex flex-wrap gap-1.5">
+                          {item.nodes.map((n, i) => (
+                            <Badge key={i} variant="secondary" className="font-normal">
+                              <span className="text-muted-foreground mr-1">
+                                {nodeTypeLabel(n.type)}:
+                              </span>
+                              {n.name}
+                            </Badge>
+                          ))}
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Ítems no vinculados */}
+      {hasUnlinked && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-sm">
+              <AlertCircle className="h-4 w-4 text-amber-600 dark:text-amber-400" />
+              Ítems sin vincular ({unlinkedItems.length})
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="max-h-72 overflow-auto rounded border">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead className="w-20">Pregunta</TableHead>
+                    <TableHead>Motivo</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {unlinkedItems.map((item, i) => (
+                    <TableRow key={`unlinked-${item.position ?? 'na'}-${i}`}>
+                      <TableCell className="font-medium">
+                        {item.position ?? '—'}
+                      </TableCell>
+                      <TableCell className="text-muted-foreground">
+                        {item.reason}
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Errores de guardado */}
+      {hasErrors && (
+        <Card className="border-destructive/40">
+          <CardHeader>
+            <CardTitle className="text-sm">Errores ({result.errors.length})</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <ul className="list-disc space-y-1 pl-5 text-sm text-destructive">
               {result.errors.map((err, i) => (
                 <li key={i}>{err}</li>
               ))}

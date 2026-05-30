@@ -105,7 +105,13 @@ export class SpecTablesService {
       .where(eq(taxonomyNodes.curriculumId, curriculumId));
 
     // 4. Process each row
-    const result: LinkResult = { linked: 0, warnings: [], errors: [] };
+    const result: LinkResult = {
+      linked: 0,
+      warnings: [],
+      errors: [],
+      linkedItems: [],
+      unlinkedItems: [],
+    };
     const tagsToInsert: Array<{
       itemId: string;
       nodeId: string;
@@ -114,6 +120,10 @@ export class SpecTablesService {
       taggedBy: 'human' | 'ai';
     }> = [];
 
+    // Posiciones de ítems que aparecieron en alguna fila de la tabla, para luego
+    // detectar ítems del instrumento que quedaron fuera de la tabla.
+    const seenPositions = new Set<number>();
+
     for (let i = 0; i < rows.length; i++) {
       const row = rows[i];
       const rowNum = i + 1;
@@ -121,31 +131,34 @@ export class SpecTablesService {
       // a. Parse position from the mapped column
       const positionRaw = row[mapping.position];
       if (positionRaw === undefined || positionRaw === '') {
-        result.warnings.push(
-          `Fila ${rowNum}: columna de posición "${mapping.position}" está vacía, se omite.`,
-        );
+        const reason = `Fila ${rowNum}: columna de posición "${mapping.position}" está vacía.`;
+        result.warnings.push(reason);
+        result.unlinkedItems.push({ position: null, reason });
         continue;
       }
 
       const position = parseInt(positionRaw, 10);
       if (isNaN(position)) {
-        result.warnings.push(
-          `Fila ${rowNum}: valor de posición "${positionRaw}" no es un número válido.`,
-        );
+        const reason = `Fila ${rowNum}: valor de posición "${positionRaw}" no es un número válido.`;
+        result.warnings.push(reason);
+        result.unlinkedItems.push({ position: null, reason });
         continue;
       }
+
+      seenPositions.add(position);
 
       // b. Find item by position
       const itemId = positionMap.get(position);
       if (!itemId) {
-        result.warnings.push(
-          `Fila ${rowNum}: no se encontró ítem con posición ${position}.`,
-        );
+        const reason = `No se encontró ítem con posición ${position} en el instrumento.`;
+        result.warnings.push(`Fila ${rowNum}: ${reason}`);
+        result.unlinkedItems.push({ position, reason });
         continue;
       }
 
       // c. For each taxonomy column, find matching node and prepare tag
-      let linkedInRow = false;
+      const matchedNodes: LinkResult['linkedItems'][number]['nodes'] = [];
+      const unmatchedValues: string[] = [];
 
       for (const colKey of TAXONOMY_COLUMNS) {
         const columnName = mapping[colKey];
@@ -155,41 +168,57 @@ export class SpecTablesService {
         if (!cellValue || cellValue.trim() === '') continue;
 
         const expectedType = COLUMN_TO_NODE_TYPE[colKey];
-        const matchedNode = findMatchingNode(cellValue, nodes, expectedType);
+        // Primero intentamos con el tipo esperado; si no, fallback sin filtro.
+        const node =
+          findMatchingNode(cellValue, nodes, expectedType) ??
+          findMatchingNode(cellValue, nodes);
 
-        if (!matchedNode) {
-          // Try again without type filter as fallback
-          const fallbackNode = findMatchingNode(cellValue, nodes);
-          if (fallbackNode) {
-            tagsToInsert.push({
-              itemId,
-              nodeId: fallbackNode.id,
-              tagType: colKey === 'skill' || colKey === 'oa' ? 'primary' : 'secondary',
-              confidence: '1.00',
-              taggedBy: 'human',
-            });
-            linkedInRow = true;
-          } else {
-            result.warnings.push(
-              `Fila ${rowNum}, columna "${colKey}": no se encontró nodo taxonómico para "${cellValue}".`,
-            );
-          }
-        } else {
+        if (node) {
           tagsToInsert.push({
             itemId,
-            nodeId: matchedNode.id,
+            nodeId: node.id,
             tagType: colKey === 'skill' || colKey === 'oa' ? 'primary' : 'secondary',
             confidence: '1.00',
             taggedBy: 'human',
           });
-          linkedInRow = true;
+          matchedNodes.push({ type: node.type, name: node.name, code: node.code });
+        } else {
+          unmatchedValues.push(`${colKey}: "${cellValue}"`);
+          result.warnings.push(
+            `Fila ${rowNum}, columna "${colKey}": no se encontró nodo taxonómico para "${cellValue}".`,
+          );
         }
       }
 
-      if (linkedInRow) {
+      if (matchedNodes.length > 0) {
         result.linked++;
+        result.linkedItems.push({ position, nodes: matchedNodes });
+      } else {
+        result.unlinkedItems.push({
+          position,
+          reason:
+            unmatchedValues.length > 0
+              ? `Ningún valor coincidió con la taxonomía (${unmatchedValues.join(', ')}).`
+              : 'No se mapeó ninguna columna taxonómica con contenido.',
+        });
       }
     }
+
+    // d. Ítems del instrumento que nunca aparecieron en la tabla de especificaciones.
+    for (const item of instrumentItems) {
+      if (!seenPositions.has(item.position)) {
+        result.unlinkedItems.push({
+          position: item.position,
+          reason: 'El ítem no aparece en la tabla de especificaciones.',
+        });
+      }
+    }
+
+    // Ordenar para una lectura predecible (posiciones nulas al final).
+    result.linkedItems.sort((a, b) => a.position - b.position);
+    result.unlinkedItems.sort(
+      (a, b) => (a.position ?? Infinity) - (b.position ?? Infinity),
+    );
 
     // 5. Bulk insert tags (with conflict handling — skip duplicates)
     if (tagsToInsert.length > 0) {

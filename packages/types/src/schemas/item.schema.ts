@@ -202,6 +202,8 @@ export type DiaConfirmResponse = {
 
 export const specTableMappingSchema = z.object({
   instrumentId: z.string().uuid(),
+  curriculumId: z.string().uuid(),
+  fileData: z.array(z.record(z.string())).min(1),
   columnMapping: z.record(z.string()),
 });
 
@@ -210,6 +212,9 @@ export type SpecTableMappingDto = z.infer<typeof specTableMappingSchema>;
 export type SpecTableUploadResponse = {
   columns: string[];
   preview: SpecTableRow[];
+  // Todas las filas parseadas — se reenvían al backend en el paso de vinculación.
+  // `preview` es solo un subconjunto para mostrar.
+  fileData: Record<string, string>[];
   totalRows: number;
 };
 
@@ -221,10 +226,22 @@ export type SpecTableRow = {
   [key: string]: unknown;
 };
 
+export type SpecTableLinkedItem = {
+  position: number;
+  nodes: Array<{ type: string; name: string; code: string | null }>;
+};
+
+export type SpecTableUnlinkedItem = {
+  position: number | null;
+  reason: string;
+};
+
 export type SpecTableLinkResponse = {
   linked: number;
   warnings: string[];
   errors: string[];
+  linkedItems: SpecTableLinkedItem[];
+  unlinkedItems: SpecTableUnlinkedItem[];
 };
 
 // ── Response Models (API shape) ──────────────────────────────────────────────
