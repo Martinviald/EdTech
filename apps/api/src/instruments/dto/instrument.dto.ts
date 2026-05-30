@@ -39,7 +39,7 @@ export const createSectionSchema = z.object({
   name: z.string().min(1).max(200),
   type: z.enum(SECTION_TYPES),
   order: z.number().int().min(0).default(0),
-  maxPoints: z.string().optional(),
+  maxPoints: z.coerce.string().optional(),
   timeLimitMin: z.number().int().min(0).optional(),
   instructions: z.string().max(2000).optional(),
   config: z.record(z.unknown()).optional(),

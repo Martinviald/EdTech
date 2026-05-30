@@ -80,7 +80,42 @@ export class ItemsService {
 
     const total = totalResult[0]?.total ?? 0;
 
-    return { data, total, page, limit: pageSize };
+    if (data.length === 0) return { data: [], total, page, limit: pageSize };
+
+    const allTags = await this.db
+      .select({
+        id: itemTaxonomyTags.id,
+        itemId: itemTaxonomyTags.itemId,
+        nodeId: itemTaxonomyTags.nodeId,
+        tagType: itemTaxonomyTags.tagType,
+        confidence: itemTaxonomyTags.confidence,
+        taggedBy: itemTaxonomyTags.taggedBy,
+        taggedAt: itemTaxonomyTags.taggedAt,
+        node: {
+          id: taxonomyNodes.id,
+          name: taxonomyNodes.name,
+          code: taxonomyNodes.code,
+          type: taxonomyNodes.type,
+          curriculumId: taxonomyNodes.curriculumId,
+        },
+      })
+      .from(itemTaxonomyTags)
+      .innerJoin(taxonomyNodes, eq(itemTaxonomyTags.nodeId, taxonomyNodes.id))
+      .where(inArray(itemTaxonomyTags.itemId, data.map((i) => i.id)));
+
+    const tagsByItem = new Map<string, typeof allTags>();
+    for (const tag of allTags) {
+      const list = tagsByItem.get(tag.itemId) ?? [];
+      list.push(tag);
+      tagsByItem.set(tag.itemId, list);
+    }
+
+    const dataWithTags = data.map((item) => ({
+      ...item,
+      tags: tagsByItem.get(item.id) ?? [],
+    }));
+
+    return { data: dataWithTags, total, page, limit: pageSize };
   }
 
   async getById(id: string, user: JwtPayload) {

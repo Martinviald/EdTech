@@ -7,15 +7,22 @@ import type { DiaIngestionRequestDto } from '@soe/types';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
-import { Field } from '@/components/patterns';
+import { Label } from '@/components/ui/label';
 import { FileDropzone } from '../components/FileDropzone';
+
+export interface CatalogOptions {
+  curricula: Array<{ id: string; name: string; type: string }>;
+  subjects: Array<{ id: string; name: string; shortName: string }>;
+  grades: Array<{ id: string; name: string; shortName: string; gradeOrder: number }>;
+}
 
 interface UploadStepProps {
   onSubmit: (data: unknown, metadata: DiaIngestionRequestDto) => void;
   isPending: boolean;
+  catalogOptions: CatalogOptions;
 }
 
-export function UploadStep({ onSubmit, isPending }: UploadStepProps) {
+export function UploadStep({ onSubmit, isPending, catalogOptions }: UploadStepProps) {
   const [file, setFile] = useState<File | null>(null);
   const [fileData, setFileData] = useState<unknown>(null);
   const [name, setName] = useState('');
@@ -54,16 +61,16 @@ export function UploadStep({ onSubmit, isPending }: UploadStepProps) {
       toast.error('Ingresa un nombre para el instrumento');
       return;
     }
-    if (!curriculumId.trim()) {
-      toast.error('Ingresa el ID del curriculum');
+    if (!curriculumId) {
+      toast.error('Selecciona un curriculum');
       return;
     }
-    if (!subjectId.trim()) {
-      toast.error('Ingresa el ID de la asignatura');
+    if (!subjectId) {
+      toast.error('Selecciona una asignatura');
       return;
     }
-    if (!gradeId.trim()) {
-      toast.error('Ingresa el ID del nivel');
+    if (!gradeId) {
+      toast.error('Selecciona un nivel');
       return;
     }
 
@@ -76,9 +83,9 @@ export function UploadStep({ onSubmit, isPending }: UploadStepProps) {
     const metadata: DiaIngestionRequestDto = {
       name: name.trim(),
       year: yearNum,
-      curriculumId: curriculumId.trim(),
-      subjectId: subjectId.trim(),
-      gradeId: gradeId.trim(),
+      curriculumId,
+      subjectId,
+      gradeId,
       version: version.trim() || undefined,
     };
 
@@ -126,7 +133,8 @@ export function UploadStep({ onSubmit, isPending }: UploadStepProps) {
         </CardHeader>
         <CardContent>
           <div className="grid gap-4 sm:grid-cols-2">
-            <Field label="Nombre del instrumento" htmlFor="dia-name" required className="sm:col-span-2">
+            <div className="sm:col-span-2">
+              <Label htmlFor="dia-name">Nombre del instrumento</Label>
               <Input
                 id="dia-name"
                 placeholder="DIA Lectura 2o Basico 2025"
@@ -134,8 +142,9 @@ export function UploadStep({ onSubmit, isPending }: UploadStepProps) {
                 onChange={(e) => setName(e.target.value)}
                 disabled={isPending}
               />
-            </Field>
-            <Field label="Año" htmlFor="dia-year" required>
+            </div>
+            <div>
+              <Label htmlFor="dia-year">Anio</Label>
               <Input
                 id="dia-year"
                 type="number"
@@ -145,8 +154,9 @@ export function UploadStep({ onSubmit, isPending }: UploadStepProps) {
                 onChange={(e) => setYear(e.target.value)}
                 disabled={isPending}
               />
-            </Field>
-            <Field label="Versión" htmlFor="dia-version" hint="Opcional">
+            </div>
+            <div>
+              <Label htmlFor="dia-version">Version (opcional)</Label>
               <Input
                 id="dia-version"
                 placeholder="v1"
@@ -154,34 +164,58 @@ export function UploadStep({ onSubmit, isPending }: UploadStepProps) {
                 onChange={(e) => setVersion(e.target.value)}
                 disabled={isPending}
               />
-            </Field>
-            <Field label="ID Currículum" htmlFor="dia-curriculum" required>
-              <Input
+            </div>
+            <div>
+              <Label htmlFor="dia-curriculum">Curriculum</Label>
+              <select
                 id="dia-curriculum"
-                placeholder="UUID del curriculum"
                 value={curriculumId}
                 onChange={(e) => setCurriculumId(e.target.value)}
                 disabled={isPending}
-              />
-            </Field>
-            <Field label="ID Asignatura" htmlFor="dia-subject" required>
-              <Input
+                className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                <option value="">Selecciona...</option>
+                {catalogOptions.curricula.map((c) => (
+                  <option key={c.id} value={c.id}>
+                    {c.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <Label htmlFor="dia-subject">Asignatura</Label>
+              <select
                 id="dia-subject"
-                placeholder="UUID de la asignatura"
                 value={subjectId}
                 onChange={(e) => setSubjectId(e.target.value)}
                 disabled={isPending}
-              />
-            </Field>
-            <Field label="ID Nivel" htmlFor="dia-grade" required>
-              <Input
+                className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                <option value="">Selecciona...</option>
+                {catalogOptions.subjects.map((s) => (
+                  <option key={s.id} value={s.id}>
+                    {s.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <Label htmlFor="dia-grade">Nivel</Label>
+              <select
                 id="dia-grade"
-                placeholder="UUID del nivel"
                 value={gradeId}
                 onChange={(e) => setGradeId(e.target.value)}
                 disabled={isPending}
-              />
-            </Field>
+                className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                <option value="">Selecciona...</option>
+                {catalogOptions.grades.map((g) => (
+                  <option key={g.id} value={g.id}>
+                    {g.name}
+                  </option>
+                ))}
+              </select>
+            </div>
           </div>
         </CardContent>
       </Card>

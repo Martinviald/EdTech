@@ -6,10 +6,10 @@ import {
   ServiceUnavailableException,
 } from '@nestjs/common';
 import { and, eq, inArray, isNull, or } from 'drizzle-orm';
-import { items, itemTaxonomyTags, taxonomyNodes } from '@soe/db';
+import { instruments, items, itemTaxonomyTags, taxonomyNodes } from '@soe/db';
 import type { JwtPayload } from '../auth/jwt-payload.types';
 import { InjectDb, type Database } from '../database/database.types';
-import { AnthropicClient } from './lib/anthropic-client';
+import { LlmService } from '../llm/llm.service';
 import {
   buildTaggingPrompt,
   parseAiResponse,
@@ -57,16 +57,16 @@ export class AiTaggingService {
 
   constructor(
     @InjectDb() private readonly db: Database,
-    private readonly anthropicClient: AnthropicClient,
+    private readonly llm: LlmService,
   ) {}
 
   async suggest(
     dto: { itemIds: string[]; curriculumId: string },
     user: JwtPayload,
   ): Promise<SuggestResult> {
-    if (!this.anthropicClient.isAvailable()) {
+    if (!(await this.llm.isAvailable(user.orgId))) {
       throw new ServiceUnavailableException(
-        'AI tagging service is not available — ANTHROPIC_API_KEY may not be configured',
+        'AI tagging service is not available — el proveedor LLM activo no tiene API key configurada',
       );
     }
 
@@ -101,7 +101,53 @@ export class AiTaggingService {
       throw new NotFoundException('No accessible items found for the given IDs');
     }
 
-    // 3. Fetch taxonomy nodes for the specified curriculum
+    // 3. Derive the (subject, grade) scopes from the items' instruments so we
+    //    can narrow the taxonomy slice we feed to the LLM. Less noise → better
+    //    suggestions, lower input cost.
+    const instrumentScopes = await this.db
+      .selectDistinct({
+        subjectId: instruments.subjectId,
+        gradeId: instruments.gradeId,
+      })
+      .from(items)
+      .innerJoin(instruments, eq(items.instrumentId, instruments.id))
+      .where(inArray(items.id, dto.itemIds));
+
+    const subjectIds = [
+      ...new Set(
+        instrumentScopes
+          .map((s) => s.subjectId)
+          .filter((id): id is string => !!id),
+      ),
+    ];
+    const gradeIds = [
+      ...new Set(
+        instrumentScopes
+          .map((s) => s.gradeId)
+          .filter((id): id is string => !!id),
+      ),
+    ];
+
+    // Universal nodes (subjectId/gradeId NULL) are always included — they
+    // represent cross-cutting skills that apply regardless of subject/grade.
+    const subjectFilter =
+      subjectIds.length > 0
+        ? or(
+            isNull(taxonomyNodes.subjectId),
+            inArray(taxonomyNodes.subjectId, subjectIds),
+          )
+        : undefined;
+
+    const gradeFilter =
+      gradeIds.length > 0
+        ? or(
+            isNull(taxonomyNodes.gradeId),
+            inArray(taxonomyNodes.gradeId, gradeIds),
+          )
+        : undefined;
+
+    // 4. Fetch taxonomy nodes for the specified curriculum, scoped to the
+    //    items' subject/grade plus universal nodes.
     const nodes = await this.db
       .select({
         id: taxonomyNodes.id,
@@ -110,7 +156,13 @@ export class AiTaggingService {
         code: taxonomyNodes.code,
       })
       .from(taxonomyNodes)
-      .where(eq(taxonomyNodes.curriculumId, dto.curriculumId));
+      .where(
+        and(
+          eq(taxonomyNodes.curriculumId, dto.curriculumId),
+          subjectFilter,
+          gradeFilter,
+        ),
+      );
 
     if (nodes.length === 0) {
       throw new NotFoundException(
@@ -134,13 +186,14 @@ export class AiTaggingService {
 
       let rawResponse: string;
       try {
-        rawResponse = await this.anthropicClient.complete(
+        rawResponse = await this.llm.complete(
           prompt.system,
           prompt.user,
+          user.orgId,
         );
       } catch (err) {
         this.logger.error(
-          `Claude API call failed for item ${item.id}`,
+          `LLM call failed for item ${item.id}`,
           err instanceof Error ? err.stack : String(err),
         );
         throw new ServiceUnavailableException(
@@ -154,12 +207,13 @@ export class AiTaggingService {
       // If parsing returned empty but response was not empty, retry once
       if (parsed.length === 0 && rawResponse.trim().length > 0) {
         this.logger.warn(
-          `Invalid JSON from Claude for item ${item.id}, retrying once`,
+          `Invalid JSON from LLM for item ${item.id}, retrying once`,
         );
         try {
-          rawResponse = await this.anthropicClient.complete(
+          rawResponse = await this.llm.complete(
             prompt.system,
             prompt.user,
+            user.orgId,
           );
           parsed = parseAiResponse(rawResponse);
         } catch (retryErr) {

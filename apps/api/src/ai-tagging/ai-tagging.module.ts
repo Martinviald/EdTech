@@ -1,11 +1,12 @@
 import { Module } from '@nestjs/common';
+import { LlmModule } from '../llm/llm.module';
 import { AiTaggingController } from './ai-tagging.controller';
 import { AiTaggingService } from './ai-tagging.service';
-import { AnthropicClient } from './lib/anthropic-client';
 
 @Module({
+  imports: [LlmModule],
   controllers: [AiTaggingController],
-  providers: [AiTaggingService, AnthropicClient],
+  providers: [AiTaggingService],
   exports: [AiTaggingService],
 })
 export class AiTaggingModule {}

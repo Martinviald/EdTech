@@ -20,6 +20,7 @@ import { ItemsModule } from './items/items.module';
 import { DiaIngestionModule } from './dia-ingestion/dia-ingestion.module';
 import { AiTaggingModule } from './ai-tagging/ai-tagging.module';
 import { SpecTablesModule } from './spec-tables/spec-tables.module';
+import { CatalogModule } from './catalog/catalog.module';
 
 @Module({
   imports: [
@@ -43,6 +44,7 @@ import { SpecTablesModule } from './spec-tables/spec-tables.module';
     DiaIngestionModule,
     AiTaggingModule,
     SpecTablesModule,
+    CatalogModule,
   ],
   controllers: [AppController],
   providers: [

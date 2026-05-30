@@ -14,14 +14,16 @@ const NODE_TYPE_COLORS: Record<string, string> = {
 export function TagBadge({ tag }: { tag: ItemTaxonomyTagModel }) {
   const nodeType = tag.node?.type ?? 'unknown';
   const colorClass = NODE_TYPE_COLORS[nodeType] ?? 'bg-gray-100 text-gray-800 dark:bg-gray-950 dark:text-gray-200';
-  const label = tag.node?.code
-    ? `${tag.node.code}: ${tag.node.name}`
-    : tag.node?.name ?? tag.nodeId.slice(0, 8);
+  const code = tag.node?.code;
+  const name = tag.node?.name;
+  const label = code ?? name ?? tag.nodeId.slice(0, 8);
+  const tooltip = code && name ? `${code}: ${name}` : name ?? '';
 
   return (
     <Badge
       variant="outline"
       className={cn('border-0 text-[10px] font-medium', colorClass)}
+      title={tooltip}
     >
       {label}
       {tag.taggedBy === 'ai' && (

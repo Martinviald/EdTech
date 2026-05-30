@@ -1,5 +1,5 @@
-import { Body, Controller, Get, Post, UseGuards } from '@nestjs/common';
-import { z } from 'zod';
+import { BadRequestException, Body, Controller, Get, Post, UseGuards } from '@nestjs/common';
+import { z, type ZodError } from 'zod';
 import { CURRICULUM_ROLES } from '@soe/types';
 import { CurrentUser } from '../auth/current-user.decorator';
 import type { JwtPayload } from '../auth/jwt-payload.types';
@@ -46,6 +46,36 @@ const diaIngestionRequestSchema = z.object({
   metadata: diaIngestionMetadataSchema,
 });
 
+function parseDiaIngestionBody(body: unknown) {
+  const result = diaIngestionRequestSchema.safeParse(body);
+  if (result.success) return result.data;
+  throw new BadRequestException({
+    message: humanizeDiaZodError(result.error),
+    errors: result.error.issues,
+  });
+}
+
+function humanizeDiaZodError(error: ZodError): string {
+  const first = error.issues[0];
+  if (!first) return 'El archivo no es válido.';
+
+  const path = first.path.join('.');
+  if (path === 'data.items' && first.code === 'too_small') {
+    return 'El archivo no contiene preguntas. Verifica que el JSON tenga al menos una pregunta en `items`.';
+  }
+  if (path.startsWith('data.instrument.')) {
+    const field = path.replace('data.instrument.', '');
+    return `Falta o es inválido el campo "${field}" en la metadata del instrumento.`;
+  }
+  if (path.startsWith('data.items.')) {
+    return `Hay un ítem inválido en el archivo (${path}): ${first.message}`;
+  }
+  if (path.startsWith('metadata.')) {
+    return `Metadata inválida (${path.replace('metadata.', '')}): ${first.message}`;
+  }
+  return first.message;
+}
+
 @Controller('dia-ingestion')
 @UseGuards(RolesGuard)
 @Roles(...CURRICULUM_ROLES)
@@ -59,7 +89,7 @@ export class DiaIngestionController {
    */
   @Post('preview')
   async preview(@Body() body: unknown, @CurrentUser() user: JwtPayload) {
-    const { data, metadata } = diaIngestionRequestSchema.parse(body);
+    const { data, metadata } = parseDiaIngestionBody(body);
     return this.diaIngestionService.preview(data, metadata, user);
   }
 
@@ -70,7 +100,7 @@ export class DiaIngestionController {
    */
   @Post('confirm')
   async confirm(@Body() body: unknown, @CurrentUser() user: JwtPayload) {
-    const { data, metadata } = diaIngestionRequestSchema.parse(body);
+    const { data, metadata } = parseDiaIngestionBody(body);
     return this.diaIngestionService.confirm(data, metadata, user);
   }
 
