@@ -7,12 +7,21 @@ import type {
   DiaPreviewResponse,
   DiaConfirmResponse,
 } from '@soe/types';
+import { Stepper } from '@/components/patterns';
 import { previewDiaImport, confirmDiaImport } from './actions';
 import { UploadStep, type CatalogOptions } from './steps/UploadStep';
 import { PreviewStep } from './steps/PreviewStep';
 import { ConfirmStep } from './steps/ConfirmStep';
 
 type Step = 'upload' | 'preview' | 'confirm';
+
+const WIZARD_STEPS = [
+  { id: 'upload', label: 'Cargar archivo' },
+  { id: 'preview', label: 'Previsualizar' },
+  { id: 'confirm', label: 'Confirmar' },
+];
+
+const STEP_INDEX: Record<Step, number> = { upload: 0, preview: 1, confirm: 2 };
 
 interface DiaImportWizardProps {
   catalogOptions: CatalogOptions;
@@ -63,7 +72,8 @@ export function DiaImportWizard({ catalogOptions }: DiaImportWizardProps) {
   };
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-6">
+      <Stepper steps={WIZARD_STEPS} currentStep={STEP_INDEX[step]} />
       {step === 'upload' && (
         <UploadStep onSubmit={handleUpload} isPending={isPending} catalogOptions={catalogOptions} />
       )}

@@ -3,7 +3,7 @@
 import { useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
-import { UserPlus } from 'lucide-react';
+import { Loader2, UserPlus } from 'lucide-react';
 import {
   ASSIGNABLE_SCHOOL_ROLES,
   inviteMemberSchema,
@@ -20,7 +20,6 @@ import {
   DialogTrigger,
 } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import {
   Select,
   SelectContent,
@@ -28,6 +27,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import { Field } from '@/components/patterns';
 import { inviteMember } from './actions';
 
 const ROLE_LABELS: Record<AssignableSchoolRole, string> = {
@@ -93,8 +93,7 @@ export function AddMemberDialog() {
           </DialogHeader>
 
           <div className="space-y-3">
-            <div className="space-y-1.5">
-              <Label htmlFor="member-email">Correo institucional</Label>
+            <Field label="Correo institucional" htmlFor="member-email" required>
               <Input
                 id="member-email"
                 type="email"
@@ -105,10 +104,9 @@ export function AddMemberDialog() {
                 required
                 autoComplete="off"
               />
-            </div>
+            </Field>
 
-            <div className="space-y-1.5">
-              <Label htmlFor="member-role">Rol</Label>
+            <Field label="Rol" htmlFor="member-role" required>
               <Select
                 value={role}
                 onValueChange={(v) => setRole(v as AssignableSchoolRole)}
@@ -125,7 +123,7 @@ export function AddMemberDialog() {
                   ))}
                 </SelectContent>
               </Select>
-            </div>
+            </Field>
           </div>
 
           <DialogFooter>
@@ -138,7 +136,14 @@ export function AddMemberDialog() {
               Cancelar
             </Button>
             <Button type="submit" disabled={pending}>
-              {pending ? 'Invitando…' : 'Invitar'}
+              {pending ? (
+                <>
+                  <Loader2 className="size-4 animate-spin" />
+                  Invitando…
+                </>
+              ) : (
+                'Invitar'
+              )}
             </Button>
           </DialogFooter>
         </form>

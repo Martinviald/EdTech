@@ -1,4 +1,7 @@
+import { GraduationCap } from 'lucide-react';
 import { internalGet } from '@/lib/api';
+import { BRAND } from '@/lib/brand';
+import { AlertCallout } from '@/components/patterns';
 import { LoginButtons } from './LoginButtons';
 import { MockLoginForm } from './MockLoginForm';
 
@@ -12,9 +15,13 @@ export default async function LoginPage() {
   return (
     <main className="flex min-h-screen items-center justify-center bg-background px-4">
       <div className="w-full max-w-sm rounded-lg border border-border bg-card p-8 shadow-sm">
-        <header className="mb-6 text-center">
-          <h1 className="text-xl font-semibold text-foreground">Sistema Operativo Educativo</h1>
-          <p className="mt-1 text-sm text-foreground/60">Ingresa con tu cuenta institucional</p>
+        <header className="mb-6 flex flex-col items-center text-center">
+          <span className="mb-3 flex size-11 items-center justify-center rounded-xl bg-primary text-primary-foreground">
+            <GraduationCap className="size-6" aria-hidden />
+          </span>
+          <h1 className="text-xl font-semibold text-foreground">{BRAND.name}</h1>
+          <p className="mt-1 text-sm text-muted-foreground">{BRAND.legalName}</p>
+          <p className="mt-3 text-sm text-muted-foreground">Ingresa con tu cuenta institucional</p>
         </header>
 
         {isMock ? <MockSection /> : <LoginButtons />}
@@ -28,10 +35,10 @@ async function MockSection() {
 
   return (
     <div className="flex flex-col gap-4">
-      <div className="rounded-md border border-yellow-400/40 bg-yellow-100/60 px-3 py-2 text-xs text-yellow-900">
+      <AlertCallout tone="warning">
         Mock Auth activo — solo para desarrollo. Define <code>AUTH_MODE=sso</code> para usar SSO
         real.
-      </div>
+      </AlertCallout>
       {users.length === 0 ? (
         <p className="text-sm text-foreground/60">
           No hay usuarios de prueba. Corre <code>pnpm --filter @soe/db db:seed</code>.
