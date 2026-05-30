@@ -48,3 +48,4 @@ packages/db/drizzle/*
 # Claude
 claude/
 .claude/
+.claude-soe/

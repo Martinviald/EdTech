@@ -17,6 +17,17 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Input } from '@/components/ui/input';
+import { Badge } from '@/components/ui/badge';
+import { Inbox, UserPlus } from 'lucide-react';
+import {
+  AlertCallout,
+  EmptyState,
+  Field,
+  PageHeader,
+  StatusBadge,
+  Stepper,
+} from '@/components/patterns';
+import { BRAND } from '@/lib/brand';
 
 const PALETTE = [
   { label: 'primary', bg: 'bg-primary' },
@@ -24,6 +35,8 @@ const PALETTE = [
   { label: 'accent', bg: 'bg-accent' },
   { label: 'destructive', bg: 'bg-destructive' },
   { label: 'success', bg: 'bg-success' },
+  { label: 'warning', bg: 'bg-warning' },
+  { label: 'info', bg: 'bg-info' },
   { label: 'muted', bg: 'bg-muted border' },
   { label: 'background', bg: 'bg-background border' },
   { label: 'foreground', bg: 'bg-foreground' },
@@ -33,7 +46,7 @@ export default function StyleguidePage() {
   return (
     <main className="p-8 space-y-14 max-w-4xl mx-auto">
       <div>
-        <h1 className="text-3xl font-bold tracking-tight">Design System — SOE</h1>
+        <h1 className="text-3xl font-bold tracking-tight">Design System — {BRAND.name}</h1>
         <p className="text-muted-foreground mt-1">
           Referencia visual de componentes, colores y tipografía.
         </p>
@@ -159,6 +172,98 @@ export default function StyleguidePage() {
               <DropdownMenuItem className="text-destructive">Eliminar</DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
+        </div>
+      </section>
+
+      {/* Badges */}
+      <section className="space-y-4">
+        <h2 className="text-xl font-semibold border-b pb-2">Badges</h2>
+        <div className="flex gap-3 flex-wrap items-center">
+          <Badge>Default</Badge>
+          <Badge variant="secondary">Secondary</Badge>
+          <Badge variant="outline">Outline</Badge>
+          <Badge variant="destructive">Destructive</Badge>
+          <Badge variant="success">Success</Badge>
+          <Badge variant="warning">Warning</Badge>
+          <Badge variant="info">Info</Badge>
+        </div>
+      </section>
+
+      {/* Patrones */}
+      <section className="space-y-6">
+        <h2 className="text-xl font-semibold border-b pb-2">Patrones (components/patterns)</h2>
+
+        <div className="space-y-2">
+          <p className="text-sm font-medium text-muted-foreground">PageHeader</p>
+          <div className="rounded-lg border p-4">
+            <PageHeader
+              title="Banco de Items"
+              description="Encabezado de página estándar con acciones."
+              actions={<Button>Acción</Button>}
+            />
+          </div>
+        </div>
+
+        <div className="space-y-2">
+          <p className="text-sm font-medium text-muted-foreground">StatusBadge (tonos semánticos)</p>
+          <div className="flex gap-3 flex-wrap items-center">
+            <StatusBadge tone="success">Publicado</StatusBadge>
+            <StatusBadge tone="warning">Borrador</StatusBadge>
+            <StatusBadge tone="info">Oficial</StatusBadge>
+            <StatusBadge tone="neutral">Archivado</StatusBadge>
+            <StatusBadge tone="danger">Bloqueado</StatusBadge>
+          </div>
+        </div>
+
+        <div className="space-y-2">
+          <p className="text-sm font-medium text-muted-foreground">AlertCallout</p>
+          <div className="space-y-3">
+            <AlertCallout tone="info" title="Información">Mensaje informativo de contexto.</AlertCallout>
+            <AlertCallout tone="success" title="Éxito">La operación se completó correctamente.</AlertCallout>
+            <AlertCallout tone="warning" title="Atención">Revisa este punto antes de continuar.</AlertCallout>
+            <AlertCallout tone="danger" title="Error">Algo salió mal con la solicitud.</AlertCallout>
+          </div>
+        </div>
+
+        <div className="space-y-2">
+          <p className="text-sm font-medium text-muted-foreground">Stepper</p>
+          <div className="rounded-lg border p-4">
+            <Stepper
+              steps={[
+                { id: 'a', label: 'Cargar archivo' },
+                { id: 'b', label: 'Previsualizar' },
+                { id: 'c', label: 'Confirmar' },
+              ]}
+              currentStep={1}
+            />
+          </div>
+        </div>
+
+        <div className="space-y-2">
+          <p className="text-sm font-medium text-muted-foreground">Field</p>
+          <div className="max-w-sm rounded-lg border p-4 space-y-3">
+            <Field label="Correo institucional" htmlFor="sg-email" required hint="Usa el dominio del colegio.">
+              <Input id="sg-email" type="email" placeholder="profesor@colegio.cl" />
+            </Field>
+            <Field label="Nombre" htmlFor="sg-name" error="Este campo es obligatorio.">
+              <Input id="sg-name" placeholder="Nombre" />
+            </Field>
+          </div>
+        </div>
+
+        <div className="space-y-2">
+          <p className="text-sm font-medium text-muted-foreground">EmptyState</p>
+          <EmptyState
+            icon={Inbox}
+            title="Aún no hay datos"
+            description="Cuando agregues elementos, aparecerán aquí."
+            action={
+              <Button>
+                <UserPlus className="size-4" />
+                Agregar
+              </Button>
+            }
+          />
         </div>
       </section>
     </main>

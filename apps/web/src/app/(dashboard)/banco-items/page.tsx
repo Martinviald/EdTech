@@ -3,8 +3,9 @@ import type { Route } from 'next';
 import { redirect } from 'next/navigation';
 import { auth } from '@/auth';
 import { apiGet } from '@/lib/api';
+import { Library } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
+import { PageContainer, PageHeader, EmptyState } from '@/components/patterns';
 import {
   canAccess,
   userHasAnyRole,
@@ -49,31 +50,38 @@ export default async function BancoItemsPage({ searchParams }: PageProps) {
   const canCreate = userHasAnyRole(session.user.roles, ITEM_BANK_ROLES);
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-semibold">Banco de Items</h1>
-          <p className="text-muted-foreground mt-1 text-sm">
-            Instrumentos de evaluacion, preguntas y pautas oficiales.
-          </p>
-        </div>
-        {canCreate && (
-          <Link href={'/banco-items/nuevo' as Route}>
-            <Button>Nuevo instrumento</Button>
-          </Link>
-        )}
-      </div>
+    <PageContainer>
+      <PageHeader
+        title="Banco de Items"
+        description="Instrumentos de evaluación, preguntas y pautas oficiales."
+        actions={
+          canCreate ? (
+            <Link href={'/banco-items/nuevo' as Route}>
+              <Button>Nuevo instrumento</Button>
+            </Link>
+          ) : null
+        }
+      />
 
       <InstrumentFilters />
 
       {instruments.length === 0 ? (
-        <Card>
-          <CardContent className="pt-6">
-            <p className="text-sm text-muted-foreground">
-              No se encontraron instrumentos. {canCreate && 'Crea el primero.'}
-            </p>
-          </CardContent>
-        </Card>
+        <EmptyState
+          icon={Library}
+          title="No se encontraron instrumentos"
+          description={
+            canCreate
+              ? 'Crea el primer instrumento para empezar a construir tu banco de ítems.'
+              : 'Aún no hay instrumentos disponibles para tu colegio.'
+          }
+          action={
+            canCreate ? (
+              <Link href={'/banco-items/nuevo' as Route}>
+                <Button>Nuevo instrumento</Button>
+              </Link>
+            ) : undefined
+          }
+        />
       ) : (
         <>
           <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
@@ -88,6 +96,6 @@ export default async function BancoItemsPage({ searchParams }: PageProps) {
           )}
         </>
       )}
-    </div>
+    </PageContainer>
   );
 }
