@@ -24,6 +24,8 @@ import { CatalogModule } from './catalog/catalog.module';
 import { AnswerSheetsModule } from './answer-sheets/answer-sheets.module';
 import { GradingScalesModule } from './grading-scales/grading-scales.module';
 import { AssessmentResultsModule } from './assessment-results/assessment-results.module';
+import { DashboardsModule } from './dashboards/dashboards.module';
+import { AnalyticsModule } from './analytics/analytics.module';
 
 @Module({
   imports: [
@@ -52,6 +54,9 @@ import { AssessmentResultsModule } from './assessment-results/assessment-results
     AnswerSheetsModule,
     GradingScalesModule,
     AssessmentResultsModule,
+    // ── Sprint 4: dashboards core y analítica de series temporales ──
+    DashboardsModule,
+    AnalyticsModule,
   ],
   controllers: [AppController],
   providers: [
