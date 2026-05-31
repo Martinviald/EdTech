@@ -117,3 +117,13 @@ export const RESULTS_RECALCULATE_ROLES: readonly UserRole[] = [
   'academic_director',
   'eval_coordinator',
 ];
+
+// Roles que pueden ver los dashboards de resultados (S4 — H6.1..H6.8). Mismo
+// conjunto que RESULTS_VIEWER_ROLES: los dashboards son la capa de visualización
+// sobre los resultados. El scoping por curso para profesores lo aplica el
+// service, no esta constante.
+export const DASHBOARD_VIEWER_ROLES: readonly UserRole[] = RESULTS_VIEWER_ROLES;
+
+// Roles que pueden ver la analítica de series temporales (S4 — H6.3, H6.6:
+// comparación de generaciones y progresión).
+export const ANALYTICS_VIEWER_ROLES: readonly UserRole[] = RESULTS_VIEWER_ROLES;
