@@ -619,7 +619,7 @@ export class DashboardsService {
     if (query.assessmentId) conditions.push(eq(assessments.id, query.assessmentId));
     if (query.instrumentId) conditions.push(eq(assessments.instrumentId, query.instrumentId));
     if (query.instrumentType) {
-      conditions.push(sql`${instruments.type} = ${query.instrumentType}`);
+      conditions.push(sql`${instruments.type}::text = ${query.instrumentType}`);
     }
     if (query.subjectId) conditions.push(eq(instruments.subjectId, query.subjectId));
     if (query.gradeId) conditions.push(eq(instruments.gradeId, query.gradeId));
@@ -701,6 +701,26 @@ export class DashboardsService {
     const assessmentIds = await this.resolveScopedAssessmentIds(orgId, query);
     if (assessmentIds.length === 0) return [];
 
+    // Teacher scoping: si el caller está acotado a un set de alumnos
+    // (studentIds !== null), las evaluaciones recientes deben intersectarse con
+    // las que tienen resultados de esos alumnos. Si no, un profesor vería en la
+    // lista nombres de evaluaciones de toda la org que no tocan a sus cursos.
+    let scopedAssessmentIds = assessmentIds;
+    if (studentIds !== null) {
+      if (studentIds.length === 0) return [];
+      const withResults = await this.db
+        .selectDistinct({ assessmentId: assessmentResults.assessmentId })
+        .from(assessmentResults)
+        .where(
+          and(
+            inArray(assessmentResults.assessmentId, assessmentIds),
+            inArray(assessmentResults.studentId, studentIds),
+          ),
+        );
+      scopedAssessmentIds = withResults.map((r) => r.assessmentId);
+      if (scopedAssessmentIds.length === 0) return [];
+    }
+
     const rows = await this.db
       .select({
         assessmentId: assessments.id,
@@ -717,7 +737,7 @@ export class DashboardsService {
       .innerJoin(instruments, eq(instruments.id, assessments.instrumentId))
       .leftJoin(subjects, eq(subjects.id, instruments.subjectId))
       .leftJoin(grades, eq(grades.id, instruments.gradeId))
-      .where(inArray(assessments.id, assessmentIds))
+      .where(inArray(assessments.id, scopedAssessmentIds))
       .orderBy(desc(assessments.administeredAt), desc(assessments.createdAt))
       .limit(5);
 

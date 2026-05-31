@@ -13,6 +13,8 @@ const TABS: { href: string; label: string }[] = [
   { href: '/resultados', label: 'Resumen' },
   { href: '/resultados/clasificacion', label: 'Clasificación' },
   { href: '/resultados/habilidades', label: 'Habilidades' },
+  { href: '/resultados/comparacion', label: 'Comparación' },
+  { href: '/resultados/progresion', label: 'Progresión' },
 ];
 
 export function ResultadosNav() {

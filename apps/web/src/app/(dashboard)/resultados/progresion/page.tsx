@@ -18,6 +18,7 @@ import { ProgressionChart } from '../components/charts/progression-chart';
 import { ExportViewButton } from '../components/charts/export-view-button';
 import { PERFORMANCE_LEVEL_LABELS } from '../components/charts/performance-distribution';
 import { ProgressionScopeBar } from './progression-scope-bar';
+import { ResultadosNav } from '../components/resultados-nav';
 
 type SearchParams = Record<string, string | string[] | undefined>;
 
@@ -129,6 +130,8 @@ export default async function ProgresionPage({
           ) : undefined
         }
       />
+
+      <ResultadosNav />
 
       <ProgressionScopeBar
         options={options}

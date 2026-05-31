@@ -17,6 +17,7 @@ import {
 import { GenerationalChart } from '../components/charts/generational-chart';
 import { GenerationalDistributionChart } from '../components/charts/generational-distribution-chart';
 import { ExportViewButton } from '../components/charts/export-view-button';
+import { ResultadosNav } from '../components/resultados-nav';
 import {
   PERFORMANCE_LEVEL_LABELS,
   PERFORMANCE_LEVEL_ORDER,
@@ -111,6 +112,8 @@ export default async function ComparacionPage({
           ) : undefined
         }
       />
+
+      <ResultadosNav />
 
       <DashboardFilterBar options={options} value={filters} basePath={BASE_PATH} />
 

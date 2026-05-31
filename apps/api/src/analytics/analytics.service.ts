@@ -6,6 +6,7 @@ import {
   assessments,
   classGroups,
   grades,
+  gradingScales,
   instruments,
   skillResults,
   studentEnrollments,
@@ -46,9 +47,10 @@ const ADMIN_LIKE_ROLES: readonly UserRole[] = [
   'eval_coordinator',
 ];
 
-// Nota de aprobación por defecto (escala chilena 1.0-7.0). Las notas en
-// assessment_results.grade ya fueron calculadas con la escala aplicable, así
-// que el umbral de aprobación se evalúa sobre la nota almacenada.
+// Fallback de nota de aprobación (escala chilena 1.0-7.0) cuando ninguna
+// evaluación del scope tiene grading scale asignada. El umbral real se resuelve
+// desde grading_scales.passing_grade de la escala aplicable (ver
+// resolveScopePassingGrade) — NO se hardcodea el supuesto de escala.
 const DEFAULT_PASSING_GRADE = 4.0;
 
 const PERFORMANCE_LEVELS_ORDER: readonly PerformanceLevel[] = [
@@ -138,6 +140,39 @@ export class AnalyticsService {
   // ───────────────────────────────────────────────────────────────────────────
 
   /**
+   * passing_grade de la grading scale aplicable al scope (la del instrumento de
+   * la primera evaluación del scope que tenga escala asignada). Fallback 4.0 si
+   * ninguna define escala. Evita hardcodear el supuesto de escala chilena.
+   */
+  private async resolveScopePassingGrade(
+    orgId: string,
+    cgConditions: SQL[],
+    instrumentConditions: SQL[],
+  ): Promise<number> {
+    const [row] = await this.db
+      .select({ passingGrade: gradingScales.passingGrade })
+      .from(assessments)
+      .innerJoin(
+        assessmentCourseAssignments,
+        eq(assessmentCourseAssignments.assessmentId, assessments.id),
+      )
+      .innerJoin(classGroups, eq(classGroups.id, assessmentCourseAssignments.classGroupId))
+      .innerJoin(instruments, eq(instruments.id, assessments.instrumentId))
+      .innerJoin(gradingScales, eq(gradingScales.id, instruments.gradingScaleId))
+      .where(
+        and(
+          eq(assessments.orgId, orgId),
+          isNull(instruments.deletedAt),
+          ...cgConditions,
+          ...instrumentConditions,
+        ),
+      )
+      .limit(1);
+
+    return row ? Number(row.passingGrade) : DEFAULT_PASSING_GRADE;
+  }
+
+  /**
    * Serie por año usando assessment_results.percentage / grade. Cada punto =
    * un academic_year con: nº de alumnos distintos, % logro promedio, % de
    * aprobación y distribución por nivel de desempeño.
@@ -147,6 +182,12 @@ export class AnalyticsService {
     cgConditions: SQL[],
     instrumentConditions: SQL[],
   ): Promise<GenerationalPoint[]> {
+    const passingGrade = await this.resolveScopePassingGrade(
+      orgId,
+      cgConditions,
+      instrumentConditions,
+    );
+
     const rows = await this.db
       .select({
         academicYearId: academicYears.id,
@@ -154,7 +195,7 @@ export class AnalyticsService {
         avgPct: sql<string | null>`avg(${assessmentResults.percentage}::numeric)`,
         studentsCount: sql<number>`count(distinct ${assessmentResults.studentId})::int`,
         totalGraded: sql<number>`count(${assessmentResults.grade})::int`,
-        passingCount: sql<number>`count(*) filter (where ${assessmentResults.grade}::numeric >= ${DEFAULT_PASSING_GRADE})::int`,
+        passingCount: sql<number>`count(*) filter (where ${assessmentResults.grade}::numeric >= ${passingGrade})::int`,
       })
       .from(assessmentResults)
       .innerJoin(assessments, eq(assessments.id, assessmentResults.assessmentId))

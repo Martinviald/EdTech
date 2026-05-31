@@ -44,6 +44,19 @@ export const PERFORMANCE_LEVEL_BAR_CLASS: Record<PerformanceLevel, string> = {
   advanced: 'bg-blue-500 dark:bg-blue-600',
 };
 
+/**
+ * Color concreto (hex) por nivel para gráficos recharts, que necesitan un valor
+ * de `fill` y no aceptan clases Tailwind. Equivalen exactamente a la paleta de
+ * `PERFORMANCE_LEVEL_BAR_CLASS` (red-500 / amber-500 / emerald-500 / blue-500)
+ * para que un mismo nivel se vea idéntico en barras y en charts.
+ */
+export const PERFORMANCE_LEVEL_CHART_COLOR: Record<PerformanceLevel, string> = {
+  insufficient: '#ef4444', // red-500
+  elementary: '#f59e0b', // amber-500
+  adequate: '#10b981', // emerald-500
+  advanced: '#3b82f6', // blue-500
+};
+
 export function performanceLevelLabel(level: PerformanceLevel | null): string {
   return level ? PERFORMANCE_LEVEL_LABELS[level] : 'Sin datos';
 }

@@ -93,6 +93,8 @@ describe('AnalyticsService.generational', () => {
     const db = makeDb([
       // resolveGenerationalMeta → grades
       [{ name: '3° Básico' }],
+      // resolveScopePassingGrade → grading scale aplicable
+      [{ passingGrade: '4.00' }],
       // generationalSeriesFromResults → filas por año
       [
         {
@@ -143,6 +145,7 @@ describe('AnalyticsService.generational', () => {
   it('devuelve un único punto cuando sólo existe un período (válido)', async () => {
     const db = makeDb([
       [{ name: '4° Básico' }], // meta
+      [{ passingGrade: '4.00' }], // resolveScopePassingGrade
       [
         {
           academicYearId: 'ay-2025',
@@ -171,6 +174,7 @@ describe('AnalyticsService.generational', () => {
   it('devuelve serie vacía cuando no hay datos para el grade', async () => {
     const db = makeDb([
       [{ name: '5° Básico' }], // meta
+      [{ passingGrade: '4.00' }], // resolveScopePassingGrade
       [], // sin filas → serie vacía
       [], // distribución vacía
     ]);
