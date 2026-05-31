@@ -1,0 +1,150 @@
+import Link from 'next/link';
+import type { Route } from 'next';
+import { notFound, redirect } from 'next/navigation';
+import { ChevronLeft } from 'lucide-react';
+import { auth } from '@/auth';
+import { apiGet } from '@/lib/api';
+import {
+  canAccess,
+  GRADING_SCALE_ROLES,
+  userHasRole,
+  type GradingScaleResponseModel,
+} from '@soe/types';
+import { Badge } from '@/components/ui/badge';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { EscalaForm } from '../components/escala-form';
+import { ConversionPreview } from '../components/conversion-preview';
+import { DeleteButton } from '../components/delete-button';
+import { SCALE_TYPE_LABELS } from '../components/scale-format';
+
+export default async function EscalaDetailPage({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}) {
+  const session = await auth();
+  if (!session?.user?.orgId) redirect('/login');
+  if (!canAccess(session.user.roles, GRADING_SCALE_ROLES)) {
+    redirect('/dashboard');
+  }
+
+  const { id } = await params;
+
+  let scale: GradingScaleResponseModel;
+  try {
+    scale = await apiGet<GradingScaleResponseModel>(`/grading-scales/${id}`);
+  } catch {
+    notFound();
+  }
+
+  const isPlatformAdmin = userHasRole(session.user.roles, 'platform_admin');
+  // Las escalas globales (orgId null) solo pueden editarlas platform_admin.
+  // Las de la org solo pueden editarlas usuarios de esa org (el filtro real
+  // ya lo hace el backend; acá decidimos solo el shape de la UI).
+  const editable = scale.isGlobal
+    ? isPlatformAdmin
+    : scale.orgId === session.user.orgId || isPlatformAdmin;
+
+  return (
+    <div className="space-y-6">
+      <div className="space-y-2">
+        <Link
+          href={'/configuracion/escalas' as Route}
+          className="text-muted-foreground hover:text-foreground inline-flex items-center gap-1 text-sm"
+        >
+          <ChevronLeft className="size-4" /> Volver a escalas
+        </Link>
+        <div className="flex flex-wrap items-start justify-between gap-3">
+          <div>
+            <div className="flex flex-wrap items-center gap-2">
+              <h1 className="text-2xl font-semibold">{scale.name}</h1>
+              {scale.isGlobal ? (
+                <Badge variant="secondary">Global</Badge>
+              ) : (
+                <Badge variant="outline">Mi colegio</Badge>
+              )}
+            </div>
+            <p className="text-muted-foreground mt-1 text-sm">
+              {SCALE_TYPE_LABELS[scale.type] ?? scale.type}
+            </p>
+          </div>
+        </div>
+        {!editable ? (
+          <p className="bg-muted text-muted-foreground rounded-md px-3 py-2 text-xs">
+            Esta escala es de solo lectura para tu cuenta. Las escalas globales solo pueden
+            editarlas administradores de plataforma.
+          </p>
+        ) : null}
+      </div>
+
+      <div className="grid gap-6 lg:grid-cols-2">
+        <Card>
+          <CardHeader>
+            <CardTitle>Configuración</CardTitle>
+          </CardHeader>
+          <CardContent>
+            {editable ? (
+              <EscalaForm mode="edit" initial={scale} canManageGlobal={isPlatformAdmin} />
+            ) : (
+              <ReadonlySummary scale={scale} />
+            )}
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>Previsualización</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <ConversionPreview scaleId={scale.id} />
+          </CardContent>
+        </Card>
+      </div>
+
+      {editable ? (
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-destructive">Zona de peligro</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-muted-foreground mb-4 text-sm">
+              Eliminar la escala es definitivo. Si algún instrumento todavía la usa, el sistema
+              bloqueará la operación.
+            </p>
+            <DeleteButton scaleId={scale.id} scaleName={scale.name} />
+          </CardContent>
+        </Card>
+      ) : null}
+    </div>
+  );
+}
+
+function ReadonlySummary({ scale }: { scale: GradingScaleResponseModel }) {
+  const min = Number(scale.minGrade).toFixed(1);
+  const max = Number(scale.maxGrade).toFixed(1);
+  const passing = Number(scale.passingGrade).toFixed(1);
+  const thresholdPct = Math.round(Number(scale.passingThreshold) * 100);
+
+  return (
+    <dl className="grid grid-cols-2 gap-3 text-sm">
+      <div>
+        <dt className="text-muted-foreground">Rango</dt>
+        <dd className="font-medium">
+          {min} — {max}
+        </dd>
+      </div>
+      <div>
+        <dt className="text-muted-foreground">Nota mínima de aprobación</dt>
+        <dd className="font-medium">{passing}</dd>
+      </div>
+      <div>
+        <dt className="text-muted-foreground">Umbral de aprobación</dt>
+        <dd className="font-medium">{thresholdPct}%</dd>
+      </div>
+      <div>
+        <dt className="text-muted-foreground">Tipo</dt>
+        <dd className="font-medium">{SCALE_TYPE_LABELS[scale.type] ?? scale.type}</dd>
+      </div>
+    </dl>
+  );
+}
