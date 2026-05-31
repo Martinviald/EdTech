@@ -3,7 +3,7 @@ import type { Route } from 'next';
 import { redirect } from 'next/navigation';
 import { SlidersHorizontal, ChevronRight } from 'lucide-react';
 import { auth } from '@/auth';
-import { canAccess, GRADING_SCALE_ROLES } from '@soe/types';
+import { canAccess, GRADING_SCALE_ROLES, type UserRole } from '@soe/types';
 import { Card, CardContent } from '@/components/ui/card';
 
 /**
@@ -16,7 +16,7 @@ type ConfigOption = {
   label: string;
   description: string;
   icon: typeof SlidersHorizontal;
-  roles: readonly string[];
+  roles: readonly UserRole[];
 };
 
 const CONFIG_OPTIONS: ConfigOption[] = [

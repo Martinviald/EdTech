@@ -49,3 +49,5 @@ packages/db/drizzle/*
 claude/
 .claude/
 .claude-soe/
+# Archivos de prueba locales de spec-table
+packages/db/data/test-spec-table.csv
