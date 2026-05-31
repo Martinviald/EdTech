@@ -16,9 +16,20 @@ export default async function EscalasPage() {
   }
 
   const scales = await apiGet<GradingScaleListResponse>('/grading-scales?limit=50');
+  // El backend devuelve { data, total, page, limit }; si por alguna razón llega
+  // un payload sin `data`, no reventamos la vista — mostramos el estado vacío.
+  const scaleList = scales?.data ?? [];
 
   return (
     <div className="space-y-6">
+      <div className="flex items-center gap-2 text-sm text-muted-foreground">
+        <Link href={'/configuracion' as Route} className="hover:text-foreground">
+          Configuración
+        </Link>
+        <span>/</span>
+        <span>Escalas de notas</span>
+      </div>
+
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
           <h1 className="text-2xl font-semibold">Escalas de notas</h1>
@@ -36,7 +47,7 @@ export default async function EscalasPage() {
         </Button>
       </div>
 
-      <EscalasTable scales={scales.data} />
+      <EscalasTable scales={scaleList} />
     </div>
   );
 }

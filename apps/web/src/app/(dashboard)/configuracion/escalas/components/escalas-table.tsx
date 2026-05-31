@@ -13,8 +13,8 @@ import {
 import { EmptyState } from '@/components/EmptyState';
 import { SCALE_TYPE_LABELS, formatGrade, formatThresholdPercent } from './scale-format';
 
-export function EscalasTable({ scales }: { scales: GradingScaleResponseModel[] }) {
-  if (scales.length === 0) {
+export function EscalasTable({ scales }: { scales?: GradingScaleResponseModel[] }) {
+  if (!scales || scales.length === 0) {
     return (
       <EmptyState
         title="Aún no hay escalas configuradas"
