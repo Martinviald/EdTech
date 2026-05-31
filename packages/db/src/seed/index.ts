@@ -3,7 +3,7 @@ import { resolve } from 'path';
 import { and, eq, sql } from 'drizzle-orm';
 import { createDbClient } from '../client';
 import { classGroups, grades, subjectClasses, subjects } from '../schema/academic';
-import { curricula } from '../schema/curriculum';
+import { curricula, taxonomyNodes } from '../schema/curriculum';
 import { academicYears, organizations } from '../schema/organizations';
 import { students } from '../schema/students';
 import { orgMemberships, teacherAssignments, users } from '../schema/users';
@@ -16,10 +16,14 @@ config({ path: resolve(__dirname, '../../../../.env') });
 // Permiten referenciar org, usuarios y alumnos desde tests y mock auth sin lookups.
 // Nota: los UUIDs solo aceptan dígitos hex (0-9, a-f).
 export const DEMO_ORG_ID = 'dec00000-0000-0000-0000-000000000001';
+export const DEMO_ORG2_ID = 'dec00000-0000-0000-0000-000000000002';
 const DEMO_USER_IDS = {
   admin: 'dec00000-0000-0000-0000-0000000000a1',
   director: 'dec00000-0000-0000-0000-0000000000d1',
   teacher: 'dec00000-0000-0000-0000-0000000000c1',
+} as const;
+const DEMO2_USER_IDS = {
+  admin: 'dec00000-0000-0000-0000-0000000000a2',
 } as const;
 
 export const DEMO_STUDENT_IDS = {
@@ -132,6 +136,59 @@ async function main() {
 
   await seedMineducTaxonomy(db);
 
+  // -------- Habilidades DIA 2025 (nodos de taxonomía) --------
+  console.log('Seeding DIA 2025 taxonomy nodes...');
+  const [diaCurriculum] = await db
+    .select({ id: curricula.id })
+    .from(curricula)
+    .where(and(eq(curricula.type, 'dia'), eq(curricula.version, '2025')));
+
+  if (diaCurriculum) {
+    const [langSubject] = await db.select().from(subjects).where(eq(subjects.code, 'LANG'));
+    const [mathSubject] = await db.select().from(subjects).where(eq(subjects.code, 'MATH'));
+
+    const diaSkills: Array<{
+      code: string;
+      name: string;
+      subjectId: string | undefined;
+      order: number;
+    }> = [];
+
+    if (langSubject) {
+      diaSkills.push(
+        { code: 'DIA-LANG-SK-LOC', name: 'Localizar información explícita', subjectId: langSubject.id, order: 1 },
+        { code: 'DIA-LANG-SK-INT', name: 'Interpretar y relacionar', subjectId: langSubject.id, order: 2 },
+        { code: 'DIA-LANG-SK-REF', name: 'Reflexionar sobre el texto', subjectId: langSubject.id, order: 3 },
+      );
+    }
+    if (mathSubject) {
+      diaSkills.push(
+        { code: 'DIA-MATH-SK-RES', name: 'Resolver problemas', subjectId: mathSubject.id, order: 1 },
+        { code: 'DIA-MATH-SK-MOD', name: 'Modelar', subjectId: mathSubject.id, order: 2 },
+        { code: 'DIA-MATH-SK-REP', name: 'Representar', subjectId: mathSubject.id, order: 3 },
+        { code: 'DIA-MATH-SK-ARG', name: 'Argumentar y comunicar', subjectId: mathSubject.id, order: 4 },
+      );
+    }
+
+    if (diaSkills.length > 0) {
+      await db
+        .insert(taxonomyNodes)
+        .values(
+          diaSkills.map((s) => ({
+            curriculumId: diaCurriculum.id,
+            type: 'skill' as const,
+            code: s.code,
+            name: s.name,
+            subjectId: s.subjectId,
+            order: s.order,
+            depth: 1,
+          })),
+        )
+        .onConflictDoNothing();
+      console.log(`  → DIA 2025: ${diaSkills.length} habilidades.`);
+    }
+  }
+
   // -------- Demo tenant para mock auth y validación end-to-end --------
   console.log('Seeding Colegio Demo...');
   await db
@@ -169,6 +226,39 @@ async function main() {
         isActive: true,
       })),
     )
+    .onConflictDoNothing();
+
+  // -------- Segundo tenant para testing multi-tenancy --------
+  console.log('Seeding Colegio San Patricio...');
+  await db
+    .insert(organizations)
+    .values({
+      id: DEMO_ORG2_ID,
+      type: 'school',
+      name: 'Colegio San Patricio',
+      rbd: '00001-0',
+    })
+    .onConflictDoNothing();
+
+  await db
+    .insert(users)
+    .values({
+      id: DEMO2_USER_IDS.admin,
+      email: 'admin@sanpatricio.cl',
+      name: 'Admin San Patricio',
+      provider: 'google' as const,
+      providerId: 'seed-school_admin-org2',
+    })
+    .onConflictDoNothing();
+
+  await db
+    .insert(orgMemberships)
+    .values({
+      userId: DEMO2_USER_IDS.admin,
+      orgId: DEMO_ORG2_ID,
+      role: 'school_admin',
+      isActive: true,
+    })
     .onConflictDoNothing();
 
   console.log('Seeding platform admins...');

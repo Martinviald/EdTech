@@ -15,7 +15,6 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
-import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
@@ -31,6 +30,7 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
+import { EmptyState, StatusBadge } from '@/components/patterns';
 import { revokeMember } from './actions';
 
 const ROLE_LABELS: Record<string, string> = {
@@ -89,15 +89,11 @@ export function MembersTable({
 
   if (members.length === 0) {
     return (
-      <div className="flex flex-col items-center gap-3 rounded-lg border border-dashed p-12 text-center">
-        <Users className="text-muted-foreground size-8" aria-hidden />
-        <div>
-          <p className="font-medium">Aún no hay miembros</p>
-          <p className="text-muted-foreground text-sm">
-            Invita al primer docente o coordinador para comenzar.
-          </p>
-        </div>
-      </div>
+      <EmptyState
+        icon={Users}
+        title="Aún no hay miembros"
+        description="Invita al primer docente o coordinador para comenzar."
+      />
     );
   }
 
@@ -131,13 +127,9 @@ export function MembersTable({
                   <TableCell>{ROLE_LABELS[m.role] ?? m.role}</TableCell>
                   <TableCell>
                     {m.status === 'active' ? (
-                      <Badge className="bg-emerald-100 text-emerald-800 hover:bg-emerald-100 dark:bg-emerald-950 dark:text-emerald-200">
-                        Activo
-                      </Badge>
+                      <StatusBadge tone="success">Activo</StatusBadge>
                     ) : (
-                      <Badge className="bg-amber-100 text-amber-800 hover:bg-amber-100 dark:bg-amber-950 dark:text-amber-200">
-                        Pendiente
-                      </Badge>
+                      <StatusBadge tone="warning">Pendiente</StatusBadge>
                     )}
                   </TableCell>
                   <TableCell className="text-muted-foreground text-sm">

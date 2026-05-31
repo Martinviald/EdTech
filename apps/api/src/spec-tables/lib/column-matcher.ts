@@ -22,10 +22,27 @@ export interface ColumnMapping {
   correctAnswer?: string;
 }
 
+/** Detalle de un ítem que sí quedó vinculado a uno o más nodos. */
+export interface LinkedItemDetail {
+  position: number;
+  nodes: Array<{ type: string; name: string; code: string | null }>;
+}
+
+/** Detalle de un ítem/fila que NO se pudo vincular, con su motivo. */
+export interface UnlinkedItemDetail {
+  /** Posición del ítem; `null` si la fila ni siquiera tenía una posición válida. */
+  position: number | null;
+  reason: string;
+}
+
 export interface LinkResult {
   linked: number;
   warnings: string[];
   errors: string[];
+  /** Ítems vinculados con los nodos taxonómicos que se les asignaron. */
+  linkedItems: LinkedItemDetail[];
+  /** Ítems/filas que no se vincularon, con el motivo. */
+  unlinkedItems: UnlinkedItemDetail[];
 }
 
 export interface TaxonomyNodeRef {

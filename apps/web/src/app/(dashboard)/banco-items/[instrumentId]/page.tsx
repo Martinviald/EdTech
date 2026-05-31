@@ -101,6 +101,11 @@ export default async function InstrumentDetailPage({ params }: PageProps) {
 
         {canEdit && (
           <div className="flex gap-2">
+            <Link href={`/banco-items/${instrumentId}/spec-table` as Route}>
+              <Button variant="outline" size="sm">
+                Tabla de especificaciones
+              </Button>
+            </Link>
             <Link href={`/banco-items/${instrumentId}/etiquetar` as Route}>
               <Button variant="outline" size="sm">
                 Etiquetar con IA

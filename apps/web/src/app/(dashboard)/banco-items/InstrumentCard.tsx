@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import type { Route } from 'next';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { StatusBadge, type StatusTone } from '@/components/patterns';
 import type { InstrumentModel } from '@soe/types';
 
 const TYPE_LABELS: Record<string, string> = {
@@ -14,10 +15,10 @@ const TYPE_LABELS: Record<string, string> = {
   custom: 'Personalizado',
 };
 
-const STATUS_COLORS: Record<string, string> = {
-  draft: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-950 dark:text-yellow-200',
-  published: 'bg-green-100 text-green-800 dark:bg-green-950 dark:text-green-200',
-  archived: 'bg-gray-100 text-gray-800 dark:bg-gray-950 dark:text-gray-200',
+const STATUS_TONES: Record<string, StatusTone> = {
+  draft: 'warning',
+  published: 'success',
+  archived: 'neutral',
 };
 
 const STATUS_LABELS: Record<string, string> = {
@@ -30,7 +31,7 @@ export function InstrumentCard({ instrument }: { instrument: InstrumentModel }) 
   return (
     <Link
       href={`/banco-items/${instrument.id}` as Route}
-      className="group block rounded-lg border bg-card transition-shadow hover:shadow-md"
+      className="group block rounded-xl border bg-card transition-shadow hover:shadow-md hover:shadow-primary/5"
     >
       <Card className="border-0 shadow-none">
         <CardHeader className="space-y-2">
@@ -38,11 +39,9 @@ export function InstrumentCard({ instrument }: { instrument: InstrumentModel }) 
             <CardTitle className="text-base leading-tight group-hover:text-primary">
               {instrument.name}
             </CardTitle>
-            <span
-              className={`shrink-0 rounded-full px-2 py-0.5 text-xs font-medium ${STATUS_COLORS[instrument.status] ?? STATUS_COLORS.draft}`}
-            >
+            <StatusBadge tone={STATUS_TONES[instrument.status] ?? 'warning'}>
               {STATUS_LABELS[instrument.status] ?? instrument.status}
-            </span>
+            </StatusBadge>
           </div>
         </CardHeader>
         <CardContent className="space-y-1 text-xs text-muted-foreground">
