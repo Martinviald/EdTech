@@ -4,13 +4,11 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { and, count, eq, isNull, or, sql } from 'drizzle-orm';
+import { and, count, eq, isNull, or } from 'drizzle-orm';
 import {
-  gradingScales,
   instruments,
   instrumentSections,
   type Instrument,
-  type GradingScale,
 } from '@soe/db';
 import { userHasRole } from '@soe/types';
 import type { JwtPayload } from '../auth/jwt-payload.types';
@@ -21,8 +19,6 @@ import type {
   ListInstrumentsQueryDto,
   CreateSectionDto,
   UpdateSectionDto,
-  CreateGradingScaleDto,
-  UpdateGradingScaleDto,
 } from './dto/instrument.dto';
 
 @Injectable()
@@ -276,72 +272,6 @@ export class InstrumentsService {
     await this.db.delete(instrumentSections).where(eq(instrumentSections.id, sectionId));
   }
 
-  // ── Grading Scales ──────────────────────────────────────────────────────
-
-  async listGradingScales(user: JwtPayload) {
-    const conditions = [
-      user.isPlatformAdmin
-        ? sql`true`
-        : user.orgId
-          ? or(eq(gradingScales.orgId, user.orgId), isNull(gradingScales.orgId))
-          : isNull(gradingScales.orgId),
-    ];
-
-    return this.db
-      .select()
-      .from(gradingScales)
-      .where(and(...conditions))
-      .orderBy(gradingScales.name);
-  }
-
-  async createGradingScale(dto: CreateGradingScaleDto, user: JwtPayload) {
-    const [created] = await this.db
-      .insert(gradingScales)
-      .values({
-        orgId: user.orgId,
-        name: dto.name,
-        type: dto.type,
-        minGrade: dto.minGrade,
-        maxGrade: dto.maxGrade,
-        passingGrade: dto.passingGrade,
-        passingThreshold: dto.passingThreshold,
-        config: dto.config ?? {},
-      })
-      .returning();
-
-    if (!created) throw new BadRequestException('No se pudo crear la escala de calificación');
-    return created;
-  }
-
-  async updateGradingScale(id: string, dto: UpdateGradingScaleDto, user: JwtPayload) {
-    const existing = await this.getGradingScaleById(id, user);
-    this.assertGradingScaleEditable(existing, user);
-
-    const updateData: Record<string, unknown> = {};
-    if (dto.name !== undefined) updateData.name = dto.name;
-    if (dto.type !== undefined) updateData.type = dto.type;
-    if (dto.minGrade !== undefined) updateData.minGrade = dto.minGrade;
-    if (dto.maxGrade !== undefined) updateData.maxGrade = dto.maxGrade;
-    if (dto.passingGrade !== undefined) updateData.passingGrade = dto.passingGrade;
-    if (dto.passingThreshold !== undefined) updateData.passingThreshold = dto.passingThreshold;
-    if (dto.config !== undefined) updateData.config = dto.config;
-
-    const [updated] = await this.db
-      .update(gradingScales)
-      .set(updateData)
-      .where(eq(gradingScales.id, id))
-      .returning();
-
-    return updated;
-  }
-
-  async deleteGradingScale(id: string, user: JwtPayload) {
-    const existing = await this.getGradingScaleById(id, user);
-    this.assertGradingScaleEditable(existing, user);
-
-    await this.db.delete(gradingScales).where(eq(gradingScales.id, id));
-  }
-
   // ── Helpers ─────────────────────────────────────────────────────────────
 
   /**
@@ -396,32 +326,6 @@ export class InstrumentsService {
     }
     if (!user.orgId || instrument.orgId !== user.orgId) {
       throw new ForbiddenException('Solo puedes editar instrumentos de tu propia organización');
-    }
-  }
-
-  private async getGradingScaleById(id: string, user: JwtPayload): Promise<GradingScale> {
-    const [row] = await this.db
-      .select()
-      .from(gradingScales)
-      .where(eq(gradingScales.id, id));
-
-    if (!row) throw new NotFoundException('Escala de calificación no encontrada');
-
-    if (!user.isPlatformAdmin) {
-      if (row.orgId !== null && row.orgId !== user.orgId) {
-        throw new ForbiddenException('No tienes acceso a esta escala de calificación');
-      }
-    }
-    return row;
-  }
-
-  private assertGradingScaleEditable(scale: GradingScale, user: JwtPayload) {
-    if (user.isPlatformAdmin) return;
-    if (scale.orgId === null) {
-      throw new ForbiddenException('Las escalas globales son de solo lectura');
-    }
-    if (!user.orgId || scale.orgId !== user.orgId) {
-      throw new ForbiddenException('Solo puedes editar escalas de tu propia organización');
     }
   }
 }
