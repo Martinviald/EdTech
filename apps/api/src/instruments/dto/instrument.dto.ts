@@ -26,14 +26,6 @@ const SECTION_TYPES = [
   'mixed',
 ] as const;
 
-const GRADING_SCALE_TYPES = [
-  'linear_chilean',
-  'percentage',
-  'paes_scaled',
-  'irt_based',
-  'custom',
-] as const;
-
 // ── Section DTOs ────────────────────────────────────────────────────────────
 export const createSectionSchema = z.object({
   name: z.string().min(1).max(200),
@@ -79,24 +71,9 @@ export const listInstrumentsQuerySchema = paginationSchema.extend({
     .optional(),
 });
 
-// ── Grading Scale DTOs ──────────────────────────────────────────────────────
-export const createGradingScaleSchema = z.object({
-  name: z.string().min(1).max(200),
-  type: z.enum(GRADING_SCALE_TYPES),
-  minGrade: z.string().default('1.00'),
-  maxGrade: z.string().default('7.00'),
-  passingGrade: z.string().default('4.00'),
-  passingThreshold: z.string().default('0.60'),
-  config: z.record(z.unknown()).optional(),
-});
-
-export const updateGradingScaleSchema = createGradingScaleSchema.partial();
-
 // ── Inferred types ──────────────────────────────────────────────────────────
 export type CreateInstrumentDto = z.infer<typeof createInstrumentSchema>;
 export type UpdateInstrumentDto = z.infer<typeof updateInstrumentSchema>;
 export type ListInstrumentsQueryDto = z.infer<typeof listInstrumentsQuerySchema>;
 export type CreateSectionDto = z.infer<typeof createSectionSchema>;
 export type UpdateSectionDto = z.infer<typeof updateSectionSchema>;
-export type CreateGradingScaleDto = z.infer<typeof createGradingScaleSchema>;
-export type UpdateGradingScaleDto = z.infer<typeof updateGradingScaleSchema>;

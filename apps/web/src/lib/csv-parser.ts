@@ -8,6 +8,25 @@ export interface ParsedMembersCsv {
 }
 
 /**
+ * Lee únicamente la fila de encabezado de un CSV y devuelve los nombres de
+ * columna detectados (trim aplicado, vacíos descartados). Se usa para construir
+ * la UI de mapeo de columnas del formato `generic_csv` sin subir el archivo.
+ */
+export function parseCsvHeaders(file: File): Promise<string[]> {
+  return new Promise((resolve, reject) => {
+    Papa.parse<Record<string, string>>(file, {
+      header: true,
+      preview: 1,
+      skipEmptyLines: true,
+      transformHeader: (h) => h.trim(),
+      complete: (results) =>
+        resolve((results.meta.fields ?? []).map((h) => h.trim()).filter(Boolean)),
+      error: (err) => reject(err),
+    });
+  });
+}
+
+/**
  * Parsea un archivo CSV de miembros y valida cada fila contra `inviteMemberSchema`.
  *
  * Formato esperado: header `email,role` (case-insensitive). Filas vacías se ignoran.

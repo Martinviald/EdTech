@@ -135,13 +135,6 @@ export const NAV_ITEMS: readonly NavItem[] = [
     roles: ['platform_admin', 'school_admin', 'academic_director', 'eval_coordinator'],
   },
   {
-    href: '/configuracion/escalas',
-    label: 'Escalas de notas',
-    icon: Settings,
-    status: 'live',
-    roles: ['platform_admin', 'school_admin', 'academic_director'],
-  },
-  {
     href: '/equipo',
     label: 'Equipo',
     icon: UserCog,
@@ -152,8 +145,8 @@ export const NAV_ITEMS: readonly NavItem[] = [
     href: '/configuracion',
     label: 'Configuración',
     icon: Settings,
-    status: 'soon',
-    roles: ALL_ROLES,
+    status: 'live',
+    roles: ['platform_admin', 'school_admin', 'academic_director'],
   },
 ];
 
