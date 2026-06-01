@@ -10,10 +10,8 @@ import {
 } from '@soe/types';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { PageContainer, PageHeader, EmptyState } from '@/components/patterns';
-import {
-  DashboardFilterBar,
-  parseDashboardFilters,
-} from '../components/dashboard-filter-bar';
+import { DashboardFilterBar } from '../components/dashboard-filter-bar';
+import { parseDashboardFilters } from '../components/dashboard-filters';
 import { GenerationalChart } from '../components/charts/generational-chart';
 import { GenerationalDistributionChart } from '../components/charts/generational-distribution-chart';
 import { ExportViewButton } from '../components/charts/export-view-button';

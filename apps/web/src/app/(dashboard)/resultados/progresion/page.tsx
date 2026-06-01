@@ -13,7 +13,7 @@ import {
 } from '@soe/types';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { PageContainer, PageHeader, EmptyState } from '@/components/patterns';
-import { parseDashboardFilters } from '../components/dashboard-filter-bar';
+import { parseDashboardFilters } from '../components/dashboard-filters';
 import { ProgressionChart } from '../components/charts/progression-chart';
 import { ExportViewButton } from '../components/charts/export-view-button';
 import { PERFORMANCE_LEVEL_LABELS } from '../components/charts/performance-distribution';
