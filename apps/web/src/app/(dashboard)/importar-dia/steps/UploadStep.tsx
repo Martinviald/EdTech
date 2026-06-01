@@ -76,7 +76,7 @@ export function UploadStep({ onSubmit, isPending, catalogOptions }: UploadStepPr
 
     const yearNum = parseInt(year, 10);
     if (isNaN(yearNum) || yearNum < 2020 || yearNum > 2100) {
-      toast.error('El anio debe estar entre 2020 y 2100');
+      toast.error('El año debe estar entre 2020 y 2100');
       return;
     }
 
@@ -144,7 +144,7 @@ export function UploadStep({ onSubmit, isPending, catalogOptions }: UploadStepPr
               />
             </div>
             <div>
-              <Label htmlFor="dia-year">Anio</Label>
+              <Label htmlFor="dia-year">Año</Label>
               <Input
                 id="dia-year"
                 type="number"
