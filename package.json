@@ -14,6 +14,8 @@
     "db:migrate": "turbo run db:migrate",
     "db:push": "turbo run db:push",
     "db:seed": "turbo run db:seed",
+    "db:seed:e2e": "pnpm --filter @soe/db db:seed:e2e",
+    "db:reset": "pnpm --filter @soe/db db:reset",
     "db:studio": "turbo run db:studio",
     "format": "prettier --write \"**/*.{ts,tsx,md,json}\"",
     "format:check": "prettier --check \"**/*.{ts,tsx,md,json}\""
