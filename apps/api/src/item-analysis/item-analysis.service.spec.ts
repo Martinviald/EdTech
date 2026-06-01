@@ -1,0 +1,522 @@
+import { ForbiddenException, NotFoundException } from '@nestjs/common';
+import type { Database } from '@soe/db';
+import type { UserRole } from '@soe/types';
+import type { JwtPayload } from '../auth/jwt-payload.types';
+import { ItemAnalysisService } from './item-analysis.service';
+
+// ──────────────────────────────────────────────────────────────────────────────
+// Mock de Database: cada llamada a `select()` consume la siguiente respuesta de
+// `selectResults` en orden. El builder es encadenable y resuelve a un array al
+// hacer `await`. Mismo estilo que analytics.service.spec.ts.
+// ──────────────────────────────────────────────────────────────────────────────
+
+function makeUser(overrides: Partial<JwtPayload> = {}): JwtPayload {
+  const role: UserRole = overrides.activeRole ?? overrides.role ?? 'school_admin';
+  return {
+    userId: 'user-1',
+    orgId: 'org-1',
+    email: 't@x.cl',
+    name: 'Tester',
+    isPlatformAdmin: role === 'platform_admin',
+    roles: [role],
+    activeRole: role,
+    role,
+    ...overrides,
+  };
+}
+
+type QueryBuilder = {
+  from: (..._: unknown[]) => QueryBuilder;
+  where: (..._: unknown[]) => QueryBuilder;
+  innerJoin: (..._: unknown[]) => QueryBuilder;
+  leftJoin: (..._: unknown[]) => QueryBuilder;
+  groupBy: (..._: unknown[]) => QueryBuilder;
+  orderBy: (..._: unknown[]) => QueryBuilder;
+  limit: (..._: unknown[]) => QueryBuilder;
+  offset: (..._: unknown[]) => QueryBuilder;
+  then: <T>(resolve: (rows: T[]) => unknown) => Promise<unknown>;
+};
+
+type DbMock = Database & { __selectCalls: () => number };
+
+function makeDb(selectResults: unknown[][]): DbMock {
+  let selectIdx = 0;
+
+  function buildSelectChain(rows: unknown[]): QueryBuilder {
+    const chain: QueryBuilder = {
+      from: () => chain,
+      where: () => chain,
+      innerJoin: () => chain,
+      leftJoin: () => chain,
+      groupBy: () => chain,
+      orderBy: () => chain,
+      limit: () => chain,
+      offset: () => chain,
+      then: (resolve) => Promise.resolve(rows as never).then(resolve as never),
+    };
+    return chain;
+  }
+
+  const db = {
+    select: () => {
+      const rows = selectResults[selectIdx] ?? [];
+      selectIdx++;
+      return buildSelectChain(rows);
+    },
+    __selectCalls: () => selectIdx,
+  } as unknown as DbMock;
+
+  return db;
+}
+
+function makeService(db: Database): ItemAnalysisService {
+  return new (ItemAnalysisService as new (db: Database) => ItemAnalysisService)(db);
+}
+
+const ASSESSMENT_ID = 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa';
+const INSTRUMENT_ID = 'bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb';
+const ITEM_A = '11111111-1111-1111-1111-111111111111';
+const ITEM_B = '22222222-2222-2222-2222-222222222222';
+const STUDENT_1 = 'cccccccc-cccc-cccc-cccc-cccccccccccc';
+const STUDENT_2 = 'dddddddd-dddd-dddd-dddd-dddddddddddd';
+const CLASS_GROUP_ID = 'eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee';
+const NODE_SKILL = 'ffffffff-ffff-ffff-ffff-ffffffffffff';
+const NODE_CONTENT = 'a0a0a0a0-a0a0-a0a0-a0a0-a0a0a0a0a0a0';
+
+const assessmentRow = {
+  id: ASSESSMENT_ID,
+  orgId: 'org-1',
+  instrumentId: INSTRUMENT_ID,
+  name: 'DIA Lectura',
+  instrumentName: 'Instrumento Lectura',
+};
+
+const itemRows = [
+  {
+    itemId: ITEM_A,
+    position: 1,
+    type: 'multiple_choice',
+    content: {
+      stem: 'Pregunta A',
+      alternatives: [
+        { key: 'A', text: 'Opción A' },
+        { key: 'B', text: 'Opción B' },
+      ],
+      correctKey: 'B',
+    },
+    scoringConfig: { points: 1 },
+  },
+  {
+    itemId: ITEM_B,
+    position: 2,
+    type: 'multiple_choice',
+    content: {
+      stem: 'Pregunta B',
+      alternatives: [
+        { key: 'A', text: 'Opción A', isCorrect: true },
+        { key: 'B', text: 'Opción B' },
+      ],
+      // sin correctKey → se deriva de alternatives[].isCorrect
+    },
+    scoringConfig: { points: 1 },
+  },
+];
+
+const tagRows = [
+  {
+    itemId: ITEM_A,
+    tagType: 'primary',
+    nodeId: NODE_SKILL,
+    nodeName: 'Localizar información',
+    nodeType: 'skill',
+  },
+  {
+    itemId: ITEM_A,
+    tagType: 'secondary',
+    nodeId: NODE_CONTENT,
+    nodeName: 'OA 1',
+    nodeType: 'content',
+  },
+];
+
+// ──────────────────────────────────────────────────────────────────────────────
+// getMatrix (H6.11)
+// ──────────────────────────────────────────────────────────────────────────────
+
+describe('ItemAnalysisService.getMatrix', () => {
+  it('arma columnas y celdas en el mismo orden, con paginación (admin)', async () => {
+    const db = makeDb([
+      [assessmentRow], // requireAssessmentOwnedByUser
+      // getAccessibleClassGroupIds → admin → sin query
+      itemRows, // loadQuestionColumns → items
+      tagRows, // loadTagsByItems
+      // resolveAccessibleStudentIds → scopeAll, sin classGroupId → null (sin query)
+      [
+        // attachCorrectRates → group by item_id
+        { itemId: ITEM_A, total: 2, correct: 1 },
+        { itemId: ITEM_B, total: 2, correct: 2 },
+      ],
+      [{ total: 2 }], // loadStudentsPage → count
+      [
+        // loadStudentsPage → page
+        {
+          studentId: STUDENT_1,
+          studentRut: '11.111.111-1',
+          firstName: 'Ana',
+          lastName: 'Soto',
+          classGroupId: CLASS_GROUP_ID,
+          classGroupName: '3A',
+          percentage: '50.00',
+        },
+        {
+          studentId: STUDENT_2,
+          studentRut: '22.222.222-2',
+          firstName: 'Beto',
+          lastName: 'Vera',
+          classGroupId: CLASS_GROUP_ID,
+          classGroupName: '3A',
+          percentage: null,
+        },
+      ],
+      [
+        // loadCells
+        {
+          studentId: STUDENT_1,
+          itemId: ITEM_A,
+          value: { answer: 'B' },
+          isCorrect: true,
+          finalScore: '1.00',
+          rawScore: '1.00',
+        },
+        {
+          studentId: STUDENT_1,
+          itemId: ITEM_B,
+          value: { answer: 'B' },
+          isCorrect: false,
+          finalScore: null,
+          rawScore: '0.00',
+        },
+        {
+          studentId: STUDENT_2,
+          itemId: ITEM_A,
+          value: { answer: 'A' },
+          isCorrect: false,
+          finalScore: null,
+          rawScore: null,
+        },
+      ],
+    ]);
+    const service = makeService(db);
+
+    const res = await service.getMatrix(makeUser(), {
+      assessmentId: ASSESSMENT_ID,
+      page: 1,
+      limit: 50,
+    });
+
+    expect(res.assessmentId).toBe(ASSESSMENT_ID);
+    expect(res.instrumentName).toBe('Instrumento Lectura');
+    expect(res.questions).toHaveLength(2);
+    // Orden por position.
+    expect(res.questions[0].itemId).toBe(ITEM_A);
+    expect(res.questions[1].itemId).toBe(ITEM_B);
+    // correctKey: A desde content.correctKey; B desde alternatives[].isCorrect.
+    expect(res.questions[0].correctKey).toBe('B');
+    expect(res.questions[1].correctKey).toBe('A');
+    // skill / content derivados de tags.
+    expect(res.questions[0].skill?.nodeId).toBe(NODE_SKILL);
+    expect(res.questions[0].content?.nodeId).toBe(NODE_CONTENT);
+    // correctRate agregado.
+    expect(res.questions[0].correctRate).toBe(50);
+    expect(res.questions[1].correctRate).toBe(100);
+
+    // Paginación.
+    expect(res.students.total).toBe(2);
+    expect(res.students.page).toBe(1);
+    expect(res.students.data).toHaveLength(2);
+
+    // Celdas en el mismo orden que questions.
+    const row1 = res.students.data[0];
+    expect(row1.studentFullName).toBe('Ana Soto');
+    expect(row1.cells.map((c) => c.itemId)).toEqual([ITEM_A, ITEM_B]);
+    expect(row1.cells[0].selectedKey).toBe('B');
+    expect(row1.cells[0].isCorrect).toBe(true);
+    expect(row1.cells[0].score).toBe(1);
+    expect(row1.correctCount).toBe(1);
+    expect(row1.answeredCount).toBe(2);
+    // achievement desde assessment_results.percentage.
+    expect(row1.achievement).toBe(50);
+
+    // Alumno sin percentage → derivado de correctCount/answeredCount.
+    const row2 = res.students.data[1];
+    expect(row2.cells[1].itemId).toBe(ITEM_B);
+    expect(row2.cells[1].selectedKey).toBeNull(); // sin respuesta a ITEM_B
+    expect(row2.correctCount).toBe(0);
+    expect(row2.answeredCount).toBe(1);
+    expect(row2.achievement).toBe(0);
+  });
+
+  it('lanza NotFound si la evaluación no existe', async () => {
+    const db = makeDb([[]]); // requireAssessmentOwnedByUser → vacío
+    const service = makeService(db);
+    await expect(
+      service.getMatrix(makeUser(), {
+        assessmentId: ASSESSMENT_ID,
+        page: 1,
+        limit: 50,
+      }),
+    ).rejects.toBeInstanceOf(NotFoundException);
+  });
+
+  it('lanza NotFound si la evaluación es de otra org', async () => {
+    const db = makeDb([[{ ...assessmentRow, orgId: 'org-OTRA' }]]);
+    const service = makeService(db);
+    await expect(
+      service.getMatrix(makeUser(), {
+        assessmentId: ASSESSMENT_ID,
+        page: 1,
+        limit: 50,
+      }),
+    ).rejects.toBeInstanceOf(NotFoundException);
+  });
+
+  it('lanza Forbidden si un profesor no tiene scope sobre la evaluación', async () => {
+    const db = makeDb([
+      [assessmentRow], // requireAssessmentOwnedByUser
+      [{ classGroupId: 'cg-otro' }], // getAccessibleClassGroupIds → profesor con otros cursos
+      [], // assessmentTouchesScope → no toca su scope
+    ]);
+    const service = makeService(db);
+    await expect(
+      service.getMatrix(makeUser({ role: 'teacher' }), {
+        assessmentId: ASSESSMENT_ID,
+        page: 1,
+        limit: 50,
+      }),
+    ).rejects.toBeInstanceOf(ForbiddenException);
+  });
+
+  it('profesor con scope: limita alumnos a su classGroup (resolveAccessibleStudentIds)', async () => {
+    const db = makeDb([
+      [assessmentRow], // requireAssessmentOwnedByUser
+      [{ classGroupId: CLASS_GROUP_ID }], // getAccessibleClassGroupIds
+      [{ classGroupId: CLASS_GROUP_ID }], // assessmentTouchesScope → ok
+      itemRows, // loadQuestionColumns → items
+      tagRows, // loadTagsByItems
+      [{ studentId: STUDENT_1 }], // resolveAccessibleStudentIds (teacher, sin classGroupId param)
+      [{ itemId: ITEM_A, total: 1, correct: 1 }], // attachCorrectRates
+      [{ total: 1 }], // loadStudentsPage count
+      [
+        {
+          studentId: STUDENT_1,
+          studentRut: '11.111.111-1',
+          firstName: 'Ana',
+          lastName: 'Soto',
+          classGroupId: CLASS_GROUP_ID,
+          classGroupName: '3A',
+          percentage: '80.00',
+        },
+      ],
+      [
+        {
+          studentId: STUDENT_1,
+          itemId: ITEM_A,
+          value: { answer: 'B' },
+          isCorrect: true,
+          finalScore: '1.00',
+          rawScore: '1.00',
+        },
+      ],
+    ]);
+    const service = makeService(db);
+
+    const res = await service.getMatrix(makeUser({ role: 'teacher' }), {
+      assessmentId: ASSESSMENT_ID,
+      page: 1,
+      limit: 50,
+    });
+    expect(res.students.total).toBe(1);
+    expect(res.students.data[0].studentId).toBe(STUDENT_1);
+    expect(res.students.data[0].achievement).toBe(80);
+  });
+
+  it('filtro nodeId: limita las columnas a ítems taggeados con ese nodo', async () => {
+    const db = makeDb([
+      [assessmentRow], // requireAssessmentOwnedByUser
+      itemRows, // loadQuestionColumns → items (admin, sin scope query)
+      tagRows, // loadTagsByItems
+      [{ itemId: ITEM_A }], // filtro nodeId → solo ITEM_A taggeado
+      [{ itemId: ITEM_A, total: 2, correct: 1 }], // attachCorrectRates
+      [{ total: 1 }], // count
+      [
+        {
+          studentId: STUDENT_1,
+          studentRut: '11.111.111-1',
+          firstName: 'Ana',
+          lastName: 'Soto',
+          classGroupId: CLASS_GROUP_ID,
+          classGroupName: '3A',
+          percentage: '50.00',
+        },
+      ],
+      [
+        {
+          studentId: STUDENT_1,
+          itemId: ITEM_A,
+          value: { answer: 'B' },
+          isCorrect: true,
+          finalScore: '1.00',
+          rawScore: '1.00',
+        },
+      ],
+    ]);
+    const service = makeService(db);
+
+    const res = await service.getMatrix(makeUser(), {
+      assessmentId: ASSESSMENT_ID,
+      nodeId: NODE_SKILL,
+      page: 1,
+      limit: 50,
+    });
+    expect(res.questions).toHaveLength(1);
+    expect(res.questions[0].itemId).toBe(ITEM_A);
+    // Las celdas también respetan una sola columna.
+    expect(res.students.data[0].cells).toHaveLength(1);
+  });
+});
+
+// ──────────────────────────────────────────────────────────────────────────────
+// getQuestionAnalysis (H6.12)
+// ──────────────────────────────────────────────────────────────────────────────
+
+describe('ItemAnalysisService.getQuestionAnalysis', () => {
+  const itemVisibleRow = {
+    id: ITEM_A,
+    orgId: 'org-1',
+    instrumentId: INSTRUMENT_ID,
+    instrumentOrgId: 'org-1',
+    position: 1,
+    type: 'multiple_choice',
+    content: {
+      stem: 'Pregunta A',
+      explanation: 'Porque B.',
+      alternatives: [
+        { key: 'A', text: 'Opción A' },
+        { key: 'B', text: 'Opción B' },
+      ],
+      correctKey: 'B',
+    },
+  };
+
+  it('distribuye respuestas por alternativa con blankCount y correctRate (admin)', async () => {
+    const db = makeDb([
+      // getAccessibleClassGroupIds → admin → sin query
+      [itemVisibleRow], // requireItemVisible
+      tagRows.filter((t) => t.itemId === ITEM_A), // loadItemTags
+      // resolveAccessibleStudentIds → null (sin query)
+      [
+        // loadAnswerDistribution → group by answer, isCorrect
+        { answer: 'B', isCorrect: true, count: 6 },
+        { answer: 'A', isCorrect: false, count: 3 },
+        { answer: null, isCorrect: false, count: 1 },
+      ],
+    ]);
+    const service = makeService(db);
+
+    const res = await service.getQuestionAnalysis(makeUser(), ITEM_A, {});
+
+    expect(res.itemId).toBe(ITEM_A);
+    expect(res.stem).toBe('Pregunta A');
+    expect(res.explanation).toBe('Porque B.');
+    expect(res.correctKey).toBe('B');
+    expect(res.totalResponses).toBe(10);
+    expect(res.blankCount).toBe(1);
+    expect(res.correctCount).toBe(6);
+    expect(res.correctRate).toBe(60);
+
+    // alternativas incluyen correcta + distractores con count/percentage.
+    expect(res.alternatives).toHaveLength(2);
+    const altB = res.alternatives.find((a) => a.key === 'B')!;
+    expect(altB.isCorrect).toBe(true);
+    expect(altB.count).toBe(6);
+    expect(altB.percentage).toBe(60);
+    const altA = res.alternatives.find((a) => a.key === 'A')!;
+    expect(altA.isCorrect).toBe(false);
+    expect(altA.count).toBe(3);
+    expect(altA.percentage).toBe(30);
+    // skill/content derivados.
+    expect(res.skill?.nodeId).toBe(NODE_SKILL);
+  });
+
+  it('lanza NotFound si el ítem no es visible para la org', async () => {
+    const db = makeDb([
+      // admin → sin scope query
+      [], // requireItemVisible → vacío
+    ]);
+    const service = makeService(db);
+    await expect(
+      service.getQuestionAnalysis(makeUser(), ITEM_A, {}),
+    ).rejects.toBeInstanceOf(NotFoundException);
+  });
+
+  it('ítem no de selección múltiple → alternatives vacías pero conserva totales', async () => {
+    const openItem = {
+      id: ITEM_B,
+      orgId: 'org-1',
+      instrumentId: INSTRUMENT_ID,
+      instrumentOrgId: 'org-1',
+      position: 2,
+      type: 'open_ended',
+      content: { stem: 'Desarrolle su respuesta.' }, // sin alternatives
+    };
+    const db = makeDb([
+      [openItem], // requireItemVisible
+      [], // loadItemTags → sin tags
+      [
+        { answer: null, isCorrect: false, count: 4 },
+        { answer: null, isCorrect: true, count: 1 },
+      ], // loadAnswerDistribution
+    ]);
+    const service = makeService(db);
+
+    const res = await service.getQuestionAnalysis(makeUser(), ITEM_B, {});
+    expect(res.alternatives).toEqual([]);
+    expect(res.totalResponses).toBe(5);
+    expect(res.correctCount).toBe(1);
+    expect(res.correctRate).toBe(20);
+    expect(res.skill).toBeNull();
+    expect(res.content).toBeNull();
+  });
+
+  it('deriva correctKey desde alternatives[].isCorrect cuando falta correctKey', async () => {
+    const itemNoKey = {
+      id: ITEM_B,
+      orgId: 'org-1',
+      instrumentId: INSTRUMENT_ID,
+      instrumentOrgId: 'org-1',
+      position: 2,
+      type: 'multiple_choice',
+      content: {
+        stem: 'Pregunta sin correctKey',
+        alternatives: [
+          { key: 'A', text: 'Opción A', isCorrect: true },
+          { key: 'B', text: 'Opción B' },
+        ],
+      },
+    };
+    const db = makeDb([
+      [itemNoKey], // requireItemVisible
+      [], // loadItemTags
+      [
+        { answer: 'A', isCorrect: true, count: 5 },
+        { answer: 'B', isCorrect: false, count: 5 },
+      ], // loadAnswerDistribution
+    ]);
+    const service = makeService(db);
+
+    const res = await service.getQuestionAnalysis(makeUser(), ITEM_B, {});
+    expect(res.correctKey).toBe('A');
+    const altA = res.alternatives.find((a) => a.key === 'A')!;
+    expect(altA.isCorrect).toBe(true);
+  });
+});
