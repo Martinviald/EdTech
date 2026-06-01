@@ -12,7 +12,7 @@
 
 | Sprint | Semanas | Objetivo                                   | Historias                                              | Progreso         |
 | ------ | ------- | ------------------------------------------ | ------------------------------------------------------ | ---------------- |
-| S0     | 1-2     | Cimientos: stack, modelo de datos, auth    | H19.11, H19.12, H1.7, H17.1, H19.4, H19.5, H19.10    | 6/7 ✅ (H19.5 ⏳) |
+| S0     | 1-2     | Cimientos: stack, modelo de datos, auth    | H19.11, H19.12, H1.7, H17.1, H19.4, H19.10           | 6/6 ✅ (H19.5 → S6) |
 | S1     | 3-4     | Onboarding del colegio                     | H1.1, H1.2, H1.3, H1.4, H17.2, H17.3, H19.2          | 7/7 ✅            |
 | S2     | 5-6     | Banco de ítems + pautas DIA                | H3.3, H3.10, H3.11, H3.12, H5.8                       | 5/5 ✅            |
 | S3     | 7-8     | Ingesta y corrección DIA                   | H4.5, H4.6, H5.7, H16.3, H16.4                        | 5/5 ✅            |
@@ -38,7 +38,7 @@ Subir hojas DIA → corrección automática → dashboard habilidades → click 
 | **H17.1**  | UX simple: design system base (colores, tipografía, componentes core)                                               | ★★          | ✅      | shadcn/ui en `apps/web/src/components/ui/`. Sidebar colapsable, Topbar, MobileSidebar, UserNav con RoleSwitcher.                                  |
 | **H19.10** | Manual de marca implementado en la plataforma (coherencia visual)                                                   | ★★          | ✅      | Tokens CSS light/dark en `globals.css`, config en `tailwind.config.ts`. Inter como fuente base.                                                   |
 | **H19.4**  | Estructura de privacidad: modelo de datos con aislamiento por colegio (tenant isolation)                            | ★★★         | ✅      | `withOrgContext`, `SensitiveDataGuard` (Ley 19.628), `RolesGuard` por unión, org_id obligatorio en queries. Tests en `privacy.service.spec.ts`.   |
-| **H19.5**  | Backups automáticos y plan de recuperación                                                                          | ★★          | ⏳      | Pendiente. No hay scripts de pg_dump ni configuración de backups en el repo.                                                                      |
+| **H19.5**  | Backups automáticos y plan de recuperación                                                                          | ★★          | ➡️ S6   | Diferida a **S6 — optimización** (post-F1). No bloquea F1. Pendiente: scripts pg_dump + plan de recuperación. (También en S6: H19.14 CI/CD.)        |
 
 **División de trabajo sugerida:**
 
