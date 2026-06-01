@@ -57,8 +57,28 @@ export function QuestionDetailPanel(props: {
         side="right"
         className="w-full overflow-y-auto sm:max-w-lg lg:max-w-xl"
       >
+        {/* Header SIEMPRE presente (título + descripción) para accesibilidad:
+            Radix Dialog exige un Title/Description en cada Content. */}
+        <SheetHeader className="space-y-2 pr-8">
+          <div className="flex flex-wrap items-center gap-2">
+            <Badge variant="secondary">
+              {data ? `Pregunta ${data.position}` : 'Pregunta'}
+            </Badge>
+            {data?.correctKey ? (
+              <Badge variant="success">Clave correcta: {data.correctKey}</Badge>
+            ) : null}
+          </div>
+          <SheetTitle className="text-base leading-snug">
+            {data ? `Detalle de la pregunta ${data.position}` : 'Detalle de la pregunta'}
+          </SheetTitle>
+          <SheetDescription>
+            Enunciado, distribución de respuestas, análisis de distractores y nodos
+            asociados a la pregunta.
+          </SheetDescription>
+        </SheetHeader>
+
         {data === null ? (
-          <div className="flex h-full flex-col items-center justify-center gap-3 text-muted-foreground">
+          <div className="flex flex-col items-center justify-center gap-3 py-16 text-muted-foreground">
             <Loader2 className="size-6 animate-spin" aria-hidden />
             <p className="text-sm">Cargando análisis de la pregunta…</p>
           </div>
@@ -74,21 +94,17 @@ function QuestionDetailContent({ data }: { data: QuestionAnalysisResponse }): JS
   const distractor = topDistractorKey(data.alternatives);
 
   return (
-    <div className="space-y-6">
-      <SheetHeader className="space-y-2 pr-8">
-        <div className="flex flex-wrap items-center gap-2">
-          <Badge variant="secondary">Pregunta {data.position}</Badge>
-          {data.correctKey ? (
-            <Badge variant="success">Clave correcta: {data.correctKey}</Badge>
-          ) : null}
-        </div>
-        <SheetTitle className="text-base leading-snug">
-          {data.stem ?? 'Pregunta sin enunciado registrado'}
-        </SheetTitle>
+    <div className="mt-6 space-y-6">
+      {/* Enunciado de la pregunta, prominente y etiquetado */}
+      <section className="space-y-1.5">
+        <h3 className="text-sm font-semibold text-foreground">Enunciado</h3>
+        <p className="whitespace-pre-line text-sm leading-relaxed text-foreground">
+          {data.stem ?? 'Esta pregunta no tiene enunciado registrado.'}
+        </p>
         {data.explanation ? (
-          <SheetDescription>{data.explanation}</SheetDescription>
+          <p className="text-xs text-muted-foreground">{data.explanation}</p>
         ) : null}
-      </SheetHeader>
+      </section>
 
       {data.imageUrl ? (
         // eslint-disable-next-line @next/next/no-img-element
