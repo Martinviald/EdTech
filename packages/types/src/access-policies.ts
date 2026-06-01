@@ -127,3 +127,14 @@ export const DASHBOARD_VIEWER_ROLES: readonly UserRole[] = RESULTS_VIEWER_ROLES;
 // Roles que pueden ver la analítica de series temporales (S4 — H6.3, H6.6:
 // comparación de generaciones y progresión).
 export const ANALYTICS_VIEWER_ROLES: readonly UserRole[] = RESULTS_VIEWER_ROLES;
+
+// Roles que pueden ver el mapa de calor de % logro por habilidad × asignatura
+// (S5 — H6.10). Mismo conjunto que los dashboards; el scoping por curso para
+// profesores lo aplica el service.
+export const HEATMAP_VIEWER_ROLES: readonly UserRole[] = RESULTS_VIEWER_ROLES;
+
+// Roles que pueden ver el análisis a nivel de ítem (S5 — H6.11 tabla cruzada
+// alumno × pregunta × habilidad × contenido, y H6.12 distribución de respuestas
+// y análisis de distractores). Mismo conjunto que los dashboards; el scoping por
+// curso para profesores lo aplica el service.
+export const ITEM_ANALYSIS_VIEWER_ROLES: readonly UserRole[] = RESULTS_VIEWER_ROLES;
