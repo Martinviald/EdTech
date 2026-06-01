@@ -422,7 +422,26 @@ describe('ItemAnalysisService.getQuestionAnalysis', () => {
     const db = makeDb([
       // getAccessibleClassGroupIds → admin → sin query
       [itemVisibleRow], // requireItemVisible
-      tagRows.filter((t) => t.itemId === ITEM_A), // loadItemTags
+      tagRows.filter((t) => t.itemId === ITEM_A), // loadItemTags (representativo)
+      [
+        // loadAllItemTags → TODOS los nodos asociados
+        {
+          nodeId: NODE_SKILL,
+          nodeName: 'Localizar información',
+          nodeType: 'skill',
+          nodeCode: null,
+          tagType: 'primary',
+          taggedBy: 'human',
+        },
+        {
+          nodeId: NODE_CONTENT,
+          nodeName: 'OA 1',
+          nodeType: 'content',
+          nodeCode: 'OA 1',
+          tagType: 'secondary',
+          taggedBy: 'ai',
+        },
+      ],
       // resolveAccessibleStudentIds → null (sin query)
       [
         // loadAnswerDistribution → group by answer, isCorrect
@@ -456,6 +475,16 @@ describe('ItemAnalysisService.getQuestionAnalysis', () => {
     expect(altA.percentage).toBe(30);
     // skill/content derivados.
     expect(res.skill?.nodeId).toBe(NODE_SKILL);
+    // tags: TODOS los nodos asociados, con código/tagType/origen.
+    expect(res.tags).toHaveLength(2);
+    expect(res.tags.map((t) => t.nodeId)).toEqual([NODE_SKILL, NODE_CONTENT]);
+    const contentTag = res.tags.find((t) => t.nodeId === NODE_CONTENT)!;
+    expect(contentTag).toMatchObject({
+      nodeCode: 'OA 1',
+      nodeType: 'content',
+      tagType: 'secondary',
+      taggedBy: 'ai',
+    });
   });
 
   it('lanza NotFound si el ítem no es visible para la org', async () => {
@@ -482,6 +511,7 @@ describe('ItemAnalysisService.getQuestionAnalysis', () => {
     const db = makeDb([
       [openItem], // requireItemVisible
       [], // loadItemTags → sin tags
+      [], // loadAllItemTags → sin nodos
       [
         { answer: null, isCorrect: false, count: 4 },
         { answer: null, isCorrect: true, count: 1 },
@@ -496,6 +526,7 @@ describe('ItemAnalysisService.getQuestionAnalysis', () => {
     expect(res.correctRate).toBe(20);
     expect(res.skill).toBeNull();
     expect(res.content).toBeNull();
+    expect(res.tags).toEqual([]);
   });
 
   it('deriva correctKey desde alternatives[].isCorrect cuando falta correctKey', async () => {
@@ -517,6 +548,7 @@ describe('ItemAnalysisService.getQuestionAnalysis', () => {
     const db = makeDb([
       [itemNoKey], // requireItemVisible
       [], // loadItemTags
+      [], // loadAllItemTags
       [
         { answer: 'A', isCorrect: true, count: 5 },
         { answer: 'B', isCorrect: false, count: 5 },

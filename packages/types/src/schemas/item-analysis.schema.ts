@@ -139,6 +139,20 @@ export type AlternativeDistribution = {
   percentage: number; // 0..100, proporción del total de respuestas
 };
 
+/**
+ * Un nodo de taxonomía asociado al ítem (item_taxonomy_tags → taxonomy_nodes).
+ * A diferencia de `skill`/`content` (un solo nodo representativo), esto lista
+ * TODOS los nodos etiquetados en la pregunta.
+ */
+export type QuestionTaxonomyTag = {
+  nodeId: string;
+  nodeName: string;
+  nodeType: string; // taxonomy_node_type: skill | content | learning_objective | text_type | axis | ...
+  nodeCode: string | null; // ej. "OA 4"
+  tagType: string; // item_tag_type: primary | secondary
+  taggedBy: string; // human | ai
+};
+
 export type QuestionAnalysisResponse = {
   itemId: string;
   position: number;
@@ -147,8 +161,9 @@ export type QuestionAnalysisResponse = {
   imageUrl: string | null;
   explanation: string | null;
   correctKey: string | null;
-  skill: ItemTaxonomyRef | null;
-  content: ItemTaxonomyRef | null;
+  skill: ItemTaxonomyRef | null; // habilidad principal (representativo, compat)
+  content: ItemTaxonomyRef | null; // contenido/OA principal (representativo, compat)
+  tags: QuestionTaxonomyTag[]; // TODOS los nodos asociados a la pregunta
   totalResponses: number; // alumnos con respuesta registrada (incluye en blanco)
   blankCount: number; // alumnos sin alternativa elegida
   correctCount: number;

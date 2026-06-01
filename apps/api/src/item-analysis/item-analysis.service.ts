@@ -36,6 +36,7 @@ import {
   type MatrixStudentRow,
   type QuestionAnalysisQueryDto,
   type QuestionAnalysisResponse,
+  type QuestionTaxonomyTag,
   type UserRole,
 } from '@soe/types';
 import type { JwtPayload } from '../auth/jwt-payload.types';
@@ -377,6 +378,7 @@ export class ItemAnalysisService {
     const altDefs = this.parseAlternatives(content);
 
     const { skill, contentRef } = await this.loadItemTags(itemId);
+    const tags = await this.loadAllItemTags(itemId);
 
     // ── Distribución agregada por valor de respuesta (1 query group by) ───────
     const dist = await this.loadAnswerDistribution(
@@ -424,6 +426,7 @@ export class ItemAnalysisService {
       correctKey,
       skill,
       content: contentRef,
+      tags,
       totalResponses,
       blankCount,
       correctCount,
@@ -835,6 +838,40 @@ export class ItemAnalysisService {
   ): Promise<{ skill: ItemTaxonomyRef | null; contentRef: ItemTaxonomyRef | null }> {
     const map = await this.loadTagsByItems([itemId]);
     return map.get(itemId) ?? { skill: null, contentRef: null };
+  }
+
+  /**
+   * TODOS los nodos de taxonomía etiquetados en un ítem (1 query), con su código,
+   * tipo de tag (primary/secondary) y origen (human/ai). Ordenados primary→
+   * secondary, luego por tipo de nodo y nombre, para un agrupado estable en la UI.
+   */
+  private async loadAllItemTags(itemId: string): Promise<QuestionTaxonomyTag[]> {
+    const rows = await this.db
+      .select({
+        nodeId: taxonomyNodes.id,
+        nodeName: taxonomyNodes.name,
+        nodeType: sql<string>`${taxonomyNodes.type}::text`,
+        nodeCode: taxonomyNodes.code,
+        tagType: sql<string>`${itemTaxonomyTags.tagType}::text`,
+        taggedBy: sql<string>`${itemTaxonomyTags.taggedBy}::text`,
+      })
+      .from(itemTaxonomyTags)
+      .innerJoin(taxonomyNodes, eq(taxonomyNodes.id, itemTaxonomyTags.nodeId))
+      .where(eq(itemTaxonomyTags.itemId, itemId))
+      .orderBy(
+        asc(itemTaxonomyTags.tagType),
+        asc(taxonomyNodes.type),
+        asc(taxonomyNodes.name),
+      );
+
+    return rows.map((r) => ({
+      nodeId: r.nodeId,
+      nodeName: r.nodeName,
+      nodeType: r.nodeType,
+      nodeCode: r.nodeCode ?? null,
+      tagType: r.tagType,
+      taggedBy: r.taggedBy,
+    }));
   }
 
   // ───────────────────────────────────────────────────────────────────────────
