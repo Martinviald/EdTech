@@ -69,7 +69,7 @@ export function ItemsTable({ items }: { items: ItemModel[] }) {
         <TableBody>
           {items.map((item) => (
             <TableRow key={item.id}>
-              <TableCell className="font-mono text-xs">{item.position + 1}</TableCell>
+              <TableCell className="font-mono text-xs">{item.position}</TableCell>
               <TableCell>
                 <span className="text-xs">
                   {ITEM_TYPE_LABELS[item.type] ?? item.type}
