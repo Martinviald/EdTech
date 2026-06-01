@@ -12,66 +12,18 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
+import {
+  FILTER_KEYS,
+  type DashboardFilterValues,
+} from './dashboard-filters';
 
-// ── Contrato compartido (lo consume FE-B) ────────────────────────────────────
-// FE-B importa `DashboardFilterBar`, `DashboardFilterValues` y
-// `parseDashboardFilters` desde esta ruta. La firma de props NO cambia.
-
-export type DashboardFilterValues = {
-  subjectId?: string;
-  gradeId?: string;
-  classGroupId?: string;
-  studentId?: string;
-  academicYearId?: string;
-  instrumentType?: string;
-};
-
-/** Claves de filtro que viven en la querystring. */
-const FILTER_KEYS: readonly (keyof DashboardFilterValues)[] = [
-  'subjectId',
-  'gradeId',
-  'classGroupId',
-  'studentId',
-  'academicYearId',
-  'instrumentType',
-];
+// La lógica pura de filtros (tipo, claves, parse/serialize) vive en
+// `./dashboard-filters` (módulo sin 'use client') para que las páginas server la
+// reutilicen. Re-exportamos el tipo por compatibilidad de imports existentes.
+export type { DashboardFilterValues };
 
 /** Valor centinela para la opción "todos" (Radix Select no admite value vacío). */
 const ALL = '__all__';
-
-/**
- * Parsea los filtros del dashboard desde el objeto `searchParams` resuelto de
- * Next 15. Vive en `components/` para que las páginas (FE-A y FE-B) lo
- * reutilicen sin duplicar lógica.
- */
-export function parseDashboardFilters(
-  params: Record<string, string | string[] | undefined>,
-): DashboardFilterValues {
-  const pick = (key: keyof DashboardFilterValues): string | undefined => {
-    const raw = params[key];
-    const value = Array.isArray(raw) ? raw[0] : raw;
-    return value && value.length > 0 ? value : undefined;
-  };
-  return {
-    subjectId: pick('subjectId'),
-    gradeId: pick('gradeId'),
-    classGroupId: pick('classGroupId'),
-    studentId: pick('studentId'),
-    academicYearId: pick('academicYearId'),
-    instrumentType: pick('instrumentType'),
-  };
-}
-
-/** Serializa los filtros a una querystring (orden estable, sin claves vacías). */
-export function buildDashboardQuery(value: DashboardFilterValues): string {
-  const params = new URLSearchParams();
-  for (const key of FILTER_KEYS) {
-    const v = value[key];
-    if (v) params.set(key, v);
-  }
-  const qs = params.toString();
-  return qs ? `?${qs}` : '';
-}
 
 export function DashboardFilterBar({
   options,

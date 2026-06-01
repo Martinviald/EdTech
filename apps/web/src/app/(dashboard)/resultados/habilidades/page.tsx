@@ -11,11 +11,11 @@ import {
 } from '@soe/types';
 import { PageContainer, PageHeader, EmptyState } from '@/components/patterns';
 import { Card, CardContent } from '@/components/ui/card';
+import { DashboardFilterBar } from '../components/dashboard-filter-bar';
 import {
-  DashboardFilterBar,
   parseDashboardFilters,
   buildDashboardQuery,
-} from '../components/dashboard-filter-bar';
+} from '../components/dashboard-filters';
 import { ResultadosNav } from '../components/resultados-nav';
 import { PerformanceBadge } from '../components/performance-badge';
 import {
