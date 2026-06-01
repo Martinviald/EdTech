@@ -58,7 +58,12 @@ export function ConversionPreview({ scaleId }: { scaleId: string }) {
     }
     startTransition(async () => {
       try {
-        const response = await previewConversionAction(scaleId, percentages);
+        // El backend trabaja porcentajes como fracción (0..1); la UI los maneja
+        // como 0..100 para el usuario. Convertimos al enviar.
+        const response = await previewConversionAction(
+          scaleId,
+          percentages.map((p) => p / 100),
+        );
         setResults(response.rows);
       } catch (err) {
         const message =
@@ -160,7 +165,9 @@ export function ConversionPreview({ scaleId }: { scaleId: string }) {
             <TableBody>
               {results.map((row) => (
                 <TableRow key={row.percentage}>
-                  <TableCell className="font-medium">{row.percentage}%</TableCell>
+                  <TableCell className="font-medium">
+                    {Math.round(row.percentage * 100)}%
+                  </TableCell>
                   <TableCell>{formatGrade(row.grade)}</TableCell>
                   <TableCell>
                     {row.isPassing ? (
