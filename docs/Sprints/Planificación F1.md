@@ -17,7 +17,7 @@
 | S2     | 5-6     | Banco de ítems + pautas DIA                | H3.3, H3.10, H3.11, H3.12, H5.8                       | 5/5 ✅            |
 | S3     | 7-8     | Ingesta y corrección DIA                   | H4.5, H4.6, H5.7, H16.3, H16.4                        | 5/5 ✅            |
 | S4     | 9-10    | Dashboards core (directivo y profesor)     | H6.1, H6.2, H6.3, H6.4, H6.5, H6.6, H6.7, H6.8, H6.9| 9/9 ✅            |
-| S5     | 11-12   | Dashboards avanzados + flujo demo completo | H6.10, H6.11, H6.12, H6.18, H19.1                     | 0/5              |
+| S5     | 11-12   | Dashboards avanzados + flujo demo completo | H6.10, H6.11, H6.12, H6.18, H19.1                     | 5/5 ✅            |
 
 **Flujo demo F1 completo al final del Sprint 5:**
 Subir hojas DIA → corrección automática → dashboard habilidades → click en pregunta → distractores → comparar con diagnóstico anterior → exportar Excel/PDF
@@ -149,7 +149,9 @@ Subir hojas DIA → corrección automática → dashboard habilidades → click 
 
 ---
 
-## Sprint 5 — Dashboards avanzados + Flujo demo completo _(Semanas 11-12)_
+## Sprint 5 — Dashboards avanzados + Flujo demo completo _(Semanas 11-12)_ ✅
+
+> **Estado:** completado. Las 5 historias (H6.10, H6.11, H6.12, H6.18, H19.1) están implementadas en la rama `sprint-5` (salida de `dev`). Backend: módulos `heatmap/` (H6.10) y `item-analysis/` (H6.11 tabla cruzada + H6.12 distractores). Frontend: `resultados/mapa-calor` (heatmap + export genérico H6.18), `resultados/detalle` (tabla cruzada con drill-down) y `question-detail-panel` (distractores). H19.1 validado en `docs/H19.1-validacion-arquitectonica.md` (sin lógica hardcodeada para DIA). Ver `docs/sprint5-contracts.md` y `docs/Sprints/S5-testing-guide.md`.
 
 **Objetivo:** completar las visualizaciones de mayor impacto en la demo y pulir el flujo de 5 minutos que convence al directivo.
 
