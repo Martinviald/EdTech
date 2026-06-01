@@ -20,11 +20,11 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
+import { DashboardFilterBar } from '../components/dashboard-filter-bar';
 import {
-  DashboardFilterBar,
   parseDashboardFilters,
   buildDashboardQuery,
-} from '../components/dashboard-filter-bar';
+} from '../components/dashboard-filters';
 import { ResultadosNav } from '../components/resultados-nav';
 import { DistributionBar } from '../components/distribution-bar';
 import { PerformanceBadge } from '../components/performance-badge';

@@ -260,8 +260,6 @@ export class DashboardsService {
 
     const resolvedThresholds = await this.resolveThresholds(orgId, query, assessmentIds);
 
-    const distribution = await this.computePerformanceDistribution(assessmentIds, studentIds);
-
     // Clasificación por alumno: promediamos el % logro por alumno sobre el set de
     // evaluaciones que matchean los filtros. Una fila por alumno.
     const baseConditions = this.buildResultConditions(assessmentIds, studentIds, undefined);
@@ -312,6 +310,21 @@ export class DashboardsService {
         achievement: pct,
         grade: r.avgGrade == null ? null : Number(r.avgGrade).toFixed(2),
         performanceLevel: level,
+      };
+    });
+
+    // Distribución por nivel: se calcula sobre la MISMA clasificación por alumno
+    // (promedio) que alimenta la tabla, para que seleccionar un badge coincida
+    // exactamente con el conteo de la gráfica. Antes se contaba por resultado
+    // (alumno × evaluación), lo que producía discrepancias cuando el promedio del
+    // alumno caía en un nivel distinto al de alguna de sus evaluaciones.
+    const classifiedTotal = classified.filter((c) => c.performanceLevel != null).length;
+    const distribution: PerformanceDistributionBucket[] = PERFORMANCE_LEVELS.map((level) => {
+      const count = classified.filter((c) => c.performanceLevel === level).length;
+      return {
+        level,
+        count,
+        percentage: classifiedTotal > 0 ? (count / classifiedTotal) * 100 : 0,
       };
     });
 
