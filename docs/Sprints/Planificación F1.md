@@ -16,7 +16,7 @@
 | S1     | 3-4     | Onboarding del colegio                     | H1.1, H1.2, H1.3, H1.4, H17.2, H17.3, H19.2          | 7/7 ✅            |
 | S2     | 5-6     | Banco de ítems + pautas DIA                | H3.3, H3.10, H3.11, H3.12, H5.8                       | 5/5 ✅            |
 | S3     | 7-8     | Ingesta y corrección DIA                   | H4.5, H4.6, H5.7, H16.3, H16.4                        | 5/5 ✅            |
-| S4     | 9-10    | Dashboards core (directivo y profesor)     | H6.1, H6.2, H6.3, H6.4, H6.5, H6.6, H6.7, H6.8, H6.9| 0/9              |
+| S4     | 9-10    | Dashboards core (directivo y profesor)     | H6.1, H6.2, H6.3, H6.4, H6.5, H6.6, H6.7, H6.8, H6.9| 9/9 ✅            |
 | S5     | 11-12   | Dashboards avanzados + flujo demo completo | H6.10, H6.11, H6.12, H6.18, H19.1                     | 0/5              |
 
 **Flujo demo F1 completo al final del Sprint 5:**
@@ -120,7 +120,9 @@ Subir hojas DIA → corrección automática → dashboard habilidades → click 
 
 ---
 
-## Sprint 4 — Dashboards core _(Semanas 9-10)_
+## Sprint 4 — Dashboards core _(Semanas 9-10)_ ✅
+
+> **Estado:** completado. Las 9 historias (H6.1–H6.9) están implementadas en la rama `sprint-4` (salida de `dev`). Backend: módulos `dashboards/` y `analytics/`. Frontend: sección `/resultados` (resumen, clasificación, habilidades, comparación, progresión) + export Excel/PDF. Ver `docs/sprint4-contracts.md` y `docs/Sprints/S4-testing-guide.md`.
 
 **Objetivo:** directivos y profesores tienen un panel completo de resultados con filtros, comparaciones históricas y clasificación por nivel de desempeño.
 

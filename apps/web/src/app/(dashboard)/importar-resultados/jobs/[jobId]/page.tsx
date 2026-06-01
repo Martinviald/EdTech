@@ -66,12 +66,8 @@ export default async function JobStatusPage({ params }: PageProps) {
               (result.data.status === 'completed' ||
                 result.data.status === 'partial') && (
                 <Button asChild>
-                  <Link
-                    href={
-                      `/dashboard/assessments/${result.data.assessmentId}` as Route
-                    }
-                  >
-                    Ver resultados de la evaluación
+                  <Link href={'/resultados' as Route}>
+                    Ver dashboards de resultados
                     <ArrowRight className="ml-2 h-4 w-4" />
                   </Link>
                 </Button>

@@ -15,6 +15,7 @@ import {
   type LucideIcon,
 } from 'lucide-react';
 import type { UserRole } from '@soe/types';
+import { DASHBOARD_VIEWER_ROLES } from '@soe/types';
 
 export type NavStatus = 'live' | 'soon';
 
@@ -80,8 +81,8 @@ export const NAV_ITEMS: readonly NavItem[] = [
     href: '/resultados',
     label: 'Resultados',
     icon: BarChart3,
-    status: 'soon',
-    roles: [...ALL_STAFF_ROLES, 'foundation_director'],
+    status: 'live',
+    roles: DASHBOARD_VIEWER_ROLES,
   },
   {
     href: '/alumnos',
