@@ -23,7 +23,7 @@ import {
 import { cn } from '@/lib/utils';
 import type {
   ItemModel,
-  CurriculumModel,
+  TaxonomyModel,
   AiTagSuggestion,
   CreateItemTagDto,
 } from '@soe/types';
@@ -32,7 +32,7 @@ import { requestAiTagging, confirmTags } from '../../actions';
 /** Local type that associates an AiTagSuggestion with its parent itemId */
 type FlatSuggestion = AiTagSuggestion & { itemId: string };
 
-type Step = 'select' | 'curriculum' | 'review' | 'done';
+type Step = 'select' | 'taxonomy' | 'review' | 'done';
 
 function getContentPreview(content: Record<string, unknown>): string {
   if (typeof content.stem === 'string') return content.stem;
@@ -57,14 +57,14 @@ function confidenceLabel(confidence: number): string {
 type Props = {
   instrumentId: string;
   items: ItemModel[];
-  curricula: CurriculumModel[];
+  taxonomies: TaxonomyModel[];
 };
 
-export function AiTaggingWizard({ instrumentId, items, curricula }: Props) {
+export function AiTaggingWizard({ instrumentId, items, taxonomies }: Props) {
   const router = useRouter();
   const [step, setStep] = useState<Step>('select');
   const [selectedItemIds, setSelectedItemIds] = useState<Set<string>>(new Set());
-  const [curriculumId, setCurriculumId] = useState('');
+  const [taxonomyId, setTaxonomyId] = useState('');
   const [suggestions, setSuggestions] = useState<FlatSuggestion[]>([]);
   const [accepted, setAccepted] = useState<Set<string>>(new Set());
   const [loading, setLoading] = useState(false);
@@ -116,13 +116,13 @@ export function AiTaggingWizard({ instrumentId, items, curricula }: Props) {
   }, [suggestions]);
 
   async function handleRequestTagging() {
-    if (!curriculumId || selectedItemIds.size === 0) return;
+    if (!taxonomyId || selectedItemIds.size === 0) return;
     setLoading(true);
     setError(null);
     try {
       const result = await requestAiTagging({
         itemIds: Array.from(selectedItemIds),
-        curriculumId,
+        taxonomyId,
       });
       // Flatten the grouped suggestions (Record<itemId, AiTagSuggestion[]>) into FlatSuggestion[]
       const flat: FlatSuggestion[] = [];
@@ -208,10 +208,10 @@ export function AiTaggingWizard({ instrumentId, items, curricula }: Props) {
         <span
           className={cn(
             'rounded-full px-3 py-1',
-            step === 'curriculum' ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground',
+            step === 'taxonomy' ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground',
           )}
         >
-          2. Elegir curriculo
+          2. Elegir marco
         </span>
         <span className="text-muted-foreground">&rarr;</span>
         <span
@@ -291,7 +291,7 @@ export function AiTaggingWizard({ instrumentId, items, curricula }: Props) {
                   </p>
                   <Button
                     disabled={selectedItemIds.size === 0}
-                    onClick={() => setStep('curriculum')}
+                    onClick={() => setStep('taxonomy')}
                   >
                     Siguiente
                   </Button>
@@ -302,24 +302,24 @@ export function AiTaggingWizard({ instrumentId, items, curricula }: Props) {
         </Card>
       )}
 
-      {/* Step 2: Select curriculum */}
-      {step === 'curriculum' && (
+      {/* Step 2: Select taxonomy */}
+      {step === 'taxonomy' && (
         <Card>
           <CardHeader>
-            <CardTitle className="text-base">Elegir curriculo de referencia</CardTitle>
+            <CardTitle className="text-base">Elegir marco acadÃ©mico de referencia</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             <p className="text-sm text-muted-foreground">
-              La IA usara la taxonomia de este curriculo para sugerir tags a los{' '}
+              La IA usara la taxonomÃ­a de este marco acadÃ©mico para sugerir tags a los{' '}
               {selectedItemIds.size} items seleccionados.
             </p>
             <div className="max-w-sm space-y-2">
-              <Select value={curriculumId} onValueChange={setCurriculumId}>
+              <Select value={taxonomyId} onValueChange={setTaxonomyId}>
                 <SelectTrigger>
-                  <SelectValue placeholder="Seleccionar curriculo" />
+                  <SelectValue placeholder="Seleccionar marco acadÃ©mico" />
                 </SelectTrigger>
                 <SelectContent>
-                  {curricula.map((c) => (
+                  {taxonomies.map((c) => (
                     <SelectItem key={c.id} value={c.id}>
                       {c.name} ({c.type})
                     </SelectItem>
@@ -332,7 +332,7 @@ export function AiTaggingWizard({ instrumentId, items, curricula }: Props) {
                 Atras
               </Button>
               <Button
-                disabled={!curriculumId || loading}
+                disabled={!taxonomyId || loading}
                 onClick={handleRequestTagging}
               >
                 {loading ? 'Solicitando sugerencias...' : 'Obtener sugerencias IA'}
@@ -432,7 +432,7 @@ export function AiTaggingWizard({ instrumentId, items, curricula }: Props) {
                     {accepted.size} de {suggestions.length} sugerencias aceptadas
                   </p>
                   <div className="flex gap-3">
-                    <Button variant="outline" onClick={() => setStep('curriculum')}>
+                    <Button variant="outline" onClick={() => setStep('taxonomy')}>
                       Atras
                     </Button>
                     <Button disabled={loading || accepted.size === 0} onClick={handleConfirm}>

@@ -146,7 +146,7 @@ export const aiTagSuggestionSchema = z.object({
 
 export const aiTagRequestSchema = z.object({
   itemIds: z.array(z.string().uuid()).min(1).max(50),
-  curriculumId: z.string().uuid(),
+  taxonomyId: z.string().uuid(),
 });
 
 export const confirmAiTagsSchema = z.object({
@@ -167,7 +167,7 @@ export type ConfirmAiTagsDto = z.infer<typeof confirmAiTagsSchema>;
 // ── DIA Ingestion ────────────────────────────────────────────────────────────
 
 export const diaIngestionRequestSchema = z.object({
-  curriculumId: z.string().uuid(),
+  taxonomyId: z.string().uuid(),
   subjectId: z.string().uuid(),
   gradeId: z.string().uuid(),
   year: z.number().int().min(2020).max(2100),
@@ -202,7 +202,7 @@ export type DiaConfirmResponse = {
 
 export const specTableMappingSchema = z.object({
   instrumentId: z.string().uuid(),
-  curriculumId: z.string().uuid(),
+  taxonomyId: z.string().uuid(),
   fileData: z.array(z.record(z.string())).min(1),
   columnMapping: z.record(z.string()),
 });

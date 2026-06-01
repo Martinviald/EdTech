@@ -96,7 +96,7 @@ export class ItemsService {
           name: taxonomyNodes.name,
           code: taxonomyNodes.code,
           type: taxonomyNodes.type,
-          curriculumId: taxonomyNodes.curriculumId,
+          taxonomyId: taxonomyNodes.taxonomyId,
         },
       })
       .from(itemTaxonomyTags)
@@ -142,7 +142,7 @@ export class ItemsService {
           name: taxonomyNodes.name,
           code: taxonomyNodes.code,
           type: taxonomyNodes.type,
-          curriculumId: taxonomyNodes.curriculumId,
+          taxonomyId: taxonomyNodes.taxonomyId,
         },
       })
       .from(itemTaxonomyTags)

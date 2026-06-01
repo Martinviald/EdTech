@@ -67,7 +67,7 @@ export type UpdateInstrumentSectionDto = z.infer<typeof updateInstrumentSectionS
 // ── Instruments ──────────────────────────────────────────────────────────────
 
 export const createInstrumentSchema = z.object({
-  curriculumId: z.string().uuid().optional(),
+  taxonomyId: z.string().uuid().optional(),
   name: z.string().min(2).max(300),
   shortName: z.string().max(50).optional(),
   type: instrumentTypeSchema,
@@ -118,7 +118,7 @@ export type InstrumentSectionModel = {
 export type InstrumentModel = {
   id: string;
   orgId: string | null;
-  curriculumId: string | null;
+  taxonomyId: string | null;
   name: string;
   shortName: string | null;
   type: InstrumentType;

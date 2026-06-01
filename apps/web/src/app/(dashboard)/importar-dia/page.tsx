@@ -13,8 +13,8 @@ export default async function ImportarDiaPage() {
 
   const orgId = session.user.orgId;
 
-  const [curricula, subjectClasses] = await Promise.all([
-    apiGet<CatalogOptions['curricula']>('/taxonomies/curricula'),
+  const [taxonomies, subjectClasses] = await Promise.all([
+    apiGet<CatalogOptions['taxonomies']>('/taxonomies'),
     apiGet<OrgSubjectClass[]>(`/organizations/${orgId}/subject-classes`),
   ]);
 
@@ -37,7 +37,7 @@ export default async function ImportarDiaPage() {
   const subjects = [...subjectsMap.values()].sort((a, b) => a.name.localeCompare(b.name));
   const grades = [...gradesMap.values()].sort((a, b) => a.gradeOrder - b.gradeOrder || a.name.localeCompare(b.name));
 
-  const catalogOptions: CatalogOptions = { curricula, subjects, grades };
+  const catalogOptions: CatalogOptions = { taxonomies, subjects, grades };
 
   return (
     <div className="space-y-6">

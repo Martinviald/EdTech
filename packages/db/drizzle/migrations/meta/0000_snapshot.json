@@ -1,5 +1,5 @@
 {
-  "id": "dac0ec2f-13dd-4151-997b-69ee3aa4daf9",
+  "id": "41e29fb3-347b-4fa0-a843-a6a5189fa153",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
@@ -998,8 +998,8 @@
       "checkConstraints": {},
       "isRLSEnabled": false
     },
-    "public.curricula": {
-      "name": "curricula",
+    "public.taxonomies": {
+      "name": "taxonomies",
       "schema": "",
       "columns": {
         "id": {
@@ -1017,7 +1017,7 @@
         },
         "type": {
           "name": "type",
-          "type": "curriculum_type",
+          "type": "taxonomy_type",
           "typeSchema": "public",
           "primaryKey": false,
           "notNull": true
@@ -1064,8 +1064,8 @@
         }
       },
       "indexes": {
-        "curricula_official_type_version_uniq": {
-          "name": "curricula_official_type_version_uniq",
+        "taxonomies_official_type_version_uniq": {
+          "name": "taxonomies_official_type_version_uniq",
           "columns": [
             {
               "expression": "type",
@@ -1081,16 +1081,16 @@
             }
           ],
           "isUnique": true,
-          "where": "\"curricula\".\"is_official\" = true AND \"curricula\".\"org_id\" IS NULL",
+          "where": "\"taxonomies\".\"is_official\" = true AND \"taxonomies\".\"org_id\" IS NULL",
           "concurrently": false,
           "method": "btree",
           "with": {}
         }
       },
       "foreignKeys": {
-        "curricula_org_id_organizations_id_fk": {
-          "name": "curricula_org_id_organizations_id_fk",
-          "tableFrom": "curricula",
+        "taxonomies_org_id_organizations_id_fk": {
+          "name": "taxonomies_org_id_organizations_id_fk",
+          "tableFrom": "taxonomies",
           "tableTo": "organizations",
           "columnsFrom": [
             "org_id"
@@ -1214,8 +1214,8 @@
           "notNull": true,
           "default": "gen_random_uuid()"
         },
-        "curriculum_id": {
-          "name": "curriculum_id",
+        "taxonomy_id": {
+          "name": "taxonomy_id",
           "type": "uuid",
           "primaryKey": false,
           "notNull": true
@@ -1293,11 +1293,11 @@
         }
       },
       "indexes": {
-        "taxonomy_nodes_curriculum_code_uniq": {
-          "name": "taxonomy_nodes_curriculum_code_uniq",
+        "taxonomy_nodes_taxonomy_code_uniq": {
+          "name": "taxonomy_nodes_taxonomy_code_uniq",
           "columns": [
             {
-              "expression": "curriculum_id",
+              "expression": "taxonomy_id",
               "isExpression": false,
               "asc": true,
               "nulls": "last"
@@ -1317,12 +1317,12 @@
         }
       },
       "foreignKeys": {
-        "taxonomy_nodes_curriculum_id_curricula_id_fk": {
-          "name": "taxonomy_nodes_curriculum_id_curricula_id_fk",
+        "taxonomy_nodes_taxonomy_id_taxonomies_id_fk": {
+          "name": "taxonomy_nodes_taxonomy_id_taxonomies_id_fk",
           "tableFrom": "taxonomy_nodes",
-          "tableTo": "curricula",
+          "tableTo": "taxonomies",
           "columnsFrom": [
-            "curriculum_id"
+            "taxonomy_id"
           ],
           "columnsTo": [
             "id"
@@ -1560,8 +1560,8 @@
           "primaryKey": false,
           "notNull": false
         },
-        "curriculum_id": {
-          "name": "curriculum_id",
+        "taxonomy_id": {
+          "name": "taxonomy_id",
           "type": "uuid",
           "primaryKey": false,
           "notNull": false
@@ -1679,12 +1679,12 @@
           "onDelete": "no action",
           "onUpdate": "no action"
         },
-        "instruments_curriculum_id_curricula_id_fk": {
-          "name": "instruments_curriculum_id_curricula_id_fk",
+        "instruments_taxonomy_id_taxonomies_id_fk": {
+          "name": "instruments_taxonomy_id_taxonomies_id_fk",
           "tableFrom": "instruments",
-          "tableTo": "curricula",
+          "tableTo": "taxonomies",
           "columnsFrom": [
-            "curriculum_id"
+            "taxonomy_id"
           ],
           "columnsTo": [
             "id"
@@ -3532,20 +3532,6 @@
         "cancelled"
       ]
     },
-    "public.curriculum_type": {
-      "name": "curriculum_type",
-      "schema": "public",
-      "values": [
-        "mineduc",
-        "simce",
-        "paes",
-        "dia",
-        "cambridge",
-        "aptus",
-        "desafio",
-        "custom"
-      ]
-    },
     "public.enrollment_status": {
       "name": "enrollment_status",
       "schema": "public",
@@ -3767,6 +3753,20 @@
         "descriptor",
         "criterion",
         "paper"
+      ]
+    },
+    "public.taxonomy_type": {
+      "name": "taxonomy_type",
+      "schema": "public",
+      "values": [
+        "mineduc",
+        "simce",
+        "paes",
+        "dia",
+        "cambridge",
+        "aptus",
+        "desafio",
+        "custom"
       ]
     },
     "public.user_role": {

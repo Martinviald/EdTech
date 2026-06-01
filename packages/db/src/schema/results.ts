@@ -3,7 +3,7 @@ import { relations } from 'drizzle-orm';
 import { performanceLevelEnum } from './enums';
 import { assessments } from './assessments';
 import { students } from './students';
-import { taxonomyNodes } from './curriculum';
+import { taxonomyNodes } from './taxonomy';
 
 export const assessmentResults = pgTable(
   'assessment_results',

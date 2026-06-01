@@ -11,7 +11,7 @@ import { Label } from '@/components/ui/label';
 import { FileDropzone } from '../components/FileDropzone';
 
 export interface CatalogOptions {
-  curricula: Array<{ id: string; name: string; type: string }>;
+  taxonomies: Array<{ id: string; name: string; type: string }>;
   subjects: Array<{ id: string; name: string; shortName: string }>;
   grades: Array<{ id: string; name: string; shortName: string; gradeOrder: number }>;
 }
@@ -27,7 +27,7 @@ export function UploadStep({ onSubmit, isPending, catalogOptions }: UploadStepPr
   const [fileData, setFileData] = useState<unknown>(null);
   const [name, setName] = useState('');
   const [year, setYear] = useState(new Date().getFullYear().toString());
-  const [curriculumId, setCurriculumId] = useState('');
+  const [taxonomyId, setTaxonomyId] = useState('');
   const [subjectId, setSubjectId] = useState('');
   const [gradeId, setGradeId] = useState('');
   const [version, setVersion] = useState('');
@@ -61,8 +61,8 @@ export function UploadStep({ onSubmit, isPending, catalogOptions }: UploadStepPr
       toast.error('Ingresa un nombre para el instrumento');
       return;
     }
-    if (!curriculumId) {
-      toast.error('Selecciona un curriculum');
+    if (!taxonomyId) {
+      toast.error('Selecciona un marco acadÃ©mico');
       return;
     }
     if (!subjectId) {
@@ -83,7 +83,7 @@ export function UploadStep({ onSubmit, isPending, catalogOptions }: UploadStepPr
     const metadata: DiaIngestionRequestDto = {
       name: name.trim(),
       year: yearNum,
-      curriculumId,
+      taxonomyId,
       subjectId,
       gradeId,
       version: version.trim() || undefined,
@@ -166,16 +166,16 @@ export function UploadStep({ onSubmit, isPending, catalogOptions }: UploadStepPr
               />
             </div>
             <div>
-              <Label htmlFor="dia-curriculum">Curriculum</Label>
+              <Label htmlFor="dia-taxonomy">Marco acadÃ©mico</Label>
               <select
-                id="dia-curriculum"
-                value={curriculumId}
-                onChange={(e) => setCurriculumId(e.target.value)}
+                id="dia-taxonomy"
+                value={taxonomyId}
+                onChange={(e) => setTaxonomyId(e.target.value)}
                 disabled={isPending}
                 className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
               >
                 <option value="">Selecciona...</option>
-                {catalogOptions.curricula.map((c) => (
+                {catalogOptions.taxonomies.map((c) => (
                   <option key={c.id} value={c.id}>
                     {c.name}
                   </option>

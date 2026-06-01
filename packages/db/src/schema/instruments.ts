@@ -17,7 +17,7 @@ import {
 } from './enums';
 import { organizations } from './organizations';
 import { grades, subjects } from './academic';
-import { curricula } from './curriculum';
+import { taxonomies } from './taxonomy';
 import { users } from './users';
 
 export const gradingScales = pgTable('grading_scales', {
@@ -38,7 +38,7 @@ export const gradingScales = pgTable('grading_scales', {
 export const instruments = pgTable('instruments', {
   id: uuid('id').defaultRandom().primaryKey(),
   orgId: uuid('org_id').references(() => organizations.id),
-  curriculumId: uuid('curriculum_id').references(() => curricula.id),
+  taxonomyId: uuid('taxonomy_id').references(() => taxonomies.id),
   name: text('name').notNull(),
   shortName: text('short_name'),
   type: instrumentTypeEnum('type').notNull(),
@@ -72,9 +72,9 @@ export const instrumentSections = pgTable('instrument_sections', {
 
 export const instrumentsRelations = relations(instruments, ({ one, many }) => ({
   org: one(organizations, { fields: [instruments.orgId], references: [organizations.id] }),
-  curriculum: one(curricula, {
-    fields: [instruments.curriculumId],
-    references: [curricula.id],
+  taxonomy: one(taxonomies, {
+    fields: [instruments.taxonomyId],
+    references: [taxonomies.id],
   }),
   subject: one(subjects, { fields: [instruments.subjectId], references: [subjects.id] }),
   grade: one(grades, { fields: [instruments.gradeId], references: [grades.id] }),

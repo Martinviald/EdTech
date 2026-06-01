@@ -5,7 +5,7 @@ import {
   items,
   itemTaxonomyTags,
   taxonomyNodes,
-  curricula,
+  taxonomies,
 } from '@soe/db';
 import type { JwtPayload } from '../auth/jwt-payload.types';
 import { InjectDb, type Database } from '../database/database.types';
@@ -13,7 +13,7 @@ import { parseDiaPayload, type DiaParseResult } from './lib/dia-parser';
 import type { DiaRawPayload } from './lib/dia-sample-data';
 
 export interface DiaIngestionMetadata {
-  curriculumId: string;
+  taxonomyId: string;
   isOfficial?: boolean;
 }
 
@@ -60,7 +60,7 @@ export class DiaIngestionService {
     const parseResult = parseDiaPayload(data);
     const taxonomyMatches = await this.matchTaxonomy(
       parseResult.items.map((i) => i.skillName),
-      metadata.curriculumId,
+      metadata.taxonomyId,
     );
 
     const matchedSkills = taxonomyMatches.filter((m) => m.matched).length;
@@ -106,19 +106,19 @@ export class DiaIngestionService {
       throw new BadRequestException('No hay ítems válidos para crear');
     }
 
-    // Verify curriculum exists
-    const [curriculum] = await this.db
+    // Verify taxonomy exists
+    const [taxonomy] = await this.db
       .select()
-      .from(curricula)
-      .where(eq(curricula.id, metadata.curriculumId));
+      .from(taxonomies)
+      .where(eq(taxonomies.id, metadata.taxonomyId));
 
-    if (!curriculum) {
+    if (!taxonomy) {
       throw new NotFoundException('Currículum no encontrado');
     }
 
     const taxonomyMatches = await this.matchTaxonomy(
       parseResult.items.map((i) => i.skillName),
-      metadata.curriculumId,
+      metadata.taxonomyId,
     );
 
     // Determine orgId: official instruments have null orgId
@@ -130,7 +130,7 @@ export class DiaIngestionService {
         .insert(instruments)
         .values({
           orgId,
-          curriculumId: metadata.curriculumId,
+          taxonomyId: metadata.taxonomyId,
           name: parseResult.instrument.name,
           type: 'dia',
           year: parseResult.instrument.year,
@@ -234,20 +234,20 @@ export class DiaIngestionService {
   }
 
   /**
-   * Match skill names to taxonomy nodes in the given curriculum.
+   * Match skill names to taxonomy nodes in the given taxonomy.
    * Uses case-insensitive matching by name.
    */
   private async matchTaxonomy(
     skillNames: string[],
-    curriculumId: string,
+    taxonomyId: string,
   ): Promise<TaxonomyMatchResult[]> {
     if (skillNames.length === 0) return [];
 
-    // Get all nodes from the curriculum for matching
+    // Get all nodes from the taxonomy for matching
     const nodes = await this.db
       .select({ id: taxonomyNodes.id, name: taxonomyNodes.name })
       .from(taxonomyNodes)
-      .where(eq(taxonomyNodes.curriculumId, curriculumId));
+      .where(eq(taxonomyNodes.taxonomyId, taxonomyId));
 
     // Build a case-insensitive lookup map
     const nodeMap = new Map<string, { id: string; name: string }>();

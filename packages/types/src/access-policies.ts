@@ -5,7 +5,7 @@ import type { UserRole } from './enums';
 // en server components del frontend. Si agregas una constante nueva acá,
 // úsala en ambos lados — no la dupliques inline.
 
-export const CURRICULUM_ROLES: readonly UserRole[] = [
+export const TAXONOMY_ROLES: readonly UserRole[] = [
   'platform_admin',
   'school_admin',
   'academic_director',

@@ -99,7 +99,7 @@ export class InstrumentsService {
       .insert(instruments)
       .values({
         orgId,
-        curriculumId: dto.curriculumId ?? null,
+        taxonomyId: dto.taxonomyId ?? null,
         name: dto.name,
         shortName: dto.shortName ?? null,
         type: dto.type,
@@ -145,7 +145,7 @@ export class InstrumentsService {
     if (dto.name !== undefined) updateData.name = dto.name;
     if (dto.shortName !== undefined) updateData.shortName = dto.shortName;
     if (dto.type !== undefined) updateData.type = dto.type;
-    if (dto.curriculumId !== undefined) updateData.curriculumId = dto.curriculumId;
+    if (dto.taxonomyId !== undefined) updateData.taxonomyId = dto.taxonomyId;
     if (dto.subjectId !== undefined) updateData.subjectId = dto.subjectId;
     if (dto.gradeId !== undefined) updateData.gradeId = dto.gradeId;
     if (dto.year !== undefined) updateData.year = dto.year;

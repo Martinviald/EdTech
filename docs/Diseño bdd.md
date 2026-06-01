@@ -32,7 +32,7 @@
 │                         teacher_assignments                          │
 ├─────────────────────────────────────────────────────────────────────┤
 │  ALUMNOS                TAXONOMÍA UNIVERSAL                         │
-│  students               curricula                                    │
+│  students               taxonomies                                    │
 │  student_enrollments    taxonomy_nodes  ◄── árbol polimórfico       │
 │                         taxonomy_mappings (cross-curriculum)         │
 ├─────────────────────────────────────────────────────────────────────┤
@@ -289,7 +289,7 @@ Diseñada para soportar en la misma estructura:
 - **Cambridge**: Papers, skills y criterios (Reading, Writing, Listening, Speaking)
 - **Custom**: Cualquier taxonomía que defina la plataforma o el colegio
 
-#### `curricula`
+#### `taxonomies`
 
 El "sistema de clasificación" raíz.
 
@@ -311,7 +311,7 @@ metadata        jsonb       Info adicional del curriculum
 
 ```
 id              uuid        PK
-curriculum_id   uuid        FK → curricula.id
+taxonomy_id   uuid        FK → taxonomies.id
 parent_id       uuid        FK → taxonomy_nodes.id  NULLABLE (nodos raíz)
 type            enum        'domain' | 'subdomain' | 'axis' | 'learning_objective'
                             | 'skill' | 'content' | 'text_type' | 'performance_level'
@@ -325,9 +325,9 @@ order           integer
 depth           integer     Calculado: 0=raíz, 1=dominio, 2=subdominio...
 metadata        jsonb       Datos tipo-específicos
 
-INDEX(curriculum_id)
+INDEX(taxonomy_id)
 INDEX(parent_id)
-INDEX(curriculum_id, grade_id, subject_id)
+INDEX(taxonomy_id, grade_id, subject_id)
 ```
 
 **Ejemplos de árbol MINEDUC Lenguaje 3° básico:**
@@ -366,7 +366,7 @@ INDEX(curriculum_id, grade_id, subject_id)
 
 #### `taxonomy_mappings`
 
-Equivalencias entre nodos de distintos curricula. Permite cruzar SIMCE con MINEDUC.
+Equivalencias entre nodos de distintos taxonomies. Permite cruzar SIMCE con MINEDUC.
 
 ```
 id              uuid        PK
@@ -390,7 +390,7 @@ La definición de una prueba (no una aplicación específica).
 ```
 id              uuid        PK
 org_id          uuid        FK → organizations.id  NULLABLE (NULL = plataforma global)
-curriculum_id   uuid        FK → curricula.id
+taxonomy_id   uuid        FK → taxonomies.id
 name            text        e.g. "DIA Lectura 1° Básico 2025"
 short_name      text
 type            enum        'dia' | 'simce' | 'paes' | 'cambridge_mock' | 'aptus'
@@ -875,7 +875,7 @@ En F4 se agrega:
 
 **Problema:** los dashboards necesitan agregar y cruzar datos entre instrumentos ("el alumno tiene 60% en OA5 MINEDUC y 45% en la habilidad equivalente del SIMCE"). Con tablas separadas, ese join es una pesadilla.
 
-**Decisión:** árbol polimórfico. El `type` del nodo indica qué clase de objeto es. `taxonomy_mappings` conecta nodos equivalentes entre curricula.
+**Decisión:** árbol polimórfico. El `type` del nodo indica qué clase de objeto es. `taxonomy_mappings` conecta nodos equivalentes entre taxonomies.
 
 ### ¿Por qué `responses` tiene `ai_score` y `human_score` separados?
 
@@ -896,7 +896,7 @@ Tablas necesarias en orden de implementación:
 ```
 S0: organizations, academic_years, grades, subjects
     users, org_memberships
-    curricula, taxonomy_nodes  ← MINEDUC seed data
+    taxonomies, taxonomy_nodes  ← MINEDUC seed data
 
 S1: class_groups, subject_classes, teacher_assignments
     students, student_enrollments
@@ -952,7 +952,7 @@ Para que el sistema funcione desde el primer día, se necesita cargar:
 
 1. **`grades`** — 12 niveles (1° básico → 4° medio)
 2. **`subjects`** — Lenguaje, Matemáticas (F1), resto en F3
-3. **`curricula`** — "MINEDUC 2024", "DIA 2025"
+3. **`taxonomies`** — "MINEDUC 2024", "DIA 2025"
 4. **`taxonomy_nodes`** — OAs de Lenguaje y Matemáticas 1°-8° básico (DIA scope)
 5. **`instruments`** — Pautas oficiales DIA 2025 por asignatura y nivel
 6. **`grading_scales`** — Escala chilena estándar (60% exigencia, 1.0-7.0)

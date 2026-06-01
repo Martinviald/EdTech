@@ -61,7 +61,7 @@ export class AiTaggingService {
   ) {}
 
   async suggest(
-    dto: { itemIds: string[]; curriculumId: string },
+    dto: { itemIds: string[]; taxonomyId: string },
     user: JwtPayload,
   ): Promise<SuggestResult> {
     if (!(await this.llm.isAvailable(user.orgId))) {
@@ -146,7 +146,7 @@ export class AiTaggingService {
           )
         : undefined;
 
-    // 4. Fetch taxonomy nodes for the specified curriculum, scoped to the
+    // 4. Fetch taxonomy nodes for the specified taxonomy, scoped to the
     //    items' subject/grade plus universal nodes.
     const nodes = await this.db
       .select({
@@ -158,7 +158,7 @@ export class AiTaggingService {
       .from(taxonomyNodes)
       .where(
         and(
-          eq(taxonomyNodes.curriculumId, dto.curriculumId),
+          eq(taxonomyNodes.taxonomyId, dto.taxonomyId),
           subjectFilter,
           gradeFilter,
         ),
@@ -166,7 +166,7 @@ export class AiTaggingService {
 
     if (nodes.length === 0) {
       throw new NotFoundException(
-        'No taxonomy nodes found for the specified curriculum',
+        'No taxonomy nodes found for the specified taxonomy',
       );
     }
 

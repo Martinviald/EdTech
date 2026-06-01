@@ -38,7 +38,7 @@ import {
 } from '@soe/types';
 import { createDbClient } from '../client';
 import { classGroups, grades, subjectClasses, subjects } from '../schema/academic';
-import { curricula, taxonomyNodes } from '../schema/curriculum';
+import { taxonomies, taxonomyNodes } from '../schema/taxonomy';
 import { academicYears } from '../schema/organizations';
 import { students, studentEnrollments } from '../schema/students';
 import { teacherAssignments } from '../schema/users';
@@ -202,11 +202,11 @@ async function main() {
   const grade3 = gradeRows.find((g) => g.code === '3RD_BASIC');
   const [langSubject] = await db.select().from(subjects).where(eq(subjects.code, 'LANG'));
   const [mathSubject] = await db.select().from(subjects).where(eq(subjects.code, 'MATH'));
-  const [diaCurriculum] = await db
+  const [diaTaxonomy] = await db
     .select()
-    .from(curricula)
-    .where(and(eq(curricula.type, 'dia'), eq(curricula.version, '2025')));
-  if (!grade2 || !grade3 || !langSubject || !mathSubject || !diaCurriculum) {
+    .from(taxonomies)
+    .where(and(eq(taxonomies.type, 'dia'), eq(taxonomies.version, '2025')));
+  if (!grade2 || !grade3 || !langSubject || !mathSubject || !diaTaxonomy) {
     throw new Error(
       'Faltan prerrequisitos. Corre primero el seed base: pnpm --filter @soe/db db:seed',
     );
@@ -214,7 +214,7 @@ async function main() {
   const diaNodes = await db
     .select()
     .from(taxonomyNodes)
-    .where(eq(taxonomyNodes.curriculumId, diaCurriculum.id));
+    .where(eq(taxonomyNodes.taxonomyId, diaTaxonomy.id));
   const nodeByCode = new Map(diaNodes.map((n) => [n.code as string, n.id]));
   for (const code of [...new Set([...LECT_SKILL_CYCLE, ...MAT_SKILL_CYCLE])]) {
     if (!nodeByCode.has(code)) {
@@ -358,7 +358,7 @@ async function main() {
     {
       id: INST_LECT,
       orgId: DEMO_ORG_ID,
-      curriculumId: diaCurriculum.id,
+      taxonomyId: diaTaxonomy.id,
       name: 'DIA Lectura 2° Básico',
       shortName: 'DIA Lectura 2°B',
       type: 'dia',
@@ -372,7 +372,7 @@ async function main() {
     {
       id: INST_MAT,
       orgId: DEMO_ORG_ID,
-      curriculumId: diaCurriculum.id,
+      taxonomyId: diaTaxonomy.id,
       name: 'DIA Matemática 2° Básico',
       shortName: 'DIA Mat 2°B',
       type: 'dia',

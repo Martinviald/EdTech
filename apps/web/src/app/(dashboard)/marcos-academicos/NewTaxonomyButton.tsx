@@ -14,10 +14,10 @@ import {
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { createCurriculum } from './actions';
-import type { CreateCurriculumDto } from '@soe/types';
+import { createTaxonomy } from './actions';
+import type { CreateTaxonomyDto } from '@soe/types';
 
-const TYPE_OPTIONS: Array<{ value: CreateCurriculumDto['type']; label: string }> = [
+const TYPE_OPTIONS: Array<{ value: CreateTaxonomyDto['type']; label: string }> = [
   { value: 'custom', label: 'Personalizado' },
   { value: 'mineduc', label: 'MINEDUC' },
   { value: 'simce', label: 'SIMCE' },
@@ -28,10 +28,10 @@ const TYPE_OPTIONS: Array<{ value: CreateCurriculumDto['type']; label: string }>
   { value: 'desafio', label: 'Desafío' },
 ];
 
-export function NewCurriculumButton({ isPlatformAdmin }: { isPlatformAdmin: boolean }) {
+export function NewTaxonomyButton({ isPlatformAdmin }: { isPlatformAdmin: boolean }) {
   const [open, setOpen] = useState(false);
   const [name, setName] = useState('');
-  const [type, setType] = useState<CreateCurriculumDto['type']>('custom');
+  const [type, setType] = useState<CreateTaxonomyDto['type']>('custom');
   const [version, setVersion] = useState('');
   const [isOfficial, setIsOfficial] = useState(false);
   const [pending, startTransition] = useTransition();
@@ -52,18 +52,18 @@ export function NewCurriculumButton({ isPlatformAdmin }: { isPlatformAdmin: bool
     }
     startTransition(async () => {
       try {
-        const created = await createCurriculum({
+        const created = await createTaxonomy({
           name: name.trim(),
           type,
           language: 'es',
           version: version.trim() || undefined,
           isOfficial: isPlatformAdmin && isOfficial,
         });
-        toast.success('Currículum creado');
+        toast.success('Marco académico creado');
         setOpen(false);
         reset();
         router.refresh();
-        router.push(`/curriculum/${created.id}`);
+        router.push(`/marcos-academicos/${created.id}`);
       } catch (err) {
         toast.error(err instanceof Error ? err.message : 'Error al crear');
       }
@@ -73,24 +73,24 @@ export function NewCurriculumButton({ isPlatformAdmin }: { isPlatformAdmin: bool
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button>Nuevo currículum</Button>
+        <Button>Nuevo marco académico</Button>
       </DialogTrigger>
       <DialogContent>
         <form onSubmit={handleSubmit} className="space-y-4">
           <DialogHeader>
-            <DialogTitle>Nuevo currículum</DialogTitle>
+            <DialogTitle>Nuevo marco académico</DialogTitle>
             <DialogDescription>
-              Crea un currículum personalizado para tu colegio (ej: plan lector, escalas internas).
+              Crea un marco académico propio para tu colegio (ej: plan lector, escalas internas).
             </DialogDescription>
           </DialogHeader>
 
           <div className="space-y-3">
             <div className="space-y-1.5">
-              <label className="text-sm font-medium" htmlFor="curriculum-name">
+              <label className="text-sm font-medium" htmlFor="taxonomy-name">
                 Nombre
               </label>
               <Input
-                id="curriculum-name"
+                id="taxonomy-name"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 placeholder="Ej: Plan lector 2026"
@@ -102,13 +102,13 @@ export function NewCurriculumButton({ isPlatformAdmin }: { isPlatformAdmin: bool
             </div>
 
             <div className="space-y-1.5">
-              <label className="text-sm font-medium" htmlFor="curriculum-type">
+              <label className="text-sm font-medium" htmlFor="taxonomy-type">
                 Tipo
               </label>
               <select
-                id="curriculum-type"
+                id="taxonomy-type"
                 value={type}
-                onChange={(e) => setType(e.target.value as CreateCurriculumDto['type'])}
+                onChange={(e) => setType(e.target.value as CreateTaxonomyDto['type'])}
                 disabled={pending}
                 className="border-input bg-background ring-offset-background focus-visible:ring-ring flex h-9 w-full rounded-md border px-3 py-1 text-sm focus-visible:outline-none focus-visible:ring-1"
               >
@@ -121,11 +121,11 @@ export function NewCurriculumButton({ isPlatformAdmin }: { isPlatformAdmin: bool
             </div>
 
             <div className="space-y-1.5">
-              <label className="text-sm font-medium" htmlFor="curriculum-version">
+              <label className="text-sm font-medium" htmlFor="taxonomy-version">
                 Versión (opcional)
               </label>
               <Input
-                id="curriculum-version"
+                id="taxonomy-version"
                 value={version}
                 onChange={(e) => setVersion(e.target.value)}
                 placeholder="Ej: 2026"

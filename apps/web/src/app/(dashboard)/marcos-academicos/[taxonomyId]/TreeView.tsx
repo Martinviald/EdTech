@@ -87,11 +87,11 @@ type FormState =
   | { kind: 'edit'; node: TaxonomyNode };
 
 export function TreeView({
-  curriculumId,
+  taxonomyId,
   nodes,
   editable,
 }: {
-  curriculumId: string;
+  taxonomyId: string;
   nodes: TaxonomyNode[];
   editable: boolean;
 }) {
@@ -129,7 +129,7 @@ export function TreeView({
       {filtered.length === 0 ? (
         <div className="text-muted-foreground rounded-md border border-dashed p-8 text-center text-sm">
           {nodes.length === 0
-            ? 'Este currículum aún no tiene nodos.'
+            ? 'Este marco académico aún no tiene nodos.'
             : 'Ningún nodo coincide con la búsqueda.'}
         </div>
       ) : (
@@ -144,7 +144,7 @@ export function TreeView({
               editable={editable}
               onAddChild={(parent) => setForm({ kind: 'create', parent })}
               onEdit={(node) => setForm({ kind: 'edit', node })}
-              curriculumId={curriculumId}
+              taxonomyId={taxonomyId}
             />
           ))}
         </ul>
@@ -152,7 +152,7 @@ export function TreeView({
 
       <NodeFormDialog
         state={form}
-        curriculumId={curriculumId}
+        taxonomyId={taxonomyId}
         onClose={() => setForm({ kind: 'closed' })}
       />
     </div>
@@ -167,7 +167,7 @@ function NodeRow({
   editable,
   onAddChild,
   onEdit,
-  curriculumId,
+  taxonomyId,
 }: {
   node: Tree;
   depth: number;
@@ -176,7 +176,7 @@ function NodeRow({
   editable: boolean;
   onAddChild: (parent: TaxonomyNode) => void;
   onEdit: (node: TaxonomyNode) => void;
-  curriculumId: string;
+  taxonomyId: string;
 }) {
   const isOpen = expanded.has(node.id);
   const hasChildren = node.children.length > 0;
@@ -192,7 +192,7 @@ function NodeRow({
     if (!confirmed) return;
     startTransition(async () => {
       try {
-        await deleteTaxonomyNode(node.id, curriculumId, hasChildren);
+        await deleteTaxonomyNode(node.id, taxonomyId, hasChildren);
         toast.success('Nodo eliminado');
         router.refresh();
       } catch (err) {
@@ -280,7 +280,7 @@ function NodeRow({
               editable={editable}
               onAddChild={onAddChild}
               onEdit={onEdit}
-              curriculumId={curriculumId}
+              taxonomyId={taxonomyId}
             />
           ))}
         </ul>
@@ -291,11 +291,11 @@ function NodeRow({
 
 function NodeFormDialog({
   state,
-  curriculumId,
+  taxonomyId,
   onClose,
 }: {
   state: FormState;
-  curriculumId: string;
+  taxonomyId: string;
   onClose: () => void;
 }) {
   const open = state.kind !== 'closed';
@@ -342,11 +342,11 @@ function NodeFormDialog({
             type,
             description: description.trim() || undefined,
           };
-          await updateTaxonomyNode(state.node.id, curriculumId, dto);
+          await updateTaxonomyNode(state.node.id, taxonomyId, dto);
           toast.success('Nodo actualizado');
         } else {
           const dto: CreateTaxonomyNodeDto = {
-            curriculumId,
+            taxonomyId,
             parentId: parent?.id ?? null,
             type,
             name: name.trim(),

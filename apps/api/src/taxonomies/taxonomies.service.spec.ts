@@ -1,12 +1,12 @@
 import { ForbiddenException } from '@nestjs/common';
-import { CurriculaService } from './curricula.service';
+import { TaxonomiesService } from './taxonomies.service';
 import type { JwtPayload } from '../auth/jwt-payload.types';
-import type { Curriculum } from '@soe/db';
+import type { Taxonomy } from '@soe/db';
 
 function makeService() {
   // Inyectamos un db mínimo: el service solo lo usa en métodos que aquí no probamos.
   const db = {} as never;
-  return new CurriculaService(db);
+  return new TaxonomiesService(db);
 }
 
 function user(overrides: Partial<JwtPayload> = {}): JwtPayload {
@@ -28,7 +28,7 @@ function user(overrides: Partial<JwtPayload> = {}): JwtPayload {
   };
 }
 
-function curriculum(overrides: Partial<Curriculum> = {}): Curriculum {
+function taxonomy(overrides: Partial<Taxonomy> = {}): Taxonomy {
   return {
     id: 'c1',
     name: 'Test',
@@ -40,50 +40,50 @@ function curriculum(overrides: Partial<Curriculum> = {}): Curriculum {
     metadata: {},
     createdAt: new Date(),
     ...overrides,
-  } as Curriculum;
+  } as Taxonomy;
 }
 
-describe('CurriculaService.assertVisible', () => {
+describe('TaxonomiesService.assertVisible', () => {
   const svc = makeService();
 
   it('permite ver currícula oficiales a cualquier usuario', () => {
     expect(() =>
-      svc.assertVisible(curriculum({ isOfficial: true, orgId: null }), user()),
+      svc.assertVisible(taxonomy({ isOfficial: true, orgId: null }), user()),
     ).not.toThrow();
   });
 
   it('permite ver currícula propios de la org', () => {
     expect(() =>
-      svc.assertVisible(curriculum({ orgId: 'org-1' }), user({ orgId: 'org-1' })),
+      svc.assertVisible(taxonomy({ orgId: 'org-1' }), user({ orgId: 'org-1' })),
     ).not.toThrow();
   });
 
   it('bloquea currícula custom de otra org', () => {
     expect(() =>
-      svc.assertVisible(curriculum({ orgId: 'other' }), user({ orgId: 'org-1' })),
+      svc.assertVisible(taxonomy({ orgId: 'other' }), user({ orgId: 'org-1' })),
     ).toThrow(ForbiddenException);
   });
 });
 
-describe('CurriculaService.assertEditable', () => {
+describe('TaxonomiesService.assertEditable', () => {
   const svc = makeService();
 
   it('bloquea oficiales cuando el usuario no es platform_admin', () => {
     expect(() =>
-      svc.assertEditable(curriculum({ isOfficial: true }), user({ role: 'school_admin' })),
+      svc.assertEditable(taxonomy({ isOfficial: true }), user({ role: 'school_admin' })),
     ).toThrow(ForbiddenException);
   });
 
   it('permite editar oficiales a platform_admin', () => {
     expect(() =>
-      svc.assertEditable(curriculum({ isOfficial: true }), user({ role: 'platform_admin' })),
+      svc.assertEditable(taxonomy({ isOfficial: true }), user({ role: 'platform_admin' })),
     ).not.toThrow();
   });
 
   it('permite editar custom de la propia org a school_admin', () => {
     expect(() =>
       svc.assertEditable(
-        curriculum({ orgId: 'org-1' }),
+        taxonomy({ orgId: 'org-1' }),
         user({ orgId: 'org-1', role: 'school_admin' }),
       ),
     ).not.toThrow();
@@ -92,7 +92,7 @@ describe('CurriculaService.assertEditable', () => {
   it('bloquea editar custom de otra org a school_admin', () => {
     expect(() =>
       svc.assertEditable(
-        curriculum({ orgId: 'other' }),
+        taxonomy({ orgId: 'other' }),
         user({ orgId: 'org-1', role: 'school_admin' }),
       ),
     ).toThrow(ForbiddenException);
@@ -101,7 +101,7 @@ describe('CurriculaService.assertEditable', () => {
   it('permite a platform_admin editar custom de cualquier org', () => {
     expect(() =>
       svc.assertEditable(
-        curriculum({ orgId: 'other' }),
+        taxonomy({ orgId: 'other' }),
         user({ orgId: 'org-1', role: 'platform_admin' }),
       ),
     ).not.toThrow();

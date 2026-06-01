@@ -7,7 +7,7 @@ import {
   canAccess,
   ITEM_BANK_ROLES,
   type InstrumentModel,
-  type CurriculumModel,
+  type TaxonomyModel,
 } from '@soe/types';
 import { SpecTableWizard } from './SpecTableWizard';
 
@@ -22,9 +22,9 @@ export default async function SpecTablePage({ params }: PageProps) {
 
   const { instrumentId } = await params;
 
-  const [instrument, curricula] = await Promise.all([
+  const [instrument, taxonomies] = await Promise.all([
     apiGet<InstrumentModel>(`/instruments/${instrumentId}`),
-    apiGet<CurriculumModel[]>('/taxonomies/curricula'),
+    apiGet<TaxonomyModel[]>('/taxonomies'),
   ]);
 
   return (
@@ -50,7 +50,7 @@ export default async function SpecTablePage({ params }: PageProps) {
           Mapea las columnas y vincula los items automaticamente.
         </p>
       </div>
-      <SpecTableWizard instrumentId={instrumentId} curricula={curricula} />
+      <SpecTableWizard instrumentId={instrumentId} taxonomies={taxonomies} />
     </div>
   );
 }

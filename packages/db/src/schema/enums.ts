@@ -34,7 +34,7 @@ export const enrollmentStatusEnum = pgEnum('enrollment_status', [
   'withdrawn',
 ]);
 
-export const curriculumTypeEnum = pgEnum('curriculum_type', [
+export const taxonomyTypeEnum = pgEnum('taxonomy_type', [
   'mineduc',
   'simce',
   'paes',

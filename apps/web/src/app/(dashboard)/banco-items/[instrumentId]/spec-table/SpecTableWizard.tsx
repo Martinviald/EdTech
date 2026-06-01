@@ -8,7 +8,7 @@ import type {
   SpecTableUploadResponse,
   SpecTableLinkResponse,
   SpecTableMappingDto,
-  CurriculumModel,
+  TaxonomyModel,
 } from '@soe/types';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -44,15 +44,15 @@ const ACCEPTED_TYPES = {
 
 interface SpecTableWizardProps {
   instrumentId: string;
-  curricula: CurriculumModel[];
+  taxonomies: TaxonomyModel[];
 }
 
-export function SpecTableWizard({ instrumentId, curricula }: SpecTableWizardProps) {
+export function SpecTableWizard({ instrumentId, taxonomies }: SpecTableWizardProps) {
   const [step, setStep] = useState<Step>('upload');
   const [isPending, startTransition] = useTransition();
   const [uploadResult, setUploadResult] = useState<SpecTableUploadResponse | null>(null);
   const [linkResult, setLinkResult] = useState<SpecTableLinkResponse | null>(null);
-  const [curriculumId, setCurriculumId] = useState('');
+  const [taxonomyId, setTaxonomyId] = useState('');
 
   const handleFileAccept = useCallback(
     (file: File) => {
@@ -75,14 +75,14 @@ export function SpecTableWizard({ instrumentId, curricula }: SpecTableWizardProp
 
   const handleLink = (columnMapping: Record<string, string>) => {
     if (!uploadResult) return;
-    if (!curriculumId) {
-      toast.error('Selecciona un currículo de referencia');
+    if (!taxonomyId) {
+      toast.error('Selecciona un marco académico de referencia');
       return;
     }
 
     const mapping: SpecTableMappingDto = {
       instrumentId,
-      curriculumId,
+      taxonomyId,
       fileData: uploadResult.fileData,
       columnMapping,
     };
@@ -103,7 +103,7 @@ export function SpecTableWizard({ instrumentId, curricula }: SpecTableWizardProp
     setStep('upload');
     setUploadResult(null);
     setLinkResult(null);
-    setCurriculumId('');
+    setTaxonomyId('');
   };
 
   return (
@@ -117,9 +117,9 @@ export function SpecTableWizard({ instrumentId, curricula }: SpecTableWizardProp
       {step === 'map' && uploadResult && (
         <MapSection
           uploadResult={uploadResult}
-          curricula={curricula}
-          curriculumId={curriculumId}
-          onCurriculumChange={setCurriculumId}
+          taxonomies={taxonomies}
+          taxonomyId={taxonomyId}
+          onTaxonomyChange={setTaxonomyId}
           onLink={handleLink}
           onCancel={handleReset}
           isPending={isPending}
@@ -204,17 +204,17 @@ function UploadSection({
 
 function MapSection({
   uploadResult,
-  curricula,
-  curriculumId,
-  onCurriculumChange,
+  taxonomies,
+  taxonomyId,
+  onTaxonomyChange,
   onLink,
   onCancel,
   isPending,
 }: {
   uploadResult: SpecTableUploadResponse;
-  curricula: CurriculumModel[];
-  curriculumId: string;
-  onCurriculumChange: (id: string) => void;
+  taxonomies: TaxonomyModel[];
+  taxonomyId: string;
+  onTaxonomyChange: (id: string) => void;
   onLink: (mapping: Record<string, string>) => void;
   onCancel: () => void;
   isPending: boolean;
@@ -225,23 +225,23 @@ function MapSection({
     <div className="space-y-4">
       <Card>
         <CardHeader>
-          <CardTitle className="text-base">Currículo de referencia</CardTitle>
+          <CardTitle className="text-base">Marco académico de referencia</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="max-w-sm space-y-1.5">
             <Label className="text-sm">
-              Currículo <span className="text-destructive">*</span>
+              Marco académico <span className="text-destructive">*</span>
             </Label>
             <Select
-              value={curriculumId}
-              onValueChange={onCurriculumChange}
+              value={taxonomyId}
+              onValueChange={onTaxonomyChange}
               disabled={isPending}
             >
               <SelectTrigger>
-                <SelectValue placeholder="Seleccionar currículo" />
+                <SelectValue placeholder="Seleccionar marco académico" />
               </SelectTrigger>
               <SelectContent>
-                {curricula.map((c) => (
+                {taxonomies.map((c) => (
                   <SelectItem key={c.id} value={c.id}>
                     {c.name} ({c.type})
                   </SelectItem>
@@ -250,7 +250,7 @@ function MapSection({
             </Select>
             <p className="text-muted-foreground text-xs">
               Los OA y habilidades de la tabla se vincularán contra la taxonomía de
-              este currículo.
+              este marco académico.
             </p>
           </div>
         </CardContent>

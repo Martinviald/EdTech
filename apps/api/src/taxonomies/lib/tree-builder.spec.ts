@@ -4,7 +4,7 @@ import type { TaxonomyNode } from '@soe/db';
 function node(over: Partial<TaxonomyNode> & { id: string }): TaxonomyNode {
   return {
     id: over.id,
-    curriculumId: 'c1',
+    taxonomyId: 'c1',
     parentId: over.parentId ?? null,
     type: over.type ?? 'domain',
     code: over.code ?? null,

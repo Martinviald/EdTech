@@ -20,7 +20,7 @@ import {
 } from './enums';
 import { organizations } from './organizations';
 import { subjects } from './academic';
-import { taxonomyNodes } from './curriculum';
+import { taxonomyNodes } from './taxonomy';
 import { instruments, instrumentSections } from './instruments';
 import { users } from './users';
 
