@@ -472,25 +472,20 @@ export class ItemAnalysisService {
 
     if (total === 0) return { data: [], total: 0 };
 
-    // Página de alumnos (1 query). LEFT JOIN a enrollment/classGroup para nombre
-    // de curso; el % logro viene de assessment_results.
+    // Página de alumnos (1 query). NO se une enrollment/classGroup aquí: un alumno
+    // con matrícula en varios años académicos generaría filas duplicadas y
+    // descuadraría la paginación contra `total = count(distinct studentId)`. El %
+    // logro viene de assessment_results (único por (assessment, alumno)).
     const rows = await this.db
       .select({
         studentId: students.id,
         studentRut: students.rut,
         firstName: students.firstName,
         lastName: students.lastName,
-        classGroupId: classGroups.id,
-        classGroupName: classGroups.name,
         percentage: assessmentResults.percentage,
       })
       .from(responses)
       .innerJoin(students, eq(students.id, responses.studentId))
-      .leftJoin(
-        studentEnrollments,
-        eq(studentEnrollments.studentId, students.id),
-      )
-      .leftJoin(classGroups, eq(classGroups.id, studentEnrollments.classGroupId))
       .leftJoin(
         assessmentResults,
         and(
@@ -504,15 +499,73 @@ export class ItemAnalysisService {
         students.rut,
         students.firstName,
         students.lastName,
-        classGroups.id,
-        classGroups.name,
         assessmentResults.percentage,
       )
       .orderBy(asc(students.lastName), asc(students.firstName))
       .limit(limit)
       .offset((page - 1) * limit);
 
-    return { data: rows, total };
+    // Curso de cada alumno relevante a ESTA evaluación (1 query), resuelto aparte
+    // para no inflar la página. Un alumno → un único curso (DISTINCT ON).
+    const classGroupByStudent = await this.loadStudentClassGroups(
+      assessmentId,
+      rows.map((r) => r.studentId),
+    );
+
+    const data = rows.map((r) => {
+      const cg = classGroupByStudent.get(r.studentId);
+      return {
+        studentId: r.studentId,
+        studentRut: r.studentRut,
+        firstName: r.firstName,
+        lastName: r.lastName,
+        classGroupId: cg?.id ?? null,
+        classGroupName: cg?.name ?? null,
+        percentage: r.percentage,
+      };
+    });
+
+    return { data, total };
+  }
+
+  /**
+   * Curso de cada alumno relevante a la evaluación (el class_group asignado a la
+   * evaluación en el que el alumno está matriculado). Un alumno → un único curso
+   * vía DISTINCT ON, evitando duplicados por matrículas en varios años.
+   */
+  private async loadStudentClassGroups(
+    assessmentId: string,
+    studentIds: string[],
+  ): Promise<Map<string, { id: string; name: string }>> {
+    const result = new Map<string, { id: string; name: string }>();
+    if (studentIds.length === 0) return result;
+
+    const rows = await this.db
+      .select({
+        studentId: studentEnrollments.studentId,
+        classGroupId: classGroups.id,
+        classGroupName: classGroups.name,
+      })
+      .from(studentEnrollments)
+      .innerJoin(classGroups, eq(classGroups.id, studentEnrollments.classGroupId))
+      .innerJoin(
+        assessmentCourseAssignments,
+        and(
+          eq(assessmentCourseAssignments.classGroupId, classGroups.id),
+          eq(assessmentCourseAssignments.assessmentId, assessmentId),
+        ),
+      )
+      .where(inArray(studentEnrollments.studentId, studentIds))
+      .orderBy(asc(studentEnrollments.studentId), asc(classGroups.name));
+
+    // Un alumno → un único curso: nos quedamos con el primero (orden estable por
+    // nombre de curso). Dedupe en JS para no depender de DISTINCT ON.
+    for (const row of rows) {
+      if (!result.has(row.studentId)) {
+        result.set(row.studentId, { id: row.classGroupId, name: row.classGroupName });
+      }
+    }
+    return result;
   }
 
   /** Respuestas de la página de alumnos (1 query) → mapa studentId → itemId → celda. */
@@ -581,10 +634,12 @@ export class ItemAnalysisService {
       conditions.push(inArray(responses.studentId, studentFilter));
     }
 
-    // coalesce de las claves candidatas answer | raw | key del JSONB.
+    // coalesce de las claves candidatas raw | key | answer del JSONB. Mismo
+    // orden de precedencia que extractRawAnswer (celdas de la matriz) para que la
+    // distribución y las celdas reporten la misma alternativa.
     const answerExpr = sql<
       string | null
-    >`coalesce(${responses.value}->>'answer', ${responses.value}->>'raw', ${responses.value}->>'key')`;
+    >`nullif(coalesce(${responses.value}->>'raw', ${responses.value}->>'key', ${responses.value}->>'answer'), '')`;
 
     const rows = await this.db
       .select({

@@ -14,7 +14,7 @@ import type {
  * tumbar el arranque de la app.
  */
 // Tipo dinámico para no romper la compilación si el SDK aún no está instalado.
-// eslint-disable-next-line @typescript-eslint/consistent-type-imports
+ 
 type Anthropic = import('@anthropic-ai/sdk').default;
 
 @Injectable()

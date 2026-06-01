@@ -21,7 +21,6 @@ import {
   type HeatmapResponse,
   type HeatmapRow,
   type HeatmapSubject,
-  type PerformanceLevel,
   type UserRole,
 } from '@soe/types';
 import type { JwtPayload } from '../auth/jwt-payload.types';

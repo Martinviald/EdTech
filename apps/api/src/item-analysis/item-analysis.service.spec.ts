@@ -173,10 +173,13 @@ describe('ItemAnalysisService.getMatrix', () => {
           studentRut: '22.222.222-2',
           firstName: 'Beto',
           lastName: 'Vera',
-          classGroupId: CLASS_GROUP_ID,
-          classGroupName: '3A',
           percentage: null,
         },
+      ],
+      [
+        // loadStudentClassGroups → curso por alumno (1 query, dedupe en JS)
+        { studentId: STUDENT_1, classGroupId: CLASS_GROUP_ID, classGroupName: '3A' },
+        { studentId: STUDENT_2, classGroupId: CLASS_GROUP_ID, classGroupName: '3A' },
       ],
       [
         // loadCells
@@ -238,6 +241,9 @@ describe('ItemAnalysisService.getMatrix', () => {
     // Celdas en el mismo orden que questions.
     const row1 = res.students.data[0];
     expect(row1.studentFullName).toBe('Ana Soto');
+    // Curso resuelto vía loadStudentClassGroups (no por el join de la página).
+    expect(row1.classGroupName).toBe('3A');
+    expect(row1.classGroupId).toBe(CLASS_GROUP_ID);
     expect(row1.cells.map((c) => c.itemId)).toEqual([ITEM_A, ITEM_B]);
     expect(row1.cells[0].selectedKey).toBe('B');
     expect(row1.cells[0].isCorrect).toBe(true);
@@ -312,10 +318,12 @@ describe('ItemAnalysisService.getMatrix', () => {
           studentRut: '11.111.111-1',
           firstName: 'Ana',
           lastName: 'Soto',
-          classGroupId: CLASS_GROUP_ID,
-          classGroupName: '3A',
           percentage: '80.00',
         },
+      ],
+      [
+        // loadStudentClassGroups
+        { studentId: STUDENT_1, classGroupId: CLASS_GROUP_ID, classGroupName: '3A' },
       ],
       [
         {
@@ -354,10 +362,12 @@ describe('ItemAnalysisService.getMatrix', () => {
           studentRut: '11.111.111-1',
           firstName: 'Ana',
           lastName: 'Soto',
-          classGroupId: CLASS_GROUP_ID,
-          classGroupName: '3A',
           percentage: '50.00',
         },
+      ],
+      [
+        // loadStudentClassGroups
+        { studentId: STUDENT_1, classGroupId: CLASS_GROUP_ID, classGroupName: '3A' },
       ],
       [
         {

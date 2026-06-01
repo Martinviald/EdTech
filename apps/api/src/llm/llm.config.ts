@@ -16,7 +16,7 @@ import type { LlmProviderName, LlmRuntimeConfig } from './llm.types';
  */
 @Injectable()
 export class LlmConfigService {
-  // eslint-disable-next-line @typescript-eslint/require-await
+   
   async resolve(orgId?: string | null): Promise<LlmRuntimeConfig> {
     // TODO(F2): si existe configuración en `llm_settings` para `orgId`,
     // devolverla aquí. Hoy `orgId` no se usa; se mantiene en la firma para que
