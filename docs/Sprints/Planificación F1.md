@@ -130,15 +130,15 @@ Subir hojas DIA → corrección automática → dashboard habilidades → click 
 
 | ID       | Historia                                                                        | Complejidad | Notas                                                                                                              |
 | -------- | ------------------------------------------------------------------------------- | ----------- | ------------------------------------------------------------------------------------------------------------------ |
-| **H6.1** | Panel de resultados para directivo                                              | ★★★         | Vista de aterrizaje post-login directivo. Cards resumen: últimas evaluaciones, alertas, % logro global.            |
-| **H6.2** | Filtros: asignatura, nivel, curso, alumno, período                              | ★★★         | Filtros aplicados a toda la vista. State en URL para compartir/bookmarkear.                                        |
-| **H6.3** | Comparación de generaciones en un mismo nivel (año actual vs años anteriores)   | ★★★         | Serie de tiempo. Requiere que haya datos de al menos 2 períodos (puede mostrarse vacío el primer año).             |
-| **H6.4** | Clasificar alumnos por nivel de desempeño (insuficiente / elemental / adecuado) | ★★          | Thresholds configurables por prueba/colegio. Vista de tabla con colores.                                           |
-| **H6.5** | Métricas de desempeño por habilidad (no solo por prueba)                        | ★★★         | Agrupación de ítems por habilidad → % logro agregado. La Taxonomía Universal de H19.11 habilita esto directamente. |
-| **H6.6** | Progresión de resultados a lo largo del año                                     | ★★★         | Gráfico de línea temporal. Por alumno, por curso, por habilidad.                                                   |
-| **H6.7** | Resultados de evaluaciones para el profesor (solo sus cursos)                   | ★★          | Mismo componente que H6.1 pero filtrado por el scope del profesor.                                                 |
-| **H6.8** | Métricas y KPIs del profesor                                                    | ★★          | % logro promedio del curso, alumnos críticos, evolución.                                                           |
-| **H6.9** | Reportes descargables básicos (PDF/Excel) de los resultados actuales            | ★★          | Usar la misma lógica de export que H6.18 del Sprint 5. Puede ser un simple "exportar vista actual".                |
+| **H6.1** | Panel de resultados para directivo                                              | ★★★         | ✅ `/resultados` (overview): cards de % logro global, alumnos evaluados, nº de evaluaciones, alertas (curso <60% / habilidad <50%) + distribución por nivel. Backend `dashboards/overview`. |
+| **H6.2** | Filtros: asignatura, nivel, curso, alumno, período                              | ★★★         | ✅ Barra de filtros con estado en la URL (bookmarkeable). Backend `dashboards/filters`.                            |
+| **H6.3** | Comparación de generaciones en un mismo nivel (año actual vs años anteriores)   | ★★★         | ✅ `analytics/generational`: % logro por año del mismo grado + distribución por año. Vista `/resultados/comparacion`. |
+| **H6.4** | Clasificar alumnos por nivel de desempeño (insuficiente / elemental / adecuado) | ★★          | ✅ `/resultados/clasificacion`: distribución + tabla paginada por nivel; thresholds desde la escala de notas. Backend `dashboards/performance`. |
+| **H6.5** | Métricas de desempeño por habilidad (no solo por prueba)                        | ★★★         | ✅ `dashboards/skills`: % logro agregado por habilidad (taxonomía). Vista `/resultados/habilidades`.               |
+| **H6.6** | Progresión de resultados a lo largo del año                                     | ★★★         | ✅ `analytics/progression`: serie temporal por alumno/curso/habilidad (orden por `administeredAt`). Vista `/resultados/progresion`. |
+| **H6.7** | Resultados de evaluaciones para el profesor (solo sus cursos)                   | ★★          | ✅ Scoping de profesor (solo sus cursos vía `teacher_assignments`) aplicado en todas las vistas de resultados.     |
+| **H6.8** | Métricas y KPIs del profesor                                                    | ★★          | ✅ `dashboards/teacher-kpis`: por curso → nº alumnos, % logro, % aprobación, alumnos críticos (insuficiente).      |
+| **H6.9** | Reportes descargables básicos (PDF/Excel) de los resultados actuales            | ★★          | ✅ Export Excel/PDF de la vista con los filtros aplicados (serializa lo visible, sin re-fetch).                    |
 
 **División de trabajo sugerida:**
 
