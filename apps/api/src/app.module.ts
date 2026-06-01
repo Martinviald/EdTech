@@ -21,6 +21,9 @@ import { DiaIngestionModule } from './dia-ingestion/dia-ingestion.module';
 import { AiTaggingModule } from './ai-tagging/ai-tagging.module';
 import { SpecTablesModule } from './spec-tables/spec-tables.module';
 import { CatalogModule } from './catalog/catalog.module';
+import { AnswerSheetsModule } from './answer-sheets/answer-sheets.module';
+import { GradingScalesModule } from './grading-scales/grading-scales.module';
+import { AssessmentResultsModule } from './assessment-results/assessment-results.module';
 
 @Module({
   imports: [
@@ -45,6 +48,10 @@ import { CatalogModule } from './catalog/catalog.module';
     AiTaggingModule,
     SpecTablesModule,
     CatalogModule,
+    // ── Sprint 3: hojas de respuesta, resultados y escalas de notas ──
+    AnswerSheetsModule,
+    GradingScalesModule,
+    AssessmentResultsModule,
   ],
   controllers: [AppController],
   providers: [

@@ -127,6 +127,13 @@ export const NAV_ITEMS: readonly NavItem[] = [
     roles: ['platform_admin', 'school_admin', 'academic_director', 'eval_coordinator'],
   },
   {
+    href: '/importar-resultados',
+    label: 'Importar resultados',
+    icon: FileUp,
+    status: 'live',
+    roles: ['platform_admin', 'school_admin', 'academic_director', 'eval_coordinator'],
+  },
+  {
     href: '/equipo',
     label: 'Equipo',
     icon: UserCog,
@@ -137,8 +144,8 @@ export const NAV_ITEMS: readonly NavItem[] = [
     href: '/configuracion',
     label: 'Configuración',
     icon: Settings,
-    status: 'soon',
-    roles: ALL_ROLES,
+    status: 'live',
+    roles: ['platform_admin', 'school_admin', 'academic_director'],
   },
 ];
 

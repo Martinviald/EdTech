@@ -32,14 +32,23 @@ export type ImportJobStatus = (typeof IMPORT_JOB_STATUSES)[number];
 // `POST /answer-sheets/upload` (multipart): file + metadata como campos de form.
 // Devuelve un previewToken que se usa en /preview y /confirm para evitar re-parsear.
 
+export const answerSheetColumnMappingSchema = z.object({
+  rut: z.string().optional(),
+  firstName: z.string().optional(),
+  lastName: z.string().optional(),
+  questionsPrefix: z.string().optional(),
+  questionColumns: z.array(z.string()).optional(),
+});
+
+export type AnswerSheetColumnMapping = z.infer<typeof answerSheetColumnMappingSchema>;
+
 export const answerSheetUploadMetadataSchema = z.object({
   format: z.enum(ANSWER_SHEET_FORMATS),
   instrumentId: z.string().uuid(),
   classGroupId: z.string().uuid().optional(),
   assessmentId: z.string().uuid().optional(),
-  // Mapeo columna → campo cuando el formato es generic_csv. Para formatos
-  // específicos (gradecam_csv, zipgrade_csv, dia_official) el mapeo es fijo.
-  columnMapping: z.record(z.string()).optional(),
+  // Mapeo columna → campo cuando el formato es generic_csv.
+  columnMapping: answerSheetColumnMappingSchema.optional(),
   // Nombre lógico para el assessment si se crea uno nuevo.
   assessmentName: z.string().min(1).max(300).optional(),
 });
@@ -62,6 +71,10 @@ export const answerSheetConfirmRequestSchema = z.object({
   createAssessment: z.boolean().default(true),
   // Si las filas con errores deben ignorarse (true) o bloquear el commit (false).
   skipErrorRows: z.boolean().default(true),
+  // Si el caller quiere asociar la ingesta a un assessment existente.
+  assessmentId: z.string().uuid().optional(),
+  // Nombre del nuevo assessment cuando createAssessment=true.
+  assessmentName: z.string().min(1).max(300).optional(),
 });
 export type AnswerSheetConfirmRequestDto = z.infer<typeof answerSheetConfirmRequestSchema>;
 
@@ -123,7 +136,10 @@ export type AnswerSheetConfirmResponse = {
   assessmentId: string;
   responsesCreated: number;
   studentsProcessed: number;
-  resultsCalculated: number;
+  // Total de resultados (assessment_results) calculados.
+  resultsCalculated?: number;
+  // Filas saltadas por errores (cuando skipErrorRows = true).
+  rowsSkipped?: number;
   errors: AnswerSheetRowError[];
 };
 
@@ -157,4 +173,7 @@ export type AnswerSheetTemplate = {
   requiredColumns: string[];
   optionalColumns: string[];
   sampleCsvUrl: string | null;
+  // Opcionales: contenido inline del CSV de ejemplo y extensión del archivo.
+  exampleCsv?: string;
+  fileExtension?: string;
 };
