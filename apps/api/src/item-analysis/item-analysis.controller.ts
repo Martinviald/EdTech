@@ -1,6 +1,7 @@
 import { Controller, Get, Param, Query, UseGuards } from '@nestjs/common';
 import {
   ITEM_ANALYSIS_VIEWER_ROLES,
+  assessmentListQuerySchema,
   itemMatrixQuerySchema,
   questionAnalysisQuerySchema,
 } from '@soe/types';
@@ -14,6 +15,18 @@ import { ItemAnalysisService } from './item-analysis.service';
 @UseGuards(RolesGuard)
 export class ItemAnalysisController {
   constructor(private readonly service: ItemAnalysisService) {}
+
+  /**
+   * GET /api/item-analysis/assessments
+   * Evaluaciones con resultados visibles para el usuario (scoped), para poblar el
+   * selector de la tabla cruzada. Filtrable por asignatura/grado/curso/período/tipo.
+   */
+  @Get('assessments')
+  @Roles(...ITEM_ANALYSIS_VIEWER_ROLES)
+  assessments(@Query() query: unknown, @CurrentUser() user: JwtPayload) {
+    const dto = assessmentListQuerySchema.parse(query ?? {});
+    return this.service.listAssessments(user, dto);
+  }
 
   /**
    * GET /api/item-analysis/matrix  (H6.11)

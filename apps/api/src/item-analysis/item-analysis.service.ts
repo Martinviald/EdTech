@@ -3,12 +3,13 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { and, asc, eq, inArray, isNull, sql } from 'drizzle-orm';
+import { and, asc, desc, eq, inArray, isNull, sql } from 'drizzle-orm';
 import {
   assessmentCourseAssignments,
   assessmentResults,
   assessments,
   classGroups,
+  grades,
   instruments,
   itemTaxonomyTags,
   items,
@@ -16,6 +17,7 @@ import {
   studentEnrollments,
   students,
   subjectClasses,
+  subjects,
   taxonomyNodes,
   teacherAssignments,
 } from '@soe/db';
@@ -23,6 +25,9 @@ import {
   RESULTS_VIEWER_ROLES,
   userHasAnyRole,
   type AlternativeDistribution,
+  type AssessmentListQueryDto,
+  type AssessmentListResponse,
+  type AssessmentOption,
   type ItemMatrixQueryDto,
   type ItemMatrixResponse,
   type ItemTaxonomyRef,
@@ -73,6 +78,123 @@ interface ItemContent {
 @Injectable()
 export class ItemAnalysisService {
   constructor(@InjectDb() private readonly db: Database) {}
+
+  // ───────────────────────────────────────────────────────────────────────────
+  // GET /api/item-analysis/assessments  (selector de la tabla cruzada)
+  // Evaluaciones con resultados visibles para el usuario, filtrables.
+  // ───────────────────────────────────────────────────────────────────────────
+
+  async listAssessments(
+    user: JwtPayload,
+    query: AssessmentListQueryDto,
+  ): Promise<AssessmentListResponse> {
+    const orgId = this.requireOrgId(user);
+    const scope = await this.getAccessibleClassGroupIds(user, orgId);
+
+    // Profesor sin cursos asignados → no ve evaluaciones.
+    if (!scope.scopeAll && scope.classGroupIds.length === 0) {
+      return { data: [] };
+    }
+
+    // Sólo evaluaciones con resultados (para que la matriz nunca salga vacía).
+    const conditions = [
+      eq(assessments.orgId, orgId),
+      isNull(instruments.deletedAt),
+      sql`exists (select 1 from ${assessmentResults} where ${assessmentResults.assessmentId} = ${assessments.id})`,
+    ];
+    if (query.subjectId) conditions.push(eq(instruments.subjectId, query.subjectId));
+    if (query.instrumentType) {
+      conditions.push(sql`${instruments.type}::text = ${query.instrumentType}`);
+    }
+    if (query.gradeId) conditions.push(eq(classGroups.gradeId, query.gradeId));
+    if (query.classGroupId) {
+      conditions.push(eq(assessmentCourseAssignments.classGroupId, query.classGroupId));
+    }
+    if (query.academicYearId) {
+      conditions.push(eq(classGroups.academicYearId, query.academicYearId));
+    }
+    if (!scope.scopeAll) {
+      conditions.push(
+        inArray(assessmentCourseAssignments.classGroupId, scope.classGroupIds),
+      );
+    }
+
+    // El join a course_assignments multiplica por curso; group by colapsa a una
+    // fila por evaluación. gradeName representativo vía max() (una evaluación
+    // suele apuntar a un grado).
+    const rows = await this.db
+      .select({
+        assessmentId: assessments.id,
+        name: assessments.name,
+        administeredAt: assessments.administeredAt,
+        instrumentName: instruments.name,
+        instrumentType: sql<string>`${instruments.type}::text`,
+        subjectName: subjects.name,
+        gradeName: sql<string | null>`max(${grades.name})`,
+      })
+      .from(assessments)
+      .innerJoin(instruments, eq(instruments.id, assessments.instrumentId))
+      .innerJoin(
+        assessmentCourseAssignments,
+        eq(assessmentCourseAssignments.assessmentId, assessments.id),
+      )
+      .innerJoin(classGroups, eq(classGroups.id, assessmentCourseAssignments.classGroupId))
+      .leftJoin(subjects, eq(subjects.id, instruments.subjectId))
+      .leftJoin(grades, eq(grades.id, classGroups.gradeId))
+      .where(and(...conditions))
+      .groupBy(
+        assessments.id,
+        assessments.name,
+        assessments.administeredAt,
+        instruments.name,
+        instruments.type,
+        subjects.name,
+      )
+      .orderBy(desc(assessments.administeredAt));
+
+    if (rows.length === 0) return { data: [] };
+
+    // studentsCount por evaluación, acotado al scope del profesor (alumnos de sus
+    // cursos). Para admins cuenta todos los alumnos con resultados.
+    const ids = rows.map((r) => r.assessmentId);
+    let scopedStudentIds: string[] | null = null;
+    if (!scope.scopeAll) {
+      const enr = await this.db
+        .select({ studentId: studentEnrollments.studentId })
+        .from(studentEnrollments)
+        .where(inArray(studentEnrollments.classGroupId, scope.classGroupIds));
+      scopedStudentIds = Array.from(new Set(enr.map((r) => r.studentId)));
+    }
+
+    const countConds = [inArray(assessmentResults.assessmentId, ids)];
+    if (scopedStudentIds !== null) {
+      countConds.push(inArray(assessmentResults.studentId, scopedStudentIds));
+    }
+    const countRows = await this.db
+      .select({
+        assessmentId: assessmentResults.assessmentId,
+        count: sql<number>`count(distinct ${assessmentResults.studentId})::int`,
+      })
+      .from(assessmentResults)
+      .where(and(...countConds))
+      .groupBy(assessmentResults.assessmentId);
+    const countByAssessment = new Map(
+      countRows.map((r) => [r.assessmentId, Number(r.count)]),
+    );
+
+    const data: AssessmentOption[] = rows.map((r) => ({
+      assessmentId: r.assessmentId,
+      name: r.name,
+      instrumentName: r.instrumentName,
+      instrumentType: r.instrumentType,
+      subjectName: r.subjectName ?? null,
+      gradeName: r.gradeName ?? null,
+      administeredAt: r.administeredAt,
+      studentsCount: countByAssessment.get(r.assessmentId) ?? 0,
+    }));
+
+    return { data };
+  }
 
   // ───────────────────────────────────────────────────────────────────────────
   // H6.11 — GET /api/item-analysis/matrix
