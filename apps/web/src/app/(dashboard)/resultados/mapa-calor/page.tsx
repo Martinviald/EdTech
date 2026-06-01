@@ -12,11 +12,11 @@ import {
   type DashboardFilterOptionsResponse,
 } from '@soe/types';
 import { PageContainer, PageHeader, EmptyState } from '@/components/patterns';
+import { DashboardFilterBar } from '../components/dashboard-filter-bar';
 import {
-  DashboardFilterBar,
   parseDashboardFilters,
   buildDashboardQuery,
-} from '../components/dashboard-filter-bar';
+} from '../components/dashboard-filters';
 import { ResultadosNav } from '../components/resultados-nav';
 import { formatAchievement } from '../components/performance-level';
 import { ExportButton, type ExportColumn } from '../components/export/export-button';
