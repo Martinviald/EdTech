@@ -129,8 +129,14 @@ Roles: `@Roles(...ITEM_ANALYSIS_VIEWER_ROLES)`.
 
 | Verbo + Path | Query DTO | Response Model | Historia |
 |---|---|---|---|
+| `GET /api/item-analysis/assessments` | `AssessmentListQueryDto` | `AssessmentListResponse` | H6.11 (selector) |
 | `GET /api/item-analysis/matrix` | `ItemMatrixQueryDto` | `ItemMatrixResponse` | H6.11 |
 | `GET /api/item-analysis/questions/:itemId` | `QuestionAnalysisQueryDto` | `QuestionAnalysisResponse` | H6.12 |
+
+**assessments (selector):** evaluaciones con resultados visibles para el usuario
+(scoped), filtrables por `subjectId`/`gradeId`/`classGroupId`/`academicYearId`/
+`instrumentType`. Pobla el dropdown de `/resultados/detalle`. `studentsCount`
+acotado al scope del profesor.
 
 **Matrix (H6.11):**
 - `assessmentId` obligatorio. Verificar que la evaluación pertenece a `user.orgId`

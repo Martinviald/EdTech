@@ -530,3 +530,81 @@ describe('ItemAnalysisService.getQuestionAnalysis', () => {
     expect(altA.isCorrect).toBe(true);
   });
 });
+
+// ──────────────────────────────────────────────────────────────────────────────
+// listAssessments (selector de la tabla cruzada)
+// ──────────────────────────────────────────────────────────────────────────────
+
+describe('ItemAnalysisService.listAssessments', () => {
+  it('admin: lista evaluaciones con studentsCount mergeado y ordenadas', async () => {
+    const db = makeDb([
+      // rows: evaluaciones con resultados (admin → sin query de scope previa)
+      [
+        {
+          assessmentId: ASSESSMENT_ID,
+          name: 'DIA Lectura',
+          administeredAt: new Date('2026-03-10T00:00:00Z'),
+          instrumentName: 'Instrumento Lectura',
+          instrumentType: 'dia',
+          subjectName: 'Lenguaje',
+          gradeName: '3° básico',
+        },
+      ],
+      // countRows: count(distinct studentId) por evaluación
+      [{ assessmentId: ASSESSMENT_ID, count: 24 }],
+    ]);
+    const service = makeService(db);
+
+    const res = await service.listAssessments(makeUser(), {});
+    expect(res.data).toHaveLength(1);
+    expect(res.data[0]).toMatchObject({
+      assessmentId: ASSESSMENT_ID,
+      name: 'DIA Lectura',
+      instrumentName: 'Instrumento Lectura',
+      instrumentType: 'dia',
+      subjectName: 'Lenguaje',
+      gradeName: '3° básico',
+      studentsCount: 24,
+    });
+  });
+
+  it('admin: sin evaluaciones con resultados → data vacía (sin segunda query)', async () => {
+    const db = makeDb([[]]); // rows vacío → no se consulta countRows
+    const service = makeService(db);
+    const res = await service.listAssessments(makeUser(), {});
+    expect(res.data).toEqual([]);
+  });
+
+  it('profesor sin cursos asignados → data vacía', async () => {
+    const db = makeDb([
+      [], // getAccessibleClassGroupIds → profesor sin class_groups
+    ]);
+    const service = makeService(db);
+    const res = await service.listAssessments(makeUser({ role: 'teacher' }), {});
+    expect(res.data).toEqual([]);
+  });
+
+  it('profesor con cursos: acota studentsCount a sus alumnos', async () => {
+    const db = makeDb([
+      [{ classGroupId: CLASS_GROUP_ID }], // getAccessibleClassGroupIds
+      [
+        {
+          assessmentId: ASSESSMENT_ID,
+          name: 'DIA Lectura',
+          administeredAt: new Date('2026-03-10T00:00:00Z'),
+          instrumentName: 'Instrumento Lectura',
+          instrumentType: 'dia',
+          subjectName: 'Lenguaje',
+          gradeName: '3° básico',
+        },
+      ], // rows
+      [{ studentId: STUDENT_1 }, { studentId: STUDENT_2 }], // scopedStudentIds (enrollments)
+      [{ assessmentId: ASSESSMENT_ID, count: 2 }], // countRows acotado
+    ]);
+    const service = makeService(db);
+
+    const res = await service.listAssessments(makeUser({ role: 'teacher' }), {});
+    expect(res.data).toHaveLength(1);
+    expect(res.data[0].studentsCount).toBe(2);
+  });
+});

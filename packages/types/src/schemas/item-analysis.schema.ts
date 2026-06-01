@@ -17,6 +17,38 @@ import { z } from 'zod';
 // ─────────────────────────────────────────────────────────────────────────────
 
 // ═══════════════════════════════════════════════════════════════════════════
+// Selector de evaluación (apoyo a H6.11): lista de evaluaciones visibles para el
+// usuario, con resultados, para poblar el dropdown de la vista de detalle.
+// GET /api/item-analysis/assessments
+// ═══════════════════════════════════════════════════════════════════════════
+
+/** Filtros del listado: acotan las evaluaciones ofrecidas (mismos que el dashboard). */
+export const assessmentListQuerySchema = z.object({
+  subjectId: z.string().uuid().optional(),
+  gradeId: z.string().uuid().optional(),
+  classGroupId: z.string().uuid().optional(),
+  academicYearId: z.string().uuid().optional(),
+  instrumentType: z.string().min(1).optional(),
+});
+export type AssessmentListQueryDto = z.infer<typeof assessmentListQuerySchema>;
+
+/** Una evaluación seleccionable para la tabla cruzada. */
+export type AssessmentOption = {
+  assessmentId: string;
+  name: string | null;
+  instrumentName: string;
+  instrumentType: string;
+  subjectName: string | null;
+  gradeName: string | null;
+  administeredAt: string | Date | null;
+  studentsCount: number; // alumnos con resultados (dentro del scope)
+};
+
+export type AssessmentListResponse = {
+  data: AssessmentOption[];
+};
+
+// ═══════════════════════════════════════════════════════════════════════════
 // H6.11 — Tabla cruzada alumno × pregunta
 // GET /api/item-analysis/matrix?assessmentId=...
 // ═══════════════════════════════════════════════════════════════════════════
