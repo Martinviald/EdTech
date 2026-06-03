@@ -7,6 +7,7 @@ import {
   taxonomyNodes,
   taxonomies,
 } from '@soe/db';
+import type { ItemContent } from '@soe/types';
 import type { JwtPayload } from '../auth/jwt-payload.types';
 import { InjectDb, type Database } from '../database/database.types';
 import { parseDiaPayload, type DiaParseResult } from './lib/dia-parser';
@@ -150,13 +151,21 @@ export class DiaIngestionService {
         throw new BadRequestException('No se pudo crear el instrumento');
       }
 
-      // 2. Create items
+      // 2. Create items.
+      // La columna `items.content` ahora es `ItemContent` (unión tipada, #5). El parser
+      // DIA produce hoy un `MultipleChoiceContent` LOCAL (lib/dia-parser.ts) cuyo shape
+      // —`alternatives` sin `isCorrect`, más `correctKey`— aún NO coincide con el schema
+      // canónico de @soe/types. Alinear el parser para que emita contenido que pase
+      // `validateItemContent('multiple_choice', ...)` es un entregable de la OLEADA B-#4
+      // (dia-ingestion). Hasta entonces, el contenido se inserta con un cast explícito
+      // vía `unknown` para no romper el build; la validación de tipo real llega con #4.
+      // TODO(#4): reemplazar este cast por `validateItemContent` una vez normalizado el parser.
       const itemValues = parseResult.items.map((item) => ({
         orgId,
         instrumentId: newInstrument.id,
         position: item.position,
         type: 'multiple_choice' as const,
-        content: item.content as unknown as Record<string, unknown>,
+        content: item.content as unknown as ItemContent,
         scoringConfig: { points: 1, partialCredit: false },
         status: 'published' as const,
         source: 'official' as const,

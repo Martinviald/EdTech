@@ -10,6 +10,7 @@ import {
   uuid,
 } from 'drizzle-orm/pg-core';
 import { relations } from 'drizzle-orm';
+import type { ItemContent } from '@soe/types';
 import {
   itemSourceEnum,
   itemStatusEnum,
@@ -31,7 +32,10 @@ export const items = pgTable('items', {
   sectionId: uuid('section_id').references(() => instrumentSections.id),
   position: integer('position').default(0).notNull(),
   type: itemTypeEnum('type').notNull(),
-  content: jsonb('content').$type<Record<string, unknown>>().notNull().default({}),
+  // Contenido polimórfico por `type`: cada valor de `item_type` tiene su shape Zod
+  // en `ITEM_CONTENT_SCHEMAS` (@soe/types). La validación ocurre en la capa de
+  // aplicación (items.service) con `validateItemContent`; aquí solo tipamos (CLAUDE.md §5.4).
+  content: jsonb('content').$type<ItemContent>().notNull().default({} as ItemContent),
   scoringConfig: jsonb('scoring_config')
     .$type<{
       points?: number;
