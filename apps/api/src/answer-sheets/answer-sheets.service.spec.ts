@@ -22,6 +22,7 @@ const ASSESSMENT_ID = 'dddddddd-0000-0000-0000-000000000001';
 const USER_A_ID = 'eeeeeeee-0000-0000-0000-000000000001';
 const ITEM_1 = 'ffff0001-0000-0000-0000-000000000001';
 const ITEM_2 = 'ffff0002-0000-0000-0000-000000000001';
+const ITEM_3 = 'ffff0003-0000-0000-0000-000000000001';
 const STUDENT_1 = '11110000-0000-0000-0000-000000000001';
 const NODE_1 = '22220000-0000-0000-0000-000000000001';
 const JOB_ID = '99990000-0000-0000-0000-000000000001';
@@ -49,6 +50,7 @@ function buildMockDb(plan: {
   itemRows?: Array<{
     id: string;
     position: number;
+    type?: string;
     content: Record<string, unknown>;
     scoringConfig: Record<string, unknown>;
   }>;
@@ -195,6 +197,88 @@ function buildMockDb(plan: {
   return db as unknown as Database;
 }
 
+// Mock que captura los `values()` insertados en `responses` y `assessment_results`,
+// con un instrumento de 3 ítems (2 MCQ + 1 open_ended) para verificar el scoring
+// por estrategia end-to-end. Reusa el detector de tabla de Drizzle.
+function buildCapturingDb(captured: {
+  responses: unknown[][];
+  assessmentResults: unknown[][];
+}): Database {
+  const detect = (table: unknown): string => {
+    try {
+      return getTableName(table as Parameters<typeof getTableName>[0]);
+    } catch {
+      return String(table);
+    }
+  };
+
+  const itemRows = [
+    { id: ITEM_1, position: 1, type: 'multiple_choice', content: { correctKey: 'A' }, scoringConfig: { points: 1 } },
+    { id: ITEM_2, position: 2, type: 'multiple_choice', content: { correctKey: 'B' }, scoringConfig: { points: 1 } },
+    { id: ITEM_3, position: 3, type: 'open_ended', content: { prompt: 'Explica...' }, scoringConfig: { points: 1 } },
+  ];
+  const studentRows = [
+    { id: STUDENT_1, rut: '12345678-5', firstName: 'Juan', lastName: 'Pérez' },
+  ];
+
+  const rowsFor = (name: string): unknown[] => {
+    if (name === 'instruments') return [{ id: INSTRUMENT_ID, orgId: ORG_A, gradingScaleId: null }];
+    if (name === 'items') return itemRows;
+    if (name === 'item_taxonomy_tags') return [{ itemId: ITEM_1, nodeId: NODE_1 }];
+    if (name === 'students') return studentRows;
+    if (name === 'grading_scales') return [];
+    return [];
+  };
+
+  let lastTable: string | null = null;
+  const whereChain = (name: string) => ({
+    then: (resolve: (v: unknown) => unknown, reject: (e: unknown) => unknown) =>
+      Promise.resolve(rowsFor(name)).then(resolve, reject),
+    orderBy: () => Promise.resolve(rowsFor(name)),
+  });
+  const selectChain = (table: unknown) => {
+    lastTable = detect(table);
+    return {
+      where: () => whereChain(lastTable as string),
+      orderBy: () => Promise.resolve(rowsFor(lastTable as string)),
+    };
+  };
+
+  const insertFor = (table: unknown) => {
+    const name = detect(table);
+    return {
+      values: (values: unknown) => {
+        const arr = Array.isArray(values) ? values : [values];
+        if (name === 'responses') captured.responses.push(arr);
+        if (name === 'assessment_results') captured.assessmentResults.push(arr);
+        return {
+          returning: () => {
+            if (name === 'assessments') return Promise.resolve([{ id: ASSESSMENT_ID }]);
+            if (name === 'import_jobs') return Promise.resolve([{ id: JOB_ID }]);
+            return Promise.resolve([{ id: 'unknown' }]);
+          },
+          onConflictDoUpdate: () => Promise.resolve(undefined),
+        };
+      },
+    };
+  };
+
+  const tx = {
+    select: () => ({ from: (table: unknown) => selectChain(table) }),
+    insert: (table: unknown) => insertFor(table),
+    delete: () => ({ where: () => Promise.resolve(undefined) }),
+  };
+
+  const db = {
+    select: () => ({ from: (table: unknown) => selectChain(table) }),
+    insert: (table: unknown) => insertFor(table),
+    delete: () => ({ where: () => Promise.resolve(undefined) }),
+    transaction: async (cb: (t: Database) => Promise<unknown>) =>
+      cb(tx as unknown as Database),
+  };
+  return db as unknown as Database;
+}
+
 describe('AnswerSheetsService', () => {
   let store: AnswerSheetPreviewStore;
 
@@ -276,12 +360,14 @@ describe('AnswerSheetsService', () => {
           {
             id: ITEM_1,
             position: 1,
+            type: 'multiple_choice',
             content: { correctKey: 'A' },
             scoringConfig: { points: 1 },
           },
           {
             id: ITEM_2,
             position: 2,
+            type: 'multiple_choice',
             content: { correctKey: 'B' },
             scoringConfig: { points: 1 },
           },
@@ -354,12 +440,14 @@ describe('AnswerSheetsService', () => {
           {
             id: ITEM_1,
             position: 1,
+            type: 'multiple_choice',
             content: { correctKey: 'A' },
             scoringConfig: { points: 1 },
           },
           {
             id: ITEM_2,
             position: 2,
+            type: 'multiple_choice',
             content: { correctKey: 'B' },
             scoringConfig: { points: 1 },
           },
@@ -393,6 +481,66 @@ describe('AnswerSheetsService', () => {
       expect(result.responsesCreated).toBe(2);
       expect(result.studentsProcessed).toBe(1);
       expect(['completed', 'partial']).toContain(result.status);
+    });
+
+    it('puntúa MCQ por estrategia y NO contamina el % con un ítem open_ended pendiente', async () => {
+      // Instrumento: ítem 1 MCQ (clave A), ítem 2 MCQ (clave B), ítem 3 open_ended.
+      // El alumno responde A, B y "texto libre". Esperado:
+      //  - Q1 y Q2 correctos (auto) → % autocorregido = 100%.
+      //  - Q3 (open_ended) → pendiente: isCorrect null, scoredBy human, sin score.
+      //  - El % del alumno NO baja por Q3 (excluido del denominador).
+      const captured: { responses: unknown[][]; assessmentResults: unknown[][] } = {
+        responses: [],
+        assessmentResults: [],
+      };
+      const db = buildCapturingDb(captured);
+      const service = new AnswerSheetsService(db, store);
+
+      const csv = Buffer.from(
+        `Student ID,First Name,Last Name,Q1,Q2,Q3\n12345678-5,Juan,Pérez,A,B,respuesta libre del alumno\n`,
+      );
+      const upload = await service.upload(
+        makeJwt(),
+        { buffer: csv, originalname: 'mixed.csv' },
+        { format: 'gradecam_csv', instrumentId: INSTRUMENT_ID },
+      );
+      const result = await service.confirm(makeJwt(), {
+        previewToken: upload.previewToken,
+        createAssessment: true,
+        skipErrorRows: true,
+      });
+
+      // 1 alumno × 3 items = 3 responses.
+      expect(result.responsesCreated).toBe(3);
+
+      const insertedResponses = captured.responses.flat() as Array<{
+        itemId: string;
+        isCorrect: boolean | null;
+        scoredBy: string | null;
+        finalScore: string | null;
+        rawScore: string | null;
+      }>;
+      const byItem = new Map(insertedResponses.map((r) => [r.itemId, r]));
+
+      // MCQ auto-scored.
+      expect(byItem.get(ITEM_1)).toMatchObject({ isCorrect: true, scoredBy: 'auto' });
+      expect(byItem.get(ITEM_2)).toMatchObject({ isCorrect: true, scoredBy: 'auto' });
+      // open_ended pendiente: NUNCA 0/incorrecto.
+      const openEnded = byItem.get(ITEM_3)!;
+      expect(openEnded.isCorrect).toBeNull();
+      expect(openEnded.scoredBy).toBe('human');
+      expect(openEnded.finalScore).toBeNull();
+      expect(openEnded.rawScore).toBeNull();
+
+      // Resultado del alumno: % = 100% (2/2 MCQ), NO 66% — el open_ended no
+      // contamina el denominador. `isComplete` false porque hay pendiente.
+      const studentResult = (captured.assessmentResults.flat() as Array<{
+        studentId: string;
+        percentage: string;
+        isComplete: boolean;
+      }>)[0]!;
+      expect(Number(studentResult.percentage)).toBeCloseTo(100, 5);
+      expect(studentResult.isComplete).toBe(false);
     });
 
     it('rechaza si el previewToken expiró/no existe', async () => {
