@@ -3,6 +3,7 @@ import { and, eq, inArray, isNull, sql, type SQL } from 'drizzle-orm';
 import {
   assessments,
   classGroups,
+  gradingScales,
   instruments,
   skillResults,
   studentEnrollments,
@@ -13,6 +14,7 @@ import {
   teacherAssignments,
 } from '@soe/db';
 import {
+  DEFAULT_PERFORMANCE_THRESHOLDS,
   RESULTS_VIEWER_ROLES,
   percentageToPerformanceLevel,
   userHasAnyRole,
@@ -21,6 +23,7 @@ import {
   type HeatmapResponse,
   type HeatmapRow,
   type HeatmapSubject,
+  type PerformanceThresholds,
   type UserRole,
 } from '@soe/types';
 import type { JwtPayload } from '../auth/jwt-payload.types';
@@ -100,7 +103,42 @@ export class HeatmapService {
     // visibles). Es el promedio real student-weighted, no el promedio de celdas.
     const overallRows = await this.loadOverallRows(baseConditions);
 
-    return this.assembleResponse(cellRows, overallRows);
+    // BUG #8: los niveles de desempeño deben usar los thresholds de la escala
+    // del instrumento, no los defaults fijos. Se resuelven una vez sobre el
+    // scope y se pasan a percentageToPerformanceLevel en el ensamblado.
+    const thresholds = await this.resolveThresholds(baseConditions);
+
+    return this.assembleResponse(cellRows, overallRows, thresholds);
+  }
+
+  /**
+   * Thresholds (0..1) de la escala aplicable al scope. Toma el `config.
+   * performanceThresholds` del primer instrumento (con grading_scale) que matchee
+   * las condiciones; si ninguno define escala/thresholds, usa los defaults DIA.
+   * Multi-tenancy: las condiciones ya incluyen `eq(assessments.orgId, orgId)`.
+   */
+  private async resolveThresholds(conditions: SQL[]): Promise<PerformanceThresholds> {
+    const [row] = await this.db
+      .select({ config: gradingScales.config })
+      .from(skillResults)
+      .innerJoin(assessments, eq(assessments.id, skillResults.assessmentId))
+      .innerJoin(instruments, eq(instruments.id, assessments.instrumentId))
+      .innerJoin(subjects, eq(subjects.id, instruments.subjectId))
+      .innerJoin(students, eq(students.id, skillResults.studentId))
+      .innerJoin(gradingScales, eq(gradingScales.id, instruments.gradingScaleId))
+      .where(and(...conditions))
+      .limit(1);
+
+    const cfg = row?.config as
+      | { performanceThresholds?: Partial<PerformanceThresholds> }
+      | null
+      | undefined;
+    const t = cfg?.performanceThresholds;
+    return {
+      elementary: t?.elementary ?? DEFAULT_PERFORMANCE_THRESHOLDS.elementary,
+      adequate: t?.adequate ?? DEFAULT_PERFORMANCE_THRESHOLDS.adequate,
+      advanced: t?.advanced ?? DEFAULT_PERFORMANCE_THRESHOLDS.advanced,
+    };
   }
 
   // ───────────────────────────────────────────────────────────────────────────
@@ -201,6 +239,7 @@ export class HeatmapService {
   private assembleResponse(
     cellRows: CellRow[],
     overallRows: OverallRow[],
+    thresholds: PerformanceThresholds,
   ): HeatmapResponse {
     // Asignaturas (columnas), únicas y ordenadas por nombre.
     const subjectMap = new Map<string, HeatmapSubject>();
@@ -242,7 +281,9 @@ export class HeatmapService {
         subjectId: r.subjectId,
         averageAchievement: pct,
         performanceLevel:
-          pct == null ? null : percentageToPerformanceLevel(pct / 100),
+          pct == null
+            ? null
+            : percentageToPerformanceLevel(pct / 100, { performanceThresholds: thresholds }),
         studentsAssessed: Number(r.studentsAssessed ?? 0),
       });
     }
@@ -270,7 +311,11 @@ export class HeatmapService {
         nodeCode: node.nodeCode,
         overallAchievement: overall,
         overallPerformanceLevel:
-          overall == null ? null : percentageToPerformanceLevel(overall / 100),
+          overall == null
+            ? null
+            : percentageToPerformanceLevel(overall / 100, {
+                performanceThresholds: thresholds,
+              }),
         cells,
       };
     });
