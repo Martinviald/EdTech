@@ -153,7 +153,20 @@ Esto crea archivos SQL en `packages/db/drizzle/` basados en los schemas TypeScri
 pnpm --filter @soe/db db:migrate
 ```
 
-Esto ejecuta los SQL contra la base de datos definida en `DATABASE_URL`.
+Esto ejecuta los SQL contra la base de datos y, al final, **re-aplica las políticas RLS**
+de `packages/db/sql/rls-policies.sql` de forma idempotente.
+
+> ⚠️ **RLS multi-tenant:** las políticas RLS **no** viven en el schema Drizzle, sino en
+> `packages/db/sql/rls-policies.sql`. Por eso **no se pierden** al regenerar/aplanar
+> migraciones con `db:generate` — `db:migrate` siempre las vuelve a aplicar.
+>
+> - **`DATABASE_URL`** → conexión de la **API** en runtime. Para que el RLS filtre, debe
+>   apuntar a un rol **sin** `BYPASSRLS` (ej. `soe_app`; crearlo con
+>   `packages/db/sql/roles.sql`).
+> - **`DATABASE_ADMIN_URL`** → usada por `db:migrate`/`db:seed`/`db:reset` (rol
+>   privilegiado que bypassa RLS). Si se omite, cae a `DATABASE_URL`.
+>
+> Detalle completo en `packages/db/README.md`.
 
 Output esperado:
 

@@ -59,6 +59,15 @@
 
 ### 1. Multi-tenancy
 
+#### Tablas con RLS y `withOrgContext`
+
+El aislamiento por colegio se enforce con **Row Level Security (RLS)** de PostgreSQL en 6 tablas:
+
+- **Con `org_id` directo:** `students`, `assessments`, `import_jobs`.
+- **Sin `org_id` propio** (heredan el tenant vía `EXISTS` sobre `assessments`): `responses`, `assessment_results`, `skill_results`.
+
+Las políticas (`*_tenant_isolation`, `ENABLE` + `FORCE ROW LEVEL SECURITY`) **no** viven en el schema Drizzle: están en **`packages/db/sql/rls-policies.sql`** y se re-aplican de forma idempotente en cada `db:migrate` (sobreviven a regeneraciones). Toda query de la API a estas tablas **debe** correr dentro de `withOrgContext(db, orgId, tx => ...)`, que fija `app.current_org_id`; sin contexto, RLS devuelve 0 filas. Detalle completo en **`packages/db/README.md`**.
+
 #### `organizations`
 
 Nodo raíz del tenant. La plataforma, fundaciones y colegios son todos `Organization`.
