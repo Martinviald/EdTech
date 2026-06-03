@@ -99,6 +99,9 @@ function makeDb(selectResults: unknown[][]): DbMock {
         return Promise.resolve({});
       },
     }),
+    // withOrgContext() abre una transacción y ejecuta set_config vía tx.execute
+    // antes de correr el callback. El mock provee execute como no-op.
+    execute: async () => [],
     transaction: async <T>(fn: (tx: unknown) => Promise<T>): Promise<T> => {
       db.__transactionRan = true;
       return fn(db);
@@ -245,7 +248,7 @@ describe('AssessmentResultsService.calculate', () => {
     expect(inserted[0]!.grade).toBe('7.00');
   });
 
-  it('retorna 0/0 sin transacción cuando no hay responses', async () => {
+  it('retorna 0/0 sin escrituras cuando no hay responses', async () => {
     const db = makeDb([
       [{ id: 'a1', orgId: 'org-1', instrumentId: 'i1' }], // assessment
       [{ gradingScaleId: null }],                         // instrument
@@ -261,7 +264,9 @@ describe('AssessmentResultsService.calculate', () => {
       skillResultsUpdated: 0,
       studentsProcessed: 0,
     });
-    expect(db.__transactionRan).toBe(false);
+    // withOrgContext siempre abre una transacción (set_config), pero no debe
+    // haber escrituras: el método retorna antes de cualquier delete/insert.
+    expect(db.__deleteCalls).toHaveLength(0);
     expect(db.__insertCalls).toHaveLength(0);
   });
 });

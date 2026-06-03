@@ -69,6 +69,10 @@ function makeDb(selectResults: unknown[][]): DbMock {
       selectIdx++;
       return buildSelectChain(rows);
     },
+    // withOrgContext() abre una transacción y fija app.current_org_id vía
+    // tx.execute antes de correr el callback. El tx es el propio mock.
+    execute: async () => [],
+    transaction: async (fn: (tx: unknown) => unknown) => fn(db),
     __selectIdx: () => selectIdx,
   } as unknown as DbMock;
 
