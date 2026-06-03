@@ -75,6 +75,38 @@ describe('grade-calculator — golden DIA (cero regresión)', () => {
   });
 });
 
+describe('aggregateStudentResults — ítems pendientes no contaminan el % (fuente única)', () => {
+  // Instrumento MIXTO: 2 MCQ auto-corregidos (1 correcto) + 1 ítem pendiente
+  // (no auto-corregible: isCorrect/rawScore/finalScore null, maxScore 5). El
+  // pendiente NO debe contar en numerador ni denominador → % = 1/2 = 50%, e
+  // isComplete = false. Cubre el hallazgo de auditoría: ambos consumidores
+  // (ingesta y recálculo) deben coincidir sin replicar el filtro.
+  const mixed: ResponseForCalculation[] = [
+    { studentId: 'stu-1', itemId: 'mc-1', isCorrect: true, rawScore: 1, maxScore: 1, itemPosition: 1, taxonomyNodeIds: [] },
+    { studentId: 'stu-1', itemId: 'mc-2', isCorrect: false, rawScore: 0, maxScore: 1, itemPosition: 2, taxonomyNodeIds: [] },
+    { studentId: 'stu-1', itemId: 'open-1', isCorrect: null, rawScore: null, finalScore: null, maxScore: 5, itemPosition: 3, taxonomyNodeIds: [] },
+  ];
+
+  it('excluye el pendiente del % (su maxScore 5 no diluye el denominador)', () => {
+    const [r] = aggregateStudentResults(mixed, DIA_SCALE);
+    expect(r!.totalScore).toBe(1);
+    expect(r!.maxScore).toBe(2); // 1+1; el maxScore 5 del pendiente NO se suma
+    expect(r!.percentage).toBeCloseTo(0.5, 10);
+    expect(r!.isComplete).toBe(false);
+  });
+
+  it('mismo % pasando todas las respuestas o solo las corregidas (rutas consistentes)', () => {
+    const scoredOnly = mixed.filter((r) => r.isCorrect !== null);
+    const withPending = aggregateStudentResults(mixed, DIA_SCALE)[0]!;
+    const preFiltered = aggregateStudentResults(scoredOnly, DIA_SCALE)[0]!;
+    expect(withPending.percentage).toBeCloseTo(preFiltered.percentage, 10);
+    expect(withPending.totalScore).toBe(preFiltered.totalScore);
+    expect(withPending.maxScore).toBe(preFiltered.maxScore);
+    expect(withPending.isComplete).toBe(false); // con pendiente
+    expect(preFiltered.isComplete).toBe(true); // sin pendiente
+  });
+});
+
 describe('percentageToGrade — linear_chilean y percentage', () => {
   it('linear_chilean: 0% → minGrade, 100% → maxGrade, threshold → passingGrade', () => {
     expect(percentageToGrade(0, DIA_SCALE)).toBe(1);

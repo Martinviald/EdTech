@@ -301,8 +301,15 @@ export function aggregateStudentResults(
 
   const results: StudentAggregateResult[] = [];
   for (const [studentId, rows] of byStudent) {
-    const totalScore = rows.reduce((acc, r) => acc + effectiveScore(r), 0);
-    const maxScore = rows.reduce((acc, r) => acc + r.maxScore, 0);
+    // Los ítems pendientes (`isCorrect === null`: no auto-corregibles, esperan
+    // corrección humana/IA) NO cuentan para el % — ni en numerador ni en
+    // denominador — para no diluir el logro de los ítems efectivamente evaluados.
+    // Sí marcan `isComplete = false`. Misma semántica que `aggregateSkillResults`,
+    // aplicada en la fuente para que TODOS los consumidores (ingesta de respuestas
+    // y recálculo de resultados) sean consistentes sin replicar el filtro (DRY).
+    const scored = rows.filter((r) => r.isCorrect !== null);
+    const totalScore = scored.reduce((acc, r) => acc + effectiveScore(r), 0);
+    const maxScore = scored.reduce((acc, r) => acc + r.maxScore, 0);
     const percentage = maxScore > 0 ? totalScore / maxScore : 0;
     const grade = percentageToGrade(percentage, scale);
     const performanceLevel = percentageToPerformanceLevel(percentage, scale);
