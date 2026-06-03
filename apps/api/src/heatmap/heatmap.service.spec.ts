@@ -9,11 +9,13 @@ import { HeatmapService } from './heatmap.service';
 // orden. Las funciones encadenables retornan el chain y al resolver entregan las
 // filas configuradas.
 //
-// Orden de queries en getHeatmap():
-//   admin/scopeAll, sin filtro de curso → [cells, overall]
-//   admin con classGroupId/academicYearId → [students, cells, overall]
-//   teacher → [scope, students, cells, overall]
+// Orden de queries en getHeatmap() (tras cells no-vacías corre resolveThresholds):
+//   admin/scopeAll, sin filtro de curso → [cells, overall, thresholds]
+//   admin con classGroupId/academicYearId → [students, cells, overall, thresholds]
+//   teacher → [scope, students, cells, overall, thresholds]
 //   (early returns: profesor sin cursos = [scope]; sin datos = [..., cells=[]])
+//   La query de thresholds devuelve la config de la grading_scale del scope; si
+//   no se provee (selectResults faltante → []), se usan los defaults DIA.
 // ──────────────────────────────────────────────────────────────────────────────
 
 function makeUser(overrides: Partial<JwtPayload> = {}): JwtPayload {
@@ -296,12 +298,14 @@ describe('HeatmapService.getHeatmap', () => {
       [cell('n1', 'Comprensión', 's-leng', 'Lenguaje', '65.00', 2)],
       // 4. overall
       [{ nodeId: 'n1', avgPct: '65.00' }],
+      // 5. thresholds (sin grading_scale → defaults DIA)
+      [],
     ]);
     const service = makeService(db);
 
     const res = await service.getHeatmap(makeUser({ role: 'teacher' }), {});
 
-    expect(db.__selectIdx()).toBe(4);
+    expect(db.__selectIdx()).toBe(5);
     expect(res.subjects.map((s) => s.subjectId)).toEqual(['s-leng']);
     expect(res.rows).toHaveLength(1);
     expect(res.rows[0].cells[0].averageAchievement).toBe(65);
@@ -343,12 +347,14 @@ describe('HeatmapService.getHeatmap', () => {
       [cell('n1', 'Comprensión', 's-leng', 'Lenguaje', '88.00', 1)],
       // 3. overall
       [{ nodeId: 'n1', avgPct: '88.00' }],
+      // 4. thresholds (sin grading_scale → defaults DIA)
+      [],
     ]);
     const service = makeService(db);
 
     const res = await service.getHeatmap(makeUser(), { classGroupId: 'cg-1' });
 
-    expect(db.__selectIdx()).toBe(3);
+    expect(db.__selectIdx()).toBe(4);
     expect(res.rows[0].cells[0].performanceLevel).toBe('advanced');
   });
 });

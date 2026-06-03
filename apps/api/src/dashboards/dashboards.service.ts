@@ -17,6 +17,7 @@ import {
   teacherAssignments,
 } from '@soe/db';
 import {
+  DEFAULT_PERFORMANCE_THRESHOLDS,
   PERFORMANCE_LEVELS,
   RESULTS_VIEWER_ROLES,
   percentageToPerformanceLevel,
@@ -55,8 +56,9 @@ const ADMIN_LIKE_ROLES: readonly UserRole[] = [
 ];
 
 // Umbrales por defecto (0..1) — alineados al estándar DIA. Se usan cuando la
-// grading scale aplicable no define `config.performanceThresholds`.
-const DEFAULT_THRESHOLDS = { elementary: 0.4, adequate: 0.7, advanced: 0.85 } as const;
+// grading scale aplicable no define `config.performanceThresholds`. Single source
+// of truth en @soe/types (no duplicar literales 0.4/0.7/0.85).
+const DEFAULT_THRESHOLDS = DEFAULT_PERFORMANCE_THRESHOLDS;
 
 type Scope = { scopeAll: boolean; classGroupIds: string[] };
 
