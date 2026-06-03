@@ -243,8 +243,9 @@ function answerFor(
 }
 
 async function main() {
-  const databaseUrl = process.env.DATABASE_URL;
-  if (!databaseUrl) throw new Error('DATABASE_URL is required');
+  // Rol privilegiado (bypassa RLS) para cargar datos sin contexto de org.
+  const databaseUrl = process.env.DATABASE_ADMIN_URL ?? process.env.DATABASE_URL;
+  if (!databaseUrl) throw new Error('DATABASE_ADMIN_URL o DATABASE_URL es requerido');
   const db = createDbClient(databaseUrl);
 
   // ── 0. Prerrequisitos del seed base ────────────────────────────────────────
