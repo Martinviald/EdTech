@@ -7,11 +7,19 @@ import {
   taxonomyNodes,
   taxonomies,
 } from '@soe/db';
-import type { ItemContent } from '@soe/types';
+import { validateItemContent, type InstrumentType } from '@soe/types';
 import type { JwtPayload } from '../auth/jwt-payload.types';
 import { InjectDb, type Database } from '../database/database.types';
 import { parseDiaPayload, type DiaParseResult } from './lib/dia-parser';
 import type { DiaRawPayload } from './lib/dia-sample-data';
+
+/**
+ * Tipo de instrumento que produce/consume este módulo. Único punto de acoplamiento
+ * a "dia": se usa tanto al crear el instrumento como al filtrar el listado. Aislarlo
+ * en una constante lo vuelve un punto de extensión explícito (un futuro módulo de
+ * ingesta SIMCE/PAES parametrizaría esto) en vez de un literal disperso por el servicio.
+ */
+const DIA_INSTRUMENT_TYPE = 'dia' satisfies InstrumentType;
 
 export interface DiaIngestionMetadata {
   taxonomyId: string;
@@ -133,7 +141,7 @@ export class DiaIngestionService {
           orgId,
           taxonomyId: metadata.taxonomyId,
           name: parseResult.instrument.name,
-          type: 'dia',
+          type: DIA_INSTRUMENT_TYPE,
           year: parseResult.instrument.year,
           version: parseResult.instrument.applicationPeriod,
           isOfficial: metadata.isOfficial ?? false,
@@ -152,20 +160,18 @@ export class DiaIngestionService {
       }
 
       // 2. Create items.
-      // La columna `items.content` ahora es `ItemContent` (unión tipada, #5). El parser
-      // DIA produce hoy un `MultipleChoiceContent` LOCAL (lib/dia-parser.ts) cuyo shape
-      // —`alternatives` sin `isCorrect`, más `correctKey`— aún NO coincide con el schema
-      // canónico de @soe/types. Alinear el parser para que emita contenido que pase
-      // `validateItemContent('multiple_choice', ...)` es un entregable de la OLEADA B-#4
-      // (dia-ingestion). Hasta entonces, el contenido se inserta con un cast explícito
-      // vía `unknown` para no romper el build; la validación de tipo real llega con #4.
-      // TODO(#4): reemplazar este cast por `validateItemContent` una vez normalizado el parser.
+      // El parser DIA (#4) ahora produce `content` con el shape CANÓNICO de @soe/types
+      // (`MultipleChoiceContent`: alternativas con `isCorrect`). Lo pasamos por
+      // `validateItemContent(item.type, ...)` para que la columna tipada `items.content`
+      // (`ItemContent`, #5) reciba contenido validado por su `type` — sin casts vía
+      // `unknown`. Si el contenido no cumple el contrato, Zod lanza y abortamos la
+      // transacción (BadRequest), evitando persistir ítems mal formados.
       const itemValues = parseResult.items.map((item) => ({
         orgId,
         instrumentId: newInstrument.id,
         position: item.position,
-        type: 'multiple_choice' as const,
-        content: item.content as unknown as ItemContent,
+        type: item.type,
+        content: validateItemContent(item.type, item.content),
         scoringConfig: { points: 1, partialCredit: false },
         status: 'published' as const,
         source: 'official' as const,
@@ -224,7 +230,7 @@ export class DiaIngestionService {
    */
   async listInstruments(user: JwtPayload) {
     const conditions = [
-      eq(instruments.type, 'dia'),
+      eq(instruments.type, DIA_INSTRUMENT_TYPE),
       isNull(instruments.deletedAt),
     ];
 
