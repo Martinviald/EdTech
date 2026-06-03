@@ -19,6 +19,7 @@ import {
   subjectClasses,
   taxonomyNodes,
   teacherAssignments,
+  withOrgContext,
 } from '@soe/db';
 import {
   RESULTS_VIEWER_ROLES,
@@ -70,67 +71,74 @@ export class AssessmentResultsService {
     assessmentId: string,
     dto: CalculateAssessmentResultsRequestDto,
   ): Promise<CalculateAssessmentResultsResponse> {
-    const assessment = await this.requireAssessmentOwnedByUser(user, assessmentId);
+    const orgId = user.orgId;
+    if (orgId === null) {
+      throw new ForbiddenException('Usuario sin organización activa');
+    }
 
-    // Teacher scoping: si el caller no tiene roles administrativos y no es
-    // platform_admin, debe ser teacher con al menos un course assignment que
-    // toque algún curso elegible. Si no, 403.
-    const scope = await this.getAccessibleClassGroupIds(user, assessment.orgId);
-    if (!scope.scopeAll && scope.classGroupIds.length === 0) {
-      throw new ForbiddenException(
-        'Sin acceso a cursos para calcular resultados de esta evaluación',
+    return withOrgContext(this.db, orgId, async (tx) => {
+      const assessment = await this.requireAssessmentOwnedByUser(tx, user, assessmentId);
+
+      // Teacher scoping: si el caller no tiene roles administrativos y no es
+      // platform_admin, debe ser teacher con al menos un course assignment que
+      // toque algún curso elegible. Si no, 403.
+      const scope = await this.getAccessibleClassGroupIds(tx, user, assessment.orgId);
+      if (!scope.scopeAll && scope.classGroupIds.length === 0) {
+        throw new ForbiddenException(
+          'Sin acceso a cursos para calcular resultados de esta evaluación',
+        );
+      }
+
+      const scale = await this.resolveGradingScale(
+        tx,
+        user,
+        assessment.orgId,
+        assessment.instrumentId,
+        dto.gradingScaleId,
       );
-    }
 
-    const scale = await this.resolveGradingScale(
-      user,
-      assessment.orgId,
-      assessment.instrumentId,
-      dto.gradingScaleId,
-    );
+      const responseRows = await tx
+        .select({
+          studentId: responses.studentId,
+          itemId: responses.itemId,
+          isCorrect: responses.isCorrect,
+          rawScore: responses.rawScore,
+          finalScore: responses.finalScore,
+          maxScore: responses.maxScore,
+          itemPosition: items.position,
+        })
+        .from(responses)
+        .innerJoin(items, eq(items.id, responses.itemId))
+        .where(eq(responses.assessmentId, assessmentId));
 
-    const responseRows = await this.db
-      .select({
-        studentId: responses.studentId,
-        itemId: responses.itemId,
-        isCorrect: responses.isCorrect,
-        rawScore: responses.rawScore,
-        finalScore: responses.finalScore,
-        maxScore: responses.maxScore,
-        itemPosition: items.position,
-      })
-      .from(responses)
-      .innerJoin(items, eq(items.id, responses.itemId))
-      .where(eq(responses.assessmentId, assessmentId));
+      if (responseRows.length === 0) {
+        return {
+          assessmentId,
+          resultsCreated: 0,
+          resultsUpdated: 0,
+          skillResultsCreated: 0,
+          skillResultsUpdated: 0,
+          studentsProcessed: 0,
+        };
+      }
 
-    if (responseRows.length === 0) {
-      return {
-        assessmentId,
-        resultsCreated: 0,
-        resultsUpdated: 0,
-        skillResultsCreated: 0,
-        skillResultsUpdated: 0,
-        studentsProcessed: 0,
-      };
-    }
+      const tagsByItemId = await this.loadTagsByItemId(
+        tx,
+        Array.from(new Set(responseRows.map((r) => r.itemId))),
+      );
 
-    const tagsByItemId = await this.loadTagsByItemId(
-      Array.from(new Set(responseRows.map((r) => r.itemId))),
-    );
+      const computed = toResponseForCalculation(responseRows, tagsByItemId);
+      const studentAggregates = aggregateStudentResults(computed, scale);
+      const skillAggregates = aggregateSkillResults(computed, scale);
 
-    const computed = toResponseForCalculation(responseRows, tagsByItemId);
-    const studentAggregates = aggregateStudentResults(computed, scale);
-    const skillAggregates = aggregateSkillResults(computed, scale);
+      // Cuántos resultados previos había — define created vs updated.
+      const [{ priorResults, priorSkillResults }] = await tx
+        .select({
+          priorResults: sql<number>`(select count(*)::int from ${assessmentResults} where ${assessmentResults.assessmentId} = ${assessmentId})`,
+          priorSkillResults: sql<number>`(select count(*)::int from ${skillResults} where ${skillResults.assessmentId} = ${assessmentId})`,
+        })
+        .from(sql`(values (1)) as _`);
 
-    // Cuántos resultados previos había — define created vs updated.
-    const [{ priorResults, priorSkillResults }] = await this.db
-      .select({
-        priorResults: sql<number>`(select count(*)::int from ${assessmentResults} where ${assessmentResults.assessmentId} = ${assessmentId})`,
-        priorSkillResults: sql<number>`(select count(*)::int from ${skillResults} where ${skillResults.assessmentId} = ${assessmentId})`,
-      })
-      .from(sql`(values (1)) as _`);
-
-    await this.db.transaction(async (tx) => {
       // Recálculo = delete + reinsert. Las tablas no tienen deletedAt.
       await tx.delete(assessmentResults).where(eq(assessmentResults.assessmentId, assessmentId));
       await tx.delete(skillResults).where(eq(skillResults.assessmentId, assessmentId));
@@ -165,16 +173,16 @@ export class AssessmentResultsService {
           })),
         );
       }
-    });
 
-    return {
-      assessmentId,
-      resultsCreated: Math.max(0, studentAggregates.length - priorResults),
-      resultsUpdated: Math.min(priorResults, studentAggregates.length),
-      skillResultsCreated: Math.max(0, skillAggregates.length - priorSkillResults),
-      skillResultsUpdated: Math.min(priorSkillResults, skillAggregates.length),
-      studentsProcessed: studentAggregates.length,
-    };
+      return {
+        assessmentId,
+        resultsCreated: Math.max(0, studentAggregates.length - priorResults),
+        resultsUpdated: Math.min(priorResults, studentAggregates.length),
+        skillResultsCreated: Math.max(0, skillAggregates.length - priorSkillResults),
+        skillResultsUpdated: Math.min(priorSkillResults, skillAggregates.length),
+        studentsProcessed: studentAggregates.length,
+      };
+    });
   }
 
   // ───────────────────────────────────────────────────────────────────────────
@@ -186,70 +194,78 @@ export class AssessmentResultsService {
     assessmentId: string,
     query: ListAssessmentResultsQueryDto,
   ): Promise<AssessmentResultsListResponse> {
-    const assessment = await this.requireAssessmentOwnedByUser(user, assessmentId);
-    const scope = await this.getAccessibleClassGroupIds(user, assessment.orgId);
-
-    if (!scope.scopeAll && scope.classGroupIds.length === 0) {
-      return { data: [], total: 0, page: query.page, limit: query.limit };
+    const orgId = user.orgId;
+    if (orgId === null) {
+      throw new ForbiddenException('Usuario sin organización activa');
     }
 
-    const accessibleStudentIds = await this.resolveAccessibleStudentIds(
-      assessment.orgId,
-      scope,
-      query.classGroupId,
-    );
+    return withOrgContext(this.db, orgId, async (tx) => {
+      const assessment = await this.requireAssessmentOwnedByUser(tx, user, assessmentId);
+      const scope = await this.getAccessibleClassGroupIds(tx, user, assessment.orgId);
 
-    if (accessibleStudentIds !== null && accessibleStudentIds.length === 0) {
-      return { data: [], total: 0, page: query.page, limit: query.limit };
-    }
+      if (!scope.scopeAll && scope.classGroupIds.length === 0) {
+        return { data: [], total: 0, page: query.page, limit: query.limit };
+      }
 
-    const conditions = [eq(assessmentResults.assessmentId, assessmentId)];
-    if (accessibleStudentIds !== null) {
-      conditions.push(inArray(assessmentResults.studentId, accessibleStudentIds));
-    }
-    if (query.performanceLevel) {
-      conditions.push(eq(assessmentResults.performanceLevel, query.performanceLevel));
-    }
+      const accessibleStudentIds = await this.resolveAccessibleStudentIds(
+        tx,
+        assessment.orgId,
+        scope,
+        query.classGroupId,
+      );
 
-    const [countRow] = await this.db
-      .select({ total: sql<number>`count(*)::int` })
-      .from(assessmentResults)
-      .innerJoin(students, eq(students.id, assessmentResults.studentId))
-      .where(and(...conditions, isNull(students.deletedAt)));
+      if (accessibleStudentIds !== null && accessibleStudentIds.length === 0) {
+        return { data: [], total: 0, page: query.page, limit: query.limit };
+      }
 
-    const total = Number(countRow?.total ?? 0);
+      const conditions = [eq(assessmentResults.assessmentId, assessmentId)];
+      if (accessibleStudentIds !== null) {
+        conditions.push(inArray(assessmentResults.studentId, accessibleStudentIds));
+      }
+      if (query.performanceLevel) {
+        conditions.push(eq(assessmentResults.performanceLevel, query.performanceLevel));
+      }
 
-    const rows = await this.db
-      .select({
-        id: assessmentResults.id,
-        assessmentId: assessmentResults.assessmentId,
-        studentId: assessmentResults.studentId,
-        studentRut: students.rut,
-        firstName: students.firstName,
-        lastName: students.lastName,
-        totalScore: assessmentResults.totalScore,
-        maxScore: assessmentResults.maxScore,
-        percentage: assessmentResults.percentage,
-        grade: assessmentResults.grade,
-        performanceLevel: assessmentResults.performanceLevel,
-        isComplete: assessmentResults.isComplete,
-        completedAt: assessmentResults.completedAt,
-        createdAt: assessmentResults.createdAt,
-        updatedAt: assessmentResults.updatedAt,
-      })
-      .from(assessmentResults)
-      .innerJoin(students, eq(students.id, assessmentResults.studentId))
-      .where(and(...conditions, isNull(students.deletedAt)))
-      .orderBy(students.lastName, students.firstName)
-      .limit(query.limit)
-      .offset((query.page - 1) * query.limit);
+      const [countRow] = await tx
+        .select({ total: sql<number>`count(*)::int` })
+        .from(assessmentResults)
+        .innerJoin(students, eq(students.id, assessmentResults.studentId))
+        .where(and(...conditions, isNull(students.deletedAt)));
 
-    return {
-      data: rows.map((r) => this.toAssessmentResultModel(r)),
-      total,
-      page: query.page,
-      limit: query.limit,
-    };
+      const total = Number(countRow?.total ?? 0);
+
+      const rows = await tx
+        .select({
+          id: assessmentResults.id,
+          assessmentId: assessmentResults.assessmentId,
+          studentId: assessmentResults.studentId,
+          studentRut: students.rut,
+          firstName: students.firstName,
+          lastName: students.lastName,
+          totalScore: assessmentResults.totalScore,
+          maxScore: assessmentResults.maxScore,
+          percentage: assessmentResults.percentage,
+          grade: assessmentResults.grade,
+          performanceLevel: assessmentResults.performanceLevel,
+          isComplete: assessmentResults.isComplete,
+          completedAt: assessmentResults.completedAt,
+          createdAt: assessmentResults.createdAt,
+          updatedAt: assessmentResults.updatedAt,
+        })
+        .from(assessmentResults)
+        .innerJoin(students, eq(students.id, assessmentResults.studentId))
+        .where(and(...conditions, isNull(students.deletedAt)))
+        .orderBy(students.lastName, students.firstName)
+        .limit(query.limit)
+        .offset((query.page - 1) * query.limit);
+
+      return {
+        data: rows.map((r) => this.toAssessmentResultModel(r)),
+        total,
+        page: query.page,
+        limit: query.limit,
+      };
+    });
   }
 
   // ───────────────────────────────────────────────────────────────────────────
@@ -261,63 +277,71 @@ export class AssessmentResultsService {
     assessmentId: string,
     query: Pick<ListAssessmentResultsQueryDto, 'classGroupId' | 'page' | 'limit'>,
   ): Promise<SkillResultsListResponse> {
-    const assessment = await this.requireAssessmentOwnedByUser(user, assessmentId);
-    const scope = await this.getAccessibleClassGroupIds(user, assessment.orgId);
-
-    if (!scope.scopeAll && scope.classGroupIds.length === 0) {
-      return { data: [], total: 0, page: query.page, limit: query.limit };
+    const orgId = user.orgId;
+    if (orgId === null) {
+      throw new ForbiddenException('Usuario sin organización activa');
     }
 
-    const accessibleStudentIds = await this.resolveAccessibleStudentIds(
-      assessment.orgId,
-      scope,
-      query.classGroupId,
-    );
+    return withOrgContext(this.db, orgId, async (tx) => {
+      const assessment = await this.requireAssessmentOwnedByUser(tx, user, assessmentId);
+      const scope = await this.getAccessibleClassGroupIds(tx, user, assessment.orgId);
 
-    if (accessibleStudentIds !== null && accessibleStudentIds.length === 0) {
-      return { data: [], total: 0, page: query.page, limit: query.limit };
-    }
+      if (!scope.scopeAll && scope.classGroupIds.length === 0) {
+        return { data: [], total: 0, page: query.page, limit: query.limit };
+      }
 
-    const conditions = [eq(skillResults.assessmentId, assessmentId)];
-    if (accessibleStudentIds !== null) {
-      conditions.push(inArray(skillResults.studentId, accessibleStudentIds));
-    }
+      const accessibleStudentIds = await this.resolveAccessibleStudentIds(
+        tx,
+        assessment.orgId,
+        scope,
+        query.classGroupId,
+      );
 
-    const [countRow] = await this.db
-      .select({ total: sql<number>`count(*)::int` })
-      .from(skillResults)
-      .where(and(...conditions));
+      if (accessibleStudentIds !== null && accessibleStudentIds.length === 0) {
+        return { data: [], total: 0, page: query.page, limit: query.limit };
+      }
 
-    const total = Number(countRow?.total ?? 0);
+      const conditions = [eq(skillResults.assessmentId, assessmentId)];
+      if (accessibleStudentIds !== null) {
+        conditions.push(inArray(skillResults.studentId, accessibleStudentIds));
+      }
 
-    const rows = await this.db
-      .select({
-        id: skillResults.id,
-        assessmentId: skillResults.assessmentId,
-        studentId: skillResults.studentId,
-        nodeId: skillResults.nodeId,
-        nodeName: taxonomyNodes.name,
-        nodeType: taxonomyNodes.type,
-        correctCount: skillResults.correctCount,
-        totalCount: skillResults.totalCount,
-        percentage: skillResults.percentage,
-        performanceLevel: skillResults.performanceLevel,
-        createdAt: skillResults.createdAt,
-        updatedAt: skillResults.updatedAt,
-      })
-      .from(skillResults)
-      .innerJoin(taxonomyNodes, eq(taxonomyNodes.id, skillResults.nodeId))
-      .where(and(...conditions))
-      .orderBy(taxonomyNodes.name)
-      .limit(query.limit)
-      .offset((query.page - 1) * query.limit);
+      const [countRow] = await tx
+        .select({ total: sql<number>`count(*)::int` })
+        .from(skillResults)
+        .where(and(...conditions));
 
-    return {
-      data: rows.map((r) => this.toSkillResultModel(r)),
-      total,
-      page: query.page,
-      limit: query.limit,
-    };
+      const total = Number(countRow?.total ?? 0);
+
+      const rows = await tx
+        .select({
+          id: skillResults.id,
+          assessmentId: skillResults.assessmentId,
+          studentId: skillResults.studentId,
+          nodeId: skillResults.nodeId,
+          nodeName: taxonomyNodes.name,
+          nodeType: taxonomyNodes.type,
+          correctCount: skillResults.correctCount,
+          totalCount: skillResults.totalCount,
+          percentage: skillResults.percentage,
+          performanceLevel: skillResults.performanceLevel,
+          createdAt: skillResults.createdAt,
+          updatedAt: skillResults.updatedAt,
+        })
+        .from(skillResults)
+        .innerJoin(taxonomyNodes, eq(taxonomyNodes.id, skillResults.nodeId))
+        .where(and(...conditions))
+        .orderBy(taxonomyNodes.name)
+        .limit(query.limit)
+        .offset((query.page - 1) * query.limit);
+
+      return {
+        data: rows.map((r) => this.toSkillResultModel(r)),
+        total,
+        page: query.page,
+        limit: query.limit,
+      };
+    });
   }
 
   // ───────────────────────────────────────────────────────────────────────────
@@ -329,116 +353,123 @@ export class AssessmentResultsService {
     assessmentId: string,
     studentId: string,
   ): Promise<StudentResultDetail> {
-    const assessment = await this.requireAssessmentOwnedByUser(user, assessmentId);
-    const scope = await this.getAccessibleClassGroupIds(user, assessment.orgId);
-
-    if (!scope.scopeAll && scope.classGroupIds.length === 0) {
-      throw new NotFoundException('Resultado de alumno no encontrado');
+    const orgId = user.orgId;
+    if (orgId === null) {
+      throw new ForbiddenException('Usuario sin organización activa');
     }
 
-    // Verificar que el alumno es accesible para este caller dentro del org.
-    if (!scope.scopeAll) {
-      const [enrollment] = await this.db
-        .select({ id: studentEnrollments.id })
-        .from(studentEnrollments)
+    return withOrgContext(this.db, orgId, async (tx) => {
+      const assessment = await this.requireAssessmentOwnedByUser(tx, user, assessmentId);
+      const scope = await this.getAccessibleClassGroupIds(tx, user, assessment.orgId);
+
+      if (!scope.scopeAll && scope.classGroupIds.length === 0) {
+        throw new NotFoundException('Resultado de alumno no encontrado');
+      }
+
+      // Verificar que el alumno es accesible para este caller dentro del org.
+      if (!scope.scopeAll) {
+        const [enrollment] = await tx
+          .select({ id: studentEnrollments.id })
+          .from(studentEnrollments)
+          .where(
+            and(
+              eq(studentEnrollments.studentId, studentId),
+              inArray(studentEnrollments.classGroupId, scope.classGroupIds),
+            ),
+          )
+          .limit(1);
+        if (!enrollment) {
+          throw new NotFoundException('Resultado de alumno no encontrado');
+        }
+      }
+
+      const [resultRow] = await tx
+        .select({
+          id: assessmentResults.id,
+          assessmentId: assessmentResults.assessmentId,
+          studentId: assessmentResults.studentId,
+          studentRut: students.rut,
+          firstName: students.firstName,
+          lastName: students.lastName,
+          totalScore: assessmentResults.totalScore,
+          maxScore: assessmentResults.maxScore,
+          percentage: assessmentResults.percentage,
+          grade: assessmentResults.grade,
+          performanceLevel: assessmentResults.performanceLevel,
+          isComplete: assessmentResults.isComplete,
+          completedAt: assessmentResults.completedAt,
+          createdAt: assessmentResults.createdAt,
+          updatedAt: assessmentResults.updatedAt,
+        })
+        .from(assessmentResults)
+        .innerJoin(students, eq(students.id, assessmentResults.studentId))
         .where(
           and(
-            eq(studentEnrollments.studentId, studentId),
-            inArray(studentEnrollments.classGroupId, scope.classGroupIds),
+            eq(assessmentResults.assessmentId, assessmentId),
+            eq(assessmentResults.studentId, studentId),
+            eq(students.orgId, assessment.orgId),
+            isNull(students.deletedAt),
           ),
         )
         .limit(1);
-      if (!enrollment) {
+
+      if (!resultRow) {
         throw new NotFoundException('Resultado de alumno no encontrado');
       }
-    }
 
-    const [resultRow] = await this.db
-      .select({
-        id: assessmentResults.id,
-        assessmentId: assessmentResults.assessmentId,
-        studentId: assessmentResults.studentId,
-        studentRut: students.rut,
-        firstName: students.firstName,
-        lastName: students.lastName,
-        totalScore: assessmentResults.totalScore,
-        maxScore: assessmentResults.maxScore,
-        percentage: assessmentResults.percentage,
-        grade: assessmentResults.grade,
-        performanceLevel: assessmentResults.performanceLevel,
-        isComplete: assessmentResults.isComplete,
-        completedAt: assessmentResults.completedAt,
-        createdAt: assessmentResults.createdAt,
-        updatedAt: assessmentResults.updatedAt,
-      })
-      .from(assessmentResults)
-      .innerJoin(students, eq(students.id, assessmentResults.studentId))
-      .where(
-        and(
-          eq(assessmentResults.assessmentId, assessmentId),
-          eq(assessmentResults.studentId, studentId),
-          eq(students.orgId, assessment.orgId),
-          isNull(students.deletedAt),
-        ),
-      )
-      .limit(1);
+      const skillRows = await tx
+        .select({
+          id: skillResults.id,
+          assessmentId: skillResults.assessmentId,
+          studentId: skillResults.studentId,
+          nodeId: skillResults.nodeId,
+          nodeName: taxonomyNodes.name,
+          nodeType: taxonomyNodes.type,
+          correctCount: skillResults.correctCount,
+          totalCount: skillResults.totalCount,
+          percentage: skillResults.percentage,
+          performanceLevel: skillResults.performanceLevel,
+          createdAt: skillResults.createdAt,
+          updatedAt: skillResults.updatedAt,
+        })
+        .from(skillResults)
+        .innerJoin(taxonomyNodes, eq(taxonomyNodes.id, skillResults.nodeId))
+        .where(
+          and(eq(skillResults.assessmentId, assessmentId), eq(skillResults.studentId, studentId)),
+        )
+        .orderBy(taxonomyNodes.name);
 
-    if (!resultRow) {
-      throw new NotFoundException('Resultado de alumno no encontrado');
-    }
+      const responseRows = await tx
+        .select({
+          itemId: responses.itemId,
+          itemPosition: items.position,
+          value: responses.value,
+          isCorrect: responses.isCorrect,
+          rawScore: responses.rawScore,
+          finalScore: responses.finalScore,
+          maxScore: responses.maxScore,
+        })
+        .from(responses)
+        .innerJoin(items, eq(items.id, responses.itemId))
+        .where(
+          and(eq(responses.assessmentId, assessmentId), eq(responses.studentId, studentId)),
+        )
+        .orderBy(items.position);
 
-    const skillRows = await this.db
-      .select({
-        id: skillResults.id,
-        assessmentId: skillResults.assessmentId,
-        studentId: skillResults.studentId,
-        nodeId: skillResults.nodeId,
-        nodeName: taxonomyNodes.name,
-        nodeType: taxonomyNodes.type,
-        correctCount: skillResults.correctCount,
-        totalCount: skillResults.totalCount,
-        percentage: skillResults.percentage,
-        performanceLevel: skillResults.performanceLevel,
-        createdAt: skillResults.createdAt,
-        updatedAt: skillResults.updatedAt,
-      })
-      .from(skillResults)
-      .innerJoin(taxonomyNodes, eq(taxonomyNodes.id, skillResults.nodeId))
-      .where(
-        and(eq(skillResults.assessmentId, assessmentId), eq(skillResults.studentId, studentId)),
-      )
-      .orderBy(taxonomyNodes.name);
-
-    const responseRows = await this.db
-      .select({
-        itemId: responses.itemId,
-        itemPosition: items.position,
-        value: responses.value,
-        isCorrect: responses.isCorrect,
-        rawScore: responses.rawScore,
-        finalScore: responses.finalScore,
-        maxScore: responses.maxScore,
-      })
-      .from(responses)
-      .innerJoin(items, eq(items.id, responses.itemId))
-      .where(
-        and(eq(responses.assessmentId, assessmentId), eq(responses.studentId, studentId)),
-      )
-      .orderBy(items.position);
-
-    return {
-      result: this.toAssessmentResultModel(resultRow),
-      skillResults: skillRows.map((r) => this.toSkillResultModel(r)),
-      responses: responseRows.map((r) => ({
-        itemId: r.itemId,
-        itemPosition: r.itemPosition,
-        rawAnswer: this.extractRawAnswer(r.value),
-        isCorrect: r.isCorrect,
-        rawScore: r.rawScore,
-        finalScore: r.finalScore,
-        maxScore: r.maxScore,
-      })),
-    };
+      return {
+        result: this.toAssessmentResultModel(resultRow),
+        skillResults: skillRows.map((r) => this.toSkillResultModel(r)),
+        responses: responseRows.map((r) => ({
+          itemId: r.itemId,
+          itemPosition: r.itemPosition,
+          rawAnswer: this.extractRawAnswer(r.value),
+          isCorrect: r.isCorrect,
+          rawScore: r.rawScore,
+          finalScore: r.finalScore,
+          maxScore: r.maxScore,
+        })),
+      };
+    });
   }
 
   // ───────────────────────────────────────────────────────────────────────────
@@ -454,6 +485,7 @@ export class AssessmentResultsService {
    * academic_director ve todo (admin-like gana).
    */
   private async getAccessibleClassGroupIds(
+    tx: Database,
     user: JwtPayload,
     assessmentOrgId: string,
   ): Promise<{ scopeAll: boolean; classGroupIds: string[] }> {
@@ -468,7 +500,7 @@ export class AssessmentResultsService {
       return { scopeAll: false, classGroupIds: [] };
     }
 
-    const rows = await this.db
+    const rows = await tx
       .select({ classGroupId: subjectClasses.classGroupId })
       .from(teacherAssignments)
       .innerJoin(subjectClasses, eq(subjectClasses.id, teacherAssignments.subjectClassId))
@@ -492,6 +524,7 @@ export class AssessmentResultsService {
    * classGroupId — significa "sin filtro extra de student".
    */
   private async resolveAccessibleStudentIds(
+    tx: Database,
     orgId: string,
     scope: { scopeAll: boolean; classGroupIds: string[] },
     classGroupId: string | undefined,
@@ -503,7 +536,7 @@ export class AssessmentResultsService {
     let allowedClassGroupIds: string[];
     if (scope.scopeAll) {
       // El caller pide un filtro por classGroup; validar que pertenece a la org.
-      const [cg] = await this.db
+      const [cg] = await tx
         .select({ id: classGroups.id })
         .from(classGroups)
         .where(and(eq(classGroups.id, classGroupId!), eq(classGroups.orgId, orgId)))
@@ -521,7 +554,7 @@ export class AssessmentResultsService {
 
     if (allowedClassGroupIds.length === 0) return [];
 
-    const rows = await this.db
+    const rows = await tx
       .select({ studentId: studentEnrollments.studentId })
       .from(studentEnrollments)
       .innerJoin(students, eq(students.id, studentEnrollments.studentId))
@@ -541,10 +574,11 @@ export class AssessmentResultsService {
    * 404 — no filtrar existencia entre orgs.
    */
   private async requireAssessmentOwnedByUser(
+    tx: Database,
     user: JwtPayload,
     assessmentId: string,
   ): Promise<{ id: string; orgId: string; instrumentId: string }> {
-    const [row] = await this.db
+    const [row] = await tx
       .select({
         id: assessments.id,
         orgId: assessments.orgId,
@@ -574,13 +608,14 @@ export class AssessmentResultsService {
    *  3. Default linear_chilean 1.0-7.0 / threshold 0.6.
    */
   private async resolveGradingScale(
+    tx: Database,
     user: JwtPayload,
     orgId: string,
     instrumentId: string,
     requestedScaleId: string | undefined,
   ): Promise<GradingScaleParams> {
     if (requestedScaleId) {
-      const [scale] = await this.db
+      const [scale] = await tx
         .select()
         .from(gradingScales)
         .where(eq(gradingScales.id, requestedScaleId))
@@ -590,14 +625,14 @@ export class AssessmentResultsService {
       }
     }
 
-    const [instrument] = await this.db
+    const [instrument] = await tx
       .select({ gradingScaleId: instruments.gradingScaleId })
       .from(instruments)
       .where(eq(instruments.id, instrumentId))
       .limit(1);
 
     if (instrument?.gradingScaleId) {
-      const [scale] = await this.db
+      const [scale] = await tx
         .select()
         .from(gradingScales)
         .where(eq(gradingScales.id, instrument.gradingScaleId))
@@ -626,9 +661,12 @@ export class AssessmentResultsService {
     };
   }
 
-  private async loadTagsByItemId(itemIds: string[]): Promise<Map<string, string[]>> {
+  private async loadTagsByItemId(
+    tx: Database,
+    itemIds: string[],
+  ): Promise<Map<string, string[]>> {
     if (itemIds.length === 0) return new Map();
-    const rows = await this.db
+    const rows = await tx
       .select({ itemId: itemTaxonomyTags.itemId, nodeId: itemTaxonomyTags.nodeId })
       .from(itemTaxonomyTags)
       .where(inArray(itemTaxonomyTags.itemId, itemIds));

@@ -10,6 +10,7 @@ import {
   subjects,
   teacherAssignments,
   users,
+  withOrgContext,
 } from '@soe/db';
 import {
   TEACHER_ROLES,
@@ -154,26 +155,30 @@ export class ClassGroupsService {
       }
     }
 
-    const studentRows = await this.db
-      .select({
-        studentId: students.id,
-        firstName: students.firstName,
-        lastName: students.lastName,
-        rut: students.rut,
-        enrollmentStatus: studentEnrollments.status,
-      })
-      .from(studentEnrollments)
-      .innerJoin(students, eq(students.id, studentEnrollments.studentId))
-      .where(
-        and(
-          eq(studentEnrollments.classGroupId, classGroupId),
-          eq(studentEnrollments.academicYearId, classGroupRow.academicYearId),
-          eq(studentEnrollments.status, 'active'),
-          eq(students.orgId, orgId),
-          isNull(students.deletedAt),
-        ),
-      )
-      .orderBy(students.lastName, students.firstName);
+    // Toca `students` (tabla con RLS): debe correr dentro de withOrgContext
+    // para que el contexto de org esté fijado y RLS filtre correctamente.
+    const studentRows = await withOrgContext(this.db, orgId, async (tx) =>
+      tx
+        .select({
+          studentId: students.id,
+          firstName: students.firstName,
+          lastName: students.lastName,
+          rut: students.rut,
+          enrollmentStatus: studentEnrollments.status,
+        })
+        .from(studentEnrollments)
+        .innerJoin(students, eq(students.id, studentEnrollments.studentId))
+        .where(
+          and(
+            eq(studentEnrollments.classGroupId, classGroupId),
+            eq(studentEnrollments.academicYearId, classGroupRow.academicYearId),
+            eq(studentEnrollments.status, 'active'),
+            eq(students.orgId, orgId),
+            isNull(students.deletedAt),
+          ),
+        )
+        .orderBy(students.lastName, students.firstName),
+    );
 
     const subjectRows = await this.db
       .select({
