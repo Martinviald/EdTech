@@ -28,6 +28,7 @@ import { DashboardsModule } from './dashboards/dashboards.module';
 import { AnalyticsModule } from './analytics/analytics.module';
 import { HeatmapModule } from './heatmap/heatmap.module';
 import { ItemAnalysisModule } from './item-analysis/item-analysis.module';
+import { AssessmentReportModule } from './assessment-report/assessment-report.module';
 
 @Module({
   imports: [
@@ -62,6 +63,8 @@ import { ItemAnalysisModule } from './item-analysis/item-analysis.module';
     // ── Sprint 5: dashboards avanzados (heatmap, tabla cruzada, distractores) ──
     HeatmapModule,
     ItemAnalysisModule,
+    // ── Informe consolidado por evaluación (directivos / UTP) ──
+    AssessmentReportModule,
   ],
   controllers: [AppController],
   providers: [

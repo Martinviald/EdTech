@@ -104,7 +104,7 @@ export default function NuevoInstrumentoPage() {
       <div>
         <div className="flex items-center gap-2 text-sm text-muted-foreground">
           <Link href={'/banco-items' as Route} className="hover:text-foreground">
-            Banco de Items
+            Banco de Instrumentos
           </Link>
           <span>/</span>
           <span>Nuevo instrumento</span>

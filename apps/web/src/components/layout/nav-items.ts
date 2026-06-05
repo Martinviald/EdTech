@@ -115,7 +115,7 @@ export const NAV_ITEMS: readonly NavItem[] = [
   },
   {
     href: '/banco-items',
-    label: 'Banco de Ítems',
+    label: 'Banco de Instrumentos',
     icon: Library,
     status: 'live',
     roles: ['platform_admin', 'school_admin', 'academic_director', 'eval_coordinator', 'teacher', 'homeroom_teacher'],

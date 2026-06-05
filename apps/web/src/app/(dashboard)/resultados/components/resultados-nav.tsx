@@ -11,6 +11,7 @@ import { cn } from '@/lib/utils';
  */
 const TABS: { href: string; label: string }[] = [
   { href: '/resultados', label: 'Resumen' },
+  { href: '/resultados/informe', label: 'Informe' },
   { href: '/resultados/clasificacion', label: 'Clasificación' },
   { href: '/resultados/habilidades', label: 'Habilidades' },
   { href: '/resultados/mapa-calor', label: 'Mapa de calor' },

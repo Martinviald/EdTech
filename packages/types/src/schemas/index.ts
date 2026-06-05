@@ -16,5 +16,6 @@ export * from './grading-scale.schema';
 export * from './assessment-result.schema';
 export * from './dashboard.schema';
 export * from './analytics.schema';
+export * from './assessment-report.schema';
 export * from './heatmap.schema';
 export * from './item-analysis.schema';
