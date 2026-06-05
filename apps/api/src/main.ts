@@ -3,6 +3,9 @@ import { NestFactory } from '@nestjs/core';
 import { ValidationPipe, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { AppModule } from './app.module';
+import { DATABASE_CONNECTION } from './database/database.module';
+import type { Database } from './database/database.types';
+import { checkRlsEnforcement } from './database/rls-startup-check';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, {
@@ -36,6 +39,9 @@ async function bootstrap() {
     origin: configService.get<string>('CORS_ORIGIN', 'http://localhost:3000'),
     credentials: true,
   });
+
+  // Self-check de aislamiento multi-tenant: avisa si la conexión bypassa RLS.
+  await checkRlsEnforcement(app.get<Database>(DATABASE_CONNECTION));
 
   const port = configService.get<number>('API_PORT', 4000);
   await app.listen(port);

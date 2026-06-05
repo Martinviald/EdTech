@@ -41,7 +41,7 @@ export const updateSectionSchema = createSectionSchema.partial();
 
 // ── Instrument DTOs ─────────────────────────────────────────────────────────
 export const createInstrumentSchema = z.object({
-  curriculumId: z.string().uuid().optional(),
+  taxonomyId: z.string().uuid().optional(),
   name: z.string().min(1).max(300),
   shortName: z.string().max(50).optional(),
   type: z.enum(INSTRUMENT_TYPES),

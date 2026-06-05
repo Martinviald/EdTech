@@ -37,9 +37,11 @@ pnpm build
 
 # Base de datos
 pnpm db:generate    # Generar migraciones desde schemas
-pnpm db:migrate     # Aplicar migraciones
+pnpm db:migrate     # Aplicar migraciones (+ re-aplica RLS de packages/db/sql/rls-policies.sql)
 pnpm db:push        # Push del schema (sólo dev)
 pnpm db:studio      # Drizzle Studio (UI de la BD)
+# Nota: el RLS multi-tenant vive en packages/db/sql/rls-policies.sql (no en el schema
+# Drizzle) y no se pierde al regenerar migraciones. Ver packages/db/README.md.
 
 # Calidad
 pnpm lint

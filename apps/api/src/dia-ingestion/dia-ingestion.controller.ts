@@ -1,6 +1,6 @@
 import { BadRequestException, Body, Controller, Get, Post, UseGuards } from '@nestjs/common';
 import { z, type ZodError } from 'zod';
-import { CURRICULUM_ROLES } from '@soe/types';
+import { TAXONOMY_ROLES } from '@soe/types';
 import { CurrentUser } from '../auth/current-user.decorator';
 import type { JwtPayload } from '../auth/jwt-payload.types';
 import { Roles } from '../common/decorators/roles.decorator';
@@ -12,10 +12,13 @@ import { DiaIngestionService } from './dia-ingestion.service';
  */
 const diaRawItemSchema = z.object({
   position: z.number().int().positive(),
-  correctKey: z.string().min(1).max(1),
+  // Claves de alternativa configurables: hasta 5 chars (alinea con el schema canónico
+  // `multipleChoiceContentSchema.alternatives[].key`). Soporta A–E (PAES) y V/F sin
+  // capar a un único carácter. La validación del set válido la hace el parser (#4).
+  correctKey: z.string().min(1).max(5),
   alternatives: z.array(
     z.object({
-      key: z.string().min(1).max(1),
+      key: z.string().min(1).max(5),
       text: z.string().optional(),
     }),
   ).min(2),
@@ -37,7 +40,7 @@ const diaRawPayloadSchema = z.object({
 });
 
 const diaIngestionMetadataSchema = z.object({
-  curriculumId: z.string().uuid(),
+  taxonomyId: z.string().uuid(),
   isOfficial: z.boolean().optional().default(false),
 });
 
@@ -78,7 +81,7 @@ function humanizeDiaZodError(error: ZodError): string {
 
 @Controller('dia-ingestion')
 @UseGuards(RolesGuard)
-@Roles(...CURRICULUM_ROLES)
+@Roles(...TAXONOMY_ROLES)
 export class DiaIngestionController {
   constructor(private readonly diaIngestionService: DiaIngestionService) {}
 

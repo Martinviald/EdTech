@@ -3,7 +3,7 @@ import { resolve } from 'path';
 import { and, eq, sql } from 'drizzle-orm';
 import { createDbClient } from '../client';
 import { classGroups, grades, subjectClasses, subjects } from '../schema/academic';
-import { curricula, taxonomyNodes } from '../schema/curriculum';
+import { taxonomies, taxonomyNodes } from '../schema/taxonomy';
 import { academicYears, organizations } from '../schema/organizations';
 import { students } from '../schema/students';
 import { orgMemberships, teacherAssignments, users } from '../schema/users';
@@ -81,9 +81,11 @@ export const DEMO_USERS = [
 ];
 
 async function main() {
-  const databaseUrl = process.env.DATABASE_URL;
+  // El seed inserta en tablas con RLS+FORCE sin contexto de org: usa el rol
+  // privilegiado (DATABASE_ADMIN_URL) que bypassa RLS. Cae a DATABASE_URL en dev.
+  const databaseUrl = process.env.DATABASE_ADMIN_URL ?? process.env.DATABASE_URL;
   if (!databaseUrl) {
-    throw new Error('DATABASE_URL is required');
+    throw new Error('DATABASE_ADMIN_URL o DATABASE_URL es requerido');
   }
 
   const db = createDbClient(databaseUrl);
@@ -119,31 +121,31 @@ async function main() {
     ])
     .onConflictDoNothing();
 
-  console.log('Seeding curricula...');
-  // El partial unique index curricula_official_type_version_uniq evita
+  console.log('Seeding taxonomies...');
+  // El partial unique index taxonomies_official_type_version_uniq evita
   // duplicar (type, version) cuando is_official=true AND org_id IS NULL.
   // Sin `target` explícito el onConflictDoNothing no detectaría el constraint.
   await db
-    .insert(curricula)
+    .insert(taxonomies)
     .values([
       { name: 'MINEDUC 2024', type: 'mineduc', isOfficial: true, version: '2024' },
       { name: 'DIA 2025', type: 'dia', isOfficial: true, version: '2025' },
     ])
     .onConflictDoNothing({
-      target: [curricula.type, curricula.version],
-      where: sql`${curricula.isOfficial} = true AND ${curricula.orgId} IS NULL`,
+      target: [taxonomies.type, taxonomies.version],
+      where: sql`${taxonomies.isOfficial} = true AND ${taxonomies.orgId} IS NULL`,
     });
 
   await seedMineducTaxonomy(db);
 
   // -------- Habilidades DIA 2025 (nodos de taxonomía) --------
   console.log('Seeding DIA 2025 taxonomy nodes...');
-  const [diaCurriculum] = await db
-    .select({ id: curricula.id })
-    .from(curricula)
-    .where(and(eq(curricula.type, 'dia'), eq(curricula.version, '2025')));
+  const [diaTaxonomy] = await db
+    .select({ id: taxonomies.id })
+    .from(taxonomies)
+    .where(and(eq(taxonomies.type, 'dia'), eq(taxonomies.version, '2025')));
 
-  if (diaCurriculum) {
+  if (diaTaxonomy) {
     const [langSubject] = await db.select().from(subjects).where(eq(subjects.code, 'LANG'));
     const [mathSubject] = await db.select().from(subjects).where(eq(subjects.code, 'MATH'));
 
@@ -175,7 +177,7 @@ async function main() {
         .insert(taxonomyNodes)
         .values(
           diaSkills.map((s) => ({
-            curriculumId: diaCurriculum.id,
+            taxonomyId: diaTaxonomy.id,
             type: 'skill' as const,
             code: s.code,
             name: s.name,

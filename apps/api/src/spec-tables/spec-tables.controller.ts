@@ -22,7 +22,7 @@ import { SpecTablesService } from './spec-tables.service';
 
 const specTableLinkSchema = z.object({
   instrumentId: z.string().uuid(),
-  curriculumId: z.string().uuid(),
+  taxonomyId: z.string().uuid(),
   fileData: z.array(z.record(z.string())).min(1),
   columnMapping: z.object({
     position: z.string().min(1),
@@ -102,7 +102,7 @@ export class SpecTablesController {
       dto.instrumentId,
       dto.fileData,
       dto.columnMapping,
-      dto.curriculumId,
+      dto.taxonomyId,
       user,
     );
   }

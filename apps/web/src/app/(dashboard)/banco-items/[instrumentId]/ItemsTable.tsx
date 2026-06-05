@@ -1,3 +1,6 @@
+'use client';
+
+import { useState } from 'react';
 import {
   Table,
   TableBody,
@@ -9,6 +12,7 @@ import {
 import { Badge } from '@/components/ui/badge';
 import type { ItemModel } from '@soe/types';
 import { TagBadge } from './TagBadge';
+import { ItemDetailPanel } from './ItemDetailPanel';
 
 const ITEM_TYPE_LABELS: Record<string, string> = {
   multiple_choice: 'Seleccion multiple',
@@ -46,6 +50,8 @@ function getContentPreview(content: Record<string, unknown>): string {
 }
 
 export function ItemsTable({ items }: { items: ItemModel[] }) {
+  const [selected, setSelected] = useState<ItemModel | null>(null);
+
   if (items.length === 0) {
     return (
       <p className="py-8 text-center text-sm text-muted-foreground">
@@ -55,50 +61,71 @@ export function ItemsTable({ items }: { items: ItemModel[] }) {
   }
 
   return (
-    <div className="overflow-x-auto rounded-md border">
-      <Table>
-        <TableHeader>
-          <TableRow>
-            <TableHead className="w-[50px]">#</TableHead>
-            <TableHead className="w-[140px]">Tipo</TableHead>
-            <TableHead>Contenido</TableHead>
-            <TableHead className="w-[240px]">Tags</TableHead>
-            <TableHead className="w-[100px]">Estado</TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {items.map((item) => (
-            <TableRow key={item.id}>
-              <TableCell className="font-mono text-xs">{item.position}</TableCell>
-              <TableCell>
-                <span className="text-xs">
-                  {ITEM_TYPE_LABELS[item.type] ?? item.type}
-                </span>
-              </TableCell>
-              <TableCell className="max-w-[300px] truncate text-sm">
-                {getContentPreview(item.content)}
-              </TableCell>
-              <TableCell>
-                <div className="flex flex-wrap gap-1">
-                  {item.tags && item.tags.length > 0 ? (
-                    item.tags.map((tag) => <TagBadge key={tag.id} tag={tag} />)
-                  ) : (
-                    <span className="text-xs text-muted-foreground">Sin tags</span>
-                  )}
-                </div>
-              </TableCell>
-              <TableCell>
-                <Badge
-                  variant="outline"
-                  className={`border-0 text-[10px] ${ITEM_STATUS_COLORS[item.status] ?? ''}`}
-                >
-                  {ITEM_STATUS_LABELS[item.status] ?? item.status}
-                </Badge>
-              </TableCell>
+    <>
+      <div className="overflow-x-auto rounded-md border">
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead className="w-[50px]">#</TableHead>
+              <TableHead className="w-[140px]">Tipo</TableHead>
+              <TableHead>Contenido</TableHead>
+              <TableHead className="w-[240px]">Tags</TableHead>
+              <TableHead className="w-[100px]">Estado</TableHead>
             </TableRow>
-          ))}
-        </TableBody>
-      </Table>
-    </div>
+          </TableHeader>
+          <TableBody>
+            {items.map((item) => (
+              <TableRow
+                key={item.id}
+                role="button"
+                tabIndex={0}
+                aria-label={`Ver detalle de la pregunta ${item.position}`}
+                className="cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                onClick={() => setSelected(item)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    setSelected(item);
+                  }
+                }}
+              >
+                <TableCell className="font-mono text-xs">{item.position}</TableCell>
+                <TableCell>
+                  <span className="text-xs">
+                    {ITEM_TYPE_LABELS[item.type] ?? item.type}
+                  </span>
+                </TableCell>
+                <TableCell className="max-w-[300px] truncate text-sm">
+                  {getContentPreview(item.content)}
+                </TableCell>
+                <TableCell>
+                  <div className="flex flex-wrap gap-1">
+                    {item.tags && item.tags.length > 0 ? (
+                      item.tags.map((tag) => <TagBadge key={tag.id} tag={tag} />)
+                    ) : (
+                      <span className="text-xs text-muted-foreground">Sin tags</span>
+                    )}
+                  </div>
+                </TableCell>
+                <TableCell>
+                  <Badge
+                    variant="outline"
+                    className={`border-0 text-[10px] ${ITEM_STATUS_COLORS[item.status] ?? ''}`}
+                  >
+                    {ITEM_STATUS_LABELS[item.status] ?? item.status}
+                  </Badge>
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </div>
+
+      <ItemDetailPanel
+        item={selected}
+        open={selected !== null}
+        onClose={() => setSelected(null)}
+      />
+    </>
   );
 }

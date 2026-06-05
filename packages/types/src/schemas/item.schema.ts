@@ -62,27 +62,65 @@ export type MultipleChoiceContent = z.infer<typeof multipleChoiceContentSchema>;
 
 // ── Items ────────────────────────────────────────────────────────────────────
 
-export const createItemSchema = z.object({
-  instrumentId: z.string().uuid().optional(),
-  sectionId: z.string().uuid().optional(),
-  position: z.number().int().min(0).default(0),
-  type: itemTypeSchema,
-  content: z.record(z.unknown()).default({}),
-  scoringConfig: scoringConfigSchema,
-  irtParams: irtParamsSchema,
-  status: itemStatusSchema.default('draft'),
-  source: itemSourceSchema.default('custom'),
-  tags: z
-    .array(
-      z.object({
-        nodeId: z.string().uuid(),
-        tagType: itemTagTypeSchema.default('primary'),
-      }),
-    )
-    .optional(),
-});
+// ── Cross-validación content ↔ type ──────────────────────────────────────────
+// `content` debe cumplir el schema Zod del `type` declarado. El registro
+// `ITEM_CONTENT_SCHEMAS` vive en item-content.schema.ts, que importa
+// `multipleChoiceContentSchema` desde ESTE archivo. Para no crear un ciclo de
+// inicialización de módulos (TDZ en `ITEM_CONTENT_SCHEMAS`), resolvemos el
+// registro de forma perezosa DENTRO del callback de superRefine (corre en tiempo
+// de validación, cuando todos los módulos ya están cargados).
+function refineContentByType(
+  data: { type?: ItemType; content?: unknown },
+  ctx: z.RefinementCtx,
+): void {
+  // Solo validamos cuando ambos campos están presentes (en update parcial, uno
+  // puede faltar). Sin `type` no sabemos contra qué schema cruzar.
+  if (data.type === undefined || data.content === undefined) return;
 
-export const updateItemSchema = createItemSchema.omit({ tags: true }).partial();
+  // Import perezoso para evitar el ciclo item.schema ↔ item-content.schema.
+  // eslint-disable-next-line @typescript-eslint/no-var-requires
+  const { ITEM_CONTENT_SCHEMAS } = require('./item-content.schema') as typeof import('./item-content.schema');
+  const schema = ITEM_CONTENT_SCHEMAS[data.type];
+
+  const result = schema.safeParse(data.content);
+  if (result.success) return;
+
+  for (const issue of result.error.issues) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      path: ['content', ...issue.path],
+      message: issue.message,
+    });
+  }
+}
+
+export const createItemSchema = z
+  .object({
+    instrumentId: z.string().uuid().optional(),
+    sectionId: z.string().uuid().optional(),
+    position: z.number().int().min(0).default(0),
+    type: itemTypeSchema,
+    content: z.record(z.unknown()).default({}),
+    scoringConfig: scoringConfigSchema,
+    irtParams: irtParamsSchema,
+    status: itemStatusSchema.default('draft'),
+    source: itemSourceSchema.default('custom'),
+    tags: z
+      .array(
+        z.object({
+          nodeId: z.string().uuid(),
+          tagType: itemTagTypeSchema.default('primary'),
+        }),
+      )
+      .optional(),
+  })
+  .superRefine(refineContentByType);
+
+export const updateItemSchema = createItemSchema
+  .innerType()
+  .omit({ tags: true })
+  .partial()
+  .superRefine(refineContentByType);
 
 export const listItemsQuerySchema = z.object({
   instrumentId: z.string().uuid().optional(),
@@ -146,7 +184,7 @@ export const aiTagSuggestionSchema = z.object({
 
 export const aiTagRequestSchema = z.object({
   itemIds: z.array(z.string().uuid()).min(1).max(50),
-  curriculumId: z.string().uuid(),
+  taxonomyId: z.string().uuid(),
 });
 
 export const confirmAiTagsSchema = z.object({
@@ -167,7 +205,7 @@ export type ConfirmAiTagsDto = z.infer<typeof confirmAiTagsSchema>;
 // ── DIA Ingestion ────────────────────────────────────────────────────────────
 
 export const diaIngestionRequestSchema = z.object({
-  curriculumId: z.string().uuid(),
+  taxonomyId: z.string().uuid(),
   subjectId: z.string().uuid(),
   gradeId: z.string().uuid(),
   year: z.number().int().min(2020).max(2100),
@@ -202,7 +240,7 @@ export type DiaConfirmResponse = {
 
 export const specTableMappingSchema = z.object({
   instrumentId: z.string().uuid(),
-  curriculumId: z.string().uuid(),
+  taxonomyId: z.string().uuid(),
   fileData: z.array(z.record(z.string())).min(1),
   columnMapping: z.record(z.string()),
 });

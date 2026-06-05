@@ -17,7 +17,7 @@
 | S2     | 5-6     | Banco de ítems + pautas DIA                | H3.3, H3.10, H3.11, H3.12, H5.8                       | 5/5 ✅            |
 | S3     | 7-8     | Ingesta y corrección DIA                   | H4.5, H4.6, H5.7, H16.3, H16.4                        | 5/5 ✅            |
 | S4     | 9-10    | Dashboards core (directivo y profesor)     | H6.1, H6.2, H6.3, H6.4, H6.5, H6.6, H6.7, H6.8, H6.9| 9/9 ✅            |
-| S5     | 11-12   | Dashboards avanzados + flujo demo completo | H6.10, H6.11, H6.12, H6.18, H19.1                     | 0/5              |
+| S5     | 11-12   | Dashboards avanzados + flujo demo completo | H6.10, H6.11, H6.12, H6.18, H19.1                     | 5/5 ✅            |
 
 **Flujo demo F1 completo al final del Sprint 5:**
 Subir hojas DIA → corrección automática → dashboard habilidades → click en pregunta → distractores → comparar con diagnóstico anterior → exportar Excel/PDF
@@ -32,12 +32,12 @@ Subir hojas DIA → corrección automática → dashboard habilidades → click 
 
 | ID         | Historia                                                                                                            | Complejidad | Estado | Notas                                                                                                                                             |
 | ---------- | ------------------------------------------------------------------------------------------------------------------- | ----------- | ------ | ------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **H19.11** | Taxonomía Universal en Drizzle: OAs, habilidades, contenidos MINEDUC con soporte futuro para SIMCE, PAES, Cambridge | ★★★★★       | ✅      | Tablas `curricula`, `taxonomy_nodes`, `taxonomy_mappings` en `packages/db/src/schema/curriculum.ts` con relaciones polimórficas y RLS.             |
+| **H19.11** | Taxonomía Universal en Drizzle: OAs, habilidades, contenidos MINEDUC con soporte futuro para SIMCE, PAES, Cambridge | ★★★★★       | ✅      | Tablas `taxonomies`, `taxonomy_nodes`, `taxonomy_mappings` en `packages/db/src/schema/taxonomy.ts` con relaciones polimórficas y RLS.             |
 | **H19.12** | Infraestructura serverless Next.js: repo, CI/CD, entornos dev/staging/prod                                          | ★★★         | ✅      | Monorepo Turborepo + pnpm: `apps/api` (NestJS), `apps/web` (Next.js 15), `packages/db` (Drizzle), `packages/types`.                              |
 | **H1.7**   | Autenticación con Google / Microsoft (SSO)                                                                          | ★★★         | ✅      | NextAuth v5 con Google + Microsoft Entra ID + mock provider. Guards JWT, multi-rol con `roles[]` + `activeRole` + switch-role endpoint.            |
 | **H17.1**  | UX simple: design system base (colores, tipografía, componentes core)                                               | ★★          | ✅      | shadcn/ui en `apps/web/src/components/ui/`. Sidebar colapsable, Topbar, MobileSidebar, UserNav con RoleSwitcher.                                  |
 | **H19.10** | Manual de marca implementado en la plataforma (coherencia visual)                                                   | ★★          | ✅      | Tokens CSS light/dark en `globals.css`, config en `tailwind.config.ts`. Inter como fuente base.                                                   |
-| **H19.4**  | Estructura de privacidad: modelo de datos con aislamiento por colegio (tenant isolation)                            | ★★★         | ✅      | `withOrgContext`, `SensitiveDataGuard` (Ley 19.628), `RolesGuard` por unión, org_id obligatorio en queries. Tests en `privacy.service.spec.ts`.   |
+| **H19.4**  | Estructura de privacidad: modelo de datos con aislamiento por colegio (tenant isolation)                            | ★★★         | ✅      | `withOrgContext`, `SensitiveDataGuard` (Ley 19.628), `RolesGuard` por unión, org_id obligatorio en queries. Tests en `privacy.service.spec.ts`. **RLS regresó al aplanar migraciones (53aa242) y se restauró robustamente en `feature/rls-restore`: políticas en `packages/db/sql/rls-policies.sql` + `withOrgContext` en todos los services. Ver `packages/db/README.md`.**   |
 | **H19.5**  | Backups automáticos y plan de recuperación                                                                          | ★★          | ➡️ S6   | Diferida a **S6 — optimización** (post-F1). No bloquea F1. Pendiente: scripts pg_dump + plan de recuperación. (También en S6: H19.14 CI/CD.)        |
 
 **División de trabajo sugerida:**
@@ -62,7 +62,7 @@ Subir hojas DIA → corrección automática → dashboard habilidades → click 
 | **H1.3**  | Crear cuentas de profesores y directivos con roles                                    | ★★          | ✅      | `staff.service.ts` con invite/bulk-invite/revoke. Multi-rol soportado (UNIQUE por terna). Frontend en `/equipo` con AddMemberDialog y BulkImportDialog.                   |
 | **H1.4**  | Asignar profesor a cursos y asignaturas                                               | ★★          | ✅      | `teacher-assignments.service.ts` con CRUD. Frontend en `organizacion/asignaciones/` con CreateAssignmentDialog y AssignmentsTable.                                         |
 | **H17.2** | Gestión del currículum MINEDUC (OAs por asignatura y nivel)                           | ★★★         | ✅      | Seed MINEDUC como taxonomía universal (`mineduc-taxonomy.ts` + `mineduc-2024.json`). Panel de gestión en `/curriculum`.                                                    |
-| **H17.3** | Gestión de taxonomías (habilidades, contenidos, tipos de texto, niveles de desempeño) | ★★          | ✅      | `curricula.controller.ts` + `nodes.controller.ts` con CRUD completo + tree builder. Frontend en `/curriculum/[curriculumId]` con TreeView interactivo.                     |
+| **H17.3** | Gestión de taxonomías (habilidades, contenidos, tipos de texto, niveles de desempeño) | ★★          | ✅      | `taxonomies.controller.ts` + `nodes.controller.ts` con CRUD completo + tree builder. Frontend en `/marcos-academicos/[taxonomyId]` con TreeView interactivo.                     |
 | **H19.2** | Responsive: funciona en móvil, tablet y desktop                                       | ★★          | ✅      | `MobileSidebar.tsx` con Sheet, sidebar `hidden md:flex`, padding responsive en Topbar. Aplicado en todos los layouts.                                                      |
 
 **División de trabajo sugerida:**
@@ -149,7 +149,9 @@ Subir hojas DIA → corrección automática → dashboard habilidades → click 
 
 ---
 
-## Sprint 5 — Dashboards avanzados + Flujo demo completo _(Semanas 11-12)_
+## Sprint 5 — Dashboards avanzados + Flujo demo completo _(Semanas 11-12)_ ✅
+
+> **Estado:** completado. Las 5 historias (H6.10, H6.11, H6.12, H6.18, H19.1) están implementadas en la rama `sprint-5` (salida de `dev`). Backend: módulos `heatmap/` (H6.10) y `item-analysis/` (H6.11 tabla cruzada + H6.12 distractores). Frontend: `resultados/mapa-calor` (heatmap + export genérico H6.18), `resultados/detalle` (tabla cruzada con drill-down) y `question-detail-panel` (distractores). H19.1 validado en `docs/H19.1-validacion-arquitectonica.md` (sin lógica hardcodeada para DIA). Ver `docs/sprint5-contracts.md` y `docs/Sprints/S5-testing-guide.md`.
 
 **Objetivo:** completar las visualizaciones de mayor impacto en la demo y pulir el flujo de 5 minutos que convence al directivo.
 

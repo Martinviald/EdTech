@@ -53,14 +53,14 @@ export class SpecTablesService {
    * Flow:
    * 1. Verify instrument access.
    * 2. Load items for the instrument (ordered by position).
-   * 3. Load taxonomy nodes for the curriculum.
+   * 3. Load taxonomy nodes for the taxonomy.
    * 4. For each row, match by position and create tags for mapped columns.
    */
   async linkToInstrument(
     instrumentId: string,
     rows: Record<string, string>[],
     mapping: ColumnMapping,
-    curriculumId: string,
+    taxonomyId: string,
     user: JwtPayload,
   ): Promise<LinkResult> {
     // 1. Verify instrument exists and belongs to the user's org (or is official)
@@ -93,7 +93,7 @@ export class SpecTablesService {
       positionMap.set(item.position, item.id);
     }
 
-    // 3. Get taxonomy nodes for the curriculum
+    // 3. Get taxonomy nodes for the taxonomy
     const nodes: TaxonomyNodeRef[] = await this.db
       .select({
         id: taxonomyNodes.id,
@@ -102,7 +102,7 @@ export class SpecTablesService {
         name: taxonomyNodes.name,
       })
       .from(taxonomyNodes)
-      .where(eq(taxonomyNodes.curriculumId, curriculumId));
+      .where(eq(taxonomyNodes.taxonomyId, taxonomyId));
 
     // 4. Process each row
     const result: LinkResult = {

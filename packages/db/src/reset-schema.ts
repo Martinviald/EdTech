@@ -19,8 +19,9 @@ import postgres from 'postgres';
 config({ path: resolve(__dirname, '../../../.env') });
 
 async function main() {
-  const databaseUrl = process.env.DATABASE_URL;
-  if (!databaseUrl) throw new Error('DATABASE_URL is required');
+  // DROP/CREATE SCHEMA requiere privilegios: usa el rol admin (cae a DATABASE_URL).
+  const databaseUrl = process.env.DATABASE_ADMIN_URL ?? process.env.DATABASE_URL;
+  if (!databaseUrl) throw new Error('DATABASE_ADMIN_URL o DATABASE_URL es requerido');
 
   // Guarda de seguridad: solo bases locales, salvo override explícito.
   let host = '';

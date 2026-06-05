@@ -1,10 +1,9 @@
 import { z } from 'zod';
 import { TAXONOMY_NODE_TYPES, type TaxonomyNodeType } from '../enums';
 
-// Replicado localmente desde packages/db/src/schema/enums.ts (curriculumTypeEnum).
-// TODO: unificar con CURRICULUM_TYPES en packages/types/src/enums.ts cuando H17.2 mergee
-// (H17.2 crea curriculum.schema.ts y probablemente moverá esta lista a enums.ts).
-export const CURRICULUM_TYPES_LOCAL = [
+// Tipos de marco académico (taxonomía). Réplica local de taxonomyTypeEnum en
+// packages/db/src/schema/enums.ts.
+export const TAXONOMY_TYPES = [
   'mineduc',
   'simce',
   'paes',
@@ -14,29 +13,29 @@ export const CURRICULUM_TYPES_LOCAL = [
   'desafio',
   'custom',
 ] as const;
-export type CurriculumType = (typeof CURRICULUM_TYPES_LOCAL)[number];
+export type TaxonomyType = (typeof TAXONOMY_TYPES)[number];
 
-export const curriculumTypeSchema = z.enum(CURRICULUM_TYPES_LOCAL);
+export const taxonomyTypeSchema = z.enum(TAXONOMY_TYPES);
 export const taxonomyNodeTypeSchema = z.enum(TAXONOMY_NODE_TYPES);
 
-export const createCurriculumSchema = z.object({
+export const createTaxonomySchema = z.object({
   name: z.string().min(2).max(200),
-  type: curriculumTypeSchema,
+  type: taxonomyTypeSchema,
   language: z.string().min(2).max(10).default('es'),
   version: z.string().max(50).optional(),
   isOfficial: z.boolean().default(false),
   metadata: z.record(z.unknown()).optional(),
 });
 
-export const updateCurriculumSchema = createCurriculumSchema.partial();
+export const updateTaxonomySchema = createTaxonomySchema.partial();
 
-export const listCurriculaQuerySchema = z.object({
-  type: curriculumTypeSchema.optional(),
+export const listTaxonomiesQuerySchema = z.object({
+  type: taxonomyTypeSchema.optional(),
   isOfficial: z.coerce.boolean().optional(),
 });
 
 export const createTaxonomyNodeSchema = z.object({
-  curriculumId: z.string().uuid(),
+  taxonomyId: z.string().uuid(),
   parentId: z.string().uuid().nullish(),
   type: taxonomyNodeTypeSchema,
   code: z.string().max(50).optional(),
@@ -49,20 +48,20 @@ export const createTaxonomyNodeSchema = z.object({
 });
 
 export const updateTaxonomyNodeSchema = createTaxonomyNodeSchema
-  .omit({ curriculumId: true })
+  .omit({ taxonomyId: true })
   .partial();
 
 export const listTaxonomyNodesQuerySchema = z.object({
-  curriculumId: z.string().uuid(),
+  taxonomyId: z.string().uuid(),
   gradeId: z.string().uuid().optional(),
   subjectId: z.string().uuid().optional(),
   type: taxonomyNodeTypeSchema.optional(),
   parentId: z.string().uuid().optional(),
 });
 
-export type CreateCurriculumDto = z.infer<typeof createCurriculumSchema>;
-export type UpdateCurriculumDto = z.infer<typeof updateCurriculumSchema>;
-export type ListCurriculaQueryDto = z.infer<typeof listCurriculaQuerySchema>;
+export type CreateTaxonomyDto = z.infer<typeof createTaxonomySchema>;
+export type UpdateTaxonomyDto = z.infer<typeof updateTaxonomySchema>;
+export type ListTaxonomiesQueryDto = z.infer<typeof listTaxonomiesQuerySchema>;
 export type CreateTaxonomyNodeDto = z.infer<typeof createTaxonomyNodeSchema>;
 export type UpdateTaxonomyNodeDto = z.infer<typeof updateTaxonomyNodeSchema>;
 export type ListTaxonomyNodesQueryDto = z.infer<typeof listTaxonomyNodesQuerySchema>;
@@ -71,10 +70,10 @@ export type ListTaxonomyNodesQueryDto = z.infer<typeof listTaxonomyNodesQuerySch
 // El refactor "web-no-db-direct" impide importar tipos de Drizzle desde @soe/web.
 // Reflejamos aquí el shape devuelto por la API NestJS (que sí lee Drizzle).
 
-export type CurriculumModel = {
+export type TaxonomyModel = {
   id: string;
   name: string;
-  type: CurriculumType;
+  type: TaxonomyType;
   language: string;
   version: string | null;
   isOfficial: boolean;
@@ -85,7 +84,7 @@ export type CurriculumModel = {
 
 export type TaxonomyNodeModel = {
   id: string;
-  curriculumId: string;
+  taxonomyId: string;
   parentId: string | null;
   type: TaxonomyNodeType;
   code: string | null;
@@ -103,8 +102,8 @@ export type TaxonomyTreeNodeModel = TaxonomyNodeModel & {
   children: TaxonomyTreeNodeModel[];
 };
 
-export type CurriculumTreeResponse = {
-  curriculum: CurriculumModel;
+export type TaxonomyTreeResponse = {
+  taxonomy: TaxonomyModel;
   nodes: TaxonomyNodeModel[];
   tree: TaxonomyTreeNodeModel[];
 };

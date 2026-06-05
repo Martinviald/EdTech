@@ -15,6 +15,7 @@ import {
   items,
   responses,
   skillResults,
+  withOrgContext,
 } from '@soe/db';
 import {
   DEFAULT_GRADING_SCALE,
@@ -32,10 +33,13 @@ import {
   type GradingScaleParams,
   type GradingScaleType,
   type ImportJobModel,
+  type ItemContent,
+  type ItemType,
   type ResponseForCalculation,
 } from '@soe/types';
 import type { JwtPayload } from '../auth/jwt-payload.types';
 import { InjectDb, type Database } from '../database/database.types';
+import { getScoringStrategy } from './scoring/scoring-strategy';
 import { AnswerSheetPreviewStore } from './lib/preview-store';
 import { parseGradecamCsv } from './lib/parsers/gradecam-parser';
 import { parseZipgradeCsv } from './lib/parsers/zipgrade-parser';
@@ -45,17 +49,11 @@ import { getTemplate, listTemplates } from './lib/templates';
 import type { ParserResult } from './lib/parsers/parser.types';
 import { matchStudents } from './lib/student-matcher';
 
-interface MultipleChoiceItemContent {
-  stem?: string;
-  correctKey?: string;
-  alternatives?: Array<{ key: string; text?: string; isCorrect?: boolean }>;
-  [k: string]: unknown;
-}
-
 interface ItemForAssessment {
   id: string;
   position: number;
-  correctKey: string;
+  type: ItemType;
+  content: ItemContent;
   maxScore: number;
 }
 
@@ -141,7 +139,10 @@ export class AnswerSheetsService {
       );
     }
 
-    const matches = await matchStudents(this.db, orgId, entry.rows);
+    // matchStudents consulta `students` (RLS): correr con contexto de org.
+    const matches = await withOrgContext(this.db, orgId, async (tx) =>
+      matchStudents(tx, orgId, entry.rows),
+    );
 
     // Posiciones detectadas (todas las preguntas que aparecieron en alguna fila).
     const positionSet = new Set<string>();
@@ -278,7 +279,10 @@ export class AnswerSheetsService {
     }
 
     // 3. Re-matchear alumnos (no confiamos en datos del preview).
-    const matches = await matchStudents(this.db, orgId, entry.rows);
+    //    matchStudents consulta `students` (RLS): correr con contexto de org.
+    const matches = await withOrgContext(this.db, orgId, async (tx) =>
+      matchStudents(tx, orgId, entry.rows),
+    );
 
     // 4. Construir responses + errores.
     const errors: AnswerSheetRowError[] = [];
@@ -320,13 +324,54 @@ export class AnswerSheetsService {
       // Crear una response por ítem del instrumento (incluye los items que
       // el alumno no contestó: rawScore = 0). Esto garantiza que el calculador
       // pueda derivar % real (con totalQuestions del instrumento).
+      //
+      // La corrección se delega al registro de estrategias por `item.type`
+      // (#1): MCQ/true_false → binaria; matching/ordering/gap_fill →
+      // determinística por content; el resto → pendiente (corrección humana/IA),
+      // NUNCA 0/incorrecto en silencio.
       for (const item of instrumentItems) {
         const rawAnswer = row.answers[String(item.position)] ?? null;
-        const isCorrect =
-          rawAnswer === null
-            ? false
-            : rawAnswer.toUpperCase() === item.correctKey.toUpperCase();
-        const rawScore = isCorrect ? item.maxScore : 0;
+        const result = getScoringStrategy(item.type).score({
+          item: {
+            id: item.id,
+            type: item.type,
+            content: item.content,
+            maxScore: item.maxScore,
+          },
+          rawAnswer,
+        });
+
+        if (result.requiresManualGrading) {
+          // Pendiente de corrección humana/IA (F4). NUNCA puntuar 0/incorrecto:
+          // scores en null → el calculador puro excluye `isCorrect === null` del
+          // denominador, así no contaminan el % de los autocorregidos.
+          responseRows.push({
+            assessmentId: '', // se completa una vez creado el assessment
+            studentId,
+            itemId: item.id,
+            value: { answer: rawAnswer },
+            isCorrect: null,
+            rawScore: null,
+            maxScore: item.maxScore.toFixed(2),
+            finalScore: null,
+            scoredBy: 'human',
+            scoredAt: null,
+          });
+
+          calcResponses.push({
+            studentId,
+            itemId: item.id,
+            itemPosition: item.position,
+            rawScore: null,
+            maxScore: item.maxScore,
+            finalScore: null,
+            isCorrect: null,
+            taxonomyNodeIds: tagsByItemId.get(item.id) ?? [],
+          });
+          continue;
+        }
+
+        const rawScore = result.rawScore ?? 0;
         const finalScore = rawScore;
 
         responseRows.push({
@@ -334,7 +379,7 @@ export class AnswerSheetsService {
           studentId,
           itemId: item.id,
           value: { answer: rawAnswer },
-          isCorrect,
+          isCorrect: result.isCorrect,
           rawScore: rawScore.toFixed(2),
           maxScore: item.maxScore.toFixed(2),
           finalScore: finalScore.toFixed(2),
@@ -349,7 +394,7 @@ export class AnswerSheetsService {
           rawScore,
           maxScore: item.maxScore,
           finalScore,
-          isCorrect,
+          isCorrect: result.isCorrect,
           taxonomyNodeIds: tagsByItemId.get(item.id) ?? [],
         });
       }
@@ -365,7 +410,9 @@ export class AnswerSheetsService {
     const scale = await this.resolveGradingScale(instrument.gradingScaleId);
 
     // 6. Transacción: crear/reusar assessment + responses + results + import_job.
-    const transactionResult = await this.db.transaction(async (tx) => {
+    //    Toca assessments/responses/assessment_results/skill_results/import_jobs
+    //    (todas con RLS): withOrgContext fija el contexto de org en la transacción.
+    const transactionResult = await withOrgContext(this.db, orgId, async (tx) => {
       // Crear o reusar assessment.
       let assessmentId: string;
       if (body.assessmentId) {
@@ -432,7 +479,21 @@ export class AnswerSheetsService {
       await tx.delete(skillResults).where(eq(skillResults.assessmentId, assessmentId));
 
       // Llamar al calculador puro.
-      const studentAgg = aggregateStudentResults(calcResponses, scale);
+      //
+      // Los ítems pendientes de corrección humana/IA (`isCorrect === null`) NO
+      // deben contaminar el % autocorregido. `aggregateSkillResults` ya los
+      // excluye de su denominador ponderado; para el total por alumno los
+      // filtramos aquí (suman 0 al numerador pero su maxScore inflaría el
+      // denominador). Conservamos `isComplete` calculado sobre el set COMPLETO:
+      // un alumno con ítems pendientes no está "completo".
+      const autoScoredResponses = calcResponses.filter((r) => r.isCorrect !== null);
+      const studentsWithPending = new Set(
+        calcResponses.filter((r) => r.isCorrect === null).map((r) => r.studentId),
+      );
+      const studentAgg = aggregateStudentResults(autoScoredResponses, scale).map((a) => ({
+        ...a,
+        isComplete: a.isComplete && !studentsWithPending.has(a.studentId),
+      }));
       const skillAgg = aggregateSkillResults(calcResponses, scale);
 
       if (studentAgg.length > 0) {
@@ -522,10 +583,13 @@ export class AnswerSheetsService {
 
   async getJob(user: JwtPayload, jobId: string): Promise<ImportJobModel> {
     const orgId = this.requireOrgId(user);
-    const [row] = await this.db
-      .select()
-      .from(importJobs)
-      .where(and(eq(importJobs.id, jobId), eq(importJobs.orgId, orgId)));
+    // importJobs tiene RLS: correr el SELECT con contexto de org.
+    const [row] = await withOrgContext(this.db, orgId, async (tx) =>
+      tx
+        .select()
+        .from(importJobs)
+        .where(and(eq(importJobs.id, jobId), eq(importJobs.orgId, orgId))),
+    );
     if (!row) throw new NotFoundException('Import job no encontrado');
     return {
       id: row.id,
@@ -632,6 +696,7 @@ export class AnswerSheetsService {
       .select({
         id: items.id,
         position: items.position,
+        type: items.type,
         content: items.content,
         scoringConfig: items.scoringConfig,
       })
@@ -641,36 +706,20 @@ export class AnswerSheetsService {
 
     const out: ItemForAssessment[] = [];
     for (const row of rows) {
-      const correctKey = this.extractCorrectKey(row.content as MultipleChoiceItemContent);
       const scoringConfig = (row.scoringConfig ?? {}) as { points?: number };
       const maxScore = scoringConfig.points ?? 1;
       out.push({
         id: row.id,
         position: row.position,
-        correctKey,
+        // `items.type` es un enum de DB tipado como ItemType. El `content`
+        // JSONB ya está tipado como ItemContent en el schema Drizzle; lo pasamos
+        // a la estrategia de scoring correspondiente a su `type`.
+        type: row.type as ItemType,
+        content: (row.content ?? {}) as ItemContent,
         maxScore,
       });
     }
     return out;
-  }
-
-  /**
-   * Acepta dos shapes:
-   *  - `{ correctKey: "A" }` (formato dia-ingestion actual)
-   *  - `{ alternatives: [{ key: "A", isCorrect: true }] }` (formato extensible)
-   */
-  private extractCorrectKey(content: MultipleChoiceItemContent): string {
-    if (typeof content.correctKey === 'string' && content.correctKey) {
-      return content.correctKey.toUpperCase();
-    }
-    if (Array.isArray(content.alternatives)) {
-      const correct = content.alternatives.find((a) => a.isCorrect === true);
-      if (correct && typeof correct.key === 'string') {
-        return correct.key.toUpperCase();
-      }
-    }
-    // Si no hay clave, retornar "" y dejar que el cálculo marque todas como incorrectas.
-    return '';
   }
 
   private async resolveGradingScale(

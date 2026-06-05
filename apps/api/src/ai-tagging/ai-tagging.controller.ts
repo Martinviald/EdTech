@@ -16,7 +16,7 @@ const aiTagRequestSchema = z.object({
     .array(z.string().uuid())
     .min(1, 'At least one item ID is required')
     .max(50, 'Maximum 50 item IDs per request'),
-  curriculumId: z.string().uuid(),
+  taxonomyId: z.string().uuid(),
 });
 
 const confirmAiTagsSchema = z.object({

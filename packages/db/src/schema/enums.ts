@@ -34,7 +34,7 @@ export const enrollmentStatusEnum = pgEnum('enrollment_status', [
   'withdrawn',
 ]);
 
-export const curriculumTypeEnum = pgEnum('curriculum_type', [
+export const taxonomyTypeEnum = pgEnum('taxonomy_type', [
   'mineduc',
   'simce',
   'paes',
@@ -157,5 +157,9 @@ export const performanceLevelEnum = pgEnum('performance_level', [
   'adequate',
   'advanced',
 ]);
+
+// Métrica raíz de un assessment_result (#3). `percentage` (DIA y la mayoría),
+// `scaled` (PAES 150–1000, IRT, stanine) o `band` (Cambridge CEFR, categóricas).
+export const metricTypeEnum = pgEnum('metric_type', ['percentage', 'scaled', 'band']);
 
 export const rubricTypeEnum = pgEnum('rubric_type', ['analytic', 'holistic']);

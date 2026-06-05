@@ -1,6 +1,5 @@
 CREATE TYPE "public"."assessment_mode" AS ENUM('paper', 'digital', 'oral', 'mixed');--> statement-breakpoint
 CREATE TYPE "public"."assessment_status" AS ENUM('scheduled', 'in_progress', 'processing', 'completed', 'cancelled');--> statement-breakpoint
-CREATE TYPE "public"."curriculum_type" AS ENUM('mineduc', 'simce', 'paes', 'dia', 'cambridge', 'aptus', 'desafio', 'custom');--> statement-breakpoint
 CREATE TYPE "public"."enrollment_status" AS ENUM('active', 'transferred', 'graduated', 'withdrawn');--> statement-breakpoint
 CREATE TYPE "public"."gender" AS ENUM('M', 'F', 'X', 'unspecified');--> statement-breakpoint
 CREATE TYPE "public"."grading_scale_type" AS ENUM('linear_chilean', 'percentage', 'paes_scaled', 'irt_based', 'custom');--> statement-breakpoint
@@ -12,6 +11,7 @@ CREATE TYPE "public"."item_source" AS ENUM('official', 'ai_generated', 'custom',
 CREATE TYPE "public"."item_status" AS ENUM('draft', 'review', 'published', 'deprecated');--> statement-breakpoint
 CREATE TYPE "public"."item_tag_type" AS ENUM('primary', 'secondary');--> statement-breakpoint
 CREATE TYPE "public"."item_type" AS ENUM('multiple_choice', 'true_false', 'open_ended', 'oral_reading', 'oral_expression', 'writing', 'listening', 'matching', 'ordering', 'gap_fill');--> statement-breakpoint
+CREATE TYPE "public"."metric_type" AS ENUM('percentage', 'scaled', 'band');--> statement-breakpoint
 CREATE TYPE "public"."org_type" AS ENUM('platform', 'foundation', 'school');--> statement-breakpoint
 CREATE TYPE "public"."performance_level" AS ENUM('insufficient', 'elementary', 'adequate', 'advanced');--> statement-breakpoint
 CREATE TYPE "public"."rubric_type" AS ENUM('analytic', 'holistic');--> statement-breakpoint
@@ -22,6 +22,7 @@ CREATE TYPE "public"."sso_provider" AS ENUM('google', 'microsoft');--> statement
 CREATE TYPE "public"."tagged_by" AS ENUM('human', 'ai');--> statement-breakpoint
 CREATE TYPE "public"."taxonomy_mapping_type" AS ENUM('equivalent', 'subset', 'related');--> statement-breakpoint
 CREATE TYPE "public"."taxonomy_node_type" AS ENUM('domain', 'subdomain', 'axis', 'learning_objective', 'skill', 'content', 'text_type', 'performance_level', 'descriptor', 'criterion', 'paper');--> statement-breakpoint
+CREATE TYPE "public"."taxonomy_type" AS ENUM('mineduc', 'simce', 'paes', 'dia', 'cambridge', 'aptus', 'desafio', 'custom');--> statement-breakpoint
 CREATE TYPE "public"."user_role" AS ENUM('platform_admin', 'foundation_director', 'school_admin', 'academic_director', 'cycle_director', 'dept_head', 'coordinator', 'teacher', 'homeroom_teacher', 'eval_coordinator', 'guardian');--> statement-breakpoint
 CREATE TABLE "academic_years" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
@@ -150,10 +151,10 @@ CREATE TABLE "students" (
 	CONSTRAINT "students_org_rut_unique" UNIQUE("org_id","rut")
 );
 --> statement-breakpoint
-CREATE TABLE "curricula" (
+CREATE TABLE "taxonomies" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"name" text NOT NULL,
-	"type" "curriculum_type" NOT NULL,
+	"type" "taxonomy_type" NOT NULL,
 	"language" text DEFAULT 'es' NOT NULL,
 	"version" text,
 	"is_official" boolean DEFAULT false NOT NULL,
@@ -175,7 +176,7 @@ CREATE TABLE "taxonomy_mappings" (
 --> statement-breakpoint
 CREATE TABLE "taxonomy_nodes" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
-	"curriculum_id" uuid NOT NULL,
+	"taxonomy_id" uuid NOT NULL,
 	"parent_id" uuid,
 	"type" "taxonomy_node_type" NOT NULL,
 	"code" text,
@@ -217,7 +218,7 @@ CREATE TABLE "instrument_sections" (
 CREATE TABLE "instruments" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"org_id" uuid,
-	"curriculum_id" uuid,
+	"taxonomy_id" uuid,
 	"name" text NOT NULL,
 	"short_name" text,
 	"type" "instrument_type" NOT NULL,
@@ -398,12 +399,31 @@ CREATE TABLE "assessment_results" (
 	"max_score" numeric(7, 2),
 	"percentage" numeric(5, 2),
 	"grade" numeric(5, 2),
+	"metric_type" "metric_type" DEFAULT 'percentage' NOT NULL,
+	"scaled_score" numeric(7, 2),
+	"band_label" text,
+	"performance_band_id" uuid,
 	"performance_level" "performance_level",
 	"is_complete" boolean DEFAULT false NOT NULL,
 	"completed_at" timestamp,
 	"created_at" timestamp DEFAULT now() NOT NULL,
 	"updated_at" timestamp DEFAULT now() NOT NULL,
 	CONSTRAINT "assessment_results_assessment_id_student_id_unique" UNIQUE("assessment_id","student_id")
+);
+--> statement-breakpoint
+CREATE TABLE "performance_bands" (
+	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
+	"scale_id" uuid,
+	"org_id" uuid,
+	"key" text NOT NULL,
+	"label" text NOT NULL,
+	"order" integer DEFAULT 0 NOT NULL,
+	"min_threshold" numeric(5, 4) NOT NULL,
+	"max_threshold" numeric(5, 4) NOT NULL,
+	"color" text,
+	"created_at" timestamp DEFAULT now() NOT NULL,
+	"updated_at" timestamp DEFAULT now() NOT NULL,
+	"deleted_at" timestamp
 );
 --> statement-breakpoint
 CREATE TABLE "skill_results" (
@@ -414,6 +434,7 @@ CREATE TABLE "skill_results" (
 	"correct_count" integer DEFAULT 0 NOT NULL,
 	"total_count" integer DEFAULT 0 NOT NULL,
 	"percentage" numeric(5, 2),
+	"performance_band_id" uuid,
 	"performance_level" "performance_level",
 	"created_at" timestamp DEFAULT now() NOT NULL,
 	"updated_at" timestamp DEFAULT now() NOT NULL,
@@ -460,16 +481,16 @@ ALTER TABLE "student_enrollments" ADD CONSTRAINT "student_enrollments_class_grou
 ALTER TABLE "student_enrollments" ADD CONSTRAINT "student_enrollments_academic_year_id_academic_years_id_fk" FOREIGN KEY ("academic_year_id") REFERENCES "public"."academic_years"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "students" ADD CONSTRAINT "students_org_id_organizations_id_fk" FOREIGN KEY ("org_id") REFERENCES "public"."organizations"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "students" ADD CONSTRAINT "students_user_id_users_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."users"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
-ALTER TABLE "curricula" ADD CONSTRAINT "curricula_org_id_organizations_id_fk" FOREIGN KEY ("org_id") REFERENCES "public"."organizations"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "taxonomies" ADD CONSTRAINT "taxonomies_org_id_organizations_id_fk" FOREIGN KEY ("org_id") REFERENCES "public"."organizations"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "taxonomy_mappings" ADD CONSTRAINT "taxonomy_mappings_source_node_id_taxonomy_nodes_id_fk" FOREIGN KEY ("source_node_id") REFERENCES "public"."taxonomy_nodes"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "taxonomy_mappings" ADD CONSTRAINT "taxonomy_mappings_target_node_id_taxonomy_nodes_id_fk" FOREIGN KEY ("target_node_id") REFERENCES "public"."taxonomy_nodes"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
-ALTER TABLE "taxonomy_nodes" ADD CONSTRAINT "taxonomy_nodes_curriculum_id_curricula_id_fk" FOREIGN KEY ("curriculum_id") REFERENCES "public"."curricula"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "taxonomy_nodes" ADD CONSTRAINT "taxonomy_nodes_taxonomy_id_taxonomies_id_fk" FOREIGN KEY ("taxonomy_id") REFERENCES "public"."taxonomies"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "taxonomy_nodes" ADD CONSTRAINT "taxonomy_nodes_grade_id_grades_id_fk" FOREIGN KEY ("grade_id") REFERENCES "public"."grades"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "taxonomy_nodes" ADD CONSTRAINT "taxonomy_nodes_subject_id_subjects_id_fk" FOREIGN KEY ("subject_id") REFERENCES "public"."subjects"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "grading_scales" ADD CONSTRAINT "grading_scales_org_id_organizations_id_fk" FOREIGN KEY ("org_id") REFERENCES "public"."organizations"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "instrument_sections" ADD CONSTRAINT "instrument_sections_instrument_id_instruments_id_fk" FOREIGN KEY ("instrument_id") REFERENCES "public"."instruments"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "instruments" ADD CONSTRAINT "instruments_org_id_organizations_id_fk" FOREIGN KEY ("org_id") REFERENCES "public"."organizations"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
-ALTER TABLE "instruments" ADD CONSTRAINT "instruments_curriculum_id_curricula_id_fk" FOREIGN KEY ("curriculum_id") REFERENCES "public"."curricula"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "instruments" ADD CONSTRAINT "instruments_taxonomy_id_taxonomies_id_fk" FOREIGN KEY ("taxonomy_id") REFERENCES "public"."taxonomies"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "instruments" ADD CONSTRAINT "instruments_subject_id_subjects_id_fk" FOREIGN KEY ("subject_id") REFERENCES "public"."subjects"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "instruments" ADD CONSTRAINT "instruments_grade_id_grades_id_fk" FOREIGN KEY ("grade_id") REFERENCES "public"."grades"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "instruments" ADD CONSTRAINT "instruments_grading_scale_id_grading_scales_id_fk" FOREIGN KEY ("grading_scale_id") REFERENCES "public"."grading_scales"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
@@ -504,12 +525,16 @@ ALTER TABLE "responses" ADD CONSTRAINT "responses_student_id_students_id_fk" FOR
 ALTER TABLE "responses" ADD CONSTRAINT "responses_item_id_items_id_fk" FOREIGN KEY ("item_id") REFERENCES "public"."items"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "assessment_results" ADD CONSTRAINT "assessment_results_assessment_id_assessments_id_fk" FOREIGN KEY ("assessment_id") REFERENCES "public"."assessments"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "assessment_results" ADD CONSTRAINT "assessment_results_student_id_students_id_fk" FOREIGN KEY ("student_id") REFERENCES "public"."students"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "assessment_results" ADD CONSTRAINT "assessment_results_performance_band_id_performance_bands_id_fk" FOREIGN KEY ("performance_band_id") REFERENCES "public"."performance_bands"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "performance_bands" ADD CONSTRAINT "performance_bands_scale_id_grading_scales_id_fk" FOREIGN KEY ("scale_id") REFERENCES "public"."grading_scales"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "performance_bands" ADD CONSTRAINT "performance_bands_org_id_organizations_id_fk" FOREIGN KEY ("org_id") REFERENCES "public"."organizations"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "skill_results" ADD CONSTRAINT "skill_results_assessment_id_assessments_id_fk" FOREIGN KEY ("assessment_id") REFERENCES "public"."assessments"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "skill_results" ADD CONSTRAINT "skill_results_student_id_students_id_fk" FOREIGN KEY ("student_id") REFERENCES "public"."students"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "skill_results" ADD CONSTRAINT "skill_results_node_id_taxonomy_nodes_id_fk" FOREIGN KEY ("node_id") REFERENCES "public"."taxonomy_nodes"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "skill_results" ADD CONSTRAINT "skill_results_performance_band_id_performance_bands_id_fk" FOREIGN KEY ("performance_band_id") REFERENCES "public"."performance_bands"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "audit_logs" ADD CONSTRAINT "audit_logs_user_id_users_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."users"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "audit_logs" ADD CONSTRAINT "audit_logs_org_id_organizations_id_fk" FOREIGN KEY ("org_id") REFERENCES "public"."organizations"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "platform_admins" ADD CONSTRAINT "platform_admins_user_id_users_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."users"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "platform_admins" ADD CONSTRAINT "platform_admins_granted_by_user_id_users_id_fk" FOREIGN KEY ("granted_by_user_id") REFERENCES "public"."users"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
-CREATE UNIQUE INDEX "curricula_official_type_version_uniq" ON "curricula" USING btree ("type","version") WHERE "curricula"."is_official" = true AND "curricula"."org_id" IS NULL;--> statement-breakpoint
-CREATE UNIQUE INDEX "taxonomy_nodes_curriculum_code_uniq" ON "taxonomy_nodes" USING btree ("curriculum_id","code") WHERE "taxonomy_nodes"."code" IS NOT NULL;
+CREATE UNIQUE INDEX "taxonomies_official_type_version_uniq" ON "taxonomies" USING btree ("type","version") WHERE "taxonomies"."is_official" = true AND "taxonomies"."org_id" IS NULL;--> statement-breakpoint
+CREATE UNIQUE INDEX "taxonomy_nodes_taxonomy_code_uniq" ON "taxonomy_nodes" USING btree ("taxonomy_id","code") WHERE "taxonomy_nodes"."code" IS NOT NULL;

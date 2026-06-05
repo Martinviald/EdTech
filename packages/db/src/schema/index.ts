@@ -4,7 +4,7 @@ export * from './organizations';
 export * from './academic';
 export * from './users';
 export * from './students';
-export * from './curriculum';
+export * from './taxonomy';
 export * from './instruments';
 export * from './items';
 export * from './assessments';

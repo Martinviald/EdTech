@@ -45,7 +45,7 @@ describe('prompt-builder', () => {
       expect(typeof user).toBe('string');
     });
 
-    it('should include curriculum alignment context in system prompt', () => {
+    it('should include taxonomy alignment context in system prompt', () => {
       const { system } = buildTaggingPrompt(sampleItem, sampleNodes);
 
       expect(system).toContain('curricular');

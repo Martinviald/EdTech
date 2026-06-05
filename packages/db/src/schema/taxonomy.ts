@@ -11,16 +11,16 @@ import {
   uuid,
 } from 'drizzle-orm/pg-core';
 import { relations, sql } from 'drizzle-orm';
-import { curriculumTypeEnum, taxonomyMappingTypeEnum, taxonomyNodeTypeEnum } from './enums';
+import { taxonomyTypeEnum, taxonomyMappingTypeEnum, taxonomyNodeTypeEnum } from './enums';
 import { organizations } from './organizations';
 import { grades, subjects } from './academic';
 
-export const curricula = pgTable(
-  'curricula',
+export const taxonomies = pgTable(
+  'taxonomies',
   {
     id: uuid('id').defaultRandom().primaryKey(),
     name: text('name').notNull(),
-    type: curriculumTypeEnum('type').notNull(),
+    type: taxonomyTypeEnum('type').notNull(),
     language: text('language').default('es').notNull(),
     version: text('version'),
     isOfficial: boolean('is_official').default(false).notNull(),
@@ -32,7 +32,7 @@ export const curricula = pgTable(
     // Un (type, version) oficial debe ser único globalmente. Sin esto, el seed
     // o la API podrían crear MINEDUC 2024 N veces. Partial index para no
     // restringir los custom (que deben coexistir por org).
-    uniqueIndex('curricula_official_type_version_uniq')
+    uniqueIndex('taxonomies_official_type_version_uniq')
       .on(table.type, table.version)
       .where(sql`${table.isOfficial} = true AND ${table.orgId} IS NULL`),
   ],
@@ -42,9 +42,9 @@ export const taxonomyNodes = pgTable(
   'taxonomy_nodes',
   {
     id: uuid('id').defaultRandom().primaryKey(),
-    curriculumId: uuid('curriculum_id')
+    taxonomyId: uuid('taxonomy_id')
       .notNull()
-      .references(() => curricula.id, { onDelete: 'cascade' }),
+      .references(() => taxonomies.id, { onDelete: 'cascade' }),
     parentId: uuid('parent_id'),
     type: taxonomyNodeTypeEnum('type').notNull(),
     code: text('code'),
@@ -58,8 +58,8 @@ export const taxonomyNodes = pgTable(
     createdAt: timestamp('created_at').defaultNow().notNull(),
   },
   (table) => [
-    uniqueIndex('taxonomy_nodes_curriculum_code_uniq')
-      .on(table.curriculumId, table.code)
+    uniqueIndex('taxonomy_nodes_taxonomy_code_uniq')
+      .on(table.taxonomyId, table.code)
       .where(sql`${table.code} IS NOT NULL`),
   ],
 );
@@ -82,14 +82,14 @@ export const taxonomyMappings = pgTable(
   (table) => [unique().on(table.sourceNodeId, table.targetNodeId)],
 );
 
-export const curriculaRelations = relations(curricula, ({ many }) => ({
+export const taxonomiesRelations = relations(taxonomies, ({ many }) => ({
   nodes: many(taxonomyNodes),
 }));
 
 export const taxonomyNodesRelations = relations(taxonomyNodes, ({ one, many }) => ({
-  curriculum: one(curricula, {
-    fields: [taxonomyNodes.curriculumId],
-    references: [curricula.id],
+  taxonomy: one(taxonomies, {
+    fields: [taxonomyNodes.taxonomyId],
+    references: [taxonomies.id],
   }),
   parent: one(taxonomyNodes, {
     fields: [taxonomyNodes.parentId],
@@ -101,8 +101,8 @@ export const taxonomyNodesRelations = relations(taxonomyNodes, ({ one, many }) =
   subject: one(subjects, { fields: [taxonomyNodes.subjectId], references: [subjects.id] }),
 }));
 
-export type Curriculum = typeof curricula.$inferSelect;
-export type NewCurriculum = typeof curricula.$inferInsert;
+export type Taxonomy = typeof taxonomies.$inferSelect;
+export type NewTaxonomy = typeof taxonomies.$inferInsert;
 export type TaxonomyNode = typeof taxonomyNodes.$inferSelect;
 export type NewTaxonomyNode = typeof taxonomyNodes.$inferInsert;
 export type TaxonomyMapping = typeof taxonomyMappings.$inferSelect;

@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { and, desc, eq, inArray, isNull, sql } from 'drizzle-orm';
+import { and, asc, desc, eq, inArray, isNull, sql } from 'drizzle-orm';
 import {
   academicYears,
   assessmentResults,
@@ -15,8 +15,10 @@ import {
   subjects,
   taxonomyNodes,
   teacherAssignments,
+  withOrgContext,
 } from '@soe/db';
 import {
+  DEFAULT_PERFORMANCE_THRESHOLDS,
   PERFORMANCE_LEVELS,
   RESULTS_VIEWER_ROLES,
   percentageToPerformanceLevel,
@@ -55,8 +57,9 @@ const ADMIN_LIKE_ROLES: readonly UserRole[] = [
 ];
 
 // Umbrales por defecto (0..1) — alineados al estándar DIA. Se usan cuando la
-// grading scale aplicable no define `config.performanceThresholds`.
-const DEFAULT_THRESHOLDS = { elementary: 0.4, adequate: 0.7, advanced: 0.85 } as const;
+// grading scale aplicable no define `config.performanceThresholds`. Single source
+// of truth en @soe/types (no duplicar literales 0.4/0.7/0.85).
+const DEFAULT_THRESHOLDS = DEFAULT_PERFORMANCE_THRESHOLDS;
 
 type Scope = { scopeAll: boolean; classGroupIds: string[] };
 
@@ -85,50 +88,53 @@ export class DashboardsService {
     };
     if (!orgId) return empty;
 
-    const scope = await this.getAccessibleClassGroupIds(user, orgId);
-    if (!scope.scopeAll && scope.classGroupIds.length === 0) return empty;
+    return withOrgContext(this.db, orgId, async (tx) => {
+      const scope = await this.getAccessibleClassGroupIds(tx, user, orgId);
+      if (!scope.scopeAll && scope.classGroupIds.length === 0) return empty;
 
-    const studentIds = await this.resolveScopedStudentIds(orgId, scope, query);
-    if (studentIds !== null && studentIds.length === 0) return empty;
+      const studentIds = await this.resolveScopedStudentIds(tx, orgId, scope, query);
+      if (studentIds !== null && studentIds.length === 0) return empty;
 
-    const assessmentIds = await this.resolveScopedAssessmentIds(orgId, query);
-    if (assessmentIds.length === 0) {
-      return { ...empty, scope: isTeacherScope ? 'teacher' : 'org' };
-    }
+      const assessmentIds = await this.resolveScopedAssessmentIds(tx, orgId, query);
+      if (assessmentIds.length === 0) {
+        return { ...empty, scope: isTeacherScope ? 'teacher' : 'org' };
+      }
 
-    const resultConditions = this.buildResultConditions(assessmentIds, studentIds, undefined);
+      const resultConditions = this.buildResultConditions(assessmentIds, studentIds, undefined);
 
-    // Métricas globales: promedio de % logro, alumnos distintos evaluados.
-    const [metrics] = await this.db
-      .select({
-        avgPct: sql<string | null>`avg(${assessmentResults.percentage}::numeric)`,
-        studentsEvaluated: sql<number>`count(distinct ${assessmentResults.studentId})::int`,
-        assessmentsCount: sql<number>`count(distinct ${assessmentResults.assessmentId})::int`,
-      })
-      .from(assessmentResults)
-      .innerJoin(students, eq(students.id, assessmentResults.studentId))
-      .where(and(...resultConditions, isNull(students.deletedAt)));
+      // Métricas globales: promedio de % logro, alumnos distintos evaluados.
+      const [metrics] = await tx
+        .select({
+          avgPct: sql<string | null>`avg(${assessmentResults.percentage}::numeric)`,
+          studentsEvaluated: sql<number>`count(distinct ${assessmentResults.studentId})::int`,
+          assessmentsCount: sql<number>`count(distinct ${assessmentResults.assessmentId})::int`,
+        })
+        .from(assessmentResults)
+        .innerJoin(students, eq(students.id, assessmentResults.studentId))
+        .where(and(...resultConditions, isNull(students.deletedAt)));
 
-    const globalAchievement = metrics?.avgPct == null ? null : Number(metrics.avgPct);
+      const globalAchievement = metrics?.avgPct == null ? null : Number(metrics.avgPct);
 
-    const distribution = await this.computePerformanceDistribution(
-      assessmentIds,
-      studentIds,
-    );
+      const distribution = await this.computePerformanceDistribution(
+        tx,
+        assessmentIds,
+        studentIds,
+      );
 
-    const recentAssessments = await this.loadRecentAssessments(orgId, scope, query, studentIds);
+      const recentAssessments = await this.loadRecentAssessments(tx, orgId, scope, query, studentIds);
 
-    const alerts = await this.deriveAlerts(orgId, scope, query, studentIds, assessmentIds);
+      const alerts = await this.deriveAlerts(tx, orgId, scope, query, studentIds, assessmentIds);
 
-    return {
-      scope: isTeacherScope ? 'teacher' : 'org',
-      globalAchievement,
-      studentsEvaluated: Number(metrics?.studentsEvaluated ?? 0),
-      assessmentsCount: Number(metrics?.assessmentsCount ?? 0),
-      performanceDistribution: distribution,
-      recentAssessments,
-      alerts,
-    };
+      return {
+        scope: isTeacherScope ? 'teacher' : 'org',
+        globalAchievement,
+        studentsEvaluated: Number(metrics?.studentsEvaluated ?? 0),
+        assessmentsCount: Number(metrics?.assessmentsCount ?? 0),
+        performanceDistribution: distribution,
+        recentAssessments,
+        alerts,
+      };
+    });
   }
 
   // ───────────────────────────────────────────────────────────────────────────
@@ -149,85 +155,87 @@ export class DashboardsService {
     };
     if (!orgId) return empty;
 
-    const scope = await this.getAccessibleClassGroupIds(user, orgId);
-    if (!scope.scopeAll && scope.classGroupIds.length === 0) {
-      // Profesor sin cursos: igual exponemos los períodos de la org para que la
-      // UI no quede sin contexto, pero sin cursos/asignaturas visibles.
+    return withOrgContext(this.db, orgId, async (tx) => {
+      const scope = await this.getAccessibleClassGroupIds(tx, user, orgId);
+      if (!scope.scopeAll && scope.classGroupIds.length === 0) {
+        // Profesor sin cursos: igual exponemos los períodos de la org para que la
+        // UI no quede sin contexto, pero sin cursos/asignaturas visibles.
+        const periods = await this.loadPeriods(orgId);
+        return { ...empty, periods };
+      }
+
+      // Cursos visibles para el scope.
+      const cgConditions = [eq(classGroups.orgId, orgId)];
+      if (!scope.scopeAll) {
+        cgConditions.push(inArray(classGroups.id, scope.classGroupIds));
+      }
+      const classGroupRows = await tx
+        .select({
+          id: classGroups.id,
+          name: classGroups.name,
+          gradeId: classGroups.gradeId,
+          academicYearId: classGroups.academicYearId,
+          gradeName: grades.name,
+        })
+        .from(classGroups)
+        .innerJoin(grades, eq(grades.id, classGroups.gradeId))
+        .where(and(...cgConditions))
+        .orderBy(classGroups.name);
+
+      const visibleClassGroupIds = classGroupRows.map((r) => r.id);
+      const gradeMap = new Map<string, string>();
+      for (const r of classGroupRows) gradeMap.set(r.gradeId, r.gradeName);
+
+      // Asignaturas visibles vía subject_classes de los cursos visibles.
+      const subjectRows =
+        visibleClassGroupIds.length === 0
+          ? []
+          : await tx
+              .selectDistinct({ id: subjects.id, name: subjects.name })
+              .from(subjectClasses)
+              .innerJoin(subjects, eq(subjects.id, subjectClasses.subjectId))
+              .where(inArray(subjectClasses.classGroupId, visibleClassGroupIds))
+              .orderBy(subjects.name);
+
+      // Instrumentos: oficiales (org_id null) + propios de la org, no borrados.
+      const instrumentRows = await tx
+        .select({
+          id: instruments.id,
+          name: instruments.name,
+          type: instruments.type,
+          subjectId: instruments.subjectId,
+          gradeId: instruments.gradeId,
+        })
+        .from(instruments)
+        .where(
+          and(
+            isNull(instruments.deletedAt),
+            sql`(${instruments.orgId} = ${orgId} or ${instruments.orgId} is null)`,
+          ),
+        )
+        .orderBy(instruments.name);
+
       const periods = await this.loadPeriods(orgId);
-      return { ...empty, periods };
-    }
 
-    // Cursos visibles para el scope.
-    const cgConditions = [eq(classGroups.orgId, orgId)];
-    if (!scope.scopeAll) {
-      cgConditions.push(inArray(classGroups.id, scope.classGroupIds));
-    }
-    const classGroupRows = await this.db
-      .select({
-        id: classGroups.id,
-        name: classGroups.name,
-        gradeId: classGroups.gradeId,
-        academicYearId: classGroups.academicYearId,
-        gradeName: grades.name,
-      })
-      .from(classGroups)
-      .innerJoin(grades, eq(grades.id, classGroups.gradeId))
-      .where(and(...cgConditions))
-      .orderBy(classGroups.name);
-
-    const visibleClassGroupIds = classGroupRows.map((r) => r.id);
-    const gradeMap = new Map<string, string>();
-    for (const r of classGroupRows) gradeMap.set(r.gradeId, r.gradeName);
-
-    // Asignaturas visibles vía subject_classes de los cursos visibles.
-    const subjectRows =
-      visibleClassGroupIds.length === 0
-        ? []
-        : await this.db
-            .selectDistinct({ id: subjects.id, name: subjects.name })
-            .from(subjectClasses)
-            .innerJoin(subjects, eq(subjects.id, subjectClasses.subjectId))
-            .where(inArray(subjectClasses.classGroupId, visibleClassGroupIds))
-            .orderBy(subjects.name);
-
-    // Instrumentos: oficiales (org_id null) + propios de la org, no borrados.
-    const instrumentRows = await this.db
-      .select({
-        id: instruments.id,
-        name: instruments.name,
-        type: instruments.type,
-        subjectId: instruments.subjectId,
-        gradeId: instruments.gradeId,
-      })
-      .from(instruments)
-      .where(
-        and(
-          isNull(instruments.deletedAt),
-          sql`(${instruments.orgId} = ${orgId} or ${instruments.orgId} is null)`,
-        ),
-      )
-      .orderBy(instruments.name);
-
-    const periods = await this.loadPeriods(orgId);
-
-    return {
-      subjects: subjectRows.map((r) => ({ id: r.id, label: r.name })),
-      grades: Array.from(gradeMap.entries()).map(([id, label]) => ({ id, label })),
-      classGroups: classGroupRows.map((r) => ({
-        id: r.id,
-        label: r.name,
-        gradeId: r.gradeId,
-        academicYearId: r.academicYearId,
-      })),
-      periods,
-      instruments: instrumentRows.map((r) => ({
-        id: r.id,
-        label: r.name,
-        type: r.type,
-        subjectId: r.subjectId,
-        gradeId: r.gradeId,
-      })),
-    };
+      return {
+        subjects: subjectRows.map((r) => ({ id: r.id, label: r.name })),
+        grades: Array.from(gradeMap.entries()).map(([id, label]) => ({ id, label })),
+        classGroups: classGroupRows.map((r) => ({
+          id: r.id,
+          label: r.name,
+          gradeId: r.gradeId,
+          academicYearId: r.academicYearId,
+        })),
+        periods,
+        instruments: instrumentRows.map((r) => ({
+          id: r.id,
+          label: r.name,
+          type: r.type,
+          subjectId: r.subjectId,
+          gradeId: r.gradeId,
+        })),
+      };
+    });
   }
 
   // ───────────────────────────────────────────────────────────────────────────
@@ -247,100 +255,103 @@ export class DashboardsService {
     };
     if (!orgId) return empty;
 
-    const scope = await this.getAccessibleClassGroupIds(user, orgId);
-    if (!scope.scopeAll && scope.classGroupIds.length === 0) return empty;
+    return withOrgContext(this.db, orgId, async (tx) => {
+      const scope = await this.getAccessibleClassGroupIds(tx, user, orgId);
+      if (!scope.scopeAll && scope.classGroupIds.length === 0) return empty;
 
-    const studentIds = await this.resolveScopedStudentIds(orgId, scope, query);
-    if (studentIds !== null && studentIds.length === 0) return empty;
+      const studentIds = await this.resolveScopedStudentIds(tx, orgId, scope, query);
+      if (studentIds !== null && studentIds.length === 0) return empty;
 
-    const assessmentIds = await this.resolveScopedAssessmentIds(orgId, query);
-    if (assessmentIds.length === 0) {
-      return { ...empty, thresholds: await this.resolveThresholds(orgId, query, assessmentIds) };
-    }
+      const assessmentIds = await this.resolveScopedAssessmentIds(tx, orgId, query);
+      if (assessmentIds.length === 0) {
+        return { ...empty, thresholds: await this.resolveThresholds(tx, orgId, query, assessmentIds) };
+      }
 
-    const resolvedThresholds = await this.resolveThresholds(orgId, query, assessmentIds);
+      const resolvedThresholds = await this.resolveThresholds(tx, orgId, query, assessmentIds);
 
-    // Clasificación por alumno: promediamos el % logro por alumno sobre el set de
-    // evaluaciones que matchean los filtros. Una fila por alumno.
-    const baseConditions = this.buildResultConditions(assessmentIds, studentIds, undefined);
+      // Clasificación por alumno: promediamos el % logro por alumno sobre el set de
+      // evaluaciones que matchean los filtros. Una fila por alumno.
+      const baseConditions = this.buildResultConditions(assessmentIds, studentIds, undefined);
 
-    // Para filtrar por performanceLevel del promedio, calculamos el nivel a
-    // partir del promedio (no del nivel por evaluación). El filtro se aplica
-    // en SQL sobre el promedio para que la paginación sea consistente.
-    const avgPct = sql`avg(${assessmentResults.percentage}::numeric)`;
-    const avgGrade = sql`avg(${assessmentResults.grade}::numeric)`;
+      // Para filtrar por performanceLevel del promedio, calculamos el nivel a
+      // partir del promedio (no del nivel por evaluación). El filtro se aplica
+      // en SQL sobre el promedio para que la paginación sea consistente.
+      const avgPct = sql`avg(${assessmentResults.percentage}::numeric)`;
+      const avgGrade = sql`avg(${assessmentResults.grade}::numeric)`;
 
-    const aggregateRows = await this.db
-      .select({
-        studentId: assessmentResults.studentId,
-        studentRut: students.rut,
-        firstName: students.firstName,
-        lastName: students.lastName,
-        avgPct: sql<string | null>`${avgPct}`,
-        avgGrade: sql<string | null>`${avgGrade}`,
-      })
-      .from(assessmentResults)
-      .innerJoin(students, eq(students.id, assessmentResults.studentId))
-      .where(and(...baseConditions, isNull(students.deletedAt)))
-      .groupBy(assessmentResults.studentId, students.rut, students.firstName, students.lastName)
-      .orderBy(students.lastName, students.firstName);
+      const aggregateRows = await tx
+        .select({
+          studentId: assessmentResults.studentId,
+          studentRut: students.rut,
+          firstName: students.firstName,
+          lastName: students.lastName,
+          avgPct: sql<string | null>`${avgPct}`,
+          avgGrade: sql<string | null>`${avgGrade}`,
+        })
+        .from(assessmentResults)
+        .innerJoin(students, eq(students.id, assessmentResults.studentId))
+        .where(and(...baseConditions, isNull(students.deletedAt)))
+        .groupBy(assessmentResults.studentId, students.rut, students.firstName, students.lastName)
+        .orderBy(students.lastName, students.firstName);
 
-    // Enrollment → classGroup por alumno (para nombre de curso en la fila).
-    const classGroupByStudent = await this.loadClassGroupByStudent(
-      orgId,
-      scope,
-      aggregateRows.map((r) => r.studentId),
-    );
+      // Enrollment → classGroup por alumno (para nombre de curso en la fila).
+      const classGroupByStudent = await this.loadClassGroupByStudent(
+        tx,
+        orgId,
+        scope,
+        aggregateRows.map((r) => r.studentId),
+      );
 
-    const scaleThresholds = { elementary: resolvedThresholds.elementary, adequate: resolvedThresholds.adequate, advanced: resolvedThresholds.advanced };
+      const scaleThresholds = { elementary: resolvedThresholds.elementary, adequate: resolvedThresholds.adequate, advanced: resolvedThresholds.advanced };
 
-    let classified: StudentClassificationModel[] = aggregateRows.map((r) => {
-      const pct = r.avgPct == null ? null : Number(r.avgPct);
-      const level =
-        pct == null
-          ? null
-          : percentageToPerformanceLevel(pct / 100, { performanceThresholds: scaleThresholds });
-      const cg = classGroupByStudent.get(r.studentId) ?? null;
+      let classified: StudentClassificationModel[] = aggregateRows.map((r) => {
+        const pct = r.avgPct == null ? null : Number(r.avgPct);
+        const level =
+          pct == null
+            ? null
+            : percentageToPerformanceLevel(pct / 100, { performanceThresholds: scaleThresholds });
+        const cg = classGroupByStudent.get(r.studentId) ?? null;
+        return {
+          studentId: r.studentId,
+          studentRut: r.studentRut,
+          studentFullName: `${r.firstName} ${r.lastName}`.trim(),
+          classGroupId: cg?.id ?? null,
+          classGroupName: cg?.name ?? null,
+          achievement: pct,
+          grade: r.avgGrade == null ? null : Number(r.avgGrade).toFixed(2),
+          performanceLevel: level,
+        };
+      });
+
+      // Distribución por nivel: se calcula sobre la MISMA clasificación por alumno
+      // (promedio) que alimenta la tabla, para que seleccionar un badge coincida
+      // exactamente con el conteo de la gráfica. Antes se contaba por resultado
+      // (alumno × evaluación), lo que producía discrepancias cuando el promedio del
+      // alumno caía en un nivel distinto al de alguna de sus evaluaciones.
+      const classifiedTotal = classified.filter((c) => c.performanceLevel != null).length;
+      const distribution: PerformanceDistributionBucket[] = PERFORMANCE_LEVELS.map((level) => {
+        const count = classified.filter((c) => c.performanceLevel === level).length;
+        return {
+          level,
+          count,
+          percentage: classifiedTotal > 0 ? (count / classifiedTotal) * 100 : 0,
+        };
+      });
+
+      if (query.performanceLevel) {
+        classified = classified.filter((c) => c.performanceLevel === query.performanceLevel);
+      }
+
+      const total = classified.length;
+      const start = (query.page - 1) * query.limit;
+      const pageData = classified.slice(start, start + query.limit);
+
       return {
-        studentId: r.studentId,
-        studentRut: r.studentRut,
-        studentFullName: `${r.firstName} ${r.lastName}`.trim(),
-        classGroupId: cg?.id ?? null,
-        classGroupName: cg?.name ?? null,
-        achievement: pct,
-        grade: r.avgGrade == null ? null : Number(r.avgGrade).toFixed(2),
-        performanceLevel: level,
+        distribution,
+        thresholds: resolvedThresholds,
+        students: { data: pageData, total, page: query.page, limit: query.limit },
       };
     });
-
-    // Distribución por nivel: se calcula sobre la MISMA clasificación por alumno
-    // (promedio) que alimenta la tabla, para que seleccionar un badge coincida
-    // exactamente con el conteo de la gráfica. Antes se contaba por resultado
-    // (alumno × evaluación), lo que producía discrepancias cuando el promedio del
-    // alumno caía en un nivel distinto al de alguna de sus evaluaciones.
-    const classifiedTotal = classified.filter((c) => c.performanceLevel != null).length;
-    const distribution: PerformanceDistributionBucket[] = PERFORMANCE_LEVELS.map((level) => {
-      const count = classified.filter((c) => c.performanceLevel === level).length;
-      return {
-        level,
-        count,
-        percentage: classifiedTotal > 0 ? (count / classifiedTotal) * 100 : 0,
-      };
-    });
-
-    if (query.performanceLevel) {
-      classified = classified.filter((c) => c.performanceLevel === query.performanceLevel);
-    }
-
-    const total = classified.length;
-    const start = (query.page - 1) * query.limit;
-    const pageData = classified.slice(start, start + query.limit);
-
-    return {
-      distribution,
-      thresholds: resolvedThresholds,
-      students: { data: pageData, total, page: query.page, limit: query.limit },
-    };
   }
 
   // ───────────────────────────────────────────────────────────────────────────
@@ -354,58 +365,74 @@ export class DashboardsService {
     const orgId = this.resolveOrgId(user);
     if (!orgId) return { skills: [] };
 
-    const scope = await this.getAccessibleClassGroupIds(user, orgId);
-    if (!scope.scopeAll && scope.classGroupIds.length === 0) return { skills: [] };
+    return withOrgContext(this.db, orgId, async (tx) => {
+      const scope = await this.getAccessibleClassGroupIds(tx, user, orgId);
+      if (!scope.scopeAll && scope.classGroupIds.length === 0) return { skills: [] };
 
-    const studentIds = await this.resolveScopedStudentIds(orgId, scope, query);
-    if (studentIds !== null && studentIds.length === 0) return { skills: [] };
+      const studentIds = await this.resolveScopedStudentIds(tx, orgId, scope, query);
+      if (studentIds !== null && studentIds.length === 0) return { skills: [] };
 
-    const assessmentIds = await this.resolveScopedAssessmentIds(orgId, query);
-    if (assessmentIds.length === 0) return { skills: [] };
+      const assessmentIds = await this.resolveScopedAssessmentIds(tx, orgId, query);
+      if (assessmentIds.length === 0) return { skills: [] };
 
-    const conditions = [inArray(skillResults.assessmentId, assessmentIds)];
-    if (studentIds !== null) {
-      conditions.push(inArray(skillResults.studentId, studentIds));
-    }
-
-    const rows = await this.db
-      .select({
-        nodeId: skillResults.nodeId,
-        nodeName: taxonomyNodes.name,
-        nodeType: taxonomyNodes.type,
-        nodeCode: taxonomyNodes.code,
-        parentId: taxonomyNodes.parentId,
-        avgPct: sql<string | null>`avg(${skillResults.percentage}::numeric)`,
-        studentsAssessed: sql<number>`count(distinct ${skillResults.studentId})::int`,
-      })
-      .from(skillResults)
-      .innerJoin(taxonomyNodes, eq(taxonomyNodes.id, skillResults.nodeId))
-      .where(and(...conditions))
-      .groupBy(
-        skillResults.nodeId,
-        taxonomyNodes.name,
-        taxonomyNodes.type,
-        taxonomyNodes.code,
-        taxonomyNodes.parentId,
-      )
-      .orderBy(taxonomyNodes.name);
-
-    const skills: SkillAchievementModel[] = rows.map((r) => {
-      const pct = r.avgPct == null ? null : Number(r.avgPct);
-      return {
-        nodeId: r.nodeId,
-        nodeName: r.nodeName,
-        nodeType: r.nodeType,
-        nodeCode: r.nodeCode,
-        parentId: r.parentId,
-        studentsAssessed: Number(r.studentsAssessed ?? 0),
-        averageAchievement: pct,
-        performanceLevel:
-          pct == null ? null : percentageToPerformanceLevel(pct / 100),
+      // Thresholds de la escala aplicable (consistente con getPerformance/
+      // getDistribution; antes getSkills usaba siempre defaults). Misma limitación
+      // multi-escala documentada en resolveApplicableScale (F1 OK / revisar en F2).
+      const resolvedThresholds = await this.resolveThresholds(tx, orgId, query, assessmentIds);
+      const scaleThresholds = {
+        elementary: resolvedThresholds.elementary,
+        adequate: resolvedThresholds.adequate,
+        advanced: resolvedThresholds.advanced,
       };
-    });
 
-    return { skills };
+      const conditions = [inArray(skillResults.assessmentId, assessmentIds)];
+      if (studentIds !== null) {
+        conditions.push(inArray(skillResults.studentId, studentIds));
+      }
+
+      const rows = await tx
+        .select({
+          nodeId: skillResults.nodeId,
+          nodeName: taxonomyNodes.name,
+          nodeType: taxonomyNodes.type,
+          nodeCode: taxonomyNodes.code,
+          parentId: taxonomyNodes.parentId,
+          avgPct: sql<string | null>`avg(${skillResults.percentage}::numeric)`,
+          studentsAssessed: sql<number>`count(distinct ${skillResults.studentId})::int`,
+        })
+        .from(skillResults)
+        .innerJoin(taxonomyNodes, eq(taxonomyNodes.id, skillResults.nodeId))
+        .where(and(...conditions))
+        .groupBy(
+          skillResults.nodeId,
+          taxonomyNodes.name,
+          taxonomyNodes.type,
+          taxonomyNodes.code,
+          taxonomyNodes.parentId,
+        )
+        .orderBy(taxonomyNodes.name);
+
+      const skills: SkillAchievementModel[] = rows.map((r) => {
+        const pct = r.avgPct == null ? null : Number(r.avgPct);
+        return {
+          nodeId: r.nodeId,
+          nodeName: r.nodeName,
+          nodeType: r.nodeType,
+          nodeCode: r.nodeCode,
+          parentId: r.parentId,
+          studentsAssessed: Number(r.studentsAssessed ?? 0),
+          averageAchievement: pct,
+          performanceLevel:
+            pct == null
+              ? null
+              : percentageToPerformanceLevel(pct / 100, {
+                  performanceThresholds: scaleThresholds,
+                }),
+        };
+      });
+
+      return { skills };
+    });
   }
 
   // ───────────────────────────────────────────────────────────────────────────
@@ -419,107 +446,109 @@ export class DashboardsService {
     const orgId = this.resolveOrgId(user);
     if (!orgId) return { courses: [] };
 
-    const scope = await this.getAccessibleClassGroupIds(user, orgId);
-    if (!scope.scopeAll && scope.classGroupIds.length === 0) return { courses: [] };
+    return withOrgContext(this.db, orgId, async (tx) => {
+      const scope = await this.getAccessibleClassGroupIds(tx, user, orgId);
+      if (!scope.scopeAll && scope.classGroupIds.length === 0) return { courses: [] };
 
-    // Cursos del scope (filtrados por gradeId/classGroupId/academicYearId si vienen).
-    const cgConditions = [eq(classGroups.orgId, orgId)];
-    if (!scope.scopeAll) cgConditions.push(inArray(classGroups.id, scope.classGroupIds));
-    if (query.classGroupId) cgConditions.push(eq(classGroups.id, query.classGroupId));
-    if (query.gradeId) cgConditions.push(eq(classGroups.gradeId, query.gradeId));
-    if (query.academicYearId) {
-      cgConditions.push(eq(classGroups.academicYearId, query.academicYearId));
-    }
+      // Cursos del scope (filtrados por gradeId/classGroupId/academicYearId si vienen).
+      const cgConditions = [eq(classGroups.orgId, orgId)];
+      if (!scope.scopeAll) cgConditions.push(inArray(classGroups.id, scope.classGroupIds));
+      if (query.classGroupId) cgConditions.push(eq(classGroups.id, query.classGroupId));
+      if (query.gradeId) cgConditions.push(eq(classGroups.gradeId, query.gradeId));
+      if (query.academicYearId) {
+        cgConditions.push(eq(classGroups.academicYearId, query.academicYearId));
+      }
 
-    const courseRows = await this.db
-      .select({
-        classGroupId: classGroups.id,
-        classGroupName: classGroups.name,
-        gradeName: grades.name,
-      })
-      .from(classGroups)
-      .innerJoin(grades, eq(grades.id, classGroups.gradeId))
-      .where(and(...cgConditions))
-      .orderBy(classGroups.name);
+      const courseRows = await tx
+        .select({
+          classGroupId: classGroups.id,
+          classGroupName: classGroups.name,
+          gradeName: grades.name,
+        })
+        .from(classGroups)
+        .innerJoin(grades, eq(grades.id, classGroups.gradeId))
+        .where(and(...cgConditions))
+        .orderBy(classGroups.name);
 
-    if (courseRows.length === 0) return { courses: [] };
+      if (courseRows.length === 0) return { courses: [] };
 
-    const courseIds = courseRows.map((r) => r.classGroupId);
+      const courseIds = courseRows.map((r) => r.classGroupId);
 
-    // Asignaturas por curso (puede haber varias — tomamos la lista para label).
-    const subjectByCourse = await this.loadSubjectNamesByClassGroup(courseIds);
+      // Asignaturas por curso (puede haber varias — tomamos la lista para label).
+      const subjectByCourse = await this.loadSubjectNamesByClassGroup(tx, courseIds);
 
-    // passing_grade de la escala aplicable (default 4.0).
-    const passingGrade = await this.resolvePassingGrade(orgId, query);
+      // passing_grade de la escala aplicable (default 4.0).
+      const passingGrade = await this.resolvePassingGrade(tx, orgId, query);
 
-    const assessmentIds = await this.resolveScopedAssessmentIds(orgId, query);
+      const assessmentIds = await this.resolveScopedAssessmentIds(tx, orgId, query);
 
-    const courses: TeacherCourseKpiModel[] = [];
-    for (const c of courseRows) {
-      // Alumnos del curso (no borrados).
-      const studentRows = await this.db
-        .select({ studentId: studentEnrollments.studentId })
-        .from(studentEnrollments)
-        .innerJoin(students, eq(students.id, studentEnrollments.studentId))
-        .where(
-          and(
-            eq(studentEnrollments.classGroupId, c.classGroupId),
-            eq(students.orgId, orgId),
-            isNull(students.deletedAt),
-          ),
-        );
-      const courseStudentIds = Array.from(new Set(studentRows.map((r) => r.studentId)));
+      const courses: TeacherCourseKpiModel[] = [];
+      for (const c of courseRows) {
+        // Alumnos del curso (no borrados).
+        const studentRows = await tx
+          .select({ studentId: studentEnrollments.studentId })
+          .from(studentEnrollments)
+          .innerJoin(students, eq(students.id, studentEnrollments.studentId))
+          .where(
+            and(
+              eq(studentEnrollments.classGroupId, c.classGroupId),
+              eq(students.orgId, orgId),
+              isNull(students.deletedAt),
+            ),
+          );
+        const courseStudentIds = Array.from(new Set(studentRows.map((r) => r.studentId)));
 
-      if (courseStudentIds.length === 0 || assessmentIds.length === 0) {
+        if (courseStudentIds.length === 0 || assessmentIds.length === 0) {
+          courses.push({
+            classGroupId: c.classGroupId,
+            classGroupName: c.classGroupName,
+            gradeName: c.gradeName,
+            subjectName: subjectByCourse.get(c.classGroupId) ?? null,
+            studentsCount: courseStudentIds.length,
+            averageAchievement: null,
+            passingRate: null,
+            criticalStudents: 0,
+            assessmentsCount: 0,
+          });
+          continue;
+        }
+
+        const [agg] = await tx
+          .select({
+            avgPct: sql<string | null>`avg(${assessmentResults.percentage}::numeric)`,
+            assessmentsCount: sql<number>`count(distinct ${assessmentResults.assessmentId})::int`,
+            totalResults: sql<number>`count(*)::int`,
+            passingResults: sql<number>`count(*) filter (where ${assessmentResults.grade}::numeric >= ${passingGrade})::int`,
+            criticalStudents: sql<number>`count(distinct ${assessmentResults.studentId}) filter (where ${assessmentResults.performanceLevel} = 'insufficient')::int`,
+          })
+          .from(assessmentResults)
+          .where(
+            and(
+              inArray(assessmentResults.assessmentId, assessmentIds),
+              inArray(assessmentResults.studentId, courseStudentIds),
+            ),
+          );
+
+        const avgPct = agg?.avgPct == null ? null : Number(agg.avgPct);
+        const totalResults = Number(agg?.totalResults ?? 0);
+        const passingResults = Number(agg?.passingResults ?? 0);
+        const passingRate = totalResults > 0 ? (passingResults / totalResults) * 100 : null;
+
         courses.push({
           classGroupId: c.classGroupId,
           classGroupName: c.classGroupName,
           gradeName: c.gradeName,
           subjectName: subjectByCourse.get(c.classGroupId) ?? null,
           studentsCount: courseStudentIds.length,
-          averageAchievement: null,
-          passingRate: null,
-          criticalStudents: 0,
-          assessmentsCount: 0,
+          averageAchievement: avgPct,
+          passingRate,
+          criticalStudents: Number(agg?.criticalStudents ?? 0),
+          assessmentsCount: Number(agg?.assessmentsCount ?? 0),
         });
-        continue;
       }
 
-      const [agg] = await this.db
-        .select({
-          avgPct: sql<string | null>`avg(${assessmentResults.percentage}::numeric)`,
-          assessmentsCount: sql<number>`count(distinct ${assessmentResults.assessmentId})::int`,
-          totalResults: sql<number>`count(*)::int`,
-          passingResults: sql<number>`count(*) filter (where ${assessmentResults.grade}::numeric >= ${passingGrade})::int`,
-          criticalStudents: sql<number>`count(distinct ${assessmentResults.studentId}) filter (where ${assessmentResults.performanceLevel} = 'insufficient')::int`,
-        })
-        .from(assessmentResults)
-        .where(
-          and(
-            inArray(assessmentResults.assessmentId, assessmentIds),
-            inArray(assessmentResults.studentId, courseStudentIds),
-          ),
-        );
-
-      const avgPct = agg?.avgPct == null ? null : Number(agg.avgPct);
-      const totalResults = Number(agg?.totalResults ?? 0);
-      const passingResults = Number(agg?.passingResults ?? 0);
-      const passingRate = totalResults > 0 ? (passingResults / totalResults) * 100 : null;
-
-      courses.push({
-        classGroupId: c.classGroupId,
-        classGroupName: c.classGroupName,
-        gradeName: c.gradeName,
-        subjectName: subjectByCourse.get(c.classGroupId) ?? null,
-        studentsCount: courseStudentIds.length,
-        averageAchievement: avgPct,
-        passingRate,
-        criticalStudents: Number(agg?.criticalStudents ?? 0),
-        assessmentsCount: Number(agg?.assessmentsCount ?? 0),
-      });
-    }
-
-    return { courses };
+      return { courses };
+    });
   }
 
   // ───────────────────────────────────────────────────────────────────────────
@@ -545,7 +574,11 @@ export class DashboardsService {
    * Replica assessment-results.getAccessibleClassGroupIds: admin-like ve toda
    * la org (`scopeAll`), teacher ve sólo sus class_groups vía teacher_assignments.
    */
-  private async getAccessibleClassGroupIds(user: JwtPayload, orgId: string): Promise<Scope> {
+  private async getAccessibleClassGroupIds(
+    tx: Database,
+    user: JwtPayload,
+    orgId: string,
+  ): Promise<Scope> {
     if (user.isPlatformAdmin) return { scopeAll: true, classGroupIds: [] };
 
     const adminLike = userHasAnyRole(user.roles, ADMIN_LIKE_ROLES);
@@ -555,7 +588,7 @@ export class DashboardsService {
       return { scopeAll: false, classGroupIds: [] };
     }
 
-    const rows = await this.db
+    const rows = await tx
       .select({ classGroupId: subjectClasses.classGroupId })
       .from(teacherAssignments)
       .innerJoin(subjectClasses, eq(subjectClasses.id, teacherAssignments.subjectClassId))
@@ -572,6 +605,7 @@ export class DashboardsService {
    * curso/alumno (sin filtro extra). Retorna `[]` si el filtro deja set vacío.
    */
   private async resolveScopedStudentIds(
+    tx: Database,
     orgId: string,
     scope: Scope,
     query: DashboardFiltersQueryDto,
@@ -610,7 +644,7 @@ export class DashboardsService {
     ];
     if (query.studentId) enrollConditions.push(eq(students.id, query.studentId));
 
-    const rows = await this.db
+    const rows = await tx
       .select({ studentId: studentEnrollments.studentId })
       .from(studentEnrollments)
       .innerJoin(classGroups, eq(classGroups.id, studentEnrollments.classGroupId))
@@ -625,6 +659,7 @@ export class DashboardsService {
    * instrumento/asignatura/grado/evaluación. Siempre acotado a la org.
    */
   private async resolveScopedAssessmentIds(
+    tx: Database,
     orgId: string,
     query: DashboardFiltersQueryDto,
   ): Promise<string[]> {
@@ -637,7 +672,7 @@ export class DashboardsService {
     if (query.subjectId) conditions.push(eq(instruments.subjectId, query.subjectId));
     if (query.gradeId) conditions.push(eq(instruments.gradeId, query.gradeId));
 
-    const rows = await this.db
+    const rows = await tx
       .select({ id: assessments.id })
       .from(assessments)
       .innerJoin(instruments, eq(instruments.id, assessments.instrumentId))
@@ -662,13 +697,14 @@ export class DashboardsService {
    * un punto. Agregado en SQL con group by.
    */
   private async computePerformanceDistribution(
+    tx: Database,
     assessmentIds: string[],
     studentIds: string[] | null,
   ): Promise<PerformanceDistributionBucket[]> {
     if (assessmentIds.length === 0) return this.emptyDistribution();
 
     const conditions = this.buildResultConditions(assessmentIds, studentIds, undefined);
-    const rows = await this.db
+    const rows = await tx
       .select({
         level: assessmentResults.performanceLevel,
         count: sql<number>`count(*)::int`,
@@ -706,12 +742,13 @@ export class DashboardsService {
    * asignatura, grado, conteo de alumnos y % logro promedio.
    */
   private async loadRecentAssessments(
+    tx: Database,
     orgId: string,
     scope: Scope,
     query: DashboardFiltersQueryDto,
     studentIds: string[] | null,
   ): Promise<DashboardAssessmentSummary[]> {
-    const assessmentIds = await this.resolveScopedAssessmentIds(orgId, query);
+    const assessmentIds = await this.resolveScopedAssessmentIds(tx, orgId, query);
     if (assessmentIds.length === 0) return [];
 
     // Teacher scoping: si el caller está acotado a un set de alumnos
@@ -721,7 +758,7 @@ export class DashboardsService {
     let scopedAssessmentIds = assessmentIds;
     if (studentIds !== null) {
       if (studentIds.length === 0) return [];
-      const withResults = await this.db
+      const withResults = await tx
         .selectDistinct({ assessmentId: assessmentResults.assessmentId })
         .from(assessmentResults)
         .where(
@@ -734,7 +771,7 @@ export class DashboardsService {
       if (scopedAssessmentIds.length === 0) return [];
     }
 
-    const rows = await this.db
+    const rows = await tx
       .select({
         assessmentId: assessments.id,
         name: assessments.name,
@@ -760,7 +797,7 @@ export class DashboardsService {
     const statsConditions = [inArray(assessmentResults.assessmentId, summaryAssessmentIds)];
     if (studentIds !== null) statsConditions.push(inArray(assessmentResults.studentId, studentIds));
 
-    const statsRows = await this.db
+    const statsRows = await tx
       .select({
         assessmentId: assessmentResults.assessmentId,
         studentsCount: sql<number>`count(distinct ${assessmentResults.studentId})::int`,
@@ -803,6 +840,7 @@ export class DashboardsService {
    * promedio < 50 (critical_skill). Sobre el scope filtrado.
    */
   private async deriveAlerts(
+    tx: Database,
     orgId: string,
     scope: Scope,
     query: DashboardFiltersQueryDto,
@@ -824,7 +862,7 @@ export class DashboardsService {
       resultConditions.push(inArray(assessmentResults.studentId, studentIds));
     }
 
-    const courseAchievementRows = await this.db
+    const courseAchievementRows = await tx
       .select({
         classGroupId: classGroups.id,
         classGroupName: classGroups.name,
@@ -855,7 +893,7 @@ export class DashboardsService {
     const skillConditions = [inArray(skillResults.assessmentId, assessmentIds)];
     if (studentIds !== null) skillConditions.push(inArray(skillResults.studentId, studentIds));
 
-    const skillRows = await this.db
+    const skillRows = await tx
       .select({
         nodeId: skillResults.nodeId,
         nodeName: taxonomyNodes.name,
@@ -908,6 +946,7 @@ export class DashboardsService {
    * en varios cursos visibles, tomamos el primero por nombre.
    */
   private async loadClassGroupByStudent(
+    tx: Database,
     orgId: string,
     scope: Scope,
     studentIds: string[],
@@ -918,7 +957,7 @@ export class DashboardsService {
     const conditions = [eq(classGroups.orgId, orgId), inArray(studentEnrollments.studentId, studentIds)];
     if (!scope.scopeAll) conditions.push(inArray(classGroups.id, scope.classGroupIds));
 
-    const rows = await this.db
+    const rows = await tx
       .select({
         studentId: studentEnrollments.studentId,
         classGroupId: classGroups.id,
@@ -939,12 +978,13 @@ export class DashboardsService {
 
   /** Mapa classGroupId → nombres de asignaturas (join por ", "). */
   private async loadSubjectNamesByClassGroup(
+    tx: Database,
     classGroupIds: string[],
   ): Promise<Map<string, string>> {
     const map = new Map<string, string>();
     if (classGroupIds.length === 0) return map;
 
-    const rows = await this.db
+    const rows = await tx
       .select({
         classGroupId: subjectClasses.classGroupId,
         subjectName: subjects.name,
@@ -970,6 +1010,7 @@ export class DashboardsService {
    * config.performanceThresholds, se usa esa; si no, defaults 0.4/0.7/0.85.
    */
   private async resolveThresholds(
+    tx: Database,
     orgId: string,
     query: DashboardFiltersQueryDto,
     assessmentIds: string[],
@@ -980,7 +1021,7 @@ export class DashboardsService {
       advanced: DEFAULT_THRESHOLDS.advanced,
     };
 
-    const scale = await this.resolveApplicableScale(orgId, query, assessmentIds);
+    const scale = await this.resolveApplicableScale(tx, orgId, query, assessmentIds);
     const cfg = scale?.config as
       | { performanceThresholds?: { elementary?: number; adequate?: number; advanced?: number } }
       | null
@@ -996,26 +1037,34 @@ export class DashboardsService {
 
   /** passing_grade (número) de la escala aplicable, default 4.0. */
   private async resolvePassingGrade(
+    tx: Database,
     orgId: string,
     query: DashboardFiltersQueryDto,
   ): Promise<number> {
-    const assessmentIds = await this.resolveScopedAssessmentIds(orgId, query);
-    const scale = await this.resolveApplicableScale(orgId, query, assessmentIds);
+    const assessmentIds = await this.resolveScopedAssessmentIds(tx, orgId, query);
+    const scale = await this.resolveApplicableScale(tx, orgId, query, assessmentIds);
     return scale ? Number(scale.passingGrade) : 4;
   }
 
   /**
    * Grading scale aplicable: la del instrumento de la primera evaluación del
    * scope que tenga una asignada. Retorna null si ninguna define escala.
+   *
+   * ⚠️ LIMITACIÓN (F1 OK / revisar en F2): asume escala HOMOGÉNEA en el scope.
+   * Con un scope que mezcle instrumentos de escalas distintas, toma una sola
+   * (`limit(1)`) y la aplica a todo el dashboard. En F1 (solo DIA) no afecta. El
+   * fix real (escala por instrumento) se difiere a F2 multi-escala; el
+   * `orderBy(createdAt)` solo hace determinista cuál escala se elige.
    */
   private async resolveApplicableScale(
+    tx: Database,
     orgId: string,
     query: DashboardFiltersQueryDto,
     assessmentIds: string[],
   ): Promise<{ passingGrade: string; config: Record<string, unknown> | null } | null> {
     if (assessmentIds.length === 0) return null;
 
-    const [row] = await this.db
+    const [row] = await tx
       .select({
         passingGrade: gradingScales.passingGrade,
         config: gradingScales.config,
@@ -1024,6 +1073,8 @@ export class DashboardsService {
       .innerJoin(instruments, eq(instruments.id, assessments.instrumentId))
       .innerJoin(gradingScales, eq(gradingScales.id, instruments.gradingScaleId))
       .where(and(eq(assessments.orgId, orgId), inArray(assessments.id, assessmentIds)))
+      // Determinista: instrumento más antiguo del scope, no una fila arbitraria.
+      .orderBy(asc(instruments.createdAt))
       .limit(1);
 
     return row ?? null;

@@ -28,7 +28,7 @@ function instrument(overrides: Partial<Instrument> = {}): Instrument {
   return {
     id: 'inst-1',
     orgId: 'org-1',
-    curriculumId: null,
+    taxonomyId: null,
     name: 'DIA Lenguaje 3ro',
     shortName: null,
     type: 'dia',

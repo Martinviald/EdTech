@@ -12,7 +12,9 @@ import {
   taxonomyNodes,
   type Item,
 } from '@soe/db';
-import { userHasRole } from '@soe/types';
+import { userHasRole, validateItemContent } from '@soe/types';
+import type { ItemContent, ItemType } from '@soe/types';
+import { ZodError } from 'zod';
 import type { JwtPayload } from '../auth/jwt-payload.types';
 import { InjectDb, type Database } from '../database/database.types';
 import type {
@@ -96,7 +98,7 @@ export class ItemsService {
           name: taxonomyNodes.name,
           code: taxonomyNodes.code,
           type: taxonomyNodes.type,
-          curriculumId: taxonomyNodes.curriculumId,
+          taxonomyId: taxonomyNodes.taxonomyId,
         },
       })
       .from(itemTaxonomyTags)
@@ -142,7 +144,7 @@ export class ItemsService {
           name: taxonomyNodes.name,
           code: taxonomyNodes.code,
           type: taxonomyNodes.type,
-          curriculumId: taxonomyNodes.curriculumId,
+          taxonomyId: taxonomyNodes.taxonomyId,
         },
       })
       .from(itemTaxonomyTags)
@@ -155,6 +157,9 @@ export class ItemsService {
   async create(dto: CreateItemDto, user: JwtPayload) {
     const orgId = user.orgId;
 
+    // El `content` polimórfico debe cumplir el schema de su `type` antes de persistir.
+    const content = this.validateContent(dto.type, dto.content);
+
     const [created] = await this.db
       .insert(items)
       .values({
@@ -163,7 +168,7 @@ export class ItemsService {
         sectionId: dto.sectionId ?? null,
         position: dto.position,
         type: dto.type,
-        content: dto.content,
+        content,
         scoringConfig: dto.scoringConfig ?? {},
         irtParams: dto.irtParams ?? {},
         status: dto.status,
@@ -207,7 +212,16 @@ export class ItemsService {
     if (dto.sectionId !== undefined) updateData.sectionId = dto.sectionId;
     if (dto.position !== undefined) updateData.position = dto.position;
     if (dto.type !== undefined) updateData.type = dto.type;
-    if (dto.content !== undefined) updateData.content = dto.content;
+    // El content (si cambia) se valida contra el `type` efectivo: el nuevo si se
+    // está cambiando, o el existente. Si solo cambia el `type` sin reenviar content,
+    // re-validamos el content existente contra el nuevo type para no dejar datos
+    // inconsistentes (un content MC bajo un type `gap_fill`, por ejemplo).
+    const nextType = (dto.type ?? existing.type) as ItemType;
+    if (dto.content !== undefined) {
+      updateData.content = this.validateContent(nextType, dto.content);
+    } else if (dto.type !== undefined) {
+      updateData.content = this.validateContent(nextType, existing.content);
+    }
     if (dto.scoringConfig !== undefined) updateData.scoringConfig = dto.scoringConfig;
     if (dto.irtParams !== undefined) updateData.irtParams = dto.irtParams;
     if (dto.status !== undefined) updateData.status = dto.status;
@@ -332,6 +346,31 @@ export class ItemsService {
   }
 
   // ── Helpers ─────────────────────────────────────────────────────────────
+
+  /**
+   * Valida el `content` polimórfico contra el schema Zod de su `type`
+   * (`validateItemContent` de @soe/types) y devuelve el content ya parseado.
+   * Un content inválido para su tipo se traduce en un `BadRequestException`
+   * con el detalle de los issues de Zod, en vez de un 500.
+   */
+  private validateContent(type: ItemType, content: unknown): ItemContent {
+    try {
+      return validateItemContent(type, content);
+    } catch (error) {
+      if (error instanceof ZodError) {
+        const detail = error.issues
+          .map((i) => {
+            const path = i.path.length ? `${i.path.join('.')}: ` : '';
+            return `${path}${i.message}`;
+          })
+          .join('; ');
+        throw new BadRequestException(
+          `El contenido del ítem no es válido para el tipo "${type}": ${detail}`,
+        );
+      }
+      throw error;
+    }
+  }
 
   /**
    * Builds the base visibility + soft-delete conditions for items.

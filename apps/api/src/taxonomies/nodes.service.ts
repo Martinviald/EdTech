@@ -13,20 +13,20 @@ import type {
 } from '@soe/types';
 import type { JwtPayload } from '../auth/jwt-payload.types';
 import { InjectDb, type Database } from '../database/database.types';
-import { CurriculaService } from './curricula.service';
+import { TaxonomiesService } from './taxonomies.service';
 
 @Injectable()
 export class NodesService {
   constructor(
     @InjectDb() private readonly db: Database,
-    private readonly curriculaService: CurriculaService,
+    private readonly taxonomiesService: TaxonomiesService,
   ) {}
 
   async list(filters: ListTaxonomyNodesQueryDto, user: JwtPayload) {
     // Verifica acceso al currículum antes de filtrar nodos.
-    await this.curriculaService.getById(filters.curriculumId, user);
+    await this.taxonomiesService.getById(filters.taxonomyId, user);
 
-    const conditions = [eq(taxonomyNodes.curriculumId, filters.curriculumId)];
+    const conditions = [eq(taxonomyNodes.taxonomyId, filters.taxonomyId)];
     if (filters.gradeId) conditions.push(eq(taxonomyNodes.gradeId, filters.gradeId));
     if (filters.subjectId) conditions.push(eq(taxonomyNodes.subjectId, filters.subjectId));
     if (filters.type) conditions.push(eq(taxonomyNodes.type, filters.type));
@@ -42,13 +42,13 @@ export class NodesService {
   async getById(id: string, user: JwtPayload): Promise<TaxonomyNode> {
     const [node] = await this.db.select().from(taxonomyNodes).where(eq(taxonomyNodes.id, id));
     if (!node) throw new NotFoundException('Nodo no encontrado');
-    await this.curriculaService.getById(node.curriculumId, user);
+    await this.taxonomiesService.getById(node.taxonomyId, user);
     return node;
   }
 
   async create(dto: CreateTaxonomyNodeDto, user: JwtPayload) {
-    const curriculum = await this.curriculaService.getById(dto.curriculumId, user);
-    this.curriculaService.assertEditable(curriculum, user);
+    const taxonomy = await this.taxonomiesService.getById(dto.taxonomyId, user);
+    this.taxonomiesService.assertEditable(taxonomy, user);
 
     let depth = 0;
     if (dto.parentId) {
@@ -56,13 +56,13 @@ export class NodesService {
         .select({
           id: taxonomyNodes.id,
           depth: taxonomyNodes.depth,
-          curriculumId: taxonomyNodes.curriculumId,
+          taxonomyId: taxonomyNodes.taxonomyId,
         })
         .from(taxonomyNodes)
         .where(eq(taxonomyNodes.id, dto.parentId));
 
       if (!parent) throw new BadRequestException('Nodo padre no encontrado');
-      if (parent.curriculumId !== dto.curriculumId) {
+      if (parent.taxonomyId !== dto.taxonomyId) {
         throw new BadRequestException('El nodo padre pertenece a otro currículum');
       }
       depth = parent.depth + 1;
@@ -71,7 +71,7 @@ export class NodesService {
     const [created] = await this.db
       .insert(taxonomyNodes)
       .values({
-        curriculumId: dto.curriculumId,
+        taxonomyId: dto.taxonomyId,
         parentId: dto.parentId ?? null,
         type: dto.type,
         code: dto.code,
@@ -91,8 +91,8 @@ export class NodesService {
 
   async update(id: string, dto: UpdateTaxonomyNodeDto, user: JwtPayload) {
     const existing = await this.getById(id, user);
-    const curriculum = await this.curriculaService.getById(existing.curriculumId, user);
-    this.curriculaService.assertEditable(curriculum, user);
+    const taxonomy = await this.taxonomiesService.getById(existing.taxonomyId, user);
+    this.taxonomiesService.assertEditable(taxonomy, user);
 
     let nextDepth = existing.depth;
     if (dto.parentId !== undefined && dto.parentId !== existing.parentId) {
@@ -103,14 +103,14 @@ export class NodesService {
       if (dto.parentId === null) {
         nextDepth = 0;
       } else {
-        await this.assertNoCycle(id, dto.parentId, existing.curriculumId);
+        await this.assertNoCycle(id, dto.parentId, existing.taxonomyId);
         const [parent] = await this.db
-          .select({ depth: taxonomyNodes.depth, curriculumId: taxonomyNodes.curriculumId })
+          .select({ depth: taxonomyNodes.depth, taxonomyId: taxonomyNodes.taxonomyId })
           .from(taxonomyNodes)
           .where(eq(taxonomyNodes.id, dto.parentId));
 
         if (!parent) throw new BadRequestException('Nodo padre no encontrado');
-        if (parent.curriculumId !== existing.curriculumId) {
+        if (parent.taxonomyId !== existing.taxonomyId) {
           throw new BadRequestException('El nodo padre pertenece a otro currículum');
         }
         nextDepth = parent.depth + 1;
@@ -143,8 +143,8 @@ export class NodesService {
 
   async remove(id: string, user: JwtPayload, opts: { cascade?: boolean } = {}) {
     const existing = await this.getById(id, user);
-    const curriculum = await this.curriculaService.getById(existing.curriculumId, user);
-    this.curriculaService.assertEditable(curriculum, user);
+    const taxonomy = await this.taxonomiesService.getById(existing.taxonomyId, user);
+    this.taxonomiesService.assertEditable(taxonomy, user);
 
     const [{ tagCount }] = await this.db
       .select({ tagCount: sql<number>`count(*)::int` })
@@ -196,7 +196,7 @@ export class NodesService {
    * que `nodeId` (el que se está moviendo) NO aparece en la cadena.
    * Si aparece, hay ciclo.
    */
-  private async assertNoCycle(nodeId: string, newParentId: string, curriculumId: string) {
+  private async assertNoCycle(nodeId: string, newParentId: string, taxonomyId: string) {
     let current: string | null = newParentId;
     const visited = new Set<string>();
     while (current) {
@@ -209,7 +209,7 @@ export class NodesService {
       const [parent]: Array<{ parentId: string | null }> = await this.db
         .select({ parentId: taxonomyNodes.parentId })
         .from(taxonomyNodes)
-        .where(and(eq(taxonomyNodes.id, current), eq(taxonomyNodes.curriculumId, curriculumId)));
+        .where(and(eq(taxonomyNodes.id, current), eq(taxonomyNodes.taxonomyId, taxonomyId)));
       current = parent?.parentId ?? null;
     }
   }

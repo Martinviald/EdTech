@@ -4,7 +4,7 @@ import { and, eq, sql } from 'drizzle-orm';
 import { mineducCurriculumSchema } from '@soe/types';
 import type { Database } from '../client';
 import { grades, subjects } from '../schema/academic';
-import { curricula, taxonomyNodes } from '../schema/curriculum';
+import { taxonomies, taxonomyNodes } from '../schema/taxonomy';
 
 const DATASET_PATH = resolve(__dirname, '../../data/mineduc-2024.json');
 
@@ -15,13 +15,13 @@ export async function seedMineducTaxonomy(db: Database): Promise<void> {
   const data = mineducCurriculumSchema.parse(raw);
 
   const [mineduc] = await db
-    .select({ id: curricula.id })
-    .from(curricula)
-    .where(and(eq(curricula.type, 'mineduc'), eq(curricula.version, '2024')))
-    .orderBy(curricula.createdAt)
+    .select({ id: taxonomies.id })
+    .from(taxonomies)
+    .where(and(eq(taxonomies.type, 'mineduc'), eq(taxonomies.version, '2024')))
+    .orderBy(taxonomies.createdAt)
     .limit(1);
   if (!mineduc) {
-    throw new Error('MINEDUC 2024 curriculum row missing — run base seed first');
+    throw new Error('MINEDUC 2024 taxonomy row missing — run base seed first');
   }
 
   const subjectRows = await db
@@ -57,7 +57,7 @@ export async function seedMineducTaxonomy(db: Database): Promise<void> {
         const [axisRow] = await db
           .insert(taxonomyNodes)
           .values({
-            curriculumId: mineduc.id,
+            taxonomyId: mineduc.id,
             type: 'axis',
             code: axisCode,
             name: axisName,
@@ -67,7 +67,7 @@ export async function seedMineducTaxonomy(db: Database): Promise<void> {
             depth: 1,
           })
           .onConflictDoUpdate({
-            target: [taxonomyNodes.curriculumId, taxonomyNodes.code],
+            target: [taxonomyNodes.taxonomyId, taxonomyNodes.code],
             targetWhere: sql`${taxonomyNodes.code} IS NOT NULL`,
             set: {
               name: axisName,
@@ -90,7 +90,7 @@ export async function seedMineducTaxonomy(db: Database): Promise<void> {
           await db
             .insert(taxonomyNodes)
             .values({
-              curriculumId: mineduc.id,
+              taxonomyId: mineduc.id,
               parentId: axisRow.id,
               type: 'learning_objective',
               code: oaCode,
@@ -102,7 +102,7 @@ export async function seedMineducTaxonomy(db: Database): Promise<void> {
               depth: 2,
             })
             .onConflictDoUpdate({
-              target: [taxonomyNodes.curriculumId, taxonomyNodes.code],
+              target: [taxonomyNodes.taxonomyId, taxonomyNodes.code],
               targetWhere: sql`${taxonomyNodes.code} IS NOT NULL`,
               set: {
                 parentId: axisRow.id,

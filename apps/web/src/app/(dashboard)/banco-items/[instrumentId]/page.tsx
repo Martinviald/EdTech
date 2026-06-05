@@ -75,7 +75,7 @@ export default async function InstrumentDetailPage({ params }: PageProps) {
               href={'/banco-items' as Route}
               className="text-sm text-muted-foreground hover:text-foreground"
             >
-              Banco de Items
+              Banco de Instrumentos
             </Link>
             <span className="text-sm text-muted-foreground">/</span>
           </div>

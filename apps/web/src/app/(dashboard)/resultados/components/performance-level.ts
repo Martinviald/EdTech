@@ -66,3 +66,54 @@ export function formatAchievement(value: number | null): string {
   if (value === null || Number.isNaN(value)) return '—';
   return `${value.toFixed(1)}%`;
 }
+
+// ── Bandas de desempeño como datos (#2) ──────────────────────────────────────
+// El sistema ya no asume 4 niveles fijos. Cuando un instrumento/escala define
+// bandas configurables (SIMCE 3, Cambridge CEFR 6, etc.), la UI las deriva de
+// estos datos. Si no hay bandas, se cae a los 4 niveles DIA por defecto, de modo
+// que la vista actual (heatmap, distribution-bar, badges) NO cambia.
+
+/** Vista mínima de una banda de desempeño servida por la API. */
+export type PerformanceBandView = {
+  key: string;
+  label: string;
+  order: number;
+  /** Color de presentación: token Tailwind o hex. Opcional. */
+  color?: string | null;
+};
+
+/**
+ * Etiqueta de una banda. Prioriza la banda (dato); si no hay banda pero sí un
+ * `PerformanceLevel` DIA, usa el mapa estático; si no, 'Sin datos'.
+ */
+export function bandLabel(
+  band: PerformanceBandView | null | undefined,
+  fallbackLevel: PerformanceLevel | null = null,
+): string {
+  if (band) return band.label;
+  return performanceLevelLabel(fallbackLevel);
+}
+
+/**
+ * Color (hex) de una banda para charts. Si la banda trae un color hex lo usa; si
+ * no, cae al color del nivel DIA equivalente, o a un gris neutro.
+ */
+export function bandChartColor(
+  band: PerformanceBandView | null | undefined,
+  fallbackLevel: PerformanceLevel | null = null,
+): string {
+  if (band?.color && band.color.startsWith('#')) return band.color;
+  if (fallbackLevel) return PERFORMANCE_LEVEL_CHART_COLOR[fallbackLevel];
+  return '#94a3b8'; // slate-400 neutro
+}
+
+/**
+ * ¿La lista de bandas corresponde al esquema DIA por defecto (4 niveles)? Permite
+ * a los consumidores decidir si renderizan con el mapa estático o con datos.
+ */
+export function isDefaultDiaBands(bands: PerformanceBandView[] | null | undefined): boolean {
+  if (!bands || bands.length !== PERFORMANCE_LEVEL_ORDER.length) return false;
+  const keys = bands.map((b) => b.key).sort();
+  const expected = [...PERFORMANCE_LEVEL_ORDER].sort();
+  return keys.every((k, i) => k === expected[i]);
+}

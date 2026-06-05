@@ -38,7 +38,7 @@ import {
 } from '@soe/types';
 import { createDbClient } from '../client';
 import { classGroups, grades, subjectClasses, subjects } from '../schema/academic';
-import { curricula, taxonomyNodes } from '../schema/curriculum';
+import { taxonomies, taxonomyNodes } from '../schema/taxonomy';
 import { academicYears } from '../schema/organizations';
 import { students, studentEnrollments } from '../schema/students';
 import { teacherAssignments } from '../schema/users';
@@ -137,6 +137,57 @@ const MAT_SKILL_CYCLE = [
   'DIA-MATH-SK-RES', 'DIA-MATH-SK-MOD', 'DIA-MATH-SK-REP', 'DIA-MATH-SK-ARG',
   'DIA-MATH-SK-RES', 'DIA-MATH-SK-MOD',
 ];
+
+// Banco de enunciados realistas por posición (alineado a LECT/MAT_SKILL_CYCLE).
+// La alternativa correcta está en la clave KEYS[idx % 4] (A,B,C,D,A,B,...), igual
+// que el correctKey que ya usa el seed para generar respuestas y notas.
+type SeedQuestion = { stem: string; options: Record<'A' | 'B' | 'C' | 'D', string> };
+
+// Lectura — basadas en un texto narrativo breve ("Pedro y el perro Tomás").
+const LECT_QUESTIONS: SeedQuestion[] = [
+  { stem: 'Según el texto, ¿dónde encontró Pedro al perro?', options: { A: 'En el parque', B: 'En la escuela', C: 'En la playa', D: 'En el mercado' } },
+  { stem: '¿Por qué Pedro decidió quedarse con el perro?', options: { A: 'Porque era de raza fina', B: 'Porque estaba solo y necesitaba ayuda', C: 'Porque se lo pidieron sus amigos', D: 'Porque quería venderlo' } },
+  { stem: '¿Cuál es el propósito principal del texto?', options: { A: 'Explicar cómo cuidar perros', B: 'Describir un parque', C: 'Mostrar el valor de la compasión', D: 'Enseñar a entrenar mascotas' } },
+  { stem: '¿Qué nombre le puso Pedro al perro?', options: { A: 'Rocky', B: 'Max', C: 'Bobby', D: 'Tomás' } },
+  { stem: "¿Qué quiere decir la frase 'el perro movía la cola sin parar'?", options: { A: 'Que estaba feliz', B: 'Que tenía frío', C: 'Que estaba enojado', D: 'Que quería irse' } },
+  { stem: '¿Qué enseñanza nos deja la historia?', options: { A: 'No conviene tener mascotas', B: 'Ayudar a otros nos hace bien', C: 'Los parques son peligrosos', D: 'Los perros son difíciles de cuidar' } },
+  { stem: '¿En qué momento del día ocurre la historia?', options: { A: 'En la noche', B: 'Al mediodía', C: 'En la mañana', D: 'En la madrugada' } },
+  { stem: '¿Cómo se sentía Pedro al final del texto?', options: { A: 'Aburrido', B: 'Asustado', C: 'Triste', D: 'Contento' } },
+  { stem: 'Si tú fueras Pedro, ¿qué habrías hecho?', options: { A: 'Ayudar al perro, como él', B: 'Ignorarlo y seguir', C: 'Pedir que se lo llevaran', D: 'Asustarlo para que se fuera' } },
+  { stem: '¿Con quién vivía Pedro?', options: { A: 'Con sus abuelos', B: 'Con su familia', C: 'Solo', D: 'Con sus amigos' } },
+];
+
+// Matemática — problemas de 2°/3° básico (RES/MOD/REP/ARG).
+const MAT_QUESTIONS: SeedQuestion[] = [
+  { stem: 'María tiene 75 láminas y le regalan 50 más. ¿Cuántas tiene en total?', options: { A: '125', B: '25', C: '100', D: '135' } },
+  { stem: 'Hay 3 bolsas con 6 manzanas cada una. ¿Qué operación da el total de manzanas?', options: { A: '3 + 6', B: '3 × 6', C: '6 − 3', D: '6 ÷ 3' } },
+  { stem: '¿Qué figura tiene 4 lados iguales y 4 ángulos rectos?', options: { A: 'El triángulo', B: 'El rectángulo', C: 'El cuadrado', D: 'El círculo' } },
+  { stem: 'Pedro dice que 5 filas de 4 sillas son 20 sillas. ¿Cuál es la mejor justificación?', options: { A: 'Porque 5 + 4 = 9', B: 'Porque 5 − 4 = 1', C: 'Porque 20 ÷ 4 = 5', D: 'Porque 5 × 4 = 20' } },
+  { stem: 'Ana tenía 90 stickers y regaló 35. ¿Cuántos le quedan?', options: { A: '55', B: '125', C: '65', D: '45' } },
+  { stem: 'Un cuaderno cuesta $500. ¿Qué operación da el costo de 4 cuadernos?', options: { A: '500 + 4', B: '500 × 4', C: '500 ÷ 4', D: '500 − 4' } },
+  { stem: '¿Cuál es una propiedad correcta del cubo?', options: { A: 'Tiene 4 caras', B: 'Tiene 5 vértices', C: 'Tiene 6 caras cuadradas', D: 'Tiene 3 aristas' } },
+  { stem: '¿Por qué 2 kilogramos equivalen a 2.000 gramos?', options: { A: 'Porque 1 kg = 100 g', B: 'Porque 1 kg = 10 g', C: 'Porque 1 kg = 500 g', D: 'Porque 1 kg = 1.000 g' } },
+  { stem: 'Si hay 3 botellas de 500 ml, ¿cuántos ml hay en total?', options: { A: '1.500 ml', B: '800 ml', C: '1.000 ml', D: '2.000 ml' } },
+  { stem: 'Pedro tiene 96 figuritas y las reparte en partes iguales entre 2 amigos. ¿Qué operación usa?', options: { A: '96 × 2', B: '96 ÷ 2', C: '96 + 2', D: '96 − 2' } },
+];
+
+/** Construye el content del ítem con enunciado + alternativas reales. */
+function buildItemContent(
+  bank: SeedQuestion[],
+  idx: number,
+  position: number,
+  correctKey: string,
+  fallbackLabel: string,
+) {
+  const q = bank[idx];
+  const stem = q?.stem ?? `${fallbackLabel} · pregunta ${position}`;
+  const alternatives = KEYS.map((k) => ({
+    key: k,
+    text: q?.options[k] ?? `Alternativa ${k}`,
+    isCorrect: k === correctKey,
+  }));
+  return { stem, correctKey, alternatives };
+}
 // Dificultad base por habilidad (probabilidad de acierto antes de ajustes).
 // Calibrado para un colegio "con brechas": LOC y REP relativamente sanas, pero
 // REF / MOD / ARG quedan por debajo del umbral crítico (<50% → critical_skill)
@@ -192,8 +243,9 @@ function answerFor(
 }
 
 async function main() {
-  const databaseUrl = process.env.DATABASE_URL;
-  if (!databaseUrl) throw new Error('DATABASE_URL is required');
+  // Rol privilegiado (bypassa RLS) para cargar datos sin contexto de org.
+  const databaseUrl = process.env.DATABASE_ADMIN_URL ?? process.env.DATABASE_URL;
+  if (!databaseUrl) throw new Error('DATABASE_ADMIN_URL o DATABASE_URL es requerido');
   const db = createDbClient(databaseUrl);
 
   // ── 0. Prerrequisitos del seed base ────────────────────────────────────────
@@ -202,11 +254,11 @@ async function main() {
   const grade3 = gradeRows.find((g) => g.code === '3RD_BASIC');
   const [langSubject] = await db.select().from(subjects).where(eq(subjects.code, 'LANG'));
   const [mathSubject] = await db.select().from(subjects).where(eq(subjects.code, 'MATH'));
-  const [diaCurriculum] = await db
+  const [diaTaxonomy] = await db
     .select()
-    .from(curricula)
-    .where(and(eq(curricula.type, 'dia'), eq(curricula.version, '2025')));
-  if (!grade2 || !grade3 || !langSubject || !mathSubject || !diaCurriculum) {
+    .from(taxonomies)
+    .where(and(eq(taxonomies.type, 'dia'), eq(taxonomies.version, '2025')));
+  if (!grade2 || !grade3 || !langSubject || !mathSubject || !diaTaxonomy) {
     throw new Error(
       'Faltan prerrequisitos. Corre primero el seed base: pnpm --filter @soe/db db:seed',
     );
@@ -214,7 +266,7 @@ async function main() {
   const diaNodes = await db
     .select()
     .from(taxonomyNodes)
-    .where(eq(taxonomyNodes.curriculumId, diaCurriculum.id));
+    .where(eq(taxonomyNodes.taxonomyId, diaTaxonomy.id));
   const nodeByCode = new Map(diaNodes.map((n) => [n.code as string, n.id]));
   for (const code of [...new Set([...LECT_SKILL_CYCLE, ...MAT_SKILL_CYCLE])]) {
     if (!nodeByCode.has(code)) {
@@ -358,7 +410,7 @@ async function main() {
     {
       id: INST_LECT,
       orgId: DEMO_ORG_ID,
-      curriculumId: diaCurriculum.id,
+      taxonomyId: diaTaxonomy.id,
       name: 'DIA Lectura 2° Básico',
       shortName: 'DIA Lectura 2°B',
       type: 'dia',
@@ -372,7 +424,7 @@ async function main() {
     {
       id: INST_MAT,
       orgId: DEMO_ORG_ID,
-      curriculumId: diaCurriculum.id,
+      taxonomyId: diaTaxonomy.id,
       name: 'DIA Matemática 2° Básico',
       shortName: 'DIA Mat 2°B',
       type: 'dia',
@@ -397,7 +449,7 @@ async function main() {
       out.push({ id, position, nodeId, correctKey });
       itemRows.push({
         id, orgId: DEMO_ORG_ID, instrumentId: INST_LECT, position, type: 'multiple_choice',
-        content: { stem: `Lectura · pregunta ${position}`, correctKey, alternatives: KEYS.map((k) => ({ key: k, text: `Alternativa ${k}` })) },
+        content: buildItemContent(LECT_QUESTIONS, idx, position, correctKey, 'Lectura'),
         scoringConfig: { points: 1, partialCredit: false }, status: 'published', source: 'official',
       });
       tagRows.push({ id: uid(0x630 + position), itemId: id, nodeId, tagType: 'primary', confidence: '1.00', taggedBy: 'human' });
@@ -416,7 +468,7 @@ async function main() {
       out.push({ id, position, nodeId, correctKey });
       itemRows.push({
         id, orgId: DEMO_ORG_ID, instrumentId: INST_MAT, position, type: 'multiple_choice',
-        content: { stem: `Matemática · pregunta ${position}`, correctKey, alternatives: KEYS.map((k) => ({ key: k, text: `Alternativa ${k}` })) },
+        content: buildItemContent(MAT_QUESTIONS, idx, position, correctKey, 'Matemática'),
         scoringConfig: { points: 1, partialCredit: false }, status: 'published', source: 'official',
       });
       tagRows.push({ id: uid(0x6b0 + position), itemId: id, nodeId, tagType: 'primary', confidence: '1.00', taggedBy: 'human' });

@@ -24,6 +24,22 @@ export type GradingScaleParams = {
   };
 };
 
+// ── Thresholds de nivel de desempeño ─────────────────────────────────────────
+// Umbrales (0..1) por defecto alineados al estándar DIA (4 niveles). ÚNICO punto
+// de verdad: lo consumen `percentageToPerformanceLevel` aquí, y los servicios
+// `dashboards`/`heatmap` en la API. No duplicar literales 0.4/0.7/0.85.
+export const DEFAULT_PERFORMANCE_THRESHOLDS = {
+  elementary: 0.4,
+  adequate: 0.7,
+  advanced: 0.85,
+} as const;
+
+export type PerformanceThresholds = {
+  elementary: number;
+  adequate: number;
+  advanced: number;
+};
+
 // Escala por defecto cuando el instrumento no tiene grading_scale asignada.
 // Convención chilena: 1.0..7.0, aprobación con 60% de logro → 4.0.
 export const DEFAULT_GRADING_SCALE: GradingScaleParams = {
@@ -34,13 +50,50 @@ export const DEFAULT_GRADING_SCALE: GradingScaleParams = {
   passingThreshold: 0.6,
 };
 
+// ── Config tipada de escalas escaladas (paes_scaled / irt_based) ─────────────
+// Las fórmulas NO se hardcodean: se leen de `scale.config`. Si la config falta,
+// se documenta el fallback (linear_chilean) en cada conversor.
+
+/** Punto de anclaje (porcentaje de logro 0..1 → puntaje escalado). */
+export type ScaledAnchor = { p: number; score: number };
+
+/** Config para `paes_scaled`: anclajes para interpolación lineal por tramos. */
+export type PaesScaledConfig = {
+  // Anclajes ordenables por `p`. Ej.: [{p:0,score:150},{p:1,score:1000}].
+  anchors?: ScaledAnchor[];
+  // Alternativa simple si no hay anchors: extremos del rango escalado.
+  minScore?: number;
+  maxScore?: number;
+};
+
 /**
- * Convierte un porcentaje de logro (0..1) a nota numérica.
+ * Config para `irt_based`. El % de logro (proxy de θ) se mapea a un puntaje
+ * escalado con `scaledScore = mean + theta * sd`, donde `theta` se deriva del
+ * porcentaje vía la inversa logística centrada (logit). Parámetros configurables.
+ */
+export type IrtScaledConfig = {
+  mean?: number; // media de la escala (ej. 500 IRT, 50 stanine*10)
+  sd?: number; // desviación estándar de la escala (ej. 100)
+  // Factor que escala el logit a unidades de θ. Default 1.
+  thetaScale?: number;
+  // Recorte del puntaje resultante.
+  minScore?: number;
+  maxScore?: number;
+};
+
+/**
+ * Convierte un porcentaje de logro (0..1) a nota/puntaje numérico.
  * - `linear_chilean`: lineal por tramos con quiebre en passingThreshold.
  *   - 0..threshold → minGrade..passingGrade
  *   - threshold..1 → passingGrade..maxGrade
  * - `percentage`: devuelve percentage * 100 (escala 0-100).
- * - otros: linear_chilean como fallback.
+ * - `paes_scaled`: interpolación por anclajes de `config.anchors` (o min/maxScore).
+ * - `irt_based`: mapea el % vía logit a un puntaje `mean + θ·sd` de `config`.
+ * - `custom`/otros: linear_chilean como fallback.
+ *
+ * Para `paes_scaled`/`irt_based` el valor devuelto es el puntaje escalado (no la
+ * nota chilena). Si la config necesaria falta, cae a `linear_chilean` (fallback
+ * documentado) para no romper el flujo.
  */
 export function percentageToGrade(percentage: number, scale: GradingScaleParams): number {
   if (!Number.isFinite(percentage)) return scale.minGrade;
@@ -49,9 +102,11 @@ export function percentageToGrade(percentage: number, scale: GradingScaleParams)
   switch (scale.type) {
     case 'percentage':
       return roundGrade(p * 100);
-    case 'linear_chilean':
-    case 'irt_based':
     case 'paes_scaled':
+      return paesScaledScore(p, scale);
+    case 'irt_based':
+      return irtScaledScore(p, scale);
+    case 'linear_chilean':
     case 'custom':
     default:
       return linearChileanGrade(p, scale);
@@ -70,6 +125,62 @@ function linearChileanGrade(p: number, scale: GradingScaleParams): number {
   }
   const ratio = (p - passingThreshold) / (1 - passingThreshold);
   return roundGrade(passingGrade + ratio * (maxGrade - passingGrade));
+}
+
+/**
+ * PAES (u otra escala lineal por tramos). Interpola `p` (0..1) sobre los anclajes
+ * `config.anchors` (ordenados por `p`). Sin anchors, usa `config.minScore`/
+ * `config.maxScore` como recta. Sin config → fallback `linear_chilean`.
+ */
+function paesScaledScore(p: number, scale: GradingScaleParams): number {
+  const cfg = (scale.config ?? undefined) as PaesScaledConfig | undefined;
+  const anchors = cfg?.anchors;
+  if (anchors && anchors.length >= 2) {
+    return roundGrade(interpolateAnchors(p, anchors));
+  }
+  if (typeof cfg?.minScore === 'number' && typeof cfg?.maxScore === 'number') {
+    return roundGrade(cfg.minScore + p * (cfg.maxScore - cfg.minScore));
+  }
+  // Fallback documentado: sin config de escalado, comportamiento chileno previo.
+  return linearChileanGrade(p, scale);
+}
+
+/** Interpolación lineal por tramos sobre anclajes ordenados por `p`. */
+function interpolateAnchors(p: number, anchors: ScaledAnchor[]): number {
+  const sorted = [...anchors].sort((a, b) => a.p - b.p);
+  if (p <= sorted[0]!.p) return sorted[0]!.score;
+  const last = sorted[sorted.length - 1]!;
+  if (p >= last.p) return last.score;
+  for (let i = 0; i < sorted.length - 1; i++) {
+    const lo = sorted[i]!;
+    const hi = sorted[i + 1]!;
+    if (p >= lo.p && p <= hi.p) {
+      const span = hi.p - lo.p;
+      const ratio = span === 0 ? 0 : (p - lo.p) / span;
+      return lo.score + ratio * (hi.score - lo.score);
+    }
+  }
+  return last.score;
+}
+
+/**
+ * IRT: aproxima θ a partir del % de logro con la inversa logística (logit) y lo
+ * mapea a la escala `mean + θ·sd`. `p` se recorta a (ε, 1-ε) para evitar ±∞.
+ * Sin `mean`/`sd` en config → fallback `linear_chilean`.
+ */
+function irtScaledScore(p: number, scale: GradingScaleParams): number {
+  const cfg = (scale.config ?? undefined) as IrtScaledConfig | undefined;
+  if (cfg == null || typeof cfg.mean !== 'number' || typeof cfg.sd !== 'number') {
+    return linearChileanGrade(p, scale);
+  }
+  const eps = 1e-6;
+  const clamped = Math.max(eps, Math.min(1 - eps, p));
+  const logit = Math.log(clamped / (1 - clamped));
+  const theta = logit * (cfg.thetaScale ?? 1);
+  let score = cfg.mean + theta * cfg.sd;
+  if (typeof cfg.minScore === 'number') score = Math.max(cfg.minScore, score);
+  if (typeof cfg.maxScore === 'number') score = Math.min(cfg.maxScore, score);
+  return roundGrade(score);
 }
 
 function roundGrade(g: number): number {
@@ -97,9 +208,18 @@ export function percentageToPerformanceLevel(
     | undefined;
   const direct = scale?.performanceThresholds;
   const thresholds = {
-    elementary: direct?.elementary ?? cfg?.performanceThresholds?.elementary ?? 0.4,
-    adequate: direct?.adequate ?? cfg?.performanceThresholds?.adequate ?? 0.7,
-    advanced: direct?.advanced ?? cfg?.performanceThresholds?.advanced ?? 0.85,
+    elementary:
+      direct?.elementary ??
+      cfg?.performanceThresholds?.elementary ??
+      DEFAULT_PERFORMANCE_THRESHOLDS.elementary,
+    adequate:
+      direct?.adequate ??
+      cfg?.performanceThresholds?.adequate ??
+      DEFAULT_PERFORMANCE_THRESHOLDS.adequate,
+    advanced:
+      direct?.advanced ??
+      cfg?.performanceThresholds?.advanced ??
+      DEFAULT_PERFORMANCE_THRESHOLDS.advanced,
   };
   if (p < thresholds.elementary) return 'insufficient';
   if (p < thresholds.adequate) return 'elementary';
@@ -138,6 +258,10 @@ export type StudentAggregateResult = {
   grade: number;
   performanceLevel: PerformanceLevel;
   isComplete: boolean;
+  // Métrica raíz extendida (#3). Opcionales para no romper consumidores DIA:
+  // un instrumento `percentage`/`linear_chilean` los deja en null/undefined.
+  scaledScore?: number | null;
+  bandLabel?: string | null;
 };
 
 export type SkillAggregateResult = {
@@ -148,6 +272,17 @@ export type SkillAggregateResult = {
   percentage: number; // 0..1
   performanceLevel: PerformanceLevel;
 };
+
+/**
+ * Score efectivo de una respuesta: `finalScore` tiene precedencia sobre
+ * `rawScore` cuando existe (CLAUDE.md §8.3 — el final_score es el que cuenta).
+ * Respuestas pendientes (`finalScore`/`rawScore` ambos null) cuentan 0.
+ */
+function effectiveScore(r: Pick<ResponseForCalculation, 'finalScore' | 'rawScore'>): number {
+  if (r.finalScore != null) return r.finalScore;
+  if (r.rawScore != null) return r.rawScore;
+  return 0;
+}
 
 /**
  * Agrega `responses` por alumno y devuelve los totales (assessment_results).
@@ -166,12 +301,26 @@ export function aggregateStudentResults(
 
   const results: StudentAggregateResult[] = [];
   for (const [studentId, rows] of byStudent) {
-    const totalScore = rows.reduce((acc, r) => acc + (r.rawScore ?? 0), 0);
-    const maxScore = rows.reduce((acc, r) => acc + r.maxScore, 0);
+    // Los ítems pendientes (`isCorrect === null`: no auto-corregibles, esperan
+    // corrección humana/IA) NO cuentan para el % — ni en numerador ni en
+    // denominador — para no diluir el logro de los ítems efectivamente evaluados.
+    // Sí marcan `isComplete = false`. Misma semántica que `aggregateSkillResults`,
+    // aplicada en la fuente para que TODOS los consumidores (ingesta de respuestas
+    // y recálculo de resultados) sean consistentes sin replicar el filtro (DRY).
+    const scored = rows.filter((r) => r.isCorrect !== null);
+    const totalScore = scored.reduce((acc, r) => acc + effectiveScore(r), 0);
+    const maxScore = scored.reduce((acc, r) => acc + r.maxScore, 0);
     const percentage = maxScore > 0 ? totalScore / maxScore : 0;
     const grade = percentageToGrade(percentage, scale);
     const performanceLevel = percentageToPerformanceLevel(percentage, scale);
     const isComplete = rows.every((r) => r.isCorrect !== null);
+
+    // Métrica raíz extendida (#3): para escalas `paes_scaled`/`irt_based`,
+    // `grade` ya ES el puntaje escalado → exponerlo también como `scaledScore`.
+    // `bandLabel` se deriva de `config.bands` si la escala las define.
+    const isScaled = scale.type === 'paes_scaled' || scale.type === 'irt_based';
+    const scaledScore = isScaled ? grade : null;
+    const bandLabel = resolveBandLabel(percentage, scale);
 
     results.push({
       studentId,
@@ -181,9 +330,27 @@ export function aggregateStudentResults(
       grade,
       performanceLevel,
       isComplete,
+      scaledScore,
+      bandLabel,
     });
   }
   return results;
+}
+
+/** Banda de desempeño (etiqueta) según `config.bands`, si la escala las define. */
+export type BandThreshold = { label: string; minThreshold: number };
+
+function resolveBandLabel(percentage: number, scale: GradingScaleParams): string | null {
+  const cfg = (scale.config ?? undefined) as { bands?: BandThreshold[] } | undefined;
+  const bands = cfg?.bands;
+  if (!bands || bands.length === 0) return null;
+  const p = Math.max(0, Math.min(1, percentage));
+  // Mayor minThreshold que el alumno alcanza gana.
+  const sorted = [...bands].sort((a, b) => b.minThreshold - a.minThreshold);
+  for (const b of sorted) {
+    if (p >= b.minThreshold) return b.label;
+  }
+  return sorted[sorted.length - 1]?.label ?? null;
 }
 
 /**
@@ -196,7 +363,17 @@ export function aggregateSkillResults(
   const key = (studentId: string, nodeId: string) => `${studentId}__${nodeId}`;
   const byKey = new Map<
     string,
-    { studentId: string; nodeId: string; correctCount: number; totalCount: number }
+    {
+      studentId: string;
+      nodeId: string;
+      // correctCount/totalCount se mantienen como conteo de ítems (para las
+      // columnas integer de skill_results y compatibilidad). El % real se
+      // pondera por puntaje/maxScore (#7/#9), no por conteo binario.
+      correctCount: number;
+      totalCount: number;
+      scoreSum: number; // Σ effectiveScore de ítems corregidos
+      maxSum: number; // Σ maxScore de ítems corregidos (peso por ítem)
+    }
   >();
 
   for (const r of responses) {
@@ -207,16 +384,26 @@ export function aggregateSkillResults(
         nodeId,
         correctCount: 0,
         totalCount: 0,
+        scoreSum: 0,
+        maxSum: 0,
       };
       acc.totalCount += 1;
       if (r.isCorrect === true) acc.correctCount += 1;
+      // Ítems pendientes (isCorrect === null) NO contaminan el %: se excluyen
+      // del denominador ponderado. Sólo se promedian los ítems corregidos.
+      if (r.isCorrect !== null && r.maxScore > 0) {
+        acc.scoreSum += effectiveScore(r);
+        acc.maxSum += r.maxScore;
+      }
       byKey.set(k, acc);
     }
   }
 
   const results: SkillAggregateResult[] = [];
   for (const v of byKey.values()) {
-    const percentage = v.totalCount > 0 ? v.correctCount / v.totalCount : 0;
+    // % ponderado por maxScore por ítem (respeta finalScore). Si no hay ítems
+    // corregidos con maxScore (todo pendiente / maxScore 0), cae a 0.
+    const percentage = v.maxSum > 0 ? v.scoreSum / v.maxSum : 0;
     results.push({
       studentId: v.studentId,
       nodeId: v.nodeId,

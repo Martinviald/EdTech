@@ -52,7 +52,7 @@ export default async function BancoItemsPage({ searchParams }: PageProps) {
   return (
     <PageContainer>
       <PageHeader
-        title="Banco de Items"
+        title="Banco de Instrumentos"
         description="Instrumentos de evaluación, preguntas y pautas oficiales."
         actions={
           canCreate ? (

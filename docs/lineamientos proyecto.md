@@ -53,7 +53,7 @@ Se ha seleccionado un stack full-TypeScript para maximizar la velocidad de desar
 
 - **Motor Principal:** PostgreSQL.
 - **ORM:** Drizzle ORM (Elegido sobre Prisma/TypeORM por su control SQL nativo, ligereza en entornos serverless y soporte nativo JSONB).
-- **Multi-tenancy:** Implementación estricta de RLS (_Row Level Security_) para garantizar el aislamiento de datos por colegio.
+- **Multi-tenancy:** Implementación estricta de RLS (_Row Level Security_) para garantizar el aislamiento de datos por colegio. Las políticas viven en `packages/db/sql/rls-policies.sql` (no en el schema Drizzle) y se re-aplican en cada `db:migrate`, por lo que no se pierden al regenerar migraciones. Toda query de la API a tablas con RLS corre dentro de `withOrgContext`. Ver `packages/db/README.md`.
 
 ### 3.3. IA, Ingesta e Infraestructura
 

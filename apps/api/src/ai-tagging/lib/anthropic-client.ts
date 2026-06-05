@@ -9,7 +9,7 @@ import { Injectable, Logger } from '@nestjs/common';
  */
 
 // Dynamic import type to avoid hard crash if the SDK package isn't installed yet.
-// eslint-disable-next-line @typescript-eslint/consistent-type-imports
+ 
 type Anthropic = import('@anthropic-ai/sdk').default;
 
 @Injectable()
