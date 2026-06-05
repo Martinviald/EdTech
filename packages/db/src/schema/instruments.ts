@@ -10,9 +10,11 @@ import {
 } from 'drizzle-orm/pg-core';
 import { relations } from 'drizzle-orm';
 import {
+  attachmentKindEnum,
   gradingScaleTypeEnum,
   instrumentStatusEnum,
   instrumentTypeEnum,
+  passageFormatEnum,
   sectionTypeEnum,
 } from './enums';
 import { organizations } from './organizations';
@@ -67,7 +69,29 @@ export const instrumentSections = pgTable('instrument_sections', {
   maxPoints: decimal('max_points', { precision: 7, scale: 2 }),
   timeLimitMin: integer('time_limit_min'),
   instructions: text('instructions'),
+  // ── Pasaje / texto base de la sección (comprensión lectora) ──
+  passageTitle: text('passage_title'),
+  passageText: text('passage_text'),
+  passageFormat: passageFormatEnum('passage_format'), // null si la sección no tiene pasaje
   config: jsonb('config').$type<Record<string, unknown>>().default({}),
+});
+
+export const sectionAttachments = pgTable('section_attachments', {
+  id: uuid('id').defaultRandom().primaryKey(),
+  sectionId: uuid('section_id')
+    .notNull()
+    .references(() => instrumentSections.id, { onDelete: 'cascade' }),
+  kind: attachmentKindEnum('kind').notNull(),
+  order: integer('order').default(0).notNull(),
+  storageKey: text('storage_key'), // clave S3 (null mientras no se sube el archivo)
+  url: text('url'), // url pública/externa opcional
+  fileName: text('file_name'),
+  mimeType: text('mime_type'),
+  sizeBytes: integer('size_bytes'),
+  note: text('note'), // descripción (mapea `passage.attachments[].note` del JSON)
+  meta: jsonb('meta').$type<Record<string, unknown>>().default({}),
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+  updatedAt: timestamp('updated_at').defaultNow().notNull(),
 });
 
 export const instrumentsRelations = relations(instruments, ({ one, many }) => ({
@@ -85,10 +109,18 @@ export const instrumentsRelations = relations(instruments, ({ one, many }) => ({
   sections: many(instrumentSections),
 }));
 
-export const instrumentSectionsRelations = relations(instrumentSections, ({ one }) => ({
+export const instrumentSectionsRelations = relations(instrumentSections, ({ one, many }) => ({
   instrument: one(instruments, {
     fields: [instrumentSections.instrumentId],
     references: [instruments.id],
+  }),
+  attachments: many(sectionAttachments),
+}));
+
+export const sectionAttachmentsRelations = relations(sectionAttachments, ({ one }) => ({
+  section: one(instrumentSections, {
+    fields: [sectionAttachments.sectionId],
+    references: [instrumentSections.id],
   }),
 }));
 
@@ -98,3 +130,5 @@ export type Instrument = typeof instruments.$inferSelect;
 export type NewInstrument = typeof instruments.$inferInsert;
 export type InstrumentSection = typeof instrumentSections.$inferSelect;
 export type NewInstrumentSection = typeof instrumentSections.$inferInsert;
+export type SectionAttachment = typeof sectionAttachments.$inferSelect;
+export type NewSectionAttachment = typeof sectionAttachments.$inferInsert;

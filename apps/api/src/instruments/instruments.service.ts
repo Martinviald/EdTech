@@ -4,13 +4,16 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { and, count, eq, isNull, or } from 'drizzle-orm';
+import { and, count, eq, inArray, isNull, or } from 'drizzle-orm';
 import {
   instruments,
   instrumentSections,
+  sectionAttachments,
   type Instrument,
+  type InstrumentSection,
+  type NewSectionAttachment,
 } from '@soe/db';
-import { userHasRole } from '@soe/types';
+import { userHasRole, type PassageDto, type SectionAttachmentInputDto } from '@soe/types';
 import type { JwtPayload } from '../auth/jwt-payload.types';
 import { InjectDb, type Database } from '../database/database.types';
 import type {
@@ -20,6 +23,14 @@ import type {
   CreateSectionDto,
   UpdateSectionDto,
 } from './dto/instrument.dto';
+
+/** Cliente transaccional de Drizzle (mismo shape que `Database` dentro de un `.transaction`). */
+type Tx = Parameters<Parameters<Database['transaction']>[0]>[0];
+
+/** Sección con sus adjuntos poblados (API shape). */
+type SectionWithAttachments = InstrumentSection & {
+  attachments: (typeof sectionAttachments.$inferSelect)[];
+};
 
 @Injectable()
 export class InstrumentsService {
@@ -78,14 +89,16 @@ export class InstrumentsService {
     if (!row) throw new NotFoundException('Instrumento no encontrado');
     this.assertVisible(row, user);
 
-    // Populate sections
+    // Populate sections (con pasaje + adjuntos)
     const sections = await this.db
       .select()
       .from(instrumentSections)
       .where(eq(instrumentSections.instrumentId, id))
       .orderBy(instrumentSections.order);
 
-    return { ...row, sections };
+    const withAttachments = await this.withAttachments(sections);
+
+    return { ...row, sections: withAttachments };
   }
 
   async create(dto: CreateInstrumentDto, user: JwtPayload) {
@@ -117,20 +130,30 @@ export class InstrumentsService {
 
     if (!created) throw new BadRequestException('No se pudo crear el instrumento');
 
-    // Create inline sections if provided
+    // Create inline sections if provided (sección + pasaje + adjuntos, atómico)
     if (dto.sections?.length) {
-      for (const section of dto.sections) {
-        await this.db.insert(instrumentSections).values({
-          instrumentId: created.id,
-          name: section.name,
-          type: section.type,
-          order: section.order,
-          maxPoints: section.maxPoints ?? null,
-          timeLimitMin: section.timeLimitMin ?? null,
-          instructions: section.instructions ?? null,
-          config: section.config ?? {},
-        });
-      }
+      await this.db.transaction(async (tx) => {
+        for (const section of dto.sections!) {
+          const [createdSection] = await tx
+            .insert(instrumentSections)
+            .values({
+              instrumentId: created.id,
+              name: section.name,
+              type: section.type,
+              order: section.order,
+              maxPoints: section.maxPoints ?? null,
+              timeLimitMin: section.timeLimitMin ?? null,
+              instructions: section.instructions ?? null,
+              ...this.passageColumns(section.passage),
+              config: section.config ?? {},
+            })
+            .returning({ id: instrumentSections.id });
+
+          if (createdSection) {
+            await this.insertAttachments(tx, createdSection.id, section.attachments);
+          }
+        }
+      });
     }
 
     return this.getById(created.id, user);
@@ -185,33 +208,42 @@ export class InstrumentsService {
     // Validate instrument exists and is visible
     await this.getByIdRaw(instrumentId, user);
 
-    return this.db
+    const sections = await this.db
       .select()
       .from(instrumentSections)
       .where(eq(instrumentSections.instrumentId, instrumentId))
       .orderBy(instrumentSections.order);
+
+    return this.withAttachments(sections);
   }
 
   async createSection(instrumentId: string, dto: CreateSectionDto, user: JwtPayload) {
     const instrument = await this.getByIdRaw(instrumentId);
     this.assertEditable(instrument, user);
 
-    const [created] = await this.db
-      .insert(instrumentSections)
-      .values({
-        instrumentId,
-        name: dto.name,
-        type: dto.type,
-        order: dto.order,
-        maxPoints: dto.maxPoints ?? null,
-        timeLimitMin: dto.timeLimitMin ?? null,
-        instructions: dto.instructions ?? null,
-        config: dto.config ?? {},
-      })
-      .returning();
+    const created = await this.db.transaction(async (tx) => {
+      const [row] = await tx
+        .insert(instrumentSections)
+        .values({
+          instrumentId,
+          name: dto.name,
+          type: dto.type,
+          order: dto.order,
+          maxPoints: dto.maxPoints ?? null,
+          timeLimitMin: dto.timeLimitMin ?? null,
+          instructions: dto.instructions ?? null,
+          ...this.passageColumns(dto.passage),
+          config: dto.config ?? {},
+        })
+        .returning();
 
-    if (!created) throw new BadRequestException('No se pudo crear la sección');
-    return created;
+      if (!row) throw new BadRequestException('No se pudo crear la sección');
+
+      await this.insertAttachments(tx, row.id, dto.attachments);
+      return row;
+    });
+
+    return this.getSectionWithAttachments(created.id);
   }
 
   async updateSection(
@@ -242,15 +274,27 @@ export class InstrumentsService {
     if (dto.maxPoints !== undefined) updateData.maxPoints = dto.maxPoints;
     if (dto.timeLimitMin !== undefined) updateData.timeLimitMin = dto.timeLimitMin;
     if (dto.instructions !== undefined) updateData.instructions = dto.instructions;
+    // Pasaje: si `dto.passage` viene, se reescriben las 3 columnas (incluido borrarlo con null).
+    if (dto.passage !== undefined) Object.assign(updateData, this.passageColumns(dto.passage));
     if (dto.config !== undefined) updateData.config = dto.config;
 
-    const [updated] = await this.db
-      .update(instrumentSections)
-      .set(updateData)
-      .where(eq(instrumentSections.id, sectionId))
-      .returning();
+    await this.db.transaction(async (tx) => {
+      if (Object.keys(updateData).length > 0) {
+        await tx
+          .update(instrumentSections)
+          .set(updateData)
+          .where(eq(instrumentSections.id, sectionId));
+      }
 
-    return updated;
+      // Reemplazo de adjuntos: si `dto.attachments` está definido, se borran los
+      // existentes de la sección y se insertan los nuevos. Si es `undefined`, no se tocan.
+      if (dto.attachments !== undefined) {
+        await tx.delete(sectionAttachments).where(eq(sectionAttachments.sectionId, sectionId));
+        await this.insertAttachments(tx, sectionId, dto.attachments);
+      }
+    });
+
+    return this.getSectionWithAttachments(sectionId);
   }
 
   async deleteSection(instrumentId: string, sectionId: string, user: JwtPayload) {
@@ -327,5 +371,83 @@ export class InstrumentsService {
     if (!user.orgId || instrument.orgId !== user.orgId) {
       throw new ForbiddenException('Solo puedes editar instrumentos de tu propia organización');
     }
+  }
+
+  // ── Passage / Attachments helpers ─────────────────────────────────────────
+
+  /** Mapea el `passage` del DTO a las columnas tipadas de la sección. */
+  private passageColumns(passage?: PassageDto): {
+    passageTitle: string | null;
+    passageText: string | null;
+    passageFormat: PassageDto['format'] | null;
+  } {
+    if (!passage) {
+      return { passageTitle: null, passageText: null, passageFormat: null };
+    }
+    return {
+      passageTitle: passage.title ?? null,
+      passageText: passage.text,
+      passageFormat: passage.format ?? 'plain',
+    };
+  }
+
+  /** Inserta los adjuntos de una sección dentro de la transacción dada. */
+  private async insertAttachments(
+    tx: Tx,
+    sectionId: string,
+    attachments?: SectionAttachmentInputDto[],
+  ): Promise<void> {
+    if (!attachments?.length) return;
+
+    const values: NewSectionAttachment[] = attachments.map((a) => ({
+      sectionId,
+      kind: a.kind,
+      order: a.order,
+      storageKey: a.storageKey ?? null,
+      url: a.url ?? null,
+      fileName: a.fileName ?? null,
+      mimeType: a.mimeType ?? null,
+      sizeBytes: a.sizeBytes ?? null,
+      note: a.note ?? null,
+      meta: a.meta ?? {},
+    }));
+
+    await tx.insert(sectionAttachments).values(values);
+  }
+
+  /** Pobla los adjuntos (ordenados) en un conjunto de secciones. */
+  private async withAttachments(
+    sections: InstrumentSection[],
+  ): Promise<SectionWithAttachments[]> {
+    if (!sections.length) return [];
+
+    const ids = sections.map((s) => s.id);
+    const rows = await this.db
+      .select()
+      .from(sectionAttachments)
+      .where(inArray(sectionAttachments.sectionId, ids))
+      .orderBy(sectionAttachments.order);
+
+    const bySection = new Map<string, (typeof sectionAttachments.$inferSelect)[]>();
+    for (const row of rows) {
+      const list = bySection.get(row.sectionId) ?? [];
+      list.push(row);
+      bySection.set(row.sectionId, list);
+    }
+
+    return sections.map((s) => ({ ...s, attachments: bySection.get(s.id) ?? [] }));
+  }
+
+  /** Lee una sección con sus adjuntos poblados. */
+  private async getSectionWithAttachments(sectionId: string): Promise<SectionWithAttachments> {
+    const [section] = await this.db
+      .select()
+      .from(instrumentSections)
+      .where(eq(instrumentSections.id, sectionId));
+
+    if (!section) throw new NotFoundException('Sección no encontrada');
+
+    const [withAttachments] = await this.withAttachments([section]);
+    return withAttachments;
   }
 }
