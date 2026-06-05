@@ -163,3 +163,9 @@ export const performanceLevelEnum = pgEnum('performance_level', [
 export const metricTypeEnum = pgEnum('metric_type', ['percentage', 'scaled', 'band']);
 
 export const rubricTypeEnum = pgEnum('rubric_type', ['analytic', 'holistic']);
+
+// Formato del texto base (pasaje) de una sección de instrumento.
+export const passageFormatEnum = pgEnum('passage_format', ['plain', 'markdown', 'html']);
+
+// Tipo de archivo adjunto a una sección (audio cubre listening de inglés a futuro).
+export const attachmentKindEnum = pgEnum('attachment_kind', ['image', 'audio', 'pdf', 'other']);

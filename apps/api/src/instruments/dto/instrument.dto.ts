@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { paginationSchema } from '@soe/types';
+import { paginationSchema, passageSchema, sectionAttachmentInputSchema } from '@soe/types';
 
 // ── Instrument Type / Status enums ──────────────────────────────────────────
 const INSTRUMENT_TYPES = [
@@ -34,6 +34,8 @@ export const createSectionSchema = z.object({
   maxPoints: z.coerce.string().optional(),
   timeLimitMin: z.number().int().min(0).optional(),
   instructions: z.string().max(2000).optional(),
+  passage: passageSchema.optional(),
+  attachments: z.array(sectionAttachmentInputSchema).optional(),
   config: z.record(z.unknown()).optional(),
 });
 
