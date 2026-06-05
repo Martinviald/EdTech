@@ -7,10 +7,19 @@ import {
   taxonomyNodes,
   taxonomies,
 } from '@soe/db';
+import { validateItemContent, type InstrumentType } from '@soe/types';
 import type { JwtPayload } from '../auth/jwt-payload.types';
 import { InjectDb, type Database } from '../database/database.types';
 import { parseDiaPayload, type DiaParseResult } from './lib/dia-parser';
 import type { DiaRawPayload } from './lib/dia-sample-data';
+
+/**
+ * Tipo de instrumento que produce/consume este módulo. Único punto de acoplamiento
+ * a "dia": se usa tanto al crear el instrumento como al filtrar el listado. Aislarlo
+ * en una constante lo vuelve un punto de extensión explícito (un futuro módulo de
+ * ingesta SIMCE/PAES parametrizaría esto) en vez de un literal disperso por el servicio.
+ */
+const DIA_INSTRUMENT_TYPE = 'dia' satisfies InstrumentType;
 
 export interface DiaIngestionMetadata {
   taxonomyId: string;
@@ -132,7 +141,7 @@ export class DiaIngestionService {
           orgId,
           taxonomyId: metadata.taxonomyId,
           name: parseResult.instrument.name,
-          type: 'dia',
+          type: DIA_INSTRUMENT_TYPE,
           year: parseResult.instrument.year,
           version: parseResult.instrument.applicationPeriod,
           isOfficial: metadata.isOfficial ?? false,
@@ -150,13 +159,19 @@ export class DiaIngestionService {
         throw new BadRequestException('No se pudo crear el instrumento');
       }
 
-      // 2. Create items
+      // 2. Create items.
+      // El parser DIA (#4) ahora produce `content` con el shape CANÓNICO de @soe/types
+      // (`MultipleChoiceContent`: alternativas con `isCorrect`). Lo pasamos por
+      // `validateItemContent(item.type, ...)` para que la columna tipada `items.content`
+      // (`ItemContent`, #5) reciba contenido validado por su `type` — sin casts vía
+      // `unknown`. Si el contenido no cumple el contrato, Zod lanza y abortamos la
+      // transacción (BadRequest), evitando persistir ítems mal formados.
       const itemValues = parseResult.items.map((item) => ({
         orgId,
         instrumentId: newInstrument.id,
         position: item.position,
-        type: 'multiple_choice' as const,
-        content: item.content as unknown as Record<string, unknown>,
+        type: item.type,
+        content: validateItemContent(item.type, item.content),
         scoringConfig: { points: 1, partialCredit: false },
         status: 'published' as const,
         source: 'official' as const,
@@ -215,7 +230,7 @@ export class DiaIngestionService {
    */
   async listInstruments(user: JwtPayload) {
     const conditions = [
-      eq(instruments.type, 'dia'),
+      eq(instruments.type, DIA_INSTRUMENT_TYPE),
       isNull(instruments.deletedAt),
     ];
 

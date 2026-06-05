@@ -12,10 +12,13 @@ import { DiaIngestionService } from './dia-ingestion.service';
  */
 const diaRawItemSchema = z.object({
   position: z.number().int().positive(),
-  correctKey: z.string().min(1).max(1),
+  // Claves de alternativa configurables: hasta 5 chars (alinea con el schema canónico
+  // `multipleChoiceContentSchema.alternatives[].key`). Soporta A–E (PAES) y V/F sin
+  // capar a un único carácter. La validación del set válido la hace el parser (#4).
+  correctKey: z.string().min(1).max(5),
   alternatives: z.array(
     z.object({
-      key: z.string().min(1).max(1),
+      key: z.string().min(1).max(5),
       text: z.string().optional(),
     }),
   ).min(2),

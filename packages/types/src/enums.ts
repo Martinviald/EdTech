@@ -84,6 +84,13 @@ export type TaxonomyNodeType = (typeof TAXONOMY_NODE_TYPES)[number];
 export const PERFORMANCE_LEVELS = ['insufficient', 'elementary', 'adequate', 'advanced'] as const;
 export type PerformanceLevel = (typeof PERFORMANCE_LEVELS)[number];
 
+// Métrica raíz de un resultado. El DIA y la mayoría de las pruebas chilenas
+// usan `percentage` (% de logro 0..1). `scaled` cubre PAES (150–1000), stanine,
+// puntaje IRT, etc. `band` cubre escalas puramente categóricas (Cambridge CEFR
+// A1–C2) donde no hay un puntaje numérico continuo sino una banda.
+export const METRIC_TYPES = ['percentage', 'scaled', 'band'] as const;
+export type MetricType = (typeof METRIC_TYPES)[number];
+
 export const ASSESSMENT_STATUS = [
   'scheduled',
   'in_progress',

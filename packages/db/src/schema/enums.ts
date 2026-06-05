@@ -158,4 +158,8 @@ export const performanceLevelEnum = pgEnum('performance_level', [
   'advanced',
 ]);
 
+// Métrica raíz de un assessment_result (#3). `percentage` (DIA y la mayoría),
+// `scaled` (PAES 150–1000, IRT, stanine) o `band` (Cambridge CEFR, categóricas).
+export const metricTypeEnum = pgEnum('metric_type', ['percentage', 'scaled', 'band']);
+
 export const rubricTypeEnum = pgEnum('rubric_type', ['analytic', 'holistic']);

@@ -1,7 +1,9 @@
-import { ForbiddenException } from '@nestjs/common';
+import { BadRequestException, ForbiddenException } from '@nestjs/common';
 import { ItemsService } from './items.service';
 import type { JwtPayload } from '../auth/jwt-payload.types';
 import type { Item } from '@soe/db';
+import type { ItemType } from '@soe/types';
+import type { CreateItemDto, UpdateItemDto } from './dto/item.dto';
 
 function makeService() {
   const db = {} as never;
@@ -117,5 +119,283 @@ describe('ItemsService.assertEditable', () => {
         user({ role: 'platform_admin' }),
       ),
     ).not.toThrow();
+  });
+});
+
+// ── Polymorphic content validation (#5) ────────────────────────────────────
+//
+// `create`/`update` validan el `content` contra el schema Zod de su `type`
+// (validateItemContent de @soe/types) ANTES de persistir. Un content inválido
+// para su tipo => BadRequestException; uno válido => no se rechaza.
+
+/**
+ * Content de ejemplo VÁLIDO por cada uno de los 10 item_type.
+ * Tipado como `Item['content']` (la unión `ItemContent`) vía cast para poder
+ * pasarlo a `item({ content })` sin fricción de assignability de la unión; las
+ * formas reales se validan en runtime por `validateItemContent`.
+ */
+const VALID_CONTENT = {
+  multiple_choice: {
+    stem: '¿2 + 2?',
+    alternatives: [
+      { key: 'A', text: '3', isCorrect: false },
+      { key: 'B', text: '4', isCorrect: true },
+    ],
+  },
+  true_false: { stem: 'El cielo es azul', correctAnswer: true },
+  open_ended: { prompt: 'Explica el ciclo del agua' },
+  writing: { prompt: 'Escribe un cuento breve', minWords: 50 },
+  oral_reading: { passage: 'Había una vez un gato...' },
+  oral_expression: { prompt: 'Describe tu rutina diaria' },
+  listening: {
+    audioUrl: 'https://cdn.example.com/audio.mp3',
+    stem: '¿Qué animal se menciona?',
+    alternatives: [
+      { key: 'A', text: 'Perro', isCorrect: true },
+      { key: 'B', text: 'Gato', isCorrect: false },
+    ],
+  },
+  matching: {
+    leftItems: [
+      { id: 'l1', text: 'Chile' },
+      { id: 'l2', text: 'Perú' },
+    ],
+    rightItems: [
+      { id: 'r1', text: 'Santiago' },
+      { id: 'r2', text: 'Lima' },
+    ],
+    correctPairs: [
+      { leftId: 'l1', rightId: 'r1' },
+      { leftId: 'l2', rightId: 'r2' },
+    ],
+  },
+  ordering: {
+    items: [
+      { id: 'a', text: 'Primero' },
+      { id: 'b', text: 'Segundo' },
+    ],
+    correctOrder: ['a', 'b'],
+  },
+  gap_fill: {
+    textWithGaps: 'El sol ___ por el este.',
+    gaps: [{ position: 0, acceptedAnswers: ['sale', 'aparece'] }],
+  },
+} satisfies Record<ItemType, Record<string, unknown>> as Record<
+  ItemType,
+  Item['content']
+>;
+
+const ALL_ITEM_TYPES = Object.keys(VALID_CONTENT) as ItemType[];
+
+/**
+ * Mock mínimo del cliente Drizzle: cubre la cadena insert().values().returning()
+ * y los select() que ejecuta create() (getById + tags). Permite verificar que un
+ * content VÁLIDO NO es rechazado por la validación (la creación llega a la DB).
+ */
+function dbMockForCreate(createdRow: Item) {
+  const selectChain = {
+    from: jest.fn().mockReturnThis(),
+    innerJoin: jest.fn().mockReturnThis(),
+    // getById hace `select().from().where()` (item) y luego un select de tags.
+    where: jest.fn().mockResolvedValue([createdRow]),
+  };
+  return {
+    insert: jest.fn().mockReturnValue({
+      values: jest.fn().mockReturnValue({
+        returning: jest.fn().mockResolvedValue([createdRow]),
+      }),
+    }),
+    select: jest.fn().mockReturnValue(selectChain),
+  } as never;
+}
+
+function createDto(type: ItemType, content: Record<string, unknown>): CreateItemDto {
+  return {
+    position: 0,
+    type,
+    content,
+    status: 'draft',
+    source: 'custom',
+  } as CreateItemDto;
+}
+
+describe('ItemsService.create — validación de content polimórfico', () => {
+  it.each(ALL_ITEM_TYPES)(
+    'acepta content válido para el tipo %s',
+    async (type) => {
+      const created = item({ type, content: VALID_CONTENT[type] });
+      const svc = new ItemsService(dbMockForCreate(created));
+      await expect(
+        svc.create(createDto(type, VALID_CONTENT[type]), user()),
+      ).resolves.toBeDefined();
+    },
+  );
+
+  it('rechaza multiple_choice sin alternativas', async () => {
+    const svc = makeService();
+    await expect(
+      svc.create(createDto('multiple_choice', { stem: '¿Algo?' }), user()),
+    ).rejects.toBeInstanceOf(BadRequestException);
+  });
+
+  it('rechaza multiple_choice con una sola alternativa (min 2)', async () => {
+    const svc = makeService();
+    await expect(
+      svc.create(
+        createDto('multiple_choice', {
+          stem: '¿Algo?',
+          alternatives: [{ key: 'A', text: 'Sí', isCorrect: true }],
+        }),
+        user(),
+      ),
+    ).rejects.toBeInstanceOf(BadRequestException);
+  });
+
+  it('rechaza true_false sin correctAnswer', async () => {
+    const svc = makeService();
+    await expect(
+      svc.create(createDto('true_false', { stem: 'El cielo es azul' }), user()),
+    ).rejects.toBeInstanceOf(BadRequestException);
+  });
+
+  it('rechaza gap_fill sin gaps', async () => {
+    const svc = makeService();
+    await expect(
+      svc.create(
+        createDto('gap_fill', { textWithGaps: 'El sol ___ por el este.' }),
+        user(),
+      ),
+    ).rejects.toBeInstanceOf(BadRequestException);
+  });
+
+  it('rechaza matching sin correctPairs', async () => {
+    const svc = makeService();
+    await expect(
+      svc.create(
+        createDto('matching', {
+          leftItems: [{ id: 'l1', text: 'A' }, { id: 'l2', text: 'B' }],
+          rightItems: [{ id: 'r1', text: '1' }, { id: 'r2', text: '2' }],
+        }),
+        user(),
+      ),
+    ).rejects.toBeInstanceOf(BadRequestException);
+  });
+
+  it('rechaza content del TIPO EQUIVOCADO (content MC declarado como gap_fill)', async () => {
+    const svc = makeService();
+    await expect(
+      svc.create(createDto('gap_fill', VALID_CONTENT.multiple_choice), user()),
+    ).rejects.toBeInstanceOf(BadRequestException);
+  });
+
+  it('el mensaje de error nombra el tipo de ítem', async () => {
+    const svc = makeService();
+    await expect(
+      svc.create(createDto('true_false', {}), user()),
+    ).rejects.toThrow(/true_false/);
+  });
+
+  it('CERO REGRESIÓN: un multiple_choice con shape del seed (incl. correctKey extra) sigue validando', async () => {
+    // El seed e2e produce content MC con un campo extra `correctKey` además de
+    // stem + alternatives[{key,text,isCorrect}]. El schema canónico (z.object, sin
+    // passthrough) descarta la clave extra pero NO la rechaza, así que el ítem
+    // productivo DIA debe seguir creándose sin error.
+    const seedLikeContent = {
+      stem: 'Según el texto, ¿dónde encontró Pedro al perro?',
+      correctKey: 'A',
+      alternatives: [
+        { key: 'A', text: 'En el parque', isCorrect: true },
+        { key: 'B', text: 'En la escuela', isCorrect: false },
+        { key: 'C', text: 'En la playa', isCorrect: false },
+        { key: 'D', text: 'En el mercado', isCorrect: false },
+      ],
+    };
+    const created = item({ type: 'multiple_choice', content: seedLikeContent as Item['content'] });
+    const svc = new ItemsService(dbMockForCreate(created));
+    await expect(
+      svc.create(createDto('multiple_choice', seedLikeContent), user()),
+    ).resolves.toBeDefined();
+  });
+});
+
+describe('ItemsService.update — validación de content polimórfico', () => {
+  /**
+   * Mock para update: getByIdRaw (select item), snapshot de versión (insert),
+   * y el update().set().where().returning(). La validación de content corre antes
+   * del update(); para casos inválidos lanza antes de tocar la DB de escritura.
+   */
+  function dbMockForUpdate(existing: Item) {
+    return {
+      select: jest.fn().mockReturnValue({
+        from: jest.fn().mockReturnThis(),
+        where: jest.fn().mockResolvedValue([existing]),
+      }),
+      insert: jest.fn().mockReturnValue({
+        values: jest.fn().mockReturnValue({
+          returning: jest.fn().mockResolvedValue([{ id: 'v1' }]),
+        }),
+      }),
+      update: jest.fn().mockReturnValue({
+        set: jest.fn().mockReturnValue({
+          where: jest.fn().mockReturnValue({
+            returning: jest
+              .fn()
+              .mockResolvedValue([{ ...existing, content: existing.content }]),
+          }),
+        }),
+      }),
+    } as never;
+  }
+
+  it('acepta nuevo content válido para el type existente', async () => {
+    const existing = item({
+      orgId: 'org-1',
+      type: 'multiple_choice',
+      content: VALID_CONTENT.multiple_choice,
+    });
+    const svc = new ItemsService(dbMockForUpdate(existing));
+    const dto = { content: VALID_CONTENT.multiple_choice } as UpdateItemDto;
+    await expect(svc.update('item-1', dto, user({ orgId: 'org-1' }))).resolves.toBeDefined();
+  });
+
+  it('rechaza nuevo content inválido para el type existente', async () => {
+    const existing = item({
+      orgId: 'org-1',
+      type: 'true_false',
+      content: VALID_CONTENT.true_false,
+    });
+    const svc = new ItemsService(dbMockForUpdate(existing));
+    const dto = { content: { stem: 'sin correctAnswer' } } as UpdateItemDto;
+    await expect(
+      svc.update('item-1', dto, user({ orgId: 'org-1' })),
+    ).rejects.toBeInstanceOf(BadRequestException);
+  });
+
+  it('al cambiar solo el type, re-valida el content existente contra el nuevo type', async () => {
+    // content MC existente, se cambia el type a gap_fill sin reenviar content =>
+    // el content existente ya no es válido para gap_fill => rechazo.
+    const existing = item({
+      orgId: 'org-1',
+      type: 'multiple_choice',
+      content: VALID_CONTENT.multiple_choice,
+    });
+    const svc = new ItemsService(dbMockForUpdate(existing));
+    const dto = { type: 'gap_fill' } as UpdateItemDto;
+    await expect(
+      svc.update('item-1', dto, user({ orgId: 'org-1' })),
+    ).rejects.toBeInstanceOf(BadRequestException);
+  });
+
+  it('no valida content cuando ni type ni content cambian (cero regresión)', async () => {
+    const existing = item({
+      orgId: 'org-1',
+      type: 'multiple_choice',
+      content: VALID_CONTENT.multiple_choice,
+    });
+    const svc = new ItemsService(dbMockForUpdate(existing));
+    const dto = { position: 5 } as UpdateItemDto;
+    await expect(
+      svc.update('item-1', dto, user({ orgId: 'org-1' })),
+    ).resolves.toBeDefined();
   });
 });
