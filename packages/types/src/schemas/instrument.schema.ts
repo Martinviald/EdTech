@@ -25,6 +25,12 @@ export const GRADING_SCALE_TYPES = [
 ] as const;
 export type GradingScaleType = (typeof GRADING_SCALE_TYPES)[number];
 
+export const PASSAGE_FORMATS = ['plain', 'markdown', 'html'] as const;
+export type PassageFormat = (typeof PASSAGE_FORMATS)[number];
+
+export const ATTACHMENT_KINDS = ['image', 'audio', 'pdf', 'other'] as const;
+export type AttachmentKind = (typeof ATTACHMENT_KINDS)[number];
+
 const instrumentTypeSchema = z.enum(INSTRUMENT_TYPES);
 const instrumentStatusSchema = z.enum(INSTRUMENT_STATUS);
 const sectionTypeSchema = z.enum(SECTION_TYPES);
@@ -47,6 +53,29 @@ export const updateGradingScaleSchema = createGradingScaleSchema.partial();
 export type CreateGradingScaleDto = z.infer<typeof createGradingScaleSchema>;
 export type UpdateGradingScaleDto = z.infer<typeof updateGradingScaleSchema>;
 
+// ── Section Passage / Attachments ────────────────────────────────────────────
+
+export const sectionAttachmentInputSchema = z.object({
+  kind: z.enum(ATTACHMENT_KINDS),
+  order: z.number().int().min(0).default(0),
+  storageKey: z.string().max(1024).optional(),
+  url: z.string().url().optional(),
+  fileName: z.string().max(300).optional(),
+  mimeType: z.string().max(150).optional(),
+  sizeBytes: z.number().int().min(0).optional(),
+  note: z.string().max(2000).optional(),
+  meta: z.record(z.unknown()).optional(),
+});
+
+export const passageSchema = z.object({
+  title: z.string().max(300).optional(),
+  text: z.string().min(1),
+  format: z.enum(PASSAGE_FORMATS).default('plain'),
+});
+
+export type SectionAttachmentInputDto = z.infer<typeof sectionAttachmentInputSchema>;
+export type PassageDto = z.infer<typeof passageSchema>;
+
 // ── Instrument Sections ──────────────────────────────────────────────────────
 
 export const createInstrumentSectionSchema = z.object({
@@ -56,6 +85,8 @@ export const createInstrumentSectionSchema = z.object({
   maxPoints: z.coerce.number().min(0).optional(),
   timeLimitMin: z.number().int().min(0).optional(),
   instructions: z.string().max(2000).optional(),
+  passage: passageSchema.optional(),
+  attachments: z.array(sectionAttachmentInputSchema).optional(),
   config: z.record(z.unknown()).optional(),
 });
 
@@ -103,6 +134,22 @@ export type ListInstrumentsQueryDto = z.infer<typeof listInstrumentsQuerySchema>
 
 // ── Response Models (API shape) ──────────────────────────────────────────────
 
+export type SectionAttachmentModel = {
+  id: string;
+  sectionId: string;
+  kind: AttachmentKind;
+  order: number;
+  storageKey: string | null;
+  url: string | null;
+  fileName: string | null;
+  mimeType: string | null;
+  sizeBytes: number | null;
+  note: string | null;
+  meta: Record<string, unknown>;
+  createdAt: string | Date;
+  updatedAt: string | Date;
+};
+
 export type InstrumentSectionModel = {
   id: string;
   instrumentId: string;
@@ -112,7 +159,11 @@ export type InstrumentSectionModel = {
   maxPoints: string | null;
   timeLimitMin: number | null;
   instructions: string | null;
+  passageTitle: string | null;
+  passageText: string | null;
+  passageFormat: PassageFormat | null;
   config: Record<string, unknown>;
+  attachments?: SectionAttachmentModel[];
 };
 
 export type InstrumentModel = {

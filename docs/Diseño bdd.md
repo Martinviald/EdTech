@@ -445,7 +445,37 @@ order           integer
 max_points      decimal
 time_limit_min  integer     NULLABLE
 instructions    text
+passage_title   text        NULLABLE  Título del texto base (comprensión lectora)
+passage_text    text        NULLABLE  Texto base / pasaje compartido por los ítems de la sección
+passage_format  enum        NULLABLE  'plain' | 'markdown' | 'html'  (NULL = sección sin pasaje)
 config          jsonb       Configuración específica de sección
+```
+
+> **Pasaje (texto base):** una sección tiene a lo más un pasaje (1:1, columnas tipadas).
+> Las preguntas asociadas al texto se agrupan por `items.section_id`. Sin pasaje =
+> `passage_text IS NULL`. Sin `org_id`/RLS: hereda tenant vía `instruments`.
+
+#### `section_attachments`
+
+Archivos asociados a una sección (imagen del pasaje, audio de listening, PDF). 1:N con
+`instrument_sections`. Los archivos van a S3 (`storage_key`); la fila se crea con metadata
+y `storage_key` se llena al subir. **Sin `org_id`/RLS** (hereda tenant vía la sección →
+`instruments`); `ON DELETE cascade` desde la sección.
+
+```
+id              uuid        PK
+section_id      uuid        FK → instrument_sections.id  NOT NULL  ON DELETE cascade
+kind            enum        'image' | 'audio' | 'pdf' | 'other'
+order           integer     DEFAULT 0
+storage_key     text        NULLABLE  Clave S3 (NULL mientras no se sube el archivo)
+url             text        NULLABLE  URL pública/externa opcional
+file_name       text        NULLABLE
+mime_type       text        NULLABLE
+size_bytes      integer     NULLABLE
+note            text        NULLABLE  Descripción (mapea passage.attachments[].note del JSON)
+meta            jsonb       DEFAULT {}
+created_at      timestamp   DEFAULT now()
+updated_at      timestamp   DEFAULT now()
 ```
 
 #### `grading_scales`
