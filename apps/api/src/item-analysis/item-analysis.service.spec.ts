@@ -63,6 +63,10 @@ function makeDb(selectResults: unknown[][]): DbMock {
       selectIdx++;
       return buildSelectChain(rows);
     },
+    // withOrgContext() abre una transacción y fija app.current_org_id vía
+    // tx.execute antes de correr el callback. El tx es el propio mock.
+    execute: async () => [],
+    transaction: async (fn: (tx: unknown) => unknown) => fn(db),
     __selectCalls: () => selectIdx,
   } as unknown as DbMock;
 
@@ -422,7 +426,26 @@ describe('ItemAnalysisService.getQuestionAnalysis', () => {
     const db = makeDb([
       // getAccessibleClassGroupIds → admin → sin query
       [itemVisibleRow], // requireItemVisible
-      tagRows.filter((t) => t.itemId === ITEM_A), // loadItemTags
+      tagRows.filter((t) => t.itemId === ITEM_A), // loadItemTags (representativo)
+      [
+        // loadAllItemTags → TODOS los nodos asociados
+        {
+          nodeId: NODE_SKILL,
+          nodeName: 'Localizar información',
+          nodeType: 'skill',
+          nodeCode: null,
+          tagType: 'primary',
+          taggedBy: 'human',
+        },
+        {
+          nodeId: NODE_CONTENT,
+          nodeName: 'OA 1',
+          nodeType: 'content',
+          nodeCode: 'OA 1',
+          tagType: 'secondary',
+          taggedBy: 'ai',
+        },
+      ],
       // resolveAccessibleStudentIds → null (sin query)
       [
         // loadAnswerDistribution → group by answer, isCorrect
@@ -456,6 +479,16 @@ describe('ItemAnalysisService.getQuestionAnalysis', () => {
     expect(altA.percentage).toBe(30);
     // skill/content derivados.
     expect(res.skill?.nodeId).toBe(NODE_SKILL);
+    // tags: TODOS los nodos asociados, con código/tagType/origen.
+    expect(res.tags).toHaveLength(2);
+    expect(res.tags.map((t) => t.nodeId)).toEqual([NODE_SKILL, NODE_CONTENT]);
+    const contentTag = res.tags.find((t) => t.nodeId === NODE_CONTENT)!;
+    expect(contentTag).toMatchObject({
+      nodeCode: 'OA 1',
+      nodeType: 'content',
+      tagType: 'secondary',
+      taggedBy: 'ai',
+    });
   });
 
   it('lanza NotFound si el ítem no es visible para la org', async () => {
@@ -482,6 +515,7 @@ describe('ItemAnalysisService.getQuestionAnalysis', () => {
     const db = makeDb([
       [openItem], // requireItemVisible
       [], // loadItemTags → sin tags
+      [], // loadAllItemTags → sin nodos
       [
         { answer: null, isCorrect: false, count: 4 },
         { answer: null, isCorrect: true, count: 1 },
@@ -496,6 +530,7 @@ describe('ItemAnalysisService.getQuestionAnalysis', () => {
     expect(res.correctRate).toBe(20);
     expect(res.skill).toBeNull();
     expect(res.content).toBeNull();
+    expect(res.tags).toEqual([]);
   });
 
   it('deriva correctKey desde alternatives[].isCorrect cuando falta correctKey', async () => {
@@ -517,6 +552,7 @@ describe('ItemAnalysisService.getQuestionAnalysis', () => {
     const db = makeDb([
       [itemNoKey], // requireItemVisible
       [], // loadItemTags
+      [], // loadAllItemTags
       [
         { answer: 'A', isCorrect: true, count: 5 },
         { answer: 'B', isCorrect: false, count: 5 },
@@ -528,5 +564,83 @@ describe('ItemAnalysisService.getQuestionAnalysis', () => {
     expect(res.correctKey).toBe('A');
     const altA = res.alternatives.find((a) => a.key === 'A')!;
     expect(altA.isCorrect).toBe(true);
+  });
+});
+
+// ──────────────────────────────────────────────────────────────────────────────
+// listAssessments (selector de la tabla cruzada)
+// ──────────────────────────────────────────────────────────────────────────────
+
+describe('ItemAnalysisService.listAssessments', () => {
+  it('admin: lista evaluaciones con studentsCount mergeado y ordenadas', async () => {
+    const db = makeDb([
+      // rows: evaluaciones con resultados (admin → sin query de scope previa)
+      [
+        {
+          assessmentId: ASSESSMENT_ID,
+          name: 'DIA Lectura',
+          administeredAt: new Date('2026-03-10T00:00:00Z'),
+          instrumentName: 'Instrumento Lectura',
+          instrumentType: 'dia',
+          subjectName: 'Lenguaje',
+          gradeName: '3° básico',
+        },
+      ],
+      // countRows: count(distinct studentId) por evaluación
+      [{ assessmentId: ASSESSMENT_ID, count: 24 }],
+    ]);
+    const service = makeService(db);
+
+    const res = await service.listAssessments(makeUser(), {});
+    expect(res.data).toHaveLength(1);
+    expect(res.data[0]).toMatchObject({
+      assessmentId: ASSESSMENT_ID,
+      name: 'DIA Lectura',
+      instrumentName: 'Instrumento Lectura',
+      instrumentType: 'dia',
+      subjectName: 'Lenguaje',
+      gradeName: '3° básico',
+      studentsCount: 24,
+    });
+  });
+
+  it('admin: sin evaluaciones con resultados → data vacía (sin segunda query)', async () => {
+    const db = makeDb([[]]); // rows vacío → no se consulta countRows
+    const service = makeService(db);
+    const res = await service.listAssessments(makeUser(), {});
+    expect(res.data).toEqual([]);
+  });
+
+  it('profesor sin cursos asignados → data vacía', async () => {
+    const db = makeDb([
+      [], // getAccessibleClassGroupIds → profesor sin class_groups
+    ]);
+    const service = makeService(db);
+    const res = await service.listAssessments(makeUser({ role: 'teacher' }), {});
+    expect(res.data).toEqual([]);
+  });
+
+  it('profesor con cursos: acota studentsCount a sus alumnos', async () => {
+    const db = makeDb([
+      [{ classGroupId: CLASS_GROUP_ID }], // getAccessibleClassGroupIds
+      [
+        {
+          assessmentId: ASSESSMENT_ID,
+          name: 'DIA Lectura',
+          administeredAt: new Date('2026-03-10T00:00:00Z'),
+          instrumentName: 'Instrumento Lectura',
+          instrumentType: 'dia',
+          subjectName: 'Lenguaje',
+          gradeName: '3° básico',
+        },
+      ], // rows
+      [{ studentId: STUDENT_1 }, { studentId: STUDENT_2 }], // scopedStudentIds (enrollments)
+      [{ assessmentId: ASSESSMENT_ID, count: 2 }], // countRows acotado
+    ]);
+    const service = makeService(db);
+
+    const res = await service.listAssessments(makeUser({ role: 'teacher' }), {});
+    expect(res.data).toHaveLength(1);
+    expect(res.data[0].studentsCount).toBe(2);
   });
 });

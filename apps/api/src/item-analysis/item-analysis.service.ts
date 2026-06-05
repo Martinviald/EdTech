@@ -3,12 +3,13 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { and, asc, eq, inArray, isNull, sql } from 'drizzle-orm';
+import { and, asc, desc, eq, inArray, isNull, sql } from 'drizzle-orm';
 import {
   assessmentCourseAssignments,
   assessmentResults,
   assessments,
   classGroups,
+  grades,
   instruments,
   itemTaxonomyTags,
   items,
@@ -16,13 +17,18 @@ import {
   studentEnrollments,
   students,
   subjectClasses,
+  subjects,
   taxonomyNodes,
   teacherAssignments,
+  withOrgContext,
 } from '@soe/db';
 import {
   RESULTS_VIEWER_ROLES,
   userHasAnyRole,
   type AlternativeDistribution,
+  type AssessmentListQueryDto,
+  type AssessmentListResponse,
+  type AssessmentOption,
   type ItemMatrixQueryDto,
   type ItemMatrixResponse,
   type ItemTaxonomyRef,
@@ -31,6 +37,7 @@ import {
   type MatrixStudentRow,
   type QuestionAnalysisQueryDto,
   type QuestionAnalysisResponse,
+  type QuestionTaxonomyTag,
   type UserRole,
 } from '@soe/types';
 import type { JwtPayload } from '../auth/jwt-payload.types';
@@ -75,6 +82,125 @@ export class ItemAnalysisService {
   constructor(@InjectDb() private readonly db: Database) {}
 
   // ───────────────────────────────────────────────────────────────────────────
+  // GET /api/item-analysis/assessments  (selector de la tabla cruzada)
+  // Evaluaciones con resultados visibles para el usuario, filtrables.
+  // ───────────────────────────────────────────────────────────────────────────
+
+  async listAssessments(
+    user: JwtPayload,
+    query: AssessmentListQueryDto,
+  ): Promise<AssessmentListResponse> {
+    const orgId = this.requireOrgId(user);
+    return withOrgContext(this.db, orgId, async (tx) => {
+      const scope = await this.getAccessibleClassGroupIds(tx, user, orgId);
+
+      // Profesor sin cursos asignados → no ve evaluaciones.
+      if (!scope.scopeAll && scope.classGroupIds.length === 0) {
+        return { data: [] };
+      }
+
+      // Sólo evaluaciones con resultados (para que la matriz nunca salga vacía).
+      const conditions = [
+        eq(assessments.orgId, orgId),
+        isNull(instruments.deletedAt),
+        sql`exists (select 1 from ${assessmentResults} where ${assessmentResults.assessmentId} = ${assessments.id})`,
+      ];
+      if (query.subjectId) conditions.push(eq(instruments.subjectId, query.subjectId));
+      if (query.instrumentType) {
+        conditions.push(sql`${instruments.type}::text = ${query.instrumentType}`);
+      }
+      if (query.gradeId) conditions.push(eq(classGroups.gradeId, query.gradeId));
+      if (query.classGroupId) {
+        conditions.push(eq(assessmentCourseAssignments.classGroupId, query.classGroupId));
+      }
+      if (query.academicYearId) {
+        conditions.push(eq(classGroups.academicYearId, query.academicYearId));
+      }
+      if (!scope.scopeAll) {
+        conditions.push(
+          inArray(assessmentCourseAssignments.classGroupId, scope.classGroupIds),
+        );
+      }
+
+      // El join a course_assignments multiplica por curso; group by colapsa a una
+      // fila por evaluación. gradeName representativo vía max() (una evaluación
+      // suele apuntar a un grado).
+      const rows = await tx
+        .select({
+        assessmentId: assessments.id,
+        name: assessments.name,
+        administeredAt: assessments.administeredAt,
+        instrumentName: instruments.name,
+        instrumentType: sql<string>`${instruments.type}::text`,
+        subjectName: subjects.name,
+        gradeName: sql<string | null>`max(${grades.name})`,
+      })
+      .from(assessments)
+      .innerJoin(instruments, eq(instruments.id, assessments.instrumentId))
+      .innerJoin(
+        assessmentCourseAssignments,
+        eq(assessmentCourseAssignments.assessmentId, assessments.id),
+      )
+      .innerJoin(classGroups, eq(classGroups.id, assessmentCourseAssignments.classGroupId))
+      .leftJoin(subjects, eq(subjects.id, instruments.subjectId))
+      .leftJoin(grades, eq(grades.id, classGroups.gradeId))
+      .where(and(...conditions))
+      .groupBy(
+        assessments.id,
+        assessments.name,
+        assessments.administeredAt,
+        instruments.name,
+        instruments.type,
+        subjects.name,
+      )
+        .orderBy(desc(assessments.administeredAt));
+
+      if (rows.length === 0) return { data: [] };
+
+      // studentsCount por evaluación, acotado al scope del profesor (alumnos de sus
+      // cursos). Para admins cuenta todos los alumnos con resultados.
+      const ids = rows.map((r) => r.assessmentId);
+      let scopedStudentIds: string[] | null = null;
+      if (!scope.scopeAll) {
+        const enr = await tx
+          .select({ studentId: studentEnrollments.studentId })
+          .from(studentEnrollments)
+          .where(inArray(studentEnrollments.classGroupId, scope.classGroupIds));
+        scopedStudentIds = Array.from(new Set(enr.map((r) => r.studentId)));
+      }
+
+      const countConds = [inArray(assessmentResults.assessmentId, ids)];
+      if (scopedStudentIds !== null) {
+        countConds.push(inArray(assessmentResults.studentId, scopedStudentIds));
+      }
+      const countRows = await tx
+        .select({
+          assessmentId: assessmentResults.assessmentId,
+          count: sql<number>`count(distinct ${assessmentResults.studentId})::int`,
+        })
+        .from(assessmentResults)
+        .where(and(...countConds))
+        .groupBy(assessmentResults.assessmentId);
+      const countByAssessment = new Map(
+        countRows.map((r) => [r.assessmentId, Number(r.count)]),
+      );
+
+      const data: AssessmentOption[] = rows.map((r) => ({
+        assessmentId: r.assessmentId,
+        name: r.name,
+        instrumentName: r.instrumentName,
+        instrumentType: r.instrumentType,
+        subjectName: r.subjectName ?? null,
+        gradeName: r.gradeName ?? null,
+        administeredAt: r.administeredAt,
+        studentsCount: countByAssessment.get(r.assessmentId) ?? 0,
+      }));
+
+      return { data };
+    });
+  }
+
+  // ───────────────────────────────────────────────────────────────────────────
   // H6.11 — GET /api/item-analysis/matrix
   // ───────────────────────────────────────────────────────────────────────────
 
@@ -83,119 +209,133 @@ export class ItemAnalysisService {
     query: ItemMatrixQueryDto,
   ): Promise<ItemMatrixResponse> {
     const orgId = this.requireOrgId(user);
-    const assessment = await this.requireAssessmentOwnedByUser(
-      user,
-      orgId,
-      query.assessmentId,
-    );
-    const scope = await this.getAccessibleClassGroupIds(user, orgId);
-
-    // Profesor sin scope sobre esta evaluación → Forbidden.
-    if (!scope.scopeAll) {
-      const hasScope = await this.assessmentTouchesScope(
+    return withOrgContext(this.db, orgId, async (tx) => {
+      const assessment = await this.requireAssessmentOwnedByUser(
+        tx,
+        user,
+        orgId,
         query.assessmentId,
-        scope.classGroupIds,
       );
-      if (!hasScope) {
-        throw new ForbiddenException(
-          'No tiene acceso a los resultados de esta evaluación',
+      const scope = await this.getAccessibleClassGroupIds(tx, user, orgId);
+
+      // Profesor sin scope sobre esta evaluación → Forbidden.
+      if (!scope.scopeAll) {
+        const hasScope = await this.assessmentTouchesScope(
+          tx,
+          query.assessmentId,
+          scope.classGroupIds,
         );
-      }
-    }
-
-    // Si pasa classGroupId, validar que está en el scope y pertenece a la org.
-    if (query.classGroupId) {
-      const ok = await this.classGroupInScope(orgId, scope, query.classGroupId);
-      if (!ok) {
-        throw new ForbiddenException('No tiene acceso a ese curso');
-      }
-    }
-
-    // ── Columnas: ítems del instrumento de la evaluación ──────────────────────
-    const questions = await this.loadQuestionColumns(
-      assessment.instrumentId,
-      query.nodeId,
-    );
-    const itemIds = questions.map((q) => q.itemId);
-
-    // Empaquetar tasa de acierto por ítem (1 query agregada group by item_id) y
-    // adjuntarla a las columnas.
-    const studentFilter = await this.resolveAccessibleStudentIds(
-      orgId,
-      scope,
-      query.classGroupId,
-    );
-
-    const questionsWithRate = await this.attachCorrectRates(
-      query.assessmentId,
-      questions,
-      itemIds,
-      studentFilter,
-    );
-
-    // ── Alumnos visibles con respuestas en la evaluación (paginados) ──────────
-    const pagination = await this.loadStudentsPage(
-      query.assessmentId,
-      orgId,
-      studentFilter,
-      query.page,
-      query.limit,
-    );
-
-    const pageStudentIds = pagination.data.map((s) => s.studentId);
-
-    // ── Respuestas de la página de alumnos (1 query, inArray) → celdas ────────
-    const cellsByStudent = await this.loadCells(
-      query.assessmentId,
-      pageStudentIds,
-      itemIds,
-    );
-
-    const students: MatrixStudentRow[] = pagination.data.map((s) => {
-      const byItem = cellsByStudent.get(s.studentId) ?? new Map<string, MatrixCell>();
-      let correctCount = 0;
-      let answeredCount = 0;
-      const cells: MatrixCell[] = itemIds.map((itemId) => {
-        const cell = byItem.get(itemId);
-        if (!cell) {
-          return { itemId, selectedKey: null, isCorrect: null, score: null };
+        if (!hasScope) {
+          throw new ForbiddenException(
+            'No tiene acceso a los resultados de esta evaluación',
+          );
         }
-        if (cell.selectedKey !== null) answeredCount++;
-        if (cell.isCorrect === true) correctCount++;
-        return cell;
+      }
+
+      // Si pasa classGroupId, validar que está en el scope y pertenece a la org.
+      if (query.classGroupId) {
+        const ok = await this.classGroupInScope(
+          tx,
+          orgId,
+          scope,
+          query.classGroupId,
+        );
+        if (!ok) {
+          throw new ForbiddenException('No tiene acceso a ese curso');
+        }
+      }
+
+      // ── Columnas: ítems del instrumento de la evaluación ──────────────────────
+      const questions = await this.loadQuestionColumns(
+        tx,
+        assessment.instrumentId,
+        query.nodeId,
+      );
+      const itemIds = questions.map((q) => q.itemId);
+
+      // Empaquetar tasa de acierto por ítem (1 query agregada group by item_id) y
+      // adjuntarla a las columnas.
+      const studentFilter = await this.resolveAccessibleStudentIds(
+        tx,
+        orgId,
+        scope,
+        query.classGroupId,
+      );
+
+      const questionsWithRate = await this.attachCorrectRates(
+        tx,
+        query.assessmentId,
+        questions,
+        itemIds,
+        studentFilter,
+      );
+
+      // ── Alumnos visibles con respuestas en la evaluación (paginados) ──────────
+      const pagination = await this.loadStudentsPage(
+        tx,
+        query.assessmentId,
+        orgId,
+        studentFilter,
+        query.page,
+        query.limit,
+      );
+
+      const pageStudentIds = pagination.data.map((s) => s.studentId);
+
+      // ── Respuestas de la página de alumnos (1 query, inArray) → celdas ────────
+      const cellsByStudent = await this.loadCells(
+        tx,
+        query.assessmentId,
+        pageStudentIds,
+        itemIds,
+      );
+
+      const students: MatrixStudentRow[] = pagination.data.map((s) => {
+        const byItem = cellsByStudent.get(s.studentId) ?? new Map<string, MatrixCell>();
+        let correctCount = 0;
+        let answeredCount = 0;
+        const cells: MatrixCell[] = itemIds.map((itemId) => {
+          const cell = byItem.get(itemId);
+          if (!cell) {
+            return { itemId, selectedKey: null, isCorrect: null, score: null };
+          }
+          if (cell.selectedKey !== null) answeredCount++;
+          if (cell.isCorrect === true) correctCount++;
+          return cell;
+        });
+
+        // % logro: de assessment_results.percentage si existe, si no derivado.
+        let achievement: number | null = s.percentage != null ? Number(s.percentage) : null;
+        if (achievement === null && answeredCount > 0) {
+          achievement = (correctCount / answeredCount) * 100;
+        }
+
+        return {
+          studentId: s.studentId,
+          studentRut: s.studentRut,
+          studentFullName: `${s.firstName} ${s.lastName}`.trim(),
+          classGroupId: s.classGroupId,
+          classGroupName: s.classGroupName,
+          correctCount,
+          answeredCount,
+          achievement,
+          cells,
+        };
       });
 
-      // % logro: de assessment_results.percentage si existe, si no derivado.
-      let achievement: number | null = s.percentage != null ? Number(s.percentage) : null;
-      if (achievement === null && answeredCount > 0) {
-        achievement = (correctCount / answeredCount) * 100;
-      }
-
       return {
-        studentId: s.studentId,
-        studentRut: s.studentRut,
-        studentFullName: `${s.firstName} ${s.lastName}`.trim(),
-        classGroupId: s.classGroupId,
-        classGroupName: s.classGroupName,
-        correctCount,
-        answeredCount,
-        achievement,
-        cells,
+        assessmentId: query.assessmentId,
+        assessmentName: assessment.name,
+        instrumentName: assessment.instrumentName,
+        questions: questionsWithRate,
+        students: {
+          data: students,
+          total: pagination.total,
+          page: query.page,
+          limit: query.limit,
+        },
       };
     });
-
-    return {
-      assessmentId: query.assessmentId,
-      assessmentName: assessment.name,
-      instrumentName: assessment.instrumentName,
-      questions: questionsWithRate,
-      students: {
-        data: students,
-        total: pagination.total,
-        page: query.page,
-        limit: query.limit,
-      },
-    };
   }
 
   // ───────────────────────────────────────────────────────────────────────────
@@ -208,106 +348,119 @@ export class ItemAnalysisService {
     query: QuestionAnalysisQueryDto,
   ): Promise<QuestionAnalysisResponse> {
     const orgId = this.requireOrgId(user);
-    const scope = await this.getAccessibleClassGroupIds(user, orgId);
+    return withOrgContext(this.db, orgId, async (tx) => {
+      const scope = await this.getAccessibleClassGroupIds(tx, user, orgId);
 
-    // El ítem debe pertenecer a un instrumento de la org del caller.
-    const item = await this.requireItemVisible(user, orgId, itemId);
+      // El ítem debe pertenecer a un instrumento de la org del caller.
+      const item = await this.requireItemVisible(tx, user, orgId, itemId);
 
-    // Si viene assessmentId, validar pertenencia a la org + scope del profesor.
-    if (query.assessmentId) {
-      const assessment = await this.requireAssessmentOwnedByUser(
-        user,
-        orgId,
-        query.assessmentId,
-      );
-      // El ítem debe pertenecer al instrumento de la evaluación.
-      if (assessment.instrumentId !== item.instrumentId) {
-        throw new NotFoundException('Pregunta no encontrada en esta evaluación');
-      }
-      if (!scope.scopeAll) {
-        const hasScope = await this.assessmentTouchesScope(
+      // Si viene assessmentId, validar pertenencia a la org + scope del profesor.
+      if (query.assessmentId) {
+        const assessment = await this.requireAssessmentOwnedByUser(
+          tx,
+          user,
+          orgId,
           query.assessmentId,
-          scope.classGroupIds,
         );
-        if (!hasScope) {
-          throw new ForbiddenException(
-            'No tiene acceso a los resultados de esta evaluación',
+        // El ítem debe pertenecer al instrumento de la evaluación.
+        if (assessment.instrumentId !== item.instrumentId) {
+          throw new NotFoundException('Pregunta no encontrada en esta evaluación');
+        }
+        if (!scope.scopeAll) {
+          const hasScope = await this.assessmentTouchesScope(
+            tx,
+            query.assessmentId,
+            scope.classGroupIds,
           );
+          if (!hasScope) {
+            throw new ForbiddenException(
+              'No tiene acceso a los resultados de esta evaluación',
+            );
+          }
         }
       }
-    }
 
-    if (query.classGroupId) {
-      const ok = await this.classGroupInScope(orgId, scope, query.classGroupId);
-      if (!ok) {
-        throw new ForbiddenException('No tiene acceso a ese curso');
+      if (query.classGroupId) {
+        const ok = await this.classGroupInScope(
+          tx,
+          orgId,
+          scope,
+          query.classGroupId,
+        );
+        if (!ok) {
+          throw new ForbiddenException('No tiene acceso a ese curso');
+        }
       }
-    }
 
-    const studentFilter = await this.resolveAccessibleStudentIds(
-      orgId,
-      scope,
-      query.classGroupId,
-    );
+      const studentFilter = await this.resolveAccessibleStudentIds(
+        tx,
+        orgId,
+        scope,
+        query.classGroupId,
+      );
 
-    const content = (item.content ?? {}) as ItemContent;
-    const correctKey = this.deriveCorrectKey(content);
-    const altDefs = this.parseAlternatives(content);
+      const content = (item.content ?? {}) as ItemContent;
+      const correctKey = this.deriveCorrectKey(content);
+      const altDefs = this.parseAlternatives(content);
 
-    const { skill, contentRef } = await this.loadItemTags(itemId);
+      const { skill, contentRef } = await this.loadItemTags(tx, itemId);
+      const tags = await this.loadAllItemTags(tx, itemId);
 
-    // ── Distribución agregada por valor de respuesta (1 query group by) ───────
-    const dist = await this.loadAnswerDistribution(
-      itemId,
-      query.assessmentId,
-      studentFilter,
-    );
+      // ── Distribución agregada por valor de respuesta (1 query group by) ───────
+      const dist = await this.loadAnswerDistribution(
+        tx,
+        itemId,
+        query.assessmentId,
+        studentFilter,
+      );
 
-    let totalResponses = 0;
-    let blankCount = 0;
-    let correctCount = 0;
-    const countByKey = new Map<string, number>();
-    for (const row of dist) {
-      totalResponses += row.count;
-      if (row.answer === null) {
-        blankCount += row.count;
-      } else {
-        countByKey.set(row.answer, (countByKey.get(row.answer) ?? 0) + row.count);
+      let totalResponses = 0;
+      let blankCount = 0;
+      let correctCount = 0;
+      const countByKey = new Map<string, number>();
+      for (const row of dist) {
+        totalResponses += row.count;
+        if (row.answer === null) {
+          blankCount += row.count;
+        } else {
+          countByKey.set(row.answer, (countByKey.get(row.answer) ?? 0) + row.count);
+        }
+        if (row.isCorrect) correctCount += row.count;
       }
-      if (row.isCorrect) correctCount += row.count;
-    }
 
-    const correctRate =
-      totalResponses > 0 ? (correctCount / totalResponses) * 100 : null;
+      const correctRate =
+        totalResponses > 0 ? (correctCount / totalResponses) * 100 : null;
 
-    const alternatives: AlternativeDistribution[] = altDefs.map((alt) => {
-      const count = countByKey.get(alt.key) ?? 0;
+      const alternatives: AlternativeDistribution[] = altDefs.map((alt) => {
+        const count = countByKey.get(alt.key) ?? 0;
+        return {
+          key: alt.key,
+          text: alt.text,
+          isCorrect: correctKey != null ? alt.key === correctKey : alt.isCorrect,
+          count,
+          percentage: totalResponses > 0 ? (count / totalResponses) * 100 : 0,
+        };
+      });
+
       return {
-        key: alt.key,
-        text: alt.text,
-        isCorrect: correctKey != null ? alt.key === correctKey : alt.isCorrect,
-        count,
-        percentage: totalResponses > 0 ? (count / totalResponses) * 100 : 0,
+        itemId,
+        position: item.position,
+        type: item.type,
+        stem: typeof content.stem === 'string' ? content.stem : null,
+        imageUrl: typeof content.imageUrl === 'string' ? content.imageUrl : null,
+        explanation:
+          typeof content.explanation === 'string' ? content.explanation : null,
+        correctKey,
+        skill,
+        content: contentRef,
+        tags,
+        totalResponses,
+        blankCount,
+        correctCount,
+        correctRate,
+        alternatives,
       };
     });
-
-    return {
-      itemId,
-      position: item.position,
-      type: item.type,
-      stem: typeof content.stem === 'string' ? content.stem : null,
-      imageUrl: typeof content.imageUrl === 'string' ? content.imageUrl : null,
-      explanation:
-        typeof content.explanation === 'string' ? content.explanation : null,
-      correctKey,
-      skill,
-      content: contentRef,
-      totalResponses,
-      blankCount,
-      correctCount,
-      correctRate,
-      alternatives,
-    };
   }
 
   // ───────────────────────────────────────────────────────────────────────────
@@ -316,6 +469,7 @@ export class ItemAnalysisService {
 
   /** Columnas de la matriz: ítems del instrumento, opcionalmente filtrados por nodeId. */
   private async loadQuestionColumns(
+    tx: Database,
     instrumentId: string,
     nodeId: string | undefined,
   ): Promise<MatrixQuestionColumn[]> {
@@ -324,7 +478,7 @@ export class ItemAnalysisService {
       isNull(items.deletedAt),
     ];
 
-    const rows = await this.db
+    const rows = await tx
       .select({
         itemId: items.id,
         position: items.position,
@@ -338,7 +492,7 @@ export class ItemAnalysisService {
 
     // Tags de todos los ítems (1 query) para derivar skill/content por ítem.
     const itemIds = rows.map((r) => r.itemId);
-    const tagsByItem = await this.loadTagsByItems(itemIds);
+    const tagsByItem = await this.loadTagsByItems(tx, itemIds);
 
     let columns: MatrixQuestionColumn[] = rows.map((r) => {
       const content = (r.content ?? {}) as ItemContent;
@@ -369,7 +523,7 @@ export class ItemAnalysisService {
       }
       // tagsByItem sólo guarda primary/secondary representativos; consultar el
       // set completo de tags para el filtro exacto.
-      const allTagged = await this.db
+      const allTagged = await tx
         .select({ itemId: itemTaxonomyTags.itemId })
         .from(itemTaxonomyTags)
         .where(
@@ -387,6 +541,7 @@ export class ItemAnalysisService {
 
   /** Tasa de acierto por ítem (1 query agregada group by item_id). */
   private async attachCorrectRates(
+    tx: Database,
     assessmentId: string,
     questions: MatrixQuestionColumn[],
     itemIds: string[],
@@ -405,7 +560,7 @@ export class ItemAnalysisService {
       conditions.push(inArray(responses.studentId, studentFilter));
     }
 
-    const rows = await this.db
+    const rows = await tx
       .select({
         itemId: responses.itemId,
         total: sql<number>`count(*)::int`,
@@ -430,6 +585,7 @@ export class ItemAnalysisService {
 
   /** Alumnos con respuestas en la evaluación dentro del scope, paginados. */
   private async loadStudentsPage(
+    tx: Database,
     assessmentId: string,
     orgId: string,
     studentFilter: string[] | null,
@@ -461,7 +617,7 @@ export class ItemAnalysisService {
     }
 
     // Total de alumnos distintos con respuestas (1 query).
-    const [countRow] = await this.db
+    const [countRow] = await tx
       .select({
         total: sql<number>`count(distinct ${responses.studentId})::int`,
       })
@@ -476,7 +632,7 @@ export class ItemAnalysisService {
     // con matrícula en varios años académicos generaría filas duplicadas y
     // descuadraría la paginación contra `total = count(distinct studentId)`. El %
     // logro viene de assessment_results (único por (assessment, alumno)).
-    const rows = await this.db
+    const rows = await tx
       .select({
         studentId: students.id,
         studentRut: students.rut,
@@ -508,6 +664,7 @@ export class ItemAnalysisService {
     // Curso de cada alumno relevante a ESTA evaluación (1 query), resuelto aparte
     // para no inflar la página. Un alumno → un único curso (DISTINCT ON).
     const classGroupByStudent = await this.loadStudentClassGroups(
+      tx,
       assessmentId,
       rows.map((r) => r.studentId),
     );
@@ -534,13 +691,14 @@ export class ItemAnalysisService {
    * vía DISTINCT ON, evitando duplicados por matrículas en varios años.
    */
   private async loadStudentClassGroups(
+    tx: Database,
     assessmentId: string,
     studentIds: string[],
   ): Promise<Map<string, { id: string; name: string }>> {
     const result = new Map<string, { id: string; name: string }>();
     if (studentIds.length === 0) return result;
 
-    const rows = await this.db
+    const rows = await tx
       .select({
         studentId: studentEnrollments.studentId,
         classGroupId: classGroups.id,
@@ -570,6 +728,7 @@ export class ItemAnalysisService {
 
   /** Respuestas de la página de alumnos (1 query) → mapa studentId → itemId → celda. */
   private async loadCells(
+    tx: Database,
     assessmentId: string,
     studentIds: string[],
     itemIds: string[],
@@ -577,7 +736,7 @@ export class ItemAnalysisService {
     const result = new Map<string, Map<string, MatrixCell>>();
     if (studentIds.length === 0 || itemIds.length === 0) return result;
 
-    const rows = await this.db
+    const rows = await tx
       .select({
         studentId: responses.studentId,
         itemId: responses.itemId,
@@ -620,6 +779,7 @@ export class ItemAnalysisService {
 
   /** Distribución agregada de respuestas por valor de alternativa (1 query group by). */
   private async loadAnswerDistribution(
+    tx: Database,
     itemId: string,
     assessmentId: string | undefined,
     studentFilter: string[] | null,
@@ -641,7 +801,7 @@ export class ItemAnalysisService {
       string | null
     >`nullif(coalesce(${responses.value}->>'raw', ${responses.value}->>'key', ${responses.value}->>'answer'), '')`;
 
-    const rows = await this.db
+    const rows = await tx
       .select({
         answer: answerExpr,
         isCorrect: sql<boolean>`coalesce(${responses.isCorrect}, false)`,
@@ -664,6 +824,7 @@ export class ItemAnalysisService {
    * contenido/OA.
    */
   private async loadTagsByItems(
+    tx: Database,
     itemIds: string[],
   ): Promise<
     Map<string, { skill: ItemTaxonomyRef | null; contentRef: ItemTaxonomyRef | null }>
@@ -674,7 +835,7 @@ export class ItemAnalysisService {
     >();
     if (itemIds.length === 0) return map;
 
-    const rows = await this.db
+    const rows = await tx
       .select({
         itemId: itemTaxonomyTags.itemId,
         tagType: sql<string>`${itemTaxonomyTags.tagType}::text`,
@@ -709,10 +870,48 @@ export class ItemAnalysisService {
 
   /** skill/content de un único ítem (reusa loadTagsByItems). */
   private async loadItemTags(
+    tx: Database,
     itemId: string,
   ): Promise<{ skill: ItemTaxonomyRef | null; contentRef: ItemTaxonomyRef | null }> {
-    const map = await this.loadTagsByItems([itemId]);
+    const map = await this.loadTagsByItems(tx, [itemId]);
     return map.get(itemId) ?? { skill: null, contentRef: null };
+  }
+
+  /**
+   * TODOS los nodos de taxonomía etiquetados en un ítem (1 query), con su código,
+   * tipo de tag (primary/secondary) y origen (human/ai). Ordenados primary→
+   * secondary, luego por tipo de nodo y nombre, para un agrupado estable en la UI.
+   */
+  private async loadAllItemTags(
+    tx: Database,
+    itemId: string,
+  ): Promise<QuestionTaxonomyTag[]> {
+    const rows = await tx
+      .select({
+        nodeId: taxonomyNodes.id,
+        nodeName: taxonomyNodes.name,
+        nodeType: sql<string>`${taxonomyNodes.type}::text`,
+        nodeCode: taxonomyNodes.code,
+        tagType: sql<string>`${itemTaxonomyTags.tagType}::text`,
+        taggedBy: sql<string>`${itemTaxonomyTags.taggedBy}::text`,
+      })
+      .from(itemTaxonomyTags)
+      .innerJoin(taxonomyNodes, eq(taxonomyNodes.id, itemTaxonomyTags.nodeId))
+      .where(eq(itemTaxonomyTags.itemId, itemId))
+      .orderBy(
+        asc(itemTaxonomyTags.tagType),
+        asc(taxonomyNodes.type),
+        asc(taxonomyNodes.name),
+      );
+
+    return rows.map((r) => ({
+      nodeId: r.nodeId,
+      nodeName: r.nodeName,
+      nodeType: r.nodeType,
+      nodeCode: r.nodeCode ?? null,
+      tagType: r.tagType,
+      taggedBy: r.taggedBy,
+    }));
   }
 
   // ───────────────────────────────────────────────────────────────────────────
@@ -726,6 +925,7 @@ export class ItemAnalysisService {
   }
 
   private async getAccessibleClassGroupIds(
+    tx: Database,
     user: JwtPayload,
     orgId: string,
   ): Promise<ScopeResult> {
@@ -738,7 +938,7 @@ export class ItemAnalysisService {
       return { scopeAll: false, classGroupIds: [] };
     }
 
-    const rows = await this.db
+    const rows = await tx
       .select({ classGroupId: subjectClasses.classGroupId })
       .from(teacherAssignments)
       .innerJoin(subjectClasses, eq(subjectClasses.id, teacherAssignments.subjectClassId))
@@ -759,6 +959,7 @@ export class ItemAnalysisService {
    * — no filtra existencia entre orgs. Devuelve también nombre de instrumento.
    */
   private async requireAssessmentOwnedByUser(
+    tx: Database,
     user: JwtPayload,
     orgId: string,
     assessmentId: string,
@@ -769,7 +970,7 @@ export class ItemAnalysisService {
     name: string | null;
     instrumentName: string;
   }> {
-    const [row] = await this.db
+    const [row] = await tx
       .select({
         id: assessments.id,
         orgId: assessments.orgId,
@@ -795,6 +996,7 @@ export class ItemAnalysisService {
 
   /** El ítem debe pertenecer a un instrumento de la org del caller. */
   private async requireItemVisible(
+    tx: Database,
     user: JwtPayload,
     orgId: string,
     itemId: string,
@@ -805,7 +1007,7 @@ export class ItemAnalysisService {
     type: string;
     content: Record<string, unknown>;
   }> {
-    const [row] = await this.db
+    const [row] = await tx
       .select({
         id: items.id,
         orgId: items.orgId,
@@ -840,11 +1042,12 @@ export class ItemAnalysisService {
 
   /** ¿La evaluación toca alguno de los class_groups del scope? */
   private async assessmentTouchesScope(
+    tx: Database,
     assessmentId: string,
     classGroupIds: string[],
   ): Promise<boolean> {
     if (classGroupIds.length === 0) return false;
-    const [row] = await this.db
+    const [row] = await tx
       .select({ classGroupId: assessmentCourseAssignments.classGroupId })
       .from(assessmentCourseAssignments)
       .where(
@@ -859,12 +1062,13 @@ export class ItemAnalysisService {
 
   /** ¿El classGroup pedido está en el scope del caller y pertenece a la org? */
   private async classGroupInScope(
+    tx: Database,
     orgId: string,
     scope: ScopeResult,
     classGroupId: string,
   ): Promise<boolean> {
     if (scope.scopeAll) {
-      const [cg] = await this.db
+      const [cg] = await tx
         .select({ id: classGroups.id })
         .from(classGroups)
         .where(and(eq(classGroups.id, classGroupId), eq(classGroups.orgId, orgId)))
@@ -879,6 +1083,7 @@ export class ItemAnalysisService {
    * scopeAll sin filtro (sin filtro extra de student).
    */
   private async resolveAccessibleStudentIds(
+    tx: Database,
     orgId: string,
     scope: ScopeResult,
     classGroupId: string | undefined,
@@ -899,7 +1104,7 @@ export class ItemAnalysisService {
 
     if (allowedClassGroupIds.length === 0) return [];
 
-    const rows = await this.db
+    const rows = await tx
       .select({ studentId: studentEnrollments.studentId })
       .from(studentEnrollments)
       .innerJoin(students, eq(students.id, studentEnrollments.studentId))

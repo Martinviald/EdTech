@@ -16,6 +16,7 @@ import {
   taxonomyNodes,
   teacherAssignments,
   assessmentResults,
+  withOrgContext,
 } from '@soe/db';
 import {
   RESULTS_VIEWER_ROLES,
@@ -74,44 +75,49 @@ export class AnalyticsService {
     query: GenerationalComparisonQueryDto,
   ): Promise<GenerationalComparisonResponse> {
     const orgId = this.requireOrgId(user);
-    const scope = await this.getAccessibleClassGroupIds(user, orgId);
 
-    const meta = await this.resolveGenerationalMeta(orgId, query);
+    return withOrgContext(this.db, orgId, async (tx) => {
+      const scope = await this.getAccessibleClassGroupIds(tx, user, orgId);
 
-    // Profesor sin cursos → no hay datos visibles. Devolvemos serie vacía.
-    if (!scope.scopeAll && scope.classGroupIds.length === 0) {
-      return { ...meta, series: [] };
-    }
+      const meta = await this.resolveGenerationalMeta(tx, orgId, query);
 
-    // Filtro base sobre class_groups: grade + org. El scope de profesor restringe
-    // a sus class_groups asignados.
-    const cgConditions = [
-      eq(classGroups.gradeId, query.gradeId),
-      eq(classGroups.orgId, orgId),
-    ];
-    if (!scope.scopeAll) {
-      cgConditions.push(inArray(classGroups.id, scope.classGroupIds));
-    }
+      // Profesor sin cursos → no hay datos visibles. Devolvemos serie vacía.
+      if (!scope.scopeAll && scope.classGroupIds.length === 0) {
+        return { ...meta, series: [] };
+      }
 
-    // Filtros opcionales sobre el instrumento de la evaluación.
-    const instrumentConditions = this.instrumentFilters(query);
+      // Filtro base sobre class_groups: grade + org. El scope de profesor
+      // restringe a sus class_groups asignados.
+      const cgConditions = [
+        eq(classGroups.gradeId, query.gradeId),
+        eq(classGroups.orgId, orgId),
+      ];
+      if (!scope.scopeAll) {
+        cgConditions.push(inArray(classGroups.id, scope.classGroupIds));
+      }
 
-    if (query.nodeId) {
-      const series = await this.generationalSeriesFromSkills(
+      // Filtros opcionales sobre el instrumento de la evaluación.
+      const instrumentConditions = this.instrumentFilters(query);
+
+      if (query.nodeId) {
+        const series = await this.generationalSeriesFromSkills(
+          tx,
+          orgId,
+          cgConditions,
+          instrumentConditions,
+          query.nodeId,
+        );
+        return { ...meta, series };
+      }
+
+      const series = await this.generationalSeriesFromResults(
+        tx,
         orgId,
         cgConditions,
         instrumentConditions,
-        query.nodeId,
       );
       return { ...meta, series };
-    }
-
-    const series = await this.generationalSeriesFromResults(
-      orgId,
-      cgConditions,
-      instrumentConditions,
-    );
-    return { ...meta, series };
+    });
   }
 
   // ───────────────────────────────────────────────────────────────────────────
@@ -124,15 +130,18 @@ export class AnalyticsService {
     query: ProgressionQueryDto,
   ): Promise<ProgressionResponse> {
     const orgId = this.requireOrgId(user);
-    const scope = await this.getAccessibleClassGroupIds(user, orgId);
 
-    if (query.scope === 'student') {
-      return this.progressionForStudent(orgId, scope, query);
-    }
-    if (query.scope === 'class') {
-      return this.progressionForClass(orgId, scope, query);
-    }
-    return this.progressionForSkill(orgId, scope, query);
+    return withOrgContext(this.db, orgId, async (tx) => {
+      const scope = await this.getAccessibleClassGroupIds(tx, user, orgId);
+
+      if (query.scope === 'student') {
+        return this.progressionForStudent(tx, orgId, scope, query);
+      }
+      if (query.scope === 'class') {
+        return this.progressionForClass(tx, orgId, scope, query);
+      }
+      return this.progressionForSkill(tx, orgId, scope, query);
+    });
   }
 
   // ───────────────────────────────────────────────────────────────────────────
@@ -145,11 +154,12 @@ export class AnalyticsService {
    * ninguna define escala. Evita hardcodear el supuesto de escala chilena.
    */
   private async resolveScopePassingGrade(
+    tx: Database,
     orgId: string,
     cgConditions: SQL[],
     instrumentConditions: SQL[],
   ): Promise<number> {
-    const [row] = await this.db
+    const [row] = await tx
       .select({ passingGrade: gradingScales.passingGrade })
       .from(assessments)
       .innerJoin(
@@ -178,17 +188,19 @@ export class AnalyticsService {
    * aprobación y distribución por nivel de desempeño.
    */
   private async generationalSeriesFromResults(
+    tx: Database,
     orgId: string,
     cgConditions: SQL[],
     instrumentConditions: SQL[],
   ): Promise<GenerationalPoint[]> {
     const passingGrade = await this.resolveScopePassingGrade(
+      tx,
       orgId,
       cgConditions,
       instrumentConditions,
     );
 
-    const rows = await this.db
+    const rows = await tx
       .select({
         academicYearId: academicYears.id,
         year: academicYears.year,
@@ -221,6 +233,7 @@ export class AnalyticsService {
 
     // La distribución por nivel se calcula con una query agregada aparte.
     const distByYear = await this.generationalDistributionFromResults(
+      tx,
       orgId,
       cgConditions,
       instrumentConditions,
@@ -247,11 +260,12 @@ export class AnalyticsService {
    * agregada en SQL para evitar N+1.
    */
   private async generationalDistributionFromResults(
+    tx: Database,
     orgId: string,
     cgConditions: SQL[],
     instrumentConditions: SQL[],
   ): Promise<Map<string, PerformanceDistributionBucket[]>> {
-    const rows = await this.db
+    const rows = await tx
       .select({
         academicYearId: academicYears.id,
         level: assessmentResults.performanceLevel,
@@ -285,12 +299,13 @@ export class AnalyticsService {
    * Serie por año enfocada en una habilidad (nodeId), usando skill_results.
    */
   private async generationalSeriesFromSkills(
+    tx: Database,
     orgId: string,
     cgConditions: SQL[],
     instrumentConditions: SQL[],
     nodeId: string,
   ): Promise<GenerationalPoint[]> {
-    const rows = await this.db
+    const rows = await tx
       .select({
         academicYearId: academicYears.id,
         year: academicYears.year,
@@ -320,7 +335,7 @@ export class AnalyticsService {
       .groupBy(academicYears.id, academicYears.year)
       .orderBy(asc(academicYears.year));
 
-    const distRows = await this.db
+    const distRows = await tx
       .select({
         academicYearId: academicYears.id,
         level: skillResults.performanceLevel,
@@ -367,10 +382,11 @@ export class AnalyticsService {
 
   /** Etiquetas del grade/subject/node para la respuesta. */
   private async resolveGenerationalMeta(
+    tx: Database,
     orgId: string,
     query: GenerationalComparisonQueryDto,
   ): Promise<Omit<GenerationalComparisonResponse, 'series'>> {
-    const [grade] = await this.db
+    const [grade] = await tx
       .select({ name: grades.name })
       .from(grades)
       .where(eq(grades.id, query.gradeId))
@@ -378,7 +394,7 @@ export class AnalyticsService {
 
     let subjectName: string | null = null;
     if (query.subjectId) {
-      const [subject] = await this.db
+      const [subject] = await tx
         .select({ name: subjects.name })
         .from(subjects)
         .where(eq(subjects.id, query.subjectId))
@@ -388,7 +404,7 @@ export class AnalyticsService {
 
     let nodeName: string | null = null;
     if (query.nodeId) {
-      const [node] = await this.db
+      const [node] = await tx
         .select({ name: taxonomyNodes.name })
         .from(taxonomyNodes)
         .where(eq(taxonomyNodes.id, query.nodeId))
@@ -411,6 +427,7 @@ export class AnalyticsService {
   // ───────────────────────────────────────────────────────────────────────────
 
   private async progressionForStudent(
+    tx: Database,
     orgId: string,
     scope: { scopeAll: boolean; classGroupIds: string[] },
     query: ProgressionQueryDto,
@@ -418,18 +435,18 @@ export class AnalyticsService {
     const studentId = query.studentId!;
 
     // Verificar que el alumno pertenece a la org y es visible para el caller.
-    const visible = await this.isStudentVisible(orgId, scope, studentId);
+    const visible = await this.isStudentVisible(tx, orgId, scope, studentId);
     if (!visible) {
       throw new ForbiddenException('Sin acceso a la progresión de este alumno');
     }
 
-    const [student] = await this.db
+    const [student] = await tx
       .select({ firstName: students.firstName, lastName: students.lastName })
       .from(students)
       .where(and(eq(students.id, studentId), eq(students.orgId, orgId)))
       .limit(1);
 
-    const rows = await this.db
+    const rows = await tx
       .select({
         assessmentId: assessments.id,
         assessmentName: assessments.name,
@@ -463,6 +480,7 @@ export class AnalyticsService {
   }
 
   private async progressionForClass(
+    tx: Database,
     orgId: string,
     scope: { scopeAll: boolean; classGroupIds: string[] },
     query: ProgressionQueryDto,
@@ -473,7 +491,7 @@ export class AnalyticsService {
       throw new ForbiddenException('Sin acceso a la progresión de este curso');
     }
 
-    const [cg] = await this.db
+    const [cg] = await tx
       .select({ name: classGroups.name })
       .from(classGroups)
       .where(and(eq(classGroups.id, classGroupId), eq(classGroups.orgId, orgId)))
@@ -489,7 +507,7 @@ export class AnalyticsService {
       };
     }
 
-    const rows = await this.db
+    const rows = await tx
       .select({
         assessmentId: assessments.id,
         assessmentName: assessments.name,
@@ -534,20 +552,21 @@ export class AnalyticsService {
   }
 
   private async progressionForSkill(
+    tx: Database,
     orgId: string,
     scope: { scopeAll: boolean; classGroupIds: string[] },
     query: ProgressionQueryDto,
   ): Promise<ProgressionResponse> {
     const nodeId = query.nodeId!;
 
-    const [node] = await this.db
+    const [node] = await tx
       .select({ name: taxonomyNodes.name })
       .from(taxonomyNodes)
       .where(eq(taxonomyNodes.id, nodeId))
       .limit(1);
 
     // Para profesor puro restringimos a alumnos de sus cursos.
-    const studentFilter = await this.skillStudentFilter(orgId, scope);
+    const studentFilter = await this.skillStudentFilter(tx, orgId, scope);
     if (studentFilter !== null && studentFilter.length === 0) {
       return {
         scope: 'skill',
@@ -569,7 +588,7 @@ export class AnalyticsService {
       conditions.push(inArray(skillResults.studentId, studentFilter));
     }
 
-    const rows = await this.db
+    const rows = await tx
       .select({
         assessmentId: assessments.id,
         assessmentName: assessments.name,
@@ -618,6 +637,7 @@ export class AnalyticsService {
    *  - `scopeAll = false` → teacher puro, ve sólo sus class_groups asignados.
    */
   private async getAccessibleClassGroupIds(
+    tx: Database,
     user: JwtPayload,
     orgId: string,
   ): Promise<{ scopeAll: boolean; classGroupIds: string[] }> {
@@ -630,7 +650,7 @@ export class AnalyticsService {
       return { scopeAll: false, classGroupIds: [] };
     }
 
-    const rows = await this.db
+    const rows = await tx
       .select({ classGroupId: subjectClasses.classGroupId })
       .from(teacherAssignments)
       .innerJoin(subjectClasses, eq(subjectClasses.id, teacherAssignments.subjectClassId))
@@ -648,13 +668,14 @@ export class AnalyticsService {
 
   /** Set de studentIds visibles para un profesor, o `null` si ve toda la org. */
   private async skillStudentFilter(
+    tx: Database,
     orgId: string,
     scope: { scopeAll: boolean; classGroupIds: string[] },
   ): Promise<string[] | null> {
     if (scope.scopeAll) return null;
     if (scope.classGroupIds.length === 0) return [];
 
-    const rows = await this.db
+    const rows = await tx
       .select({ studentId: studentEnrollments.studentId })
       .from(studentEnrollments)
       .innerJoin(students, eq(students.id, studentEnrollments.studentId))
@@ -670,11 +691,12 @@ export class AnalyticsService {
 
   /** Verifica que un alumno pertenezca a la org y al scope del caller. */
   private async isStudentVisible(
+    tx: Database,
     orgId: string,
     scope: { scopeAll: boolean; classGroupIds: string[] },
     studentId: string,
   ): Promise<boolean> {
-    const [student] = await this.db
+    const [student] = await tx
       .select({ id: students.id })
       .from(students)
       .where(
@@ -689,7 +711,7 @@ export class AnalyticsService {
     if (scope.scopeAll) return true;
     if (scope.classGroupIds.length === 0) return false;
 
-    const [enrollment] = await this.db
+    const [enrollment] = await tx
       .select({ id: studentEnrollments.id })
       .from(studentEnrollments)
       .where(

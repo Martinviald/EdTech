@@ -15,6 +15,7 @@ import {
   items,
   responses,
   skillResults,
+  withOrgContext,
 } from '@soe/db';
 import {
   DEFAULT_GRADING_SCALE,
@@ -141,7 +142,10 @@ export class AnswerSheetsService {
       );
     }
 
-    const matches = await matchStudents(this.db, orgId, entry.rows);
+    // matchStudents consulta `students` (RLS): correr con contexto de org.
+    const matches = await withOrgContext(this.db, orgId, async (tx) =>
+      matchStudents(tx, orgId, entry.rows),
+    );
 
     // Posiciones detectadas (todas las preguntas que aparecieron en alguna fila).
     const positionSet = new Set<string>();
@@ -278,7 +282,10 @@ export class AnswerSheetsService {
     }
 
     // 3. Re-matchear alumnos (no confiamos en datos del preview).
-    const matches = await matchStudents(this.db, orgId, entry.rows);
+    //    matchStudents consulta `students` (RLS): correr con contexto de org.
+    const matches = await withOrgContext(this.db, orgId, async (tx) =>
+      matchStudents(tx, orgId, entry.rows),
+    );
 
     // 4. Construir responses + errores.
     const errors: AnswerSheetRowError[] = [];
@@ -365,7 +372,9 @@ export class AnswerSheetsService {
     const scale = await this.resolveGradingScale(instrument.gradingScaleId);
 
     // 6. Transacción: crear/reusar assessment + responses + results + import_job.
-    const transactionResult = await this.db.transaction(async (tx) => {
+    //    Toca assessments/responses/assessment_results/skill_results/import_jobs
+    //    (todas con RLS): withOrgContext fija el contexto de org en la transacción.
+    const transactionResult = await withOrgContext(this.db, orgId, async (tx) => {
       // Crear o reusar assessment.
       let assessmentId: string;
       if (body.assessmentId) {
@@ -522,10 +531,13 @@ export class AnswerSheetsService {
 
   async getJob(user: JwtPayload, jobId: string): Promise<ImportJobModel> {
     const orgId = this.requireOrgId(user);
-    const [row] = await this.db
-      .select()
-      .from(importJobs)
-      .where(and(eq(importJobs.id, jobId), eq(importJobs.orgId, orgId)));
+    // importJobs tiene RLS: correr el SELECT con contexto de org.
+    const [row] = await withOrgContext(this.db, orgId, async (tx) =>
+      tx
+        .select()
+        .from(importJobs)
+        .where(and(eq(importJobs.id, jobId), eq(importJobs.orgId, orgId))),
+    );
     if (!row) throw new NotFoundException('Import job no encontrado');
     return {
       id: row.id,

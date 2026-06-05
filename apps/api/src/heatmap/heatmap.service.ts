@@ -11,6 +11,7 @@ import {
   subjects,
   taxonomyNodes,
   teacherAssignments,
+  withOrgContext,
 } from '@soe/db';
 import {
   RESULTS_VIEWER_ROLES,
@@ -74,33 +75,41 @@ export class HeatmapService {
     query: HeatmapQueryDto,
   ): Promise<HeatmapResponse> {
     const orgId = this.requireOrgId(user);
-    const scope = await this.getAccessibleClassGroupIds(user, orgId);
 
-    // Profesor sin cursos → no hay datos visibles.
-    if (!scope.scopeAll && scope.classGroupIds.length === 0) {
-      return { subjects: [], rows: [] };
-    }
+    return withOrgContext(this.db, orgId, async (tx) => {
+      const scope = await this.getAccessibleClassGroupIds(tx, user, orgId);
 
-    // Set de alumnos visibles según scope + filtros de curso/grado/período
-    // (null = toda la org sin restricción de alumno).
-    const studentIds = await this.resolveScopedStudentIds(orgId, scope, query);
-    if (studentIds !== null && studentIds.length === 0) {
-      return { subjects: [], rows: [] };
-    }
+      // Profesor sin cursos → no hay datos visibles.
+      if (!scope.scopeAll && scope.classGroupIds.length === 0) {
+        return { subjects: [], rows: [] };
+      }
 
-    const baseConditions = this.buildConditions(orgId, query, studentIds);
+      // Set de alumnos visibles según scope + filtros de curso/grado/período
+      // (null = toda la org sin restricción de alumno).
+      const studentIds = await this.resolveScopedStudentIds(
+        tx,
+        orgId,
+        scope,
+        query,
+      );
+      if (studentIds !== null && studentIds.length === 0) {
+        return { subjects: [], rows: [] };
+      }
 
-    // 1 query: celdas agregadas por (node, subject).
-    const cellRows = await this.loadCellRows(baseConditions);
-    if (cellRows.length === 0) {
-      return { subjects: [], rows: [] };
-    }
+      const baseConditions = this.buildConditions(orgId, query, studentIds);
 
-    // 1 query: overall por nodo (promedio del nodo sobre todas las asignaturas
-    // visibles). Es el promedio real student-weighted, no el promedio de celdas.
-    const overallRows = await this.loadOverallRows(baseConditions);
+      // 1 query: celdas agregadas por (node, subject).
+      const cellRows = await this.loadCellRows(tx, baseConditions);
+      if (cellRows.length === 0) {
+        return { subjects: [], rows: [] };
+      }
 
-    return this.assembleResponse(cellRows, overallRows);
+      // 1 query: overall por nodo (promedio del nodo sobre todas las asignaturas
+      // visibles). Es el promedio real student-weighted, no el promedio de celdas.
+      const overallRows = await this.loadOverallRows(tx, baseConditions);
+
+      return this.assembleResponse(cellRows, overallRows);
+    });
   }
 
   // ───────────────────────────────────────────────────────────────────────────
@@ -149,8 +158,11 @@ export class HeatmapService {
   }
 
   /** UNA query: % logro promedio + alumnos distintos por (node, subject). */
-  private async loadCellRows(conditions: SQL[]): Promise<CellRow[]> {
-    return this.db
+  private async loadCellRows(
+    tx: Database,
+    conditions: SQL[],
+  ): Promise<CellRow[]> {
+    return tx
       .select({
         nodeId: skillResults.nodeId,
         nodeName: taxonomyNodes.name,
@@ -179,8 +191,11 @@ export class HeatmapService {
   }
 
   /** UNA query: % logro promedio del nodo sobre todas las asignaturas visibles. */
-  private async loadOverallRows(conditions: SQL[]): Promise<OverallRow[]> {
-    return this.db
+  private async loadOverallRows(
+    tx: Database,
+    conditions: SQL[],
+  ): Promise<OverallRow[]> {
+    return tx
       .select({
         nodeId: skillResults.nodeId,
         avgPct: sql<string | null>`avg(${skillResults.percentage}::numeric)`,
@@ -308,6 +323,7 @@ export class HeatmapService {
    *  - `scopeAll = false` → teacher puro, ve sólo sus class_groups asignados.
    */
   private async getAccessibleClassGroupIds(
+    tx: Database,
     user: JwtPayload,
     orgId: string,
   ): Promise<Scope> {
@@ -320,7 +336,7 @@ export class HeatmapService {
       return { scopeAll: false, classGroupIds: [] };
     }
 
-    const rows = await this.db
+    const rows = await tx
       .select({ classGroupId: subjectClasses.classGroupId })
       .from(teacherAssignments)
       .innerJoin(
@@ -346,6 +362,7 @@ export class HeatmapService {
    * alumno). Retorna `[]` cuando el filtro deja el set vacío.
    */
   private async resolveScopedStudentIds(
+    tx: Database,
     orgId: string,
     scope: Scope,
     query: HeatmapQueryDto,
@@ -378,7 +395,7 @@ export class HeatmapService {
       cgConditions.push(eq(classGroups.academicYearId, query.academicYearId));
     }
 
-    const rows = await this.db
+    const rows = await tx
       .select({ studentId: studentEnrollments.studentId })
       .from(studentEnrollments)
       .innerJoin(classGroups, eq(classGroups.id, studentEnrollments.classGroupId))

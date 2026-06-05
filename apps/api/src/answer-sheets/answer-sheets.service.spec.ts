@@ -151,6 +151,8 @@ function buildMockDb(plan: {
   });
 
   const txDb = {
+    // withOrgContext() ejecuta set_config vía tx.execute antes del callback.
+    execute: async () => [],
     select: (cols?: unknown) => ({
       from: (table: unknown) => {
         if (cols !== undefined) {

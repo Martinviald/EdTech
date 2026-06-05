@@ -1,4 +1,5 @@
 import { config } from 'dotenv';
+import { readFileSync } from 'fs';
 import { resolve } from 'path';
 import { drizzle } from 'drizzle-orm/postgres-js';
 import { migrate } from 'drizzle-orm/postgres-js/migrator';
@@ -6,10 +7,17 @@ import postgres from 'postgres';
 
 config({ path: resolve(__dirname, '../../../.env') });
 
+// Las políticas RLS NO viven en el schema Drizzle (drizzle-kit no las regenera).
+// Se aplican SIEMPRE de forma idempotente tras migrar, para que sobrevivan a
+// cualquier db:generate / aplanamiento de migraciones. Ver sql/rls-policies.sql.
+const RLS_POLICIES_PATH = resolve(__dirname, '../sql/rls-policies.sql');
+
 async function main() {
-  const databaseUrl = process.env.DATABASE_URL;
+  // migrate y seed usan un rol privilegiado (owner/superuser) que puede hacer DDL
+  // y cargar datos sin contexto de org. La API usa DATABASE_URL (rol sujeto a RLS).
+  const databaseUrl = process.env.DATABASE_ADMIN_URL ?? process.env.DATABASE_URL;
   if (!databaseUrl) {
-    throw new Error('DATABASE_URL is required');
+    throw new Error('DATABASE_ADMIN_URL o DATABASE_URL es requerido');
   }
 
   const sql = postgres(databaseUrl, { max: 1 });
@@ -18,6 +26,11 @@ async function main() {
   console.log('Running migrations...');
   await migrate(db, { migrationsFolder: './drizzle/migrations' });
   console.log('Migrations completed.');
+
+  console.log('Applying RLS policies (idempotent)...');
+  const rlsSql = readFileSync(RLS_POLICIES_PATH, 'utf-8');
+  await sql.unsafe(rlsSql);
+  console.log('RLS policies applied (6 tablas: students, assessments, import_jobs, responses, assessment_results, skill_results).');
 
   await sql.end();
   process.exit(0);

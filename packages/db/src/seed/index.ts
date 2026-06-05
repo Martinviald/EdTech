@@ -81,9 +81,11 @@ export const DEMO_USERS = [
 ];
 
 async function main() {
-  const databaseUrl = process.env.DATABASE_URL;
+  // El seed inserta en tablas con RLS+FORCE sin contexto de org: usa el rol
+  // privilegiado (DATABASE_ADMIN_URL) que bypassa RLS. Cae a DATABASE_URL en dev.
+  const databaseUrl = process.env.DATABASE_ADMIN_URL ?? process.env.DATABASE_URL;
   if (!databaseUrl) {
-    throw new Error('DATABASE_URL is required');
+    throw new Error('DATABASE_ADMIN_URL o DATABASE_URL es requerido');
   }
 
   const db = createDbClient(databaseUrl);

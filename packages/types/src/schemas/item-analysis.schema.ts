@@ -17,6 +17,38 @@ import { z } from 'zod';
 // ─────────────────────────────────────────────────────────────────────────────
 
 // ═══════════════════════════════════════════════════════════════════════════
+// Selector de evaluación (apoyo a H6.11): lista de evaluaciones visibles para el
+// usuario, con resultados, para poblar el dropdown de la vista de detalle.
+// GET /api/item-analysis/assessments
+// ═══════════════════════════════════════════════════════════════════════════
+
+/** Filtros del listado: acotan las evaluaciones ofrecidas (mismos que el dashboard). */
+export const assessmentListQuerySchema = z.object({
+  subjectId: z.string().uuid().optional(),
+  gradeId: z.string().uuid().optional(),
+  classGroupId: z.string().uuid().optional(),
+  academicYearId: z.string().uuid().optional(),
+  instrumentType: z.string().min(1).optional(),
+});
+export type AssessmentListQueryDto = z.infer<typeof assessmentListQuerySchema>;
+
+/** Una evaluación seleccionable para la tabla cruzada. */
+export type AssessmentOption = {
+  assessmentId: string;
+  name: string | null;
+  instrumentName: string;
+  instrumentType: string;
+  subjectName: string | null;
+  gradeName: string | null;
+  administeredAt: string | Date | null;
+  studentsCount: number; // alumnos con resultados (dentro del scope)
+};
+
+export type AssessmentListResponse = {
+  data: AssessmentOption[];
+};
+
+// ═══════════════════════════════════════════════════════════════════════════
 // H6.11 — Tabla cruzada alumno × pregunta
 // GET /api/item-analysis/matrix?assessmentId=...
 // ═══════════════════════════════════════════════════════════════════════════
@@ -107,6 +139,20 @@ export type AlternativeDistribution = {
   percentage: number; // 0..100, proporción del total de respuestas
 };
 
+/**
+ * Un nodo de taxonomía asociado al ítem (item_taxonomy_tags → taxonomy_nodes).
+ * A diferencia de `skill`/`content` (un solo nodo representativo), esto lista
+ * TODOS los nodos etiquetados en la pregunta.
+ */
+export type QuestionTaxonomyTag = {
+  nodeId: string;
+  nodeName: string;
+  nodeType: string; // taxonomy_node_type: skill | content | learning_objective | text_type | axis | ...
+  nodeCode: string | null; // ej. "OA 4"
+  tagType: string; // item_tag_type: primary | secondary
+  taggedBy: string; // human | ai
+};
+
 export type QuestionAnalysisResponse = {
   itemId: string;
   position: number;
@@ -115,8 +161,9 @@ export type QuestionAnalysisResponse = {
   imageUrl: string | null;
   explanation: string | null;
   correctKey: string | null;
-  skill: ItemTaxonomyRef | null;
-  content: ItemTaxonomyRef | null;
+  skill: ItemTaxonomyRef | null; // habilidad principal (representativo, compat)
+  content: ItemTaxonomyRef | null; // contenido/OA principal (representativo, compat)
+  tags: QuestionTaxonomyTag[]; // TODOS los nodos asociados a la pregunta
   totalResponses: number; // alumnos con respuesta registrada (incluye en blanco)
   blankCount: number; // alumnos sin alternativa elegida
   correctCount: number;

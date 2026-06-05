@@ -1,10 +1,11 @@
 'use client';
 
 import type { JSX } from 'react';
-import { CheckCircle2, FileQuestion, Loader2 } from 'lucide-react';
+import { CheckCircle2, FileQuestion, Loader2, Sparkles } from 'lucide-react';
 import type {
   AlternativeDistribution,
   QuestionAnalysisResponse,
+  QuestionTaxonomyTag,
 } from '@soe/types';
 import {
   Sheet,
@@ -56,8 +57,28 @@ export function QuestionDetailPanel(props: {
         side="right"
         className="w-full overflow-y-auto sm:max-w-lg lg:max-w-xl"
       >
+        {/* Header SIEMPRE presente (título + descripción) para accesibilidad:
+            Radix Dialog exige un Title/Description en cada Content. */}
+        <SheetHeader className="space-y-2 pr-8">
+          <div className="flex flex-wrap items-center gap-2">
+            <Badge variant="secondary">
+              {data ? `Pregunta ${data.position}` : 'Pregunta'}
+            </Badge>
+            {data?.correctKey ? (
+              <Badge variant="success">Clave correcta: {data.correctKey}</Badge>
+            ) : null}
+          </div>
+          <SheetTitle className="text-base leading-snug">
+            {data ? `Detalle de la pregunta ${data.position}` : 'Detalle de la pregunta'}
+          </SheetTitle>
+          <SheetDescription>
+            Enunciado, distribución de respuestas, análisis de distractores y nodos
+            asociados a la pregunta.
+          </SheetDescription>
+        </SheetHeader>
+
         {data === null ? (
-          <div className="flex h-full flex-col items-center justify-center gap-3 text-muted-foreground">
+          <div className="flex flex-col items-center justify-center gap-3 py-16 text-muted-foreground">
             <Loader2 className="size-6 animate-spin" aria-hidden />
             <p className="text-sm">Cargando análisis de la pregunta…</p>
           </div>
@@ -73,21 +94,17 @@ function QuestionDetailContent({ data }: { data: QuestionAnalysisResponse }): JS
   const distractor = topDistractorKey(data.alternatives);
 
   return (
-    <div className="space-y-6">
-      <SheetHeader className="space-y-2 pr-8">
-        <div className="flex flex-wrap items-center gap-2">
-          <Badge variant="secondary">Pregunta {data.position}</Badge>
-          {data.correctKey ? (
-            <Badge variant="success">Clave correcta: {data.correctKey}</Badge>
-          ) : null}
-        </div>
-        <SheetTitle className="text-base leading-snug">
-          {data.stem ?? 'Pregunta sin enunciado registrado'}
-        </SheetTitle>
+    <div className="mt-6 space-y-6">
+      {/* Enunciado de la pregunta, prominente y etiquetado */}
+      <section className="space-y-1.5">
+        <h3 className="text-sm font-semibold text-foreground">Enunciado</h3>
+        <p className="whitespace-pre-line text-sm leading-relaxed text-foreground">
+          {data.stem ?? 'Esta pregunta no tiene enunciado registrado.'}
+        </p>
         {data.explanation ? (
-          <SheetDescription>{data.explanation}</SheetDescription>
+          <p className="text-xs text-muted-foreground">{data.explanation}</p>
         ) : null}
-      </SheetHeader>
+      </section>
 
       {data.imageUrl ? (
         // eslint-disable-next-line @next/next/no-img-element
@@ -117,21 +134,8 @@ function QuestionDetailContent({ data }: { data: QuestionAnalysisResponse }): JS
         />
       </div>
 
-      {/* Habilidad / contenido */}
-      {data.skill || data.content ? (
-        <div className="flex flex-wrap gap-2">
-          {data.skill ? (
-            <Badge variant="info" className="font-normal">
-              Habilidad: {data.skill.nodeName}
-            </Badge>
-          ) : null}
-          {data.content ? (
-            <Badge variant="outline" className="font-normal">
-              Contenido: {data.content.nodeName}
-            </Badge>
-          ) : null}
-        </div>
-      ) : null}
+      {/* Todos los nodos de taxonomía asociados a la pregunta */}
+      <QuestionNodes tags={data.tags} />
 
       {/* Distribución por alternativa */}
       <section className="space-y-3">
@@ -166,6 +170,97 @@ function QuestionDetailContent({ data }: { data: QuestionAnalysisResponse }): JS
         )}
       </section>
     </div>
+  );
+}
+
+// Etiquetas legibles por tipo de nodo (taxonomy_node_type) y orden de aparición.
+const NODE_TYPE_LABELS: Record<string, string> = {
+  skill: 'Habilidades',
+  content: 'Contenidos',
+  learning_objective: 'Objetivos de aprendizaje',
+  text_type: 'Tipos de texto',
+  axis: 'Ejes',
+  domain: 'Dominios',
+  subdomain: 'Subdominios',
+  performance_level: 'Niveles de desempeño',
+  descriptor: 'Descriptores',
+  criterion: 'Criterios',
+  paper: 'Papers',
+};
+
+const NODE_TYPE_ORDER = Object.keys(NODE_TYPE_LABELS);
+
+function nodeTypeRank(type: string): number {
+  const i = NODE_TYPE_ORDER.indexOf(type);
+  return i === -1 ? NODE_TYPE_ORDER.length : i;
+}
+
+/** Lista TODOS los nodos asociados a la pregunta, agrupados por tipo de nodo. */
+function QuestionNodes({ tags }: { tags: QuestionTaxonomyTag[] }): JSX.Element {
+  return (
+    <section className="space-y-3">
+      <h3 className="text-sm font-semibold text-foreground">Nodos asociados</h3>
+      {tags.length === 0 ? (
+        <p className="text-sm text-muted-foreground">
+          Esta pregunta no tiene nodos de taxonomía asociados.
+        </p>
+      ) : (
+        <div className="space-y-3">
+          {groupTagsByType(tags).map(([type, group]) => (
+            <div key={type} className="space-y-1.5">
+              <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                {NODE_TYPE_LABELS[type] ?? type}
+              </p>
+              <ul className="flex flex-wrap gap-2">
+                {group.map((tag) => (
+                  <li key={tag.nodeId}>
+                    <span className="inline-flex items-center gap-1.5 rounded-md border bg-card px-2.5 py-1 text-sm">
+                      {tag.nodeCode ? (
+                        <span className="font-medium tabular-nums">{tag.nodeCode}</span>
+                      ) : null}
+                      <span className="text-foreground">{tag.nodeName}</span>
+                      {tag.tagType === 'secondary' ? (
+                        <Badge
+                          variant="outline"
+                          className="ml-0.5 px-1 py-0 text-[10px] font-normal"
+                        >
+                          secundario
+                        </Badge>
+                      ) : null}
+                      {tag.taggedBy === 'ai' ? (
+                        <Badge
+                          variant="secondary"
+                          className="ml-0.5 gap-0.5 px-1 py-0 text-[10px] font-normal"
+                          title="Sugerido por IA"
+                        >
+                          <Sparkles className="size-2.5" aria-hidden />
+                          IA
+                        </Badge>
+                      ) : null}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ))}
+        </div>
+      )}
+    </section>
+  );
+}
+
+/** Agrupa los tags por `nodeType`, conservando el orden de relevancia. */
+function groupTagsByType(
+  tags: QuestionTaxonomyTag[],
+): [string, QuestionTaxonomyTag[]][] {
+  const groups = new Map<string, QuestionTaxonomyTag[]>();
+  for (const tag of tags) {
+    const arr = groups.get(tag.nodeType) ?? [];
+    arr.push(tag);
+    groups.set(tag.nodeType, arr);
+  }
+  return Array.from(groups.entries()).sort(
+    ([a], [b]) => nodeTypeRank(a) - nodeTypeRank(b),
   );
 }
 
