@@ -258,12 +258,8 @@ describe('DashboardsService.getPerformance', () => {
       [{ id: 'a1' }],
       // 2. resolveThresholds → resolveApplicableScale (sin escala → null)
       [],
-      // 3. computePerformanceDistribution
-      [
-        { level: 'advanced', count: 1 },
-        { level: 'insufficient', count: 1 },
-      ],
-      // 4. aggregateRows (group by student)
+      // 3. aggregateRows (group by student). La distribución se calcula en memoria
+      //    a partir de esta clasificación (sin query separada).
       [
         {
           studentId: 's1',
@@ -282,7 +278,7 @@ describe('DashboardsService.getPerformance', () => {
           avgGrade: '3.00',
         },
       ],
-      // 5. loadClassGroupByStudent
+      // 4. loadClassGroupByStudent
       [
         { studentId: 's1', classGroupId: 'cg1', classGroupName: '2°A' },
         { studentId: 's2', classGroupId: 'cg1', classGroupName: '2°A' },
@@ -311,8 +307,6 @@ describe('DashboardsService.getPerformance', () => {
       // resolveScopedAssessmentIds
       [{ id: 'a1' }],
       // resolveThresholds → scale null
-      [],
-      // distribution
       [],
       // aggregateRows
       [
@@ -373,7 +367,9 @@ describe('DashboardsService.getSkills', () => {
     const db = makeDb([
       // 1. resolveScopedAssessmentIds
       [{ id: 'a1' }],
-      // 2. skills grouped
+      // 2. resolveThresholds → resolveApplicableScale (sin escala → null)
+      [],
+      // 3. skills grouped
       [
         {
           nodeId: 'n1',

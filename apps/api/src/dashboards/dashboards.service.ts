@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { and, desc, eq, inArray, isNull, sql } from 'drizzle-orm';
+import { and, asc, desc, eq, inArray, isNull, sql } from 'drizzle-orm';
 import {
   academicYears,
   assessmentResults,
@@ -375,6 +375,16 @@ export class DashboardsService {
       const assessmentIds = await this.resolveScopedAssessmentIds(tx, orgId, query);
       if (assessmentIds.length === 0) return { skills: [] };
 
+      // Thresholds de la escala aplicable (consistente con getPerformance/
+      // getDistribution; antes getSkills usaba siempre defaults). Misma limitación
+      // multi-escala documentada en resolveApplicableScale (F1 OK / revisar en F2).
+      const resolvedThresholds = await this.resolveThresholds(tx, orgId, query, assessmentIds);
+      const scaleThresholds = {
+        elementary: resolvedThresholds.elementary,
+        adequate: resolvedThresholds.adequate,
+        advanced: resolvedThresholds.advanced,
+      };
+
       const conditions = [inArray(skillResults.assessmentId, assessmentIds)];
       if (studentIds !== null) {
         conditions.push(inArray(skillResults.studentId, studentIds));
@@ -413,7 +423,11 @@ export class DashboardsService {
           studentsAssessed: Number(r.studentsAssessed ?? 0),
           averageAchievement: pct,
           performanceLevel:
-            pct == null ? null : percentageToPerformanceLevel(pct / 100),
+            pct == null
+              ? null
+              : percentageToPerformanceLevel(pct / 100, {
+                  performanceThresholds: scaleThresholds,
+                }),
         };
       });
 
@@ -1035,6 +1049,12 @@ export class DashboardsService {
   /**
    * Grading scale aplicable: la del instrumento de la primera evaluación del
    * scope que tenga una asignada. Retorna null si ninguna define escala.
+   *
+   * ⚠️ LIMITACIÓN (F1 OK / revisar en F2): asume escala HOMOGÉNEA en el scope.
+   * Con un scope que mezcle instrumentos de escalas distintas, toma una sola
+   * (`limit(1)`) y la aplica a todo el dashboard. En F1 (solo DIA) no afecta. El
+   * fix real (escala por instrumento) se difiere a F2 multi-escala; el
+   * `orderBy(createdAt)` solo hace determinista cuál escala se elige.
    */
   private async resolveApplicableScale(
     tx: Database,
@@ -1053,6 +1073,8 @@ export class DashboardsService {
       .innerJoin(instruments, eq(instruments.id, assessments.instrumentId))
       .innerJoin(gradingScales, eq(gradingScales.id, instruments.gradingScaleId))
       .where(and(eq(assessments.orgId, orgId), inArray(assessments.id, assessmentIds)))
+      // Determinista: instrumento más antiguo del scope, no una fila arbitraria.
+      .orderBy(asc(instruments.createdAt))
       .limit(1);
 
     return row ?? null;

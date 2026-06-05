@@ -1,5 +1,5 @@
 import { ForbiddenException, Injectable } from '@nestjs/common';
-import { and, eq, inArray, isNull, sql, type SQL } from 'drizzle-orm';
+import { and, asc, eq, inArray, isNull, sql, type SQL } from 'drizzle-orm';
 import {
   assessments,
   classGroups,
@@ -127,6 +127,14 @@ export class HeatmapService {
    * Corre dentro de `withOrgContext` (recibe `tx`): toca tablas con RLS
    * (skill_results, assessments, students), y las condiciones ya incluyen
    * `eq(assessments.orgId, orgId)`.
+   *
+   * ⚠️ LIMITACIÓN (F1 OK / revisar en F2): asume escala HOMOGÉNEA en el scope.
+   * Si la vista mezcla instrumentos con escalas de thresholds distintas (p. ej.
+   * PAES + DIA), toma una sola escala (`limit(1)`) y la aplica a TODAS las celdas
+   * → las de otra escala quedarían clasificadas con thresholds ajenos. En F1 (solo
+   * DIA, thresholds = defaults) no afecta. El fix real (thresholds por instrumento)
+   * se difiere a F2 multi-escala. El `orderBy(createdAt)` solo garantiza que la
+   * escala elegida sea determinista, no que sea correcta para celdas de otra escala.
    */
   private async resolveThresholds(
     tx: Database,
@@ -141,6 +149,9 @@ export class HeatmapService {
       .innerJoin(students, eq(students.id, skillResults.studentId))
       .innerJoin(gradingScales, eq(gradingScales.id, instruments.gradingScaleId))
       .where(and(...conditions))
+      // Determinista: el "primer instrumento" es el más antiguo del scope, no una
+      // fila arbitraria (limit(1) sin orden no es determinista entre requests).
+      .orderBy(asc(instruments.createdAt))
       .limit(1);
 
     const cfg = row?.config as

@@ -11,6 +11,7 @@ CREATE TYPE "public"."item_source" AS ENUM('official', 'ai_generated', 'custom',
 CREATE TYPE "public"."item_status" AS ENUM('draft', 'review', 'published', 'deprecated');--> statement-breakpoint
 CREATE TYPE "public"."item_tag_type" AS ENUM('primary', 'secondary');--> statement-breakpoint
 CREATE TYPE "public"."item_type" AS ENUM('multiple_choice', 'true_false', 'open_ended', 'oral_reading', 'oral_expression', 'writing', 'listening', 'matching', 'ordering', 'gap_fill');--> statement-breakpoint
+CREATE TYPE "public"."metric_type" AS ENUM('percentage', 'scaled', 'band');--> statement-breakpoint
 CREATE TYPE "public"."org_type" AS ENUM('platform', 'foundation', 'school');--> statement-breakpoint
 CREATE TYPE "public"."performance_level" AS ENUM('insufficient', 'elementary', 'adequate', 'advanced');--> statement-breakpoint
 CREATE TYPE "public"."rubric_type" AS ENUM('analytic', 'holistic');--> statement-breakpoint
@@ -398,12 +399,31 @@ CREATE TABLE "assessment_results" (
 	"max_score" numeric(7, 2),
 	"percentage" numeric(5, 2),
 	"grade" numeric(5, 2),
+	"metric_type" "metric_type" DEFAULT 'percentage' NOT NULL,
+	"scaled_score" numeric(7, 2),
+	"band_label" text,
+	"performance_band_id" uuid,
 	"performance_level" "performance_level",
 	"is_complete" boolean DEFAULT false NOT NULL,
 	"completed_at" timestamp,
 	"created_at" timestamp DEFAULT now() NOT NULL,
 	"updated_at" timestamp DEFAULT now() NOT NULL,
 	CONSTRAINT "assessment_results_assessment_id_student_id_unique" UNIQUE("assessment_id","student_id")
+);
+--> statement-breakpoint
+CREATE TABLE "performance_bands" (
+	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
+	"scale_id" uuid,
+	"org_id" uuid,
+	"key" text NOT NULL,
+	"label" text NOT NULL,
+	"order" integer DEFAULT 0 NOT NULL,
+	"min_threshold" numeric(5, 4) NOT NULL,
+	"max_threshold" numeric(5, 4) NOT NULL,
+	"color" text,
+	"created_at" timestamp DEFAULT now() NOT NULL,
+	"updated_at" timestamp DEFAULT now() NOT NULL,
+	"deleted_at" timestamp
 );
 --> statement-breakpoint
 CREATE TABLE "skill_results" (
@@ -414,6 +434,7 @@ CREATE TABLE "skill_results" (
 	"correct_count" integer DEFAULT 0 NOT NULL,
 	"total_count" integer DEFAULT 0 NOT NULL,
 	"percentage" numeric(5, 2),
+	"performance_band_id" uuid,
 	"performance_level" "performance_level",
 	"created_at" timestamp DEFAULT now() NOT NULL,
 	"updated_at" timestamp DEFAULT now() NOT NULL,
@@ -504,9 +525,13 @@ ALTER TABLE "responses" ADD CONSTRAINT "responses_student_id_students_id_fk" FOR
 ALTER TABLE "responses" ADD CONSTRAINT "responses_item_id_items_id_fk" FOREIGN KEY ("item_id") REFERENCES "public"."items"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "assessment_results" ADD CONSTRAINT "assessment_results_assessment_id_assessments_id_fk" FOREIGN KEY ("assessment_id") REFERENCES "public"."assessments"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "assessment_results" ADD CONSTRAINT "assessment_results_student_id_students_id_fk" FOREIGN KEY ("student_id") REFERENCES "public"."students"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "assessment_results" ADD CONSTRAINT "assessment_results_performance_band_id_performance_bands_id_fk" FOREIGN KEY ("performance_band_id") REFERENCES "public"."performance_bands"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "performance_bands" ADD CONSTRAINT "performance_bands_scale_id_grading_scales_id_fk" FOREIGN KEY ("scale_id") REFERENCES "public"."grading_scales"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "performance_bands" ADD CONSTRAINT "performance_bands_org_id_organizations_id_fk" FOREIGN KEY ("org_id") REFERENCES "public"."organizations"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "skill_results" ADD CONSTRAINT "skill_results_assessment_id_assessments_id_fk" FOREIGN KEY ("assessment_id") REFERENCES "public"."assessments"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "skill_results" ADD CONSTRAINT "skill_results_student_id_students_id_fk" FOREIGN KEY ("student_id") REFERENCES "public"."students"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "skill_results" ADD CONSTRAINT "skill_results_node_id_taxonomy_nodes_id_fk" FOREIGN KEY ("node_id") REFERENCES "public"."taxonomy_nodes"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "skill_results" ADD CONSTRAINT "skill_results_performance_band_id_performance_bands_id_fk" FOREIGN KEY ("performance_band_id") REFERENCES "public"."performance_bands"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "audit_logs" ADD CONSTRAINT "audit_logs_user_id_users_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."users"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "audit_logs" ADD CONSTRAINT "audit_logs_org_id_organizations_id_fk" FOREIGN KEY ("org_id") REFERENCES "public"."organizations"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "platform_admins" ADD CONSTRAINT "platform_admins_user_id_users_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."users"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint

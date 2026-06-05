@@ -1,5 +1,5 @@
 {
-  "id": "41e29fb3-347b-4fa0-a843-a6a5189fa153",
+  "id": "8da30447-e26f-4ec4-acfe-c563388616c4",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
@@ -3113,6 +3113,32 @@
           "primaryKey": false,
           "notNull": false
         },
+        "metric_type": {
+          "name": "metric_type",
+          "type": "metric_type",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'percentage'"
+        },
+        "scaled_score": {
+          "name": "scaled_score",
+          "type": "numeric(7, 2)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "band_label": {
+          "name": "band_label",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "performance_band_id": {
+          "name": "performance_band_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
         "performance_level": {
           "name": "performance_level",
           "type": "performance_level",
@@ -3175,6 +3201,19 @@
           ],
           "onDelete": "cascade",
           "onUpdate": "no action"
+        },
+        "assessment_results_performance_band_id_performance_bands_id_fk": {
+          "name": "assessment_results_performance_band_id_performance_bands_id_fk",
+          "tableFrom": "assessment_results",
+          "tableTo": "performance_bands",
+          "columnsFrom": [
+            "performance_band_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
         }
       },
       "compositePrimaryKeys": {},
@@ -3188,6 +3227,122 @@
           ]
         }
       },
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.performance_bands": {
+      "name": "performance_bands",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "scale_id": {
+          "name": "scale_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "org_id": {
+          "name": "org_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "key": {
+          "name": "key",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "label": {
+          "name": "label",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "order": {
+          "name": "order",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 0
+        },
+        "min_threshold": {
+          "name": "min_threshold",
+          "type": "numeric(5, 4)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "max_threshold": {
+          "name": "max_threshold",
+          "type": "numeric(5, 4)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "color": {
+          "name": "color",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "deleted_at": {
+          "name": "deleted_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "performance_bands_scale_id_grading_scales_id_fk": {
+          "name": "performance_bands_scale_id_grading_scales_id_fk",
+          "tableFrom": "performance_bands",
+          "tableTo": "grading_scales",
+          "columnsFrom": [
+            "scale_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "performance_bands_org_id_organizations_id_fk": {
+          "name": "performance_bands_org_id_organizations_id_fk",
+          "tableFrom": "performance_bands",
+          "tableTo": "organizations",
+          "columnsFrom": [
+            "org_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
       "policies": {},
       "checkConstraints": {},
       "isRLSEnabled": false
@@ -3238,6 +3393,12 @@
         "percentage": {
           "name": "percentage",
           "type": "numeric(5, 2)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "performance_band_id": {
+          "name": "performance_band_id",
+          "type": "uuid",
           "primaryKey": false,
           "notNull": false
         },
@@ -3302,6 +3463,19 @@
             "id"
           ],
           "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "skill_results_performance_band_id_performance_bands_id_fk": {
+          "name": "skill_results_performance_band_id_performance_bands_id_fk",
+          "tableFrom": "skill_results",
+          "tableTo": "performance_bands",
+          "columnsFrom": [
+            "performance_band_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
           "onUpdate": "no action"
         }
       },
@@ -3651,6 +3825,15 @@
         "matching",
         "ordering",
         "gap_fill"
+      ]
+    },
+    "public.metric_type": {
+      "name": "metric_type",
+      "schema": "public",
+      "values": [
+        "percentage",
+        "scaled",
+        "band"
       ]
     },
     "public.org_type": {

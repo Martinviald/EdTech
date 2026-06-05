@@ -35,6 +35,8 @@ ALTER TABLE "assessment_results"  ENABLE ROW LEVEL SECURITY;
 ALTER TABLE "assessment_results"  FORCE  ROW LEVEL SECURITY;
 ALTER TABLE "skill_results"       ENABLE ROW LEVEL SECURITY;
 ALTER TABLE "skill_results"       FORCE  ROW LEVEL SECURITY;
+ALTER TABLE "performance_bands"   ENABLE ROW LEVEL SECURITY;
+ALTER TABLE "performance_bands"   FORCE  ROW LEVEL SECURITY;
 
 -- ── Políticas con org_id directo ────────────────────────────────────────────
 DROP POLICY IF EXISTS "students_tenant_isolation" ON "students";
@@ -51,6 +53,22 @@ DROP POLICY IF EXISTS "import_jobs_tenant_isolation" ON "import_jobs";
 CREATE POLICY "import_jobs_tenant_isolation" ON "import_jobs"
   AS PERMISSIVE FOR ALL
   USING (org_id::text = current_setting('app.current_org_id', true));
+
+-- performance_bands tiene org_id NULLABLE: las filas con org_id IS NULL son el
+-- catálogo global de plataforma (ej. bandas DIA por defecto) y deben ser visibles
+-- para todos los tenants como fallback de niveles. Por eso la condición incluye
+-- `org_id IS NULL` además del match por tenant. Esas filas no contienen PII
+-- (sólo label/umbral/color), así que exponerlas sin contexto es intencional.
+-- Con FOR ALL sin WITH CHECK explícito, Postgres hereda esta misma expresión para
+-- INSERT/UPDATE (consistente con el resto del archivo); las bandas globales se
+-- siembran con el rol admin (BYPASSRLS), no por la API sujeta a RLS.
+DROP POLICY IF EXISTS "performance_bands_tenant_isolation" ON "performance_bands";
+CREATE POLICY "performance_bands_tenant_isolation" ON "performance_bands"
+  AS PERMISSIVE FOR ALL
+  USING (
+    org_id IS NULL
+    OR org_id::text = current_setting('app.current_org_id', true)
+  );
 
 -- ── Políticas sin org_id directo (heredan vía assessments) ──────────────────
 DROP POLICY IF EXISTS "responses_tenant_isolation" ON "responses";

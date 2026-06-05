@@ -43,6 +43,11 @@ export const performanceBands = pgTable('performance_bands', {
   // Color de presentación (token o hex). Nullable.
   color: text('color'),
   createdAt: timestamp('created_at').defaultNow().notNull(),
+  updatedAt: timestamp('updated_at').defaultNow().notNull(),
+  // Soft delete (§5.1): las bandas son configuración editable por tenant; al
+  // retirar una banda se marca deleted_at en vez de DELETE. Las lecturas deben
+  // filtrar `deleted_at IS NULL` por defecto.
+  deletedAt: timestamp('deleted_at'),
 });
 
 export const assessmentResults = pgTable(
