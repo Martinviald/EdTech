@@ -1,0 +1,1779 @@
+{
+  "schemaVersion": "1.0",
+  "source": {
+    "file": "5º lenguaje cierre 2025.pdf",
+    "subjectFolder": "Lenguaje"
+  },
+  "instrument": {
+    "name": "DIA Lectura 5° Básico 2025 — Cierre",
+    "subject": "Lenguaje y Comunicación",
+    "subjectCode": "LANG",
+    "grade": "5° Básico",
+    "gradeCode": "5TH_BASIC",
+    "year": 2025,
+    "applicationPeriod": "cierre",
+    "type": "dia",
+    "isOfficial": true,
+    "source": "imported"
+  },
+  "sections": [
+    {
+      "order": 1,
+      "name": "Texto 1: «El rey que no quería bañarse»",
+      "type": "mixed",
+      "instructions": "Lee el siguiente texto y responde las preguntas 1 a 4.",
+      "passage": {
+        "title": "El rey que no quería bañarse",
+        "text": "Las esponjas suelen contar historias muy interesantes. El único problema es que las cuentan en voz muy baja y para oírlas hay que lavarse muy bien las orejas.\n\nUna esponja me contó una vez lo siguiente:\n\nEn una época lejana, las guerras duraban mucho tiempo. Los reyes iban a la guerra y volvían treinta años después, cansados y sudados de tanto cabalgar y batallar.\n\nAlgo así le sucedió al Rey Vigildo. Se fue a la guerra una mañana y volvió veinte años más tarde, protestando porque le dolía todo el cuerpo.\n\nNaturalmente lo primero que hizo su esposa, la reina Inés, fue prepararle una bañera con agua caliente. Pero cuando llegó el momento de sumergirse en la bañera, el rey se negó.\n\n—No me baño —dijo— ¡No me baño, no me baño y no me baño!\n\nLa reina, los príncipes, la parentela real y la corte entera quedaron sorprendidos.\n\n—¿Qué pasa majestad? —preguntó el viejo chambelán— ¿Acaso el agua está demasiado caliente? ¿El jabón demasiado frío? ¿La bañera es muy profunda?\n\n—No, no y no —contestó el rey—. Pero yo no me baño nada.\n\nPor muchos esfuerzos que hicieron para convencerlo, no hubo caso. Con todo respeto trataron de meterlo en la bañera entre cuatro, pero tanto gritó y tanto escándalo hizo para zafar que al final lo soltaron. La reina Inés consiguió que se cambiara las medias —¡las medias que habían batallado con él veinte años!— pero nada más.\n\nSu hermana, la duquesa Flora, le decía:\n\n—¿Qué te pasa Vigildo? ¿Temes oxidarte o despintarte o encogerte o arrugarte…?\n\nAsí pasaron días interminables. Hasta que el rey se atrevió a confesar:\n\n—¡Extraño las armas, los soldados, las fortalezas, las batallas! Después de tantos años en guerra, ¿qué voy a hacer yo sumergido como un pez en una bañera de agua tibia? Además de aburrirme y sentirme ridículo.\n\nY terminó diciendo en tono dramático: ¿Qué soy yo, acaso, un rey guerrero o un poroto en remojo?\n\nPensándolo bien, Vigildo tenía razón, pero ¿cómo solucionarlo? Razonaron bastante, hasta que al viejo chambelán se le ocurrió una idea. Mandó a hacer un ejército de soldados del tamaño de un dedo pulgar, cada uno con su escudo, su lanza, su caballo, y pintaron los uniformes del mismo color que el de los soldados del rey. También construyeron una pequeña fortaleza con puente levadizo y cocodrilos del tamaño de una aguja, para poner en el foso del castillo. Fabricaron tambores, clarines en miniatura y barcos de guerra que navegaban empujados a mano o a soplidos.\n\nTodo esto lo metieron a la bañera del rey junto con algunos dragones de jabón.\n\nVigildo quedó fascinado. ¡Era justo lo que necesitaba!\n\nLigero como una foca, se zambulló en el agua. Alineó a sus soldados y ahí inició un alboroto de salpicaduras y combate.\n\nSegún su costumbre, daba órdenes y contraórdenes, hacía sonar la corneta y gritaba:\n\n—¡Avanzad, mis valientes! Glub, glub. ¡No retrocedáis, cobardes! ¡Por el lado izquierdo! ¡Por atrás...! Y cosas así.\n\nLa esponja me contó que después no había forma de sacarlo del agua, y que también esa costumbre quedó para siempre.\n\nEs por eso que todavía hoy, cuando los chicos se van a bañar, llevan sus soldados, sus perros, sus osos, sus tambores, sus cascos, sus armas, sus caballos, sus patos y patas de rana. Y si no hacen eso, cuéntenme lo aburrido que es bañarse.\n\nEma Wolf. ¡Silencio niños! y otros cuentos. Colombia: Norma, 1997. (Adaptación).\n\nGlosario\n• chambelán: persona que se encargaba de acompañar y servir al rey.",
+        "format": "plain",
+        "attachments": [
+          {
+            "kind": "image",
+            "note": "Ilustración decorativa de un rey en una bañera con soldados de juguete."
+          }
+        ]
+      },
+      "items": [
+        {
+          "position": 1,
+          "type": "multiple_choice",
+          "stem": "Según el texto, ¿por qué el Rey Vigildo volvió protestando?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Porque le dolía todo el cuerpo.",
+              "isCorrect": true
+            },
+            {
+              "key": "B",
+              "text": "Porque estaba cansado y sudado.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Porque volvió veinte años más tarde.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "Porque las guerras duraban mucho tiempo.",
+              "isCorrect": false
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "A",
+          "skill": "Localizar",
+          "oa": "OA 4",
+          "contentAxis": "Narración",
+          "hasFigure": false,
+          "figureNote": null,
+          "taxonomy": [
+            {
+              "type": "descriptor",
+              "code": null,
+              "name": "Localizan información explícita relevante en un texto narrativo.",
+              "parentCode": "LANG-5B-OA04",
+              "tagType": "primary"
+            },
+            {
+              "type": "learning_objective",
+              "code": "LANG-5B-OA04",
+              "name": "OA 4",
+              "level": "5_basico",
+              "tagType": "secondary"
+            },
+            {
+              "type": "skill",
+              "code": "LANG-SK-LOCALIZAR",
+              "name": "Localizar",
+              "tagType": "secondary"
+            },
+            {
+              "type": "text_type",
+              "code": "LANG-TT-NARRACION",
+              "name": "Narración",
+              "tagType": "secondary"
+            }
+          ]
+        },
+        {
+          "position": 2,
+          "type": "multiple_choice",
+          "stem": "¿Qué pretendía el chambelán al hacerle varias preguntas al rey?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Convencerlo de que se metiera en la bañera.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Comprender por qué se negaba a darse un baño.",
+              "isCorrect": true
+            },
+            {
+              "key": "C",
+              "text": "Encontrar la forma de entretenerlo mientras se bañaba.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "Ayudarlo a que se cambiara las medias antes de bañarse.",
+              "isCorrect": false
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "B",
+          "skill": "Interpretar y relacionar",
+          "oa": "OA 4",
+          "contentAxis": "Narración",
+          "hasFigure": false,
+          "figureNote": null,
+          "taxonomy": [
+            {
+              "type": "descriptor",
+              "code": null,
+              "name": "Infieren información relevante sobre personajes en un texto narrativo.",
+              "parentCode": "LANG-5B-OA04",
+              "tagType": "primary"
+            },
+            {
+              "type": "learning_objective",
+              "code": "LANG-5B-OA04",
+              "name": "OA 4",
+              "level": "5_basico",
+              "tagType": "secondary"
+            },
+            {
+              "type": "skill",
+              "code": "LANG-SK-INTERPRETAR-Y-RELACIONAR",
+              "name": "Interpretar y relacionar",
+              "tagType": "secondary"
+            },
+            {
+              "type": "text_type",
+              "code": "LANG-TT-NARRACION",
+              "name": "Narración",
+              "tagType": "secondary"
+            }
+          ]
+        },
+        {
+          "position": 3,
+          "type": "multiple_choice",
+          "stem": "¿Por qué el rey no quería bañarse?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Porque se sentía muy cansado.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Porque le molestaba recibir órdenes.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Porque extrañaba su vida en la guerra.",
+              "isCorrect": true
+            },
+            {
+              "key": "D",
+              "text": "Porque temía encogerse con el agua.",
+              "isCorrect": false
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "C",
+          "skill": "Interpretar y relacionar",
+          "oa": "OA 4",
+          "contentAxis": "Narración",
+          "hasFigure": false,
+          "figureNote": null,
+          "taxonomy": [
+            {
+              "type": "descriptor",
+              "code": null,
+              "name": "Infieren causa o consecuencia de acontecimientos o acciones relevantes en un texto narrativo.",
+              "parentCode": "LANG-5B-OA04",
+              "tagType": "primary"
+            },
+            {
+              "type": "learning_objective",
+              "code": "LANG-5B-OA04",
+              "name": "OA 4",
+              "level": "5_basico",
+              "tagType": "secondary"
+            },
+            {
+              "type": "skill",
+              "code": "LANG-SK-INTERPRETAR-Y-RELACIONAR",
+              "name": "Interpretar y relacionar",
+              "tagType": "secondary"
+            },
+            {
+              "type": "text_type",
+              "code": "LANG-TT-NARRACION",
+              "name": "Narración",
+              "tagType": "secondary"
+            }
+          ]
+        },
+        {
+          "position": 4,
+          "type": "multiple_choice",
+          "stem": "¿Cómo se resuelve el conflicto de la historia?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "El rey regresa a la guerra.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "El rey es obligado a bañarse.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "El rey fabrica instrumentos de guerra.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "El rey se baña con un ejército de juguete.",
+              "isCorrect": true
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "D",
+          "skill": "Interpretar y relacionar",
+          "oa": "OA 4",
+          "contentAxis": "Narración",
+          "hasFigure": false,
+          "figureNote": null,
+          "taxonomy": [
+            {
+              "type": "descriptor",
+              "code": null,
+              "name": "Identifican el conflicto y/o la solución en un texto narrativo.",
+              "parentCode": "LANG-5B-OA04",
+              "tagType": "primary"
+            },
+            {
+              "type": "learning_objective",
+              "code": "LANG-5B-OA04",
+              "name": "OA 4",
+              "level": "5_basico",
+              "tagType": "secondary"
+            },
+            {
+              "type": "skill",
+              "code": "LANG-SK-INTERPRETAR-Y-RELACIONAR",
+              "name": "Interpretar y relacionar",
+              "tagType": "secondary"
+            },
+            {
+              "type": "text_type",
+              "code": "LANG-TT-NARRACION",
+              "name": "Narración",
+              "tagType": "secondary"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "order": 2,
+      "name": "Texto 2: «Richard Turere»",
+      "type": "mixed",
+      "instructions": "Lee el siguiente texto y responde las preguntas 5 a 10.",
+      "passage": {
+        "title": "RICHARD TURERE",
+        "text": "¿Quién es Richard Turere?\nRichard es un inventor de 14 años, perteneciente a la tribu de los masai. Vive en Kenia, en un territorio muy cercano al parque nacional de Nairobi donde es común encontrar búfalos, jirafas, cebras, rinocerontes y leones.\n\nCuriosidad y responsabilidad\nSiendo un niño de 9 años, el inquieto Richard comenzaba a aprender electricidad y a inventar pequeños juguetes. Lo hizo sin libros y sin nadie que le enseñara, pero contaba con una gran motivación y con el apoyo de sus padres. Ellos le permitían desarmar y volver a armar los electrodomésticos del hogar, y reciclar partes de objetos y autos abandonados que encontraba por ahí. Como otros niños de su tribu, ya a los 9 años, Richard cuidaba el ganado de su familia. Era una tarea que él realizaba con mucho cariño y valentía.\n\nUn gran problema y un genial invento\nEra común que por las noches vinieran los leones y atacaran a las vacas, cabritas y ovejas del ganado. A su vez, los guerreros masai atacaban a los leones, para proteger a su comunidad. Richard estaba convencido de que tenía que haber otra solución: una que protegiera a seres humanos y animales por igual. Puso sus talentos en acción y comenzó a experimentar. Primero, intentó ahuyentar a los predadores con fuego y con un espantapájaros, o “espantaleones”, pero no tuvo mayor éxito. No se dio por vencido y observó que los leones se asustaban al ver luces en movimiento. Entonces ingenió un sistema con ampolletas de viejas linternas, una batería y energía solar. Al titilar continuamente, las luces alejaban a los leones. Nunca más hubo un ataque al ganado.\n\nUn gran futuro\nEl sistema “luces de león” creado por Richard se utiliza actualmente en casi todo su país, mientras él continúa trabajando en nuevas invenciones. Para premiar su genialidad y su aporte a la vida de los seres humanos, la naturaleza y los animales, el gobierno de Kenya financió sus estudios en una gran escuela y en la universidad más importante del país. Richard cuenta que la historia de los masai está vinculada al cielo. Es una hermosa coincidencia que él sueñe con ser ingeniero aeronáutico y piloto. De seguro volará muy alto.\n\nPaz con los leones\nHace 70 años se calculaba que los leones que vivían en África y Asia llegaban a unos 500 000, es decir, medio millón. Hoy quedan solo 20 000. Es preciso cuidarlos y Richard lo tenía claro. Gracias a su invento, es posible salvar la vida de cientos de leones y convivir con ellos en paz.\n\nVinka Jackson. Todos juntos. Chile: Ediciones B, 2015. (Adaptación).",
+        "format": "plain",
+        "attachments": [
+          {
+            "kind": "image",
+            "note": "Fotografía de Richard Turere (encabezado del texto)."
+          }
+        ]
+      },
+      "items": [
+        {
+          "position": 5,
+          "type": "multiple_choice",
+          "stem": "¿Qué buscaba Richard con su invento “luces de león”?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Distinguir a los leones en sus ataques nocturnos.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Ahuyentar a los predadores utilizando fuego.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Reciclar objetos y cuidar el medioambiente.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "Proteger a humanos y animales por igual.",
+              "isCorrect": true
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "D",
+          "skill": "Interpretar y relacionar",
+          "oa": "OA 6",
+          "contentAxis": "Texto no literario",
+          "hasFigure": false,
+          "figureNote": null,
+          "taxonomy": [
+            {
+              "type": "descriptor",
+              "code": null,
+              "name": "Infieren relaciones entre las ideas (causa-consecuencia, problema-solución, etc.) en un texto no literario.",
+              "parentCode": "LANG-5B-OA06",
+              "tagType": "primary"
+            },
+            {
+              "type": "learning_objective",
+              "code": "LANG-5B-OA06",
+              "name": "OA 6",
+              "level": "5_basico",
+              "tagType": "secondary"
+            },
+            {
+              "type": "skill",
+              "code": "LANG-SK-INTERPRETAR-Y-RELACIONAR",
+              "name": "Interpretar y relacionar",
+              "tagType": "secondary"
+            },
+            {
+              "type": "text_type",
+              "code": "LANG-TT-TEXTO-NO-LITERARIO",
+              "name": "Texto no literario",
+              "tagType": "secondary"
+            }
+          ]
+        },
+        {
+          "position": 6,
+          "type": "multiple_choice",
+          "stem": "¿Qué idea en común tienen el segundo y tercer párrafo del texto?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Ambos mencionan la utilidad del invento desarrollado por Richard.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Ambos mencionan las actividades que realizaban los niños de la tribu masai.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Ambos mencionan la experimentación que hacía Richard con distintos objetos.",
+              "isCorrect": true
+            },
+            {
+              "key": "D",
+              "text": "Ambos mencionan la forma en que la tribu masai se protegía de los depredadores.",
+              "isCorrect": false
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "C",
+          "skill": "Interpretar y relacionar",
+          "oa": "OA 6",
+          "contentAxis": "Texto no literario",
+          "hasFigure": false,
+          "figureNote": null,
+          "taxonomy": [
+            {
+              "type": "descriptor",
+              "code": null,
+              "name": "Comparan información relevante de distintas partes de un texto no literario.",
+              "parentCode": "LANG-5B-OA06",
+              "tagType": "primary"
+            },
+            {
+              "type": "learning_objective",
+              "code": "LANG-5B-OA06",
+              "name": "OA 6",
+              "level": "5_basico",
+              "tagType": "secondary"
+            },
+            {
+              "type": "skill",
+              "code": "LANG-SK-INTERPRETAR-Y-RELACIONAR",
+              "name": "Interpretar y relacionar",
+              "tagType": "secondary"
+            },
+            {
+              "type": "text_type",
+              "code": "LANG-TT-TEXTO-NO-LITERARIO",
+              "name": "Texto no literario",
+              "tagType": "secondary"
+            }
+          ]
+        },
+        {
+          "position": 7,
+          "type": "multiple_choice",
+          "stem": "Según Richard, ¿con qué se vincula la historia de los masai?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Con el cielo.",
+              "isCorrect": true
+            },
+            {
+              "key": "B",
+              "text": "Con las luces.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Con el ganado.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "Con los leones.",
+              "isCorrect": false
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "A",
+          "skill": "Localizar",
+          "oa": "OA 6",
+          "contentAxis": "Texto no literario",
+          "hasFigure": false,
+          "figureNote": null,
+          "taxonomy": [
+            {
+              "type": "descriptor",
+              "code": null,
+              "name": "Localizan información explícita relevante en un texto no literario.",
+              "parentCode": "LANG-5B-OA06",
+              "tagType": "primary"
+            },
+            {
+              "type": "learning_objective",
+              "code": "LANG-5B-OA06",
+              "name": "OA 6",
+              "level": "5_basico",
+              "tagType": "secondary"
+            },
+            {
+              "type": "skill",
+              "code": "LANG-SK-LOCALIZAR",
+              "name": "Localizar",
+              "tagType": "secondary"
+            },
+            {
+              "type": "text_type",
+              "code": "LANG-TT-TEXTO-NO-LITERARIO",
+              "name": "Texto no literario",
+              "tagType": "secondary"
+            }
+          ]
+        },
+        {
+          "position": 8,
+          "type": "multiple_choice",
+          "stem": "¿Cuál de las siguientes ideas se presenta como un problema en el texto?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Los leones se asustaban al ver luces en movimiento.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Los primeros inventos de Richard no tuvieron mayor éxito.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Los masai mataban a los leones porque atacaban su ganado.",
+              "isCorrect": true
+            },
+            {
+              "key": "D",
+              "text": "Los niños de la tribu masai debían trabajar cuidando a los animales.",
+              "isCorrect": false
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "C",
+          "skill": "Interpretar y relacionar",
+          "oa": "OA 6",
+          "contentAxis": "Texto no literario",
+          "hasFigure": false,
+          "figureNote": null,
+          "taxonomy": [
+            {
+              "type": "descriptor",
+              "code": null,
+              "name": "Infieren relaciones entre las ideas (causa-consecuencia, problema-solución, etc.) en un texto no literario.",
+              "parentCode": "LANG-5B-OA06",
+              "tagType": "primary"
+            },
+            {
+              "type": "learning_objective",
+              "code": "LANG-5B-OA06",
+              "name": "OA 6",
+              "level": "5_basico",
+              "tagType": "secondary"
+            },
+            {
+              "type": "skill",
+              "code": "LANG-SK-INTERPRETAR-Y-RELACIONAR",
+              "name": "Interpretar y relacionar",
+              "tagType": "secondary"
+            },
+            {
+              "type": "text_type",
+              "code": "LANG-TT-TEXTO-NO-LITERARIO",
+              "name": "Texto no literario",
+              "tagType": "secondary"
+            }
+          ]
+        },
+        {
+          "position": 9,
+          "type": "multiple_choice",
+          "stem": "¿Cuál es el propósito del texto en relación con Richard Turere?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Opinar sobre sus logros.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Informar sobre su historia de vida.",
+              "isCorrect": true
+            },
+            {
+              "key": "C",
+              "text": "Motivar a otros niños a ser como él.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "Convencer sobre la utilidad de su invento.",
+              "isCorrect": false
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "B",
+          "skill": "Reflexionar",
+          "oa": "OA 7",
+          "contentAxis": "Texto no literario",
+          "hasFigure": false,
+          "figureNote": null,
+          "taxonomy": [
+            {
+              "type": "descriptor",
+              "code": null,
+              "name": "Determinan propósitos explícitos e implícitos en un texto no literario.",
+              "parentCode": "LANG-5B-OA07",
+              "tagType": "primary"
+            },
+            {
+              "type": "learning_objective",
+              "code": "LANG-5B-OA07",
+              "name": "OA 7",
+              "level": "5_basico",
+              "tagType": "secondary"
+            },
+            {
+              "type": "skill",
+              "code": "LANG-SK-REFLEXIONAR",
+              "name": "Reflexionar",
+              "tagType": "secondary"
+            },
+            {
+              "type": "text_type",
+              "code": "LANG-TT-TEXTO-NO-LITERARIO",
+              "name": "Texto no literario",
+              "tagType": "secondary"
+            }
+          ]
+        },
+        {
+          "position": 10,
+          "type": "open_ended",
+          "stem": "¿Qué opinas sobre el invento “luces de león” creado por Richard Turere? Justifica tu respuesta con información del texto.",
+          "alternatives": [],
+          "responseFormat": "develop",
+          "correctKey": null,
+          "skill": "Reflexionar",
+          "oa": "OA 6",
+          "contentAxis": "Texto no literario",
+          "hasFigure": false,
+          "figureNote": null,
+          "taxonomy": [
+            {
+              "type": "descriptor",
+              "code": null,
+              "name": "Opinan sobre algún aspecto relevante de un texto no literario con fundamentos que integran información del texto.",
+              "parentCode": "LANG-5B-OA06",
+              "tagType": "primary"
+            },
+            {
+              "type": "learning_objective",
+              "code": "LANG-5B-OA06",
+              "name": "OA 6",
+              "level": "5_basico",
+              "tagType": "secondary"
+            },
+            {
+              "type": "skill",
+              "code": "LANG-SK-REFLEXIONAR",
+              "name": "Reflexionar",
+              "tagType": "secondary"
+            },
+            {
+              "type": "text_type",
+              "code": "LANG-TT-TEXTO-NO-LITERARIO",
+              "name": "Texto no literario",
+              "tagType": "secondary"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "order": 3,
+      "name": "Texto 3: «El quinto sol»",
+      "type": "mixed",
+      "instructions": "Lee el siguiente texto y responde las preguntas 11 a 15.",
+      "passage": {
+        "title": "El quinto sol",
+        "text": "Inmediatamente después de que el cuarto sol se apagara, todos los dioses se reunieron en el cielo, en Teotihuacán. Allí, alrededor del fuego, deliberaron. ¿Quién será ahora el sol? Un dios muy vanidoso se ofreció para la tarea: era Tecuciztécatl. ¿Quién mejor que él mismo, pensaba, para ser sol? Los dioses volvieron a hablar. Necesitaban a alguien más. ¿Quién otro se ofrecía? Se miraron temerosos unos a otros: nadie se atrevía a tomar semejante responsabilidad. Pero había en la asamblea un dios pequeño y débil.\n\n—Tú también puedes ser el nuevo sol —le dijeron.\n\nEntonces, el llamado Nanahuatzin se vio obligado a aceptar.\n\nLos dos candidatos se retiraron a meditar durante cuatro días. Después de eso se encendió una enorme fogata y ambos dioses se acercaron con sus ofrendas para que el sacrificio tuviera éxito. Tecuciztécatl llevó riquezas incalculables: plumas de quetzal, piedras preciosas, globos de oro… Nanahuatzin, en cambio, ofreció humildes manojos de cañas verdes, pelotas de heno y espinas de maguey mojadas en su propia sangre.\n\nLlegó entonces el momento de la decisión. La asamblea de los dioses le dio la siguiente orden al dios vanidoso:\n\n—¡Lánzate al fuego para convertirte en sol!\n\nEste se lanzó a la carrera. Pero el fuego lo quemaba, y se detuvo antes de saltar a las llamas. Una y otra vez lo intentó, pero nunca tuvo el valor suficiente.\n\nDespués de un cuarto fracaso, le tocó a Nanahuatzin. Los otros lo motivaron a cumplir la hazaña. Y el pequeño dios cerró los ojos, se lanzó al fuego y ardió largamente.\n\nEl arrogante Tecuciztécatl, al ver que su débil rival había realizado la hazaña y se había convertido en sol, se precipitó también. Pero solo quedaban cenizas y salió convertido en luna. Por eso, uno de los dioses le tiró a la cara un conejo que apagó su luz, dejando en la superficie de la luna, hasta hoy, la marca de un conejo.\n\nJuan Andrés Piña y Marcela Recabarren. Un viaje por las letras. Antología literaria. Chile: Alfaguara Infantil, 2011. (Adaptación).\n\nGlosario\n• quetzal: ave de América Central que se caracteriza por tener un plumaje suave de color verde tornasolado y rojo.\n• heno: hierba seca para alimento del ganado.\n• maguey: planta de origen mexicano, con espinas muy robustas.",
+        "format": "plain",
+        "attachments": []
+      },
+      "items": [
+        {
+          "position": 11,
+          "type": "multiple_choice",
+          "stem": "¿Qué ocurrió inmediatamente después de que el cuarto sol se apagara?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Los dioses se reunieron en el cielo.",
+              "isCorrect": true
+            },
+            {
+              "key": "B",
+              "text": "Los dioses encendieron una gran fogata.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Los dioses deliberaron quién sería el nuevo sol.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "Los dioses le dijeron a un dios que podía ser el nuevo sol.",
+              "isCorrect": false
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "A",
+          "skill": "Localizar",
+          "oa": "OA 4",
+          "contentAxis": "Narración",
+          "hasFigure": false,
+          "figureNote": null,
+          "taxonomy": [
+            {
+              "type": "descriptor",
+              "code": null,
+              "name": "Localizan información explícita relevante en un texto narrativo.",
+              "parentCode": "LANG-5B-OA04",
+              "tagType": "primary"
+            },
+            {
+              "type": "learning_objective",
+              "code": "LANG-5B-OA04",
+              "name": "OA 4",
+              "level": "5_basico",
+              "tagType": "secondary"
+            },
+            {
+              "type": "skill",
+              "code": "LANG-SK-LOCALIZAR",
+              "name": "Localizar",
+              "tagType": "secondary"
+            },
+            {
+              "type": "text_type",
+              "code": "LANG-TT-NARRACION",
+              "name": "Narración",
+              "tagType": "secondary"
+            }
+          ]
+        },
+        {
+          "position": 12,
+          "type": "multiple_choice",
+          "stem": "¿Qué ocurrió finalmente con Tecuciztécatl?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Se transformó en conejo.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Se convirtió en cenizas.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Se transformó en sol.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "Se convirtió en luna.",
+              "isCorrect": true
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "D",
+          "skill": "Interpretar y relacionar",
+          "oa": "OA 4",
+          "contentAxis": "Narración",
+          "hasFigure": false,
+          "figureNote": null,
+          "taxonomy": [
+            {
+              "type": "descriptor",
+              "code": null,
+              "name": "Identifican un acontecimiento o acción relevante en un texto narrativo.",
+              "parentCode": "LANG-5B-OA04",
+              "tagType": "primary"
+            },
+            {
+              "type": "learning_objective",
+              "code": "LANG-5B-OA04",
+              "name": "OA 4",
+              "level": "5_basico",
+              "tagType": "secondary"
+            },
+            {
+              "type": "skill",
+              "code": "LANG-SK-INTERPRETAR-Y-RELACIONAR",
+              "name": "Interpretar y relacionar",
+              "tagType": "secondary"
+            },
+            {
+              "type": "text_type",
+              "code": "LANG-TT-NARRACION",
+              "name": "Narración",
+              "tagType": "secondary"
+            }
+          ]
+        },
+        {
+          "position": 13,
+          "type": "multiple_choice",
+          "stem": "¿Qué característica demostró tener Nanahuatzin al final del relato?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Valentía.",
+              "isCorrect": true
+            },
+            {
+              "key": "B",
+              "text": "Disciplina.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Humildad.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "Constancia.",
+              "isCorrect": false
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "A",
+          "skill": "Interpretar y relacionar",
+          "oa": "OA 4",
+          "contentAxis": "Narración",
+          "hasFigure": false,
+          "figureNote": null,
+          "taxonomy": [
+            {
+              "type": "descriptor",
+              "code": null,
+              "name": "Infieren información relevante sobre personajes en un texto narrativo.",
+              "parentCode": "LANG-5B-OA04",
+              "tagType": "primary"
+            },
+            {
+              "type": "learning_objective",
+              "code": "LANG-5B-OA04",
+              "name": "OA 4",
+              "level": "5_basico",
+              "tagType": "secondary"
+            },
+            {
+              "type": "skill",
+              "code": "LANG-SK-INTERPRETAR-Y-RELACIONAR",
+              "name": "Interpretar y relacionar",
+              "tagType": "secondary"
+            },
+            {
+              "type": "text_type",
+              "code": "LANG-TT-NARRACION",
+              "name": "Narración",
+              "tagType": "secondary"
+            }
+          ]
+        },
+        {
+          "position": 14,
+          "type": "multiple_choice",
+          "stem": "¿Qué explica esta historia?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Porqué solo hay un sol.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Cómo se apagó un sol.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Cómo se crearon el sol y la luna.",
+              "isCorrect": true
+            },
+            {
+              "key": "D",
+              "text": "Porqué el sol y la luna son brillantes.",
+              "isCorrect": false
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "C",
+          "skill": "Interpretar y relacionar",
+          "oa": "OA 4",
+          "contentAxis": "Narración",
+          "hasFigure": false,
+          "figureNote": null,
+          "taxonomy": [
+            {
+              "type": "descriptor",
+              "code": null,
+              "name": "Infieren el sentido global de un texto narrativo.",
+              "parentCode": "LANG-5B-OA04",
+              "tagType": "primary"
+            },
+            {
+              "type": "learning_objective",
+              "code": "LANG-5B-OA04",
+              "name": "OA 4",
+              "level": "5_basico",
+              "tagType": "secondary"
+            },
+            {
+              "type": "skill",
+              "code": "LANG-SK-INTERPRETAR-Y-RELACIONAR",
+              "name": "Interpretar y relacionar",
+              "tagType": "secondary"
+            },
+            {
+              "type": "text_type",
+              "code": "LANG-TT-NARRACION",
+              "name": "Narración",
+              "tagType": "secondary"
+            }
+          ]
+        },
+        {
+          "position": 15,
+          "type": "open_ended",
+          "stem": "¿Qué opinas de que Nanahuatzin haya aceptado competir para convertirse en sol? ¿Por qué? Justifica tu opinión con información del texto.",
+          "alternatives": [],
+          "responseFormat": "develop",
+          "correctKey": null,
+          "skill": "Reflexionar",
+          "oa": "OA 4",
+          "contentAxis": "Narración",
+          "hasFigure": false,
+          "figureNote": null,
+          "taxonomy": [
+            {
+              "type": "descriptor",
+              "code": null,
+              "name": "Opinan sobre algún aspecto controversial de un texto narrativo con fundamentos que integran información del texto.",
+              "parentCode": "LANG-5B-OA04",
+              "tagType": "primary"
+            },
+            {
+              "type": "learning_objective",
+              "code": "LANG-5B-OA04",
+              "name": "OA 4",
+              "level": "5_basico",
+              "tagType": "secondary"
+            },
+            {
+              "type": "skill",
+              "code": "LANG-SK-REFLEXIONAR",
+              "name": "Reflexionar",
+              "tagType": "secondary"
+            },
+            {
+              "type": "text_type",
+              "code": "LANG-TT-NARRACION",
+              "name": "Narración",
+              "tagType": "secondary"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "order": 4,
+      "name": "Texto 4: «Un pudú y un concón fueron devueltos exitosamente a su hábitat natural en la Región del Biobío»",
+      "type": "multiple_choice",
+      "instructions": "Lee el siguiente texto y responde las preguntas 16 a 20.",
+      "passage": {
+        "title": "Un pudú y un concón fueron devueltos exitosamente a su hábitat natural en la Región del Biobío",
+        "text": "NOTICIA\n\nUn pudú y un concón fueron devueltos exitosamente a su hábitat natural en la Región del Biobío\nPor Valentina Cortés Lehuei\n29 de abril de 2024 | 10:40\n\nTras su rehabilitación en el Centro de Rescate Ñacurutú, ambos ejemplares pudieron ser reinsertados en su medio natural.\n\nLuego de tres meses de tratamiento y rehabilitación en el Centro de Rescate Ñacurutú, ubicado en Coliumo, Región del Biobío, un pudú y un concón fueron liberados en su hábitat natural en un sector rural de la comuna de Hualqui.\n\nAl respecto, el director regional del Servicio Agrícola y Ganadero (SAG), Roberto Ferrada, explicó que el ejemplar de pudú fue trasladado al centro desde Chiguayante luego de ser encontrado con lesiones y heridas correspondientes a un atropello. El director de la Fundación Ñacurutú, Cristian Herrera, indicó que, una vez realizada su evaluación veterinaria, se le aplicó un tratamiento en base a medicamentos, vitaminas y curaciones de las lesiones infectadas hasta lograr su recuperación y rehabilitación.\n\nEl pudú se caracteriza por ser un animal muy tímido y asustadizo. Su enemigo natural es el puma, sin embargo, los ataques de perros y su caza indiscriminada lo han convertido en una especie protegida por la ley de caza y su estado de conservación es vulnerable.\n\nPor su parte, el concón cayó de su nido siendo un polluelo, por lo que fue trasladado al centro de rescate con el objetivo de ayudarlo a desarrollar su instinto de caza y vuelo. Este búho, que se encuentra desde Santiago hasta Tierra del Fuego, es totalmente inofensivo para los seres humanos. Roberto Ferrada explicó que esta especie tiene un rol fundamental en el equilibrio ecológico del medio ambiente y es una especie muy benéfica para la agricultura. “Además, se encuentra protegida por la ley de caza de especies con poblaciones reducidas”, agregó.\n\nEl director regional del SAG de Biobío agradeció a las personas que informan a la institución sobre los ejemplares heridos, lesionados o fuera de hábitat, destacando su compromiso con la fauna silvestre. Desde la institución indicaron que esta acción es muy importante, ya que posibilita que el animal sea rescatado y devuelto a su hábitat, o bien, que pueda ser enviado a centros de rehabilitación. Además, señaló que en caso de observar a ejemplares que no presentan lesiones o problemas de movilidad, no se les debe molestar y se les debe dejar que retornen de forma voluntaria a su medio natural, ya que la manipulación inadecuada y el cautiverio son un grave daño que se les provoca a estas especies.\n\nLa liberación de estos dos ejemplares en Hualqui representa un paso importante en la conservación de la fauna silvestre de la región. Es de esperar que este caso sirva como ejemplo para crear conciencia sobre la importancia de cuidar nuestro medio ambiente y proteger a las especies que lo habitan.\n\nValentina Cortés Lehuei. “Un pudú y un concón fueron devueltos exitosamente a su hábitat natural en Región del Biobío”. Diario Sostenible. [Santiago, Chile]. 29 abril 2024. Web. 29 abril 2024. (Adaptación)\n\nGlosario\n• hábitat: es el lugar donde los seres vivos habitan y crecen naturalmente.\n• caza indiscriminada: actividad realizada por el hombre que consiste en la captura o matanza de animales sin ningún tipo de control.\n• vulnerable: una especie se considera en estado de conservación vulnerable cuando tiene un alto riesgo de extinguirse o desaparecer.\n• equilibrio ecológico: es la relación estable y pacífica entre los humanos y los seres vivos.\n• fauna silvestre: especies que viven libremente en ambientes naturales, fuera del control del hombre.\n• cautiverio: es cuando la especie está encerrada fuera de su hábitat.",
+        "format": "plain",
+        "attachments": [
+          {
+            "kind": "image",
+            "note": "Fotografía de los ejemplares rescatados (pudú y concón) acompañando la noticia."
+          }
+        ]
+      },
+      "items": [
+        {
+          "position": 16,
+          "type": "multiple_choice",
+          "stem": "¿Dónde fueron liberados los ejemplares de pudú y concón?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "En Hualqui.",
+              "isCorrect": true
+            },
+            {
+              "key": "B",
+              "text": "En Coliumo.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "En Chiguayante.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "En Tierra del Fuego.",
+              "isCorrect": false
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "A",
+          "skill": "Localizar",
+          "oa": "OA 6",
+          "contentAxis": "Texto no literario",
+          "hasFigure": false,
+          "figureNote": null,
+          "taxonomy": [
+            {
+              "type": "descriptor",
+              "code": null,
+              "name": "Localizan información explícita relevante en un texto no literario.",
+              "parentCode": "LANG-5B-OA06",
+              "tagType": "primary"
+            },
+            {
+              "type": "learning_objective",
+              "code": "LANG-5B-OA06",
+              "name": "OA 6",
+              "level": "5_basico",
+              "tagType": "secondary"
+            },
+            {
+              "type": "skill",
+              "code": "LANG-SK-LOCALIZAR",
+              "name": "Localizar",
+              "tagType": "secondary"
+            },
+            {
+              "type": "text_type",
+              "code": "LANG-TT-TEXTO-NO-LITERARIO",
+              "name": "Texto no literario",
+              "tagType": "secondary"
+            }
+          ]
+        },
+        {
+          "position": 17,
+          "type": "multiple_choice",
+          "stem": "Según el texto, ¿cuál es el enemigo natural del pudú?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "El perro.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "El puma.",
+              "isCorrect": true
+            },
+            {
+              "key": "C",
+              "text": "El concón.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "El hombre.",
+              "isCorrect": false
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "B",
+          "skill": "Localizar",
+          "oa": "OA 6",
+          "contentAxis": "Texto no literario",
+          "hasFigure": false,
+          "figureNote": null,
+          "taxonomy": [
+            {
+              "type": "descriptor",
+              "code": null,
+              "name": "Localizan información explícita relevante en un texto no literario.",
+              "parentCode": "LANG-5B-OA06",
+              "tagType": "primary"
+            },
+            {
+              "type": "learning_objective",
+              "code": "LANG-5B-OA06",
+              "name": "OA 6",
+              "level": "5_basico",
+              "tagType": "secondary"
+            },
+            {
+              "type": "skill",
+              "code": "LANG-SK-LOCALIZAR",
+              "name": "Localizar",
+              "tagType": "secondary"
+            },
+            {
+              "type": "text_type",
+              "code": "LANG-TT-TEXTO-NO-LITERARIO",
+              "name": "Texto no literario",
+              "tagType": "secondary"
+            }
+          ]
+        },
+        {
+          "position": 18,
+          "type": "multiple_choice",
+          "stem": "¿Por qué el concón debió ser enviado al Centro de Rescate Ñacurutú?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Porque había caído de su nido.",
+              "isCorrect": true
+            },
+            {
+              "key": "B",
+              "text": "Porque había sido atropellado.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Porque lo atacaron unos perros.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "Porque lo hallaron fuera de su hábitat.",
+              "isCorrect": false
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "A",
+          "skill": "Interpretar y relacionar",
+          "oa": "OA 6",
+          "contentAxis": "Texto no literario",
+          "hasFigure": false,
+          "figureNote": null,
+          "taxonomy": [
+            {
+              "type": "descriptor",
+              "code": null,
+              "name": "Infieren relaciones entre las ideas (causa-consecuencia, problema-solución, etc.) en un texto no literario.",
+              "parentCode": "LANG-5B-OA06",
+              "tagType": "primary"
+            },
+            {
+              "type": "learning_objective",
+              "code": "LANG-5B-OA06",
+              "name": "OA 6",
+              "level": "5_basico",
+              "tagType": "secondary"
+            },
+            {
+              "type": "skill",
+              "code": "LANG-SK-INTERPRETAR-Y-RELACIONAR",
+              "name": "Interpretar y relacionar",
+              "tagType": "secondary"
+            },
+            {
+              "type": "text_type",
+              "code": "LANG-TT-TEXTO-NO-LITERARIO",
+              "name": "Texto no literario",
+              "tagType": "secondary"
+            }
+          ]
+        },
+        {
+          "position": 19,
+          "type": "multiple_choice",
+          "stem": "Según lo leído, ¿qué deben hacer las personas en caso de encontrar ejemplares de fauna silvestre heridos?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Trasladarlos a un centro de rescate.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Dejar que retornen a su hábitat.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Tratarlos con medicamentos.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "Dar aviso oportuno al SAG.",
+              "isCorrect": true
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "D",
+          "skill": "Interpretar y relacionar",
+          "oa": "OA 6",
+          "contentAxis": "Texto no literario",
+          "hasFigure": false,
+          "figureNote": null,
+          "taxonomy": [
+            {
+              "type": "descriptor",
+              "code": null,
+              "name": "Infieren información relevante en un texto no literario.",
+              "parentCode": "LANG-5B-OA06",
+              "tagType": "primary"
+            },
+            {
+              "type": "learning_objective",
+              "code": "LANG-5B-OA06",
+              "name": "OA 6",
+              "level": "5_basico",
+              "tagType": "secondary"
+            },
+            {
+              "type": "skill",
+              "code": "LANG-SK-INTERPRETAR-Y-RELACIONAR",
+              "name": "Interpretar y relacionar",
+              "tagType": "secondary"
+            },
+            {
+              "type": "text_type",
+              "code": "LANG-TT-TEXTO-NO-LITERARIO",
+              "name": "Texto no literario",
+              "tagType": "secondary"
+            }
+          ]
+        },
+        {
+          "position": 20,
+          "type": "multiple_choice",
+          "stem": "¿Cuál es el propósito comunicativo de este texto?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Alertar sobre las amenazas que enfrentan el pudú y el concón en Chile.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Informar sobre la liberación de un pudú y un concón en su hábitat natural.",
+              "isCorrect": true
+            },
+            {
+              "key": "C",
+              "text": "Opinar sobre la importancia de proteger a los ejemplares de fauna silvestre.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "Enseñar sobre la labor del Centro Ñacurutú en el cuidado de la fauna silvestre.",
+              "isCorrect": false
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "B",
+          "skill": "Reflexionar",
+          "oa": "OA 7",
+          "contentAxis": "Texto no literario",
+          "hasFigure": false,
+          "figureNote": null,
+          "taxonomy": [
+            {
+              "type": "descriptor",
+              "code": null,
+              "name": "Determinan propósitos explícitos e implícitos en un texto no literario.",
+              "parentCode": "LANG-5B-OA07",
+              "tagType": "primary"
+            },
+            {
+              "type": "learning_objective",
+              "code": "LANG-5B-OA07",
+              "name": "OA 7",
+              "level": "5_basico",
+              "tagType": "secondary"
+            },
+            {
+              "type": "skill",
+              "code": "LANG-SK-REFLEXIONAR",
+              "name": "Reflexionar",
+              "tagType": "secondary"
+            },
+            {
+              "type": "text_type",
+              "code": "LANG-TT-TEXTO-NO-LITERARIO",
+              "name": "Texto no literario",
+              "tagType": "secondary"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "order": 5,
+      "name": "Texto 5: «Estrella»",
+      "type": "multiple_choice",
+      "instructions": "Lee el siguiente texto y responde las preguntas 21 a 24.",
+      "passage": {
+        "title": "Estrella",
+        "text": "Cuando vi que ella entraba a la sala, no me di cuenta de que estaba siendo acompañada por el profesor Cofré; solo noté a una niña delgada con pelo negro, pero el pelo negro más brillante que había visto hasta entonces. Creo que únicamente en el espacio interestelar algo tan oscuro puede brillar tanto.\n\n—Es su nueva compañera —dijo el profesor, y recién en ese momento advertí que también estaba ahí ese hombre gigante, flaco y de barba chistosa que me enseñaba casi todas las materias.\n\n—Hola —dijo la niña sonriendo.\n\nNadie contestó, solo yo levanté la mano tímidamente en ademán de saludar. Ella miró mi gesto y yo, apurado, bajé la mano.\n\n—Mi nombre es Estrella —agregó ella.\n\n—¡Saluden, niños! —dijo enérgico el profesor.\n\n—Buenos días, Estrella —dijimos todos a coro.\n\nNadie quería hacer enojar al profesor Cofré, pues sus castigos son muy vergonzosos. Una vez a mí, por llegar varias veces atrasado a la sala después de los recreos, me obligó a inventar un poema de amor y leerlo en voz alta.\n\nDespués de saludar a Estrella, caí en la cuenta de que el único puesto vacío que quedaba en la sala era el que estaba al lado mío. Éramos veintinueve alumnos, con ella treinta, y yo me sentaba solo, pues no puedo dejar de leer en voz alta todo lo que escribo, y eso desconcentra a los demás.\n\n—Me gusta este planeta —dijo Estrella, y tanto el profesor como los alumnos nos quedamos atónitos. Luego ella se tapó la boca y empezó a reírse; y su risa contagiosa atacó al profesor Cofré, primero, y a todos los demás después. Fue un concierto de carcajadas e hipos.\n\nDebimos habernos reído durante unos diez minutos. No exagero. Solo cuando ella paró de reír —una risa musical y algo aguda— pudimos detenernos los demás.\n\nEntonces Estrella, sin que nadie le dijera nada, se fue a sentar al lado mío.\n\n—Me llamo Germán —le dije torpemente.\n\n—Ya lo sé —me dijo ella —y para que tú sepas, la risa es solo uno de mis tantos poderes.\n\nLuego dibujó esto en mi cuaderno:\n\nYo me sentí feliz. La niña más entretenida del mundo se sentaba a mi lado.\n\nLe agregué un par de cositas a su dibujo y le mostré cómo quedó:\n\nDespués el profesor Cofré se puso a hablar y le tomamos atención.\n\nRoberto Fuentes. Estrella. Chile: Nube de Tinta, 2016. (Fragmento).",
+        "format": "plain",
+        "attachments": [
+          {
+            "kind": "image",
+            "note": "Dos dibujos embebidos en el relato: el dibujo que Estrella hace en el cuaderno de Germán y la versión a la que Germán le agrega detalles. Decorativos para la trama, no requeridos para responder los ítems."
+          }
+        ]
+      },
+      "items": [
+        {
+          "position": 21,
+          "type": "multiple_choice",
+          "stem": "Cuando Estrella entró a la sala, ¿qué característica de la niña llamó la atención de Germán?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Su risa contagiosa.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Su forma de saludar.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Su sentido del humor.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "Su pelo negro brillante.",
+              "isCorrect": true
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "D",
+          "skill": "Interpretar y relacionar",
+          "oa": "OA 4",
+          "contentAxis": "Narración",
+          "hasFigure": false,
+          "figureNote": null,
+          "taxonomy": [
+            {
+              "type": "descriptor",
+              "code": null,
+              "name": "Infieren información relevante sobre personajes en un texto narrativo.",
+              "parentCode": "LANG-5B-OA04",
+              "tagType": "primary"
+            },
+            {
+              "type": "learning_objective",
+              "code": "LANG-5B-OA04",
+              "name": "OA 4",
+              "level": "5_basico",
+              "tagType": "secondary"
+            },
+            {
+              "type": "skill",
+              "code": "LANG-SK-INTERPRETAR-Y-RELACIONAR",
+              "name": "Interpretar y relacionar",
+              "tagType": "secondary"
+            },
+            {
+              "type": "text_type",
+              "code": "LANG-TT-NARRACION",
+              "name": "Narración",
+              "tagType": "secondary"
+            }
+          ]
+        },
+        {
+          "position": 22,
+          "type": "multiple_choice",
+          "stem": "¿Por qué Germán se sentaba solo?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Porque se reía mucho.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Porque estaba castigado.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Porque leía en voz alta todo lo que escribía.",
+              "isCorrect": true
+            },
+            {
+              "key": "D",
+              "text": "Porque llegaba atrasado después de los recreos.",
+              "isCorrect": false
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "C",
+          "skill": "Localizar",
+          "oa": "OA 4",
+          "contentAxis": "Narración",
+          "hasFigure": false,
+          "figureNote": null,
+          "taxonomy": [
+            {
+              "type": "descriptor",
+              "code": null,
+              "name": "Localizan información explícita relevante en un texto narrativo.",
+              "parentCode": "LANG-5B-OA04",
+              "tagType": "primary"
+            },
+            {
+              "type": "learning_objective",
+              "code": "LANG-5B-OA04",
+              "name": "OA 4",
+              "level": "5_basico",
+              "tagType": "secondary"
+            },
+            {
+              "type": "skill",
+              "code": "LANG-SK-LOCALIZAR",
+              "name": "Localizar",
+              "tagType": "secondary"
+            },
+            {
+              "type": "text_type",
+              "code": "LANG-TT-NARRACION",
+              "name": "Narración",
+              "tagType": "secondary"
+            }
+          ]
+        },
+        {
+          "position": 23,
+          "type": "multiple_choice",
+          "stem": "¿Por qué Germán pensaba que Estrella era la niña “más entretenida del mundo”?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Porque hizo un dibujo gracioso.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Porque hizo reír al curso y era ingeniosa.",
+              "isCorrect": true
+            },
+            {
+              "key": "C",
+              "text": "Porque inventaba poemas y los leía en voz alta.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "Porque llegaba atrasada después de los recreos.",
+              "isCorrect": false
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "B",
+          "skill": "Interpretar y relacionar",
+          "oa": "OA 4",
+          "contentAxis": "Narración",
+          "hasFigure": false,
+          "figureNote": null,
+          "taxonomy": [
+            {
+              "type": "descriptor",
+              "code": null,
+              "name": "Infieren causa o consecuencia de acontecimientos o acciones relevantes en un texto narrativo.",
+              "parentCode": "LANG-5B-OA04",
+              "tagType": "primary"
+            },
+            {
+              "type": "learning_objective",
+              "code": "LANG-5B-OA04",
+              "name": "OA 4",
+              "level": "5_basico",
+              "tagType": "secondary"
+            },
+            {
+              "type": "skill",
+              "code": "LANG-SK-INTERPRETAR-Y-RELACIONAR",
+              "name": "Interpretar y relacionar",
+              "tagType": "secondary"
+            },
+            {
+              "type": "text_type",
+              "code": "LANG-TT-NARRACION",
+              "name": "Narración",
+              "tagType": "secondary"
+            }
+          ]
+        },
+        {
+          "position": 24,
+          "type": "multiple_choice",
+          "stem": "¿De qué trata este fragmento?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "De la risa contagiosa que tenía Estrella.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "De la llegada de Estrella al curso de Germán.",
+              "isCorrect": true
+            },
+            {
+              "key": "C",
+              "text": "De las travesuras que realizaban Germán y Estrella.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "De los castigos que el profesor daba al curso de Germán.",
+              "isCorrect": false
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "B",
+          "skill": "Interpretar y relacionar",
+          "oa": "OA 4",
+          "contentAxis": "Narración",
+          "hasFigure": false,
+          "figureNote": null,
+          "taxonomy": [
+            {
+              "type": "descriptor",
+              "code": null,
+              "name": "Infieren el sentido global de un texto narrativo.",
+              "parentCode": "LANG-5B-OA04",
+              "tagType": "primary"
+            },
+            {
+              "type": "learning_objective",
+              "code": "LANG-5B-OA04",
+              "name": "OA 4",
+              "level": "5_basico",
+              "tagType": "secondary"
+            },
+            {
+              "type": "skill",
+              "code": "LANG-SK-INTERPRETAR-Y-RELACIONAR",
+              "name": "Interpretar y relacionar",
+              "tagType": "secondary"
+            },
+            {
+              "type": "text_type",
+              "code": "LANG-TT-NARRACION",
+              "name": "Narración",
+              "tagType": "secondary"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "order": 6,
+      "name": "Texto 6: «La higuera»",
+      "type": "multiple_choice",
+      "instructions": "Lee el siguiente texto y responde las preguntas 25 a 27.",
+      "passage": {
+        "title": "La higuera",
+        "text": "Porque es áspera y fea,\nporque todas sus ramas son grises,\nyo le tengo piedad a la higuera.\n\nEn mi quinta hay cien árboles bellos,\nciruelos redondos,\nlimoneros rectos\ny naranjos de brotes lustrosos.\n\nEn las primaveras,\ntodos ellos se cubren de flores\nen torno a la higuera.\n\nY la pobre parece tan triste\ncon sus gajos torcidos que nunca\nde apretados capullos se viste...\n\nPor eso,\ncada vez que yo paso a su lado,\ndigo, procurando\nhacer dulce y alegre mi acento:\n«Es la higuera el más bello\nde los árboles todos del huerto».\n\nSi ella escucha,\nsi comprende el idioma en que hablo,\n¡qué dulzura tan honda hará nido\nen su alma sensible de árbol!\n\nY tal vez, a la noche,\ncuando el viento abanique su copa,\nembriagada de gozo le cuente:\n\n¡Hoy a mí me dijeron hermosa!\n\nJuana de Ibarbourou. Raíz salvaje. Montevideo: Maximino García, 1924.\n\nGlosario\n• quinta: casa de campo.\n• lustroso: que tiene brillo.\n• copa: conjunto de ramas y hojas que forma la parte superior de un árbol.",
+        "format": "plain",
+        "attachments": []
+      },
+      "items": [
+        {
+          "position": 25,
+          "type": "multiple_choice",
+          "stem": "Lee los siguientes versos:\n\n«con sus gajos torcidos que nunca / de apretados capullos se viste...»\n\n¿Qué expresan sobre la higuera los versos anteriores?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Que no tiene brillo.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Que no tiene frutos.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Que no tiene flores.",
+              "isCorrect": true
+            },
+            {
+              "key": "D",
+              "text": "Que no tiene ramas.",
+              "isCorrect": false
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "C",
+          "skill": "Interpretar y relacionar",
+          "oa": "OA 5",
+          "contentAxis": "Poema",
+          "hasFigure": false,
+          "figureNote": "El ítem cita dos versos del poema como estímulo propio; se incluyen dentro del stem.",
+          "taxonomy": [
+            {
+              "type": "descriptor",
+              "code": null,
+              "name": "Interpretan el sentido de expresiones en lenguaje figurado presentes en un poema.",
+              "parentCode": "LANG-5B-OA05",
+              "tagType": "primary"
+            },
+            {
+              "type": "learning_objective",
+              "code": "LANG-5B-OA05",
+              "name": "OA 5",
+              "level": "5_basico",
+              "tagType": "secondary"
+            },
+            {
+              "type": "skill",
+              "code": "LANG-SK-INTERPRETAR-Y-RELACIONAR",
+              "name": "Interpretar y relacionar",
+              "tagType": "secondary"
+            },
+            {
+              "type": "text_type",
+              "code": "LANG-TT-POEMA",
+              "name": "Poema",
+              "tagType": "secondary"
+            }
+          ]
+        },
+        {
+          "position": 26,
+          "type": "multiple_choice",
+          "stem": "Respecto de la copa de la higuera, ¿qué quiere decir el verso “cuando el viento abanique su copa”?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Que crecerá.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Que florecerá.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Que se moverá.",
+              "isCorrect": true
+            },
+            {
+              "key": "D",
+              "text": "Que se deshojará.",
+              "isCorrect": false
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "C",
+          "skill": "Interpretar y relacionar",
+          "oa": "OA 5",
+          "contentAxis": "Poema",
+          "hasFigure": false,
+          "figureNote": null,
+          "taxonomy": [
+            {
+              "type": "descriptor",
+              "code": null,
+              "name": "Interpretan el sentido de expresiones en lenguaje figurado presentes en un poema.",
+              "parentCode": "LANG-5B-OA05",
+              "tagType": "primary"
+            },
+            {
+              "type": "learning_objective",
+              "code": "LANG-5B-OA05",
+              "name": "OA 5",
+              "level": "5_basico",
+              "tagType": "secondary"
+            },
+            {
+              "type": "skill",
+              "code": "LANG-SK-INTERPRETAR-Y-RELACIONAR",
+              "name": "Interpretar y relacionar",
+              "tagType": "secondary"
+            },
+            {
+              "type": "text_type",
+              "code": "LANG-TT-POEMA",
+              "name": "Poema",
+              "tagType": "secondary"
+            }
+          ]
+        },
+        {
+          "position": 27,
+          "type": "multiple_choice",
+          "stem": "¿Qué sentimiento expresa por la higuera el hablante en el poema?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Angustia.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Nostalgia.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Indiferencia.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "Compasión.",
+              "isCorrect": true
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "D",
+          "skill": "Interpretar y relacionar",
+          "oa": "OA 5",
+          "contentAxis": "Poema",
+          "hasFigure": false,
+          "figureNote": null,
+          "taxonomy": [
+            {
+              "type": "descriptor",
+              "code": null,
+              "name": "Infieren el sentido global de un poema o un fragmento de este.",
+              "parentCode": "LANG-5B-OA05",
+              "tagType": "primary"
+            },
+            {
+              "type": "learning_objective",
+              "code": "LANG-5B-OA05",
+              "name": "OA 5",
+              "level": "5_basico",
+              "tagType": "secondary"
+            },
+            {
+              "type": "skill",
+              "code": "LANG-SK-INTERPRETAR-Y-RELACIONAR",
+              "name": "Interpretar y relacionar",
+              "tagType": "secondary"
+            },
+            {
+              "type": "text_type",
+              "code": "LANG-TT-POEMA",
+              "name": "Poema",
+              "tagType": "secondary"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "extraction": {
+    "itemCount": 27,
+    "warnings": [
+      "Q10 y Q15 son ítems de desarrollo (open_ended, responseFormat develop).",
+      "Texto 5 «Estrella» incluye dos dibujos embebidos en el relato (cuaderno de Germán); son decorativos para la trama y no se requieren para responder los ítems 21-24.",
+      "Q25 cita dos versos del poema como estímulo propio, embebidos en el stem.",
+      "Textos transcritos desde la capa de texto del PDF (pdftotext -layout), verbatim."
+    ],
+    "needsHumanReview": false
+  },
+  "pauta": {
+    "source": {
+      "report": "RBD25520_DIA_LECTURA_5_A_Resultados_Asignatura_Cierre_2025.pdf",
+      "subjectCode": "LANG",
+      "gradeCode": "5TH_BASIC",
+      "applicationPeriod": "cierre",
+      "year": 2025,
+      "instrumentJson": "extraccion/lenguaje/5º lenguaje cierre 2025.json"
+    },
+    "appliedKeys": 25,
+    "issues": []
+  }
+}

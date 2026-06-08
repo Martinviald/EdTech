@@ -1,0 +1,1322 @@
+{
+  "schemaVersion": "1.0",
+  "source": {
+    "file": "3º lenguaje cierre 2025.pdf",
+    "subjectFolder": "Lenguaje"
+  },
+  "instrument": {
+    "name": "DIA Lectura 3° Básico 2025 — Cierre",
+    "subject": "Lenguaje y Comunicación",
+    "subjectCode": "LANG",
+    "grade": "3° Básico",
+    "gradeCode": "3RD_BASIC",
+    "year": 2025,
+    "applicationPeriod": "cierre",
+    "type": "dia",
+    "isOfficial": true,
+    "source": "imported"
+  },
+  "sections": [
+    {
+      "order": 1,
+      "name": "Texto 1: «El mago y su varita mágica»",
+      "type": "multiple_choice",
+      "instructions": "Lee el siguiente texto y responde las preguntas 1 a 5.",
+      "passage": {
+        "title": "El mago y su varita mágica",
+        "text": "El mago Serafín tenía grandes poderes, todos gracias a su varita mágica. Con ella podía cambiar el color de las flores, encrespar las pestañas tiesas, saber la hora del día, iluminar la oscuridad de la noche, alcanzar una estrella con la mano, alisar el cabello crespo, convertir el llanto en risa y realizar obras de bien. Era tal la cantidad de maravillas que el mago podía realizar con su varita, que sería difícil enumerarlas todas.\n\nUna noche, después de guardar la varita en una caja negra, se acostó y se quedó dormido. Aprovechando aquella oportunidad, la bruja Eufrasia entró en silencio por la ventana, y con guantes de terciopelo abrió la caja y se robó la varita, dejando en su lugar una varilla inservible. Luego se montó en la misma escoba en que había llegado y volando desapareció en la oscuridad de la noche.\n\nAl día siguiente, cuando despertó el mago Serafín, lo primero que hizo después de bañarse y peinarse, fue levantar la tapa de la caja para sacar la varita, pero en vez de esta encontró aquella que no servía para nada.\n\nDe inmediato pensó en la bruja Eufrasia, quien tenía fama de ladrona.\n\n—Ella se la robó, estoy seguro —se dijo. El mago tenía urgencia en recuperarla, pues debía llevar una medicina a un niño que la necesitaba. Como ya no tenía poderes, se le ocurrió recurrir a su ingenio.\n\nSe disfrazó de afilador de cuchillos y con una piedra esmeril, que es afiladora, y un carrito salió a la calle gritando:\n\n—¡Afilo cuchillos, tijeras y varitas!\n\nSalieron a la calle varias personas con sus cuchillos y tijeras. La primera en salir de su casa fue la bruja, la que deseaba sacarle brillo a la varita y así dejarla resplandeciente. El mago, en primer lugar, afiló los cuchillos de todas las personas de la cuadra y dejó la varita para el final.\n\nCuando la bruja se la pasó, el mago la tomó y no la soltó. Rápidamente, hizo desaparecer el carro. Usando su capa voladora se elevó en el cielo y, llevándose la varita mágica, desapareció entre las nubes.\n\nLas personas se quedaron con la boca abierta mirando aquel milagro y la bruja quedó pataleando en el suelo, echando chispas de rabia.\n\nMaría Luisa García-Tello. La Academia del Ruiseñor y otros cuentos. Chile: Ediciones Universitarias de Valparaíso, 2010. (Adaptación).\n\nGlosario\n• piedra esmeril: herramienta que permite, entre otras cosas, sacar brillo y afilar herramientas cortantes, como tijeras o cuchillos.",
+        "format": "plain",
+        "attachments": [
+          {
+            "kind": "image",
+            "note": "Ilustración decorativa de un mago con sombrero y una varita mágica (no aporta información para responder)."
+          }
+        ]
+      },
+      "items": [
+        {
+          "position": 1,
+          "type": "multiple_choice",
+          "stem": "¿Qué hizo la bruja luego de que el mago se durmió?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Entró por la ventana para sacar la varita mágica.",
+              "isCorrect": true
+            },
+            {
+              "key": "B",
+              "text": "Cambió el color de las flores usando la varita mágica.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Sorprendió a los vecinos haciendo trucos con la varita mágica.",
+              "isCorrect": false
+            }
+          ],
+          "correctKey": "A",
+          "skill": "Interpretar y relacionar",
+          "oa": "OA 4",
+          "contentAxis": "Narración",
+          "hasFigure": false,
+          "figureNote": null,
+          "taxonomy": [
+            {
+              "type": "descriptor",
+              "code": null,
+              "name": "Identifican un acontecimiento o acción relevante en un texto narrativo.",
+              "parentCode": "LANG-2B-OA04",
+              "tagType": "primary"
+            },
+            {
+              "type": "learning_objective",
+              "code": "LANG-2B-OA04",
+              "name": "OA 4",
+              "level": "2_basico",
+              "tagType": "secondary"
+            },
+            {
+              "type": "skill",
+              "code": "LANG-SK-INTERPRETAR-Y-RELACIONAR",
+              "name": "Interpretar y relacionar",
+              "tagType": "secondary"
+            },
+            {
+              "type": "text_type",
+              "code": "LANG-TT-NARRACION",
+              "name": "Narración",
+              "tagType": "secondary"
+            }
+          ]
+        },
+        {
+          "position": 2,
+          "type": "multiple_choice",
+          "stem": "Según lo leído, ¿por qué el mago tenía urgencia en recuperar su varita mágica?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Porque la necesitaba para afilar cuchillos.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Porque quería castigar a la bruja por el robo.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Porque necesitaba llevar medicina a un niño.",
+              "isCorrect": true
+            }
+          ],
+          "correctKey": "C",
+          "skill": "Interpretar y relacionar",
+          "oa": "OA 4",
+          "contentAxis": "Narración",
+          "hasFigure": false,
+          "figureNote": null,
+          "taxonomy": [
+            {
+              "type": "descriptor",
+              "code": null,
+              "name": "Infieren causa o consecuencia de acontecimientos o acciones relevantes en un texto narrativo.",
+              "parentCode": "LANG-2B-OA04",
+              "tagType": "primary"
+            },
+            {
+              "type": "learning_objective",
+              "code": "LANG-2B-OA04",
+              "name": "OA 4",
+              "level": "2_basico",
+              "tagType": "secondary"
+            },
+            {
+              "type": "skill",
+              "code": "LANG-SK-INTERPRETAR-Y-RELACIONAR",
+              "name": "Interpretar y relacionar",
+              "tagType": "secondary"
+            },
+            {
+              "type": "text_type",
+              "code": "LANG-TT-NARRACION",
+              "name": "Narración",
+              "tagType": "secondary"
+            }
+          ]
+        },
+        {
+          "position": 3,
+          "type": "multiple_choice",
+          "stem": "¿Qué hizo el mago para recuperar sus poderes?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Usó su capa voladora.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Recurrió a su ingenio.",
+              "isCorrect": true
+            },
+            {
+              "key": "C",
+              "text": "Cambió su varita mágica.",
+              "isCorrect": false
+            }
+          ],
+          "correctKey": "B",
+          "skill": "Interpretar y relacionar",
+          "oa": "OA 4",
+          "contentAxis": "Narración",
+          "hasFigure": false,
+          "figureNote": null,
+          "taxonomy": [
+            {
+              "type": "descriptor",
+              "code": null,
+              "name": "Identifican un acontecimiento o acción relevante en un texto narrativo.",
+              "parentCode": "LANG-2B-OA04",
+              "tagType": "primary"
+            },
+            {
+              "type": "learning_objective",
+              "code": "LANG-2B-OA04",
+              "name": "OA 4",
+              "level": "2_basico",
+              "tagType": "secondary"
+            },
+            {
+              "type": "skill",
+              "code": "LANG-SK-INTERPRETAR-Y-RELACIONAR",
+              "name": "Interpretar y relacionar",
+              "tagType": "secondary"
+            },
+            {
+              "type": "text_type",
+              "code": "LANG-TT-NARRACION",
+              "name": "Narración",
+              "tagType": "secondary"
+            }
+          ]
+        },
+        {
+          "position": 4,
+          "type": "multiple_choice",
+          "stem": "¿De qué se disfrazó Serafín para recuperar su varita?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "De brujo.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "De ladrón.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "De afilador.",
+              "isCorrect": true
+            }
+          ],
+          "correctKey": "C",
+          "skill": "Localizar",
+          "oa": "OA 4",
+          "contentAxis": "Narración",
+          "hasFigure": false,
+          "figureNote": null,
+          "taxonomy": [
+            {
+              "type": "descriptor",
+              "code": null,
+              "name": "Localizan información explícita relevante en un texto narrativo.",
+              "parentCode": "LANG-2B-OA04",
+              "tagType": "primary"
+            },
+            {
+              "type": "learning_objective",
+              "code": "LANG-2B-OA04",
+              "name": "OA 4",
+              "level": "2_basico",
+              "tagType": "secondary"
+            },
+            {
+              "type": "skill",
+              "code": "LANG-SK-LOCALIZAR",
+              "name": "Localizar",
+              "tagType": "secondary"
+            },
+            {
+              "type": "text_type",
+              "code": "LANG-TT-NARRACION",
+              "name": "Narración",
+              "tagType": "secondary"
+            }
+          ]
+        },
+        {
+          "position": 5,
+          "type": "multiple_choice",
+          "stem": "¿Qué truco hizo el mago al final de la historia?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Iluminó la noche y alcanzó una estrella.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Hizo desaparecer un carro y se elevó en el cielo.",
+              "isCorrect": true
+            },
+            {
+              "key": "C",
+              "text": "Convirtió el llanto en risa y realizó obras de bien.",
+              "isCorrect": false
+            }
+          ],
+          "correctKey": "B",
+          "skill": "Interpretar y relacionar",
+          "oa": "OA 4",
+          "contentAxis": "Narración",
+          "hasFigure": false,
+          "figureNote": null,
+          "taxonomy": [
+            {
+              "type": "descriptor",
+              "code": null,
+              "name": "Identifican un acontecimiento o acción relevante en un texto narrativo.",
+              "parentCode": "LANG-2B-OA04",
+              "tagType": "primary"
+            },
+            {
+              "type": "learning_objective",
+              "code": "LANG-2B-OA04",
+              "name": "OA 4",
+              "level": "2_basico",
+              "tagType": "secondary"
+            },
+            {
+              "type": "skill",
+              "code": "LANG-SK-INTERPRETAR-Y-RELACIONAR",
+              "name": "Interpretar y relacionar",
+              "tagType": "secondary"
+            },
+            {
+              "type": "text_type",
+              "code": "LANG-TT-NARRACION",
+              "name": "Narración",
+              "tagType": "secondary"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "order": 2,
+      "name": "Texto 2: «Chicle»",
+      "type": "multiple_choice",
+      "instructions": "Lee el siguiente texto y responde las preguntas 6 a 10.",
+      "passage": {
+        "title": "CHICLE",
+        "text": "Por cientos de años, los pueblos de México y Centroamérica utilizaban, como goma de mascar, un líquido lechoso que se conocía como la “savia de chicle”, que se obtenía al cortar la corteza de un árbol llamado zapote, que es originario de las zonas tropicales de América.\n\nLos primeros chicles “modernos”\nA un norteamericano llamado Thomas Adams, se le ocurrió comercializar por primera vez el “chicle”, recordando que los aztecas, indígenas de México, mascaban la savia de chicle. Así, en 1859, fabricó la primera goma de mascar, sin sabor. Luego, le agregó azúcar y saborizantes como menta y frutilla.\n\nFabricación actual del chicle\nDurante muchos años, la industria de las gomas de mascar estuvo basada en el chicle natural, pero hoy en día se usan productos sintéticos para su fabricación. Para fabricarlo actualmente, se utiliza una base de goma, la que permite que el chicle sea elástico, y aunque antiguamente se empleaba resina de árboles, en la actualidad se utiliza una resina sintética, elaborada de plástico y caucho. A esta base de goma se le agrega colorante, sabor y se mezcla con jarabe de glucosa.\n\n¿Sabías qué…?\nLa palabra chicle viene de tzictli que, en náhuatl, significa estar pegado. Otros significados: se le llama chicle a una persona que es considerada molesta por querer estar siempre pegada a otra.\n\nAna María Pavez y Constanza Recart, Sabores de América. Chile: Amanuta, 2015. (Adaptación).\n\nGlosario\n• corteza: cubierta externa del árbol.",
+        "format": "plain",
+        "attachments": [
+          {
+            "kind": "image",
+            "note": "Ilustraciones decorativas asociadas al texto informativo sobre el chicle (no aportan información indispensable para responder)."
+          }
+        ]
+      },
+      "items": [
+        {
+          "position": 6,
+          "type": "multiple_choice",
+          "stem": "¿De dónde se obtenía la goma de mascar que dio origen al chicle?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "De la menta.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Del zapote.",
+              "isCorrect": true
+            },
+            {
+              "key": "C",
+              "text": "Del azúcar.",
+              "isCorrect": false
+            }
+          ],
+          "correctKey": "B",
+          "skill": "Interpretar y relacionar",
+          "oa": "OA 6",
+          "contentAxis": "Texto no literario",
+          "hasFigure": false,
+          "figureNote": null,
+          "taxonomy": [
+            {
+              "type": "descriptor",
+              "code": null,
+              "name": "Infieren información relevante en un texto no literario.",
+              "parentCode": "LANG-2B-OA06",
+              "tagType": "primary"
+            },
+            {
+              "type": "learning_objective",
+              "code": "LANG-2B-OA06",
+              "name": "OA 6",
+              "level": "2_basico",
+              "tagType": "secondary"
+            },
+            {
+              "type": "skill",
+              "code": "LANG-SK-INTERPRETAR-Y-RELACIONAR",
+              "name": "Interpretar y relacionar",
+              "tagType": "secondary"
+            },
+            {
+              "type": "text_type",
+              "code": "LANG-TT-TEXTO-NO-LITERARIO",
+              "name": "Texto no literario",
+              "tagType": "secondary"
+            }
+          ]
+        },
+        {
+          "position": 7,
+          "type": "multiple_choice",
+          "stem": "¿Qué usaban los pueblos de México y Centroamérica como goma de mascar?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Un líquido que salía de un árbol.",
+              "isCorrect": true
+            },
+            {
+              "key": "B",
+              "text": "Una resina sintética de caucho.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Un jarabe de glucosa.",
+              "isCorrect": false
+            }
+          ],
+          "correctKey": "A",
+          "skill": "Localizar",
+          "oa": "OA 6",
+          "contentAxis": "Texto no literario",
+          "hasFigure": false,
+          "figureNote": null,
+          "taxonomy": [
+            {
+              "type": "descriptor",
+              "code": null,
+              "name": "Localizan información explícita relevante en un texto no literario.",
+              "parentCode": "LANG-2B-OA06",
+              "tagType": "primary"
+            },
+            {
+              "type": "learning_objective",
+              "code": "LANG-2B-OA06",
+              "name": "OA 6",
+              "level": "2_basico",
+              "tagType": "secondary"
+            },
+            {
+              "type": "skill",
+              "code": "LANG-SK-LOCALIZAR",
+              "name": "Localizar",
+              "tagType": "secondary"
+            },
+            {
+              "type": "text_type",
+              "code": "LANG-TT-TEXTO-NO-LITERARIO",
+              "name": "Texto no literario",
+              "tagType": "secondary"
+            }
+          ]
+        },
+        {
+          "position": 8,
+          "type": "multiple_choice",
+          "stem": "¿Qué hizo Thomas Adams?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Usó resina sintética para hacer chicle.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Descubrió la savia de chicle.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Comercializó el chicle.",
+              "isCorrect": true
+            }
+          ],
+          "correctKey": "C",
+          "skill": "Localizar",
+          "oa": "OA 6",
+          "contentAxis": "Texto no literario",
+          "hasFigure": false,
+          "figureNote": null,
+          "taxonomy": [
+            {
+              "type": "descriptor",
+              "code": null,
+              "name": "Localizan información explícita relevante en un texto no literario.",
+              "parentCode": "LANG-2B-OA06",
+              "tagType": "primary"
+            },
+            {
+              "type": "learning_objective",
+              "code": "LANG-2B-OA06",
+              "name": "OA 6",
+              "level": "2_basico",
+              "tagType": "secondary"
+            },
+            {
+              "type": "skill",
+              "code": "LANG-SK-LOCALIZAR",
+              "name": "Localizar",
+              "tagType": "secondary"
+            },
+            {
+              "type": "text_type",
+              "code": "LANG-TT-TEXTO-NO-LITERARIO",
+              "name": "Texto no literario",
+              "tagType": "secondary"
+            }
+          ]
+        },
+        {
+          "position": 9,
+          "type": "multiple_choice",
+          "stem": "Según el texto, ¿qué significa “tzictli”?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Estar pegado.",
+              "isCorrect": true
+            },
+            {
+              "key": "B",
+              "text": "Savia de chicle.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Persona molesta.",
+              "isCorrect": false
+            }
+          ],
+          "correctKey": "A",
+          "skill": "Localizar",
+          "oa": "OA 6",
+          "contentAxis": "Texto no literario",
+          "hasFigure": false,
+          "figureNote": null,
+          "taxonomy": [
+            {
+              "type": "descriptor",
+              "code": null,
+              "name": "Localizan información explícita relevante en un texto no literario.",
+              "parentCode": "LANG-2B-OA06",
+              "tagType": "primary"
+            },
+            {
+              "type": "learning_objective",
+              "code": "LANG-2B-OA06",
+              "name": "OA 6",
+              "level": "2_basico",
+              "tagType": "secondary"
+            },
+            {
+              "type": "skill",
+              "code": "LANG-SK-LOCALIZAR",
+              "name": "Localizar",
+              "tagType": "secondary"
+            },
+            {
+              "type": "text_type",
+              "code": "LANG-TT-TEXTO-NO-LITERARIO",
+              "name": "Texto no literario",
+              "tagType": "secondary"
+            }
+          ]
+        },
+        {
+          "position": 10,
+          "type": "multiple_choice",
+          "stem": "¿De qué trata el texto?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Del descubrimiento y desarrollo actual del chicle.",
+              "isCorrect": true
+            },
+            {
+              "key": "B",
+              "text": "De un mexicano que compraba y vendía chicle a los Aztecas.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "De los pueblos que usaban menta y frutilla para saborizar el chicle.",
+              "isCorrect": false
+            }
+          ],
+          "correctKey": "A",
+          "skill": "Interpretar y relacionar",
+          "oa": "OA 6",
+          "contentAxis": "Texto no literario",
+          "hasFigure": false,
+          "figureNote": null,
+          "taxonomy": [
+            {
+              "type": "descriptor",
+              "code": null,
+              "name": "Infieren el sentido global de un texto no literario.",
+              "parentCode": "LANG-2B-OA06",
+              "tagType": "primary"
+            },
+            {
+              "type": "learning_objective",
+              "code": "LANG-2B-OA06",
+              "name": "OA 6",
+              "level": "2_basico",
+              "tagType": "secondary"
+            },
+            {
+              "type": "skill",
+              "code": "LANG-SK-INTERPRETAR-Y-RELACIONAR",
+              "name": "Interpretar y relacionar",
+              "tagType": "secondary"
+            },
+            {
+              "type": "text_type",
+              "code": "LANG-TT-TEXTO-NO-LITERARIO",
+              "name": "Texto no literario",
+              "tagType": "secondary"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "order": 3,
+      "name": "Texto 3: «Por qué los árboles se ponen amarillos en otoño»",
+      "type": "mixed",
+      "instructions": "Lee el siguiente texto y responde las preguntas 11 a 14.",
+      "passage": {
+        "title": "Por qué los árboles se ponen amarillos en otoño",
+        "text": "Una antigua leyenda indígena cuenta que hace mucho, mucho tiempo, todos los árboles permanecían siempre verdes durante el año.\n\nUn día, un anciano partió hacia el norte. Con el sol a la espalda, recorrió montañas, cruzó ríos, y atravesó bosques y desiertos, hasta que llegó a un reino maravilloso. Allí el sol se levantaba apenas un poco y se ocultaba muy temprano, pero todo brillaba intensamente, con los más vivos colores, bajo los rayos de luz. Pero lo más hermoso era observar a los árboles de colores: amarillo, rojo y café. A lo lejos se veían las montañas que eran azules y estaban cubiertas de nieve.\n\nDespués de un tiempo, cuando el anciano llegó a su pueblo, les contó a sus amigos todo lo que había visto, pero nadie le quería creer.\n\n—Estás inventando todo —le decían y se burlaban—. ¿Cómo van a ser los árboles de color amarillo, rojo y café?\n\n—Yo lo he visto con mis ojos —decía el hombre—. Si no me creen, vengan conmigo.\n\nPero la gente era muy cómoda y nadie pensaba en hacerlo.\n\n—Ve tú solo —le decían riéndose—, y si quieres que te creamos, tráenos una ramita de algún árbol amarillo, rojo o café.\n\nEl hombre se encaminó una vez más hacia el norte.\n\nEstuvo mucho tiempo ausente y la gente del pueblo ya se había olvidado de él.\n\nUn día, sin embargo, se acordaron del anciano. Al pueblo llegó un hermoso pájaro, lleno de colores vivos, que traía en su piquito una rama con hojas amarillas, rojas y cafés. El pájaro dejó caer la rama sobre la copa de un árbol y este se puso amarillo, rojo y café. El pájaro era el hombre que se había ido al norte.\n\nCuando todo el pueblo se reunió para ver lo sucedido, el pájaro lanzó un extraño graznido, como si quisiera reír, luego se alejó volando hacia el horizonte. La ramita quedó en la copa del árbol, y desde ese día en todos los otoños se tiñen de colores las hojas de algunos árboles y luego caen al suelo.\n\nCecilia Beuchat y Loreto Rodríguez. Las cuatro estaciones tomo 1. Santiago: Andrés Bello, 1992. (Adaptación).",
+        "format": "plain",
+        "attachments": [
+          {
+            "kind": "image",
+            "note": "Ilustraciones decorativas de un anciano caminando, árboles de colores y un pájaro multicolor (no aportan información indispensable para responder)."
+          }
+        ]
+      },
+      "items": [
+        {
+          "position": 11,
+          "type": "multiple_choice",
+          "stem": "Al inicio del relato, ¿qué características tenían los árboles del pueblo del anciano?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Brillaban intensamente con vivos colores.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Cambiaban de color según la estación.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Permanecían verdes durante el año.",
+              "isCorrect": true
+            }
+          ],
+          "correctKey": "C",
+          "skill": "Interpretar y relacionar",
+          "oa": "OA 4",
+          "contentAxis": "Narración",
+          "hasFigure": false,
+          "figureNote": null,
+          "taxonomy": [
+            {
+              "type": "descriptor",
+              "code": null,
+              "name": "Identifican aspectos relevantes sobre el ambiente físico y sicológico en un texto narrativo.",
+              "parentCode": "LANG-2B-OA04",
+              "tagType": "primary"
+            },
+            {
+              "type": "learning_objective",
+              "code": "LANG-2B-OA04",
+              "name": "OA 4",
+              "level": "2_basico",
+              "tagType": "secondary"
+            },
+            {
+              "type": "skill",
+              "code": "LANG-SK-INTERPRETAR-Y-RELACIONAR",
+              "name": "Interpretar y relacionar",
+              "tagType": "secondary"
+            },
+            {
+              "type": "text_type",
+              "code": "LANG-TT-NARRACION",
+              "name": "Narración",
+              "tagType": "secondary"
+            }
+          ]
+        },
+        {
+          "position": 12,
+          "type": "multiple_choice",
+          "stem": "¿Por qué el anciano viajó por segunda vez al norte?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Porque debía encontrar el pájaro de colores vivos.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Porque quería demostrarle a la gente que él decía la verdad.",
+              "isCorrect": true
+            },
+            {
+              "key": "C",
+              "text": "Porque necesitaba cambiar el color de los árboles de su pueblo.",
+              "isCorrect": false
+            }
+          ],
+          "correctKey": "B",
+          "skill": "Interpretar y relacionar",
+          "oa": "OA 4",
+          "contentAxis": "Narración",
+          "hasFigure": false,
+          "figureNote": null,
+          "taxonomy": [
+            {
+              "type": "descriptor",
+              "code": null,
+              "name": "Infieren causa o consecuencia de acontecimientos o acciones relevantes en un texto narrativo.",
+              "parentCode": "LANG-2B-OA04",
+              "tagType": "primary"
+            },
+            {
+              "type": "learning_objective",
+              "code": "LANG-2B-OA04",
+              "name": "OA 4",
+              "level": "2_basico",
+              "tagType": "secondary"
+            },
+            {
+              "type": "skill",
+              "code": "LANG-SK-INTERPRETAR-Y-RELACIONAR",
+              "name": "Interpretar y relacionar",
+              "tagType": "secondary"
+            },
+            {
+              "type": "text_type",
+              "code": "LANG-TT-NARRACION",
+              "name": "Narración",
+              "tagType": "secondary"
+            }
+          ]
+        },
+        {
+          "position": 13,
+          "type": "multiple_choice",
+          "stem": "¿Qué sucedió finalmente con el anciano?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Llegó a un reino maravilloso.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Descubrió árboles de colores.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Regresó convertido en pájaro.",
+              "isCorrect": true
+            }
+          ],
+          "correctKey": "C",
+          "skill": "Interpretar y relacionar",
+          "oa": "OA 4",
+          "contentAxis": "Narración",
+          "hasFigure": false,
+          "figureNote": null,
+          "taxonomy": [
+            {
+              "type": "descriptor",
+              "code": null,
+              "name": "Identifican un acontecimiento o acción relevante en un texto narrativo.",
+              "parentCode": "LANG-2B-OA04",
+              "tagType": "primary"
+            },
+            {
+              "type": "learning_objective",
+              "code": "LANG-2B-OA04",
+              "name": "OA 4",
+              "level": "2_basico",
+              "tagType": "secondary"
+            },
+            {
+              "type": "skill",
+              "code": "LANG-SK-INTERPRETAR-Y-RELACIONAR",
+              "name": "Interpretar y relacionar",
+              "tagType": "secondary"
+            },
+            {
+              "type": "text_type",
+              "code": "LANG-TT-NARRACION",
+              "name": "Narración",
+              "tagType": "secondary"
+            }
+          ]
+        },
+        {
+          "position": 14,
+          "type": "open_ended",
+          "stem": "Cuando el anciano contó lo que vio en su primer viaje, sus amigos no le creyeron. ¿Estás de acuerdo con que sus amigos no confiaran en él? (Sí / No). Justifica tu respuesta con información del texto.",
+          "alternatives": [],
+          "correctKey": null,
+          "skill": "Reflexionar",
+          "oa": "OA 4",
+          "contentAxis": "Narración",
+          "hasFigure": false,
+          "figureNote": "Ítem híbrido: ofrece selección Sí/No y luego pide justificación escrita. Se modela como open_ended porque lo evaluable es la justificación.",
+          "taxonomy": [
+            {
+              "type": "descriptor",
+              "code": null,
+              "name": "Opinan sobre algún aspecto controversial de un texto narrativo con fundamentos que integran información del texto.",
+              "parentCode": "LANG-2B-OA04",
+              "tagType": "primary"
+            },
+            {
+              "type": "learning_objective",
+              "code": "LANG-2B-OA04",
+              "name": "OA 4",
+              "level": "2_basico",
+              "tagType": "secondary"
+            },
+            {
+              "type": "skill",
+              "code": "LANG-SK-REFLEXIONAR",
+              "name": "Reflexionar",
+              "tagType": "secondary"
+            },
+            {
+              "type": "text_type",
+              "code": "LANG-TT-NARRACION",
+              "name": "Narración",
+              "tagType": "secondary"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "order": 4,
+      "name": "Texto 4: «Disco de colores»",
+      "type": "mixed",
+      "instructions": "Lee el siguiente texto y responde las preguntas 15 a 19.",
+      "passage": {
+        "title": "Disco de colores",
+        "text": "Con este disco de colores podrás demostrar que la luz blanca se puede formar con los siete colores del arcoíris.\n\nNecesitarás\nTrozo de cartón (idealmente blanco)\nCompás (o algo redondo para usar de molde)\nLápices de colores\nHilo\nTijeras\n\nPasos\n1. Con el compás o algo redondo, marca un círculo en el cartón y recórtalo.\n2. Divide el círculo en 7 partes iguales y pinta cada una con un color diferente del arcoíris.\n3. Haz dos agujeros cerca del centro e introduce a través de ellos un hilo.\n4. Ata el hilo en los extremos.\n\n¡Listo!\nYa tienes el disco para observar cómo se forma el color blanco.\n\nAl enrollar el hilo y luego tirarlo de los extremos, el disco girará a gran velocidad y se verá de color similar al blanco. Esto ocurre porque tus ojos no logran distinguir los colores y mezclan todos los colores del arcoíris.\n\nCarla Hernández. Juguetes científicos para hacer en casa: Disco de Newton. Cambalache 3, 2020. (Adaptación).",
+        "format": "plain",
+        "attachments": [
+          {
+            "kind": "image",
+            "note": "Instructivo ilustrado con los pasos para construir un disco de Newton: círculo de cartón dividido en colores, agujeros con hilo, y el disco terminado."
+          }
+        ]
+      },
+      "items": [
+        {
+          "position": 15,
+          "type": "multiple_choice",
+          "stem": "¿Para qué se usa el compás?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Para estirar los hilos en el círculo.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Para hacer un círculo en el cartón.",
+              "isCorrect": true
+            },
+            {
+              "key": "C",
+              "text": "Para dividir el círculo en partes iguales.",
+              "isCorrect": false
+            }
+          ],
+          "correctKey": "B",
+          "skill": "Localizar",
+          "oa": "OA 6",
+          "contentAxis": "Texto no literario",
+          "hasFigure": false,
+          "figureNote": null,
+          "taxonomy": [
+            {
+              "type": "descriptor",
+              "code": null,
+              "name": "Localizan información explícita relevante en un texto no literario.",
+              "parentCode": "LANG-2B-OA06",
+              "tagType": "primary"
+            },
+            {
+              "type": "learning_objective",
+              "code": "LANG-2B-OA06",
+              "name": "OA 6",
+              "level": "2_basico",
+              "tagType": "secondary"
+            },
+            {
+              "type": "skill",
+              "code": "LANG-SK-LOCALIZAR",
+              "name": "Localizar",
+              "tagType": "secondary"
+            },
+            {
+              "type": "text_type",
+              "code": "LANG-TT-TEXTO-NO-LITERARIO",
+              "name": "Texto no literario",
+              "tagType": "secondary"
+            }
+          ]
+        },
+        {
+          "position": 16,
+          "type": "multiple_choice",
+          "stem": "¿Qué se muestra en esta imagen?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Cómo hacer girar el disco a gran velocidad.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Cómo enrollar y estirar los hilos del disco.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Cómo quedan los hilos atados en el disco.",
+              "isCorrect": true
+            }
+          ],
+          "correctKey": "C",
+          "skill": "Interpretar y relacionar",
+          "oa": "OA 6",
+          "contentAxis": "Texto no literario",
+          "hasFigure": true,
+          "figureNote": "Imagen del disco de colores (disco de Newton) dividido en 7 sectores de colores del arcoíris, con un hilo enhebrado a ambos lados que sale del centro. El ítem depende de la imagen para responderse.",
+          "taxonomy": [
+            {
+              "type": "descriptor",
+              "code": null,
+              "name": "Infieren información relevante que aportan los elementos discontinuos en un texto no literario.",
+              "parentCode": "LANG-2B-OA06",
+              "tagType": "primary"
+            },
+            {
+              "type": "learning_objective",
+              "code": "LANG-2B-OA06",
+              "name": "OA 6",
+              "level": "2_basico",
+              "tagType": "secondary"
+            },
+            {
+              "type": "skill",
+              "code": "LANG-SK-INTERPRETAR-Y-RELACIONAR",
+              "name": "Interpretar y relacionar",
+              "tagType": "secondary"
+            },
+            {
+              "type": "text_type",
+              "code": "LANG-TT-TEXTO-NO-LITERARIO",
+              "name": "Texto no literario",
+              "tagType": "secondary"
+            }
+          ]
+        },
+        {
+          "position": 17,
+          "type": "multiple_choice",
+          "stem": "¿Qué ocurre con los colores del disco al girarlo a gran velocidad?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Se ven con claridad.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Se ven igual al arcoíris.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Se ven como un solo color.",
+              "isCorrect": true
+            }
+          ],
+          "correctKey": "C",
+          "skill": "Interpretar y relacionar",
+          "oa": "OA 6",
+          "contentAxis": "Texto no literario",
+          "hasFigure": false,
+          "figureNote": null,
+          "taxonomy": [
+            {
+              "type": "descriptor",
+              "code": null,
+              "name": "Infieren información relevante en un texto no literario.",
+              "parentCode": "LANG-2B-OA06",
+              "tagType": "primary"
+            },
+            {
+              "type": "learning_objective",
+              "code": "LANG-2B-OA06",
+              "name": "OA 6",
+              "level": "2_basico",
+              "tagType": "secondary"
+            },
+            {
+              "type": "skill",
+              "code": "LANG-SK-INTERPRETAR-Y-RELACIONAR",
+              "name": "Interpretar y relacionar",
+              "tagType": "secondary"
+            },
+            {
+              "type": "text_type",
+              "code": "LANG-TT-TEXTO-NO-LITERARIO",
+              "name": "Texto no literario",
+              "tagType": "secondary"
+            }
+          ]
+        },
+        {
+          "position": 18,
+          "type": "multiple_choice",
+          "stem": "¿Para qué se usa el hilo?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Para amarrar el disco.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Para hacer girar el disco.",
+              "isCorrect": true
+            },
+            {
+              "key": "C",
+              "text": "Para marcar los agujeros del disco.",
+              "isCorrect": false
+            }
+          ],
+          "correctKey": "B",
+          "skill": "Interpretar y relacionar",
+          "oa": "OA 6",
+          "contentAxis": "Texto no literario",
+          "hasFigure": false,
+          "figureNote": null,
+          "taxonomy": [
+            {
+              "type": "descriptor",
+              "code": null,
+              "name": "Infieren información relevante en un texto no literario.",
+              "parentCode": "LANG-2B-OA06",
+              "tagType": "primary"
+            },
+            {
+              "type": "learning_objective",
+              "code": "LANG-2B-OA06",
+              "name": "OA 6",
+              "level": "2_basico",
+              "tagType": "secondary"
+            },
+            {
+              "type": "skill",
+              "code": "LANG-SK-INTERPRETAR-Y-RELACIONAR",
+              "name": "Interpretar y relacionar",
+              "tagType": "secondary"
+            },
+            {
+              "type": "text_type",
+              "code": "LANG-TT-TEXTO-NO-LITERARIO",
+              "name": "Texto no literario",
+              "tagType": "secondary"
+            }
+          ]
+        },
+        {
+          "position": 19,
+          "type": "open_ended",
+          "stem": "¿Qué te pareció este disco de colores? ¿Por qué? Justifica tu respuesta con información del texto.",
+          "alternatives": [],
+          "correctKey": null,
+          "skill": "Reflexionar",
+          "oa": "OA 6",
+          "contentAxis": "Texto no literario",
+          "hasFigure": false,
+          "figureNote": null,
+          "taxonomy": [
+            {
+              "type": "descriptor",
+              "code": null,
+              "name": "Opinan sobre algún aspecto relevante en un texto no literario con fundamentos que integran información del texto.",
+              "parentCode": "LANG-2B-OA06",
+              "tagType": "primary"
+            },
+            {
+              "type": "learning_objective",
+              "code": "LANG-2B-OA06",
+              "name": "OA 6",
+              "level": "2_basico",
+              "tagType": "secondary"
+            },
+            {
+              "type": "skill",
+              "code": "LANG-SK-REFLEXIONAR",
+              "name": "Reflexionar",
+              "tagType": "secondary"
+            },
+            {
+              "type": "text_type",
+              "code": "LANG-TT-TEXTO-NO-LITERARIO",
+              "name": "Texto no literario",
+              "tagType": "secondary"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "order": 5,
+      "name": "Texto 5: «Los castillos»",
+      "type": "mixed",
+      "instructions": "Lee el siguiente texto y responde las preguntas 20 a 22.",
+      "passage": {
+        "title": "Los castillos",
+        "text": "Los castillos se quedaron solos,\nsin princesas ni caballeros.\nSolos a la orilla de un río,\nvestidos de musgo y silencio.\n\nA las altas ventanas suben\nlos pájaros muertos de miedo.\nEspían salones vacíos,\nabandonados terciopelos.\n\nCiegas sueñan las armaduras\nel más inútil de los sueños.\nReposan de largas batallas,\nse miran en libros de cuentos.\n\nLos dragones y las alimañas\nno los defendieron del tiempo.\nLos castillos están solos,\ntristes de sombras y misterio.\n\nMaría Elena Walsh. Tutú Marambá. Argentina: Sudamericana, 1969.\n\nGlosario\n• musgo: son plantas muy simples y pequeñas que viven en lugares húmedos y sombríos.",
+        "format": "plain",
+        "attachments": [
+          {
+            "kind": "image",
+            "note": "Ilustración decorativa de castillos a la orilla de un río (no aporta información indispensable para responder)."
+          }
+        ]
+      },
+      "items": [
+        {
+          "position": 20,
+          "type": "multiple_choice",
+          "stem": "¿Qué significa en el poema que los castillos están “vestidos de musgo”?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Que están cubiertos de musgo.",
+              "isCorrect": true
+            },
+            {
+              "key": "B",
+              "text": "Que fueron construidos con musgo.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Que sus habitantes se visten de musgo.",
+              "isCorrect": false
+            }
+          ],
+          "correctKey": "A",
+          "skill": "Interpretar y relacionar",
+          "oa": "OA 5",
+          "contentAxis": "Poema",
+          "hasFigure": false,
+          "figureNote": null,
+          "taxonomy": [
+            {
+              "type": "descriptor",
+              "code": null,
+              "name": "Interpretan el sentido de expresiones en lenguaje figurado presentes en un poema.",
+              "parentCode": "LANG-2B-OA05",
+              "tagType": "primary"
+            },
+            {
+              "type": "learning_objective",
+              "code": "LANG-2B-OA05",
+              "name": "OA 5",
+              "level": "2_basico",
+              "tagType": "secondary"
+            },
+            {
+              "type": "skill",
+              "code": "LANG-SK-INTERPRETAR-Y-RELACIONAR",
+              "name": "Interpretar y relacionar",
+              "tagType": "secondary"
+            },
+            {
+              "type": "text_type",
+              "code": "LANG-TT-POEMA",
+              "name": "Poema",
+              "tagType": "secondary"
+            }
+          ]
+        },
+        {
+          "position": 21,
+          "type": "multiple_choice",
+          "stem": "Lee la siguiente estrofa:\n\n«Ciegas sueñan las armaduras / el más inútil de los sueños. / Reposan de largas batallas, / se miran en libros de cuentos».\n\n¿Qué se dice de las armaduras?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Que ya nadie las usa.",
+              "isCorrect": true
+            },
+            {
+              "key": "B",
+              "text": "Que defienden a los castillos.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Que están en una larga batalla.",
+              "isCorrect": false
+            }
+          ],
+          "correctKey": "A",
+          "skill": "Interpretar y relacionar",
+          "oa": "OA 5",
+          "contentAxis": "Poema",
+          "hasFigure": false,
+          "figureNote": "El ítem cita una estrofa del poema como estímulo propio; se incluye dentro del stem.",
+          "taxonomy": [
+            {
+              "type": "descriptor",
+              "code": null,
+              "name": "Interpretan el sentido de expresiones en lenguaje figurado presentes en un poema.",
+              "parentCode": "LANG-2B-OA05",
+              "tagType": "primary"
+            },
+            {
+              "type": "learning_objective",
+              "code": "LANG-2B-OA05",
+              "name": "OA 5",
+              "level": "2_basico",
+              "tagType": "secondary"
+            },
+            {
+              "type": "skill",
+              "code": "LANG-SK-INTERPRETAR-Y-RELACIONAR",
+              "name": "Interpretar y relacionar",
+              "tagType": "secondary"
+            },
+            {
+              "type": "text_type",
+              "code": "LANG-TT-POEMA",
+              "name": "Poema",
+              "tagType": "secondary"
+            }
+          ]
+        },
+        {
+          "position": 22,
+          "type": "open_ended",
+          "stem": "¿Cómo se describen los castillos en el poema? Responde a partir de lo leído.",
+          "alternatives": [],
+          "correctKey": null,
+          "skill": "Interpretar y relacionar",
+          "oa": "OA 5",
+          "contentAxis": "Poema",
+          "hasFigure": false,
+          "figureNote": null,
+          "taxonomy": [
+            {
+              "type": "descriptor",
+              "code": null,
+              "name": "Infieren el sentido global de un poema.",
+              "parentCode": "LANG-2B-OA05",
+              "tagType": "primary"
+            },
+            {
+              "type": "learning_objective",
+              "code": "LANG-2B-OA05",
+              "name": "OA 5",
+              "level": "2_basico",
+              "tagType": "secondary"
+            },
+            {
+              "type": "skill",
+              "code": "LANG-SK-INTERPRETAR-Y-RELACIONAR",
+              "name": "Interpretar y relacionar",
+              "tagType": "secondary"
+            },
+            {
+              "type": "text_type",
+              "code": "LANG-TT-POEMA",
+              "name": "Poema",
+              "tagType": "secondary"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "extraction": {
+    "itemCount": 22,
+    "warnings": [
+      "Q14 es un ítem híbrido Sí/No + justificación; modelado como open_ended.",
+      "Q16 depende de una imagen (disco de Newton) para poder responderse; needsHumanReview.",
+      "Q21 incluye una estrofa-estímulo propia del ítem, embebida en el stem.",
+      "Textos transcritos desde la capa de texto del PDF (pdftotext), verbatim."
+    ],
+    "needsHumanReview": true
+  },
+  "pauta": {
+    "source": {
+      "report": "RBD25520_DIA_LECTURA_3_A_Resultados_Asignatura_Cierre_2025.pdf",
+      "subjectCode": "LANG",
+      "gradeCode": "3RD_BASIC",
+      "applicationPeriod": "cierre",
+      "year": 2025,
+      "instrumentJson": "extraccion/lenguaje/3º lenguaje cierre 2025.json"
+    },
+    "appliedKeys": 19,
+    "issues": []
+  }
+}

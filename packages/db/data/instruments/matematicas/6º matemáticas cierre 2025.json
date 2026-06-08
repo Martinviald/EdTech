@@ -1,0 +1,1804 @@
+{
+  "schemaVersion": "1.0",
+  "source": {
+    "file": "6º matemáticas cierre 2025.pdf",
+    "subjectFolder": "Matematicas"
+  },
+  "instrument": {
+    "name": "DIA Matemática 6° Básico 2025 — Cierre",
+    "subject": "Matemática",
+    "subjectCode": "MATH",
+    "grade": "6° Básico",
+    "gradeCode": "6TH_BASIC",
+    "year": 2025,
+    "applicationPeriod": "cierre",
+    "type": "dia",
+    "isOfficial": true,
+    "source": "imported"
+  },
+  "sections": [
+    {
+      "order": 1,
+      "name": "Preguntas",
+      "type": "mixed",
+      "instructions": "Esta prueba tiene 29 preguntas que debes responder de la siguiente forma: en las preguntas de alternativas, debes contestar marcando con una X la respuesta que consideres correcta; en las preguntas de desarrollo, debes escribir tu respuesta en la cuadrícula; en las preguntas de completación, debes anotar tu respuesta en los recuadros correspondientes.",
+      "passage": null,
+      "items": [
+        {
+          "position": 1,
+          "type": "multiple_choice",
+          "responseFormat": "choice",
+          "stem": "En una caja de 12 huevos, 2 de ellos estaban quebrados. ¿Cuál es la razón entre los huevos quebrados y la cantidad total de huevos de la caja?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "2 : 10",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "2 : 12",
+              "isCorrect": true
+            },
+            {
+              "key": "C",
+              "text": "10 : 2",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "12 : 2",
+              "isCorrect": false
+            }
+          ],
+          "correctKey": "B",
+          "skill": "Representar",
+          "oa": "OA 3",
+          "contentAxis": "Números y operaciones",
+          "hasFigure": false,
+          "figureNote": null,
+          "taxonomy": [
+            {
+              "type": "descriptor",
+              "code": null,
+              "name": "Identifican razones entre las cantidades involucradas en una situación dada.",
+              "parentCode": "MATH-6B-OA03",
+              "tagType": "primary"
+            },
+            {
+              "type": "learning_objective",
+              "code": "MATH-6B-OA03",
+              "name": "OA 3",
+              "level": "6_basico",
+              "tagType": "secondary"
+            },
+            {
+              "type": "skill",
+              "code": "MATH-SK-REPRESENTAR",
+              "name": "Representar",
+              "tagType": "secondary"
+            },
+            {
+              "type": "axis",
+              "code": "MATH-AX-NUMEROS-Y-OPERACIONES",
+              "name": "Números y operaciones",
+              "tagType": "secondary"
+            }
+          ]
+        },
+        {
+          "position": 2,
+          "type": "multiple_choice",
+          "responseFormat": "choice",
+          "stem": "Leonor asiste a un taller de 60 personas, en donde el 50% de los participantes son de otras escuelas. ¿Cuál de las siguientes afirmaciones es correcta en relación con la cantidad de participantes?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Hay 10 participantes que son de la misma escuela de Leonor.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "La mayoría de los participantes son de la misma escuela de Leonor.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Hay 50 participantes que son de escuelas distintas a la de Leonor.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "La mitad de los participantes son de escuelas distintas a la de Leonor.",
+              "isCorrect": true
+            }
+          ],
+          "correctKey": "D",
+          "skill": "Argumentar y comunicar",
+          "oa": "OA 4",
+          "contentAxis": "Números y operaciones",
+          "hasFigure": false,
+          "figureNote": null,
+          "taxonomy": [
+            {
+              "type": "descriptor",
+              "code": null,
+              "name": "Interpretan información cotidiana entregada como porcentajes.",
+              "parentCode": "MATH-6B-OA04",
+              "tagType": "primary"
+            },
+            {
+              "type": "learning_objective",
+              "code": "MATH-6B-OA04",
+              "name": "OA 4",
+              "level": "6_basico",
+              "tagType": "secondary"
+            },
+            {
+              "type": "skill",
+              "code": "MATH-SK-ARGUMENTAR-Y-COMUNICAR",
+              "name": "Argumentar y comunicar",
+              "tagType": "secondary"
+            },
+            {
+              "type": "axis",
+              "code": "MATH-AX-NUMEROS-Y-OPERACIONES",
+              "name": "Números y operaciones",
+              "tagType": "secondary"
+            }
+          ]
+        },
+        {
+          "position": 3,
+          "type": "multiple_choice",
+          "responseFormat": "choice",
+          "stem": "Observa la siguiente recta numérica (de 0 a 3, dividida en quintos, con un punto P marcado entre 2 y 3, cerca de 2 3/5). ¿Cuál de los siguientes números se ubica en el punto P de la recta anterior?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "2 3/5",
+              "isCorrect": true
+            },
+            {
+              "key": "B",
+              "text": "2 3/4",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "2 2/5",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "2 4/6",
+              "isCorrect": false
+            }
+          ],
+          "correctKey": "A",
+          "skill": "Representar",
+          "oa": "OA 5",
+          "contentAxis": "Números y operaciones",
+          "hasFigure": true,
+          "figureNote": "Recta numérica de 0 a 3 con marcas intermedias y un punto P ubicado entre 2 y 3. Requiere la imagen para leer la posición exacta de P.",
+          "taxonomy": [
+            {
+              "type": "descriptor",
+              "code": null,
+              "name": "Representan números mixtos en la recta numérica.",
+              "parentCode": "MATH-6B-OA05",
+              "tagType": "primary"
+            },
+            {
+              "type": "learning_objective",
+              "code": "MATH-6B-OA05",
+              "name": "OA 5",
+              "level": "6_basico",
+              "tagType": "secondary"
+            },
+            {
+              "type": "skill",
+              "code": "MATH-SK-REPRESENTAR",
+              "name": "Representar",
+              "tagType": "secondary"
+            },
+            {
+              "type": "axis",
+              "code": "MATH-AX-NUMEROS-Y-OPERACIONES",
+              "name": "Números y operaciones",
+              "tagType": "secondary"
+            }
+          ]
+        },
+        {
+          "position": 4,
+          "type": "open_ended",
+          "responseFormat": "fill_in",
+          "stem": "Resuelve: 0,89 • 10 =",
+          "alternatives": [],
+          "correctKey": null,
+          "skill": "Resolver problemas",
+          "oa": "OA 7",
+          "contentAxis": "Números y operaciones",
+          "hasFigure": false,
+          "figureNote": null,
+          "taxonomy": [
+            {
+              "type": "descriptor",
+              "code": null,
+              "name": "Calculan multiplicaciones de números decimales por múltiplos de 10.",
+              "parentCode": "MATH-6B-OA07",
+              "tagType": "primary"
+            },
+            {
+              "type": "learning_objective",
+              "code": "MATH-6B-OA07",
+              "name": "OA 7",
+              "level": "6_basico",
+              "tagType": "secondary"
+            },
+            {
+              "type": "skill",
+              "code": "MATH-SK-RESOLVER-PROBLEMAS",
+              "name": "Resolver problemas",
+              "tagType": "secondary"
+            },
+            {
+              "type": "axis",
+              "code": "MATH-AX-NUMEROS-Y-OPERACIONES",
+              "name": "Números y operaciones",
+              "tagType": "secondary"
+            }
+          ]
+        },
+        {
+          "position": 5,
+          "type": "multiple_choice",
+          "responseFormat": "choice",
+          "stem": "Matías invitó a un amigo a su casa y pidieron una pizza. Matías se comió 2/8 de la pizza y su amigo se comió 3/8 de la pizza. ¿Qué fracción de la pizza se comieron entre los dos?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "3/8",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "5/8",
+              "isCorrect": true
+            },
+            {
+              "key": "C",
+              "text": "5/16",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "6/64",
+              "isCorrect": false
+            }
+          ],
+          "correctKey": "B",
+          "skill": "Resolver problemas",
+          "oa": "OA 8",
+          "contentAxis": "Números y operaciones",
+          "hasFigure": false,
+          "figureNote": null,
+          "taxonomy": [
+            {
+              "type": "descriptor",
+              "code": null,
+              "name": "Resuelven problemas que requieren calcular adiciones de fracciones propias con el mismo denominador.",
+              "parentCode": "MATH-6B-OA08",
+              "tagType": "primary"
+            },
+            {
+              "type": "learning_objective",
+              "code": "MATH-6B-OA08",
+              "name": "OA 8",
+              "level": "6_basico",
+              "tagType": "secondary"
+            },
+            {
+              "type": "skill",
+              "code": "MATH-SK-RESOLVER-PROBLEMAS",
+              "name": "Resolver problemas",
+              "tagType": "secondary"
+            },
+            {
+              "type": "axis",
+              "code": "MATH-AX-NUMEROS-Y-OPERACIONES",
+              "name": "Números y operaciones",
+              "tagType": "secondary"
+            }
+          ]
+        },
+        {
+          "position": 6,
+          "type": "multiple_choice",
+          "responseFormat": "choice",
+          "stem": "Una botella contenía 13/12 litros de agua. Ana traspasó 1/6 de litro de esa agua a un vaso. ¿Cuántos litros de agua quedan ahora en la botella?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "14/18",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "12/6",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "12/12",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "11/12",
+              "isCorrect": true
+            }
+          ],
+          "correctKey": "D",
+          "skill": "Resolver problemas",
+          "oa": "OA 8",
+          "contentAxis": "Números y operaciones",
+          "hasFigure": false,
+          "figureNote": null,
+          "taxonomy": [
+            {
+              "type": "descriptor",
+              "code": null,
+              "name": "Resuelven problemas que requieren calcular sustracciones de fracciones propias con distintos denominadores.",
+              "parentCode": "MATH-6B-OA08",
+              "tagType": "primary"
+            },
+            {
+              "type": "learning_objective",
+              "code": "MATH-6B-OA08",
+              "name": "OA 8",
+              "level": "6_basico",
+              "tagType": "secondary"
+            },
+            {
+              "type": "skill",
+              "code": "MATH-SK-RESOLVER-PROBLEMAS",
+              "name": "Resolver problemas",
+              "tagType": "secondary"
+            },
+            {
+              "type": "axis",
+              "code": "MATH-AX-NUMEROS-Y-OPERACIONES",
+              "name": "Números y operaciones",
+              "tagType": "secondary"
+            }
+          ]
+        },
+        {
+          "position": 7,
+          "type": "multiple_choice",
+          "responseFormat": "choice",
+          "stem": "Sofía necesita 2 2/4 kg de jamón para preparar los sándwiches que vende en su almacén. Ella tiene en su refrigerador solo 3/4 kg de jamón, los que usará. ¿Cuánto jamón tiene que comprar como mínimo para preparar los sándwiches?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "1/4 kg",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "1 1/4 kg",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "1 3/4 kg",
+              "isCorrect": true
+            },
+            {
+              "key": "D",
+              "text": "2 kg",
+              "isCorrect": false
+            }
+          ],
+          "correctKey": "C",
+          "skill": "Resolver problemas",
+          "oa": "OA 8",
+          "contentAxis": "Números y operaciones",
+          "hasFigure": false,
+          "figureNote": null,
+          "taxonomy": [
+            {
+              "type": "descriptor",
+              "code": null,
+              "name": "Resuelven problemas que requieren calcular sustracciones de números mixtos y fracciones propias con el mismo denominador.",
+              "parentCode": "MATH-6B-OA08",
+              "tagType": "primary"
+            },
+            {
+              "type": "learning_objective",
+              "code": "MATH-6B-OA08",
+              "name": "OA 8",
+              "level": "6_basico",
+              "tagType": "secondary"
+            },
+            {
+              "type": "skill",
+              "code": "MATH-SK-RESOLVER-PROBLEMAS",
+              "name": "Resolver problemas",
+              "tagType": "secondary"
+            },
+            {
+              "type": "axis",
+              "code": "MATH-AX-NUMEROS-Y-OPERACIONES",
+              "name": "Números y operaciones",
+              "tagType": "secondary"
+            }
+          ]
+        },
+        {
+          "position": 8,
+          "type": "multiple_choice",
+          "responseFormat": "choice",
+          "stem": "¿Cuál es el valor de x en la ecuación x – 3 = 6?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "2",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "3",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "9",
+              "isCorrect": true
+            },
+            {
+              "key": "D",
+              "text": "18",
+              "isCorrect": false
+            }
+          ],
+          "correctKey": "C",
+          "skill": "Resolver problemas",
+          "oa": "OA 11",
+          "contentAxis": "Patrones y álgebra",
+          "hasFigure": false,
+          "figureNote": null,
+          "taxonomy": [
+            {
+              "type": "descriptor",
+              "code": null,
+              "name": "Resuelven ecuaciones de primer grado con una incógnita representadas algebraicamente.",
+              "parentCode": "MATH-6B-OA11",
+              "tagType": "primary"
+            },
+            {
+              "type": "learning_objective",
+              "code": "MATH-6B-OA11",
+              "name": "OA 11",
+              "level": "6_basico",
+              "tagType": "secondary"
+            },
+            {
+              "type": "skill",
+              "code": "MATH-SK-RESOLVER-PROBLEMAS",
+              "name": "Resolver problemas",
+              "tagType": "secondary"
+            },
+            {
+              "type": "axis",
+              "code": "MATH-AX-PATRONES-Y-ALGEBRA",
+              "name": "Patrones y álgebra",
+              "tagType": "secondary"
+            }
+          ]
+        },
+        {
+          "position": 9,
+          "type": "multiple_choice",
+          "responseFormat": "choice",
+          "stem": "La siguiente balanza está en equilibrio. En el platillo izquierdo hay una caja x junto a 7 esferas con valor 1; en el platillo derecho hay 9 esferas con valor 1. ¿Cuál es el valor de x?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "1",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "2",
+              "isCorrect": true
+            },
+            {
+              "key": "C",
+              "text": "9",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "16",
+              "isCorrect": false
+            }
+          ],
+          "correctKey": "B",
+          "skill": "Resolver problemas",
+          "oa": "OA 11",
+          "contentAxis": "Patrones y álgebra",
+          "hasFigure": true,
+          "figureNote": "Balanza en equilibrio: a la izquierda una caja x más 7 esferas de valor 1, a la derecha 9 esferas de valor 1. Requiere la imagen para contar las esferas.",
+          "taxonomy": [
+            {
+              "type": "descriptor",
+              "code": null,
+              "name": "Resuelven ecuaciones de primer grado con una incógnita representadas pictóricamente.",
+              "parentCode": "MATH-6B-OA11",
+              "tagType": "primary"
+            },
+            {
+              "type": "learning_objective",
+              "code": "MATH-6B-OA11",
+              "name": "OA 11",
+              "level": "6_basico",
+              "tagType": "secondary"
+            },
+            {
+              "type": "skill",
+              "code": "MATH-SK-RESOLVER-PROBLEMAS",
+              "name": "Resolver problemas",
+              "tagType": "secondary"
+            },
+            {
+              "type": "axis",
+              "code": "MATH-AX-PATRONES-Y-ALGEBRA",
+              "name": "Patrones y álgebra",
+              "tagType": "secondary"
+            }
+          ]
+        },
+        {
+          "position": 10,
+          "type": "multiple_choice",
+          "responseFormat": "choice",
+          "stem": "¿Cuál es la solución de la ecuación 2y = 8?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "y = 4",
+              "isCorrect": true
+            },
+            {
+              "key": "B",
+              "text": "y = 6",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "y = 10",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "y = 16",
+              "isCorrect": false
+            }
+          ],
+          "correctKey": "A",
+          "skill": "Resolver problemas",
+          "oa": "OA 11",
+          "contentAxis": "Patrones y álgebra",
+          "hasFigure": false,
+          "figureNote": null,
+          "taxonomy": [
+            {
+              "type": "descriptor",
+              "code": null,
+              "name": "Resuelven ecuaciones de primer grado con una incógnita representadas algebraicamente.",
+              "parentCode": "MATH-6B-OA11",
+              "tagType": "primary"
+            },
+            {
+              "type": "learning_objective",
+              "code": "MATH-6B-OA11",
+              "name": "OA 11",
+              "level": "6_basico",
+              "tagType": "secondary"
+            },
+            {
+              "type": "skill",
+              "code": "MATH-SK-RESOLVER-PROBLEMAS",
+              "name": "Resolver problemas",
+              "tagType": "secondary"
+            },
+            {
+              "type": "axis",
+              "code": "MATH-AX-PATRONES-Y-ALGEBRA",
+              "name": "Patrones y álgebra",
+              "tagType": "secondary"
+            }
+          ]
+        },
+        {
+          "position": 11,
+          "type": "multiple_choice",
+          "responseFormat": "choice",
+          "stem": "Observa la siguiente balanza equilibrada: en el platillo izquierdo hay 3 cajas iguales rotuladas x y en el platillo derecho hay 18 cubitos pequeños. ¿Cuántos cubitos equivalen a un x?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "18",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "15",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "6",
+              "isCorrect": true
+            },
+            {
+              "key": "D",
+              "text": "3",
+              "isCorrect": false
+            }
+          ],
+          "correctKey": "C",
+          "skill": "Resolver problemas",
+          "oa": "OA 11",
+          "contentAxis": "Patrones y álgebra",
+          "hasFigure": true,
+          "figureNote": "Balanza equilibrada: 3 cajas x a la izquierda y un grupo de cubitos a la derecha. Requiere la imagen para contar la cantidad de cubitos.",
+          "taxonomy": [
+            {
+              "type": "descriptor",
+              "code": null,
+              "name": "Resuelven ecuaciones de primer grado con una incógnita representadas pictóricamente.",
+              "parentCode": "MATH-6B-OA11",
+              "tagType": "primary"
+            },
+            {
+              "type": "learning_objective",
+              "code": "MATH-6B-OA11",
+              "name": "OA 11",
+              "level": "6_basico",
+              "tagType": "secondary"
+            },
+            {
+              "type": "skill",
+              "code": "MATH-SK-RESOLVER-PROBLEMAS",
+              "name": "Resolver problemas",
+              "tagType": "secondary"
+            },
+            {
+              "type": "axis",
+              "code": "MATH-AX-PATRONES-Y-ALGEBRA",
+              "name": "Patrones y álgebra",
+              "tagType": "secondary"
+            }
+          ]
+        },
+        {
+          "position": 12,
+          "type": "multiple_choice",
+          "responseFormat": "choice",
+          "stem": "La imagen muestra un cubo y la medida de una de sus aristas: 2 cm. ¿Cuánto mide el área de su superficie?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "8 cm²",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "12 cm²",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "16 cm²",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "24 cm²",
+              "isCorrect": true
+            }
+          ],
+          "correctKey": "D",
+          "skill": "Resolver problemas",
+          "oa": "OA 18",
+          "contentAxis": "Medición",
+          "hasFigure": true,
+          "figureNote": "Imagen de un cubo con arista rotulada 2 cm; la medida está en el enunciado, la imagen ilustra el sólido.",
+          "taxonomy": [
+            {
+              "type": "descriptor",
+              "code": null,
+              "name": "Calculan el área de la superficie de cubos.",
+              "parentCode": "MATH-6B-OA18",
+              "tagType": "primary"
+            },
+            {
+              "type": "learning_objective",
+              "code": "MATH-6B-OA18",
+              "name": "OA 18",
+              "level": "6_basico",
+              "tagType": "secondary"
+            },
+            {
+              "type": "skill",
+              "code": "MATH-SK-RESOLVER-PROBLEMAS",
+              "name": "Resolver problemas",
+              "tagType": "secondary"
+            },
+            {
+              "type": "axis",
+              "code": "MATH-AX-MEDICION",
+              "name": "Medición",
+              "tagType": "secondary"
+            }
+          ]
+        },
+        {
+          "position": 13,
+          "type": "multiple_choice",
+          "responseFormat": "choice",
+          "stem": "La siguiente figura corresponde a un paralelepípedo con aristas que miden 5 cm, 2 cm y 2 cm. ¿Cuál de las siguientes operaciones permite calcular el área total del paralelepípedo en centímetros cuadrados?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "5 ∙ 2 ∙ 2",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "5 + 2 + 2",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "5 ∙ 2 + 2 ∙ 2",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "4 ∙ 5 ∙ 2 + 2 ∙ 2 ∙ 2",
+              "isCorrect": true
+            }
+          ],
+          "correctKey": "D",
+          "skill": "Representar",
+          "oa": "OA 18",
+          "contentAxis": "Medición",
+          "hasFigure": true,
+          "figureNote": "Imagen de un paralelepípedo con aristas rotuladas 5 cm, 2 cm y 2 cm; las medidas están en el enunciado.",
+          "taxonomy": [
+            {
+              "type": "descriptor",
+              "code": null,
+              "name": "Identifican la operación que permite calcular el área de la superficie de un paralelepípedo.",
+              "parentCode": "MATH-6B-OA18",
+              "tagType": "primary"
+            },
+            {
+              "type": "learning_objective",
+              "code": "MATH-6B-OA18",
+              "name": "OA 18",
+              "level": "6_basico",
+              "tagType": "secondary"
+            },
+            {
+              "type": "skill",
+              "code": "MATH-SK-REPRESENTAR",
+              "name": "Representar",
+              "tagType": "secondary"
+            },
+            {
+              "type": "axis",
+              "code": "MATH-AX-MEDICION",
+              "name": "Medición",
+              "tagType": "secondary"
+            }
+          ]
+        },
+        {
+          "position": 14,
+          "type": "multiple_choice",
+          "responseFormat": "choice",
+          "stem": "¿Cuánto mide el volumen de un cubo de arista 8 cm?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "512 cm³",
+              "isCorrect": true
+            },
+            {
+              "key": "B",
+              "text": "384 cm³",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "96 cm³",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "24 cm³",
+              "isCorrect": false
+            }
+          ],
+          "correctKey": "A",
+          "skill": "Resolver problemas",
+          "oa": "OA 19",
+          "contentAxis": "Medición",
+          "hasFigure": false,
+          "figureNote": null,
+          "taxonomy": [
+            {
+              "type": "descriptor",
+              "code": null,
+              "name": "Calculan el volumen de cubos.",
+              "parentCode": "MATH-6B-OA19",
+              "tagType": "primary"
+            },
+            {
+              "type": "learning_objective",
+              "code": "MATH-6B-OA19",
+              "name": "OA 19",
+              "level": "6_basico",
+              "tagType": "secondary"
+            },
+            {
+              "type": "skill",
+              "code": "MATH-SK-RESOLVER-PROBLEMAS",
+              "name": "Resolver problemas",
+              "tagType": "secondary"
+            },
+            {
+              "type": "axis",
+              "code": "MATH-AX-MEDICION",
+              "name": "Medición",
+              "tagType": "secondary"
+            }
+          ]
+        },
+        {
+          "position": 15,
+          "type": "multiple_choice",
+          "responseFormat": "choice",
+          "stem": "Observa las medidas del siguiente paralelepípedo: 3 cm, 4 cm y 5 cm. ¿Cuál es su volumen?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "12 cm³",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "47 cm³",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "60 cm³",
+              "isCorrect": true
+            },
+            {
+              "key": "D",
+              "text": "94 cm³",
+              "isCorrect": false
+            }
+          ],
+          "correctKey": "C",
+          "skill": "Resolver problemas",
+          "oa": "OA 19",
+          "contentAxis": "Medición",
+          "hasFigure": true,
+          "figureNote": "Imagen de un paralelepípedo con aristas rotuladas 3 cm, 4 cm y 5 cm; las medidas están en el enunciado.",
+          "taxonomy": [
+            {
+              "type": "descriptor",
+              "code": null,
+              "name": "Calculan el volumen de paralelepípedos.",
+              "parentCode": "MATH-6B-OA19",
+              "tagType": "primary"
+            },
+            {
+              "type": "learning_objective",
+              "code": "MATH-6B-OA19",
+              "name": "OA 19",
+              "level": "6_basico",
+              "tagType": "secondary"
+            },
+            {
+              "type": "skill",
+              "code": "MATH-SK-RESOLVER-PROBLEMAS",
+              "name": "Resolver problemas",
+              "tagType": "secondary"
+            },
+            {
+              "type": "axis",
+              "code": "MATH-AX-MEDICION",
+              "name": "Medición",
+              "tagType": "secondary"
+            }
+          ]
+        },
+        {
+          "position": 16,
+          "type": "multiple_choice",
+          "responseFormat": "choice",
+          "stem": "En la siguiente imagen se muestra una red y el cubo que se arma con ella; una de las caras de la red tiene área 9 cm². ¿Cuánto mide la superficie del cubo armado?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "15 cm²",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "27 cm²",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "54 cm²",
+              "isCorrect": true
+            },
+            {
+              "key": "D",
+              "text": "81 cm²",
+              "isCorrect": false
+            }
+          ],
+          "correctKey": "C",
+          "skill": "Resolver problemas",
+          "oa": "OA 13",
+          "contentAxis": "Geometría",
+          "hasFigure": true,
+          "figureNote": "Imagen de la red (desarrollo) de un cubo y el cubo armado, con una cara rotulada 9 cm². El dato 9 cm² está en el enunciado; la imagen ilustra el armado.",
+          "taxonomy": [
+            {
+              "type": "descriptor",
+              "code": null,
+              "name": "Calculan el área de la superficie de cubos, a partir de información entregada en una de sus redes.",
+              "parentCode": "MATH-6B-OA13",
+              "tagType": "primary"
+            },
+            {
+              "type": "learning_objective",
+              "code": "MATH-6B-OA13",
+              "name": "OA 13",
+              "level": "6_basico",
+              "tagType": "secondary"
+            },
+            {
+              "type": "skill",
+              "code": "MATH-SK-RESOLVER-PROBLEMAS",
+              "name": "Resolver problemas",
+              "tagType": "secondary"
+            },
+            {
+              "type": "axis",
+              "code": "MATH-AX-GEOMETRIA",
+              "name": "Geometría",
+              "tagType": "secondary"
+            }
+          ]
+        },
+        {
+          "position": 17,
+          "type": "multiple_choice",
+          "responseFormat": "choice",
+          "stem": "A continuación, se muestran algunas medidas de una red y el paralelepípedo que se arma con ella: 26 cm, 12 cm, 12 cm y 12 cm. ¿Cuál es el área de la superficie del paralelepípedo?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "3 744 cm²",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "1 536 cm²",
+              "isCorrect": true
+            },
+            {
+              "key": "C",
+              "text": "400 cm²",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "62 cm²",
+              "isCorrect": false
+            }
+          ],
+          "correctKey": "B",
+          "skill": "Resolver problemas",
+          "oa": "OA 13",
+          "contentAxis": "Geometría",
+          "hasFigure": true,
+          "figureNote": "Imagen de la red (desarrollo) de un paralelepípedo con medidas 26 cm, 12 cm, 12 cm, 12 cm. Requiere la imagen para asociar cada medida a las caras correspondientes.",
+          "taxonomy": [
+            {
+              "type": "descriptor",
+              "code": null,
+              "name": "Calculan el área de paralelepípedos, a partir de información entregada en una de sus redes.",
+              "parentCode": "MATH-6B-OA13",
+              "tagType": "primary"
+            },
+            {
+              "type": "learning_objective",
+              "code": "MATH-6B-OA13",
+              "name": "OA 13",
+              "level": "6_basico",
+              "tagType": "secondary"
+            },
+            {
+              "type": "skill",
+              "code": "MATH-SK-RESOLVER-PROBLEMAS",
+              "name": "Resolver problemas",
+              "tagType": "secondary"
+            },
+            {
+              "type": "axis",
+              "code": "MATH-AX-GEOMETRIA",
+              "name": "Geometría",
+              "tagType": "secondary"
+            }
+          ]
+        },
+        {
+          "position": 18,
+          "type": "multiple_choice",
+          "responseFormat": "choice",
+          "stem": "En el siguiente reloj, sus dos manecillas se intersectan formando los ángulos J, K, L y M (J arriba, K a la derecha, L abajo, M a la izquierda). ¿Qué opción muestra dos ángulos opuestos por el vértice?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "M y K",
+              "isCorrect": true
+            },
+            {
+              "key": "B",
+              "text": "M y L",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "K y J",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "L y K",
+              "isCorrect": false
+            }
+          ],
+          "correctKey": "A",
+          "skill": "Modelar",
+          "oa": "OA 16",
+          "contentAxis": "Geometría",
+          "hasFigure": true,
+          "figureNote": "Imagen de un reloj cuyas manecillas forman 4 ángulos rotulados J, K, L y M. Requiere la imagen para ver la disposición de los ángulos.",
+          "taxonomy": [
+            {
+              "type": "descriptor",
+              "code": null,
+              "name": "Identifican pares de ángulos opuestos por el vértice que se forman entre dos rectas que se cortan.",
+              "parentCode": "MATH-6B-OA16",
+              "tagType": "primary"
+            },
+            {
+              "type": "learning_objective",
+              "code": "MATH-6B-OA16",
+              "name": "OA 16",
+              "level": "6_basico",
+              "tagType": "secondary"
+            },
+            {
+              "type": "skill",
+              "code": "MATH-SK-MODELAR",
+              "name": "Modelar",
+              "tagType": "secondary"
+            },
+            {
+              "type": "axis",
+              "code": "MATH-AX-GEOMETRIA",
+              "name": "Geometría",
+              "tagType": "secondary"
+            }
+          ]
+        },
+        {
+          "position": 19,
+          "type": "multiple_choice",
+          "responseFormat": "choice",
+          "stem": "Observa los ángulos formados por las rectas L1 y L2: uno de los ángulos mide 27° y x es el ángulo adyacente. ¿Cuánto mide el ángulo x?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "27°",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "54°",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "63°",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "153°",
+              "isCorrect": true
+            }
+          ],
+          "correctKey": "D",
+          "skill": "Resolver problemas",
+          "oa": "OA 16",
+          "contentAxis": "Geometría",
+          "hasFigure": true,
+          "figureNote": "Imagen de dos rectas L1 y L2 que se cortan, con un ángulo de 27° y el ángulo x marcado. Requiere la imagen para identificar la relación entre x y el ángulo de 27°.",
+          "taxonomy": [
+            {
+              "type": "descriptor",
+              "code": null,
+              "name": "Identifican la medida de un ángulo a partir de la medida de un ángulo adyacente suplementario.",
+              "parentCode": "MATH-6B-OA16",
+              "tagType": "primary"
+            },
+            {
+              "type": "learning_objective",
+              "code": "MATH-6B-OA16",
+              "name": "OA 16",
+              "level": "6_basico",
+              "tagType": "secondary"
+            },
+            {
+              "type": "skill",
+              "code": "MATH-SK-RESOLVER-PROBLEMAS",
+              "name": "Resolver problemas",
+              "tagType": "secondary"
+            },
+            {
+              "type": "axis",
+              "code": "MATH-AX-GEOMETRIA",
+              "name": "Geometría",
+              "tagType": "secondary"
+            }
+          ]
+        },
+        {
+          "position": 20,
+          "type": "multiple_choice",
+          "responseFormat": "choice",
+          "stem": "Tania usó un computador para simular el lanzamiento de una moneda no cargada. Esta tabla muestra la cantidad de resultados obtenidos para distinta cantidad de lanzamientos. Cara: 7, 45, 511, 4 908, 49 984, ¿?; Sello: 3, 55, 489, 5 092, 50 016, ¿?; Total de lanzamientos: 10, 100, 1 000, 10 000, 100 000, 1 000 000. Considerando la tendencia de los resultados anteriores, cuando la misma moneda se lance 1 000 000 de veces, ¿cuál de estas opciones muestra la cantidad de caras y sellos que se podría obtener?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Cara 700 001; Sello 299 999",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Cara 500 972; Sello 499 028",
+              "isCorrect": true
+            },
+            {
+              "key": "C",
+              "text": "Cara 490 000; Sello 510 000",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "Cara 700 000; Sello 300 000",
+              "isCorrect": false
+            }
+          ],
+          "correctKey": "B",
+          "skill": "Argumentar y comunicar",
+          "oa": "OA 23",
+          "contentAxis": "Datos y probabilidades",
+          "hasFigure": false,
+          "figureNote": null,
+          "taxonomy": [
+            {
+              "type": "descriptor",
+              "code": null,
+              "name": "Evalúan conjeturas acerca de la tendencia de resultados obtenidos en repeticiones de un mismo experimento.",
+              "parentCode": "MATH-6B-OA23",
+              "tagType": "primary"
+            },
+            {
+              "type": "learning_objective",
+              "code": "MATH-6B-OA23",
+              "name": "OA 23",
+              "level": "6_basico",
+              "tagType": "secondary"
+            },
+            {
+              "type": "skill",
+              "code": "MATH-SK-ARGUMENTAR-Y-COMUNICAR",
+              "name": "Argumentar y comunicar",
+              "tagType": "secondary"
+            },
+            {
+              "type": "axis",
+              "code": "MATH-AX-DATOS-Y-PROBABILIDADES",
+              "name": "Datos y probabilidades",
+              "tagType": "secondary"
+            }
+          ]
+        },
+        {
+          "position": 21,
+          "type": "open_ended",
+          "responseFormat": "develop",
+          "stem": "El siguiente gráfico muestra el porcentaje de la población que usó las áreas verdes de su comuna, al menos una vez al mes, en las distintas zonas geográficas de Chile, en los años 2015 y 2018 (gráfico de barras dobles por zona: Norte Grande, Norte Chico, Centro, Sur y Austral). Considerando todas las zonas geográficas de Chile, ¿qué ocurrió con el uso de áreas verdes el año 2018 respecto al uso que hubo el año 2015? Escribe a continuación tu respuesta, señalando qué elementos del gráfico usaste para tu conclusión.",
+          "alternatives": [],
+          "correctKey": null,
+          "skill": "Argumentar y comunicar",
+          "oa": "OA 24",
+          "contentAxis": "Datos y probabilidades",
+          "hasFigure": true,
+          "figureNote": "Única pregunta de desarrollo. Gráfico de barras dobles (2015 vs 2018) por zona geográfica. Requiere la imagen para leer y comparar los valores de cada zona.",
+          "taxonomy": [
+            {
+              "type": "descriptor",
+              "code": null,
+              "name": "Comunican conclusiones obtenidas a partir de información presentada en gráficos de barra doble.",
+              "parentCode": "MATH-6B-OA24",
+              "tagType": "primary"
+            },
+            {
+              "type": "learning_objective",
+              "code": "MATH-6B-OA24",
+              "name": "OA 24",
+              "level": "6_basico",
+              "tagType": "secondary"
+            },
+            {
+              "type": "skill",
+              "code": "MATH-SK-ARGUMENTAR-Y-COMUNICAR",
+              "name": "Argumentar y comunicar",
+              "tagType": "secondary"
+            },
+            {
+              "type": "axis",
+              "code": "MATH-AX-DATOS-Y-PROBABILIDADES",
+              "name": "Datos y probabilidades",
+              "tagType": "secondary"
+            }
+          ]
+        },
+        {
+          "position": 22,
+          "type": "multiple_choice",
+          "responseFormat": "choice",
+          "stem": "El siguiente gráfico muestra la distribución de los diferentes tipos de libros que hay, según sus temáticas, en una biblioteca escolar (gráfico circular con sectores: Ciencias, Historia, Literatura, Artes, Otros). ¿De cuál de las temáticas hay más libros en la biblioteca?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Literatura.",
+              "isCorrect": true
+            },
+            {
+              "key": "B",
+              "text": "Historia.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Artes.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "Otros.",
+              "isCorrect": false
+            }
+          ],
+          "correctKey": "A",
+          "skill": "Representar",
+          "oa": "OA 24",
+          "contentAxis": "Datos y probabilidades",
+          "hasFigure": true,
+          "figureNote": "Gráfico circular con sectores para Ciencias, Historia, Literatura, Artes y Otros. Requiere la imagen para comparar el tamaño de los sectores.",
+          "taxonomy": [
+            {
+              "type": "descriptor",
+              "code": null,
+              "name": "Interpretan información presentada en gráficos circulares.",
+              "parentCode": "MATH-6B-OA24",
+              "tagType": "primary"
+            },
+            {
+              "type": "learning_objective",
+              "code": "MATH-6B-OA24",
+              "name": "OA 24",
+              "level": "6_basico",
+              "tagType": "secondary"
+            },
+            {
+              "type": "skill",
+              "code": "MATH-SK-REPRESENTAR",
+              "name": "Representar",
+              "tagType": "secondary"
+            },
+            {
+              "type": "axis",
+              "code": "MATH-AX-DATOS-Y-PROBABILIDADES",
+              "name": "Datos y probabilidades",
+              "tagType": "secondary"
+            }
+          ]
+        },
+        {
+          "position": 23,
+          "type": "multiple_choice",
+          "responseFormat": "choice",
+          "stem": "El siguiente gráfico muestra la cantidad de hombres y mujeres que participan en una actividad deportiva, según su curso (gráfico de barras dobles por curso: 5° A, 5° B, 6° A, 6° B). ¿En qué curso participaron exactamente 8 mujeres en la actividad deportiva?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "5° A",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "5° B",
+              "isCorrect": true
+            },
+            {
+              "key": "C",
+              "text": "6° A",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "6° B",
+              "isCorrect": false
+            }
+          ],
+          "correctKey": "B",
+          "skill": "Representar",
+          "oa": "OA 24",
+          "contentAxis": "Datos y probabilidades",
+          "hasFigure": true,
+          "figureNote": "Gráfico de barras dobles (Hombres y Mujeres) por curso 5° A, 5° B, 6° A, 6° B. Requiere la imagen para leer la cantidad de mujeres por curso.",
+          "taxonomy": [
+            {
+              "type": "descriptor",
+              "code": null,
+              "name": "Leen información presentada gráficos de barra doble.",
+              "parentCode": "MATH-6B-OA24",
+              "tagType": "primary"
+            },
+            {
+              "type": "learning_objective",
+              "code": "MATH-6B-OA24",
+              "name": "OA 24",
+              "level": "6_basico",
+              "tagType": "secondary"
+            },
+            {
+              "type": "skill",
+              "code": "MATH-SK-REPRESENTAR",
+              "name": "Representar",
+              "tagType": "secondary"
+            },
+            {
+              "type": "axis",
+              "code": "MATH-AX-DATOS-Y-PROBABILIDADES",
+              "name": "Datos y probabilidades",
+              "tagType": "secondary"
+            }
+          ]
+        },
+        {
+          "position": 24,
+          "type": "multiple_choice",
+          "responseFormat": "choice",
+          "stem": "En una biblioteca escolar, la razón entre los libros con menos de 100 páginas y el total de libros de la biblioteca es de 2 : 5. ¿Cómo se interpreta esa información?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Por cada 2 libros con menos de 100 páginas, hay 3 libros con 100 páginas o más.",
+              "isCorrect": true
+            },
+            {
+              "key": "B",
+              "text": "Por cada 2 libros con menos de 100 páginas, hay 5 libros con 100 páginas o más.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Por cada 2 libros con menos de 100 páginas, hay 7 libros con 100 páginas o más.",
+              "isCorrect": false
+            }
+          ],
+          "correctKey": "A",
+          "skill": "Resolver problemas",
+          "oa": "OA 3",
+          "contentAxis": "Números y operaciones",
+          "hasFigure": false,
+          "figureNote": null,
+          "taxonomy": [
+            {
+              "type": "descriptor",
+              "code": null,
+              "name": "Interpretan razones entre cantidades involucradas en una situación dada.",
+              "parentCode": "MATH-6B-OA03",
+              "tagType": "primary"
+            },
+            {
+              "type": "learning_objective",
+              "code": "MATH-6B-OA03",
+              "name": "OA 3",
+              "level": "6_basico",
+              "tagType": "secondary"
+            },
+            {
+              "type": "skill",
+              "code": "MATH-SK-RESOLVER-PROBLEMAS",
+              "name": "Resolver problemas",
+              "tagType": "secondary"
+            },
+            {
+              "type": "axis",
+              "code": "MATH-AX-NUMEROS-Y-OPERACIONES",
+              "name": "Números y operaciones",
+              "tagType": "secondary"
+            }
+          ]
+        },
+        {
+          "position": 25,
+          "type": "multiple_choice",
+          "responseFormat": "choice",
+          "stem": "El rectángulo ABCD de la siguiente imagen se ha dividido en 5 cuadrados del mismo tamaño; 2 de ellos están pintados de color gris. ¿Qué porcentaje de la superficie del rectángulo ABCD representan los cuadrados de color gris?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "20%",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "30%",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "40%",
+              "isCorrect": true
+            },
+            {
+              "key": "D",
+              "text": "50%",
+              "isCorrect": false
+            }
+          ],
+          "correctKey": "C",
+          "skill": "Representar",
+          "oa": "OA 4",
+          "contentAxis": "Números y operaciones",
+          "hasFigure": true,
+          "figureNote": "Imagen del rectángulo ABCD dividido en 5 cuadrados iguales; el dato (5 cuadrados, 2 grises) está descrito, la imagen ilustra la distribución.",
+          "taxonomy": [
+            {
+              "type": "descriptor",
+              "code": null,
+              "name": "Identifican representaciones simbólicas de porcentajes, dada su representación pictórica.",
+              "parentCode": "MATH-6B-OA04",
+              "tagType": "primary"
+            },
+            {
+              "type": "learning_objective",
+              "code": "MATH-6B-OA04",
+              "name": "OA 4",
+              "level": "6_basico",
+              "tagType": "secondary"
+            },
+            {
+              "type": "skill",
+              "code": "MATH-SK-REPRESENTAR",
+              "name": "Representar",
+              "tagType": "secondary"
+            },
+            {
+              "type": "axis",
+              "code": "MATH-AX-NUMEROS-Y-OPERACIONES",
+              "name": "Números y operaciones",
+              "tagType": "secondary"
+            }
+          ]
+        },
+        {
+          "position": 26,
+          "type": "multiple_choice",
+          "responseFormat": "choice",
+          "stem": "¿Cuál es el resultado de 0,8 : 0,005?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "0,004",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "0,160",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "1,6",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "160",
+              "isCorrect": true
+            }
+          ],
+          "correctKey": "D",
+          "skill": "Resolver problemas",
+          "oa": "OA 7",
+          "contentAxis": "Números y operaciones",
+          "hasFigure": false,
+          "figureNote": null,
+          "taxonomy": [
+            {
+              "type": "descriptor",
+              "code": null,
+              "name": "Calculan divisiones de números decimales.",
+              "parentCode": "MATH-6B-OA07",
+              "tagType": "primary"
+            },
+            {
+              "type": "learning_objective",
+              "code": "MATH-6B-OA07",
+              "name": "OA 7",
+              "level": "6_basico",
+              "tagType": "secondary"
+            },
+            {
+              "type": "skill",
+              "code": "MATH-SK-RESOLVER-PROBLEMAS",
+              "name": "Resolver problemas",
+              "tagType": "secondary"
+            },
+            {
+              "type": "axis",
+              "code": "MATH-AX-NUMEROS-Y-OPERACIONES",
+              "name": "Números y operaciones",
+              "tagType": "secondary"
+            }
+          ]
+        },
+        {
+          "position": 27,
+          "type": "multiple_choice",
+          "responseFormat": "choice",
+          "stem": "Para hacer un experimento de laboratorio, se mezclaron 317,42 cm³ de glicerina con 63,193 cm³ de agua en un recipiente. ¿Cuánta mezcla contiene el recipiente?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "949,35 cm³",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "948,35 cm³",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "380,613 cm³",
+              "isCorrect": true
+            },
+            {
+              "key": "D",
+              "text": "370,513 cm³",
+              "isCorrect": false
+            }
+          ],
+          "correctKey": "C",
+          "skill": "Resolver problemas",
+          "oa": "OA 8",
+          "contentAxis": "Números y operaciones",
+          "hasFigure": false,
+          "figureNote": null,
+          "taxonomy": [
+            {
+              "type": "descriptor",
+              "code": null,
+              "name": "Resuelven problemas que requieren calcular adiciones de números decimales con distinta cantidad de cifras decimales.",
+              "parentCode": "MATH-6B-OA08",
+              "tagType": "primary"
+            },
+            {
+              "type": "learning_objective",
+              "code": "MATH-6B-OA08",
+              "name": "OA 8",
+              "level": "6_basico",
+              "tagType": "secondary"
+            },
+            {
+              "type": "skill",
+              "code": "MATH-SK-RESOLVER-PROBLEMAS",
+              "name": "Resolver problemas",
+              "tagType": "secondary"
+            },
+            {
+              "type": "axis",
+              "code": "MATH-AX-NUMEROS-Y-OPERACIONES",
+              "name": "Números y operaciones",
+              "tagType": "secondary"
+            }
+          ]
+        },
+        {
+          "position": 28,
+          "type": "multiple_choice",
+          "responseFormat": "choice",
+          "stem": "Para vender completos, Eduardo compró 2,8 kg de pan, 2,7 kg de tomates, 1,0 kg de vienesas y 1,0 kg de paltas. ¿Cuántos kilogramos de productos compró en total?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "5,7 kg",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "6,5 kg",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "7,5 kg",
+              "isCorrect": true
+            },
+            {
+              "key": "D",
+              "text": "25,5 kg",
+              "isCorrect": false
+            }
+          ],
+          "correctKey": "C",
+          "skill": "Resolver problemas",
+          "oa": "OA 8",
+          "contentAxis": "Números y operaciones",
+          "hasFigure": false,
+          "figureNote": null,
+          "taxonomy": [
+            {
+              "type": "descriptor",
+              "code": null,
+              "name": "Resuelven problemas que requieren calcular adiciones de números decimales con la misma cantidad de cifras decimales.",
+              "parentCode": "MATH-6B-OA08",
+              "tagType": "primary"
+            },
+            {
+              "type": "learning_objective",
+              "code": "MATH-6B-OA08",
+              "name": "OA 8",
+              "level": "6_basico",
+              "tagType": "secondary"
+            },
+            {
+              "type": "skill",
+              "code": "MATH-SK-RESOLVER-PROBLEMAS",
+              "name": "Resolver problemas",
+              "tagType": "secondary"
+            },
+            {
+              "type": "axis",
+              "code": "MATH-AX-NUMEROS-Y-OPERACIONES",
+              "name": "Números y operaciones",
+              "tagType": "secondary"
+            }
+          ]
+        },
+        {
+          "position": 29,
+          "type": "multiple_choice",
+          "responseFormat": "choice",
+          "stem": "Un repartidor debe llevar un paquete a una casa siguiendo una ruta de 17,27 km desde su oficina. Durante la ruta, se detuvo a comprar un jugo en una tienda que está a 11,53 km de su oficina. ¿Qué distancia le falta por recorrer al repartidor para llegar a la casa en la que dejará el paquete?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "5,74 km",
+              "isCorrect": true
+            },
+            {
+              "key": "B",
+              "text": "6,34 km",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "28,7 km",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "28,8 km",
+              "isCorrect": false
+            }
+          ],
+          "correctKey": "A",
+          "skill": "Resolver problemas",
+          "oa": "OA 8",
+          "contentAxis": "Números y operaciones",
+          "hasFigure": false,
+          "figureNote": null,
+          "taxonomy": [
+            {
+              "type": "descriptor",
+              "code": null,
+              "name": "Resuelven problemas que requieren calcular sustracciones de números decimales con la misma cantidad de cifras decimales.",
+              "parentCode": "MATH-6B-OA08",
+              "tagType": "primary"
+            },
+            {
+              "type": "learning_objective",
+              "code": "MATH-6B-OA08",
+              "name": "OA 8",
+              "level": "6_basico",
+              "tagType": "secondary"
+            },
+            {
+              "type": "skill",
+              "code": "MATH-SK-RESOLVER-PROBLEMAS",
+              "name": "Resolver problemas",
+              "tagType": "secondary"
+            },
+            {
+              "type": "axis",
+              "code": "MATH-AX-NUMEROS-Y-OPERACIONES",
+              "name": "Números y operaciones",
+              "tagType": "secondary"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "extraction": {
+    "itemCount": 29,
+    "warnings": [
+      "responseFormat: 'fill_in' (completación/cálculo) en ítem 4 → modelado como open_ended; se promoverá a gap_fill (auto-corregible) al cargar la pauta.",
+      "responseFormat: 'develop' en ítem 21 (única pregunta de desarrollo: interpretar un gráfico de barras y fundamentar).",
+      "Figura imprescindible en el enunciado de ítems 3, 9, 11, 17, 18, 19, 21, 22, 23: la respuesta depende de leer datos de la imagen (recta numérica, balanzas, redes/desarrollos, ángulos, gráficos). Requieren captura de imagen para ser usables.",
+      "Figuras ilustrativas (datos ya en el enunciado) en ítems 12, 13, 15, 16, 25.",
+      "Texto y fracciones transcritos desde la capa de texto del PDF (pdftotext); estructura y figuras confirmadas con la imagen renderizada."
+    ],
+    "needsHumanReview": true
+  },
+  "pauta": {
+    "source": {
+      "report": "RBD25520_DIA_MATEMATICA_6_A_Resultados_Asignatura_Cierre_2025.pdf",
+      "subjectCode": "MATH",
+      "gradeCode": "6TH_BASIC",
+      "applicationPeriod": "cierre",
+      "year": 2025,
+      "instrumentJson": "extraccion/matematicas/6º matemáticas cierre 2025.json"
+    },
+    "appliedKeys": 27,
+    "issues": []
+  }
+}

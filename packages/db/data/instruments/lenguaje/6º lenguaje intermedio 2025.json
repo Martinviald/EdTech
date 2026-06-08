@@ -1,0 +1,1812 @@
+{
+  "schemaVersion": "1.0",
+  "source": {
+    "file": "6º lenguaje intermedio 2025.pdf",
+    "subjectFolder": "Lenguaje"
+  },
+  "instrument": {
+    "name": "DIA Lectura 6° Básico 2025 — Intermedio",
+    "subject": "Lenguaje y Comunicación",
+    "subjectCode": "LANG",
+    "grade": "6° Básico",
+    "gradeCode": "6TH_BASIC",
+    "year": 2025,
+    "applicationPeriod": "intermedio",
+    "type": "dia",
+    "isOfficial": true,
+    "source": "imported"
+  },
+  "sections": [
+    {
+      "order": 1,
+      "name": "Texto 1: «El joven cangrejo»",
+      "type": "mixed",
+      "instructions": "Lee el siguiente texto y responde las preguntas 1 a 5.",
+      "passage": {
+        "title": "El joven cangrejo",
+        "text": "Un joven cangrejo pensó: “¿Por qué todos los miembros de mi familia caminan hacia atrás? Quiero aprender a caminar hacia adelante, como las ranas, y que se me caiga la cola si no lo consigo”.\n\nEmpezó a entrenarse a escondidas, entre las piedras de su arroyuelo nativo, y los primeros días le costaba muchísimo trabajo lograrlo. Chocaba contra todo, se magullaba la coraza y una pata se le enredaba con la otra. Pero las cosas fueron mejorando lentamente, porque todo puede aprenderse cuando se desea de verdad.\n\nCuando estuvo bien seguro de sí mismo, se presentó ante su familia y le dijo:\n\n—Fíjense.\n\nY dio una magnífica caminata hacia adelante.\n\n—Hijo mío —dijo llorando la madre— ¿has perdido el juicio? Vuelve en ti y camina como te hemos enseñado tu padre y yo, camina como tus hermanos, que tanto te quieren.\n\nSus hermanos, no obstante, se mataban de risa.\n\nEl padre se le quedó mirando un rato severamente, y luego dijo:\n\n—¡Ya basta! Si quieres quedarte con nosotros, camina como todos los cangrejos. Si quieres hacer lo que te parezca, el arroyo es bastante grande. Vete y no regreses más.\n\nEl buen cangrejo quería a su familia, pero estaba convencido de que tenía la razón. Abrazó a su madre, se despidió de su padre y de sus hermanos y se marchó.\n\nSu paso despertó inmediatamente la sorpresa de un grupo de ranas que, como buenas comadres, se habían reunido en torno a una hoja de nenúfar para charlar.\n\n—El mundo va al revés —dijo una rana—. Miren a aquel cangrejo y díganme si me equivoco.\n\n—Ya no hay educación —dijo la otra rana.\n\n—Vaya, vaya —dijo una tercera.\n\nPero el cangrejo continuó adelante por el camino que había elegido. En cierto momento oyó que lo llamaba un viejo cangrejote de expresión melancólica, que estaba solitario junto a un guijarro.\n\n—Buenos días —dijo el joven cangrejo.\n\nEl viejo le observó atentamente y luego le preguntó:\n\n—¿Qué crees que estás haciendo? También yo, cuando era joven, pensaba enseñar a caminar hacia adelante a los cangrejos. Y mira lo que he conseguido: vivo solo y la gente se cortaría la lengua antes de dirigirme la palabra. Mientras estés a tiempo de hacerlo, hazme caso: resígnate a caminar como los demás y un día me agradecerás el consejo.\n\nEl joven cangrejo no sabía qué responder y no dijo nada. Pero pensaba: “Yo tengo la razón”.\n\nY después de saludar atentamente al viejo, volvió a emprender de nuevo su camino orgullosamente.\n\n¿Llegará muy lejos? ¿Tendrá suerte? Nosotros no lo sabemos, porque está todavía caminando con el coraje y la decisión del primer día. Solo podemos desearle, de todo corazón: ¡Buen viaje!\n\nGianni Rodari. El joven Cangrejo. Biblioteca Digital E-libro. Web. 2008. (Adaptación).",
+        "format": "plain",
+        "attachments": []
+      },
+      "items": [
+        {
+          "position": 1,
+          "type": "multiple_choice",
+          "stem": "¿Qué condición le puso el padre al joven cangrejo para que pudiera quedarse a vivir con ellos?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Que fuera a recapacitar sobre su error al arroyo.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Que se disculpara con su madre y sus hermanos.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Que fuera a pedirle un consejo al viejo cangrejote.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "Que renunciara a seguir caminando hacia adelante.",
+              "isCorrect": true
+            }
+          ],
+          "correctKey": "D",
+          "skill": "Interpretar y relacionar",
+          "oa": "OA 4",
+          "contentAxis": "Narración",
+          "hasFigure": false,
+          "figureNote": null,
+          "taxonomy": [
+            {
+              "type": "descriptor",
+              "code": null,
+              "name": "Identifican un acontecimiento o acción relevante en un texto narrativo.",
+              "parentCode": "LANG-6B-OA04",
+              "tagType": "primary"
+            },
+            {
+              "type": "learning_objective",
+              "code": "LANG-6B-OA04",
+              "name": "OA 4",
+              "level": "6_basico",
+              "tagType": "secondary"
+            },
+            {
+              "type": "skill",
+              "code": "LANG-SK-INTERPRETAR-Y-RELACIONAR",
+              "name": "Interpretar y relacionar",
+              "tagType": "secondary"
+            },
+            {
+              "type": "text_type",
+              "code": "LANG-TT-NARRACION",
+              "name": "Narración",
+              "tagType": "secondary"
+            }
+          ]
+        },
+        {
+          "position": 2,
+          "type": "multiple_choice",
+          "stem": "Según el texto, ¿cómo era el joven cangrejo?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Perseverante.",
+              "isCorrect": true
+            },
+            {
+              "key": "B",
+              "text": "Maleducado.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Conformista.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "Solitario.",
+              "isCorrect": false
+            }
+          ],
+          "correctKey": "A",
+          "skill": "Interpretar y relacionar",
+          "oa": "OA 4",
+          "contentAxis": "Narración",
+          "hasFigure": false,
+          "figureNote": null,
+          "taxonomy": [
+            {
+              "type": "descriptor",
+              "code": null,
+              "name": "Infieren información relevante sobre personajes en un texto narrativo.",
+              "parentCode": "LANG-6B-OA04",
+              "tagType": "primary"
+            },
+            {
+              "type": "learning_objective",
+              "code": "LANG-6B-OA04",
+              "name": "OA 4",
+              "level": "6_basico",
+              "tagType": "secondary"
+            },
+            {
+              "type": "skill",
+              "code": "LANG-SK-INTERPRETAR-Y-RELACIONAR",
+              "name": "Interpretar y relacionar",
+              "tagType": "secondary"
+            },
+            {
+              "type": "text_type",
+              "code": "LANG-TT-NARRACION",
+              "name": "Narración",
+              "tagType": "secondary"
+            }
+          ]
+        },
+        {
+          "position": 3,
+          "type": "multiple_choice",
+          "stem": "¿Cuál fue el consejo que le dio el viejo cangrejote al joven cangrejo?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Que le enseñara a caminar hacia adelante a los demás cangrejos.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Que se resignara a caminar como un cangrejo normal.",
+              "isCorrect": true
+            },
+            {
+              "key": "C",
+              "text": "Que siguiera caminando con coraje y decisión.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "Que fuera un cangrejo solitario como él.",
+              "isCorrect": false
+            }
+          ],
+          "correctKey": "B",
+          "skill": "Interpretar y relacionar",
+          "oa": "OA 4",
+          "contentAxis": "Narración",
+          "hasFigure": false,
+          "figureNote": null,
+          "taxonomy": [
+            {
+              "type": "descriptor",
+              "code": null,
+              "name": "Identifican un acontecimiento o acción relevante en un texto narrativo.",
+              "parentCode": "LANG-6B-OA04",
+              "tagType": "primary"
+            },
+            {
+              "type": "learning_objective",
+              "code": "LANG-6B-OA04",
+              "name": "OA 4",
+              "level": "6_basico",
+              "tagType": "secondary"
+            },
+            {
+              "type": "skill",
+              "code": "LANG-SK-INTERPRETAR-Y-RELACIONAR",
+              "name": "Interpretar y relacionar",
+              "tagType": "secondary"
+            },
+            {
+              "type": "text_type",
+              "code": "LANG-TT-NARRACION",
+              "name": "Narración",
+              "tagType": "secondary"
+            }
+          ]
+        },
+        {
+          "position": 4,
+          "type": "multiple_choice",
+          "stem": "¿Cómo se sintió el joven cangrejo luego de escuchar al viejo cangrejote?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Molesto por su opinión.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Seguro de su propia decisión.",
+              "isCorrect": true
+            },
+            {
+              "key": "C",
+              "text": "Arrepentido por el camino tomado.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "Agradecido por el consejo recibido.",
+              "isCorrect": false
+            }
+          ],
+          "correctKey": "B",
+          "skill": "Interpretar y relacionar",
+          "oa": "OA 4",
+          "contentAxis": "Narración",
+          "hasFigure": false,
+          "figureNote": null,
+          "taxonomy": [
+            {
+              "type": "descriptor",
+              "code": null,
+              "name": "Infieren información relevante sobre personajes en un texto narrativo.",
+              "parentCode": "LANG-6B-OA04",
+              "tagType": "primary"
+            },
+            {
+              "type": "learning_objective",
+              "code": "LANG-6B-OA04",
+              "name": "OA 4",
+              "level": "6_basico",
+              "tagType": "secondary"
+            },
+            {
+              "type": "skill",
+              "code": "LANG-SK-INTERPRETAR-Y-RELACIONAR",
+              "name": "Interpretar y relacionar",
+              "tagType": "secondary"
+            },
+            {
+              "type": "text_type",
+              "code": "LANG-TT-NARRACION",
+              "name": "Narración",
+              "tagType": "secondary"
+            }
+          ]
+        },
+        {
+          "position": 5,
+          "type": "open_ended",
+          "stem": "¿Qué opinas sobre la decisión que tomó el joven cangrejo de caminar hacia adelante? Fundamenta tu opinión dando ejemplos del texto.",
+          "alternatives": [],
+          "correctKey": null,
+          "skill": "Reflexionar",
+          "oa": "OA 4",
+          "contentAxis": "Narración",
+          "hasFigure": false,
+          "figureNote": null,
+          "taxonomy": [
+            {
+              "type": "descriptor",
+              "code": null,
+              "name": "Opinan sobre algún aspecto controversial de un texto narrativo con fundamentos que integran información del texto.",
+              "parentCode": "LANG-6B-OA04",
+              "tagType": "primary"
+            },
+            {
+              "type": "learning_objective",
+              "code": "LANG-6B-OA04",
+              "name": "OA 4",
+              "level": "6_basico",
+              "tagType": "secondary"
+            },
+            {
+              "type": "skill",
+              "code": "LANG-SK-REFLEXIONAR",
+              "name": "Reflexionar",
+              "tagType": "secondary"
+            },
+            {
+              "type": "text_type",
+              "code": "LANG-TT-NARRACION",
+              "name": "Narración",
+              "tagType": "secondary"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "order": 2,
+      "name": "Texto 2: «Los fósforos»",
+      "type": "multiple_choice",
+      "instructions": "Lee el siguiente texto y responde las preguntas 6 a 9.",
+      "passage": {
+        "title": "LOS FÓSFOROS",
+        "text": "La vida cotidiana se hace más fácil gracias a la existencia de algo tan chico y sin importancia como los fósforos. Sin ellos, ¿cómo encenderíamos la cocina, el horno, el calefón o el fuego de una parrilla? Pero, por simple que parezca este objeto, no siempre estuvo al alcance de las personas. Los fósforos son un invento reciente en la historia de la humanidad.\n\nEn 1826, un químico británico llamado John Walker creó accidentalmente una cerilla de fricción. Al remover una mezcla de productos químicos con un palito, observó que en el extremo de este se había secado una gota en forma de lágrima. Para eliminarla, la frotó contra el suelo del laboratorio, provocando que se encendiera. La gota en el extremo del palito contenía sulfuro de antimonio, clorato de potasio, goma y almidón. Estas primeras cerillas no contenían fósforo. En 1833, con el reemplazo del sulfuro de antimonio por fósforo blanco, se fabricaron las verdaderas cerillas de fricción que derivaron en lo que hoy llamamos fósforos.\n\nEstas cerillas tenían el inconveniente de que se encendían con facilidad. Uno podía quemarse simplemente por llevar una caja de cerillas en el bolsillo. El fósforo blanco fue sustituido por otras sustancias. La variedad no venenosa del fósforo, la roja, fue el mejor sustituto.\n\nFinalmente, en 1844 el sueco Gustaf Pasch inventó los fósforos de seguridad. Su innovación consistía en que solo se encendían si la cabeza de la cerilla se frotaba contra la superficie áspera de la caja, el llamado “rascador”. Salieron al mercado en 1850 y son prácticamente iguales a los que ahora compramos en el supermercado.\n\nQuizás la única innovación que se ha inventado desde entonces son los fósforos de supervivencia: se encienden, aunque llueva o haya viento, gracias a que son más grandes, tienen más combustible y suelen estar recubiertos de cera, lo que los hace resistentes al agua.\n\nErnesto Ayala y Claudia Larraguibel. Curiosidades del mundo y de la naturaleza III. Chile: Fundación Astoreca, 2010.",
+        "format": "plain",
+        "attachments": [
+          {
+            "kind": "image",
+            "note": "Fotografía de fósforos (cerillas) y una caja de fósforos abierta (decorativa, no aporta información para responder)."
+          }
+        ]
+      },
+      "items": [
+        {
+          "position": 6,
+          "type": "multiple_choice",
+          "stem": "¿En qué año se inventaron los fósforos de seguridad?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "1826.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "1833.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "1844.",
+              "isCorrect": true
+            },
+            {
+              "key": "D",
+              "text": "1850.",
+              "isCorrect": false
+            }
+          ],
+          "correctKey": "C",
+          "skill": "Localizar",
+          "oa": "OA 6",
+          "contentAxis": "Texto no literario",
+          "hasFigure": false,
+          "figureNote": null,
+          "taxonomy": [
+            {
+              "type": "descriptor",
+              "code": null,
+              "name": "Localizan información explícita relevante en un texto no literario.",
+              "parentCode": "LANG-6B-OA06",
+              "tagType": "primary"
+            },
+            {
+              "type": "learning_objective",
+              "code": "LANG-6B-OA06",
+              "name": "OA 6",
+              "level": "6_basico",
+              "tagType": "secondary"
+            },
+            {
+              "type": "skill",
+              "code": "LANG-SK-LOCALIZAR",
+              "name": "Localizar",
+              "tagType": "secondary"
+            },
+            {
+              "type": "text_type",
+              "code": "LANG-TT-TEXTO-NO-LITERARIO",
+              "name": "Texto no literario",
+              "tagType": "secondary"
+            }
+          ]
+        },
+        {
+          "position": 7,
+          "type": "multiple_choice",
+          "stem": "¿Qué significa en el texto que los fósforos no siempre estuvieron “al alcance de las personas”?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Que los fósforos eran muy escasos.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Que los fósforos eran difíciles de usar.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Que los fósforos fueron inventados hace poco tiempo.",
+              "isCorrect": true
+            },
+            {
+              "key": "D",
+              "text": "Que los fósforos solo podían ser usados por algunas personas.",
+              "isCorrect": false
+            }
+          ],
+          "correctKey": "C",
+          "skill": "Interpretar y relacionar",
+          "oa": "OA 6",
+          "contentAxis": "Texto no literario",
+          "hasFigure": false,
+          "figureNote": null,
+          "taxonomy": [
+            {
+              "type": "descriptor",
+              "code": null,
+              "name": "Interpretan el sentido de expresiones en lenguaje figurado en un texto no literario.",
+              "parentCode": "LANG-6B-OA06",
+              "tagType": "primary"
+            },
+            {
+              "type": "learning_objective",
+              "code": "LANG-6B-OA06",
+              "name": "OA 6",
+              "level": "6_basico",
+              "tagType": "secondary"
+            },
+            {
+              "type": "skill",
+              "code": "LANG-SK-INTERPRETAR-Y-RELACIONAR",
+              "name": "Interpretar y relacionar",
+              "tagType": "secondary"
+            },
+            {
+              "type": "text_type",
+              "code": "LANG-TT-TEXTO-NO-LITERARIO",
+              "name": "Texto no literario",
+              "tagType": "secondary"
+            }
+          ]
+        },
+        {
+          "position": 8,
+          "type": "multiple_choice",
+          "stem": "¿Qué información en común presentan los dos últimos párrafos del texto?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Ambos se refieren a la función del combustible en los fósforos.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Ambos se refieren a innovaciones que han tenido los fósforos.",
+              "isCorrect": true
+            },
+            {
+              "key": "C",
+              "text": "Ambos se refieren a los fósforos de supervivencia.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "Ambos se refieren a los fósforos de seguridad.",
+              "isCorrect": false
+            }
+          ],
+          "correctKey": "B",
+          "skill": "Interpretar y relacionar",
+          "oa": "OA 6",
+          "contentAxis": "Texto no literario",
+          "hasFigure": false,
+          "figureNote": null,
+          "taxonomy": [
+            {
+              "type": "descriptor",
+              "code": null,
+              "name": "Comparan información relevante de distintas partes de un texto no literario.",
+              "parentCode": "LANG-6B-OA06",
+              "tagType": "primary"
+            },
+            {
+              "type": "learning_objective",
+              "code": "LANG-6B-OA06",
+              "name": "OA 6",
+              "level": "6_basico",
+              "tagType": "secondary"
+            },
+            {
+              "type": "skill",
+              "code": "LANG-SK-INTERPRETAR-Y-RELACIONAR",
+              "name": "Interpretar y relacionar",
+              "tagType": "secondary"
+            },
+            {
+              "type": "text_type",
+              "code": "LANG-TT-TEXTO-NO-LITERARIO",
+              "name": "Texto no literario",
+              "tagType": "secondary"
+            }
+          ]
+        },
+        {
+          "position": 9,
+          "type": "multiple_choice",
+          "stem": "¿Cuál es el propósito del texto leído?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Enseñar el uso correcto de los fósforos.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Informar sobre la evolución de los fósforos.",
+              "isCorrect": true
+            },
+            {
+              "key": "C",
+              "text": "Convencer sobre la utilidad de los fósforos.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "Advertir sobre los componentes de los fósforos.",
+              "isCorrect": false
+            }
+          ],
+          "correctKey": "B",
+          "skill": "Reflexionar",
+          "oa": "OA 7",
+          "contentAxis": "Texto no literario",
+          "hasFigure": false,
+          "figureNote": null,
+          "taxonomy": [
+            {
+              "type": "descriptor",
+              "code": null,
+              "name": "Determinan propósitos explícitos e implícitos en un texto no literario.",
+              "parentCode": "LANG-6B-OA07",
+              "tagType": "primary"
+            },
+            {
+              "type": "learning_objective",
+              "code": "LANG-6B-OA07",
+              "name": "OA 7",
+              "level": "6_basico",
+              "tagType": "secondary"
+            },
+            {
+              "type": "skill",
+              "code": "LANG-SK-REFLEXIONAR",
+              "name": "Reflexionar",
+              "tagType": "secondary"
+            },
+            {
+              "type": "text_type",
+              "code": "LANG-TT-TEXTO-NO-LITERARIO",
+              "name": "Texto no literario",
+              "tagType": "secondary"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "order": 3,
+      "name": "Texto 3: «Primer viaje de Simbad el Marino»",
+      "type": "multiple_choice",
+      "instructions": "Lee el siguiente texto y responde las preguntas 10 a 14.",
+      "passage": {
+        "title": "Primer viaje de Simbad el Marino",
+        "text": "Un día reuní el poco dinero que me quedaba y salí de Bassora con algunos comerciantes en un barco que arrendamos.\n\nFuimos a diversos países, tomando y dejando mercancías, y una mañana vimos una isla casi a flor de agua y semejante a una pradera, por su fertilidad y su aspecto. Cuatro pasajeros desembarcamos para comer y beber en tierra, libres del balanceo del barco, cuando de repente, la isla tembló en brusca sacudida. Nos gritaron de a bordo que estábamos a lomos de una ballena, y cada cual se salvó como pudo; uno a nado y los otros en la chalupa, dejándome a mí sobre el monstruoso animal, que poco a poco se hundió en el mar. Me aferré a un trozo de madera que habíamos llevado para hacer fuego, y vi con dolor que el barco se alejaba a toda vela, creyéndome muerto.\n\nDos días estuve a merced de las olas en la situación más angustiosa del mundo, hasta que las aguas me arrojaron a una isla de grata apariencia. Bebí el agua cristalina de un manantial que encontré junto a unos árboles frutales. Ya más repuesto, avancé hasta una llanura donde comía una yegua, atada a un poste de madera. Me acerqué a contemplar la belleza del animal, y en eso salió un hombre del centro de la tierra y me preguntó quién era. Le conté mi aventura, entonces me llevó a una gruta donde había varios hombres que me dijeron ser palafreneros del rey Mihrage, soberano de la isla.\n\nAl día siguiente, fui con ellos a la capital, y el rey Mihrage me recibió a las mil maravillas y dio orden de que no me faltara nada de lo necesario. Visité a los mercaderes por si encontraba el medio de regresar a Bagdad, frecuenté a los sabios de la India y a los señores de la Corte, para instruirme en las ciencias y costumbres del país.\n\nUn día llegó al puerto un barco que comenzó a descargar mercancías en las que reconocí mi propia marca, y convencido de que el barco era mío, pregunté al capitán a quién pertenecían los géneros. El capitán me respondió:\n\n—Teníamos a bordo un mercader de Bagdad, llamado Simbad, que desembarcó con tres hombres en lo que creyeron una isla y no era más que una ballena colosal, dormida a flor de agua. Todos se salvaron a excepción de Simbad, cuyas mercancías traigo aquí para venderlas y entregar luego el dinero a la familia del náufrago.\n\n—Capitán —le dije—, yo soy Simbad, por lo tanto, puede entregarme los géneros que me pertenecen.\n\nLe relaté el verdadero milagro de mi salvación, pero el capitán no quería creerme, creyéndome algún impostor que tomaba el nombre de Simbad para hacerme dueño de las mercancías, hasta que desembarcaron unos tripulantes que me reconocieron en seguida. El capitán, confuso, me pidió disculpas.\n\nObsequié al rey Mihrage lo más selecto que poseía, a lo que él correspondió con regalos de gran valor. Me embarqué con abundante mercadería. Con las ganancias de mi primer viaje compré tierras y una casa magnífica para establecerme, decidido a olvidar los pasados peligros.\n\nAnónimo. Las mil y una noches. Chile: Zig-Zag, 1990. (Adaptación).\n\nGlosario\nchalupa: embarcación pequeña con cubierta y dos palos para las velas.\npalafreneros: trabajadores que llevan el freno del caballo.",
+        "format": "plain",
+        "attachments": [
+          {
+            "kind": "image",
+            "note": "Ilustración de un barco navegando junto a una gran ballena que aflora del agua como si fuera una isla (decorativa)."
+          }
+        ]
+      },
+      "items": [
+        {
+          "position": 10,
+          "type": "multiple_choice",
+          "stem": "En el texto, ¿a qué hace referencia que la isla esté “casi a flor de agua”?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "A una isla fértil.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "A una isla de tierra firme.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "A una isla semejante a una ballena.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "A una isla que apenas sobresale del agua.",
+              "isCorrect": true
+            }
+          ],
+          "correctKey": "D",
+          "skill": "Interpretar y relacionar",
+          "oa": "OA 4",
+          "contentAxis": "Narración",
+          "hasFigure": false,
+          "figureNote": null,
+          "taxonomy": [
+            {
+              "type": "descriptor",
+              "code": null,
+              "name": "Interpretan el sentido de expresiones en lenguaje figurado presentes en un texto literario.",
+              "parentCode": "LANG-6B-OA04",
+              "tagType": "primary"
+            },
+            {
+              "type": "learning_objective",
+              "code": "LANG-6B-OA04",
+              "name": "OA 4",
+              "level": "6_basico",
+              "tagType": "secondary"
+            },
+            {
+              "type": "skill",
+              "code": "LANG-SK-INTERPRETAR-Y-RELACIONAR",
+              "name": "Interpretar y relacionar",
+              "tagType": "secondary"
+            },
+            {
+              "type": "text_type",
+              "code": "LANG-TT-NARRACION",
+              "name": "Narración",
+              "tagType": "secondary"
+            }
+          ]
+        },
+        {
+          "position": 11,
+          "type": "multiple_choice",
+          "stem": "¿Qué hace Simbad para intentar salvar su vida cuando la ballena se hunde?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Nada con fuerza.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Se aferra a la ballena.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Se afirma de un trozo de madera.",
+              "isCorrect": true
+            },
+            {
+              "key": "D",
+              "text": "Sube a la chalupa que los transportaba.",
+              "isCorrect": false
+            }
+          ],
+          "correctKey": "C",
+          "skill": "Interpretar y relacionar",
+          "oa": "OA 4",
+          "contentAxis": "Narración",
+          "hasFigure": false,
+          "figureNote": null,
+          "taxonomy": [
+            {
+              "type": "descriptor",
+              "code": null,
+              "name": "Identifican un acontecimiento o acción relevante en un texto narrativo.",
+              "parentCode": "LANG-6B-OA04",
+              "tagType": "primary"
+            },
+            {
+              "type": "learning_objective",
+              "code": "LANG-6B-OA04",
+              "name": "OA 4",
+              "level": "6_basico",
+              "tagType": "secondary"
+            },
+            {
+              "type": "skill",
+              "code": "LANG-SK-INTERPRETAR-Y-RELACIONAR",
+              "name": "Interpretar y relacionar",
+              "tagType": "secondary"
+            },
+            {
+              "type": "text_type",
+              "code": "LANG-TT-NARRACION",
+              "name": "Narración",
+              "tagType": "secondary"
+            }
+          ]
+        },
+        {
+          "position": 12,
+          "type": "multiple_choice",
+          "stem": "A partir del texto, ¿cómo era el rey Mihrage?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Generoso.",
+              "isCorrect": true
+            },
+            {
+              "key": "B",
+              "text": "Ambicioso.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Aventurero.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "Desconfiado.",
+              "isCorrect": false
+            }
+          ],
+          "correctKey": "A",
+          "skill": "Interpretar y relacionar",
+          "oa": "OA 4",
+          "contentAxis": "Narración",
+          "hasFigure": false,
+          "figureNote": null,
+          "taxonomy": [
+            {
+              "type": "descriptor",
+              "code": null,
+              "name": "Infieren información relevante sobre personajes en un texto narrativo.",
+              "parentCode": "LANG-6B-OA04",
+              "tagType": "primary"
+            },
+            {
+              "type": "learning_objective",
+              "code": "LANG-6B-OA04",
+              "name": "OA 4",
+              "level": "6_basico",
+              "tagType": "secondary"
+            },
+            {
+              "type": "skill",
+              "code": "LANG-SK-INTERPRETAR-Y-RELACIONAR",
+              "name": "Interpretar y relacionar",
+              "tagType": "secondary"
+            },
+            {
+              "type": "text_type",
+              "code": "LANG-TT-NARRACION",
+              "name": "Narración",
+              "tagType": "secondary"
+            }
+          ]
+        },
+        {
+          "position": 13,
+          "type": "multiple_choice",
+          "stem": "¿Qué pretendía hacer el capitán con las mercancías de Simbad?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Quedarse con ellas y estafar a Simbad.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Distribuirlas entre los tripulantes del barco.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Entregarlas como obsequio al rey Mihrage.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "Venderlas para ayudar a la familia de Simbad.",
+              "isCorrect": true
+            }
+          ],
+          "correctKey": "D",
+          "skill": "Interpretar y relacionar",
+          "oa": "OA 4",
+          "contentAxis": "Narración",
+          "hasFigure": false,
+          "figureNote": null,
+          "taxonomy": [
+            {
+              "type": "descriptor",
+              "code": null,
+              "name": "Infieren información relevante sobre personajes en un texto narrativo.",
+              "parentCode": "LANG-6B-OA04",
+              "tagType": "primary"
+            },
+            {
+              "type": "learning_objective",
+              "code": "LANG-6B-OA04",
+              "name": "OA 4",
+              "level": "6_basico",
+              "tagType": "secondary"
+            },
+            {
+              "type": "skill",
+              "code": "LANG-SK-INTERPRETAR-Y-RELACIONAR",
+              "name": "Interpretar y relacionar",
+              "tagType": "secondary"
+            },
+            {
+              "type": "text_type",
+              "code": "LANG-TT-NARRACION",
+              "name": "Narración",
+              "tagType": "secondary"
+            }
+          ]
+        },
+        {
+          "position": 14,
+          "type": "multiple_choice",
+          "stem": "¿Cuál es el tema central del texto?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Las ganancias de Simbad durante su primer viaje.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Las nuevas amistades que hizo Simbad en su primer viaje.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Los diversos lugares que conoció Simbad durante su primer viaje.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "Las experiencias de Simbad producto del naufragio en su primer viaje.",
+              "isCorrect": true
+            }
+          ],
+          "correctKey": "D",
+          "skill": "Interpretar y relacionar",
+          "oa": "OA 4",
+          "contentAxis": "Narración",
+          "hasFigure": false,
+          "figureNote": null,
+          "taxonomy": [
+            {
+              "type": "descriptor",
+              "code": null,
+              "name": "Infieren el sentido global de un texto literario o un fragmento de este.",
+              "parentCode": "LANG-6B-OA04",
+              "tagType": "primary"
+            },
+            {
+              "type": "learning_objective",
+              "code": "LANG-6B-OA04",
+              "name": "OA 4",
+              "level": "6_basico",
+              "tagType": "secondary"
+            },
+            {
+              "type": "skill",
+              "code": "LANG-SK-INTERPRETAR-Y-RELACIONAR",
+              "name": "Interpretar y relacionar",
+              "tagType": "secondary"
+            },
+            {
+              "type": "text_type",
+              "code": "LANG-TT-NARRACION",
+              "name": "Narración",
+              "tagType": "secondary"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "order": 4,
+      "name": "Texto 4: «Lorena Ramírez, una deportista con pies ligeros»",
+      "type": "mixed",
+      "instructions": "Lee el siguiente texto y responde las preguntas 15 a 20.",
+      "passage": {
+        "title": "Lorena Ramírez, una deportista con pies ligeros",
+        "text": "Lorena Ramírez (1995) es una mujer mexicana perteneciente al pueblo rarámuri, una etnia indígena cuyo nombre significa «pies ligeros» o «corredores a pie». Los rarámuri viven en la sierra, un conjunto de montañas y cordilleras, y son conocidos por recorrer hasta 270 kilómetros sin detenerse. Para este pueblo, acostumbrado a los caminos rocosos y altas montañas, correr es una forma de vida y una tradición.\n\nLa fama de corredores de los rarámuri es tal que ellos mismos organizan ultramaratones, carreras a pie cuya distancia supera los 42 kilómetros. A estas carreras llegan competidores de todo el mundo a probarse contra ellos. Hoy, los rarámuri son aún más conocidos gracias a Lorena Ramírez, quien se ha vuelto corredora internacional. Una corredora que no usa ropa deportiva, sino sandalias y los vestidos tradicionales de su pueblo.\n\nLorena creció recorriendo su natal Sierra Tarahumara para buscar comida en otros pueblos o para seguir rebaños de cabras junto a sus hermanos. A los diecisiete años comenzó a competir profesionalmente y llegó cuarta en la Maratón de los Cañones de 2015, la misma donde llegó segunda en 2018. Pero fue el 2017 cuando Lorena se hizo famosa, ya que ganó la competencia UltraTrail Cerro Rojo, una maratón de 50 kilómetros en Tlatlauquitepec. Además de destacar por competir con su atuendo tradicional (que incluye el modelo de sandalias planas que usa desde niña), a Lorena se la conoce por su gran destreza para correr, ya que no aterriza con el talón, sino con su mediopié, una técnica que los maratonistas demoran años en aprender y dominar.\n\nEn junio de 2018 Lorena se convirtió en la primera mujer de su etnia en participar en una ultramaratón europea, la Bluetrail 2018 de Tenerife. En esta competencia de categoría mundial, ella llegó tercera luego de recorrer 102 kilómetros a una altitud de 3.500 metros sobre el nivel del mar.\n\nPara las carreras, Lorena sigue reanimando su cuerpo con el tradicional pinole, bebida energizante preparada con harina de maíz y agua. Habiendo participado en más de quince maratones en el mundo, la mexicana se niega a vestir ropa especializada para competir, rechaza los auspicios de marcas deportivas y sigue entrenando con su hermano Mario en las montañas de la sierra.\n\nIsabel Plant. Mujeres bacanas latinas. Chile: Catalonia, 2019. (Adaptación).",
+        "format": "plain",
+        "attachments": [
+          {
+            "kind": "image",
+            "note": "Fotografía de Lorena Ramírez corriendo con su vestido tradicional y sandalias, junto a otras corredoras (decorativa)."
+          }
+        ]
+      },
+      "items": [
+        {
+          "position": 15,
+          "type": "multiple_choice",
+          "stem": "Según el texto, ¿cuál es uno de los significados de “rarámuri”?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Conjunto de montañas.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Corredores a pie.",
+              "isCorrect": true
+            },
+            {
+              "key": "C",
+              "text": "Etnia indígena.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "Deportista.",
+              "isCorrect": false
+            }
+          ],
+          "correctKey": "B",
+          "skill": "Localizar",
+          "oa": "OA 6",
+          "contentAxis": "Texto no literario",
+          "hasFigure": false,
+          "figureNote": null,
+          "taxonomy": [
+            {
+              "type": "descriptor",
+              "code": null,
+              "name": "Localizan información explícita relevante en un texto no literario.",
+              "parentCode": "LANG-6B-OA06",
+              "tagType": "primary"
+            },
+            {
+              "type": "learning_objective",
+              "code": "LANG-6B-OA06",
+              "name": "OA 6",
+              "level": "6_basico",
+              "tagType": "secondary"
+            },
+            {
+              "type": "skill",
+              "code": "LANG-SK-LOCALIZAR",
+              "name": "Localizar",
+              "tagType": "secondary"
+            },
+            {
+              "type": "text_type",
+              "code": "LANG-TT-TEXTO-NO-LITERARIO",
+              "name": "Texto no literario",
+              "tagType": "secondary"
+            }
+          ]
+        },
+        {
+          "position": 16,
+          "type": "multiple_choice",
+          "stem": "¿Qué competencia ganó Lorena Ramírez?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "La carrera de Sierra Tarahumara.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "La Maratón de los Cañones.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "UltraTrail Cerro Rojo.",
+              "isCorrect": true
+            },
+            {
+              "key": "D",
+              "text": "Bluetrail de Tenerife.",
+              "isCorrect": false
+            }
+          ],
+          "correctKey": "C",
+          "skill": "Localizar",
+          "oa": "OA 6",
+          "contentAxis": "Texto no literario",
+          "hasFigure": false,
+          "figureNote": null,
+          "taxonomy": [
+            {
+              "type": "descriptor",
+              "code": null,
+              "name": "Localizan información explícita relevante en un texto no literario.",
+              "parentCode": "LANG-6B-OA06",
+              "tagType": "primary"
+            },
+            {
+              "type": "learning_objective",
+              "code": "LANG-6B-OA06",
+              "name": "OA 6",
+              "level": "6_basico",
+              "tagType": "secondary"
+            },
+            {
+              "type": "skill",
+              "code": "LANG-SK-LOCALIZAR",
+              "name": "Localizar",
+              "tagType": "secondary"
+            },
+            {
+              "type": "text_type",
+              "code": "LANG-TT-TEXTO-NO-LITERARIO",
+              "name": "Texto no literario",
+              "tagType": "secondary"
+            }
+          ]
+        },
+        {
+          "position": 17,
+          "type": "multiple_choice",
+          "stem": "¿Cuál es el tema central del primer párrafo del texto?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Las características de Lorena Ramírez.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Las características del pueblo rarámuri.",
+              "isCorrect": true
+            },
+            {
+              "key": "C",
+              "text": "Las características de la sierra mexicana.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "Las características de los pueblos mexicanos.",
+              "isCorrect": false
+            }
+          ],
+          "correctKey": "B",
+          "skill": "Interpretar y relacionar",
+          "oa": "OA 6",
+          "contentAxis": "Texto no literario",
+          "hasFigure": false,
+          "figureNote": null,
+          "taxonomy": [
+            {
+              "type": "descriptor",
+              "code": null,
+              "name": "Infieren el sentido global de un texto no literario o un fragmento de este.",
+              "parentCode": "LANG-6B-OA06",
+              "tagType": "primary"
+            },
+            {
+              "type": "learning_objective",
+              "code": "LANG-6B-OA06",
+              "name": "OA 6",
+              "level": "6_basico",
+              "tagType": "secondary"
+            },
+            {
+              "type": "skill",
+              "code": "LANG-SK-INTERPRETAR-Y-RELACIONAR",
+              "name": "Interpretar y relacionar",
+              "tagType": "secondary"
+            },
+            {
+              "type": "text_type",
+              "code": "LANG-TT-TEXTO-NO-LITERARIO",
+              "name": "Texto no literario",
+              "tagType": "secondary"
+            }
+          ]
+        },
+        {
+          "position": 18,
+          "type": "multiple_choice",
+          "stem": "Según el texto, ¿por qué se destaca Lorena Ramírez en las carreras?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Por rechazar auspicios de marcas deportivas.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Por ser mujer y pertenecer a un pueblo indígena de México.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Por tomar una bebida energizante para reanimar su cuerpo antes de correr.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "Por su técnica para correr y por usar la vestimenta tradicional de su pueblo.",
+              "isCorrect": true
+            }
+          ],
+          "correctKey": "D",
+          "skill": "Localizar",
+          "oa": "OA 6",
+          "contentAxis": "Texto no literario",
+          "hasFigure": false,
+          "figureNote": null,
+          "taxonomy": [
+            {
+              "type": "descriptor",
+              "code": null,
+              "name": "Localizan información explícita relevante en un texto no literario.",
+              "parentCode": "LANG-6B-OA06",
+              "tagType": "primary"
+            },
+            {
+              "type": "learning_objective",
+              "code": "LANG-6B-OA06",
+              "name": "OA 6",
+              "level": "6_basico",
+              "tagType": "secondary"
+            },
+            {
+              "type": "skill",
+              "code": "LANG-SK-LOCALIZAR",
+              "name": "Localizar",
+              "tagType": "secondary"
+            },
+            {
+              "type": "text_type",
+              "code": "LANG-TT-TEXTO-NO-LITERARIO",
+              "name": "Texto no literario",
+              "tagType": "secondary"
+            }
+          ]
+        },
+        {
+          "position": 19,
+          "type": "multiple_choice",
+          "stem": "¿A qué hace referencia el título al señalar que Lorena Ramírez es “una deportista con pies ligeros”?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "A la forma que tienen sus pies.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Al tipo de calzado que utiliza.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "A su técnica para correr.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "A su velocidad para correr.",
+              "isCorrect": true
+            }
+          ],
+          "correctKey": "D",
+          "skill": "Interpretar y relacionar",
+          "oa": "OA 6",
+          "contentAxis": "Texto no literario",
+          "hasFigure": false,
+          "figureNote": null,
+          "taxonomy": [
+            {
+              "type": "descriptor",
+              "code": null,
+              "name": "Interpretan el sentido de expresiones en lenguaje figurado en un texto no literario.",
+              "parentCode": "LANG-6B-OA06",
+              "tagType": "primary"
+            },
+            {
+              "type": "learning_objective",
+              "code": "LANG-6B-OA06",
+              "name": "OA 6",
+              "level": "6_basico",
+              "tagType": "secondary"
+            },
+            {
+              "type": "skill",
+              "code": "LANG-SK-INTERPRETAR-Y-RELACIONAR",
+              "name": "Interpretar y relacionar",
+              "tagType": "secondary"
+            },
+            {
+              "type": "text_type",
+              "code": "LANG-TT-TEXTO-NO-LITERARIO",
+              "name": "Texto no literario",
+              "tagType": "secondary"
+            }
+          ]
+        },
+        {
+          "position": 20,
+          "type": "open_ended",
+          "stem": "¿Qué opinas de que Lorena Ramírez se niegue a vestir ropa especializada para competir en las maratones? Fundamenta tu opinión utilizando información del texto.",
+          "alternatives": [],
+          "correctKey": null,
+          "skill": "Reflexionar",
+          "oa": "OA 6",
+          "contentAxis": "Texto no literario",
+          "hasFigure": false,
+          "figureNote": null,
+          "taxonomy": [
+            {
+              "type": "descriptor",
+              "code": null,
+              "name": "Opinan sobre algún aspecto relevante en un texto no literario con fundamentos que integran información del texto.",
+              "parentCode": "LANG-6B-OA06",
+              "tagType": "primary"
+            },
+            {
+              "type": "learning_objective",
+              "code": "LANG-6B-OA06",
+              "name": "OA 6",
+              "level": "6_basico",
+              "tagType": "secondary"
+            },
+            {
+              "type": "skill",
+              "code": "LANG-SK-REFLEXIONAR",
+              "name": "Reflexionar",
+              "tagType": "secondary"
+            },
+            {
+              "type": "text_type",
+              "code": "LANG-TT-TEXTO-NO-LITERARIO",
+              "name": "Texto no literario",
+              "tagType": "secondary"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "order": 5,
+      "name": "Texto 5: «El Sol, la Luna y los cazadores»",
+      "type": "multiple_choice",
+      "instructions": "Lee el siguiente texto y responde las preguntas 21 a 25.",
+      "passage": {
+        "title": "El Sol, la Luna y los cazadores",
+        "text": "El Sol era un señor que tenía necesidad de flechas. Un día dijo: “Me voy a convertir en un pez para conseguir flechas” y se fue a un río, en cuya orilla vivía un pueblo de cazadores que usaban flechas y arcos.\n\nLas mujeres del pueblo siempre iban al río en busca de agua para tomar. El Sol llegó, se zambulló y se convirtió en un pez dorado grandote, así aguantaría los flechazos. Enseguida vinieron las mujeres y vieron al pez dorado grandote que estaba nadando allí, muy cerca de ellas. Las mujeres sacaron agua y regresaron rápido para avisar a sus maridos lo que habían visto en el río.\n\nLos hombres salieron corriendo con arcos y flechas. Cuando llegaron ¡todavía estaba el gran pez dorado! Contentos decían: “¡Qué suerte que tenemos! ¡Allí está todavía!” y le empezaron a tirar flechazos.\n\nCada vez que recibía uno, se movía un poco. Cuando le resultó difícil moverse, se fue a la parte más profunda, llevándose muchas flechas. Los hombres quedaron parados mirando cómo se llevaba sus flechas. De esta manera el señor Sol consiguió las flechas que tanto le hacían falta.\n\nEl señor Luna, como era vecino y amigo del Sol, vio que el Sol había conseguido flechas. Se acercó a su amigo y le preguntó: “¿Cómo hiciste para conseguir flechas?”. El Sol le respondió: “Tuve que convertirme en un pez grande en el río donde las mujeres de los cazadores siempre sacan agua, allí me tiraron flechazos. Aguanté hasta que conseguí las flechas que necesitaba y me escapé hacia la parte más profunda”.\n\nEl señor Luna, al escuchar lo que dijo su amigo, quiso hacer lo mismo, porque él también tenía necesidad de flechas. Decidió entonces, convertirse en pez.\n\nSu amigo Sol le dio un consejo: “No permitas que te carguen muchas flechas, después de cada flechazo tienes que moverte un poco y probar si es que vas a poder escapar rápido”.\n\nEntonces el señor Luna se fue al río y se convirtió en un pez dorado grande. Al rato vinieron las mujeres a buscar agua y vieron que estaba el pez dorado grande otra vez. Por eso volvieron rápido para avisar que el pez estaba allí. Los hombres, con sus arcos y flechas, partieron hacia el río, y empezaron a tirarle flechazos.\n\nEl señor Luna no cumplió el consejo que su amigo Sol le había dado y cuando tuvo muchas flechas y quiso escapar, ya no podía moverse. Entonces los cazadores lo agarraron y lo llevaron para comerlo.\n\nSu amigo Sol lo estaba esperando. Estaba muy preocupado. Cuando pasó el mediodía se dio cuenta de que le había pasado algo. Esa noche, se convirtió en un perro para seguir su olor y poder encontrarlo. Así fue que, siguiendo las huellas y el olor, llegó hasta el pueblo donde lo habían llevado.\n\nAllí vio mucha gente que comía y dejaba los huesos tirados por todas partes. El señor Sol los amontonó y cuando los tuvo todos, los tiró para arriba. Por eso hoy la Luna está arriba y es del mismo color que los huesos.\n\nContado por Nieves Rosario. “El Sol, la Luna y los cazadores”. Recopilación de historias, leyendas y poemas. Coord. Patricia Maldonado. Educación y capacitación para el desarrollo sostenible del Chaco sudamericano-GTZ.",
+        "format": "plain",
+        "attachments": [
+          {
+            "kind": "image",
+            "note": "Ilustración nocturna de personas reunidas en un poblado alrededor de un pez, con la luna en el cielo (decorativa)."
+          }
+        ]
+      },
+      "items": [
+        {
+          "position": 21,
+          "type": "multiple_choice",
+          "stem": "Según el texto, ¿para qué el señor Sol decide convertirse en pez?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Para engañar a los cazadores.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Para asustar a las mujeres.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Para ayudar al señor Luna.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "Para conseguir flechas.",
+              "isCorrect": true
+            }
+          ],
+          "correctKey": "D",
+          "skill": "Localizar",
+          "oa": "OA 4",
+          "contentAxis": "Narración",
+          "hasFigure": false,
+          "figureNote": null,
+          "taxonomy": [
+            {
+              "type": "descriptor",
+              "code": null,
+              "name": "Localizan información explícita relevante en un texto narrativo.",
+              "parentCode": "LANG-6B-OA04",
+              "tagType": "primary"
+            },
+            {
+              "type": "learning_objective",
+              "code": "LANG-6B-OA04",
+              "name": "OA 4",
+              "level": "6_basico",
+              "tagType": "secondary"
+            },
+            {
+              "type": "skill",
+              "code": "LANG-SK-LOCALIZAR",
+              "name": "Localizar",
+              "tagType": "secondary"
+            },
+            {
+              "type": "text_type",
+              "code": "LANG-TT-NARRACION",
+              "name": "Narración",
+              "tagType": "secondary"
+            }
+          ]
+        },
+        {
+          "position": 22,
+          "type": "multiple_choice",
+          "stem": "¿Por qué el señor Luna fue atrapado por los cazadores?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Porque las mujeres ayudaron a los cazadores a atraparlo.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Porque los cazadores actuaron tan rápido que no pudo escapar.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Porque quedó inmovilizado por la cantidad de flechas que recibió.",
+              "isCorrect": true
+            },
+            {
+              "key": "D",
+              "text": "Porque estaba en la parte profunda del río cuando recibió los flechazos.",
+              "isCorrect": false
+            }
+          ],
+          "correctKey": "C",
+          "skill": "Interpretar y relacionar",
+          "oa": "OA 4",
+          "contentAxis": "Narración",
+          "hasFigure": false,
+          "figureNote": null,
+          "taxonomy": [
+            {
+              "type": "descriptor",
+              "code": null,
+              "name": "Infieren causa o consecuencia de acontecimientos o acciones relevantes en un texto narrativo.",
+              "parentCode": "LANG-6B-OA04",
+              "tagType": "primary"
+            },
+            {
+              "type": "learning_objective",
+              "code": "LANG-6B-OA04",
+              "name": "OA 4",
+              "level": "6_basico",
+              "tagType": "secondary"
+            },
+            {
+              "type": "skill",
+              "code": "LANG-SK-INTERPRETAR-Y-RELACIONAR",
+              "name": "Interpretar y relacionar",
+              "tagType": "secondary"
+            },
+            {
+              "type": "text_type",
+              "code": "LANG-TT-NARRACION",
+              "name": "Narración",
+              "tagType": "secondary"
+            }
+          ]
+        },
+        {
+          "position": 23,
+          "type": "multiple_choice",
+          "stem": "¿Qué característica posee el señor Sol que lo distingue del señor Luna?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Lealtad.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Avaricia.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Valentía.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "Prudencia.",
+              "isCorrect": true
+            }
+          ],
+          "correctKey": "D",
+          "skill": "Interpretar y relacionar",
+          "oa": "OA 4",
+          "contentAxis": "Narración",
+          "hasFigure": false,
+          "figureNote": null,
+          "taxonomy": [
+            {
+              "type": "descriptor",
+              "code": null,
+              "name": "Comparan personajes en un texto literario.",
+              "parentCode": "LANG-6B-OA04",
+              "tagType": "primary"
+            },
+            {
+              "type": "learning_objective",
+              "code": "LANG-6B-OA04",
+              "name": "OA 4",
+              "level": "6_basico",
+              "tagType": "secondary"
+            },
+            {
+              "type": "skill",
+              "code": "LANG-SK-INTERPRETAR-Y-RELACIONAR",
+              "name": "Interpretar y relacionar",
+              "tagType": "secondary"
+            },
+            {
+              "type": "text_type",
+              "code": "LANG-TT-NARRACION",
+              "name": "Narración",
+              "tagType": "secondary"
+            }
+          ]
+        },
+        {
+          "position": 24,
+          "type": "multiple_choice",
+          "stem": "¿Qué logra el señor Sol al recoger los huesos del pez?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Transformarse en un perro.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Quedarse con las flechas del señor Luna.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Darle una nueva existencia al señor Luna.",
+              "isCorrect": true
+            },
+            {
+              "key": "D",
+              "text": "Alimentarse al igual que la gente del pueblo.",
+              "isCorrect": false
+            }
+          ],
+          "correctKey": "C",
+          "skill": "Interpretar y relacionar",
+          "oa": "OA 4",
+          "contentAxis": "Narración",
+          "hasFigure": false,
+          "figureNote": null,
+          "taxonomy": [
+            {
+              "type": "descriptor",
+              "code": null,
+              "name": "Infieren cómo influyen acciones y acontecimientos relevantes en el desarrollo de un texto literario.",
+              "parentCode": "LANG-6B-OA04",
+              "tagType": "primary"
+            },
+            {
+              "type": "learning_objective",
+              "code": "LANG-6B-OA04",
+              "name": "OA 4",
+              "level": "6_basico",
+              "tagType": "secondary"
+            },
+            {
+              "type": "skill",
+              "code": "LANG-SK-INTERPRETAR-Y-RELACIONAR",
+              "name": "Interpretar y relacionar",
+              "tagType": "secondary"
+            },
+            {
+              "type": "text_type",
+              "code": "LANG-TT-NARRACION",
+              "name": "Narración",
+              "tagType": "secondary"
+            }
+          ]
+        },
+        {
+          "position": 25,
+          "type": "multiple_choice",
+          "stem": "¿Qué busca explicar esta historia?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Los orígenes del Sol.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Las características de la Luna.",
+              "isCorrect": true
+            },
+            {
+              "key": "C",
+              "text": "La amistad entre el Sol y la Luna.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "El valor del Sol y la Luna para un pueblo.",
+              "isCorrect": false
+            }
+          ],
+          "correctKey": "B",
+          "skill": "Interpretar y relacionar",
+          "oa": "OA 4",
+          "contentAxis": "Narración",
+          "hasFigure": false,
+          "figureNote": null,
+          "taxonomy": [
+            {
+              "type": "descriptor",
+              "code": null,
+              "name": "Infieren el sentido global de un texto literario o un fragmento de este.",
+              "parentCode": "LANG-6B-OA04",
+              "tagType": "primary"
+            },
+            {
+              "type": "learning_objective",
+              "code": "LANG-6B-OA04",
+              "name": "OA 4",
+              "level": "6_basico",
+              "tagType": "secondary"
+            },
+            {
+              "type": "skill",
+              "code": "LANG-SK-INTERPRETAR-Y-RELACIONAR",
+              "name": "Interpretar y relacionar",
+              "tagType": "secondary"
+            },
+            {
+              "type": "text_type",
+              "code": "LANG-TT-NARRACION",
+              "name": "Narración",
+              "tagType": "secondary"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "order": 6,
+      "name": "Texto 6: «Oda al día feliz»",
+      "type": "multiple_choice",
+      "instructions": "Lee el siguiente texto y responde las preguntas 26 a 28.",
+      "passage": {
+        "title": "ODA AL DÍA FELIZ",
+        "text": "Esta vez dejadme\nser feliz,\nnada ha pasado a nadie,\nno estoy en parte alguna,\nsucede solamente\nque soy feliz\npor los cuatro costados\ndel corazón, andando,\ndurmiendo o escribiendo.\nQué voy a hacerle, soy\nfeliz.\nSoy más innumerable\nque el pasto\nen las praderas,\nsiento la piel como un árbol rugoso\ny el agua abajo,\nlos pájaros arriba,\nel mar como un anillo\nen mi cintura,\nhecha de pan y piedra la tierra\nel aire canta como una guitarra.\n\nTú a mi lado en la arena\neres arena,\ntú cantas y eres canto,\nel mundo\nes hoy mi alma,\ncanto y arena,\nel mundo\nes hoy tu boca,\ndejadme\nen tu boca y en la arena\nser feliz,\nser feliz porque sí, porque respiro\ny porque tú respiras,\nser feliz porque toco\ntu rodilla\ny es como si tocara\nla piel azul del cielo\ny su frescura.\n\nHoy dejadme\na mí solo\nser feliz,\ncon todos o sin todos,\nser feliz\ncon el pasto\ny la arena,\nser feliz\ncon el aire y la tierra,\nser feliz,\ncontigo, con tu boca,\nser feliz.\n\nPablo Neruda. Odas elementales. Chile: Planeta, 1999.",
+        "format": "plain",
+        "attachments": []
+      },
+      "items": [
+        {
+          "position": 26,
+          "type": "multiple_choice",
+          "stem": "¿Cuál es el tema central que se aborda en este poema?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "El placer que produce la soledad.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "El bienestar que provoca el amor.",
+              "isCorrect": true
+            },
+            {
+              "key": "C",
+              "text": "La alegría que transmite la naturaleza.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "La libertad que causa la incertidumbre.",
+              "isCorrect": false
+            }
+          ],
+          "correctKey": "B",
+          "skill": "Interpretar y relacionar",
+          "oa": "OA 5",
+          "contentAxis": "Poema",
+          "hasFigure": false,
+          "figureNote": null,
+          "taxonomy": [
+            {
+              "type": "descriptor",
+              "code": null,
+              "name": "Infieren el sentido global de un poema o un fragmento de este.",
+              "parentCode": "LANG-6B-OA05",
+              "tagType": "primary"
+            },
+            {
+              "type": "learning_objective",
+              "code": "LANG-6B-OA05",
+              "name": "OA 5",
+              "level": "6_basico",
+              "tagType": "secondary"
+            },
+            {
+              "type": "skill",
+              "code": "LANG-SK-INTERPRETAR-Y-RELACIONAR",
+              "name": "Interpretar y relacionar",
+              "tagType": "secondary"
+            },
+            {
+              "type": "text_type",
+              "code": "LANG-TT-POEMA",
+              "name": "Poema",
+              "tagType": "secondary"
+            }
+          ]
+        },
+        {
+          "position": 27,
+          "type": "multiple_choice",
+          "stem": "¿Cuál es el estado de ánimo de la voz que habla en el poema?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Plenitud.",
+              "isCorrect": true
+            },
+            {
+              "key": "B",
+              "text": "Asombro.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Extrañeza.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "Desconcierto.",
+              "isCorrect": false
+            }
+          ],
+          "correctKey": "A",
+          "skill": "Interpretar y relacionar",
+          "oa": "OA 5",
+          "contentAxis": "Poema",
+          "hasFigure": false,
+          "figureNote": null,
+          "taxonomy": [
+            {
+              "type": "descriptor",
+              "code": null,
+              "name": "Establecen conclusiones sobre distintos aspectos en un poema.",
+              "parentCode": "LANG-6B-OA05",
+              "tagType": "primary"
+            },
+            {
+              "type": "learning_objective",
+              "code": "LANG-6B-OA05",
+              "name": "OA 5",
+              "level": "6_basico",
+              "tagType": "secondary"
+            },
+            {
+              "type": "skill",
+              "code": "LANG-SK-INTERPRETAR-Y-RELACIONAR",
+              "name": "Interpretar y relacionar",
+              "tagType": "secondary"
+            },
+            {
+              "type": "text_type",
+              "code": "LANG-TT-POEMA",
+              "name": "Poema",
+              "tagType": "secondary"
+            }
+          ]
+        },
+        {
+          "position": 28,
+          "type": "multiple_choice",
+          "stem": "Lee estos versos:\n\n“Hoy dejadme / a mí solo / ser feliz, / con todos o sin todos, / ser feliz / con el pasto / y la arena, / ser feliz / con el aire y la tierra, / ser feliz, / contigo, con tu boca, / ser feliz.”\n\n¿Qué efecto busca producir la repetición de los sonidos en los versos destacados?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Descubrir la relación que hay entre las personas del poema.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Destacar la emoción que siente la voz que habla en el poema.",
+              "isCorrect": true
+            },
+            {
+              "key": "C",
+              "text": "Recrear el lugar en el que se encuentran las personas del poema.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "Transmitir la sensación de soledad de la voz que habla en el poema.",
+              "isCorrect": false
+            }
+          ],
+          "correctKey": "B",
+          "skill": "Reflexionar",
+          "oa": "OA 5",
+          "contentAxis": "Poema",
+          "hasFigure": false,
+          "figureNote": "El ítem cita versos del poema como estímulo propio; se incluyen dentro del stem.",
+          "taxonomy": [
+            {
+              "type": "descriptor",
+              "code": null,
+              "name": "Evalúan el efecto que tienen recursos sonoros en un poema.",
+              "parentCode": "LANG-6B-OA05",
+              "tagType": "primary"
+            },
+            {
+              "type": "learning_objective",
+              "code": "LANG-6B-OA05",
+              "name": "OA 5",
+              "level": "6_basico",
+              "tagType": "secondary"
+            },
+            {
+              "type": "skill",
+              "code": "LANG-SK-REFLEXIONAR",
+              "name": "Reflexionar",
+              "tagType": "secondary"
+            },
+            {
+              "type": "text_type",
+              "code": "LANG-TT-POEMA",
+              "name": "Poema",
+              "tagType": "secondary"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "extraction": {
+    "itemCount": 28,
+    "warnings": [
+      "Q5 y Q20 son ítems de desarrollo (open_ended, responseFormat develop).",
+      "Q28 incluye versos-estímulo propios del ítem, embebidos en el stem.",
+      "Textos transcritos desde la capa de texto del PDF (pdftotext), verbatim."
+    ],
+    "needsHumanReview": false
+  },
+  "pauta": {
+    "source": {
+      "report": "RBD25520_DIA_LECTURA_6_A_Resultados_Asignatura_Monitoreo_2025.pdf",
+      "subjectCode": "LANG",
+      "gradeCode": "6TH_BASIC",
+      "applicationPeriod": "intermedio",
+      "year": 2025,
+      "instrumentJson": "extraccion/lenguaje/6º lenguaje intermedio 2025.json"
+    },
+    "appliedKeys": 26,
+    "issues": []
+  }
+}

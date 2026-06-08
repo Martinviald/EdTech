@@ -1,0 +1,1533 @@
+{
+  "schemaVersion": "1.0",
+  "source": {
+    "file": "4º lenguaje intermedio 2025.pdf",
+    "subjectFolder": "Lenguaje"
+  },
+  "instrument": {
+    "name": "DIA Lectura 4° Básico 2025 — Intermedio",
+    "subject": "Lenguaje y Comunicación",
+    "subjectCode": "LANG",
+    "grade": "4° Básico",
+    "gradeCode": "4TH_BASIC",
+    "year": 2025,
+    "applicationPeriod": "intermedio",
+    "type": "dia",
+    "isOfficial": true,
+    "source": "imported"
+  },
+  "sections": [
+    {
+      "order": 1,
+      "name": "Texto 1: «ZETA»",
+      "type": "multiple_choice",
+      "instructions": "Lee el siguiente texto y responde las preguntas 1 a 5.",
+      "passage": {
+        "title": "ZETA",
+        "text": "Guiado por la luz de la única ventana iluminada de la cuadra, ZZZ ubicó el punto de aterrizaje. Apuntó la parte delantera de su nave hacia el pequeño jardín, aseguró su cinturón de seguridad, desconectó el piloto automático y se aferró al volante.\n\nCon mucha habilidad esquivó la piscina de lona y apoyó las patas de descanso de la pequeña nave entre una hamaca y un espacio con flores y plantas. Luego abrió la compuerta y descendió de un salto. Apuntó sus llamativos bigotes hacia el cielo y olió el aire de la noche. Había oxígeno, un poco contaminado, sin duda, pero suficientemente bueno para respirar. Se llenó los pulmones con satisfacción, estiró sus músculos y empujó la nave tras un arbusto.\n\nDesde la ventana, con la boca abierta y un grito congelado en la garganta, Lucas lo miraba estupefacto. ZZZ le sonrió, aunque nunca supo si su gesto había sido bien interpretado por el niño, que seguía quieto como una estatua.\n\nUn rato después, Lucas daba vueltas por su habitación, tratando de no despertar a sus padres. ZZZ lo miraba divertido, recostado en la almohada. Ya le había explicado cuál era su misión y ahora solo quería dormir. Tenía mucho sueño, y no podía evitar un leve ronroneo que lo iba adormeciendo. Lucas seguía hablando, solo.\n\n—¡¿Pero cómo le digo a mamá?! ¡Le va a dar alergia, va a empezar a estornudar, se le van a hinchar los ojos! ¡Esto me pasa por no dormirme cuando me dicen que me duerma!\n\nPero ZZZ no escuchó ninguna de las quejas del chico hasta la mañana siguiente, en que se despertó con un hambre de lobo y le pidió algo de comer.\n\nLucas bajó a la cocina, sirvió una taza de leche y unas galletas en una bandeja y empezó a subir las escaleras. Justo en ese momento apareció su madre.\n\n—Lucas, ¿adónde vas? ¿Qué pasa con el desayuno?\n\n—Es que…— empezó a contestar el chico, pero tuvo que interrumpirse: ZZZ bajaba la escalera, con su paso ágil y elegante.\n\n—¡Lucas! —exclamó la mamá—. ¿Y mi alergia?\n\nLucas no sabía qué decir. Aún no pasaba nada, estaba congelado, sabía que la verdadera locura empezaría apenas ZZZ se pusiera a hablar. ZZZ abrió la boca, Lucas se puso blanco, y el viajero del espacio lanzó un encantador maullido. Lucas miró a su madre.\n\nZZZ se frotaba suavemente contra las piernas de la mamá, que parecía maravillada.\n\n—¿Y tu alergia, mami?— preguntó Lucas.\n\n—Parece que no me hace nada— contestó ella encantada—. ¿Cómo se llama?\n\n—Zeta— dijo Lucas, para simplificar.\n\nLuego dejó la taza de leche en el piso y ZZZ empezó a tomarla de inmediato, sacando la lengua y lamiendo con placer, como si fuera un gato común y corriente.\n\nA partir de ese día y durante todas las vacaciones, Lucas y Zeta fueron inseparables. El chico aprendió mucho y casi ni se sorprendió cuando Zeta le confesó que muchos de los gatos que habitan la Tierra, y algunos perros, son originarios de su mundo.\n\nY a los tres meses exactos, ZZZ se despidió de Lucas con un abrazo, y así como había venido, desapareció en el cielo, montado en su pequeña nave.\n\n—Andará por los techos— le dijo Lucas a su madre, al otro día, cuando ella se sorprendió por la repentina ausencia—. Y ya va a volver, no te preocupes— agregó con una misteriosa sonrisa.\n\nMario Méndez. Cuentos y poemas para niños de hoy y siempre. Chile: Planeta, 2010.",
+        "format": "plain",
+        "attachments": [
+          {
+            "kind": "image",
+            "note": "Ilustración de una pequeña nave espacial aterrizando en un jardín nocturno con flores, una pelota y una hamaca (decorativa, no aporta información para responder)."
+          }
+        ]
+      },
+      "items": [
+        {
+          "position": 1,
+          "type": "multiple_choice",
+          "stem": "¿Por qué Zeta aterrizó en el pequeño jardín?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Porque estaba buscando a Lucas.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Porque tenía un arbusto para esconder la nave.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Porque había una luz que facilitaba el aterrizaje.",
+              "isCorrect": true
+            },
+            {
+              "key": "D",
+              "text": "Porque necesitaba descansar y respirar fuera de su nave.",
+              "isCorrect": false
+            }
+          ],
+          "correctKey": "C",
+          "skill": "Interpretar y relacionar",
+          "oa": "OA 4",
+          "contentAxis": "Narración",
+          "hasFigure": false,
+          "figureNote": null,
+          "taxonomy": [
+            {
+              "type": "descriptor",
+              "code": null,
+              "name": "Infieren causa o consecuencia de acontecimientos o acciones relevantes en un texto narrativo.",
+              "parentCode": "LANG-4B-OA04",
+              "tagType": "primary"
+            },
+            {
+              "type": "learning_objective",
+              "code": "LANG-4B-OA04",
+              "name": "OA 4",
+              "level": "4_basico",
+              "tagType": "secondary"
+            },
+            {
+              "type": "skill",
+              "code": "LANG-SK-INTERPRETAR-Y-RELACIONAR",
+              "name": "Interpretar y relacionar",
+              "tagType": "secondary"
+            },
+            {
+              "type": "text_type",
+              "code": "LANG-TT-NARRACION",
+              "name": "Narración",
+              "tagType": "secondary"
+            }
+          ]
+        },
+        {
+          "position": 2,
+          "type": "multiple_choice",
+          "stem": "¿Cómo se sintió Lucas cuando vio a Zeta por primera vez?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Divertido.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Tranquilo.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Sorprendido.",
+              "isCorrect": true
+            },
+            {
+              "key": "D",
+              "text": "Avergonzado.",
+              "isCorrect": false
+            }
+          ],
+          "correctKey": "C",
+          "skill": "Interpretar y relacionar",
+          "oa": "OA 4",
+          "contentAxis": "Narración",
+          "hasFigure": false,
+          "figureNote": null,
+          "taxonomy": [
+            {
+              "type": "descriptor",
+              "code": null,
+              "name": "Infieren características y sentimientos de personajes en un texto narrativo.",
+              "parentCode": "LANG-4B-OA04",
+              "tagType": "primary"
+            },
+            {
+              "type": "learning_objective",
+              "code": "LANG-4B-OA04",
+              "name": "OA 4",
+              "level": "4_basico",
+              "tagType": "secondary"
+            },
+            {
+              "type": "skill",
+              "code": "LANG-SK-INTERPRETAR-Y-RELACIONAR",
+              "name": "Interpretar y relacionar",
+              "tagType": "secondary"
+            },
+            {
+              "type": "text_type",
+              "code": "LANG-TT-NARRACION",
+              "name": "Narración",
+              "tagType": "secondary"
+            }
+          ]
+        },
+        {
+          "position": 3,
+          "type": "multiple_choice",
+          "stem": "¿Cuál fue la preocupación de Lucas cuando llegó Zeta a su casa?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Que Zeta se quedara a vivir con él.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Que descubrieran quién era Zeta realmente.",
+              "isCorrect": true
+            },
+            {
+              "key": "C",
+              "text": "Que su mamá encontrara la nave escondida en el jardín.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "Que su mamá se diera cuenta de que no se durmió temprano.",
+              "isCorrect": false
+            }
+          ],
+          "correctKey": "B",
+          "skill": "Interpretar y relacionar",
+          "oa": "OA 4",
+          "contentAxis": "Narración",
+          "hasFigure": false,
+          "figureNote": null,
+          "taxonomy": [
+            {
+              "type": "descriptor",
+              "code": null,
+              "name": "Identifican el conflicto y/o la solución en un texto narrativo.",
+              "parentCode": "LANG-4B-OA04",
+              "tagType": "primary"
+            },
+            {
+              "type": "learning_objective",
+              "code": "LANG-4B-OA04",
+              "name": "OA 4",
+              "level": "4_basico",
+              "tagType": "secondary"
+            },
+            {
+              "type": "skill",
+              "code": "LANG-SK-INTERPRETAR-Y-RELACIONAR",
+              "name": "Interpretar y relacionar",
+              "tagType": "secondary"
+            },
+            {
+              "type": "text_type",
+              "code": "LANG-TT-NARRACION",
+              "name": "Narración",
+              "tagType": "secondary"
+            }
+          ]
+        },
+        {
+          "position": 4,
+          "type": "multiple_choice",
+          "stem": "¿Qué hizo Zeta al final de la historia?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Se fue volando en su pequeña nave.",
+              "isCorrect": true
+            },
+            {
+              "key": "B",
+              "text": "Se transformó en la mascota de Lucas.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Desapareció sin que nadie supiera de él.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "Salió a recorrer los techos del vecindario.",
+              "isCorrect": false
+            }
+          ],
+          "correctKey": "A",
+          "skill": "Interpretar y relacionar",
+          "oa": "OA 4",
+          "contentAxis": "Narración",
+          "hasFigure": false,
+          "figureNote": null,
+          "taxonomy": [
+            {
+              "type": "descriptor",
+              "code": null,
+              "name": "Identifican un acontecimiento o acción relevante en un texto narrativo.",
+              "parentCode": "LANG-4B-OA04",
+              "tagType": "primary"
+            },
+            {
+              "type": "learning_objective",
+              "code": "LANG-4B-OA04",
+              "name": "OA 4",
+              "level": "4_basico",
+              "tagType": "secondary"
+            },
+            {
+              "type": "skill",
+              "code": "LANG-SK-INTERPRETAR-Y-RELACIONAR",
+              "name": "Interpretar y relacionar",
+              "tagType": "secondary"
+            },
+            {
+              "type": "text_type",
+              "code": "LANG-TT-NARRACION",
+              "name": "Narración",
+              "tagType": "secondary"
+            }
+          ]
+        },
+        {
+          "position": 5,
+          "type": "multiple_choice",
+          "stem": "¿De qué trata el texto?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "De un niño que quería adoptar un gato común y corriente.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "De un gato de otro mundo que llegó a la casa de un niño.",
+              "isCorrect": true
+            },
+            {
+              "key": "C",
+              "text": "De un niño que soñó la llegada de un gato en una nave.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "De un gato perdido que buscaba un hogar para vivir.",
+              "isCorrect": false
+            }
+          ],
+          "correctKey": "B",
+          "skill": "Interpretar y relacionar",
+          "oa": "OA 4",
+          "contentAxis": "Narración",
+          "hasFigure": false,
+          "figureNote": null,
+          "taxonomy": [
+            {
+              "type": "descriptor",
+              "code": null,
+              "name": "Infieren el sentido global de un texto narrativo o un fragmento de este.",
+              "parentCode": "LANG-4B-OA04",
+              "tagType": "primary"
+            },
+            {
+              "type": "learning_objective",
+              "code": "LANG-4B-OA04",
+              "name": "OA 4",
+              "level": "4_basico",
+              "tagType": "secondary"
+            },
+            {
+              "type": "skill",
+              "code": "LANG-SK-INTERPRETAR-Y-RELACIONAR",
+              "name": "Interpretar y relacionar",
+              "tagType": "secondary"
+            },
+            {
+              "type": "text_type",
+              "code": "LANG-TT-NARRACION",
+              "name": "Narración",
+              "tagType": "secondary"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "order": 2,
+      "name": "Texto 2: «El pingüino emperador»",
+      "type": "multiple_choice",
+      "instructions": "Lee el siguiente texto y responde las preguntas 6 a 9.",
+      "passage": {
+        "title": "El pingüino emperador",
+        "text": "Los pingüinos son aves cuyas alas se transformaron en aletas a lo largo de la evolución. No pueden volar y son bastante torpes en tierra firme, pero son magníficos buceadores. El más grande de todos ellos es el pingüino emperador, que llega a medir 1,1 metros de altura y a pesar 38 kilogramos, aproximadamente como un niño de cinco años.\n\nAunque hay pingüinos que viven cerca del Ecuador, el hábitat del pingüino emperador es el suelo helado de la Antártida, un lugar donde las temperaturas llegan a caer hasta 60 grados bajo cero. Ese frío es un verdadero problema para los huevos, que necesitan calor constante durante la incubación, ya que los pingüinos emperador incuban en espacios abiertos durante los meses del invierno.\n\nLa hembra pone un único huevo, pero es el macho quien lo incuba. Lo aísla del hielo manteniéndolo sobre sus pies y dándole calor con su cuerpo. Aunque el huevo tiene una cáscara bastante gruesa, si lo dejara en el suelo, incluso solo durante unos minutos, el pollito que se desarrolla dentro se congelaría y moriría. En otras especies de pingüinos, los dos progenitores se turnan para cuidar al huevo, pero, en el caso del emperador, la hembra se lanza al mar y nada kilómetros y kilómetros durante tres meses comiendo peces, calamares y crustáceos. Tiene que prepararse y almacenar reservas para cuando nazca su polluelo, pues entonces todo el alimento será para él. Entre tanto, el macho hace el sacrificio de no comer ni beber, pues no puede abandonar el huevo ni por un minuto.\n\nLos pingüinos emperador viven en bandadas y van rotando para que todos pasen un tiempo en el centro del grupo, que es el lugar más protegido y agradable, y también se abrazan unos a otros para darse calor.\n\nCuando la madre vuelve y el pingüino comienza a salir del huevo, ella devuelve desde su estómago un montón de comida con la que el polluelo se empieza a alimentar. Entonces, el macho se lanza al mar para poder, por fin, comer y beber.\n\nJosé Ramón Alonso. Seres Asombrosos. España: A buen paso, 2017. (Adaptación).",
+        "format": "plain",
+        "attachments": [
+          {
+            "kind": "image",
+            "note": "Dos fotografías de pingüinos emperador: una de dos pingüinos adultos junto al mar y otra de los pies de un pingüino incubando un huevo (decorativas, no aportan información para responder)."
+          }
+        ]
+      },
+      "items": [
+        {
+          "position": 6,
+          "type": "multiple_choice",
+          "stem": "Según el texto, ¿qué necesita el huevo del pingüino emperador?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Calor constante durante la incubación.",
+              "isCorrect": true
+            },
+            {
+              "key": "B",
+              "text": "Que la hembra lo proteja.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Una cáscara más gruesa.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "Reserva de alimento.",
+              "isCorrect": false
+            }
+          ],
+          "correctKey": "A",
+          "skill": "Localizar",
+          "oa": "OA 6",
+          "contentAxis": "Texto no literario",
+          "hasFigure": false,
+          "figureNote": null,
+          "taxonomy": [
+            {
+              "type": "descriptor",
+              "code": null,
+              "name": "Localizan información explícita relevante en un texto no literario.",
+              "parentCode": "LANG-4B-OA06",
+              "tagType": "primary"
+            },
+            {
+              "type": "learning_objective",
+              "code": "LANG-4B-OA06",
+              "name": "OA 6",
+              "level": "4_basico",
+              "tagType": "secondary"
+            },
+            {
+              "type": "skill",
+              "code": "LANG-SK-LOCALIZAR",
+              "name": "Localizar",
+              "tagType": "secondary"
+            },
+            {
+              "type": "text_type",
+              "code": "LANG-TT-TEXTO-NO-LITERARIO",
+              "name": "Texto no literario",
+              "tagType": "secondary"
+            }
+          ]
+        },
+        {
+          "position": 7,
+          "type": "multiple_choice",
+          "stem": "¿Qué sacrificio hace el macho para cuidar al huevo?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Deja de comer y de beber.",
+              "isCorrect": true
+            },
+            {
+              "key": "B",
+              "text": "Debe alejarse de su bandada.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Nada en el mar muchos kilómetros.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "Come sin detenerse durante tres meses.",
+              "isCorrect": false
+            }
+          ],
+          "correctKey": "A",
+          "skill": "Localizar",
+          "oa": "OA 6",
+          "contentAxis": "Texto no literario",
+          "hasFigure": false,
+          "figureNote": null,
+          "taxonomy": [
+            {
+              "type": "descriptor",
+              "code": null,
+              "name": "Localizan información explícita relevante en un texto no literario.",
+              "parentCode": "LANG-4B-OA06",
+              "tagType": "primary"
+            },
+            {
+              "type": "learning_objective",
+              "code": "LANG-4B-OA06",
+              "name": "OA 6",
+              "level": "4_basico",
+              "tagType": "secondary"
+            },
+            {
+              "type": "skill",
+              "code": "LANG-SK-LOCALIZAR",
+              "name": "Localizar",
+              "tagType": "secondary"
+            },
+            {
+              "type": "text_type",
+              "code": "LANG-TT-TEXTO-NO-LITERARIO",
+              "name": "Texto no literario",
+              "tagType": "secondary"
+            }
+          ]
+        },
+        {
+          "position": 8,
+          "type": "multiple_choice",
+          "stem": "¿Cómo consigue su alimento el polluelo recién nacido?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "El padre le trae la comida que necesita.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Se lanza al mar en busca de su propia comida.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "La madre le da la comida que ha juntado en su estómago.",
+              "isCorrect": true
+            },
+            {
+              "key": "D",
+              "text": "Ambos progenitores le enseñan a recoger comida en el mar.",
+              "isCorrect": false
+            }
+          ],
+          "correctKey": "C",
+          "skill": "Interpretar y relacionar",
+          "oa": "OA 6",
+          "contentAxis": "Texto no literario",
+          "hasFigure": false,
+          "figureNote": null,
+          "taxonomy": [
+            {
+              "type": "descriptor",
+              "code": null,
+              "name": "Infieren información relevante en un texto no literario.",
+              "parentCode": "LANG-4B-OA06",
+              "tagType": "primary"
+            },
+            {
+              "type": "learning_objective",
+              "code": "LANG-4B-OA06",
+              "name": "OA 6",
+              "level": "4_basico",
+              "tagType": "secondary"
+            },
+            {
+              "type": "skill",
+              "code": "LANG-SK-INTERPRETAR-Y-RELACIONAR",
+              "name": "Interpretar y relacionar",
+              "tagType": "secondary"
+            },
+            {
+              "type": "text_type",
+              "code": "LANG-TT-TEXTO-NO-LITERARIO",
+              "name": "Texto no literario",
+              "tagType": "secondary"
+            }
+          ]
+        },
+        {
+          "position": 9,
+          "type": "multiple_choice",
+          "stem": "¿Cuál es el tema central de este texto?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "El ciclo de vida de los pingüinos emperador.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Las características del hábitat de los pingüinos emperador.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "La forma en que se dan calor los pingüinos emperador durante el invierno.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "Las dificultades que enfrentan los pingüinos emperador para cuidar a sus huevos.",
+              "isCorrect": true
+            }
+          ],
+          "correctKey": "D",
+          "skill": "Interpretar y relacionar",
+          "oa": "OA 6",
+          "contentAxis": "Texto no literario",
+          "hasFigure": false,
+          "figureNote": null,
+          "taxonomy": [
+            {
+              "type": "descriptor",
+              "code": null,
+              "name": "Infieren el sentido global o tema de un texto no literario o un fragmento de este.",
+              "parentCode": "LANG-4B-OA06",
+              "tagType": "primary"
+            },
+            {
+              "type": "learning_objective",
+              "code": "LANG-4B-OA06",
+              "name": "OA 6",
+              "level": "4_basico",
+              "tagType": "secondary"
+            },
+            {
+              "type": "skill",
+              "code": "LANG-SK-INTERPRETAR-Y-RELACIONAR",
+              "name": "Interpretar y relacionar",
+              "tagType": "secondary"
+            },
+            {
+              "type": "text_type",
+              "code": "LANG-TT-TEXTO-NO-LITERARIO",
+              "name": "Texto no literario",
+              "tagType": "secondary"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "order": 3,
+      "name": "Texto 3: «Hombre devuelve libro a biblioteca tras 50 años de retraso y envía una nota de disculpas»",
+      "type": "mixed",
+      "instructions": "Lee el siguiente texto y responde las preguntas 10 a 16.",
+      "passage": {
+        "title": "Hombre devuelve libro a biblioteca tras 50 años de retraso y envía una nota de disculpas",
+        "text": "LUNES 2, AGOSTO 2021 19:56 HRS\n\nCOMPARTIR\n\n“Por favor, acepte mis disculpas por la devolución tardía de este libro”, decía parte de la nota.\n\nEn la Biblioteca Central de Paisley, en Escocia, fue regresado un libro que había sido retirado 50 años atrás, además, venía con una nota de disculpa y una multa simbólica por el gigantesco retraso. Los trabajadores de la Biblioteca consideraron este hecho como insólito y sorpresivo.\n\nLa información fue confirmada por los propios empleados del organismo, quienes se sorprendieron al notar que un lector anónimo había devuelto por correo un libro de cocina, el que venía acompañado de una nota y una suma de dinero.\n\nSe trata del libro “Cocina india de la Señora Balbir Singh”, el cual se cree que fue prestado en 1968.\n\nSin embargo, la persona no ha podido ser identificada, pues el préstamo fue hecho hace tanto tiempo que ni siquiera se pudo encontrar en los registros digitales.\n\n“Por favor, acepte mis disculpas por la devolución tardía de este libro. Se adjunta un pago simbólico en reconocimiento a este descuido. Gracias”, se leía en la nota entregada junto al libro, además de las 20 libras esterlinas (más de 21 mil pesos chilenos).\n\n“Me sorprendió mucho cuando abrí el sobre acolchado y vi lo que había dentro. Es raro que se devuelva un libro después de tantos años de retraso. Sospecho que el libro había estado olvidado en un armario o en una caja durante algún tiempo y fue descubierto recientemente”, señaló la supervisora del equipo de la biblioteca, Linda Flynn.\n\nEn ese sentido, apuntó que “fue un gesto encantador de quien encontró el libro el tomarse el tiempo de enviarlo de regreso con un billete de 20 libras esterlinas como un gesto simbólico de que se retrasó tanto tiempo. Nos aseguraremos de que el dinero se destine a una buena causa”.\n\n“Se podía ver que el libro se había usado bien y algunas de las marcas en las páginas sugerían que alguien había seguido las recetas para hacer unas buenas cenas. Desafortunadamente, el libro no está en condiciones de volver a ponerlo en nuestros estantes para que la gente lo pida prestado, pero como se ha convertido en un tema de conversación entre el personal de la biblioteca, lo guardaremos en un lugar seguro”, añadió Flynn.\n\nT13. “Hombre devuelve libro a biblioteca tras 50 años de retraso y envía nota de disculpas”. Canal 13 [Santiago, Chile]. 2 ago. 2021. Web. 9 sept. 2021.",
+        "format": "plain",
+        "attachments": [
+          {
+            "kind": "image",
+            "note": "Fotografía del libro de cocina devuelto junto a la nota de disculpas manuscrita y un billete de 20 libras esterlinas (ilustra la noticia, no aporta información adicional para responder)."
+          }
+        ]
+      },
+      "items": [
+        {
+          "position": 10,
+          "type": "multiple_choice",
+          "stem": "¿Qué hecho es considerado insólito y sorpresivo en esta noticia?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Que se realizará una buena causa con el dinero recibido por un libro.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Que se hizo famoso un libro en Escocia y mucha gente lo pide prestado.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Que se devolvió un libro con años de retraso y se pagó una multa simbólica.",
+              "isCorrect": true
+            },
+            {
+              "key": "D",
+              "text": "Que se guardará un libro en un lugar seguro de la Biblioteca Central de Paisley.",
+              "isCorrect": false
+            }
+          ],
+          "correctKey": "C",
+          "skill": "Interpretar y relacionar",
+          "oa": "OA 6",
+          "contentAxis": "Texto no literario",
+          "hasFigure": false,
+          "figureNote": null,
+          "taxonomy": [
+            {
+              "type": "descriptor",
+              "code": null,
+              "name": "Infieren información relevante en un texto no literario.",
+              "parentCode": "LANG-4B-OA06",
+              "tagType": "primary"
+            },
+            {
+              "type": "learning_objective",
+              "code": "LANG-4B-OA06",
+              "name": "OA 6",
+              "level": "4_basico",
+              "tagType": "secondary"
+            },
+            {
+              "type": "skill",
+              "code": "LANG-SK-INTERPRETAR-Y-RELACIONAR",
+              "name": "Interpretar y relacionar",
+              "tagType": "secondary"
+            },
+            {
+              "type": "text_type",
+              "code": "LANG-TT-TEXTO-NO-LITERARIO",
+              "name": "Texto no literario",
+              "tagType": "secondary"
+            }
+          ]
+        },
+        {
+          "position": 11,
+          "type": "multiple_choice",
+          "stem": "¿Qué envió el hombre junto al libro?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Una caja.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Una receta.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Un libro nuevo.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "Una nota y un billete.",
+              "isCorrect": true
+            }
+          ],
+          "correctKey": "D",
+          "skill": "Localizar",
+          "oa": "OA 6",
+          "contentAxis": "Texto no literario",
+          "hasFigure": false,
+          "figureNote": null,
+          "taxonomy": [
+            {
+              "type": "descriptor",
+              "code": null,
+              "name": "Localizan información explícita relevante en un texto no literario.",
+              "parentCode": "LANG-4B-OA06",
+              "tagType": "primary"
+            },
+            {
+              "type": "learning_objective",
+              "code": "LANG-4B-OA06",
+              "name": "OA 6",
+              "level": "4_basico",
+              "tagType": "secondary"
+            },
+            {
+              "type": "skill",
+              "code": "LANG-SK-LOCALIZAR",
+              "name": "Localizar",
+              "tagType": "secondary"
+            },
+            {
+              "type": "text_type",
+              "code": "LANG-TT-TEXTO-NO-LITERARIO",
+              "name": "Texto no literario",
+              "tagType": "secondary"
+            }
+          ]
+        },
+        {
+          "position": 12,
+          "type": "multiple_choice",
+          "stem": "Según el texto, ¿qué se cree que sucedió en 1968?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Fue publicado el libro de cocina.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Se devolvió el libro a la biblioteca.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Fue prestado el libro en la biblioteca.",
+              "isCorrect": true
+            },
+            {
+              "key": "D",
+              "text": "Se supo la historia de la devolución del libro.",
+              "isCorrect": false
+            }
+          ],
+          "correctKey": "C",
+          "skill": "Localizar",
+          "oa": "OA 6",
+          "contentAxis": "Texto no literario",
+          "hasFigure": false,
+          "figureNote": null,
+          "taxonomy": [
+            {
+              "type": "descriptor",
+              "code": null,
+              "name": "Localizan información explícita relevante en un texto no literario.",
+              "parentCode": "LANG-4B-OA06",
+              "tagType": "primary"
+            },
+            {
+              "type": "learning_objective",
+              "code": "LANG-4B-OA06",
+              "name": "OA 6",
+              "level": "4_basico",
+              "tagType": "secondary"
+            },
+            {
+              "type": "skill",
+              "code": "LANG-SK-LOCALIZAR",
+              "name": "Localizar",
+              "tagType": "secondary"
+            },
+            {
+              "type": "text_type",
+              "code": "LANG-TT-TEXTO-NO-LITERARIO",
+              "name": "Texto no literario",
+              "tagType": "secondary"
+            }
+          ]
+        },
+        {
+          "position": 13,
+          "type": "multiple_choice",
+          "stem": "De acuerdo a lo leído, ¿por qué no se ha podido identificar al lector anónimo?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Porque murió hace 50 años.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Porque envió el libro por correo.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Porque no hay registro del préstamo del libro.",
+              "isCorrect": true
+            },
+            {
+              "key": "D",
+              "text": "Porque en la biblioteca no preguntaron su nombre.",
+              "isCorrect": false
+            }
+          ],
+          "correctKey": "C",
+          "skill": "Interpretar y relacionar",
+          "oa": "OA 6",
+          "contentAxis": "Texto no literario",
+          "hasFigure": false,
+          "figureNote": null,
+          "taxonomy": [
+            {
+              "type": "descriptor",
+              "code": null,
+              "name": "Infieren relaciones entre las ideas (causa-consecuencia, problema-solución, etc.) en un texto no literario.",
+              "parentCode": "LANG-4B-OA06",
+              "tagType": "primary"
+            },
+            {
+              "type": "learning_objective",
+              "code": "LANG-4B-OA06",
+              "name": "OA 6",
+              "level": "4_basico",
+              "tagType": "secondary"
+            },
+            {
+              "type": "skill",
+              "code": "LANG-SK-INTERPRETAR-Y-RELACIONAR",
+              "name": "Interpretar y relacionar",
+              "tagType": "secondary"
+            },
+            {
+              "type": "text_type",
+              "code": "LANG-TT-TEXTO-NO-LITERARIO",
+              "name": "Texto no literario",
+              "tagType": "secondary"
+            }
+          ]
+        },
+        {
+          "position": 14,
+          "type": "multiple_choice",
+          "stem": "¿Por qué razón se piensa que el lector no devolvió el libro a tiempo?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Porque olvidó que lo tenía entre sus cosas.",
+              "isCorrect": true
+            },
+            {
+              "key": "B",
+              "text": "Porque le faltaba dinero para pagar la multa.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Porque deseaba seguir cocinando sus recetas.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "Porque quería conservarlo como un recuerdo simbólico.",
+              "isCorrect": false
+            }
+          ],
+          "correctKey": "A",
+          "skill": "Interpretar y relacionar",
+          "oa": "OA 6",
+          "contentAxis": "Texto no literario",
+          "hasFigure": false,
+          "figureNote": null,
+          "taxonomy": [
+            {
+              "type": "descriptor",
+              "code": null,
+              "name": "Infieren relaciones entre las ideas (causa-consecuencia, problema-solución, etc.) en un texto no literario.",
+              "parentCode": "LANG-4B-OA06",
+              "tagType": "primary"
+            },
+            {
+              "type": "learning_objective",
+              "code": "LANG-4B-OA06",
+              "name": "OA 6",
+              "level": "4_basico",
+              "tagType": "secondary"
+            },
+            {
+              "type": "skill",
+              "code": "LANG-SK-INTERPRETAR-Y-RELACIONAR",
+              "name": "Interpretar y relacionar",
+              "tagType": "secondary"
+            },
+            {
+              "type": "text_type",
+              "code": "LANG-TT-TEXTO-NO-LITERARIO",
+              "name": "Texto no literario",
+              "tagType": "secondary"
+            }
+          ]
+        },
+        {
+          "position": 15,
+          "type": "multiple_choice",
+          "stem": "¿Por qué el libro no se prestará nuevamente?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Porque está en malas condiciones.",
+              "isCorrect": true
+            },
+            {
+              "key": "B",
+              "text": "Porque podría extraviarse para siempre.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Porque no está registrado en la biblioteca.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "Porque se exhibirá en un lugar de la biblioteca.",
+              "isCorrect": false
+            }
+          ],
+          "correctKey": "A",
+          "skill": "Interpretar y relacionar",
+          "oa": "OA 6",
+          "contentAxis": "Texto no literario",
+          "hasFigure": false,
+          "figureNote": null,
+          "taxonomy": [
+            {
+              "type": "descriptor",
+              "code": null,
+              "name": "Infieren relaciones entre las ideas (causa-consecuencia, problema-solución, etc.) en un texto no literario.",
+              "parentCode": "LANG-4B-OA06",
+              "tagType": "primary"
+            },
+            {
+              "type": "learning_objective",
+              "code": "LANG-4B-OA06",
+              "name": "OA 6",
+              "level": "4_basico",
+              "tagType": "secondary"
+            },
+            {
+              "type": "skill",
+              "code": "LANG-SK-INTERPRETAR-Y-RELACIONAR",
+              "name": "Interpretar y relacionar",
+              "tagType": "secondary"
+            },
+            {
+              "type": "text_type",
+              "code": "LANG-TT-TEXTO-NO-LITERARIO",
+              "name": "Texto no literario",
+              "tagType": "secondary"
+            }
+          ]
+        },
+        {
+          "position": 16,
+          "type": "open_ended",
+          "stem": "¿Qué opinas de que se haya devuelto el libro tanto tiempo después de su préstamo? Justifica tu opinión utilizando información del texto.",
+          "alternatives": [],
+          "correctKey": null,
+          "skill": "Reflexionar",
+          "oa": "OA 6",
+          "contentAxis": "Texto no literario",
+          "hasFigure": false,
+          "figureNote": null,
+          "taxonomy": [
+            {
+              "type": "descriptor",
+              "code": null,
+              "name": "Opinan sobre algún aspecto relevante en un texto no literario con fundamentos que integran información del texto.",
+              "parentCode": "LANG-4B-OA06",
+              "tagType": "primary"
+            },
+            {
+              "type": "learning_objective",
+              "code": "LANG-4B-OA06",
+              "name": "OA 6",
+              "level": "4_basico",
+              "tagType": "secondary"
+            },
+            {
+              "type": "skill",
+              "code": "LANG-SK-REFLEXIONAR",
+              "name": "Reflexionar",
+              "tagType": "secondary"
+            },
+            {
+              "type": "text_type",
+              "code": "LANG-TT-TEXTO-NO-LITERARIO",
+              "name": "Texto no literario",
+              "tagType": "secondary"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "order": 4,
+      "name": "Texto 4: «La lucha entre el águila y la serpiente»",
+      "type": "mixed",
+      "instructions": "Lee el siguiente texto y responde las preguntas 17 a 21.",
+      "passage": {
+        "title": "La lucha entre el águila y la serpiente",
+        "text": "El príncipe Narija estaba tratando de cazar un águila para hacer con sus plumas un adorno para el día de la Fiesta del Sol. Desde lo alto de la cordillera lanzaba sus flechas, pero el águila escapaba a ellas extendiendo sus majestuosas alas.\n\nEl príncipe no sabía qué hacer; de pronto, vio algo que se acercó volando y cayó al suelo, a sus pies. Narija se acercó a ver qué era, ¡y cuál no sería su sorpresa cuando vio que era el águila, y que entre sus garras se movía el cuerpo de una serpiente!\n\nEl reptil, que estaba enroscado en el cuello del águila, no la dejaba respirar, y el príncipe se dio cuenta de que el águila iba a morir ahorcada si él no la ayudaba. Entonces golpeó con su lanza la cabeza de la serpiente, y con las manos retiró el cuerpo del reptil que estaba oculto entre el plumaje del águila. La serpiente, al ver que había perdido su presa, atacó a Narija, pero el joven se defendió dándole muerte con una piedra. Mientras tanto, el águila sacudió su plumaje y se elevó hacia el cielo.\n\nSorprendido el príncipe Narija y sin saber qué hacer, decidió regresar al pueblo, pues el Sol comenzaba a ocultarse y teñía el cielo de rojo.\n\nMientras andaba, Narija pensó que el color del cielo era igual al de la sangre de la serpiente, y se preguntó: “¿Acaso con esto el gran Sol me agradece la ayuda que le presté al águila?”.\n\nAl acercarse al templo vio que sus pensamientos se habían convertido en realidad: en los muros del templo estaba grabada, por manos invisibles, la imagen del águila y la serpiente.\n\nDesde entonces el águila es para los nahuas y los aztecas símbolo de grandeza, y la serpiente la fuerza de la tierra, que ataca y mata. Por ello, estos pueblos jamás volvieron a cazar águilas para adornarse con sus plumas.\n\nUte Bergdolt de Walschburger. Leyendas de nuestra América. Colombia: Norma, 1989.",
+        "format": "plain",
+        "attachments": [
+          {
+            "kind": "image",
+            "note": "Ilustración del príncipe Narija con lanza frente a un águila que sostiene una serpiente entre sus garras (decorativa, no aporta información para responder)."
+          }
+        ]
+      },
+      "items": [
+        {
+          "position": 17,
+          "type": "multiple_choice",
+          "stem": "¿Para qué Narija quería cazar al águila?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Para dársela como regalo al Sol.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Para adornarse con sus plumas.",
+              "isCorrect": true
+            },
+            {
+              "key": "C",
+              "text": "Para sorprender a su pueblo.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "Para desafiar a la serpiente.",
+              "isCorrect": false
+            }
+          ],
+          "correctKey": "B",
+          "skill": "Localizar",
+          "oa": "OA 4",
+          "contentAxis": "Narración",
+          "hasFigure": false,
+          "figureNote": null,
+          "taxonomy": [
+            {
+              "type": "descriptor",
+              "code": null,
+              "name": "Localizan información explícita relevante en un texto narrativo.",
+              "parentCode": "LANG-4B-OA04",
+              "tagType": "primary"
+            },
+            {
+              "type": "learning_objective",
+              "code": "LANG-4B-OA04",
+              "name": "OA 4",
+              "level": "4_basico",
+              "tagType": "secondary"
+            },
+            {
+              "type": "skill",
+              "code": "LANG-SK-LOCALIZAR",
+              "name": "Localizar",
+              "tagType": "secondary"
+            },
+            {
+              "type": "text_type",
+              "code": "LANG-TT-NARRACION",
+              "name": "Narración",
+              "tagType": "secondary"
+            }
+          ]
+        },
+        {
+          "position": 18,
+          "type": "multiple_choice",
+          "stem": "¿Con qué mató a la serpiente el príncipe Narija?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Con una lanza.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Con una flecha.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Con una piedra.",
+              "isCorrect": true
+            },
+            {
+              "key": "D",
+              "text": "Con sus manos.",
+              "isCorrect": false
+            }
+          ],
+          "correctKey": "C",
+          "skill": "Localizar",
+          "oa": "OA 4",
+          "contentAxis": "Narración",
+          "hasFigure": false,
+          "figureNote": null,
+          "taxonomy": [
+            {
+              "type": "descriptor",
+              "code": null,
+              "name": "Localizan información explícita relevante en un texto narrativo.",
+              "parentCode": "LANG-4B-OA04",
+              "tagType": "primary"
+            },
+            {
+              "type": "learning_objective",
+              "code": "LANG-4B-OA04",
+              "name": "OA 4",
+              "level": "4_basico",
+              "tagType": "secondary"
+            },
+            {
+              "type": "skill",
+              "code": "LANG-SK-LOCALIZAR",
+              "name": "Localizar",
+              "tagType": "secondary"
+            },
+            {
+              "type": "text_type",
+              "code": "LANG-TT-NARRACION",
+              "name": "Narración",
+              "tagType": "secondary"
+            }
+          ]
+        },
+        {
+          "position": 19,
+          "type": "multiple_choice",
+          "stem": "¿Cómo se dio cuenta Narija de que el Sol estaba agradecido con él?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Por la muerte de la serpiente.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Por la grandeza que adquirió su pueblo.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Por la elevación del águila hacia el cielo.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "Por la imagen grabada en las paredes del templo.",
+              "isCorrect": true
+            }
+          ],
+          "correctKey": "D",
+          "skill": "Interpretar y relacionar",
+          "oa": "OA 4",
+          "contentAxis": "Narración",
+          "hasFigure": false,
+          "figureNote": null,
+          "taxonomy": [
+            {
+              "type": "descriptor",
+              "code": null,
+              "name": "Identifican un acontecimiento o acción relevante en un texto narrativo.",
+              "parentCode": "LANG-4B-OA04",
+              "tagType": "primary"
+            },
+            {
+              "type": "learning_objective",
+              "code": "LANG-4B-OA04",
+              "name": "OA 4",
+              "level": "4_basico",
+              "tagType": "secondary"
+            },
+            {
+              "type": "skill",
+              "code": "LANG-SK-INTERPRETAR-Y-RELACIONAR",
+              "name": "Interpretar y relacionar",
+              "tagType": "secondary"
+            },
+            {
+              "type": "text_type",
+              "code": "LANG-TT-NARRACION",
+              "name": "Narración",
+              "tagType": "secondary"
+            }
+          ]
+        },
+        {
+          "position": 20,
+          "type": "multiple_choice",
+          "stem": "¿Qué se explica a partir de la leyenda?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "La manera en que las águilas demuestran su agradecimiento.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "La importancia del enfrentamiento entre el águila y la serpiente.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Lo que simbolizan el águila y la serpiente para los nahuas y los aztecas.",
+              "isCorrect": true
+            },
+            {
+              "key": "D",
+              "text": "El valor que tienen los adornos de plumas para los nahuas y los aztecas.",
+              "isCorrect": false
+            }
+          ],
+          "correctKey": "C",
+          "skill": "Interpretar y relacionar",
+          "oa": "OA 4",
+          "contentAxis": "Narración",
+          "hasFigure": false,
+          "figureNote": null,
+          "taxonomy": [
+            {
+              "type": "descriptor",
+              "code": null,
+              "name": "Infieren el sentido global de un texto narrativo o un fragmento de este.",
+              "parentCode": "LANG-4B-OA04",
+              "tagType": "primary"
+            },
+            {
+              "type": "learning_objective",
+              "code": "LANG-4B-OA04",
+              "name": "OA 4",
+              "level": "4_basico",
+              "tagType": "secondary"
+            },
+            {
+              "type": "skill",
+              "code": "LANG-SK-INTERPRETAR-Y-RELACIONAR",
+              "name": "Interpretar y relacionar",
+              "tagType": "secondary"
+            },
+            {
+              "type": "text_type",
+              "code": "LANG-TT-NARRACION",
+              "name": "Narración",
+              "tagType": "secondary"
+            }
+          ]
+        },
+        {
+          "position": 21,
+          "type": "open_ended",
+          "stem": "¿Estás de acuerdo con que Narija interviniera en la lucha entre el águila y la serpiente? (Sí / No). ¿Por qué? Justifica tu respuesta con información del texto.",
+          "alternatives": [],
+          "correctKey": null,
+          "skill": "Reflexionar",
+          "oa": "OA 4",
+          "contentAxis": "Narración",
+          "hasFigure": false,
+          "figureNote": "Ítem híbrido: ofrece selección Sí/No y luego pide fundamentación escrita. Se modela como open_ended porque lo evaluable es la justificación.",
+          "taxonomy": [
+            {
+              "type": "descriptor",
+              "code": null,
+              "name": "Opinan sobre algún aspecto controversial de un texto narrativo con fundamentos que integran información del texto.",
+              "parentCode": "LANG-4B-OA04",
+              "tagType": "primary"
+            },
+            {
+              "type": "learning_objective",
+              "code": "LANG-4B-OA04",
+              "name": "OA 4",
+              "level": "4_basico",
+              "tagType": "secondary"
+            },
+            {
+              "type": "skill",
+              "code": "LANG-SK-REFLEXIONAR",
+              "name": "Reflexionar",
+              "tagType": "secondary"
+            },
+            {
+              "type": "text_type",
+              "code": "LANG-TT-NARRACION",
+              "name": "Narración",
+              "tagType": "secondary"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "order": 5,
+      "name": "Texto 5: «Con mi abuelo»",
+      "type": "mixed",
+      "instructions": "Lee el siguiente texto y responde las preguntas 22 a 24.",
+      "passage": {
+        "title": "Con mi abuelo",
+        "text": "Sucedió hace muchos años,\npero nunca lo he olvidado.\nCaminaba con mi abuelo…\nmás bien brincaba a su lado\ntratando de no pisar\nlas rayas de las aceras.\nMe veo como aquellas tardes:\nradiante de primavera.\n\nDe repente daba un salto\nen las tapas de metal\nque abundaban en la ruta;\nme gustaba oírlas sonar.\nY subíamos la cuesta\ny volvíamos a bajar.\nÉl y yo y nuestro paseo,\nno existía nada más.\n\nMi mano en la de mi abuelo;\nsu mirada, toda mía.\nMe parecía que en mi vida\nnada malo ocurría.\nTodavía siento su mano,\nsu mirada, su sonrisa.\nUn recuerdo que a mi lado\npasa como dulce brisa.\n\nGeorgina Lázaro. “Con mi abuelo”. EE.UU.: Fundación Cuatrogatos. Web. 30 abr. 2023\n\nGlosario\nacera: vereda.",
+        "format": "plain",
+        "attachments": []
+      },
+      "items": [
+        {
+          "position": 22,
+          "type": "multiple_choice",
+          "stem": "Lee el siguiente fragmento:\n\n«Sucedió hace muchos años, / pero nunca lo he olvidado. / Caminaba con mi abuelo… / más bien brincaba a su lado / tratando de no pisar / las rayas de las aceras. / Me veo como aquellas tardes: / radiante de primavera.»\n\nSegún el fragmento, ¿qué significan los versos “Me veo como aquellas tardes: radiante de primavera”?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Que la persona que habla disfruta de la primavera.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Que la persona que habla se siente como su abuelo.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Que la persona que habla cree que nada ha cambiado.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "Que la persona que habla se recuerda llena de felicidad.",
+              "isCorrect": true
+            }
+          ],
+          "correctKey": "D",
+          "skill": "Interpretar y relacionar",
+          "oa": "OA 5",
+          "contentAxis": "Poema",
+          "hasFigure": false,
+          "figureNote": "El ítem cita un fragmento del poema como estímulo propio; se incluye dentro del stem.",
+          "taxonomy": [
+            {
+              "type": "descriptor",
+              "code": null,
+              "name": "Interpretan el sentido de expresiones en lenguaje figurado presentes en un poema.",
+              "parentCode": "LANG-4B-OA05",
+              "tagType": "primary"
+            },
+            {
+              "type": "learning_objective",
+              "code": "LANG-4B-OA05",
+              "name": "OA 5",
+              "level": "4_basico",
+              "tagType": "secondary"
+            },
+            {
+              "type": "skill",
+              "code": "LANG-SK-INTERPRETAR-Y-RELACIONAR",
+              "name": "Interpretar y relacionar",
+              "tagType": "secondary"
+            },
+            {
+              "type": "text_type",
+              "code": "LANG-TT-POEMA",
+              "name": "Poema",
+              "tagType": "secondary"
+            }
+          ]
+        },
+        {
+          "position": 23,
+          "type": "multiple_choice",
+          "stem": "¿Qué significan los siguientes versos para la persona que habla en el poema?\n\n«Todavía siento su mano, / su mirada, su sonrisa.»",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Que aún vive con su abuelo.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Que aún recuerda a su abuelo.",
+              "isCorrect": true
+            },
+            {
+              "key": "C",
+              "text": "Que aún toma la mano de su abuelo.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "Que aún sale a pasear con su abuelo.",
+              "isCorrect": false
+            }
+          ],
+          "correctKey": "B",
+          "skill": "Interpretar y relacionar",
+          "oa": "OA 5",
+          "contentAxis": "Poema",
+          "hasFigure": false,
+          "figureNote": "El ítem cita versos del poema como estímulo propio; se incluyen dentro del stem.",
+          "taxonomy": [
+            {
+              "type": "descriptor",
+              "code": null,
+              "name": "Interpretan el sentido de expresiones en lenguaje figurado presentes en un poema.",
+              "parentCode": "LANG-4B-OA05",
+              "tagType": "primary"
+            },
+            {
+              "type": "learning_objective",
+              "code": "LANG-4B-OA05",
+              "name": "OA 5",
+              "level": "4_basico",
+              "tagType": "secondary"
+            },
+            {
+              "type": "skill",
+              "code": "LANG-SK-INTERPRETAR-Y-RELACIONAR",
+              "name": "Interpretar y relacionar",
+              "tagType": "secondary"
+            },
+            {
+              "type": "text_type",
+              "code": "LANG-TT-POEMA",
+              "name": "Poema",
+              "tagType": "secondary"
+            }
+          ]
+        },
+        {
+          "position": 24,
+          "type": "open_ended",
+          "stem": "¿Qué significan en el poema los siguientes versos?\n\n«Él y yo y nuestro paseo, / no existía nada más.»\n\nResponde a partir de lo leído.",
+          "alternatives": [],
+          "correctKey": null,
+          "skill": "Interpretar y relacionar",
+          "oa": "OA 5",
+          "contentAxis": "Poema",
+          "hasFigure": false,
+          "figureNote": "El ítem cita versos del poema como estímulo propio; se incluyen dentro del stem.",
+          "taxonomy": [
+            {
+              "type": "descriptor",
+              "code": null,
+              "name": "Interpretan el sentido de expresiones en lenguaje figurado presentes en un poema.",
+              "parentCode": "LANG-4B-OA05",
+              "tagType": "primary"
+            },
+            {
+              "type": "learning_objective",
+              "code": "LANG-4B-OA05",
+              "name": "OA 5",
+              "level": "4_basico",
+              "tagType": "secondary"
+            },
+            {
+              "type": "skill",
+              "code": "LANG-SK-INTERPRETAR-Y-RELACIONAR",
+              "name": "Interpretar y relacionar",
+              "tagType": "secondary"
+            },
+            {
+              "type": "text_type",
+              "code": "LANG-TT-POEMA",
+              "name": "Poema",
+              "tagType": "secondary"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "extraction": {
+    "itemCount": 24,
+    "warnings": [
+      "Q21 es un ítem híbrido Sí/No + fundamentación; modelado como open_ended.",
+      "Q22, Q23 y Q24 incluyen versos-estímulo propios del ítem, embebidos en el stem.",
+      "Textos transcritos desde la capa de texto del PDF (pdftotext), verbatim."
+    ],
+    "needsHumanReview": false
+  },
+  "pauta": {
+    "source": {
+      "report": "RBD25520_DIA_LECTURA_4_A_Resultados_Asignatura_Monitoreo_2025.pdf",
+      "subjectCode": "LANG",
+      "gradeCode": "4TH_BASIC",
+      "applicationPeriod": "intermedio",
+      "year": 2025,
+      "instrumentJson": "extraccion/lenguaje/4º lenguaje intermedio 2025.json"
+    },
+    "appliedKeys": 21,
+    "issues": []
+  }
+}

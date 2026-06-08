@@ -1,0 +1,1552 @@
+{
+  "schemaVersion": "1.0",
+  "source": {
+    "file": "4º matemáticas cierre 2025.pdf",
+    "subjectFolder": "Matematicas"
+  },
+  "instrument": {
+    "name": "DIA Matemática 4° Básico 2025 — Cierre",
+    "subject": "Matemática",
+    "subjectCode": "MATH",
+    "grade": "4° Básico",
+    "gradeCode": "4TH_BASIC",
+    "year": 2025,
+    "applicationPeriod": "cierre",
+    "type": "dia",
+    "isOfficial": true,
+    "source": "imported"
+  },
+  "sections": [
+    {
+      "order": 1,
+      "name": "Preguntas",
+      "type": "mixed",
+      "instructions": "Esta prueba tiene 25 preguntas que debes responder de la siguiente forma: en las preguntas de alternativas, debes contestar marcando con una X la respuesta que consideres correcta. En las preguntas de desarrollo, debes escribir tu respuesta en la cuadrícula. En las preguntas de completación, debes anotar tu respuesta en los recuadros correspondientes.",
+      "passage": null,
+      "items": [
+        {
+          "position": 1,
+          "type": "multiple_choice",
+          "responseFormat": "choice",
+          "stem": "Observa el siguiente letrero: Distancia entre ciudades. Arica - Iquique: 309 km; Arica - Valparaíso: 1 993 km; Arica - Concepción: 2 565 km; Arica - Puerto Montt: 3 097 km. ¿Cuántos kilómetros hay entre Arica y Concepción?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Dos mil quinientos sesenta y cinco.",
+              "isCorrect": true
+            },
+            {
+              "key": "B",
+              "text": "Cinco mil seiscientos cincuenta y dos.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Veinticinco mil seiscientos cincuenta.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "Doscientos cincuenta y seis.",
+              "isCorrect": false
+            }
+          ],
+          "correctKey": "A",
+          "skill": "Representar",
+          "oa": "OA 1",
+          "contentAxis": "Números y operaciones",
+          "hasFigure": true,
+          "figureNote": "Letrero con tabla de distancias entre ciudades; los valores están transcritos en el enunciado.",
+          "taxonomy": [
+            {
+              "type": "descriptor",
+              "code": null,
+              "name": "Leen números naturales del 0 al 10 000.",
+              "parentCode": "MATH-4B-OA01",
+              "tagType": "primary"
+            },
+            {
+              "type": "learning_objective",
+              "code": "MATH-4B-OA01",
+              "name": "OA 1",
+              "level": "4_basico",
+              "tagType": "secondary"
+            },
+            {
+              "type": "skill",
+              "code": "MATH-SK-REPRESENTAR",
+              "name": "Representar",
+              "tagType": "secondary"
+            },
+            {
+              "type": "axis",
+              "code": "MATH-AX-NUMEROS-Y-OPERACIONES",
+              "name": "Números y operaciones",
+              "tagType": "secondary"
+            }
+          ]
+        },
+        {
+          "position": 2,
+          "type": "multiple_choice",
+          "responseFormat": "choice",
+          "stem": "Victoria quiere juntar $1 000. Tiene $450 en monedas de $50 y además tiene otras monedas de $10. Si le faltan $230 para tener los $1 000, ¿cuánto dinero en monedas de $10 tiene?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "$320",
+              "isCorrect": true
+            },
+            {
+              "key": "B",
+              "text": "$420",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "$770",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "$900",
+              "isCorrect": false
+            }
+          ],
+          "correctKey": "A",
+          "skill": "Resolver problemas",
+          "oa": "OA 7",
+          "contentAxis": "Números y operaciones",
+          "hasFigure": false,
+          "figureNote": null,
+          "taxonomy": [
+            {
+              "type": "descriptor",
+              "code": null,
+              "name": "Resuelven problemas que requieren calcular adiciones y sustracciones de números naturales.",
+              "parentCode": "MATH-4B-OA07",
+              "tagType": "primary"
+            },
+            {
+              "type": "learning_objective",
+              "code": "MATH-4B-OA07",
+              "name": "OA 7",
+              "level": "4_basico",
+              "tagType": "secondary"
+            },
+            {
+              "type": "skill",
+              "code": "MATH-SK-RESOLVER-PROBLEMAS",
+              "name": "Resolver problemas",
+              "tagType": "secondary"
+            },
+            {
+              "type": "axis",
+              "code": "MATH-AX-NUMEROS-Y-OPERACIONES",
+              "name": "Números y operaciones",
+              "tagType": "secondary"
+            }
+          ]
+        },
+        {
+          "position": 3,
+          "type": "multiple_choice",
+          "responseFormat": "choice",
+          "stem": "¿Cuál es el resultado de 75 : 5?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "11",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "15",
+              "isCorrect": true
+            },
+            {
+              "key": "C",
+              "text": "19",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "70",
+              "isCorrect": false
+            }
+          ],
+          "correctKey": "B",
+          "skill": "Resolver problemas",
+          "oa": "OA 6",
+          "contentAxis": "Números y operaciones",
+          "hasFigure": false,
+          "figureNote": null,
+          "taxonomy": [
+            {
+              "type": "descriptor",
+              "code": null,
+              "name": "Calculan divisiones exactas de números naturales.",
+              "parentCode": "MATH-4B-OA06",
+              "tagType": "primary"
+            },
+            {
+              "type": "learning_objective",
+              "code": "MATH-4B-OA06",
+              "name": "OA 6",
+              "level": "4_basico",
+              "tagType": "secondary"
+            },
+            {
+              "type": "skill",
+              "code": "MATH-SK-RESOLVER-PROBLEMAS",
+              "name": "Resolver problemas",
+              "tagType": "secondary"
+            },
+            {
+              "type": "axis",
+              "code": "MATH-AX-NUMEROS-Y-OPERACIONES",
+              "name": "Números y operaciones",
+              "tagType": "secondary"
+            }
+          ]
+        },
+        {
+          "position": 4,
+          "type": "open_ended",
+          "responseFormat": "develop",
+          "stem": "Joaquín va a la feria y compra en su puesto preferido frutas y verduras. Melón $2 000; Sandía $4 000; Choclo $200; Pimiento $400. Joaquín gastó $4 600. De estas frutas y verduras, ¿qué pudo haber comprado? Responde y explica cómo llegaste a tu respuesta.",
+          "alternatives": [],
+          "correctKey": null,
+          "skill": "Resolver problemas",
+          "oa": "OA 3",
+          "contentAxis": "Números y operaciones",
+          "hasFigure": true,
+          "figureNote": "Única pregunta de desarrollo. Imágenes de melón, sandía, choclo y pimiento con sus precios; los precios están transcritos en el enunciado.",
+          "taxonomy": [
+            {
+              "type": "descriptor",
+              "code": null,
+              "name": "Resuelven problemas no rutinarios en contextos cotidianos que incluyen dinero.",
+              "parentCode": "MATH-4B-OA03",
+              "tagType": "primary"
+            },
+            {
+              "type": "learning_objective",
+              "code": "MATH-4B-OA03",
+              "name": "OA 3",
+              "level": "4_basico",
+              "tagType": "secondary"
+            },
+            {
+              "type": "skill",
+              "code": "MATH-SK-RESOLVER-PROBLEMAS",
+              "name": "Resolver problemas",
+              "tagType": "secondary"
+            },
+            {
+              "type": "axis",
+              "code": "MATH-AX-NUMEROS-Y-OPERACIONES",
+              "name": "Números y operaciones",
+              "tagType": "secondary"
+            }
+          ]
+        },
+        {
+          "position": 5,
+          "type": "multiple_choice",
+          "responseFormat": "choice",
+          "stem": "¿En cuál de las siguientes imágenes la parte gris corresponde a 1/3 del círculo completo?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Círculo con dos sectores grises laterales que dejan en blanco un triángulo central (aprox. 2/3 gris).",
+              "isImage": true,
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Círculo dividido en tres franjas verticales; la franja central está pintada gris (1/3).",
+              "isImage": true,
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Círculo dividido en 3 partes iguales con 1 parte (la inferior) pintada gris (1/3).",
+              "isImage": true,
+              "isCorrect": true
+            },
+            {
+              "key": "D",
+              "text": "Círculo dividido en 4 partes iguales con 1 parte (superior izquierda) pintada gris (1/4).",
+              "isImage": true,
+              "isCorrect": false
+            }
+          ],
+          "correctKey": "C",
+          "skill": "Representar",
+          "oa": "OA 8",
+          "contentAxis": "Números y operaciones",
+          "hasFigure": true,
+          "figureNote": "Las 4 alternativas son círculos con distintas particiones y sectores pintados gris. Requiere captura de imagen de cada alternativa.",
+          "taxonomy": [
+            {
+              "type": "descriptor",
+              "code": null,
+              "name": "Identifican representaciones de fracciones como partes de un todo.",
+              "parentCode": "MATH-4B-OA08",
+              "tagType": "primary"
+            },
+            {
+              "type": "learning_objective",
+              "code": "MATH-4B-OA08",
+              "name": "OA 8",
+              "level": "4_basico",
+              "tagType": "secondary"
+            },
+            {
+              "type": "skill",
+              "code": "MATH-SK-REPRESENTAR",
+              "name": "Representar",
+              "tagType": "secondary"
+            },
+            {
+              "type": "axis",
+              "code": "MATH-AX-NUMEROS-Y-OPERACIONES",
+              "name": "Números y operaciones",
+              "tagType": "secondary"
+            }
+          ]
+        },
+        {
+          "position": 6,
+          "type": "open_ended",
+          "responseFormat": "fill_in",
+          "stem": "Resuelve: 4/12 + 2/12 =",
+          "alternatives": [],
+          "correctKey": null,
+          "skill": "Resolver problemas",
+          "oa": "OA 9",
+          "contentAxis": "Números y operaciones",
+          "hasFigure": false,
+          "figureNote": null,
+          "taxonomy": [
+            {
+              "type": "descriptor",
+              "code": null,
+              "name": "Calculan adiciones de fracciones con igual denominador.",
+              "parentCode": "MATH-4B-OA09",
+              "tagType": "primary"
+            },
+            {
+              "type": "learning_objective",
+              "code": "MATH-4B-OA09",
+              "name": "OA 9",
+              "level": "4_basico",
+              "tagType": "secondary"
+            },
+            {
+              "type": "skill",
+              "code": "MATH-SK-RESOLVER-PROBLEMAS",
+              "name": "Resolver problemas",
+              "tagType": "secondary"
+            },
+            {
+              "type": "axis",
+              "code": "MATH-AX-NUMEROS-Y-OPERACIONES",
+              "name": "Números y operaciones",
+              "tagType": "secondary"
+            }
+          ]
+        },
+        {
+          "position": 7,
+          "type": "multiple_choice",
+          "responseFormat": "choice",
+          "stem": "Del total de postulantes a un programa de televisión, 1/5 tiene entre 18 y 21 años, 2/5 tienen entre 22 y 25 años y otros 2/5 tienen más de 25 años. ¿Qué fracción de los postulantes al programa de televisión tienen entre 18 y 25 años?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "1/5",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "2/5",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "3/5",
+              "isCorrect": true
+            },
+            {
+              "key": "D",
+              "text": "5/5",
+              "isCorrect": false
+            }
+          ],
+          "correctKey": "C",
+          "skill": "Resolver problemas",
+          "oa": "OA 9",
+          "contentAxis": "Números y operaciones",
+          "hasFigure": false,
+          "figureNote": null,
+          "taxonomy": [
+            {
+              "type": "descriptor",
+              "code": null,
+              "name": "Resuelven problemas que requieren calcular adiciones de fracciones con igual denominador.",
+              "parentCode": "MATH-4B-OA09",
+              "tagType": "primary"
+            },
+            {
+              "type": "learning_objective",
+              "code": "MATH-4B-OA09",
+              "name": "OA 9",
+              "level": "4_basico",
+              "tagType": "secondary"
+            },
+            {
+              "type": "skill",
+              "code": "MATH-SK-RESOLVER-PROBLEMAS",
+              "name": "Resolver problemas",
+              "tagType": "secondary"
+            },
+            {
+              "type": "axis",
+              "code": "MATH-AX-NUMEROS-Y-OPERACIONES",
+              "name": "Números y operaciones",
+              "tagType": "secondary"
+            }
+          ]
+        },
+        {
+          "position": 8,
+          "type": "open_ended",
+          "responseFormat": "fill_in",
+          "stem": "La siguiente secuencia comienza en 2 y sus números se forman siguiendo una regla: 2, 12, 22, 32, ▢. Al mantener el mismo patrón, ¿qué número va en la ▢? Respuesta: En la ▢ va el número ___.",
+          "alternatives": [],
+          "correctKey": null,
+          "skill": "Resolver problemas",
+          "oa": "OA 13",
+          "contentAxis": "Patrones y álgebra",
+          "hasFigure": false,
+          "figureNote": null,
+          "taxonomy": [
+            {
+              "type": "descriptor",
+              "code": null,
+              "name": "Completan secuencias numéricas presentadas en tablas.",
+              "parentCode": "MATH-4B-OA13",
+              "tagType": "primary"
+            },
+            {
+              "type": "learning_objective",
+              "code": "MATH-4B-OA13",
+              "name": "OA 13",
+              "level": "4_basico",
+              "tagType": "secondary"
+            },
+            {
+              "type": "skill",
+              "code": "MATH-SK-RESOLVER-PROBLEMAS",
+              "name": "Resolver problemas",
+              "tagType": "secondary"
+            },
+            {
+              "type": "axis",
+              "code": "MATH-AX-PATRONES-Y-ALGEBRA",
+              "name": "Patrones y álgebra",
+              "tagType": "secondary"
+            }
+          ]
+        },
+        {
+          "position": 9,
+          "type": "multiple_choice",
+          "responseFormat": "choice",
+          "stem": "La siguiente secuencia empieza en 3 y sigue un patrón para formar los demás números: 3, 6, 12, 24. ¿Cuál es el patrón de formación de esta secuencia?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Se suma 3 al número anterior.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Se suma 4 al número anterior.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Se multiplica por 2 el número anterior.",
+              "isCorrect": true
+            },
+            {
+              "key": "D",
+              "text": "Se multiplica por 3 el número anterior.",
+              "isCorrect": false
+            }
+          ],
+          "correctKey": "C",
+          "skill": "Resolver problemas",
+          "oa": "OA 13",
+          "contentAxis": "Patrones y álgebra",
+          "hasFigure": false,
+          "figureNote": null,
+          "taxonomy": [
+            {
+              "type": "descriptor",
+              "code": null,
+              "name": "Identifican un patrón de formación de secuencias numéricas presentadas en tablas.",
+              "parentCode": "MATH-4B-OA13",
+              "tagType": "primary"
+            },
+            {
+              "type": "learning_objective",
+              "code": "MATH-4B-OA13",
+              "name": "OA 13",
+              "level": "4_basico",
+              "tagType": "secondary"
+            },
+            {
+              "type": "skill",
+              "code": "MATH-SK-RESOLVER-PROBLEMAS",
+              "name": "Resolver problemas",
+              "tagType": "secondary"
+            },
+            {
+              "type": "axis",
+              "code": "MATH-AX-PATRONES-Y-ALGEBRA",
+              "name": "Patrones y álgebra",
+              "tagType": "secondary"
+            }
+          ]
+        },
+        {
+          "position": 10,
+          "type": "multiple_choice",
+          "responseFormat": "choice",
+          "stem": "Observa la ecuación: ▢ + 18 = 75. ¿Qué número debe ir en ▢?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "57",
+              "isCorrect": true
+            },
+            {
+              "key": "B",
+              "text": "63",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "83",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "93",
+              "isCorrect": false
+            }
+          ],
+          "correctKey": "A",
+          "skill": "Resolver problemas",
+          "oa": "OA 14",
+          "contentAxis": "Patrones y álgebra",
+          "hasFigure": false,
+          "figureNote": null,
+          "taxonomy": [
+            {
+              "type": "descriptor",
+              "code": null,
+              "name": "Resuelven ecuaciones de un paso que involucran adiciones o sustracciones.",
+              "parentCode": "MATH-4B-OA14",
+              "tagType": "primary"
+            },
+            {
+              "type": "learning_objective",
+              "code": "MATH-4B-OA14",
+              "name": "OA 14",
+              "level": "4_basico",
+              "tagType": "secondary"
+            },
+            {
+              "type": "skill",
+              "code": "MATH-SK-RESOLVER-PROBLEMAS",
+              "name": "Resolver problemas",
+              "tagType": "secondary"
+            },
+            {
+              "type": "axis",
+              "code": "MATH-AX-PATRONES-Y-ALGEBRA",
+              "name": "Patrones y álgebra",
+              "tagType": "secondary"
+            }
+          ]
+        },
+        {
+          "position": 11,
+          "type": "multiple_choice",
+          "responseFormat": "choice",
+          "stem": "¿Cuántos centímetros equivalen a 15 metros?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "15",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "150",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "1 500",
+              "isCorrect": true
+            },
+            {
+              "key": "D",
+              "text": "15 000",
+              "isCorrect": false
+            }
+          ],
+          "correctKey": "C",
+          "skill": "Representar",
+          "oa": "OA 22",
+          "contentAxis": "Medición",
+          "hasFigure": false,
+          "figureNote": null,
+          "taxonomy": [
+            {
+              "type": "descriptor",
+              "code": null,
+              "name": "Realizan conversiones entre unidades de medida de longitud.",
+              "parentCode": "MATH-4B-OA22",
+              "tagType": "primary"
+            },
+            {
+              "type": "learning_objective",
+              "code": "MATH-4B-OA22",
+              "name": "OA 22",
+              "level": "4_basico",
+              "tagType": "secondary"
+            },
+            {
+              "type": "skill",
+              "code": "MATH-SK-REPRESENTAR",
+              "name": "Representar",
+              "tagType": "secondary"
+            },
+            {
+              "type": "axis",
+              "code": "MATH-AX-MEDICION",
+              "name": "Medición",
+              "tagType": "secondary"
+            }
+          ]
+        },
+        {
+          "position": 12,
+          "type": "multiple_choice",
+          "responseFormat": "choice",
+          "stem": "Por las Fiestas Patrias, una sala de clases se decoró con una cinta de banderas, tal como se muestra en la imagen. La pizarra mide 7 metros y 3 centímetros de largo. ¿Cuántos centímetros de cinta se usaron en total?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "307 cm",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "703 cm",
+              "isCorrect": true
+            },
+            {
+              "key": "C",
+              "text": "3 007 cm",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "7 003 cm",
+              "isCorrect": false
+            }
+          ],
+          "correctKey": "B",
+          "skill": "Representar",
+          "oa": "OA 22",
+          "contentAxis": "Medición",
+          "hasFigure": true,
+          "figureNote": "Ilustración de una sala de clases con cinta de banderas sobre la pizarra (contexto). El dato de la medida está en el enunciado; la imagen no es imprescindible.",
+          "taxonomy": [
+            {
+              "type": "descriptor",
+              "code": null,
+              "name": "Resuelven problemas que requieren realizar conversiones de unidades de medida de longitud.",
+              "parentCode": "MATH-4B-OA22",
+              "tagType": "primary"
+            },
+            {
+              "type": "learning_objective",
+              "code": "MATH-4B-OA22",
+              "name": "OA 22",
+              "level": "4_basico",
+              "tagType": "secondary"
+            },
+            {
+              "type": "skill",
+              "code": "MATH-SK-REPRESENTAR",
+              "name": "Representar",
+              "tagType": "secondary"
+            },
+            {
+              "type": "axis",
+              "code": "MATH-AX-MEDICION",
+              "name": "Medición",
+              "tagType": "secondary"
+            }
+          ]
+        },
+        {
+          "position": 13,
+          "type": "multiple_choice",
+          "responseFormat": "choice",
+          "stem": "Observa la figura en la cuadrícula (cada cuadro mide 1 cm por 1 cm). ¿Cuál es el área de la figura anterior?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "6 cm²",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "9 cm²",
+              "isCorrect": true
+            },
+            {
+              "key": "C",
+              "text": "12 cm²",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "18 cm²",
+              "isCorrect": false
+            }
+          ],
+          "correctKey": "B",
+          "skill": "Resolver problemas",
+          "oa": "OA 23",
+          "contentAxis": "Medición",
+          "hasFigure": true,
+          "figureNote": "Figura gris (rectángulo de 3x3 cuadros) sobre una cuadrícula de cuadros de 1 cm de lado. Requiere la imagen para contar/medir el área.",
+          "taxonomy": [
+            {
+              "type": "descriptor",
+              "code": null,
+              "name": "Calculan el área de un cuadrado.",
+              "parentCode": "MATH-4B-OA23",
+              "tagType": "primary"
+            },
+            {
+              "type": "learning_objective",
+              "code": "MATH-4B-OA23",
+              "name": "OA 23",
+              "level": "4_basico",
+              "tagType": "secondary"
+            },
+            {
+              "type": "skill",
+              "code": "MATH-SK-RESOLVER-PROBLEMAS",
+              "name": "Resolver problemas",
+              "tagType": "secondary"
+            },
+            {
+              "type": "axis",
+              "code": "MATH-AX-MEDICION",
+              "name": "Medición",
+              "tagType": "secondary"
+            }
+          ]
+        },
+        {
+          "position": 14,
+          "type": "multiple_choice",
+          "responseFormat": "choice",
+          "stem": "Observa este rectángulo de lados 4 cm y 9 cm. ¿Cuál es el área del rectángulo?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "11 cm²",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "26 cm²",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "36 cm²",
+              "isCorrect": true
+            },
+            {
+              "key": "D",
+              "text": "97 cm²",
+              "isCorrect": false
+            }
+          ],
+          "correctKey": "C",
+          "skill": "Resolver problemas",
+          "oa": "OA 23",
+          "contentAxis": "Medición",
+          "hasFigure": true,
+          "figureNote": "Imagen de un rectángulo con lados rotulados 4 cm y 9 cm; las medidas están en el enunciado, la imagen no es imprescindible.",
+          "taxonomy": [
+            {
+              "type": "descriptor",
+              "code": null,
+              "name": "Calculan el área de un rectángulo.",
+              "parentCode": "MATH-4B-OA23",
+              "tagType": "primary"
+            },
+            {
+              "type": "learning_objective",
+              "code": "MATH-4B-OA23",
+              "name": "OA 23",
+              "level": "4_basico",
+              "tagType": "secondary"
+            },
+            {
+              "type": "skill",
+              "code": "MATH-SK-RESOLVER-PROBLEMAS",
+              "name": "Resolver problemas",
+              "tagType": "secondary"
+            },
+            {
+              "type": "axis",
+              "code": "MATH-AX-MEDICION",
+              "name": "Medición",
+              "tagType": "secondary"
+            }
+          ]
+        },
+        {
+          "position": 15,
+          "type": "multiple_choice",
+          "responseFormat": "choice",
+          "stem": "Observa la figura 3D formada por cubos de 1 cm³ cada uno. ¿Cuál es el volumen de la figura 3D?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "9 cm³",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "11 cm³",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "12 cm³",
+              "isCorrect": true
+            },
+            {
+              "key": "D",
+              "text": "20 cm³",
+              "isCorrect": false
+            }
+          ],
+          "correctKey": "C",
+          "skill": "Resolver problemas",
+          "oa": "OA 24",
+          "contentAxis": "Medición",
+          "hasFigure": true,
+          "figureNote": "Imagen de una figura 3D compuesta por cubos unitarios apilados de forma irregular. Requiere la imagen para contar los cubos.",
+          "taxonomy": [
+            {
+              "type": "descriptor",
+              "code": null,
+              "name": "Calculan el volumen de un cuerpo conformado por cubos apilados.",
+              "parentCode": "MATH-4B-OA24",
+              "tagType": "primary"
+            },
+            {
+              "type": "learning_objective",
+              "code": "MATH-4B-OA24",
+              "name": "OA 24",
+              "level": "4_basico",
+              "tagType": "secondary"
+            },
+            {
+              "type": "skill",
+              "code": "MATH-SK-RESOLVER-PROBLEMAS",
+              "name": "Resolver problemas",
+              "tagType": "secondary"
+            },
+            {
+              "type": "axis",
+              "code": "MATH-AX-MEDICION",
+              "name": "Medición",
+              "tagType": "secondary"
+            }
+          ]
+        },
+        {
+          "position": 16,
+          "type": "multiple_choice",
+          "responseFormat": "choice",
+          "stem": "¿En qué imagen la línea dibujada es un eje de simetría de la figura?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Figura de cruz con una línea diagonal que no es eje de simetría.",
+              "isImage": true,
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Figura de cruz con una línea horizontal que pasa por su centro (eje de simetría horizontal).",
+              "isImage": true,
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Figura de cruz con una línea vertical que pasa por su centro (eje de simetría vertical).",
+              "isImage": true,
+              "isCorrect": true
+            },
+            {
+              "key": "D",
+              "text": "Figura de cruz con una línea vertical desplazada hacia un costado, fuera del centro (no es eje de simetría).",
+              "isImage": true,
+              "isCorrect": false
+            }
+          ],
+          "correctKey": "C",
+          "skill": "Representar",
+          "oa": "OA 17",
+          "contentAxis": "Geometría",
+          "hasFigure": true,
+          "figureNote": "Las 4 alternativas son la misma figura (cruz) con distintas líneas dibujadas; hay que identificar cuál línea es eje de simetría. Requiere captura de imagen.",
+          "taxonomy": [
+            {
+              "type": "descriptor",
+              "code": null,
+              "name": "Identifican ejes de simetría.",
+              "parentCode": "MATH-4B-OA17",
+              "tagType": "primary"
+            },
+            {
+              "type": "learning_objective",
+              "code": "MATH-4B-OA17",
+              "name": "OA 17",
+              "level": "4_basico",
+              "tagType": "secondary"
+            },
+            {
+              "type": "skill",
+              "code": "MATH-SK-REPRESENTAR",
+              "name": "Representar",
+              "tagType": "secondary"
+            },
+            {
+              "type": "axis",
+              "code": "MATH-AX-GEOMETRIA",
+              "name": "Geometría",
+              "tagType": "secondary"
+            }
+          ]
+        },
+        {
+          "position": 17,
+          "type": "multiple_choice",
+          "responseFormat": "choice",
+          "stem": "En cada una de estas cuadrículas se presentan dos figuras 2D. ¿En qué cuadrícula las dos figuras son simétricas respecto del eje?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Dos figuras sobre cuadrícula con eje horizontal; la figura inferior no es reflejo de la superior.",
+              "isImage": true,
+              "isCorrect": true
+            },
+            {
+              "key": "B",
+              "text": "Dos figuras sobre cuadrícula con eje horizontal; la figura inferior es el reflejo de la superior (simétricas).",
+              "isImage": true,
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Dos figuras sobre cuadrícula con eje horizontal; la figura inferior no es reflejo de la superior.",
+              "isImage": true,
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "Dos figuras sobre cuadrícula con eje horizontal; la figura inferior no es reflejo de la superior.",
+              "isImage": true,
+              "isCorrect": false
+            }
+          ],
+          "correctKey": "A",
+          "skill": "Representar",
+          "oa": "OA 18",
+          "contentAxis": "Geometría",
+          "hasFigure": true,
+          "figureNote": "Las 4 alternativas son pares de figuras 2D sobre cuadrícula con un eje; hay que identificar el par simétrico. Requiere captura de imagen.",
+          "taxonomy": [
+            {
+              "type": "descriptor",
+              "code": null,
+              "name": "Identifican figuras 2D relacionadas por una reflexión axial.",
+              "parentCode": "MATH-4B-OA18",
+              "tagType": "primary"
+            },
+            {
+              "type": "learning_objective",
+              "code": "MATH-4B-OA18",
+              "name": "OA 18",
+              "level": "4_basico",
+              "tagType": "secondary"
+            },
+            {
+              "type": "skill",
+              "code": "MATH-SK-REPRESENTAR",
+              "name": "Representar",
+              "tagType": "secondary"
+            },
+            {
+              "type": "axis",
+              "code": "MATH-AX-GEOMETRIA",
+              "name": "Geometría",
+              "tagType": "secondary"
+            }
+          ]
+        },
+        {
+          "position": 18,
+          "type": "multiple_choice",
+          "responseFormat": "choice",
+          "stem": "Martín compró 3 barritas de cereal que cuestan $240 cada una. Sofía compró el doble de las barritas que compró Martín. ¿Cuánto dinero gastó Sofía?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "$360",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "$480",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "$1 240",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "$1 440",
+              "isCorrect": true
+            }
+          ],
+          "correctKey": "D",
+          "skill": "Resolver problemas",
+          "oa": "OA 7",
+          "contentAxis": "Números y operaciones",
+          "hasFigure": false,
+          "figureNote": null,
+          "taxonomy": [
+            {
+              "type": "descriptor",
+              "code": null,
+              "name": "Resuelven problemas no rutinarios, en contextos de dinero, que requieren calcular multiplicaciones de números naturales.",
+              "parentCode": "MATH-4B-OA07",
+              "tagType": "primary"
+            },
+            {
+              "type": "learning_objective",
+              "code": "MATH-4B-OA07",
+              "name": "OA 7",
+              "level": "4_basico",
+              "tagType": "secondary"
+            },
+            {
+              "type": "skill",
+              "code": "MATH-SK-RESOLVER-PROBLEMAS",
+              "name": "Resolver problemas",
+              "tagType": "secondary"
+            },
+            {
+              "type": "axis",
+              "code": "MATH-AX-NUMEROS-Y-OPERACIONES",
+              "name": "Números y operaciones",
+              "tagType": "secondary"
+            }
+          ]
+        },
+        {
+          "position": 19,
+          "type": "multiple_choice",
+          "responseFormat": "choice",
+          "stem": "¿Cuál es el resultado aproximado de 298 • 4?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Aproximadamente 80.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Aproximadamente 120.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Aproximadamente 1 200.",
+              "isCorrect": true
+            },
+            {
+              "key": "D",
+              "text": "Aproximadamente 8 000.",
+              "isCorrect": false
+            }
+          ],
+          "correctKey": "C",
+          "skill": "Resolver problemas",
+          "oa": "OA 5",
+          "contentAxis": "Números y operaciones",
+          "hasFigure": false,
+          "figureNote": null,
+          "taxonomy": [
+            {
+              "type": "descriptor",
+              "code": null,
+              "name": "Estiman el resultado de multiplicaciones de números naturales.",
+              "parentCode": "MATH-4B-OA05",
+              "tagType": "primary"
+            },
+            {
+              "type": "learning_objective",
+              "code": "MATH-4B-OA05",
+              "name": "OA 5",
+              "level": "4_basico",
+              "tagType": "secondary"
+            },
+            {
+              "type": "skill",
+              "code": "MATH-SK-RESOLVER-PROBLEMAS",
+              "name": "Resolver problemas",
+              "tagType": "secondary"
+            },
+            {
+              "type": "axis",
+              "code": "MATH-AX-NUMEROS-Y-OPERACIONES",
+              "name": "Números y operaciones",
+              "tagType": "secondary"
+            }
+          ]
+        },
+        {
+          "position": 20,
+          "type": "multiple_choice",
+          "responseFormat": "choice",
+          "stem": "Pamela necesita ganar 175 puntos diarios durante 7 días en un juego para recibir una recompensa. ¿Cuántos puntos necesita ganar en total?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "25",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "182",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "795",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "1 225",
+              "isCorrect": true
+            }
+          ],
+          "correctKey": "D",
+          "skill": "Resolver problemas",
+          "oa": "OA 5",
+          "contentAxis": "Números y operaciones",
+          "hasFigure": false,
+          "figureNote": null,
+          "taxonomy": [
+            {
+              "type": "descriptor",
+              "code": null,
+              "name": "Resuelven problemas que requieren calcular multiplicaciones de números naturales.",
+              "parentCode": "MATH-4B-OA05",
+              "tagType": "primary"
+            },
+            {
+              "type": "learning_objective",
+              "code": "MATH-4B-OA05",
+              "name": "OA 5",
+              "level": "4_basico",
+              "tagType": "secondary"
+            },
+            {
+              "type": "skill",
+              "code": "MATH-SK-RESOLVER-PROBLEMAS",
+              "name": "Resolver problemas",
+              "tagType": "secondary"
+            },
+            {
+              "type": "axis",
+              "code": "MATH-AX-NUMEROS-Y-OPERACIONES",
+              "name": "Números y operaciones",
+              "tagType": "secondary"
+            }
+          ]
+        },
+        {
+          "position": 21,
+          "type": "multiple_choice",
+          "responseFormat": "choice",
+          "stem": "¿Cuál es el resultado de 42 : 2?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "12",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "21",
+              "isCorrect": true
+            },
+            {
+              "key": "C",
+              "text": "40",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "84",
+              "isCorrect": false
+            }
+          ],
+          "correctKey": "B",
+          "skill": "Resolver problemas",
+          "oa": "OA 6",
+          "contentAxis": "Números y operaciones",
+          "hasFigure": false,
+          "figureNote": null,
+          "taxonomy": [
+            {
+              "type": "descriptor",
+              "code": null,
+              "name": "Calculan divisiones exactas de números naturales.",
+              "parentCode": "MATH-4B-OA06",
+              "tagType": "primary"
+            },
+            {
+              "type": "learning_objective",
+              "code": "MATH-4B-OA06",
+              "name": "OA 6",
+              "level": "4_basico",
+              "tagType": "secondary"
+            },
+            {
+              "type": "skill",
+              "code": "MATH-SK-RESOLVER-PROBLEMAS",
+              "name": "Resolver problemas",
+              "tagType": "secondary"
+            },
+            {
+              "type": "axis",
+              "code": "MATH-AX-NUMEROS-Y-OPERACIONES",
+              "name": "Números y operaciones",
+              "tagType": "secondary"
+            }
+          ]
+        },
+        {
+          "position": 22,
+          "type": "multiple_choice",
+          "responseFormat": "choice",
+          "stem": "Javiera y Luis juntan su dinero para comprar un jugo que vale $970. Javiera tiene $390 y Luis tiene $440. ¿Cuánto dinero les falta para comprar el jugo?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "$50",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "$140",
+              "isCorrect": true
+            },
+            {
+              "key": "C",
+              "text": "$240",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "$1 800",
+              "isCorrect": false
+            }
+          ],
+          "correctKey": "B",
+          "skill": "Resolver problemas",
+          "oa": "OA 7",
+          "contentAxis": "Números y operaciones",
+          "hasFigure": false,
+          "figureNote": null,
+          "taxonomy": [
+            {
+              "type": "descriptor",
+              "code": null,
+              "name": "Resuelven problemas no rutinarios en contextos que incluyen dinero.",
+              "parentCode": "MATH-4B-OA07",
+              "tagType": "primary"
+            },
+            {
+              "type": "learning_objective",
+              "code": "MATH-4B-OA07",
+              "name": "OA 7",
+              "level": "4_basico",
+              "tagType": "secondary"
+            },
+            {
+              "type": "skill",
+              "code": "MATH-SK-RESOLVER-PROBLEMAS",
+              "name": "Resolver problemas",
+              "tagType": "secondary"
+            },
+            {
+              "type": "axis",
+              "code": "MATH-AX-NUMEROS-Y-OPERACIONES",
+              "name": "Números y operaciones",
+              "tagType": "secondary"
+            }
+          ]
+        },
+        {
+          "position": 23,
+          "type": "multiple_choice",
+          "responseFormat": "choice",
+          "stem": "Verónica recicla 20 envases. 3/4 del total de los envases reciclados son botellas. De los 20 envases, 2/4 son botellas de plástico y las otras botellas son de vidrio. ¿Qué fracción de los envases reciclados son botellas de vidrio?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "5/8",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "5/4",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "1/4",
+              "isCorrect": true
+            },
+            {
+              "key": "D",
+              "text": "1/8",
+              "isCorrect": false
+            }
+          ],
+          "correctKey": "C",
+          "skill": "Resolver problemas",
+          "oa": "OA 9",
+          "contentAxis": "Números y operaciones",
+          "hasFigure": false,
+          "figureNote": null,
+          "taxonomy": [
+            {
+              "type": "descriptor",
+              "code": null,
+              "name": "Resuelven problemas que requieren calcular sustracciones de fracciones con igual denominador.",
+              "parentCode": "MATH-4B-OA09",
+              "tagType": "primary"
+            },
+            {
+              "type": "learning_objective",
+              "code": "MATH-4B-OA09",
+              "name": "OA 9",
+              "level": "4_basico",
+              "tagType": "secondary"
+            },
+            {
+              "type": "skill",
+              "code": "MATH-SK-RESOLVER-PROBLEMAS",
+              "name": "Resolver problemas",
+              "tagType": "secondary"
+            },
+            {
+              "type": "axis",
+              "code": "MATH-AX-NUMEROS-Y-OPERACIONES",
+              "name": "Números y operaciones",
+              "tagType": "secondary"
+            }
+          ]
+        },
+        {
+          "position": 24,
+          "type": "multiple_choice",
+          "responseFormat": "choice",
+          "stem": "Para un trabajo de Lenguaje y Comunicación, cada estudiante pudo elegir entre escribir un poema, un cuento, una noticia o una carta. El gráfico muestra la cantidad de trabajos escritos por cada tipo de texto: Poema 6, Cuento 14, Noticia 9, Carta 12. ¿Cuántos estudiantes en total escribieron una noticia?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "3",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "4",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "8",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "9",
+              "isCorrect": true
+            }
+          ],
+          "correctKey": "D",
+          "skill": "Representar",
+          "oa": "OA 27",
+          "contentAxis": "Datos y probabilidades",
+          "hasFigure": true,
+          "figureNote": "Gráfico de barras de trabajos escritos por tipo de texto (Poema 6, Cuento 14, Noticia 9, Carta 12); valores transcritos en el enunciado.",
+          "taxonomy": [
+            {
+              "type": "descriptor",
+              "code": null,
+              "name": "Leen información presentada en gráficos de barra simple con escala.",
+              "parentCode": "MATH-4B-OA27",
+              "tagType": "primary"
+            },
+            {
+              "type": "learning_objective",
+              "code": "MATH-4B-OA27",
+              "name": "OA 27",
+              "level": "4_basico",
+              "tagType": "secondary"
+            },
+            {
+              "type": "skill",
+              "code": "MATH-SK-REPRESENTAR",
+              "name": "Representar",
+              "tagType": "secondary"
+            },
+            {
+              "type": "axis",
+              "code": "MATH-AX-DATOS-Y-PROBABILIDADES",
+              "name": "Datos y probabilidades",
+              "tagType": "secondary"
+            }
+          ]
+        },
+        {
+          "position": 25,
+          "type": "multiple_choice",
+          "responseFormat": "choice",
+          "stem": "El pictograma muestra la cantidad de canciones que 3 integrantes del taller de guitarra han aprendido durante este año. Cada ícono de guitarra equivale a 5 canciones: Gabriel 2 íconos, Amanda 4 íconos, Pedro 1 ícono. ¿Cuántas canciones más que Pedro ha aprendido Amanda?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "15",
+              "isCorrect": true
+            },
+            {
+              "key": "B",
+              "text": "10",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "5",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "3",
+              "isCorrect": false
+            }
+          ],
+          "correctKey": "A",
+          "skill": "Resolver problemas",
+          "oa": "OA 27",
+          "contentAxis": "Datos y probabilidades",
+          "hasFigure": true,
+          "figureNote": "Pictograma con íconos de guitarra (1 ícono = 5 canciones): Gabriel 2, Amanda 4, Pedro 1. Requiere la imagen para contar los íconos por persona.",
+          "taxonomy": [
+            {
+              "type": "descriptor",
+              "code": null,
+              "name": "Interpretan información presentada en un pictograma con escala.",
+              "parentCode": "MATH-4B-OA27",
+              "tagType": "primary"
+            },
+            {
+              "type": "learning_objective",
+              "code": "MATH-4B-OA27",
+              "name": "OA 27",
+              "level": "4_basico",
+              "tagType": "secondary"
+            },
+            {
+              "type": "skill",
+              "code": "MATH-SK-RESOLVER-PROBLEMAS",
+              "name": "Resolver problemas",
+              "tagType": "secondary"
+            },
+            {
+              "type": "axis",
+              "code": "MATH-AX-DATOS-Y-PROBABILIDADES",
+              "name": "Datos y probabilidades",
+              "tagType": "secondary"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "extraction": {
+    "itemCount": 25,
+    "warnings": [
+      "responseFormat: 'fill_in' (completación/cálculo) en ítems 6 y 8 → modelados como open_ended; se promoverán a gap_fill (auto-corregible) al cargar la pauta.",
+      "responseFormat: 'develop' en ítem 4 (única pregunta de desarrollo).",
+      "Alternativas-imagen (isImage:true) en ítems 5, 16, 17: requieren captura de imagen para ser usables.",
+      "Figura imprescindible en el enunciado de ítems 13, 15, 25 (y alternativas-imagen ya listadas en 5, 16, 17).",
+      "Texto y fracciones transcritos desde la capa de texto del PDF (pdftotext); estructura y figuras confirmadas con la imagen renderizada."
+    ],
+    "needsHumanReview": true
+  },
+  "pauta": {
+    "source": {
+      "report": "RBD25520_DIA_MATEMATICA_4_A_Resultados_Asignatura_Cierre_2025.pdf",
+      "subjectCode": "MATH",
+      "gradeCode": "4TH_BASIC",
+      "applicationPeriod": "cierre",
+      "year": 2025,
+      "instrumentJson": "extraccion/matematicas/4º matemáticas cierre 2025.json"
+    },
+    "appliedKeys": 22,
+    "issues": []
+  }
+}

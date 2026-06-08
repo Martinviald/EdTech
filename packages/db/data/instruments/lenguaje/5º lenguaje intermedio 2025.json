@@ -1,0 +1,1763 @@
+{
+  "schemaVersion": "1.0",
+  "source": {
+    "file": "5º lenguaje intermedio 2025.pdf",
+    "subjectFolder": "Lenguaje"
+  },
+  "instrument": {
+    "name": "DIA Lectura 5° Básico 2025 — Intermedio",
+    "subject": "Lenguaje y Comunicación",
+    "subjectCode": "LANG",
+    "grade": "5° Básico",
+    "gradeCode": "5TH_BASIC",
+    "year": 2025,
+    "applicationPeriod": "intermedio",
+    "type": "dia",
+    "isOfficial": true,
+    "source": "imported"
+  },
+  "sections": [
+    {
+      "order": 1,
+      "name": "Texto 1: «La apuesta con un campeón»",
+      "type": "mixed",
+      "instructions": "Lee el siguiente texto y responde las preguntas 1 a 5.",
+      "passage": {
+        "title": "La apuesta con un campeón",
+        "text": "Una helada mañana de invierno, camino de la ciudad, Pedro Urdemales encontró un gorrión casi congelado, que ni podía caminar, mucho menos volar.\n\nCompadecido, lo recogió y se lo echó al bolsillo. Entrando a la ciudad pasó por el estadio, donde se entretuvo mirando a un atleta que se entrenaba en el lanzamiento de la bala.\n\nPedro parecía tan interesado, que el deportista pensó en jugarle una broma y lo llamó a la pista.\n\n—Pareces un huaso forzudo —le dijo a modo de saludo— y si me ganas a lanzar la bala, te invitaré a una parrillada en el restaurante del frente.\n\nDe una cancha vecina había caído una teñida pelota de tenis, y el lanzador la tomó, simulando que pesaba como las balas de hierro con que se estaba entrenando. Luego, tomando impulso, lanzó con tal fuerza, que fue a caer debajo de las galerías de la cancha de fútbol.\n\n—¡Lejazos la tiró! —comentó Pedro agachándose a recoger algo—. Allá en el campo solo lanzo peñascazos —explicó—, de modo que lanzaré esta piedra.\n\nY mientras el atleta aprobaba sin preocuparse de lo que lanzara, Urdemales cambió la piedra por el gorrión que llevaba en el bolsillo.\n\n—¡Allá va! —exclamó Pedro lanzando el pajarillo que, repuestas sus energías y recobrada su libertad, voló, voló y voló en línea recta.\n\nEl atleta no salía de su asombro, mientras eso que creía una piedra cruzaba sobre la pileta, las galerías y hasta las blancas murallas del Estadio Municipal.\n\nPor un momento temió que el peñascazo fuera a caer justo en los ventanales del restaurante del frente, donde ahora debería ir a pagar su apuesta a Pedro Urdemales, que ya lo esperaba con un hambre olímpica.\n\nFloridor Pérez. La vuelta de Pedro Urdemales. Chile: Ediciones Lo que leo, 2019. (Adaptación).",
+        "format": "plain",
+        "attachments": [
+          {
+            "kind": "image",
+            "note": "Ilustración de un personaje (Pedro Urdemales) junto a un atleta en un estadio (decorativa)."
+          }
+        ]
+      },
+      "items": [
+        {
+          "position": 1,
+          "type": "multiple_choice",
+          "stem": "¿Por qué Pedro Urdemales recoge un gorrión?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Porque cree que le servirá para ganar una parrillada.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Porque siente lástima por el estado en que se encuentra.",
+              "isCorrect": true
+            },
+            {
+              "key": "C",
+              "text": "Porque piensa que será mejor dejarlo en libertad en la ciudad.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "Porque considera que puede ser su cómplice para hacer una broma.",
+              "isCorrect": false
+            }
+          ],
+          "correctKey": "B",
+          "skill": "Interpretar y relacionar",
+          "oa": "OA 4",
+          "contentAxis": "Narración",
+          "hasFigure": false,
+          "figureNote": null,
+          "taxonomy": [
+            {
+              "type": "descriptor",
+              "code": null,
+              "name": "Infieren causa o consecuencia de acontecimientos o acciones relevantes en un texto narrativo.",
+              "parentCode": "LANG-4B-OA04",
+              "tagType": "primary"
+            },
+            {
+              "type": "learning_objective",
+              "code": "LANG-4B-OA04",
+              "name": "OA 4",
+              "level": "4_basico",
+              "tagType": "secondary"
+            },
+            {
+              "type": "skill",
+              "code": "LANG-SK-INTERPRETAR-Y-RELACIONAR",
+              "name": "Interpretar y relacionar",
+              "tagType": "secondary"
+            },
+            {
+              "type": "text_type",
+              "code": "LANG-TT-NARRACION",
+              "name": "Narración",
+              "tagType": "secondary"
+            }
+          ]
+        },
+        {
+          "position": 2,
+          "type": "multiple_choice",
+          "stem": "¿Qué pensó el deportista al ver que Pedro lo miraba interesado?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Proponerle jugar un partido de tenis.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Invitarlo a comer una parrillada.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Demostrarle su fuerza.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "Jugarle una broma.",
+              "isCorrect": true
+            }
+          ],
+          "correctKey": "D",
+          "skill": "Localizar",
+          "oa": "OA 4",
+          "contentAxis": "Narración",
+          "hasFigure": false,
+          "figureNote": null,
+          "taxonomy": [
+            {
+              "type": "descriptor",
+              "code": null,
+              "name": "Localizan información explícita relevante en un texto narrativo.",
+              "parentCode": "LANG-4B-OA04",
+              "tagType": "primary"
+            },
+            {
+              "type": "learning_objective",
+              "code": "LANG-4B-OA04",
+              "name": "OA 4",
+              "level": "4_basico",
+              "tagType": "secondary"
+            },
+            {
+              "type": "skill",
+              "code": "LANG-SK-LOCALIZAR",
+              "name": "Localizar",
+              "tagType": "secondary"
+            },
+            {
+              "type": "text_type",
+              "code": "LANG-TT-NARRACION",
+              "name": "Narración",
+              "tagType": "secondary"
+            }
+          ]
+        },
+        {
+          "position": 3,
+          "type": "multiple_choice",
+          "stem": "En el texto, ¿qué fue lo que asombró al atleta?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Que Pedro Urdemales lanzara tan lejos.",
+              "isCorrect": true
+            },
+            {
+              "key": "B",
+              "text": "Que Pedro Urdemales utilizara una bala.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Que Pedro Urdemales aceptara la apuesta.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "Que Pedro Urdemales convirtiera una piedra en gorrión.",
+              "isCorrect": false
+            }
+          ],
+          "correctKey": "A",
+          "skill": "Interpretar y relacionar",
+          "oa": "OA 4",
+          "contentAxis": "Narración",
+          "hasFigure": false,
+          "figureNote": null,
+          "taxonomy": [
+            {
+              "type": "descriptor",
+              "code": null,
+              "name": "Infieren información relevante sobre personajes en un texto narrativo.",
+              "parentCode": "LANG-4B-OA04",
+              "tagType": "primary"
+            },
+            {
+              "type": "learning_objective",
+              "code": "LANG-4B-OA04",
+              "name": "OA 4",
+              "level": "4_basico",
+              "tagType": "secondary"
+            },
+            {
+              "type": "skill",
+              "code": "LANG-SK-INTERPRETAR-Y-RELACIONAR",
+              "name": "Interpretar y relacionar",
+              "tagType": "secondary"
+            },
+            {
+              "type": "text_type",
+              "code": "LANG-TT-NARRACION",
+              "name": "Narración",
+              "tagType": "secondary"
+            }
+          ]
+        },
+        {
+          "position": 4,
+          "type": "multiple_choice",
+          "stem": "¿De qué trata el texto?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "De la astucia de Pedro Urdemales para engañar al atleta.",
+              "isCorrect": true
+            },
+            {
+              "key": "B",
+              "text": "De las habilidades de Pedro Urdemales para lanzar la bala.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "De cómo Pedro Urdemales logra salvar la vida de un gorrión.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "Del esfuerzo de Pedro Urdemales para ganarse una parrillada.",
+              "isCorrect": false
+            }
+          ],
+          "correctKey": "A",
+          "skill": "Interpretar y relacionar",
+          "oa": "OA 4",
+          "contentAxis": "Narración",
+          "hasFigure": false,
+          "figureNote": null,
+          "taxonomy": [
+            {
+              "type": "descriptor",
+              "code": null,
+              "name": "Infieren el sentido global de un texto narrativo o un fragmento de este.",
+              "parentCode": "LANG-4B-OA04",
+              "tagType": "primary"
+            },
+            {
+              "type": "learning_objective",
+              "code": "LANG-4B-OA04",
+              "name": "OA 4",
+              "level": "4_basico",
+              "tagType": "secondary"
+            },
+            {
+              "type": "skill",
+              "code": "LANG-SK-INTERPRETAR-Y-RELACIONAR",
+              "name": "Interpretar y relacionar",
+              "tagType": "secondary"
+            },
+            {
+              "type": "text_type",
+              "code": "LANG-TT-NARRACION",
+              "name": "Narración",
+              "tagType": "secondary"
+            }
+          ]
+        },
+        {
+          "position": 5,
+          "type": "open_ended",
+          "stem": "¿Estás de acuerdo con lo que hizo Pedro Urdemales para ganar la apuesta? (Sí / No). ¿Por qué? Fundamenta tu opinión dando ejemplos del texto.",
+          "alternatives": [],
+          "correctKey": null,
+          "skill": "Reflexionar",
+          "oa": "OA 4",
+          "contentAxis": "Narración",
+          "hasFigure": false,
+          "figureNote": "Ítem híbrido: ofrece selección Sí/No y luego pide fundamentación escrita. Se modela como open_ended porque lo evaluable es la justificación.",
+          "taxonomy": [
+            {
+              "type": "descriptor",
+              "code": null,
+              "name": "Opinan sobre algún aspecto controversial de un texto narrativo con fundamentos que integran información del texto.",
+              "parentCode": "LANG-4B-OA04",
+              "tagType": "primary"
+            },
+            {
+              "type": "learning_objective",
+              "code": "LANG-4B-OA04",
+              "name": "OA 4",
+              "level": "4_basico",
+              "tagType": "secondary"
+            },
+            {
+              "type": "skill",
+              "code": "LANG-SK-REFLEXIONAR",
+              "name": "Reflexionar",
+              "tagType": "secondary"
+            },
+            {
+              "type": "text_type",
+              "code": "LANG-TT-NARRACION",
+              "name": "Narración",
+              "tagType": "secondary"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "order": 2,
+      "name": "Texto 2: «Hongos»",
+      "type": "multiple_choice",
+      "instructions": "Lee el siguiente texto y responde las preguntas 6 a 9.",
+      "passage": {
+        "title": "Hongos",
+        "text": "Los hongos son organismos tan distintos a todos los demás que tienen su propio reino: el reino fungi. Aunque se parecen a las plantas, comparten con los insectos la formación de un exoesqueleto, que es la estructura más fuerte que los articula y se asemeja a lo que en los animales son los huesos. El exoesqueleto está compuesto por filamentos, llamados hifas, que les sirven para la reproducción.\n\nJunto a las bacterias, los hongos son los principales descomponedores en los sistemas ecológicos: esto quiere decir que modifican lo que comen (restos de hojas, raíces o bichos), pues solo absorben algunos elementos y dejan libres otros. Esta actividad es fundamental para la supervivencia de los otros seres vivos, ya que lo modificado por el hongo les sirve como nutriente.\n\nEn el mundo hay más de cien mil tipos de hongos, desde algunos casi invisibles, como la levadura del pan y el moho negro de la humedad, hasta las setas silvestres y los champiñones que comemos en la pizza. ¡Y quienes saben del tema suponen que existen muchos más hongos que no han sido descubiertos!\n\nAlgunos hongos son un alimento buenísimo para los seres humanos, pero ¡cuidado!, otros pueden ser venenosos.\n\nLos hongos se encuentran en los parques, en el tronco de algún árbol, incluso en los patios de las casas. Si ves uno, no te lo comas, solo mira lo especial y lindo que es.\n\n*Los hongos se consideran mágicos en la mayoría de las culturas, por ejemplo, se dice que son las casas de las hadas y de los duendes. ¿Te has fijado que el Viejo Pascuero tiene traje rojo y blanco, y que sus amigos animales son renos y sus ayudantes duendes? El rojo y blanco son los colores del hongo Amanita muscaria, que es la comida favorita de sus renos y el hogar de los duendes.\n\nMarcela Fuentealba y María Pía Escobar. Agua. Chile: Hueders, 2015. (Adaptación).\n\nGlosario\nexoesqueleto: es el esqueleto externo que recubre, protege y soporta el cuerpo de un hongo o un insecto.",
+        "format": "plain",
+        "attachments": [
+          {
+            "kind": "image",
+            "note": "Cuatro fotografías de hongos rotuladas: Agaricus campestris (champiñón silvestre), Flammulina velutipes (enoki), Marasmius oreades (senderuela) y Amanita muscaria (matamoscas)."
+          }
+        ]
+      },
+      "items": [
+        {
+          "position": 6,
+          "type": "multiple_choice",
+          "stem": "Según el texto, ¿qué tienen en común los hongos y los insectos?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Poseen un exoesqueleto.",
+              "isCorrect": true
+            },
+            {
+              "key": "B",
+              "text": "Pertenecen al reino fungi.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Transforman lo que comen.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "Absorben parte de los alimentos.",
+              "isCorrect": false
+            }
+          ],
+          "correctKey": "A",
+          "skill": "Interpretar y relacionar",
+          "oa": "OA 6",
+          "contentAxis": "Texto no literario",
+          "hasFigure": false,
+          "figureNote": null,
+          "taxonomy": [
+            {
+              "type": "descriptor",
+              "code": null,
+              "name": "Infieren información relevante en un texto no literario.",
+              "parentCode": "LANG-4B-OA06",
+              "tagType": "primary"
+            },
+            {
+              "type": "learning_objective",
+              "code": "LANG-4B-OA06",
+              "name": "OA 6",
+              "level": "4_basico",
+              "tagType": "secondary"
+            },
+            {
+              "type": "skill",
+              "code": "LANG-SK-INTERPRETAR-Y-RELACIONAR",
+              "name": "Interpretar y relacionar",
+              "tagType": "secondary"
+            },
+            {
+              "type": "text_type",
+              "code": "LANG-TT-TEXTO-NO-LITERARIO",
+              "name": "Texto no literario",
+              "tagType": "secondary"
+            }
+          ]
+        },
+        {
+          "position": 7,
+          "type": "multiple_choice",
+          "stem": "¿Qué quiere decir que los hongos sean descomponedores en los sistemas ecológicos?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Que ayudan a las bacterias.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Que algunos son venenosos.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Que modifican lo que comen.",
+              "isCorrect": true
+            },
+            {
+              "key": "D",
+              "text": "Que sirven de alimento para otros animales.",
+              "isCorrect": false
+            }
+          ],
+          "correctKey": "C",
+          "skill": "Localizar",
+          "oa": "OA 6",
+          "contentAxis": "Texto no literario",
+          "hasFigure": false,
+          "figureNote": null,
+          "taxonomy": [
+            {
+              "type": "descriptor",
+              "code": null,
+              "name": "Localizan información explícita relevante en un texto no literario.",
+              "parentCode": "LANG-4B-OA06",
+              "tagType": "primary"
+            },
+            {
+              "type": "learning_objective",
+              "code": "LANG-4B-OA06",
+              "name": "OA 6",
+              "level": "4_basico",
+              "tagType": "secondary"
+            },
+            {
+              "type": "skill",
+              "code": "LANG-SK-LOCALIZAR",
+              "name": "Localizar",
+              "tagType": "secondary"
+            },
+            {
+              "type": "text_type",
+              "code": "LANG-TT-TEXTO-NO-LITERARIO",
+              "name": "Texto no literario",
+              "tagType": "secondary"
+            }
+          ]
+        },
+        {
+          "position": 8,
+          "type": "multiple_choice",
+          "stem": "¿Cuál de los siguientes tipos de hongo es casi invisible?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Enoki.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Senderuela.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Levadura del pan.",
+              "isCorrect": true
+            },
+            {
+              "key": "D",
+              "text": "Champiñón silvestre.",
+              "isCorrect": false
+            }
+          ],
+          "correctKey": "C",
+          "skill": "Localizar",
+          "oa": "OA 6",
+          "contentAxis": "Texto no literario",
+          "hasFigure": false,
+          "figureNote": null,
+          "taxonomy": [
+            {
+              "type": "descriptor",
+              "code": null,
+              "name": "Localizan información explícita relevante en un texto no literario.",
+              "parentCode": "LANG-4B-OA06",
+              "tagType": "primary"
+            },
+            {
+              "type": "learning_objective",
+              "code": "LANG-4B-OA06",
+              "name": "OA 6",
+              "level": "4_basico",
+              "tagType": "secondary"
+            },
+            {
+              "type": "skill",
+              "code": "LANG-SK-LOCALIZAR",
+              "name": "Localizar",
+              "tagType": "secondary"
+            },
+            {
+              "type": "text_type",
+              "code": "LANG-TT-TEXTO-NO-LITERARIO",
+              "name": "Texto no literario",
+              "tagType": "secondary"
+            }
+          ]
+        },
+        {
+          "position": 9,
+          "type": "multiple_choice",
+          "stem": "¿Para qué se utiliza la siguiente imagen en el texto?\n\n[Imagen: fotografía del hongo Amanita muscaria (matamoscas), de sombrero rojo con puntos blancos.]",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Para explicar el exoesqueleto de los hongos.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Para mostrar el ecosistema de los hongos.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Para advertir sobre un tipo de hongo que es considerado venenoso.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "Para ejemplificar un tipo de hongo que es considerado mágico.",
+              "isCorrect": true
+            }
+          ],
+          "correctKey": "D",
+          "skill": "Reflexionar",
+          "oa": "OA 7",
+          "contentAxis": "Texto no literario",
+          "hasFigure": true,
+          "figureNote": "El enunciado pregunta por el propósito de una imagen (fotografía de Amanita muscaria / matamoscas) que se muestra junto al ítem; depende de la figura para responderse.",
+          "taxonomy": [
+            {
+              "type": "descriptor",
+              "code": null,
+              "name": "Determinan propósitos explícitos e implícitos en un texto no literario.",
+              "parentCode": "LANG-4B-OA07",
+              "tagType": "primary"
+            },
+            {
+              "type": "learning_objective",
+              "code": "LANG-4B-OA07",
+              "name": "OA 7",
+              "level": "4_basico",
+              "tagType": "secondary"
+            },
+            {
+              "type": "skill",
+              "code": "LANG-SK-REFLEXIONAR",
+              "name": "Reflexionar",
+              "tagType": "secondary"
+            },
+            {
+              "type": "text_type",
+              "code": "LANG-TT-TEXTO-NO-LITERARIO",
+              "name": "Texto no literario",
+              "tagType": "secondary"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "order": 3,
+      "name": "Texto 3: «Más abejas, glaciares e incluso loros: descubren tesoro animal y natural en pleno Valle del Elqui»",
+      "type": "mixed",
+      "instructions": "Lee el siguiente texto y responde las preguntas 10 a 14.",
+      "passage": {
+        "title": "Más abejas, glaciares e incluso loros: descubren tesoro animal y natural en pleno Valle del Elqui",
+        "text": "Publicado por Emilio Lara\nViernes 13 marzo de 2020\n\nEn la quebrada de Paihuano, al interior del Valle del Elqui, en la región de Coquimbo, investigadores del Instituto de Ecología y Biodiversidad (IEB) descubrieron lo que simplemente puede catalogarse como un “tesoro ecosistémico”.\n\nEn concreto, se trata de 21 tipos de abejas nativas, otras 50 especies de animales y una gran cantidad de flora autóctona.\n\nSumado a ello, desde el centro comunicaron que los científicos hallaron aves, reptiles y felinos, muchos de ellos bajo amenaza. Así también, identificaron la existencia de glaciares de roca y masas de peñazcos con hielo en terrenos entre los 1.200 y 2.500 metros sobre el nivel del mar, que tampoco están protegidos.\n\nAbejas, loros y otras especies\nEn el contexto de las indagaciones, uno de los hallazgos más sorprendentes fue el descubrimiento de 21 variedades de abejas nativas. “Esta riqueza de especies es alta, considerando que en Chile se han registrado cerca de 450 especies de estos insectos, 70% de los cuales no existe en ningún otro país del mundo”, indicaron a través de un comunicado.\n\nDentro de las otras especies que fueron analizadas, desde el IEB señalaron que los estudios determinaron la existencia de 50 especies de animales vertebrados, siendo las aves el grupo más numeroso de todos. En este contexto, se detallaron “34 tipos de pájaros, seguidos de 7 especies de roedores, 4 de reptiles, 2 tipos de murciélagos, más un felino, un marsupial y un anfibio”, indicaron en el escrito.\n\nSegún Milen Duarte, bióloga ambiental de la Universidad de Chile, algunas de estas especies están en categoría de conservación, viéndose principalmente amenazados por la degradación y pérdida de hábitat. “En el caso del puma, también se debe a la caza furtiva y al envenenamiento como resultado del conflicto ganadero, donde este animal es considerado como una amenaza para la ganadería”, comentó la investigadora.\n\nDuarte comunicó que también ha identificado a más de cien loros barranqueros, más conocidos como tricahue, especie nativa de Chile que habita en la zona centro-sur y “el más grande de los cuatro tipos de loros que conocemos en nuestro país”.\n\nLlegada de mineras\nA todas las amenazas anteriores se suma otra: el arribo de la industria minera. “Hace algunas semanas comenzaron a llegar camiones, probablemente mineros, a una de las quebradas importantes de la zona”, comentó la bióloga.\n\nSi bien las mineras podrían llevar más trabajo a la zona, “la comunidad que vive y trabaja en este lugar, y que se dedica principalmente a actividades agrícolas, de ganadería y de turismo; está muy preocupada por la situación y nosotros como investigadores también, ya que existe una gran biodiversidad de especies que requieren ser protegidas y que con la llegada de las mineras podrían correr todavía más peligro”, recalcó la especialista.\n\nAsí, los residentes se han organizado para evitar la llegada de mineras hasta el sector, principalmente porque se oponen al aumento de la contaminación, a la escasez de agua y a la pérdida de biodiversidad que ya ha ocurrido en otras localidades de la región, como es el caso de Andacollo.\n\nEmilio Lara. “Más abejas, glaciares e incluso loros: descubren tesoro animal y natural en pleno Valle del Elqui”. Biobio Chile. Chile. 13 marzo 2020. Web. (Adaptación).",
+        "format": "plain",
+        "attachments": [
+          {
+            "kind": "image",
+            "note": "Fotografías de fauna del Valle del Elqui (zorro, reptil, loros tricahue) y una fotografía de un loro barranquero (tricahue) sobre una rama."
+          }
+        ]
+      },
+      "items": [
+        {
+          "position": 10,
+          "type": "multiple_choice",
+          "stem": "En el texto, ¿a qué se refiere la expresión “tesoro ecosistémico”?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "A las múltiples amenazas a las que se enfrentan los animales del lugar.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "A la gran diversidad de especies animales y de flora del lugar.",
+              "isCorrect": true
+            },
+            {
+              "key": "C",
+              "text": "A las ganancias que se pueden obtener del turismo en la zona.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "A las riquezas que se pueden obtener con la minería en la zona.",
+              "isCorrect": false
+            }
+          ],
+          "correctKey": "B",
+          "skill": "Interpretar y relacionar",
+          "oa": "OA 6",
+          "contentAxis": "Texto no literario",
+          "hasFigure": false,
+          "figureNote": null,
+          "taxonomy": [
+            {
+              "type": "descriptor",
+              "code": null,
+              "name": "Interpretan el sentido de expresiones en lenguaje figurado en un texto no literario.",
+              "parentCode": "LANG-4B-OA06",
+              "tagType": "primary"
+            },
+            {
+              "type": "learning_objective",
+              "code": "LANG-4B-OA06",
+              "name": "OA 6",
+              "level": "4_basico",
+              "tagType": "secondary"
+            },
+            {
+              "type": "skill",
+              "code": "LANG-SK-INTERPRETAR-Y-RELACIONAR",
+              "name": "Interpretar y relacionar",
+              "tagType": "secondary"
+            },
+            {
+              "type": "text_type",
+              "code": "LANG-TT-TEXTO-NO-LITERARIO",
+              "name": "Texto no literario",
+              "tagType": "secondary"
+            }
+          ]
+        },
+        {
+          "position": 11,
+          "type": "multiple_choice",
+          "stem": "Según el texto, ¿cuál es el grupo más numeroso de animales vertebrados encontrados en la zona?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Las aves.",
+              "isCorrect": true
+            },
+            {
+              "key": "B",
+              "text": "Los felinos.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Los reptiles.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "Los roedores.",
+              "isCorrect": false
+            }
+          ],
+          "correctKey": "A",
+          "skill": "Localizar",
+          "oa": "OA 6",
+          "contentAxis": "Texto no literario",
+          "hasFigure": false,
+          "figureNote": null,
+          "taxonomy": [
+            {
+              "type": "descriptor",
+              "code": null,
+              "name": "Localizan información explícita relevante en un texto no literario.",
+              "parentCode": "LANG-4B-OA06",
+              "tagType": "primary"
+            },
+            {
+              "type": "learning_objective",
+              "code": "LANG-4B-OA06",
+              "name": "OA 6",
+              "level": "4_basico",
+              "tagType": "secondary"
+            },
+            {
+              "type": "skill",
+              "code": "LANG-SK-LOCALIZAR",
+              "name": "Localizar",
+              "tagType": "secondary"
+            },
+            {
+              "type": "text_type",
+              "code": "LANG-TT-TEXTO-NO-LITERARIO",
+              "name": "Texto no literario",
+              "tagType": "secondary"
+            }
+          ]
+        },
+        {
+          "position": 12,
+          "type": "multiple_choice",
+          "stem": "¿Qué actividad económica se ve amenazada por el puma?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "La agricultura.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "La ganadería.",
+              "isCorrect": true
+            },
+            {
+              "key": "C",
+              "text": "La minería.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "El turismo.",
+              "isCorrect": false
+            }
+          ],
+          "correctKey": "B",
+          "skill": "Interpretar y relacionar",
+          "oa": "OA 6",
+          "contentAxis": "Texto no literario",
+          "hasFigure": false,
+          "figureNote": null,
+          "taxonomy": [
+            {
+              "type": "descriptor",
+              "code": null,
+              "name": "Infieren información relevante en un texto no literario.",
+              "parentCode": "LANG-4B-OA06",
+              "tagType": "primary"
+            },
+            {
+              "type": "learning_objective",
+              "code": "LANG-4B-OA06",
+              "name": "OA 6",
+              "level": "4_basico",
+              "tagType": "secondary"
+            },
+            {
+              "type": "skill",
+              "code": "LANG-SK-INTERPRETAR-Y-RELACIONAR",
+              "name": "Interpretar y relacionar",
+              "tagType": "secondary"
+            },
+            {
+              "type": "text_type",
+              "code": "LANG-TT-TEXTO-NO-LITERARIO",
+              "name": "Texto no literario",
+              "tagType": "secondary"
+            }
+          ]
+        },
+        {
+          "position": 13,
+          "type": "multiple_choice",
+          "stem": "¿Para qué el autor escribió este texto?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Para advertir sobre las especies amenazadas que habitan el Valle del Elqui.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Para informar sobre el descubrimiento de un gran ecosistema en el Valle del Elqui.",
+              "isCorrect": true
+            },
+            {
+              "key": "C",
+              "text": "Para enseñar sobre las medidas de protección a favor de la vida natural del Valle del Elqui.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "Para exponer sobre el impacto de las empresas mineras en la naturaleza del Valle del Elqui.",
+              "isCorrect": false
+            }
+          ],
+          "correctKey": "B",
+          "skill": "Reflexionar",
+          "oa": "OA 7",
+          "contentAxis": "Texto no literario",
+          "hasFigure": false,
+          "figureNote": null,
+          "taxonomy": [
+            {
+              "type": "descriptor",
+              "code": null,
+              "name": "Determinan propósitos explícitos e implícitos en un texto no literario.",
+              "parentCode": "LANG-4B-OA07",
+              "tagType": "primary"
+            },
+            {
+              "type": "learning_objective",
+              "code": "LANG-4B-OA07",
+              "name": "OA 7",
+              "level": "4_basico",
+              "tagType": "secondary"
+            },
+            {
+              "type": "skill",
+              "code": "LANG-SK-REFLEXIONAR",
+              "name": "Reflexionar",
+              "tagType": "secondary"
+            },
+            {
+              "type": "text_type",
+              "code": "LANG-TT-TEXTO-NO-LITERARIO",
+              "name": "Texto no literario",
+              "tagType": "secondary"
+            }
+          ]
+        },
+        {
+          "position": 14,
+          "type": "open_ended",
+          "stem": "¿Estás de acuerdo con la llegada de mineras a la zona? (Sí / No). ¿Por qué? Fundamenta tu opinión utilizando información del texto.",
+          "alternatives": [],
+          "correctKey": null,
+          "skill": "Reflexionar",
+          "oa": "OA 6",
+          "contentAxis": "Texto no literario",
+          "hasFigure": false,
+          "figureNote": "Ítem híbrido: ofrece selección Sí/No y luego pide fundamentación escrita. Se modela como open_ended porque lo evaluable es la justificación.",
+          "taxonomy": [
+            {
+              "type": "descriptor",
+              "code": null,
+              "name": "Opinan sobre algún aspecto relevante de un texto no literario con fundamentos que integran información del texto.",
+              "parentCode": "LANG-4B-OA06",
+              "tagType": "primary"
+            },
+            {
+              "type": "learning_objective",
+              "code": "LANG-4B-OA06",
+              "name": "OA 6",
+              "level": "4_basico",
+              "tagType": "secondary"
+            },
+            {
+              "type": "skill",
+              "code": "LANG-SK-REFLEXIONAR",
+              "name": "Reflexionar",
+              "tagType": "secondary"
+            },
+            {
+              "type": "text_type",
+              "code": "LANG-TT-TEXTO-NO-LITERARIO",
+              "name": "Texto no literario",
+              "tagType": "secondary"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "order": 4,
+      "name": "Texto 4: «Bucéfalo»",
+      "type": "multiple_choice",
+      "instructions": "Lee el siguiente texto y responde las preguntas 15 a 19.",
+      "passage": {
+        "title": "Bucéfalo",
+        "text": "Cuando el príncipe Alejandro tenía doce años, su padre Filipo, rey de Macedonia, lo mandó a llamar.\n\n—Hijo —dijo el monarca—, ya sabes cabalgar. Cuando seas mayor y te conviertas en rey, deberás tener un caballo fuerte y valiente.\n\n—Sí, padre —dijo Alejandro.\n\n—Mañana iremos a Pella, a la feria de caballos —dijo Filipo—. Los hay de todas las clases y de todas las tierras. Tú elegirás el mejor.\n\nAl día siguiente, el rey y su hijo, con la corte, se encontraban en la gran explanada de Pella, donde los mercaderes mostraban centenares de caballos. El chico andaba y miraba, acariciaba hocicos y cuellos, hacía preguntas y montaba alguno que otro animal.\n\nDe repente oyó un alboroto. Aceleró el paso y vio que, dentro de un recinto, un gran caballo negro, con un lucero blanco en la frente, pateaba y saltaba, regañando y relinchando.\n\n—¡Estupendo! —exclamó.\n\n—Sí, príncipe —dijo el mercader que estaba allí al lado—. Claro que solo para mirarlo, porque nadie consigue cabalgarlo.\n\n—Dejadme ver —dijo el príncipe.\n\nUn jinete se acercó al caballo y lo cogió por la rienda. Como se acostumbraba en las ferias, antes de montarlo le hizo dar una vuelta sobre sí mismo, para hacer que los presentes lo admiraran. Y entonces el caballo se levantó, relinchando, y se escapó, arrancando las riendas del puño del hombre.\n\n—¿Habéis visto, príncipe? ¡Siempre hace lo mismo! —dijo el mercader.\n\n—Intentadlo una vez más, por favor —pidió Alejandro.\n\nOtro jinete se acercó al caballo, que se dejó tomar por las riendas, pero en medio de la vuelta se levantó y se escapó.\n\n—¡No hay quien lo monte, príncipe! —dijo el mercader.\n\n—Quiero montarlo yo —dijo Alejandro.\n\n—Pero… No lo han logrado los mejores jinetes… —dijo el mercader—. Si el caballo se rebela, podríais heriros…\n\n—Quiero intentarlo —dijo Alejandro.\n\n—Inténtalo entonces —dijo el rey, que había escuchado todo en silencio.\n\nEl mercader suspiró, y levantó la barra del recinto.\n\nAlejandro se acercó al caballo, que se había calmado. Tomó las riendas muy despacio. Luego le acarició el hocico y, sin hacer que se diera la vuelta, lo montó de un salto.\n\nEl caballo se quedó inmóvil.\n\nLa gente, a su alrededor, murmuraba con asombro.\n\nAlejandro llevó al caballo junto a la cerca.\n\n—¿Cómo lo has conseguido, hijo mío? —preguntó Filipo.\n\n—Padre —explicó el chico—, he notado que el caballo se asustaba cuando, durante la vuelta que le hacían dar, el sol le daba en los ojos. Yo no le he hecho dar la vuelta y el sol se ha quedado a sus espaldas, por eso no se ha levantado.\n\nEl rey, contento y orgulloso, dijo:\n\n—¿Es este el caballo que eliges, Alejandro?\n\n—Sí —respondió el chico, acariciando al animal en el cuello—. Lo llamaré Bucéfalo.\n\nAsí, a lomos de Bucéfalo, Alejandro cabalgó toda su vida, viajando y conquistando fabulosos países de Oriente.\n\nRoberto Piumini. Mil caballos. España: Siruela, 2009.",
+        "format": "plain",
+        "attachments": [
+          {
+            "kind": "image",
+            "note": "Ilustración de Alejandro montando a Bucéfalo, un caballo (decorativa)."
+          }
+        ]
+      },
+      "items": [
+        {
+          "position": 15,
+          "type": "multiple_choice",
+          "stem": "¿Qué advertencia realiza el mercader a Alejandro?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Que el caballo se asusta con el sol.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Que es imposible montar ese caballo.",
+              "isCorrect": true
+            },
+            {
+              "key": "C",
+              "text": "Que las riendas del caballo se deben tomar lentamente.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "Que debe acariciar el hocico del caballo antes de montarlo.",
+              "isCorrect": false
+            }
+          ],
+          "correctKey": "B",
+          "skill": "Interpretar y relacionar",
+          "oa": "OA 4",
+          "contentAxis": "Narración",
+          "hasFigure": false,
+          "figureNote": null,
+          "taxonomy": [
+            {
+              "type": "descriptor",
+              "code": null,
+              "name": "Identifican un acontecimiento o acción relevante en un texto narrativo.",
+              "parentCode": "LANG-4B-OA04",
+              "tagType": "primary"
+            },
+            {
+              "type": "learning_objective",
+              "code": "LANG-4B-OA04",
+              "name": "OA 4",
+              "level": "4_basico",
+              "tagType": "secondary"
+            },
+            {
+              "type": "skill",
+              "code": "LANG-SK-INTERPRETAR-Y-RELACIONAR",
+              "name": "Interpretar y relacionar",
+              "tagType": "secondary"
+            },
+            {
+              "type": "text_type",
+              "code": "LANG-TT-NARRACION",
+              "name": "Narración",
+              "tagType": "secondary"
+            }
+          ]
+        },
+        {
+          "position": 16,
+          "type": "multiple_choice",
+          "stem": "¿Cuál es la actitud de Alejandro al intentar montar el caballo negro por primera vez?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Fuerza.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Esfuerzo.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Soberbia.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "Confianza.",
+              "isCorrect": true
+            }
+          ],
+          "correctKey": "D",
+          "skill": "Interpretar y relacionar",
+          "oa": "OA 4",
+          "contentAxis": "Narración",
+          "hasFigure": false,
+          "figureNote": null,
+          "taxonomy": [
+            {
+              "type": "descriptor",
+              "code": null,
+              "name": "Infieren información relevante sobre personajes en un texto narrativo.",
+              "parentCode": "LANG-4B-OA04",
+              "tagType": "primary"
+            },
+            {
+              "type": "learning_objective",
+              "code": "LANG-4B-OA04",
+              "name": "OA 4",
+              "level": "4_basico",
+              "tagType": "secondary"
+            },
+            {
+              "type": "skill",
+              "code": "LANG-SK-INTERPRETAR-Y-RELACIONAR",
+              "name": "Interpretar y relacionar",
+              "tagType": "secondary"
+            },
+            {
+              "type": "text_type",
+              "code": "LANG-TT-NARRACION",
+              "name": "Narración",
+              "tagType": "secondary"
+            }
+          ]
+        },
+        {
+          "position": 17,
+          "type": "multiple_choice",
+          "stem": "¿Por qué Alejandro consigue montar el caballo?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Porque lo hizo de un solo salto.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Porque evitó que le molestara el sol.",
+              "isCorrect": true
+            },
+            {
+              "key": "C",
+              "text": "Porque lo acarició antes de montarlo.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "Porque tomó lentamente las riendas.",
+              "isCorrect": false
+            }
+          ],
+          "correctKey": "B",
+          "skill": "Interpretar y relacionar",
+          "oa": "OA 4",
+          "contentAxis": "Narración",
+          "hasFigure": false,
+          "figureNote": null,
+          "taxonomy": [
+            {
+              "type": "descriptor",
+              "code": null,
+              "name": "Infieren causa o consecuencia de acontecimientos o acciones relevantes en un texto narrativo.",
+              "parentCode": "LANG-4B-OA04",
+              "tagType": "primary"
+            },
+            {
+              "type": "learning_objective",
+              "code": "LANG-4B-OA04",
+              "name": "OA 4",
+              "level": "4_basico",
+              "tagType": "secondary"
+            },
+            {
+              "type": "skill",
+              "code": "LANG-SK-INTERPRETAR-Y-RELACIONAR",
+              "name": "Interpretar y relacionar",
+              "tagType": "secondary"
+            },
+            {
+              "type": "text_type",
+              "code": "LANG-TT-NARRACION",
+              "name": "Narración",
+              "tagType": "secondary"
+            }
+          ]
+        },
+        {
+          "position": 18,
+          "type": "multiple_choice",
+          "stem": "¿Quién era Bucéfalo?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "El rey de Macedonia.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "El príncipe heredero.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "El mercader.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "El caballo.",
+              "isCorrect": true
+            }
+          ],
+          "correctKey": "D",
+          "skill": "Interpretar y relacionar",
+          "oa": "OA 4",
+          "contentAxis": "Narración",
+          "hasFigure": false,
+          "figureNote": null,
+          "taxonomy": [
+            {
+              "type": "descriptor",
+              "code": null,
+              "name": "Infieren información relevante sobre personajes en un texto narrativo.",
+              "parentCode": "LANG-4B-OA04",
+              "tagType": "primary"
+            },
+            {
+              "type": "learning_objective",
+              "code": "LANG-4B-OA04",
+              "name": "OA 4",
+              "level": "4_basico",
+              "tagType": "secondary"
+            },
+            {
+              "type": "skill",
+              "code": "LANG-SK-INTERPRETAR-Y-RELACIONAR",
+              "name": "Interpretar y relacionar",
+              "tagType": "secondary"
+            },
+            {
+              "type": "text_type",
+              "code": "LANG-TT-NARRACION",
+              "name": "Narración",
+              "tagType": "secondary"
+            }
+          ]
+        },
+        {
+          "position": 19,
+          "type": "multiple_choice",
+          "stem": "En las ferias, ¿para qué hacían que los caballos se dieran una vuelta sobre sí mismos?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Para que la gente los pudiera montar.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Para que el público los pudiera admirar.",
+              "isCorrect": true
+            },
+            {
+              "key": "C",
+              "text": "Para que los jinetes los pudieran domesticar.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "Para que los mercaderes los pudieran calmar.",
+              "isCorrect": false
+            }
+          ],
+          "correctKey": "B",
+          "skill": "Interpretar y relacionar",
+          "oa": "OA 4",
+          "contentAxis": "Narración",
+          "hasFigure": false,
+          "figureNote": null,
+          "taxonomy": [
+            {
+              "type": "descriptor",
+              "code": null,
+              "name": "Infieren causa o consecuencia de acontecimientos o acciones relevantes en un texto narrativo.",
+              "parentCode": "LANG-4B-OA04",
+              "tagType": "primary"
+            },
+            {
+              "type": "learning_objective",
+              "code": "LANG-4B-OA04",
+              "name": "OA 4",
+              "level": "4_basico",
+              "tagType": "secondary"
+            },
+            {
+              "type": "skill",
+              "code": "LANG-SK-INTERPRETAR-Y-RELACIONAR",
+              "name": "Interpretar y relacionar",
+              "tagType": "secondary"
+            },
+            {
+              "type": "text_type",
+              "code": "LANG-TT-NARRACION",
+              "name": "Narración",
+              "tagType": "secondary"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "order": 5,
+      "name": "Texto 5: «Cómo nacieron los delfines»",
+      "type": "multiple_choice",
+      "instructions": "Lee el siguiente texto y responde las preguntas 20 a 24.",
+      "passage": {
+        "title": "Cómo nacieron los delfines (Mito Ona)",
+        "text": "Una mujer había ido a la playa a recoger mejillones. Mientras estaba allí, le pareció oír un ruido a lo lejos.\n\nComo tenía un oído muy agudo, prestó más atención. Del sur parecía acercarse un murmullo apagado, como si la tierra estuviera temblando levemente. El sonido provenía de lejos, pero se oía cada vez más cerca. Rápidamente, la mujer corrió hacia el campamento para avisar a su gente. Allí nadie había oído nada, pero todos fueron a la playa para ver de qué se trataba. Cuando llegaron pudieron oír este retumbar lejano del aire, que cada vez se hacía más próximo.\n\n—Una tormenta terrible se acerca —dijo la mujer que primero había oído el ruido—; debemos irnos de aquí cuanto antes.\n\nLa mujer tenía razón: nunca había visto a Xosé, el espíritu de la nieve; pero su intuición le decía que una catástrofe estaba por caer sobre ellos. Los demás estuvieron de acuerdo, y decidieron que el mejor lugar para escapar era mar adentro. Solo Kemanta, el marido de la mujer, se mantuvo aparte.\n\n—Yo no iré. Me treparé en esa roca, y cuando pase la tormenta volveré a casa —dijo con obstinación. En realidad, no sabía nadar, y por eso no quería meterse en el mar.\n\n—Vamos, todos te ayudaremos —le replicaron los demás—. No hay nada que hacer aquí. La nieve y el viento arrasarán con todo. Además, dentro del mar hay un hermoso lugar para vivir…\n\nPero él seguía con su postura. Finalmente lo convencieron; pero cada vez que sus pies tocaban el agua fría, volvía hacia atrás. Hubo que hacer varios intentos, hasta que por fin pudieron introducirse todos en el mar. Kemanta no tocaba fondo y se hundió. Pero de inmediato volvió a la superficie, ayudado por sus compañeros. Volvió a hundirse y volvieron a sacarlo a flote. Así Kemanta siguió avanzando todo el tiempo. Iban siempre juntos, hasta que al fin Kemanta aprendió a nadar.\n\nEsta gente no volvió jamás a tierra; se quedaron a vivir en el mar, empujados por Xosé, el espíritu de la nieve. Son los bellos delfines, que siempre andan juntos y que, como Kemanta, se hunden en el mar para emerger después un poco más adelante.\n\nJuan Andrés Piña y Marcela Recabarren. Un viaje por las letras. Antología literaria. Chile: Alfaguara infantil, 2011.",
+        "format": "plain",
+        "attachments": [
+          {
+            "kind": "image",
+            "note": "Ilustración de delfines nadando en el mar (decorativa)."
+          }
+        ]
+      },
+      "items": [
+        {
+          "position": 20,
+          "type": "multiple_choice",
+          "stem": "¿Cómo se sintió la mujer cuando escuchó que el ruido se oía cada vez más cerca?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Valiente.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Asustada.",
+              "isCorrect": true
+            },
+            {
+              "key": "C",
+              "text": "Asombrada.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "Confundida.",
+              "isCorrect": false
+            }
+          ],
+          "correctKey": "B",
+          "skill": "Interpretar y relacionar",
+          "oa": "OA 4",
+          "contentAxis": "Narración",
+          "hasFigure": false,
+          "figureNote": null,
+          "taxonomy": [
+            {
+              "type": "descriptor",
+              "code": null,
+              "name": "Infieren información relevante sobre personajes en un texto narrativo.",
+              "parentCode": "LANG-4B-OA04",
+              "tagType": "primary"
+            },
+            {
+              "type": "learning_objective",
+              "code": "LANG-4B-OA04",
+              "name": "OA 4",
+              "level": "4_basico",
+              "tagType": "secondary"
+            },
+            {
+              "type": "skill",
+              "code": "LANG-SK-INTERPRETAR-Y-RELACIONAR",
+              "name": "Interpretar y relacionar",
+              "tagType": "secondary"
+            },
+            {
+              "type": "text_type",
+              "code": "LANG-TT-NARRACION",
+              "name": "Narración",
+              "tagType": "secondary"
+            }
+          ]
+        },
+        {
+          "position": 21,
+          "type": "multiple_choice",
+          "stem": "¿Por qué las personas decidieron irse del campamento?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Porque creían que se acercaba una tormenta terrible.",
+              "isCorrect": true
+            },
+            {
+              "key": "B",
+              "text": "Porque querían transformarse en delfines.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Porque habían discutido con Kemanta.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "Porque deseaban vivir en el mar.",
+              "isCorrect": false
+            }
+          ],
+          "correctKey": "A",
+          "skill": "Interpretar y relacionar",
+          "oa": "OA 4",
+          "contentAxis": "Narración",
+          "hasFigure": false,
+          "figureNote": null,
+          "taxonomy": [
+            {
+              "type": "descriptor",
+              "code": null,
+              "name": "Infieren causa o consecuencia de acontecimientos o acciones relevantes en un texto narrativo.",
+              "parentCode": "LANG-4B-OA04",
+              "tagType": "primary"
+            },
+            {
+              "type": "learning_objective",
+              "code": "LANG-4B-OA04",
+              "name": "OA 4",
+              "level": "4_basico",
+              "tagType": "secondary"
+            },
+            {
+              "type": "skill",
+              "code": "LANG-SK-INTERPRETAR-Y-RELACIONAR",
+              "name": "Interpretar y relacionar",
+              "tagType": "secondary"
+            },
+            {
+              "type": "text_type",
+              "code": "LANG-TT-NARRACION",
+              "name": "Narración",
+              "tagType": "secondary"
+            }
+          ]
+        },
+        {
+          "position": 22,
+          "type": "multiple_choice",
+          "stem": "¿Quién era Xosé?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "La persona que alertó de la tormenta.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "El hombre que quería trepar la roca.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "La mujer que escuchó el ruido.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "El espíritu de la nieve.",
+              "isCorrect": true
+            }
+          ],
+          "correctKey": "D",
+          "skill": "Localizar",
+          "oa": "OA 4",
+          "contentAxis": "Narración",
+          "hasFigure": false,
+          "figureNote": null,
+          "taxonomy": [
+            {
+              "type": "descriptor",
+              "code": null,
+              "name": "Localizan información explícita relevante en un texto narrativo.",
+              "parentCode": "LANG-4B-OA04",
+              "tagType": "primary"
+            },
+            {
+              "type": "learning_objective",
+              "code": "LANG-4B-OA04",
+              "name": "OA 4",
+              "level": "4_basico",
+              "tagType": "secondary"
+            },
+            {
+              "type": "skill",
+              "code": "LANG-SK-LOCALIZAR",
+              "name": "Localizar",
+              "tagType": "secondary"
+            },
+            {
+              "type": "text_type",
+              "code": "LANG-TT-NARRACION",
+              "name": "Narración",
+              "tagType": "secondary"
+            }
+          ]
+        },
+        {
+          "position": 23,
+          "type": "multiple_choice",
+          "stem": "¿Por qué Kemanta rechazaba meterse al mar?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Porque creía que la roca era un lugar más seguro.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Porque sabía que se transformaría en delfín.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Porque sentía temor al no saber nadar.",
+              "isCorrect": true
+            },
+            {
+              "key": "D",
+              "text": "Porque deseaba quedarse en su casa.",
+              "isCorrect": false
+            }
+          ],
+          "correctKey": "C",
+          "skill": "Interpretar y relacionar",
+          "oa": "OA 4",
+          "contentAxis": "Narración",
+          "hasFigure": false,
+          "figureNote": null,
+          "taxonomy": [
+            {
+              "type": "descriptor",
+              "code": null,
+              "name": "Infieren causa o consecuencia de acontecimientos o acciones relevantes en un texto narrativo.",
+              "parentCode": "LANG-4B-OA04",
+              "tagType": "primary"
+            },
+            {
+              "type": "learning_objective",
+              "code": "LANG-4B-OA04",
+              "name": "OA 4",
+              "level": "4_basico",
+              "tagType": "secondary"
+            },
+            {
+              "type": "skill",
+              "code": "LANG-SK-INTERPRETAR-Y-RELACIONAR",
+              "name": "Interpretar y relacionar",
+              "tagType": "secondary"
+            },
+            {
+              "type": "text_type",
+              "code": "LANG-TT-NARRACION",
+              "name": "Narración",
+              "tagType": "secondary"
+            }
+          ]
+        },
+        {
+          "position": 24,
+          "type": "multiple_choice",
+          "stem": "¿Qué hicieron los compañeros de Kemanta cuando este volvió a hundirse?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Lo dejaron solo.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Lo sacaron a flote.",
+              "isCorrect": true
+            },
+            {
+              "key": "C",
+              "text": "Lo llevaron a tierra.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "Lo enviaron con Xosé.",
+              "isCorrect": false
+            }
+          ],
+          "correctKey": "B",
+          "skill": "Localizar",
+          "oa": "OA 4",
+          "contentAxis": "Narración",
+          "hasFigure": false,
+          "figureNote": null,
+          "taxonomy": [
+            {
+              "type": "descriptor",
+              "code": null,
+              "name": "Localizan información explícita relevante en un texto narrativo.",
+              "parentCode": "LANG-4B-OA04",
+              "tagType": "primary"
+            },
+            {
+              "type": "learning_objective",
+              "code": "LANG-4B-OA04",
+              "name": "OA 4",
+              "level": "4_basico",
+              "tagType": "secondary"
+            },
+            {
+              "type": "skill",
+              "code": "LANG-SK-LOCALIZAR",
+              "name": "Localizar",
+              "tagType": "secondary"
+            },
+            {
+              "type": "text_type",
+              "code": "LANG-TT-NARRACION",
+              "name": "Narración",
+              "tagType": "secondary"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "order": 6,
+      "name": "Texto 6: «El zorzal»",
+      "type": "multiple_choice",
+      "instructions": "Lee el siguiente texto y responde las preguntas 25 a 27.",
+      "passage": {
+        "title": "El zorzal",
+        "text": "Con su pechera rosada\ny su levita marrón;\ncon ese cuerpo robusto\ny ese aire de gran señor,\nnadie lo imaginaría\ntan delicado cantor.\n\nMuere el sol y, junto al río,\nda sus silbidos el zorzal;\nla tarde que se marchaba,\nse volvió para escuchar;\nel agua, que iba corriendo,\nse detuvo hecha un cristal;\nel aire se quedó en suspenso;\nla brisa, sin respirar;\nabrió la boca tamaña\nla luna sobre el sauzal,\ny con lágrimas de estrellas\nel cielo rompió a llorar…\nAnochece… Junto al río,\nsigue cantando el zorzal.\n\nJuan Burghi. “El zorzal”. Arcoíris de Poesía infantil. Comp. Lucía Araya y Clementina Maldonado. Chile: Universitaria, 1987.\n\nGlosario\nlevita: chaqueta.\nsauzal: sitio poblado de sauces.",
+        "format": "plain",
+        "attachments": [
+          {
+            "kind": "image",
+            "note": "Ilustración de un zorzal (ave) junto a un río al atardecer (decorativa)."
+          }
+        ]
+      },
+      "items": [
+        {
+          "position": 25,
+          "type": "multiple_choice",
+          "stem": "¿Qué quieren decir los siguientes versos del poema?\n\n«abrió la boca tamaña / la luna sobre el sauzal,»",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Que la luna se ve más grande que el sauzal.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Que la luna se escondió entre los sauces.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Que la luna apareció en el cielo.",
+              "isCorrect": true
+            },
+            {
+              "key": "D",
+              "text": "Que la luna se reflejó en el río.",
+              "isCorrect": false
+            }
+          ],
+          "correctKey": "C",
+          "skill": "Interpretar y relacionar",
+          "oa": "OA 5",
+          "contentAxis": "Poema",
+          "hasFigure": false,
+          "figureNote": "El ítem cita dos versos del poema como estímulo propio; se incluyen dentro del stem.",
+          "taxonomy": [
+            {
+              "type": "descriptor",
+              "code": null,
+              "name": "Interpretan el sentido de expresiones en lenguaje figurado presentes en un poema.",
+              "parentCode": "LANG-4B-OA05",
+              "tagType": "primary"
+            },
+            {
+              "type": "learning_objective",
+              "code": "LANG-4B-OA05",
+              "name": "OA 5",
+              "level": "4_basico",
+              "tagType": "secondary"
+            },
+            {
+              "type": "skill",
+              "code": "LANG-SK-INTERPRETAR-Y-RELACIONAR",
+              "name": "Interpretar y relacionar",
+              "tagType": "secondary"
+            },
+            {
+              "type": "text_type",
+              "code": "LANG-TT-POEMA",
+              "name": "Poema",
+              "tagType": "secondary"
+            }
+          ]
+        },
+        {
+          "position": 26,
+          "type": "multiple_choice",
+          "stem": "¿Qué siente por el zorzal quien habla en el poema?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Tristeza.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Compasión.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Curiosidad.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "Admiración.",
+              "isCorrect": true
+            }
+          ],
+          "correctKey": "D",
+          "skill": "Interpretar y relacionar",
+          "oa": "OA 5",
+          "contentAxis": "Poema",
+          "hasFigure": false,
+          "figureNote": null,
+          "taxonomy": [
+            {
+              "type": "descriptor",
+              "code": null,
+              "name": "Infieren el sentido global de un poema o un fragmento de este.",
+              "parentCode": "LANG-4B-OA05",
+              "tagType": "primary"
+            },
+            {
+              "type": "learning_objective",
+              "code": "LANG-4B-OA05",
+              "name": "OA 5",
+              "level": "4_basico",
+              "tagType": "secondary"
+            },
+            {
+              "type": "skill",
+              "code": "LANG-SK-INTERPRETAR-Y-RELACIONAR",
+              "name": "Interpretar y relacionar",
+              "tagType": "secondary"
+            },
+            {
+              "type": "text_type",
+              "code": "LANG-TT-POEMA",
+              "name": "Poema",
+              "tagType": "secondary"
+            }
+          ]
+        },
+        {
+          "position": 27,
+          "type": "multiple_choice",
+          "stem": "¿Qué cualidad del zorzal se destaca en el poema?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Su vida nocturna.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Su hermoso canto.",
+              "isCorrect": true
+            },
+            {
+              "key": "C",
+              "text": "La forma de su cuerpo.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "El color de sus plumas.",
+              "isCorrect": false
+            }
+          ],
+          "correctKey": "B",
+          "skill": "Interpretar y relacionar",
+          "oa": "OA 5",
+          "contentAxis": "Poema",
+          "hasFigure": false,
+          "figureNote": null,
+          "taxonomy": [
+            {
+              "type": "descriptor",
+              "code": null,
+              "name": "Infieren el sentido global de un poema o un fragmento de este.",
+              "parentCode": "LANG-4B-OA05",
+              "tagType": "primary"
+            },
+            {
+              "type": "learning_objective",
+              "code": "LANG-4B-OA05",
+              "name": "OA 5",
+              "level": "4_basico",
+              "tagType": "secondary"
+            },
+            {
+              "type": "skill",
+              "code": "LANG-SK-INTERPRETAR-Y-RELACIONAR",
+              "name": "Interpretar y relacionar",
+              "tagType": "secondary"
+            },
+            {
+              "type": "text_type",
+              "code": "LANG-TT-POEMA",
+              "name": "Poema",
+              "tagType": "secondary"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "extraction": {
+    "itemCount": 27,
+    "warnings": [
+      "Q5 es un ítem híbrido Sí/No + fundamentación; modelado como open_ended.",
+      "Q9 depende de una imagen (fotografía del hongo Amanita muscaria) que el enunciado pregunta directamente; hasFigure:true y needsHumanReview.",
+      "Q14 es un ítem híbrido Sí/No + fundamentación; modelado como open_ended.",
+      "Q25 incluye dos versos-estímulo propios del ítem, embebidos en el stem.",
+      "Textos transcritos desde la capa de texto del PDF (pdftotext), verbatim."
+    ],
+    "needsHumanReview": true
+  },
+  "pauta": {
+    "source": {
+      "report": "RBD25520_DIA_LECTURA_5_A_Resultados_Asignatura_Monitoreo_2025.pdf",
+      "subjectCode": "LANG",
+      "gradeCode": "5TH_BASIC",
+      "applicationPeriod": "intermedio",
+      "year": 2025,
+      "instrumentJson": "extraccion/lenguaje/5º lenguaje intermedio 2025.json"
+    },
+    "appliedKeys": 25,
+    "issues": []
+  }
+}

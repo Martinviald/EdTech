@@ -1,0 +1,1357 @@
+{
+  "schemaVersion": "1.0",
+  "source": {
+    "file": "4º lenguaje diagnóstico 2025.pdf",
+    "subjectFolder": "Lenguaje"
+  },
+  "instrument": {
+    "name": "DIA Lectura 4° Básico 2025 — Diagnóstico",
+    "subject": "Lenguaje y Comunicación",
+    "subjectCode": "LANG",
+    "grade": "4° Básico",
+    "gradeCode": "4TH_BASIC",
+    "year": 2025,
+    "applicationPeriod": "diagnostico",
+    "type": "dia",
+    "isOfficial": true,
+    "source": "imported"
+  },
+  "sections": [
+    {
+      "order": 1,
+      "name": "Texto 1: «Las moscas y la miel»",
+      "type": "multiple_choice",
+      "instructions": "Lee el siguiente texto y responde las preguntas 1 a 5.",
+      "passage": {
+        "title": "Las moscas y la miel",
+        "text": "Érase una vez una mosca que encontró un panal del cual se había derramado toda su miel. Tentada por el delicioso aroma, se abalanzó sobre la miel y comenzó a nadar en ella, deleitándose con su dulce sabor.\n\nAl verla disfrutar bocado tras bocado, un grupo de moscas que pasaba por allí, se acercó. Tentadas por el delicioso olor, se prepararon para descender sobre la miel.\n\n—¡Alto! —gritó la mosca que había llegado primero—. ¡Esta miel es solo mía y de nadie más! ¡Yo la vi primero y no quiero compartirla con nadie!\n\nUna de las moscas que sobrevolaba la miel, sorprendida por esta actitud tan egoísta, se quedó mirándola y le contestó:\n\n—Siempre compartimos todo lo que encontramos, ¿por qué esta vez tiene que ser diferente?\n\nLa mosca no les prestó atención y, caprichosa, siguió nadando. “Ya necesitarás de nuestra ayuda”, contestaron las moscas, que se dieron vuelta y comenzaron a marcharse enojadas.\n\nEn ese momento, la mosca se hundió en una zona donde la miel era demasiado densa y espesa y, para salvarse, pidió auxilio a sus amigas. Para demostrarle que no era bueno tener rencor ni ser egoísta, sus amigas la ayudaron a salir y gracias a eso se salvó.\n\nLuciana Acuña, adap. Fábulas para toda la vida. Colección Fábulas para antes de dormir. Chile: EME, 2011.",
+        "format": "plain",
+        "attachments": [
+          {
+            "kind": "image",
+            "note": "Ilustración de una mosca posada sobre miel derramada (decorativa)."
+          }
+        ]
+      },
+      "items": [
+        {
+          "position": 1,
+          "type": "multiple_choice",
+          "stem": "¿Por qué la mosca se acerca a la miel?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Porque recuerda su dulce sabor.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Porque siente su delicioso aroma.",
+              "isCorrect": true
+            },
+            {
+              "key": "C",
+              "text": "Porque quiere nadar en su espesor.",
+              "isCorrect": false
+            }
+          ],
+          "correctKey": "B",
+          "skill": "Interpretar y relacionar",
+          "oa": "OA 4",
+          "contentAxis": "Narración",
+          "responseFormat": "choice",
+          "hasFigure": false,
+          "figureNote": null,
+          "taxonomy": [
+            {
+              "type": "descriptor",
+              "code": null,
+              "name": "Infieren causa o consecuencia de acontecimientos o acciones relevantes en un texto narrativo.",
+              "parentCode": "LANG-3B-OA04",
+              "tagType": "primary"
+            },
+            {
+              "type": "learning_objective",
+              "code": "LANG-3B-OA04",
+              "name": "OA 4",
+              "level": "3_basico",
+              "tagType": "secondary"
+            },
+            {
+              "type": "skill",
+              "code": "LANG-SK-INTERPRETAR-Y-RELACIONAR",
+              "name": "Interpretar y relacionar",
+              "tagType": "secondary"
+            },
+            {
+              "type": "text_type",
+              "code": "LANG-TT-NARRACION",
+              "name": "Narración",
+              "tagType": "secondary"
+            }
+          ]
+        },
+        {
+          "position": 2,
+          "type": "multiple_choice",
+          "stem": "¿Cómo es la mosca que llega primero a la miel?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Egoísta.",
+              "isCorrect": true
+            },
+            {
+              "key": "B",
+              "text": "Enojona.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Rencorosa.",
+              "isCorrect": false
+            }
+          ],
+          "correctKey": "A",
+          "skill": "Interpretar y relacionar",
+          "oa": "OA 4",
+          "contentAxis": "Narración",
+          "responseFormat": "choice",
+          "hasFigure": false,
+          "figureNote": null,
+          "taxonomy": [
+            {
+              "type": "descriptor",
+              "code": null,
+              "name": "Infieren características y sentimientos de personajes en un texto narrativo.",
+              "parentCode": "LANG-3B-OA04",
+              "tagType": "primary"
+            },
+            {
+              "type": "learning_objective",
+              "code": "LANG-3B-OA04",
+              "name": "OA 4",
+              "level": "3_basico",
+              "tagType": "secondary"
+            },
+            {
+              "type": "skill",
+              "code": "LANG-SK-INTERPRETAR-Y-RELACIONAR",
+              "name": "Interpretar y relacionar",
+              "tagType": "secondary"
+            },
+            {
+              "type": "text_type",
+              "code": "LANG-TT-NARRACION",
+              "name": "Narración",
+              "tagType": "secondary"
+            }
+          ]
+        },
+        {
+          "position": 3,
+          "type": "multiple_choice",
+          "stem": "¿Por qué la mosca necesitó la ayuda de sus compañeras?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Porque se estaba ahogando en la miel.",
+              "isCorrect": true
+            },
+            {
+              "key": "B",
+              "text": "Porque había comido demasiada miel.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Porque debía encontrar más miel.",
+              "isCorrect": false
+            }
+          ],
+          "correctKey": "A",
+          "skill": "Interpretar y relacionar",
+          "oa": "OA 4",
+          "contentAxis": "Narración",
+          "responseFormat": "choice",
+          "hasFigure": false,
+          "figureNote": null,
+          "taxonomy": [
+            {
+              "type": "descriptor",
+              "code": null,
+              "name": "Infieren causa o consecuencia de acontecimientos o acciones relevantes en un texto narrativo.",
+              "parentCode": "LANG-3B-OA04",
+              "tagType": "primary"
+            },
+            {
+              "type": "learning_objective",
+              "code": "LANG-3B-OA04",
+              "name": "OA 4",
+              "level": "3_basico",
+              "tagType": "secondary"
+            },
+            {
+              "type": "skill",
+              "code": "LANG-SK-INTERPRETAR-Y-RELACIONAR",
+              "name": "Interpretar y relacionar",
+              "tagType": "secondary"
+            },
+            {
+              "type": "text_type",
+              "code": "LANG-TT-NARRACION",
+              "name": "Narración",
+              "tagType": "secondary"
+            }
+          ]
+        },
+        {
+          "position": 4,
+          "type": "multiple_choice",
+          "stem": "¿Por qué las moscas salvaron a la que había llegado primero?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Porque querían disfrutar de la miel.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Porque necesitaban pedirle ayuda.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Porque querían darle una lección.",
+              "isCorrect": true
+            }
+          ],
+          "correctKey": "C",
+          "skill": "Interpretar y relacionar",
+          "oa": "OA 4",
+          "contentAxis": "Narración",
+          "responseFormat": "choice",
+          "hasFigure": false,
+          "figureNote": null,
+          "taxonomy": [
+            {
+              "type": "descriptor",
+              "code": null,
+              "name": "Infieren causa o consecuencia de acontecimientos o acciones relevantes en un texto narrativo.",
+              "parentCode": "LANG-3B-OA04",
+              "tagType": "primary"
+            },
+            {
+              "type": "learning_objective",
+              "code": "LANG-3B-OA04",
+              "name": "OA 4",
+              "level": "3_basico",
+              "tagType": "secondary"
+            },
+            {
+              "type": "skill",
+              "code": "LANG-SK-INTERPRETAR-Y-RELACIONAR",
+              "name": "Interpretar y relacionar",
+              "tagType": "secondary"
+            },
+            {
+              "type": "text_type",
+              "code": "LANG-TT-NARRACION",
+              "name": "Narración",
+              "tagType": "secondary"
+            }
+          ]
+        },
+        {
+          "position": 5,
+          "type": "multiple_choice",
+          "stem": "Finalmente, ¿qué aprendió la mosca?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Que debe pedir ayuda a quienes la rodean.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Que debe ser cuidadosa con lo que encuentra.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Que debe compartir para disfrutar lo que tiene.",
+              "isCorrect": true
+            }
+          ],
+          "correctKey": "C",
+          "skill": "Interpretar y relacionar",
+          "oa": "OA 4",
+          "contentAxis": "Narración",
+          "responseFormat": "choice",
+          "hasFigure": false,
+          "figureNote": null,
+          "taxonomy": [
+            {
+              "type": "descriptor",
+              "code": null,
+              "name": "Infieren el sentido global de un texto narrativo.",
+              "parentCode": "LANG-3B-OA04",
+              "tagType": "primary"
+            },
+            {
+              "type": "learning_objective",
+              "code": "LANG-3B-OA04",
+              "name": "OA 4",
+              "level": "3_basico",
+              "tagType": "secondary"
+            },
+            {
+              "type": "skill",
+              "code": "LANG-SK-INTERPRETAR-Y-RELACIONAR",
+              "name": "Interpretar y relacionar",
+              "tagType": "secondary"
+            },
+            {
+              "type": "text_type",
+              "code": "LANG-TT-NARRACION",
+              "name": "Narración",
+              "tagType": "secondary"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "order": 2,
+      "name": "Texto 2: «Cómo hacer un muñeco con cabeza de pasto»",
+      "type": "mixed",
+      "instructions": "Lee el siguiente texto y responde las preguntas 6 a 10.",
+      "passage": {
+        "title": "Cómo hacer un muñeco con cabeza de pasto",
+        "text": "Materiales:\n• Un calcetín viejo\n• Semillas de pasto\n• Tierra\n• Un vaso de plástico\n• Cuatro elásticos\n• Un plumón o marcador\n• Un trozo de alambre\n\nPaso 1\nColoca en el calcetín las semillas de pasto y agrégale la tierra.\n\nPaso 2\nUtilizando un elástico, cierra el calcetín formando una especie de pelota.\n\nPaso 3\nPara hacer las orejas y la nariz, debes formar bolitas de tierra dentro del calcetín y amarrarlas con los elásticos, como lo muestra la imagen.\n\nPaso 4\nCon el plumón o marcador, debes dibujar los ojos y la boca.\n\nPaso 5\nCon el alambre tienes que fabricar unos anteojos. Pídele ayuda a un adulto. Se pueden guiar por la siguiente imagen:\n\nPaso 6\nFinalmente, llena el vaso de plástico con agua, introduce tu muñeco y ¡listo!\n\nEn unos días verás que le comenzará a crecer el cabello, es decir, las semillas comenzarán a germinar y se verá fantástico. Lo puedes colocar en tu ventana donde pueda captar la luz solar. Solo debes asegurarte de cambiar el agua cada cinco días.",
+        "format": "plain",
+        "attachments": [
+          {
+            "kind": "image",
+            "note": "Instructivo ilustrado con materiales y seis pasos, cada uno con una imagen del muñeco en construcción."
+          }
+        ]
+      },
+      "items": [
+        {
+          "position": 6,
+          "type": "multiple_choice",
+          "stem": "¿Qué se debe hacer antes de formar las orejas y la nariz?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Dibujar los ojos.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Cerrar el calcetín.",
+              "isCorrect": true
+            },
+            {
+              "key": "C",
+              "text": "Poner el vaso al sol.",
+              "isCorrect": false
+            }
+          ],
+          "correctKey": "B",
+          "skill": "Interpretar y relacionar",
+          "oa": "OA 6",
+          "contentAxis": "Texto no literario",
+          "responseFormat": "choice",
+          "hasFigure": false,
+          "figureNote": null,
+          "taxonomy": [
+            {
+              "type": "descriptor",
+              "code": null,
+              "name": "Infieren información relevante en un texto no literario.",
+              "parentCode": "LANG-3B-OA06",
+              "tagType": "primary"
+            },
+            {
+              "type": "learning_objective",
+              "code": "LANG-3B-OA06",
+              "name": "OA 6",
+              "level": "3_basico",
+              "tagType": "secondary"
+            },
+            {
+              "type": "skill",
+              "code": "LANG-SK-INTERPRETAR-Y-RELACIONAR",
+              "name": "Interpretar y relacionar",
+              "tagType": "secondary"
+            },
+            {
+              "type": "text_type",
+              "code": "LANG-TT-TEXTO-NO-LITERARIO",
+              "name": "Texto no literario",
+              "tagType": "secondary"
+            }
+          ]
+        },
+        {
+          "position": 7,
+          "type": "multiple_choice",
+          "stem": "¿Para qué se usa el alambre?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Para hacer la boca.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Para cerrar el calcetín.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Para fabricar los anteojos.",
+              "isCorrect": true
+            }
+          ],
+          "correctKey": "C",
+          "skill": "Localizar",
+          "oa": "OA 6",
+          "contentAxis": "Texto no literario",
+          "responseFormat": "choice",
+          "hasFigure": false,
+          "figureNote": null,
+          "taxonomy": [
+            {
+              "type": "descriptor",
+              "code": null,
+              "name": "Localizan información explícita relevante en un texto no literario.",
+              "parentCode": "LANG-3B-OA06",
+              "tagType": "primary"
+            },
+            {
+              "type": "learning_objective",
+              "code": "LANG-3B-OA06",
+              "name": "OA 6",
+              "level": "3_basico",
+              "tagType": "secondary"
+            },
+            {
+              "type": "skill",
+              "code": "LANG-SK-LOCALIZAR",
+              "name": "Localizar",
+              "tagType": "secondary"
+            },
+            {
+              "type": "text_type",
+              "code": "LANG-TT-TEXTO-NO-LITERARIO",
+              "name": "Texto no literario",
+              "tagType": "secondary"
+            }
+          ]
+        },
+        {
+          "position": 8,
+          "type": "multiple_choice",
+          "stem": "¿Qué se muestra en esta imagen?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Cómo se ve el muñeco terminado.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Cómo se hacen las orejas y la nariz.",
+              "isCorrect": true
+            },
+            {
+              "key": "C",
+              "text": "Cómo se forman los ojos y la boca.",
+              "isCorrect": false
+            }
+          ],
+          "correctKey": "B",
+          "skill": "Interpretar y relacionar",
+          "oa": "OA 6",
+          "contentAxis": "Texto no literario",
+          "responseFormat": "choice",
+          "hasFigure": true,
+          "figureNote": "Imagen del muñeco-calcetín mostrando un detalle circulado (orejas/nariz). El ítem depende de la figura para responderse.",
+          "needsHumanReview": true,
+          "taxonomy": [
+            {
+              "type": "descriptor",
+              "code": null,
+              "name": "Infieren información relevante que aportan los elementos discontinuos en un texto no literario.",
+              "parentCode": "LANG-3B-OA06",
+              "tagType": "primary"
+            },
+            {
+              "type": "learning_objective",
+              "code": "LANG-3B-OA06",
+              "name": "OA 6",
+              "level": "3_basico",
+              "tagType": "secondary"
+            },
+            {
+              "type": "skill",
+              "code": "LANG-SK-INTERPRETAR-Y-RELACIONAR",
+              "name": "Interpretar y relacionar",
+              "tagType": "secondary"
+            },
+            {
+              "type": "text_type",
+              "code": "LANG-TT-TEXTO-NO-LITERARIO",
+              "name": "Texto no literario",
+              "tagType": "secondary"
+            }
+          ]
+        },
+        {
+          "position": 9,
+          "type": "multiple_choice",
+          "stem": "Según el texto, ¿con qué se llena el vaso de plástico?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Con semillas.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Con tierra.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Con agua.",
+              "isCorrect": true
+            }
+          ],
+          "correctKey": "C",
+          "skill": "Localizar",
+          "oa": "OA 6",
+          "contentAxis": "Texto no literario",
+          "responseFormat": "choice",
+          "hasFigure": false,
+          "figureNote": null,
+          "taxonomy": [
+            {
+              "type": "descriptor",
+              "code": null,
+              "name": "Localizan información explícita relevante en un texto no literario.",
+              "parentCode": "LANG-3B-OA06",
+              "tagType": "primary"
+            },
+            {
+              "type": "learning_objective",
+              "code": "LANG-3B-OA06",
+              "name": "OA 6",
+              "level": "3_basico",
+              "tagType": "secondary"
+            },
+            {
+              "type": "skill",
+              "code": "LANG-SK-LOCALIZAR",
+              "name": "Localizar",
+              "tagType": "secondary"
+            },
+            {
+              "type": "text_type",
+              "code": "LANG-TT-TEXTO-NO-LITERARIO",
+              "name": "Texto no literario",
+              "tagType": "secondary"
+            }
+          ]
+        },
+        {
+          "position": 10,
+          "type": "open_ended",
+          "stem": "¿Por qué le crecerá el cabello al muñeco después de que esté listo? Fundamenta tu respuesta con información del texto.",
+          "alternatives": [],
+          "correctKey": null,
+          "skill": "Interpretar y relacionar",
+          "oa": "OA 6",
+          "contentAxis": "Texto no literario",
+          "responseFormat": "develop",
+          "hasFigure": false,
+          "figureNote": null,
+          "taxonomy": [
+            {
+              "type": "descriptor",
+              "code": null,
+              "name": "Infieren relaciones entre las ideas (causa-consecuencia, problema-solución, etc.) en un texto no literario.",
+              "parentCode": "LANG-3B-OA06",
+              "tagType": "primary"
+            },
+            {
+              "type": "learning_objective",
+              "code": "LANG-3B-OA06",
+              "name": "OA 6",
+              "level": "3_basico",
+              "tagType": "secondary"
+            },
+            {
+              "type": "skill",
+              "code": "LANG-SK-INTERPRETAR-Y-RELACIONAR",
+              "name": "Interpretar y relacionar",
+              "tagType": "secondary"
+            },
+            {
+              "type": "text_type",
+              "code": "LANG-TT-TEXTO-NO-LITERARIO",
+              "name": "Texto no literario",
+              "tagType": "secondary"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "order": 3,
+      "name": "Texto 3: «¿A qué sabe la luna?»",
+      "type": "mixed",
+      "instructions": "Lee el siguiente texto y responde las preguntas 11 a 15.",
+      "passage": {
+        "title": "¿A qué sabe la luna?",
+        "text": "Hacía mucho tiempo que los animales deseaban averiguar a qué sabía la luna. ¿Sería dulce o salada? Tan solo querían probar un pedacito.\n\nPor las noches, miraban ansiosos hacia el cielo. Se estiraban e intentaban cogerla, alargando el cuello, las piernas y los brazos. Pero todo fue en vano, y ni el animal más grande pudo alcanzarla. Un buen día, la pequeña tortuga decidió subir la montaña más alta para poder tocar la luna.\n\nDesde allí arriba, la luna estaba más cerca; pero la tortuga no podía tocarla.\n\nEntonces, llamó al elefante.\n\n—Si te subes a mi espalda, tal vez lleguemos a la luna.\n\nLa luna pensó que se trataba de un juego y, a medida que el elefante se acercaba, ella se alejaba un poco.\n\nComo el elefante no pudo tocar la luna, llamó a la jirafa.\n\n—Si te subes a mi espalda, a lo mejor la alcanzamos.\n\nPero al ver a la jirafa, la luna se distanció un poco más.\n\nLa jirafa estiró y estiró el cuello cuanto pudo, pero no sirvió de nada.\n\nY llamó a la cebra.\n\n—Si te subes a mi espalda, es probable que nos acerquemos más a ella.\n\nLa luna empezaba a divertirse con aquel juego, y se alejó otro poquito.\n\nLa cebra se esforzó mucho, mucho, pero tampoco pudo tocarla.\n\nY llamó al león.\n\n—Si te subes a mi espalda, quizá podamos alcanzarla.\n\nPero cuando la luna vio al león, volvió a subir algo más.\n\nTampoco esta vez lograron tocar la luna, y llamaron al zorro.\n\n—Verás cómo lo conseguimos si te subes a mi espalda —dijo el león.\n\nAl avistar al zorro, la luna se alejó de nuevo.\n\nAhora solo faltaba un poquito de nada para tocar la luna, pero esta se desvanecía más y más.\n\nY el zorro llamó al mono.\n\n—Seguro que esta vez lo logramos. ¡Anda, súbete a mi espalda!\n\nLa luna vio al mono y retrocedió.\n\nEl mono ya podía oler la luna, pero de tocarla, ¡ni hablar!\n\nY llamó al ratón.\n\n—Súbete a mi espalda y tocaremos la luna.\n\nEsta vio al ratón y pensó:\n\n“Seguro que un animal tan pequeño no podrá cogerme”.\n\nY como empezaba a aburrirse con aquel juego, la luna se quedó donde estaba.\n\nEntonces, el ratón subió por encima de la tortuga, del elefante, de la jirafa, de la cebra, del león, del zorro, del mono y… de un mordisco, arrancó un trozo pequeño de luna.\n\nLo saboreó complacido y después fue dando un pedacito al mono, al zorro, al león, a la cebra, a la jirafa, al elefante y a la tortuga.\n\nY la luna les supo exactamente a aquello que más le gustaba a cada uno.\n\nAquella noche, los animales durmieron muy, muy juntos.\n\nEl pez que lo había visto todo y no entendía nada, dijo:\n\n— ¡Vaya, vaya! Tanto esfuerzo para llegar a esa luna que está en el cielo. ¿Acaso no verán que aquí, en el agua, hay otra más cerca?\n\nMichael Grejniec. ¿A qué sabe la luna? Colección libros para soñar. Ediciones Kalandraka, 2011. (Adaptación).",
+        "format": "plain",
+        "attachments": [
+          {
+            "kind": "image",
+            "note": "Ilustración de animales apilados intentando alcanzar la luna (decorativa)."
+          }
+        ]
+      },
+      "items": [
+        {
+          "position": 11,
+          "type": "multiple_choice",
+          "stem": "¿Qué querían hacer los animales?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Jugar con la luna.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Averiguar el sabor de la luna.",
+              "isCorrect": true
+            },
+            {
+              "key": "C",
+              "text": "Observar a la luna en el agua.",
+              "isCorrect": false
+            }
+          ],
+          "correctKey": "B",
+          "skill": "Localizar",
+          "oa": "OA 4",
+          "contentAxis": "Narración",
+          "responseFormat": "choice",
+          "hasFigure": false,
+          "figureNote": null,
+          "taxonomy": [
+            {
+              "type": "descriptor",
+              "code": null,
+              "name": "Localizan información explícita relevante en un texto narrativo.",
+              "parentCode": "LANG-3B-OA04",
+              "tagType": "primary"
+            },
+            {
+              "type": "learning_objective",
+              "code": "LANG-3B-OA04",
+              "name": "OA 4",
+              "level": "3_basico",
+              "tagType": "secondary"
+            },
+            {
+              "type": "skill",
+              "code": "LANG-SK-LOCALIZAR",
+              "name": "Localizar",
+              "tagType": "secondary"
+            },
+            {
+              "type": "text_type",
+              "code": "LANG-TT-NARRACION",
+              "name": "Narración",
+              "tagType": "secondary"
+            }
+          ]
+        },
+        {
+          "position": 12,
+          "type": "multiple_choice",
+          "stem": "¿Qué animal decidió primero subir a la montaña para tocar la luna?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "La jirafa.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "La cebra.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "La tortuga.",
+              "isCorrect": true
+            }
+          ],
+          "correctKey": "C",
+          "skill": "Localizar",
+          "oa": "OA 4",
+          "contentAxis": "Narración",
+          "responseFormat": "choice",
+          "hasFigure": false,
+          "figureNote": null,
+          "taxonomy": [
+            {
+              "type": "descriptor",
+              "code": null,
+              "name": "Localizan información explícita relevante en un texto narrativo.",
+              "parentCode": "LANG-3B-OA04",
+              "tagType": "primary"
+            },
+            {
+              "type": "learning_objective",
+              "code": "LANG-3B-OA04",
+              "name": "OA 4",
+              "level": "3_basico",
+              "tagType": "secondary"
+            },
+            {
+              "type": "skill",
+              "code": "LANG-SK-LOCALIZAR",
+              "name": "Localizar",
+              "tagType": "secondary"
+            },
+            {
+              "type": "text_type",
+              "code": "LANG-TT-NARRACION",
+              "name": "Narración",
+              "tagType": "secondary"
+            }
+          ]
+        },
+        {
+          "position": 13,
+          "type": "multiple_choice",
+          "stem": "¿Qué animal repartió el trozo de luna?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "El león.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "El ratón.",
+              "isCorrect": true
+            },
+            {
+              "key": "C",
+              "text": "El zorro.",
+              "isCorrect": false
+            }
+          ],
+          "correctKey": "B",
+          "skill": "Interpretar y relacionar",
+          "oa": "OA 4",
+          "contentAxis": "Narración",
+          "responseFormat": "choice",
+          "hasFigure": false,
+          "figureNote": null,
+          "taxonomy": [
+            {
+              "type": "descriptor",
+              "code": null,
+              "name": "Identifican un acontecimiento o acción relevante en un texto narrativo.",
+              "parentCode": "LANG-3B-OA04",
+              "tagType": "primary"
+            },
+            {
+              "type": "learning_objective",
+              "code": "LANG-3B-OA04",
+              "name": "OA 4",
+              "level": "3_basico",
+              "tagType": "secondary"
+            },
+            {
+              "type": "skill",
+              "code": "LANG-SK-INTERPRETAR-Y-RELACIONAR",
+              "name": "Interpretar y relacionar",
+              "tagType": "secondary"
+            },
+            {
+              "type": "text_type",
+              "code": "LANG-TT-NARRACION",
+              "name": "Narración",
+              "tagType": "secondary"
+            }
+          ]
+        },
+        {
+          "position": 14,
+          "type": "multiple_choice",
+          "stem": "Según el texto, ¿qué descubrieron los animales con el trozo de luna?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Que la luna es inalcanzable.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Que la luna se esconde en el agua.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Que la luna sabe a lo que más les gusta.",
+              "isCorrect": true
+            }
+          ],
+          "correctKey": "C",
+          "skill": "Interpretar y relacionar",
+          "oa": "OA 4",
+          "contentAxis": "Narración",
+          "responseFormat": "choice",
+          "hasFigure": false,
+          "figureNote": null,
+          "taxonomy": [
+            {
+              "type": "descriptor",
+              "code": null,
+              "name": "Infieren el sentido global de un texto narrativo.",
+              "parentCode": "LANG-3B-OA04",
+              "tagType": "primary"
+            },
+            {
+              "type": "learning_objective",
+              "code": "LANG-3B-OA04",
+              "name": "OA 4",
+              "level": "3_basico",
+              "tagType": "secondary"
+            },
+            {
+              "type": "skill",
+              "code": "LANG-SK-INTERPRETAR-Y-RELACIONAR",
+              "name": "Interpretar y relacionar",
+              "tagType": "secondary"
+            },
+            {
+              "type": "text_type",
+              "code": "LANG-TT-NARRACION",
+              "name": "Narración",
+              "tagType": "secondary"
+            }
+          ]
+        },
+        {
+          "position": 15,
+          "type": "open_ended",
+          "stem": "¿Crees que valió la pena el esfuerzo que hicieron los animales por conseguir lo que querían? (Sí / No). ¿Por qué? Fundamenta tu respuesta con información del texto.",
+          "alternatives": [],
+          "correctKey": null,
+          "skill": "Reflexionar",
+          "oa": "OA 4",
+          "contentAxis": "Narración",
+          "responseFormat": "develop",
+          "hasFigure": false,
+          "figureNote": "Ítem híbrido: ofrece selección Sí/No y luego pide fundamentación escrita. Se modela como open_ended porque lo evaluable es la justificación.",
+          "taxonomy": [
+            {
+              "type": "descriptor",
+              "code": null,
+              "name": "Opinan sobre algún aspecto controversial de un texto narrativo con fundamentos que integran información del texto.",
+              "parentCode": "LANG-3B-OA04",
+              "tagType": "primary"
+            },
+            {
+              "type": "learning_objective",
+              "code": "LANG-3B-OA04",
+              "name": "OA 4",
+              "level": "3_basico",
+              "tagType": "secondary"
+            },
+            {
+              "type": "skill",
+              "code": "LANG-SK-REFLEXIONAR",
+              "name": "Reflexionar",
+              "tagType": "secondary"
+            },
+            {
+              "type": "text_type",
+              "code": "LANG-TT-NARRACION",
+              "name": "Narración",
+              "tagType": "secondary"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "order": 4,
+      "name": "Texto 4: «NASA descubre 7 planetas similares a la Tierra»",
+      "type": "multiple_choice",
+      "instructions": "Lee el siguiente texto y responde las preguntas 16 a 19.",
+      "passage": {
+        "title": "NASA descubre 7 planetas similares a la Tierra",
+        "text": "22 de febrero de 2017\n\nNASA descubre 7 planetas similares a la Tierra\n\nSegún el hallazgo, tres de ellos serían habitables, ya que cuentan con océanos en su superficie.\n\nLa Administración Nacional de la Aeronáutica y del Espacio de Estados Unidos (NASA) reveló una importante información este miércoles. Se trata del hallazgo de un sistema que se encuentra a tan solo 39 años luz de distancia y que posee siete cuerpos del tamaño de la Tierra.\n\nEl autor principal del estudio, Michael Gillon, del Instituto STAR en la Universidad de Lieja (Bélgica), señaló que el descubrimiento representa un gran avance para el estudio de la vida más allá del Sistema Solar.\n\n“Se trata de un sistema planetario sorprendente, no solo porque hayamos encontrado tantos planetas, ¡sino porque son todos asombrosamente similares en tamaño a la Tierra!”, declaró el científico que logró identificarlos gracias a un telescopio ubicado en Chile.\n\nDe acuerdo a los datos, tres de los planetas descubiertos podrían calificarse como habitables, puesto que albergan océanos de agua en su superficie. En este sentido, el organismo comunicó que el resto de los cuerpos pueden poseer una temperatura en la superficie de entre 0 y 100 grados, rango en el que puede haber agua líquida.\n\nLos planetas recién descubiertos no tienen satélites naturales y giran en órbitas planas y ordenadas alrededor de TRAPPIST-1, una estrella enana ultra fría con un brillo cerca de mil veces menor al del Sol.\n\nTras una primera fase de reconocimiento, los científicos planean ahora iniciar observaciones detalladas para estudiar el clima y la composición química del hallazgo, con el objetivo de determinar si hay vida en ellos.\n\n“NASA descubre 7 planetas similares a la Tierra”. Diario Uchile [Santiago, Chile]. 22 feb. 2017. Web. 27 sep. 2019. (Adaptación).",
+        "format": "plain",
+        "attachments": []
+      },
+      "items": [
+        {
+          "position": 16,
+          "type": "multiple_choice",
+          "stem": "Según el texto, ¿cómo logró el científico identificar estos siete planetas?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Utilizando un telescopio ubicado en Chile.",
+              "isCorrect": true
+            },
+            {
+              "key": "B",
+              "text": "Revisando investigaciones realizadas por la NASA.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Realizando estudios sobre el clima de cuerpos planetarios.",
+              "isCorrect": false
+            }
+          ],
+          "correctKey": "A",
+          "skill": "Localizar",
+          "oa": "OA 6",
+          "contentAxis": "Texto no literario",
+          "responseFormat": "choice",
+          "hasFigure": false,
+          "figureNote": null,
+          "taxonomy": [
+            {
+              "type": "descriptor",
+              "code": null,
+              "name": "Localizan información explícita relevante en un texto no literario.",
+              "parentCode": "LANG-3B-OA06",
+              "tagType": "primary"
+            },
+            {
+              "type": "learning_objective",
+              "code": "LANG-3B-OA06",
+              "name": "OA 6",
+              "level": "3_basico",
+              "tagType": "secondary"
+            },
+            {
+              "type": "skill",
+              "code": "LANG-SK-LOCALIZAR",
+              "name": "Localizar",
+              "tagType": "secondary"
+            },
+            {
+              "type": "text_type",
+              "code": "LANG-TT-TEXTO-NO-LITERARIO",
+              "name": "Texto no literario",
+              "tagType": "secondary"
+            }
+          ]
+        },
+        {
+          "position": 17,
+          "type": "multiple_choice",
+          "stem": "Según el texto, ¿por qué tres de los planetas serían habitables?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Porque cuentan con océanos en su superficie.",
+              "isCorrect": true
+            },
+            {
+              "key": "B",
+              "text": "Porque giran en órbitas planas y ordenadas.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Porque son similares en tamaño a la Tierra.",
+              "isCorrect": false
+            }
+          ],
+          "correctKey": "A",
+          "skill": "Interpretar y relacionar",
+          "oa": "OA 6",
+          "contentAxis": "Texto no literario",
+          "responseFormat": "choice",
+          "hasFigure": false,
+          "figureNote": null,
+          "taxonomy": [
+            {
+              "type": "descriptor",
+              "code": null,
+              "name": "Infieren relaciones entre las ideas (causa-consecuencia, problema-solución, etc.) en un texto no literario.",
+              "parentCode": "LANG-3B-OA06",
+              "tagType": "primary"
+            },
+            {
+              "type": "learning_objective",
+              "code": "LANG-3B-OA06",
+              "name": "OA 6",
+              "level": "3_basico",
+              "tagType": "secondary"
+            },
+            {
+              "type": "skill",
+              "code": "LANG-SK-INTERPRETAR-Y-RELACIONAR",
+              "name": "Interpretar y relacionar",
+              "tagType": "secondary"
+            },
+            {
+              "type": "text_type",
+              "code": "LANG-TT-TEXTO-NO-LITERARIO",
+              "name": "Texto no literario",
+              "tagType": "secondary"
+            }
+          ]
+        },
+        {
+          "position": 18,
+          "type": "multiple_choice",
+          "stem": "¿Cuál es el objetivo de la próxima fase del estudio?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Averiguar el tamaño de los planetas.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Averiguar la distancia desde la Tierra.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Averiguar si hay vida en los planetas.",
+              "isCorrect": true
+            }
+          ],
+          "correctKey": "C",
+          "skill": "Interpretar y relacionar",
+          "oa": "OA 6",
+          "contentAxis": "Texto no literario",
+          "responseFormat": "choice",
+          "hasFigure": false,
+          "figureNote": null,
+          "taxonomy": [
+            {
+              "type": "descriptor",
+              "code": null,
+              "name": "Infieren información relevante en un texto no literario.",
+              "parentCode": "LANG-3B-OA06",
+              "tagType": "primary"
+            },
+            {
+              "type": "learning_objective",
+              "code": "LANG-3B-OA06",
+              "name": "OA 6",
+              "level": "3_basico",
+              "tagType": "secondary"
+            },
+            {
+              "type": "skill",
+              "code": "LANG-SK-INTERPRETAR-Y-RELACIONAR",
+              "name": "Interpretar y relacionar",
+              "tagType": "secondary"
+            },
+            {
+              "type": "text_type",
+              "code": "LANG-TT-TEXTO-NO-LITERARIO",
+              "name": "Texto no literario",
+              "tagType": "secondary"
+            }
+          ]
+        },
+        {
+          "position": 19,
+          "type": "multiple_choice",
+          "stem": "Según el texto, ¿qué es TRAPPIST-1?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Un satélite natural.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Una estrella enana ultra fría.",
+              "isCorrect": true
+            },
+            {
+              "key": "C",
+              "text": "Un planeta similar a la Tierra.",
+              "isCorrect": false
+            }
+          ],
+          "correctKey": "B",
+          "skill": "Localizar",
+          "oa": "OA 6",
+          "contentAxis": "Texto no literario",
+          "responseFormat": "choice",
+          "hasFigure": false,
+          "figureNote": null,
+          "taxonomy": [
+            {
+              "type": "descriptor",
+              "code": null,
+              "name": "Localizan información explícita relevante en un texto no literario.",
+              "parentCode": "LANG-3B-OA06",
+              "tagType": "primary"
+            },
+            {
+              "type": "learning_objective",
+              "code": "LANG-3B-OA06",
+              "name": "OA 6",
+              "level": "3_basico",
+              "tagType": "secondary"
+            },
+            {
+              "type": "skill",
+              "code": "LANG-SK-LOCALIZAR",
+              "name": "Localizar",
+              "tagType": "secondary"
+            },
+            {
+              "type": "text_type",
+              "code": "LANG-TT-TEXTO-NO-LITERARIO",
+              "name": "Texto no literario",
+              "tagType": "secondary"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "order": 5,
+      "name": "Texto 5: «Llega el invierno»",
+      "type": "multiple_choice",
+      "instructions": "Lee el siguiente texto y responde las preguntas 20 a 22.",
+      "passage": {
+        "title": "Llega el invierno",
+        "text": "El señor invierno\nse viste de blanco,\nse pone el abrigo\nporque está temblando.\nSe va a la montaña,\nse mete en el río,\ny el parque y la calle\nse llenan de frío.\nSe encuentra a la lluvia\nllorando, llorando,\ny también al viento\nque viene soplando.\n¡Ven amigo sol!\nGrita en el camino,\npero el sol no viene\nporque se ha dormido.\n\nMarisol Perales. “Llega el invierno”. Versos con pijama para meterse a la cama. Madrid: Editorial Verbum, 2015.",
+        "format": "plain",
+        "attachments": [
+          {
+            "kind": "image",
+            "note": "Ilustración invernal acompañando el poema (decorativa)."
+          }
+        ]
+      },
+      "items": [
+        {
+          "position": 20,
+          "type": "multiple_choice",
+          "stem": "Lee los siguientes versos:\n\n«El señor invierno / se viste de blanco»\n\n¿Qué significa que el señor invierno se vista de blanco?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Que en invierno cae nieve.",
+              "isCorrect": true
+            },
+            {
+              "key": "B",
+              "text": "Que en invierno corre el viento.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Que en invierno las nubes aparecen.",
+              "isCorrect": false
+            }
+          ],
+          "correctKey": "A",
+          "skill": "Interpretar y relacionar",
+          "oa": "OA 5",
+          "contentAxis": "Poema",
+          "responseFormat": "choice",
+          "hasFigure": false,
+          "figureNote": "El ítem cita dos versos del poema como estímulo propio; se incluyen dentro del stem.",
+          "taxonomy": [
+            {
+              "type": "descriptor",
+              "code": null,
+              "name": "Interpretan el sentido de expresiones en lenguaje figurado presentes en un poema.",
+              "parentCode": "LANG-3B-OA05",
+              "tagType": "primary"
+            },
+            {
+              "type": "learning_objective",
+              "code": "LANG-3B-OA05",
+              "name": "OA 5",
+              "level": "3_basico",
+              "tagType": "secondary"
+            },
+            {
+              "type": "skill",
+              "code": "LANG-SK-INTERPRETAR-Y-RELACIONAR",
+              "name": "Interpretar y relacionar",
+              "tagType": "secondary"
+            },
+            {
+              "type": "text_type",
+              "code": "LANG-TT-POEMA",
+              "name": "Poema",
+              "tagType": "secondary"
+            }
+          ]
+        },
+        {
+          "position": 21,
+          "type": "multiple_choice",
+          "stem": "Al final del poema, ¿por qué se dice que el sol se ha dormido?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Porque hace mucho frío.",
+              "isCorrect": true
+            },
+            {
+              "key": "B",
+              "text": "Porque está anocheciendo.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Porque puede comenzar a llover.",
+              "isCorrect": false
+            }
+          ],
+          "correctKey": "A",
+          "skill": "Interpretar y relacionar",
+          "oa": "OA 5",
+          "contentAxis": "Poema",
+          "responseFormat": "choice",
+          "hasFigure": false,
+          "figureNote": null,
+          "taxonomy": [
+            {
+              "type": "descriptor",
+              "code": null,
+              "name": "Interpretan el sentido de expresiones en lenguaje figurado presentes en un poema.",
+              "parentCode": "LANG-3B-OA05",
+              "tagType": "primary"
+            },
+            {
+              "type": "learning_objective",
+              "code": "LANG-3B-OA05",
+              "name": "OA 5",
+              "level": "3_basico",
+              "tagType": "secondary"
+            },
+            {
+              "type": "skill",
+              "code": "LANG-SK-INTERPRETAR-Y-RELACIONAR",
+              "name": "Interpretar y relacionar",
+              "tagType": "secondary"
+            },
+            {
+              "type": "text_type",
+              "code": "LANG-TT-POEMA",
+              "name": "Poema",
+              "tagType": "secondary"
+            }
+          ]
+        },
+        {
+          "position": 22,
+          "type": "multiple_choice",
+          "stem": "¿De qué trata este poema?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "De cómo se esconde el sol en el invierno.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "De cómo el invierno invade todos los lugares.",
+              "isCorrect": true
+            },
+            {
+              "key": "C",
+              "text": "De cómo un señor espera la llegada del invierno.",
+              "isCorrect": false
+            }
+          ],
+          "correctKey": "B",
+          "skill": "Interpretar y relacionar",
+          "oa": "OA 5",
+          "contentAxis": "Poema",
+          "responseFormat": "choice",
+          "hasFigure": false,
+          "figureNote": null,
+          "taxonomy": [
+            {
+              "type": "descriptor",
+              "code": null,
+              "name": "Infieren el sentido global de un poema.",
+              "parentCode": "LANG-3B-OA05",
+              "tagType": "primary"
+            },
+            {
+              "type": "learning_objective",
+              "code": "LANG-3B-OA05",
+              "name": "OA 5",
+              "level": "3_basico",
+              "tagType": "secondary"
+            },
+            {
+              "type": "skill",
+              "code": "LANG-SK-INTERPRETAR-Y-RELACIONAR",
+              "name": "Interpretar y relacionar",
+              "tagType": "secondary"
+            },
+            {
+              "type": "text_type",
+              "code": "LANG-TT-POEMA",
+              "name": "Poema",
+              "tagType": "secondary"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "extraction": {
+    "itemCount": 22,
+    "warnings": [
+      "Q8 depende de una imagen (muñeco-calcetín con detalle circulado) para poder responderse; hasFigure y needsHumanReview en true.",
+      "Q10 y Q15 son ítems de desarrollo (open_ended); Q15 es híbrido Sí/No + fundamentación.",
+      "Q20 incluye dos versos-estímulo propios del ítem, embebidos en el stem.",
+      "Las alternativas de esta prueba son A/B/C (3 opciones), no A–D.",
+      "Textos transcritos desde la capa de texto del PDF (pdftotext), verbatim."
+    ],
+    "needsHumanReview": true
+  },
+  "pauta": {
+    "source": {
+      "report": "RBD25520_DIA_LECTURA_4_A_Resultados_Asignatura_Diagnostico_2025.pdf",
+      "subjectCode": "LANG",
+      "gradeCode": "4TH_BASIC",
+      "applicationPeriod": "diagnostico",
+      "year": 2025,
+      "instrumentJson": "extraccion/lenguaje/4º lenguaje diagnóstico 2025.json"
+    },
+    "appliedKeys": 20,
+    "issues": []
+  }
+}
