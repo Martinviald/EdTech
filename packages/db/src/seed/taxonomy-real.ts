@@ -19,7 +19,7 @@ config({ path: resolve(__dirname, '../../../../.env') });
 
 import { readFileSync } from 'node:fs';
 import { and, eq, inArray } from 'drizzle-orm';
-import { createDbClient } from '../client';
+import { createDbClient, type Database } from '../client';
 import { taxonomies, taxonomyNodes, taxonomyMappings } from '../schema/taxonomy';
 import { grades, subjects } from '../schema/academic';
 
@@ -40,11 +40,7 @@ function gradeShort(level?: string): string | null {
   return /^[1-8]$/.test(n) ? `${n}B` : null;
 }
 
-async function main(): Promise<void> {
-  const url = process.env.DATABASE_ADMIN_URL ?? process.env.DATABASE_URL;
-  if (!url) throw new Error('DATABASE_ADMIN_URL o DATABASE_URL es requerido');
-  const db = createDbClient(url);
-
+export async function seedTaxonomyReal(db: Database): Promise<void> {
   const cat = JSON.parse(
     readFileSync(resolve(__dirname, '../../data/taxonomia-catalogo-v2.json'), 'utf-8'),
   ) as Catalog;
@@ -136,11 +132,17 @@ async function main(): Promise<void> {
     console.log(`taxonomy_mappings: ${cat.mappings.length}`);
   });
 
-  console.log('✅ Taxonomía real (2 marcos) sembrada. Las taxonomías viejas NO se tocaron (auditar y borrar aparte).');
-  process.exit(0);
+  console.log('✅ Taxonomía real (2 marcos) sembrada.');
 }
 
-main().catch((e) => {
-  console.error('ERROR sembrando taxonomía:', e);
-  process.exit(1);
-});
+// CLI: `pnpm --filter @soe/db db:seed:taxonomy` (reference-data, replicable en prod).
+if (require.main === module) {
+  const url = process.env.DATABASE_ADMIN_URL ?? process.env.DATABASE_URL;
+  if (!url) throw new Error('DATABASE_ADMIN_URL o DATABASE_URL es requerido');
+  seedTaxonomyReal(createDbClient(url))
+    .then(() => process.exit(0))
+    .catch((e) => {
+      console.error('ERROR sembrando taxonomía:', e);
+      process.exit(1);
+    });
+}

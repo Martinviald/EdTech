@@ -1,14 +1,13 @@
 import { config } from 'dotenv';
 import { resolve } from 'path';
-import { and, eq, sql } from 'drizzle-orm';
+import { and, eq } from 'drizzle-orm';
 import { createDbClient } from '../client';
 import { classGroups, grades, subjectClasses, subjects } from '../schema/academic';
-import { taxonomies, taxonomyNodes } from '../schema/taxonomy';
 import { academicYears, organizations } from '../schema/organizations';
 import { students } from '../schema/students';
 import { orgMemberships, teacherAssignments, users } from '../schema/users';
 import { platformAdmins } from '../schema/platform-admins';
-import { seedMineducTaxonomy } from './mineduc-taxonomy';
+import { seedTaxonomyReal } from './taxonomy-real';
 
 config({ path: resolve(__dirname, '../../../../.env') });
 
@@ -121,75 +120,10 @@ async function main() {
     ])
     .onConflictDoNothing();
 
-  console.log('Seeding taxonomies...');
-  // El partial unique index taxonomies_official_type_version_uniq evita
-  // duplicar (type, version) cuando is_official=true AND org_id IS NULL.
-  // Sin `target` explícito el onConflictDoNothing no detectaría el constraint.
-  await db
-    .insert(taxonomies)
-    .values([
-      { name: 'MINEDUC 2024', type: 'mineduc', isOfficial: true, version: '2024' },
-      { name: 'DIA 2025', type: 'dia', isOfficial: true, version: '2025' },
-    ])
-    .onConflictDoNothing({
-      target: [taxonomies.type, taxonomies.version],
-      where: sql`${taxonomies.isOfficial} = true AND ${taxonomies.orgId} IS NULL`,
-    });
-
-  await seedMineducTaxonomy(db);
-
-  // -------- Habilidades DIA 2025 (nodos de taxonomía) --------
-  console.log('Seeding DIA 2025 taxonomy nodes...');
-  const [diaTaxonomy] = await db
-    .select({ id: taxonomies.id })
-    .from(taxonomies)
-    .where(and(eq(taxonomies.type, 'dia'), eq(taxonomies.version, '2025')));
-
-  if (diaTaxonomy) {
-    const [langSubject] = await db.select().from(subjects).where(eq(subjects.code, 'LANG'));
-    const [mathSubject] = await db.select().from(subjects).where(eq(subjects.code, 'MATH'));
-
-    const diaSkills: Array<{
-      code: string;
-      name: string;
-      subjectId: string | undefined;
-      order: number;
-    }> = [];
-
-    if (langSubject) {
-      diaSkills.push(
-        { code: 'DIA-LANG-SK-LOC', name: 'Localizar información explícita', subjectId: langSubject.id, order: 1 },
-        { code: 'DIA-LANG-SK-INT', name: 'Interpretar y relacionar', subjectId: langSubject.id, order: 2 },
-        { code: 'DIA-LANG-SK-REF', name: 'Reflexionar sobre el texto', subjectId: langSubject.id, order: 3 },
-      );
-    }
-    if (mathSubject) {
-      diaSkills.push(
-        { code: 'DIA-MATH-SK-RES', name: 'Resolver problemas', subjectId: mathSubject.id, order: 1 },
-        { code: 'DIA-MATH-SK-MOD', name: 'Modelar', subjectId: mathSubject.id, order: 2 },
-        { code: 'DIA-MATH-SK-REP', name: 'Representar', subjectId: mathSubject.id, order: 3 },
-        { code: 'DIA-MATH-SK-ARG', name: 'Argumentar y comunicar', subjectId: mathSubject.id, order: 4 },
-      );
-    }
-
-    if (diaSkills.length > 0) {
-      await db
-        .insert(taxonomyNodes)
-        .values(
-          diaSkills.map((s) => ({
-            taxonomyId: diaTaxonomy.id,
-            type: 'skill' as const,
-            code: s.code,
-            name: s.name,
-            subjectId: s.subjectId,
-            order: s.order,
-            depth: 1,
-          })),
-        )
-        .onConflictDoNothing();
-      console.log(`  → DIA 2025: ${diaSkills.length} habilidades.`);
-    }
-  }
+  // Taxonomía REAL en 2 marcos (Currículum Nacional universal + DIA), reference-data
+  // idempotente. Reemplaza la antigua siembra IA (mineduc-2024.json + skills inline).
+  console.log('Seeding taxonomía real (Currículum Nacional + DIA)...');
+  await seedTaxonomyReal(db);
 
   // -------- Demo tenant para mock auth y validación end-to-end --------
   console.log('Seeding Colegio Demo...');
