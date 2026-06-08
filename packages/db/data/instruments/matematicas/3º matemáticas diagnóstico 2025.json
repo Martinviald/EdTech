@@ -1136,23 +1136,10 @@
         },
         {
           "position": 22,
-          "type": "multiple_choice",
-          "responseFormat": "choice",
-          "stem": "Elena compra estos packs de jugos (dibujo de 4 packs, cada uno con 3 botellas de jugo). Al pagar en caja, le regalan 2 packs adicionales de jugos. ¿Con qué multiplicación se puede calcular la cantidad total de jugos que se lleva Elena?",
-          "alternatives": [
-            {
-              "key": "A",
-              "text": "3 • 2"
-            },
-            {
-              "key": "B",
-              "text": "6 • 3"
-            },
-            {
-              "key": "C",
-              "text": "4 • 2"
-            }
-          ],
+          "type": "open_ended",
+          "responseFormat": "completacion",
+          "stem": "Elena compra estos packs de jugos (dibujo de 4 packs, cada uno con 3 botellas de jugo). Al pagar en caja, le regalan 2 packs adicionales de jugos. ¿Con qué multiplicación se puede calcular la cantidad total de jugos que se lleva Elena?\n\nAlternativas: A) 3 • 2 B) 6 • 3 C) 4 • 2",
+          "alternatives": [],
           "correctKey": null,
           "skill": "Modelar",
           "oa": "OA 11",

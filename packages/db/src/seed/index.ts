@@ -8,6 +8,8 @@ import { students } from '../schema/students';
 import { orgMemberships, teacherAssignments, users } from '../schema/users';
 import { platformAdmins } from '../schema/platform-admins';
 import { seedTaxonomyReal } from './taxonomy-real';
+import { importInstruments } from './import-instruments';
+import { applyItemTags } from './import-item-tags';
 
 config({ path: resolve(__dirname, '../../../../.env') });
 
@@ -124,6 +126,12 @@ async function main() {
   // idempotente. Reemplaza la antigua siembra IA (mineduc-2024.json + skills inline).
   console.log('Seeding taxonomía real (Currículum Nacional + DIA)...');
   await seedTaxonomyReal(db);
+
+  // Instrumentos + ítems reales (DIA 2025, 24 con-pauta) + sus tags de taxonomía.
+  // Reference-data idempotente; reemplaza cualquier import previo por config.sourceJson.
+  console.log('Importando instrumentos + ítems reales (DIA 2025)...');
+  await importInstruments(db);
+  await applyItemTags(db);
 
   // -------- Demo tenant para mock auth y validación end-to-end --------
   console.log('Seeding Colegio Demo...');

@@ -1059,35 +1059,10 @@
         },
         {
           "position": 18,
-          "type": "multiple_choice",
-          "responseFormat": "choice",
-          "stem": "Observa los ángulos que se forman entre las rectas L1 y L2 (cuatro ángulos en el punto de cruce: α arriba, β a la derecha, μ abajo, δ a la izquierda). En el siguiente listado, marca todos los pares de ángulos que son siempre suplementarios:",
-          "alternatives": [
-            {
-              "key": "1",
-              "text": "α y β"
-            },
-            {
-              "key": "2",
-              "text": "α y μ"
-            },
-            {
-              "key": "3",
-              "text": "μ y δ"
-            },
-            {
-              "key": "4",
-              "text": "β y δ"
-            },
-            {
-              "key": "5",
-              "text": "δ y α"
-            },
-            {
-              "key": "6",
-              "text": "μ y β"
-            }
-          ],
+          "type": "open_ended",
+          "responseFormat": "multiple_response",
+          "stem": "Observa los ángulos que se forman entre las rectas L1 y L2 (cuatro ángulos en el punto de cruce: α arriba, β a la derecha, μ abajo, δ a la izquierda). En el siguiente listado, marca todos los pares de ángulos que son siempre suplementarios:\n\nOpciones (marca TODAS las correctas): 1) α y β 2) α y μ 3) μ y δ 4) β y δ 5) δ y α 6) μ y β",
+          "alternatives": [],
           "correctKey": null,
           "skill": "Representar",
           "oa": "OA 16",
