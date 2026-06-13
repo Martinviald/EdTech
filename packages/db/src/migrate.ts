@@ -30,7 +30,9 @@ async function main() {
   console.log('Applying RLS policies (idempotent)...');
   const rlsSql = readFileSync(RLS_POLICIES_PATH, 'utf-8');
   await sql.unsafe(rlsSql);
-  console.log('RLS policies applied (7 tablas: students, assessments, import_jobs, responses, assessment_results, skill_results, performance_bands).');
+  console.log(
+    'RLS policies applied (9 tablas: students, assessments, import_jobs, responses, assessment_results, skill_results, performance_bands, ai_analyses, org_benchmark_settings).',
+  );
 
   await sql.end();
   process.exit(0);

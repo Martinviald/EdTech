@@ -36,7 +36,7 @@ Tres épicas de producto + una de infraestructura:
 
 | Sprint | Semanas | Objetivo | Historias | Progreso |
 | --- | --- | --- | --- | --- |
-| **S0** | 1-2 | Cimientos F2: jobs async in-process (abstracción), recuperación curricular estructurada, motor IA base, modelo de participación en benchmarking | H19.20, H19.21, H19.23, H19.24 | 0/4 |
+| **S0** | 1-2 | Cimientos F2: jobs async in-process (abstracción), recuperación curricular estructurada, motor IA base, modelo de participación en benchmarking | H19.20, H19.21, H19.23, H19.24 | 4/4 ✅ |
 | **S1** | 3-4 | Informe IA de evaluación (narrativa adaptativa + Top/Bottom 5 + brechas + recomendaciones) | H20.1, H20.2, H20.3, H20.4, H20.5, H20.6, H20.7 | 0/7 |
 | **S2** | 5-6 | Análisis IA por-pregunta (multimodal, con pasaje) + calidad de ítem/instrumento + export del informe | H20.8, H20.9, H20.10, H20.11 | 0/4 |
 | **S3** | 7-8 | IA Remedial (RAG): guía de reenseñanza + ítems de práctica + plan remedial por grupo + flujo de aprobación | H9.1, H9.2, H9.3, H9.4, H9.5, H9.6 | 0/6 |
