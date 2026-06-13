@@ -8877,19 +8877,9 @@
       "mappingType": "subset"
     },
     {
-      "sourceCode": "LANG-2B-OA04-I1",
-      "targetCode": "LANG-SK-INTERPRETAR-Y-RELACIONAR",
-      "mappingType": "related"
-    },
-    {
       "sourceCode": "LANG-2B-OA04-I2",
       "targetCode": "LANG-2B-OA04",
       "mappingType": "subset"
-    },
-    {
-      "sourceCode": "LANG-2B-OA04-I2",
-      "targetCode": "LANG-SK-INTERPRETAR-Y-RELACIONAR",
-      "mappingType": "related"
     },
     {
       "sourceCode": "LANG-2B-OA04-I3",
@@ -8897,19 +8887,9 @@
       "mappingType": "subset"
     },
     {
-      "sourceCode": "LANG-2B-OA04-I3",
-      "targetCode": "LANG-SK-INTERPRETAR-Y-RELACIONAR",
-      "mappingType": "related"
-    },
-    {
       "sourceCode": "LANG-2B-OA04-I4",
       "targetCode": "LANG-2B-OA04",
       "mappingType": "subset"
-    },
-    {
-      "sourceCode": "LANG-2B-OA04-I4",
-      "targetCode": "LANG-SK-LOCALIZAR",
-      "mappingType": "related"
     },
     {
       "sourceCode": "LANG-2B-OA04-I5",
@@ -8917,19 +8897,9 @@
       "mappingType": "subset"
     },
     {
-      "sourceCode": "LANG-2B-OA04-I5",
-      "targetCode": "LANG-SK-REFLEXIONAR",
-      "mappingType": "related"
-    },
-    {
       "sourceCode": "LANG-2B-OA05-I1",
       "targetCode": "LANG-2B-OA05",
       "mappingType": "subset"
-    },
-    {
-      "sourceCode": "LANG-2B-OA05-I1",
-      "targetCode": "LANG-SK-INTERPRETAR-Y-RELACIONAR",
-      "mappingType": "related"
     },
     {
       "sourceCode": "LANG-2B-OA05-I2",
@@ -8937,19 +8907,9 @@
       "mappingType": "subset"
     },
     {
-      "sourceCode": "LANG-2B-OA05-I2",
-      "targetCode": "LANG-SK-INTERPRETAR-Y-RELACIONAR",
-      "mappingType": "related"
-    },
-    {
       "sourceCode": "LANG-2B-OA05-I3",
       "targetCode": "LANG-2B-OA05",
       "mappingType": "subset"
-    },
-    {
-      "sourceCode": "LANG-2B-OA05-I3",
-      "targetCode": "LANG-SK-INTERPRETAR-Y-RELACIONAR",
-      "mappingType": "related"
     },
     {
       "sourceCode": "LANG-2B-OA05-I4",
@@ -8957,19 +8917,9 @@
       "mappingType": "subset"
     },
     {
-      "sourceCode": "LANG-2B-OA05-I4",
-      "targetCode": "LANG-SK-INTERPRETAR-Y-RELACIONAR",
-      "mappingType": "related"
-    },
-    {
       "sourceCode": "LANG-2B-OA05-I5",
       "targetCode": "LANG-2B-OA05",
       "mappingType": "subset"
-    },
-    {
-      "sourceCode": "LANG-2B-OA05-I5",
-      "targetCode": "LANG-SK-INTERPRETAR-Y-RELACIONAR",
-      "mappingType": "related"
     },
     {
       "sourceCode": "LANG-2B-OA05-I6",
@@ -8977,29 +8927,14 @@
       "mappingType": "subset"
     },
     {
-      "sourceCode": "LANG-2B-OA05-I6",
-      "targetCode": "LANG-SK-LOCALIZAR",
-      "mappingType": "related"
-    },
-    {
       "sourceCode": "LANG-2B-OA05-I7",
       "targetCode": "LANG-2B-OA05",
       "mappingType": "subset"
     },
     {
-      "sourceCode": "LANG-2B-OA05-I7",
-      "targetCode": "LANG-SK-REFLEXIONAR",
-      "mappingType": "related"
-    },
-    {
       "sourceCode": "LANG-2B-OA06-I1",
       "targetCode": "LANG-2B-OA06",
       "mappingType": "subset"
-    },
-    {
-      "sourceCode": "LANG-2B-OA06-I1",
-      "targetCode": "LANG-SK-INTERPRETAR-Y-RELACIONAR",
-      "mappingType": "related"
     },
     {
       "sourceCode": "LANG-2B-OA06-I2",
@@ -9007,19 +8942,9 @@
       "mappingType": "subset"
     },
     {
-      "sourceCode": "LANG-2B-OA06-I2",
-      "targetCode": "LANG-SK-INTERPRETAR-Y-RELACIONAR",
-      "mappingType": "related"
-    },
-    {
       "sourceCode": "LANG-2B-OA06-I3",
       "targetCode": "LANG-2B-OA06",
       "mappingType": "subset"
-    },
-    {
-      "sourceCode": "LANG-2B-OA06-I3",
-      "targetCode": "LANG-SK-INTERPRETAR-Y-RELACIONAR",
-      "mappingType": "related"
     },
     {
       "sourceCode": "LANG-2B-OA06-I4",
@@ -9027,29 +8952,14 @@
       "mappingType": "subset"
     },
     {
-      "sourceCode": "LANG-2B-OA06-I4",
-      "targetCode": "LANG-SK-LOCALIZAR",
-      "mappingType": "related"
-    },
-    {
       "sourceCode": "LANG-2B-OA06-I5",
       "targetCode": "LANG-2B-OA06",
       "mappingType": "subset"
     },
     {
-      "sourceCode": "LANG-2B-OA06-I5",
-      "targetCode": "LANG-SK-REFLEXIONAR",
-      "mappingType": "related"
-    },
-    {
       "sourceCode": "LANG-2B-OA07-I1",
       "targetCode": "LANG-2B-OA07",
       "mappingType": "subset"
-    },
-    {
-      "sourceCode": "LANG-2B-OA07-I1",
-      "targetCode": "LANG-SK-INTERPRETAR-Y-RELACIONAR",
-      "mappingType": "related"
     },
     {
       "sourceCode": "LANG-2B-OA07-I2",
@@ -9057,29 +8967,14 @@
       "mappingType": "subset"
     },
     {
-      "sourceCode": "LANG-2B-OA07-I2",
-      "targetCode": "LANG-SK-INTERPRETAR-Y-RELACIONAR",
-      "mappingType": "related"
-    },
-    {
       "sourceCode": "LANG-2B-OA07-I3",
       "targetCode": "LANG-2B-OA07",
       "mappingType": "subset"
     },
     {
-      "sourceCode": "LANG-2B-OA07-I3",
-      "targetCode": "LANG-SK-LOCALIZAR",
-      "mappingType": "related"
-    },
-    {
       "sourceCode": "LANG-3B-OA04-I1",
       "targetCode": "LANG-3B-OA04",
       "mappingType": "subset"
-    },
-    {
-      "sourceCode": "LANG-3B-OA04-I1",
-      "targetCode": "LANG-SK-INTERPRETAR-Y-RELACIONAR",
-      "mappingType": "related"
     },
     {
       "sourceCode": "LANG-3B-OA04-I2",
@@ -9087,19 +8982,9 @@
       "mappingType": "subset"
     },
     {
-      "sourceCode": "LANG-3B-OA04-I2",
-      "targetCode": "LANG-SK-INTERPRETAR-Y-RELACIONAR",
-      "mappingType": "related"
-    },
-    {
       "sourceCode": "LANG-3B-OA04-I3",
       "targetCode": "LANG-3B-OA04",
       "mappingType": "subset"
-    },
-    {
-      "sourceCode": "LANG-3B-OA04-I3",
-      "targetCode": "LANG-SK-INTERPRETAR-Y-RELACIONAR",
-      "mappingType": "related"
     },
     {
       "sourceCode": "LANG-3B-OA04-I4",
@@ -9107,19 +8992,9 @@
       "mappingType": "subset"
     },
     {
-      "sourceCode": "LANG-3B-OA04-I4",
-      "targetCode": "LANG-SK-INTERPRETAR-Y-RELACIONAR",
-      "mappingType": "related"
-    },
-    {
       "sourceCode": "LANG-3B-OA04-I5",
       "targetCode": "LANG-3B-OA04",
       "mappingType": "subset"
-    },
-    {
-      "sourceCode": "LANG-3B-OA04-I5",
-      "targetCode": "LANG-SK-INTERPRETAR-Y-RELACIONAR",
-      "mappingType": "related"
     },
     {
       "sourceCode": "LANG-3B-OA04-I6",
@@ -9127,19 +9002,9 @@
       "mappingType": "subset"
     },
     {
-      "sourceCode": "LANG-3B-OA04-I6",
-      "targetCode": "LANG-SK-INTERPRETAR-Y-RELACIONAR",
-      "mappingType": "related"
-    },
-    {
       "sourceCode": "LANG-3B-OA04-I7",
       "targetCode": "LANG-3B-OA04",
       "mappingType": "subset"
-    },
-    {
-      "sourceCode": "LANG-3B-OA04-I7",
-      "targetCode": "LANG-SK-LOCALIZAR",
-      "mappingType": "related"
     },
     {
       "sourceCode": "LANG-3B-OA04-I8",
@@ -9147,19 +9012,9 @@
       "mappingType": "subset"
     },
     {
-      "sourceCode": "LANG-3B-OA04-I8",
-      "targetCode": "LANG-SK-REFLEXIONAR",
-      "mappingType": "related"
-    },
-    {
       "sourceCode": "LANG-3B-OA05-I1",
       "targetCode": "LANG-3B-OA05",
       "mappingType": "subset"
-    },
-    {
-      "sourceCode": "LANG-3B-OA05-I1",
-      "targetCode": "LANG-SK-INTERPRETAR-Y-RELACIONAR",
-      "mappingType": "related"
     },
     {
       "sourceCode": "LANG-3B-OA05-I2",
@@ -9167,29 +9022,14 @@
       "mappingType": "subset"
     },
     {
-      "sourceCode": "LANG-3B-OA05-I2",
-      "targetCode": "LANG-SK-INTERPRETAR-Y-RELACIONAR",
-      "mappingType": "related"
-    },
-    {
       "sourceCode": "LANG-3B-OA05-I3",
       "targetCode": "LANG-3B-OA05",
       "mappingType": "subset"
     },
     {
-      "sourceCode": "LANG-3B-OA05-I3",
-      "targetCode": "LANG-SK-INTERPRETAR-Y-RELACIONAR",
-      "mappingType": "related"
-    },
-    {
       "sourceCode": "LANG-3B-OA06-I1",
       "targetCode": "LANG-3B-OA06",
       "mappingType": "subset"
-    },
-    {
-      "sourceCode": "LANG-3B-OA06-I1",
-      "targetCode": "LANG-SK-INTERPRETAR-Y-RELACIONAR",
-      "mappingType": "related"
     },
     {
       "sourceCode": "LANG-3B-OA06-I2",
@@ -9197,19 +9037,9 @@
       "mappingType": "subset"
     },
     {
-      "sourceCode": "LANG-3B-OA06-I2",
-      "targetCode": "LANG-SK-REFLEXIONAR",
-      "mappingType": "related"
-    },
-    {
       "sourceCode": "LANG-3B-OA06-I3",
       "targetCode": "LANG-3B-OA06",
       "mappingType": "subset"
-    },
-    {
-      "sourceCode": "LANG-3B-OA06-I3",
-      "targetCode": "LANG-SK-INTERPRETAR-Y-RELACIONAR",
-      "mappingType": "related"
     },
     {
       "sourceCode": "LANG-3B-OA06-I4",
@@ -9217,19 +9047,9 @@
       "mappingType": "subset"
     },
     {
-      "sourceCode": "LANG-3B-OA06-I4",
-      "targetCode": "LANG-SK-INTERPRETAR-Y-RELACIONAR",
-      "mappingType": "related"
-    },
-    {
       "sourceCode": "LANG-3B-OA06-I5",
       "targetCode": "LANG-3B-OA06",
       "mappingType": "subset"
-    },
-    {
-      "sourceCode": "LANG-3B-OA06-I5",
-      "targetCode": "LANG-SK-INTERPRETAR-Y-RELACIONAR",
-      "mappingType": "related"
     },
     {
       "sourceCode": "LANG-3B-OA06-I6",
@@ -9237,19 +9057,9 @@
       "mappingType": "subset"
     },
     {
-      "sourceCode": "LANG-3B-OA06-I6",
-      "targetCode": "LANG-SK-INTERPRETAR-Y-RELACIONAR",
-      "mappingType": "related"
-    },
-    {
       "sourceCode": "LANG-3B-OA06-I7",
       "targetCode": "LANG-3B-OA06",
       "mappingType": "subset"
-    },
-    {
-      "sourceCode": "LANG-3B-OA06-I7",
-      "targetCode": "LANG-SK-INTERPRETAR-Y-RELACIONAR",
-      "mappingType": "related"
     },
     {
       "sourceCode": "LANG-3B-OA06-I8",
@@ -9257,29 +9067,14 @@
       "mappingType": "subset"
     },
     {
-      "sourceCode": "LANG-3B-OA06-I8",
-      "targetCode": "LANG-SK-LOCALIZAR",
-      "mappingType": "related"
-    },
-    {
       "sourceCode": "LANG-3B-OA06-I9",
       "targetCode": "LANG-3B-OA06",
       "mappingType": "subset"
     },
     {
-      "sourceCode": "LANG-3B-OA06-I9",
-      "targetCode": "LANG-SK-REFLEXIONAR",
-      "mappingType": "related"
-    },
-    {
       "sourceCode": "LANG-4B-OA04-I1",
       "targetCode": "LANG-4B-OA04",
       "mappingType": "subset"
-    },
-    {
-      "sourceCode": "LANG-4B-OA04-I1",
-      "targetCode": "LANG-SK-INTERPRETAR-Y-RELACIONAR",
-      "mappingType": "related"
     },
     {
       "sourceCode": "LANG-4B-OA04-I2",
@@ -9287,19 +9082,9 @@
       "mappingType": "subset"
     },
     {
-      "sourceCode": "LANG-4B-OA04-I2",
-      "targetCode": "LANG-SK-INTERPRETAR-Y-RELACIONAR",
-      "mappingType": "related"
-    },
-    {
       "sourceCode": "LANG-4B-OA04-I3",
       "targetCode": "LANG-4B-OA04",
       "mappingType": "subset"
-    },
-    {
-      "sourceCode": "LANG-4B-OA04-I3",
-      "targetCode": "LANG-SK-INTERPRETAR-Y-RELACIONAR",
-      "mappingType": "related"
     },
     {
       "sourceCode": "LANG-4B-OA04-I4",
@@ -9307,19 +9092,9 @@
       "mappingType": "subset"
     },
     {
-      "sourceCode": "LANG-4B-OA04-I4",
-      "targetCode": "LANG-SK-INTERPRETAR-Y-RELACIONAR",
-      "mappingType": "related"
-    },
-    {
       "sourceCode": "LANG-4B-OA04-I5",
       "targetCode": "LANG-4B-OA04",
       "mappingType": "subset"
-    },
-    {
-      "sourceCode": "LANG-4B-OA04-I5",
-      "targetCode": "LANG-SK-INTERPRETAR-Y-RELACIONAR",
-      "mappingType": "related"
     },
     {
       "sourceCode": "LANG-4B-OA04-I6",
@@ -9327,19 +9102,9 @@
       "mappingType": "subset"
     },
     {
-      "sourceCode": "LANG-4B-OA04-I6",
-      "targetCode": "LANG-SK-INTERPRETAR-Y-RELACIONAR",
-      "mappingType": "related"
-    },
-    {
       "sourceCode": "LANG-4B-OA04-I7",
       "targetCode": "LANG-4B-OA04",
       "mappingType": "subset"
-    },
-    {
-      "sourceCode": "LANG-4B-OA04-I7",
-      "targetCode": "LANG-SK-INTERPRETAR-Y-RELACIONAR",
-      "mappingType": "related"
     },
     {
       "sourceCode": "LANG-4B-OA04-I8",
@@ -9347,19 +9112,9 @@
       "mappingType": "subset"
     },
     {
-      "sourceCode": "LANG-4B-OA04-I8",
-      "targetCode": "LANG-SK-INTERPRETAR-Y-RELACIONAR",
-      "mappingType": "related"
-    },
-    {
       "sourceCode": "LANG-4B-OA04-I9",
       "targetCode": "LANG-4B-OA04",
       "mappingType": "subset"
-    },
-    {
-      "sourceCode": "LANG-4B-OA04-I9",
-      "targetCode": "LANG-SK-LOCALIZAR",
-      "mappingType": "related"
     },
     {
       "sourceCode": "LANG-4B-OA04-I10",
@@ -9367,19 +9122,9 @@
       "mappingType": "subset"
     },
     {
-      "sourceCode": "LANG-4B-OA04-I10",
-      "targetCode": "LANG-SK-REFLEXIONAR",
-      "mappingType": "related"
-    },
-    {
       "sourceCode": "LANG-4B-OA05-I1",
       "targetCode": "LANG-4B-OA05",
       "mappingType": "subset"
-    },
-    {
-      "sourceCode": "LANG-4B-OA05-I1",
-      "targetCode": "LANG-SK-INTERPRETAR-Y-RELACIONAR",
-      "mappingType": "related"
     },
     {
       "sourceCode": "LANG-4B-OA05-I2",
@@ -9387,19 +9132,9 @@
       "mappingType": "subset"
     },
     {
-      "sourceCode": "LANG-4B-OA05-I2",
-      "targetCode": "LANG-SK-INTERPRETAR-Y-RELACIONAR",
-      "mappingType": "related"
-    },
-    {
       "sourceCode": "LANG-4B-OA05-I3",
       "targetCode": "LANG-4B-OA05",
       "mappingType": "subset"
-    },
-    {
-      "sourceCode": "LANG-4B-OA05-I3",
-      "targetCode": "LANG-SK-INTERPRETAR-Y-RELACIONAR",
-      "mappingType": "related"
     },
     {
       "sourceCode": "LANG-4B-OA05-I4",
@@ -9407,19 +9142,9 @@
       "mappingType": "subset"
     },
     {
-      "sourceCode": "LANG-4B-OA05-I4",
-      "targetCode": "LANG-SK-INTERPRETAR-Y-RELACIONAR",
-      "mappingType": "related"
-    },
-    {
       "sourceCode": "LANG-4B-OA06-I1",
       "targetCode": "LANG-4B-OA06",
       "mappingType": "subset"
-    },
-    {
-      "sourceCode": "LANG-4B-OA06-I1",
-      "targetCode": "LANG-SK-REFLEXIONAR",
-      "mappingType": "related"
     },
     {
       "sourceCode": "LANG-4B-OA06-I2",
@@ -9427,19 +9152,9 @@
       "mappingType": "subset"
     },
     {
-      "sourceCode": "LANG-4B-OA06-I2",
-      "targetCode": "LANG-SK-INTERPRETAR-Y-RELACIONAR",
-      "mappingType": "related"
-    },
-    {
       "sourceCode": "LANG-4B-OA06-I3",
       "targetCode": "LANG-4B-OA06",
       "mappingType": "subset"
-    },
-    {
-      "sourceCode": "LANG-4B-OA06-I3",
-      "targetCode": "LANG-SK-INTERPRETAR-Y-RELACIONAR",
-      "mappingType": "related"
     },
     {
       "sourceCode": "LANG-4B-OA06-I4",
@@ -9447,19 +9162,9 @@
       "mappingType": "subset"
     },
     {
-      "sourceCode": "LANG-4B-OA06-I4",
-      "targetCode": "LANG-SK-INTERPRETAR-Y-RELACIONAR",
-      "mappingType": "related"
-    },
-    {
       "sourceCode": "LANG-4B-OA06-I5",
       "targetCode": "LANG-4B-OA06",
       "mappingType": "subset"
-    },
-    {
-      "sourceCode": "LANG-4B-OA06-I5",
-      "targetCode": "LANG-SK-INTERPRETAR-Y-RELACIONAR",
-      "mappingType": "related"
     },
     {
       "sourceCode": "LANG-4B-OA06-I6",
@@ -9467,19 +9172,9 @@
       "mappingType": "subset"
     },
     {
-      "sourceCode": "LANG-4B-OA06-I6",
-      "targetCode": "LANG-SK-INTERPRETAR-Y-RELACIONAR",
-      "mappingType": "related"
-    },
-    {
       "sourceCode": "LANG-4B-OA06-I7",
       "targetCode": "LANG-4B-OA06",
       "mappingType": "subset"
-    },
-    {
-      "sourceCode": "LANG-4B-OA06-I7",
-      "targetCode": "LANG-SK-LOCALIZAR",
-      "mappingType": "related"
     },
     {
       "sourceCode": "LANG-4B-OA06-I8",
@@ -9487,19 +9182,9 @@
       "mappingType": "subset"
     },
     {
-      "sourceCode": "LANG-4B-OA06-I8",
-      "targetCode": "LANG-SK-REFLEXIONAR",
-      "mappingType": "related"
-    },
-    {
       "sourceCode": "LANG-4B-OA06-I9",
       "targetCode": "LANG-4B-OA06",
       "mappingType": "subset"
-    },
-    {
-      "sourceCode": "LANG-4B-OA06-I9",
-      "targetCode": "LANG-SK-REFLEXIONAR",
-      "mappingType": "related"
     },
     {
       "sourceCode": "LANG-4B-OA07-I1",
@@ -9507,19 +9192,9 @@
       "mappingType": "subset"
     },
     {
-      "sourceCode": "LANG-4B-OA07-I1",
-      "targetCode": "LANG-SK-REFLEXIONAR",
-      "mappingType": "related"
-    },
-    {
       "sourceCode": "LANG-5B-OA04-I1",
       "targetCode": "LANG-5B-OA04",
       "mappingType": "subset"
-    },
-    {
-      "sourceCode": "LANG-5B-OA04-I1",
-      "targetCode": "LANG-SK-INTERPRETAR-Y-RELACIONAR",
-      "mappingType": "related"
     },
     {
       "sourceCode": "LANG-5B-OA04-I2",
@@ -9527,19 +9202,9 @@
       "mappingType": "subset"
     },
     {
-      "sourceCode": "LANG-5B-OA04-I2",
-      "targetCode": "LANG-SK-INTERPRETAR-Y-RELACIONAR",
-      "mappingType": "related"
-    },
-    {
       "sourceCode": "LANG-5B-OA04-I3",
       "targetCode": "LANG-5B-OA04",
       "mappingType": "subset"
-    },
-    {
-      "sourceCode": "LANG-5B-OA04-I3",
-      "targetCode": "LANG-SK-INTERPRETAR-Y-RELACIONAR",
-      "mappingType": "related"
     },
     {
       "sourceCode": "LANG-5B-OA04-I4",
@@ -9547,19 +9212,9 @@
       "mappingType": "subset"
     },
     {
-      "sourceCode": "LANG-5B-OA04-I4",
-      "targetCode": "LANG-SK-INTERPRETAR-Y-RELACIONAR",
-      "mappingType": "related"
-    },
-    {
       "sourceCode": "LANG-5B-OA04-I5",
       "targetCode": "LANG-5B-OA04",
       "mappingType": "subset"
-    },
-    {
-      "sourceCode": "LANG-5B-OA04-I5",
-      "targetCode": "LANG-SK-INTERPRETAR-Y-RELACIONAR",
-      "mappingType": "related"
     },
     {
       "sourceCode": "LANG-5B-OA04-I6",
@@ -9567,19 +9222,9 @@
       "mappingType": "subset"
     },
     {
-      "sourceCode": "LANG-5B-OA04-I6",
-      "targetCode": "LANG-SK-INTERPRETAR-Y-RELACIONAR",
-      "mappingType": "related"
-    },
-    {
       "sourceCode": "LANG-5B-OA04-I7",
       "targetCode": "LANG-5B-OA04",
       "mappingType": "subset"
-    },
-    {
-      "sourceCode": "LANG-5B-OA04-I7",
-      "targetCode": "LANG-SK-LOCALIZAR",
-      "mappingType": "related"
     },
     {
       "sourceCode": "LANG-5B-OA04-I8",
@@ -9587,19 +9232,9 @@
       "mappingType": "subset"
     },
     {
-      "sourceCode": "LANG-5B-OA04-I8",
-      "targetCode": "LANG-SK-REFLEXIONAR",
-      "mappingType": "related"
-    },
-    {
       "sourceCode": "LANG-5B-OA05-I1",
       "targetCode": "LANG-5B-OA05",
       "mappingType": "subset"
-    },
-    {
-      "sourceCode": "LANG-5B-OA05-I1",
-      "targetCode": "LANG-SK-INTERPRETAR-Y-RELACIONAR",
-      "mappingType": "related"
     },
     {
       "sourceCode": "LANG-5B-OA05-I2",
@@ -9607,29 +9242,14 @@
       "mappingType": "subset"
     },
     {
-      "sourceCode": "LANG-5B-OA05-I2",
-      "targetCode": "LANG-SK-INTERPRETAR-Y-RELACIONAR",
-      "mappingType": "related"
-    },
-    {
       "sourceCode": "LANG-5B-OA05-I3",
       "targetCode": "LANG-5B-OA05",
       "mappingType": "subset"
     },
     {
-      "sourceCode": "LANG-5B-OA05-I3",
-      "targetCode": "LANG-SK-INTERPRETAR-Y-RELACIONAR",
-      "mappingType": "related"
-    },
-    {
       "sourceCode": "LANG-5B-OA06-I1",
       "targetCode": "LANG-5B-OA06",
       "mappingType": "subset"
-    },
-    {
-      "sourceCode": "LANG-5B-OA06-I1",
-      "targetCode": "LANG-SK-INTERPRETAR-Y-RELACIONAR",
-      "mappingType": "related"
     },
     {
       "sourceCode": "LANG-5B-OA06-I2",
@@ -9637,19 +9257,9 @@
       "mappingType": "subset"
     },
     {
-      "sourceCode": "LANG-5B-OA06-I2",
-      "targetCode": "LANG-SK-INTERPRETAR-Y-RELACIONAR",
-      "mappingType": "related"
-    },
-    {
       "sourceCode": "LANG-5B-OA06-I3",
       "targetCode": "LANG-5B-OA06",
       "mappingType": "subset"
-    },
-    {
-      "sourceCode": "LANG-5B-OA06-I3",
-      "targetCode": "LANG-SK-INTERPRETAR-Y-RELACIONAR",
-      "mappingType": "related"
     },
     {
       "sourceCode": "LANG-5B-OA06-I4",
@@ -9657,29 +9267,14 @@
       "mappingType": "subset"
     },
     {
-      "sourceCode": "LANG-5B-OA06-I4",
-      "targetCode": "LANG-SK-INTERPRETAR-Y-RELACIONAR",
-      "mappingType": "related"
-    },
-    {
       "sourceCode": "LANG-5B-OA06-I5",
       "targetCode": "LANG-5B-OA06",
       "mappingType": "subset"
     },
     {
-      "sourceCode": "LANG-5B-OA06-I5",
-      "targetCode": "LANG-SK-LOCALIZAR",
-      "mappingType": "related"
-    },
-    {
       "sourceCode": "LANG-5B-OA06-I6",
       "targetCode": "LANG-5B-OA06",
       "mappingType": "subset"
-    },
-    {
-      "sourceCode": "LANG-5B-OA06-I6",
-      "targetCode": "LANG-SK-REFLEXIONAR",
-      "mappingType": "related"
     },
     {
       "sourceCode": "LANG-5B-OA07-I1",
@@ -9687,19 +9282,9 @@
       "mappingType": "subset"
     },
     {
-      "sourceCode": "LANG-5B-OA07-I1",
-      "targetCode": "LANG-SK-REFLEXIONAR",
-      "mappingType": "related"
-    },
-    {
       "sourceCode": "LANG-6B-OA04-I1",
       "targetCode": "LANG-6B-OA04",
       "mappingType": "subset"
-    },
-    {
-      "sourceCode": "LANG-6B-OA04-I1",
-      "targetCode": "LANG-SK-INTERPRETAR-Y-RELACIONAR",
-      "mappingType": "related"
     },
     {
       "sourceCode": "LANG-6B-OA04-I2",
@@ -9707,19 +9292,9 @@
       "mappingType": "subset"
     },
     {
-      "sourceCode": "LANG-6B-OA04-I2",
-      "targetCode": "LANG-SK-INTERPRETAR-Y-RELACIONAR",
-      "mappingType": "related"
-    },
-    {
       "sourceCode": "LANG-6B-OA04-I3",
       "targetCode": "LANG-6B-OA04",
       "mappingType": "subset"
-    },
-    {
-      "sourceCode": "LANG-6B-OA04-I3",
-      "targetCode": "LANG-SK-INTERPRETAR-Y-RELACIONAR",
-      "mappingType": "related"
     },
     {
       "sourceCode": "LANG-6B-OA04-I4",
@@ -9727,19 +9302,9 @@
       "mappingType": "subset"
     },
     {
-      "sourceCode": "LANG-6B-OA04-I4",
-      "targetCode": "LANG-SK-INTERPRETAR-Y-RELACIONAR",
-      "mappingType": "related"
-    },
-    {
       "sourceCode": "LANG-6B-OA04-I5",
       "targetCode": "LANG-6B-OA04",
       "mappingType": "subset"
-    },
-    {
-      "sourceCode": "LANG-6B-OA04-I5",
-      "targetCode": "LANG-SK-INTERPRETAR-Y-RELACIONAR",
-      "mappingType": "related"
     },
     {
       "sourceCode": "LANG-6B-OA04-I6",
@@ -9747,19 +9312,9 @@
       "mappingType": "subset"
     },
     {
-      "sourceCode": "LANG-6B-OA04-I6",
-      "targetCode": "LANG-SK-INTERPRETAR-Y-RELACIONAR",
-      "mappingType": "related"
-    },
-    {
       "sourceCode": "LANG-6B-OA04-I7",
       "targetCode": "LANG-6B-OA04",
       "mappingType": "subset"
-    },
-    {
-      "sourceCode": "LANG-6B-OA04-I7",
-      "targetCode": "LANG-SK-INTERPRETAR-Y-RELACIONAR",
-      "mappingType": "related"
     },
     {
       "sourceCode": "LANG-6B-OA04-I8",
@@ -9767,29 +9322,14 @@
       "mappingType": "subset"
     },
     {
-      "sourceCode": "LANG-6B-OA04-I8",
-      "targetCode": "LANG-SK-LOCALIZAR",
-      "mappingType": "related"
-    },
-    {
       "sourceCode": "LANG-6B-OA04-I9",
       "targetCode": "LANG-6B-OA04",
       "mappingType": "subset"
     },
     {
-      "sourceCode": "LANG-6B-OA04-I9",
-      "targetCode": "LANG-SK-REFLEXIONAR",
-      "mappingType": "related"
-    },
-    {
       "sourceCode": "LANG-6B-OA05-I1",
       "targetCode": "LANG-6B-OA05",
       "mappingType": "subset"
-    },
-    {
-      "sourceCode": "LANG-6B-OA05-I1",
-      "targetCode": "LANG-SK-INTERPRETAR-Y-RELACIONAR",
-      "mappingType": "related"
     },
     {
       "sourceCode": "LANG-6B-OA05-I2",
@@ -9797,29 +9337,14 @@
       "mappingType": "subset"
     },
     {
-      "sourceCode": "LANG-6B-OA05-I2",
-      "targetCode": "LANG-SK-REFLEXIONAR",
-      "mappingType": "related"
-    },
-    {
       "sourceCode": "LANG-6B-OA05-I3",
       "targetCode": "LANG-6B-OA05",
       "mappingType": "subset"
     },
     {
-      "sourceCode": "LANG-6B-OA05-I3",
-      "targetCode": "LANG-SK-INTERPRETAR-Y-RELACIONAR",
-      "mappingType": "related"
-    },
-    {
       "sourceCode": "LANG-6B-OA06-I1",
       "targetCode": "LANG-6B-OA06",
       "mappingType": "subset"
-    },
-    {
-      "sourceCode": "LANG-6B-OA06-I1",
-      "targetCode": "LANG-SK-INTERPRETAR-Y-RELACIONAR",
-      "mappingType": "related"
     },
     {
       "sourceCode": "LANG-6B-OA06-I2",
@@ -9827,19 +9352,9 @@
       "mappingType": "subset"
     },
     {
-      "sourceCode": "LANG-6B-OA06-I2",
-      "targetCode": "LANG-SK-INTERPRETAR-Y-RELACIONAR",
-      "mappingType": "related"
-    },
-    {
       "sourceCode": "LANG-6B-OA06-I3",
       "targetCode": "LANG-6B-OA06",
       "mappingType": "subset"
-    },
-    {
-      "sourceCode": "LANG-6B-OA06-I3",
-      "targetCode": "LANG-SK-INTERPRETAR-Y-RELACIONAR",
-      "mappingType": "related"
     },
     {
       "sourceCode": "LANG-6B-OA06-I4",
@@ -9847,19 +9362,9 @@
       "mappingType": "subset"
     },
     {
-      "sourceCode": "LANG-6B-OA06-I4",
-      "targetCode": "LANG-SK-LOCALIZAR",
-      "mappingType": "related"
-    },
-    {
       "sourceCode": "LANG-6B-OA06-I5",
       "targetCode": "LANG-6B-OA06",
       "mappingType": "subset"
-    },
-    {
-      "sourceCode": "LANG-6B-OA06-I5",
-      "targetCode": "LANG-SK-REFLEXIONAR",
-      "mappingType": "related"
     },
     {
       "sourceCode": "LANG-6B-OA07-I1",
@@ -9867,19 +9372,9 @@
       "mappingType": "subset"
     },
     {
-      "sourceCode": "LANG-6B-OA07-I1",
-      "targetCode": "LANG-SK-REFLEXIONAR",
-      "mappingType": "related"
-    },
-    {
       "sourceCode": "MATH-1B-OA11-I1",
       "targetCode": "MATH-1B-OA11",
       "mappingType": "subset"
-    },
-    {
-      "sourceCode": "MATH-1B-OA11-I1",
-      "targetCode": "MATH-SK-ARGUMENTAR-Y-COMUNICAR",
-      "mappingType": "related"
     },
     {
       "sourceCode": "MATH-1B-OA20-I1",
@@ -9887,19 +9382,9 @@
       "mappingType": "subset"
     },
     {
-      "sourceCode": "MATH-1B-OA20-I1",
-      "targetCode": "MATH-SK-ARGUMENTAR-Y-COMUNICAR",
-      "mappingType": "related"
-    },
-    {
       "sourceCode": "MATH-2B-OA02-I1",
       "targetCode": "MATH-2B-OA02",
       "mappingType": "subset"
-    },
-    {
-      "sourceCode": "MATH-2B-OA02-I1",
-      "targetCode": "MATH-SK-REPRESENTAR",
-      "mappingType": "related"
     },
     {
       "sourceCode": "MATH-2B-OA02-I2",
@@ -9907,29 +9392,14 @@
       "mappingType": "subset"
     },
     {
-      "sourceCode": "MATH-2B-OA02-I2",
-      "targetCode": "MATH-SK-REPRESENTAR",
-      "mappingType": "related"
-    },
-    {
       "sourceCode": "MATH-2B-OA02-I3",
       "targetCode": "MATH-2B-OA02",
       "mappingType": "subset"
     },
     {
-      "sourceCode": "MATH-2B-OA02-I3",
-      "targetCode": "MATH-SK-REPRESENTAR",
-      "mappingType": "related"
-    },
-    {
       "sourceCode": "MATH-2B-OA02-I4",
       "targetCode": "MATH-2B-OA02",
       "mappingType": "subset"
-    },
-    {
-      "sourceCode": "MATH-2B-OA02-I4",
-      "targetCode": "MATH-SK-REPRESENTAR",
-      "mappingType": "related"
     },
     {
       "sourceCode": "MATH-2B-OA05-I1",
@@ -9937,29 +9407,14 @@
       "mappingType": "subset"
     },
     {
-      "sourceCode": "MATH-2B-OA05-I1",
-      "targetCode": "MATH-SK-REPRESENTAR",
-      "mappingType": "related"
-    },
-    {
       "sourceCode": "MATH-2B-OA07-I1",
       "targetCode": "MATH-2B-OA07",
       "mappingType": "subset"
     },
     {
-      "sourceCode": "MATH-2B-OA07-I1",
-      "targetCode": "MATH-SK-REPRESENTAR",
-      "mappingType": "related"
-    },
-    {
       "sourceCode": "MATH-2B-OA09-I1",
       "targetCode": "MATH-2B-OA09",
       "mappingType": "subset"
-    },
-    {
-      "sourceCode": "MATH-2B-OA09-I1",
-      "targetCode": "MATH-SK-RESOLVER-PROBLEMAS",
-      "mappingType": "related"
     },
     {
       "sourceCode": "MATH-2B-OA09-I2",
@@ -9967,19 +9422,9 @@
       "mappingType": "subset"
     },
     {
-      "sourceCode": "MATH-2B-OA09-I2",
-      "targetCode": "MATH-SK-RESOLVER-PROBLEMAS",
-      "mappingType": "related"
-    },
-    {
       "sourceCode": "MATH-2B-OA09-I3",
       "targetCode": "MATH-2B-OA09",
       "mappingType": "subset"
-    },
-    {
-      "sourceCode": "MATH-2B-OA09-I3",
-      "targetCode": "MATH-SK-MODELAR",
-      "mappingType": "related"
     },
     {
       "sourceCode": "MATH-2B-OA09-I4",
@@ -9987,19 +9432,9 @@
       "mappingType": "subset"
     },
     {
-      "sourceCode": "MATH-2B-OA09-I4",
-      "targetCode": "MATH-SK-MODELAR",
-      "mappingType": "related"
-    },
-    {
       "sourceCode": "MATH-2B-OA09-I5",
       "targetCode": "MATH-2B-OA09",
       "mappingType": "subset"
-    },
-    {
-      "sourceCode": "MATH-2B-OA09-I5",
-      "targetCode": "MATH-SK-RESOLVER-PROBLEMAS",
-      "mappingType": "related"
     },
     {
       "sourceCode": "MATH-2B-OA09-I6",
@@ -10007,19 +9442,9 @@
       "mappingType": "subset"
     },
     {
-      "sourceCode": "MATH-2B-OA09-I6",
-      "targetCode": "MATH-SK-RESOLVER-PROBLEMAS",
-      "mappingType": "related"
-    },
-    {
       "sourceCode": "MATH-2B-OA11-I1",
       "targetCode": "MATH-2B-OA11",
       "mappingType": "subset"
-    },
-    {
-      "sourceCode": "MATH-2B-OA11-I1",
-      "targetCode": "MATH-SK-MODELAR",
-      "mappingType": "related"
     },
     {
       "sourceCode": "MATH-2B-OA11-I2",
@@ -10027,24 +9452,9 @@
       "mappingType": "subset"
     },
     {
-      "sourceCode": "MATH-2B-OA11-I2",
-      "targetCode": "MATH-SK-REPRESENTAR",
-      "mappingType": "related"
-    },
-    {
       "sourceCode": "MATH-2B-OA12-I1",
       "targetCode": "MATH-2B-OA12",
       "mappingType": "subset"
-    },
-    {
-      "sourceCode": "MATH-2B-OA12-I1",
-      "targetCode": "MATH-SK-ARGUMENTAR-Y-COMUNICAR",
-      "mappingType": "related"
-    },
-    {
-      "sourceCode": "MATH-2B-OA12-I1",
-      "targetCode": "MATH-SK-RESOLVER-PROBLEMAS",
-      "mappingType": "related"
     },
     {
       "sourceCode": "MATH-2B-OA12-I2",
@@ -10052,39 +9462,19 @@
       "mappingType": "subset"
     },
     {
-      "sourceCode": "MATH-2B-OA12-I2",
-      "targetCode": "MATH-SK-ARGUMENTAR-Y-COMUNICAR",
-      "mappingType": "related"
-    },
-    {
       "sourceCode": "MATH-2B-OA12-I3",
       "targetCode": "MATH-2B-OA12",
       "mappingType": "subset"
     },
     {
-      "sourceCode": "MATH-2B-OA12-I3",
-      "targetCode": "MATH-SK-ARGUMENTAR-Y-COMUNICAR",
-      "mappingType": "related"
-    },
-    {
       "sourceCode": "MATH-2B-OA13-I1",
       "targetCode": "MATH-2B-OA13",
       "mappingType": "subset"
     },
     {
-      "sourceCode": "MATH-2B-OA13-I1",
-      "targetCode": "MATH-SK-REPRESENTAR",
-      "mappingType": "related"
-    },
-    {
       "sourceCode": "MATH-2B-OA13-I2",
       "targetCode": "MATH-2B-OA13",
       "mappingType": "subset"
-    },
-    {
-      "sourceCode": "MATH-2B-OA13-I2",
-      "targetCode": "MATH-SK-REPRESENTAR",
-      "mappingType": "related"
     },
     {
       "sourceCode": "MATH-2B-OA15-I1",
@@ -10092,29 +9482,14 @@
       "mappingType": "subset"
     },
     {
-      "sourceCode": "MATH-2B-OA15-I1",
-      "targetCode": "MATH-SK-REPRESENTAR",
-      "mappingType": "related"
-    },
-    {
       "sourceCode": "MATH-2B-OA16-I1",
       "targetCode": "MATH-2B-OA16",
       "mappingType": "subset"
     },
     {
-      "sourceCode": "MATH-2B-OA16-I1",
-      "targetCode": "MATH-SK-REPRESENTAR",
-      "mappingType": "related"
-    },
-    {
       "sourceCode": "MATH-2B-OA16-I2",
       "targetCode": "MATH-2B-OA16",
       "mappingType": "subset"
-    },
-    {
-      "sourceCode": "MATH-2B-OA16-I2",
-      "targetCode": "MATH-SK-REPRESENTAR",
-      "mappingType": "related"
     },
     {
       "sourceCode": "MATH-2B-OA19-I1",
@@ -10122,29 +9497,14 @@
       "mappingType": "subset"
     },
     {
-      "sourceCode": "MATH-2B-OA19-I1",
-      "targetCode": "MATH-SK-RESOLVER-PROBLEMAS",
-      "mappingType": "related"
-    },
-    {
       "sourceCode": "MATH-2B-OA20-I1",
       "targetCode": "MATH-2B-OA20",
       "mappingType": "subset"
     },
     {
-      "sourceCode": "MATH-2B-OA20-I1",
-      "targetCode": "MATH-SK-ARGUMENTAR-Y-COMUNICAR",
-      "mappingType": "related"
-    },
-    {
       "sourceCode": "MATH-2B-OA21-I1",
       "targetCode": "MATH-2B-OA21",
       "mappingType": "subset"
-    },
-    {
-      "sourceCode": "MATH-2B-OA21-I1",
-      "targetCode": "MATH-SK-ARGUMENTAR-Y-COMUNICAR",
-      "mappingType": "related"
     },
     {
       "sourceCode": "MATH-2B-OA21-I2",
@@ -10152,19 +9512,9 @@
       "mappingType": "subset"
     },
     {
-      "sourceCode": "MATH-2B-OA21-I2",
-      "targetCode": "MATH-SK-RESOLVER-PROBLEMAS",
-      "mappingType": "related"
-    },
-    {
       "sourceCode": "MATH-2B-OA22-I1",
       "targetCode": "MATH-2B-OA22",
       "mappingType": "subset"
-    },
-    {
-      "sourceCode": "MATH-2B-OA22-I1",
-      "targetCode": "MATH-SK-ARGUMENTAR-Y-COMUNICAR",
-      "mappingType": "related"
     },
     {
       "sourceCode": "MATH-2B-OA22-I2",
@@ -10172,19 +9522,9 @@
       "mappingType": "subset"
     },
     {
-      "sourceCode": "MATH-2B-OA22-I2",
-      "targetCode": "MATH-SK-ARGUMENTAR-Y-COMUNICAR",
-      "mappingType": "related"
-    },
-    {
       "sourceCode": "MATH-3B-OA02-I1",
       "targetCode": "MATH-3B-OA02",
       "mappingType": "subset"
-    },
-    {
-      "sourceCode": "MATH-3B-OA02-I1",
-      "targetCode": "MATH-SK-REPRESENTAR",
-      "mappingType": "related"
     },
     {
       "sourceCode": "MATH-3B-OA02-I2",
@@ -10192,29 +9532,14 @@
       "mappingType": "subset"
     },
     {
-      "sourceCode": "MATH-3B-OA02-I2",
-      "targetCode": "MATH-SK-REPRESENTAR",
-      "mappingType": "related"
-    },
-    {
       "sourceCode": "MATH-3B-OA02-I3",
       "targetCode": "MATH-3B-OA02",
       "mappingType": "subset"
     },
     {
-      "sourceCode": "MATH-3B-OA02-I3",
-      "targetCode": "MATH-SK-REPRESENTAR",
-      "mappingType": "related"
-    },
-    {
       "sourceCode": "MATH-3B-OA03-I1",
       "targetCode": "MATH-3B-OA03",
       "mappingType": "subset"
-    },
-    {
-      "sourceCode": "MATH-3B-OA03-I1",
-      "targetCode": "MATH-SK-RESOLVER-PROBLEMAS",
-      "mappingType": "related"
     },
     {
       "sourceCode": "MATH-3B-OA03-I2",
@@ -10222,29 +9547,14 @@
       "mappingType": "subset"
     },
     {
-      "sourceCode": "MATH-3B-OA03-I2",
-      "targetCode": "MATH-SK-MODELAR",
-      "mappingType": "related"
-    },
-    {
       "sourceCode": "MATH-3B-OA03-I3",
       "targetCode": "MATH-3B-OA03",
       "mappingType": "subset"
     },
     {
-      "sourceCode": "MATH-3B-OA03-I3",
-      "targetCode": "MATH-SK-REPRESENTAR",
-      "mappingType": "related"
-    },
-    {
       "sourceCode": "MATH-3B-OA05-I1",
       "targetCode": "MATH-3B-OA05",
       "mappingType": "subset"
-    },
-    {
-      "sourceCode": "MATH-3B-OA05-I1",
-      "targetCode": "MATH-SK-REPRESENTAR",
-      "mappingType": "related"
     },
     {
       "sourceCode": "MATH-3B-OA05-I2",
@@ -10252,29 +9562,14 @@
       "mappingType": "subset"
     },
     {
-      "sourceCode": "MATH-3B-OA05-I2",
-      "targetCode": "MATH-SK-REPRESENTAR",
-      "mappingType": "related"
-    },
-    {
       "sourceCode": "MATH-3B-OA05-I3",
       "targetCode": "MATH-3B-OA05",
       "mappingType": "subset"
     },
     {
-      "sourceCode": "MATH-3B-OA05-I3",
-      "targetCode": "MATH-SK-REPRESENTAR",
-      "mappingType": "related"
-    },
-    {
       "sourceCode": "MATH-3B-OA06-I1",
       "targetCode": "MATH-3B-OA06",
       "mappingType": "subset"
-    },
-    {
-      "sourceCode": "MATH-3B-OA06-I1",
-      "targetCode": "MATH-SK-RESOLVER-PROBLEMAS",
-      "mappingType": "related"
     },
     {
       "sourceCode": "MATH-3B-OA06-I2",
@@ -10282,19 +9577,9 @@
       "mappingType": "subset"
     },
     {
-      "sourceCode": "MATH-3B-OA06-I2",
-      "targetCode": "MATH-SK-RESOLVER-PROBLEMAS",
-      "mappingType": "related"
-    },
-    {
       "sourceCode": "MATH-3B-OA06-I3",
       "targetCode": "MATH-3B-OA06",
       "mappingType": "subset"
-    },
-    {
-      "sourceCode": "MATH-3B-OA06-I3",
-      "targetCode": "MATH-SK-RESOLVER-PROBLEMAS",
-      "mappingType": "related"
     },
     {
       "sourceCode": "MATH-3B-OA06-I4",
@@ -10302,19 +9587,9 @@
       "mappingType": "subset"
     },
     {
-      "sourceCode": "MATH-3B-OA06-I4",
-      "targetCode": "MATH-SK-RESOLVER-PROBLEMAS",
-      "mappingType": "related"
-    },
-    {
       "sourceCode": "MATH-3B-OA06-I5",
       "targetCode": "MATH-3B-OA06",
       "mappingType": "subset"
-    },
-    {
-      "sourceCode": "MATH-3B-OA06-I5",
-      "targetCode": "MATH-SK-RESOLVER-PROBLEMAS",
-      "mappingType": "related"
     },
     {
       "sourceCode": "MATH-3B-OA06-I6",
@@ -10322,19 +9597,9 @@
       "mappingType": "subset"
     },
     {
-      "sourceCode": "MATH-3B-OA06-I6",
-      "targetCode": "MATH-SK-MODELAR",
-      "mappingType": "related"
-    },
-    {
       "sourceCode": "MATH-3B-OA06-I7",
       "targetCode": "MATH-3B-OA06",
       "mappingType": "subset"
-    },
-    {
-      "sourceCode": "MATH-3B-OA06-I7",
-      "targetCode": "MATH-SK-MODELAR",
-      "mappingType": "related"
     },
     {
       "sourceCode": "MATH-3B-OA06-I8",
@@ -10342,19 +9607,9 @@
       "mappingType": "subset"
     },
     {
-      "sourceCode": "MATH-3B-OA06-I8",
-      "targetCode": "MATH-SK-RESOLVER-PROBLEMAS",
-      "mappingType": "related"
-    },
-    {
       "sourceCode": "MATH-3B-OA06-I9",
       "targetCode": "MATH-3B-OA06",
       "mappingType": "subset"
-    },
-    {
-      "sourceCode": "MATH-3B-OA06-I9",
-      "targetCode": "MATH-SK-RESOLVER-PROBLEMAS",
-      "mappingType": "related"
     },
     {
       "sourceCode": "MATH-3B-OA06-I10",
@@ -10362,19 +9617,9 @@
       "mappingType": "subset"
     },
     {
-      "sourceCode": "MATH-3B-OA06-I10",
-      "targetCode": "MATH-SK-RESOLVER-PROBLEMAS",
-      "mappingType": "related"
-    },
-    {
       "sourceCode": "MATH-3B-OA06-I11",
       "targetCode": "MATH-3B-OA06",
       "mappingType": "subset"
-    },
-    {
-      "sourceCode": "MATH-3B-OA06-I11",
-      "targetCode": "MATH-SK-RESOLVER-PROBLEMAS",
-      "mappingType": "related"
     },
     {
       "sourceCode": "MATH-3B-OA06-I12",
@@ -10382,19 +9627,9 @@
       "mappingType": "subset"
     },
     {
-      "sourceCode": "MATH-3B-OA06-I12",
-      "targetCode": "MATH-SK-RESOLVER-PROBLEMAS",
-      "mappingType": "related"
-    },
-    {
       "sourceCode": "MATH-3B-OA07-I1",
       "targetCode": "MATH-3B-OA07",
       "mappingType": "subset"
-    },
-    {
-      "sourceCode": "MATH-3B-OA07-I1",
-      "targetCode": "MATH-SK-REPRESENTAR",
-      "mappingType": "related"
     },
     {
       "sourceCode": "MATH-3B-OA07-I2",
@@ -10402,19 +9637,9 @@
       "mappingType": "subset"
     },
     {
-      "sourceCode": "MATH-3B-OA07-I2",
-      "targetCode": "MATH-SK-ARGUMENTAR-Y-COMUNICAR",
-      "mappingType": "related"
-    },
-    {
       "sourceCode": "MATH-3B-OA08-I1",
       "targetCode": "MATH-3B-OA08",
       "mappingType": "subset"
-    },
-    {
-      "sourceCode": "MATH-3B-OA08-I1",
-      "targetCode": "MATH-SK-RESOLVER-PROBLEMAS",
-      "mappingType": "related"
     },
     {
       "sourceCode": "MATH-3B-OA08-I2",
@@ -10422,19 +9647,9 @@
       "mappingType": "subset"
     },
     {
-      "sourceCode": "MATH-3B-OA08-I2",
-      "targetCode": "MATH-SK-RESOLVER-PROBLEMAS",
-      "mappingType": "related"
-    },
-    {
       "sourceCode": "MATH-3B-OA08-I3",
       "targetCode": "MATH-3B-OA08",
       "mappingType": "subset"
-    },
-    {
-      "sourceCode": "MATH-3B-OA08-I3",
-      "targetCode": "MATH-SK-MODELAR",
-      "mappingType": "related"
     },
     {
       "sourceCode": "MATH-3B-OA08-I4",
@@ -10442,24 +9657,9 @@
       "mappingType": "subset"
     },
     {
-      "sourceCode": "MATH-3B-OA08-I4",
-      "targetCode": "MATH-SK-REPRESENTAR",
-      "mappingType": "related"
-    },
-    {
       "sourceCode": "MATH-3B-OA08-I5",
       "targetCode": "MATH-3B-OA08",
       "mappingType": "subset"
-    },
-    {
-      "sourceCode": "MATH-3B-OA08-I5",
-      "targetCode": "MATH-SK-REPRESENTAR",
-      "mappingType": "related"
-    },
-    {
-      "sourceCode": "MATH-3B-OA08-I5",
-      "targetCode": "MATH-SK-RESOLVER-PROBLEMAS",
-      "mappingType": "related"
     },
     {
       "sourceCode": "MATH-3B-OA08-I6",
@@ -10467,19 +9667,9 @@
       "mappingType": "subset"
     },
     {
-      "sourceCode": "MATH-3B-OA08-I6",
-      "targetCode": "MATH-SK-RESOLVER-PROBLEMAS",
-      "mappingType": "related"
-    },
-    {
       "sourceCode": "MATH-3B-OA09-I1",
       "targetCode": "MATH-3B-OA09",
       "mappingType": "subset"
-    },
-    {
-      "sourceCode": "MATH-3B-OA09-I1",
-      "targetCode": "MATH-SK-RESOLVER-PROBLEMAS",
-      "mappingType": "related"
     },
     {
       "sourceCode": "MATH-3B-OA09-I2",
@@ -10487,19 +9677,9 @@
       "mappingType": "subset"
     },
     {
-      "sourceCode": "MATH-3B-OA09-I2",
-      "targetCode": "MATH-SK-REPRESENTAR",
-      "mappingType": "related"
-    },
-    {
       "sourceCode": "MATH-3B-OA09-I3",
       "targetCode": "MATH-3B-OA09",
       "mappingType": "subset"
-    },
-    {
-      "sourceCode": "MATH-3B-OA09-I3",
-      "targetCode": "MATH-SK-RESOLVER-PROBLEMAS",
-      "mappingType": "related"
     },
     {
       "sourceCode": "MATH-3B-OA09-I4",
@@ -10507,19 +9687,9 @@
       "mappingType": "subset"
     },
     {
-      "sourceCode": "MATH-3B-OA09-I4",
-      "targetCode": "MATH-SK-RESOLVER-PROBLEMAS",
-      "mappingType": "related"
-    },
-    {
       "sourceCode": "MATH-3B-OA10-I1",
       "targetCode": "MATH-3B-OA10",
       "mappingType": "subset"
-    },
-    {
-      "sourceCode": "MATH-3B-OA10-I1",
-      "targetCode": "MATH-SK-MODELAR",
-      "mappingType": "related"
     },
     {
       "sourceCode": "MATH-3B-OA10-I2",
@@ -10527,29 +9697,14 @@
       "mappingType": "subset"
     },
     {
-      "sourceCode": "MATH-3B-OA10-I2",
-      "targetCode": "MATH-SK-RESOLVER-PROBLEMAS",
-      "mappingType": "related"
-    },
-    {
       "sourceCode": "MATH-3B-OA10-I3",
       "targetCode": "MATH-3B-OA10",
       "mappingType": "subset"
     },
     {
-      "sourceCode": "MATH-3B-OA10-I3",
-      "targetCode": "MATH-SK-RESOLVER-PROBLEMAS",
-      "mappingType": "related"
-    },
-    {
       "sourceCode": "MATH-3B-OA11-I1",
       "targetCode": "MATH-3B-OA11",
       "mappingType": "subset"
-    },
-    {
-      "sourceCode": "MATH-3B-OA11-I1",
-      "targetCode": "MATH-SK-RESOLVER-PROBLEMAS",
-      "mappingType": "related"
     },
     {
       "sourceCode": "MATH-3B-OA11-I2",
@@ -10557,19 +9712,9 @@
       "mappingType": "subset"
     },
     {
-      "sourceCode": "MATH-3B-OA11-I2",
-      "targetCode": "MATH-SK-REPRESENTAR",
-      "mappingType": "related"
-    },
-    {
       "sourceCode": "MATH-3B-OA11-I3",
       "targetCode": "MATH-3B-OA11",
       "mappingType": "subset"
-    },
-    {
-      "sourceCode": "MATH-3B-OA11-I3",
-      "targetCode": "MATH-SK-REPRESENTAR",
-      "mappingType": "related"
     },
     {
       "sourceCode": "MATH-3B-OA11-I4",
@@ -10577,19 +9722,9 @@
       "mappingType": "subset"
     },
     {
-      "sourceCode": "MATH-3B-OA11-I4",
-      "targetCode": "MATH-SK-REPRESENTAR",
-      "mappingType": "related"
-    },
-    {
       "sourceCode": "MATH-3B-OA12-I1",
       "targetCode": "MATH-3B-OA12",
       "mappingType": "subset"
-    },
-    {
-      "sourceCode": "MATH-3B-OA12-I1",
-      "targetCode": "MATH-SK-REPRESENTAR",
-      "mappingType": "related"
     },
     {
       "sourceCode": "MATH-3B-OA12-I2",
@@ -10597,39 +9732,19 @@
       "mappingType": "subset"
     },
     {
-      "sourceCode": "MATH-3B-OA12-I2",
-      "targetCode": "MATH-SK-RESOLVER-PROBLEMAS",
-      "mappingType": "related"
-    },
-    {
       "sourceCode": "MATH-3B-OA12-I3",
       "targetCode": "MATH-3B-OA12",
       "mappingType": "subset"
     },
     {
-      "sourceCode": "MATH-3B-OA12-I3",
-      "targetCode": "MATH-SK-RESOLVER-PROBLEMAS",
-      "mappingType": "related"
-    },
-    {
       "sourceCode": "MATH-3B-OA15-I1",
       "targetCode": "MATH-3B-OA15",
       "mappingType": "subset"
     },
     {
-      "sourceCode": "MATH-3B-OA15-I1",
-      "targetCode": "MATH-SK-REPRESENTAR",
-      "mappingType": "related"
-    },
-    {
       "sourceCode": "MATH-3B-OA15-I2",
       "targetCode": "MATH-3B-OA15",
       "mappingType": "subset"
-    },
-    {
-      "sourceCode": "MATH-3B-OA15-I2",
-      "targetCode": "MATH-SK-RESOLVER-PROBLEMAS",
-      "mappingType": "related"
     },
     {
       "sourceCode": "MATH-3B-OA16-I1",
@@ -10637,29 +9752,14 @@
       "mappingType": "subset"
     },
     {
-      "sourceCode": "MATH-3B-OA16-I1",
-      "targetCode": "MATH-SK-REPRESENTAR",
-      "mappingType": "related"
-    },
-    {
       "sourceCode": "MATH-3B-OA17-I1",
       "targetCode": "MATH-3B-OA17",
       "mappingType": "subset"
     },
     {
-      "sourceCode": "MATH-3B-OA17-I1",
-      "targetCode": "MATH-SK-MODELAR",
-      "mappingType": "related"
-    },
-    {
       "sourceCode": "MATH-3B-OA17-I2",
       "targetCode": "MATH-3B-OA17",
       "mappingType": "subset"
-    },
-    {
-      "sourceCode": "MATH-3B-OA17-I2",
-      "targetCode": "MATH-SK-MODELAR",
-      "mappingType": "related"
     },
     {
       "sourceCode": "MATH-3B-OA18-I1",
@@ -10667,19 +9767,9 @@
       "mappingType": "subset"
     },
     {
-      "sourceCode": "MATH-3B-OA18-I1",
-      "targetCode": "MATH-SK-REPRESENTAR",
-      "mappingType": "related"
-    },
-    {
       "sourceCode": "MATH-3B-OA21-I1",
       "targetCode": "MATH-3B-OA21",
       "mappingType": "subset"
-    },
-    {
-      "sourceCode": "MATH-3B-OA21-I1",
-      "targetCode": "MATH-SK-RESOLVER-PROBLEMAS",
-      "mappingType": "related"
     },
     {
       "sourceCode": "MATH-3B-OA21-I2",
@@ -10687,19 +9777,9 @@
       "mappingType": "subset"
     },
     {
-      "sourceCode": "MATH-3B-OA21-I2",
-      "targetCode": "MATH-SK-RESOLVER-PROBLEMAS",
-      "mappingType": "related"
-    },
-    {
       "sourceCode": "MATH-3B-OA21-I3",
       "targetCode": "MATH-3B-OA21",
       "mappingType": "subset"
-    },
-    {
-      "sourceCode": "MATH-3B-OA21-I3",
-      "targetCode": "MATH-SK-RESOLVER-PROBLEMAS",
-      "mappingType": "related"
     },
     {
       "sourceCode": "MATH-3B-OA21-I4",
@@ -10707,29 +9787,14 @@
       "mappingType": "subset"
     },
     {
-      "sourceCode": "MATH-3B-OA21-I4",
-      "targetCode": "MATH-SK-RESOLVER-PROBLEMAS",
-      "mappingType": "related"
-    },
-    {
       "sourceCode": "MATH-3B-OA21-I5",
       "targetCode": "MATH-3B-OA21",
       "mappingType": "subset"
     },
     {
-      "sourceCode": "MATH-3B-OA21-I5",
-      "targetCode": "MATH-SK-RESOLVER-PROBLEMAS",
-      "mappingType": "related"
-    },
-    {
       "sourceCode": "MATH-3B-OA22-I1",
       "targetCode": "MATH-3B-OA22",
       "mappingType": "subset"
-    },
-    {
-      "sourceCode": "MATH-3B-OA22-I1",
-      "targetCode": "MATH-SK-REPRESENTAR",
-      "mappingType": "related"
     },
     {
       "sourceCode": "MATH-3B-OA22-I2",
@@ -10737,19 +9802,9 @@
       "mappingType": "subset"
     },
     {
-      "sourceCode": "MATH-3B-OA22-I2",
-      "targetCode": "MATH-SK-REPRESENTAR",
-      "mappingType": "related"
-    },
-    {
       "sourceCode": "MATH-3B-OA25-I1",
       "targetCode": "MATH-3B-OA25",
       "mappingType": "subset"
-    },
-    {
-      "sourceCode": "MATH-3B-OA25-I1",
-      "targetCode": "MATH-SK-RESOLVER-PROBLEMAS",
-      "mappingType": "related"
     },
     {
       "sourceCode": "MATH-3B-OA25-I2",
@@ -10757,29 +9812,14 @@
       "mappingType": "subset"
     },
     {
-      "sourceCode": "MATH-3B-OA25-I2",
-      "targetCode": "MATH-SK-REPRESENTAR",
-      "mappingType": "related"
-    },
-    {
       "sourceCode": "MATH-3B-OA25-I3",
       "targetCode": "MATH-3B-OA25",
       "mappingType": "subset"
     },
     {
-      "sourceCode": "MATH-3B-OA25-I3",
-      "targetCode": "MATH-SK-REPRESENTAR",
-      "mappingType": "related"
-    },
-    {
       "sourceCode": "MATH-4B-OA01-I1",
       "targetCode": "MATH-4B-OA01",
       "mappingType": "subset"
-    },
-    {
-      "sourceCode": "MATH-4B-OA01-I1",
-      "targetCode": "MATH-SK-REPRESENTAR",
-      "mappingType": "related"
     },
     {
       "sourceCode": "MATH-4B-OA01-I2",
@@ -10787,29 +9827,14 @@
       "mappingType": "subset"
     },
     {
-      "sourceCode": "MATH-4B-OA01-I2",
-      "targetCode": "MATH-SK-REPRESENTAR",
-      "mappingType": "related"
-    },
-    {
       "sourceCode": "MATH-4B-OA01-I3",
       "targetCode": "MATH-4B-OA01",
       "mappingType": "subset"
     },
     {
-      "sourceCode": "MATH-4B-OA01-I3",
-      "targetCode": "MATH-SK-REPRESENTAR",
-      "mappingType": "related"
-    },
-    {
       "sourceCode": "MATH-4B-OA03-I1",
       "targetCode": "MATH-4B-OA03",
       "mappingType": "subset"
-    },
-    {
-      "sourceCode": "MATH-4B-OA03-I1",
-      "targetCode": "MATH-SK-RESOLVER-PROBLEMAS",
-      "mappingType": "related"
     },
     {
       "sourceCode": "MATH-4B-OA03-I2",
@@ -10817,19 +9842,9 @@
       "mappingType": "subset"
     },
     {
-      "sourceCode": "MATH-4B-OA03-I2",
-      "targetCode": "MATH-SK-RESOLVER-PROBLEMAS",
-      "mappingType": "related"
-    },
-    {
       "sourceCode": "MATH-4B-OA03-I3",
       "targetCode": "MATH-4B-OA03",
       "mappingType": "subset"
-    },
-    {
-      "sourceCode": "MATH-4B-OA03-I3",
-      "targetCode": "MATH-SK-RESOLVER-PROBLEMAS",
-      "mappingType": "related"
     },
     {
       "sourceCode": "MATH-4B-OA03-I4",
@@ -10837,19 +9852,9 @@
       "mappingType": "subset"
     },
     {
-      "sourceCode": "MATH-4B-OA03-I4",
-      "targetCode": "MATH-SK-RESOLVER-PROBLEMAS",
-      "mappingType": "related"
-    },
-    {
       "sourceCode": "MATH-4B-OA05-I1",
       "targetCode": "MATH-4B-OA05",
       "mappingType": "subset"
-    },
-    {
-      "sourceCode": "MATH-4B-OA05-I1",
-      "targetCode": "MATH-SK-RESOLVER-PROBLEMAS",
-      "mappingType": "related"
     },
     {
       "sourceCode": "MATH-4B-OA05-I2",
@@ -10857,19 +9862,9 @@
       "mappingType": "subset"
     },
     {
-      "sourceCode": "MATH-4B-OA05-I2",
-      "targetCode": "MATH-SK-RESOLVER-PROBLEMAS",
-      "mappingType": "related"
-    },
-    {
       "sourceCode": "MATH-4B-OA05-I3",
       "targetCode": "MATH-4B-OA05",
       "mappingType": "subset"
-    },
-    {
-      "sourceCode": "MATH-4B-OA05-I3",
-      "targetCode": "MATH-SK-RESOLVER-PROBLEMAS",
-      "mappingType": "related"
     },
     {
       "sourceCode": "MATH-4B-OA05-I4",
@@ -10877,29 +9872,14 @@
       "mappingType": "subset"
     },
     {
-      "sourceCode": "MATH-4B-OA05-I4",
-      "targetCode": "MATH-SK-RESOLVER-PROBLEMAS",
-      "mappingType": "related"
-    },
-    {
       "sourceCode": "MATH-4B-OA05-I5",
       "targetCode": "MATH-4B-OA05",
       "mappingType": "subset"
     },
     {
-      "sourceCode": "MATH-4B-OA05-I5",
-      "targetCode": "MATH-SK-RESOLVER-PROBLEMAS",
-      "mappingType": "related"
-    },
-    {
       "sourceCode": "MATH-4B-OA06-I1",
       "targetCode": "MATH-4B-OA06",
       "mappingType": "subset"
-    },
-    {
-      "sourceCode": "MATH-4B-OA06-I1",
-      "targetCode": "MATH-SK-RESOLVER-PROBLEMAS",
-      "mappingType": "related"
     },
     {
       "sourceCode": "MATH-4B-OA06-I2",
@@ -10907,34 +9887,14 @@
       "mappingType": "subset"
     },
     {
-      "sourceCode": "MATH-4B-OA06-I2",
-      "targetCode": "MATH-SK-RESOLVER-PROBLEMAS",
-      "mappingType": "related"
-    },
-    {
       "sourceCode": "MATH-4B-OA06-I3",
       "targetCode": "MATH-4B-OA06",
       "mappingType": "subset"
     },
     {
-      "sourceCode": "MATH-4B-OA06-I3",
-      "targetCode": "MATH-SK-RESOLVER-PROBLEMAS",
-      "mappingType": "related"
-    },
-    {
       "sourceCode": "MATH-4B-OA07-I1",
       "targetCode": "MATH-4B-OA07",
       "mappingType": "subset"
-    },
-    {
-      "sourceCode": "MATH-4B-OA07-I1",
-      "targetCode": "MATH-SK-ARGUMENTAR-Y-COMUNICAR",
-      "mappingType": "related"
-    },
-    {
-      "sourceCode": "MATH-4B-OA07-I1",
-      "targetCode": "MATH-SK-RESOLVER-PROBLEMAS",
-      "mappingType": "related"
     },
     {
       "sourceCode": "MATH-4B-OA07-I2",
@@ -10942,19 +9902,9 @@
       "mappingType": "subset"
     },
     {
-      "sourceCode": "MATH-4B-OA07-I2",
-      "targetCode": "MATH-SK-RESOLVER-PROBLEMAS",
-      "mappingType": "related"
-    },
-    {
       "sourceCode": "MATH-4B-OA07-I3",
       "targetCode": "MATH-4B-OA07",
       "mappingType": "subset"
-    },
-    {
-      "sourceCode": "MATH-4B-OA07-I3",
-      "targetCode": "MATH-SK-RESOLVER-PROBLEMAS",
-      "mappingType": "related"
     },
     {
       "sourceCode": "MATH-4B-OA07-I4",
@@ -10962,19 +9912,9 @@
       "mappingType": "subset"
     },
     {
-      "sourceCode": "MATH-4B-OA07-I4",
-      "targetCode": "MATH-SK-RESOLVER-PROBLEMAS",
-      "mappingType": "related"
-    },
-    {
       "sourceCode": "MATH-4B-OA08-I1",
       "targetCode": "MATH-4B-OA08",
       "mappingType": "subset"
-    },
-    {
-      "sourceCode": "MATH-4B-OA08-I1",
-      "targetCode": "MATH-SK-REPRESENTAR",
-      "mappingType": "related"
     },
     {
       "sourceCode": "MATH-4B-OA08-I2",
@@ -10982,29 +9922,14 @@
       "mappingType": "subset"
     },
     {
-      "sourceCode": "MATH-4B-OA08-I2",
-      "targetCode": "MATH-SK-REPRESENTAR",
-      "mappingType": "related"
-    },
-    {
       "sourceCode": "MATH-4B-OA08-I3",
       "targetCode": "MATH-4B-OA08",
       "mappingType": "subset"
     },
     {
-      "sourceCode": "MATH-4B-OA08-I3",
-      "targetCode": "MATH-SK-REPRESENTAR",
-      "mappingType": "related"
-    },
-    {
       "sourceCode": "MATH-4B-OA09-I1",
       "targetCode": "MATH-4B-OA09",
       "mappingType": "subset"
-    },
-    {
-      "sourceCode": "MATH-4B-OA09-I1",
-      "targetCode": "MATH-SK-RESOLVER-PROBLEMAS",
-      "mappingType": "related"
     },
     {
       "sourceCode": "MATH-4B-OA09-I2",
@@ -11012,19 +9937,9 @@
       "mappingType": "subset"
     },
     {
-      "sourceCode": "MATH-4B-OA09-I2",
-      "targetCode": "MATH-SK-RESOLVER-PROBLEMAS",
-      "mappingType": "related"
-    },
-    {
       "sourceCode": "MATH-4B-OA09-I3",
       "targetCode": "MATH-4B-OA09",
       "mappingType": "subset"
-    },
-    {
-      "sourceCode": "MATH-4B-OA09-I3",
-      "targetCode": "MATH-SK-MODELAR",
-      "mappingType": "related"
     },
     {
       "sourceCode": "MATH-4B-OA09-I4",
@@ -11032,19 +9947,9 @@
       "mappingType": "subset"
     },
     {
-      "sourceCode": "MATH-4B-OA09-I4",
-      "targetCode": "MATH-SK-RESOLVER-PROBLEMAS",
-      "mappingType": "related"
-    },
-    {
       "sourceCode": "MATH-4B-OA09-I5",
       "targetCode": "MATH-4B-OA09",
       "mappingType": "subset"
-    },
-    {
-      "sourceCode": "MATH-4B-OA09-I5",
-      "targetCode": "MATH-SK-RESOLVER-PROBLEMAS",
-      "mappingType": "related"
     },
     {
       "sourceCode": "MATH-4B-OA11-I1",
@@ -11052,19 +9957,9 @@
       "mappingType": "subset"
     },
     {
-      "sourceCode": "MATH-4B-OA11-I1",
-      "targetCode": "MATH-SK-REPRESENTAR",
-      "mappingType": "related"
-    },
-    {
       "sourceCode": "MATH-4B-OA13-I1",
       "targetCode": "MATH-4B-OA13",
       "mappingType": "subset"
-    },
-    {
-      "sourceCode": "MATH-4B-OA13-I1",
-      "targetCode": "MATH-SK-RESOLVER-PROBLEMAS",
-      "mappingType": "related"
     },
     {
       "sourceCode": "MATH-4B-OA13-I2",
@@ -11072,19 +9967,9 @@
       "mappingType": "subset"
     },
     {
-      "sourceCode": "MATH-4B-OA13-I2",
-      "targetCode": "MATH-SK-RESOLVER-PROBLEMAS",
-      "mappingType": "related"
-    },
-    {
       "sourceCode": "MATH-4B-OA14-I1",
       "targetCode": "MATH-4B-OA14",
       "mappingType": "subset"
-    },
-    {
-      "sourceCode": "MATH-4B-OA14-I1",
-      "targetCode": "MATH-SK-RESOLVER-PROBLEMAS",
-      "mappingType": "related"
     },
     {
       "sourceCode": "MATH-4B-OA14-I2",
@@ -11092,19 +9977,9 @@
       "mappingType": "subset"
     },
     {
-      "sourceCode": "MATH-4B-OA14-I2",
-      "targetCode": "MATH-SK-RESOLVER-PROBLEMAS",
-      "mappingType": "related"
-    },
-    {
       "sourceCode": "MATH-4B-OA14-I3",
       "targetCode": "MATH-4B-OA14",
       "mappingType": "subset"
-    },
-    {
-      "sourceCode": "MATH-4B-OA14-I3",
-      "targetCode": "MATH-SK-RESOLVER-PROBLEMAS",
-      "mappingType": "related"
     },
     {
       "sourceCode": "MATH-4B-OA17-I1",
@@ -11112,19 +9987,9 @@
       "mappingType": "subset"
     },
     {
-      "sourceCode": "MATH-4B-OA17-I1",
-      "targetCode": "MATH-SK-REPRESENTAR",
-      "mappingType": "related"
-    },
-    {
       "sourceCode": "MATH-4B-OA18-I1",
       "targetCode": "MATH-4B-OA18",
       "mappingType": "subset"
-    },
-    {
-      "sourceCode": "MATH-4B-OA18-I1",
-      "targetCode": "MATH-SK-REPRESENTAR",
-      "mappingType": "related"
     },
     {
       "sourceCode": "MATH-4B-OA18-I2",
@@ -11132,19 +9997,9 @@
       "mappingType": "subset"
     },
     {
-      "sourceCode": "MATH-4B-OA18-I2",
-      "targetCode": "MATH-SK-RESOLVER-PROBLEMAS",
-      "mappingType": "related"
-    },
-    {
       "sourceCode": "MATH-4B-OA22-I1",
       "targetCode": "MATH-4B-OA22",
       "mappingType": "subset"
-    },
-    {
-      "sourceCode": "MATH-4B-OA22-I1",
-      "targetCode": "MATH-SK-RESOLVER-PROBLEMAS",
-      "mappingType": "related"
     },
     {
       "sourceCode": "MATH-4B-OA22-I2",
@@ -11152,19 +10007,9 @@
       "mappingType": "subset"
     },
     {
-      "sourceCode": "MATH-4B-OA22-I2",
-      "targetCode": "MATH-SK-RESOLVER-PROBLEMAS",
-      "mappingType": "related"
-    },
-    {
       "sourceCode": "MATH-4B-OA22-I3",
       "targetCode": "MATH-4B-OA22",
       "mappingType": "subset"
-    },
-    {
-      "sourceCode": "MATH-4B-OA22-I3",
-      "targetCode": "MATH-SK-REPRESENTAR",
-      "mappingType": "related"
     },
     {
       "sourceCode": "MATH-4B-OA22-I4",
@@ -11172,19 +10017,9 @@
       "mappingType": "subset"
     },
     {
-      "sourceCode": "MATH-4B-OA22-I4",
-      "targetCode": "MATH-SK-REPRESENTAR",
-      "mappingType": "related"
-    },
-    {
       "sourceCode": "MATH-4B-OA23-I1",
       "targetCode": "MATH-4B-OA23",
       "mappingType": "subset"
-    },
-    {
-      "sourceCode": "MATH-4B-OA23-I1",
-      "targetCode": "MATH-SK-RESOLVER-PROBLEMAS",
-      "mappingType": "related"
     },
     {
       "sourceCode": "MATH-4B-OA23-I2",
@@ -11192,19 +10027,9 @@
       "mappingType": "subset"
     },
     {
-      "sourceCode": "MATH-4B-OA23-I2",
-      "targetCode": "MATH-SK-RESOLVER-PROBLEMAS",
-      "mappingType": "related"
-    },
-    {
       "sourceCode": "MATH-4B-OA23-I3",
       "targetCode": "MATH-4B-OA23",
       "mappingType": "subset"
-    },
-    {
-      "sourceCode": "MATH-4B-OA23-I3",
-      "targetCode": "MATH-SK-RESOLVER-PROBLEMAS",
-      "mappingType": "related"
     },
     {
       "sourceCode": "MATH-4B-OA23-I4",
@@ -11212,39 +10037,19 @@
       "mappingType": "subset"
     },
     {
-      "sourceCode": "MATH-4B-OA23-I4",
-      "targetCode": "MATH-SK-RESOLVER-PROBLEMAS",
-      "mappingType": "related"
-    },
-    {
       "sourceCode": "MATH-4B-OA23-I5",
       "targetCode": "MATH-4B-OA23",
       "mappingType": "subset"
     },
     {
-      "sourceCode": "MATH-4B-OA23-I5",
-      "targetCode": "MATH-SK-REPRESENTAR",
-      "mappingType": "related"
-    },
-    {
       "sourceCode": "MATH-4B-OA24-I1",
       "targetCode": "MATH-4B-OA24",
       "mappingType": "subset"
     },
     {
-      "sourceCode": "MATH-4B-OA24-I1",
-      "targetCode": "MATH-SK-RESOLVER-PROBLEMAS",
-      "mappingType": "related"
-    },
-    {
       "sourceCode": "MATH-4B-OA24-I2",
       "targetCode": "MATH-4B-OA24",
       "mappingType": "subset"
-    },
-    {
-      "sourceCode": "MATH-4B-OA24-I2",
-      "targetCode": "MATH-SK-RESOLVER-PROBLEMAS",
-      "mappingType": "related"
     },
     {
       "sourceCode": "MATH-4B-OA25-I1",
@@ -11252,19 +10057,9 @@
       "mappingType": "subset"
     },
     {
-      "sourceCode": "MATH-4B-OA25-I1",
-      "targetCode": "MATH-SK-REPRESENTAR",
-      "mappingType": "related"
-    },
-    {
       "sourceCode": "MATH-4B-OA26-I1",
       "targetCode": "MATH-4B-OA26",
       "mappingType": "subset"
-    },
-    {
-      "sourceCode": "MATH-4B-OA26-I1",
-      "targetCode": "MATH-SK-RESOLVER-PROBLEMAS",
-      "mappingType": "related"
     },
     {
       "sourceCode": "MATH-4B-OA26-I2",
@@ -11272,19 +10067,9 @@
       "mappingType": "subset"
     },
     {
-      "sourceCode": "MATH-4B-OA26-I2",
-      "targetCode": "MATH-SK-RESOLVER-PROBLEMAS",
-      "mappingType": "related"
-    },
-    {
       "sourceCode": "MATH-4B-OA27-I1",
       "targetCode": "MATH-4B-OA27",
       "mappingType": "subset"
-    },
-    {
-      "sourceCode": "MATH-4B-OA27-I1",
-      "targetCode": "MATH-SK-RESOLVER-PROBLEMAS",
-      "mappingType": "related"
     },
     {
       "sourceCode": "MATH-4B-OA27-I2",
@@ -11292,19 +10077,9 @@
       "mappingType": "subset"
     },
     {
-      "sourceCode": "MATH-4B-OA27-I2",
-      "targetCode": "MATH-SK-RESOLVER-PROBLEMAS",
-      "mappingType": "related"
-    },
-    {
       "sourceCode": "MATH-4B-OA27-I3",
       "targetCode": "MATH-4B-OA27",
       "mappingType": "subset"
-    },
-    {
-      "sourceCode": "MATH-4B-OA27-I3",
-      "targetCode": "MATH-SK-REPRESENTAR",
-      "mappingType": "related"
     },
     {
       "sourceCode": "MATH-5B-OA01-I1",
@@ -11312,29 +10087,14 @@
       "mappingType": "subset"
     },
     {
-      "sourceCode": "MATH-5B-OA01-I1",
-      "targetCode": "MATH-SK-REPRESENTAR",
-      "mappingType": "related"
-    },
-    {
       "sourceCode": "MATH-5B-OA03-I1",
       "targetCode": "MATH-5B-OA03",
       "mappingType": "subset"
     },
     {
-      "sourceCode": "MATH-5B-OA03-I1",
-      "targetCode": "MATH-SK-RESOLVER-PROBLEMAS",
-      "mappingType": "related"
-    },
-    {
       "sourceCode": "MATH-5B-OA04-I1",
       "targetCode": "MATH-5B-OA04",
       "mappingType": "subset"
-    },
-    {
-      "sourceCode": "MATH-5B-OA04-I1",
-      "targetCode": "MATH-SK-RESOLVER-PROBLEMAS",
-      "mappingType": "related"
     },
     {
       "sourceCode": "MATH-5B-OA04-I2",
@@ -11342,29 +10102,14 @@
       "mappingType": "subset"
     },
     {
-      "sourceCode": "MATH-5B-OA04-I2",
-      "targetCode": "MATH-SK-RESOLVER-PROBLEMAS",
-      "mappingType": "related"
-    },
-    {
       "sourceCode": "MATH-5B-OA04-I3",
       "targetCode": "MATH-5B-OA04",
       "mappingType": "subset"
     },
     {
-      "sourceCode": "MATH-5B-OA04-I3",
-      "targetCode": "MATH-SK-RESOLVER-PROBLEMAS",
-      "mappingType": "related"
-    },
-    {
       "sourceCode": "MATH-5B-OA06-I1",
       "targetCode": "MATH-5B-OA06",
       "mappingType": "subset"
-    },
-    {
-      "sourceCode": "MATH-5B-OA06-I1",
-      "targetCode": "MATH-SK-MODELAR",
-      "mappingType": "related"
     },
     {
       "sourceCode": "MATH-5B-OA06-I2",
@@ -11372,19 +10117,9 @@
       "mappingType": "subset"
     },
     {
-      "sourceCode": "MATH-5B-OA06-I2",
-      "targetCode": "MATH-SK-MODELAR",
-      "mappingType": "related"
-    },
-    {
       "sourceCode": "MATH-5B-OA06-I3",
       "targetCode": "MATH-5B-OA06",
       "mappingType": "subset"
-    },
-    {
-      "sourceCode": "MATH-5B-OA06-I3",
-      "targetCode": "MATH-SK-RESOLVER-PROBLEMAS",
-      "mappingType": "related"
     },
     {
       "sourceCode": "MATH-5B-OA06-I4",
@@ -11392,19 +10127,9 @@
       "mappingType": "subset"
     },
     {
-      "sourceCode": "MATH-5B-OA06-I4",
-      "targetCode": "MATH-SK-RESOLVER-PROBLEMAS",
-      "mappingType": "related"
-    },
-    {
       "sourceCode": "MATH-5B-OA06-I5",
       "targetCode": "MATH-5B-OA06",
       "mappingType": "subset"
-    },
-    {
-      "sourceCode": "MATH-5B-OA06-I5",
-      "targetCode": "MATH-SK-RESOLVER-PROBLEMAS",
-      "mappingType": "related"
     },
     {
       "sourceCode": "MATH-5B-OA06-I6",
@@ -11412,19 +10137,9 @@
       "mappingType": "subset"
     },
     {
-      "sourceCode": "MATH-5B-OA06-I6",
-      "targetCode": "MATH-SK-RESOLVER-PROBLEMAS",
-      "mappingType": "related"
-    },
-    {
       "sourceCode": "MATH-5B-OA06-I7",
       "targetCode": "MATH-5B-OA06",
       "mappingType": "subset"
-    },
-    {
-      "sourceCode": "MATH-5B-OA06-I7",
-      "targetCode": "MATH-SK-RESOLVER-PROBLEMAS",
-      "mappingType": "related"
     },
     {
       "sourceCode": "MATH-5B-OA06-I8",
@@ -11432,19 +10147,9 @@
       "mappingType": "subset"
     },
     {
-      "sourceCode": "MATH-5B-OA06-I8",
-      "targetCode": "MATH-SK-RESOLVER-PROBLEMAS",
-      "mappingType": "related"
-    },
-    {
       "sourceCode": "MATH-5B-OA07-I1",
       "targetCode": "MATH-5B-OA07",
       "mappingType": "subset"
-    },
-    {
-      "sourceCode": "MATH-5B-OA07-I1",
-      "targetCode": "MATH-SK-MODELAR",
-      "mappingType": "related"
     },
     {
       "sourceCode": "MATH-5B-OA07-I2",
@@ -11452,19 +10157,9 @@
       "mappingType": "subset"
     },
     {
-      "sourceCode": "MATH-5B-OA07-I2",
-      "targetCode": "MATH-SK-REPRESENTAR",
-      "mappingType": "related"
-    },
-    {
       "sourceCode": "MATH-5B-OA07-I3",
       "targetCode": "MATH-5B-OA07",
       "mappingType": "subset"
-    },
-    {
-      "sourceCode": "MATH-5B-OA07-I3",
-      "targetCode": "MATH-SK-RESOLVER-PROBLEMAS",
-      "mappingType": "related"
     },
     {
       "sourceCode": "MATH-5B-OA07-I4",
@@ -11472,19 +10167,9 @@
       "mappingType": "subset"
     },
     {
-      "sourceCode": "MATH-5B-OA07-I4",
-      "targetCode": "MATH-SK-RESOLVER-PROBLEMAS",
-      "mappingType": "related"
-    },
-    {
       "sourceCode": "MATH-5B-OA07-I5",
       "targetCode": "MATH-5B-OA07",
       "mappingType": "subset"
-    },
-    {
-      "sourceCode": "MATH-5B-OA07-I5",
-      "targetCode": "MATH-SK-RESOLVER-PROBLEMAS",
-      "mappingType": "related"
     },
     {
       "sourceCode": "MATH-5B-OA07-I6",
@@ -11492,19 +10177,9 @@
       "mappingType": "subset"
     },
     {
-      "sourceCode": "MATH-5B-OA07-I6",
-      "targetCode": "MATH-SK-RESOLVER-PROBLEMAS",
-      "mappingType": "related"
-    },
-    {
       "sourceCode": "MATH-5B-OA07-I7",
       "targetCode": "MATH-5B-OA07",
       "mappingType": "subset"
-    },
-    {
-      "sourceCode": "MATH-5B-OA07-I7",
-      "targetCode": "MATH-SK-MODELAR",
-      "mappingType": "related"
     },
     {
       "sourceCode": "MATH-5B-OA07-I8",
@@ -11512,29 +10187,14 @@
       "mappingType": "subset"
     },
     {
-      "sourceCode": "MATH-5B-OA07-I8",
-      "targetCode": "MATH-SK-REPRESENTAR",
-      "mappingType": "related"
-    },
-    {
       "sourceCode": "MATH-5B-OA07-I9",
       "targetCode": "MATH-5B-OA07",
       "mappingType": "subset"
     },
     {
-      "sourceCode": "MATH-5B-OA07-I9",
-      "targetCode": "MATH-SK-REPRESENTAR",
-      "mappingType": "related"
-    },
-    {
       "sourceCode": "MATH-5B-OA07-I10",
       "targetCode": "MATH-5B-OA07",
       "mappingType": "subset"
-    },
-    {
-      "sourceCode": "MATH-5B-OA07-I10",
-      "targetCode": "MATH-SK-REPRESENTAR",
-      "mappingType": "related"
     },
     {
       "sourceCode": "MATH-5B-OA08-I1",
@@ -11542,29 +10202,14 @@
       "mappingType": "subset"
     },
     {
-      "sourceCode": "MATH-5B-OA08-I1",
-      "targetCode": "MATH-SK-REPRESENTAR",
-      "mappingType": "related"
-    },
-    {
       "sourceCode": "MATH-5B-OA09-I1",
       "targetCode": "MATH-5B-OA09",
       "mappingType": "subset"
     },
     {
-      "sourceCode": "MATH-5B-OA09-I1",
-      "targetCode": "MATH-SK-RESOLVER-PROBLEMAS",
-      "mappingType": "related"
-    },
-    {
       "sourceCode": "MATH-5B-OA10-I1",
       "targetCode": "MATH-5B-OA10",
       "mappingType": "subset"
-    },
-    {
-      "sourceCode": "MATH-5B-OA10-I1",
-      "targetCode": "MATH-SK-REPRESENTAR",
-      "mappingType": "related"
     },
     {
       "sourceCode": "MATH-5B-OA10-I2",
@@ -11572,29 +10217,14 @@
       "mappingType": "subset"
     },
     {
-      "sourceCode": "MATH-5B-OA10-I2",
-      "targetCode": "MATH-SK-REPRESENTAR",
-      "mappingType": "related"
-    },
-    {
       "sourceCode": "MATH-5B-OA10-I3",
       "targetCode": "MATH-5B-OA10",
       "mappingType": "subset"
     },
     {
-      "sourceCode": "MATH-5B-OA10-I3",
-      "targetCode": "MATH-SK-REPRESENTAR",
-      "mappingType": "related"
-    },
-    {
       "sourceCode": "MATH-5B-OA11-I1",
       "targetCode": "MATH-5B-OA11",
       "mappingType": "subset"
-    },
-    {
-      "sourceCode": "MATH-5B-OA11-I1",
-      "targetCode": "MATH-SK-RESOLVER-PROBLEMAS",
-      "mappingType": "related"
     },
     {
       "sourceCode": "MATH-5B-OA11-I2",
@@ -11602,19 +10232,9 @@
       "mappingType": "subset"
     },
     {
-      "sourceCode": "MATH-5B-OA11-I2",
-      "targetCode": "MATH-SK-RESOLVER-PROBLEMAS",
-      "mappingType": "related"
-    },
-    {
       "sourceCode": "MATH-5B-OA12-I1",
       "targetCode": "MATH-5B-OA12",
       "mappingType": "subset"
-    },
-    {
-      "sourceCode": "MATH-5B-OA12-I1",
-      "targetCode": "MATH-SK-RESOLVER-PROBLEMAS",
-      "mappingType": "related"
     },
     {
       "sourceCode": "MATH-5B-OA12-I2",
@@ -11622,19 +10242,9 @@
       "mappingType": "subset"
     },
     {
-      "sourceCode": "MATH-5B-OA12-I2",
-      "targetCode": "MATH-SK-RESOLVER-PROBLEMAS",
-      "mappingType": "related"
-    },
-    {
       "sourceCode": "MATH-5B-OA13-I1",
       "targetCode": "MATH-5B-OA13",
       "mappingType": "subset"
-    },
-    {
-      "sourceCode": "MATH-5B-OA13-I1",
-      "targetCode": "MATH-SK-ARGUMENTAR-Y-COMUNICAR",
-      "mappingType": "related"
     },
     {
       "sourceCode": "MATH-5B-OA13-I2",
@@ -11642,29 +10252,14 @@
       "mappingType": "subset"
     },
     {
-      "sourceCode": "MATH-5B-OA13-I2",
-      "targetCode": "MATH-SK-ARGUMENTAR-Y-COMUNICAR",
-      "mappingType": "related"
-    },
-    {
       "sourceCode": "MATH-5B-OA13-I3",
       "targetCode": "MATH-5B-OA13",
       "mappingType": "subset"
     },
     {
-      "sourceCode": "MATH-5B-OA13-I3",
-      "targetCode": "MATH-SK-RESOLVER-PROBLEMAS",
-      "mappingType": "related"
-    },
-    {
       "sourceCode": "MATH-5B-OA14-I1",
       "targetCode": "MATH-5B-OA14",
       "mappingType": "subset"
-    },
-    {
-      "sourceCode": "MATH-5B-OA14-I1",
-      "targetCode": "MATH-SK-RESOLVER-PROBLEMAS",
-      "mappingType": "related"
     },
     {
       "sourceCode": "MATH-5B-OA14-I2",
@@ -11672,29 +10267,14 @@
       "mappingType": "subset"
     },
     {
-      "sourceCode": "MATH-5B-OA14-I2",
-      "targetCode": "MATH-SK-MODELAR",
-      "mappingType": "related"
-    },
-    {
       "sourceCode": "MATH-5B-OA14-I3",
       "targetCode": "MATH-5B-OA14",
       "mappingType": "subset"
     },
     {
-      "sourceCode": "MATH-5B-OA14-I3",
-      "targetCode": "MATH-SK-RESOLVER-PROBLEMAS",
-      "mappingType": "related"
-    },
-    {
       "sourceCode": "MATH-5B-OA15-I1",
       "targetCode": "MATH-5B-OA15",
       "mappingType": "subset"
-    },
-    {
-      "sourceCode": "MATH-5B-OA15-I1",
-      "targetCode": "MATH-SK-MODELAR",
-      "mappingType": "related"
     },
     {
       "sourceCode": "MATH-5B-OA15-I2",
@@ -11702,29 +10282,14 @@
       "mappingType": "subset"
     },
     {
-      "sourceCode": "MATH-5B-OA15-I2",
-      "targetCode": "MATH-SK-RESOLVER-PROBLEMAS",
-      "mappingType": "related"
-    },
-    {
       "sourceCode": "MATH-5B-OA15-I3",
       "targetCode": "MATH-5B-OA15",
       "mappingType": "subset"
     },
     {
-      "sourceCode": "MATH-5B-OA15-I3",
-      "targetCode": "MATH-SK-RESOLVER-PROBLEMAS",
-      "mappingType": "related"
-    },
-    {
       "sourceCode": "MATH-5B-OA17-I1",
       "targetCode": "MATH-5B-OA17",
       "mappingType": "subset"
-    },
-    {
-      "sourceCode": "MATH-5B-OA17-I1",
-      "targetCode": "MATH-SK-RESOLVER-PROBLEMAS",
-      "mappingType": "related"
     },
     {
       "sourceCode": "MATH-5B-OA17-I2",
@@ -11732,29 +10297,14 @@
       "mappingType": "subset"
     },
     {
-      "sourceCode": "MATH-5B-OA17-I2",
-      "targetCode": "MATH-SK-RESOLVER-PROBLEMAS",
-      "mappingType": "related"
-    },
-    {
       "sourceCode": "MATH-5B-OA18-I1",
       "targetCode": "MATH-5B-OA18",
       "mappingType": "subset"
     },
     {
-      "sourceCode": "MATH-5B-OA18-I1",
-      "targetCode": "MATH-SK-RESOLVER-PROBLEMAS",
-      "mappingType": "related"
-    },
-    {
       "sourceCode": "MATH-5B-OA18-I2",
       "targetCode": "MATH-5B-OA18",
       "mappingType": "subset"
-    },
-    {
-      "sourceCode": "MATH-5B-OA18-I2",
-      "targetCode": "MATH-SK-RESOLVER-PROBLEMAS",
-      "mappingType": "related"
     },
     {
       "sourceCode": "MATH-5B-OA19-I1",
@@ -11762,29 +10312,14 @@
       "mappingType": "subset"
     },
     {
-      "sourceCode": "MATH-5B-OA19-I1",
-      "targetCode": "MATH-SK-RESOLVER-PROBLEMAS",
-      "mappingType": "related"
-    },
-    {
       "sourceCode": "MATH-5B-OA21-I1",
       "targetCode": "MATH-5B-OA21",
       "mappingType": "subset"
     },
     {
-      "sourceCode": "MATH-5B-OA21-I1",
-      "targetCode": "MATH-SK-RESOLVER-PROBLEMAS",
-      "mappingType": "related"
-    },
-    {
       "sourceCode": "MATH-5B-OA22-I1",
       "targetCode": "MATH-5B-OA22",
       "mappingType": "subset"
-    },
-    {
-      "sourceCode": "MATH-5B-OA22-I1",
-      "targetCode": "MATH-SK-RESOLVER-PROBLEMAS",
-      "mappingType": "related"
     },
     {
       "sourceCode": "MATH-5B-OA22-I2",
@@ -11792,19 +10327,9 @@
       "mappingType": "subset"
     },
     {
-      "sourceCode": "MATH-5B-OA22-I2",
-      "targetCode": "MATH-SK-RESOLVER-PROBLEMAS",
-      "mappingType": "related"
-    },
-    {
       "sourceCode": "MATH-5B-OA22-I3",
       "targetCode": "MATH-5B-OA22",
       "mappingType": "subset"
-    },
-    {
-      "sourceCode": "MATH-5B-OA22-I3",
-      "targetCode": "MATH-SK-RESOLVER-PROBLEMAS",
-      "mappingType": "related"
     },
     {
       "sourceCode": "MATH-5B-OA23-I1",
@@ -11812,19 +10337,9 @@
       "mappingType": "subset"
     },
     {
-      "sourceCode": "MATH-5B-OA23-I1",
-      "targetCode": "MATH-SK-RESOLVER-PROBLEMAS",
-      "mappingType": "related"
-    },
-    {
       "sourceCode": "MATH-5B-OA24-I1",
       "targetCode": "MATH-5B-OA24",
       "mappingType": "subset"
-    },
-    {
-      "sourceCode": "MATH-5B-OA24-I1",
-      "targetCode": "MATH-SK-RESOLVER-PROBLEMAS",
-      "mappingType": "related"
     },
     {
       "sourceCode": "MATH-5B-OA24-I2",
@@ -11832,29 +10347,14 @@
       "mappingType": "subset"
     },
     {
-      "sourceCode": "MATH-5B-OA24-I2",
-      "targetCode": "MATH-SK-RESOLVER-PROBLEMAS",
-      "mappingType": "related"
-    },
-    {
       "sourceCode": "MATH-5B-OA24-I3",
       "targetCode": "MATH-5B-OA24",
       "mappingType": "subset"
     },
     {
-      "sourceCode": "MATH-5B-OA24-I3",
-      "targetCode": "MATH-SK-ARGUMENTAR-Y-COMUNICAR",
-      "mappingType": "related"
-    },
-    {
       "sourceCode": "MATH-5B-OA26-I1",
       "targetCode": "MATH-5B-OA26",
       "mappingType": "subset"
-    },
-    {
-      "sourceCode": "MATH-5B-OA26-I1",
-      "targetCode": "MATH-SK-REPRESENTAR",
-      "mappingType": "related"
     },
     {
       "sourceCode": "MATH-5B-OA26-I2",
@@ -11862,24 +10362,9 @@
       "mappingType": "subset"
     },
     {
-      "sourceCode": "MATH-5B-OA26-I2",
-      "targetCode": "MATH-SK-ARGUMENTAR-Y-COMUNICAR",
-      "mappingType": "related"
-    },
-    {
       "sourceCode": "MATH-5B-OA26-I3",
       "targetCode": "MATH-5B-OA26",
       "mappingType": "subset"
-    },
-    {
-      "sourceCode": "MATH-5B-OA26-I3",
-      "targetCode": "MATH-SK-REPRESENTAR",
-      "mappingType": "related"
-    },
-    {
-      "sourceCode": "MATH-5B-OA26-I3",
-      "targetCode": "MATH-SK-RESOLVER-PROBLEMAS",
-      "mappingType": "related"
     },
     {
       "sourceCode": "MATH-5B-OA26-I4",
@@ -11887,19 +10372,9 @@
       "mappingType": "subset"
     },
     {
-      "sourceCode": "MATH-5B-OA26-I4",
-      "targetCode": "MATH-SK-REPRESENTAR",
-      "mappingType": "related"
-    },
-    {
       "sourceCode": "MATH-6B-OA03-I1",
       "targetCode": "MATH-6B-OA03",
       "mappingType": "subset"
-    },
-    {
-      "sourceCode": "MATH-6B-OA03-I1",
-      "targetCode": "MATH-SK-REPRESENTAR",
-      "mappingType": "related"
     },
     {
       "sourceCode": "MATH-6B-OA03-I2",
@@ -11907,19 +10382,9 @@
       "mappingType": "subset"
     },
     {
-      "sourceCode": "MATH-6B-OA03-I2",
-      "targetCode": "MATH-SK-RESOLVER-PROBLEMAS",
-      "mappingType": "related"
-    },
-    {
       "sourceCode": "MATH-6B-OA04-I1",
       "targetCode": "MATH-6B-OA04",
       "mappingType": "subset"
-    },
-    {
-      "sourceCode": "MATH-6B-OA04-I1",
-      "targetCode": "MATH-SK-REPRESENTAR",
-      "mappingType": "related"
     },
     {
       "sourceCode": "MATH-6B-OA04-I2",
@@ -11927,19 +10392,9 @@
       "mappingType": "subset"
     },
     {
-      "sourceCode": "MATH-6B-OA04-I2",
-      "targetCode": "MATH-SK-ARGUMENTAR-Y-COMUNICAR",
-      "mappingType": "related"
-    },
-    {
       "sourceCode": "MATH-6B-OA05-I1",
       "targetCode": "MATH-6B-OA05",
       "mappingType": "subset"
-    },
-    {
-      "sourceCode": "MATH-6B-OA05-I1",
-      "targetCode": "MATH-SK-REPRESENTAR",
-      "mappingType": "related"
     },
     {
       "sourceCode": "MATH-6B-OA05-I2",
@@ -11947,19 +10402,9 @@
       "mappingType": "subset"
     },
     {
-      "sourceCode": "MATH-6B-OA05-I2",
-      "targetCode": "MATH-SK-REPRESENTAR",
-      "mappingType": "related"
-    },
-    {
       "sourceCode": "MATH-6B-OA07-I1",
       "targetCode": "MATH-6B-OA07",
       "mappingType": "subset"
-    },
-    {
-      "sourceCode": "MATH-6B-OA07-I1",
-      "targetCode": "MATH-SK-RESOLVER-PROBLEMAS",
-      "mappingType": "related"
     },
     {
       "sourceCode": "MATH-6B-OA07-I2",
@@ -11967,19 +10412,9 @@
       "mappingType": "subset"
     },
     {
-      "sourceCode": "MATH-6B-OA07-I2",
-      "targetCode": "MATH-SK-RESOLVER-PROBLEMAS",
-      "mappingType": "related"
-    },
-    {
       "sourceCode": "MATH-6B-OA08-I1",
       "targetCode": "MATH-6B-OA08",
       "mappingType": "subset"
-    },
-    {
-      "sourceCode": "MATH-6B-OA08-I1",
-      "targetCode": "MATH-SK-RESOLVER-PROBLEMAS",
-      "mappingType": "related"
     },
     {
       "sourceCode": "MATH-6B-OA08-I2",
@@ -11987,19 +10422,9 @@
       "mappingType": "subset"
     },
     {
-      "sourceCode": "MATH-6B-OA08-I2",
-      "targetCode": "MATH-SK-RESOLVER-PROBLEMAS",
-      "mappingType": "related"
-    },
-    {
       "sourceCode": "MATH-6B-OA08-I3",
       "targetCode": "MATH-6B-OA08",
       "mappingType": "subset"
-    },
-    {
-      "sourceCode": "MATH-6B-OA08-I3",
-      "targetCode": "MATH-SK-RESOLVER-PROBLEMAS",
-      "mappingType": "related"
     },
     {
       "sourceCode": "MATH-6B-OA08-I4",
@@ -12007,19 +10432,9 @@
       "mappingType": "subset"
     },
     {
-      "sourceCode": "MATH-6B-OA08-I4",
-      "targetCode": "MATH-SK-RESOLVER-PROBLEMAS",
-      "mappingType": "related"
-    },
-    {
       "sourceCode": "MATH-6B-OA08-I5",
       "targetCode": "MATH-6B-OA08",
       "mappingType": "subset"
-    },
-    {
-      "sourceCode": "MATH-6B-OA08-I5",
-      "targetCode": "MATH-SK-RESOLVER-PROBLEMAS",
-      "mappingType": "related"
     },
     {
       "sourceCode": "MATH-6B-OA08-I6",
@@ -12027,19 +10442,9 @@
       "mappingType": "subset"
     },
     {
-      "sourceCode": "MATH-6B-OA08-I6",
-      "targetCode": "MATH-SK-RESOLVER-PROBLEMAS",
-      "mappingType": "related"
-    },
-    {
       "sourceCode": "MATH-6B-OA11-I1",
       "targetCode": "MATH-6B-OA11",
       "mappingType": "subset"
-    },
-    {
-      "sourceCode": "MATH-6B-OA11-I1",
-      "targetCode": "MATH-SK-RESOLVER-PROBLEMAS",
-      "mappingType": "related"
     },
     {
       "sourceCode": "MATH-6B-OA11-I2",
@@ -12047,19 +10452,9 @@
       "mappingType": "subset"
     },
     {
-      "sourceCode": "MATH-6B-OA11-I2",
-      "targetCode": "MATH-SK-RESOLVER-PROBLEMAS",
-      "mappingType": "related"
-    },
-    {
       "sourceCode": "MATH-6B-OA13-I1",
       "targetCode": "MATH-6B-OA13",
       "mappingType": "subset"
-    },
-    {
-      "sourceCode": "MATH-6B-OA13-I1",
-      "targetCode": "MATH-SK-RESOLVER-PROBLEMAS",
-      "mappingType": "related"
     },
     {
       "sourceCode": "MATH-6B-OA13-I2",
@@ -12067,29 +10462,14 @@
       "mappingType": "subset"
     },
     {
-      "sourceCode": "MATH-6B-OA13-I2",
-      "targetCode": "MATH-SK-RESOLVER-PROBLEMAS",
-      "mappingType": "related"
-    },
-    {
       "sourceCode": "MATH-6B-OA13-I3",
       "targetCode": "MATH-6B-OA13",
       "mappingType": "subset"
     },
     {
-      "sourceCode": "MATH-6B-OA13-I3",
-      "targetCode": "MATH-SK-RESOLVER-PROBLEMAS",
-      "mappingType": "related"
-    },
-    {
       "sourceCode": "MATH-6B-OA16-I1",
       "targetCode": "MATH-6B-OA16",
       "mappingType": "subset"
-    },
-    {
-      "sourceCode": "MATH-6B-OA16-I1",
-      "targetCode": "MATH-SK-RESOLVER-PROBLEMAS",
-      "mappingType": "related"
     },
     {
       "sourceCode": "MATH-6B-OA16-I2",
@@ -12097,29 +10477,14 @@
       "mappingType": "subset"
     },
     {
-      "sourceCode": "MATH-6B-OA16-I2",
-      "targetCode": "MATH-SK-MODELAR",
-      "mappingType": "related"
-    },
-    {
       "sourceCode": "MATH-6B-OA16-I3",
       "targetCode": "MATH-6B-OA16",
       "mappingType": "subset"
     },
     {
-      "sourceCode": "MATH-6B-OA16-I3",
-      "targetCode": "MATH-SK-REPRESENTAR",
-      "mappingType": "related"
-    },
-    {
       "sourceCode": "MATH-6B-OA18-I1",
       "targetCode": "MATH-6B-OA18",
       "mappingType": "subset"
-    },
-    {
-      "sourceCode": "MATH-6B-OA18-I1",
-      "targetCode": "MATH-SK-RESOLVER-PROBLEMAS",
-      "mappingType": "related"
     },
     {
       "sourceCode": "MATH-6B-OA18-I2",
@@ -12127,19 +10492,9 @@
       "mappingType": "subset"
     },
     {
-      "sourceCode": "MATH-6B-OA18-I2",
-      "targetCode": "MATH-SK-REPRESENTAR",
-      "mappingType": "related"
-    },
-    {
       "sourceCode": "MATH-6B-OA19-I1",
       "targetCode": "MATH-6B-OA19",
       "mappingType": "subset"
-    },
-    {
-      "sourceCode": "MATH-6B-OA19-I1",
-      "targetCode": "MATH-SK-RESOLVER-PROBLEMAS",
-      "mappingType": "related"
     },
     {
       "sourceCode": "MATH-6B-OA19-I2",
@@ -12147,19 +10502,9 @@
       "mappingType": "subset"
     },
     {
-      "sourceCode": "MATH-6B-OA19-I2",
-      "targetCode": "MATH-SK-RESOLVER-PROBLEMAS",
-      "mappingType": "related"
-    },
-    {
       "sourceCode": "MATH-6B-OA23-I1",
       "targetCode": "MATH-6B-OA23",
       "mappingType": "subset"
-    },
-    {
-      "sourceCode": "MATH-6B-OA23-I1",
-      "targetCode": "MATH-SK-ARGUMENTAR-Y-COMUNICAR",
-      "mappingType": "related"
     },
     {
       "sourceCode": "MATH-6B-OA23-I2",
@@ -12167,19 +10512,9 @@
       "mappingType": "subset"
     },
     {
-      "sourceCode": "MATH-6B-OA23-I2",
-      "targetCode": "MATH-SK-RESOLVER-PROBLEMAS",
-      "mappingType": "related"
-    },
-    {
       "sourceCode": "MATH-6B-OA24-I1",
       "targetCode": "MATH-6B-OA24",
       "mappingType": "subset"
-    },
-    {
-      "sourceCode": "MATH-6B-OA24-I1",
-      "targetCode": "MATH-SK-ARGUMENTAR-Y-COMUNICAR",
-      "mappingType": "related"
     },
     {
       "sourceCode": "MATH-6B-OA24-I2",
@@ -12187,29 +10522,14 @@
       "mappingType": "subset"
     },
     {
-      "sourceCode": "MATH-6B-OA24-I2",
-      "targetCode": "MATH-SK-REPRESENTAR",
-      "mappingType": "related"
-    },
-    {
       "sourceCode": "MATH-6B-OA24-I3",
       "targetCode": "MATH-6B-OA24",
       "mappingType": "subset"
     },
     {
-      "sourceCode": "MATH-6B-OA24-I3",
-      "targetCode": "MATH-SK-REPRESENTAR",
-      "mappingType": "related"
-    },
-    {
       "sourceCode": "MATH-6B-OA24-I4",
       "targetCode": "MATH-6B-OA24",
       "mappingType": "subset"
-    },
-    {
-      "sourceCode": "MATH-6B-OA24-I4",
-      "targetCode": "MATH-SK-REPRESENTAR",
-      "mappingType": "related"
     }
   ]
 }
