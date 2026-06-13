@@ -10,12 +10,13 @@ import {
   School,
   Settings,
   ShieldCheck,
+  Sparkles,
   UserCog,
   Users,
   type LucideIcon,
 } from 'lucide-react';
 import type { UserRole } from '@soe/types';
-import { DASHBOARD_VIEWER_ROLES } from '@soe/types';
+import { DASHBOARD_VIEWER_ROLES, AI_ANALYSIS_VIEWER_ROLES } from '@soe/types';
 
 export type NavStatus = 'live' | 'soon';
 
@@ -83,6 +84,13 @@ export const NAV_ITEMS: readonly NavItem[] = [
     icon: BarChart3,
     status: 'live',
     roles: DASHBOARD_VIEWER_ROLES,
+  },
+  {
+    href: '/analisis-ia',
+    label: 'Análisis IA',
+    icon: Sparkles,
+    status: 'live',
+    roles: AI_ANALYSIS_VIEWER_ROLES,
   },
   {
     href: '/alumnos',
