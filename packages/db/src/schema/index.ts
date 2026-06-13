@@ -12,3 +12,5 @@ export * from './responses';
 export * from './results';
 export * from './audit-logs';
 export * from './platform-admins';
+export * from './ai-analyses';
+export * from './benchmark';

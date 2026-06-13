@@ -169,3 +169,11 @@ export const passageFormatEnum = pgEnum('passage_format', ['plain', 'markdown', 
 
 // Tipo de archivo adjunto a una sección (audio cubre listening de inglés a futuro).
 export const attachmentKindEnum = pgEnum('attachment_kind', ['image', 'audio', 'pdf', 'other']);
+
+// Estado de un job de análisis IA (F2 S0 — H19.23).
+export const aiAnalysisStatusEnum = pgEnum('ai_analysis_status', [
+  'pending',
+  'processing',
+  'completed',
+  'failed',
+]);

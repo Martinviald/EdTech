@@ -20,3 +20,6 @@ export * from './analytics.schema';
 export * from './assessment-report.schema';
 export * from './heatmap.schema';
 export * from './item-analysis.schema';
+export * from './ai-analysis.schema';
+export * from './benchmark-settings.schema';
+export * from './curriculum-context.schema';

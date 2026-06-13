@@ -29,6 +29,10 @@ import { AnalyticsModule } from './analytics/analytics.module';
 import { HeatmapModule } from './heatmap/heatmap.module';
 import { ItemAnalysisModule } from './item-analysis/item-analysis.module';
 import { AssessmentReportModule } from './assessment-report/assessment-report.module';
+import { JobsModule } from './jobs/jobs.module';
+import { CurriculumRetrieverModule } from './curriculum-retriever/curriculum-retriever.module';
+import { AiAnalysisModule } from './ai-analysis/ai-analysis.module';
+import { BenchmarkSettingsModule } from './benchmark-settings/benchmark-settings.module';
 
 @Module({
   imports: [
@@ -65,6 +69,11 @@ import { AssessmentReportModule } from './assessment-report/assessment-report.mo
     ItemAnalysisModule,
     // ── Informe consolidado por evaluación (directivos / UTP) ──
     AssessmentReportModule,
+    // ── F2 S0: cimientos (jobs async in-process, recuperación curricular, motor IA, benchmarking) ──
+    JobsModule,
+    CurriculumRetrieverModule,
+    AiAnalysisModule,
+    BenchmarkSettingsModule,
   ],
   controllers: [AppController],
   providers: [
