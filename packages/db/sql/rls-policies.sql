@@ -103,3 +103,19 @@ CREATE POLICY "skill_results_tenant_isolation" ON "skill_results"
         AND "assessments"."org_id"::text = current_setting('app.current_org_id', true)
     )
   );
+
+-- ── F2 S0 — ai_analyses + org_benchmark_settings (org_id directo) ────────────
+ALTER TABLE "ai_analyses"             ENABLE ROW LEVEL SECURITY;
+ALTER TABLE "ai_analyses"             FORCE  ROW LEVEL SECURITY;
+ALTER TABLE "org_benchmark_settings"  ENABLE ROW LEVEL SECURITY;
+ALTER TABLE "org_benchmark_settings"  FORCE  ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "ai_analyses_tenant_isolation" ON "ai_analyses";
+CREATE POLICY "ai_analyses_tenant_isolation" ON "ai_analyses"
+  AS PERMISSIVE FOR ALL
+  USING (org_id::text = current_setting('app.current_org_id', true));
+
+DROP POLICY IF EXISTS "org_benchmark_settings_tenant_isolation" ON "org_benchmark_settings";
+CREATE POLICY "org_benchmark_settings_tenant_isolation" ON "org_benchmark_settings"
+  AS PERMISSIVE FOR ALL
+  USING (org_id::text = current_setting('app.current_org_id', true));

@@ -138,3 +138,24 @@ export const HEATMAP_VIEWER_ROLES: readonly UserRole[] = RESULTS_VIEWER_ROLES;
 // y análisis de distractores). Mismo conjunto que los dashboards; el scoping por
 // curso para profesores lo aplica el service.
 export const ITEM_ANALYSIS_VIEWER_ROLES: readonly UserRole[] = RESULTS_VIEWER_ROLES;
+
+// ── F2 S0 — Análisis IA y Benchmarking ──────────────────────────────────────
+// Roles que pueden VER análisis IA (E20 / H19.23). Resultados + profesor.
+export const AI_ANALYSIS_VIEWER_ROLES: readonly UserRole[] = [
+  'platform_admin',
+  'school_admin',
+  'academic_director',
+  'eval_coordinator',
+  'teacher',
+];
+
+// Roles que pueden GATILLAR generación de análisis IA (tiene costo) — sin teacher.
+export const AI_ANALYSIS_GENERATOR_ROLES: readonly UserRole[] = [
+  'platform_admin',
+  'school_admin',
+  'academic_director',
+  'eval_coordinator',
+];
+
+// Roles que gestionan la participación en benchmarking (opt-out + consentimiento, H19.24).
+export const BENCHMARK_SETTINGS_ROLES: readonly UserRole[] = ['platform_admin', 'school_admin'];
