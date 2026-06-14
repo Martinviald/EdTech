@@ -33,6 +33,7 @@ import { JobsModule } from './jobs/jobs.module';
 import { CurriculumRetrieverModule } from './curriculum-retriever/curriculum-retriever.module';
 import { AiAnalysisModule } from './ai-analysis/ai-analysis.module';
 import { BenchmarkSettingsModule } from './benchmark-settings/benchmark-settings.module';
+import { RemedialModule } from './remedial/remedial.module';
 import { InstrumentQualityModule } from './instrument-quality/instrument-quality.module';
 
 @Module({
@@ -77,6 +78,8 @@ import { InstrumentQualityModule } from './instrument-quality/instrument-quality
     BenchmarkSettingsModule,
     // ── F2 S2: análisis IA por-pregunta (en AiAnalysisModule) + calidad de instrumento ──
     InstrumentQualityModule,
+    // ── F2 S3: IA Remedial (RAG) — generación de material con aprobación humana ──
+    RemedialModule,
   ],
   controllers: [AppController],
   providers: [

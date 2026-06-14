@@ -111,7 +111,7 @@ export function AnalysisReport({
         activeRole={activeRole}
       />
 
-      <SkillGapsCard skillGaps={output.skillGaps} />
+      <SkillGapsCard skillGaps={output.skillGaps} assessmentId={assessmentId} />
 
       <RecommendationsCard
         recommendations={output.recommendations}
