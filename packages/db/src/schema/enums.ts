@@ -197,3 +197,8 @@ export const remedialStatusEnum = pgEnum('remedial_status', [
   'approved',
   'discarded',
 ]);
+
+// ── F2 S4 — Benchmarking Institucional ───────────────────────────────────────
+// Modo de comparación: pool global anónimo (k-anonimato) vs red/sostenedor
+// identificada (orgs con el mismo organizations.parent_id).
+export const benchmarkModeEnum = pgEnum('benchmark_mode', ['global', 'network']);
