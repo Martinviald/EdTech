@@ -34,6 +34,7 @@ import { CurriculumRetrieverModule } from './curriculum-retriever/curriculum-ret
 import { AiAnalysisModule } from './ai-analysis/ai-analysis.module';
 import { BenchmarkSettingsModule } from './benchmark-settings/benchmark-settings.module';
 import { RemedialModule } from './remedial/remedial.module';
+import { BenchmarkingModule } from './benchmarking/benchmarking.module';
 import { InstrumentQualityModule } from './instrument-quality/instrument-quality.module';
 
 @Module({
@@ -80,6 +81,8 @@ import { InstrumentQualityModule } from './instrument-quality/instrument-quality
     InstrumentQualityModule,
     // ── F2 S3: IA Remedial (RAG) — generación de material con aprobación humana ──
     RemedialModule,
+    // ── F2 S4: Benchmarking Institucional (read-model cross-tenant + k-anonimato) ──
+    BenchmarkingModule,
   ],
   controllers: [AppController],
   providers: [

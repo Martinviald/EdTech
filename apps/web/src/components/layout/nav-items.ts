@@ -12,6 +12,7 @@ import {
   Settings,
   ShieldCheck,
   Sparkles,
+  TrendingUp,
   UserCog,
   Users,
   type LucideIcon,
@@ -21,6 +22,7 @@ import {
   DASHBOARD_VIEWER_ROLES,
   AI_ANALYSIS_VIEWER_ROLES,
   REMEDIAL_VIEWER_ROLES,
+  BENCHMARKING_VIEWER_ROLES,
 } from '@soe/types';
 
 export type NavStatus = 'live' | 'soon';
@@ -103,6 +105,13 @@ export const NAV_ITEMS: readonly NavItem[] = [
     icon: Lightbulb,
     status: 'live',
     roles: REMEDIAL_VIEWER_ROLES,
+  },
+  {
+    href: '/benchmarking',
+    label: 'Benchmarking',
+    icon: TrendingUp,
+    status: 'live',
+    roles: BENCHMARKING_VIEWER_ROLES,
   },
   {
     href: '/alumnos',
