@@ -5,9 +5,13 @@ import { apiGet } from '@/lib/api';
 import {
   canAccess,
   AI_ANALYSIS_VIEWER_ROLES,
+  INSTRUMENT_QUALITY_VIEWER_ROLES,
   assessmentInsightsOutputSchema,
   type AiAnalysisModel,
   type AssessmentInsightsOutput,
+  type InstrumentQualityResponse,
+  type ItemMatrixResponse,
+  type MatrixQuestionColumn,
 } from '@soe/types';
 import { PageContainer, PageHeader, EmptyState } from '@/components/patterns';
 import { GenerateButton } from './components/generate-button';
@@ -170,6 +174,35 @@ export default async function AnalisisIaPage({
 
   const output: AssessmentInsightsOutput = parsed.data;
 
+  // Datos deterministas complementarios para el informe consolidado (H20.9/H20.11)
+  // y el drill-down por-pregunta (H20.8). Best-effort: si fallan, el informe IA se
+  // muestra igual (la calidad queda como null y el selector de ítems vacío).
+  const qualityQuery = new URLSearchParams({ assessmentId });
+  if (classGroupId) qualityQuery.set('classGroupId', classGroupId);
+
+  const matrixQuery = new URLSearchParams({ assessmentId, limit: '1' });
+  if (classGroupId) matrixQuery.set('classGroupId', classGroupId);
+
+  const canViewQuality = canAccess(
+    session.user.roles,
+    INSTRUMENT_QUALITY_VIEWER_ROLES,
+  );
+
+  const [quality, matrix] = await Promise.all([
+    canViewQuality
+      ? apiGet<InstrumentQualityResponse>(
+          `/instrument-quality?${qualityQuery.toString()}`,
+        ).catch(() => null)
+      : Promise.resolve(null),
+    apiGet<ItemMatrixResponse>(
+      `/item-analysis/matrix?${matrixQuery.toString()}`,
+    ).catch((): ItemMatrixResponse | null => null),
+  ]);
+
+  const questions: MatrixQuestionColumn[] = matrix?.questions ?? [];
+  const exportTitle =
+    matrix?.assessmentName ?? matrix?.instrumentName ?? 'evaluacion';
+
   return (
     <PageContainer>
       {header}
@@ -179,6 +212,9 @@ export default async function AnalisisIaPage({
         activeRole={activeRole}
         assessmentId={assessmentId}
         classGroupId={classGroupId}
+        quality={quality}
+        questions={questions}
+        exportTitle={exportTitle}
       />
     </PageContainer>
   );

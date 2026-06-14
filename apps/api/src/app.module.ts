@@ -33,6 +33,7 @@ import { JobsModule } from './jobs/jobs.module';
 import { CurriculumRetrieverModule } from './curriculum-retriever/curriculum-retriever.module';
 import { AiAnalysisModule } from './ai-analysis/ai-analysis.module';
 import { BenchmarkSettingsModule } from './benchmark-settings/benchmark-settings.module';
+import { InstrumentQualityModule } from './instrument-quality/instrument-quality.module';
 
 @Module({
   imports: [
@@ -74,6 +75,8 @@ import { BenchmarkSettingsModule } from './benchmark-settings/benchmark-settings
     CurriculumRetrieverModule,
     AiAnalysisModule,
     BenchmarkSettingsModule,
+    // ── F2 S2: análisis IA por-pregunta (en AiAnalysisModule) + calidad de instrumento ──
+    InstrumentQualityModule,
   ],
   controllers: [AppController],
   providers: [

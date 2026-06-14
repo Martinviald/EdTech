@@ -38,7 +38,7 @@ Tres épicas de producto + una de infraestructura:
 | --- | --- | --- | --- | --- |
 | **S0** | 1-2 | Cimientos F2: jobs async in-process (abstracción), recuperación curricular estructurada, motor IA base, modelo de participación en benchmarking | H19.20, H19.21, H19.23, H19.24 | 4/4 ✅ |
 | **S1** | 3-4 | Informe IA de evaluación (narrativa adaptativa + Top/Bottom 5 + brechas + recomendaciones) | H20.1, H20.2, H20.3, H20.4, H20.5, H20.6, H20.7 | 7/7 ✅ |
-| **S2** | 5-6 | Análisis IA por-pregunta (multimodal, con pasaje) + calidad de ítem/instrumento + export del informe | H20.8, H20.9, H20.10, H20.11 | 0/4 |
+| **S2** | 5-6 | Análisis IA por-pregunta (multimodal, con pasaje) + calidad de ítem/instrumento + export del informe | H20.8, H20.9, H20.10, H20.11 | 4/4 ✅ |
 | **S3** | 7-8 | IA Remedial (RAG): guía de reenseñanza + ítems de práctica + plan remedial por grupo + flujo de aprobación | H9.1, H9.2, H9.3, H9.4, H9.5, H9.6 | 0/6 |
 | **S4** | 9-10 | Benchmarking Institucional: motor mismo-instrumento, cohortes, doble modo (global anónimo / red identificada), dashboard | H7.1, H7.2, H7.3, H7.4, H7.5, H7.6 | 0/6 |
 | **S5** | 11-12 | Integración, gating de tier pago, validación pedagógica, costo/latencia, QA E2E, hardening | H18.1, H18.2, H19.25, H20.12 | 0/4 |
@@ -224,10 +224,10 @@ en su contexto real, multimodal). Cierra la capa de interpretación antes de pas
 
 | ID | Historia | Complejidad | Estado | Notas |
 | --- | --- | --- | --- | --- |
-| **H20.8** | **Análisis IA por-pregunta (drill-down multimodal)**: la IA ingiere enunciado + alternativas + clave + distribución de respuestas/distractor dominante + **pasaje/material asociado** (`instrument_sections`) + **imágenes del ítem** (Gemini multimodal) → explicación precisa del porqué del resultado | ★★★★★ | — | Tu épica #1. Salida tipada (por qué falló/acertó, misconcepción inferida, calidad del ítem, acción). El pasaje y las imágenes se adjuntan desde `instrument_sections`/attachments. Caché por ítem+cohorte. |
-| **H20.9** | Calidad de instrumento e ítems: KR-20 + flags (`low_discrimination`, `ambiguous_key`, `strong_distractor`, `too_easy`, `misaligned`) + sugerencia de corrección | ★★★ | — | Distingue brecha de aprendizaje de defecto de instrumento (capa 3, §3). |
-| **H20.10** | Export del análisis a Excel/PDF | ★★ | — | Reusa el patrón de export de H6.13. |
-| **H20.11** | Informe IA consolidado de la evaluación (documento exportable que reúne narrativa + Top/Bottom 5 + brechas + recomendaciones + por-pregunta destacadas) | ★★★ | — | El "informe" de tu épica #2 como entregable único compartible con el equipo directivo. |
+| **H20.8** | **Análisis IA por-pregunta (drill-down multimodal)**: la IA ingiere enunciado + alternativas + clave + distribución de respuestas/distractor dominante + **pasaje/material asociado** (`instrument_sections`) + **imágenes del ítem** (Gemini multimodal) → explicación precisa del porqué del resultado | ★★★★★ | ✅ | Tu épica #1. Salida tipada (por qué falló/acertó, misconcepción inferida, calidad del ítem, acción). El pasaje y las imágenes se adjuntan desde `instrument_sections`/attachments. Caché por ítem+cohorte. **Implementado:** `apps/api/src/ai-analysis/item-insight.*` + extensión multimodal `completeMultimodal` en `llm/` (best-effort, fallback a texto). `POST /api/ai-analysis/items/:itemId/generate`. |
+| **H20.9** | Calidad de instrumento e ítems: KR-20 + flags (`low_discrimination`, `ambiguous_key`, `strong_distractor`, `too_easy`, `misaligned`) + sugerencia de corrección | ★★★ | ✅ | Distingue brecha de aprendizaje de defecto de instrumento (capa 3, §3). **Implementado (determinista, sin IA):** `apps/api/src/instrument-quality/`. `GET /api/instrument-quality`. Sugerencias por plantilla según flag. |
+| **H20.10** | Export del análisis a Excel/PDF | ★★ | ✅ | Reusa el patrón de export de H6.13. **Implementado:** `analisis-ia/components/ai-export-button.tsx` (client-side `xlsx` + `jspdf`). |
+| **H20.11** | Informe IA consolidado de la evaluación (documento exportable que reúne narrativa + Top/Bottom 5 + brechas + recomendaciones + por-pregunta destacadas) | ★★★ | ✅ | El "informe" de tu épica #2 como entregable único compartible con el equipo directivo. **Implementado:** `analisis-ia/components/analysis-report.tsx` (consolidado + drill-down + panel de calidad). |
 
 **División de trabajo sugerida:**
 - Dev 1: H20.8 + H20.9 (backend multimodal y métricas de calidad)

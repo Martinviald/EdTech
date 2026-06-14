@@ -20,6 +20,14 @@ export interface LlmCompletionOptions {
   temperature?: number;
 }
 
+/** Imagen adjunta a una completion multimodal (best-effort). */
+export interface LlmImagePart {
+  /** MIME del binario (p. ej. `image/png`, `image/jpeg`). */
+  mimeType: string;
+  /** Contenido binario codificado en base64 (sin prefijo `data:`). */
+  data: string;
+}
+
 /** Solicitud normalizada e independiente del proveedor. */
 export interface LlmCompletionRequest {
   /** Instrucción de sistema / rol. */
@@ -28,6 +36,12 @@ export interface LlmCompletionRequest {
   prompt: string;
   /** Parámetros de inferencia resueltos por la configuración activa. */
   options: LlmCompletionOptions;
+  /**
+   * Imágenes a incluir en la completion (multimodal, best-effort). Solo las
+   * consume `completeMultimodal`; `complete` (texto) las ignora. Opcional: si no
+   * se entrega o el provider no soporta multimodal, el análisis cae a solo-texto.
+   */
+  images?: LlmImagePart[];
 }
 
 /**
@@ -44,6 +58,12 @@ export interface LlmProvider {
   isAvailable(): boolean;
   /** Ejecuta una completion y devuelve el texto plano de la respuesta. */
   complete(request: LlmCompletionRequest): Promise<string>;
+  /**
+   * Ejecuta una completion MULTIMODAL (texto + imágenes) y devuelve texto plano.
+   * OPCIONAL: si el provider no lo implementa, `LlmService.completeMultimodal`
+   * degrada elegantemente a `complete` (solo texto).
+   */
+  completeMultimodal?(request: LlmCompletionRequest): Promise<string>;
 }
 
 /**

@@ -75,4 +75,51 @@ export class AnthropicProvider implements LlmProvider {
     );
     return (textBlock as { type: 'text'; text: string } | undefined)?.text ?? '';
   }
+
+  /**
+   * Completion MULTIMODAL: la Messages API de Anthropic acepta bloques `image`
+   * con `source: { type: 'base64', media_type, data }` junto al bloque `text`.
+   * Sin imágenes → delega en `complete`. Tipado estructural local para no romper
+   * si el SDK aún no está instalado (mismo patrón tolerante).
+   */
+  async completeMultimodal(request: LlmCompletionRequest): Promise<string> {
+    if (!this.client) {
+      throw new Error('Anthropic provider no está disponible');
+    }
+
+    const images = request.images ?? [];
+    if (images.length === 0) {
+      return this.complete(request);
+    }
+
+    const content = [
+      { type: 'text', text: request.prompt },
+      ...images.map((img) => ({
+        type: 'image',
+        source: {
+          type: 'base64',
+          media_type: img.mimeType,
+          data: img.data,
+        },
+      })),
+    ];
+
+    // El cliente está tipado por el SDK; el array `content` mixto es válido en la
+    // API real pero su unión exacta varía por versión → narrowing local.
+    const client = this.client as unknown as {
+      messages: {
+        create(req: unknown): Promise<{ content: Array<{ type: string }> }>;
+      };
+    };
+    const response = await client.messages.create({
+      model: request.options.model,
+      max_tokens: request.options.maxTokens,
+      temperature: request.options.temperature,
+      system: request.system,
+      messages: [{ role: 'user', content }],
+    });
+
+    const textBlock = response.content.find((b) => b.type === 'text');
+    return (textBlock as { type: 'text'; text: string } | undefined)?.text ?? '';
+  }
 }
