@@ -139,6 +139,12 @@ export const HEATMAP_VIEWER_ROLES: readonly UserRole[] = RESULTS_VIEWER_ROLES;
 // curso para profesores lo aplica el service.
 export const ITEM_ANALYSIS_VIEWER_ROLES: readonly UserRole[] = RESULTS_VIEWER_ROLES;
 
+// Roles que pueden ver la calidad de instrumento/ítems (F2 S2 — H20.9: KR-20 +
+// flags psicométricos + sugerencias de corrección deterministas). Análisis
+// determinista (sin costo IA) → mismo conjunto que los dashboards. El scoping por
+// curso para profesores lo aplica el service.
+export const INSTRUMENT_QUALITY_VIEWER_ROLES: readonly UserRole[] = RESULTS_VIEWER_ROLES;
+
 // ── F2 S0 — Análisis IA y Benchmarking ──────────────────────────────────────
 // Roles que pueden VER análisis IA (E20 / H19.23). Resultados + profesor.
 export const AI_ANALYSIS_VIEWER_ROLES: readonly UserRole[] = [
