@@ -119,3 +119,12 @@ DROP POLICY IF EXISTS "org_benchmark_settings_tenant_isolation" ON "org_benchmar
 CREATE POLICY "org_benchmark_settings_tenant_isolation" ON "org_benchmark_settings"
   AS PERMISSIVE FOR ALL
   USING (org_id::text = current_setting('app.current_org_id', true));
+
+-- ── F2 S3 — remedial_materials (org_id directo) ──────────────────────────────
+ALTER TABLE "remedial_materials"      ENABLE ROW LEVEL SECURITY;
+ALTER TABLE "remedial_materials"      FORCE  ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "remedial_materials_tenant_isolation" ON "remedial_materials";
+CREATE POLICY "remedial_materials_tenant_isolation" ON "remedial_materials"
+  AS PERMISSIVE FOR ALL
+  USING (org_id::text = current_setting('app.current_org_id', true));

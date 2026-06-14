@@ -24,3 +24,4 @@ export * from './ai-analysis.schema';
 export * from './instrument-quality.schema';
 export * from './benchmark-settings.schema';
 export * from './curriculum-context.schema';
+export * from './remedial.schema';

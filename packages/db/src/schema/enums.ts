@@ -177,3 +177,23 @@ export const aiAnalysisStatusEnum = pgEnum('ai_analysis_status', [
   'completed',
   'failed',
 ]);
+
+// ── F2 S3 — IA Remedial (RAG) ────────────────────────────────────────────────
+// Tipo de artefacto remedial generado (polimórfico: type + content JSONB).
+export const remedialMaterialTypeEnum = pgEnum('remedial_material_type', [
+  'guide', // guía de reenseñanza para el profesor (H9.2)
+  'practice_set', // set de ítems de práctica generados (H9.3) — referencian items en draft
+  'group_plan', // plan remedial por grupo de alumnos (H9.4)
+]);
+
+// Ciclo de vida de un material remedial: generación async + aprobación humana.
+// pending→processing→(failed | ready); ready→(approved | discarded). `ready` =
+// generado, pendiente de revisión humana (CLAUDE.md §8.3: IA propone, humano aprueba).
+export const remedialStatusEnum = pgEnum('remedial_status', [
+  'pending',
+  'processing',
+  'ready',
+  'failed',
+  'approved',
+  'discarded',
+]);
