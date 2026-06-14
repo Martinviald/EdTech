@@ -6,7 +6,11 @@ import {
 } from '@nestjs/common';
 import { and, desc, eq, isNull } from 'drizzle-orm';
 import { aiAnalyses, withOrgContext, type AiAnalysis } from '@soe/db';
-import type { AiAnalysisModel, GenerateAnalysisDto } from '@soe/types';
+import type {
+  AiAnalysisModel,
+  GenerateAnalysisDto,
+  GenerateItemInsightDto,
+} from '@soe/types';
 import type { JwtPayload } from '../auth/jwt-payload.types';
 import { InjectDb, type Database } from '../database/database.types';
 
@@ -98,6 +102,72 @@ export class AiAnalysisService {
           analysisType: dto.analysisType,
           audience: dto.audience,
           inputHash,
+          status: 'pending',
+          createdById: user.userId,
+        })
+        .returning();
+
+      if (!inserted) {
+        throw new Error('No se pudo crear el registro de análisis IA');
+      }
+      return { analysis: this.toModel(inserted), fromCache: false };
+    });
+  }
+
+  /**
+   * Crea (o reutiliza desde caché) un análisis POR-PREGUNTA (H20.8).
+   *
+   * Igual que `create`, pero el `inputHash` incluye `itemId` (además de
+   * assessmentId, analysisType='item_insight', audience, classGroupId) y persiste
+   * `input: { itemId, assessmentId }` en la fila (no hay columna itemId en S2).
+   * `analysisType` queda fijado a 'item_insight'.
+   */
+  async createForItem(
+    user: JwtPayload,
+    itemId: string,
+    dto: GenerateItemInsightDto,
+  ): Promise<CreateAnalysisResult> {
+    const orgId = this.requireOrgId(user);
+    const analysisType = 'item_insight';
+    const classGroupId = dto.classGroupId ?? null;
+    const inputHash = this.computeInputHash({
+      assessmentId: dto.assessmentId,
+      analysisType,
+      audience: dto.audience,
+      classGroupId,
+      itemId,
+    });
+
+    return withOrgContext(this.db, orgId, async (tx) => {
+      if (!dto.force) {
+        const [existing] = await tx
+          .select()
+          .from(aiAnalyses)
+          .where(
+            and(
+              eq(aiAnalyses.orgId, orgId),
+              eq(aiAnalyses.inputHash, inputHash),
+              isNull(aiAnalyses.deletedAt),
+            ),
+          )
+          .orderBy(desc(aiAnalyses.createdAt))
+          .limit(1);
+
+        if (existing && this.isCacheable(existing)) {
+          return { analysis: this.toModel(existing), fromCache: true };
+        }
+      }
+
+      const [inserted] = await tx
+        .insert(aiAnalyses)
+        .values({
+          orgId,
+          assessmentId: dto.assessmentId,
+          classGroupId,
+          analysisType,
+          audience: dto.audience,
+          inputHash,
+          input: { itemId, assessmentId: dto.assessmentId },
           status: 'pending',
           createdById: user.userId,
         })
@@ -213,13 +283,17 @@ export class AiAnalysisService {
     analysisType: string;
     audience: string;
     classGroupId: string | null;
+    itemId?: string;
   }): string {
     // Orden de claves fijo → hash determinista e independiente del insertion order.
+    // `itemId` solo entra al canonical para análisis por-pregunta (H20.8); para los
+    // demás tipos el canonical NO cambia (hash de S1 estable).
     const canonical = JSON.stringify({
       assessmentId: input.assessmentId,
       analysisType: input.analysisType,
       audience: input.audience,
       classGroupId: input.classGroupId,
+      ...(input.itemId !== undefined ? { itemId: input.itemId } : {}),
     });
     return createHash('sha256').update(canonical).digest('hex');
   }

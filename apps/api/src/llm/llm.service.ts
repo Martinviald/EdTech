@@ -1,7 +1,11 @@
 import { Inject, Injectable, ServiceUnavailableException } from '@nestjs/common';
 import { LlmConfigService } from './llm.config';
 import { LLM_PROVIDERS } from './llm.constants';
-import type { LlmProvider, LlmProviderName } from './llm.types';
+import type {
+  LlmImagePart,
+  LlmProvider,
+  LlmProviderName,
+} from './llm.types';
 
 /**
  * Fachada provider-agnóstica para inferencia LLM.
@@ -66,5 +70,55 @@ export class LlmService {
         temperature: cfg.temperature,
       },
     });
+  }
+
+  /**
+   * Ejecuta una completion MULTIMODAL (texto + imágenes) contra el proveedor/modelo
+   * activos. Degradación elegante (best-effort): si no hay imágenes o el provider
+   * no implementa `completeMultimodal`, cae a `complete` (solo texto). NO cambia la
+   * firma de `complete()` (la usan el runner de S1 y `ai-tagging`).
+   *
+   * @param system instrucción de sistema.
+   * @param prompt prompt del usuario.
+   * @param images imágenes a adjuntar (base64). Vacío/undefined → solo texto.
+   * @param orgId  tenant para resolución de config por organización (F2+).
+   * @returns texto plano de la respuesta del modelo.
+   */
+  async completeMultimodal(
+    system: string,
+    prompt: string,
+    images?: LlmImagePart[],
+    orgId?: string | null,
+  ): Promise<string> {
+    const cfg = await this.config.resolve(orgId);
+    const provider = this.registry.get(cfg.provider);
+
+    if (!provider) {
+      throw new ServiceUnavailableException(
+        `LLM provider "${cfg.provider}" no está registrado`,
+      );
+    }
+    if (!provider.isAvailable()) {
+      throw new ServiceUnavailableException(
+        `LLM provider "${cfg.provider}" no está disponible — revisa su API key`,
+      );
+    }
+
+    const request = {
+      system,
+      prompt,
+      images,
+      options: {
+        model: cfg.model,
+        maxTokens: cfg.maxTokens,
+        temperature: cfg.temperature,
+      },
+    };
+
+    // Sin imágenes o sin soporte multimodal → solo texto (degradación elegante).
+    if (images && images.length > 0 && provider.completeMultimodal) {
+      return provider.completeMultimodal(request);
+    }
+    return provider.complete(request);
   }
 }

@@ -25,11 +25,18 @@ import type {
 interface GenerateContentResponse {
   readonly text?: string;
 }
+/**
+ * Una "part" del contenido multimodal de Gemini: texto o binario en línea.
+ * La API real acepta `contents` como string (solo texto) o como array de parts.
+ */
+type GeminiPart =
+  | { text: string }
+  | { inlineData: { mimeType: string; data: string } };
 interface GeminiClient {
   readonly models: {
     generateContent(req: {
       model: string;
-      contents: string;
+      contents: string | GeminiPart[];
       config?: {
         systemInstruction?: string;
         maxOutputTokens?: number;
@@ -84,6 +91,42 @@ export class GeminiProvider implements LlmProvider {
     const response = await this.client.models.generateContent({
       model: request.options.model,
       contents: request.prompt,
+      config: {
+        systemInstruction: request.system,
+        maxOutputTokens: request.options.maxTokens,
+        temperature: request.options.temperature,
+      },
+    });
+
+    return response.text ?? '';
+  }
+
+  /**
+   * Completion MULTIMODAL: envía el prompt + imágenes en línea (`inlineData`).
+   * `@google/genai` acepta `contents` como array de parts:
+   * `[{ text }, { inlineData: { mimeType, data } }, …]`. Si no llegan imágenes,
+   * delega en `complete` (solo texto) — mismo patrón tolerante al SDK ausente.
+   */
+  async completeMultimodal(request: LlmCompletionRequest): Promise<string> {
+    if (!this.client) {
+      throw new Error('Gemini provider no está disponible');
+    }
+
+    const images = request.images ?? [];
+    if (images.length === 0) {
+      return this.complete(request);
+    }
+
+    const parts: GeminiPart[] = [
+      { text: request.prompt },
+      ...images.map((img) => ({
+        inlineData: { mimeType: img.mimeType, data: img.data },
+      })),
+    ];
+
+    const response = await this.client.models.generateContent({
+      model: request.options.model,
+      contents: parts,
       config: {
         systemInstruction: request.system,
         maxOutputTokens: request.options.maxTokens,
