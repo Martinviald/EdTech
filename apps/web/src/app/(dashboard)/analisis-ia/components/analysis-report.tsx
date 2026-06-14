@@ -2,6 +2,8 @@ import { Sparkles } from 'lucide-react';
 import type {
   AiAnalysisModel,
   AssessmentInsightsOutput,
+  InstrumentQualityResponse,
+  MatrixQuestionColumn,
   UserRole,
 } from '@soe/types';
 import { AlertCallout } from '@/components/patterns';
@@ -12,6 +14,9 @@ import { SkillGapsCard } from './skill-gaps';
 import { RecommendationsCard } from './recommendations';
 import { ReliabilityPanel } from './reliability-panel';
 import { ReportActions } from './report-actions';
+import { QualityPanel } from './quality-panel';
+import { ItemInsightSection } from './item-insight-section';
+import { AiExportButton } from './ai-export-button';
 
 interface AnalysisReportProps {
   output: AssessmentInsightsOutput;
@@ -19,6 +24,12 @@ interface AnalysisReportProps {
   activeRole: UserRole;
   assessmentId: string;
   classGroupId?: string;
+  /** Calidad determinista del instrumento (H20.9). null si no se pudo cargar. */
+  quality: InstrumentQualityResponse | null;
+  /** Columnas de la matriz (item-analysis): mapa posición → itemId del drill-down. */
+  questions: MatrixQuestionColumn[];
+  /** Nombre de la evaluación/instrumento, para el nombre del archivo exportado. */
+  exportTitle: string;
 }
 
 function formatDate(value: string | null): string | null {
@@ -41,12 +52,15 @@ export function AnalysisReport({
   activeRole,
   assessmentId,
   classGroupId,
+  quality,
+  questions,
+  exportTitle,
 }: AnalysisReportProps) {
   const generatedAt = formatDate(analysis.completedAt ?? analysis.createdAt);
 
   return (
     <div className="space-y-6">
-      {/* Encabezado del informe + acciones */}
+      {/* Encabezado del informe consolidado (H20.11) + acciones + export */}
       <div className="flex flex-col gap-4 rounded-lg border bg-card p-5 sm:flex-row sm:items-start sm:justify-between">
         <div className="space-y-2">
           <div className="flex items-center gap-2">
@@ -59,11 +73,14 @@ export function AnalysisReport({
             <p className="text-xs text-muted-foreground">Generado el {generatedAt}</p>
           ) : null}
         </div>
-        <ReportActions
-          assessmentId={assessmentId}
-          classGroupId={classGroupId}
-          activeRole={activeRole}
-        />
+        <div className="flex flex-col items-stretch gap-2 sm:items-end">
+          <AiExportButton output={output} quality={quality} title={exportTitle} />
+          <ReportActions
+            assessmentId={assessmentId}
+            classGroupId={classGroupId}
+            activeRole={activeRole}
+          />
+        </div>
       </div>
 
       {/* Disclaimer visible (H20.7) */}
@@ -86,12 +103,23 @@ export function AnalysisReport({
         <BottomItemsCard items={output.bottomItems} />
       </div>
 
+      {/* Drill-down por-pregunta (H20.8) */}
+      <ItemInsightSection
+        questions={questions}
+        assessmentId={assessmentId}
+        classGroupId={classGroupId}
+        activeRole={activeRole}
+      />
+
       <SkillGapsCard skillGaps={output.skillGaps} />
 
       <RecommendationsCard
         recommendations={output.recommendations}
         activeRole={activeRole}
       />
+
+      {/* Calidad determinista del instrumento (H20.9) */}
+      {quality ? <QualityPanel quality={quality} /> : null}
 
       <ReliabilityPanel
         reliability={output.reliability}
