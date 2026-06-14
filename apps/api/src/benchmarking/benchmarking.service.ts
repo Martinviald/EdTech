@@ -1,5 +1,5 @@
 import { ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
-import { and, asc, desc, eq, isNull, sql } from 'drizzle-orm';
+import { and, asc, desc, eq, inArray, sql } from 'drizzle-orm';
 import {
   benchmarkAccessLogs,
   benchmarkAggregates,
@@ -434,19 +434,20 @@ export class BenchmarkingService {
     orgId: string,
     query: BenchmarkComparisonQueryDto,
   ): Promise<BenchmarkAggregate | null> {
+    // Mismo matching que `fetchCohortRows`: por instrumento (+ grade/subject solo si
+    // se filtran). El refresh genera una fila por (org, instrumento) con el grade/
+    // subject DERIVADO del instrumento (nunca NULL); forzar `isNull` cuando el filtro
+    // está ausente dejaría `yourSchool=null` con la cohorte poblada (granularidades
+    // distintas). Apples-to-apples = mismo instrumento.
     const conditions = [
       eq(benchmarkAggregates.orgId, orgId),
       eq(benchmarkAggregates.instrumentId, query.instrumentId),
     ];
     if (query.gradeId) {
       conditions.push(eq(benchmarkAggregates.gradeId, query.gradeId));
-    } else {
-      conditions.push(isNull(benchmarkAggregates.gradeId));
     }
     if (query.subjectId) {
       conditions.push(eq(benchmarkAggregates.subjectId, query.subjectId));
-    } else {
-      conditions.push(isNull(benchmarkAggregates.subjectId));
     }
 
     const [row] = await this.db
@@ -508,9 +509,10 @@ export class BenchmarkingService {
     if (orgIds.length === 0) return names;
     const rows = await this.db
       .select({ id: organizations.id, name: organizations.name })
-      .from(organizations);
+      .from(organizations)
+      .where(inArray(organizations.id, orgIds));
     for (const row of rows) {
-      if (orgIds.includes(row.id)) names.set(row.id, row.name);
+      names.set(row.id, row.name);
     }
     return names;
   }
