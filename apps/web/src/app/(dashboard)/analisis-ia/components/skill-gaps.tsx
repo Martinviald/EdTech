@@ -1,12 +1,20 @@
-import { Target, Users } from 'lucide-react';
+import Link from 'next/link';
+import { Lightbulb, Target, Users } from 'lucide-react';
 import type { SkillDiagnosis } from '@soe/types';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import { EmptyState } from '@/components/patterns';
 import { formatAchievement } from './format';
 
 /** Brechas por habilidad con causa raíz, misconcepción y estrategia (H20.4). */
-export function SkillGapsCard({ skillGaps }: { skillGaps: SkillDiagnosis[] }) {
+export function SkillGapsCard({
+  skillGaps,
+  assessmentId,
+}: {
+  skillGaps: SkillDiagnosis[];
+  assessmentId: string;
+}) {
   return (
     <Card>
       <CardHeader>
@@ -58,6 +66,17 @@ export function SkillGapsCard({ skillGaps }: { skillGaps: SkillDiagnosis[] }) {
                   </p>
                   <p className="mt-1 text-sm text-foreground">{gap.exampleActivity}</p>
                 </div>
+              </div>
+
+              <div className="mt-3 flex justify-end">
+                <Button asChild variant="outline" size="sm">
+                  <Link
+                    href={`/material-remedial?nodeId=${gap.nodeId}&assessmentId=${assessmentId}&type=guide&generate=1`}
+                  >
+                    <Lightbulb className="mr-2 size-4" aria-hidden />
+                    Generar material remedial
+                  </Link>
+                </Button>
               </div>
             </div>
           ))

@@ -1,0 +1,176 @@
+import { z } from 'zod';
+
+// ─────────────────────────────────────────────────────────────────────────────
+// F2 S3 — IA Remedial (RAG). Contratos compartidos del módulo `remedial`
+// (apps/api/src/remedial/, ruta base /api/remedial) y la UI /material-remedial.
+//
+// Principio rector (CLAUDE.md §8.3): la IA PROPONE, el humano APRUEBA. El material
+// se genera async (status pending→processing→ready), entra en BORRADOR (`ready`) y
+// un humano lo aprueba (`approved`) o descarta (`discarded`). El "retrieval" del RAG
+// es recuperación curricular ESTRUCTURADA (CurriculumRetriever sobre taxonomy_nodes,
+// sin embeddings). NUNCA se envía PII al LLM: la agrupación de alumnos (group_plan)
+// es determinista en backend; la IA solo etiqueta el grupo en abstracto.
+// ─────────────────────────────────────────────────────────────────────────────
+
+export const remedialMaterialTypeSchema = z.enum(['guide', 'practice_set', 'group_plan']);
+export type RemedialMaterialType = z.infer<typeof remedialMaterialTypeSchema>;
+
+export const remedialStatusSchema = z.enum([
+  'pending',
+  'processing',
+  'ready', // generado, pendiente de revisión humana
+  'failed',
+  'approved',
+  'discarded',
+]);
+export type RemedialStatus = z.infer<typeof remedialStatusSchema>;
+
+// ── Contenido por tipo (polimórfico; validado tras la respuesta del modelo) ──
+
+/** Guía de reenseñanza para el profesor (H9.2). */
+export const remedialGuideContentSchema = z.object({
+  objective: z.string(), // qué reenseñar, alineado al OA de la brecha
+  rootCauseSummary: z.string(), // por qué ocurre la brecha (desde el diagnóstico)
+  strategy: z.string(), // estrategia pedagógica de reenseñanza
+  classActivities: z
+    .array(
+      z.object({
+        title: z.string(),
+        description: z.string(),
+        durationMin: z.number().int().nullable(),
+      }),
+    )
+    .min(1),
+  materials: z.array(z.string()), // recursos sugeridos
+  successCriteria: z.array(z.string()), // cómo saber que se superó la brecha
+});
+export type RemedialGuideContent = z.infer<typeof remedialGuideContentSchema>;
+
+/** Referencia a un ítem de práctica generado (vive en la tabla `items` como draft). */
+export const remedialPracticeItemRefSchema = z.object({
+  itemId: z.string().uuid(), // item creado con source='ai_generated', status='draft'
+  position: z.number().int(),
+  stem: z.string(), // copia para preview rápido en el banco de material
+});
+export type RemedialPracticeItemRef = z.infer<typeof remedialPracticeItemRefSchema>;
+
+/** Set de ítems de práctica generados sobre la habilidad débil (H9.3). */
+export const remedialPracticeContentSchema = z.object({
+  skillFocus: z.string(),
+  itemCount: z.number().int(),
+  items: z.array(remedialPracticeItemRefSchema),
+  notes: z.string().nullable(),
+});
+export type RemedialPracticeContent = z.infer<typeof remedialPracticeContentSchema>;
+
+/** Un paso de la secuencia remedial sugerida. */
+export const remedialPlanStepSchema = z.object({
+  order: z.number().int(),
+  title: z.string(),
+  description: z.string(),
+  linkedNodeId: z.string().nullable(), // OA/habilidad relacionada al paso
+});
+export type RemedialPlanStep = z.infer<typeof remedialPlanStepSchema>;
+
+/** Plan remedial por grupo de alumnos (H9.4). Sin PII: solo conteo + etiqueta abstracta. */
+export const remedialPlanContentSchema = z.object({
+  groupLabel: z.string(), // etiqueta abstracta del grupo (sin nombres)
+  studentCount: z.number().int(), // determinista (backend)
+  sharedGap: z.string(), // la brecha compartida que define el grupo
+  sequence: z.array(remedialPlanStepSchema).min(1),
+  estimatedSessions: z.number().int().nullable(),
+});
+export type RemedialPlanContent = z.infer<typeof remedialPlanContentSchema>;
+
+/** Unión discriminada del contenido de un material remedial (por `type`). */
+export const remedialContentSchema = z.union([
+  remedialGuideContentSchema,
+  remedialPracticeContentSchema,
+  remedialPlanContentSchema,
+]);
+export type RemedialContent = z.infer<typeof remedialContentSchema>;
+
+/** Valida el `content` según el `type` del material (capa de aplicación). */
+export function validateRemedialContent(
+  type: RemedialMaterialType,
+  content: unknown,
+): RemedialContent {
+  switch (type) {
+    case 'guide':
+      return remedialGuideContentSchema.parse(content);
+    case 'practice_set':
+      return remedialPracticeContentSchema.parse(content);
+    case 'group_plan':
+      return remedialPlanContentSchema.parse(content);
+  }
+}
+
+// ── Model de respuesta (lo que el frontend tipa) ──
+
+export const remedialMaterialModelSchema = z.object({
+  id: z.string().uuid(),
+  orgId: z.string().uuid(),
+  type: remedialMaterialTypeSchema,
+  status: remedialStatusSchema,
+  nodeId: z.string().uuid().nullable(),
+  nodeName: z.string().nullable(), // joineado para mostrar
+  assessmentId: z.string().uuid().nullable(),
+  classGroupId: z.string().uuid().nullable(),
+  title: z.string().nullable(),
+  // forma varía por `type`; se valida con `validateRemedialContent` cuando status='ready'/'approved'.
+  content: remedialContentSchema.nullable(),
+  model: z.string().nullable(),
+  promptVersion: z.string().nullable(),
+  costUsd: z.string().nullable(),
+  error: z.string().nullable(),
+  createdById: z.string().uuid().nullable(),
+  reviewedById: z.string().uuid().nullable(),
+  createdAt: z.string(),
+  completedAt: z.string().nullable(),
+  reviewedAt: z.string().nullable(),
+});
+export type RemedialMaterialModel = z.infer<typeof remedialMaterialModelSchema>;
+
+export const remedialListResponseSchema = z.object({
+  data: z.array(remedialMaterialModelSchema),
+  total: z.number(),
+  page: z.number(),
+  limit: z.number(),
+});
+export type RemedialListResponse = z.infer<typeof remedialListResponseSchema>;
+
+// ── DTOs de entrada ──
+
+/** Gatilla la generación de un material remedial desde una brecha (nodeId). */
+export const generateRemedialSchema = z.object({
+  type: remedialMaterialTypeSchema,
+  nodeId: z.string().uuid(), // la brecha / OA a remediar
+  assessmentId: z.string().uuid().optional(), // evaluación de origen
+  classGroupId: z.string().uuid().optional(), // requerido para group_plan (cohorte)
+  sourceAnalysisId: z.string().uuid().optional(), // análisis IA de origen (trazabilidad)
+  itemCount: z.number().int().min(1).max(20).optional(), // solo practice_set (default en el service)
+  force: z.boolean().default(false), // ignora la caché por input_hash
+});
+export type GenerateRemedialDto = z.infer<typeof generateRemedialSchema>;
+
+/** Filtros del banco de material remedial. */
+export const remedialListQuerySchema = z.object({
+  type: remedialMaterialTypeSchema.optional(),
+  status: remedialStatusSchema.optional(),
+  nodeId: z.string().uuid().optional(),
+  assessmentId: z.string().uuid().optional(),
+  page: z.coerce.number().int().min(1).default(1),
+  limit: z.coerce.number().int().min(1).max(100).default(20),
+});
+export type RemedialListQueryDto = z.infer<typeof remedialListQuerySchema>;
+
+/**
+ * Revisión humana (H9.5): aprobar o descartar. Al aprobar se puede enviar el
+ * `content` editado por el humano (override) — la IA propone, el humano ajusta y
+ * aprueba. Aprobar un practice_set publica sus ítems (status='published').
+ */
+export const reviewRemedialSchema = z.object({
+  action: z.enum(['approve', 'discard']),
+  content: remedialContentSchema.optional(), // contenido editado (solo en approve)
+});
+export type ReviewRemedialDto = z.infer<typeof reviewRemedialSchema>;

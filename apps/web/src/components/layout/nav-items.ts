@@ -7,6 +7,7 @@ import {
   FolderTree,
   LayoutDashboard,
   Library,
+  Lightbulb,
   School,
   Settings,
   ShieldCheck,
@@ -16,7 +17,11 @@ import {
   type LucideIcon,
 } from 'lucide-react';
 import type { UserRole } from '@soe/types';
-import { DASHBOARD_VIEWER_ROLES, AI_ANALYSIS_VIEWER_ROLES } from '@soe/types';
+import {
+  DASHBOARD_VIEWER_ROLES,
+  AI_ANALYSIS_VIEWER_ROLES,
+  REMEDIAL_VIEWER_ROLES,
+} from '@soe/types';
 
 export type NavStatus = 'live' | 'soon';
 
@@ -91,6 +96,13 @@ export const NAV_ITEMS: readonly NavItem[] = [
     icon: Sparkles,
     status: 'live',
     roles: AI_ANALYSIS_VIEWER_ROLES,
+  },
+  {
+    href: '/material-remedial',
+    label: 'Material Remedial',
+    icon: Lightbulb,
+    status: 'live',
+    roles: REMEDIAL_VIEWER_ROLES,
   },
   {
     href: '/alumnos',

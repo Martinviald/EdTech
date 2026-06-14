@@ -14,3 +14,4 @@ export * from './audit-logs';
 export * from './platform-admins';
 export * from './ai-analyses';
 export * from './benchmark';
+export * from './remedial';

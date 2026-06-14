@@ -39,7 +39,7 @@ Tres épicas de producto + una de infraestructura:
 | **S0** | 1-2 | Cimientos F2: jobs async in-process (abstracción), recuperación curricular estructurada, motor IA base, modelo de participación en benchmarking | H19.20, H19.21, H19.23, H19.24 | 4/4 ✅ |
 | **S1** | 3-4 | Informe IA de evaluación (narrativa adaptativa + Top/Bottom 5 + brechas + recomendaciones) | H20.1, H20.2, H20.3, H20.4, H20.5, H20.6, H20.7 | 7/7 ✅ |
 | **S2** | 5-6 | Análisis IA por-pregunta (multimodal, con pasaje) + calidad de ítem/instrumento + export del informe | H20.8, H20.9, H20.10, H20.11 | 4/4 ✅ |
-| **S3** | 7-8 | IA Remedial (RAG): guía de reenseñanza + ítems de práctica + plan remedial por grupo + flujo de aprobación | H9.1, H9.2, H9.3, H9.4, H9.5, H9.6 | 0/6 |
+| **S3** | 7-8 | IA Remedial (RAG): guía de reenseñanza + ítems de práctica + plan remedial por grupo + flujo de aprobación | H9.1, H9.2, H9.3, H9.4, H9.5, H9.6 | 6/6 ✅ |
 | **S4** | 9-10 | Benchmarking Institucional: motor mismo-instrumento, cohortes, doble modo (global anónimo / red identificada), dashboard | H7.1, H7.2, H7.3, H7.4, H7.5, H7.6 | 0/6 |
 | **S5** | 11-12 | Integración, gating de tier pago, validación pedagógica, costo/latencia, QA E2E, hardening | H18.1, H18.2, H19.25, H20.12 | 0/4 |
 
@@ -250,12 +250,12 @@ upsell de "Material Remedial generado con IA" del PLG.
 
 | ID | Historia | Complejidad | Estado | Notas |
 | --- | --- | --- | --- | --- |
-| **H9.1** | Pipeline RAG base: `CurriculumRetriever.getContext(nodeId)` (recuperación estructurada) → ensamblar contexto curricular para el prompt | ★★★ | — | Anti-alucinación (intención de lineamientos §4.3, sin embeddings). Nodo + ancestros + descriptores + hermanos + ítems etiquetados. |
-| **H9.2** | Generación de **guía de reenseñanza** para el profesor (estrategia + actividad de aula alineada al OA de la brecha) | ★★★ | — | Material genérico por OA → cacheable y reusable como plataforma-global. |
-| **H9.3** | Generación de **ítems de práctica nuevos** sobre la habilidad débil, validados con Zod, persistidos con `source='ai_generated'` + `status='draft'` | ★★★★ | — | Reusa el banco polimórfico. Humano aprueba antes de publicar (CLAUDE.md §8.3). |
-| **H9.4** | **Plan remedial por grupo de alumnos**: agrupación determinista por brecha compartida (sin PII al LLM) + secuencia remedial sugerida | ★★★★ | — | La agrupación es backend-determinista; la IA solo etiqueta el grupo en abstracto. |
-| **H9.5** | Workflow "IA propone, humano aprueba": revisar/editar/aprobar/descartar material; trazabilidad (`prompt_version`, modelo, `cost_usd`) | ★★★ | — | Aplica a guía, ítems y plan. |
-| **H9.6** | Sección "Material Remedial" (`/material-remedial`): disparar generación desde una brecha, estado async, revisar y aprobar, banco de material | ★★★ | — | Acción enlazada desde la brecha del Análisis IA (S1). |
+| **H9.1** | Pipeline RAG base: `CurriculumRetriever.getContext(nodeId)` (recuperación estructurada) → ensamblar contexto curricular para el prompt | ★★★ | ✅ | Anti-alucinación (intención de lineamientos §4.3, sin embeddings). Nodo + ancestros + descriptores + hermanos + ítems etiquetados. **Implementado:** `remedial/remedial-context.service.ts`. |
+| **H9.2** | Generación de **guía de reenseñanza** para el profesor (estrategia + actividad de aula alineada al OA de la brecha) | ★★★ | ✅ | Material genérico por OA → cacheable (caché por `inputHash`, per-tenant en S3; plataforma-global cross-tenant = optimización futura). **Implementado:** `remedial/generators/guide.generator.ts`. |
+| **H9.3** | Generación de **ítems de práctica nuevos** sobre la habilidad débil, validados con Zod, persistidos con `source='ai_generated'` + `status='draft'` | ★★★★ | ✅ | Reusa el banco polimórfico (`validateItemContent`, batch insert + tags `ai`). Humano aprueba antes de publicar (`status='published'`). **Implementado:** `remedial/generators/practice.generator.ts`. |
+| **H9.4** | **Plan remedial por grupo de alumnos**: agrupación determinista por brecha compartida (sin PII al LLM) + secuencia remedial sugerida | ★★★★ | ✅ | Agrupación backend-determinista (skill_results bajo umbral); el `studentCount` se sobrescribe desde backend; la IA solo etiqueta el grupo en abstracto. **Implementado:** `remedial/generators/group-plan.generator.ts`. |
+| **H9.5** | Workflow "IA propone, humano aprueba": revisar/editar/aprobar/descartar material; trazabilidad (`prompt_version`, modelo, `cost_usd`) | ★★★ | ✅ | Aplica a guía, ítems y plan. **Implementado:** `remedial.service.review()` (`ready`→`approved`/`discarded`; aprobar practice_set publica los ítems). |
+| **H9.6** | Sección "Material Remedial" (`/material-remedial`): disparar generación desde una brecha, estado async, revisar y aprobar, banco de material | ★★★ | ✅ | Acción enlazada desde la brecha del Análisis IA. **Implementado:** `apps/web/src/app/(dashboard)/material-remedial/` + enlace en `analisis-ia/skill-gaps.tsx`. |
 
 **División de trabajo sugerida:**
 - Dev 1: H9.1 + H9.3 + H9.4 (RAG, generación de ítems y agrupación remedial)
