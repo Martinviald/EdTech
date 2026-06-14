@@ -40,7 +40,7 @@ Tres épicas de producto + una de infraestructura:
 | **S1** | 3-4 | Informe IA de evaluación (narrativa adaptativa + Top/Bottom 5 + brechas + recomendaciones) | H20.1, H20.2, H20.3, H20.4, H20.5, H20.6, H20.7 | 7/7 ✅ |
 | **S2** | 5-6 | Análisis IA por-pregunta (multimodal, con pasaje) + calidad de ítem/instrumento + export del informe | H20.8, H20.9, H20.10, H20.11 | 4/4 ✅ |
 | **S3** | 7-8 | IA Remedial (RAG): guía de reenseñanza + ítems de práctica + plan remedial por grupo + flujo de aprobación | H9.1, H9.2, H9.3, H9.4, H9.5, H9.6 | 6/6 ✅ |
-| **S4** | 9-10 | Benchmarking Institucional: motor mismo-instrumento, cohortes, doble modo (global anónimo / red identificada), dashboard | H7.1, H7.2, H7.3, H7.4, H7.5, H7.6 | 0/6 |
+| **S4** | 9-10 | Benchmarking Institucional: motor mismo-instrumento, cohortes, doble modo (global anónimo / red identificada), dashboard | H7.1, H7.2, H7.3, H7.4, H7.5, H7.6 | 6/6 ✅ |
 | **S5** | 11-12 | Integración, gating de tier pago, validación pedagógica, costo/latencia, QA E2E, hardening | H18.1, H18.2, H19.25, H20.12 | 0/4 |
 
 **Flujo demo de F2 (end-to-end):** un profesor abre una evaluación DIA → genera el **Análisis IA**
@@ -278,12 +278,12 @@ remedial para el grupo de alumnos afectados; todo el contexto curricular provien
 
 | ID | Historia | Complejidad | Estado | Notas |
 | --- | --- | --- | --- | --- |
-| **H7.1** | Read-model de benchmarking: agregado **cross-tenant sin RLS** de resultados, con dimensiones (instrumento, nivel, asignatura, dependencia, región, comuna) + refresh | ★★★★★ | — | Cruza el aislamiento por org **por diseño** → endpoint especial fuera de `withOrgContext`, protegido por guards de rol; nunca expone datos crudos por alumno. Ver §9. **Arrancar liviano:** empezar con una **tabla resumen refrescada por schedule** (no la maquinaria completa de vistas materializadas con refresh incremental); es el único lugar de F2 que justifica pre-cómputo (agregación O(n×m) cross-tenant). Encapsular tras el Service para evolucionar a vista materializada si el volumen lo pide. |
-| **H7.2** | Motor de comparación **mismo-instrumento**: percentil/mediana/distribución del colegio vs el pool comparable (misma forma/nivel) | ★★★★ | — | Comparabilidad apples-to-apples (decisión cerrada §2). Compara por % global, por habilidad y por banda de desempeño. |
-| **H7.3** | Cohortes y filtros: "colegios de perfil similar" por `dependence`, `region`, `commune`, tamaño | ★★★ | — | Atributos ya existen en `organizations`. No hardcodear; filtros configurables. |
-| **H7.4** | Doble modo de privacidad: (a) pool global **anónimo opt-out con k-anonimato** (supresión de celdas < k); (b) comparación **intra-red identificada** | ★★★★★ | — | Usa `org_benchmark_settings` (S0). El modo red revela identidad solo entre miembros de la misma red/sostenedor. |
-| **H7.5** | Dashboard de benchmarking (`/benchmarking`): tu colegio vs cohorte (percentil + distribución), heatmap por habilidad (sobre/bajo), distribución por banda comparada, conmutador global↔red, disclaimers | ★★★★ | — | Sin rankings públicos 1-N: percentiles/cuartiles y effect size. |
-| **H7.6** | Auditoría y consentimiento: log de accesos a datos de benchmarking, gestión de `opt_out` y consentimiento | ★★★ | — | Compliance Ley 19.628. Todo acceso cross-tenant auditado. La membresía de red se lee de `organizations.parent_id` (no se gestiona aquí). |
+| **H7.1** | Read-model de benchmarking: agregado **cross-tenant sin RLS** de resultados, con dimensiones (instrumento, nivel, asignatura, dependencia, región, comuna) + refresh | ★★★★★ | ✅ | Cruza el aislamiento por org **por diseño**. **Implementado:** tabla `benchmark_aggregates` (sin RLS, cero PII) + `benchmarking-refresh.service.ts` (itera org-por-org bajo `withOrgContext` → upsert). `POST /benchmarking/refresh`. |
+| **H7.2** | Motor de comparación **mismo-instrumento**: percentil/mediana/distribución del colegio vs el pool comparable (misma forma/nivel) | ★★★★ | ✅ | Apples-to-apples. **Implementado:** `benchmarking.service.ts` (percentil/median/p25/p75, % global, por banda y por habilidad con delta). `GET /benchmarking/comparison`. |
+| **H7.3** | Cohortes y filtros: "colegios de perfil similar" por `dependence`, `region`, `commune`, tamaño | ★★★ | ✅ | Filtros sobre el read-model (dimensiones desnormalizadas). No hardcodeado. |
+| **H7.4** | Doble modo de privacidad: (a) pool global **anónimo opt-out con k-anonimato** (supresión de celdas < k); (b) comparación **intra-red identificada** | ★★★★★ | ✅ | **Implementado:** k-anonimato `k≥3` colegios y `n≥20` alumnos (constantes en `@soe/types`, fuente única); modo red por `organizations.parent_id` (sostenedor `foundation`), identificado, sin supresión. Global excluye opt-out. |
+| **H7.5** | Dashboard de benchmarking (`/benchmarking`): tu colegio vs cohorte (percentil + distribución), heatmap por habilidad (sobre/bajo), distribución por banda comparada, conmutador global↔red, disclaimers | ★★★★ | ✅ | Sin rankings 1-N (orden alfabético/cuartiles). **Implementado:** `apps/web/src/app/(dashboard)/benchmarking/`. |
+| **H7.6** | Auditoría y consentimiento: log de accesos a datos de benchmarking, gestión de `opt_out` y consentimiento | ★★★ | ✅ | Compliance Ley 19.628. **Implementado:** `benchmark_access_logs` (RLS) — cada consulta auditada dentro de `withOrgContext`; `GET /benchmarking/audit`. Consentimiento/opt-out vía módulo `benchmark-settings` (S0). |
 
 **División de trabajo sugerida:**
 - Dev 1: H7.1 + H7.2 + H7.4 (read-model, motor de comparación y modos de privacidad)
