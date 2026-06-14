@@ -5,6 +5,8 @@ import {
   items,
   responses,
   sectionAttachments,
+  studentEnrollments,
+  students,
   withOrgContext,
 } from '@soe/db';
 import type { ItemInsightSnapshot } from '@soe/types';
@@ -83,9 +85,11 @@ export class ItemInsightSnapshotService implements ItemInsightBuilder {
           : [];
         const pb = await this.computePointBiserial(
           tx,
+          orgId,
           opts.assessmentId,
           meta?.instrumentId ?? null,
           itemId,
+          opts.classGroupId ?? null,
         );
         return {
           passage,
@@ -243,12 +247,18 @@ export class ItemInsightSnapshotService implements ItemInsightBuilder {
    * Punto-biserial del ítem en la cohorte de la evaluación. Construye la matriz
    * de aciertos (alumno × ítem) sobre TODOS los ítems del instrumento y aplica la
    * función pura. Sin PII: los ids de alumno solo agrupan y se descartan.
+   *
+   * Si se pasa `classGroupId`, la matriz se acota a los alumnos matriculados en
+   * ese curso — así el punto-biserial usa la MISMA cohorte que el p/D del informe
+   * (que también se scopea por `classGroupId`), evitando una métrica inconsistente.
    */
   private async computePointBiserial(
     tx: Database,
+    orgId: string,
     assessmentId: string,
     instrumentId: string | null,
     itemId: string,
+    classGroupId: string | null,
   ): Promise<number | null> {
     if (!instrumentId) return null;
 
@@ -263,6 +273,21 @@ export class ItemInsightSnapshotService implements ItemInsightBuilder {
     const targetIndex = itemOrder.indexOf(itemId);
     if (targetIndex < 0 || itemOrder.length < 2) return null;
 
+    // Cohorte: alumnos del curso (si se filtró). null = toda la evaluación.
+    const cohortStudentIds = classGroupId
+      ? await this.resolveCohortStudentIds(tx, orgId, classGroupId)
+      : null;
+    // Curso sin alumnos visibles → no hay matriz que calcular.
+    if (cohortStudentIds !== null && cohortStudentIds.length === 0) return null;
+
+    const respConditions = [
+      eq(responses.assessmentId, assessmentId),
+      inArray(responses.itemId, itemOrder),
+    ];
+    if (cohortStudentIds !== null) {
+      respConditions.push(inArray(responses.studentId, cohortStudentIds));
+    }
+
     const respRows = await tx
       .select({
         studentId: responses.studentId,
@@ -270,12 +295,7 @@ export class ItemInsightSnapshotService implements ItemInsightBuilder {
         isCorrect: sql<boolean>`coalesce(${responses.isCorrect}, false)`,
       })
       .from(responses)
-      .where(
-        and(
-          eq(responses.assessmentId, assessmentId),
-          inArray(responses.itemId, itemOrder),
-        ),
-      );
+      .where(and(...respConditions));
 
     const itemIndex = new Map(itemOrder.map((id, idx) => [id, idx]));
     const byStudent = new Map<string, boolean[]>();
@@ -295,6 +315,31 @@ export class ItemInsightSnapshotService implements ItemInsightBuilder {
       .map(([, row]) => row);
 
     return pointBiserial(matrix, targetIndex);
+  }
+
+  /**
+   * IDs de alumnos matriculados en un curso, acotados a la org y no eliminados.
+   * Sin PII en la salida: solo se usan para filtrar la matriz de aciertos y se
+   * descartan. El acceso del caller al curso ya fue validado por
+   * getQuestionAnalysis/getReport (que comparten el mismo `classGroupId`).
+   */
+  private async resolveCohortStudentIds(
+    tx: Database,
+    orgId: string,
+    classGroupId: string,
+  ): Promise<string[]> {
+    const rows = await tx
+      .select({ studentId: studentEnrollments.studentId })
+      .from(studentEnrollments)
+      .innerJoin(students, eq(students.id, studentEnrollments.studentId))
+      .where(
+        and(
+          eq(studentEnrollments.classGroupId, classGroupId),
+          eq(students.orgId, orgId),
+          isNull(students.deletedAt),
+        ),
+      );
+    return Array.from(new Set(rows.map((r) => r.studentId)));
   }
 
   // ───────────────────────────────────────────────────────────────────────────
