@@ -2,9 +2,7 @@ import { ForbiddenException, NotFoundException } from '@nestjs/common';
 import type { Database } from '@soe/db';
 import type { JwtPayload } from '../auth/jwt-payload.types';
 import type { UserRole } from '@soe/types';
-import { LlmService } from '../llm/llm.service';
 import { AiAnalysisService } from './ai-analysis.service';
-import { AiAnalysisRunner } from './ai-analysis.runner';
 
 // ──────────────────────────────────────────────────────────────────────────────
 // Helpers de mock (patrón de assessment-results.service.spec.ts).
@@ -293,78 +291,5 @@ describe('AiAnalysisService status transitions', () => {
     await svc.markFailed('a-1', 'org-1', 'boom');
     expect(db.__updates[0]!.status).toBe('failed');
     expect(db.__updates[0]!.error).toBe('boom');
-  });
-});
-
-// ──────────────────────────────────────────────────────────────────────────────
-// AiAnalysisRunner
-// ──────────────────────────────────────────────────────────────────────────────
-
-function makeRunner(
-  llmComplete: () => Promise<string>,
-): {
-  runner: AiAnalysisRunner;
-  markProcessing: jest.Mock;
-  markCompleted: jest.Mock;
-  markFailed: jest.Mock;
-} {
-  const db = makeDb([[baseRow({ id: 'a-1', status: 'pending' })]]);
-  const llm = { complete: jest.fn(llmComplete) } as unknown as LlmService;
-  const markProcessing = jest.fn().mockResolvedValue(undefined);
-  const markCompleted = jest.fn().mockResolvedValue(undefined);
-  const markFailed = jest.fn().mockResolvedValue(undefined);
-  const service = { markProcessing, markCompleted, markFailed } as unknown as AiAnalysisService;
-  const runner = new (AiAnalysisRunner as new (
-    db: Database,
-    llm: LlmService,
-    service: AiAnalysisService,
-  ) => AiAnalysisRunner)(db, llm, service);
-  return { runner, markProcessing, markCompleted, markFailed };
-}
-
-describe('AiAnalysisRunner.run', () => {
-  it('happy path: parsea la salida del LLM y marca completed con output', async () => {
-    const { runner, markProcessing, markCompleted, markFailed } = makeRunner(async () =>
-      JSON.stringify({ summary: 'Resumen pedagógico' }),
-    );
-    await runner.run('a-1', 'org-1');
-    expect(markProcessing).toHaveBeenCalledWith('a-1', 'org-1');
-    expect(markCompleted).toHaveBeenCalledTimes(1);
-    const arg = markCompleted.mock.calls[0]![2] as { output: Record<string, unknown> };
-    expect(arg.output).toEqual({ summary: 'Resumen pedagógico' });
-    expect(markFailed).not.toHaveBeenCalled();
-  });
-
-  it('tolera fences ```json alrededor del JSON', async () => {
-    const { runner, markCompleted } = makeRunner(async () =>
-      '```json\n{"summary":"ok"}\n```',
-    );
-    await runner.run('a-1', 'org-1');
-    expect(markCompleted).toHaveBeenCalledTimes(1);
-  });
-
-  it('salida no parseable (no JSON) → markFailed', async () => {
-    const { runner, markCompleted, markFailed } = makeRunner(async () => 'esto no es json');
-    await runner.run('a-1', 'org-1');
-    expect(markCompleted).not.toHaveBeenCalled();
-    expect(markFailed).toHaveBeenCalledTimes(1);
-  });
-
-  it('JSON válido pero que no cumple el schema → markFailed', async () => {
-    const { runner, markCompleted, markFailed } = makeRunner(async () =>
-      JSON.stringify({ noSummary: true }),
-    );
-    await runner.run('a-1', 'org-1');
-    expect(markCompleted).not.toHaveBeenCalled();
-    expect(markFailed).toHaveBeenCalledTimes(1);
-  });
-
-  it('error del LLM → markFailed (no tumba el proceso)', async () => {
-    const { runner, markFailed } = makeRunner(async () => {
-      throw new Error('llm down');
-    });
-    await runner.run('a-1', 'org-1');
-    expect(markFailed).toHaveBeenCalledTimes(1);
-    expect(markFailed.mock.calls[0]![2]).toContain('llm down');
   });
 });

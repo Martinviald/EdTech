@@ -1,60 +1,69 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
-import { z } from 'zod';
+import { Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { aiAnalyses, withOrgContext, type AiAnalysis } from '@soe/db';
+import {
+  aiAnalysisAudienceSchema,
+  assessmentInsightsOutputSchema,
+  type AiAnalysisAudience,
+  type AssessmentInsightsOutput,
+} from '@soe/types';
 import { and, eq } from 'drizzle-orm';
 import { InjectDb, type Database } from '../database/database.types';
 import { LlmService } from '../llm/llm.service';
 import { AiAnalysisService } from './ai-analysis.service';
-
-/**
- * Versión del prompt/contrato de salida. Se persiste con el análisis para poder
- * invalidar caché y auditar regresiones cuando el prompt evolucione (el prompt
- * rico de evaluación llega en S1; aquí basta cerrar el ciclo real).
- */
-const PROMPT_VERSION = 's0-baseline-v1';
+import {
+  buildAssessmentInsightsPrompt,
+  PROMPT_VERSION,
+} from './prompts/assessment-insights.prompt';
+import { SNAPSHOT_BUILDER, type SnapshotBuilder } from './snapshot.port';
 
 const AI_ANALYSIS_TIMEOUT_MS_DEFAULT = 60_000;
 
 /**
- * Schema mínimo de la salida esperada del modelo en S0. El runner exige un JSON
- * con `summary` (string). Si la salida no parsea → el análisis queda `failed`.
- * El `AssessmentInsightsOutput` rico es de S1.
+ * Ejecuta el ciclo real del informe IA de evaluación (F2 S1 — H20.2–H20.5).
+ *
+ * Flujo: markProcessing → snapshot determinista (puerto SnapshotBuilder) →
+ * prompt único (`buildAssessmentInsightsPrompt`) → `LlmService.complete` →
+ * parseo Zod ESTRICTO con `assessmentInsightsOutputSchema` → markCompleted.
+ *
+ * Todo va dentro de try/catch + timeout (`Promise.race`): cualquier error, salida
+ * no parseable, schema inválido o timeout deja el análisis `failed` (nunca tumba
+ * el proceso). La IA SOLO interpreta el snapshot determinista; NUNCA recibe PII
+ * (el snapshot ya viene anonimizado). La salida del modelo vive solo en `output`.
  */
-const baselineOutputSchema = z.object({
-  summary: z.string().min(1),
-});
-
 @Injectable()
 export class AiAnalysisRunner {
   constructor(
     @InjectDb() private readonly db: Database,
     private readonly llm: LlmService,
     private readonly service: AiAnalysisService,
+    @Inject(SNAPSHOT_BUILDER) private readonly snapshot: SnapshotBuilder,
   ) {}
 
-  /**
-   * Ejecuta el ciclo real del análisis: markProcessing → ensambla prompt
-   * mínimo → `LlmService.complete` → parseo Zod del output → markCompleted.
-   * Todo envuelto en try/catch + timeout (`Promise.race`): cualquier error,
-   * salida no parseable o timeout deja el análisis `failed` (nunca tumba el
-   * proceso). NUNCA se envía PII de alumnos al LLM.
-   */
   async run(analysisId: string, orgId: string): Promise<void> {
     try {
       const record = await this.loadRecord(analysisId, orgId);
+      if (!record.assessmentId) {
+        throw new Error('El análisis no tiene una evaluación asociada');
+      }
+
       await this.service.markProcessing(analysisId, orgId);
 
-      const { system, prompt } = this.assemblePrompt(record);
+      const snapshot = await this.snapshot.build(record.assessmentId, orgId, {
+        classGroupId: record.classGroupId ?? undefined,
+      });
+
+      const audience = this.resolveAudience(record.audience);
+      const { system, prompt } = buildAssessmentInsightsPrompt(snapshot, audience);
 
       const raw = await this.withTimeout(
         this.llm.complete(system, prompt, orgId),
         this.timeoutMs(),
       );
 
-      const parsed = this.parseOutput(raw);
+      const output = this.parseOutput(raw);
 
       await this.service.markCompleted(analysisId, orgId, {
-        output: parsed,
+        output,
         model: null,
         promptVersion: PROMPT_VERSION,
         tokens: null,
@@ -84,33 +93,28 @@ export class AiAnalysisRunner {
   }
 
   /**
-   * Ensambla un prompt mínimo de prueba (S0). Solo usa metadatos del análisis
-   * (`analysisType`, `audience`) — NUNCA PII de alumnos. El prompt rico (con
-   * contexto curricular y resultados) es de S1.
+   * Normaliza la audiencia persistida (text libre en DB) al enum del contrato.
+   * Si no es una audiencia conocida, cae a `general` (defensa: no debe romper el
+   * informe por un valor histórico inesperado).
    */
-  private assemblePrompt(record: AiAnalysis): { system: string; prompt: string } {
-    const system =
-      'Eres un asistente pedagógico. Responde EXCLUSIVAMENTE con un objeto JSON ' +
-      'válido de la forma {"summary": "<texto>"}. No incluyas texto fuera del JSON.';
-    const prompt =
-      `Genera un análisis de tipo "${record.analysisType}" para la audiencia ` +
-      `"${record.audience}". Devuelve un resumen breve en el campo "summary".`;
-    return { system, prompt };
+  private resolveAudience(audience: string): AiAnalysisAudience {
+    const parsed = aiAnalysisAudienceSchema.safeParse(audience);
+    return parsed.success ? parsed.data : 'general';
   }
 
   /**
-   * Parsea la salida del modelo a JSON y la valida con el schema baseline.
-   * Lanza si no es JSON o no cumple el schema (el caller la convierte en
-   * `failed`).
+   * Parsea la salida del modelo a JSON (tolerando fences ```json) y la valida con
+   * el schema ESTRICTO del informe. Lanza si no es JSON o no cumple el contrato
+   * (el caller la convierte en `failed`).
    */
-  private parseOutput(raw: string): Record<string, unknown> {
+  private parseOutput(raw: string): AssessmentInsightsOutput {
     let json: unknown;
     try {
       json = JSON.parse(this.stripCodeFences(raw));
     } catch {
       throw new Error('La salida del modelo no es JSON válido');
     }
-    const result = baselineOutputSchema.safeParse(json);
+    const result = assessmentInsightsOutputSchema.safeParse(json);
     if (!result.success) {
       throw new Error(`La salida del modelo no cumple el schema: ${result.error.message}`);
     }
