@@ -59,8 +59,7 @@ export class RemedialController {
     const { material, fromCache } = await this.service.create(user, dto);
 
     if (!fromCache) {
-      const orgId = user.orgId as string; // service.create ya validó que existe
-      const materialId = material.id;
+      const { id: materialId, orgId } = material; // del Model ya creado (orgId del token)
       this.dispatcher.enqueue({
         id: materialId,
         kind: 'remedial',

@@ -51,7 +51,6 @@ export default async function MaterialRemedialPage({
   const assessmentId = pickParam(params.assessmentId);
   const classGroupId = pickParam(params.classGroupId);
   const sourceAnalysisId = pickParam(params.sourceAnalysisId);
-  const presetType = parseType(pickParam(params.type));
   const filterType = parseType(pickParam(params.type));
   const filterStatus = parseStatus(pickParam(params.status));
   const generate = pickParam(params.generate) === '1';
@@ -65,9 +64,11 @@ export default async function MaterialRemedialPage({
     />
   );
 
-  // Modo "generar desde brecha": se llega con ?nodeId=&generate=1 (enlace desde
-  // el Análisis IA) o ?nodeId=&type=. Muestra el panel de generación.
-  if (nodeId && (generate || presetType)) {
+  // Modo "generar desde brecha": requiere ?nodeId=&generate=1 explícito (enlace
+  // desde el Análisis IA). Sin `generate`, `type`/`nodeId` filtran el banco — así
+  // filtrar por tipo nunca cae por error en modo generación.
+  const presetType = filterType;
+  if (nodeId && generate) {
     return (
       <PageContainer>
         {header}
