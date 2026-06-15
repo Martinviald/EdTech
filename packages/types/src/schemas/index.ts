@@ -26,3 +26,5 @@ export * from './benchmark-settings.schema';
 export * from './benchmark.schema';
 export * from './curriculum-context.schema';
 export * from './remedial.schema';
+export * from './feature.schema';
+export * from './ai-observability.schema';
