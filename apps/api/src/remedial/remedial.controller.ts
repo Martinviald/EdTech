@@ -24,6 +24,8 @@ import { CurrentUser } from '../auth/current-user.decorator';
 import type { JwtPayload } from '../auth/jwt-payload.types';
 import { Roles } from '../common/decorators/roles.decorator';
 import { RolesGuard } from '../common/guards/roles.guard';
+import { RequireFeature } from '../common/decorators/feature.decorator';
+import { FeatureGuard } from '../common/guards/feature.guard';
 import { JOB_DISPATCHER, type JobDispatcher } from '../jobs/job-dispatcher';
 import { RemedialRunner } from './remedial.runner';
 import { RemedialService } from './remedial.service';
@@ -35,7 +37,8 @@ import { RemedialService } from './remedial.service';
  * polling con `GET /:id`. `orgId` SIEMPRE del token (en el service).
  */
 @Controller('remedial')
-@UseGuards(RolesGuard)
+@UseGuards(RolesGuard, FeatureGuard)
+@RequireFeature('remedial')
 export class RemedialController {
   constructor(
     private readonly service: RemedialService,

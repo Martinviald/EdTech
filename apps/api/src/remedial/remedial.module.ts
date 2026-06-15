@@ -10,6 +10,7 @@ import { RemedialController } from './remedial.controller';
 import { REMEDIAL_GENERATORS } from './remedial.generator';
 import { RemedialRunner } from './remedial.runner';
 import { RemedialService } from './remedial.service';
+import { FeatureGuard } from '../common/guards/feature.guard';
 
 /**
  * Módulo de IA Remedial (RAG) — F2 S3 (E9, H9.1–H9.5).
@@ -41,6 +42,7 @@ import { RemedialService } from './remedial.service';
       ) => [guide, practice, groupPlan],
       inject: [GuideGenerator, PracticeGenerator, GroupPlanGenerator],
     },
+    FeatureGuard,
   ],
   exports: [RemedialService],
 })

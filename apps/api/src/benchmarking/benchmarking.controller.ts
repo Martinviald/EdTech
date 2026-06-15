@@ -9,6 +9,8 @@ import { CurrentUser } from '../auth/current-user.decorator';
 import type { JwtPayload } from '../auth/jwt-payload.types';
 import { Roles } from '../common/decorators/roles.decorator';
 import { RolesGuard } from '../common/guards/roles.guard';
+import { RequireFeature } from '../common/decorators/feature.decorator';
+import { FeatureGuard } from '../common/guards/feature.guard';
 import { BenchmarkingRefreshService } from './benchmarking-refresh.service';
 import { BenchmarkingService } from './benchmarking.service';
 
@@ -18,7 +20,8 @@ import { BenchmarkingService } from './benchmarking.service';
  * se accede dentro del service con guards de rol + k-anonimato.
  */
 @Controller('benchmarking')
-@UseGuards(RolesGuard)
+@UseGuards(RolesGuard, FeatureGuard)
+@RequireFeature('benchmarking')
 export class BenchmarkingController {
   constructor(
     private readonly service: BenchmarkingService,

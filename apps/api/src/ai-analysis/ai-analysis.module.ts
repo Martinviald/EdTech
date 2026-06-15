@@ -12,6 +12,7 @@ import { ItemInsightController } from './item-insight.controller';
 import { ItemInsightRunner } from './item-insight.runner';
 import { ItemInsightSnapshotService } from './item-insight.snapshot';
 import { ITEM_INSIGHT_BUILDER } from './item-insight.port';
+import { FeatureGuard } from '../common/guards/feature.guard';
 
 /**
  * Motor IA base (H19.23) + informe IA de evaluación (F2 S1, E20) + análisis IA
@@ -29,6 +30,7 @@ import { ITEM_INSIGHT_BUILDER } from './item-insight.port';
     { provide: SNAPSHOT_BUILDER, useClass: SnapshotService },
     ItemInsightRunner,
     { provide: ITEM_INSIGHT_BUILDER, useClass: ItemInsightSnapshotService },
+    FeatureGuard,
   ],
   exports: [AiAnalysisService],
 })
