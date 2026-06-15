@@ -14,6 +14,8 @@ import {
   type MatrixQuestionColumn,
 } from '@soe/types';
 import { PageContainer, PageHeader, EmptyState } from '@/components/patterns';
+import { FeatureUpgradeNotice } from '@/components/feature-gate';
+import { isFeatureEnabled } from '@/lib/features';
 import { GenerateButton } from './components/generate-button';
 import { AnalysisPoller } from './components/analysis-poller';
 import { AnalysisReport } from './components/analysis-report';
@@ -33,6 +35,9 @@ export default async function AnalisisIaPage({
   const session = await auth();
   if (!session?.user) redirect('/login');
   if (!canAccess(session.user.roles, AI_ANALYSIS_VIEWER_ROLES)) redirect('/dashboard');
+  if (!(await isFeatureEnabled('ai_analysis'))) {
+    return <FeatureUpgradeNotice feature="ai_analysis" />;
+  }
 
   const activeRole = session.user.activeRole;
 

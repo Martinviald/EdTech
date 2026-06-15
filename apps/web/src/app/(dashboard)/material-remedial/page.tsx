@@ -12,6 +12,8 @@ import {
   type RemedialStatus,
 } from '@soe/types';
 import { PageContainer, PageHeader, EmptyState, AlertCallout } from '@/components/patterns';
+import { FeatureUpgradeNotice } from '@/components/feature-gate';
+import { isFeatureEnabled } from '@/lib/features';
 import { RemedialFilters } from './components/remedial-filters';
 import { MaterialCard } from './components/material-card';
 import { GeneratePanel } from './components/generate-panel';
@@ -44,6 +46,9 @@ export default async function MaterialRemedialPage({
   const session = await auth();
   if (!session?.user) redirect('/login');
   if (!canAccess(session.user.roles, REMEDIAL_VIEWER_ROLES)) redirect('/dashboard');
+  if (!(await isFeatureEnabled('remedial'))) {
+    return <FeatureUpgradeNotice feature="remedial" />;
+  }
 
   const params = await searchParams;
   const nodeId = pickParam(params.nodeId);
