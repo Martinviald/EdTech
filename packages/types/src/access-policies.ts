@@ -200,3 +200,17 @@ export const BENCHMARKING_VIEWER_ROLES: readonly UserRole[] = [
 
 // Roles que pueden gatillar el refresh del read-model cross-tenant (operación global).
 export const BENCHMARKING_ADMIN_ROLES: readonly UserRole[] = ['platform_admin'];
+
+// ── F2 S5 — Gating de tier pago (H18.1) y Observabilidad IA (H19.25) ──────────
+// Roles que pueden GESTIONAR el plan/features pagas de una org. Es una decisión
+// de facturación a nivel plataforma → sólo platform_admin (un school_admin no
+// debería habilitarse features pagas a sí mismo).
+export const FEATURE_MANAGEMENT_ROLES: readonly UserRole[] = ['platform_admin'];
+
+// Roles que pueden ver el panel de observabilidad de costo/latencia IA. Es
+// información de gasto/facturación → directivos, no profesores.
+export const AI_OBSERVABILITY_VIEWER_ROLES: readonly UserRole[] = [
+  'platform_admin',
+  'school_admin',
+  'academic_director',
+];

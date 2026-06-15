@@ -12,6 +12,8 @@ import {
   type BenchmarkMode,
 } from '@soe/types';
 import { PageContainer, PageHeader, EmptyState } from '@/components/patterns';
+import { FeatureUpgradeNotice } from '@/components/feature-gate';
+import { isFeatureEnabled } from '@/lib/features';
 import { BenchmarkToolbar } from './components/benchmark-toolbar';
 import { ComparisonView } from './components/comparison-view';
 
@@ -56,6 +58,9 @@ export default async function BenchmarkingPage({
   if (!session?.user) redirect('/login');
   if (!canAccess(session.user.roles, BENCHMARKING_VIEWER_ROLES)) {
     redirect('/dashboard');
+  }
+  if (!(await isFeatureEnabled('benchmarking'))) {
+    return <FeatureUpgradeNotice feature="benchmarking" />;
   }
 
   const params = await searchParams;

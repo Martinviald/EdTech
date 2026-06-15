@@ -41,7 +41,7 @@ Tres épicas de producto + una de infraestructura:
 | **S2** | 5-6 | Análisis IA por-pregunta (multimodal, con pasaje) + calidad de ítem/instrumento + export del informe | H20.8, H20.9, H20.10, H20.11 | 4/4 ✅ |
 | **S3** | 7-8 | IA Remedial (RAG): guía de reenseñanza + ítems de práctica + plan remedial por grupo + flujo de aprobación | H9.1, H9.2, H9.3, H9.4, H9.5, H9.6 | 6/6 ✅ |
 | **S4** | 9-10 | Benchmarking Institucional: motor mismo-instrumento, cohortes, doble modo (global anónimo / red identificada), dashboard | H7.1, H7.2, H7.3, H7.4, H7.5, H7.6 | 6/6 ✅ |
-| **S5** | 11-12 | Integración, gating de tier pago, validación pedagógica, costo/latencia, QA E2E, hardening | H18.1, H18.2, H19.25, H20.12 | 0/4 |
+| **S5** | 11-12 | Integración, gating de tier pago, validación pedagógica, costo/latencia, QA E2E, hardening | H18.1, H18.2, H19.25, H20.12 | 3/4 ✅ · H18.2 diferida (sin GEMINI_API_KEY) |
 
 **Flujo demo de F2 (end-to-end):** un profesor abre una evaluación DIA → genera el **Análisis IA**
 → lee el informe adaptado a su rol (Top 5 a replicar, Bottom 5 a remediar, brechas con causa raíz)
@@ -303,17 +303,19 @@ humanos, medir costo/latencia reales y endurecer para producción.
 
 | ID | Historia | Complejidad | Estado | Notas |
 | --- | --- | --- | --- | --- |
-| **H18.1** | Gating de tier pago: `org.config.allowedFeatures` gobierna Análisis IA, IA Remedial y Benchmarking; guards en API + UI | ★★★ | — | F1 (ingesta + dashboards) permanece gratuito (gancho PLG). |
-| **H18.2** | Validación pedagógica humana: revisión cualitativa de muestras de análisis y material generado; ajuste de prompts (`prompt_version`) y few-shot | ★★★ | — | Mitiga calidad variable de Flash. Define umbral de aceptación. |
-| **H19.25** | Observabilidad de costo/latencia IA: panel de `cost_usd`/tokens por org y por tipo, alertas de presupuesto, tuning de caché | ★★ | — | Controla el costo marginal del upsell. |
-| **H20.12** | QA E2E + hardening: pruebas del flujo dato→insight→remedial→benchmark con datos seedeados; `typecheck` + `lint` + tests de service en verde | ★★★ | — | Cierre de F2. |
+| **H18.1** | Gating de tier pago: `org.config.allowedFeatures` gobierna Análisis IA, IA Remedial y Benchmarking; guards en API + UI | ★★★ | ✅ | `FeatureGuard` + `@RequireFeature` en los 3 controllers; `OrgConfig` tipado en `@soe/types`; endpoints `GET /organizations/me/features` y `GET\|PATCH /organizations/:orgId/features`; gating UI (CTA upgrade) en las 3 páginas. Default piloto: features habilitadas si no hay `allowedFeatures`. F1 sigue gratis. |
+| **H18.2** | Validación pedagógica humana: revisión cualitativa de muestras de análisis y material generado; ajuste de prompts (`prompt_version`) y few-shot | ★★★ | ⏸️ Diferida | **Requiere `GEMINI_API_KEY`** para generar output IA real sobre datos seedeados. La infra de soporte ya existe (`promptVersion` en `ai_analyses`/`remedial_materials`, observabilidad de costo). Retomar al disponer de la key. |
+| **H19.25** | Observabilidad de costo/latencia IA: panel de `cost_usd`/tokens por org y por tipo, alertas de presupuesto, tuning de caché | ★★ | ✅ | Módulo `ai-observability` (3 endpoints: summary/budget/timeseries) agregando `ai_analyses`+`remedial_materials` bajo `withOrgContext`; panel `/observabilidad-ia` con presupuesto y alertas. 12 tests. |
+| **H20.12** | QA E2E + hardening: pruebas del flujo dato→insight→remedial→benchmark con datos seedeados; `typecheck` + `lint` + tests de service en verde | ★★★ | ✅ (parcial) | `pnpm typecheck` 7/7 limpio; 435 tests verdes (las 2 suites `privacy/*` fallan sólo por falta de `DATABASE_URL`, pre-existente). Smoke de arranque: API bootea, rutas mapeadas, guards → 401. E2E con datos reales pendiente de seed multi-colegio + key IA. |
 
-**División de trabajo sugerida:**
-- Dev 1: H18.1 + H19.25 (gating y observabilidad)
-- Dev 2: H18.2 + H20.12 (validación pedagógica y QA E2E)
+**División de trabajo (ejecución real — HÍBRIDA, S5 no encaja con fan-out completo):**
+- Orquestador (secuencial): H18.1 (gating transversal) + integración + H20.12 (gate final).
+- Agente A (full-stack): H19.25 (módulo observabilidad aislable).
+- H18.2: diferida (sin `GEMINI_API_KEY`).
 
-**Criterio de salida:** las tres capacidades de F2 están detrás del tier pago, validadas
-pedagógicamente, con costo/latencia bajo control y el flujo end-to-end probado en verde.
+**Criterio de salida:** las tres capacidades de F2 están detrás del tier pago (✅), con costo/latencia
+observable (✅) y el flujo probado estáticamente + smoke (✅). Falta la validación pedagógica con
+output real (H18.2) y el E2E con datos seedeados, ambos a la espera de la `GEMINI_API_KEY`.
 
 ---
 

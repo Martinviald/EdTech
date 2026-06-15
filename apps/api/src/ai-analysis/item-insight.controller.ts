@@ -8,6 +8,8 @@ import { CurrentUser } from '../auth/current-user.decorator';
 import type { JwtPayload } from '../auth/jwt-payload.types';
 import { Roles } from '../common/decorators/roles.decorator';
 import { RolesGuard } from '../common/guards/roles.guard';
+import { RequireFeature } from '../common/decorators/feature.decorator';
+import { FeatureGuard } from '../common/guards/feature.guard';
 import { JOB_DISPATCHER, type JobDispatcher } from '../jobs/job-dispatcher';
 import { AiAnalysisService } from './ai-analysis.service';
 import { ItemInsightRunner } from './item-insight.runner';
@@ -19,7 +21,8 @@ import { ItemInsightRunner } from './item-insight.runner';
  * (no se duplica aquí).
  */
 @Controller('ai-analysis')
-@UseGuards(RolesGuard)
+@UseGuards(RolesGuard, FeatureGuard)
+@RequireFeature('ai_analysis')
 export class ItemInsightController {
   constructor(
     private readonly service: AiAnalysisService,
