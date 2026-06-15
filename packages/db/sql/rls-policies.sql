@@ -128,3 +128,18 @@ DROP POLICY IF EXISTS "remedial_materials_tenant_isolation" ON "remedial_materia
 CREATE POLICY "remedial_materials_tenant_isolation" ON "remedial_materials"
   AS PERMISSIVE FOR ALL
   USING (org_id::text = current_setting('app.current_org_id', true));
+
+-- ── F2 S4 — Benchmarking ─────────────────────────────────────────────────────
+-- benchmark_access_logs: RLS por org_id (cada org ve solo sus propios accesos).
+ALTER TABLE "benchmark_access_logs"   ENABLE ROW LEVEL SECURITY;
+ALTER TABLE "benchmark_access_logs"   FORCE  ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "benchmark_access_logs_tenant_isolation" ON "benchmark_access_logs";
+CREATE POLICY "benchmark_access_logs_tenant_isolation" ON "benchmark_access_logs"
+  AS PERMISSIVE FOR ALL
+  USING (org_id::text = current_setting('app.current_org_id', true));
+
+-- ⚠️ benchmark_aggregates: SIN RLS A PROPÓSITO (H7.1). Es el read-model CROSS-TENANT
+-- del benchmarking — la única excepción documentada al aislamiento por org. No
+-- contiene PII (solo agregados por org). El acceso se protege por guards de rol y
+-- el servicio aplica k-anonimato. NO habilitar RLS aquí.
