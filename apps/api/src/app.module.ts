@@ -36,6 +36,7 @@ import { BenchmarkSettingsModule } from './benchmark-settings/benchmark-settings
 import { RemedialModule } from './remedial/remedial.module';
 import { BenchmarkingModule } from './benchmarking/benchmarking.module';
 import { InstrumentQualityModule } from './instrument-quality/instrument-quality.module';
+import { AiObservabilityModule } from './ai-observability/ai-observability.module';
 
 @Module({
   imports: [
@@ -83,6 +84,8 @@ import { InstrumentQualityModule } from './instrument-quality/instrument-quality
     RemedialModule,
     // ── F2 S4: Benchmarking Institucional (read-model cross-tenant + k-anonimato) ──
     BenchmarkingModule,
+    // ── F2 S5: observabilidad de costo/latencia IA (H19.25) ──
+    AiObservabilityModule,
   ],
   controllers: [AppController],
   providers: [

@@ -5,6 +5,7 @@ import {
   ClipboardList,
   FileUp,
   FolderTree,
+  Gauge,
   LayoutDashboard,
   Library,
   Lightbulb,
@@ -23,6 +24,7 @@ import {
   AI_ANALYSIS_VIEWER_ROLES,
   REMEDIAL_VIEWER_ROLES,
   BENCHMARKING_VIEWER_ROLES,
+  AI_OBSERVABILITY_VIEWER_ROLES,
 } from '@soe/types';
 
 export type NavStatus = 'live' | 'soon';
@@ -169,6 +171,13 @@ export const NAV_ITEMS: readonly NavItem[] = [
     icon: UserCog,
     status: 'live',
     roles: ['school_admin', 'platform_admin'],
+  },
+  {
+    href: '/observabilidad-ia',
+    label: 'Observabilidad IA',
+    icon: Gauge,
+    status: 'live',
+    roles: AI_OBSERVABILITY_VIEWER_ROLES,
   },
   {
     href: '/configuracion',
