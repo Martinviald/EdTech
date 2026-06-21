@@ -1,4 +1,5 @@
 import { Module } from '@nestjs/common';
+import { LlmAgentService } from './llm-agent.service';
 import { LlmConfigService } from './llm.config';
 import { LLM_PROVIDERS } from './llm.constants';
 import { LlmService } from './llm.service';
@@ -28,7 +29,8 @@ import { GeminiProvider } from './providers/gemini.provider';
       inject: [AnthropicProvider, GeminiProvider],
     },
     LlmService,
+    LlmAgentService,
   ],
-  exports: [LlmService],
+  exports: [LlmService, LlmAgentService],
 })
 export class LlmModule {}

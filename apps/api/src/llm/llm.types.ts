@@ -64,6 +64,90 @@ export interface LlmProvider {
    * degrada elegantemente a `complete` (solo texto).
    */
   completeMultimodal?(request: LlmCompletionRequest): Promise<string>;
+  /**
+   * Ejecuta una vuelta agéntica con tool-use y STREAMING. Emite eventos
+   * (`text_delta`, `tool_call`, `usage`, `done`) a medida que el modelo produce
+   * texto o decide invocar una tool. OPCIONAL: si el provider no lo implementa,
+   * `LlmAgentService` lanza un error claro (no hay degradación posible — el loop
+   * conversacional requiere tool-use nativo). Ver `LlmAgentRequest`/`LlmAgentEvent`.
+   */
+  streamWithTools?(request: LlmAgentRequest): AsyncIterable<LlmAgentEvent>;
+}
+
+// ──────────────────────────────────────────────────────────────────────────────
+// Contrato agéntico (tool-use + streaming) — base del asistente conversacional.
+// Provider-agnóstico: cada provider traduce estos tipos a su SDK (Anthropic
+// `tools`, Gemini `functionDeclarations`, …). El loop vive en `LlmAgentService`.
+// ──────────────────────────────────────────────────────────────────────────────
+
+/**
+ * Definición de una tool expuesta al modelo. `inputSchema` es un JSON Schema
+ * (derivado de un schema Zod en `packages/types`) que describe los parámetros.
+ */
+export interface LlmToolDefinition {
+  /** Identificador estable de la tool (p. ej. `get_heatmap`). */
+  name: string;
+  /** Descripción en lenguaje natural — el modelo decide cuándo llamarla. */
+  description: string;
+  /** JSON Schema del input (objeto raíz con `type: 'object'`, `properties`, …). */
+  inputSchema: Record<string, unknown>;
+}
+
+/** Rol de un mensaje en el historial agéntico. */
+export type LlmAgentRole = 'user' | 'assistant';
+
+/**
+ * Bloques que componen un mensaje del historial agéntico. Un turno del asistente
+ * puede mezclar texto y varias invocaciones de tool; los resultados se reinyectan
+ * como bloques `tool_result` dentro de un mensaje `user`.
+ */
+export type LlmAgentContent =
+  | { type: 'text'; text: string }
+  | { type: 'tool_use'; id: string; name: string; input: unknown }
+  | {
+      type: 'tool_result';
+      /** Referencia al `id` del `tool_use` que originó este resultado. */
+      toolCallId: string;
+      /** Contenido serializado (JSON) que ve el modelo. */
+      content: string;
+      /** `true` si la tool falló — el modelo debe reaccionar al error. */
+      isError?: boolean;
+    };
+
+/** Mensaje del historial agéntico (multi-bloque). */
+export interface LlmAgentMessage {
+  role: LlmAgentRole;
+  content: LlmAgentContent[];
+}
+
+/** Razón por la que el modelo detuvo la generación en una vuelta. */
+export type LlmAgentStopReason =
+  | 'end_turn'
+  | 'tool_use'
+  | 'max_tokens'
+  | 'other';
+
+/**
+ * Evento emitido por `streamWithTools`. El provider los produce en orden a
+ * medida que llega la respuesta; `LlmAgentService` los consume para conducir el
+ * loop y reenviar `text_delta` al frontend (SSE).
+ */
+export type LlmAgentEvent =
+  | { type: 'text_delta'; text: string }
+  | { type: 'tool_call'; id: string; name: string; input: unknown }
+  | { type: 'usage'; inputTokens: number; outputTokens: number }
+  | { type: 'done'; stopReason: LlmAgentStopReason };
+
+/** Solicitud de una vuelta agéntica (provider-agnóstica). */
+export interface LlmAgentRequest {
+  /** Instrucción de sistema (guardrails + rol del asistente). */
+  system: string;
+  /** Historial completo de la conversación hasta ahora. */
+  messages: LlmAgentMessage[];
+  /** Tools disponibles para el modelo en esta vuelta. */
+  tools: LlmToolDefinition[];
+  /** Parámetros de inferencia resueltos por la configuración activa. */
+  options: LlmCompletionOptions;
 }
 
 /**
