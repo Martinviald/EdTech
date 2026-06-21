@@ -5,7 +5,12 @@ import { z } from 'zod';
 // F1 (ingesta DIA + dashboards) es SIEMPRE gratis (gancho PLG) y no se gatea.
 // Fuente única de verdad de las claves de feature pagas.
 
-export const FEATURE_KEYS = ['ai_analysis', 'remedial', 'benchmarking'] as const;
+export const FEATURE_KEYS = [
+  'ai_analysis',
+  'remedial',
+  'benchmarking',
+  'ai_assistant',
+] as const;
 export type FeatureKey = (typeof FEATURE_KEYS)[number];
 
 export const featureKeySchema = z.enum(FEATURE_KEYS);
@@ -15,6 +20,7 @@ export const FEATURE_LABELS: Record<FeatureKey, string> = {
   ai_analysis: 'Análisis IA',
   remedial: 'IA Remedial',
   benchmarking: 'Benchmarking',
+  ai_assistant: 'Asistente IA',
 };
 
 /**
