@@ -4,15 +4,16 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { and, count, eq, inArray, isNull, or } from 'drizzle-orm';
+import { and, asc, count, eq, inArray, isNull, or } from 'drizzle-orm';
 import {
+  assessments,
   items,
   itemTaxonomyTags,
   itemVersions,
   taxonomyNodes,
   type Item,
 } from '@soe/db';
-import { userHasRole, validateItemContent } from '@soe/types';
+import { validateItemContent } from '@soe/types';
 import type { ItemContent, ItemType } from '@soe/types';
 import { ZodError } from 'zod';
 import type { JwtPayload } from '../auth/jwt-payload.types';
@@ -25,6 +26,27 @@ import type {
   BatchTagDto,
   CreateVersionDto,
 } from './dto/item.dto';
+
+/**
+ * Forma NORMALIZADA y PII-free del contenido de un ítem para el asistente IA
+ * (H21.6b). Aplana el `content` polimórfico a una estructura común que el modelo
+ * puede leer para explicar la misconcepción detrás de un distractor. Para tipos
+ * sin alternativas (open_ended, writing, …) `alternatives` va vacío y `correctKey`
+ * en null. Solo contenido de la prueba — nunca datos de alumnos.
+ */
+export interface ItemContentForAssistant {
+  itemId: string;
+  position: number;
+  type: ItemType;
+  /** Enunciado / prompt / pasaje de la pregunta (lo que aplique según el tipo). */
+  stem: string | null;
+  /** Alternativas como pares clave→texto. Vacío si el tipo no las tiene. */
+  alternatives: { key: string; text: string }[];
+  /** Clave correcta (selección múltiple) o `V`/`F` (true_false); null si no aplica. */
+  correctKey: string | null;
+  /** Habilidad principal etiquetada al ítem (taxonomy tag), si existe. */
+  skillName: string | null;
+}
 
 @Injectable()
 export class ItemsService {
@@ -152,6 +174,24 @@ export class ItemsService {
       .where(eq(itemTaxonomyTags.itemId, id));
 
     return { ...row, tags };
+  }
+
+  /**
+   * Lee el contenido de un ítem (enunciado + alternativas) en forma NORMALIZADA y
+   * PII-free para el asistente IA (H21.6b). El ítem se resuelve por `itemId` o,
+   * alternativamente, por `assessmentId` + `position` (vía instrumento → ítems).
+   * Hereda el scoping de visibilidad de los demás métodos: ítems propios de la org
+   * + oficiales (`org_id IS NULL`), excluyendo soft-deleted.
+   *
+   * La identidad SIEMPRE viene del `user` (JWT), nunca del modelo.
+   */
+  async getContentForAssistant(
+    user: JwtPayload,
+    params: { itemId?: string; assessmentId?: string; position?: number },
+  ): Promise<ItemContentForAssistant> {
+    const row = await this.resolveItemForAssistant(user, params);
+    const skillName = await this.loadPrimarySkillName(row.id);
+    return this.normalizeItemContent(row, skillName);
   }
 
   async create(dto: CreateItemDto, user: JwtPayload) {
@@ -389,6 +429,139 @@ export class ItemsService {
     }
 
     return conditions;
+  }
+
+  /**
+   * Resuelve el ítem para el asistente: por `itemId` directo, o por
+   * `assessmentId` + `position` (el ítem en esa posición del instrumento de la
+   * evaluación). Aplica visibilidad (org propia + oficiales) y soft-delete.
+   * Lanza NotFound/BadRequest si no se puede resolver — la tool los captura.
+   */
+  private async resolveItemForAssistant(
+    user: JwtPayload,
+    params: { itemId?: string; assessmentId?: string; position?: number },
+  ): Promise<Item> {
+    if (params.itemId) {
+      const conditions = [eq(items.id, params.itemId)];
+      conditions.push(...this.buildVisibilityConditions(user));
+      const [row] = await this.db.select().from(items).where(and(...conditions));
+      if (!row) throw new NotFoundException('Ítem no encontrado');
+      return row;
+    }
+
+    if (params.assessmentId && params.position !== undefined) {
+      // assessmentId → instrumentId. La evaluación debe ser de la org del usuario
+      // (o cualquiera si es platform_admin); el filtro de items vuelve a aplicar
+      // visibilidad sobre los ítems del instrumento.
+      const assessmentConditions = [eq(assessments.id, params.assessmentId)];
+      if (!user.isPlatformAdmin) {
+        if (!user.orgId) throw new NotFoundException('Evaluación no encontrada');
+        assessmentConditions.push(eq(assessments.orgId, user.orgId));
+      }
+      const [assessment] = await this.db
+        .select({ instrumentId: assessments.instrumentId })
+        .from(assessments)
+        .where(and(...assessmentConditions))
+        .limit(1);
+      if (!assessment) throw new NotFoundException('Evaluación no encontrada');
+
+      const itemConditions = [
+        eq(items.instrumentId, assessment.instrumentId),
+        eq(items.position, params.position),
+        ...this.buildVisibilityConditions(user),
+      ];
+      const [row] = await this.db
+        .select()
+        .from(items)
+        .where(and(...itemConditions))
+        .orderBy(asc(items.createdAt))
+        .limit(1);
+      if (!row) throw new NotFoundException('Ítem no encontrado');
+      return row;
+    }
+
+    throw new BadRequestException(
+      'Debe entregar itemId o (assessmentId y position)',
+    );
+  }
+
+  /** Nombre de la habilidad principal etiquetada al ítem (primer tag), si existe. */
+  private async loadPrimarySkillName(itemId: string): Promise<string | null> {
+    const [row] = await this.db
+      .select({ name: taxonomyNodes.name })
+      .from(itemTaxonomyTags)
+      .innerJoin(taxonomyNodes, eq(taxonomyNodes.id, itemTaxonomyTags.nodeId))
+      .where(eq(itemTaxonomyTags.itemId, itemId))
+      .orderBy(asc(itemTaxonomyTags.tagType))
+      .limit(1);
+    return row?.name ?? null;
+  }
+
+  /**
+   * Aplana el `content` polimórfico a la forma común del asistente. Respeta el
+   * modelo polimórfico: extrae stem/alternativas/clave correcta de cada `type`
+   * sin hardcodear un único tipo. Tipos sin alternativas devuelven lista vacía.
+   */
+  private normalizeItemContent(
+    item: Item,
+    skillName: string | null,
+  ): ItemContentForAssistant {
+    const type = item.type as ItemType;
+    const content = (item.content ?? {}) as Record<string, unknown>;
+
+    const base = {
+      itemId: item.id,
+      position: item.position,
+      type,
+      skillName,
+    };
+
+    const rawAlternatives = Array.isArray(content.alternatives)
+      ? content.alternatives
+      : [];
+    const alternatives = rawAlternatives.flatMap((alt) => {
+      if (!alt || typeof alt !== 'object') return [];
+      const a = alt as { key?: unknown; text?: unknown };
+      if (typeof a.key !== 'string' || typeof a.text !== 'string') return [];
+      return [{ key: a.key, text: a.text }];
+    });
+
+    const correctKeyFromAlternatives = (): string | null => {
+      for (const alt of rawAlternatives) {
+        if (!alt || typeof alt !== 'object') continue;
+        const a = alt as { key?: unknown; isCorrect?: unknown };
+        if (a.isCorrect === true && typeof a.key === 'string') return a.key;
+      }
+      return null;
+    };
+
+    const asString = (v: unknown): string | null =>
+      typeof v === 'string' && v.length > 0 ? v : null;
+
+    // El enunciado vive bajo distintas claves según el tipo (stem/prompt/passage/
+    // textWithGaps). Tomamos la primera presente — sin hardcodear un único tipo.
+    const stem =
+      asString(content.stem) ??
+      asString(content.prompt) ??
+      asString(content.passage) ??
+      asString(content.textWithGaps);
+
+    if (type === 'true_false') {
+      const correct =
+        typeof content.correctAnswer === 'boolean'
+          ? content.correctAnswer
+            ? 'V'
+            : 'F'
+          : null;
+      return { ...base, stem, alternatives, correctKey: correct };
+    }
+
+    // multiple_choice / listening (y cualquier tipo con alternativas): clave
+    // correcta desde `content.correctKey` explícito o desde la alternativa marcada.
+    const correctKey =
+      asString(content.correctKey) ?? correctKeyFromAlternatives();
+
+    return { ...base, stem, alternatives, correctKey };
   }
 
   /** Fetch raw item (no tags), checking soft-delete. */
