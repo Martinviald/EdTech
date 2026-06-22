@@ -11,11 +11,9 @@ import {
   type DashboardFilterOptionsResponse,
 } from '@soe/types';
 import { PageContainer, PageHeader, EmptyState } from '@/components/patterns';
+import { AskAiButton, RegisterAssistantContext } from '@/components/assistant';
 import { DashboardFilterBar } from '../components/dashboard-filter-bar';
-import {
-  parseDashboardFilters,
-  buildDashboardQuery,
-} from '../components/dashboard-filters';
+import { parseDashboardFilters, buildDashboardQuery } from '../components/dashboard-filters';
 import { ResultadosNav } from '../components/resultados-nav';
 import { AssessmentSelect } from '../detalle/assessment-select';
 import { ReportBody } from './report-body';
@@ -69,11 +67,7 @@ export default async function InformeEvaluacionPage({
   // La evaluación seleccionada debe aparecer en el selector aunque los filtros la
   // dejen fuera de la lista.
   const selectOptions: AssessmentOption[] = [...assessmentList.data];
-  if (
-    assessmentId &&
-    report &&
-    !selectOptions.some((o) => o.assessmentId === assessmentId)
-  ) {
+  if (assessmentId && report && !selectOptions.some((o) => o.assessmentId === assessmentId)) {
     selectOptions.unshift({
       assessmentId,
       name: report.meta.assessmentName,
@@ -91,6 +85,11 @@ export default async function InformeEvaluacionPage({
       <PageHeader
         title="Informe de evaluación"
         description="Informe consolidado y accionable de una evaluación para el equipo directivo y UTP: síntesis ejecutiva, comparativa por curso, fortalezas y brechas, análisis psicométrico de ítems y recomendaciones (H6.13)."
+        actions={
+          assessmentId && report ? (
+            <AskAiButton prompt="Analiza esta evaluación: ¿qué cursos y habilidades están más descendidos y qué ítems conviene revisar?" />
+          ) : undefined
+        }
       />
 
       <ResultadosNav />
@@ -98,11 +97,7 @@ export default async function InformeEvaluacionPage({
       <DashboardFilterBar options={options} value={filters} basePath={BASE_PATH} />
 
       <div className="flex flex-wrap items-end gap-3 rounded-lg border bg-card p-4">
-        <AssessmentSelect
-          options={selectOptions}
-          value={assessmentId}
-          basePath={BASE_PATH}
-        />
+        <AssessmentSelect options={selectOptions} value={assessmentId} basePath={BASE_PATH} />
       </div>
 
       {!assessmentId ? (
@@ -118,7 +113,21 @@ export default async function InformeEvaluacionPage({
           description="No tienes acceso a esta evaluación o no existe. Verifica que tengas asignados los cursos de la evaluación."
         />
       ) : (
-        <ReportBody report={report} />
+        <>
+          {/* Contexto de la vista para el asistente embebido (E21): evaluación
+              (+ curso si está filtrado) que el usuario está revisando. */}
+          <RegisterAssistantContext
+            refs={[
+              {
+                kind: 'assessment' as const,
+                id: assessmentId,
+                label: report.meta.assessmentName ?? undefined,
+              },
+              ...(classGroupId ? [{ kind: 'classGroup' as const, id: classGroupId }] : []),
+            ]}
+          />
+          <ReportBody report={report} />
+        </>
       )}
     </PageContainer>
   );

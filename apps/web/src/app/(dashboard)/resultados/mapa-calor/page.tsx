@@ -12,11 +12,10 @@ import {
   type DashboardFilterOptionsResponse,
 } from '@soe/types';
 import { PageContainer, PageHeader, EmptyState } from '@/components/patterns';
+import { AskAiButton, RegisterAssistantContext } from '@/components/assistant';
 import { DashboardFilterBar } from '../components/dashboard-filter-bar';
-import {
-  parseDashboardFilters,
-  buildDashboardQuery,
-} from '../components/dashboard-filters';
+import { parseDashboardFilters, buildDashboardQuery } from '../components/dashboard-filters';
+import { dashboardFiltersToAssistantRefs } from '../components/assistant-context';
 import { ResultadosNav } from '../components/resultados-nav';
 import { formatAchievement } from '../components/performance-level';
 import { ExportButton, type ExportColumn } from '../components/export/export-button';
@@ -54,16 +53,20 @@ export default async function MapaCalorPage({
     ...heatmap.subjects.map((s) => ({ key: s.subjectId, header: s.subjectName })),
     { key: 'total', header: 'Total' },
   ];
-  const exportRows: Record<string, string>[] = heatmap.rows.map((row) =>
-    flattenRow(row),
-  );
+  const exportRows: Record<string, string>[] = heatmap.rows.map((row) => flattenRow(row));
   const filtersSummary = buildFiltersSummary(filters, options);
 
   return (
     <PageContainer>
+      <RegisterAssistantContext refs={dashboardFiltersToAssistantRefs(filters)} />
       <PageHeader
         title="Mapa de calor"
         description="% de logro promedio por habilidad (filas) y asignatura (columnas). Las habilidades más críticas aparecen primero (H6.10)."
+        actions={
+          hasData ? (
+            <AskAiButton prompt="Según este mapa de calor, ¿cuáles son las habilidades más críticas y en qué asignaturas/cursos debería enfocar primero?" />
+          ) : undefined
+        }
       />
 
       <ResultadosNav />
@@ -73,11 +76,7 @@ export default async function MapaCalorPage({
       {!hasData ? (
         <EmptyState
           icon={LayoutGrid}
-          title={
-            isTeacher
-              ? 'No hay datos para tus cursos'
-              : 'No hay datos para el mapa de calor'
-          }
+          title={isTeacher ? 'No hay datos para tus cursos' : 'No hay datos para el mapa de calor'}
           description={
             isTeacher
               ? 'No se encontraron resultados de habilidades en los cursos que tienes asignados con los filtros aplicados.'
