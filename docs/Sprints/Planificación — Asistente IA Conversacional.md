@@ -24,7 +24,7 @@
 | **Alcance v1** | Solo lectura / análisis | El asistente consulta, explica, diagnostica y recomienda. **No** ejecuta acciones que muten estado (generar remedial, recalcular). Las tools son todas `GET`. Acciones → v2. |
 | **Motor LLM** | Configurable por org | Se diseña el loop de tool-use sobre la abstracción `LlmModule` existente, soportando **Claude (Anthropic)** y **Gemini** vía `llm_settings` por org. Default recomendado para el agente: Claude (tool-use multipaso más confiable). |
 | **Audiencia v1** | Solo directivos | `platform_admin`, `school_admin`, `academic_director`, `cycle_director`. Menor superficie de PII inicial. Profesores (con scoping por curso) → v2. |
-| **Superficie** | Nueva sección "Asistente IA" (`/asistente`) | Chat transversal, no anclado a una evaluación. Enlazable con contexto desde dashboards / Informe de Evaluación ("Pregúntale a la IA sobre esto"). |
+| **Superficie** | **Asistente embebido** (botón flotante + panel lateral en todas las vistas) + sección `/asistente` (foco/historial) | Chat transversal, no anclado a una evaluación. El panel auto-carga el **contexto de la vista actual** (refs tipadas por UUID) para responder sobre "lo que el usuario está mirando" sin que tenga que explicarlo. Ver §3.4. |
 | **Gating** | Feature de tier pago `ai_assistant` | Upsell PLG. `@RequireFeature('ai_assistant')` + entrada en `FeatureKey`. |
 | **Persistencia** | Conversaciones + mensajes en DB | Historial recuperable por usuario, auditable, con trazas de tool-calls y costo. |
 
@@ -193,14 +193,62 @@ con Zod, (2) **resuelve el `orgId` y roles desde el JWT, nunca desde el LLM**,
 
 ### 3.4 Frontend (Next.js — App Router)
 
-- Sección `/asistente` (Server Component shell + componente de chat `'use client'`).
-- **Streaming vía SSE**: el endpoint `POST /api/assistant/conversations/:id/messages`
-  responde `text/event-stream`; el cliente renderiza `text_delta` incrementalmente
-  y muestra un indicador "consultando datos…" durante los `tool_call`.
-- Estado de chat local con `useState`; solo la sesión/feature-flag va a Zustand si
-  ya existe store. Tokens de diseño Tailwind, responsive (H19.2), shadcn/ui.
-- Historial de conversaciones en un panel lateral (lista desde
-  `GET /api/assistant/conversations`).
+**Superficie dual** (misma lógica de chat, dos contenedores):
+- **Asistente embebido (entrada primaria)**: un **botón flotante** + **panel lateral**
+  (`Sheet`/drawer de shadcn) montados UNA sola vez en el layout del dashboard → el
+  asistente está disponible en **todas** las vistas. Gating UI con
+  `canAccess(roles, ASSISTANT_USER_ROLES)` + feature `ai_assistant`.
+- **Sección `/asistente` (foco/historial)**: ruta full-page (Server Component shell +
+  chat `'use client'`) para conversaciones largas y el panel de historial. **Reusa el
+  mismo componente de chat** que el panel (DRY: un chat, un contrato, una vía de SSE).
+
+**Streaming vía SSE**: el endpoint `POST /api/assistant/conversations/:id/messages`
+responde `text/event-stream`. Como es POST con body, el cliente lo consume con
+`fetch` + `response.body.getReader()` (NO `EventSource`, que es GET): renderiza
+`text_delta` incrementalmente y muestra "consultando datos…" durante
+`tool_call`/`tool_result`. Estado de chat local con `useState`; solo sesión/feature
+en Zustand. Tokens de diseño Tailwind, responsive (H19.2), shadcn/ui.
+
+**Contexto de la vista actual (auto-carga) — pieza clave del asistente embebido.**
+En vez de un mapa central "vista → contexto" (frágil, no extensible), se usa **un
+solo contrato declarativo** que cada vista rellena localmente:
+- Contrato compartido `assistantPageContext` en `@soe/types`: una lista de
+  **referencias tipadas** `{ kind, id, label? }`. Los `kind` son FINITOS y derivan de
+  los inputs de las tools (`assessment`, `classGroup`, `grade`, `subject`,
+  `instrument`, `academicYear`, `item`, `student`) — agregar una vista NO amplía el
+  enum. Solo `kind`+`id` (UUID) viajan al LLM; el `label` es para el chip de la UI y
+  **nunca** sale del cliente (PII opción B).
+- Cada página **declara su contexto** vía un hook/registry (`useAssistantContext([...])`),
+  reactivo (p. ej. al abrir una pregunta concreta se agrega su `item`). El panel lee lo
+  que la vista registró y lo envía en `pageContext` **por mensaje** (el usuario puede
+  navegar mientras chatea → el contexto refleja "dónde está ahora").
+- El backend inyecta esas refs como **datos delimitados** en el turno (no como
+  instrucciones, §4.3); el modelo pasa esos UUIDs directo a las tools y se **salta**
+  `list_filter_options`. El grounding se mantiene: el contexto son IDs, no cifras — la
+  IA igual debe llamar tools para obtener números.
+- **Unifica el deep-link** "Pregúntale a la IA sobre esto" (H21.12): deja de ser una
+  feature aparte — es *abrir el panel con el contexto que la vista ya declara* (+ un
+  prompt sugerido por `kind`, opcional).
+- El **selector `@`** de alumno (H21.11b) es un caso del mismo contrato
+  (`kind: 'student'`): la UI inserta el UUID en `pageContext` y muestra un chip con el
+  nombre; el resolver nombre→UUID ocurre en el cliente.
+
+> **Por qué este enfoque y no un mapeo por-vista hardcodeado:** (1) extensibilidad
+> §8.2 — vista nueva = declarar contexto local, sin tocar nada central ni hardcodear
+> "DIA"; (2) DRY — un contrato + una inyección (generaliza la anotación de refs) + un
+> chat; (3) grounding y PII intactos — solo viajan UUIDs opacos, nunca nombres ni
+> métricas. El "mapeo" que sí se hace es ligero y colocado en cada página, acotado por
+> los inputs de las tools (ver tabla en §6, H21.10b).
+
+### 3.5 Endpoints (REST + SSE)
+
+| Método | Ruta | Rol | Descripción |
+|---|---|---|---|
+| `POST` | `/api/assistant/conversations` | `ASSISTANT_USER_ROLES` + `@RequireFeature('ai_assistant')` | Crea conversación |
+| `GET` | `/api/assistant/conversations` | idem | Lista paginada del usuario |
+| `GET` | `/api/assistant/conversations/:id` | idem | Conversación + mensajes |
+| `POST` | `/api/assistant/conversations/:id/messages` | idem | Envía mensaje (`{ content, pageContext? }`) → **stream SSE** de la respuesta |
+| `DELETE` | `/api/assistant/conversations/:id` | idem | Soft delete |
 
 ### 3.5 Endpoints (REST + SSE)
 
@@ -272,6 +320,12 @@ de menores cruzando a un procesador externo. Antes del **piloto en producción**
 - **`packages/types`:** nuevos schemas Zod en `schemas/assistant.schema.ts`
   (DTOs de conversación/mensaje + el contrato de input de cada tool, del que se
   deriva el `inputSchema` JSON de las tools). Nueva `FeatureKey: 'ai_assistant'`.
+  - **Contrato de contexto de vista** (asistente embebido, §3.4):
+    `assistantPageContext` = `Array<{ kind, id, label? }>` con
+    `ASSISTANT_CONTEXT_KINDS` (enum finito acotado por los inputs de las tools).
+    `sendAssistantMessageSchema` lleva `pageContext?` — que **subsume** el antiguo
+    `studentRefs` (un alumno es `{ kind: 'student', id }`): una sola vía para el
+    selector `@` y el contexto auto-cargado. El `label` no viaja al backend/LLM.
 - **`access-policies.ts`:** `ASSISTANT_USER_ROLES` (v1 = directivos:
   `platform_admin`, `school_admin`, `academic_director`, `cycle_director`).
 - **Sin tablas nuevas por instrumento** ni hardcodeo de "DIA": el asistente opera
@@ -309,10 +363,11 @@ de menores cruzando a un procesador externo. Antes del **piloto en producción**
 
 | Historia | Descripción | Entregable |
 |---|---|---|
-| **H21.10** | UI de chat `/asistente` con streaming (SSE), indicador de tool-calls, render markdown, responsive | Chat funcional para directivos |
+| **H21.10** | Componente de chat con streaming (SSE vía `fetch`+`getReader`), indicador de tool-calls, render markdown, responsive — reusable por el panel y por `/asistente`. Ruta `/asistente` (full-page) como contenedor de foco/historial | Chat funcional para directivos |
+| **H21.10b** | **Asistente embebido**: botón flotante + panel lateral (`Sheet`) en el layout del dashboard (gated por rol+feature) + contrato `assistantPageContext` en `@soe/types` + hook `useAssistantContext` (registry por vista, reactivo). Cada vista declara sus refs; el panel las envía en `pageContext` por mensaje. **Mapeo de vistas → refs** (ligero, colocado por página, acotado por los inputs de las tools): Informe→`assessment`(+`classGroup`); detalle de ítem/pregunta→`assessment`+`item`; dashboard habilidades→`grade`/`subject`/`academicYear`; heatmap→filtros activos; detalle de alumno→`student`(+`classGroup`); progresión/generacional→`classGroup`/`subject`/años | Asistente accesible en toda la app con contexto auto-cargado |
 | **H21.11** | Panel de historial de conversaciones (lista, abrir, borrar) | Continuidad de conversaciones |
-| **H21.11b** | **Selector/mención `@` de alumno** (§4.4): autocompletado de alumnos del scope; al elegir, la UI inserta el **UUID** en el contexto del mensaje y muestra un chip con el nombre. Resolución nombre→UUID en el cliente — el nombre nunca viaja al LLM | Preguntar por un alumno puntual sin enviar PII |
-| **H21.12** | "Pregúntale a la IA sobre esto" desde dashboards/Informe (deep-link con contexto pre-cargado) | Punto de entrada contextual |
+| **H21.11b** | **Selector/mención `@` de alumno** (§4.4) como caso del contrato `pageContext` (`kind: 'student'`): autocompletado de alumnos del scope; al elegir, la UI inserta el **UUID** y muestra un chip con el nombre. Resolución nombre→UUID en el cliente — el nombre nunca viaja al LLM | Preguntar por un alumno puntual sin enviar PII |
+| **H21.12** | "Pregúntale a la IA sobre esto" desde dashboards/Informe — **subsumido por H21.10b**: abre el panel con el `pageContext` que la vista ya declara, opcionalmente con un prompt sugerido por `kind` | Punto de entrada contextual (sin código de contexto adicional) |
 | **H21.13** | Tests: aislamiento multi-tenant vía prompt (no leak entre orgs), guardrail anti-alucinación, scoping por rol; e2e del loop | Suite de seguridad/calidad |
 | **H21.14** | Pulido de prompts con casos reales + doc de uso para directivos | Listo para piloto |
 
