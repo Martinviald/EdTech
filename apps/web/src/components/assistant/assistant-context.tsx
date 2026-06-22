@@ -22,6 +22,8 @@ import type { ChatMessage } from './stream';
  * pueda DECLARAR su contexto (`useRegisterAssistantContext`) y el panel lo lea.
  */
 interface AssistantContextValue {
+  /** `true` si el asistente está montado para este usuario (rol + feature). */
+  enabled: boolean;
   open: boolean;
   setOpen: (open: boolean) => void;
   /** Abre el panel; opcionalmente con un prompt pre-cargado en el input. */
@@ -43,7 +45,13 @@ interface AssistantContextValue {
 
 const AssistantCtx = createContext<AssistantContextValue | null>(null);
 
-export function AssistantProvider({ children }: { children: React.ReactNode }) {
+export function AssistantProvider({
+  children,
+  enabled = false,
+}: {
+  children: React.ReactNode;
+  enabled?: boolean;
+}) {
   const [open, setOpen] = useState(false);
   const [pageContext, setPageContext] = useState<AssistantContextRef[]>([]);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
@@ -68,6 +76,7 @@ export function AssistantProvider({ children }: { children: React.ReactNode }) {
 
   const value = useMemo<AssistantContextValue>(
     () => ({
+      enabled,
       open,
       setOpen,
       openAssistant,
@@ -81,6 +90,7 @@ export function AssistantProvider({ children }: { children: React.ReactNode }) {
       resetConversation,
     }),
     [
+      enabled,
       open,
       openAssistant,
       pageContext,

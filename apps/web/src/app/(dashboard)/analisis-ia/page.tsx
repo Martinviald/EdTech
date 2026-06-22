@@ -15,7 +15,7 @@ import {
 } from '@soe/types';
 import { PageContainer, PageHeader, EmptyState } from '@/components/patterns';
 import { FeatureUpgradeNotice } from '@/components/feature-gate';
-import { RegisterAssistantContext } from '@/components/assistant';
+import { AskAiButton, RegisterAssistantContext } from '@/components/assistant';
 import { isFeatureEnabled } from '@/lib/features';
 import { GenerateButton } from './components/generate-button';
 import { AnalysisPoller } from './components/analysis-poller';
@@ -215,7 +215,13 @@ export default async function AnalisisIaPage({
           ...(classGroupId ? [{ kind: 'classGroup' as const, id: classGroupId }] : []),
         ]}
       />
-      {header}
+      <PageHeader
+        title="Análisis IA"
+        description="Informe pedagógico generado por IA a partir de las métricas de una evaluación: síntesis ejecutiva, ítems destacados y críticos, brechas por habilidad y recomendaciones priorizadas (E20 — H20.2 a H20.7)."
+        actions={
+          <AskAiButton prompt="Explícame los resultados de esta evaluación: ¿dónde están las mayores brechas y qué priorizar?" />
+        }
+      />
       <AnalysisReport
         output={output}
         analysis={analysis}

@@ -26,7 +26,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
     canAccess(session.user.roles, ASSISTANT_USER_ROLES) && (await isFeatureEnabled('ai_assistant'));
 
   return (
-    <AssistantProvider>
+    <AssistantProvider enabled={assistantEnabled}>
       <div className="flex h-screen bg-background">
         <SkipLink />
         <Sidebar roles={session.user.roles} />
