@@ -66,16 +66,57 @@ export const createAssistantConversationSchema = z.object({
 export type CreateAssistantConversationDto = z.infer<typeof createAssistantConversationSchema>;
 
 /**
+ * Tipos de entidad que el asistente sabe consumir como CONTEXTO de la vista
+ * actual (asistente embebido, §3.4). El conjunto es FINITO y está acotado por los
+ * inputs de las tools (no por las vistas): cada `kind` mapea a un parámetro que
+ * alguna tool ya recibe (`assessmentId`, `classGroupId`, `itemId`, …). Agregar
+ * una vista nueva NO amplía este enum — solo declara refs de estos `kind`.
+ */
+export const ASSISTANT_CONTEXT_KINDS = [
+  'assessment',
+  'classGroup',
+  'grade',
+  'subject',
+  'instrument',
+  'academicYear',
+  'item',
+  'student',
+] as const;
+export type AssistantContextKind = (typeof ASSISTANT_CONTEXT_KINDS)[number];
+export const assistantContextKindSchema = z.enum(ASSISTANT_CONTEXT_KINDS);
+
+/**
+ * Referencia a una entidad que el usuario está viendo. PII opción B: solo el
+ * `kind` + el `id` (UUID, pseudónimo opaco) viajan al LLM. El `label` es para el
+ * chip en la UI (cliente) y NUNCA se envía al backend/LLM — el resolver
+ * nombre→UUID ocurre en el cliente. Cubre tanto el selector `@` de alumno
+ * (`kind: 'student'`) como el contexto auto-cargado de la página.
+ */
+export const assistantContextRefSchema = z.object({
+  kind: assistantContextKindSchema,
+  id: z.string().uuid(),
+  /** Etiqueta legible para la UI (chip). No se transmite al backend/LLM. */
+  label: z.string().max(200).optional(),
+});
+export type AssistantContextRef = z.infer<typeof assistantContextRefSchema>;
+
+/** Contexto de la vista actual: lista de referencias tipadas (máx. 20). */
+export const assistantPageContextSchema = z.array(assistantContextRefSchema).max(20);
+export type AssistantPageContext = z.infer<typeof assistantPageContextSchema>;
+
+/**
  * POST /assistant/conversations/:id/messages (respuesta vía stream SSE).
  *
- * `studentRefs` son UUIDs de alumnos mencionados con el selector `@` (PII opción
- * B, §4.4 de la planificación): el cliente resuelve nombre→UUID, de modo que el
- * NOMBRE nunca viaja al LLM — solo el UUID, que es un pseudónimo opaco. El
- * backend valida que esos alumnos pertenezcan al scope del usuario.
+ * `pageContext` son las entidades que el usuario está viendo (asistente embebido
+ * + selector `@`, §3.4/§4.4): el cliente las declara por vista y el backend las
+ * inyecta como DATOS delimitados en el turno (no como instrucciones), para que el
+ * modelo pase esos UUIDs directo a las tools. PII opción B: solo `kind`+`id`
+ * (UUID) llegan aquí; el NOMBRE nunca viaja al LLM. Se adjunta POR MENSAJE (el
+ * usuario puede navegar mientras chatea → el contexto refleja "dónde está ahora").
  */
 export const sendAssistantMessageSchema = z.object({
   content: z.string().min(1).max(4000),
-  studentRefs: z.array(z.string().uuid()).max(20).optional(),
+  pageContext: assistantPageContextSchema.optional(),
 });
 export type SendAssistantMessageDto = z.infer<typeof sendAssistantMessageSchema>;
 

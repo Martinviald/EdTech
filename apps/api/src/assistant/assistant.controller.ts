@@ -37,7 +37,7 @@ import { AssistantService } from './assistant.service';
  *
  * El endpoint de mensajes responde con STREAMING SSE escrito manualmente sobre
  * el `Response` de Express: el cliente hace POST con body (`{ content,
- * studentRefs }`), por lo que `@Sse()` (GET + EventSource) no encaja. El frontend
+ * pageContext }`), por lo que `@Sse()` (GET + EventSource) no encaja. El frontend
  * consume con `fetch` + `response.body.getReader()` (ver planificación §3.4/§6).
  */
 @Controller('assistant')

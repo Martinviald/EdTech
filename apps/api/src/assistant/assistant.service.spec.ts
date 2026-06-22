@@ -435,7 +435,7 @@ describe('AssistantService.streamReply', () => {
     expect(JSON.parse(result.content).error).toContain('no_existe');
   });
 
-  it('inyecta studentRefs (UUID) como contexto en el mensaje del usuario', async () => {
+  it('inyecta el pageContext (UUIDs por tipo) como contexto del mensaje del usuario', async () => {
     const state = emptyState({ conversations: [conversationRow({ title: 'T' })] });
     const { agent, captured } = makeAgent(scriptedEvents());
     const service = new AssistantService(makeDb(state), agent, LLM_CONFIG, [
@@ -444,14 +444,26 @@ describe('AssistantService.streamReply', () => {
 
     await drain(
       service.streamReply(USER, 'conv-1', {
-        content: 'Háblame de este alumno',
-        studentRefs: ['aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa'],
+        content: 'Háblame de este ítem',
+        pageContext: [
+          {
+            kind: 'assessment',
+            id: 'bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb',
+            label: 'DIA Matemática',
+          },
+          { kind: 'item', id: 'cccccccc-cccc-cccc-cccc-cccccccccccc' },
+          { kind: 'student', id: 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa' },
+        ],
       }),
     );
 
     const lastMsg = captured.params!.messages.at(-1)!;
     const text = (lastMsg.content[0] as { type: 'text'; text: string }).text;
-    expect(text).toContain('Háblame de este alumno');
-    expect(text).toContain('aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa');
+    expect(text).toContain('Háblame de este ítem');
+    expect(text).toContain('evaluación=bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb');
+    expect(text).toContain('ítem=cccccccc-cccc-cccc-cccc-cccccccccccc');
+    expect(text).toContain('alumno=aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa');
+    // El label de la UI NUNCA se inyecta al LLM (PII opción B).
+    expect(text).not.toContain('DIA Matemática');
   });
 });
