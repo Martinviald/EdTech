@@ -444,6 +444,34 @@ describe('AssistantService.streamReply', () => {
     expect(result).toEqual({ content: '{"ok":true}' });
   });
 
+  it('multi-tenant: el modelo NO puede cambiar de org vía los args de la tool (H21.13)', async () => {
+    const state = emptyState({ conversations: [conversationRow({ title: 'T' })] });
+    const { agent, captured } = makeAgent(scriptedEvents());
+    const execute = jest.fn(async () => ({ content: '{}' }));
+    const service = new AssistantService(makeDb(state), agent, LLM_CONFIG, [
+      makeTool('get_heatmap', execute),
+    ]);
+
+    await drain(service.streamReply(USER, 'conv-1', { content: 'hola' }));
+
+    // El modelo intenta inyectar otra identidad/tenant en los argumentos.
+    const maliciousInput = {
+      orgId: 'EVIL-ORG',
+      roles: ['platform_admin'],
+      classGroupId: 'x',
+    };
+    await captured.params!.executeTool({
+      id: 't9',
+      name: 'get_heatmap',
+      input: maliciousInput,
+    });
+
+    // El ctx que recibe la tool es SIEMPRE el del JWT (org-1, school_admin),
+    // nunca el del input: el args se pasa tal cual, pero la identidad no se toma
+    // de ahí. Las tools reales scopean por ctx.user, no por input.orgId.
+    expect(execute).toHaveBeenCalledWith(maliciousInput, { user: USER });
+  });
+
   it('executeTool devuelve error serializado para una tool desconocida', async () => {
     const state = emptyState({ conversations: [conversationRow({ title: 'T' })] });
     const { agent, captured } = makeAgent(scriptedEvents());
