@@ -13,12 +13,14 @@ import {
 import type { Response } from 'express';
 import {
   assistantConversationListQuerySchema,
+  assistantStudentSearchQuerySchema,
   createAssistantConversationSchema,
   sendAssistantMessageSchema,
   ASSISTANT_USER_ROLES,
   type AssistantConversationDetail,
   type AssistantConversationListResponse,
   type AssistantConversationModel,
+  type AssistantStudentSearchResponse,
 } from '@soe/types';
 import { CurrentUser } from '../auth/current-user.decorator';
 import type { JwtPayload } from '../auth/jwt-payload.types';
@@ -55,6 +57,20 @@ export class AssistantController {
   ): Promise<AssistantConversationModel> {
     const dto = createAssistantConversationSchema.parse(body);
     return this.service.createConversation(user, dto);
+  }
+
+  /**
+   * GET /api/assistant/students?q= — autocompletado de alumnos para el selector
+   * `@` (H21.11b). Devuelve UUID + nombre (el nombre solo lo ve el navegador del
+   * directivo, nunca el LLM). Acotado al org del token.
+   */
+  @Get('students')
+  async searchStudents(
+    @Query() query: unknown,
+    @CurrentUser() user: JwtPayload,
+  ): Promise<AssistantStudentSearchResponse> {
+    const dto = assistantStudentSearchQuerySchema.parse(query);
+    return { data: await this.service.searchStudents(user, dto) };
   }
 
   /** GET /api/assistant/conversations — listado paginado del usuario. */

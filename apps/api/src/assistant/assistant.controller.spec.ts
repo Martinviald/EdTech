@@ -36,6 +36,7 @@ describe('AssistantController (integración HTTP + SSE)', () => {
     listConversations: jest.fn(),
     getConversation: jest.fn(),
     deleteConversation: jest.fn(),
+    searchStudents: jest.fn(),
     streamReply: jest.fn(),
   };
 
@@ -142,6 +143,15 @@ describe('AssistantController (integración HTTP + SSE)', () => {
     expect(res.text).toContain('"type":"text_delta"');
     expect(res.text).toContain('"type":"error"');
     expect(res.text).toContain('boom interno');
+  });
+
+  it('GET /assistant/students?q= devuelve { data } del service', async () => {
+    service.searchStudents.mockResolvedValue([{ id: 'st-1', fullName: 'Ana Pérez' }]);
+
+    const res = await request(app.getHttpServer()).get('/assistant/students?q=ana').expect(200);
+
+    expect(res.body).toEqual({ data: [{ id: 'st-1', fullName: 'Ana Pérez' }] });
+    expect(service.searchStudents).toHaveBeenCalledWith(USER, { q: 'ana', limit: 10 });
   });
 
   it('DELETE /assistant/conversations/:id responde 204', async () => {

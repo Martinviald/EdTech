@@ -1,8 +1,9 @@
 import { ForbiddenException, Inject, Injectable, NotFoundException } from '@nestjs/common';
-import { and, asc, desc, eq, isNull } from 'drizzle-orm';
+import { and, asc, desc, eq, ilike, isNull, or, sql } from 'drizzle-orm';
 import {
   assistantConversations,
   assistantMessages,
+  students,
   withOrgContext,
   type AssistantConversation,
   type AssistantMessage,
@@ -14,6 +15,8 @@ import {
   type AssistantContextKind,
   type AssistantConversationModel,
   type AssistantMessageModel,
+  type AssistantStudentResult,
+  type AssistantStudentSearchQueryDto,
   type AssistantToolCall,
   type CreateAssistantConversationDto,
   type SendAssistantMessageDto,
@@ -154,6 +157,53 @@ export class AssistantService {
             eq(assistantConversations.orgId, orgId),
           ),
         );
+    });
+  }
+
+  // ───────────────────────────────────────────────────────────────────────────
+  // Selector `@` de alumno (H21.11b)
+  // ───────────────────────────────────────────────────────────────────────────
+
+  /**
+   * GET /assistant/students?q= — busca alumnos del scope por nombre, para el
+   * selector `@`. Devuelve `id` (UUID, lo que va al contexto) + nombre (solo lo
+   * ve el navegador del directivo; nunca el LLM). Acotado al `org_id` del JWT y
+   * corre dentro de `withOrgContext` (RLS). Audiencia v1 = directivos (gating del
+   * controller); el scoping por curso para profesores llega en v2.
+   */
+  async searchStudents(
+    user: JwtPayload,
+    query: AssistantStudentSearchQueryDto,
+  ): Promise<AssistantStudentResult[]> {
+    const orgId = this.requireOrgId(user);
+    const pattern = `%${query.q.trim()}%`;
+
+    return withOrgContext(this.db, orgId, async (tx) => {
+      const rows = await tx
+        .select({
+          id: students.id,
+          firstName: students.firstName,
+          lastName: students.lastName,
+        })
+        .from(students)
+        .where(
+          and(
+            eq(students.orgId, orgId),
+            isNull(students.deletedAt),
+            or(
+              ilike(students.firstName, pattern),
+              ilike(students.lastName, pattern),
+              ilike(sql`${students.firstName} || ' ' || ${students.lastName}`, pattern),
+            ),
+          ),
+        )
+        .orderBy(asc(students.lastName), asc(students.firstName))
+        .limit(query.limit);
+
+      return rows.map((r) => ({
+        id: r.id,
+        fullName: `${r.firstName} ${r.lastName}`.trim(),
+      }));
     });
   }
 

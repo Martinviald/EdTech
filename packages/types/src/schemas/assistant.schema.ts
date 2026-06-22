@@ -120,6 +120,30 @@ export const sendAssistantMessageSchema = z.object({
 });
 export type SendAssistantMessageDto = z.infer<typeof sendAssistantMessageSchema>;
 
+// ── Selector `@` de alumno (H21.11b, PII opción B) ───────────────────────────
+// El cliente busca alumnos por nombre (autocompletado) y al elegir inserta el
+// UUID en el `pageContext` como `{ kind: 'student', id }`. El NOMBRE solo viaja
+// hacia el navegador del directivo (lo ve en el chip); NUNCA hacia el LLM.
+
+/** GET /assistant/students — query de búsqueda de alumnos del scope. */
+export const assistantStudentSearchQuerySchema = z.object({
+  q: z.string().min(1).max(100),
+  limit: z.coerce.number().int().min(1).max(25).default(10),
+});
+export type AssistantStudentSearchQueryDto = z.infer<typeof assistantStudentSearchQuerySchema>;
+
+/** Alumno encontrado: `id` (UUID, el que va al contexto) + nombre (solo UI). */
+export const assistantStudentResultSchema = z.object({
+  id: z.string().uuid(),
+  fullName: z.string(),
+});
+export type AssistantStudentResult = z.infer<typeof assistantStudentResultSchema>;
+
+export const assistantStudentSearchResponseSchema = z.object({
+  data: z.array(assistantStudentResultSchema),
+});
+export type AssistantStudentSearchResponse = z.infer<typeof assistantStudentSearchResponseSchema>;
+
 /** GET /assistant/conversations — query de paginación. */
 export const assistantConversationListQuerySchema = z.object({
   page: z.coerce.number().int().min(1).default(1),

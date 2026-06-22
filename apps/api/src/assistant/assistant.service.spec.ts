@@ -14,7 +14,7 @@ jest.mock('@soe/db', () => {
   };
 });
 
-import { assistantConversations, assistantMessages, type Database } from '@soe/db';
+import { assistantConversations, assistantMessages, students, type Database } from '@soe/db';
 import type { JwtPayload } from '../auth/jwt-payload.types';
 import type { LlmConfigService } from '../llm/llm.config';
 import type { AgentStreamEvent, LlmAgentService, RunAgentParams } from '../llm/llm-agent.service';
@@ -40,6 +40,7 @@ const USER: JwtPayload = {
 interface DbState {
   conversations: Record<string, unknown>[];
   messages: Record<string, unknown>[];
+  students: Record<string, unknown>[];
   inserted: Array<{ table: unknown; values: Record<string, unknown> }>;
   updated: Array<{ table: unknown; values: Record<string, unknown> }>;
 }
@@ -58,7 +59,12 @@ function makeDb(state: DbState): Database {
         limit: () => chain,
         offset: () => chain,
         then: (resolve: (v: unknown[]) => unknown) => {
-          const rows = table === assistantConversations ? state.conversations : state.messages;
+          const rows =
+            table === assistantConversations
+              ? state.conversations
+              : table === students
+                ? state.students
+                : state.messages;
           return Promise.resolve(resolve(rows));
         },
       };
@@ -111,6 +117,7 @@ function emptyState(overrides: Partial<DbState> = {}): DbState {
   return {
     conversations: [],
     messages: [],
+    students: [],
     inserted: [],
     updated: [],
     ...overrides,
@@ -264,6 +271,26 @@ describe('AssistantService — CRUD de conversaciones', () => {
     await expect(service.createConversation({ ...USER, orgId: null }, {})).rejects.toBeInstanceOf(
       ForbiddenException,
     );
+  });
+
+  it('searchStudents devuelve id + fullName (sin RUT) para el selector @', async () => {
+    const state = emptyState({
+      students: [
+        { id: 'st-1', firstName: 'Ana', lastName: 'Pérez', rut: '11111111-1' },
+        { id: 'st-2', firstName: 'Beto', lastName: 'Soto', rut: '22222222-2' },
+      ],
+    });
+    const { agent } = makeAgent([]);
+    const service = new AssistantService(makeDb(state), agent, LLM_CONFIG, []);
+
+    const result = await service.searchStudents(USER, { q: 'a', limit: 10 });
+
+    expect(result).toEqual([
+      { id: 'st-1', fullName: 'Ana Pérez' },
+      { id: 'st-2', fullName: 'Beto Soto' },
+    ]);
+    // El RUT (PII) no se proyecta hacia el resultado.
+    expect(JSON.stringify(result)).not.toContain('11111111');
   });
 });
 

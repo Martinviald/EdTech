@@ -5,6 +5,8 @@ import {
   type AssistantConversationDetail,
   type AssistantConversationListResponse,
   type AssistantConversationModel,
+  type AssistantStudentResult,
+  type AssistantStudentSearchResponse,
   type CreateAssistantConversationDto,
 } from '@soe/types';
 import { apiDelete, apiGet, apiPost } from '@/lib/api';
@@ -38,4 +40,14 @@ export async function getConversation(id: string): Promise<AssistantConversation
 
 export async function deleteConversation(id: string): Promise<void> {
   await apiDelete(`/assistant/conversations/${id}`);
+}
+
+/** Busca alumnos del scope por nombre, para el selector `@` (H21.11b). */
+export async function searchStudents(q: string): Promise<AssistantStudentResult[]> {
+  const trimmed = q.trim();
+  if (trimmed.length === 0) return [];
+  const res = await apiGet<AssistantStudentSearchResponse>(
+    `/assistant/students?q=${encodeURIComponent(trimmed)}`,
+  );
+  return res.data;
 }
