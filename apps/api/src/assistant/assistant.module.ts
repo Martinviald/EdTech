@@ -4,6 +4,7 @@ import { AssessmentReportModule } from '../assessment-report/assessment-report.m
 import { AssessmentResultsModule } from '../assessment-results/assessment-results.module';
 import { DashboardsModule } from '../dashboards/dashboards.module';
 import { HeatmapModule } from '../heatmap/heatmap.module';
+import { ItemAnalysisModule } from '../item-analysis/item-analysis.module';
 import { ItemsModule } from '../items/items.module';
 import { LlmModule } from '../llm/llm.module';
 import { ASSISTANT_TOOLS } from './assistant.constants';
@@ -19,6 +20,7 @@ import { GetHeatmapTool } from './tools/get-heatmap.tool';
 import { GetItemContentTool } from './tools/get-item-content.tool';
 import { GetProgressionTool } from './tools/get-progression.tool';
 import { GetStudentDetailTool } from './tools/get-student-detail.tool';
+import { ListAssessmentsTool } from './tools/list-assessments.tool';
 import { ListFilterOptionsTool } from './tools/list-filter-options.tool';
 
 /**
@@ -33,6 +35,7 @@ import { ListFilterOptionsTool } from './tools/list-filter-options.tool';
  */
 const ASSISTANT_TOOL_CLASSES = [
   ListFilterOptionsTool,
+  ListAssessmentsTool,
   GetDashboardOverviewTool,
   GetDashboardSkillsTool,
   GetDashboardPerformanceTool,
@@ -53,6 +56,7 @@ const ASSISTANT_TOOL_CLASSES = [
     AssessmentReportModule,
     AssessmentResultsModule,
     ItemsModule,
+    ItemAnalysisModule,
   ],
   controllers: [AssistantController],
   providers: [

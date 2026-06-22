@@ -8,8 +8,10 @@ import type {
 import type { JwtPayload } from '../../auth/jwt-payload.types';
 import type { DashboardsService } from '../../dashboards/dashboards.service';
 import type { HeatmapService } from '../../heatmap/heatmap.service';
+import type { ItemAnalysisService } from '../../item-analysis/item-analysis.service';
 import type { AssistantToolContext } from './assistant-tool.types';
 import { ListFilterOptionsTool } from './list-filter-options.tool';
+import { ListAssessmentsTool } from './list-assessments.tool';
 import { GetDashboardOverviewTool } from './get-dashboard-overview.tool';
 import { GetDashboardSkillsTool } from './get-dashboard-skills.tool';
 import { GetDashboardPerformanceTool } from './get-dashboard-performance.tool';
@@ -75,10 +77,7 @@ describe('get_dashboard_overview tool', () => {
 
     const result = await tool.execute({ classGroupId: UUID }, CTX);
 
-    expect(getOverview).toHaveBeenCalledWith(
-      USER,
-      expect.objectContaining({ classGroupId: UUID }),
-    );
+    expect(getOverview).toHaveBeenCalledWith(USER, expect.objectContaining({ classGroupId: UUID }));
     expect(JSON.parse(result.content)).toEqual(response);
   });
 
@@ -105,10 +104,7 @@ describe('get_dashboard_skills tool', () => {
 
     const result = await tool.execute({ subjectId: UUID }, CTX);
 
-    expect(getSkills).toHaveBeenCalledWith(
-      USER,
-      expect.objectContaining({ subjectId: UUID }),
-    );
+    expect(getSkills).toHaveBeenCalledWith(USER, expect.objectContaining({ subjectId: UUID }));
     expect(JSON.parse(result.content)).toEqual(response);
   });
 
@@ -220,10 +216,7 @@ describe('get_heatmap tool', () => {
 
     const result = await tool.execute({ gradeId: UUID }, CTX);
 
-    expect(getHeatmap).toHaveBeenCalledWith(
-      USER,
-      expect.objectContaining({ gradeId: UUID }),
-    );
+    expect(getHeatmap).toHaveBeenCalledWith(USER, expect.objectContaining({ gradeId: UUID }));
     expect(JSON.parse(result.content)).toEqual(response);
   });
 
@@ -237,5 +230,49 @@ describe('get_heatmap tool', () => {
 
     expect(result.isError).toBe(true);
     expect(getHeatmap).not.toHaveBeenCalled();
+  });
+});
+
+describe('list_assessments tool', () => {
+  it('valida e invoca listAssessments con ctx.user y serializa', async () => {
+    const response = {
+      data: [
+        {
+          assessmentId: UUID,
+          name: 'DIA Matemática diagnóstico',
+          instrumentName: 'DIA Mat',
+          instrumentType: 'dia',
+          subjectName: 'Matemática',
+          gradeName: '8° básico',
+          administeredAt: '2026-03-01',
+          studentsCount: 30,
+        },
+      ],
+    };
+    const listAssessments = jest.fn().mockResolvedValue(response);
+    const tool = new ListAssessmentsTool({
+      listAssessments,
+    } as unknown as ItemAnalysisService);
+
+    const result = await tool.execute({ instrumentType: 'dia' }, CTX);
+
+    expect(listAssessments).toHaveBeenCalledWith(
+      USER,
+      expect.objectContaining({ instrumentType: 'dia' }),
+    );
+    expect(result.isError).toBeUndefined();
+    expect(JSON.parse(result.content)).toEqual(response);
+  });
+
+  it('input inválido (UUID malformado) → isError sin invocar el service', async () => {
+    const listAssessments = jest.fn();
+    const tool = new ListAssessmentsTool({
+      listAssessments,
+    } as unknown as ItemAnalysisService);
+
+    const result = await tool.execute({ subjectId: 'no-uuid' }, CTX);
+
+    expect(result.isError).toBe(true);
+    expect(listAssessments).not.toHaveBeenCalled();
   });
 });
