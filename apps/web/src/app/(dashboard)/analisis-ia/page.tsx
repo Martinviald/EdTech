@@ -15,6 +15,7 @@ import {
 } from '@soe/types';
 import { PageContainer, PageHeader, EmptyState } from '@/components/patterns';
 import { FeatureUpgradeNotice } from '@/components/feature-gate';
+import { RegisterAssistantContext } from '@/components/assistant';
 import { isFeatureEnabled } from '@/lib/features';
 import { GenerateButton } from './components/generate-button';
 import { AnalysisPoller } from './components/analysis-poller';
@@ -188,28 +189,32 @@ export default async function AnalisisIaPage({
   const matrixQuery = new URLSearchParams({ assessmentId, limit: '1' });
   if (classGroupId) matrixQuery.set('classGroupId', classGroupId);
 
-  const canViewQuality = canAccess(
-    session.user.roles,
-    INSTRUMENT_QUALITY_VIEWER_ROLES,
-  );
+  const canViewQuality = canAccess(session.user.roles, INSTRUMENT_QUALITY_VIEWER_ROLES);
 
   const [quality, matrix] = await Promise.all([
     canViewQuality
-      ? apiGet<InstrumentQualityResponse>(
-          `/instrument-quality?${qualityQuery.toString()}`,
-        ).catch(() => null)
+      ? apiGet<InstrumentQualityResponse>(`/instrument-quality?${qualityQuery.toString()}`).catch(
+          () => null,
+        )
       : Promise.resolve(null),
-    apiGet<ItemMatrixResponse>(
-      `/item-analysis/matrix?${matrixQuery.toString()}`,
-    ).catch((): ItemMatrixResponse | null => null),
+    apiGet<ItemMatrixResponse>(`/item-analysis/matrix?${matrixQuery.toString()}`).catch(
+      (): ItemMatrixResponse | null => null,
+    ),
   ]);
 
   const questions: MatrixQuestionColumn[] = matrix?.questions ?? [];
-  const exportTitle =
-    matrix?.assessmentName ?? matrix?.instrumentName ?? 'evaluacion';
+  const exportTitle = matrix?.assessmentName ?? matrix?.instrumentName ?? 'evaluacion';
 
   return (
     <PageContainer>
+      {/* Declara el contexto de esta vista para el asistente embebido (E21): al
+          abrir el panel, ya sabe sobre qué evaluación/curso se pregunta. */}
+      <RegisterAssistantContext
+        refs={[
+          { kind: 'assessment' as const, id: assessmentId, label: exportTitle },
+          ...(classGroupId ? [{ kind: 'classGroup' as const, id: classGroupId }] : []),
+        ]}
+      />
       {header}
       <AnalysisReport
         output={output}
