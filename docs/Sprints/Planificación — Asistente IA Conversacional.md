@@ -301,9 +301,9 @@ de menores cruzando a un procesador externo. Antes del **piloto en producción**
 | **H21.5** ✅ | Tools read-only `list_filter_options`, `get_dashboard_*`, `get_heatmap` (wrappers sobre services, input Zod, orgId del JWT) — implementadas como clases `AssistantTool` (contrato `assistant-tool.types.ts`), una por archivo | Commit `bb445e6` — 5 tools |
 | **H21.6** ✅ | Tools de análisis: `get_progression`, `get_generational`, `get_assessment_report`, `get_student_detail` con proyección PII opción B (sin nombre/RUT) | Commit `97036df` — 4 tools |
 | **H21.6b** ✅ | Tool `get_item_content` + `ItemsService.getContentForAssistant` (normaliza el `items.content` JSONB polimórfico, sin hardcodear type, PII-free) | Commit `4a9d6a6` — habilita análisis de misconcepciones |
-| **H21.7** | `AssistantModule` (controller + service): CRUD de conversaciones + endpoint de mensajes con streaming, orquestando el loop y ejecutando tools (registra las tools, construye el `executeTool`) | API conversacional completa — **Ola 3** |
-| **H21.8** | System prompt versionado (guardrails §4) + `@RequireFeature('ai_assistant')` + `ASSISTANT_USER_ROLES` | Agente gated y con guardrails |
-| **H21.9** | Trazado de costo: persistir `tokens`/`cost_usd` por mensaje + integrar `source: 'assistant'` en `AiObservabilityService` | Observabilidad del chat |
+| **H21.7** ✅ | `AssistantModule` (controller + service): CRUD de conversaciones + endpoint de mensajes con streaming, orquestando el loop y ejecutando tools (registra las tools, construye el `executeTool`) | API conversacional completa — **Ola 3** |
+| **H21.8** ✅ | System prompt versionado (guardrails §4) + `@RequireFeature('ai_assistant')` + `ASSISTANT_USER_ROLES` | Agente gated y con guardrails |
+| **H21.9** ✅ | Trazado de costo: persistir `tokens`/`cost_usd` por mensaje + integrar `source: 'assistant'` en `AiObservabilityService` | Observabilidad del chat |
 
 ### Sprint C — Frontend y cierre
 
