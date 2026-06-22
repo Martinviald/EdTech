@@ -143,3 +143,23 @@ CREATE POLICY "benchmark_access_logs_tenant_isolation" ON "benchmark_access_logs
 -- del benchmarking — la única excepción documentada al aislamiento por org. No
 -- contiene PII (solo agregados por org). El acceso se protege por guards de rol y
 -- el servicio aplica k-anonimato. NO habilitar RLS aquí.
+
+-- ── E21 — Asistente IA Conversacional (org_id directo) ───────────────────────
+-- Conversaciones y mensajes del asistente. Datos sensibles (consultas de un
+-- directivo sobre desempeño de su colegio) → aislamiento por org_id. El scoping
+-- por usuario (cada quien ve solo sus conversaciones) lo aplica el service; RLS
+-- es la barrera de tenant a nivel de motor.
+ALTER TABLE "assistant_conversations"  ENABLE ROW LEVEL SECURITY;
+ALTER TABLE "assistant_conversations"  FORCE  ROW LEVEL SECURITY;
+ALTER TABLE "assistant_messages"       ENABLE ROW LEVEL SECURITY;
+ALTER TABLE "assistant_messages"       FORCE  ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "assistant_conversations_tenant_isolation" ON "assistant_conversations";
+CREATE POLICY "assistant_conversations_tenant_isolation" ON "assistant_conversations"
+  AS PERMISSIVE FOR ALL
+  USING (org_id::text = current_setting('app.current_org_id', true));
+
+DROP POLICY IF EXISTS "assistant_messages_tenant_isolation" ON "assistant_messages";
+CREATE POLICY "assistant_messages_tenant_isolation" ON "assistant_messages"
+  AS PERMISSIVE FOR ALL
+  USING (org_id::text = current_setting('app.current_org_id', true));

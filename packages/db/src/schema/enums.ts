@@ -202,3 +202,11 @@ export const remedialStatusEnum = pgEnum('remedial_status', [
 // Modo de comparación: pool global anónimo (k-anonimato) vs red/sostenedor
 // identificada (orgs con el mismo organizations.parent_id).
 export const benchmarkModeEnum = pgEnum('benchmark_mode', ['global', 'network']);
+
+// ── E21 — Asistente IA Conversacional ────────────────────────────────────────
+// Rol de un mensaje persistido en la conversación. Las invocaciones de tools no
+// son mensajes: su traza va en assistant_messages.tool_calls (JSONB) del turno.
+export const assistantMessageRoleEnum = pgEnum('assistant_message_role', [
+  'user',
+  'assistant',
+]);

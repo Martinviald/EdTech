@@ -37,6 +37,7 @@ import { RemedialModule } from './remedial/remedial.module';
 import { BenchmarkingModule } from './benchmarking/benchmarking.module';
 import { InstrumentQualityModule } from './instrument-quality/instrument-quality.module';
 import { AiObservabilityModule } from './ai-observability/ai-observability.module';
+import { AssistantModule } from './assistant/assistant.module';
 
 @Module({
   imports: [
@@ -86,6 +87,8 @@ import { AiObservabilityModule } from './ai-observability/ai-observability.modul
     BenchmarkingModule,
     // ── F2 S5: observabilidad de costo/latencia IA (H19.25) ──
     AiObservabilityModule,
+    // ── E21: Asistente IA Conversacional (loop de tool-use + chat SSE) ──
+    AssistantModule,
   ],
   controllers: [AppController],
   providers: [

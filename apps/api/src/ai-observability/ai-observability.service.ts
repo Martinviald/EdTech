@@ -2,10 +2,12 @@ import { ForbiddenException, Injectable } from '@nestjs/common';
 import { and, eq, gte, isNull, lte } from 'drizzle-orm';
 import {
   aiAnalyses,
+  assistantMessages,
   organizations,
   remedialMaterials,
   withOrgContext,
   type AiAnalysis,
+  type AssistantMessage,
   type RemedialMaterial,
 } from '@soe/db';
 import {
@@ -35,7 +37,7 @@ const REMEDIAL_COMPLETED: ReadonlySet<string> = new Set(['ready', 'approved', 'd
 
 /** Una fila normalizada de gasto IA, independiente de la tabla de origen. */
 interface NormalizedRow {
-  source: 'ai_analysis' | 'remedial';
+  source: 'ai_analysis' | 'remedial' | 'assistant';
   type: string;
   model: string | null;
   status: string;
@@ -75,7 +77,12 @@ const REMEDIAL_TYPE_LABELS: Record<string, string> = {
 const SOURCE_LABELS: Record<NormalizedRow['source'], string> = {
   ai_analysis: 'Análisis IA',
   remedial: 'Material remedial',
+  assistant: 'Asistente IA',
 };
+
+/** Etiqueta única de tipo para los turnos del asistente conversacional. */
+const ASSISTANT_TYPE = 'chat';
+const ASSISTANT_TYPE_LABEL = 'Conversación';
 
 @Injectable()
 export class AiObservabilityService {
@@ -85,11 +92,7 @@ export class AiObservabilityService {
   // GET /ai-observability/summary?from&to
   // ───────────────────────────────────────────────────────────────────────────
 
-  async getSummary(
-    user: JwtPayload,
-    from?: string,
-    to?: string,
-  ): Promise<AiObservabilitySummary> {
+  async getSummary(user: JwtPayload, from?: string, to?: string): Promise<AiObservabilitySummary> {
     const orgId = this.requireOrgId(user);
     const range = resolveRange(from, to);
 
@@ -126,8 +129,7 @@ export class AiObservabilityService {
 
     const budgetUsd = await this.resolveBudget(orgId);
 
-    const pctUsed =
-      budgetUsd && budgetUsd > 0 ? round2((monthSpendUsd / budgetUsd) * 100) : null;
+    const pctUsed = budgetUsd && budgetUsd > 0 ? round2((monthSpendUsd / budgetUsd) * 100) : null;
 
     return {
       orgId,
@@ -205,9 +207,23 @@ export class AiObservabilityService {
           ),
         )) as RemedialMaterial[];
 
+      // Solo los turnos del ASISTENTE acarrean costo/tokens (los del usuario no).
+      const assistantRows = (await tx
+        .select()
+        .from(assistantMessages)
+        .where(
+          and(
+            eq(assistantMessages.orgId, orgId),
+            eq(assistantMessages.role, 'assistant'),
+            gte(assistantMessages.createdAt, start),
+            lte(assistantMessages.createdAt, end),
+          ),
+        )) as AssistantMessage[];
+
       return [
         ...analysisRows.map((r) => normalizeAnalysis(r)),
         ...remedialRows.map((r) => normalizeRemedial(r)),
+        ...assistantRows.map((r) => normalizeAssistant(r)),
       ];
     });
   }
@@ -271,18 +287,16 @@ export class AiObservabilityService {
 
     for (const row of rows) {
       const { key, label } = keyFn(row);
-      const bucket =
-        acc.get(key) ??
-        {
-          key,
-          label,
-          count: 0,
-          totalCostUsd: 0,
-          inputTokens: 0,
-          outputTokens: 0,
-          latencySum: 0,
-          latencyCount: 0,
-        };
+      const bucket = acc.get(key) ?? {
+        key,
+        label,
+        count: 0,
+        totalCostUsd: 0,
+        inputTokens: 0,
+        outputTokens: 0,
+        latencySum: 0,
+        latencyCount: 0,
+      };
       bucket.count += 1;
       bucket.totalCostUsd += row.costUsd;
       bucket.inputTokens += row.inputTokens;
@@ -349,6 +363,27 @@ function normalizeRemedial(row: RemedialMaterial): NormalizedRow {
   };
 }
 
+/**
+ * Normaliza un turno del asistente conversacional (E21 — H21.9). Cada fila
+ * `assistant` ya trae `tokens`/`costUsd` persistidos por turno. No hay timestamps
+ * de inicio/fin separados → latencia null; no hay estado de fallo → isFailed
+ * false (un turno que falla no persiste como mensaje del asistente).
+ */
+function normalizeAssistant(row: AssistantMessage): NormalizedRow {
+  return {
+    source: 'assistant',
+    type: ASSISTANT_TYPE,
+    model: row.model,
+    status: 'completed',
+    costUsd: parseCost(row.costUsd),
+    inputTokens: row.tokens?.input ?? 0,
+    outputTokens: row.tokens?.output ?? 0,
+    latencyMs: null,
+    createdAt: row.createdAt,
+    isFailed: false,
+  };
+}
+
 /** `costUsd` viene como decimal (string) o null → Number, null→0. */
 function parseCost(value: string | null): number {
   if (value === null) return 0;
@@ -374,6 +409,9 @@ function typeKey(row: NormalizedRow): string {
 function typeLabel(row: NormalizedRow): string {
   if (row.source === 'ai_analysis') {
     return ANALYSIS_TYPE_LABELS[row.type] ?? row.type;
+  }
+  if (row.source === 'assistant') {
+    return ASSISTANT_TYPE_LABEL;
   }
   return REMEDIAL_TYPE_LABELS[row.type] ?? row.type;
 }

@@ -97,6 +97,24 @@ function remedialRow(overrides: Record<string, unknown> = {}): Record<string, un
   };
 }
 
+/** Fila de assistant_messages (turno del asistente con costo/tokens). */
+function assistantRow(overrides: Record<string, unknown> = {}): Record<string, unknown> {
+  return {
+    id: 'm-1',
+    conversationId: 'c-1',
+    orgId: 'org-1',
+    role: 'assistant',
+    content: 'respuesta',
+    toolCalls: [],
+    model: 'claude-sonnet-4-20250514',
+    promptVersion: 'e21-assistant-v1',
+    tokens: { input: 500, output: 250 },
+    costUsd: '0.005250',
+    createdAt: new Date('2026-06-03T10:00:00Z'),
+    ...overrides,
+  };
+}
+
 describe('AiObservabilityService', () => {
   describe('getSummary — agregación de costo y tokens', () => {
     it('agrega costo y tokens de ambas tablas en totals', async () => {
@@ -111,6 +129,25 @@ describe('AiObservabilityService', () => {
       expect(result.totals.inputTokens).toBe(3000);
       expect(result.totals.outputTokens).toBe(1300);
       expect(result.totals.failedCount).toBe(0);
+    });
+
+    it('incluye los turnos del asistente (source assistant) en totals y bySource', async () => {
+      const db = makeDb([[analysisRow()], [remedialRow()], [assistantRow()]]);
+      const service = makeService(db);
+
+      const result = await service.getSummary(makeUser());
+
+      expect(result.totals.count).toBe(3);
+      expect(result.totals.totalCostUsd).toBeCloseTo(0.047595, 6);
+      expect(result.totals.inputTokens).toBe(3500);
+      expect(result.totals.outputTokens).toBe(1550);
+
+      const sources = result.bySource.map((b) => b.key).sort();
+      expect(sources).toEqual(['ai_analysis', 'assistant', 'remedial']);
+      const assistantBucket = result.bySource.find((b) => b.key === 'assistant');
+      expect(assistantBucket?.label).toBe('Asistente IA');
+      expect(assistantBucket?.count).toBe(1);
+      expect(assistantBucket?.totalCostUsd).toBeCloseTo(0.00525, 6);
     });
 
     it('trata costUsd null y tokens null como 0', async () => {
@@ -220,7 +257,7 @@ describe('AiObservabilityService', () => {
 
   describe('getBudget', () => {
     it('sin tope (config sin aiBudgetUsd) → budgetUsd null, pctUsed null, alertLevel ok', async () => {
-      const db = makeDb([[analysisRow({ costUsd: '0.50' })], [], [{ config: {} }]]);
+      const db = makeDb([[analysisRow({ costUsd: '0.50' })], [], [], [{ config: {} }]]);
       const service = makeService(db);
 
       const result = await service.getBudget(makeUser());
@@ -235,6 +272,7 @@ describe('AiObservabilityService', () => {
     it('gasto en zona warning (80-100%) → alertLevel warning', async () => {
       const db = makeDb([
         [analysisRow({ costUsd: '85' })],
+        [],
         [],
         [{ config: { aiBudgetUsd: 100 } }],
       ]);
@@ -251,6 +289,7 @@ describe('AiObservabilityService', () => {
       const db = makeDb([
         [analysisRow({ costUsd: '60' })],
         [remedialRow({ costUsd: '60' })],
+        [],
         [{ config: { aiBudgetUsd: 100 } }],
       ]);
       const service = makeService(db);

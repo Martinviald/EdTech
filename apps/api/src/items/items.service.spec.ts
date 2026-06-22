@@ -1,4 +1,4 @@
-import { BadRequestException, ForbiddenException } from '@nestjs/common';
+import { BadRequestException, ForbiddenException, NotFoundException } from '@nestjs/common';
 import { ItemsService } from './items.service';
 import type { JwtPayload } from '../auth/jwt-payload.types';
 import type { Item } from '@soe/db';
@@ -397,5 +397,134 @@ describe('ItemsService.update — validación de content polimórfico', () => {
     await expect(
       svc.update('item-1', dto, user({ orgId: 'org-1' })),
     ).resolves.toBeDefined();
+  });
+});
+
+// ── getContentForAssistant — normalización PII-free (H21.6b) ─────────────────
+//
+// Resuelve un ítem (por itemId) y aplana el `content` polimórfico a la forma
+// común del asistente. Verificamos el normalizador para multiple_choice (con su
+// clave correcta) y la robustez ante otros tipos sin alternativas.
+
+describe('ItemsService.getContentForAssistant — normalización', () => {
+  /**
+   * Mock que devuelve, en orden, el ítem (resolveItemForAssistant) y luego sus
+   * tags de habilidad (loadPrimarySkillName). Cada `select()` se consume una vez.
+   */
+  function dbMockForAssistant(row: Item, skillName: string | null) {
+    const itemSelect = {
+      from: jest.fn().mockReturnThis(),
+      where: jest.fn().mockResolvedValue([row]),
+    };
+    const skillSelect = {
+      from: jest.fn().mockReturnThis(),
+      innerJoin: jest.fn().mockReturnThis(),
+      where: jest.fn().mockReturnThis(),
+      orderBy: jest.fn().mockReturnThis(),
+      limit: jest
+        .fn()
+        .mockResolvedValue(skillName === null ? [] : [{ name: skillName }]),
+    };
+    const select = jest
+      .fn()
+      .mockReturnValueOnce(itemSelect)
+      .mockReturnValueOnce(skillSelect);
+    return { select } as never;
+  }
+
+  const ITEM_UUID = '11111111-1111-1111-1111-111111111111';
+
+  it('normaliza multiple_choice: stem, alternatives clave→texto y correctKey', async () => {
+    const row = item({
+      id: ITEM_UUID,
+      orgId: 'org-1',
+      position: 4,
+      type: 'multiple_choice',
+      content: {
+        stem: '¿2 + 2?',
+        alternatives: [
+          { key: 'A', text: '3', isCorrect: false },
+          { key: 'B', text: '4', isCorrect: true },
+        ],
+      } as Item['content'],
+    });
+    const svc = new ItemsService(dbMockForAssistant(row, 'Operatoria'));
+
+    const result = await svc.getContentForAssistant(user({ orgId: 'org-1' }), {
+      itemId: ITEM_UUID,
+    });
+
+    expect(result).toEqual({
+      itemId: ITEM_UUID,
+      position: 4,
+      type: 'multiple_choice',
+      stem: '¿2 + 2?',
+      alternatives: [
+        { key: 'A', text: '3' },
+        { key: 'B', text: '4' },
+      ],
+      correctKey: 'B',
+      skillName: 'Operatoria',
+    });
+  });
+
+  it('true_false: sin alternativas, correctKey en V/F', async () => {
+    const row = item({
+      id: ITEM_UUID,
+      orgId: 'org-1',
+      position: 1,
+      type: 'true_false',
+      content: { stem: 'El cielo es azul', correctAnswer: true } as Item['content'],
+    });
+    const svc = new ItemsService(dbMockForAssistant(row, null));
+
+    const result = await svc.getContentForAssistant(user({ orgId: 'org-1' }), {
+      itemId: ITEM_UUID,
+    });
+
+    expect(result.alternatives).toEqual([]);
+    expect(result.correctKey).toBe('V');
+    expect(result.stem).toBe('El cielo es azul');
+    expect(result.skillName).toBeNull();
+  });
+
+  it('open_ended: stem desde prompt, alternatives vacío, correctKey null', async () => {
+    const row = item({
+      id: ITEM_UUID,
+      orgId: 'org-1',
+      position: 2,
+      type: 'open_ended',
+      content: { prompt: 'Explica el ciclo del agua' } as Item['content'],
+    });
+    const svc = new ItemsService(dbMockForAssistant(row, null));
+
+    const result = await svc.getContentForAssistant(user({ orgId: 'org-1' }), {
+      itemId: ITEM_UUID,
+    });
+
+    expect(result.stem).toBe('Explica el ciclo del agua');
+    expect(result.alternatives).toEqual([]);
+    expect(result.correctKey).toBeNull();
+  });
+
+  it('lanza NotFound cuando el ítem no existe', async () => {
+    const itemSelect = {
+      from: jest.fn().mockReturnThis(),
+      where: jest.fn().mockResolvedValue([]),
+    };
+    const svc = new ItemsService({
+      select: jest.fn().mockReturnValue(itemSelect),
+    } as never);
+
+    await expect(
+      svc.getContentForAssistant(user({ orgId: 'org-1' }), { itemId: ITEM_UUID }),
+    ).rejects.toBeInstanceOf(NotFoundException);
+  });
+
+  it('exige itemId o (assessmentId + position)', async () => {
+    const svc = makeService();
+    await expect(
+      svc.getContentForAssistant(user({ orgId: 'org-1' }), {}),
+    ).rejects.toBeInstanceOf(BadRequestException);
   });
 });
