@@ -9,7 +9,7 @@ import {
   type PointerEvent as ReactPointerEvent,
 } from 'react';
 import dynamic from 'next/dynamic';
-import { Loader2, Plus } from 'lucide-react';
+import { ArrowLeft, History, Loader2, Plus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
   Sheet,
@@ -19,6 +19,7 @@ import {
   SheetTitle,
 } from '@/components/ui/sheet';
 import { useAssistant } from './assistant-context';
+import { AssistantHistory } from './assistant-history';
 
 // El chat (y su dependencia react-markdown) se cargan en un chunk aparte, solo
 // cuando el panel se monta al abrirse → no pesa el bundle inicial del dashboard.
@@ -123,6 +124,12 @@ function useResizableWidth() {
 export function AssistantPanel() {
   const { open, setOpen, resetConversation, messages } = useAssistant();
   const { width, onPointerDown, onKeyDown } = useResizableWidth();
+  const [view, setView] = useState<'chat' | 'history'>('chat');
+
+  // Al cerrar el panel, volver a la vista de chat para la próxima apertura.
+  useEffect(() => {
+    if (!open) setView('chat');
+  }, [open]);
 
   return (
     <Sheet open={open} onOpenChange={setOpen}>
@@ -146,19 +153,40 @@ export function AssistantPanel() {
 
         <SheetHeader className="pr-8 text-left">
           <div className="flex items-center justify-between gap-2">
-            <SheetTitle>Asistente IA</SheetTitle>
-            {messages.length > 0 && (
+            <SheetTitle>{view === 'history' ? 'Historial' : 'Asistente IA'}</SheetTitle>
+            <div className="flex items-center gap-1">
               <Button
                 type="button"
                 variant="ghost"
                 size="sm"
                 className="h-7 gap-1 px-2 text-xs"
-                onClick={resetConversation}
+                onClick={() => setView((v) => (v === 'history' ? 'chat' : 'history'))}
               >
-                <Plus className="size-3.5" aria-hidden />
-                Nueva
+                {view === 'history' ? (
+                  <>
+                    <ArrowLeft className="size-3.5" aria-hidden />
+                    Volver
+                  </>
+                ) : (
+                  <>
+                    <History className="size-3.5" aria-hidden />
+                    Historial
+                  </>
+                )}
               </Button>
-            )}
+              {view === 'chat' && messages.length > 0 && (
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  className="h-7 gap-1 px-2 text-xs"
+                  onClick={resetConversation}
+                >
+                  <Plus className="size-3.5" aria-hidden />
+                  Nueva
+                </Button>
+              )}
+            </div>
           </div>
           <SheetDescription>
             Pregúntale a tus datos. Toda cifra proviene de tus resultados reales.
@@ -166,7 +194,11 @@ export function AssistantPanel() {
         </SheetHeader>
 
         <div className="min-h-0 flex-1">
-          <AssistantChat />
+          {view === 'history' ? (
+            <AssistantHistory onOpened={() => setView('chat')} />
+          ) : (
+            <AssistantChat />
+          )}
         </div>
       </SheetContent>
     </Sheet>
