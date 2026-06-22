@@ -22,15 +22,12 @@ import { GeminiProvider } from './providers/gemini.provider';
     GeminiProvider,
     {
       provide: LLM_PROVIDERS,
-      useFactory: (anthropic: AnthropicProvider, gemini: GeminiProvider) => [
-        anthropic,
-        gemini,
-      ],
+      useFactory: (anthropic: AnthropicProvider, gemini: GeminiProvider) => [anthropic, gemini],
       inject: [AnthropicProvider, GeminiProvider],
     },
     LlmService,
     LlmAgentService,
   ],
-  exports: [LlmService, LlmAgentService],
+  exports: [LlmService, LlmAgentService, LlmConfigService],
 })
 export class LlmModule {}

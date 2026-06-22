@@ -51,26 +51,19 @@ export const assistantConversationModelSchema = z.object({
   createdAt: z.string().datetime(),
   updatedAt: z.string().datetime(),
 });
-export type AssistantConversationModel = z.infer<
-  typeof assistantConversationModelSchema
->;
+export type AssistantConversationModel = z.infer<typeof assistantConversationModelSchema>;
 
 /** Conversación con su historial de mensajes (detalle). */
-export const assistantConversationDetailSchema =
-  assistantConversationModelSchema.extend({
-    messages: z.array(assistantMessageModelSchema),
-  });
-export type AssistantConversationDetail = z.infer<
-  typeof assistantConversationDetailSchema
->;
+export const assistantConversationDetailSchema = assistantConversationModelSchema.extend({
+  messages: z.array(assistantMessageModelSchema),
+});
+export type AssistantConversationDetail = z.infer<typeof assistantConversationDetailSchema>;
 
 /** POST /assistant/conversations */
 export const createAssistantConversationSchema = z.object({
   title: z.string().min(1).max(200).optional(),
 });
-export type CreateAssistantConversationDto = z.infer<
-  typeof createAssistantConversationSchema
->;
+export type CreateAssistantConversationDto = z.infer<typeof createAssistantConversationSchema>;
 
 /**
  * POST /assistant/conversations/:id/messages (respuesta vía stream SSE).
@@ -84,8 +77,15 @@ export const sendAssistantMessageSchema = z.object({
   content: z.string().min(1).max(4000),
   studentRefs: z.array(z.string().uuid()).max(20).optional(),
 });
-export type SendAssistantMessageDto = z.infer<
-  typeof sendAssistantMessageSchema
+export type SendAssistantMessageDto = z.infer<typeof sendAssistantMessageSchema>;
+
+/** GET /assistant/conversations — query de paginación. */
+export const assistantConversationListQuerySchema = z.object({
+  page: z.coerce.number().int().min(1).default(1),
+  limit: z.coerce.number().int().min(1).max(100).default(20),
+});
+export type AssistantConversationListQueryDto = z.infer<
+  typeof assistantConversationListQuerySchema
 >;
 
 /** GET /assistant/conversations (paginada). */
