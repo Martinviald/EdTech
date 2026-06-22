@@ -27,10 +27,11 @@
     "db:studio": "drizzle-kit studio",
     "db:seed": "tsx src/seed/index.ts",
     "db:seed:e2e": "tsx src/seed/e2e-testing.ts",
+    "db:seed:benchmark": "tsx src/seed/benchmark-demo.ts",
     "db:seed:taxonomy": "tsx src/seed/taxonomy-real.ts",
     "db:import:instruments": "tsx src/seed/import-instruments.ts",
     "db:import:item-tags": "tsx src/seed/import-item-tags.ts",
-    "db:reset": "tsx src/reset-schema.ts && tsx src/migrate.ts && tsx src/seed/index.ts && tsx src/seed/e2e-testing.ts",
+    "db:reset": "tsx src/reset-schema.ts && tsx src/migrate.ts && tsx src/seed/index.ts && tsx src/seed/e2e-testing.ts && tsx src/seed/benchmark-demo.ts",
     "lint": "echo 'lint: db ok'",
     "typecheck": "tsc --noEmit",
     "clean": "rm -rf dist .turbo *.tsbuildinfo"
