@@ -35,9 +35,7 @@ function makeFakeClient(chunks: FakeChunk[]) {
   };
 }
 
-async function collect(
-  gen: AsyncIterable<LlmAgentEvent>,
-): Promise<LlmAgentEvent[]> {
+async function collect(gen: AsyncIterable<LlmAgentEvent>): Promise<LlmAgentEvent[]> {
   const out: LlmAgentEvent[] = [];
   for await (const e of gen) out.push(e);
   return out;
@@ -46,9 +44,7 @@ async function collect(
 function makeRequest(): LlmAgentRequest {
   return {
     system: 'eres un asistente',
-    messages: [
-      { role: 'user', content: [{ type: 'text', text: '¿qué pasó con el 8°B?' }] },
-    ],
+    messages: [{ role: 'user', content: [{ type: 'text', text: '¿qué pasó con el 8°B?' }] }],
     tools: [
       {
         name: 'get_heatmap',
@@ -127,9 +123,7 @@ describe('GeminiProvider.streamWithTools', () => {
     const provider = new GeminiProvider();
     const fake = makeFakeClient([
       {
-        candidates: [
-          { finishReason: 'STOP', content: { parts: [{ text: 'Listo.' }] } },
-        ],
+        candidates: [{ finishReason: 'STOP', content: { parts: [{ text: 'Listo.' }] } }],
       },
     ]);
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -152,5 +146,51 @@ describe('GeminiProvider.streamWithTools', () => {
     await expect(collect(provider.streamWithTools(makeRequest()))).rejects.toThrow(
       'Gemini provider no está disponible',
     );
+  });
+
+  it('omite `parameters` para tools sin propiedades y lo conserva si las tiene (fix 400 Gemini)', async () => {
+    const provider = new GeminiProvider();
+    const fake = makeFakeClient([{ candidates: [{ finishReason: 'STOP' }] }]);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (provider as any).client = fake;
+
+    const request: LlmAgentRequest = {
+      system: 's',
+      messages: [{ role: 'user', content: [{ type: 'text', text: 'hola' }] }],
+      tools: [
+        {
+          name: 'list_filter_options',
+          description: 'sin args',
+          inputSchema: { type: 'object', properties: {}, required: [] },
+        },
+        {
+          name: 'get_heatmap',
+          description: 'con args',
+          inputSchema: {
+            type: 'object',
+            properties: { classGroupId: { type: 'string' } },
+            required: [],
+          },
+        },
+      ],
+      options: { model: 'gemini-2.0-flash', maxTokens: 1024, temperature: 0 },
+    };
+
+    await collect(provider.streamWithTools(request));
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const callArg = (fake.models.generateContentStream as jest.Mock).mock.calls[0][0] as any;
+    const decls = callArg.config.tools[0].functionDeclarations;
+    const noArg = decls.find((d: { name: string }) => d.name === 'list_filter_options');
+    const withArg = decls.find((d: { name: string }) => d.name === 'get_heatmap');
+
+    // Sin propiedades → `parameters` OMITIDO (Gemini rechaza el objeto vacío).
+    expect('parameters' in noArg).toBe(false);
+    // Con propiedades → se conserva tal cual.
+    expect(withArg.parameters).toEqual({
+      type: 'object',
+      properties: { classGroupId: { type: 'string' } },
+      required: [],
+    });
   });
 });

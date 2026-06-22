@@ -4,6 +4,7 @@ import {
   Delete,
   Get,
   HttpCode,
+  Logger,
   Param,
   Post,
   Query,
@@ -47,6 +48,8 @@ import { AssistantService } from './assistant.service';
 @RequireFeature('ai_assistant')
 @Roles(...ASSISTANT_USER_ROLES)
 export class AssistantController {
+  private readonly logger = new Logger(AssistantController.name);
+
   constructor(private readonly service: AssistantService) {}
 
   /** POST /api/assistant/conversations — crea un hilo de chat. */
@@ -136,6 +139,14 @@ export class AssistantController {
     } catch (err) {
       // El stream ya está abierto (200): un throw no puede convertirse en un
       // status de error HTTP, así que emitimos el error dentro del propio SSE.
+      // Se loguea server-side: el error del provider (p. ej. 400 de Gemini) no
+      // aparecería en ningún lado de otro modo.
+      this.logger.error(
+        `Fallo el turno del asistente (conversación ${id}): ${
+          err instanceof Error ? err.message : String(err)
+        }`,
+        err instanceof Error ? err.stack : undefined,
+      );
       const message = err instanceof Error ? err.message : 'Error inesperado del asistente';
       write({ type: 'error', message });
     } finally {

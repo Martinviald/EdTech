@@ -33,9 +33,7 @@ interface GenerateContentResponse {
  * Una "part" del contenido multimodal de Gemini: texto o binario en línea.
  * La API real acepta `contents` como string (solo texto) o como array de parts.
  */
-type GeminiPart =
-  | { text: string }
-  | { inlineData: { mimeType: string; data: string } };
+type GeminiPart = { text: string } | { inlineData: { mimeType: string; data: string } };
 interface GeminiClient {
   readonly models: {
     generateContent(req: {
@@ -73,11 +71,16 @@ interface GeminiContent {
   role: 'user' | 'model';
   parts: GeminiAgentPart[];
 }
-/** Una declaración de función expuesta al modelo (equivalente a una tool). */
+/**
+ * Una declaración de función expuesta al modelo (equivalente a una tool).
+ * `parameters` es OPCIONAL a propósito: Gemini rechaza (400 INVALID_ARGUMENT) una
+ * función cuyo `parameters` es `{ type: 'object', properties: {} }` (objeto sin
+ * propiedades). Para tools sin argumentos, se OMITE `parameters` por completo.
+ */
 interface GeminiFunctionDeclaration {
   name: string;
   description: string;
-  parameters: Record<string, unknown>;
+  parameters?: Record<string, unknown>;
 }
 /** Chunk emitido por `generateContentStream` (forma mínima que consumimos). */
 interface GeminiStreamChunk {
@@ -106,9 +109,7 @@ export class GeminiProvider implements LlmProvider {
   private initClient(): void {
     const apiKey = process.env[LLM_PROVIDER_DEFAULTS.gemini.apiKeyEnv];
     if (!apiKey) {
-      this.logger.warn(
-        'GEMINI_API_KEY no definida — provider gemini deshabilitado',
-      );
+      this.logger.warn('GEMINI_API_KEY no definida — provider gemini deshabilitado');
       return;
     }
 
@@ -198,20 +199,17 @@ export class GeminiProvider implements LlmProvider {
    *  - Gemini no entrega un id de tool-call; generamos uno determinista al emitir
    *    el evento (`${name}-${indiceDeLlamada}`) para que el loop lo referencie.
    */
-  async *streamWithTools(
-    request: LlmAgentRequest,
-  ): AsyncIterable<LlmAgentEvent> {
+  async *streamWithTools(request: LlmAgentRequest): AsyncIterable<LlmAgentEvent> {
     if (!this.client) {
       throw new Error('Gemini provider no está disponible');
     }
 
-    const functionDeclarations: GeminiFunctionDeclaration[] = request.tools.map(
-      (t) => ({
-        name: t.name,
-        description: t.description,
-        parameters: t.inputSchema,
-      }),
-    );
+    const functionDeclarations: GeminiFunctionDeclaration[] = request.tools.map((t) => {
+      const parameters = this.toGeminiParameters(t.inputSchema);
+      return parameters
+        ? { name: t.name, description: t.description, parameters }
+        : { name: t.name, description: t.description };
+    });
 
     // Mapa id → name de las tools invocadas en el historial: Gemini necesita el
     // NOMBRE de la función al reinyectar su resultado (`functionResponse.name`),
@@ -246,10 +244,7 @@ export class GeminiProvider implements LlmProvider {
       contents,
       config: {
         systemInstruction: request.system,
-        tools:
-          functionDeclarations.length > 0
-            ? [{ functionDeclarations }]
-            : undefined,
+        tools: functionDeclarations.length > 0 ? [{ functionDeclarations }] : undefined,
         maxOutputTokens: request.options.maxTokens,
         temperature: request.options.temperature,
       },
@@ -302,13 +297,29 @@ export class GeminiProvider implements LlmProvider {
   }
 
   /**
+   * Traduce el `inputSchema` de una tool al `parameters` de Gemini. Devuelve
+   * `undefined` cuando la tool NO tiene propiedades (objeto vacío o sin
+   * `properties`): Gemini exige omitir `parameters` para funciones sin argumentos
+   * — un `{ type: 'object', properties: {} }` provoca un 400 INVALID_ARGUMENT que
+   * tumba TODA la request (todas las tools van juntas). Anthropic sí lo acepta.
+   */
+  private toGeminiParameters(
+    inputSchema: Record<string, unknown>,
+  ): Record<string, unknown> | undefined {
+    const properties = inputSchema?.properties;
+    const hasProps =
+      properties !== null &&
+      typeof properties === 'object' &&
+      Object.keys(properties as Record<string, unknown>).length > 0;
+    return hasProps ? inputSchema : undefined;
+  }
+
+  /**
    * Recorre el historial y construye un mapa `idDelToolUse → nombreDeLaFunción`.
    * Necesario porque al reinyectar un `tool_result`, Gemini empareja por nombre
    * (`functionResponse.name`) y nuestro bloque solo conoce el `toolCallId`.
    */
-  private buildToolNameMap(
-    messages: LlmAgentRequest['messages'],
-  ): Map<string, string> {
+  private buildToolNameMap(messages: LlmAgentRequest['messages']): Map<string, string> {
     const map = new Map<string, string>();
     for (const message of messages) {
       for (const block of message.content) {
@@ -367,10 +378,7 @@ export class GeminiProvider implements LlmProvider {
    * Mapea el `finishReason` de Gemini al stop reason agnóstico. La presencia de
    * function calls tiene prioridad: el loop debe ejecutar la tool antes de cerrar.
    */
-  private toStopReason(
-    raw: string | undefined,
-    sawFunctionCall: boolean,
-  ): LlmAgentStopReason {
+  private toStopReason(raw: string | undefined, sawFunctionCall: boolean): LlmAgentStopReason {
     if (sawFunctionCall) {
       return 'tool_use';
     }
