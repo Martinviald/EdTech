@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { createConversation } from '@/lib/assistant/actions';
 import { useAssistant } from './assistant-context';
+import { Markdown } from './markdown';
 import { readAssistantStream } from './stream';
 
 /** Nombre legible de cada tool, para el indicador "consultando datos…". */
@@ -215,13 +216,23 @@ export function AssistantChat() {
             )}
             <div
               className={cn(
-                'max-w-[85%] whitespace-pre-wrap break-words rounded-2xl px-3 py-2 text-sm',
+                'max-w-[85%] break-words rounded-2xl px-3 py-2 text-sm',
                 m.role === 'user'
-                  ? 'bg-primary text-primary-foreground'
+                  ? 'whitespace-pre-wrap bg-primary text-primary-foreground'
                   : 'bg-muted text-foreground',
               )}
             >
-              {m.content || (m.role === 'assistant' && isStreaming ? '…' : '')}
+              {m.role === 'assistant' ? (
+                m.content ? (
+                  <Markdown>{m.content}</Markdown>
+                ) : isStreaming ? (
+                  '…'
+                ) : (
+                  ''
+                )
+              ) : (
+                m.content
+              )}
             </div>
           </div>
         ))}

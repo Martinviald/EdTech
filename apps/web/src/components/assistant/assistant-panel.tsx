@@ -1,6 +1,7 @@
 'use client';
 
-import { Plus } from 'lucide-react';
+import dynamic from 'next/dynamic';
+import { Loader2, Plus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
   Sheet,
@@ -9,8 +10,18 @@ import {
   SheetHeader,
   SheetTitle,
 } from '@/components/ui/sheet';
-import { AssistantChat } from './assistant-chat';
 import { useAssistant } from './assistant-context';
+
+// El chat (y su dependencia react-markdown) se cargan en un chunk aparte, solo
+// cuando el panel se monta al abrirse → no pesa el bundle inicial del dashboard.
+const AssistantChat = dynamic(() => import('./assistant-chat').then((m) => m.AssistantChat), {
+  ssr: false,
+  loading: () => (
+    <div className="flex h-full items-center justify-center">
+      <Loader2 className="size-5 animate-spin text-muted-foreground" aria-hidden />
+    </div>
+  ),
+});
 
 /**
  * Panel lateral del asistente embebido (E21 — Ola 4). `Sheet` (drawer) controlado
