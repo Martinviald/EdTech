@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import type { Route } from 'next';
 import { redirect } from 'next/navigation';
-import { AlertCircle, ArrowLeft, ArrowRight } from 'lucide-react';
+import { AlertCircle, ArrowLeft, ArrowRight, Sparkles } from 'lucide-react';
 import { ANSWER_SHEET_IMPORT_ROLES, canAccess } from '@soe/types';
 import { auth } from '@/auth';
 import { Button } from '@/components/ui/button';
@@ -63,14 +63,25 @@ export default async function JobStatusPage({ params }: PageProps) {
             </Button>
 
             {result.data.assessmentId &&
-              (result.data.status === 'completed' ||
-                result.data.status === 'partial') && (
-                <Button asChild>
-                  <Link href={'/resultados' as Route}>
-                    Ver dashboards de resultados
-                    <ArrowRight className="ml-2 h-4 w-4" />
-                  </Link>
-                </Button>
+              (result.data.status === 'completed' || result.data.status === 'partial') && (
+                <div className="flex flex-col gap-2 sm:flex-row">
+                  {/* Cierre de loop: ir directo a la evaluación recién importada,
+                      no al dashboard genérico. */}
+                  <Button asChild variant="outline">
+                    <Link href={`/analisis-ia?assessmentId=${result.data.assessmentId}` as Route}>
+                      <Sparkles className="mr-2 h-4 w-4" />
+                      Generar análisis IA
+                    </Link>
+                  </Button>
+                  <Button asChild>
+                    <Link
+                      href={`/resultados/informe?assessmentId=${result.data.assessmentId}` as Route}
+                    >
+                      Ver resultados de la evaluación
+                      <ArrowRight className="ml-2 h-4 w-4" />
+                    </Link>
+                  </Button>
+                </div>
               )}
           </div>
         </>
