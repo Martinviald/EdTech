@@ -43,6 +43,13 @@
       "when": 1782084740261,
       "tag": "0005_low_hydra",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1782516394550,
+      "tag": "0006_wandering_vulcan",
+      "breakpoints": true
     }
   ]
 }

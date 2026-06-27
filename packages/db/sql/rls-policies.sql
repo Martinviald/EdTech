@@ -37,6 +37,8 @@ ALTER TABLE "skill_results"       ENABLE ROW LEVEL SECURITY;
 ALTER TABLE "skill_results"       FORCE  ROW LEVEL SECURITY;
 ALTER TABLE "performance_bands"   ENABLE ROW LEVEL SECURITY;
 ALTER TABLE "performance_bands"   FORCE  ROW LEVEL SECURITY;
+ALTER TABLE "llm_settings"        ENABLE ROW LEVEL SECURITY;
+ALTER TABLE "llm_settings"        FORCE  ROW LEVEL SECURITY;
 
 -- ── Políticas con org_id directo ────────────────────────────────────────────
 DROP POLICY IF EXISTS "students_tenant_isolation" ON "students";
@@ -64,6 +66,22 @@ CREATE POLICY "import_jobs_tenant_isolation" ON "import_jobs"
 -- siembran con el rol admin (BYPASSRLS), no por la API sujeta a RLS.
 DROP POLICY IF EXISTS "performance_bands_tenant_isolation" ON "performance_bands";
 CREATE POLICY "performance_bands_tenant_isolation" ON "performance_bands"
+  AS PERMISSIVE FOR ALL
+  USING (
+    org_id IS NULL
+    OR org_id::text = current_setting('app.current_org_id', true)
+  );
+
+-- llm_settings: config de modelo de IA por funcionalidad. org_id NULLABLE igual que
+-- performance_bands. Las filas globales (org_id IS NULL) son la config de plataforma:
+-- legibles por todos los tenants y resueltas por LlmConfigService SIN contexto de org
+-- (como las bandas globales). No contienen PII (solo provider/model). A diferencia de
+-- las bandas, ESTAS filas globales sí las escribe la API (panel /configuracion/modelos-ia):
+-- con `org_id IS NULL` la expresión USING se hereda como WITH CHECK y evalúa TRUE, así que
+-- el rol de la API (sin BYPASSRLS) puede upsertearlas. La autorización real es el role
+-- guard platform_admin del endpoint (RLS no es la barrera para config global de plataforma).
+DROP POLICY IF EXISTS "llm_settings_tenant_isolation" ON "llm_settings";
+CREATE POLICY "llm_settings_tenant_isolation" ON "llm_settings"
   AS PERMISSIVE FOR ALL
   USING (
     org_id IS NULL

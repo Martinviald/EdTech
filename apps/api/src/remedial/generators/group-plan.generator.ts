@@ -65,7 +65,7 @@ export class GroupPlanGenerator implements RemedialGenerator {
     );
 
     const { system, prompt } = buildGroupPlanPrompt(input.curriculum, aggregates);
-    const raw = await this.llm.complete(system, prompt, input.orgId);
+    const raw = await this.llm.complete(system, prompt, input.orgId, 'remedial');
 
     const json = parseModelJson(raw);
     const result = remedialPlanContentSchema.safeParse(json);

@@ -1,4 +1,5 @@
 import { Inject, Injectable, Logger, ServiceUnavailableException } from '@nestjs/common';
+import type { LlmFeature } from '@soe/types';
 import { LlmConfigService } from './llm.config';
 import { LLM_PROVIDERS } from './llm.constants';
 import type {
@@ -41,6 +42,11 @@ export interface RunAgentParams {
   executeTool: AgentToolExecutor;
   /** Tenant para resolución de config por organización. */
   orgId?: string | null;
+  /**
+   * Funcionalidad de IA (resuelve proveedor+modelo desde `llm_settings`). Default:
+   * `'assistant'`. Se acepta como parámetro para mantener el loop agéntico genérico.
+   */
+  feature?: LlmFeature;
   /**
    * Tope de vueltas modelo→tool→modelo (cortafuegos de costo/loop infinito).
    * Si se alcanza, se cierra con `final.truncated = true`. Default: 6.
@@ -103,8 +109,9 @@ export class LlmAgentService {
    * en el evento `final`.
    */
   async *runAgent(params: RunAgentParams): AsyncGenerator<AgentStreamEvent> {
-    const provider = await this.resolveProvider(params.orgId);
-    const cfg = await this.config.resolve(params.orgId);
+    const feature: LlmFeature = params.feature ?? 'assistant';
+    const provider = await this.resolveProvider(params.orgId, feature);
+    const cfg = await this.config.resolve(params.orgId, feature);
     const maxSteps = params.maxSteps ?? DEFAULT_MAX_STEPS;
 
     const messages: LlmAgentMessage[] = [...params.messages];
@@ -235,9 +242,10 @@ export class LlmAgentService {
 
   /** Resuelve el provider activo y verifica que soporte tool-use con streaming. */
   private async resolveProvider(
-    orgId?: string | null,
+    orgId: string | null | undefined,
+    feature: LlmFeature,
   ): Promise<LlmProvider & { streamWithTools: NonNullable<LlmProvider['streamWithTools']> }> {
-    const cfg = await this.config.resolve(orgId);
+    const cfg = await this.config.resolve(orgId, feature);
     const provider = this.registry.get(cfg.provider);
 
     if (!provider) {

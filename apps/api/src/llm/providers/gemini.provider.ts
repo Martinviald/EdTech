@@ -43,6 +43,14 @@ interface GeminiClient {
         systemInstruction?: string;
         maxOutputTokens?: number;
         temperature?: number;
+        /** MIME de la respuesta. `application/json` activa el JSON mode nativo. */
+        responseMimeType?: string;
+        /**
+         * Control del razonamiento interno ("thinking") de los modelos 2.5+.
+         * `thinkingBudget: 0` lo desactiva: en salida estructurada el thinking
+         * consume `maxOutputTokens` (visto: 3928/4096) y trunca el JSON.
+         */
+        thinkingConfig?: { thinkingBudget?: number };
       };
     }): Promise<GenerateContentResponse>;
   };
@@ -131,6 +139,19 @@ export class GeminiProvider implements LlmProvider {
     return this.client !== null;
   }
 
+  /**
+   * Config de "thinking" según el modelo. Quirk de Gemini 2.5:
+   *  - Modelos **Pro** EXIGEN thinking (`thinkingBudget: 0` → 400). Se omite la
+   *    config para dejar el thinking activo; el budget de salida debe ser holgado
+   *    (ver `analysisMaxTokens`) porque el thinking consume tokens.
+   *  - El resto (Flash) lo DESACTIVAMOS: en salida estructurada el thinking
+   *    agotaba `maxOutputTokens` y truncaba el JSON (finishReason MAX_TOKENS).
+   * Devuelve `undefined` cuando no hay que enviar `thinkingConfig`.
+   */
+  private thinkingConfigFor(model: string): { thinkingBudget: number } | undefined {
+    return /pro/i.test(model) ? undefined : { thinkingBudget: 0 };
+  }
+
   async complete(request: LlmCompletionRequest): Promise<string> {
     if (!this.client) {
       throw new Error('Gemini provider no está disponible');
@@ -143,6 +164,17 @@ export class GeminiProvider implements LlmProvider {
         systemInstruction: request.system,
         maxOutputTokens: request.options.maxTokens,
         temperature: request.options.temperature,
+        // JSON mode nativo: todos los consumidores de `complete` (ai-analysis,
+        // item-insight, remedial, ai-tagging) parsean la salida con `JSON.parse`.
+        // Forzar `application/json` evita prosa/markdown alrededor del objeto, que
+        // rompía el parser ("La salida del modelo no es JSON válido"). El asistente
+        // conversacional usa `streamWithTools`, no esta ruta.
+        responseMimeType: 'application/json',
+        // Thinking según modelo (ver `thinkingConfigFor`): off en Flash para no
+        // truncar el JSON; activo (omitido) en Pro, que lo exige.
+        ...(this.thinkingConfigFor(request.options.model)
+          ? { thinkingConfig: this.thinkingConfigFor(request.options.model) }
+          : {}),
       },
     });
 
@@ -179,6 +211,12 @@ export class GeminiProvider implements LlmProvider {
         systemInstruction: request.system,
         maxOutputTokens: request.options.maxTokens,
         temperature: request.options.temperature,
+        // Mismo JSON mode + política de thinking que `complete`: el único caller
+        // multimodal (item-insight con imágenes del ítem) también parsea JSON.
+        responseMimeType: 'application/json',
+        ...(this.thinkingConfigFor(request.options.model)
+          ? { thinkingConfig: this.thinkingConfigFor(request.options.model) }
+          : {}),
       },
     });
 

@@ -1,9 +1,14 @@
 import Link from 'next/link';
 import type { Route } from 'next';
 import { redirect } from 'next/navigation';
-import { SlidersHorizontal, ChevronRight } from 'lucide-react';
+import { SlidersHorizontal, ChevronRight, Cpu } from 'lucide-react';
 import { auth } from '@/auth';
-import { canAccess, GRADING_SCALE_ROLES, type UserRole } from '@soe/types';
+import {
+  canAccess,
+  GRADING_SCALE_ROLES,
+  LLM_SETTINGS_ROLES,
+  type UserRole,
+} from '@soe/types';
 import { Card, CardContent } from '@/components/ui/card';
 
 /**
@@ -28,6 +33,14 @@ const CONFIG_OPTIONS: ConfigOption[] = [
     icon: SlidersHorizontal,
     roles: GRADING_SCALE_ROLES,
   },
+  {
+    href: '/configuracion/modelos-ia',
+    label: 'Modelos de IA',
+    description:
+      'Elige el proveedor (Gemini/Claude) y el modelo que usa cada funcionalidad de IA.',
+    icon: Cpu,
+    roles: LLM_SETTINGS_ROLES,
+  },
 ];
 
 export default async function ConfiguracionPage() {
@@ -35,12 +48,15 @@ export default async function ConfiguracionPage() {
   if (!session?.user) redirect('/login');
 
   const roles = session.user.roles;
+  // Un platform_admin ve TODAS las opciones, igual que el bypass del RolesGuard en
+  // el backend: su `roles` puede traer los de su org (sin 'platform_admin') cuando
+  // además es miembro de un colegio, así que no basta con canAccess.
+  const isAdmin = Boolean(session.user.isPlatformAdmin);
+  const options = CONFIG_OPTIONS.filter((o) => isAdmin || canAccess(roles, o.roles));
   // Solo entra a la sección quien puede acceder a al menos una opción.
-  if (!canAccess(roles, GRADING_SCALE_ROLES)) {
+  if (options.length === 0) {
     redirect('/dashboard');
   }
-
-  const options = CONFIG_OPTIONS.filter((o) => canAccess(roles, o.roles));
 
   return (
     <div className="space-y-6">

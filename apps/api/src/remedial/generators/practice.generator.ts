@@ -86,7 +86,7 @@ export class PracticeGenerator implements RemedialGenerator {
 
     const itemCount = this.resolveItemCount(input);
     const { system, prompt } = buildPracticePrompt(input.curriculum, itemCount);
-    const raw = await this.llm.complete(system, prompt, input.orgId);
+    const raw = await this.llm.complete(system, prompt, input.orgId, 'remedial');
 
     const json = parseModelJson(raw);
     const parsed = llmPracticeOutputSchema.safeParse(json);

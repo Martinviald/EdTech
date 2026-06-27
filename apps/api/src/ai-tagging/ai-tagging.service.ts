@@ -64,7 +64,7 @@ export class AiTaggingService {
     dto: { itemIds: string[]; taxonomyId: string },
     user: JwtPayload,
   ): Promise<SuggestResult> {
-    if (!(await this.llm.isAvailable(user.orgId))) {
+    if (!(await this.llm.isAvailable(user.orgId, 'ai_tagging'))) {
       throw new ServiceUnavailableException(
         'AI tagging service is not available — el proveedor LLM activo no tiene API key configurada',
       );
@@ -190,6 +190,7 @@ export class AiTaggingService {
           prompt.system,
           prompt.user,
           user.orgId,
+          'ai_tagging',
         );
       } catch (err) {
         this.logger.error(
@@ -214,6 +215,7 @@ export class AiTaggingService {
             prompt.system,
             prompt.user,
             user.orgId,
+            'ai_tagging',
           );
           parsed = parseAiResponse(rawResponse);
         } catch (retryErr) {

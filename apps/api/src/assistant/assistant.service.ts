@@ -258,7 +258,7 @@ export class AssistantService {
     const messages = buildAgentMessages(history, dto);
 
     // ── Fase 2: correr el loop, reemitiendo eventos al consumidor ──
-    const cfg = await this.llmConfig.resolve(orgId);
+    const cfg = await this.llmConfig.resolve(orgId, 'assistant');
     const executeTool = this.buildExecuteTool(user);
     const toolDefs = this.tools.map((t) => t.definition);
 
@@ -271,6 +271,7 @@ export class AssistantService {
       tools: toolDefs,
       executeTool,
       orgId,
+      feature: 'assistant',
     })) {
       switch (event.type) {
         case 'tool_call':

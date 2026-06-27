@@ -10,6 +10,10 @@
 /** Identificadores estables de proveedores soportados o planificados. */
 export type LlmProviderName = 'anthropic' | 'gemini' | 'openai' | 'deepseek';
 
+// El propósito de una completion se modela con `LlmFeature` (de `@soe/types`): cada
+// funcionalidad de IA declara su feature y `LlmConfigService.resolve(orgId, feature)`
+// resuelve proveedor+modelo desde `llm_settings` (panel /configuracion/modelos-ia).
+
 /** Parámetros de inferencia para una llamada concreta. */
 export interface LlmCompletionOptions {
   /** Identificador del modelo en el proveedor (p. ej. `gemini-2.0-flash`). */
