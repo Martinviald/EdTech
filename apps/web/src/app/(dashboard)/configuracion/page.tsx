@@ -1,12 +1,13 @@
 import Link from 'next/link';
 import type { Route } from 'next';
 import { redirect } from 'next/navigation';
-import { SlidersHorizontal, ChevronRight, Cpu } from 'lucide-react';
+import { SlidersHorizontal, ChevronRight, Cpu, Gauge } from 'lucide-react';
 import { auth } from '@/auth';
 import {
   canAccess,
   GRADING_SCALE_ROLES,
   LLM_SETTINGS_ROLES,
+  AI_OBSERVABILITY_VIEWER_ROLES,
   type UserRole,
 } from '@soe/types';
 import { Card, CardContent } from '@/components/ui/card';
@@ -36,10 +37,17 @@ const CONFIG_OPTIONS: ConfigOption[] = [
   {
     href: '/configuracion/modelos-ia',
     label: 'Modelos de IA',
-    description:
-      'Elige el proveedor (Gemini/Claude) y el modelo que usa cada funcionalidad de IA.',
+    description: 'Elige el proveedor (Gemini/Claude) y el modelo que usa cada funcionalidad de IA.',
     icon: Cpu,
     roles: LLM_SETTINGS_ROLES,
+  },
+  {
+    href: '/observabilidad-ia',
+    label: 'Observabilidad IA',
+    description:
+      'Costo, tokens y latencia de las funcionalidades de IA: presupuesto mensual y desglose por origen y modelo.',
+    icon: Gauge,
+    roles: AI_OBSERVABILITY_VIEWER_ROLES,
   },
 ];
 
@@ -82,9 +90,7 @@ export default async function ConfiguracionPage() {
                       <h2 className="font-medium">{option.label}</h2>
                       <ChevronRight className="text-muted-foreground size-4 shrink-0 transition-transform group-hover:translate-x-0.5" />
                     </div>
-                    <p className="text-muted-foreground mt-1 text-sm">
-                      {option.description}
-                    </p>
+                    <p className="text-muted-foreground mt-1 text-sm">{option.description}</p>
                   </div>
                 </CardContent>
               </Card>
