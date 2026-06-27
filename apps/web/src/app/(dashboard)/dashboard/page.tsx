@@ -140,14 +140,14 @@ export default async function DashboardPage() {
       title: 'Carga la pauta del instrumento',
       description: 'Importa la pauta oficial para poder corregir las respuestas.',
       done: instrumentDone,
-      href: '/importar-dia',
+      href: '/importar/instrumento',
       cta: 'Cargar pauta',
     },
     {
       title: 'Importa los resultados',
       description: 'Sube las hojas de respuesta y calcula los resultados por alumno y habilidad.',
       done: resultsDone,
-      href: '/importar-resultados',
+      href: '/importar/resultados',
       cta: 'Importar',
     },
   ];
@@ -208,7 +208,7 @@ function QuickAccess({ roles, canImport }: { roles: readonly UserRole[]; canImpo
       icon: Lightbulb,
       show: canAccess(roles, REMEDIAL_VIEWER_ROLES),
     },
-    { href: '/importar-resultados', label: 'Importar resultados', icon: FileUp, show: canImport },
+    { href: '/importar/resultados', label: 'Importar resultados', icon: FileUp, show: canImport },
   ];
   const visible = links.filter((l) => l.show);
   if (visible.length === 0) return null;

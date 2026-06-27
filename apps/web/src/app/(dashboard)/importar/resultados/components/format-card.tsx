@@ -25,10 +25,7 @@ export function FormatCard({ template }: FormatCardProps) {
             </p>
             <div className="flex flex-wrap gap-1">
               {template.requiredColumns.map((col) => (
-                <code
-                  key={col}
-                  className="rounded bg-muted px-1.5 py-0.5 text-xs"
-                >
+                <code key={col} className="rounded bg-muted px-1.5 py-0.5 text-xs">
                   {col}
                 </code>
               ))}
@@ -43,10 +40,7 @@ export function FormatCard({ template }: FormatCardProps) {
             </p>
             <div className="flex flex-wrap gap-1">
               {template.optionalColumns.map((col) => (
-                <code
-                  key={col}
-                  className="rounded bg-muted px-1.5 py-0.5 text-xs"
-                >
+                <code key={col} className="rounded bg-muted px-1.5 py-0.5 text-xs">
                   {col}
                 </code>
               ))}
@@ -64,9 +58,7 @@ export function FormatCard({ template }: FormatCardProps) {
             </Button>
           )}
           <Button asChild size="sm" className="flex-1">
-            <Link
-              href={`/importar-resultados/cargar?format=${template.format}` as Route}
-            >
+            <Link href={`/importar/resultados/cargar?format=${template.format}` as Route}>
               Usar este formato
               <ArrowRight className="ml-2 h-4 w-4" />
             </Link>

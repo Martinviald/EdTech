@@ -67,7 +67,7 @@ export default async function MyClassesPage() {
         </div>
         {canImport ? (
           <Button asChild variant="outline" size="sm">
-            <Link href={'/importar' as Route}>
+            <Link href={'/importar/alumnos' as Route}>
               <Upload className="mr-2 size-4" aria-hidden />
               Importar alumnos
             </Link>

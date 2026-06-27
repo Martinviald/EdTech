@@ -44,7 +44,7 @@ export default async function JobStatusPage({ params }: PageProps) {
             </CardContent>
           </Card>
           <Button asChild variant="outline">
-            <Link href={'/importar-resultados' as Route}>
+            <Link href={'/importar/resultados' as Route}>
               <ArrowLeft className="mr-2 h-4 w-4" />
               Volver a importar resultados
             </Link>
@@ -56,7 +56,7 @@ export default async function JobStatusPage({ params }: PageProps) {
 
           <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-between">
             <Button asChild variant="outline">
-              <Link href={'/importar-resultados' as Route}>
+              <Link href={'/importar/resultados' as Route}>
                 <ArrowLeft className="mr-2 h-4 w-4" />
                 Volver a importar resultados
               </Link>

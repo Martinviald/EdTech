@@ -53,9 +53,7 @@ function guessMapping(columns: string[]): GuessedMapping {
   const firstName = find(/nombre|first\s*name/i);
   const lastName = find(/apellido|last\s*name/i);
   const used = new Set([rut, firstName, lastName].filter(Boolean));
-  const questionColumns = columns.filter(
-    (c) => !used.has(c) && QUESTION_COLUMN_RE.test(c.trim()),
-  );
+  const questionColumns = columns.filter((c) => !used.has(c) && QUESTION_COLUMN_RE.test(c.trim()));
   return { rut, firstName, lastName, questionColumns };
 }
 
@@ -68,9 +66,7 @@ export function UploadForm({ defaultFormat, instruments }: UploadFormProps) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
 
-  const [format, setFormat] = useState<AnswerSheetFormat>(
-    defaultFormat ?? 'generic_csv',
-  );
+  const [format, setFormat] = useState<AnswerSheetFormat>(defaultFormat ?? 'generic_csv');
   const [instrumentId, setInstrumentId] = useState<string>('');
   const [assessmentName, setAssessmentName] = useState<string>('');
   const [file, setFile] = useState<File | null>(null);
@@ -128,24 +124,20 @@ export function UploadForm({ defaultFormat, instruments }: UploadFormProps) {
     );
   };
 
-  const onDrop = useCallback(
-    (accepted: File[], rejections: FileRejection[]) => {
-      if (rejections.length > 0) {
-        const r = rejections[0];
-        const msg =
-          r?.errors[0]?.message ??
-          'Archivo rechazado. Verifica que sea un CSV válido menor a 10 MB.';
-        toast.error(msg);
-        return;
-      }
-      const first = accepted[0];
-      if (first) {
-        setFile(first);
-        setErrorMessage(null);
-      }
-    },
-    [],
-  );
+  const onDrop = useCallback((accepted: File[], rejections: FileRejection[]) => {
+    if (rejections.length > 0) {
+      const r = rejections[0];
+      const msg =
+        r?.errors[0]?.message ?? 'Archivo rechazado. Verifica que sea un CSV válido menor a 10 MB.';
+      toast.error(msg);
+      return;
+    }
+    const first = accepted[0];
+    if (first) {
+      setFile(first);
+      setErrorMessage(null);
+    }
+  }, []);
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop,
@@ -210,7 +202,7 @@ export function UploadForm({ defaultFormat, instruments }: UploadFormProps) {
       }
       toast.success('Archivo procesado. Revisa la previsualización.');
       router.push(
-        `/importar-resultados/preview?token=${encodeURIComponent(result.data.previewToken)}` as Route,
+        `/importar/resultados/preview?token=${encodeURIComponent(result.data.previewToken)}` as Route,
       );
     });
   };
@@ -226,9 +218,7 @@ export function UploadForm({ defaultFormat, instruments }: UploadFormProps) {
             <div className="flex items-center justify-between rounded-lg border p-4">
               <div className="space-y-0.5">
                 <p className="text-sm font-medium">{file.name}</p>
-                <p className="text-muted-foreground text-xs">
-                  {(file.size / 1024).toFixed(1)} KB
-                </p>
+                <p className="text-muted-foreground text-xs">{(file.size / 1024).toFixed(1)} KB</p>
               </div>
               <Button
                 type="button"
@@ -259,9 +249,7 @@ export function UploadForm({ defaultFormat, instruments }: UploadFormProps) {
                     ? 'Suelta el archivo aquí'
                     : 'Arrastra tu archivo o haz clic para seleccionar'}
                 </p>
-                <p className="text-muted-foreground text-xs">
-                  CSV con encabezado · máximo 10 MB
-                </p>
+                <p className="text-muted-foreground text-xs">CSV con encabezado · máximo 10 MB</p>
               </div>
             </div>
           )}
@@ -321,12 +309,9 @@ export function UploadForm({ defaultFormat, instruments }: UploadFormProps) {
               </Select>
               {instruments.length === 0 && (
                 <p className="text-muted-foreground text-xs">
-                  Primero debes importar la pauta DIA desde{' '}
-                  <a
-                    href="/importar-dia"
-                    className="underline hover:text-foreground"
-                  >
-                    Importar pauta DIA
+                  Primero debes importar la pauta del instrumento desde{' '}
+                  <a href="/importar/instrumento" className="underline hover:text-foreground">
+                    Pauta / Instrumento
                   </a>
                   .
                 </p>
@@ -334,9 +319,7 @@ export function UploadForm({ defaultFormat, instruments }: UploadFormProps) {
             </div>
 
             <div className="space-y-1.5 sm:col-span-2">
-              <Label htmlFor="assessment-name">
-                Nombre de la evaluación (opcional)
-              </Label>
+              <Label htmlFor="assessment-name">Nombre de la evaluación (opcional)</Label>
               <Input
                 id="assessment-name"
                 placeholder="Por ejemplo: DIA Lectura 2° básico — Marzo 2026"
@@ -366,14 +349,14 @@ export function UploadForm({ defaultFormat, instruments }: UploadFormProps) {
               </p>
             ) : detectedColumns.length === 0 ? (
               <p className="text-muted-foreground text-sm">
-                No se detectaron columnas en el archivo. Verifica que el CSV
-                tenga una fila de encabezado.
+                No se detectaron columnas en el archivo. Verifica que el CSV tenga una fila de
+                encabezado.
               </p>
             ) : (
               <>
                 <p className="text-muted-foreground text-sm">
-                  Indica qué columna del CSV corresponde a cada dato. Detectamos
-                  un mapeo inicial; ajústalo si es necesario.
+                  Indica qué columna del CSV corresponde a cada dato. Detectamos un mapeo inicial;
+                  ajústalo si es necesario.
                 </p>
                 <div className="grid gap-4 sm:grid-cols-3">
                   <div className="space-y-1.5">
@@ -401,9 +384,7 @@ export function UploadForm({ defaultFormat, instruments }: UploadFormProps) {
                     <Label htmlFor="map-first">Columna Nombres (opcional)</Label>
                     <Select
                       value={firstNameCol || NONE}
-                      onValueChange={(v) =>
-                        setFirstNameCol(v === NONE ? '' : v)
-                      }
+                      onValueChange={(v) => setFirstNameCol(v === NONE ? '' : v)}
                       disabled={isPending}
                     >
                       <SelectTrigger id="map-first">
@@ -493,7 +474,7 @@ export function UploadForm({ defaultFormat, instruments }: UploadFormProps) {
         <Button
           type="button"
           variant="outline"
-          onClick={() => router.push('/importar-resultados' as Route)}
+          onClick={() => router.push('/importar/resultados' as Route)}
           disabled={isPending}
         >
           Cancelar

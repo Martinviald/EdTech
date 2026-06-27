@@ -24,6 +24,7 @@ import {
   AI_ANALYSIS_VIEWER_ROLES,
   REMEDIAL_VIEWER_ROLES,
   BENCHMARKING_VIEWER_ROLES,
+  ANSWER_SHEET_IMPORT_ROLES,
 } from '@soe/types';
 
 export type NavStatus = 'live' | 'soon';
@@ -138,18 +139,11 @@ export const NAV_GROUPS: readonly NavGroup[] = [
     label: 'Contenido y datos',
     items: [
       {
-        href: '/importar-dia',
-        label: 'Pauta / Instrumento',
+        href: '/importar',
+        label: 'Importar',
         icon: FileUp,
         status: 'live',
-        roles: ['platform_admin', 'school_admin', 'academic_director', 'eval_coordinator'],
-      },
-      {
-        href: '/importar-resultados',
-        label: 'Importar resultados',
-        icon: FileUp,
-        status: 'live',
-        roles: ['platform_admin', 'school_admin', 'academic_director', 'eval_coordinator'],
+        roles: ANSWER_SHEET_IMPORT_ROLES,
       },
       {
         href: '/banco-items',
