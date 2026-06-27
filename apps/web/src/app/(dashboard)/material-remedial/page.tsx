@@ -1,5 +1,6 @@
 import { redirect } from 'next/navigation';
 import Link from 'next/link';
+import type { Route } from 'next';
 import { Sparkles } from 'lucide-react';
 import { auth } from '@/auth';
 import { apiGet } from '@/lib/api';
@@ -106,8 +107,8 @@ export default async function MaterialRemedialPage({
 
   let list: RemedialListResponse | null = null;
   let loadError = false;
-  // Evaluaciones disponibles para el launchpad (elegir una → ir a su Análisis IA
-  // a detectar brechas y generar material). Best-effort: si falla, se omite.
+  // Evaluaciones disponibles para el selector (elegir una → filtra el banco por esa
+  // evaluación en esta misma página). Best-effort: si falla, se omite.
   let assessments: AssessmentOption[] = [];
   try {
     const [listRes, assessmentList] = await Promise.all([
@@ -144,13 +145,15 @@ export default async function MaterialRemedialPage({
 
       <AlertCallout tone="info">{AI_DISCLAIMER}</AlertCallout>
 
-      {/* Launchpad: el material remedial nace de una brecha diagnosticada por la
-          IA. Elegir una evaluación lleva a su Análisis IA, donde cada brecha tiene
-          su botón "Generar material remedial". */}
+      {/* Selector de evaluación: filtra el banco por evaluación EN ESTA misma página
+          (no saca a otra vista). La GENERACIÓN de material nace de una brecha concreta
+          y se hace desde el Análisis IA de la evaluación ("Generar material remedial"
+          en cada brecha), por eso ofrecemos un enlace directo a ese flujo. */}
       <div className="flex flex-wrap items-end gap-3 rounded-lg border bg-card p-4">
-        <AssessmentSelect options={assessments} basePath="/analisis-ia" />
+        <AssessmentSelect options={assessments} basePath="/material-remedial" />
         <p className="max-w-sm text-sm text-muted-foreground">
-          Para generar material nuevo, elige una evaluación y revisa sus brechas en el Análisis IA.
+          Elige una evaluación para ver su material. Para generar material nuevo, abre su
+          Análisis IA y usa “Generar material remedial” en cada brecha.
         </p>
       </div>
 
@@ -163,6 +166,17 @@ export default async function MaterialRemedialPage({
               'la evaluación seleccionada'}
           </span>
           .{' '}
+          <Link
+            href={
+              `/analisis-ia?assessmentId=${assessmentId}${
+                classGroupId ? `&classGroupId=${classGroupId}` : ''
+              }` as Route
+            }
+            className="font-medium underline"
+          >
+            Ver brechas y generar material
+          </Link>
+          {' · '}
           <Link href="/material-remedial" className="font-medium underline">
             Ver todo el banco
           </Link>
