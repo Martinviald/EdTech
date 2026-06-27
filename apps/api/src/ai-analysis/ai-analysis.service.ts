@@ -180,6 +180,50 @@ export class AiAnalysisService {
     });
   }
 
+  /**
+   * Devuelve el ÚLTIMO análisis ya existente para una evaluación con el mismo
+   * scope que usa la caché (`assessmentId + analysisType + audience + classGroupId`),
+   * o `null` si no hay ninguno. NO genera ni inserta nada: permite que la vista
+   * cargue el informe creado previamente al re-seleccionar la evaluación. Devuelve
+   * la fila más reciente sin importar su estado — la UI maneja
+   * pending/processing/failed/completed.
+   */
+  async findLatestForAssessment(
+    user: JwtPayload,
+    params: {
+      assessmentId: string;
+      analysisType: string;
+      audience: string;
+      classGroupId: string | null;
+    },
+  ): Promise<AiAnalysisModel | null> {
+    const orgId = this.requireOrgId(user);
+    const inputHash = this.computeInputHash({
+      assessmentId: params.assessmentId,
+      analysisType: params.analysisType,
+      audience: params.audience,
+      classGroupId: params.classGroupId,
+    });
+
+    const row = await withOrgContext(this.db, orgId, async (tx) => {
+      const [found] = await tx
+        .select()
+        .from(aiAnalyses)
+        .where(
+          and(
+            eq(aiAnalyses.orgId, orgId),
+            eq(aiAnalyses.inputHash, inputHash),
+            isNull(aiAnalyses.deletedAt),
+          ),
+        )
+        .orderBy(desc(aiAnalyses.createdAt))
+        .limit(1);
+      return found;
+    });
+
+    return row ? this.toModel(row) : null;
+  }
+
   /** Devuelve un análisis por id dentro del tenant del usuario. */
   async get(user: JwtPayload, id: string): Promise<AiAnalysisModel> {
     const orgId = this.requireOrgId(user);

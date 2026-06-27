@@ -53,6 +53,9 @@ export default async function AnalisisIaPage({
   }
 
   const activeRole = session.user.activeRole;
+  // Audiencia del informe: igual que la usada al generar (entra al `inputHash`). Un
+  // profesor ve la versión 'teacher'; el resto, 'director'.
+  const audience = activeRole === 'teacher' ? 'teacher' : 'director';
 
   const params = await searchParams;
   const assessmentId = pickParam(params.assessmentId);
@@ -94,37 +97,27 @@ export default async function AnalisisIaPage({
     );
   }
 
-  // Sin análisis aún: ofrecer generarlo.
-  if (!analysisId) {
-    return (
-      <PageContainer>
-        {header}
-        <EmptyState
-          icon={Sparkles}
-          title="Aún no hay análisis para esta evaluación"
-          description="Genera un informe IA que interpreta las métricas de la evaluación y propone acciones concretas. El proceso es asíncrono y puede tomar algunos segundos."
-          action={
-            <GenerateButton
-              assessmentId={assessmentId}
-              classGroupId={classGroupId}
-              audience={activeRole === 'teacher' ? 'teacher' : 'director'}
-            />
-          }
-        />
-      </PageContainer>
-    );
-  }
-
-  // Hay un análisis: consultar su estado.
+  // Resolver el análisis: por `analysisId` explícito (recién generado / polling) o,
+  // si no viene, buscando el ÚLTIMO ya existente para esta evaluación. Esto último
+  // arregla que al re-seleccionar la evaluación no se cargara el informe ya creado.
   let analysis: AiAnalysisModel | null = null;
   let loadError = false;
-  try {
-    analysis = await apiGet<AiAnalysisModel>(`/ai-analysis/${analysisId}`);
-  } catch {
-    loadError = true;
+  if (analysisId) {
+    try {
+      analysis = await apiGet<AiAnalysisModel>(`/ai-analysis/${analysisId}`);
+    } catch {
+      loadError = true;
+    }
+  } else {
+    const latestQuery = new URLSearchParams({ audience });
+    if (classGroupId) latestQuery.set('classGroupId', classGroupId);
+    analysis = await apiGet<AiAnalysisModel | null>(
+      `/ai-analysis/assessments/${assessmentId}/latest?${latestQuery.toString()}`,
+    ).catch(() => null);
   }
 
-  if (loadError || !analysis) {
+  // Vino `analysisId` pero no se pudo cargar (sin acceso / no existe).
+  if (loadError) {
     return (
       <PageContainer>
         {header}
@@ -136,7 +129,28 @@ export default async function AnalisisIaPage({
             <GenerateButton
               assessmentId={assessmentId}
               classGroupId={classGroupId}
-              audience={activeRole === 'teacher' ? 'teacher' : 'director'}
+              audience={audience}
+            />
+          }
+        />
+      </PageContainer>
+    );
+  }
+
+  // No hay ningún análisis para esta evaluación todavía → ofrecer generarlo.
+  if (!analysis) {
+    return (
+      <PageContainer>
+        {header}
+        <EmptyState
+          icon={Sparkles}
+          title="Aún no hay análisis para esta evaluación"
+          description="Genera un informe IA que interpreta las métricas de la evaluación y propone acciones concretas. El proceso es asíncrono y puede tomar algunos segundos."
+          action={
+            <GenerateButton
+              assessmentId={assessmentId}
+              classGroupId={classGroupId}
+              audience={audience}
             />
           }
         />
@@ -169,7 +183,7 @@ export default async function AnalisisIaPage({
             <GenerateButton
               assessmentId={assessmentId}
               classGroupId={classGroupId}
-              audience={activeRole === 'teacher' ? 'teacher' : 'director'}
+              audience={audience}
               force
               label="Reintentar"
             />
@@ -193,7 +207,7 @@ export default async function AnalisisIaPage({
             <GenerateButton
               assessmentId={assessmentId}
               classGroupId={classGroupId}
-              audience={activeRole === 'teacher' ? 'teacher' : 'director'}
+              audience={audience}
               force
               label="Regenerar"
             />
