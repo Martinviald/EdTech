@@ -36,6 +36,11 @@ export default async function DashboardLayout({ children }: { children: React.Re
             user={session.user}
             roles={session.user.roles}
             activeRole={session.user.activeRole}
+            platformLink={
+              session.user.isPlatformAdmin
+                ? { href: '/admin', label: 'Panel de plataforma' }
+                : undefined
+            }
           />
           <main id="main-content" className="flex-1 overflow-y-auto p-6">
             {children}

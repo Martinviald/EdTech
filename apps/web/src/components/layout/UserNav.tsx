@@ -1,6 +1,8 @@
 'use client';
 
-import { ChevronDown, LogOut, Settings } from 'lucide-react';
+import Link from 'next/link';
+import type { Route } from 'next';
+import { ArrowLeftRight, ChevronDown, LogOut, Settings } from 'lucide-react';
 import { signOut } from 'next-auth/react';
 import { toast } from 'sonner';
 import type { UserRole } from '@soe/types';
@@ -25,9 +27,11 @@ interface UserNavProps {
   roles: readonly UserRole[];
   activeRole: UserRole;
   orgName: string;
+  /** Si está presente, muestra el acceso para alternar colegio ↔ panel de plataforma. */
+  platformLink?: { href: string; label: string };
 }
 
-export function UserNav({ user, roles, activeRole, orgName }: UserNavProps) {
+export function UserNav({ user, roles, activeRole, orgName, platformLink }: UserNavProps) {
   const role = activeRole;
   const name = user.name ?? user.email ?? 'Usuario';
   const initials = getInitials(name);
@@ -69,6 +73,17 @@ export function UserNav({ user, roles, activeRole, orgName }: UserNavProps) {
           </p>
         </div>
         <DropdownMenuSeparator />
+        {platformLink ? (
+          <>
+            <DropdownMenuItem asChild>
+              <Link href={platformLink.href as Route}>
+                <ArrowLeftRight className="size-4" aria-hidden />
+                {platformLink.label}
+              </Link>
+            </DropdownMenuItem>
+            <DropdownMenuSeparator />
+          </>
+        ) : null}
         {roles.length > 1 ? (
           <>
             <RoleSwitcher roles={roles} activeRole={activeRole} />
@@ -83,7 +98,10 @@ export function UserNav({ user, roles, activeRole, orgName }: UserNavProps) {
           </span>
         </DropdownMenuItem>
         <DropdownMenuSeparator />
-        <DropdownMenuItem onSelect={handleSignOut} className="text-destructive focus:text-destructive">
+        <DropdownMenuItem
+          onSelect={handleSignOut}
+          className="text-destructive focus:text-destructive"
+        >
           <LogOut className="size-4" aria-hidden />
           Cerrar sesión
         </DropdownMenuItem>
