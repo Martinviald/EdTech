@@ -18,6 +18,10 @@ const TABS: { href: string; label: string }[] = [
   { href: '/resultados/detalle', label: 'Detalle por pregunta' },
   { href: '/resultados/comparacion', label: 'Comparación' },
   { href: '/resultados/progresion', label: 'Progresión' },
+  // Salto contextual a Análisis IA conservando la evaluación + filtros activos
+  // (la querystring se arrastra). Vive fuera de /resultados pero es la
+  // continuación natural del informe de una evaluación (E20).
+  { href: '/analisis-ia', label: 'Análisis IA' },
 ];
 
 export function ResultadosNav() {

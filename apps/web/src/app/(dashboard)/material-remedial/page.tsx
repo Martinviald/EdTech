@@ -1,4 +1,5 @@
 import { redirect } from 'next/navigation';
+import Link from 'next/link';
 import { Sparkles } from 'lucide-react';
 import { auth } from '@/auth';
 import { apiGet } from '@/lib/api';
@@ -7,6 +8,8 @@ import {
   REMEDIAL_VIEWER_ROLES,
   remedialMaterialTypeSchema,
   remedialStatusSchema,
+  type AssessmentListResponse,
+  type AssessmentOption,
   type RemedialListResponse,
   type RemedialMaterialType,
   type RemedialStatus,
@@ -14,6 +17,7 @@ import {
 import { PageContainer, PageHeader, EmptyState, AlertCallout } from '@/components/patterns';
 import { FeatureUpgradeNotice } from '@/components/feature-gate';
 import { isFeatureEnabled } from '@/lib/features';
+import { AssessmentSelect } from '../resultados/detalle/assessment-select';
 import { RemedialFilters } from './components/remedial-filters';
 import { MaterialCard } from './components/material-card';
 import { GeneratePanel } from './components/generate-panel';
@@ -89,18 +93,31 @@ export default async function MaterialRemedialPage({
     );
   }
 
-  // Banco de material: lista paginada con filtros (tipo/estado/nodeId).
+  // Banco de material: lista paginada con filtros (tipo/estado/nodeId/assessmentId).
+  // El filtro por `assessmentId` permite llegar desde Resultados / Análisis IA y ver
+  // sólo el material de esa evaluación.
   const query = new URLSearchParams();
   query.set('page', String(page));
   query.set('limit', String(PAGE_SIZE));
   if (filterType) query.set('type', filterType);
   if (filterStatus) query.set('status', filterStatus);
   if (nodeId) query.set('nodeId', nodeId);
+  if (assessmentId) query.set('assessmentId', assessmentId);
 
   let list: RemedialListResponse | null = null;
   let loadError = false;
+  // Evaluaciones disponibles para el launchpad (elegir una → ir a su Análisis IA
+  // a detectar brechas y generar material). Best-effort: si falla, se omite.
+  let assessments: AssessmentOption[] = [];
   try {
-    list = await apiGet<RemedialListResponse>(`/remedial?${query.toString()}`);
+    const [listRes, assessmentList] = await Promise.all([
+      apiGet<RemedialListResponse>(`/remedial?${query.toString()}`),
+      apiGet<AssessmentListResponse>('/item-analysis/assessments').catch(
+        (): AssessmentListResponse | null => null,
+      ),
+    ]);
+    list = listRes;
+    assessments = assessmentList?.data ?? [];
   } catch {
     loadError = true;
   }
@@ -117,12 +134,40 @@ export default async function MaterialRemedialPage({
   }
 
   const totalPages = Math.max(1, Math.ceil(list.total / list.limit));
+  const selectedAssessment = assessmentId
+    ? assessments.find((a) => a.assessmentId === assessmentId)
+    : undefined;
 
   return (
     <PageContainer>
       {header}
 
       <AlertCallout tone="info">{AI_DISCLAIMER}</AlertCallout>
+
+      {/* Launchpad: el material remedial nace de una brecha diagnosticada por la
+          IA. Elegir una evaluación lleva a su Análisis IA, donde cada brecha tiene
+          su botón "Generar material remedial". */}
+      <div className="flex flex-wrap items-end gap-3 rounded-lg border bg-card p-4">
+        <AssessmentSelect options={assessments} basePath="/analisis-ia" />
+        <p className="max-w-sm text-sm text-muted-foreground">
+          Para generar material nuevo, elige una evaluación y revisa sus brechas en el Análisis IA.
+        </p>
+      </div>
+
+      {assessmentId ? (
+        <AlertCallout tone="info">
+          Mostrando sólo el material de{' '}
+          <span className="font-medium">
+            {selectedAssessment?.name ??
+              selectedAssessment?.instrumentName ??
+              'la evaluación seleccionada'}
+          </span>
+          .{' '}
+          <Link href="/material-remedial" className="font-medium underline">
+            Ver todo el banco
+          </Link>
+        </AlertCallout>
+      ) : null}
 
       <RemedialFilters />
 

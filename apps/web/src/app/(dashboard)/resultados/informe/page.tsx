@@ -1,16 +1,19 @@
 import { redirect } from 'next/navigation';
-import { ClipboardList, Inbox } from 'lucide-react';
+import Link from 'next/link';
+import { ClipboardList, Inbox, Sparkles } from 'lucide-react';
 import { auth } from '@/auth';
 import { apiGet } from '@/lib/api';
 import {
   canAccess,
   ANALYTICS_VIEWER_ROLES,
+  AI_ANALYSIS_VIEWER_ROLES,
   type AssessmentListResponse,
   type AssessmentOption,
   type AssessmentReportResponse,
   type DashboardFilterOptionsResponse,
 } from '@soe/types';
 import { PageContainer, PageHeader, EmptyState } from '@/components/patterns';
+import { Button } from '@/components/ui/button';
 import { AskAiButton, RegisterAssistantContext } from '@/components/assistant';
 import { DashboardFilterBar } from '../components/dashboard-filter-bar';
 import { parseDashboardFilters, buildDashboardQuery } from '../components/dashboard-filters';
@@ -87,7 +90,21 @@ export default async function InformeEvaluacionPage({
         description="Informe consolidado y accionable de una evaluación para el equipo directivo y UTP: síntesis ejecutiva, comparativa por curso, fortalezas y brechas, análisis psicométrico de ítems y recomendaciones (H6.13)."
         actions={
           assessmentId && report ? (
-            <AskAiButton prompt="Analiza esta evaluación: ¿qué cursos y habilidades están más descendidos y qué ítems conviene revisar?" />
+            <div className="flex flex-wrap gap-2">
+              {canAccess(session.user.roles, AI_ANALYSIS_VIEWER_ROLES) ? (
+                <Button asChild variant="outline" size="sm">
+                  <Link
+                    href={`/analisis-ia?assessmentId=${assessmentId}${
+                      classGroupId ? `&classGroupId=${classGroupId}` : ''
+                    }`}
+                  >
+                    <Sparkles className="mr-2 size-4" aria-hidden />
+                    Análisis IA
+                  </Link>
+                </Button>
+              ) : null}
+              <AskAiButton prompt="Analiza esta evaluación: ¿qué cursos y habilidades están más descendidos y qué ítems conviene revisar?" />
+            </div>
           ) : undefined
         }
       />

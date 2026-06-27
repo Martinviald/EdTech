@@ -1,22 +1,34 @@
 import { redirect } from 'next/navigation';
-import { Sparkles, ClipboardList } from 'lucide-react';
+import Link from 'next/link';
+import type { Route } from 'next';
+import { Sparkles, ClipboardList, Lightbulb } from 'lucide-react';
 import { auth } from '@/auth';
 import { apiGet } from '@/lib/api';
 import {
   canAccess,
   AI_ANALYSIS_VIEWER_ROLES,
   INSTRUMENT_QUALITY_VIEWER_ROLES,
+  REMEDIAL_VIEWER_ROLES,
   assessmentInsightsOutputSchema,
   type AiAnalysisModel,
   type AssessmentInsightsOutput,
+  type AssessmentListResponse,
+  type DashboardFilterOptionsResponse,
   type InstrumentQualityResponse,
   type ItemMatrixResponse,
   type MatrixQuestionColumn,
 } from '@soe/types';
 import { PageContainer, PageHeader, EmptyState } from '@/components/patterns';
+import { Button } from '@/components/ui/button';
 import { FeatureUpgradeNotice } from '@/components/feature-gate';
 import { AskAiButton, RegisterAssistantContext } from '@/components/assistant';
 import { isFeatureEnabled } from '@/lib/features';
+import { DashboardFilterBar } from '../resultados/components/dashboard-filter-bar';
+import {
+  parseDashboardFilters,
+  buildDashboardQuery,
+} from '../resultados/components/dashboard-filters';
+import { AssessmentSelect } from '../resultados/detalle/assessment-select';
 import { GenerateButton } from './components/generate-button';
 import { AnalysisPoller } from './components/analysis-poller';
 import { AnalysisReport } from './components/analysis-report';
@@ -54,16 +66,29 @@ export default async function AnalisisIaPage({
     />
   );
 
-  // Sin evaluación seleccionada: el análisis se genera para una evaluación
-  // específica. Normalmente se llega aquí desde el Informe de Evaluación.
+  // Sin evaluación seleccionada: en vez de un callejón sin salida, ofrecer aquí
+  // mismo el selector de evaluación (mismo patrón que el Informe de evaluación).
+  // El análisis se genera para una evaluación específica; al elegirla se vuelve a
+  // esta página con `?assessmentId=` y se ofrece generar el análisis.
   if (!assessmentId) {
+    const filters = parseDashboardFilters(params);
+    const filterQuery = buildDashboardQuery(filters);
+    const [options, assessmentList] = await Promise.all([
+      apiGet<DashboardFilterOptionsResponse>(`/dashboards/filters${filterQuery}`),
+      apiGet<AssessmentListResponse>(`/item-analysis/assessments${filterQuery}`),
+    ]);
+
     return (
       <PageContainer>
         {header}
+        <DashboardFilterBar options={options} value={filters} basePath="/analisis-ia" />
+        <div className="flex flex-wrap items-end gap-3 rounded-lg border bg-card p-4">
+          <AssessmentSelect options={assessmentList.data} basePath="/analisis-ia" />
+        </div>
         <EmptyState
           icon={ClipboardList}
           title="Selecciona una evaluación"
-          description="El análisis IA se genera para una evaluación específica. Accede desde el Informe de evaluación para elegir una evaluación con resultados."
+          description="Elige una evaluación con resultados para generar su análisis IA. También puedes llegar aquí desde el Informe de evaluación o la pestaña Análisis IA de Resultados con la evaluación ya cargada."
         />
       </PageContainer>
     );
@@ -205,6 +230,13 @@ export default async function AnalisisIaPage({
   const questions: MatrixQuestionColumn[] = matrix?.questions ?? [];
   const exportTitle = matrix?.assessmentName ?? matrix?.instrumentName ?? 'evaluacion';
 
+  // Acceso contextual al banco de material remedial de ESTA evaluación (las
+  // brechas concretas se generan desde cada tarjeta en `SkillGapsCard`).
+  const canViewRemedial = canAccess(session.user.roles, REMEDIAL_VIEWER_ROLES);
+  const remedialHref = `/material-remedial?assessmentId=${assessmentId}${
+    classGroupId ? `&classGroupId=${classGroupId}` : ''
+  }` as Route;
+
   return (
     <PageContainer>
       {/* Declara el contexto de esta vista para el asistente embebido (E21): al
@@ -219,7 +251,17 @@ export default async function AnalisisIaPage({
         title="Análisis IA"
         description="Informe pedagógico generado por IA a partir de las métricas de una evaluación: síntesis ejecutiva, ítems destacados y críticos, brechas por habilidad y recomendaciones priorizadas (E20 — H20.2 a H20.7)."
         actions={
-          <AskAiButton prompt="Explícame los resultados de esta evaluación: ¿dónde están las mayores brechas y qué priorizar?" />
+          <div className="flex flex-wrap gap-2">
+            {canViewRemedial ? (
+              <Button asChild variant="outline" size="sm">
+                <Link href={remedialHref}>
+                  <Lightbulb className="mr-2 size-4" aria-hidden />
+                  Material remedial
+                </Link>
+              </Button>
+            ) : null}
+            <AskAiButton prompt="Explícame los resultados de esta evaluación: ¿dónde están las mayores brechas y qué priorizar?" />
+          </div>
         }
       />
       <AnalysisReport
