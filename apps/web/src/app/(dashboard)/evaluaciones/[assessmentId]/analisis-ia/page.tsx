@@ -49,14 +49,33 @@ export default async function EvaluacionAnalisisIaPage({
   const basePath = `/evaluaciones/${assessmentId}/analisis-ia`;
   const audience = activeRole === 'teacher' ? 'teacher' : 'director';
 
-  // Sin análisis aún: ofrecer generarlo.
-  if (!analysisId) {
+  // Resolver el análisis: por `analysisId` explícito (recién generado / polling) o,
+  // si no viene (al abrir la pestaña), buscando el ÚLTIMO ya existente para esta
+  // evaluación + audiencia + curso. Evita ofrecer "generar" cuando ya hay informe.
+  let analysis: AiAnalysisModel | null = null;
+  let loadError = false;
+  if (analysisId) {
+    try {
+      analysis = await apiGet<AiAnalysisModel>(`/ai-analysis/${analysisId}`);
+    } catch {
+      loadError = true;
+    }
+  } else {
+    const latestQuery = new URLSearchParams({ audience });
+    if (classGroupId) latestQuery.set('classGroupId', classGroupId);
+    analysis = await apiGet<AiAnalysisModel | null>(
+      `/ai-analysis/assessments/${assessmentId}/latest?${latestQuery.toString()}`,
+    ).catch(() => null);
+  }
+
+  // Vino `analysisId` pero no se pudo cargar (sin acceso / no existe).
+  if (loadError) {
     return (
       <div className="space-y-6">
         <EmptyState
           icon={Sparkles}
-          title="Aún no hay análisis para esta evaluación"
-          description="Genera un informe IA que interpreta las métricas de la evaluación y propone acciones concretas. El proceso es asíncrono y puede tomar algunos segundos."
+          title="No se pudo cargar el análisis"
+          description="No tienes acceso a este análisis o no existe. Puedes generar uno nuevo."
           action={
             <GenerateButton
               assessmentId={assessmentId}
@@ -70,21 +89,14 @@ export default async function EvaluacionAnalisisIaPage({
     );
   }
 
-  // Hay un análisis: consultar su estado.
-  let analysis: AiAnalysisModel | null = null;
-  try {
-    analysis = await apiGet<AiAnalysisModel>(`/ai-analysis/${analysisId}`);
-  } catch {
-    analysis = null;
-  }
-
+  // No hay ningún análisis para esta evaluación todavía → ofrecer generarlo.
   if (!analysis) {
     return (
       <div className="space-y-6">
         <EmptyState
           icon={Sparkles}
-          title="No se pudo cargar el análisis"
-          description="No tienes acceso a este análisis o no existe. Puedes generar uno nuevo."
+          title="Aún no hay análisis para esta evaluación"
+          description="Genera un informe IA que interpreta las métricas de la evaluación y propone acciones concretas. El proceso es asíncrono y puede tomar algunos segundos."
           action={
             <GenerateButton
               assessmentId={assessmentId}
