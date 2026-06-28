@@ -12,6 +12,8 @@ interface ReportActionsProps {
   assessmentId: string;
   classGroupId?: string;
   activeRole: UserRole;
+  /** Ruta base a la que redirigir (hub o top-level). Por defecto `/analisis-ia`. */
+  basePath?: string;
 }
 
 /**
@@ -23,6 +25,7 @@ export function ReportActions({
   assessmentId,
   classGroupId,
   activeRole,
+  basePath = '/analisis-ia',
 }: ReportActionsProps) {
   const router = useRouter();
   const [isRegenerating, startRegenerate] = useTransition();
@@ -43,7 +46,7 @@ export function ReportActions({
         query.set('assessmentId', assessmentId);
         query.set('analysisId', analysisId);
         if (classGroupId) query.set('classGroupId', classGroupId);
-        router.replace(`/analisis-ia?${query.toString()}`);
+        router.replace(`${basePath}?${query.toString()}`);
         router.refresh();
       } catch (err) {
         setError(err instanceof Error ? err.message : 'No se pudo regenerar el análisis.');
@@ -56,7 +59,7 @@ export function ReportActions({
       const query = new URLSearchParams();
       query.set('assessmentId', assessmentId);
       if (classGroupId) query.set('classGroupId', classGroupId);
-      router.replace(`/analisis-ia?${query.toString()}`);
+      router.replace(`${basePath}?${query.toString()}`);
       router.refresh();
     });
   }

@@ -30,6 +30,8 @@ interface AnalysisReportProps {
   questions: MatrixQuestionColumn[];
   /** Nombre de la evaluación/instrumento, para el nombre del archivo exportado. */
   exportTitle: string;
+  /** Ruta base para las acciones (regenerar/descartar). Por defecto `/analisis-ia`. */
+  basePath?: string;
 }
 
 function formatDate(value: string | null): string | null {
@@ -55,6 +57,7 @@ export function AnalysisReport({
   quality,
   questions,
   exportTitle,
+  basePath = '/analisis-ia',
 }: AnalysisReportProps) {
   const generatedAt = formatDate(analysis.completedAt ?? analysis.createdAt);
 
@@ -79,17 +82,15 @@ export function AnalysisReport({
             assessmentId={assessmentId}
             classGroupId={classGroupId}
             activeRole={activeRole}
+            basePath={basePath}
           />
         </div>
       </div>
 
       {/* Disclaimer visible (H20.7) */}
-      <AlertCallout
-        tone="warning"
-        title="Sugerencia generada por IA — validar antes de actuar"
-      >
-        Este informe interpreta métricas deterministas de la evaluación. Revisa y valida
-        cada conclusión con tu criterio pedagógico antes de tomar decisiones.
+      <AlertCallout tone="warning" title="Sugerencia generada por IA — validar antes de actuar">
+        Este informe interpreta métricas deterministas de la evaluación. Revisa y valida cada
+        conclusión con tu criterio pedagógico antes de tomar decisiones.
       </AlertCallout>
 
       <ExecutiveSummary
@@ -113,10 +114,7 @@ export function AnalysisReport({
 
       <SkillGapsCard skillGaps={output.skillGaps} assessmentId={assessmentId} />
 
-      <RecommendationsCard
-        recommendations={output.recommendations}
-        activeRole={activeRole}
-      />
+      <RecommendationsCard recommendations={output.recommendations} activeRole={activeRole} />
 
       {/* Calidad determinista del instrumento (H20.9) */}
       {quality ? <QualityPanel quality={quality} /> : null}

@@ -16,8 +16,11 @@ import { REMEDIAL_STATUS_OPTIONS, REMEDIAL_TYPE_OPTIONS } from './labels';
  * Filtros del banco de material (tipo / estado). Sincroniza el estado en la URL
  * para que el Server Component refetchee con los query params (sin estado cliente
  * de datos). `nodeId` se respeta si viene en la URL (enlace desde una brecha).
+ * `basePath` permite reusar los filtros dentro del hub de evaluación (pestaña
+ * Material en `/evaluaciones/[id]/material-remedial`); por defecto, el banco
+ * global top-level.
  */
-export function RemedialFilters() {
+export function RemedialFilters({ basePath = '/material-remedial' }: { basePath?: string }) {
   const router = useRouter();
   const searchParams = useSearchParams();
 
@@ -33,9 +36,9 @@ export function RemedialFilters() {
         params.delete(key);
       }
       params.set('page', '1');
-      router.push(`/material-remedial?${params.toString()}` as Route);
+      router.push(`${basePath}?${params.toString()}` as Route);
     },
-    [router, searchParams],
+    [router, searchParams, basePath],
   );
 
   return (
