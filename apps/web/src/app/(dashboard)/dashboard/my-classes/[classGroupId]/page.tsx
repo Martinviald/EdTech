@@ -1,12 +1,18 @@
 import Link from 'next/link';
 import type { Route } from 'next';
 import { notFound, redirect } from 'next/navigation';
-import { BarChart3, BookOpen, ChevronLeft, GraduationCap, Sparkles, Users } from 'lucide-react';
+import {
+  BarChart3,
+  BookOpen,
+  ChevronLeft,
+  ClipboardList,
+  GraduationCap,
+  Users,
+} from 'lucide-react';
 import {
   canAccess,
   CLASS_VIEWER_ROLES,
   RESULTS_VIEWER_ROLES,
-  AI_ANALYSIS_VIEWER_ROLES,
   type ClassGroupDetailResponse,
   type EnrollmentStatus,
 } from '@soe/types';
@@ -93,11 +99,11 @@ export default async function ClassGroupDetailPage({
                 </Link>
               </Button>
             ) : null}
-            {canAccess(session.user.roles, AI_ANALYSIS_VIEWER_ROLES) ? (
+            {canAccess(session.user.roles, RESULTS_VIEWER_ROLES) ? (
               <Button asChild variant="outline" size="sm">
-                <Link href={`/analisis-ia?classGroupId=${classGroupId}` as Route}>
-                  <Sparkles className="mr-2 size-4" aria-hidden />
-                  Análisis IA
+                <Link href={`/evaluaciones?classGroupId=${classGroupId}` as Route}>
+                  <ClipboardList className="mr-2 size-4" aria-hidden />
+                  Ver evaluaciones del curso
                 </Link>
               </Button>
             ) : null}

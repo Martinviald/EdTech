@@ -48,7 +48,7 @@ export function RecentAssessmentsCard({
               return (
                 <li key={a.assessmentId}>
                   <Link
-                    href={`/resultados/informe?assessmentId=${a.assessmentId}` as Route}
+                    href={`/evaluaciones/${a.assessmentId}` as Route}
                     className="flex items-center justify-between gap-3 px-4 py-3 transition-colors hover:bg-muted/40"
                   >
                     <div className="min-w-0">

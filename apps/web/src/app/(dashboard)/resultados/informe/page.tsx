@@ -1,151 +1,34 @@
 import { redirect } from 'next/navigation';
-import Link from 'next/link';
-import { ClipboardList, Inbox, Sparkles } from 'lucide-react';
-import { auth } from '@/auth';
-import { apiGet } from '@/lib/api';
-import {
-  canAccess,
-  ANALYTICS_VIEWER_ROLES,
-  AI_ANALYSIS_VIEWER_ROLES,
-  type AssessmentListResponse,
-  type AssessmentOption,
-  type AssessmentReportResponse,
-  type DashboardFilterOptionsResponse,
-} from '@soe/types';
-import { PageContainer, PageHeader, EmptyState } from '@/components/patterns';
-import { Button } from '@/components/ui/button';
-import { AskAiButton, RegisterAssistantContext } from '@/components/assistant';
-import { DashboardFilterBar } from '../components/dashboard-filter-bar';
-import { parseDashboardFilters, buildDashboardQuery } from '../components/dashboard-filters';
-import { ResultadosNav } from '../components/resultados-nav';
-import { AssessmentSelect } from '../detalle/assessment-select';
-import { ReportBody } from './report-body';
+import type { Route } from 'next';
 
 export const dynamic = 'force-dynamic';
-
-const BASE_PATH = '/resultados/informe';
 
 function pickParam(raw: string | string[] | undefined): string | undefined {
   const value = Array.isArray(raw) ? raw[0] : raw;
   return value && value.length > 0 ? value : undefined;
 }
 
-export default async function InformeEvaluacionPage({
+/**
+ * Compatibilidad: el Informe de evaluación se movió al hub
+ * `/evaluaciones/[assessmentId]/resultados`. Con `assessmentId` en la query
+ * (links/marcadores antiguos, asistente E21) se redirige al hub; sin él, a la
+ * lista de evaluaciones, que es el nuevo selector.
+ */
+export default async function InformeRedirect({
   searchParams,
 }: {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
-  const session = await auth();
-  if (!session?.user) redirect('/login');
-  if (!canAccess(session.user.roles, ANALYTICS_VIEWER_ROLES)) redirect('/dashboard');
-
   const params = await searchParams;
-  const filters = parseDashboardFilters(params);
-  const filterQuery = buildDashboardQuery(filters);
   const assessmentId = pickParam(params.assessmentId);
-  const classGroupId = filters.classGroupId;
+  const classGroupId = pickParam(params.classGroupId);
 
-  // Opciones de filtro + evaluaciones disponibles (ambas acotadas por filtros y
-  // por el scope del usuario), para poblar el filter bar y el selector.
-  const [options, assessmentList] = await Promise.all([
-    apiGet<DashboardFilterOptionsResponse>(`/dashboards/filters${filterQuery}`),
-    apiGet<AssessmentListResponse>(`/item-analysis/assessments${filterQuery}`),
-  ]);
-
-  let report: AssessmentReportResponse | null = null;
-  let reportError = false;
   if (assessmentId) {
-    try {
-      const query = new URLSearchParams();
-      query.set('assessmentId', assessmentId);
-      if (classGroupId) query.set('classGroupId', classGroupId);
-      report = await apiGet<AssessmentReportResponse>(
-        `/analytics/assessment-report?${query.toString()}`,
-      );
-    } catch {
-      reportError = true;
-    }
+    const qs = classGroupId ? `?classGroupId=${classGroupId}` : '';
+    redirect(`/evaluaciones/${assessmentId}/resultados${qs}` as Route);
   }
 
-  // La evaluación seleccionada debe aparecer en el selector aunque los filtros la
-  // dejen fuera de la lista.
-  const selectOptions: AssessmentOption[] = [...assessmentList.data];
-  if (assessmentId && report && !selectOptions.some((o) => o.assessmentId === assessmentId)) {
-    selectOptions.unshift({
-      assessmentId,
-      name: report.meta.assessmentName,
-      instrumentName: report.meta.instrumentName,
-      instrumentType: report.meta.instrumentType,
-      subjectName: report.meta.subjectName,
-      gradeName: report.meta.gradeName,
-      administeredAt: report.meta.administeredAt,
-      studentsCount: report.summary.studentsEvaluated,
-    });
-  }
-
-  return (
-    <PageContainer>
-      <PageHeader
-        title="Informe de evaluación"
-        description="Informe consolidado y accionable de una evaluación para el equipo directivo y UTP: síntesis ejecutiva, comparativa por curso, fortalezas y brechas, análisis psicométrico de ítems y recomendaciones (H6.13)."
-        actions={
-          assessmentId && report ? (
-            <div className="flex flex-wrap gap-2">
-              {canAccess(session.user.roles, AI_ANALYSIS_VIEWER_ROLES) ? (
-                <Button asChild variant="outline" size="sm">
-                  <Link
-                    href={`/analisis-ia?assessmentId=${assessmentId}${
-                      classGroupId ? `&classGroupId=${classGroupId}` : ''
-                    }`}
-                  >
-                    <Sparkles className="mr-2 size-4" aria-hidden />
-                    Análisis IA
-                  </Link>
-                </Button>
-              ) : null}
-              <AskAiButton prompt="Analiza esta evaluación: ¿qué cursos y habilidades están más descendidos y qué ítems conviene revisar?" />
-            </div>
-          ) : undefined
-        }
-      />
-
-      <ResultadosNav />
-
-      <DashboardFilterBar options={options} value={filters} basePath={BASE_PATH} />
-
-      <div className="flex flex-wrap items-end gap-3 rounded-lg border bg-card p-4">
-        <AssessmentSelect options={selectOptions} value={assessmentId} basePath={BASE_PATH} />
-      </div>
-
-      {!assessmentId ? (
-        <EmptyState
-          icon={ClipboardList}
-          title="Selecciona una evaluación"
-          description="El informe se genera para una evaluación específica. Usa los filtros y el selector de arriba para elegir una evaluación con resultados."
-        />
-      ) : reportError || !report ? (
-        <EmptyState
-          icon={Inbox}
-          title="No se pudo generar el informe"
-          description="No tienes acceso a esta evaluación o no existe. Verifica que tengas asignados los cursos de la evaluación."
-        />
-      ) : (
-        <>
-          {/* Contexto de la vista para el asistente embebido (E21): evaluación
-              (+ curso si está filtrado) que el usuario está revisando. */}
-          <RegisterAssistantContext
-            refs={[
-              {
-                kind: 'assessment' as const,
-                id: assessmentId,
-                label: report.meta.assessmentName ?? undefined,
-              },
-              ...(classGroupId ? [{ kind: 'classGroup' as const, id: classGroupId }] : []),
-            ]}
-          />
-          <ReportBody report={report} />
-        </>
-      )}
-    </PageContainer>
+  redirect(
+    (classGroupId ? `/evaluaciones?classGroupId=${classGroupId}` : '/evaluaciones') as Route,
   );
 }

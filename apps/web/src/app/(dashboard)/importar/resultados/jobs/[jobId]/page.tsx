@@ -68,15 +68,13 @@ export default async function JobStatusPage({ params }: PageProps) {
                   {/* Cierre de loop: ir directo a la evaluación recién importada,
                       no al dashboard genérico. */}
                   <Button asChild variant="outline">
-                    <Link href={`/analisis-ia?assessmentId=${result.data.assessmentId}` as Route}>
+                    <Link href={`/evaluaciones/${result.data.assessmentId}/analisis-ia` as Route}>
                       <Sparkles className="mr-2 h-4 w-4" />
                       Generar análisis IA
                     </Link>
                   </Button>
                   <Button asChild>
-                    <Link
-                      href={`/resultados/informe?assessmentId=${result.data.assessmentId}` as Route}
-                    >
+                    <Link href={`/evaluaciones/${result.data.assessmentId}/resultados` as Route}>
                       Ver resultados de la evaluación
                       <ArrowRight className="ml-2 h-4 w-4" />
                     </Link>
