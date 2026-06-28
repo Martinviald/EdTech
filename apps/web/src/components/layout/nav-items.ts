@@ -101,8 +101,8 @@ export const NAV_GROUPS: readonly NavGroup[] = [
         href: '/evaluaciones',
         label: 'Evaluaciones',
         icon: ClipboardList,
-        status: 'soon',
-        roles: ALL_STAFF_ROLES,
+        status: 'live',
+        roles: DASHBOARD_VIEWER_ROLES,
       },
       {
         href: '/resultados',
