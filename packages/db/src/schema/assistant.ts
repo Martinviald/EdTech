@@ -20,6 +20,16 @@ export const assistantConversations = pgTable(
       .references(() => users.id, { onDelete: 'cascade' }),
     /** Título autogenerado del primer mensaje; null hasta fijarse. */
     title: text('title'),
+    /**
+     * Bandeja de contexto FIJADA por el usuario (E21 Ola 5): refs `{kind, id,
+     * label?}` que el usuario adjunta al hilo y persisten entre turnos. El backend
+     * las fusiona con el `pageContext` (auto) en cada turno; al LLM solo viajan
+     * `kind+id`. El `label` se guarda para rehidratar el chip (display org-scoped).
+     */
+    pinnedContext: jsonb('pinned_context')
+      .$type<Array<{ kind: string; id: string; label?: string }>>()
+      .notNull()
+      .default([]),
     createdAt: timestamp('created_at').defaultNow().notNull(),
     updatedAt: timestamp('updated_at').defaultNow().notNull(),
     deletedAt: timestamp('deleted_at'),
