@@ -1,219 +1,192 @@
-# Despliegue AWS — Nivel 1 (dev, optimizado para costo)
+# Despliegue AWS — App Runner + SST/OpenNext + RDS
 
-Despliegue 100% por CLI/código con **SST v3**. Un solo `sst.config.ts` provisiona todo:
+Despliegue por código (un solo `sst.config.ts`, SST corre sobre Pulumi así que App Runner
+se define con el provider crudo `aws.*`). Stage: `production`. Región: `us-east-1`.
 
-| Capa | Corre en (AWS) | Componente SST |
+| Capa | Corre en (AWS) | Definido con |
 |---|---|---|
 | Frontend (Next.js) | CloudFront + Lambda (OpenNext) | `sst.aws.Nextjs` |
-| Backend (NestJS) | ECS Fargate ARM (0.25 vCPU / 0.5 GB) tras ALB público | `sst.aws.Service` |
+| Backend (NestJS) | **App Runner** desde imagen en **ECR** | `aws.apprunner.*` (crudo) |
 | BDD (Postgres) | RDS `t4g.micro` Single-AZ | `sst.aws.Postgres` |
 | Archivos | S3 | `sst.aws.Bucket` |
-| Red | VPC con fck-nat (`nat: "ec2"`) + bastion | `sst.aws.Vpc` |
+| Red | VPC **sin NAT** + bastion (para `sst tunnel`) | `sst.aws.Vpc` |
 
-> Región: `us-east-1`. Stage de ejemplo: `dev`.
+**Costo idle ~$22-26/mes** (sin ALB, sin NAT, sin Fargate). Ver §7.
+
+> ⚠️ **Deploy en 2 fases:** App Runner exige que la imagen exista en ECR antes de crearse.
+> Fase 1 deja la infra base (incl. ECR); se pushea la imagen y se provisiona la BDD;
+> Fase 2 (`SST_BACKEND_READY=1`) crea App Runner + front. Después el CI/CD mantiene todo.
 
 ---
 
-## 0. Prerrequisitos (una vez)
+## 0. Prerrequisitos
 
-- **Docker Desktop** corriendo (SST construye la imagen del backend localmente; tu Mac es ARM → build nativo arm64, rápido).
+- **Docker Desktop** corriendo (para construir la imagen del backend la 1ª vez).
 - **Node 20 + pnpm 10** (ya en el repo).
-- **Cuenta AWS** con acceso a la consola.
+- **Credenciales AWS** ya configuradas: `aws configure --profile edtech` + `export AWS_PROFILE=edtech`.
 
 ---
 
-## 1. Crear credenciales IAM (ÚNICO paso manual)
-
-Algo tiene que autenticar el primer comando. Esto se hace una vez.
-
-1. Consola AWS → **IAM** → **Users** → **Create user**.
-   - Nombre: `edtech-deployer`.
-   - **No** marcar "provide user access to the Console" (solo se usará por CLI).
-2. **Permissions** → Attach policies directly → `AdministratorAccess`
-   _(En dev es lo pragmático. Más adelante se restringe con una policy mínima de SST.)_
-3. Crear el usuario → entrar al usuario → pestaña **Security credentials** → **Create access key** → caso de uso **Command Line Interface (CLI)** → confirmar.
-4. Copiar **Access key ID** y **Secret access key** (el secret se muestra una sola vez).
-
-Configurar el perfil local:
-
-```bash
-aws configure --profile edtech
-# AWS Access Key ID:     <pegar>
-# AWS Secret Access Key: <pegar>
-# Default region name:   us-east-1
-# Default output format:  json
-```
-
-Usar este perfil en toda la sesión:
-
-```bash
-export AWS_PROFILE=edtech
-```
-
----
-
-## 2. Instalar SST
-
-Desde la raíz del repo (worktree `infra/aws-sst`):
+## 1. Instalar SST y definir secretos
 
 ```bash
 pnpm add -D -w sst
+
+# Secretos sin default (obligatorios). AuthSecret debe ser el mismo en web y api.
+npx sst secret set AuthSecret        "$(openssl rand -base64 32)"            --stage production
+npx sst secret set InternalApiSecret "$(openssl rand -base64 32)"            --stage production
+npx sst secret set SoeAppPassword    "$(openssl rand -base64 24 | tr -d '/+=')" --stage production
+npx sst secret set DbMasterPassword  "$(openssl rand -base64 24 | tr -d '/+=')" --stage production
+
+# LLM (opcional para la demo de dashboards):
+npx sst secret set LlmProvider gemini   --stage production
+npx sst secret set GeminiApiKey "<key>" --stage production
+
+# Auth: 'mock' para la primera demo (dropdown del seed); 'sso' cuando tengas OAuth (§6).
+npx sst secret set AuthMode mock --stage production
 ```
 
 ---
 
-## 3. Definir secretos (por CLI, no consola)
-
-`AuthSecret`, `SoeAppPassword` y `DbMasterPassword` no tienen default → hay que setearlos.
-`AuthSecret` **debe** ser el mismo valor para web y api (NestJS valida el JWE de NextAuth).
+## 2. Fase 1 — Infra base + ECR
 
 ```bash
-# Genera valores aleatorios fuertes:
-npx sst secret set AuthSecret        "$(openssl rand -base64 32)" --stage dev
-npx sst secret set InternalApiSecret "$(openssl rand -base64 32)" --stage dev
-npx sst secret set SoeAppPassword    "$(openssl rand -base64 24 | tr -d '/+=')" --stage dev
-npx sst secret set DbMasterPassword  "$(openssl rand -base64 24 | tr -d '/+=')" --stage dev
-
-# LLM (opcional para la demo base; setear la key del proveedor activo):
-npx sst secret set LlmProvider  gemini --stage dev
-npx sst secret set GeminiApiKey "<tu-key>" --stage dev
-
-# Auth: 'mock' para la primera demo (dropdown del seed). Cambiar a 'sso' cuando
-# tengas las apps OAuth (ver §7).
-npx sst secret set AuthMode mock --stage dev
+npx sst deploy --stage production
 ```
 
-> Los passwords de Postgres evitan `/ + =` para no romper la URL de conexión.
+Crea VPC, RDS, S3, **ECR**, roles IAM y VPC connector. Imprime `ecrRepo`, `dbHost`, `bucket`.
+(App Runner y el front todavía NO se crean.)
 
 ---
 
-## 4. Desplegar la infraestructura
+## 3. Build + push de la imagen del backend a ECR
+
+La 1ª imagen se sube a mano (después lo hace el CI). En Mac (ARM) construimos `linux/amd64`
+porque App Runner corre x86_64:
 
 ```bash
-npx sst deploy --stage dev
+ECR_REPO=$(aws ecr describe-repositories --repository-names edtech-api-production \
+  --query 'repositories[0].repositoryUri' --output text)
+
+aws ecr get-login-password --region us-east-1 \
+  | docker login --username AWS --password-stdin "${ECR_REPO%/*}"
+
+docker buildx build --platform linux/amd64 \
+  -f apps/api/Dockerfile -t "$ECR_REPO:latest" --push .
 ```
-
-Crea VPC, RDS, ECS/Fargate, ALB, CloudFront, S3, Lambdas. Al final imprime los outputs:
-`web` (URL CloudFront), `api` (URL del ALB), `dbHost`, `bucket`.
-
-> ⚠️ **Orden BDD (chicken-and-egg):** la API arranca conectando con el rol `soe_app`,
-> que aún no existe. Mientras ECS descarga la imagen y levanta la task (~2-3 min),
-> ejecutá el §5 en otra terminal para provisionar la BD. Cuando el rol exista y las
-> migraciones estén aplicadas, la task pasa a *healthy* (ECS reintenta sola).
 
 ---
 
-## 5. Provisionar BDD: roles RLS + migraciones
+## 4. Provisionar BDD: roles RLS + migraciones
 
-El RDS está en subred privada. Abrí un túnel con el bastion (otra terminal):
+El RDS es privado. Abrí el túnel con el bastion (otra terminal, dejar corriendo):
 
 ```bash
-# Una sola vez por máquina (instala routing; pide sudo):
-sudo npx sst tunnel install
-
-# Abrir el túnel (dejar corriendo):
-npx sst tunnel --stage dev
+sudo npx sst tunnel install        # una sola vez por máquina (pide sudo)
+npx sst tunnel --stage production
 ```
 
-Con el túnel abierto, obtené las URLs de conexión y corré, **en este orden**:
+Con el túnel abierto, **en este orden**:
 
 ```bash
-# Las URLs reales (con el host del RDS) las da el deploy / `sst shell`.
-# Atajo: exportá ADMIN y la password de soe_app.
 export DATABASE_ADMIN_URL="postgresql://soe_admin:<DbMasterPassword>@<dbHost>:5432/soe"
 export SOE_APP_PASSWORD="<SoeAppPassword>"
 
-# 1) Crear el rol soe_app (sin BYPASSRLS) + GRANTs + default privileges:
+# 1) Rol soe_app (sin BYPASSRLS) + GRANTs + default privileges:
 pnpm --filter @soe/db db:provision-roles
 
-# 2) Migraciones (schema + re-aplica rls-policies.sql) con el rol admin:
+# 2) Migraciones (schema + re-aplica rls-policies.sql):
 pnpm --filter @soe/db db:migrate
 
-# 3) (Opcional) Datos de demo para stakeholders:
+# 3) (Opcional) datos de demo:
 DATABASE_URL="$DATABASE_ADMIN_URL" pnpm --filter @soe/db db:seed
 ```
 
-> Usar `pnpm --filter @soe/db db:migrate` (no `pnpm db:migrate`): el script directo
-> deja pasar `DATABASE_ADMIN_URL`; el de turbo lo filtra del entorno.
+> Provisionar la BDD **antes** de crear App Runner: el contenedor arranca conectando con
+> `soe_app`; si el rol no existe, el health check de App Runner falla y el deploy se cuelga.
 
-A los pocos segundos la task de la API queda *healthy*. Verificá:
+---
+
+## 5. Fase 2 — App Runner + Frontend
 
 ```bash
-curl <api-url>/api/health   # o el endpoint de health que exponga app.controller
+SST_BACKEND_READY=1 npx sst deploy --stage production
 ```
 
----
+Crea App Runner (apunta a `edtech-api-production:latest`, `autoDeployments` ON) y el front
+(con `API_URL` = URL real de App Runner). Imprime `web` (CloudFront) y `api` (App Runner).
 
-## 6. Abrir la app
-
-Andá a la URL `web` (CloudFront) que imprimió el deploy. Con `AuthMode=mock` entrás con
-el dropdown de usuarios del seed.
+Abrí la URL `web`. Con `AuthMode=mock` entrás con el dropdown del seed.
 
 ---
 
-## 7. (Después) Activar SSO real
+## 6. CI/CD (push a main)
 
-1. Crear apps OAuth en Google Cloud / Azure AD.
-2. **Redirect URI** = `https://<web-url>/api/auth/callback/google` (y el de Microsoft).
-3. Cargar secretos y cambiar el modo:
+Dos workflows en `.github/workflows/`:
 
-```bash
-npx sst secret set GoogleClientId     "<id>"     --stage dev
-npx sst secret set GoogleClientSecret "<secret>" --stage dev
-npx sst secret set AuthMode           sso        --stage dev
-npx sst deploy --stage dev
+| Workflow | Dispara con | Hace |
+|---|---|---|
+| `deploy-backend.yml` | cambios en `apps/api`, `packages/db`, `packages/types`, lockfile | build de la imagen → push a ECR `:latest` → App Runner **auto-deploya** |
+| `deploy-frontend.yml` | cambios en `apps/web`, `packages`, `sst.config.ts` | `SST_BACKEND_READY=1 sst deploy` (reconciliación idempotente) |
+
+**Secrets de GitHub** (Settings → Secrets and variables → Actions):
+
+```
+AWS_ACCESS_KEY_ID
+AWS_SECRET_ACCESS_KEY
 ```
 
-`AUTH_TRUST_HOST=true` ya está seteado, así que NextAuth infiere el host sin `NEXTAUTH_URL`.
+> Para producción real, migrar a **GitHub OIDC** (rol asumible sin llaves de larga vida)
+> en vez de access keys. Para dev/demo, las keys en secrets son suficientes.
+
+### Activar SSO real (cuando toque)
+
+1. Apps OAuth en Google/Azure. Redirect URI = `https://<web-url>/api/auth/callback/google`.
+2. `npx sst secret set GoogleClientId/GoogleClientSecret ... --stage production`
+3. `npx sst secret set AuthMode sso --stage production` → re-deploy del front (push o manual).
 
 ---
 
-## 8. Costo aproximado (Nivel 1, idle)
+## 7. Costo aproximado (idle)
 
 | Recurso | ~USD/mes |
 |---|---|
 | RDS `t4g.micro` Single-AZ | ~13 |
-| ALB (base del Service público) | ~16 |
-| Fargate 0.25 vCPU / 0.5 GB ARM | ~9 |
-| fck-nat (`t4g.nano`) | ~3 |
-| Bastion (`t4g.nano`) | ~3 |
-| CloudFront + Lambda (web) | ~0-1 (pago por uso) |
+| App Runner 0.25 vCPU / 0.5 GB (min 1 instancia) | ~5-8 |
+| Bastion `t4g.nano` | ~3 |
+| CloudFront + Lambda (web) | ~0-1 |
+| ECR (storage de imágenes) | ~0-1 |
 | S3 | ~0 |
-| **Total** | **~$45/mes** |
+| **Total** | **~$22-26/mes** |
 
-**Para bajar más** (Nivel 2): backend en Lambda (elimina ALB + Fargate), RDS con
-auto-pause y quitar el bastion → idle ≈ casi $0. Trade-off: cold starts y el límite de
-15 min de Lambda en imports grandes.
-
-**Ahorro inmediato sin cambiar de nivel:** una vez provisionada la BD, podés quitar
-`bastion: true` del `sst.config.ts` y redeployar (re-agregalo cuando necesites migrar).
+**Ahorros adicionales:**
+- Quitar `bastion: true` del `sst.config.ts` tras provisionar la BDD (re-agregar para migrar).
+- App Runner no escala a 0 (mínimo 1 instancia). Para idle ≈ $0 habría que ir a Lambda.
 
 ---
 
-## 9. Iterar y limpiar
+## 8. Operación y limpieza
 
 ```bash
-# Preview aislada por rama/PR (URL propia para un stakeholder):
-npx sst deploy --stage pr-123
-npx sst remove --stage pr-123     # borra TODO ese stage
+# Preview aislada por rama (URL propia para un stakeholder):
+SST_BACKEND_READY=1 npx sst deploy --stage pr-123   # requiere imagen :latest del repo ECR de ese stage
+npx sst remove --stage pr-123
 
-# Desarrollo local del día a día (no uses el cloud para esto):
-npx sst dev --stage <tu-nombre>
-
-# Bajar el entorno dev completo:
-npx sst remove --stage dev
+# Bajar producción completa:
+npx sst remove --stage production
 ```
 
 ---
 
 ## Troubleshooting
 
-- **`pnpm deploy --legacy` falla en el Docker build:** quitá `--legacy` (depende de la
-  versión de pnpm). Es la línea final del stage `build` en `apps/api/Dockerfile`.
-- **La task de la API hace crash-loop:** casi siempre es la BDD sin provisionar (§5) o el
-  `SoeAppPassword` del secreto distinto al que se le puso al rol. Re-corré
-  `db:provision-roles` con el mismo `SOE_APP_PASSWORD` y revisá CloudWatch Logs del servicio.
-- **`sst tunnel` no conecta:** confirmá `bastion: true` en el VPC y que el deploy lo creó;
-  reinstalá con `sudo npx sst tunnel install`.
-- **CORS desde el browser:** hoy las llamadas son server-side (no aplica CORS). Si agregás
-  fetch desde el cliente, usá un dominio propio y fijá `CORS_ORIGIN` al host del front.
+- **App Runner queda en `CREATE_FAILED` / rolling back:** casi siempre la BDD sin provisionar
+  (§4) o `SoeAppPassword` distinto al del rol. Revisá los Application Logs del servicio en
+  App Runner. Re-corré `db:provision-roles` con el mismo `SOE_APP_PASSWORD`.
+- **La API no conecta al RDS (timeouts):** el VPC connector usa el SG por defecto de la VPC;
+  si el RDS no lo acepta como inbound, agregá un ingress 5432 desde ese SG al SG del RDS.
+- **`pnpm deploy --legacy` falla en el Docker build:** quitá `--legacy` (depende de la versión
+  de pnpm). Última línea del stage `build` en `apps/api/Dockerfile`.
+- **El front buildeó pero las llamadas a la API fallan:** revisá que `API_URL` (output `api`)
+  apunte a `https://<...>.awsapprunner.com` y que App Runner esté `RUNNING`.
+- **`sst tunnel` no conecta:** confirmá `bastion: true` y reinstalá con `sudo npx sst tunnel install`.
