@@ -4,6 +4,7 @@ import { AssessmentReportModule } from '../assessment-report/assessment-report.m
 import { AssessmentResultsModule } from '../assessment-results/assessment-results.module';
 import { DashboardsModule } from '../dashboards/dashboards.module';
 import { HeatmapModule } from '../heatmap/heatmap.module';
+import { InstrumentsModule } from '../instruments/instruments.module';
 import { ItemAnalysisModule } from '../item-analysis/item-analysis.module';
 import { ItemsModule } from '../items/items.module';
 import { LlmModule } from '../llm/llm.module';
@@ -17,6 +18,7 @@ import { GetDashboardPerformanceTool } from './tools/get-dashboard-performance.t
 import { GetDashboardSkillsTool } from './tools/get-dashboard-skills.tool';
 import { GetGenerationalTool } from './tools/get-generational.tool';
 import { GetHeatmapTool } from './tools/get-heatmap.tool';
+import { GetInstrumentTool } from './tools/get-instrument.tool';
 import { GetItemContentTool } from './tools/get-item-content.tool';
 import { GetProgressionTool } from './tools/get-progression.tool';
 import { GetStudentDetailTool } from './tools/get-student-detail.tool';
@@ -26,7 +28,7 @@ import { ListFilterOptionsTool } from './tools/list-filter-options.tool';
 /**
  * Módulo del Asistente IA Conversacional (E21 — Ola 3).
  *
- * Registra las 10 tools read-only (una clase `@Injectable()` por tool) y las
+ * Registra las tools read-only (una clase `@Injectable()` por tool) y las
  * agrupa en el token `ASSISTANT_TOOLS` vía una factory — mismo patrón que
  * `LLM_PROVIDERS` en `LlmModule`. El `AssistantService` recibe esa lista y
  * construye el `executeTool` del loop agéntico. Cada tool inyecta el service de
@@ -45,6 +47,7 @@ const ASSISTANT_TOOL_CLASSES = [
   GetAssessmentReportTool,
   GetStudentDetailTool,
   GetItemContentTool,
+  GetInstrumentTool,
 ] as const;
 
 @Module({
@@ -55,6 +58,7 @@ const ASSISTANT_TOOL_CLASSES = [
     AnalyticsModule,
     AssessmentReportModule,
     AssessmentResultsModule,
+    InstrumentsModule,
     ItemsModule,
     ItemAnalysisModule,
   ],

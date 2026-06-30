@@ -7,17 +7,22 @@ import {
   Logger,
   Param,
   Post,
+  Put,
   Query,
   Res,
   UseGuards,
 } from '@nestjs/common';
 import type { Response } from 'express';
 import {
+  assistantContextSearchQuerySchema,
   assistantConversationListQuerySchema,
   assistantStudentSearchQuerySchema,
   createAssistantConversationSchema,
   sendAssistantMessageSchema,
+  updateAssistantContextSchema,
   ASSISTANT_USER_ROLES,
+  type AssistantContextSearchResponse,
+  type AssistantContextUpdateResponse,
   type AssistantConversationDetail,
   type AssistantConversationListResponse,
   type AssistantConversationModel,
@@ -76,6 +81,21 @@ export class AssistantController {
     return { data: await this.service.searchStudents(user, dto) };
   }
 
+  /**
+   * GET /api/assistant/context-search?kind=&q= — buscador unificado del panel
+   * (E21 Ola 5). Generaliza el selector `@` a cualquier `kind` fijable. Devuelve
+   * `{ kind, id, label }`; el `label` (nombre) solo lo ve el navegador, nunca el
+   * LLM. Acotado al org del token (en el service, dentro de `withOrgContext`).
+   */
+  @Get('context-search')
+  async searchContext(
+    @Query() query: unknown,
+    @CurrentUser() user: JwtPayload,
+  ): Promise<AssistantContextSearchResponse> {
+    const dto = assistantContextSearchQuerySchema.parse(query);
+    return { data: await this.service.searchContext(user, dto) };
+  }
+
   /** GET /api/assistant/conversations — listado paginado del usuario. */
   @Get('conversations')
   listConversations(
@@ -93,6 +113,21 @@ export class AssistantController {
     @CurrentUser() user: JwtPayload,
   ): Promise<AssistantConversationDetail> {
     return this.service.getConversation(user, id);
+  }
+
+  /**
+   * PUT /api/assistant/conversations/:id/context — reemplaza la bandeja de
+   * contexto fijada del hilo (set completo). El backend la fusiona con el
+   * `pageContext` (auto) en cada turno; el cliente no la reenvía al chatear.
+   */
+  @Put('conversations/:id/context')
+  updateContext(
+    @Param('id') id: string,
+    @Body() body: unknown,
+    @CurrentUser() user: JwtPayload,
+  ): Promise<AssistantContextUpdateResponse> {
+    const dto = updateAssistantContextSchema.parse(body);
+    return this.service.updateContext(user, id, dto);
   }
 
   /** DELETE /api/assistant/conversations/:id — soft delete. */
