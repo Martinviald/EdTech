@@ -1,36 +1,82 @@
 import { Injectable } from '@nestjs/common';
-import { ACTIVE_LLM_PROVIDER, LLM_PROVIDER_DEFAULTS } from './llm.constants';
-import type { LlmProviderName, LlmRuntimeConfig } from './llm.types';
+import { and, eq, isNull, or, sql } from 'drizzle-orm';
+import { llmSettings } from '@soe/db';
+import {
+  LLM_FEATURE_DEFAULTS,
+  resolveModelMaxTokens,
+  type LlmFeature,
+  type LlmModelChoice,
+} from '@soe/types';
+import { InjectDb, type Database } from '../database/database.types';
+import { ACTIVE_LLM_PROVIDER } from './llm.constants';
+import type { LlmRuntimeConfig } from './llm.types';
+
+/** Temperatura determinista para todas las funcionalidades (salida estructurada). */
+const DEFAULT_TEMPERATURE = 0;
 
 /**
- * Resuelve la configuración LLM efectiva (proveedor + modelo + parámetros).
+ * Resuelve la configuración LLM efectiva (proveedor + modelo + parámetros) POR
+ * FUNCIONALIDAD (`LlmFeature`).
  *
- * Es el ÚNICO punto del sistema que lee la configuración estática. El método
- * `resolve()` es asíncrono a propósito: cuando la configuración migre a la
- * tabla `llm_settings` (por organización), solo cambia el cuerpo de este
- * método — la firma y todos los consumidores quedan intactos.
- *
- * Overrides puntuales por entorno (sin tocar código):
- *  - `LLM_PROVIDER`: proveedor activo (ver `llm.constants.ts`).
- *  - `LLM_MODEL`: modelo a usar dentro del proveedor activo.
+ * Fuente de verdad en runtime: tabla `llm_settings` (panel /configuracion/modelos-ia).
+ *  1. Fila per-org (`org_id = :orgId`) si existe → gana. (Hoy no se escriben filas
+ *     per-org; quedan habilitadas para el futuro. Nota RLS: las filas per-org sólo
+ *     son visibles dentro de `withOrgContext`; las globales se leen sin contexto.)
+ *  2. Fila global (`org_id IS NULL`).
+ *  3. Default de código `LLM_FEATURE_DEFAULTS[feature]` (fallback).
+ * El `maxTokens` se deriva del catálogo de modelos (`resolveModelMaxTokens`); el
+ * panel sólo configura proveedor + modelo.
  */
 @Injectable()
 export class LlmConfigService {
-   
-  async resolve(orgId?: string | null): Promise<LlmRuntimeConfig> {
-    // TODO(F2): si existe configuración en `llm_settings` para `orgId`,
-    // devolverla aquí. Hoy `orgId` no se usa; se mantiene en la firma para que
-    // los consumidores ya pasen el tenant y la migración no los afecte.
-    void orgId;
+  constructor(@InjectDb() private readonly db: Database) {}
 
-    const provider: LlmProviderName = ACTIVE_LLM_PROVIDER;
-    const defaults = LLM_PROVIDER_DEFAULTS[provider];
-
+  async resolve(
+    orgId: string | null | undefined,
+    feature: LlmFeature,
+  ): Promise<LlmRuntimeConfig> {
+    const choice = await this.resolveChoice(orgId, feature);
     return {
-      provider,
-      model: process.env.LLM_MODEL || defaults.model,
-      maxTokens: defaults.maxTokens,
-      temperature: defaults.temperature,
+      provider: choice.provider,
+      model: choice.model,
+      maxTokens: resolveModelMaxTokens(choice.provider, choice.model),
+      temperature: DEFAULT_TEMPERATURE,
     };
+  }
+
+  /** Lee `llm_settings` (per-org → global) y cae al default de código. */
+  private async resolveChoice(
+    orgId: string | null | undefined,
+    feature: LlmFeature,
+  ): Promise<LlmModelChoice> {
+    const rows = await this.db
+      .select({
+        provider: llmSettings.provider,
+        model: llmSettings.model,
+        orgId: llmSettings.orgId,
+      })
+      .from(llmSettings)
+      .where(
+        and(
+          eq(llmSettings.feature, feature),
+          orgId
+            ? or(isNull(llmSettings.orgId), eq(llmSettings.orgId, orgId))
+            : isNull(llmSettings.orgId),
+        ),
+      )
+      // org_id NOT NULL (per-org) primero; global (NULL) al final → per-org gana.
+      .orderBy(sql`${llmSettings.orgId} NULLS LAST`)
+      .limit(1);
+
+    const row = rows[0];
+    if (row) {
+      return { provider: row.provider, model: row.model };
+    }
+    return LLM_FEATURE_DEFAULTS[feature];
+  }
+
+  /** Proveedor activo por defecto (para chequeos de disponibilidad/baseline). */
+  get activeProvider() {
+    return ACTIVE_LLM_PROVIDER;
   }
 }

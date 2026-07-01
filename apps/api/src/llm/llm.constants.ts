@@ -17,9 +17,9 @@ import type { LlmProviderName } from './llm.types';
 export interface ProviderStaticConfig {
   /** Nombre de la variable de entorno que contiene la API key del proveedor. */
   apiKeyEnv: string;
-  /** Modelo por defecto del proveedor. */
+  /** Modelo baseline del proveedor (fallback; la elección real vive en `llm_settings`). */
   model: string;
-  /** Máximo de tokens de salida. */
+  /** Máximo de tokens de salida baseline. */
   maxTokens: number;
   /** Temperatura de muestreo (0 = determinista, recomendado para etiquetado). */
   temperature: number;
@@ -34,8 +34,10 @@ export const LLM_PROVIDER_DEFAULTS: Record<LlmProviderName, ProviderStaticConfig
   },
   gemini: {
     apiKeyEnv: 'GEMINI_API_KEY',
-    model: 'gemini-2.0-flash',
-    maxTokens: 4096,
+    // Baseline. El modelo/budget reales por funcionalidad salen de `llm_settings`
+    // (panel) con fallback a `LLM_FEATURE_DEFAULTS` + catálogo (`@soe/types`).
+    model: 'gemini-2.5-flash',
+    maxTokens: 8192,
     temperature: 0,
   },
   // ── Puntos de extensión ──

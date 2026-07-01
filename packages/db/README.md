@@ -32,6 +32,12 @@ expresar en los archivos `src/schema/*.ts`. Por eso viven en SQL plano versionad
 `students`, `assessments`, `import_jobs` (org_id directo) y `responses`,
 `assessment_results`, `skill_results` (heredan el tenant vía `assessments`).
 
+`performance_bands` y `llm_settings` usan `org_id` **NULLABLE**: las filas con
+`org_id IS NULL` son catálogo/config GLOBAL de plataforma (visibles a todos los
+tenants y legibles sin contexto de org). En `llm_settings` la config global la
+escribe la API (panel /configuracion/modelos-ia); la autorización es el role guard
+`platform_admin`, no el RLS.
+
 ## withOrgContext (regla de la capa de aplicación)
 
 `set_config('app.current_org_id', orgId, true)` se fija por transacción mediante

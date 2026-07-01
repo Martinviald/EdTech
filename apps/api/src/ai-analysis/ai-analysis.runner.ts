@@ -16,7 +16,9 @@ import {
 } from './prompts/assessment-insights.prompt';
 import { SNAPSHOT_BUILDER, type SnapshotBuilder } from './snapshot.port';
 
-const AI_ANALYSIS_TIMEOUT_MS_DEFAULT = 60_000;
+// 120s: el modelo Pro (tarea `analysis`) con thinking obligatorio tarda más que
+// Flash — un informe extenso midió ~90s. Override por env `AI_ANALYSIS_TIMEOUT_MS`.
+const AI_ANALYSIS_TIMEOUT_MS_DEFAULT = 120_000;
 
 /**
  * Ejecuta el ciclo real del informe IA de evaluación (F2 S1 — H20.2–H20.5).
@@ -56,7 +58,7 @@ export class AiAnalysisRunner {
       const { system, prompt } = buildAssessmentInsightsPrompt(snapshot, audience);
 
       const raw = await this.withTimeout(
-        this.llm.complete(system, prompt, orgId),
+        this.llm.complete(system, prompt, orgId, 'assessment_analysis'),
         this.timeoutMs(),
       );
 

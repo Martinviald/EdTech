@@ -18,6 +18,19 @@ export const generateAnalysisSchema = z.object({
 });
 export type GenerateAnalysisDto = z.infer<typeof generateAnalysisSchema>;
 
+/**
+ * Query de `GET /ai-analysis/assessments/:assessmentId/latest` — busca el último
+ * análisis YA EXISTENTE para una evaluación (mismo scope que el `inputHash`:
+ * analysisType + audience + classGroupId), sin generar nada. Permite que la vista
+ * cargue el informe creado previamente al re-seleccionar la evaluación.
+ */
+export const findLatestAnalysisQuerySchema = z.object({
+  analysisType: z.string().min(1).default('assessment_insights'),
+  audience: aiAnalysisAudienceSchema.default('general'),
+  classGroupId: z.string().uuid().optional(),
+});
+export type FindLatestAnalysisQuery = z.infer<typeof findLatestAnalysisQuerySchema>;
+
 export type AiAnalysisModel = {
   id: string;
   orgId: string;

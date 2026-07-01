@@ -21,7 +21,9 @@ import {
   type ItemInsightBuilder,
 } from './item-insight.port';
 
-const ITEM_INSIGHT_TIMEOUT_MS_DEFAULT = 60_000;
+// 120s: la tarea `analysis` usa el modelo Pro (thinking obligatorio), más lento
+// que Flash. Override por env `AI_ANALYSIS_TIMEOUT_MS`.
+const ITEM_INSIGHT_TIMEOUT_MS_DEFAULT = 120_000;
 
 /**
  * Ejecuta el ciclo del análisis IA POR-PREGUNTA (F2 S2 — H20.8).
@@ -66,7 +68,7 @@ export class ItemInsightRunner {
       const { system, prompt } = buildItemInsightPrompt(snapshot, audience);
 
       const raw = await this.withTimeout(
-        this.llm.completeMultimodal(system, prompt, images, orgId),
+        this.llm.completeMultimodal(system, prompt, images, orgId, 'item_insight'),
         this.timeoutMs(),
       );
 

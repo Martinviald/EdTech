@@ -27,7 +27,7 @@ export class GuideGenerator implements RemedialGenerator {
     input: RemedialGenerationInput,
   ): Promise<RemedialGenerationResult> {
     const { system, prompt } = buildGuidePrompt(input.curriculum);
-    const raw = await this.llm.complete(system, prompt, input.orgId);
+    const raw = await this.llm.complete(system, prompt, input.orgId, 'remedial');
 
     const json = parseModelJson(raw);
     const result = remedialGuideContentSchema.safeParse(json);

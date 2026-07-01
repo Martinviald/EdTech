@@ -31,14 +31,18 @@
  */
 import { config } from 'dotenv';
 import { resolve } from 'path';
-import { eq, inArray } from 'drizzle-orm';
+import { eq, inArray, or } from 'drizzle-orm';
 import { createDbClient } from '../client';
 import { organizations, academicYears } from '../schema/organizations';
 import { orgMemberships, users } from '../schema/users';
 import { instruments } from '../schema/instruments';
 import { grades, subjects } from '../schema/academic';
 import { taxonomyNodes } from '../schema/taxonomy';
-import { benchmarkAggregates, orgBenchmarkSettings } from '../schema/benchmark';
+import {
+  benchmarkAggregates,
+  benchmarkAccessLogs,
+  orgBenchmarkSettings,
+} from '../schema/benchmark';
 import type { BenchmarkBandDistribution, BenchmarkSkillAggregate } from '@soe/types';
 
 config({ path: resolve(__dirname, '../../../../.env') });
@@ -245,6 +249,16 @@ async function main() {
 
   // ── Limpieza idempotente (borra solo el namespace b3c...) ──
   console.log('Limpiando datos previos del seed de benchmarking...');
+  // Los logs de auditoría (H7.6) referencian al usuario foco y a las orgs del
+  // namespace por FK; hay que borrarlos ANTES que usuarios/orgs o el delete falla.
+  await db
+    .delete(benchmarkAccessLogs)
+    .where(
+      or(
+        inArray(benchmarkAccessLogs.orgId, ALL_SCHOOL_IDS),
+        eq(benchmarkAccessLogs.userId, FOCUS_USER_ID),
+      ),
+    );
   await db.delete(benchmarkAggregates).where(inArray(benchmarkAggregates.orgId, ALL_SCHOOL_IDS));
   await db.delete(orgBenchmarkSettings).where(inArray(orgBenchmarkSettings.orgId, ALL_SCHOOL_IDS));
   await db.delete(orgMemberships).where(inArray(orgMemberships.orgId, ALL_SCHOOL_IDS));

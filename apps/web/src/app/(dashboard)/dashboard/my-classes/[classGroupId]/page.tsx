@@ -1,16 +1,25 @@
 import Link from 'next/link';
 import type { Route } from 'next';
 import { notFound, redirect } from 'next/navigation';
-import { BookOpen, ChevronLeft, GraduationCap, Users } from 'lucide-react';
+import {
+  BarChart3,
+  BookOpen,
+  ChevronLeft,
+  ClipboardList,
+  GraduationCap,
+  Users,
+} from 'lucide-react';
 import {
   canAccess,
   CLASS_VIEWER_ROLES,
+  RESULTS_VIEWER_ROLES,
   type ClassGroupDetailResponse,
   type EnrollmentStatus,
 } from '@soe/types';
 import { auth } from '@/auth';
 import { getClassGroupDetail } from '@/lib/teacherAssignmentsApi';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { EmptyState } from '@/components/EmptyState';
 import {
@@ -68,15 +77,37 @@ export default async function ClassGroupDetailPage({
         >
           <ChevronLeft className="size-4" /> Volver a mis cursos
         </Link>
-        <div>
-          <h1 className="text-2xl font-semibold">
-            {classGroup.gradeShortName} · {classGroup.name}
-          </h1>
-          <p className="text-muted-foreground mt-1 text-sm">
-            Año {classGroup.academicYear} · {students.length}{' '}
-            {students.length === 1 ? 'alumno' : 'alumnos'} · {subjects.length}{' '}
-            {subjects.length === 1 ? 'asignatura' : 'asignaturas'}
-          </p>
+        <div className="flex flex-wrap items-start justify-between gap-3">
+          <div>
+            <h1 className="text-2xl font-semibold">
+              {classGroup.gradeShortName} · {classGroup.name}
+            </h1>
+            <p className="text-muted-foreground mt-1 text-sm">
+              Año {classGroup.academicYear} · {students.length}{' '}
+              {students.length === 1 ? 'alumno' : 'alumnos'} · {subjects.length}{' '}
+              {subjects.length === 1 ? 'asignatura' : 'asignaturas'}
+            </p>
+          </div>
+          {/* Cierre de loop: ver los resultados / análisis de ESTE curso sin volver
+              al sidebar ni re-seleccionar el curso en los filtros. */}
+          <div className="flex flex-wrap gap-2">
+            {canAccess(session.user.roles, RESULTS_VIEWER_ROLES) ? (
+              <Button asChild variant="outline" size="sm">
+                <Link href={`/resultados?classGroupId=${classGroupId}` as Route}>
+                  <BarChart3 className="mr-2 size-4" aria-hidden />
+                  Ver resultados del curso
+                </Link>
+              </Button>
+            ) : null}
+            {canAccess(session.user.roles, RESULTS_VIEWER_ROLES) ? (
+              <Button asChild variant="outline" size="sm">
+                <Link href={`/evaluaciones?classGroupId=${classGroupId}` as Route}>
+                  <ClipboardList className="mr-2 size-4" aria-hidden />
+                  Ver evaluaciones del curso
+                </Link>
+              </Button>
+            ) : null}
+          </div>
         </div>
       </div>
 
@@ -108,9 +139,7 @@ export default async function ClassGroupDetailPage({
                     <TableRow key={s.studentId}>
                       <TableCell className="font-medium">{s.lastName}</TableCell>
                       <TableCell>{s.firstName}</TableCell>
-                      <TableCell className="text-muted-foreground tabular-nums">
-                        {s.rut}
-                      </TableCell>
+                      <TableCell className="text-muted-foreground tabular-nums">{s.rut}</TableCell>
                       <TableCell>
                         <EnrollmentStatusBadge status={s.enrollmentStatus} />
                       </TableCell>
@@ -150,9 +179,7 @@ export default async function ClassGroupDetailPage({
                   <span className="font-medium">{subject.subjectName}</span>
                   <div className="flex flex-wrap gap-2">
                     {subject.teachers.length === 0 ? (
-                      <span className="text-sm text-muted-foreground">
-                        Sin profesor asignado
-                      </span>
+                      <span className="text-sm text-muted-foreground">Sin profesor asignado</span>
                     ) : (
                       subject.teachers.map((teacher) => (
                         <span

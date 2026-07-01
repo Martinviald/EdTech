@@ -23,7 +23,7 @@ const dateFmt = new Intl.DateTimeFormat('es-CL', {
  * a la vista de chat. Permite borrar (soft delete en el backend).
  */
 export function AssistantHistory({ onOpened }: { onOpened: () => void }) {
-  const { conversationId, setConversationId, setMessages } = useAssistant();
+  const { conversationId, setConversationId, setMessages, hydratePinnedContext } = useAssistant();
   const [items, setItems] = useState<AssistantConversationModel[] | null>(null);
   const [loadingId, setLoadingId] = useState<string | null>(null);
 
@@ -56,6 +56,7 @@ export function AssistantHistory({ onOpened }: { onOpened: () => void }) {
       }));
       setConversationId(detail.id);
       setMessages(messages);
+      hydratePinnedContext(detail.pinnedContext);
       onOpened();
     } catch {
       toast.error('No se pudo abrir la conversación');
@@ -72,6 +73,7 @@ export function AssistantHistory({ onOpened }: { onOpened: () => void }) {
       if (conversationId === id) {
         setConversationId(null);
         setMessages([]);
+        hydratePinnedContext([]);
       }
     } catch {
       setItems(prev); // revertir

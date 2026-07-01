@@ -15,6 +15,12 @@ interface GenerateButtonProps {
   force?: boolean;
   label?: string;
   variant?: 'default' | 'outline' | 'secondary';
+  /**
+   * Ruta a la que redirigir con `?analysisId=` tras generar. Por defecto el
+   * top-level `/analisis-ia`; el hub pasa `/evaluaciones/[id]/analisis-ia` para
+   * no saltar fuera de la evaluación.
+   */
+  basePath?: string;
 }
 
 /**
@@ -28,6 +34,7 @@ export function GenerateButton({
   force = false,
   label,
   variant = 'default',
+  basePath = '/analisis-ia',
 }: GenerateButtonProps) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
@@ -47,7 +54,7 @@ export function GenerateButton({
         query.set('assessmentId', assessmentId);
         query.set('analysisId', analysisId);
         if (classGroupId) query.set('classGroupId', classGroupId);
-        router.replace(`/analisis-ia?${query.toString()}`);
+        router.replace(`${basePath}?${query.toString()}`);
         router.refresh();
       } catch (err) {
         setError(err instanceof Error ? err.message : 'No se pudo generar el análisis.');

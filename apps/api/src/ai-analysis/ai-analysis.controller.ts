@@ -5,11 +5,13 @@ import {
   Inject,
   Param,
   Post,
+  Query,
   UseGuards,
 } from '@nestjs/common';
 import {
   AI_ANALYSIS_GENERATOR_ROLES,
   AI_ANALYSIS_VIEWER_ROLES,
+  findLatestAnalysisQuerySchema,
   generateAnalysisSchema,
   type AiAnalysisModel,
 } from '@soe/types';
@@ -61,6 +63,30 @@ export class AiAnalysisController {
     }
 
     return { analysisId: analysis.id, status: analysis.status };
+  }
+
+  /**
+   * GET /api/ai-analysis/assessments/:assessmentId/latest
+   *
+   * Devuelve el último análisis YA EXISTENTE para la evaluación (mismo scope que la
+   * caché: analysisType + audience + classGroupId), o `null` si no hay. No genera
+   * nada. La vista lo usa para cargar el informe creado previamente al re-seleccionar
+   * la evaluación (sin `analysisId` en la URL).
+   */
+  @Get('assessments/:assessmentId/latest')
+  @Roles(...AI_ANALYSIS_VIEWER_ROLES)
+  findLatest(
+    @Param('assessmentId') assessmentId: string,
+    @Query() query: unknown,
+    @CurrentUser() user: JwtPayload,
+  ): Promise<AiAnalysisModel | null> {
+    const q = findLatestAnalysisQuerySchema.parse(query);
+    return this.service.findLatestForAssessment(user, {
+      assessmentId,
+      analysisType: q.analysisType,
+      audience: q.audience,
+      classGroupId: q.classGroupId ?? null,
+    });
   }
 
   /** GET /api/ai-analysis/:id — poll del estado/salida del análisis. */

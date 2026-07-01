@@ -3,6 +3,8 @@ import { LlmAgentService } from './llm-agent.service';
 import { LlmConfigService } from './llm.config';
 import { LLM_PROVIDERS } from './llm.constants';
 import { LlmService } from './llm.service';
+import { LlmSettingsController } from './llm-settings.controller';
+import { LlmSettingsService } from './llm-settings.service';
 import { AnthropicProvider } from './providers/anthropic.provider';
 import { GeminiProvider } from './providers/gemini.provider';
 
@@ -27,7 +29,9 @@ import { GeminiProvider } from './providers/gemini.provider';
     },
     LlmService,
     LlmAgentService,
+    LlmSettingsService,
   ],
+  controllers: [LlmSettingsController],
   exports: [LlmService, LlmAgentService, LlmConfigService],
 })
 export class LlmModule {}

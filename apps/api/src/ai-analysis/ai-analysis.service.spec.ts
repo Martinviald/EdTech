@@ -124,6 +124,35 @@ function baseRow(overrides: Record<string, unknown> = {}): Record<string, unknow
 }
 
 // ──────────────────────────────────────────────────────────────────────────────
+// findLatestForAssessment()
+// ──────────────────────────────────────────────────────────────────────────────
+
+describe('AiAnalysisService.findLatestForAssessment', () => {
+  const params = {
+    assessmentId: 'as-1',
+    analysisType: 'assessment_insights',
+    audience: 'director',
+    classGroupId: null,
+  };
+
+  it('devuelve el último análisis existente para el scope', async () => {
+    const db = makeDb([[baseRow({ id: 'a-9', status: 'completed' })]]);
+    const res = await makeService(db).findLatestForAssessment(makeUser(), params);
+
+    expect(res).not.toBeNull();
+    expect(res?.id).toBe('a-9');
+    expect(res?.status).toBe('completed');
+  });
+
+  it('devuelve null cuando no existe ningún análisis', async () => {
+    const db = makeDb([[]]);
+    const res = await makeService(db).findLatestForAssessment(makeUser(), params);
+
+    expect(res).toBeNull();
+  });
+});
+
+// ──────────────────────────────────────────────────────────────────────────────
 // create()
 // ──────────────────────────────────────────────────────────────────────────────
 

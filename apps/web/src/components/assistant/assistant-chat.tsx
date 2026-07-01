@@ -3,11 +3,12 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { AtSign, Loader2, Send, Sparkles, X } from 'lucide-react';
 import { toast } from 'sonner';
-import type { AssistantContextKind, AssistantContextRef, AssistantStudentResult } from '@soe/types';
+import type { AssistantStudentResult } from '@soe/types';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { createConversation, searchStudents } from '@/lib/assistant/actions';
 import { useAssistant } from './assistant-context';
+import { ContextTray, contextChipLabel } from './context-tray';
 import { Markdown } from './markdown';
 import { readAssistantStream } from './stream';
 
@@ -41,24 +42,8 @@ const TOOL_LABELS: Record<string, string> = {
   get_item_content: 'contenido del ítem',
 };
 
-/** Etiqueta del chip de contexto cuando la ref no trae `label` propio. */
-const CONTEXT_KIND_LABELS: Record<AssistantContextKind, string> = {
-  assessment: 'Evaluación',
-  classGroup: 'Curso',
-  grade: 'Grado',
-  subject: 'Asignatura',
-  instrument: 'Instrumento',
-  academicYear: 'Período',
-  item: 'Ítem',
-  student: 'Alumno',
-};
-
 function toolLabel(name: string): string {
   return TOOL_LABELS[name] ?? name;
-}
-
-function contextChipLabel(ref: AssistantContextRef): string {
-  return ref.label ?? CONTEXT_KIND_LABELS[ref.kind];
 }
 
 /** Inserta o actualiza una traza de tool por nombre (dedup para el chip). */
@@ -327,6 +312,8 @@ export function AssistantChat() {
         }}
         className="space-y-2 border-t pt-3"
       >
+        <ContextTray />
+
         {(pageContext.length > 0 || mentions.length > 0) && (
           <div className="flex flex-wrap items-center gap-1 text-xs text-muted-foreground">
             <span>Contexto:</span>

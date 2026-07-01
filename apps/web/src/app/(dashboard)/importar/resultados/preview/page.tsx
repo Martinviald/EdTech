@@ -3,12 +3,7 @@
 import { useEffect, useState, useTransition } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import type { Route } from 'next';
-import {
-  AlertCircle,
-  ArrowLeft,
-  CheckCircle2,
-  Loader2,
-} from 'lucide-react';
+import { AlertCircle, ArrowLeft, CheckCircle2, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 import type { AnswerSheetPreviewResponse } from '@soe/types';
 import { Button } from '@/components/ui/button';
@@ -77,9 +72,7 @@ export default function PreviewPage() {
         return;
       }
       toast.success('Importación confirmada.');
-      router.push(
-        `/importar-resultados/jobs/${result.data.jobId}` as Route,
-      );
+      router.push(`/importar/resultados/jobs/${result.data.jobId}` as Route);
     });
   };
 
@@ -87,9 +80,7 @@ export default function PreviewPage() {
     return (
       <div className="flex items-center justify-center gap-3 rounded-lg border bg-card p-10">
         <Loader2 className="text-muted-foreground h-5 w-5 animate-spin" />
-        <span className="text-muted-foreground text-sm">
-          Cargando previsualización…
-        </span>
+        <span className="text-muted-foreground text-sm">Cargando previsualización…</span>
       </div>
     );
   }
@@ -101,16 +92,13 @@ export default function PreviewPage() {
           <AlertCircle className="mt-0.5 h-5 w-5 shrink-0" />
           <div className="space-y-0.5">
             <p className="font-medium">No se pudo cargar la previsualización</p>
-            <p>
-              {loadError ??
-                'El token puede haber expirado. Vuelve a subir el archivo.'}
-            </p>
+            <p>{loadError ?? 'El token puede haber expirado. Vuelve a subir el archivo.'}</p>
           </div>
         </div>
         <div>
           <Button
             variant="outline"
-            onClick={() => router.push('/importar-resultados/cargar' as Route)}
+            onClick={() => router.push('/importar/resultados/cargar' as Route)}
           >
             <ArrowLeft className="mr-2 h-4 w-4" />
             Volver a cargar archivo
@@ -120,25 +108,16 @@ export default function PreviewPage() {
     );
   }
 
-  const {
-    summary,
-    rows,
-    instrumentName,
-    detectedColumns,
-    warnings,
-    format,
-  } = preview;
-  const canConfirm =
-    summary.matchedStudents > 0 &&
-    (skipErrorRows || summary.rowsWithErrors === 0);
+  const { summary, rows, instrumentName, detectedColumns, warnings, format } = preview;
+  const canConfirm = summary.matchedStudents > 0 && (skipErrorRows || summary.rowsWithErrors === 0);
 
   return (
     <div className="space-y-6">
       <div className="space-y-1">
         <h1 className="text-2xl font-semibold">Previsualización</h1>
         <p className="text-muted-foreground text-sm">
-          Revisa las filas detectadas. Aún no se ha guardado nada — confirma
-          abajo para crear la evaluación y registrar las respuestas.
+          Revisa las filas detectadas. Aún no se ha guardado nada — confirma abajo para crear la
+          evaluación y registrar las respuestas.
         </p>
         <div className="flex flex-wrap items-center gap-2 pt-2 text-sm">
           <Badge variant="secondary">{FORMAT_LABELS[format] ?? format}</Badge>
@@ -149,11 +128,7 @@ export default function PreviewPage() {
 
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
         <Stat label="Filas totales" value={summary.totalRows} variant="neutral" />
-        <Stat
-          label="Alumnos encontrados"
-          value={summary.matchedStudents}
-          variant="success"
-        />
+        <Stat label="Alumnos encontrados" value={summary.matchedStudents} variant="success" />
         <Stat
           label="No encontrados"
           value={summary.unmatchedStudents}
@@ -173,20 +148,15 @@ export default function PreviewPage() {
         <CardContent className="space-y-2 text-sm">
           <p>
             <span className="font-medium">{summary.itemsCovered}</span> de{' '}
-            <span className="font-medium">{summary.itemsInInstrument}</span>{' '}
-            ítems del instrumento están presentes en el archivo.
+            <span className="font-medium">{summary.itemsInInstrument}</span> ítems del instrumento
+            están presentes en el archivo.
           </p>
           {detectedColumns.length > 0 && (
             <div className="space-y-1">
-              <p className="text-muted-foreground text-xs uppercase">
-                Columnas detectadas
-              </p>
+              <p className="text-muted-foreground text-xs uppercase">Columnas detectadas</p>
               <div className="flex flex-wrap gap-1">
                 {detectedColumns.map((col) => (
-                  <code
-                    key={col}
-                    className="rounded bg-muted px-1.5 py-0.5 text-xs"
-                  >
+                  <code key={col} className="rounded bg-muted px-1.5 py-0.5 text-xs">
                     {col}
                   </code>
                 ))}
@@ -237,9 +207,7 @@ export default function PreviewPage() {
                 disabled={isConfirming}
               />
               <span>
-                <span className="font-medium">
-                  Omitir filas con errores y continuar
-                </span>
+                <span className="font-medium">Omitir filas con errores y continuar</span>
                 <span className="text-muted-foreground block text-xs">
                   Si lo desmarcas, la importación se cancelará si hay errores.
                 </span>
@@ -262,7 +230,7 @@ export default function PreviewPage() {
       <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
         <Button
           variant="outline"
-          onClick={() => router.push('/importar-resultados/cargar' as Route)}
+          onClick={() => router.push('/importar/resultados/cargar' as Route)}
           disabled={isConfirming}
         >
           <ArrowLeft className="mr-2 h-4 w-4" />
