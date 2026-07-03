@@ -24,6 +24,24 @@ export interface LlmCompletionOptions {
   temperature?: number;
 }
 
+/** Uso de tokens de una completion (entrada/salida). */
+export interface LlmUsage {
+  inputTokens: number;
+  outputTokens: number;
+}
+
+/**
+ * Resultado de una completion con METADATOS de uso, para observabilidad de costo.
+ * `usage` es `null` si el provider no reporta uso de tokens (degradación elegante:
+ * el texto se devuelve igual, pero el costo queda sin estimar). `model` es el
+ * modelo efectivo resuelto por la configuración activa.
+ */
+export interface LlmCompletionResult {
+  text: string;
+  model: string;
+  usage: LlmUsage | null;
+}
+
 /** Imagen adjunta a una completion multimodal (best-effort). */
 export interface LlmImagePart {
   /** MIME del binario (p. ej. `image/png`, `image/jpeg`). */
@@ -63,11 +81,23 @@ export interface LlmProvider {
   /** Ejecuta una completion y devuelve el texto plano de la respuesta. */
   complete(request: LlmCompletionRequest): Promise<string>;
   /**
+   * Igual que `complete`, pero devuelve además el uso de tokens para estimar el
+   * costo (observabilidad). OPCIONAL: si el provider no lo implementa,
+   * `LlmService.completeWithUsage` degrada a `complete` con `usage: null`.
+   */
+  completeWithUsage?(request: LlmCompletionRequest): Promise<LlmCompletionResult>;
+  /**
    * Ejecuta una completion MULTIMODAL (texto + imágenes) y devuelve texto plano.
    * OPCIONAL: si el provider no lo implementa, `LlmService.completeMultimodal`
    * degrada elegantemente a `complete` (solo texto).
    */
   completeMultimodal?(request: LlmCompletionRequest): Promise<string>;
+  /**
+   * Igual que `completeMultimodal`, pero devuelve además el uso de tokens.
+   * OPCIONAL: si el provider no lo implementa, `LlmService.completeMultimodalWithUsage`
+   * degrada a la mejor variante disponible con `usage: null`.
+   */
+  completeMultimodalWithUsage?(request: LlmCompletionRequest): Promise<LlmCompletionResult>;
   /**
    * Ejecuta una vuelta agéntica con tool-use y STREAMING. Emite eventos
    * (`text_delta`, `tool_call`, `usage`, `done`) a medida que el modelo produce
@@ -125,11 +155,7 @@ export interface LlmAgentMessage {
 }
 
 /** Razón por la que el modelo detuvo la generación en una vuelta. */
-export type LlmAgentStopReason =
-  | 'end_turn'
-  | 'tool_use'
-  | 'max_tokens'
-  | 'other';
+export type LlmAgentStopReason = 'end_turn' | 'tool_use' | 'max_tokens' | 'other';
 
 /**
  * Evento emitido por `streamWithTools`. El provider los produce en orden a

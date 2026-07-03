@@ -163,7 +163,12 @@ function validOutput(overrides: Partial<AssessmentInsightsOutput> = {}): Assessm
 
 function makeRunner(opts: {
   record?: Record<string, unknown> | null;
-  llmComplete: () => Promise<string>;
+  llmComplete: (
+    system?: string,
+    prompt?: string,
+    orgId?: string,
+    feature?: string,
+  ) => Promise<string>;
   snapshotBuild?: () => Promise<AiAnalysisSnapshot>;
 }): {
   runner: AiAnalysisRunner;
@@ -175,7 +180,16 @@ function makeRunner(opts: {
 } {
   const db = makeDb(opts.record === undefined ? baseRecord() : opts.record);
   const llmComplete = jest.fn(opts.llmComplete);
-  const llm = { complete: llmComplete } as unknown as LlmService;
+  // El runner llama `completeWithUsage`; lo envolvemos sobre `llmComplete` (que
+  // devuelve el string del modelo) para no reescribir los cuerpos de cada test.
+  const completeWithUsage = jest.fn(
+    async (system: string, prompt: string, orgId: string, feature: string) => ({
+      text: await llmComplete(system, prompt, orgId, feature),
+      model: 'gemini-2.5-flash',
+      usage: { inputTokens: 100, outputTokens: 50 },
+    }),
+  );
+  const llm = { complete: llmComplete, completeWithUsage } as unknown as LlmService;
   const snapshotBuild = jest.fn(opts.snapshotBuild ?? (async () => makeSnapshot()));
   const snapshot = { build: snapshotBuild } as unknown as SnapshotBuilder;
   const markProcessing = jest.fn().mockResolvedValue(undefined);
@@ -251,12 +265,11 @@ describe('AiAnalysisRunner.run', () => {
 
   it('audiencia director: el prompt enfatiza la mirada de gestión', async () => {
     let captured = '';
-    const { runner } = makeRunner({
+    const { runner, llmComplete } = makeRunner({
       record: baseRecord({ audience: 'director' }),
       llmComplete: async () => JSON.stringify(validOutput()),
     });
-    const llm = (runner as unknown as { llm: { complete: jest.Mock } }).llm;
-    llm.complete.mockImplementation(async (_system: string, prompt: string) => {
+    llmComplete.mockImplementation(async (_system: string, prompt: string) => {
       captured = prompt;
       return JSON.stringify(validOutput());
     });
@@ -267,12 +280,11 @@ describe('AiAnalysisRunner.run', () => {
 
   it('audiencia profesor: el prompt enfatiza lo accionable de aula', async () => {
     let captured = '';
-    const { runner } = makeRunner({
+    const { runner, llmComplete } = makeRunner({
       record: baseRecord({ audience: 'teacher' }),
       llmComplete: async () => JSON.stringify(validOutput()),
     });
-    const llm = (runner as unknown as { llm: { complete: jest.Mock } }).llm;
-    llm.complete.mockImplementation(async (_system: string, prompt: string) => {
+    llmComplete.mockImplementation(async (_system: string, prompt: string) => {
       captured = prompt;
       return JSON.stringify(validOutput());
     });
@@ -283,12 +295,11 @@ describe('AiAnalysisRunner.run', () => {
 
   it('audiencia desconocida cae a general (no rompe)', async () => {
     let captured = '';
-    const { runner, markCompleted } = makeRunner({
+    const { runner, markCompleted, llmComplete } = makeRunner({
       record: baseRecord({ audience: 'legacy_value' }),
       llmComplete: async () => JSON.stringify(validOutput()),
     });
-    const llm = (runner as unknown as { llm: { complete: jest.Mock } }).llm;
-    llm.complete.mockImplementation(async (_system: string, prompt: string) => {
+    llmComplete.mockImplementation(async (_system: string, prompt: string) => {
       captured = prompt;
       return JSON.stringify(validOutput());
     });

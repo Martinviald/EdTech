@@ -1,11 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { and, eq, isNull, lt } from 'drizzle-orm';
-import {
-  skillResults,
-  studentEnrollments,
-  students,
-  withOrgContext,
-} from '@soe/db';
+import { skillResults, studentEnrollments, students, withOrgContext } from '@soe/db';
 import {
   remedialPlanContentSchema,
   type RemedialMaterialType,
@@ -19,10 +14,11 @@ import {
   GROUP_PLAN_PROMPT_VERSION,
   type GroupPlanAggregates,
 } from '../prompts/group-plan.prompt';
-import type {
-  RemedialGenerationInput,
-  RemedialGenerationResult,
-  RemedialGenerator,
+import {
+  remedialUsageFields,
+  type RemedialGenerationInput,
+  type RemedialGenerationResult,
+  type RemedialGenerator,
 } from '../remedial.generator';
 
 /** Umbral de % de logro (0..100) bajo el cual un alumno entra al grupo remedial. */
@@ -46,9 +42,7 @@ export class GroupPlanGenerator implements RemedialGenerator {
     @InjectDb() private readonly db: Database,
   ) {}
 
-  async generate(
-    input: RemedialGenerationInput,
-  ): Promise<RemedialGenerationResult> {
+  async generate(input: RemedialGenerationInput): Promise<RemedialGenerationResult> {
     const nodeId = input.material.nodeId;
     if (!nodeId) {
       throw new Error('El plan por grupo requiere un nodeId (habilidad objetivo)');
@@ -58,21 +52,15 @@ export class GroupPlanGenerator implements RemedialGenerator {
       throw new Error('El plan por grupo requiere un classGroupId (cohorte)');
     }
 
-    const aggregates = await this.computeAggregates(
-      input.orgId,
-      classGroupId,
-      nodeId,
-    );
+    const aggregates = await this.computeAggregates(input.orgId, classGroupId, nodeId);
 
     const { system, prompt } = buildGroupPlanPrompt(input.curriculum, aggregates);
-    const raw = await this.llm.complete(system, prompt, input.orgId, 'remedial');
+    const completion = await this.llm.completeWithUsage(system, prompt, input.orgId, 'remedial');
 
-    const json = parseModelJson(raw);
+    const json = parseModelJson(completion.text);
     const result = remedialPlanContentSchema.safeParse(json);
     if (!result.success) {
-      throw new Error(
-        `El plan generado no cumple el schema: ${result.error.message}`,
-      );
+      throw new Error(`El plan generado no cumple el schema: ${result.error.message}`);
     }
 
     // El studentCount es DETERMINISTA: lo fijamos desde backend, nunca confiamos
@@ -87,6 +75,7 @@ export class GroupPlanGenerator implements RemedialGenerator {
       promptVersion: GROUP_PLAN_PROMPT_VERSION,
       // Auditoría: solo agregados anónimos + contexto curricular. SIN PII.
       audit: { curriculum: input.curriculum, aggregates },
+      ...remedialUsageFields(completion),
     };
   }
 
@@ -105,10 +94,7 @@ export class GroupPlanGenerator implements RemedialGenerator {
         .select({ percentage: skillResults.percentage })
         .from(skillResults)
         .innerJoin(students, eq(skillResults.studentId, students.id))
-        .innerJoin(
-          studentEnrollments,
-          eq(studentEnrollments.studentId, students.id),
-        )
+        .innerJoin(studentEnrollments, eq(studentEnrollments.studentId, students.id))
         .where(
           and(
             eq(skillResults.nodeId, nodeId),
