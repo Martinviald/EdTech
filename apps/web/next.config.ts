@@ -9,6 +9,8 @@ loadEnv({ path: resolve(__dirname, '../../.env') });
 const nextConfig: NextConfig = {
   reactStrictMode: true,
   transpilePackages: ['@soe/ui', '@soe/types', '@soe/db'],
+  // Oculta el indicador/botón flotante de desarrollo de Next (logo + estado de build).
+  devIndicators: false,
   experimental: {
     typedRoutes: true,
   },
