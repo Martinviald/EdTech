@@ -42,10 +42,11 @@ async function main(): Promise<void> {
     $$;
   `);
 
-  // 2. Fijar/rotar el password y reasegurar atributos (idempotente).
-  await sql.unsafe(
-    `ALTER ROLE soe_app WITH LOGIN NOSUPERUSER NOCREATEDB NOCREATEROLE NOBYPASSRLS PASSWORD '${pw}';`,
-  );
+  // 2. Fijar/rotar el password (idempotente).
+  //    NO tocar SUPERUSER/BYPASSRLS aquí: en RDS el master (rds_superuser) no es
+  //    superusuario real y Postgres exige SUPERUSER para *alterar* esos atributos,
+  //    aunque sean el default. El CREATE de arriba ya deja el rol NOSUPERUSER/NOBYPASSRLS.
+  await sql.unsafe(`ALTER ROLE soe_app WITH LOGIN PASSWORD '${pw}';`);
 
   // 3. Permisos mínimos sobre el schema public (las políticas RLS hacen el resto).
   //    GRANT CONNECT sobre la BD actual (vía dynamic SQL, current_database()).
