@@ -1,4 +1,6 @@
+import { redirect } from 'next/navigation';
 import { GraduationCap } from 'lucide-react';
+import { auth } from '@/auth';
 import { internalGet } from '@/lib/api';
 import { BRAND } from '@/lib/brand';
 import { AlertCallout } from '@/components/patterns';
@@ -10,6 +12,12 @@ type MockUser = { email: string; name: string; role: string; orgName: string };
 export const dynamic = 'force-dynamic';
 
 export default async function LoginPage() {
+  // Si el usuario ya está autenticado, no mostramos el login: lo enviamos al
+  // resolver post-login, que decide el destino según org/rol (multi-org,
+  // platform_admin o dashboard directo).
+  const session = await auth();
+  if (session?.user) redirect('/seleccionar-colegio');
+
   const isMock = process.env.AUTH_MODE === 'mock';
 
   return (
