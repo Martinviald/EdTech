@@ -1,16 +1,20 @@
 import type { RemedialContent, RemedialMaterialType } from '@soe/types';
 import type { RemedialMaterial } from '@soe/db';
+import type { RemedialBrief } from './remedial-brief.service';
 import type { RemedialCurriculumContext } from './remedial-context.service';
 
 /**
  * Datos de entrada que el runner entrega a cada generador: el registro de dominio
- * (para id/orgId/parámetros deterministas) y el contexto curricular RAG ya
- * ensamblado (sin PII).
+ * (para id/orgId/parámetros deterministas), el contexto curricular RAG ya ensamblado
+ * (sin PII) y, opcionalmente, el brief diagnóstico anclado a la evidencia del error
+ * (G4). El `brief` es OPCIONAL: `guide`/`group_plan` pueden ignorarlo; `practice_set`
+ * lo usa para que las alternativas incorrectas capturen el error real.
  */
 export interface RemedialGenerationInput {
   material: RemedialMaterial;
   orgId: string;
   curriculum: RemedialCurriculumContext;
+  brief?: RemedialBrief | null;
 }
 
 /**

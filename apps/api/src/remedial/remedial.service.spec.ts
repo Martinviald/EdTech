@@ -319,4 +319,51 @@ describe('RemedialService', () => {
     const publishUpdate = db.__updates.find((u) => u.status === 'published');
     expect(publishUpdate).toBeDefined();
   });
+
+  it('get hidrata practiceItems on-read para practice_set ready (sin persistir)', async () => {
+    const practiceContent: RemedialPracticeContent = {
+      skillFocus: 'fracciones',
+      itemCount: 1,
+      items: [{ itemId: '22222222-2222-2222-2222-222222222222', position: 1, stem: 'a' }],
+      notes: null,
+    };
+    const row = makeRow({ status: 'ready', type: 'practice_set', content: practiceContent });
+    const itemRow = {
+      id: '22222222-2222-2222-2222-222222222222',
+      type: 'multiple_choice',
+      content: {
+        stem: '¿Cuál es equivalente a 1/2?',
+        alternatives: [
+          { key: 'A', text: '2/4', isCorrect: true },
+          { key: 'B', text: '1/3', isCorrect: false },
+        ],
+        explanation: '2/4 simplifica a 1/2',
+      },
+    };
+    // 1) findOne, 2) nodeName (toModel), 3) items (hidratación)
+    const db = makeDb([[row], [{ name: 'OA' }], [itemRow]]);
+    const service = new RemedialService(db);
+    const model = await service.get(makeUser(), 'mat-1');
+
+    expect(model.practiceItems).toHaveLength(1);
+    expect(model.practiceItems?.[0]).toMatchObject({
+      itemId: '22222222-2222-2222-2222-222222222222',
+      position: 1,
+      type: 'multiple_choice',
+      stem: '¿Cuál es equivalente a 1/2?',
+      correctKey: 'A',
+      explanation: '2/4 simplifica a 1/2',
+    });
+    expect(model.practiceItems?.[0]?.alternatives).toHaveLength(2);
+    // on-read: no se persiste nada.
+    expect(db.__updates).toHaveLength(0);
+  });
+
+  it('get NO hidrata practiceItems para guide (queda undefined)', async () => {
+    const row = makeRow({ status: 'ready', type: 'guide' });
+    const db = makeDb([[row], [{ name: 'OA' }]]);
+    const service = new RemedialService(db);
+    const model = await service.get(makeUser(), 'mat-1');
+    expect(model.practiceItems).toBeUndefined();
+  });
 });
