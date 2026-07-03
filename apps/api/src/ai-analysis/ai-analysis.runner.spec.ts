@@ -308,6 +308,36 @@ describe('AiAnalysisRunner.run', () => {
     expect(markFailed.mock.calls[0]![2]).toContain('llm down');
   });
 
+  it('reintenta ante fallo TRANSITORIO de red y completa (fetch failed → éxito)', async () => {
+    process.env.AI_ANALYSIS_RETRY_BACKOFF_MS = '0';
+    let calls = 0;
+    const { runner, markCompleted, markFailed, llmComplete } = makeRunner({
+      llmComplete: async () => {
+        calls += 1;
+        if (calls === 1) {
+          throw new Error('exception TypeError: fetch failed sending request');
+        }
+        return JSON.stringify(validOutput());
+      },
+    });
+    await runner.run('a-1', 'org-1');
+    delete process.env.AI_ANALYSIS_RETRY_BACKOFF_MS;
+    expect(llmComplete).toHaveBeenCalledTimes(2);
+    expect(markCompleted).toHaveBeenCalledTimes(1);
+    expect(markFailed).not.toHaveBeenCalled();
+  });
+
+  it('NO reintenta errores no-transitorios → failed en un solo intento', async () => {
+    const { runner, markFailed, llmComplete } = makeRunner({
+      llmComplete: async () => {
+        throw new Error('llm down');
+      },
+    });
+    await runner.run('a-1', 'org-1');
+    expect(llmComplete).toHaveBeenCalledTimes(1);
+    expect(markFailed).toHaveBeenCalledTimes(1);
+  });
+
   it('timeout → failed', async () => {
     process.env.AI_ANALYSIS_TIMEOUT_MS = '20';
     const { runner, markCompleted, markFailed } = makeRunner({
