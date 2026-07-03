@@ -41,6 +41,11 @@ coverage/
 packages/db/drizzle/*
 !packages/db/drizzle/migrations/
 
+# SST / OpenNext (infra) — artefactos generados, no versionar
+.sst/
+sst-env.d.ts
+.open-next/
+
 # Misc
 .cache/
 .eslintcache

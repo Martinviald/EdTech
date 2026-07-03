@@ -1,0 +1,16 @@
+# Contexto de build = raíz del monorepo. Excluir todo lo pesado/derivado.
+**/node_modules
+**/dist
+**/.next
+**/.open-next
+**/.turbo
+**/coverage
+**/*.tsbuildinfo
+.git
+.sst
+.vscode
+**/.env
+**/.env.*
+docs
+Histórico*
+*.md
