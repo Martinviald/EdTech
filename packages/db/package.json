@@ -29,6 +29,7 @@
     "db:seed": "tsx src/seed/index.ts",
     "db:seed:e2e": "tsx src/seed/e2e-testing.ts",
     "db:seed:benchmark": "tsx src/seed/benchmark-demo.ts",
+    "db:seed:demo-access": "tsx src/seed/demo-access.ts",
     "db:seed:taxonomy": "tsx src/seed/taxonomy-real.ts",
     "db:import:instruments": "tsx src/seed/import-instruments.ts",
     "db:import:item-tags": "tsx src/seed/import-item-tags.ts",
