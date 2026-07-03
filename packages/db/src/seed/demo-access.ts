@@ -1,20 +1,19 @@
 /**
  * Seed de ACCESO DEMO (stage demo).
  *
- * Crea la org **CSCJ** como shell (fundación Tupungato + colegio, SIN roster real
- * de alumnos — no cargamos PII en el stage demo) y **pre-crea los usuarios/accesos**
- * de los stakeholders para que puedan entrar con **SSO Google**.
+ * Crea la org **CSCJ** shell (fundación Tupungato + colegio) y da acceso a los
+ * stakeholders para login **SSO Google**, de forma robusta ante cualquier estado
+ * previo de la BDD:
+ *   - Si el email YA tiene users row → adjunta la membership por su userId.
+ *   - Si NO → crea la membership como **invitación pendiente** (userId NULL + email);
+ *     en el primer login SSO el callback signIn (Caso A) crea el user y la promueve.
+ *   - Platform admin: requiere users row → query-or-create + platform_admins.
  *
- * Patrón: pre-crear `users` (provider google + providerId placeholder) + memberships
- * con UUIDs fijos. En el primer login real, el callback signIn matchea por email
- * (Caso B → /auth/sync-user actualiza el providerId real). Idempotente
- * (onConflictDoNothing). NO toca otras orgs.
- *
- * Requiere: `db:seed` (base) y `db:seed:benchmark` (crea Colegio Andes Centro) antes.
- * Correr con DATABASE_ADMIN_URL.
+ * Idempotente (onConflictDoNothing). NO carga PII de alumnos. Correr con DATABASE_ADMIN_URL.
  */
 import { config } from 'dotenv';
 import { resolve } from 'path';
+import { eq } from 'drizzle-orm';
 import { createDbClient } from '../client';
 import { organizations, academicYears } from '../schema/organizations';
 import { users, orgMemberships } from '../schema/users';
@@ -23,16 +22,12 @@ import type { UserRole } from '@soe/types';
 
 config({ path: resolve(__dirname, '../../../../.env') });
 
-// ── CSCJ: mismos UUIDs fijos que import-cscj-roster.ts (org shell, sin roster) ──
 const CSCJ_FOUNDATION_ID = 'c5c10000-0000-0000-0000-0000000000f0';
 const CSCJ_SCHOOL_ID = 'c5c10000-0000-0000-0000-000000000001';
 const CSCJ_AY_2025_ID = 'c5c10000-0000-0000-0000-000000002025';
-
-// ── Colegio Andes Centro (foco), creado por el seed de benchmark ──
 const ANDES_CENTRO_ID = 'b3c00000-0000-0000-0000-000000000001';
 
 type Person = {
-  id: string;
   email: string;
   name: string;
   orgId?: string;
@@ -40,28 +35,28 @@ type Person = {
   platformAdmin?: boolean;
 };
 
-// Namespace de UUID propio (d3m0...) para los usuarios demo.
 const PEOPLE: Person[] = [
-  // CSCJ — school_admin
-  { id: 'd3e00000-0000-0000-0000-000000000001', email: 'mvial@cscj.cl', name: 'M. Vial', orgId: CSCJ_SCHOOL_ID, role: 'school_admin' },
-  { id: 'd3e00000-0000-0000-0000-000000000002', email: 'ariztia.tomas@cscj.cl', name: 'Tomás Ariztía (CSCJ)', orgId: CSCJ_SCHOOL_ID, role: 'school_admin' },
-  { id: 'd3e00000-0000-0000-0000-000000000003', email: 'celton@cscj.cl', name: 'C. Elton', orgId: CSCJ_SCHOOL_ID, role: 'school_admin' },
-  // CSCJ — academic_director ("director")
-  { id: 'd3e00000-0000-0000-0000-000000000004', email: 'fgutierrez@cscj.cl', name: 'F. Gutiérrez', orgId: CSCJ_SCHOOL_ID, role: 'academic_director' },
-  { id: 'd3e00000-0000-0000-0000-000000000005', email: 'tlagos@cscj.cl', name: 'T. Lagos', orgId: CSCJ_SCHOOL_ID, role: 'academic_director' },
-  // Platform admin
-  { id: 'd3e00000-0000-0000-0000-000000000006', email: 'martinviald@gmail.com', name: 'Martín Vial (Plataforma)', platformAdmin: true },
-  // Acceso al Colegio Andes Centro (red demo) — school_admin
-  { id: 'd3e00000-0000-0000-0000-000000000007', email: 'ariztia.tomas@gmail.com', name: 'Tomás Ariztía (Andes)', orgId: ANDES_CENTRO_ID, role: 'school_admin' },
-  { id: 'd3e00000-0000-0000-0000-000000000008', email: 'cristobalelton@cscj.cl', name: 'Cristóbal Elton', orgId: ANDES_CENTRO_ID, role: 'school_admin' },
+  { email: 'mvial@cscj.cl', name: 'M. Vial', orgId: CSCJ_SCHOOL_ID, role: 'school_admin' },
+  { email: 'ariztia.tomas@cscj.cl', name: 'Tomás Ariztía (CSCJ)', orgId: CSCJ_SCHOOL_ID, role: 'school_admin' },
+  { email: 'celton@cscj.cl', name: 'C. Elton', orgId: CSCJ_SCHOOL_ID, role: 'school_admin' },
+  { email: 'fgutierrez@cscj.cl', name: 'F. Gutiérrez', orgId: CSCJ_SCHOOL_ID, role: 'academic_director' },
+  { email: 'tlagos@cscj.cl', name: 'T. Lagos', orgId: CSCJ_SCHOOL_ID, role: 'academic_director' },
+  { email: 'martinviald@gmail.com', name: 'Martín Vial (Plataforma)', platformAdmin: true },
+  { email: 'ariztia.tomas@gmail.com', name: 'Tomás Ariztía (Andes)', orgId: ANDES_CENTRO_ID, role: 'school_admin' },
+  { email: 'cristobalelton@cscj.cl', name: 'Cristóbal Elton', orgId: ANDES_CENTRO_ID, role: 'school_admin' },
 ];
+
+async function findUserId(db: ReturnType<typeof createDbClient>, email: string): Promise<string | undefined> {
+  const rows = await db.select({ id: users.id }).from(users).where(eq(users.email, email));
+  return rows[0]?.id;
+}
 
 async function main(): Promise<void> {
   const databaseUrl = process.env.DATABASE_ADMIN_URL ?? process.env.DATABASE_URL;
   if (!databaseUrl) throw new Error('DATABASE_ADMIN_URL o DATABASE_URL requerido');
   const db = createDbClient(databaseUrl);
 
-  // 1. Org CSCJ (fundación + colegio) — shell, sin alumnos.
+  // 1. Org CSCJ (shell) + academic year 2025.
   console.log('Creando org CSCJ (shell)...');
   await db
     .insert(organizations)
@@ -70,48 +65,44 @@ async function main(): Promise<void> {
       { id: CSCJ_SCHOOL_ID, type: 'school', parentId: CSCJ_FOUNDATION_ID, name: 'Colegio Sagrado Corazón de La Reina', rbd: '25520-3', commune: 'La Reina', region: 'Región Metropolitana', dependence: 'particular_pagado' },
     ])
     .onConflictDoNothing();
-
   await db
     .insert(academicYears)
     .values({ id: CSCJ_AY_2025_ID, orgId: CSCJ_SCHOOL_ID, year: 2025, isCurrent: true })
     .onConflictDoNothing();
 
-  // 2. Usuarios (pre-creados; se matchean por email en el primer login SSO).
-  console.log(`Pre-creando ${PEOPLE.length} usuarios demo...`);
-  await db
-    .insert(users)
-    .values(
-      PEOPLE.map((p) => ({
-        id: p.id,
-        email: p.email,
-        name: p.name,
-        provider: 'google' as const,
-        providerId: `seed-demo-${p.id.slice(-2)}`,
-      })),
-    )
-    .onConflictDoNothing();
-
-  // 3. Memberships (rol × org) para los que tienen org.
-  const memberships = PEOPLE.filter((p) => p.orgId && p.role).map((p) => ({
-    userId: p.id,
-    orgId: p.orgId as string,
-    role: p.role as UserRole,
-    isActive: true,
-  }));
-  console.log(`Creando ${memberships.length} memberships...`);
-  await db.insert(orgMemberships).values(memberships).onConflictDoNothing();
-
-  // 4. Platform admins.
-  const admins = PEOPLE.filter((p) => p.platformAdmin).map((p) => ({
-    userId: p.id,
-    notes: 'seed demo-access',
-  }));
-  if (admins.length) {
-    console.log(`Creando ${admins.length} platform admin(s)...`);
-    await db.insert(platformAdmins).values(admins).onConflictDoNothing();
+  // 2. Memberships (adjuntar por userId si el email ya existe; si no, invitación pendiente).
+  for (const p of PEOPLE.filter((x) => x.orgId && x.role)) {
+    const userId = await findUserId(db, p.email);
+    if (userId) {
+      await db
+        .insert(orgMemberships)
+        .values({ userId, orgId: p.orgId as string, role: p.role as UserRole, isActive: true })
+        .onConflictDoNothing();
+      console.log(`  membership (existente) ${p.email} → ${p.role}`);
+    } else {
+      await db
+        .insert(orgMemberships)
+        .values({ orgId: p.orgId as string, role: p.role as UserRole, email: p.email, isActive: true, invitedAt: new Date() })
+        .onConflictDoNothing();
+      console.log(`  invitación (whitelist) ${p.email} → ${p.role}`);
+    }
   }
 
-  console.log('✅ Acceso demo cargado: CSCJ + usuarios + platform admin.');
+  // 3. Platform admin: query-or-create user + platform_admins.
+  for (const p of PEOPLE.filter((x) => x.platformAdmin)) {
+    let userId = await findUserId(db, p.email);
+    if (!userId) {
+      const ins = await db
+        .insert(users)
+        .values({ email: p.email, name: p.name, provider: 'google', providerId: 'seed-demo-platform-admin' })
+        .returning({ id: users.id });
+      userId = ins[0].id;
+    }
+    await db.insert(platformAdmins).values({ userId, notes: 'seed demo-access' }).onConflictDoNothing();
+    console.log(`  platform admin ${p.email}`);
+  }
+
+  console.log('✅ demo-access cargado (CSCJ + accesos).');
 }
 
 main()
