@@ -172,12 +172,22 @@ export default $config({
         },
       },
       instanceConfiguration: {
-        cpu: "0.25 vCPU",
-        memory: "0.5 GB",
+        // 1 vCPU / 2 GB: la API NestJS carga ~40 módulos + SDKs de IA al arrancar;
+        // con 0.25 vCPU el boot excedía la ventana del health check → CREATE_FAILED.
+        cpu: "1 vCPU",
+        memory: "2 GB",
         instanceRoleArn: instanceRole.arn,
       },
       networkConfiguration: {
         egressConfiguration: { egressType: "VPC", vpcConnectorArn: vpcConnector.arn },
+      },
+      // Health check tolerante: da tiempo a que el boot bindee el puerto 4000.
+      healthCheckConfiguration: {
+        protocol: "TCP",
+        interval: 10,
+        timeout: 5,
+        healthyThreshold: 1,
+        unhealthyThreshold: 10,
       },
     });
 
