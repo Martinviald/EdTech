@@ -37,6 +37,8 @@ ALTER TABLE "skill_results"       ENABLE ROW LEVEL SECURITY;
 ALTER TABLE "skill_results"       FORCE  ROW LEVEL SECURITY;
 ALTER TABLE "performance_bands"   ENABLE ROW LEVEL SECURITY;
 ALTER TABLE "performance_bands"   FORCE  ROW LEVEL SECURITY;
+ALTER TABLE "llm_settings"        ENABLE ROW LEVEL SECURITY;
+ALTER TABLE "llm_settings"        FORCE  ROW LEVEL SECURITY;
 
 -- ── Políticas con org_id directo ────────────────────────────────────────────
 DROP POLICY IF EXISTS "students_tenant_isolation" ON "students";
@@ -64,6 +66,22 @@ CREATE POLICY "import_jobs_tenant_isolation" ON "import_jobs"
 -- siembran con el rol admin (BYPASSRLS), no por la API sujeta a RLS.
 DROP POLICY IF EXISTS "performance_bands_tenant_isolation" ON "performance_bands";
 CREATE POLICY "performance_bands_tenant_isolation" ON "performance_bands"
+  AS PERMISSIVE FOR ALL
+  USING (
+    org_id IS NULL
+    OR org_id::text = current_setting('app.current_org_id', true)
+  );
+
+-- llm_settings: config de modelo de IA por funcionalidad. org_id NULLABLE igual que
+-- performance_bands. Las filas globales (org_id IS NULL) son la config de plataforma:
+-- legibles por todos los tenants y resueltas por LlmConfigService SIN contexto de org
+-- (como las bandas globales). No contienen PII (solo provider/model). A diferencia de
+-- las bandas, ESTAS filas globales sí las escribe la API (panel /configuracion/modelos-ia):
+-- con `org_id IS NULL` la expresión USING se hereda como WITH CHECK y evalúa TRUE, así que
+-- el rol de la API (sin BYPASSRLS) puede upsertearlas. La autorización real es el role
+-- guard platform_admin del endpoint (RLS no es la barrera para config global de plataforma).
+DROP POLICY IF EXISTS "llm_settings_tenant_isolation" ON "llm_settings";
+CREATE POLICY "llm_settings_tenant_isolation" ON "llm_settings"
   AS PERMISSIVE FOR ALL
   USING (
     org_id IS NULL
@@ -103,3 +121,63 @@ CREATE POLICY "skill_results_tenant_isolation" ON "skill_results"
         AND "assessments"."org_id"::text = current_setting('app.current_org_id', true)
     )
   );
+
+-- ── F2 S0 — ai_analyses + org_benchmark_settings (org_id directo) ────────────
+ALTER TABLE "ai_analyses"             ENABLE ROW LEVEL SECURITY;
+ALTER TABLE "ai_analyses"             FORCE  ROW LEVEL SECURITY;
+ALTER TABLE "org_benchmark_settings"  ENABLE ROW LEVEL SECURITY;
+ALTER TABLE "org_benchmark_settings"  FORCE  ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "ai_analyses_tenant_isolation" ON "ai_analyses";
+CREATE POLICY "ai_analyses_tenant_isolation" ON "ai_analyses"
+  AS PERMISSIVE FOR ALL
+  USING (org_id::text = current_setting('app.current_org_id', true));
+
+DROP POLICY IF EXISTS "org_benchmark_settings_tenant_isolation" ON "org_benchmark_settings";
+CREATE POLICY "org_benchmark_settings_tenant_isolation" ON "org_benchmark_settings"
+  AS PERMISSIVE FOR ALL
+  USING (org_id::text = current_setting('app.current_org_id', true));
+
+-- ── F2 S3 — remedial_materials (org_id directo) ──────────────────────────────
+ALTER TABLE "remedial_materials"      ENABLE ROW LEVEL SECURITY;
+ALTER TABLE "remedial_materials"      FORCE  ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "remedial_materials_tenant_isolation" ON "remedial_materials";
+CREATE POLICY "remedial_materials_tenant_isolation" ON "remedial_materials"
+  AS PERMISSIVE FOR ALL
+  USING (org_id::text = current_setting('app.current_org_id', true));
+
+-- ── F2 S4 — Benchmarking ─────────────────────────────────────────────────────
+-- benchmark_access_logs: RLS por org_id (cada org ve solo sus propios accesos).
+ALTER TABLE "benchmark_access_logs"   ENABLE ROW LEVEL SECURITY;
+ALTER TABLE "benchmark_access_logs"   FORCE  ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "benchmark_access_logs_tenant_isolation" ON "benchmark_access_logs";
+CREATE POLICY "benchmark_access_logs_tenant_isolation" ON "benchmark_access_logs"
+  AS PERMISSIVE FOR ALL
+  USING (org_id::text = current_setting('app.current_org_id', true));
+
+-- ⚠️ benchmark_aggregates: SIN RLS A PROPÓSITO (H7.1). Es el read-model CROSS-TENANT
+-- del benchmarking — la única excepción documentada al aislamiento por org. No
+-- contiene PII (solo agregados por org). El acceso se protege por guards de rol y
+-- el servicio aplica k-anonimato. NO habilitar RLS aquí.
+
+-- ── E21 — Asistente IA Conversacional (org_id directo) ───────────────────────
+-- Conversaciones y mensajes del asistente. Datos sensibles (consultas de un
+-- directivo sobre desempeño de su colegio) → aislamiento por org_id. El scoping
+-- por usuario (cada quien ve solo sus conversaciones) lo aplica el service; RLS
+-- es la barrera de tenant a nivel de motor.
+ALTER TABLE "assistant_conversations"  ENABLE ROW LEVEL SECURITY;
+ALTER TABLE "assistant_conversations"  FORCE  ROW LEVEL SECURITY;
+ALTER TABLE "assistant_messages"       ENABLE ROW LEVEL SECURITY;
+ALTER TABLE "assistant_messages"       FORCE  ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "assistant_conversations_tenant_isolation" ON "assistant_conversations";
+CREATE POLICY "assistant_conversations_tenant_isolation" ON "assistant_conversations"
+  AS PERMISSIVE FOR ALL
+  USING (org_id::text = current_setting('app.current_org_id', true));
+
+DROP POLICY IF EXISTS "assistant_messages_tenant_isolation" ON "assistant_messages";
+CREATE POLICY "assistant_messages_tenant_isolation" ON "assistant_messages"
+  AS PERMISSIVE FOR ALL
+  USING (org_id::text = current_setting('app.current_org_id', true));

@@ -1,0 +1,1789 @@
+{
+  "schemaVersion": "1.0",
+  "source": {
+    "file": "6º lenguaje diagnóstico 2025.pdf",
+    "subjectFolder": "Lenguaje"
+  },
+  "instrument": {
+    "name": "DIA Lectura 6° Básico 2025 — Diagnóstico",
+    "subject": "Lenguaje y Comunicación",
+    "subjectCode": "LANG",
+    "grade": "6° Básico",
+    "gradeCode": "6TH_BASIC",
+    "year": 2025,
+    "applicationPeriod": "diagnostico",
+    "type": "dia",
+    "isOfficial": true,
+    "source": "imported"
+  },
+  "sections": [
+    {
+      "order": 1,
+      "name": "Texto 1: «La manzana de oro»",
+      "type": "mixed",
+      "instructions": "Lee el siguiente texto y responde las preguntas 1 a 4.",
+      "passage": {
+        "title": "La manzana de oro",
+        "text": "Hace muchos años vivía un rey que era inmensamente rico. Un día proclamó por todo el reino, que le daría una manzana de oro a aquel que le pudiera contar la mentira más grande.\n\nLlegaban muchos hombres y le contaban mentiras, pero el rey siempre movía su cabeza y decía:\n\n—No, esa no es una mentira. Eso que me cuentas puede ser verdad.\n\nY entonces ordenaba que los echaran del palacio. Un día se presentó ante su trono, un joven, que le puso delante de su nariz una jarra y le dijo:\n\n—Mi querido rey, vengo para que me devuelvas por fin mis monedas de oro.\n\n—¿Qué monedas de oro? —respondió extrañado el soberano.\n\n—Bueno, la jarra de monedas de oro que me pediste prestada hace justamente doce meses.\n\nEl rey se enojó mucho:\n\n—Joven sinvergüenza, ¿cómo te atreves? ¿Qué es eso de que yo te pedí prestada una jarra llena de monedas de oro? ¡Eso es una mentira!\n\n—Así es —se rio el joven—, pero si es una mentira, entonces dame la manzana de oro, según lo prometiste a viva voz.\n\nEl rey se agarró la barba, se puso algo pensativo y dijo:\n\n—Tienes razón… ah… sí… ahora sí recuerdo…\n\n—Mucho mejor, honorable rey, entonces ordena que me llenen la jarra de monedas de oro.\n\nEl rey se rio y tuvo que reconocer que el joven había sido más inteligente que él. Entonces le dio la manzana de oro y decretó que a partir de ese día nadie podría mentir más en ese reino.\n\nCecilia Beuchat, sel. Atrapa lecturas 4. Leyendo para siempre. Chile: MN Editorial, 2010.",
+        "format": "plain",
+        "attachments": [
+          {
+            "kind": "image",
+            "note": "Ilustración de un rey sentado en su trono frente a un joven que sostiene una jarra (decorativa, no aporta información para responder)."
+          }
+        ]
+      },
+      "items": [
+        {
+          "position": 1,
+          "type": "multiple_choice",
+          "stem": "¿Qué mentira contó el joven?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Que él le prestó monedas de oro al rey.",
+              "isCorrect": true
+            },
+            {
+              "key": "B",
+              "text": "Que él era más inteligente que el rey.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Que él ganó una manzana de oro.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "Que él era inmensamente rico.",
+              "isCorrect": false
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "A",
+          "skill": "Interpretar y relacionar",
+          "oa": "OA 4",
+          "contentAxis": "Narración",
+          "hasFigure": false,
+          "figureNote": null,
+          "taxonomy": [
+            {
+              "type": "descriptor",
+              "code": null,
+              "name": "Identifican un acontecimiento o acción relevante en un texto narrativo.",
+              "parentCode": "LANG-5B-OA04",
+              "tagType": "primary"
+            },
+            {
+              "type": "learning_objective",
+              "code": "LANG-5B-OA04",
+              "name": "OA 4",
+              "level": "5_basico",
+              "tagType": "secondary"
+            },
+            {
+              "type": "skill",
+              "code": "LANG-SK-INTERPRETAR-Y-RELACIONAR",
+              "name": "Interpretar y relacionar",
+              "tagType": "secondary"
+            },
+            {
+              "type": "text_type",
+              "code": "LANG-TT-NARRACION",
+              "name": "Narración",
+              "tagType": "secondary"
+            }
+          ]
+        },
+        {
+          "position": 2,
+          "type": "multiple_choice",
+          "stem": "Según lo leído, ¿cómo era el joven?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Avaro.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Astuto.",
+              "isCorrect": true
+            },
+            {
+              "key": "C",
+              "text": "Atrevido.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "Tramposo.",
+              "isCorrect": false
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "B",
+          "skill": "Interpretar y relacionar",
+          "oa": "OA 4",
+          "contentAxis": "Narración",
+          "hasFigure": false,
+          "figureNote": null,
+          "taxonomy": [
+            {
+              "type": "descriptor",
+              "code": null,
+              "name": "Infieren información relevante sobre personajes en un texto narrativo.",
+              "parentCode": "LANG-5B-OA04",
+              "tagType": "primary"
+            },
+            {
+              "type": "learning_objective",
+              "code": "LANG-5B-OA04",
+              "name": "OA 4",
+              "level": "5_basico",
+              "tagType": "secondary"
+            },
+            {
+              "type": "skill",
+              "code": "LANG-SK-INTERPRETAR-Y-RELACIONAR",
+              "name": "Interpretar y relacionar",
+              "tagType": "secondary"
+            },
+            {
+              "type": "text_type",
+              "code": "LANG-TT-NARRACION",
+              "name": "Narración",
+              "tagType": "secondary"
+            }
+          ]
+        },
+        {
+          "position": 3,
+          "type": "multiple_choice",
+          "stem": "Finalmente, ¿por qué el rey reconoce que el joven fue más inteligente que él?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Porque consiguió quedarse en su palacio.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Porque consiguió engañarlo con su mentira.",
+              "isCorrect": true
+            },
+            {
+              "key": "C",
+              "text": "Porque consiguió que le llenara su jarra con monedas.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "Porque consiguió que le devolviera su manzana de oro.",
+              "isCorrect": false
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "B",
+          "skill": "Interpretar y relacionar",
+          "oa": "OA 4",
+          "contentAxis": "Narración",
+          "hasFigure": false,
+          "figureNote": null,
+          "taxonomy": [
+            {
+              "type": "descriptor",
+              "code": null,
+              "name": "Infieren causa o consecuencia de acontecimientos o acciones relevantes en un texto narrativo.",
+              "parentCode": "LANG-5B-OA04",
+              "tagType": "primary"
+            },
+            {
+              "type": "learning_objective",
+              "code": "LANG-5B-OA04",
+              "name": "OA 4",
+              "level": "5_basico",
+              "tagType": "secondary"
+            },
+            {
+              "type": "skill",
+              "code": "LANG-SK-INTERPRETAR-Y-RELACIONAR",
+              "name": "Interpretar y relacionar",
+              "tagType": "secondary"
+            },
+            {
+              "type": "text_type",
+              "code": "LANG-TT-NARRACION",
+              "name": "Narración",
+              "tagType": "secondary"
+            }
+          ]
+        },
+        {
+          "position": 4,
+          "type": "open_ended",
+          "stem": "¿Qué opinas del enojo del rey luego de escuchar al joven pedirle las monedas de oro? Fundamenta con información del texto.",
+          "alternatives": [],
+          "responseFormat": "develop",
+          "correctKey": null,
+          "skill": "Reflexionar",
+          "oa": "OA 4",
+          "contentAxis": "Narración",
+          "hasFigure": false,
+          "figureNote": null,
+          "taxonomy": [
+            {
+              "type": "descriptor",
+              "code": null,
+              "name": "Opinan sobre algún aspecto controversial de un texto narrativo con fundamentos que integran información del texto.",
+              "parentCode": "LANG-5B-OA04",
+              "tagType": "primary"
+            },
+            {
+              "type": "learning_objective",
+              "code": "LANG-5B-OA04",
+              "name": "OA 4",
+              "level": "5_basico",
+              "tagType": "secondary"
+            },
+            {
+              "type": "skill",
+              "code": "LANG-SK-REFLEXIONAR",
+              "name": "Reflexionar",
+              "tagType": "secondary"
+            },
+            {
+              "type": "text_type",
+              "code": "LANG-TT-NARRACION",
+              "name": "Narración",
+              "tagType": "secondary"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "order": 2,
+      "name": "Texto 2: «DELFÍNIDOS»",
+      "type": "multiple_choice",
+      "instructions": "Lee el siguiente texto y responde las preguntas 5 a 9.",
+      "passage": {
+        "title": "DELFÍNIDOS",
+        "text": "Los delfínidos son cetáceos, aunque a diferencia de las ballenas, son dentados. Los delfínidos, como los delfines y las marsopas, son mamíferos marinos que utilizan sus dientes afilados para atrapar a sus presas. Y muchas especies son más pequeñas que sus parientes las ballenas. Presentan cuerpos esbeltos y muy hidrodinámicos que se deslizan con facilidad entre las olas. Los delfínidos también poseen aletas dorsales que les ayudan a mantener mejor el equilibrio.\n\n¿CÓMO SON LAS MARSOPAS?\nLa marsopa común presenta un aspecto muy similar al delfín, aunque tiene el hocico más corto y cabeza más pequeña y cónica. Habitualmente, vive en parejas o en grupos reducidos, y no es tan juguetona como su pariente el delfín. Lamentablemente la marsopa común no es tan común como en otros tiempos, pues está en peligro de extinción por haber sido cazada sin medida por su carne y aceite. Y además puede quedar atrapada en las redes de los atuneros.\n\n¿SON INTELIGENTES LOS DELFINES?\nEl delfín se considera uno de los animales más inteligentes del mundo. El cerebro del delfín mular, también llamado delfín hocico de botella, es más grande que el de un ser humano. Y al igual que otros delfines, el mular vive en grupos familiares que en ocasiones superan los 100 individuos. El delfín mular es un cetáceo muy juguetón que acostumbra a dar saltos impresionantes fuera del agua. Vive en aguas poco profundas de todos los mares excepto en los más fríos.\n\n¿QUÉ HACEN LOS DELFINES?\nLos delfines acróbatas o giradores deben su nombre a la gran capacidad que tienen para hacer saltos acrobáticos fuera del agua. El delfín acróbata es más activo tras haberse tomado un descanso. Y hacen sus mejores saltos por la noche. Son animales muy sociables y acostumbrados a reunirse con otras especies de delfines, como los moteados. Todos los delfines utilizan la ecolocalización, es decir, emiten ondas sonoras que se desplazan en el agua y que, cuando chocan con algo o alguien, regresan al emisor. Así los delfines saben si hay presas, depredadores o cualquier objeto que esté en el campo de acción de sus ondas. El melón, un órgano de los delfines, los ayuda a identificar el tamaño y la posición de otros animales marinos.\n\n¿CÓMO ES DE GRANDE LA BALLENA ASESINA?\nEn realidad, la orca, también llamada ballena asesina, no es una ballena, sino un delfínido. Puede superar los 10 metros de largo, que es, aproximadamente, lo que miden tres autos familiares. Las orcas son animales temibles, que, en ocasiones, cazan en grupo a animales más grandes que ellas, como algunas especies de ballenas. Tienen una dieta muy variada, que incluye, peces, calamares, focas e incluso aves. Viven en los grandes océanos de todo el mundo, con frecuencia cerca de las costas.\n\nColección Enciclopedia de los Animales. España: Saldaña, 2011. (Adaptación).",
+        "format": "plain",
+        "attachments": [
+          {
+            "kind": "image",
+            "note": "Ilustraciones de distintos delfínidos (delfín, marsopa, delfín mular, orca) acompañando las secciones del texto informativo."
+          }
+        ]
+      },
+      "items": [
+        {
+          "position": 5,
+          "type": "multiple_choice",
+          "stem": "Según el texto, ¿qué delfínido se encuentra en peligro de extinción?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "El delfín girador.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "El delfín mular.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "La marsopa.",
+              "isCorrect": true
+            },
+            {
+              "key": "D",
+              "text": "La orca.",
+              "isCorrect": false
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "C",
+          "skill": "Localizar",
+          "oa": "OA 6",
+          "contentAxis": "Texto no literario",
+          "hasFigure": false,
+          "figureNote": null,
+          "taxonomy": [
+            {
+              "type": "descriptor",
+              "code": null,
+              "name": "Localizan información explícita relevante en un texto no literario.",
+              "parentCode": "LANG-5B-OA06",
+              "tagType": "primary"
+            },
+            {
+              "type": "learning_objective",
+              "code": "LANG-5B-OA06",
+              "name": "OA 6",
+              "level": "5_basico",
+              "tagType": "secondary"
+            },
+            {
+              "type": "skill",
+              "code": "LANG-SK-LOCALIZAR",
+              "name": "Localizar",
+              "tagType": "secondary"
+            },
+            {
+              "type": "text_type",
+              "code": "LANG-TT-TEXTO-NO-LITERARIO",
+              "name": "Texto no literario",
+              "tagType": "secondary"
+            }
+          ]
+        },
+        {
+          "position": 6,
+          "type": "multiple_choice",
+          "stem": "¿En qué les ayudan las aletas dorsales a los delfínidos?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "A atrapar a sus presas.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "A deslizarse entre las olas.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "A dar saltos fuera del agua.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "A mantener mejor el equilibrio.",
+              "isCorrect": true
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "D",
+          "skill": "Localizar",
+          "oa": "OA 6",
+          "contentAxis": "Texto no literario",
+          "hasFigure": false,
+          "figureNote": null,
+          "taxonomy": [
+            {
+              "type": "descriptor",
+              "code": null,
+              "name": "Localizan información explícita relevante en un texto no literario.",
+              "parentCode": "LANG-5B-OA06",
+              "tagType": "primary"
+            },
+            {
+              "type": "learning_objective",
+              "code": "LANG-5B-OA06",
+              "name": "OA 6",
+              "level": "5_basico",
+              "tagType": "secondary"
+            },
+            {
+              "type": "skill",
+              "code": "LANG-SK-LOCALIZAR",
+              "name": "Localizar",
+              "tagType": "secondary"
+            },
+            {
+              "type": "text_type",
+              "code": "LANG-TT-TEXTO-NO-LITERARIO",
+              "name": "Texto no literario",
+              "tagType": "secondary"
+            }
+          ]
+        },
+        {
+          "position": 7,
+          "type": "multiple_choice",
+          "stem": "Según el texto, ¿para qué les puede servir a los delfines la ecolocalización?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Para hacer acrobacias.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Para desplazarse en el agua.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Para ubicar diferentes objetos.",
+              "isCorrect": true
+            },
+            {
+              "key": "D",
+              "text": "Para comunicarse con otros delfines.",
+              "isCorrect": false
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "C",
+          "skill": "Interpretar y relacionar",
+          "oa": "OA 6",
+          "contentAxis": "Texto no literario",
+          "hasFigure": false,
+          "figureNote": null,
+          "taxonomy": [
+            {
+              "type": "descriptor",
+              "code": null,
+              "name": "Infieren información relevante en un texto no literario.",
+              "parentCode": "LANG-5B-OA06",
+              "tagType": "primary"
+            },
+            {
+              "type": "learning_objective",
+              "code": "LANG-5B-OA06",
+              "name": "OA 6",
+              "level": "5_basico",
+              "tagType": "secondary"
+            },
+            {
+              "type": "skill",
+              "code": "LANG-SK-INTERPRETAR-Y-RELACIONAR",
+              "name": "Interpretar y relacionar",
+              "tagType": "secondary"
+            },
+            {
+              "type": "text_type",
+              "code": "LANG-TT-TEXTO-NO-LITERARIO",
+              "name": "Texto no literario",
+              "tagType": "secondary"
+            }
+          ]
+        },
+        {
+          "position": 8,
+          "type": "multiple_choice",
+          "stem": "¿Por qué se dice que las orcas son temibles?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Porque su tamaño es superior al de las ballenas.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Porque pueden cazar una gran cantidad de animales.",
+              "isCorrect": true
+            },
+            {
+              "key": "C",
+              "text": "Porque habitan en los grandes océanos de todo el mundo.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "Porque utilizan sus dientes afilados para atrapar a sus presas.",
+              "isCorrect": false
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "B",
+          "skill": "Interpretar y relacionar",
+          "oa": "OA 6",
+          "contentAxis": "Texto no literario",
+          "hasFigure": false,
+          "figureNote": null,
+          "taxonomy": [
+            {
+              "type": "descriptor",
+              "code": null,
+              "name": "Infieren relaciones entre las ideas (causa-consecuencia, problema-solución, etc.) en un texto no literario.",
+              "parentCode": "LANG-5B-OA06",
+              "tagType": "primary"
+            },
+            {
+              "type": "learning_objective",
+              "code": "LANG-5B-OA06",
+              "name": "OA 6",
+              "level": "5_basico",
+              "tagType": "secondary"
+            },
+            {
+              "type": "skill",
+              "code": "LANG-SK-INTERPRETAR-Y-RELACIONAR",
+              "name": "Interpretar y relacionar",
+              "tagType": "secondary"
+            },
+            {
+              "type": "text_type",
+              "code": "LANG-TT-TEXTO-NO-LITERARIO",
+              "name": "Texto no literario",
+              "tagType": "secondary"
+            }
+          ]
+        },
+        {
+          "position": 9,
+          "type": "multiple_choice",
+          "stem": "¿Cuál es el tema central del texto anterior?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Las habilidades de los delfínidos.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Las características de los delfínidos.",
+              "isCorrect": true
+            },
+            {
+              "key": "C",
+              "text": "Las diferencias entre cetáceos y delfínidos.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "Las amenazas que enfrentan los delfínidos.",
+              "isCorrect": false
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "B",
+          "skill": "Interpretar y relacionar",
+          "oa": "OA 6",
+          "contentAxis": "Texto no literario",
+          "hasFigure": false,
+          "figureNote": null,
+          "taxonomy": [
+            {
+              "type": "descriptor",
+              "code": null,
+              "name": "Infieren el sentido global de un texto no literario.",
+              "parentCode": "LANG-5B-OA06",
+              "tagType": "primary"
+            },
+            {
+              "type": "learning_objective",
+              "code": "LANG-5B-OA06",
+              "name": "OA 6",
+              "level": "5_basico",
+              "tagType": "secondary"
+            },
+            {
+              "type": "skill",
+              "code": "LANG-SK-INTERPRETAR-Y-RELACIONAR",
+              "name": "Interpretar y relacionar",
+              "tagType": "secondary"
+            },
+            {
+              "type": "text_type",
+              "code": "LANG-TT-TEXTO-NO-LITERARIO",
+              "name": "Texto no literario",
+              "tagType": "secondary"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "order": 3,
+      "name": "Texto 3: «La noche»",
+      "type": "multiple_choice",
+      "instructions": "Lee el siguiente texto y responde las preguntas 10 a 12.",
+      "passage": {
+        "title": "La noche",
+        "text": "Viene cayendo\nuna noche inmensa,\nsin lunas, lenta\ncomo una nube.\nLas cosas se van\ncomo si no existieran.\nLas cosas, con sus colores vivos,\nestán muertas.\nEn el medio del cielo\nbrilla un sol negro.\nTibio y extraño,\nsu peso nuevo\ncae en mi cuerpo.\nY unos sentidos\nlentos y oscuros\nse van abriendo\nsobre mi cara\ny entre mis dedos.\nEn la sombra\nestán las cosas,\nnegras y suaves,\nlatiendo de nuevo.\nYo las siento,\ny es como si las viera.\nSaltan los ruidos pequeños\ncomo luces bruscas,\ny estoy rodeada\nde infinitos seres.\nViene cayendo\nuna noche inmensa,\ny no tengo miedo.\n\nAlicia Morel. Como una raíz de agua. Chile: Del pacífico Impresores, 1951.",
+        "format": "plain",
+        "attachments": [
+          {
+            "kind": "image",
+            "note": "Ilustración nocturna que acompaña al poema (decorativa)."
+          }
+        ]
+      },
+      "items": [
+        {
+          "position": 10,
+          "type": "multiple_choice",
+          "stem": "Lee los siguientes versos:\n\n“Viene cayendo / una noche inmensa, / sin lunas, lenta / como una nube”\n\n¿Cómo se describe a la noche en los versos anteriores?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Como una noche muy fría.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Como una noche nublada.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Como una noche estrellada.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "Como una noche muy oscura.",
+              "isCorrect": true
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "D",
+          "skill": "Interpretar y relacionar",
+          "oa": "OA 5",
+          "contentAxis": "Poema",
+          "hasFigure": false,
+          "figureNote": "El ítem cita versos del poema como estímulo propio; se incluyen dentro del stem.",
+          "taxonomy": [
+            {
+              "type": "descriptor",
+              "code": null,
+              "name": "Establecen conclusiones sobre distintos aspectos en un poema.",
+              "parentCode": "LANG-5B-OA05",
+              "tagType": "primary"
+            },
+            {
+              "type": "learning_objective",
+              "code": "LANG-5B-OA05",
+              "name": "OA 5",
+              "level": "5_basico",
+              "tagType": "secondary"
+            },
+            {
+              "type": "skill",
+              "code": "LANG-SK-INTERPRETAR-Y-RELACIONAR",
+              "name": "Interpretar y relacionar",
+              "tagType": "secondary"
+            },
+            {
+              "type": "text_type",
+              "code": "LANG-TT-POEMA",
+              "name": "Poema",
+              "tagType": "secondary"
+            }
+          ]
+        },
+        {
+          "position": 11,
+          "type": "multiple_choice",
+          "stem": "En el poema, ¿por qué se dice que las cosas están muertas?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Porque pierden su valor.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Porque dejan de ser visibles.",
+              "isCorrect": true
+            },
+            {
+              "key": "C",
+              "text": "Porque proyectan su sombra.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "Porque permanecen inmóviles.",
+              "isCorrect": false
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "B",
+          "skill": "Interpretar y relacionar",
+          "oa": "OA 5",
+          "contentAxis": "Poema",
+          "hasFigure": false,
+          "figureNote": null,
+          "taxonomy": [
+            {
+              "type": "descriptor",
+              "code": null,
+              "name": "Interpretan el sentido de expresiones en lenguaje figurado presentes en un poema.",
+              "parentCode": "LANG-5B-OA05",
+              "tagType": "primary"
+            },
+            {
+              "type": "learning_objective",
+              "code": "LANG-5B-OA05",
+              "name": "OA 5",
+              "level": "5_basico",
+              "tagType": "secondary"
+            },
+            {
+              "type": "skill",
+              "code": "LANG-SK-INTERPRETAR-Y-RELACIONAR",
+              "name": "Interpretar y relacionar",
+              "tagType": "secondary"
+            },
+            {
+              "type": "text_type",
+              "code": "LANG-TT-POEMA",
+              "name": "Poema",
+              "tagType": "secondary"
+            }
+          ]
+        },
+        {
+          "position": 12,
+          "type": "multiple_choice",
+          "stem": "¿Qué sentimiento expresa el hablante respecto de la llegada de la noche?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Temor.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Sorpresa.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Serenidad.",
+              "isCorrect": true
+            },
+            {
+              "key": "D",
+              "text": "Incomodidad.",
+              "isCorrect": false
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "C",
+          "skill": "Interpretar y relacionar",
+          "oa": "OA 5",
+          "contentAxis": "Poema",
+          "hasFigure": false,
+          "figureNote": null,
+          "taxonomy": [
+            {
+              "type": "descriptor",
+              "code": null,
+              "name": "Establecen conclusiones sobre distintos aspectos en un poema.",
+              "parentCode": "LANG-5B-OA05",
+              "tagType": "primary"
+            },
+            {
+              "type": "learning_objective",
+              "code": "LANG-5B-OA05",
+              "name": "OA 5",
+              "level": "5_basico",
+              "tagType": "secondary"
+            },
+            {
+              "type": "skill",
+              "code": "LANG-SK-INTERPRETAR-Y-RELACIONAR",
+              "name": "Interpretar y relacionar",
+              "tagType": "secondary"
+            },
+            {
+              "type": "text_type",
+              "code": "LANG-TT-POEMA",
+              "name": "Poema",
+              "tagType": "secondary"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "order": 4,
+      "name": "Texto 4: «Eco ladrillos se alzan como material sustentable de construcción»",
+      "type": "multiple_choice",
+      "instructions": "Lee el siguiente texto y responde las preguntas 13 a 17.",
+      "passage": {
+        "title": "Eco ladrillos se alzan como material sustentable de construcción",
+        "text": "Las botellas se rellenan con plástico y bolsas para dar vida al material de construcción reciclado gracias al que se han creado un anfiteatro en el Lago Rapel, bancas en la plaza de Villa O’Higgins y hasta una casa en Olmué.\n\nLa concientización con el medio ambiente es un tema cada vez más recurrente en el mundo, y nuestro país no se queda atrás, ya que cada vez es más común oír hablar de “eco ladrillos” y de su utilización en construcciones ambientales, no solo en Santiago sino también en Olmué, el Lago Rapel y Villa O’Higgins.\n\nUn eco ladrillo es una botella no retornable rellena con bolsas plásticas, con propiedades aislantes, antisísmicas y, sobre todo, resistente. Atributos que conquistaron a diferentes comunidades de nuestro país, que a la fecha cuentan con bancas, jardineras, un tanque de agua y hasta una casa hecha de este material.\n\nPara Roberto Giadach, del Movimiento Ecológico Rapel, la construcción con eco ladrillos les permitió recuperar un espacio público en deterioro. “El terreno era súper fangoso y había un micro basural”, por lo que tras seis meses de trabajo lograron levantar el Anfiteatro Llallauquén.\n\n“En un principio partimos con el club de adulto mayor ‘Los cariñositos de Llallauquén’, la junta de vecinos del sector y la Escuela Grecia, pero necesitábamos 4 mil eco ladrillos y vimos que nos iban a faltar”, explica Giadach y agrega que “por suerte vino la Directora Regional del Fosis y nació la idea de hacer un concurso de ladrillos para Llallauquén”.\n\nLa actividad motivó a los colegios de la región para que armaran sus propios ladrillos ecológicos y los enviaran a la organización. De este modo lograron alzar un escenario con capacidad para más de 180 espectadores utilizando 6 mil botellas plásticas y alrededor de 3.500 neumáticos.\n\nUn caso similar es el de la Agrupación Río Pascua que, tras adjudicarse un Fondo de Protección Ambiental, iniciaron la construcción de jardineras y bancas en la plaza “Tito Obreque” de la comuna Villa O´Higgins, en la Región de Aysén.\n\n“Los vecinos del sector han tenido súper buena voluntad y han sido súper visionarios al aceptar las ideas para trabajar en conjunto. Y eso es súper lindo” comenta Mauricio Melgarejo, miembro de Río Pascua, quien llegó a la comuna hace cinco años.\n\n“En un principio es raro hablar de medio ambiente en una comunidad gaucha, pero ellos mismos vieron el beneficio que se producía en sus hogares, porque les pedimos que hicieran compost con sus desechos vegetales, que usaran papel y cartón para hacer fuego y que hicieran eco ladrillos con las botellas plásticas, tema que no es menor, ya que acá los envases no son retornables y todo lo que llega, se queda”, explica Melgarejo y añade que las familias han reducido hasta en un 50% la basura de sus casas.\n\nPero este proyecto no fue suficiente para Melgarejo, ya que está levantando su propia casa a base de material reciclado, utilizando desde árboles caídos hasta botellas plásticas y de vidrio. “Es una casa hecha con basura” comenta.\n\n“Eco ladrillos se alzan como material sustentable de construcción”. Emol [Santiago, Chile]. 16 feb. 2014. Web. 26 ago. 2019. (Fragmento).",
+        "format": "plain",
+        "attachments": [
+          {
+            "kind": "image",
+            "note": "Fotografías de construcciones hechas con eco ladrillos (anfiteatro, bancas, casa) que acompañan el reportaje."
+          }
+        ]
+      },
+      "items": [
+        {
+          "position": 13,
+          "type": "multiple_choice",
+          "stem": "Según Roberto Giadach, ¿qué permitió recuperar un espacio público en deterioro?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "La adjudicación de un Fondo de Protección Ambiental.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "La buena voluntad de los vecinos del sector.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "La utilización de un terreno fangoso.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "La construcción con eco ladrillos.",
+              "isCorrect": true
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "D",
+          "skill": "Localizar",
+          "oa": "OA 6",
+          "contentAxis": "Texto no literario",
+          "hasFigure": false,
+          "figureNote": null,
+          "taxonomy": [
+            {
+              "type": "descriptor",
+              "code": null,
+              "name": "Localizan información explícita relevante en un texto no literario.",
+              "parentCode": "LANG-5B-OA06",
+              "tagType": "primary"
+            },
+            {
+              "type": "learning_objective",
+              "code": "LANG-5B-OA06",
+              "name": "OA 6",
+              "level": "5_basico",
+              "tagType": "secondary"
+            },
+            {
+              "type": "skill",
+              "code": "LANG-SK-LOCALIZAR",
+              "name": "Localizar",
+              "tagType": "secondary"
+            },
+            {
+              "type": "text_type",
+              "code": "LANG-TT-TEXTO-NO-LITERARIO",
+              "name": "Texto no literario",
+              "tagType": "secondary"
+            }
+          ]
+        },
+        {
+          "position": 14,
+          "type": "multiple_choice",
+          "stem": "¿En qué localidad de Chile se construyó un anfiteatro con eco ladrillos?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "En Rapel.",
+              "isCorrect": true
+            },
+            {
+              "key": "B",
+              "text": "En Olmué.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "En Santiago.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "En Villa O‘Higgins.",
+              "isCorrect": false
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "A",
+          "skill": "Localizar",
+          "oa": "OA 6",
+          "contentAxis": "Texto no literario",
+          "hasFigure": false,
+          "figureNote": null,
+          "taxonomy": [
+            {
+              "type": "descriptor",
+              "code": null,
+              "name": "Localizan información explícita relevante en un texto no literario.",
+              "parentCode": "LANG-5B-OA06",
+              "tagType": "primary"
+            },
+            {
+              "type": "learning_objective",
+              "code": "LANG-5B-OA06",
+              "name": "OA 6",
+              "level": "5_basico",
+              "tagType": "secondary"
+            },
+            {
+              "type": "skill",
+              "code": "LANG-SK-LOCALIZAR",
+              "name": "Localizar",
+              "tagType": "secondary"
+            },
+            {
+              "type": "text_type",
+              "code": "LANG-TT-TEXTO-NO-LITERARIO",
+              "name": "Texto no literario",
+              "tagType": "secondary"
+            }
+          ]
+        },
+        {
+          "position": 15,
+          "type": "multiple_choice",
+          "stem": "De acuerdo al texto, ¿qué hecho permitió reunir la cantidad de eco ladrillos necesaria para levantar el Anfiteatro Llallauquén?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "La gran cantidad de envases acumulados.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "El trabajo en conjunto de los vecinos.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "El apoyo del club de adulto mayor.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "La realización de un concurso.",
+              "isCorrect": true
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "D",
+          "skill": "Interpretar y relacionar",
+          "oa": "OA 6",
+          "contentAxis": "Texto no literario",
+          "hasFigure": false,
+          "figureNote": null,
+          "taxonomy": [
+            {
+              "type": "descriptor",
+              "code": null,
+              "name": "Infieren relaciones entre las ideas (causa-consecuencia, problema-solución, etc.) en un texto no literario.",
+              "parentCode": "LANG-5B-OA06",
+              "tagType": "primary"
+            },
+            {
+              "type": "learning_objective",
+              "code": "LANG-5B-OA06",
+              "name": "OA 6",
+              "level": "5_basico",
+              "tagType": "secondary"
+            },
+            {
+              "type": "skill",
+              "code": "LANG-SK-INTERPRETAR-Y-RELACIONAR",
+              "name": "Interpretar y relacionar",
+              "tagType": "secondary"
+            },
+            {
+              "type": "text_type",
+              "code": "LANG-TT-TEXTO-NO-LITERARIO",
+              "name": "Texto no literario",
+              "tagType": "secondary"
+            }
+          ]
+        },
+        {
+          "position": 16,
+          "type": "multiple_choice",
+          "stem": "¿Qué actitud de los vecinos de Villa O’Higgins destaca Mauricio Melgarejo?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Su esfuerzo.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Su sencillez.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Su iniciativa.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "Su disposición.",
+              "isCorrect": true
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "D",
+          "skill": "Interpretar y relacionar",
+          "oa": "OA 6",
+          "contentAxis": "Texto no literario",
+          "hasFigure": false,
+          "figureNote": null,
+          "taxonomy": [
+            {
+              "type": "descriptor",
+              "code": null,
+              "name": "Infieren información relevante en un texto no literario.",
+              "parentCode": "LANG-5B-OA06",
+              "tagType": "primary"
+            },
+            {
+              "type": "learning_objective",
+              "code": "LANG-5B-OA06",
+              "name": "OA 6",
+              "level": "5_basico",
+              "tagType": "secondary"
+            },
+            {
+              "type": "skill",
+              "code": "LANG-SK-INTERPRETAR-Y-RELACIONAR",
+              "name": "Interpretar y relacionar",
+              "tagType": "secondary"
+            },
+            {
+              "type": "text_type",
+              "code": "LANG-TT-TEXTO-NO-LITERARIO",
+              "name": "Texto no literario",
+              "tagType": "secondary"
+            }
+          ]
+        },
+        {
+          "position": 17,
+          "type": "multiple_choice",
+          "stem": "¿Cuál es el propósito de este texto?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Enseñar sobre el modo de confeccionar eco ladrillos.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Convencer sobre la necesidad de usar eco ladrillos para edificar.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Informar sobre el uso de eco ladrillos como material de construcción.",
+              "isCorrect": true
+            },
+            {
+              "key": "D",
+              "text": "Opinar sobre la iniciativa de una comunidad de Aysén que utiliza eco ladrillos.",
+              "isCorrect": false
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "C",
+          "skill": "Reflexionar",
+          "oa": "OA 7",
+          "contentAxis": "Texto no literario",
+          "hasFigure": false,
+          "figureNote": null,
+          "taxonomy": [
+            {
+              "type": "descriptor",
+              "code": null,
+              "name": "Determinan propósitos explícitos e implícitos en un texto no literario.",
+              "parentCode": "LANG-5B-OA07",
+              "tagType": "primary"
+            },
+            {
+              "type": "learning_objective",
+              "code": "LANG-5B-OA07",
+              "name": "OA 7",
+              "level": "5_basico",
+              "tagType": "secondary"
+            },
+            {
+              "type": "skill",
+              "code": "LANG-SK-REFLEXIONAR",
+              "name": "Reflexionar",
+              "tagType": "secondary"
+            },
+            {
+              "type": "text_type",
+              "code": "LANG-TT-TEXTO-NO-LITERARIO",
+              "name": "Texto no literario",
+              "tagType": "secondary"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "order": 5,
+      "name": "Texto 5: «¿Cómo nació el Aku Aku?»",
+      "type": "mixed",
+      "instructions": "Lee el siguiente texto y responde las preguntas 18 a 22.",
+      "passage": {
+        "title": "¿Cómo nació el Aku Aku?",
+        "text": "Unos diablos, una tarde calurosa, se despojaron de sus ropas para entregarse al sueño. Pero aconteció que pasó un joven de apuesta figura y pudo observar con gran admiración que sus cuerpos carecían de carne y se les podía ver y contar las costillas.\n\nA Takuihu —que así se llamaba el joven— se le quedó fuertemente grabado en la memoria tan extraño espectáculo.\n\nOtro diablo por ahí cercano había estado observando la escena y prorrumpió en grandes gritos, hasta despertar a sus colegas y les refirió que Takuihu los había sorprendido durmiendo.\n\nLos diablos, por temor al ridículo en que caerían entre los isleños si Takuihu contaba algo sobre su curiosa contextura, resolvieron salirle al encuentro, jurándose darle muerte si les decía que los había visto desnudos.\n\nInterrogado el joven, que no tenía un pelo de tonto, negó con todo aplomo. Juró en tal forma, que los diablos lo creyeron sincero.\n\nLos diablos lo acompañaron hasta su casa y no dejaron de vigilarlo y escuchar sus conversaciones, por si hacía comentarios sobre sus escuálidos cuerpos. Durante dos días estuvieron escuchando, pero el joven los había espiado y guardaba la más absoluta reserva.\n\nDespués de este tiempo se retiraron, seguros de que el secreto de sus ridículos cuerpos no era conocido por ningún mortal.\n\nPero cuando Takuihu se vio libre de los diablos, cogió un trozo de toromiro y talló en él la figura descarnada que tenía en su memoria.\n\nTal fue la razón de las primeras imágenes de Aku Aku que se hallaron en Rapa Nui y éste es el medio de comunicación que encontró el nativo sin recurrir al lenguaje, para contar lo que había visto.\n\nGlosario\n• toromiro: árbol originario de Isla de Pascua.\n• Aku Aku: figuras talladas en madera que representan espíritus benévolos o malignos de la mitología de Rapa Nui.\n\nOreste Plath. Geografía del mito y la leyenda chilenos. Santiago: Grijalbo, 1994.",
+        "format": "plain",
+        "attachments": [
+          {
+            "kind": "image",
+            "note": "Ilustración alusiva a la leyenda de Rapa Nui y a las figuras Aku Aku (decorativa)."
+          }
+        ]
+      },
+      "items": [
+        {
+          "position": 18,
+          "type": "multiple_choice",
+          "stem": "¿Qué preocupaba a los diablos?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Que los mortales descubrieran que dormían desnudos.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Que los mortales tallaran su figura en un trozo de madera.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Que los mortales los despojaran de sus ropas mientras dormían.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "Que los mortales se burlaran de ellos porque tenían cuerpos sin carne.",
+              "isCorrect": true
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "D",
+          "skill": "Interpretar y relacionar",
+          "oa": "OA 4",
+          "contentAxis": "Narración",
+          "hasFigure": false,
+          "figureNote": null,
+          "taxonomy": [
+            {
+              "type": "descriptor",
+              "code": null,
+              "name": "Identifican el conflicto y/o la solución en un texto narrativo.",
+              "parentCode": "LANG-5B-OA04",
+              "tagType": "primary"
+            },
+            {
+              "type": "learning_objective",
+              "code": "LANG-5B-OA04",
+              "name": "OA 4",
+              "level": "5_basico",
+              "tagType": "secondary"
+            },
+            {
+              "type": "skill",
+              "code": "LANG-SK-INTERPRETAR-Y-RELACIONAR",
+              "name": "Interpretar y relacionar",
+              "tagType": "secondary"
+            },
+            {
+              "type": "text_type",
+              "code": "LANG-TT-NARRACION",
+              "name": "Narración",
+              "tagType": "secondary"
+            }
+          ]
+        },
+        {
+          "position": 19,
+          "type": "multiple_choice",
+          "stem": "¿Para qué los diablos van en busca de Takuihu?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Para recuperar sus ropas.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Para hacerse amigo del joven.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Para darle muerte por haberlos espiado.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "Para asegurarse de que no revelara su secreto.",
+              "isCorrect": true
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "D",
+          "skill": "Interpretar y relacionar",
+          "oa": "OA 4",
+          "contentAxis": "Narración",
+          "hasFigure": false,
+          "figureNote": null,
+          "taxonomy": [
+            {
+              "type": "descriptor",
+              "code": null,
+              "name": "Infieren causa o consecuencia de acontecimientos o acciones relevantes en un texto narrativo.",
+              "parentCode": "LANG-5B-OA04",
+              "tagType": "primary"
+            },
+            {
+              "type": "learning_objective",
+              "code": "LANG-5B-OA04",
+              "name": "OA 4",
+              "level": "5_basico",
+              "tagType": "secondary"
+            },
+            {
+              "type": "skill",
+              "code": "LANG-SK-INTERPRETAR-Y-RELACIONAR",
+              "name": "Interpretar y relacionar",
+              "tagType": "secondary"
+            },
+            {
+              "type": "text_type",
+              "code": "LANG-TT-NARRACION",
+              "name": "Narración",
+              "tagType": "secondary"
+            }
+          ]
+        },
+        {
+          "position": 20,
+          "type": "multiple_choice",
+          "stem": "En el texto, ¿por qué se dice que Takuihu “no tiene un pelo de tonto”?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Porque logró engañar a los diablos.",
+              "isCorrect": true
+            },
+            {
+              "key": "B",
+              "text": "Porque guardó el secreto de los diablos.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Porque conocía el aspecto físico de los diablos.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "Porque había oído las conversaciones de los diablos.",
+              "isCorrect": false
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "A",
+          "skill": "Interpretar y relacionar",
+          "oa": "OA 4",
+          "contentAxis": "Narración",
+          "hasFigure": false,
+          "figureNote": null,
+          "taxonomy": [
+            {
+              "type": "descriptor",
+              "code": null,
+              "name": "Interpretan el sentido de expresiones en lenguaje figurado en un texto narrativo.",
+              "parentCode": "LANG-5B-OA04",
+              "tagType": "primary"
+            },
+            {
+              "type": "learning_objective",
+              "code": "LANG-5B-OA04",
+              "name": "OA 4",
+              "level": "5_basico",
+              "tagType": "secondary"
+            },
+            {
+              "type": "skill",
+              "code": "LANG-SK-INTERPRETAR-Y-RELACIONAR",
+              "name": "Interpretar y relacionar",
+              "tagType": "secondary"
+            },
+            {
+              "type": "text_type",
+              "code": "LANG-TT-NARRACION",
+              "name": "Narración",
+              "tagType": "secondary"
+            }
+          ]
+        },
+        {
+          "position": 21,
+          "type": "multiple_choice",
+          "stem": "¿Qué explica este texto?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Las características de los Aku Aku.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "El origen de las imágenes de los Aku Aku.",
+              "isCorrect": true
+            },
+            {
+              "key": "C",
+              "text": "El temor que sienten los humanos hacia los Aku Aku.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "Las razones que justifican la contextura de los Aku Aku.",
+              "isCorrect": false
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "B",
+          "skill": "Interpretar y relacionar",
+          "oa": "OA 4",
+          "contentAxis": "Narración",
+          "hasFigure": false,
+          "figureNote": null,
+          "taxonomy": [
+            {
+              "type": "descriptor",
+              "code": null,
+              "name": "Infieren el sentido global de un texto narrativo.",
+              "parentCode": "LANG-5B-OA04",
+              "tagType": "primary"
+            },
+            {
+              "type": "learning_objective",
+              "code": "LANG-5B-OA04",
+              "name": "OA 4",
+              "level": "5_basico",
+              "tagType": "secondary"
+            },
+            {
+              "type": "skill",
+              "code": "LANG-SK-INTERPRETAR-Y-RELACIONAR",
+              "name": "Interpretar y relacionar",
+              "tagType": "secondary"
+            },
+            {
+              "type": "text_type",
+              "code": "LANG-TT-NARRACION",
+              "name": "Narración",
+              "tagType": "secondary"
+            }
+          ]
+        },
+        {
+          "position": 22,
+          "type": "open_ended",
+          "stem": "¿Qué opinas de que Takuihu haya revelado cómo eran los Aku Aku tallando una figura de madera? Fundamenta con información del texto.",
+          "alternatives": [],
+          "responseFormat": "develop",
+          "correctKey": null,
+          "skill": "Reflexionar",
+          "oa": "OA 4",
+          "contentAxis": "Narración",
+          "hasFigure": false,
+          "figureNote": null,
+          "taxonomy": [
+            {
+              "type": "descriptor",
+              "code": null,
+              "name": "Opinan sobre algún aspecto controversial de un texto narrativo con fundamentos que integran información del texto.",
+              "parentCode": "LANG-5B-OA04",
+              "tagType": "primary"
+            },
+            {
+              "type": "learning_objective",
+              "code": "LANG-5B-OA04",
+              "name": "OA 4",
+              "level": "5_basico",
+              "tagType": "secondary"
+            },
+            {
+              "type": "skill",
+              "code": "LANG-SK-REFLEXIONAR",
+              "name": "Reflexionar",
+              "tagType": "secondary"
+            },
+            {
+              "type": "text_type",
+              "code": "LANG-TT-NARRACION",
+              "name": "Narración",
+              "tagType": "secondary"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "order": 6,
+      "name": "Texto 6: «Grandes descubrimientos: La piedra Rosetta»",
+      "type": "multiple_choice",
+      "instructions": "Lee el siguiente texto y responde las preguntas 23 a 27.",
+      "passage": {
+        "title": "Grandes descubrimientos. LA PIEDRA ROSETTA",
+        "text": "Los antiguos egipcios crearon la escritura jeroglífica 3 000 años antes de Cristo. Se trataba de un lenguaje simbólico de signos y dibujos de indiscutible belleza y complejidad. Como este código se consideraba sagrado, solo se usaba para escribir textos religiosos y oficiales sobre las paredes de los templos, tumbas y monumentos. Únicamente los sacerdotes y escribas dominaban los jeroglíficos, así que el resto de los egipcios utilizaban otros tipos de escritura, como la hierática o la demótica, mucho más sencillas.\n\nLos jeroglíficos se usaron durante muchos años, hasta que Egipto fue conquistado, primero por los griegos en el siglo cuarto antes de Cristo, y después por los romanos. Con el paso del tiempo, la escritura jeroglífica cayó en el olvido y los mismos egipcios desconocían su significado. De esta forma, las inscripciones del pasado se convirtieron en misteriosos textos que nadie sabía descifrar.\n\nEn 1799 los ejércitos del emperador Napoleón se encontraban en Egipto. Por casualidad, el capitán del ejército francés, Pierre-Francoise Bouchard, que estaba realizando una excavación, encontró una piedra de basalto negra que tenía inscripciones en varios idiomas. Se encontró cerca de la localidad de Rosetta, y por eso se le llamó así. Cuando los investigadores comenzaron a estudiarla, se dieron cuenta de que se trataba de un mismo texto escrito en jeroglífico, demótico y griego. Como el griego sí se podía traducir, comprobaron que había sido realizado en tiempos del rey de Egipto, Ptolomeo V, en el año 196 antes de Cristo. A partir de este idioma, empezaron a comparar los tres textos para intentar descifrar los jeroglíficos, pero fue el joven lingüista y egiptólogo Jean Champollion, quien lo consiguió tras muchos años de intenso trabajo.\n\nDesde entonces pudieron leerse miles de jeroglíficos del Antiguo Egipto y gracias a ellos descubrir mucha información acerca de esta fascinante civilización y sobre otras culturas de la Antigüedad.\n\n“Explicación de la piedra Rosetta para niños”. Edupeques. Web. 12 ago. 2018. (Adaptación).",
+        "format": "plain",
+        "attachments": [
+          {
+            "kind": "image",
+            "note": "Imagen de la piedra Rosetta con sus inscripciones (decorativa)."
+          }
+        ]
+      },
+      "items": [
+        {
+          "position": 23,
+          "type": "multiple_choice",
+          "stem": "¿Quiénes encuentran la piedra Rosetta?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Los griegos.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Los egipcios.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Los romanos.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "Los franceses.",
+              "isCorrect": true
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "D",
+          "skill": "Interpretar y relacionar",
+          "oa": "OA 6",
+          "contentAxis": "Texto no literario",
+          "hasFigure": false,
+          "figureNote": null,
+          "taxonomy": [
+            {
+              "type": "descriptor",
+              "code": null,
+              "name": "Infieren información relevante en un texto no literario.",
+              "parentCode": "LANG-5B-OA06",
+              "tagType": "primary"
+            },
+            {
+              "type": "learning_objective",
+              "code": "LANG-5B-OA06",
+              "name": "OA 6",
+              "level": "5_basico",
+              "tagType": "secondary"
+            },
+            {
+              "type": "skill",
+              "code": "LANG-SK-INTERPRETAR-Y-RELACIONAR",
+              "name": "Interpretar y relacionar",
+              "tagType": "secondary"
+            },
+            {
+              "type": "text_type",
+              "code": "LANG-TT-TEXTO-NO-LITERARIO",
+              "name": "Texto no literario",
+              "tagType": "secondary"
+            }
+          ]
+        },
+        {
+          "position": 24,
+          "type": "multiple_choice",
+          "stem": "¿Por qué llamaron Rosetta a la piedra encontrada?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Por los idiomas que contenía.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Por el lugar donde fue hallada.",
+              "isCorrect": true
+            },
+            {
+              "key": "C",
+              "text": "Por el material que la constituía.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "Por la persona que hizo la traducción.",
+              "isCorrect": false
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "B",
+          "skill": "Interpretar y relacionar",
+          "oa": "OA 6",
+          "contentAxis": "Texto no literario",
+          "hasFigure": false,
+          "figureNote": null,
+          "taxonomy": [
+            {
+              "type": "descriptor",
+              "code": null,
+              "name": "Infieren relaciones entre las ideas (causa-consecuencia, problema-solución, etc.) en un texto no literario.",
+              "parentCode": "LANG-5B-OA06",
+              "tagType": "primary"
+            },
+            {
+              "type": "learning_objective",
+              "code": "LANG-5B-OA06",
+              "name": "OA 6",
+              "level": "5_basico",
+              "tagType": "secondary"
+            },
+            {
+              "type": "skill",
+              "code": "LANG-SK-INTERPRETAR-Y-RELACIONAR",
+              "name": "Interpretar y relacionar",
+              "tagType": "secondary"
+            },
+            {
+              "type": "text_type",
+              "code": "LANG-TT-TEXTO-NO-LITERARIO",
+              "name": "Texto no literario",
+              "tagType": "secondary"
+            }
+          ]
+        },
+        {
+          "position": 25,
+          "type": "multiple_choice",
+          "stem": "¿Quién descifró los jeroglíficos de la piedra Rosetta?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Napoleón.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Ptolomeo V.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Jean Champollion.",
+              "isCorrect": true
+            },
+            {
+              "key": "D",
+              "text": "Pierre-Francoise Bouchard.",
+              "isCorrect": false
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "C",
+          "skill": "Interpretar y relacionar",
+          "oa": "OA 6",
+          "contentAxis": "Texto no literario",
+          "hasFigure": false,
+          "figureNote": null,
+          "taxonomy": [
+            {
+              "type": "descriptor",
+              "code": null,
+              "name": "Infieren información relevante en un texto no literario.",
+              "parentCode": "LANG-5B-OA06",
+              "tagType": "primary"
+            },
+            {
+              "type": "learning_objective",
+              "code": "LANG-5B-OA06",
+              "name": "OA 6",
+              "level": "5_basico",
+              "tagType": "secondary"
+            },
+            {
+              "type": "skill",
+              "code": "LANG-SK-INTERPRETAR-Y-RELACIONAR",
+              "name": "Interpretar y relacionar",
+              "tagType": "secondary"
+            },
+            {
+              "type": "text_type",
+              "code": "LANG-TT-TEXTO-NO-LITERARIO",
+              "name": "Texto no literario",
+              "tagType": "secondary"
+            }
+          ]
+        },
+        {
+          "position": 26,
+          "type": "multiple_choice",
+          "stem": "¿Cómo se descifraron los jeroglíficos de la Piedra Rosetta?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Solicitando ayuda a los egipcios.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Comparándolos con el idioma griego.",
+              "isCorrect": true
+            },
+            {
+              "key": "C",
+              "text": "Pidiendo apoyo al capitán del ejército francés.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "Consultando a sacerdotes que conocían el idioma.",
+              "isCorrect": false
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "B",
+          "skill": "Interpretar y relacionar",
+          "oa": "OA 6",
+          "contentAxis": "Texto no literario",
+          "hasFigure": false,
+          "figureNote": null,
+          "taxonomy": [
+            {
+              "type": "descriptor",
+              "code": null,
+              "name": "Infieren información relevante en un texto no literario.",
+              "parentCode": "LANG-5B-OA06",
+              "tagType": "primary"
+            },
+            {
+              "type": "learning_objective",
+              "code": "LANG-5B-OA06",
+              "name": "OA 6",
+              "level": "5_basico",
+              "tagType": "secondary"
+            },
+            {
+              "type": "skill",
+              "code": "LANG-SK-INTERPRETAR-Y-RELACIONAR",
+              "name": "Interpretar y relacionar",
+              "tagType": "secondary"
+            },
+            {
+              "type": "text_type",
+              "code": "LANG-TT-TEXTO-NO-LITERARIO",
+              "name": "Texto no literario",
+              "tagType": "secondary"
+            }
+          ]
+        },
+        {
+          "position": 27,
+          "type": "multiple_choice",
+          "stem": "¿Cuál es el propósito de este texto en relación con la piedra Rosetta?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Explicar cómo fue descubierta.",
+              "isCorrect": true
+            },
+            {
+              "key": "B",
+              "text": "Opinar sobre su importancia histórica.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Destacar a quienes consiguieron descifrarla.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "Dar a conocer el significado de sus inscripciones.",
+              "isCorrect": false
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "A",
+          "skill": "Reflexionar",
+          "oa": "OA 7",
+          "contentAxis": "Texto no literario",
+          "hasFigure": false,
+          "figureNote": null,
+          "taxonomy": [
+            {
+              "type": "descriptor",
+              "code": null,
+              "name": "Determinan propósitos explícitos e implícitos en un texto no literario.",
+              "parentCode": "LANG-5B-OA07",
+              "tagType": "primary"
+            },
+            {
+              "type": "learning_objective",
+              "code": "LANG-5B-OA07",
+              "name": "OA 7",
+              "level": "5_basico",
+              "tagType": "secondary"
+            },
+            {
+              "type": "skill",
+              "code": "LANG-SK-REFLEXIONAR",
+              "name": "Reflexionar",
+              "tagType": "secondary"
+            },
+            {
+              "type": "text_type",
+              "code": "LANG-TT-TEXTO-NO-LITERARIO",
+              "name": "Texto no literario",
+              "tagType": "secondary"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "extraction": {
+    "itemCount": 27,
+    "warnings": [
+      "Q4 y Q22 son ítems de desarrollo (open_ended / responseFormat develop), sin alternativas.",
+      "Q10 incluye versos-estímulo propios del ítem, embebidos en el stem.",
+      "Texto 5 («¿Cómo nació el Aku Aku?») incluye glosario, transcrito al final del passage.",
+      "Textos transcritos desde la capa de texto del PDF (pdftotext), verbatim; saltos de párrafo normalizados."
+    ],
+    "needsHumanReview": false
+  },
+  "pauta": {
+    "source": {
+      "report": "RBD25520_DIA_LECTURA_6_A_Resultados_Asignatura_Diagnostico_2025.pdf",
+      "subjectCode": "LANG",
+      "gradeCode": "6TH_BASIC",
+      "applicationPeriod": "diagnostico",
+      "year": 2025,
+      "instrumentJson": "extraccion/lenguaje/6º lenguaje diagnóstico 2025.json"
+    },
+    "appliedKeys": 25,
+    "issues": []
+  }
+}

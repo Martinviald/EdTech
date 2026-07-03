@@ -1,6 +1,6 @@
 import { Body, Controller, ForbiddenException, Get, Headers, Post } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { switchRoleSchema } from '@soe/types';
+import { switchOrgSchema, switchRoleSchema } from '@soe/types';
 import { AuthService } from './auth.service';
 import { CurrentUser } from './current-user.decorator';
 import type { JwtPayload } from './jwt-payload.types';
@@ -88,5 +88,17 @@ export class AuthController {
   switchRole(@Body() body: unknown, @CurrentUser() user: JwtPayload) {
     const dto = switchRoleSchema.parse(body);
     return this.authService.switchActiveRole(user, dto.role);
+  }
+
+  /**
+   * POST /api/auth/switch-org — cambia la org activa del usuario multi-org.
+   * Requiere autenticación. Revalida el membership contra la BD y devuelve los
+   * roles/activeRole de la org destino; el frontend los persiste vía
+   * NextAuth update({ activeOrg }).
+   */
+  @Post('switch-org')
+  switchOrg(@Body() body: unknown, @CurrentUser() user: JwtPayload) {
+    const dto = switchOrgSchema.parse(body);
+    return this.authService.switchActiveOrg(user, dto.orgId);
   }
 }

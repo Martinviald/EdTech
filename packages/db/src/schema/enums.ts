@@ -169,3 +169,44 @@ export const passageFormatEnum = pgEnum('passage_format', ['plain', 'markdown', 
 
 // Tipo de archivo adjunto a una sección (audio cubre listening de inglés a futuro).
 export const attachmentKindEnum = pgEnum('attachment_kind', ['image', 'audio', 'pdf', 'other']);
+
+// Estado de un job de análisis IA (F2 S0 — H19.23).
+export const aiAnalysisStatusEnum = pgEnum('ai_analysis_status', [
+  'pending',
+  'processing',
+  'completed',
+  'failed',
+]);
+
+// ── F2 S3 — IA Remedial (RAG) ────────────────────────────────────────────────
+// Tipo de artefacto remedial generado (polimórfico: type + content JSONB).
+export const remedialMaterialTypeEnum = pgEnum('remedial_material_type', [
+  'guide', // guía de reenseñanza para el profesor (H9.2)
+  'practice_set', // set de ítems de práctica generados (H9.3) — referencian items en draft
+  'group_plan', // plan remedial por grupo de alumnos (H9.4)
+]);
+
+// Ciclo de vida de un material remedial: generación async + aprobación humana.
+// pending→processing→(failed | ready); ready→(approved | discarded). `ready` =
+// generado, pendiente de revisión humana (CLAUDE.md §8.3: IA propone, humano aprueba).
+export const remedialStatusEnum = pgEnum('remedial_status', [
+  'pending',
+  'processing',
+  'ready',
+  'failed',
+  'approved',
+  'discarded',
+]);
+
+// ── F2 S4 — Benchmarking Institucional ───────────────────────────────────────
+// Modo de comparación: pool global anónimo (k-anonimato) vs red/sostenedor
+// identificada (orgs con el mismo organizations.parent_id).
+export const benchmarkModeEnum = pgEnum('benchmark_mode', ['global', 'network']);
+
+// ── E21 — Asistente IA Conversacional ────────────────────────────────────────
+// Rol de un mensaje persistido en la conversación. Las invocaciones de tools no
+// son mensajes: su traza va en assistant_messages.tool_calls (JSONB) del turno.
+export const assistantMessageRoleEnum = pgEnum('assistant_message_role', [
+  'user',
+  'assistant',
+]);

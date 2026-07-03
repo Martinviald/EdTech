@@ -1,0 +1,1802 @@
+{
+  "schemaVersion": "1.0",
+  "source": {
+    "file": "6º lenguaje cierre 2025.pdf",
+    "subjectFolder": "Lenguaje"
+  },
+  "instrument": {
+    "name": "DIA Lectura 6° Básico 2025 — Cierre",
+    "subject": "Lenguaje y Comunicación",
+    "subjectCode": "LANG",
+    "grade": "6° Básico",
+    "gradeCode": "6TH_BASIC",
+    "year": 2025,
+    "applicationPeriod": "cierre",
+    "type": "dia",
+    "isOfficial": true,
+    "source": "imported"
+  },
+  "sections": [
+    {
+      "order": 1,
+      "name": "Texto 1: «El picaflor y el aromo»",
+      "type": "multiple_choice",
+      "instructions": "Lee el siguiente texto y responde las preguntas 1 a 5.",
+      "passage": {
+        "title": "El picaflor y el aromo",
+        "text": "Entre el pueblo Mapuche se cuenta que en una fría noche de un 21 de junio, durante el solsticio de invierno, dos jóvenes mapuche se enamoraron en plena ceremonia del We Tripantu, su celebración del año nuevo.\n\nEn un sitio llamado Taucú, mientras los parientes se bañaban en las aguas del río para limpiar todo lo malo que habían vivido ese año, estos dos jóvenes, que pertenecían a comunidades cuyos líderes estaban en conflicto, se conocieron y amaron perdidamente.\n\nMala suerte para los dos. Los jefes que gobernaban sus familias no se querían, por lo que nunca podrían casarse. Pero el cariño que sentía uno por el otro era tan intenso que acordaron juntarse a escondidas todas las tardes a las orillas del río. Y entre más se veían, más iba creciendo su amor.\n\nUn día la joven, mientras cocinaba maíz para hacer mote junto a su madre, escuchó a su padre anunciar que la familia de un longko muy rico la había pedido en matrimonio. La muchacha rompió en llanto abrazada de su madre.\n\nEsa misma tarde retornó al río y decidió, junto a su enamorado, huir lo más lejos que pudieran. Pero el padre, tan viejo como sabio, la siguió sospechando de los llantos de su hija e intentó como fuera separarla del joven. La pareja se lanzó al río y nadó fuerte y lejos hasta perderse.\n\nEl padre de la joven no se quedó tranquilo. Tal era su rabia que se dirigió a la ruka de una poderosa machi y le pidió que castigara a su hija. Le dijo que la convirtiera en un árbol y a su enamorado en cualquier cosa, para que no pudieran estar juntos.\n\nLa machi invocó a sus espíritus al sonido del kultrung, desde el amanecer hasta entrada la noche, a la hora en que ese grupo de estrellas que se conocen como Las Pléyades —y que los mapuche llaman ngaupoñi o “papas lavadas”— aparecen para embellecer el cielo del invierno. Al día siguiente el conjuro no tenía vuelta atrás. La muchacha se había convertido en un aromo y el joven en un pequeño picaflor llamado Pinzá.\n\nAl llegar la primavera, la muchacha aromo brotó amarilla y fragante y el joven Pinzá, guiado por su perfume, alcanzó las flores de su amada que brillaban como soles. Así, primavera tras primavera el joven y la muchacha, pese a todo, demuestran su amor al mundo.\n\nSonia Montecino y Catalina Infante. Aventuras y orígenes de los pájaros. Lecturas de mitos chilenos para niños, niñas y jóvenes. Chile: Catalonia, 2015. (Adaptación).\n\nGlosario\n• solsticio de invierno: momento del año en que el sol ilumina durante menos horas al día y la noche es más larga.\n• longko: jefe mapuche a cargo de su familia y comunidad.\n• ruka: casa o vivienda mapuche.\n• machi: autoridad del pueblo mapuche que tiene poderes espirituales.\n• kultrung: instrumento musical de percusión utilizado por machis.",
+        "format": "plain",
+        "attachments": []
+      },
+      "items": [
+        {
+          "position": 1,
+          "type": "multiple_choice",
+          "stem": "¿Por qué razón los jóvenes no podían estar juntos?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Porque la machi les había hecho un conjuro.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Porque el joven se había convertido en picaflor.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Porque los jefes de sus familias estaban en conflicto.",
+              "isCorrect": true
+            },
+            {
+              "key": "D",
+              "text": "Porque la muchacha debía casarse con un joven muy rico.",
+              "isCorrect": false
+            }
+          ],
+          "correctKey": "C",
+          "skill": "Interpretar y relacionar",
+          "oa": "OA 4",
+          "contentAxis": "Narración",
+          "hasFigure": false,
+          "figureNote": null,
+          "taxonomy": [
+            {
+              "type": "descriptor",
+              "code": null,
+              "name": "Infieren causa o consecuencia de acontecimientos o acciones relevantes en un texto narrativo.",
+              "parentCode": "LANG-4B-OA04",
+              "tagType": "primary"
+            },
+            {
+              "type": "learning_objective",
+              "code": "LANG-4B-OA04",
+              "name": "OA 4",
+              "level": "4_basico",
+              "tagType": "secondary"
+            },
+            {
+              "type": "skill",
+              "code": "LANG-SK-INTERPRETAR-Y-RELACIONAR",
+              "name": "Interpretar y relacionar",
+              "tagType": "secondary"
+            },
+            {
+              "type": "text_type",
+              "code": "LANG-TT-NARRACION",
+              "name": "Narración",
+              "tagType": "secondary"
+            }
+          ]
+        },
+        {
+          "position": 2,
+          "type": "multiple_choice",
+          "stem": "¿Qué le pidió el padre de la joven a la machi?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Que un longko pidiera a su hija en matrimonio.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Que encontrara a su hija que se había perdido.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Que siguiera a su hija cuando huyera con el joven.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "Que castigara a su hija convirtiéndola en un árbol.",
+              "isCorrect": true
+            }
+          ],
+          "correctKey": "D",
+          "skill": "Localizar",
+          "oa": "OA 4",
+          "contentAxis": "Narración",
+          "hasFigure": false,
+          "figureNote": null,
+          "taxonomy": [
+            {
+              "type": "descriptor",
+              "code": null,
+              "name": "Localizan información explícita relevante en un texto narrativo.",
+              "parentCode": "LANG-4B-OA04",
+              "tagType": "primary"
+            },
+            {
+              "type": "learning_objective",
+              "code": "LANG-4B-OA04",
+              "name": "OA 4",
+              "level": "4_basico",
+              "tagType": "secondary"
+            },
+            {
+              "type": "skill",
+              "code": "LANG-SK-LOCALIZAR",
+              "name": "Localizar",
+              "tagType": "secondary"
+            },
+            {
+              "type": "text_type",
+              "code": "LANG-TT-NARRACION",
+              "name": "Narración",
+              "tagType": "secondary"
+            }
+          ]
+        },
+        {
+          "position": 3,
+          "type": "multiple_choice",
+          "stem": "¿Qué hecho ocurrió cuando Las Pléyades aparecieron en el cielo?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Los jóvenes mapuche se escaparon por el río.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Los jóvenes mapuche se conocieron y enamoraron.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "La machi llevó a cabo un conjuro en contra de la pareja.",
+              "isCorrect": true
+            },
+            {
+              "key": "D",
+              "text": "El padre visitó a la machi para que castigara a la pareja.",
+              "isCorrect": false
+            }
+          ],
+          "correctKey": "C",
+          "skill": "Interpretar y relacionar",
+          "oa": "OA 4",
+          "contentAxis": "Narración",
+          "hasFigure": false,
+          "figureNote": null,
+          "taxonomy": [
+            {
+              "type": "descriptor",
+              "code": null,
+              "name": "Identifican un acontecimiento o acción relevante en un texto narrativo.",
+              "parentCode": "LANG-4B-OA04",
+              "tagType": "primary"
+            },
+            {
+              "type": "learning_objective",
+              "code": "LANG-4B-OA04",
+              "name": "OA 4",
+              "level": "4_basico",
+              "tagType": "secondary"
+            },
+            {
+              "type": "skill",
+              "code": "LANG-SK-INTERPRETAR-Y-RELACIONAR",
+              "name": "Interpretar y relacionar",
+              "tagType": "secondary"
+            },
+            {
+              "type": "text_type",
+              "code": "LANG-TT-NARRACION",
+              "name": "Narración",
+              "tagType": "secondary"
+            }
+          ]
+        },
+        {
+          "position": 4,
+          "type": "multiple_choice",
+          "stem": "¿Qué hicieron los jóvenes enamorados luego del castigo que recibieron?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Se rebelaron en contra de sus familias.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Se volvieron a encontrar cada primavera.",
+              "isCorrect": true
+            },
+            {
+              "key": "C",
+              "text": "Se reunieron a escondidas a orillas del río.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "Se escaparon por el río hacia un lugar lejano.",
+              "isCorrect": false
+            }
+          ],
+          "correctKey": "B",
+          "skill": "Interpretar y relacionar",
+          "oa": "OA 4",
+          "contentAxis": "Narración",
+          "hasFigure": false,
+          "figureNote": null,
+          "taxonomy": [
+            {
+              "type": "descriptor",
+              "code": null,
+              "name": "Identifican un acontecimiento o acción relevante en un texto narrativo.",
+              "parentCode": "LANG-4B-OA04",
+              "tagType": "primary"
+            },
+            {
+              "type": "learning_objective",
+              "code": "LANG-4B-OA04",
+              "name": "OA 4",
+              "level": "4_basico",
+              "tagType": "secondary"
+            },
+            {
+              "type": "skill",
+              "code": "LANG-SK-INTERPRETAR-Y-RELACIONAR",
+              "name": "Interpretar y relacionar",
+              "tagType": "secondary"
+            },
+            {
+              "type": "text_type",
+              "code": "LANG-TT-NARRACION",
+              "name": "Narración",
+              "tagType": "secondary"
+            }
+          ]
+        },
+        {
+          "position": 5,
+          "type": "multiple_choice",
+          "stem": "¿Qué busca explicar este texto?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "La razón por la que el picaflor visita al aromo.",
+              "isCorrect": true
+            },
+            {
+              "key": "B",
+              "text": "La razón por la que se celebra We Tripantu.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "El origen del invierno y de la primavera.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "El origen de las estrellas Pléyades.",
+              "isCorrect": false
+            }
+          ],
+          "correctKey": "A",
+          "skill": "Interpretar y relacionar",
+          "oa": "OA 4",
+          "contentAxis": "Narración",
+          "hasFigure": false,
+          "figureNote": null,
+          "taxonomy": [
+            {
+              "type": "descriptor",
+              "code": null,
+              "name": "Infieren el sentido global de un texto narrativo.",
+              "parentCode": "LANG-4B-OA04",
+              "tagType": "primary"
+            },
+            {
+              "type": "learning_objective",
+              "code": "LANG-4B-OA04",
+              "name": "OA 4",
+              "level": "4_basico",
+              "tagType": "secondary"
+            },
+            {
+              "type": "skill",
+              "code": "LANG-SK-INTERPRETAR-Y-RELACIONAR",
+              "name": "Interpretar y relacionar",
+              "tagType": "secondary"
+            },
+            {
+              "type": "text_type",
+              "code": "LANG-TT-NARRACION",
+              "name": "Narración",
+              "tagType": "secondary"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "order": 2,
+      "name": "Texto 2: «Nombres científicos. ¿Por qué son importantes?»",
+      "type": "multiple_choice",
+      "instructions": "Lee el siguiente texto y responde las preguntas 6 a 10.",
+      "passage": {
+        "title": "NOMBRES CIENTÍFICOS. ¿Por qué son importantes?",
+        "text": "Nombrar lo que nos rodea es algo propio del ser humano; al hacerlo, podemos ordenarlo y comprenderlo mejor. Si bien todos conocemos las palabras “pájaro”, “ratón”, “árbol” u “hongo”, existen muchos tipos distintos de cada una de estas especies (sabemos que no todos los pájaros, ratones, árboles u hongos son iguales), por lo que si las diferenciamos y nombramos, podremos conocer mejor el medio en que vivimos.\n\nEn un intento por organizar los distintos seres vivos, los científicos los llamaron a todos “especies”. Con el pasar del tiempo, les pusieron nombres específicos, así pudieron agruparlos según lo que tienen en común y lo que los diferencia.\n\nLos nombres científicos siempre contienen dos palabras (algo así como el apellido y el nombre). La inicial de la primera palabra va en mayúscula y la segunda palabra se escribe completa con minúscula, y ambas se escriben siempre con letra cursiva. Además, los nombres científicos son en latín y griego, por lo que pueden ser bastante difíciles de memorizar. Sin embargo, lo bueno de conocerlos es que podemos identificar con precisión a un ser vivo, ya que son como un código que muestra la característica principal de la especie que nombra.\n\nLa segunda palabra de los nombres científicos casi siempre nos cuenta una pequeña historia sobre las especies.\n\nEn ocasiones, le hace honor a un naturalista importante: el chinche verde se llama Planois gayi por Claudio Gay, uno de los primeros naturalistas chilenos que realizó estudios en flora, fauna y geografía de Chile.\n\nEn otras, describe el aspecto de una especie: el arrayán macho se llama Rhaphithamnus spinosus porque tiene espinas.\n\nTambién puede hablar del lugar en el que se encuentra la especie: el hongo Ganoderma australe se llama así porque habita en una zona austral del mundo, es decir, muy al sur.\n\n¡Hasta la actualidad, han sido identificadas y nombradas poco más de 1 millón de especies!\n\nCatalina Mekis. Exploradores del bosque. Chile: Santillana, 2019. (Adaptación).\n\nGlosario\n• especie: conjunto de seres semejantes.\n• naturalista: estudioso o estudiosa de las ciencias naturales.",
+        "format": "plain",
+        "attachments": [
+          {
+            "kind": "image",
+            "note": "Tres ilustraciones acompañan los ejemplos: el chinche verde (Planois gayi), el arrayán macho (Rhaphithamnus spinosus) y el hongo Ganoderma australe. Se referencian en la pregunta 9."
+          }
+        ]
+      },
+      "items": [
+        {
+          "position": 6,
+          "type": "multiple_choice",
+          "stem": "¿Para qué se crearon los nombres científicos?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Para identificar con precisión a cada ser vivo.",
+              "isCorrect": true
+            },
+            {
+              "key": "B",
+              "text": "Para describir el aspecto físico de cada ser vivo.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Para agrupar en una sola categoría a todas las especies.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "Para distinguir el lugar en el que habitan todas las especies.",
+              "isCorrect": false
+            }
+          ],
+          "correctKey": "A",
+          "skill": "Interpretar y relacionar",
+          "oa": "OA 6",
+          "contentAxis": "Texto no literario",
+          "hasFigure": false,
+          "figureNote": null,
+          "taxonomy": [
+            {
+              "type": "descriptor",
+              "code": null,
+              "name": "Infieren información relevante en un texto no literario.",
+              "parentCode": "LANG-4B-OA06",
+              "tagType": "primary"
+            },
+            {
+              "type": "learning_objective",
+              "code": "LANG-4B-OA06",
+              "name": "OA 6",
+              "level": "4_basico",
+              "tagType": "secondary"
+            },
+            {
+              "type": "skill",
+              "code": "LANG-SK-INTERPRETAR-Y-RELACIONAR",
+              "name": "Interpretar y relacionar",
+              "tagType": "secondary"
+            },
+            {
+              "type": "text_type",
+              "code": "LANG-TT-TEXTO-NO-LITERARIO",
+              "name": "Texto no literario",
+              "tagType": "secondary"
+            }
+          ]
+        },
+        {
+          "position": 7,
+          "type": "multiple_choice",
+          "stem": "Según el texto, ¿por qué los nombres científicos pueden ser difíciles de memorizar?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Porque son como un código.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Porque contienen dos palabras.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Porque son en latín y en griego.",
+              "isCorrect": true
+            },
+            {
+              "key": "D",
+              "text": "Porque contienen mayúsculas y minúsculas.",
+              "isCorrect": false
+            }
+          ],
+          "correctKey": "C",
+          "skill": "Localizar",
+          "oa": "OA 6",
+          "contentAxis": "Texto no literario",
+          "hasFigure": false,
+          "figureNote": null,
+          "taxonomy": [
+            {
+              "type": "descriptor",
+              "code": null,
+              "name": "Localizan información explícita relevante en un texto no literario.",
+              "parentCode": "LANG-4B-OA06",
+              "tagType": "primary"
+            },
+            {
+              "type": "learning_objective",
+              "code": "LANG-4B-OA06",
+              "name": "OA 6",
+              "level": "4_basico",
+              "tagType": "secondary"
+            },
+            {
+              "type": "skill",
+              "code": "LANG-SK-LOCALIZAR",
+              "name": "Localizar",
+              "tagType": "secondary"
+            },
+            {
+              "type": "text_type",
+              "code": "LANG-TT-TEXTO-NO-LITERARIO",
+              "name": "Texto no literario",
+              "tagType": "secondary"
+            }
+          ]
+        },
+        {
+          "position": 8,
+          "type": "multiple_choice",
+          "stem": "¿A qué hace referencia la segunda palabra de Planois gayi?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "A un lugar.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "A la especie.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "A su aspecto.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "A un naturalista.",
+              "isCorrect": true
+            }
+          ],
+          "correctKey": "D",
+          "skill": "Interpretar y relacionar",
+          "oa": "OA 6",
+          "contentAxis": "Texto no literario",
+          "hasFigure": false,
+          "figureNote": null,
+          "taxonomy": [
+            {
+              "type": "descriptor",
+              "code": null,
+              "name": "Infieren información relevante en un texto no literario.",
+              "parentCode": "LANG-4B-OA06",
+              "tagType": "primary"
+            },
+            {
+              "type": "learning_objective",
+              "code": "LANG-4B-OA06",
+              "name": "OA 6",
+              "level": "4_basico",
+              "tagType": "secondary"
+            },
+            {
+              "type": "skill",
+              "code": "LANG-SK-INTERPRETAR-Y-RELACIONAR",
+              "name": "Interpretar y relacionar",
+              "tagType": "secondary"
+            },
+            {
+              "type": "text_type",
+              "code": "LANG-TT-TEXTO-NO-LITERARIO",
+              "name": "Texto no literario",
+              "tagType": "secondary"
+            }
+          ]
+        },
+        {
+          "position": 9,
+          "type": "multiple_choice",
+          "stem": "¿Para qué se incluyen las ilustraciones en el texto?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Para incorporar elementos decorativos en cada apartado.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Para destacar la información más importante de cada apartado.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Para mostrar cómo son las especies mencionadas en cada apartado.",
+              "isCorrect": true
+            },
+            {
+              "key": "D",
+              "text": "Para comparar la forma de las especies mencionadas en cada apartado.",
+              "isCorrect": false
+            }
+          ],
+          "correctKey": "C",
+          "skill": "Reflexionar",
+          "oa": "OA 6",
+          "contentAxis": "Texto no literario",
+          "hasFigure": false,
+          "figureNote": "El ítem pregunta por el propósito de las ilustraciones del texto; estas se describen en el attachment del pasaje. Es respondible desde el texto.",
+          "taxonomy": [
+            {
+              "type": "descriptor",
+              "code": null,
+              "name": "Establecen la función de elementos discontinuos (imágenes, gráficos, tablas, mapas, diagramas, etc.) presentes en un texto no literario.",
+              "parentCode": "LANG-4B-OA06",
+              "tagType": "primary"
+            },
+            {
+              "type": "learning_objective",
+              "code": "LANG-4B-OA06",
+              "name": "OA 6",
+              "level": "4_basico",
+              "tagType": "secondary"
+            },
+            {
+              "type": "skill",
+              "code": "LANG-SK-REFLEXIONAR",
+              "name": "Reflexionar",
+              "tagType": "secondary"
+            },
+            {
+              "type": "text_type",
+              "code": "LANG-TT-TEXTO-NO-LITERARIO",
+              "name": "Texto no literario",
+              "tagType": "secondary"
+            }
+          ]
+        },
+        {
+          "position": 10,
+          "type": "multiple_choice",
+          "stem": "¿De qué trata el primer párrafo del texto?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "De las diferencias que existen entre los seres vivos.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "De la importancia de nombrar todo lo que nos rodea.",
+              "isCorrect": true
+            },
+            {
+              "key": "C",
+              "text": "De los distintos tipos de especies que viven en nuestro medio.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "De la necesidad de comprender las características comunes de las especies.",
+              "isCorrect": false
+            }
+          ],
+          "correctKey": "B",
+          "skill": "Interpretar y relacionar",
+          "oa": "OA 6",
+          "contentAxis": "Texto no literario",
+          "hasFigure": false,
+          "figureNote": null,
+          "taxonomy": [
+            {
+              "type": "descriptor",
+              "code": null,
+              "name": "Infieren el sentido global de un texto no literario.",
+              "parentCode": "LANG-4B-OA06",
+              "tagType": "primary"
+            },
+            {
+              "type": "learning_objective",
+              "code": "LANG-4B-OA06",
+              "name": "OA 6",
+              "level": "4_basico",
+              "tagType": "secondary"
+            },
+            {
+              "type": "skill",
+              "code": "LANG-SK-INTERPRETAR-Y-RELACIONAR",
+              "name": "Interpretar y relacionar",
+              "tagType": "secondary"
+            },
+            {
+              "type": "text_type",
+              "code": "LANG-TT-TEXTO-NO-LITERARIO",
+              "name": "Texto no literario",
+              "tagType": "secondary"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "order": 3,
+      "name": "Texto 3: «El juez hábil»",
+      "type": "multiple_choice",
+      "instructions": "Lee el siguiente texto y responde las preguntas 11 a 15.",
+      "passage": {
+        "title": "El juez hábil",
+        "text": "El Emir de Argel, Bauakas, quiso cerciorarse de que no se exageraba al afirmar que en un lugar de la provincia había un juez extraordinariamente hábil y justo, que descubría siempre la verdad hasta el punto que nadie había logrado engañarle nunca.\n\nBauakas se disfrazó de comerciante y se presentó en el lugar donde habitaba el juez.\n\nA la entrada del pueblo, se encontró con un mendigo que le pidió limosna. Bauakas le dio unas monedas e iba a proseguir su camino, cuando el mendigo le cogió por una parte del traje.\n\n—¿Qué quieres? —le preguntó entonces el Emir. —¿No te he dado ya limosna?\n\n—¡Me has dado limosna! —respondió el mendigo—. Pero quiero que me hagas el favor de llevarme sobre tu caballo hasta la plaza, porque los demás caballos podrían pisotearme si tratase de llegar hasta allí por mí mismo.\n\nBauakas subió a la grupa al mendigo y le condujo hasta la plaza.\n\nAllí detuvo al caballo, pero el mendigo no bajaba.\n\n—¿Por qué no te mueves? —le dijo el Emir—. Baja, hemos llegado.\n\n—¿Por qué he de bajar? —le replicó el mendigo, —este caballo es mío. Si por las buenas no me dejas, el juez decidirá.\n\nMuchas personas lo rodeaban, escuchando la discusión.\n\n—Id a la casa del juez —le gritaron—. Él os pondrá de acuerdo.\n\nBauakas y el mendigo fueron en busca del juez.\n\nHabía mucha gente en la sala; el juez llamaba por turno a los que ante él debían comparecer.\n\nEntraron un carnicero y un vendedor de aceite. El carnicero estaba cubierto de manchas de sangre y el aceitero lleno de manchas de aceite. El carnicero llevaba dinero en la mano y el aceitero estrechaba la mano del carnicero.\n\nEste decía:\n\n—He comprado aceite a este hombre y sacaba mi bolsa para pagarle, cuando me cogió la mano para robarme el dinero; y ante ti hemos venido, yo con la bolsa y él sujetando mi mano ¡El dinero me pertenece y él es un ladrón!\n\n—¡No es cierto! —replicó el aceitero—. El carnicero quiso comprarme aceite y me rogó que le cambiase una moneda de oro; tomé el dinero y lo pasé sobre el mostrador. Él se apoderó entonces de la bolsa y quiso huir, pero yo le cogí de la mano y aquí estamos.\n\nDespués de una pausa respondió el juez:\n\n—Dejad el dinero en mi casa y volved mañana.\n\nCuando llegó el turno de Bauakas y del mendigo, el Emir refirió cómo había ocurrido el hecho. Le oyó el juez y cuando terminó pidió al mendigo que le diera su versión.\n\n—Nada de lo que ha dicho es cierto —replicó este—. Yo atravesaba el lugar montado en mi caballo, cuando él me pidió que le llevase a la plaza de la ciudad. Le hice subir sobre la grupa del animal y le conduje a donde quería ir, pero una vez llegados no quiso bajar, diciendo que el caballo era suyo, lo cual no es cierto.\n\nDespués de una pausa, dijo el juez: —Dejad el caballo en mi casa y venid aquí mañana.\n\nAl día siguiente, una gran multitud se reunió para conocer las decisiones del juez.\n\nEl juez llamó al carnicero.\n\n—Tuya es la bolsa — le dijo.\n\nY designando al vendedor de aceite: —que le den cincuenta azotes — añadió.\n\nLlegó el turno de Bauakas y el mendigo.\n\n—¿Reconocerías a tu caballo entre otros veinte? —preguntó el juez al Emir.\n\n—Le reconocería.\n\n—¿Y tú? —le preguntó el juez al mendigo.\n\n—También —dijo el mendigo.\n\n—Sígueme —dijo el juez a Bauakas.\n\nFueron al establo; el Emir designó a su caballo entre los otros veinte. El juez llamó enseguida al mendigo y le ordenó que dijese cuál era su animal.\n\nEl mendigo reconoció al caballo y le mostró. Volvieron todos a la sala y el juez dijo a Bauakas: —Tuyo es el caballo. Ve por él. E hizo dar cincuenta azotes al mendigo.\n\nDespués de esto, el juez se volvió a su casa, pero Bauakas le siguió.\n\n—¿Qué quieres? —le preguntó el juez—. ¿Te desagrada mi sentencia?\n\n—Estoy muy satisfecho con ella —dijo el Emir—. Solo que quisiera saber cómo te has enterado de que la bolsa era del carnicero y no del mercader y de que el caballo me pertenecía.\n\n—He aquí cómo supe la verdad: en cuanto al dinero, anoche puse la bolsa en un cubo de agua, y por la mañana fui a ver si en el agua flotaba aceite. Si el dinero hubiese sido del aceitero, el roce de sus manos aceitosas hubiera manchado la bolsa y algo de aceite hubiera quedado: como el agua estaba clara, el dinero pertenecía al carnicero.\n\nRespecto al caballo, era más difícil de resolver. El mendigo lo reconoció tan pronto como tú. Mas yo no os había sometido a la misma prueba. Os hice ir al establo para ver a quién de los dos reconocía el caballo. Cuando tú te acercaste, volvió la cabeza hacia ti, mientras que cuando se acercó el mendigo, solo movió la oreja y levantó la pata. He aquí cómo comprendí que tú eras el dueño de caballo.\n\nBauakas le dijo entonces: —yo no soy mercader, soy el Emir Bauakas y he venido solamente para saber si lo que de ti se hablaba era cierto. Ahora veo que eres un sabio y un hábil juez. Pídeme lo que quieras y te lo concederé.\n\n—Ninguna recompensa necesito —respondió el juez—. Me basta con oír tus alabanzas.\n\nLeón Tolstoi. Antología Te cuento y te canto; fábulas, cuentos, teatro y poesía. Chile: Pehuén, 2010. (Adaptación).\n\nGlosario\n• Emir: príncipe árabe.\n• cerciorarse: asegurarse.\n• grupa: parte posterior del lomo del caballo.",
+        "format": "plain",
+        "attachments": []
+      },
+      "items": [
+        {
+          "position": 11,
+          "type": "multiple_choice",
+          "stem": "¿Qué intención tuvo el Emir para viajar hacia el pueblo donde vivía el juez?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Intervenir en el conflicto entre el carnicero y el aceitero.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Comprobar lo hábil que era el juez al impartir justicia.",
+              "isCorrect": true
+            },
+            {
+              "key": "C",
+              "text": "Ayudar a los mendigos que habitaban en el pueblo.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "Realizar negocios con los comerciantes del lugar.",
+              "isCorrect": false
+            }
+          ],
+          "correctKey": "B",
+          "skill": "Interpretar y relacionar",
+          "oa": "OA 4",
+          "contentAxis": "Narración",
+          "hasFigure": false,
+          "figureNote": null,
+          "taxonomy": [
+            {
+              "type": "descriptor",
+              "code": null,
+              "name": "Infieren información relevante sobre personajes en un texto narrativo.",
+              "parentCode": "LANG-4B-OA04",
+              "tagType": "primary"
+            },
+            {
+              "type": "learning_objective",
+              "code": "LANG-4B-OA04",
+              "name": "OA 4",
+              "level": "4_basico",
+              "tagType": "secondary"
+            },
+            {
+              "type": "skill",
+              "code": "LANG-SK-INTERPRETAR-Y-RELACIONAR",
+              "name": "Interpretar y relacionar",
+              "tagType": "secondary"
+            },
+            {
+              "type": "text_type",
+              "code": "LANG-TT-NARRACION",
+              "name": "Narración",
+              "tagType": "secondary"
+            }
+          ]
+        },
+        {
+          "position": 12,
+          "type": "multiple_choice",
+          "stem": "¿En qué lugar se encontró Bauakas con el mendigo?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "En la plaza.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "En el establo.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "En la casa del juez.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "En la entrada del pueblo.",
+              "isCorrect": true
+            }
+          ],
+          "correctKey": "D",
+          "skill": "Localizar",
+          "oa": "OA 4",
+          "contentAxis": "Narración",
+          "hasFigure": false,
+          "figureNote": null,
+          "taxonomy": [
+            {
+              "type": "descriptor",
+              "code": null,
+              "name": "Localizan información explícita relevante en un texto narrativo.",
+              "parentCode": "LANG-4B-OA04",
+              "tagType": "primary"
+            },
+            {
+              "type": "learning_objective",
+              "code": "LANG-4B-OA04",
+              "name": "OA 4",
+              "level": "4_basico",
+              "tagType": "secondary"
+            },
+            {
+              "type": "skill",
+              "code": "LANG-SK-LOCALIZAR",
+              "name": "Localizar",
+              "tagType": "secondary"
+            },
+            {
+              "type": "text_type",
+              "code": "LANG-TT-NARRACION",
+              "name": "Narración",
+              "tagType": "secondary"
+            }
+          ]
+        },
+        {
+          "position": 13,
+          "type": "multiple_choice",
+          "stem": "¿Qué actitud muestra el Emir cuando se encuentra con el mendigo?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Molestia.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Curiosidad.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Generosidad.",
+              "isCorrect": true
+            },
+            {
+              "key": "D",
+              "text": "Desconfianza.",
+              "isCorrect": false
+            }
+          ],
+          "correctKey": "C",
+          "skill": "Interpretar y relacionar",
+          "oa": "OA 4",
+          "contentAxis": "Narración",
+          "hasFigure": false,
+          "figureNote": null,
+          "taxonomy": [
+            {
+              "type": "descriptor",
+              "code": null,
+              "name": "Infieren información relevante sobre personajes en un texto narrativo.",
+              "parentCode": "LANG-4B-OA04",
+              "tagType": "primary"
+            },
+            {
+              "type": "learning_objective",
+              "code": "LANG-4B-OA04",
+              "name": "OA 4",
+              "level": "4_basico",
+              "tagType": "secondary"
+            },
+            {
+              "type": "skill",
+              "code": "LANG-SK-INTERPRETAR-Y-RELACIONAR",
+              "name": "Interpretar y relacionar",
+              "tagType": "secondary"
+            },
+            {
+              "type": "text_type",
+              "code": "LANG-TT-NARRACION",
+              "name": "Narración",
+              "tagType": "secondary"
+            }
+          ]
+        },
+        {
+          "position": 14,
+          "type": "multiple_choice",
+          "stem": "¿Qué motivó el conflicto entre el Emir y el mendigo?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "El deseo del Emir de poner a prueba las habilidades del juez.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "El intento del mendigo de quedarse con el caballo del Emir.",
+              "isCorrect": true
+            },
+            {
+              "key": "C",
+              "text": "La actitud del Emir al darle la limosna al mendigo.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "La pretensión del mendigo de engañar al juez.",
+              "isCorrect": false
+            }
+          ],
+          "correctKey": "B",
+          "skill": "Interpretar y relacionar",
+          "oa": "OA 4",
+          "contentAxis": "Narración",
+          "hasFigure": false,
+          "figureNote": null,
+          "taxonomy": [
+            {
+              "type": "descriptor",
+              "code": null,
+              "name": "Infieren causa o consecuencia de acontecimientos o acciones relevantes en un texto narrativo.",
+              "parentCode": "LANG-4B-OA04",
+              "tagType": "primary"
+            },
+            {
+              "type": "learning_objective",
+              "code": "LANG-4B-OA04",
+              "name": "OA 4",
+              "level": "4_basico",
+              "tagType": "secondary"
+            },
+            {
+              "type": "skill",
+              "code": "LANG-SK-INTERPRETAR-Y-RELACIONAR",
+              "name": "Interpretar y relacionar",
+              "tagType": "secondary"
+            },
+            {
+              "type": "text_type",
+              "code": "LANG-TT-NARRACION",
+              "name": "Narración",
+              "tagType": "secondary"
+            }
+          ]
+        },
+        {
+          "position": 15,
+          "type": "multiple_choice",
+          "stem": "Finalmente, ¿de qué manera el juez logró resolver el problema entre el Emir y el mendigo?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Escuchando los relatos entregados por el Emir y el mendigo.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Pidiendo al Emir y al mendigo que reconocieran al caballo.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Analizando la reacción del caballo frente al Emir y al mendigo.",
+              "isCorrect": true
+            },
+            {
+              "key": "D",
+              "text": "Observando la manera en que el Emir y el mendigo montaron el caballo.",
+              "isCorrect": false
+            }
+          ],
+          "correctKey": "C",
+          "skill": "Interpretar y relacionar",
+          "oa": "OA 4",
+          "contentAxis": "Narración",
+          "hasFigure": false,
+          "figureNote": null,
+          "taxonomy": [
+            {
+              "type": "descriptor",
+              "code": null,
+              "name": "Identifican un acontecimiento o acción relevante en un texto narrativo.",
+              "parentCode": "LANG-4B-OA04",
+              "tagType": "primary"
+            },
+            {
+              "type": "learning_objective",
+              "code": "LANG-4B-OA04",
+              "name": "OA 4",
+              "level": "4_basico",
+              "tagType": "secondary"
+            },
+            {
+              "type": "skill",
+              "code": "LANG-SK-INTERPRETAR-Y-RELACIONAR",
+              "name": "Interpretar y relacionar",
+              "tagType": "secondary"
+            },
+            {
+              "type": "text_type",
+              "code": "LANG-TT-NARRACION",
+              "name": "Narración",
+              "tagType": "secondary"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "order": 4,
+      "name": "Texto 4: «Las ballenas cautivas»",
+      "type": "mixed",
+      "instructions": "Lee el siguiente texto y responde las preguntas 16 a 19.",
+      "passage": {
+        "title": "Las ballenas cautivas. La vuelta al mundo en ochenta segundos",
+        "text": "Un vociferante despertador musical quiebra el sueño de Bob Smith. Es un hombre simpático, joven y atlético. Pulsa un interruptor que enciende todas las luces de su pequeña vivienda y, literalmente, brinca de la cama. Da varios saltos al pie de su lecho, hace flexiones, pega trompadas al aire y unos segundos después está cantando bajo la ducha.\n\nSe frota vivamente y enciende la cocina para prepararse un “desayuno sostenido”, como llaman los norteamericanos al jugo de fruta, jamón con huevos revueltos, cereales vitamínicos con leche, tostadas y café negro.\n\nMedia hora más tarde estará instalado en su despacho, filial de la Enterprise International, una de las cadenas más importantes de televisión de los Estados Unidos. Bob es jefe de los servicios informativos de la estación retransmisora de Punta Barrow (Alaska), situada en la parte más septentrional del planeta, prácticamente en el Polo Norte.\n\nSe enfunda una cazadora y los pantalones térmicos, que le dan un leve aire de oso polar, porque fuera, a la intemperie, hay 20 grados bajo cero. Con solo cruzar un par de calles, llegará a la estación.\n\nSe dispone a salir y suena el teléfono.\n\n― ¿Bob? ¡Hola! Soy Ted Lindsay. ¡Tengo una auténtica primicia para ti!\n\n― ¿Qué hay, Ted? Hombre, ¿de qué se trata?\n\n― Ven a los estudios y lo verás tú mismo.\n\n― Oye, por poco sales en antena y me dices que encienda el televisor para ver tu primicia. Ted, ahora en serio, dime qué sucede.\n\n― ¡Hablo en serio, Bob! ¡Cruza la calle y tendrás la respuesta! ― Y cuelga el teléfono.\n\n― ¡Vaya broma! ― se impacienta Bob, y sale apresuradamente.\n\nTed Lindsay es ecologista de profesión. Se ha especializado en varias universidades del mundo sobre la conservación del medio ambiente y la fauna del Polo Norte. Desde hace años vive en Alaska dedicado al estudio y la conservación del ecosistema, y de vez en cuando, del transporte desesperado de hombres que en alguna emergencia recurren a los servicios de su helicóptero, un viejo aparato que él mismo arregla y mantiene.\n\nBob atraviesa visiblemente contrariado la calle. No hay cosa más molesta para un periodista que alguna información escape entre sus dedos, incluso como ahora, cuando en unos minutos podrá tener la respuesta. ¿Pero qué bicho puede haberle picado a un hombre tan serio como Ted Lindsay para montar tanto aparato?\n\nEn la puerta de la estación le aguarda su amigo. Esto despierta todavía más su curiosidad.\n\nSe estrechan las manos efusivamente. Comparten la aventura de vivir en el gran páramo helado desde hace algunos años. Juntos, han colaborado para solucionar casos desesperados, como cuando un petrolero que rompió el casco produjo la primera marea negra, o cuando aviones pequeños se quedan atrapados en la nieve, o cuando se trata de localizar a personas perdidas, generalmente expedicionarios científicos. Alguna vez han identificado también los globos sonda que se extravían con valiosa información meteorológica. Ahora lo que más les preocupa es el agujero que se ha abierto en el Polo Norte y por donde se escapa al vacío el ozono de nuestro planeta, poniendo en gravísimo peligro a la humanidad. Caminan hasta la sala de grabaciones. Allí les aguarda un video listo para funcionar.\n\nEn la pantalla, con una toma desde el aire, en medio de una interminable llanura cubierta de nieve, aparece un agujero abierto sobre el mar, del que asoman de tanto en tanto las cabezas de unas ballenas. Mientras, a los costados, unos esquimales golpean los bordes del hielo, como si trataran de agrandar el respiradero artificial.\n\n― ¡Están atrapadas y luchan desesperadamente por sobrevivir!\n\n― ¿Ballenas grises?\n\n― Sí. Dos adultas de unos cinco años y otra menor.\n\n― ¿Es posible a estas alturas del año?\n\n― Las estás viendo, ¿no?\n\n― ¿Cuándo realizaste las tomas?\n\n― Ayer, naturalmente.\n\n― ¿Y a qué distancia están?\n\n― ¡Imagínate! ¡A menos de diez minutos en helicóptero!\n\n― ¿Las encontraste tú mismo?\n\n― No. ¡Qué va! Unos esquimales las descubrieron, ellos me informaron. Yo avisé al ejército y, después de consultarlo en Prudhoe Bay, me ofrecieron ayuda.\n\n― ¿Al ejército? ¿Y se puede saber qué pintan ellos en esto?\n\n― Mira, Bob. Antes de hablar con el ejército, me monté en el helicóptero y recorrí las inmediaciones del agujero de las ballenas. En muchos kilómetros a la redonda el hielo ha bloqueado ya la lógica salida al mar. Sin una ayuda de gran envergadura…, adiós ballenas.\n\nCarlos Villanes. Las ballenas cautivas: La vuelta al mundo en ochenta segundos. España: SM, 2010. (Fragmento).\n\nGlosario\n• trompadas: puñetazos.\n• septentrional: del norte.\n• cazadora: una especie de chaqueta usada por lo general para la caza y el deporte.\n• Prudhoe Bay: lugar de Alaska.",
+        "format": "plain",
+        "attachments": []
+      },
+      "items": [
+        {
+          "position": 16,
+          "type": "multiple_choice",
+          "stem": "¿Cómo reaccionó Bob Smith luego del diálogo telefónico con Ted Lindsay?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Confundido por el extraño tono que tenía su amigo.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Incrédulo de la importancia que se le daba a la noticia.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Agradecido de su amigo por la información que le daría.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "Ansioso por la necesidad de conocer la primicia lo antes posible.",
+              "isCorrect": true
+            }
+          ],
+          "correctKey": "D",
+          "skill": "Interpretar y relacionar",
+          "oa": "OA 4",
+          "contentAxis": "Narración",
+          "hasFigure": false,
+          "figureNote": null,
+          "taxonomy": [
+            {
+              "type": "descriptor",
+              "code": null,
+              "name": "Infieren información relevante sobre personajes en un texto narrativo.",
+              "parentCode": "LANG-4B-OA04",
+              "tagType": "primary"
+            },
+            {
+              "type": "learning_objective",
+              "code": "LANG-4B-OA04",
+              "name": "OA 4",
+              "level": "4_basico",
+              "tagType": "secondary"
+            },
+            {
+              "type": "skill",
+              "code": "LANG-SK-INTERPRETAR-Y-RELACIONAR",
+              "name": "Interpretar y relacionar",
+              "tagType": "secondary"
+            },
+            {
+              "type": "text_type",
+              "code": "LANG-TT-NARRACION",
+              "name": "Narración",
+              "tagType": "secondary"
+            }
+          ]
+        },
+        {
+          "position": 17,
+          "type": "multiple_choice",
+          "stem": "¿Cuál es la profesión de Ted Lindsay?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Meteorólogo.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Ecologista.",
+              "isCorrect": true
+            },
+            {
+              "key": "C",
+              "text": "Periodista.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "Militar.",
+              "isCorrect": false
+            }
+          ],
+          "correctKey": "B",
+          "skill": "Localizar",
+          "oa": "OA 4",
+          "contentAxis": "Narración",
+          "hasFigure": false,
+          "figureNote": null,
+          "taxonomy": [
+            {
+              "type": "descriptor",
+              "code": null,
+              "name": "Localizan información explícita relevante en un texto narrativo.",
+              "parentCode": "LANG-4B-OA04",
+              "tagType": "primary"
+            },
+            {
+              "type": "learning_objective",
+              "code": "LANG-4B-OA04",
+              "name": "OA 4",
+              "level": "4_basico",
+              "tagType": "secondary"
+            },
+            {
+              "type": "skill",
+              "code": "LANG-SK-LOCALIZAR",
+              "name": "Localizar",
+              "tagType": "secondary"
+            },
+            {
+              "type": "text_type",
+              "code": "LANG-TT-NARRACION",
+              "name": "Narración",
+              "tagType": "secondary"
+            }
+          ]
+        },
+        {
+          "position": 18,
+          "type": "multiple_choice",
+          "stem": "¿Qué hace Ted para ayudar a resolver el problema de las ballenas?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Solicita colaboración al ejército.",
+              "isCorrect": true
+            },
+            {
+              "key": "B",
+              "text": "Difunde la noticia por televisión.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Localiza a científicos expedicionarios.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "Colabora con el trabajo de los esquimales.",
+              "isCorrect": false
+            }
+          ],
+          "correctKey": "A",
+          "skill": "Interpretar y relacionar",
+          "oa": "OA 4",
+          "contentAxis": "Narración",
+          "hasFigure": false,
+          "figureNote": null,
+          "taxonomy": [
+            {
+              "type": "descriptor",
+              "code": null,
+              "name": "Identifican un acontecimiento o acción relevante en un texto narrativo.",
+              "parentCode": "LANG-4B-OA04",
+              "tagType": "primary"
+            },
+            {
+              "type": "learning_objective",
+              "code": "LANG-4B-OA04",
+              "name": "OA 4",
+              "level": "4_basico",
+              "tagType": "secondary"
+            },
+            {
+              "type": "skill",
+              "code": "LANG-SK-INTERPRETAR-Y-RELACIONAR",
+              "name": "Interpretar y relacionar",
+              "tagType": "secondary"
+            },
+            {
+              "type": "text_type",
+              "code": "LANG-TT-NARRACION",
+              "name": "Narración",
+              "tagType": "secondary"
+            }
+          ]
+        },
+        {
+          "position": 19,
+          "type": "open_ended",
+          "stem": "¿Qué opinas sobre el trabajo que realiza Ted en Alaska? Justifica tu respuesta con información del texto.",
+          "alternatives": [],
+          "correctKey": null,
+          "skill": "Reflexionar",
+          "oa": "OA 4",
+          "contentAxis": "Narración",
+          "hasFigure": false,
+          "figureNote": null,
+          "taxonomy": [
+            {
+              "type": "descriptor",
+              "code": null,
+              "name": "Opinan sobre algún aspecto controversial de un texto narrativo con fundamentos que integran información del texto.",
+              "parentCode": "LANG-4B-OA04",
+              "tagType": "primary"
+            },
+            {
+              "type": "learning_objective",
+              "code": "LANG-4B-OA04",
+              "name": "OA 4",
+              "level": "4_basico",
+              "tagType": "secondary"
+            },
+            {
+              "type": "skill",
+              "code": "LANG-SK-REFLEXIONAR",
+              "name": "Reflexionar",
+              "tagType": "secondary"
+            },
+            {
+              "type": "text_type",
+              "code": "LANG-TT-NARRACION",
+              "name": "Narración",
+              "tagType": "secondary"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "order": 5,
+      "name": "Texto 5: «Anita Lizana. Menuda campeona»",
+      "type": "mixed",
+      "instructions": "Lee el siguiente texto y responde las preguntas 20 a 25.",
+      "passage": {
+        "title": "ANITA LIZANA. MENUDA CAMPEONA",
+        "text": "1915-1994 • Chilena • Tenista\n\nEs la tenista mujer más galardonada de la historia de Chile. Además, en 1937 consiguió ser la mejor tenista femenina individual del mundo, con lo que se transformó en la única latinoamericana en ostentar esa categoría. Anita Lizana obtuvo en total veinticuatro títulos, diecisiete individuales y siete en dobles.\n\n«La Ratita», como la apodaban por su menudo cuerpo y su agilidad, nació en 1915 en Santiago. Su carrera deportiva comenzó desde niña, gracias a que su padre y su tío la entrenaban. A diferencia de sus hermanos, que jugaban tenis esporádicamente, Anita vio en la raqueta un estilo de vida. Para poder practicar, esperaba que los socios del club Riege des Deutschen Vereins, donde su padre trabajaba como administrador, se fueran para ocupar las canchas. Su esfuerzo rindió frutos: cuando tenía once ganó su primer campeonato y a los quince fue campeona nacional adulta. Sus condiciones eran claramente sobresalientes y, considerando que en Chile este deporte recién se estaba profesionalizando, Anita se propuso salir al extranjero. Logró juntar ciento veinte mil pesos de la época con el apoyo de sus seguidores, y partió a Europa y a Estados Unidos en 1935. Allí comenzó una racha que la llevó a debutar en Wimbledon y Roland Garros, y a conquistar el quinto lugar en el ranking mundial.\n\nEn 1937 disputó el título de Forest Hills (el actual Abierto de Estados Unidos) contra la polaca Jadwiga Jędrzejowska. Al final del partido cayó desmayada por el esfuerzo y la emoción de haber conseguido el 6-4 y 6-2. Ese triunfo la llevó a convertirse en la número 1 del mundo cuando tenía solo veintidós años y a ser la primera latinoamericana en ganar un Grand Slam en individuales.\n\nAnita regresó triunfante a Chile, fue condecorada por el presidente Alessandri y saludó a miles de compatriotas desde el balcón del Palacio de la Moneda. Sin embargo, fue celebración y despedida, ya que la tenista se casó con el escocés Roland Ellis, se fue a vivir a Dundee, Escocia, y tuvo tres hijas. Mientras ocurría la Segunda Guerra Mundial, fue campeona nacional de Escocia y Suecia. Durante años se mantuvo alejada del tenis que se disputaba en los torneos internacionales. Trató de reincorporarse en 1946 en Wimbledon, pero solo llegó a segunda ronda, por lo que decidió retirarse de forma definitiva.\n\nEn 1966 fue invitada por el presidente Eduardo Frei Montalva a jugar en Chile para el Campeonato Sudamericano y un Estadio Nacional repleto la vitoreó. La campeona murió de cáncer en 1994. Hoy, sus hijas intentan que su nombre siga figurando en la historia del deporte chileno.\n\nIsabel Plant y otras. Mujeres bacanas latinas: si ellas pudieron, nosotras también. Chile: Catalonia, 2019. (Adaptación).\n\nGlosario\n• ostentar: tener un título o cargo que le da prestigio.\n• menudo: que es bajo y delgado.\n• racha: periodo breve de fortuna.\n• vitorear: aplaudir o aclamar con alegría.",
+        "format": "plain",
+        "attachments": [
+          {
+            "kind": "image",
+            "note": "Ilustración/retrato de Anita Lizana, tenista chilena (decorativa)."
+          }
+        ]
+      },
+      "items": [
+        {
+          "position": 20,
+          "type": "multiple_choice",
+          "stem": "¿Qué tuvo de especial el comienzo de la carrera deportiva de Anita?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Recolectaba dinero para salir a jugar tenis al extranjero.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Jugaba tenis de manera esporádica como sus hermanos.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Practicaba tenis en las canchas donde trabajaba su papá.",
+              "isCorrect": true
+            },
+            {
+              "key": "D",
+              "text": "Competía con los socios del club Riege des Deutschen Vereins.",
+              "isCorrect": false
+            }
+          ],
+          "correctKey": "C",
+          "skill": "Interpretar y relacionar",
+          "oa": "OA 6",
+          "contentAxis": "Texto no literario",
+          "hasFigure": false,
+          "figureNote": null,
+          "taxonomy": [
+            {
+              "type": "descriptor",
+              "code": null,
+              "name": "Infieren información relevante en un texto no literario.",
+              "parentCode": "LANG-4B-OA06",
+              "tagType": "primary"
+            },
+            {
+              "type": "learning_objective",
+              "code": "LANG-4B-OA06",
+              "name": "OA 6",
+              "level": "4_basico",
+              "tagType": "secondary"
+            },
+            {
+              "type": "skill",
+              "code": "LANG-SK-INTERPRETAR-Y-RELACIONAR",
+              "name": "Interpretar y relacionar",
+              "tagType": "secondary"
+            },
+            {
+              "type": "text_type",
+              "code": "LANG-TT-TEXTO-NO-LITERARIO",
+              "name": "Texto no literario",
+              "tagType": "secondary"
+            }
+          ]
+        },
+        {
+          "position": 21,
+          "type": "multiple_choice",
+          "stem": "¿En qué año Anita Lizana decidió salir al extranjero?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "1935",
+              "isCorrect": true
+            },
+            {
+              "key": "B",
+              "text": "1937",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "1946",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "1966",
+              "isCorrect": false
+            }
+          ],
+          "correctKey": "A",
+          "skill": "Localizar",
+          "oa": "OA 6",
+          "contentAxis": "Texto no literario",
+          "hasFigure": false,
+          "figureNote": null,
+          "taxonomy": [
+            {
+              "type": "descriptor",
+              "code": null,
+              "name": "Localizan información explícita relevante en un texto no literario.",
+              "parentCode": "LANG-4B-OA06",
+              "tagType": "primary"
+            },
+            {
+              "type": "learning_objective",
+              "code": "LANG-4B-OA06",
+              "name": "OA 6",
+              "level": "4_basico",
+              "tagType": "secondary"
+            },
+            {
+              "type": "skill",
+              "code": "LANG-SK-LOCALIZAR",
+              "name": "Localizar",
+              "tagType": "secondary"
+            },
+            {
+              "type": "text_type",
+              "code": "LANG-TT-TEXTO-NO-LITERARIO",
+              "name": "Texto no literario",
+              "tagType": "secondary"
+            }
+          ]
+        },
+        {
+          "position": 22,
+          "type": "multiple_choice",
+          "stem": "¿Qué anécdota le ocurrió a Anita en Forest Hills?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "El estadio completo la vitoreó.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Sus seguidores le dieron dinero.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Se desmayó al terminar el partido.",
+              "isCorrect": true
+            },
+            {
+              "key": "D",
+              "text": "Fue condecorada por el presidente Alessandri.",
+              "isCorrect": false
+            }
+          ],
+          "correctKey": "C",
+          "skill": "Interpretar y relacionar",
+          "oa": "OA 6",
+          "contentAxis": "Texto no literario",
+          "hasFigure": false,
+          "figureNote": null,
+          "taxonomy": [
+            {
+              "type": "descriptor",
+              "code": null,
+              "name": "Infieren información relevante en un texto no literario.",
+              "parentCode": "LANG-4B-OA06",
+              "tagType": "primary"
+            },
+            {
+              "type": "learning_objective",
+              "code": "LANG-4B-OA06",
+              "name": "OA 6",
+              "level": "4_basico",
+              "tagType": "secondary"
+            },
+            {
+              "type": "skill",
+              "code": "LANG-SK-INTERPRETAR-Y-RELACIONAR",
+              "name": "Interpretar y relacionar",
+              "tagType": "secondary"
+            },
+            {
+              "type": "text_type",
+              "code": "LANG-TT-TEXTO-NO-LITERARIO",
+              "name": "Texto no literario",
+              "tagType": "secondary"
+            }
+          ]
+        },
+        {
+          "position": 23,
+          "type": "multiple_choice",
+          "stem": "¿Qué quiere decir la expresión “menuda campeona” que aparece en el título del texto?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Que Anita Lizana fue campeona siendo muy niña.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Que Anita Lizana tenía un cuerpo pequeño pero fue una gran campeona.",
+              "isCorrect": true
+            },
+            {
+              "key": "C",
+              "text": "Que Anita Lizana fue campeona por poco tiempo ya que se retiró joven del tenis.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "Que Anita Lizana realizó muchos esfuerzos para ser una campeona internacional.",
+              "isCorrect": false
+            }
+          ],
+          "correctKey": "B",
+          "skill": "Interpretar y relacionar",
+          "oa": "OA 6",
+          "contentAxis": "Texto no literario",
+          "hasFigure": false,
+          "figureNote": null,
+          "taxonomy": [
+            {
+              "type": "descriptor",
+              "code": null,
+              "name": "Interpretan el sentido de expresiones en lenguaje figurado en un texto no literario.",
+              "parentCode": "LANG-4B-OA06",
+              "tagType": "primary"
+            },
+            {
+              "type": "learning_objective",
+              "code": "LANG-4B-OA06",
+              "name": "OA 6",
+              "level": "4_basico",
+              "tagType": "secondary"
+            },
+            {
+              "type": "skill",
+              "code": "LANG-SK-INTERPRETAR-Y-RELACIONAR",
+              "name": "Interpretar y relacionar",
+              "tagType": "secondary"
+            },
+            {
+              "type": "text_type",
+              "code": "LANG-TT-TEXTO-NO-LITERARIO",
+              "name": "Texto no literario",
+              "tagType": "secondary"
+            }
+          ]
+        },
+        {
+          "position": 24,
+          "type": "multiple_choice",
+          "stem": "¿Cuál es el propósito comunicativo de este texto?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Dar a conocer los triunfos internacionales de Anita Lizana.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Informar sobre los hechos más importantes de la vida de Anita Lizana.",
+              "isCorrect": true
+            },
+            {
+              "key": "C",
+              "text": "Opinar sobre la importancia de Anita Lizana en el deporte nacional.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "Convencer sobre la popularidad que alcanzó Anita Lizana en el extranjero.",
+              "isCorrect": false
+            }
+          ],
+          "correctKey": "B",
+          "skill": "Reflexionar",
+          "oa": "OA 7",
+          "contentAxis": "Texto no literario",
+          "hasFigure": false,
+          "figureNote": null,
+          "taxonomy": [
+            {
+              "type": "descriptor",
+              "code": null,
+              "name": "Determinan propósitos explícitos e implícitos en un texto no literario.",
+              "parentCode": "LANG-4B-OA07",
+              "tagType": "primary"
+            },
+            {
+              "type": "learning_objective",
+              "code": "LANG-4B-OA07",
+              "name": "OA 7",
+              "level": "4_basico",
+              "tagType": "secondary"
+            },
+            {
+              "type": "skill",
+              "code": "LANG-SK-REFLEXIONAR",
+              "name": "Reflexionar",
+              "tagType": "secondary"
+            },
+            {
+              "type": "text_type",
+              "code": "LANG-TT-TEXTO-NO-LITERARIO",
+              "name": "Texto no literario",
+              "tagType": "secondary"
+            }
+          ]
+        },
+        {
+          "position": 25,
+          "type": "open_ended",
+          "stem": "¿Qué opinas de que Anita Lizana se haya ido al extranjero a desarrollar su carrera como tenista? Justifica tu opinión con información del texto.",
+          "alternatives": [],
+          "correctKey": null,
+          "skill": "Reflexionar",
+          "oa": "OA 6",
+          "contentAxis": "Texto no literario",
+          "hasFigure": false,
+          "figureNote": null,
+          "taxonomy": [
+            {
+              "type": "descriptor",
+              "code": null,
+              "name": "Opinan sobre algún aspecto relevante en un texto no literario con fundamentos que integran información del texto.",
+              "parentCode": "LANG-4B-OA06",
+              "tagType": "primary"
+            },
+            {
+              "type": "learning_objective",
+              "code": "LANG-4B-OA06",
+              "name": "OA 6",
+              "level": "4_basico",
+              "tagType": "secondary"
+            },
+            {
+              "type": "skill",
+              "code": "LANG-SK-REFLEXIONAR",
+              "name": "Reflexionar",
+              "tagType": "secondary"
+            },
+            {
+              "type": "text_type",
+              "code": "LANG-TT-TEXTO-NO-LITERARIO",
+              "name": "Texto no literario",
+              "tagType": "secondary"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "order": 6,
+      "name": "Texto 6: «Árbol»",
+      "type": "multiple_choice",
+      "instructions": "Lee el siguiente texto y responde las preguntas 26 a 28.",
+      "passage": {
+        "title": "Árbol",
+        "text": "Este árbol grande que nació pequeño\nechó raíces en la tierra dura,\ny desde el fondo de su oscuro sueño\nsacó el oro terrestre hacia la altura.\n\nSacó la claridad con dulce empeño\nde la tierra y del agua la frescura\ndel aire ahora rumoroso dueño\na los vientos despliega su estructura.\n\nÁlamo del camino, mástil de oro,\nnavío de las olas forestales,\nalta columna de esplendor sonoro,\n\ndame una rama de tu fuerza alada,\nun gramo de tus íntimos metales,\ny nacerá la luz en mí enterrada.\n\nHomero Arce. El árbol y otras hojas. Santiago: Zig-Zag, 1967.\n\nGlosario\n• rumoroso: que genera un ruido continuo.\n• mástil: palo vertical en una embarcación que tiene como función sujetar las velas.\n• navío: barco de grandes dimensiones.\n• esplendor: que destaca por su hermosura.",
+        "format": "plain",
+        "attachments": []
+      },
+      "items": [
+        {
+          "position": 26,
+          "type": "multiple_choice",
+          "stem": "¿Qué característica del árbol se destaca al inicio del poema?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Su frescura.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Su gran altura.",
+              "isCorrect": true
+            },
+            {
+              "key": "C",
+              "text": "El sonido de sus hojas.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "El movimiento de sus ramas.",
+              "isCorrect": false
+            }
+          ],
+          "correctKey": "B",
+          "skill": "Interpretar y relacionar",
+          "oa": "OA 5",
+          "contentAxis": "Poema",
+          "hasFigure": false,
+          "figureNote": null,
+          "taxonomy": [
+            {
+              "type": "descriptor",
+              "code": null,
+              "name": "Establecen conclusiones sobre distintos aspectos en un poema.",
+              "parentCode": "LANG-4B-OA05",
+              "tagType": "primary"
+            },
+            {
+              "type": "learning_objective",
+              "code": "LANG-4B-OA05",
+              "name": "OA 5",
+              "level": "4_basico",
+              "tagType": "secondary"
+            },
+            {
+              "type": "skill",
+              "code": "LANG-SK-INTERPRETAR-Y-RELACIONAR",
+              "name": "Interpretar y relacionar",
+              "tagType": "secondary"
+            },
+            {
+              "type": "text_type",
+              "code": "LANG-TT-POEMA",
+              "name": "Poema",
+              "tagType": "secondary"
+            }
+          ]
+        },
+        {
+          "position": 27,
+          "type": "multiple_choice",
+          "stem": "¿Con qué se compara al árbol en el poema?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Con las olas en el mar.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Con un avión en el cielo.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Con las raíces en la tierra.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "Con un barco en el océano.",
+              "isCorrect": true
+            }
+          ],
+          "correctKey": "D",
+          "skill": "Interpretar y relacionar",
+          "oa": "OA 5",
+          "contentAxis": "Poema",
+          "hasFigure": false,
+          "figureNote": null,
+          "taxonomy": [
+            {
+              "type": "descriptor",
+              "code": null,
+              "name": "Establecen conclusiones sobre distintos aspectos en un poema.",
+              "parentCode": "LANG-4B-OA05",
+              "tagType": "primary"
+            },
+            {
+              "type": "learning_objective",
+              "code": "LANG-4B-OA05",
+              "name": "OA 5",
+              "level": "4_basico",
+              "tagType": "secondary"
+            },
+            {
+              "type": "skill",
+              "code": "LANG-SK-INTERPRETAR-Y-RELACIONAR",
+              "name": "Interpretar y relacionar",
+              "tagType": "secondary"
+            },
+            {
+              "type": "text_type",
+              "code": "LANG-TT-POEMA",
+              "name": "Poema",
+              "tagType": "secondary"
+            }
+          ]
+        },
+        {
+          "position": 28,
+          "type": "multiple_choice",
+          "stem": "¿Qué sentimiento hacia el árbol expresa el hablante en el poema?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Tristeza.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Compasión.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Admiración.",
+              "isCorrect": true
+            },
+            {
+              "key": "D",
+              "text": "Preocupación.",
+              "isCorrect": false
+            }
+          ],
+          "correctKey": "C",
+          "skill": "Interpretar y relacionar",
+          "oa": "OA 5",
+          "contentAxis": "Poema",
+          "hasFigure": false,
+          "figureNote": null,
+          "taxonomy": [
+            {
+              "type": "descriptor",
+              "code": null,
+              "name": "Infieren el sentido global de un poema.",
+              "parentCode": "LANG-4B-OA05",
+              "tagType": "primary"
+            },
+            {
+              "type": "learning_objective",
+              "code": "LANG-4B-OA05",
+              "name": "OA 5",
+              "level": "4_basico",
+              "tagType": "secondary"
+            },
+            {
+              "type": "skill",
+              "code": "LANG-SK-INTERPRETAR-Y-RELACIONAR",
+              "name": "Interpretar y relacionar",
+              "tagType": "secondary"
+            },
+            {
+              "type": "text_type",
+              "code": "LANG-TT-POEMA",
+              "name": "Poema",
+              "tagType": "secondary"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "extraction": {
+    "itemCount": 28,
+    "warnings": [
+      "Q9 pregunta por el propósito de las ilustraciones del Texto 2 (Nombres científicos); las ilustraciones se describen en el attachment del pasaje y la pregunta es respondible desde el texto.",
+      "Q19 y Q25 son ítems de desarrollo (open_ended / responseFormat develop).",
+      "Textos transcritos desde la capa de texto del PDF (pdftotext), verbatim."
+    ],
+    "needsHumanReview": false
+  },
+  "pauta": {
+    "source": {
+      "report": "RBD25520_DIA_LECTURA_6_A_Resultados_Asignatura_Cierre_2025 (2).pdf",
+      "subjectCode": "LANG",
+      "gradeCode": "6TH_BASIC",
+      "applicationPeriod": "cierre",
+      "year": 2025,
+      "instrumentJson": "extraccion/lenguaje/6º lenguaje cierre 2025.json"
+    },
+    "appliedKeys": 26,
+    "issues": []
+  }
+}

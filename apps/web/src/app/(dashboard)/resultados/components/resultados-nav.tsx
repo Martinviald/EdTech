@@ -8,14 +8,17 @@ import { cn } from '@/lib/utils';
 /**
  * Sub-navegación de la sección Resultados. Mantiene la querystring (filtros)
  * al cambiar de vista para que los filtros aplicados se conserven (H6.2).
+ *
+ * Sólo agrupa las vistas AGREGADAS (cross-evaluación, filtradas por
+ * asignatura/grado/curso). Las vistas por-evaluación (Informe, Detalle por
+ * pregunta, Análisis IA) viven ahora en el hub `/evaluaciones/[id]`, al que se
+ * entra eligiendo una evaluación en la lista `/evaluaciones`.
  */
 const TABS: { href: string; label: string }[] = [
   { href: '/resultados', label: 'Resumen' },
-  { href: '/resultados/informe', label: 'Informe' },
   { href: '/resultados/clasificacion', label: 'Clasificación' },
   { href: '/resultados/habilidades', label: 'Habilidades' },
   { href: '/resultados/mapa-calor', label: 'Mapa de calor' },
-  { href: '/resultados/detalle', label: 'Detalle por pregunta' },
   { href: '/resultados/comparacion', label: 'Comparación' },
   { href: '/resultados/progresion', label: 'Progresión' },
 ];

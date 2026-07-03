@@ -60,8 +60,9 @@ export class AuthGuard implements CanActivate {
     const legacyRole = payload['role'] as string | undefined;
     const rolesRaw = payload['roles'] as unknown;
     const roles: UserRole[] = Array.isArray(rolesRaw)
-      ? rolesRaw.filter((r): r is UserRole =>
-          typeof r === 'string' && (USER_ROLES as readonly string[]).includes(r),
+      ? rolesRaw.filter(
+          (r): r is UserRole =>
+            typeof r === 'string' && (USER_ROLES as readonly string[]).includes(r),
         )
       : legacyRole && (USER_ROLES as readonly string[]).includes(legacyRole)
         ? [legacyRole as UserRole]
@@ -71,8 +72,7 @@ export class AuthGuard implements CanActivate {
       throw new UnauthorizedException('Token sin roles válidos');
     }
 
-    const activeRoleRaw =
-      (payload['activeRole'] as string | undefined) ?? legacyRole ?? roles[0];
+    const activeRoleRaw = (payload['activeRole'] as string | undefined) ?? legacyRole ?? roles[0];
     if (!(USER_ROLES as readonly string[]).includes(activeRoleRaw)) {
       throw new UnauthorizedException('Token con activeRole inválido');
     }
@@ -83,9 +83,25 @@ export class AuthGuard implements CanActivate {
       throw new UnauthorizedException('Token inconsistente');
     }
 
+    // Multi-org: `orgs` lista las orgs del usuario para validar el switch.
+    // Tokens viejos (pre-multi-org) no lo traen → array vacío (el selector no
+    // se renderiza y switch-org queda deshabilitado hasta el próximo login).
+    const orgsRaw = payload['orgs'] as unknown;
+    const orgs: Array<{ id: string; name: string }> = Array.isArray(orgsRaw)
+      ? orgsRaw.filter(
+          (o): o is { id: string; name: string } =>
+            typeof o === 'object' &&
+            o !== null &&
+            typeof (o as { id?: unknown }).id === 'string' &&
+            typeof (o as { name?: unknown }).name === 'string',
+        )
+      : [];
+
     request.user = {
       userId: payload['userId'] as string,
       orgId: (payload['orgId'] as string | null | undefined) ?? null,
+      orgName: (payload['orgName'] as string | null | undefined) ?? null,
+      orgs,
       email: payload['email'] as string,
       name: payload['name'] as string,
       isPlatformAdmin,

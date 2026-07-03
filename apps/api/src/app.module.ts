@@ -29,6 +29,15 @@ import { AnalyticsModule } from './analytics/analytics.module';
 import { HeatmapModule } from './heatmap/heatmap.module';
 import { ItemAnalysisModule } from './item-analysis/item-analysis.module';
 import { AssessmentReportModule } from './assessment-report/assessment-report.module';
+import { JobsModule } from './jobs/jobs.module';
+import { CurriculumRetrieverModule } from './curriculum-retriever/curriculum-retriever.module';
+import { AiAnalysisModule } from './ai-analysis/ai-analysis.module';
+import { BenchmarkSettingsModule } from './benchmark-settings/benchmark-settings.module';
+import { RemedialModule } from './remedial/remedial.module';
+import { BenchmarkingModule } from './benchmarking/benchmarking.module';
+import { InstrumentQualityModule } from './instrument-quality/instrument-quality.module';
+import { AiObservabilityModule } from './ai-observability/ai-observability.module';
+import { AssistantModule } from './assistant/assistant.module';
 
 @Module({
   imports: [
@@ -65,6 +74,21 @@ import { AssessmentReportModule } from './assessment-report/assessment-report.mo
     ItemAnalysisModule,
     // ── Informe consolidado por evaluación (directivos / UTP) ──
     AssessmentReportModule,
+    // ── F2 S0: cimientos (jobs async in-process, recuperación curricular, motor IA, benchmarking) ──
+    JobsModule,
+    CurriculumRetrieverModule,
+    AiAnalysisModule,
+    BenchmarkSettingsModule,
+    // ── F2 S2: análisis IA por-pregunta (en AiAnalysisModule) + calidad de instrumento ──
+    InstrumentQualityModule,
+    // ── F2 S3: IA Remedial (RAG) — generación de material con aprobación humana ──
+    RemedialModule,
+    // ── F2 S4: Benchmarking Institucional (read-model cross-tenant + k-anonimato) ──
+    BenchmarkingModule,
+    // ── F2 S5: observabilidad de costo/latencia IA (H19.25) ──
+    AiObservabilityModule,
+    // ── E21: Asistente IA Conversacional (loop de tool-use + chat SSE) ──
+    AssistantModule,
   ],
   controllers: [AppController],
   providers: [

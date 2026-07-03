@@ -15,6 +15,8 @@
     "db:push": "turbo run db:push",
     "db:seed": "turbo run db:seed",
     "db:seed:e2e": "pnpm --filter @soe/db db:seed:e2e",
+    "db:seed:dev": "pnpm --filter @soe/db db:seed:dev",
+    "db:migrate:dev": "pnpm --filter @soe/db db:migrate:dev",
     "db:reset": "pnpm --filter @soe/db db:reset",
     "db:studio": "turbo run db:studio",
     "format": "prettier --write \"**/*.{ts,tsx,md,json}\"",
@@ -23,6 +25,7 @@
   "devDependencies": {
     "@types/node": "^22.10.0",
     "prettier": "^3.4.2",
+    "sst": "^4.17.0",
     "turbo": "^2.3.3",
     "typescript": "^5.7.2"
   },

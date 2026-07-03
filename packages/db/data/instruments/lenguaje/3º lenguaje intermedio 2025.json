@@ -1,0 +1,1316 @@
+{
+  "schemaVersion": "1.0",
+  "source": {
+    "file": "3º lenguaje intermedio 2025.pdf",
+    "subjectFolder": "Lenguaje"
+  },
+  "instrument": {
+    "name": "DIA Lectura 3° Básico 2025 — Intermedio",
+    "subject": "Lenguaje y Comunicación",
+    "subjectCode": "LANG",
+    "grade": "3° Básico",
+    "gradeCode": "3RD_BASIC",
+    "year": 2025,
+    "applicationPeriod": "intermedio",
+    "type": "dia",
+    "isOfficial": true,
+    "source": "imported"
+  },
+  "sections": [
+    {
+      "order": 1,
+      "name": "Texto 1: «Los vecinos del abeto»",
+      "type": "mixed",
+      "instructions": "Lee el siguiente texto y responde las preguntas 1 a 6.",
+      "passage": {
+        "title": "Los vecinos del abeto",
+        "text": "En el gran abeto del bosque Verde vivía una comunidad de vecinos muy felices. En la primera rama no vivía nadie. En la segunda, había un nido de pajarillos. La tercera rama era la de don Búho, que solía dormir de día. En la mitad del tronco vivía la familia de ardillas Hacendosas. Dos ramas más arriba, vivía un famoso cantante: don Ruiseñor. Y en la última rama no vivía nadie: era muy alta.\n\nUn martes de otoño, llegó un nuevo inquilino y, como es natural, todos se asomaron con curiosidad para ver quién era. Se trataba de un pájaro carpintero que se instaló en la última rama y empezó a golpear el tronco con su pico: toc, toc, toc, toc.\n\n—¿Qué escándalo es este? —se quejó don Búho.\n\n—¡Tanto ruido…! —protestaron las ardillas.\n\n—¡Con ese toc, toc, ni siquiera escucho mis propias notas! —dijo don Ruiseñor.\n\nLos pajarillos, asustados por el estruendo, se pusieron a llorar. Y así, la comunidad de vecinos se reunió, dispuesta a echar de su abeto a aquel vecino molesto. Pero ocurrió que, justo entonces, descubrieron en el tronco una plaga de termitas que se estaba comiendo la madera del árbol, amenazándolos con perder sus casas.\n\nEstaban desesperados, pensando en el derrumbe de su querido abeto, cuando de pronto vieron que el pájaro carpintero se estaba comiendo todas las termitas.\n\nY así, el peor vecino se convirtió en el favorito, salvándolos de perder sus hogares. Así es que los animalitos organizaron una linda fiesta para darle la bienvenida al nuevo vecino.\n\nMaría Mañeru. Cuentos del bosque. Colección Mis nuevos cuentos no tradicionales. Chile: Mundicrom, 2018.",
+        "format": "plain",
+        "attachments": []
+      },
+      "items": [
+        {
+          "position": 1,
+          "type": "multiple_choice",
+          "stem": "¿Por qué le molestaba el ruido al Ruiseñor?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Porque no podía dormir durante el día.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Porque no podía escuchar su propio canto.",
+              "isCorrect": true
+            },
+            {
+              "key": "C",
+              "text": "Porque no podía comer termitas tranquilo.",
+              "isCorrect": false
+            }
+          ],
+          "correctKey": "B",
+          "skill": "Interpretar y relacionar",
+          "oa": "OA 4",
+          "contentAxis": "Narración",
+          "hasFigure": false,
+          "figureNote": null,
+          "taxonomy": [
+            {
+              "type": "descriptor",
+              "code": null,
+              "name": "Infieren causa o consecuencia de acontecimientos o acciones relevantes en un texto narrativo.",
+              "parentCode": "LANG-3B-OA04",
+              "tagType": "primary"
+            },
+            {
+              "type": "learning_objective",
+              "code": "LANG-3B-OA04",
+              "name": "OA 4",
+              "level": "3_basico",
+              "tagType": "secondary"
+            },
+            {
+              "type": "skill",
+              "code": "LANG-SK-INTERPRETAR-Y-RELACIONAR",
+              "name": "Interpretar y relacionar",
+              "tagType": "secondary"
+            },
+            {
+              "type": "text_type",
+              "code": "LANG-TT-NARRACION",
+              "name": "Narración",
+              "tagType": "secondary"
+            }
+          ]
+        },
+        {
+          "position": 2,
+          "type": "multiple_choice",
+          "stem": "¿Cuándo descubrieron a las termitas los vecinos del abeto?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Cuando se reunieron para echar al nuevo vecino.",
+              "isCorrect": true
+            },
+            {
+              "key": "B",
+              "text": "Cuando se asustaron por el ruido del nuevo vecino.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Cuando se asomaron para ver quién era el nuevo vecino.",
+              "isCorrect": false
+            }
+          ],
+          "correctKey": "A",
+          "skill": "Interpretar y relacionar",
+          "oa": "OA 4",
+          "contentAxis": "Narración",
+          "hasFigure": false,
+          "figureNote": null,
+          "taxonomy": [
+            {
+              "type": "descriptor",
+              "code": null,
+              "name": "Identifican un acontecimiento o acción relevante en un texto narrativo.",
+              "parentCode": "LANG-3B-OA04",
+              "tagType": "primary"
+            },
+            {
+              "type": "learning_objective",
+              "code": "LANG-3B-OA04",
+              "name": "OA 4",
+              "level": "3_basico",
+              "tagType": "secondary"
+            },
+            {
+              "type": "skill",
+              "code": "LANG-SK-INTERPRETAR-Y-RELACIONAR",
+              "name": "Interpretar y relacionar",
+              "tagType": "secondary"
+            },
+            {
+              "type": "text_type",
+              "code": "LANG-TT-NARRACION",
+              "name": "Narración",
+              "tagType": "secondary"
+            }
+          ]
+        },
+        {
+          "position": 3,
+          "type": "multiple_choice",
+          "stem": "¿Cómo se sintieron los vecinos al comprender que el abeto estaba en peligro?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Curiosos.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Asustados.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Desesperados.",
+              "isCorrect": true
+            }
+          ],
+          "correctKey": "C",
+          "skill": "Interpretar y relacionar",
+          "oa": "OA 4",
+          "contentAxis": "Narración",
+          "hasFigure": false,
+          "figureNote": null,
+          "taxonomy": [
+            {
+              "type": "descriptor",
+              "code": null,
+              "name": "Infieren características y sentimientos de personajes en un texto narrativo.",
+              "parentCode": "LANG-3B-OA04",
+              "tagType": "primary"
+            },
+            {
+              "type": "learning_objective",
+              "code": "LANG-3B-OA04",
+              "name": "OA 4",
+              "level": "3_basico",
+              "tagType": "secondary"
+            },
+            {
+              "type": "skill",
+              "code": "LANG-SK-INTERPRETAR-Y-RELACIONAR",
+              "name": "Interpretar y relacionar",
+              "tagType": "secondary"
+            },
+            {
+              "type": "text_type",
+              "code": "LANG-TT-NARRACION",
+              "name": "Narración",
+              "tagType": "secondary"
+            }
+          ]
+        },
+        {
+          "position": 4,
+          "type": "multiple_choice",
+          "stem": "¿Por qué el pájaro carpintero se convirtió en el vecino favorito?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Porque salvó al abeto.",
+              "isCorrect": true
+            },
+            {
+              "key": "B",
+              "text": "Porque preparó una fiesta.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Porque se instaló en la rama más alta.",
+              "isCorrect": false
+            }
+          ],
+          "correctKey": "A",
+          "skill": "Interpretar y relacionar",
+          "oa": "OA 4",
+          "contentAxis": "Narración",
+          "hasFigure": false,
+          "figureNote": null,
+          "taxonomy": [
+            {
+              "type": "descriptor",
+              "code": null,
+              "name": "Infieren causa o consecuencia de acontecimientos o acciones relevantes en un texto narrativo.",
+              "parentCode": "LANG-3B-OA04",
+              "tagType": "primary"
+            },
+            {
+              "type": "learning_objective",
+              "code": "LANG-3B-OA04",
+              "name": "OA 4",
+              "level": "3_basico",
+              "tagType": "secondary"
+            },
+            {
+              "type": "skill",
+              "code": "LANG-SK-INTERPRETAR-Y-RELACIONAR",
+              "name": "Interpretar y relacionar",
+              "tagType": "secondary"
+            },
+            {
+              "type": "text_type",
+              "code": "LANG-TT-NARRACION",
+              "name": "Narración",
+              "tagType": "secondary"
+            }
+          ]
+        },
+        {
+          "position": 5,
+          "type": "multiple_choice",
+          "stem": "¿Para qué se organizó una fiesta?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Para celebrar que el abeto estaba bien.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Para darle la bienvenida al pájaro carpintero.",
+              "isCorrect": true
+            },
+            {
+              "key": "C",
+              "text": "Para consolar a los pajarillos que estaban llorando.",
+              "isCorrect": false
+            }
+          ],
+          "correctKey": "B",
+          "skill": "Localizar",
+          "oa": "OA 4",
+          "contentAxis": "Narración",
+          "hasFigure": false,
+          "figureNote": null,
+          "taxonomy": [
+            {
+              "type": "descriptor",
+              "code": null,
+              "name": "Localizan información explícita relevante en un texto narrativo.",
+              "parentCode": "LANG-3B-OA04",
+              "tagType": "primary"
+            },
+            {
+              "type": "learning_objective",
+              "code": "LANG-3B-OA04",
+              "name": "OA 4",
+              "level": "3_basico",
+              "tagType": "secondary"
+            },
+            {
+              "type": "skill",
+              "code": "LANG-SK-LOCALIZAR",
+              "name": "Localizar",
+              "tagType": "secondary"
+            },
+            {
+              "type": "text_type",
+              "code": "LANG-TT-NARRACION",
+              "name": "Narración",
+              "tagType": "secondary"
+            }
+          ]
+        },
+        {
+          "position": 6,
+          "type": "open_ended",
+          "responseFormat": "develop",
+          "stem": "¿Qué opinas sobre la reacción de los vecinos al escuchar el ruido del nuevo vecino? Justifica tu respuesta con información del texto.",
+          "alternatives": [],
+          "correctKey": null,
+          "skill": "Reflexionar",
+          "oa": "OA 4",
+          "contentAxis": "Narración",
+          "hasFigure": false,
+          "figureNote": null,
+          "taxonomy": [
+            {
+              "type": "descriptor",
+              "code": null,
+              "name": "Opinan sobre algún aspecto controversial de un texto narrativo con fundamentos que integran información del texto.",
+              "parentCode": "LANG-3B-OA04",
+              "tagType": "primary"
+            },
+            {
+              "type": "learning_objective",
+              "code": "LANG-3B-OA04",
+              "name": "OA 4",
+              "level": "3_basico",
+              "tagType": "secondary"
+            },
+            {
+              "type": "skill",
+              "code": "LANG-SK-REFLEXIONAR",
+              "name": "Reflexionar",
+              "tagType": "secondary"
+            },
+            {
+              "type": "text_type",
+              "code": "LANG-TT-NARRACION",
+              "name": "Narración",
+              "tagType": "secondary"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "order": 2,
+      "name": "Texto 2: «Fósiles de dinosaurio»",
+      "type": "multiple_choice",
+      "instructions": "Lee el siguiente texto y responde las preguntas 7 a 10.",
+      "passage": {
+        "title": "Fósiles de dinosaurio",
+        "text": "Hace millones de años, los dinosaurios dominaban la Tierra; sin embargo, se extinguieron por completo mucho antes de la aparición del hombre. Sabemos que los dinosaurios existieron gracias al análisis de fósiles. Los fósiles son restos de animales y plantas que se han conservado en rocas que todavía podemos ver hoy.\n\n¿Cómo se obtienen los fósiles?\nCuando encuentran un fósil de dinosaurio, los paleontólogos excavan y limpian con cuidado las rocas que lo contienen. Después fotografían, miden y anotan la posición de cada fósil. A continuación, se extraen, se envuelven en varias capas de papel y se dejan secar. Este envoltorio protege al fósil durante el traslado hasta el lugar en el que se analizará.\n\n¿Qué fósiles hay?\nLos fósiles de huesos y dientes no son los únicos restos de dinosaurio existentes. Se han encontrado partes de su piel, huellas y nidos con huevos. Los científicos, incluso, han podido averiguar la dieta de los dinosaurios a partir del estudio de excrementos fosilizados.\n\nR. Kerrod y otros. 1.000 preguntas y respuestas. México: Susaeta Ediciones S.A., 2019. (Adaptación).\n\nGlosario\npaleontólogo: científico que estudia los fósiles.",
+        "format": "plain",
+        "attachments": [
+          {
+            "kind": "image",
+            "note": "Ilustración de un dinosaurio acompañada de un diagrama que rotula distintos tipos de fósiles: hueso, cráneo, excremento, cría y huevo."
+          }
+        ]
+      },
+      "items": [
+        {
+          "position": 7,
+          "type": "multiple_choice",
+          "stem": "¿Qué es lo primero que hacen los paleontólogos cuando encuentran un fósil?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Trasladan el fósil a un lugar seguro para analizarlo.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Extraen y envuelven el fósil en varias capas de papel.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Excavan y limpian con cuidado las rocas donde está el fósil.",
+              "isCorrect": true
+            }
+          ],
+          "correctKey": "C",
+          "skill": "Interpretar y relacionar",
+          "oa": "OA 6",
+          "contentAxis": "Texto no literario",
+          "hasFigure": false,
+          "figureNote": null,
+          "taxonomy": [
+            {
+              "type": "descriptor",
+              "code": null,
+              "name": "Infieren información relevante en un texto no literario.",
+              "parentCode": "LANG-3B-OA06",
+              "tagType": "primary"
+            },
+            {
+              "type": "learning_objective",
+              "code": "LANG-3B-OA06",
+              "name": "OA 6",
+              "level": "3_basico",
+              "tagType": "secondary"
+            },
+            {
+              "type": "skill",
+              "code": "LANG-SK-INTERPRETAR-Y-RELACIONAR",
+              "name": "Interpretar y relacionar",
+              "tagType": "secondary"
+            },
+            {
+              "type": "text_type",
+              "code": "LANG-TT-TEXTO-NO-LITERARIO",
+              "name": "Texto no literario",
+              "tagType": "secondary"
+            }
+          ]
+        },
+        {
+          "position": 8,
+          "type": "multiple_choice",
+          "stem": "¿Para qué sirve el envoltorio que se usa en los fósiles?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Para secarlos.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Para limpiarlos.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Para protegerlos.",
+              "isCorrect": true
+            }
+          ],
+          "correctKey": "C",
+          "skill": "Interpretar y relacionar",
+          "oa": "OA 6",
+          "contentAxis": "Texto no literario",
+          "hasFigure": false,
+          "figureNote": null,
+          "taxonomy": [
+            {
+              "type": "descriptor",
+              "code": null,
+              "name": "Infieren información relevante en un texto no literario.",
+              "parentCode": "LANG-3B-OA06",
+              "tagType": "primary"
+            },
+            {
+              "type": "learning_objective",
+              "code": "LANG-3B-OA06",
+              "name": "OA 6",
+              "level": "3_basico",
+              "tagType": "secondary"
+            },
+            {
+              "type": "skill",
+              "code": "LANG-SK-INTERPRETAR-Y-RELACIONAR",
+              "name": "Interpretar y relacionar",
+              "tagType": "secondary"
+            },
+            {
+              "type": "text_type",
+              "code": "LANG-TT-TEXTO-NO-LITERARIO",
+              "name": "Texto no literario",
+              "tagType": "secondary"
+            }
+          ]
+        },
+        {
+          "position": 9,
+          "type": "multiple_choice",
+          "stem": "¿Qué han estudiado los científicos para averiguar la dieta de los dinosaurios?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Excrementos fosilizados.",
+              "isCorrect": true
+            },
+            {
+              "key": "B",
+              "text": "Nidos con huevos.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Partes de su piel.",
+              "isCorrect": false
+            }
+          ],
+          "correctKey": "A",
+          "skill": "Localizar",
+          "oa": "OA 6",
+          "contentAxis": "Texto no literario",
+          "hasFigure": false,
+          "figureNote": null,
+          "taxonomy": [
+            {
+              "type": "descriptor",
+              "code": null,
+              "name": "Localizan información explícita relevante en un texto no literario.",
+              "parentCode": "LANG-3B-OA06",
+              "tagType": "primary"
+            },
+            {
+              "type": "learning_objective",
+              "code": "LANG-3B-OA06",
+              "name": "OA 6",
+              "level": "3_basico",
+              "tagType": "secondary"
+            },
+            {
+              "type": "skill",
+              "code": "LANG-SK-LOCALIZAR",
+              "name": "Localizar",
+              "tagType": "secondary"
+            },
+            {
+              "type": "text_type",
+              "code": "LANG-TT-TEXTO-NO-LITERARIO",
+              "name": "Texto no literario",
+              "tagType": "secondary"
+            }
+          ]
+        },
+        {
+          "position": 10,
+          "type": "multiple_choice",
+          "stem": "¿De qué trata el texto?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "De la vida de los paleontólogos.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "De la información que entregan los fósiles.",
+              "isCorrect": true
+            },
+            {
+              "key": "C",
+              "text": "De cómo dominaron la Tierra los dinosaurios.",
+              "isCorrect": false
+            }
+          ],
+          "correctKey": "B",
+          "skill": "Interpretar y relacionar",
+          "oa": "OA 6",
+          "contentAxis": "Texto no literario",
+          "hasFigure": false,
+          "figureNote": null,
+          "taxonomy": [
+            {
+              "type": "descriptor",
+              "code": null,
+              "name": "Infieren el sentido global de un texto no literario o un fragmento de este.",
+              "parentCode": "LANG-3B-OA06",
+              "tagType": "primary"
+            },
+            {
+              "type": "learning_objective",
+              "code": "LANG-3B-OA06",
+              "name": "OA 6",
+              "level": "3_basico",
+              "tagType": "secondary"
+            },
+            {
+              "type": "skill",
+              "code": "LANG-SK-INTERPRETAR-Y-RELACIONAR",
+              "name": "Interpretar y relacionar",
+              "tagType": "secondary"
+            },
+            {
+              "type": "text_type",
+              "code": "LANG-TT-TEXTO-NO-LITERARIO",
+              "name": "Texto no literario",
+              "tagType": "secondary"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "order": 3,
+      "name": "Texto 3: «El cuervo y la vasija»",
+      "type": "multiple_choice",
+      "instructions": "Lee el siguiente texto y responde las preguntas 11 a 14.",
+      "passage": {
+        "title": "El cuervo y la vasija",
+        "text": "Había una vez un cuervo que tenía mucha sed. Pasó por una plaza, por una iglesia y de pronto vio una vasija en el patio de una casa. Se acercó y se dio cuenta de que contenía un poco de agua. Trató de beber, pero la vasija era honda y no pudo alcanzar el agua con el pico.\n\nEl cuervo se lamentó porque estaba sediento. Pensó que debía beber esa agua para seguir volando. Entonces, se le ocurrió una idea: volcar la vasija.\n\nLe pegó con las alas, pero era demasiado pesada. No podía moverla. Luego, pensó en otra idea: romper la vasija y beber el agua cuando se derramara. Estaría muy rica.\n\nEntonces, se lanzó contra la vasija con pico, garras y alas. Pero esta era demasiado resistente para romperla.\n\nEl triste cuervo se tomó un descanso y pensó:\n\n—¿Qué haré ahora? No puedo morir de sed con el agua tan cerca. Tiene que haber una manera. Solo necesito pensar hasta descubrirla.\n\nAl cabo de un rato, el cuervo tuvo una idea brillante. Había muchas piedrecitas alrededor. Las tomó una por una y las arrojó dentro de la vasija.\n\nPoco a poco el agua subió, hasta que al fin pudo beberla.\n\nEntonces, el cuervo comprobó que siempre hay un modo de vencer los obstáculos, solo hay que usar el ingenio.\n\nEsopo. Colección Cuento contigo I. Chile: Centro de Estudios Públicos, 2004. (Adaptación).",
+        "format": "plain",
+        "attachments": [
+          {
+            "kind": "image",
+            "note": "Ilustración de un cuervo junto a una vasija (decorativa)."
+          }
+        ]
+      },
+      "items": [
+        {
+          "position": 11,
+          "type": "multiple_choice",
+          "stem": "¿Dónde encontró la vasija el cuervo?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "En una casa.",
+              "isCorrect": true
+            },
+            {
+              "key": "B",
+              "text": "En una plaza.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "En una iglesia.",
+              "isCorrect": false
+            }
+          ],
+          "correctKey": "A",
+          "skill": "Localizar",
+          "oa": "OA 4",
+          "contentAxis": "Narración",
+          "hasFigure": false,
+          "figureNote": null,
+          "taxonomy": [
+            {
+              "type": "descriptor",
+              "code": null,
+              "name": "Localizan información explícita relevante en un texto narrativo.",
+              "parentCode": "LANG-3B-OA04",
+              "tagType": "primary"
+            },
+            {
+              "type": "learning_objective",
+              "code": "LANG-3B-OA04",
+              "name": "OA 4",
+              "level": "3_basico",
+              "tagType": "secondary"
+            },
+            {
+              "type": "skill",
+              "code": "LANG-SK-LOCALIZAR",
+              "name": "Localizar",
+              "tagType": "secondary"
+            },
+            {
+              "type": "text_type",
+              "code": "LANG-TT-NARRACION",
+              "name": "Narración",
+              "tagType": "secondary"
+            }
+          ]
+        },
+        {
+          "position": 12,
+          "type": "multiple_choice",
+          "stem": "¿Cómo estaba el cuervo cuando encontró la vasija?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Triste.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Aburrido.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Sediento.",
+              "isCorrect": true
+            }
+          ],
+          "correctKey": "C",
+          "skill": "Interpretar y relacionar",
+          "oa": "OA 4",
+          "contentAxis": "Narración",
+          "hasFigure": false,
+          "figureNote": null,
+          "taxonomy": [
+            {
+              "type": "descriptor",
+              "code": null,
+              "name": "Infieren características y sentimientos de personajes en un texto narrativo.",
+              "parentCode": "LANG-3B-OA04",
+              "tagType": "primary"
+            },
+            {
+              "type": "learning_objective",
+              "code": "LANG-3B-OA04",
+              "name": "OA 4",
+              "level": "3_basico",
+              "tagType": "secondary"
+            },
+            {
+              "type": "skill",
+              "code": "LANG-SK-INTERPRETAR-Y-RELACIONAR",
+              "name": "Interpretar y relacionar",
+              "tagType": "secondary"
+            },
+            {
+              "type": "text_type",
+              "code": "LANG-TT-NARRACION",
+              "name": "Narración",
+              "tagType": "secondary"
+            }
+          ]
+        },
+        {
+          "position": 13,
+          "type": "multiple_choice",
+          "stem": "¿De qué manera el cuervo logra tomarse el agua de la vasija?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Volcando la vasija para tomar el agua.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Golpeando la vasija para derramar el agua.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Echando piedras a la vasija para que suba el agua.",
+              "isCorrect": true
+            }
+          ],
+          "correctKey": "C",
+          "skill": "Interpretar y relacionar",
+          "oa": "OA 4",
+          "contentAxis": "Narración",
+          "hasFigure": false,
+          "figureNote": null,
+          "taxonomy": [
+            {
+              "type": "descriptor",
+              "code": null,
+              "name": "Identifican un acontecimiento o acción relevante en un texto narrativo.",
+              "parentCode": "LANG-3B-OA04",
+              "tagType": "primary"
+            },
+            {
+              "type": "learning_objective",
+              "code": "LANG-3B-OA04",
+              "name": "OA 4",
+              "level": "3_basico",
+              "tagType": "secondary"
+            },
+            {
+              "type": "skill",
+              "code": "LANG-SK-INTERPRETAR-Y-RELACIONAR",
+              "name": "Interpretar y relacionar",
+              "tagType": "secondary"
+            },
+            {
+              "type": "text_type",
+              "code": "LANG-TT-NARRACION",
+              "name": "Narración",
+              "tagType": "secondary"
+            }
+          ]
+        },
+        {
+          "position": 14,
+          "type": "multiple_choice",
+          "stem": "¿Cuál es la enseñanza que entrega el texto?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Debemos ser insistentes para obtener lo que queremos.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Debemos usar la inteligencia para superar las dificultades.",
+              "isCorrect": true
+            },
+            {
+              "key": "C",
+              "text": "Debemos mantenernos positivos para enfrentar los problemas.",
+              "isCorrect": false
+            }
+          ],
+          "correctKey": "B",
+          "skill": "Interpretar y relacionar",
+          "oa": "OA 4",
+          "contentAxis": "Narración",
+          "hasFigure": false,
+          "figureNote": null,
+          "taxonomy": [
+            {
+              "type": "descriptor",
+              "code": null,
+              "name": "Infieren el sentido global de un texto narrativo o un fragmento de este.",
+              "parentCode": "LANG-3B-OA04",
+              "tagType": "primary"
+            },
+            {
+              "type": "learning_objective",
+              "code": "LANG-3B-OA04",
+              "name": "OA 4",
+              "level": "3_basico",
+              "tagType": "secondary"
+            },
+            {
+              "type": "skill",
+              "code": "LANG-SK-INTERPRETAR-Y-RELACIONAR",
+              "name": "Interpretar y relacionar",
+              "tagType": "secondary"
+            },
+            {
+              "type": "text_type",
+              "code": "LANG-TT-NARRACION",
+              "name": "Narración",
+              "tagType": "secondary"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "order": 4,
+      "name": "Texto 4: «Los rompecabezas»",
+      "type": "mixed",
+      "instructions": "Lee el siguiente texto y responde las preguntas 15 a 19.",
+      "passage": {
+        "title": "Los rompecabezas",
+        "text": "Si te gustan los rompecabezas, esta actividad te va a encantar. Sobre todo, porque es muy fácil y te va a permitir convertir tus dibujos en divertidos rompecabezas. Desafía a tu familia, a tus amigos y amigas a armar el dibujo que has pintado.\n\nMateriales\n• 6 palitos de helado\n• Témpera de colores\n• Marcadores de colores\n• Pincel\n• Cinta adhesiva\n\nPasos\n1. Lo primero que debes hacer es juntar todos los palitos, unos 5 o 6, y colocarlos uno después del otro, tal como muestra la imagen.\n2. Pega los palitos con la cinta adhesiva para fijarlos y evitar que se muevan.\n3. Pinta tu obra de arte con témpera directamente sobre los palitos. Luego, déjalos secar.\n4. Despega los palitos sacando la cinta adhesiva. Ahora tu rompecabezas está listo para jugar.\n\n• Opcional\nTambién puedes pintar un fondo de color claro, dejar que se seque y luego pintar encima con los marcadores de colores.\n\nGema Casado. Manualidades para niños rebuenos. Barcelona: Altea, 2015. (Adaptación).",
+        "format": "plain",
+        "attachments": [
+          {
+            "kind": "image",
+            "note": "Serie de ilustraciones que muestran los pasos del instructivo: palitos de helado alineados, palitos pegados con cinta adhesiva, palitos pintados con témpera y rompecabezas terminado."
+          }
+        ]
+      },
+      "items": [
+        {
+          "position": 15,
+          "type": "multiple_choice",
+          "stem": "¿Qué materiales se usan en el paso 1?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Témperas.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Palitos.",
+              "isCorrect": true
+            },
+            {
+              "key": "C",
+              "text": "Lápices.",
+              "isCorrect": false
+            }
+          ],
+          "correctKey": "B",
+          "skill": "Localizar",
+          "oa": "OA 6",
+          "contentAxis": "Texto no literario",
+          "hasFigure": false,
+          "figureNote": null,
+          "taxonomy": [
+            {
+              "type": "descriptor",
+              "code": null,
+              "name": "Localizan información explícita relevante en un texto no literario.",
+              "parentCode": "LANG-3B-OA06",
+              "tagType": "primary"
+            },
+            {
+              "type": "learning_objective",
+              "code": "LANG-3B-OA06",
+              "name": "OA 6",
+              "level": "3_basico",
+              "tagType": "secondary"
+            },
+            {
+              "type": "skill",
+              "code": "LANG-SK-LOCALIZAR",
+              "name": "Localizar",
+              "tagType": "secondary"
+            },
+            {
+              "type": "text_type",
+              "code": "LANG-TT-TEXTO-NO-LITERARIO",
+              "name": "Texto no literario",
+              "tagType": "secondary"
+            }
+          ]
+        },
+        {
+          "position": 16,
+          "type": "multiple_choice",
+          "stem": "¿Para qué se deben pegar los palitos con cinta adhesiva?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Para fijarlos.",
+              "isCorrect": true
+            },
+            {
+              "key": "B",
+              "text": "Para dejarlos secar.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Para colocarlos uno después del otro.",
+              "isCorrect": false
+            }
+          ],
+          "correctKey": "A",
+          "skill": "Localizar",
+          "oa": "OA 6",
+          "contentAxis": "Texto no literario",
+          "hasFigure": false,
+          "figureNote": null,
+          "taxonomy": [
+            {
+              "type": "descriptor",
+              "code": null,
+              "name": "Localizan información explícita relevante en un texto no literario.",
+              "parentCode": "LANG-3B-OA06",
+              "tagType": "primary"
+            },
+            {
+              "type": "learning_objective",
+              "code": "LANG-3B-OA06",
+              "name": "OA 6",
+              "level": "3_basico",
+              "tagType": "secondary"
+            },
+            {
+              "type": "skill",
+              "code": "LANG-SK-LOCALIZAR",
+              "name": "Localizar",
+              "tagType": "secondary"
+            },
+            {
+              "type": "text_type",
+              "code": "LANG-TT-TEXTO-NO-LITERARIO",
+              "name": "Texto no literario",
+              "tagType": "secondary"
+            }
+          ]
+        },
+        {
+          "position": 17,
+          "type": "multiple_choice",
+          "stem": "¿Qué muestra la primera imagen del texto?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Muestra cómo se usa el rompecabezas terminado.",
+              "isCorrect": true
+            },
+            {
+              "key": "B",
+              "text": "Muestra cómo se empieza a hacer el rompecabezas.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Muestra qué materiales se necesitan para el rompecabezas.",
+              "isCorrect": false
+            }
+          ],
+          "correctKey": "A",
+          "skill": "Interpretar y relacionar",
+          "oa": "OA 6",
+          "contentAxis": "Texto no literario",
+          "hasFigure": true,
+          "figureNote": "El ítem muestra una imagen propia (manos sosteniendo palitos de helado pintados, dispuestos para armar un rompecabezas) y pregunta qué muestra esa imagen. Depende de la figura para responderse.",
+          "taxonomy": [
+            {
+              "type": "descriptor",
+              "code": null,
+              "name": "Infieren información relevante que aportan los elementos discontinuos en un texto no literario.",
+              "parentCode": "LANG-3B-OA06",
+              "tagType": "primary"
+            },
+            {
+              "type": "learning_objective",
+              "code": "LANG-3B-OA06",
+              "name": "OA 6",
+              "level": "3_basico",
+              "tagType": "secondary"
+            },
+            {
+              "type": "skill",
+              "code": "LANG-SK-INTERPRETAR-Y-RELACIONAR",
+              "name": "Interpretar y relacionar",
+              "tagType": "secondary"
+            },
+            {
+              "type": "text_type",
+              "code": "LANG-TT-TEXTO-NO-LITERARIO",
+              "name": "Texto no literario",
+              "tagType": "secondary"
+            }
+          ]
+        },
+        {
+          "position": 18,
+          "type": "multiple_choice",
+          "stem": "¿Qué te enseña a hacer este texto?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Un dibujo.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Un adorno.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Un juguete.",
+              "isCorrect": true
+            }
+          ],
+          "correctKey": "C",
+          "skill": "Interpretar y relacionar",
+          "oa": "OA 6",
+          "contentAxis": "Texto no literario",
+          "hasFigure": false,
+          "figureNote": null,
+          "taxonomy": [
+            {
+              "type": "descriptor",
+              "code": null,
+              "name": "Infieren el sentido global de un texto no literario o un fragmento de este.",
+              "parentCode": "LANG-3B-OA06",
+              "tagType": "primary"
+            },
+            {
+              "type": "learning_objective",
+              "code": "LANG-3B-OA06",
+              "name": "OA 6",
+              "level": "3_basico",
+              "tagType": "secondary"
+            },
+            {
+              "type": "skill",
+              "code": "LANG-SK-INTERPRETAR-Y-RELACIONAR",
+              "name": "Interpretar y relacionar",
+              "tagType": "secondary"
+            },
+            {
+              "type": "text_type",
+              "code": "LANG-TT-TEXTO-NO-LITERARIO",
+              "name": "Texto no literario",
+              "tagType": "secondary"
+            }
+          ]
+        },
+        {
+          "position": 19,
+          "type": "open_ended",
+          "responseFormat": "develop",
+          "stem": "¿Qué te pareció el rompecabezas propuesto? Justifica tu respuesta con información del texto.",
+          "alternatives": [],
+          "correctKey": null,
+          "skill": "Reflexionar",
+          "oa": "OA 6",
+          "contentAxis": "Texto no literario",
+          "hasFigure": false,
+          "figureNote": null,
+          "taxonomy": [
+            {
+              "type": "descriptor",
+              "code": null,
+              "name": "Opinan sobre algún aspecto relevante en un texto no literario con fundamentos que integran información del texto.",
+              "parentCode": "LANG-3B-OA06",
+              "tagType": "primary"
+            },
+            {
+              "type": "learning_objective",
+              "code": "LANG-3B-OA06",
+              "name": "OA 6",
+              "level": "3_basico",
+              "tagType": "secondary"
+            },
+            {
+              "type": "skill",
+              "code": "LANG-SK-REFLEXIONAR",
+              "name": "Reflexionar",
+              "tagType": "secondary"
+            },
+            {
+              "type": "text_type",
+              "code": "LANG-TT-TEXTO-NO-LITERARIO",
+              "name": "Texto no literario",
+              "tagType": "secondary"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "order": 5,
+      "name": "Texto 5: «El viento»",
+      "type": "mixed",
+      "instructions": "Lee el siguiente texto y responde las preguntas 20 a 22.",
+      "passage": {
+        "title": "El viento",
+        "text": "El viento juega con los árboles\nen el monte y en el valle,\nhace ondular las praderas\nque se visten de trigales.\n\nEl viento juega en el mar\nhaciendo rodar el agua,\na las olas de la mano\nel viento lleva a la playa.\n\nCómo poder yo jugar\ncomo el viento, como el agua,\ny hacer anillos de cielo\npara ponerme en el alma.\n\nBernardo Gutiérrez. “El viento”. Adivitrabacuentos. Poesías 3. Comp. Equipo Editorial. Chile: Universitaria, 1993.\n\nGlosario\ntrigales: terrenos sembrados de trigo.",
+        "format": "plain",
+        "attachments": []
+      },
+      "items": [
+        {
+          "position": 20,
+          "type": "multiple_choice",
+          "stem": "Al inicio del poema, ¿a qué juega el viento?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "A formar anillos en el cielo.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "A quitar las hojas de los árboles.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "A mover los trigales de las praderas.",
+              "isCorrect": true
+            }
+          ],
+          "correctKey": "C",
+          "skill": "Interpretar y relacionar",
+          "oa": "OA 5",
+          "contentAxis": "Poema",
+          "hasFigure": false,
+          "figureNote": null,
+          "taxonomy": [
+            {
+              "type": "descriptor",
+              "code": null,
+              "name": "Infieren el sentido global de un poema o un fragmento de este.",
+              "parentCode": "LANG-3B-OA05",
+              "tagType": "primary"
+            },
+            {
+              "type": "learning_objective",
+              "code": "LANG-3B-OA05",
+              "name": "OA 5",
+              "level": "3_basico",
+              "tagType": "secondary"
+            },
+            {
+              "type": "skill",
+              "code": "LANG-SK-INTERPRETAR-Y-RELACIONAR",
+              "name": "Interpretar y relacionar",
+              "tagType": "secondary"
+            },
+            {
+              "type": "text_type",
+              "code": "LANG-TT-POEMA",
+              "name": "Poema",
+              "tagType": "secondary"
+            }
+          ]
+        },
+        {
+          "position": 21,
+          "type": "multiple_choice",
+          "stem": "Según lo leído, ¿qué significan los siguientes versos?\n\n“El viento juega en el mar / haciendo rodar el agua,”",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Que el viento produce olas en el mar.",
+              "isCorrect": true
+            },
+            {
+              "key": "B",
+              "text": "Que el viento sopla fuerte en la playa.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Que el viento hace desaparecer las olas.",
+              "isCorrect": false
+            }
+          ],
+          "correctKey": "A",
+          "skill": "Interpretar y relacionar",
+          "oa": "OA 5",
+          "contentAxis": "Poema",
+          "hasFigure": false,
+          "figureNote": "El ítem cita dos versos del poema como estímulo propio; se incluyen dentro del stem.",
+          "taxonomy": [
+            {
+              "type": "descriptor",
+              "code": null,
+              "name": "Interpretan el sentido de expresiones en lenguaje figurado presentes en un poema.",
+              "parentCode": "LANG-3B-OA05",
+              "tagType": "primary"
+            },
+            {
+              "type": "learning_objective",
+              "code": "LANG-3B-OA05",
+              "name": "OA 5",
+              "level": "3_basico",
+              "tagType": "secondary"
+            },
+            {
+              "type": "skill",
+              "code": "LANG-SK-INTERPRETAR-Y-RELACIONAR",
+              "name": "Interpretar y relacionar",
+              "tagType": "secondary"
+            },
+            {
+              "type": "text_type",
+              "code": "LANG-TT-POEMA",
+              "name": "Poema",
+              "tagType": "secondary"
+            }
+          ]
+        },
+        {
+          "position": 22,
+          "type": "open_ended",
+          "responseFormat": "develop",
+          "stem": "¿Qué siente por el viento la persona que habla en el poema? Responde a partir de lo leído.",
+          "alternatives": [],
+          "correctKey": null,
+          "skill": "Interpretar y relacionar",
+          "oa": "OA 5",
+          "contentAxis": "Poema",
+          "hasFigure": false,
+          "figureNote": null,
+          "taxonomy": [
+            {
+              "type": "descriptor",
+              "code": null,
+              "name": "Infieren el sentido global de un poema o un fragmento de este.",
+              "parentCode": "LANG-3B-OA05",
+              "tagType": "primary"
+            },
+            {
+              "type": "learning_objective",
+              "code": "LANG-3B-OA05",
+              "name": "OA 5",
+              "level": "3_basico",
+              "tagType": "secondary"
+            },
+            {
+              "type": "skill",
+              "code": "LANG-SK-INTERPRETAR-Y-RELACIONAR",
+              "name": "Interpretar y relacionar",
+              "tagType": "secondary"
+            },
+            {
+              "type": "text_type",
+              "code": "LANG-TT-POEMA",
+              "name": "Poema",
+              "tagType": "secondary"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "extraction": {
+    "itemCount": 22,
+    "warnings": [
+      "Prueba de 3° básico: los ítems de alternativas tienen 3 opciones (A, B, C).",
+      "Q17 depende de una imagen propia del ítem (la primera imagen del instructivo) para poder responderse; hasFigure:true.",
+      "Q21 incluye dos versos-estímulo del poema embebidos en el stem.",
+      "Q6, Q19 y Q22 son ítems de desarrollo (responseFormat develop).",
+      "Textos transcritos desde la capa de texto del PDF (pdftotext), verbatim."
+    ],
+    "needsHumanReview": true
+  },
+  "pauta": {
+    "source": {
+      "report": "RBD25520_DIA_LECTURA_3_A_Resultados_Asignatura_Monitoreo_2025.pdf",
+      "subjectCode": "LANG",
+      "gradeCode": "3RD_BASIC",
+      "applicationPeriod": "intermedio",
+      "year": 2025,
+      "instrumentJson": "extraccion/lenguaje/3º lenguaje intermedio 2025.json"
+    },
+    "appliedKeys": 19,
+    "issues": []
+  }
+}

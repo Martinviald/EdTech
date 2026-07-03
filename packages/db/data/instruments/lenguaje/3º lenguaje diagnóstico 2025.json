@@ -1,0 +1,1165 @@
+{
+  "schemaVersion": "1.0",
+  "source": {
+    "file": "3º lenguaje diagnóstico 2025.pdf",
+    "subjectFolder": "Lenguaje"
+  },
+  "instrument": {
+    "name": "DIA Lectura 3° Básico 2025 — Diagnóstico",
+    "subject": "Lenguaje y Comunicación",
+    "subjectCode": "LANG",
+    "grade": "3° Básico",
+    "gradeCode": "3RD_BASIC",
+    "year": 2025,
+    "applicationPeriod": "diagnostico",
+    "type": "dia",
+    "isOfficial": true,
+    "source": "imported"
+  },
+  "sections": [
+    {
+      "order": 1,
+      "name": "Texto 1: «La avispa agradecida»",
+      "type": "mixed",
+      "instructions": "Lee el siguiente texto y responde las preguntas 1 a 4.",
+      "passage": {
+        "title": "La avispa agradecida",
+        "text": "Una vez, una avispa se enredó en una tela de araña. Un ratón que pasaba por ese lugar, al ver a la asustada avispa, se compadeció de ella y la ayudó. Rompió la tela de araña con sus filudos dientes y la avispa pudo escapar.\n\n—¡Gracias! Nunca olvidaré esta buena acción —le dijo a su amigo ratón. Luego, se fue volando.\n\nPoco tiempo después, mientras el ratón comía un delicioso queso, un gato lo esperaba para atraparlo. En ese momento, llegó la avispa volando y, al darse cuenta del peligro que corría su amigo, rápidamente picó la oreja del gato. Ante el gran dolor, el goloso gato desapareció de inmediato.",
+        "format": "plain",
+        "attachments": []
+      },
+      "items": [
+        {
+          "position": 1,
+          "type": "multiple_choice",
+          "stem": "¿Quién se enredó en una tela de araña?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "El gato.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "El ratón.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "La avispa.",
+              "isCorrect": true
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "C",
+          "skill": "Localizar",
+          "oa": "OA 5",
+          "contentAxis": "Narración",
+          "hasFigure": false,
+          "figureNote": null,
+          "taxonomy": [
+            {
+              "type": "descriptor",
+              "code": null,
+              "name": "Localizan información explícita relevante en un texto narrativo.",
+              "parentCode": "LANG-2B-OA05",
+              "tagType": "primary"
+            },
+            {
+              "type": "learning_objective",
+              "code": "LANG-2B-OA05",
+              "name": "OA 5",
+              "level": "2_basico",
+              "tagType": "secondary"
+            },
+            {
+              "type": "skill",
+              "code": "LANG-SK-LOCALIZAR",
+              "name": "Localizar",
+              "tagType": "secondary"
+            },
+            {
+              "type": "text_type",
+              "code": "LANG-TT-NARRACION",
+              "name": "Narración",
+              "tagType": "secondary"
+            }
+          ]
+        },
+        {
+          "position": 2,
+          "type": "multiple_choice",
+          "stem": "¿Por qué la avispa ayudó al ratón?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Porque el ratón se lo pidió.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Porque sintió pena por el ratón.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Porque le devolvió el favor al ratón.",
+              "isCorrect": true
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "C",
+          "skill": "Interpretar y relacionar",
+          "oa": "OA 5",
+          "contentAxis": "Narración",
+          "hasFigure": false,
+          "figureNote": null,
+          "taxonomy": [
+            {
+              "type": "descriptor",
+              "code": null,
+              "name": "Infieren causa o consecuencia de hechos o acciones relevantes en un texto narrativo.",
+              "parentCode": "LANG-2B-OA05",
+              "tagType": "primary"
+            },
+            {
+              "type": "learning_objective",
+              "code": "LANG-2B-OA05",
+              "name": "OA 5",
+              "level": "2_basico",
+              "tagType": "secondary"
+            },
+            {
+              "type": "skill",
+              "code": "LANG-SK-INTERPRETAR-Y-RELACIONAR",
+              "name": "Interpretar y relacionar",
+              "tagType": "secondary"
+            },
+            {
+              "type": "text_type",
+              "code": "LANG-TT-NARRACION",
+              "name": "Narración",
+              "tagType": "secondary"
+            }
+          ]
+        },
+        {
+          "position": 3,
+          "type": "multiple_choice",
+          "stem": "¿Por qué desapareció el gato?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Porque se enredó en una tela de araña.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Porque sintió un gran dolor en la oreja.",
+              "isCorrect": true
+            },
+            {
+              "key": "C",
+              "text": "Porque pudo escapar rápidamente.",
+              "isCorrect": false
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "B",
+          "skill": "Interpretar y relacionar",
+          "oa": "OA 5",
+          "contentAxis": "Narración",
+          "hasFigure": false,
+          "figureNote": null,
+          "taxonomy": [
+            {
+              "type": "descriptor",
+              "code": null,
+              "name": "Infieren causa o consecuencia de hechos o acciones relevantes en un texto narrativo.",
+              "parentCode": "LANG-2B-OA05",
+              "tagType": "primary"
+            },
+            {
+              "type": "learning_objective",
+              "code": "LANG-2B-OA05",
+              "name": "OA 5",
+              "level": "2_basico",
+              "tagType": "secondary"
+            },
+            {
+              "type": "skill",
+              "code": "LANG-SK-INTERPRETAR-Y-RELACIONAR",
+              "name": "Interpretar y relacionar",
+              "tagType": "secondary"
+            },
+            {
+              "type": "text_type",
+              "code": "LANG-TT-NARRACION",
+              "name": "Narración",
+              "tagType": "secondary"
+            }
+          ]
+        },
+        {
+          "position": 4,
+          "type": "open_ended",
+          "stem": "Según el texto, ¿por qué la avispa es agradecida? Usa información del texto para responder.",
+          "alternatives": [],
+          "responseFormat": "develop",
+          "correctKey": null,
+          "skill": "Interpretar y relacionar",
+          "oa": "OA 5",
+          "contentAxis": "Narración",
+          "hasFigure": false,
+          "figureNote": null,
+          "taxonomy": [
+            {
+              "type": "descriptor",
+              "code": null,
+              "name": "Infieren causa o consecuencia de hechos o acciones relevantes en un texto narrativo.",
+              "parentCode": "LANG-2B-OA05",
+              "tagType": "primary"
+            },
+            {
+              "type": "learning_objective",
+              "code": "LANG-2B-OA05",
+              "name": "OA 5",
+              "level": "2_basico",
+              "tagType": "secondary"
+            },
+            {
+              "type": "skill",
+              "code": "LANG-SK-INTERPRETAR-Y-RELACIONAR",
+              "name": "Interpretar y relacionar",
+              "tagType": "secondary"
+            },
+            {
+              "type": "text_type",
+              "code": "LANG-TT-NARRACION",
+              "name": "Narración",
+              "tagType": "secondary"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "order": 2,
+      "name": "Texto 2: «¡Juguemos a los bolos!»",
+      "type": "multiple_choice",
+      "instructions": "Lee el siguiente texto y responde las preguntas 5 a 9.",
+      "passage": {
+        "title": "¡Juguemos a los bolos!",
+        "text": "Juega a los bolos en el patio o, si llueve, dentro de la casa. Lanza una pelota para que ruede hacia los bolos e intenta derribar todos los que puedas.\n\nNecesitas:\n• 6 botellas iguales de plástico transparente, con tapa\n• Pintura roja, amarilla y verde\n• Lavalozas líquido\n• Jarra vieja\n• Calcomanías\n• Embudo\n• Arena\n\n1. En una jarra vieja, mezcla la pintura verde con agua hasta que parezca una sopa. Agrega un chorrito de lavalozas líquido.\n\n2. Introduce un poco de la mezcla en una botella transparente y ponle la tapa. Agita la botella para teñir con la pintura todo su interior. Quita la tapa y vierte la pintura que sobre. Deja secar la botella.\n\n3. Haz lo mismo con las otras botellas, pintando tres de verde, dos de rojo y una de amarillo.\n\n4. Coloca el embudo en el cuello de la botella y echa arena hasta la mitad. Esto hace que la botella sea más difícil de derribar. Repítelo con las otras botellas.\n\n5. Enrosca bien las tapas y decora los bolos con calcomanías.\n\nComo las botellas están pintadas por dentro, la pintura no se saldrá cuando juegues con ellas.\n\nYo aprendo a… inventar juegos, hacer magia. Londres: Anness Publishing Limited, 1997. (Adaptación).",
+        "format": "plain",
+        "attachments": [
+          {
+            "kind": "image",
+            "note": "Ilustraciones de los pasos del instructivo: jarra vertiendo pintura, botella siendo agitada, botellas pintadas de colores, embudo con arena y bolos decorados. Las imágenes acompañan los pasos descritos en el texto."
+          }
+        ]
+      },
+      "items": [
+        {
+          "position": 5,
+          "type": "multiple_choice",
+          "stem": "¿Para qué se debe agitar la botella?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Para que se seque la pintura.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Para mezclar la pintura con agua.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Para teñir con pintura todo el interior.",
+              "isCorrect": true
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "C",
+          "skill": "Localizar",
+          "oa": "OA 7",
+          "contentAxis": "Texto no literario",
+          "hasFigure": false,
+          "figureNote": null,
+          "taxonomy": [
+            {
+              "type": "descriptor",
+              "code": null,
+              "name": "Localizan información explícita relevante en un texto no literario.",
+              "parentCode": "LANG-2B-OA07",
+              "tagType": "primary"
+            },
+            {
+              "type": "learning_objective",
+              "code": "LANG-2B-OA07",
+              "name": "OA 7",
+              "level": "2_basico",
+              "tagType": "secondary"
+            },
+            {
+              "type": "skill",
+              "code": "LANG-SK-LOCALIZAR",
+              "name": "Localizar",
+              "tagType": "secondary"
+            },
+            {
+              "type": "text_type",
+              "code": "LANG-TT-TEXTO-NO-LITERARIO",
+              "name": "Texto no literario",
+              "tagType": "secondary"
+            }
+          ]
+        },
+        {
+          "position": 6,
+          "type": "multiple_choice",
+          "stem": "¿Para qué se les coloca arena a las botellas?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Para que sean más difíciles de derribar.",
+              "isCorrect": true
+            },
+            {
+              "key": "B",
+              "text": "Para que la pintura se seque.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Para que queden decoradas.",
+              "isCorrect": false
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "A",
+          "skill": "Interpretar y relacionar",
+          "oa": "OA 7",
+          "contentAxis": "Texto no literario",
+          "hasFigure": false,
+          "figureNote": null,
+          "taxonomy": [
+            {
+              "type": "descriptor",
+              "code": null,
+              "name": "Infieren información relevante en un texto no literario.",
+              "parentCode": "LANG-2B-OA07",
+              "tagType": "primary"
+            },
+            {
+              "type": "learning_objective",
+              "code": "LANG-2B-OA07",
+              "name": "OA 7",
+              "level": "2_basico",
+              "tagType": "secondary"
+            },
+            {
+              "type": "skill",
+              "code": "LANG-SK-INTERPRETAR-Y-RELACIONAR",
+              "name": "Interpretar y relacionar",
+              "tagType": "secondary"
+            },
+            {
+              "type": "text_type",
+              "code": "LANG-TT-TEXTO-NO-LITERARIO",
+              "name": "Texto no literario",
+              "tagType": "secondary"
+            }
+          ]
+        },
+        {
+          "position": 7,
+          "type": "multiple_choice",
+          "stem": "Según el texto, ¿para qué se usa el embudo?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Para sacar la pintura que sobra.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Para echar la arena en la botella.",
+              "isCorrect": true
+            },
+            {
+              "key": "C",
+              "text": "Para vaciar el lavalozas en la jarra.",
+              "isCorrect": false
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "B",
+          "skill": "Interpretar y relacionar",
+          "oa": "OA 7",
+          "contentAxis": "Texto no literario",
+          "hasFigure": false,
+          "figureNote": null,
+          "taxonomy": [
+            {
+              "type": "descriptor",
+              "code": null,
+              "name": "Infieren información relevante en un texto no literario.",
+              "parentCode": "LANG-2B-OA07",
+              "tagType": "primary"
+            },
+            {
+              "type": "learning_objective",
+              "code": "LANG-2B-OA07",
+              "name": "OA 7",
+              "level": "2_basico",
+              "tagType": "secondary"
+            },
+            {
+              "type": "skill",
+              "code": "LANG-SK-INTERPRETAR-Y-RELACIONAR",
+              "name": "Interpretar y relacionar",
+              "tagType": "secondary"
+            },
+            {
+              "type": "text_type",
+              "code": "LANG-TT-TEXTO-NO-LITERARIO",
+              "name": "Texto no literario",
+              "tagType": "secondary"
+            }
+          ]
+        },
+        {
+          "position": 8,
+          "type": "multiple_choice",
+          "stem": "¿Para qué se pintan por dentro las botellas?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Para que no se vea la arena.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Para que no se salga la pintura.",
+              "isCorrect": true
+            },
+            {
+              "key": "C",
+              "text": "Para que no se suelten las calcomanías.",
+              "isCorrect": false
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "B",
+          "skill": "Interpretar y relacionar",
+          "oa": "OA 7",
+          "contentAxis": "Texto no literario",
+          "hasFigure": false,
+          "figureNote": null,
+          "taxonomy": [
+            {
+              "type": "descriptor",
+              "code": null,
+              "name": "Infieren información relevante en un texto no literario.",
+              "parentCode": "LANG-2B-OA07",
+              "tagType": "primary"
+            },
+            {
+              "type": "learning_objective",
+              "code": "LANG-2B-OA07",
+              "name": "OA 7",
+              "level": "2_basico",
+              "tagType": "secondary"
+            },
+            {
+              "type": "skill",
+              "code": "LANG-SK-INTERPRETAR-Y-RELACIONAR",
+              "name": "Interpretar y relacionar",
+              "tagType": "secondary"
+            },
+            {
+              "type": "text_type",
+              "code": "LANG-TT-TEXTO-NO-LITERARIO",
+              "name": "Texto no literario",
+              "tagType": "secondary"
+            }
+          ]
+        },
+        {
+          "position": 9,
+          "type": "multiple_choice",
+          "stem": "¿Qué te enseña a hacer este texto?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Unos adornos.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Una bebida.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Un juguete.",
+              "isCorrect": true
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "C",
+          "skill": "Interpretar y relacionar",
+          "oa": "OA 7",
+          "contentAxis": "Texto no literario",
+          "hasFigure": false,
+          "figureNote": null,
+          "taxonomy": [
+            {
+              "type": "descriptor",
+              "code": null,
+              "name": "Infieren el sentido global de un texto no literario.",
+              "parentCode": "LANG-2B-OA07",
+              "tagType": "primary"
+            },
+            {
+              "type": "learning_objective",
+              "code": "LANG-2B-OA07",
+              "name": "OA 7",
+              "level": "2_basico",
+              "tagType": "secondary"
+            },
+            {
+              "type": "skill",
+              "code": "LANG-SK-INTERPRETAR-Y-RELACIONAR",
+              "name": "Interpretar y relacionar",
+              "tagType": "secondary"
+            },
+            {
+              "type": "text_type",
+              "code": "LANG-TT-TEXTO-NO-LITERARIO",
+              "name": "Texto no literario",
+              "tagType": "secondary"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "order": 3,
+      "name": "Texto 3: «Los pantalones mágicos»",
+      "type": "mixed",
+      "instructions": "Lee el siguiente texto y responde las preguntas 10 a 15.",
+      "passage": {
+        "title": "LOS PANTALONES MÁGICOS",
+        "text": "Una mañana, al topo Amable lo sorprendió la voz de un vendedor callejero:\n—¡Pantalones mágicos! ¡Vendo pantalones mágicos!\nCorrió a averiguar el precio y se enteró de que costaban un trébol de cuatro hojas. Un trébol así tan difícil de hallar que no cualquiera lo tiene. Pero, casualmente, Amable guardaba uno en su billetera. Y los compró.\n—Úselos hoy mismo —aconsejó el vendedor—. Mire que la magia solo dura unas horas.\nEl topo corrió a probárselos pero, camino a su casa, se encontró con Pepa, la ardilla, que lo invitó a jugar un partido de tenis.\nAmable no pudo negarse y, en vez de los pantalones mágicos, tuvo que ponerse los bermudas.\nNo le importó perder con tal de volver rápido a su casita.\nPero, antes de llegar, le salió al paso Kato, el castor, que le propuso correr una carrera.\n—¡Me cambio y vengo! —dijo Amable.\nKato le explicó que no era necesario:\n—Basta con que te saques la ropa; la carrera es en el agua, a ver quién llega primero a la otra orilla del lago.\n¡Uf! Cuando volvió a su casa, pensó que la mejor forma de lucir los pantalones de una vez por todas era dando una fiesta.\nMandó invitaciones a amigos y vecinos, y luego hizo de todo. Compró, preparó, cocinó, adornó…\nFinalmente se bañó y hasta se perfumó antes de estrenar los pantalones mágicos. En cuanto se los puso, le cambió la vida.\n\nEn la fiesta no paró, a los saltos y a los brincos, liviano como una mariposa. Más divertido que nunca, se animó a cantar y bailar, hizo piruetas y repartió besos y abrazos. Los invitados, tan felices como él, comentaban entre ellos lo original de sus pantalones.\nLa última en irse fue Pepa, la ardilla, que se despidió diciendo:\n—¡Genial, topo Amable! ¿Cómo se te ocurrió recibirnos en pijamas?\n¿Pijamas? ¿Acaso en el apuro había tomado el pijamas en vez de los pantalones mágicos?\n—¡Ay sí!\nEl topo se agarró la cabeza. Y pensó algo…\n\nÉl había comprado una ilusión, la de que por unas horas sería inmensamente feliz. Y eso se había cumplido.\nDespués miró los pantalones sin estrenar, colgando mustios de una percha, y todo el asunto le dio risa.\nEsa noche se durmió con el recuerdo de su abuelito, tan distraído como él, que tantas veces le había dicho:\n—Si te sirve de consuelo, ¡yo también me equivoco!\n\nBeatriz Ferro. Cuentos del topo Amable. Argentina: Atlántida, 2007.",
+        "format": "plain",
+        "attachments": [
+          {
+            "kind": "image",
+            "note": "Ilustraciones del topo Amable a lo largo del cuento (decorativas, acompañan el relato)."
+          }
+        ]
+      },
+      "items": [
+        {
+          "position": 10,
+          "type": "multiple_choice",
+          "stem": "¿Qué compró el topo con un trébol de cuatro hojas?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Unos pantalones mágicos.",
+              "isCorrect": true
+            },
+            {
+              "key": "B",
+              "text": "Unos adornos para la fiesta.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Unos bermudas para jugar tenis.",
+              "isCorrect": false
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "A",
+          "skill": "Interpretar y relacionar",
+          "oa": "OA 5",
+          "contentAxis": "Narración",
+          "hasFigure": false,
+          "figureNote": null,
+          "taxonomy": [
+            {
+              "type": "descriptor",
+              "code": null,
+              "name": "Identifican un hecho o acción relevante en un texto narrativo.",
+              "parentCode": "LANG-2B-OA05",
+              "tagType": "primary"
+            },
+            {
+              "type": "learning_objective",
+              "code": "LANG-2B-OA05",
+              "name": "OA 5",
+              "level": "2_basico",
+              "tagType": "secondary"
+            },
+            {
+              "type": "skill",
+              "code": "LANG-SK-INTERPRETAR-Y-RELACIONAR",
+              "name": "Interpretar y relacionar",
+              "tagType": "secondary"
+            },
+            {
+              "type": "text_type",
+              "code": "LANG-TT-NARRACION",
+              "name": "Narración",
+              "tagType": "secondary"
+            }
+          ]
+        },
+        {
+          "position": 11,
+          "type": "multiple_choice",
+          "stem": "¿Qué le propuso el castor al topo Amable?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Dar una fiesta.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Correr una carrera.",
+              "isCorrect": true
+            },
+            {
+              "key": "C",
+              "text": "Jugar un partido de tenis.",
+              "isCorrect": false
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "B",
+          "skill": "Localizar",
+          "oa": "OA 5",
+          "contentAxis": "Narración",
+          "hasFigure": false,
+          "figureNote": null,
+          "taxonomy": [
+            {
+              "type": "descriptor",
+              "code": null,
+              "name": "Localizan información explícita relevante en un texto narrativo.",
+              "parentCode": "LANG-2B-OA05",
+              "tagType": "primary"
+            },
+            {
+              "type": "learning_objective",
+              "code": "LANG-2B-OA05",
+              "name": "OA 5",
+              "level": "2_basico",
+              "tagType": "secondary"
+            },
+            {
+              "type": "skill",
+              "code": "LANG-SK-LOCALIZAR",
+              "name": "Localizar",
+              "tagType": "secondary"
+            },
+            {
+              "type": "text_type",
+              "code": "LANG-TT-NARRACION",
+              "name": "Narración",
+              "tagType": "secondary"
+            }
+          ]
+        },
+        {
+          "position": 12,
+          "type": "multiple_choice",
+          "stem": "¿Por qué el topo organizó una fiesta?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Porque quería lucir su pijama.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Porque quería mostrar sus piruetas.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Porque quería estrenar sus pantalones.",
+              "isCorrect": true
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "C",
+          "skill": "Interpretar y relacionar",
+          "oa": "OA 5",
+          "contentAxis": "Narración",
+          "hasFigure": false,
+          "figureNote": null,
+          "taxonomy": [
+            {
+              "type": "descriptor",
+              "code": null,
+              "name": "Infieren causa o consecuencia de hechos o acciones relevantes en un texto narrativo.",
+              "parentCode": "LANG-2B-OA05",
+              "tagType": "primary"
+            },
+            {
+              "type": "learning_objective",
+              "code": "LANG-2B-OA05",
+              "name": "OA 5",
+              "level": "2_basico",
+              "tagType": "secondary"
+            },
+            {
+              "type": "skill",
+              "code": "LANG-SK-INTERPRETAR-Y-RELACIONAR",
+              "name": "Interpretar y relacionar",
+              "tagType": "secondary"
+            },
+            {
+              "type": "text_type",
+              "code": "LANG-TT-NARRACION",
+              "name": "Narración",
+              "tagType": "secondary"
+            }
+          ]
+        },
+        {
+          "position": 13,
+          "type": "multiple_choice",
+          "stem": "¿Con qué se vistió el topo para la fiesta?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Con un pijama.",
+              "isCorrect": true
+            },
+            {
+              "key": "B",
+              "text": "Con un pantalón.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Con un bermuda.",
+              "isCorrect": false
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "A",
+          "skill": "Interpretar y relacionar",
+          "oa": "OA 5",
+          "contentAxis": "Narración",
+          "hasFigure": false,
+          "figureNote": null,
+          "taxonomy": [
+            {
+              "type": "descriptor",
+              "code": null,
+              "name": "Identifican un hecho o acción relevante en un texto narrativo.",
+              "parentCode": "LANG-2B-OA05",
+              "tagType": "primary"
+            },
+            {
+              "type": "learning_objective",
+              "code": "LANG-2B-OA05",
+              "name": "OA 5",
+              "level": "2_basico",
+              "tagType": "secondary"
+            },
+            {
+              "type": "skill",
+              "code": "LANG-SK-INTERPRETAR-Y-RELACIONAR",
+              "name": "Interpretar y relacionar",
+              "tagType": "secondary"
+            },
+            {
+              "type": "text_type",
+              "code": "LANG-TT-NARRACION",
+              "name": "Narración",
+              "tagType": "secondary"
+            }
+          ]
+        },
+        {
+          "position": 14,
+          "type": "multiple_choice",
+          "stem": "Según el texto, ¿en qué se parecía el topo a su abuelo?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "En lo amable.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "En lo distraído.",
+              "isCorrect": true
+            },
+            {
+              "key": "C",
+              "text": "En lo inocente.",
+              "isCorrect": false
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "B",
+          "skill": "Interpretar y relacionar",
+          "oa": "OA 5",
+          "contentAxis": "Narración",
+          "hasFigure": false,
+          "figureNote": null,
+          "taxonomy": [
+            {
+              "type": "descriptor",
+              "code": null,
+              "name": "Infieren características y sentimientos de personajes en un texto narrativo.",
+              "parentCode": "LANG-2B-OA05",
+              "tagType": "primary"
+            },
+            {
+              "type": "learning_objective",
+              "code": "LANG-2B-OA05",
+              "name": "OA 5",
+              "level": "2_basico",
+              "tagType": "secondary"
+            },
+            {
+              "type": "skill",
+              "code": "LANG-SK-INTERPRETAR-Y-RELACIONAR",
+              "name": "Interpretar y relacionar",
+              "tagType": "secondary"
+            },
+            {
+              "type": "text_type",
+              "code": "LANG-TT-NARRACION",
+              "name": "Narración",
+              "tagType": "secondary"
+            }
+          ]
+        },
+        {
+          "position": 15,
+          "type": "open_ended",
+          "stem": "¿Qué opinas sobre la reacción del topo al darse cuenta de su error? Usa información del texto para responder.",
+          "alternatives": [],
+          "responseFormat": "develop",
+          "correctKey": null,
+          "skill": "Reflexionar",
+          "oa": "OA 5",
+          "contentAxis": "Narración",
+          "hasFigure": false,
+          "figureNote": null,
+          "taxonomy": [
+            {
+              "type": "descriptor",
+              "code": null,
+              "name": "Opinan sobre algún aspecto controversial en un texto narrativo.",
+              "parentCode": "LANG-2B-OA05",
+              "tagType": "primary"
+            },
+            {
+              "type": "learning_objective",
+              "code": "LANG-2B-OA05",
+              "name": "OA 5",
+              "level": "2_basico",
+              "tagType": "secondary"
+            },
+            {
+              "type": "skill",
+              "code": "LANG-SK-REFLEXIONAR",
+              "name": "Reflexionar",
+              "tagType": "secondary"
+            },
+            {
+              "type": "text_type",
+              "code": "LANG-TT-NARRACION",
+              "name": "Narración",
+              "tagType": "secondary"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "order": 4,
+      "name": "Texto 4: «El cangrejo violinista»",
+      "type": "multiple_choice",
+      "instructions": "Lee el siguiente texto y responde las preguntas 16 a 19.",
+      "passage": {
+        "title": "El cangrejo violinista",
+        "text": "El macho del cangrejo violinista tiene una pinza mucho más grande que la otra. La pinza grande tiene a menudo colores brillantes y recibe el nombre de violín. El cangrejo la usa como una bandera, moviéndola de arriba a abajo para avisar a otros machos que se mantengan alejados. También la agita vigorosamente para atraer a las hembras. Vive en madrigueras en las costas tropicales, especialmente en las desembocaduras de los ríos. Sale de la madriguera solo cuando baja la marea.\n\nLa hembra es de menor colorido que el macho. Tiene dos pinzas normales y las usa para obtener comida del barro.\n\nLos cangrejos se alimentan recogiendo barro o arena con las pinzas y extrayendo trozos de alimentos de ella.\n\nEl color del caparazón del cangrejo macho cambia siempre. Es especialmente brillante cuando hace señas a la hembra.\n\nLos cangrejos violinistas se mantienen cerca de sus madrigueras. Cuando sube la marea, cada cangrejo vuelve a su madriguera y la cierra con un trozo de barro.\n\nMichael Chinery. Enciclopedia de los animales salvajes. Las costas. España: Everest S.A., 1995.",
+        "format": "plain",
+        "attachments": [
+          {
+            "kind": "image",
+            "note": "Diagrama de cangrejos violinistas (macho y hembra) con recuadros de texto rotulados. Los textos de los rótulos están transcritos dentro del passage; las ilustraciones son de apoyo."
+          }
+        ]
+      },
+      "items": [
+        {
+          "position": 16,
+          "type": "multiple_choice",
+          "stem": "Según el texto, ¿a qué se le llama violín?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Al caparazón.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Al cangrejo macho.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "A la pinza más grande.",
+              "isCorrect": true
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "C",
+          "skill": "Localizar",
+          "oa": "OA 7",
+          "contentAxis": "Texto no literario",
+          "hasFigure": false,
+          "figureNote": null,
+          "taxonomy": [
+            {
+              "type": "descriptor",
+              "code": null,
+              "name": "Localizan información explícita relevante en un texto no literario.",
+              "parentCode": "LANG-2B-OA07",
+              "tagType": "primary"
+            },
+            {
+              "type": "learning_objective",
+              "code": "LANG-2B-OA07",
+              "name": "OA 7",
+              "level": "2_basico",
+              "tagType": "secondary"
+            },
+            {
+              "type": "skill",
+              "code": "LANG-SK-LOCALIZAR",
+              "name": "Localizar",
+              "tagType": "secondary"
+            },
+            {
+              "type": "text_type",
+              "code": "LANG-TT-TEXTO-NO-LITERARIO",
+              "name": "Texto no literario",
+              "tagType": "secondary"
+            }
+          ]
+        },
+        {
+          "position": 17,
+          "type": "multiple_choice",
+          "stem": "¿Cuándo el caparazón del macho es especialmente brillante?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Cuando hace señas a la hembra.",
+              "isCorrect": true
+            },
+            {
+              "key": "B",
+              "text": "Cuando se protege de la marea.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Cuando se defiende de otros machos.",
+              "isCorrect": false
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "A",
+          "skill": "Interpretar y relacionar",
+          "oa": "OA 7",
+          "contentAxis": "Texto no literario",
+          "hasFigure": false,
+          "figureNote": null,
+          "taxonomy": [
+            {
+              "type": "descriptor",
+              "code": null,
+              "name": "Infieren información relevante en un texto no literario.",
+              "parentCode": "LANG-2B-OA07",
+              "tagType": "primary"
+            },
+            {
+              "type": "learning_objective",
+              "code": "LANG-2B-OA07",
+              "name": "OA 7",
+              "level": "2_basico",
+              "tagType": "secondary"
+            },
+            {
+              "type": "skill",
+              "code": "LANG-SK-INTERPRETAR-Y-RELACIONAR",
+              "name": "Interpretar y relacionar",
+              "tagType": "secondary"
+            },
+            {
+              "type": "text_type",
+              "code": "LANG-TT-TEXTO-NO-LITERARIO",
+              "name": "Texto no literario",
+              "tagType": "secondary"
+            }
+          ]
+        },
+        {
+          "position": 18,
+          "type": "multiple_choice",
+          "stem": "¿Qué hacen los cangrejos cuando sube la marea?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Atraen a las hembras.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Salen a buscar alimento.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Vuelven a su madriguera.",
+              "isCorrect": true
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "C",
+          "skill": "Localizar",
+          "oa": "OA 7",
+          "contentAxis": "Texto no literario",
+          "hasFigure": false,
+          "figureNote": null,
+          "taxonomy": [
+            {
+              "type": "descriptor",
+              "code": null,
+              "name": "Localizan información explícita relevante en un texto no literario.",
+              "parentCode": "LANG-2B-OA07",
+              "tagType": "primary"
+            },
+            {
+              "type": "learning_objective",
+              "code": "LANG-2B-OA07",
+              "name": "OA 7",
+              "level": "2_basico",
+              "tagType": "secondary"
+            },
+            {
+              "type": "skill",
+              "code": "LANG-SK-LOCALIZAR",
+              "name": "Localizar",
+              "tagType": "secondary"
+            },
+            {
+              "type": "text_type",
+              "code": "LANG-TT-TEXTO-NO-LITERARIO",
+              "name": "Texto no literario",
+              "tagType": "secondary"
+            }
+          ]
+        },
+        {
+          "position": 19,
+          "type": "multiple_choice",
+          "stem": "Según el texto, ¿para qué usa sus pinzas la hembra?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Para atraer a los machos.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Para alejar a otros cangrejos.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Para obtener comida del barro.",
+              "isCorrect": true
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "C",
+          "skill": "Interpretar y relacionar",
+          "oa": "OA 7",
+          "contentAxis": "Texto no literario",
+          "hasFigure": false,
+          "figureNote": null,
+          "taxonomy": [
+            {
+              "type": "descriptor",
+              "code": null,
+              "name": "Infieren información relevante en un texto no literario.",
+              "parentCode": "LANG-2B-OA07",
+              "tagType": "primary"
+            },
+            {
+              "type": "learning_objective",
+              "code": "LANG-2B-OA07",
+              "name": "OA 7",
+              "level": "2_basico",
+              "tagType": "secondary"
+            },
+            {
+              "type": "skill",
+              "code": "LANG-SK-INTERPRETAR-Y-RELACIONAR",
+              "name": "Interpretar y relacionar",
+              "tagType": "secondary"
+            },
+            {
+              "type": "text_type",
+              "code": "LANG-TT-TEXTO-NO-LITERARIO",
+              "name": "Texto no literario",
+              "tagType": "secondary"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "extraction": {
+    "itemCount": 19,
+    "warnings": [
+      "Ítems de alternativas con solo 3 opciones (A, B, C), típico de 3° básico DIA; cumple el mínimo de 2 alternativas.",
+      "Q4 y Q15 son ítems de desarrollo (open_ended).",
+      "Texto 2 (instructivo «¡Juguemos a los bolos!») y Texto 4 («El cangrejo violinista») incluyen ilustraciones de apoyo; todo el texto necesario para responder está transcrito en el passage.",
+      "Textos transcritos desde la capa de texto del PDF (pdftotext), verbatim."
+    ],
+    "needsHumanReview": false
+  },
+  "pauta": {
+    "source": {
+      "report": "RBD25520_DIA_LECTURA_3_A_Resultados_Asignatura_Diagnostico_2025.pdf",
+      "subjectCode": "LANG",
+      "gradeCode": "3RD_BASIC",
+      "applicationPeriod": "diagnostico",
+      "year": 2025,
+      "instrumentJson": "extraccion/lenguaje/3º lenguaje diagnóstico 2025.json"
+    },
+    "appliedKeys": 17,
+    "issues": []
+  }
+}

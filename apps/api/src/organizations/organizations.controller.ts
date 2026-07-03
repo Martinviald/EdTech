@@ -22,6 +22,9 @@ import {
   createClassGroupSchema,
   updateOrganizationProfileSchema,
   academicSetupSchema,
+  updateOrgFeaturesSchema,
+  FEATURE_MANAGEMENT_ROLES,
+  type OrgFeaturesResponse,
 } from '@soe/types';
 
 @Controller('organizations')
@@ -41,6 +44,41 @@ export class OrganizationsController {
   @Roles('school_admin', 'academic_director', 'platform_admin')
   getOverview(@CurrentUser() user: JwtPayload, @Query('orgId') orgId?: string) {
     return this.organizationsService.getOverview(getEffectiveOrgId(user, orgId));
+  }
+
+  /**
+   * GET /api/organizations/me/features — features pagas habilitadas para la org
+   * del usuario (H18.1). Accesible a cualquier usuario autenticado de la org: el
+   * frontend lo usa para decidir el gating (CTA de upgrade) de las páginas pagas.
+   */
+  @Get('me/features')
+  getMyFeatures(
+    @CurrentUser() user: JwtPayload,
+    @Query('orgId') orgId?: string,
+  ): Promise<OrgFeaturesResponse> {
+    return this.organizationsService.getFeatures(getEffectiveOrgId(user, orgId));
+  }
+
+  /** GET /api/organizations/:orgId/features — plan de features de una org (gestión). */
+  @Get(':orgId/features')
+  @Roles(...FEATURE_MANAGEMENT_ROLES)
+  getFeatures(
+    @Param('orgId', ParseUUIDPipe) orgId: string,
+    @CurrentUser() user: JwtPayload,
+  ): Promise<OrgFeaturesResponse> {
+    return this.organizationsService.getFeatures(getEffectiveOrgId(user, orgId));
+  }
+
+  /** PATCH /api/organizations/:orgId/features — habilita/deshabilita features pagas + presupuesto IA. */
+  @Patch(':orgId/features')
+  @Roles(...FEATURE_MANAGEMENT_ROLES)
+  updateFeatures(
+    @Param('orgId', ParseUUIDPipe) orgId: string,
+    @Body() body: unknown,
+    @CurrentUser() user: JwtPayload,
+  ): Promise<OrgFeaturesResponse> {
+    const dto = updateOrgFeaturesSchema.parse(body);
+    return this.organizationsService.updateFeatures(getEffectiveOrgId(user, orgId), dto);
   }
 
   /** GET /api/organizations/grades — lista global de niveles educativos. */

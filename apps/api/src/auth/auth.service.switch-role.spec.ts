@@ -11,6 +11,8 @@ function user(overrides: Partial<JwtPayload> = {}): JwtPayload {
   return {
     userId: 'u1',
     orgId: 'org-1',
+    orgName: 'Colegio Uno',
+    orgs: [{ id: 'org-1', name: 'Colegio Uno' }],
     email: 'a@b.cl',
     name: 'Test',
     isPlatformAdmin: false,

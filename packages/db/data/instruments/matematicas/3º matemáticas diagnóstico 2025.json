@@ -1,0 +1,1263 @@
+{
+  "schemaVersion": "1.0",
+  "source": {
+    "file": "3º matemáticas diagnóstico 2025.pdf",
+    "subjectFolder": "Matematicas"
+  },
+  "instrument": {
+    "name": "DIA Matemática 3° Básico 2025 — Diagnóstico",
+    "subject": "Matemática",
+    "subjectCode": "MATH",
+    "grade": "3° Básico",
+    "gradeCode": "3RD_BASIC",
+    "year": 2025,
+    "applicationPeriod": "diagnostico",
+    "type": "dia",
+    "isOfficial": true,
+    "source": "imported"
+  },
+  "sections": [
+    {
+      "order": 1,
+      "name": "Preguntas",
+      "type": "mixed",
+      "instructions": "Esta prueba tiene 23 preguntas: de alternativas (marcar con una X), de completación (anotar la respuesta en los recuadros) y de desarrollo (escribir la respuesta en la cuadrícula).",
+      "passage": null,
+      "items": [
+        {
+          "position": 1,
+          "type": "multiple_choice",
+          "responseFormat": "choice",
+          "stem": "¿Cómo se escribe el número ochenta y siete?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "78",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "80",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "87",
+              "isCorrect": true
+            }
+          ],
+          "correctKey": "C",
+          "skill": "Representar",
+          "oa": "OA 2",
+          "contentAxis": "Números y operaciones",
+          "hasFigure": false,
+          "figureNote": null,
+          "taxonomy": [
+            {
+              "type": "descriptor",
+              "code": null,
+              "name": "Leen un número del 0 al 100.",
+              "parentCode": "MATH-2B-OA02",
+              "tagType": "primary"
+            },
+            {
+              "type": "learning_objective",
+              "code": "MATH-2B-OA02",
+              "name": "OA 2",
+              "level": "2_basico",
+              "tagType": "secondary"
+            },
+            {
+              "type": "skill",
+              "code": "MATH-SK-REPRESENTAR",
+              "name": "Representar",
+              "tagType": "secondary"
+            },
+            {
+              "type": "axis",
+              "code": "MATH-AX-NUMEROS-Y-OPERACIONES",
+              "name": "Números y operaciones",
+              "tagType": "secondary"
+            }
+          ]
+        },
+        {
+          "position": 2,
+          "type": "open_ended",
+          "responseFormat": "fill_in",
+          "stem": "Observa esta representación de un número (bloques base diez: 4 barras de decenas y 7 cubos de unidades). ¿Qué número está representado? Respuesta: ___",
+          "alternatives": [],
+          "correctKey": null,
+          "skill": "Representar",
+          "oa": "OA 2",
+          "contentAxis": "Números y operaciones",
+          "hasFigure": true,
+          "figureNote": "Representación con material base diez: 4 barras verticales (decenas) y 7 cubos sueltos (unidades). Requiere la imagen para contar el valor representado.",
+          "taxonomy": [
+            {
+              "type": "descriptor",
+              "code": null,
+              "name": "Representan números del 0 al 100 de manera pictórica.",
+              "parentCode": "MATH-2B-OA02",
+              "tagType": "primary"
+            },
+            {
+              "type": "learning_objective",
+              "code": "MATH-2B-OA02",
+              "name": "OA 2",
+              "level": "2_basico",
+              "tagType": "secondary"
+            },
+            {
+              "type": "skill",
+              "code": "MATH-SK-REPRESENTAR",
+              "name": "Representar",
+              "tagType": "secondary"
+            },
+            {
+              "type": "axis",
+              "code": "MATH-AX-NUMEROS-Y-OPERACIONES",
+              "name": "Números y operaciones",
+              "tagType": "secondary"
+            }
+          ]
+        },
+        {
+          "position": 3,
+          "type": "multiple_choice",
+          "responseFormat": "choice",
+          "stem": "¿En qué opción los números están ordenados de menor a mayor?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "89  90  98",
+              "isCorrect": true
+            },
+            {
+              "key": "B",
+              "text": "89  98  90",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "98  90  89",
+              "isCorrect": false
+            }
+          ],
+          "correctKey": "A",
+          "skill": "Representar",
+          "oa": "OA 2",
+          "contentAxis": "Números y operaciones",
+          "hasFigure": false,
+          "figureNote": null,
+          "taxonomy": [
+            {
+              "type": "descriptor",
+              "code": null,
+              "name": "Ordenan números del 0 al 100.",
+              "parentCode": "MATH-2B-OA02",
+              "tagType": "primary"
+            },
+            {
+              "type": "learning_objective",
+              "code": "MATH-2B-OA02",
+              "name": "OA 2",
+              "level": "2_basico",
+              "tagType": "secondary"
+            },
+            {
+              "type": "skill",
+              "code": "MATH-SK-REPRESENTAR",
+              "name": "Representar",
+              "tagType": "secondary"
+            },
+            {
+              "type": "axis",
+              "code": "MATH-AX-NUMEROS-Y-OPERACIONES",
+              "name": "Números y operaciones",
+              "tagType": "secondary"
+            }
+          ]
+        },
+        {
+          "position": 4,
+          "type": "multiple_choice",
+          "responseFormat": "choice",
+          "stem": "Observa la recta numérica: 60 _ 62 _ _ 66 _ 68 (la casilla a ubicar está entre 62 y 66). ¿Qué número se ubica en la casilla?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "63",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "64",
+              "isCorrect": true
+            },
+            {
+              "key": "C",
+              "text": "65",
+              "isCorrect": false
+            }
+          ],
+          "correctKey": "B",
+          "skill": "Representar",
+          "oa": "OA 2",
+          "contentAxis": "Números y operaciones",
+          "hasFigure": true,
+          "figureNote": "Recta numérica con marcas 60, 62, 66, 68 y una casilla vacía intermedia; los valores rotulados están en el enunciado, la imagen no es imprescindible.",
+          "taxonomy": [
+            {
+              "type": "descriptor",
+              "code": null,
+              "name": "Ubican un número del 0 al 100 en la recta numérica, con graduación de 2 en 2.",
+              "parentCode": "MATH-2B-OA02",
+              "tagType": "primary"
+            },
+            {
+              "type": "learning_objective",
+              "code": "MATH-2B-OA02",
+              "name": "OA 2",
+              "level": "2_basico",
+              "tagType": "secondary"
+            },
+            {
+              "type": "skill",
+              "code": "MATH-SK-REPRESENTAR",
+              "name": "Representar",
+              "tagType": "secondary"
+            },
+            {
+              "type": "axis",
+              "code": "MATH-AX-NUMEROS-Y-OPERACIONES",
+              "name": "Números y operaciones",
+              "tagType": "secondary"
+            }
+          ]
+        },
+        {
+          "position": 5,
+          "type": "open_ended",
+          "responseFormat": "fill_in",
+          "stem": "¿Cuál es el valor posicional de 8 en el número 82? Respuesta: ___ unidades.",
+          "alternatives": [],
+          "correctKey": null,
+          "skill": "Representar",
+          "oa": "OA 7",
+          "contentAxis": "Números y operaciones",
+          "hasFigure": false,
+          "figureNote": null,
+          "taxonomy": [
+            {
+              "type": "descriptor",
+              "code": null,
+              "name": "Identifican el valor posicional de la decena en un número del 0 al 100.",
+              "parentCode": "MATH-2B-OA07",
+              "tagType": "primary"
+            },
+            {
+              "type": "learning_objective",
+              "code": "MATH-2B-OA07",
+              "name": "OA 7",
+              "level": "2_basico",
+              "tagType": "secondary"
+            },
+            {
+              "type": "skill",
+              "code": "MATH-SK-REPRESENTAR",
+              "name": "Representar",
+              "tagType": "secondary"
+            },
+            {
+              "type": "axis",
+              "code": "MATH-AX-NUMEROS-Y-OPERACIONES",
+              "name": "Números y operaciones",
+              "tagType": "secondary"
+            }
+          ]
+        },
+        {
+          "position": 6,
+          "type": "multiple_choice",
+          "responseFormat": "choice",
+          "stem": "¿Cómo se puede descomponer el número 68?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "6 + 8",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "60 + 8",
+              "isCorrect": true
+            },
+            {
+              "key": "C",
+              "text": "80 + 6",
+              "isCorrect": false
+            }
+          ],
+          "correctKey": "B",
+          "skill": "Representar",
+          "oa": "OA 5",
+          "contentAxis": "Números y operaciones",
+          "hasFigure": false,
+          "figureNote": null,
+          "taxonomy": [
+            {
+              "type": "descriptor",
+              "code": null,
+              "name": "Descomponen aditivamente un número del 0 al 100, según su valor posicional.",
+              "parentCode": "MATH-2B-OA05",
+              "tagType": "primary"
+            },
+            {
+              "type": "learning_objective",
+              "code": "MATH-2B-OA05",
+              "name": "OA 5",
+              "level": "2_basico",
+              "tagType": "secondary"
+            },
+            {
+              "type": "skill",
+              "code": "MATH-SK-REPRESENTAR",
+              "name": "Representar",
+              "tagType": "secondary"
+            },
+            {
+              "type": "axis",
+              "code": "MATH-AX-NUMEROS-Y-OPERACIONES",
+              "name": "Números y operaciones",
+              "tagType": "secondary"
+            }
+          ]
+        },
+        {
+          "position": 7,
+          "type": "open_ended",
+          "responseFormat": "fill_in",
+          "stem": "Resuelve: 65 + 24 =",
+          "alternatives": [],
+          "correctKey": null,
+          "skill": "Resolver problemas",
+          "oa": "OA 9",
+          "contentAxis": "Números y operaciones",
+          "hasFigure": false,
+          "figureNote": null,
+          "taxonomy": [
+            {
+              "type": "descriptor",
+              "code": null,
+              "name": "Calculan el resultado de una adición sin reserva de números naturales del 0 al 100.",
+              "parentCode": "MATH-2B-OA09",
+              "tagType": "primary"
+            },
+            {
+              "type": "learning_objective",
+              "code": "MATH-2B-OA09",
+              "name": "OA 9",
+              "level": "2_basico",
+              "tagType": "secondary"
+            },
+            {
+              "type": "skill",
+              "code": "MATH-SK-RESOLVER-PROBLEMAS",
+              "name": "Resolver problemas",
+              "tagType": "secondary"
+            },
+            {
+              "type": "axis",
+              "code": "MATH-AX-NUMEROS-Y-OPERACIONES",
+              "name": "Números y operaciones",
+              "tagType": "secondary"
+            }
+          ]
+        },
+        {
+          "position": 8,
+          "type": "open_ended",
+          "responseFormat": "fill_in",
+          "stem": "Resuelve: 98 – 55 =",
+          "alternatives": [],
+          "correctKey": null,
+          "skill": "Resolver problemas",
+          "oa": "OA 9",
+          "contentAxis": "Números y operaciones",
+          "hasFigure": false,
+          "figureNote": null,
+          "taxonomy": [
+            {
+              "type": "descriptor",
+              "code": null,
+              "name": "Calculan el resultado de una sustracción sin canje de números naturales del 0 al 100.",
+              "parentCode": "MATH-2B-OA09",
+              "tagType": "primary"
+            },
+            {
+              "type": "learning_objective",
+              "code": "MATH-2B-OA09",
+              "name": "OA 9",
+              "level": "2_basico",
+              "tagType": "secondary"
+            },
+            {
+              "type": "skill",
+              "code": "MATH-SK-RESOLVER-PROBLEMAS",
+              "name": "Resolver problemas",
+              "tagType": "secondary"
+            },
+            {
+              "type": "axis",
+              "code": "MATH-AX-NUMEROS-Y-OPERACIONES",
+              "name": "Números y operaciones",
+              "tagType": "secondary"
+            }
+          ]
+        },
+        {
+          "position": 9,
+          "type": "multiple_choice",
+          "responseFormat": "choice",
+          "stem": "Manuel compró los siguientes yogures (dibujo de yogures dispuestos en filas y columnas). ¿Con qué operación se puede calcular la cantidad total de yogures que compró Manuel?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "4 • 4",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "5 • 4",
+              "isCorrect": true
+            },
+            {
+              "key": "C",
+              "text": "5 + 4",
+              "isCorrect": false
+            }
+          ],
+          "correctKey": "B",
+          "skill": "Modelar",
+          "oa": "OA 9",
+          "contentAxis": "Números y operaciones",
+          "hasFigure": true,
+          "figureNote": "Arreglo rectangular de yogures (filas y columnas); la operación correcta depende de contar filas y columnas en la imagen. Requiere la imagen.",
+          "taxonomy": [
+            {
+              "type": "descriptor",
+              "code": null,
+              "name": "Identifican la multiplicación que representa el total de elementos agrupados con igual cantidad.",
+              "parentCode": "MATH-2B-OA09",
+              "tagType": "primary"
+            },
+            {
+              "type": "learning_objective",
+              "code": "MATH-2B-OA09",
+              "name": "OA 9",
+              "level": "2_basico",
+              "tagType": "secondary"
+            },
+            {
+              "type": "skill",
+              "code": "MATH-SK-MODELAR",
+              "name": "Modelar",
+              "tagType": "secondary"
+            },
+            {
+              "type": "axis",
+              "code": "MATH-AX-NUMEROS-Y-OPERACIONES",
+              "name": "Números y operaciones",
+              "tagType": "secondary"
+            }
+          ]
+        },
+        {
+          "position": 10,
+          "type": "multiple_choice",
+          "responseFormat": "choice",
+          "stem": "¿Con qué adición se puede calcular 9 • 5?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "5 + 9 + 5 + 9 + 5 + 9 + 5 + 9 + 5 + 9",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "9 + 9 + 9 + 9 + 9 + 9 + 9 + 9 + 9",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "5 + 5 + 5 + 5 + 5 + 5 + 5 + 5 + 5",
+              "isCorrect": true
+            }
+          ],
+          "correctKey": "C",
+          "skill": "Representar",
+          "oa": "OA 11",
+          "contentAxis": "Números y operaciones",
+          "hasFigure": false,
+          "figureNote": null,
+          "taxonomy": [
+            {
+              "type": "descriptor",
+              "code": null,
+              "name": "Identifican una adición de sumandos iguales que representa una multiplicación dada.",
+              "parentCode": "MATH-2B-OA11",
+              "tagType": "primary"
+            },
+            {
+              "type": "learning_objective",
+              "code": "MATH-2B-OA11",
+              "name": "OA 11",
+              "level": "2_basico",
+              "tagType": "secondary"
+            },
+            {
+              "type": "skill",
+              "code": "MATH-SK-REPRESENTAR",
+              "name": "Representar",
+              "tagType": "secondary"
+            },
+            {
+              "type": "axis",
+              "code": "MATH-AX-NUMEROS-Y-OPERACIONES",
+              "name": "Números y operaciones",
+              "tagType": "secondary"
+            }
+          ]
+        },
+        {
+          "position": 11,
+          "type": "multiple_choice",
+          "responseFormat": "choice",
+          "stem": "Observa la secuencia de números: 4 8 2 4 8 2 4 8 2 4 8 2. ¿Cuál es un patrón en la secuencia anterior?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "2 8 4",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "4 8 2",
+              "isCorrect": true
+            },
+            {
+              "key": "C",
+              "text": "8 4 2",
+              "isCorrect": false
+            }
+          ],
+          "correctKey": "B",
+          "skill": "Argumentar y comunicar",
+          "oa": "OA 11",
+          "contentAxis": "Patrones y álgebra",
+          "hasFigure": false,
+          "figureNote": null,
+          "taxonomy": [
+            {
+              "type": "descriptor",
+              "code": null,
+              "name": "Identifican un patrón numérico repetitivo.",
+              "parentCode": "MATH-1B-OA11",
+              "tagType": "primary"
+            },
+            {
+              "type": "learning_objective",
+              "code": "MATH-1B-OA11",
+              "name": "OA 11",
+              "level": "1_basico",
+              "tagType": "secondary"
+            },
+            {
+              "type": "skill",
+              "code": "MATH-SK-ARGUMENTAR-Y-COMUNICAR",
+              "name": "Argumentar y comunicar",
+              "tagType": "secondary"
+            },
+            {
+              "type": "axis",
+              "code": "MATH-AX-PATRONES-Y-ALGEBRA",
+              "name": "Patrones y álgebra",
+              "tagType": "secondary"
+            }
+          ]
+        },
+        {
+          "position": 12,
+          "type": "multiple_choice",
+          "responseFormat": "choice",
+          "stem": "Observa las figuras dibujadas sobre una cuadrícula. ¿Qué figura tiene 4 lados de igual medida?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Rectángulo (más ancho que alto) dibujado sobre la cuadrícula.",
+              "isImage": true,
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Triángulo dibujado sobre la cuadrícula.",
+              "isImage": true,
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Cuadrado dibujado sobre la cuadrícula.",
+              "isImage": true,
+              "isCorrect": true
+            }
+          ],
+          "correctKey": "C",
+          "skill": "Representar",
+          "oa": "OA 15",
+          "contentAxis": "Geometría",
+          "hasFigure": true,
+          "figureNote": "Las 3 alternativas son figuras sobre cuadrícula (rectángulo, triángulo, cuadrado). Requiere captura de imagen.",
+          "taxonomy": [
+            {
+              "type": "descriptor",
+              "code": null,
+              "name": "Identifican una figura 2D a partir de una de sus características.",
+              "parentCode": "MATH-2B-OA15",
+              "tagType": "primary"
+            },
+            {
+              "type": "learning_objective",
+              "code": "MATH-2B-OA15",
+              "name": "OA 15",
+              "level": "2_basico",
+              "tagType": "secondary"
+            },
+            {
+              "type": "skill",
+              "code": "MATH-SK-REPRESENTAR",
+              "name": "Representar",
+              "tagType": "secondary"
+            },
+            {
+              "type": "axis",
+              "code": "MATH-AX-GEOMETRIA",
+              "name": "Geometría",
+              "tagType": "secondary"
+            }
+          ]
+        },
+        {
+          "position": 13,
+          "type": "multiple_choice",
+          "responseFormat": "choice",
+          "stem": "Observa esta figura 3D (paralelepípedo / prisma rectangular). ¿Con qué grupo de figuras 2D se forma la figura 3D?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Grupo de 6 figuras 2D: 4 rectángulos y 2 cuadrados pequeños.",
+              "isImage": true,
+              "isCorrect": true
+            },
+            {
+              "key": "B",
+              "text": "Grupo de 4 figuras 2D: 2 rectángulos y 2 cuadrados pequeños.",
+              "isImage": true,
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Grupo de 3 figuras 2D: 2 rectángulos y 1 cuadrado pequeño.",
+              "isImage": true,
+              "isCorrect": false
+            }
+          ],
+          "correctKey": "A",
+          "skill": "Representar",
+          "oa": "OA 16",
+          "contentAxis": "Geometría",
+          "hasFigure": true,
+          "figureNote": "Enunciado muestra un paralelepípedo; las alternativas son grupos de figuras 2D (caras/red). Requiere captura de imagen.",
+          "taxonomy": [
+            {
+              "type": "descriptor",
+              "code": null,
+              "name": "Identifican las figuras 2D que permiten construir una figura 3D.",
+              "parentCode": "MATH-2B-OA16",
+              "tagType": "primary"
+            },
+            {
+              "type": "learning_objective",
+              "code": "MATH-2B-OA16",
+              "name": "OA 16",
+              "level": "2_basico",
+              "tagType": "secondary"
+            },
+            {
+              "type": "skill",
+              "code": "MATH-SK-REPRESENTAR",
+              "name": "Representar",
+              "tagType": "secondary"
+            },
+            {
+              "type": "axis",
+              "code": "MATH-AX-GEOMETRIA",
+              "name": "Geometría",
+              "tagType": "secondary"
+            }
+          ]
+        },
+        {
+          "position": 14,
+          "type": "multiple_choice",
+          "responseFormat": "choice",
+          "stem": "¿Cuál de estas figuras 3D es un cubo?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Cubo (sólido con caras cuadradas iguales).",
+              "isImage": true,
+              "isCorrect": true
+            },
+            {
+              "key": "B",
+              "text": "Cono.",
+              "isImage": true,
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Prisma rectangular más alto que ancho.",
+              "isImage": true,
+              "isCorrect": false
+            }
+          ],
+          "correctKey": "A",
+          "skill": "Representar",
+          "oa": "OA 16",
+          "contentAxis": "Geometría",
+          "hasFigure": true,
+          "figureNote": "Las 3 alternativas son sólidos 3D (cubo, cono, prisma). Requiere captura de imagen.",
+          "taxonomy": [
+            {
+              "type": "descriptor",
+              "code": null,
+              "name": "Identifican una figura 3D.",
+              "parentCode": "MATH-2B-OA16",
+              "tagType": "primary"
+            },
+            {
+              "type": "learning_objective",
+              "code": "MATH-2B-OA16",
+              "name": "OA 16",
+              "level": "2_basico",
+              "tagType": "secondary"
+            },
+            {
+              "type": "skill",
+              "code": "MATH-SK-REPRESENTAR",
+              "name": "Representar",
+              "tagType": "secondary"
+            },
+            {
+              "type": "axis",
+              "code": "MATH-AX-GEOMETRIA",
+              "name": "Geometría",
+              "tagType": "secondary"
+            }
+          ]
+        },
+        {
+          "position": 15,
+          "type": "open_ended",
+          "responseFormat": "fill_in",
+          "stem": "Observa esta imagen (un clip sobre una regla graduada de 0 a 10 cm). ¿Cuánto mide el clip? Respuesta: El clip mide ___ cm.",
+          "alternatives": [],
+          "correctKey": null,
+          "skill": "Resolver problemas",
+          "oa": "OA 21",
+          "contentAxis": "Medición",
+          "hasFigure": true,
+          "figureNote": "Imagen de un clip alineado sobre una regla de 0 a 10 cm. Requiere la imagen para leer la medida.",
+          "taxonomy": [
+            {
+              "type": "descriptor",
+              "code": null,
+              "name": "Miden la longitud de un objeto con un instrumento estandarizado.",
+              "parentCode": "MATH-2B-OA21",
+              "tagType": "primary"
+            },
+            {
+              "type": "learning_objective",
+              "code": "MATH-2B-OA21",
+              "name": "OA 21",
+              "level": "2_basico",
+              "tagType": "secondary"
+            },
+            {
+              "type": "skill",
+              "code": "MATH-SK-RESOLVER-PROBLEMAS",
+              "name": "Resolver problemas",
+              "tagType": "secondary"
+            },
+            {
+              "type": "axis",
+              "code": "MATH-AX-MEDICION",
+              "name": "Medición",
+              "tagType": "secondary"
+            }
+          ]
+        },
+        {
+          "position": 16,
+          "type": "multiple_choice",
+          "responseFormat": "choice",
+          "stem": "Observa la balanza (una balanza de platillos con 5 pelotas en el platillo izquierdo, que baja, y 3 pelotas en el platillo derecho, que sube). ¿Cuál de estas comparaciones se representa en la balanza?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "5 = 3",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "5 > 3",
+              "isCorrect": true
+            },
+            {
+              "key": "C",
+              "text": "5 < 3",
+              "isCorrect": false
+            }
+          ],
+          "correctKey": "B",
+          "skill": "Argumentar y comunicar",
+          "oa": "OA 21",
+          "contentAxis": "Patrones y álgebra",
+          "hasFigure": true,
+          "figureNote": "Balanza de platillos con 5 pelotas a la izquierda y 3 a la derecha; las cantidades están descritas en el enunciado, las alternativas son texto.",
+          "taxonomy": [
+            {
+              "type": "descriptor",
+              "code": null,
+              "name": "Identifican una igualdad o desigualdad representada en una balanza.",
+              "parentCode": "MATH-2B-OA21",
+              "tagType": "primary"
+            },
+            {
+              "type": "learning_objective",
+              "code": "MATH-2B-OA21",
+              "name": "OA 21",
+              "level": "2_basico",
+              "tagType": "secondary"
+            },
+            {
+              "type": "skill",
+              "code": "MATH-SK-ARGUMENTAR-Y-COMUNICAR",
+              "name": "Argumentar y comunicar",
+              "tagType": "secondary"
+            },
+            {
+              "type": "axis",
+              "code": "MATH-AX-PATRONES-Y-ALGEBRA",
+              "name": "Patrones y álgebra",
+              "tagType": "secondary"
+            }
+          ]
+        },
+        {
+          "position": 17,
+          "type": "multiple_choice",
+          "responseFormat": "choice",
+          "stem": "Este pictograma muestra la cantidad de instrumentos que tiene una banda. Cada ícono representa 1 instrumento. Filas: Guitarra, Metalófono, Violín, Trompeta, Piano. ¿Cuántas trompetas tiene en total la banda?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "8",
+              "isCorrect": true
+            },
+            {
+              "key": "B",
+              "text": "9",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "10",
+              "isCorrect": false
+            }
+          ],
+          "correctKey": "A",
+          "skill": "Argumentar y comunicar",
+          "oa": "OA 20",
+          "contentAxis": "Datos y probabilidades",
+          "hasFigure": true,
+          "figureNote": "Pictograma con filas por instrumento; hay que contar los íconos de la fila Trompeta. Requiere la imagen.",
+          "taxonomy": [
+            {
+              "type": "descriptor",
+              "code": null,
+              "name": "Leen información presentada en un pictograma con escala.",
+              "parentCode": "MATH-2B-OA20",
+              "tagType": "primary"
+            },
+            {
+              "type": "learning_objective",
+              "code": "MATH-2B-OA20",
+              "name": "OA 20",
+              "level": "2_basico",
+              "tagType": "secondary"
+            },
+            {
+              "type": "skill",
+              "code": "MATH-SK-ARGUMENTAR-Y-COMUNICAR",
+              "name": "Argumentar y comunicar",
+              "tagType": "secondary"
+            },
+            {
+              "type": "axis",
+              "code": "MATH-AX-DATOS-Y-PROBABILIDADES",
+              "name": "Datos y probabilidades",
+              "tagType": "secondary"
+            }
+          ]
+        },
+        {
+          "position": 18,
+          "type": "multiple_choice",
+          "responseFormat": "choice",
+          "stem": "Este gráfico muestra la cantidad de estudiantes inscritos en los talleres de un colegio (gráfico de barras: talleres Astronomía, Ecología, Computación; eje y de 0 a 16). Según el gráfico, ¿qué taller tiene más estudiantes inscritos?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Astronomía.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Ecología.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Computación.",
+              "isCorrect": true
+            }
+          ],
+          "correctKey": "C",
+          "skill": "Argumentar y comunicar",
+          "oa": "OA 22",
+          "contentAxis": "Datos y probabilidades",
+          "hasFigure": true,
+          "figureNote": "Gráfico de barras de inscritos por taller (Astronomía, Ecología, Computación); las alturas de las barras no aparecen en el texto. Requiere la imagen.",
+          "taxonomy": [
+            {
+              "type": "descriptor",
+              "code": null,
+              "name": "Leen información presentada en un gráfico de barras con escala.",
+              "parentCode": "MATH-2B-OA22",
+              "tagType": "primary"
+            },
+            {
+              "type": "learning_objective",
+              "code": "MATH-2B-OA22",
+              "name": "OA 22",
+              "level": "2_basico",
+              "tagType": "secondary"
+            },
+            {
+              "type": "skill",
+              "code": "MATH-SK-ARGUMENTAR-Y-COMUNICAR",
+              "name": "Argumentar y comunicar",
+              "tagType": "secondary"
+            },
+            {
+              "type": "axis",
+              "code": "MATH-AX-DATOS-Y-PROBABILIDADES",
+              "name": "Datos y probabilidades",
+              "tagType": "secondary"
+            }
+          ]
+        },
+        {
+          "position": 19,
+          "type": "multiple_choice",
+          "responseFormat": "choice",
+          "stem": "En un juego, Laura ganó 35 fichas y luego, perdió 14 fichas. ¿Con qué operación puede calcular cuántas fichas le quedaron?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "35 + 14",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "35 – 14",
+              "isCorrect": true
+            },
+            {
+              "key": "C",
+              "text": "14 – 35",
+              "isCorrect": false
+            }
+          ],
+          "correctKey": "B",
+          "skill": "Modelar",
+          "oa": "OA 9",
+          "contentAxis": "Números y operaciones",
+          "hasFigure": false,
+          "figureNote": null,
+          "taxonomy": [
+            {
+              "type": "descriptor",
+              "code": null,
+              "name": "Identifican la sustracción que permite resolver un problema con números del 0 al 100.",
+              "parentCode": "MATH-2B-OA09",
+              "tagType": "primary"
+            },
+            {
+              "type": "learning_objective",
+              "code": "MATH-2B-OA09",
+              "name": "OA 9",
+              "level": "2_basico",
+              "tagType": "secondary"
+            },
+            {
+              "type": "skill",
+              "code": "MATH-SK-MODELAR",
+              "name": "Modelar",
+              "tagType": "secondary"
+            },
+            {
+              "type": "axis",
+              "code": "MATH-AX-NUMEROS-Y-OPERACIONES",
+              "name": "Números y operaciones",
+              "tagType": "secondary"
+            }
+          ]
+        },
+        {
+          "position": 20,
+          "type": "multiple_choice",
+          "responseFormat": "choice",
+          "stem": "Daniel leyó 43 páginas de su libro el sábado y 33 páginas el domingo. ¿Cuántas páginas leyó en total los dos días?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "10",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "67",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "76",
+              "isCorrect": true
+            }
+          ],
+          "correctKey": "C",
+          "skill": "Resolver problemas",
+          "oa": "OA 9",
+          "contentAxis": "Números y operaciones",
+          "hasFigure": false,
+          "figureNote": null,
+          "taxonomy": [
+            {
+              "type": "descriptor",
+              "code": null,
+              "name": "Resuelven un problema de adición con números naturales del 0 al 100.",
+              "parentCode": "MATH-2B-OA09",
+              "tagType": "primary"
+            },
+            {
+              "type": "learning_objective",
+              "code": "MATH-2B-OA09",
+              "name": "OA 9",
+              "level": "2_basico",
+              "tagType": "secondary"
+            },
+            {
+              "type": "skill",
+              "code": "MATH-SK-RESOLVER-PROBLEMAS",
+              "name": "Resolver problemas",
+              "tagType": "secondary"
+            },
+            {
+              "type": "axis",
+              "code": "MATH-AX-NUMEROS-Y-OPERACIONES",
+              "name": "Números y operaciones",
+              "tagType": "secondary"
+            }
+          ]
+        },
+        {
+          "position": 21,
+          "type": "open_ended",
+          "responseFormat": "develop",
+          "stem": "Camila tiene 18 años y su hermano Diego tiene 8 años. ¿Cuántos años mayor es Camila que Diego? Escribe aquí tus cálculos y tu respuesta.",
+          "alternatives": [],
+          "correctKey": null,
+          "skill": "Resolver problemas",
+          "oa": "OA 9",
+          "contentAxis": "Números y operaciones",
+          "hasFigure": false,
+          "figureNote": "Única pregunta de desarrollo de la prueba (espacio en cuadrícula para cálculos y respuesta).",
+          "taxonomy": [
+            {
+              "type": "descriptor",
+              "code": null,
+              "name": "Resuelven un problema de sustracción de números naturales del 0 al 100.",
+              "parentCode": "MATH-2B-OA09",
+              "tagType": "primary"
+            },
+            {
+              "type": "learning_objective",
+              "code": "MATH-2B-OA09",
+              "name": "OA 9",
+              "level": "2_basico",
+              "tagType": "secondary"
+            },
+            {
+              "type": "skill",
+              "code": "MATH-SK-RESOLVER-PROBLEMAS",
+              "name": "Resolver problemas",
+              "tagType": "secondary"
+            },
+            {
+              "type": "axis",
+              "code": "MATH-AX-NUMEROS-Y-OPERACIONES",
+              "name": "Números y operaciones",
+              "tagType": "secondary"
+            }
+          ]
+        },
+        {
+          "position": 22,
+          "type": "open_ended",
+          "responseFormat": "completacion",
+          "stem": "Elena compra estos packs de jugos (dibujo de 4 packs, cada uno con 3 botellas de jugo). Al pagar en caja, le regalan 2 packs adicionales de jugos. ¿Con qué multiplicación se puede calcular la cantidad total de jugos que se lleva Elena?\n\nAlternativas: A) 3 • 2 B) 6 • 3 C) 4 • 2",
+          "alternatives": [],
+          "correctKey": null,
+          "skill": "Modelar",
+          "oa": "OA 11",
+          "contentAxis": "Números y operaciones",
+          "hasFigure": true,
+          "figureNote": "Imagen de 4 packs de jugos, cada pack con 3 botellas; el cálculo depende de contar packs y botellas por pack en la imagen. Requiere la imagen.",
+          "taxonomy": [
+            {
+              "type": "descriptor",
+              "code": null,
+              "name": "Identifican la multiplicación que permite resolver un problema.",
+              "parentCode": "MATH-2B-OA11",
+              "tagType": "primary"
+            },
+            {
+              "type": "learning_objective",
+              "code": "MATH-2B-OA11",
+              "name": "OA 11",
+              "level": "2_basico",
+              "tagType": "secondary"
+            },
+            {
+              "type": "skill",
+              "code": "MATH-SK-MODELAR",
+              "name": "Modelar",
+              "tagType": "secondary"
+            },
+            {
+              "type": "axis",
+              "code": "MATH-AX-NUMEROS-Y-OPERACIONES",
+              "name": "Números y operaciones",
+              "tagType": "secondary"
+            }
+          ]
+        },
+        {
+          "position": 23,
+          "type": "multiple_choice",
+          "responseFormat": "choice",
+          "stem": "Esta secuencia numérica se completa sumando 2 al término anterior: 11 → ▢ → ▢ → ✷ → 19. ¿Qué número debe ir en ✷?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "14",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "17",
+              "isCorrect": true
+            },
+            {
+              "key": "C",
+              "text": "18",
+              "isCorrect": false
+            }
+          ],
+          "correctKey": "B",
+          "skill": "Argumentar y comunicar",
+          "oa": "OA 12",
+          "contentAxis": "Patrones y álgebra",
+          "hasFigure": false,
+          "figureNote": null,
+          "taxonomy": [
+            {
+              "type": "descriptor",
+              "code": null,
+              "name": "Completan una secuencia numérica según un patrón.",
+              "parentCode": "MATH-2B-OA12",
+              "tagType": "primary"
+            },
+            {
+              "type": "learning_objective",
+              "code": "MATH-2B-OA12",
+              "name": "OA 12",
+              "level": "2_basico",
+              "tagType": "secondary"
+            },
+            {
+              "type": "skill",
+              "code": "MATH-SK-ARGUMENTAR-Y-COMUNICAR",
+              "name": "Argumentar y comunicar",
+              "tagType": "secondary"
+            },
+            {
+              "type": "axis",
+              "code": "MATH-AX-PATRONES-Y-ALGEBRA",
+              "name": "Patrones y álgebra",
+              "tagType": "secondary"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "extraction": {
+    "itemCount": 23,
+    "warnings": [
+      "responseFormat: 'fill_in' (completación/cálculo) en ítems 2, 5, 7, 8, 15 → modelados como open_ended; se promoverán a gap_fill (auto-corregible) al cargar la pauta.",
+      "responseFormat: 'develop' en ítem 21 (única pregunta de desarrollo).",
+      "Alternativas-imagen (isImage:true) en ítems 12, 13, 14: requieren captura de imagen para ser usables.",
+      "Figura imprescindible en el enunciado de ítems 2, 9, 15, 17, 18, 22 (y alternativas-imagen ya listadas en 12, 13, 14).",
+      "Texto y números transcritos desde la capa de texto del PDF (pdftotext); estructura y figuras confirmadas con la imagen renderizada."
+    ],
+    "needsHumanReview": true
+  },
+  "pauta": {
+    "source": {
+      "report": "RBD25520_DIA_MATEMATICA_3_A_Resultados_Asignatura_Diagnostico_2025.pdf",
+      "subjectCode": "MATH",
+      "gradeCode": "3RD_BASIC",
+      "applicationPeriod": "diagnostico",
+      "year": 2025,
+      "instrumentJson": "extraccion/matematicas/3º matemáticas diagnóstico 2025.json"
+    },
+    "appliedKeys": 16,
+    "issues": [
+      "pos 22: informe la trata como abierta pero el ítem es multiple_choice (posible error de tipo)"
+    ]
+  }
+}

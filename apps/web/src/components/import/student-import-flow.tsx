@@ -4,15 +4,15 @@ import { useCallback, useState, useTransition } from 'react';
 import { useDropzone, type FileRejection } from 'react-dropzone';
 import { AlertCircle, CheckCircle2, FileUp, Loader2, RotateCcw, Upload } from 'lucide-react';
 import { toast } from 'sonner';
-import type {
-  StudentImportCommitResponse,
-  StudentImportPreviewResponse,
-} from '@soe/types';
+import type { StudentImportCommitResponse, StudentImportPreviewResponse } from '@soe/types';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
-import { commitImportAction, previewImportAction } from '@/app/(dashboard)/importar/actions';
+import {
+  commitImportAction,
+  previewImportAction,
+} from '@/app/(dashboard)/importar/alumnos/actions';
 
 type Step = 'upload' | 'previewing' | 'preview' | 'committing' | 'done';
 
@@ -89,9 +89,7 @@ export function StudentImportFlow() {
         />
       )}
       {step === 'committing' && <LoadingPanel label="Guardando alumnos..." />}
-      {step === 'done' && commitResult && (
-        <DoneStep result={commitResult} onReset={reset} />
-      )}
+      {step === 'done' && commitResult && <DoneStep result={commitResult} onReset={reset} />}
     </div>
   );
 }
@@ -130,7 +128,9 @@ function UploadStep({ onAccept }: { onAccept: (file: File) => void }) {
       {...getRootProps()}
       className={cn(
         'flex flex-col items-center justify-center gap-3 rounded-lg border-2 border-dashed p-10 text-center transition-colors cursor-pointer',
-        isDragActive ? 'border-primary bg-primary/5' : 'border-muted-foreground/25 hover:bg-muted/50',
+        isDragActive
+          ? 'border-primary bg-primary/5'
+          : 'border-muted-foreground/25 hover:bg-muted/50',
       )}
     >
       <input {...getInputProps()} />
@@ -184,7 +184,11 @@ function PreviewStep({
 
       <div className="grid gap-3 sm:grid-cols-3">
         <Stat label="Válidas" value={validRows} variant="success" />
-        <Stat label="Con error" value={errors.length} variant={errors.length > 0 ? 'warn' : 'neutral'} />
+        <Stat
+          label="Con error"
+          value={errors.length}
+          variant={errors.length > 0 ? 'warn' : 'neutral'}
+        />
         <Stat
           label="Cursos nuevos"
           value={preview.newClassGroups.length}
@@ -201,14 +205,13 @@ function PreviewStep({
           </CardHeader>
           <CardContent className="space-y-1 text-sm text-red-900 dark:text-red-200">
             <p>
-              Los siguientes cursos no se pudieron mapear a un nivel conocido. Corrígelos en el
-              CSV y vuelve a subirlo:
+              Los siguientes cursos no se pudieron mapear a un nivel conocido. Corrígelos en el CSV
+              y vuelve a subirlo:
             </p>
             <ul className="list-disc pl-5">
               {preview.unknownGrades.map((g) => (
                 <li key={g.label}>
-                  <span className="font-medium">{g.label}</span> · filas{' '}
-                  {g.rowNumbers.join(', ')}
+                  <span className="font-medium">{g.label}</span> · filas {g.rowNumbers.join(', ')}
                 </li>
               ))}
             </ul>
@@ -321,9 +324,9 @@ function DoneStep({
               {variant === 'success' ? 'Importación completada' : 'Importación parcial'}
             </p>
             <p className="text-muted-foreground">
-              {result.inserted} insertado{result.inserted === 1 ? '' : 's'},{' '}
-              {result.updated} actualizado{result.updated === 1 ? '' : 's'},{' '}
-              {result.failed} con error{result.failed === 1 ? '' : 'es'}
+              {result.inserted} insertado{result.inserted === 1 ? '' : 's'}, {result.updated}{' '}
+              actualizado{result.updated === 1 ? '' : 's'}, {result.failed} con error
+              {result.failed === 1 ? '' : 'es'}
               {result.classGroupsCreated > 0
                 ? `, ${result.classGroupsCreated} curso${result.classGroupsCreated === 1 ? '' : 's'} nuevo${result.classGroupsCreated === 1 ? '' : 's'} creado${result.classGroupsCreated === 1 ? '' : 's'}`
                 : ''}
@@ -383,7 +386,8 @@ function Stat({
   variant: 'success' | 'warn' | 'info' | 'neutral';
 }) {
   const colors: Record<typeof variant, string> = {
-    success: 'border-emerald-200 bg-emerald-50 text-emerald-900 dark:border-emerald-900 dark:bg-emerald-950/20 dark:text-emerald-200',
+    success:
+      'border-emerald-200 bg-emerald-50 text-emerald-900 dark:border-emerald-900 dark:bg-emerald-950/20 dark:text-emerald-200',
     warn: 'border-amber-200 bg-amber-50 text-amber-900 dark:border-amber-900 dark:bg-amber-950/20 dark:text-amber-200',
     info: 'border-blue-200 bg-blue-50 text-blue-900 dark:border-blue-900 dark:bg-blue-950/20 dark:text-blue-200',
     neutral: 'border-muted bg-muted/30 text-foreground',

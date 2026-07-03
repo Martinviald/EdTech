@@ -1,0 +1,1563 @@
+{
+  "schemaVersion": "1.0",
+  "source": {
+    "file": "4º lenguaje cierre 2025.pdf",
+    "subjectFolder": "Lenguaje"
+  },
+  "instrument": {
+    "name": "DIA Lectura 4° Básico 2025 — Cierre",
+    "subject": "Lenguaje y Comunicación",
+    "subjectCode": "LANG",
+    "grade": "4° Básico",
+    "gradeCode": "4TH_BASIC",
+    "year": 2025,
+    "applicationPeriod": "cierre",
+    "type": "dia",
+    "isOfficial": true,
+    "source": "imported"
+  },
+  "sections": [
+    {
+      "order": 1,
+      "name": "Texto 1: «El león y el mosquito»",
+      "type": "multiple_choice",
+      "instructions": "Lee el siguiente texto y responde las preguntas 1 a 4.",
+      "passage": {
+        "title": "El león y el mosquito",
+        "text": "Amaneció un día el mosquito sintiéndose muy valiente e invencible y con deseos de que todo el mundo se enterara. De modo que se fue volando a la casa del león y por el camino iba anunciando a grandes voces:\n—¡Soy invencible! Nadie puede conmigo, ni siquiera el león.\nLos animales escucharon sorprendidos los gritos del mosquito y lo siguieron para ver qué sucedía. Al llegar a la casa del león, el mosquito le dijo:\n—León, yo puedo vencerte en el combate. Puedo, puedo.\n—Mosquito, me parece que eres demasiado pequeño para enfrentarte conmigo —le contestó el león sin hacerle demasiado caso.\n—Soy pequeño, pero valiente e invencible —dijo el mosquito haciendo sonar su trompetilla—. Vamos a pelear.\n—Si así lo deseas… —dijo el león y lanzó un rugido y un manotazo.\nPero el mosquito esquivó el manotazo, voló directo a la nariz del león y comenzó a picarlo allí en donde el león es más sensible. El león, desesperado, se daba manotazos y se desgarraba la piel, pero no lograba cazar al mosquito que era más rápido que él. Por fin, desesperado, el león dijo:\n—Basta ya, mosquito. Me rindo. Has ganado la pelea.\nLos animales aplaudieron y el mosquito estaba feliz:\n—¡Soy invencible! ¡Soy valiente! ¡Soy el mejor!\n—Eres valiente, no hay duda —dijo el león—. Pero invencible… eso es otra cosa.\nEl mosquito ni siquiera lo oyó y se fue volando y tocando su trompetilla.\nEntonces, sin darse cuenta, se enredó en la tela que una araña había tejido entre dos ramas. La araña dio un salto y se lo comió.\n\nCon astucia y valentía, los pequeños pueden derrotar a los poderosos, pero no son invencibles.\n\nVerónica Uribe. El libro de oro de las fábulas. Santiago: Ekaré, 2009.",
+        "format": "plain",
+        "attachments": []
+      },
+      "items": [
+        {
+          "position": 1,
+          "type": "multiple_choice",
+          "stem": "¿Por qué en un principio el león no quería enfrentarse con el mosquito?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Porque lo consideraba invencible.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Porque sabía que era más rápido que él.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Porque sabía que podía picarlo en la nariz.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "Porque lo consideraba demasiado pequeño.",
+              "isCorrect": true
+            }
+          ],
+          "correctKey": "D",
+          "skill": "Interpretar y relacionar",
+          "oa": "OA 4",
+          "contentAxis": "Narración",
+          "hasFigure": false,
+          "figureNote": null,
+          "taxonomy": [
+            {
+              "type": "descriptor",
+              "code": null,
+              "name": "Infieren causa o consecuencia de acontecimientos o acciones relevantes en un texto narrativo.",
+              "parentCode": "LANG-3B-OA04",
+              "tagType": "primary"
+            },
+            {
+              "type": "learning_objective",
+              "code": "LANG-3B-OA04",
+              "name": "OA 4",
+              "level": "3_basico",
+              "tagType": "secondary"
+            },
+            {
+              "type": "skill",
+              "code": "LANG-SK-INTERPRETAR-Y-RELACIONAR",
+              "name": "Interpretar y relacionar",
+              "tagType": "secondary"
+            },
+            {
+              "type": "text_type",
+              "code": "LANG-TT-NARRACION",
+              "name": "Narración",
+              "tagType": "secondary"
+            }
+          ]
+        },
+        {
+          "position": 2,
+          "type": "multiple_choice",
+          "stem": "¿Por qué pelearon el mosquito y el león?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Porque el león amenazó al mosquito.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Porque el mosquito le picó la nariz al león.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Porque el mosquito quiso enfrentarse al león.",
+              "isCorrect": true
+            },
+            {
+              "key": "D",
+              "text": "Porque el león le dio un manotazo al mosquito.",
+              "isCorrect": false
+            }
+          ],
+          "correctKey": "C",
+          "skill": "Interpretar y relacionar",
+          "oa": "OA 4",
+          "contentAxis": "Narración",
+          "hasFigure": false,
+          "figureNote": null,
+          "taxonomy": [
+            {
+              "type": "descriptor",
+              "code": null,
+              "name": "Infieren causa o consecuencia de acontecimientos o acciones relevantes en un texto narrativo.",
+              "parentCode": "LANG-3B-OA04",
+              "tagType": "primary"
+            },
+            {
+              "type": "learning_objective",
+              "code": "LANG-3B-OA04",
+              "name": "OA 4",
+              "level": "3_basico",
+              "tagType": "secondary"
+            },
+            {
+              "type": "skill",
+              "code": "LANG-SK-INTERPRETAR-Y-RELACIONAR",
+              "name": "Interpretar y relacionar",
+              "tagType": "secondary"
+            },
+            {
+              "type": "text_type",
+              "code": "LANG-TT-NARRACION",
+              "name": "Narración",
+              "tagType": "secondary"
+            }
+          ]
+        },
+        {
+          "position": 3,
+          "type": "multiple_choice",
+          "stem": "Según lo leído, ¿cómo era el mosquito?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Alegre.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Valiente.",
+              "isCorrect": true
+            },
+            {
+              "key": "C",
+              "text": "Distraído.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "Invencible.",
+              "isCorrect": false
+            }
+          ],
+          "correctKey": "B",
+          "skill": "Interpretar y relacionar",
+          "oa": "OA 4",
+          "contentAxis": "Narración",
+          "hasFigure": false,
+          "figureNote": null,
+          "taxonomy": [
+            {
+              "type": "descriptor",
+              "code": null,
+              "name": "Infieren características y sentimientos de personajes en un texto narrativo.",
+              "parentCode": "LANG-3B-OA04",
+              "tagType": "primary"
+            },
+            {
+              "type": "learning_objective",
+              "code": "LANG-3B-OA04",
+              "name": "OA 4",
+              "level": "3_basico",
+              "tagType": "secondary"
+            },
+            {
+              "type": "skill",
+              "code": "LANG-SK-INTERPRETAR-Y-RELACIONAR",
+              "name": "Interpretar y relacionar",
+              "tagType": "secondary"
+            },
+            {
+              "type": "text_type",
+              "code": "LANG-TT-NARRACION",
+              "name": "Narración",
+              "tagType": "secondary"
+            }
+          ]
+        },
+        {
+          "position": 4,
+          "type": "multiple_choice",
+          "stem": "¿Cuál es la enseñanza de este texto?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Que debemos ser valientes.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Que siendo rápido puedes ganar.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Que nadie debe creerse invencible.",
+              "isCorrect": true
+            },
+            {
+              "key": "D",
+              "text": "Que debes ser pequeño para vencer.",
+              "isCorrect": false
+            }
+          ],
+          "correctKey": "C",
+          "skill": "Interpretar y relacionar",
+          "oa": "OA 4",
+          "contentAxis": "Narración",
+          "hasFigure": false,
+          "figureNote": null,
+          "taxonomy": [
+            {
+              "type": "descriptor",
+              "code": null,
+              "name": "Infieren el sentido global de un texto narrativo.",
+              "parentCode": "LANG-3B-OA04",
+              "tagType": "primary"
+            },
+            {
+              "type": "learning_objective",
+              "code": "LANG-3B-OA04",
+              "name": "OA 4",
+              "level": "3_basico",
+              "tagType": "secondary"
+            },
+            {
+              "type": "skill",
+              "code": "LANG-SK-INTERPRETAR-Y-RELACIONAR",
+              "name": "Interpretar y relacionar",
+              "tagType": "secondary"
+            },
+            {
+              "type": "text_type",
+              "code": "LANG-TT-NARRACION",
+              "name": "Narración",
+              "tagType": "secondary"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "order": 2,
+      "name": "Texto 2: «Altas temperaturas hacen que osos terminen de hibernar antes de tiempo en Norteamérica»",
+      "type": "multiple_choice",
+      "instructions": "Lee el siguiente texto y responde las preguntas 5 a 8.",
+      "passage": {
+        "title": "Altas temperaturas hacen que osos terminen de hibernar antes de tiempo en Norteamérica",
+        "text": "12 de marzo de 2020 | 17:30 | Redactado por María José Hermosilla.\n\nExpertos indicaron que los animales, al salir a la vida salvaje en un momento que no es común, intentan encontrar alimento, acercándose cada vez más a la población.\n\nLas altas temperaturas registradas alrededor del mundo durante los últimos años, han dejado graves consecuencias, tanto en los ecosistemas como en la vida salvaje. Derretimiento de glaciares, cortas temporadas de nieve y devastadores incendios forestales, son algunos de los problemas que continúan afectando al medioambiente.\nUna de las recientes víctimas de esta situación han sido los osos, los que están terminando de hibernar antes de tiempo, según informó un zoológico de Estados Unidos, al medio local CBS Noticias. La institución reportó que este año se había visto a más osos negros nativos a principios de marzo, es decir, casi un mes antes de lo habitual.\nSegún explican, normalmente, estos animales hibernan para poder sobrevivir al invierno, una época del año en que la comida y el agua son más escasas en la vida salvaje. Luego, a medida que las temperaturas van aumentando en la primavera, los osos salen de sus madrigueras en busca de alimentos. Sin embargo, este año, las altas temperaturas que han marcado el invierno en el hemisferio norte, han hecho que estos patrones naturales se vean afectados.\nSteve Smith, director de un centro de cuidado animal del mismo país, advirtió que, cuando los inviernos son inusualmente cálidos, los osos se ven obligados a salir de la hibernación antes de que estén disponibles sus recursos alimenticios. “Los osos se están adaptando al cambio climático más rápido que las plantas de las que dependen para su comida”, añadió.\nEl problema con esta situación, según señaló un vocero del zoológico, podría llevar a que los osos hambrientos se enfrenten con los humanos, como una forma desesperada de encontrar algo para comer. “Los osos son ingeniosos, buscarán fuentes de alimento en las personas, como la comida para mascotas o semillas para pájaros, a la que puedan acceder. Esto lleva a que ingresen a tiendas, bodegas y casas, lo que los pone en conflicto con las personas”. Al respecto, Steve Smith añade que este acostumbramiento de los osos a los humanos podría provocar también el riesgo de que las autoridades se vean obligadas a sacrificar a los animales, si los intentos de reubicarlos en su hábitat fallan y vuelven a los poblados.\nEn otros países también se viven situaciones similares. En un zoológico de Finlandia, un invierno cálido hizo que los osos comenzaran a hibernar un mes más tarde, en diciembre en lugar de noviembre.\n\nMaría José Hermosilla. “Altas temperaturas hacen que osos terminen de hibernar antes de tiempo en Norteamérica”. Emol [Santiago, Chile]. 12 mar. 2020. Web. 14 junio 2021. (Adaptación).\n\nGlosario\n• hibernar: mantenerse en estado de reposo durante el invierno.",
+        "format": "plain",
+        "attachments": [
+          {
+            "kind": "image",
+            "note": "Fotografía a color de dos osos negros caminando sobre el pasto en un entorno natural (Fuente: The New York Times). Decorativa, no aporta información para responder."
+          }
+        ]
+      },
+      "items": [
+        {
+          "position": 5,
+          "type": "multiple_choice",
+          "stem": "Según el texto, ¿qué está provocando que los osos terminen de hibernar antes de tiempo?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "La falta de alimento.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Las altas temperaturas.",
+              "isCorrect": true
+            },
+            {
+              "key": "C",
+              "text": "La adaptación al zoológico.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "La cercanía con la población.",
+              "isCorrect": false
+            }
+          ],
+          "correctKey": "B",
+          "skill": "Localizar",
+          "oa": "OA 6",
+          "contentAxis": "Texto no literario",
+          "hasFigure": false,
+          "figureNote": null,
+          "taxonomy": [
+            {
+              "type": "descriptor",
+              "code": null,
+              "name": "Localizan información explícita relevante en un texto no literario.",
+              "parentCode": "LANG-3B-OA06",
+              "tagType": "primary"
+            },
+            {
+              "type": "learning_objective",
+              "code": "LANG-3B-OA06",
+              "name": "OA 6",
+              "level": "3_basico",
+              "tagType": "secondary"
+            },
+            {
+              "type": "skill",
+              "code": "LANG-SK-LOCALIZAR",
+              "name": "Localizar",
+              "tagType": "secondary"
+            },
+            {
+              "type": "text_type",
+              "code": "LANG-TT-TEXTO-NO-LITERARIO",
+              "name": "Texto no literario",
+              "tagType": "secondary"
+            }
+          ]
+        },
+        {
+          "position": 6,
+          "type": "multiple_choice",
+          "stem": "Según lo leído, ¿qué quieren evitar las autoridades?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Que los osos deban ser reubicados en su hábitat.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Que los osos se acostumbren a la comida para mascotas.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Que los osos se enfrenten a las personas al buscar alimento.",
+              "isCorrect": true
+            },
+            {
+              "key": "D",
+              "text": "Que los osos sean alimentados antes de lo planificado en los zoológicos.",
+              "isCorrect": false
+            }
+          ],
+          "correctKey": "C",
+          "skill": "Interpretar y relacionar",
+          "oa": "OA 6",
+          "contentAxis": "Texto no literario",
+          "hasFigure": false,
+          "figureNote": null,
+          "taxonomy": [
+            {
+              "type": "descriptor",
+              "code": null,
+              "name": "Infieren información relevante en un texto no literario.",
+              "parentCode": "LANG-3B-OA06",
+              "tagType": "primary"
+            },
+            {
+              "type": "learning_objective",
+              "code": "LANG-3B-OA06",
+              "name": "OA 6",
+              "level": "3_basico",
+              "tagType": "secondary"
+            },
+            {
+              "type": "skill",
+              "code": "LANG-SK-INTERPRETAR-Y-RELACIONAR",
+              "name": "Interpretar y relacionar",
+              "tagType": "secondary"
+            },
+            {
+              "type": "text_type",
+              "code": "LANG-TT-TEXTO-NO-LITERARIO",
+              "name": "Texto no literario",
+              "tagType": "secondary"
+            }
+          ]
+        },
+        {
+          "position": 7,
+          "type": "multiple_choice",
+          "stem": "Según el texto, ¿qué sucedió en un zoológico de Finlandia?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Los osos negros salieron antes de su madriguera.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Los osos comenzaron a hibernar un mes más tarde.",
+              "isCorrect": true
+            },
+            {
+              "key": "C",
+              "text": "Los osos se acercaron a la población buscando alimento.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "Los osos tuvieron poco tiempo para adaptarse al cambio climático.",
+              "isCorrect": false
+            }
+          ],
+          "correctKey": "B",
+          "skill": "Localizar",
+          "oa": "OA 6",
+          "contentAxis": "Texto no literario",
+          "hasFigure": false,
+          "figureNote": null,
+          "taxonomy": [
+            {
+              "type": "descriptor",
+              "code": null,
+              "name": "Localizan información explícita relevante en un texto no literario.",
+              "parentCode": "LANG-3B-OA06",
+              "tagType": "primary"
+            },
+            {
+              "type": "learning_objective",
+              "code": "LANG-3B-OA06",
+              "name": "OA 6",
+              "level": "3_basico",
+              "tagType": "secondary"
+            },
+            {
+              "type": "skill",
+              "code": "LANG-SK-LOCALIZAR",
+              "name": "Localizar",
+              "tagType": "secondary"
+            },
+            {
+              "type": "text_type",
+              "code": "LANG-TT-TEXTO-NO-LITERARIO",
+              "name": "Texto no literario",
+              "tagType": "secondary"
+            }
+          ]
+        },
+        {
+          "position": 8,
+          "type": "multiple_choice",
+          "stem": "¿De qué trata el texto?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "De las consecuencias del cambio climático en los ecosistemas.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "De las razones por las que los osos se acercan a los humanos.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Del efecto de las altas temperaturas en los osos.",
+              "isCorrect": true
+            },
+            {
+              "key": "D",
+              "text": "Del descanso de los osos durante el invierno.",
+              "isCorrect": false
+            }
+          ],
+          "correctKey": "C",
+          "skill": "Interpretar y relacionar",
+          "oa": "OA 6",
+          "contentAxis": "Texto no literario",
+          "hasFigure": false,
+          "figureNote": null,
+          "taxonomy": [
+            {
+              "type": "descriptor",
+              "code": null,
+              "name": "Infieren el sentido global de un texto no literario.",
+              "parentCode": "LANG-3B-OA06",
+              "tagType": "primary"
+            },
+            {
+              "type": "learning_objective",
+              "code": "LANG-3B-OA06",
+              "name": "OA 6",
+              "level": "3_basico",
+              "tagType": "secondary"
+            },
+            {
+              "type": "skill",
+              "code": "LANG-SK-INTERPRETAR-Y-RELACIONAR",
+              "name": "Interpretar y relacionar",
+              "tagType": "secondary"
+            },
+            {
+              "type": "text_type",
+              "code": "LANG-TT-TEXTO-NO-LITERARIO",
+              "name": "Texto no literario",
+              "tagType": "secondary"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "order": 3,
+      "name": "Texto 3: «El ñame hablador»",
+      "type": "multiple_choice",
+      "instructions": "Lee el siguiente texto y responde las preguntas 9 a 12.",
+      "passage": {
+        "title": "El ñame hablador",
+        "text": "Este es un cuento que viene de allá lejos, de esas tierras donde muchos se alimentan de ñames, una especie de papa dulce, parecida a un camote.\nPues bien, un día, un campesino salió una mañana a su huerto a sacar algunos ñames. En eso estaba picando la tierra, cuando uno de los ñames exclamó:\n—¡Esto sí que está bueno! No fuiste capaz de sacar la maleza en todo el verano, y ahora vienes con la horqueta y me quieres sacar a mí. ¡Ándate y déjame tranquilo!\nEl campesino muy sorprendido miró por todos lados, y vio a su vaca masticando.\n—¿Dijiste algo? —le preguntó.\nLa vaca no había dicho nada, pero el perro dijo entonces:\n—No fue la vaca, pero sí uno de los ñames y te acaba de decir que lo dejes tranquilo.\nEl hombre se molestó mucho. Nunca había escuchado hablar a su perro y no le había gustado para nada el tono con que lo hacía.\nEntonces cortó una rama y estaba a punto de pegarle, cuando la rama dijo:\n—¡No lo hagas!\nEl hombre no podía creer lo que estaba ocurriendo, y entonces asustado dejó caer la rama sobre una piedra. La piedra gritó:\n—¡Quítame eso de encima!\nEso era demasiado, y bastó para que el campesino saliera muerto de miedo, huyendo por el camino. Corrió y corrió hasta llegar donde un amigo que regresaba de la pesca.\nCuando este lo vio tan desesperado le preguntó qué había ocurrido.\nCasi sin respiración y con las palabras atarantadas logró decir:\n—¡En mi huerto hay un ñame que habla! Me ha dicho que lo deje tranquilo… Y eso no es nada… después el perro dijo que escuchara al ñame, y cuando quise pegarle al perro, la rama me pidió que la soltara, y cuando dejé caer la rama encima de una piedra, ella me dijo: “Quítame eso de encima”.\nEl amigo lo miró asombrado y luego sospechando le dijo:\n—Todo esto es una broma, ¿verdad?\n—¡No, no, te prometo que no! ¡Todo lo que te he dicho es verdad! Es lo más extraño que jamás me haya sucedido…\n—Mira —dijo entonces el amigo, ya algo impaciente—. Los perros, las ramas y las piedras no hablan, y que yo sepa, tampoco los ñames… ¿Por qué tienes tanto miedo?\nEn eso, un pescado dentro del canasto dijo:\n—¿Y le quitaste la rama a la piedra?\nAl oír esto los dos hombres huyeron asustados. Y en eso que iban corriendo se encontraron con un tejedor:\n—¿Por qué van tan apurados? —quiso saber.\n—El ñame me dijo que lo dejara en paz. El perro dijo que escuchara lo que el ñame decía. La rama me pidió que la soltara. Y la piedra quiso que le sacara la rama de encima —dijo el campesino.\n—Pero eso no es para tanto —afirmó el tejedor.\n—Claro, si te hubiera pasado a ti, estarías igual corriendo como loco.\nEl tejedor se puso a gritar. La voz salía de su bolsa. Los tres hombres salieron corriendo.\nCorrieron a no más dar y llegaron al pueblo. Atravesaron la calle principal hasta llegar a la casa del jefe, quien tomó asiento en su trono para escuchar qué ocurría.\n—Yo estaba en mi jardín desenterrando ñames cuando todo comenzó a hablar. El ñame dijo que lo dejara en paz. El perro dijo que escuchara lo que el ñame decía. La rama me pidió que la soltara. Y la piedra quiso que le sacara la rama de encima —relató el campesino.\nLuego el pescador continuó:\n—Y un pescado dentro de mi canasto también habló.\nEl tejedor agitado agregó:\n—Y mi bolsa también habló…\nEl jefe escuchó atentamente y luego señaló:\n—En realidad esta es una historia bastante loca…\nY luego agregó con firmeza:\n—Creo que lo mejor es que se vayan y sigan trabajando, antes de que los castigue por interrumpir la paz de este lugar.\nLos tres hombres tuvieron que irse.\nEl jefe los vio alejarse y murmuró.\n—Tanto alboroto… Puras tonteras…\n—Qué fantástico, ¿verdad? Y todo por un ñame que habla…\nEl jefe casi se muere del susto. Era su trono el que hablaba.\n\nCecilia Beuchat. Atrapalecturas 3: Leyendo otro poco. Chile: Edebé. 2005. (Adaptación).\n\nGlosario\n• maleza: plantas que crecen en lugares no deseados por el hombre y que dañan las tierras de cultivo.\n• horqueta: herramienta parecida a un tenedor grande que se usa para trabajar la tierra en tareas agrícolas.",
+        "format": "plain",
+        "attachments": [
+          {
+            "kind": "image",
+            "note": "Ilustraciones decorativas del cuento (vaca y perro; jefe en su trono). No aportan información para responder."
+          }
+        ]
+      },
+      "items": [
+        {
+          "position": 9,
+          "type": "multiple_choice",
+          "stem": "¿Qué hizo el campesino inmediatamente después de salir huyendo de su huerto?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Le contó lo ocurrido a su jefe.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Soltó la rama que llevaba en la mano.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Buscó al tejedor para contarle lo ocurrido.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "Corrió hasta donde su amigo el pescador.",
+              "isCorrect": true
+            }
+          ],
+          "correctKey": "D",
+          "skill": "Interpretar y relacionar",
+          "oa": "OA 4",
+          "contentAxis": "Narración",
+          "hasFigure": false,
+          "figureNote": null,
+          "taxonomy": [
+            {
+              "type": "descriptor",
+              "code": null,
+              "name": "Identifican un acontecimiento o acción relevante en un texto narrativo.",
+              "parentCode": "LANG-3B-OA04",
+              "tagType": "primary"
+            },
+            {
+              "type": "learning_objective",
+              "code": "LANG-3B-OA04",
+              "name": "OA 4",
+              "level": "3_basico",
+              "tagType": "secondary"
+            },
+            {
+              "type": "skill",
+              "code": "LANG-SK-INTERPRETAR-Y-RELACIONAR",
+              "name": "Interpretar y relacionar",
+              "tagType": "secondary"
+            },
+            {
+              "type": "text_type",
+              "code": "LANG-TT-NARRACION",
+              "name": "Narración",
+              "tagType": "secondary"
+            }
+          ]
+        },
+        {
+          "position": 10,
+          "type": "multiple_choice",
+          "stem": "¿Qué hecho dio origen al conflicto en el cuento?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Que el campesino quisiera sacar al ñame de la tierra.",
+              "isCorrect": true
+            },
+            {
+              "key": "B",
+              "text": "Que los hombres le fueran a contar lo ocurrido al jefe.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Que el jefe solicitara a los hombres que siguieran trabajando.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "Que el campesino fuera comentando en el camino lo que le sucedió.",
+              "isCorrect": false
+            }
+          ],
+          "correctKey": "A",
+          "skill": "Interpretar y relacionar",
+          "oa": "OA 4",
+          "contentAxis": "Narración",
+          "hasFigure": false,
+          "figureNote": null,
+          "taxonomy": [
+            {
+              "type": "descriptor",
+              "code": null,
+              "name": "Identifican un acontecimiento o acción relevante en un texto narrativo.",
+              "parentCode": "LANG-3B-OA04",
+              "tagType": "primary"
+            },
+            {
+              "type": "learning_objective",
+              "code": "LANG-3B-OA04",
+              "name": "OA 4",
+              "level": "3_basico",
+              "tagType": "secondary"
+            },
+            {
+              "type": "skill",
+              "code": "LANG-SK-INTERPRETAR-Y-RELACIONAR",
+              "name": "Interpretar y relacionar",
+              "tagType": "secondary"
+            },
+            {
+              "type": "text_type",
+              "code": "LANG-TT-NARRACION",
+              "name": "Narración",
+              "tagType": "secondary"
+            }
+          ]
+        },
+        {
+          "position": 11,
+          "type": "multiple_choice",
+          "stem": "¿Cómo reaccionó el jefe frente a los hombres cuando le contaron la historia?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Se asustó.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Se molestó.",
+              "isCorrect": true
+            },
+            {
+              "key": "C",
+              "text": "Se desesperó.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "Se puso nervioso.",
+              "isCorrect": false
+            }
+          ],
+          "correctKey": "B",
+          "skill": "Interpretar y relacionar",
+          "oa": "OA 4",
+          "contentAxis": "Narración",
+          "hasFigure": false,
+          "figureNote": null,
+          "taxonomy": [
+            {
+              "type": "descriptor",
+              "code": null,
+              "name": "Infieren características y sentimientos de personajes en un texto narrativo.",
+              "parentCode": "LANG-3B-OA04",
+              "tagType": "primary"
+            },
+            {
+              "type": "learning_objective",
+              "code": "LANG-3B-OA04",
+              "name": "OA 4",
+              "level": "3_basico",
+              "tagType": "secondary"
+            },
+            {
+              "type": "skill",
+              "code": "LANG-SK-INTERPRETAR-Y-RELACIONAR",
+              "name": "Interpretar y relacionar",
+              "tagType": "secondary"
+            },
+            {
+              "type": "text_type",
+              "code": "LANG-TT-NARRACION",
+              "name": "Narración",
+              "tagType": "secondary"
+            }
+          ]
+        },
+        {
+          "position": 12,
+          "type": "multiple_choice",
+          "stem": "¿Qué objeto le habló al jefe?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "El trono.",
+              "isCorrect": true
+            },
+            {
+              "key": "B",
+              "text": "El perro.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "El ñame.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "El pescado.",
+              "isCorrect": false
+            }
+          ],
+          "correctKey": "A",
+          "skill": "Localizar",
+          "oa": "OA 4",
+          "contentAxis": "Narración",
+          "hasFigure": false,
+          "figureNote": null,
+          "taxonomy": [
+            {
+              "type": "descriptor",
+              "code": null,
+              "name": "Localizan información explícita relevante en un texto narrativo.",
+              "parentCode": "LANG-3B-OA04",
+              "tagType": "primary"
+            },
+            {
+              "type": "learning_objective",
+              "code": "LANG-3B-OA04",
+              "name": "OA 4",
+              "level": "3_basico",
+              "tagType": "secondary"
+            },
+            {
+              "type": "skill",
+              "code": "LANG-SK-LOCALIZAR",
+              "name": "Localizar",
+              "tagType": "secondary"
+            },
+            {
+              "type": "text_type",
+              "code": "LANG-TT-NARRACION",
+              "name": "Narración",
+              "tagType": "secondary"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "order": 4,
+      "name": "Texto 4: «Submarinos»",
+      "type": "mixed",
+      "instructions": "Lee el siguiente texto y responde las preguntas 13 a 17.",
+      "passage": {
+        "title": "Submarinos",
+        "text": "Un submarino es un tipo de buque que puede navegar, tanto sobre la superficie como debajo del agua.\n\n¿Cómo se manejan los submarinos?\nLos submarinos tienen dos cascos y en medio de ellos se sitúan unos grandes contenedores llamados tanques de lastre. Cuando los tanques contienen aire, el submarino flota en la superficie como un barco normal. Cuando el capitán ordena que se sumerja, los tanques se llenan poco a poco de agua. Esto hace que la nave pese más y se hunda hacia el fondo del mar. Cuando va a salir a la superficie, se inyecta aire comprimido en los tanques de lastre para expulsar el agua.\nPara conducir un submarino se utilizan las aletas, llamadas timones, que pueden moverse hacia arriba y hacia abajo, para ayudar al submarino a ascender y sumergirse en el agua. Los timones también pueden hacer virar a los submarinos para cambiar de dirección.\n\nAlgunos tipos de submarinos\nAlgunos submarinos pequeños pueden bajar hasta los seis mil metros. Estos son rápidos y fáciles de conducir, y además, van equipados con ojos de buey, que son como pequeñas ventanitas redondas.\nGracias a este tipo de submarinos con ventanas, se ha conseguido examinar el fondo de los océanos, un maravilloso paisaje formado por llanuras, montañas y fosas muy profundas.\nOtros submarinos son más grandes, como el submarino nuclear que se muestra en la foto. Esa clase de submarino es impulsado por un reactor nuclear. La ventaja de esta forma de energía, es que la nave puede navegar una distancia casi ilimitada sin necesidad de repostar (lo que es muy útil cuando las naves deben recorrer miles de kilómetros); sin embargo, su mantención es más costosa y también son naves más contaminantes.\n\nRobin Kerrod y otros. “Submarino”. 1.000 preguntas y respuestas. México: Susaeta, 2019. (Adaptación).\n\nGlosario\n• ascender: subir a la superficie.\n• sumergirse: hundirse en el fondo del agua.\n• repostar: llenar de nuevo de combustible o energía.",
+        "format": "plain",
+        "attachments": [
+          {
+            "kind": "image",
+            "note": "Fotografías/ilustraciones decorativas de submarinos (un submarino navegando, un submarino pequeño y un submarino nuclear). El texto las menciona pero no son necesarias para responder los ítems."
+          }
+        ]
+      },
+      "items": [
+        {
+          "position": 13,
+          "type": "multiple_choice",
+          "stem": "¿Qué sucede con el submarino cuando sus tanques contienen aire?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Se sumerge hacia el fondo del mar.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Puede moverse hacia arriba y hacia abajo.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Puede navegar una distancia casi ilimitada.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "Flota en la superficie como un barco normal.",
+              "isCorrect": true
+            }
+          ],
+          "correctKey": "D",
+          "skill": "Localizar",
+          "oa": "OA 6",
+          "contentAxis": "Texto no literario",
+          "hasFigure": false,
+          "figureNote": null,
+          "taxonomy": [
+            {
+              "type": "descriptor",
+              "code": null,
+              "name": "Localizan información explícita relevante en un texto no literario.",
+              "parentCode": "LANG-3B-OA06",
+              "tagType": "primary"
+            },
+            {
+              "type": "learning_objective",
+              "code": "LANG-3B-OA06",
+              "name": "OA 6",
+              "level": "3_basico",
+              "tagType": "secondary"
+            },
+            {
+              "type": "skill",
+              "code": "LANG-SK-LOCALIZAR",
+              "name": "Localizar",
+              "tagType": "secondary"
+            },
+            {
+              "type": "text_type",
+              "code": "LANG-TT-TEXTO-NO-LITERARIO",
+              "name": "Texto no literario",
+              "tagType": "secondary"
+            }
+          ]
+        },
+        {
+          "position": 14,
+          "type": "multiple_choice",
+          "stem": "¿Cómo se llaman las aletas que tienen los submarinos?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Lastres.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Cascos.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Timones.",
+              "isCorrect": true
+            },
+            {
+              "key": "D",
+              "text": "Reactores.",
+              "isCorrect": false
+            }
+          ],
+          "correctKey": "C",
+          "skill": "Localizar",
+          "oa": "OA 6",
+          "contentAxis": "Texto no literario",
+          "hasFigure": false,
+          "figureNote": null,
+          "taxonomy": [
+            {
+              "type": "descriptor",
+              "code": null,
+              "name": "Localizan información explícita relevante en un texto no literario.",
+              "parentCode": "LANG-3B-OA06",
+              "tagType": "primary"
+            },
+            {
+              "type": "learning_objective",
+              "code": "LANG-3B-OA06",
+              "name": "OA 6",
+              "level": "3_basico",
+              "tagType": "secondary"
+            },
+            {
+              "type": "skill",
+              "code": "LANG-SK-LOCALIZAR",
+              "name": "Localizar",
+              "tagType": "secondary"
+            },
+            {
+              "type": "text_type",
+              "code": "LANG-TT-TEXTO-NO-LITERARIO",
+              "name": "Texto no literario",
+              "tagType": "secondary"
+            }
+          ]
+        },
+        {
+          "position": 15,
+          "type": "multiple_choice",
+          "stem": "¿Qué tienen en común el timón y los tanques de lastre?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Ambos ayudan a que el submarino sea fácil de conducir.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Ambos permiten al submarino ascender y sumergirse.",
+              "isCorrect": true
+            },
+            {
+              "key": "C",
+              "text": "Ambos permiten conocer el paisaje del fondo marino.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "Ambos producen desechos tóxicos que contaminan.",
+              "isCorrect": false
+            }
+          ],
+          "correctKey": "B",
+          "skill": "Interpretar y relacionar",
+          "oa": "OA 6",
+          "contentAxis": "Texto no literario",
+          "hasFigure": false,
+          "figureNote": null,
+          "taxonomy": [
+            {
+              "type": "descriptor",
+              "code": null,
+              "name": "Comparan información relevante en un texto no literario.",
+              "parentCode": "LANG-3B-OA06",
+              "tagType": "primary"
+            },
+            {
+              "type": "learning_objective",
+              "code": "LANG-3B-OA06",
+              "name": "OA 6",
+              "level": "3_basico",
+              "tagType": "secondary"
+            },
+            {
+              "type": "skill",
+              "code": "LANG-SK-INTERPRETAR-Y-RELACIONAR",
+              "name": "Interpretar y relacionar",
+              "tagType": "secondary"
+            },
+            {
+              "type": "text_type",
+              "code": "LANG-TT-TEXTO-NO-LITERARIO",
+              "name": "Texto no literario",
+              "tagType": "secondary"
+            }
+          ]
+        },
+        {
+          "position": 16,
+          "type": "multiple_choice",
+          "stem": "Según el texto, ¿cuál es uno de los inconvenientes que tienen los submarinos nucleares?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Que son contaminantes.",
+              "isCorrect": true
+            },
+            {
+              "key": "B",
+              "text": "Que tienen pequeñas aletas.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Que tienen grandes contenedores.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "Que bajan solo hasta seis mil metros.",
+              "isCorrect": false
+            }
+          ],
+          "correctKey": "A",
+          "skill": "Localizar",
+          "oa": "OA 6",
+          "contentAxis": "Texto no literario",
+          "hasFigure": false,
+          "figureNote": null,
+          "taxonomy": [
+            {
+              "type": "descriptor",
+              "code": null,
+              "name": "Localizan información explícita relevante en un texto no literario.",
+              "parentCode": "LANG-3B-OA06",
+              "tagType": "primary"
+            },
+            {
+              "type": "learning_objective",
+              "code": "LANG-3B-OA06",
+              "name": "OA 6",
+              "level": "3_basico",
+              "tagType": "secondary"
+            },
+            {
+              "type": "skill",
+              "code": "LANG-SK-LOCALIZAR",
+              "name": "Localizar",
+              "tagType": "secondary"
+            },
+            {
+              "type": "text_type",
+              "code": "LANG-TT-TEXTO-NO-LITERARIO",
+              "name": "Texto no literario",
+              "tagType": "secondary"
+            }
+          ]
+        },
+        {
+          "position": 17,
+          "type": "open_ended",
+          "stem": "Si tuvieras que diseñar un submarino que te permita navegar miles de kilómetros sin parar y observar el fondo marino, ¿cómo sería tu submarino? ¿Por qué? Justifica tu respuesta con información del texto.",
+          "alternatives": [],
+          "correctKey": null,
+          "skill": "Reflexionar",
+          "oa": "OA 6",
+          "contentAxis": "Texto no literario",
+          "hasFigure": false,
+          "figureNote": null,
+          "taxonomy": [
+            {
+              "type": "descriptor",
+              "code": null,
+              "name": "Establecen una hipótesis en un texto no literario.",
+              "parentCode": "LANG-3B-OA06",
+              "tagType": "primary"
+            },
+            {
+              "type": "learning_objective",
+              "code": "LANG-3B-OA06",
+              "name": "OA 6",
+              "level": "3_basico",
+              "tagType": "secondary"
+            },
+            {
+              "type": "skill",
+              "code": "LANG-SK-REFLEXIONAR",
+              "name": "Reflexionar",
+              "tagType": "secondary"
+            },
+            {
+              "type": "text_type",
+              "code": "LANG-TT-TEXTO-NO-LITERARIO",
+              "name": "Texto no literario",
+              "tagType": "secondary"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "order": 5,
+      "name": "Texto 5: «Ñucu, el gusano»",
+      "type": "mixed",
+      "instructions": "Lee el siguiente texto y responde las preguntas 18 a 21.",
+      "passage": {
+        "title": "Ñucu, el gusano",
+        "text": "Leyenda de Bolivia\n\nHace mucho tiempo, el cielo estaba tan cerca de la Tierra que a veces chocaba contra ella y aplastaba a muchas personas.\nEn una aldea de Chimané, había una anciana que vivía sola. Como nadie la ayudaba a cultivar su chaco, huerta donde cultivaba lo que comía, a menudo pasaba hambre.\nUn día en la huerta, mientras intentaba cosechar yuca para comer, vio algo que brillaba entre las hojas. Parecía un gusano blanco. La anciana lo llamó Ñucu, lo puso en una jarra, y le dio de comer. Luego siguió cuidando a Ñucu como si fuera su hijo.\nEn una semana, Ñucu creció tanto que llenó la jarra. La anciana lo puso en una jarra más grande. Pasada otra semana, Ñucu llenó la segunda jarra también.\nDespués de tres semanas, Ñucu le dijo a la anciana:\n—Madre, voy a pescar —y se tumbó atravesado de un lado a otro del río. Su cuerpo era tan grande que formó un dique, y los peces comenzaron a saltar a la ribera del río.\nLa mujer recogió los pescados y, a partir de entonces, tuvo mucho que comer.\nEntonces, los aldeanos comenzaron a decirle:\n—Te morías de hambre el mes pasado. ¿De dónde sacas todo el pescado que tienes ahora? —pero ella no les respondía.\nPasó el tiempo y los aldeanos comenzaron a pasar hambre porque Ñucu pescaba todos los peces.\nEntonces Ñucu le dijo a la anciana:\n—Madre, invita a los aldeanos a pescar.\nLa anciana los invitó y durante un tiempo todo anduvo bien para todos.\nPero Ñucu había crecido tanto que ya no cabía en el río.\n—Madre —dijo Ñucu—, tengo que irme a arreglar el cielo para que no siga cayendo sobre la Tierra. No volverás a pasar hambre porque has ayudado a los aldeanos y de aquí en adelante ellos te ayudarán a ti.\nEntonces Ñucu se estiró a todo lo ancho de la Tierra, de un extremo al otro, y con su cuerpo levantó el cielo.\nLa anciana se entristeció porque se le fue su hijo, pero se consoló al ver a Ñucu brillando en lo alto, de noche. Ñucu se había convertido en la Vía Láctea, y continúa brillando hasta el día de hoy.\n\nThe University of North Carolina at Chapel Hill. A la luna y más allá: Cuentos latinoamericanos sobre el cielo. Estados Unidos: Morehead Planetarium & Sciencie Center, 2019.",
+        "format": "plain",
+        "attachments": []
+      },
+      "items": [
+        {
+          "position": 18,
+          "type": "multiple_choice",
+          "stem": "¿Dónde encontró a Ñucu la anciana?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "En un río.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "En el cielo.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "En la huerta.",
+              "isCorrect": true
+            },
+            {
+              "key": "D",
+              "text": "En una jarra.",
+              "isCorrect": false
+            }
+          ],
+          "correctKey": "C",
+          "skill": "Interpretar y relacionar",
+          "oa": "OA 4",
+          "contentAxis": "Narración",
+          "hasFigure": false,
+          "figureNote": null,
+          "taxonomy": [
+            {
+              "type": "descriptor",
+              "code": null,
+              "name": "Identifican aspectos relevantes sobre el ambiente físico y psicológico en un texto narrativo.",
+              "parentCode": "LANG-3B-OA04",
+              "tagType": "primary"
+            },
+            {
+              "type": "learning_objective",
+              "code": "LANG-3B-OA04",
+              "name": "OA 4",
+              "level": "3_basico",
+              "tagType": "secondary"
+            },
+            {
+              "type": "skill",
+              "code": "LANG-SK-INTERPRETAR-Y-RELACIONAR",
+              "name": "Interpretar y relacionar",
+              "tagType": "secondary"
+            },
+            {
+              "type": "text_type",
+              "code": "LANG-TT-NARRACION",
+              "name": "Narración",
+              "tagType": "secondary"
+            }
+          ]
+        },
+        {
+          "position": 19,
+          "type": "multiple_choice",
+          "stem": "Según Ñucu, ¿por qué la anciana no volvería a pasar hambre?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Porque la miraría desde el cielo.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Porque los aldeanos la ayudarían.",
+              "isCorrect": true
+            },
+            {
+              "key": "C",
+              "text": "Porque había dejado suficientes peces.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "Porque ella sola podría cultivar su huerta.",
+              "isCorrect": false
+            }
+          ],
+          "correctKey": "B",
+          "skill": "Interpretar y relacionar",
+          "oa": "OA 4",
+          "contentAxis": "Narración",
+          "hasFigure": false,
+          "figureNote": null,
+          "taxonomy": [
+            {
+              "type": "descriptor",
+              "code": null,
+              "name": "Infieren causa o consecuencia de acontecimientos o acciones relevantes en un texto narrativo.",
+              "parentCode": "LANG-3B-OA04",
+              "tagType": "primary"
+            },
+            {
+              "type": "learning_objective",
+              "code": "LANG-3B-OA04",
+              "name": "OA 4",
+              "level": "3_basico",
+              "tagType": "secondary"
+            },
+            {
+              "type": "skill",
+              "code": "LANG-SK-INTERPRETAR-Y-RELACIONAR",
+              "name": "Interpretar y relacionar",
+              "tagType": "secondary"
+            },
+            {
+              "type": "text_type",
+              "code": "LANG-TT-NARRACION",
+              "name": "Narración",
+              "tagType": "secondary"
+            }
+          ]
+        },
+        {
+          "position": 20,
+          "type": "multiple_choice",
+          "stem": "Según Ñucu, ¿por qué se debía ir?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Porque tenía que arreglar el cielo.",
+              "isCorrect": true
+            },
+            {
+              "key": "B",
+              "text": "Porque la anciana ya no pasaba hambre.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Porque los aldeanos aprendieron a pescar.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "Porque ocupaba todo el ancho de la Tierra.",
+              "isCorrect": false
+            }
+          ],
+          "correctKey": "A",
+          "skill": "Interpretar y relacionar",
+          "oa": "OA 4",
+          "contentAxis": "Narración",
+          "hasFigure": false,
+          "figureNote": null,
+          "taxonomy": [
+            {
+              "type": "descriptor",
+              "code": null,
+              "name": "Infieren causa o consecuencia de acontecimientos o acciones relevantes en un texto narrativo.",
+              "parentCode": "LANG-3B-OA04",
+              "tagType": "primary"
+            },
+            {
+              "type": "learning_objective",
+              "code": "LANG-3B-OA04",
+              "name": "OA 4",
+              "level": "3_basico",
+              "tagType": "secondary"
+            },
+            {
+              "type": "skill",
+              "code": "LANG-SK-INTERPRETAR-Y-RELACIONAR",
+              "name": "Interpretar y relacionar",
+              "tagType": "secondary"
+            },
+            {
+              "type": "text_type",
+              "code": "LANG-TT-NARRACION",
+              "name": "Narración",
+              "tagType": "secondary"
+            }
+          ]
+        },
+        {
+          "position": 21,
+          "type": "open_ended",
+          "stem": "¿Estás de acuerdo con que Ñucu le pidiera a la anciana que invitara a los aldeanos a pescar? ¿Por qué? Justifica con información del texto.",
+          "alternatives": [],
+          "correctKey": null,
+          "skill": "Reflexionar",
+          "oa": "OA 4",
+          "contentAxis": "Narración",
+          "hasFigure": false,
+          "figureNote": null,
+          "taxonomy": [
+            {
+              "type": "descriptor",
+              "code": null,
+              "name": "Opinan sobre algún aspecto controversial de un texto narrativo con fundamentos que integran información del texto.",
+              "parentCode": "LANG-3B-OA04",
+              "tagType": "primary"
+            },
+            {
+              "type": "learning_objective",
+              "code": "LANG-3B-OA04",
+              "name": "OA 4",
+              "level": "3_basico",
+              "tagType": "secondary"
+            },
+            {
+              "type": "skill",
+              "code": "LANG-SK-REFLEXIONAR",
+              "name": "Reflexionar",
+              "tagType": "secondary"
+            },
+            {
+              "type": "text_type",
+              "code": "LANG-TT-NARRACION",
+              "name": "Narración",
+              "tagType": "secondary"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "order": 6,
+      "name": "Texto 6: «La araña soñadora»",
+      "type": "multiple_choice",
+      "instructions": "Lee el siguiente texto y responde las preguntas 22 a 24.",
+      "passage": {
+        "title": "La araña soñadora",
+        "text": "Debe haber sido hija de un acróbata\nesta araña de panza verdinegra\nque se posa en la red, cabeza abajo,\ncolgada a cinco metros de la tierra.\nCon hilachas plateadas y con sueños\nha tejido la tela más perfecta\ny es tan fino, tan fino su trapecio\nque la brisa lo busca y no lo encuentra.\nEs una araña soñadora. Piensa\nque viajará en un circo, por el mundo.\nY entre el pliegue afelpado de la sombra\nsiente el aplauso de su inmenso público...\nTrenza los hilos con fervor de artista\no como si escribiera una novela…\nLa hace dormir un rizo de luna\ny un collar de rocío la despierta.\nY así espera esta araña soñadora\nensayando en su tela de constancia,\ntoda vestida de color tabaco\ny lazos verdinegros en la panza.\n\nÓscar Jara Azócar. “La araña soñadora”. Atrapalecturas 4. Leyendo para siempre. Comp. Cecilia Beuchat. Chile: Mare Nostrum, 2005.",
+        "format": "plain",
+        "attachments": []
+      },
+      "items": [
+        {
+          "position": 22,
+          "type": "multiple_choice",
+          "stem": "En el poema, ¿qué representa el trapecio de la araña?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Un hilo de plata.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Una fina telaraña.",
+              "isCorrect": true
+            },
+            {
+              "key": "C",
+              "text": "Una delgada lana.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "Un trozo de género.",
+              "isCorrect": false
+            }
+          ],
+          "correctKey": "B",
+          "skill": "Interpretar y relacionar",
+          "oa": "OA 5",
+          "contentAxis": "Poema",
+          "hasFigure": false,
+          "figureNote": null,
+          "taxonomy": [
+            {
+              "type": "descriptor",
+              "code": null,
+              "name": "Interpretan el sentido de expresiones en lenguaje figurado presentes en un poema.",
+              "parentCode": "LANG-3B-OA05",
+              "tagType": "primary"
+            },
+            {
+              "type": "learning_objective",
+              "code": "LANG-3B-OA05",
+              "name": "OA 5",
+              "level": "3_basico",
+              "tagType": "secondary"
+            },
+            {
+              "type": "skill",
+              "code": "LANG-SK-INTERPRETAR-Y-RELACIONAR",
+              "name": "Interpretar y relacionar",
+              "tagType": "secondary"
+            },
+            {
+              "type": "text_type",
+              "code": "LANG-TT-POEMA",
+              "name": "Poema",
+              "tagType": "secondary"
+            }
+          ]
+        },
+        {
+          "position": 23,
+          "type": "multiple_choice",
+          "stem": "Lee los siguientes versos:\n\n“y es tan fino, tan fino su trapecio / que la brisa lo busca y no lo encuentra”.\n\n¿Qué expresan los versos leídos?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Que la araña esconde su trapecio.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Que la tela del trapecio es muy elegante.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Que el trapecio busca donde esconderse.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "Que la brisa no logra mover el trapecio de la araña.",
+              "isCorrect": true
+            }
+          ],
+          "correctKey": "D",
+          "skill": "Interpretar y relacionar",
+          "oa": "OA 5",
+          "contentAxis": "Poema",
+          "hasFigure": false,
+          "figureNote": "El ítem cita dos versos del poema como estímulo propio; se incluyen dentro del stem.",
+          "taxonomy": [
+            {
+              "type": "descriptor",
+              "code": null,
+              "name": "Interpretan el sentido de expresiones en lenguaje figurado presentes en un poema.",
+              "parentCode": "LANG-3B-OA05",
+              "tagType": "primary"
+            },
+            {
+              "type": "learning_objective",
+              "code": "LANG-3B-OA05",
+              "name": "OA 5",
+              "level": "3_basico",
+              "tagType": "secondary"
+            },
+            {
+              "type": "skill",
+              "code": "LANG-SK-INTERPRETAR-Y-RELACIONAR",
+              "name": "Interpretar y relacionar",
+              "tagType": "secondary"
+            },
+            {
+              "type": "text_type",
+              "code": "LANG-TT-POEMA",
+              "name": "Poema",
+              "tagType": "secondary"
+            }
+          ]
+        },
+        {
+          "position": 24,
+          "type": "multiple_choice",
+          "stem": "Según el texto, ¿por qué la araña es soñadora?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Porque desea escribir una novela.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Porque quiere ser una artista famosa.",
+              "isCorrect": true
+            },
+            {
+              "key": "C",
+              "text": "Porque cree que la luna la hace dormir.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "Porque siente que su trabajo es perfecto.",
+              "isCorrect": false
+            }
+          ],
+          "correctKey": "B",
+          "skill": "Interpretar y relacionar",
+          "oa": "OA 5",
+          "contentAxis": "Poema",
+          "hasFigure": false,
+          "figureNote": null,
+          "taxonomy": [
+            {
+              "type": "descriptor",
+              "code": null,
+              "name": "Infieren el sentido global de un poema.",
+              "parentCode": "LANG-3B-OA05",
+              "tagType": "primary"
+            },
+            {
+              "type": "learning_objective",
+              "code": "LANG-3B-OA05",
+              "name": "OA 5",
+              "level": "3_basico",
+              "tagType": "secondary"
+            },
+            {
+              "type": "skill",
+              "code": "LANG-SK-INTERPRETAR-Y-RELACIONAR",
+              "name": "Interpretar y relacionar",
+              "tagType": "secondary"
+            },
+            {
+              "type": "text_type",
+              "code": "LANG-TT-POEMA",
+              "name": "Poema",
+              "tagType": "secondary"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "extraction": {
+    "itemCount": 24,
+    "warnings": [
+      "Q17 y Q21 son ítems de desarrollo (open_ended, responseFormat develop).",
+      "Q23 incluye dos versos-estímulo propios del ítem, embebidos en el stem.",
+      "Textos transcritos desde la capa de texto del PDF (pdftotext), verbatim. Las imágenes de los pasajes (osos, submarinos, ilustraciones del cuento) son decorativas y no se requieren para responder."
+    ],
+    "needsHumanReview": false
+  },
+  "pauta": {
+    "source": {
+      "report": "RBD25520_DIA_LECTURA_4_A_Resultados_Asignatura_Cierre_2025.pdf",
+      "subjectCode": "LANG",
+      "gradeCode": "4TH_BASIC",
+      "applicationPeriod": "cierre",
+      "year": 2025,
+      "instrumentJson": "extraccion/lenguaje/4º lenguaje cierre 2025.json"
+    },
+    "appliedKeys": 22,
+    "issues": []
+  }
+}

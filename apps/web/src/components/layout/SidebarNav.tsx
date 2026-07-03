@@ -6,15 +6,13 @@ import { usePathname } from 'next/navigation';
 import { GraduationCap, PanelLeftClose, PanelLeftOpen } from 'lucide-react';
 import type { UserRole } from '@soe/types';
 import { Button } from '@/components/ui/button';
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from '@/components/ui/tooltip';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { cn } from '@/lib/utils';
 import { BRAND } from '@/lib/brand';
-import { ADMIN_NAV_ITEMS, visibleNavItems, type NavItem } from './nav-items';
+import { ADMIN_NAV_ITEMS, visibleNavGroups, type NavItem } from './nav-items';
+
+/** Sección renderizable del sidebar. La variante 'admin' usa una sola sección sin título. */
+type NavSection = { id: string; label?: string; items: readonly NavItem[] };
 
 export type SidebarVariant = 'main' | 'admin';
 
@@ -35,9 +33,12 @@ export function SidebarNav({
   variant = 'main',
 }: SidebarNavProps) {
   const pathname = usePathname();
-  const items: readonly NavItem[] =
-    variant === 'admin' ? ADMIN_NAV_ITEMS : visibleNavItems(roles);
-  const activeHref = findActiveHref(pathname, items);
+  const sections: NavSection[] =
+    variant === 'admin' ? [{ id: 'admin', items: ADMIN_NAV_ITEMS }] : visibleNavGroups(roles);
+  const activeHref = findActiveHref(
+    pathname,
+    sections.flatMap((s) => s.items),
+  );
 
   return (
     <TooltipProvider delayDuration={200} skipDelayDuration={100}>
@@ -57,16 +58,28 @@ export function SidebarNav({
         </div>
         <nav
           aria-label="Navegación principal"
-          className={cn('flex-1 space-y-1 overflow-y-auto', collapsed ? 'p-2' : 'p-3')}
+          className={cn('flex-1 overflow-y-auto', collapsed ? 'p-2' : 'p-3')}
         >
-          {items.map((item) => (
-            <NavRow
-              key={item.href}
-              item={item}
-              isActive={item.href === activeHref}
-              collapsed={collapsed}
-              onNavigate={onNavigate}
-            />
+          {sections.map((section, idx) => (
+            <div
+              key={section.id}
+              className={cn('space-y-1', idx > 0 && (collapsed ? 'mt-2 border-t pt-2' : 'mt-4'))}
+            >
+              {!collapsed && section.label ? (
+                <p className="px-3 pb-1 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground/70">
+                  {section.label}
+                </p>
+              ) : null}
+              {section.items.map((item) => (
+                <NavRow
+                  key={item.href}
+                  item={item}
+                  isActive={item.href === activeHref}
+                  collapsed={collapsed}
+                  onNavigate={onNavigate}
+                />
+              ))}
+            </div>
           ))}
         </nav>
         {onToggle ? (
@@ -104,10 +117,7 @@ export function SidebarNav({
  * y /admin/colegios cuando estás en /admin/colegios), gana el href más largo —
  * así sólo el item más específico queda marcado como activo.
  */
-function findActiveHref(
-  pathname: string | null,
-  items: readonly NavItem[],
-): string | null {
+function findActiveHref(pathname: string | null, items: readonly NavItem[]): string | null {
   if (!pathname) return null;
   let best: NavItem | null = null;
   for (const item of items) {
@@ -129,8 +139,7 @@ interface NavRowProps {
 
 function NavRow({ item, isActive, collapsed, onNavigate }: NavRowProps) {
   const Icon = item.icon;
-  const baseClasses =
-    'flex items-center gap-3 rounded-md text-sm font-medium transition-colors';
+  const baseClasses = 'flex items-center gap-3 rounded-md text-sm font-medium transition-colors';
   const focusClasses =
     'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2';
   const sizeClasses = collapsed ? 'h-10 w-10 justify-center' : 'px-3 py-2';

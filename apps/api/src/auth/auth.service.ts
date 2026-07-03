@@ -1,14 +1,22 @@
-import { ConflictException, ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
+import {
+  ConflictException,
+  ForbiddenException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { and, eq, isNull, sql } from 'drizzle-orm';
 import {
+  getActiveMembershipsForEmailAndOrg,
   isPlatformAdmin as isPlatformAdminQuery,
   listActiveMembershipsByEmail,
   listActiveMembershipsForMock,
+  listActiveOrgsWithMembershipsByEmail,
   listPlatformAdmins,
   orgMemberships,
   users,
 } from '@soe/db';
 import {
+  pickDefaultActiveOrg,
   pickDefaultActiveRole,
   userHasRole,
   type UserRole,
@@ -73,19 +81,22 @@ export class AuthService {
             },
           ],
           organization: null,
+          orgs: [] as Array<{ id: string; name: string }>,
+          orgName: null,
         };
       }
     }
 
-    // 2) Buscar memberships reales (todos los activos) o invitación pendiente.
-    const lookup = await listActiveMembershipsByEmail(this.db, normalized);
+    // 2) Buscar memberships reales (todas las orgs activas) o invitación pendiente.
+    const lookup = await listActiveOrgsWithMembershipsByEmail(this.db, normalized);
     if (!lookup) {
       throw new NotFoundException('Usuario no encontrado o sin acceso activo');
     }
 
     if (lookup.isPending) {
       // El user aún no existe — primer login pendiente de promoción.
-      const pending = lookup.memberships[0]!;
+      const pendingOrg = lookup.orgs[0];
+      const pending = pendingOrg.memberships[0]!;
       const roles: UserRole[] = [pending.role];
       return {
         user: null,
@@ -111,15 +122,20 @@ export class AuthService {
           },
         ],
         organization: {
-          id: lookup.organization.id,
-          name: lookup.organization.name,
-          type: lookup.organization.type,
+          id: pendingOrg.organization.id,
+          name: pendingOrg.organization.name,
+          type: pendingOrg.organization.type,
         },
+        orgs: [{ id: pendingOrg.organization.id, name: pendingOrg.organization.name }],
+        orgName: pendingOrg.organization.name,
       };
     }
 
-    const roles: UserRole[] = lookup.memberships.map((m) => m.role);
-    const first = lookup.memberships[0]!;
+    // Usuario real multi-org: elegir org activa por defecto (mayor jerarquía de
+    // rol) y derivar roles/activeRole de ESA org. `orgs` lista todas para el selector.
+    const activeOrg = pickDefaultActiveOrg(lookup.orgs);
+    const roles: UserRole[] = activeOrg.memberships.map((m) => m.role);
+    const first = activeOrg.memberships[0]!;
     return {
       user: {
         id: lookup.user.id,
@@ -132,7 +148,7 @@ export class AuthService {
       isPending: false as const,
       roles,
       activeRole: pickDefaultActiveRole(roles),
-      /** @deprecated mantener durante migración multi-rol — primer membership. */
+      /** @deprecated mantener durante migración multi-rol — primer membership de la org activa. */
       membership: {
         id: first.id,
         userId: first.userId,
@@ -140,7 +156,7 @@ export class AuthService {
         role: first.role,
         isActive: first.isActive,
       },
-      memberships: lookup.memberships.map((m) => ({
+      memberships: activeOrg.memberships.map((m) => ({
         id: m.id,
         userId: m.userId,
         orgId: m.orgId,
@@ -148,10 +164,12 @@ export class AuthService {
         isActive: m.isActive,
       })),
       organization: {
-        id: lookup.organization.id,
-        name: lookup.organization.name,
-        type: lookup.organization.type,
+        id: activeOrg.organization.id,
+        name: activeOrg.organization.name,
+        type: activeOrg.organization.type,
       },
+      orgs: lookup.orgs.map((o) => ({ id: o.organization.id, name: o.organization.name })),
+      orgName: activeOrg.organization.name,
     };
   }
 
@@ -294,6 +312,36 @@ export class AuthService {
       throw new ForbiddenException('Rol no asignado al usuario');
     }
     return { activeRole: role, roles: user.roles };
+  }
+
+  /**
+   * Cambia la org activa del usuario. Revalida contra la BD que el usuario
+   * tenga un membership activo en la org destino (no confía sólo en el token,
+   * que podría estar cacheado tras una revocación) y recalcula roles +
+   * activeRole para esa org — los roles son por-org, así que cambian al saltar.
+   *
+   * No re-emite el token: el frontend usa NextAuth `update()` con el resultado.
+   */
+  async switchActiveOrg(
+    user: JwtPayload,
+    orgId: string,
+  ): Promise<{ orgId: string; orgName: string; roles: UserRole[]; activeRole: UserRole }> {
+    if (!(user.orgs ?? []).some((o) => o.id === orgId)) {
+      throw new ForbiddenException('Organización no asignada al usuario');
+    }
+
+    const result = await getActiveMembershipsForEmailAndOrg(this.db, user.email, orgId);
+    if (!result || result.memberships.length === 0) {
+      throw new ForbiddenException('Sin acceso activo a esta organización');
+    }
+
+    const roles: UserRole[] = result.memberships.map((m) => m.role);
+    return {
+      orgId,
+      orgName: result.organization.name,
+      roles,
+      activeRole: pickDefaultActiveRole(roles),
+    };
   }
 
   /**

@@ -21,11 +21,15 @@ import {
   users,
   withOrgContext,
 } from '@soe/db';
-import type {
-  AcademicSetupDto,
-  BulkAddSubjectsDto,
-  CreateClassGroupDto,
-  UpdateOrganizationProfileDto,
+import {
+  orgConfigSchema,
+  resolveAllowedFeatures,
+  type AcademicSetupDto,
+  type BulkAddSubjectsDto,
+  type CreateClassGroupDto,
+  type OrgFeaturesResponse,
+  type UpdateOrganizationProfileDto,
+  type UpdateOrgFeaturesDto,
 } from '@soe/types';
 import { InjectDb, type Database } from '../database/database.types';
 
@@ -41,6 +45,52 @@ export class OrganizationsService {
 
     if (!org) throw new NotFoundException('Colegio no encontrado');
     return org;
+  }
+
+  // ── F2 S5 · H18.1 — Gating de tier pago ─────────────────────────────────────
+  // `organizations` NO está bajo RLS → se lee/escribe con this.db directo por id.
+
+  /** Features pagas habilitadas + presupuesto IA de una org (resuelto con defaults). */
+  async getFeatures(orgId: string): Promise<OrgFeaturesResponse> {
+    const [org] = await this.db
+      .select({ id: organizations.id, config: organizations.config })
+      .from(organizations)
+      .where(eq(organizations.id, orgId));
+    if (!org) throw new NotFoundException('Organización no encontrada');
+
+    const parsed = orgConfigSchema.safeParse(org.config ?? {});
+    const aiBudgetUsd = parsed.success ? parsed.data.aiBudgetUsd ?? null : null;
+    return {
+      orgId: org.id,
+      allowedFeatures: resolveAllowedFeatures(org.config),
+      aiBudgetUsd,
+    };
+  }
+
+  /** Actualiza el plan de features pagas de una org (sólo FEATURE_MANAGEMENT_ROLES). */
+  async updateFeatures(orgId: string, dto: UpdateOrgFeaturesDto): Promise<OrgFeaturesResponse> {
+    const [org] = await this.db
+      .select({ config: organizations.config })
+      .from(organizations)
+      .where(eq(organizations.id, orgId));
+    if (!org) throw new NotFoundException('Organización no encontrada');
+
+    // Merge no destructivo: preserva otras claves de config de otros dominios.
+    const currentConfig = (org.config ?? {}) as Record<string, unknown>;
+    const nextConfig: Record<string, unknown> = {
+      ...currentConfig,
+      allowedFeatures: dto.allowedFeatures,
+    };
+    if (dto.aiBudgetUsd !== undefined) {
+      nextConfig.aiBudgetUsd = dto.aiBudgetUsd;
+    }
+
+    await this.db
+      .update(organizations)
+      .set({ config: nextConfig, updatedAt: new Date() })
+      .where(eq(organizations.id, orgId));
+
+    return this.getFeatures(orgId);
   }
 
   async updateProfile(

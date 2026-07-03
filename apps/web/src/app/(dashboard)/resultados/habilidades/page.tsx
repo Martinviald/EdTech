@@ -11,17 +11,13 @@ import {
 } from '@soe/types';
 import { PageContainer, PageHeader, EmptyState } from '@/components/patterns';
 import { Card, CardContent } from '@/components/ui/card';
+import { AskAiButton, RegisterAssistantContext } from '@/components/assistant';
 import { DashboardFilterBar } from '../components/dashboard-filter-bar';
-import {
-  parseDashboardFilters,
-  buildDashboardQuery,
-} from '../components/dashboard-filters';
+import { parseDashboardFilters, buildDashboardQuery } from '../components/dashboard-filters';
+import { dashboardFiltersToAssistantRefs } from '../components/assistant-context';
 import { ResultadosNav } from '../components/resultados-nav';
 import { PerformanceBadge } from '../components/performance-badge';
-import {
-  PERFORMANCE_LEVEL_BAR_CLASS,
-  formatAchievement,
-} from '../components/performance-level';
+import { PERFORMANCE_LEVEL_BAR_CLASS, formatAchievement } from '../components/performance-level';
 import { cn } from '@/lib/utils';
 
 export const dynamic = 'force-dynamic';
@@ -50,9 +46,15 @@ export default async function HabilidadesPage({
 
   return (
     <PageContainer>
+      <RegisterAssistantContext refs={dashboardFiltersToAssistantRefs(filters)} />
       <PageHeader
         title="Logro por habilidad"
         description="% de logro promedio por habilidad evaluada según la taxonomía (H6.5)."
+        actions={
+          skills.length > 0 ? (
+            <AskAiButton prompt="¿Qué habilidades están más descendidas y qué acciones remediales priorizarías?" />
+          ) : undefined
+        }
       />
 
       <ResultadosNav />

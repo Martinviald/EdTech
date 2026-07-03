@@ -1,0 +1,1 @@
+ALTER TABLE "assistant_conversations" ADD COLUMN "pinned_context" jsonb DEFAULT '[]'::jsonb NOT NULL;

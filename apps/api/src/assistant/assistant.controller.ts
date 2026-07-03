@@ -1,0 +1,191 @@
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  HttpCode,
+  Logger,
+  Param,
+  Post,
+  Put,
+  Query,
+  Res,
+  UseGuards,
+} from '@nestjs/common';
+import type { Response } from 'express';
+import {
+  assistantContextSearchQuerySchema,
+  assistantConversationListQuerySchema,
+  assistantStudentSearchQuerySchema,
+  createAssistantConversationSchema,
+  sendAssistantMessageSchema,
+  updateAssistantContextSchema,
+  ASSISTANT_USER_ROLES,
+  type AssistantContextSearchResponse,
+  type AssistantContextUpdateResponse,
+  type AssistantConversationDetail,
+  type AssistantConversationListResponse,
+  type AssistantConversationModel,
+  type AssistantStudentSearchResponse,
+} from '@soe/types';
+import { CurrentUser } from '../auth/current-user.decorator';
+import type { JwtPayload } from '../auth/jwt-payload.types';
+import { Roles } from '../common/decorators/roles.decorator';
+import { RolesGuard } from '../common/guards/roles.guard';
+import { RequireFeature } from '../common/decorators/feature.decorator';
+import { FeatureGuard } from '../common/guards/feature.guard';
+import { AssistantService } from './assistant.service';
+
+/**
+ * API del Asistente IA Conversacional (E21 — H21.7/H21.8).
+ *
+ * Gating: rol directivo (`ASSISTANT_USER_ROLES`, autorizado por unión en
+ * `RolesGuard`) + feature de tier pago `ai_assistant` (`FeatureGuard`). El
+ * `orgId`/roles SIEMPRE del token (en el service), nunca del body.
+ *
+ * El endpoint de mensajes responde con STREAMING SSE escrito manualmente sobre
+ * el `Response` de Express: el cliente hace POST con body (`{ content,
+ * pageContext }`), por lo que `@Sse()` (GET + EventSource) no encaja. El frontend
+ * consume con `fetch` + `response.body.getReader()` (ver planificación §3.4/§6).
+ */
+@Controller('assistant')
+@UseGuards(RolesGuard, FeatureGuard)
+@RequireFeature('ai_assistant')
+@Roles(...ASSISTANT_USER_ROLES)
+export class AssistantController {
+  private readonly logger = new Logger(AssistantController.name);
+
+  constructor(private readonly service: AssistantService) {}
+
+  /** POST /api/assistant/conversations — crea un hilo de chat. */
+  @Post('conversations')
+  createConversation(
+    @Body() body: unknown,
+    @CurrentUser() user: JwtPayload,
+  ): Promise<AssistantConversationModel> {
+    const dto = createAssistantConversationSchema.parse(body);
+    return this.service.createConversation(user, dto);
+  }
+
+  /**
+   * GET /api/assistant/students?q= — autocompletado de alumnos para el selector
+   * `@` (H21.11b). Devuelve UUID + nombre (el nombre solo lo ve el navegador del
+   * directivo, nunca el LLM). Acotado al org del token.
+   */
+  @Get('students')
+  async searchStudents(
+    @Query() query: unknown,
+    @CurrentUser() user: JwtPayload,
+  ): Promise<AssistantStudentSearchResponse> {
+    const dto = assistantStudentSearchQuerySchema.parse(query);
+    return { data: await this.service.searchStudents(user, dto) };
+  }
+
+  /**
+   * GET /api/assistant/context-search?kind=&q= — buscador unificado del panel
+   * (E21 Ola 5). Generaliza el selector `@` a cualquier `kind` fijable. Devuelve
+   * `{ kind, id, label }`; el `label` (nombre) solo lo ve el navegador, nunca el
+   * LLM. Acotado al org del token (en el service, dentro de `withOrgContext`).
+   */
+  @Get('context-search')
+  async searchContext(
+    @Query() query: unknown,
+    @CurrentUser() user: JwtPayload,
+  ): Promise<AssistantContextSearchResponse> {
+    const dto = assistantContextSearchQuerySchema.parse(query);
+    return { data: await this.service.searchContext(user, dto) };
+  }
+
+  /** GET /api/assistant/conversations — listado paginado del usuario. */
+  @Get('conversations')
+  listConversations(
+    @Query() query: unknown,
+    @CurrentUser() user: JwtPayload,
+  ): Promise<AssistantConversationListResponse> {
+    const dto = assistantConversationListQuerySchema.parse(query);
+    return this.service.listConversations(user, dto);
+  }
+
+  /** GET /api/assistant/conversations/:id — conversación + mensajes. */
+  @Get('conversations/:id')
+  getConversation(
+    @Param('id') id: string,
+    @CurrentUser() user: JwtPayload,
+  ): Promise<AssistantConversationDetail> {
+    return this.service.getConversation(user, id);
+  }
+
+  /**
+   * PUT /api/assistant/conversations/:id/context — reemplaza la bandeja de
+   * contexto fijada del hilo (set completo). El backend la fusiona con el
+   * `pageContext` (auto) en cada turno; el cliente no la reenvía al chatear.
+   */
+  @Put('conversations/:id/context')
+  updateContext(
+    @Param('id') id: string,
+    @Body() body: unknown,
+    @CurrentUser() user: JwtPayload,
+  ): Promise<AssistantContextUpdateResponse> {
+    const dto = updateAssistantContextSchema.parse(body);
+    return this.service.updateContext(user, id, dto);
+  }
+
+  /** DELETE /api/assistant/conversations/:id — soft delete. */
+  @Delete('conversations/:id')
+  @HttpCode(204)
+  async deleteConversation(
+    @Param('id') id: string,
+    @CurrentUser() user: JwtPayload,
+  ): Promise<void> {
+    await this.service.deleteConversation(user, id);
+  }
+
+  /**
+   * POST /api/assistant/conversations/:id/messages — envía un mensaje y
+   * responde la generación del asistente como stream SSE.
+   *
+   * Cada evento del loop (`text_delta`, `tool_call`, `tool_result`) se escribe
+   * como un frame `data: <json>\n\n`. El evento `final` no se reenvía (la
+   * persistencia ocurre en el service); al cerrar se emite `{ type: 'done' }`.
+   */
+  @Post('conversations/:id/messages')
+  async sendMessage(
+    @Param('id') id: string,
+    @Body() body: unknown,
+    @CurrentUser() user: JwtPayload,
+    @Res() res: Response,
+  ): Promise<void> {
+    const dto = sendAssistantMessageSchema.parse(body);
+
+    res.setHeader('Content-Type', 'text/event-stream');
+    res.setHeader('Cache-Control', 'no-cache');
+    res.setHeader('Connection', 'keep-alive');
+    res.flushHeaders?.();
+
+    const write = (event: unknown): void => {
+      res.write(`data: ${JSON.stringify(event)}\n\n`);
+    };
+
+    try {
+      for await (const event of this.service.streamReply(user, id, dto)) {
+        if (event.type !== 'final') write(event);
+      }
+      write({ type: 'done' });
+    } catch (err) {
+      // El stream ya está abierto (200): un throw no puede convertirse en un
+      // status de error HTTP, así que emitimos el error dentro del propio SSE.
+      // Se loguea server-side: el error del provider (p. ej. 400 de Gemini) no
+      // aparecería en ningún lado de otro modo.
+      this.logger.error(
+        `Fallo el turno del asistente (conversación ${id}): ${
+          err instanceof Error ? err.message : String(err)
+        }`,
+        err instanceof Error ? err.stack : undefined,
+      );
+      const message = err instanceof Error ? err.message : 'Error inesperado del asistente';
+      write({ type: 'error', message });
+    } finally {
+      res.end();
+    }
+  }
+}

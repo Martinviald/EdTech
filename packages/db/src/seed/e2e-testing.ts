@@ -126,16 +126,16 @@ const LAST = [
   'Reyes', 'Gutiérrez', 'Castro', 'Vargas', 'Álvarez', 'Vergara', 'Bravo', 'Núñez',
 ];
 
-// ── Definición de habilidades por instrumento (códigos DIA del seed base) ─────
+// ── Definición de habilidades por instrumento (códigos de habilidad del marco real) ─────
 const LECT_SKILL_CYCLE = [
-  'DIA-LANG-SK-LOC', 'DIA-LANG-SK-INT', 'DIA-LANG-SK-REF',
-  'DIA-LANG-SK-LOC', 'DIA-LANG-SK-INT', 'DIA-LANG-SK-REF',
-  'DIA-LANG-SK-LOC', 'DIA-LANG-SK-INT', 'DIA-LANG-SK-REF', 'DIA-LANG-SK-LOC',
+  'LANG-SK-LOCALIZAR', 'LANG-SK-INTERPRETAR-Y-RELACIONAR', 'LANG-SK-REFLEXIONAR',
+  'LANG-SK-LOCALIZAR', 'LANG-SK-INTERPRETAR-Y-RELACIONAR', 'LANG-SK-REFLEXIONAR',
+  'LANG-SK-LOCALIZAR', 'LANG-SK-INTERPRETAR-Y-RELACIONAR', 'LANG-SK-REFLEXIONAR', 'LANG-SK-LOCALIZAR',
 ];
 const MAT_SKILL_CYCLE = [
-  'DIA-MATH-SK-RES', 'DIA-MATH-SK-MOD', 'DIA-MATH-SK-REP', 'DIA-MATH-SK-ARG',
-  'DIA-MATH-SK-RES', 'DIA-MATH-SK-MOD', 'DIA-MATH-SK-REP', 'DIA-MATH-SK-ARG',
-  'DIA-MATH-SK-RES', 'DIA-MATH-SK-MOD',
+  'MATH-SK-RESOLVER-PROBLEMAS', 'MATH-SK-MODELAR', 'MATH-SK-REPRESENTAR', 'MATH-SK-ARGUMENTAR-Y-COMUNICAR',
+  'MATH-SK-RESOLVER-PROBLEMAS', 'MATH-SK-MODELAR', 'MATH-SK-REPRESENTAR', 'MATH-SK-ARGUMENTAR-Y-COMUNICAR',
+  'MATH-SK-RESOLVER-PROBLEMAS', 'MATH-SK-MODELAR',
 ];
 
 // Banco de enunciados realistas por posición (alineado a LECT/MAT_SKILL_CYCLE).
@@ -195,13 +195,13 @@ function buildItemContent(
 // haya hartos alumnos en nivel insuficiente (<40%). La mejora año-a-año y por
 // período se mantiene vía YEAR_FACTOR / PERIOD_FACTOR.
 const BASE_SKILL: Record<string, number> = {
-  'DIA-LANG-SK-LOC': 0.62,
-  'DIA-LANG-SK-INT': 0.45,
-  'DIA-LANG-SK-REF': 0.3,
-  'DIA-MATH-SK-RES': 0.5,
-  'DIA-MATH-SK-MOD': 0.34,
-  'DIA-MATH-SK-REP': 0.55,
-  'DIA-MATH-SK-ARG': 0.28,
+  'LANG-SK-LOCALIZAR': 0.62,
+  'LANG-SK-INTERPRETAR-Y-RELACIONAR': 0.45,
+  'LANG-SK-REFLEXIONAR': 0.3,
+  'MATH-SK-RESOLVER-PROBLEMAS': 0.5,
+  'MATH-SK-MODELAR': 0.34,
+  'MATH-SK-REPRESENTAR': 0.55,
+  'MATH-SK-ARGUMENTAR-Y-COMUNICAR': 0.28,
 };
 const YEAR_FACTOR: Record<number, number> = { 2024: 0, 2025: 0.06, 2026: 0.11 };
 const PERIOD_FACTOR: Record<string, number> = {
@@ -254,24 +254,29 @@ async function main() {
   const grade3 = gradeRows.find((g) => g.code === '3RD_BASIC');
   const [langSubject] = await db.select().from(subjects).where(eq(subjects.code, 'LANG'));
   const [mathSubject] = await db.select().from(subjects).where(eq(subjects.code, 'MATH'));
-  const [diaTaxonomy] = await db
-    .select()
-    .from(taxonomies)
-    .where(and(eq(taxonomies.type, 'dia'), eq(taxonomies.version, '2025')));
-  if (!grade2 || !grade3 || !langSubject || !mathSubject || !diaTaxonomy) {
+  if (!grade2 || !grade3 || !langSubject || !mathSubject) {
     throw new Error(
       'Faltan prerrequisitos. Corre primero el seed base: pnpm --filter @soe/db db:seed',
     );
   }
-  const diaNodes = await db
-    .select()
+  // Las habilidades viven en el marco real (Currículum Nacional); se buscan por code.
+  const skillNodes = await db
+    .select({ id: taxonomyNodes.id, code: taxonomyNodes.code })
     .from(taxonomyNodes)
-    .where(eq(taxonomyNodes.taxonomyId, diaTaxonomy.id));
-  const nodeByCode = new Map(diaNodes.map((n) => [n.code as string, n.id]));
+    .where(eq(taxonomyNodes.type, 'skill'));
+  const nodeByCode = new Map(skillNodes.map((n) => [n.code as string, n.id]));
   for (const code of [...new Set([...LECT_SKILL_CYCLE, ...MAT_SKILL_CYCLE])]) {
     if (!nodeByCode.has(code)) {
-      throw new Error(`Falta el nodo de taxonomía DIA "${code}". Corre el seed base.`);
+      throw new Error(`Falta el nodo de habilidad "${code}". Corre el seed base: pnpm --filter @soe/db db:seed`);
     }
+  }
+  // Marco de evaluación DIA (al que pertenecen los instrumentos DIA demo).
+  const [diaMarco] = await db
+    .select({ id: taxonomies.id })
+    .from(taxonomies)
+    .where(and(eq(taxonomies.type, 'dia'), eq(taxonomies.version, 'vigente')));
+  if (!diaMarco) {
+    throw new Error('Falta el marco DIA. Corre el seed base: pnpm --filter @soe/db db:seed');
   }
 
   // ── 1. Limpieza idempotente (borra solo el namespace e2e) ──────────────────
@@ -410,7 +415,7 @@ async function main() {
     {
       id: INST_LECT,
       orgId: DEMO_ORG_ID,
-      taxonomyId: diaTaxonomy.id,
+      taxonomyId: diaMarco.id,
       name: 'DIA Lectura 2° Básico',
       shortName: 'DIA Lectura 2°B',
       type: 'dia',
@@ -424,7 +429,7 @@ async function main() {
     {
       id: INST_MAT,
       orgId: DEMO_ORG_ID,
-      taxonomyId: diaTaxonomy.id,
+      taxonomyId: diaMarco.id,
       name: 'DIA Matemática 2° Básico',
       shortName: 'DIA Mat 2°B',
       type: 'dia',

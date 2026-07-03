@@ -1,0 +1,1620 @@
+{
+  "schemaVersion": "1.0",
+  "source": {
+    "file": "5º lenguaje diagnóstico 2025.pdf",
+    "subjectFolder": "Lenguaje"
+  },
+  "instrument": {
+    "name": "DIA Lectura 5° Básico 2025 — Diagnóstico",
+    "subject": "Lenguaje y Comunicación",
+    "subjectCode": "LANG",
+    "grade": "5° Básico",
+    "gradeCode": "5TH_BASIC",
+    "year": 2025,
+    "applicationPeriod": "diagnostico",
+    "type": "dia",
+    "isOfficial": true,
+    "source": "imported"
+  },
+  "sections": [
+    {
+      "order": 1,
+      "name": "Texto 1: «Las alas de Ana»",
+      "type": "mixed",
+      "instructions": "Lee el siguiente texto y responde las preguntas 1 a 6.",
+      "passage": {
+        "title": "Las alas de Ana",
+        "text": "Últimamente me ronda la sospecha de que mi amiga Ana no es de este mundo. Hay algo en ella que la hace especial, diferente. Cuando se enfada, se pone roja, roja como un tomate, y si uno está cerca, puede ver cómo le empieza a salir de las orejas un hilo de humo blanco. Y a la hora del recreo, cuando todos comemos la colación que nos mandan de casa, una fruta, un jugo o un sándwich de jamón, ella se aparta de todos y se esconde detrás de unos arbustos.\n\nAsí que he decidido espiarla para ver si descubro por qué Ana se comporta así. Es una compañera nueva y nos tocó sentarnos juntos. Habla poco. Creo que es muy tímida. Me cae bien, pero no puedo reprimir la idea de que esconde algo.\n\nA la salida de clases, la sigo, teniendo cuidado de no ser visto. Me voy escondiendo entre la gente. Me oculto tras los puestos de revistas, o detrás de las cabinas telefónicas. Ella no voltea. Va distraída, pensando en sus cosas. De vez en cuando se detiene y gira la cabeza, como he visto que hacen los perros al escuchar un silbato. Yo contengo la respiración y, tras unos segundos, continúa avanzando.\n\nPor fin, Ana llega a su casa. Es amarilla y tiene una puerta color azul. Toca tres veces. Toc, toc, toc. Luego abren y ella pasa sin saludar a nadie. Yo me acerco e intento asomarme por una ventana. Y entonces, veo algo que me deja perplejo. Atónito. Sin habla.\n\nAna lanza la mochila sobre la mesa del comedor. Después, se estira. Luego, se tira las orejas. Una con la mano izquierda y otra con la derecha. Y entonces, de su espalda brotan unas alas enormes, bonitas, con plumas verdes. Ella se sacude y suspira. Liberada. Como quien durante mucho tiempo tiene que encoger los dedos en unos zapatos apretados. Por primera vez, la veo sonreír. La veo enseñar una fila de dientes blancos, radiantes, y sus ojos brillan como miel traslúcida. Me parece feliz. Recorre la habitación en busca de alguien. Alguien viene. Con mis ojos sigo la ruta de la mirada de Ana. Y veo que corre a abrazar a otro ser igual que ella.\n\nPero… ¿qué es, entonces, Ana? ¿Es un ángel? ¿Una niña pájaro? ¿Puede volar?\n\nTantas preguntas se me arremolinan de golpe y tropiezo sin darme cuenta con un macetero con flores que hay en la ventana. El macetero cae al suelo haciendo un ruido enorme. Y yo, salgo corriendo por donde he venido sin esperar a que me descubran.\n\nAl día siguiente, Ana está sentada junto a mí. Yo la observo con más curiosidad que nunca. Sé que no sonríe porque está incómoda. Sus alas están prisioneras en una cárcel que nadie puede ver. La miro. Me mira. Siento que sospecha que he sido yo quien espiaba por la ventana. O quizás, pienso eso porque no puedo con el peso de mi conciencia. Me muero por decirle que sé que tiene alas, pero no me atrevo. No es el momento. Y decido esperar al recreo.\n\nLaura Martínez Belli. “Las alas de Ana”. Libro de lecturas. Cuarto grado. Argentina: Secretaría de Educación Pública, 2011.",
+        "format": "plain",
+        "attachments": [
+          {
+            "kind": "image",
+            "note": "Ilustración de una niña con alas verdes flotando (decorativa, no aporta información para responder)."
+          }
+        ]
+      },
+      "items": [
+        {
+          "position": 1,
+          "type": "multiple_choice",
+          "stem": "Al principio del texto, ¿cómo cree el niño que es Ana?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Feliz.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Tímida.",
+              "isCorrect": true
+            },
+            {
+              "key": "C",
+              "text": "Divertida.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "Distraída.",
+              "isCorrect": false
+            }
+          ],
+          "correctKey": "B",
+          "skill": "Localizar",
+          "oa": "OA 4",
+          "contentAxis": "Narración",
+          "hasFigure": false,
+          "figureNote": null,
+          "taxonomy": [
+            {
+              "type": "descriptor",
+              "code": null,
+              "name": "Localizan información explícita relevante en un texto narrativo.",
+              "parentCode": "LANG-4B-OA04",
+              "tagType": "primary"
+            },
+            {
+              "type": "learning_objective",
+              "code": "LANG-4B-OA04",
+              "name": "OA 4",
+              "level": "4_basico",
+              "tagType": "secondary"
+            },
+            {
+              "type": "skill",
+              "code": "LANG-SK-LOCALIZAR",
+              "name": "Localizar",
+              "tagType": "secondary"
+            },
+            {
+              "type": "text_type",
+              "code": "LANG-TT-NARRACION",
+              "name": "Narración",
+              "tagType": "secondary"
+            }
+          ]
+        },
+        {
+          "position": 2,
+          "type": "multiple_choice",
+          "stem": "A la hora del recreo, ¿dónde se esconde la niña?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Detrás de unos arbustos.",
+              "isCorrect": true
+            },
+            {
+              "key": "B",
+              "text": "Detrás de una cabina telefónica.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Detrás de un puesto de revistas.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "Detrás de una puerta de color azul.",
+              "isCorrect": false
+            }
+          ],
+          "correctKey": "A",
+          "skill": "Localizar",
+          "oa": "OA 4",
+          "contentAxis": "Narración",
+          "hasFigure": false,
+          "figureNote": null,
+          "taxonomy": [
+            {
+              "type": "descriptor",
+              "code": null,
+              "name": "Localizan información explícita relevante en un texto narrativo.",
+              "parentCode": "LANG-4B-OA04",
+              "tagType": "primary"
+            },
+            {
+              "type": "learning_objective",
+              "code": "LANG-4B-OA04",
+              "name": "OA 4",
+              "level": "4_basico",
+              "tagType": "secondary"
+            },
+            {
+              "type": "skill",
+              "code": "LANG-SK-LOCALIZAR",
+              "name": "Localizar",
+              "tagType": "secondary"
+            },
+            {
+              "type": "text_type",
+              "code": "LANG-TT-NARRACION",
+              "name": "Narración",
+              "tagType": "secondary"
+            }
+          ]
+        },
+        {
+          "position": 3,
+          "type": "multiple_choice",
+          "stem": "¿En qué lugar el niño descubre el secreto de Ana?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "En la calle.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "En las nubes.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "En la casa de Ana.",
+              "isCorrect": true
+            },
+            {
+              "key": "D",
+              "text": "En el patio del colegio.",
+              "isCorrect": false
+            }
+          ],
+          "correctKey": "C",
+          "skill": "Interpretar y relacionar",
+          "oa": "OA 4",
+          "contentAxis": "Narración",
+          "hasFigure": false,
+          "figureNote": null,
+          "taxonomy": [
+            {
+              "type": "descriptor",
+              "code": null,
+              "name": "Identifican aspectos relevantes sobre el ambiente físico y sicológico en un texto narrativo.",
+              "parentCode": "LANG-4B-OA04",
+              "tagType": "primary"
+            },
+            {
+              "type": "learning_objective",
+              "code": "LANG-4B-OA04",
+              "name": "OA 4",
+              "level": "4_basico",
+              "tagType": "secondary"
+            },
+            {
+              "type": "skill",
+              "code": "LANG-SK-INTERPRETAR-Y-RELACIONAR",
+              "name": "Interpretar y relacionar",
+              "tagType": "secondary"
+            },
+            {
+              "type": "text_type",
+              "code": "LANG-TT-NARRACION",
+              "name": "Narración",
+              "tagType": "secondary"
+            }
+          ]
+        },
+        {
+          "position": 4,
+          "type": "multiple_choice",
+          "stem": "¿En qué momento del relato Ana cambia de actitud hacia el niño?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Cuando él la sigue hasta su casa.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Cuando ella despliega sus alas frente a él.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Cuando él le pregunta si ella vivía en las nubes.",
+              "isCorrect": true
+            },
+            {
+              "key": "D",
+              "text": "Cuando ella le da las gracias después de volar juntos.",
+              "isCorrect": false
+            }
+          ],
+          "correctKey": "C",
+          "skill": "Interpretar y relacionar",
+          "oa": "OA 4",
+          "contentAxis": "Narración",
+          "hasFigure": false,
+          "figureNote": null,
+          "taxonomy": [
+            {
+              "type": "descriptor",
+              "code": null,
+              "name": "Identifican un acontecimiento o acción relevante en un texto narrativo.",
+              "parentCode": "LANG-4B-OA04",
+              "tagType": "primary"
+            },
+            {
+              "type": "learning_objective",
+              "code": "LANG-4B-OA04",
+              "name": "OA 4",
+              "level": "4_basico",
+              "tagType": "secondary"
+            },
+            {
+              "type": "skill",
+              "code": "LANG-SK-INTERPRETAR-Y-RELACIONAR",
+              "name": "Interpretar y relacionar",
+              "tagType": "secondary"
+            },
+            {
+              "type": "text_type",
+              "code": "LANG-TT-NARRACION",
+              "name": "Narración",
+              "tagType": "secondary"
+            }
+          ]
+        },
+        {
+          "position": 5,
+          "type": "multiple_choice",
+          "stem": "Cuando le toma la mano al niño, ¿qué le susurra Ana al oído?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Que cierre los ojos.",
+              "isCorrect": true
+            },
+            {
+              "key": "B",
+              "text": "Que libere sus alas.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Que guarde su secreto.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "Que le obedezca sin dudar.",
+              "isCorrect": false
+            }
+          ],
+          "correctKey": "A",
+          "skill": "Localizar",
+          "oa": "OA 4",
+          "contentAxis": "Narración",
+          "hasFigure": false,
+          "figureNote": null,
+          "taxonomy": [
+            {
+              "type": "descriptor",
+              "code": null,
+              "name": "Localizan información explícita relevante en un texto narrativo.",
+              "parentCode": "LANG-4B-OA04",
+              "tagType": "primary"
+            },
+            {
+              "type": "learning_objective",
+              "code": "LANG-4B-OA04",
+              "name": "OA 4",
+              "level": "4_basico",
+              "tagType": "secondary"
+            },
+            {
+              "type": "skill",
+              "code": "LANG-SK-LOCALIZAR",
+              "name": "Localizar",
+              "tagType": "secondary"
+            },
+            {
+              "type": "text_type",
+              "code": "LANG-TT-NARRACION",
+              "name": "Narración",
+              "tagType": "secondary"
+            }
+          ]
+        },
+        {
+          "position": 6,
+          "type": "open_ended",
+          "stem": "¿Qué te parece lo que hace el niño desde que sospecha que Ana “no es de este mundo”? ¿Por qué? Fundamenta tu respuesta con información del texto.",
+          "alternatives": [],
+          "correctKey": null,
+          "skill": "Reflexionar",
+          "oa": "OA 4",
+          "contentAxis": "Narración",
+          "hasFigure": false,
+          "figureNote": null,
+          "taxonomy": [
+            {
+              "type": "descriptor",
+              "code": null,
+              "name": "Opinan sobre algún aspecto controversial de un texto narrativo con fundamentos que integran información del texto.",
+              "parentCode": "LANG-4B-OA04",
+              "tagType": "primary"
+            },
+            {
+              "type": "learning_objective",
+              "code": "LANG-4B-OA04",
+              "name": "OA 4",
+              "level": "4_basico",
+              "tagType": "secondary"
+            },
+            {
+              "type": "skill",
+              "code": "LANG-SK-REFLEXIONAR",
+              "name": "Reflexionar",
+              "tagType": "secondary"
+            },
+            {
+              "type": "text_type",
+              "code": "LANG-TT-NARRACION",
+              "name": "Narración",
+              "tagType": "secondary"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "order": 2,
+      "name": "Texto 2: «Bikila ganó el maratón sin zapatillas»",
+      "type": "mixed",
+      "instructions": "Lee el siguiente texto y responde las preguntas 7 a 12.",
+      "passage": {
+        "title": "Bikila ganó el maratón sin zapatillas",
+        "text": "En los Juegos Olímpicos de Roma un deportista de Etiopía hizo historia al ganar el maratón de manera muy especial.\n\nEl 10 de septiembre de 1960, en los Juegos Olímpicos de Roma, se pudo ver al primer africano en lo más alto del pódium de premiación de esta competencia internacional. Abebe Bikila, a quien nadie le creyó que hiciera los tiempos que afirmaba cuando se inscribió, ganó a todos sus contrincantes corriendo a pie pelado el maratón, una carrera que se extiende nada menos que por 42 kilómetros y que él completó en tan solo 2 horas, 15 minutos y 16 segundos.\n\nBikila fue a esta competencia solo porque otro deportista se había lesionado, y una vez que estaba en la ciudad de Roma, le pasaron unas zapatillas especiales para correr, pero no le quedaron bien. Así que decidió participar en el maratón tal como había entrenado: descalzo.\n\nBikila pronto alcanzó el primer lugar en la carrera junto con su principal rival, un corredor marroquí. Ambos llevaban una gran ventaja de los demás competidores. Cuando solo quedaban 500 metros para finalizar, Bikila aceleró su paso y le ganó a su adversario por 26 segundos.\n\nAbebe Bikila, nacido en Etiopía en 1932, consiguió una de las mayores hazañas del mundo del atletismo y de los Juegos Olímpicos. No solo pasó a la historia como el primer africano en conseguir una medalla de oro en las Olimpiadas, ni como el récord del mundo de maratón de 1960, sino que su leyenda se vio agrandada por un hecho sin precedentes y que posiblemente no vuelva a ocurrir, corrió todo el maratón descalzo.\n\nTras conseguir el oro en los Juegos Olímpicos de Roma volvió a repetir su hazaña dorada, pero esta vez con zapatillas, en los Juegos Olímpicos de Tokio de 1964. También en esta ocasión batió la marca mundial, situándola en 2 horas, 12 minutos y 11 segundos. Finalmente, participó en la competición de México 1968, pero tuvo que retirarse de la prueba pasado el kilómetro 17. Esta fue la última competencia de este tipo en la que participó el etíope.\n\nSarah Romero. “Bikila, el africano que ganó el maratón sin zapatillas”. Muy Historia. Web. 27 mar. 2018. (Adaptación).",
+        "format": "plain",
+        "attachments": [
+          {
+            "kind": "image",
+            "note": "Fotografía en blanco y negro de un grupo de corredores de maratón en una calle, con público a los costados."
+          }
+        ]
+      },
+      "items": [
+        {
+          "position": 7,
+          "type": "multiple_choice",
+          "stem": "Según el texto, ¿dónde ganó Bikila su primera medalla de oro olímpica?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "En México.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "En Etiopía.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "En Tokio.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "En Roma.",
+              "isCorrect": true
+            }
+          ],
+          "correctKey": "D",
+          "skill": "Interpretar y relacionar",
+          "oa": "OA 6",
+          "contentAxis": "Texto no literario",
+          "hasFigure": false,
+          "figureNote": null,
+          "taxonomy": [
+            {
+              "type": "descriptor",
+              "code": null,
+              "name": "Infieren información relevante en un texto no literario.",
+              "parentCode": "LANG-4B-OA06",
+              "tagType": "primary"
+            },
+            {
+              "type": "learning_objective",
+              "code": "LANG-4B-OA06",
+              "name": "OA 6",
+              "level": "4_basico",
+              "tagType": "secondary"
+            },
+            {
+              "type": "skill",
+              "code": "LANG-SK-INTERPRETAR-Y-RELACIONAR",
+              "name": "Interpretar y relacionar",
+              "tagType": "secondary"
+            },
+            {
+              "type": "text_type",
+              "code": "LANG-TT-TEXTO-NO-LITERARIO",
+              "name": "Texto no literario",
+              "tagType": "secondary"
+            }
+          ]
+        },
+        {
+          "position": 8,
+          "type": "multiple_choice",
+          "stem": "Según el texto, ¿quién fue el principal rival de Bikila en el maratón de los Juegos Olímpicos de Roma?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Un corredor mexicano.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Un corredor marroquí.",
+              "isCorrect": true
+            },
+            {
+              "key": "C",
+              "text": "Un corredor romano.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "Un corredor etíope.",
+              "isCorrect": false
+            }
+          ],
+          "correctKey": "B",
+          "skill": "Localizar",
+          "oa": "OA 6",
+          "contentAxis": "Texto no literario",
+          "hasFigure": false,
+          "figureNote": null,
+          "taxonomy": [
+            {
+              "type": "descriptor",
+              "code": null,
+              "name": "Localizan información explícita relevante en un texto no literario.",
+              "parentCode": "LANG-4B-OA06",
+              "tagType": "primary"
+            },
+            {
+              "type": "learning_objective",
+              "code": "LANG-4B-OA06",
+              "name": "OA 6",
+              "level": "4_basico",
+              "tagType": "secondary"
+            },
+            {
+              "type": "skill",
+              "code": "LANG-SK-LOCALIZAR",
+              "name": "Localizar",
+              "tagType": "secondary"
+            },
+            {
+              "type": "text_type",
+              "code": "LANG-TT-TEXTO-NO-LITERARIO",
+              "name": "Texto no literario",
+              "tagType": "secondary"
+            }
+          ]
+        },
+        {
+          "position": 9,
+          "type": "multiple_choice",
+          "stem": "¿En qué año Bikila ganó el maratón usando zapatillas?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "En 1932.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "En 1960.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "En 1964.",
+              "isCorrect": true
+            },
+            {
+              "key": "D",
+              "text": "En 1968.",
+              "isCorrect": false
+            }
+          ],
+          "correctKey": "C",
+          "skill": "Interpretar y relacionar",
+          "oa": "OA 6",
+          "contentAxis": "Texto no literario",
+          "hasFigure": false,
+          "figureNote": null,
+          "taxonomy": [
+            {
+              "type": "descriptor",
+              "code": null,
+              "name": "Infieren información relevante en un texto no literario.",
+              "parentCode": "LANG-4B-OA06",
+              "tagType": "primary"
+            },
+            {
+              "type": "learning_objective",
+              "code": "LANG-4B-OA06",
+              "name": "OA 6",
+              "level": "4_basico",
+              "tagType": "secondary"
+            },
+            {
+              "type": "skill",
+              "code": "LANG-SK-INTERPRETAR-Y-RELACIONAR",
+              "name": "Interpretar y relacionar",
+              "tagType": "secondary"
+            },
+            {
+              "type": "text_type",
+              "code": "LANG-TT-TEXTO-NO-LITERARIO",
+              "name": "Texto no literario",
+              "tagType": "secondary"
+            }
+          ]
+        },
+        {
+          "position": 10,
+          "type": "multiple_choice",
+          "stem": "¿Dónde nació Bikila?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Roma.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Etiopía.",
+              "isCorrect": true
+            },
+            {
+              "key": "C",
+              "text": "México.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "Marruecos.",
+              "isCorrect": false
+            }
+          ],
+          "correctKey": "B",
+          "skill": "Localizar",
+          "oa": "OA 6",
+          "contentAxis": "Texto no literario",
+          "hasFigure": false,
+          "figureNote": null,
+          "taxonomy": [
+            {
+              "type": "descriptor",
+              "code": null,
+              "name": "Localizan información explícita relevante en un texto no literario.",
+              "parentCode": "LANG-4B-OA06",
+              "tagType": "primary"
+            },
+            {
+              "type": "learning_objective",
+              "code": "LANG-4B-OA06",
+              "name": "OA 6",
+              "level": "4_basico",
+              "tagType": "secondary"
+            },
+            {
+              "type": "skill",
+              "code": "LANG-SK-LOCALIZAR",
+              "name": "Localizar",
+              "tagType": "secondary"
+            },
+            {
+              "type": "text_type",
+              "code": "LANG-TT-TEXTO-NO-LITERARIO",
+              "name": "Texto no literario",
+              "tagType": "secondary"
+            }
+          ]
+        },
+        {
+          "position": 11,
+          "type": "multiple_choice",
+          "stem": "¿Qué le pasó a Bikila en 1968?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Batió un récord mundial.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Obtuvo una medalla de oro.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Corrió un maratón sin zapatillas.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "Tuvo que retirarse de una competición.",
+              "isCorrect": true
+            }
+          ],
+          "correctKey": "D",
+          "skill": "Localizar",
+          "oa": "OA 6",
+          "contentAxis": "Texto no literario",
+          "hasFigure": false,
+          "figureNote": null,
+          "taxonomy": [
+            {
+              "type": "descriptor",
+              "code": null,
+              "name": "Localizan información explícita relevante en un texto no literario.",
+              "parentCode": "LANG-4B-OA06",
+              "tagType": "primary"
+            },
+            {
+              "type": "learning_objective",
+              "code": "LANG-4B-OA06",
+              "name": "OA 6",
+              "level": "4_basico",
+              "tagType": "secondary"
+            },
+            {
+              "type": "skill",
+              "code": "LANG-SK-LOCALIZAR",
+              "name": "Localizar",
+              "tagType": "secondary"
+            },
+            {
+              "type": "text_type",
+              "code": "LANG-TT-TEXTO-NO-LITERARIO",
+              "name": "Texto no literario",
+              "tagType": "secondary"
+            }
+          ]
+        },
+        {
+          "position": 12,
+          "type": "open_ended",
+          "stem": "Si Bikila hubiese corrido su primer maratón con zapatillas, ¿crees que sería famoso? (Sí / No). Fundamenta tu respuesta con información del texto.",
+          "alternatives": [],
+          "correctKey": null,
+          "skill": "Reflexionar",
+          "oa": "OA 6",
+          "contentAxis": "Texto no literario",
+          "hasFigure": false,
+          "figureNote": "Ítem híbrido: ofrece selección Sí/No y luego pide fundamentación escrita. Se modela como open_ended porque lo evaluable es la justificación.",
+          "taxonomy": [
+            {
+              "type": "descriptor",
+              "code": null,
+              "name": "Opinan sobre algún aspecto relevante en un texto no literario con fundamentos que integran información del texto.",
+              "parentCode": "LANG-4B-OA06",
+              "tagType": "primary"
+            },
+            {
+              "type": "learning_objective",
+              "code": "LANG-4B-OA06",
+              "name": "OA 6",
+              "level": "4_basico",
+              "tagType": "secondary"
+            },
+            {
+              "type": "skill",
+              "code": "LANG-SK-REFLEXIONAR",
+              "name": "Reflexionar",
+              "tagType": "secondary"
+            },
+            {
+              "type": "text_type",
+              "code": "LANG-TT-TEXTO-NO-LITERARIO",
+              "name": "Texto no literario",
+              "tagType": "secondary"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "order": 3,
+      "name": "Texto 3: «¿Mi planta de porotos?»",
+      "type": "multiple_choice",
+      "instructions": "Lee el siguiente texto y responde las preguntas 13 a 16.",
+      "passage": {
+        "title": "¿Mi planta de porotos?",
+        "text": "Pedro llegó a su casa muy entusiasmado.\n—¡Mamá, mamá! —gritó—. Necesito una semilla.\nSu madre lo miró como diciendo ¿y de dónde saco yo una semilla?\nPedro, para facilitar las cosas, explicó:\n—Me sirve un poroto porque también es una semilla.\nPensó un momento:\n—Además, necesito algo de tierra para plantarlo. La mamá buscó en el patio un macetero con tierra y se lo dio al niño.\nPedro hizo un hoyo con el dedo en la tierra. Plantó su semilla-poroto cubriéndola con tierra. La regó bien regada y dejó el macetero en el patio…\nY hasta ahí no más llegó, porque se fue a jugar a la pelota y… bueno, había tantas cosas interesantes que hacer que no le quedó tiempo para acordarse del poroto.\nNo se acordó ni ese día ni al siguiente…\nPero, ¿qué pasó con la semilla-poroto durante ese tiempo?\n¿Quieres saberlo?\nTe lo diré: la tierra recogió el rocío de las noches y con esa humedad hizo que la semilla-poroto se abriera en dos, que un brote pequeñito creciera hacia arriba y que unas raicillas crecieran hacia abajo.\nComo a los tres días llegó su amigo Antonio. Estuvieron jugando un rato, y cuando ya estaba por irse, el niño vio el macetero y se dio cuenta de que había un tallo a punto de brotar.\n—¿Qué hay aquí? —preguntó.\nPedro, entretenido con otra cosa, no respondió.\n—¿Me lo puedo llevar? —volvió a preguntar.\nY como Pedro tampoco respondiera, Antonio tomó el macetero y se lo llevó a su casa. Allí, le echó agua y apretó suavemente la tierra, como haciéndole cariño, para que la plantita creciera mejor.\nMuy pronto el tallo salió de la tierra, le crecieron dos hojitas, después otras dos y dos más, hasta que hubo una linda planta de porotos.\nPasaron varios días…\nEntonces llegó Pedro, y viendo el macetero recordó el poroto que había plantado.\n—¡Ah, es mi planta de porotos! —exclamó.\n—No, no —lo corrigió Antonio—, es “mi” planta.\n—¡Pero yo la planté! —argumentó Pedro—. Así que es mi planta.\n—Yo la regué y la cuidé. Por eso es mía —insistió Antonio.\nLa pequeña planta de porotos los miró con ternura y les dijo:\n—¿Por qué no me lo preguntan a mí?...\nSaúl Schkolnik. Cuentos transversales. Santiago: Zig Zag, 2003.",
+        "format": "plain",
+        "attachments": [
+          {
+            "kind": "image",
+            "note": "Ilustración de un macetero con una pequeña planta de porotos brotando."
+          }
+        ]
+      },
+      "items": [
+        {
+          "position": 13,
+          "type": "multiple_choice",
+          "stem": "¿Qué hizo Pedro luego de plantar la semilla-poroto?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Se dedicó a jugar a la pelota.",
+              "isCorrect": true
+            },
+            {
+              "key": "B",
+              "text": "Guardó el macetero en su casa.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Pidió a su madre que le ayudara.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "Cuidó la planta junto a su amigo.",
+              "isCorrect": false
+            }
+          ],
+          "correctKey": "A",
+          "skill": "Interpretar y relacionar",
+          "oa": "OA 4",
+          "contentAxis": "Narración",
+          "hasFigure": false,
+          "figureNote": null,
+          "taxonomy": [
+            {
+              "type": "descriptor",
+              "code": null,
+              "name": "Identifican un acontecimiento o acción relevante en un texto narrativo.",
+              "parentCode": "LANG-4B-OA04",
+              "tagType": "primary"
+            },
+            {
+              "type": "learning_objective",
+              "code": "LANG-4B-OA04",
+              "name": "OA 4",
+              "level": "4_basico",
+              "tagType": "secondary"
+            },
+            {
+              "type": "skill",
+              "code": "LANG-SK-INTERPRETAR-Y-RELACIONAR",
+              "name": "Interpretar y relacionar",
+              "tagType": "secondary"
+            },
+            {
+              "type": "text_type",
+              "code": "LANG-TT-NARRACION",
+              "name": "Narración",
+              "tagType": "secondary"
+            }
+          ]
+        },
+        {
+          "position": 14,
+          "type": "multiple_choice",
+          "stem": "¿Por qué la semilla-poroto creció mientras estuvo en el patio?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Porque Pedro la regó bien regada.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Porque Antonio se la llevó a su casa.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Porque la madre la puso en un macetero.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "Porque la tierra absorbió el rocío de la noche.",
+              "isCorrect": true
+            }
+          ],
+          "correctKey": "D",
+          "skill": "Interpretar y relacionar",
+          "oa": "OA 4",
+          "contentAxis": "Narración",
+          "hasFigure": false,
+          "figureNote": null,
+          "taxonomy": [
+            {
+              "type": "descriptor",
+              "code": null,
+              "name": "Infieren causa o consecuencia de acontecimientos o acciones relevantes en un texto narrativo.",
+              "parentCode": "LANG-4B-OA04",
+              "tagType": "primary"
+            },
+            {
+              "type": "learning_objective",
+              "code": "LANG-4B-OA04",
+              "name": "OA 4",
+              "level": "4_basico",
+              "tagType": "secondary"
+            },
+            {
+              "type": "skill",
+              "code": "LANG-SK-INTERPRETAR-Y-RELACIONAR",
+              "name": "Interpretar y relacionar",
+              "tagType": "secondary"
+            },
+            {
+              "type": "text_type",
+              "code": "LANG-TT-NARRACION",
+              "name": "Narración",
+              "tagType": "secondary"
+            }
+          ]
+        },
+        {
+          "position": 15,
+          "type": "multiple_choice",
+          "stem": "¿Por qué Antonio considera que la planta es suya?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Porque la regó y la cuidó.",
+              "isCorrect": true
+            },
+            {
+              "key": "B",
+              "text": "Porque Pedro se la regaló.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Porque la encontró en el patio.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "Porque buscó la semilla y la plantó.",
+              "isCorrect": false
+            }
+          ],
+          "correctKey": "A",
+          "skill": "Interpretar y relacionar",
+          "oa": "OA 4",
+          "contentAxis": "Narración",
+          "hasFigure": false,
+          "figureNote": null,
+          "taxonomy": [
+            {
+              "type": "descriptor",
+              "code": null,
+              "name": "Infieren causa o consecuencia de acontecimientos o acciones relevantes en un texto narrativo.",
+              "parentCode": "LANG-4B-OA04",
+              "tagType": "primary"
+            },
+            {
+              "type": "learning_objective",
+              "code": "LANG-4B-OA04",
+              "name": "OA 4",
+              "level": "4_basico",
+              "tagType": "secondary"
+            },
+            {
+              "type": "skill",
+              "code": "LANG-SK-INTERPRETAR-Y-RELACIONAR",
+              "name": "Interpretar y relacionar",
+              "tagType": "secondary"
+            },
+            {
+              "type": "text_type",
+              "code": "LANG-TT-NARRACION",
+              "name": "Narración",
+              "tagType": "secondary"
+            }
+          ]
+        },
+        {
+          "position": 16,
+          "type": "multiple_choice",
+          "stem": "¿Qué característica define a Pedro luego de plantar la semilla-poroto?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Entusiasmado.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Descuidado.",
+              "isCorrect": true
+            },
+            {
+              "key": "C",
+              "text": "Cariñoso.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "Egoísta.",
+              "isCorrect": false
+            }
+          ],
+          "correctKey": "B",
+          "skill": "Interpretar y relacionar",
+          "oa": "OA 4",
+          "contentAxis": "Narración",
+          "hasFigure": false,
+          "figureNote": null,
+          "taxonomy": [
+            {
+              "type": "descriptor",
+              "code": null,
+              "name": "Infieren características y sentimientos de personajes en un texto narrativo.",
+              "parentCode": "LANG-4B-OA04",
+              "tagType": "primary"
+            },
+            {
+              "type": "learning_objective",
+              "code": "LANG-4B-OA04",
+              "name": "OA 4",
+              "level": "4_basico",
+              "tagType": "secondary"
+            },
+            {
+              "type": "skill",
+              "code": "LANG-SK-INTERPRETAR-Y-RELACIONAR",
+              "name": "Interpretar y relacionar",
+              "tagType": "secondary"
+            },
+            {
+              "type": "text_type",
+              "code": "LANG-TT-NARRACION",
+              "name": "Narración",
+              "tagType": "secondary"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "order": 4,
+      "name": "Texto 4: «El telescopio»",
+      "type": "multiple_choice",
+      "instructions": "Lee el siguiente texto y responde las preguntas 17 a 21.",
+      "passage": {
+        "title": "El telescopio",
+        "text": "Sabemos muchas cosas del Universo, incluso cómo se formó, su tamaño y el lugar que ocupa la Tierra en él. La herramienta que nos ha permitido saber todo esto es el telescopio, instrumento que hace que las cosas se puedan ver más cerca y más brillantes.\n\nLa invención del telescopio se atribuye generalmente al alemán Hans Lipperhey en 1608, aunque estudios recientes indicarían que su verdadero inventor fue el español Joan Roget. En 1609, el científico italiano Galileo Galilei construyó una versión mejorada del mismo. En unas cuantas noches descubrió más cosas del espacio exterior que las que se habían descubierto en los diez mil años anteriores. Desde entonces, los telescopios han ido mejorando. Algunos son tan potentes que permiten observar más de la mitad del Universo, a muchos millones de millones de kilómetros de distancia.\n\nEl secreto del telescopio es una pieza de material transparente, generalmente de cristal, denominada lente, que cambia la dirección de los rayos de luz que la atraviesan. El telescopio de Galileo tenía dos lentes: una grande destinada a recoger la luz, y la pequeña para enfocarla sobre el ojo. En 1671, Isaac Newton sustituyó la lente grande por un espejo curvo, y todos los grandes telescopios actuales se basan en este diseño. Así, los telescopios amplifican las cosas lejanas y nos muestran nuevos mundos.\n\nMike Goldsmith. Inventos en 30 segundos. Barcelona: Blume, 2016. (Adaptación).",
+        "format": "plain",
+        "attachments": [
+          {
+            "kind": "image",
+            "note": "Fotografía antigua de una persona observando con un telescopio de tubo largo sobre trípode."
+          }
+        ]
+      },
+      "items": [
+        {
+          "position": 17,
+          "type": "multiple_choice",
+          "stem": "Según estudios recientes, ¿quién habría sido el verdadero inventor del telescopio?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Hans Lipperhey.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Galileo Galilei.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Isaac Newton.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "Joan Roget.",
+              "isCorrect": true
+            }
+          ],
+          "correctKey": "D",
+          "skill": "Localizar",
+          "oa": "OA 6",
+          "contentAxis": "Texto no literario",
+          "hasFigure": false,
+          "figureNote": null,
+          "taxonomy": [
+            {
+              "type": "descriptor",
+              "code": null,
+              "name": "Localizan información explícita relevante en un texto no literario.",
+              "parentCode": "LANG-4B-OA06",
+              "tagType": "primary"
+            },
+            {
+              "type": "learning_objective",
+              "code": "LANG-4B-OA06",
+              "name": "OA 6",
+              "level": "4_basico",
+              "tagType": "secondary"
+            },
+            {
+              "type": "skill",
+              "code": "LANG-SK-LOCALIZAR",
+              "name": "Localizar",
+              "tagType": "secondary"
+            },
+            {
+              "type": "text_type",
+              "code": "LANG-TT-TEXTO-NO-LITERARIO",
+              "name": "Texto no literario",
+              "tagType": "secondary"
+            }
+          ]
+        },
+        {
+          "position": 18,
+          "type": "multiple_choice",
+          "stem": "Según lo leído, ¿cuál fue el aporte de Galileo Galilei al desarrollo del telescopio?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Pulió las lentes que se usaron en el telescopio.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Inventó la primera lente para usar en un telescopio.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Sustituyó una lente del telescopio que ayudó a ver mejor.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "Construyó una versión mejorada del telescopio de Lipperhey.",
+              "isCorrect": true
+            }
+          ],
+          "correctKey": "D",
+          "skill": "Interpretar y relacionar",
+          "oa": "OA 6",
+          "contentAxis": "Texto no literario",
+          "hasFigure": false,
+          "figureNote": null,
+          "taxonomy": [
+            {
+              "type": "descriptor",
+              "code": null,
+              "name": "Infieren información relevante en un texto no literario.",
+              "parentCode": "LANG-4B-OA06",
+              "tagType": "primary"
+            },
+            {
+              "type": "learning_objective",
+              "code": "LANG-4B-OA06",
+              "name": "OA 6",
+              "level": "4_basico",
+              "tagType": "secondary"
+            },
+            {
+              "type": "skill",
+              "code": "LANG-SK-INTERPRETAR-Y-RELACIONAR",
+              "name": "Interpretar y relacionar",
+              "tagType": "secondary"
+            },
+            {
+              "type": "text_type",
+              "code": "LANG-TT-TEXTO-NO-LITERARIO",
+              "name": "Texto no literario",
+              "tagType": "secondary"
+            }
+          ]
+        },
+        {
+          "position": 19,
+          "type": "multiple_choice",
+          "stem": "¿Qué cambio realizó Isaac Newton al telescopio?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Agregó una lente pequeña para enfocar la luz.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Sustituyó la lente grande por un espejo curvo.",
+              "isCorrect": true
+            },
+            {
+              "key": "C",
+              "text": "Incluyó una lente de material transparente.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "Incorporó dos lentes de cristal.",
+              "isCorrect": false
+            }
+          ],
+          "correctKey": "B",
+          "skill": "Localizar",
+          "oa": "OA 6",
+          "contentAxis": "Texto no literario",
+          "hasFigure": false,
+          "figureNote": null,
+          "taxonomy": [
+            {
+              "type": "descriptor",
+              "code": null,
+              "name": "Localizan información explícita relevante en un texto no literario.",
+              "parentCode": "LANG-4B-OA06",
+              "tagType": "primary"
+            },
+            {
+              "type": "learning_objective",
+              "code": "LANG-4B-OA06",
+              "name": "OA 6",
+              "level": "4_basico",
+              "tagType": "secondary"
+            },
+            {
+              "type": "skill",
+              "code": "LANG-SK-LOCALIZAR",
+              "name": "Localizar",
+              "tagType": "secondary"
+            },
+            {
+              "type": "text_type",
+              "code": "LANG-TT-TEXTO-NO-LITERARIO",
+              "name": "Texto no literario",
+              "tagType": "secondary"
+            }
+          ]
+        },
+        {
+          "position": 20,
+          "type": "multiple_choice",
+          "stem": "¿En cuál de los modelos se basan los actuales telescopios?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "En el de Hans Lipperhey.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "En el de Galileo Galilei.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "En el de Isaac Newton.",
+              "isCorrect": true
+            },
+            {
+              "key": "D",
+              "text": "En el de Joan Roget.",
+              "isCorrect": false
+            }
+          ],
+          "correctKey": "C",
+          "skill": "Interpretar y relacionar",
+          "oa": "OA 6",
+          "contentAxis": "Texto no literario",
+          "hasFigure": false,
+          "figureNote": null,
+          "taxonomy": [
+            {
+              "type": "descriptor",
+              "code": null,
+              "name": "Infieren información relevante en un texto no literario.",
+              "parentCode": "LANG-4B-OA06",
+              "tagType": "primary"
+            },
+            {
+              "type": "learning_objective",
+              "code": "LANG-4B-OA06",
+              "name": "OA 6",
+              "level": "4_basico",
+              "tagType": "secondary"
+            },
+            {
+              "type": "skill",
+              "code": "LANG-SK-INTERPRETAR-Y-RELACIONAR",
+              "name": "Interpretar y relacionar",
+              "tagType": "secondary"
+            },
+            {
+              "type": "text_type",
+              "code": "LANG-TT-TEXTO-NO-LITERARIO",
+              "name": "Texto no literario",
+              "tagType": "secondary"
+            }
+          ]
+        },
+        {
+          "position": 21,
+          "type": "multiple_choice",
+          "stem": "¿De qué trata principalmente el texto?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "De los avances de los actuales telescopios.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "De la evolución del telescopio desde su invención.",
+              "isCorrect": true
+            },
+            {
+              "key": "C",
+              "text": "De dos grandes científicos creadores del telescopio.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "De cosas que se han descubierto usando telescopios.",
+              "isCorrect": false
+            }
+          ],
+          "correctKey": "B",
+          "skill": "Interpretar y relacionar",
+          "oa": "OA 6",
+          "contentAxis": "Texto no literario",
+          "hasFigure": false,
+          "figureNote": null,
+          "taxonomy": [
+            {
+              "type": "descriptor",
+              "code": null,
+              "name": "Infieren el sentido global de un texto no literario.",
+              "parentCode": "LANG-4B-OA06",
+              "tagType": "primary"
+            },
+            {
+              "type": "learning_objective",
+              "code": "LANG-4B-OA06",
+              "name": "OA 6",
+              "level": "4_basico",
+              "tagType": "secondary"
+            },
+            {
+              "type": "skill",
+              "code": "LANG-SK-INTERPRETAR-Y-RELACIONAR",
+              "name": "Interpretar y relacionar",
+              "tagType": "secondary"
+            },
+            {
+              "type": "text_type",
+              "code": "LANG-TT-TEXTO-NO-LITERARIO",
+              "name": "Texto no literario",
+              "tagType": "secondary"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "order": 5,
+      "name": "Texto 5: «Sueños de ropa tendida»",
+      "type": "multiple_choice",
+      "instructions": "Lee el siguiente texto y responde las preguntas 22 a 25.",
+      "passage": {
+        "title": "Sueños de ropa tendida",
+        "text": "Sueños de ropa tendida\ncuando se duerme la casa.\nRopa —al sereno— dormida.\nDormitorio en la terraza.\n\n¿Qué sueña Doña Camisa\nen su piel de seda fina?\nA cada silbo de brisa\nsueña con que es bailarina.\n\nCon que es potrillo el mantel\ny en el aire corcovea...\nPotro a cuadritos es él,\nde tela que se menea.\n\nA medio metro del suelo\nzapatea un pantalón\ny un malambo —al ancho cielo—\nle ofrece como función.\n\nCamisetas escurridas...\nservilletas empapadas...\nsueñan que vuelan —unidas—\nde la soga liberadas.\n\nLas sábanas soñadoras\nfantasmas creen que son\ny de la noche en las horas,\nasustan por diversión.\n\nSueños de ropa tendida\nen mi mágica terraza.\nSueños de ropa dormida,\ncuando se duerme la casa.\n\nGlosario\n• corcovea: que da saltos encorvando el lomo.\n• malambo: baile de zapateo.\n\nElsa Bornemann. Un día, Una brújula. Argentina: Santillana, 2015.",
+        "format": "plain",
+        "attachments": [
+          {
+            "kind": "image",
+            "note": "Ilustración nocturna de ropa colgada en una soga en una terraza, con la luna de fondo."
+          }
+        ]
+      },
+      "items": [
+        {
+          "position": 22,
+          "type": "multiple_choice",
+          "stem": "¿Con qué se compara un potrillo?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Con las sábanas.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Con el pantalón.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Con la camisa.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "Con el mantel.",
+              "isCorrect": true
+            }
+          ],
+          "correctKey": "D",
+          "skill": "Interpretar y relacionar",
+          "oa": "OA 5",
+          "contentAxis": "Poema",
+          "hasFigure": false,
+          "figureNote": null,
+          "taxonomy": [
+            {
+              "type": "descriptor",
+              "code": null,
+              "name": "Interpretan el sentido de expresiones en lenguaje figurado presentes en un poema.",
+              "parentCode": "LANG-4B-OA05",
+              "tagType": "primary"
+            },
+            {
+              "type": "learning_objective",
+              "code": "LANG-4B-OA05",
+              "name": "OA 5",
+              "level": "4_basico",
+              "tagType": "secondary"
+            },
+            {
+              "type": "skill",
+              "code": "LANG-SK-INTERPRETAR-Y-RELACIONAR",
+              "name": "Interpretar y relacionar",
+              "tagType": "secondary"
+            },
+            {
+              "type": "text_type",
+              "code": "LANG-TT-POEMA",
+              "name": "Poema",
+              "tagType": "secondary"
+            }
+          ]
+        },
+        {
+          "position": 23,
+          "type": "multiple_choice",
+          "stem": "Lee la siguiente estrofa:\n\n«¿Qué sueña Doña Camisa / en su piel de seda fina? / A cada silbo de brisa / sueña con que es bailarina.»\n\n¿Qué significa “a cada silbo de brisa sueña con que es bailarina”?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Que la camisa hace sonidos.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Que la camisa es de seda fina.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Que la camisa se agita con el viento.",
+              "isCorrect": true
+            },
+            {
+              "key": "D",
+              "text": "Que la camisa es usada por una bailarina.",
+              "isCorrect": false
+            }
+          ],
+          "correctKey": "C",
+          "skill": "Interpretar y relacionar",
+          "oa": "OA 5",
+          "contentAxis": "Poema",
+          "hasFigure": false,
+          "figureNote": "El ítem cita una estrofa del poema como estímulo propio; se incluye dentro del stem.",
+          "taxonomy": [
+            {
+              "type": "descriptor",
+              "code": null,
+              "name": "Interpretan el sentido de expresiones en lenguaje figurado presentes en un poema.",
+              "parentCode": "LANG-4B-OA05",
+              "tagType": "primary"
+            },
+            {
+              "type": "learning_objective",
+              "code": "LANG-4B-OA05",
+              "name": "OA 5",
+              "level": "4_basico",
+              "tagType": "secondary"
+            },
+            {
+              "type": "skill",
+              "code": "LANG-SK-INTERPRETAR-Y-RELACIONAR",
+              "name": "Interpretar y relacionar",
+              "tagType": "secondary"
+            },
+            {
+              "type": "text_type",
+              "code": "LANG-TT-POEMA",
+              "name": "Poema",
+              "tagType": "secondary"
+            }
+          ]
+        },
+        {
+          "position": 24,
+          "type": "multiple_choice",
+          "stem": "¿Cómo está la casa del poema?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Silenciosa.",
+              "isCorrect": true
+            },
+            {
+              "key": "B",
+              "text": "Embrujada.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Abandonada.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "Desordenada.",
+              "isCorrect": false
+            }
+          ],
+          "correctKey": "A",
+          "skill": "Interpretar y relacionar",
+          "oa": "OA 5",
+          "contentAxis": "Poema",
+          "hasFigure": false,
+          "figureNote": null,
+          "taxonomy": [
+            {
+              "type": "descriptor",
+              "code": null,
+              "name": "Infieren el sentido global de un poema.",
+              "parentCode": "LANG-4B-OA05",
+              "tagType": "primary"
+            },
+            {
+              "type": "learning_objective",
+              "code": "LANG-4B-OA05",
+              "name": "OA 5",
+              "level": "4_basico",
+              "tagType": "secondary"
+            },
+            {
+              "type": "skill",
+              "code": "LANG-SK-INTERPRETAR-Y-RELACIONAR",
+              "name": "Interpretar y relacionar",
+              "tagType": "secondary"
+            },
+            {
+              "type": "text_type",
+              "code": "LANG-TT-POEMA",
+              "name": "Poema",
+              "tagType": "secondary"
+            }
+          ]
+        },
+        {
+          "position": 25,
+          "type": "multiple_choice",
+          "stem": "¿Sobre qué se habla en el poema?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Sobre ropa tendida secándose al sol.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Sobre alguien que olvidó ropa en la terraza.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Sobre ropa tendida moviéndose con el viento.",
+              "isCorrect": true
+            },
+            {
+              "key": "D",
+              "text": "Sobre alguien que sueña mientras tiende la ropa.",
+              "isCorrect": false
+            }
+          ],
+          "correctKey": "C",
+          "skill": "Interpretar y relacionar",
+          "oa": "OA 5",
+          "contentAxis": "Poema",
+          "hasFigure": false,
+          "figureNote": null,
+          "taxonomy": [
+            {
+              "type": "descriptor",
+              "code": null,
+              "name": "Infieren el sentido global de un poema.",
+              "parentCode": "LANG-4B-OA05",
+              "tagType": "primary"
+            },
+            {
+              "type": "learning_objective",
+              "code": "LANG-4B-OA05",
+              "name": "OA 5",
+              "level": "4_basico",
+              "tagType": "secondary"
+            },
+            {
+              "type": "skill",
+              "code": "LANG-SK-INTERPRETAR-Y-RELACIONAR",
+              "name": "Interpretar y relacionar",
+              "tagType": "secondary"
+            },
+            {
+              "type": "text_type",
+              "code": "LANG-TT-POEMA",
+              "name": "Poema",
+              "tagType": "secondary"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "extraction": {
+    "itemCount": 25,
+    "warnings": [
+      "Q12 es un ítem híbrido Sí/No + fundamentación; modelado como open_ended.",
+      "Q23 incluye una estrofa-estímulo propia del ítem, embebida en el stem.",
+      "Textos transcritos desde la capa de texto del PDF (pdftotext), verbatim."
+    ],
+    "needsHumanReview": false
+  },
+  "pauta": {
+    "source": {
+      "report": "RBD25520_DIA_LECTURA_5_A_Resultados_Asignatura_Diagnostico_2025.pdf",
+      "subjectCode": "LANG",
+      "gradeCode": "5TH_BASIC",
+      "applicationPeriod": "diagnostico",
+      "year": 2025,
+      "instrumentJson": "extraccion/lenguaje/5º lenguaje diagnóstico 2025.json"
+    },
+    "appliedKeys": 23,
+    "issues": []
+  }
+}

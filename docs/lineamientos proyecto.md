@@ -99,6 +99,23 @@ Para evitar alucinaciones en la IA Remedial:
 - **Fase 4 (2027) - Ecosistema Propietario:** Marketplace de contenido, LMS clase a clase, Tracker Curricular y AI Grading Total (Zonal OCR).
 - **Fase 5 (Post 2027) - Escalamiento:** Full Curriculum (Todas las asignaturas 1°B a 4°M) y Modelos Predictivos.
 
+### 5.1 Deuda Técnica Diferida (decisiones de secuenciación)
+
+Tres piezas de infraestructura "robusta" mencionadas en la arquitectura (§3-§4) se **difieren
+conscientemente** para priorizar iteración rápida y testeo con los primeros colegios piloto. **No son
+descartes**: cada una se encapsula tras un puerto/abstracción para que adoptarla luego sea cambiar la
+implementación, no reescribir los callers. La regla es introducirlas **cuando un gatillo real lo
+justifique**, no por anticipado (arquitectura sólida no aporta valor si retrasa llegar a usuarios).
+
+| Deuda | Qué se usa en su lugar (piloto) | Gatillo para adoptarla | Horizonte |
+|---|---|---|---|
+| **BullMQ + Redis** (cola distribuida) | Procesamiento async **in-process** sobre jobs en DB (patrón `import_jobs`) tras el puerto `JobDispatcher`, con semáforo de concurrencia + reaper de colgados | Múltiples instancias de API, carga en ráfaga real, o jobs programados/recurrentes a escala | F3+ |
+| **pgvector + embeddings del currículo** | **Recuperación curricular estructurada** (`CurriculumRetriever`): traversal de `taxonomy_nodes` (nodo + ancestros + descriptores + hermanos + ítems etiquetados). Cumple la intención anti-alucinación de §4.3 | Corpus pedagógico **no estructurado** (recursos/textos fuera de la taxonomía), matching semántico cross-currículo más allá de `taxonomy_mappings`, o evidencia pedagógica de que el contexto estructurado no alcanza | F3+ |
+| **Read-model materializado (CQRS, §4.2)** | **Query directa indexada tras el Service** para lecturas single-tenant. Solo el benchmarking cross-tenant pre-computa, y arranca como **tabla resumen por schedule** (no vistas materializadas con refresh incremental) | Un dashboard single-tenant medido lento (colegio grande / varios años de historia), o volumen del agregado cross-tenant que la tabla resumen no sostenga; escalamiento a ClickHouse/DuckDB más adelante | F3+ |
+
+> Detalle y ubicación de estas decisiones en la planificación de F2: `docs/Sprints/Planificación F2.md`
+> (§2 "Decisiones de alcance" y "Qué NO entra en F2").
+
 ---
 
 ## 6. Unit Economics y Dimensionamiento

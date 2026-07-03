@@ -19,7 +19,7 @@ export function MockLoginForm({ users }: { users: MockUser[] }) {
     e.preventDefault();
     if (!email) return;
     setLoading(true);
-    await signIn('mock', { email, callbackUrl: '/dashboard' });
+    await signIn('mock', { email, callbackUrl: '/seleccionar-colegio' });
   }
 
   return (

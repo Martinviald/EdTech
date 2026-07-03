@@ -41,6 +41,11 @@ coverage/
 packages/db/drizzle/*
 !packages/db/drizzle/migrations/
 
+# SST / OpenNext (infra) — artefactos generados, no versionar
+.sst/
+sst-env.d.ts
+.open-next/
+
 # Misc
 .cache/
 .eslintcache
@@ -51,3 +56,10 @@ claude/
 .claude-soe/
 # Archivos de prueba locales de spec-table
 packages/db/data/test-spec-table.csv
+
+# CSCJ — datos con PII de alumnos (nombres/RUTs). Nunca versionar (Ley 19.628).
+# Solo se versionan los scripts; sus salidas de datos quedan fuera de git.
+# (La planilla de digitación se genera en ../docs, fuera de este repo.)
+scripts/cscj/**/*.xlsx
+scripts/cscj/**/*.csv
+scripts/cscj/**/*.json
