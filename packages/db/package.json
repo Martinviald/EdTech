@@ -31,7 +31,9 @@
     "db:seed:taxonomy": "tsx src/seed/taxonomy-real.ts",
     "db:import:instruments": "tsx src/seed/import-instruments.ts",
     "db:import:item-tags": "tsx src/seed/import-item-tags.ts",
-    "db:reset": "tsx src/reset-schema.ts && tsx src/migrate.ts && tsx src/seed/index.ts && tsx src/seed/e2e-testing.ts && tsx src/seed/benchmark-demo.ts",
+    "db:seed:dev": "tsx src/seed/index.ts && tsx src/seed/taxonomy-real.ts && tsx src/seed/import-instruments.ts && tsx src/seed/import-item-tags.ts && tsx src/seed/e2e-testing.ts && tsx src/seed/benchmark-demo.ts",
+    "db:migrate:dev": "tsx src/migrate.ts && pnpm db:seed:dev",
+    "db:reset": "tsx src/reset-schema.ts && pnpm db:migrate:dev",
     "lint": "echo 'lint: db ok'",
     "typecheck": "tsc --noEmit",
     "clean": "rm -rf dist .turbo *.tsbuildinfo"
