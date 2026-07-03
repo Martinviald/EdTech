@@ -1,5 +1,5 @@
 import { GeminiProvider } from './gemini.provider';
-import type { LlmAgentEvent, LlmAgentRequest } from '../llm.types';
+import type { LlmAgentEvent, LlmAgentRequest, LlmCompletionRequest } from '../llm.types';
 
 // ──────────────────────────────────────────────────────────────────────────────
 // Fake del cliente @google/genai: scriptea `generateContentStream` con un async
@@ -192,5 +192,40 @@ describe('GeminiProvider.streamWithTools', () => {
       properties: { classGroupId: { type: 'string' } },
       required: [],
     });
+  });
+});
+
+describe('GeminiProvider.complete', () => {
+  function makeCompletionRequest(): LlmCompletionRequest {
+    return {
+      system: 'sistema',
+      prompt: 'analiza la evaluación',
+      options: { model: 'gemini-2.5-flash', maxTokens: 8192, temperature: 0 },
+    };
+  }
+
+  it('usa generateContentStream y ACUMULA el texto de los chunks (JSON completo)', async () => {
+    const provider = new GeminiProvider();
+    // El JSON llega partido en varios chunks (como haría el streaming real).
+    const fake = makeFakeClient([
+      { candidates: [{ content: { parts: [{ text: '{"headline":' }] } }] },
+      { candidates: [{ content: { parts: [{ text: '"todo ok",' }] } }] },
+      { candidates: [{ content: { parts: [{ text: '"n":3}' }] } }] },
+      { candidates: [{ finishReason: 'STOP', content: { parts: [] } }] },
+    ]);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (provider as any).client = fake;
+
+    const result = await provider.complete(makeCompletionRequest());
+
+    // El caller recibe el JSON COMPLETO acumulado, no un fragmento.
+    expect(result).toBe('{"headline":"todo ok","n":3}');
+    // Va por STREAMING (no por generateContent): así la conexión no queda idle y
+    // no la corta el idle-timeout de egress (~60s en AWS → "fetch failed").
+    expect(fake.models.generateContentStream).toHaveBeenCalledTimes(1);
+    const cfg = (fake.models.generateContentStream as jest.Mock).mock.calls[0][0].config;
+    expect(cfg.responseMimeType).toBe('application/json');
+    // Flash → thinking OFF (no truncar el JSON).
+    expect(cfg.thinkingConfig).toEqual({ thinkingBudget: 0 });
   });
 });
