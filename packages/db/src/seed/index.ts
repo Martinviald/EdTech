@@ -38,6 +38,9 @@ export const DEMO_STUDENT_IDS = {
 export const DEMO_ACADEMIC_YEAR_ID = 'dec00000-0000-0000-0000-000000000071';
 export const DEMO_CLASS_GROUP_ID = 'dec00000-0000-0000-0000-000000000072';
 export const DEMO_SUBJECT_CLASS_LANG_ID = 'dec00000-0000-0000-0000-000000000073';
+// Año vigente del segundo tenant, para que el usuario multi-org no aterrice en
+// un estado sin configurar al cambiar a Colegio San Patricio.
+export const DEMO_ORG2_ACADEMIC_YEAR_ID = 'dec00000-0000-0000-0000-000000000074';
 
 // Platform admins: operadores de la plataforma con acceso global, sin membership de colegio.
 export const PLATFORM_ADMIN_USER_IDS = {
@@ -202,6 +205,35 @@ async function main() {
       orgId: DEMO_ORG2_ID,
       role: 'school_admin',
       isActive: true,
+    })
+    .onConflictDoNothing();
+
+  // -------- Usuario multi-org para testear el selector de organización --------
+  // Admin Demo pertenece a AMBOS colegios, con distinto rol en cada uno:
+  // school_admin en Colegio Demo y academic_director en San Patricio. Al iniciar
+  // sesión aterriza en Colegio Demo (rol de mayor jerarquía) y, vía el selector
+  // "Cambiar colegio", puede saltar a San Patricio — donde roles y permisos se
+  // recalculan a academic_director. Login mock: admin.demo@colegiodemo.cl.
+  console.log('Seeding membership multi-org (Admin Demo también en San Patricio)...');
+  await db
+    .insert(orgMemberships)
+    .values({
+      userId: DEMO_USER_IDS.admin,
+      orgId: DEMO_ORG2_ID,
+      role: 'academic_director',
+      isActive: true,
+    })
+    .onConflictDoNothing();
+
+  // Año académico vigente de San Patricio para que la vista directiva del
+  // segundo colegio tenga contexto y no caiga en el wizard de configuración.
+  await db
+    .insert(academicYears)
+    .values({
+      id: DEMO_ORG2_ACADEMIC_YEAR_ID,
+      orgId: DEMO_ORG2_ID,
+      year: 2026,
+      isCurrent: true,
     })
     .onConflictDoNothing();
 

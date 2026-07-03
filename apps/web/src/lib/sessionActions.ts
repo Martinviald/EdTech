@@ -20,3 +20,22 @@ export async function switchRoleAction(role: UserRole): Promise<SwitchRoleRespon
   }
   return apiPost<SwitchRoleResponse>('/auth/switch-role', { role });
 }
+
+type SwitchOrgResponse = {
+  orgId: string;
+  orgName: string;
+  roles: UserRole[];
+  activeRole: UserRole;
+};
+
+/**
+ * Server action que cambia la org activa del usuario multi-org.
+ *
+ * Llama a `/auth/switch-org`; el backend revalida el membership contra la BD y
+ * devuelve los roles + activeRole de la org destino (son por-org, así que
+ * cambian). El cliente pasa el resultado a `useSession().update({ activeOrg })`
+ * para que NextAuth re-emita el JWT — el callback `jwt` reconoce `trigger='update'`.
+ */
+export async function switchOrgAction(orgId: string): Promise<SwitchOrgResponse> {
+  return apiPost<SwitchOrgResponse>('/auth/switch-org', { orgId });
+}

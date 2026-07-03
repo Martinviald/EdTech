@@ -117,6 +117,147 @@ export async function listActiveMembershipsByEmail(
   return null;
 }
 
+/** Una org del usuario con todos sus memberships activos en ella. */
+export type OrgWithMemberships = {
+  organization: typeof organizations.$inferSelect;
+  memberships: Array<typeof orgMemberships.$inferSelect>;
+};
+
+export type OrgsWithUser = {
+  user: typeof users.$inferSelect;
+  orgs: OrgWithMemberships[];
+  isPending: false;
+};
+
+export type PendingOrgs = {
+  user: null;
+  orgs: [OrgWithMemberships];
+  isPending: true;
+};
+
+export type OrgsLookup = OrgsWithUser | PendingOrgs;
+
+/**
+ * Lookup multi-org + multi-rol del usuario por email.
+ *
+ * A diferencia de `listActiveMembershipsByEmail` (que colapsa a la primera
+ * org), agrupa TODOS los memberships activos por org, permitiendo el selector
+ * multi-org. Las orgs se ordenan por nombre para un orden estable.
+ *
+ *  - Caso real: usuario con memberships en 1+ orgs → orgs[] con sus roles.
+ *  - Caso pending: invitación con user_id NULL → una sola org pending.
+ *  - null si nada matchea.
+ *
+ * Soft-deleted users y memberships inactivos se excluyen.
+ */
+export async function listActiveOrgsWithMembershipsByEmail(
+  db: Database,
+  email: string,
+): Promise<OrgsLookup | null> {
+  const realRows = await db
+    .select({
+      user: users,
+      membership: orgMemberships,
+      organization: organizations,
+    })
+    .from(users)
+    .innerJoin(orgMemberships, eq(orgMemberships.userId, users.id))
+    .innerJoin(organizations, eq(organizations.id, orgMemberships.orgId))
+    .where(
+      and(
+        sql`lower(${users.email}) = lower(${email})`,
+        isNull(users.deletedAt),
+        eq(orgMemberships.isActive, true),
+      ),
+    );
+
+  if (realRows.length > 0) {
+    const byOrg = new Map<string, OrgWithMemberships>();
+    for (const row of realRows) {
+      const existing = byOrg.get(row.organization.id);
+      if (existing) {
+        existing.memberships.push(row.membership);
+      } else {
+        byOrg.set(row.organization.id, {
+          organization: row.organization,
+          memberships: [row.membership],
+        });
+      }
+    }
+    const orgs = Array.from(byOrg.values()).sort((a, b) =>
+      a.organization.name.localeCompare(b.organization.name),
+    );
+    return { user: realRows[0]!.user, orgs, isPending: false };
+  }
+
+  // Match con invitación pendiente (mismo criterio que listActiveMembershipsByEmail).
+  const pendingRows = await db
+    .select({
+      membership: orgMemberships,
+      organization: organizations,
+    })
+    .from(orgMemberships)
+    .innerJoin(organizations, eq(organizations.id, orgMemberships.orgId))
+    .where(
+      and(
+        isNull(orgMemberships.userId),
+        sql`lower(${orgMemberships.email}) = lower(${email})`,
+        eq(orgMemberships.isActive, true),
+      ),
+    )
+    .limit(1);
+
+  if (pendingRows[0]) {
+    return {
+      user: null,
+      orgs: [
+        {
+          organization: pendingRows[0].organization,
+          memberships: [pendingRows[0].membership],
+        },
+      ],
+      isPending: true,
+    };
+  }
+
+  return null;
+}
+
+/**
+ * Trae los memberships activos de un usuario real en UNA org específica.
+ * Usado por el flujo switch-org: revalida contra la BD (isActive) que el
+ * usuario sigue teniendo acceso a la org destino y devuelve sus roles frescos.
+ * Retorna null si el usuario no tiene ningún membership activo en esa org.
+ */
+export async function getActiveMembershipsForEmailAndOrg(
+  db: Database,
+  email: string,
+  orgId: string,
+): Promise<OrgWithMemberships | null> {
+  const rows = await db
+    .select({
+      membership: orgMemberships,
+      organization: organizations,
+    })
+    .from(users)
+    .innerJoin(orgMemberships, eq(orgMemberships.userId, users.id))
+    .innerJoin(organizations, eq(organizations.id, orgMemberships.orgId))
+    .where(
+      and(
+        sql`lower(${users.email}) = lower(${email})`,
+        isNull(users.deletedAt),
+        eq(orgMemberships.orgId, orgId),
+        eq(orgMemberships.isActive, true),
+      ),
+    );
+
+  if (rows.length === 0) return null;
+  return {
+    organization: rows[0]!.organization,
+    memberships: rows.map((r) => r.membership),
+  };
+}
+
 /**
  * @deprecated Usar `listActiveMembershipsByEmail` que retorna todos los
  * memberships activos. Esta función toma sólo el primero (no determinista)

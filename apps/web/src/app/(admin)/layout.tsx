@@ -26,6 +26,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
           user={session.user}
           roles={session.user.roles}
           activeRole={session.user.activeRole}
+          orgs={session.user.orgs}
           platformLink={
             session.user.orgId ? { href: '/dashboard', label: 'Ir a mi colegio' } : undefined
           }
