@@ -11,6 +11,7 @@ import {
   itemTaxonomyTags,
   itemVersions,
   taxonomyNodes,
+  withOrgContext,
   type Item,
 } from '@soe/db';
 import { validateItemContent } from '@soe/types';
@@ -458,11 +459,21 @@ export class ItemsService {
         if (!user.orgId) throw new NotFoundException('Evaluación no encontrada');
         assessmentConditions.push(eq(assessments.orgId, user.orgId));
       }
-      const [assessment] = await this.db
-        .select({ instrumentId: assessments.instrumentId })
-        .from(assessments)
-        .where(and(...assessmentConditions))
-        .limit(1);
+      // `assessments` tiene RLS: la lectura debe correr dentro de withOrgContext
+      // para fijar app.current_org_id; si no, bajo soe_app (sin BYPASSRLS) el RLS
+      // devuelve 0 filas → NotFound (§5.2). Sólo ESTA query necesita contexto: las
+      // lecturas de `items`/tags de más abajo NO son tablas RLS. (platform_admin
+      // sin orgId es un caso cross-org preexistente fuera de alcance: corre sin
+      // contexto, igual que antes.)
+      const readInstrument = (db: Database) =>
+        db
+          .select({ instrumentId: assessments.instrumentId })
+          .from(assessments)
+          .where(and(...assessmentConditions))
+          .limit(1);
+      const [assessment] = user.orgId
+        ? await withOrgContext(this.db, user.orgId, (tx) => readInstrument(tx))
+        : await readInstrument(this.db);
       if (!assessment) throw new NotFoundException('Evaluación no encontrada');
 
       const itemConditions = [

@@ -36,29 +36,60 @@ type QueryBuilder = {
   then: <T>(resolve: (rows: T[]) => unknown) => Promise<unknown>;
 };
 
+function buildSelectChain(rows: unknown[]): QueryBuilder {
+  const chain: QueryBuilder = {
+    from: () => chain,
+    where: () => chain,
+    innerJoin: () => chain,
+    leftJoin: () => chain,
+    groupBy: () => chain,
+    orderBy: () => chain,
+    limit: () => chain,
+    offset: () => chain,
+    then: (resolve) => Promise.resolve(rows as never).then(resolve as never),
+  };
+  return chain;
+}
+
+// Mock estándar: getReport corre dentro de withOrgContext(db, orgId, fn) =
+// db.transaction(tx => { tx.execute(set_config); fn(tx) }). El mock ejecuta fn
+// con el mismo `db` (mismo selectIdx) y `execute` es no-op.
 function makeDb(selectResults: unknown[][]): Database {
   let selectIdx = 0;
-  function buildSelectChain(rows: unknown[]): QueryBuilder {
-    const chain: QueryBuilder = {
-      from: () => chain,
-      where: () => chain,
-      innerJoin: () => chain,
-      leftJoin: () => chain,
-      groupBy: () => chain,
-      orderBy: () => chain,
-      limit: () => chain,
-      offset: () => chain,
-      then: (resolve) => Promise.resolve(rows as never).then(resolve as never),
-    };
-    return chain;
-  }
-  return {
+  const db = {
     select: () => {
       const rows = selectResults[selectIdx] ?? [];
       selectIdx++;
       return buildSelectChain(rows);
     },
+    execute: async () => undefined,
+    transaction: async (fn: (tx: unknown) => unknown) => fn(db),
   } as unknown as Database;
+  return db;
+}
+
+// Mock que simula RLS (§5.2): las queries en `this.db` (SIN contexto de org)
+// devuelven SIEMPRE 0 filas, como haría PostgreSQL bajo un rol sin BYPASSRLS.
+// Sólo dentro de `transaction` (el `tx` de withOrgContext, con app.current_org_id
+// fijado) las queries ven las filas precargadas. Si algún día getReport dejara de
+// envolver en withOrgContext, requireAssessment leería de `this.db` → [] →
+// NotFound, y el test de regresión abajo fallaría.
+function makeRlsAwareDb(selectResults: unknown[][]): Database {
+  let selectIdx = 0;
+  const tx = {
+    select: () => {
+      const rows = selectResults[selectIdx] ?? [];
+      selectIdx++;
+      return buildSelectChain(rows);
+    },
+    execute: async () => undefined,
+  };
+  const db = {
+    select: () => buildSelectChain([]), // RLS sin contexto → 0 filas
+    execute: async () => undefined,
+    transaction: async (fn: (t: unknown) => unknown) => fn(tx),
+  } as unknown as Database;
+  return db;
 }
 
 function makeService(db: Database): AssessmentReportService {
@@ -239,5 +270,18 @@ describe('AssessmentReportService.getReport', () => {
     // Los ítems siguen listándose (estructura), pero sin métricas.
     expect(res.items).toHaveLength(2);
     expect(res.items[0].difficulty).toBeNull();
+  });
+
+  // Regresión §5.2: getReport DEBE correr dentro de withOrgContext. Con el mock
+  // RLS-aware, `this.db` (sin contexto) devuelve 0 filas y sólo el `tx` de la
+  // transacción ve datos. Si alguien quita el withOrgContext, requireAssessment
+  // leería de `this.db` → [] → NotFound y este test fallaría (reproduce el 404
+  // que ocurría en AWS bajo el rol soe_app sin BYPASSRLS).
+  it('resuelve el informe SOLO dentro del contexto de org (withOrgContext / RLS)', async () => {
+    const svc = makeService(makeRlsAwareDb(baseSelectResults()));
+    const res = await svc.getReport(makeUser(), { assessmentId: ASSESSMENT_ID });
+
+    expect(res.meta.assessmentId).toBe(ASSESSMENT_ID);
+    expect(res.summary.studentsEvaluated).toBe(4);
   });
 });
