@@ -68,6 +68,33 @@ La API emite un warning de arranque si detecta que conecta con un rol que bypass
 ```bash
 pnpm db:generate   # genera migración desde schema (NO toca rls-policies.sql)
 pnpm db:migrate    # aplica migraciones + re-aplica rls-policies.sql (idempotente)
-pnpm db:seed       # carga datos demo (usa DATABASE_ADMIN_URL → bypassa RLS)
-pnpm db:reset      # reset-schema + migrate + seed (destructivo, solo local)
+pnpm db:seed       # carga datos demo base (usa DATABASE_ADMIN_URL → bypassa RLS)
+pnpm db:seed:dev   # ⭐ SEED MAESTRO dev/testing: las 6 seeds en orden (ver abajo)
+pnpm db:migrate:dev # migra y luego corre db:seed:dev — el flujo post-migración
+pnpm db:reset      # reset-schema + migrate:dev (destructivo, solo local)
 ```
+
+### Seed maestro de dev/testing (`db:seed:dev`)
+
+Reseedea un entorno local completo para testear cambios. Corre las 6 seeds en el
+**orden de dependencias correcto** (todas idempotentes: borran-y-recrean por
+namespace de UUID, así que se puede re-ejecutar sin duplicar):
+
+| # | Seed | Aporta | Depende de |
+|---|---|---|---|
+| 1 | `index.ts` | Orgs demo + usuarios mock (admin/director/teacher) | — |
+| 2 | `taxonomy-real.ts` | Taxonomía real (marcos Currículum Nacional + DIA) | — |
+| 3 | `import-instruments.ts` | 24 instrumentos · 77 secciones · 612 ítems | (2) taxonomía |
+| 4 | `import-item-tags.ts` | ~2131 `item_taxonomy_tags` | (2)(3) |
+| 5 | `e2e-testing.ts` | 5 cursos · 74 alumnos · 10 evals · respuestas + resultados | (1)(2) |
+| 6 | `benchmark-demo.ts` | Cohorte de benchmarking (modo global + red) | — |
+
+**Uso típico tras una migración** (para validar los cambios en local):
+
+```bash
+pnpm db:migrate:dev   # = db:migrate + db:seed:dev
+```
+
+> Solo dev/testing. NO ejecutar en staging/producción (carga data demo).
+> `import-cscj-roster.ts` (roster real de CSCJ, PII) NO está incluida a propósito:
+> es data real, tiene dry-run por defecto y se corre aparte con `--commit`.
