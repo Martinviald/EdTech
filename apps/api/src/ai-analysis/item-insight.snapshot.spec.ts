@@ -80,6 +80,7 @@ function makeQuestion(
         taggedBy: 'human',
       },
     ],
+    section: null,
     totalResponses: 25,
     blankCount: 1,
     correctCount: 7,
