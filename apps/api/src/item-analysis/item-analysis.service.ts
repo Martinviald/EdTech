@@ -1026,8 +1026,13 @@ export class ItemAnalysisService {
       throw new NotFoundException('Pregunta no encontrada');
     }
 
+    // Visible si es oficial (org null, ej. instrumentos DIA compartidos) o de la
+    // org del caller. Sólo se rechaza si pertenece a OTRA org. Misma semántica que
+    // buildVisibilityConditions en items.service (org propia + oficiales). Sin el
+    // `itemOrg !== null`, la matriz mostraba las preguntas pero el detalle las
+    // tumbaba con "Pregunta no encontrada" para todo instrumento oficial.
     const itemOrg = row.orgId ?? row.instrumentOrgId;
-    if (!user.isPlatformAdmin && itemOrg !== orgId) {
+    if (!user.isPlatformAdmin && itemOrg !== null && itemOrg !== orgId) {
       throw new NotFoundException('Pregunta no encontrada');
     }
 
