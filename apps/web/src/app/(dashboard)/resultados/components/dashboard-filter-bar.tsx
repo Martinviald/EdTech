@@ -38,20 +38,49 @@ export function DashboardFilterBar({
   const router = useRouter();
   const searchParams = useSearchParams();
 
-  const updateFilter = useCallback(
-    (key: keyof DashboardFilterValues, next: string) => {
+  // Aplica varias claves de filtro en un solo router.push (atómico). Un valor
+  // null/vacío/ALL borra la clave. Cambiar filtros reinicia la paginación (H6.4).
+  const applyFilters = useCallback(
+    (updates: Partial<Record<keyof DashboardFilterValues, string | null>>) => {
       const params = new URLSearchParams(searchParams.toString());
-      if (next && next !== ALL) {
-        params.set(key, next);
-      } else {
-        params.delete(key);
+      for (const [key, next] of Object.entries(updates)) {
+        if (next && next !== ALL) {
+          params.set(key, next);
+        } else {
+          params.delete(key);
+        }
       }
-      // Cambiar filtros reinicia la paginación de la clasificación (H6.4).
       params.delete('page');
       const qs = params.toString();
       router.push(`${basePath}${qs ? `?${qs}` : ''}` as Route);
     },
     [router, searchParams, basePath],
+  );
+
+  const updateFilter = useCallback(
+    (key: keyof DashboardFilterValues, next: string) =>
+      applyFilters({ [key]: next }),
+    [applyFilters],
+  );
+
+  // Al elegir un nivel, si el curso ya seleccionado no pertenece a ese nivel,
+  // se limpia junto con el cambio de grado (evita filtrar por un curso que ni
+  // siquiera aparece en el dropdown de Cursos).
+  const updateGrade = useCallback(
+    (next: string) => {
+      const nextGrade = next && next !== ALL ? next : null;
+      const courseStillValid =
+        !value.classGroupId ||
+        !nextGrade ||
+        options.classGroups.some(
+          (c) => c.id === value.classGroupId && c.gradeId === nextGrade,
+        );
+      applyFilters({
+        gradeId: nextGrade,
+        ...(courseStillValid ? {} : { classGroupId: null }),
+      });
+    },
+    [applyFilters, options.classGroups, value.classGroupId],
   );
 
   const clearAll = useCallback(() => {
@@ -68,6 +97,12 @@ export function DashboardFilterBar({
   const instrumentTypes = Array.from(
     new Map(options.instruments.map((i) => [i.type, i.type])).values(),
   );
+
+  // El dropdown de Cursos solo muestra los cursos del nivel seleccionado.
+  // Sin nivel elegido, se muestran todos.
+  const coursesForGrade = value.gradeId
+    ? options.classGroups.filter((c) => c.gradeId === value.gradeId)
+    : options.classGroups;
 
   return (
     <div className="flex flex-wrap items-end gap-3 rounded-lg border bg-card p-4">
@@ -90,13 +125,13 @@ export function DashboardFilterBar({
         placeholder="Todos los grados"
         value={value.gradeId}
         options={options.grades}
-        onChange={(v) => updateFilter('gradeId', v)}
+        onChange={updateGrade}
       />
       <FilterSelect
         label="Curso"
         placeholder="Todos los cursos"
         value={value.classGroupId}
-        options={options.classGroups.map((c) => ({ id: c.id, label: c.label }))}
+        options={coursesForGrade.map((c) => ({ id: c.id, label: c.label }))}
         onChange={(v) => updateFilter('classGroupId', v)}
       />
       {instrumentTypes.length > 0 ? (
