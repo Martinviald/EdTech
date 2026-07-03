@@ -35,6 +35,9 @@ jobs:
 
       - run: pnpm install --frozen-lockfile
 
+      - name: Build workspace packages (needed for next build)
+        run: pnpm --filter @soe/types build && pnpm --filter @soe/db build
+
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
