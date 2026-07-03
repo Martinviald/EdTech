@@ -1,3 +1,5 @@
+import { redirect } from 'next/navigation';
+import { auth } from '@/auth';
 import { HeroSection } from '@/components/marketing/HeroSection';
 import { TrustStrip } from '@/components/marketing/TrustStrip';
 import { ProblemSection } from '@/components/marketing/ProblemSection';
@@ -8,7 +10,13 @@ import { AiSection } from '@/components/marketing/AiSection';
 import { PricingTeaser } from '@/components/marketing/PricingTeaser';
 import { FinalCtaSection } from '@/components/marketing/FinalCtaSection';
 
-export default function LandingPage() {
+export default async function LandingPage() {
+  // Un usuario ya autenticado no debe ver la landing pública: lo enviamos al
+  // resolver post-login (`/seleccionar-colegio`), que centraliza el destino
+  // según org/rol. Consultar la sesión vuelve dinámica esta página (esperado).
+  const session = await auth();
+  if (session?.user) redirect('/seleccionar-colegio');
+
   return (
     <>
       <HeroSection />
