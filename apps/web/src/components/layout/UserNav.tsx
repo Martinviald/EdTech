@@ -17,6 +17,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { ROLE_LABELS } from './nav-items';
 import { RoleSwitcher } from './RoleSwitcher';
+import { OrgSwitcher } from './OrgSwitcher';
 
 interface UserNavProps {
   user: {
@@ -27,11 +28,22 @@ interface UserNavProps {
   roles: readonly UserRole[];
   activeRole: UserRole;
   orgName: string;
+  /** Orgs del usuario para el selector multi-org. Si tiene ≤1, no se muestra. */
+  orgs?: readonly { id: string; name: string }[];
+  activeOrgId?: string | null;
   /** Si está presente, muestra el acceso para alternar colegio ↔ panel de plataforma. */
   platformLink?: { href: string; label: string };
 }
 
-export function UserNav({ user, roles, activeRole, orgName, platformLink }: UserNavProps) {
+export function UserNav({
+  user,
+  roles,
+  activeRole,
+  orgName,
+  orgs = [],
+  activeOrgId = null,
+  platformLink,
+}: UserNavProps) {
   const role = activeRole;
   const name = user.name ?? user.email ?? 'Usuario';
   const initials = getInitials(name);
@@ -81,6 +93,12 @@ export function UserNav({ user, roles, activeRole, orgName, platformLink }: User
                 {platformLink.label}
               </Link>
             </DropdownMenuItem>
+            <DropdownMenuSeparator />
+          </>
+        ) : null}
+        {orgs.length > 1 ? (
+          <>
+            <OrgSwitcher orgs={orgs} activeOrgId={activeOrgId} />
             <DropdownMenuSeparator />
           </>
         ) : null}

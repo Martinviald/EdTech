@@ -3,11 +3,15 @@ import type { DefaultSession } from 'next-auth';
 
 type UserRole = (typeof USER_ROLES)[number];
 
+type OrgSummary = { id: string; name: string };
+
 declare module 'next-auth' {
   interface Session {
     user: {
       id: string;
       orgId: string | null;
+      orgName: string | null;
+      orgs: OrgSummary[];
       roles: UserRole[];
       activeRole: UserRole;
       /** @deprecated mirror de activeRole durante la migración multi-rol. */
@@ -18,6 +22,8 @@ declare module 'next-auth' {
 
   interface User {
     orgId?: string | null;
+    orgName?: string | null;
+    orgs?: OrgSummary[];
     roles?: UserRole[];
     activeRole?: UserRole;
     /** @deprecated mirror de activeRole. */
@@ -30,6 +36,8 @@ declare module 'next-auth/jwt' {
   interface JWT {
     userId?: string;
     orgId?: string | null;
+    orgName?: string | null;
+    orgs?: OrgSummary[];
     roles?: UserRole[];
     activeRole?: UserRole;
     /** @deprecated mirror de activeRole. */
