@@ -43,17 +43,17 @@ type Person = {
 // Namespace de UUID propio (d3m0...) para los usuarios demo.
 const PEOPLE: Person[] = [
   // CSCJ — school_admin
-  { id: 'd3m00000-0000-0000-0000-000000000001', email: 'mvial@cscj.cl', name: 'M. Vial', orgId: CSCJ_SCHOOL_ID, role: 'school_admin' },
-  { id: 'd3m00000-0000-0000-0000-000000000002', email: 'ariztia.tomas@cscj.cl', name: 'Tomás Ariztía (CSCJ)', orgId: CSCJ_SCHOOL_ID, role: 'school_admin' },
-  { id: 'd3m00000-0000-0000-0000-000000000003', email: 'celton@cscj.cl', name: 'C. Elton', orgId: CSCJ_SCHOOL_ID, role: 'school_admin' },
+  { id: 'd3e00000-0000-0000-0000-000000000001', email: 'mvial@cscj.cl', name: 'M. Vial', orgId: CSCJ_SCHOOL_ID, role: 'school_admin' },
+  { id: 'd3e00000-0000-0000-0000-000000000002', email: 'ariztia.tomas@cscj.cl', name: 'Tomás Ariztía (CSCJ)', orgId: CSCJ_SCHOOL_ID, role: 'school_admin' },
+  { id: 'd3e00000-0000-0000-0000-000000000003', email: 'celton@cscj.cl', name: 'C. Elton', orgId: CSCJ_SCHOOL_ID, role: 'school_admin' },
   // CSCJ — academic_director ("director")
-  { id: 'd3m00000-0000-0000-0000-000000000004', email: 'fgutierrez@cscj.cl', name: 'F. Gutiérrez', orgId: CSCJ_SCHOOL_ID, role: 'academic_director' },
-  { id: 'd3m00000-0000-0000-0000-000000000005', email: 'tlagos@cscj.cl', name: 'T. Lagos', orgId: CSCJ_SCHOOL_ID, role: 'academic_director' },
+  { id: 'd3e00000-0000-0000-0000-000000000004', email: 'fgutierrez@cscj.cl', name: 'F. Gutiérrez', orgId: CSCJ_SCHOOL_ID, role: 'academic_director' },
+  { id: 'd3e00000-0000-0000-0000-000000000005', email: 'tlagos@cscj.cl', name: 'T. Lagos', orgId: CSCJ_SCHOOL_ID, role: 'academic_director' },
   // Platform admin
-  { id: 'd3m00000-0000-0000-0000-000000000006', email: 'martinviald@gmail.com', name: 'Martín Vial (Plataforma)', platformAdmin: true },
+  { id: 'd3e00000-0000-0000-0000-000000000006', email: 'martinviald@gmail.com', name: 'Martín Vial (Plataforma)', platformAdmin: true },
   // Acceso al Colegio Andes Centro (red demo) — school_admin
-  { id: 'd3m00000-0000-0000-0000-000000000007', email: 'ariztia.tomas@gmail.com', name: 'Tomás Ariztía (Andes)', orgId: ANDES_CENTRO_ID, role: 'school_admin' },
-  { id: 'd3m00000-0000-0000-0000-000000000008', email: 'cristobalelton@cscj.cl', name: 'Cristóbal Elton', orgId: ANDES_CENTRO_ID, role: 'school_admin' },
+  { id: 'd3e00000-0000-0000-0000-000000000007', email: 'ariztia.tomas@gmail.com', name: 'Tomás Ariztía (Andes)', orgId: ANDES_CENTRO_ID, role: 'school_admin' },
+  { id: 'd3e00000-0000-0000-0000-000000000008', email: 'cristobalelton@cscj.cl', name: 'Cristóbal Elton', orgId: ANDES_CENTRO_ID, role: 'school_admin' },
 ];
 
 async function main(): Promise<void> {
