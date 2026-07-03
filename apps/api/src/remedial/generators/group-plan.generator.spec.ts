@@ -29,9 +29,16 @@ function makeInput(overrides: Partial<RemedialMaterial> = {}): RemedialGeneratio
   };
 }
 
-function makeLlm(response: string): { llm: LlmService; complete: jest.Mock } {
-  const complete = jest.fn().mockResolvedValue(response);
-  return { llm: { complete } as unknown as LlmService, complete };
+function makeLlm(response: string): {
+  llm: LlmService;
+  completeWithUsage: jest.Mock;
+} {
+  const completeWithUsage = jest.fn().mockResolvedValue({
+    text: response,
+    model: 'gemini-2.5-flash',
+    usage: { inputTokens: 100, outputTokens: 50 },
+  });
+  return { llm: { completeWithUsage } as unknown as LlmService, completeWithUsage };
 }
 
 /** Mock DB: el select de skill_results devuelve `belowRows` (alumnos bajo umbral). */
@@ -79,12 +86,12 @@ describe('GroupPlanGenerator', () => {
   });
 
   it('NO envía PII al LLM (sin nombres/rut/studentId en el prompt)', async () => {
-    const { llm, complete } = makeLlm(JSON.stringify(validPlan));
+    const { llm, completeWithUsage } = makeLlm(JSON.stringify(validPlan));
     const db = makeDb([{ percentage: '30.00' }]);
     const gen = new GroupPlanGenerator(llm, db);
     await gen.generate(makeInput());
 
-    const [, prompt] = complete.mock.calls[0]!;
+    const [, prompt] = completeWithUsage.mock.calls[0]!;
     expect(prompt).not.toMatch(/rut|firstName|lastName|studentId/i);
     // solo agregados: el conteo sí va
     expect(prompt).toMatch(/studentCount.*1|1.*alumno/i);

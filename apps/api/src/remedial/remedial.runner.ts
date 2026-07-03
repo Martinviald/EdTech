@@ -5,10 +5,7 @@ import type { RemedialMaterialType } from '@soe/types';
 import { InjectDb, type Database } from '../database/database.types';
 import { RemedialContextService } from './remedial-context.service';
 import { RemedialService } from './remedial.service';
-import {
-  REMEDIAL_GENERATORS,
-  type RemedialGenerator,
-} from './remedial.generator';
+import { REMEDIAL_GENERATORS, type RemedialGenerator } from './remedial.generator';
 
 const REMEDIAL_TIMEOUT_MS_DEFAULT = 90_000;
 
@@ -61,10 +58,10 @@ export class RemedialRunner {
       await this.service.markReady(materialId, orgId, {
         content: result.content,
         input: result.audit,
-        model: null,
+        model: result.model,
         promptVersion: result.promptVersion,
-        tokens: null,
-        costUsd: null,
+        tokens: result.tokens,
+        costUsd: result.costUsd,
       });
     } catch (err) {
       const message = err instanceof Error ? err.message : String(err);
@@ -74,20 +71,12 @@ export class RemedialRunner {
 
   // ---------- helpers ----------
 
-  private async loadRecord(
-    materialId: string,
-    orgId: string,
-  ): Promise<RemedialMaterial> {
+  private async loadRecord(materialId: string, orgId: string): Promise<RemedialMaterial> {
     const row = await withOrgContext(this.db, orgId, async (tx) => {
       const [found] = await tx
         .select()
         .from(remedialMaterials)
-        .where(
-          and(
-            eq(remedialMaterials.id, materialId),
-            eq(remedialMaterials.orgId, orgId),
-          ),
-        )
+        .where(and(eq(remedialMaterials.id, materialId), eq(remedialMaterials.orgId, orgId)))
         .limit(1);
       return found;
     });

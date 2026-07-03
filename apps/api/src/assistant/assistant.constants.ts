@@ -1,4 +1,5 @@
 import type { AgentUsage } from '../llm/llm-agent.service';
+import { estimateLlmCostUsd } from '../llm/llm.pricing';
 
 /**
  * Constantes del módulo del Asistente IA Conversacional (E21 — Ola 3).
@@ -70,44 +71,13 @@ export const ASSISTANT_SYSTEM_PROMPT = [
 ].join('\n');
 
 /**
- * Tarifas de referencia (USD por 1.000.000 de tokens) por modelo, para estimar el
- * costo de cada turno con fines de OBSERVABILIDAD (no de facturación exacta). Son
- * precios de lista aproximados; ajustar si cambian. Claves por prefijo de modelo
- * para tolerar sufijos de versión/fecha (p. ej. `claude-sonnet-4-20250514`).
- */
-const MODEL_PRICING_PER_MTOK: ReadonlyArray<{
-  prefix: string;
-  inputUsd: number;
-  outputUsd: number;
-}> = [
-  // Anthropic Claude (tier Sonnet) — motor recomendado para el asistente.
-  { prefix: 'claude-sonnet', inputUsd: 3, outputUsd: 15 },
-  { prefix: 'claude-opus', inputUsd: 15, outputUsd: 75 },
-  { prefix: 'claude-haiku', inputUsd: 0.8, outputUsd: 4 },
-  { prefix: 'claude-3-5-haiku', inputUsd: 0.8, outputUsd: 4 },
-  { prefix: 'claude-3-haiku', inputUsd: 0.25, outputUsd: 1.25 },
-  // Google Gemini.
-  { prefix: 'gemini-2.0-flash', inputUsd: 0.1, outputUsd: 0.4 },
-  { prefix: 'gemini-1.5-flash', inputUsd: 0.075, outputUsd: 0.3 },
-  { prefix: 'gemini-1.5-pro', inputUsd: 1.25, outputUsd: 5 },
-];
-
-/**
- * Estima el costo en USD de un turno a partir del modelo y el uso de tokens.
- * Devuelve un string decimal (6 decimales) listo para la columna `cost_usd`, o
- * `null` si el modelo es desconocido (no inventamos una tarifa: el costo queda
- * sin registrar, igual que hoy en `ai_analyses`).
+ * Estima el costo en USD de un turno del asistente a partir del modelo y el uso de
+ * tokens. Delega en `estimateLlmCostUsd` (fuente única de tarifas en `llm.pricing`,
+ * compartida con el informe IA y los generadores remediales). `AgentUsage` es
+ * estructuralmente compatible con `LlmUsage` (`inputTokens`/`outputTokens`).
  */
 export function estimateAssistantCostUsd(model: string | null, usage: AgentUsage): string | null {
-  if (!model) return null;
-  const tariff = MODEL_PRICING_PER_MTOK.find((t) => model.startsWith(t.prefix));
-  if (!tariff) return null;
-
-  const cost =
-    (usage.inputTokens / 1_000_000) * tariff.inputUsd +
-    (usage.outputTokens / 1_000_000) * tariff.outputUsd;
-
-  return cost.toFixed(6);
+  return estimateLlmCostUsd(model, usage);
 }
 
 /** Largo máximo del título autogenerado desde el primer mensaje del usuario. */

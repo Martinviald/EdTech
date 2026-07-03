@@ -31,7 +31,13 @@ function makeInput(overrides: Partial<RemedialMaterial> = {}): RemedialGeneratio
 }
 
 function makeLlm(response: string): LlmService {
-  return { complete: jest.fn().mockResolvedValue(response) } as unknown as LlmService;
+  return {
+    completeWithUsage: jest.fn().mockResolvedValue({
+      text: response,
+      model: 'gemini-2.5-flash',
+      usage: { inputTokens: 100, outputTokens: 50 },
+    }),
+  } as unknown as LlmService;
 }
 
 type DbMock = Database & { __inserted: Array<Record<string, unknown>> };
@@ -97,7 +103,11 @@ describe('PracticeGenerator', () => {
     // 2 items + 2 tags
     const itemInserts = db.__inserted.filter((r) => 'source' in r);
     expect(itemInserts).toHaveLength(2);
-    expect(itemInserts[0]).toMatchObject({ source: 'ai_generated', status: 'draft', instrumentId: null });
+    expect(itemInserts[0]).toMatchObject({
+      source: 'ai_generated',
+      status: 'draft',
+      instrumentId: null,
+    });
 
     const tagInserts = db.__inserted.filter((r) => 'taggedBy' in r);
     expect(tagInserts).toHaveLength(2);

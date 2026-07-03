@@ -1,6 +1,8 @@
 import type { RemedialContent, RemedialMaterialType } from '@soe/types';
 import type { RemedialMaterial } from '@soe/db';
 import type { RemedialCurriculumContext } from './remedial-context.service';
+import { estimateLlmCostUsd } from '../llm/llm.pricing';
+import type { LlmCompletionResult } from '../llm/llm.types';
 
 /**
  * Datos de entrada que el runner entrega a cada generador: el registro de dominio
@@ -22,6 +24,12 @@ export interface RemedialGenerationResult {
   promptVersion: string;
   /** Contexto enviado al modelo (auditoría RAG, sin PII). */
   audit: Record<string, unknown>;
+  /** Modelo efectivo usado (para observabilidad de costo). `null` si desconocido. */
+  model: string | null;
+  /** Uso de tokens del turno. `null` si el provider no lo reporta. */
+  tokens: { input: number; output: number } | null;
+  /** Costo estimado en USD (string decimal 6). `null` si no se pudo estimar. */
+  costUsd: string | null;
 }
 
 /**
@@ -32,6 +40,26 @@ export interface RemedialGenerationResult {
 export interface RemedialGenerator {
   readonly type: RemedialMaterialType;
   generate(input: RemedialGenerationInput): Promise<RemedialGenerationResult>;
+}
+
+/**
+ * Deriva los campos de observabilidad (`model`/`tokens`/`costUsd`) desde el
+ * resultado de `LlmService.completeWithUsage`. Fuente única para los 3 generadores
+ * (DRY): el costo se estima con `estimateLlmCostUsd` (tarifas en `llm.pricing`).
+ */
+export function remedialUsageFields(
+  completion: LlmCompletionResult,
+): Pick<RemedialGenerationResult, 'model' | 'tokens' | 'costUsd'> {
+  return {
+    model: completion.model,
+    tokens: completion.usage
+      ? {
+          input: completion.usage.inputTokens,
+          output: completion.usage.outputTokens,
+        }
+      : null,
+    costUsd: estimateLlmCostUsd(completion.model, completion.usage),
+  };
 }
 
 /** Token de inyección NestJS para el array de generadores registrados. */

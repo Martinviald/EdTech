@@ -6,8 +6,10 @@ import type {
   LlmAgentRequest,
   LlmAgentStopReason,
   LlmCompletionRequest,
+  LlmCompletionResult,
   LlmProvider,
   LlmProviderName,
+  LlmUsage,
 } from '../llm.types';
 
 /**
@@ -161,15 +163,20 @@ export class GeminiProvider implements LlmProvider {
   }
 
   async complete(request: LlmCompletionRequest): Promise<string> {
+    return (await this.completeWithUsage(request)).text;
+  }
+
+  async completeWithUsage(request: LlmCompletionRequest): Promise<LlmCompletionResult> {
     if (!this.client) {
       throw new Error('Gemini provider no está disponible');
     }
 
-    return this.streamToString({
+    const { text, usage } = await this.streamToResult({
       model: request.options.model,
       contents: request.prompt,
       config: this.completionConfig(request),
     });
+    return { text, model: request.options.model, usage };
   }
 
   /**
@@ -199,11 +206,11 @@ export class GeminiProvider implements LlmProvider {
    * informes largos) resetee la conexión. El asistente ya funcionaba por esta
    * misma razón (usa streaming); el caller sigue recibiendo el JSON completo.
    */
-  private async streamToString(req: {
+  private async streamToResult(req: {
     model: string;
     contents: string | GeminiPart[];
     config: GeminiCompletionConfig;
-  }): Promise<string> {
+  }): Promise<{ text: string; usage: LlmUsage | null }> {
     const client = this.client as unknown as {
       models: {
         generateContentStream(r: {
@@ -216,13 +223,23 @@ export class GeminiProvider implements LlmProvider {
 
     const stream = await client.models.generateContentStream(req);
     let text = '';
+    // Gemini reporta el uso ACUMULADO en `usageMetadata`; nos quedamos con el
+    // último chunk que lo trae (el total del turno). Mismo criterio que la ruta
+    // agéntica (`streamWithTools`).
+    let usage: LlmUsage | null = null;
     for await (const chunk of stream) {
       const parts = chunk.candidates?.[0]?.content?.parts ?? [];
       for (const part of parts) {
         if (typeof part.text === 'string') text += part.text;
       }
+      if (chunk.usageMetadata) {
+        usage = {
+          inputTokens: chunk.usageMetadata.promptTokenCount ?? 0,
+          outputTokens: chunk.usageMetadata.candidatesTokenCount ?? 0,
+        };
+      }
     }
-    return text;
+    return { text, usage };
   }
 
   /**
@@ -232,13 +249,17 @@ export class GeminiProvider implements LlmProvider {
    * delega en `complete` (solo texto) — mismo patrón tolerante al SDK ausente.
    */
   async completeMultimodal(request: LlmCompletionRequest): Promise<string> {
+    return (await this.completeMultimodalWithUsage(request)).text;
+  }
+
+  async completeMultimodalWithUsage(request: LlmCompletionRequest): Promise<LlmCompletionResult> {
     if (!this.client) {
       throw new Error('Gemini provider no está disponible');
     }
 
     const images = request.images ?? [];
     if (images.length === 0) {
-      return this.complete(request);
+      return this.completeWithUsage(request);
     }
 
     const parts: GeminiPart[] = [
@@ -248,13 +269,14 @@ export class GeminiProvider implements LlmProvider {
       })),
     ];
 
-    // Mismo streaming-acumulado que `complete` (ver `streamToString`): el único
+    // Mismo streaming-acumulado que `complete` (ver `streamToResult`): el único
     // caller multimodal (item-insight con imágenes) también parsea JSON.
-    return this.streamToString({
+    const { text, usage } = await this.streamToResult({
       model: request.options.model,
       contents: parts,
       config: this.completionConfig(request),
     });
+    return { text, model: request.options.model, usage };
   }
 
   /**
