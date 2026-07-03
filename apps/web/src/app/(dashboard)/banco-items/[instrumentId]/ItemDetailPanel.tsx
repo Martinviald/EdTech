@@ -1,8 +1,12 @@
 'use client';
 
-import type { JSX } from 'react';
-import { CheckCircle2, FileQuestion, Sparkles } from 'lucide-react';
-import type { ItemModel, ItemTaxonomyTagModel } from '@soe/types';
+import { useState, type JSX } from 'react';
+import { BookOpen, CheckCircle2, FileQuestion, Sparkles } from 'lucide-react';
+import type {
+  ItemModel,
+  ItemTaxonomyTagModel,
+  InstrumentSectionModel,
+} from '@soe/types';
 import {
   Sheet,
   SheetContent,
@@ -11,7 +15,30 @@ import {
   SheetTitle,
 } from '@/components/ui/sheet';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import {
+  PassageDialog,
+  hasPassageContent,
+  type PassageAttachment,
+  type PassageData,
+} from '@/components/passage-dialog';
 import { cn } from '@/lib/utils';
+
+function sectionToPassage(section: InstrumentSectionModel): PassageData {
+  return {
+    sectionName: section.name,
+    passageTitle: section.passageTitle,
+    passageText: section.passageText,
+    passageFormat: section.passageFormat,
+    attachments: (section.attachments ?? []).map<PassageAttachment>((a) => ({
+      kind: a.kind,
+      url: a.url,
+      fileName: a.fileName,
+      mimeType: a.mimeType,
+      note: a.note,
+    })),
+  };
+}
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Panel de detalle de un ítem del banco. Muestra el enunciado completo, las
@@ -66,10 +93,17 @@ function getStringField(content: Record<string, unknown>, field: string): string
 
 export function ItemDetailPanel(props: {
   item: ItemModel | null;
+  sections?: InstrumentSectionModel[];
   open: boolean;
   onClose: () => void;
 }): JSX.Element {
-  const { item, open, onClose } = props;
+  const { item, sections = [], open, onClose } = props;
+  const [passageOpen, setPassageOpen] = useState(false);
+
+  const section = item?.sectionId
+    ? sections.find((s) => s.id === item.sectionId) ?? null
+    : null;
+  const showPassage = hasPassageContent(section);
 
   return (
     <Sheet open={open} onOpenChange={(next) => (next ? undefined : onClose())}>
@@ -94,8 +128,28 @@ export function ItemDetailPanel(props: {
           </SheetDescription>
         </SheetHeader>
 
+        {showPassage ? (
+          <Button
+            variant="outline"
+            size="sm"
+            className="mt-4 w-full justify-start gap-2"
+            onClick={() => setPassageOpen(true)}
+          >
+            <BookOpen className="size-4" aria-hidden />
+            Ver texto de lectura
+          </Button>
+        ) : null}
+
         {item ? <ItemDetailContent item={item} /> : null}
       </SheetContent>
+
+      {section ? (
+        <PassageDialog
+          open={passageOpen}
+          onOpenChange={setPassageOpen}
+          passage={sectionToPassage(section)}
+        />
+      ) : null}
     </Sheet>
   );
 }

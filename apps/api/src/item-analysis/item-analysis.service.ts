@@ -11,9 +11,11 @@ import {
   classGroups,
   grades,
   instruments,
+  instrumentSections,
   itemTaxonomyTags,
   items,
   responses,
+  sectionAttachments,
   studentEnrollments,
   students,
   subjectClasses,
@@ -37,6 +39,7 @@ import {
   type MatrixStudentRow,
   type QuestionAnalysisQueryDto,
   type QuestionAnalysisResponse,
+  type QuestionSection,
   type QuestionTaxonomyTag,
   type UserRole,
 } from '@soe/types';
@@ -405,6 +408,9 @@ export class ItemAnalysisService {
 
       const { skill, contentRef } = await this.loadItemTags(tx, itemId);
       const tags = await this.loadAllItemTags(tx, itemId);
+      const section = item.sectionId
+        ? await this.loadQuestionSection(tx, item.sectionId)
+        : null;
 
       // ── Distribución agregada por valor de respuesta (1 query group by) ───────
       const dist = await this.loadAnswerDistribution(
@@ -454,6 +460,7 @@ export class ItemAnalysisService {
         skill,
         content: contentRef,
         tags,
+        section,
         totalResponses,
         blankCount,
         correctCount,
@@ -1003,6 +1010,7 @@ export class ItemAnalysisService {
   ): Promise<{
     id: string;
     instrumentId: string | null;
+    sectionId: string | null;
     position: number;
     type: string;
     content: Record<string, unknown>;
@@ -1013,6 +1021,7 @@ export class ItemAnalysisService {
         orgId: items.orgId,
         instrumentId: items.instrumentId,
         instrumentOrgId: instruments.orgId,
+        sectionId: items.sectionId,
         position: items.position,
         type: sql<string>`${items.type}::text`,
         content: items.content,
@@ -1034,9 +1043,56 @@ export class ItemAnalysisService {
     return {
       id: row.id,
       instrumentId: row.instrumentId,
+      sectionId: row.sectionId,
       position: row.position,
       type: row.type,
       content: row.content,
+    };
+  }
+
+  /** Sección de lectura (texto base + multimedia) del ítem; null si no tiene. */
+  private async loadQuestionSection(
+    tx: Database,
+    sectionId: string,
+  ): Promise<QuestionSection | null> {
+    const [sec] = await tx
+      .select({
+        id: instrumentSections.id,
+        name: instrumentSections.name,
+        passageTitle: instrumentSections.passageTitle,
+        passageText: instrumentSections.passageText,
+        passageFormat: sql<string | null>`${instrumentSections.passageFormat}::text`,
+      })
+      .from(instrumentSections)
+      .where(eq(instrumentSections.id, sectionId))
+      .limit(1);
+    if (!sec) return null;
+
+    const atts = await tx
+      .select({
+        kind: sql<string>`${sectionAttachments.kind}::text`,
+        url: sectionAttachments.url,
+        fileName: sectionAttachments.fileName,
+        mimeType: sectionAttachments.mimeType,
+        note: sectionAttachments.note,
+      })
+      .from(sectionAttachments)
+      .where(eq(sectionAttachments.sectionId, sectionId))
+      .orderBy(asc(sectionAttachments.order));
+
+    return {
+      id: sec.id,
+      name: sec.name,
+      passageTitle: sec.passageTitle ?? null,
+      passageText: sec.passageText ?? null,
+      passageFormat: sec.passageFormat ?? null,
+      attachments: atts.map((a) => ({
+        kind: a.kind,
+        url: a.url ?? null,
+        fileName: a.fileName ?? null,
+        mimeType: a.mimeType ?? null,
+        note: a.note ?? null,
+      })),
     };
   }
 

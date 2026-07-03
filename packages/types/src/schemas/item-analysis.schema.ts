@@ -153,6 +153,29 @@ export type QuestionTaxonomyTag = {
   taggedBy: string; // human | ai
 };
 
+/** Un adjunto multimedia de la sección (figura/audio/pdf) del ítem. */
+export type QuestionSectionAttachment = {
+  kind: string; // image | audio | pdf | other
+  url: string | null; // null si aún no se sube el archivo a S3
+  fileName: string | null;
+  mimeType: string | null;
+  note: string | null;
+};
+
+/**
+ * Sección de lectura (texto base + multimedia) a la que pertenece la pregunta.
+ * `null` si el ítem no cuelga de una sección con passage (ej. matemática sin
+ * texto). Permite mostrar el texto de lectura en la vista de resultados.
+ */
+export type QuestionSection = {
+  id: string;
+  name: string;
+  passageTitle: string | null;
+  passageText: string | null;
+  passageFormat: string | null; // 'plain' | 'markdown' | 'html'
+  attachments: QuestionSectionAttachment[];
+};
+
 export type QuestionAnalysisResponse = {
   itemId: string;
   position: number;
@@ -164,6 +187,7 @@ export type QuestionAnalysisResponse = {
   skill: ItemTaxonomyRef | null; // habilidad principal (representativo, compat)
   content: ItemTaxonomyRef | null; // contenido/OA principal (representativo, compat)
   tags: QuestionTaxonomyTag[]; // TODOS los nodos asociados a la pregunta
+  section: QuestionSection | null; // texto de lectura + multimedia de la sección
   totalResponses: number; // alumnos con respuesta registrada (incluye en blanco)
   blankCount: number; // alumnos sin alternativa elegida
   correctCount: number;

@@ -15,6 +15,7 @@ import {
   type ItemModel,
 } from '@soe/types';
 import { ItemsTable } from './ItemsTable';
+import { SectionsList } from './SectionsList';
 
 const TYPE_LABELS: Record<string, string> = {
   dia: 'DIA',
@@ -145,23 +146,7 @@ export default async function InstrumentDetailPage({ params }: PageProps) {
       {instrument.sections && instrument.sections.length > 0 && (
         <section className="space-y-3">
           <h2 className="text-sm font-medium uppercase text-muted-foreground">Secciones</h2>
-          <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
-            {instrument.sections.map((section) => (
-              <Card key={section.id}>
-                <CardContent className="py-3">
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm font-medium">{section.name}</span>
-                    {section.maxPoints && (
-                      <span className="text-xs text-muted-foreground">
-                        {section.maxPoints} pts
-                      </span>
-                    )}
-                  </div>
-                  <p className="text-xs text-muted-foreground">{section.type}</p>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
+          <SectionsList sections={instrument.sections} />
         </section>
       )}
 
@@ -170,7 +155,7 @@ export default async function InstrumentDetailPage({ params }: PageProps) {
         <h2 className="text-sm font-medium uppercase text-muted-foreground">
           Items ({items.length})
         </h2>
-        <ItemsTable items={items} />
+        <ItemsTable items={items} sections={instrument.sections ?? []} />
       </section>
     </div>
   );

@@ -10,7 +10,7 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
-import type { ItemModel } from '@soe/types';
+import type { ItemModel, InstrumentSectionModel } from '@soe/types';
 import { TagBadge } from './TagBadge';
 import { ItemDetailPanel } from './ItemDetailPanel';
 
@@ -49,7 +49,13 @@ function getContentPreview(content: Record<string, unknown>): string {
   return '(Sin contenido)';
 }
 
-export function ItemsTable({ items }: { items: ItemModel[] }) {
+export function ItemsTable({
+  items,
+  sections = [],
+}: {
+  items: ItemModel[];
+  sections?: InstrumentSectionModel[];
+}) {
   const [selected, setSelected] = useState<ItemModel | null>(null);
 
   if (items.length === 0) {
@@ -123,6 +129,7 @@ export function ItemsTable({ items }: { items: ItemModel[] }) {
 
       <ItemDetailPanel
         item={selected}
+        sections={sections}
         open={selected !== null}
         onClose={() => setSelected(null)}
       />

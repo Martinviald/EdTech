@@ -1,10 +1,11 @@
 'use client';
 
-import type { JSX } from 'react';
-import { CheckCircle2, FileQuestion, Loader2, Sparkles } from 'lucide-react';
+import { useState, type JSX } from 'react';
+import { BookOpen, CheckCircle2, FileQuestion, Loader2, Sparkles } from 'lucide-react';
 import type {
   AlternativeDistribution,
   QuestionAnalysisResponse,
+  QuestionSection,
   QuestionTaxonomyTag,
 } from '@soe/types';
 import {
@@ -15,7 +16,29 @@ import {
   SheetTitle,
 } from '@/components/ui/sheet';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import {
+  PassageDialog,
+  hasPassageContent,
+  type PassageData,
+} from '@/components/passage-dialog';
 import { cn } from '@/lib/utils';
+
+function questionSectionToPassage(section: QuestionSection): PassageData {
+  return {
+    sectionName: section.name,
+    passageTitle: section.passageTitle,
+    passageText: section.passageText,
+    passageFormat: section.passageFormat,
+    attachments: section.attachments.map((a) => ({
+      kind: a.kind,
+      url: a.url,
+      fileName: a.fileName,
+      mimeType: a.mimeType,
+      note: a.note,
+    })),
+  };
+}
 
 // ─────────────────────────────────────────────────────────────────────────────
 // H6.12 — Panel de distribución de respuestas + análisis de distractores.
@@ -50,6 +73,9 @@ export function QuestionDetailPanel(props: {
   onClose: () => void;
 }): JSX.Element {
   const { data, open, onClose } = props;
+  const [passageOpen, setPassageOpen] = useState(false);
+  const section = data?.section ?? null;
+  const showPassage = hasPassageContent(section);
 
   return (
     <Sheet open={open} onOpenChange={(next) => (next ? undefined : onClose())}>
@@ -77,6 +103,18 @@ export function QuestionDetailPanel(props: {
           </SheetDescription>
         </SheetHeader>
 
+        {showPassage ? (
+          <Button
+            variant="outline"
+            size="sm"
+            className="mt-4 w-full justify-start gap-2"
+            onClick={() => setPassageOpen(true)}
+          >
+            <BookOpen className="size-4" aria-hidden />
+            Ver texto de lectura
+          </Button>
+        ) : null}
+
         {data === null ? (
           <div className="flex flex-col items-center justify-center gap-3 py-16 text-muted-foreground">
             <Loader2 className="size-6 animate-spin" aria-hidden />
@@ -86,6 +124,14 @@ export function QuestionDetailPanel(props: {
           <QuestionDetailContent data={data} />
         )}
       </SheetContent>
+
+      {section ? (
+        <PassageDialog
+          open={passageOpen}
+          onOpenChange={setPassageOpen}
+          passage={questionSectionToPassage(section)}
+        />
+      ) : null}
     </Sheet>
   );
 }
