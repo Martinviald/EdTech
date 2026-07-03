@@ -502,6 +502,57 @@ describe('ItemAnalysisService.getQuestionAnalysis', () => {
     ).rejects.toBeInstanceOf(NotFoundException);
   });
 
+  // Regresión: los instrumentos oficiales (ej. DIA) tienen org_id NULL. El detalle
+  // de pregunta DEBE resolverlos (la matriz ya los muestra); antes los rechazaba
+  // con "Pregunta no encontrada" porque exigía org exacta (itemOrg === orgId).
+  it('resuelve una pregunta de instrumento OFICIAL (org_id NULL) sin lanzar', async () => {
+    const officialRow = {
+      id: ITEM_A,
+      orgId: null,
+      instrumentId: INSTRUMENT_ID,
+      instrumentOrgId: null,
+      position: 1,
+      type: 'multiple_choice',
+      content: {
+        stem: 'Pregunta oficial',
+        alternatives: [
+          { key: 'A', text: 'Opción A' },
+          { key: 'B', text: 'Opción B' },
+        ],
+        correctKey: 'B',
+      },
+    };
+    const db = makeDb([
+      [officialRow], // requireItemVisible → oficial (org null)
+      [], // loadItemTags
+      [], // loadAllItemTags
+      [{ answer: 'B', isCorrect: true, count: 5 }], // loadAnswerDistribution
+    ]);
+    const service = makeService(db);
+
+    const res = await service.getQuestionAnalysis(makeUser(), ITEM_A, {});
+    expect(res.itemId).toBe(ITEM_A);
+    expect(res.stem).toBe('Pregunta oficial');
+  });
+
+  // El fix NO debe abrir visibilidad de más: un ítem de OTRA org sigue oculto.
+  it('lanza NotFound si el ítem pertenece a OTRA org', async () => {
+    const otherOrgRow = {
+      id: ITEM_A,
+      orgId: 'org-OTRA',
+      instrumentId: INSTRUMENT_ID,
+      instrumentOrgId: 'org-OTRA',
+      position: 1,
+      type: 'multiple_choice',
+      content: { stem: 'x', alternatives: [], correctKey: null },
+    };
+    const db = makeDb([[otherOrgRow]]); // requireItemVisible → org ajena
+    const service = makeService(db);
+    await expect(
+      service.getQuestionAnalysis(makeUser(), ITEM_A, {}),
+    ).rejects.toBeInstanceOf(NotFoundException);
+  });
+
   it('ítem no de selección múltiple → alternatives vacías pero conserva totales', async () => {
     const openItem = {
       id: ITEM_B,
