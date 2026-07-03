@@ -22,6 +22,7 @@ import {
   subjects,
   taxonomyNodes,
   teacherAssignments,
+  withOrgContext,
 } from '@soe/db';
 import {
   RESULTS_VIEWER_ROLES,
@@ -100,156 +101,176 @@ export class AssessmentReportService {
     query: AssessmentReportQueryDto,
   ): Promise<AssessmentReportResponse> {
     const orgId = this.requireOrgId(user);
-    const assessment = await this.requireAssessment(user, orgId, query.assessmentId);
-    const scope = await this.getAccessibleClassGroupIds(user, orgId);
 
-    // Profesor sin scope sobre esta evaluación → 403.
-    if (!scope.scopeAll) {
-      const hasScope = await this.assessmentTouchesScope(
-        query.assessmentId,
-        scope.classGroupIds,
-      );
-      if (!hasScope) {
-        throw new ForbiddenException(
-          'No tiene acceso a los resultados de esta evaluación',
+    // Todo el informe consulta tablas con RLS (assessments, assessment_results,
+    // responses, skill_results, students). Debe correr dentro de withOrgContext
+    // para fijar `app.current_org_id` en la transacción; de lo contrario, bajo un
+    // rol sin BYPASSRLS (soe_app en cloud) el RLS devuelve 0 filas → 404 (§5.2).
+    // Los helpers de acceso a datos reciben el `tx` de la transacción, nunca
+    // this.db (una query en this.db correría sin contexto).
+    return withOrgContext(this.db, orgId, async (tx) => {
+      const assessment = await this.requireAssessment(tx, user, orgId, query.assessmentId);
+      const scope = await this.getAccessibleClassGroupIds(tx, user, orgId);
+
+      // Profesor sin scope sobre esta evaluación → 403.
+      if (!scope.scopeAll) {
+        const hasScope = await this.assessmentTouchesScope(
+          tx,
+          query.assessmentId,
+          scope.classGroupIds,
         );
+        if (!hasScope) {
+          throw new ForbiddenException(
+            'No tiene acceso a los resultados de esta evaluación',
+          );
+        }
       }
-    }
-    if (query.classGroupId) {
-      const ok = await this.classGroupInScope(orgId, scope, query.classGroupId);
-      if (!ok) throw new ForbiddenException('No tiene acceso a ese curso');
-    }
+      if (query.classGroupId) {
+        const ok = await this.classGroupInScope(tx, orgId, scope, query.classGroupId);
+        if (!ok) throw new ForbiddenException('No tiene acceso a ese curso');
+      }
 
-    const studentFilter = await this.resolveAccessibleStudentIds(
-      orgId,
-      scope,
-      query.classGroupId,
-    );
+      const studentFilter = await this.resolveAccessibleStudentIds(
+        tx,
+        orgId,
+        scope,
+        query.classGroupId,
+      );
 
-    const passingGrade = await this.resolvePassingGrade(assessment.gradingScaleId);
+      const passingGrade = await this.resolvePassingGrade(tx, assessment.gradingScaleId);
 
-    // Cursos de la evaluación visibles para el caller (intersectados con el scope).
-    const reportClassGroups = await this.loadAssessmentClassGroups(
-      query.assessmentId,
-      orgId,
-      scope,
-      query.classGroupId,
-    );
-    const gradeName = reportClassGroups.find((c) => c.gradeName)?.gradeName ?? null;
+      // Cursos de la evaluación visibles para el caller (intersectados con el scope).
+      const reportClassGroups = await this.loadAssessmentClassGroups(
+        tx,
+        query.assessmentId,
+        orgId,
+        scope,
+        query.classGroupId,
+      );
+      const gradeName = reportClassGroups.find((c) => c.gradeName)?.gradeName ?? null;
 
-    // Ítems del instrumento + sus tags (skill/content) representativos.
-    const itemColumns = await this.loadItemColumns(assessment.instrumentId);
-    const itemIds = itemColumns.map((i) => i.itemId);
+      // Ítems del instrumento + sus tags (skill/content) representativos.
+      const itemColumns = await this.loadItemColumns(tx, assessment.instrumentId);
+      const itemIds = itemColumns.map((i) => i.itemId);
 
-    // Alumnos evaluados (con assessment_results) dentro del scope.
-    const evaluated = await this.loadEvaluatedStudents(
-      query.assessmentId,
-      orgId,
-      studentFilter,
-    );
-    const classGroupByStudent = await this.loadStudentClassGroups(
-      query.assessmentId,
-      evaluated.map((s) => s.studentId),
-    );
-    const studentsEnrolled = await this.countEnrolled(reportClassGroups.map((c) => c.id));
+      // Alumnos evaluados (con assessment_results) dentro del scope.
+      const evaluated = await this.loadEvaluatedStudents(
+        tx,
+        query.assessmentId,
+        orgId,
+        studentFilter,
+      );
+      const classGroupByStudent = await this.loadStudentClassGroups(
+        tx,
+        query.assessmentId,
+        evaluated.map((s) => s.studentId),
+      );
+      const studentsEnrolled = await this.countEnrolled(
+        tx,
+        reportClassGroups.map((c) => c.id),
+      );
 
-    const meta = {
-      assessmentId: assessment.id,
-      assessmentName: assessment.name,
-      instrumentName: assessment.instrumentName,
-      instrumentType: assessment.instrumentType,
-      subjectName: assessment.subjectName,
-      gradeName,
-      administeredAt: assessment.administeredAt,
-      classGroups: reportClassGroups.map((c) => ({ id: c.id, name: c.name })),
-      itemsCount: itemColumns.length,
-    };
+      const meta = {
+        assessmentId: assessment.id,
+        assessmentName: assessment.name,
+        instrumentName: assessment.instrumentName,
+        instrumentType: assessment.instrumentType,
+        subjectName: assessment.subjectName,
+        gradeName,
+        administeredAt: assessment.administeredAt,
+        classGroups: reportClassGroups.map((c) => ({ id: c.id, name: c.name })),
+        itemsCount: itemColumns.length,
+      };
 
-    // Caso sin alumnos evaluados: informe vacío pero bien formado.
-    if (evaluated.length === 0) {
+      // Caso sin alumnos evaluados: informe vacío pero bien formado.
+      if (evaluated.length === 0) {
+        return {
+          meta,
+          summary: {
+            studentsEvaluated: 0,
+            studentsEnrolled,
+            coverageRate: studentsEnrolled > 0 ? 0 : null,
+            averageAchievement: null,
+            averageGrade: null,
+            passingGrade,
+            passingRate: null,
+            performanceLevel: null,
+          },
+          distribution: this.emptyDistribution(),
+          courseComparison: [],
+          skills: [],
+          highlights: { strengths: [], gaps: [] },
+          items: itemColumns.map((c) => this.emptyItemRow(c)),
+          studentsAtRisk: [],
+          recommendations: [],
+        };
+      }
+
+      // ── Síntesis ejecutiva ──────────────────────────────────────────────────
+      const summary = this.buildSummary(
+        evaluated,
+        studentsEnrolled,
+        passingGrade,
+        assessment.gradingScaleConfig,
+      );
+      const distribution = this.buildDistribution(evaluated);
+
+      // ── Comparativa por curso ───────────────────────────────────────────────
+      const courseComparison = this.buildCourseComparison(
+        evaluated,
+        classGroupByStudent,
+        passingGrade,
+        summary.averageAchievement,
+      );
+
+      // ── Análisis psicométrico de ítems ──────────────────────────────────────
+      const items = await this.buildItemAnalysis(
+        tx,
+        query.assessmentId,
+        itemColumns,
+        itemIds,
+        evaluated,
+        studentFilter,
+      );
+
+      // ── Fortalezas y brechas por habilidad ──────────────────────────────────
+      const skills = await this.buildSkills(
+        tx,
+        query.assessmentId,
+        orgId,
+        studentFilter,
+        assessment.gradingScaleConfig,
+      );
+      const highlights = this.buildHighlights(skills);
+
+      // ── Alumnos en foco ─────────────────────────────────────────────────────
+      const studentsAtRisk = await this.buildRiskStudents(
+        tx,
+        query.assessmentId,
+        evaluated,
+        classGroupByStudent,
+      );
+
+      // ── Recomendaciones (reglas) ────────────────────────────────────────────
+      const recommendations = this.buildRecommendations(
+        summary,
+        skills,
+        items,
+        studentsAtRisk,
+      );
+
       return {
         meta,
-        summary: {
-          studentsEvaluated: 0,
-          studentsEnrolled,
-          coverageRate: studentsEnrolled > 0 ? 0 : null,
-          averageAchievement: null,
-          averageGrade: null,
-          passingGrade,
-          passingRate: null,
-          performanceLevel: null,
-        },
-        distribution: this.emptyDistribution(),
-        courseComparison: [],
-        skills: [],
-        highlights: { strengths: [], gaps: [] },
-        items: itemColumns.map((c) => this.emptyItemRow(c)),
-        studentsAtRisk: [],
-        recommendations: [],
+        summary,
+        distribution,
+        courseComparison,
+        skills,
+        highlights,
+        items,
+        studentsAtRisk,
+        recommendations,
       };
-    }
-
-    // ── Síntesis ejecutiva ────────────────────────────────────────────────────
-    const summary = this.buildSummary(
-      evaluated,
-      studentsEnrolled,
-      passingGrade,
-      assessment.gradingScaleConfig,
-    );
-    const distribution = this.buildDistribution(evaluated);
-
-    // ── Comparativa por curso ─────────────────────────────────────────────────
-    const courseComparison = this.buildCourseComparison(
-      evaluated,
-      classGroupByStudent,
-      passingGrade,
-      summary.averageAchievement,
-    );
-
-    // ── Análisis psicométrico de ítems ────────────────────────────────────────
-    const items = await this.buildItemAnalysis(
-      query.assessmentId,
-      itemColumns,
-      itemIds,
-      evaluated,
-      studentFilter,
-    );
-
-    // ── Fortalezas y brechas por habilidad ────────────────────────────────────
-    const skills = await this.buildSkills(
-      query.assessmentId,
-      orgId,
-      studentFilter,
-      assessment.gradingScaleConfig,
-    );
-    const highlights = this.buildHighlights(skills);
-
-    // ── Alumnos en foco ───────────────────────────────────────────────────────
-    const studentsAtRisk = await this.buildRiskStudents(
-      query.assessmentId,
-      evaluated,
-      classGroupByStudent,
-    );
-
-    // ── Recomendaciones (reglas) ──────────────────────────────────────────────
-    const recommendations = this.buildRecommendations(
-      summary,
-      skills,
-      items,
-      studentsAtRisk,
-    );
-
-    return {
-      meta,
-      summary,
-      distribution,
-      courseComparison,
-      skills,
-      highlights,
-      items,
-      studentsAtRisk,
-      recommendations,
-    };
+    });
   }
 
   // ───────────────────────────────────────────────────────────────────────────
@@ -371,6 +392,7 @@ export class AssessmentReportService {
   // ───────────────────────────────────────────────────────────────────────────
 
   private async buildItemAnalysis(
+    db: Database,
     assessmentId: string,
     itemColumns: ItemColumn[],
     itemIds: string[],
@@ -381,7 +403,7 @@ export class AssessmentReportService {
 
     // Distribución de respuestas por ítem y alternativa (1 query) → dificultad +
     // distractor dominante.
-    const dist = await this.loadItemDistribution(assessmentId, itemIds, studentFilter);
+    const dist = await this.loadItemDistribution(db, assessmentId, itemIds, studentFilter);
 
     // Discriminación: grupos alto/bajo (27%) por puntaje total. Sólo se calcula si
     // hay alumnos suficientes en cada grupo.
@@ -395,8 +417,8 @@ export class AssessmentReportService {
       const topIds = sorted.slice(0, groupSize).map((e) => e.studentId);
       const bottomIds = sorted.slice(-groupSize).map((e) => e.studentId);
       [topCorrect, bottomCorrect] = await Promise.all([
-        this.loadGroupCorrectness(assessmentId, itemIds, topIds),
-        this.loadGroupCorrectness(assessmentId, itemIds, bottomIds),
+        this.loadGroupCorrectness(db, assessmentId, itemIds, topIds),
+        this.loadGroupCorrectness(db, assessmentId, itemIds, bottomIds),
       ]);
     }
 
@@ -480,6 +502,7 @@ export class AssessmentReportService {
   // ───────────────────────────────────────────────────────────────────────────
 
   private async buildSkills(
+    db: Database,
     assessmentId: string,
     orgId: string,
     studentFilter: string[] | null,
@@ -496,7 +519,7 @@ export class AssessmentReportService {
       conditions.push(inArray(skillResults.studentId, studentFilter));
     }
 
-    const rows = await this.db
+    const rows = await db
       .select({
         nodeId: taxonomyNodes.id,
         nodeName: taxonomyNodes.name,
@@ -554,6 +577,7 @@ export class AssessmentReportService {
   // ───────────────────────────────────────────────────────────────────────────
 
   private async buildRiskStudents(
+    db: Database,
     assessmentId: string,
     evaluated: EvaluatedStudent[],
     classGroupByStudent: Map<string, { id: string; name: string }>,
@@ -566,6 +590,7 @@ export class AssessmentReportService {
     if (atRisk.length === 0) return [];
 
     const weakest = await this.loadWeakestSkillPerStudent(
+      db,
       assessmentId,
       atRisk.map((e) => e.studentId),
     );
@@ -650,8 +675,11 @@ export class AssessmentReportService {
   // ───────────────────────────────────────────────────────────────────────────
 
   /** Ítems del instrumento + skill/content representativos. */
-  private async loadItemColumns(instrumentId: string): Promise<ItemColumn[]> {
-    const rows = await this.db
+  private async loadItemColumns(
+    db: Database,
+    instrumentId: string,
+  ): Promise<ItemColumn[]> {
+    const rows = await db
       .select({
         itemId: items.id,
         position: items.position,
@@ -662,7 +690,7 @@ export class AssessmentReportService {
       .orderBy(asc(items.position));
 
     const itemIds = rows.map((r) => r.itemId);
-    const tagsByItem = await this.loadTagsByItems(itemIds);
+    const tagsByItem = await this.loadTagsByItems(db, itemIds);
 
     return rows.map((r) => {
       const content = (r.content ?? {}) as ItemContent;
@@ -678,12 +706,13 @@ export class AssessmentReportService {
   }
 
   private async loadTagsByItems(
+    db: Database,
     itemIds: string[],
   ): Promise<Map<string, { skill: string | null; contentRef: string | null }>> {
     const map = new Map<string, { skill: string | null; contentRef: string | null }>();
     if (itemIds.length === 0) return map;
 
-    const rows = await this.db
+    const rows = await db
       .select({
         itemId: itemTaxonomyTags.itemId,
         nodeName: taxonomyNodes.name,
@@ -711,6 +740,7 @@ export class AssessmentReportService {
 
   /** Alumnos con assessment_results en la evaluación dentro del scope. */
   private async loadEvaluatedStudents(
+    db: Database,
     assessmentId: string,
     orgId: string,
     studentFilter: string[] | null,
@@ -726,7 +756,7 @@ export class AssessmentReportService {
       conditions.push(inArray(assessmentResults.studentId, studentFilter));
     }
 
-    const rows = await this.db
+    const rows = await db
       .select({
         studentId: assessmentResults.studentId,
         studentRut: students.rut,
@@ -753,13 +783,14 @@ export class AssessmentReportService {
 
   /** Curso de cada alumno relevante a la evaluación (enrollment ∩ assignment). */
   private async loadStudentClassGroups(
+    db: Database,
     assessmentId: string,
     studentIds: string[],
   ): Promise<Map<string, { id: string; name: string }>> {
     const result = new Map<string, { id: string; name: string }>();
     if (studentIds.length === 0) return result;
 
-    const rows = await this.db
+    const rows = await db
       .select({
         studentId: studentEnrollments.studentId,
         classGroupId: classGroups.id,
@@ -787,6 +818,7 @@ export class AssessmentReportService {
 
   /** Cursos asignados a la evaluación, intersectados con el scope del caller. */
   private async loadAssessmentClassGroups(
+    db: Database,
     assessmentId: string,
     orgId: string,
     scope: ScopeResult,
@@ -803,7 +835,7 @@ export class AssessmentReportService {
       conditions.push(inArray(classGroups.id, scope.classGroupIds));
     }
 
-    const rows = await this.db
+    const rows = await db
       .select({
         id: classGroups.id,
         name: classGroups.name,
@@ -823,9 +855,12 @@ export class AssessmentReportService {
   }
 
   /** Matriculados (distinct) en los cursos dados — base de la cobertura. */
-  private async countEnrolled(classGroupIds: string[]): Promise<number> {
+  private async countEnrolled(
+    db: Database,
+    classGroupIds: string[],
+  ): Promise<number> {
     if (classGroupIds.length === 0) return 0;
-    const [row] = await this.db
+    const [row] = await db
       .select({
         total: sql<number>`count(distinct ${studentEnrollments.studentId})::int`,
       })
@@ -846,6 +881,7 @@ export class AssessmentReportService {
    * (alternativa incorrecta) más elegido.
    */
   private async loadItemDistribution(
+    db: Database,
     assessmentId: string,
     itemIds: string[],
     studentFilter: string[] | null,
@@ -866,7 +902,7 @@ export class AssessmentReportService {
       string | null
     >`nullif(coalesce(${responses.value}->>'raw', ${responses.value}->>'key', ${responses.value}->>'answer'), '')`;
 
-    const rows = await this.db
+    const rows = await db
       .select({
         itemId: responses.itemId,
         answer: answerExpr,
@@ -924,6 +960,7 @@ export class AssessmentReportService {
 
   /** Aciertos por ítem dentro de un grupo de alumnos (para discriminación). */
   private async loadGroupCorrectness(
+    db: Database,
     assessmentId: string,
     itemIds: string[],
     studentIds: string[],
@@ -931,7 +968,7 @@ export class AssessmentReportService {
     const result = new Map<string, { correct: number; total: number }>();
     if (itemIds.length === 0 || studentIds.length === 0) return result;
 
-    const rows = await this.db
+    const rows = await db
       .select({
         itemId: responses.itemId,
         total: sql<number>`count(*)::int`,
@@ -955,13 +992,14 @@ export class AssessmentReportService {
 
   /** Habilidad de menor logro por alumno (1 query, dedupe en JS). */
   private async loadWeakestSkillPerStudent(
+    db: Database,
     assessmentId: string,
     studentIds: string[],
   ): Promise<Map<string, string>> {
     const result = new Map<string, string>();
     if (studentIds.length === 0) return result;
 
-    const rows = await this.db
+    const rows = await db
       .select({
         studentId: skillResults.studentId,
         nodeName: taxonomyNodes.name,
@@ -987,10 +1025,11 @@ export class AssessmentReportService {
   }
 
   private async resolvePassingGrade(
+    db: Database,
     gradingScaleId: string | null,
   ): Promise<number> {
     if (!gradingScaleId) return DEFAULT_PASSING_GRADE;
-    const [row] = await this.db
+    const [row] = await db
       .select({ passingGrade: gradingScales.passingGrade })
       .from(gradingScales)
       .where(eq(gradingScales.id, gradingScaleId))
@@ -1008,6 +1047,7 @@ export class AssessmentReportService {
   }
 
   private async requireAssessment(
+    db: Database,
     user: JwtPayload,
     orgId: string,
     assessmentId: string,
@@ -1022,7 +1062,7 @@ export class AssessmentReportService {
     gradingScaleId: string | null;
     gradingScaleConfig: unknown;
   }> {
-    const [row] = await this.db
+    const [row] = await db
       .select({
         id: assessments.id,
         orgId: assessments.orgId,
@@ -1059,6 +1099,7 @@ export class AssessmentReportService {
   }
 
   private async getAccessibleClassGroupIds(
+    db: Database,
     user: JwtPayload,
     orgId: string,
   ): Promise<ScopeResult> {
@@ -1070,7 +1111,7 @@ export class AssessmentReportService {
       return { scopeAll: false, classGroupIds: [] };
     }
 
-    const rows = await this.db
+    const rows = await db
       .select({ classGroupId: subjectClasses.classGroupId })
       .from(teacherAssignments)
       .innerJoin(subjectClasses, eq(subjectClasses.id, teacherAssignments.subjectClassId))
@@ -1087,11 +1128,12 @@ export class AssessmentReportService {
   }
 
   private async assessmentTouchesScope(
+    db: Database,
     assessmentId: string,
     classGroupIds: string[],
   ): Promise<boolean> {
     if (classGroupIds.length === 0) return false;
-    const [row] = await this.db
+    const [row] = await db
       .select({ classGroupId: assessmentCourseAssignments.classGroupId })
       .from(assessmentCourseAssignments)
       .where(
@@ -1105,12 +1147,13 @@ export class AssessmentReportService {
   }
 
   private async classGroupInScope(
+    db: Database,
     orgId: string,
     scope: ScopeResult,
     classGroupId: string,
   ): Promise<boolean> {
     if (scope.scopeAll) {
-      const [cg] = await this.db
+      const [cg] = await db
         .select({ id: classGroups.id })
         .from(classGroups)
         .where(and(eq(classGroups.id, classGroupId), eq(classGroups.orgId, orgId)))
@@ -1121,6 +1164,7 @@ export class AssessmentReportService {
   }
 
   private async resolveAccessibleStudentIds(
+    db: Database,
     orgId: string,
     scope: ScopeResult,
     classGroupId: string | undefined,
@@ -1138,7 +1182,7 @@ export class AssessmentReportService {
     }
     if (allowedClassGroupIds.length === 0) return [];
 
-    const rows = await this.db
+    const rows = await db
       .select({ studentId: studentEnrollments.studentId })
       .from(studentEnrollments)
       .innerJoin(students, eq(students.id, studentEnrollments.studentId))
