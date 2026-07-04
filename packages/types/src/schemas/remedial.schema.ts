@@ -141,6 +141,34 @@ export const remedialPracticeItemPreviewSchema = z.object({
 });
 export type RemedialPracticeItemPreview = z.infer<typeof remedialPracticeItemPreviewSchema>;
 
+// ── Juez de calidad (Ola 2.1b) ──
+// El juez automático valida cada pregunta generada (solve-then-check) y, vía el
+// loop de regeneración (máx 3), arma un `qualityReport` que se persiste en
+// `remedial_materials.qualityReport` y se lee on-read en el model de respuesta.
+
+/**
+ * Veredicto del juez por ítem (pregunta). Los hard-gate (answerable, uniqueCorrect,
+ * factual) gatillan regeneración; `skillMatch` es un aviso blando (no regenera).
+ */
+export const judgeVerdictSchema = z.object({
+  position: z.number().int(),
+  answerable: z.boolean(), // solve-then-check: la clave se deduce del texto
+  derivedAnswer: z.string().nullable(), // la respuesta que dedujo el juez del texto (o null)
+  uniqueCorrect: z.boolean(), // exactamente una alternativa correcta
+  factual: z.boolean(), // sin errores de hecho en texto/clave/explicación
+  skillMatch: z.boolean(), // mide la habilidad objetivo (aviso blando)
+  objections: z.array(z.string()), // objeciones concretas para regenerar/mostrar
+});
+export type JudgeVerdict = z.infer<typeof judgeVerdictSchema>;
+
+/** Reporte del loop de calidad: nº de vueltas, si convergió y el último veredicto por ítem. */
+export const qualityReportSchema = z.object({
+  iterations: z.number().int(), // cuántas vueltas de regeneración
+  finalStatus: z.enum(['converged', 'exhausted']), // convergió o agotó las 3
+  verdicts: z.array(judgeVerdictSchema), // último veredicto por ítem
+});
+export type QualityReport = z.infer<typeof qualityReportSchema>;
+
 export const remedialMaterialModelSchema = z.object({
   id: z.string().uuid(),
   orgId: z.string().uuid(),
@@ -158,6 +186,8 @@ export const remedialMaterialModelSchema = z.object({
   practiceItems: z.array(remedialPracticeItemPreviewSchema).nullable().optional(),
   // Ola 2.1a: estímulos hidratados on-read (texto completo del pasaje) desde `instrument_sections`.
   stimuli: z.array(remedialStimulusSchema).nullable().optional(),
+  // Ola 2.1b: reporte del juez (iteraciones + veredictos), leído on-read desde el material.
+  qualityReport: qualityReportSchema.nullable().optional(),
   model: z.string().nullable(),
   promptVersion: z.string().nullable(),
   costUsd: z.string().nullable(),
