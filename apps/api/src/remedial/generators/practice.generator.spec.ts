@@ -201,4 +201,35 @@ describe('PracticeGenerator', () => {
       expect(result.content.stimuli).toEqual([]);
     }
   });
+
+  it('devuelve judgeItems (Ola 2.1b) con la clave real y la explicación, ligados al itemId insertado', async () => {
+    const db = makeDb();
+    const gen = new PracticeGenerator(makeLlm(JSON.stringify(twoItems)), db);
+    const result = await gen.generate(makeInput());
+
+    expect(result.judgeItems).toHaveLength(2);
+    expect(result.judgeItems![0]).toEqual({
+      position: 1,
+      itemId: '00000001-0000-4000-8000-000000000000',
+      stem: '¿Cuál es equivalente a 1/2?',
+      alternatives: [
+        { key: 'A', text: '2/4', isCorrect: true }, // la clave real viaja al juez-service (no al LLM)
+        { key: 'B', text: '1/3', isCorrect: false },
+        { key: 'C', text: '2/3', isCorrect: false },
+        { key: 'D', text: '3/4', isCorrect: false },
+      ],
+      explanation: '2/4 simplifica a 1/2',
+    });
+  });
+
+  it('modo regeneración: inyecta el feedback del juez en el prompt (EVITA ESTOS PROBLEMAS)', async () => {
+    const db = makeDb();
+    const llm = makeLlm(JSON.stringify(twoItems));
+    const gen = new PracticeGenerator(llm, db);
+    await gen.generate({ ...makeInput(), feedback: ['La pregunta 1 no es respondible desde el texto'] });
+
+    const prompt = (llm.completeWithUsage as jest.Mock).mock.calls[0][1];
+    expect(prompt).toContain('EVITA ESTOS PROBLEMAS DETECTADOS');
+    expect(prompt).toContain('La pregunta 1 no es respondible desde el texto');
+  });
 });

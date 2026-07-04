@@ -1,15 +1,36 @@
 import { Inject, Injectable, NotFoundException } from '@nestjs/common';
-import { and, eq } from 'drizzle-orm';
-import { remedialMaterials, withOrgContext, type RemedialMaterial } from '@soe/db';
-import type { RemedialMaterialType } from '@soe/types';
+import { and, eq, inArray, isNull } from 'drizzle-orm';
+import { items, remedialMaterials, withOrgContext, type RemedialMaterial } from '@soe/db';
+import {
+  qualityReportSchema,
+  type QualityReport,
+  type RemedialMaterialType,
+  type RemedialStimulus,
+} from '@soe/types';
 import { InjectDb, type Database } from '../database/database.types';
-import { RemedialBriefService } from './remedial-brief.service';
-import { RemedialContextService } from './remedial-context.service';
+import { RemedialBriefService, type RemedialBrief } from './remedial-brief.service';
+import { RemedialContextService, type RemedialCurriculumContext } from './remedial-context.service';
+import { RemedialJudgeService } from './remedial-judge.service';
+import { RemedialQualityLoop } from './remedial-quality-loop.service';
 import { RemedialService } from './remedial.service';
-import { REMEDIAL_GENERATORS, type RemedialGenerator } from './remedial.generator';
+import {
+  REMEDIAL_GENERATORS,
+  type RemedialGenerationResult,
+  type RemedialGenerator,
+  type RemedialJudgeItem,
+} from './remedial.generator';
 import { StimulusResolver } from './stimulus/stimulus.resolver';
 
 const REMEDIAL_TIMEOUT_MS_DEFAULT = 90_000;
+
+/** Tope de rondas del loop de calidad (ronda 0 + hasta 2 regeneraciones). */
+const MAX_QUALITY_ITERATIONS = 3;
+
+/**
+ * Batch del loop de calidad: el resultado del generador de práctica con `judgeItems`
+ * garantizado (el loop lo exige). El generador siempre los devuelve para `practice_set`.
+ */
+type PracticeLoopBatch = RemedialGenerationResult & { judgeItems: RemedialJudgeItem[] };
 
 /**
  * Ejecuta el ciclo real de generación de material remedial (F2 S3 — H9.1–H9.4).
@@ -33,6 +54,8 @@ export class RemedialRunner {
     private readonly context: RemedialContextService,
     private readonly brief: RemedialBriefService,
     private readonly stimulus: StimulusResolver,
+    private readonly judgeService: RemedialJudgeService,
+    private readonly qualityLoop: RemedialQualityLoop,
     @Inject(REMEDIAL_GENERATORS) generators: RemedialGenerator[],
   ) {
     this.generators = new Map(generators.map((g) => [g.type, g]));
@@ -76,6 +99,31 @@ export class RemedialRunner {
         }),
       ]);
 
+      // practice_set (Ola 2.1b): juez automático + loop de regeneración (máx 3). El
+      // resto de tipos (guide/group_plan) mantiene la generación única sin juez.
+      if (record.type === 'practice_set') {
+        const { finalBatch, qualityReport } = await this.runQualityLoop(
+          generator,
+          record,
+          orgId,
+          curriculum,
+          brief,
+          resolved.stimulus,
+        );
+        await this.service.markReady(materialId, orgId, {
+          content: finalBatch.content,
+          input: { ...finalBatch.audit, brief },
+          method: resolved.method,
+          model: finalBatch.model,
+          promptVersion: finalBatch.promptVersion,
+          tokens: finalBatch.tokens,
+          costUsd: finalBatch.costUsd,
+          // Reporte del juez (converged o exhausted): SIEMPRE queda draft con las objeciones.
+          qualityReport: qualityReportSchema.parse(qualityReport),
+        });
+        return;
+      }
+
       const result = await this.withTimeout(
         generator.generate({
           material: record,
@@ -98,6 +146,7 @@ export class RemedialRunner {
         promptVersion: result.promptVersion,
         tokens: result.tokens,
         costUsd: result.costUsd,
+        qualityReport: null,
       });
     } catch (err) {
       const message = err instanceof Error ? err.message : String(err);
@@ -118,6 +167,64 @@ export class RemedialRunner {
       if (typeof value === 'string' && value.length > 0) return value;
     }
     return undefined;
+  }
+
+  /**
+   * Corre el loop de calidad (Ola 2.1b) para un `practice_set`: genera → juzga →
+   * regenera TODO el set con las objeciones (máx 3) → converge o `exhausted`.
+   *
+   * El timeout global (`withTimeout`) envuelve CADA generación y CADA juzgamiento (no
+   * el loop completo): así el loop puede correr sus hasta 3 rondas sin que la suma de
+   * latencias dispare un timeout espurio, y el modo `exhausted` (que igual persiste el
+   * material draft + objeciones) siempre llega a `markReady`. El costo lo acota el
+   * cap de 3 rondas (≤3 generaciones + ≤3 juzgamientos), no el reloj.
+   */
+  private async runQualityLoop(
+    generator: RemedialGenerator,
+    record: RemedialMaterial,
+    orgId: string,
+    curriculum: RemedialCurriculumContext,
+    brief: RemedialBrief | null,
+    stimulus: RemedialStimulus | null,
+  ): Promise<{ finalBatch: PracticeLoopBatch; qualityReport: QualityReport }> {
+    const generate = async (feedback: string[] | undefined): Promise<PracticeLoopBatch> => {
+      const result = await this.withTimeout(
+        generator.generate({ material: record, orgId, curriculum, brief, stimulus, feedback }),
+        this.timeoutMs(),
+      );
+      if (!result.judgeItems) {
+        throw new Error('El generador de práctica no devolvió ítems para el juez');
+      }
+      return { ...result, judgeItems: result.judgeItems };
+    };
+
+    return this.qualityLoop.run<PracticeLoopBatch>({
+      generate,
+      judge: (judgeItems) =>
+        this.withTimeout(this.judgeService.judge(orgId, stimulus, judgeItems), this.timeoutMs()),
+      softDeletePrevious: (batch) => this.softDeletePreviousItems(batch.judgeItems, orgId),
+      maxIter: MAX_QUALITY_ITERATIONS,
+    });
+  }
+
+  /**
+   * Soft-delete (`deletedAt = now()`) de los ítems de una ronda descartada, para que
+   * solo sobreviva el set final como draft. Los ítems son del tenant (`org_id`
+   * explícito) y `draft` — nunca publicados. Corre en `withOrgContext` (patrón del
+   * módulo); `items` se aísla además por filtro `org_id` + `deletedAt IS NULL`.
+   */
+  private async softDeletePreviousItems(
+    judgeItems: RemedialJudgeItem[],
+    orgId: string,
+  ): Promise<void> {
+    const itemIds = judgeItems.map((ji) => ji.itemId);
+    if (itemIds.length === 0) return;
+    await withOrgContext(this.db, orgId, async (tx) => {
+      await tx
+        .update(items)
+        .set({ deletedAt: new Date(), updatedAt: new Date() })
+        .where(and(inArray(items.id, itemIds), eq(items.orgId, orgId), isNull(items.deletedAt)));
+    });
   }
 
   private async loadRecord(materialId: string, orgId: string): Promise<RemedialMaterial> {

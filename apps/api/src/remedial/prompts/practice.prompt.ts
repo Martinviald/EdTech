@@ -33,16 +33,22 @@ export const PRACTICE_STIMULUS_PROMPT_VERSION = 'ola2-practice-stimulus-v1';
  * `stimulus` (opcional · Ola 2.1a): con pasaje, el prompt incluye su texto completo
  * e instruye que cada ítem sea RESPONDIBLE SOLO desde él (Opción A). El pasaje es
  * contenido curricular, no PII.
+ *
+ * `feedback` (opcional · Ola 2.1b, modo regeneración): objeciones concretas del juez
+ * de la ronda anterior. Cuando viene no vacío, el prompt agrega un bloque "EVITA ESTOS
+ * PROBLEMAS DETECTADOS" para que la regeneración corrija lo objetado. `undefined`/`[]`
+ * → prompt idéntico a la ronda 0 (no invalida la caché ni la versión).
  */
 export function buildPracticePrompt(
   ctx: RemedialCurriculumContext,
   itemCount: number,
   brief?: RemedialBrief | null,
   stimulus?: RemedialStimulus | null,
+  feedback?: string[],
 ): { system: string; prompt: string } {
   return {
     system: buildSystem(itemCount, Boolean(stimulus)),
-    prompt: buildUserPrompt(ctx, itemCount, brief, stimulus ?? null),
+    prompt: buildUserPrompt(ctx, itemCount, brief, stimulus ?? null, feedback),
   };
 }
 
@@ -113,6 +119,7 @@ function buildUserPrompt(
   itemCount: number,
   brief?: RemedialBrief | null,
   stimulus?: RemedialStimulus | null,
+  feedback?: string[],
 ): string {
   const sections: string[] = [];
 
@@ -145,8 +152,36 @@ function buildUserPrompt(
     sections.push('', briefBlock);
   }
 
+  // Ola 2.1b (regeneración): objeciones del juez de la ronda anterior. Va al final,
+  // como restricción dura sobre el set regenerado.
+  const feedbackBlock = renderFeedback(feedback);
+  if (feedbackBlock) {
+    sections.push('', feedbackBlock);
+  }
+
   sections.push('', 'Devuelve solo el JSON del set de ítems.');
   return sections.join('\n');
+}
+
+/**
+ * Renderiza las objeciones del juez (Ola 2.1b) como restricciones a evitar en la
+ * regeneración. Devuelve `''` si no hay feedback (ronda 0 → prompt sin este bloque,
+ * idéntico al histórico). Las objeciones son sobre el CONTENIDO del ítem (no PII).
+ */
+function renderFeedback(feedback?: string[]): string {
+  const objections = (feedback ?? []).map((o) => o.trim()).filter((o) => o.length > 0);
+  if (objections.length === 0) return '';
+
+  const lines: string[] = [
+    'EVITA ESTOS PROBLEMAS DETECTADOS por el juez en la ronda anterior (corrígelos en TODOS los ítems nuevos):',
+  ];
+  objections.forEach((objection, idx) => {
+    lines.push(`${idx + 1}. ${objection}`);
+  });
+  lines.push(
+    'INSTRUCCIÓN: cada ítem nuevo debe ser respondible desde el material, tener EXACTAMENTE una alternativa correcta y no contener errores de hecho.',
+  );
+  return lines.join('\n');
 }
 
 /**

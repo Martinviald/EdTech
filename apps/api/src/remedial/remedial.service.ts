@@ -15,8 +15,10 @@ import {
   type RemedialMaterial,
 } from '@soe/db';
 import {
+  qualityReportSchema,
   validateRemedialContent,
   type GenerateRemedialDto,
+  type QualityReport,
   type RemedialContent,
   type RemedialListQueryDto,
   type RemedialListResponse,
@@ -60,6 +62,11 @@ export interface MarkReadyInput {
   promptVersion: string | null;
   tokens: { input: number; output: number } | null;
   costUsd: string | null;
+  /**
+   * Reporte del juez (Ola 2.1b): iteraciones + veredicto final por ítem. Solo lo trae
+   * `practice_set` (viene del loop de calidad); `null`/ausente en el resto.
+   */
+  qualityReport?: QualityReport | null;
 }
 
 /**
@@ -267,6 +274,8 @@ export class RemedialService {
           input: data.input,
           // Método EFECTIVO (Ola 2.1a): el resolver pudo degradar el solicitado.
           method: data.method,
+          // Reporte del juez (Ola 2.1b): `null` en tipos sin loop (guide/group_plan).
+          qualityReport: data.qualityReport ?? null,
           model: data.model,
           promptVersion: data.promptVersion,
           tokens: data.tokens,
@@ -495,6 +504,9 @@ export class RemedialService {
       classGroupId: row.classGroupId,
       title: row.title,
       content: row.content ?? null,
+      // Ola 2.1b: reporte del juez leído on-read desde la fila (parseado/validado;
+      // `null` si no hay o si la fila trae un shape viejo/incompatible).
+      qualityReport: this.parseQualityReport(row.qualityReport),
       model: row.model,
       promptVersion: row.promptVersion,
       costUsd: row.costUsd,
@@ -505,6 +517,17 @@ export class RemedialService {
       completedAt: row.completedAt ? row.completedAt.toISOString() : null,
       reviewedAt: row.reviewedAt ? row.reviewedAt.toISOString() : null,
     };
+  }
+
+  /**
+   * Parsea/valida el `qualityReport` crudo de la fila (JSONB genérico) con
+   * `qualityReportSchema` (Ola 2.1b). `null` si la fila no lo trae o si su shape no
+   * valida (degradación elegante: nunca rompe la lectura del material).
+   */
+  private parseQualityReport(raw: Record<string, unknown> | null): QualityReport | null {
+    if (!raw) return null;
+    const parsed = qualityReportSchema.safeParse(raw);
+    return parsed.success ? parsed.data : null;
   }
 
   /**

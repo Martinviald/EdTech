@@ -29,6 +29,7 @@ import {
   type RemedialGenerationInput,
   type RemedialGenerationResult,
   type RemedialGenerator,
+  type RemedialJudgeItem,
 } from '../remedial.generator';
 
 /** Cantidad de ítems por defecto si el registro no la trae. */
@@ -103,6 +104,8 @@ export class PracticeGenerator implements RemedialGenerator {
       itemCount,
       input.brief,
       stimulus,
+      // Ola 2.1b: objeciones del juez de la ronda anterior (modo regeneración).
+      input.feedback,
     );
     const completion = await this.llm.completeWithUsage(system, prompt, input.orgId, feature);
 
@@ -124,7 +127,7 @@ export class PracticeGenerator implements RemedialGenerator {
     // Modo anclado: los ítems quedan ligados al pasaje (no `null`). Self_contained: `null`.
     const sectionId = stimulus ? stimulus.sectionId : null;
 
-    const refs = await withOrgContext(this.db, input.orgId, async (tx) => {
+    const { refs, judgeItems } = await withOrgContext(this.db, input.orgId, async (tx) => {
       const newItems: NewItem[] = validatedContents.map((content, idx) => ({
         orgId: input.orgId,
         instrumentId: null,
@@ -149,13 +152,33 @@ export class PracticeGenerator implements RemedialGenerator {
       }));
       await tx.insert(itemTaxonomyTags).values(newTags);
 
-      return insertedItems.map(
+      const itemRefs = insertedItems.map(
         (created, idx): RemedialPracticeItemRef => ({
           itemId: created.id,
           position: idx + 1,
           stem: parsed.data.items[idx]!.stem,
         }),
       );
+
+      // Ola 2.1b: ítems para el juez, armados de la salida validada + los ids recién
+      // insertados (sin re-leer de DB). Llevan la `isCorrect` (clave real) para el
+      // solve-then-check del juez; el `RemedialJudgeService` NO la envía al LLM.
+      const items4judge = insertedItems.map((created, idx): RemedialJudgeItem => {
+        const source = parsed.data.items[idx]!;
+        return {
+          position: idx + 1,
+          itemId: created.id,
+          stem: source.stem,
+          alternatives: source.alternatives.map((alt) => ({
+            key: alt.key,
+            text: alt.text,
+            isCorrect: alt.isCorrect,
+          })),
+          explanation: source.explanation ?? null,
+        };
+      });
+
+      return { refs: itemRefs, judgeItems: items4judge };
     });
 
     const content: RemedialPracticeContent = remedialPracticeContentSchema.parse({
@@ -174,7 +197,13 @@ export class PracticeGenerator implements RemedialGenerator {
         curriculum: input.curriculum,
         requestedItemCount: itemCount,
         stimulusSectionId: sectionId,
+        // Ola 2.1b: si es una regeneración, deja traza de las objeciones inyectadas.
+        ...(input.feedback && input.feedback.length > 0
+          ? { regeneratedFrom: input.feedback }
+          : {}),
       },
+      // Ola 2.1b: ítems para el juez (el loop los pasa a `RemedialJudgeService.judge`).
+      judgeItems,
       ...remedialUsageFields(completion),
     };
   }

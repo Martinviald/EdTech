@@ -234,6 +234,7 @@ describe('RemedialService', () => {
         'nodeName',
         'orgId',
         'promptVersion',
+        'qualityReport',
         'reviewedAt',
         'reviewedById',
         'status',

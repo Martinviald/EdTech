@@ -7,6 +7,8 @@ import { GuideGenerator } from './generators/guide.generator';
 import { PracticeGenerator } from './generators/practice.generator';
 import { RemedialBriefService } from './remedial-brief.service';
 import { RemedialContextService } from './remedial-context.service';
+import { RemedialJudgeService } from './remedial-judge.service';
+import { RemedialQualityLoop } from './remedial-quality-loop.service';
 import { RemedialController } from './remedial.controller';
 import { REMEDIAL_GENERATORS } from './remedial.generator';
 import { RemedialRunner } from './remedial.runner';
@@ -38,6 +40,9 @@ import { FeatureGuard } from '../common/guards/feature.guard';
     RemedialService,
     RemedialContextService,
     RemedialBriefService,
+    // Ola 2.1b: juez automático de calidad + loop de regeneración (solo practice_set).
+    RemedialJudgeService,
+    RemedialQualityLoop,
     RemedialRunner,
     GuideGenerator,
     PracticeGenerator,
