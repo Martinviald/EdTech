@@ -430,6 +430,7 @@ export class RemedialService {
       orgId: row.orgId,
       type: row.type,
       status: row.status,
+      method: row.method,
       nodeId: row.nodeId,
       nodeName,
       assessmentId: row.assessmentId,

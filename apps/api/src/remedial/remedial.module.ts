@@ -11,6 +11,13 @@ import { RemedialController } from './remedial.controller';
 import { REMEDIAL_GENERATORS } from './remedial.generator';
 import { RemedialRunner } from './remedial.runner';
 import { RemedialService } from './remedial.service';
+import { BankPassageService } from './stimulus/bank-passage.service';
+import { FailedStimulusService } from './stimulus/failed-stimulus.service';
+import { HighestGapPolicy } from './stimulus/highest-gap.policy';
+import { PASSAGE_SELECTION_POLICY } from './stimulus/passage-selection.policy';
+import { SelfContainedFallback } from './stimulus/self-contained.fallback';
+import { StimulusResolver } from './stimulus/stimulus.resolver';
+import { TERMINAL_FALLBACK_POLICY } from './stimulus/terminal-fallback.policy';
 import { FeatureGuard } from '../common/guards/feature.guard';
 
 /**
@@ -44,6 +51,14 @@ import { FeatureGuard } from '../common/guards/feature.guard';
       ) => [guide, practice, groupPlan],
       inject: [GuideGenerator, PracticeGenerator, GroupPlanGenerator],
     },
+    // Motor remedial con estímulo (Ola 2.1a): recuperación de pasajes fallados / del
+    // banco + resolución del estímulo. Los puertos de política se inyectan por token
+    // (patrón `CURRICULUM_RETRIEVER`) para swappearlos sin tocar el resolver (2.2).
+    FailedStimulusService,
+    BankPassageService,
+    StimulusResolver,
+    { provide: PASSAGE_SELECTION_POLICY, useClass: HighestGapPolicy },
+    { provide: TERMINAL_FALLBACK_POLICY, useClass: SelfContainedFallback },
     FeatureGuard,
   ],
   exports: [RemedialService],

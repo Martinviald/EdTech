@@ -34,6 +34,7 @@ function makeRow(overrides: Partial<RemedialMaterial> = {}): RemedialMaterial {
     id: 'mat-1',
     orgId: 'org-1',
     type: 'guide',
+    method: 'self_contained',
     status: 'pending',
     nodeId: 'node-1',
     assessmentId: null,
@@ -41,6 +42,7 @@ function makeRow(overrides: Partial<RemedialMaterial> = {}): RemedialMaterial {
     sourceAnalysisId: null,
     title: null,
     content: null,
+    qualityReport: null,
     input: null,
     inputHash: 'hash-1',
     model: null,
@@ -226,6 +228,7 @@ describe('RemedialService', () => {
         'createdById',
         'error',
         'id',
+        'method',
         'model',
         'nodeId',
         'nodeName',
@@ -302,6 +305,7 @@ describe('RemedialService', () => {
         { itemId: '33333333-3333-3333-3333-333333333333', position: 2, stem: 'b' },
       ],
       notes: null,
+      stimuli: [],
     };
     const ready = makeRow({
       status: 'ready',
@@ -326,6 +330,7 @@ describe('RemedialService', () => {
       itemCount: 1,
       items: [{ itemId: '22222222-2222-2222-2222-222222222222', position: 1, stem: 'a' }],
       notes: null,
+      stimuli: [],
     };
     const row = makeRow({ status: 'ready', type: 'practice_set', content: practiceContent });
     const itemRow = {

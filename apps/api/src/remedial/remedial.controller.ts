@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  ForbiddenException,
   Get,
   Inject,
   Param,
@@ -9,6 +10,7 @@ import {
   Query,
   UseGuards,
 } from '@nestjs/common';
+import { z } from 'zod';
 import {
   generateRemedialSchema,
   remedialListQuerySchema,
@@ -19,6 +21,7 @@ import {
   type RemedialListResponse,
   type RemedialMaterialModel,
   type RemedialStatus,
+  type RemedialStimulusRef,
 } from '@soe/types';
 import { CurrentUser } from '../auth/current-user.decorator';
 import type { JwtPayload } from '../auth/jwt-payload.types';
@@ -29,6 +32,20 @@ import { FeatureGuard } from '../common/guards/feature.guard';
 import { JOB_DISPATCHER, type JobDispatcher } from '../jobs/job-dispatcher';
 import { RemedialRunner } from './remedial.runner';
 import { RemedialService } from './remedial.service';
+import { BankPassageService } from './stimulus/bank-passage.service';
+import {
+  FailedStimulusService,
+  type FailedStimulus,
+} from './stimulus/failed-stimulus.service';
+
+/**
+ * Query del picker de estímulos (Ola 2.1a). Validación Zod local al módulo: es BE-only
+ * (no compartida con `web`). Los schemas compartidos viven en `@soe/types`.
+ */
+const candidateStimuliQuerySchema = z.object({
+  assessmentId: z.string().uuid(),
+  nodeId: z.string().uuid(),
+});
 
 /**
  * API del módulo de IA Remedial (F2 S3 — H9.1–H9.5). Validación Zod en cada
@@ -43,6 +60,8 @@ export class RemedialController {
   constructor(
     private readonly service: RemedialService,
     private readonly runner: RemedialRunner,
+    private readonly failedStimulus: FailedStimulusService,
+    private readonly bankPassages: BankPassageService,
     @Inject(JOB_DISPATCHER) private readonly dispatcher: JobDispatcher,
   ) {}
 
@@ -71,6 +90,33 @@ export class RemedialController {
     }
 
     return { materialId: material.id, status: material.status };
+  }
+
+  /**
+   * GET /api/remedial/candidate-stimuli?assessmentId&nodeId
+   *
+   * Alimenta el picker de pasaje del modo A (Ola 2.1a): `fromAssessment` = pasajes
+   * fallados de la evaluación (mayor brecha primero, default del picker); `fromBank` =
+   * pasajes publicados del banco para el nodo (override / fallback). `orgId` SIEMPRE del
+   * token. Declarado ANTES de `:id` para que la ruta estática no la capture el parámetro.
+   */
+  @Get('candidate-stimuli')
+  @Roles(...REMEDIAL_GENERATOR_ROLES)
+  async candidateStimuli(
+    @Query() query: unknown,
+    @CurrentUser() user: JwtPayload,
+  ): Promise<{ fromAssessment: FailedStimulus[]; fromBank: RemedialStimulusRef[] }> {
+    const { assessmentId, nodeId } = candidateStimuliQuerySchema.parse(query);
+    if (!user.orgId) {
+      throw new ForbiddenException(
+        'Sin organización activa. Selecciona una organización antes de continuar.',
+      );
+    }
+    const [fromAssessment, fromBank] = await Promise.all([
+      this.failedStimulus.list(user.orgId, assessmentId, nodeId),
+      this.bankPassages.listCandidates(user.orgId, nodeId),
+    ]);
+    return { fromAssessment, fromBank };
   }
 
   /** GET /api/remedial/:id — poll del estado/salida del material. */
