@@ -7,6 +7,7 @@ import { RemedialBriefService } from './remedial-brief.service';
 import { RemedialContextService } from './remedial-context.service';
 import { RemedialService } from './remedial.service';
 import { REMEDIAL_GENERATORS, type RemedialGenerator } from './remedial.generator';
+import { StimulusResolver } from './stimulus/stimulus.resolver';
 
 const REMEDIAL_TIMEOUT_MS_DEFAULT = 90_000;
 
@@ -31,6 +32,7 @@ export class RemedialRunner {
     private readonly service: RemedialService,
     private readonly context: RemedialContextService,
     private readonly brief: RemedialBriefService,
+    private readonly stimulus: StimulusResolver,
     @Inject(REMEDIAL_GENERATORS) generators: RemedialGenerator[],
   ) {
     this.generators = new Map(generators.map((g) => [g.type, g]));
@@ -50,10 +52,14 @@ export class RemedialRunner {
 
       await this.service.markProcessing(materialId, orgId);
 
-      // Brief del error (G4) + contexto curricular enriquecido (G5) en paralelo.
-      // El brief degrada a `null` si no hay evidencia (la generación sigue con el
-      // contexto curricular). `assemble` recibe `orgId` para acotar el pool de ítems.
-      const [brief, curriculum] = await Promise.all([
+      // Brief del error (G4) + contexto curricular enriquecido (G5) + resolución del
+      // estímulo (Ola 2.1a) en paralelo. El brief degrada a `null` si no hay evidencia;
+      // `assemble` recibe `orgId` para acotar el pool de ítems. El resolver define el
+      // `method` efectivo (puede degradar `reuse_stimulus`→`self_contained` si no hay
+      // pasaje) y el estímulo hidratado (o `null`). Si el `stimulusId` del docente no es
+      // un pasaje visible, `resolve` lanza NotFoundException → el catch deja `failed`.
+      const stimulusId = this.readStimulusId(record.input);
+      const [brief, curriculum, resolved] = await Promise.all([
         this.brief.build({
           orgId,
           nodeId: record.nodeId,
@@ -61,10 +67,23 @@ export class RemedialRunner {
           sourceAnalysisId: record.sourceAnalysisId,
         }),
         this.context.assemble(record.nodeId, orgId),
+        this.stimulus.resolve({
+          orgId,
+          assessmentId: record.assessmentId ?? '',
+          nodeId: record.nodeId,
+          method: record.method,
+          stimulusId,
+        }),
       ]);
 
       const result = await this.withTimeout(
-        generator.generate({ material: record, orgId, curriculum, brief }),
+        generator.generate({
+          material: record,
+          orgId,
+          curriculum,
+          brief,
+          stimulus: resolved.stimulus,
+        }),
         this.timeoutMs(),
       );
 
@@ -73,6 +92,8 @@ export class RemedialRunner {
         // del error usado para anclar la generación. La salida vive solo en `content`.
         content: result.content,
         input: { ...result.audit, brief },
+        // Método EFECTIVO resuelto (el generador ya dejó `content.stimuli`).
+        method: resolved.method,
         model: result.model,
         promptVersion: result.promptVersion,
         tokens: result.tokens,
@@ -85,6 +106,19 @@ export class RemedialRunner {
   }
 
   // ---------- helpers ----------
+
+  /**
+   * Lee el override de pasaje del docente desde `input.stimulusId` (persistido por
+   * `RemedialService.create`). `undefined` si no vino → el resolver elige el pasaje de
+   * mayor brecha (o cae a self_contained).
+   */
+  private readStimulusId(input: Record<string, unknown> | null): string | undefined {
+    if (input && typeof input === 'object' && 'stimulusId' in input) {
+      const value = (input as { stimulusId?: unknown }).stimulusId;
+      if (typeof value === 'string' && value.length > 0) return value;
+    }
+    return undefined;
+  }
 
   private async loadRecord(materialId: string, orgId: string): Promise<RemedialMaterial> {
     const row = await withOrgContext(this.db, orgId, async (tx) => {

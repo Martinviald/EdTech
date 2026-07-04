@@ -7,6 +7,7 @@ import {
 } from '@nestjs/common';
 import { and, desc, eq, inArray, isNull, or } from 'drizzle-orm';
 import {
+  instrumentSections,
   items,
   remedialMaterials,
   taxonomyNodes,
@@ -21,14 +22,19 @@ import {
   type RemedialListResponse,
   type RemedialMaterialModel,
   type RemedialMaterialType,
+  type RemedialMethod,
   type RemedialPracticeItemPreview,
+  type RemedialStimulus,
   type ReviewRemedialDto,
 } from '@soe/types';
 import type { JwtPayload } from '../auth/jwt-payload.types';
 import { InjectDb, type Database } from '../database/database.types';
 import { GROUP_PLAN_PROMPT_VERSION } from './prompts/group-plan.prompt';
 import { GUIDE_PROMPT_VERSION } from './prompts/guide.prompt';
-import { PRACTICE_PROMPT_VERSION } from './prompts/practice.prompt';
+import {
+  PRACTICE_PROMPT_VERSION,
+  PRACTICE_STIMULUS_PROMPT_VERSION,
+} from './prompts/practice.prompt';
 
 /**
  * Versión de prompt vigente por tipo. Entra en el `inputHash` de la caché para que
@@ -48,6 +54,8 @@ const DEFAULT_PRACTICE_ITEM_COUNT = 5;
 export interface MarkReadyInput {
   content: RemedialContent;
   input: Record<string, unknown>;
+  /** Método EFECTIVO resuelto por el runner (Ola 2.1a); puede diferir del solicitado. */
+  method: RemedialMethod;
   model: string | null;
   promptVersion: string | null;
   tokens: { input: number; output: number } | null;
@@ -79,7 +87,8 @@ export class RemedialService {
   /**
    * Crea (o reutiliza desde caché) un registro de material remedial.
    *
-   * - `inputHash` determinista de {type, nodeId, classGroupId, itemCount}.
+   * - `inputHash` determinista de {type, nodeId, classGroupId, itemCount, method,
+   *   stimulusId}.
    * - Si existe una fila cacheable (`ready`/`approved`) con ese hash y NO `force`
    *   → la devuelve (`fromCache: true`).
    * - En cualquier otro caso inserta una fila `pending` y la devuelve.
@@ -93,6 +102,12 @@ export class RemedialService {
       dto.type === 'practice_set'
         ? dto.itemCount ?? DEFAULT_PRACTICE_ITEM_COUNT
         : null;
+    // Ola 2.1a: método remedial (default self_contained) + override de pasaje del
+    // docente. Ambos entran en la caché (mismo nodo con/sin pasaje NO deben colisionar)
+    // y se persisten (`method` en columna, `stimulusId` en `input`) para que el runner
+    // los reproduzca.
+    const method: RemedialMethod = dto.method ?? 'self_contained';
+    const stimulusId = dto.stimulusId ?? null;
     const inputHash = this.computeInputHash({
       type: dto.type,
       nodeId: dto.nodeId,
@@ -101,8 +116,11 @@ export class RemedialService {
       // Distinto diagnóstico de origen no debe colisionar en caché (el brief que
       // ancla la generación depende del análisis IA).
       sourceAnalysisId: dto.sourceAnalysisId ?? null,
+      method,
+      stimulusId,
       // Bump de prompt → clave distinta (no reutilizar material de una versión vieja).
-      promptVersion: PROMPT_VERSION_BY_TYPE[dto.type],
+      // El modo con estímulo tiene su propia versión (no colisiona con self_contained).
+      promptVersion: this.resolvePromptVersion(dto.type, method),
     });
 
     return withOrgContext(this.db, orgId, async (tx) => {
@@ -132,6 +150,7 @@ export class RemedialService {
           orgId,
           type: dto.type,
           status: 'pending',
+          method,
           nodeId: dto.nodeId,
           assessmentId: dto.assessmentId ?? null,
           classGroupId: dto.classGroupId ?? null,
@@ -140,7 +159,7 @@ export class RemedialService {
           // Parámetros deterministas de generación (no PII). El runner los lee
           // para reproducir la generación; markReady reescribe `input` con el
           // contexto RAG auditado.
-          input: itemCount !== null ? { itemCount } : null,
+          input: this.buildCreateInput(itemCount, stimulusId),
           createdById: user.userId,
         })
         .returning();
@@ -166,12 +185,15 @@ export class RemedialService {
       // Hidratación on-read del preview de ítems (G2): solo para practice_set en
       // estado revisable. El ítem completo (enunciado + alternativas + clave +
       // explicación) se lee de `items` (fuente de verdad); NO se persiste, el
-      // `content` (refs ligeras) queda intacto.
+      // `content` (refs ligeras) queda intacto. Junto a él (Ola 2.1a), el TEXTO
+      // completo del pasaje se re-hidrata desde `instrument_sections` para los sets
+      // con estímulo (`content.stimuli` no vacío); self_contained → `[]`.
       if (
         row.type === 'practice_set' &&
         (row.status === 'ready' || row.status === 'approved')
       ) {
         model.practiceItems = await this.hydratePracticeItems(tx, row.content, orgId);
+        model.stimuli = await this.hydrateStimuli(tx, row.content, orgId);
       }
 
       return model;
@@ -243,6 +265,8 @@ export class RemedialService {
           status: 'ready',
           content: data.content,
           input: data.input,
+          // Método EFECTIVO (Ola 2.1a): el resolver pudo degradar el solicitado.
+          method: data.method,
           model: data.model,
           promptVersion: data.promptVersion,
           tokens: data.tokens,
@@ -387,6 +411,8 @@ export class RemedialService {
     classGroupId: string | null;
     itemCount: number | null;
     sourceAnalysisId: string | null;
+    method: RemedialMethod;
+    stimulusId: string | null;
     promptVersion: string;
   }): string {
     // Orden de claves fijo → hash determinista independiente del insertion order.
@@ -396,9 +422,41 @@ export class RemedialService {
       classGroupId: input.classGroupId,
       itemCount: input.itemCount,
       sourceAnalysisId: input.sourceAnalysisId,
+      // Ola 2.1a: método + pasaje elegido → el mismo nodo con/sin estímulo (o con
+      // pasajes distintos) genera material distinto y no debe compartir caché.
+      method: input.method,
+      stimulusId: input.stimulusId,
       promptVersion: input.promptVersion,
     });
     return createHash('sha256').update(canonical).digest('hex');
+  }
+
+  /**
+   * Versión de prompt EFECTIVA para la caché. `practice_set` en modo `reuse_stimulus`
+   * usa el prompt anclado al pasaje (versión propia); el resto usa la versión por tipo.
+   */
+  private resolvePromptVersion(
+    type: RemedialMaterialType,
+    method: RemedialMethod,
+  ): string {
+    if (type === 'practice_set' && method === 'reuse_stimulus') {
+      return PRACTICE_STIMULUS_PROMPT_VERSION;
+    }
+    return PROMPT_VERSION_BY_TYPE[type];
+  }
+
+  /**
+   * Arma el `input` determinista de la fila `pending` (no PII): `itemCount` (solo
+   * practice_set) + `stimulusId` (override del docente, Ola 2.1a). `null` si no hay nada.
+   */
+  private buildCreateInput(
+    itemCount: number | null,
+    stimulusId: string | null,
+  ): Record<string, unknown> | null {
+    const meta: Record<string, unknown> = {};
+    if (itemCount !== null) meta.itemCount = itemCount;
+    if (stimulusId) meta.stimulusId = stimulusId;
+    return Object.keys(meta).length > 0 ? meta : null;
   }
 
   private requireOrgId(user: JwtPayload): string {
@@ -496,6 +554,57 @@ export class RemedialService {
       });
     }
     return previews;
+  }
+
+  /**
+   * Hidrata el TEXTO COMPLETO de los estímulos (pasajes) del set desde
+   * `instrument_sections` por los `sectionId` de `content.stimuli` (Ola 2.1a).
+   * `instrument_sections` NO está bajo RLS → aislamiento con filtro EXPLÍCITO del pool
+   * visible (`org_id = :orgId ∪ org_id IS NULL`, patrón `items`). Se arma on-read; el
+   * `content` (refs ligeras) no se modifica. Una sección ausente se omite sin romper el
+   * resto. `[]` para sets self_contained (sin `stimuli`).
+   */
+  private async hydrateStimuli(
+    tx: Database,
+    content: RemedialContent | null,
+    orgId: string,
+  ): Promise<RemedialStimulus[]> {
+    if (!content || !('stimuli' in content) || content.stimuli.length === 0) {
+      return [];
+    }
+    const refs = content.stimuli;
+    const sectionIds = refs.map((ref) => ref.sectionId);
+
+    const rows = await tx
+      .select({
+        id: instrumentSections.id,
+        kind: instrumentSections.kind,
+        source: instrumentSections.source,
+        passageTitle: instrumentSections.passageTitle,
+        passageText: instrumentSections.passageText,
+      })
+      .from(instrumentSections)
+      .where(
+        and(
+          inArray(instrumentSections.id, sectionIds),
+          or(eq(instrumentSections.orgId, orgId), isNull(instrumentSections.orgId)),
+        ),
+      );
+    const byId = new Map(rows.map((row) => [row.id, row]));
+
+    const stimuli: RemedialStimulus[] = [];
+    for (const ref of refs) {
+      const section = byId.get(ref.sectionId);
+      if (!section) continue;
+      stimuli.push({
+        sectionId: section.id,
+        kind: section.kind,
+        source: section.source,
+        title: section.passageTitle ?? null,
+        text: section.passageText ?? null,
+      });
+    }
+    return stimuli;
   }
 }
 

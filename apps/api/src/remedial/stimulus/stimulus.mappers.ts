@@ -44,3 +44,18 @@ export function failedStimulusToStimulus(stimulus: FailedStimulus): RemedialStim
     text: stimulus.text,
   };
 }
+
+/**
+ * Ref ligera (con preview) desde un estímulo hidratado. La usa el generador anclado
+ * para persistir `content.stimuli = [ref]` sin guardar el texto completo (que se
+ * re-hidrata on-read desde `instrument_sections`).
+ */
+export function stimulusToRef(stimulus: RemedialStimulus): RemedialStimulusRef {
+  return {
+    sectionId: stimulus.sectionId,
+    kind: stimulus.kind,
+    source: stimulus.source,
+    title: stimulus.title,
+    textPreview: stimulusTextPreview(stimulus.text),
+  };
+}

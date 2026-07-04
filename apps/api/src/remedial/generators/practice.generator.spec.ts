@@ -146,4 +146,59 @@ describe('PracticeGenerator', () => {
     (input.material as { nodeId: string | null }).nodeId = null;
     await expect(gen.generate(input)).rejects.toThrow(/nodeId/);
   });
+
+  it('modo estímulo: ancla al pasaje (feature remedial_reading, sectionId, content.stimuli)', async () => {
+    const db = makeDb();
+    const llm = makeLlm(JSON.stringify(twoItems));
+    const gen = new PracticeGenerator(llm, db);
+    const stimulus = {
+      sectionId: '99999999-9999-4999-8999-999999999999',
+      kind: 'passage' as const,
+      source: 'official' as const,
+      title: 'Las abejas',
+      text: 'Las abejas polinizan las flores y producen miel.',
+    };
+    const result = await gen.generate({ ...makeInput(), stimulus });
+
+    // usa el prompt anclado (versión propia, no la self_contained).
+    expect(result.promptVersion).toBe('ola2-practice-stimulus-v1');
+
+    // llama al LLM con la feature Pro y un prompt que incluye el TEXTO del pasaje.
+    const call = (llm.completeWithUsage as jest.Mock).mock.calls[0];
+    expect(call[3]).toBe('remedial_reading');
+    expect(call[1]).toContain('Las abejas polinizan las flores');
+
+    // los ítems quedan ligados al pasaje (sectionId, no null).
+    const itemInserts = db.__inserted.filter((r) => 'source' in r);
+    expect(itemInserts).toHaveLength(2);
+    expect(itemInserts[0]).toMatchObject({ sectionId: stimulus.sectionId });
+
+    // content.stimuli trae la ref ligera del pasaje (preview, sin el texto completo).
+    if ('stimuli' in result.content) {
+      expect(result.content.stimuli).toHaveLength(1);
+      expect(result.content.stimuli[0]).toMatchObject({
+        sectionId: stimulus.sectionId,
+        kind: 'passage',
+        source: 'official',
+        title: 'Las abejas',
+      });
+    }
+  });
+
+  it('modo self_contained: sin estímulo → feature remedial, sectionId null, stimuli vacío', async () => {
+    const db = makeDb();
+    const llm = makeLlm(JSON.stringify(twoItems));
+    const gen = new PracticeGenerator(llm, db);
+    const result = await gen.generate(makeInput());
+
+    expect(result.promptVersion).toBe('ola1-practice-v2');
+    const call = (llm.completeWithUsage as jest.Mock).mock.calls[0];
+    expect(call[3]).toBe('remedial');
+
+    const itemInserts = db.__inserted.filter((r) => 'source' in r);
+    expect(itemInserts[0]).toMatchObject({ sectionId: null });
+    if ('stimuli' in result.content) {
+      expect(result.content.stimuli).toEqual([]);
+    }
+  });
 });

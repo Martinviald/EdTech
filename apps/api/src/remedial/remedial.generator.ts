@@ -1,4 +1,4 @@
-import type { RemedialContent, RemedialMaterialType } from '@soe/types';
+import type { RemedialContent, RemedialMaterialType, RemedialStimulus } from '@soe/types';
 import type { RemedialMaterial } from '@soe/db';
 import type { RemedialBrief } from './remedial-brief.service';
 import type { RemedialCurriculumContext } from './remedial-context.service';
@@ -11,12 +11,17 @@ import type { LlmCompletionResult } from '../llm/llm.types';
  * (sin PII) y, opcionalmente, el brief diagnóstico anclado a la evidencia del error
  * (G4). El `brief` es OPCIONAL: `guide`/`group_plan` pueden ignorarlo; `practice_set`
  * lo usa para que las alternativas incorrectas capturen el error real.
+ *
+ * `stimulus` es OPCIONAL (Ola 2.1a): cuando el runner lo resuelve (Opción A), el
+ * `practice_set` genera preguntas ANCLADAS al pasaje (respondibles solo desde su
+ * texto). `null`/ausente → modo self_contained (comportamiento actual).
  */
 export interface RemedialGenerationInput {
   material: RemedialMaterial;
   orgId: string;
   curriculum: RemedialCurriculumContext;
   brief?: RemedialBrief | null;
+  stimulus?: RemedialStimulus | null;
 }
 
 /**

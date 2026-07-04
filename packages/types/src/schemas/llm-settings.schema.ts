@@ -13,11 +13,14 @@ import { z } from 'zod';
 
 // ── Funcionalidades configurables ────────────────────────────────────────────
 // Granularidad acordada: las 3 generaciones remediales (guía/práctica/plan grupal)
-// se agrupan en `remedial`.
+// se agrupan en `remedial` (self_contained, Flash). `remedial_reading` es su punto
+// de llamada hermano para la generación ANCLADA a un pasaje (Opción A, Ola 2.1a):
+// razona sobre el texto completo del estímulo → usa un modelo más fuerte (Pro).
 export const LLM_FEATURES = [
   'assessment_analysis',
   'item_insight',
   'remedial',
+  'remedial_reading',
   'ai_tagging',
   'assistant',
 ] as const;
@@ -42,6 +45,11 @@ export const LLM_FEATURE_LABELS: Record<
   remedial: {
     label: 'Material Remedial',
     description: 'Guías de reenseñanza, sets de práctica y planes remediales por grupo.',
+  },
+  remedial_reading: {
+    label: 'Material Remedial — Lectura anclada',
+    description:
+      'Preguntas nuevas ancladas a un pasaje oficial de la evaluación (Opción A). Razona sobre el texto completo.',
   },
   ai_tagging: {
     label: 'Auto-etiquetado de ítems',
@@ -125,6 +133,8 @@ export const LLM_FEATURE_DEFAULTS: Record<LlmFeature, LlmModelChoice> = {
   assessment_analysis: { provider: 'gemini', model: 'gemini-2.5-pro' },
   item_insight: { provider: 'gemini', model: 'gemini-2.5-pro' },
   remedial: { provider: 'gemini', model: 'gemini-2.5-flash' },
+  // Generación anclada al pasaje (Opción A): razona sobre el texto → Pro por defecto.
+  remedial_reading: { provider: 'gemini', model: 'gemini-2.5-pro' },
   ai_tagging: { provider: 'gemini', model: 'gemini-2.5-flash' },
   assistant: { provider: 'gemini', model: 'gemini-2.5-flash' },
 };

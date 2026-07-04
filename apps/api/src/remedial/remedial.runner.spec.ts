@@ -1,12 +1,23 @@
+import { NotFoundException } from '@nestjs/common';
 import type { Database, RemedialMaterial } from '@soe/db';
 import type { RemedialBriefService } from './remedial-brief.service';
 import type { RemedialContextService } from './remedial-context.service';
 import type { RemedialService } from './remedial.service';
 import type { RemedialGenerator } from './remedial.generator';
+import type { ResolvedStimulus, StimulusResolver } from './stimulus/stimulus.resolver';
 import { RemedialRunner } from './remedial.runner';
 
 function makeRow(overrides: Partial<RemedialMaterial> = {}): RemedialMaterial {
-  return { id: 'mat-1', orgId: 'org-1', type: 'guide', nodeId: 'node-1', ...overrides } as RemedialMaterial;
+  return {
+    id: 'mat-1',
+    orgId: 'org-1',
+    type: 'guide',
+    method: 'self_contained',
+    nodeId: 'node-1',
+    assessmentId: null,
+    input: null,
+    ...overrides,
+  } as RemedialMaterial;
 }
 
 function makeDb(row: RemedialMaterial | undefined): Database {
@@ -55,6 +66,14 @@ function makeBrief(brief: unknown = null) {
   } as unknown as RemedialBriefService & { build: jest.Mock };
 }
 
+function makeResolver(
+  resolved: ResolvedStimulus = { method: 'self_contained', stimulus: null },
+) {
+  return {
+    resolve: jest.fn().mockResolvedValue(resolved),
+  } as unknown as StimulusResolver & { resolve: jest.Mock };
+}
+
 function makeGenerator(type: RemedialGenerator['type'], result: unknown): RemedialGenerator {
   return {
     type,
@@ -76,12 +95,13 @@ const validResult = {
 };
 
 describe('RemedialRunner', () => {
-  it('happy path: markProcessing → brief+contexto (con orgId) → generate → markReady', async () => {
+  it('happy path: markProcessing → brief+contexto+estímulo (con orgId) → generate → markReady', async () => {
     const service = makeService() as ReturnType<typeof makeService>;
     const context = makeContext() as RemedialContextService & { assemble: jest.Mock };
     const brief = makeBrief({ rootCauseHypothesis: 'rc', realErrors: [] });
+    const resolver = makeResolver();
     const gen = makeGenerator('guide', validResult);
-    const runner = new RemedialRunner(makeDb(makeRow()), service, context, brief, [gen]);
+    const runner = new RemedialRunner(makeDb(makeRow()), service, context, brief, resolver, [gen]);
 
     await runner.run('mat-1', 'org-1');
 
@@ -92,22 +112,98 @@ describe('RemedialRunner', () => {
     expect(brief.build).toHaveBeenCalledWith(
       expect.objectContaining({ orgId: 'org-1', nodeId: 'node-1' }),
     );
-    // el brief se persiste en el input de auditoría.
+    // el estímulo se resuelve con el método/nodo del registro (default self_contained).
+    expect(resolver.resolve).toHaveBeenCalledWith(
+      expect.objectContaining({ orgId: 'org-1', nodeId: 'node-1', method: 'self_contained' }),
+    );
+    // el brief se persiste en el input de auditoría + el método EFECTIVO resuelto.
     expect(service.markReady).toHaveBeenCalledWith(
       'mat-1',
       'org-1',
       expect.objectContaining({
+        method: 'self_contained',
         input: expect.objectContaining({ brief: { rootCauseHypothesis: 'rc', realErrors: [] } }),
       }),
     );
     expect(service.markFailed).not.toHaveBeenCalled();
   });
 
+  it('modo estímulo: resuelve reuse_stimulus → pasa el pasaje al generador y persiste method', async () => {
+    const service = makeService() as ReturnType<typeof makeService>;
+    const stimulus = {
+      sectionId: 'sec-1',
+      kind: 'passage' as const,
+      source: 'official' as const,
+      title: 'La abeja',
+      text: 'Las abejas polinizan las flores.',
+    };
+    const resolver = makeResolver({ method: 'reuse_stimulus', stimulus });
+    const gen = makeGenerator('practice_set', {
+      content: { skillFocus: 's', itemCount: 0, items: [], notes: null, stimuli: [] },
+      promptVersion: 'ola2-practice-stimulus-v1',
+      audit: {},
+    });
+    const row = makeRow({
+      type: 'practice_set',
+      method: 'reuse_stimulus',
+      assessmentId: 'assess-1',
+      input: { stimulusId: 'sec-1' },
+    });
+    const runner = new RemedialRunner(makeDb(row), service, makeContext(), makeBrief(), resolver, [gen]);
+
+    await runner.run('mat-1', 'org-1');
+
+    // el runner lee el stimulusId persistido en input y lo pasa al resolver.
+    expect(resolver.resolve).toHaveBeenCalledWith(
+      expect.objectContaining({
+        assessmentId: 'assess-1',
+        method: 'reuse_stimulus',
+        stimulusId: 'sec-1',
+      }),
+    );
+    // el estímulo resuelto llega al generador.
+    expect(gen.generate).toHaveBeenCalledWith(expect.objectContaining({ stimulus }));
+    // se persiste el método efectivo.
+    expect(service.markReady).toHaveBeenCalledWith(
+      'mat-1',
+      'org-1',
+      expect.objectContaining({ method: 'reuse_stimulus' }),
+    );
+  });
+
+  it('NotFoundException del resolver (pasaje inválido) → markFailed con el mensaje', async () => {
+    const service = makeService() as ReturnType<typeof makeService>;
+    const resolver = makeResolver();
+    (resolver.resolve as jest.Mock).mockRejectedValue(
+      new NotFoundException('Estímulo no encontrado o no es un pasaje visible para la organización'),
+    );
+    const gen = makeGenerator('practice_set', validResult);
+    const row = makeRow({ type: 'practice_set', method: 'reuse_stimulus' });
+    const runner = new RemedialRunner(makeDb(row), service, makeContext(), makeBrief(), resolver, [gen]);
+
+    await runner.run('mat-1', 'org-1');
+
+    expect(service.markFailed).toHaveBeenCalledWith(
+      'mat-1',
+      'org-1',
+      expect.stringContaining('Estímulo no encontrado'),
+    );
+    expect(gen.generate).not.toHaveBeenCalled();
+    expect(service.markReady).not.toHaveBeenCalled();
+  });
+
   it('si el generador lanza → markFailed (nunca tumba el proceso)', async () => {
     const service = makeService() as ReturnType<typeof makeService>;
     const gen = makeGenerator('guide', undefined);
     (gen.generate as jest.Mock).mockRejectedValue(new Error('llm caído'));
-    const runner = new RemedialRunner(makeDb(makeRow()), service, makeContext(), makeBrief(), [gen]);
+    const runner = new RemedialRunner(
+      makeDb(makeRow()),
+      service,
+      makeContext(),
+      makeBrief(),
+      makeResolver(),
+      [gen],
+    );
 
     await runner.run('mat-1', 'org-1');
 
@@ -122,6 +218,7 @@ describe('RemedialRunner', () => {
       service,
       makeContext(),
       makeBrief(),
+      makeResolver(),
       [], // sin generadores
     );
 
@@ -132,7 +229,14 @@ describe('RemedialRunner', () => {
   it('si el material no existe → markFailed', async () => {
     const service = makeService() as ReturnType<typeof makeService>;
     const gen = makeGenerator('guide', validResult);
-    const runner = new RemedialRunner(makeDb(undefined), service, makeContext(), makeBrief(), [gen]);
+    const runner = new RemedialRunner(
+      makeDb(undefined),
+      service,
+      makeContext(),
+      makeBrief(),
+      makeResolver(),
+      [gen],
+    );
 
     await runner.run('missing', 'org-1');
     expect(service.markFailed).toHaveBeenCalled();
