@@ -1,4 +1,5 @@
 import type { Database, RemedialMaterial } from '@soe/db';
+import type { RemedialBriefService } from './remedial-brief.service';
 import type { RemedialContextService } from './remedial-context.service';
 import type { RemedialService } from './remedial.service';
 import type { RemedialGenerator } from './remedial.generator';
@@ -43,8 +44,15 @@ function makeContext() {
       descriptors: [],
       siblings: [],
       fewShotItems: [],
+      referenceItems: [],
     }),
   } as unknown as RemedialContextService;
+}
+
+function makeBrief(brief: unknown = null) {
+  return {
+    build: jest.fn().mockResolvedValue(brief),
+  } as unknown as RemedialBriefService & { build: jest.Mock };
 }
 
 function makeGenerator(type: RemedialGenerator['type'], result: unknown): RemedialGenerator {
@@ -68,15 +76,30 @@ const validResult = {
 };
 
 describe('RemedialRunner', () => {
-  it('happy path: markProcessing → generate → markReady', async () => {
+  it('happy path: markProcessing → brief+contexto (con orgId) → generate → markReady', async () => {
     const service = makeService() as ReturnType<typeof makeService>;
+    const context = makeContext() as RemedialContextService & { assemble: jest.Mock };
+    const brief = makeBrief({ rootCauseHypothesis: 'rc', realErrors: [] });
     const gen = makeGenerator('guide', validResult);
-    const runner = new RemedialRunner(makeDb(makeRow()), service, makeContext(), [gen]);
+    const runner = new RemedialRunner(makeDb(makeRow()), service, context, brief, [gen]);
 
     await runner.run('mat-1', 'org-1');
 
     expect(service.markProcessing).toHaveBeenCalledWith('mat-1', 'org-1');
-    expect(service.markReady).toHaveBeenCalled();
+    // assemble ahora recibe el orgId (activa el filtro de pool por org).
+    expect(context.assemble).toHaveBeenCalledWith('node-1', 'org-1');
+    // el brief se construye desde el material (nodeId + trazabilidad).
+    expect(brief.build).toHaveBeenCalledWith(
+      expect.objectContaining({ orgId: 'org-1', nodeId: 'node-1' }),
+    );
+    // el brief se persiste en el input de auditoría.
+    expect(service.markReady).toHaveBeenCalledWith(
+      'mat-1',
+      'org-1',
+      expect.objectContaining({
+        input: expect.objectContaining({ brief: { rootCauseHypothesis: 'rc', realErrors: [] } }),
+      }),
+    );
     expect(service.markFailed).not.toHaveBeenCalled();
   });
 
@@ -84,7 +107,7 @@ describe('RemedialRunner', () => {
     const service = makeService() as ReturnType<typeof makeService>;
     const gen = makeGenerator('guide', undefined);
     (gen.generate as jest.Mock).mockRejectedValue(new Error('llm caído'));
-    const runner = new RemedialRunner(makeDb(makeRow()), service, makeContext(), [gen]);
+    const runner = new RemedialRunner(makeDb(makeRow()), service, makeContext(), makeBrief(), [gen]);
 
     await runner.run('mat-1', 'org-1');
 
@@ -98,6 +121,7 @@ describe('RemedialRunner', () => {
       makeDb(makeRow({ type: 'group_plan' })),
       service,
       makeContext(),
+      makeBrief(),
       [], // sin generadores
     );
 
@@ -108,7 +132,7 @@ describe('RemedialRunner', () => {
   it('si el material no existe → markFailed', async () => {
     const service = makeService() as ReturnType<typeof makeService>;
     const gen = makeGenerator('guide', validResult);
-    const runner = new RemedialRunner(makeDb(undefined), service, makeContext(), [gen]);
+    const runner = new RemedialRunner(makeDb(undefined), service, makeContext(), makeBrief(), [gen]);
 
     await runner.run('missing', 'org-1');
     expect(service.markFailed).toHaveBeenCalled();

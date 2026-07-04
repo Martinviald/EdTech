@@ -99,7 +99,7 @@ describe('PracticeGenerator', () => {
     const gen = new PracticeGenerator(makeLlm(JSON.stringify(twoItems)), db);
     const result = await gen.generate(makeInput());
 
-    expect(result.promptVersion).toBe('s3-practice-v1');
+    expect(result.promptVersion).toBe('ola1-practice-v2');
     // 2 items + 2 tags
     const itemInserts = db.__inserted.filter((r) => 'source' in r);
     expect(itemInserts).toHaveLength(2);

@@ -3,6 +3,7 @@ import { and, eq } from 'drizzle-orm';
 import { remedialMaterials, withOrgContext, type RemedialMaterial } from '@soe/db';
 import type { RemedialMaterialType } from '@soe/types';
 import { InjectDb, type Database } from '../database/database.types';
+import { RemedialBriefService } from './remedial-brief.service';
 import { RemedialContextService } from './remedial-context.service';
 import { RemedialService } from './remedial.service';
 import { REMEDIAL_GENERATORS, type RemedialGenerator } from './remedial.generator';
@@ -29,6 +30,7 @@ export class RemedialRunner {
     @InjectDb() private readonly db: Database,
     private readonly service: RemedialService,
     private readonly context: RemedialContextService,
+    private readonly brief: RemedialBriefService,
     @Inject(REMEDIAL_GENERATORS) generators: RemedialGenerator[],
   ) {
     this.generators = new Map(generators.map((g) => [g.type, g]));
@@ -48,16 +50,29 @@ export class RemedialRunner {
 
       await this.service.markProcessing(materialId, orgId);
 
-      const curriculum = await this.context.assemble(record.nodeId);
+      // Brief del error (G4) + contexto curricular enriquecido (G5) en paralelo.
+      // El brief degrada a `null` si no hay evidencia (la generación sigue con el
+      // contexto curricular). `assemble` recibe `orgId` para acotar el pool de ítems.
+      const [brief, curriculum] = await Promise.all([
+        this.brief.build({
+          orgId,
+          nodeId: record.nodeId,
+          assessmentId: record.assessmentId,
+          sourceAnalysisId: record.sourceAnalysisId,
+        }),
+        this.context.assemble(record.nodeId, orgId),
+      ]);
 
       const result = await this.withTimeout(
-        generator.generate({ material: record, orgId, curriculum }),
+        generator.generate({ material: record, orgId, curriculum, brief }),
         this.timeoutMs(),
       );
 
       await this.service.markReady(materialId, orgId, {
+        // Auditoría (sin PII): contexto curricular enviado (`result.audit`) + el brief
+        // del error usado para anclar la generación. La salida vive solo en `content`.
         content: result.content,
-        input: result.audit,
+        input: { ...result.audit, brief },
         model: result.model,
         promptVersion: result.promptVersion,
         tokens: result.tokens,

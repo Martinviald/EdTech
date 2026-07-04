@@ -107,6 +107,24 @@ export function validateRemedialContent(
 
 // ── Model de respuesta (lo que el frontend tipa) ──
 
+/**
+ * Preview hidratado de un ítem de práctica (H9.3 · Ola 1 remedial G2). Se arma en
+ * la lectura desde `items` (fuente de verdad), NO se persiste en el material: el
+ * `content` sigue guardando solo las refs ligeras (`remedialPracticeItemRefSchema`).
+ */
+export const remedialPracticeItemPreviewSchema = z.object({
+  itemId: z.string().uuid(),
+  position: z.number().int(),
+  type: z.string(), // item_type
+  stem: z.string().nullable(),
+  alternatives: z
+    .array(z.object({ key: z.string(), text: z.string(), isCorrect: z.boolean() }))
+    .nullable(),
+  correctKey: z.string().nullable(),
+  explanation: z.string().nullable(),
+});
+export type RemedialPracticeItemPreview = z.infer<typeof remedialPracticeItemPreviewSchema>;
+
 export const remedialMaterialModelSchema = z.object({
   id: z.string().uuid(),
   orgId: z.string().uuid(),
@@ -119,6 +137,8 @@ export const remedialMaterialModelSchema = z.object({
   title: z.string().nullable(),
   // forma varía por `type`; se valida con `validateRemedialContent` cuando status='ready'/'approved'.
   content: remedialContentSchema.nullable(),
+  // preview hidratado on-read desde `items`; solo se llena para type='practice_set' en el detalle.
+  practiceItems: z.array(remedialPracticeItemPreviewSchema).nullable().optional(),
   model: z.string().nullable(),
   promptVersion: z.string().nullable(),
   costUsd: z.string().nullable(),

@@ -98,7 +98,8 @@ export function ReviewPanel({ material, content, canApprove }: ReviewPanelProps)
     }
     // Narrowing por schema (el content ya viene validado por tipo desde el servidor).
     const practice = remedialPracticeContentSchema.safeParse(content);
-    if (practice.success) return <PracticeView content={practice.data} />;
+    if (practice.success)
+      return <PracticeView content={practice.data} practiceItems={material.practiceItems} />;
     const plan = remedialPlanContentSchema.safeParse(content);
     if (plan.success) return <PlanView content={plan.data} />;
     return (

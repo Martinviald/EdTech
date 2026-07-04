@@ -5,7 +5,7 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { and, desc, eq, inArray, isNull } from 'drizzle-orm';
+import { and, desc, eq, inArray, isNull, or } from 'drizzle-orm';
 import {
   items,
   remedialMaterials,
@@ -20,10 +20,26 @@ import {
   type RemedialListQueryDto,
   type RemedialListResponse,
   type RemedialMaterialModel,
+  type RemedialMaterialType,
+  type RemedialPracticeItemPreview,
   type ReviewRemedialDto,
 } from '@soe/types';
 import type { JwtPayload } from '../auth/jwt-payload.types';
 import { InjectDb, type Database } from '../database/database.types';
+import { GROUP_PLAN_PROMPT_VERSION } from './prompts/group-plan.prompt';
+import { GUIDE_PROMPT_VERSION } from './prompts/guide.prompt';
+import { PRACTICE_PROMPT_VERSION } from './prompts/practice.prompt';
+
+/**
+ * Versión de prompt vigente por tipo. Entra en el `inputHash` de la caché para que
+ * un bump de prompt (p. ej. `s3-practice-v1` → `ola1-practice-v2`) invalide el
+ * material previo en lugar de servir una versión vieja desde caché.
+ */
+const PROMPT_VERSION_BY_TYPE: Record<RemedialMaterialType, string> = {
+  guide: GUIDE_PROMPT_VERSION,
+  practice_set: PRACTICE_PROMPT_VERSION,
+  group_plan: GROUP_PLAN_PROMPT_VERSION,
+};
 
 /** Cantidad de ítems de práctica por defecto cuando el DTO no la especifica. */
 const DEFAULT_PRACTICE_ITEM_COUNT = 5;
@@ -82,6 +98,11 @@ export class RemedialService {
       nodeId: dto.nodeId,
       classGroupId: dto.classGroupId ?? null,
       itemCount,
+      // Distinto diagnóstico de origen no debe colisionar en caché (el brief que
+      // ancla la generación depende del análisis IA).
+      sourceAnalysisId: dto.sourceAnalysisId ?? null,
+      // Bump de prompt → clave distinta (no reutilizar material de una versión vieja).
+      promptVersion: PROMPT_VERSION_BY_TYPE[dto.type],
     });
 
     return withOrgContext(this.db, orgId, async (tx) => {
@@ -140,7 +161,20 @@ export class RemedialService {
       if (!row) {
         throw new NotFoundException('Material remedial no encontrado');
       }
-      return this.toModel(tx, row);
+      const model = await this.toModel(tx, row);
+
+      // Hidratación on-read del preview de ítems (G2): solo para practice_set en
+      // estado revisable. El ítem completo (enunciado + alternativas + clave +
+      // explicación) se lee de `items` (fuente de verdad); NO se persiste, el
+      // `content` (refs ligeras) queda intacto.
+      if (
+        row.type === 'practice_set' &&
+        (row.status === 'ready' || row.status === 'approved')
+      ) {
+        model.practiceItems = await this.hydratePracticeItems(tx, row.content, orgId);
+      }
+
+      return model;
     });
   }
 
@@ -352,6 +386,8 @@ export class RemedialService {
     nodeId: string;
     classGroupId: string | null;
     itemCount: number | null;
+    sourceAnalysisId: string | null;
+    promptVersion: string;
   }): string {
     // Orden de claves fijo → hash determinista independiente del insertion order.
     const canonical = JSON.stringify({
@@ -359,6 +395,8 @@ export class RemedialService {
       nodeId: input.nodeId,
       classGroupId: input.classGroupId,
       itemCount: input.itemCount,
+      sourceAnalysisId: input.sourceAnalysisId,
+      promptVersion: input.promptVersion,
     });
     return createHash('sha256').update(canonical).digest('hex');
   }
@@ -409,4 +447,112 @@ export class RemedialService {
       reviewedAt: row.reviewedAt ? row.reviewedAt.toISOString() : null,
     };
   }
+
+  /**
+   * Hidrata el preview completo de los ítems de práctica leyéndolos de `items`
+   * (fuente de verdad) por los `itemId` guardados en el `content`. `items` NO está
+   * bajo RLS → aislamiento con filtro EXPLÍCITO de pool visible
+   * (`org_id = :orgId ∪ org_id IS NULL`) + soft-delete (CLAUDE.md §5.2). Se arma
+   * on-read; el `content` (refs) no se modifica. Un ítem ausente (borrado o fuera
+   * del pool) se omite del preview sin romper el resto.
+   */
+  private async hydratePracticeItems(
+    tx: Database,
+    content: RemedialContent | null,
+    orgId: string,
+  ): Promise<RemedialPracticeItemPreview[]> {
+    if (!content || !('items' in content) || content.items.length === 0) {
+      return [];
+    }
+    const refs = content.items;
+    const itemIds = refs.map((ref) => ref.itemId);
+
+    const rows = await tx
+      .select({ id: items.id, type: items.type, content: items.content })
+      .from(items)
+      .where(
+        and(
+          inArray(items.id, itemIds),
+          or(eq(items.orgId, orgId), isNull(items.orgId)),
+          isNull(items.deletedAt),
+        ),
+      );
+    const byId = new Map(rows.map((row) => [row.id, row]));
+
+    const previews: RemedialPracticeItemPreview[] = [];
+    for (const ref of refs) {
+      const item = byId.get(ref.itemId);
+      if (!item) continue;
+      const alternatives = extractAlternatives(item.content);
+      previews.push({
+        itemId: item.id,
+        position: ref.position,
+        type: item.type,
+        stem: extractStem(item.content),
+        alternatives,
+        correctKey: extractCorrectKey(alternatives),
+        explanation: extractExplanation(item.content),
+      });
+    }
+    return previews;
+  }
+}
+
+// ──────────────────────────────────────────────────────────────────────────────
+// Extracción defensiva del `content` polimórfico de un ítem (G2). El banco es
+// heterogéneo por `item_type`: se parsea campo a campo (no contra el schema
+// estricto, que rechazaría un ítem entero por un detalle). Degrada a `null`.
+// ──────────────────────────────────────────────────────────────────────────────
+
+type PreviewAlternative = { key: string; text: string; isCorrect: boolean };
+
+/** `content.stem` si existe y es string; `null` en otro caso. */
+function extractStem(content: unknown): string | null {
+  if (content && typeof content === 'object' && 'stem' in content) {
+    const stem = (content as { stem?: unknown }).stem;
+    if (typeof stem === 'string') return stem;
+  }
+  return null;
+}
+
+/**
+ * `content.alternatives` como lista `{key,text,isCorrect}`. Solo los tipos con
+ * alternativas (`multiple_choice`, `listening`) las traen; el resto degrada a `null`.
+ */
+function extractAlternatives(content: unknown): PreviewAlternative[] | null {
+  if (!content || typeof content !== 'object' || !('alternatives' in content)) {
+    return null;
+  }
+  const raw = (content as { alternatives?: unknown }).alternatives;
+  if (!Array.isArray(raw)) return null;
+
+  const parsed: PreviewAlternative[] = [];
+  for (const entry of raw) {
+    if (!entry || typeof entry !== 'object') continue;
+    const { key, text, isCorrect } = entry as {
+      key?: unknown;
+      text?: unknown;
+      isCorrect?: unknown;
+    };
+    if (typeof key === 'string' && typeof text === 'string' && typeof isCorrect === 'boolean') {
+      parsed.push({ key, text, isCorrect });
+    }
+  }
+  return parsed.length > 0 ? parsed : null;
+}
+
+/** Clave correcta: primera alternativa con `isCorrect=true`. `null` si no aplica. */
+function extractCorrectKey(alternatives: PreviewAlternative[] | null): string | null {
+  if (!alternatives) return null;
+  const correct = alternatives.find((alt) => alt.isCorrect);
+  return correct ? correct.key : null;
+}
+
+/** `content.explanation` si existe y es string; `null` en otro caso. */
+function extractExplanation(content: unknown): string | null {
+  if (content && typeof content === 'object' && 'explanation' in content) {
+    const explanation = (content as { explanation?: unknown }).explanation;
+    if (typeof explanation === 'string') return explanation;
+  }
+  return null;
 }

@@ -5,6 +5,7 @@ import { LlmModule } from '../llm/llm.module';
 import { GroupPlanGenerator } from './generators/group-plan.generator';
 import { GuideGenerator } from './generators/guide.generator';
 import { PracticeGenerator } from './generators/practice.generator';
+import { RemedialBriefService } from './remedial-brief.service';
 import { RemedialContextService } from './remedial-context.service';
 import { RemedialController } from './remedial.controller';
 import { REMEDIAL_GENERATORS } from './remedial.generator';
@@ -29,6 +30,7 @@ import { FeatureGuard } from '../common/guards/feature.guard';
   providers: [
     RemedialService,
     RemedialContextService,
+    RemedialBriefService,
     RemedialRunner,
     GuideGenerator,
     PracticeGenerator,
