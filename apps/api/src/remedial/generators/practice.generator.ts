@@ -17,14 +17,12 @@ import {
 import { InjectDb, type Database } from '../../database/database.types';
 import { LlmService } from '../../llm/llm.service';
 import { parseModelJson } from '../prompts/curriculum-context.prompt';
+import { buildPracticePrompt, PRACTICE_PROMPT_VERSION } from '../prompts/practice.prompt';
 import {
-  buildPracticePrompt,
-  PRACTICE_PROMPT_VERSION,
-} from '../prompts/practice.prompt';
-import type {
-  RemedialGenerationInput,
-  RemedialGenerationResult,
-  RemedialGenerator,
+  remedialUsageFields,
+  type RemedialGenerationInput,
+  type RemedialGenerationResult,
+  type RemedialGenerator,
 } from '../remedial.generator';
 
 /** Cantidad de ítems por defecto si el registro no la trae. */
@@ -76,9 +74,7 @@ export class PracticeGenerator implements RemedialGenerator {
     @InjectDb() private readonly db: Database,
   ) {}
 
-  async generate(
-    input: RemedialGenerationInput,
-  ): Promise<RemedialGenerationResult> {
+  async generate(input: RemedialGenerationInput): Promise<RemedialGenerationResult> {
     const nodeId = input.material.nodeId;
     if (!nodeId) {
       throw new Error('El set de práctica requiere un nodeId (habilidad objetivo)');
@@ -90,14 +86,12 @@ export class PracticeGenerator implements RemedialGenerator {
       itemCount,
       input.brief,
     );
-    const raw = await this.llm.complete(system, prompt, input.orgId, 'remedial');
+    const completion = await this.llm.completeWithUsage(system, prompt, input.orgId, 'remedial');
 
-    const json = parseModelJson(raw);
+    const json = parseModelJson(completion.text);
     const parsed = llmPracticeOutputSchema.safeParse(json);
     if (!parsed.success) {
-      throw new Error(
-        `El set de ítems generado no cumple el schema: ${parsed.error.message}`,
-      );
+      throw new Error(`El set de ítems generado no cumple el schema: ${parsed.error.message}`);
     }
 
     // Valida cada content contra el schema MC ANTES de persistir.
@@ -154,6 +148,7 @@ export class PracticeGenerator implements RemedialGenerator {
       content,
       promptVersion: PRACTICE_PROMPT_VERSION,
       audit: { curriculum: input.curriculum, requestedItemCount: itemCount },
+      ...remedialUsageFields(completion),
     };
   }
 

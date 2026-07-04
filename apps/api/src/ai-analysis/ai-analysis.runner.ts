@@ -9,6 +9,7 @@ import {
 import { and, eq } from 'drizzle-orm';
 import { InjectDb, type Database } from '../database/database.types';
 import { LlmService } from '../llm/llm.service';
+import { estimateLlmCostUsd } from '../llm/llm.pricing';
 import { AiAnalysisService } from './ai-analysis.service';
 import {
   buildAssessmentInsightsPrompt,
@@ -66,21 +67,26 @@ export class AiAnalysisRunner {
       const audience = this.resolveAudience(record.audience);
       const { system, prompt } = buildAssessmentInsightsPrompt(snapshot, audience);
 
-      const raw = await this.withRetry(() =>
+      const completion = await this.withRetry(() =>
         this.withTimeout(
-          this.llm.complete(system, prompt, orgId, 'assessment_analysis'),
+          this.llm.completeWithUsage(system, prompt, orgId, 'assessment_analysis'),
           this.timeoutMs(),
         ),
       );
 
-      const output = this.parseOutput(raw);
+      const output = this.parseOutput(completion.text);
 
       await this.service.markCompleted(analysisId, orgId, {
         output,
-        model: null,
+        model: completion.model,
         promptVersion: PROMPT_VERSION,
-        tokens: null,
-        costUsd: null,
+        tokens: completion.usage
+          ? {
+              input: completion.usage.inputTokens,
+              output: completion.usage.outputTokens,
+            }
+          : null,
+        costUsd: estimateLlmCostUsd(completion.model, completion.usage),
       });
     } catch (err) {
       const message = err instanceof Error ? err.message : String(err);
@@ -144,10 +150,7 @@ export class AiAnalysisRunner {
   private withTimeout<T>(promise: Promise<T>, ms: number): Promise<T> {
     let timer: ReturnType<typeof setTimeout>;
     const timeout = new Promise<never>((_resolve, reject) => {
-      timer = setTimeout(
-        () => reject(new Error(`Timeout de análisis IA tras ${ms}ms`)),
-        ms,
-      );
+      timer = setTimeout(() => reject(new Error(`Timeout de análisis IA tras ${ms}ms`)), ms);
     });
     return Promise.race([promise, timeout]).finally(() => clearTimeout(timer));
   }
