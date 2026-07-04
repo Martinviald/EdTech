@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { remedialStimulusRefSchema, remedialStimulusSchema } from './stimulus.schema';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // F2 S3 — IA Remedial (RAG). Contratos compartidos del módulo `remedial`
@@ -24,6 +25,18 @@ export const remedialStatusSchema = z.enum([
   'discarded',
 ]);
 export type RemedialStatus = z.infer<typeof remedialStatusSchema>;
+
+/**
+ * Método de generación del set remedial (Ola 2.1a). `self_contained`: MCQ sin texto
+ * (comportamiento actual). `reuse_stimulus`: preguntas nuevas sobre un estímulo OFICIAL
+ * de la evaluación (Opción A). `generate_stimulus`: texto nuevo generado por IA (Opción B, 2.2).
+ */
+export const remedialMethodSchema = z.enum([
+  'self_contained',
+  'reuse_stimulus',
+  'generate_stimulus',
+]);
+export type RemedialMethod = z.infer<typeof remedialMethodSchema>;
 
 // ── Contenido por tipo (polimórfico; validado tras la respuesta del modelo) ──
 
@@ -60,6 +73,9 @@ export const remedialPracticeContentSchema = z.object({
   itemCount: z.number().int(),
   items: z.array(remedialPracticeItemRefSchema),
   notes: z.string().nullable(),
+  // Ola 2.1a: refs ligeras a los estímulos (pasajes) del set. `[]` para self_contained;
+  // el default hace que el contenido viejo sin `stimuli` siga validando.
+  stimuli: z.array(remedialStimulusRefSchema).default([]),
 });
 export type RemedialPracticeContent = z.infer<typeof remedialPracticeContentSchema>;
 
@@ -130,6 +146,7 @@ export const remedialMaterialModelSchema = z.object({
   orgId: z.string().uuid(),
   type: remedialMaterialTypeSchema,
   status: remedialStatusSchema,
+  method: remedialMethodSchema.default('self_contained'), // Ola 2.1a: cómo se generó el set
   nodeId: z.string().uuid().nullable(),
   nodeName: z.string().nullable(), // joineado para mostrar
   assessmentId: z.string().uuid().nullable(),
@@ -139,6 +156,8 @@ export const remedialMaterialModelSchema = z.object({
   content: remedialContentSchema.nullable(),
   // preview hidratado on-read desde `items`; solo se llena para type='practice_set' en el detalle.
   practiceItems: z.array(remedialPracticeItemPreviewSchema).nullable().optional(),
+  // Ola 2.1a: estímulos hidratados on-read (texto completo del pasaje) desde `instrument_sections`.
+  stimuli: z.array(remedialStimulusSchema).nullable().optional(),
   model: z.string().nullable(),
   promptVersion: z.string().nullable(),
   costUsd: z.string().nullable(),
@@ -169,6 +188,8 @@ export const generateRemedialSchema = z.object({
   classGroupId: z.string().uuid().optional(), // requerido para group_plan (cohorte)
   sourceAnalysisId: z.string().uuid().optional(), // análisis IA de origen (trazabilidad)
   itemCount: z.number().int().min(1).max(20).optional(), // solo practice_set (default en el service)
+  method: remedialMethodSchema.optional(), // Ola 2.1a: método remedial (default resuelto en el service)
+  stimulusId: z.string().uuid().optional(), // Ola 2.1a: override del pasaje elegido por el docente
   force: z.boolean().default(false), // ignora la caché por input_hash
 });
 export type GenerateRemedialDto = z.infer<typeof generateRemedialSchema>;
