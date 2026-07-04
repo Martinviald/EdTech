@@ -166,6 +166,7 @@ export default async function MaterialRemedialDetailPage({
         content={content}
         practiceItems={material.practiceItems}
         stimuli={material.stimuli}
+        qualityReport={material.qualityReport}
       />
     </PageContainer>
   );

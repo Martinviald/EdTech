@@ -1,11 +1,15 @@
-import { BookOpen, CheckCircle2 } from 'lucide-react';
+import { AlertTriangle, BookOpen, CheckCircle2, Info } from 'lucide-react';
 import type {
+  JudgeVerdict,
+  QualityReport,
   RemedialPracticeContent,
   RemedialPracticeItemPreview,
   RemedialStimulus,
 } from '@soe/types';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { AlertCallout } from '@/components/patterns';
 import { cn } from '@/lib/utils';
+import { REMEDIAL_JUDGE_LABELS } from './labels';
 
 const POSITION_BADGE =
   'mt-0.5 shrink-0 rounded bg-primary/10 px-2 py-0.5 text-xs font-medium text-primary';
@@ -32,14 +36,93 @@ function StimulusPassage({ stimulus }: { stimulus: RemedialStimulus }) {
   );
 }
 
+/** Motivos de falla dura (hard-gate) derivados del veredicto del juez, en español. */
+function hardFailReasons(verdict: JudgeVerdict): string[] {
+  const reasons: string[] = [];
+  if (!verdict.answerable) reasons.push(REMEDIAL_JUDGE_LABELS.notAnswerable);
+  if (!verdict.uniqueCorrect) reasons.push(REMEDIAL_JUDGE_LABELS.notUniqueCorrect);
+  if (!verdict.factual) reasons.push(REMEDIAL_JUDGE_LABELS.notFactual);
+  return reasons;
+}
+
+/**
+ * Flag del juez automático por ítem (Ola 2.1b). Falla dura (answerable / uniqueCorrect /
+ * factual) ⇒ aviso de advertencia con los motivos y las objeciones; `skillMatch=false` sin
+ * falla dura ⇒ aviso blando informativo; todo ok ⇒ check verde discreto. Sin veredicto para
+ * la posición (material antiguo o degradación) ⇒ no renderiza nada.
+ */
+function ItemVerdictFlag({ verdict }: { verdict?: JudgeVerdict }) {
+  if (!verdict) return null;
+
+  const reasons = hardFailReasons(verdict);
+  const objections = verdict.objections.filter((objection) => objection.trim());
+
+  if (reasons.length > 0) {
+    return (
+      <div className="rounded-md border border-warning/40 bg-warning/10 p-2.5 text-xs">
+        <p className="flex items-center gap-1.5 font-medium text-warning">
+          <AlertTriangle className="size-3.5 shrink-0" aria-hidden />
+          {REMEDIAL_JUDGE_LABELS.itemReviewNeeded}
+        </p>
+        <ul className="mt-1 list-disc space-y-0.5 pl-5 text-foreground">
+          {reasons.map((reason) => (
+            <li key={reason}>{reason}</li>
+          ))}
+        </ul>
+        {objections.length > 0 ? (
+          <ul className="mt-1.5 space-y-0.5 text-muted-foreground">
+            {objections.map((objection, idx) => (
+              <li key={idx}>{objection}</li>
+            ))}
+          </ul>
+        ) : null}
+      </div>
+    );
+  }
+
+  if (!verdict.skillMatch) {
+    return (
+      <div className="rounded-md border border-info/30 bg-info/5 p-2.5 text-xs">
+        <p className="flex items-center gap-1.5 font-medium text-info">
+          <Info className="size-3.5 shrink-0" aria-hidden />
+          {REMEDIAL_JUDGE_LABELS.skillMismatch}
+        </p>
+        {objections.length > 0 ? (
+          <ul className="mt-1 space-y-0.5 text-muted-foreground">
+            {objections.map((objection, idx) => (
+              <li key={idx}>{objection}</li>
+            ))}
+          </ul>
+        ) : null}
+      </div>
+    );
+  }
+
+  return (
+    <p className="inline-flex items-center gap-1 text-xs font-medium text-success">
+      <CheckCircle2 className="size-3.5 shrink-0" aria-hidden />
+      {REMEDIAL_JUDGE_LABELS.validated}
+    </p>
+  );
+}
+
 /** Ítem completo (enunciado + alternativas + explicación) hidratado desde `items` (G2). */
-function PracticeItemCard({ item }: { item: RemedialPracticeItemPreview }) {
+function PracticeItemCard({
+  item,
+  verdict,
+}: {
+  item: RemedialPracticeItemPreview;
+  /** Veredicto del juez para esta posición (Ola 2.1b); ausente ⇒ sin flag. */
+  verdict?: JudgeVerdict;
+}) {
   const alternatives = item.alternatives ?? [];
   return (
     <li className="rounded-md border bg-muted/30 p-3 sm:p-4">
       <div className="flex items-start gap-2">
         <span className={POSITION_BADGE}>{item.position}</span>
         <div className="min-w-0 flex-1 space-y-3">
+          <ItemVerdictFlag verdict={verdict} />
+
           {item.stem ? (
             <p className="text-sm text-foreground">{item.stem}</p>
           ) : (
@@ -96,11 +179,16 @@ function PracticeItemCard({ item }: { item: RemedialPracticeItemPreview }) {
  * muestra el ítem COMPLETO: enunciado + alternativas (marcando la correcta) +
  * explicación. Si no llega (material antiguo o nodo sin generación), degrada al
  * listado ligero por `stem` de las refs del `content`, sin romper.
+ *
+ * Si el detalle trae `qualityReport` (Ola 2.1b), muestra el estado del juez
+ * automático: banner si no convergió (`exhausted`), check discreto si convergió, y
+ * los flags por ítem mapeando los veredictos por `position`.
  */
 export function PracticeView({
   content,
   practiceItems,
   stimuli,
+  qualityReport,
 }: {
   content: RemedialPracticeContent;
   /** Preview hidratado del detalle; ausente/vacío ⇒ degradación al `stem` de las refs. */
@@ -110,6 +198,12 @@ export function PracticeView({
    * Ausente/vacío (o sin texto) ⇒ vista actual sin pasaje, sin romper.
    */
   stimuli?: RemedialStimulus[] | null;
+  /**
+   * Reporte del juez automático (Ola 2.1b). `exhausted` ⇒ banner de no-convergencia;
+   * `converged` ⇒ check discreto. Los veredictos se mapean por `position` a cada ítem.
+   * Ausente/`null` (material antiguo, guía o plan) ⇒ sin flags, sin romper.
+   */
+  qualityReport?: QualityReport | null;
 }) {
   const hasPreview = Array.isArray(practiceItems) && practiceItems.length > 0;
   const previewItems = hasPreview
@@ -118,8 +212,26 @@ export function PracticeView({
   const refItems = [...content.items].sort((a, b) => a.position - b.position);
   const passages = (stimuli ?? []).filter((s) => s.text && s.text.trim());
 
+  const verdictByPosition = new Map<number, JudgeVerdict>(
+    (qualityReport?.verdicts ?? []).map((verdict): [number, JudgeVerdict] => [
+      verdict.position,
+      verdict,
+    ]),
+  );
+
   return (
     <div className="space-y-4">
+      {qualityReport?.finalStatus === 'exhausted' ? (
+        <AlertCallout tone="warning" title={REMEDIAL_JUDGE_LABELS.notConvergedTitle}>
+          {REMEDIAL_JUDGE_LABELS.notConverged(qualityReport.iterations)}
+        </AlertCallout>
+      ) : qualityReport?.finalStatus === 'converged' ? (
+        <p className="flex items-center gap-1.5 text-xs font-medium text-success">
+          <CheckCircle2 className="size-3.5 shrink-0" aria-hidden />
+          {REMEDIAL_JUDGE_LABELS.converged}
+        </p>
+      ) : null}
+
       {passages.map((stimulus) => (
         <StimulusPassage key={stimulus.sectionId} stimulus={stimulus} />
       ))}
@@ -143,7 +255,11 @@ export function PracticeView({
           {hasPreview ? (
             <ol className="space-y-4">
               {previewItems.map((item) => (
-                <PracticeItemCard key={item.itemId} item={item} />
+                <PracticeItemCard
+                  key={item.itemId}
+                  item={item}
+                  verdict={verdictByPosition.get(item.position)}
+                />
               ))}
             </ol>
           ) : refItems.length === 0 ? (

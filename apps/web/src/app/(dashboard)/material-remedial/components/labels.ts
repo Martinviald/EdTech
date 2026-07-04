@@ -94,3 +94,31 @@ export const REMEDIAL_STATUS_OPTIONS: { value: RemedialStatus; label: string }[]
 /** Texto del disclaimer IA (CLAUDE.md §8.3: la IA propone, el humano aprueba). */
 export const AI_DISCLAIMER =
   'Contenido sugerido por IA. Revisa y valida antes de usarlo en aula; ajústalo si es necesario y apruébalo.';
+
+/**
+ * Etiquetas del juez automático de calidad (Ola 2.1b). Se usan en el banner de
+ * (no-)convergencia y en los flags por ítem del set de práctica.
+ */
+export const REMEDIAL_JUDGE_LABELS = {
+  /** Título del banner cuando el set no convergió (`finalStatus='exhausted'`). */
+  notConvergedTitle: 'El juez automático no validó el set',
+  /** Cuerpo del banner de no-convergencia (`iterations` = vueltas de regeneración). */
+  notConverged: (iterations: number): string =>
+    `El juez automático no logró un set consistente tras ${iterations} ${
+      iterations === 1 ? 'intento' : 'intentos'
+    }. Revisa las objeciones marcadas antes de aprobar.`,
+  /** Confirmación discreta cuando el set convergió (`finalStatus='converged'`). */
+  converged: 'Set validado por el juez automático',
+  /** Encabezado del aviso por ítem con falla dura (hard-gate). */
+  itemReviewNeeded: 'Revisar antes de aprobar',
+  /** Falla dura: la pregunta no se puede responder desde el texto. */
+  notAnswerable: 'No respondible desde el texto',
+  /** Falla dura: no hay exactamente una alternativa correcta. */
+  notUniqueCorrect: 'No hay una única alternativa correcta',
+  /** Falla dura: posible error de hecho en texto, clave o explicación. */
+  notFactual: 'Posible error factual',
+  /** Aviso blando: podría no medir la habilidad objetivo (no regenera). */
+  skillMismatch: 'Podría no medir exactamente la habilidad objetivo',
+  /** Ítem sin objeciones: validado por el juez. */
+  validated: 'Validada',
+} as const;

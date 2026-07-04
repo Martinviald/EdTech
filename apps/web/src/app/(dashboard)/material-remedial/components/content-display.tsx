@@ -2,6 +2,7 @@ import {
   remedialGuideContentSchema,
   remedialPracticeContentSchema,
   remedialPlanContentSchema,
+  type QualityReport,
   type RemedialContent,
   type RemedialPracticeItemPreview,
   type RemedialStimulus,
@@ -20,12 +21,15 @@ export function ContentDisplay({
   content,
   practiceItems,
   stimuli,
+  qualityReport,
 }: {
   content: RemedialContent;
   /** Preview hidratado de los ítems (solo practice_set); ausente en material antiguo. */
   practiceItems?: RemedialPracticeItemPreview[] | null;
   /** Estímulos hidratados (Ola 2.1a · Opción A); ausente/vacío ⇒ sin pasaje. */
   stimuli?: RemedialStimulus[] | null;
+  /** Reporte del juez automático (Ola 2.1b); ausente/`null` ⇒ sin flags. */
+  qualityReport?: QualityReport | null;
 }) {
   const guide = remedialGuideContentSchema.safeParse(content);
   if (guide.success) return <GuideView content={guide.data} />;
@@ -33,7 +37,12 @@ export function ContentDisplay({
   const practice = remedialPracticeContentSchema.safeParse(content);
   if (practice.success)
     return (
-      <PracticeView content={practice.data} practiceItems={practiceItems} stimuli={stimuli} />
+      <PracticeView
+        content={practice.data}
+        practiceItems={practiceItems}
+        stimuli={stimuli}
+        qualityReport={qualityReport}
+      />
     );
 
   const plan = remedialPlanContentSchema.safeParse(content);

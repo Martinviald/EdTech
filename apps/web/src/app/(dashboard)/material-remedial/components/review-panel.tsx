@@ -104,6 +104,7 @@ export function ReviewPanel({ material, content, canApprove }: ReviewPanelProps)
           content={practice.data}
           practiceItems={material.practiceItems}
           stimuli={material.stimuli}
+          qualityReport={material.qualityReport}
         />
       );
     const plan = remedialPlanContentSchema.safeParse(content);
