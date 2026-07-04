@@ -1,10 +1,36 @@
-import { CheckCircle2 } from 'lucide-react';
-import type { RemedialPracticeContent, RemedialPracticeItemPreview } from '@soe/types';
+import { BookOpen, CheckCircle2 } from 'lucide-react';
+import type {
+  RemedialPracticeContent,
+  RemedialPracticeItemPreview,
+  RemedialStimulus,
+} from '@soe/types';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { cn } from '@/lib/utils';
 
 const POSITION_BADGE =
   'mt-0.5 shrink-0 rounded bg-primary/10 px-2 py-0.5 text-xs font-medium text-primary';
+
+/**
+ * Pasaje (estímulo) del set, solo-lectura, arriba de las preguntas (Ola 2.1a · Opción A).
+ * Estilo legible tipo lectura; preserva saltos y espacios con `whitespace-pre-wrap`.
+ */
+function StimulusPassage({ stimulus }: { stimulus: RemedialStimulus }) {
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2 text-base">
+          <BookOpen className="size-4 shrink-0 text-muted-foreground" aria-hidden />
+          {stimulus.title?.trim() || 'Texto de lectura'}
+        </CardTitle>
+      </CardHeader>
+      <CardContent>
+        <p className="whitespace-pre-wrap text-sm leading-relaxed text-foreground">
+          {stimulus.text}
+        </p>
+      </CardContent>
+    </Card>
+  );
+}
 
 /** Ítem completo (enunciado + alternativas + explicación) hidratado desde `items` (G2). */
 function PracticeItemCard({ item }: { item: RemedialPracticeItemPreview }) {
@@ -74,19 +100,30 @@ function PracticeItemCard({ item }: { item: RemedialPracticeItemPreview }) {
 export function PracticeView({
   content,
   practiceItems,
+  stimuli,
 }: {
   content: RemedialPracticeContent;
   /** Preview hidratado del detalle; ausente/vacío ⇒ degradación al `stem` de las refs. */
   practiceItems?: RemedialPracticeItemPreview[] | null;
+  /**
+   * Estímulos hidratados (texto completo del pasaje) del set (Ola 2.1a · Opción A).
+   * Ausente/vacío (o sin texto) ⇒ vista actual sin pasaje, sin romper.
+   */
+  stimuli?: RemedialStimulus[] | null;
 }) {
   const hasPreview = Array.isArray(practiceItems) && practiceItems.length > 0;
   const previewItems = hasPreview
     ? [...practiceItems].sort((a, b) => a.position - b.position)
     : [];
   const refItems = [...content.items].sort((a, b) => a.position - b.position);
+  const passages = (stimuli ?? []).filter((s) => s.text && s.text.trim());
 
   return (
     <div className="space-y-4">
+      {passages.map((stimulus) => (
+        <StimulusPassage key={stimulus.sectionId} stimulus={stimulus} />
+      ))}
+
       <Card>
         <CardHeader>
           <CardTitle className="text-base">Habilidad focalizada</CardTitle>

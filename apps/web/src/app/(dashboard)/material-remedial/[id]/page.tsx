@@ -162,7 +162,11 @@ export default async function MaterialRemedialDetailPage({
           Este material fue descartado y no se usará en aula.
         </AlertCallout>
       )}
-      <ContentDisplay content={content} practiceItems={material.practiceItems} />
+      <ContentDisplay
+        content={content}
+        practiceItems={material.practiceItems}
+        stimuli={material.stimuli}
+      />
     </PageContainer>
   );
 }
