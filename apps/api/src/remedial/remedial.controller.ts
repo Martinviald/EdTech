@@ -114,7 +114,7 @@ export class RemedialController {
     }
     const [fromAssessment, fromBank] = await Promise.all([
       this.failedStimulus.list(user.orgId, assessmentId, nodeId),
-      this.bankPassages.listCandidates(user.orgId, nodeId),
+      this.bankPassages.listCandidates(user.orgId, nodeId, assessmentId),
     ]);
     return { fromAssessment, fromBank };
   }
