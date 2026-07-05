@@ -15,10 +15,17 @@ import { RemedialRunner } from './remedial.runner';
 import { RemedialService } from './remedial.service';
 import { BankPassageService } from './stimulus/bank-passage.service';
 import { FailedStimulusService } from './stimulus/failed-stimulus.service';
+import { GenerateStimulusFallback } from './stimulus/generate-stimulus.fallback';
+import { GenerateStimulusProvider } from './stimulus/generate-stimulus.provider';
 import { HighestGapPolicy } from './stimulus/highest-gap.policy';
 import { PASSAGE_SELECTION_POLICY } from './stimulus/passage-selection.policy';
+import {
+  FernandezHuertaFormula,
+  READABILITY_FORMULA,
+} from './stimulus/readability.formula';
 import { SelfContainedFallback } from './stimulus/self-contained.fallback';
 import { StimulusResolver } from './stimulus/stimulus.resolver';
+import { TargetProfiler } from './stimulus/target-profiler';
 import { TERMINAL_FALLBACK_POLICY } from './stimulus/terminal-fallback.policy';
 import { FeatureGuard } from '../common/guards/feature.guard';
 
@@ -63,7 +70,17 @@ import { FeatureGuard } from '../common/guards/feature.guard';
     BankPassageService,
     StimulusResolver,
     { provide: PASSAGE_SELECTION_POLICY, useClass: HighestGapPolicy },
-    { provide: TERMINAL_FALLBACK_POLICY, useClass: SelfContainedFallback },
+    // Ola 2.2 (Opción B): generación de un texto nuevo con IA calibrado a la brecha +
+    // legibilidad enchufable (Fernández-Huerta). El fallback terminal pasa de
+    // `SelfContainedFallback` a `GenerateStimulusFallback` (A sin pasaje → generar = B).
+    { provide: READABILITY_FORMULA, useClass: FernandezHuertaFormula },
+    TargetProfiler,
+    GenerateStimulusProvider,
+    GenerateStimulusFallback,
+    // `SelfContainedFallback` se conserva registrado para poder revertir el binding de
+    // `TERMINAL_FALLBACK_POLICY` a él si se quisiera volver al comportamiento 2.1a.
+    SelfContainedFallback,
+    { provide: TERMINAL_FALLBACK_POLICY, useClass: GenerateStimulusFallback },
     FeatureGuard,
   ],
   exports: [RemedialService],
