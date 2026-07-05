@@ -27,7 +27,8 @@ export interface RemedialMethodOption {
 /**
  * Opciones del selector de método (solo `practice_set`). `reuse_stimulus` (Opción A)
  * genera preguntas sobre un texto oficial; `self_contained`, ejercicios sin texto;
- * `generate_stimulus` (Opción B) llega en 2.2 → deshabilitado con tag "Próximamente".
+ * `generate_stimulus` (Opción B, Ola 2.2) hace que la IA redacte un texto nuevo (sin
+ * pasaje a elegir) y genere preguntas sobre él.
  */
 export const REMEDIAL_METHOD_OPTIONS: RemedialMethodOption[] = [
   {
@@ -44,9 +45,8 @@ export const REMEDIAL_METHOD_OPTIONS: RemedialMethodOption[] = [
   {
     value: 'generate_stimulus',
     label: REMEDIAL_METHOD_LABELS.generate_stimulus,
-    description: 'La IA redacta un texto nuevo y genera preguntas sobre él.',
-    disabled: true,
-    badge: 'Próximamente',
+    description:
+      'La IA crea un texto nuevo de dificultad similar a los que fallaron y genera preguntas sobre él.',
   },
 ];
 
