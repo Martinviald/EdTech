@@ -4,6 +4,7 @@ import type {
   GenerateRemedialDto,
   RemedialPracticeContent,
   ReviewRemedialDto,
+  UpdateRemedialItemDto,
   UserRole,
 } from '@soe/types';
 import type { JwtPayload } from '../auth/jwt-payload.types';
@@ -442,5 +443,197 @@ describe('RemedialService', () => {
     });
     // on-read: no se persiste nada.
     expect(db.__updates).toHaveLength(0);
+  });
+
+  // ── updateItem / removeItem (Ola 1‑resto G2) ───────────────────────────────
+  const ITEM_A = '22222222-2222-2222-2222-222222222222';
+  const ITEM_B = '33333333-3333-3333-3333-333333333333';
+
+  function practiceContent(
+    refs: RemedialPracticeContent['items'],
+  ): RemedialPracticeContent {
+    return {
+      skillFocus: 'fracciones',
+      itemCount: refs.length,
+      items: refs,
+      notes: null,
+      stimuli: [],
+    };
+  }
+
+  const validUpdate: UpdateRemedialItemDto = {
+    stem: 'Nuevo enunciado',
+    alternatives: [
+      { key: 'A', text: '2/4', isCorrect: false },
+      { key: 'B', text: '1/3', isCorrect: true },
+    ],
+    explanation: 'nueva explicación',
+  };
+
+  it('updateItem persiste el content (preservando imageUrl) y actualiza el stem del ref', async () => {
+    const content = practiceContent([
+      { itemId: ITEM_A, position: 1, stem: 'viejo A' },
+      { itemId: ITEM_B, position: 2, stem: 'viejo B' },
+    ]);
+    const material = makeRow({ status: 'ready', type: 'practice_set', content });
+    const itemRow = {
+      id: ITEM_A,
+      type: 'multiple_choice',
+      content: {
+        stem: 'viejo A',
+        imageUrl: 'https://cdn.example.com/a.png',
+        alternatives: [
+          { key: 'A', text: '2/4', isCorrect: true },
+          { key: 'B', text: '1/3', isCorrect: false },
+        ],
+        explanation: 'exp vieja',
+      },
+    };
+    // 1) findOne(material), 2) item lookup (draft)
+    const db = makeDb([[material], [itemRow]]);
+    const service = new RemedialService(db);
+
+    const preview = await service.updateItem('org-1', 'mat-1', ITEM_A, validUpdate);
+
+    expect(preview).toMatchObject({
+      itemId: ITEM_A,
+      position: 1,
+      type: 'multiple_choice',
+      stem: 'Nuevo enunciado',
+      correctKey: 'B',
+      explanation: 'nueva explicación',
+    });
+    // items.content: preserva imageUrl, sobrescribe stem/alternatives/explanation.
+    const itemUpdate = db.__updates.find(
+      (u) => u.content && typeof u.content === 'object' && 'stem' in u.content,
+    );
+    expect(itemUpdate?.content).toMatchObject({
+      stem: 'Nuevo enunciado',
+      imageUrl: 'https://cdn.example.com/a.png',
+      explanation: 'nueva explicación',
+    });
+    // material.content: el ref del ítem editado refleja el nuevo stem (preview ligero).
+    const matUpdate = db.__updates.find(
+      (u) => u.content && typeof u.content === 'object' && 'items' in u.content,
+    );
+    const refs = (matUpdate!.content as RemedialPracticeContent).items;
+    expect(refs.find((r) => r.itemId === ITEM_A)?.stem).toBe('Nuevo enunciado');
+    expect(refs.find((r) => r.itemId === ITEM_B)?.stem).toBe('viejo B');
+  });
+
+  it('updateItem rechaza (400) con dos alternativas correctas', async () => {
+    const service = new RemedialService(makeDb([]));
+    const dto: UpdateRemedialItemDto = {
+      stem: 's',
+      alternatives: [
+        { key: 'A', text: 'a', isCorrect: true },
+        { key: 'B', text: 'b', isCorrect: true },
+      ],
+    };
+    await expect(
+      service.updateItem('org-1', 'mat-1', ITEM_A, dto),
+    ).rejects.toBeInstanceOf(BadRequestException);
+  });
+
+  it('updateItem rechaza (400) con ninguna alternativa correcta', async () => {
+    const service = new RemedialService(makeDb([]));
+    const dto: UpdateRemedialItemDto = {
+      stem: 's',
+      alternatives: [
+        { key: 'A', text: 'a', isCorrect: false },
+        { key: 'B', text: 'b', isCorrect: false },
+      ],
+    };
+    await expect(
+      service.updateItem('org-1', 'mat-1', ITEM_A, dto),
+    ).rejects.toBeInstanceOf(BadRequestException);
+  });
+
+  it('updateItem rechaza (400) si el material no está ready', async () => {
+    const content = practiceContent([{ itemId: ITEM_A, position: 1, stem: 'a' }]);
+    const material = makeRow({ status: 'approved', type: 'practice_set', content });
+    const db = makeDb([[material]]);
+    const service = new RemedialService(db);
+    await expect(
+      service.updateItem('org-1', 'mat-1', ITEM_A, validUpdate),
+    ).rejects.toBeInstanceOf(BadRequestException);
+  });
+
+  it('updateItem rechaza (NotFound) si el ítem no es un draft de la org', async () => {
+    const content = practiceContent([{ itemId: ITEM_A, position: 1, stem: 'a' }]);
+    const material = makeRow({ status: 'ready', type: 'practice_set', content });
+    // 1) findOne(material) ok, 2) item lookup vacío (otra org / ya publicado / borrado).
+    const db = makeDb([[material], []]);
+    const service = new RemedialService(db);
+    await expect(
+      service.updateItem('org-1', 'mat-1', ITEM_A, validUpdate),
+    ).rejects.toBeInstanceOf(NotFoundException);
+  });
+
+  it('updateItem rechaza (NotFound) si el ítem no pertenece al set', async () => {
+    const content = practiceContent([{ itemId: ITEM_B, position: 1, stem: 'b' }]);
+    const material = makeRow({ status: 'ready', type: 'practice_set', content });
+    const db = makeDb([[material]]);
+    const service = new RemedialService(db);
+    await expect(
+      service.updateItem('org-1', 'mat-1', ITEM_A, validUpdate),
+    ).rejects.toBeInstanceOf(NotFoundException);
+  });
+
+  it('removeItem quita el ref, soft-deletea el draft y reindexa positions', async () => {
+    const content = practiceContent([
+      { itemId: ITEM_A, position: 1, stem: 'a' },
+      { itemId: ITEM_B, position: 2, stem: 'b' },
+    ]);
+    const material = makeRow({ status: 'ready', type: 'practice_set', content });
+    const updated = makeRow({
+      status: 'ready',
+      type: 'practice_set',
+      content: practiceContent([{ itemId: ITEM_B, position: 1, stem: 'b' }]),
+    });
+    const remainingItem = {
+      id: ITEM_B,
+      type: 'multiple_choice',
+      content: {
+        stem: 'b',
+        alternatives: [
+          { key: 'A', text: 'a', isCorrect: true },
+          { key: 'B', text: 'b', isCorrect: false },
+        ],
+      },
+    };
+    // 1) findOne(material), 2) item lookup, 3) findOne(updated), 4) nodeName, 5) hidratación
+    const db = makeDb([
+      [material],
+      [{ id: ITEM_A }],
+      [updated],
+      [{ name: 'OA' }],
+      [remainingItem],
+    ]);
+    const service = new RemedialService(db);
+
+    const model = await service.removeItem('org-1', 'mat-1', ITEM_A);
+
+    // material.content: solo queda ITEM_B, reindexado a position 1 e itemCount 1.
+    const matUpdate = db.__updates.find(
+      (u) => u.content && typeof u.content === 'object' && 'items' in u.content,
+    );
+    const next = matUpdate!.content as RemedialPracticeContent;
+    expect(next.items).toEqual([{ itemId: ITEM_B, position: 1, stem: 'b' }]);
+    expect(next.itemCount).toBe(1);
+    // soft-delete del ítem (nunca DELETE).
+    const del = db.__updates.find((u) => u.deletedAt);
+    expect(del).toBeDefined();
+    expect(model.practiceItems).toHaveLength(1);
+  });
+
+  it('removeItem rechaza (400) si dejaría el set vacío', async () => {
+    const content = practiceContent([{ itemId: ITEM_A, position: 1, stem: 'a' }]);
+    const material = makeRow({ status: 'ready', type: 'practice_set', content });
+    const db = makeDb([[material]]);
+    const service = new RemedialService(db);
+    await expect(
+      service.removeItem('org-1', 'mat-1', ITEM_A),
+    ).rejects.toBeInstanceOf(BadRequestException);
   });
 });

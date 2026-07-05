@@ -16,6 +16,7 @@ import {
 } from '@soe/db';
 import {
   qualityReportSchema,
+  validateItemContent,
   validateRemedialContent,
   type GenerateRemedialDto,
   type QualityReport,
@@ -28,6 +29,7 @@ import {
   type RemedialPracticeItemPreview,
   type RemedialStimulus,
   type ReviewRemedialDto,
+  type UpdateRemedialItemDto,
 } from '@soe/types';
 import type { JwtPayload } from '../auth/jwt-payload.types';
 import { InjectDb, type Database } from '../database/database.types';
@@ -388,7 +390,215 @@ export class RemedialService {
     });
   }
 
+  /**
+   * Edita un ítem `draft` de un `practice_set` en `ready` (Ola 1‑resto G2). Es el
+   * "humano AJUSTA" de CLAUDE.md §8.3: se corrige el borrador antes de publicarlo,
+   * NUNCA se toca la evidencia IA original (el brief/contexto queda en
+   * `remedial_materials.input`). Enunciado, alternativas, cuál es la correcta y
+   * explicación.
+   *
+   * - `remedial_materials` bajo `withOrgContext`+`tx`; el `item` (tabla `items`, sin
+   *   RLS) se aísla con filtro `org_id` EXPLÍCITO (§5.2).
+   * - Regla de negocio: EXACTAMENTE una alternativa correcta (además del Zod del DTO).
+   * - Preserva los campos no editables del content existente (p. ej. `imageUrl`) y
+   *   sobrescribe `stem`/`alternatives`/`explanation`; re-valida con
+   *   `validateItemContent` (ítems polimórficos).
+   */
+  async updateItem(
+    orgId: string,
+    materialId: string,
+    itemId: string,
+    dto: UpdateRemedialItemDto,
+  ): Promise<RemedialPracticeItemPreview> {
+    // Regla "exactamente una correcta" (el Zod del DTO solo garantiza ≥2 alternativas).
+    const correctCount = dto.alternatives.filter((alt) => alt.isCorrect).length;
+    if (correctCount !== 1) {
+      throw new BadRequestException('Debe haber exactamente una alternativa correcta');
+    }
+
+    return withOrgContext(this.db, orgId, async (tx) => {
+      const { content, ref } = await this.loadPracticeRef(tx, materialId, itemId, orgId);
+
+      // El ítem debe ser un borrador generado por IA de esta org (items NO tiene RLS
+      // → filtro org_id EXPLÍCITO). No editar ítems ya publicados ni de otro pool.
+      const [item] = await tx
+        .select({ id: items.id, type: items.type, content: items.content })
+        .from(items)
+        .where(
+          and(
+            eq(items.id, itemId),
+            eq(items.orgId, orgId),
+            eq(items.status, 'draft'),
+            eq(items.source, 'ai_generated'),
+            isNull(items.deletedAt),
+          ),
+        )
+        .limit(1);
+      if (!item) {
+        throw new NotFoundException(
+          'Ítem editable no encontrado (debe ser un borrador generado por IA de esta organización)',
+        );
+      }
+
+      // Ensambla el nuevo content MC preservando lo no editable (imageUrl, …) y
+      // sobrescribiendo lo editado. `explanation`: omitida → se preserva; null/"" →
+      // se limpia; string → se fija.
+      const existing = (item.content ?? {}) as Record<string, unknown>;
+      const nextContentRaw: Record<string, unknown> = {
+        ...existing,
+        stem: dto.stem,
+        alternatives: dto.alternatives,
+      };
+      if (dto.explanation !== undefined) {
+        if (dto.explanation && dto.explanation.trim() !== '') {
+          nextContentRaw.explanation = dto.explanation;
+        } else {
+          delete nextContentRaw.explanation;
+        }
+      }
+      // Valida polimórficamente + re-aplica la regla del validador MC.
+      const validated = validateItemContent('multiple_choice', nextContentRaw);
+
+      await tx
+        .update(items)
+        .set({ content: validated, updatedAt: new Date() })
+        .where(and(eq(items.id, itemId), eq(items.orgId, orgId)));
+
+      // Refleja el nuevo enunciado en el ref del material (preview ligero), coherente
+      // con `hydratePracticeItems` (fuente de verdad = `items`). El spread preserva los
+      // `stimuli` del set (Ola 2.1a) intactos.
+      const nextItems = content.items.map((r) =>
+        r.itemId === itemId ? { ...r, stem: dto.stem } : r,
+      );
+      const nextContent: RemedialContent = { ...content, items: nextItems };
+      await tx
+        .update(remedialMaterials)
+        .set({ content: nextContent, updatedAt: new Date() })
+        .where(
+          and(eq(remedialMaterials.id, materialId), eq(remedialMaterials.orgId, orgId)),
+        );
+
+      const alternatives = extractAlternatives(validated);
+      return {
+        itemId,
+        position: ref.position,
+        type: item.type,
+        stem: extractStem(validated),
+        alternatives,
+        correctKey: extractCorrectKey(alternatives),
+        explanation: extractExplanation(validated),
+      };
+    });
+  }
+
+  /**
+   * Quita un ítem de un `practice_set` en `ready` (Ola 1‑resto G2): saca el ref de
+   * `content.items`, hace **soft-delete** del ítem draft (`items.deletedAt=now()`,
+   * nunca DELETE — §5.2) y reindexa las `position` de los refs restantes. No se
+   * permite dejar el set vacío (mín. 1 ítem → 400). Devuelve el material actualizado
+   * con el preview re-hidratado.
+   */
+  async removeItem(
+    orgId: string,
+    materialId: string,
+    itemId: string,
+  ): Promise<RemedialMaterialModel> {
+    return withOrgContext(this.db, orgId, async (tx) => {
+      const { content } = await this.loadPracticeRef(tx, materialId, itemId, orgId);
+
+      if (content.items.length <= 1) {
+        throw new BadRequestException('El set debe conservar al menos un ítem');
+      }
+
+      // El ítem debe ser un borrador de esta org (items NO tiene RLS → filtro explícito).
+      const [item] = await tx
+        .select({ id: items.id })
+        .from(items)
+        .where(
+          and(
+            eq(items.id, itemId),
+            eq(items.orgId, orgId),
+            eq(items.status, 'draft'),
+            eq(items.source, 'ai_generated'),
+            isNull(items.deletedAt),
+          ),
+        )
+        .limit(1);
+      if (!item) {
+        throw new NotFoundException(
+          'Ítem editable no encontrado (debe ser un borrador generado por IA de esta organización)',
+        );
+      }
+
+      // Reindexa las posiciones de los refs restantes (1..N-1) preservando el orden.
+      // El spread preserva los `stimuli` del set (Ola 2.1a).
+      const remaining = content.items
+        .filter((r) => r.itemId !== itemId)
+        .map((r, idx) => ({ ...r, position: idx + 1 }));
+      const nextContent: RemedialContent = {
+        ...content,
+        items: remaining,
+        itemCount: remaining.length,
+      };
+
+      await tx
+        .update(remedialMaterials)
+        .set({ content: nextContent, updatedAt: new Date() })
+        .where(
+          and(eq(remedialMaterials.id, materialId), eq(remedialMaterials.orgId, orgId)),
+        );
+
+      // Soft-delete del ítem draft (la evidencia IA original queda en `input`).
+      await tx
+        .update(items)
+        .set({ deletedAt: new Date(), updatedAt: new Date() })
+        .where(and(eq(items.id, itemId), eq(items.orgId, orgId)));
+
+      const updated = await this.findOne(tx, materialId, orgId);
+      const model = await this.toModel(tx, updated!);
+      // Re-hidrata el preview de ítems y los estímulos (coherente con `get`).
+      model.practiceItems = await this.hydratePracticeItems(tx, updated!.content, orgId);
+      model.stimuli = await this.hydrateStimuli(tx, updated!.content, orgId);
+      return model;
+    });
+  }
+
   // ---------- helpers ----------
+
+  /**
+   * Carga un `practice_set` editable y el ref del ítem pedido, validando el estado.
+   * Encapsula las precondiciones comunes de `updateItem`/`removeItem`: material de la
+   * org (`withOrgContext`+`tx`), `type='practice_set'`, `status='ready'`, y `itemId`
+   * presente en `content.items`.
+   */
+  private async loadPracticeRef(
+    tx: Database,
+    materialId: string,
+    itemId: string,
+    orgId: string,
+  ) {
+    const material = await this.findOne(tx, materialId, orgId);
+    if (!material) {
+      throw new NotFoundException('Material remedial no encontrado');
+    }
+    if (material.type !== 'practice_set') {
+      throw new BadRequestException('Solo los sets de práctica tienen ítems editables');
+    }
+    if (material.status !== 'ready') {
+      throw new BadRequestException(
+        `Solo se pueden editar ítems de un set en estado "ready" (actual: "${material.status}")`,
+      );
+    }
+    const content = material.content;
+    if (!content || !('items' in content)) {
+      throw new NotFoundException('El set no tiene ítems');
+    }
+    const ref = content.items.find((r) => r.itemId === itemId);
+    if (!ref) {
+      throw new NotFoundException('El ítem no pertenece a este set');
+    }
+    return { material, content, ref };
+  }
 
   private async findOne(
     tx: Database,
