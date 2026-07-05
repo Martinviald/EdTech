@@ -383,4 +383,90 @@ describe('RemedialRunner', () => {
     expect(service.markFailed).toHaveBeenCalled();
     expect(service.markProcessing).not.toHaveBeenCalled();
   });
+
+  // ── Retry ante fallos transitorios de red del LLM (Ola 1‑resto G13) ─────────
+  it('reintenta ante un fallo TRANSITORIO del generador y luego tiene éxito (G13)', async () => {
+    process.env.REMEDIAL_RETRY_BACKOFF_MS = '0'; // sin espera en el test
+    const service = makeService() as ReturnType<typeof makeService>;
+    const gen = makeGenerator('guide', validResult);
+    // 1er intento: blip de red; 2do intento: éxito (valor por defecto del mock).
+    (gen.generate as jest.Mock).mockRejectedValueOnce(new Error('fetch failed'));
+    const runner = new RemedialRunner(
+      makeDb(makeRow()),
+      service,
+      makeContext(),
+      makeBrief(),
+      makeResolver(),
+      makeJudge(),
+      new RemedialQualityLoop(),
+      [gen],
+    );
+
+    await runner.run('mat-1', 'org-1');
+    delete process.env.REMEDIAL_RETRY_BACKOFF_MS;
+
+    expect(gen.generate as jest.Mock).toHaveBeenCalledTimes(2);
+    expect(service.markReady).toHaveBeenCalled();
+    expect(service.markFailed).not.toHaveBeenCalled();
+  });
+
+  it('NO reintenta un error de parseo/schema (falla directo, un solo intento) (G13)', async () => {
+    const service = makeService() as ReturnType<typeof makeService>;
+    const gen = makeGenerator('guide', validResult);
+    (gen.generate as jest.Mock).mockReset();
+    (gen.generate as jest.Mock).mockRejectedValue(
+      new Error('El set de ítems generado no cumple el schema: campo faltante'),
+    );
+    const runner = new RemedialRunner(
+      makeDb(makeRow()),
+      service,
+      makeContext(),
+      makeBrief(),
+      makeResolver(),
+      makeJudge(),
+      new RemedialQualityLoop(),
+      [gen],
+    );
+
+    await runner.run('mat-1', 'org-1');
+
+    expect(gen.generate as jest.Mock).toHaveBeenCalledTimes(1);
+    expect(service.markFailed).toHaveBeenCalled();
+    expect(service.markReady).not.toHaveBeenCalled();
+  });
+
+  it('practice_set: reintenta un fallo TRANSITORIO de generación DENTRO del loop (G13)', async () => {
+    process.env.REMEDIAL_RETRY_BACKOFF_MS = '0';
+    const service = makeService() as ReturnType<typeof makeService>;
+    const judge = makeJudge([passVerdict]);
+    const gen = makeGenerator('practice_set', makePracticeResult());
+    // Ronda 0: 1er intento blip de red, 2do intento éxito → juzga → converge. El retry
+    // envuelve la generación DENTRO del loop (no dispara una 2ª ronda de regeneración).
+    (gen.generate as jest.Mock).mockRejectedValueOnce(new Error('ECONNRESET'));
+    const runner = new RemedialRunner(
+      makeDb(makeRow({ type: 'practice_set', method: 'self_contained' })),
+      service,
+      makeContext(),
+      makeBrief(),
+      makeResolver(),
+      judge,
+      new RemedialQualityLoop(),
+      [gen],
+    );
+
+    await runner.run('mat-1', 'org-1');
+    delete process.env.REMEDIAL_RETRY_BACKOFF_MS;
+
+    // 2 llamadas al generador: el reintento de la ronda 0, no una 2ª ronda del loop.
+    expect(gen.generate as jest.Mock).toHaveBeenCalledTimes(2);
+    // Convergió en la ronda 0 (1 iteración) pese al blip.
+    expect(service.markReady).toHaveBeenCalledWith(
+      'mat-1',
+      'org-1',
+      expect.objectContaining({
+        qualityReport: { iterations: 1, finalStatus: 'converged', verdicts: [passVerdict] },
+      }),
+    );
+    expect(service.markFailed).not.toHaveBeenCalled();
+  });
 });

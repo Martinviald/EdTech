@@ -26,6 +26,13 @@ const REMEDIAL_TIMEOUT_MS_DEFAULT = 90_000;
 /** Tope de rondas del loop de calidad (ronda 0 + hasta 2 regeneraciones). */
 const MAX_QUALITY_ITERATIONS = 3;
 
+// Reintentos ante fallos TRANSITORIOS de red del LLM (ej. "fetch failed" por un reset
+// de conexión en el egress). NO reintenta parseo/schema/validación/timeout (esos =
+// `failed` directo). Espeja el patrón de ai-analysis.runner.ts (helper privado allá;
+// se replica pequeño aquí para no forzar un import cruzado feo). Máx. 2 intentos.
+const REMEDIAL_MAX_ATTEMPTS = 2;
+const REMEDIAL_RETRY_BACKOFF_MS_DEFAULT = 2_000;
+
 /**
  * Batch del loop de calidad: el resultado del generador de práctica con `judgeItems`
  * garantizado (el loop lo exige). El generador siempre los devuelve para `practice_set`.
@@ -124,15 +131,19 @@ export class RemedialRunner {
         return;
       }
 
-      const result = await this.withTimeout(
-        generator.generate({
-          material: record,
-          orgId,
-          curriculum,
-          brief,
-          stimulus: resolved.stimulus,
-        }),
-        this.timeoutMs(),
+      // Retry ante blips de red del LLM (guide/group_plan); el timeout aplica POR
+      // intento. Un error de parseo/schema/validación NO es transitorio → falla directo.
+      const result = await this.withRetry(() =>
+        this.withTimeout(
+          generator.generate({
+            material: record,
+            orgId,
+            curriculum,
+            brief,
+            stimulus: resolved.stimulus,
+          }),
+          this.timeoutMs(),
+        ),
       );
 
       await this.service.markReady(materialId, orgId, {
@@ -187,10 +198,17 @@ export class RemedialRunner {
     brief: RemedialBrief | null,
     stimulus: RemedialStimulus | null,
   ): Promise<{ finalBatch: PracticeLoopBatch; qualityReport: QualityReport }> {
+    // Retry (G13) aplicado a CADA operación LLM del loop (generación + juzgamiento):
+    // el `withRetry` envuelve el `withTimeout`, así el timeout sigue siendo POR intento
+    // y solo los blips de red se reintentan (parseo/schema/timeout NO son transitorios →
+    // fallan directo sin gastar el segundo intento). No envuelve el loop completo (que
+    // ya acota el costo con el cap de 3 rondas).
     const generate = async (feedback: string[] | undefined): Promise<PracticeLoopBatch> => {
-      const result = await this.withTimeout(
-        generator.generate({ material: record, orgId, curriculum, brief, stimulus, feedback }),
-        this.timeoutMs(),
+      const result = await this.withRetry(() =>
+        this.withTimeout(
+          generator.generate({ material: record, orgId, curriculum, brief, stimulus, feedback }),
+          this.timeoutMs(),
+        ),
       );
       if (!result.judgeItems) {
         throw new Error('El generador de práctica no devolvió ítems para el juez');
@@ -201,7 +219,9 @@ export class RemedialRunner {
     return this.qualityLoop.run<PracticeLoopBatch>({
       generate,
       judge: (judgeItems) =>
-        this.withTimeout(this.judgeService.judge(orgId, stimulus, judgeItems), this.timeoutMs()),
+        this.withRetry(() =>
+          this.withTimeout(this.judgeService.judge(orgId, stimulus, judgeItems), this.timeoutMs()),
+        ),
       softDeletePrevious: (batch) => this.softDeletePreviousItems(batch.judgeItems, orgId),
       maxIter: MAX_QUALITY_ITERATIONS,
     });
@@ -256,5 +276,44 @@ export class RemedialRunner {
   private timeoutMs(): number {
     const raw = Number(process.env.REMEDIAL_TIMEOUT_MS);
     return Number.isFinite(raw) && raw > 0 ? raw : REMEDIAL_TIMEOUT_MS_DEFAULT;
+  }
+
+  /**
+   * Reintenta `factory` ante fallos TRANSITORIOS de red (ej. "fetch failed" por un
+   * reset de conexión en el egress). NO reintenta parseo/schema/validación/timeout
+   * (no son transitorios → `failed` directo). Backoff lineal; override por
+   * `REMEDIAL_RETRY_BACKOFF_MS`.
+   */
+  private async withRetry<T>(factory: () => Promise<T>): Promise<T> {
+    let lastErr: unknown;
+    for (let attempt = 1; attempt <= REMEDIAL_MAX_ATTEMPTS; attempt++) {
+      try {
+        return await factory();
+      } catch (err) {
+        lastErr = err;
+        if (attempt >= REMEDIAL_MAX_ATTEMPTS || !this.isTransient(err)) {
+          throw err;
+        }
+        await this.delay(this.retryBackoffMs() * attempt);
+      }
+    }
+    throw lastErr;
+  }
+
+  /** ¿El error es un fallo de red transitorio (vale la pena reintentar)? */
+  private isTransient(err: unknown): boolean {
+    const msg = (err instanceof Error ? err.message : String(err)).toLowerCase();
+    return /fetch failed|econnreset|etimedout|eai_again|socket|network|und_err|terminated|other side closed/.test(
+      msg,
+    );
+  }
+
+  private delay(ms: number): Promise<void> {
+    return new Promise((resolve) => setTimeout(resolve, ms));
+  }
+
+  private retryBackoffMs(): number {
+    const raw = Number(process.env.REMEDIAL_RETRY_BACKOFF_MS);
+    return Number.isFinite(raw) && raw >= 0 ? raw : REMEDIAL_RETRY_BACKOFF_MS_DEFAULT;
   }
 }
