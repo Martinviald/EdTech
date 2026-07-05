@@ -260,3 +260,13 @@ export const updateRemedialItemSchema = z.object({
   explanation: z.string().nullable().optional(),
 });
 export type UpdateRemedialItemDto = z.infer<typeof updateRemedialItemSchema>;
+
+/**
+ * Edición humana del pasaje generado por IA (Ola 2.2, Opción B). Solo aplica a estímulos
+ * `source='ai_generated'` — un pasaje oficial NUNCA se edita (lo valida el service).
+ */
+export const updateRemedialStimulusSchema = z.object({
+  title: z.string().nullable().optional(),
+  text: z.string().min(1),
+});
+export type UpdateRemedialStimulusDto = z.infer<typeof updateRemedialStimulusSchema>;
