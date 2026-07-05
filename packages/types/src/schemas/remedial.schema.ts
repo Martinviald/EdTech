@@ -245,3 +245,18 @@ export const reviewRemedialSchema = z.object({
   content: remedialContentSchema.optional(), // contenido editado (solo en approve)
 });
 export type ReviewRemedialDto = z.infer<typeof reviewRemedialSchema>;
+
+/**
+ * Edición humana de un ítem de práctica (Ola 1‑resto G2): enunciado, alternativas,
+ * cuál es la correcta y explicación. `practice_set` es contenido MC en esta ola.
+ * La regla "exactamente una correcta" se valida en el service (RemedialService.updateItem),
+ * no en el schema.
+ */
+export const updateRemedialItemSchema = z.object({
+  stem: z.string().min(1),
+  alternatives: z
+    .array(z.object({ key: z.string(), text: z.string().min(1), isCorrect: z.boolean() }))
+    .min(2),
+  explanation: z.string().nullable().optional(),
+});
+export type UpdateRemedialItemDto = z.infer<typeof updateRemedialItemSchema>;

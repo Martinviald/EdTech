@@ -1,6 +1,7 @@
 import {
   boolean,
   decimal,
+  index,
   integer,
   jsonb,
   pgTable,
@@ -25,39 +26,46 @@ import { taxonomyNodes } from './taxonomy';
 import { instruments, instrumentSections } from './instruments';
 import { users } from './users';
 
-export const items = pgTable('items', {
-  id: uuid('id').defaultRandom().primaryKey(),
-  orgId: uuid('org_id').references(() => organizations.id),
-  instrumentId: uuid('instrument_id').references(() => instruments.id),
-  sectionId: uuid('section_id').references(() => instrumentSections.id),
-  position: integer('position').default(0).notNull(),
-  type: itemTypeEnum('type').notNull(),
-  // Contenido polimórfico por `type`: cada valor de `item_type` tiene su shape Zod
-  // en `ITEM_CONTENT_SCHEMAS` (@soe/types). La validación ocurre en la capa de
-  // aplicación (items.service) con `validateItemContent`; aquí solo tipamos (CLAUDE.md §5.4).
-  content: jsonb('content').$type<ItemContent>().notNull().default({} as ItemContent),
-  scoringConfig: jsonb('scoring_config')
-    .$type<{
-      points?: number;
-      partialCredit?: boolean;
-      [k: string]: unknown;
-    }>()
-    .default({}),
-  irtParams: jsonb('irt_params')
-    .$type<{
-      a?: number;
-      b?: number;
-      c?: number;
-    }>()
-    .default({}),
-  status: itemStatusEnum('status').default('draft').notNull(),
-  version: integer('version').default(1).notNull(),
-  source: itemSourceEnum('source').default('custom').notNull(),
-  createdById: uuid('created_by_id').references(() => users.id),
-  deletedAt: timestamp('deleted_at'),
-  createdAt: timestamp('created_at').defaultNow().notNull(),
-  updatedAt: timestamp('updated_at').defaultNow().notNull(),
-});
+export const items = pgTable(
+  'items',
+  {
+    id: uuid('id').defaultRandom().primaryKey(),
+    orgId: uuid('org_id').references(() => organizations.id),
+    instrumentId: uuid('instrument_id').references(() => instruments.id),
+    sectionId: uuid('section_id').references(() => instrumentSections.id),
+    position: integer('position').default(0).notNull(),
+    type: itemTypeEnum('type').notNull(),
+    // Contenido polimórfico por `type`: cada valor de `item_type` tiene su shape Zod
+    // en `ITEM_CONTENT_SCHEMAS` (@soe/types). La validación ocurre en la capa de
+    // aplicación (items.service) con `validateItemContent`; aquí solo tipamos (CLAUDE.md §5.4).
+    content: jsonb('content').$type<ItemContent>().notNull().default({} as ItemContent),
+    scoringConfig: jsonb('scoring_config')
+      .$type<{
+        points?: number;
+        partialCredit?: boolean;
+        [k: string]: unknown;
+      }>()
+      .default({}),
+    irtParams: jsonb('irt_params')
+      .$type<{
+        a?: number;
+        b?: number;
+        c?: number;
+      }>()
+      .default({}),
+    status: itemStatusEnum('status').default('draft').notNull(),
+    version: integer('version').default(1).notNull(),
+    source: itemSourceEnum('source').default('custom').notNull(),
+    createdById: uuid('created_by_id').references(() => users.id),
+    deletedAt: timestamp('deleted_at'),
+    createdAt: timestamp('created_at').defaultNow().notNull(),
+    updatedAt: timestamp('updated_at').defaultNow().notNull(),
+  },
+  (table) => [
+    // Pool de referencia visible + hidratación del preview remedial filtran por (org_id, status).
+    index('items_org_status_idx').on(table.orgId, table.status),
+  ],
+);
 
 export const itemTaxonomyTags = pgTable(
   'item_taxonomy_tags',
@@ -74,7 +82,11 @@ export const itemTaxonomyTags = pgTable(
     taggedBy: taggedByEnum('tagged_by').default('human').notNull(),
     taggedAt: timestamp('tagged_at').defaultNow().notNull(),
   },
-  (table) => [unique().on(table.itemId, table.nodeId)],
+  (table) => [
+    unique().on(table.itemId, table.nodeId),
+    // El retriever de referencia consulta ítems por nodo de taxonomía.
+    index('item_taxonomy_tags_node_idx').on(table.nodeId),
+  ],
 );
 
 export const itemVersions = pgTable(
