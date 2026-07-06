@@ -13,11 +13,18 @@ import { z } from 'zod';
 
 // ── Funcionalidades configurables ────────────────────────────────────────────
 // Granularidad acordada: las 3 generaciones remediales (guía/práctica/plan grupal)
-// se agrupan en `remedial`.
+// se agrupan en `remedial` (self_contained, Flash). `remedial_reading` es su punto
+// de llamada hermano para la generación ANCLADA a un pasaje (Opción A, Ola 2.1a):
+// razona sobre el texto completo del estímulo → usa un modelo más fuerte (Pro).
+// `remedial_judge` (Ola 2.1b) es el juez automático que valida las preguntas
+// generadas (solve-then-check + loop de regeneración): arranca en Flash y se
+// cambiará a otro proveedor por config.
 export const LLM_FEATURES = [
   'assessment_analysis',
   'item_insight',
   'remedial',
+  'remedial_reading',
+  'remedial_judge',
   'ai_tagging',
   'assistant',
 ] as const;
@@ -42,6 +49,16 @@ export const LLM_FEATURE_LABELS: Record<
   remedial: {
     label: 'Material Remedial',
     description: 'Guías de reenseñanza, sets de práctica y planes remediales por grupo.',
+  },
+  remedial_reading: {
+    label: 'Material Remedial — Lectura anclada',
+    description:
+      'Preguntas nuevas ancladas a un pasaje oficial de la evaluación (Opción A). Razona sobre el texto completo.',
+  },
+  remedial_judge: {
+    label: 'Material Remedial — Juez de calidad',
+    description:
+      'Valida las preguntas remediales generadas (respondibles, clave única, factual) y gatilla su regeneración.',
   },
   ai_tagging: {
     label: 'Auto-etiquetado de ítems',
@@ -125,6 +142,10 @@ export const LLM_FEATURE_DEFAULTS: Record<LlmFeature, LlmModelChoice> = {
   assessment_analysis: { provider: 'gemini', model: 'gemini-2.5-pro' },
   item_insight: { provider: 'gemini', model: 'gemini-2.5-pro' },
   remedial: { provider: 'gemini', model: 'gemini-2.5-flash' },
+  // Generación anclada al pasaje (Opción A): razona sobre el texto → Pro por defecto.
+  remedial_reading: { provider: 'gemini', model: 'gemini-2.5-pro' },
+  // Juez automático (Ola 2.1b): arranca en Flash; se cambiará a otro proveedor por config.
+  remedial_judge: { provider: 'gemini', model: 'gemini-2.5-flash' },
   ai_tagging: { provider: 'gemini', model: 'gemini-2.5-flash' },
   assistant: { provider: 'gemini', model: 'gemini-2.5-flash' },
 };
