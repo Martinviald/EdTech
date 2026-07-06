@@ -12,6 +12,7 @@ import {
   instruments,
   itemTaxonomyTags,
   items,
+  performanceBands,
   responses,
   skillResults,
   studentEnrollments,
@@ -32,6 +33,7 @@ import {
   type CalculateAssessmentResultsResponse,
   type GradingScaleParams,
   type ListAssessmentResultsQueryDto,
+  type PerformanceBandView,
   type PerformanceLevel,
   type SkillResultModel,
   type SkillResultsListResponse,
@@ -44,6 +46,7 @@ import {
   defaultLinearChileanScale,
   toResponseForCalculation,
 } from './lib/result-aggregator';
+import { loadInstrumentBands } from '../performance-bands/lib/load-instrument-bands';
 
 // Roles "administrativos" — ven todos los cursos de la org. Cualquier otro rol
 // con acceso (teacher, homeroom_teacher) ve sólo los cursos donde tiene
@@ -57,6 +60,21 @@ const ADMIN_LIKE_ROLES: readonly UserRole[] = [
   'coordinator',
   'eval_coordinator',
 ];
+
+/**
+ * Construye la vista de banda para un resultado a partir de las columnas del
+ * LEFT JOIN a performance_bands. `null` si el resultado no tiene banda asignada
+ * (instrumentos sin bandas configuradas) → la UI cae al enum legacy.
+ */
+function toBandView(r: {
+  bandKey: string | null;
+  bandLabel: string | null;
+  bandOrder: number | null;
+  bandColor: string | null;
+}): PerformanceBandView | null {
+  if (r.bandKey === null || r.bandLabel === null || r.bandOrder === null) return null;
+  return { key: r.bandKey, label: r.bandLabel, order: r.bandOrder, color: r.bandColor };
+}
 
 @Injectable()
 export class AssessmentResultsService {
@@ -127,9 +145,13 @@ export class AssessmentResultsService {
         Array.from(new Set(responseRows.map((r) => r.itemId))),
       );
 
+      // Bandas de logro del instrumento (fuente de verdad del nivel por
+      // instrumento). Corre dentro de withOrgContext → RLS trae globales + org.
+      const bands = await loadInstrumentBands(tx, assessment.instrumentId);
+
       const computed = toResponseForCalculation(responseRows, tagsByItemId);
-      const studentAggregates = aggregateStudentResults(computed, scale);
-      const skillAggregates = aggregateSkillResults(computed, scale);
+      const studentAggregates = aggregateStudentResults(computed, scale, bands);
+      const skillAggregates = aggregateSkillResults(computed, scale, bands);
 
       // Cuántos resultados previos había — define created vs updated.
       const [{ priorResults, priorSkillResults }] = await tx
@@ -153,6 +175,7 @@ export class AssessmentResultsService {
             maxScore: a.maxScore.toFixed(2),
             percentage: (a.percentage * 100).toFixed(2),
             grade: a.grade.toFixed(2),
+            performanceBandId: a.performanceBandId ?? null,
             performanceLevel: a.performanceLevel,
             isComplete: a.isComplete,
             completedAt: a.isComplete ? now : null,
@@ -169,6 +192,7 @@ export class AssessmentResultsService {
             correctCount: a.correctCount,
             totalCount: a.totalCount,
             percentage: (a.percentage * 100).toFixed(2),
+            performanceBandId: a.performanceBandId ?? null,
             performanceLevel: a.performanceLevel,
           })),
         );
@@ -247,6 +271,10 @@ export class AssessmentResultsService {
           percentage: assessmentResults.percentage,
           grade: assessmentResults.grade,
           performanceLevel: assessmentResults.performanceLevel,
+          bandKey: performanceBands.key,
+          bandLabel: performanceBands.label,
+          bandOrder: performanceBands.order,
+          bandColor: performanceBands.color,
           isComplete: assessmentResults.isComplete,
           completedAt: assessmentResults.completedAt,
           createdAt: assessmentResults.createdAt,
@@ -254,6 +282,7 @@ export class AssessmentResultsService {
         })
         .from(assessmentResults)
         .innerJoin(students, eq(students.id, assessmentResults.studentId))
+        .leftJoin(performanceBands, eq(performanceBands.id, assessmentResults.performanceBandId))
         .where(and(...conditions, isNull(students.deletedAt)))
         .orderBy(students.lastName, students.firstName)
         .limit(query.limit)
@@ -325,11 +354,16 @@ export class AssessmentResultsService {
           totalCount: skillResults.totalCount,
           percentage: skillResults.percentage,
           performanceLevel: skillResults.performanceLevel,
+          bandKey: performanceBands.key,
+          bandLabel: performanceBands.label,
+          bandOrder: performanceBands.order,
+          bandColor: performanceBands.color,
           createdAt: skillResults.createdAt,
           updatedAt: skillResults.updatedAt,
         })
         .from(skillResults)
         .innerJoin(taxonomyNodes, eq(taxonomyNodes.id, skillResults.nodeId))
+        .leftJoin(performanceBands, eq(performanceBands.id, skillResults.performanceBandId))
         .where(and(...conditions))
         .orderBy(taxonomyNodes.name)
         .limit(query.limit)
@@ -396,6 +430,10 @@ export class AssessmentResultsService {
           percentage: assessmentResults.percentage,
           grade: assessmentResults.grade,
           performanceLevel: assessmentResults.performanceLevel,
+          bandKey: performanceBands.key,
+          bandLabel: performanceBands.label,
+          bandOrder: performanceBands.order,
+          bandColor: performanceBands.color,
           isComplete: assessmentResults.isComplete,
           completedAt: assessmentResults.completedAt,
           createdAt: assessmentResults.createdAt,
@@ -403,6 +441,7 @@ export class AssessmentResultsService {
         })
         .from(assessmentResults)
         .innerJoin(students, eq(students.id, assessmentResults.studentId))
+        .leftJoin(performanceBands, eq(performanceBands.id, assessmentResults.performanceBandId))
         .where(
           and(
             eq(assessmentResults.assessmentId, assessmentId),
@@ -429,11 +468,16 @@ export class AssessmentResultsService {
           totalCount: skillResults.totalCount,
           percentage: skillResults.percentage,
           performanceLevel: skillResults.performanceLevel,
+          bandKey: performanceBands.key,
+          bandLabel: performanceBands.label,
+          bandOrder: performanceBands.order,
+          bandColor: performanceBands.color,
           createdAt: skillResults.createdAt,
           updatedAt: skillResults.updatedAt,
         })
         .from(skillResults)
         .innerJoin(taxonomyNodes, eq(taxonomyNodes.id, skillResults.nodeId))
+        .leftJoin(performanceBands, eq(performanceBands.id, skillResults.performanceBandId))
         .where(
           and(eq(skillResults.assessmentId, assessmentId), eq(skillResults.studentId, studentId)),
         )
@@ -692,6 +736,10 @@ export class AssessmentResultsService {
     percentage: string | null;
     grade: string | null;
     performanceLevel: PerformanceLevel | null;
+    bandKey: string | null;
+    bandLabel: string | null;
+    bandOrder: number | null;
+    bandColor: string | null;
     isComplete: boolean;
     completedAt: Date | null;
     createdAt: Date;
@@ -708,6 +756,7 @@ export class AssessmentResultsService {
       percentage: r.percentage,
       grade: r.grade,
       performanceLevel: r.performanceLevel,
+      performanceBand: toBandView(r),
       isComplete: r.isComplete,
       completedAt: r.completedAt,
       createdAt: r.createdAt,
@@ -726,6 +775,10 @@ export class AssessmentResultsService {
     totalCount: number;
     percentage: string | null;
     performanceLevel: PerformanceLevel | null;
+    bandKey: string | null;
+    bandLabel: string | null;
+    bandOrder: number | null;
+    bandColor: string | null;
     createdAt: Date;
     updatedAt: Date;
   }): SkillResultModel {
@@ -740,6 +793,7 @@ export class AssessmentResultsService {
       totalCount: r.totalCount,
       percentage: r.percentage,
       performanceLevel: r.performanceLevel,
+      performanceBand: toBandView(r),
       createdAt: r.createdAt,
       updatedAt: r.updatedAt,
     };

@@ -194,7 +194,9 @@ describe('AssessmentResultsService.calculate', () => {
         { itemId: 'it2', nodeId: 'n1' },
         { itemId: 'it2', nodeId: 'n2' },
       ],
-      // 5 (prior counts)
+      // 5 (loadInstrumentBands — sin bandas configuradas → cae al enum legacy)
+      [],
+      // 6 (prior counts)
       [{ priorResults: 0, priorSkillResults: 0 }],
     ]);
 
@@ -238,7 +240,8 @@ describe('AssessmentResultsService.calculate', () => {
         { studentId: 's1', itemId: 'it1', isCorrect: true, rawScore: '1.00', finalScore: '1.00', maxScore: '1.00', itemPosition: 1 },
       ],
       [],                                                  // 4: tags vacío
-      [{ priorResults: 0, priorSkillResults: 0 }],         // 5: prior counts
+      [],                                                  // 5: loadInstrumentBands (sin bandas)
+      [{ priorResults: 0, priorSkillResults: 0 }],         // 6: prior counts
     ]);
     const svc = makeService(db);
     const result = await svc.calculate(makeUser(), 'a1', { force: false });

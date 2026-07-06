@@ -1,6 +1,7 @@
 import {
   boolean,
   decimal,
+  index,
   integer,
   pgTable,
   text,
@@ -11,7 +12,7 @@ import {
 import { relations } from 'drizzle-orm';
 import { metricTypeEnum, performanceLevelEnum } from './enums';
 import { assessments } from './assessments';
-import { gradingScales } from './instruments';
+import { gradingScales, instruments } from './instruments';
 import { organizations } from './organizations';
 import { students } from './students';
 import { taxonomyNodes } from './taxonomy';
@@ -23,32 +24,41 @@ import { taxonomyNodes } from './taxonomy';
 // modela SIMCE (3), Cambridge CEFR (6), stanine (9), o cualquier N de bandas sin
 // migración de schema. El enum `performance_level` se mantiene como fallback
 // deprecated en assessment_results/skill_results (soft migration).
-export const performanceBands = pgTable('performance_bands', {
-  id: uuid('id').defaultRandom().primaryKey(),
-  // Escala a la que pertenece la banda. Nullable: permite catálogos por org
-  // (orgId) no atados a una escala concreta.
-  scaleId: uuid('scale_id').references(() => gradingScales.id, { onDelete: 'cascade' }),
-  // Tenant dueño de la banda (multi-tenancy). Nullable para bandas globales
-  // de plataforma (ej. catálogo DIA por defecto).
-  orgId: uuid('org_id').references(() => organizations.id),
-  // Clave estable legible (ej. 'A1', 'insufficient', 'nivel_1').
-  key: text('key').notNull(),
-  // Etiqueta presentable (ej. 'A1 — Beginner', 'Insuficiente').
-  label: text('label').notNull(),
-  // Orden de menor a mayor logro.
-  order: integer('order').default(0).notNull(),
-  // Rango sobre el % de logro (0..1). Inclusivo en min, exclusivo en max.
-  minThreshold: decimal('min_threshold', { precision: 5, scale: 4 }).notNull(),
-  maxThreshold: decimal('max_threshold', { precision: 5, scale: 4 }).notNull(),
-  // Color de presentación (token o hex). Nullable.
-  color: text('color'),
-  createdAt: timestamp('created_at').defaultNow().notNull(),
-  updatedAt: timestamp('updated_at').defaultNow().notNull(),
-  // Soft delete (§5.1): las bandas son configuración editable por tenant; al
-  // retirar una banda se marca deleted_at en vez de DELETE. Las lecturas deben
-  // filtrar `deleted_at IS NULL` por defecto.
-  deletedAt: timestamp('deleted_at'),
-});
+export const performanceBands = pgTable(
+  'performance_bands',
+  {
+    id: uuid('id').defaultRandom().primaryKey(),
+    // Instrumento al que pertenece la banda. Nullable: las bandas pueden colgar
+    // del instrumento (cortes oficiales por grado/forma, ej. DIA) o resolverse
+    // vía la escala (`scaleId`). Un instrumento oficial (org_id NULL) con bandas
+    // globales (org_id NULL) las comparte con todas las orgs que lo usan.
+    instrumentId: uuid('instrument_id').references(() => instruments.id),
+    // Escala a la que pertenece la banda. Nullable: permite catálogos por org
+    // (orgId) no atados a una escala concreta.
+    scaleId: uuid('scale_id').references(() => gradingScales.id, { onDelete: 'cascade' }),
+    // Tenant dueño de la banda (multi-tenancy). Nullable para bandas globales
+    // de plataforma (ej. catálogo DIA por defecto).
+    orgId: uuid('org_id').references(() => organizations.id),
+    // Clave estable legible (ej. 'A1', 'insufficient', 'nivel_1').
+    key: text('key').notNull(),
+    // Etiqueta presentable (ej. 'A1 — Beginner', 'Insuficiente').
+    label: text('label').notNull(),
+    // Orden de menor a mayor logro.
+    order: integer('order').default(0).notNull(),
+    // Rango sobre el % de logro (0..1). Inclusivo en min, exclusivo en max.
+    minThreshold: decimal('min_threshold', { precision: 5, scale: 4 }).notNull(),
+    maxThreshold: decimal('max_threshold', { precision: 5, scale: 4 }).notNull(),
+    // Color de presentación (token o hex). Nullable.
+    color: text('color'),
+    createdAt: timestamp('created_at').defaultNow().notNull(),
+    updatedAt: timestamp('updated_at').defaultNow().notNull(),
+    // Soft delete (§5.1): las bandas son configuración editable por tenant; al
+    // retirar una banda se marca deleted_at en vez de DELETE. Las lecturas deben
+    // filtrar `deleted_at IS NULL` por defecto.
+    deletedAt: timestamp('deleted_at'),
+  },
+  (table) => [index('performance_bands_instrument_order_idx').on(table.instrumentId, table.order)],
+);
 
 export const assessmentResults = pgTable(
   'assessment_results',
@@ -111,6 +121,10 @@ export const skillResults = pgTable(
 );
 
 export const performanceBandsRelations = relations(performanceBands, ({ one }) => ({
+  instrument: one(instruments, {
+    fields: [performanceBands.instrumentId],
+    references: [instruments.id],
+  }),
   scale: one(gradingScales, {
     fields: [performanceBands.scaleId],
     references: [gradingScales.id],

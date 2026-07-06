@@ -14,6 +14,7 @@ export * from './item.schema';
 export * from './item-content.schema';
 export * from './answer-sheet.schema';
 export * from './grading-scale.schema';
+export * from './performance-band.schema';
 export * from './assessment-result.schema';
 export * from './dashboard.schema';
 export * from './analytics.schema';
