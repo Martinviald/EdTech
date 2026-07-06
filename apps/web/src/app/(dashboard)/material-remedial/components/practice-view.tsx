@@ -1,4 +1,4 @@
-import { AlertTriangle, BookOpen, CheckCircle2, Info } from 'lucide-react';
+import { AlertTriangle, BookOpen, CheckCircle2, Info, Sparkles } from 'lucide-react';
 import type {
   JudgeVerdict,
   QualityReport,
@@ -11,6 +11,7 @@ import { AlertCallout } from '@/components/patterns';
 import { cn } from '@/lib/utils';
 import { REMEDIAL_JUDGE_LABELS } from './labels';
 import { ItemEditor } from './item-editor';
+import { StimulusEditor } from './stimulus-editor';
 
 const POSITION_BADGE =
   'mt-0.5 shrink-0 rounded bg-primary/10 px-2 py-0.5 text-xs font-medium text-primary';
@@ -34,6 +35,46 @@ function StimulusPassage({ stimulus }: { stimulus: RemedialStimulus }) {
         </p>
       </CardContent>
     </Card>
+  );
+}
+
+/** Distintivo de procedencia de un pasaje redactado por IA (Ola 2.2 · Opción B). */
+function AiGeneratedLabel() {
+  return (
+    <p className="inline-flex items-center gap-1.5 text-xs font-medium text-primary">
+      <Sparkles className="size-3.5 shrink-0" aria-hidden />
+      Texto generado por IA
+    </p>
+  );
+}
+
+/**
+ * Bloque de un estímulo del set. Un pasaje generado por IA (`source='ai_generated'`,
+ * Opción B) lleva el distintivo "Texto generado por IA"; si además el material es
+ * editable (revisión: `ready` + `canApprove`, con `materialId`) se muestra en el
+ * `StimulusEditor` (título + texto). Un pasaje oficial (`source='official'`, Opción A)
+ * o cualquier estímulo fuera de la revisión es de solo lectura (`StimulusPassage`).
+ */
+function StimulusBlock({
+  stimulus,
+  editable,
+  materialId,
+}: {
+  stimulus: RemedialStimulus;
+  editable: boolean;
+  materialId?: string;
+}) {
+  const isAiGenerated = stimulus.source === 'ai_generated';
+
+  return (
+    <div className="space-y-2">
+      {isAiGenerated ? <AiGeneratedLabel /> : null}
+      {isAiGenerated && editable && materialId != null ? (
+        <StimulusEditor stimulus={stimulus} materialId={materialId} />
+      ) : (
+        <StimulusPassage stimulus={stimulus} />
+      )}
+    </div>
   );
 }
 
@@ -188,6 +229,10 @@ function PracticeItemCard({
  * Con `editable` (solo en revisión: `ready` + `canApprove`) y preview hidratado, cada
  * ítem se muestra en `ItemEditor` (editar/quitar antes de aprobar) conservando su flag
  * del juez arriba. En cualquier otro caso el render es de solo lectura (Ola 1 + 2.1).
+ *
+ * Ola 2.2 · Opción B: un pasaje generado por IA (`source='ai_generated'`) lleva el
+ * distintivo "Texto generado por IA" y, si el material es editable, se muestra en el
+ * `StimulusEditor` (título + texto). Un pasaje oficial (Opción A) sigue de solo lectura.
  */
 export function PracticeView({
   content,
@@ -245,7 +290,12 @@ export function PracticeView({
       ) : null}
 
       {passages.map((stimulus) => (
-        <StimulusPassage key={stimulus.sectionId} stimulus={stimulus} />
+        <StimulusBlock
+          key={stimulus.sectionId}
+          stimulus={stimulus}
+          editable={editable}
+          materialId={materialId}
+        />
       ))}
 
       <Card>

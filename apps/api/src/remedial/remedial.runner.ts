@@ -119,7 +119,13 @@ export class RemedialRunner {
         );
         await this.service.markReady(materialId, orgId, {
           content: finalBatch.content,
-          input: { ...finalBatch.audit, brief },
+          // Ola 2.2 (Opción B): si se generó el estímulo, persiste la legibilidad medida
+          // del texto nuevo para auditoría/UI (`undefined` en el resto de los métodos).
+          input: {
+            ...finalBatch.audit,
+            brief,
+            ...(resolved.readability ? { stimulusReadability: resolved.readability } : {}),
+          },
           method: resolved.method,
           model: finalBatch.model,
           promptVersion: finalBatch.promptVersion,
@@ -149,8 +155,13 @@ export class RemedialRunner {
       await this.service.markReady(materialId, orgId, {
         // Auditoría (sin PII): contexto curricular enviado (`result.audit`) + el brief
         // del error usado para anclar la generación. La salida vive solo en `content`.
+        // Ola 2.2 (Opción B): + la legibilidad medida del estímulo generado, si aplica.
         content: result.content,
-        input: { ...result.audit, brief },
+        input: {
+          ...result.audit,
+          brief,
+          ...(resolved.readability ? { stimulusReadability: resolved.readability } : {}),
+        },
         // Método EFECTIVO resuelto (el generador ya dejó `content.stimuli`).
         method: resolved.method,
         model: result.model,

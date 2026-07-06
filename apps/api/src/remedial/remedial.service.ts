@@ -30,6 +30,7 @@ import {
   type RemedialStimulus,
   type ReviewRemedialDto,
   type UpdateRemedialItemDto,
+  type UpdateRemedialStimulusDto,
 } from '@soe/types';
 import type { JwtPayload } from '../auth/jwt-payload.types';
 import { InjectDb, type Database } from '../database/database.types';
@@ -39,6 +40,7 @@ import {
   PRACTICE_PROMPT_VERSION,
   PRACTICE_STIMULUS_PROMPT_VERSION,
 } from './prompts/practice.prompt';
+import { stimulusTextPreview } from './stimulus/stimulus.mappers';
 
 /**
  * Versión de prompt vigente por tipo. Entra en el `inputHash` de la caché para que
@@ -563,6 +565,104 @@ export class RemedialService {
     });
   }
 
+  /**
+   * Edita el PASAJE generado por IA de un `practice_set` en `ready` (Ola 2.2, Opción B).
+   * Es el "humano AJUSTA" de CLAUDE.md §8.3 aplicado al estímulo: el docente corrige el
+   * texto (y opcionalmente el título) antes de aprobar el set. Solo aplica a pasajes
+   * `source='ai_generated'` (per-material, `orgId` del tenant); un pasaje `official`
+   * (Opción A, compartido) es READ-ONLY y NUNCA se toca.
+   *
+   * - `remedial_materials` bajo `withOrgContext`+`tx`; la sección (`instrument_sections`,
+   *   sin RLS) se aísla con filtro `org_id` EXPLÍCITO (§5.2). Edita `content.stimuli[0]`.
+   * - `text` reemplaza `passageText`; `title` omitido → preserva, `null` → limpia,
+   *   string → fija (`passageTitle`). `instrument_sections` no tiene `updated_at`.
+   * - Refleja el nuevo título/preview en el ref ligero (`content.stimuli[0]`) del material
+   *   (DRY con `stimulusTextPreview`) y devuelve el Model con `stimuli`/`practiceItems`
+   *   re-hidratados (igual que `removeItem`).
+   */
+  async updateStimulus(
+    orgId: string,
+    materialId: string,
+    dto: UpdateRemedialStimulusDto,
+  ): Promise<RemedialMaterialModel> {
+    return withOrgContext(this.db, orgId, async (tx) => {
+      const { content, ref } = await this.loadStimulusRef(tx, materialId, orgId);
+      const sectionId = ref.sectionId;
+
+      // La sección vive en `instrument_sections` (sin RLS → filtro EXPLÍCITO del pool
+      // visible: `org_id = :orgId ∪ org_id IS NULL`, patrón `hydrateStimuli`).
+      const [section] = await tx
+        .select({
+          id: instrumentSections.id,
+          kind: instrumentSections.kind,
+          source: instrumentSections.source,
+          passageTitle: instrumentSections.passageTitle,
+        })
+        .from(instrumentSections)
+        .where(
+          and(
+            eq(instrumentSections.id, sectionId),
+            or(eq(instrumentSections.orgId, orgId), isNull(instrumentSections.orgId)),
+          ),
+        )
+        .limit(1);
+      if (!section) {
+        throw new NotFoundException('Pasaje del estímulo no encontrado');
+      }
+      // NUNCA editar un pasaje oficial (Opción A): es contenido compartido de la
+      // evaluación. Solo los generados por IA (Opción B) son editables por el docente.
+      if (section.source !== 'ai_generated') {
+        throw new ForbiddenException('No se puede editar un pasaje oficial');
+      }
+      if (section.kind !== 'passage') {
+        throw new BadRequestException('Solo se puede editar un pasaje de texto');
+      }
+
+      // `title` omitido → preserva el actual; `null` → limpia; string → fija.
+      const nextTitle: string | null =
+        dto.title !== undefined ? dto.title : section.passageTitle ?? null;
+
+      // Actualiza el pasaje. Filtro `org_id` EXPLÍCITO (nunca toca una fila compartida
+      // de otro pool); `instrument_sections` no tiene `updated_at`.
+      await tx
+        .update(instrumentSections)
+        .set({ passageText: dto.text, passageTitle: nextTitle })
+        .where(
+          and(
+            eq(instrumentSections.id, sectionId),
+            eq(instrumentSections.orgId, orgId),
+          ),
+        );
+
+      // Refleja el nuevo título/preview en el ref ligero (`content.stimuli[0]`),
+      // coherente con el texto completo re-hidratado on-read (fuente de verdad =
+      // `instrument_sections`). El spread preserva los `items` del set intactos.
+      const nextStimuli = content.stimuli.map((stimulusRef, idx) =>
+        idx === 0
+          ? {
+              ...stimulusRef,
+              title: nextTitle,
+              textPreview: stimulusTextPreview(dto.text),
+            }
+          : stimulusRef,
+      );
+      const nextContent: RemedialContent = { ...content, stimuli: nextStimuli };
+      await tx
+        .update(remedialMaterials)
+        .set({ content: nextContent, updatedAt: new Date() })
+        .where(
+          and(eq(remedialMaterials.id, materialId), eq(remedialMaterials.orgId, orgId)),
+        );
+
+      const updated = await this.findOne(tx, materialId, orgId);
+      const model = await this.toModel(tx, updated!);
+      // Re-hidrata el preview de ítems y los estímulos (coherente con `get`/`removeItem`).
+      model.practiceItems = await this.hydratePracticeItems(tx, updated!.content, orgId);
+      model.stimuli = await this.hydrateStimuli(tx, updated!.content, orgId);
+      return model;
+    });
+  }
+
   // ---------- helpers ----------
 
   /**
@@ -597,6 +697,33 @@ export class RemedialService {
     if (!ref) {
       throw new NotFoundException('El ítem no pertenece a este set');
     }
+    return { material, content, ref };
+  }
+
+  /**
+   * Carga un `practice_set` editable y su PRIMER estímulo (`content.stimuli[0]`),
+   * validando el estado (Ola 2.2). Paralelo a `loadPracticeRef` pero para el pasaje:
+   * material de la org (`withOrgContext`+`tx`), `type='practice_set'`, `status='ready'`
+   * y `content.stimuli` no vacío. El pasaje se edita en la revisión, antes de aprobar.
+   */
+  private async loadStimulusRef(tx: Database, materialId: string, orgId: string) {
+    const material = await this.findOne(tx, materialId, orgId);
+    if (!material) {
+      throw new NotFoundException('Material remedial no encontrado');
+    }
+    if (material.type !== 'practice_set') {
+      throw new BadRequestException('Solo los sets de práctica tienen pasaje editable');
+    }
+    if (material.status !== 'ready') {
+      throw new BadRequestException(
+        `Solo se puede editar el pasaje de un set en estado "ready" (actual: "${material.status}")`,
+      );
+    }
+    const content = material.content;
+    if (!content || !('stimuli' in content) || content.stimuli.length === 0) {
+      throw new BadRequestException('El set no tiene un pasaje editable');
+    }
+    const ref = content.stimuli[0];
     return { material, content, ref };
   }
 

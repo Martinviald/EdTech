@@ -17,6 +17,7 @@ import {
   remedialListQuerySchema,
   reviewRemedialSchema,
   updateRemedialItemSchema,
+  updateRemedialStimulusSchema,
   REMEDIAL_APPROVER_ROLES,
   REMEDIAL_GENERATOR_ROLES,
   REMEDIAL_VIEWER_ROLES,
@@ -180,6 +181,23 @@ export class RemedialController {
     @CurrentUser() user: JwtPayload,
   ): Promise<RemedialMaterialModel> {
     return this.service.removeItem(this.requireOrgId(user), id, itemId);
+  }
+
+  /**
+   * PATCH /api/remedial/:id/stimulus — editar el pasaje generado por IA en la revisión
+   * (Ola 2.2, Opción B). El docente corrige el texto (y opcionalmente el título) del
+   * estímulo `source='ai_generated'` antes de aprobar; un pasaje `official` (Opción A) es
+   * read-only y el service lo rechaza. Devuelve el material con `stimuli` re-hidratado.
+   */
+  @Patch(':id/stimulus')
+  @Roles(...REMEDIAL_APPROVER_ROLES)
+  updateStimulus(
+    @Param('id') id: string,
+    @Body() body: unknown,
+    @CurrentUser() user: JwtPayload,
+  ): Promise<RemedialMaterialModel> {
+    const dto = updateRemedialStimulusSchema.parse(body);
+    return this.service.updateStimulus(this.requireOrgId(user), id, dto);
   }
 
   /** Resuelve el `orgId` del token (SIEMPRE del token, nunca del body/params). */

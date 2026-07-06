@@ -5,6 +5,7 @@ import type {
   RemedialPracticeContent,
   ReviewRemedialDto,
   UpdateRemedialItemDto,
+  UpdateRemedialStimulusDto,
   UserRole,
 } from '@soe/types';
 import type { JwtPayload } from '../auth/jwt-payload.types';
@@ -634,6 +635,217 @@ describe('RemedialService', () => {
     const service = new RemedialService(db);
     await expect(
       service.removeItem('org-1', 'mat-1', ITEM_A),
+    ).rejects.toBeInstanceOf(BadRequestException);
+  });
+
+  // ── updateStimulus (Ola 2.2, Opción B) ─────────────────────────────────────
+  const SECTION_ID = '66666666-6666-4666-8666-666666666666';
+
+  const validStimulusUpdate: UpdateRemedialStimulusDto = {
+    title: 'Nuevo título',
+    text: 'Nuevo texto del pasaje generado por IA.',
+  };
+
+  /** Content de un practice_set con UN estímulo `ai_generated` editable (Ola 2.2). */
+  function practiceWithStimulus(): RemedialPracticeContent {
+    return {
+      skillFocus: 'comprensión',
+      itemCount: 1,
+      items: [{ itemId: ITEM_A, position: 1, stem: 'a' }],
+      notes: null,
+      stimuli: [
+        {
+          sectionId: SECTION_ID,
+          kind: 'passage',
+          source: 'ai_generated',
+          title: 'Viejo título',
+          textPreview: 'viejo preview',
+        },
+      ],
+    };
+  }
+
+  it('updateStimulus actualiza el pasaje ai_generated y re-hidrata el material', async () => {
+    const material = makeRow({
+      status: 'ready',
+      type: 'practice_set',
+      content: practiceWithStimulus(),
+    });
+    const section = {
+      id: SECTION_ID,
+      kind: 'passage',
+      source: 'ai_generated',
+      passageTitle: 'Viejo título',
+    };
+    const updatedRow = makeRow({
+      status: 'ready',
+      type: 'practice_set',
+      content: {
+        ...practiceWithStimulus(),
+        stimuli: [
+          {
+            sectionId: SECTION_ID,
+            kind: 'passage',
+            source: 'ai_generated',
+            title: 'Nuevo título',
+            textPreview: 'Nuevo texto del pasaje generado por IA.',
+          },
+        ],
+      },
+    });
+    const itemRow = {
+      id: ITEM_A,
+      type: 'multiple_choice',
+      content: { stem: 'q', alternatives: [{ key: 'A', text: 'x', isCorrect: true }] },
+    };
+    const updatedSectionRow = {
+      id: SECTION_ID,
+      kind: 'passage',
+      source: 'ai_generated',
+      passageTitle: 'Nuevo título',
+      passageText: 'Nuevo texto del pasaje generado por IA.',
+    };
+    // 1) loadStimulusRef→findOne, 2) section load, 3) findOne(updated),
+    // 4) nodeName (toModel), 5) items (hidratación), 6) sections (estímulo)
+    const db = makeDb([
+      [material],
+      [section],
+      [updatedRow],
+      [{ name: 'OA' }],
+      [itemRow],
+      [updatedSectionRow],
+    ]);
+    const service = new RemedialService(db);
+
+    const model = await service.updateStimulus('org-1', 'mat-1', validStimulusUpdate);
+
+    // instrument_sections: passageText + passageTitle actualizados (org explícito).
+    const sectionUpdate = db.__updates.find((u) => 'passageText' in u);
+    expect(sectionUpdate).toMatchObject({
+      passageText: 'Nuevo texto del pasaje generado por IA.',
+      passageTitle: 'Nuevo título',
+    });
+    // material.content: el ref ligero refleja el nuevo título + preview.
+    const matUpdate = db.__updates.find(
+      (u) => u.content && typeof u.content === 'object' && 'stimuli' in u.content,
+    );
+    const nextStimuli = (matUpdate!.content as RemedialPracticeContent).stimuli;
+    expect(nextStimuli[0]).toMatchObject({
+      sectionId: SECTION_ID,
+      title: 'Nuevo título',
+      textPreview: 'Nuevo texto del pasaje generado por IA.',
+    });
+    // re-hidratado: el estímulo trae el TEXTO COMPLETO desde instrument_sections.
+    expect(model.stimuli).toHaveLength(1);
+    expect(model.stimuli?.[0]).toMatchObject({
+      sectionId: SECTION_ID,
+      source: 'ai_generated',
+      title: 'Nuevo título',
+      text: 'Nuevo texto del pasaje generado por IA.',
+    });
+    expect(model.practiceItems).toHaveLength(1);
+  });
+
+  it('updateStimulus preserva el título si el DTO no lo trae (solo texto)', async () => {
+    const material = makeRow({
+      status: 'ready',
+      type: 'practice_set',
+      content: practiceWithStimulus(),
+    });
+    const section = {
+      id: SECTION_ID,
+      kind: 'passage',
+      source: 'ai_generated',
+      passageTitle: 'Viejo título',
+    };
+    const updatedRow = makeRow({
+      status: 'ready',
+      type: 'practice_set',
+      content: practiceWithStimulus(),
+    });
+    const sectionRow = {
+      id: SECTION_ID,
+      kind: 'passage',
+      source: 'ai_generated',
+      passageTitle: 'Viejo título',
+      passageText: 'Texto corregido, mismo título.',
+    };
+    const db = makeDb([
+      [material],
+      [section],
+      [updatedRow],
+      [{ name: 'OA' }],
+      [],
+      [sectionRow],
+    ]);
+    const service = new RemedialService(db);
+
+    await service.updateStimulus('org-1', 'mat-1', {
+      text: 'Texto corregido, mismo título.',
+    });
+
+    // title omitido → se preserva el passageTitle actual (no se pone null).
+    const sectionUpdate = db.__updates.find((u) => 'passageText' in u);
+    expect(sectionUpdate).toMatchObject({
+      passageText: 'Texto corregido, mismo título.',
+      passageTitle: 'Viejo título',
+    });
+  });
+
+  it('updateStimulus rechaza (Forbidden) editar un pasaje oficial', async () => {
+    const material = makeRow({
+      status: 'ready',
+      type: 'practice_set',
+      content: practiceWithStimulus(),
+    });
+    const officialSection = {
+      id: SECTION_ID,
+      kind: 'passage',
+      source: 'official',
+      passageTitle: 'Pasaje oficial',
+    };
+    // 1) findOne(material), 2) section load (oficial → rechazo antes de actualizar)
+    const db = makeDb([[material], [officialSection]]);
+    const service = new RemedialService(db);
+    await expect(
+      service.updateStimulus('org-1', 'mat-1', validStimulusUpdate),
+    ).rejects.toBeInstanceOf(ForbiddenException);
+    // no se persistió nada.
+    expect(db.__updates).toHaveLength(0);
+  });
+
+  it('updateStimulus rechaza (400) si el material no está ready', async () => {
+    const material = makeRow({
+      status: 'approved',
+      type: 'practice_set',
+      content: practiceWithStimulus(),
+    });
+    const db = makeDb([[material]]);
+    const service = new RemedialService(db);
+    await expect(
+      service.updateStimulus('org-1', 'mat-1', validStimulusUpdate),
+    ).rejects.toBeInstanceOf(BadRequestException);
+  });
+
+  it('updateStimulus rechaza (NotFound) si el material es de otra org', async () => {
+    // findOne filtra por org_id → vacío para un material de otro tenant.
+    const db = makeDb([[]]);
+    const service = new RemedialService(db);
+    await expect(
+      service.updateStimulus('org-1', 'mat-1', validStimulusUpdate),
+    ).rejects.toBeInstanceOf(NotFoundException);
+  });
+
+  it('updateStimulus rechaza (400) si el set no tiene estímulo', async () => {
+    const material = makeRow({
+      status: 'ready',
+      type: 'practice_set',
+      content: practiceContent([{ itemId: ITEM_A, position: 1, stem: 'a' }]), // stimuli: []
+    });
+    const db = makeDb([[material]]);
+    const service = new RemedialService(db);
+    await expect(
+      service.updateStimulus('org-1', 'mat-1', validStimulusUpdate),
     ).rejects.toBeInstanceOf(BadRequestException);
   });
 });
