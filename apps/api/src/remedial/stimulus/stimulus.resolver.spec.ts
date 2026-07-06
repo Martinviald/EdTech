@@ -2,6 +2,10 @@ import type { Database } from '@soe/db';
 import type { RemedialStimulusRef } from '@soe/types';
 import type { FailedStimulus } from './failed-stimulus.service';
 import { FailedStimulusService } from './failed-stimulus.service';
+import type {
+  GenerateStimulusProvider,
+  GeneratedStimulus,
+} from './generate-stimulus.provider';
 import type { PassageSelectionPolicy } from './passage-selection.policy';
 import type { TerminalFallbackPolicy } from './terminal-fallback.policy';
 import { StimulusResolver } from './stimulus.resolver';
@@ -19,11 +23,13 @@ function makeDb(rows: unknown[]): Database {
 
 function makeDeps(): {
   failed: { list: jest.Mock };
+  generate: { generate: jest.Mock };
   policy: { select: jest.Mock };
   fallback: { fallback: jest.Mock };
 } {
   return {
     failed: { list: jest.fn() },
+    generate: { generate: jest.fn() },
     policy: { select: jest.fn() },
     fallback: { fallback: jest.fn() },
   };
@@ -36,6 +42,7 @@ function makeResolver(
   return new StimulusResolver(
     db,
     deps.failed as unknown as FailedStimulusService,
+    deps.generate as unknown as GenerateStimulusProvider,
     deps.policy as unknown as PassageSelectionPolicy,
     deps.fallback as unknown as TerminalFallbackPolicy,
   );
@@ -73,6 +80,55 @@ describe('StimulusResolver', () => {
     });
 
     expect(result).toEqual({ method: 'self_contained', stimulus: null });
+    expect(deps.failed.list).not.toHaveBeenCalled();
+    expect(deps.fallback.fallback).not.toHaveBeenCalled();
+  });
+
+  it('generate_stimulus → GenerateStimulusProvider (Opción B), propaga readability', async () => {
+    const deps = makeDeps();
+    const generated: GeneratedStimulus = {
+      method: 'generate_stimulus',
+      stimulus: {
+        sectionId: 'GEN1',
+        kind: 'passage',
+        source: 'ai_generated',
+        title: 'Texto nuevo',
+        text: 'Un texto original generado por IA.',
+      },
+      readability: {
+        value: 72,
+        gradeEstimate: 6,
+        target: 70,
+        gradeTarget: 6,
+        withinBand: true,
+        wordCount: 6,
+        wordCountRange: [1, 100],
+        textType: 'informativo',
+        warning: null,
+        promptVersion: 'ola2-generate-stimulus-v1',
+      },
+    };
+    deps.generate.generate.mockResolvedValue(generated);
+    const resolver = makeResolver(deps, makeDb([]));
+
+    const result = await resolver.resolve({
+      orgId: 'o',
+      assessmentId: 'a',
+      nodeId: 'n',
+      method: 'generate_stimulus',
+      // El picker no aplica en B: el stimulusId se ignora.
+      stimulusId: 'ignored',
+    });
+
+    expect(deps.generate.generate).toHaveBeenCalledWith({
+      orgId: 'o',
+      assessmentId: 'a',
+      nodeId: 'n',
+    });
+    expect(result.method).toBe('generate_stimulus');
+    expect(result.stimulus).toEqual(generated.stimulus);
+    expect(result.readability).toEqual(generated.readability);
+    // No pasa por la cadena de la Opción A.
     expect(deps.failed.list).not.toHaveBeenCalled();
     expect(deps.fallback.fallback).not.toHaveBeenCalled();
   });

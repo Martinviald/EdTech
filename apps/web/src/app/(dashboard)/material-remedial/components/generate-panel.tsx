@@ -62,10 +62,11 @@ function previewText(text: string | null, max = 180): string {
  * plan por grupo, requiere `classGroupId`. Tras crear el registro redirige al
  * detalle (`/material-remedial/:id`), donde se hace el polling del estado.
  *
- * Ola 2.1a (practice_set): selector de método. «Mismas lecturas» (Opción A)
- * genera preguntas nuevas sobre un texto OFICIAL — el docente elige el pasaje de
- * una lista (default = mayor brecha) vía `getCandidateStimuli`; «Ejercicios sin
- * texto» genera MCQ sin pasaje; «Texto nuevo IA» (Opción B) llega en 2.2.
+ * practice_set: selector de método. «Mismas lecturas» (Opción A) genera preguntas
+ * nuevas sobre un texto OFICIAL — el docente elige el pasaje de una lista (default =
+ * mayor brecha) vía `getCandidateStimuli`; «Ejercicios sin texto» genera MCQ sin
+ * pasaje; «Texto nuevo IA» (Opción B, Ola 2.2) hace que la IA redacte un texto nuevo
+ * (sin pasaje a elegir; se envía `assessmentId` para el grounding, sin `stimulusId`).
  */
 export function GeneratePanel({
   nodeId,
@@ -170,9 +171,9 @@ export function GeneratePanel({
   const bankOptions = passageOptions.filter((o) => o.origin === 'bank');
 
   function methodDisabled(value: RemedialMethod, optDisabled?: boolean): boolean {
-    if (optDisabled) return true; // generate_stimulus (Opción B, próximamente)
+    if (optDisabled) return true; // opción marcada como no disponible en labels
     if (value === 'reuse_stimulus') return !canReuse || loadingCandidates;
-    return false; // self_contained siempre disponible
+    return false; // self_contained y generate_stimulus (Opción B) siempre disponibles
   }
 
   function handleGenerate() {
@@ -191,12 +192,16 @@ export function GeneratePanel({
           type === 'practice_set' && itemCount !== undefined
             ? Math.min(20, Math.max(1, Math.round(itemCount)))
             : undefined;
-        // Método efectivo: reuse solo si es válido (evaluación + candidatos); de lo
-        // contrario self_contained. El stimulusId (override del pasaje) solo va con reuse.
+        // Método efectivo: reuse solo si es válido (evaluación + candidatos);
+        // generate_stimulus (Opción B) si el docente lo eligió — la IA crea el texto,
+        // no hay pasaje a elegir; en cualquier otro caso self_contained. El stimulusId
+        // (override del pasaje) solo va con reuse.
         const effectiveMethod: RemedialMethod =
           type === 'practice_set' && method === 'reuse_stimulus' && canReuse
             ? 'reuse_stimulus'
-            : 'self_contained';
+            : type === 'practice_set' && method === 'generate_stimulus'
+              ? 'generate_stimulus'
+              : 'self_contained';
         const { materialId } = await generateRemedial({
           type,
           nodeId,

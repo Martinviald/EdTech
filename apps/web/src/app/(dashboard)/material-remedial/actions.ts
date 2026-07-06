@@ -3,16 +3,21 @@
 import {
   generateRemedialSchema,
   reviewRemedialSchema,
+  updateRemedialItemSchema,
+  updateRemedialStimulusSchema,
   type RemedialMaterialModel,
   type RemedialMaterialType,
   type RemedialMethod,
   type RemedialStatus,
   type RemedialContent,
+  type RemedialPracticeItemPreview,
   type RemedialStimulusRef,
   type StimulusKind,
   type StimulusSource,
+  type UpdateRemedialItemDto,
+  type UpdateRemedialStimulusDto,
 } from '@soe/types';
-import { apiGet, apiPost, apiPatch } from '@/lib/api';
+import { apiGet, apiPost, apiPatch, apiDelete } from '@/lib/api';
 
 /**
  * Pasaje fallado candidato (modo A · Ola 2.1a). Espejo del shape backend-interno
@@ -119,5 +124,60 @@ export async function reviewRemedial(input: {
   return apiPatch<RemedialMaterialModel>(
     `/remedial/${input.materialId}/review`,
     dto,
+  );
+}
+
+/**
+ * Edición humana (Ola 1-resto G2) de un ítem `draft` de un `practice_set` en `ready`:
+ * enunciado, alternativas, cuál es la correcta y explicación. La IA propone; el humano
+ * ajusta antes de publicar. La regla "exactamente una correcta" la revalida el service
+ * (400). Devuelve el preview hidratado del ítem actualizado para reflejar la edición.
+ * La autorización efectiva la aplica el guard del endpoint (`REMEDIAL_APPROVER_ROLES`).
+ */
+export async function updateRemedialItem(
+  materialId: string,
+  itemId: string,
+  dto: UpdateRemedialItemDto,
+): Promise<RemedialPracticeItemPreview> {
+  const body = updateRemedialItemSchema.parse(dto);
+
+  return apiPatch<RemedialPracticeItemPreview>(
+    `/remedial/${materialId}/items/${itemId}`,
+    body,
+  );
+}
+
+/**
+ * Quita un ítem `draft` del `practice_set` (soft-delete + reindexado de posiciones).
+ * El backend no permite dejar el set vacío (responde 400). Devuelve el material
+ * hidratado. La autorización efectiva la aplica el guard del endpoint
+ * (`REMEDIAL_APPROVER_ROLES`).
+ */
+export async function removeRemedialItem(
+  materialId: string,
+  itemId: string,
+): Promise<RemedialMaterialModel> {
+  return apiDelete<RemedialMaterialModel>(
+    `/remedial/${materialId}/items/${itemId}`,
+  );
+}
+
+/**
+ * Edición humana (Ola 2.2 · Opción B) del pasaje generado por IA de un `practice_set`
+ * en `ready`: título y texto del estímulo. Solo aplica a estímulos `ai_generated` — un
+ * pasaje oficial NUNCA se edita (el service responde 403); requiere el material `ready`
+ * con stimulus (si no, 400). Devuelve el material hidratado (con `stimuli` y
+ * `practiceItems` re-hidratados). La autorización efectiva la aplica el guard del
+ * endpoint (`REMEDIAL_APPROVER_ROLES`).
+ */
+export async function updateRemedialStimulus(
+  materialId: string,
+  dto: UpdateRemedialStimulusDto,
+): Promise<RemedialMaterialModel> {
+  const body = updateRemedialStimulusSchema.parse(dto);
+
+  return apiPatch<RemedialMaterialModel>(
+    `/remedial/${materialId}/stimulus`,
+    body,
   );
 }

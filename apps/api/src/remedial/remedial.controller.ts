@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  Delete,
   ForbiddenException,
   Get,
   Inject,
@@ -15,11 +16,14 @@ import {
   generateRemedialSchema,
   remedialListQuerySchema,
   reviewRemedialSchema,
+  updateRemedialItemSchema,
+  updateRemedialStimulusSchema,
   REMEDIAL_APPROVER_ROLES,
   REMEDIAL_GENERATOR_ROLES,
   REMEDIAL_VIEWER_ROLES,
   type RemedialListResponse,
   type RemedialMaterialModel,
+  type RemedialPracticeItemPreview,
   type RemedialStatus,
   type RemedialStimulusRef,
 } from '@soe/types';
@@ -107,14 +111,10 @@ export class RemedialController {
     @CurrentUser() user: JwtPayload,
   ): Promise<{ fromAssessment: FailedStimulus[]; fromBank: RemedialStimulusRef[] }> {
     const { assessmentId, nodeId } = candidateStimuliQuerySchema.parse(query);
-    if (!user.orgId) {
-      throw new ForbiddenException(
-        'Sin organización activa. Selecciona una organización antes de continuar.',
-      );
-    }
+    const orgId = this.requireOrgId(user);
     const [fromAssessment, fromBank] = await Promise.all([
-      this.failedStimulus.list(user.orgId, assessmentId, nodeId),
-      this.bankPassages.listCandidates(user.orgId, nodeId, assessmentId),
+      this.failedStimulus.list(orgId, assessmentId, nodeId),
+      this.bankPassages.listCandidates(orgId, nodeId, assessmentId),
     ]);
     return { fromAssessment, fromBank };
   }
@@ -150,5 +150,63 @@ export class RemedialController {
   ): Promise<RemedialMaterialModel> {
     const dto = reviewRemedialSchema.parse(body);
     return this.service.review(user, id, dto);
+  }
+
+  /**
+   * PATCH /api/remedial/:id/items/:itemId — editar un ítem draft del set antes de
+   * aprobar (Ola 1‑resto G2). El humano ajusta enunciado/alternativas/correcta/
+   * explicación; el service re-valida (ítem polimórfico + "exactamente una correcta").
+   */
+  @Patch(':id/items/:itemId')
+  @Roles(...REMEDIAL_APPROVER_ROLES)
+  updateItem(
+    @Param('id') id: string,
+    @Param('itemId') itemId: string,
+    @Body() body: unknown,
+    @CurrentUser() user: JwtPayload,
+  ): Promise<RemedialPracticeItemPreview> {
+    const dto = updateRemedialItemSchema.parse(body);
+    return this.service.updateItem(this.requireOrgId(user), id, itemId, dto);
+  }
+
+  /**
+   * DELETE /api/remedial/:id/items/:itemId — quitar un ítem del set antes de aprobar
+   * (Ola 1‑resto G2). Soft-delete del draft + reindexa positions; mínimo 1 ítem.
+   */
+  @Delete(':id/items/:itemId')
+  @Roles(...REMEDIAL_APPROVER_ROLES)
+  removeItem(
+    @Param('id') id: string,
+    @Param('itemId') itemId: string,
+    @CurrentUser() user: JwtPayload,
+  ): Promise<RemedialMaterialModel> {
+    return this.service.removeItem(this.requireOrgId(user), id, itemId);
+  }
+
+  /**
+   * PATCH /api/remedial/:id/stimulus — editar el pasaje generado por IA en la revisión
+   * (Ola 2.2, Opción B). El docente corrige el texto (y opcionalmente el título) del
+   * estímulo `source='ai_generated'` antes de aprobar; un pasaje `official` (Opción A) es
+   * read-only y el service lo rechaza. Devuelve el material con `stimuli` re-hidratado.
+   */
+  @Patch(':id/stimulus')
+  @Roles(...REMEDIAL_APPROVER_ROLES)
+  updateStimulus(
+    @Param('id') id: string,
+    @Body() body: unknown,
+    @CurrentUser() user: JwtPayload,
+  ): Promise<RemedialMaterialModel> {
+    const dto = updateRemedialStimulusSchema.parse(body);
+    return this.service.updateStimulus(this.requireOrgId(user), id, dto);
+  }
+
+  /** Resuelve el `orgId` del token (SIEMPRE del token, nunca del body/params). */
+  private requireOrgId(user: JwtPayload): string {
+    if (!user.orgId) {
+      throw new ForbiddenException(
+        'Sin organización activa. Selecciona una organización antes de continuar.',
+      );
+    }
+    return user.orgId;
   }
 }

@@ -1,4 +1,4 @@
-import { AlertTriangle, BookOpen, CheckCircle2, Info } from 'lucide-react';
+import { AlertTriangle, BookOpen, CheckCircle2, Info, Sparkles } from 'lucide-react';
 import type {
   JudgeVerdict,
   QualityReport,
@@ -10,6 +10,8 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { AlertCallout } from '@/components/patterns';
 import { cn } from '@/lib/utils';
 import { REMEDIAL_JUDGE_LABELS } from './labels';
+import { ItemEditor } from './item-editor';
+import { StimulusEditor } from './stimulus-editor';
 
 const POSITION_BADGE =
   'mt-0.5 shrink-0 rounded bg-primary/10 px-2 py-0.5 text-xs font-medium text-primary';
@@ -33,6 +35,46 @@ function StimulusPassage({ stimulus }: { stimulus: RemedialStimulus }) {
         </p>
       </CardContent>
     </Card>
+  );
+}
+
+/** Distintivo de procedencia de un pasaje redactado por IA (Ola 2.2 · Opción B). */
+function AiGeneratedLabel() {
+  return (
+    <p className="inline-flex items-center gap-1.5 text-xs font-medium text-primary">
+      <Sparkles className="size-3.5 shrink-0" aria-hidden />
+      Texto generado por IA
+    </p>
+  );
+}
+
+/**
+ * Bloque de un estímulo del set. Un pasaje generado por IA (`source='ai_generated'`,
+ * Opción B) lleva el distintivo "Texto generado por IA"; si además el material es
+ * editable (revisión: `ready` + `canApprove`, con `materialId`) se muestra en el
+ * `StimulusEditor` (título + texto). Un pasaje oficial (`source='official'`, Opción A)
+ * o cualquier estímulo fuera de la revisión es de solo lectura (`StimulusPassage`).
+ */
+function StimulusBlock({
+  stimulus,
+  editable,
+  materialId,
+}: {
+  stimulus: RemedialStimulus;
+  editable: boolean;
+  materialId?: string;
+}) {
+  const isAiGenerated = stimulus.source === 'ai_generated';
+
+  return (
+    <div className="space-y-2">
+      {isAiGenerated ? <AiGeneratedLabel /> : null}
+      {isAiGenerated && editable && materialId != null ? (
+        <StimulusEditor stimulus={stimulus} materialId={materialId} />
+      ) : (
+        <StimulusPassage stimulus={stimulus} />
+      )}
+    </div>
   );
 }
 
@@ -183,12 +225,22 @@ function PracticeItemCard({
  * Si el detalle trae `qualityReport` (Ola 2.1b), muestra el estado del juez
  * automático: banner si no convergió (`exhausted`), check discreto si convergió, y
  * los flags por ítem mapeando los veredictos por `position`.
+ *
+ * Con `editable` (solo en revisión: `ready` + `canApprove`) y preview hidratado, cada
+ * ítem se muestra en `ItemEditor` (editar/quitar antes de aprobar) conservando su flag
+ * del juez arriba. En cualquier otro caso el render es de solo lectura (Ola 1 + 2.1).
+ *
+ * Ola 2.2 · Opción B: un pasaje generado por IA (`source='ai_generated'`) lleva el
+ * distintivo "Texto generado por IA" y, si el material es editable, se muestra en el
+ * `StimulusEditor` (título + texto). Un pasaje oficial (Opción A) sigue de solo lectura.
  */
 export function PracticeView({
   content,
   practiceItems,
   stimuli,
   qualityReport,
+  editable = false,
+  materialId,
 }: {
   content: RemedialPracticeContent;
   /** Preview hidratado del detalle; ausente/vacío ⇒ degradación al `stem` de las refs. */
@@ -204,6 +256,10 @@ export function PracticeView({
    * Ausente/`null` (material antiguo, guía o plan) ⇒ sin flags, sin romper.
    */
   qualityReport?: QualityReport | null;
+  /** Habilita el editor inline por ítem (requiere preview hidratado). */
+  editable?: boolean;
+  /** Requerido cuando `editable`: id del material para las server actions. */
+  materialId?: string;
 }) {
   const hasPreview = Array.isArray(practiceItems) && practiceItems.length > 0;
   const previewItems = hasPreview
@@ -211,6 +267,7 @@ export function PracticeView({
     : [];
   const refItems = [...content.items].sort((a, b) => a.position - b.position);
   const passages = (stimuli ?? []).filter((s) => s.text && s.text.trim());
+  const canEdit = editable && hasPreview && materialId != null;
 
   const verdictByPosition = new Map<number, JudgeVerdict>(
     (qualityReport?.verdicts ?? []).map((verdict): [number, JudgeVerdict] => [
@@ -233,7 +290,12 @@ export function PracticeView({
       ) : null}
 
       {passages.map((stimulus) => (
-        <StimulusPassage key={stimulus.sectionId} stimulus={stimulus} />
+        <StimulusBlock
+          key={stimulus.sectionId}
+          stimulus={stimulus}
+          editable={editable}
+          materialId={materialId}
+        />
       ))}
 
       <Card>
@@ -254,13 +316,19 @@ export function PracticeView({
         <CardContent>
           {hasPreview ? (
             <ol className="space-y-4">
-              {previewItems.map((item) => (
-                <PracticeItemCard
-                  key={item.itemId}
-                  item={item}
-                  verdict={verdictByPosition.get(item.position)}
-                />
-              ))}
+              {previewItems.map((item) => {
+                const verdict = verdictByPosition.get(item.position);
+                return canEdit && materialId ? (
+                  <ItemEditor
+                    key={item.itemId}
+                    item={item}
+                    materialId={materialId}
+                    flag={<ItemVerdictFlag verdict={verdict} />}
+                  />
+                ) : (
+                  <PracticeItemCard key={item.itemId} item={item} verdict={verdict} />
+                );
+              })}
             </ol>
           ) : refItems.length === 0 ? (
             <p className="text-sm text-muted-foreground">No hay ítems en este set.</p>
@@ -277,7 +345,9 @@ export function PracticeView({
             </ol>
           )}
           <p className="mt-3 text-xs text-muted-foreground">
-            Los ítems se publican en el banco al aprobar este material.
+            {canEdit
+              ? 'Edita o quita ítems antes de aprobar. Se publican en el banco al aprobar este material.'
+              : 'Los ítems se publican en el banco al aprobar este material.'}
           </p>
         </CardContent>
       </Card>

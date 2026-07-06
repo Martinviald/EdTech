@@ -4,6 +4,10 @@ import { instrumentSections } from '@soe/db';
 import type { RemedialMethod, RemedialStimulus } from '@soe/types';
 import { InjectDb, type Database } from '../../database/database.types';
 import { FailedStimulusService } from './failed-stimulus.service';
+import {
+  GenerateStimulusProvider,
+  type StimulusReadability,
+} from './generate-stimulus.provider';
 import { failedStimulusToStimulus } from './stimulus.mappers';
 import {
   PASSAGE_SELECTION_POLICY,
@@ -27,17 +31,24 @@ export interface ResolveStimulusInput {
 export interface ResolvedStimulus {
   method: RemedialMethod;
   stimulus: RemedialStimulus | null;
+  // Solo en `generate_stimulus` (Ola 2.2, Opción B): legibilidad medida del texto nuevo,
+  // para que el runner la persista en `remedial_materials.input` (auditoría) y la UI la
+  // muestre. `undefined` en el resto de los métodos.
+  readability?: StimulusReadability;
 }
 
 /**
- * Orquesta la cadena de fallback para conseguir el estímulo de un set remedial (Ola 2.1a).
+ * Orquesta la cadena de fallback para conseguir el estímulo de un set remedial (Ola 2.1a +
+ * 2.2).
  *
- * - `method != 'reuse_stimulus'` → `self_contained` (sin estímulo). `generate_stimulus`
- *   (Opción B) llega en 2.2; hasta entonces también cae aquí.
+ * - `generate_stimulus` (Opción B, Ola 2.2) → `GenerateStimulusProvider` genera un texto
+ *   nuevo con IA calibrado a los pasajes fallados (sin picker; ignora `stimulusId`).
+ * - `self_contained` (o cualquier método distinto de los anteriores) → sin estímulo.
  * - `reuse_stimulus` con `stimulusId` (override del docente) → carga y valida esa sección
  *   (visible a la org, `kind='passage'`).
  * - `reuse_stimulus` sin `stimulusId` → pasaje de mayor brecha vía `FailedStimulusService` +
- *   `PassageSelectionPolicy`; si no hay ninguno → `TerminalFallbackPolicy` (2.1a: self_contained).
+ *   `PassageSelectionPolicy`; si no hay ninguno → `TerminalFallbackPolicy` (Ola 2.2: el
+ *   binding es `GenerateStimulusFallback`, así que A sin pasaje cae a generar = B).
  *
  * La elección del docente NO es interactiva en el backend: el front pide candidatos
  * (`GET /remedial/candidate-stimuli`), el docente elige y reenvía `generate` con `stimulusId`.
@@ -47,6 +58,7 @@ export class StimulusResolver {
   constructor(
     @InjectDb() private readonly db: Database,
     private readonly failedStimulus: FailedStimulusService,
+    private readonly generateProvider: GenerateStimulusProvider,
     @Inject(PASSAGE_SELECTION_POLICY)
     private readonly selectionPolicy: PassageSelectionPolicy,
     @Inject(TERMINAL_FALLBACK_POLICY)
@@ -56,7 +68,22 @@ export class StimulusResolver {
   async resolve(input: ResolveStimulusInput): Promise<ResolvedStimulus> {
     const method = input.method ?? 'self_contained';
 
-    // Solo `reuse_stimulus` (Opción A) ancla a un pasaje en 2.1a.
+    // Opción B (Ola 2.2): generar un texto NUEVO con IA, calibrado a los pasajes fallados.
+    // No hay picker (no hay pasaje a elegir) → ignora `stimulusId`.
+    if (method === 'generate_stimulus') {
+      const generated = await this.generateProvider.generate({
+        orgId: input.orgId,
+        assessmentId: input.assessmentId,
+        nodeId: input.nodeId,
+      });
+      return {
+        method: generated.method,
+        stimulus: generated.stimulus,
+        readability: generated.readability,
+      };
+    }
+
+    // Solo `reuse_stimulus` (Opción A) ancla a un pasaje oficial en 2.1a.
     if (method !== 'reuse_stimulus') {
       return { method: 'self_contained', stimulus: null };
     }

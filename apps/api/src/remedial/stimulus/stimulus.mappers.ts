@@ -46,6 +46,25 @@ export function failedStimulusToStimulus(stimulus: FailedStimulus): RemedialStim
 }
 
 /**
+ * Estímulo hidratado desde una sección `ai_generated` recién insertada (Ola 2.2, Opción
+ * B). El pasaje se genera con IA, por lo que `source` es siempre `ai_generated` (a
+ * diferencia de los pasajes oficiales de la Opción A).
+ */
+export function generatedSectionToStimulus(section: {
+  id: string;
+  passageTitle: string | null;
+  passageText: string | null;
+}): RemedialStimulus {
+  return {
+    sectionId: section.id,
+    kind: 'passage',
+    source: 'ai_generated',
+    title: section.passageTitle ?? null,
+    text: section.passageText ?? null,
+  };
+}
+
+/**
  * Ref ligera (con preview) desde un estímulo hidratado. La usa el generador anclado
  * para persistir `content.stimuli = [ref]` sin guardar el texto completo (que se
  * re-hidrata on-read desde `instrument_sections`).

@@ -1,6 +1,7 @@
 import {
   boolean,
   decimal,
+  index,
   integer,
   jsonb,
   pgTable,
@@ -61,6 +62,8 @@ export const taxonomyNodes = pgTable(
     uniqueIndex('taxonomy_nodes_taxonomy_code_uniq')
       .on(table.taxonomyId, table.code)
       .where(sql`${table.code} IS NOT NULL`),
+    // Tree-walk del retriever curricular (ancestros/descendientes/hermanos por parentId).
+    index('taxonomy_nodes_parent_idx').on(table.parentId),
   ],
 );
 
