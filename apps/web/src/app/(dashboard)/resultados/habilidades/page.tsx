@@ -100,7 +100,7 @@ function SkillRow({ skill }: { skill: SkillAchievementModel }) {
             <span className="text-sm font-semibold tabular-nums">
               {formatAchievement(skill.averageAchievement)}
             </span>
-            <PerformanceBadge level={skill.performanceLevel} />
+            <PerformanceBadge level={skill.performanceLevel} band={skill.performanceBand} />
           </div>
         </div>
 
