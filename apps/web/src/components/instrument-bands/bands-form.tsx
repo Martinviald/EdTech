@@ -6,8 +6,18 @@ import { toast } from 'sonner';
 import type { PerformanceBandResponseModel } from '@soe/types';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 import { cn } from '@/lib/utils';
-import { upsertInstrumentBandsAction } from './actions';
+import { recalculateInstrumentBandsAction, upsertInstrumentBandsAction } from './actions';
 
 // Paleta de niveles de la plataforma (los mismos colores de la distribución de
 // resultados: PERFORMANCE_LEVEL_CHART_COLOR): rojo → ámbar → esmeralda → azul,
@@ -84,6 +94,7 @@ export function BandsForm({
   const [levels, setLevels] = useState<Level[]>(init.levels);
   const [cuts, setCuts] = useState<number[]>(init.cuts);
   const [saving, startTransition] = useTransition();
+  const [confirmOpen, setConfirmOpen] = useState(false);
   const barRef = useRef<HTMLDivElement>(null);
   const dragRef = useRef<{ j: number; rect: DOMRect } | null>(null);
 
@@ -169,12 +180,16 @@ export function BandsForm({
     setLevels((prev) => prev.map((lv, k) => (k === i ? { ...lv, ...p } : lv)));
   }
 
-  // ── guardar ───────────────────────────────────────────────────────────────
-  function save() {
+  // ── guardar (con confirmación + recálculo) ────────────────────────────────
+  function requestSave() {
     if (levels.some((l) => !l.label.trim())) {
       toast.error('Cada nivel necesita una etiqueta.');
       return;
     }
+    setConfirmOpen(true);
+  }
+
+  function confirmSave() {
     startTransition(async () => {
       try {
         await upsertInstrumentBandsAction(instrumentId, {
@@ -191,9 +206,24 @@ export function BandsForm({
             };
           }),
         });
-        toast.success('Niveles guardados. Recalcula la evaluación para ver los cambios.');
       } catch (e) {
         toast.error(e instanceof Error ? e.message : 'No se pudieron guardar los niveles.');
+        return;
+      }
+
+      // Guardado OK → gatillar el recálculo de todos los colegios que rindieron.
+      try {
+        const r = await recalculateInstrumentBandsAction(instrumentId);
+        setConfirmOpen(false);
+        toast.success(
+          `Niveles guardados. Se recalcularon ${r.assessmentsRecalculated} evaluación(es) en ` +
+            `${r.orgsAffected} colegio(s).`,
+        );
+      } catch {
+        setConfirmOpen(false);
+        toast.warning(
+          'Niveles guardados, pero el recálculo falló. Puedes reintentar guardando de nuevo.',
+        );
       }
     });
   }
@@ -359,10 +389,35 @@ export function BandsForm({
           <Plus className="mr-1.5 h-4 w-4" />
           Agregar nivel
         </Button>
-        <Button type="button" onClick={save} disabled={saving}>
-          {saving ? 'Guardando…' : 'Guardar niveles'}
+        <Button type="button" onClick={requestSave} disabled={saving}>
+          Guardar niveles
         </Button>
       </div>
+
+      <AlertDialog open={confirmOpen} onOpenChange={(o) => !saving && setConfirmOpen(o)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Guardar y recalcular resultados</AlertDialogTitle>
+            <AlertDialogDescription>
+              Se guardarán los niveles de este instrumento y se recalcularán los resultados de
+              todas las evaluaciones que lo hayan usado, en todos los colegios. Los gráficos de
+              resultados pasarán a reflejar estos cortes. La operación puede tardar unos segundos.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={saving}>Cancelar</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={(e) => {
+                e.preventDefault();
+                confirmSave();
+              }}
+              disabled={saving}
+            >
+              {saving ? 'Guardando…' : 'Guardar y recalcular'}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

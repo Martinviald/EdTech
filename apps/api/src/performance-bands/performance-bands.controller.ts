@@ -1,9 +1,10 @@
-import { Body, Controller, Get, Param, Put, Query, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post, Put, Query, UseGuards } from '@nestjs/common';
 import {
   PERFORMANCE_BANDS_ADMIN_ROLES,
   performanceBandListQuerySchema,
   upsertInstrumentBandsSchema,
   type PerformanceBandListResponse,
+  type RecalculateInstrumentBandsResponse,
 } from '@soe/types';
 import { Roles } from '../common/decorators/roles.decorator';
 import { RolesGuard } from '../common/guards/roles.guard';
@@ -36,5 +37,17 @@ export class PerformanceBandsController {
   ): Promise<PerformanceBandListResponse> {
     const dto = upsertInstrumentBandsSchema.parse(body);
     return this.service.upsertInstrumentBands(instrumentId, dto);
+  }
+
+  /**
+   * POST /api/instruments/:instrumentId/performance-bands/recalculate — recalcula
+   * los resultados de todas las evaluaciones (todos los colegios) que usan el
+   * instrumento, para reflejar las bandas recién guardadas en sus gráficos.
+   */
+  @Post('instruments/:instrumentId/performance-bands/recalculate')
+  recalculate(
+    @Param('instrumentId') instrumentId: string,
+  ): Promise<RecalculateInstrumentBandsResponse> {
+    return this.service.recalculateInstrument(instrumentId);
   }
 }

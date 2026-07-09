@@ -4,9 +4,11 @@ import { instruments, performanceBands } from '@soe/db';
 import type {
   PerformanceBandListResponse,
   PerformanceBandResponseModel,
+  RecalculateInstrumentBandsResponse,
   UpsertInstrumentBandsDto,
 } from '@soe/types';
 import { InjectDb, type Database } from '../database/database.types';
+import { AssessmentResultsService } from '../assessment-results/assessment-results.service';
 
 /**
  * Gestión de los niveles/umbrales de logro (performance_bands) por instrumento.
@@ -30,7 +32,20 @@ import { InjectDb, type Database } from '../database/database.types';
  */
 @Injectable()
 export class PerformanceBandsService {
-  constructor(@InjectDb() private readonly db: Database) {}
+  constructor(
+    @InjectDb() private readonly db: Database,
+    private readonly assessmentResults: AssessmentResultsService,
+  ) {}
+
+  /**
+   * Recalcula los resultados de todas las evaluaciones (de todos los colegios)
+   * que usan el instrumento, para que reflejen las bandas/umbrales recién
+   * guardados. Delega en AssessmentResultsService (lógica de cálculo).
+   */
+  async recalculateInstrument(instrumentId: string): Promise<RecalculateInstrumentBandsResponse> {
+    await this.requireInstrument(instrumentId);
+    return this.assessmentResults.recalculateByInstrument(instrumentId);
+  }
 
   /** GET /api/performance-bands?instrumentId= — bandas globales del instrumento. */
   async listByInstrument(instrumentId: string): Promise<PerformanceBandListResponse> {

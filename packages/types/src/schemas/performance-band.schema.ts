@@ -114,6 +114,14 @@ export type PerformanceBandListResponse = {
   total: number;
 };
 
+// Resultado del recálculo cross-tenant disparado al guardar bandas de un
+// instrumento: cuántas evaluaciones/colegios/alumnos se reprocesaron.
+export type RecalculateInstrumentBandsResponse = {
+  assessmentsRecalculated: number;
+  orgsAffected: number;
+  studentsProcessed: number;
+};
+
 // Vista mínima de una banda para adjuntar a un resultado (assessment/skill) y
 // que la UI muestre el nivel real del instrumento (ej. DIA I/II/III) en lugar
 // del enum legacy de 4 niveles. `null` en el resultado → usar el enum legacy.

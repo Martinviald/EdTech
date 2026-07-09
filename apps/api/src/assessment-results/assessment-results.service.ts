@@ -12,6 +12,7 @@ import {
   instruments,
   itemTaxonomyTags,
   items,
+  organizations,
   performanceBands,
   responses,
   skillResults,
@@ -115,98 +116,160 @@ export class AssessmentResultsService {
         dto.gradingScaleId,
       );
 
-      const responseRows = await tx
-        .select({
-          studentId: responses.studentId,
-          itemId: responses.itemId,
-          isCorrect: responses.isCorrect,
-          rawScore: responses.rawScore,
-          finalScore: responses.finalScore,
-          maxScore: responses.maxScore,
-          itemPosition: items.position,
-        })
-        .from(responses)
-        .innerJoin(items, eq(items.id, responses.itemId))
-        .where(eq(responses.assessmentId, assessmentId));
+      return this.computeAndPersist(tx, assessmentId, assessment.instrumentId, scale);
+    });
+  }
 
-      if (responseRows.length === 0) {
-        return {
-          assessmentId,
-          resultsCreated: 0,
-          resultsUpdated: 0,
-          skillResultsCreated: 0,
-          skillResultsUpdated: 0,
-          studentsProcessed: 0,
-        };
-      }
+  /**
+   * Núcleo del recálculo (compute + delete + reinsert) de un assessment. Puro
+   * respecto a auth/scope: asume que el caller ya validó permisos y que `tx`
+   * corre en el `withOrgContext` de la org dueña del assessment (RLS activo).
+   * Reutilizado por `calculate` (path de usuario) y `recalculateByInstrument`
+   * (path platform_admin cross-tenant).
+   */
+  private async computeAndPersist(
+    tx: Database,
+    assessmentId: string,
+    instrumentId: string,
+    scale: GradingScaleParams,
+  ): Promise<CalculateAssessmentResultsResponse> {
+    const responseRows = await tx
+      .select({
+        studentId: responses.studentId,
+        itemId: responses.itemId,
+        isCorrect: responses.isCorrect,
+        rawScore: responses.rawScore,
+        finalScore: responses.finalScore,
+        maxScore: responses.maxScore,
+        itemPosition: items.position,
+      })
+      .from(responses)
+      .innerJoin(items, eq(items.id, responses.itemId))
+      .where(eq(responses.assessmentId, assessmentId));
 
-      const tagsByItemId = await this.loadTagsByItemId(
-        tx,
-        Array.from(new Set(responseRows.map((r) => r.itemId))),
-      );
-
-      // Bandas de logro del instrumento (fuente de verdad del nivel por
-      // instrumento). Corre dentro de withOrgContext → RLS trae globales + org.
-      const bands = await loadInstrumentBands(tx, assessment.instrumentId);
-
-      const computed = toResponseForCalculation(responseRows, tagsByItemId);
-      const studentAggregates = aggregateStudentResults(computed, scale, bands);
-      const skillAggregates = aggregateSkillResults(computed, scale, bands);
-
-      // Cuántos resultados previos había — define created vs updated.
-      const [{ priorResults, priorSkillResults }] = await tx
-        .select({
-          priorResults: sql<number>`(select count(*)::int from ${assessmentResults} where ${assessmentResults.assessmentId} = ${assessmentId})`,
-          priorSkillResults: sql<number>`(select count(*)::int from ${skillResults} where ${skillResults.assessmentId} = ${assessmentId})`,
-        })
-        .from(sql`(values (1)) as _`);
-
-      // Recálculo = delete + reinsert. Las tablas no tienen deletedAt.
-      await tx.delete(assessmentResults).where(eq(assessmentResults.assessmentId, assessmentId));
-      await tx.delete(skillResults).where(eq(skillResults.assessmentId, assessmentId));
-
-      if (studentAggregates.length > 0) {
-        const now = new Date();
-        await tx.insert(assessmentResults).values(
-          studentAggregates.map((a) => ({
-            assessmentId,
-            studentId: a.studentId,
-            totalScore: a.totalScore.toFixed(2),
-            maxScore: a.maxScore.toFixed(2),
-            percentage: (a.percentage * 100).toFixed(2),
-            grade: a.grade.toFixed(2),
-            performanceBandId: a.performanceBandId ?? null,
-            performanceLevel: a.performanceLevel,
-            isComplete: a.isComplete,
-            completedAt: a.isComplete ? now : null,
-          })),
-        );
-      }
-
-      if (skillAggregates.length > 0) {
-        await tx.insert(skillResults).values(
-          skillAggregates.map((a) => ({
-            assessmentId,
-            studentId: a.studentId,
-            nodeId: a.nodeId,
-            correctCount: a.correctCount,
-            totalCount: a.totalCount,
-            percentage: (a.percentage * 100).toFixed(2),
-            performanceBandId: a.performanceBandId ?? null,
-            performanceLevel: a.performanceLevel,
-          })),
-        );
-      }
-
+    if (responseRows.length === 0) {
       return {
         assessmentId,
-        resultsCreated: Math.max(0, studentAggregates.length - priorResults),
-        resultsUpdated: Math.min(priorResults, studentAggregates.length),
-        skillResultsCreated: Math.max(0, skillAggregates.length - priorSkillResults),
-        skillResultsUpdated: Math.min(priorSkillResults, skillAggregates.length),
-        studentsProcessed: studentAggregates.length,
+        resultsCreated: 0,
+        resultsUpdated: 0,
+        skillResultsCreated: 0,
+        skillResultsUpdated: 0,
+        studentsProcessed: 0,
       };
-    });
+    }
+
+    const tagsByItemId = await this.loadTagsByItemId(
+      tx,
+      Array.from(new Set(responseRows.map((r) => r.itemId))),
+    );
+
+    // Bandas de logro del instrumento (fuente de verdad del nivel por
+    // instrumento). Corre dentro de withOrgContext → RLS trae globales + org.
+    const bands = await loadInstrumentBands(tx, instrumentId);
+
+    const computed = toResponseForCalculation(responseRows, tagsByItemId);
+    const studentAggregates = aggregateStudentResults(computed, scale, bands);
+    const skillAggregates = aggregateSkillResults(computed, scale, bands);
+
+    // Cuántos resultados previos había — define created vs updated.
+    const [{ priorResults, priorSkillResults }] = await tx
+      .select({
+        priorResults: sql<number>`(select count(*)::int from ${assessmentResults} where ${assessmentResults.assessmentId} = ${assessmentId})`,
+        priorSkillResults: sql<number>`(select count(*)::int from ${skillResults} where ${skillResults.assessmentId} = ${assessmentId})`,
+      })
+      .from(sql`(values (1)) as _`);
+
+    // Recálculo = delete + reinsert. Las tablas no tienen deletedAt.
+    await tx.delete(assessmentResults).where(eq(assessmentResults.assessmentId, assessmentId));
+    await tx.delete(skillResults).where(eq(skillResults.assessmentId, assessmentId));
+
+    if (studentAggregates.length > 0) {
+      const now = new Date();
+      await tx.insert(assessmentResults).values(
+        studentAggregates.map((a) => ({
+          assessmentId,
+          studentId: a.studentId,
+          totalScore: a.totalScore.toFixed(2),
+          maxScore: a.maxScore.toFixed(2),
+          percentage: (a.percentage * 100).toFixed(2),
+          grade: a.grade.toFixed(2),
+          performanceBandId: a.performanceBandId ?? null,
+          performanceLevel: a.performanceLevel,
+          isComplete: a.isComplete,
+          completedAt: a.isComplete ? now : null,
+        })),
+      );
+    }
+
+    if (skillAggregates.length > 0) {
+      await tx.insert(skillResults).values(
+        skillAggregates.map((a) => ({
+          assessmentId,
+          studentId: a.studentId,
+          nodeId: a.nodeId,
+          correctCount: a.correctCount,
+          totalCount: a.totalCount,
+          percentage: (a.percentage * 100).toFixed(2),
+          performanceBandId: a.performanceBandId ?? null,
+          performanceLevel: a.performanceLevel,
+        })),
+      );
+    }
+
+    return {
+      assessmentId,
+      resultsCreated: Math.max(0, studentAggregates.length - priorResults),
+      resultsUpdated: Math.min(priorResults, studentAggregates.length),
+      skillResultsCreated: Math.max(0, skillAggregates.length - priorSkillResults),
+      skillResultsUpdated: Math.min(priorSkillResults, skillAggregates.length),
+      studentsProcessed: studentAggregates.length,
+    };
+  }
+
+  /**
+   * Recalcula los resultados de TODOS los assessments (de todas las orgs) que
+   * usan un instrumento. Operación de plataforma (gate platform_admin en el
+   * caller): se dispara al cambiar las bandas/umbrales de un instrumento para que
+   * los gráficos de todos los colegios que rindieron esa evaluación reflejen los
+   * nuevos cortes.
+   *
+   * Recorre org por org dentro de `withOrgContext` (RLS aísla cada tenant). Las
+   * `organizations` no tienen RLS, así que se enumeran directamente.
+   */
+  async recalculateByInstrument(
+    instrumentId: string,
+  ): Promise<{ assessmentsRecalculated: number; orgsAffected: number; studentsProcessed: number }> {
+    const orgs = await this.db.select({ id: organizations.id }).from(organizations);
+
+    let assessmentsRecalculated = 0;
+    let studentsProcessed = 0;
+    let orgsAffected = 0;
+
+    for (const org of orgs) {
+      const summary = await withOrgContext(this.db, org.id, async (tx) => {
+        const rows = await tx
+          .select({ id: assessments.id })
+          .from(assessments)
+          .where(and(eq(assessments.instrumentId, instrumentId), eq(assessments.orgId, org.id)));
+        if (rows.length === 0) return { assessments: 0, students: 0 };
+
+        const scale = await this.resolveInstrumentScaleOrDefault(tx, instrumentId);
+        let students = 0;
+        for (const a of rows) {
+          const res = await this.computeAndPersist(tx, a.id, instrumentId, scale);
+          students += res.studentsProcessed;
+        }
+        return { assessments: rows.length, students };
+      });
+
+      if (summary.assessments > 0) {
+        orgsAffected += 1;
+        assessmentsRecalculated += summary.assessments;
+        studentsProcessed += summary.students;
+      }
+    }
+
+    return { assessmentsRecalculated, orgsAffected, studentsProcessed };
   }
 
   // ───────────────────────────────────────────────────────────────────────────
@@ -669,6 +732,17 @@ export class AssessmentResultsService {
       }
     }
 
+    return this.resolveInstrumentScaleOrDefault(tx, instrumentId);
+  }
+
+  /**
+   * Escala del instrumento (o default linear_chilean) sin depender de un `user`
+   * ni de un scale solicitado. Usado por el recálculo cross-tenant.
+   */
+  private async resolveInstrumentScaleOrDefault(
+    tx: Database,
+    instrumentId: string,
+  ): Promise<GradingScaleParams> {
     const [instrument] = await tx
       .select({ gradingScaleId: instruments.gradingScaleId })
       .from(instruments)
