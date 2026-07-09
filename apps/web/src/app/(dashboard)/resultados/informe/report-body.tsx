@@ -29,7 +29,6 @@ import { SummaryCard } from '../components/summary-card';
 import {
   bandLabel,
   formatAchievement,
-  performanceLevelLabel,
   PERFORMANCE_LEVEL_BAR_CLASS,
 } from '../components/performance-level';
 import { ReportExportButton } from './report-export-button';
