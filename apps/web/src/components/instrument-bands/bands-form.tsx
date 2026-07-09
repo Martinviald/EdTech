@@ -9,16 +9,26 @@ import { Input } from '@/components/ui/input';
 import { cn } from '@/lib/utils';
 import { upsertInstrumentBandsAction } from './actions';
 
-// Rampa "semáforo" con la paleta de la plataforma (Tailwind red/orange/amber/
-// emerald-500, la misma familia que PERFORMANCE_LEVEL_CHART_COLOR): de menor a
-// mayor logro. Se usa como propuesta automática de color; el usuario puede
-// sobrescribir cada nivel.
+// Paleta de niveles de la plataforma (los mismos colores de la distribución de
+// resultados: PERFORMANCE_LEVEL_CHART_COLOR): rojo → ámbar → esmeralda → azul,
+// de menor a mayor logro. Se usa como propuesta automática de color; el usuario
+// puede sobrescribir cada nivel.
 const RAMP: readonly [number, number, number][] = [
-  [239, 68, 68], // red-500
-  [249, 115, 22], // orange-500
-  [245, 158, 11], // amber-500
-  [16, 185, 129], // emerald-500
+  [239, 68, 68], // red-500      · Insuficiente
+  [245, 158, 11], // amber-500   · Elemental
+  [16, 185, 129], // emerald-500 · Adecuado
+  [59, 130, 246], // blue-500    · Avanzado
 ];
+
+// Presets discretos para pocos niveles, para que reproduzcan exactamente la
+// paleta de la plataforma (4 niveles = igual a la distribución de resultados;
+// 3 niveles = rojo/ámbar/verde, como DIA I/II/III). Para 5-6 niveles se
+// interpola sobre la rampa.
+const PALETTE_BY_N: Record<number, readonly string[]> = {
+  2: ['#ef4444', '#10b981'],
+  3: ['#ef4444', '#f59e0b', '#10b981'],
+  4: ['#ef4444', '#f59e0b', '#10b981', '#3b82f6'],
+};
 
 function rampColor(t: number): string {
   const clamped = Math.max(0, Math.min(1, t));
@@ -29,6 +39,13 @@ function rampColor(t: number): string {
     Math.round(RAMP[i]![k]! + (RAMP[i + 1]![k]! - RAMP[i]![k]!) * f),
   );
   return '#' + c.map((x) => x.toString(16).padStart(2, '0')).join('');
+}
+
+/** Color propuesto para el nivel `i` de un set de `n` niveles. */
+function autoColor(i: number, n: number): string {
+  const preset = PALETTE_BY_N[n];
+  if (preset) return preset[i]!;
+  return rampColor(n <= 1 ? 0 : i / (n - 1));
 }
 
 type Level = { label: string; color: string; colorAuto: boolean };
@@ -76,7 +93,7 @@ export function BandsForm({
     i === n - 1 ? 1 : cuts[i]!,
   ];
   const colorAt = (i: number): string =>
-    levels[i]!.colorAuto ? rampColor(n === 1 ? 0.5 : i / (n - 1)) : levels[i]!.color;
+    levels[i]!.colorAuto ? autoColor(i, n) : levels[i]!.color;
 
   // ── mutaciones de cortes ──────────────────────────────────────────────────
   function setCut(j: number, val: number) {
