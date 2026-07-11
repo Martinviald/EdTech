@@ -72,3 +72,40 @@
     @apply bg-background text-foreground;
   }
 }
+
+/*
+ * Impresión limpia (TKT-17): al imprimir se oculta todo el shell del dashboard
+ * (sidebar, topbar, toolbars) usando el patrón `visibility` y se muestra sólo la
+ * región marcada con `.print-region`. Los controles interactivos que no deben
+ * aparecer en papel llevan `.no-print`. No requiere tocar el layout del dashboard.
+ */
+@media print {
+  html,
+  body {
+    height: auto !important;
+    overflow: visible !important;
+    background: #fff !important;
+  }
+  #main-content {
+    height: auto !important;
+    overflow: visible !important;
+    padding: 0 !important;
+  }
+  body * {
+    visibility: hidden !important;
+  }
+  .print-region,
+  .print-region * {
+    visibility: visible !important;
+  }
+  .print-region {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    padding: 0;
+  }
+  .no-print {
+    display: none !important;
+  }
+}

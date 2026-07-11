@@ -2,74 +2,88 @@
 
 import { useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
-import { Check, Loader2, Pencil, Undo2, X } from 'lucide-react';
+import { Check, Loader2, Pencil, Save, Undo2, X } from 'lucide-react';
 import {
   remedialGuideContentSchema,
   remedialPracticeContentSchema,
   remedialPlanContentSchema,
+  validateRemedialContent,
   type RemedialContent,
-  type RemedialGuideContent,
   type RemedialMaterialModel,
 } from '@soe/types';
 import { Button } from '@/components/ui/button';
 import { AlertCallout } from '@/components/patterns';
-import { reviewRemedial } from '../actions';
+import { reviewRemedial, updateRemedialContent } from '../actions';
 import { AI_DISCLAIMER } from './labels';
-import { GuideView } from './guide-view';
+import { ContentDisplay } from './content-display';
 import { GuideEditor } from './guide-editor';
-import { PracticeView } from './practice-view';
-import { PlanView } from './plan-view';
+import { PracticeEditor } from './practice-editor';
+import { PlanEditor } from './plan-editor';
 
 interface ReviewPanelProps {
   material: RemedialMaterialModel;
+  /** Contenido EFECTIVO (editedContent ?? content), ya validado por tipo. */
   content: RemedialContent;
   canApprove: boolean;
 }
 
-function isGuide(
-  type: RemedialMaterialModel['type'],
-  content: RemedialContent,
-): content is RemedialGuideContent {
-  return type === 'guide' && remedialGuideContentSchema.safeParse(content).success;
-}
-
 /**
- * Vista de revisión (estado `ready`, H9.5): muestra el contenido por tipo, permite
- * editar la guía antes de aprobar, y ofrece aprobar/descartar. La IA propone; el
- * humano ajusta y aprueba. Las acciones las autoriza el guard del endpoint
- * (`REMEDIAL_APPROVER_ROLES`); aquí se ocultan si el usuario no puede aprobar.
+ * Vista de revisión (estado `ready`, H9.5 + TKT-17 c): muestra el contenido
+ * efectivo por tipo, permite editar TODOS los tipos (guía / set de práctica /
+ * plan por grupo) antes de aprobar y persistir el override con `PATCH
+ * /remedial/:id` (§8.3: la edición va a `editedContent`, la evidencia IA
+ * `content` queda intacta), y ofrece aprobar/descartar. Las acciones las autoriza
+ * el guard del endpoint (`REMEDIAL_APPROVER_ROLES`); aquí se ocultan si el usuario
+ * no puede aprobar.
  */
 export function ReviewPanel({ material, content, canApprove }: ReviewPanelProps) {
   const router = useRouter();
-  const guideContent = isGuide(material.type, content) ? content : null;
 
   const [editing, setEditing] = useState(false);
-  const [draft, setDraft] = useState<RemedialGuideContent | null>(guideContent);
+  const [draft, setDraft] = useState<RemedialContent>(content);
+  const [isSaving, startSave] = useTransition();
   const [isApproving, startApprove] = useTransition();
   const [isDiscarding, startDiscard] = useTransition();
   const [error, setError] = useState<string | null>(null);
 
-  const busy = isApproving || isDiscarding;
+  const busy = isSaving || isApproving || isDiscarding;
+
+  function startEditing() {
+    setError(null);
+    setDraft(content);
+    setEditing(true);
+  }
+
+  function cancelEditing() {
+    setError(null);
+    setDraft(content);
+    setEditing(false);
+  }
+
+  function handleSave() {
+    setError(null);
+    startSave(async () => {
+      try {
+        // Validamos el override por tipo antes de persistirlo.
+        const validated = validateRemedialContent(material.type, draft);
+        await updateRemedialContent({ materialId: material.id, content: validated });
+        setEditing(false);
+        router.refresh();
+      } catch (err) {
+        setError(
+          err instanceof Error
+            ? err.message
+            : 'El material editado tiene campos inválidos. Revísalo antes de guardar.',
+        );
+      }
+    });
+  }
 
   function handleApprove() {
     setError(null);
     startApprove(async () => {
       try {
-        // Si se editó la guía, validamos el override antes de enviarlo.
-        let edited: RemedialContent | undefined;
-        if (editing && draft) {
-          const parsed = remedialGuideContentSchema.safeParse(draft);
-          if (!parsed.success) {
-            setError('La guía editada tiene campos inválidos. Revísala antes de aprobar.');
-            return;
-          }
-          edited = parsed.data;
-        }
-        await reviewRemedial({
-          materialId: material.id,
-          action: 'approve',
-          content: edited,
-        });
+        await reviewRemedial({ materialId: material.id, action: 'approve' });
         router.refresh();
       } catch (err) {
         setError(err instanceof Error ? err.message : 'No se pudo aprobar el material.');
@@ -89,48 +103,50 @@ export function ReviewPanel({ material, content, canApprove }: ReviewPanelProps)
     });
   }
 
-  function renderContent() {
-    if (guideContent) {
-      if (editing && draft) {
-        return <GuideEditor value={draft} onChange={setDraft} disabled={busy} />;
+  function renderEditor() {
+    switch (material.type) {
+      case 'guide': {
+        const parsed = remedialGuideContentSchema.safeParse(draft);
+        if (!parsed.success) break;
+        return <GuideEditor value={parsed.data} onChange={setDraft} disabled={busy} />;
       }
-      return <GuideView content={guideContent} />;
+      case 'practice_set': {
+        const parsed = remedialPracticeContentSchema.safeParse(draft);
+        if (!parsed.success) break;
+        return <PracticeEditor value={parsed.data} onChange={setDraft} disabled={busy} />;
+      }
+      case 'group_plan': {
+        const parsed = remedialPlanContentSchema.safeParse(draft);
+        if (!parsed.success) break;
+        return <PlanEditor value={parsed.data} onChange={setDraft} disabled={busy} />;
+      }
     }
-    // Narrowing por schema (el content ya viene validado por tipo desde el servidor).
-    const practice = remedialPracticeContentSchema.safeParse(content);
-    if (practice.success) return <PracticeView content={practice.data} />;
-    const plan = remedialPlanContentSchema.safeParse(content);
-    if (plan.success) return <PlanView content={plan.data} />;
     return (
       <AlertCallout tone="danger">
-        El contenido del material tiene un formato inesperado.
+        El contenido del material tiene un formato inesperado y no puede editarse.
       </AlertCallout>
     );
   }
 
   return (
     <div className="space-y-4">
-      <AlertCallout tone="warning" title="Sugerencia IA — validar antes de aprobar">
+      <AlertCallout
+        tone="warning"
+        title="Sugerencia IA — validar antes de aprobar"
+        className="no-print"
+      >
         {AI_DISCLAIMER}
       </AlertCallout>
 
-      {canApprove && guideContent ? (
-        <div className="flex justify-end">
+      {canApprove ? (
+        <div className="flex justify-end no-print">
           {editing ? (
-            <Button
-              variant="ghost"
-              size="sm"
-              disabled={busy}
-              onClick={() => {
-                setEditing(false);
-                setDraft(guideContent);
-              }}
-            >
+            <Button variant="ghost" size="sm" disabled={busy} onClick={cancelEditing}>
               <Undo2 className="size-4" aria-hidden />
               Cancelar edición
             </Button>
           ) : (
-            <Button variant="outline" size="sm" disabled={busy} onClick={() => setEditing(true)}>
+            <Button variant="outline" size="sm" disabled={busy} onClick={startEditing}>
               <Pencil className="size-4" aria-hidden />
               Editar
             </Button>
@@ -138,32 +154,50 @@ export function ReviewPanel({ material, content, canApprove }: ReviewPanelProps)
         </div>
       ) : null}
 
-      {renderContent()}
+      {editing ? renderEditor() : <ContentDisplay content={content} />}
 
-      {error ? <AlertCallout tone="danger">{error}</AlertCallout> : null}
+      {error ? (
+        <AlertCallout tone="danger" className="no-print">
+          {error}
+        </AlertCallout>
+      ) : null}
 
       {canApprove ? (
-        <div className="flex flex-col gap-2 sm:flex-row sm:justify-end">
-          <Button variant="secondary" disabled={busy} onClick={handleDiscard}>
-            {isDiscarding ? (
-              <Loader2 className="size-4 animate-spin" aria-hidden />
-            ) : (
-              <X className="size-4" aria-hidden />
-            )}
-            Descartar
-          </Button>
-          <Button disabled={busy} onClick={handleApprove}>
-            {isApproving ? (
-              <Loader2 className="size-4 animate-spin" aria-hidden />
-            ) : (
-              <Check className="size-4" aria-hidden />
-            )}
-            {editing ? 'Aprobar con cambios' : 'Aprobar'}
-          </Button>
+        <div className="flex flex-col gap-2 no-print sm:flex-row sm:justify-end">
+          {editing ? (
+            <Button disabled={busy} onClick={handleSave}>
+              {isSaving ? (
+                <Loader2 className="size-4 animate-spin" aria-hidden />
+              ) : (
+                <Save className="size-4" aria-hidden />
+              )}
+              Guardar cambios
+            </Button>
+          ) : (
+            <>
+              <Button variant="secondary" disabled={busy} onClick={handleDiscard}>
+                {isDiscarding ? (
+                  <Loader2 className="size-4 animate-spin" aria-hidden />
+                ) : (
+                  <X className="size-4" aria-hidden />
+                )}
+                Descartar
+              </Button>
+              <Button disabled={busy} onClick={handleApprove}>
+                {isApproving ? (
+                  <Loader2 className="size-4 animate-spin" aria-hidden />
+                ) : (
+                  <Check className="size-4" aria-hidden />
+                )}
+                Aprobar
+              </Button>
+            </>
+          )}
         </div>
       ) : (
-        <AlertCallout tone="info">
-          No tienes permisos para aprobar o descartar este material. Solo puedes revisarlo.
+        <AlertCallout tone="info" className="no-print">
+          No tienes permisos para editar, aprobar o descartar este material. Solo puedes
+          revisarlo.
         </AlertCallout>
       )}
     </div>

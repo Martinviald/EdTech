@@ -3,6 +3,7 @@
 import {
   generateRemedialSchema,
   reviewRemedialSchema,
+  updateRemedialSchema,
   type RemedialMaterialModel,
   type RemedialMaterialType,
   type RemedialStatus,
@@ -74,4 +75,21 @@ export async function reviewRemedial(input: {
     `/remedial/${input.materialId}/review`,
     dto,
   );
+}
+
+/**
+ * Edición humana del material en borrador (TKT-17 c): persiste el `content`
+ * editado en `editedContent` vía `PATCH /remedial/:id`, sin tocar la salida IA
+ * (`content`, evidencia §8.3). Aplica a TODOS los tipos (guide | practice_set |
+ * group_plan); el content se valida por `type` en el backend. Solo mientras el
+ * material está en `ready`. La autorización efectiva la aplica el guard del
+ * endpoint (`REMEDIAL_APPROVER_ROLES`).
+ */
+export async function updateRemedialContent(input: {
+  materialId: string;
+  content: RemedialContent;
+}): Promise<RemedialMaterialModel> {
+  const dto = updateRemedialSchema.parse({ content: input.content });
+
+  return apiPatch<RemedialMaterialModel>(`/remedial/${input.materialId}`, dto);
 }

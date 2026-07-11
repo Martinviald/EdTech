@@ -11,11 +11,11 @@ import {
   REMEDIAL_APPROVER_ROLES,
   type RemedialContent,
   type RemedialMaterialModel,
+  type RemedialStudentMaterialModel,
 } from '@soe/types';
 import { PageContainer, PageHeader, EmptyState, AlertCallout, StatusBadge } from '@/components/patterns';
 import { RemedialPoller } from '../components/remedial-poller';
-import { ReviewPanel } from '../components/review-panel';
-import { ContentDisplay } from '../components/content-display';
+import { RemedialMaterialView } from '../components/remedial-material-view';
 import {
   REMEDIAL_STATUS_LABELS,
   REMEDIAL_STATUS_TONE,
@@ -111,8 +111,10 @@ export default async function MaterialRemedialDetailPage({
     );
   }
 
-  // ready/approved/discarded: validar el content con el schema por tipo.
-  if (!material.content) {
+  // ready/approved/discarded: renderizar el contenido EFECTIVO (§8.3: la edición
+  // humana vive en `editedContent`; la salida IA en `content` es evidencia inmutable).
+  const effectiveContent = material.editedContent ?? material.content;
+  if (!effectiveContent) {
     return (
       <PageContainer>
         {backLink}
@@ -124,7 +126,7 @@ export default async function MaterialRemedialDetailPage({
 
   let content: RemedialContent;
   try {
-    content = validateRemedialContent(material.type, material.content);
+    content = validateRemedialContent(material.type, effectiveContent);
   } catch {
     return (
       <PageContainer>
@@ -137,32 +139,26 @@ export default async function MaterialRemedialDetailPage({
     );
   }
 
-  // ready → flujo de revisión (editar / aprobar / descartar).
-  if (material.status === 'ready') {
-    return (
-      <PageContainer>
-        {backLink}
-        {header}
-        <ReviewPanel material={material} content={content} canApprove={canApprove} />
-      </PageContainer>
-    );
+  // Versión estudiante (TKT-17 b): mismo material, render sin la información
+  // solo-profesor. Se deriva en backend desde el content efectivo.
+  let studentMaterial: RemedialStudentMaterialModel | null = null;
+  try {
+    studentMaterial = await apiGet<RemedialStudentMaterialModel>(`/remedial/${id}/student`);
+  } catch {
+    studentMaterial = null;
   }
 
-  // approved / discarded → solo lectura con banner de estado.
   return (
     <PageContainer>
       {backLink}
       {header}
-      {material.status === 'approved' ? (
-        <AlertCallout tone="success" title="Material aprobado">
-          Este material fue revisado y aprobado por un responsable.
-        </AlertCallout>
-      ) : (
-        <AlertCallout tone="warning" title="Material descartado">
-          Este material fue descartado y no se usará en aula.
-        </AlertCallout>
-      )}
-      <ContentDisplay content={content} />
+      <RemedialMaterialView
+        material={material}
+        teacherContent={content}
+        studentContent={studentMaterial?.content ?? null}
+        canApprove={canApprove}
+        title={title}
+      />
     </PageContainer>
   );
 }
