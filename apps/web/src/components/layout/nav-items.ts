@@ -271,6 +271,14 @@ export const ADMIN_NAV_ITEMS: readonly NavItem[] = [
     requiresPlatformAdmin: true,
   },
   {
+    href: '/admin/instrumentos',
+    label: 'Instrumentos oficiales',
+    icon: Library,
+    status: 'live',
+    roles: ['platform_admin'],
+    requiresPlatformAdmin: true,
+  },
+  {
     href: '/admin/equipo',
     label: 'Equipo plataforma',
     icon: ShieldCheck,
