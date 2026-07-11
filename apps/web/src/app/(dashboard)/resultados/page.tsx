@@ -1,11 +1,5 @@
 import { redirect } from 'next/navigation';
-import {
-  BarChart3,
-  GraduationCap,
-  ClipboardList,
-  TriangleAlert,
-  Inbox,
-} from 'lucide-react';
+import { BarChart3, GraduationCap, ClipboardList, TriangleAlert, Inbox } from 'lucide-react';
 import { auth } from '@/auth';
 import { apiGet } from '@/lib/api';
 import {
@@ -18,12 +12,7 @@ import {
   type DashboardAssessmentSummary,
 } from '@soe/types';
 import { PageContainer, PageHeader, EmptyState } from '@/components/patterns';
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import {
   Table,
   TableBody,
@@ -33,10 +22,7 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { DashboardFilterBar } from './components/dashboard-filter-bar';
-import {
-  parseDashboardFilters,
-  buildDashboardQuery,
-} from './components/dashboard-filters';
+import { parseDashboardFilters, buildDashboardQuery } from './components/dashboard-filters';
 import { SummaryCard } from './components/summary-card';
 import { DistributionBar } from './components/distribution-bar';
 import { ResultadosNav } from './components/resultados-nav';
@@ -77,7 +63,7 @@ export default async function ResultadosOverviewPage({
   return (
     <PageContainer>
       <PageHeader
-        title="Resultados"
+        title="Panorama pedagógico"
         description={
           overview.scope === 'teacher'
             ? 'Panorama de tus cursos asignados: logro, evaluaciones y alertas.'
@@ -156,11 +142,7 @@ function AlertsSection({ alerts }: { alerts: DashboardAlert[] }) {
   );
 }
 
-function RecentAssessments({
-  assessments,
-}: {
-  assessments: DashboardAssessmentSummary[];
-}) {
+function RecentAssessments({ assessments }: { assessments: DashboardAssessmentSummary[] }) {
   return (
     <Card>
       <CardHeader>
@@ -195,9 +177,7 @@ function RecentAssessments({
                         {[a.subjectName, a.gradeName].filter(Boolean).join(' · ')}
                       </span>
                     </TableCell>
-                    <TableCell className="hidden md:table-cell">
-                      {a.subjectName ?? '—'}
-                    </TableCell>
+                    <TableCell className="hidden md:table-cell">{a.subjectName ?? '—'}</TableCell>
                     <TableCell className="hidden md:table-cell">{a.gradeName ?? '—'}</TableCell>
                     <TableCell className="hidden sm:table-cell">
                       {formatDate(a.administeredAt)}
@@ -262,7 +242,9 @@ function TeacherKpisSection({ kpis }: { kpis: DashboardTeacherKpisResponse }) {
                       {formatAchievement(c.passingRate)}
                     </TableCell>
                     <TableCell className="text-right">
-                      <span className={c.criticalStudents > 0 ? 'font-medium text-destructive' : ''}>
+                      <span
+                        className={c.criticalStudents > 0 ? 'font-medium text-destructive' : ''}
+                      >
                         {c.criticalStudents}
                       </span>
                     </TableCell>

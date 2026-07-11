@@ -13,7 +13,7 @@ import {
   ITEM_BANK_ROLES,
   type InstrumentModel,
 } from '@soe/types';
-import { InstrumentCard } from './InstrumentCard';
+import { InstrumentRow } from './InstrumentRow';
 import { InstrumentFilters } from './InstrumentFilters';
 
 type InstrumentListResponse = {
@@ -84,9 +84,9 @@ export default async function BancoItemsPage({ searchParams }: PageProps) {
         />
       ) : (
         <>
-          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+          <div className="divide-y overflow-hidden rounded-lg border">
             {instruments.map((instrument) => (
-              <InstrumentCard key={instrument.id} instrument={instrument} />
+              <InstrumentRow key={instrument.id} instrument={instrument} />
             ))}
           </div>
           {total > 20 && (
