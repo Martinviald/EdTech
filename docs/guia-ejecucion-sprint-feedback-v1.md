@@ -156,15 +156,16 @@ Se marca a medida que avanzamos. Estados: ⬜ pendiente · 🟡 en curso · ✅ 
 - [x] ✅ P0 — Crear rama+worktree `sprint-feedback-v1` desde `dev` *(worktree en `../sprint-feedback-v1`, commit `c6eb570` con plan+guía)*
 
 ### Stream FRONT (serial)
-- [x] ✅ FRONT-1 — Terminología (TKT-01, 02, 03, 05, 06, 07) *(typecheck + lint OK; helper `lib/taxonomy-labels.ts`)*
-- [ ] ⬜ FRONT-2 — Interacción (TKT-08, 10, 11, 13, 18 + consumo de contratos 09/12)
+- [x] ✅ FRONT-1 — Terminología (TKT-01, 02, 03, 05, 06, 07) *(typecheck + lint OK; helper `lib/taxonomy-labels.ts`; mergeado a `dev` `3dae945`)*
+- [ ] 🟡 FRONT-2a — Pure-front (TKT-08 listas, 13 textos colapsable, 18 renombrar) *(agente en rama `front-2a`)*
+- [ ] ⬜ FRONT-2b — Consumo de contratos backend (TKT-09, 10, 11, 12 + follow-ups de B/C/D/E) *(tras integrar backend)*
 
 ### Backend (paralelo)
-- [ ] ⬜ Fase 0 — Contratos en `packages/types` (B, C, E) + commit
-- [ ] ⬜ BACK-B — Analytics (TKT-04, 09, 12)
-- [ ] ⬜ BACK-C — Instrumentos/PDF/spec-table (TKT-14, 15, 16)
-- [ ] ⬜ BACK-D — Remedial (TKT-17)
-- [ ] ⬜ BACK-E — Informe DIA (TKT-24, 25, 26)
+- [x] ✅ Fase 0 (adaptada) — Sin commit de contratos previo: cada agente backend define su contrato en `packages/types` (archivos separados → sin colisión) y el frontend los consume en el stream serial. Justificación: no hay agentes de frontend en paralelo durante esta fase.
+- [ ] 🟡 BACK-B — Analytics (TKT-04, 09, 12 + TKT-05 backend) *(agente en rama `back-b-analytics`)*
+- [ ] 🟡 BACK-C — Instrumentos/PDF/spec-table (TKT-14, 15, 16) *(agente en rama `back-c-instruments`)*
+- [ ] 🟡 BACK-D — Remedial (TKT-17) *(agente en rama `back-d-remedial`)*
+- [ ] 🟡 BACK-E — Informe DIA (TKT-24, 25, 26) *(agente en rama `back-e-informe-dia`)*
 
 ### Cierre
 - [ ] ⬜ Fase 3 — Auditoría de todos los streams
