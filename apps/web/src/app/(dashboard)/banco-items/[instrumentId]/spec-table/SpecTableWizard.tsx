@@ -126,7 +126,11 @@ export function SpecTableWizard({ instrumentId, taxonomies }: SpecTableWizardPro
         />
       )}
       {step === 'done' && linkResult && (
-        <DoneSection result={linkResult} onReset={handleReset} />
+        <DoneSection
+          result={linkResult}
+          onReset={handleReset}
+          instrumentId={instrumentId}
+        />
       )}
     </div>
   );
@@ -333,9 +337,11 @@ function nodeTypeLabel(type: string): string {
 function DoneSection({
   result,
   onReset,
+  instrumentId,
 }: {
   result: SpecTableLinkResponse;
   onReset: () => void;
+  instrumentId: string;
 }) {
   const linkedItems = result.linkedItems ?? [];
   const unlinkedItems = result.unlinkedItems ?? [];
@@ -472,11 +478,14 @@ function DoneSection({
         </Card>
       )}
 
-      <div className="flex justify-end">
+      <div className="flex flex-wrap justify-end gap-2">
         <Button onClick={onReset} variant="outline">
           <RotateCcw className="mr-2 h-4 w-4" />
           Subir otra tabla
         </Button>
+        <Link href={`/banco-items/${instrumentId}/spec-table` as Route}>
+          <Button>Ver tabla de especificaciones</Button>
+        </Link>
       </div>
     </div>
   );
