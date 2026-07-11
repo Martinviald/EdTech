@@ -171,15 +171,23 @@ Se marca a medida que avanzamos. Estados: ⬜ pendiente · 🟡 en curso · ✅ 
 - [x] ✅ Fase 3 — Auditoría (ligera): reportes de agentes revisados + typecheck/tests por stream
 - [x] ✅ Fase 4 — Integración de los 5 streams en `sprint-feedback-v1` (migración 0008 unificada; wiring `app.module.ts`/`nav-items.ts` vía merge; fix TKT-04 front)
 - [x] ✅ Fase 5 — Validación: build types/db ✅, typecheck api+web ✅, lint web ✅, tests api 575/591 (16 fallas = `privacy/*`, requieren DB, ajenas al sprint)
-- [ ] ⬜ FRONT-2b — Frontend serial que consume los endpoints backend (ver arriba)
-- [ ] ⬜ Merge a `dev` (con confirmación del usuario)
-- [ ] ⬜ Marcar tickets restantes en Notion + en el plan
+- [x] ✅ FRONT-2b — Frontend de los endpoints backend (integrado y validado)
+- [x] ✅ Apéndice A + benchmark viable (TKT-19, 23, 21/22) integrados
+- [ ] 🟡 Merge del sprint completo a `dev`
+- [ ] 🟡 Marcar tickets en Notion + en el plan
 
-**Estado de tickets tras integración:**
-- ✅ Completos (backend+front): TKT-01,02,03,04,05,06,07,08,18
-- 🏗️ Backend listo, falta frontend (FRONT-2b): TKT-09,11,12,14,15,16,17,24,25,26 · TKT-10 drill-down
-- 🚫 Bloqueado: TKT-13 (dependencia motor remedial)
-- 🗿 Diferidos: TKT-19,20,23 + parte "muestra" de 21/22
+**Estado de tickets tras integración (final):**
+- ✅ Completos (backend+front, integrados y validados): TKT-01→12, 14, 15, 16, 17, 18, **19** (asistente edita ítems), **21** (histórico propio), **22** (% colegio), **23** (diagnóstico IA), 24, 25, 26
+- 🚫 No construible por dependencia real (fuera del alcance posible hoy):
+  - **TKT-13** — depende del picker de textos del motor remedial (ausente en la base del sprint)
+  - **TKT-20** y la parte "muestra de colegios" de **21/22** — no hay pool de datos multi-colegio (contrato ya estructurado con el hueco `references.sample` para sumarlo cuando exista)
+
+### Apéndice A + benchmark viable (integrados)
+- [x] ✅ TKT-19 — Asistente propone ediciones de ítems (§8.3) *(rama `feat-tkt19-asistente-edita-items`, tabla `item_edit_proposals` + RLS, migración 0009)*
+- [x] ✅ TKT-23 — Diagnóstico IA de instrumentos comparables *(rama `feat-tkt23-diagnostico-ia-instrumentos`, reusa `ai_analyses`, async, gemini-2.5-pro)*
+- [x] ✅ TKT-21/22 (viable) — % colegio por pregunta + `MetricComparison` vs histórico propio *(rama `feat-tkt21-22-historico-colegio`)*
+
+**Validación final:** migraciones 0008 (unificada) + 0009 secuenciales; build types/db + typecheck api/web + lint web limpios; tests api 587/603 (16 fallas = `privacy/*`, requieren DB real, ajenas al sprint).
 
 ### Diferidos (no ejecutar en esta pasada)
 - TKT-19, TKT-20, TKT-23 · parte "muestra de colegios" de TKT-21/22
