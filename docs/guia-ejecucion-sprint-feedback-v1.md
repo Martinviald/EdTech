@@ -158,7 +158,7 @@ Se marca a medida que avanzamos. Estados: ⬜ pendiente · 🟡 en curso · ✅ 
 ### Stream FRONT (serial)
 - [x] ✅ FRONT-1 — Terminología (TKT-01, 02, 03, 05, 06, 07) *(typecheck + lint OK; helper `lib/taxonomy-labels.ts`; mergeado a `dev` `3dae945`)*
 - [x] ✅ FRONT-2a — Pure-front: TKT-08 listas ✅, TKT-18 renombrar ✅. **TKT-13 BLOQUEADO** (el picker de textos remediales no está en la base del sprint; depende del motor remedial E9). *(rama `front-2a`, integrada)*
-- [ ] ⬜ FRONT-2b — Consumo de contratos backend (frontend serial): TKT-09 orden, 11 dropdown dimensión, 12 filtro multi-tag, 14 vista banco global, 15 dropzone PDF, 16 vista revisión spec-table, 17 toggle estudiante + editar tipos + imprimible, 24/25/26 maquetado de los 3 informes DIA, 10 drill-down. *(pendiente)*
+- [x] ✅ FRONT-2b — Consumo de contratos backend (4 agentes, integrados y validados): TKT-09 orden ✅, 10 drill-down ✅, 11 dropdown dimensión ✅, 12 filtro multi-tag ✅, 14 banco global ✅, 15 dropzone PDF ✅, 16 revisión spec-table ✅, 17 toggle estudiante/editar tipos/imprimible ✅, 24/25/26 informes DIA ✅. *(ramas `fe-*-cont`; typecheck+lint limpios; interrumpidos una vez por límite de sesión, trabajo rescatado y continuado)*
 
 ### Backend (paralelo) — TODOS INTEGRADOS en `sprint-feedback-v1`
 - [x] ✅ Fase 0 (adaptada) — cada agente backend definió su contrato en `packages/types` (archivos separados → sin colisión); el frontend los consume en el stream serial.
