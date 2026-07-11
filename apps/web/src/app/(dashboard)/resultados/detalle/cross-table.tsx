@@ -382,6 +382,13 @@ export function CrossTable({
               </TableRow>
             </TableHeader>
             <TableBody>
+              {/* TKT-22 — fila de referencia "% de logro del colegio" por pregunta:
+                  el promedio de TODA la org, con independencia del scope del
+                  usuario (un profesor ve su curso en las celdas de alumnos y el
+                  colegio completo aquí). La línea de "muestra de colegios"
+                  (benchmark inter-colegio) queda DIFERIDA hasta existir un pool
+                  multi-colegio; llegará como `q.references.sample` sin romper esto. */}
+              <SchoolReferenceRow questions={displayQuestions} />
               {displayStudents.map((row) => (
                 <StudentRow key={row.studentId} row={row} questions={displayQuestions} />
               ))}
@@ -397,6 +404,51 @@ export function CrossTable({
 
       <QuestionDetailPanel data={detail} open={open} onClose={closePanel} />
     </div>
+  );
+}
+
+/** Color de texto de la referencia del colegio por % de logro (mismos cortes). */
+function referenceCellClass(rate: number | null): string {
+  if (rate === null) return 'text-muted-foreground';
+  if (rate < 40) return 'text-red-700 dark:text-red-300 font-semibold';
+  if (rate < 60) return 'text-amber-700 dark:text-amber-300';
+  return 'text-emerald-700 dark:text-emerald-300';
+}
+
+/**
+ * TKT-22 — Fila de referencia del tablero maestro: "% de logro del colegio" por
+ * pregunta (`q.references.org`), independiente del scope del usuario. La columna
+ * "% Logro" muestra el promedio de esas tasas como referencia agregada. Cuando
+ * exista el pool multi-colegio (TKT-20), la "muestra de colegios"
+ * (`q.references.sample`) se agrega como una segunda fila análoga.
+ */
+function SchoolReferenceRow({ questions }: { questions: MatrixQuestionColumn[] }): JSX.Element {
+  const orgRates = questions.map((q) => q.references.org).filter((v): v is number => v !== null);
+  const orgMean =
+    orgRates.length > 0 ? orgRates.reduce((a, b) => a + b, 0) / orgRates.length : null;
+
+  return (
+    <TableRow className="border-b-2 bg-muted/30">
+      <TableCell className="sticky left-0 z-10 bg-muted/60 align-top">
+        <span className="block text-sm font-semibold">% Logro colegio</span>
+        <span className="block text-xs font-normal text-muted-foreground">
+          Promedio de toda la organización
+        </span>
+      </TableCell>
+      <TableCell className="text-right font-semibold tabular-nums">{formatPct(orgMean)}</TableCell>
+      {questions.map((q) => (
+        <TableCell
+          key={q.itemId}
+          className={cn(
+            'text-center text-xs font-semibold tabular-nums',
+            referenceCellClass(q.references.org),
+          )}
+          title={`Colegio · Pregunta ${q.position}: ${formatPct(q.references.org)} de logro`}
+        >
+          {formatPct(q.references.org)}
+        </TableCell>
+      ))}
+    </TableRow>
   );
 }
 

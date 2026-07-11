@@ -78,6 +78,24 @@ export type ItemTaxonomyRef = {
   nodeType: string;
 };
 
+/**
+ * TKT-22 — Líneas de referencia comparativas por pregunta en el tablero maestro
+ * (Detalle por pregunta). Objeto extensible: cada nueva referencia es un campo
+ * más, sin romper el contrato existente.
+ *
+ * - `org` (viable ahora): % de logro del COLEGIO para la pregunta = promedio de
+ *   TODA la org, independiente del scope del usuario (un profesor ve su curso en
+ *   `correctRate` y el colegio completo aquí). Sale del token; nunca expone datos
+ *   de otra org (RLS + withOrgContext).
+ * - `sample` (DIFERIDO): % de logro de la MUESTRA de colegios (benchmark
+ *   inter-colegio). Bloqueado hasta existir un pool multi-colegio (TKT-20). El
+ *   campo se deja opcional para poblarlo después sin cambiar el contrato.
+ */
+export type QuestionReferences = {
+  org: number | null; // 0..100 — % logro del colegio (toda la org)
+  sample?: number | null; // 0..100 — muestra de colegios (DIFERIDO, TKT-20)
+};
+
 /** Una columna de la matriz = una pregunta (ítem) de la evaluación. */
 export type MatrixQuestionColumn = {
   itemId: string;
@@ -87,9 +105,11 @@ export type MatrixQuestionColumn = {
   correctKey: string | null; // clave correcta si es selección múltiple
   skill: ItemTaxonomyRef | null; // habilidad principal
   content: ItemTaxonomyRef | null; // contenido/OA principal
-  // % de alumnos (de la población visible) que respondió correctamente esta
-  // pregunta — para resaltar preguntas críticas en la cabecera.
+  // % de alumnos (de la población VISIBLE, según scope) que respondió
+  // correctamente esta pregunta — para resaltar preguntas críticas en la cabecera.
   correctRate: number | null; // 0..100
+  // TKT-22 — líneas de referencia por pregunta (% colegio ahora; muestra diferida).
+  references: QuestionReferences;
 };
 
 /** Una celda de la matriz: la respuesta de un alumno a una pregunta. */

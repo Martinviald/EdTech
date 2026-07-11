@@ -237,6 +237,11 @@ describe('ItemAnalysisService.getMatrix', () => {
     // correctRate agregado.
     expect(res.questions[0].correctRate).toBe(50);
     expect(res.questions[1].correctRate).toBe(100);
+    // TKT-22 — admin sin filtro: la población visible ya es toda la org, así que
+    // references.org = correctRate sin query adicional. `sample` DIFERIDO (ausente).
+    expect(res.questions[0].references.org).toBe(50);
+    expect(res.questions[1].references.org).toBe(100);
+    expect(res.questions[0].references.sample).toBeUndefined();
 
     // Paginación.
     expect(res.students.total).toBe(2);
@@ -318,7 +323,8 @@ describe('ItemAnalysisService.getMatrix', () => {
       itemRows, // loadQuestionColumns → items
       tagRows, // loadTagsByItems
       [{ studentId: STUDENT_1 }], // resolveAccessibleStudentIds (teacher, sin classGroupId param)
-      [{ itemId: ITEM_A, total: 1, correct: 1 }], // attachCorrectRates
+      [{ itemId: ITEM_A, total: 1, correct: 1 }], // attachCorrectRates (scope profesor → 100%)
+      [{ itemId: ITEM_A, total: 4, correct: 2 }], // attachOrgReferences (colegio → 50%)
       [{ total: 1 }], // loadStudentsPage count
       [
         {
@@ -355,6 +361,10 @@ describe('ItemAnalysisService.getMatrix', () => {
     expect(res.students.total).toBe(1);
     expect(res.students.data[0].studentId).toBe(STUDENT_1);
     expect(res.students.data[0].achievement).toBe(80);
+    // TKT-22 — el profesor ve su curso en correctRate (100%) y el COLEGIO completo
+    // en references.org (50%): la referencia trasciende el scope del usuario.
+    expect(res.questions[0].correctRate).toBe(100);
+    expect(res.questions[0].references.org).toBe(50);
   });
 
   it('filtro nodeId: limita las columnas a ítems taggeados con ese nodo', async () => {
@@ -596,9 +606,9 @@ describe('ItemAnalysisService.getQuestionAnalysis', () => {
       [], // requireItemVisible → vacío
     ]);
     const service = makeService(db);
-    await expect(
-      service.getQuestionAnalysis(makeUser(), ITEM_A, {}),
-    ).rejects.toBeInstanceOf(NotFoundException);
+    await expect(service.getQuestionAnalysis(makeUser(), ITEM_A, {})).rejects.toBeInstanceOf(
+      NotFoundException,
+    );
   });
 
   // Regresión: los instrumentos oficiales (ej. DIA) tienen org_id NULL. El detalle
@@ -647,9 +657,9 @@ describe('ItemAnalysisService.getQuestionAnalysis', () => {
     };
     const db = makeDb([[otherOrgRow]]); // requireItemVisible → org ajena
     const service = makeService(db);
-    await expect(
-      service.getQuestionAnalysis(makeUser(), ITEM_A, {}),
-    ).rejects.toBeInstanceOf(NotFoundException);
+    await expect(service.getQuestionAnalysis(makeUser(), ITEM_A, {})).rejects.toBeInstanceOf(
+      NotFoundException,
+    );
   });
 
   it('ítem no de selección múltiple → alternatives vacías pero conserva totales', async () => {
