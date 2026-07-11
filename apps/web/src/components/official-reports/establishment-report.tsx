@@ -15,13 +15,7 @@ import {
   fmtDateTime,
 } from './report-primitives';
 import { resolveDisclaimers, resolveLevelDefinitions } from './report-copy';
-import {
-  DIA_LEVEL_ORDER,
-  DIA_LEVEL_OF,
-  DIA_LEVEL_LABELS,
-  diaLevelBadgeClass,
-  type DiaLevel,
-} from './dia-levels';
+import { DIA_LEVEL_ORDER, DIA_LEVEL_OF, DIA_LEVEL_LABELS, diaLevelBadgeClass } from './dia-levels';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // TKT-25 — Informe de establecimiento (Área Académica). Server Component.
@@ -44,11 +38,7 @@ const SEX_TITLE: Record<SexComparisonResult, string> = {
   insufficient_sample: 'Muestra insuficiente para el cálculo',
 };
 
-export function EstablishmentReport({
-  report,
-}: {
-  report: OfficialEstablishmentReportResponse;
-}) {
+export function EstablishmentReport({ report }: { report: OfficialEstablishmentReportResponse }) {
   const { meta, subjects, sexDataAvailable, scopeNotes } = report;
   const disclaimers = resolveDisclaimers(meta.disclaimers);
   const levelDefinitions = resolveLevelDefinitions(report.levelDefinitions);
@@ -68,7 +58,10 @@ export function EstablishmentReport({
       <ReportCover
         eyebrow="Informe de resultados — Establecimiento"
         title={meta.orgName}
-        subtitle={[meta.periodLabel ?? meta.period, meta.academicYear ? String(meta.academicYear) : null]
+        subtitle={[
+          meta.periodLabel ?? meta.period,
+          meta.academicYear ? String(meta.academicYear) : null,
+        ]
           .filter(Boolean)
           .join(' · ')}
         meta={coverMeta}

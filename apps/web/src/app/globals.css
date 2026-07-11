@@ -72,3 +72,31 @@
     @apply bg-background text-foreground;
   }
 }
+
+/*
+ * Aislamiento de impresión para los informes oficiales (TKT-24/25/26).
+ * El contenedor `.print-root` (ver report-primitives → ReportShell) se convierte
+ * en la única región visible al imprimir / "Guardar como PDF": el resto de la app
+ * (sidebar, header, pestañas, barras de filtro/acciones) queda oculto. Los
+ * controles marcados con la utilidad `print:hidden` de Tailwind (display:none)
+ * siguen ocultándose aunque estén dentro del informe.
+ */
+@media print {
+  body * {
+    visibility: hidden;
+  }
+  .print-root,
+  .print-root * {
+    visibility: visible;
+  }
+  .print-root {
+    position: absolute;
+    inset: 0 auto auto 0;
+    width: 100%;
+    max-width: none;
+    margin: 0;
+    padding: 0;
+    border: none;
+    box-shadow: none;
+  }
+}

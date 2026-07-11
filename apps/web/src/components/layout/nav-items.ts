@@ -4,6 +4,7 @@ import {
   Building2,
   ClipboardList,
   Cpu,
+  FileText,
   FileUp,
   FolderTree,
   LayoutDashboard,
@@ -25,6 +26,7 @@ import {
   REMEDIAL_VIEWER_ROLES,
   BENCHMARKING_VIEWER_ROLES,
   ANSWER_SHEET_IMPORT_ROLES,
+  ESTABLISHMENT_REPORT_ROLES,
 } from '@soe/types';
 
 export type NavStatus = 'live' | 'soon';
@@ -131,6 +133,13 @@ export const NAV_GROUPS: readonly NavGroup[] = [
         icon: TrendingUp,
         status: 'live',
         roles: BENCHMARKING_VIEWER_ROLES,
+      },
+      {
+        href: '/establecimiento/informe-oficial',
+        label: 'Informe establecimiento',
+        icon: FileText,
+        status: 'live',
+        roles: ESTABLISHMENT_REPORT_ROLES,
       },
     ],
   },
