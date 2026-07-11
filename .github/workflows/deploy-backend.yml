@@ -1,7 +1,14 @@
-name: Deploy Backend (ECR → App Runner)
+name: Deploy Backend (migrate → ECR → App Runner)
 
-# Push a main que toca el backend → rebuild de la imagen y push a ECR.
-# App Runner tiene autoDeploymentsEnabled → redeploya solo al detectar :latest nuevo.
+# Push a dev que toca el backend → (1) migra el RDS, (2) rebuildea la imagen y la pushea
+# a ECR. App Runner (autoDeploymentsEnabled) redeploya al detectar :latest nuevo.
+#
+# La migración corre ANTES del build/push y lo GATEA (needs: migrate): las migraciones
+# son ADITIVAS, así que el código viejo que sigue corriendo no se rompe, y cuando App
+# Runner levanta la imagen nueva la BDD ya está a la par. Esto evita el bug de
+# "column ... does not exist" cuando un deploy agrega columnas y el RDS no se migró.
+#
+# Requiere el secret de GitHub DB_MASTER_PASSWORD (= SST secret DbMasterPassword, stage demo).
 on:
   push:
     branches: [dev]
@@ -16,12 +23,98 @@ on:
 permissions:
   contents: read
 
+concurrency:
+  group: deploy-backend-${{ github.ref }}
+  cancel-in-progress: false
+
 env:
   AWS_REGION: us-east-1
+  STAGE: demo
   ECR_REPOSITORY: edtech-api-demo # = aws.ecr.Repository name en sst.config.ts (stage demo)
 
 jobs:
+  # ── Migra el RDS privado ANTES de publicar la imagen nueva. ──
+  # El RDS vive en la VPC; se llega por un port-forward SSM a través del bastión (la NAT
+  # instance de SST, que está gestionada por SSM). No usa `sst tunnel` (evita sudo/TUN
+  # en el runner). El script `db:migrate` corre drizzle + re-aplica rls-policies.sql.
+  migrate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+
+      - name: Install deps
+        run: pnpm install --frozen-lockfile
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Install session-manager-plugin + psql client
+        run: |
+          curl -fsSL "https://s3.amazonaws.com/session-manager-downloads/plugin/latest/ubuntu_64bit/session-manager-plugin.deb" -o /tmp/smp.deb
+          sudo dpkg -i /tmp/smp.deb
+          sudo apt-get update -y && sudo apt-get install -y postgresql-client
+
+      - name: Migrate RDS (SSM port-forward via bastion)
+        env:
+          DB_MASTER_PASSWORD: ${{ secrets.DB_MASTER_PASSWORD }}
+        run: |
+          set -euo pipefail
+
+          [ -n "${DB_MASTER_PASSWORD:-}" ] || { echo "::error::Falta el secret DB_MASTER_PASSWORD (= SST DbMasterPassword del stage ${STAGE})"; exit 1; }
+
+          # RDS privado del stage (endpoint).
+          RDS_HOST=$(aws rds describe-db-instances \
+            --query "DBInstances[?starts_with(DBInstanceIdentifier,'edtech-${STAGE}-dbinstance')].Endpoint.Address | [0]" \
+            --output text)
+          { [ -n "$RDS_HOST" ] && [ "$RDS_HOST" != "None" ]; } || { echo "::error::No encontré el RDS del stage ${STAGE}"; exit 1; }
+          echo "RDS host: $RDS_HOST"
+
+          # Bastión = NAT instance de SST (combina NAT + bastión SSM).
+          BASTION=$(aws ec2 describe-instances \
+            --filters "Name=instance-state-name,Values=running" "Name=tag:sst:is-nat,Values=true" "Name=tag:sst:stage,Values=${STAGE}" \
+            --query "Reservations[0].Instances[0].InstanceId" --output text)
+          { [ -n "$BASTION" ] && [ "$BASTION" != "None" ]; } || { echo "::error::No encontré el bastión (NAT SSM) del stage ${STAGE}"; exit 1; }
+          echo "bastion: $BASTION"
+
+          # Port-forward SSM: 127.0.0.1:5432 -> RDS:5432 por el bastión (background).
+          aws ssm start-session --target "$BASTION" \
+            --document-name AWS-StartPortForwardingSessionToRemoteHost \
+            --parameters "{\"host\":[\"${RDS_HOST}\"],\"portNumber\":[\"5432\"],\"localPortNumber\":[\"5432\"]}" \
+            > /tmp/ssm.log 2>&1 &
+          SSM_PID=$!
+
+          # Esperar a que el forward acepte conexiones (máx ~80s).
+          ready=0
+          for i in $(seq 1 40); do
+            if pg_isready -h 127.0.0.1 -p 5432 >/dev/null 2>&1; then ready=1; echo "port-forward listo (intento $i)"; break; fi
+            sleep 2
+          done
+          if [ "$ready" != 1 ]; then echo "::error::El port-forward SSM no quedó listo"; cat /tmp/ssm.log 2>/dev/null || true; kill "$SSM_PID" 2>/dev/null || true; exit 1; fi
+
+          # Migrar como admin (soe_admin). En CI migrate.ts no lee .env → usa DATABASE_ADMIN_URL.
+          PW_ENC=$(python3 -c 'import urllib.parse,sys;print(urllib.parse.quote(sys.argv[1],safe=""))' "$DB_MASTER_PASSWORD")
+          echo "::add-mask::$PW_ENC"
+          export DATABASE_ADMIN_URL="postgresql://soe_admin:${PW_ENC}@127.0.0.1:5432/soe?sslmode=require"
+          pnpm --filter @soe/db db:migrate
+
+          kill "$SSM_PID" 2>/dev/null || true
+          echo "✓ RDS migrado (stage ${STAGE})"
+
   build-and-push:
+    needs: migrate # el deploy no publica imagen nueva si la migración falló
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
