@@ -157,22 +157,29 @@ Se marca a medida que avanzamos. Estados: ⬜ pendiente · 🟡 en curso · ✅ 
 
 ### Stream FRONT (serial)
 - [x] ✅ FRONT-1 — Terminología (TKT-01, 02, 03, 05, 06, 07) *(typecheck + lint OK; helper `lib/taxonomy-labels.ts`; mergeado a `dev` `3dae945`)*
-- [ ] 🟡 FRONT-2a — Pure-front (TKT-08 listas, 13 textos colapsable, 18 renombrar) *(agente en rama `front-2a`)*
-- [ ] ⬜ FRONT-2b — Consumo de contratos backend (TKT-09, 10, 11, 12 + follow-ups de B/C/D/E) *(tras integrar backend)*
+- [x] ✅ FRONT-2a — Pure-front: TKT-08 listas ✅, TKT-18 renombrar ✅. **TKT-13 BLOQUEADO** (el picker de textos remediales no está en la base del sprint; depende del motor remedial E9). *(rama `front-2a`, integrada)*
+- [ ] ⬜ FRONT-2b — Consumo de contratos backend (frontend serial): TKT-09 orden, 11 dropdown dimensión, 12 filtro multi-tag, 14 vista banco global, 15 dropzone PDF, 16 vista revisión spec-table, 17 toggle estudiante + editar tipos + imprimible, 24/25/26 maquetado de los 3 informes DIA, 10 drill-down. *(pendiente)*
 
-### Backend (paralelo)
-- [x] ✅ Fase 0 (adaptada) — Sin commit de contratos previo: cada agente backend define su contrato en `packages/types` (archivos separados → sin colisión) y el frontend los consume en el stream serial. Justificación: no hay agentes de frontend en paralelo durante esta fase.
-- [ ] 🟡 BACK-B — Analytics (TKT-04, 09, 12 + TKT-05 backend) *(agente en rama `back-b-analytics`)*
-- [ ] 🟡 BACK-C — Instrumentos/PDF/spec-table (TKT-14, 15, 16) *(agente en rama `back-c-instruments`)*
-- [ ] 🟡 BACK-D — Remedial (TKT-17) *(agente en rama `back-d-remedial`)*
-- [ ] 🟡 BACK-E — Informe DIA (TKT-24, 25, 26) *(agente en rama `back-e-informe-dia`)*
+### Backend (paralelo) — TODOS INTEGRADOS en `sprint-feedback-v1`
+- [x] ✅ Fase 0 (adaptada) — cada agente backend definió su contrato en `packages/types` (archivos separados → sin colisión); el frontend los consume en el stream serial.
+- [x] ✅ BACK-B — Analytics (TKT-04, 09, 12 + TKT-05 backend) *(rama `back-b-analytics`, sin migración, 99/99 tests)*
+- [x] ✅ BACK-C — Instrumentos/PDF/banco global (TKT-14, 15; 16 = solo front) *(rama `back-c-instruments`, tabla `instrument_attachments`, 61/61 tests)*
+- [x] ✅ BACK-D — Remedial (TKT-17) *(rama `back-d-remedial`, columna `edited_content`, 45/45 tests)*
+- [x] ✅ BACK-E — Informe DIA (TKT-24, 25, 26) *(rama `back-e-informe-dia`, 3 endpoints, sexo del alumno SÍ existe → tablas 1.5–1.8 hechas, 14/14 tests)*
 
 ### Cierre
-- [ ] ⬜ Fase 3 — Auditoría de todos los streams
-- [ ] ⬜ Fase 4 — Integración en `sprint-feedback-v1`
-- [ ] ⬜ Fase 5 — Validación E2E
+- [x] ✅ Fase 3 — Auditoría (ligera): reportes de agentes revisados + typecheck/tests por stream
+- [x] ✅ Fase 4 — Integración de los 5 streams en `sprint-feedback-v1` (migración 0008 unificada; wiring `app.module.ts`/`nav-items.ts` vía merge; fix TKT-04 front)
+- [x] ✅ Fase 5 — Validación: build types/db ✅, typecheck api+web ✅, lint web ✅, tests api 575/591 (16 fallas = `privacy/*`, requieren DB, ajenas al sprint)
+- [ ] ⬜ FRONT-2b — Frontend serial que consume los endpoints backend (ver arriba)
 - [ ] ⬜ Merge a `dev` (con confirmación del usuario)
-- [ ] ⬜ Marcar tickets como ✅ en Notion + en el plan
+- [ ] ⬜ Marcar tickets restantes en Notion + en el plan
+
+**Estado de tickets tras integración:**
+- ✅ Completos (backend+front): TKT-01,02,03,04,05,06,07,08,18
+- 🏗️ Backend listo, falta frontend (FRONT-2b): TKT-09,11,12,14,15,16,17,24,25,26 · TKT-10 drill-down
+- 🚫 Bloqueado: TKT-13 (dependencia motor remedial)
+- 🗿 Diferidos: TKT-19,20,23 + parte "muestra" de 21/22
 
 ### Diferidos (no ejecutar en esta pasada)
 - TKT-19, TKT-20, TKT-23 · parte "muestra de colegios" de TKT-21/22
