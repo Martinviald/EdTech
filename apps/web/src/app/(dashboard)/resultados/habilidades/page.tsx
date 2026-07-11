@@ -19,6 +19,7 @@ import { ResultadosNav } from '../components/resultados-nav';
 import { PerformanceBadge } from '../components/performance-badge';
 import { PERFORMANCE_LEVEL_BAR_CLASS, formatAchievement } from '../components/performance-level';
 import { cn } from '@/lib/utils';
+import { formatNodeCode, nodeTypeLabel } from '@/lib/taxonomy-labels';
 
 export const dynamic = 'force-dynamic';
 
@@ -91,7 +92,9 @@ function SkillRow({ skill }: { skill: SkillAchievementModel }) {
           <div className="min-w-0">
             <p className="font-medium leading-tight">{skill.nodeName}</p>
             <p className="text-xs text-muted-foreground">
-              {[skill.nodeCode, skill.nodeType].filter(Boolean).join(' · ')}
+              {[formatNodeCode(skill.nodeCode, skill.nodeType), nodeTypeLabel(skill.nodeType)]
+                .filter(Boolean)
+                .join(' · ')}
               {' · '}
               {skill.studentsAssessed} alumnos
             </p>

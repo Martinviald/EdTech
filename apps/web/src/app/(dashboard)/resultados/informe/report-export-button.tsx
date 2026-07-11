@@ -20,11 +20,7 @@ import * as XLSX from 'xlsx';
 import { jsPDF } from 'jspdf';
 import autoTable, { type CellHookData } from 'jspdf-autotable';
 import { FileDown } from 'lucide-react';
-import type {
-  AssessmentReportResponse,
-  ItemReportFlag,
-  PerformanceLevel,
-} from '@soe/types';
+import type { AssessmentReportResponse, ItemReportFlag, PerformanceLevel } from '@soe/types';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -121,16 +117,10 @@ function sanitize(name: string): string {
   return name.replace(/[\\/?*[\]:]/g, ' ').trim();
 }
 
-export function ReportExportButton({
-  report,
-}: {
-  report: AssessmentReportResponse;
-}): JSX.Element {
+export function ReportExportButton({ report }: { report: AssessmentReportResponse }): JSX.Element {
   const [busy, setBusy] = useState(false);
-  const base = `informe-${sanitize(report.meta.assessmentName ?? report.meta.instrumentName)}`.slice(
-    0,
-    80,
-  );
+  const base =
+    `informe-${sanitize(report.meta.assessmentName ?? report.meta.instrumentName)}`.slice(0, 80);
 
   function exportExcel() {
     setBusy(true);
@@ -161,9 +151,7 @@ export function ReportExportButton({
         <DropdownMenuItem onSelect={exportExcel}>
           Informe completo en Excel (.xlsx)
         </DropdownMenuItem>
-        <DropdownMenuItem onSelect={exportPdf}>
-          Informe completo en PDF (.pdf)
-        </DropdownMenuItem>
+        <DropdownMenuItem onSelect={exportPdf}>Informe completo en PDF (.pdf)</DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
   );
@@ -196,7 +184,7 @@ function buildWorkbook(report: AssessmentReportResponse, base: string) {
     ['Nota promedio', fmtNum(summary.averageGrade)],
     ['Alumnos evaluados', summary.studentsEvaluated],
     ['Alumnos matriculados', summary.studentsEnrolled],
-    ['Cobertura', fmtPct(summary.coverageRate, 0)],
+    ['Asistencia', fmtPct(summary.coverageRate, 0)],
     [],
     ['Fortalezas', ...report.highlights.strengths],
     ['Brechas prioritarias', ...report.highlights.gaps],
@@ -313,11 +301,7 @@ function buildWorkbook(report: AssessmentReportResponse, base: string) {
   XLSX.writeFile(wb, `${base}.xlsx`);
 }
 
-function appendSheet(
-  wb: XLSX.WorkBook,
-  name: string,
-  ws: XLSX.WorkSheet,
-) {
+function appendSheet(wb: XLSX.WorkBook, name: string, ws: XLSX.WorkSheet) {
   XLSX.utils.book_append_sheet(wb, ws, name.slice(0, 31));
 }
 
@@ -354,11 +338,16 @@ function buildPdf(report: AssessmentReportResponse, base: string) {
     theme: 'plain',
     styles: { fontSize: 9, cellPadding: 1 },
     body: [
-      ['Cursos', meta.classGroups.map((c) => c.name).join(', ') || '—', 'Preguntas', String(meta.itemsCount)],
+      [
+        'Cursos',
+        meta.classGroups.map((c) => c.name).join(', ') || '—',
+        'Preguntas',
+        String(meta.itemsCount),
+      ],
       [
         'Alumnos evaluados',
         `${summary.studentsEvaluated} / ${summary.studentsEnrolled}`,
-        'Cobertura',
+        'Asistencia',
         fmtPct(summary.coverageRate, 0),
       ],
     ],
@@ -398,12 +387,9 @@ function buildPdf(report: AssessmentReportResponse, base: string) {
   if (report.highlights.strengths.length || report.highlights.gaps.length) {
     doc.setFontSize(9);
     doc.setTextColor(...GREEN);
-    doc.text(
-      `Fortalezas: ${report.highlights.strengths.join(' · ') || '—'}`,
-      marginX,
-      y,
-      { maxWidth: pageW - marginX * 2 },
-    );
+    doc.text(`Fortalezas: ${report.highlights.strengths.join(' · ') || '—'}`, marginX, y, {
+      maxWidth: pageW - marginX * 2,
+    });
     y += 5;
     doc.setTextColor(...RED);
     doc.text(`Brechas: ${report.highlights.gaps.join(' · ') || '—'}`, marginX, y, {
@@ -508,7 +494,7 @@ function buildPdf(report: AssessmentReportResponse, base: string) {
     doc.setFontSize(8);
     doc.setTextColor(...MUTED);
     doc.text(
-      'Dificultad (p): % aciertos — bajo = difícil. Discriminación (D): D < 0,2 sugiere revisar la pregunta.',
+      'Dificultad (p): % de logro — bajo = difícil. Discriminación (D): D < 0,2 sugiere revisar la pregunta.',
       marginX,
       y,
       { maxWidth: pageW - marginX * 2 },
@@ -517,7 +503,9 @@ function buildPdf(report: AssessmentReportResponse, base: string) {
     const items = report.items;
     autoTable(doc, {
       startY: y + 4,
-      head: [['N°', 'Habilidad / contenido', 'Clave', 'Dificultad', 'Discrim.', 'Distractor', 'Alertas']],
+      head: [
+        ['N°', 'Habilidad / contenido', 'Clave', 'Dificultad', 'Discrim.', 'Distractor', 'Alertas'],
+      ],
       body: items.map((i) => [
         String(i.position),
         i.skillName ?? i.contentName ?? '—',
@@ -614,12 +602,9 @@ function buildPdf(report: AssessmentReportResponse, base: string) {
     doc.setPage(p);
     doc.setFontSize(8);
     doc.setTextColor(...MUTED);
-    doc.text(
-      `Página ${p} de ${pages}`,
-      pageW - marginX,
-      doc.internal.pageSize.getHeight() - 8,
-      { align: 'right' },
-    );
+    doc.text(`Página ${p} de ${pages}`, pageW - marginX, doc.internal.pageSize.getHeight() - 8, {
+      align: 'right',
+    });
   }
 
   doc.save(`${base}.pdf`);

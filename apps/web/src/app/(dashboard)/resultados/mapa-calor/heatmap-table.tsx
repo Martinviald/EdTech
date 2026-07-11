@@ -17,17 +17,10 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from '@/components/ui/tooltip';
-import {
-  PERFORMANCE_LEVEL_LABELS,
-  formatAchievement,
-} from '../components/performance-level';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { PERFORMANCE_LEVEL_LABELS, formatAchievement } from '../components/performance-level';
 import { cn } from '@/lib/utils';
+import { formatNodeCode, nodeTypeLabel } from '@/lib/taxonomy-labels';
 
 /**
  * Clases de fondo/texto de la celda por nivel de desempeño. La escala de calor
@@ -57,20 +50,13 @@ export function HeatmapTable({ data }: { data: HeatmapResponse }) {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead className="sticky left-0 z-10 bg-card min-w-[180px]">
-                Habilidad
-              </TableHead>
+              <TableHead className="sticky left-0 z-10 bg-card min-w-[180px]">Habilidad</TableHead>
               {subjects.map((subject) => (
-                <TableHead
-                  key={subject.subjectId}
-                  className="min-w-[96px] text-center"
-                >
+                <TableHead key={subject.subjectId} className="min-w-[96px] text-center">
                   {subject.subjectName}
                 </TableHead>
               ))}
-              <TableHead className="min-w-[88px] text-center font-semibold">
-                Total
-              </TableHead>
+              <TableHead className="min-w-[88px] text-center font-semibold">Total</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -80,7 +66,9 @@ export function HeatmapTable({ data }: { data: HeatmapResponse }) {
                   <span className="block font-medium leading-tight">{row.nodeName}</span>
                   {(row.nodeCode || row.nodeType) && (
                     <span className="block text-xs text-muted-foreground">
-                      {[row.nodeCode, row.nodeType].filter(Boolean).join(' · ')}
+                      {[formatNodeCode(row.nodeCode, row.nodeType), nodeTypeLabel(row.nodeType)]
+                        .filter(Boolean)
+                        .join(' · ')}
                     </span>
                   )}
                 </TableCell>
@@ -122,9 +110,7 @@ export function HeatmapTable({ data }: { data: HeatmapResponse }) {
                     </TableCell>
                   </TooltipTrigger>
                   <TooltipContent>
-                    <p className="font-medium">
-                      {cellLevelLabel(row.overallPerformanceLevel)}
-                    </p>
+                    <p className="font-medium">{cellLevelLabel(row.overallPerformanceLevel)}</p>
                     <p className="text-xs">Promedio en todas las asignaturas</p>
                   </TooltipContent>
                 </Tooltip>
@@ -157,10 +143,7 @@ export function HeatmapLegend(): JSX.Element {
         </span>
       ))}
       <span className="inline-flex items-center gap-1.5">
-        <span
-          className={cn('inline-block size-3 rounded-sm', NO_DATA_CELL_CLASS)}
-          aria-hidden
-        />
+        <span className={cn('inline-block size-3 rounded-sm', NO_DATA_CELL_CLASS)} aria-hidden />
         Sin datos
       </span>
     </div>
