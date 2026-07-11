@@ -258,8 +258,8 @@ export function CrossTable({
       <p className="text-xs text-muted-foreground">
         Clic en el <span className="font-medium">número</span> de una pregunta para ver su detalle;
         el botón <ArrowDownUp className="inline size-3" aria-hidden /> bajo cada pregunta ordena a
-        los alumnos por esa pregunta. Clic en <span className="font-medium">% Logro colegio</span>{' '}
-        (primera columna) ordena a los alumnos por su logro global; o usa{' '}
+        los alumnos por esa pregunta. Clic en <span className="font-medium">% Logro</span>{' '}
+        (cabecera) ordena a los alumnos por su logro global; o usa{' '}
         <span className="font-medium">Ordenar preguntas</span>. Verde = correcta, rojo = incorrecta,
         gris = sin respuesta.
       </p>
@@ -311,9 +311,17 @@ export function CrossTable({
                 <TableHead className="sticky left-0 z-30 min-w-[180px] bg-background">
                   Alumno
                 </TableHead>
-                {/* El orden por logro global se dispara desde la primera celda de la
-                    fila "% Logro colegio" (ver SchoolReferenceRow); aquí solo el rótulo. */}
-                <TableHead className="bg-background text-right font-medium">% Logro</TableHead>
+                <TableHead className="bg-background text-right">
+                  <button
+                    type="button"
+                    onClick={sortByAchievement}
+                    className="ml-auto inline-flex items-center gap-1 rounded px-1.5 py-1 font-medium transition-colors hover:bg-accent focus:outline-none focus:ring-2 focus:ring-ring"
+                    aria-label="Ordenar alumnos por porcentaje de logro"
+                  >
+                    % Logro
+                    <SortIndicator dir={achievementDir} />
+                  </button>
+                </TableHead>
                 {displayQuestions.map((q) => {
                   const isSorted = sortedColumnId === q.itemId;
                   const isLoading = loadingItemId === q.itemId;
@@ -384,11 +392,7 @@ export function CrossTable({
                   colegio completo aquí). La línea de "muestra de colegios"
                   (benchmark inter-colegio) queda DIFERIDA hasta existir un pool
                   multi-colegio; llegará como `q.references.sample` sin romper esto. */}
-              <SchoolReferenceRow
-                questions={displayQuestions}
-                onSortAchievement={sortByAchievement}
-                achievementDir={achievementDir}
-              />
+              <SchoolReferenceRow questions={displayQuestions} />
               {displayStudents.map((row) => (
                 <StudentRow key={row.studentId} row={row} questions={displayQuestions} />
               ))}
@@ -422,41 +426,18 @@ function referenceCellClass(rate: number | null): string {
  * exista el pool multi-colegio (TKT-20), la "muestra de colegios"
  * (`q.references.sample`) se agrega como una segunda fila análoga.
  */
-function SchoolReferenceRow({
-  questions,
-  onSortAchievement,
-  achievementDir,
-}: {
-  questions: MatrixQuestionColumn[];
-  onSortAchievement: () => void;
-  achievementDir: SortDir | null;
-}): JSX.Element {
+function SchoolReferenceRow({ questions }: { questions: MatrixQuestionColumn[] }): JSX.Element {
   const orgRates = questions.map((q) => q.references.org).filter((v): v is number => v !== null);
   const orgMean =
     orgRates.length > 0 ? orgRates.reduce((a, b) => a + b, 0) / orgRates.length : null;
 
   return (
     <TableRow className="border-b-2 bg-muted/30">
-      {/* Primera columna: clic ordena a los alumnos por su % de logro global. */}
-      <TableCell className="sticky left-0 z-10 bg-muted/60 p-0 align-top">
-        <button
-          type="button"
-          onClick={onSortAchievement}
-          className={cn(
-            'flex w-full flex-col items-start gap-0 px-4 py-2 text-left transition-colors hover:bg-accent focus:outline-none focus:ring-2 focus:ring-inset focus:ring-ring',
-            achievementDir !== null && 'bg-accent/60',
-          )}
-          aria-label="Ordenar alumnos por su porcentaje de logro global"
-          title="Clic para ordenar alumnos por su % de logro global"
-        >
-          <span className="inline-flex items-center gap-1 text-sm font-semibold">
-            % Logro colegio
-            <SortIndicator dir={achievementDir} />
-          </span>
-          <span className="text-xs font-normal text-muted-foreground">
-            Promedio de la organización · clic para ordenar alumnos
-          </span>
-        </button>
+      <TableCell className="sticky left-0 z-10 bg-muted/60 align-top">
+        <span className="block text-sm font-semibold">% Logro colegio</span>
+        <span className="block text-xs font-normal text-muted-foreground">
+          Promedio de toda la organización
+        </span>
       </TableCell>
       <TableCell className="text-right font-semibold tabular-nums">{formatPct(orgMean)}</TableCell>
       {questions.map((q) => (
