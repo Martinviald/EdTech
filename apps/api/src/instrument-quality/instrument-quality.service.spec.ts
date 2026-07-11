@@ -117,6 +117,7 @@ function makeReport(items: AssessmentReportItemRow[]): AssessmentReportResponse 
       studentsEnrolled: 0,
       coverageRate: null,
       averageAchievement: null,
+      hasGradingScale: true,
       averageGrade: null,
       passingGrade: 4,
       passingRate: null,

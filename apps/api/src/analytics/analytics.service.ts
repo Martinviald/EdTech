@@ -48,12 +48,6 @@ const ADMIN_LIKE_ROLES: readonly UserRole[] = [
   'eval_coordinator',
 ];
 
-// Fallback de nota de aprobación (escala chilena 1.0-7.0) cuando ninguna
-// evaluación del scope tiene grading scale asignada. El umbral real se resuelve
-// desde grading_scales.passing_grade de la escala aplicable (ver
-// resolveScopePassingGrade) — NO se hardcodea el supuesto de escala.
-const DEFAULT_PASSING_GRADE = 4.0;
-
 const PERFORMANCE_LEVELS_ORDER: readonly PerformanceLevel[] = [
   'insufficient',
   'elementary',
@@ -149,16 +143,18 @@ export class AnalyticsService {
   // ───────────────────────────────────────────────────────────────────────────
 
   /**
-   * passing_grade de la grading scale aplicable al scope (la del instrumento de
-   * la primera evaluación del scope que tenga escala asignada). Fallback 4.0 si
-   * ninguna define escala. Evita hardcodear el supuesto de escala chilena.
+   * TKT-04 — passing_grade de la grading scale aplicable al scope (la del
+   * instrumento de la primera evaluación del scope que tenga escala asignada).
+   * Retorna `null` si NINGUNA evaluación del scope tiene escala configurada: en ese
+   * caso la tasa de aprobación no se calcula (viene `null`), en vez de inventar un
+   * corte 4.0 que enmascararía la ausencia de escala.
    */
   private async resolveScopePassingGrade(
     tx: Database,
     orgId: string,
     cgConditions: SQL[],
     instrumentConditions: SQL[],
-  ): Promise<number> {
+  ): Promise<number | null> {
     const [row] = await tx
       .select({ passingGrade: gradingScales.passingGrade })
       .from(assessments)
@@ -179,7 +175,7 @@ export class AnalyticsService {
       )
       .limit(1);
 
-    return row ? Number(row.passingGrade) : DEFAULT_PASSING_GRADE;
+    return row ? Number(row.passingGrade) : null;
   }
 
   /**
@@ -200,6 +196,13 @@ export class AnalyticsService {
       instrumentConditions,
     );
 
+    // TKT-04 — sin escala en el scope (passingGrade null) no se cuenta aprobación:
+    // el filtro se degrada a 0 y la tasa se reporta como `null` (ver map abajo).
+    const passingCountExpr =
+      passingGrade !== null
+        ? sql<number>`count(*) filter (where ${assessmentResults.grade}::numeric >= ${passingGrade})::int`
+        : sql<number>`0::int`;
+
     const rows = await tx
       .select({
         academicYearId: academicYears.id,
@@ -207,7 +210,7 @@ export class AnalyticsService {
         avgPct: sql<string | null>`avg(${assessmentResults.percentage}::numeric)`,
         studentsCount: sql<number>`count(distinct ${assessmentResults.studentId})::int`,
         totalGraded: sql<number>`count(${assessmentResults.grade})::int`,
-        passingCount: sql<number>`count(*) filter (where ${assessmentResults.grade}::numeric >= ${passingGrade})::int`,
+        passingCount: passingCountExpr,
       })
       .from(assessmentResults)
       .innerJoin(assessments, eq(assessments.id, assessmentResults.assessmentId))
@@ -241,8 +244,11 @@ export class AnalyticsService {
 
     return rows.map((r) => {
       const avg = r.avgPct === null ? null : Number(r.avgPct);
+      // Sin escala configurada en el scope, la tasa de aprobación no aplica.
       const passingRate =
-        r.totalGraded > 0 ? (r.passingCount / r.totalGraded) * 100 : null;
+        passingGrade !== null && r.totalGraded > 0
+          ? (r.passingCount / r.totalGraded) * 100
+          : null;
       return {
         academicYearId: r.academicYearId,
         year: r.year,

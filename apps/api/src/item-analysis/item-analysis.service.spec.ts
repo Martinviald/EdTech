@@ -219,6 +219,7 @@ describe('ItemAnalysisService.getMatrix', () => {
       assessmentId: ASSESSMENT_ID,
       page: 1,
       limit: 50,
+      all: false,
     });
 
     expect(res.assessmentId).toBe(ASSESSMENT_ID);
@@ -274,6 +275,7 @@ describe('ItemAnalysisService.getMatrix', () => {
         assessmentId: ASSESSMENT_ID,
         page: 1,
         limit: 50,
+        all: false,
       }),
     ).rejects.toBeInstanceOf(NotFoundException);
   });
@@ -286,6 +288,7 @@ describe('ItemAnalysisService.getMatrix', () => {
         assessmentId: ASSESSMENT_ID,
         page: 1,
         limit: 50,
+        all: false,
       }),
     ).rejects.toBeInstanceOf(NotFoundException);
   });
@@ -302,6 +305,7 @@ describe('ItemAnalysisService.getMatrix', () => {
         assessmentId: ASSESSMENT_ID,
         page: 1,
         limit: 50,
+        all: false,
       }),
     ).rejects.toBeInstanceOf(ForbiddenException);
   });
@@ -346,6 +350,7 @@ describe('ItemAnalysisService.getMatrix', () => {
       assessmentId: ASSESSMENT_ID,
       page: 1,
       limit: 50,
+      all: false,
     });
     expect(res.students.total).toBe(1);
     expect(res.students.data[0].studentId).toBe(STUDENT_1);
@@ -391,11 +396,105 @@ describe('ItemAnalysisService.getMatrix', () => {
       nodeId: NODE_SKILL,
       page: 1,
       limit: 50,
+      all: false,
     });
     expect(res.questions).toHaveLength(1);
     expect(res.questions[0].itemId).toBe(ITEM_A);
     // Las celdas también respetan una sola columna.
     expect(res.students.data[0].cells).toHaveLength(1);
+  });
+
+  it('TKT-12 filtro multi-tag OR: incluye ítems con CUALQUIERA de los tags', async () => {
+    const db = makeDb([
+      [assessmentRow], // requireAssessmentOwnedByUser
+      itemRows, // loadQuestionColumns → items
+      tagRows, // loadTagsByItems
+      // filtro por nodos (nodeId ∪ tagIds): ambos ítems calzan con algún tag.
+      [{ itemId: ITEM_A }, { itemId: ITEM_B }],
+      [
+        { itemId: ITEM_A, total: 2, correct: 1 },
+        { itemId: ITEM_B, total: 2, correct: 2 },
+      ], // attachCorrectRates
+      [{ total: 1 }], // count
+      [
+        {
+          studentId: STUDENT_1,
+          studentRut: '11.111.111-1',
+          firstName: 'Ana',
+          lastName: 'Soto',
+          percentage: '50.00',
+        },
+      ],
+      [{ studentId: STUDENT_1, classGroupId: CLASS_GROUP_ID, classGroupName: '3A' }],
+      [
+        {
+          studentId: STUDENT_1,
+          itemId: ITEM_A,
+          value: { answer: 'B' },
+          isCorrect: true,
+          finalScore: '1.00',
+          rawScore: '1.00',
+        },
+      ],
+    ]);
+    const service = makeService(db);
+
+    const res = await service.getMatrix(makeUser(), {
+      assessmentId: ASSESSMENT_ID,
+      tagIds: [NODE_SKILL, NODE_CONTENT],
+      page: 1,
+      limit: 50,
+      all: false,
+    });
+    // OR: ambos ítems se mantienen porque cada uno tiene alguno de los tags.
+    expect(res.questions.map((q) => q.itemId).sort()).toEqual([ITEM_A, ITEM_B].sort());
+  });
+
+  it('TKT-09 all=true: devuelve el curso completo sin paginar (page=1, limit=total)', async () => {
+    const db = makeDb([
+      [assessmentRow], // requireAssessmentOwnedByUser
+      itemRows, // loadQuestionColumns → items
+      tagRows, // loadTagsByItems
+      [
+        { itemId: ITEM_A, total: 2, correct: 1 },
+        { itemId: ITEM_B, total: 2, correct: 2 },
+      ], // attachCorrectRates
+      [{ total: 2 }], // count
+      [
+        {
+          studentId: STUDENT_1,
+          studentRut: '11.111.111-1',
+          firstName: 'Ana',
+          lastName: 'Soto',
+          percentage: '50.00',
+        },
+        {
+          studentId: STUDENT_2,
+          studentRut: '22.222.222-2',
+          firstName: 'Beto',
+          lastName: 'Vera',
+          percentage: '80.00',
+        },
+      ], // loadStudentsPage → page (all → sin limit/offset)
+      [
+        { studentId: STUDENT_1, classGroupId: CLASS_GROUP_ID, classGroupName: '3A' },
+        { studentId: STUDENT_2, classGroupId: CLASS_GROUP_ID, classGroupName: '3A' },
+      ],
+      [], // loadCells
+    ]);
+    const service = makeService(db);
+
+    const res = await service.getMatrix(makeUser(), {
+      assessmentId: ASSESSMENT_ID,
+      page: 1,
+      limit: 50,
+      all: true,
+    });
+    expect(res.students.total).toBe(2);
+    expect(res.students.data).toHaveLength(2);
+    // Con all=true se reporta una sola página con todo el curso.
+    expect(res.students.page).toBe(1);
+    expect(res.students.limit).toBe(2);
   });
 });
 
