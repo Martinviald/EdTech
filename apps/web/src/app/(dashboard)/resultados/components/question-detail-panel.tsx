@@ -1,15 +1,7 @@
 'use client';
 
 import { useState, type JSX } from 'react';
-import {
-  BookOpen,
-  CheckCircle2,
-  FileQuestion,
-  Loader2,
-  Maximize2,
-  Minimize2,
-  Sparkles,
-} from 'lucide-react';
+import { BookOpen, CheckCircle2, FileQuestion, Loader2, Sparkles } from 'lucide-react';
 import type {
   AlternativeDistribution,
   QuestionAnalysisResponse,
@@ -28,6 +20,7 @@ import { Button } from '@/components/ui/button';
 import { PassageDialog, hasPassageContent, type PassageData } from '@/components/passage-dialog';
 import { cn } from '@/lib/utils';
 import { formatNodeCode } from '@/lib/taxonomy-labels';
+import { useResizablePanelWidth, PanelResizeHandle } from '@/hooks/use-resizable-panel-width';
 
 function questionSectionToPassage(section: QuestionSection): PassageData {
   return {
@@ -79,8 +72,13 @@ export function QuestionDetailPanel(props: {
 }): JSX.Element {
   const { data, open, onClose } = props;
   const [passageOpen, setPassageOpen] = useState(false);
-  // TKT-07: el usuario puede agrandar el panel para leer enunciados largos.
-  const [expanded, setExpanded] = useState(false);
+  // TKT-07: el ancho del panel es ajustable arrastrando el borde izquierdo,
+  // persistido en localStorage (mismo patrón que el panel del asistente).
+  const { width, onPointerDown, onKeyDown } = useResizablePanelWidth({
+    storageKey: 'soe.questionDetail.panelWidth',
+    defaultWidth: 560,
+    minWidth: 400,
+  });
   const section = data?.section ?? null;
   const showPassage = hasPassageContent(section);
 
@@ -88,11 +86,11 @@ export function QuestionDetailPanel(props: {
     <Sheet open={open} onOpenChange={(next) => (next ? undefined : onClose())}>
       <SheetContent
         side="right"
-        className={cn(
-          'w-full overflow-y-auto',
-          expanded ? 'sm:max-w-3xl lg:max-w-5xl' : 'sm:max-w-lg lg:max-w-xl',
-        )}
+        style={{ width, maxWidth: '95vw' }}
+        className="w-full max-w-none overflow-y-auto"
       >
+        {/* Tirador de redimensionado en el borde izquierdo (panel ancla derecha). */}
+        <PanelResizeHandle onPointerDown={onPointerDown} onKeyDown={onKeyDown} />
         {/* Header SIEMPRE presente (título + descripción) para accesibilidad:
             Radix Dialog exige un Title/Description en cada Content. */}
         <SheetHeader className="space-y-2 pr-8">
@@ -101,20 +99,6 @@ export function QuestionDetailPanel(props: {
             {data?.correctKey ? (
               <Badge variant="success">Clave correcta: {data.correctKey}</Badge>
             ) : null}
-            <Button
-              variant="ghost"
-              size="sm"
-              className="ml-auto h-7 gap-1.5 px-2 text-xs text-muted-foreground"
-              onClick={() => setExpanded((v) => !v)}
-              aria-label={expanded ? 'Reducir panel' : 'Agrandar panel'}
-            >
-              {expanded ? (
-                <Minimize2 className="size-3.5" aria-hidden />
-              ) : (
-                <Maximize2 className="size-3.5" aria-hidden />
-              )}
-              {expanded ? 'Reducir' : 'Agrandar'}
-            </Button>
           </div>
           <SheetTitle className="text-base leading-snug">
             {data ? `Detalle de la pregunta ${data.position}` : 'Detalle de la pregunta'}
