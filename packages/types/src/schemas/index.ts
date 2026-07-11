@@ -10,6 +10,7 @@ export * from './teacher-assignment.schema';
 export * from './student.schema';
 export * from './class-group.schema';
 export * from './instrument.schema';
+export * from './file.schema';
 export * from './item.schema';
 export * from './item-content.schema';
 export * from './item-edit-proposal.schema';

@@ -192,3 +192,24 @@ DROP POLICY IF EXISTS "item_edit_proposals_tenant_isolation" ON "item_edit_propo
 CREATE POLICY "item_edit_proposals_tenant_isolation" ON "item_edit_proposals"
   AS PERMISSIVE FOR ALL
   USING (org_id::text = current_setting('app.current_org_id', true));
+
+-- ── Módulo genérico de almacenamiento de archivos (S3) ───────────────────────
+-- `files` tiene org_id NULLABLE: las filas con org_id IS NULL son archivos GLOBALES
+-- / de plataforma (ej. el PDF de un instrumento OFICIAL, que no pertenece a ningún
+-- colegio), visibles para todos los tenants — mismo criterio que performance_bands /
+-- llm_settings. Las filas de tenant se aíslan por org_id. FilesService corre las
+-- queries de tenant dentro de withOrgContext(orgId); las globales sin contexto
+-- (org_id IS NULL). Con FOR ALL sin WITH CHECK explícito, la expresión USING se
+-- hereda para INSERT/UPDATE; el org_id efectivo lo fija el service desde el contexto
+-- autorizado (nunca el body), así que el role guard —no el RLS— es la barrera para
+-- crear archivos globales.
+ALTER TABLE "files" ENABLE ROW LEVEL SECURITY;
+ALTER TABLE "files" FORCE  ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "files_tenant_isolation" ON "files";
+CREATE POLICY "files_tenant_isolation" ON "files"
+  AS PERMISSIVE FOR ALL
+  USING (
+    org_id IS NULL
+    OR org_id::text = current_setting('app.current_org_id', true)
+  );

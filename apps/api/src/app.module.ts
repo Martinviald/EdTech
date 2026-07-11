@@ -16,6 +16,7 @@ import { TeacherAssignmentsModule } from './teacher-assignments/teacher-assignme
 import { ClassGroupsModule } from './class-groups/class-groups.module';
 import { StudentsModule } from './students/students.module';
 import { InstrumentsModule } from './instruments/instruments.module';
+import { FilesModule } from './files/files.module';
 import { ItemsModule } from './items/items.module';
 import { ItemEditProposalsModule } from './item-edit-proposals/item-edit-proposals.module';
 import { DiaIngestionModule } from './dia-ingestion/dia-ingestion.module';
@@ -59,6 +60,8 @@ import { OfficialReportsModule } from './official-reports/official-reports.modul
     ClassGroupsModule,
     StudentsModule,
     InstrumentsModule,
+    // ── Módulo genérico de almacenamiento de archivos (S3 CRUD reutilizable) ──
+    FilesModule,
     ItemsModule,
     // ── TKT-19: escritura asistida de ítems (IA propone, humano aprueba) ──
     ItemEditProposalsModule,

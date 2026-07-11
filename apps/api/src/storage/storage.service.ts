@@ -108,11 +108,122 @@ export class StorageService {
     });
   }
 
+  // ── Operaciones S3 server-side ───────────────────────────────────────────────
+
+  /**
+   * Elimina un objeto de S3. Presigna un `DELETE` y lo ejecuta desde el backend
+   * (no lo delega al cliente). Es idempotente: S3 responde 204 tanto si borró el
+   * objeto como si no existía, y aquí tratamos cualquier 2xx y el 404 como éxito.
+   * Un 403/5xx (permisos, fallo del servicio) sí se propaga como error.
+   */
+  async deleteObject(key: string): Promise<void> {
+    const config = this.requireConfig();
+    const url = this.presign({
+      config,
+      method: 'DELETE',
+      key,
+      expiresIn: DEFAULT_EXPIRES_IN,
+    });
+    const res = await fetch(url, { method: 'DELETE' });
+    // 2xx (204 típico) o 404 → objeto ausente = éxito idempotente.
+    if (res.ok || res.status === 404) return;
+    throw new Error(
+      `Error al eliminar el objeto S3 "${key}": ${res.status} ${res.statusText}`,
+    );
+  }
+
+  /**
+   * Consulta metadatos de un objeto sin descargar su contenido (presigna un `HEAD`).
+   * 200 → existe (con tamaño y content-type de los headers); 404 → no existe.
+   * Cualquier otro status (403/5xx) se propaga como error.
+   */
+  async headObject(
+    key: string,
+  ): Promise<{ exists: boolean; sizeBytes: number | null; contentType: string | null }> {
+    const config = this.requireConfig();
+    const url = this.presign({
+      config,
+      method: 'HEAD',
+      key,
+      expiresIn: DEFAULT_EXPIRES_IN,
+    });
+    const res = await fetch(url, { method: 'HEAD' });
+    if (res.status === 404) {
+      return { exists: false, sizeBytes: null, contentType: null };
+    }
+    if (res.ok) {
+      return {
+        exists: true,
+        sizeBytes: Number(res.headers.get('content-length')) || null,
+        contentType: res.headers.get('content-type'),
+      };
+    }
+    throw new Error(
+      `Error al consultar el objeto S3 "${key}": ${res.status} ${res.statusText}`,
+    );
+  }
+
+  /**
+   * Lista los objetos del bucket bajo un `prefix` (S3 ListObjectsV2). El presign
+   * apunta al root del bucket (`/`, key vacía), con `list-type=2` y `prefix` como
+   * query. La respuesta es XML: se parsea con regex simple para extraer
+   * `<Contents><Key>…</Key><Size>…</Size></Contents>`. Bucket/prefijo vacío → `[]`.
+   */
+  async listObjects(
+    prefix: string,
+  ): Promise<Array<{ key: string; sizeBytes: number | null }>> {
+    const config = this.requireConfig();
+    const url = this.presign({
+      config,
+      method: 'GET',
+      key: '', // canonicalUri = '/' (root del bucket), no una key concreta
+      expiresIn: DEFAULT_EXPIRES_IN,
+      extraQuery: { 'list-type': '2', prefix },
+    });
+    const res = await fetch(url, { method: 'GET' });
+    if (!res.ok) {
+      throw new Error(
+        `Error al listar objetos S3 (prefix "${prefix}"): ${res.status} ${res.statusText}`,
+      );
+    }
+    return this.parseListObjectsXml(await res.text());
+  }
+
+  /** Parseo minimalista del XML de ListObjectsV2 (sin dependencia de un parser XML). */
+  private parseListObjectsXml(
+    xml: string,
+  ): Array<{ key: string; sizeBytes: number | null }> {
+    const results: Array<{ key: string; sizeBytes: number | null }> = [];
+    const contentsRe = /<Contents>([\s\S]*?)<\/Contents>/g;
+    let match: RegExpExecArray | null;
+    while ((match = contentsRe.exec(xml)) !== null) {
+      const block = match[1]!;
+      const keyMatch = /<Key>([\s\S]*?)<\/Key>/.exec(block);
+      if (!keyMatch) continue;
+      const sizeMatch = /<Size>(\d+)<\/Size>/.exec(block);
+      results.push({
+        key: this.decodeXmlEntities(keyMatch[1]!),
+        sizeBytes: sizeMatch ? Number(sizeMatch[1]) : null,
+      });
+    }
+    return results;
+  }
+
+  /** Decodifica las entidades XML básicas que S3 puede emitir en las keys. */
+  private decodeXmlEntities(input: string): string {
+    return input
+      .replace(/&lt;/g, '<')
+      .replace(/&gt;/g, '>')
+      .replace(/&quot;/g, '"')
+      .replace(/&#39;/g, "'")
+      .replace(/&amp;/g, '&');
+  }
+
   // ── SigV4 presigning ───────────────────────────────────────────────────────
 
   private presign(args: {
     config: S3Config;
-    method: 'GET' | 'PUT';
+    method: 'GET' | 'PUT' | 'DELETE' | 'HEAD';
     key: string;
     expiresIn: number;
     extraQuery?: Record<string, string>;
@@ -199,7 +310,12 @@ export class StorageService {
   }
 
   private readConfig(): S3Config | null {
-    const bucket = process.env.STORAGE_S3_BUCKET ?? process.env.S3_BUCKET;
+    // `AWS_S3_BUCKET` es la variable que inyecta la infra AWS/SST al aprovisionar
+    // el bucket; se deja como último fallback tras las overrides locales explícitas.
+    const bucket =
+      process.env.STORAGE_S3_BUCKET ??
+      process.env.S3_BUCKET ??
+      process.env.AWS_S3_BUCKET;
     const accessKeyId = process.env.AWS_ACCESS_KEY_ID;
     const secretAccessKey = process.env.AWS_SECRET_ACCESS_KEY;
     const region = process.env.STORAGE_S3_REGION ?? process.env.AWS_REGION ?? 'us-east-1';

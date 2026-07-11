@@ -179,6 +179,12 @@ export const passageFormatEnum = pgEnum('passage_format', ['plain', 'markdown', 
 // Tipo de archivo adjunto a una sección (audio cubre listening de inglés a futuro).
 export const attachmentKindEnum = pgEnum('attachment_kind', ['image', 'audio', 'pdf', 'other']);
 
+// Estado de un objeto en el módulo genérico de almacenamiento (`files`):
+//  · `pending`  = se emitió la URL prefirmada de subida, el archivo aún no se confirma.
+//  · `ready`    = subida confirmada y validada (headObject en S3). Es el estado usable.
+// El "borrado" es soft-delete (deleted_at), no un valor de este enum.
+export const fileStatusEnum = pgEnum('file_status', ['pending', 'ready']);
+
 // Estado de un job de análisis IA (F2 S0 — H19.23).
 export const aiAnalysisStatusEnum = pgEnum('ai_analysis_status', [
   'pending',
