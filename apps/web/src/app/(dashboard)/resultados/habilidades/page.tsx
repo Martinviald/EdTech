@@ -79,11 +79,7 @@ export default async function HabilidadesPage({
           description="No se encontraron habilidades evaluadas para los filtros aplicados."
         />
       ) : (
-        <SkillsBreakdown
-          skills={skills}
-          assessmentId={assessmentId}
-          classGroupId={filters.classGroupId}
-        />
+        <SkillsBreakdown skills={skills} filters={filters} assessmentId={assessmentId} />
       )}
     </PageContainer>
   );
