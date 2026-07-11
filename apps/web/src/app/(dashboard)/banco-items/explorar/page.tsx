@@ -36,10 +36,9 @@ type PageProps = {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 };
 
-// Tipos de nodo que NO se ofrecen como filtro en el banco de ítems. El
-// descriptor es metadato fino del ítem (contexto para IA remedial), no una
-// dimensión de exploración útil aquí.
-const HIDDEN_FILTER_NODE_TYPES = new Set<string>(['descriptor']);
+// Marco a filtrar (de momento solo Currículum Nacional). Restringe los facets a
+// esta taxonomía → los descriptores del marco DIA no aparecen como filtro.
+const CURRICULUM_MARCO_TYPE = 'mineduc';
 
 function parseScope(raw: string | string[] | undefined): ItemBankScope {
   const value = typeof raw === 'string' ? raw : undefined;
@@ -75,37 +74,70 @@ export default async function BancoItemsExplorarPage({ searchParams }: PageProps
   const subjectId = parseSingle(params.subjectId);
   const gradeId = parseSingle(params.gradeId);
 
-  // Selección por tipo de nodo (una clave por TaxonomyNodeType en la URL).
-  const selectedByType: Record<string, string[]> = {};
-  for (const type of TAXONOMY_NODE_TYPES) {
-    if (HIDDEN_FILTER_NODE_TYPES.has(type)) continue;
+  // Nodos del marco curricular (todos): pueblan y acotan los filtros client-side.
+  const [subjects, grades, nodes] = await Promise.all([
+    apiGet<CatalogEntry[]>('/catalog/subjects'),
+    apiGet<CatalogEntry[]>('/catalog/grades'),
+    apiGet<TaxonomyNodeModel[]>(`/taxonomies/nodes/facets?taxonomyType=${CURRICULUM_MARCO_TYPE}`),
+  ]);
+
+  // Tipos HOJA (etiquetan ítems) vs PADRE (estructura). Se derivan del árbol.
+  const parentIds = new Set(nodes.map((n) => n.parentId).filter((p): p is string => Boolean(p)));
+  const structuralTypes = new Set(nodes.filter((n) => parentIds.has(n.id)).map((n) => n.type));
+  const presentTypes = new Set(nodes.map((n) => n.type));
+  const leafTypes = TAXONOMY_NODE_TYPES.filter(
+    (t) => presentTypes.has(t) && !structuralTypes.has(t),
+  );
+
+  const matchesScope = (n: TaxonomyNodeModel) => {
+    if (subjectId && n.subjectId && n.subjectId !== subjectId) return false;
+    if (gradeId && n.gradeId && n.gradeId !== gradeId) return false;
+    return true;
+  };
+
+  // Selección: por tipo HOJA (ids) y por tipo PADRE/narrower (id único).
+  const selectedLeaf: Record<string, string[]> = {};
+  for (const type of leafTypes) {
     const ids = parseCsvIds(params[type]);
-    if (ids.length > 0) selectedByType[type] = ids;
+    if (ids.length > 0) selectedLeaf[type] = ids;
+  }
+  const selectedParent: Record<string, string> = {};
+  for (const type of structuralTypes) {
+    const id = parseSingle(params[type]);
+    if (id) selectedParent[type] = id;
   }
 
-  // Query de facets (nodos acotados por asignatura/nivel para los dropdowns).
-  const facetsQuery = new URLSearchParams();
-  if (subjectId) facetsQuery.set('subjectId', subjectId);
-  if (gradeId) facetsQuery.set('gradeId', gradeId);
+  // Grupos AND para /items: un grupo por dimensión con selección. Si hay un padre
+  // (narrower) elegido pero SIN selección explícita de su tipo hoja hijo, se
+  // expande a los hijos de ese padre en el ámbito (p. ej. "Eje: Lectura" → todos
+  // sus OA). Semántica: AND entre grupos, OR dentro de cada grupo.
+  const groups: string[][] = [];
+  for (const [, ids] of Object.entries(selectedLeaf)) {
+    if (ids.length > 0) groups.push(ids);
+  }
+  for (const parentId of Object.values(selectedParent)) {
+    const children = nodes.filter(
+      (n) => n.parentId === parentId && leafTypes.includes(n.type) && matchesScope(n),
+    );
+    const childLeafTypes = new Set(children.map((n) => n.type));
+    const alreadySelected = [...childLeafTypes].some((t) => (selectedLeaf[t]?.length ?? 0) > 0);
+    if (!alreadySelected && children.length > 0) {
+      groups.push(children.map((n) => n.id));
+    }
+  }
 
-  // Query de ítems: asignatura/nivel + un grupo AND por cada tipo con selección.
-  const itemsQuery = new URLSearchParams();
-  itemsQuery.set('scope', scope);
   // El DTO de /items usa paginationSchema (`pageSize`, máx 100). Con el filtrado
   // facetado server-side, una página basta; el aviso de "truncado" sugiere afinar.
+  const itemsQuery = new URLSearchParams();
+  itemsQuery.set('scope', scope);
   itemsQuery.set('pageSize', '100');
   if (subjectId) itemsQuery.set('subjectId', subjectId);
   if (gradeId) itemsQuery.set('gradeId', gradeId);
-  for (const ids of Object.values(selectedByType)) {
-    if (ids.length > 0) itemsQuery.append('taxonomyNodeGroups', ids.join(','));
-  }
+  for (const group of groups) itemsQuery.append('taxonomyNodeGroups', group.join(','));
 
-  const [itemsResponse, instrumentsResponse, subjects, grades, facetNodes] = await Promise.all([
+  const [itemsResponse, instrumentsResponse] = await Promise.all([
     apiGet<ItemsListResponse>(`/items?${itemsQuery.toString()}`),
     apiGet<InstrumentsListResponse>('/instruments?limit=200'),
-    apiGet<CatalogEntry[]>('/catalog/subjects'),
-    apiGet<CatalogEntry[]>('/catalog/grades'),
-    apiGet<TaxonomyNodeModel[]>(`/taxonomies/nodes/facets?${facetsQuery.toString()}`),
   ]);
 
   const items = itemsResponse.data;
@@ -137,10 +169,11 @@ export default async function BancoItemsExplorarPage({ searchParams }: PageProps
       <ItemBankFilters
         subjects={subjects}
         grades={grades}
-        facetNodes={facetNodes.filter((n) => !HIDDEN_FILTER_NODE_TYPES.has(n.type))}
+        nodes={nodes}
         subjectId={subjectId}
         gradeId={gradeId}
-        selectedByType={selectedByType}
+        selectedLeaf={selectedLeaf}
+        selectedParent={selectedParent}
       />
 
       <ItemBankExplorer items={items} instrumentNames={instrumentNames} />

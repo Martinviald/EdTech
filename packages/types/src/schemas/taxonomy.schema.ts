@@ -66,6 +66,9 @@ export const listTaxonomyNodeFacetsQuerySchema = z.object({
   subjectId: z.string().uuid().optional(),
   gradeId: z.string().uuid().optional(),
   type: taxonomyNodeTypeSchema.optional(),
+  // Restringe a un marco (tipo de taxonomía). Ej.: `mineduc` = Currículum
+  // Nacional. Permite que el banco filtre por un marco a la vez.
+  taxonomyType: taxonomyTypeSchema.optional(),
 });
 
 export type CreateTaxonomyDto = z.infer<typeof createTaxonomySchema>;

@@ -52,7 +52,10 @@ export class NodesService {
    * estricto los ocultaría al elegir un nivel.
    */
   async listFacets(filters: ListTaxonomyNodeFacetsQueryDto, user: JwtPayload) {
-    const visible = await this.taxonomiesService.listVisible(user);
+    const visible = await this.taxonomiesService.listVisible(
+      user,
+      filters.taxonomyType ? { type: filters.taxonomyType } : {},
+    );
     const visibleIds = visible.map((t) => t.id);
     if (visibleIds.length === 0) return [];
 
