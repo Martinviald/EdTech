@@ -11,7 +11,7 @@ import type {
   QuestionAnalysisResponse,
 } from '@soe/types';
 import { toast } from 'sonner';
-import { ArrowDownUp, BarChart3, ChevronDown, ChevronUp, Loader2, RotateCcw } from 'lucide-react';
+import { ArrowDownUp, ChevronDown, ChevronUp, Loader2, RotateCcw } from 'lucide-react';
 import {
   Table,
   TableBody,
@@ -256,11 +256,12 @@ export function CrossTable({
   return (
     <div className="space-y-4">
       <p className="text-xs text-muted-foreground">
-        Ordena por logro con las cabeceras: clic en <span className="font-medium">% Logro</span>{' '}
-        (alumnos), en el número de una pregunta (alumnos por esa pregunta) o en{' '}
-        <span className="font-medium">Ordenar preguntas</span>. Toca el ícono{' '}
-        <BarChart3 className="inline size-3" aria-hidden /> para ver la distribución de respuestas.
-        Verde = correcta, rojo = incorrecta, gris = sin respuesta.
+        Clic en el <span className="font-medium">número</span> de una pregunta para ver su detalle;
+        el botón <ArrowDownUp className="inline size-3" aria-hidden /> bajo cada pregunta ordena a
+        los alumnos por esa pregunta. Clic en <span className="font-medium">% Logro colegio</span>{' '}
+        (primera columna) ordena a los alumnos por su logro global; o usa{' '}
+        <span className="font-medium">Ordenar preguntas</span>. Verde = correcta, rojo = incorrecta,
+        gris = sin respuesta.
       </p>
 
       {/* Barra de herramientas: filtro por tags (TKT-12) + orden de preguntas (TKT-09) */}
@@ -310,36 +311,30 @@ export function CrossTable({
                 <TableHead className="sticky left-0 z-30 min-w-[180px] bg-background">
                   Alumno
                 </TableHead>
-                <TableHead className="bg-background text-right">
-                  <button
-                    type="button"
-                    onClick={sortByAchievement}
-                    className="ml-auto inline-flex items-center gap-1 rounded px-1.5 py-1 font-medium transition-colors hover:bg-accent focus:outline-none focus:ring-2 focus:ring-ring"
-                    aria-label="Ordenar alumnos por porcentaje de logro"
-                  >
-                    % Logro
-                    <SortIndicator dir={achievementDir} />
-                  </button>
-                </TableHead>
+                {/* El orden por logro global se dispara desde la primera celda de la
+                    fila "% Logro colegio" (ver SchoolReferenceRow); aquí solo el rótulo. */}
+                <TableHead className="bg-background text-right font-medium">% Logro</TableHead>
                 {displayQuestions.map((q) => {
                   const isSorted = sortedColumnId === q.itemId;
+                  const isLoading = loadingItemId === q.itemId;
                   return (
                     <TableHead key={q.itemId} className="bg-background px-1 text-center">
                       <div className="flex flex-col items-center gap-0.5">
+                        {/* Principal: el número de la pregunta abre el detalle. */}
                         <Tooltip>
                           <TooltipTrigger asChild>
                             <button
                               type="button"
-                              onClick={() => sortByColumn(q.itemId)}
-                              className={cn(
-                                'flex w-full flex-col items-center gap-0.5 rounded px-1.5 py-1 transition-colors hover:bg-accent focus:outline-none focus:ring-2 focus:ring-ring',
-                                isSorted && 'bg-accent',
-                              )}
-                              aria-label={`Ordenar alumnos por el logro de la pregunta ${q.position}`}
+                              onClick={() => void openQuestion(q)}
+                              disabled={isLoading}
+                              className="flex w-full flex-col items-center gap-0.5 rounded px-1.5 py-1 transition-colors hover:bg-accent focus:outline-none focus:ring-2 focus:ring-ring disabled:opacity-70"
+                              aria-label={`Ver el detalle de la pregunta ${q.position}`}
                             >
                               <span className="inline-flex items-center gap-0.5 text-sm font-medium tabular-nums">
                                 P{q.position}
-                                {isSorted ? <SortIndicator dir={studentSort?.dir ?? null} /> : null}
+                                {isLoading ? (
+                                  <Loader2 className="size-3 animate-spin" aria-hidden />
+                                ) : null}
                               </span>
                               <span
                                 className={cn(
@@ -358,22 +353,23 @@ export function CrossTable({
                             <p>Clave correcta: {q.correctKey ?? '—'}</p>
                             <p>% de logro: {formatPct(q.correctRate)}</p>
                             <p className="mt-1 text-muted-foreground">
-                              Clic para ordenar alumnos por esta pregunta.
+                              Clic para ver el detalle de la pregunta.
                             </p>
                           </TooltipContent>
                         </Tooltip>
+                        {/* Secundario: botón chico para ordenar alumnos por esta pregunta. */}
                         <button
                           type="button"
-                          onClick={() => void openQuestion(q)}
-                          disabled={loadingItemId === q.itemId}
-                          className="rounded p-0.5 text-muted-foreground transition-colors hover:bg-accent hover:text-foreground focus:outline-none focus:ring-2 focus:ring-ring disabled:opacity-70"
-                          aria-label={`Ver distribución de respuestas de la pregunta ${q.position}`}
-                        >
-                          {loadingItemId === q.itemId ? (
-                            <Loader2 className="size-3.5 animate-spin" aria-hidden />
-                          ) : (
-                            <BarChart3 className="size-3.5" aria-hidden />
+                          onClick={() => sortByColumn(q.itemId)}
+                          className={cn(
+                            'inline-flex items-center gap-0.5 rounded px-1 py-0.5 text-[10px] text-muted-foreground transition-colors hover:bg-accent hover:text-foreground focus:outline-none focus:ring-2 focus:ring-ring',
+                            isSorted && 'bg-accent text-foreground',
                           )}
+                          aria-label={`Ordenar alumnos por el logro de la pregunta ${q.position}`}
+                          title="Ordenar alumnos por esta pregunta"
+                        >
+                          <ArrowDownUp className="size-3" aria-hidden />
+                          {isSorted ? <SortIndicator dir={studentSort?.dir ?? null} /> : null}
                         </button>
                       </div>
                     </TableHead>
@@ -388,7 +384,11 @@ export function CrossTable({
                   colegio completo aquí). La línea de "muestra de colegios"
                   (benchmark inter-colegio) queda DIFERIDA hasta existir un pool
                   multi-colegio; llegará como `q.references.sample` sin romper esto. */}
-              <SchoolReferenceRow questions={displayQuestions} />
+              <SchoolReferenceRow
+                questions={displayQuestions}
+                onSortAchievement={sortByAchievement}
+                achievementDir={achievementDir}
+              />
               {displayStudents.map((row) => (
                 <StudentRow key={row.studentId} row={row} questions={displayQuestions} />
               ))}
@@ -422,18 +422,41 @@ function referenceCellClass(rate: number | null): string {
  * exista el pool multi-colegio (TKT-20), la "muestra de colegios"
  * (`q.references.sample`) se agrega como una segunda fila análoga.
  */
-function SchoolReferenceRow({ questions }: { questions: MatrixQuestionColumn[] }): JSX.Element {
+function SchoolReferenceRow({
+  questions,
+  onSortAchievement,
+  achievementDir,
+}: {
+  questions: MatrixQuestionColumn[];
+  onSortAchievement: () => void;
+  achievementDir: SortDir | null;
+}): JSX.Element {
   const orgRates = questions.map((q) => q.references.org).filter((v): v is number => v !== null);
   const orgMean =
     orgRates.length > 0 ? orgRates.reduce((a, b) => a + b, 0) / orgRates.length : null;
 
   return (
     <TableRow className="border-b-2 bg-muted/30">
-      <TableCell className="sticky left-0 z-10 bg-muted/60 align-top">
-        <span className="block text-sm font-semibold">% Logro colegio</span>
-        <span className="block text-xs font-normal text-muted-foreground">
-          Promedio de toda la organización
-        </span>
+      {/* Primera columna: clic ordena a los alumnos por su % de logro global. */}
+      <TableCell className="sticky left-0 z-10 bg-muted/60 p-0 align-top">
+        <button
+          type="button"
+          onClick={onSortAchievement}
+          className={cn(
+            'flex w-full flex-col items-start gap-0 px-4 py-2 text-left transition-colors hover:bg-accent focus:outline-none focus:ring-2 focus:ring-inset focus:ring-ring',
+            achievementDir !== null && 'bg-accent/60',
+          )}
+          aria-label="Ordenar alumnos por su porcentaje de logro global"
+          title="Clic para ordenar alumnos por su % de logro global"
+        >
+          <span className="inline-flex items-center gap-1 text-sm font-semibold">
+            % Logro colegio
+            <SortIndicator dir={achievementDir} />
+          </span>
+          <span className="text-xs font-normal text-muted-foreground">
+            Promedio de la organización · clic para ordenar alumnos
+          </span>
+        </button>
       </TableCell>
       <TableCell className="text-right font-semibold tabular-nums">{formatPct(orgMean)}</TableCell>
       {questions.map((q) => (
