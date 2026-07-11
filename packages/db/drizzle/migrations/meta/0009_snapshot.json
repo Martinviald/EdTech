@@ -1,6 +1,6 @@
 {
-  "id": "79917d07-ccc4-4819-b44d-113d925c6ed1",
-  "prevId": "9fb81362-da8b-49f2-b63e-5e126bd58fc0",
+  "id": "8b2d6332-0134-4a1b-ba19-f8502ec4765d",
+  "prevId": "79917d07-ccc4-4819-b44d-113d925c6ed1",
   "version": "7",
   "dialect": "postgresql",
   "tables": {
@@ -3429,6 +3429,12 @@
           "notNull": true,
           "default": "gen_random_uuid()"
         },
+        "instrument_id": {
+          "name": "instrument_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
         "scale_id": {
           "name": "scale_id",
           "type": "uuid",
@@ -3499,8 +3505,43 @@
           "notNull": false
         }
       },
-      "indexes": {},
+      "indexes": {
+        "performance_bands_instrument_order_idx": {
+          "name": "performance_bands_instrument_order_idx",
+          "columns": [
+            {
+              "expression": "instrument_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "order",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
       "foreignKeys": {
+        "performance_bands_instrument_id_instruments_id_fk": {
+          "name": "performance_bands_instrument_id_instruments_id_fk",
+          "tableFrom": "performance_bands",
+          "tableTo": "instruments",
+          "columnsFrom": [
+            "instrument_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
         "performance_bands_scale_id_grading_scales_id_fk": {
           "name": "performance_bands_scale_id_grading_scales_id_fk",
           "tableFrom": "performance_bands",

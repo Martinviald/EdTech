@@ -1,7 +1,7 @@
 import { decimal, index, jsonb, pgTable, text, timestamp, uuid } from 'drizzle-orm/pg-core';
 import { relations } from 'drizzle-orm';
 import type { RemedialContent } from '@soe/types';
-import { remedialMaterialTypeEnum, remedialStatusEnum } from './enums';
+import { remedialMaterialTypeEnum, remedialMethodEnum, remedialStatusEnum } from './enums';
 import { organizations } from './organizations';
 import { assessments } from './assessments';
 import { taxonomyNodes } from './taxonomy';
@@ -31,6 +31,9 @@ export const remedialMaterials = pgTable(
       .references(() => organizations.id, { onDelete: 'cascade' }),
     type: remedialMaterialTypeEnum('type').notNull(),
     status: remedialStatusEnum('status').notNull().default('pending'),
+    // Método de generación del set (Ola 2.1a). `self_contained` = default para no romper
+    // filas viejas; `reuse_stimulus` (A) / `generate_stimulus` (B, 2.2).
+    method: remedialMethodEnum('method').notNull().default('self_contained'),
     // Nodo de taxonomía objetivo (la brecha / OA a remediar).
     nodeId: uuid('node_id').references(() => taxonomyNodes.id, { onDelete: 'set null' }),
     // Evaluación de origen (la brecha proviene de su Análisis IA), opcional.
@@ -42,6 +45,10 @@ export const remedialMaterials = pgTable(
     title: text('title'),
     // Salida polimórfica por `type` (validada con Zod en la capa de aplicación).
     content: jsonb('content').$type<RemedialContent>(),
+    // Reporte del juez automático (Ola 2.1b): { iterations, finalStatus, verdicts[] }.
+    // Genérico por ahora — el `qualityReportSchema` dedicado llega en 2.1b; se agrega la
+    // columna ya para que 2.1b solo la rellene. `null` en filas 2.1a / sin juez.
+    qualityReport: jsonb('quality_report').$type<Record<string, unknown>>(),
     // Contexto curricular (RAG) enviado al modelo — auditoría, sin PII.
     input: jsonb('input').$type<Record<string, unknown>>(),
     inputHash: text('input_hash'), // caché por (type, nodeId, nivel, …)

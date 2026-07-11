@@ -61,8 +61,15 @@
     {
       "idx": 8,
       "version": "7",
-      "when": 1783364994189,
-      "tag": "0008_absent_squadron_supreme",
+      "when": 1783200153742,
+      "tag": "0008_uneven_power_pack",
+      "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1783736910217,
+      "tag": "0009_goofy_shocker",
       "breakpoints": true
     }
   ]
