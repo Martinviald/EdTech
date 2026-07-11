@@ -52,6 +52,20 @@ export function nodeTypeLabel(type: string | null | undefined): string | null {
 }
 
 /**
+ * Etiqueta legible de un nodo de taxonomía para un filtro/opción: código legible
+ * (si aplica) + nombre humano. Comparte formato con las facetas de tags.
+ */
+export function nodeOptionLabel(node: {
+  code: string | null;
+  name: string;
+  type?: string | null;
+}): string {
+  const short = formatNodeCode(node.code, node.type);
+  if (short && node.name) return `${short} · ${node.name}`;
+  return node.name || short || node.code || '';
+}
+
+/**
  * Código de nodo en forma legible para mostrar junto al nombre del nodo.
  *   - Objetivo de aprendizaje → `"OA-{n}"` (sin cero a la izquierda ni prefijo).
  *   - Asignatura pura (LANG/MATH/…) → el nombre de la asignatura.

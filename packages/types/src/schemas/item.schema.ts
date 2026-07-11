@@ -148,6 +148,29 @@ const taxonomyNodeIdsSchema = z
   })
   .pipe(z.array(z.string().uuid()).optional());
 
+/**
+ * Coacciona `taxonomyNodeGroups` a `string[][]` (grupos AND, OR dentro de cada
+ * grupo). Cada ocurrencia del query param (repetido) es una CSV de uuids = un
+ * grupo. Espejo del schema en apps/api (item.dto.ts).
+ */
+const taxonomyNodeGroupsSchema = z
+  .union([z.array(z.string()), z.string()])
+  .optional()
+  .transform((v) => {
+    if (v === undefined) return undefined;
+    const raw = Array.isArray(v) ? v : [v];
+    const groups = raw
+      .map((g) =>
+        g
+          .split(',')
+          .map((s) => s.trim())
+          .filter((s) => s.length > 0),
+      )
+      .filter((g) => g.length > 0);
+    return groups.length > 0 ? groups : undefined;
+  })
+  .pipe(z.array(z.array(z.string().uuid())).optional());
+
 export const listItemsQuerySchema = z.object({
   instrumentId: z.string().uuid().optional(),
   sectionId: z.string().uuid().optional(),
@@ -159,6 +182,11 @@ export const listItemsQuerySchema = z.object({
   // Filtro multi-tag con lógica OR (TKT-12/TKT-14): el ítem se incluye si tiene
   // CUALQUIERA de estos nodos etiquetado. Se combina con `taxonomyNodeId` (OR).
   taxonomyNodeIds: taxonomyNodeIdsSchema,
+  // Filtro facetado del banco: asignatura Y nivel (transitivo vía tags → nodos).
+  subjectId: z.string().uuid().optional(),
+  gradeId: z.string().uuid().optional(),
+  // Grupos AND (OR dentro de cada grupo): un grupo por tipo de nodo elegido.
+  taxonomyNodeGroups: taxonomyNodeGroupsSchema,
   // Alcance del banco de ítems (TKT-14): 'own' | 'global' | 'all' (default).
   scope: itemBankScopeSchema.default('all'),
   page: z.coerce.number().int().min(1).default(1),

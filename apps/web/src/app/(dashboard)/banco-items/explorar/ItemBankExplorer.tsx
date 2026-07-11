@@ -2,18 +2,16 @@
 
 // TKT-14 — Explorador del banco de ítems global (cross-instrumento).
 //
-// Recibe los ítems ya cargados por el Server Component (según el alcance) y
-// aplica el filtro multi-tag (OR) del lado del cliente, operando sobre los tags
-// presentes en los datos (decisión de TKT-12). Reutiliza `TagMultiFilter`,
+// Recibe los ítems YA filtrados por el Server Component (asignatura, nivel y tags
+// de taxonomía, server-side). Solo presenta la lista y el detalle: el filtrado
+// vive en `ItemBankFilters` (que reescribe la URL) y en el backend. Reutiliza
 // `TagBadge` e `ItemDetailPanel` para no duplicar UI.
 
-import { useMemo, useState } from 'react';
+import { useState } from 'react';
 import { Library } from 'lucide-react';
 import type { ItemModel } from '@soe/types';
 import { Badge } from '@/components/ui/badge';
 import { EmptyState } from '@/components/patterns';
-import { TagMultiFilter } from '../TagMultiFilter';
-import { deriveTagFacets, filterItemsByTags } from '../tag-facets';
 import { TagBadge } from '../[instrumentId]/TagBadge';
 import { ItemDetailPanel } from '../[instrumentId]/ItemDetailPanel';
 
@@ -45,36 +43,25 @@ interface ItemBankExplorerProps {
 }
 
 export function ItemBankExplorer({ items, instrumentNames }: ItemBankExplorerProps) {
-  const [selected, setSelected] = useState<string[]>([]);
   const [detail, setDetail] = useState<ItemModel | null>(null);
-
-  const facets = useMemo(() => deriveTagFacets(items), [items]);
-  const filtered = useMemo(() => filterItemsByTags(items, selected), [items, selected]);
 
   return (
     <div className="space-y-4">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <TagMultiFilter facets={facets} selected={selected} onChange={setSelected} />
         <p className="text-xs text-muted-foreground">
-          {filtered.length === items.length
-            ? `${items.length} ítem${items.length === 1 ? '' : 's'}`
-            : `${filtered.length} de ${items.length} ítems`}
+          {items.length} ítem{items.length === 1 ? '' : 's'}
         </p>
       </div>
 
-      {filtered.length === 0 ? (
+      {items.length === 0 ? (
         <EmptyState
           icon={Library}
           title="Sin ítems para el filtro"
-          description={
-            selected.length > 0
-              ? 'Ningún ítem coincide con los tags seleccionados. Ajusta o limpia el filtro.'
-              : 'No hay ítems en este alcance del banco.'
-          }
+          description="Ningún ítem coincide con los filtros seleccionados. Ajusta o limpia los filtros."
         />
       ) : (
         <ul className="divide-y overflow-hidden rounded-lg border">
-          {filtered.map((item) => {
+          {items.map((item) => {
             const instrumentName = item.instrumentId
               ? (instrumentNames[item.instrumentId] ?? 'Instrumento')
               : 'Ítem sin instrumento';

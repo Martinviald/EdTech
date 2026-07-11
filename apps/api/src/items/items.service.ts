@@ -4,7 +4,7 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { and, asc, count, eq, inArray, isNull, or } from 'drizzle-orm';
+import { and, asc, count, eq, exists, inArray, isNull, or } from 'drizzle-orm';
 import {
   assessments,
   items,
@@ -75,6 +75,61 @@ export class ItemsService {
     }
     if (filters.source) {
       conditions.push(eq(items.source, filters.source));
+    }
+
+    // Filtro facetado del banco (dropdowns en cascada): asignatura, nivel y cada
+    // grupo de nodos elegido se combinan con AND (intersección). Los `items` no
+    // tienen subject/grade: se derivan de los nodos que los etiquetan, así que
+    // cada dimensión se expresa como un EXISTS correlacionado sobre los tags.
+    // Semántica: AND entre dimensiones, OR dentro de cada grupo/subconsulta.
+    if (filters.subjectId) {
+      conditions.push(
+        exists(
+          this.db
+            .select()
+            .from(itemTaxonomyTags)
+            .innerJoin(taxonomyNodes, eq(itemTaxonomyTags.nodeId, taxonomyNodes.id))
+            .where(
+              and(
+                eq(itemTaxonomyTags.itemId, items.id),
+                eq(taxonomyNodes.subjectId, filters.subjectId),
+              ),
+            ),
+        ),
+      );
+    }
+    if (filters.gradeId) {
+      conditions.push(
+        exists(
+          this.db
+            .select()
+            .from(itemTaxonomyTags)
+            .innerJoin(taxonomyNodes, eq(itemTaxonomyTags.nodeId, taxonomyNodes.id))
+            .where(
+              and(
+                eq(itemTaxonomyTags.itemId, items.id),
+                eq(taxonomyNodes.gradeId, filters.gradeId),
+              ),
+            ),
+        ),
+      );
+    }
+    if (filters.taxonomyNodeGroups) {
+      for (const group of filters.taxonomyNodeGroups) {
+        conditions.push(
+          exists(
+            this.db
+              .select()
+              .from(itemTaxonomyTags)
+              .where(
+                and(
+                  eq(itemTaxonomyTags.itemId, items.id),
+                  inArray(itemTaxonomyTags.nodeId, group),
+                ),
+              ),
+          ),
+        );
+      }
     }
 
     // Filtro por tags (TKT-12/TKT-14): un ítem se incluye si tiene CUALQUIERA de
