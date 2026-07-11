@@ -106,7 +106,7 @@ export const NAV_GROUPS: readonly NavGroup[] = [
       },
       {
         href: '/resultados',
-        label: 'Resultados',
+        label: 'Panorama pedagógico',
         icon: BarChart3,
         status: 'live',
         roles: DASHBOARD_VIEWER_ROLES,

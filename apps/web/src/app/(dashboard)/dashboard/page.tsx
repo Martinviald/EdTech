@@ -192,7 +192,7 @@ function QuickAccess({ roles, canImport }: { roles: readonly UserRole[]; canImpo
   const links: { href: string; label: string; icon: typeof BarChart3; show: boolean }[] = [
     {
       href: '/resultados',
-      label: 'Ver resultados',
+      label: 'Panorama pedagógico',
       icon: BarChart3,
       show: canAccess(roles, RESULTS_VIEWER_ROLES),
     },
