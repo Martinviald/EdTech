@@ -20,6 +20,10 @@ import {
 } from '@/components/passage-dialog';
 import { cn } from '@/lib/utils';
 import { formatNodeCode } from '@/lib/taxonomy-labels';
+import {
+  useResizablePanelWidth,
+  PanelResizeHandle,
+} from '@/hooks/use-resizable-panel-width';
 import { ItemEditProposals } from './ItemEditProposals';
 
 function sectionToPassage(section: InstrumentSectionModel): PassageData {
@@ -96,13 +100,26 @@ export function ItemDetailPanel(props: {
 }): JSX.Element {
   const { item, sections = [], canEdit = false, instrumentId, open, onClose } = props;
   const [passageOpen, setPassageOpen] = useState(false);
+  // El ancho del panel es ajustable arrastrando el borde izquierdo, persistido en
+  // localStorage (mismo patrón que el panel del asistente y el de resultados).
+  const { width, onPointerDown, onKeyDown } = useResizablePanelWidth({
+    storageKey: 'soe.itemDetail.panelWidth',
+    defaultWidth: 560,
+    minWidth: 400,
+  });
 
   const section = item?.sectionId ? (sections.find((s) => s.id === item.sectionId) ?? null) : null;
   const showPassage = hasPassageContent(section);
 
   return (
     <Sheet open={open} onOpenChange={(next) => (next ? undefined : onClose())}>
-      <SheetContent side="right" className="w-full overflow-y-auto sm:max-w-lg lg:max-w-xl">
+      <SheetContent
+        side="right"
+        style={{ width, maxWidth: '95vw' }}
+        className="w-full max-w-none overflow-y-auto"
+      >
+        {/* Tirador de redimensionado en el borde izquierdo (panel ancla derecha). */}
+        <PanelResizeHandle onPointerDown={onPointerDown} onKeyDown={onKeyDown} />
         {/* Header SIEMPRE presente (Radix Dialog exige Title + Description). */}
         <SheetHeader className="space-y-2 pr-8">
           <div className="flex flex-wrap items-center gap-2">
