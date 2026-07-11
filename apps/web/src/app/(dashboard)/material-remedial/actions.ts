@@ -3,6 +3,7 @@
 import {
   generateRemedialSchema,
   reviewRemedialSchema,
+  updateRemedialSchema,
   type RemedialMaterialModel,
   type RemedialMaterialType,
   type RemedialStatus,
@@ -36,10 +37,7 @@ export async function generateRemedial(input: {
     force: input.force ?? false,
   });
 
-  return apiPost<{ materialId: string; status: RemedialStatus }>(
-    '/remedial/generate',
-    dto,
-  );
+  return apiPost<{ materialId: string; status: RemedialStatus }>('/remedial/generate', dto);
 }
 
 /**
@@ -47,9 +45,7 @@ export async function generateRemedial(input: {
  * devuelve el `status`: el render del contenido lo hace el Server Component tras
  * `refresh`.
  */
-export async function pollRemedialStatus(
-  materialId: string,
-): Promise<{ status: RemedialStatus }> {
+export async function pollRemedialStatus(materialId: string): Promise<{ status: RemedialStatus }> {
   const material = await apiGet<RemedialMaterialModel>(`/remedial/${materialId}`);
   return { status: material.status };
 }
@@ -70,8 +66,22 @@ export async function reviewRemedial(input: {
     content: input.content,
   });
 
-  return apiPatch<RemedialMaterialModel>(
-    `/remedial/${input.materialId}/review`,
-    dto,
-  );
+  return apiPatch<RemedialMaterialModel>(`/remedial/${input.materialId}/review`, dto);
+}
+
+/**
+ * Edición humana del material en borrador (TKT-17 c): persiste el `content`
+ * editado en `editedContent` vía `PATCH /remedial/:id`, sin tocar la salida IA
+ * (`content`, evidencia §8.3). Aplica a TODOS los tipos (guide | practice_set |
+ * group_plan); el content se valida por `type` en el backend. Solo mientras el
+ * material está en `ready`. La autorización efectiva la aplica el guard del
+ * endpoint (`REMEDIAL_APPROVER_ROLES`).
+ */
+export async function updateRemedialContent(input: {
+  materialId: string;
+  content: RemedialContent;
+}): Promise<RemedialMaterialModel> {
+  const dto = updateRemedialSchema.parse({ content: input.content });
+
+  return apiPatch<RemedialMaterialModel>(`/remedial/${input.materialId}`, dto);
 }
