@@ -38,6 +38,7 @@ import { BenchmarkingModule } from './benchmarking/benchmarking.module';
 import { InstrumentQualityModule } from './instrument-quality/instrument-quality.module';
 import { AiObservabilityModule } from './ai-observability/ai-observability.module';
 import { AssistantModule } from './assistant/assistant.module';
+import { OfficialReportsModule } from './official-reports/official-reports.module';
 
 @Module({
   imports: [
@@ -89,6 +90,8 @@ import { AssistantModule } from './assistant/assistant.module';
     AiObservabilityModule,
     // ── E21: Asistente IA Conversacional (loop de tool-use + chat SSE) ──
     AssistantModule,
+    // ── Informes oficiales (TKT-24/25/26): por curso, establecimiento y por alumno ──
+    OfficialReportsModule,
   ],
   controllers: [AppController],
   providers: [
