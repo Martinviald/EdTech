@@ -12,6 +12,9 @@ import { ItemInsightController } from './item-insight.controller';
 import { ItemInsightRunner } from './item-insight.runner';
 import { ItemInsightSnapshotService } from './item-insight.snapshot';
 import { ITEM_INSIGHT_BUILDER } from './item-insight.port';
+import { InstrumentComparisonController } from './instrument-comparison.controller';
+import { InstrumentComparisonRunner } from './instrument-comparison.runner';
+import { InstrumentComparisonSnapshotService } from './instrument-comparison.snapshot';
 import { FeatureGuard } from '../common/guards/feature.guard';
 
 /**
@@ -23,13 +26,19 @@ import { FeatureGuard } from '../common/guards/feature.guard';
  */
 @Module({
   imports: [LlmModule, JobsModule, AssessmentReportModule, ItemAnalysisModule],
-  controllers: [AiAnalysisController, ItemInsightController],
+  controllers: [
+    AiAnalysisController,
+    ItemInsightController,
+    InstrumentComparisonController,
+  ],
   providers: [
     AiAnalysisService,
     AiAnalysisRunner,
     { provide: SNAPSHOT_BUILDER, useClass: SnapshotService },
     ItemInsightRunner,
     { provide: ITEM_INSIGHT_BUILDER, useClass: ItemInsightSnapshotService },
+    InstrumentComparisonRunner,
+    InstrumentComparisonSnapshotService,
     FeatureGuard,
   ],
   exports: [AiAnalysisService],
