@@ -1,8 +1,4 @@
-import {
-  ForbiddenException,
-  Injectable,
-  NotFoundException,
-} from '@nestjs/common';
+import { ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
 import { and, asc, desc, eq, inArray, isNull, sql } from 'drizzle-orm';
 import {
   assessmentCourseAssignments,
@@ -121,9 +117,7 @@ export class ItemAnalysisService {
         conditions.push(eq(classGroups.academicYearId, query.academicYearId));
       }
       if (!scope.scopeAll) {
-        conditions.push(
-          inArray(assessmentCourseAssignments.classGroupId, scope.classGroupIds),
-        );
+        conditions.push(inArray(assessmentCourseAssignments.classGroupId, scope.classGroupIds));
       }
 
       // El join a course_assignments multiplica por curso; group by colapsa a una
@@ -131,32 +125,32 @@ export class ItemAnalysisService {
       // suele apuntar a un grado).
       const rows = await tx
         .select({
-        assessmentId: assessments.id,
-        name: assessments.name,
-        administeredAt: assessments.administeredAt,
-        instrumentName: instruments.name,
-        instrumentType: sql<string>`${instruments.type}::text`,
-        subjectName: subjects.name,
-        gradeName: sql<string | null>`max(${grades.name})`,
-      })
-      .from(assessments)
-      .innerJoin(instruments, eq(instruments.id, assessments.instrumentId))
-      .innerJoin(
-        assessmentCourseAssignments,
-        eq(assessmentCourseAssignments.assessmentId, assessments.id),
-      )
-      .innerJoin(classGroups, eq(classGroups.id, assessmentCourseAssignments.classGroupId))
-      .leftJoin(subjects, eq(subjects.id, instruments.subjectId))
-      .leftJoin(grades, eq(grades.id, classGroups.gradeId))
-      .where(and(...conditions))
-      .groupBy(
-        assessments.id,
-        assessments.name,
-        assessments.administeredAt,
-        instruments.name,
-        instruments.type,
-        subjects.name,
-      )
+          assessmentId: assessments.id,
+          name: assessments.name,
+          administeredAt: assessments.administeredAt,
+          instrumentName: instruments.name,
+          instrumentType: sql<string>`${instruments.type}::text`,
+          subjectName: subjects.name,
+          gradeName: sql<string | null>`max(${grades.name})`,
+        })
+        .from(assessments)
+        .innerJoin(instruments, eq(instruments.id, assessments.instrumentId))
+        .innerJoin(
+          assessmentCourseAssignments,
+          eq(assessmentCourseAssignments.assessmentId, assessments.id),
+        )
+        .innerJoin(classGroups, eq(classGroups.id, assessmentCourseAssignments.classGroupId))
+        .leftJoin(subjects, eq(subjects.id, instruments.subjectId))
+        .leftJoin(grades, eq(grades.id, classGroups.gradeId))
+        .where(and(...conditions))
+        .groupBy(
+          assessments.id,
+          assessments.name,
+          assessments.administeredAt,
+          instruments.name,
+          instruments.type,
+          subjects.name,
+        )
         .orderBy(desc(assessments.administeredAt));
 
       if (rows.length === 0) return { data: [] };
@@ -185,9 +179,7 @@ export class ItemAnalysisService {
         .from(assessmentResults)
         .where(and(...countConds))
         .groupBy(assessmentResults.assessmentId);
-      const countByAssessment = new Map(
-        countRows.map((r) => [r.assessmentId, Number(r.count)]),
-      );
+      const countByAssessment = new Map(countRows.map((r) => [r.assessmentId, Number(r.count)]));
 
       const data: AssessmentOption[] = rows.map((r) => ({
         assessmentId: r.assessmentId,
@@ -208,10 +200,7 @@ export class ItemAnalysisService {
   // H6.11 — GET /api/item-analysis/matrix
   // ───────────────────────────────────────────────────────────────────────────
 
-  async getMatrix(
-    user: JwtPayload,
-    query: ItemMatrixQueryDto,
-  ): Promise<ItemMatrixResponse> {
+  async getMatrix(user: JwtPayload, query: ItemMatrixQueryDto): Promise<ItemMatrixResponse> {
     const orgId = this.requireOrgId(user);
     return withOrgContext(this.db, orgId, async (tx) => {
       const assessment = await this.requireAssessmentOwnedByUser(
@@ -230,20 +219,13 @@ export class ItemAnalysisService {
           scope.classGroupIds,
         );
         if (!hasScope) {
-          throw new ForbiddenException(
-            'No tiene acceso a los resultados de esta evaluación',
-          );
+          throw new ForbiddenException('No tiene acceso a los resultados de esta evaluación');
         }
       }
 
       // Si pasa classGroupId, validar que está en el scope y pertenece a la org.
       if (query.classGroupId) {
-        const ok = await this.classGroupInScope(
-          tx,
-          orgId,
-          scope,
-          query.classGroupId,
-        );
+        const ok = await this.classGroupInScope(tx, orgId, scope, query.classGroupId);
         if (!ok) {
           throw new ForbiddenException('No tiene acceso a ese curso');
         }
@@ -278,6 +260,18 @@ export class ItemAnalysisService {
         studentFilter,
       );
 
+      // TKT-22 — línea de referencia "% de logro del colegio" por pregunta: el
+      // promedio de TODA la org, con independencia del scope del usuario. La línea
+      // de "muestra de colegios" (benchmark inter-colegio) queda DIFERIDA hasta
+      // existir un pool multi-colegio (references.sample; ver QuestionReferences).
+      const questionsWithRefs = await this.attachOrgReferences(
+        tx,
+        query.assessmentId,
+        questionsWithRate,
+        itemIds,
+        studentFilter,
+      );
+
       // ── Alumnos visibles con respuestas en la evaluación ──────────────────────
       // TKT-09 — con `all=true` se devuelve el curso COMPLETO (sin paginar) para
       // que el frontend pueda ordenar alumnos/preguntas por % de logro en cliente.
@@ -294,12 +288,7 @@ export class ItemAnalysisService {
       const pageStudentIds = pagination.data.map((s) => s.studentId);
 
       // ── Respuestas de la página de alumnos (1 query, inArray) → celdas ────────
-      const cellsByStudent = await this.loadCells(
-        tx,
-        query.assessmentId,
-        pageStudentIds,
-        itemIds,
-      );
+      const cellsByStudent = await this.loadCells(tx, query.assessmentId, pageStudentIds, itemIds);
 
       const students: MatrixStudentRow[] = pagination.data.map((s) => {
         const byItem = cellsByStudent.get(s.studentId) ?? new Map<string, MatrixCell>();
@@ -338,7 +327,7 @@ export class ItemAnalysisService {
         assessmentId: query.assessmentId,
         assessmentName: assessment.name,
         instrumentName: assessment.instrumentName,
-        questions: questionsWithRate,
+        questions: questionsWithRefs,
         students: {
           data: students,
           total: pagination.total,
@@ -385,20 +374,13 @@ export class ItemAnalysisService {
             scope.classGroupIds,
           );
           if (!hasScope) {
-            throw new ForbiddenException(
-              'No tiene acceso a los resultados de esta evaluación',
-            );
+            throw new ForbiddenException('No tiene acceso a los resultados de esta evaluación');
           }
         }
       }
 
       if (query.classGroupId) {
-        const ok = await this.classGroupInScope(
-          tx,
-          orgId,
-          scope,
-          query.classGroupId,
-        );
+        const ok = await this.classGroupInScope(tx, orgId, scope, query.classGroupId);
         if (!ok) {
           throw new ForbiddenException('No tiene acceso a ese curso');
         }
@@ -417,17 +399,10 @@ export class ItemAnalysisService {
 
       const { skill, contentRef } = await this.loadItemTags(tx, itemId);
       const tags = await this.loadAllItemTags(tx, itemId);
-      const section = item.sectionId
-        ? await this.loadQuestionSection(tx, item.sectionId)
-        : null;
+      const section = item.sectionId ? await this.loadQuestionSection(tx, item.sectionId) : null;
 
       // ── Distribución agregada por valor de respuesta (1 query group by) ───────
-      const dist = await this.loadAnswerDistribution(
-        tx,
-        itemId,
-        query.assessmentId,
-        studentFilter,
-      );
+      const dist = await this.loadAnswerDistribution(tx, itemId, query.assessmentId, studentFilter);
 
       let totalResponses = 0;
       let blankCount = 0;
@@ -443,8 +418,7 @@ export class ItemAnalysisService {
         if (row.isCorrect) correctCount += row.count;
       }
 
-      const correctRate =
-        totalResponses > 0 ? (correctCount / totalResponses) * 100 : null;
+      const correctRate = totalResponses > 0 ? (correctCount / totalResponses) * 100 : null;
 
       const alternatives: AlternativeDistribution[] = altDefs.map((alt) => {
         const count = countByKey.get(alt.key) ?? 0;
@@ -463,8 +437,7 @@ export class ItemAnalysisService {
         type: item.type,
         stem: typeof content.stem === 'string' ? content.stem : null,
         imageUrl: typeof content.imageUrl === 'string' ? content.imageUrl : null,
-        explanation:
-          typeof content.explanation === 'string' ? content.explanation : null,
+        explanation: typeof content.explanation === 'string' ? content.explanation : null,
         correctKey,
         skill,
         content: contentRef,
@@ -494,10 +467,7 @@ export class ItemAnalysisService {
     nodeId: string | undefined,
     tagIds: string[] | undefined,
   ): Promise<MatrixQuestionColumn[]> {
-    const conditions = [
-      eq(items.instrumentId, instrumentId),
-      isNull(items.deletedAt),
-    ];
+    const conditions = [eq(items.instrumentId, instrumentId), isNull(items.deletedAt)];
 
     const rows = await tx
       .select({
@@ -519,9 +489,7 @@ export class ItemAnalysisService {
       const content = (r.content ?? {}) as ItemContent;
       const refs = tagsByItem.get(r.itemId) ?? { skill: null, contentRef: null };
       const maxScore =
-        r.scoringConfig && typeof r.scoringConfig.points === 'number'
-          ? r.scoringConfig.points
-          : 1;
+        r.scoringConfig && typeof r.scoringConfig.points === 'number' ? r.scoringConfig.points : 1;
       return {
         itemId: r.itemId,
         position: r.position,
@@ -531,6 +499,8 @@ export class ItemAnalysisService {
         skill: refs.skill,
         content: refs.contentRef,
         correctRate: null,
+        // sample queda en undefined → línea de "muestra de colegios" DIFERIDA (TKT-20).
+        references: { org: null },
       };
     });
 
@@ -538,16 +508,17 @@ export class ItemAnalysisService {
     // tengan CUALQUIERA de esos nodos (semántica OR — TKT-12). Consulta el set
     // completo de item_taxonomy_tags (primary + secondary), no sólo los tags
     // representativos, para un filtro exacto.
-    const filterNodeIds = Array.from(
-      new Set([...(nodeId ? [nodeId] : []), ...(tagIds ?? [])]),
-    );
+    const filterNodeIds = Array.from(new Set([...(nodeId ? [nodeId] : []), ...(tagIds ?? [])]));
     if (filterNodeIds.length > 0 && columns.length > 0) {
       const tagged = await tx
         .select({ itemId: itemTaxonomyTags.itemId })
         .from(itemTaxonomyTags)
         .where(
           and(
-            inArray(itemTaxonomyTags.itemId, columns.map((c) => c.itemId)),
+            inArray(
+              itemTaxonomyTags.itemId,
+              columns.map((c) => c.itemId),
+            ),
             inArray(itemTaxonomyTags.nodeId, filterNodeIds),
           ),
         );
@@ -599,6 +570,66 @@ export class ItemAnalysisService {
     return questions.map((q) => ({
       ...q,
       correctRate: rateByItem.has(q.itemId) ? rateByItem.get(q.itemId)! : null,
+    }));
+  }
+
+  /**
+   * TKT-22 — "% de logro del colegio" por pregunta: promedio de aciertos de TODA
+   * la org, con independencia del scope del usuario, como línea de referencia.
+   *
+   * La query corre dentro de `withOrgContext` (RLS ya acota a la org del token) y
+   * la evaluación fue validada como propia de la org → agregar SIN filtro de
+   * alumno es el promedio del colegio, nunca de otra org.
+   *
+   * Optimización: cuando `studentFilter === null` (admin sin filtro de curso) la
+   * población visible YA es toda la org, así que `references.org = correctRate`
+   * sin una query extra. Sólo cuando el scope está acotado (profesor, o filtro por
+   * curso) se lanza la agregación org-wide adicional.
+   *
+   * `references.sample` (muestra de colegios / benchmark inter-colegio) queda
+   * DIFERIDO: requiere pool multi-colegio (TKT-20). Se deja el hueco en el
+   * contrato (`QuestionReferences.sample`) sin poblarlo.
+   */
+  private async attachOrgReferences(
+    tx: Database,
+    assessmentId: string,
+    questions: MatrixQuestionColumn[],
+    itemIds: string[],
+    studentFilter: string[] | null,
+  ): Promise<MatrixQuestionColumn[]> {
+    if (itemIds.length === 0) return questions;
+
+    // Sin acotar el scope, la tasa visible es la del colegio completo.
+    if (studentFilter === null) {
+      return questions.map((q) => ({
+        ...q,
+        references: { ...q.references, org: q.correctRate },
+      }));
+    }
+
+    const rows = await tx
+      .select({
+        itemId: responses.itemId,
+        total: sql<number>`count(*)::int`,
+        correct: sql<number>`sum(case when ${responses.isCorrect} = true then 1 else 0 end)::int`,
+      })
+      .from(responses)
+      .where(and(eq(responses.assessmentId, assessmentId), inArray(responses.itemId, itemIds)))
+      .groupBy(responses.itemId);
+
+    const orgRateByItem = new Map<string, number>();
+    for (const r of rows) {
+      const total = Number(r.total);
+      const correct = Number(r.correct);
+      orgRateByItem.set(r.itemId, total > 0 ? (correct / total) * 100 : 0);
+    }
+
+    return questions.map((q) => ({
+      ...q,
+      references: {
+        ...q.references,
+        org: orgRateByItem.has(q.itemId) ? orgRateByItem.get(q.itemId)! : null,
+      },
     }));
   }
 
@@ -681,9 +712,7 @@ export class ItemAnalysisService {
 
     // TKT-09 — `all` devuelve el curso completo (sin limit/offset) para ordenar en
     // el cliente; en modo normal se pagina con limit/offset.
-    const rows = all
-      ? await baseQuery
-      : await baseQuery.limit(limit).offset((page - 1) * limit);
+    const rows = all ? await baseQuery : await baseQuery.limit(limit).offset((page - 1) * limit);
 
     // Curso de cada alumno relevante a ESTA evaluación (1 query), resuelto aparte
     // para no inflar la página. Un alumno → un único curso (DISTINCT ON).
@@ -850,9 +879,7 @@ export class ItemAnalysisService {
   private async loadTagsByItems(
     tx: Database,
     itemIds: string[],
-  ): Promise<
-    Map<string, { skill: ItemTaxonomyRef | null; contentRef: ItemTaxonomyRef | null }>
-  > {
+  ): Promise<Map<string, { skill: ItemTaxonomyRef | null; contentRef: ItemTaxonomyRef | null }>> {
     const map = new Map<
       string,
       { skill: ItemTaxonomyRef | null; contentRef: ItemTaxonomyRef | null }
@@ -911,10 +938,7 @@ export class ItemAnalysisService {
    * tipo de tag (primary/secondary) y origen (human/ai). Ordenados primary→
    * secondary, luego por tipo de nodo y nombre, para un agrupado estable en la UI.
    */
-  private async loadAllItemTags(
-    tx: Database,
-    itemId: string,
-  ): Promise<QuestionTaxonomyTag[]> {
+  private async loadAllItemTags(tx: Database, itemId: string): Promise<QuestionTaxonomyTag[]> {
     const rows = await tx
       .select({
         nodeId: taxonomyNodes.id,
@@ -927,11 +951,7 @@ export class ItemAnalysisService {
       .from(itemTaxonomyTags)
       .innerJoin(taxonomyNodes, eq(taxonomyNodes.id, itemTaxonomyTags.nodeId))
       .where(eq(itemTaxonomyTags.itemId, itemId))
-      .orderBy(
-        asc(itemTaxonomyTags.tagType),
-        asc(taxonomyNodes.type),
-        asc(taxonomyNodes.name),
-      );
+      .orderBy(asc(itemTaxonomyTags.tagType), asc(taxonomyNodes.type), asc(taxonomyNodes.name));
 
     return rows.map((r) => ({
       nodeId: r.nodeId,
@@ -972,12 +992,7 @@ export class ItemAnalysisService {
       .from(teacherAssignments)
       .innerJoin(subjectClasses, eq(subjectClasses.id, teacherAssignments.subjectClassId))
       .innerJoin(classGroups, eq(classGroups.id, subjectClasses.classGroupId))
-      .where(
-        and(
-          eq(teacherAssignments.userId, user.userId),
-          eq(classGroups.orgId, orgId),
-        ),
-      );
+      .where(and(eq(teacherAssignments.userId, user.userId), eq(classGroups.orgId, orgId)));
 
     const ids = Array.from(new Set(rows.map((r) => r.classGroupId)));
     return { scopeAll: false, classGroupIds: ids };
@@ -1009,9 +1024,7 @@ export class ItemAnalysisService {
       })
       .from(assessments)
       .innerJoin(instruments, eq(instruments.id, assessments.instrumentId))
-      .where(
-        and(eq(assessments.id, assessmentId), isNull(instruments.deletedAt)),
-      )
+      .where(and(eq(assessments.id, assessmentId), isNull(instruments.deletedAt)))
       .limit(1);
 
     if (!row) {
