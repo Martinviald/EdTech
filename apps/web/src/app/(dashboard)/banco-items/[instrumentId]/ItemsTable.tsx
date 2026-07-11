@@ -54,9 +54,13 @@ function getContentPreview(content: Record<string, unknown>): string {
 export function ItemsTable({
   items,
   sections = [],
+  canEdit = false,
+  instrumentId,
 }: {
   items: ItemModel[];
   sections?: InstrumentSectionModel[];
+  canEdit?: boolean;
+  instrumentId: string;
 }) {
   const [selected, setSelected] = useState<ItemModel | null>(null);
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
@@ -149,6 +153,8 @@ export function ItemsTable({
       <ItemDetailPanel
         item={selected}
         sections={sections}
+        canEdit={canEdit}
+        instrumentId={instrumentId}
         open={selected !== null}
         onClose={() => setSelected(null)}
       />

@@ -12,6 +12,7 @@ export * from './class-group.schema';
 export * from './instrument.schema';
 export * from './item.schema';
 export * from './item-content.schema';
+export * from './item-edit-proposal.schema';
 export * from './answer-sheet.schema';
 export * from './grading-scale.schema';
 export * from './assessment-result.schema';

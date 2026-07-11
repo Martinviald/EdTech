@@ -181,3 +181,14 @@ DROP POLICY IF EXISTS "assistant_messages_tenant_isolation" ON "assistant_messag
 CREATE POLICY "assistant_messages_tenant_isolation" ON "assistant_messages"
   AS PERMISSIVE FOR ALL
   USING (org_id::text = current_setting('app.current_org_id', true));
+
+-- ── TKT-19 — Propuestas de edición de ítems (org_id directo) ─────────────────
+-- Escritura asistida por IA (§8.3: la IA propone, el humano aprueba). Cada org
+-- solo ve/aprueba sus propias propuestas; el aplicar al ítem lo hace el service.
+ALTER TABLE "item_edit_proposals"      ENABLE ROW LEVEL SECURITY;
+ALTER TABLE "item_edit_proposals"      FORCE  ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "item_edit_proposals_tenant_isolation" ON "item_edit_proposals";
+CREATE POLICY "item_edit_proposals_tenant_isolation" ON "item_edit_proposals"
+  AS PERMISSIVE FOR ALL
+  USING (org_id::text = current_setting('app.current_org_id', true));

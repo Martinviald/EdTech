@@ -121,9 +121,7 @@ export default async function InstrumentDetailPage({ params }: PageProps) {
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-xs font-medium text-muted-foreground">
-              Items
-            </CardTitle>
+            <CardTitle className="text-xs font-medium text-muted-foreground">Items</CardTitle>
           </CardHeader>
           <CardContent>
             <p className="text-sm font-medium">{items.length}</p>
@@ -132,9 +130,7 @@ export default async function InstrumentDetailPage({ params }: PageProps) {
         {instrument.isOfficial && (
           <Card>
             <CardHeader className="pb-2">
-              <CardTitle className="text-xs font-medium text-muted-foreground">
-                Origen
-              </CardTitle>
+              <CardTitle className="text-xs font-medium text-muted-foreground">Origen</CardTitle>
             </CardHeader>
             <CardContent>
               <p className="text-sm font-medium">Oficial</p>
@@ -163,7 +159,12 @@ export default async function InstrumentDetailPage({ params }: PageProps) {
         <h2 className="text-sm font-medium uppercase text-muted-foreground">
           Items ({items.length})
         </h2>
-        <ItemsTable items={items} sections={instrument.sections ?? []} />
+        <ItemsTable
+          items={items}
+          sections={instrument.sections ?? []}
+          canEdit={canEdit}
+          instrumentId={instrumentId}
+        />
       </section>
     </div>
   );
