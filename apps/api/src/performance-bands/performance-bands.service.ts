@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { and, asc, eq, isNull } from 'drizzle-orm';
 import { instruments, performanceBands } from '@soe/db';
 import type {
@@ -130,12 +130,27 @@ export class PerformanceBandsService {
 
   private async requireInstrument(instrumentId: string): Promise<void> {
     const [row] = await this.db
-      .select({ id: instruments.id, deletedAt: instruments.deletedAt })
+      .select({
+        id: instruments.id,
+        deletedAt: instruments.deletedAt,
+        isOfficial: instruments.isOfficial,
+      })
       .from(instruments)
       .where(eq(instruments.id, instrumentId))
       .limit(1);
     if (!row || row.deletedAt) {
       throw new NotFoundException('Instrumento no encontrado');
+    }
+    // Los niveles/umbrales de logro son config GLOBAL de plataforma y, en esta
+    // fase, sólo aplican a instrumentos del sistema (`is_official = true`). Un
+    // instrumento propio de un colegio no tiene bandas globales configurables:
+    // se rechaza para no escribir una banda "global" sobre un instrumento
+    // privado (ver §5.2/§8.2 CLAUDE.md). El punto de extensión a overrides
+    // por-org (`org_id` NOT NULL) queda para F2+ sin cambio de schema.
+    if (!row.isOfficial) {
+      throw new BadRequestException(
+        'Solo los instrumentos oficiales del sistema pueden tener niveles/umbrales de logro',
+      );
     }
   }
 

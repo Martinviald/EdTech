@@ -27,7 +27,12 @@ type InstrumentsListResponse = {
  * aplican a todas las organizaciones que usan el instrumento.
  */
 export default async function InstrumentBandsListPage() {
-  const instruments = await apiGet<InstrumentsListResponse>('/instruments?limit=200');
+  // Solo instrumentos del sistema (oficiales): sus niveles/umbrales son globales
+  // y compartidos por todas las orgs. Los instrumentos propios de un colegio no
+  // son configurables aquí (el endpoint también los rechaza).
+  const instruments = await apiGet<InstrumentsListResponse>(
+    '/instruments?isOfficial=true&limit=200',
+  );
 
   return (
     <div className="space-y-6">
