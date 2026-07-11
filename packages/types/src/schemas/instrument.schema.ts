@@ -76,6 +76,66 @@ export const passageSchema = z.object({
 export type SectionAttachmentInputDto = z.infer<typeof sectionAttachmentInputSchema>;
 export type PassageDto = z.infer<typeof passageSchema>;
 
+// ── Instrument-level attachment / Enunciado PDF (TKT-15) ─────────────────────
+// Un instrumento puede tener adjuntos a nivel de instrumento (no de sección). El
+// caso principal es el PDF del enunciado / cuadernillo. La subida es en 2 pasos con
+// presigned URL de S3 (el backend NO recibe el archivo en memoria):
+//   1) POST /instruments/:id/enunciado-pdf/upload-url  → { storageKey, uploadUrl }
+//   2) el cliente hace PUT del archivo directo a S3
+//   3) PUT  /instruments/:id/enunciado-pdf             → confirma y persiste metadata
+
+/** Paso 1: pedir la URL prefirmada de subida del PDF de enunciado. */
+export const instrumentUploadUrlRequestSchema = z.object({
+  fileName: z.string().min(1).max(300),
+  mimeType: z.string().min(1).max(150).default('application/pdf'),
+  sizeBytes: z.number().int().min(1).max(50 * 1024 * 1024).optional(),
+});
+
+/** Paso 3: confirmar la subida (persistir el adjunto) tras el PUT a S3. */
+export const confirmInstrumentAttachmentSchema = z.object({
+  storageKey: z.string().min(1).max(1024),
+  fileName: z.string().min(1).max(300),
+  mimeType: z.string().min(1).max(150).default('application/pdf'),
+  sizeBytes: z.number().int().min(0).optional(),
+  note: z.string().max(2000).optional(),
+});
+
+export type InstrumentUploadUrlRequestDto = z.infer<typeof instrumentUploadUrlRequestSchema>;
+export type ConfirmInstrumentAttachmentDto = z.infer<typeof confirmInstrumentAttachmentSchema>;
+
+/** Respuesta del paso 1: instrucciones para subir el archivo directo a S3. */
+export type InstrumentUploadUrlResponse = {
+  /** Clave de almacenamiento (S3 key) que luego se confirma en el paso 3. */
+  storageKey: string;
+  /** URL prefirmada a la que el cliente hace el PUT del archivo. */
+  uploadUrl: string;
+  /** Método HTTP para la subida (siempre PUT en el flujo presigned). */
+  method: 'PUT';
+  /** Headers que el cliente DEBE reenviar en el PUT (ej. Content-Type). */
+  headers: Record<string, string>;
+  /** Segundos de validez de la URL prefirmada. */
+  expiresIn: number;
+};
+
+/** Adjunto a nivel de instrumento (API shape). */
+export type InstrumentAttachmentModel = {
+  id: string;
+  instrumentId: string;
+  kind: AttachmentKind;
+  order: number;
+  storageKey: string | null;
+  url: string | null;
+  fileName: string | null;
+  mimeType: string | null;
+  sizeBytes: number | null;
+  note: string | null;
+  meta: Record<string, unknown>;
+  createdAt: string | Date;
+  updatedAt: string | Date;
+  /** URL prefirmada de descarga (solo presente al leer un adjunto puntual). */
+  downloadUrl?: string;
+};
+
 // ── Instrument Sections ──────────────────────────────────────────────────────
 
 export const createInstrumentSectionSchema = z.object({
@@ -186,6 +246,12 @@ export type InstrumentModel = {
   createdAt: string | Date;
   updatedAt: string | Date;
   sections?: InstrumentSectionModel[];
+  /**
+   * PDF del enunciado / cuadernillo del instrumento (TKT-15), si existe.
+   * `null` cuando el instrumento aún no tiene un PDF de enunciado asociado.
+   * Presente en la respuesta de detalle (`GET /instruments/:id`).
+   */
+  enunciadoPdf?: InstrumentAttachmentModel | null;
 };
 
 export type GradingScaleModel = {

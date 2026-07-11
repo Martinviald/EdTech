@@ -71,6 +71,7 @@ export class GetInstrumentTool implements AssistantTool {
       const instrument = await this.instruments.getById(parsed.data.instrumentId, ctx.user);
       const itemsPage = await this.items.list(ctx.user, {
         instrumentId: parsed.data.instrumentId,
+        scope: 'all',
         page: 1,
         pageSize: ITEMS_PAGE_SIZE,
       });
