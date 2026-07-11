@@ -156,22 +156,38 @@ Se marca a medida que avanzamos. Estados: ⬜ pendiente · 🟡 en curso · ✅ 
 - [x] ✅ P0 — Crear rama+worktree `sprint-feedback-v1` desde `dev` *(worktree en `../sprint-feedback-v1`, commit `c6eb570` con plan+guía)*
 
 ### Stream FRONT (serial)
-- [x] ✅ FRONT-1 — Terminología (TKT-01, 02, 03, 05, 06, 07) *(typecheck + lint OK; helper `lib/taxonomy-labels.ts`)*
-- [ ] ⬜ FRONT-2 — Interacción (TKT-08, 10, 11, 13, 18 + consumo de contratos 09/12)
+- [x] ✅ FRONT-1 — Terminología (TKT-01, 02, 03, 05, 06, 07) *(typecheck + lint OK; helper `lib/taxonomy-labels.ts`; mergeado a `dev` `3dae945`)*
+- [x] ✅ FRONT-2a — Pure-front: TKT-08 listas ✅, TKT-18 renombrar ✅. **TKT-13 BLOQUEADO** (el picker de textos remediales no está en la base del sprint; depende del motor remedial E9). *(rama `front-2a`, integrada)*
+- [x] ✅ FRONT-2b — Consumo de contratos backend (4 agentes, integrados y validados): TKT-09 orden ✅, 10 drill-down ✅, 11 dropdown dimensión ✅, 12 filtro multi-tag ✅, 14 banco global ✅, 15 dropzone PDF ✅, 16 revisión spec-table ✅, 17 toggle estudiante/editar tipos/imprimible ✅, 24/25/26 informes DIA ✅. *(ramas `fe-*-cont`; typecheck+lint limpios; interrumpidos una vez por límite de sesión, trabajo rescatado y continuado)*
 
-### Backend (paralelo)
-- [ ] ⬜ Fase 0 — Contratos en `packages/types` (B, C, E) + commit
-- [ ] ⬜ BACK-B — Analytics (TKT-04, 09, 12)
-- [ ] ⬜ BACK-C — Instrumentos/PDF/spec-table (TKT-14, 15, 16)
-- [ ] ⬜ BACK-D — Remedial (TKT-17)
-- [ ] ⬜ BACK-E — Informe DIA (TKT-24, 25, 26)
+### Backend (paralelo) — TODOS INTEGRADOS en `sprint-feedback-v1`
+- [x] ✅ Fase 0 (adaptada) — cada agente backend definió su contrato en `packages/types` (archivos separados → sin colisión); el frontend los consume en el stream serial.
+- [x] ✅ BACK-B — Analytics (TKT-04, 09, 12 + TKT-05 backend) *(rama `back-b-analytics`, sin migración, 99/99 tests)*
+- [x] ✅ BACK-C — Instrumentos/PDF/banco global (TKT-14, 15; 16 = solo front) *(rama `back-c-instruments`, tabla `instrument_attachments`, 61/61 tests)*
+- [x] ✅ BACK-D — Remedial (TKT-17) *(rama `back-d-remedial`, columna `edited_content`, 45/45 tests)*
+- [x] ✅ BACK-E — Informe DIA (TKT-24, 25, 26) *(rama `back-e-informe-dia`, 3 endpoints, sexo del alumno SÍ existe → tablas 1.5–1.8 hechas, 14/14 tests)*
 
 ### Cierre
-- [ ] ⬜ Fase 3 — Auditoría de todos los streams
-- [ ] ⬜ Fase 4 — Integración en `sprint-feedback-v1`
-- [ ] ⬜ Fase 5 — Validación E2E
-- [ ] ⬜ Merge a `dev` (con confirmación del usuario)
-- [ ] ⬜ Marcar tickets como ✅ en Notion + en el plan
+- [x] ✅ Fase 3 — Auditoría (ligera): reportes de agentes revisados + typecheck/tests por stream
+- [x] ✅ Fase 4 — Integración de los 5 streams en `sprint-feedback-v1` (migración 0008 unificada; wiring `app.module.ts`/`nav-items.ts` vía merge; fix TKT-04 front)
+- [x] ✅ Fase 5 — Validación: build types/db ✅, typecheck api+web ✅, lint web ✅, tests api 575/591 (16 fallas = `privacy/*`, requieren DB, ajenas al sprint)
+- [x] ✅ FRONT-2b — Frontend de los endpoints backend (integrado y validado)
+- [x] ✅ Apéndice A + benchmark viable (TKT-19, 23, 21/22) integrados
+- [ ] 🟡 Merge del sprint completo a `dev`
+- [ ] 🟡 Marcar tickets en Notion + en el plan
+
+**Estado de tickets tras integración (final):**
+- ✅ Completos (backend+front, integrados y validados): TKT-01→12, 14, 15, 16, 17, 18, **19** (asistente edita ítems), **21** (histórico propio), **22** (% colegio), **23** (diagnóstico IA), 24, 25, 26
+- 🚫 No construible por dependencia real (fuera del alcance posible hoy):
+  - **TKT-13** — depende del picker de textos del motor remedial (ausente en la base del sprint)
+  - **TKT-20** y la parte "muestra de colegios" de **21/22** — no hay pool de datos multi-colegio (contrato ya estructurado con el hueco `references.sample` para sumarlo cuando exista)
+
+### Apéndice A + benchmark viable (integrados)
+- [x] ✅ TKT-19 — Asistente propone ediciones de ítems (§8.3) *(rama `feat-tkt19-asistente-edita-items`, tabla `item_edit_proposals` + RLS, migración 0009)*
+- [x] ✅ TKT-23 — Diagnóstico IA de instrumentos comparables *(rama `feat-tkt23-diagnostico-ia-instrumentos`, reusa `ai_analyses`, async, gemini-2.5-pro)*
+- [x] ✅ TKT-21/22 (viable) — % colegio por pregunta + `MetricComparison` vs histórico propio *(rama `feat-tkt21-22-historico-colegio`)*
+
+**Validación final:** migraciones 0008 (unificada) + 0009 secuenciales; build types/db + typecheck api/web + lint web limpios; tests api 587/603 (16 fallas = `privacy/*`, requieren DB real, ajenas al sprint).
 
 ### Diferidos (no ejecutar en esta pasada)
 - TKT-19, TKT-20, TKT-23 · parte "muestra de colegios" de TKT-21/22

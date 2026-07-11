@@ -17,6 +17,7 @@ import { z } from 'zod';
 export const LLM_FEATURES = [
   'assessment_analysis',
   'item_insight',
+  'instrument_comparison',
   'remedial',
   'ai_tagging',
   'assistant',
@@ -25,10 +26,7 @@ export type LlmFeature = (typeof LLM_FEATURES)[number];
 export const llmFeatureSchema = z.enum(LLM_FEATURES);
 
 /** Etiqueta + descripción legibles por funcionalidad (UI del panel). */
-export const LLM_FEATURE_LABELS: Record<
-  LlmFeature,
-  { label: string; description: string }
-> = {
+export const LLM_FEATURE_LABELS: Record<LlmFeature, { label: string; description: string }> = {
   assessment_analysis: {
     label: 'Análisis IA — Informe de evaluación',
     description:
@@ -38,6 +36,11 @@ export const LLM_FEATURE_LABELS: Record<
     label: 'Análisis IA por pregunta',
     description:
       'Análisis de una pregunta individual (causa, distractores, pasaje/imagen). Requiere modelo multimodal.',
+  },
+  instrument_comparison: {
+    label: 'Análisis IA — Comparación de instrumentos',
+    description:
+      'Diagnóstico cualitativo de la variación entre dos instrumentos comparables (año vs año): qué cambió en el contenido y por qué variaron los resultados.',
   },
   remedial: {
     label: 'Material Remedial',
@@ -92,7 +95,12 @@ export const LLM_MODEL_CATALOG: Record<LlmProviderId, readonly LlmModelOption[]>
     },
   ],
   anthropic: [
-    { id: 'claude-haiku-4-5-20251001', label: 'Claude Haiku 4.5', maxTokens: 8192, multimodal: true },
+    {
+      id: 'claude-haiku-4-5-20251001',
+      label: 'Claude Haiku 4.5',
+      maxTokens: 8192,
+      multimodal: true,
+    },
     { id: 'claude-sonnet-4-6', label: 'Claude Sonnet 4.6', maxTokens: 16384, multimodal: true },
     { id: 'claude-opus-4-8', label: 'Claude Opus 4.8', maxTokens: 16384, multimodal: true },
   ],
@@ -124,6 +132,9 @@ export interface LlmModelChoice {
 export const LLM_FEATURE_DEFAULTS: Record<LlmFeature, LlmModelChoice> = {
   assessment_analysis: { provider: 'gemini', model: 'gemini-2.5-pro' },
   item_insight: { provider: 'gemini', model: 'gemini-2.5-pro' },
+  // Comparación de instrumentos: razonamiento cualitativo sobre contenido +
+  // resultados de dos instrumentos → modelo potente (Pro) por defecto.
+  instrument_comparison: { provider: 'gemini', model: 'gemini-2.5-pro' },
   remedial: { provider: 'gemini', model: 'gemini-2.5-flash' },
   ai_tagging: { provider: 'gemini', model: 'gemini-2.5-flash' },
   assistant: { provider: 'gemini', model: 'gemini-2.5-flash' },

@@ -14,9 +14,7 @@ export function PracticeView({ content }: { content: RemedialPracticeContent }) 
         <CardContent className="space-y-1 text-sm text-foreground">
           <p>{content.skillFocus}</p>
           <p className="text-muted-foreground">{content.itemCount} ítems generados</p>
-          {content.notes ? (
-            <p className="text-muted-foreground">{content.notes}</p>
-          ) : null}
+          {content.notes ? <p className="text-muted-foreground">{content.notes}</p> : null}
         </CardContent>
       </Card>
 

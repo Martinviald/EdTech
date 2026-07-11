@@ -13,7 +13,7 @@ import {
   ITEM_BANK_ROLES,
   type InstrumentModel,
 } from '@soe/types';
-import { InstrumentCard } from './InstrumentCard';
+import { InstrumentRow } from './InstrumentRow';
 import { InstrumentFilters } from './InstrumentFilters';
 
 type InstrumentListResponse = {
@@ -55,11 +55,16 @@ export default async function BancoItemsPage({ searchParams }: PageProps) {
         title="Banco de Instrumentos"
         description="Instrumentos de evaluación, preguntas y pautas oficiales."
         actions={
-          canCreate ? (
-            <Link href={'/banco-items/nuevo' as Route}>
-              <Button>Nuevo instrumento</Button>
+          <div className="flex flex-wrap gap-2">
+            <Link href={'/banco-items/explorar' as Route}>
+              <Button variant="outline">Banco de ítems</Button>
             </Link>
-          ) : null
+            {canCreate ? (
+              <Link href={'/banco-items/nuevo' as Route}>
+                <Button>Nuevo instrumento</Button>
+              </Link>
+            ) : null}
+          </div>
         }
       />
 
@@ -84,9 +89,9 @@ export default async function BancoItemsPage({ searchParams }: PageProps) {
         />
       ) : (
         <>
-          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+          <div className="divide-y overflow-hidden rounded-lg border">
             {instruments.map((instrument) => (
-              <InstrumentCard key={instrument.id} instrument={instrument} />
+              <InstrumentRow key={instrument.id} instrument={instrument} />
             ))}
           </div>
           {total > 20 && (

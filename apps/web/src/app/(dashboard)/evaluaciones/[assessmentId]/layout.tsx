@@ -10,6 +10,7 @@ import {
   AI_ANALYSIS_VIEWER_ROLES,
   REMEDIAL_VIEWER_ROLES,
   INSTRUMENT_QUALITY_VIEWER_ROLES,
+  OFFICIAL_REPORT_VIEWER_ROLES,
   type AssessmentReportResponse,
 } from '@soe/types';
 import { PageContainer, PageHeader } from '@/components/patterns';
@@ -80,6 +81,9 @@ export default async function EvaluacionLayout({
       : []),
     ...(canAccess(roles, INSTRUMENT_QUALITY_VIEWER_ROLES)
       ? [{ href: `${base}/calidad`, label: 'Calidad' }]
+      : []),
+    ...(canAccess(roles, OFFICIAL_REPORT_VIEWER_ROLES)
+      ? [{ href: `${base}/informe-oficial`, label: 'Informe oficial' }]
       : []),
   ];
 

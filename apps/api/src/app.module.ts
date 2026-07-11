@@ -17,6 +17,7 @@ import { ClassGroupsModule } from './class-groups/class-groups.module';
 import { StudentsModule } from './students/students.module';
 import { InstrumentsModule } from './instruments/instruments.module';
 import { ItemsModule } from './items/items.module';
+import { ItemEditProposalsModule } from './item-edit-proposals/item-edit-proposals.module';
 import { DiaIngestionModule } from './dia-ingestion/dia-ingestion.module';
 import { AiTaggingModule } from './ai-tagging/ai-tagging.module';
 import { SpecTablesModule } from './spec-tables/spec-tables.module';
@@ -38,6 +39,7 @@ import { BenchmarkingModule } from './benchmarking/benchmarking.module';
 import { InstrumentQualityModule } from './instrument-quality/instrument-quality.module';
 import { AiObservabilityModule } from './ai-observability/ai-observability.module';
 import { AssistantModule } from './assistant/assistant.module';
+import { OfficialReportsModule } from './official-reports/official-reports.module';
 
 @Module({
   imports: [
@@ -58,6 +60,8 @@ import { AssistantModule } from './assistant/assistant.module';
     StudentsModule,
     InstrumentsModule,
     ItemsModule,
+    // ── TKT-19: escritura asistida de ítems (IA propone, humano aprueba) ──
+    ItemEditProposalsModule,
     DiaIngestionModule,
     AiTaggingModule,
     SpecTablesModule,
@@ -89,6 +93,8 @@ import { AssistantModule } from './assistant/assistant.module';
     AiObservabilityModule,
     // ── E21: Asistente IA Conversacional (loop de tool-use + chat SSE) ──
     AssistantModule,
+    // ── Informes oficiales (TKT-24/25/26): por curso, establecimiento y por alumno ──
+    OfficialReportsModule,
   ],
   controllers: [AppController],
   providers: [
