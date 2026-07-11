@@ -67,10 +67,7 @@ export function PracticeEditor({ value, onChange, disabled }: PracticeEditorProp
             items.map((item) => {
               const idx = value.items.indexOf(item);
               return (
-                <div
-                  key={item.itemId}
-                  className="space-y-2 rounded-md border bg-muted/20 p-3"
-                >
+                <div key={item.itemId} className="space-y-2 rounded-md border bg-muted/20 p-3">
                   <span className="inline-block rounded bg-primary/10 px-2 py-0.5 text-xs font-medium text-primary">
                     Ítem {item.position}
                   </span>

@@ -13,7 +13,13 @@ import {
   type RemedialMaterialModel,
   type RemedialStudentMaterialModel,
 } from '@soe/types';
-import { PageContainer, PageHeader, EmptyState, AlertCallout, StatusBadge } from '@/components/patterns';
+import {
+  PageContainer,
+  PageHeader,
+  EmptyState,
+  AlertCallout,
+  StatusBadge,
+} from '@/components/patterns';
 import { RemedialPoller } from '../components/remedial-poller';
 import { RemedialMaterialView } from '../components/remedial-material-view';
 import {

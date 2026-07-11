@@ -152,8 +152,8 @@ export default async function MaterialRemedialPage({
       <div className="flex flex-wrap items-end gap-3 rounded-lg border bg-card p-4">
         <AssessmentSelect options={assessments} basePath="/material-remedial" />
         <p className="max-w-sm text-sm text-muted-foreground">
-          Elige una evaluación para ver su material. Para generar material nuevo, abre su
-          Análisis IA y usa “Generar material remedial” en cada brecha.
+          Elige una evaluación para ver su material. Para generar material nuevo, abre su Análisis
+          IA y usa “Generar material remedial” en cada brecha.
         </p>
       </div>
 

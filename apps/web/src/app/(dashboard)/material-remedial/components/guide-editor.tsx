@@ -23,7 +23,10 @@ export function GuideEditor({ value, onChange, disabled }: GuideEditorProps) {
     onChange({ ...value, ...partial });
   }
 
-  function patchActivity(idx: number, partial: Partial<RemedialGuideContent['classActivities'][number]>) {
+  function patchActivity(
+    idx: number,
+    partial: Partial<RemedialGuideContent['classActivities'][number]>,
+  ) {
     const classActivities = value.classActivities.map((a, i) =>
       i === idx ? { ...a, ...partial } : a,
     );

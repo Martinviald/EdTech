@@ -13,14 +13,11 @@ export function PlanView({ content }: { content: RemedialPlanContent }) {
         </CardHeader>
         <CardContent className="space-y-1 text-sm text-foreground">
           <p>
-            Alumnos en el grupo:{' '}
-            <span className="font-medium">{content.studentCount}</span>
+            Alumnos en el grupo: <span className="font-medium">{content.studentCount}</span>
           </p>
           <p className="text-muted-foreground">Brecha compartida: {content.sharedGap}</p>
           {content.estimatedSessions != null ? (
-            <p className="text-muted-foreground">
-              Sesiones estimadas: {content.estimatedSessions}
-            </p>
+            <p className="text-muted-foreground">Sesiones estimadas: {content.estimatedSessions}</p>
           ) : null}
         </CardContent>
       </Card>

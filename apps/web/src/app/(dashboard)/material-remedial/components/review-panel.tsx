@@ -196,8 +196,7 @@ export function ReviewPanel({ material, content, canApprove }: ReviewPanelProps)
         </div>
       ) : (
         <AlertCallout tone="info" className="no-print">
-          No tienes permisos para editar, aprobar o descartar este material. Solo puedes
-          revisarlo.
+          No tienes permisos para editar, aprobar o descartar este material. Solo puedes revisarlo.
         </AlertCallout>
       )}
     </div>
