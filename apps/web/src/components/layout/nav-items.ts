@@ -7,6 +7,7 @@ import {
   FileText,
   FileUp,
   FolderTree,
+  GitCompareArrows,
   LayoutDashboard,
   Library,
   Lightbulb,
@@ -23,6 +24,7 @@ import type { UserRole } from '@soe/types';
 import {
   DASHBOARD_VIEWER_ROLES,
   AI_ANALYSIS_VIEWER_ROLES,
+  AI_ANALYSIS_GENERATOR_ROLES,
   REMEDIAL_VIEWER_ROLES,
   BENCHMARKING_VIEWER_ROLES,
   ANSWER_SHEET_IMPORT_ROLES,
@@ -119,6 +121,14 @@ export const NAV_GROUPS: readonly NavGroup[] = [
         icon: Sparkles,
         status: 'live',
         roles: AI_ANALYSIS_VIEWER_ROLES,
+      },
+      {
+        // TKT-23: diagnóstico IA de la variación entre instrumentos comparables.
+        href: '/comparar-instrumentos',
+        label: 'Comparar instrumentos',
+        icon: GitCompareArrows,
+        status: 'live',
+        roles: AI_ANALYSIS_GENERATOR_ROLES,
       },
       {
         href: '/material-remedial',
