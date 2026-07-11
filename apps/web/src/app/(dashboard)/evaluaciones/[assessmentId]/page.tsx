@@ -141,18 +141,28 @@ export default async function EvaluacionResumenPage({
           hint={`Nivel: ${performanceLevelLabel(summary.performanceLevel)}`}
           icon={Target}
         />
-        <SummaryCard
-          label="Aprobación"
-          value={summary.passingRate === null ? '—' : `${summary.passingRate.toFixed(1)}%`}
-          hint={`Nota de corte: ${summary.passingGrade.toFixed(1)}`}
-          icon={CheckCircle2}
-        />
-        <SummaryCard
-          label="Nota promedio"
-          value={summary.averageGrade === null ? '—' : summary.averageGrade.toFixed(1)}
-          hint={summary.averageGrade === null ? undefined : 'Promedio del curso evaluado'}
-          icon={GraduationCap}
-        />
+        {/* TKT-04: notas/escala solo si el instrumento tiene escala configurada.
+            Sin escala, se ocultan estas tarjetas (no se muestra el default 4.0). */}
+        {summary.hasGradingScale ? (
+          <>
+            <SummaryCard
+              label="Aprobación"
+              value={summary.passingRate === null ? '—' : `${summary.passingRate.toFixed(1)}%`}
+              hint={
+                summary.passingGrade === null
+                  ? undefined
+                  : `Nota de corte: ${summary.passingGrade.toFixed(1)}`
+              }
+              icon={CheckCircle2}
+            />
+            <SummaryCard
+              label="Nota promedio"
+              value={summary.averageGrade === null ? '—' : summary.averageGrade.toFixed(1)}
+              hint={summary.averageGrade === null ? undefined : 'Promedio del curso evaluado'}
+              icon={GraduationCap}
+            />
+          </>
+        ) : null}
         <SummaryCard
           label="Asistencia"
           value={`${summary.studentsEvaluated}/${summary.studentsEnrolled}`}
