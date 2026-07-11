@@ -55,11 +55,16 @@ export default async function BancoItemsPage({ searchParams }: PageProps) {
         title="Banco de Instrumentos"
         description="Instrumentos de evaluación, preguntas y pautas oficiales."
         actions={
-          canCreate ? (
-            <Link href={'/banco-items/nuevo' as Route}>
-              <Button>Nuevo instrumento</Button>
+          <div className="flex flex-wrap gap-2">
+            <Link href={'/banco-items/explorar' as Route}>
+              <Button variant="outline">Banco de ítems</Button>
             </Link>
-          ) : null
+            {canCreate ? (
+              <Link href={'/banco-items/nuevo' as Route}>
+                <Button>Nuevo instrumento</Button>
+              </Link>
+            ) : null}
+          </div>
         }
       />
 

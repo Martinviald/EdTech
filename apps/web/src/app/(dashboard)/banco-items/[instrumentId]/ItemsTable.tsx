@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import {
   Table,
   TableBody,
@@ -13,6 +13,8 @@ import { Badge } from '@/components/ui/badge';
 import type { ItemModel, InstrumentSectionModel } from '@soe/types';
 import { TagBadge } from './TagBadge';
 import { ItemDetailPanel } from './ItemDetailPanel';
+import { TagMultiFilter } from '../TagMultiFilter';
+import { deriveTagFacets, filterItemsByTags } from '../tag-facets';
 
 const ITEM_TYPE_LABELS: Record<string, string> = {
   multiple_choice: 'Seleccion multiple',
@@ -57,6 +59,10 @@ export function ItemsTable({
   sections?: InstrumentSectionModel[];
 }) {
   const [selected, setSelected] = useState<ItemModel | null>(null);
+  const [selectedTags, setSelectedTags] = useState<string[]>([]);
+
+  const facets = useMemo(() => deriveTagFacets(items), [items]);
+  const filtered = useMemo(() => filterItemsByTags(items, selectedTags), [items, selectedTags]);
 
   if (items.length === 0) {
     return (
@@ -68,6 +74,14 @@ export function ItemsTable({
 
   return (
     <>
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <TagMultiFilter facets={facets} selected={selectedTags} onChange={setSelectedTags} />
+        {selectedTags.length > 0 && (
+          <p className="text-xs text-muted-foreground">
+            {filtered.length} de {items.length} ítems
+          </p>
+        )}
+      </div>
       <div className="overflow-x-auto rounded-md border">
         <Table>
           <TableHeader>
@@ -80,7 +94,14 @@ export function ItemsTable({
             </TableRow>
           </TableHeader>
           <TableBody>
-            {items.map((item) => (
+            {filtered.length === 0 && (
+              <TableRow>
+                <TableCell colSpan={5} className="py-8 text-center text-sm text-muted-foreground">
+                  Ningún ítem coincide con los tags seleccionados.
+                </TableCell>
+              </TableRow>
+            )}
+            {filtered.map((item) => (
               <TableRow
                 key={item.id}
                 role="button"
@@ -97,9 +118,7 @@ export function ItemsTable({
               >
                 <TableCell className="font-mono text-xs">{item.position}</TableCell>
                 <TableCell>
-                  <span className="text-xs">
-                    {ITEM_TYPE_LABELS[item.type] ?? item.type}
-                  </span>
+                  <span className="text-xs">{ITEM_TYPE_LABELS[item.type] ?? item.type}</span>
                 </TableCell>
                 <TableCell className="max-w-[300px] truncate text-sm">
                   {getContentPreview(item.content)}

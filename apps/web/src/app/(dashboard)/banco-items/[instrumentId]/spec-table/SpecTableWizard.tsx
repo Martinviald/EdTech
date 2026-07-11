@@ -1,6 +1,8 @@
 'use client';
 
 import { useCallback, useState, useTransition } from 'react';
+import Link from 'next/link';
+import type { Route } from 'next';
 import { CheckCircle2, Loader2, RotateCcw, Upload, AlertCircle } from 'lucide-react';
 import { useDropzone, type FileRejection } from 'react-dropzone';
 import { toast } from 'sonner';
@@ -108,12 +110,7 @@ export function SpecTableWizard({ instrumentId, taxonomies }: SpecTableWizardPro
 
   return (
     <div className="space-y-4">
-      {step === 'upload' && (
-        <UploadSection
-          onAccept={handleFileAccept}
-          isPending={isPending}
-        />
-      )}
+      {step === 'upload' && <UploadSection onAccept={handleFileAccept} isPending={isPending} />}
       {step === 'map' && uploadResult && (
         <MapSection
           uploadResult={uploadResult}
@@ -126,11 +123,7 @@ export function SpecTableWizard({ instrumentId, taxonomies }: SpecTableWizardPro
         />
       )}
       {step === 'done' && linkResult && (
-        <DoneSection
-          result={linkResult}
-          onReset={handleReset}
-          instrumentId={instrumentId}
-        />
+        <DoneSection result={linkResult} onReset={handleReset} instrumentId={instrumentId} />
       )}
     </div>
   );
@@ -147,9 +140,7 @@ function UploadSection({
     (accepted: File[], rejections: FileRejection[]) => {
       if (rejections.length > 0) {
         const r = rejections[0];
-        toast.error(
-          r?.errors[0]?.message ?? 'Archivo rechazado. Verifica el formato.',
-        );
+        toast.error(r?.errors[0]?.message ?? 'Archivo rechazado. Verifica el formato.');
         return;
       }
       const first = accepted[0];
@@ -191,13 +182,9 @@ function UploadSection({
             <Upload className="text-muted-foreground h-10 w-10" />
             <div className="space-y-1">
               <p className="font-medium">
-                {isDragActive
-                  ? 'Suelta el archivo aqui'
-                  : 'Arrastra tu archivo Excel o CSV'}
+                {isDragActive ? 'Suelta el archivo aqui' : 'Arrastra tu archivo Excel o CSV'}
               </p>
-              <p className="text-muted-foreground text-xs">
-                .xlsx, .xls o .csv
-              </p>
+              <p className="text-muted-foreground text-xs">.xlsx, .xls o .csv</p>
             </div>
           </div>
         )}
@@ -236,11 +223,7 @@ function MapSection({
             <Label className="text-sm">
               Marco académico <span className="text-destructive">*</span>
             </Label>
-            <Select
-              value={taxonomyId}
-              onValueChange={onTaxonomyChange}
-              disabled={isPending}
-            >
+            <Select value={taxonomyId} onValueChange={onTaxonomyChange} disabled={isPending}>
               <SelectTrigger>
                 <SelectValue placeholder="Seleccionar marco académico" />
               </SelectTrigger>
@@ -253,8 +236,8 @@ function MapSection({
               </SelectContent>
             </Select>
             <p className="text-muted-foreground text-xs">
-              Los OA y habilidades de la tabla se vincularán contra la taxonomía de
-              este marco académico.
+              Los OA y habilidades de la tabla se vincularán contra la taxonomía de este marco
+              académico.
             </p>
           </div>
         </CardContent>
@@ -305,12 +288,7 @@ function MapSection({
         </CardContent>
       </Card>
 
-      <ColumnMapper
-        columns={columns}
-        onLink={onLink}
-        onCancel={onCancel}
-        isPending={isPending}
-      />
+      <ColumnMapper columns={columns} onLink={onLink} onCancel={onCancel} isPending={isPending} />
     </div>
   );
 }
@@ -374,7 +352,10 @@ function DoneSection({
                 {linkedItems.length} vinculado{linkedItems.length === 1 ? '' : 's'}
               </Badge>
               {hasUnlinked && (
-                <Badge variant="outline" className="border-amber-400 text-amber-700 dark:text-amber-300">
+                <Badge
+                  variant="outline"
+                  className="border-amber-400 text-amber-700 dark:text-amber-300"
+                >
                   {unlinkedItems.length} sin vincular
                 </Badge>
               )}
@@ -447,12 +428,8 @@ function DoneSection({
                 <TableBody>
                   {unlinkedItems.map((item, i) => (
                     <TableRow key={`unlinked-${item.position ?? 'na'}-${i}`}>
-                      <TableCell className="font-medium">
-                        {item.position ?? '—'}
-                      </TableCell>
-                      <TableCell className="text-muted-foreground">
-                        {item.reason}
-                      </TableCell>
+                      <TableCell className="font-medium">{item.position ?? '—'}</TableCell>
+                      <TableCell className="text-muted-foreground">{item.reason}</TableCell>
                     </TableRow>
                   ))}
                 </TableBody>
