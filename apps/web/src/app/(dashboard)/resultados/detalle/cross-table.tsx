@@ -18,12 +18,7 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from '@/components/ui/tooltip';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { cn } from '@/lib/utils';
 import { PaginationControls } from '../components/pagination-controls';
 import { QuestionDetailPanel } from '../components/question-detail-panel';
@@ -41,7 +36,7 @@ function formatPct(value: number | null): string {
   return `${value.toFixed(0)}%`;
 }
 
-/** Color de cabecera de columna por % de acierto (resalta preguntas críticas). */
+/** Color de cabecera de columna por % de logro (resalta preguntas críticas). */
 function correctRateHeaderClass(rate: number | null): string {
   if (rate === null) return 'text-muted-foreground';
   if (rate < 40) return 'text-red-700 dark:text-red-300 font-semibold';
@@ -118,9 +113,8 @@ export function CrossTable({
   return (
     <div className="space-y-4">
       <p className="text-xs text-muted-foreground">
-        Toca el número de una pregunta en la cabecera para ver la distribución de
-        respuestas y el análisis de distractores. Verde = correcta, rojo =
-        incorrecta, gris = sin respuesta.
+        Toca el número de una pregunta en la cabecera para ver la distribución de respuestas y el
+        análisis de distractores. Verde = correcta, rojo = incorrecta, gris = sin respuesta.
       </p>
 
       <TooltipProvider delayDuration={150}>
@@ -142,9 +136,7 @@ export function CrossTable({
                           className="flex w-full flex-col items-center gap-0.5 rounded px-1.5 py-1 transition-colors hover:bg-accent focus:outline-none focus:ring-2 focus:ring-ring"
                           aria-label={`Ver detalle de la pregunta ${q.position}`}
                         >
-                          <span className="text-sm font-medium tabular-nums">
-                            P{q.position}
-                          </span>
+                          <span className="text-sm font-medium tabular-nums">P{q.position}</span>
                           <span
                             className={cn(
                               'text-[10px] tabular-nums',
@@ -160,7 +152,7 @@ export function CrossTable({
                         {q.skill ? <p>Habilidad: {q.skill.nodeName}</p> : null}
                         {q.content ? <p>Contenido: {q.content.nodeName}</p> : null}
                         <p>Clave correcta: {q.correctKey ?? '—'}</p>
-                        <p>Acierto: {formatPct(q.correctRate)}</p>
+                        <p>% de logro: {formatPct(q.correctRate)}</p>
                       </TooltipContent>
                     </Tooltip>
                   </TableHead>
@@ -229,10 +221,7 @@ function StudentRow({
         return (
           <TableCell
             key={q.itemId}
-            className={cn(
-              'text-center text-xs font-semibold tabular-nums',
-              cellClass(cell),
-            )}
+            className={cn('text-center text-xs font-semibold tabular-nums', cellClass(cell))}
             title={
               cell.selectedKey
                 ? `Respondió ${cell.selectedKey}${

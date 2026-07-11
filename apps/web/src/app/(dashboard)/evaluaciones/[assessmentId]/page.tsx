@@ -154,7 +154,7 @@ export default async function EvaluacionResumenPage({
           icon={GraduationCap}
         />
         <SummaryCard
-          label="Cobertura"
+          label="Asistencia"
           value={`${summary.studentsEvaluated}/${summary.studentsEnrolled}`}
           hint={
             summary.coverageRate === null

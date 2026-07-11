@@ -153,10 +153,10 @@ Se inyectan en cada prompt de agente y se auditan en Fase 3:
 Se marca a medida que avanzamos. Estados: ⬜ pendiente · 🟡 en curso · ✅ hecho.
 
 ### Pre-fase
-- [ ] ⬜ P0 — Crear rama+worktree `sprint-feedback-v1` desde `dev`
+- [x] ✅ P0 — Crear rama+worktree `sprint-feedback-v1` desde `dev` *(worktree en `../sprint-feedback-v1`, commit `c6eb570` con plan+guía)*
 
 ### Stream FRONT (serial)
-- [ ] ⬜ FRONT-1 — Terminología (TKT-01, 02, 03, 05, 06, 07)
+- [x] ✅ FRONT-1 — Terminología (TKT-01, 02, 03, 05, 06, 07) *(typecheck + lint OK; helper `lib/taxonomy-labels.ts`)*
 - [ ] ⬜ FRONT-2 — Interacción (TKT-08, 10, 11, 13, 18 + consumo de contratos 09/12)
 
 ### Backend (paralelo)

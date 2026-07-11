@@ -2,11 +2,7 @@
 
 import { useState, type JSX } from 'react';
 import { BookOpen, CheckCircle2, FileQuestion, Sparkles } from 'lucide-react';
-import type {
-  ItemModel,
-  ItemTaxonomyTagModel,
-  InstrumentSectionModel,
-} from '@soe/types';
+import type { ItemModel, ItemTaxonomyTagModel, InstrumentSectionModel } from '@soe/types';
 import {
   Sheet,
   SheetContent,
@@ -23,6 +19,7 @@ import {
   type PassageData,
 } from '@/components/passage-dialog';
 import { cn } from '@/lib/utils';
+import { formatNodeCode } from '@/lib/taxonomy-labels';
 
 function sectionToPassage(section: InstrumentSectionModel): PassageData {
   return {
@@ -80,15 +77,12 @@ function getAlternatives(content: Record<string, unknown>): Alternative[] {
   const raw = content.alternatives;
   if (!Array.isArray(raw)) return [];
   return raw.filter(
-    (alt): alt is Alternative =>
-      typeof alt === 'object' && alt !== null && 'key' in alt,
+    (alt): alt is Alternative => typeof alt === 'object' && alt !== null && 'key' in alt,
   );
 }
 
 function getStringField(content: Record<string, unknown>, field: string): string | null {
-  return typeof content[field] === 'string' && content[field]
-    ? (content[field] as string)
-    : null;
+  return typeof content[field] === 'string' && content[field] ? (content[field] as string) : null;
 }
 
 export function ItemDetailPanel(props: {
@@ -100,9 +94,7 @@ export function ItemDetailPanel(props: {
   const { item, sections = [], open, onClose } = props;
   const [passageOpen, setPassageOpen] = useState(false);
 
-  const section = item?.sectionId
-    ? sections.find((s) => s.id === item.sectionId) ?? null
-    : null;
+  const section = item?.sectionId ? (sections.find((s) => s.id === item.sectionId) ?? null) : null;
   const showPassage = hasPassageContent(section);
 
   return (
@@ -111,13 +103,9 @@ export function ItemDetailPanel(props: {
         {/* Header SIEMPRE presente (Radix Dialog exige Title + Description). */}
         <SheetHeader className="space-y-2 pr-8">
           <div className="flex flex-wrap items-center gap-2">
-            <Badge variant="secondary">
-              {item ? `Pregunta ${item.position}` : 'Pregunta'}
-            </Badge>
+            <Badge variant="secondary">{item ? `Pregunta ${item.position}` : 'Pregunta'}</Badge>
             {item ? (
-              <Badge variant="outline">
-                {ITEM_TYPE_LABELS[item.type] ?? item.type}
-              </Badge>
+              <Badge variant="outline">{ITEM_TYPE_LABELS[item.type] ?? item.type}</Badge>
             ) : null}
           </div>
           <SheetTitle className="text-base leading-snug">
@@ -169,9 +157,7 @@ function ItemDetailContent({ item }: { item: ItemModel }): JSX.Element {
         <p className="whitespace-pre-line text-sm leading-relaxed text-foreground">
           {stem ?? 'Esta pregunta no tiene enunciado registrado.'}
         </p>
-        {explanation ? (
-          <p className="text-xs text-muted-foreground">{explanation}</p>
-        ) : null}
+        {explanation ? <p className="text-xs text-muted-foreground">{explanation}</p> : null}
       </section>
 
       {imageUrl ? (
@@ -226,9 +212,7 @@ function AlternativeRow({ alt }: { alt: Alternative }): JSX.Element {
       >
         {alt.key}
       </span>
-      <span className="min-w-0 flex-1 text-foreground">
-        {alt.text ?? `Alternativa ${alt.key}`}
-      </span>
+      <span className="min-w-0 flex-1 text-foreground">{alt.text ?? `Alternativa ${alt.key}`}</span>
       {alt.isCorrect ? (
         <CheckCircle2
           className="mt-0.5 size-4 shrink-0 text-emerald-600 dark:text-emerald-400"
@@ -278,36 +262,35 @@ function ItemNodes({ tags }: { tags: ItemTaxonomyTagModel[] }): JSX.Element {
                 {NODE_TYPE_LABELS[type] ?? type}
               </p>
               <ul className="flex flex-wrap gap-2">
-                {group.map((tag) => (
-                  <li key={tag.nodeId}>
-                    <span className="inline-flex items-center gap-1.5 rounded-md border bg-card px-2.5 py-1 text-sm">
-                      {tag.node?.code ? (
-                        <span className="font-medium tabular-nums">{tag.node.code}</span>
-                      ) : null}
-                      <span className="text-foreground">
-                        {tag.node?.name ?? tag.nodeId.slice(0, 8)}
+                {group.map((tag) => {
+                  // TKT-03: mostrar "OA-{n}"/nombre humano, no el código técnico (LANG-…).
+                  const codeLabel = formatNodeCode(tag.node?.code, tag.node?.type);
+                  return (
+                    <li key={tag.nodeId}>
+                      <span className="inline-flex items-center gap-1.5 rounded-md border bg-card px-2.5 py-1 text-sm">
+                        {codeLabel ? (
+                          <span className="font-medium tabular-nums">{codeLabel}</span>
+                        ) : null}
+                        <span className="text-foreground">
+                          {tag.node?.name ?? tag.nodeId.slice(0, 8)}
+                        </span>
+                        {/* TKT-06: se elimina el badge "secundario" (rótulo técnico
+                          confuso). La distinción primary/secondary se mantiene solo
+                          a nivel de datos. */}
+                        {tag.taggedBy === 'ai' ? (
+                          <Badge
+                            variant="secondary"
+                            className="ml-0.5 gap-0.5 px-1 py-0 text-[10px] font-normal"
+                            title="Sugerido por IA"
+                          >
+                            <Sparkles className="size-2.5" aria-hidden />
+                            IA
+                          </Badge>
+                        ) : null}
                       </span>
-                      {tag.tagType === 'secondary' ? (
-                        <Badge
-                          variant="outline"
-                          className="ml-0.5 px-1 py-0 text-[10px] font-normal"
-                        >
-                          secundario
-                        </Badge>
-                      ) : null}
-                      {tag.taggedBy === 'ai' ? (
-                        <Badge
-                          variant="secondary"
-                          className="ml-0.5 gap-0.5 px-1 py-0 text-[10px] font-normal"
-                          title="Sugerido por IA"
-                        >
-                          <Sparkles className="size-2.5" aria-hidden />
-                          IA
-                        </Badge>
-                      ) : null}
-                    </span>
-                  </li>
-                ))}
+                    </li>
+                  );
+                })}
               </ul>
             </div>
           ))}
@@ -318,9 +301,7 @@ function ItemNodes({ tags }: { tags: ItemTaxonomyTagModel[] }): JSX.Element {
 }
 
 /** Agrupa los tags por el `type` del nodo, conservando el orden de relevancia. */
-function groupTagsByType(
-  tags: ItemTaxonomyTagModel[],
-): [string, ItemTaxonomyTagModel[]][] {
+function groupTagsByType(tags: ItemTaxonomyTagModel[]): [string, ItemTaxonomyTagModel[]][] {
   const groups = new Map<string, ItemTaxonomyTagModel[]>();
   for (const tag of tags) {
     const type = tag.node?.type ?? 'unknown';
@@ -328,7 +309,5 @@ function groupTagsByType(
     arr.push(tag);
     groups.set(type, arr);
   }
-  return Array.from(groups.entries()).sort(
-    ([a], [b]) => nodeTypeRank(a) - nodeTypeRank(b),
-  );
+  return Array.from(groups.entries()).sort(([a], [b]) => nodeTypeRank(a) - nodeTypeRank(b));
 }

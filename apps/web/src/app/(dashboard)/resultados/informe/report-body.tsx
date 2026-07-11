@@ -8,11 +8,7 @@ import {
   TrendingUp,
   Users,
 } from 'lucide-react';
-import type {
-  AssessmentReportItemRow,
-  AssessmentReportResponse,
-  ItemReportFlag,
-} from '@soe/types';
+import type { AssessmentReportItemRow, AssessmentReportResponse, ItemReportFlag } from '@soe/types';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import {
   Table,
@@ -46,14 +42,10 @@ const DIFFICULTY_MID = 60;
 const DISCRIMINATION_LOW = 0.2;
 const DISCRIMINATION_MID = 0.3;
 
-const FLAG_META: Record<
-  ItemReportFlag,
-  { label: string; className: string }
-> = {
+const FLAG_META: Record<ItemReportFlag, { label: string; className: string }> = {
   critical: {
     label: 'Crítico',
-    className:
-      'border-transparent bg-red-100 text-red-800 dark:bg-red-950 dark:text-red-200',
+    className: 'border-transparent bg-red-100 text-red-800 dark:bg-red-950 dark:text-red-200',
   },
   low_discrimination: {
     label: 'Baja discriminación',
@@ -72,10 +64,7 @@ const FLAG_META: Record<
   },
 };
 
-const PRIORITY_META: Record<
-  'high' | 'medium' | 'low',
-  { label: string; className: string }
-> = {
+const PRIORITY_META: Record<'high' | 'medium' | 'low', { label: string; className: string }> = {
   high: {
     label: 'Alta',
     className: 'bg-red-100 text-red-800 dark:bg-red-950 dark:text-red-200',
@@ -121,10 +110,8 @@ function difficultyClass(value: number | null): string {
 
 function discriminationClass(value: number | null): string {
   if (value === null) return 'text-muted-foreground';
-  if (value < DISCRIMINATION_LOW)
-    return 'text-red-600 dark:text-red-400 font-semibold';
-  if (value < DISCRIMINATION_MID)
-    return 'text-amber-600 dark:text-amber-400 font-medium';
+  if (value < DISCRIMINATION_LOW) return 'text-red-600 dark:text-red-400 font-semibold';
+  if (value < DISCRIMINATION_MID) return 'text-amber-600 dark:text-amber-400 font-medium';
   return 'text-emerald-600 dark:text-emerald-400 font-medium';
 }
 
@@ -145,24 +132,18 @@ export function ReportBody({ report }: { report: AssessmentReportResponse }) {
         />
         <SummaryCard
           label="Aprobación"
-          value={
-            summary.passingRate === null
-              ? '—'
-              : `${summary.passingRate.toFixed(1)}%`
-          }
+          value={summary.passingRate === null ? '—' : `${summary.passingRate.toFixed(1)}%`}
           hint={`Nota de corte: ${summary.passingGrade.toFixed(1)}`}
           icon={CheckCircle2}
         />
         <SummaryCard
           label="Nota promedio"
           value={summary.averageGrade === null ? '—' : summary.averageGrade.toFixed(1)}
-          hint={
-            summary.averageGrade === null ? undefined : 'Promedio del curso evaluado'
-          }
+          hint={summary.averageGrade === null ? undefined : 'Promedio del curso evaluado'}
           icon={GraduationCap}
         />
         <SummaryCard
-          label="Cobertura"
+          label="Asistencia"
           value={`${summary.studentsEvaluated}/${summary.studentsEnrolled}`}
           hint={
             summary.coverageRate === null
@@ -208,10 +189,7 @@ function FichaTecnica({ report }: { report: AssessmentReportResponse }) {
     { label: 'Preguntas', value: String(meta.itemsCount) },
     {
       label: 'Cursos',
-      value:
-        meta.classGroups.length > 0
-          ? meta.classGroups.map((c) => c.name).join(', ')
-          : '—',
+      value: meta.classGroups.length > 0 ? meta.classGroups.map((c) => c.name).join(', ') : '—',
     },
   ];
 
@@ -220,12 +198,10 @@ function FichaTecnica({ report }: { report: AssessmentReportResponse }) {
       <CardContent className="space-y-4 p-5">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
           <div>
-            <h2 className="text-lg font-semibold">
-              {meta.assessmentName ?? meta.instrumentName}
-            </h2>
+            <h2 className="text-lg font-semibold">{meta.assessmentName ?? meta.instrumentName}</h2>
             <p className="text-sm text-muted-foreground">
-              Informe consolidado para dirección · {report.summary.studentsEvaluated}{' '}
-              alumnos evaluados
+              Informe consolidado para dirección · {report.summary.studentsEvaluated} alumnos
+              evaluados
             </p>
           </div>
           <ReportExportButton report={report} />
@@ -319,9 +295,7 @@ function CourseComparison({ report }: { report: AssessmentReportResponse }) {
                 <TableHead className="text-right">Evaluados</TableHead>
                 <TableHead className="text-right">% Logro</TableHead>
                 <TableHead className="text-right">Brecha vs prom.</TableHead>
-                <TableHead className="text-right hidden sm:table-cell">
-                  % Aprobación
-                </TableHead>
+                <TableHead className="text-right hidden sm:table-cell">% Aprobación</TableHead>
                 <TableHead className="text-right">En riesgo</TableHead>
               </TableRow>
             </TableHeader>
@@ -382,9 +356,7 @@ function SkillsSection({ report }: { report: AssessmentReportResponse }) {
                 <span className="font-medium">
                   {s.nodeName}
                   {s.nodeCode ? (
-                    <span className="ml-1 text-xs text-muted-foreground">
-                      {s.nodeCode}
-                    </span>
+                    <span className="ml-1 text-xs text-muted-foreground">{s.nodeCode}</span>
                   ) : null}
                 </span>
                 <span className="flex items-center gap-2">
@@ -427,9 +399,9 @@ function ItemsSection({ report }: { report: AssessmentReportResponse }) {
       <CardHeader>
         <CardTitle className="text-base">Análisis de preguntas</CardTitle>
         <p className="text-sm text-muted-foreground">
-          Dificultad (p): % de aciertos — bajo = difícil. Discriminación (D):
-          distingue a quienes dominan el contenido — D&nbsp;&lt;&nbsp;0,2 sugiere
-          revisar la pregunta, no el aprendizaje.
+          Dificultad (p): % de logro — bajo = difícil. Discriminación (D): distingue a quienes
+          dominan el contenido — D&nbsp;&lt;&nbsp;0,2 sugiere revisar la pregunta, no el
+          aprendizaje.
         </p>
       </CardHeader>
       <CardContent className="space-y-4">
@@ -461,8 +433,7 @@ function ItemsSection({ report }: { report: AssessmentReportResponse }) {
 
 function ItemRow({ item }: { item: AssessmentReportItemRow }) {
   const label = item.skillName ?? item.contentName ?? '—';
-  const secondary =
-    item.skillName && item.contentName ? item.contentName : null;
+  const secondary = item.skillName && item.contentName ? item.contentName : null;
   return (
     <TableRow>
       <TableCell className="font-medium">{item.position}</TableCell>
@@ -472,9 +443,7 @@ function ItemRow({ item }: { item: AssessmentReportItemRow }) {
           <span className="block text-xs text-muted-foreground">{secondary}</span>
         ) : null}
       </TableCell>
-      <TableCell className="text-center font-mono text-xs">
-        {item.correctKey ?? '—'}
-      </TableCell>
+      <TableCell className="text-center font-mono text-xs">{item.correctKey ?? '—'}</TableCell>
       <TableCell className={cn('text-right tabular-nums', difficultyClass(item.difficulty))}>
         {item.difficulty === null ? '—' : `${item.difficulty.toFixed(0)}%`}
       </TableCell>
@@ -488,10 +457,7 @@ function ItemRow({ item }: { item: AssessmentReportItemRow }) {
           <span>
             <span className="font-mono">{item.topDistractorKey}</span>
             {item.topDistractorRate !== null ? (
-              <span className="text-muted-foreground">
-                {' '}
-                ({item.topDistractorRate.toFixed(0)}%)
-              </span>
+              <span className="text-muted-foreground"> ({item.topDistractorRate.toFixed(0)}%)</span>
             ) : null}
           </span>
         ) : (
@@ -521,19 +487,19 @@ function FlagsLegend() {
   return (
     <div className="flex flex-wrap gap-x-5 gap-y-1.5 text-xs text-muted-foreground">
       <span>
-        <strong className="text-foreground">Crítico</strong>: &lt;40% de aciertos —
-        contenido no logrado.
+        <strong className="text-foreground">Crítico</strong>: &lt;40% de logro — contenido no
+        logrado.
       </span>
       <span>
-        <strong className="text-foreground">Baja discriminación</strong>: D&nbsp;&lt;&nbsp;0,2
-        — posible problema de redacción/clave.
+        <strong className="text-foreground">Baja discriminación</strong>: D&nbsp;&lt;&nbsp;0,2 —
+        posible problema de redacción/clave.
       </span>
       <span>
-        <strong className="text-foreground">Distractor potente</strong>: una
-        alternativa incorrecta atrae más que la clave.
+        <strong className="text-foreground">Distractor potente</strong>: una alternativa incorrecta
+        atrae más que la clave.
       </span>
       <span>
-        <strong className="text-foreground">Muy fácil</strong>: ≥85% de aciertos.
+        <strong className="text-foreground">Muy fácil</strong>: ≥85% de logro.
       </span>
     </div>
   );
@@ -573,13 +539,9 @@ function RiskStudents({ report }: { report: AssessmentReportResponse }) {
                 <TableRow key={s.studentId}>
                   <TableCell className="font-medium">
                     {s.studentFullName}
-                    <span className="block text-xs text-muted-foreground">
-                      {s.studentRut}
-                    </span>
+                    <span className="block text-xs text-muted-foreground">{s.studentRut}</span>
                   </TableCell>
-                  <TableCell className="hidden md:table-cell">
-                    {s.classGroupName ?? '—'}
-                  </TableCell>
+                  <TableCell className="hidden md:table-cell">{s.classGroupName ?? '—'}</TableCell>
                   <TableCell className="text-right font-medium">
                     {formatAchievement(s.achievement)}
                   </TableCell>
