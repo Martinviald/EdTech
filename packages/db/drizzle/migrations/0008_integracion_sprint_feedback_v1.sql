@@ -14,4 +14,5 @@ CREATE TABLE "instrument_attachments" (
 	"updated_at" timestamp DEFAULT now() NOT NULL
 );
 --> statement-breakpoint
+ALTER TABLE "remedial_materials" ADD COLUMN "edited_content" jsonb;--> statement-breakpoint
 ALTER TABLE "instrument_attachments" ADD CONSTRAINT "instrument_attachments_instrument_id_instruments_id_fk" FOREIGN KEY ("instrument_id") REFERENCES "public"."instruments"("id") ON DELETE cascade ON UPDATE no action;

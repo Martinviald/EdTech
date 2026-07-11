@@ -13,12 +13,14 @@ import {
   generateRemedialSchema,
   remedialListQuerySchema,
   reviewRemedialSchema,
+  updateRemedialSchema,
   REMEDIAL_APPROVER_ROLES,
   REMEDIAL_GENERATOR_ROLES,
   REMEDIAL_VIEWER_ROLES,
   type RemedialListResponse,
   type RemedialMaterialModel,
   type RemedialStatus,
+  type RemedialStudentMaterialModel,
 } from '@soe/types';
 import { CurrentUser } from '../auth/current-user.decorator';
 import type { JwtPayload } from '../auth/jwt-payload.types';
@@ -73,7 +75,7 @@ export class RemedialController {
     return { materialId: material.id, status: material.status };
   }
 
-  /** GET /api/remedial/:id — poll del estado/salida del material. */
+  /** GET /api/remedial/:id — poll del estado/salida del material (versión profesor). */
   @Get(':id')
   @Roles(...REMEDIAL_VIEWER_ROLES)
   get(
@@ -81,6 +83,19 @@ export class RemedialController {
     @CurrentUser() user: JwtPayload,
   ): Promise<RemedialMaterialModel> {
     return this.service.get(user, id);
+  }
+
+  /**
+   * GET /api/remedial/:id/student — versión ESTUDIANTE del material (TKT-17 b).
+   * Mismo contenido generado, render sin la información solo-profesor.
+   */
+  @Get(':id/student')
+  @Roles(...REMEDIAL_VIEWER_ROLES)
+  getStudentVersion(
+    @Param('id') id: string,
+    @CurrentUser() user: JwtPayload,
+  ): Promise<RemedialStudentMaterialModel> {
+    return this.service.getStudentVersion(user, id);
   }
 
   /** GET /api/remedial — banco de material remedial paginado/filtrado. */
@@ -92,6 +107,22 @@ export class RemedialController {
   ): Promise<RemedialListResponse> {
     const dto = remedialListQuerySchema.parse(query);
     return this.service.list(user, dto);
+  }
+
+  /**
+   * PATCH /api/remedial/:id — edición humana en borrador (TKT-17 c). Aplica a TODOS
+   * los tipos (guide | practice_set | group_plan). Persiste en `editedContent` sin
+   * tocar la evidencia IA (`content`). Solo mientras el material está en `ready`.
+   */
+  @Patch(':id')
+  @Roles(...REMEDIAL_APPROVER_ROLES)
+  update(
+    @Param('id') id: string,
+    @Body() body: unknown,
+    @CurrentUser() user: JwtPayload,
+  ): Promise<RemedialMaterialModel> {
+    const dto = updateRemedialSchema.parse(body);
+    return this.service.update(user, id, dto);
   }
 
   /** PATCH /api/remedial/:id/review — aprobar/descartar (H9.5). */

@@ -1,5 +1,5 @@
 {
-  "id": "45f9e638-c68b-4882-b85c-9b8673434ebc",
+  "id": "0f85236f-73b8-45a3-bf28-f9e1167de610",
   "prevId": "9fb81362-da8b-49f2-b63e-5e126bd58fc0",
   "version": "7",
   "dialect": "postgresql",
@@ -4632,6 +4632,12 @@
         },
         "content": {
           "name": "content",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "edited_content": {
+          "name": "edited_content",
           "type": "jsonb",
           "primaryKey": false,
           "notNull": false
