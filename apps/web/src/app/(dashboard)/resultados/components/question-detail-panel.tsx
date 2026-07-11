@@ -1,26 +1,18 @@
 'use client';
 
-import { useState, type JSX } from 'react';
-import { BookOpen, CheckCircle2, FileQuestion, Loader2, Sparkles } from 'lucide-react';
+import type { JSX } from 'react';
+import { CheckCircle2, FileQuestion, Loader2 } from 'lucide-react';
 import type {
   AlternativeDistribution,
   QuestionAnalysisResponse,
   QuestionSection,
   QuestionTaxonomyTag,
 } from '@soe/types';
-import {
-  Sheet,
-  SheetContent,
-  SheetDescription,
-  SheetHeader,
-  SheetTitle,
-} from '@/components/ui/sheet';
 import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { PassageDialog, hasPassageContent, type PassageData } from '@/components/passage-dialog';
+import { hasPassageContent, type PassageData } from '@/components/passage-dialog';
 import { cn } from '@/lib/utils';
-import { formatNodeCode } from '@/lib/taxonomy-labels';
-import { useResizablePanelWidth, PanelResizeHandle } from '@/hooks/use-resizable-panel-width';
+import { QuestionDetailSheet } from '@/components/question-detail/question-detail-sheet';
+import { QuestionNodes, type QuestionNodeTag } from '@/components/question-detail/question-nodes';
 
 function questionSectionToPassage(section: QuestionSection): PassageData {
   return {
@@ -71,75 +63,45 @@ export function QuestionDetailPanel(props: {
   onClose: () => void;
 }): JSX.Element {
   const { data, open, onClose } = props;
-  const [passageOpen, setPassageOpen] = useState(false);
-  // TKT-07: el ancho del panel es ajustable arrastrando el borde izquierdo,
-  // persistido en localStorage (mismo patrón que el panel del asistente).
-  const { width, onPointerDown, onKeyDown } = useResizablePanelWidth({
-    storageKey: 'soe.questionDetail.panelWidth',
-    defaultWidth: 560,
-    minWidth: 400,
-  });
   const section = data?.section ?? null;
-  const showPassage = hasPassageContent(section);
+  const passage =
+    section && hasPassageContent(section) ? questionSectionToPassage(section) : null;
 
   return (
-    <Sheet open={open} onOpenChange={(next) => (next ? undefined : onClose())}>
-      <SheetContent
-        side="right"
-        style={{ width, maxWidth: '95vw' }}
-        className="w-full max-w-none overflow-y-auto"
-      >
-        {/* Tirador de redimensionado en el borde izquierdo (panel ancla derecha). */}
-        <PanelResizeHandle onPointerDown={onPointerDown} onKeyDown={onKeyDown} />
-        {/* Header SIEMPRE presente (título + descripción) para accesibilidad:
-            Radix Dialog exige un Title/Description en cada Content. */}
-        <SheetHeader className="space-y-2 pr-8">
-          <div className="flex flex-wrap items-center gap-2">
-            <Badge variant="secondary">{data ? `Pregunta ${data.position}` : 'Pregunta'}</Badge>
-            {data?.correctKey ? (
-              <Badge variant="success">Clave correcta: {data.correctKey}</Badge>
-            ) : null}
-          </div>
-          <SheetTitle className="text-base leading-snug">
-            {data ? `Detalle de la pregunta ${data.position}` : 'Detalle de la pregunta'}
-          </SheetTitle>
-          <SheetDescription>
-            Enunciado, distribución de respuestas, análisis de distractores y nodos asociados a la
-            pregunta.
-          </SheetDescription>
-        </SheetHeader>
-
-        {showPassage ? (
-          <Button
-            variant="outline"
-            size="sm"
-            className="mt-4 w-full justify-start gap-2"
-            onClick={() => setPassageOpen(true)}
-          >
-            <BookOpen className="size-4" aria-hidden />
-            Ver texto de lectura
-          </Button>
-        ) : null}
-
-        {data === null ? (
-          <div className="flex flex-col items-center justify-center gap-3 py-16 text-muted-foreground">
-            <Loader2 className="size-6 animate-spin" aria-hidden />
-            <p className="text-sm">Cargando análisis de la pregunta…</p>
-          </div>
-        ) : (
-          <QuestionDetailContent data={data} />
-        )}
-      </SheetContent>
-
-      {section ? (
-        <PassageDialog
-          open={passageOpen}
-          onOpenChange={setPassageOpen}
-          passage={questionSectionToPassage(section)}
-        />
-      ) : null}
-    </Sheet>
+    <QuestionDetailSheet
+      open={open}
+      onClose={onClose}
+      position={data?.position ?? null}
+      headerBadges={
+        data?.correctKey ? (
+          <Badge variant="success">Clave correcta: {data.correctKey}</Badge>
+        ) : null
+      }
+      description="Enunciado, distribución de respuestas, análisis de distractores y nodos asociados a la pregunta."
+      passage={passage}
+      storageKey="soe.questionDetail.panelWidth"
+    >
+      {data === null ? (
+        <div className="flex flex-col items-center justify-center gap-3 py-16 text-muted-foreground">
+          <Loader2 className="size-6 animate-spin" aria-hidden />
+          <p className="text-sm">Cargando análisis de la pregunta…</p>
+        </div>
+      ) : (
+        <QuestionDetailContent data={data} />
+      )}
+    </QuestionDetailSheet>
   );
+}
+
+/** Normaliza los tags de la pregunta a la forma común de `QuestionNodes`. */
+function toNodeTags(tags: QuestionTaxonomyTag[]): QuestionNodeTag[] {
+  return tags.map((t) => ({
+    nodeId: t.nodeId,
+    code: t.nodeCode ?? null,
+    type: t.nodeType,
+    name: t.nodeName,
+    taggedBy: t.taggedBy,
+  }));
 }
 
 function QuestionDetailContent({ data }: { data: QuestionAnalysisResponse }): JSX.Element {
@@ -182,8 +144,9 @@ function QuestionDetailContent({ data }: { data: QuestionAnalysisResponse }): JS
         />
       </div>
 
-      {/* Todos los nodos de taxonomía asociados a la pregunta */}
-      <QuestionNodes tags={data.tags} />
+      {/* Todos los nodos de taxonomía asociados a la pregunta. TKT-05: en
+          resultados los descriptores no se muestran (solo en el banco de ítems). */}
+      <QuestionNodes tags={toNodeTags(data.tags)} hiddenTypes={['descriptor']} />
 
       {/* Distribución por alternativa */}
       <section className="space-y-3">
@@ -209,95 +172,6 @@ function QuestionDetailContent({ data }: { data: QuestionAnalysisResponse }): JS
       </section>
     </div>
   );
-}
-
-// Etiquetas legibles por tipo de nodo (taxonomy_node_type) y orden de aparición.
-const NODE_TYPE_LABELS: Record<string, string> = {
-  skill: 'Habilidades',
-  content: 'Contenidos',
-  learning_objective: 'Objetivos de aprendizaje',
-  text_type: 'Tipos de texto',
-  axis: 'Ejes',
-  domain: 'Dominios',
-  subdomain: 'Subdominios',
-  performance_level: 'Niveles de desempeño',
-  descriptor: 'Descriptores',
-  criterion: 'Criterios',
-  paper: 'Papers',
-};
-
-const NODE_TYPE_ORDER = Object.keys(NODE_TYPE_LABELS);
-
-function nodeTypeRank(type: string): number {
-  const i = NODE_TYPE_ORDER.indexOf(type);
-  return i === -1 ? NODE_TYPE_ORDER.length : i;
-}
-
-/** Lista TODOS los nodos asociados a la pregunta, agrupados por tipo de nodo. */
-function QuestionNodes({ tags }: { tags: QuestionTaxonomyTag[] }): JSX.Element {
-  // TKT-05: los descriptores se almacenan por ítem pero NO se muestran ni se
-  // reportan en resultados (solo son visibles en el banco de ítems).
-  const visibleTags = tags.filter((tag) => tag.nodeType !== 'descriptor');
-  return (
-    <section className="space-y-3">
-      <h3 className="text-sm font-semibold text-foreground">Nodos asociados</h3>
-      {visibleTags.length === 0 ? (
-        <p className="text-sm text-muted-foreground">
-          Esta pregunta no tiene nodos de taxonomía asociados.
-        </p>
-      ) : (
-        <div className="space-y-3">
-          {groupTagsByType(visibleTags).map(([type, group]) => (
-            <div key={type} className="space-y-1.5">
-              <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-                {NODE_TYPE_LABELS[type] ?? type}
-              </p>
-              <ul className="flex flex-wrap gap-2">
-                {group.map((tag) => {
-                  // TKT-03: mostrar "OA-{n}"/nombre humano, no el código técnico (LANG-…).
-                  const codeLabel = formatNodeCode(tag.nodeCode, tag.nodeType);
-                  return (
-                    <li key={tag.nodeId}>
-                      <span className="inline-flex items-center gap-1.5 rounded-md border bg-card px-2.5 py-1 text-sm">
-                        {codeLabel ? (
-                          <span className="font-medium tabular-nums">{codeLabel}</span>
-                        ) : null}
-                        <span className="text-foreground">{tag.nodeName}</span>
-                        {/* TKT-06: se elimina el badge "secundario" (rótulo técnico
-                          confuso). La distinción primary/secondary se mantiene solo
-                          a nivel de datos para derivar la habilidad principal. */}
-                        {tag.taggedBy === 'ai' ? (
-                          <Badge
-                            variant="secondary"
-                            className="ml-0.5 gap-0.5 px-1 py-0 text-[10px] font-normal"
-                            title="Sugerido por IA"
-                          >
-                            <Sparkles className="size-2.5" aria-hidden />
-                            IA
-                          </Badge>
-                        ) : null}
-                      </span>
-                    </li>
-                  );
-                })}
-              </ul>
-            </div>
-          ))}
-        </div>
-      )}
-    </section>
-  );
-}
-
-/** Agrupa los tags por `nodeType`, conservando el orden de relevancia. */
-function groupTagsByType(tags: QuestionTaxonomyTag[]): [string, QuestionTaxonomyTag[]][] {
-  const groups = new Map<string, QuestionTaxonomyTag[]>();
-  for (const tag of tags) {
-    const arr = groups.get(tag.nodeType) ?? [];
-    arr.push(tag);
-    groups.set(tag.nodeType, arr);
-  }
-  return Array.from(groups.entries()).sort(([a], [b]) => nodeTypeRank(a) - nodeTypeRank(b));
 }
 
 function AlternativeRow({
