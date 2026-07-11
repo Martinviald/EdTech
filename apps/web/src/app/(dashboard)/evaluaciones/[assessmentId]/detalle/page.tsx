@@ -19,19 +19,6 @@ import { CrossTable } from '../../../resultados/detalle/cross-table';
 
 export const dynamic = 'force-dynamic';
 
-const LIMIT = 50;
-
-function pickParam(raw: string | string[] | undefined): string | undefined {
-  const value = Array.isArray(raw) ? raw[0] : raw;
-  return value && value.length > 0 ? value : undefined;
-}
-
-function parsePage(raw: string | string[] | undefined): number {
-  const value = pickParam(raw);
-  const n = value ? Number.parseInt(value, 10) : 1;
-  return Number.isFinite(n) && n >= 1 ? n : 1;
-}
-
 export default async function EvaluacionDetallePage({
   params,
   searchParams,
@@ -48,13 +35,12 @@ export default async function EvaluacionDetallePage({
   const filters = parseDashboardFilters(sp);
   const filterQuery = buildDashboardQuery(filters);
   const classGroupId = filters.classGroupId;
-  const page = parsePage(sp.page);
   const basePath = `/evaluaciones/${assessmentId}/detalle`;
 
-  const matrixQuery = new URLSearchParams({ assessmentId });
+  // TKT-09 — el ordenamiento (alumnos/preguntas por % de logro) se resuelve en el
+  // cliente, por lo que se pide el curso COMPLETO sin paginar (`all=true`).
+  const matrixQuery = new URLSearchParams({ assessmentId, all: 'true' });
   if (classGroupId) matrixQuery.set('classGroupId', classGroupId);
-  matrixQuery.set('page', String(page));
-  matrixQuery.set('limit', String(LIMIT));
 
   const [options, matrix] = await Promise.all([
     apiGet<DashboardFilterOptionsResponse>(`/dashboards/filters${filterQuery}`),
@@ -108,12 +94,7 @@ export default async function EvaluacionDetallePage({
                 {matrix.students.total} alumnos
               </p>
             </div>
-            <CrossTable
-              matrix={matrix}
-              basePath={basePath}
-              assessmentId={assessmentId}
-              classGroupId={classGroupId}
-            />
+            <CrossTable matrix={matrix} assessmentId={assessmentId} classGroupId={classGroupId} />
           </CardContent>
         </Card>
       )}
