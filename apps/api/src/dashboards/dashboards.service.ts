@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { and, asc, desc, eq, inArray, isNull, sql } from 'drizzle-orm';
+import { and, asc, desc, eq, inArray, isNull, notInArray, sql } from 'drizzle-orm';
 import {
   academicYears,
   assessmentResults,
@@ -21,6 +21,7 @@ import {
   DEFAULT_PERFORMANCE_THRESHOLDS,
   PERFORMANCE_LEVELS,
   RESULTS_VIEWER_ROLES,
+  RESULT_HIDDEN_NODE_TYPES,
   percentageToPerformanceLevel,
   userHasAnyRole,
   type AssessmentStatus,
@@ -385,7 +386,11 @@ export class DashboardsService {
         advanced: resolvedThresholds.advanced,
       };
 
-      const conditions = [inArray(skillResults.assessmentId, assessmentIds)];
+      const conditions = [
+        inArray(skillResults.assessmentId, assessmentIds),
+        // TKT-05 — la matriz de habilidades no reporta nodos tipo descriptor.
+        notInArray(taxonomyNodes.type, [...RESULT_HIDDEN_NODE_TYPES]),
+      ];
       if (studentIds !== null) {
         conditions.push(inArray(skillResults.studentId, studentIds));
       }
@@ -889,8 +894,11 @@ export class DashboardsService {
       }
     }
 
-    // 2) Habilidades críticas (< 50% promedio).
-    const skillConditions = [inArray(skillResults.assessmentId, assessmentIds)];
+    // 2) Habilidades críticas (< 50% promedio). TKT-05 — sin descriptores.
+    const skillConditions = [
+      inArray(skillResults.assessmentId, assessmentIds),
+      notInArray(taxonomyNodes.type, [...RESULT_HIDDEN_NODE_TYPES]),
+    ];
     if (studentIds !== null) skillConditions.push(inArray(skillResults.studentId, studentIds));
 
     const skillRows = await tx

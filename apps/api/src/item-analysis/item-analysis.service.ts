@@ -26,6 +26,7 @@ import {
 } from '@soe/db';
 import {
   RESULTS_VIEWER_ROLES,
+  RESULT_HIDDEN_NODE_TYPES,
   userHasAnyRole,
   type AlternativeDistribution,
   type AssessmentListQueryDto,
@@ -249,10 +250,14 @@ export class ItemAnalysisService {
       }
 
       // ── Columnas: ítems del instrumento de la evaluación ──────────────────────
+      // TKT-12 — filtro por nodeId (single, drill-down de habilidad) y/o tagIds
+      // (multi-tag OR). Se combinan como unión: un ítem se muestra si tiene
+      // cualquiera de los nodos/tags provistos.
       const questions = await this.loadQuestionColumns(
         tx,
         assessment.instrumentId,
         query.nodeId,
+        query.tagIds,
       );
       const itemIds = questions.map((q) => q.itemId);
 
@@ -273,7 +278,9 @@ export class ItemAnalysisService {
         studentFilter,
       );
 
-      // ── Alumnos visibles con respuestas en la evaluación (paginados) ──────────
+      // ── Alumnos visibles con respuestas en la evaluación ──────────────────────
+      // TKT-09 — con `all=true` se devuelve el curso COMPLETO (sin paginar) para
+      // que el frontend pueda ordenar alumnos/preguntas por % de logro en cliente.
       const pagination = await this.loadStudentsPage(
         tx,
         query.assessmentId,
@@ -281,6 +288,7 @@ export class ItemAnalysisService {
         studentFilter,
         query.page,
         query.limit,
+        query.all,
       );
 
       const pageStudentIds = pagination.data.map((s) => s.studentId);
@@ -334,8 +342,9 @@ export class ItemAnalysisService {
         students: {
           data: students,
           total: pagination.total,
-          page: query.page,
-          limit: query.limit,
+          // Con `all=true` no hay paginación: reportamos una sola página con todo.
+          page: query.all ? 1 : query.page,
+          limit: query.all ? pagination.total : query.limit,
         },
       };
     });
@@ -474,11 +483,16 @@ export class ItemAnalysisService {
   // Query helpers (sin N+1)
   // ───────────────────────────────────────────────────────────────────────────
 
-  /** Columnas de la matriz: ítems del instrumento, opcionalmente filtrados por nodeId. */
+  /**
+   * Columnas de la matriz: ítems del instrumento, opcionalmente filtrados por
+   * nodeId (single) y/o tagIds (multi, OR). Ambos se combinan en una unión de
+   * nodos: el ítem se muestra si tiene CUALQUIERA de los nodos/tags provistos.
+   */
   private async loadQuestionColumns(
     tx: Database,
     instrumentId: string,
     nodeId: string | undefined,
+    tagIds: string[] | undefined,
   ): Promise<MatrixQuestionColumn[]> {
     const conditions = [
       eq(items.instrumentId, instrumentId),
@@ -520,26 +534,24 @@ export class ItemAnalysisService {
       };
     });
 
-    // Filtro por nodeId: limita las columnas a ítems taggeados con ese nodo.
-    if (nodeId) {
-      const taggedItemIds = new Set<string>();
-      for (const [iid, refs] of tagsByItem.entries()) {
-        if (refs.skill?.nodeId === nodeId || refs.contentRef?.nodeId === nodeId) {
-          taggedItemIds.add(iid);
-        }
-      }
-      // tagsByItem sólo guarda primary/secondary representativos; consultar el
-      // set completo de tags para el filtro exacto.
-      const allTagged = await tx
+    // Filtro por nodos/tags (nodeId ∪ tagIds): limita las columnas a ítems que
+    // tengan CUALQUIERA de esos nodos (semántica OR — TKT-12). Consulta el set
+    // completo de item_taxonomy_tags (primary + secondary), no sólo los tags
+    // representativos, para un filtro exacto.
+    const filterNodeIds = Array.from(
+      new Set([...(nodeId ? [nodeId] : []), ...(tagIds ?? [])]),
+    );
+    if (filterNodeIds.length > 0 && columns.length > 0) {
+      const tagged = await tx
         .select({ itemId: itemTaxonomyTags.itemId })
         .from(itemTaxonomyTags)
         .where(
           and(
             inArray(itemTaxonomyTags.itemId, columns.map((c) => c.itemId)),
-            eq(itemTaxonomyTags.nodeId, nodeId),
+            inArray(itemTaxonomyTags.nodeId, filterNodeIds),
           ),
         );
-      for (const t of allTagged) taggedItemIds.add(t.itemId);
+      const taggedItemIds = new Set(tagged.map((t) => t.itemId));
       columns = columns.filter((c) => taggedItemIds.has(c.itemId));
     }
 
@@ -598,6 +610,7 @@ export class ItemAnalysisService {
     studentFilter: string[] | null,
     page: number,
     limit: number,
+    all: boolean,
   ): Promise<{
     data: {
       studentId: string;
@@ -639,7 +652,7 @@ export class ItemAnalysisService {
     // con matrícula en varios años académicos generaría filas duplicadas y
     // descuadraría la paginación contra `total = count(distinct studentId)`. El %
     // logro viene de assessment_results (único por (assessment, alumno)).
-    const rows = await tx
+    const baseQuery = tx
       .select({
         studentId: students.id,
         studentRut: students.rut,
@@ -664,9 +677,13 @@ export class ItemAnalysisService {
         students.lastName,
         assessmentResults.percentage,
       )
-      .orderBy(asc(students.lastName), asc(students.firstName))
-      .limit(limit)
-      .offset((page - 1) * limit);
+      .orderBy(asc(students.lastName), asc(students.firstName));
+
+    // TKT-09 — `all` devuelve el curso completo (sin limit/offset) para ordenar en
+    // el cliente; en modo normal se pagina con limit/offset.
+    const rows = all
+      ? await baseQuery
+      : await baseQuery.limit(limit).offset((page - 1) * limit);
 
     // Curso de cada alumno relevante a ESTA evaluación (1 query), resuelto aparte
     // para no inflar la página. Un alumno → un único curso (DISTINCT ON).
@@ -856,6 +873,11 @@ export class ItemAnalysisService {
       .orderBy(asc(itemTaxonomyTags.tagType));
 
     for (const r of rows) {
+      // TKT-05 — un descriptor no es la habilidad/contenido representativo del ítem
+      // en la matriz de resultados (sigue disponible en el banco de ítems).
+      if ((RESULT_HIDDEN_NODE_TYPES as readonly string[]).includes(r.nodeType)) {
+        continue;
+      }
       let entry = map.get(r.itemId);
       if (!entry) {
         entry = { skill: null, contentRef: null };

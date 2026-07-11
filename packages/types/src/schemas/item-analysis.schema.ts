@@ -58,8 +58,16 @@ export const itemMatrixQuerySchema = z.object({
   assessmentId: z.string().uuid(),
   classGroupId: z.string().uuid().optional(),
   nodeId: z.string().uuid().optional(), // filtra columnas por habilidad/contenido
+  // TKT-12 — filtro multi-tag con semántica OR: una pregunta se muestra si tiene
+  // CUALQUIERA de estos nodos/tags (OA, habilidad, contenido, tipo de texto…).
+  // Se combina con `nodeId` como unión (OR sobre todos los ids provistos).
+  tagIds: z.array(z.string().uuid()).optional(),
   page: z.coerce.number().int().min(1).default(1),
   limit: z.coerce.number().int().min(1).max(200).default(50),
+  // TKT-09 — "Detalle por pregunta": el ordenamiento (alumnos/preguntas por % de
+  // logro) se resuelve en el frontend, por lo que necesita el curso COMPLETO. Con
+  // `all=true` se ignora la paginación y se devuelven todos los alumnos del scope.
+  all: z.coerce.boolean().optional().default(false),
 });
 export type ItemMatrixQueryDto = z.infer<typeof itemMatrixQuerySchema>;
 

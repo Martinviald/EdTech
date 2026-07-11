@@ -166,6 +166,7 @@ describe('GetAssessmentReportTool', () => {
         studentsEnrolled: 1,
         coverageRate: 100,
         averageAchievement: 50,
+        hasGradingScale: true,
         averageGrade: 4,
         passingGrade: 4,
         passingRate: 100,

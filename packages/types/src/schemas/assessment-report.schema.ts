@@ -53,9 +53,15 @@ export type AssessmentReportSummary = {
   studentsEnrolled: number; // matriculados en los cursos de la evaluación
   coverageRate: number | null; // % evaluados / matriculados, 0..100
   averageAchievement: number | null; // % logro promedio 0..100
-  averageGrade: number | null; // nota promedio
-  passingGrade: number; // umbral de aprobación usado
-  passingRate: number | null; // % alumnos sobre el umbral, 0..100
+  // TKT-04 — `hasGradingScale` distingue explícitamente "el instrumento no tiene
+  // escala de notas configurada" de "escala con corte 4.0". Cuando es `false`,
+  // todos los campos de nota (averageGrade, passingGrade, passingRate) vienen
+  // `null`: NO se inventa un default 4.0. El % de logro y el nivel de desempeño
+  // (que no dependen de la escala de notas) se siguen reportando.
+  hasGradingScale: boolean;
+  averageGrade: number | null; // nota promedio (null si no hay escala)
+  passingGrade: number | null; // umbral de aprobación usado (null si no hay escala)
+  passingRate: number | null; // % alumnos sobre el umbral, 0..100 (null si no hay escala)
   performanceLevel: PerformanceLevel | null; // nivel del logro promedio
 };
 
