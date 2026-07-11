@@ -96,7 +96,7 @@ async function main(): Promise<void> {
         .insert(users)
         .values({ email: p.email, name: p.name, provider: 'google', providerId: 'seed-demo-platform-admin' })
         .returning({ id: users.id });
-      userId = ins[0].id;
+      userId = ins[0]!.id;
     }
     await db.insert(platformAdmins).values({ userId, notes: 'seed demo-access' }).onConflictDoNothing();
     console.log(`  platform admin ${p.email}`);

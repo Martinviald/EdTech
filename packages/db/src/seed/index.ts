@@ -10,6 +10,7 @@ import { platformAdmins } from '../schema/platform-admins';
 import { seedTaxonomyReal } from './taxonomy-real';
 import { importInstruments } from './import-instruments';
 import { applyItemTags } from './import-item-tags';
+import { seedPerformanceBands } from './seed-performance-bands';
 
 config({ path: resolve(__dirname, '../../../../.env') });
 
@@ -135,6 +136,11 @@ async function main() {
   console.log('Importando instrumentos + ítems reales (DIA 2025)...');
   await importInstruments(db);
   await applyItemTags(db);
+
+  // Niveles/umbrales de logro por instrumento (cortes oficiales DIA reverse-
+  // engineered). Bandas globales (org_id NULL) compartidas por todas las orgs.
+  console.log('Sembrando performance_bands (cortes DIA)...');
+  await seedPerformanceBands(db);
 
   // -------- Demo tenant para mock auth y validación end-to-end --------
   console.log('Seeding Colegio Demo...');

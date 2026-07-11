@@ -12,6 +12,8 @@ import {
   instruments,
   itemTaxonomyTags,
   items,
+  organizations,
+  performanceBands,
   responses,
   skillResults,
   studentEnrollments,
@@ -32,6 +34,7 @@ import {
   type CalculateAssessmentResultsResponse,
   type GradingScaleParams,
   type ListAssessmentResultsQueryDto,
+  type PerformanceBandView,
   type PerformanceLevel,
   type SkillResultModel,
   type SkillResultsListResponse,
@@ -44,6 +47,7 @@ import {
   defaultLinearChileanScale,
   toResponseForCalculation,
 } from './lib/result-aggregator';
+import { loadInstrumentBands } from '../performance-bands/lib/load-instrument-bands';
 
 // Roles "administrativos" — ven todos los cursos de la org. Cualquier otro rol
 // con acceso (teacher, homeroom_teacher) ve sólo los cursos donde tiene
@@ -57,6 +61,21 @@ const ADMIN_LIKE_ROLES: readonly UserRole[] = [
   'coordinator',
   'eval_coordinator',
 ];
+
+/**
+ * Construye la vista de banda para un resultado a partir de las columnas del
+ * LEFT JOIN a performance_bands. `null` si el resultado no tiene banda asignada
+ * (instrumentos sin bandas configuradas) → la UI cae al enum legacy.
+ */
+function toBandView(r: {
+  bandKey: string | null;
+  bandLabel: string | null;
+  bandOrder: number | null;
+  bandColor: string | null;
+}): PerformanceBandView | null {
+  if (r.bandKey === null || r.bandLabel === null || r.bandOrder === null) return null;
+  return { key: r.bandKey, label: r.bandLabel, order: r.bandOrder, color: r.bandColor };
+}
 
 @Injectable()
 export class AssessmentResultsService {
@@ -97,92 +116,160 @@ export class AssessmentResultsService {
         dto.gradingScaleId,
       );
 
-      const responseRows = await tx
-        .select({
-          studentId: responses.studentId,
-          itemId: responses.itemId,
-          isCorrect: responses.isCorrect,
-          rawScore: responses.rawScore,
-          finalScore: responses.finalScore,
-          maxScore: responses.maxScore,
-          itemPosition: items.position,
-        })
-        .from(responses)
-        .innerJoin(items, eq(items.id, responses.itemId))
-        .where(eq(responses.assessmentId, assessmentId));
+      return this.computeAndPersist(tx, assessmentId, assessment.instrumentId, scale);
+    });
+  }
 
-      if (responseRows.length === 0) {
-        return {
-          assessmentId,
-          resultsCreated: 0,
-          resultsUpdated: 0,
-          skillResultsCreated: 0,
-          skillResultsUpdated: 0,
-          studentsProcessed: 0,
-        };
-      }
+  /**
+   * Núcleo del recálculo (compute + delete + reinsert) de un assessment. Puro
+   * respecto a auth/scope: asume que el caller ya validó permisos y que `tx`
+   * corre en el `withOrgContext` de la org dueña del assessment (RLS activo).
+   * Reutilizado por `calculate` (path de usuario) y `recalculateByInstrument`
+   * (path platform_admin cross-tenant).
+   */
+  private async computeAndPersist(
+    tx: Database,
+    assessmentId: string,
+    instrumentId: string,
+    scale: GradingScaleParams,
+  ): Promise<CalculateAssessmentResultsResponse> {
+    const responseRows = await tx
+      .select({
+        studentId: responses.studentId,
+        itemId: responses.itemId,
+        isCorrect: responses.isCorrect,
+        rawScore: responses.rawScore,
+        finalScore: responses.finalScore,
+        maxScore: responses.maxScore,
+        itemPosition: items.position,
+      })
+      .from(responses)
+      .innerJoin(items, eq(items.id, responses.itemId))
+      .where(eq(responses.assessmentId, assessmentId));
 
-      const tagsByItemId = await this.loadTagsByItemId(
-        tx,
-        Array.from(new Set(responseRows.map((r) => r.itemId))),
-      );
-
-      const computed = toResponseForCalculation(responseRows, tagsByItemId);
-      const studentAggregates = aggregateStudentResults(computed, scale);
-      const skillAggregates = aggregateSkillResults(computed, scale);
-
-      // Cuántos resultados previos había — define created vs updated.
-      const [{ priorResults, priorSkillResults }] = await tx
-        .select({
-          priorResults: sql<number>`(select count(*)::int from ${assessmentResults} where ${assessmentResults.assessmentId} = ${assessmentId})`,
-          priorSkillResults: sql<number>`(select count(*)::int from ${skillResults} where ${skillResults.assessmentId} = ${assessmentId})`,
-        })
-        .from(sql`(values (1)) as _`);
-
-      // Recálculo = delete + reinsert. Las tablas no tienen deletedAt.
-      await tx.delete(assessmentResults).where(eq(assessmentResults.assessmentId, assessmentId));
-      await tx.delete(skillResults).where(eq(skillResults.assessmentId, assessmentId));
-
-      if (studentAggregates.length > 0) {
-        const now = new Date();
-        await tx.insert(assessmentResults).values(
-          studentAggregates.map((a) => ({
-            assessmentId,
-            studentId: a.studentId,
-            totalScore: a.totalScore.toFixed(2),
-            maxScore: a.maxScore.toFixed(2),
-            percentage: (a.percentage * 100).toFixed(2),
-            grade: a.grade.toFixed(2),
-            performanceLevel: a.performanceLevel,
-            isComplete: a.isComplete,
-            completedAt: a.isComplete ? now : null,
-          })),
-        );
-      }
-
-      if (skillAggregates.length > 0) {
-        await tx.insert(skillResults).values(
-          skillAggregates.map((a) => ({
-            assessmentId,
-            studentId: a.studentId,
-            nodeId: a.nodeId,
-            correctCount: a.correctCount,
-            totalCount: a.totalCount,
-            percentage: (a.percentage * 100).toFixed(2),
-            performanceLevel: a.performanceLevel,
-          })),
-        );
-      }
-
+    if (responseRows.length === 0) {
       return {
         assessmentId,
-        resultsCreated: Math.max(0, studentAggregates.length - priorResults),
-        resultsUpdated: Math.min(priorResults, studentAggregates.length),
-        skillResultsCreated: Math.max(0, skillAggregates.length - priorSkillResults),
-        skillResultsUpdated: Math.min(priorSkillResults, skillAggregates.length),
-        studentsProcessed: studentAggregates.length,
+        resultsCreated: 0,
+        resultsUpdated: 0,
+        skillResultsCreated: 0,
+        skillResultsUpdated: 0,
+        studentsProcessed: 0,
       };
-    });
+    }
+
+    const tagsByItemId = await this.loadTagsByItemId(
+      tx,
+      Array.from(new Set(responseRows.map((r) => r.itemId))),
+    );
+
+    // Bandas de logro del instrumento (fuente de verdad del nivel por
+    // instrumento). Corre dentro de withOrgContext → RLS trae globales + org.
+    const bands = await loadInstrumentBands(tx, instrumentId);
+
+    const computed = toResponseForCalculation(responseRows, tagsByItemId);
+    const studentAggregates = aggregateStudentResults(computed, scale, bands);
+    const skillAggregates = aggregateSkillResults(computed, scale, bands);
+
+    // Cuántos resultados previos había — define created vs updated.
+    const [{ priorResults, priorSkillResults }] = await tx
+      .select({
+        priorResults: sql<number>`(select count(*)::int from ${assessmentResults} where ${assessmentResults.assessmentId} = ${assessmentId})`,
+        priorSkillResults: sql<number>`(select count(*)::int from ${skillResults} where ${skillResults.assessmentId} = ${assessmentId})`,
+      })
+      .from(sql`(values (1)) as _`);
+
+    // Recálculo = delete + reinsert. Las tablas no tienen deletedAt.
+    await tx.delete(assessmentResults).where(eq(assessmentResults.assessmentId, assessmentId));
+    await tx.delete(skillResults).where(eq(skillResults.assessmentId, assessmentId));
+
+    if (studentAggregates.length > 0) {
+      const now = new Date();
+      await tx.insert(assessmentResults).values(
+        studentAggregates.map((a) => ({
+          assessmentId,
+          studentId: a.studentId,
+          totalScore: a.totalScore.toFixed(2),
+          maxScore: a.maxScore.toFixed(2),
+          percentage: (a.percentage * 100).toFixed(2),
+          grade: a.grade.toFixed(2),
+          performanceBandId: a.performanceBandId ?? null,
+          performanceLevel: a.performanceLevel,
+          isComplete: a.isComplete,
+          completedAt: a.isComplete ? now : null,
+        })),
+      );
+    }
+
+    if (skillAggregates.length > 0) {
+      await tx.insert(skillResults).values(
+        skillAggregates.map((a) => ({
+          assessmentId,
+          studentId: a.studentId,
+          nodeId: a.nodeId,
+          correctCount: a.correctCount,
+          totalCount: a.totalCount,
+          percentage: (a.percentage * 100).toFixed(2),
+          performanceBandId: a.performanceBandId ?? null,
+          performanceLevel: a.performanceLevel,
+        })),
+      );
+    }
+
+    return {
+      assessmentId,
+      resultsCreated: Math.max(0, studentAggregates.length - priorResults),
+      resultsUpdated: Math.min(priorResults, studentAggregates.length),
+      skillResultsCreated: Math.max(0, skillAggregates.length - priorSkillResults),
+      skillResultsUpdated: Math.min(priorSkillResults, skillAggregates.length),
+      studentsProcessed: studentAggregates.length,
+    };
+  }
+
+  /**
+   * Recalcula los resultados de TODOS los assessments (de todas las orgs) que
+   * usan un instrumento. Operación de plataforma (gate platform_admin en el
+   * caller): se dispara al cambiar las bandas/umbrales de un instrumento para que
+   * los gráficos de todos los colegios que rindieron esa evaluación reflejen los
+   * nuevos cortes.
+   *
+   * Recorre org por org dentro de `withOrgContext` (RLS aísla cada tenant). Las
+   * `organizations` no tienen RLS, así que se enumeran directamente.
+   */
+  async recalculateByInstrument(
+    instrumentId: string,
+  ): Promise<{ assessmentsRecalculated: number; orgsAffected: number; studentsProcessed: number }> {
+    const orgs = await this.db.select({ id: organizations.id }).from(organizations);
+
+    let assessmentsRecalculated = 0;
+    let studentsProcessed = 0;
+    let orgsAffected = 0;
+
+    for (const org of orgs) {
+      const summary = await withOrgContext(this.db, org.id, async (tx) => {
+        const rows = await tx
+          .select({ id: assessments.id })
+          .from(assessments)
+          .where(and(eq(assessments.instrumentId, instrumentId), eq(assessments.orgId, org.id)));
+        if (rows.length === 0) return { assessments: 0, students: 0 };
+
+        const scale = await this.resolveInstrumentScaleOrDefault(tx, instrumentId);
+        let students = 0;
+        for (const a of rows) {
+          const res = await this.computeAndPersist(tx, a.id, instrumentId, scale);
+          students += res.studentsProcessed;
+        }
+        return { assessments: rows.length, students };
+      });
+
+      if (summary.assessments > 0) {
+        orgsAffected += 1;
+        assessmentsRecalculated += summary.assessments;
+        studentsProcessed += summary.students;
+      }
+    }
+
+    return { assessmentsRecalculated, orgsAffected, studentsProcessed };
   }
 
   // ───────────────────────────────────────────────────────────────────────────
@@ -247,6 +334,10 @@ export class AssessmentResultsService {
           percentage: assessmentResults.percentage,
           grade: assessmentResults.grade,
           performanceLevel: assessmentResults.performanceLevel,
+          bandKey: performanceBands.key,
+          bandLabel: performanceBands.label,
+          bandOrder: performanceBands.order,
+          bandColor: performanceBands.color,
           isComplete: assessmentResults.isComplete,
           completedAt: assessmentResults.completedAt,
           createdAt: assessmentResults.createdAt,
@@ -254,6 +345,7 @@ export class AssessmentResultsService {
         })
         .from(assessmentResults)
         .innerJoin(students, eq(students.id, assessmentResults.studentId))
+        .leftJoin(performanceBands, eq(performanceBands.id, assessmentResults.performanceBandId))
         .where(and(...conditions, isNull(students.deletedAt)))
         .orderBy(students.lastName, students.firstName)
         .limit(query.limit)
@@ -325,11 +417,16 @@ export class AssessmentResultsService {
           totalCount: skillResults.totalCount,
           percentage: skillResults.percentage,
           performanceLevel: skillResults.performanceLevel,
+          bandKey: performanceBands.key,
+          bandLabel: performanceBands.label,
+          bandOrder: performanceBands.order,
+          bandColor: performanceBands.color,
           createdAt: skillResults.createdAt,
           updatedAt: skillResults.updatedAt,
         })
         .from(skillResults)
         .innerJoin(taxonomyNodes, eq(taxonomyNodes.id, skillResults.nodeId))
+        .leftJoin(performanceBands, eq(performanceBands.id, skillResults.performanceBandId))
         .where(and(...conditions))
         .orderBy(taxonomyNodes.name)
         .limit(query.limit)
@@ -396,6 +493,10 @@ export class AssessmentResultsService {
           percentage: assessmentResults.percentage,
           grade: assessmentResults.grade,
           performanceLevel: assessmentResults.performanceLevel,
+          bandKey: performanceBands.key,
+          bandLabel: performanceBands.label,
+          bandOrder: performanceBands.order,
+          bandColor: performanceBands.color,
           isComplete: assessmentResults.isComplete,
           completedAt: assessmentResults.completedAt,
           createdAt: assessmentResults.createdAt,
@@ -403,6 +504,7 @@ export class AssessmentResultsService {
         })
         .from(assessmentResults)
         .innerJoin(students, eq(students.id, assessmentResults.studentId))
+        .leftJoin(performanceBands, eq(performanceBands.id, assessmentResults.performanceBandId))
         .where(
           and(
             eq(assessmentResults.assessmentId, assessmentId),
@@ -429,11 +531,16 @@ export class AssessmentResultsService {
           totalCount: skillResults.totalCount,
           percentage: skillResults.percentage,
           performanceLevel: skillResults.performanceLevel,
+          bandKey: performanceBands.key,
+          bandLabel: performanceBands.label,
+          bandOrder: performanceBands.order,
+          bandColor: performanceBands.color,
           createdAt: skillResults.createdAt,
           updatedAt: skillResults.updatedAt,
         })
         .from(skillResults)
         .innerJoin(taxonomyNodes, eq(taxonomyNodes.id, skillResults.nodeId))
+        .leftJoin(performanceBands, eq(performanceBands.id, skillResults.performanceBandId))
         .where(
           and(eq(skillResults.assessmentId, assessmentId), eq(skillResults.studentId, studentId)),
         )
@@ -625,6 +732,17 @@ export class AssessmentResultsService {
       }
     }
 
+    return this.resolveInstrumentScaleOrDefault(tx, instrumentId);
+  }
+
+  /**
+   * Escala del instrumento (o default linear_chilean) sin depender de un `user`
+   * ni de un scale solicitado. Usado por el recálculo cross-tenant.
+   */
+  private async resolveInstrumentScaleOrDefault(
+    tx: Database,
+    instrumentId: string,
+  ): Promise<GradingScaleParams> {
     const [instrument] = await tx
       .select({ gradingScaleId: instruments.gradingScaleId })
       .from(instruments)
@@ -692,6 +810,10 @@ export class AssessmentResultsService {
     percentage: string | null;
     grade: string | null;
     performanceLevel: PerformanceLevel | null;
+    bandKey: string | null;
+    bandLabel: string | null;
+    bandOrder: number | null;
+    bandColor: string | null;
     isComplete: boolean;
     completedAt: Date | null;
     createdAt: Date;
@@ -708,6 +830,7 @@ export class AssessmentResultsService {
       percentage: r.percentage,
       grade: r.grade,
       performanceLevel: r.performanceLevel,
+      performanceBand: toBandView(r),
       isComplete: r.isComplete,
       completedAt: r.completedAt,
       createdAt: r.createdAt,
@@ -726,6 +849,10 @@ export class AssessmentResultsService {
     totalCount: number;
     percentage: string | null;
     performanceLevel: PerformanceLevel | null;
+    bandKey: string | null;
+    bandLabel: string | null;
+    bandOrder: number | null;
+    bandColor: string | null;
     createdAt: Date;
     updatedAt: Date;
   }): SkillResultModel {
@@ -740,6 +867,7 @@ export class AssessmentResultsService {
       totalCount: r.totalCount,
       percentage: r.percentage,
       performanceLevel: r.performanceLevel,
+      performanceBand: toBandView(r),
       createdAt: r.createdAt,
       updatedAt: r.updatedAt,
     };

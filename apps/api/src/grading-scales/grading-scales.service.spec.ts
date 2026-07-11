@@ -15,11 +15,6 @@ import type { JwtPayload } from '../auth/jwt-payload.types';
 // reusable que captura las llamadas y devuelve un array configurado por
 // test, sin tocar Postgres ni `drizzle-orm` real.
 
-interface SelectStubConfig {
-  // Cada vez que se hace un select(), se consume el primer resultado.
-  results: unknown[][];
-}
-
 function buildDbMock(config: {
   selectResults?: unknown[][];
   insertReturning?: unknown[];

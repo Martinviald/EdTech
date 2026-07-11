@@ -1,0 +1,3 @@
+ALTER TABLE "performance_bands" ADD COLUMN "instrument_id" uuid;--> statement-breakpoint
+ALTER TABLE "performance_bands" ADD CONSTRAINT "performance_bands_instrument_id_instruments_id_fk" FOREIGN KEY ("instrument_id") REFERENCES "public"."instruments"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
+CREATE INDEX "performance_bands_instrument_order_idx" ON "performance_bands" USING btree ("instrument_id","order");
