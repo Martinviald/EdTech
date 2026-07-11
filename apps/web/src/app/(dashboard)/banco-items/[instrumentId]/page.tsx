@@ -16,6 +16,7 @@ import {
 } from '@soe/types';
 import { ItemsTable } from './ItemsTable';
 import { SectionsList } from './SectionsList';
+import { EnunciadoPdfCard } from './EnunciadoPdfCard';
 
 const TYPE_LABELS: Record<string, string> = {
   dia: 'DIA',
@@ -141,6 +142,13 @@ export default async function InstrumentDetailPage({ params }: PageProps) {
           </Card>
         )}
       </div>
+
+      {/* PDF del enunciado (TKT-15) */}
+      <EnunciadoPdfCard
+        instrumentId={instrumentId}
+        enunciadoPdf={instrument.enunciadoPdf ?? null}
+        canEdit={canEdit}
+      />
 
       {/* Sections */}
       {instrument.sections && instrument.sections.length > 0 && (
