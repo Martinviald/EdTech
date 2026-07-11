@@ -15,7 +15,7 @@ import {
   type Item,
 } from '@soe/db';
 import { validateItemContent } from '@soe/types';
-import type { ItemContent, ItemType } from '@soe/types';
+import type { ItemBankScope, ItemContent, ItemType } from '@soe/types';
 import { ZodError } from 'zod';
 import type { JwtPayload } from '../auth/jwt-payload.types';
 import { InjectDb, type Database } from '../database/database.types';
@@ -57,7 +57,9 @@ export class ItemsService {
 
   async list(user: JwtPayload, query: ListItemsQueryDto) {
     const { page, pageSize, ...filters } = query;
-    const conditions = this.buildVisibilityConditions(user);
+    // Banco de ítems (TKT-14): el `scope` decide qué origen se lista (propio de
+    // la org, global/oficial, o ambos). Nunca expone otras orgs (ver §5.2).
+    const conditions = this.buildVisibilityConditions(user, filters.scope);
 
     if (filters.instrumentId) {
       conditions.push(eq(items.instrumentId, filters.instrumentId));
@@ -75,14 +77,20 @@ export class ItemsService {
       conditions.push(eq(items.source, filters.source));
     }
 
-    // Filter by taxonomy node: find items that have a tag pointing to this node.
-    if (filters.taxonomyNodeId) {
+    // Filtro por tags (TKT-12/TKT-14): un ítem se incluye si tiene CUALQUIERA de
+    // los nodos pedidos (lógica OR). Se admite `taxonomyNodeId` (single) y
+    // `taxonomyNodeIds` (multi); ambos se combinan en un único conjunto OR.
+    const nodeIds = [
+      ...(filters.taxonomyNodeId ? [filters.taxonomyNodeId] : []),
+      ...(filters.taxonomyNodeIds ?? []),
+    ];
+    if (nodeIds.length > 0) {
       const taggedItemIds = await this.db
         .select({ itemId: itemTaxonomyTags.itemId })
         .from(itemTaxonomyTags)
-        .where(eq(itemTaxonomyTags.nodeId, filters.taxonomyNodeId));
+        .where(inArray(itemTaxonomyTags.nodeId, nodeIds));
 
-      const ids = taggedItemIds.map((t) => t.itemId);
+      const ids = [...new Set(taggedItemIds.map((t) => t.itemId))];
       if (ids.length === 0) {
         return { data: [], total: 0, page, limit: pageSize };
       }
@@ -414,13 +422,33 @@ export class ItemsService {
   }
 
   /**
-   * Builds the base visibility + soft-delete conditions for items.
-   * Official items (org_id IS NULL) are visible to everyone.
-   * Custom items are filtered by the user's org_id.
+   * Builds the base visibility + soft-delete conditions for items, honouring the
+   * item-bank `scope` (TKT-14):
+   *  · 'global' → sólo ítems globales/oficiales (org_id IS NULL).
+   *  · 'own'    → sólo ítems de la org del usuario (org_id = orgId).
+   *  · 'all'    → ambos (default histórico).
+   *
+   * El aislamiento se mantiene SIEMPRE: un usuario no-admin nunca ve ítems de
+   * otra org, independientemente del `scope` (a lo sumo restringe lo que ya podía
+   * ver). `items` no es tabla RLS (sin PII); el scope es un filtro de servicio.
    */
-  private buildVisibilityConditions(user: JwtPayload) {
+  private buildVisibilityConditions(user: JwtPayload, scope: ItemBankScope = 'all') {
     const conditions = [isNull(items.deletedAt)];
 
+    if (scope === 'global') {
+      conditions.push(isNull(items.orgId));
+      return conditions;
+    }
+
+    if (scope === 'own') {
+      // Sin org (ej. platform_admin sin membership) no hay "propios": se resuelve
+      // como "ninguno" para no filtrar de más — usar isNull en un uuid es siempre
+      // falso para filas con org, así garantizamos 0 leaks.
+      conditions.push(user.orgId ? eq(items.orgId, user.orgId) : isNull(items.id));
+      return conditions;
+    }
+
+    // scope === 'all'
     if (!user.isPlatformAdmin) {
       conditions.push(
         user.orgId

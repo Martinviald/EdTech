@@ -1,6 +1,18 @@
 import { z } from 'zod';
 import { paginationSchema, passageSchema, sectionAttachmentInputSchema } from '@soe/types';
 
+// ── Enunciado PDF a nivel de instrumento (TKT-15) ────────────────────────────
+// Los schemas viven en `@soe/types` (contrato compartido con web). Se re-exportan
+// aquí para que el controller los consuma desde el barrel de DTOs del módulo.
+export {
+  instrumentUploadUrlRequestSchema,
+  confirmInstrumentAttachmentSchema,
+} from '@soe/types';
+export type {
+  InstrumentUploadUrlRequestDto,
+  ConfirmInstrumentAttachmentDto,
+} from '@soe/types';
+
 // ── Instrument Type / Status enums ──────────────────────────────────────────
 const INSTRUMENT_TYPES = [
   'dia',

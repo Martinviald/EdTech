@@ -80,6 +80,7 @@ describe('GetInstrumentTool', () => {
     expect(getById).toHaveBeenCalledWith(INSTRUMENT_ID, ctx.user);
     expect(list).toHaveBeenCalledWith(ctx.user, {
       instrumentId: INSTRUMENT_ID,
+      scope: 'all',
       page: 1,
       pageSize: 100,
     });
