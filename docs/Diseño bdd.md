@@ -478,6 +478,57 @@ created_at      timestamp   DEFAULT now()
 updated_at      timestamp   DEFAULT now()
 ```
 
+#### `files` — Módulo genérico de almacenamiento (S3)
+
+Registro **fuente de verdad** de todo objeto subido a S3 en la plataforma. Es
+infraestructura desacoplada (módulo `files` en la API): hoy almacena el **PDF del
+enunciado** de instrumentos y está diseñada para hojas de respuesta, material remedial,
+imágenes de ítems y audios de listening a futuro, sin cambios de schema.
+
+El archivo se sube **directo a S3 vía presigned URL** (el backend nunca lo recibe en
+memoria, §11 de CLAUDE.md); aquí sólo se persiste la metadata + `storage_key`. Ciclo de
+vida: `pending` (URL de subida emitida) → `ready` (subida confirmada y validada con
+`headObject`). El borrado es **soft-delete** (`deleted_at`) + borrado real del objeto en
+S3 (lo orquesta `FilesService`, así no quedan huérfanos).
+
+**Multi-tenant con RLS**: `org_id` NULLABLE. Filas con `org_id IS NULL` = archivos
+GLOBALES/de plataforma (ej. el PDF de un instrumento OFICIAL), visibles para todos los
+tenants — mismo criterio que `performance_bands` / `llm_settings`. RLS activo (política
+`files_tenant_isolation` en `packages/db/sql/rls-policies.sql`): las queries de tenant
+corren dentro de `withOrgContext(org_id)`; las globales sin contexto.
+
+Asociación **polimórfica opcional** (`owner_type` / `owner_id` / `purpose`): permite a
+cualquier dominio adjuntar archivos sin una tabla-enlace por dominio. La autoridad de
+negocio (permisos, reglas "1 archivo por entidad") vive en el service consumidor.
+
+```
+id              uuid        PK
+org_id          uuid        FK → organizations.id  NULLABLE (NULL = archivo global/plataforma)
+status          enum        'pending' | 'ready'
+storage_key     text        NOT NULL  Clave S3 del objeto
+bucket          text        NULLABLE  NULL = bucket por defecto del entorno
+file_name       text        NULLABLE
+mime_type       text        NULLABLE
+size_bytes      integer     NULLABLE
+checksum        text        NULLABLE  ETag/hash opcional
+url             text        NULLABLE  URL pública/externa opcional
+owner_type      text        NULLABLE  Asociación polimórfica (ej. 'instrument')
+owner_id        uuid        NULLABLE  (sin FK: polimórfico)
+purpose         text        NULLABLE  ej. 'enunciado_pdf'
+note            text        NULLABLE
+meta            jsonb       DEFAULT {}
+created_by_id   uuid        FK → users.id  NULLABLE
+deleted_at      timestamp   NULLABLE  Soft delete
+created_at      timestamp   DEFAULT now()
+updated_at      timestamp   DEFAULT now()
+```
+
+> **`instrument_attachments` (DEPRECADA):** el PDF del enunciado (TKT-15) se almacenaba
+> en `instrument_attachments`; ahora vive en `files` (`owner_type='instrument'`,
+> `purpose='enunciado_pdf'`). La migración `0010_files_module.sql` incluye un backfill
+> idempotente. La tabla `instrument_attachments` se conserva por compatibilidad y se
+> eliminará en un sprint posterior.
+
 #### `grading_scales`
 
 Escalas de conversión puntaje → nota. Configurable por colegio.
