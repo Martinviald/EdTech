@@ -394,8 +394,8 @@ function SkillsSection({
         <CardContent>
           <SkillsBreakdown
             skills={skillsBreakdown}
+            filters={{ classGroupId }}
             assessmentId={assessmentId}
-            classGroupId={classGroupId}
           />
         </CardContent>
       </Card>

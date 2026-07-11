@@ -164,10 +164,7 @@ describe('DashboardsService.getOverview', () => {
       [],
     ]);
     const svc = makeService(db);
-    const res = await svc.getOverview(
-      makeUser({ activeRole: 'teacher', roles: ['teacher'] }),
-      {},
-    );
+    const res = await svc.getOverview(makeUser({ activeRole: 'teacher', roles: ['teacher'] }), {});
     expect(res.scope).toBe('teacher');
     expect(res.studentsEvaluated).toBe(0);
     expect(res.assessmentsCount).toBe(0);
@@ -176,10 +173,7 @@ describe('DashboardsService.getOverview', () => {
   it('platform_admin sin org activa → vacío sin consultar la DB', async () => {
     const db = makeDb([]);
     const svc = makeService(db);
-    const res = await svc.getOverview(
-      makeUser({ activeRole: 'platform_admin', orgId: null }),
-      {},
-    );
+    const res = await svc.getOverview(makeUser({ activeRole: 'platform_admin', orgId: null }), {});
     expect(res.scope).toBe('org');
     expect(res.assessmentsCount).toBe(0);
     expect(db.__selectIdx()).toBe(0); // ninguna query ejecutada
@@ -399,6 +393,87 @@ describe('DashboardsService.getSkills', () => {
     const svc = makeService(db);
     const res = await svc.getSkills(makeUser({ activeRole: 'teacher', roles: ['teacher'] }), {});
     expect(res.skills).toEqual([]);
+  });
+});
+
+// ──────────────────────────────────────────────────────────────────────────────
+// getSkillBreakdown()  (drill-down jerárquico)
+// ──────────────────────────────────────────────────────────────────────────────
+
+describe('DashboardsService.getSkillBreakdown', () => {
+  it('desglosa el nodo por curso: mapea promedio, nivel, sublabel y alumnos', async () => {
+    const db = makeDb([
+      // 1. metadata del nodo
+      [{ name: 'Localizar información', type: 'skill', code: 'OA1' }],
+      // 2. resolveScopedAssessmentIds
+      [{ id: 'a1' }],
+      // 3. resolveThresholds → resolveApplicableScale (sin escala → defaults)
+      [],
+      // 4. breakdown por classGroup
+      [
+        { id: 'cg1', name: '2°A', gradeName: '2° Básico', avgPct: '80.00', studentsAssessed: 18 },
+        { id: 'cg2', name: '2°B', gradeName: '2° Básico', avgPct: '35.00', studentsAssessed: 15 },
+      ],
+    ]);
+    const svc = makeService(db);
+    const res = await svc.getSkillBreakdown(makeUser({ activeRole: 'academic_director' }), {
+      nodeId: 'n1',
+      groupBy: 'classGroup',
+    });
+    expect(res.node.nodeName).toBe('Localizar información');
+    expect(res.groupBy).toBe('classGroup');
+    expect(res.rows).toHaveLength(2);
+    expect(res.rows[0]!).toMatchObject({
+      id: 'cg1',
+      label: '2°A',
+      sublabel: '2° Básico',
+      averageAchievement: 80,
+      studentsAssessed: 18,
+      performanceLevel: 'adequate', // 0.80 ∈ [0.70, 0.85)
+    });
+    expect(res.rows[1]!.performanceLevel).toBe('insufficient'); // 0.35 < 0.40
+  });
+
+  it('usa el nombre del instrumento como fallback cuando la evaluación no tiene nombre', async () => {
+    const db = makeDb([
+      [{ name: 'Comprensión', type: 'skill', code: null }],
+      [{ id: 'a1' }],
+      [],
+      // breakdown por assessment con name null
+      [
+        {
+          id: 'a1',
+          name: null,
+          instrumentName: 'DIA Lenguaje 2°',
+          subjectName: 'Lenguaje',
+          avgPct: '60.00',
+          studentsAssessed: 30,
+        },
+      ],
+    ]);
+    const svc = makeService(db);
+    const res = await svc.getSkillBreakdown(makeUser({ activeRole: 'school_admin' }), {
+      nodeId: 'n1',
+      groupBy: 'assessment',
+    });
+    expect(res.rows[0]!.label).toBe('DIA Lenguaje 2°');
+    expect(res.rows[0]!.sublabel).toBe('Lenguaje');
+  });
+
+  it('teacher sin asignaciones → rows vacío (pero node se resuelve)', async () => {
+    const db = makeDb([
+      // metadata del nodo
+      [{ name: 'Localizar', type: 'skill', code: 'OA1' }],
+      // getAccessibleClassGroupIds (teacher) → vacío
+      [],
+    ]);
+    const svc = makeService(db);
+    const res = await svc.getSkillBreakdown(
+      makeUser({ activeRole: 'teacher', roles: ['teacher'] }),
+      { nodeId: 'n1', groupBy: 'grade' },
+    );
+    expect(res.node.nodeName).toBe('Localizar');
+    expect(res.rows).toEqual([]);
   });
 });
 

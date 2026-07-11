@@ -15,16 +15,22 @@ import { cn } from '@/lib/utils';
 import { formatNodeCode, nodeTypeLabel } from '@/lib/taxonomy-labels';
 import { PerformanceBadge } from './performance-badge';
 import { PERFORMANCE_LEVEL_BAR_CLASS, formatAchievement } from './performance-level';
-import { SkillQuestionsDialog, type DrilldownNode } from './skill-questions-dialog';
+import {
+  SkillDrilldownDialog,
+  type DrilldownNode,
+  type DrilldownBaseFilters,
+} from './skill-drilldown-dialog';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // TKT-11 — Dropdown de dimensión de análisis (habilidad / contenido / OA / eje…).
-// TKT-10 — Cada fila es interactiva: abre un modal con las preguntas asociadas.
+// TKT-10 — Cada fila es interactiva: abre el drill-down jerárquico del logro.
 //
 // El backend (`/dashboards/skills`) ya devuelve TODOS los nodos evaluados con su
 // `nodeType`; agrupar por dimensión es filtrar por ese tipo en cliente. El
-// drill-down reutiliza `SkillQuestionsDialog` (matriz filtrada por `nodeId`), que
-// requiere una evaluación en contexto (`assessmentId`).
+// drill-down (`SkillDrilldownDialog`) desglosa el % del nodo por Asignatura →
+// Nivel → Curso → Evaluación → Pregunta, arrancando en el peldaño por debajo de
+// lo que ya fijan los filtros. Funciona tanto en la vista agregada como con una
+// evaluación en contexto (`assessmentId` ⇒ arranca directo en preguntas).
 // ─────────────────────────────────────────────────────────────────────────────
 
 /** Sentinela para "todas las dimensiones" (Radix Select no admite value vacío). */
@@ -48,12 +54,13 @@ function dimensionRank(type: string): number {
 
 export function SkillsBreakdown({
   skills,
+  filters,
   assessmentId,
-  classGroupId,
 }: {
   skills: SkillAchievementModel[];
+  /** Filtros base del dashboard: fijan el peldaño inicial del drill-down. */
+  filters?: DrilldownBaseFilters;
   assessmentId?: string;
-  classGroupId?: string;
 }): JSX.Element {
   // Dimensiones (nodeType) presentes en los datos, ordenadas por relevancia.
   const dimensions = useMemo(() => {
@@ -109,10 +116,10 @@ export function SkillsBreakdown({
         ))}
       </div>
 
-      <SkillQuestionsDialog
+      <SkillDrilldownDialog
         node={activeNode}
+        filters={filters ?? {}}
         assessmentId={assessmentId}
-        classGroupId={classGroupId}
         open={dialogOpen}
         onClose={() => setDialogOpen(false)}
       />
