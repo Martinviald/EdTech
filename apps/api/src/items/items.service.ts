@@ -134,7 +134,12 @@ export class ItemsService {
       })
       .from(itemTaxonomyTags)
       .innerJoin(taxonomyNodes, eq(itemTaxonomyTags.nodeId, taxonomyNodes.id))
-      .where(inArray(itemTaxonomyTags.itemId, data.map((i) => i.id)));
+      .where(
+        inArray(
+          itemTaxonomyTags.itemId,
+          data.map((i) => i.id),
+        ),
+      );
 
     const tagsByItem = new Map<string, typeof allTags>();
     for (const tag of allTags) {
@@ -323,12 +328,7 @@ export class ItemsService {
     const [existing] = await this.db
       .select()
       .from(itemTaxonomyTags)
-      .where(
-        and(
-          eq(itemTaxonomyTags.id, tagId),
-          eq(itemTaxonomyTags.itemId, itemId),
-        ),
-      );
+      .where(and(eq(itemTaxonomyTags.id, tagId), eq(itemTaxonomyTags.itemId, itemId)));
 
     if (!existing) throw new NotFoundException('Tag no encontrado');
 
@@ -340,12 +340,7 @@ export class ItemsService {
     const itemRows = await this.db
       .select()
       .from(items)
-      .where(
-        and(
-          inArray(items.id, dto.itemIds),
-          isNull(items.deletedAt),
-        ),
-      );
+      .where(and(inArray(items.id, dto.itemIds), isNull(items.deletedAt)));
 
     if (itemRows.length !== dto.itemIds.length) {
       throw new NotFoundException('Uno o más ítems no fueron encontrados');
@@ -451,9 +446,7 @@ export class ItemsService {
     // scope === 'all'
     if (!user.isPlatformAdmin) {
       conditions.push(
-        user.orgId
-          ? or(isNull(items.orgId), eq(items.orgId, user.orgId))!
-          : isNull(items.orgId),
+        user.orgId ? or(isNull(items.orgId), eq(items.orgId, user.orgId))! : isNull(items.orgId),
       );
     }
 
@@ -473,7 +466,10 @@ export class ItemsService {
     if (params.itemId) {
       const conditions = [eq(items.id, params.itemId)];
       conditions.push(...this.buildVisibilityConditions(user));
-      const [row] = await this.db.select().from(items).where(and(...conditions));
+      const [row] = await this.db
+        .select()
+        .from(items)
+        .where(and(...conditions));
       if (!row) throw new NotFoundException('Ítem no encontrado');
       return row;
     }
@@ -519,9 +515,7 @@ export class ItemsService {
       return row;
     }
 
-    throw new BadRequestException(
-      'Debe entregar itemId o (assessmentId y position)',
-    );
+    throw new BadRequestException('Debe entregar itemId o (assessmentId y position)');
   }
 
   /** Nombre de la habilidad principal etiquetada al ítem (primer tag), si existe. */
@@ -541,10 +535,7 @@ export class ItemsService {
    * modelo polimórfico: extrae stem/alternativas/clave correcta de cada `type`
    * sin hardcodear un único tipo. Tipos sin alternativas devuelven lista vacía.
    */
-  private normalizeItemContent(
-    item: Item,
-    skillName: string | null,
-  ): ItemContentForAssistant {
+  private normalizeItemContent(item: Item, skillName: string | null): ItemContentForAssistant {
     const type = item.type as ItemType;
     const content = (item.content ?? {}) as Record<string, unknown>;
 
@@ -555,9 +546,7 @@ export class ItemsService {
       skillName,
     };
 
-    const rawAlternatives = Array.isArray(content.alternatives)
-      ? content.alternatives
-      : [];
+    const rawAlternatives = Array.isArray(content.alternatives) ? content.alternatives : [];
     const alternatives = rawAlternatives.flatMap((alt) => {
       if (!alt || typeof alt !== 'object') return [];
       const a = alt as { key?: unknown; text?: unknown };
@@ -587,20 +576,27 @@ export class ItemsService {
 
     if (type === 'true_false') {
       const correct =
-        typeof content.correctAnswer === 'boolean'
-          ? content.correctAnswer
-            ? 'V'
-            : 'F'
-          : null;
+        typeof content.correctAnswer === 'boolean' ? (content.correctAnswer ? 'V' : 'F') : null;
       return { ...base, stem, alternatives, correctKey: correct };
     }
 
     // multiple_choice / listening (y cualquier tipo con alternativas): clave
     // correcta desde `content.correctKey` explícito o desde la alternativa marcada.
-    const correctKey =
-      asString(content.correctKey) ?? correctKeyFromAlternatives();
+    const correctKey = asString(content.correctKey) ?? correctKeyFromAlternatives();
 
     return { ...base, stem, alternatives, correctKey };
+  }
+
+  /**
+   * Devuelve el ítem RAW verificando que el usuario pueda EDITARLO (no solo verlo).
+   * Lo consume el flujo de propuestas de edición (TKT-19): el snapshot del `content`
+   * y el chequeo de permiso de edición (org propia, no oficial) se hacen una vez,
+   * antes de generar/aplicar la propuesta. Lanza 404 si no existe, 403 si no editable.
+   */
+  async getEditableItem(id: string, user: JwtPayload): Promise<Item> {
+    const item = await this.getByIdRaw(id);
+    this.assertEditable(item, user);
+    return item;
   }
 
   /** Fetch raw item (no tags), checking soft-delete. */
@@ -616,11 +612,7 @@ export class ItemsService {
   }
 
   /** Creates a version snapshot from the current item state. */
-  private async createVersionSnapshot(
-    item: Item,
-    changedById: string,
-    changeNote?: string,
-  ) {
+  private async createVersionSnapshot(item: Item, changedById: string, changeNote?: string) {
     const [version] = await this.db
       .insert(itemVersions)
       .values({

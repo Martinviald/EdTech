@@ -7,6 +7,7 @@ export * from './students';
 export * from './taxonomy';
 export * from './instruments';
 export * from './items';
+export * from './item-edit-proposals';
 export * from './assessments';
 export * from './responses';
 export * from './results';

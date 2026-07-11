@@ -17,6 +17,7 @@ import { ClassGroupsModule } from './class-groups/class-groups.module';
 import { StudentsModule } from './students/students.module';
 import { InstrumentsModule } from './instruments/instruments.module';
 import { ItemsModule } from './items/items.module';
+import { ItemEditProposalsModule } from './item-edit-proposals/item-edit-proposals.module';
 import { DiaIngestionModule } from './dia-ingestion/dia-ingestion.module';
 import { AiTaggingModule } from './ai-tagging/ai-tagging.module';
 import { SpecTablesModule } from './spec-tables/spec-tables.module';
@@ -59,6 +60,8 @@ import { OfficialReportsModule } from './official-reports/official-reports.modul
     StudentsModule,
     InstrumentsModule,
     ItemsModule,
+    // ── TKT-19: escritura asistida de ítems (IA propone, humano aprueba) ──
+    ItemEditProposalsModule,
     DiaIngestionModule,
     AiTaggingModule,
     SpecTablesModule,

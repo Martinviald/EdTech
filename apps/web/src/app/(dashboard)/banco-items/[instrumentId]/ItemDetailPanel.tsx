@@ -20,6 +20,7 @@ import {
 } from '@/components/passage-dialog';
 import { cn } from '@/lib/utils';
 import { formatNodeCode } from '@/lib/taxonomy-labels';
+import { ItemEditProposals } from './ItemEditProposals';
 
 function sectionToPassage(section: InstrumentSectionModel): PassageData {
   return {
@@ -88,10 +89,12 @@ function getStringField(content: Record<string, unknown>, field: string): string
 export function ItemDetailPanel(props: {
   item: ItemModel | null;
   sections?: InstrumentSectionModel[];
+  canEdit?: boolean;
+  instrumentId?: string;
   open: boolean;
   onClose: () => void;
 }): JSX.Element {
-  const { item, sections = [], open, onClose } = props;
+  const { item, sections = [], canEdit = false, instrumentId, open, onClose } = props;
   const [passageOpen, setPassageOpen] = useState(false);
 
   const section = item?.sectionId ? (sections.find((s) => s.id === item.sectionId) ?? null) : null;
@@ -128,7 +131,13 @@ export function ItemDetailPanel(props: {
           </Button>
         ) : null}
 
-        {item ? <ItemDetailContent item={item} /> : null}
+        {item ? (
+          <ItemDetailContent
+            item={item}
+            canEdit={canEdit}
+            instrumentId={instrumentId ?? item.instrumentId ?? ''}
+          />
+        ) : null}
       </SheetContent>
 
       {section ? (
@@ -142,7 +151,15 @@ export function ItemDetailPanel(props: {
   );
 }
 
-function ItemDetailContent({ item }: { item: ItemModel }): JSX.Element {
+function ItemDetailContent({
+  item,
+  canEdit,
+  instrumentId,
+}: {
+  item: ItemModel;
+  canEdit: boolean;
+  instrumentId: string;
+}): JSX.Element {
   const content = item.content ?? {};
   const stem = getStem(content);
   const alternatives = getAlternatives(content);
@@ -188,6 +205,9 @@ function ItemDetailContent({ item }: { item: ItemModel }): JSX.Element {
 
       {/* Nodos asociados */}
       <ItemNodes tags={item.tags ?? []} />
+
+      {/* Edición asistida por IA (TKT-19) */}
+      <ItemEditProposals itemId={item.id} instrumentId={instrumentId} canEdit={canEdit} />
     </div>
   );
 }
