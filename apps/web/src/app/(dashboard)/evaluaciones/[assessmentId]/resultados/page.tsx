@@ -7,6 +7,7 @@ import {
   ANALYTICS_VIEWER_ROLES,
   type AssessmentReportResponse,
   type DashboardFilterOptionsResponse,
+  type DashboardSkillsResponse,
 } from '@soe/types';
 import { EmptyState } from '@/components/patterns';
 import { DashboardFilterBar } from '../../../resultados/components/dashboard-filter-bar';
@@ -39,11 +40,19 @@ export default async function EvaluacionResultadosPage({
   const reportQuery = new URLSearchParams({ assessmentId });
   if (classGroupId) reportQuery.set('classGroupId', classGroupId);
 
-  const [options, reportResult] = await Promise.all([
+  // TKT-11/TKT-10: todos los nodos evaluados (habilidad/contenido/OA/eje) para el
+  // desglose por dimensión + drill-down; acotado a esta evaluación y curso.
+  const skillsQuery = new URLSearchParams({ assessmentId });
+  if (classGroupId) skillsQuery.set('classGroupId', classGroupId);
+
+  const [options, reportResult, skillsResult] = await Promise.all([
     apiGet<DashboardFilterOptionsResponse>(`/dashboards/filters${filterQuery}`),
     apiGet<AssessmentReportResponse>(
       `/analytics/assessment-report?${reportQuery.toString()}`,
     ).catch((): AssessmentReportResponse | null => null),
+    apiGet<DashboardSkillsResponse>(`/dashboards/skills?${skillsQuery.toString()}`).catch(
+      (): DashboardSkillsResponse | null => null,
+    ),
   ]);
 
   return (
@@ -51,7 +60,12 @@ export default async function EvaluacionResultadosPage({
       <DashboardFilterBar options={options} value={filters} basePath={basePath} />
 
       {reportResult ? (
-        <ReportBody report={reportResult} />
+        <ReportBody
+          report={reportResult}
+          skillsBreakdown={skillsResult?.skills}
+          assessmentId={assessmentId}
+          classGroupId={classGroupId}
+        />
       ) : (
         <EmptyState
           icon={Inbox}

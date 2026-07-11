@@ -8,7 +8,12 @@ import {
   TrendingUp,
   Users,
 } from 'lucide-react';
-import type { AssessmentReportItemRow, AssessmentReportResponse, ItemReportFlag } from '@soe/types';
+import type {
+  AssessmentReportItemRow,
+  AssessmentReportResponse,
+  ItemReportFlag,
+  SkillAchievementModel,
+} from '@soe/types';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import {
   Table,
@@ -28,6 +33,7 @@ import {
   PERFORMANCE_LEVEL_BAR_CLASS,
 } from '../components/performance-level';
 import { ReportExportButton } from './report-export-button';
+import { SkillsBreakdown } from '../components/skills-breakdown';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Cuerpo del informe de evaluación (H6.13). Server Component: sólo presenta los
@@ -115,7 +121,19 @@ function discriminationClass(value: number | null): string {
   return 'text-emerald-600 dark:text-emerald-400 font-medium';
 }
 
-export function ReportBody({ report }: { report: AssessmentReportResponse }) {
+export function ReportBody({
+  report,
+  skillsBreakdown,
+  assessmentId,
+  classGroupId,
+}: {
+  report: AssessmentReportResponse;
+  // TKT-11/TKT-10: desglose interactivo por dimensión + drill-down a preguntas,
+  // cuando hay una evaluación en contexto (hub por-evaluación).
+  skillsBreakdown?: SkillAchievementModel[];
+  assessmentId?: string;
+  classGroupId?: string;
+}) {
   const { summary } = report;
 
   return (
@@ -172,8 +190,13 @@ export function ReportBody({ report }: { report: AssessmentReportResponse }) {
       {/* 3. Comparativa por curso */}
       <CourseComparison report={report} />
 
-      {/* 4. Fortalezas y brechas por habilidad */}
-      <SkillsSection report={report} />
+      {/* 4. Logro por habilidad (dimensión + drill-down si hay evaluación) */}
+      <SkillsSection
+        report={report}
+        skillsBreakdown={skillsBreakdown}
+        assessmentId={assessmentId}
+        classGroupId={classGroupId}
+      />
 
       {/* 5. Análisis psicométrico de ítems */}
       <ItemsSection report={report} />
@@ -345,7 +368,40 @@ function CourseComparison({ report }: { report: AssessmentReportResponse }) {
 
 // ── Habilidades ───────────────────────────────────────────────────────────────
 
-function SkillsSection({ report }: { report: AssessmentReportResponse }) {
+function SkillsSection({
+  report,
+  skillsBreakdown,
+  assessmentId,
+  classGroupId,
+}: {
+  report: AssessmentReportResponse;
+  skillsBreakdown?: SkillAchievementModel[];
+  assessmentId?: string;
+  classGroupId?: string;
+}) {
+  // TKT-11/TKT-10: con una evaluación en contexto se usa el desglose interactivo
+  // por dimensión (dropdown habilidad/contenido/OA/eje) con drill-down: clic en un
+  // nodo abre el modal de sus preguntas y clic en una pregunta abre su detalle.
+  if (skillsBreakdown && skillsBreakdown.length > 0) {
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-base">Logro por habilidad</CardTitle>
+          <p className="text-sm text-muted-foreground">
+            Cambia la dimensión de análisis y haz clic en un nodo para ver sus preguntas.
+          </p>
+        </CardHeader>
+        <CardContent>
+          <SkillsBreakdown
+            skills={skillsBreakdown}
+            assessmentId={assessmentId}
+            classGroupId={classGroupId}
+          />
+        </CardContent>
+      </Card>
+    );
+  }
+
   const skills = report.skills;
   if (skills.length === 0) return null;
 
