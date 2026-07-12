@@ -351,10 +351,13 @@ export class InstrumentsService {
       updatedAt: file.updatedAt,
     };
 
-    // La URL de descarga solo se genera si hay almacenamiento configurado; nunca
-    // debe hacer fallar la lectura del instrumento cuando S3 no está aprovisionado.
+    // Las URLs prefirmadas solo se generan si hay almacenamiento configurado; nunca
+    // deben hacer fallar la lectura del instrumento cuando S3 no está aprovisionado.
+    // `downloadUrl` fuerza descarga; `previewUrl` (inline) permite previsualizar el PDF.
     const downloadUrl = this.files.buildDownloadUrl(file);
     if (downloadUrl) model.downloadUrl = downloadUrl;
+    const previewUrl = this.files.buildDownloadUrl(file, 'inline');
+    if (previewUrl) model.previewUrl = previewUrl;
 
     return model;
   }

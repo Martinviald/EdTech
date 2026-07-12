@@ -2,14 +2,7 @@
 
 import { useCallback, useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
-import {
-  FileText,
-  Download,
-  Loader2,
-  Trash2,
-  Upload,
-  AlertCircle,
-} from 'lucide-react';
+import { FileText, Loader2, Trash2, Upload, AlertCircle } from 'lucide-react';
 import { useDropzone, type FileRejection } from 'react-dropzone';
 import { toast } from 'sonner';
 import type { InstrumentAttachmentModel } from '@soe/types';
@@ -173,24 +166,10 @@ export function EnunciadoPdfCard({
                 ) : null}
               </div>
             </div>
-            <div className="flex shrink-0 items-center gap-2">
-              {enunciadoPdf.downloadUrl ? (
-                <a
-                  href={enunciadoPdf.downloadUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  <Button variant="outline" size="sm" className="gap-2">
-                    <Download className="size-4" aria-hidden />
-                    Ver / Descargar
-                  </Button>
-                </a>
-              ) : (
-                <span className="text-xs text-muted-foreground">
-                  Enlace de descarga no disponible
-                </span>
-              )}
-              {canEdit ? (
+            {/* La previsualización/descarga vive en el botón "Ver enunciado" del
+                encabezado; aquí sólo queda la acción de gestión (eliminar). */}
+            {canEdit ? (
+              <div className="flex shrink-0 items-center gap-2">
                 <Button
                   variant="ghost"
                   size="sm"
@@ -200,9 +179,10 @@ export function EnunciadoPdfCard({
                   aria-label="Eliminar PDF del enunciado"
                 >
                   <Trash2 className="size-4" aria-hidden />
+                  <span className="sr-only sm:not-sr-only sm:ml-1">Eliminar</span>
                 </Button>
-              ) : null}
-            </div>
+              </div>
+            ) : null}
           </div>
         ) : (
           <p className="text-sm text-muted-foreground">
