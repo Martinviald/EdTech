@@ -125,7 +125,7 @@ export default async function EvaluacionLayout({
         description={description}
         actions={
           <>
-            {enunciadoPdf ? <EnunciadoViewButton enunciadoPdf={enunciadoPdf} /> : null}
+            {enunciadoPdf ? <EnunciadoViewButton instrumentId={meta.instrumentId} /> : null}
             <AskAiButton prompt="Analiza esta evaluación: ¿qué cursos y habilidades están más descendidos y qué priorizar?" />
           </>
         }
