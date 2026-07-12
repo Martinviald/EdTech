@@ -110,7 +110,7 @@ export function InstrumentDetailView({
         {(instrument.enunciadoPdf || (canEdit && showAuthoringLinks)) && (
           <div className="flex flex-wrap gap-2">
             {instrument.enunciadoPdf && (
-              <EnunciadoViewButton enunciadoPdf={instrument.enunciadoPdf} />
+              <EnunciadoViewButton instrumentId={instrument.id} />
             )}
             {canEdit && showAuthoringLinks && (
               <>
