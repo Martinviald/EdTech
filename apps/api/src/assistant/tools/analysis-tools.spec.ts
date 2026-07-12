@@ -153,6 +153,7 @@ describe('GetAssessmentReportTool', () => {
       meta: {
         assessmentId: ASSESSMENT_ID,
         assessmentName: 'DIA Lenguaje',
+        instrumentId: 'inst-1',
         instrumentName: 'DIA',
         instrumentType: 'dia',
         subjectName: 'Lenguaje',

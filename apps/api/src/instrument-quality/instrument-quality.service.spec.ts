@@ -104,6 +104,7 @@ function makeReport(items: AssessmentReportItemRow[]): AssessmentReportResponse 
     meta: {
       assessmentId: ASSESSMENT_ID,
       assessmentName: 'DIA Lectura',
+      instrumentId: 'inst-1',
       instrumentName: 'Instrumento Lectura',
       instrumentType: 'dia',
       subjectName: 'Lenguaje',

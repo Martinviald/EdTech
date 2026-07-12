@@ -8,7 +8,7 @@ import type { InstrumentModel, ItemModel } from '@soe/types';
 import { ItemsTable } from './ItemsTable';
 import { SectionsList } from './SectionsList';
 import { EnunciadoPdfCard } from './EnunciadoPdfCard';
-import { EnunciadoViewButton } from './EnunciadoViewButton';
+import { EnunciadoViewButton } from '@/components/instruments/EnunciadoViewButton';
 
 const TYPE_LABELS: Record<string, string> = {
   dia: 'DIA',

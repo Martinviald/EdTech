@@ -38,6 +38,7 @@ export type ItemReportFlag = (typeof ITEM_REPORT_FLAGS)[number];
 export type AssessmentReportMeta = {
   assessmentId: string;
   assessmentName: string | null;
+  instrumentId: string;
   instrumentName: string;
   instrumentType: string;
   subjectName: string | null;

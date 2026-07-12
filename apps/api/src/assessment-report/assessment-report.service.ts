@@ -176,6 +176,7 @@ export class AssessmentReportService {
       const meta = {
         assessmentId: assessment.id,
         assessmentName: assessment.name,
+        instrumentId: assessment.instrumentId,
         instrumentName: assessment.instrumentName,
         instrumentType: assessment.instrumentType,
         subjectName: assessment.subjectName,

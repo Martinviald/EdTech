@@ -52,6 +52,7 @@ function makeReport(
     meta: {
       assessmentId: 'a1',
       assessmentName: 'Prueba',
+      instrumentId: 'i1',
       instrumentName: 'Instrumento DIA',
       instrumentType: 'standardized',
       subjectName: 'Lenguaje',
