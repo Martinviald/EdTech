@@ -8,6 +8,9 @@ import { Button } from '@/components/ui/button';
  * `inline` (previewUrl) para que el navegador lo muestre con su visor nativo sin
  * descargarlo; si el almacenamiento no está configurado (sin previewUrl) cae a la
  * URL de descarga. Si no hay ninguna, no se muestra.
+ *
+ * Componente compartido: detalle de instrumento (banco de ítems), backoffice de
+ * instrumentos oficiales y el hub de una evaluación.
  */
 export function EnunciadoViewButton({
   enunciadoPdf,
