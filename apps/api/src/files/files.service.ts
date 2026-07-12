@@ -356,12 +356,20 @@ export class FilesService {
 
   // ── Presentación ─────────────────────────────────────────────────────────────
 
-  /** URL prefirmada de descarga para un archivo (o undefined si storage no configurado). */
-  buildDownloadUrl(row: FileRecord): string | undefined {
+  /**
+   * URL prefirmada para un archivo (o undefined si el storage no está configurado).
+   * `disposition = 'attachment'` (por defecto) genera una URL de descarga; `'inline'`
+   * genera una URL de previsualización (el navegador muestra el PDF embebido).
+   */
+  buildDownloadUrl(
+    row: FileRecord,
+    disposition: 'attachment' | 'inline' = 'attachment',
+  ): string | undefined {
     if (!this.storage.isConfigured()) return undefined;
     return this.storage.createDownloadUrl({
       key: row.storageKey,
       downloadFileName: row.fileName ?? undefined,
+      disposition,
     });
   }
 

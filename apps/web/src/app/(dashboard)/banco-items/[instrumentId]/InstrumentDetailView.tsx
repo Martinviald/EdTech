@@ -8,6 +8,7 @@ import type { InstrumentModel, ItemModel } from '@soe/types';
 import { ItemsTable } from './ItemsTable';
 import { SectionsList } from './SectionsList';
 import { EnunciadoPdfCard } from './EnunciadoPdfCard';
+import { EnunciadoViewButton } from './EnunciadoViewButton';
 
 const TYPE_LABELS: Record<string, string> = {
   dia: 'DIA',
@@ -106,18 +107,25 @@ export function InstrumentDetailView({
           </div>
         </div>
 
-        {canEdit && showAuthoringLinks && (
-          <div className="flex gap-2">
-            <Link href={`${basePath}/${instrument.id}/spec-table` as Route}>
-              <Button variant="outline" size="sm">
-                Tabla de especificaciones
-              </Button>
-            </Link>
-            <Link href={`${basePath}/${instrument.id}/etiquetar` as Route}>
-              <Button variant="outline" size="sm">
-                Etiquetar con IA
-              </Button>
-            </Link>
+        {(instrument.enunciadoPdf || (canEdit && showAuthoringLinks)) && (
+          <div className="flex flex-wrap gap-2">
+            {instrument.enunciadoPdf && (
+              <EnunciadoViewButton enunciadoPdf={instrument.enunciadoPdf} />
+            )}
+            {canEdit && showAuthoringLinks && (
+              <>
+                <Link href={`${basePath}/${instrument.id}/spec-table` as Route}>
+                  <Button variant="outline" size="sm">
+                    Tabla de especificaciones
+                  </Button>
+                </Link>
+                <Link href={`${basePath}/${instrument.id}/etiquetar` as Route}>
+                  <Button variant="outline" size="sm">
+                    Etiquetar con IA
+                  </Button>
+                </Link>
+              </>
+            )}
           </div>
         )}
       </div>
@@ -153,12 +161,16 @@ export function InstrumentDetailView({
         )}
       </div>
 
-      {/* PDF del enunciado (TKT-15) */}
-      <EnunciadoPdfCard
-        instrumentId={instrument.id}
-        enunciadoPdf={instrument.enunciadoPdf ?? null}
-        canEdit={canEdit}
-      />
+      {/* PDF del enunciado (TKT-15) — panel de gestión (subir / reemplazar / eliminar)
+          sólo para editores. La previsualización y descarga viven en el botón
+          "Ver enunciado" del encabezado, disponible para todos. */}
+      {canEdit && (
+        <EnunciadoPdfCard
+          instrumentId={instrument.id}
+          enunciadoPdf={instrument.enunciadoPdf ?? null}
+          canEdit={canEdit}
+        />
+      )}
 
       {/* Sections */}
       {instrument.sections && instrument.sections.length > 0 && (

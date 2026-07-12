@@ -39,8 +39,13 @@ export interface PresignedUpload {
 export interface CreateDownloadUrlParams {
   key: string;
   expiresIn?: number;
-  /** Fuerza `Content-Disposition: attachment; filename=...` al descargar. */
+  /** Nombre sugerido en `Content-Disposition; filename=...`. */
   downloadFileName?: string;
+  /**
+   * `attachment` (por defecto) fuerza la descarga; `inline` pide al navegador
+   * mostrar el archivo embebido (previsualización de PDF en un iframe, sin bajarlo).
+   */
+  disposition?: 'attachment' | 'inline';
 }
 
 const DEFAULT_EXPIRES_IN = 900; // 15 min
@@ -95,9 +100,12 @@ export class StorageService {
     const config = this.requireConfig();
     const expiresIn = this.clampExpiry(params.expiresIn);
     const extraQuery: Record<string, string> = {};
-    if (params.downloadFileName) {
-      extraQuery['response-content-disposition'] =
-        `attachment; filename="${params.downloadFileName.replace(/"/g, '')}"`;
+    if (params.downloadFileName || params.disposition) {
+      const disposition = params.disposition ?? 'attachment';
+      const filenamePart = params.downloadFileName
+        ? `; filename="${params.downloadFileName.replace(/"/g, '')}"`
+        : '';
+      extraQuery['response-content-disposition'] = `${disposition}${filenamePart}`;
     }
     return this.presign({
       config,

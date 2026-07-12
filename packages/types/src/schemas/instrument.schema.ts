@@ -134,6 +134,11 @@ export type InstrumentAttachmentModel = {
   updatedAt: string | Date;
   /** URL prefirmada de descarga (solo presente al leer un adjunto puntual). */
   downloadUrl?: string;
+  /**
+   * URL prefirmada de previsualización (Content-Disposition: inline) para mostrar
+   * el PDF embebido sin descargarlo. Solo presente al leer un adjunto puntual.
+   */
+  previewUrl?: string;
 };
 
 // ── Instrument Sections ──────────────────────────────────────────────────────
