@@ -10,6 +10,17 @@ import { cn } from '@/lib/utils';
  * al cambiar de pestaña — mismo patrón que `ResultadosNav` — para no perder el
  * contexto de la vista (H6.2). Las pestañas visibles se calculan en el layout
  * (server) según los roles del usuario; aquí solo se renderizan.
+ *
+ * Queda fija (`sticky`) al hacer scroll: el contenedor de scroll es el `<main>`
+ * del dashboard (con `p-6`), así que se ancla a su borde superior. El `-mx-6 px-6`
+ * la sangra hasta cubrir el padding horizontal del `main` (borde inferior a todo
+ * el ancho) y el fondo opaco + `z-20` evitan que el contenido se transparente por
+ * detrás.
+ *
+ * `-top-6` cancela el `pt-6` (24px) del `<main>`: sin él la barra se pegaría 24px
+ * por debajo del navbar dejando un hueco vacío. Con él queda al ras del navbar
+ * (`h-14`), de modo que lo único que queda por sobre las tabs al fijarse es el
+ * propio navbar. Mantener sincronizado con el padding vertical del `<main>`.
  */
 export type HubTab = { href: string; label: string; exact?: boolean };
 
@@ -20,7 +31,7 @@ export function AssessmentTabsNav({ tabs }: { tabs: HubTab[] }) {
   const suffix = qs ? `?${qs}` : '';
 
   return (
-    <nav className="flex flex-nowrap gap-1 overflow-x-auto border-b">
+    <nav className="sticky -top-6 z-20 -mx-6 flex flex-nowrap gap-1 overflow-x-auto border-b bg-background px-6">
       {tabs.map((tab) => {
         const active = tab.exact
           ? pathname === tab.href

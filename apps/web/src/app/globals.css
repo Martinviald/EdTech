@@ -73,6 +73,23 @@
   }
 }
 
+@layer utilities {
+  /*
+   * Permite swipe/scroll horizontal ocultando la barra de scroll. Se usa en la
+   * celda del nombre de alumno de la tabla cruzada: el nombre queda acotado al
+   * ancho de la columna y se desplaza para ver el resto, sin que un scrollbar
+   * horizontal ensucie cada fila ni le reste altura (Windows/Linux). El
+   * contenido sigue siendo totalmente desplazable.
+   */
+  .scrollbar-none {
+    -ms-overflow-style: none; /* IE / Edge antiguo */
+    scrollbar-width: none; /* Firefox */
+  }
+  .scrollbar-none::-webkit-scrollbar {
+    display: none; /* Chrome / Safari */
+  }
+}
+
 /*
  * Impresión limpia (TKT-17 material remedial + TKT-24/25/26 informes oficiales):
  * al imprimir / "Guardar como PDF" se oculta todo el shell del dashboard (sidebar,

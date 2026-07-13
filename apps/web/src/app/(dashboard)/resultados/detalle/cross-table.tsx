@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import type { JSX } from 'react';
 import type {
   ItemMatrixResponse,
@@ -11,7 +11,15 @@ import type {
   QuestionAnalysisResponse,
 } from '@soe/types';
 import { toast } from 'sonner';
-import { ArrowDownUp, ChevronDown, ChevronUp, Loader2, RotateCcw } from 'lucide-react';
+import {
+  ArrowDownUp,
+  ChevronDown,
+  ChevronUp,
+  Loader2,
+  Maximize2,
+  Minimize2,
+  RotateCcw,
+} from 'lucide-react';
 import {
   Table,
   TableBody,
@@ -50,6 +58,12 @@ type StudentSort =
 
 /** Orden de preguntas (columnas) por % de logro. `null` = orden original (posición). */
 type QuestionSort = { dir: SortDir } | null;
+
+/**
+ * El nombre del alumno se acota a esta longitud para no ensanchar la columna;
+ * lo que exceda el ancho visible se lee con swipe horizontal dentro de la celda.
+ */
+const MAX_STUDENT_NAME_LENGTH = 30;
 
 function formatPct(value: number | null): string {
   if (value === null || Number.isNaN(value)) return '—';
@@ -126,6 +140,10 @@ export function CrossTable({
   // TKT-09 — estado de ordenamiento (todo en cliente).
   const [studentSort, setStudentSort] = useState<StudentSort>(null);
   const [questionSort, setQuestionSort] = useState<QuestionSort>(null);
+  // Modo "pantalla completa": el tablero se muestra como overlay a viewport
+  // completo para aprovechar toda la pantalla. Se sale con el botón de minimizar
+  // o con Esc (salvo que el panel de detalle esté abierto: ahí Esc lo cierra a él).
+  const [maximized, setMaximized] = useState(false);
 
   const openQuestion = useCallback(
     async (column: MatrixQuestionColumn) => {
@@ -249,16 +267,38 @@ export function CrossTable({
     setQuestionSort(null);
   }, []);
 
+  // Salir de pantalla completa con Esc + bloquear el scroll del body mientras el
+  // overlay está activo. Si el panel de detalle está abierto, Esc lo cierra a él
+  // primero (no minimiza), para no perder el tablero al cerrar una pregunta.
+  useEffect(() => {
+    if (!maximized) return;
+    const onKeyDown = (event: KeyboardEvent): void => {
+      if (event.key === 'Escape' && !open) setMaximized(false);
+    };
+    document.addEventListener('keydown', onKeyDown);
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    return () => {
+      document.removeEventListener('keydown', onKeyDown);
+      document.body.style.overflow = previousOverflow;
+    };
+  }, [maximized, open]);
+
   const achievementDir = studentSort?.by === 'achievement' ? studentSort.dir : null;
   const sortedColumnId = studentSort?.by === 'column' ? studentSort.itemId : null;
   const anySortActive = studentSort !== null || questionSort !== null;
 
   return (
-    <div className="space-y-4">
+    <div
+      className={cn(
+        'flex flex-col gap-4',
+        maximized && 'fixed inset-0 z-50 overflow-hidden bg-background p-4 sm:p-6',
+      )}
+    >
       <p className="text-xs text-muted-foreground">
         Clic en el <span className="font-medium">número</span> de una pregunta para ver su detalle;
         el botón <ArrowDownUp className="inline size-3" aria-hidden /> bajo cada pregunta ordena a
-        los alumnos por esa pregunta. Clic en <span className="font-medium">% Logro</span>{' '}
+        los alumnos por esa pregunta. Clic en <span className="font-medium">Logro</span>{' '}
         (cabecera) ordena a los alumnos por su logro global; o usa{' '}
         <span className="font-medium">Ordenar preguntas</span>. Verde = correcta, rojo = incorrecta,
         gris = sin respuesta.
@@ -301,24 +341,44 @@ export function CrossTable({
             {displayQuestions.length} de {questions.length} preguntas
           </span>
         ) : null}
+        <Button
+          type="button"
+          variant="outline"
+          size="sm"
+          className="ml-auto gap-1.5"
+          onClick={() => setMaximized((value) => !value)}
+          aria-label={maximized ? 'Minimizar el tablero' : 'Ver el tablero en pantalla completa'}
+        >
+          {maximized ? (
+            <Minimize2 className="size-4" aria-hidden />
+          ) : (
+            <Maximize2 className="size-4" aria-hidden />
+          )}
+          {maximized ? 'Minimizar' : 'Pantalla completa'}
+        </Button>
       </div>
 
       <TooltipProvider delayDuration={150}>
-        <div className="max-h-[70vh] overflow-auto rounded-md border">
+        <div
+          className={cn(
+            'overflow-auto rounded-md border',
+            maximized ? 'min-h-0 flex-1' : 'max-h-[70vh]',
+          )}
+        >
           <Table>
             <TableHeader className="sticky top-0 z-20 bg-background">
               <TableRow>
-                <TableHead className="sticky left-0 z-30 min-w-[180px] bg-background">
+                <TableHead className="sticky left-0 z-30 w-[150px] bg-background px-2">
                   Alumno
                 </TableHead>
-                <TableHead className="bg-background text-right">
+                <TableHead className="w-[68px] bg-background px-2 text-right">
                   <button
                     type="button"
                     onClick={sortByAchievement}
-                    className="ml-auto inline-flex items-center gap-1 rounded px-1.5 py-1 font-medium transition-colors hover:bg-accent focus:outline-none focus:ring-2 focus:ring-ring"
+                    className="ml-auto inline-flex items-center gap-1 whitespace-nowrap rounded px-1 py-1 font-medium transition-colors hover:bg-accent focus:outline-none focus:ring-2 focus:ring-ring"
                     aria-label="Ordenar alumnos por porcentaje de logro"
                   >
-                    % Logro
+                    Logro
                     <SortIndicator dir={achievementDir} />
                   </button>
                 </TableHead>
@@ -326,7 +386,7 @@ export function CrossTable({
                   const isSorted = sortedColumnId === q.itemId;
                   const isLoading = loadingItemId === q.itemId;
                   return (
-                    <TableHead key={q.itemId} className="bg-background px-1 text-center">
+                    <TableHead key={q.itemId} className="bg-background px-0.5 text-center">
                       <div className="flex flex-col items-center gap-0.5">
                         {/* Principal: el número de la pregunta abre el detalle. */}
                         <Tooltip>
@@ -335,7 +395,7 @@ export function CrossTable({
                               type="button"
                               onClick={() => void openQuestion(q)}
                               disabled={isLoading}
-                              className="flex w-full flex-col items-center gap-0.5 rounded px-1.5 py-1 transition-colors hover:bg-accent focus:outline-none focus:ring-2 focus:ring-ring disabled:opacity-70"
+                              className="flex w-full flex-col items-center gap-0.5 rounded px-0.5 py-1 transition-colors hover:bg-accent focus:outline-none focus:ring-2 focus:ring-ring disabled:opacity-70"
                               aria-label={`Ver el detalle de la pregunta ${q.position}`}
                             >
                               <span className="inline-flex items-center gap-0.5 text-sm font-medium tabular-nums">
@@ -433,18 +493,24 @@ function SchoolReferenceRow({ questions }: { questions: MatrixQuestionColumn[] }
 
   return (
     <TableRow className="border-b-2 bg-muted/30">
-      <TableCell className="sticky left-0 z-10 bg-muted/60 align-top">
-        <span className="block text-sm font-semibold">% Logro colegio</span>
-        <span className="block text-xs font-normal text-muted-foreground">
-          Promedio de toda la organización
-        </span>
+      <TableCell className="sticky left-0 z-10 w-[150px] bg-muted/60 px-2 align-top">
+        {/* Mismo ancho fijo que las filas de alumno para que la columna congelada
+            no crezca con este texto más largo (que envuelve dentro de los 134px). */}
+        <div className="w-[134px]">
+          <span className="block text-sm font-semibold">% Logro colegio</span>
+          <span className="block text-xs font-normal text-muted-foreground">
+            Promedio de toda la organización
+          </span>
+        </div>
       </TableCell>
-      <TableCell className="text-right font-semibold tabular-nums">{formatPct(orgMean)}</TableCell>
+      <TableCell className="w-[68px] px-2 text-right font-semibold tabular-nums">
+        {formatPct(orgMean)}
+      </TableCell>
       {questions.map((q) => (
         <TableCell
           key={q.itemId}
           className={cn(
-            'text-center text-xs font-semibold tabular-nums',
+            'px-0.5 py-1.5 text-center text-xs font-semibold tabular-nums',
             referenceCellClass(q.references.org),
           )}
           title={`Colegio · Pregunta ${q.position}: ${formatPct(q.references.org)} de logro`}
@@ -467,19 +533,33 @@ function StudentRow({
   const cellByItem = new Map<string, MatrixCell>();
   for (const cell of row.cells) cellByItem.set(cell.itemId, cell);
 
+  // El nombre se corta a 30 caracteres (con elipsis si excede); el ancho visible
+  // es aún menor, y el resto se lee haciendo swipe horizontal dentro de la celda.
+  const displayName =
+    row.studentFullName.length > MAX_STUDENT_NAME_LENGTH
+      ? `${row.studentFullName.slice(0, MAX_STUDENT_NAME_LENGTH)}…`
+      : row.studentFullName;
+
   return (
     <TableRow>
-      <TableCell className="sticky left-0 z-10 bg-background font-medium">
-        {row.studentFullName}
-        <span className="block text-xs font-normal text-muted-foreground">
-          {row.studentRut}
-          {row.classGroupName ? ` · ${row.classGroupName}` : ''}
-        </span>
-        <span className="block text-xs font-normal text-muted-foreground">
-          {row.correctCount}/{row.answeredCount} correctas
-        </span>
+      <TableCell className="sticky left-0 z-10 w-[150px] bg-background px-2 align-top font-medium">
+        {/* Ancho FIJO real del wrapper (no un `width` en el `td`, que en
+            `table-layout:auto` la columna ignora y crece hasta el nombre completo,
+            impidiendo el desborde → sin swipe). Con el ancho fijo, el nombre
+            desborda su propio scroll horizontal y se desplaza (swipe) para ver el
+            resto; `scrollbar-none` oculta la barra para no ensuciar cada fila. */}
+        <div className="w-[134px]">
+          <div className="overflow-x-auto whitespace-nowrap scrollbar-none">{displayName}</div>
+          <span className="block truncate text-xs font-normal text-muted-foreground">
+            {row.studentRut}
+            {row.classGroupName ? ` · ${row.classGroupName}` : ''}
+          </span>
+          <span className="block text-xs font-normal text-muted-foreground">
+            {row.correctCount}/{row.answeredCount} correctas
+          </span>
+        </div>
       </TableCell>
-      <TableCell className="text-right font-medium tabular-nums">
+      <TableCell className="w-[68px] px-2 text-right font-medium tabular-nums">
         {row.achievement === null ? '—' : `${row.achievement.toFixed(1)}%`}
       </TableCell>
       {questions.map((q) => {
@@ -488,7 +568,7 @@ function StudentRow({
           return (
             <TableCell
               key={q.itemId}
-              className="bg-muted/40 text-center text-xs text-muted-foreground"
+              className="bg-muted/40 px-0.5 py-1.5 text-center text-xs text-muted-foreground"
             >
               ·
             </TableCell>
@@ -497,7 +577,7 @@ function StudentRow({
         return (
           <TableCell
             key={q.itemId}
-            className={cn('text-center text-xs font-semibold tabular-nums', cellClass(cell))}
+            className={cn('px-0.5 py-1.5 text-center text-xs font-semibold tabular-nums', cellClass(cell))}
             title={
               cell.selectedKey
                 ? `Respondió ${cell.selectedKey}${

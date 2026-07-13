@@ -1,7 +1,10 @@
 import type { ReactNode } from 'react';
+import Link from 'next/link';
+import type { Route } from 'next';
 import { notFound, redirect } from 'next/navigation';
 import { auth } from '@/auth';
 import { apiGet } from '@/lib/api';
+import { Button } from '@/components/ui/button';
 import {
   canAccess,
   DASHBOARD_VIEWER_ROLES,
@@ -126,6 +129,11 @@ export default async function EvaluacionLayout({
         actions={
           <>
             {enunciadoPdf ? <EnunciadoViewButton instrumentId={meta.instrumentId} /> : null}
+            <Link href={`/banco-items/${meta.instrumentId}/spec-table` as Route}>
+              <Button variant="outline" size="sm">
+                Tabla de especificaciones
+              </Button>
+            </Link>
             <AskAiButton prompt="Analiza esta evaluación: ¿qué cursos y habilidades están más descendidos y qué priorizar?" />
           </>
         }
