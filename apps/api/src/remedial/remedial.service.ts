@@ -463,13 +463,18 @@ export class RemedialService {
       }
 
       const effective = row.editedContent ?? row.content;
-      const studentContent =
-        effective !== null && effective !== undefined
-          ? toRemedialStudentContent(
-              row.type,
-              validateRemedialContent(row.type, effective),
-            )
-          : null;
+      let studentContent: RemedialStudentMaterialModel['content'] = null;
+      if (effective !== null && effective !== undefined) {
+        const validated = validateRemedialContent(row.type, effective);
+        // Hidrata las alternativas de práctica por el mismo canal RLS-safe que el
+        // docente (`hydratePracticeItems`); el proyector las stripea de la clave
+        // correcta y la explicación antes de enviarlas al estudiante.
+        const practiceItems =
+          row.type === 'practice_set'
+            ? await this.hydratePracticeItems(tx, validated, orgId)
+            : null;
+        studentContent = toRemedialStudentContent(row.type, validated, practiceItems);
+      }
 
       let nodeName: string | null = null;
       if (row.nodeId) {

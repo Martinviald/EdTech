@@ -153,13 +153,30 @@ export type RemedialGuideStudentContent = z.infer<
   typeof remedialGuideStudentContentSchema
 >;
 
+/** Ítem de práctica en la versión ESTUDIANTE: enunciado + alternativas para poder
+ * responder, pero SIN marcar la correcta (`isCorrect`/`correctKey`) ni la
+ * explicación — eso es solo-profesor. Las alternativas se hidratan on-read desde
+ * `items` y el proyector (`toRemedialStudentContent`) las stripea. `alternatives`
+ * es `null` para ítems sin alternativas (desarrollo) o material sin hidratar. */
+export const remedialPracticeStudentItemSchema = z.object({
+  itemId: z.string().uuid(),
+  position: z.number().int(),
+  stem: z.string(),
+  alternatives: z
+    .array(z.object({ key: z.string(), text: z.string() }))
+    .nullable(),
+});
+export type RemedialPracticeStudentItem = z.infer<
+  typeof remedialPracticeStudentItemSchema
+>;
+
 /** Set de práctica para el estudiante: los ítems sin las notas docentes
- * (`notes`). El ocultamiento de respuestas/pautas de cada ítem es responsabilidad
- * del render/export de `items` (viven en la tabla `items`). */
+ * (`notes`). Cada ítem lleva sus alternativas SIN la clave correcta ni la
+ * explicación (solo-profesor); el stripping ocurre en `toRemedialStudentContent`. */
 export const remedialPracticeStudentContentSchema = z.object({
   skillFocus: z.string(),
   itemCount: z.number().int(),
-  items: z.array(remedialPracticeItemRefSchema),
+  items: z.array(remedialPracticeStudentItemSchema),
 });
 export type RemedialPracticeStudentContent = z.infer<
   typeof remedialPracticeStudentContentSchema
@@ -196,10 +213,17 @@ export type RemedialStudentContent = z.infer<typeof remedialStudentContentSchema
  * Deriva la versión ESTUDIANTE del contenido de un material remedial, ocultando
  * la información dirigida al profesor. Determinista, sin IA. Recibe el content
  * EFECTIVO (edición humana si existe, si no la salida IA).
+ *
+ * Para `practice_set`, `practiceItems` son los ítems hidratados on-read desde
+ * `items` (con la clave correcta y la explicación): el proyector STRIPEA esa
+ * información solo-profesor y deja solo `{ key, text }` por alternativa para que el
+ * estudiante pueda responder sin ver la respuesta. Ausente/`null` ⇒ ítems sin
+ * alternativas (degradación al enunciado, como antes).
  */
 export function toRemedialStudentContent(
   type: RemedialMaterialType,
   content: RemedialContent,
+  practiceItems?: RemedialPracticeItemPreview[] | null,
 ): RemedialStudentContent {
   switch (type) {
     case 'guide': {
@@ -216,10 +240,27 @@ export function toRemedialStudentContent(
     }
     case 'practice_set': {
       const c = content as RemedialPracticeContent;
+      // Alternativas hidratadas por `itemId`; se stripea `isCorrect` (y no se
+      // copian `correctKey`/`explanation`) → el estudiante ve las opciones para
+      // responder, nunca la respuesta.
+      const previewByItemId = new Map(
+        (practiceItems ?? []).map((p) => [p.itemId, p]),
+      );
       return {
         skillFocus: c.skillFocus,
         itemCount: c.itemCount,
-        items: c.items,
+        items: c.items.map((ref) => {
+          const preview = previewByItemId.get(ref.itemId);
+          const alternatives =
+            preview?.alternatives?.map((alt) => ({ key: alt.key, text: alt.text })) ??
+            null;
+          return {
+            itemId: ref.itemId,
+            position: ref.position,
+            stem: ref.stem,
+            alternatives,
+          };
+        }),
       };
     }
     case 'group_plan': {
