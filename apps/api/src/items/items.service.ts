@@ -4,7 +4,7 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { and, asc, count, eq, inArray, isNull, or } from 'drizzle-orm';
+import { and, asc, count, eq, exists, inArray, isNull, or } from 'drizzle-orm';
 import {
   assessments,
   items,
@@ -15,7 +15,7 @@ import {
   type Item,
 } from '@soe/db';
 import { validateItemContent } from '@soe/types';
-import type { ItemContent, ItemType } from '@soe/types';
+import type { ItemBankScope, ItemContent, ItemType } from '@soe/types';
 import { ZodError } from 'zod';
 import type { JwtPayload } from '../auth/jwt-payload.types';
 import { InjectDb, type Database } from '../database/database.types';
@@ -57,7 +57,9 @@ export class ItemsService {
 
   async list(user: JwtPayload, query: ListItemsQueryDto) {
     const { page, pageSize, ...filters } = query;
-    const conditions = this.buildVisibilityConditions(user);
+    // Banco de ítems (TKT-14): el `scope` decide qué origen se lista (propio de
+    // la org, global/oficial, o ambos). Nunca expone otras orgs (ver §5.2).
+    const conditions = this.buildVisibilityConditions(user, filters.scope);
 
     if (filters.instrumentId) {
       conditions.push(eq(items.instrumentId, filters.instrumentId));
@@ -75,14 +77,75 @@ export class ItemsService {
       conditions.push(eq(items.source, filters.source));
     }
 
-    // Filter by taxonomy node: find items that have a tag pointing to this node.
-    if (filters.taxonomyNodeId) {
+    // Filtro facetado del banco (dropdowns en cascada): asignatura, nivel y cada
+    // grupo de nodos elegido se combinan con AND (intersección). Los `items` no
+    // tienen subject/grade: se derivan de los nodos que los etiquetan, así que
+    // cada dimensión se expresa como un EXISTS correlacionado sobre los tags.
+    // Semántica: AND entre dimensiones, OR dentro de cada grupo/subconsulta.
+    if (filters.subjectId) {
+      conditions.push(
+        exists(
+          this.db
+            .select()
+            .from(itemTaxonomyTags)
+            .innerJoin(taxonomyNodes, eq(itemTaxonomyTags.nodeId, taxonomyNodes.id))
+            .where(
+              and(
+                eq(itemTaxonomyTags.itemId, items.id),
+                eq(taxonomyNodes.subjectId, filters.subjectId),
+              ),
+            ),
+        ),
+      );
+    }
+    if (filters.gradeId) {
+      conditions.push(
+        exists(
+          this.db
+            .select()
+            .from(itemTaxonomyTags)
+            .innerJoin(taxonomyNodes, eq(itemTaxonomyTags.nodeId, taxonomyNodes.id))
+            .where(
+              and(
+                eq(itemTaxonomyTags.itemId, items.id),
+                eq(taxonomyNodes.gradeId, filters.gradeId),
+              ),
+            ),
+        ),
+      );
+    }
+    if (filters.taxonomyNodeGroups) {
+      for (const group of filters.taxonomyNodeGroups) {
+        conditions.push(
+          exists(
+            this.db
+              .select()
+              .from(itemTaxonomyTags)
+              .where(
+                and(
+                  eq(itemTaxonomyTags.itemId, items.id),
+                  inArray(itemTaxonomyTags.nodeId, group),
+                ),
+              ),
+          ),
+        );
+      }
+    }
+
+    // Filtro por tags (TKT-12/TKT-14): un ítem se incluye si tiene CUALQUIERA de
+    // los nodos pedidos (lógica OR). Se admite `taxonomyNodeId` (single) y
+    // `taxonomyNodeIds` (multi); ambos se combinan en un único conjunto OR.
+    const nodeIds = [
+      ...(filters.taxonomyNodeId ? [filters.taxonomyNodeId] : []),
+      ...(filters.taxonomyNodeIds ?? []),
+    ];
+    if (nodeIds.length > 0) {
       const taggedItemIds = await this.db
         .select({ itemId: itemTaxonomyTags.itemId })
         .from(itemTaxonomyTags)
-        .where(eq(itemTaxonomyTags.nodeId, filters.taxonomyNodeId));
+        .where(inArray(itemTaxonomyTags.nodeId, nodeIds));
 
-      const ids = taggedItemIds.map((t) => t.itemId);
+      const ids = [...new Set(taggedItemIds.map((t) => t.itemId))];
       if (ids.length === 0) {
         return { data: [], total: 0, page, limit: pageSize };
       }
@@ -121,12 +184,18 @@ export class ItemsService {
           name: taxonomyNodes.name,
           code: taxonomyNodes.code,
           type: taxonomyNodes.type,
+          description: taxonomyNodes.description,
           taxonomyId: taxonomyNodes.taxonomyId,
         },
       })
       .from(itemTaxonomyTags)
       .innerJoin(taxonomyNodes, eq(itemTaxonomyTags.nodeId, taxonomyNodes.id))
-      .where(inArray(itemTaxonomyTags.itemId, data.map((i) => i.id)));
+      .where(
+        inArray(
+          itemTaxonomyTags.itemId,
+          data.map((i) => i.id),
+        ),
+      );
 
     const tagsByItem = new Map<string, typeof allTags>();
     for (const tag of allTags) {
@@ -167,6 +236,7 @@ export class ItemsService {
           name: taxonomyNodes.name,
           code: taxonomyNodes.code,
           type: taxonomyNodes.type,
+          description: taxonomyNodes.description,
           taxonomyId: taxonomyNodes.taxonomyId,
         },
       })
@@ -315,12 +385,7 @@ export class ItemsService {
     const [existing] = await this.db
       .select()
       .from(itemTaxonomyTags)
-      .where(
-        and(
-          eq(itemTaxonomyTags.id, tagId),
-          eq(itemTaxonomyTags.itemId, itemId),
-        ),
-      );
+      .where(and(eq(itemTaxonomyTags.id, tagId), eq(itemTaxonomyTags.itemId, itemId)));
 
     if (!existing) throw new NotFoundException('Tag no encontrado');
 
@@ -332,12 +397,7 @@ export class ItemsService {
     const itemRows = await this.db
       .select()
       .from(items)
-      .where(
-        and(
-          inArray(items.id, dto.itemIds),
-          isNull(items.deletedAt),
-        ),
-      );
+      .where(and(inArray(items.id, dto.itemIds), isNull(items.deletedAt)));
 
     if (itemRows.length !== dto.itemIds.length) {
       throw new NotFoundException('Uno o más ítems no fueron encontrados');
@@ -414,18 +474,36 @@ export class ItemsService {
   }
 
   /**
-   * Builds the base visibility + soft-delete conditions for items.
-   * Official items (org_id IS NULL) are visible to everyone.
-   * Custom items are filtered by the user's org_id.
+   * Builds the base visibility + soft-delete conditions for items, honouring the
+   * item-bank `scope` (TKT-14):
+   *  · 'global' → sólo ítems globales/oficiales (org_id IS NULL).
+   *  · 'own'    → sólo ítems de la org del usuario (org_id = orgId).
+   *  · 'all'    → ambos (default histórico).
+   *
+   * El aislamiento se mantiene SIEMPRE: un usuario no-admin nunca ve ítems de
+   * otra org, independientemente del `scope` (a lo sumo restringe lo que ya podía
+   * ver). `items` no es tabla RLS (sin PII); el scope es un filtro de servicio.
    */
-  private buildVisibilityConditions(user: JwtPayload) {
+  private buildVisibilityConditions(user: JwtPayload, scope: ItemBankScope = 'all') {
     const conditions = [isNull(items.deletedAt)];
 
+    if (scope === 'global') {
+      conditions.push(isNull(items.orgId));
+      return conditions;
+    }
+
+    if (scope === 'own') {
+      // Sin org (ej. platform_admin sin membership) no hay "propios": se resuelve
+      // como "ninguno" para no filtrar de más — usar isNull en un uuid es siempre
+      // falso para filas con org, así garantizamos 0 leaks.
+      conditions.push(user.orgId ? eq(items.orgId, user.orgId) : isNull(items.id));
+      return conditions;
+    }
+
+    // scope === 'all'
     if (!user.isPlatformAdmin) {
       conditions.push(
-        user.orgId
-          ? or(isNull(items.orgId), eq(items.orgId, user.orgId))!
-          : isNull(items.orgId),
+        user.orgId ? or(isNull(items.orgId), eq(items.orgId, user.orgId))! : isNull(items.orgId),
       );
     }
 
@@ -445,7 +523,10 @@ export class ItemsService {
     if (params.itemId) {
       const conditions = [eq(items.id, params.itemId)];
       conditions.push(...this.buildVisibilityConditions(user));
-      const [row] = await this.db.select().from(items).where(and(...conditions));
+      const [row] = await this.db
+        .select()
+        .from(items)
+        .where(and(...conditions));
       if (!row) throw new NotFoundException('Ítem no encontrado');
       return row;
     }
@@ -491,9 +572,7 @@ export class ItemsService {
       return row;
     }
 
-    throw new BadRequestException(
-      'Debe entregar itemId o (assessmentId y position)',
-    );
+    throw new BadRequestException('Debe entregar itemId o (assessmentId y position)');
   }
 
   /** Nombre de la habilidad principal etiquetada al ítem (primer tag), si existe. */
@@ -513,10 +592,7 @@ export class ItemsService {
    * modelo polimórfico: extrae stem/alternativas/clave correcta de cada `type`
    * sin hardcodear un único tipo. Tipos sin alternativas devuelven lista vacía.
    */
-  private normalizeItemContent(
-    item: Item,
-    skillName: string | null,
-  ): ItemContentForAssistant {
+  private normalizeItemContent(item: Item, skillName: string | null): ItemContentForAssistant {
     const type = item.type as ItemType;
     const content = (item.content ?? {}) as Record<string, unknown>;
 
@@ -527,9 +603,7 @@ export class ItemsService {
       skillName,
     };
 
-    const rawAlternatives = Array.isArray(content.alternatives)
-      ? content.alternatives
-      : [];
+    const rawAlternatives = Array.isArray(content.alternatives) ? content.alternatives : [];
     const alternatives = rawAlternatives.flatMap((alt) => {
       if (!alt || typeof alt !== 'object') return [];
       const a = alt as { key?: unknown; text?: unknown };
@@ -559,20 +633,27 @@ export class ItemsService {
 
     if (type === 'true_false') {
       const correct =
-        typeof content.correctAnswer === 'boolean'
-          ? content.correctAnswer
-            ? 'V'
-            : 'F'
-          : null;
+        typeof content.correctAnswer === 'boolean' ? (content.correctAnswer ? 'V' : 'F') : null;
       return { ...base, stem, alternatives, correctKey: correct };
     }
 
     // multiple_choice / listening (y cualquier tipo con alternativas): clave
     // correcta desde `content.correctKey` explícito o desde la alternativa marcada.
-    const correctKey =
-      asString(content.correctKey) ?? correctKeyFromAlternatives();
+    const correctKey = asString(content.correctKey) ?? correctKeyFromAlternatives();
 
     return { ...base, stem, alternatives, correctKey };
+  }
+
+  /**
+   * Devuelve el ítem RAW verificando que el usuario pueda EDITARLO (no solo verlo).
+   * Lo consume el flujo de propuestas de edición (TKT-19): el snapshot del `content`
+   * y el chequeo de permiso de edición (org propia, no oficial) se hacen una vez,
+   * antes de generar/aplicar la propuesta. Lanza 404 si no existe, 403 si no editable.
+   */
+  async getEditableItem(id: string, user: JwtPayload): Promise<Item> {
+    const item = await this.getByIdRaw(id);
+    this.assertEditable(item, user);
+    return item;
   }
 
   /** Fetch raw item (no tags), checking soft-delete. */
@@ -588,11 +669,7 @@ export class ItemsService {
   }
 
   /** Creates a version snapshot from the current item state. */
-  private async createVersionSnapshot(
-    item: Item,
-    changedById: string,
-    changeNote?: string,
-  ) {
+  private async createVersionSnapshot(item: Item, changedById: string, changeNote?: string) {
     const [version] = await this.db
       .insert(itemVersions)
       .values({

@@ -1,9 +1,5 @@
 import { z } from 'zod';
-import {
-  PERFORMANCE_LEVELS,
-  type AssessmentStatus,
-  type PerformanceLevel,
-} from '../enums';
+import { PERFORMANCE_LEVELS, type AssessmentStatus, type PerformanceLevel } from '../enums';
 import type { PerformanceBandView } from './performance-band.schema';
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -41,6 +37,22 @@ export const dashboardPerformanceQuerySchema = dashboardFiltersQuerySchema.exten
   limit: z.coerce.number().int().min(1).max(200).default(50),
 });
 export type DashboardPerformanceQueryDto = z.infer<typeof dashboardPerformanceQuerySchema>;
+
+/**
+ * H6.5 (drill-down jerárquico) — GET /api/dashboards/skills/breakdown.
+ * Desglosa el % de logro de UN nodo de taxonomía (`nodeId`) por la dimensión
+ * `groupBy`, respetando los mismos filtros del resto de dashboards. Alimenta la
+ * escalera Asignatura → Nivel → Curso → Evaluación → Pregunta: cada `groupBy`
+ * produce las filas de un peldaño; la fila seleccionada acota el siguiente.
+ */
+export const SKILL_BREAKDOWN_DIMENSIONS = ['subject', 'grade', 'classGroup', 'assessment'] as const;
+export type SkillBreakdownDimension = (typeof SKILL_BREAKDOWN_DIMENSIONS)[number];
+
+export const dashboardSkillBreakdownQuerySchema = dashboardFiltersQuerySchema.extend({
+  nodeId: z.string().uuid(),
+  groupBy: z.enum(SKILL_BREAKDOWN_DIMENSIONS),
+});
+export type DashboardSkillBreakdownQueryDto = z.infer<typeof dashboardSkillBreakdownQuerySchema>;
 
 // ── Response Models ──────────────────────────────────────────────────────────
 
@@ -189,6 +201,32 @@ export type DashboardSkillsResponse = {
   skills: SkillAchievementModel[];
   // Bandas del instrumento cuando el scope es un único instrumento con bandas.
   bands?: PerformanceBandView[];
+};
+
+/**
+ * Una fila del desglose de un nodo por una dimensión (Asignatura/Nivel/Curso/
+ * Evaluación). `id` es la clave de esa dimensión (subjectId/gradeId/classGroupId/
+ * assessmentId), usada para acotar el siguiente peldaño del drill-down.
+ */
+export type SkillBreakdownRow = {
+  id: string;
+  label: string;
+  sublabel: string | null; // contexto secundario (nivel del curso, fecha de la evaluación…)
+  averageAchievement: number | null; // % logro promedio 0..100
+  performanceLevel: PerformanceLevel | null;
+  studentsAssessed: number;
+};
+
+/** GET /api/dashboards/skills/breakdown — un peldaño del drill-down jerárquico. */
+export type DashboardSkillBreakdownResponse = {
+  node: {
+    nodeId: string;
+    nodeName: string;
+    nodeType: string;
+    nodeCode: string | null;
+  };
+  groupBy: SkillBreakdownDimension;
+  rows: SkillBreakdownRow[];
 };
 
 // ── H6.8 — GET /api/dashboards/teacher-kpis ──────────────────────────────────

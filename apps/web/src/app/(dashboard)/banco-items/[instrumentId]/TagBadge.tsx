@@ -1,5 +1,6 @@
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
+import { formatNodeCode } from '@/lib/taxonomy-labels';
 import type { ItemTaxonomyTagModel } from '@soe/types';
 
 const NODE_TYPE_COLORS: Record<string, string> = {
@@ -13,11 +14,13 @@ const NODE_TYPE_COLORS: Record<string, string> = {
 
 export function TagBadge({ tag }: { tag: ItemTaxonomyTagModel }) {
   const nodeType = tag.node?.type ?? 'unknown';
-  const colorClass = NODE_TYPE_COLORS[nodeType] ?? 'bg-gray-100 text-gray-800 dark:bg-gray-950 dark:text-gray-200';
+  const colorClass =
+    NODE_TYPE_COLORS[nodeType] ?? 'bg-gray-100 text-gray-800 dark:bg-gray-950 dark:text-gray-200';
   const code = tag.node?.code;
   const name = tag.node?.name;
-  const label = code ?? name ?? tag.nodeId.slice(0, 8);
-  const tooltip = code && name ? `${code}: ${name}` : name ?? '';
+  // TKT-03: mostrar "OA-{n}"/nombre humano; el código técnico queda en el tooltip.
+  const label = formatNodeCode(code, nodeType) ?? name ?? tag.nodeId.slice(0, 8);
+  const tooltip = code && name ? `${code}: ${name}` : (name ?? '');
 
   return (
     <Badge

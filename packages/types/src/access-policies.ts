@@ -228,6 +228,25 @@ export const AI_OBSERVABILITY_VIEWER_ROLES: readonly UserRole[] = [
 // per-org se sumará school_admin (sólo sobre las filas de su org).
 export const LLM_SETTINGS_ROLES: readonly UserRole[] = ['platform_admin'];
 
+// ── Informes oficiales (TKT-24/25/26) ─────────────────────────────────────────
+// Roles que pueden ver/generar los informes oficiales por curso (TKT-24) y por
+// estudiante (TKT-26). Mismo conjunto que los resultados: el scoping por curso
+// para profesores lo aplica el service (un profesor sólo ve sus cursos/alumnos).
+export const OFFICIAL_REPORT_VIEWER_ROLES: readonly UserRole[] = RESULTS_VIEWER_ROLES;
+
+// Roles que pueden ver el informe AGREGADO de establecimiento (TKT-25). Es una
+// vista macro de toda la organización (no PII, sólo % y conteos) → directivos y
+// coordinadores, NO profesores (que sólo tienen alcance de sus cursos).
+export const ESTABLISHMENT_REPORT_ROLES: readonly UserRole[] = [
+  'platform_admin',
+  'school_admin',
+  'academic_director',
+  'cycle_director',
+  'dept_head',
+  'coordinator',
+  'eval_coordinator',
+];
+
 // ── E21 — Asistente IA Conversacional ────────────────────────────────────────
 // Roles que pueden usar el asistente conversacional (v1 = solo directivos, por
 // minimización de superficie de PII; los profesores entran en v2 con scoping por

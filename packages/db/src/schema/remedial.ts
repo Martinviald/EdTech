@@ -43,8 +43,12 @@ export const remedialMaterials = pgTable(
     // Análisis IA (brecha) de origen, opcional (sin FK dura: trazabilidad blanda).
     sourceAnalysisId: uuid('source_analysis_id'),
     title: text('title'),
-    // Salida polimórfica por `type` (validada con Zod en la capa de aplicación).
+    // Salida IA polimórfica por `type` (validada con Zod en la capa de aplicación).
+    // §8.3: evidencia IA — inmutable tras `markReady`. La IA propone.
     content: jsonb('content').$type<RemedialContent>(),
+    // Override humano (edición previa a la aprobación — TKT-17 c). §8.3: el humano
+    // ajusta sin borrar la evidencia IA. Content EFECTIVO = editedContent ?? content.
+    editedContent: jsonb('edited_content').$type<RemedialContent>(),
     // Reporte del juez automático (Ola 2.1b): { iterations, finalStatus, verdicts[] }.
     // Genérico por ahora — el `qualityReportSchema` dedicado llega en 2.1b; se agrega la
     // columna ya para que 2.1b solo la rellene. `null` en filas 2.1a / sin juez.

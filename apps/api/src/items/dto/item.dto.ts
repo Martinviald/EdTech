@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { paginationSchema } from '@soe/types';
+import { itemBankScopeSchema, paginationSchema } from '@soe/types';
 
 // ── Item Type / Status / Source enums ───────────────────────────────────────
 const ITEM_TYPES = [
@@ -66,13 +66,63 @@ export const createItemSchema = z.object({
 
 export const updateItemSchema = createItemSchema.omit({ tags: true }).partial();
 
+/**
+ * Coacciona `taxonomyNodeIds` a `string[]` desde: array (query repetido),
+ * valor único, o CSV. Habilita el filtro multi-tag OR del banco (TKT-12/TKT-14).
+ */
+const taxonomyNodeIdsSchema = z
+  .union([z.array(z.string()), z.string()])
+  .optional()
+  .transform((v) => {
+    if (v === undefined) return undefined;
+    const arr = Array.isArray(v) ? v : v.split(',');
+    return arr.map((s) => s.trim()).filter((s) => s.length > 0);
+  })
+  .pipe(z.array(z.string().uuid()).optional());
+
+/**
+ * Coacciona `taxonomyNodeGroups` a `string[][]` (grupos AND, OR dentro de cada
+ * grupo). Cada ocurrencia del query param (repetido) es una CSV de uuids = un
+ * grupo. Habilita el filtro facetado por dimensión del banco (asignatura Y nivel
+ * Y OA Y habilidad…); varios nodos del mismo grupo = OR entre ellos.
+ */
+const taxonomyNodeGroupsSchema = z
+  .union([z.array(z.string()), z.string()])
+  .optional()
+  .transform((v) => {
+    if (v === undefined) return undefined;
+    const raw = Array.isArray(v) ? v : [v];
+    const groups = raw
+      .map((g) =>
+        g
+          .split(',')
+          .map((s) => s.trim())
+          .filter((s) => s.length > 0),
+      )
+      .filter((g) => g.length > 0);
+    return groups.length > 0 ? groups : undefined;
+  })
+  .pipe(z.array(z.array(z.string().uuid())).optional());
+
 export const listItemsQuerySchema = paginationSchema.extend({
   instrumentId: z.string().uuid().optional(),
   sectionId: z.string().uuid().optional(),
   type: z.enum(ITEM_TYPES).optional(),
   status: z.enum(ITEM_STATUSES).optional(),
   source: z.enum(ITEM_SOURCES).optional(),
+  // Filtro por un nodo (retrocompatible).
   taxonomyNodeId: z.string().uuid().optional(),
+  // Filtro multi-tag con lógica OR (TKT-12/TKT-14).
+  taxonomyNodeIds: taxonomyNodeIdsSchema,
+  // Filtro facetado del banco: el ítem debe estar etiquetado con un nodo de la
+  // asignatura (transitivo vía item_taxonomy_tags → taxonomy_nodes.subject_id).
+  subjectId: z.string().uuid().optional(),
+  // Ídem por nivel (taxonomy_nodes.grade_id).
+  gradeId: z.string().uuid().optional(),
+  // Grupos AND (OR dentro de cada grupo): un grupo por tipo de nodo elegido.
+  taxonomyNodeGroups: taxonomyNodeGroupsSchema,
+  // Alcance del banco de ítems (TKT-14): 'own' | 'global' | 'all' (default).
+  scope: itemBankScopeSchema.default('all'),
 });
 
 // ── Version DTOs ────────────────────────────────────────────────────────────

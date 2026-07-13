@@ -1,28 +1,18 @@
 'use client';
 
-import { useState, type JSX } from 'react';
-import { BookOpen, CheckCircle2, FileQuestion, Sparkles } from 'lucide-react';
-import type {
-  ItemModel,
-  ItemTaxonomyTagModel,
-  InstrumentSectionModel,
-} from '@soe/types';
-import {
-  Sheet,
-  SheetContent,
-  SheetDescription,
-  SheetHeader,
-  SheetTitle,
-} from '@/components/ui/sheet';
+import type { JSX } from 'react';
+import { CheckCircle2, FileQuestion } from 'lucide-react';
+import type { ItemModel, ItemTaxonomyTagModel, InstrumentSectionModel } from '@soe/types';
 import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
 import {
-  PassageDialog,
   hasPassageContent,
   type PassageAttachment,
   type PassageData,
 } from '@/components/passage-dialog';
 import { cn } from '@/lib/utils';
+import { QuestionDetailSheet } from '@/components/question-detail/question-detail-sheet';
+import { QuestionNodes, type QuestionNodeTag } from '@/components/question-detail/question-nodes';
+import { ItemEditProposals } from './ItemEditProposals';
 
 function sectionToPassage(section: InstrumentSectionModel): PassageData {
   return {
@@ -80,81 +70,70 @@ function getAlternatives(content: Record<string, unknown>): Alternative[] {
   const raw = content.alternatives;
   if (!Array.isArray(raw)) return [];
   return raw.filter(
-    (alt): alt is Alternative =>
-      typeof alt === 'object' && alt !== null && 'key' in alt,
+    (alt): alt is Alternative => typeof alt === 'object' && alt !== null && 'key' in alt,
   );
 }
 
 function getStringField(content: Record<string, unknown>, field: string): string | null {
-  return typeof content[field] === 'string' && content[field]
-    ? (content[field] as string)
-    : null;
+  return typeof content[field] === 'string' && content[field] ? (content[field] as string) : null;
 }
 
 export function ItemDetailPanel(props: {
   item: ItemModel | null;
   sections?: InstrumentSectionModel[];
+  canEdit?: boolean;
+  instrumentId?: string;
   open: boolean;
   onClose: () => void;
 }): JSX.Element {
-  const { item, sections = [], open, onClose } = props;
-  const [passageOpen, setPassageOpen] = useState(false);
+  const { item, sections = [], canEdit = false, instrumentId, open, onClose } = props;
 
-  const section = item?.sectionId
-    ? sections.find((s) => s.id === item.sectionId) ?? null
-    : null;
-  const showPassage = hasPassageContent(section);
+  const section = item?.sectionId ? (sections.find((s) => s.id === item.sectionId) ?? null) : null;
+  const passage = section && hasPassageContent(section) ? sectionToPassage(section) : null;
 
   return (
-    <Sheet open={open} onOpenChange={(next) => (next ? undefined : onClose())}>
-      <SheetContent side="right" className="w-full overflow-y-auto sm:max-w-lg lg:max-w-xl">
-        {/* Header SIEMPRE presente (Radix Dialog exige Title + Description). */}
-        <SheetHeader className="space-y-2 pr-8">
-          <div className="flex flex-wrap items-center gap-2">
-            <Badge variant="secondary">
-              {item ? `Pregunta ${item.position}` : 'Pregunta'}
-            </Badge>
-            {item ? (
-              <Badge variant="outline">
-                {ITEM_TYPE_LABELS[item.type] ?? item.type}
-              </Badge>
-            ) : null}
-          </div>
-          <SheetTitle className="text-base leading-snug">
-            {item ? `Detalle de la pregunta ${item.position}` : 'Detalle de la pregunta'}
-          </SheetTitle>
-          <SheetDescription>
-            Enunciado completo, alternativas y nodos de taxonomía asociados a la pregunta.
-          </SheetDescription>
-        </SheetHeader>
-
-        {showPassage ? (
-          <Button
-            variant="outline"
-            size="sm"
-            className="mt-4 w-full justify-start gap-2"
-            onClick={() => setPassageOpen(true)}
-          >
-            <BookOpen className="size-4" aria-hidden />
-            Ver texto de lectura
-          </Button>
-        ) : null}
-
-        {item ? <ItemDetailContent item={item} /> : null}
-      </SheetContent>
-
-      {section ? (
-        <PassageDialog
-          open={passageOpen}
-          onOpenChange={setPassageOpen}
-          passage={sectionToPassage(section)}
+    <QuestionDetailSheet
+      open={open}
+      onClose={onClose}
+      position={item?.position ?? null}
+      headerBadges={
+        item ? <Badge variant="outline">{ITEM_TYPE_LABELS[item.type] ?? item.type}</Badge> : null
+      }
+      description="Enunciado completo, alternativas y nodos de taxonomía asociados a la pregunta."
+      passage={passage}
+      storageKey="soe.itemDetail.panelWidth"
+    >
+      {item ? (
+        <ItemDetailContent
+          item={item}
+          canEdit={canEdit}
+          instrumentId={instrumentId ?? item.instrumentId ?? ''}
         />
       ) : null}
-    </Sheet>
+    </QuestionDetailSheet>
   );
 }
 
-function ItemDetailContent({ item }: { item: ItemModel }): JSX.Element {
+/** Normaliza los tags del ítem a la forma común de `QuestionNodes`. */
+function toNodeTags(tags: ItemTaxonomyTagModel[]): QuestionNodeTag[] {
+  return tags.map((t) => ({
+    nodeId: t.nodeId,
+    code: t.node?.code ?? null,
+    type: t.node?.type ?? 'unknown',
+    name: t.node?.name ?? '',
+    taggedBy: t.taggedBy,
+  }));
+}
+
+function ItemDetailContent({
+  item,
+  canEdit,
+  instrumentId,
+}: {
+  item: ItemModel;
+  canEdit: boolean;
+  instrumentId: string;
+}): JSX.Element {
   const content = item.content ?? {};
   const stem = getStem(content);
   const alternatives = getAlternatives(content);
@@ -169,9 +148,7 @@ function ItemDetailContent({ item }: { item: ItemModel }): JSX.Element {
         <p className="whitespace-pre-line text-sm leading-relaxed text-foreground">
           {stem ?? 'Esta pregunta no tiene enunciado registrado.'}
         </p>
-        {explanation ? (
-          <p className="text-xs text-muted-foreground">{explanation}</p>
-        ) : null}
+        {explanation ? <p className="text-xs text-muted-foreground">{explanation}</p> : null}
       </section>
 
       {imageUrl ? (
@@ -201,7 +178,10 @@ function ItemDetailContent({ item }: { item: ItemModel }): JSX.Element {
       </section>
 
       {/* Nodos asociados */}
-      <ItemNodes tags={item.tags ?? []} />
+      <QuestionNodes tags={toNodeTags(item.tags ?? [])} />
+
+      {/* Edición asistida por IA (TKT-19) */}
+      <ItemEditProposals itemId={item.id} instrumentId={instrumentId} canEdit={canEdit} />
     </div>
   );
 }
@@ -226,9 +206,7 @@ function AlternativeRow({ alt }: { alt: Alternative }): JSX.Element {
       >
         {alt.key}
       </span>
-      <span className="min-w-0 flex-1 text-foreground">
-        {alt.text ?? `Alternativa ${alt.key}`}
-      </span>
+      <span className="min-w-0 flex-1 text-foreground">{alt.text ?? `Alternativa ${alt.key}`}</span>
       {alt.isCorrect ? (
         <CheckCircle2
           className="mt-0.5 size-4 shrink-0 text-emerald-600 dark:text-emerald-400"
@@ -239,96 +217,3 @@ function AlternativeRow({ alt }: { alt: Alternative }): JSX.Element {
   );
 }
 
-// Etiquetas legibles por tipo de nodo (taxonomy_node_type) y orden de aparición.
-const NODE_TYPE_LABELS: Record<string, string> = {
-  skill: 'Habilidades',
-  content: 'Contenidos',
-  learning_objective: 'Objetivos de aprendizaje',
-  text_type: 'Tipos de texto',
-  axis: 'Ejes',
-  domain: 'Dominios',
-  subdomain: 'Subdominios',
-  performance_level: 'Niveles de desempeño',
-  descriptor: 'Descriptores',
-  criterion: 'Criterios',
-  paper: 'Papers',
-};
-
-const NODE_TYPE_ORDER = Object.keys(NODE_TYPE_LABELS);
-
-function nodeTypeRank(type: string): number {
-  const i = NODE_TYPE_ORDER.indexOf(type);
-  return i === -1 ? NODE_TYPE_ORDER.length : i;
-}
-
-/** Lista TODOS los nodos asociados al ítem, agrupados por tipo de nodo. */
-function ItemNodes({ tags }: { tags: ItemTaxonomyTagModel[] }): JSX.Element {
-  return (
-    <section className="space-y-3">
-      <h3 className="text-sm font-semibold text-foreground">Nodos asociados</h3>
-      {tags.length === 0 ? (
-        <p className="text-sm text-muted-foreground">
-          Esta pregunta no tiene nodos de taxonomía asociados.
-        </p>
-      ) : (
-        <div className="space-y-3">
-          {groupTagsByType(tags).map(([type, group]) => (
-            <div key={type} className="space-y-1.5">
-              <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-                {NODE_TYPE_LABELS[type] ?? type}
-              </p>
-              <ul className="flex flex-wrap gap-2">
-                {group.map((tag) => (
-                  <li key={tag.nodeId}>
-                    <span className="inline-flex items-center gap-1.5 rounded-md border bg-card px-2.5 py-1 text-sm">
-                      {tag.node?.code ? (
-                        <span className="font-medium tabular-nums">{tag.node.code}</span>
-                      ) : null}
-                      <span className="text-foreground">
-                        {tag.node?.name ?? tag.nodeId.slice(0, 8)}
-                      </span>
-                      {tag.tagType === 'secondary' ? (
-                        <Badge
-                          variant="outline"
-                          className="ml-0.5 px-1 py-0 text-[10px] font-normal"
-                        >
-                          secundario
-                        </Badge>
-                      ) : null}
-                      {tag.taggedBy === 'ai' ? (
-                        <Badge
-                          variant="secondary"
-                          className="ml-0.5 gap-0.5 px-1 py-0 text-[10px] font-normal"
-                          title="Sugerido por IA"
-                        >
-                          <Sparkles className="size-2.5" aria-hidden />
-                          IA
-                        </Badge>
-                      ) : null}
-                    </span>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          ))}
-        </div>
-      )}
-    </section>
-  );
-}
-
-/** Agrupa los tags por el `type` del nodo, conservando el orden de relevancia. */
-function groupTagsByType(
-  tags: ItemTaxonomyTagModel[],
-): [string, ItemTaxonomyTagModel[]][] {
-  const groups = new Map<string, ItemTaxonomyTagModel[]>();
-  for (const tag of tags) {
-    const type = tag.node?.type ?? 'unknown';
-    const arr = groups.get(type) ?? [];
-    arr.push(tag);
-    groups.set(type, arr);
-  }
-  return Array.from(groups.entries()).sort(
-    ([a], [b]) => nodeTypeRank(a) - nodeTypeRank(b),
-  );
-}

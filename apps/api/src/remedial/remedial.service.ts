@@ -16,6 +16,7 @@ import {
 } from '@soe/db';
 import {
   qualityReportSchema,
+  toRemedialStudentContent,
   validateRemedialContent,
   type GenerateRemedialDto,
   type QualityReport,
@@ -27,7 +28,9 @@ import {
   type RemedialMethod,
   type RemedialPracticeItemPreview,
   type RemedialStimulus,
+  type RemedialStudentMaterialModel,
   type ReviewRemedialDto,
+  type UpdateRemedialDto,
 } from '@soe/types';
 import type { JwtPayload } from '../auth/jwt-payload.types';
 import { InjectDb, type Database } from '../database/database.types';
@@ -348,16 +351,23 @@ export class RemedialService {
         return this.toModel(tx, updated!);
       }
 
-      // approve: el humano puede haber editado el content (override).
-      const finalContent: RemedialContent = dto.content
+      // approve: el humano puede enviar un content editado (override). §8.3: NO se
+      // sobrescribe `content` (evidencia IA); la edición vive en `editedContent`.
+      // El content EFECTIVO a aprobar = edición del body ?? edición previa ?? IA.
+      const editedFromBody: RemedialContent | null = dto.content
         ? validateRemedialContent(row.type, dto.content)
-        : validateRemedialContent(row.type, row.content);
+        : null;
+      const finalContent: RemedialContent = validateRemedialContent(
+        row.type,
+        editedFromBody ?? row.editedContent ?? row.content,
+      );
 
       await tx
         .update(remedialMaterials)
         .set({
           status: 'approved',
-          content: finalContent,
+          // Persistir la edición del body si vino; conservar la previa si no.
+          ...(editedFromBody ? { editedContent: editedFromBody } : {}),
           reviewedById: user.userId,
           reviewedAt: new Date(),
           updatedAt: new Date(),
@@ -385,6 +395,101 @@ export class RemedialService {
 
       const updated = await this.findOne(tx, id, orgId);
       return this.toModel(tx, updated!);
+    });
+  }
+
+  /**
+   * Edición humana del material en borrador (TKT-17 c). Aplica a TODOS los tipos
+   * (guide | practice_set | group_plan), no solo la guía. Solo mientras el material
+   * está en `ready` (aún no aprobado/descartado). §8.3: persiste en `editedContent`
+   * (override), sin tocar `content` (evidencia IA). El content se valida por `type`.
+   */
+  async update(
+    user: JwtPayload,
+    id: string,
+    dto: UpdateRemedialDto,
+  ): Promise<RemedialMaterialModel> {
+    const orgId = this.requireOrgId(user);
+
+    return withOrgContext(this.db, orgId, async (tx) => {
+      const row = await this.findOne(tx, id, orgId);
+      if (!row) {
+        throw new NotFoundException('Material remedial no encontrado');
+      }
+      if (row.status !== 'ready') {
+        throw new BadRequestException(
+          `Solo se puede editar material en estado "ready" (actual: "${row.status}")`,
+        );
+      }
+
+      const patch: Partial<typeof remedialMaterials.$inferInsert> = {
+        updatedAt: new Date(),
+      };
+      if (dto.title !== undefined) {
+        patch.title = dto.title;
+      }
+      if (dto.content !== undefined) {
+        patch.editedContent = validateRemedialContent(row.type, dto.content);
+      }
+
+      await tx
+        .update(remedialMaterials)
+        .set(patch)
+        .where(
+          and(eq(remedialMaterials.id, id), eq(remedialMaterials.orgId, orgId)),
+        );
+
+      const updated = await this.findOne(tx, id, orgId);
+      return this.toModel(tx, updated!);
+    });
+  }
+
+  /**
+   * Versión ESTUDIANTE del material (TKT-17 b). Misma generación, render sin la
+   * información solo-profesor. Deriva de forma determinista el content efectivo
+   * (`editedContent ?? content`) con `toRemedialStudentContent`. `content` queda
+   * null si el material aún no tiene salida (status distinto de ready/approved).
+   */
+  async getStudentVersion(
+    user: JwtPayload,
+    id: string,
+  ): Promise<RemedialStudentMaterialModel> {
+    const orgId = this.requireOrgId(user);
+
+    return withOrgContext(this.db, orgId, async (tx) => {
+      const row = await this.findOne(tx, id, orgId);
+      if (!row) {
+        throw new NotFoundException('Material remedial no encontrado');
+      }
+
+      const effective = row.editedContent ?? row.content;
+      const studentContent =
+        effective !== null && effective !== undefined
+          ? toRemedialStudentContent(
+              row.type,
+              validateRemedialContent(row.type, effective),
+            )
+          : null;
+
+      let nodeName: string | null = null;
+      if (row.nodeId) {
+        const [node] = await tx
+          .select({ name: taxonomyNodes.name })
+          .from(taxonomyNodes)
+          .where(eq(taxonomyNodes.id, row.nodeId))
+          .limit(1);
+        nodeName = node?.name ?? null;
+      }
+
+      return {
+        id: row.id,
+        type: row.type,
+        status: row.status,
+        nodeId: row.nodeId,
+        nodeName,
+        title: row.title,
+        content: studentContent,
+      };
     });
   }
 
@@ -504,6 +609,7 @@ export class RemedialService {
       classGroupId: row.classGroupId,
       title: row.title,
       content: row.content ?? null,
+      editedContent: row.editedContent ?? null,
       // Ola 2.1b: reporte del juez leído on-read desde la fila (parseado/validado;
       // `null` si no hay o si la fila trae un shape viejo/incompatible).
       qualityReport: this.parseQualityReport(row.qualityReport),

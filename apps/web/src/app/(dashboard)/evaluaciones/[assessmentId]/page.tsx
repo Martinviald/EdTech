@@ -92,6 +92,20 @@ export default async function EvaluacionResumenPage({
   const base = `/evaluaciones/${assessmentId}`;
   const roles = session.user.roles;
 
+  // El DIA es un diagnóstico por niveles de logro (I/II/III), no por notas:
+  // ocultamos "Nota promedio" para este tipo de instrumento aunque tenga escala.
+  const isDia = report.meta.instrumentType === 'dia';
+  // Las tarjetas visibles varían (2 a 4) según escala e instrumento. Ajustamos las
+  // columnas para que ocupen todo el ancho y no quede un hueco a la derecha.
+  const gradeCards = summary.hasGradingScale ? (isDia ? 1 : 2) : 0;
+  const visibleCards = 2 + gradeCards; // % Logro + Asistencia + tarjetas de nota
+  const summaryGridCols =
+    visibleCards === 2
+      ? 'sm:grid-cols-2 lg:grid-cols-2'
+      : visibleCards === 3
+        ? 'sm:grid-cols-3 lg:grid-cols-3'
+        : 'sm:grid-cols-2 lg:grid-cols-4';
+
   const sections: SectionLink[] = [
     {
       href: `${base}/resultados`,
@@ -134,27 +148,39 @@ export default async function EvaluacionResumenPage({
 
   return (
     <div className="space-y-6">
-      <section className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      <section className={`grid grid-cols-1 gap-4 ${summaryGridCols}`}>
         <SummaryCard
           label="% Logro promedio"
           value={formatAchievement(summary.averageAchievement)}
           hint={`Nivel: ${performanceLevelLabel(summary.performanceLevel)}`}
           icon={Target}
         />
+        {/* TKT-04: notas/escala solo si el instrumento tiene escala configurada.
+            Sin escala, se ocultan estas tarjetas (no se muestra el default 4.0). */}
+        {summary.hasGradingScale ? (
+          <>
+            <SummaryCard
+              label="Aprobación"
+              value={summary.passingRate === null ? '—' : `${summary.passingRate.toFixed(1)}%`}
+              hint={
+                summary.passingGrade === null
+                  ? undefined
+                  : `Nota de corte: ${summary.passingGrade.toFixed(1)}`
+              }
+              icon={CheckCircle2}
+            />
+            {isDia ? null : (
+              <SummaryCard
+                label="Nota promedio"
+                value={summary.averageGrade === null ? '—' : summary.averageGrade.toFixed(1)}
+                hint={summary.averageGrade === null ? undefined : 'Promedio del curso evaluado'}
+                icon={GraduationCap}
+              />
+            )}
+          </>
+        ) : null}
         <SummaryCard
-          label="Aprobación"
-          value={summary.passingRate === null ? '—' : `${summary.passingRate.toFixed(1)}%`}
-          hint={`Nota de corte: ${summary.passingGrade.toFixed(1)}`}
-          icon={CheckCircle2}
-        />
-        <SummaryCard
-          label="Nota promedio"
-          value={summary.averageGrade === null ? '—' : summary.averageGrade.toFixed(1)}
-          hint={summary.averageGrade === null ? undefined : 'Promedio del curso evaluado'}
-          icon={GraduationCap}
-        />
-        <SummaryCard
-          label="Cobertura"
+          label="Asistencia"
           value={`${summary.studentsEvaluated}/${summary.studentsEnrolled}`}
           hint={
             summary.coverageRate === null

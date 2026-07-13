@@ -45,7 +45,11 @@ async function request<T>(
 
   if (!res.ok) {
     const body = await res.json().catch(() => ({}));
-    throw new Error((body as { message?: string }).message ?? `API error ${res.status}`);
+    const err = new Error(
+      (body as { message?: string }).message ?? `API error ${res.status}`,
+    ) as Error & { status?: number };
+    err.status = res.status;
+    throw err;
   }
 
   // 204 No Content

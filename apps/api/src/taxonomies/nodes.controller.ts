@@ -12,8 +12,10 @@ import {
 } from '@nestjs/common';
 import {
   createTaxonomyNodeSchema,
+  listTaxonomyNodeFacetsQuerySchema,
   listTaxonomyNodesQuerySchema,
   updateTaxonomyNodeSchema,
+  ITEM_VIEWER_ROLES,
 } from '@soe/types';
 import { CurrentUser } from '../auth/current-user.decorator';
 import type { JwtPayload } from '../auth/jwt-payload.types';
@@ -40,6 +42,18 @@ export class NodesController {
   create(@Body() body: unknown, @CurrentUser() user: JwtPayload) {
     const dto = createTaxonomyNodeSchema.parse(body);
     return this.nodesService.create(dto, user);
+  }
+
+  /**
+   * GET /api/taxonomies/nodes/facets — opciones de nodos para los filtros del
+   * banco de ítems, acotadas por asignatura/nivel/tipo (cross-currículo).
+   * Accesible a quienes ven el banco (no solo admins). Debe ir antes de `:id`.
+   */
+  @Get('facets')
+  @Roles(...ITEM_VIEWER_ROLES)
+  listFacets(@Query() query: unknown, @CurrentUser() user: JwtPayload) {
+    const filters = listTaxonomyNodeFacetsQuerySchema.parse(query);
+    return this.nodesService.listFacets(filters, user);
   }
 
   /** GET /api/taxonomies/nodes/:id — detalle de un nodo. */

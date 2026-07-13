@@ -7,6 +7,7 @@ import { HeatmapModule } from '../heatmap/heatmap.module';
 import { InstrumentsModule } from '../instruments/instruments.module';
 import { ItemAnalysisModule } from '../item-analysis/item-analysis.module';
 import { ItemsModule } from '../items/items.module';
+import { ItemEditProposalsModule } from '../item-edit-proposals/item-edit-proposals.module';
 import { LlmModule } from '../llm/llm.module';
 import { ASSISTANT_TOOLS } from './assistant.constants';
 import { AssistantController } from './assistant.controller';
@@ -24,6 +25,7 @@ import { GetProgressionTool } from './tools/get-progression.tool';
 import { GetStudentDetailTool } from './tools/get-student-detail.tool';
 import { ListAssessmentsTool } from './tools/list-assessments.tool';
 import { ListFilterOptionsTool } from './tools/list-filter-options.tool';
+import { ProposeItemEditTool } from './tools/propose-item-edit.tool';
 
 /**
  * Módulo del Asistente IA Conversacional (E21 — Ola 3).
@@ -48,6 +50,7 @@ const ASSISTANT_TOOL_CLASSES = [
   GetStudentDetailTool,
   GetItemContentTool,
   GetInstrumentTool,
+  ProposeItemEditTool,
 ] as const;
 
 @Module({
@@ -60,6 +63,7 @@ const ASSISTANT_TOOL_CLASSES = [
     AssessmentResultsModule,
     InstrumentsModule,
     ItemsModule,
+    ItemEditProposalsModule,
     ItemAnalysisModule,
   ],
   controllers: [AssistantController],

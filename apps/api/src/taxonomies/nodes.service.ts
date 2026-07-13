@@ -4,10 +4,11 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { and, eq, inArray, sql } from 'drizzle-orm';
+import { and, eq, inArray, isNull, or, sql } from 'drizzle-orm';
 import { itemTaxonomyTags, taxonomyNodes, type TaxonomyNode } from '@soe/db';
 import type {
   CreateTaxonomyNodeDto,
+  ListTaxonomyNodeFacetsQueryDto,
   ListTaxonomyNodesQueryDto,
   UpdateTaxonomyNodeDto,
 } from '@soe/types';
@@ -37,6 +38,45 @@ export class NodesService {
       .from(taxonomyNodes)
       .where(and(...conditions))
       .orderBy(taxonomyNodes.depth, taxonomyNodes.order);
+  }
+
+  /**
+   * Opciones de nodos para los dropdowns del banco de ítems. Lista los nodos de
+   * TODAS las taxonomías visibles para el usuario (oficiales + de su org),
+   * acotados por asignatura/nivel/tipo. A diferencia de `list()`, no exige
+   * `taxonomyId` (es cross-currículo).
+   *
+   * NULL = transversal: un nodo con `subjectId`/`gradeId` NULL aplica a todas las
+   * asignaturas/niveles (p. ej. habilidades y tipos de texto suelen no tener
+   * grado), así que se incluye aunque se filtre por asignatura/nivel; filtrar
+   * estricto los ocultaría al elegir un nivel.
+   */
+  async listFacets(filters: ListTaxonomyNodeFacetsQueryDto, user: JwtPayload) {
+    const visible = await this.taxonomiesService.listVisible(
+      user,
+      filters.taxonomyType ? { type: filters.taxonomyType } : {},
+    );
+    const visibleIds = visible.map((t) => t.id);
+    if (visibleIds.length === 0) return [];
+
+    const conditions = [inArray(taxonomyNodes.taxonomyId, visibleIds)];
+    if (filters.subjectId) {
+      conditions.push(
+        or(eq(taxonomyNodes.subjectId, filters.subjectId), isNull(taxonomyNodes.subjectId))!,
+      );
+    }
+    if (filters.gradeId) {
+      conditions.push(
+        or(eq(taxonomyNodes.gradeId, filters.gradeId), isNull(taxonomyNodes.gradeId))!,
+      );
+    }
+    if (filters.type) conditions.push(eq(taxonomyNodes.type, filters.type));
+
+    return this.db
+      .select()
+      .from(taxonomyNodes)
+      .where(and(...conditions))
+      .orderBy(taxonomyNodes.type, taxonomyNodes.order, taxonomyNodes.name);
   }
 
   async getById(id: string, user: JwtPayload): Promise<TaxonomyNode> {

@@ -211,9 +211,7 @@ export function GeneratePanel({
         router.replace(`/material-remedial/${materialId}` as Route);
         router.refresh();
       } catch (err) {
-        setError(
-          err instanceof Error ? err.message : 'No se pudo generar el material remedial.',
-        );
+        setError(err instanceof Error ? err.message : 'No se pudo generar el material remedial.');
       }
     });
   }
@@ -230,7 +228,8 @@ export function GeneratePanel({
         <p className="text-sm text-muted-foreground">
           {nodeName ? (
             <>
-              Brecha a remediar: <span className="font-medium text-foreground">{nodeName}</span>.{' '}
+              Brecha a remediar: <span className="font-medium text-foreground">{nodeName}</span>
+              .{' '}
             </>
           ) : null}
           Elige el tipo de material a generar. El proceso es asíncrono y puede tomar algunos

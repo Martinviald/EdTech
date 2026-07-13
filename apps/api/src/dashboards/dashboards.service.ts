@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { and, asc, desc, eq, inArray, isNull, sql } from 'drizzle-orm';
+import { and, asc, desc, eq, inArray, isNull, notInArray, sql } from 'drizzle-orm';
 import {
   academicYears,
   assessmentResults,
@@ -21,6 +21,7 @@ import {
   DEFAULT_PERFORMANCE_THRESHOLDS,
   PERFORMANCE_LEVELS,
   RESULTS_VIEWER_ROLES,
+  RESULT_HIDDEN_NODE_TYPES,
   bandToLegacyLevel,
   classifyByBands,
   percentageToPerformanceLevel,
@@ -33,7 +34,10 @@ import {
   type DashboardOverviewResponse,
   type DashboardPerformanceQueryDto,
   type DashboardPerformanceResponse,
+  type DashboardSkillBreakdownQueryDto,
+  type DashboardSkillBreakdownResponse,
   type DashboardSkillsResponse,
+  type SkillBreakdownRow,
   type DashboardTeacherKpisResponse,
   type PerformanceBandDistributionBucket,
   type PerformanceBandInput,
@@ -126,13 +130,15 @@ export class DashboardsService {
 
       const globalAchievement = metrics?.avgPct == null ? null : Number(metrics.avgPct);
 
-      const distribution = await this.computePerformanceDistribution(
+      const distribution = await this.computePerformanceDistribution(tx, assessmentIds, studentIds);
+
+      const recentAssessments = await this.loadRecentAssessments(
         tx,
-        assessmentIds,
+        orgId,
+        scope,
+        query,
         studentIds,
       );
-
-      const recentAssessments = await this.loadRecentAssessments(tx, orgId, scope, query, studentIds);
 
       const alerts = await this.deriveAlerts(tx, orgId, scope, query, studentIds, assessmentIds);
 
@@ -258,7 +264,11 @@ export class DashboardsService {
     query: DashboardPerformanceQueryDto,
   ): Promise<DashboardPerformanceResponse> {
     const orgId = this.resolveOrgId(user);
-    const thresholds = { elementary: DEFAULT_THRESHOLDS.elementary, adequate: DEFAULT_THRESHOLDS.adequate, advanced: DEFAULT_THRESHOLDS.advanced };
+    const thresholds = {
+      elementary: DEFAULT_THRESHOLDS.elementary,
+      adequate: DEFAULT_THRESHOLDS.adequate,
+      advanced: DEFAULT_THRESHOLDS.advanced,
+    };
     const empty: DashboardPerformanceResponse = {
       distribution: this.emptyDistribution(),
       thresholds,
@@ -275,7 +285,10 @@ export class DashboardsService {
 
       const assessmentIds = await this.resolveScopedAssessmentIds(tx, orgId, query);
       if (assessmentIds.length === 0) {
-        return { ...empty, thresholds: await this.resolveThresholds(tx, orgId, query, assessmentIds) };
+        return {
+          ...empty,
+          thresholds: await this.resolveThresholds(tx, orgId, query, assessmentIds),
+        };
       }
 
       const resolvedThresholds = await this.resolveThresholds(tx, orgId, query, assessmentIds);
@@ -313,7 +326,11 @@ export class DashboardsService {
         aggregateRows.map((r) => r.studentId),
       );
 
-      const scaleThresholds = { elementary: resolvedThresholds.elementary, adequate: resolvedThresholds.adequate, advanced: resolvedThresholds.advanced };
+      const scaleThresholds = {
+        elementary: resolvedThresholds.elementary,
+        adequate: resolvedThresholds.adequate,
+        advanced: resolvedThresholds.advanced,
+      };
 
       // Bandas del instrumento cuando el scope es un único instrumento (ej. una
       // evaluación DIA): la clasificación usa el corte configurado, no 40/70/85.
@@ -424,7 +441,11 @@ export class DashboardsService {
 
       const bands = await this.resolveScopedBands(tx, query, assessmentIds);
 
-      const conditions = [inArray(skillResults.assessmentId, assessmentIds)];
+      const conditions = [
+        inArray(skillResults.assessmentId, assessmentIds),
+        // TKT-05 — la matriz de habilidades no reporta nodos tipo descriptor.
+        notInArray(taxonomyNodes.type, [...RESULT_HIDDEN_NODE_TYPES]),
+      ];
       if (studentIds !== null) {
         conditions.push(inArray(skillResults.studentId, studentIds));
       }
@@ -475,6 +496,211 @@ export class DashboardsService {
       });
 
       return bands ? { skills, bands: bands.map(toBandView) } : { skills };
+    });
+  }
+
+  // ───────────────────────────────────────────────────────────────────────────
+  // GET /api/dashboards/skills/breakdown  (H6.5 — drill-down jerárquico)
+  //
+  // Desglosa el % de logro de UN nodo por la dimensión `groupBy`
+  // (Asignatura/Nivel/Curso/Evaluación), respetando el mismo scoping y filtros de
+  // getSkills. Cada fila devuelve la clave (`id`) para acotar el siguiente peldaño.
+  // El leaf "→ preguntas" NO vive aquí: lo cubre /item-analysis/matrix (nodeId +
+  // assessmentId, ya fijado por el peldaño Evaluación).
+  // ───────────────────────────────────────────────────────────────────────────
+
+  async getSkillBreakdown(
+    user: JwtPayload,
+    query: DashboardSkillBreakdownQueryDto,
+  ): Promise<DashboardSkillBreakdownResponse> {
+    const orgId = this.resolveOrgId(user);
+    const emptyNode = {
+      nodeId: query.nodeId,
+      nodeName: '',
+      nodeType: '',
+      nodeCode: null as string | null,
+    };
+    if (!orgId) return { node: emptyNode, groupBy: query.groupBy, rows: [] };
+
+    return withOrgContext(this.db, orgId, async (tx) => {
+      const [nodeRow] = await tx
+        .select({
+          name: taxonomyNodes.name,
+          type: taxonomyNodes.type,
+          code: taxonomyNodes.code,
+        })
+        .from(taxonomyNodes)
+        .where(eq(taxonomyNodes.id, query.nodeId))
+        .limit(1);
+      const node = nodeRow
+        ? {
+            nodeId: query.nodeId,
+            nodeName: nodeRow.name,
+            nodeType: nodeRow.type,
+            nodeCode: nodeRow.code,
+          }
+        : emptyNode;
+      const empty: DashboardSkillBreakdownResponse = { node, groupBy: query.groupBy, rows: [] };
+
+      const scope = await this.getAccessibleClassGroupIds(tx, user, orgId);
+      if (!scope.scopeAll && scope.classGroupIds.length === 0) return empty;
+
+      const studentIds = await this.resolveScopedStudentIds(tx, orgId, scope, query);
+      if (studentIds !== null && studentIds.length === 0) return empty;
+
+      const assessmentIds = await this.resolveScopedAssessmentIds(tx, orgId, query);
+      if (assessmentIds.length === 0) return empty;
+
+      const resolvedThresholds = await this.resolveThresholds(tx, orgId, query, assessmentIds);
+      const scaleThresholds = {
+        elementary: resolvedThresholds.elementary,
+        adequate: resolvedThresholds.adequate,
+        advanced: resolvedThresholds.advanced,
+      };
+      const toLevel = (pct: number | null): PerformanceLevel | null =>
+        pct == null
+          ? null
+          : percentageToPerformanceLevel(pct / 100, { performanceThresholds: scaleThresholds });
+
+      // Filtro base sobre skill_results: ese nodo, en el scope de evaluaciones y
+      // (si aplica) alumnos ya resuelto por los helpers compartidos.
+      const base = [
+        eq(skillResults.nodeId, query.nodeId),
+        inArray(skillResults.assessmentId, assessmentIds),
+      ];
+      if (studentIds !== null) base.push(inArray(skillResults.studentId, studentIds));
+
+      const avgPct = sql<string | null>`avg(${skillResults.percentage}::numeric)`;
+      const studentsAssessed = sql<number>`count(distinct ${skillResults.studentId})::int`;
+
+      let rows: SkillBreakdownRow[];
+
+      if (query.groupBy === 'assessment') {
+        const raw = await tx
+          .select({
+            id: assessments.id,
+            name: assessments.name,
+            instrumentName: instruments.name,
+            subjectName: subjects.name,
+            avgPct,
+            studentsAssessed,
+          })
+          .from(skillResults)
+          .innerJoin(assessments, eq(assessments.id, skillResults.assessmentId))
+          .innerJoin(instruments, eq(instruments.id, assessments.instrumentId))
+          .leftJoin(subjects, eq(subjects.id, instruments.subjectId))
+          .where(and(...base))
+          .groupBy(assessments.id, assessments.name, instruments.name, subjects.name)
+          .orderBy(desc(assessments.administeredAt), asc(assessments.createdAt));
+
+        rows = raw.map((r) => {
+          const pct = r.avgPct == null ? null : Number(r.avgPct);
+          return {
+            id: r.id,
+            label: r.name ?? r.instrumentName,
+            sublabel: r.subjectName,
+            averageAchievement: pct,
+            performanceLevel: toLevel(pct),
+            studentsAssessed: Number(r.studentsAssessed ?? 0),
+          };
+        });
+      } else if (query.groupBy === 'subject') {
+        const raw = await tx
+          .select({
+            id: subjects.id,
+            name: subjects.name,
+            avgPct,
+            studentsAssessed,
+          })
+          .from(skillResults)
+          .innerJoin(assessments, eq(assessments.id, skillResults.assessmentId))
+          .innerJoin(instruments, eq(instruments.id, assessments.instrumentId))
+          .innerJoin(subjects, eq(subjects.id, instruments.subjectId))
+          .where(and(...base))
+          .groupBy(subjects.id, subjects.name)
+          .orderBy(asc(subjects.name));
+
+        rows = raw.map((r) => {
+          const pct = r.avgPct == null ? null : Number(r.avgPct);
+          return {
+            id: r.id,
+            label: r.name,
+            sublabel: null,
+            averageAchievement: pct,
+            performanceLevel: toLevel(pct),
+            studentsAssessed: Number(r.studentsAssessed ?? 0),
+          };
+        });
+      } else {
+        // 'grade' | 'classGroup' — se agrupa vía la matrícula del alumno.
+        // ⚠️ Multi-matrícula: un alumno en >1 curso podría contarse en varios
+        // (mismo criterio best-effort que loadClassGroupByStudent). En una org/año
+        // es 1:1; acotamos por año y scope para minimizarlo (F1 OK).
+        const cgConditions = [eq(classGroups.orgId, orgId), ...base];
+        if (!scope.scopeAll) cgConditions.push(inArray(classGroups.id, scope.classGroupIds));
+        if (query.academicYearId) {
+          cgConditions.push(eq(classGroups.academicYearId, query.academicYearId));
+        }
+
+        if (query.groupBy === 'grade') {
+          const raw = await tx
+            .select({
+              id: grades.id,
+              name: grades.name,
+              avgPct,
+              studentsAssessed,
+            })
+            .from(skillResults)
+            .innerJoin(studentEnrollments, eq(studentEnrollments.studentId, skillResults.studentId))
+            .innerJoin(classGroups, eq(classGroups.id, studentEnrollments.classGroupId))
+            .innerJoin(grades, eq(grades.id, classGroups.gradeId))
+            .where(and(...cgConditions))
+            .groupBy(grades.id, grades.name)
+            .orderBy(asc(grades.name));
+
+          rows = raw.map((r) => {
+            const pct = r.avgPct == null ? null : Number(r.avgPct);
+            return {
+              id: r.id,
+              label: r.name,
+              sublabel: null,
+              averageAchievement: pct,
+              performanceLevel: toLevel(pct),
+              studentsAssessed: Number(r.studentsAssessed ?? 0),
+            };
+          });
+        } else {
+          const raw = await tx
+            .select({
+              id: classGroups.id,
+              name: classGroups.name,
+              gradeName: grades.name,
+              avgPct,
+              studentsAssessed,
+            })
+            .from(skillResults)
+            .innerJoin(studentEnrollments, eq(studentEnrollments.studentId, skillResults.studentId))
+            .innerJoin(classGroups, eq(classGroups.id, studentEnrollments.classGroupId))
+            .innerJoin(grades, eq(grades.id, classGroups.gradeId))
+            .where(and(...cgConditions))
+            .groupBy(classGroups.id, classGroups.name, grades.name)
+            .orderBy(asc(classGroups.name));
+
+          rows = raw.map((r) => {
+            const pct = r.avgPct == null ? null : Number(r.avgPct);
+            return {
+              id: r.id,
+              label: r.name,
+              sublabel: r.gradeName,
+              averageAchievement: pct,
+              performanceLevel: toLevel(pct),
+              studentsAssessed: Number(r.studentsAssessed ?? 0),
+            };
+          });
+        }
+      }
+
+      return { node, groupBy: query.groupBy, rows };
     });
   }
 
@@ -679,12 +905,10 @@ export class DashboardsService {
       cgConditions.push(eq(classGroups.id, query.classGroupId));
     }
     if (query.gradeId) cgConditions.push(eq(classGroups.gradeId, query.gradeId));
-    if (query.academicYearId) cgConditions.push(eq(classGroups.academicYearId, query.academicYearId));
+    if (query.academicYearId)
+      cgConditions.push(eq(classGroups.academicYearId, query.academicYearId));
 
-    const enrollConditions = [
-      eq(students.orgId, orgId),
-      isNull(students.deletedAt),
-    ];
+    const enrollConditions = [eq(students.orgId, orgId), isNull(students.deletedAt)];
     if (query.studentId) enrollConditions.push(eq(students.id, query.studentId));
 
     const rows = await tx
@@ -924,7 +1148,8 @@ export class DashboardsService {
     if (!scope.scopeAll) cgConditions.push(inArray(classGroups.id, scope.classGroupIds));
     if (query.classGroupId) cgConditions.push(eq(classGroups.id, query.classGroupId));
     if (query.gradeId) cgConditions.push(eq(classGroups.gradeId, query.gradeId));
-    if (query.academicYearId) cgConditions.push(eq(classGroups.academicYearId, query.academicYearId));
+    if (query.academicYearId)
+      cgConditions.push(eq(classGroups.academicYearId, query.academicYearId));
 
     const resultConditions = [inArray(assessmentResults.assessmentId, assessmentIds)];
     if (studentIds !== null) {
@@ -958,8 +1183,11 @@ export class DashboardsService {
       }
     }
 
-    // 2) Habilidades críticas (< 50% promedio).
-    const skillConditions = [inArray(skillResults.assessmentId, assessmentIds)];
+    // 2) Habilidades críticas (< 50% promedio). TKT-05 — sin descriptores.
+    const skillConditions = [
+      inArray(skillResults.assessmentId, assessmentIds),
+      notInArray(taxonomyNodes.type, [...RESULT_HIDDEN_NODE_TYPES]),
+    ];
     if (studentIds !== null) skillConditions.push(inArray(skillResults.studentId, studentIds));
 
     const skillRows = await tx
@@ -1023,7 +1251,10 @@ export class DashboardsService {
     const map = new Map<string, { id: string; name: string }>();
     if (studentIds.length === 0) return map;
 
-    const conditions = [eq(classGroups.orgId, orgId), inArray(studentEnrollments.studentId, studentIds)];
+    const conditions = [
+      eq(classGroups.orgId, orgId),
+      inArray(studentEnrollments.studentId, studentIds),
+    ];
     if (!scope.scopeAll) conditions.push(inArray(classGroups.id, scope.classGroupIds));
 
     const rows = await tx

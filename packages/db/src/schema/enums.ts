@@ -114,6 +114,15 @@ export const itemSourceEnum = pgEnum('item_source', [
 export const itemTagTypeEnum = pgEnum('item_tag_type', ['primary', 'secondary']);
 export const taggedByEnum = pgEnum('tagged_by', ['human', 'ai']);
 
+// TKT-19 — Propuestas de edición de ítems (escritura asistida por IA). Ciclo de
+// vida del workflow "la IA propone, el humano aprueba" (§8.3): pending → approved
+// (aplicada al ítem) | rejected (descartada). La evidencia IA nunca se sobrescribe.
+export const itemEditProposalStatusEnum = pgEnum('item_edit_proposal_status', [
+  'pending',
+  'approved',
+  'rejected',
+]);
+
 export const gradingScaleTypeEnum = pgEnum('grading_scale_type', [
   'linear_chilean',
   'percentage',
@@ -170,6 +179,12 @@ export const passageFormatEnum = pgEnum('passage_format', ['plain', 'markdown', 
 // Tipo de archivo adjunto a una sección (audio cubre listening de inglés a futuro).
 export const attachmentKindEnum = pgEnum('attachment_kind', ['image', 'audio', 'pdf', 'other']);
 
+// Estado de un objeto en el módulo genérico de almacenamiento (`files`):
+//  · `pending`  = se emitió la URL prefirmada de subida, el archivo aún no se confirma.
+//  · `ready`    = subida confirmada y validada (headObject en S3). Es el estado usable.
+// El "borrado" es soft-delete (deleted_at), no un valor de este enum.
+export const fileStatusEnum = pgEnum('file_status', ['pending', 'ready']);
+
 // ── Ola 2.1a — Motor Remedial con Estímulo ───────────────────────────────────
 // `instrument_sections` pasa a ser el store de "estímulo": el material sobre el que
 // se ancla una pregunta remedial. `kind` clasifica el estímulo (hoy solo `passage`);
@@ -222,7 +237,4 @@ export const benchmarkModeEnum = pgEnum('benchmark_mode', ['global', 'network'])
 // ── E21 — Asistente IA Conversacional ────────────────────────────────────────
 // Rol de un mensaje persistido en la conversación. Las invocaciones de tools no
 // son mensajes: su traza va en assistant_messages.tool_calls (JSONB) del turno.
-export const assistantMessageRoleEnum = pgEnum('assistant_message_role', [
-  'user',
-  'assistant',
-]);
+export const assistantMessageRoleEnum = pgEnum('assistant_message_role', ['user', 'assistant']);

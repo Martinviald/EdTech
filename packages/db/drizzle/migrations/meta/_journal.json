@@ -71,6 +71,13 @@
       "when": 1783736910217,
       "tag": "0009_goofy_shocker",
       "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1783903097516,
+      "tag": "0010_brainy_switch",
+      "breakpoints": true
     }
   ]
 }

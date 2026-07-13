@@ -4,11 +4,7 @@ import { ArrowRight } from 'lucide-react';
 import type { RemedialMaterialModel } from '@soe/types';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { StatusBadge } from '@/components/patterns';
-import {
-  REMEDIAL_STATUS_LABELS,
-  REMEDIAL_STATUS_TONE,
-  REMEDIAL_TYPE_LABELS,
-} from './labels';
+import { REMEDIAL_STATUS_LABELS, REMEDIAL_STATUS_TONE, REMEDIAL_TYPE_LABELS } from './labels';
 
 function formatDate(iso: string): string {
   const date = new Date(iso);
@@ -23,7 +19,8 @@ function formatDate(iso: string): string {
 /** Tarjeta de un material remedial en el banco. Enlaza al detalle (revisión). */
 export function MaterialCard({ material }: { material: RemedialMaterialModel }) {
   const title =
-    material.title ?? `${REMEDIAL_TYPE_LABELS[material.type]} · ${material.nodeName ?? 'Sin habilidad'}`;
+    material.title ??
+    `${REMEDIAL_TYPE_LABELS[material.type]} · ${material.nodeName ?? 'Sin habilidad'}`;
 
   return (
     <Link

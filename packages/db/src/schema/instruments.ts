@@ -90,6 +90,33 @@ export const instrumentSections = pgTable(
   (table) => [index('instrument_sections_org_kind_idx').on(table.orgId, table.kind)],
 );
 
+// Adjunto a NIVEL DE INSTRUMENTO (TKT-15). Mismo patrón que `section_attachments`
+// pero colgando del instrumento completo — su caso de uso principal es el PDF del
+// enunciado / cuadernillo (`kind = 'pdf'`). El archivo se sube directo a S3 vía
+// presigned URL (el backend NO lo recibe en memoria); aquí solo se persiste la
+// metadata + `storage_key`. La regla "un PDF de enunciado por instrumento" se
+// aplica en la capa de servicio (reemplazo del adjunto `pdf` existente), no como
+// restricción de schema, para dejar el modelo extensible a otros kinds a futuro.
+// NO es una tabla sensible (sin PII): hereda el aislamiento por org del instrumento
+// padre (mismo criterio que `section_attachments`, que tampoco tiene RLS).
+export const instrumentAttachments = pgTable('instrument_attachments', {
+  id: uuid('id').defaultRandom().primaryKey(),
+  instrumentId: uuid('instrument_id')
+    .notNull()
+    .references(() => instruments.id, { onDelete: 'cascade' }),
+  kind: attachmentKindEnum('kind').notNull(),
+  order: integer('order').default(0).notNull(),
+  storageKey: text('storage_key'), // clave S3 (null mientras no se sube el archivo)
+  url: text('url'), // url pública/externa opcional
+  fileName: text('file_name'),
+  mimeType: text('mime_type'),
+  sizeBytes: integer('size_bytes'),
+  note: text('note'),
+  meta: jsonb('meta').$type<Record<string, unknown>>().default({}),
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+  updatedAt: timestamp('updated_at').defaultNow().notNull(),
+});
+
 export const sectionAttachments = pgTable('section_attachments', {
   id: uuid('id').defaultRandom().primaryKey(),
   sectionId: uuid('section_id')
@@ -121,6 +148,14 @@ export const instrumentsRelations = relations(instruments, ({ one, many }) => ({
     references: [gradingScales.id],
   }),
   sections: many(instrumentSections),
+  attachments: many(instrumentAttachments),
+}));
+
+export const instrumentAttachmentsRelations = relations(instrumentAttachments, ({ one }) => ({
+  instrument: one(instruments, {
+    fields: [instrumentAttachments.instrumentId],
+    references: [instruments.id],
+  }),
 }));
 
 export const instrumentSectionsRelations = relations(instrumentSections, ({ one, many }) => ({
@@ -150,3 +185,5 @@ export type InstrumentSection = typeof instrumentSections.$inferSelect;
 export type NewInstrumentSection = typeof instrumentSections.$inferInsert;
 export type SectionAttachment = typeof sectionAttachments.$inferSelect;
 export type NewSectionAttachment = typeof sectionAttachments.$inferInsert;
+export type InstrumentAttachment = typeof instrumentAttachments.$inferSelect;
+export type NewInstrumentAttachment = typeof instrumentAttachments.$inferInsert;

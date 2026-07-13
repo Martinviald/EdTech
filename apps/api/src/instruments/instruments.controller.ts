@@ -7,6 +7,7 @@ import {
   Param,
   Patch,
   Post,
+  Put,
   Query,
   UseGuards,
 } from '@nestjs/common';
@@ -21,6 +22,8 @@ import {
   listInstrumentsQuerySchema,
   createSectionSchema,
   updateSectionSchema,
+  instrumentUploadUrlRequestSchema,
+  confirmInstrumentAttachmentSchema,
 } from './dto/instrument.dto';
 
 // Role sets — aligned with access-policies.ts concept
@@ -85,6 +88,54 @@ export class InstrumentsController {
   @HttpCode(204)
   async remove(@Param('id') id: string, @CurrentUser() user: JwtPayload) {
     await this.instrumentsService.softDelete(id, user);
+  }
+
+  // ── Enunciado PDF (TKT-15) ────────────────────────────────────────────────
+
+  /**
+   * POST /api/instruments/:id/enunciado-pdf/upload-url
+   * Paso 1: devuelve una URL prefirmada de S3 para subir el PDF del enunciado
+   * DIRECTO a S3 (el backend no recibe el archivo en memoria).
+   */
+  @Post(':id/enunciado-pdf/upload-url')
+  @Roles(...INSTRUMENT_EDITOR_ROLES)
+  createEnunciadoUploadUrl(
+    @Param('id') id: string,
+    @Body() body: unknown,
+    @CurrentUser() user: JwtPayload,
+  ) {
+    const dto = instrumentUploadUrlRequestSchema.parse(body);
+    return this.instrumentsService.createEnunciadoUploadUrl(id, dto, user);
+  }
+
+  /**
+   * PUT /api/instruments/:id/enunciado-pdf
+   * Paso 3: confirma la subida y persiste la metadata (reemplaza el PDF previo).
+   */
+  @Put(':id/enunciado-pdf')
+  @Roles(...INSTRUMENT_EDITOR_ROLES)
+  confirmEnunciadoPdf(
+    @Param('id') id: string,
+    @Body() body: unknown,
+    @CurrentUser() user: JwtPayload,
+  ) {
+    const dto = confirmInstrumentAttachmentSchema.parse(body);
+    return this.instrumentsService.confirmEnunciadoPdf(id, dto, user);
+  }
+
+  /** GET /api/instruments/:id/enunciado-pdf — metadata + URL de descarga (o null). */
+  @Get(':id/enunciado-pdf')
+  @Roles(...INSTRUMENT_VIEWER_ROLES)
+  getEnunciadoPdf(@Param('id') id: string, @CurrentUser() user: JwtPayload) {
+    return this.instrumentsService.getEnunciadoPdf(id, user);
+  }
+
+  /** DELETE /api/instruments/:id/enunciado-pdf — elimina el PDF del enunciado. */
+  @Delete(':id/enunciado-pdf')
+  @Roles(...INSTRUMENT_EDITOR_ROLES)
+  @HttpCode(204)
+  async removeEnunciadoPdf(@Param('id') id: string, @CurrentUser() user: JwtPayload) {
+    await this.instrumentsService.deleteEnunciadoPdf(id, user);
   }
 
   // ── Sections ────────────────────────────────────────────────────────────

@@ -9,13 +9,23 @@ import {
   instruments,
   instrumentSections,
   sectionAttachments,
+  type FileRecord,
   type Instrument,
   type InstrumentSection,
   type NewSectionAttachment,
 } from '@soe/db';
-import { userHasRole, type PassageDto, type SectionAttachmentInputDto } from '@soe/types';
+import {
+  userHasRole,
+  type ConfirmInstrumentAttachmentDto,
+  type InstrumentAttachmentModel,
+  type InstrumentUploadUrlRequestDto,
+  type InstrumentUploadUrlResponse,
+  type PassageDto,
+  type SectionAttachmentInputDto,
+} from '@soe/types';
 import type { JwtPayload } from '../auth/jwt-payload.types';
 import { InjectDb, type Database } from '../database/database.types';
+import { FilesService } from '../files/files.service';
 import type {
   CreateInstrumentDto,
   UpdateInstrumentDto,
@@ -23,6 +33,13 @@ import type {
   CreateSectionDto,
   UpdateSectionDto,
 } from './dto/instrument.dto';
+
+// El PDF del enunciado (TKT-15) se almacena en el módulo genérico `files` con esta
+// asociación polimórfica. La regla "1 PDF por instrumento" se aplica al confirmar.
+const ENUNCIADO_OWNER_TYPE = 'instrument' as const;
+const ENUNCIADO_PURPOSE = 'enunciado_pdf' as const;
+/** Kind del adjunto en el modelo de API (el enunciado siempre es un PDF). */
+const ENUNCIADO_PDF_KIND = 'pdf' as const;
 
 /** Cliente transaccional de Drizzle (mismo shape que `Database` dentro de un `.transaction`). */
 type Tx = Parameters<Parameters<Database['transaction']>[0]>[0];
@@ -34,7 +51,10 @@ type SectionWithAttachments = InstrumentSection & {
 
 @Injectable()
 export class InstrumentsService {
-  constructor(@InjectDb() private readonly db: Database) {}
+  constructor(
+    @InjectDb() private readonly db: Database,
+    private readonly files: FilesService,
+  ) {}
 
   // ── Instruments ─────────────────────────────────────────────────────────
 
@@ -97,8 +117,9 @@ export class InstrumentsService {
       .orderBy(instrumentSections.order);
 
     const withAttachments = await this.withAttachments(sections);
+    const enunciadoPdf = await this.loadEnunciadoPdf(row);
 
-    return { ...row, sections: withAttachments };
+    return { ...row, sections: withAttachments, enunciadoPdf };
   }
 
   async create(dto: CreateInstrumentDto, user: JwtPayload) {
@@ -200,6 +221,145 @@ export class InstrumentsService {
       .update(instruments)
       .set({ deletedAt: new Date(), updatedAt: new Date() })
       .where(eq(instruments.id, id));
+  }
+
+  // ── Enunciado PDF (TKT-15) ────────────────────────────────────────────────
+
+  /**
+   * Paso 1 del flujo de subida: delega en el módulo genérico `files` la emisión de
+   * la URL prefirmada (S3) para subir el PDF del enunciado DIRECTO a S3 (el backend
+   * no lo recibe en memoria, CLAUDE.md §11). El archivo se registra como `pending`
+   * asociado a este instrumento; se confirma en el paso 3. Devuelve `storageKey`.
+   */
+  async createEnunciadoUploadUrl(
+    id: string,
+    dto: InstrumentUploadUrlRequestDto,
+    user: JwtPayload,
+  ): Promise<InstrumentUploadUrlResponse> {
+    const instrument = await this.getByIdRaw(id);
+    this.assertEditable(instrument, user);
+
+    const { upload } = await this.files.createUploadIntent({
+      orgId: instrument.orgId, // scope del archivo = org del instrumento (null = oficial/global)
+      fileName: dto.fileName,
+      mimeType: dto.mimeType,
+      sizeBytes: dto.sizeBytes ?? null,
+      ownerType: ENUNCIADO_OWNER_TYPE,
+      ownerId: instrument.id,
+      purpose: ENUNCIADO_PURPOSE,
+      createdById: user.userId,
+    });
+
+    // Contrato estable hacia el front: se mantiene el shape `InstrumentUploadUrlResponse`
+    // (se omite `fileId`, que es interno del módulo `files`).
+    return {
+      storageKey: upload.storageKey,
+      uploadUrl: upload.uploadUrl,
+      method: upload.method,
+      headers: upload.headers,
+      expiresIn: upload.expiresIn,
+    };
+  }
+
+  /**
+   * Paso 3 del flujo: confirma la subida (valida el objeto en S3) y persiste la
+   * metadata. "Un PDF de enunciado por instrumento": `replaceSameOwnerPurpose`
+   * reemplaza cualquier PDF previo (soft-delete + borrado del objeto en S3).
+   */
+  async confirmEnunciadoPdf(
+    id: string,
+    dto: ConfirmInstrumentAttachmentDto,
+    user: JwtPayload,
+  ): Promise<InstrumentAttachmentModel> {
+    const instrument = await this.getByIdRaw(id);
+    this.assertEditable(instrument, user);
+
+    const pending = await this.files.findByStorageKey(instrument.orgId, dto.storageKey);
+    if (!pending || pending.ownerId !== id || pending.purpose !== ENUNCIADO_PURPOSE) {
+      throw new BadRequestException('La subida no corresponde a este instrumento');
+    }
+
+    const confirmed = await this.files.confirm({
+      orgId: instrument.orgId,
+      fileId: pending.id,
+      sizeBytes: dto.sizeBytes ?? null,
+      note: dto.note ?? null,
+      replaceSameOwnerPurpose: true,
+    });
+
+    return this.toAttachmentModel(confirmed, id);
+  }
+
+  /** Lee el PDF del enunciado del instrumento (con URL de descarga si aplica). */
+  async getEnunciadoPdf(
+    id: string,
+    user: JwtPayload,
+  ): Promise<InstrumentAttachmentModel | null> {
+    const instrument = await this.getByIdRaw(id, user);
+    return this.loadEnunciadoPdf(instrument);
+  }
+
+  /** Elimina el PDF del enunciado del instrumento (soft-delete + borrado en S3). */
+  async deleteEnunciadoPdf(id: string, user: JwtPayload): Promise<void> {
+    const instrument = await this.getByIdRaw(id);
+    this.assertEditable(instrument, user);
+
+    await this.files.removeByOwner(
+      instrument.orgId,
+      ENUNCIADO_OWNER_TYPE,
+      instrument.id,
+      ENUNCIADO_PURPOSE,
+    );
+  }
+
+  /**
+   * Carga el PDF de enunciado de un instrumento desde el módulo `files` (el `ready`
+   * más reciente) y le adjunta la URL de descarga prefirmada cuando el almacenamiento
+   * está configurado. Devuelve null si no hay PDF.
+   */
+  private async loadEnunciadoPdf(
+    instrument: Instrument,
+  ): Promise<InstrumentAttachmentModel | null> {
+    const row = await this.files.getLatestByOwner(
+      instrument.orgId,
+      ENUNCIADO_OWNER_TYPE,
+      instrument.id,
+      ENUNCIADO_PURPOSE,
+    );
+    if (!row) return null;
+    return this.toAttachmentModel(row, instrument.id);
+  }
+
+  /** Mapea un archivo del módulo `files` al modelo de API del adjunto (+ downloadUrl). */
+  private toAttachmentModel(
+    file: FileRecord,
+    instrumentId: string,
+  ): InstrumentAttachmentModel {
+    const model: InstrumentAttachmentModel = {
+      id: file.id,
+      instrumentId,
+      kind: ENUNCIADO_PDF_KIND,
+      order: 0,
+      storageKey: file.storageKey,
+      url: file.url,
+      fileName: file.fileName,
+      mimeType: file.mimeType,
+      sizeBytes: file.sizeBytes,
+      note: file.note,
+      meta: file.meta ?? {},
+      createdAt: file.createdAt,
+      updatedAt: file.updatedAt,
+    };
+
+    // Las URLs prefirmadas solo se generan si hay almacenamiento configurado; nunca
+    // deben hacer fallar la lectura del instrumento cuando S3 no está aprovisionado.
+    // `downloadUrl` fuerza descarga; `previewUrl` (inline) permite previsualizar el PDF.
+    const downloadUrl = this.files.buildDownloadUrl(file);
+    if (downloadUrl) model.downloadUrl = downloadUrl;
+    const previewUrl = this.files.buildDownloadUrl(file, 'inline');
+    if (previewUrl) model.previewUrl = previewUrl;
+
+    return model;
   }
 
   // ── Sections ────────────────────────────────────────────────────────────

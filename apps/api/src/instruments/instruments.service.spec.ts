@@ -1,13 +1,22 @@
 import { ForbiddenException } from '@nestjs/common';
 import { instruments, instrumentSections, sectionAttachments } from '@soe/db';
 import { InstrumentsService } from './instruments.service';
+import type { FilesService } from '../files/files.service';
 import type { JwtPayload } from '../auth/jwt-payload.types';
 import type { Database, Instrument } from '@soe/db';
 import type { CreateSectionDto, UpdateSectionDto } from './dto/instrument.dto';
 
+/** Stub de FilesService: los tests de este archivo no ejercitan el PDF del enunciado. */
+function makeFiles(): FilesService {
+  return {
+    buildDownloadUrl: () => undefined,
+    getLatestByOwner: () => Promise.resolve(null),
+  } as unknown as FilesService;
+}
+
 function makeService() {
   const db = {} as never;
-  return new InstrumentsService(db);
+  return new InstrumentsService(db, makeFiles());
 }
 
 function user(overrides: Partial<JwtPayload> = {}): JwtPayload {
@@ -171,7 +180,7 @@ describe('InstrumentsService — pasaje y adjuntos de sección', () => {
       ]),
       new Map<unknown, unknown[]>([[instrumentSections, [{ id: 'sec-1' }]]]),
     );
-    const svc = new InstrumentsService(fake as unknown as Database);
+    const svc = new InstrumentsService(fake as unknown as Database, makeFiles());
     return { svc, fake };
   }
 

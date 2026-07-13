@@ -3,6 +3,7 @@ import {
   DASHBOARD_VIEWER_ROLES,
   dashboardFiltersQuerySchema,
   dashboardPerformanceQuerySchema,
+  dashboardSkillBreakdownQuerySchema,
 } from '@soe/types';
 import { CurrentUser } from '../auth/current-user.decorator';
 import type { JwtPayload } from '../auth/jwt-payload.types';
@@ -66,6 +67,18 @@ export class DashboardsController {
   getSkills(@Query() query: unknown, @CurrentUser() user: JwtPayload) {
     const dto = dashboardFiltersQuerySchema.parse(query ?? {});
     return this.service.getSkills(user, dto);
+  }
+
+  /**
+   * GET /api/dashboards/skills/breakdown
+   * Drill-down jerárquico: % logro de un nodo desglosado por la dimensión
+   * `groupBy` (Asignatura/Nivel/Curso/Evaluación), sobre el mismo scope filtrado.
+   */
+  @Get('skills/breakdown')
+  @Roles(...DASHBOARD_VIEWER_ROLES)
+  getSkillBreakdown(@Query() query: unknown, @CurrentUser() user: JwtPayload) {
+    const dto = dashboardSkillBreakdownQuerySchema.parse(query ?? {});
+    return this.service.getSkillBreakdown(user, dto);
   }
 
   /**

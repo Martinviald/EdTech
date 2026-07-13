@@ -42,6 +42,7 @@ function makeRow(overrides: Partial<RemedialMaterial> = {}): RemedialMaterial {
     sourceAnalysisId: null,
     title: null,
     content: null,
+    editedContent: null,
     qualityReport: null,
     input: null,
     inputHash: 'hash-1',
@@ -223,6 +224,7 @@ describe('RemedialService', () => {
         'classGroupId',
         'completedAt',
         'content',
+        'editedContent',
         'costUsd',
         'createdAt',
         'createdById',
@@ -325,6 +327,111 @@ describe('RemedialService', () => {
     // dos updates: el material (approved) + los ítems (published)
     const publishUpdate = db.__updates.find((u) => u.status === 'published');
     expect(publishUpdate).toBeDefined();
+  });
+
+  it('review approve con content editado lo persiste en editedContent, NO en content (§8.3)', async () => {
+    const aiContent = {
+      objective: 'ai',
+      rootCauseSummary: 'r',
+      strategy: 's',
+      classActivities: [{ title: 't', description: 'd', durationMin: 30 }],
+      materials: [],
+      successCriteria: [],
+    };
+    const edited = { ...aiContent, objective: 'humano editó' };
+    const ready = makeRow({ status: 'ready', content: aiContent });
+    const approved = makeRow({ status: 'approved', content: aiContent, editedContent: edited });
+    const db = makeDb([[ready], [approved], [{ name: 'OA' }]]);
+    const service = new RemedialService(db);
+
+    await service.review(makeUser(), 'mat-1', { action: 'approve', content: edited });
+
+    const approveUpdate = db.__updates.find((u) => u.status === 'approved');
+    expect(approveUpdate).toMatchObject({ editedContent: edited });
+    // la evidencia IA (content) NO se toca en el approve
+    expect(approveUpdate).not.toHaveProperty('content');
+  });
+
+  it('update edita cualquier tipo (group_plan) y persiste en editedContent (no content)', async () => {
+    const planContent = {
+      groupLabel: 'Grupo A',
+      studentCount: 4,
+      sharedGap: 'fracciones',
+      sequence: [{ order: 1, title: 'p1', description: 'd1', linkedNodeId: null }],
+      estimatedSessions: 2,
+    };
+    const ready = makeRow({ status: 'ready', type: 'group_plan', content: null });
+    const updatedRow = makeRow({ status: 'ready', type: 'group_plan', editedContent: planContent });
+    // 1) findOne inicial, 2) findOne final, 3) nodeName lookup
+    const db = makeDb([[ready], [updatedRow], [{ name: 'OA' }]]);
+    const service = new RemedialService(db);
+
+    const model = await service.update(makeUser(), 'mat-1', { content: planContent });
+
+    expect(db.__updates[0]).toMatchObject({ editedContent: planContent });
+    expect(db.__updates[0]).not.toHaveProperty('content');
+    expect(model.editedContent).toMatchObject({ groupLabel: 'Grupo A' });
+  });
+
+  it('update rechaza si el material no está en ready', async () => {
+    const approved = makeRow({ status: 'approved' });
+    const db = makeDb([[approved]]);
+    const service = new RemedialService(db);
+    await expect(
+      service.update(makeUser(), 'mat-1', { title: 'x' }),
+    ).rejects.toBeInstanceOf(BadRequestException);
+  });
+
+  it('getStudentVersion deriva el render sin info solo-profesor (guide)', async () => {
+    const guide = {
+      objective: 'Reforzar inferencias',
+      rootCauseSummary: 'diagnóstico interno',
+      strategy: 'modelado docente',
+      classActivities: [{ title: 'Actividad 1', description: 'leer', durationMin: 20 }],
+      materials: ['texto'],
+      successCriteria: ['logra inferir'],
+    };
+    const row = makeRow({ status: 'approved', content: guide });
+    const db = makeDb([[row], [{ name: 'Comprensión' }]]);
+    const service = new RemedialService(db);
+
+    const student = await service.getStudentVersion(makeUser(), 'mat-1');
+
+    expect(student.content).toEqual({
+      objective: 'Reforzar inferencias',
+      classActivities: [{ title: 'Actividad 1', description: 'leer', durationMin: 20 }],
+      materials: ['texto'],
+    });
+    // no filtra información solo-profesor
+    expect(student.content).not.toHaveProperty('rootCauseSummary');
+    expect(student.content).not.toHaveProperty('strategy');
+    expect(student.content).not.toHaveProperty('successCriteria');
+  });
+
+  it('getStudentVersion prefiere editedContent sobre content (efectivo)', async () => {
+    const ai = {
+      objective: 'IA',
+      rootCauseSummary: 'r',
+      strategy: 's',
+      classActivities: [{ title: 'a', description: 'd', durationMin: null }],
+      materials: [],
+      successCriteria: [],
+    };
+    const edited = { ...ai, objective: 'editado por humano' };
+    const row = makeRow({ status: 'approved', content: ai, editedContent: edited });
+    const db = makeDb([[row], [{ name: 'OA' }]]);
+    const service = new RemedialService(db);
+
+    const student = await service.getStudentVersion(makeUser(), 'mat-1');
+    expect(student.content).toMatchObject({ objective: 'editado por humano' });
+  });
+
+  it('getStudentVersion devuelve content null si el material no tiene salida', async () => {
+    const row = makeRow({ status: 'pending', content: null });
+    const db = makeDb([[row], [{ name: 'OA' }]]);
+    const service = new RemedialService(db);
+    const student = await service.getStudentVersion(makeUser(), 'mat-1');
+    expect(student.content).toBeNull();
   });
 
   it('get hidrata practiceItems on-read para practice_set ready (sin persistir)', async () => {

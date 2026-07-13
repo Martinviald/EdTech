@@ -7,22 +7,23 @@ import {
   DASHBOARD_VIEWER_ROLES,
   type DashboardSkillsResponse,
   type DashboardFilterOptionsResponse,
-  type SkillAchievementModel,
 } from '@soe/types';
 import { PageContainer, PageHeader, EmptyState } from '@/components/patterns';
-import { Card, CardContent } from '@/components/ui/card';
 import { AskAiButton, RegisterAssistantContext } from '@/components/assistant';
 import { DashboardFilterBar } from '../components/dashboard-filter-bar';
 import { parseDashboardFilters, buildDashboardQuery } from '../components/dashboard-filters';
 import { dashboardFiltersToAssistantRefs } from '../components/assistant-context';
 import { ResultadosNav } from '../components/resultados-nav';
-import { PerformanceBadge } from '../components/performance-badge';
-import { PERFORMANCE_LEVEL_BAR_CLASS, formatAchievement } from '../components/performance-level';
-import { cn } from '@/lib/utils';
+import { SkillsBreakdown } from '../components/skills-breakdown';
 
 export const dynamic = 'force-dynamic';
 
 const BASE_PATH = '/resultados/habilidades';
+
+function pickParam(raw: string | string[] | undefined): string | undefined {
+  const value = Array.isArray(raw) ? raw[0] : raw;
+  return value && value.length > 0 ? value : undefined;
+}
 
 export default async function HabilidadesPage({
   searchParams,
@@ -37,8 +38,18 @@ export default async function HabilidadesPage({
   const filters = parseDashboardFilters(params);
   const query = buildDashboardQuery(filters);
 
+  // TKT-10 — `assessmentId` no es una clave de filtro del dashboard, pero
+  // `/dashboards/skills` lo acepta. Si viene en la URL (llegada desde una
+  // evaluación), acota el desglose a esa evaluación y habilita el drill-down a
+  // sus preguntas. Sin él, la vista es agregada (varias evaluaciones) y el
+  // drill-down lo indica.
+  const assessmentId = pickParam(params.assessmentId);
+  const skillsQuery = new URLSearchParams(query.startsWith('?') ? query.slice(1) : query);
+  if (assessmentId) skillsQuery.set('assessmentId', assessmentId);
+  const skillsQs = skillsQuery.toString();
+
   const [skillsResponse, options] = await Promise.all([
-    apiGet<DashboardSkillsResponse>(`/dashboards/skills${query}`),
+    apiGet<DashboardSkillsResponse>(`/dashboards/skills${skillsQs ? `?${skillsQs}` : ''}`),
     apiGet<DashboardFilterOptionsResponse>(`/dashboards/filters${query}`),
   ]);
 
@@ -48,8 +59,8 @@ export default async function HabilidadesPage({
     <PageContainer>
       <RegisterAssistantContext refs={dashboardFiltersToAssistantRefs(filters)} />
       <PageHeader
-        title="Logro por habilidad"
-        description="% de logro promedio por habilidad evaluada según la taxonomía (H6.5)."
+        title="Logro por dimensión"
+        description="% de logro promedio por dimensión de la tabla de especificaciones (habilidad, contenido, OA…). Toca un logro para ver las preguntas asociadas (H6.5)."
         actions={
           skills.length > 0 ? (
             <AskAiButton prompt="¿Qué habilidades están más descendidas y qué acciones remediales priorizarías?" />
@@ -68,56 +79,8 @@ export default async function HabilidadesPage({
           description="No se encontraron habilidades evaluadas para los filtros aplicados."
         />
       ) : (
-        <div className="space-y-3">
-          {skills.map((skill) => (
-            <SkillRow key={skill.nodeId} skill={skill} />
-          ))}
-        </div>
+        <SkillsBreakdown skills={skills} filters={filters} assessmentId={assessmentId} />
       )}
     </PageContainer>
-  );
-}
-
-function SkillRow({ skill }: { skill: SkillAchievementModel }) {
-  const pct = skill.averageAchievement ?? 0;
-  const barClass = skill.performanceLevel
-    ? PERFORMANCE_LEVEL_BAR_CLASS[skill.performanceLevel]
-    : 'bg-muted-foreground/40';
-
-  return (
-    <Card>
-      <CardContent className="space-y-3 p-4">
-        <div className="flex flex-wrap items-start justify-between gap-2">
-          <div className="min-w-0">
-            <p className="font-medium leading-tight">{skill.nodeName}</p>
-            <p className="text-xs text-muted-foreground">
-              {[skill.nodeCode, skill.nodeType].filter(Boolean).join(' · ')}
-              {' · '}
-              {skill.studentsAssessed} alumnos
-            </p>
-          </div>
-          <div className="flex items-center gap-3">
-            <span className="text-sm font-semibold tabular-nums">
-              {formatAchievement(skill.averageAchievement)}
-            </span>
-            <PerformanceBadge level={skill.performanceLevel} band={skill.performanceBand} />
-          </div>
-        </div>
-
-        <div
-          className="h-2.5 w-full overflow-hidden rounded-full bg-muted"
-          role="progressbar"
-          aria-valuenow={Math.round(pct)}
-          aria-valuemin={0}
-          aria-valuemax={100}
-          aria-label={`Logro de ${skill.nodeName}`}
-        >
-          <div
-            className={cn('h-full rounded-full transition-all', barClass)}
-            style={{ width: `${Math.min(100, Math.max(0, pct))}%` }}
-          />
-        </div>
-      </CardContent>
-    </Card>
   );
 }

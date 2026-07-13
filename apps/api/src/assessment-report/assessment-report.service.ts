@@ -3,7 +3,7 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { and, asc, eq, inArray, isNull, sql } from 'drizzle-orm';
+import { and, asc, eq, inArray, isNull, notInArray, sql } from 'drizzle-orm';
 import {
   assessmentCourseAssignments,
   assessmentResults,
@@ -26,6 +26,7 @@ import {
 } from '@soe/db';
 import {
   RESULTS_VIEWER_ROLES,
+  RESULT_HIDDEN_NODE_TYPES,
   bandToLegacyLevel,
   classifyByBands,
   percentageToPerformanceLevel,
@@ -77,8 +78,6 @@ const PERFORMANCE_LEVELS_ORDER: readonly PerformanceLevel[] = [
 
 // Niveles que cuentan como "en riesgo" para el foco de intervención.
 const AT_RISK_LEVELS: readonly PerformanceLevel[] = ['insufficient', 'elementary'];
-
-const DEFAULT_PASSING_GRADE = 4.0;
 
 // Umbrales de los flags psicométricos. No hardcodean instrumento: son convención
 // psicométrica estándar aplicable a cualquier prueba de selección múltiple.
@@ -148,7 +147,11 @@ export class AssessmentReportService {
         query.classGroupId,
       );
 
+      // TKT-04 — `passingGrade` es `null` cuando el instrumento no tiene escala de
+      // notas configurada. `hasGradingScale` lo expone explícitamente en el
+      // contrato para que la UI oculte los campos de nota en vez de mostrar 4.0.
       const passingGrade = await this.resolvePassingGrade(tx, assessment.gradingScaleId);
+      const hasGradingScale = passingGrade !== null;
 
       // Cursos de la evaluación visibles para el caller (intersectados con el scope).
       const reportClassGroups = await this.loadAssessmentClassGroups(
@@ -190,6 +193,7 @@ export class AssessmentReportService {
       const meta = {
         assessmentId: assessment.id,
         assessmentName: assessment.name,
+        instrumentId: assessment.instrumentId,
         instrumentName: assessment.instrumentName,
         instrumentType: assessment.instrumentType,
         subjectName: assessment.subjectName,
@@ -208,6 +212,7 @@ export class AssessmentReportService {
             studentsEnrolled,
             coverageRate: studentsEnrolled > 0 ? 0 : null,
             averageAchievement: null,
+            hasGradingScale,
             averageGrade: null,
             passingGrade,
             passingRate: null,
@@ -304,20 +309,26 @@ export class AssessmentReportService {
   private buildSummary(
     evaluated: EvaluatedStudent[],
     studentsEnrolled: number,
-    passingGrade: number,
+    passingGrade: number | null,
     scaleConfig: unknown,
     bands: PerformanceBandInput[],
   ) {
+    // TKT-04 — sin escala configurada (`passingGrade === null`): no se reporta
+    // ningún campo de nota (averageGrade/passingGrade/passingRate quedan null); el
+    // % de logro y el nivel de desempeño sí, porque no dependen de la escala.
+    const hasGradingScale = passingGrade !== null;
+
     const pcts = evaluated
       .map((e) => e.percentage)
       .filter((p): p is number => p !== null);
     const grades = evaluated.map((e) => e.grade).filter((g): g is number => g !== null);
 
     const averageAchievement = pcts.length > 0 ? avg(pcts) : null;
-    const averageGrade = grades.length > 0 ? avg(grades) : null;
+    const averageGrade =
+      hasGradingScale && grades.length > 0 ? avg(grades) : null;
     const passingRate =
-      grades.length > 0
-        ? (grades.filter((g) => g >= passingGrade).length / grades.length) * 100
+      hasGradingScale && grades.length > 0
+        ? (grades.filter((g) => g >= passingGrade!).length / grades.length) * 100
         : null;
     const coverageRate =
       studentsEnrolled > 0 ? (evaluated.length / studentsEnrolled) * 100 : null;
@@ -330,6 +341,7 @@ export class AssessmentReportService {
       studentsEnrolled,
       coverageRate,
       averageAchievement,
+      hasGradingScale,
       averageGrade,
       passingGrade,
       passingRate,
@@ -396,7 +408,7 @@ export class AssessmentReportService {
   private buildCourseComparison(
     evaluated: EvaluatedStudent[],
     classGroupByStudent: Map<string, { id: string; name: string }>,
-    passingGrade: number,
+    passingGrade: number | null,
     overallAchievement: number | null,
   ): AssessmentReportCourseRow[] {
     const byCourse = new Map<
@@ -421,8 +433,9 @@ export class AssessmentReportService {
     const rows: AssessmentReportCourseRow[] = [];
     for (const [classGroupId, entry] of byCourse) {
       const averageAchievement = entry.pcts.length > 0 ? avg(entry.pcts) : null;
+      // TKT-04 — sin escala (passingGrade null) no hay tasa de aprobación por curso.
       const passingRate =
-        entry.grades.length > 0
+        passingGrade !== null && entry.grades.length > 0
           ? (entry.grades.filter((g) => g >= passingGrade).length /
               entry.grades.length) *
             100
@@ -575,6 +588,8 @@ export class AssessmentReportService {
       eq(skillResults.assessmentId, assessmentId),
       eq(students.orgId, orgId),
       isNull(students.deletedAt),
+      // TKT-05 — los descriptores no se reportan como habilidad/eje en resultados.
+      notInArray(taxonomyNodes.type, [...RESULT_HIDDEN_NODE_TYPES]),
     ];
     if (studentFilter !== null) {
       conditions.push(inArray(skillResults.studentId, studentFilter));
@@ -795,6 +810,11 @@ export class AssessmentReportService {
       .orderBy(asc(itemTaxonomyTags.tagType));
 
     for (const r of rows) {
+      // TKT-05 — un descriptor nunca es la habilidad/contenido representativo del
+      // ítem en la vista de resultados (sí sigue disponible en el banco de ítems).
+      if ((RESULT_HIDDEN_NODE_TYPES as readonly string[]).includes(r.nodeType)) {
+        continue;
+      }
       let entry = map.get(r.itemId);
       if (!entry) {
         entry = { skill: null, contentRef: null };
@@ -1082,6 +1102,8 @@ export class AssessmentReportService {
         and(
           eq(skillResults.assessmentId, assessmentId),
           inArray(skillResults.studentId, studentIds),
+          // TKT-05 — la habilidad más débil de un alumno no puede ser un descriptor.
+          notInArray(taxonomyNodes.type, [...RESULT_HIDDEN_NODE_TYPES]),
         ),
       )
       .orderBy(asc(skillResults.percentage));
@@ -1095,17 +1117,23 @@ export class AssessmentReportService {
     return result;
   }
 
+  /**
+   * TKT-04 — passing_grade de la escala del instrumento, o `null` si el
+   * instrumento NO tiene escala configurada (o la escala referenciada no existe).
+   * `null` es la señal explícita de "sin escala": los consumidores anulan los
+   * campos de nota en vez de inventar el default 4.0.
+   */
   private async resolvePassingGrade(
     db: Database,
     gradingScaleId: string | null,
-  ): Promise<number> {
-    if (!gradingScaleId) return DEFAULT_PASSING_GRADE;
+  ): Promise<number | null> {
+    if (!gradingScaleId) return null;
     const [row] = await db
       .select({ passingGrade: gradingScales.passingGrade })
       .from(gradingScales)
       .where(eq(gradingScales.id, gradingScaleId))
       .limit(1);
-    return row ? Number(row.passingGrade) : DEFAULT_PASSING_GRADE;
+    return row ? Number(row.passingGrade) : null;
   }
 
   // ───────────────────────────────────────────────────────────────────────────
