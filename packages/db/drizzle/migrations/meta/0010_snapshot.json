@@ -1,6 +1,6 @@
 {
-  "id": "df169fff-00fb-4dc4-8128-2e217b058a2f",
-  "prevId": "715f12b6-4714-4c1a-ab50-c2696558dcef",
+  "id": "ff47a42d-415c-4ba4-a3e5-7a8b89209abe",
+  "prevId": "8b2d6332-0134-4a1b-ba19-f8502ec4765d",
   "version": "7",
   "dialect": "postgresql",
   "tables": {
@@ -1584,7 +1584,13 @@
           "name": "instrument_id",
           "type": "uuid",
           "primaryKey": false,
-          "notNull": true
+          "notNull": false
+        },
+        "org_id": {
+          "name": "org_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
         },
         "name": {
           "name": "name",
@@ -1624,6 +1630,22 @@
           "primaryKey": false,
           "notNull": false
         },
+        "kind": {
+          "name": "kind",
+          "type": "stimulus_kind",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'passage'"
+        },
+        "source": {
+          "name": "source",
+          "type": "stimulus_source",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'official'"
+        },
         "passage_title": {
           "name": "passage_title",
           "type": "text",
@@ -1651,7 +1673,29 @@
           "default": "'{}'::jsonb"
         }
       },
-      "indexes": {},
+      "indexes": {
+        "instrument_sections_org_kind_idx": {
+          "name": "instrument_sections_org_kind_idx",
+          "columns": [
+            {
+              "expression": "org_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "kind",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
       "foreignKeys": {
         "instrument_sections_instrument_id_instruments_id_fk": {
           "name": "instrument_sections_instrument_id_instruments_id_fk",
@@ -1664,6 +1708,19 @@
             "id"
           ],
           "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "instrument_sections_org_id_organizations_id_fk": {
+          "name": "instrument_sections_org_id_organizations_id_fk",
+          "tableFrom": "instrument_sections",
+          "tableTo": "organizations",
+          "columnsFrom": [
+            "org_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
           "onUpdate": "no action"
         }
       },
@@ -3923,6 +3980,12 @@
           "notNull": true,
           "default": "gen_random_uuid()"
         },
+        "instrument_id": {
+          "name": "instrument_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
         "scale_id": {
           "name": "scale_id",
           "type": "uuid",
@@ -3993,8 +4056,43 @@
           "notNull": false
         }
       },
-      "indexes": {},
+      "indexes": {
+        "performance_bands_instrument_order_idx": {
+          "name": "performance_bands_instrument_order_idx",
+          "columns": [
+            {
+              "expression": "instrument_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "order",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
       "foreignKeys": {
+        "performance_bands_instrument_id_instruments_id_fk": {
+          "name": "performance_bands_instrument_id_instruments_id_fk",
+          "tableFrom": "performance_bands",
+          "tableTo": "instruments",
+          "columnsFrom": [
+            "instrument_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
         "performance_bands_scale_id_grading_scales_id_fk": {
           "name": "performance_bands_scale_id_grading_scales_id_fk",
           "tableFrom": "performance_bands",
@@ -5040,6 +5138,14 @@
           "notNull": true,
           "default": "'pending'"
         },
+        "method": {
+          "name": "method",
+          "type": "remedial_method",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'self_contained'"
+        },
         "node_id": {
           "name": "node_id",
           "type": "uuid",
@@ -5078,6 +5184,12 @@
         },
         "edited_content": {
           "name": "edited_content",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "quality_report": {
+          "name": "quality_report",
           "type": "jsonb",
           "primaryKey": false,
           "notNull": false
@@ -5872,6 +5984,15 @@
         "group_plan"
       ]
     },
+    "public.remedial_method": {
+      "name": "remedial_method",
+      "schema": "public",
+      "values": [
+        "self_contained",
+        "reuse_stimulus",
+        "generate_stimulus"
+      ]
+    },
     "public.remedial_status": {
       "name": "remedial_status",
       "schema": "public",
@@ -5931,6 +6052,24 @@
       "values": [
         "google",
         "microsoft"
+      ]
+    },
+    "public.stimulus_kind": {
+      "name": "stimulus_kind",
+      "schema": "public",
+      "values": [
+        "passage",
+        "figure",
+        "table",
+        "dataset"
+      ]
+    },
+    "public.stimulus_source": {
+      "name": "stimulus_source",
+      "schema": "public",
+      "values": [
+        "official",
+        "ai_generated"
       ]
     },
     "public.tagged_by": {

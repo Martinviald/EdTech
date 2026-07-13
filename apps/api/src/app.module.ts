@@ -26,6 +26,7 @@ import { CatalogModule } from './catalog/catalog.module';
 import { AnswerSheetsModule } from './answer-sheets/answer-sheets.module';
 import { GradingScalesModule } from './grading-scales/grading-scales.module';
 import { AssessmentResultsModule } from './assessment-results/assessment-results.module';
+import { PerformanceBandsModule } from './performance-bands/performance-bands.module';
 import { DashboardsModule } from './dashboards/dashboards.module';
 import { AnalyticsModule } from './analytics/analytics.module';
 import { HeatmapModule } from './heatmap/heatmap.module';
@@ -73,6 +74,7 @@ import { OfficialReportsModule } from './official-reports/official-reports.modul
     AnswerSheetsModule,
     GradingScalesModule,
     AssessmentResultsModule,
+    PerformanceBandsModule,
     // ── Sprint 4: dashboards core y analítica de series temporales ──
     DashboardsModule,
     AnalyticsModule,

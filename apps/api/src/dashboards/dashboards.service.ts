@@ -22,6 +22,8 @@ import {
   PERFORMANCE_LEVELS,
   RESULTS_VIEWER_ROLES,
   RESULT_HIDDEN_NODE_TYPES,
+  bandToLegacyLevel,
+  classifyByBands,
   percentageToPerformanceLevel,
   userHasAnyRole,
   type AssessmentStatus,
@@ -37,6 +39,9 @@ import {
   type DashboardSkillsResponse,
   type SkillBreakdownRow,
   type DashboardTeacherKpisResponse,
+  type PerformanceBandDistributionBucket,
+  type PerformanceBandInput,
+  type PerformanceBandView,
   type PerformanceDistributionBucket,
   type PerformanceLevel,
   type SkillAchievementModel,
@@ -46,6 +51,12 @@ import {
 } from '@soe/types';
 import type { JwtPayload } from '../auth/jwt-payload.types';
 import { InjectDb, type Database } from '../database/database.types';
+import { loadInstrumentBands } from '../performance-bands/lib/load-instrument-bands';
+
+/** PerformanceBandInput (con thresholds) → vista mínima para la respuesta. */
+function toBandView(b: PerformanceBandInput): PerformanceBandView {
+  return { key: b.key, label: b.label, order: b.order, color: b.color ?? null };
+}
 
 // Roles "administrativos" — ven todos los cursos de la org. Cualquier otro rol
 // con acceso (teacher, homeroom_teacher) ve sólo los cursos donde tiene
@@ -321,12 +332,19 @@ export class DashboardsService {
         advanced: resolvedThresholds.advanced,
       };
 
+      // Bandas del instrumento cuando el scope es un único instrumento (ej. una
+      // evaluación DIA): la clasificación usa el corte configurado, no 40/70/85.
+      const bands = await this.resolveScopedBands(tx, query, assessmentIds);
+
       let classified: StudentClassificationModel[] = aggregateRows.map((r) => {
         const pct = r.avgPct == null ? null : Number(r.avgPct);
+        const band = pct == null ? null : classifyByBands(pct / 100, bands);
         const level =
           pct == null
             ? null
-            : percentageToPerformanceLevel(pct / 100, { performanceThresholds: scaleThresholds });
+            : band
+              ? bandToLegacyLevel(band, bands!)
+              : percentageToPerformanceLevel(pct / 100, { performanceThresholds: scaleThresholds });
         const cg = classGroupByStudent.get(r.studentId) ?? null;
         return {
           studentId: r.studentId,
@@ -337,6 +355,7 @@ export class DashboardsService {
           achievement: pct,
           grade: r.avgGrade == null ? null : Number(r.avgGrade).toFixed(2),
           performanceLevel: level,
+          performanceBand: band ? toBandView(band) : null,
         };
       });
 
@@ -355,6 +374,23 @@ export class DashboardsService {
         };
       });
 
+      // Distribución por banda del instrumento (N niveles reales) cuando aplica.
+      let bandDistribution: PerformanceBandDistributionBucket[] | undefined;
+      if (bands) {
+        const withBand = classified.filter((c) => c.performanceBand != null).length;
+        bandDistribution = bands.map((b) => {
+          const count = classified.filter((c) => c.performanceBand?.key === b.key).length;
+          return {
+            key: b.key,
+            label: b.label,
+            order: b.order,
+            color: b.color ?? null,
+            count,
+            percentage: withBand > 0 ? (count / withBand) * 100 : 0,
+          };
+        });
+      }
+
       if (query.performanceLevel) {
         classified = classified.filter((c) => c.performanceLevel === query.performanceLevel);
       }
@@ -366,6 +402,7 @@ export class DashboardsService {
       return {
         distribution,
         thresholds: resolvedThresholds,
+        ...(bands ? { bands: bands.map(toBandView), bandDistribution } : {}),
         students: { data: pageData, total, page: query.page, limit: query.limit },
       };
     });
@@ -402,6 +439,8 @@ export class DashboardsService {
         advanced: resolvedThresholds.advanced,
       };
 
+      const bands = await this.resolveScopedBands(tx, query, assessmentIds);
+
       const conditions = [
         inArray(skillResults.assessmentId, assessmentIds),
         // TKT-05 — la matriz de habilidades no reporta nodos tipo descriptor.
@@ -435,6 +474,7 @@ export class DashboardsService {
 
       const skills: SkillAchievementModel[] = rows.map((r) => {
         const pct = r.avgPct == null ? null : Number(r.avgPct);
+        const band = pct == null ? null : classifyByBands(pct / 100, bands);
         return {
           nodeId: r.nodeId,
           nodeName: r.nodeName,
@@ -446,13 +486,16 @@ export class DashboardsService {
           performanceLevel:
             pct == null
               ? null
-              : percentageToPerformanceLevel(pct / 100, {
-                  performanceThresholds: scaleThresholds,
-                }),
+              : band
+                ? bandToLegacyLevel(band, bands!)
+                : percentageToPerformanceLevel(pct / 100, {
+                    performanceThresholds: scaleThresholds,
+                  }),
+          performanceBand: band ? toBandView(band) : null,
         };
       });
 
-      return { skills };
+      return bands ? { skills, bands: bands.map(toBandView) } : { skills };
     });
   }
 
@@ -903,6 +946,32 @@ export class DashboardsService {
       .where(and(...conditions));
 
     return Array.from(new Set(rows.map((r) => r.id)));
+  }
+
+  /**
+   * Bandas de logro aplicables SÓLO cuando el scope resuelve a un ÚNICO
+   * instrumento con bandas configuradas (ej. mirar una evaluación DIA). Con
+   * varios instrumentos en scope, un corte por-instrumento no está bien definido
+   * (limitación multi-escala, F2) → devuelve null y se usa el corte legacy.
+   * Corre dentro de withOrgContext → RLS trae globales (org_id NULL) + override org.
+   */
+  private async resolveScopedBands(
+    tx: Database,
+    query: DashboardFiltersQueryDto,
+    assessmentIds: string[],
+  ): Promise<PerformanceBandInput[] | null> {
+    let instrumentId = query.instrumentId ?? null;
+    if (!instrumentId) {
+      if (assessmentIds.length === 0) return null;
+      const rows = await tx
+        .selectDistinct({ instrumentId: assessments.instrumentId })
+        .from(assessments)
+        .where(inArray(assessments.id, assessmentIds));
+      if (rows.length !== 1) return null; // 0 o múltiples instrumentos → sin bandas
+      instrumentId = rows[0]!.instrumentId;
+    }
+    const bands = await loadInstrumentBands(tx, instrumentId);
+    return bands.length > 0 ? bands : null;
   }
 
   private buildResultConditions(

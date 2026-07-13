@@ -152,7 +152,12 @@ function TeacherPane({
           Este material fue descartado y no se usará en aula.
         </AlertCallout>
       ) : null}
-      <ContentDisplay content={content} />
+      <ContentDisplay
+        content={content}
+        practiceItems={material.practiceItems}
+        stimuli={material.stimuli}
+        qualityReport={material.qualityReport}
+      />
     </div>
   );
 }

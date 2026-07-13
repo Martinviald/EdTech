@@ -34,6 +34,7 @@ function makeRow(overrides: Partial<RemedialMaterial> = {}): RemedialMaterial {
     id: 'mat-1',
     orgId: 'org-1',
     type: 'guide',
+    method: 'self_contained',
     status: 'pending',
     nodeId: 'node-1',
     assessmentId: null,
@@ -42,6 +43,7 @@ function makeRow(overrides: Partial<RemedialMaterial> = {}): RemedialMaterial {
     title: null,
     content: null,
     editedContent: null,
+    qualityReport: null,
     input: null,
     inputHash: 'hash-1',
     model: null,
@@ -228,11 +230,13 @@ describe('RemedialService', () => {
         'createdById',
         'error',
         'id',
+        'method',
         'model',
         'nodeId',
         'nodeName',
         'orgId',
         'promptVersion',
+        'qualityReport',
         'reviewedAt',
         'reviewedById',
         'status',
@@ -255,6 +259,7 @@ describe('RemedialService', () => {
         successCriteria: [],
       },
       input: { curriculum: { nodeId: 'node-1' } },
+      method: 'self_contained',
       model: 'gemini',
       promptVersion: 's3-guide-v1',
       tokens: { input: 10, output: 20 },
@@ -262,6 +267,7 @@ describe('RemedialService', () => {
     });
     expect(db.__updates[0]).toMatchObject({
       status: 'ready',
+      method: 'self_contained',
       promptVersion: 's3-guide-v1',
     });
   });
@@ -304,6 +310,7 @@ describe('RemedialService', () => {
         { itemId: '33333333-3333-3333-3333-333333333333', position: 2, stem: 'b' },
       ],
       notes: null,
+      stimuli: [],
     };
     const ready = makeRow({
       status: 'ready',
@@ -425,5 +432,122 @@ describe('RemedialService', () => {
     const service = new RemedialService(db);
     const student = await service.getStudentVersion(makeUser(), 'mat-1');
     expect(student.content).toBeNull();
+  });
+
+  it('get hidrata practiceItems on-read para practice_set ready (sin persistir)', async () => {
+    const practiceContent: RemedialPracticeContent = {
+      skillFocus: 'fracciones',
+      itemCount: 1,
+      items: [{ itemId: '22222222-2222-2222-2222-222222222222', position: 1, stem: 'a' }],
+      notes: null,
+      stimuli: [],
+    };
+    const row = makeRow({ status: 'ready', type: 'practice_set', content: practiceContent });
+    const itemRow = {
+      id: '22222222-2222-2222-2222-222222222222',
+      type: 'multiple_choice',
+      content: {
+        stem: '¿Cuál es equivalente a 1/2?',
+        alternatives: [
+          { key: 'A', text: '2/4', isCorrect: true },
+          { key: 'B', text: '1/3', isCorrect: false },
+        ],
+        explanation: '2/4 simplifica a 1/2',
+      },
+    };
+    // 1) findOne, 2) nodeName (toModel), 3) items (hidratación)
+    const db = makeDb([[row], [{ name: 'OA' }], [itemRow]]);
+    const service = new RemedialService(db);
+    const model = await service.get(makeUser(), 'mat-1');
+
+    expect(model.practiceItems).toHaveLength(1);
+    expect(model.practiceItems?.[0]).toMatchObject({
+      itemId: '22222222-2222-2222-2222-222222222222',
+      position: 1,
+      type: 'multiple_choice',
+      stem: '¿Cuál es equivalente a 1/2?',
+      correctKey: 'A',
+      explanation: '2/4 simplifica a 1/2',
+    });
+    expect(model.practiceItems?.[0]?.alternatives).toHaveLength(2);
+    // on-read: no se persiste nada.
+    expect(db.__updates).toHaveLength(0);
+  });
+
+  it('get NO hidrata practiceItems para guide (queda undefined)', async () => {
+    const row = makeRow({ status: 'ready', type: 'guide' });
+    const db = makeDb([[row], [{ name: 'OA' }]]);
+    const service = new RemedialService(db);
+    const model = await service.get(makeUser(), 'mat-1');
+    expect(model.practiceItems).toBeUndefined();
+  });
+
+  it('create persiste method + stimulusId (Ola 2.1a) para el modo con estímulo', async () => {
+    const db = makeDb(
+      [[], [{ name: 'OA' }]],
+      [[makeRow({ type: 'practice_set', method: 'reuse_stimulus' })]],
+    );
+    const service = new RemedialService(db);
+    await service.create(makeUser(), {
+      type: 'practice_set',
+      nodeId: '11111111-1111-1111-1111-111111111111',
+      assessmentId: '44444444-4444-4444-4444-444444444444',
+      itemCount: 3,
+      method: 'reuse_stimulus',
+      stimulusId: '55555555-5555-4555-8555-555555555555',
+      force: false,
+    });
+    // method va a la columna; stimulusId al input determinista (lo lee el runner).
+    expect(db.__inserted[0]).toMatchObject({
+      method: 'reuse_stimulus',
+      input: { itemCount: 3, stimulusId: '55555555-5555-4555-8555-555555555555' },
+    });
+  });
+
+  it('get hidrata stimuli on-read para practice_set con estímulo (sin persistir)', async () => {
+    const practiceContent: RemedialPracticeContent = {
+      skillFocus: 'comprensión',
+      itemCount: 1,
+      items: [{ itemId: '22222222-2222-2222-2222-222222222222', position: 1, stem: 'a' }],
+      notes: null,
+      stimuli: [
+        {
+          sectionId: '66666666-6666-4666-8666-666666666666',
+          kind: 'passage',
+          source: 'official',
+          title: 'La abeja',
+          textPreview: 'Las abejas…',
+        },
+      ],
+    };
+    const row = makeRow({ status: 'ready', type: 'practice_set', content: practiceContent });
+    const itemRow = {
+      id: '22222222-2222-2222-2222-222222222222',
+      type: 'multiple_choice',
+      content: { stem: 'q', alternatives: [{ key: 'A', text: 'x', isCorrect: true }] },
+    };
+    const sectionRow = {
+      id: '66666666-6666-4666-8666-666666666666',
+      kind: 'passage',
+      source: 'official',
+      passageTitle: 'La abeja',
+      passageText: 'Las abejas polinizan las flores y producen miel.',
+    };
+    // 1) findOne, 2) nodeName (toModel), 3) items (hidratación), 4) sections (estímulo)
+    const db = makeDb([[row], [{ name: 'OA' }], [itemRow], [sectionRow]]);
+    const service = new RemedialService(db);
+    const model = await service.get(makeUser(), 'mat-1');
+
+    // El estímulo trae el TEXTO COMPLETO re-hidratado (no el preview del content).
+    expect(model.stimuli).toHaveLength(1);
+    expect(model.stimuli?.[0]).toMatchObject({
+      sectionId: '66666666-6666-4666-8666-666666666666',
+      kind: 'passage',
+      source: 'official',
+      title: 'La abeja',
+      text: 'Las abejas polinizan las flores y producen miel.',
+    });
+    // on-read: no se persiste nada.
+    expect(db.__updates).toHaveLength(0);
   });
 });

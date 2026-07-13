@@ -277,6 +277,8 @@ describe('DashboardsService.getPerformance', () => {
         { studentId: 's1', classGroupId: 'cg1', classGroupName: '2°A' },
         { studentId: 's2', classGroupId: 'cg1', classGroupName: '2°A' },
       ],
+      // 5. resolveScopedBands: >1 instrumento en scope → sin bandas (legacy)
+      [{ instrumentId: 'i1' }, { instrumentId: 'i2' }],
     ]);
     const svc = makeService(db);
     const res = await svc.getPerformance(makeUser({ activeRole: 'school_admin' }), {
@@ -323,6 +325,8 @@ describe('DashboardsService.getPerformance', () => {
       ],
       // loadClassGroupByStudent
       [],
+      // resolveScopedBands: >1 instrumento → sin bandas (legacy)
+      [{ instrumentId: 'i1' }, { instrumentId: 'i2' }],
     ]);
     const svc = makeService(db);
     const res = await svc.getPerformance(makeUser({ activeRole: 'school_admin' }), {
@@ -363,7 +367,9 @@ describe('DashboardsService.getSkills', () => {
       [{ id: 'a1' }],
       // 2. resolveThresholds → resolveApplicableScale (sin escala → null)
       [],
-      // 3. skills grouped
+      // 3. resolveScopedBands: >1 instrumento → sin bandas (legacy)
+      [{ instrumentId: 'i1' }, { instrumentId: 'i2' }],
+      // 4. skills grouped
       [
         {
           nodeId: 'n1',

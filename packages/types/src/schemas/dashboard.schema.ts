@@ -1,5 +1,6 @@
 import { z } from 'zod';
 import { PERFORMANCE_LEVELS, type AssessmentStatus, type PerformanceLevel } from '../enums';
+import type { PerformanceBandView } from './performance-band.schema';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Sprint 4 — Dashboards core (H6.1, H6.2, H6.4, H6.5, H6.7, H6.8)
@@ -60,6 +61,20 @@ export type PerformanceDistributionBucket = {
   level: PerformanceLevel;
   count: number;
   percentage: number; // 0..100, proporción del total
+};
+
+/**
+ * Bucket de distribución por BANDA del instrumento (N niveles data-driven, ej.
+ * DIA I/II/III). Se emite en lugar de `distribution` cuando el scope resuelve a
+ * un único instrumento con bandas configuradas.
+ */
+export type PerformanceBandDistributionBucket = {
+  key: string;
+  label: string;
+  order: number;
+  color: string | null;
+  count: number;
+  percentage: number; // 0..100
 };
 
 export type DashboardAssessmentSummary = {
@@ -143,6 +158,8 @@ export type StudentClassificationModel = {
   achievement: number | null; // % logro 0..100 (promedio si abarca varias evaluaciones)
   grade: string | null; // nota
   performanceLevel: PerformanceLevel | null;
+  // Banda del instrumento (cuando el scope es un único instrumento con bandas).
+  performanceBand?: PerformanceBandView | null;
 };
 
 export type DashboardPerformanceResponse = {
@@ -153,6 +170,11 @@ export type DashboardPerformanceResponse = {
     adequate: number;
     advanced: number;
   };
+  // Bandas del instrumento y distribución por banda. Presentes SÓLO cuando el
+  // scope resuelve a un único instrumento con bandas configuradas; en ese caso la
+  // UI debe preferirlas sobre `distribution`/`thresholds` (4 niveles legacy).
+  bands?: PerformanceBandView[];
+  bandDistribution?: PerformanceBandDistributionBucket[];
   students: {
     data: StudentClassificationModel[];
     total: number;
@@ -172,10 +194,13 @@ export type SkillAchievementModel = {
   studentsAssessed: number;
   averageAchievement: number | null; // % logro promedio 0..100
   performanceLevel: PerformanceLevel | null;
+  performanceBand?: PerformanceBandView | null;
 };
 
 export type DashboardSkillsResponse = {
   skills: SkillAchievementModel[];
+  // Bandas del instrumento cuando el scope es un único instrumento con bandas.
+  bands?: PerformanceBandView[];
 };
 
 /**

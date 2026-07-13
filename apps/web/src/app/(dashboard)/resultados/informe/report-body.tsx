@@ -28,8 +28,8 @@ import { DistributionBar } from '../components/distribution-bar';
 import { PerformanceBadge } from '../components/performance-badge';
 import { SummaryCard } from '../components/summary-card';
 import {
+  bandLabel,
   formatAchievement,
-  performanceLevelLabel,
   PERFORMANCE_LEVEL_BAR_CLASS,
 } from '../components/performance-level';
 import { ReportExportButton } from './report-export-button';
@@ -159,7 +159,7 @@ export function ReportBody({
         <SummaryCard
           label="% Logro promedio"
           value={formatAchievement(summary.averageAchievement)}
-          hint={`Nivel: ${performanceLevelLabel(summary.performanceLevel)}`}
+          hint={`Nivel: ${bandLabel(summary.performanceBand, summary.performanceLevel)}`}
           icon={Target}
         />
         {/* TKT-04: notas/escala solo si el instrumento tiene escala configurada.
@@ -201,7 +201,11 @@ export function ReportBody({
       <Highlights report={report} />
 
       {/* 2. Distribución por nivel */}
-      <DistributionBar distribution={report.distribution} />
+      <DistributionBar
+        distribution={report.distribution}
+        bands={report.bands}
+        bandDistribution={report.bandDistribution}
+      />
 
       {/* 3. Comparativa por curso */}
       <CourseComparison report={report} />
@@ -445,7 +449,7 @@ function SkillsSection({
                   <span className="tabular-nums text-muted-foreground">
                     {formatAchievement(s.averageAchievement)}
                   </span>
-                  <PerformanceBadge level={s.performanceLevel} />
+                  <PerformanceBadge level={s.performanceLevel} band={s.performanceBand} />
                 </span>
               </div>
               <div className="flex h-2 w-full overflow-hidden rounded-full bg-muted">
@@ -628,7 +632,7 @@ function RiskStudents({ report }: { report: AssessmentReportResponse }) {
                     {formatAchievement(s.achievement)}
                   </TableCell>
                   <TableCell>
-                    <PerformanceBadge level={s.performanceLevel} />
+                    <PerformanceBadge level={s.performanceLevel} band={s.performanceBand} />
                   </TableCell>
                   <TableCell className="hidden sm:table-cell text-sm text-muted-foreground">
                     {s.weakestSkill ?? '—'}

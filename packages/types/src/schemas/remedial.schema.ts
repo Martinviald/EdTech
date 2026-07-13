@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { remedialStimulusRefSchema, remedialStimulusSchema } from './stimulus.schema';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // F2 S3 — IA Remedial (RAG). Contratos compartidos del módulo `remedial`
@@ -24,6 +25,18 @@ export const remedialStatusSchema = z.enum([
   'discarded',
 ]);
 export type RemedialStatus = z.infer<typeof remedialStatusSchema>;
+
+/**
+ * Método de generación del set remedial (Ola 2.1a). `self_contained`: MCQ sin texto
+ * (comportamiento actual). `reuse_stimulus`: preguntas nuevas sobre un estímulo OFICIAL
+ * de la evaluación (Opción A). `generate_stimulus`: texto nuevo generado por IA (Opción B, 2.2).
+ */
+export const remedialMethodSchema = z.enum([
+  'self_contained',
+  'reuse_stimulus',
+  'generate_stimulus',
+]);
+export type RemedialMethod = z.infer<typeof remedialMethodSchema>;
 
 // ── Contenido por tipo (polimórfico; validado tras la respuesta del modelo) ──
 
@@ -60,6 +73,9 @@ export const remedialPracticeContentSchema = z.object({
   itemCount: z.number().int(),
   items: z.array(remedialPracticeItemRefSchema),
   notes: z.string().nullable(),
+  // Ola 2.1a: refs ligeras a los estímulos (pasajes) del set. `[]` para self_contained;
+  // el default hace que el contenido viejo sin `stimuli` siga validando.
+  stimuli: z.array(remedialStimulusRefSchema).default([]),
 });
 export type RemedialPracticeContent = z.infer<typeof remedialPracticeContentSchema>;
 
@@ -222,11 +238,58 @@ export function toRemedialStudentContent(
 
 // ── Model de respuesta (lo que el frontend tipa) ──
 
+/**
+ * Preview hidratado de un ítem de práctica (H9.3 · Ola 1 remedial G2). Se arma en
+ * la lectura desde `items` (fuente de verdad), NO se persiste en el material: el
+ * `content` sigue guardando solo las refs ligeras (`remedialPracticeItemRefSchema`).
+ */
+export const remedialPracticeItemPreviewSchema = z.object({
+  itemId: z.string().uuid(),
+  position: z.number().int(),
+  type: z.string(), // item_type
+  stem: z.string().nullable(),
+  alternatives: z
+    .array(z.object({ key: z.string(), text: z.string(), isCorrect: z.boolean() }))
+    .nullable(),
+  correctKey: z.string().nullable(),
+  explanation: z.string().nullable(),
+});
+export type RemedialPracticeItemPreview = z.infer<typeof remedialPracticeItemPreviewSchema>;
+
+// ── Juez de calidad (Ola 2.1b) ──
+// El juez automático valida cada pregunta generada (solve-then-check) y, vía el
+// loop de regeneración (máx 3), arma un `qualityReport` que se persiste en
+// `remedial_materials.qualityReport` y se lee on-read en el model de respuesta.
+
+/**
+ * Veredicto del juez por ítem (pregunta). Los hard-gate (answerable, uniqueCorrect,
+ * factual) gatillan regeneración; `skillMatch` es un aviso blando (no regenera).
+ */
+export const judgeVerdictSchema = z.object({
+  position: z.number().int(),
+  answerable: z.boolean(), // solve-then-check: la clave se deduce del texto
+  derivedAnswer: z.string().nullable(), // la respuesta que dedujo el juez del texto (o null)
+  uniqueCorrect: z.boolean(), // exactamente una alternativa correcta
+  factual: z.boolean(), // sin errores de hecho en texto/clave/explicación
+  skillMatch: z.boolean(), // mide la habilidad objetivo (aviso blando)
+  objections: z.array(z.string()), // objeciones concretas para regenerar/mostrar
+});
+export type JudgeVerdict = z.infer<typeof judgeVerdictSchema>;
+
+/** Reporte del loop de calidad: nº de vueltas, si convergió y el último veredicto por ítem. */
+export const qualityReportSchema = z.object({
+  iterations: z.number().int(), // cuántas vueltas de regeneración
+  finalStatus: z.enum(['converged', 'exhausted']), // convergió o agotó las 3
+  verdicts: z.array(judgeVerdictSchema), // último veredicto por ítem
+});
+export type QualityReport = z.infer<typeof qualityReportSchema>;
+
 export const remedialMaterialModelSchema = z.object({
   id: z.string().uuid(),
   orgId: z.string().uuid(),
   type: remedialMaterialTypeSchema,
   status: remedialStatusSchema,
+  method: remedialMethodSchema.default('self_contained'), // Ola 2.1a: cómo se generó el set
   nodeId: z.string().uuid().nullable(),
   nodeName: z.string().nullable(), // joineado para mostrar
   assessmentId: z.string().uuid().nullable(),
@@ -238,6 +301,12 @@ export const remedialMaterialModelSchema = z.object({
   // Override humano (edición). §8.3: el humano ajusta sin borrar la evidencia IA.
   // El frontend renderiza el content EFECTIVO: `editedContent ?? content`.
   editedContent: remedialContentSchema.nullable(),
+  // preview hidratado on-read desde `items`; solo se llena para type='practice_set' en el detalle.
+  practiceItems: z.array(remedialPracticeItemPreviewSchema).nullable().optional(),
+  // Ola 2.1a: estímulos hidratados on-read (texto completo del pasaje) desde `instrument_sections`.
+  stimuli: z.array(remedialStimulusSchema).nullable().optional(),
+  // Ola 2.1b: reporte del juez (iteraciones + veredictos), leído on-read desde el material.
+  qualityReport: qualityReportSchema.nullable().optional(),
   model: z.string().nullable(),
   promptVersion: z.string().nullable(),
   costUsd: z.string().nullable(),
@@ -287,6 +356,8 @@ export const generateRemedialSchema = z.object({
   classGroupId: z.string().uuid().optional(), // requerido para group_plan (cohorte)
   sourceAnalysisId: z.string().uuid().optional(), // análisis IA de origen (trazabilidad)
   itemCount: z.number().int().min(1).max(20).optional(), // solo practice_set (default en el service)
+  method: remedialMethodSchema.optional(), // Ola 2.1a: método remedial (default resuelto en el service)
+  stimulusId: z.string().uuid().optional(), // Ola 2.1a: override del pasaje elegido por el docente
   force: z.boolean().default(false), // ignora la caché por input_hash
 });
 export type GenerateRemedialDto = z.infer<typeof generateRemedialSchema>;

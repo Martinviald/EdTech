@@ -150,6 +150,8 @@ function baseSelectResults(): unknown[][] {
     ],
     // 6. countEnrolled
     [{ total: 5 }],
+    // 6b. loadInstrumentBands (sin bandas configuradas → modo legacy 4 niveles)
+    [],
     // 7. loadItemDistribution (group by item, answer, isCorrect)
     [
       { itemId: 'i1', answer: 'A', isCorrect: true, count: 3 },

@@ -64,7 +64,7 @@ export class DiaIngestionService {
   async preview(
     data: DiaRawPayload,
     metadata: DiaIngestionMetadata,
-    user: JwtPayload,
+    _user: JwtPayload,
   ): Promise<PreviewResult> {
     const parseResult = parseDiaPayload(data);
     const taxonomyMatches = await this.matchTaxonomy(

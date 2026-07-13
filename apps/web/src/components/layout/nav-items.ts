@@ -294,6 +294,14 @@ export const ADMIN_NAV_ITEMS: readonly NavItem[] = [
     roles: ['platform_admin'],
     requiresPlatformAdmin: true,
   },
+  {
+    href: '/admin/instrumentos-bandas',
+    label: 'Niveles de logro',
+    icon: BarChart3,
+    status: 'live',
+    roles: ['platform_admin'],
+    requiresPlatformAdmin: true,
+  },
 ];
 
 /**

@@ -1,5 +1,6 @@
 import { z } from 'zod';
 import { PERFORMANCE_LEVELS, type PerformanceLevel } from '../enums';
+import type { PerformanceBandView } from './performance-band.schema';
 
 // ── DTOs ─────────────────────────────────────────────────────────────────────
 
@@ -35,6 +36,9 @@ export type AssessmentResultModel = {
   percentage: string | null; // 0..100 como decimal string
   grade: string | null; // nota
   performanceLevel: PerformanceLevel | null;
+  // Banda de logro del instrumento (fuente de verdad del nivel). null → usar el
+  // enum `performanceLevel` legacy. La UI prefiere la banda (ej. DIA I/II/III).
+  performanceBand: PerformanceBandView | null;
   isComplete: boolean;
   completedAt: string | Date | null;
   createdAt: string | Date;
@@ -52,6 +56,7 @@ export type SkillResultModel = {
   totalCount: number;
   percentage: string | null; // 0..100
   performanceLevel: PerformanceLevel | null;
+  performanceBand: PerformanceBandView | null;
   createdAt: string | Date;
   updatedAt: string | Date;
 };

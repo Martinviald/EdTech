@@ -27,6 +27,8 @@ import {
 import {
   RESULTS_VIEWER_ROLES,
   RESULT_HIDDEN_NODE_TYPES,
+  bandToLegacyLevel,
+  classifyByBands,
   percentageToPerformanceLevel,
   userHasAnyRole,
   type AssessmentReportCourseRow,
@@ -37,12 +39,21 @@ import {
   type AssessmentReportRiskStudent,
   type AssessmentReportSkillRow,
   type ItemReportFlag,
+  type PerformanceBandDistributionBucket,
+  type PerformanceBandInput,
+  type PerformanceBandView,
   type PerformanceDistributionBucket,
   type PerformanceLevel,
   type UserRole,
 } from '@soe/types';
 import type { JwtPayload } from '../auth/jwt-payload.types';
 import { InjectDb, type Database } from '../database/database.types';
+import { loadInstrumentBands } from '../performance-bands/lib/load-instrument-bands';
+
+/** PerformanceBandInput (con thresholds) → vista mínima para la respuesta. */
+function toBandView(b: PerformanceBandInput): PerformanceBandView {
+  return { key: b.key, label: b.label, order: b.order, color: b.color ?? null };
+}
 
 // Roles administrativos: ven toda la org. Idéntico a los demás services de
 // resultados (AssessmentResultsService / AnalyticsService / ItemAnalysisService).
@@ -173,6 +184,12 @@ export class AssessmentReportService {
         reportClassGroups.map((c) => c.id),
       );
 
+      // Bandas del instrumento (el informe es siempre de un único instrumento):
+      // fuente de verdad del nivel. Corre dentro de withOrgContext → RLS trae
+      // globales + override de la org. Sin bandas → modo legacy (4 niveles).
+      const bands = await loadInstrumentBands(tx, assessment.instrumentId);
+      const bandView = bands.length > 0 ? bands.map(toBandView) : undefined;
+
       const meta = {
         assessmentId: assessment.id,
         assessmentName: assessment.name,
@@ -202,6 +219,7 @@ export class AssessmentReportService {
             performanceLevel: null,
           },
           distribution: this.emptyDistribution(),
+          ...(bandView ? { bands: bandView, bandDistribution: [] } : {}),
           courseComparison: [],
           skills: [],
           highlights: { strengths: [], gaps: [] },
@@ -217,8 +235,11 @@ export class AssessmentReportService {
         studentsEnrolled,
         passingGrade,
         assessment.gradingScaleConfig,
+        bands,
       );
       const distribution = this.buildDistribution(evaluated);
+      const bandDistribution =
+        bands.length > 0 ? this.buildBandDistribution(evaluated, bands) : undefined;
 
       // ── Comparativa por curso ───────────────────────────────────────────────
       const courseComparison = this.buildCourseComparison(
@@ -245,6 +266,7 @@ export class AssessmentReportService {
         orgId,
         studentFilter,
         assessment.gradingScaleConfig,
+        bands,
       );
       const highlights = this.buildHighlights(skills);
 
@@ -254,6 +276,7 @@ export class AssessmentReportService {
         query.assessmentId,
         evaluated,
         classGroupByStudent,
+        bands,
       );
 
       // ── Recomendaciones (reglas) ────────────────────────────────────────────
@@ -268,6 +291,7 @@ export class AssessmentReportService {
         meta,
         summary,
         distribution,
+        ...(bandView ? { bands: bandView, bandDistribution } : {}),
         courseComparison,
         skills,
         highlights,
@@ -287,6 +311,7 @@ export class AssessmentReportService {
     studentsEnrolled: number,
     passingGrade: number | null,
     scaleConfig: unknown,
+    bands: PerformanceBandInput[],
   ) {
     // TKT-04 — sin escala configurada (`passingGrade === null`): no se reporta
     // ningún campo de nota (averageGrade/passingGrade/passingRate quedan null); el
@@ -308,6 +333,9 @@ export class AssessmentReportService {
     const coverageRate =
       studentsEnrolled > 0 ? (evaluated.length / studentsEnrolled) * 100 : null;
 
+    const band =
+      averageAchievement === null ? null : classifyByBands(averageAchievement / 100, bands);
+
     return {
       studentsEvaluated: evaluated.length,
       studentsEnrolled,
@@ -320,9 +348,12 @@ export class AssessmentReportService {
       performanceLevel:
         averageAchievement === null
           ? null
-          : percentageToPerformanceLevel(averageAchievement / 100, {
-              config: scaleConfig as never,
-            }),
+          : band
+            ? bandToLegacyLevel(band, bands)
+            : percentageToPerformanceLevel(averageAchievement / 100, {
+                config: scaleConfig as never,
+              }),
+      performanceBand: band ? toBandView(band) : null,
     };
   }
 
@@ -339,6 +370,35 @@ export class AssessmentReportService {
       const count = counts.get(level) ?? 0;
       return { level, count, percentage: total > 0 ? (count / total) * 100 : 0 };
     });
+  }
+
+  /** Distribución por banda del instrumento (clasifica el % de cada alumno). */
+  private buildBandDistribution(
+    evaluated: EvaluatedStudent[],
+    bands: PerformanceBandInput[],
+  ): PerformanceBandDistributionBucket[] {
+    const counts = new Map<string, number>();
+    let total = 0;
+    for (const e of evaluated) {
+      if (e.percentage === null) continue;
+      const band = classifyByBands(e.percentage / 100, bands);
+      if (!band) continue;
+      counts.set(band.key, (counts.get(band.key) ?? 0) + 1);
+      total += 1;
+    }
+    return [...bands]
+      .sort((a, b) => a.order - b.order)
+      .map((b) => {
+        const count = counts.get(b.key) ?? 0;
+        return {
+          key: b.key,
+          label: b.label,
+          order: b.order,
+          color: b.color ?? null,
+          count,
+          percentage: total > 0 ? (count / total) * 100 : 0,
+        };
+      });
   }
 
   // ───────────────────────────────────────────────────────────────────────────
@@ -520,6 +580,7 @@ export class AssessmentReportService {
     orgId: string,
     studentFilter: string[] | null,
     scaleConfig: unknown,
+    bands: PerformanceBandInput[],
   ): Promise<AssessmentReportSkillRow[]> {
     if (studentFilter !== null && studentFilter.length === 0) return [];
 
@@ -551,6 +612,8 @@ export class AssessmentReportService {
 
     const skills: AssessmentReportSkillRow[] = rows.map((r) => {
       const averageAchievement = r.avgPct === null ? null : Number(r.avgPct);
+      const band =
+        averageAchievement === null ? null : classifyByBands(averageAchievement / 100, bands);
       return {
         nodeId: r.nodeId,
         nodeName: r.nodeName,
@@ -561,9 +624,12 @@ export class AssessmentReportService {
         performanceLevel:
           averageAchievement === null
             ? null
-            : percentageToPerformanceLevel(averageAchievement / 100, {
-                config: scaleConfig as never,
-              }),
+            : band
+              ? bandToLegacyLevel(band, bands)
+              : percentageToPerformanceLevel(averageAchievement / 100, {
+                  config: scaleConfig as never,
+                }),
+        performanceBand: band ? toBandView(band) : null,
       };
     });
 
@@ -596,6 +662,7 @@ export class AssessmentReportService {
     assessmentId: string,
     evaluated: EvaluatedStudent[],
     classGroupByStudent: Map<string, { id: string; name: string }>,
+    bands: PerformanceBandInput[],
   ): Promise<AssessmentReportRiskStudent[]> {
     const atRisk = evaluated
       .filter((e) => e.performanceLevel && AT_RISK_LEVELS.includes(e.performanceLevel))
@@ -610,15 +677,19 @@ export class AssessmentReportService {
       atRisk.map((e) => e.studentId),
     );
 
-    return atRisk.map((e) => ({
-      studentId: e.studentId,
-      studentRut: e.studentRut,
-      studentFullName: `${e.firstName} ${e.lastName}`.trim(),
-      classGroupName: classGroupByStudent.get(e.studentId)?.name ?? null,
-      achievement: e.percentage,
-      performanceLevel: e.performanceLevel,
-      weakestSkill: weakest.get(e.studentId) ?? null,
-    }));
+    return atRisk.map((e) => {
+      const band = e.percentage === null ? null : classifyByBands(e.percentage / 100, bands);
+      return {
+        studentId: e.studentId,
+        studentRut: e.studentRut,
+        studentFullName: `${e.firstName} ${e.lastName}`.trim(),
+        classGroupName: classGroupByStudent.get(e.studentId)?.name ?? null,
+        achievement: e.percentage,
+        performanceLevel: e.performanceLevel,
+        performanceBand: band ? toBandView(band) : null,
+        weakestSkill: weakest.get(e.studentId) ?? null,
+      };
+    });
   }
 
   // ───────────────────────────────────────────────────────────────────────────

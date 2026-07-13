@@ -39,6 +39,7 @@ import {
 } from '@soe/types';
 import type { JwtPayload } from '../auth/jwt-payload.types';
 import { InjectDb, type Database } from '../database/database.types';
+import { loadInstrumentBands } from '../performance-bands/lib/load-instrument-bands';
 import { getScoringStrategy } from './scoring/scoring-strategy';
 import { AnswerSheetPreviewStore } from './lib/preview-store';
 import { parseGradecamCsv } from './lib/parsers/gradecam-parser';
@@ -490,11 +491,14 @@ export class AnswerSheetsService {
       const studentsWithPending = new Set(
         calcResponses.filter((r) => r.isCorrect === null).map((r) => r.studentId),
       );
-      const studentAgg = aggregateStudentResults(autoScoredResponses, scale).map((a) => ({
+      // Bandas de logro del instrumento (fuente de verdad del nivel). Dentro de
+      // withOrgContext → RLS trae globales (org_id NULL) + override de la org.
+      const bands = await loadInstrumentBands(tx, entry.instrumentId);
+      const studentAgg = aggregateStudentResults(autoScoredResponses, scale, bands).map((a) => ({
         ...a,
         isComplete: a.isComplete && !studentsWithPending.has(a.studentId),
       }));
-      const skillAgg = aggregateSkillResults(calcResponses, scale);
+      const skillAgg = aggregateSkillResults(calcResponses, scale, bands);
 
       if (studentAgg.length > 0) {
         await tx.insert(assessmentResults).values(
@@ -506,6 +510,7 @@ export class AnswerSheetsService {
             // Model contract: percentage es 0..100 (decimal string)
             percentage: (a.percentage * 100).toFixed(2),
             grade: a.grade.toFixed(2),
+            performanceBandId: a.performanceBandId ?? null,
             performanceLevel: a.performanceLevel,
             isComplete: a.isComplete,
             completedAt: now,
@@ -523,6 +528,7 @@ export class AnswerSheetsService {
             totalCount: a.totalCount,
             // Model contract: percentage es 0..100
             percentage: (a.percentage * 100).toFixed(2),
+            performanceBandId: a.performanceBandId ?? null,
             performanceLevel: a.performanceLevel,
           })),
         );

@@ -1,5 +1,5 @@
 {
-  "id": "0f85236f-73b8-45a3-bf28-f9e1167de610",
+  "id": "79917d07-ccc4-4819-b44d-113d925c6ed1",
   "prevId": "9fb81362-da8b-49f2-b63e-5e126bd58fc0",
   "version": "7",
   "dialect": "postgresql",
@@ -1458,117 +1458,6 @@
       "checkConstraints": {},
       "isRLSEnabled": false
     },
-    "public.instrument_attachments": {
-      "name": "instrument_attachments",
-      "schema": "",
-      "columns": {
-        "id": {
-          "name": "id",
-          "type": "uuid",
-          "primaryKey": true,
-          "notNull": true,
-          "default": "gen_random_uuid()"
-        },
-        "instrument_id": {
-          "name": "instrument_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "kind": {
-          "name": "kind",
-          "type": "attachment_kind",
-          "typeSchema": "public",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "order": {
-          "name": "order",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true,
-          "default": 0
-        },
-        "storage_key": {
-          "name": "storage_key",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "url": {
-          "name": "url",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "file_name": {
-          "name": "file_name",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "mime_type": {
-          "name": "mime_type",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "size_bytes": {
-          "name": "size_bytes",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "note": {
-          "name": "note",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "meta": {
-          "name": "meta",
-          "type": "jsonb",
-          "primaryKey": false,
-          "notNull": false,
-          "default": "'{}'::jsonb"
-        },
-        "created_at": {
-          "name": "created_at",
-          "type": "timestamp",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "now()"
-        },
-        "updated_at": {
-          "name": "updated_at",
-          "type": "timestamp",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "now()"
-        }
-      },
-      "indexes": {},
-      "foreignKeys": {
-        "instrument_attachments_instrument_id_instruments_id_fk": {
-          "name": "instrument_attachments_instrument_id_instruments_id_fk",
-          "tableFrom": "instrument_attachments",
-          "tableTo": "instruments",
-          "columnsFrom": [
-            "instrument_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
-        }
-      },
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {},
-      "policies": {},
-      "checkConstraints": {},
-      "isRLSEnabled": false
-    },
     "public.instrument_sections": {
       "name": "instrument_sections",
       "schema": "",
@@ -1584,7 +1473,13 @@
           "name": "instrument_id",
           "type": "uuid",
           "primaryKey": false,
-          "notNull": true
+          "notNull": false
+        },
+        "org_id": {
+          "name": "org_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
         },
         "name": {
           "name": "name",
@@ -1624,6 +1519,22 @@
           "primaryKey": false,
           "notNull": false
         },
+        "kind": {
+          "name": "kind",
+          "type": "stimulus_kind",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'passage'"
+        },
+        "source": {
+          "name": "source",
+          "type": "stimulus_source",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'official'"
+        },
         "passage_title": {
           "name": "passage_title",
           "type": "text",
@@ -1651,7 +1562,29 @@
           "default": "'{}'::jsonb"
         }
       },
-      "indexes": {},
+      "indexes": {
+        "instrument_sections_org_kind_idx": {
+          "name": "instrument_sections_org_kind_idx",
+          "columns": [
+            {
+              "expression": "org_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "kind",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
       "foreignKeys": {
         "instrument_sections_instrument_id_instruments_id_fk": {
           "name": "instrument_sections_instrument_id_instruments_id_fk",
@@ -1664,6 +1597,19 @@
             "id"
           ],
           "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "instrument_sections_org_id_organizations_id_fk": {
+          "name": "instrument_sections_org_id_organizations_id_fk",
+          "tableFrom": "instrument_sections",
+          "tableTo": "organizations",
+          "columnsFrom": [
+            "org_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
           "onUpdate": "no action"
         }
       },
@@ -4600,6 +4546,14 @@
           "notNull": true,
           "default": "'pending'"
         },
+        "method": {
+          "name": "method",
+          "type": "remedial_method",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'self_contained'"
+        },
         "node_id": {
           "name": "node_id",
           "type": "uuid",
@@ -4636,8 +4590,8 @@
           "primaryKey": false,
           "notNull": false
         },
-        "edited_content": {
-          "name": "edited_content",
+        "quality_report": {
+          "name": "quality_report",
           "type": "jsonb",
           "primaryKey": false,
           "notNull": false
@@ -5415,6 +5369,15 @@
         "group_plan"
       ]
     },
+    "public.remedial_method": {
+      "name": "remedial_method",
+      "schema": "public",
+      "values": [
+        "self_contained",
+        "reuse_stimulus",
+        "generate_stimulus"
+      ]
+    },
     "public.remedial_status": {
       "name": "remedial_status",
       "schema": "public",
@@ -5474,6 +5437,24 @@
       "values": [
         "google",
         "microsoft"
+      ]
+    },
+    "public.stimulus_kind": {
+      "name": "stimulus_kind",
+      "schema": "public",
+      "values": [
+        "passage",
+        "figure",
+        "table",
+        "dataset"
+      ]
+    },
+    "public.stimulus_source": {
+      "name": "stimulus_source",
+      "schema": "public",
+      "values": [
+        "official",
+        "ai_generated"
       ]
     },
     "public.tagged_by": {

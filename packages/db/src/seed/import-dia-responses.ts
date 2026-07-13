@@ -41,8 +41,9 @@ import {
 const argv = process.argv.slice(2);
 const COMMIT = argv.includes('--commit');
 const positional = argv.filter((a) => !a.startsWith('--'));
-const COURSES_JSON = positional[0];
-if (!COURSES_JSON) throw new Error('Falta ruta al courses.json (arg posicional)');
+const coursesJsonArg = positional[0];
+if (!coursesJsonArg) throw new Error('Falta ruta al courses.json (arg posicional)');
+const COURSES_JSON: string = coursesJsonArg;
 const opt = (name: string, def: string): string => {
   const p = argv.find((a) => a.startsWith(`--${name}=`));
   return p ? p.slice(name.length + 3) : def;
@@ -158,6 +159,7 @@ async function main() {
     }
     const itemsByInst = new Map<string, typeof allItems>();
     for (const it of allItems) {
+      if (it.instrumentId == null) continue; // items siempre traen instrumentId (filtrados por inArray)
       const l = itemsByInst.get(it.instrumentId) ?? [];
       l.push(it);
       itemsByInst.set(it.instrumentId, l);
@@ -274,7 +276,11 @@ async function main() {
     const insertedAssess = await tx.insert(assessments).values(assessmentValues).returning({ id: assessments.id });
     const assessIdByIdx = insertedAssess.map((a) => a.id);
     await tx.insert(assessmentCourseAssignments).values(
-      pending.map((p, i) => ({ assessmentId: assessIdByIdx[i], classGroupId: p.classGroupId })),
+      pending.map((p, i) => {
+        const assessmentId = assessIdByIdx[i];
+        if (!assessmentId) throw new Error(`Falta assessmentId para el curso índice ${i}`);
+        return { assessmentId, classGroupId: p.classGroupId };
+      }),
     );
 
     // 8. Responses (chunked), results y skills por curso.
@@ -284,6 +290,7 @@ async function main() {
     for (let i = 0; i < pending.length; i++) {
       const p = pending[i];
       const assessmentId = assessIdByIdx[i];
+      if (!p || !assessmentId) continue; // ambos garantizados por construcción (misma longitud)
       for (const r of p.responseRows) allResponses.push({ ...r, assessmentId });
 
       const scale = DEFAULT_GRADING_SCALE; // instrumentos DIA: gradingScaleId null

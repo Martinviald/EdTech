@@ -185,6 +185,13 @@ export const attachmentKindEnum = pgEnum('attachment_kind', ['image', 'audio', '
 // El "borrado" es soft-delete (deleted_at), no un valor de este enum.
 export const fileStatusEnum = pgEnum('file_status', ['pending', 'ready']);
 
+// ── Ola 2.1a — Motor Remedial con Estímulo ───────────────────────────────────
+// `instrument_sections` pasa a ser el store de "estímulo": el material sobre el que
+// se ancla una pregunta remedial. `kind` clasifica el estímulo (hoy solo `passage`);
+// `source` distingue el oficial del generado por IA (se escribe en 2.2).
+export const stimulusKindEnum = pgEnum('stimulus_kind', ['passage', 'figure', 'table', 'dataset']);
+export const stimulusSourceEnum = pgEnum('stimulus_source', ['official', 'ai_generated']);
+
 // Estado de un job de análisis IA (F2 S0 — H19.23).
 export const aiAnalysisStatusEnum = pgEnum('ai_analysis_status', [
   'pending',
@@ -211,6 +218,15 @@ export const remedialStatusEnum = pgEnum('remedial_status', [
   'failed',
   'approved',
   'discarded',
+]);
+
+// Método de generación del set remedial (Ola 2.1a). `self_contained`: MCQ sin texto
+// (comportamiento actual). `reuse_stimulus`: preguntas nuevas sobre un estímulo OFICIAL
+// de la evaluación (Opción A). `generate_stimulus`: texto nuevo generado por IA (Opción B, 2.2).
+export const remedialMethodEnum = pgEnum('remedial_method', [
+  'self_contained',
+  'reuse_stimulus',
+  'generate_stimulus',
 ]);
 
 // ── F2 S4 — Benchmarking Institucional ───────────────────────────────────────

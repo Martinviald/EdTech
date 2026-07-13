@@ -154,7 +154,16 @@ export function ReviewPanel({ material, content, canApprove }: ReviewPanelProps)
         </div>
       ) : null}
 
-      {editing ? renderEditor() : <ContentDisplay content={content} />}
+      {editing ? (
+        renderEditor()
+      ) : (
+        <ContentDisplay
+          content={content}
+          practiceItems={material.practiceItems}
+          stimuli={material.stimuli}
+          qualityReport={material.qualityReport}
+        />
+      )}
 
       {error ? (
         <AlertCallout tone="danger" className="no-print">
