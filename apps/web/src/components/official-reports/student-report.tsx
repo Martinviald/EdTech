@@ -2,6 +2,7 @@ import type { OfficialStudentReportResponse, OfficialStudentItemRow } from '@soe
 import { cn } from '@/lib/utils';
 import {
   PERFORMANCE_LEVEL_BADGE_CLASS,
+  PERFORMANCE_LEVEL_CHART_COLOR,
   performanceLevelLabel,
 } from '@/app/(dashboard)/resultados/components/performance-level';
 import {
@@ -9,11 +10,11 @@ import {
   ReportCover,
   ReportSection,
   DisclaimerBox,
-  HBarChart,
   fmtPct,
   fmtDate,
   fmtDateTime,
 } from './report-primitives';
+import { HBarChart, type BarDatum } from './report-charts';
 import { resolveDisclaimers } from './report-copy';
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -91,12 +92,29 @@ export function StudentReport({ report }: { report: OfficialStudentReportRespons
         description="Ordenado de menor a mayor logro (áreas a reforzar primero)."
       >
         <HBarChart
-          data={skills.map((s) => ({
-            key: s.nodeId,
-            label: s.nodeName,
-            sublabel: `${s.correctCount}/${s.totalCount}`,
-            value: s.percentage,
-          }))}
+          data={skills.map(
+            (s): BarDatum => ({
+              key: s.nodeId,
+              label: s.nodeName,
+              sublabel: `${s.correctCount}/${s.totalCount}`,
+              value: s.percentage,
+              color: s.performanceLevel
+                ? PERFORMANCE_LEVEL_CHART_COLOR[s.performanceLevel]
+                : null,
+              tooltip: [
+                ...(s.performanceLevel
+                  ? [
+                      {
+                        label: 'Nivel',
+                        value: performanceLevelLabel(s.performanceLevel),
+                        color: PERFORMANCE_LEVEL_CHART_COLOR[s.performanceLevel],
+                      },
+                    ]
+                  : []),
+                { label: 'Respuestas correctas', value: `${s.correctCount} / ${s.totalCount}` },
+              ],
+            }),
+          )}
         />
       </ReportSection>
 

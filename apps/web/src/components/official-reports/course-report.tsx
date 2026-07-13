@@ -19,13 +19,17 @@ import {
   ReportSection,
   DisclaimerBox,
   GuideQuestionsBox,
-  HBarChart,
-  DonutChart,
   fmtPct,
   fmtDate,
   fmtDateTime,
-  type DonutSlice,
 } from './report-primitives';
+import {
+  HBarChart,
+  DonutChart,
+  StudentDotPlot,
+  type BarDatum,
+  type DonutSlice,
+} from './report-charts';
 import { resolveDisclaimers } from './report-copy';
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -129,12 +133,29 @@ export function CourseReport({
         description="Porcentaje promedio de logro del curso por eje/habilidad, ordenado de menor a mayor (brechas primero)."
       >
         <HBarChart
-          data={skillAxes.map((axis) => ({
-            key: axis.nodeId,
-            label: axis.nodeName,
-            sublabel: axis.nodeCode,
-            value: axis.averageAchievement,
-          }))}
+          data={skillAxes.map(
+            (axis): BarDatum => ({
+              key: axis.nodeId,
+              label: axis.nodeName,
+              sublabel: axis.nodeCode,
+              value: axis.averageAchievement,
+              color: axis.performanceLevel
+                ? PERFORMANCE_LEVEL_CHART_COLOR[axis.performanceLevel]
+                : null,
+              tooltip: [
+                ...(axis.performanceLevel
+                  ? [
+                      {
+                        label: 'Nivel',
+                        value: performanceLevelLabel(axis.performanceLevel),
+                        color: PERFORMANCE_LEVEL_CHART_COLOR[axis.performanceLevel],
+                      },
+                    ]
+                  : []),
+                { label: 'Estudiantes evaluados', value: axis.studentsAssessed },
+              ],
+            }),
+          )}
         />
       </ReportSection>
 
@@ -151,7 +172,7 @@ export function CourseReport({
       <ReportSection
         index={4}
         title="Resultados por estudiante"
-        description="Cada punto es un estudiante, ubicado según su porcentaje de logro. La línea marca el umbral bajo el cual el estudiante requiere mayor apoyo."
+        description="Una fila por estudiante: el punto marca su porcentaje de logro sobre las bandas de nivel del instrumento (color por nivel), para leer visualmente en qué nivel cae cada alumno. El nivel más bajo (Insuficiente) corresponde a quienes requieren mayor apoyo."
       >
         <StudentDotPlot students={studentResults} />
         <p className="text-sm text-muted-foreground">
@@ -201,12 +222,16 @@ function levelSlices(
   distribution: OfficialCourseReportResponse['generalResult']['distribution'],
 ): DonutSlice[] {
   const byLevel = new Map(distribution.map((b) => [b.level, b]));
-  return PERFORMANCE_LEVEL_ORDER.map((level) => ({
-    key: level,
-    label: PERFORMANCE_LEVEL_LABELS[level],
-    value: byLevel.get(level)?.count ?? 0,
-    color: PERFORMANCE_LEVEL_CHART_COLOR[level],
-  }));
+  return PERFORMANCE_LEVEL_ORDER.map((level) => {
+    const bucket = byLevel.get(level);
+    return {
+      key: level,
+      label: PERFORMANCE_LEVEL_LABELS[level],
+      value: bucket?.count ?? 0,
+      color: PERFORMANCE_LEVEL_CHART_COLOR[level],
+      percentage: bucket?.percentage ?? 0,
+    };
+  });
 }
 
 // ── Tabla de especificaciones ─────────────────────────────────────────────────
@@ -287,61 +312,6 @@ function ResponseDistribution({ row }: { row: OfficialSpecTableRow }) {
     );
   }
   return <span className="text-muted-foreground">—</span>;
-}
-
-// ── Dot plot por estudiante ───────────────────────────────────────────────────
-
-function StudentDotPlot({ students }: { students: OfficialCourseStudentRow[] }) {
-  const withData = students.filter((s) => s.achievement !== null);
-  if (withData.length === 0) {
-    return <p className="text-sm text-muted-foreground">Sin resultados por estudiante.</p>;
-  }
-  const width = 100; // porcentaje del contenedor (eje x = % de logro)
-  return (
-    <div className="space-y-2">
-      <div className="relative h-24 w-full rounded-md border bg-muted/30">
-        {/* Umbral: separa "requiere apoyo" (izquierda) del resto. Se estima como el
-            mayor % de logro entre quienes requieren apoyo. Si no hay, no se dibuja. */}
-        {(() => {
-          const supportMax = Math.max(
-            ...withData.filter((s) => s.requiresSupport).map((s) => s.achievement ?? 0),
-            0,
-          );
-          const anySupport = withData.some((s) => s.requiresSupport);
-          if (!anySupport) return null;
-          const left = Math.min(100, ((supportMax + 0.5) / width) * 100);
-          return (
-            <div
-              className="absolute inset-y-0 border-l-2 border-dashed border-red-400"
-              style={{ left: `${left}%` }}
-              aria-hidden
-            />
-          );
-        })()}
-        {withData.map((s, i) => {
-          const x = Math.max(0, Math.min(100, s.achievement ?? 0));
-          // Distribuye verticalmente para reducir solapamiento.
-          const y = 12 + ((i * 37) % 76);
-          return (
-            <span
-              key={s.studentId}
-              className={cn(
-                'absolute size-2.5 -translate-x-1/2 -translate-y-1/2 rounded-full ring-1 ring-white dark:ring-slate-900',
-                s.requiresSupport ? 'bg-red-500' : 'bg-emerald-500',
-              )}
-              style={{ left: `${x}%`, top: `${y}%` }}
-              title={`${s.studentFullName}: ${fmtPct(s.achievement)} — ${performanceLevelLabel(s.performanceLevel)}`}
-            />
-          );
-        })}
-      </div>
-      <div className="flex justify-between text-xs text-muted-foreground">
-        <span>0%</span>
-        <span>% de logro</span>
-        <span>100%</span>
-      </div>
-    </div>
-  );
 }
 
 function StudentTable({

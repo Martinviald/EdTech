@@ -119,6 +119,12 @@
   .print-root,
   .print-root * {
     visibility: visible !important;
+    /* Forzar impresión de colores de fondo: sin esto el navegador descarta los
+       fondos y los gráficos que dependen de `background-color` (puntos del dot
+       plot por estudiante, bandas de nivel, swatches de leyenda, barras de
+       habilidad, badges) salen en blanco en el PDF. */
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
   }
   .print-region,
   .print-root {
