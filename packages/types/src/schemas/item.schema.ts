@@ -357,6 +357,8 @@ export type ItemTaxonomyTagModel = {
     name: string;
     type: string;
     code: string | null;
+    description: string | null;
+    taxonomyId: string;
   };
 };
 

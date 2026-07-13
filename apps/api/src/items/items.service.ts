@@ -184,6 +184,7 @@ export class ItemsService {
           name: taxonomyNodes.name,
           code: taxonomyNodes.code,
           type: taxonomyNodes.type,
+          description: taxonomyNodes.description,
           taxonomyId: taxonomyNodes.taxonomyId,
         },
       })
@@ -235,6 +236,7 @@ export class ItemsService {
           name: taxonomyNodes.name,
           code: taxonomyNodes.code,
           type: taxonomyNodes.type,
+          description: taxonomyNodes.description,
           taxonomyId: taxonomyNodes.taxonomyId,
         },
       })

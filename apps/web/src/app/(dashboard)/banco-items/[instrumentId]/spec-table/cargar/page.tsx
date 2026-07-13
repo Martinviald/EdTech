@@ -27,6 +27,11 @@ export default async function SpecTableUploadPage({ params }: PageProps) {
     apiGet<TaxonomyModel[]>('/taxonomies'),
   ]);
 
+  // Los instrumentos OFICIALES del sistema sólo los edita platform_admin.
+  if (instrument.isOfficial && !session.user.isPlatformAdmin) {
+    redirect(`/banco-items/${instrumentId}/spec-table`);
+  }
+
   return (
     <div className="space-y-6">
       <div>

@@ -107,27 +107,26 @@ export function InstrumentDetailView({
           </div>
         </div>
 
-        {(instrument.enunciadoPdf || (canEdit && showAuthoringLinks)) && (
-          <div className="flex flex-wrap gap-2">
-            {instrument.enunciadoPdf && (
-              <EnunciadoViewButton instrumentId={instrument.id} />
-            )}
-            {canEdit && showAuthoringLinks && (
-              <>
-                <Link href={`${basePath}/${instrument.id}/spec-table` as Route}>
-                  <Button variant="outline" size="sm">
-                    Tabla de especificaciones
-                  </Button>
-                </Link>
-                <Link href={`${basePath}/${instrument.id}/etiquetar` as Route}>
-                  <Button variant="outline" size="sm">
-                    Etiquetar con IA
-                  </Button>
-                </Link>
-              </>
-            )}
-          </div>
-        )}
+        <div className="flex flex-wrap gap-2">
+          {instrument.enunciadoPdf && <EnunciadoViewButton instrumentId={instrument.id} />}
+          {/* La tabla de especificaciones es de lectura: el botón se muestra
+              siempre, también en el backoffice. La acción de cargar/editar vive
+              dentro de la vista y se gatea por rol / basePath. */}
+          <Link href={`${basePath}/${instrument.id}/spec-table` as Route}>
+            <Button variant="outline" size="sm">
+              Tabla de especificaciones
+            </Button>
+          </Link>
+          {/* Etiquetar con IA modifica el instrumento → sólo para editores y donde
+              aplica la autoría (se oculta en el backoffice). */}
+          {canEdit && showAuthoringLinks && (
+            <Link href={`${basePath}/${instrument.id}/etiquetar` as Route}>
+              <Button variant="outline" size="sm">
+                Etiquetar con IA
+              </Button>
+            </Link>
+          )}
+        </div>
       </div>
 
       {/* Aviso de solo lectura para instrumentos oficiales (no platform_admin) */}
