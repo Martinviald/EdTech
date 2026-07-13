@@ -1,3 +1,5 @@
+'use client';
+
 import type {
   PerformanceBandDistributionBucket,
   PerformanceBandView,
@@ -5,16 +7,26 @@ import type {
 } from '@soe/types';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import {
+  ChartTooltipCard,
+  ChartTooltipPortal,
+  useChartTooltip,
+} from '@/components/ui/chart-tooltip';
+import {
   PERFORMANCE_LEVEL_BAR_CLASS,
   PERFORMANCE_LEVEL_BADGE_CLASS,
+  PERFORMANCE_LEVEL_CHART_COLOR,
   PERFORMANCE_LEVEL_LABELS,
   PERFORMANCE_LEVEL_ORDER,
 } from './performance-level';
 import { cn } from '@/lib/utils';
 
+const NEUTRAL = '#94a3b8'; // slate-400 (banda sin color propio)
+
+type SegHover = { label: string; count: number; pct: number; color: string };
+
 /**
  * Distribución de niveles de desempeño (H6.4): barra apilada + leyenda con
- * conteos. Sin estado → Server Component.
+ * conteos. Client Component por el tooltip moderno al hover de cada segmento.
  *
  * Dos modos:
  *  - Por defecto: los 4 niveles DIA legacy (colores estáticos), como siempre.
@@ -33,11 +45,10 @@ export function DistributionBar({
   bandDistribution?: PerformanceBandDistributionBucket[];
   title?: string;
 }) {
+  const { tip, bind } = useChartTooltip<SegHover>();
   const bandMode = Boolean(bands && bands.length > 0 && bandDistribution);
 
-  const buckets = bandMode
-    ? [...bandDistribution!].sort((a, b) => a.order - b.order)
-    : null;
+  const buckets = bandMode ? [...bandDistribution!].sort((a, b) => a.order - b.order) : null;
 
   const total = bandMode
     ? buckets!.reduce((acc, b) => acc + b.count, 0)
@@ -56,12 +67,13 @@ export function DistributionBar({
             <div className="flex h-4 w-full overflow-hidden rounded-full bg-muted">
               {buckets!.map((b) => {
                 if (b.percentage <= 0) return null;
+                const color = b.color ?? NEUTRAL;
                 return (
                   <div
                     key={b.key}
-                    className="h-full"
-                    style={{ width: `${b.percentage}%`, backgroundColor: b.color ?? '#94a3b8' }}
-                    title={`${b.label}: ${b.percentage.toFixed(1)}%`}
+                    className="h-full transition-opacity hover:opacity-80"
+                    style={{ width: `${b.percentage}%`, backgroundColor: color }}
+                    {...bind({ label: b.label, count: b.count, pct: b.percentage, color })}
                   />
                 );
               })}
@@ -73,7 +85,7 @@ export function DistributionBar({
                   <span className="inline-flex items-center gap-1.5 text-xs font-semibold">
                     <span
                       className="inline-block h-2.5 w-2.5 rounded-full"
-                      style={{ backgroundColor: b.color ?? '#94a3b8' }}
+                      style={{ backgroundColor: b.color ?? NEUTRAL }}
                     />
                     {b.label}
                   </span>
@@ -95,9 +107,14 @@ export function DistributionBar({
                 return (
                   <div
                     key={level}
-                    className={cn('h-full', PERFORMANCE_LEVEL_BAR_CLASS[level])}
+                    className={cn('h-full transition-opacity hover:opacity-80', PERFORMANCE_LEVEL_BAR_CLASS[level])}
                     style={{ width: `${pct}%` }}
-                    title={`${PERFORMANCE_LEVEL_LABELS[level]}: ${pct.toFixed(1)}%`}
+                    {...bind({
+                      label: PERFORMANCE_LEVEL_LABELS[level],
+                      count: bucket?.count ?? 0,
+                      pct,
+                      color: PERFORMANCE_LEVEL_CHART_COLOR[level],
+                    })}
                   />
                 );
               })}
@@ -130,6 +147,20 @@ export function DistributionBar({
 
         <p className="text-xs text-muted-foreground">Total clasificado: {total}</p>
       </CardContent>
+
+      {tip ? (
+        <ChartTooltipPortal x={tip.x} y={tip.y}>
+          <ChartTooltipCard
+            title={tip.data.label}
+            accentColor={tip.data.color}
+            rows={[
+              { label: 'Estudiantes', value: tip.data.count },
+              { label: 'Del total', value: `${tip.data.pct.toFixed(1)}%` },
+            ]}
+            footer={total > 0 ? `${total} clasificados` : undefined}
+          />
+        </ChartTooltipPortal>
+      ) : null}
     </Card>
   );
 }

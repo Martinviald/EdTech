@@ -17,9 +17,41 @@ import {
   YAxis,
 } from 'recharts';
 import type { GenerationalPoint } from '@soe/types';
+import { ChartTooltipCard, type RechartsContentProps } from '@/components/ui/chart-tooltip';
+
+type GenerationalDatum = {
+  year: string;
+  averageAchievement: number | null;
+  passingRate: number | null;
+  studentsCount: number;
+};
+
+function GenerationalTooltip({ active, payload }: RechartsContentProps) {
+  if (!active || !payload?.length) return null;
+  const d = payload[0]?.payload as GenerationalDatum | undefined;
+  if (!d) return null;
+  return (
+    <ChartTooltipCard
+      title={`Año ${d.year}`}
+      rows={[
+        {
+          label: '% logro promedio',
+          value: d.averageAchievement == null ? '—' : `${d.averageAchievement}%`,
+          color: 'hsl(var(--primary))',
+        },
+        {
+          label: '% aprobación',
+          value: d.passingRate == null ? '—' : `${d.passingRate}%`,
+          color: 'hsl(var(--accent))',
+        },
+      ]}
+      footer={`${d.studentsCount} ${d.studentsCount === 1 ? 'estudiante' : 'estudiantes'}`}
+    />
+  );
+}
 
 export function GenerationalChart({ series }: { series: GenerationalPoint[] }) {
-  const data = series.map((p) => ({
+  const data: GenerationalDatum[] = series.map((p) => ({
     year: String(p.year),
     averageAchievement:
       p.averageAchievement === null ? null : Math.round(p.averageAchievement * 10) / 10,
@@ -40,16 +72,8 @@ export function GenerationalChart({ series }: { series: GenerationalPoint[] }) {
             tickFormatter={(v: number) => `${v}%`}
           />
           <Tooltip
-            formatter={(value, name) => {
-              const label =
-                name === 'averageAchievement'
-                  ? '% logro promedio'
-                  : name === 'passingRate'
-                    ? '% aprobación'
-                    : String(name);
-              return [value == null ? '—' : `${value}%`, label];
-            }}
-            labelFormatter={(label) => `Año ${String(label)}`}
+            content={<GenerationalTooltip />}
+            cursor={{ fill: 'hsl(var(--muted) / 0.5)' }}
           />
           <Legend
             formatter={(value: string) =>

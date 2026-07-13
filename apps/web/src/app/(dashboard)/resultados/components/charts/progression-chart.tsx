@@ -14,7 +14,12 @@ import {
   XAxis,
   YAxis,
 } from 'recharts';
-import type { ProgressionPoint } from '@soe/types';
+import type { PerformanceLevel, ProgressionPoint } from '@soe/types';
+import { ChartTooltipCard, type RechartsContentProps } from '@/components/ui/chart-tooltip';
+import {
+  PERFORMANCE_LEVEL_COLOR,
+  PERFORMANCE_LEVEL_LABELS,
+} from './performance-distribution';
 
 function formatDate(value: string | Date | null): string {
   if (!value) return '—';
@@ -23,11 +28,45 @@ function formatDate(value: string | Date | null): string {
   return d.toLocaleDateString('es-CL', { day: '2-digit', month: 'short', year: 'numeric' });
 }
 
+type ProgressionDatum = {
+  label: string;
+  instrument: string;
+  date: string;
+  achievement: number | null;
+  level: PerformanceLevel | null;
+};
+
+function ProgressionTooltip({ active, payload }: RechartsContentProps) {
+  if (!active || !payload?.length) return null;
+  const d = payload[0]?.payload as ProgressionDatum | undefined;
+  if (!d) return null;
+  const levelColor = d.level ? PERFORMANCE_LEVEL_COLOR[d.level] : 'hsl(var(--primary))';
+  return (
+    <ChartTooltipCard
+      title={d.label}
+      subtitle={`${d.instrument} · ${d.date}`}
+      accentColor={levelColor}
+      rows={[
+        {
+          label: '% de logro',
+          value: d.achievement == null ? '—' : `${d.achievement}%`,
+          color: 'hsl(var(--primary))',
+        },
+        ...(d.level
+          ? [{ label: 'Nivel', value: PERFORMANCE_LEVEL_LABELS[d.level], color: levelColor }]
+          : []),
+      ]}
+    />
+  );
+}
+
 export function ProgressionChart({ points }: { points: ProgressionPoint[] }) {
-  const data = points.map((p) => ({
+  const data: ProgressionDatum[] = points.map((p) => ({
     label: p.assessmentName ?? p.instrumentName,
+    instrument: p.instrumentName,
     date: formatDate(p.administeredAt),
     achievement: p.achievement === null ? null : Math.round(p.achievement * 10) / 10,
+    level: p.performanceLevel,
   }));
 
   return (
@@ -43,11 +82,8 @@ export function ProgressionChart({ points }: { points: ProgressionPoint[] }) {
             tickFormatter={(v: number) => `${v}%`}
           />
           <Tooltip
-            formatter={(value) => [value == null ? '—' : `${value}%`, '% logro']}
-            labelFormatter={(_label, payload) => {
-              const item = payload?.[0]?.payload as { label: string; date: string } | undefined;
-              return item ? `${item.label} · ${item.date}` : '';
-            }}
+            content={<ProgressionTooltip />}
+            cursor={{ stroke: 'hsl(var(--border))', strokeWidth: 1 }}
           />
           <Line
             type="monotone"
