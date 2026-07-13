@@ -3,6 +3,7 @@ import type { Database, RemedialMaterial } from '@soe/db';
 import type {
   GenerateRemedialDto,
   RemedialPracticeContent,
+  RemedialPracticeStudentContent,
   ReviewRemedialDto,
   UserRole,
 } from '@soe/types';
@@ -432,6 +433,52 @@ describe('RemedialService', () => {
     const service = new RemedialService(db);
     const student = await service.getStudentVersion(makeUser(), 'mat-1');
     expect(student.content).toBeNull();
+  });
+
+  it('getStudentVersion incluye alternativas SIN la respuesta ni la explicación (practice_set)', async () => {
+    const practiceContent: RemedialPracticeContent = {
+      skillFocus: 'fracciones',
+      itemCount: 1,
+      items: [{ itemId: '22222222-2222-2222-2222-222222222222', position: 1, stem: 'a' }],
+      notes: 'nota docente',
+      stimuli: [],
+    };
+    const row = makeRow({
+      status: 'approved',
+      type: 'practice_set',
+      content: practiceContent,
+    });
+    const itemRow = {
+      id: '22222222-2222-2222-2222-222222222222',
+      type: 'multiple_choice',
+      content: {
+        stem: '¿Cuál es equivalente a 1/2?',
+        alternatives: [
+          { key: 'A', text: '2/4', isCorrect: true },
+          { key: 'B', text: '1/3', isCorrect: false },
+        ],
+        explanation: '2/4 simplifica a 1/2',
+      },
+    };
+    // 1) findOne, 2) items (hidratación), 3) nodeName
+    const db = makeDb([[row], [itemRow], [{ name: 'OA' }]]);
+    const service = new RemedialService(db);
+
+    const student = await service.getStudentVersion(makeUser(), 'mat-1');
+    const content = student.content as RemedialPracticeStudentContent;
+
+    // el alumno ve las opciones para responder…
+    expect(content.items).toHaveLength(1);
+    expect(content.items[0]?.alternatives).toEqual([
+      { key: 'A', text: '2/4' },
+      { key: 'B', text: '1/3' },
+    ]);
+    // …pero NUNCA la respuesta correcta ni la explicación (solo-profesor).
+    expect(JSON.stringify(content)).not.toContain('isCorrect');
+    expect(JSON.stringify(content)).not.toContain('2/4 simplifica a 1/2');
+    expect(content.items[0]).not.toHaveProperty('explanation');
+    expect(content.items[0]).not.toHaveProperty('correctKey');
+    expect(content).not.toHaveProperty('notes');
   });
 
   it('get hidrata practiceItems on-read para practice_set ready (sin persistir)', async () => {

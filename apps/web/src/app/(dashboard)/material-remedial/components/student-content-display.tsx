@@ -117,7 +117,25 @@ function PracticeStudentView({ content }: { content: RemedialPracticeStudentCont
                     <span className="mt-0.5 shrink-0 rounded bg-primary/10 px-2 py-0.5 text-xs font-medium text-primary">
                       {item.position}
                     </span>
-                    <p className="text-sm text-foreground">{item.stem}</p>
+                    <div className="min-w-0 flex-1 space-y-2">
+                      <p className="text-sm text-foreground">{item.stem}</p>
+                      {/* Alternativas para que el alumno responda. Sin marcar la
+                          correcta ni mostrar la explicación (solo-profesor): todas
+                          las opciones se ven idénticas. */}
+                      {item.alternatives && item.alternatives.length > 0 ? (
+                        <ul className="space-y-1.5">
+                          {item.alternatives.map((alt) => (
+                            <li
+                              key={alt.key}
+                              className="flex items-start gap-2 rounded-md border border-border bg-background px-2.5 py-1.5 text-sm text-foreground"
+                            >
+                              <span className="font-medium">{alt.key})</span>
+                              <span className="min-w-0 flex-1">{alt.text}</span>
+                            </li>
+                          ))}
+                        </ul>
+                      ) : null}
+                    </div>
                   </div>
                 </li>
               ))}
