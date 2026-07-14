@@ -5,7 +5,7 @@ name: Deploy Frontend (SST)
 # en :latest, así que no pelea con el auto-deploy del backend).
 on:
   push:
-    branches: [dev]
+    branches: [main]
     paths:
       - "apps/web/**"
       - "packages/types/**"

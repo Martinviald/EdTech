@@ -1,6 +1,6 @@
 name: Deploy Backend (migrate → ECR → App Runner)
 
-# Push a dev que toca el backend → (1) migra el RDS, (2) rebuildea la imagen y la pushea
+# Push a main que toca el backend → (1) migra el RDS, (2) rebuildea la imagen y la pushea
 # a ECR. App Runner (autoDeploymentsEnabled) redeploya al detectar :latest nuevo.
 #
 # La migración corre ANTES del build/push y lo GATEA (needs: migrate): las migraciones
@@ -11,7 +11,7 @@ name: Deploy Backend (migrate → ECR → App Runner)
 # Requiere el secret de GitHub DB_MASTER_PASSWORD (= SST secret DbMasterPassword, stage demo).
 on:
   push:
-    branches: [dev]
+    branches: [main]
     paths:
       - "apps/api/**"
       - "packages/db/**"
