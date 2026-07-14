@@ -45,7 +45,11 @@ async function request<T>(
 
   if (!res.ok) {
     const body = await res.json().catch(() => ({}));
-    throw new Error((body as { message?: string }).message ?? `API error ${res.status}`);
+    const err = new Error(
+      (body as { message?: string }).message ?? `API error ${res.status}`,
+    ) as Error & { status?: number };
+    err.status = res.status;
+    throw err;
   }
 
   // 204 No Content
@@ -70,6 +74,14 @@ export function apiPost<T>(path: string, body: unknown): Promise<T> {
 export function apiPatch<T>(path: string, body: unknown): Promise<T> {
   return request<T>(path, {
     method: 'PATCH',
+    body: JSON.stringify(body),
+    authenticated: true,
+  });
+}
+
+export function apiPut<T>(path: string, body: unknown): Promise<T> {
+  return request<T>(path, {
+    method: 'PUT',
     body: JSON.stringify(body),
     authenticated: true,
   });

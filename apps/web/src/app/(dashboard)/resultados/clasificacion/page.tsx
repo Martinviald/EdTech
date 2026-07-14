@@ -90,7 +90,11 @@ export default async function ClasificacionPage({
 
       <DashboardFilterBar options={options} value={filters} basePath={BASE_PATH} />
 
-      <DistributionBar distribution={performance.distribution} />
+      <DistributionBar
+        distribution={performance.distribution}
+        bands={performance.bands}
+        bandDistribution={performance.bandDistribution}
+      />
 
       <Card>
         <CardContent className="space-y-4 p-5">
@@ -139,7 +143,7 @@ export default async function ClasificacionPage({
                           {s.grade ?? '—'}
                         </TableCell>
                         <TableCell>
-                          <PerformanceBadge level={s.performanceLevel} />
+                          <PerformanceBadge level={s.performanceLevel} band={s.performanceBand} />
                         </TableCell>
                       </TableRow>
                     ))}

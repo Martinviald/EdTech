@@ -36,29 +36,60 @@ type QueryBuilder = {
   then: <T>(resolve: (rows: T[]) => unknown) => Promise<unknown>;
 };
 
+function buildSelectChain(rows: unknown[]): QueryBuilder {
+  const chain: QueryBuilder = {
+    from: () => chain,
+    where: () => chain,
+    innerJoin: () => chain,
+    leftJoin: () => chain,
+    groupBy: () => chain,
+    orderBy: () => chain,
+    limit: () => chain,
+    offset: () => chain,
+    then: (resolve) => Promise.resolve(rows as never).then(resolve as never),
+  };
+  return chain;
+}
+
+// Mock estándar: getReport corre dentro de withOrgContext(db, orgId, fn) =
+// db.transaction(tx => { tx.execute(set_config); fn(tx) }). El mock ejecuta fn
+// con el mismo `db` (mismo selectIdx) y `execute` es no-op.
 function makeDb(selectResults: unknown[][]): Database {
   let selectIdx = 0;
-  function buildSelectChain(rows: unknown[]): QueryBuilder {
-    const chain: QueryBuilder = {
-      from: () => chain,
-      where: () => chain,
-      innerJoin: () => chain,
-      leftJoin: () => chain,
-      groupBy: () => chain,
-      orderBy: () => chain,
-      limit: () => chain,
-      offset: () => chain,
-      then: (resolve) => Promise.resolve(rows as never).then(resolve as never),
-    };
-    return chain;
-  }
-  return {
+  const db = {
     select: () => {
       const rows = selectResults[selectIdx] ?? [];
       selectIdx++;
       return buildSelectChain(rows);
     },
+    execute: async () => undefined,
+    transaction: async (fn: (tx: unknown) => unknown) => fn(db),
   } as unknown as Database;
+  return db;
+}
+
+// Mock que simula RLS (§5.2): las queries en `this.db` (SIN contexto de org)
+// devuelven SIEMPRE 0 filas, como haría PostgreSQL bajo un rol sin BYPASSRLS.
+// Sólo dentro de `transaction` (el `tx` de withOrgContext, con app.current_org_id
+// fijado) las queries ven las filas precargadas. Si algún día getReport dejara de
+// envolver en withOrgContext, requireAssessment leería de `this.db` → [] →
+// NotFound, y el test de regresión abajo fallaría.
+function makeRlsAwareDb(selectResults: unknown[][]): Database {
+  let selectIdx = 0;
+  const tx = {
+    select: () => {
+      const rows = selectResults[selectIdx] ?? [];
+      selectIdx++;
+      return buildSelectChain(rows);
+    },
+    execute: async () => undefined,
+  };
+  const db = {
+    select: () => buildSelectChain([]), // RLS sin contexto → 0 filas
+    execute: async () => undefined,
+    transaction: async (fn: (t: unknown) => unknown) => fn(tx),
+  } as unknown as Database;
+  return db;
 }
 
 function makeService(db: Database): AssessmentReportService {
@@ -70,7 +101,7 @@ function makeService(db: Database): AssessmentReportService {
 const ASSESSMENT_ID = 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa';
 
 // Escenario base: 4 alumnos evaluados, 2 ítems, 2 cursos. gradingScaleId null →
-// nota de corte por defecto (4.0) sin query extra.
+// SIN escala configurada (TKT-04): los campos de nota vienen null, sin query extra.
 function baseSelectResults(): unknown[][] {
   return [
     // 0. requireAssessment
@@ -119,6 +150,8 @@ function baseSelectResults(): unknown[][] {
     ],
     // 6. countEnrolled
     [{ total: 5 }],
+    // 6b. loadInstrumentBands (sin bandas configuradas → modo legacy 4 niveles)
+    [],
     // 7. loadItemDistribution (group by item, answer, isCorrect)
     [
       { itemId: 'i1', answer: 'A', isCorrect: true, count: 3 },
@@ -150,7 +183,7 @@ function baseSelectResults(): unknown[][] {
 }
 
 describe('AssessmentReportService.getReport', () => {
-  it('arma la síntesis ejecutiva con cobertura, aprobación y nivel global', async () => {
+  it('sin escala configurada: reporta cobertura/logro/nivel pero anula los campos de nota (TKT-04)', async () => {
     const svc = makeService(makeDb(baseSelectResults()));
     const res = await svc.getReport(makeUser(), { assessmentId: ASSESSMENT_ID });
 
@@ -158,11 +191,31 @@ describe('AssessmentReportService.getReport', () => {
     expect(res.summary.studentsEnrolled).toBe(5);
     expect(res.summary.coverageRate).toBeCloseTo(80);
     expect(res.summary.averageAchievement).toBeCloseTo(57.5);
+    // TKT-04 — instrumento sin grading scale: no se inventa el corte 4.0.
+    expect(res.summary.hasGradingScale).toBe(false);
+    expect(res.summary.averageGrade).toBeNull();
+    expect(res.summary.passingGrade).toBeNull();
+    expect(res.summary.passingRate).toBeNull();
+    // El % de logro y el nivel de desempeño NO dependen de la escala de notas.
+    expect(res.summary.performanceLevel).toBe('elementary'); // 57.5% → elemental
+    expect(res.meta.itemsCount).toBe(2);
+    // Sin escala, la comparativa por curso tampoco reporta tasa de aprobación.
+    expect(res.courseComparison.every((c) => c.passingRate === null)).toBe(true);
+  });
+
+  it('con escala configurada: reporta nota promedio, corte y tasa de aprobación (TKT-04)', async () => {
+    const results = baseSelectResults();
+    (results[0][0] as Record<string, unknown>).gradingScaleId = 'gs-1';
+    // resolvePassingGrade hace 1 select extra justo después de requireAssessment.
+    results.splice(1, 0, [{ passingGrade: '4.0' }]);
+
+    const svc = makeService(makeDb(results));
+    const res = await svc.getReport(makeUser(), { assessmentId: ASSESSMENT_ID });
+
+    expect(res.summary.hasGradingScale).toBe(true);
     expect(res.summary.averageGrade).toBeCloseTo(4.2);
     expect(res.summary.passingGrade).toBe(4.0);
     expect(res.summary.passingRate).toBeCloseTo(50); // 6.30 y 5.00 aprueban
-    expect(res.summary.performanceLevel).toBe('elementary'); // 57.5% → elemental
-    expect(res.meta.itemsCount).toBe(2);
   });
 
   it('distribuye los niveles y ordena la comparativa por curso con su brecha', async () => {
@@ -239,5 +292,18 @@ describe('AssessmentReportService.getReport', () => {
     // Los ítems siguen listándose (estructura), pero sin métricas.
     expect(res.items).toHaveLength(2);
     expect(res.items[0].difficulty).toBeNull();
+  });
+
+  // Regresión §5.2: getReport DEBE correr dentro de withOrgContext. Con el mock
+  // RLS-aware, `this.db` (sin contexto) devuelve 0 filas y sólo el `tx` de la
+  // transacción ve datos. Si alguien quita el withOrgContext, requireAssessment
+  // leería de `this.db` → [] → NotFound y este test fallaría (reproduce el 404
+  // que ocurría en AWS bajo el rol soe_app sin BYPASSRLS).
+  it('resuelve el informe SOLO dentro del contexto de org (withOrgContext / RLS)', async () => {
+    const svc = makeService(makeRlsAwareDb(baseSelectResults()));
+    const res = await svc.getReport(makeUser(), { assessmentId: ASSESSMENT_ID });
+
+    expect(res.meta.assessmentId).toBe(ASSESSMENT_ID);
+    expect(res.summary.studentsEvaluated).toBe(4);
   });
 });

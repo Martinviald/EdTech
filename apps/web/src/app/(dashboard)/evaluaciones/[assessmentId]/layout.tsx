@@ -1,7 +1,10 @@
 import type { ReactNode } from 'react';
+import Link from 'next/link';
+import type { Route } from 'next';
 import { notFound, redirect } from 'next/navigation';
 import { auth } from '@/auth';
 import { apiGet } from '@/lib/api';
+import { Button } from '@/components/ui/button';
 import {
   canAccess,
   DASHBOARD_VIEWER_ROLES,
@@ -10,10 +13,13 @@ import {
   AI_ANALYSIS_VIEWER_ROLES,
   REMEDIAL_VIEWER_ROLES,
   INSTRUMENT_QUALITY_VIEWER_ROLES,
+  OFFICIAL_REPORT_VIEWER_ROLES,
   type AssessmentReportResponse,
+  type InstrumentAttachmentModel,
 } from '@soe/types';
 import { PageContainer, PageHeader } from '@/components/patterns';
 import { AskAiButton } from '@/components/assistant';
+import { EnunciadoViewButton } from '@/components/instruments/EnunciadoViewButton';
 import { AssessmentTabsNav, type HubTab } from './components/assessment-tabs-nav';
 import { HubAssistantContext } from './components/hub-assistant-context';
 
@@ -64,6 +70,19 @@ export default async function EvaluacionLayout({
   const base = `/evaluaciones/${assessmentId}`;
   const title = meta.assessmentName ?? meta.instrumentName;
 
+  // PDF del enunciado del instrumento de esta evaluación (si existe). Se ofrece en
+  // el encabezado del hub para abrirlo en una pestaña aparte y consultarlo junto a
+  // los resultados. Falla en silencio (botón oculto) si el rol no puede leer el
+  // instrumento o el almacenamiento no está configurado.
+  let enunciadoPdf: InstrumentAttachmentModel | null = null;
+  try {
+    enunciadoPdf = await apiGet<InstrumentAttachmentModel | null>(
+      `/instruments/${meta.instrumentId}/enunciado-pdf`,
+    );
+  } catch {
+    enunciadoPdf = null;
+  }
+
   const tabs: HubTab[] = [
     { href: base, label: 'Resumen', exact: true },
     ...(canAccess(roles, ANALYTICS_VIEWER_ROLES)
@@ -80,6 +99,9 @@ export default async function EvaluacionLayout({
       : []),
     ...(canAccess(roles, INSTRUMENT_QUALITY_VIEWER_ROLES)
       ? [{ href: `${base}/calidad`, label: 'Calidad' }]
+      : []),
+    ...(canAccess(roles, OFFICIAL_REPORT_VIEWER_ROLES)
+      ? [{ href: `${base}/informe-oficial`, label: 'Informe oficial' }]
       : []),
   ];
 
@@ -105,7 +127,15 @@ export default async function EvaluacionLayout({
         title={title}
         description={description}
         actions={
-          <AskAiButton prompt="Analiza esta evaluación: ¿qué cursos y habilidades están más descendidos y qué priorizar?" />
+          <>
+            {enunciadoPdf ? <EnunciadoViewButton instrumentId={meta.instrumentId} /> : null}
+            <Link href={`/banco-items/${meta.instrumentId}/spec-table` as Route}>
+              <Button variant="outline" size="sm">
+                Tabla de especificaciones
+              </Button>
+            </Link>
+            <AskAiButton prompt="Analiza esta evaluación: ¿qué cursos y habilidades están más descendidos y qué priorizar?" />
+          </>
         }
       />
 

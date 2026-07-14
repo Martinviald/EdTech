@@ -81,6 +81,14 @@ export const TAXONOMY_NODE_TYPES = [
 ] as const;
 export type TaxonomyNodeType = (typeof TAXONOMY_NODE_TYPES)[number];
 
+// Tipos de nodo de taxonomía que NO se reportan en las agregaciones de resultados
+// (matriz de habilidades `dashboards`/skills, heatmap, informes por nodo). Los
+// descriptores son metadato del ítem (banco de ítems) y contexto para IA remedial,
+// NO una dimensión de reporte pedagógico (TKT-05). Excluirlos aquí no afecta el
+// banco de ítems ni el pipeline de IA — sólo la lectura de resultados.
+export const RESULT_HIDDEN_NODE_TYPES = ['descriptor'] as const;
+export type ResultHiddenNodeType = (typeof RESULT_HIDDEN_NODE_TYPES)[number];
+
 export const PERFORMANCE_LEVELS = ['insufficient', 'elementary', 'adequate', 'advanced'] as const;
 export type PerformanceLevel = (typeof PERFORMANCE_LEVELS)[number];
 

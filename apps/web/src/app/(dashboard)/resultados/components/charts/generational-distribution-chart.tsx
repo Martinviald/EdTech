@@ -16,21 +16,50 @@ import {
   YAxis,
 } from 'recharts';
 import type { GenerationalPoint, PerformanceLevel } from '@soe/types';
+import { ChartTooltipCard, type RechartsContentProps } from '@/components/ui/chart-tooltip';
 import {
   PERFORMANCE_LEVEL_COLOR,
   PERFORMANCE_LEVEL_LABELS,
   PERFORMANCE_LEVEL_ORDER,
 } from './performance-distribution';
 
-type Row = { year: string } & Record<PerformanceLevel, number>;
+type Row = { year: string; _total: number; _counts: Record<PerformanceLevel, number> } & Record<
+  PerformanceLevel,
+  number
+>;
+
+function DistributionTooltip({ active, payload }: RechartsContentProps) {
+  if (!active || !payload?.length) return null;
+  const d = payload[0]?.payload as Row | undefined;
+  if (!d) return null;
+  return (
+    <ChartTooltipCard
+      title={`Año ${d.year}`}
+      rows={PERFORMANCE_LEVEL_ORDER.map((level) => ({
+        label: PERFORMANCE_LEVEL_LABELS[level],
+        value: `${d[level]}% · ${d._counts[level]}`,
+        color: PERFORMANCE_LEVEL_COLOR[level],
+      }))}
+      footer={`${d._total} ${d._total === 1 ? 'estudiante' : 'estudiantes'} clasificados`}
+    />
+  );
+}
 
 export function GenerationalDistributionChart({ series }: { series: GenerationalPoint[] }) {
   const data: Row[] = series.map((p) => {
-    const base = { year: String(p.year) } as Row;
-    for (const level of PERFORMANCE_LEVEL_ORDER) base[level] = 0;
+    const counts = {} as Record<PerformanceLevel, number>;
+    const base = { year: String(p.year), _total: 0, _counts: counts } as Row;
+    let total = 0;
+    for (const level of PERFORMANCE_LEVEL_ORDER) {
+      base[level] = 0;
+      counts[level] = 0;
+    }
     for (const bucket of p.performanceDistribution) {
       base[bucket.level] = Math.round(bucket.percentage * 10) / 10;
+      counts[bucket.level] = bucket.count;
+      total += bucket.count;
     }
+    base._total = total;
     return base;
   });
 
@@ -47,11 +76,8 @@ export function GenerationalDistributionChart({ series }: { series: Generational
             tickFormatter={(v: number) => `${v}%`}
           />
           <Tooltip
-            formatter={(value, name) => [
-              `${value}%`,
-              PERFORMANCE_LEVEL_LABELS[name as PerformanceLevel] ?? String(name),
-            ]}
-            labelFormatter={(label) => `Año ${String(label)}`}
+            content={<DistributionTooltip />}
+            cursor={{ fill: 'hsl(var(--muted) / 0.5)' }}
           />
           <Legend
             formatter={(value: string) =>

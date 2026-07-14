@@ -72,3 +72,73 @@
     @apply bg-background text-foreground;
   }
 }
+
+@layer utilities {
+  /*
+   * Permite swipe/scroll horizontal ocultando la barra de scroll. Se usa en la
+   * celda del nombre de alumno de la tabla cruzada: el nombre queda acotado al
+   * ancho de la columna y se desplaza para ver el resto, sin que un scrollbar
+   * horizontal ensucie cada fila ni le reste altura (Windows/Linux). El
+   * contenido sigue siendo totalmente desplazable.
+   */
+  .scrollbar-none {
+    -ms-overflow-style: none; /* IE / Edge antiguo */
+    scrollbar-width: none; /* Firefox */
+  }
+  .scrollbar-none::-webkit-scrollbar {
+    display: none; /* Chrome / Safari */
+  }
+}
+
+/*
+ * Impresión limpia (TKT-17 material remedial + TKT-24/25/26 informes oficiales):
+ * al imprimir / "Guardar como PDF" se oculta todo el shell del dashboard (sidebar,
+ * topbar, pestañas, toolbars) y se muestra sólo la región marcada:
+ *   - `.print-region` (material remedial)
+ *   - `.print-root`   (informes oficiales, ver report-primitives → ReportShell)
+ * Los controles que no deben aparecer en papel llevan `.no-print` o la utilidad
+ * `print:hidden` de Tailwind. No requiere tocar el layout del dashboard.
+ */
+@media print {
+  html,
+  body {
+    height: auto !important;
+    overflow: visible !important;
+    background: #fff !important;
+  }
+  #main-content {
+    height: auto !important;
+    overflow: visible !important;
+    padding: 0 !important;
+  }
+  body * {
+    visibility: hidden !important;
+  }
+  .print-region,
+  .print-region *,
+  .print-root,
+  .print-root * {
+    visibility: visible !important;
+    /* Forzar impresión de colores de fondo: sin esto el navegador descarta los
+       fondos y los gráficos que dependen de `background-color` (puntos del dot
+       plot por estudiante, bandas de nivel, swatches de leyenda, barras de
+       habilidad, badges) salen en blanco en el PDF. */
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+  .print-region,
+  .print-root {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    max-width: none;
+    margin: 0;
+    padding: 0;
+    border: none;
+    box-shadow: none;
+  }
+  .no-print {
+    display: none !important;
+  }
+}

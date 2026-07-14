@@ -1,6 +1,10 @@
 import { z } from 'zod';
 import type { PerformanceLevel } from '../enums';
-import type { PerformanceDistributionBucket } from './dashboard.schema';
+import type {
+  PerformanceBandDistributionBucket,
+  PerformanceDistributionBucket,
+} from './dashboard.schema';
+import type { PerformanceBandView } from './performance-band.schema';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Informe de Evaluación (H6.13) — vista consolidada y conclusiva por evaluación
@@ -38,6 +42,7 @@ export type ItemReportFlag = (typeof ITEM_REPORT_FLAGS)[number];
 export type AssessmentReportMeta = {
   assessmentId: string;
   assessmentName: string | null;
+  instrumentId: string;
   instrumentName: string;
   instrumentType: string;
   subjectName: string | null;
@@ -53,10 +58,17 @@ export type AssessmentReportSummary = {
   studentsEnrolled: number; // matriculados en los cursos de la evaluación
   coverageRate: number | null; // % evaluados / matriculados, 0..100
   averageAchievement: number | null; // % logro promedio 0..100
-  averageGrade: number | null; // nota promedio
-  passingGrade: number; // umbral de aprobación usado
-  passingRate: number | null; // % alumnos sobre el umbral, 0..100
+  // TKT-04 — `hasGradingScale` distingue explícitamente "el instrumento no tiene
+  // escala de notas configurada" de "escala con corte 4.0". Cuando es `false`,
+  // todos los campos de nota (averageGrade, passingGrade, passingRate) vienen
+  // `null`: NO se inventa un default 4.0. El % de logro y el nivel de desempeño
+  // (que no dependen de la escala de notas) se siguen reportando.
+  hasGradingScale: boolean;
+  averageGrade: number | null; // nota promedio (null si no hay escala)
+  passingGrade: number | null; // umbral de aprobación usado (null si no hay escala)
+  passingRate: number | null; // % alumnos sobre el umbral, 0..100 (null si no hay escala)
   performanceLevel: PerformanceLevel | null; // nivel del logro promedio
+  performanceBand?: PerformanceBandView | null; // banda del instrumento, si aplica
 };
 
 /** Una fila de la comparativa por curso (intra-evaluación). */
@@ -79,6 +91,7 @@ export type AssessmentReportSkillRow = {
   studentsAssessed: number;
   averageAchievement: number | null; // % 0..100
   performanceLevel: PerformanceLevel | null;
+  performanceBand?: PerformanceBandView | null;
 };
 
 /** Análisis psicométrico de un ítem. */
@@ -110,6 +123,7 @@ export type AssessmentReportRiskStudent = {
   classGroupName: string | null;
   achievement: number | null; // % 0..100
   performanceLevel: PerformanceLevel | null;
+  performanceBand?: PerformanceBandView | null;
   weakestSkill: string | null; // habilidad con menor logro del alumno
 };
 
@@ -134,6 +148,11 @@ export type AssessmentReportResponse = {
   meta: AssessmentReportMeta;
   summary: AssessmentReportSummary;
   distribution: PerformanceDistributionBucket[];
+  // Bandas del instrumento y distribución por banda (el informe es siempre de un
+  // único instrumento). Presentes cuando el instrumento tiene bandas configuradas;
+  // la UI las prefiere sobre `distribution` (4 niveles legacy).
+  bands?: PerformanceBandView[];
+  bandDistribution?: PerformanceBandDistributionBucket[];
   courseComparison: AssessmentReportCourseRow[]; // ordenado por logro desc
   skills: AssessmentReportSkillRow[]; // ordenado por logro asc (brechas primero)
   highlights: {

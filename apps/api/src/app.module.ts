@@ -16,7 +16,9 @@ import { TeacherAssignmentsModule } from './teacher-assignments/teacher-assignme
 import { ClassGroupsModule } from './class-groups/class-groups.module';
 import { StudentsModule } from './students/students.module';
 import { InstrumentsModule } from './instruments/instruments.module';
+import { FilesModule } from './files/files.module';
 import { ItemsModule } from './items/items.module';
+import { ItemEditProposalsModule } from './item-edit-proposals/item-edit-proposals.module';
 import { DiaIngestionModule } from './dia-ingestion/dia-ingestion.module';
 import { AiTaggingModule } from './ai-tagging/ai-tagging.module';
 import { SpecTablesModule } from './spec-tables/spec-tables.module';
@@ -24,6 +26,7 @@ import { CatalogModule } from './catalog/catalog.module';
 import { AnswerSheetsModule } from './answer-sheets/answer-sheets.module';
 import { GradingScalesModule } from './grading-scales/grading-scales.module';
 import { AssessmentResultsModule } from './assessment-results/assessment-results.module';
+import { PerformanceBandsModule } from './performance-bands/performance-bands.module';
 import { DashboardsModule } from './dashboards/dashboards.module';
 import { AnalyticsModule } from './analytics/analytics.module';
 import { HeatmapModule } from './heatmap/heatmap.module';
@@ -38,6 +41,7 @@ import { BenchmarkingModule } from './benchmarking/benchmarking.module';
 import { InstrumentQualityModule } from './instrument-quality/instrument-quality.module';
 import { AiObservabilityModule } from './ai-observability/ai-observability.module';
 import { AssistantModule } from './assistant/assistant.module';
+import { OfficialReportsModule } from './official-reports/official-reports.module';
 
 @Module({
   imports: [
@@ -57,7 +61,11 @@ import { AssistantModule } from './assistant/assistant.module';
     ClassGroupsModule,
     StudentsModule,
     InstrumentsModule,
+    // ── Módulo genérico de almacenamiento de archivos (S3 CRUD reutilizable) ──
+    FilesModule,
     ItemsModule,
+    // ── TKT-19: escritura asistida de ítems (IA propone, humano aprueba) ──
+    ItemEditProposalsModule,
     DiaIngestionModule,
     AiTaggingModule,
     SpecTablesModule,
@@ -66,6 +74,7 @@ import { AssistantModule } from './assistant/assistant.module';
     AnswerSheetsModule,
     GradingScalesModule,
     AssessmentResultsModule,
+    PerformanceBandsModule,
     // ── Sprint 4: dashboards core y analítica de series temporales ──
     DashboardsModule,
     AnalyticsModule,
@@ -89,6 +98,8 @@ import { AssistantModule } from './assistant/assistant.module';
     AiObservabilityModule,
     // ── E21: Asistente IA Conversacional (loop de tool-use + chat SSE) ──
     AssistantModule,
+    // ── Informes oficiales (TKT-24/25/26): por curso, establecimiento y por alumno ──
+    OfficialReportsModule,
   ],
   controllers: [AppController],
   providers: [

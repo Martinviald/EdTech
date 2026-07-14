@@ -1,21 +1,34 @@
 'use client';
 
 import type { JSX } from 'react';
-import { CheckCircle2, FileQuestion, Loader2, Sparkles } from 'lucide-react';
+import { CheckCircle2, FileQuestion, Loader2 } from 'lucide-react';
 import type {
   AlternativeDistribution,
   QuestionAnalysisResponse,
+  QuestionSection,
   QuestionTaxonomyTag,
 } from '@soe/types';
-import {
-  Sheet,
-  SheetContent,
-  SheetDescription,
-  SheetHeader,
-  SheetTitle,
-} from '@/components/ui/sheet';
 import { Badge } from '@/components/ui/badge';
+import { hasPassageContent, type PassageData } from '@/components/passage-dialog';
 import { cn } from '@/lib/utils';
+import { QuestionDetailSheet } from '@/components/question-detail/question-detail-sheet';
+import { QuestionNodes, type QuestionNodeTag } from '@/components/question-detail/question-nodes';
+
+function questionSectionToPassage(section: QuestionSection): PassageData {
+  return {
+    sectionName: section.name,
+    passageTitle: section.passageTitle,
+    passageText: section.passageText,
+    passageFormat: section.passageFormat,
+    attachments: section.attachments.map((a) => ({
+      kind: a.kind,
+      url: a.url,
+      fileName: a.fileName,
+      mimeType: a.mimeType,
+      note: a.note,
+    })),
+  };
+}
 
 // ─────────────────────────────────────────────────────────────────────────────
 // H6.12 — Panel de distribución de respuestas + análisis de distractores.
@@ -50,44 +63,45 @@ export function QuestionDetailPanel(props: {
   onClose: () => void;
 }): JSX.Element {
   const { data, open, onClose } = props;
+  const section = data?.section ?? null;
+  const passage =
+    section && hasPassageContent(section) ? questionSectionToPassage(section) : null;
 
   return (
-    <Sheet open={open} onOpenChange={(next) => (next ? undefined : onClose())}>
-      <SheetContent
-        side="right"
-        className="w-full overflow-y-auto sm:max-w-lg lg:max-w-xl"
-      >
-        {/* Header SIEMPRE presente (título + descripción) para accesibilidad:
-            Radix Dialog exige un Title/Description en cada Content. */}
-        <SheetHeader className="space-y-2 pr-8">
-          <div className="flex flex-wrap items-center gap-2">
-            <Badge variant="secondary">
-              {data ? `Pregunta ${data.position}` : 'Pregunta'}
-            </Badge>
-            {data?.correctKey ? (
-              <Badge variant="success">Clave correcta: {data.correctKey}</Badge>
-            ) : null}
-          </div>
-          <SheetTitle className="text-base leading-snug">
-            {data ? `Detalle de la pregunta ${data.position}` : 'Detalle de la pregunta'}
-          </SheetTitle>
-          <SheetDescription>
-            Enunciado, distribución de respuestas, análisis de distractores y nodos
-            asociados a la pregunta.
-          </SheetDescription>
-        </SheetHeader>
-
-        {data === null ? (
-          <div className="flex flex-col items-center justify-center gap-3 py-16 text-muted-foreground">
-            <Loader2 className="size-6 animate-spin" aria-hidden />
-            <p className="text-sm">Cargando análisis de la pregunta…</p>
-          </div>
-        ) : (
-          <QuestionDetailContent data={data} />
-        )}
-      </SheetContent>
-    </Sheet>
+    <QuestionDetailSheet
+      open={open}
+      onClose={onClose}
+      position={data?.position ?? null}
+      headerBadges={
+        data?.correctKey ? (
+          <Badge variant="success">Clave correcta: {data.correctKey}</Badge>
+        ) : null
+      }
+      description="Enunciado, distribución de respuestas, análisis de distractores y nodos asociados a la pregunta."
+      passage={passage}
+      storageKey="soe.questionDetail.panelWidth"
+    >
+      {data === null ? (
+        <div className="flex flex-col items-center justify-center gap-3 py-16 text-muted-foreground">
+          <Loader2 className="size-6 animate-spin" aria-hidden />
+          <p className="text-sm">Cargando análisis de la pregunta…</p>
+        </div>
+      ) : (
+        <QuestionDetailContent data={data} />
+      )}
+    </QuestionDetailSheet>
   );
+}
+
+/** Normaliza los tags de la pregunta a la forma común de `QuestionNodes`. */
+function toNodeTags(tags: QuestionTaxonomyTag[]): QuestionNodeTag[] {
+  return tags.map((t) => ({
+    nodeId: t.nodeId,
+    code: t.nodeCode ?? null,
+    type: t.nodeType,
+    name: t.nodeName,
+    taggedBy: t.taggedBy,
+  }));
 }
 
 function QuestionDetailContent({ data }: { data: QuestionAnalysisResponse }): JSX.Element {
@@ -118,15 +132,11 @@ function QuestionDetailContent({ data }: { data: QuestionAnalysisResponse }): JS
       {/* Métricas globales de la pregunta */}
       <div className="grid grid-cols-3 gap-3">
         <MetricCard
-          label="% de acierto"
+          label="% de logro"
           value={formatPct(data.correctRate)}
           tone={achievementTone(data.correctRate)}
         />
-        <MetricCard
-          label="Respuestas"
-          value={String(data.totalResponses)}
-          tone="neutral"
-        />
+        <MetricCard label="Respuestas" value={String(data.totalResponses)} tone="neutral" />
         <MetricCard
           label="En blanco"
           value={String(data.blankCount)}
@@ -134,133 +144,33 @@ function QuestionDetailContent({ data }: { data: QuestionAnalysisResponse }): JS
         />
       </div>
 
-      {/* Todos los nodos de taxonomía asociados a la pregunta */}
-      <QuestionNodes tags={data.tags} />
+      {/* Todos los nodos de taxonomía asociados a la pregunta. TKT-05: en
+          resultados los descriptores no se muestran (solo en el banco de ítems). */}
+      <QuestionNodes tags={toNodeTags(data.tags)} hiddenTypes={['descriptor']} />
 
       {/* Distribución por alternativa */}
       <section className="space-y-3">
-        <h3 className="text-sm font-semibold text-foreground">
-          Distribución de respuestas
-        </h3>
+        <h3 className="text-sm font-semibold text-foreground">Distribución de respuestas</h3>
         {data.alternatives.length === 0 ? (
           <div className="flex items-center gap-2 rounded-md border border-dashed bg-muted/30 px-4 py-6 text-sm text-muted-foreground">
             <FileQuestion className="size-5" aria-hidden />
             <span>
-              Esta pregunta no es de selección múltiple. Se registraron{' '}
-              {data.totalResponses} respuestas con {formatPct(data.correctRate)} de
-              acierto.
+              Esta pregunta no es de selección múltiple. Se registraron {data.totalResponses}{' '}
+              respuestas con {formatPct(data.correctRate)} de logro.
             </span>
           </div>
         ) : (
           <ul className="space-y-2.5">
             {data.alternatives.map((alt) => (
-              <AlternativeRow
-                key={alt.key}
-                alt={alt}
-                isTopDistractor={alt.key === distractor}
-              />
+              <AlternativeRow key={alt.key} alt={alt} isTopDistractor={alt.key === distractor} />
             ))}
             {data.blankCount > 0 ? (
-              <BlankRow
-                count={data.blankCount}
-                total={data.totalResponses}
-              />
+              <BlankRow count={data.blankCount} total={data.totalResponses} />
             ) : null}
           </ul>
         )}
       </section>
     </div>
-  );
-}
-
-// Etiquetas legibles por tipo de nodo (taxonomy_node_type) y orden de aparición.
-const NODE_TYPE_LABELS: Record<string, string> = {
-  skill: 'Habilidades',
-  content: 'Contenidos',
-  learning_objective: 'Objetivos de aprendizaje',
-  text_type: 'Tipos de texto',
-  axis: 'Ejes',
-  domain: 'Dominios',
-  subdomain: 'Subdominios',
-  performance_level: 'Niveles de desempeño',
-  descriptor: 'Descriptores',
-  criterion: 'Criterios',
-  paper: 'Papers',
-};
-
-const NODE_TYPE_ORDER = Object.keys(NODE_TYPE_LABELS);
-
-function nodeTypeRank(type: string): number {
-  const i = NODE_TYPE_ORDER.indexOf(type);
-  return i === -1 ? NODE_TYPE_ORDER.length : i;
-}
-
-/** Lista TODOS los nodos asociados a la pregunta, agrupados por tipo de nodo. */
-function QuestionNodes({ tags }: { tags: QuestionTaxonomyTag[] }): JSX.Element {
-  return (
-    <section className="space-y-3">
-      <h3 className="text-sm font-semibold text-foreground">Nodos asociados</h3>
-      {tags.length === 0 ? (
-        <p className="text-sm text-muted-foreground">
-          Esta pregunta no tiene nodos de taxonomía asociados.
-        </p>
-      ) : (
-        <div className="space-y-3">
-          {groupTagsByType(tags).map(([type, group]) => (
-            <div key={type} className="space-y-1.5">
-              <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-                {NODE_TYPE_LABELS[type] ?? type}
-              </p>
-              <ul className="flex flex-wrap gap-2">
-                {group.map((tag) => (
-                  <li key={tag.nodeId}>
-                    <span className="inline-flex items-center gap-1.5 rounded-md border bg-card px-2.5 py-1 text-sm">
-                      {tag.nodeCode ? (
-                        <span className="font-medium tabular-nums">{tag.nodeCode}</span>
-                      ) : null}
-                      <span className="text-foreground">{tag.nodeName}</span>
-                      {tag.tagType === 'secondary' ? (
-                        <Badge
-                          variant="outline"
-                          className="ml-0.5 px-1 py-0 text-[10px] font-normal"
-                        >
-                          secundario
-                        </Badge>
-                      ) : null}
-                      {tag.taggedBy === 'ai' ? (
-                        <Badge
-                          variant="secondary"
-                          className="ml-0.5 gap-0.5 px-1 py-0 text-[10px] font-normal"
-                          title="Sugerido por IA"
-                        >
-                          <Sparkles className="size-2.5" aria-hidden />
-                          IA
-                        </Badge>
-                      ) : null}
-                    </span>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          ))}
-        </div>
-      )}
-    </section>
-  );
-}
-
-/** Agrupa los tags por `nodeType`, conservando el orden de relevancia. */
-function groupTagsByType(
-  tags: QuestionTaxonomyTag[],
-): [string, QuestionTaxonomyTag[]][] {
-  const groups = new Map<string, QuestionTaxonomyTag[]>();
-  for (const tag of tags) {
-    const arr = groups.get(tag.nodeType) ?? [];
-    arr.push(tag);
-    groups.set(tag.nodeType, arr);
-  }
-  return Array.from(groups.entries()).sort(
-    ([a], [b]) => nodeTypeRank(a) - nodeTypeRank(b),
   );
 }
 
@@ -291,9 +201,7 @@ function AlternativeRow({
           >
             {alt.key}
           </span>
-          <span className="truncate text-foreground">
-            {alt.text ?? `Alternativa ${alt.key}`}
-          </span>
+          <span className="truncate text-foreground">{alt.text ?? `Alternativa ${alt.key}`}</span>
           {alt.isCorrect ? (
             <CheckCircle2
               className="size-4 shrink-0 text-emerald-600 dark:text-emerald-400"
@@ -309,10 +217,7 @@ function AlternativeRow({
           {alt.count} · {formatPct(alt.percentage)}
         </span>
       </div>
-      <div
-        className="h-2 w-full overflow-hidden rounded-full bg-muted"
-        role="presentation"
-      >
+      <div className="h-2 w-full overflow-hidden rounded-full bg-muted" role="presentation">
         <div
           className={cn('h-full rounded-full transition-all', barClass)}
           style={{ width: `${Math.min(100, Math.max(0, alt.percentage))}%` }}
@@ -322,13 +227,7 @@ function AlternativeRow({
   );
 }
 
-function BlankRow({
-  count,
-  total,
-}: {
-  count: number;
-  total: number;
-}): JSX.Element {
+function BlankRow({ count, total }: { count: number; total: number }): JSX.Element {
   const pct = total > 0 ? (count / total) * 100 : 0;
   return (
     <li className="space-y-1">
@@ -375,9 +274,7 @@ function MetricCard({
   return (
     <div className="rounded-lg border bg-card p-3 text-center">
       <p className="text-xs text-muted-foreground">{label}</p>
-      <p className={cn('mt-1 text-lg font-semibold tabular-nums', toneClass[tone])}>
-        {value}
-      </p>
+      <p className={cn('mt-1 text-lg font-semibold tabular-nums', toneClass[tone])}>{value}</p>
     </div>
   );
 }

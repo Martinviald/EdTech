@@ -9,6 +9,7 @@ import {
 import { and, eq } from 'drizzle-orm';
 import { InjectDb, type Database } from '../database/database.types';
 import { LlmService } from '../llm/llm.service';
+import { estimateLlmCostUsd } from '../llm/llm.pricing';
 import { AiAnalysisService } from './ai-analysis.service';
 import {
   buildAssessmentInsightsPrompt,
@@ -20,6 +21,12 @@ import { SNAPSHOT_BUILDER, type SnapshotBuilder } from './snapshot.port';
 // Flash — un informe extenso midió ~90s. Override por env `AI_ANALYSIS_TIMEOUT_MS`.
 const AI_ANALYSIS_TIMEOUT_MS_DEFAULT = 120_000;
 
+// Reintentos ante fallos TRANSITORIOS de red del LLM (ej. "fetch failed" por un
+// reset de conexión en el egress). NO reintenta parseo/schema/timeout. El provider
+// Gemini ya mitiga el idle-timeout usando streaming; esto cubre el blip residual.
+const AI_ANALYSIS_MAX_ATTEMPTS = 2;
+const AI_ANALYSIS_RETRY_BACKOFF_MS_DEFAULT = 2_000;
+
 /**
  * Ejecuta el ciclo real del informe IA de evaluación (F2 S1 — H20.2–H20.5).
  *
@@ -27,9 +34,12 @@ const AI_ANALYSIS_TIMEOUT_MS_DEFAULT = 120_000;
  * prompt único (`buildAssessmentInsightsPrompt`) → `LlmService.complete` →
  * parseo Zod ESTRICTO con `assessmentInsightsOutputSchema` → markCompleted.
  *
- * Todo va dentro de try/catch + timeout (`Promise.race`): cualquier error, salida
- * no parseable, schema inválido o timeout deja el análisis `failed` (nunca tumba
- * el proceso). La IA SOLO interpreta el snapshot determinista; NUNCA recibe PII
+ * Todo va dentro de try/catch + timeout (`Promise.race`) + retry ante fallos
+ * transitorios de red del LLM: cualquier error, salida no parseable, schema
+ * inválido o timeout deja el análisis `failed` (nunca tumba el proceso). El
+ * provider Gemini hace la llamada por streaming (conexión no-idle) para no chocar
+ * con el idle-timeout de egress. La IA SOLO interpreta el snapshot determinista;
+ * NUNCA recibe PII
  * (el snapshot ya viene anonimizado). La salida del modelo vive solo en `output`.
  */
 @Injectable()
@@ -57,19 +67,26 @@ export class AiAnalysisRunner {
       const audience = this.resolveAudience(record.audience);
       const { system, prompt } = buildAssessmentInsightsPrompt(snapshot, audience);
 
-      const raw = await this.withTimeout(
-        this.llm.complete(system, prompt, orgId, 'assessment_analysis'),
-        this.timeoutMs(),
+      const completion = await this.withRetry(() =>
+        this.withTimeout(
+          this.llm.completeWithUsage(system, prompt, orgId, 'assessment_analysis'),
+          this.timeoutMs(),
+        ),
       );
 
-      const output = this.parseOutput(raw);
+      const output = this.parseOutput(completion.text);
 
       await this.service.markCompleted(analysisId, orgId, {
         output,
-        model: null,
+        model: completion.model,
         promptVersion: PROMPT_VERSION,
-        tokens: null,
-        costUsd: null,
+        tokens: completion.usage
+          ? {
+              input: completion.usage.inputTokens,
+              output: completion.usage.outputTokens,
+            }
+          : null,
+        costUsd: estimateLlmCostUsd(completion.model, completion.usage),
       });
     } catch (err) {
       const message = err instanceof Error ? err.message : String(err);
@@ -133,10 +150,7 @@ export class AiAnalysisRunner {
   private withTimeout<T>(promise: Promise<T>, ms: number): Promise<T> {
     let timer: ReturnType<typeof setTimeout>;
     const timeout = new Promise<never>((_resolve, reject) => {
-      timer = setTimeout(
-        () => reject(new Error(`Timeout de análisis IA tras ${ms}ms`)),
-        ms,
-      );
+      timer = setTimeout(() => reject(new Error(`Timeout de análisis IA tras ${ms}ms`)), ms);
     });
     return Promise.race([promise, timeout]).finally(() => clearTimeout(timer));
   }
@@ -144,5 +158,43 @@ export class AiAnalysisRunner {
   private timeoutMs(): number {
     const raw = Number(process.env.AI_ANALYSIS_TIMEOUT_MS);
     return Number.isFinite(raw) && raw > 0 ? raw : AI_ANALYSIS_TIMEOUT_MS_DEFAULT;
+  }
+
+  /**
+   * Reintenta `factory` ante fallos TRANSITORIOS de red (ej. "fetch failed" por un
+   * reset de conexión en el egress). NO reintenta errores de parseo/schema/timeout
+   * (no son transitorios). Backoff lineal; override por `AI_ANALYSIS_RETRY_BACKOFF_MS`.
+   */
+  private async withRetry<T>(factory: () => Promise<T>): Promise<T> {
+    let lastErr: unknown;
+    for (let attempt = 1; attempt <= AI_ANALYSIS_MAX_ATTEMPTS; attempt++) {
+      try {
+        return await factory();
+      } catch (err) {
+        lastErr = err;
+        if (attempt >= AI_ANALYSIS_MAX_ATTEMPTS || !this.isTransient(err)) {
+          throw err;
+        }
+        await this.delay(this.retryBackoffMs() * attempt);
+      }
+    }
+    throw lastErr;
+  }
+
+  /** ¿El error es un fallo de red transitorio (vale la pena reintentar)? */
+  private isTransient(err: unknown): boolean {
+    const msg = (err instanceof Error ? err.message : String(err)).toLowerCase();
+    return /fetch failed|econnreset|etimedout|eai_again|socket|network|und_err|terminated|other side closed/.test(
+      msg,
+    );
+  }
+
+  private delay(ms: number): Promise<void> {
+    return new Promise((resolve) => setTimeout(resolve, ms));
+  }
+
+  private retryBackoffMs(): number {
+    const raw = Number(process.env.AI_ANALYSIS_RETRY_BACKOFF_MS);
+    return Number.isFinite(raw) && raw >= 0 ? raw : AI_ANALYSIS_RETRY_BACKOFF_MS_DEFAULT;
   }
 }

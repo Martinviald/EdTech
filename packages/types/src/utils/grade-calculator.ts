@@ -234,6 +234,69 @@ export function isPassingGrade(grade: number, scale: GradingScaleParams): boolea
   return grade >= scale.passingGrade;
 }
 
+// ── Clasificación por bandas data-driven (performance_bands) ──────────────────
+// Fuente de verdad del nivel de logro cuando el instrumento tiene bandas
+// configuradas. Cada banda define su rango [minThreshold, maxThreshold) sobre el
+// % de logro (0..1). Reemplaza el corte hardcodeado 40/70/85 por datos por
+// instrumento (ver docs/analisis-clasificacion-niveles-dia.md). El caller mapea
+// las filas de la tabla `performance_bands` (thresholds decimales string) a este
+// tipo con los thresholds ya parseados a number.
+
+export type PerformanceBandInput = {
+  id: string;
+  key: string;
+  label: string;
+  order: number;
+  minThreshold: number; // 0..1 inclusivo
+  maxThreshold: number; // 0..1 exclusivo (salvo la banda superior, ver abajo)
+  color?: string | null;
+};
+
+/**
+ * Clasifica un % de logro (0..1) en la banda correspondiente.
+ * - Rango [min, max): min inclusivo, max exclusivo.
+ * - La banda de mayor `order` trata su `max` como inclusivo, de modo que p=1.0
+ *   siempre cae en la banda superior aunque su maxThreshold sea 1.
+ * Devuelve `null` si no hay bandas o ninguna contiene el %.
+ */
+export function classifyByBands(
+  percentage: number,
+  bands: readonly PerformanceBandInput[] | null | undefined,
+): PerformanceBandInput | null {
+  if (!bands || bands.length === 0) return null;
+  const p = Math.max(0, Math.min(1, percentage));
+  const sorted = [...bands].sort((a, b) => a.order - b.order);
+  const top = sorted[sorted.length - 1]!;
+  for (const b of sorted) {
+    const isTop = b === top;
+    if (p >= b.minThreshold && (p < b.maxThreshold || (isTop && p <= b.maxThreshold))) {
+      return b;
+    }
+  }
+  return null;
+}
+
+/**
+ * Deriva el enum legacy de 4 niveles (`performance_level`) desde una banda, para
+ * retrocompatibilidad. Mapea la posición relativa de la banda (order) dentro del
+ * set a uno de los 4 buckets. Instrumentos con 3 bandas (DIA I/II/III) o 6 (CEFR)
+ * se proyectan proporcionalmente. `performance_band_id` sigue siendo la verdad.
+ */
+export function bandToLegacyLevel(
+  band: PerformanceBandInput,
+  bands: readonly PerformanceBandInput[],
+): PerformanceLevel {
+  const levels: PerformanceLevel[] = ['insufficient', 'elementary', 'adequate', 'advanced'];
+  const n = bands.length;
+  if (n <= 1) return 'adequate';
+  // Posición relativa 0..1 del `order` de la banda dentro del set ordenado.
+  const orders = [...bands].map((b) => b.order).sort((a, b) => a - b);
+  const idx = orders.indexOf(band.order);
+  const ratio = idx / (n - 1);
+  const bucket = Math.min(levels.length - 1, Math.round(ratio * (levels.length - 1)));
+  return levels[bucket]!;
+}
+
 // ── Aggregations ─────────────────────────────────────────────────────────────
 
 export type ResponseForCalculation = {
@@ -262,6 +325,9 @@ export type StudentAggregateResult = {
   // un instrumento `percentage`/`linear_chilean` los deja en null/undefined.
   scaledScore?: number | null;
   bandLabel?: string | null;
+  // Nivel de logro como dato (performance_bands). Poblado cuando el instrumento
+  // tiene bandas configuradas; null → se usa el enum `performanceLevel` legacy.
+  performanceBandId?: string | null;
 };
 
 export type SkillAggregateResult = {
@@ -271,6 +337,7 @@ export type SkillAggregateResult = {
   totalCount: number;
   percentage: number; // 0..1
   performanceLevel: PerformanceLevel;
+  performanceBandId?: string | null;
 };
 
 /**
@@ -291,6 +358,7 @@ function effectiveScore(r: Pick<ResponseForCalculation, 'finalScore' | 'rawScore
 export function aggregateStudentResults(
   responses: ResponseForCalculation[],
   scale: GradingScaleParams,
+  bands?: readonly PerformanceBandInput[] | null,
 ): StudentAggregateResult[] {
   const byStudent = new Map<string, ResponseForCalculation[]>();
   for (const r of responses) {
@@ -312,15 +380,23 @@ export function aggregateStudentResults(
     const maxScore = scored.reduce((acc, r) => acc + r.maxScore, 0);
     const percentage = maxScore > 0 ? totalScore / maxScore : 0;
     const grade = percentageToGrade(percentage, scale);
-    const performanceLevel = percentageToPerformanceLevel(percentage, scale);
     const isComplete = rows.every((r) => r.isCorrect !== null);
+
+    // Nivel de logro: si el instrumento tiene bandas configuradas, éstas son la
+    // fuente de verdad (performance_band_id) y el enum legacy se deriva de la
+    // banda. Sin bandas → corte por thresholds del enum (comportamiento previo).
+    const band = classifyByBands(percentage, bands);
+    const performanceLevel = band
+      ? bandToLegacyLevel(band, bands!)
+      : percentageToPerformanceLevel(percentage, scale);
+    const performanceBandId = band?.id ?? null;
 
     // Métrica raíz extendida (#3): para escalas `paes_scaled`/`irt_based`,
     // `grade` ya ES el puntaje escalado → exponerlo también como `scaledScore`.
-    // `bandLabel` se deriva de `config.bands` si la escala las define.
+    // `bandLabel` prefiere la banda del instrumento; si no, `config.bands`.
     const isScaled = scale.type === 'paes_scaled' || scale.type === 'irt_based';
     const scaledScore = isScaled ? grade : null;
-    const bandLabel = resolveBandLabel(percentage, scale);
+    const bandLabel = band?.label ?? resolveBandLabel(percentage, scale);
 
     results.push({
       studentId,
@@ -332,6 +408,7 @@ export function aggregateStudentResults(
       isComplete,
       scaledScore,
       bandLabel,
+      performanceBandId,
     });
   }
   return results;
@@ -359,6 +436,7 @@ function resolveBandLabel(percentage: number, scale: GradingScaleParams): string
 export function aggregateSkillResults(
   responses: ResponseForCalculation[],
   scale?: Pick<GradingScaleParams, 'config'>,
+  bands?: readonly PerformanceBandInput[] | null,
 ): SkillAggregateResult[] {
   const key = (studentId: string, nodeId: string) => `${studentId}__${nodeId}`;
   const byKey = new Map<
@@ -404,13 +482,18 @@ export function aggregateSkillResults(
     // % ponderado por maxScore por ítem (respeta finalScore). Si no hay ítems
     // corregidos con maxScore (todo pendiente / maxScore 0), cae a 0.
     const percentage = v.maxSum > 0 ? v.scoreSum / v.maxSum : 0;
+    // Mismas bandas del instrumento aplicadas al % del nodo de habilidad.
+    const band = classifyByBands(percentage, bands);
     results.push({
       studentId: v.studentId,
       nodeId: v.nodeId,
       correctCount: v.correctCount,
       totalCount: v.totalCount,
       percentage,
-      performanceLevel: percentageToPerformanceLevel(percentage, scale),
+      performanceLevel: band
+        ? bandToLegacyLevel(band, bands!)
+        : percentageToPerformanceLevel(percentage, scale),
+      performanceBandId: band?.id ?? null,
     });
   }
   return results;

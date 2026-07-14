@@ -13,6 +13,18 @@ export type ItemTagType = (typeof ITEM_TAG_TYPES)[number];
 export const TAGGED_BY = ['human', 'ai'] as const;
 export type TaggedBy = (typeof TAGGED_BY)[number];
 
+// ── Banco de ítems: alcance (scope) (TKT-14) ─────────────────────────────────
+// El banco de ítems es transversal a los instrumentos y combina dos orígenes:
+//   · 'own'    → ítems propios de la org del usuario (org_id = orgId).
+//   · 'global' → ítems globales/oficiales compartidos (org_id IS NULL).
+//   · 'all'    → ambos (comportamiento por defecto histórico).
+// El aislamiento NO se apoya en RLS: `items` no es tabla RLS (no contiene PII).
+// Los datos sensibles (respuestas/resultados) siguen aislados por RLS vía
+// `assessments`. La lectura del banco global sólo expone contenido de ítems.
+export const ITEM_BANK_SCOPES = ['own', 'global', 'all'] as const;
+export type ItemBankScope = (typeof ITEM_BANK_SCOPES)[number];
+export const itemBankScopeSchema = z.enum(ITEM_BANK_SCOPES);
+
 const itemTypeSchema = z.enum(ITEM_TYPES);
 const itemStatusSchema = z.enum(ITEM_STATUS);
 const itemSourceSchema = z.enum(ITEM_SOURCES);
@@ -122,13 +134,61 @@ export const updateItemSchema = createItemSchema
   .partial()
   .superRefine(refineContentByType);
 
+/**
+ * Coacciona `taxonomyNodeIds` a `string[]` aceptando: array (?taxonomyNodeIds=a&…),
+ * valor único (string) o CSV ("a,b,c"). Los uuids se validan tras normalizar.
+ */
+const taxonomyNodeIdsSchema = z
+  .union([z.array(z.string()), z.string()])
+  .optional()
+  .transform((v) => {
+    if (v === undefined) return undefined;
+    const arr = Array.isArray(v) ? v : v.split(',');
+    return arr.map((s) => s.trim()).filter((s) => s.length > 0);
+  })
+  .pipe(z.array(z.string().uuid()).optional());
+
+/**
+ * Coacciona `taxonomyNodeGroups` a `string[][]` (grupos AND, OR dentro de cada
+ * grupo). Cada ocurrencia del query param (repetido) es una CSV de uuids = un
+ * grupo. Espejo del schema en apps/api (item.dto.ts).
+ */
+const taxonomyNodeGroupsSchema = z
+  .union([z.array(z.string()), z.string()])
+  .optional()
+  .transform((v) => {
+    if (v === undefined) return undefined;
+    const raw = Array.isArray(v) ? v : [v];
+    const groups = raw
+      .map((g) =>
+        g
+          .split(',')
+          .map((s) => s.trim())
+          .filter((s) => s.length > 0),
+      )
+      .filter((g) => g.length > 0);
+    return groups.length > 0 ? groups : undefined;
+  })
+  .pipe(z.array(z.array(z.string().uuid())).optional());
+
 export const listItemsQuerySchema = z.object({
   instrumentId: z.string().uuid().optional(),
   sectionId: z.string().uuid().optional(),
   type: itemTypeSchema.optional(),
   status: itemStatusSchema.optional(),
   source: itemSourceSchema.optional(),
+  // Filtro por un nodo (retrocompatible).
   taxonomyNodeId: z.string().uuid().optional(),
+  // Filtro multi-tag con lógica OR (TKT-12/TKT-14): el ítem se incluye si tiene
+  // CUALQUIERA de estos nodos etiquetado. Se combina con `taxonomyNodeId` (OR).
+  taxonomyNodeIds: taxonomyNodeIdsSchema,
+  // Filtro facetado del banco: asignatura Y nivel (transitivo vía tags → nodos).
+  subjectId: z.string().uuid().optional(),
+  gradeId: z.string().uuid().optional(),
+  // Grupos AND (OR dentro de cada grupo): un grupo por tipo de nodo elegido.
+  taxonomyNodeGroups: taxonomyNodeGroupsSchema,
+  // Alcance del banco de ítems (TKT-14): 'own' | 'global' | 'all' (default).
+  scope: itemBankScopeSchema.default('all'),
   page: z.coerce.number().int().min(1).default(1),
   limit: z.coerce.number().int().min(1).max(200).default(50),
 });
@@ -297,6 +357,8 @@ export type ItemTaxonomyTagModel = {
     name: string;
     type: string;
     code: string | null;
+    description: string | null;
+    taxonomyId: string;
   };
 };
 

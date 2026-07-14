@@ -3,7 +3,7 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { and, asc, eq, inArray, isNull, sql } from 'drizzle-orm';
+import { and, asc, eq, inArray, isNull, notInArray, sql } from 'drizzle-orm';
 import {
   assessmentCourseAssignments,
   assessmentResults,
@@ -22,9 +22,13 @@ import {
   subjects,
   taxonomyNodes,
   teacherAssignments,
+  withOrgContext,
 } from '@soe/db';
 import {
   RESULTS_VIEWER_ROLES,
+  RESULT_HIDDEN_NODE_TYPES,
+  bandToLegacyLevel,
+  classifyByBands,
   percentageToPerformanceLevel,
   userHasAnyRole,
   type AssessmentReportCourseRow,
@@ -35,12 +39,21 @@ import {
   type AssessmentReportRiskStudent,
   type AssessmentReportSkillRow,
   type ItemReportFlag,
+  type PerformanceBandDistributionBucket,
+  type PerformanceBandInput,
+  type PerformanceBandView,
   type PerformanceDistributionBucket,
   type PerformanceLevel,
   type UserRole,
 } from '@soe/types';
 import type { JwtPayload } from '../auth/jwt-payload.types';
 import { InjectDb, type Database } from '../database/database.types';
+import { loadInstrumentBands } from '../performance-bands/lib/load-instrument-bands';
+
+/** PerformanceBandInput (con thresholds) → vista mínima para la respuesta. */
+function toBandView(b: PerformanceBandInput): PerformanceBandView {
+  return { key: b.key, label: b.label, order: b.order, color: b.color ?? null };
+}
 
 // Roles administrativos: ven toda la org. Idéntico a los demás services de
 // resultados (AssessmentResultsService / AnalyticsService / ItemAnalysisService).
@@ -65,8 +78,6 @@ const PERFORMANCE_LEVELS_ORDER: readonly PerformanceLevel[] = [
 
 // Niveles que cuentan como "en riesgo" para el foco de intervención.
 const AT_RISK_LEVELS: readonly PerformanceLevel[] = ['insufficient', 'elementary'];
-
-const DEFAULT_PASSING_GRADE = 4.0;
 
 // Umbrales de los flags psicométricos. No hardcodean instrumento: son convención
 // psicométrica estándar aplicable a cualquier prueba de selección múltiple.
@@ -100,156 +111,195 @@ export class AssessmentReportService {
     query: AssessmentReportQueryDto,
   ): Promise<AssessmentReportResponse> {
     const orgId = this.requireOrgId(user);
-    const assessment = await this.requireAssessment(user, orgId, query.assessmentId);
-    const scope = await this.getAccessibleClassGroupIds(user, orgId);
 
-    // Profesor sin scope sobre esta evaluación → 403.
-    if (!scope.scopeAll) {
-      const hasScope = await this.assessmentTouchesScope(
-        query.assessmentId,
-        scope.classGroupIds,
-      );
-      if (!hasScope) {
-        throw new ForbiddenException(
-          'No tiene acceso a los resultados de esta evaluación',
+    // Todo el informe consulta tablas con RLS (assessments, assessment_results,
+    // responses, skill_results, students). Debe correr dentro de withOrgContext
+    // para fijar `app.current_org_id` en la transacción; de lo contrario, bajo un
+    // rol sin BYPASSRLS (soe_app en cloud) el RLS devuelve 0 filas → 404 (§5.2).
+    // Los helpers de acceso a datos reciben el `tx` de la transacción, nunca
+    // this.db (una query en this.db correría sin contexto).
+    return withOrgContext(this.db, orgId, async (tx) => {
+      const assessment = await this.requireAssessment(tx, user, orgId, query.assessmentId);
+      const scope = await this.getAccessibleClassGroupIds(tx, user, orgId);
+
+      // Profesor sin scope sobre esta evaluación → 403.
+      if (!scope.scopeAll) {
+        const hasScope = await this.assessmentTouchesScope(
+          tx,
+          query.assessmentId,
+          scope.classGroupIds,
         );
+        if (!hasScope) {
+          throw new ForbiddenException(
+            'No tiene acceso a los resultados de esta evaluación',
+          );
+        }
       }
-    }
-    if (query.classGroupId) {
-      const ok = await this.classGroupInScope(orgId, scope, query.classGroupId);
-      if (!ok) throw new ForbiddenException('No tiene acceso a ese curso');
-    }
+      if (query.classGroupId) {
+        const ok = await this.classGroupInScope(tx, orgId, scope, query.classGroupId);
+        if (!ok) throw new ForbiddenException('No tiene acceso a ese curso');
+      }
 
-    const studentFilter = await this.resolveAccessibleStudentIds(
-      orgId,
-      scope,
-      query.classGroupId,
-    );
+      const studentFilter = await this.resolveAccessibleStudentIds(
+        tx,
+        orgId,
+        scope,
+        query.classGroupId,
+      );
 
-    const passingGrade = await this.resolvePassingGrade(assessment.gradingScaleId);
+      // TKT-04 — `passingGrade` es `null` cuando el instrumento no tiene escala de
+      // notas configurada. `hasGradingScale` lo expone explícitamente en el
+      // contrato para que la UI oculte los campos de nota en vez de mostrar 4.0.
+      const passingGrade = await this.resolvePassingGrade(tx, assessment.gradingScaleId);
+      const hasGradingScale = passingGrade !== null;
 
-    // Cursos de la evaluación visibles para el caller (intersectados con el scope).
-    const reportClassGroups = await this.loadAssessmentClassGroups(
-      query.assessmentId,
-      orgId,
-      scope,
-      query.classGroupId,
-    );
-    const gradeName = reportClassGroups.find((c) => c.gradeName)?.gradeName ?? null;
+      // Cursos de la evaluación visibles para el caller (intersectados con el scope).
+      const reportClassGroups = await this.loadAssessmentClassGroups(
+        tx,
+        query.assessmentId,
+        orgId,
+        scope,
+        query.classGroupId,
+      );
+      const gradeName = reportClassGroups.find((c) => c.gradeName)?.gradeName ?? null;
 
-    // Ítems del instrumento + sus tags (skill/content) representativos.
-    const itemColumns = await this.loadItemColumns(assessment.instrumentId);
-    const itemIds = itemColumns.map((i) => i.itemId);
+      // Ítems del instrumento + sus tags (skill/content) representativos.
+      const itemColumns = await this.loadItemColumns(tx, assessment.instrumentId);
+      const itemIds = itemColumns.map((i) => i.itemId);
 
-    // Alumnos evaluados (con assessment_results) dentro del scope.
-    const evaluated = await this.loadEvaluatedStudents(
-      query.assessmentId,
-      orgId,
-      studentFilter,
-    );
-    const classGroupByStudent = await this.loadStudentClassGroups(
-      query.assessmentId,
-      evaluated.map((s) => s.studentId),
-    );
-    const studentsEnrolled = await this.countEnrolled(reportClassGroups.map((c) => c.id));
+      // Alumnos evaluados (con assessment_results) dentro del scope.
+      const evaluated = await this.loadEvaluatedStudents(
+        tx,
+        query.assessmentId,
+        orgId,
+        studentFilter,
+      );
+      const classGroupByStudent = await this.loadStudentClassGroups(
+        tx,
+        query.assessmentId,
+        evaluated.map((s) => s.studentId),
+      );
+      const studentsEnrolled = await this.countEnrolled(
+        tx,
+        reportClassGroups.map((c) => c.id),
+      );
 
-    const meta = {
-      assessmentId: assessment.id,
-      assessmentName: assessment.name,
-      instrumentName: assessment.instrumentName,
-      instrumentType: assessment.instrumentType,
-      subjectName: assessment.subjectName,
-      gradeName,
-      administeredAt: assessment.administeredAt,
-      classGroups: reportClassGroups.map((c) => ({ id: c.id, name: c.name })),
-      itemsCount: itemColumns.length,
-    };
+      // Bandas del instrumento (el informe es siempre de un único instrumento):
+      // fuente de verdad del nivel. Corre dentro de withOrgContext → RLS trae
+      // globales + override de la org. Sin bandas → modo legacy (4 niveles).
+      const bands = await loadInstrumentBands(tx, assessment.instrumentId);
+      const bandView = bands.length > 0 ? bands.map(toBandView) : undefined;
 
-    // Caso sin alumnos evaluados: informe vacío pero bien formado.
-    if (evaluated.length === 0) {
+      const meta = {
+        assessmentId: assessment.id,
+        assessmentName: assessment.name,
+        instrumentId: assessment.instrumentId,
+        instrumentName: assessment.instrumentName,
+        instrumentType: assessment.instrumentType,
+        subjectName: assessment.subjectName,
+        gradeName,
+        administeredAt: assessment.administeredAt,
+        classGroups: reportClassGroups.map((c) => ({ id: c.id, name: c.name })),
+        itemsCount: itemColumns.length,
+      };
+
+      // Caso sin alumnos evaluados: informe vacío pero bien formado.
+      if (evaluated.length === 0) {
+        return {
+          meta,
+          summary: {
+            studentsEvaluated: 0,
+            studentsEnrolled,
+            coverageRate: studentsEnrolled > 0 ? 0 : null,
+            averageAchievement: null,
+            hasGradingScale,
+            averageGrade: null,
+            passingGrade,
+            passingRate: null,
+            performanceLevel: null,
+          },
+          distribution: this.emptyDistribution(),
+          ...(bandView ? { bands: bandView, bandDistribution: [] } : {}),
+          courseComparison: [],
+          skills: [],
+          highlights: { strengths: [], gaps: [] },
+          items: itemColumns.map((c) => this.emptyItemRow(c)),
+          studentsAtRisk: [],
+          recommendations: [],
+        };
+      }
+
+      // ── Síntesis ejecutiva ──────────────────────────────────────────────────
+      const summary = this.buildSummary(
+        evaluated,
+        studentsEnrolled,
+        passingGrade,
+        assessment.gradingScaleConfig,
+        bands,
+      );
+      const distribution = this.buildDistribution(evaluated);
+      const bandDistribution =
+        bands.length > 0 ? this.buildBandDistribution(evaluated, bands) : undefined;
+
+      // ── Comparativa por curso ───────────────────────────────────────────────
+      const courseComparison = this.buildCourseComparison(
+        evaluated,
+        classGroupByStudent,
+        passingGrade,
+        summary.averageAchievement,
+      );
+
+      // ── Análisis psicométrico de ítems ──────────────────────────────────────
+      const items = await this.buildItemAnalysis(
+        tx,
+        query.assessmentId,
+        itemColumns,
+        itemIds,
+        evaluated,
+        studentFilter,
+      );
+
+      // ── Fortalezas y brechas por habilidad ──────────────────────────────────
+      const skills = await this.buildSkills(
+        tx,
+        query.assessmentId,
+        orgId,
+        studentFilter,
+        assessment.gradingScaleConfig,
+        bands,
+      );
+      const highlights = this.buildHighlights(skills);
+
+      // ── Alumnos en foco ─────────────────────────────────────────────────────
+      const studentsAtRisk = await this.buildRiskStudents(
+        tx,
+        query.assessmentId,
+        evaluated,
+        classGroupByStudent,
+        bands,
+      );
+
+      // ── Recomendaciones (reglas) ────────────────────────────────────────────
+      const recommendations = this.buildRecommendations(
+        summary,
+        skills,
+        items,
+        studentsAtRisk,
+      );
+
       return {
         meta,
-        summary: {
-          studentsEvaluated: 0,
-          studentsEnrolled,
-          coverageRate: studentsEnrolled > 0 ? 0 : null,
-          averageAchievement: null,
-          averageGrade: null,
-          passingGrade,
-          passingRate: null,
-          performanceLevel: null,
-        },
-        distribution: this.emptyDistribution(),
-        courseComparison: [],
-        skills: [],
-        highlights: { strengths: [], gaps: [] },
-        items: itemColumns.map((c) => this.emptyItemRow(c)),
-        studentsAtRisk: [],
-        recommendations: [],
+        summary,
+        distribution,
+        ...(bandView ? { bands: bandView, bandDistribution } : {}),
+        courseComparison,
+        skills,
+        highlights,
+        items,
+        studentsAtRisk,
+        recommendations,
       };
-    }
-
-    // ── Síntesis ejecutiva ────────────────────────────────────────────────────
-    const summary = this.buildSummary(
-      evaluated,
-      studentsEnrolled,
-      passingGrade,
-      assessment.gradingScaleConfig,
-    );
-    const distribution = this.buildDistribution(evaluated);
-
-    // ── Comparativa por curso ─────────────────────────────────────────────────
-    const courseComparison = this.buildCourseComparison(
-      evaluated,
-      classGroupByStudent,
-      passingGrade,
-      summary.averageAchievement,
-    );
-
-    // ── Análisis psicométrico de ítems ────────────────────────────────────────
-    const items = await this.buildItemAnalysis(
-      query.assessmentId,
-      itemColumns,
-      itemIds,
-      evaluated,
-      studentFilter,
-    );
-
-    // ── Fortalezas y brechas por habilidad ────────────────────────────────────
-    const skills = await this.buildSkills(
-      query.assessmentId,
-      orgId,
-      studentFilter,
-      assessment.gradingScaleConfig,
-    );
-    const highlights = this.buildHighlights(skills);
-
-    // ── Alumnos en foco ───────────────────────────────────────────────────────
-    const studentsAtRisk = await this.buildRiskStudents(
-      query.assessmentId,
-      evaluated,
-      classGroupByStudent,
-    );
-
-    // ── Recomendaciones (reglas) ──────────────────────────────────────────────
-    const recommendations = this.buildRecommendations(
-      summary,
-      skills,
-      items,
-      studentsAtRisk,
-    );
-
-    return {
-      meta,
-      summary,
-      distribution,
-      courseComparison,
-      skills,
-      highlights,
-      items,
-      studentsAtRisk,
-      recommendations,
-    };
+    });
   }
 
   // ───────────────────────────────────────────────────────────────────────────
@@ -259,37 +309,51 @@ export class AssessmentReportService {
   private buildSummary(
     evaluated: EvaluatedStudent[],
     studentsEnrolled: number,
-    passingGrade: number,
+    passingGrade: number | null,
     scaleConfig: unknown,
+    bands: PerformanceBandInput[],
   ) {
+    // TKT-04 — sin escala configurada (`passingGrade === null`): no se reporta
+    // ningún campo de nota (averageGrade/passingGrade/passingRate quedan null); el
+    // % de logro y el nivel de desempeño sí, porque no dependen de la escala.
+    const hasGradingScale = passingGrade !== null;
+
     const pcts = evaluated
       .map((e) => e.percentage)
       .filter((p): p is number => p !== null);
     const grades = evaluated.map((e) => e.grade).filter((g): g is number => g !== null);
 
     const averageAchievement = pcts.length > 0 ? avg(pcts) : null;
-    const averageGrade = grades.length > 0 ? avg(grades) : null;
+    const averageGrade =
+      hasGradingScale && grades.length > 0 ? avg(grades) : null;
     const passingRate =
-      grades.length > 0
-        ? (grades.filter((g) => g >= passingGrade).length / grades.length) * 100
+      hasGradingScale && grades.length > 0
+        ? (grades.filter((g) => g >= passingGrade!).length / grades.length) * 100
         : null;
     const coverageRate =
       studentsEnrolled > 0 ? (evaluated.length / studentsEnrolled) * 100 : null;
+
+    const band =
+      averageAchievement === null ? null : classifyByBands(averageAchievement / 100, bands);
 
     return {
       studentsEvaluated: evaluated.length,
       studentsEnrolled,
       coverageRate,
       averageAchievement,
+      hasGradingScale,
       averageGrade,
       passingGrade,
       passingRate,
       performanceLevel:
         averageAchievement === null
           ? null
-          : percentageToPerformanceLevel(averageAchievement / 100, {
-              config: scaleConfig as never,
-            }),
+          : band
+            ? bandToLegacyLevel(band, bands)
+            : percentageToPerformanceLevel(averageAchievement / 100, {
+                config: scaleConfig as never,
+              }),
+      performanceBand: band ? toBandView(band) : null,
     };
   }
 
@@ -308,6 +372,35 @@ export class AssessmentReportService {
     });
   }
 
+  /** Distribución por banda del instrumento (clasifica el % de cada alumno). */
+  private buildBandDistribution(
+    evaluated: EvaluatedStudent[],
+    bands: PerformanceBandInput[],
+  ): PerformanceBandDistributionBucket[] {
+    const counts = new Map<string, number>();
+    let total = 0;
+    for (const e of evaluated) {
+      if (e.percentage === null) continue;
+      const band = classifyByBands(e.percentage / 100, bands);
+      if (!band) continue;
+      counts.set(band.key, (counts.get(band.key) ?? 0) + 1);
+      total += 1;
+    }
+    return [...bands]
+      .sort((a, b) => a.order - b.order)
+      .map((b) => {
+        const count = counts.get(b.key) ?? 0;
+        return {
+          key: b.key,
+          label: b.label,
+          order: b.order,
+          color: b.color ?? null,
+          count,
+          percentage: total > 0 ? (count / total) * 100 : 0,
+        };
+      });
+  }
+
   // ───────────────────────────────────────────────────────────────────────────
   // Comparativa por curso (intra-evaluación)
   // ───────────────────────────────────────────────────────────────────────────
@@ -315,7 +408,7 @@ export class AssessmentReportService {
   private buildCourseComparison(
     evaluated: EvaluatedStudent[],
     classGroupByStudent: Map<string, { id: string; name: string }>,
-    passingGrade: number,
+    passingGrade: number | null,
     overallAchievement: number | null,
   ): AssessmentReportCourseRow[] {
     const byCourse = new Map<
@@ -340,8 +433,9 @@ export class AssessmentReportService {
     const rows: AssessmentReportCourseRow[] = [];
     for (const [classGroupId, entry] of byCourse) {
       const averageAchievement = entry.pcts.length > 0 ? avg(entry.pcts) : null;
+      // TKT-04 — sin escala (passingGrade null) no hay tasa de aprobación por curso.
       const passingRate =
-        entry.grades.length > 0
+        passingGrade !== null && entry.grades.length > 0
           ? (entry.grades.filter((g) => g >= passingGrade).length /
               entry.grades.length) *
             100
@@ -371,6 +465,7 @@ export class AssessmentReportService {
   // ───────────────────────────────────────────────────────────────────────────
 
   private async buildItemAnalysis(
+    db: Database,
     assessmentId: string,
     itemColumns: ItemColumn[],
     itemIds: string[],
@@ -381,7 +476,7 @@ export class AssessmentReportService {
 
     // Distribución de respuestas por ítem y alternativa (1 query) → dificultad +
     // distractor dominante.
-    const dist = await this.loadItemDistribution(assessmentId, itemIds, studentFilter);
+    const dist = await this.loadItemDistribution(db, assessmentId, itemIds, studentFilter);
 
     // Discriminación: grupos alto/bajo (27%) por puntaje total. Sólo se calcula si
     // hay alumnos suficientes en cada grupo.
@@ -395,8 +490,8 @@ export class AssessmentReportService {
       const topIds = sorted.slice(0, groupSize).map((e) => e.studentId);
       const bottomIds = sorted.slice(-groupSize).map((e) => e.studentId);
       [topCorrect, bottomCorrect] = await Promise.all([
-        this.loadGroupCorrectness(assessmentId, itemIds, topIds),
-        this.loadGroupCorrectness(assessmentId, itemIds, bottomIds),
+        this.loadGroupCorrectness(db, assessmentId, itemIds, topIds),
+        this.loadGroupCorrectness(db, assessmentId, itemIds, bottomIds),
       ]);
     }
 
@@ -480,10 +575,12 @@ export class AssessmentReportService {
   // ───────────────────────────────────────────────────────────────────────────
 
   private async buildSkills(
+    db: Database,
     assessmentId: string,
     orgId: string,
     studentFilter: string[] | null,
     scaleConfig: unknown,
+    bands: PerformanceBandInput[],
   ): Promise<AssessmentReportSkillRow[]> {
     if (studentFilter !== null && studentFilter.length === 0) return [];
 
@@ -491,12 +588,14 @@ export class AssessmentReportService {
       eq(skillResults.assessmentId, assessmentId),
       eq(students.orgId, orgId),
       isNull(students.deletedAt),
+      // TKT-05 — los descriptores no se reportan como habilidad/eje en resultados.
+      notInArray(taxonomyNodes.type, [...RESULT_HIDDEN_NODE_TYPES]),
     ];
     if (studentFilter !== null) {
       conditions.push(inArray(skillResults.studentId, studentFilter));
     }
 
-    const rows = await this.db
+    const rows = await db
       .select({
         nodeId: taxonomyNodes.id,
         nodeName: taxonomyNodes.name,
@@ -513,6 +612,8 @@ export class AssessmentReportService {
 
     const skills: AssessmentReportSkillRow[] = rows.map((r) => {
       const averageAchievement = r.avgPct === null ? null : Number(r.avgPct);
+      const band =
+        averageAchievement === null ? null : classifyByBands(averageAchievement / 100, bands);
       return {
         nodeId: r.nodeId,
         nodeName: r.nodeName,
@@ -523,9 +624,12 @@ export class AssessmentReportService {
         performanceLevel:
           averageAchievement === null
             ? null
-            : percentageToPerformanceLevel(averageAchievement / 100, {
-                config: scaleConfig as never,
-              }),
+            : band
+              ? bandToLegacyLevel(band, bands)
+              : percentageToPerformanceLevel(averageAchievement / 100, {
+                  config: scaleConfig as never,
+                }),
+        performanceBand: band ? toBandView(band) : null,
       };
     });
 
@@ -554,9 +658,11 @@ export class AssessmentReportService {
   // ───────────────────────────────────────────────────────────────────────────
 
   private async buildRiskStudents(
+    db: Database,
     assessmentId: string,
     evaluated: EvaluatedStudent[],
     classGroupByStudent: Map<string, { id: string; name: string }>,
+    bands: PerformanceBandInput[],
   ): Promise<AssessmentReportRiskStudent[]> {
     const atRisk = evaluated
       .filter((e) => e.performanceLevel && AT_RISK_LEVELS.includes(e.performanceLevel))
@@ -566,19 +672,24 @@ export class AssessmentReportService {
     if (atRisk.length === 0) return [];
 
     const weakest = await this.loadWeakestSkillPerStudent(
+      db,
       assessmentId,
       atRisk.map((e) => e.studentId),
     );
 
-    return atRisk.map((e) => ({
-      studentId: e.studentId,
-      studentRut: e.studentRut,
-      studentFullName: `${e.firstName} ${e.lastName}`.trim(),
-      classGroupName: classGroupByStudent.get(e.studentId)?.name ?? null,
-      achievement: e.percentage,
-      performanceLevel: e.performanceLevel,
-      weakestSkill: weakest.get(e.studentId) ?? null,
-    }));
+    return atRisk.map((e) => {
+      const band = e.percentage === null ? null : classifyByBands(e.percentage / 100, bands);
+      return {
+        studentId: e.studentId,
+        studentRut: e.studentRut,
+        studentFullName: `${e.firstName} ${e.lastName}`.trim(),
+        classGroupName: classGroupByStudent.get(e.studentId)?.name ?? null,
+        achievement: e.percentage,
+        performanceLevel: e.performanceLevel,
+        performanceBand: band ? toBandView(band) : null,
+        weakestSkill: weakest.get(e.studentId) ?? null,
+      };
+    });
   }
 
   // ───────────────────────────────────────────────────────────────────────────
@@ -650,8 +761,11 @@ export class AssessmentReportService {
   // ───────────────────────────────────────────────────────────────────────────
 
   /** Ítems del instrumento + skill/content representativos. */
-  private async loadItemColumns(instrumentId: string): Promise<ItemColumn[]> {
-    const rows = await this.db
+  private async loadItemColumns(
+    db: Database,
+    instrumentId: string,
+  ): Promise<ItemColumn[]> {
+    const rows = await db
       .select({
         itemId: items.id,
         position: items.position,
@@ -662,7 +776,7 @@ export class AssessmentReportService {
       .orderBy(asc(items.position));
 
     const itemIds = rows.map((r) => r.itemId);
-    const tagsByItem = await this.loadTagsByItems(itemIds);
+    const tagsByItem = await this.loadTagsByItems(db, itemIds);
 
     return rows.map((r) => {
       const content = (r.content ?? {}) as ItemContent;
@@ -678,12 +792,13 @@ export class AssessmentReportService {
   }
 
   private async loadTagsByItems(
+    db: Database,
     itemIds: string[],
   ): Promise<Map<string, { skill: string | null; contentRef: string | null }>> {
     const map = new Map<string, { skill: string | null; contentRef: string | null }>();
     if (itemIds.length === 0) return map;
 
-    const rows = await this.db
+    const rows = await db
       .select({
         itemId: itemTaxonomyTags.itemId,
         nodeName: taxonomyNodes.name,
@@ -695,6 +810,11 @@ export class AssessmentReportService {
       .orderBy(asc(itemTaxonomyTags.tagType));
 
     for (const r of rows) {
+      // TKT-05 — un descriptor nunca es la habilidad/contenido representativo del
+      // ítem en la vista de resultados (sí sigue disponible en el banco de ítems).
+      if ((RESULT_HIDDEN_NODE_TYPES as readonly string[]).includes(r.nodeType)) {
+        continue;
+      }
       let entry = map.get(r.itemId);
       if (!entry) {
         entry = { skill: null, contentRef: null };
@@ -711,6 +831,7 @@ export class AssessmentReportService {
 
   /** Alumnos con assessment_results en la evaluación dentro del scope. */
   private async loadEvaluatedStudents(
+    db: Database,
     assessmentId: string,
     orgId: string,
     studentFilter: string[] | null,
@@ -726,7 +847,7 @@ export class AssessmentReportService {
       conditions.push(inArray(assessmentResults.studentId, studentFilter));
     }
 
-    const rows = await this.db
+    const rows = await db
       .select({
         studentId: assessmentResults.studentId,
         studentRut: students.rut,
@@ -753,13 +874,14 @@ export class AssessmentReportService {
 
   /** Curso de cada alumno relevante a la evaluación (enrollment ∩ assignment). */
   private async loadStudentClassGroups(
+    db: Database,
     assessmentId: string,
     studentIds: string[],
   ): Promise<Map<string, { id: string; name: string }>> {
     const result = new Map<string, { id: string; name: string }>();
     if (studentIds.length === 0) return result;
 
-    const rows = await this.db
+    const rows = await db
       .select({
         studentId: studentEnrollments.studentId,
         classGroupId: classGroups.id,
@@ -787,6 +909,7 @@ export class AssessmentReportService {
 
   /** Cursos asignados a la evaluación, intersectados con el scope del caller. */
   private async loadAssessmentClassGroups(
+    db: Database,
     assessmentId: string,
     orgId: string,
     scope: ScopeResult,
@@ -803,7 +926,7 @@ export class AssessmentReportService {
       conditions.push(inArray(classGroups.id, scope.classGroupIds));
     }
 
-    const rows = await this.db
+    const rows = await db
       .select({
         id: classGroups.id,
         name: classGroups.name,
@@ -823,9 +946,12 @@ export class AssessmentReportService {
   }
 
   /** Matriculados (distinct) en los cursos dados — base de la cobertura. */
-  private async countEnrolled(classGroupIds: string[]): Promise<number> {
+  private async countEnrolled(
+    db: Database,
+    classGroupIds: string[],
+  ): Promise<number> {
     if (classGroupIds.length === 0) return 0;
-    const [row] = await this.db
+    const [row] = await db
       .select({
         total: sql<number>`count(distinct ${studentEnrollments.studentId})::int`,
       })
@@ -846,6 +972,7 @@ export class AssessmentReportService {
    * (alternativa incorrecta) más elegido.
    */
   private async loadItemDistribution(
+    db: Database,
     assessmentId: string,
     itemIds: string[],
     studentFilter: string[] | null,
@@ -866,7 +993,7 @@ export class AssessmentReportService {
       string | null
     >`nullif(coalesce(${responses.value}->>'raw', ${responses.value}->>'key', ${responses.value}->>'answer'), '')`;
 
-    const rows = await this.db
+    const rows = await db
       .select({
         itemId: responses.itemId,
         answer: answerExpr,
@@ -924,6 +1051,7 @@ export class AssessmentReportService {
 
   /** Aciertos por ítem dentro de un grupo de alumnos (para discriminación). */
   private async loadGroupCorrectness(
+    db: Database,
     assessmentId: string,
     itemIds: string[],
     studentIds: string[],
@@ -931,7 +1059,7 @@ export class AssessmentReportService {
     const result = new Map<string, { correct: number; total: number }>();
     if (itemIds.length === 0 || studentIds.length === 0) return result;
 
-    const rows = await this.db
+    const rows = await db
       .select({
         itemId: responses.itemId,
         total: sql<number>`count(*)::int`,
@@ -955,13 +1083,14 @@ export class AssessmentReportService {
 
   /** Habilidad de menor logro por alumno (1 query, dedupe en JS). */
   private async loadWeakestSkillPerStudent(
+    db: Database,
     assessmentId: string,
     studentIds: string[],
   ): Promise<Map<string, string>> {
     const result = new Map<string, string>();
     if (studentIds.length === 0) return result;
 
-    const rows = await this.db
+    const rows = await db
       .select({
         studentId: skillResults.studentId,
         nodeName: taxonomyNodes.name,
@@ -973,6 +1102,8 @@ export class AssessmentReportService {
         and(
           eq(skillResults.assessmentId, assessmentId),
           inArray(skillResults.studentId, studentIds),
+          // TKT-05 — la habilidad más débil de un alumno no puede ser un descriptor.
+          notInArray(taxonomyNodes.type, [...RESULT_HIDDEN_NODE_TYPES]),
         ),
       )
       .orderBy(asc(skillResults.percentage));
@@ -986,16 +1117,23 @@ export class AssessmentReportService {
     return result;
   }
 
+  /**
+   * TKT-04 — passing_grade de la escala del instrumento, o `null` si el
+   * instrumento NO tiene escala configurada (o la escala referenciada no existe).
+   * `null` es la señal explícita de "sin escala": los consumidores anulan los
+   * campos de nota en vez de inventar el default 4.0.
+   */
   private async resolvePassingGrade(
+    db: Database,
     gradingScaleId: string | null,
-  ): Promise<number> {
-    if (!gradingScaleId) return DEFAULT_PASSING_GRADE;
-    const [row] = await this.db
+  ): Promise<number | null> {
+    if (!gradingScaleId) return null;
+    const [row] = await db
       .select({ passingGrade: gradingScales.passingGrade })
       .from(gradingScales)
       .where(eq(gradingScales.id, gradingScaleId))
       .limit(1);
-    return row ? Number(row.passingGrade) : DEFAULT_PASSING_GRADE;
+    return row ? Number(row.passingGrade) : null;
   }
 
   // ───────────────────────────────────────────────────────────────────────────
@@ -1008,6 +1146,7 @@ export class AssessmentReportService {
   }
 
   private async requireAssessment(
+    db: Database,
     user: JwtPayload,
     orgId: string,
     assessmentId: string,
@@ -1022,7 +1161,7 @@ export class AssessmentReportService {
     gradingScaleId: string | null;
     gradingScaleConfig: unknown;
   }> {
-    const [row] = await this.db
+    const [row] = await db
       .select({
         id: assessments.id,
         orgId: assessments.orgId,
@@ -1059,6 +1198,7 @@ export class AssessmentReportService {
   }
 
   private async getAccessibleClassGroupIds(
+    db: Database,
     user: JwtPayload,
     orgId: string,
   ): Promise<ScopeResult> {
@@ -1070,7 +1210,7 @@ export class AssessmentReportService {
       return { scopeAll: false, classGroupIds: [] };
     }
 
-    const rows = await this.db
+    const rows = await db
       .select({ classGroupId: subjectClasses.classGroupId })
       .from(teacherAssignments)
       .innerJoin(subjectClasses, eq(subjectClasses.id, teacherAssignments.subjectClassId))
@@ -1087,11 +1227,12 @@ export class AssessmentReportService {
   }
 
   private async assessmentTouchesScope(
+    db: Database,
     assessmentId: string,
     classGroupIds: string[],
   ): Promise<boolean> {
     if (classGroupIds.length === 0) return false;
-    const [row] = await this.db
+    const [row] = await db
       .select({ classGroupId: assessmentCourseAssignments.classGroupId })
       .from(assessmentCourseAssignments)
       .where(
@@ -1105,12 +1246,13 @@ export class AssessmentReportService {
   }
 
   private async classGroupInScope(
+    db: Database,
     orgId: string,
     scope: ScopeResult,
     classGroupId: string,
   ): Promise<boolean> {
     if (scope.scopeAll) {
-      const [cg] = await this.db
+      const [cg] = await db
         .select({ id: classGroups.id })
         .from(classGroups)
         .where(and(eq(classGroups.id, classGroupId), eq(classGroups.orgId, orgId)))
@@ -1121,6 +1263,7 @@ export class AssessmentReportService {
   }
 
   private async resolveAccessibleStudentIds(
+    db: Database,
     orgId: string,
     scope: ScopeResult,
     classGroupId: string | undefined,
@@ -1138,7 +1281,7 @@ export class AssessmentReportService {
     }
     if (allowedClassGroupIds.length === 0) return [];
 
-    const rows = await this.db
+    const rows = await db
       .select({ studentId: studentEnrollments.studentId })
       .from(studentEnrollments)
       .innerJoin(students, eq(students.id, studentEnrollments.studentId))

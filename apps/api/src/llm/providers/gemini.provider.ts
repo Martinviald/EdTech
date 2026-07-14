@@ -6,8 +6,10 @@ import type {
   LlmAgentRequest,
   LlmAgentStopReason,
   LlmCompletionRequest,
+  LlmCompletionResult,
   LlmProvider,
   LlmProviderName,
+  LlmUsage,
 } from '../llm.types';
 
 /**
@@ -34,6 +36,14 @@ interface GenerateContentResponse {
  * La API real acepta `contents` como string (solo texto) o como array de parts.
  */
 type GeminiPart = { text: string } | { inlineData: { mimeType: string; data: string } };
+/** Config de una completion no conversacional (compartida por complete/multimodal). */
+type GeminiCompletionConfig = {
+  systemInstruction?: string;
+  maxOutputTokens?: number;
+  temperature?: number;
+  responseMimeType?: string;
+  thinkingConfig?: { thinkingBudget?: number };
+};
 interface GeminiClient {
   readonly models: {
     generateContent(req: {
@@ -153,32 +163,83 @@ export class GeminiProvider implements LlmProvider {
   }
 
   async complete(request: LlmCompletionRequest): Promise<string> {
+    return (await this.completeWithUsage(request)).text;
+  }
+
+  async completeWithUsage(request: LlmCompletionRequest): Promise<LlmCompletionResult> {
     if (!this.client) {
       throw new Error('Gemini provider no está disponible');
     }
 
-    const response = await this.client.models.generateContent({
+    const { text, usage } = await this.streamToResult({
       model: request.options.model,
       contents: request.prompt,
-      config: {
-        systemInstruction: request.system,
-        maxOutputTokens: request.options.maxTokens,
-        temperature: request.options.temperature,
-        // JSON mode nativo: todos los consumidores de `complete` (ai-analysis,
-        // item-insight, remedial, ai-tagging) parsean la salida con `JSON.parse`.
-        // Forzar `application/json` evita prosa/markdown alrededor del objeto, que
-        // rompía el parser ("La salida del modelo no es JSON válido"). El asistente
-        // conversacional usa `streamWithTools`, no esta ruta.
-        responseMimeType: 'application/json',
-        // Thinking según modelo (ver `thinkingConfigFor`): off en Flash para no
-        // truncar el JSON; activo (omitido) en Pro, que lo exige.
-        ...(this.thinkingConfigFor(request.options.model)
-          ? { thinkingConfig: this.thinkingConfigFor(request.options.model) }
-          : {}),
-      },
+      config: this.completionConfig(request),
     });
+    return { text, model: request.options.model, usage };
+  }
 
-    return response.text ?? '';
+  /**
+   * Config compartida de las completions `complete`/`completeMultimodal`.
+   * JSON mode nativo: todos los consumidores (ai-analysis, item-insight, remedial,
+   * ai-tagging) parsean con `JSON.parse`; `application/json` evita prosa alrededor.
+   * Thinking según modelo (`thinkingConfigFor`): off en Flash (no truncar el JSON),
+   * activo (omitido) en Pro, que lo exige.
+   */
+  private completionConfig(request: LlmCompletionRequest): GeminiCompletionConfig {
+    const thinking = this.thinkingConfigFor(request.options.model);
+    return {
+      systemInstruction: request.system,
+      maxOutputTokens: request.options.maxTokens,
+      temperature: request.options.temperature,
+      responseMimeType: 'application/json',
+      ...(thinking ? { thinkingConfig: thinking } : {}),
+    };
+  }
+
+  /**
+   * Ejecuta una completion (NO conversacional) sobre el endpoint de STREAMING
+   * (`generateContentStream`) y ACUMULA el texto de los chunks. Devuelve el mismo
+   * string completo que `generateContent`, pero la conexión recibe datos de forma
+   * continua en vez de quedar idle esperando toda la respuesta. Esto evita que un
+   * idle-timeout de la ruta de egress (visto en AWS: ~60s → `fetch failed` en
+   * informes largos) resetee la conexión. El asistente ya funcionaba por esta
+   * misma razón (usa streaming); el caller sigue recibiendo el JSON completo.
+   */
+  private async streamToResult(req: {
+    model: string;
+    contents: string | GeminiPart[];
+    config: GeminiCompletionConfig;
+  }): Promise<{ text: string; usage: LlmUsage | null }> {
+    const client = this.client as unknown as {
+      models: {
+        generateContentStream(r: {
+          model: string;
+          contents: string | GeminiPart[];
+          config?: GeminiCompletionConfig;
+        }): Promise<AsyncIterable<GeminiStreamChunk>>;
+      };
+    };
+
+    const stream = await client.models.generateContentStream(req);
+    let text = '';
+    // Gemini reporta el uso ACUMULADO en `usageMetadata`; nos quedamos con el
+    // último chunk que lo trae (el total del turno). Mismo criterio que la ruta
+    // agéntica (`streamWithTools`).
+    let usage: LlmUsage | null = null;
+    for await (const chunk of stream) {
+      const parts = chunk.candidates?.[0]?.content?.parts ?? [];
+      for (const part of parts) {
+        if (typeof part.text === 'string') text += part.text;
+      }
+      if (chunk.usageMetadata) {
+        usage = {
+          inputTokens: chunk.usageMetadata.promptTokenCount ?? 0,
+          outputTokens: chunk.usageMetadata.candidatesTokenCount ?? 0,
+        };
+      }
+    }
+    return { text, usage };
   }
 
   /**
@@ -188,13 +249,17 @@ export class GeminiProvider implements LlmProvider {
    * delega en `complete` (solo texto) — mismo patrón tolerante al SDK ausente.
    */
   async completeMultimodal(request: LlmCompletionRequest): Promise<string> {
+    return (await this.completeMultimodalWithUsage(request)).text;
+  }
+
+  async completeMultimodalWithUsage(request: LlmCompletionRequest): Promise<LlmCompletionResult> {
     if (!this.client) {
       throw new Error('Gemini provider no está disponible');
     }
 
     const images = request.images ?? [];
     if (images.length === 0) {
-      return this.complete(request);
+      return this.completeWithUsage(request);
     }
 
     const parts: GeminiPart[] = [
@@ -204,23 +269,14 @@ export class GeminiProvider implements LlmProvider {
       })),
     ];
 
-    const response = await this.client.models.generateContent({
+    // Mismo streaming-acumulado que `complete` (ver `streamToResult`): el único
+    // caller multimodal (item-insight con imágenes) también parsea JSON.
+    const { text, usage } = await this.streamToResult({
       model: request.options.model,
       contents: parts,
-      config: {
-        systemInstruction: request.system,
-        maxOutputTokens: request.options.maxTokens,
-        temperature: request.options.temperature,
-        // Mismo JSON mode + política de thinking que `complete`: el único caller
-        // multimodal (item-insight con imágenes del ítem) también parsea JSON.
-        responseMimeType: 'application/json',
-        ...(this.thinkingConfigFor(request.options.model)
-          ? { thinkingConfig: this.thinkingConfigFor(request.options.model) }
-          : {}),
-      },
+      config: this.completionConfig(request),
     });
-
-    return response.text ?? '';
+    return { text, model: request.options.model, usage };
   }
 
   /**

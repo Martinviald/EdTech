@@ -4,8 +4,10 @@ import {
   Building2,
   ClipboardList,
   Cpu,
+  FileText,
   FileUp,
   FolderTree,
+  GitCompareArrows,
   LayoutDashboard,
   Library,
   Lightbulb,
@@ -22,9 +24,11 @@ import type { UserRole } from '@soe/types';
 import {
   DASHBOARD_VIEWER_ROLES,
   AI_ANALYSIS_VIEWER_ROLES,
+  AI_ANALYSIS_GENERATOR_ROLES,
   REMEDIAL_VIEWER_ROLES,
   BENCHMARKING_VIEWER_ROLES,
   ANSWER_SHEET_IMPORT_ROLES,
+  ESTABLISHMENT_REPORT_ROLES,
 } from '@soe/types';
 
 export type NavStatus = 'live' | 'soon';
@@ -106,7 +110,7 @@ export const NAV_GROUPS: readonly NavGroup[] = [
       },
       {
         href: '/resultados',
-        label: 'Resultados',
+        label: 'Panorama pedagógico',
         icon: BarChart3,
         status: 'live',
         roles: DASHBOARD_VIEWER_ROLES,
@@ -117,6 +121,14 @@ export const NAV_GROUPS: readonly NavGroup[] = [
         icon: Sparkles,
         status: 'live',
         roles: AI_ANALYSIS_VIEWER_ROLES,
+      },
+      {
+        // TKT-23: diagnóstico IA de la variación entre instrumentos comparables.
+        href: '/comparar-instrumentos',
+        label: 'Comparar instrumentos',
+        icon: GitCompareArrows,
+        status: 'live',
+        roles: AI_ANALYSIS_GENERATOR_ROLES,
       },
       {
         href: '/material-remedial',
@@ -131,6 +143,13 @@ export const NAV_GROUPS: readonly NavGroup[] = [
         icon: TrendingUp,
         status: 'live',
         roles: BENCHMARKING_VIEWER_ROLES,
+      },
+      {
+        href: '/establecimiento/informe-oficial',
+        label: 'Informe establecimiento',
+        icon: FileText,
+        status: 'live',
+        roles: ESTABLISHMENT_REPORT_ROLES,
       },
     ],
   },
@@ -148,6 +167,21 @@ export const NAV_GROUPS: readonly NavGroup[] = [
       {
         href: '/banco-items',
         label: 'Banco de Instrumentos',
+        icon: Library,
+        status: 'live',
+        roles: [
+          'platform_admin',
+          'school_admin',
+          'academic_director',
+          'eval_coordinator',
+          'teacher',
+          'homeroom_teacher',
+        ],
+      },
+      {
+        // TKT-14: banco de ítems global (cross-instrumento, propio + global).
+        href: '/banco-items/explorar',
+        label: 'Banco de ítems',
         icon: Library,
         status: 'live',
         roles: [
@@ -237,6 +271,14 @@ export const ADMIN_NAV_ITEMS: readonly NavItem[] = [
     requiresPlatformAdmin: true,
   },
   {
+    href: '/admin/instrumentos',
+    label: 'Instrumentos oficiales',
+    icon: Library,
+    status: 'live',
+    roles: ['platform_admin'],
+    requiresPlatformAdmin: true,
+  },
+  {
     href: '/admin/equipo',
     label: 'Equipo plataforma',
     icon: ShieldCheck,
@@ -248,6 +290,14 @@ export const ADMIN_NAV_ITEMS: readonly NavItem[] = [
     href: '/admin/modelos-ia',
     label: 'Modelos de IA',
     icon: Cpu,
+    status: 'live',
+    roles: ['platform_admin'],
+    requiresPlatformAdmin: true,
+  },
+  {
+    href: '/admin/instrumentos-bandas',
+    label: 'Niveles de logro',
+    icon: BarChart3,
     status: 'live',
     roles: ['platform_admin'],
     requiresPlatformAdmin: true,

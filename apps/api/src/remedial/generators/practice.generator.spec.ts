@@ -31,7 +31,13 @@ function makeInput(overrides: Partial<RemedialMaterial> = {}): RemedialGeneratio
 }
 
 function makeLlm(response: string): LlmService {
-  return { complete: jest.fn().mockResolvedValue(response) } as unknown as LlmService;
+  return {
+    completeWithUsage: jest.fn().mockResolvedValue({
+      text: response,
+      model: 'gemini-2.5-flash',
+      usage: { inputTokens: 100, outputTokens: 50 },
+    }),
+  } as unknown as LlmService;
 }
 
 type DbMock = Database & { __inserted: Array<Record<string, unknown>> };
@@ -93,11 +99,15 @@ describe('PracticeGenerator', () => {
     const gen = new PracticeGenerator(makeLlm(JSON.stringify(twoItems)), db);
     const result = await gen.generate(makeInput());
 
-    expect(result.promptVersion).toBe('s3-practice-v1');
+    expect(result.promptVersion).toBe('ola1-practice-v2');
     // 2 items + 2 tags
     const itemInserts = db.__inserted.filter((r) => 'source' in r);
     expect(itemInserts).toHaveLength(2);
-    expect(itemInserts[0]).toMatchObject({ source: 'ai_generated', status: 'draft', instrumentId: null });
+    expect(itemInserts[0]).toMatchObject({
+      source: 'ai_generated',
+      status: 'draft',
+      instrumentId: null,
+    });
 
     const tagInserts = db.__inserted.filter((r) => 'taggedBy' in r);
     expect(tagInserts).toHaveLength(2);
@@ -135,5 +145,91 @@ describe('PracticeGenerator', () => {
     const input = makeInput();
     (input.material as { nodeId: string | null }).nodeId = null;
     await expect(gen.generate(input)).rejects.toThrow(/nodeId/);
+  });
+
+  it('modo estímulo: ancla al pasaje (feature remedial_reading, sectionId, content.stimuli)', async () => {
+    const db = makeDb();
+    const llm = makeLlm(JSON.stringify(twoItems));
+    const gen = new PracticeGenerator(llm, db);
+    const stimulus = {
+      sectionId: '99999999-9999-4999-8999-999999999999',
+      kind: 'passage' as const,
+      source: 'official' as const,
+      title: 'Las abejas',
+      text: 'Las abejas polinizan las flores y producen miel.',
+    };
+    const result = await gen.generate({ ...makeInput(), stimulus });
+
+    // usa el prompt anclado (versión propia, no la self_contained).
+    expect(result.promptVersion).toBe('ola2-practice-stimulus-v1');
+
+    // llama al LLM con la feature Pro y un prompt que incluye el TEXTO del pasaje.
+    const call = (llm.completeWithUsage as jest.Mock).mock.calls[0];
+    expect(call[3]).toBe('remedial_reading');
+    expect(call[1]).toContain('Las abejas polinizan las flores');
+
+    // los ítems quedan ligados al pasaje (sectionId, no null).
+    const itemInserts = db.__inserted.filter((r) => 'source' in r);
+    expect(itemInserts).toHaveLength(2);
+    expect(itemInserts[0]).toMatchObject({ sectionId: stimulus.sectionId });
+
+    // content.stimuli trae la ref ligera del pasaje (preview, sin el texto completo).
+    if ('stimuli' in result.content) {
+      expect(result.content.stimuli).toHaveLength(1);
+      expect(result.content.stimuli[0]).toMatchObject({
+        sectionId: stimulus.sectionId,
+        kind: 'passage',
+        source: 'official',
+        title: 'Las abejas',
+      });
+    }
+  });
+
+  it('modo self_contained: sin estímulo → feature remedial, sectionId null, stimuli vacío', async () => {
+    const db = makeDb();
+    const llm = makeLlm(JSON.stringify(twoItems));
+    const gen = new PracticeGenerator(llm, db);
+    const result = await gen.generate(makeInput());
+
+    expect(result.promptVersion).toBe('ola1-practice-v2');
+    const call = (llm.completeWithUsage as jest.Mock).mock.calls[0];
+    expect(call[3]).toBe('remedial');
+
+    const itemInserts = db.__inserted.filter((r) => 'source' in r);
+    expect(itemInserts[0]).toMatchObject({ sectionId: null });
+    if ('stimuli' in result.content) {
+      expect(result.content.stimuli).toEqual([]);
+    }
+  });
+
+  it('devuelve judgeItems (Ola 2.1b) con la clave real y la explicación, ligados al itemId insertado', async () => {
+    const db = makeDb();
+    const gen = new PracticeGenerator(makeLlm(JSON.stringify(twoItems)), db);
+    const result = await gen.generate(makeInput());
+
+    expect(result.judgeItems).toHaveLength(2);
+    expect(result.judgeItems![0]).toEqual({
+      position: 1,
+      itemId: '00000001-0000-4000-8000-000000000000',
+      stem: '¿Cuál es equivalente a 1/2?',
+      alternatives: [
+        { key: 'A', text: '2/4', isCorrect: true }, // la clave real viaja al juez-service (no al LLM)
+        { key: 'B', text: '1/3', isCorrect: false },
+        { key: 'C', text: '2/3', isCorrect: false },
+        { key: 'D', text: '3/4', isCorrect: false },
+      ],
+      explanation: '2/4 simplifica a 1/2',
+    });
+  });
+
+  it('modo regeneración: inyecta el feedback del juez en el prompt (EVITA ESTOS PROBLEMAS)', async () => {
+    const db = makeDb();
+    const llm = makeLlm(JSON.stringify(twoItems));
+    const gen = new PracticeGenerator(llm, db);
+    await gen.generate({ ...makeInput(), feedback: ['La pregunta 1 no es respondible desde el texto'] });
+
+    const prompt = (llm.completeWithUsage as jest.Mock).mock.calls[0][1];
+    expect(prompt).toContain('EVITA ESTOS PROBLEMAS DETECTADOS');
+    expect(prompt).toContain('La pregunta 1 no es respondible desde el texto');
   });
 });

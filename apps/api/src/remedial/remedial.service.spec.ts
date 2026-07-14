@@ -3,6 +3,7 @@ import type { Database, RemedialMaterial } from '@soe/db';
 import type {
   GenerateRemedialDto,
   RemedialPracticeContent,
+  RemedialPracticeStudentContent,
   ReviewRemedialDto,
   UserRole,
 } from '@soe/types';
@@ -34,6 +35,7 @@ function makeRow(overrides: Partial<RemedialMaterial> = {}): RemedialMaterial {
     id: 'mat-1',
     orgId: 'org-1',
     type: 'guide',
+    method: 'self_contained',
     status: 'pending',
     nodeId: 'node-1',
     assessmentId: null,
@@ -41,6 +43,8 @@ function makeRow(overrides: Partial<RemedialMaterial> = {}): RemedialMaterial {
     sourceAnalysisId: null,
     title: null,
     content: null,
+    editedContent: null,
+    qualityReport: null,
     input: null,
     inputHash: 'hash-1',
     model: null,
@@ -221,16 +225,19 @@ describe('RemedialService', () => {
         'classGroupId',
         'completedAt',
         'content',
+        'editedContent',
         'costUsd',
         'createdAt',
         'createdById',
         'error',
         'id',
+        'method',
         'model',
         'nodeId',
         'nodeName',
         'orgId',
         'promptVersion',
+        'qualityReport',
         'reviewedAt',
         'reviewedById',
         'status',
@@ -253,6 +260,7 @@ describe('RemedialService', () => {
         successCriteria: [],
       },
       input: { curriculum: { nodeId: 'node-1' } },
+      method: 'self_contained',
       model: 'gemini',
       promptVersion: 's3-guide-v1',
       tokens: { input: 10, output: 20 },
@@ -260,6 +268,7 @@ describe('RemedialService', () => {
     });
     expect(db.__updates[0]).toMatchObject({
       status: 'ready',
+      method: 'self_contained',
       promptVersion: 's3-guide-v1',
     });
   });
@@ -302,6 +311,7 @@ describe('RemedialService', () => {
         { itemId: '33333333-3333-3333-3333-333333333333', position: 2, stem: 'b' },
       ],
       notes: null,
+      stimuli: [],
     };
     const ready = makeRow({
       status: 'ready',
@@ -318,5 +328,273 @@ describe('RemedialService', () => {
     // dos updates: el material (approved) + los ítems (published)
     const publishUpdate = db.__updates.find((u) => u.status === 'published');
     expect(publishUpdate).toBeDefined();
+  });
+
+  it('review approve con content editado lo persiste en editedContent, NO en content (§8.3)', async () => {
+    const aiContent = {
+      objective: 'ai',
+      rootCauseSummary: 'r',
+      strategy: 's',
+      classActivities: [{ title: 't', description: 'd', durationMin: 30 }],
+      materials: [],
+      successCriteria: [],
+    };
+    const edited = { ...aiContent, objective: 'humano editó' };
+    const ready = makeRow({ status: 'ready', content: aiContent });
+    const approved = makeRow({ status: 'approved', content: aiContent, editedContent: edited });
+    const db = makeDb([[ready], [approved], [{ name: 'OA' }]]);
+    const service = new RemedialService(db);
+
+    await service.review(makeUser(), 'mat-1', { action: 'approve', content: edited });
+
+    const approveUpdate = db.__updates.find((u) => u.status === 'approved');
+    expect(approveUpdate).toMatchObject({ editedContent: edited });
+    // la evidencia IA (content) NO se toca en el approve
+    expect(approveUpdate).not.toHaveProperty('content');
+  });
+
+  it('update edita cualquier tipo (group_plan) y persiste en editedContent (no content)', async () => {
+    const planContent = {
+      groupLabel: 'Grupo A',
+      studentCount: 4,
+      sharedGap: 'fracciones',
+      sequence: [{ order: 1, title: 'p1', description: 'd1', linkedNodeId: null }],
+      estimatedSessions: 2,
+    };
+    const ready = makeRow({ status: 'ready', type: 'group_plan', content: null });
+    const updatedRow = makeRow({ status: 'ready', type: 'group_plan', editedContent: planContent });
+    // 1) findOne inicial, 2) findOne final, 3) nodeName lookup
+    const db = makeDb([[ready], [updatedRow], [{ name: 'OA' }]]);
+    const service = new RemedialService(db);
+
+    const model = await service.update(makeUser(), 'mat-1', { content: planContent });
+
+    expect(db.__updates[0]).toMatchObject({ editedContent: planContent });
+    expect(db.__updates[0]).not.toHaveProperty('content');
+    expect(model.editedContent).toMatchObject({ groupLabel: 'Grupo A' });
+  });
+
+  it('update rechaza si el material no está en ready', async () => {
+    const approved = makeRow({ status: 'approved' });
+    const db = makeDb([[approved]]);
+    const service = new RemedialService(db);
+    await expect(
+      service.update(makeUser(), 'mat-1', { title: 'x' }),
+    ).rejects.toBeInstanceOf(BadRequestException);
+  });
+
+  it('getStudentVersion deriva el render sin info solo-profesor (guide)', async () => {
+    const guide = {
+      objective: 'Reforzar inferencias',
+      rootCauseSummary: 'diagnóstico interno',
+      strategy: 'modelado docente',
+      classActivities: [{ title: 'Actividad 1', description: 'leer', durationMin: 20 }],
+      materials: ['texto'],
+      successCriteria: ['logra inferir'],
+    };
+    const row = makeRow({ status: 'approved', content: guide });
+    const db = makeDb([[row], [{ name: 'Comprensión' }]]);
+    const service = new RemedialService(db);
+
+    const student = await service.getStudentVersion(makeUser(), 'mat-1');
+
+    expect(student.content).toEqual({
+      objective: 'Reforzar inferencias',
+      classActivities: [{ title: 'Actividad 1', description: 'leer', durationMin: 20 }],
+      materials: ['texto'],
+    });
+    // no filtra información solo-profesor
+    expect(student.content).not.toHaveProperty('rootCauseSummary');
+    expect(student.content).not.toHaveProperty('strategy');
+    expect(student.content).not.toHaveProperty('successCriteria');
+  });
+
+  it('getStudentVersion prefiere editedContent sobre content (efectivo)', async () => {
+    const ai = {
+      objective: 'IA',
+      rootCauseSummary: 'r',
+      strategy: 's',
+      classActivities: [{ title: 'a', description: 'd', durationMin: null }],
+      materials: [],
+      successCriteria: [],
+    };
+    const edited = { ...ai, objective: 'editado por humano' };
+    const row = makeRow({ status: 'approved', content: ai, editedContent: edited });
+    const db = makeDb([[row], [{ name: 'OA' }]]);
+    const service = new RemedialService(db);
+
+    const student = await service.getStudentVersion(makeUser(), 'mat-1');
+    expect(student.content).toMatchObject({ objective: 'editado por humano' });
+  });
+
+  it('getStudentVersion devuelve content null si el material no tiene salida', async () => {
+    const row = makeRow({ status: 'pending', content: null });
+    const db = makeDb([[row], [{ name: 'OA' }]]);
+    const service = new RemedialService(db);
+    const student = await service.getStudentVersion(makeUser(), 'mat-1');
+    expect(student.content).toBeNull();
+  });
+
+  it('getStudentVersion incluye alternativas SIN la respuesta ni la explicación (practice_set)', async () => {
+    const practiceContent: RemedialPracticeContent = {
+      skillFocus: 'fracciones',
+      itemCount: 1,
+      items: [{ itemId: '22222222-2222-2222-2222-222222222222', position: 1, stem: 'a' }],
+      notes: 'nota docente',
+      stimuli: [],
+    };
+    const row = makeRow({
+      status: 'approved',
+      type: 'practice_set',
+      content: practiceContent,
+    });
+    const itemRow = {
+      id: '22222222-2222-2222-2222-222222222222',
+      type: 'multiple_choice',
+      content: {
+        stem: '¿Cuál es equivalente a 1/2?',
+        alternatives: [
+          { key: 'A', text: '2/4', isCorrect: true },
+          { key: 'B', text: '1/3', isCorrect: false },
+        ],
+        explanation: '2/4 simplifica a 1/2',
+      },
+    };
+    // 1) findOne, 2) items (hidratación), 3) nodeName
+    const db = makeDb([[row], [itemRow], [{ name: 'OA' }]]);
+    const service = new RemedialService(db);
+
+    const student = await service.getStudentVersion(makeUser(), 'mat-1');
+    const content = student.content as RemedialPracticeStudentContent;
+
+    // el alumno ve las opciones para responder…
+    expect(content.items).toHaveLength(1);
+    expect(content.items[0]?.alternatives).toEqual([
+      { key: 'A', text: '2/4' },
+      { key: 'B', text: '1/3' },
+    ]);
+    // …pero NUNCA la respuesta correcta ni la explicación (solo-profesor).
+    expect(JSON.stringify(content)).not.toContain('isCorrect');
+    expect(JSON.stringify(content)).not.toContain('2/4 simplifica a 1/2');
+    expect(content.items[0]).not.toHaveProperty('explanation');
+    expect(content.items[0]).not.toHaveProperty('correctKey');
+    expect(content).not.toHaveProperty('notes');
+  });
+
+  it('get hidrata practiceItems on-read para practice_set ready (sin persistir)', async () => {
+    const practiceContent: RemedialPracticeContent = {
+      skillFocus: 'fracciones',
+      itemCount: 1,
+      items: [{ itemId: '22222222-2222-2222-2222-222222222222', position: 1, stem: 'a' }],
+      notes: null,
+      stimuli: [],
+    };
+    const row = makeRow({ status: 'ready', type: 'practice_set', content: practiceContent });
+    const itemRow = {
+      id: '22222222-2222-2222-2222-222222222222',
+      type: 'multiple_choice',
+      content: {
+        stem: '¿Cuál es equivalente a 1/2?',
+        alternatives: [
+          { key: 'A', text: '2/4', isCorrect: true },
+          { key: 'B', text: '1/3', isCorrect: false },
+        ],
+        explanation: '2/4 simplifica a 1/2',
+      },
+    };
+    // 1) findOne, 2) nodeName (toModel), 3) items (hidratación)
+    const db = makeDb([[row], [{ name: 'OA' }], [itemRow]]);
+    const service = new RemedialService(db);
+    const model = await service.get(makeUser(), 'mat-1');
+
+    expect(model.practiceItems).toHaveLength(1);
+    expect(model.practiceItems?.[0]).toMatchObject({
+      itemId: '22222222-2222-2222-2222-222222222222',
+      position: 1,
+      type: 'multiple_choice',
+      stem: '¿Cuál es equivalente a 1/2?',
+      correctKey: 'A',
+      explanation: '2/4 simplifica a 1/2',
+    });
+    expect(model.practiceItems?.[0]?.alternatives).toHaveLength(2);
+    // on-read: no se persiste nada.
+    expect(db.__updates).toHaveLength(0);
+  });
+
+  it('get NO hidrata practiceItems para guide (queda undefined)', async () => {
+    const row = makeRow({ status: 'ready', type: 'guide' });
+    const db = makeDb([[row], [{ name: 'OA' }]]);
+    const service = new RemedialService(db);
+    const model = await service.get(makeUser(), 'mat-1');
+    expect(model.practiceItems).toBeUndefined();
+  });
+
+  it('create persiste method + stimulusId (Ola 2.1a) para el modo con estímulo', async () => {
+    const db = makeDb(
+      [[], [{ name: 'OA' }]],
+      [[makeRow({ type: 'practice_set', method: 'reuse_stimulus' })]],
+    );
+    const service = new RemedialService(db);
+    await service.create(makeUser(), {
+      type: 'practice_set',
+      nodeId: '11111111-1111-1111-1111-111111111111',
+      assessmentId: '44444444-4444-4444-4444-444444444444',
+      itemCount: 3,
+      method: 'reuse_stimulus',
+      stimulusId: '55555555-5555-4555-8555-555555555555',
+      force: false,
+    });
+    // method va a la columna; stimulusId al input determinista (lo lee el runner).
+    expect(db.__inserted[0]).toMatchObject({
+      method: 'reuse_stimulus',
+      input: { itemCount: 3, stimulusId: '55555555-5555-4555-8555-555555555555' },
+    });
+  });
+
+  it('get hidrata stimuli on-read para practice_set con estímulo (sin persistir)', async () => {
+    const practiceContent: RemedialPracticeContent = {
+      skillFocus: 'comprensión',
+      itemCount: 1,
+      items: [{ itemId: '22222222-2222-2222-2222-222222222222', position: 1, stem: 'a' }],
+      notes: null,
+      stimuli: [
+        {
+          sectionId: '66666666-6666-4666-8666-666666666666',
+          kind: 'passage',
+          source: 'official',
+          title: 'La abeja',
+          textPreview: 'Las abejas…',
+        },
+      ],
+    };
+    const row = makeRow({ status: 'ready', type: 'practice_set', content: practiceContent });
+    const itemRow = {
+      id: '22222222-2222-2222-2222-222222222222',
+      type: 'multiple_choice',
+      content: { stem: 'q', alternatives: [{ key: 'A', text: 'x', isCorrect: true }] },
+    };
+    const sectionRow = {
+      id: '66666666-6666-4666-8666-666666666666',
+      kind: 'passage',
+      source: 'official',
+      passageTitle: 'La abeja',
+      passageText: 'Las abejas polinizan las flores y producen miel.',
+    };
+    // 1) findOne, 2) nodeName (toModel), 3) items (hidratación), 4) sections (estímulo)
+    const db = makeDb([[row], [{ name: 'OA' }], [itemRow], [sectionRow]]);
+    const service = new RemedialService(db);
+    const model = await service.get(makeUser(), 'mat-1');
+
+    // El estímulo trae el TEXTO COMPLETO re-hidratado (no el preview del content).
+    expect(model.stimuli).toHaveLength(1);
+    expect(model.stimuli?.[0]).toMatchObject({
+      sectionId: '66666666-6666-4666-8666-666666666666',
+      kind: 'passage',
+      source: 'official',
+      title: 'La abeja',
+      text: 'Las abejas polinizan las flores y producen miel.',
+    });
+    // on-read: no se persiste nada.
+    expect(db.__updates).toHaveLength(0);
   });
 });

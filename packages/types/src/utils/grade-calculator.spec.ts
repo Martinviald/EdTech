@@ -3,10 +3,13 @@ import {
   DEFAULT_PERFORMANCE_THRESHOLDS,
   aggregateSkillResults,
   aggregateStudentResults,
+  bandToLegacyLevel,
+  classifyByBands,
   isPassingGrade,
   percentageToGrade,
   percentageToPerformanceLevel,
   type GradingScaleParams,
+  type PerformanceBandInput,
   type ResponseForCalculation,
 } from './grade-calculator';
 
@@ -378,5 +381,68 @@ describe('isPassingGrade', () => {
   it('aprueba con nota >= passingGrade', () => {
     expect(isPassingGrade(4, DIA_SCALE)).toBe(true);
     expect(isPassingGrade(3.9, DIA_SCALE)).toBe(false);
+  });
+});
+
+// Bandas DIA Lectura 6° Intermedio (cortes reverse-engineered): I<0.35, II<0.75, III.
+const DIA_6TO_BANDS: PerformanceBandInput[] = [
+  { id: 'b1', key: 'dia_nivel_1', label: 'Nivel I', order: 0, minThreshold: 0, maxThreshold: 0.35 },
+  { id: 'b2', key: 'dia_nivel_2', label: 'Nivel II', order: 1, minThreshold: 0.35, maxThreshold: 0.75 },
+  { id: 'b3', key: 'dia_nivel_3', label: 'Nivel III', order: 2, minThreshold: 0.75, maxThreshold: 1 },
+];
+
+describe('classifyByBands', () => {
+  it('clasifica por el rango [min, max) del instrumento, no por 40/70/85', () => {
+    // 76% con corte DIA cae en Nivel III; con 40/70/85 sería sólo "adequate".
+    expect(classifyByBands(0.76, DIA_6TO_BANDS)?.key).toBe('dia_nivel_3');
+    expect(classifyByBands(0.5, DIA_6TO_BANDS)?.key).toBe('dia_nivel_2');
+    expect(classifyByBands(0.2, DIA_6TO_BANDS)?.key).toBe('dia_nivel_1');
+  });
+
+  it('min inclusivo, max exclusivo; la banda superior incluye p=1', () => {
+    expect(classifyByBands(0.35, DIA_6TO_BANDS)?.key).toBe('dia_nivel_2'); // borde inclusivo
+    expect(classifyByBands(1, DIA_6TO_BANDS)?.key).toBe('dia_nivel_3'); // tope inclusivo
+    expect(classifyByBands(0, DIA_6TO_BANDS)?.key).toBe('dia_nivel_1');
+  });
+
+  it('devuelve null sin bandas', () => {
+    expect(classifyByBands(0.5, [])).toBeNull();
+    expect(classifyByBands(0.5, null)).toBeNull();
+  });
+});
+
+describe('bandToLegacyLevel', () => {
+  it('proyecta 3 bandas DIA sobre el enum de 4 niveles por posición relativa', () => {
+    expect(bandToLegacyLevel(DIA_6TO_BANDS[0]!, DIA_6TO_BANDS)).toBe('insufficient');
+    expect(bandToLegacyLevel(DIA_6TO_BANDS[2]!, DIA_6TO_BANDS)).toBe('advanced');
+  });
+});
+
+describe('aggregateStudentResults con bandas del instrumento', () => {
+  it('puebla performanceBandId y deriva el enum desde la banda', () => {
+    // 19/26 ≈ 0.73 → Nivel II bajo el corte DIA (no Nivel III), aunque con el
+    // corte legacy 40/70/85 el % daría "adequate". La banda manda.
+    const responses: ResponseForCalculation[] = Array.from({ length: 26 }, (_, i) => ({
+      studentId: 's1',
+      itemId: `i${i}`,
+      isCorrect: i < 19,
+      rawScore: i < 19 ? 1 : 0,
+      finalScore: null,
+      maxScore: 1,
+      itemPosition: i + 1,
+      taxonomyNodeIds: [],
+    }));
+    const [r] = aggregateStudentResults(responses, DIA_SCALE, DIA_6TO_BANDS);
+    expect(r!.performanceBandId).toBe('b2');
+    expect(r!.bandLabel).toBe('Nivel II');
+  });
+
+  it('sin bandas cae al corte legacy 40/70/85 (performanceBandId null)', () => {
+    const responses: ResponseForCalculation[] = [
+      { studentId: 's1', itemId: 'i1', isCorrect: true, rawScore: 8, finalScore: null, maxScore: 10, itemPosition: 1, taxonomyNodeIds: [] },
+    ];
+    const [r] = aggregateStudentResults(responses, DIA_SCALE);
+    expect(r!.performanceBandId ?? null).toBeNull();
+    expect(r!.performanceLevel).toBe('adequate'); // 0.8 → adequate con 40/70/85
   });
 });

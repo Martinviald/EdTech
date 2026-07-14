@@ -5,11 +5,21 @@ import { LlmModule } from '../llm/llm.module';
 import { GroupPlanGenerator } from './generators/group-plan.generator';
 import { GuideGenerator } from './generators/guide.generator';
 import { PracticeGenerator } from './generators/practice.generator';
+import { RemedialBriefService } from './remedial-brief.service';
 import { RemedialContextService } from './remedial-context.service';
+import { RemedialJudgeService } from './remedial-judge.service';
+import { RemedialQualityLoop } from './remedial-quality-loop.service';
 import { RemedialController } from './remedial.controller';
 import { REMEDIAL_GENERATORS } from './remedial.generator';
 import { RemedialRunner } from './remedial.runner';
 import { RemedialService } from './remedial.service';
+import { BankPassageService } from './stimulus/bank-passage.service';
+import { FailedStimulusService } from './stimulus/failed-stimulus.service';
+import { HighestGapPolicy } from './stimulus/highest-gap.policy';
+import { PASSAGE_SELECTION_POLICY } from './stimulus/passage-selection.policy';
+import { SelfContainedFallback } from './stimulus/self-contained.fallback';
+import { StimulusResolver } from './stimulus/stimulus.resolver';
+import { TERMINAL_FALLBACK_POLICY } from './stimulus/terminal-fallback.policy';
 import { FeatureGuard } from '../common/guards/feature.guard';
 
 /**
@@ -29,6 +39,10 @@ import { FeatureGuard } from '../common/guards/feature.guard';
   providers: [
     RemedialService,
     RemedialContextService,
+    RemedialBriefService,
+    // Ola 2.1b: juez automático de calidad + loop de regeneración (solo practice_set).
+    RemedialJudgeService,
+    RemedialQualityLoop,
     RemedialRunner,
     GuideGenerator,
     PracticeGenerator,
@@ -42,6 +56,14 @@ import { FeatureGuard } from '../common/guards/feature.guard';
       ) => [guide, practice, groupPlan],
       inject: [GuideGenerator, PracticeGenerator, GroupPlanGenerator],
     },
+    // Motor remedial con estímulo (Ola 2.1a): recuperación de pasajes fallados / del
+    // banco + resolución del estímulo. Los puertos de política se inyectan por token
+    // (patrón `CURRICULUM_RETRIEVER`) para swappearlos sin tocar el resolver (2.2).
+    FailedStimulusService,
+    BankPassageService,
+    StimulusResolver,
+    { provide: PASSAGE_SELECTION_POLICY, useClass: HighestGapPolicy },
+    { provide: TERMINAL_FALLBACK_POLICY, useClass: SelfContainedFallback },
     FeatureGuard,
   ],
   exports: [RemedialService],

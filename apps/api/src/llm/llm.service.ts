@@ -2,7 +2,13 @@ import { Inject, Injectable, ServiceUnavailableException } from '@nestjs/common'
 import { LlmConfigService } from './llm.config';
 import { LLM_PROVIDERS } from './llm.constants';
 import type { LlmFeature } from '@soe/types';
-import type { LlmImagePart, LlmProvider, LlmProviderName } from './llm.types';
+import type {
+  LlmCompletionRequest,
+  LlmCompletionResult,
+  LlmImagePart,
+  LlmProvider,
+  LlmProviderName,
+} from './llm.types';
 
 /**
  * Fachada provider-agnóstica para inferencia LLM.
@@ -27,10 +33,7 @@ export class LlmService {
    * @param orgId   tenant para resolución de config por organización (F2+).
    * @param feature funcionalidad de IA (resuelve qué proveedor se chequea).
    */
-  async isAvailable(
-    orgId: string | null | undefined,
-    feature: LlmFeature,
-  ): Promise<boolean> {
+  async isAvailable(orgId: string | null | undefined, feature: LlmFeature): Promise<boolean> {
     const cfg = await this.config.resolve(orgId, feature);
     return this.registry.get(cfg.provider)?.isAvailable() ?? false;
   }
@@ -55,9 +58,7 @@ export class LlmService {
     const provider = this.registry.get(cfg.provider);
 
     if (!provider) {
-      throw new ServiceUnavailableException(
-        `LLM provider "${cfg.provider}" no está registrado`,
-      );
+      throw new ServiceUnavailableException(`LLM provider "${cfg.provider}" no está registrado`);
     }
     if (!provider.isAvailable()) {
       throw new ServiceUnavailableException(
@@ -74,6 +75,48 @@ export class LlmService {
         temperature: cfg.temperature,
       },
     });
+  }
+
+  /**
+   * Igual que `complete`, pero devuelve también el uso de tokens y el modelo
+   * efectivo, para estimar el costo (observabilidad IA). Si el provider activo no
+   * implementa `completeWithUsage`, degrada elegantemente a `complete` con
+   * `usage: null` (el costo simplemente queda sin registrar, no rompe el flujo).
+   */
+  async completeWithUsage(
+    system: string,
+    prompt: string,
+    orgId: string | null | undefined,
+    feature: LlmFeature,
+  ): Promise<LlmCompletionResult> {
+    const cfg = await this.config.resolve(orgId, feature);
+    const provider = this.registry.get(cfg.provider);
+
+    if (!provider) {
+      throw new ServiceUnavailableException(`LLM provider "${cfg.provider}" no está registrado`);
+    }
+    if (!provider.isAvailable()) {
+      throw new ServiceUnavailableException(
+        `LLM provider "${cfg.provider}" no está disponible — revisa su API key`,
+      );
+    }
+
+    const request: LlmCompletionRequest = {
+      system,
+      prompt,
+      options: {
+        model: cfg.model,
+        maxTokens: cfg.maxTokens,
+        temperature: cfg.temperature,
+      },
+    };
+
+    if (provider.completeWithUsage) {
+      const result = await provider.completeWithUsage(request);
+      // `cfg.model` es la fuente de verdad del modelo efectivo.
+      return { ...result, model: cfg.model };
+    }
+    return { text: await provider.complete(request), model: cfg.model, usage: null };
   }
 
   /**
@@ -101,9 +144,7 @@ export class LlmService {
     const provider = this.registry.get(cfg.provider);
 
     if (!provider) {
-      throw new ServiceUnavailableException(
-        `LLM provider "${cfg.provider}" no está registrado`,
-      );
+      throw new ServiceUnavailableException(`LLM provider "${cfg.provider}" no está registrado`);
     }
     if (!provider.isAvailable()) {
       throw new ServiceUnavailableException(
@@ -127,5 +168,50 @@ export class LlmService {
       return provider.completeMultimodal(request);
     }
     return provider.complete(request);
+  }
+
+  /**
+   * Igual que `completeMultimodal`, pero devuelve también el uso de tokens y el
+   * modelo efectivo, para estimar el costo (observabilidad IA). Degrada
+   * elegantemente: usa la mejor variante disponible del provider y, si ninguna
+   * reporta uso, devuelve `usage: null`.
+   */
+  async completeMultimodalWithUsage(
+    system: string,
+    prompt: string,
+    images: LlmImagePart[] | undefined,
+    orgId: string | null | undefined,
+    feature: LlmFeature,
+  ): Promise<LlmCompletionResult> {
+    const cfg = await this.config.resolve(orgId, feature);
+    const provider = this.registry.get(cfg.provider);
+
+    if (!provider) {
+      throw new ServiceUnavailableException(`LLM provider "${cfg.provider}" no está registrado`);
+    }
+    if (!provider.isAvailable()) {
+      throw new ServiceUnavailableException(
+        `LLM provider "${cfg.provider}" no está disponible — revisa su API key`,
+      );
+    }
+
+    const request: LlmCompletionRequest = {
+      system,
+      prompt,
+      images,
+      options: {
+        model: cfg.model,
+        maxTokens: cfg.maxTokens,
+        temperature: cfg.temperature,
+      },
+    };
+
+    const hasImages = !!images && images.length > 0;
+    if (hasImages && provider.completeMultimodalWithUsage) {
+      const result = await provider.completeMultimodalWithUsage(request);
+      return { ...result, model: cfg.model };
+    }
+    // Sin imágenes (o sin multimodal-con-uso): la ruta de solo-texto con uso.
+    return this.completeWithUsage(system, prompt, orgId, feature);
   }
 }

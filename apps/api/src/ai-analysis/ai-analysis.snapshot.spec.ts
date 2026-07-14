@@ -52,6 +52,7 @@ function makeReport(
     meta: {
       assessmentId: 'a1',
       assessmentName: 'Prueba',
+      instrumentId: 'i1',
       instrumentName: 'Instrumento DIA',
       instrumentType: 'standardized',
       subjectName: 'Lenguaje',
@@ -66,6 +67,7 @@ function makeReport(
       studentsEnrolled: 5,
       coverageRate: 80,
       averageAchievement: 60,
+      hasGradingScale: true,
       averageGrade: 4.2,
       passingGrade: 4,
       passingRate: 75,
@@ -358,6 +360,7 @@ describe('SnapshotService.build', () => {
         studentsEnrolled: 0,
         coverageRate: null,
         averageAchievement: null,
+        hasGradingScale: true,
         averageGrade: null,
         passingGrade: 4,
         passingRate: null,

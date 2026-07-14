@@ -163,7 +163,12 @@ function validOutput(overrides: Partial<AssessmentInsightsOutput> = {}): Assessm
 
 function makeRunner(opts: {
   record?: Record<string, unknown> | null;
-  llmComplete: () => Promise<string>;
+  llmComplete: (
+    system?: string,
+    prompt?: string,
+    orgId?: string,
+    feature?: string,
+  ) => Promise<string>;
   snapshotBuild?: () => Promise<AiAnalysisSnapshot>;
 }): {
   runner: AiAnalysisRunner;
@@ -175,7 +180,16 @@ function makeRunner(opts: {
 } {
   const db = makeDb(opts.record === undefined ? baseRecord() : opts.record);
   const llmComplete = jest.fn(opts.llmComplete);
-  const llm = { complete: llmComplete } as unknown as LlmService;
+  // El runner llama `completeWithUsage`; lo envolvemos sobre `llmComplete` (que
+  // devuelve el string del modelo) para no reescribir los cuerpos de cada test.
+  const completeWithUsage = jest.fn(
+    async (system: string, prompt: string, orgId: string, feature: string) => ({
+      text: await llmComplete(system, prompt, orgId, feature),
+      model: 'gemini-2.5-flash',
+      usage: { inputTokens: 100, outputTokens: 50 },
+    }),
+  );
+  const llm = { complete: llmComplete, completeWithUsage } as unknown as LlmService;
   const snapshotBuild = jest.fn(opts.snapshotBuild ?? (async () => makeSnapshot()));
   const snapshot = { build: snapshotBuild } as unknown as SnapshotBuilder;
   const markProcessing = jest.fn().mockResolvedValue(undefined);
@@ -251,12 +265,11 @@ describe('AiAnalysisRunner.run', () => {
 
   it('audiencia director: el prompt enfatiza la mirada de gestión', async () => {
     let captured = '';
-    const { runner } = makeRunner({
+    const { runner, llmComplete } = makeRunner({
       record: baseRecord({ audience: 'director' }),
       llmComplete: async () => JSON.stringify(validOutput()),
     });
-    const llm = (runner as unknown as { llm: { complete: jest.Mock } }).llm;
-    llm.complete.mockImplementation(async (_system: string, prompt: string) => {
+    llmComplete.mockImplementation(async (_system: string, prompt: string) => {
       captured = prompt;
       return JSON.stringify(validOutput());
     });
@@ -267,12 +280,11 @@ describe('AiAnalysisRunner.run', () => {
 
   it('audiencia profesor: el prompt enfatiza lo accionable de aula', async () => {
     let captured = '';
-    const { runner } = makeRunner({
+    const { runner, llmComplete } = makeRunner({
       record: baseRecord({ audience: 'teacher' }),
       llmComplete: async () => JSON.stringify(validOutput()),
     });
-    const llm = (runner as unknown as { llm: { complete: jest.Mock } }).llm;
-    llm.complete.mockImplementation(async (_system: string, prompt: string) => {
+    llmComplete.mockImplementation(async (_system: string, prompt: string) => {
       captured = prompt;
       return JSON.stringify(validOutput());
     });
@@ -283,12 +295,11 @@ describe('AiAnalysisRunner.run', () => {
 
   it('audiencia desconocida cae a general (no rompe)', async () => {
     let captured = '';
-    const { runner, markCompleted } = makeRunner({
+    const { runner, markCompleted, llmComplete } = makeRunner({
       record: baseRecord({ audience: 'legacy_value' }),
       llmComplete: async () => JSON.stringify(validOutput()),
     });
-    const llm = (runner as unknown as { llm: { complete: jest.Mock } }).llm;
-    llm.complete.mockImplementation(async (_system: string, prompt: string) => {
+    llmComplete.mockImplementation(async (_system: string, prompt: string) => {
       captured = prompt;
       return JSON.stringify(validOutput());
     });
@@ -306,6 +317,36 @@ describe('AiAnalysisRunner.run', () => {
     await runner.run('a-1', 'org-1');
     expect(markFailed).toHaveBeenCalledTimes(1);
     expect(markFailed.mock.calls[0]![2]).toContain('llm down');
+  });
+
+  it('reintenta ante fallo TRANSITORIO de red y completa (fetch failed → éxito)', async () => {
+    process.env.AI_ANALYSIS_RETRY_BACKOFF_MS = '0';
+    let calls = 0;
+    const { runner, markCompleted, markFailed, llmComplete } = makeRunner({
+      llmComplete: async () => {
+        calls += 1;
+        if (calls === 1) {
+          throw new Error('exception TypeError: fetch failed sending request');
+        }
+        return JSON.stringify(validOutput());
+      },
+    });
+    await runner.run('a-1', 'org-1');
+    delete process.env.AI_ANALYSIS_RETRY_BACKOFF_MS;
+    expect(llmComplete).toHaveBeenCalledTimes(2);
+    expect(markCompleted).toHaveBeenCalledTimes(1);
+    expect(markFailed).not.toHaveBeenCalled();
+  });
+
+  it('NO reintenta errores no-transitorios → failed en un solo intento', async () => {
+    const { runner, markFailed, llmComplete } = makeRunner({
+      llmComplete: async () => {
+        throw new Error('llm down');
+      },
+    });
+    await runner.run('a-1', 'org-1');
+    expect(llmComplete).toHaveBeenCalledTimes(1);
+    expect(markFailed).toHaveBeenCalledTimes(1);
   });
 
   it('timeout → failed', async () => {

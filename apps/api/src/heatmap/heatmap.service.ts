@@ -1,5 +1,5 @@
 import { ForbiddenException, Injectable } from '@nestjs/common';
-import { and, asc, eq, inArray, isNull, sql, type SQL } from 'drizzle-orm';
+import { and, asc, eq, inArray, isNull, notInArray, sql, type SQL } from 'drizzle-orm';
 import {
   assessments,
   classGroups,
@@ -17,6 +17,7 @@ import {
 import {
   DEFAULT_PERFORMANCE_THRESHOLDS,
   RESULTS_VIEWER_ROLES,
+  RESULT_HIDDEN_NODE_TYPES,
   percentageToPerformanceLevel,
   userHasAnyRole,
   type HeatmapCell,
@@ -233,7 +234,8 @@ export class HeatmapService {
       .innerJoin(subjects, eq(subjects.id, instruments.subjectId))
       .innerJoin(taxonomyNodes, eq(taxonomyNodes.id, skillResults.nodeId))
       .innerJoin(students, eq(students.id, skillResults.studentId))
-      .where(and(...conditions))
+      // TKT-05 — el heatmap (habilidad × asignatura) no reporta filas de descriptor.
+      .where(and(...conditions, notInArray(taxonomyNodes.type, [...RESULT_HIDDEN_NODE_TYPES])))
       .groupBy(
         skillResults.nodeId,
         taxonomyNodes.name,

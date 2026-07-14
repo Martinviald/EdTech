@@ -5,8 +5,9 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { and, desc, eq, inArray, isNull } from 'drizzle-orm';
+import { and, desc, eq, inArray, isNull, or } from 'drizzle-orm';
 import {
+  instrumentSections,
   items,
   remedialMaterials,
   taxonomyNodes,
@@ -14,16 +15,42 @@ import {
   type RemedialMaterial,
 } from '@soe/db';
 import {
+  qualityReportSchema,
+  toRemedialStudentContent,
   validateRemedialContent,
   type GenerateRemedialDto,
+  type QualityReport,
   type RemedialContent,
   type RemedialListQueryDto,
   type RemedialListResponse,
   type RemedialMaterialModel,
+  type RemedialMaterialType,
+  type RemedialMethod,
+  type RemedialPracticeItemPreview,
+  type RemedialStimulus,
+  type RemedialStudentMaterialModel,
   type ReviewRemedialDto,
+  type UpdateRemedialDto,
 } from '@soe/types';
 import type { JwtPayload } from '../auth/jwt-payload.types';
 import { InjectDb, type Database } from '../database/database.types';
+import { GROUP_PLAN_PROMPT_VERSION } from './prompts/group-plan.prompt';
+import { GUIDE_PROMPT_VERSION } from './prompts/guide.prompt';
+import {
+  PRACTICE_PROMPT_VERSION,
+  PRACTICE_STIMULUS_PROMPT_VERSION,
+} from './prompts/practice.prompt';
+
+/**
+ * Versión de prompt vigente por tipo. Entra en el `inputHash` de la caché para que
+ * un bump de prompt (p. ej. `s3-practice-v1` → `ola1-practice-v2`) invalide el
+ * material previo en lugar de servir una versión vieja desde caché.
+ */
+const PROMPT_VERSION_BY_TYPE: Record<RemedialMaterialType, string> = {
+  guide: GUIDE_PROMPT_VERSION,
+  practice_set: PRACTICE_PROMPT_VERSION,
+  group_plan: GROUP_PLAN_PROMPT_VERSION,
+};
 
 /** Cantidad de ítems de práctica por defecto cuando el DTO no la especifica. */
 const DEFAULT_PRACTICE_ITEM_COUNT = 5;
@@ -32,10 +59,17 @@ const DEFAULT_PRACTICE_ITEM_COUNT = 5;
 export interface MarkReadyInput {
   content: RemedialContent;
   input: Record<string, unknown>;
+  /** Método EFECTIVO resuelto por el runner (Ola 2.1a); puede diferir del solicitado. */
+  method: RemedialMethod;
   model: string | null;
   promptVersion: string | null;
   tokens: { input: number; output: number } | null;
   costUsd: string | null;
+  /**
+   * Reporte del juez (Ola 2.1b): iteraciones + veredicto final por ítem. Solo lo trae
+   * `practice_set` (viene del loop de calidad); `null`/ausente en el resto.
+   */
+  qualityReport?: QualityReport | null;
 }
 
 /**
@@ -63,7 +97,8 @@ export class RemedialService {
   /**
    * Crea (o reutiliza desde caché) un registro de material remedial.
    *
-   * - `inputHash` determinista de {type, nodeId, classGroupId, itemCount}.
+   * - `inputHash` determinista de {type, nodeId, classGroupId, itemCount, method,
+   *   stimulusId}.
    * - Si existe una fila cacheable (`ready`/`approved`) con ese hash y NO `force`
    *   → la devuelve (`fromCache: true`).
    * - En cualquier otro caso inserta una fila `pending` y la devuelve.
@@ -77,11 +112,25 @@ export class RemedialService {
       dto.type === 'practice_set'
         ? dto.itemCount ?? DEFAULT_PRACTICE_ITEM_COUNT
         : null;
+    // Ola 2.1a: método remedial (default self_contained) + override de pasaje del
+    // docente. Ambos entran en la caché (mismo nodo con/sin pasaje NO deben colisionar)
+    // y se persisten (`method` en columna, `stimulusId` en `input`) para que el runner
+    // los reproduzca.
+    const method: RemedialMethod = dto.method ?? 'self_contained';
+    const stimulusId = dto.stimulusId ?? null;
     const inputHash = this.computeInputHash({
       type: dto.type,
       nodeId: dto.nodeId,
       classGroupId: dto.classGroupId ?? null,
       itemCount,
+      // Distinto diagnóstico de origen no debe colisionar en caché (el brief que
+      // ancla la generación depende del análisis IA).
+      sourceAnalysisId: dto.sourceAnalysisId ?? null,
+      method,
+      stimulusId,
+      // Bump de prompt → clave distinta (no reutilizar material de una versión vieja).
+      // El modo con estímulo tiene su propia versión (no colisiona con self_contained).
+      promptVersion: this.resolvePromptVersion(dto.type, method),
     });
 
     return withOrgContext(this.db, orgId, async (tx) => {
@@ -111,6 +160,7 @@ export class RemedialService {
           orgId,
           type: dto.type,
           status: 'pending',
+          method,
           nodeId: dto.nodeId,
           assessmentId: dto.assessmentId ?? null,
           classGroupId: dto.classGroupId ?? null,
@@ -119,7 +169,7 @@ export class RemedialService {
           // Parámetros deterministas de generación (no PII). El runner los lee
           // para reproducir la generación; markReady reescribe `input` con el
           // contexto RAG auditado.
-          input: itemCount !== null ? { itemCount } : null,
+          input: this.buildCreateInput(itemCount, stimulusId),
           createdById: user.userId,
         })
         .returning();
@@ -140,7 +190,23 @@ export class RemedialService {
       if (!row) {
         throw new NotFoundException('Material remedial no encontrado');
       }
-      return this.toModel(tx, row);
+      const model = await this.toModel(tx, row);
+
+      // Hidratación on-read del preview de ítems (G2): solo para practice_set en
+      // estado revisable. El ítem completo (enunciado + alternativas + clave +
+      // explicación) se lee de `items` (fuente de verdad); NO se persiste, el
+      // `content` (refs ligeras) queda intacto. Junto a él (Ola 2.1a), el TEXTO
+      // completo del pasaje se re-hidrata desde `instrument_sections` para los sets
+      // con estímulo (`content.stimuli` no vacío); self_contained → `[]`.
+      if (
+        row.type === 'practice_set' &&
+        (row.status === 'ready' || row.status === 'approved')
+      ) {
+        model.practiceItems = await this.hydratePracticeItems(tx, row.content, orgId);
+        model.stimuli = await this.hydrateStimuli(tx, row.content, orgId);
+      }
+
+      return model;
     });
   }
 
@@ -209,6 +275,10 @@ export class RemedialService {
           status: 'ready',
           content: data.content,
           input: data.input,
+          // Método EFECTIVO (Ola 2.1a): el resolver pudo degradar el solicitado.
+          method: data.method,
+          // Reporte del juez (Ola 2.1b): `null` en tipos sin loop (guide/group_plan).
+          qualityReport: data.qualityReport ?? null,
           model: data.model,
           promptVersion: data.promptVersion,
           tokens: data.tokens,
@@ -281,16 +351,23 @@ export class RemedialService {
         return this.toModel(tx, updated!);
       }
 
-      // approve: el humano puede haber editado el content (override).
-      const finalContent: RemedialContent = dto.content
+      // approve: el humano puede enviar un content editado (override). §8.3: NO se
+      // sobrescribe `content` (evidencia IA); la edición vive en `editedContent`.
+      // El content EFECTIVO a aprobar = edición del body ?? edición previa ?? IA.
+      const editedFromBody: RemedialContent | null = dto.content
         ? validateRemedialContent(row.type, dto.content)
-        : validateRemedialContent(row.type, row.content);
+        : null;
+      const finalContent: RemedialContent = validateRemedialContent(
+        row.type,
+        editedFromBody ?? row.editedContent ?? row.content,
+      );
 
       await tx
         .update(remedialMaterials)
         .set({
           status: 'approved',
-          content: finalContent,
+          // Persistir la edición del body si vino; conservar la previa si no.
+          ...(editedFromBody ? { editedContent: editedFromBody } : {}),
           reviewedById: user.userId,
           reviewedAt: new Date(),
           updatedAt: new Date(),
@@ -318,6 +395,106 @@ export class RemedialService {
 
       const updated = await this.findOne(tx, id, orgId);
       return this.toModel(tx, updated!);
+    });
+  }
+
+  /**
+   * Edición humana del material en borrador (TKT-17 c). Aplica a TODOS los tipos
+   * (guide | practice_set | group_plan), no solo la guía. Solo mientras el material
+   * está en `ready` (aún no aprobado/descartado). §8.3: persiste en `editedContent`
+   * (override), sin tocar `content` (evidencia IA). El content se valida por `type`.
+   */
+  async update(
+    user: JwtPayload,
+    id: string,
+    dto: UpdateRemedialDto,
+  ): Promise<RemedialMaterialModel> {
+    const orgId = this.requireOrgId(user);
+
+    return withOrgContext(this.db, orgId, async (tx) => {
+      const row = await this.findOne(tx, id, orgId);
+      if (!row) {
+        throw new NotFoundException('Material remedial no encontrado');
+      }
+      if (row.status !== 'ready') {
+        throw new BadRequestException(
+          `Solo se puede editar material en estado "ready" (actual: "${row.status}")`,
+        );
+      }
+
+      const patch: Partial<typeof remedialMaterials.$inferInsert> = {
+        updatedAt: new Date(),
+      };
+      if (dto.title !== undefined) {
+        patch.title = dto.title;
+      }
+      if (dto.content !== undefined) {
+        patch.editedContent = validateRemedialContent(row.type, dto.content);
+      }
+
+      await tx
+        .update(remedialMaterials)
+        .set(patch)
+        .where(
+          and(eq(remedialMaterials.id, id), eq(remedialMaterials.orgId, orgId)),
+        );
+
+      const updated = await this.findOne(tx, id, orgId);
+      return this.toModel(tx, updated!);
+    });
+  }
+
+  /**
+   * Versión ESTUDIANTE del material (TKT-17 b). Misma generación, render sin la
+   * información solo-profesor. Deriva de forma determinista el content efectivo
+   * (`editedContent ?? content`) con `toRemedialStudentContent`. `content` queda
+   * null si el material aún no tiene salida (status distinto de ready/approved).
+   */
+  async getStudentVersion(
+    user: JwtPayload,
+    id: string,
+  ): Promise<RemedialStudentMaterialModel> {
+    const orgId = this.requireOrgId(user);
+
+    return withOrgContext(this.db, orgId, async (tx) => {
+      const row = await this.findOne(tx, id, orgId);
+      if (!row) {
+        throw new NotFoundException('Material remedial no encontrado');
+      }
+
+      const effective = row.editedContent ?? row.content;
+      let studentContent: RemedialStudentMaterialModel['content'] = null;
+      if (effective !== null && effective !== undefined) {
+        const validated = validateRemedialContent(row.type, effective);
+        // Hidrata las alternativas de práctica por el mismo canal RLS-safe que el
+        // docente (`hydratePracticeItems`); el proyector las stripea de la clave
+        // correcta y la explicación antes de enviarlas al estudiante.
+        const practiceItems =
+          row.type === 'practice_set'
+            ? await this.hydratePracticeItems(tx, validated, orgId)
+            : null;
+        studentContent = toRemedialStudentContent(row.type, validated, practiceItems);
+      }
+
+      let nodeName: string | null = null;
+      if (row.nodeId) {
+        const [node] = await tx
+          .select({ name: taxonomyNodes.name })
+          .from(taxonomyNodes)
+          .where(eq(taxonomyNodes.id, row.nodeId))
+          .limit(1);
+        nodeName = node?.name ?? null;
+      }
+
+      return {
+        id: row.id,
+        type: row.type,
+        status: row.status,
+        nodeId: row.nodeId,
+        nodeName,
+        title: row.title,
+        content: studentContent,
+      };
     });
   }
 
@@ -352,6 +529,10 @@ export class RemedialService {
     nodeId: string;
     classGroupId: string | null;
     itemCount: number | null;
+    sourceAnalysisId: string | null;
+    method: RemedialMethod;
+    stimulusId: string | null;
+    promptVersion: string;
   }): string {
     // Orden de claves fijo → hash determinista independiente del insertion order.
     const canonical = JSON.stringify({
@@ -359,8 +540,42 @@ export class RemedialService {
       nodeId: input.nodeId,
       classGroupId: input.classGroupId,
       itemCount: input.itemCount,
+      sourceAnalysisId: input.sourceAnalysisId,
+      // Ola 2.1a: método + pasaje elegido → el mismo nodo con/sin estímulo (o con
+      // pasajes distintos) genera material distinto y no debe compartir caché.
+      method: input.method,
+      stimulusId: input.stimulusId,
+      promptVersion: input.promptVersion,
     });
     return createHash('sha256').update(canonical).digest('hex');
+  }
+
+  /**
+   * Versión de prompt EFECTIVA para la caché. `practice_set` en modo `reuse_stimulus`
+   * usa el prompt anclado al pasaje (versión propia); el resto usa la versión por tipo.
+   */
+  private resolvePromptVersion(
+    type: RemedialMaterialType,
+    method: RemedialMethod,
+  ): string {
+    if (type === 'practice_set' && method === 'reuse_stimulus') {
+      return PRACTICE_STIMULUS_PROMPT_VERSION;
+    }
+    return PROMPT_VERSION_BY_TYPE[type];
+  }
+
+  /**
+   * Arma el `input` determinista de la fila `pending` (no PII): `itemCount` (solo
+   * practice_set) + `stimulusId` (override del docente, Ola 2.1a). `null` si no hay nada.
+   */
+  private buildCreateInput(
+    itemCount: number | null,
+    stimulusId: string | null,
+  ): Record<string, unknown> | null {
+    const meta: Record<string, unknown> = {};
+    if (itemCount !== null) meta.itemCount = itemCount;
+    if (stimulusId) meta.stimulusId = stimulusId;
+    return Object.keys(meta).length > 0 ? meta : null;
   }
 
   private requireOrgId(user: JwtPayload): string {
@@ -392,12 +607,17 @@ export class RemedialService {
       orgId: row.orgId,
       type: row.type,
       status: row.status,
+      method: row.method,
       nodeId: row.nodeId,
       nodeName,
       assessmentId: row.assessmentId,
       classGroupId: row.classGroupId,
       title: row.title,
       content: row.content ?? null,
+      editedContent: row.editedContent ?? null,
+      // Ola 2.1b: reporte del juez leído on-read desde la fila (parseado/validado;
+      // `null` si no hay o si la fila trae un shape viejo/incompatible).
+      qualityReport: this.parseQualityReport(row.qualityReport),
       model: row.model,
       promptVersion: row.promptVersion,
       costUsd: row.costUsd,
@@ -409,4 +629,174 @@ export class RemedialService {
       reviewedAt: row.reviewedAt ? row.reviewedAt.toISOString() : null,
     };
   }
+
+  /**
+   * Parsea/valida el `qualityReport` crudo de la fila (JSONB genérico) con
+   * `qualityReportSchema` (Ola 2.1b). `null` si la fila no lo trae o si su shape no
+   * valida (degradación elegante: nunca rompe la lectura del material).
+   */
+  private parseQualityReport(raw: Record<string, unknown> | null): QualityReport | null {
+    if (!raw) return null;
+    const parsed = qualityReportSchema.safeParse(raw);
+    return parsed.success ? parsed.data : null;
+  }
+
+  /**
+   * Hidrata el preview completo de los ítems de práctica leyéndolos de `items`
+   * (fuente de verdad) por los `itemId` guardados en el `content`. `items` NO está
+   * bajo RLS → aislamiento con filtro EXPLÍCITO de pool visible
+   * (`org_id = :orgId ∪ org_id IS NULL`) + soft-delete (CLAUDE.md §5.2). Se arma
+   * on-read; el `content` (refs) no se modifica. Un ítem ausente (borrado o fuera
+   * del pool) se omite del preview sin romper el resto.
+   */
+  private async hydratePracticeItems(
+    tx: Database,
+    content: RemedialContent | null,
+    orgId: string,
+  ): Promise<RemedialPracticeItemPreview[]> {
+    if (!content || !('items' in content) || content.items.length === 0) {
+      return [];
+    }
+    const refs = content.items;
+    const itemIds = refs.map((ref) => ref.itemId);
+
+    const rows = await tx
+      .select({ id: items.id, type: items.type, content: items.content })
+      .from(items)
+      .where(
+        and(
+          inArray(items.id, itemIds),
+          or(eq(items.orgId, orgId), isNull(items.orgId)),
+          isNull(items.deletedAt),
+        ),
+      );
+    const byId = new Map(rows.map((row) => [row.id, row]));
+
+    const previews: RemedialPracticeItemPreview[] = [];
+    for (const ref of refs) {
+      const item = byId.get(ref.itemId);
+      if (!item) continue;
+      const alternatives = extractAlternatives(item.content);
+      previews.push({
+        itemId: item.id,
+        position: ref.position,
+        type: item.type,
+        stem: extractStem(item.content),
+        alternatives,
+        correctKey: extractCorrectKey(alternatives),
+        explanation: extractExplanation(item.content),
+      });
+    }
+    return previews;
+  }
+
+  /**
+   * Hidrata el TEXTO COMPLETO de los estímulos (pasajes) del set desde
+   * `instrument_sections` por los `sectionId` de `content.stimuli` (Ola 2.1a).
+   * `instrument_sections` NO está bajo RLS → aislamiento con filtro EXPLÍCITO del pool
+   * visible (`org_id = :orgId ∪ org_id IS NULL`, patrón `items`). Se arma on-read; el
+   * `content` (refs ligeras) no se modifica. Una sección ausente se omite sin romper el
+   * resto. `[]` para sets self_contained (sin `stimuli`).
+   */
+  private async hydrateStimuli(
+    tx: Database,
+    content: RemedialContent | null,
+    orgId: string,
+  ): Promise<RemedialStimulus[]> {
+    if (!content || !('stimuli' in content) || content.stimuli.length === 0) {
+      return [];
+    }
+    const refs = content.stimuli;
+    const sectionIds = refs.map((ref) => ref.sectionId);
+
+    const rows = await tx
+      .select({
+        id: instrumentSections.id,
+        kind: instrumentSections.kind,
+        source: instrumentSections.source,
+        passageTitle: instrumentSections.passageTitle,
+        passageText: instrumentSections.passageText,
+      })
+      .from(instrumentSections)
+      .where(
+        and(
+          inArray(instrumentSections.id, sectionIds),
+          or(eq(instrumentSections.orgId, orgId), isNull(instrumentSections.orgId)),
+        ),
+      );
+    const byId = new Map(rows.map((row) => [row.id, row]));
+
+    const stimuli: RemedialStimulus[] = [];
+    for (const ref of refs) {
+      const section = byId.get(ref.sectionId);
+      if (!section) continue;
+      stimuli.push({
+        sectionId: section.id,
+        kind: section.kind,
+        source: section.source,
+        title: section.passageTitle ?? null,
+        text: section.passageText ?? null,
+      });
+    }
+    return stimuli;
+  }
+}
+
+// ──────────────────────────────────────────────────────────────────────────────
+// Extracción defensiva del `content` polimórfico de un ítem (G2). El banco es
+// heterogéneo por `item_type`: se parsea campo a campo (no contra el schema
+// estricto, que rechazaría un ítem entero por un detalle). Degrada a `null`.
+// ──────────────────────────────────────────────────────────────────────────────
+
+type PreviewAlternative = { key: string; text: string; isCorrect: boolean };
+
+/** `content.stem` si existe y es string; `null` en otro caso. */
+function extractStem(content: unknown): string | null {
+  if (content && typeof content === 'object' && 'stem' in content) {
+    const stem = (content as { stem?: unknown }).stem;
+    if (typeof stem === 'string') return stem;
+  }
+  return null;
+}
+
+/**
+ * `content.alternatives` como lista `{key,text,isCorrect}`. Solo los tipos con
+ * alternativas (`multiple_choice`, `listening`) las traen; el resto degrada a `null`.
+ */
+function extractAlternatives(content: unknown): PreviewAlternative[] | null {
+  if (!content || typeof content !== 'object' || !('alternatives' in content)) {
+    return null;
+  }
+  const raw = (content as { alternatives?: unknown }).alternatives;
+  if (!Array.isArray(raw)) return null;
+
+  const parsed: PreviewAlternative[] = [];
+  for (const entry of raw) {
+    if (!entry || typeof entry !== 'object') continue;
+    const { key, text, isCorrect } = entry as {
+      key?: unknown;
+      text?: unknown;
+      isCorrect?: unknown;
+    };
+    if (typeof key === 'string' && typeof text === 'string' && typeof isCorrect === 'boolean') {
+      parsed.push({ key, text, isCorrect });
+    }
+  }
+  return parsed.length > 0 ? parsed : null;
+}
+
+/** Clave correcta: primera alternativa con `isCorrect=true`. `null` si no aplica. */
+function extractCorrectKey(alternatives: PreviewAlternative[] | null): string | null {
+  if (!alternatives) return null;
+  const correct = alternatives.find((alt) => alt.isCorrect);
+  return correct ? correct.key : null;
+}
+
+/** `content.explanation` si existe y es string; `null` en otro caso. */
+function extractExplanation(content: unknown): string | null {
+  if (content && typeof content === 'object' && 'explanation' in content) {
+    const explanation = (content as { explanation?: unknown }).explanation;
+    if (typeof explanation === 'string') return explanation;
+  }
+  return null;
 }

@@ -63,6 +63,33 @@ siempre bypassan. Modelo de dos roles (ver `sql/roles.sql`):
 `FORCE ROW LEVEL SECURITY` asegura que el RLS aplique incluso al dueño de la tabla.
 La API emite un warning de arranque si detecta que conecta con un rol que bypassa RLS.
 
+### RLS en desarrollo local (reproducir el enforcement)
+
+⚠️ En dev es habitual conectar como **superuser** (ej. `postgres://tu_usuario@localhost`,
+el rol de Homebrew, que es SUPERUSER + BYPASSRLS). Con ese rol **el RLS es un no-op**:
+una query sin `withOrgContext` devuelve filas igual, así que **enmascara bugs** que en
+AWS (rol `soe_app`) revientan con 0 filas → 404/NotFound. Ya pasó: `assessment-report`
+e `items` resolvían `assessments` fuera de contexto y solo fallaban en la nube.
+
+Para que tu máquina reproduzca el RLS real (y el CI/tú atrapen la clase de bug antes
+de deployar):
+
+```bash
+# 1. Crear el rol soe_app (NOBYPASSRLS) en tu BD local — idempotente.
+DATABASE_ADMIN_URL=postgresql://<tu_superuser>@localhost:5432/soe_dev \
+SOE_APP_PASSWORD=devpass \
+pnpm --filter @soe/db db:provision-roles
+
+# 2. Apuntar la API a soe_app (deja el superuser solo en DATABASE_ADMIN_URL, para migrate/seed):
+#    DATABASE_URL=postgresql://soe_app:devpass@localhost:5432/soe_dev
+#    DATABASE_ADMIN_URL=postgresql://<tu_superuser>@localhost:5432/soe_dev
+```
+
+Con eso, `pnpm dev` corre bajo RLS y cualquier query mal envuelta falla en local igual
+que en AWS. Nota: los tests unitarios NO necesitan esto — el mock RLS-aware de
+`assessment-report.service.spec.ts` / `items.service.spec.ts` ya simula el 0-filas
+sin contexto, así que el CI atrapa la regresión sin BD real.
+
 ## Scripts
 
 ```bash

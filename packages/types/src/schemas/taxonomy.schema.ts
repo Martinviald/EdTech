@@ -59,12 +59,25 @@ export const listTaxonomyNodesQuerySchema = z.object({
   parentId: z.string().uuid().optional(),
 });
 
+// Opciones de nodos para los dropdowns del banco de ítems: lista nodos de las
+// taxonomías visibles (oficiales + de la org), acotados por asignatura/nivel/tipo,
+// sin exigir `taxonomyId` (cross-currículo). Poblada los filtros en cascada.
+export const listTaxonomyNodeFacetsQuerySchema = z.object({
+  subjectId: z.string().uuid().optional(),
+  gradeId: z.string().uuid().optional(),
+  type: taxonomyNodeTypeSchema.optional(),
+  // Restringe a un marco (tipo de taxonomía). Ej.: `mineduc` = Currículum
+  // Nacional. Permite que el banco filtre por un marco a la vez.
+  taxonomyType: taxonomyTypeSchema.optional(),
+});
+
 export type CreateTaxonomyDto = z.infer<typeof createTaxonomySchema>;
 export type UpdateTaxonomyDto = z.infer<typeof updateTaxonomySchema>;
 export type ListTaxonomiesQueryDto = z.infer<typeof listTaxonomiesQuerySchema>;
 export type CreateTaxonomyNodeDto = z.infer<typeof createTaxonomyNodeSchema>;
 export type UpdateTaxonomyNodeDto = z.infer<typeof updateTaxonomyNodeSchema>;
 export type ListTaxonomyNodesQueryDto = z.infer<typeof listTaxonomyNodesQuerySchema>;
+export type ListTaxonomyNodeFacetsQueryDto = z.infer<typeof listTaxonomyNodeFacetsQuerySchema>;
 
 // ── Modelos (response shape de la API) ────────────────────────────────────────
 // El refactor "web-no-db-direct" impide importar tipos de Drizzle desde @soe/web.

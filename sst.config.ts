@@ -50,8 +50,11 @@ export default $config({
     const googleClientId = new sst.Secret("GoogleClientId", "");
     const googleClientSecret = new sst.Secret("GoogleClientSecret", "");
 
-    // ── Red: VPC con bastion (para `sst tunnel`). SIN NAT. ──
-    const vpc = new sst.aws.Vpc("Vpc", { bastion: true });
+    // ── Red: VPC con bastion (para `sst tunnel`) + NAT ec2 (fck-nat, ~$3-4/mes). ──
+    // El NAT da salida a internet a las subredes privadas. App Runner enruta TODO su
+    // egress por la VPC (lo necesita para el RDS privado); el asistente E21 llama a la
+    // API de Gemini en runtime → sin NAT esas llamadas mueren con `fetch failed`.
+    const vpc = new sst.aws.Vpc("Vpc", { bastion: true, nat: "ec2" });
 
     // ── BDD: RDS Postgres t4g.micro Single-AZ ──
     // master user (soe_admin) = rol ADMIN -> DATABASE_ADMIN_URL (migrate/seed, desde laptop/CI).

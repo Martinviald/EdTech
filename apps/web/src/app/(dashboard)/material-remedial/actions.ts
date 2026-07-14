@@ -3,12 +3,39 @@
 import {
   generateRemedialSchema,
   reviewRemedialSchema,
+  updateRemedialSchema,
   type RemedialMaterialModel,
   type RemedialMaterialType,
+  type RemedialMethod,
   type RemedialStatus,
   type RemedialContent,
+  type RemedialStimulusRef,
+  type StimulusKind,
+  type StimulusSource,
 } from '@soe/types';
 import { apiGet, apiPost, apiPatch } from '@/lib/api';
+
+/**
+ * Pasaje fallado candidato (modo A · Ola 2.1a). Espejo del shape backend-interno
+ * de `GET /remedial/candidate-stimuli` (`FailedStimulus`), que no vive en `@soe/types`
+ * por ser BE-only. `gap` es la brecha agregada del pasaje (0–100).
+ */
+export interface FailedStimulus {
+  sectionId: string;
+  kind: StimulusKind;
+  source: StimulusSource;
+  title: string | null;
+  text: string | null;
+  textType: string | null; // passage_format (plain | markdown | html)
+  itemPositions: number[];
+  gap: number;
+}
+
+/** Respuesta del picker de pasaje: fallados de la evaluación + alternativas del banco. */
+export interface CandidateStimuliResponse {
+  fromAssessment: FailedStimulus[];
+  fromBank: RemedialStimulusRef[];
+}
 
 /**
  * Gatilla la generación (o regeneración con `force`) de un material remedial a
@@ -24,6 +51,10 @@ export async function generateRemedial(input: {
   classGroupId?: string;
   sourceAnalysisId?: string;
   itemCount?: number;
+  /** Ola 2.1a: método del set (solo practice_set). El backend resuelve el default. */
+  method?: RemedialMethod;
+  /** Ola 2.1a: pasaje elegido por el docente (override) cuando `method='reuse_stimulus'`. */
+  stimulusId?: string;
   force?: boolean;
 }): Promise<{ materialId: string; status: RemedialStatus }> {
   const dto = generateRemedialSchema.parse({
@@ -33,13 +64,26 @@ export async function generateRemedial(input: {
     classGroupId: input.classGroupId,
     sourceAnalysisId: input.sourceAnalysisId,
     itemCount: input.itemCount,
+    method: input.method,
+    stimulusId: input.stimulusId,
     force: input.force ?? false,
   });
 
-  return apiPost<{ materialId: string; status: RemedialStatus }>(
-    '/remedial/generate',
-    dto,
-  );
+  return apiPost<{ materialId: string; status: RemedialStatus }>('/remedial/generate', dto);
+}
+
+/**
+ * Lista los pasajes candidatos para el picker del modo A (Ola 2.1a): los fallados
+ * de la evaluación (mayor brecha primero, default del picker) y las alternativas
+ * publicadas del banco. La autorización efectiva la aplica el guard del endpoint
+ * (`REMEDIAL_GENERATOR_ROLES`); el `orgId` sale del token en el backend.
+ */
+export async function getCandidateStimuli(
+  assessmentId: string,
+  nodeId: string,
+): Promise<CandidateStimuliResponse> {
+  const query = new URLSearchParams({ assessmentId, nodeId }).toString();
+  return apiGet<CandidateStimuliResponse>(`/remedial/candidate-stimuli?${query}`);
 }
 
 /**
@@ -47,9 +91,7 @@ export async function generateRemedial(input: {
  * devuelve el `status`: el render del contenido lo hace el Server Component tras
  * `refresh`.
  */
-export async function pollRemedialStatus(
-  materialId: string,
-): Promise<{ status: RemedialStatus }> {
+export async function pollRemedialStatus(materialId: string): Promise<{ status: RemedialStatus }> {
   const material = await apiGet<RemedialMaterialModel>(`/remedial/${materialId}`);
   return { status: material.status };
 }
@@ -70,8 +112,22 @@ export async function reviewRemedial(input: {
     content: input.content,
   });
 
-  return apiPatch<RemedialMaterialModel>(
-    `/remedial/${input.materialId}/review`,
-    dto,
-  );
+  return apiPatch<RemedialMaterialModel>(`/remedial/${input.materialId}/review`, dto);
+}
+
+/**
+ * Edición humana del material en borrador (TKT-17 c): persiste el `content`
+ * editado en `editedContent` vía `PATCH /remedial/:id`, sin tocar la salida IA
+ * (`content`, evidencia §8.3). Aplica a TODOS los tipos (guide | practice_set |
+ * group_plan); el content se valida por `type` en el backend. Solo mientras el
+ * material está en `ready`. La autorización efectiva la aplica el guard del
+ * endpoint (`REMEDIAL_APPROVER_ROLES`).
+ */
+export async function updateRemedialContent(input: {
+  materialId: string;
+  content: RemedialContent;
+}): Promise<RemedialMaterialModel> {
+  const dto = updateRemedialSchema.parse({ content: input.content });
+
+  return apiPatch<RemedialMaterialModel>(`/remedial/${input.materialId}`, dto);
 }

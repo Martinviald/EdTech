@@ -58,8 +58,16 @@ export const itemMatrixQuerySchema = z.object({
   assessmentId: z.string().uuid(),
   classGroupId: z.string().uuid().optional(),
   nodeId: z.string().uuid().optional(), // filtra columnas por habilidad/contenido
+  // TKT-12 — filtro multi-tag con semántica OR: una pregunta se muestra si tiene
+  // CUALQUIERA de estos nodos/tags (OA, habilidad, contenido, tipo de texto…).
+  // Se combina con `nodeId` como unión (OR sobre todos los ids provistos).
+  tagIds: z.array(z.string().uuid()).optional(),
   page: z.coerce.number().int().min(1).default(1),
   limit: z.coerce.number().int().min(1).max(200).default(50),
+  // TKT-09 — "Detalle por pregunta": el ordenamiento (alumnos/preguntas por % de
+  // logro) se resuelve en el frontend, por lo que necesita el curso COMPLETO. Con
+  // `all=true` se ignora la paginación y se devuelven todos los alumnos del scope.
+  all: z.coerce.boolean().optional().default(false),
 });
 export type ItemMatrixQueryDto = z.infer<typeof itemMatrixQuerySchema>;
 
@@ -68,6 +76,24 @@ export type ItemTaxonomyRef = {
   nodeId: string;
   nodeName: string;
   nodeType: string;
+};
+
+/**
+ * TKT-22 — Líneas de referencia comparativas por pregunta en el tablero maestro
+ * (Detalle por pregunta). Objeto extensible: cada nueva referencia es un campo
+ * más, sin romper el contrato existente.
+ *
+ * - `org` (viable ahora): % de logro del COLEGIO para la pregunta = promedio de
+ *   TODA la org, independiente del scope del usuario (un profesor ve su curso en
+ *   `correctRate` y el colegio completo aquí). Sale del token; nunca expone datos
+ *   de otra org (RLS + withOrgContext).
+ * - `sample` (DIFERIDO): % de logro de la MUESTRA de colegios (benchmark
+ *   inter-colegio). Bloqueado hasta existir un pool multi-colegio (TKT-20). El
+ *   campo se deja opcional para poblarlo después sin cambiar el contrato.
+ */
+export type QuestionReferences = {
+  org: number | null; // 0..100 — % logro del colegio (toda la org)
+  sample?: number | null; // 0..100 — muestra de colegios (DIFERIDO, TKT-20)
 };
 
 /** Una columna de la matriz = una pregunta (ítem) de la evaluación. */
@@ -79,9 +105,11 @@ export type MatrixQuestionColumn = {
   correctKey: string | null; // clave correcta si es selección múltiple
   skill: ItemTaxonomyRef | null; // habilidad principal
   content: ItemTaxonomyRef | null; // contenido/OA principal
-  // % de alumnos (de la población visible) que respondió correctamente esta
-  // pregunta — para resaltar preguntas críticas en la cabecera.
+  // % de alumnos (de la población VISIBLE, según scope) que respondió
+  // correctamente esta pregunta — para resaltar preguntas críticas en la cabecera.
   correctRate: number | null; // 0..100
+  // TKT-22 — líneas de referencia por pregunta (% colegio ahora; muestra diferida).
+  references: QuestionReferences;
 };
 
 /** Una celda de la matriz: la respuesta de un alumno a una pregunta. */
@@ -153,6 +181,29 @@ export type QuestionTaxonomyTag = {
   taggedBy: string; // human | ai
 };
 
+/** Un adjunto multimedia de la sección (figura/audio/pdf) del ítem. */
+export type QuestionSectionAttachment = {
+  kind: string; // image | audio | pdf | other
+  url: string | null; // null si aún no se sube el archivo a S3
+  fileName: string | null;
+  mimeType: string | null;
+  note: string | null;
+};
+
+/**
+ * Sección de lectura (texto base + multimedia) a la que pertenece la pregunta.
+ * `null` si el ítem no cuelga de una sección con passage (ej. matemática sin
+ * texto). Permite mostrar el texto de lectura en la vista de resultados.
+ */
+export type QuestionSection = {
+  id: string;
+  name: string;
+  passageTitle: string | null;
+  passageText: string | null;
+  passageFormat: string | null; // 'plain' | 'markdown' | 'html'
+  attachments: QuestionSectionAttachment[];
+};
+
 export type QuestionAnalysisResponse = {
   itemId: string;
   position: number;
@@ -164,6 +215,7 @@ export type QuestionAnalysisResponse = {
   skill: ItemTaxonomyRef | null; // habilidad principal (representativo, compat)
   content: ItemTaxonomyRef | null; // contenido/OA principal (representativo, compat)
   tags: QuestionTaxonomyTag[]; // TODOS los nodos asociados a la pregunta
+  section: QuestionSection | null; // texto de lectura + multimedia de la sección
   totalResponses: number; // alumnos con respuesta registrada (incluye en blanco)
   blankCount: number; // alumnos sin alternativa elegida
   correctCount: number;

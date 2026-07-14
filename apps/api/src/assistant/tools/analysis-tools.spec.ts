@@ -153,6 +153,7 @@ describe('GetAssessmentReportTool', () => {
       meta: {
         assessmentId: ASSESSMENT_ID,
         assessmentName: 'DIA Lenguaje',
+        instrumentId: 'inst-1',
         instrumentName: 'DIA',
         instrumentType: 'dia',
         subjectName: 'Lenguaje',
@@ -166,6 +167,7 @@ describe('GetAssessmentReportTool', () => {
         studentsEnrolled: 1,
         coverageRate: 100,
         averageAchievement: 50,
+        hasGradingScale: true,
         averageGrade: 4,
         passingGrade: 4,
         passingRate: 100,
@@ -246,6 +248,7 @@ describe('GetStudentDetailTool', () => {
         percentage: '50',
         grade: '4',
         performanceLevel: 'elementary',
+        performanceBand: null,
         isComplete: true,
         completedAt: null,
         createdAt: '2026-01-01T00:00:00.000Z',

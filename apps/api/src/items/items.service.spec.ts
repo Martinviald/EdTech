@@ -527,4 +527,66 @@ describe('ItemsService.getContentForAssistant — normalización', () => {
       svc.getContentForAssistant(user({ orgId: 'org-1' }), {}),
     ).rejects.toBeInstanceOf(BadRequestException);
   });
+
+  /**
+   * Regresión §5.2: al resolver por `assessmentId + position`, la lectura de
+   * `assessments` (tabla con RLS) DEBE correr dentro de `withOrgContext` para
+   * fijar `app.current_org_id`. Sin eso, bajo `soe_app` (sin BYPASSRLS) el RLS
+   * devuelve 0 filas → NotFound (era el mismo 404 del hub en AWS). El mock espía
+   * `transaction`: si alguien quitara el withOrgContext, no se llamaría y el test
+   * fallaría. Las lecturas de `items`/tags NO son RLS y corren en `this.db`.
+   */
+  it('resuelve por assessmentId+position dentro de withOrgContext (RLS §5.2)', async () => {
+    const row = item({
+      id: ITEM_UUID,
+      orgId: 'org-1',
+      position: 3,
+      type: 'true_false',
+      content: { stem: '¿Verdadero?', correctAnswer: false } as Item['content'],
+    });
+
+    // Dentro de la transacción de withOrgContext: assessmentId → instrumentId.
+    const assessmentSelect = {
+      from: jest.fn().mockReturnThis(),
+      where: jest.fn().mockReturnThis(),
+      limit: jest.fn().mockResolvedValue([{ instrumentId: 'instr-1' }]),
+    };
+    // withOrgContext fija app.current_org_id vía tx.execute(set_config) antes de fn.
+    const tx = {
+      select: jest.fn().mockReturnValue(assessmentSelect),
+      execute: jest.fn().mockResolvedValue(undefined),
+    };
+    const transaction = jest.fn((fn: (t: unknown) => unknown) => fn(tx));
+
+    // this.db (fuera de contexto): item por instrumentId+position, luego su skill.
+    const itemSelect = {
+      from: jest.fn().mockReturnThis(),
+      where: jest.fn().mockReturnThis(),
+      orderBy: jest.fn().mockReturnThis(),
+      limit: jest.fn().mockResolvedValue([row]),
+    };
+    const skillSelect = {
+      from: jest.fn().mockReturnThis(),
+      innerJoin: jest.fn().mockReturnThis(),
+      where: jest.fn().mockReturnThis(),
+      orderBy: jest.fn().mockReturnThis(),
+      limit: jest.fn().mockResolvedValue([]),
+    };
+    const select = jest
+      .fn()
+      .mockReturnValueOnce(itemSelect)
+      .mockReturnValueOnce(skillSelect);
+
+    const svc = new ItemsService({ select, transaction } as never);
+
+    const result = await svc.getContentForAssistant(user({ orgId: 'org-1' }), {
+      assessmentId: '99999999-9999-9999-9999-999999999999',
+      position: 3,
+    });
+
+    expect(result.itemId).toBe(ITEM_UUID);
+    // La lectura de `assessments` (RLS) corrió dentro de withOrgContext:
+    expect(transaction).toHaveBeenCalledTimes(1);
+    expect(tx.select).toHaveBeenCalledTimes(1);
+  });
 });

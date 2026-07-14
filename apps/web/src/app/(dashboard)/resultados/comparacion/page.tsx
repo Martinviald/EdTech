@@ -8,8 +8,15 @@ import {
   type DashboardFilterOptionsResponse,
   type GenerationalComparisonResponse,
 } from '@soe/types';
+import { GraduationCap, Target, Users } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { PageContainer, PageHeader, EmptyState } from '@/components/patterns';
+import {
+  PageContainer,
+  PageHeader,
+  EmptyState,
+  MetricComparison,
+  type MetricDelta,
+} from '@/components/patterns';
 import { DashboardFilterBar } from '../components/dashboard-filter-bar';
 import { parseDashboardFilters } from '../components/dashboard-filters';
 import { GenerationalChart } from '../components/charts/generational-chart';
@@ -27,6 +34,23 @@ const BASE_PATH = '/resultados/comparacion';
 
 function fmtPct(value: number | null): string {
   return value === null ? '—' : `${(Math.round(value * 10) / 10).toFixed(1)}%`;
+}
+
+/**
+ * TKT-21 — delta de la última generación vs la anterior (histórico propio de la
+ * org). `null` si falta cualquiera de los dos valores. La comparación vs "muestra
+ * de colegios" (benchmark inter-colegio) queda DIFERIDA hasta tener pool
+ * multi-colegio (TKT-20): sería un `MetricDelta` adicional en `comparisons`.
+ */
+function historicalDelta(
+  current: number | null,
+  previous: number | null,
+  label: string,
+  format?: (v: number) => string,
+): MetricDelta {
+  const value =
+    current !== null && previous !== null ? Math.round((current - previous) * 10) / 10 : null;
+  return { value, label, format };
 }
 
 export default async function ComparacionPage({
@@ -49,9 +73,7 @@ export default async function ComparacionPage({
     const qs = new URLSearchParams({ gradeId: filters.gradeId });
     if (filters.subjectId) qs.set('subjectId', filters.subjectId);
     if (filters.instrumentType) qs.set('instrumentType', filters.instrumentType);
-    data = await apiGet<GenerationalComparisonResponse>(
-      `/analytics/generational?${qs.toString()}`,
-    );
+    data = await apiGet<GenerationalComparisonResponse>(`/analytics/generational?${qs.toString()}`);
   }
 
   const series = data?.series ?? [];
@@ -83,11 +105,10 @@ export default async function ComparacionPage({
           table: {
             columns: ['Año', ...PERFORMANCE_LEVEL_ORDER.map((l) => PERFORMANCE_LEVEL_LABELS[l])],
             rows: series.map((p) => {
-              const byLevel = new Map(p.performanceDistribution.map((b) => [b.level, b.percentage]));
-              return [
-                p.year,
-                ...PERFORMANCE_LEVEL_ORDER.map((l) => fmtPct(byLevel.get(l) ?? 0)),
-              ];
+              const byLevel = new Map(
+                p.performanceDistribution.map((b) => [b.level, b.percentage]),
+              );
+              return [p.year, ...PERFORMANCE_LEVEL_ORDER.map((l) => fmtPct(byLevel.get(l) ?? 0))];
             }),
           },
         },
@@ -133,6 +154,51 @@ export default async function ComparacionPage({
         />
       ) : (
         <div className="space-y-6">
+          {/* TKT-21 — métricas comparadas: última generación vs la anterior
+              (histórico propio de la org). El delta vs "muestra de colegios"
+              (benchmark) queda DIFERIDO hasta tener pool multi-colegio (TKT-20). */}
+          {(() => {
+            const latest = series[series.length - 1];
+            const previous = series[series.length - 2];
+            // hasComparison ya garantiza ≥2 puntos; el guard satisface a TS.
+            if (!latest || !previous) return null;
+            const yearLabel = `vs ${previous.year}`;
+            return (
+              <section className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+                <MetricComparison
+                  label={`% Logro promedio · ${latest.year}`}
+                  value={fmtPct(latest.averageAchievement)}
+                  icon={Target}
+                  comparisons={[
+                    historicalDelta(
+                      latest.averageAchievement,
+                      previous.averageAchievement,
+                      yearLabel,
+                    ),
+                  ]}
+                />
+                <MetricComparison
+                  label={`% Aprobación · ${latest.year}`}
+                  value={fmtPct(latest.passingRate)}
+                  icon={GraduationCap}
+                  comparisons={[
+                    historicalDelta(latest.passingRate, previous.passingRate, yearLabel),
+                  ]}
+                />
+                <MetricComparison
+                  label={`Alumnos evaluados · ${latest.year}`}
+                  value={String(latest.studentsCount)}
+                  icon={Users}
+                  comparisons={[
+                    historicalDelta(latest.studentsCount, previous.studentsCount, yearLabel, (v) =>
+                      String(Math.abs(Math.round(v))),
+                    ),
+                  ]}
+                />
+              </section>
+            );
+          })()}
+
           <Card>
             <CardHeader>
               <CardTitle className="text-base">

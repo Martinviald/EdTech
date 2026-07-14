@@ -411,10 +411,16 @@ async function main() {
   // ── 8. Instrumentos + ítems + tags ─────────────────────────────────────────
   const INST_LECT = uid(0x500);
   const INST_MAT = uid(0x501);
+  // Instrumentos DIA "del sistema": globales (`orgId = null`) y oficiales
+  // (`isOfficial = true`). En F1 solo se usan instrumentos del sistema — los
+  // colegios cuelgan sus evaluaciones de estos, y sus niveles/umbrales de logro
+  // (performance_bands globales) los administra `platform_admin`. Los ítems
+  // siguen `orgId = DEMO_ORG_ID` a propósito: son tablas de catálogo sin RLS y
+  // el scoring los resuelve por `instrument_id`, no por org.
   await db.insert(instruments).values([
     {
       id: INST_LECT,
-      orgId: DEMO_ORG_ID,
+      orgId: null,
       taxonomyId: diaMarco.id,
       name: 'DIA Lectura 2° Básico',
       shortName: 'DIA Lectura 2°B',
@@ -422,13 +428,13 @@ async function main() {
       subjectId: langSubject.id,
       gradeId: grade2.id,
       year: 2026,
-      isOfficial: false,
+      isOfficial: true,
       status: 'published',
       gradingScaleId: scaleId,
     },
     {
       id: INST_MAT,
-      orgId: DEMO_ORG_ID,
+      orgId: null,
       taxonomyId: diaMarco.id,
       name: 'DIA Matemática 2° Básico',
       shortName: 'DIA Mat 2°B',
@@ -436,7 +442,7 @@ async function main() {
       subjectId: mathSubject.id,
       gradeId: grade2.id,
       year: 2026,
-      isOfficial: false,
+      isOfficial: true,
       status: 'published',
       gradingScaleId: scaleId,
     },

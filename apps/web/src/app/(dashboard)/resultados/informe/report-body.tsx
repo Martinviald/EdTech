@@ -12,6 +12,7 @@ import type {
   AssessmentReportItemRow,
   AssessmentReportResponse,
   ItemReportFlag,
+  SkillAchievementModel,
 } from '@soe/types';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import {
@@ -27,11 +28,12 @@ import { DistributionBar } from '../components/distribution-bar';
 import { PerformanceBadge } from '../components/performance-badge';
 import { SummaryCard } from '../components/summary-card';
 import {
+  bandLabel,
   formatAchievement,
-  performanceLevelLabel,
   PERFORMANCE_LEVEL_BAR_CLASS,
 } from '../components/performance-level';
 import { ReportExportButton } from './report-export-button';
+import { SkillsBreakdown } from '../components/skills-breakdown';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Cuerpo del informe de evaluación (H6.13). Server Component: sólo presenta los
@@ -46,14 +48,10 @@ const DIFFICULTY_MID = 60;
 const DISCRIMINATION_LOW = 0.2;
 const DISCRIMINATION_MID = 0.3;
 
-const FLAG_META: Record<
-  ItemReportFlag,
-  { label: string; className: string }
-> = {
+const FLAG_META: Record<ItemReportFlag, { label: string; className: string }> = {
   critical: {
     label: 'Crítico',
-    className:
-      'border-transparent bg-red-100 text-red-800 dark:bg-red-950 dark:text-red-200',
+    className: 'border-transparent bg-red-100 text-red-800 dark:bg-red-950 dark:text-red-200',
   },
   low_discrimination: {
     label: 'Baja discriminación',
@@ -72,10 +70,7 @@ const FLAG_META: Record<
   },
 };
 
-const PRIORITY_META: Record<
-  'high' | 'medium' | 'low',
-  { label: string; className: string }
-> = {
+const PRIORITY_META: Record<'high' | 'medium' | 'low', { label: string; className: string }> = {
   high: {
     label: 'Alta',
     className: 'bg-red-100 text-red-800 dark:bg-red-950 dark:text-red-200',
@@ -121,48 +116,78 @@ function difficultyClass(value: number | null): string {
 
 function discriminationClass(value: number | null): string {
   if (value === null) return 'text-muted-foreground';
-  if (value < DISCRIMINATION_LOW)
-    return 'text-red-600 dark:text-red-400 font-semibold';
-  if (value < DISCRIMINATION_MID)
-    return 'text-amber-600 dark:text-amber-400 font-medium';
+  if (value < DISCRIMINATION_LOW) return 'text-red-600 dark:text-red-400 font-semibold';
+  if (value < DISCRIMINATION_MID) return 'text-amber-600 dark:text-amber-400 font-medium';
   return 'text-emerald-600 dark:text-emerald-400 font-medium';
 }
 
-export function ReportBody({ report }: { report: AssessmentReportResponse }) {
+export function ReportBody({
+  report,
+  skillsBreakdown,
+  assessmentId,
+  classGroupId,
+}: {
+  report: AssessmentReportResponse;
+  // TKT-11/TKT-10: desglose interactivo por dimensión + drill-down a preguntas,
+  // cuando hay una evaluación en contexto (hub por-evaluación).
+  skillsBreakdown?: SkillAchievementModel[];
+  assessmentId?: string;
+  classGroupId?: string;
+}) {
   const { summary } = report;
+  // El DIA es un diagnóstico por niveles de logro (I/II/III), no por notas:
+  // ocultamos "Nota promedio" para este tipo de instrumento aunque tenga escala.
+  const isDia = report.meta.instrumentType === 'dia';
+
+  // Las tarjetas visibles varían (2 a 4) según escala e instrumento. Ajustamos las
+  // columnas para que ocupen todo el ancho y no quede un hueco a la derecha.
+  const gradeCards = summary.hasGradingScale ? (isDia ? 1 : 2) : 0;
+  const visibleCards = 2 + gradeCards; // % Logro + Asistencia + tarjetas de nota
+  const summaryGridCols =
+    visibleCards === 2
+      ? 'sm:grid-cols-2 lg:grid-cols-2'
+      : visibleCards === 3
+        ? 'sm:grid-cols-3 lg:grid-cols-3'
+        : 'sm:grid-cols-2 lg:grid-cols-4';
 
   return (
     <div className="space-y-6">
       <FichaTecnica report={report} />
 
       {/* 1. Síntesis ejecutiva */}
-      <section className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      <section className={`grid grid-cols-1 gap-4 ${summaryGridCols}`}>
         <SummaryCard
           label="% Logro promedio"
           value={formatAchievement(summary.averageAchievement)}
-          hint={`Nivel: ${performanceLevelLabel(summary.performanceLevel)}`}
+          hint={`Nivel: ${bandLabel(summary.performanceBand, summary.performanceLevel)}`}
           icon={Target}
         />
+        {/* TKT-04: notas/escala solo si el instrumento tiene escala configurada.
+            Sin escala, se ocultan estas tarjetas (no se muestra el default 4.0). */}
+        {summary.hasGradingScale ? (
+          <>
+            <SummaryCard
+              label="Aprobación"
+              value={summary.passingRate === null ? '—' : `${summary.passingRate.toFixed(1)}%`}
+              hint={
+                summary.passingGrade === null
+                  ? undefined
+                  : `Nota de corte: ${summary.passingGrade.toFixed(1)}`
+              }
+              icon={CheckCircle2}
+            />
+            {isDia ? null : (
+              <SummaryCard
+                label="Nota promedio"
+                value={summary.averageGrade === null ? '—' : summary.averageGrade.toFixed(1)}
+                hint={summary.averageGrade === null ? undefined : 'Promedio del curso evaluado'}
+                icon={GraduationCap}
+              />
+            )}
+          </>
+        ) : null}
         <SummaryCard
-          label="Aprobación"
-          value={
-            summary.passingRate === null
-              ? '—'
-              : `${summary.passingRate.toFixed(1)}%`
-          }
-          hint={`Nota de corte: ${summary.passingGrade.toFixed(1)}`}
-          icon={CheckCircle2}
-        />
-        <SummaryCard
-          label="Nota promedio"
-          value={summary.averageGrade === null ? '—' : summary.averageGrade.toFixed(1)}
-          hint={
-            summary.averageGrade === null ? undefined : 'Promedio del curso evaluado'
-          }
-          icon={GraduationCap}
-        />
-        <SummaryCard
-          label="Cobertura"
+          label="Asistencia"
           value={`${summary.studentsEvaluated}/${summary.studentsEnrolled}`}
           hint={
             summary.coverageRate === null
@@ -176,13 +201,22 @@ export function ReportBody({ report }: { report: AssessmentReportResponse }) {
       <Highlights report={report} />
 
       {/* 2. Distribución por nivel */}
-      <DistributionBar distribution={report.distribution} />
+      <DistributionBar
+        distribution={report.distribution}
+        bands={report.bands}
+        bandDistribution={report.bandDistribution}
+      />
 
       {/* 3. Comparativa por curso */}
       <CourseComparison report={report} />
 
-      {/* 4. Fortalezas y brechas por habilidad */}
-      <SkillsSection report={report} />
+      {/* 4. Logro por habilidad (dimensión + drill-down si hay evaluación) */}
+      <SkillsSection
+        report={report}
+        skillsBreakdown={skillsBreakdown}
+        assessmentId={assessmentId}
+        classGroupId={classGroupId}
+      />
 
       {/* 5. Análisis psicométrico de ítems */}
       <ItemsSection report={report} />
@@ -208,10 +242,7 @@ function FichaTecnica({ report }: { report: AssessmentReportResponse }) {
     { label: 'Preguntas', value: String(meta.itemsCount) },
     {
       label: 'Cursos',
-      value:
-        meta.classGroups.length > 0
-          ? meta.classGroups.map((c) => c.name).join(', ')
-          : '—',
+      value: meta.classGroups.length > 0 ? meta.classGroups.map((c) => c.name).join(', ') : '—',
     },
   ];
 
@@ -220,12 +251,10 @@ function FichaTecnica({ report }: { report: AssessmentReportResponse }) {
       <CardContent className="space-y-4 p-5">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
           <div>
-            <h2 className="text-lg font-semibold">
-              {meta.assessmentName ?? meta.instrumentName}
-            </h2>
+            <h2 className="text-lg font-semibold">{meta.assessmentName ?? meta.instrumentName}</h2>
             <p className="text-sm text-muted-foreground">
-              Informe consolidado para dirección · {report.summary.studentsEvaluated}{' '}
-              alumnos evaluados
+              Informe consolidado para dirección · {report.summary.studentsEvaluated} alumnos
+              evaluados
             </p>
           </div>
           <ReportExportButton report={report} />
@@ -319,9 +348,7 @@ function CourseComparison({ report }: { report: AssessmentReportResponse }) {
                 <TableHead className="text-right">Evaluados</TableHead>
                 <TableHead className="text-right">% Logro</TableHead>
                 <TableHead className="text-right">Brecha vs prom.</TableHead>
-                <TableHead className="text-right hidden sm:table-cell">
-                  % Aprobación
-                </TableHead>
+                <TableHead className="text-right hidden sm:table-cell">% Aprobación</TableHead>
                 <TableHead className="text-right">En riesgo</TableHead>
               </TableRow>
             </TableHeader>
@@ -361,7 +388,40 @@ function CourseComparison({ report }: { report: AssessmentReportResponse }) {
 
 // ── Habilidades ───────────────────────────────────────────────────────────────
 
-function SkillsSection({ report }: { report: AssessmentReportResponse }) {
+function SkillsSection({
+  report,
+  skillsBreakdown,
+  assessmentId,
+  classGroupId,
+}: {
+  report: AssessmentReportResponse;
+  skillsBreakdown?: SkillAchievementModel[];
+  assessmentId?: string;
+  classGroupId?: string;
+}) {
+  // TKT-11/TKT-10: con una evaluación en contexto se usa el desglose interactivo
+  // por dimensión (dropdown habilidad/contenido/OA/eje) con drill-down: clic en un
+  // nodo abre el modal de sus preguntas y clic en una pregunta abre su detalle.
+  if (skillsBreakdown && skillsBreakdown.length > 0) {
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-base">Logro por habilidad</CardTitle>
+          <p className="text-sm text-muted-foreground">
+            Cambia la dimensión de análisis y haz clic en un nodo para ver sus preguntas.
+          </p>
+        </CardHeader>
+        <CardContent>
+          <SkillsBreakdown
+            skills={skillsBreakdown}
+            filters={{ classGroupId }}
+            assessmentId={assessmentId}
+          />
+        </CardContent>
+      </Card>
+    );
+  }
+
   const skills = report.skills;
   if (skills.length === 0) return null;
 
@@ -382,16 +442,14 @@ function SkillsSection({ report }: { report: AssessmentReportResponse }) {
                 <span className="font-medium">
                   {s.nodeName}
                   {s.nodeCode ? (
-                    <span className="ml-1 text-xs text-muted-foreground">
-                      {s.nodeCode}
-                    </span>
+                    <span className="ml-1 text-xs text-muted-foreground">{s.nodeCode}</span>
                   ) : null}
                 </span>
                 <span className="flex items-center gap-2">
                   <span className="tabular-nums text-muted-foreground">
                     {formatAchievement(s.averageAchievement)}
                   </span>
-                  <PerformanceBadge level={s.performanceLevel} />
+                  <PerformanceBadge level={s.performanceLevel} band={s.performanceBand} />
                 </span>
               </div>
               <div className="flex h-2 w-full overflow-hidden rounded-full bg-muted">
@@ -427,9 +485,9 @@ function ItemsSection({ report }: { report: AssessmentReportResponse }) {
       <CardHeader>
         <CardTitle className="text-base">Análisis de preguntas</CardTitle>
         <p className="text-sm text-muted-foreground">
-          Dificultad (p): % de aciertos — bajo = difícil. Discriminación (D):
-          distingue a quienes dominan el contenido — D&nbsp;&lt;&nbsp;0,2 sugiere
-          revisar la pregunta, no el aprendizaje.
+          Dificultad (p): % de logro — bajo = difícil. Discriminación (D): distingue a quienes
+          dominan el contenido — D&nbsp;&lt;&nbsp;0,2 sugiere revisar la pregunta, no el
+          aprendizaje.
         </p>
       </CardHeader>
       <CardContent className="space-y-4">
@@ -461,8 +519,7 @@ function ItemsSection({ report }: { report: AssessmentReportResponse }) {
 
 function ItemRow({ item }: { item: AssessmentReportItemRow }) {
   const label = item.skillName ?? item.contentName ?? '—';
-  const secondary =
-    item.skillName && item.contentName ? item.contentName : null;
+  const secondary = item.skillName && item.contentName ? item.contentName : null;
   return (
     <TableRow>
       <TableCell className="font-medium">{item.position}</TableCell>
@@ -472,9 +529,7 @@ function ItemRow({ item }: { item: AssessmentReportItemRow }) {
           <span className="block text-xs text-muted-foreground">{secondary}</span>
         ) : null}
       </TableCell>
-      <TableCell className="text-center font-mono text-xs">
-        {item.correctKey ?? '—'}
-      </TableCell>
+      <TableCell className="text-center font-mono text-xs">{item.correctKey ?? '—'}</TableCell>
       <TableCell className={cn('text-right tabular-nums', difficultyClass(item.difficulty))}>
         {item.difficulty === null ? '—' : `${item.difficulty.toFixed(0)}%`}
       </TableCell>
@@ -488,10 +543,7 @@ function ItemRow({ item }: { item: AssessmentReportItemRow }) {
           <span>
             <span className="font-mono">{item.topDistractorKey}</span>
             {item.topDistractorRate !== null ? (
-              <span className="text-muted-foreground">
-                {' '}
-                ({item.topDistractorRate.toFixed(0)}%)
-              </span>
+              <span className="text-muted-foreground"> ({item.topDistractorRate.toFixed(0)}%)</span>
             ) : null}
           </span>
         ) : (
@@ -521,19 +573,19 @@ function FlagsLegend() {
   return (
     <div className="flex flex-wrap gap-x-5 gap-y-1.5 text-xs text-muted-foreground">
       <span>
-        <strong className="text-foreground">Crítico</strong>: &lt;40% de aciertos —
-        contenido no logrado.
+        <strong className="text-foreground">Crítico</strong>: &lt;40% de logro — contenido no
+        logrado.
       </span>
       <span>
-        <strong className="text-foreground">Baja discriminación</strong>: D&nbsp;&lt;&nbsp;0,2
-        — posible problema de redacción/clave.
+        <strong className="text-foreground">Baja discriminación</strong>: D&nbsp;&lt;&nbsp;0,2 —
+        posible problema de redacción/clave.
       </span>
       <span>
-        <strong className="text-foreground">Distractor potente</strong>: una
-        alternativa incorrecta atrae más que la clave.
+        <strong className="text-foreground">Distractor potente</strong>: una alternativa incorrecta
+        atrae más que la clave.
       </span>
       <span>
-        <strong className="text-foreground">Muy fácil</strong>: ≥85% de aciertos.
+        <strong className="text-foreground">Muy fácil</strong>: ≥85% de logro.
       </span>
     </div>
   );
@@ -573,18 +625,14 @@ function RiskStudents({ report }: { report: AssessmentReportResponse }) {
                 <TableRow key={s.studentId}>
                   <TableCell className="font-medium">
                     {s.studentFullName}
-                    <span className="block text-xs text-muted-foreground">
-                      {s.studentRut}
-                    </span>
+                    <span className="block text-xs text-muted-foreground">{s.studentRut}</span>
                   </TableCell>
-                  <TableCell className="hidden md:table-cell">
-                    {s.classGroupName ?? '—'}
-                  </TableCell>
+                  <TableCell className="hidden md:table-cell">{s.classGroupName ?? '—'}</TableCell>
                   <TableCell className="text-right font-medium">
                     {formatAchievement(s.achievement)}
                   </TableCell>
                   <TableCell>
-                    <PerformanceBadge level={s.performanceLevel} />
+                    <PerformanceBadge level={s.performanceLevel} band={s.performanceBand} />
                   </TableCell>
                   <TableCell className="hidden sm:table-cell text-sm text-muted-foreground">
                     {s.weakestSkill ?? '—'}

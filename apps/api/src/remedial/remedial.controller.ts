@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  ForbiddenException,
   Get,
   Inject,
   Param,
@@ -9,16 +10,20 @@ import {
   Query,
   UseGuards,
 } from '@nestjs/common';
+import { z } from 'zod';
 import {
   generateRemedialSchema,
   remedialListQuerySchema,
   reviewRemedialSchema,
+  updateRemedialSchema,
   REMEDIAL_APPROVER_ROLES,
   REMEDIAL_GENERATOR_ROLES,
   REMEDIAL_VIEWER_ROLES,
   type RemedialListResponse,
   type RemedialMaterialModel,
   type RemedialStatus,
+  type RemedialStudentMaterialModel,
+  type RemedialStimulusRef,
 } from '@soe/types';
 import { CurrentUser } from '../auth/current-user.decorator';
 import type { JwtPayload } from '../auth/jwt-payload.types';
@@ -29,6 +34,20 @@ import { FeatureGuard } from '../common/guards/feature.guard';
 import { JOB_DISPATCHER, type JobDispatcher } from '../jobs/job-dispatcher';
 import { RemedialRunner } from './remedial.runner';
 import { RemedialService } from './remedial.service';
+import { BankPassageService } from './stimulus/bank-passage.service';
+import {
+  FailedStimulusService,
+  type FailedStimulus,
+} from './stimulus/failed-stimulus.service';
+
+/**
+ * Query del picker de estímulos (Ola 2.1a). Validación Zod local al módulo: es BE-only
+ * (no compartida con `web`). Los schemas compartidos viven en `@soe/types`.
+ */
+const candidateStimuliQuerySchema = z.object({
+  assessmentId: z.string().uuid(),
+  nodeId: z.string().uuid(),
+});
 
 /**
  * API del módulo de IA Remedial (F2 S3 — H9.1–H9.5). Validación Zod en cada
@@ -43,6 +62,8 @@ export class RemedialController {
   constructor(
     private readonly service: RemedialService,
     private readonly runner: RemedialRunner,
+    private readonly failedStimulus: FailedStimulusService,
+    private readonly bankPassages: BankPassageService,
     @Inject(JOB_DISPATCHER) private readonly dispatcher: JobDispatcher,
   ) {}
 
@@ -73,7 +94,34 @@ export class RemedialController {
     return { materialId: material.id, status: material.status };
   }
 
-  /** GET /api/remedial/:id — poll del estado/salida del material. */
+  /**
+   * GET /api/remedial/candidate-stimuli?assessmentId&nodeId
+   *
+   * Alimenta el picker de pasaje del modo A (Ola 2.1a): `fromAssessment` = pasajes
+   * fallados de la evaluación (mayor brecha primero, default del picker); `fromBank` =
+   * pasajes publicados del banco para el nodo (override / fallback). `orgId` SIEMPRE del
+   * token. Declarado ANTES de `:id` para que la ruta estática no la capture el parámetro.
+   */
+  @Get('candidate-stimuli')
+  @Roles(...REMEDIAL_GENERATOR_ROLES)
+  async candidateStimuli(
+    @Query() query: unknown,
+    @CurrentUser() user: JwtPayload,
+  ): Promise<{ fromAssessment: FailedStimulus[]; fromBank: RemedialStimulusRef[] }> {
+    const { assessmentId, nodeId } = candidateStimuliQuerySchema.parse(query);
+    if (!user.orgId) {
+      throw new ForbiddenException(
+        'Sin organización activa. Selecciona una organización antes de continuar.',
+      );
+    }
+    const [fromAssessment, fromBank] = await Promise.all([
+      this.failedStimulus.list(user.orgId, assessmentId, nodeId),
+      this.bankPassages.listCandidates(user.orgId, nodeId, assessmentId),
+    ]);
+    return { fromAssessment, fromBank };
+  }
+
+  /** GET /api/remedial/:id — poll del estado/salida del material (versión profesor). */
   @Get(':id')
   @Roles(...REMEDIAL_VIEWER_ROLES)
   get(
@@ -81,6 +129,19 @@ export class RemedialController {
     @CurrentUser() user: JwtPayload,
   ): Promise<RemedialMaterialModel> {
     return this.service.get(user, id);
+  }
+
+  /**
+   * GET /api/remedial/:id/student — versión ESTUDIANTE del material (TKT-17 b).
+   * Mismo contenido generado, render sin la información solo-profesor.
+   */
+  @Get(':id/student')
+  @Roles(...REMEDIAL_VIEWER_ROLES)
+  getStudentVersion(
+    @Param('id') id: string,
+    @CurrentUser() user: JwtPayload,
+  ): Promise<RemedialStudentMaterialModel> {
+    return this.service.getStudentVersion(user, id);
   }
 
   /** GET /api/remedial — banco de material remedial paginado/filtrado. */
@@ -92,6 +153,22 @@ export class RemedialController {
   ): Promise<RemedialListResponse> {
     const dto = remedialListQuerySchema.parse(query);
     return this.service.list(user, dto);
+  }
+
+  /**
+   * PATCH /api/remedial/:id — edición humana en borrador (TKT-17 c). Aplica a TODOS
+   * los tipos (guide | practice_set | group_plan). Persiste en `editedContent` sin
+   * tocar la evidencia IA (`content`). Solo mientras el material está en `ready`.
+   */
+  @Patch(':id')
+  @Roles(...REMEDIAL_APPROVER_ROLES)
+  update(
+    @Param('id') id: string,
+    @Body() body: unknown,
+    @CurrentUser() user: JwtPayload,
+  ): Promise<RemedialMaterialModel> {
+    const dto = updateRemedialSchema.parse(body);
+    return this.service.update(user, id, dto);
   }
 
   /** PATCH /api/remedial/:id/review — aprobar/descartar (H9.5). */

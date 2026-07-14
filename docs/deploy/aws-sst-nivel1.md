@@ -126,7 +126,7 @@ Dos workflows en `.github/workflows/`:
 
 | Workflow | Dispara con | Hace |
 |---|---|---|
-| `deploy-backend.yml` | cambios en `apps/api`, `packages/db`, `packages/types`, lockfile | build de la imagen → push a ECR `:latest` → App Runner **auto-deploya** |
+| `deploy-backend.yml` | cambios en `apps/api`, `packages/db`, `packages/types`, lockfile | **(1) migra el RDS** (port-forward SSM por el bastión — gatea el deploy) → **(2)** build de la imagen → push a ECR `:latest` → App Runner **auto-deploya** |
 | `deploy-frontend.yml` | cambios en `apps/web`, `packages`, `sst.config.ts` | `SST_BACKEND_READY=1 sst deploy` (reconciliación idempotente) |
 
 **Secrets de GitHub** (Settings → Secrets and variables → Actions):
@@ -134,7 +134,19 @@ Dos workflows en `.github/workflows/`:
 ```
 AWS_ACCESS_KEY_ID
 AWS_SECRET_ACCESS_KEY
+DB_MASTER_PASSWORD      # = SST secret DbMasterPassword (stage demo). Lo usa el job `migrate`.
 ```
+
+> **Migración automática (job `migrate` en `deploy-backend.yml`):** corre `db:migrate` contra el
+> RDS privado **antes** del build/push, vía un **port-forward SSM** por el bastión (la NAT
+> instance de SST, gestionada por SSM — no usa `sst tunnel`, evita sudo/TUN en el runner).
+> Las migraciones son **aditivas** → el código viejo no se rompe mientras corre; cuando App Runner
+> levanta la imagen nueva la BDD ya está a la par. Si la migración falla, el build/push **no**
+> ocurre (`needs: migrate`). Descubre el RDS y el bastión por tags; requiere el secret
+> `DB_MASTER_PASSWORD` (= `DbMasterPassword` de SST) y que las AWS keys tengan permisos SSM
+> `StartSession` (`EdTech-deployer` con `AdministratorAccess` los tiene). Para migrar a mano
+> fuera de CI, seguí usando `sst tunnel` (§4). **Esto cierra el bug de "column … does not exist"**
+> cuando un deploy agrega columnas y el RDS quedó sin migrar.
 
 > Para producción real, migrar a **GitHub OIDC** (rol asumible sin llaves de larga vida)
 > en vez de access keys. Para dev/demo, las keys en secrets son suficientes.

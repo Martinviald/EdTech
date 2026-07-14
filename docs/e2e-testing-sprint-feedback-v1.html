@@ -1,0 +1,422 @@
+<title>Guía E2E — Feedback v1</title>
+<style>
+  :root {
+    --bg: #f5f8f7;
+    --surface: #ffffff;
+    --surface-2: #eef3f2;
+    --border: #dde5e3;
+    --border-strong: #c6d2cf;
+    --ink: #16211f;
+    --muted: #566661;
+    --faint: #86948f;
+    --accent: #0d7a6e;
+    --accent-strong: #0a5b52;
+    --accent-soft: #e3f1ef;
+    --done: #2f8f52;
+    --done-soft: #e7f3ec;
+    --warn: #9a6a12;
+    --warn-soft: #f7efdc;
+    --shadow: 0 1px 2px rgba(16, 33, 31, 0.05), 0 8px 24px -12px rgba(16, 33, 31, 0.12);
+    --radius: 14px;
+    --mono: ui-monospace, "SF Mono", "JetBrains Mono", "Cascadia Code", Menlo, Consolas, monospace;
+    --sans: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #0c1312;
+      --surface: #121d1b;
+      --surface-2: #172321;
+      --border: #26332f;
+      --border-strong: #33443f;
+      --ink: #e7efec;
+      --muted: #94a49f;
+      --faint: #64756f;
+      --accent: #38c6b3;
+      --accent-strong: #5fd8c7;
+      --accent-soft: #14322d;
+      --done: #57c17c;
+      --done-soft: #16281d;
+      --warn: #d9ad5c;
+      --warn-soft: #2a2415;
+      --shadow: 0 1px 2px rgba(0, 0, 0, 0.3), 0 10px 30px -14px rgba(0, 0, 0, 0.6);
+    }
+  }
+  :root[data-theme="light"] {
+    --bg: #f5f8f7; --surface: #ffffff; --surface-2: #eef3f2; --border: #dde5e3;
+    --border-strong: #c6d2cf; --ink: #16211f; --muted: #566661; --faint: #86948f;
+    --accent: #0d7a6e; --accent-strong: #0a5b52; --accent-soft: #e3f1ef;
+    --done: #2f8f52; --done-soft: #e7f3ec; --warn: #9a6a12; --warn-soft: #f7efdc;
+    --shadow: 0 1px 2px rgba(16, 33, 31, 0.05), 0 8px 24px -12px rgba(16, 33, 31, 0.12);
+  }
+  :root[data-theme="dark"] {
+    --bg: #0c1312; --surface: #121d1b; --surface-2: #172321; --border: #26332f;
+    --border-strong: #33443f; --ink: #e7efec; --muted: #94a49f; --faint: #64756f;
+    --accent: #38c6b3; --accent-strong: #5fd8c7; --accent-soft: #14322d;
+    --done: #57c17c; --done-soft: #16281d; --warn: #d9ad5c; --warn-soft: #2a2415;
+    --shadow: 0 1px 2px rgba(0, 0, 0, 0.3), 0 10px 30px -14px rgba(0, 0, 0, 0.6);
+  }
+
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: var(--sans);
+    font-size: 15px;
+    line-height: 1.55;
+    -webkit-font-smoothing: antialiased;
+  }
+  .wrap { max-width: 820px; margin: 0 auto; padding: 0 20px 96px; }
+
+  /* ── Sticky header ─────────────────────────────────────────── */
+  .topbar {
+    position: sticky; top: 0; z-index: 20;
+    background: color-mix(in srgb, var(--bg) 88%, transparent);
+    backdrop-filter: blur(10px);
+    border-bottom: 1px solid var(--border);
+  }
+  .topbar-inner { max-width: 820px; margin: 0 auto; padding: 16px 20px 14px; }
+  .eyebrow {
+    font-family: var(--mono);
+    font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase;
+    color: var(--accent); font-weight: 600; margin: 0 0 4px;
+  }
+  h1 { font-size: 21px; line-height: 1.2; margin: 0; font-weight: 680; letter-spacing: -0.01em; text-wrap: balance; }
+  .sub { color: var(--muted); font-size: 13px; margin: 3px 0 0; }
+  .sub code { font-family: var(--mono); font-size: 12px; background: var(--surface-2); padding: 1px 6px; border-radius: 6px; color: var(--accent-strong); }
+
+  .progress-row { display: flex; align-items: center; gap: 14px; margin-top: 14px; }
+  .track { flex: 1; height: 9px; background: var(--surface-2); border-radius: 99px; overflow: hidden; border: 1px solid var(--border); }
+  .fill { height: 100%; width: 0%; background: linear-gradient(90deg, var(--accent), var(--accent-strong)); border-radius: 99px; transition: width 0.35s cubic-bezier(0.4, 0, 0.2, 1), background 0.4s ease; }
+  .fill.complete { background: linear-gradient(90deg, var(--done), var(--done)); }
+  .count { font-family: var(--mono); font-size: 13px; font-weight: 600; font-variant-numeric: tabular-nums; white-space: nowrap; color: var(--ink); }
+  .count .of { color: var(--faint); font-weight: 500; }
+
+  .controls { display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap; }
+  .btn {
+    font-family: var(--sans); font-size: 12.5px; font-weight: 550;
+    color: var(--muted); background: var(--surface); border: 1px solid var(--border);
+    padding: 6px 12px; border-radius: 99px; cursor: pointer;
+    display: inline-flex; align-items: center; gap: 6px;
+    transition: color 0.15s, border-color 0.15s, background 0.15s;
+  }
+  .btn:hover { color: var(--ink); border-color: var(--border-strong); }
+  .btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  .btn[aria-pressed="true"] { color: var(--accent-strong); background: var(--accent-soft); border-color: color-mix(in srgb, var(--accent) 35%, var(--border)); }
+  .btn svg { width: 14px; height: 14px; }
+
+  /* ── Reference (collapsible) ───────────────────────────────── */
+  details.ref {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius); margin-top: 22px; overflow: hidden;
+  }
+  details.ref > summary {
+    list-style: none; cursor: pointer; padding: 15px 18px;
+    display: flex; align-items: center; gap: 10px; font-weight: 600; font-size: 14.5px;
+  }
+  details.ref > summary::-webkit-details-marker { display: none; }
+  details.ref > summary .chev { color: var(--faint); transition: transform 0.2s; margin-left: auto; }
+  details.ref[open] > summary .chev { transform: rotate(90deg); }
+  details.ref > summary .tag { font-family: var(--mono); font-size: 11px; color: var(--faint); font-weight: 500; }
+  .ref-body { padding: 2px 18px 18px; border-top: 1px solid var(--border); }
+  .ref-body h3 { font-size: 13px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--accent-strong); margin: 18px 0 8px; font-weight: 650; }
+  .ref-body h3:first-child { margin-top: 14px; }
+  .ref-body ul { margin: 0; padding-left: 18px; }
+  .ref-body li { margin: 5px 0; color: var(--muted); }
+  .ref-body li b, .ref-body p b { color: var(--ink); font-weight: 620; }
+  .ref-body code { font-family: var(--mono); font-size: 12.5px; background: var(--surface-2); padding: 1px 5px; border-radius: 5px; color: var(--accent-strong); }
+  pre {
+    font-family: var(--mono); font-size: 12.5px; line-height: 1.6;
+    background: var(--surface-2); border: 1px solid var(--border);
+    border-radius: 10px; padding: 13px 15px; overflow-x: auto; margin: 10px 0; color: var(--ink);
+  }
+  pre .cm { color: var(--faint); }
+
+  /* ── Checklist sections ────────────────────────────────────── */
+  .section {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius); margin-top: 18px; box-shadow: var(--shadow); overflow: hidden;
+    transition: border-color 0.3s;
+  }
+  .section.section-done { border-color: color-mix(in srgb, var(--done) 45%, var(--border)); }
+  .section-head { padding: 15px 18px 13px; border-bottom: 1px solid var(--border); }
+  .section-head .row1 { display: flex; align-items: baseline; gap: 10px; }
+  .section-head h2 { font-size: 15.5px; margin: 0; font-weight: 650; letter-spacing: -0.005em; }
+  .tally {
+    font-family: var(--mono); font-size: 12px; font-weight: 600; font-variant-numeric: tabular-nums;
+    color: var(--faint); margin-left: auto; padding: 2px 9px; border-radius: 99px; background: var(--surface-2);
+    transition: color 0.25s, background 0.25s;
+  }
+  .section-done .tally { color: var(--done); background: var(--done-soft); }
+  .section-ctx { font-size: 12.5px; color: var(--faint); margin: 5px 0 0; font-style: italic; }
+
+  .items { display: flex; flex-direction: column; }
+  .item {
+    display: grid; grid-template-columns: auto auto 1fr; align-items: start; gap: 12px;
+    width: 100%; text-align: left; background: transparent; border: none;
+    border-top: 1px solid var(--border); padding: 13px 18px; cursor: pointer;
+    font-family: var(--sans); font-size: 14.5px; color: var(--ink); line-height: 1.5;
+    transition: background 0.12s;
+  }
+  .items .item:first-child { border-top: none; }
+  .item:hover { background: var(--surface-2); }
+  .item:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
+
+  .box {
+    width: 20px; height: 20px; border-radius: 6px; border: 1.5px solid var(--border-strong);
+    background: var(--surface); display: grid; place-items: center; margin-top: 1px;
+    transition: background 0.15s, border-color 0.15s; flex-shrink: 0;
+  }
+  .box svg { width: 13px; height: 13px; stroke: #fff; stroke-width: 3; stroke-linecap: round; stroke-linejoin: round; fill: none; stroke-dasharray: 20; stroke-dashoffset: 20; transition: stroke-dashoffset 0.2s ease; }
+  .item[aria-pressed="true"] .box { background: var(--done); border-color: var(--done); }
+  .item[aria-pressed="true"] .box svg { stroke-dashoffset: 0; }
+
+  .code {
+    font-family: var(--mono); font-size: 11.5px; font-weight: 600; font-variant-numeric: tabular-nums;
+    color: var(--accent-strong); background: var(--accent-soft); padding: 2px 8px; border-radius: 6px;
+    margin-top: 1px; white-space: nowrap; letter-spacing: 0.01em; transition: color 0.2s, background 0.2s;
+  }
+  .item[aria-pressed="true"] .code { color: var(--faint); background: var(--surface-2); }
+  .desc b { font-weight: 640; }
+  .desc code { font-family: var(--mono); font-size: 12.5px; background: var(--surface-2); padding: 1px 5px; border-radius: 5px; }
+  .item[aria-pressed="true"] .desc { color: var(--faint); text-decoration: line-through; text-decoration-color: color-mix(in srgb, var(--faint) 55%, transparent); }
+  .item[aria-pressed="true"] .desc b { color: var(--faint); }
+
+  body.hide-done .item[aria-pressed="true"] { display: none; }
+
+  /* ── Notes / blocked ───────────────────────────────────────── */
+  .notes { margin-top: 22px; }
+  .notes h2 { font-size: 15px; margin: 0 0 10px; font-weight: 650; }
+  .note {
+    display: flex; gap: 11px; padding: 12px 15px; border-radius: 11px;
+    background: var(--surface); border: 1px solid var(--border); margin-top: 9px; font-size: 13.5px; color: var(--muted);
+  }
+  .note .dot { width: 7px; height: 7px; border-radius: 99px; background: var(--accent); margin-top: 6px; flex-shrink: 0; }
+  .note b { color: var(--ink); font-weight: 620; }
+  .note code { font-family: var(--mono); font-size: 12px; background: var(--surface-2); padding: 1px 5px; border-radius: 5px; }
+  .note.blocked { background: var(--warn-soft); border-color: color-mix(in srgb, var(--warn) 30%, var(--border)); color: color-mix(in srgb, var(--warn) 70%, var(--ink)); }
+  .note.blocked .dot { background: var(--warn); }
+  .note.blocked b { color: color-mix(in srgb, var(--warn) 82%, var(--ink)); }
+
+  .foot { margin-top: 26px; text-align: center; font-size: 12px; color: var(--faint); font-family: var(--mono); }
+
+  @media (prefers-reduced-motion: reduce) {
+    * { transition: none !important; }
+  }
+  @media (max-width: 560px) {
+    .item { grid-template-columns: auto 1fr; }
+    .item .code { grid-column: 2; }
+    .item .box { grid-row: 1 / span 2; }
+  }
+</style>
+
+<div class="topbar">
+  <div class="topbar-inner">
+    <p class="eyebrow">Sprint · Iteración Feedback v1</p>
+    <h1>Guía E2E — testear en localhost</h1>
+    <p class="sub">Rama <code>dev</code> (todo integrado). Marca cada prueba a medida que la corres — el progreso se guarda en este navegador.</p>
+    <div class="progress-row">
+      <div class="track"><div class="fill" id="fill"></div></div>
+      <span class="count" id="count">0 <span class="of">/ 24</span></span>
+    </div>
+    <div class="controls">
+      <button class="btn" id="hide" aria-pressed="false">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
+        Ocultar completados
+      </button>
+      <button class="btn" id="reset">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
+        Reiniciar
+      </button>
+    </div>
+  </div>
+</div>
+
+<div class="wrap">
+
+  <details class="ref">
+    <summary>
+      Antes de empezar — requisitos, setup y arranque
+      <span class="tag">§1–3</span>
+      <svg class="chev" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+    </summary>
+    <div class="ref-body">
+      <h3>1 · Requisitos</h3>
+      <ul>
+        <li><b>PostgreSQL local</b> con la base <code>soe_dev</code> y <b>dos roles</b>: <code>soe_app</code> <b>sin <code>BYPASSRLS</code></b> (lo usa la API → <code>DATABASE_URL</code>) y un rol privilegiado para migrate/seed (<code>DATABASE_ADMIN_URL</code>).</li>
+        <li>Node + <b>pnpm 10.x</b>.</li>
+        <li><b><code>.env</code></b> en la raíz (base: <code>apps/api/.env.example</code>):</li>
+      </ul>
+      <pre>DATABASE_URL=postgresql://soe_app:...@localhost:5432/soe_dev
+DATABASE_ADMIN_URL=postgresql://&lt;admin&gt;:...@localhost:5432/soe_dev
+AUTH_MODE=mock            <span class="cm"># login local sin SSO</span>
+AUTH_SECRET=cualquier-string
+NEXTAUTH_SECRET=cualquier-string
+NEXTAUTH_URL=http://localhost:3000
+API_PORT=4000
+API_URL=http://localhost:4000
+INTERNAL_API_SECRET=cualquier-string</pre>
+      <ul>
+        <li>Opcionales por feature: <code>GEMINI_API_KEY</code> → <b>TKT-19</b> y <b>TKT-23</b>. Config S3 (<code>STORAGE_S3_BUCKET</code>, <code>AWS_*</code>) → <b>TKT-15</b> (sin ella, el endpoint responde <b>503</b> y el resto funciona).</li>
+      </ul>
+
+      <h3>2 · Setup</h3>
+      <pre>pnpm install
+pnpm --filter @soe/types build &amp;&amp; pnpm --filter @soe/db build
+pnpm --filter @soe/db db:migrate     <span class="cm"># aplica 0008 + 0009 y re-aplica RLS</span>
+pnpm --filter @soe/db db:seed:dev    <span class="cm"># org demo + taxonomía + instrumentos + tags + resultados</span></pre>
+      <p style="color:var(--muted); font-size:13px; margin:8px 0 0;"><code>db:migrate</code> y <code>db:seed:dev</code> usan <code>DATABASE_ADMIN_URL</code>.</p>
+
+      <h3>3 · Levantar y loguear</h3>
+      <pre>pnpm --filter @soe/api dev    <span class="cm"># → http://localhost:4000</span>
+pnpm --filter @soe/web dev    <span class="cm"># → http://localhost:3000</span></pre>
+      <p style="color:var(--muted); font-size:13px; margin:8px 0 0;">Abre <b>localhost:3000/login</b> y elige un usuario mock: <b><code>admin.demo@colegiodemo.cl</code></b> (directivo, ve toda la org) para la mayoría; <b><code>profesor.demo@colegiodemo.cl</code></b> (profesor, solo sus cursos) para verificar scoping/RLS.</p>
+    </div>
+  </details>
+
+  <section class="section" data-section>
+    <div class="section-head">
+      <div class="row1"><h2>Terminología y panel</h2><span class="tally" data-tally>0/8</span></div>
+      <p class="section-ctx">Ola 1 · Panorama pedagógico → una evaluación con resultados → Detalle por pregunta</p>
+    </div>
+    <div class="items">
+      <button class="item" data-id="TKT-01" aria-pressed="false"><span class="box" aria-hidden="true"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></span><span class="code">TKT-01</span><span class="desc">dice "<b>% de logro</b>" (nunca "acierto") en panel, tooltip del tablero e informe.</span></button>
+      <button class="item" data-id="TKT-02" aria-pressed="false"><span class="box" aria-hidden="true"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></span><span class="code">TKT-02</span><span class="desc">la tarjeta dice "<b>Asistencia</b>" (no "Cobertura").</span></button>
+      <button class="item" data-id="TKT-03" aria-pressed="false"><span class="box" aria-hidden="true"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></span><span class="code">TKT-03</span><span class="desc">los nodos muestran "<b>Lenguaje</b>" y "<b>OA-{n}</b>", no "LANG-…".</span></button>
+      <button class="item" data-id="TKT-05" aria-pressed="false"><span class="box" aria-hidden="true"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></span><span class="code">TKT-05</span><span class="desc"><b>no</b> aparecen "Descriptores" en el panel de pregunta (sí siguen en el banco de ítems).</span></button>
+      <button class="item" data-id="TKT-06" aria-pressed="false"><span class="box" aria-hidden="true"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></span><span class="code">TKT-06</span><span class="desc"><b>no</b> hay badge "secundario" en los nodos.</span></button>
+      <button class="item" data-id="TKT-07" aria-pressed="false"><span class="box" aria-hidden="true"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></span><span class="code">TKT-07</span><span class="desc">el <b>borde del panel</b> lateral de la pregunta es arrastrable para variar su ancho (con persistencia), igual que el panel del asistente.</span></button>
+      <button class="item" data-id="TKT-18" aria-pressed="false"><span class="box" aria-hidden="true"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></span><span class="code">TKT-18</span><span class="desc">el menú y el título dicen "<b>Panorama pedagógico</b>".</span></button>
+      <button class="item" data-id="TKT-08" aria-pressed="false"><span class="box" aria-hidden="true"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></span><span class="code">TKT-08</span><span class="desc">banco de instrumentos y evaluaciones se ven como <b>listas</b> (no tarjetas).</span></button>
+    </div>
+  </section>
+
+  <section class="section" data-section>
+    <div class="section-head">
+      <div class="row1"><h2>Analytics / interacción</h2><span class="tally" data-tally>0/7</span></div>
+    </div>
+    <div class="items">
+      <button class="item" data-id="TKT-04" aria-pressed="false"><span class="box" aria-hidden="true"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></span><span class="code">TKT-04</span><span class="desc">abre un instrumento <b>sin escala</b> configurada → <b>no</b> aparece "Nota de corte" ni 4.0 (sí aparece en uno con escala).</span></button>
+      <button class="item" data-id="TKT-09" aria-pressed="false"><span class="box" aria-hidden="true"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></span><span class="code">TKT-09</span><span class="desc">en el tablero, click en cabecera de pregunta/columna ordena; hay "Restablecer orden".</span></button>
+      <button class="item" data-id="TKT-11" aria-pressed="false"><span class="box" aria-hidden="true"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></span><span class="code">TKT-11</span><span class="desc">en "Logro por dimensión", el dropdown cambia entre habilidad/contenido/OA/eje.</span></button>
+      <button class="item" data-id="TKT-10" aria-pressed="false"><span class="box" aria-hidden="true"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></span><span class="code">TKT-10</span><span class="desc">click en una habilidad abre el <b>drill-down jerárquico</b> (Asignatura → Nivel → Curso → Evaluación → Pregunta) → abre el detalle de la pregunta.</span></button>
+      <button class="item" data-id="TKT-12" aria-pressed="false"><span class="box" aria-hidden="true"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></span><span class="code">TKT-12</span><span class="desc">el filtro multi-tag acota las preguntas (lógica OR).</span></button>
+      <button class="item" data-id="TKT-22" aria-pressed="false"><span class="box" aria-hidden="true"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></span><span class="code">TKT-22</span><span class="desc">bajo el tablero aparece la fila "<b>% Logro colegio</b>" por pregunta.</span></button>
+      <button class="item" data-id="TKT-21" aria-pressed="false"><span class="box" aria-hidden="true"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></span><span class="code">TKT-21</span><span class="desc"><code>/resultados/comparacion</code> muestra métricas con <b>delta vs periodo anterior</b>.</span></button>
+    </div>
+  </section>
+
+  <section class="section" data-section>
+    <div class="section-head">
+      <div class="row1"><h2>Banco / instrumentos</h2><span class="tally" data-tally>0/3</span></div>
+    </div>
+    <div class="items">
+      <button class="item" data-id="TKT-14" aria-pressed="false"><span class="box" aria-hidden="true"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></span><span class="code">TKT-14</span><span class="desc"><code>/banco-items/explorar</code> → selector <b>propio/global/todos</b> + filtro multi-tag; lista cross-instrumento.</span></button>
+      <button class="item" data-id="TKT-15" aria-pressed="false"><span class="box" aria-hidden="true"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></span><span class="code">TKT-15</span><span class="desc">en el detalle de instrumento, subir <b>PDF de enunciado</b> (requiere S3; sin él, 503 con mensaje claro; ver/eliminar).</span></button>
+      <button class="item" data-id="TKT-16" aria-pressed="false"><span class="box" aria-hidden="true"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></span><span class="code">TKT-16</span><span class="desc">botón "Tabla de especificaciones" abre la <b>vista de revisión</b> (ítems × tags) + "Cargar tabla" abre el wizard.</span></button>
+    </div>
+  </section>
+
+  <section class="section" data-section>
+    <div class="section-head">
+      <div class="row1"><h2>Remedial</h2><span class="tally" data-tally>0/1</span></div>
+    </div>
+    <div class="items">
+      <button class="item" data-id="TKT-17" aria-pressed="false"><span class="box" aria-hidden="true"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></span><span class="code">TKT-17</span><span class="desc">en un material remedial: toggle <b>Profesor/Estudiante</b>; editar guía / práctica / plan y guardar; botón <b>imprimir</b> (impresión limpia, sin el shell del dashboard).</span></button>
+    </div>
+  </section>
+
+  <section class="section" data-section>
+    <div class="section-head">
+      <div class="row1"><h2>Informes DIA</h2><span class="tally" data-tally>0/3</span></div>
+    </div>
+    <div class="items">
+      <button class="item" data-id="TKT-24" aria-pressed="false"><span class="box" aria-hidden="true"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></span><span class="code">TKT-24</span><span class="desc">en una evaluación → pestaña "<b>Informe oficial</b>" (6 secciones: portada, resultado general, ejes, especificaciones, estudiantes, conclusiones).</span></button>
+      <button class="item" data-id="TKT-25" aria-pressed="false"><span class="box" aria-hidden="true"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></span><span class="code">TKT-25</span><span class="desc">menú "<b>Informe establecimiento</b>" → Tablas 1.1–1.9 (niveles por grado×asignatura, comparación por sexo, conteos).</span></button>
+      <button class="item" data-id="TKT-26" aria-pressed="false"><span class="box" aria-hidden="true"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></span><span class="code">TKT-26</span><span class="desc">desde el informe de curso, click en un alumno → <b>informe individual</b> (imprimible).</span></button>
+    </div>
+  </section>
+
+  <section class="section" data-section>
+    <div class="section-head">
+      <div class="row1"><h2>Apéndice A — IA</h2><span class="tally" data-tally>0/2</span></div>
+      <p class="section-ctx">Requieren <code>GEMINI_API_KEY</code></p>
+    </div>
+    <div class="items">
+      <button class="item" data-id="TKT-19" aria-pressed="false"><span class="box" aria-hidden="true"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></span><span class="code">TKT-19</span><span class="desc">detalle de ítem → "<b>Edición asistida por IA</b>": pedir propuesta → aparece <b>diff</b> (actual vs propuesto) → <b>Aprobar</b> aplica al ítem, <b>Rechazar</b> descarta. El ítem <b>solo cambia al aprobar</b> (§8.3).</span></button>
+      <button class="item" data-id="TKT-23" aria-pressed="false"><span class="box" aria-hidden="true"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></span><span class="code">TKT-23</span><span class="desc"><code>/comparar-instrumentos</code> → elegir <b>2 evaluaciones comparables</b> (mismo tipo/grado/asignatura) → generar → <b>diagnóstico IA</b> con disclaimer de hipótesis. Es <b>async</b> (loader + polling).</span></button>
+    </div>
+  </section>
+
+  <div class="notes">
+    <h2>Notas</h2>
+    <div class="note"><span class="dot"></span><span><b>RLS:</b> si una vista sale vacía, verifica que <code>DATABASE_URL</code> use <code>soe_app</code> (sin <code>BYPASSRLS</code>) y que el usuario logueado tenga datos sembrados en su org. La API imprime un warning al arrancar si detecta una conexión que bypassa RLS.</span></div>
+    <div class="note"><span class="dot"></span><span><b>Migraciones del sprint:</b> <code>0008_integracion_sprint_feedback_v1</code> crea <code>instrument_attachments</code>; <code>0009_spooky_maddog</code> crea <code>item_edit_proposals</code> (+ su política RLS). Ambas se aplican con <code>db:migrate</code>.</span></div>
+    <div class="note"><span class="dot"></span><span><b>Scoping profesor:</b> logueado como <code>profesor.demo</code>, verifica que <b>solo</b> ve sus cursos y que los informes de establecimiento <b>no</b> le aparecen en el menú.</span></div>
+    <div class="note blocked"><span class="dot"></span><span><b>No construible por dependencia (no testeable aún):</b> TKT-13 (picker de textos remediales ausente), TKT-20 y la fila/columna "muestra de colegios" de 21/22 (sin pool multi-colegio).</span></div>
+    <div class="note"><span class="dot"></span><span><b>Tests <code>privacy/*</code>:</b> las 2 suites que fallan sin DB son de integración (requieren Postgres real); son ambientales, no del sprint.</span></div>
+  </div>
+
+  <p class="foot">24 pruebas · progreso guardado localmente en este navegador</p>
+</div>
+
+<script>
+  (function () {
+    var KEY = 'soe-e2e-feedback-v1';
+    var items = Array.prototype.slice.call(document.querySelectorAll('.item'));
+    var fill = document.getElementById('fill');
+    var count = document.getElementById('count');
+    var state = {};
+    try { state = JSON.parse(localStorage.getItem(KEY)) || {}; } catch (e) { state = {}; }
+
+    function update() {
+      var total = items.length;
+      var done = 0;
+      items.forEach(function (it) { if (it.getAttribute('aria-pressed') === 'true') done++; });
+      count.innerHTML = done + ' <span class="of">/ ' + total + '</span>';
+      fill.style.width = (total ? (done / total) * 100 : 0) + '%';
+      fill.classList.toggle('complete', done === total && total > 0);
+
+      document.querySelectorAll('[data-section]').forEach(function (sec) {
+        var its = Array.prototype.slice.call(sec.querySelectorAll('.item'));
+        var d = 0;
+        its.forEach(function (i) { if (i.getAttribute('aria-pressed') === 'true') d++; });
+        var t = sec.querySelector('[data-tally]');
+        if (t) t.textContent = d + '/' + its.length;
+        sec.classList.toggle('section-done', d === its.length && its.length > 0);
+      });
+    }
+
+    function render() {
+      items.forEach(function (it) {
+        it.setAttribute('aria-pressed', state[it.dataset.id] ? 'true' : 'false');
+      });
+      update();
+    }
+
+    items.forEach(function (it) {
+      it.addEventListener('click', function () {
+        var on = it.getAttribute('aria-pressed') !== 'true';
+        it.setAttribute('aria-pressed', on ? 'true' : 'false');
+        if (on) state[it.dataset.id] = true; else delete state[it.dataset.id];
+        try { localStorage.setItem(KEY, JSON.stringify(state)); } catch (e) {}
+        update();
+      });
+    });
+
+    document.getElementById('reset').addEventListener('click', function () {
+      state = {};
+      try { localStorage.removeItem(KEY); } catch (e) {}
+      render();
+    });
+
+    var hide = document.getElementById('hide');
+    hide.addEventListener('click', function () {
+      var on = hide.getAttribute('aria-pressed') !== 'true';
+      hide.setAttribute('aria-pressed', on ? 'true' : 'false');
+      document.body.classList.toggle('hide-done', on);
+    });
+
+    render();
+  })();
+</script>

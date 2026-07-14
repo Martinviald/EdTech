@@ -1,6 +1,7 @@
 import {
   boolean,
   decimal,
+  index,
   integer,
   jsonb,
   pgTable,
@@ -16,6 +17,8 @@ import {
   instrumentTypeEnum,
   passageFormatEnum,
   sectionTypeEnum,
+  stimulusKindEnum,
+  stimulusSourceEnum,
 } from './enums';
 import { organizations } from './organizations';
 import { grades, subjects } from './academic';
@@ -58,22 +61,60 @@ export const instruments = pgTable('instruments', {
   updatedAt: timestamp('updated_at').defaultNow().notNull(),
 });
 
-export const instrumentSections = pgTable('instrument_sections', {
+export const instrumentSections = pgTable(
+  'instrument_sections',
+  {
+    id: uuid('id').defaultRandom().primaryKey(),
+    // instrumentId nullable (Ola 2.1a): los estímulos generados por IA no pertenecen a
+    // un instrumento. Las filas oficiales existentes conservan su instrumento.
+    instrumentId: uuid('instrument_id').references(() => instruments.id, { onDelete: 'cascade' }),
+    // orgId nullable (Ola 2.1a): null = estímulo oficial/compartido; set = privado del
+    // tenant. Aislamiento por filtro `orgId` explícito en queries (patrón `items`; sin RLS).
+    orgId: uuid('org_id').references(() => organizations.id),
+    name: text('name').notNull(),
+    type: sectionTypeEnum('type').notNull(),
+    order: integer('order').default(0).notNull(),
+    maxPoints: decimal('max_points', { precision: 7, scale: 2 }),
+    timeLimitMin: integer('time_limit_min'),
+    instructions: text('instructions'),
+    // ── Pasaje / texto base de la sección · store de estímulo (Ola 2.1a) ──
+    // `kind` clasifica el estímulo (hoy solo `passage`); `source` distingue el oficial
+    // del generado por IA (se escribe en 2.2).
+    kind: stimulusKindEnum('kind').default('passage').notNull(),
+    source: stimulusSourceEnum('source').default('official').notNull(),
+    passageTitle: text('passage_title'),
+    passageText: text('passage_text'),
+    passageFormat: passageFormatEnum('passage_format'), // null si la sección no tiene pasaje
+    config: jsonb('config').$type<Record<string, unknown>>().default({}),
+  },
+  (table) => [index('instrument_sections_org_kind_idx').on(table.orgId, table.kind)],
+);
+
+// Adjunto a NIVEL DE INSTRUMENTO (TKT-15). Mismo patrón que `section_attachments`
+// pero colgando del instrumento completo — su caso de uso principal es el PDF del
+// enunciado / cuadernillo (`kind = 'pdf'`). El archivo se sube directo a S3 vía
+// presigned URL (el backend NO lo recibe en memoria); aquí solo se persiste la
+// metadata + `storage_key`. La regla "un PDF de enunciado por instrumento" se
+// aplica en la capa de servicio (reemplazo del adjunto `pdf` existente), no como
+// restricción de schema, para dejar el modelo extensible a otros kinds a futuro.
+// NO es una tabla sensible (sin PII): hereda el aislamiento por org del instrumento
+// padre (mismo criterio que `section_attachments`, que tampoco tiene RLS).
+export const instrumentAttachments = pgTable('instrument_attachments', {
   id: uuid('id').defaultRandom().primaryKey(),
   instrumentId: uuid('instrument_id')
     .notNull()
     .references(() => instruments.id, { onDelete: 'cascade' }),
-  name: text('name').notNull(),
-  type: sectionTypeEnum('type').notNull(),
+  kind: attachmentKindEnum('kind').notNull(),
   order: integer('order').default(0).notNull(),
-  maxPoints: decimal('max_points', { precision: 7, scale: 2 }),
-  timeLimitMin: integer('time_limit_min'),
-  instructions: text('instructions'),
-  // ── Pasaje / texto base de la sección (comprensión lectora) ──
-  passageTitle: text('passage_title'),
-  passageText: text('passage_text'),
-  passageFormat: passageFormatEnum('passage_format'), // null si la sección no tiene pasaje
-  config: jsonb('config').$type<Record<string, unknown>>().default({}),
+  storageKey: text('storage_key'), // clave S3 (null mientras no se sube el archivo)
+  url: text('url'), // url pública/externa opcional
+  fileName: text('file_name'),
+  mimeType: text('mime_type'),
+  sizeBytes: integer('size_bytes'),
+  note: text('note'),
+  meta: jsonb('meta').$type<Record<string, unknown>>().default({}),
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+  updatedAt: timestamp('updated_at').defaultNow().notNull(),
 });
 
 export const sectionAttachments = pgTable('section_attachments', {
@@ -107,12 +148,24 @@ export const instrumentsRelations = relations(instruments, ({ one, many }) => ({
     references: [gradingScales.id],
   }),
   sections: many(instrumentSections),
+  attachments: many(instrumentAttachments),
+}));
+
+export const instrumentAttachmentsRelations = relations(instrumentAttachments, ({ one }) => ({
+  instrument: one(instruments, {
+    fields: [instrumentAttachments.instrumentId],
+    references: [instruments.id],
+  }),
 }));
 
 export const instrumentSectionsRelations = relations(instrumentSections, ({ one, many }) => ({
   instrument: one(instruments, {
     fields: [instrumentSections.instrumentId],
     references: [instruments.id],
+  }),
+  org: one(organizations, {
+    fields: [instrumentSections.orgId],
+    references: [organizations.id],
   }),
   attachments: many(sectionAttachments),
 }));
@@ -132,3 +185,5 @@ export type InstrumentSection = typeof instrumentSections.$inferSelect;
 export type NewInstrumentSection = typeof instrumentSections.$inferInsert;
 export type SectionAttachment = typeof sectionAttachments.$inferSelect;
 export type NewSectionAttachment = typeof sectionAttachments.$inferInsert;
+export type InstrumentAttachment = typeof instrumentAttachments.$inferSelect;
+export type NewInstrumentAttachment = typeof instrumentAttachments.$inferInsert;

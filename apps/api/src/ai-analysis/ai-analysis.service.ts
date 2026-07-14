@@ -1,15 +1,28 @@
 import { createHash } from 'node:crypto';
 import {
+  BadRequestException,
   ForbiddenException,
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { and, desc, eq, isNull } from 'drizzle-orm';
-import { aiAnalyses, withOrgContext, type AiAnalysis } from '@soe/db';
-import type {
-  AiAnalysisModel,
-  GenerateAnalysisDto,
-  GenerateItemInsightDto,
+import { and, desc, eq, isNull, sql } from 'drizzle-orm';
+import {
+  aiAnalyses,
+  assessmentResults,
+  assessments,
+  grades,
+  instruments,
+  subjects,
+  withOrgContext,
+  type AiAnalysis,
+} from '@soe/db';
+import {
+  INSTRUMENT_COMPARISON_ANALYSIS_TYPE,
+  type AiAnalysisModel,
+  type ComparableAssessment,
+  type CompareInstrumentsDto,
+  type GenerateAnalysisDto,
+  type GenerateItemInsightDto,
 } from '@soe/types';
 import type { JwtPayload } from '../auth/jwt-payload.types';
 import { InjectDb, type Database } from '../database/database.types';
@@ -232,11 +245,7 @@ export class AiAnalysisService {
         .select()
         .from(aiAnalyses)
         .where(
-          and(
-            eq(aiAnalyses.id, id),
-            eq(aiAnalyses.orgId, orgId),
-            isNull(aiAnalyses.deletedAt),
-          ),
+          and(eq(aiAnalyses.id, id), eq(aiAnalyses.orgId, orgId), isNull(aiAnalyses.deletedAt)),
         )
         .limit(1);
       return found;
@@ -259,11 +268,7 @@ export class AiAnalysisService {
   }
 
   /** Marca el análisis como `completed` con la salida del modelo en `output`. */
-  async markCompleted(
-    id: string,
-    orgId: string,
-    data: MarkCompletedInput,
-  ): Promise<void> {
+  async markCompleted(id: string, orgId: string, data: MarkCompletedInput): Promise<void> {
     await withOrgContext(this.db, orgId, async (tx) => {
       await tx
         .update(aiAnalyses)
@@ -290,6 +295,246 @@ export class AiAnalysisService {
         .set({ status: 'failed', error, completedAt: new Date(), updatedAt: new Date() })
         .where(and(eq(aiAnalyses.id, id), eq(aiAnalyses.orgId, orgId)));
     });
+  }
+
+  // ============================================================================
+  // TKT-23 — Comparación de instrumentos comparables (diagnóstico IA)
+  // ============================================================================
+
+  /**
+   * Crea (o reutiliza desde caché) una comparación entre dos instrumentos
+   * comparables. Valida por DATOS que ambos instrumentos sean comparables (mismo
+   * tipo + asignatura + grado y distintos), resuelve sus instrumentos y persiste
+   * los dos assessmentId en `input`. `analysisType` = 'instrument_comparison',
+   * `assessmentId` = base (para el índice/cascade). El `orgId` viene del token.
+   */
+  async createComparison(
+    user: JwtPayload,
+    dto: CompareInstrumentsDto,
+  ): Promise<CreateAnalysisResult> {
+    const orgId = this.requireOrgId(user);
+
+    return withOrgContext(this.db, orgId, async (tx) => {
+      const [base, comparison] = await Promise.all([
+        this.loadComparableInstrument(tx, orgId, dto.baseAssessmentId),
+        this.loadComparableInstrument(tx, orgId, dto.comparisonAssessmentId),
+      ]);
+
+      this.assertComparable(base, comparison);
+
+      const inputHash = this.computeComparisonHash({
+        baseAssessmentId: dto.baseAssessmentId,
+        comparisonAssessmentId: dto.comparisonAssessmentId,
+        audience: dto.audience,
+      });
+
+      if (!dto.force) {
+        const [existing] = await tx
+          .select()
+          .from(aiAnalyses)
+          .where(
+            and(
+              eq(aiAnalyses.orgId, orgId),
+              eq(aiAnalyses.inputHash, inputHash),
+              isNull(aiAnalyses.deletedAt),
+            ),
+          )
+          .orderBy(desc(aiAnalyses.createdAt))
+          .limit(1);
+
+        if (existing && this.isCacheable(existing)) {
+          return { analysis: this.toModel(existing), fromCache: true };
+        }
+      }
+
+      const [inserted] = await tx
+        .insert(aiAnalyses)
+        .values({
+          orgId,
+          assessmentId: dto.baseAssessmentId,
+          analysisType: INSTRUMENT_COMPARISON_ANALYSIS_TYPE,
+          audience: dto.audience,
+          inputHash,
+          input: {
+            baseAssessmentId: dto.baseAssessmentId,
+            comparisonAssessmentId: dto.comparisonAssessmentId,
+            baseInstrumentId: base.instrumentId,
+            comparisonInstrumentId: comparison.instrumentId,
+          },
+          status: 'pending',
+          createdById: user.userId,
+        })
+        .returning();
+
+      if (!inserted) {
+        throw new Error('No se pudo crear el registro de comparación IA');
+      }
+      return { analysis: this.toModel(inserted), fromCache: false };
+    });
+  }
+
+  /**
+   * Devuelve la ÚLTIMA comparación YA EXISTENTE para un par de evaluaciones con el
+   * mismo scope de caché (par ordenado + audiencia), o `null`. No genera nada.
+   */
+  async findLatestComparison(
+    user: JwtPayload,
+    params: {
+      baseAssessmentId: string;
+      comparisonAssessmentId: string;
+      audience: string;
+    },
+  ): Promise<AiAnalysisModel | null> {
+    const orgId = this.requireOrgId(user);
+    const inputHash = this.computeComparisonHash(params);
+
+    const row = await withOrgContext(this.db, orgId, async (tx) => {
+      const [found] = await tx
+        .select()
+        .from(aiAnalyses)
+        .where(
+          and(
+            eq(aiAnalyses.orgId, orgId),
+            eq(aiAnalyses.inputHash, inputHash),
+            isNull(aiAnalyses.deletedAt),
+          ),
+        )
+        .orderBy(desc(aiAnalyses.createdAt))
+        .limit(1);
+      return found;
+    });
+
+    return row ? this.toModel(row) : null;
+  }
+
+  /**
+   * Lista las evaluaciones de la org que YA tienen resultados, con metadatos de su
+   * instrumento (tipo, año, grado, asignatura) y cobertura. El frontend agrupa por
+   * `comparableKey` (tipo|grado|asignatura, derivado de datos, NO hardcodeado): solo
+   * dos candidatas del mismo grupo son comparables. Vista org-wide (roles de
+   * generación de análisis IA).
+   */
+  async listComparableAssessments(user: JwtPayload): Promise<ComparableAssessment[]> {
+    const orgId = this.requireOrgId(user);
+
+    const rows = await withOrgContext(this.db, orgId, async (tx) => {
+      return tx
+        .select({
+          assessmentId: assessments.id,
+          assessmentName: assessments.name,
+          administeredAt: assessments.administeredAt,
+          instrumentId: instruments.id,
+          instrumentName: instruments.name,
+          instrumentType: sql<string>`${instruments.type}::text`,
+          year: instruments.year,
+          gradeId: instruments.gradeId,
+          gradeName: grades.name,
+          subjectId: instruments.subjectId,
+          subjectName: subjects.name,
+          studentsEvaluated: sql<number>`count(distinct ${assessmentResults.studentId})::int`,
+        })
+        .from(assessments)
+        .innerJoin(instruments, eq(instruments.id, assessments.instrumentId))
+        .innerJoin(assessmentResults, eq(assessmentResults.assessmentId, assessments.id))
+        .leftJoin(grades, eq(grades.id, instruments.gradeId))
+        .leftJoin(subjects, eq(subjects.id, instruments.subjectId))
+        .where(eq(assessments.orgId, orgId))
+        .groupBy(
+          assessments.id,
+          assessments.name,
+          assessments.administeredAt,
+          instruments.id,
+          instruments.name,
+          instruments.type,
+          instruments.year,
+          instruments.gradeId,
+          grades.name,
+          instruments.subjectId,
+          subjects.name,
+        )
+        .orderBy(desc(assessments.administeredAt));
+    });
+
+    return rows.map((r) => ({
+      assessmentId: r.assessmentId,
+      assessmentName: r.assessmentName,
+      instrumentId: r.instrumentId,
+      instrumentName: r.instrumentName,
+      instrumentType: r.instrumentType,
+      year: r.year,
+      gradeId: r.gradeId,
+      gradeName: r.gradeName,
+      subjectId: r.subjectId,
+      subjectName: r.subjectName,
+      studentsEvaluated: Number(r.studentsEvaluated),
+      administeredAt: r.administeredAt ? r.administeredAt.toISOString() : null,
+      comparableKey: comparableKey(r.instrumentType, r.gradeId, r.subjectId),
+    }));
+  }
+
+  /** Carga los datos de comparabilidad del instrumento aplicado por un assessment. */
+  private async loadComparableInstrument(
+    tx: Database,
+    orgId: string,
+    assessmentId: string,
+  ): Promise<ComparableInstrument> {
+    const [row] = await tx
+      .select({
+        instrumentId: instruments.id,
+        type: sql<string>`${instruments.type}::text`,
+        gradeId: instruments.gradeId,
+        subjectId: instruments.subjectId,
+      })
+      .from(assessments)
+      .innerJoin(instruments, eq(instruments.id, assessments.instrumentId))
+      .where(and(eq(assessments.id, assessmentId), eq(assessments.orgId, orgId)))
+      .limit(1);
+
+    if (!row) {
+      throw new NotFoundException(`Evaluación ${assessmentId} no encontrada`);
+    }
+    return {
+      instrumentId: row.instrumentId,
+      type: row.type,
+      gradeId: row.gradeId,
+      subjectId: row.subjectId,
+    };
+  }
+
+  /**
+   * Comparabilidad por DATOS: mismo tipo de instrumento + mismo grado + misma
+   * asignatura, y distintos instrumentos. No hay strings hardcodeados ("DIA", etc.):
+   * la regla se deriva de `type/gradeId/subjectId`, extensible a SIMCE/PAES/Cambridge.
+   */
+  private assertComparable(a: ComparableInstrument, b: ComparableInstrument): void {
+    if (a.instrumentId === b.instrumentId) {
+      throw new BadRequestException(
+        'Las dos evaluaciones usan el mismo instrumento; selecciona instrumentos distintos.',
+      );
+    }
+    if (a.type !== b.type || a.gradeId !== b.gradeId || a.subjectId !== b.subjectId) {
+      throw new BadRequestException(
+        'Los instrumentos no son comparables: deben ser del mismo tipo, grado y asignatura.',
+      );
+    }
+  }
+
+  /**
+   * Hash determinista del scope de una comparación. El orden base→comparación
+   * importa (determina la dirección del diagnóstico), así que NO se ordena el par.
+   */
+  private computeComparisonHash(input: {
+    baseAssessmentId: string;
+    comparisonAssessmentId: string;
+    audience: string;
+  }): string {
+    const canonical = JSON.stringify({
+      analysisType: INSTRUMENT_COMPARISON_ANALYSIS_TYPE,
+      audience: input.audience,
+      baseAssessmentId: input.baseAssessmentId,
+      comparisonAssessmentId: input.comparisonAssessmentId,
+    });
+    return createHash('sha256').update(canonical).digest('hex');
   }
 
   // ---------- helpers ----------
@@ -368,4 +613,20 @@ export class AiAnalysisService {
       completedAt: row.completedAt ? row.completedAt.toISOString() : null,
     };
   }
+}
+
+/** Datos mínimos de un instrumento para decidir comparabilidad (TKT-23). */
+interface ComparableInstrument {
+  instrumentId: string;
+  type: string;
+  gradeId: string | null;
+  subjectId: string | null;
+}
+
+/**
+ * Clave de comparabilidad derivada de datos: `tipo|grado|asignatura`. Dos
+ * evaluaciones son comparables sii comparten esta clave. No hardcodea instrumentos.
+ */
+function comparableKey(type: string, gradeId: string | null, subjectId: string | null): string {
+  return `${type}|${gradeId ?? ''}|${subjectId ?? ''}`;
 }

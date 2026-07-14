@@ -219,6 +219,7 @@ describe('ItemAnalysisService.getMatrix', () => {
       assessmentId: ASSESSMENT_ID,
       page: 1,
       limit: 50,
+      all: false,
     });
 
     expect(res.assessmentId).toBe(ASSESSMENT_ID);
@@ -236,6 +237,11 @@ describe('ItemAnalysisService.getMatrix', () => {
     // correctRate agregado.
     expect(res.questions[0].correctRate).toBe(50);
     expect(res.questions[1].correctRate).toBe(100);
+    // TKT-22 — admin sin filtro: la población visible ya es toda la org, así que
+    // references.org = correctRate sin query adicional. `sample` DIFERIDO (ausente).
+    expect(res.questions[0].references.org).toBe(50);
+    expect(res.questions[1].references.org).toBe(100);
+    expect(res.questions[0].references.sample).toBeUndefined();
 
     // Paginación.
     expect(res.students.total).toBe(2);
@@ -274,6 +280,7 @@ describe('ItemAnalysisService.getMatrix', () => {
         assessmentId: ASSESSMENT_ID,
         page: 1,
         limit: 50,
+        all: false,
       }),
     ).rejects.toBeInstanceOf(NotFoundException);
   });
@@ -286,6 +293,7 @@ describe('ItemAnalysisService.getMatrix', () => {
         assessmentId: ASSESSMENT_ID,
         page: 1,
         limit: 50,
+        all: false,
       }),
     ).rejects.toBeInstanceOf(NotFoundException);
   });
@@ -302,6 +310,7 @@ describe('ItemAnalysisService.getMatrix', () => {
         assessmentId: ASSESSMENT_ID,
         page: 1,
         limit: 50,
+        all: false,
       }),
     ).rejects.toBeInstanceOf(ForbiddenException);
   });
@@ -314,7 +323,8 @@ describe('ItemAnalysisService.getMatrix', () => {
       itemRows, // loadQuestionColumns → items
       tagRows, // loadTagsByItems
       [{ studentId: STUDENT_1 }], // resolveAccessibleStudentIds (teacher, sin classGroupId param)
-      [{ itemId: ITEM_A, total: 1, correct: 1 }], // attachCorrectRates
+      [{ itemId: ITEM_A, total: 1, correct: 1 }], // attachCorrectRates (scope profesor → 100%)
+      [{ itemId: ITEM_A, total: 4, correct: 2 }], // attachOrgReferences (colegio → 50%)
       [{ total: 1 }], // loadStudentsPage count
       [
         {
@@ -346,10 +356,15 @@ describe('ItemAnalysisService.getMatrix', () => {
       assessmentId: ASSESSMENT_ID,
       page: 1,
       limit: 50,
+      all: false,
     });
     expect(res.students.total).toBe(1);
     expect(res.students.data[0].studentId).toBe(STUDENT_1);
     expect(res.students.data[0].achievement).toBe(80);
+    // TKT-22 — el profesor ve su curso en correctRate (100%) y el COLEGIO completo
+    // en references.org (50%): la referencia trasciende el scope del usuario.
+    expect(res.questions[0].correctRate).toBe(100);
+    expect(res.questions[0].references.org).toBe(50);
   });
 
   it('filtro nodeId: limita las columnas a ítems taggeados con ese nodo', async () => {
@@ -391,11 +406,105 @@ describe('ItemAnalysisService.getMatrix', () => {
       nodeId: NODE_SKILL,
       page: 1,
       limit: 50,
+      all: false,
     });
     expect(res.questions).toHaveLength(1);
     expect(res.questions[0].itemId).toBe(ITEM_A);
     // Las celdas también respetan una sola columna.
     expect(res.students.data[0].cells).toHaveLength(1);
+  });
+
+  it('TKT-12 filtro multi-tag OR: incluye ítems con CUALQUIERA de los tags', async () => {
+    const db = makeDb([
+      [assessmentRow], // requireAssessmentOwnedByUser
+      itemRows, // loadQuestionColumns → items
+      tagRows, // loadTagsByItems
+      // filtro por nodos (nodeId ∪ tagIds): ambos ítems calzan con algún tag.
+      [{ itemId: ITEM_A }, { itemId: ITEM_B }],
+      [
+        { itemId: ITEM_A, total: 2, correct: 1 },
+        { itemId: ITEM_B, total: 2, correct: 2 },
+      ], // attachCorrectRates
+      [{ total: 1 }], // count
+      [
+        {
+          studentId: STUDENT_1,
+          studentRut: '11.111.111-1',
+          firstName: 'Ana',
+          lastName: 'Soto',
+          percentage: '50.00',
+        },
+      ],
+      [{ studentId: STUDENT_1, classGroupId: CLASS_GROUP_ID, classGroupName: '3A' }],
+      [
+        {
+          studentId: STUDENT_1,
+          itemId: ITEM_A,
+          value: { answer: 'B' },
+          isCorrect: true,
+          finalScore: '1.00',
+          rawScore: '1.00',
+        },
+      ],
+    ]);
+    const service = makeService(db);
+
+    const res = await service.getMatrix(makeUser(), {
+      assessmentId: ASSESSMENT_ID,
+      tagIds: [NODE_SKILL, NODE_CONTENT],
+      page: 1,
+      limit: 50,
+      all: false,
+    });
+    // OR: ambos ítems se mantienen porque cada uno tiene alguno de los tags.
+    expect(res.questions.map((q) => q.itemId).sort()).toEqual([ITEM_A, ITEM_B].sort());
+  });
+
+  it('TKT-09 all=true: devuelve el curso completo sin paginar (page=1, limit=total)', async () => {
+    const db = makeDb([
+      [assessmentRow], // requireAssessmentOwnedByUser
+      itemRows, // loadQuestionColumns → items
+      tagRows, // loadTagsByItems
+      [
+        { itemId: ITEM_A, total: 2, correct: 1 },
+        { itemId: ITEM_B, total: 2, correct: 2 },
+      ], // attachCorrectRates
+      [{ total: 2 }], // count
+      [
+        {
+          studentId: STUDENT_1,
+          studentRut: '11.111.111-1',
+          firstName: 'Ana',
+          lastName: 'Soto',
+          percentage: '50.00',
+        },
+        {
+          studentId: STUDENT_2,
+          studentRut: '22.222.222-2',
+          firstName: 'Beto',
+          lastName: 'Vera',
+          percentage: '80.00',
+        },
+      ], // loadStudentsPage → page (all → sin limit/offset)
+      [
+        { studentId: STUDENT_1, classGroupId: CLASS_GROUP_ID, classGroupName: '3A' },
+        { studentId: STUDENT_2, classGroupId: CLASS_GROUP_ID, classGroupName: '3A' },
+      ],
+      [], // loadCells
+    ]);
+    const service = makeService(db);
+
+    const res = await service.getMatrix(makeUser(), {
+      assessmentId: ASSESSMENT_ID,
+      page: 1,
+      limit: 50,
+      all: true,
+    });
+    expect(res.students.total).toBe(2);
+    expect(res.students.data).toHaveLength(2);
+    // Con all=true se reporta una sola página con todo el curso.
+    expect(res.students.page).toBe(1);
+    expect(res.students.limit).toBe(2);
   });
 });
 
@@ -497,9 +606,60 @@ describe('ItemAnalysisService.getQuestionAnalysis', () => {
       [], // requireItemVisible → vacío
     ]);
     const service = makeService(db);
-    await expect(
-      service.getQuestionAnalysis(makeUser(), ITEM_A, {}),
-    ).rejects.toBeInstanceOf(NotFoundException);
+    await expect(service.getQuestionAnalysis(makeUser(), ITEM_A, {})).rejects.toBeInstanceOf(
+      NotFoundException,
+    );
+  });
+
+  // Regresión: los instrumentos oficiales (ej. DIA) tienen org_id NULL. El detalle
+  // de pregunta DEBE resolverlos (la matriz ya los muestra); antes los rechazaba
+  // con "Pregunta no encontrada" porque exigía org exacta (itemOrg === orgId).
+  it('resuelve una pregunta de instrumento OFICIAL (org_id NULL) sin lanzar', async () => {
+    const officialRow = {
+      id: ITEM_A,
+      orgId: null,
+      instrumentId: INSTRUMENT_ID,
+      instrumentOrgId: null,
+      position: 1,
+      type: 'multiple_choice',
+      content: {
+        stem: 'Pregunta oficial',
+        alternatives: [
+          { key: 'A', text: 'Opción A' },
+          { key: 'B', text: 'Opción B' },
+        ],
+        correctKey: 'B',
+      },
+    };
+    const db = makeDb([
+      [officialRow], // requireItemVisible → oficial (org null)
+      [], // loadItemTags
+      [], // loadAllItemTags
+      [{ answer: 'B', isCorrect: true, count: 5 }], // loadAnswerDistribution
+    ]);
+    const service = makeService(db);
+
+    const res = await service.getQuestionAnalysis(makeUser(), ITEM_A, {});
+    expect(res.itemId).toBe(ITEM_A);
+    expect(res.stem).toBe('Pregunta oficial');
+  });
+
+  // El fix NO debe abrir visibilidad de más: un ítem de OTRA org sigue oculto.
+  it('lanza NotFound si el ítem pertenece a OTRA org', async () => {
+    const otherOrgRow = {
+      id: ITEM_A,
+      orgId: 'org-OTRA',
+      instrumentId: INSTRUMENT_ID,
+      instrumentOrgId: 'org-OTRA',
+      position: 1,
+      type: 'multiple_choice',
+      content: { stem: 'x', alternatives: [], correctKey: null },
+    };
+    const db = makeDb([[otherOrgRow]]); // requireItemVisible → org ajena
+    const service = makeService(db);
+    await expect(service.getQuestionAnalysis(makeUser(), ITEM_A, {})).rejects.toBeInstanceOf(
+      NotFoundException,
+    );
   });
 
   it('ítem no de selección múltiple → alternatives vacías pero conserva totales', async () => {
