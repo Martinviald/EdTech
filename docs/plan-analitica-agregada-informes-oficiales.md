@@ -1,7 +1,7 @@
 # Plan — Analítica agregada desde informes oficiales DIA
 
-> **Fecha:** 2026-07-14 · decisiones cerradas 2026-07-15
-> **Estado:** **Aprobado, listo para implementar.** Las 5 decisiones de §9 están tomadas (ver §10). No implementado aún.
+> **Fecha:** 2026-07-14 · decisiones cerradas 2026-07-15 · **Fases 0–5 implementadas 2026-07-15**
+> **Estado:** **Fases 0–5 completas** en la rama `feat/analitica-agregada`. Falta la **Fase 6** (carga histórica, piloto Lenguaje 2025), que es operación de datos y necesita la BD demo. Ver §11 para lo que quedó verificado y lo que no.
 > **Objetivo:** permitir cargar los resultados de evaluaciones cuyo único origen es el informe oficial DIA en PDF (sin respuestas alumno×pregunta), haciendo que convivan con el motor de analítica granular actual sin romperlo ni degradarlo.
 > **Rama sugerida:** `feat/analitica-agregada` desde `dev`.
 
@@ -519,3 +519,54 @@ Lo que hay que comprobar, **informe por informe**, antes de dar 9.3 por buena:
 3. Si el eje efectivamente desaparece: ¿se acepta como statu quo (ya es el estado actual de esos cursos hoy, no una regresión), se digita el desarrollo de esas 2 preguntas por curso, o se reabre 9.3 hacia la opción (b)?
 
 Digitar el desarrollo son ~2 preguntas × 8 cursos — puede que sea más barato que cualquiera de las alternativas de diseño, y volvería el punto irrelevante.
+
+---
+
+## 11. Estado de la implementación (2026-07-15)
+
+Rama `feat/analitica-agregada`, 12 commits. `pnpm typecheck` 7/7, `pnpm lint` 7/7, tests API 789/796 (los 7 rojos son `privacy.controller.spec`, ambiental preexistente: falla idéntico en `dev`).
+
+### 11.1 Qué quedó verificado contra datos reales
+
+Esto no es "pasan los tests unitarios". Es lo que se comprobó contra Postgres:
+
+| Verificación | Resultado |
+|---|---|
+| Paridad ítem×assessment vs el `GROUP BY` actual, sobre la BDD real clonada (405 alumnos, 9844 respuestas, 18 assessments) | **302/302 filas, 0 diferencias** |
+| Paridad de la distribución de alternativas | **1075/1075 buckets, 0 diferencias** |
+| Idempotencia del backfill | hash idéntico tras 2 corridas, sin duplicar filas |
+| RLS con un rol `NOBYPASSRLS` real + políticas aplicadas | 302 filas. Con el superusuario local el RLS es no-op, así que sin esto no se probaba nada |
+| Migraciones sobre una base virgen | tablas + `FORCE ROW LEVEL SECURITY` + políticas + default `item_level` + ambos enums. Reaplicar es idempotente |
+| Paridad de los buckets de desarrollo vs el `case` SQL viejo | test diferencial que corre el pipeline real contra una reimplementación literal del SQL, **mutado a propósito para comprobar que puede fallar** |
+| Cuerpo HTTP del 409 | `code` y `capability` viajan en la raíz, que es donde la web los lee |
+
+### 11.2 Los 3 riesgos de paridad: medidos, no asumidos
+
+Se consultó la BDD real en vez de razonar sobre ellos:
+
+- **Alumnos sin matrícula: 0 casos**, y estructuralmente no caben (`class_group_id NOT NULL`). No se "arregló": se hizo **medible** — el recompute devuelve `orphanResponses` y el backfill lo reporta.
+- **Alumno en varios cursos: 0 casos.** Ojo con la solución: restringir solo por `assessment_course_assignments` —que era la indicación inicial— habría dejado el read-model **vacío en la ingesta de hojas de respuesta**, porque `answer-sheets.confirm` crea el assessment sin ACA. Se resuelve en dos pasadas.
+- **Soft-deleted: 0 casos.** Los dos comportamientos actuales se contradicen y un read-model pre-agregado obliga a elegir al escribir. Se incluyen, que preserva exacto el % org-wide.
+
+### 11.3 Números que SÍ se mueven (los dos, a propósito)
+
+1. **`blankCount` de los ítems de desarrollo.** Antes todo contaba como blanco (la respuesta cruda no lleva alternativa → `blankCount = totalResponses`), que era un artefacto. Ahora el blanco queda reducido a N, que es lo que el informe llama "No responde". Visible en `question-detail-panel` y en el export Excel. Los MC no se mueven.
+2. **Redondeo < 0.01 pp en el % por eje.** El `avg()` viejo promediaba valores ya redondeados a `numeric(5,2)`; el read-model promedia sin redondear. La UI muestra 1 decimal.
+
+### 11.4 Divergencias conocidas y acotadas
+
+- **`studentsAssessed` con scope multi-evaluación** usa `max(student_count)` por curso, no `sum`: hoy es `count(distinct student_id)` y un alumno que rindió 2 evaluaciones cuenta una vez. `sum` habría movido el número del dashboard principal. `max` es exacto con una evaluación, y con varias mientras las cohortes de un curso estén anidadas. Solo se queda corto si dos evaluaciones del mismo curso evaluaron alumnos **disjuntos**.
+- **El filtro por `studentId` de los dashboards no se migra**: el grano del read-model es el curso. Se desvía a `skill_results` vía `requiresPerStudentData()`. No hay UI que lo setee, pero es clave viva del contrato.
+
+### 11.5 Lo que NO se pudo verificar — pendiente de la Fase 6
+
+- **El importador nunca corrió contra Postgres.** Sus tests usan mock de Drizzle: la forma de las filas está verificada, el comportamiento real de RLS, del upsert y de los índices únicos **no**. Falta E2E en demo.
+- **Ninguna ruta de UI de `aggregate_only` se ejecutó de verdad** — no existe todavía ningún assessment así, solo está verificada por tipos.
+- **Las keys de las bandas DIA en la BD demo**: `resolveLevelBand` cruza `"I"` con el label `"Nivel I"` por último token. El fixture usa los mismos `key`/`label` que `seed-performance-bands.ts`, pero si la demo quedó editada a mano, el match falla.
+- **`blankCount` de desarrollo en la UI de demo**: es el único número que cambia; conviene mirarlo antes de dar la fase por buena.
+- **`P9` y `P15` del fixture del importador**: del informe real solo está documentado su conteo de correctas; el reparto de sus distractores se construyó para sumar N. Anotado en el fixture.
+
+### 11.6 Hallazgos colaterales
+
+- **`packages/db/sql/roles.sql` está roto**: `GRANT CONNECT ON DATABASE current_database() TO soe_app;` no es SQL válido (`current_database()` no se puede usar ahí). El `CREATE ROLE` sí corre, los GRANT posteriores también; solo falla esa línea. Sugiere que nadie lo ha corrido entero nunca. No se tocó — es ajeno a esta rama.
+- **`db:migrate` falla en `soe_dev` local** con `42710` (enum duplicado): el journal quedó desincronizado de antes (ver la nota de `project-performance-bands-instrumento`). El orden fresco aplica limpio — se comprobó. Es problema de esa BD local, no de la rama.
