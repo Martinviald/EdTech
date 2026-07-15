@@ -13,8 +13,12 @@
  * Recorre org por org dentro de `withOrgContext` (CLAUDE.md §5.2): ambas tablas tienen
  * RLS por `EXISTS` sobre `assessments.org_id` y sin contexto los INSERT fallan.
  *
- * Fase 1 del plan (docs/plan-analitica-agregada-informes-oficiales.md §7): nadie LEE el
- * read-model todavía, así que este backfill no puede cambiar lo que ve un usuario.
+ * ⚠️ NO es opcional después de una migración. Desde la Fase 2 los lectores
+ * (item-analysis, official-reports, dashboards, heatmap, assessment-report) ya no
+ * derivan de `responses`: leen de acá. Migrar sin correr esto deja la analítica en
+ * blanco — correctRate null, skills [] y heatmap []. Por eso el deploy lo corre dentro
+ * del mismo túnel que la migración y antes de publicar la imagen nueva
+ * (.github/workflows/deploy-backend.yml).
  *
  * Dos cosas que no hace, a propósito:
  *  · No recalcula `assessment_results` / `skill_results`. Lee los que ya están y los
