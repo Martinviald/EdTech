@@ -13,7 +13,7 @@ config({ path: resolve(__dirname, '../../../../.env') });
 
 import { readFileSync, readdirSync } from 'node:fs';
 import { and, eq, sql } from 'drizzle-orm';
-import { validateItemContent } from '@soe/types';
+import { toApplicationPeriod, validateItemContent } from '@soe/types';
 import { createDbClient, type Database } from '../client';
 import { instruments, instrumentSections, sectionAttachments } from '../schema/instruments';
 import { items } from '../schema/items';
@@ -100,10 +100,10 @@ export async function importInstruments(db: Database): Promise<void> {
           subjectId: sId,
           gradeId: gId,
           year: ins.year,
-          version: ins.applicationPeriod,
+          applicationPeriod: toApplicationPeriod(ins.applicationPeriod),
           isOfficial: ins.isOfficial ?? true,
           status: 'published',
-          config: { sourceJson, applicationPeriod: ins.applicationPeriod, subject: ins.subject, grade: ins.grade },
+          config: { sourceJson, subject: ins.subject, grade: ins.grade },
         })
         .returning({ id: instruments.id });
       const instrumentId = inst!.id;

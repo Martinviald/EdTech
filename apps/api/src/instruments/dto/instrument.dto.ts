@@ -1,5 +1,10 @@
 import { z } from 'zod';
-import { paginationSchema, passageSchema, sectionAttachmentInputSchema } from '@soe/types';
+import {
+  INSTRUMENT_APPLICATION_PERIODS,
+  paginationSchema,
+  passageSchema,
+  sectionAttachmentInputSchema,
+} from '@soe/types';
 
 // ── Enunciado PDF a nivel de instrumento (TKT-15) ────────────────────────────
 // Los schemas viven en `@soe/types` (contrato compartido con web). Se re-exportan
@@ -62,6 +67,7 @@ export const createInstrumentSchema = z.object({
   subjectId: z.string().uuid().optional(),
   gradeId: z.string().uuid().optional(),
   year: z.number().int().min(2000).max(2100).optional(),
+  applicationPeriod: z.enum(INSTRUMENT_APPLICATION_PERIODS).optional(),
   version: z.string().max(50).optional(),
   isOfficial: z.boolean().default(false),
   status: z.enum(INSTRUMENT_STATUSES).default('draft'),
@@ -79,6 +85,7 @@ export const listInstrumentsQuerySchema = paginationSchema.extend({
   subjectId: z.string().uuid().optional(),
   gradeId: z.string().uuid().optional(),
   year: z.coerce.number().int().optional(),
+  applicationPeriod: z.enum(INSTRUMENT_APPLICATION_PERIODS).optional(),
   status: z.enum(INSTRUMENT_STATUSES).optional(),
   isOfficial: z
     .union([z.boolean(), z.string().transform((v) => v === 'true')])

@@ -24,7 +24,7 @@
 import { useRouter, useSearchParams } from 'next/navigation';
 import type { Route } from 'next';
 import { X } from 'lucide-react';
-import { TAXONOMY_NODE_TYPES, type TaxonomyNodeModel } from '@soe/types';
+import { TAXONOMY_NODE_TYPES, type CatalogEntryModel, type TaxonomyNodeModel } from '@soe/types';
 import { Button } from '@/components/ui/button';
 import {
   Select,
@@ -38,7 +38,8 @@ import { NodeTypeFilter } from './NodeTypeFilter';
 
 const ALL = '__all__';
 
-export type CatalogEntry = { id: string; name: string; shortName: string };
+/** @deprecated Alias del contrato compartido; importar `CatalogEntryModel` de `@soe/types`. */
+export type CatalogEntry = CatalogEntryModel;
 
 interface ItemBankFiltersProps {
   subjects: CatalogEntry[];
