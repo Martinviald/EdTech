@@ -2,6 +2,7 @@ import { ForbiddenException, Injectable, NotFoundException } from '@nestjs/commo
 import { and, asc, desc, eq, inArray, isNull, sql } from 'drizzle-orm';
 import {
   assessmentCourseAssignments,
+  assessmentItemStats,
   assessmentResults,
   assessments,
   classGroups,
@@ -25,6 +26,7 @@ import {
   RESULT_HIDDEN_NODE_TYPES,
   userHasAnyRole,
   type AlternativeDistribution,
+  type AnswerCount,
   type AssessmentListQueryDto,
   type AssessmentListResponse,
   type AssessmentOption,
