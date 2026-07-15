@@ -40,12 +40,7 @@ export function PaginationControls({
         Mostrando {from}–{to} de {total}
       </p>
       <div className="flex items-center gap-2">
-        <Button
-          variant="outline"
-          size="sm"
-          disabled={page <= 1}
-          onClick={() => goTo(page - 1)}
-        >
+        <Button variant="outline" size="sm" disabled={page <= 1} onClick={() => goTo(page - 1)}>
           Anterior
         </Button>
         <span className="text-xs text-muted-foreground">
