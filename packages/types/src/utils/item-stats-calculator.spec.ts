@@ -1,8 +1,10 @@
 import {
   aggregateCohortSkillStats,
   aggregateItemStats,
+  classifyDevelopmentResponse,
   deriveSkillStatsFromItemStats,
   extractRawAnswer,
+  mergeAnswerCounts,
   reconstructCountsFromPercentages,
   type ItemCohortStats,
   type ResponseForItemStats,
@@ -18,8 +20,22 @@ function resp(over: Partial<ResponseForItemStats> & Pick<ResponseForItemStats, '
     isCorrect: true,
     rawScore: 1,
     maxScore: 1,
+    hasAlternatives: true,
     ...over,
   } satisfies ResponseForItemStats;
+}
+
+/** Respuesta a un ítem de desarrollo: sin alternativas, se bucketiza por puntaje. */
+function devResp(studentId: string, score: number | null, maxScore = 2): ResponseForItemStats {
+  return {
+    studentId,
+    itemId: 'dev1',
+    value: {},
+    isCorrect: score != null && score >= maxScore,
+    rawScore: score,
+    maxScore,
+    hasAlternatives: false,
+  };
 }
 
 describe('extractRawAnswer', () => {
@@ -156,6 +172,126 @@ describe('aggregateItemStats', () => {
     );
     expect(out[0]!.scoreSum).toBe(0);
     expect(out[0]!.correctCount).toBe(0);
+  });
+});
+
+describe('ítems de desarrollo — buckets RC/RPC/RI/N', () => {
+  const enrollment = new Map([
+    ['s1', CURSO_A],
+    ['s2', CURSO_A],
+    ['s3', CURSO_A],
+    ['s4', CURSO_A],
+  ]);
+
+  it('replica el case SQL de loadDevelopmentDistributions', () => {
+    // score null → N (null) · <= 0 → RI · >= max → RC · resto → RPC.
+    expect(
+      classifyDevelopmentResponse({ rawScore: null, finalScore: null, maxScore: 2 }),
+    ).toBeNull();
+    expect(classifyDevelopmentResponse({ rawScore: 0, finalScore: null, maxScore: 2 })).toBe('RI');
+    expect(classifyDevelopmentResponse({ rawScore: 2, finalScore: null, maxScore: 2 })).toBe('RC');
+    expect(classifyDevelopmentResponse({ rawScore: 1, finalScore: null, maxScore: 2 })).toBe('RPC');
+    // finalScore gana sobre rawScore, igual que el coalesce del SQL.
+    expect(classifyDevelopmentResponse({ rawScore: 0, finalScore: 2, maxScore: 2 })).toBe('RC');
+  });
+
+  it('separa RC/RPC/RI/N en answerCounts en vez de colapsarlos en blancos', () => {
+    // Es la razón de ser de `hasAlternatives`: sin él, extractRawAnswer devolvería
+    // null para los cuatro y todo el desarrollo caería en un único bucket.
+    const out = aggregateItemStats(
+      [devResp('s1', 2), devResp('s2', 1), devResp('s3', 0), devResp('s4', null)],
+      enrollment,
+    );
+
+    expect(out[0]!.answerCounts).toEqual([
+      { key: 'RC', count: 1, isCorrect: true },
+      { key: 'RI', count: 1, isCorrect: false },
+      { key: 'RPC', count: 1, isCorrect: false },
+      { key: null, count: 1, isCorrect: false },
+    ]);
+  });
+
+  it('desambigua lo que scoreSum/maxSum no puede: 3 RC + 3 RI vs 6 RPC', () => {
+    // Ambos escenarios dan scoreSum=3, maxSum=6, responseCount=6. Los marginales
+    // coinciden y la distribución no: por eso los buckets categóricos son
+    // necesarios y no un lujo.
+    const seisEstudiantes = new Map(
+      ['a1', 'a2', 'a3', 'a4', 'a5', 'a6'].map((s) => [s, CURSO_A] as const),
+    );
+
+    const rcRi = aggregateItemStats(
+      [
+        devResp('a1', 1, 1),
+        devResp('a2', 1, 1),
+        devResp('a3', 1, 1),
+        devResp('a4', 0, 1),
+        devResp('a5', 0, 1),
+        devResp('a6', 0, 1),
+      ],
+      seisEstudiantes,
+    )[0]!;
+
+    const todosRpc = aggregateItemStats(
+      ['a1', 'a2', 'a3', 'a4', 'a5', 'a6'].map((s) => devResp(s, 0.5, 1)),
+      seisEstudiantes,
+    )[0]!;
+
+    // Marginales idénticos...
+    expect(rcRi.scoreSum).toBe(3);
+    expect(todosRpc.scoreSum).toBe(3);
+    expect(rcRi.maxSum).toBe(todosRpc.maxSum);
+    expect(rcRi.responseCount).toBe(todosRpc.responseCount);
+    // ...distribuciones distintas.
+    expect(rcRi.answerCounts).not.toEqual(todosRpc.answerCounts);
+    expect(todosRpc.answerCounts).toEqual([{ key: 'RPC', count: 6, isCorrect: false }]);
+  });
+});
+
+describe('mergeAnswerCounts', () => {
+  it('SUMA conteos entre cohortes; no promedia porcentajes', () => {
+    // 2 cursos de N distinto: 30/40 y 15/60. Agregado real = 45/100 = 45%.
+    // El promedio de porcentajes daría (75 + 25) / 2 = 50%, que no corresponde a
+    // ninguna población real. Por eso el read-model guarda conteos.
+    const merged = mergeAnswerCounts([
+      [
+        { key: 'A', count: 30, isCorrect: true },
+        { key: 'B', count: 10, isCorrect: false },
+      ],
+      [
+        { key: 'A', count: 15, isCorrect: true },
+        { key: 'B', count: 45, isCorrect: false },
+      ],
+    ]);
+
+    expect(merged).toEqual([
+      { key: 'A', count: 45, isCorrect: true },
+      { key: 'B', count: 55, isCorrect: false },
+    ]);
+    const total = merged.reduce((a, b) => a + b.count, 0);
+    const correct = merged.filter((b) => b.isCorrect).reduce((a, b) => a + b.count, 0);
+    expect((correct / total) * 100).toBe(45);
+  });
+
+  it('mantiene separados los buckets con la misma clave y distinto isCorrect', () => {
+    const merged = mergeAnswerCounts([
+      [{ key: 'A', count: 2, isCorrect: true }],
+      [{ key: 'A', count: 3, isCorrect: false }],
+    ]);
+    expect(merged).toHaveLength(2);
+  });
+
+  it('los blancos se recombinan y quedan al final', () => {
+    const merged = mergeAnswerCounts([
+      [{ key: null, count: 2, isCorrect: false }],
+      [
+        { key: null, count: 1, isCorrect: false },
+        { key: 'A', count: 5, isCorrect: true },
+      ],
+    ]);
+    expect(merged).toEqual([
+      { key: 'A', count: 5, isCorrect: true },
+      { key: null, count: 3, isCorrect: false },
+    ]);
   });
 });
 

@@ -21,12 +21,24 @@
  *    aparte, con `correctKey ?? alt.isCorrect`.
  */
 
-/** Un bucket de la distribución de respuestas de un ítem. `key: null` = blanco/nulo. */
+/**
+ * Un bucket de la distribución de respuestas de un ítem. `key: null` = blanco/nulo
+ * (la opción "N — No responde" del informe oficial).
+ *
+ * En ítems de selección múltiple la clave es la alternativa marcada ('A', 'B', …).
+ * En ítems de desarrollo es la categoría por puntaje ('RC' | 'RPC' | 'RI'), que son
+ * las mismas claves que usa el informe oficial DIA. Así los dos escritores emiten un
+ * único tipo de dato y el read-model sirve ambos tipos de ítem sin ramificar.
+ */
 export type AnswerCount = {
   key: string | null;
   count: number;
   isCorrect: boolean;
 };
+
+/** Categorías de un ítem de desarrollo. `null` (no responde) se emite como `key: null`. */
+export const DEVELOPMENT_BUCKETS = ['RC', 'RPC', 'RI'] as const;
+export type DevelopmentBucket = (typeof DEVELOPMENT_BUCKETS)[number];
 
 /** Una respuesta cruda, tal como sale de `responses` ⋈ `items`. */
 export type ResponseForItemStats = {
@@ -39,6 +51,15 @@ export type ResponseForItemStats = {
   /** `finalScore` tiene precedencia sobre `rawScore` (CLAUDE.md §8.3). */
   finalScore?: number | null;
   maxScore: number;
+  /**
+   * ¿El ítem ofrece alternativas (selección múltiple)?
+   *
+   * Necesario y no derivable de `value`: un ítem de desarrollo y una respuesta MC en
+   * blanco producen ambos `extractRawAnswer → null`, y sin distinguirlos todo el
+   * desarrollo colapsaría en un solo bucket de blancos, perdiendo RC/RPC/RI. El
+   * caller lo resuelve con `Array.isArray(items.content.alternatives) && length > 0`.
+   */
+  hasAlternatives: boolean;
 };
 
 /** Una fila del read-model por (curso × ítem). Conteos, nunca porcentajes. */
@@ -95,6 +116,55 @@ function effectiveScore(r: Pick<ResponseForItemStats, 'finalScore' | 'rawScore'>
   if (r.finalScore != null) return r.finalScore;
   if (r.rawScore != null) return r.rawScore;
   return 0;
+}
+
+/**
+ * Categoriza la respuesta a un ítem de desarrollo por su puntaje.
+ *
+ * Réplica exacta del `case` SQL de `loadDevelopmentDistributions`:
+ *   score is null → N (acá `null`) · <= 0 → RI · >= max → RC · resto → RPC.
+ * El orden importa: un ítem con maxScore 0 caería en RC, igual que hoy.
+ */
+export function classifyDevelopmentResponse(
+  r: Pick<ResponseForItemStats, 'finalScore' | 'rawScore' | 'maxScore'>,
+): DevelopmentBucket | null {
+  const score = r.finalScore ?? r.rawScore;
+  if (score == null) return null;
+  if (score <= 0) return 'RI';
+  if (score >= r.maxScore) return 'RC';
+  return 'RPC';
+}
+
+/**
+ * Clave del bucket de una respuesta: la alternativa marcada en selección múltiple,
+ * o la categoría por puntaje en desarrollo.
+ */
+function bucketKeyFor(r: ResponseForItemStats): string | null {
+  return r.hasAlternatives ? extractRawAnswer(r.value) : classifyDevelopmentResponse(r);
+}
+
+/**
+ * Recombina distribuciones de varias cohortes en una sola.
+ *
+ * ⚠️ Suma conteos; NUNCA promedia porcentajes. Dos cursos de N distinto promediados
+ * dan un número que no corresponde a ninguna población real. Los porcentajes se
+ * recalculan al final sobre el total ya recombinado.
+ *
+ * Vive acá y no en cada lector porque es la primitiva que usan tanto `item-analysis`
+ * como `official-reports`: tenerla dos veces es exactamente la duplicación que este
+ * read-model vino a matar.
+ */
+export function mergeAnswerCounts(buckets: readonly AnswerCount[][]): AnswerCount[] {
+  const acc = new Map<string, AnswerCount>();
+  for (const list of buckets) {
+    for (const b of list) {
+      const k = JSON.stringify([b.key, b.isCorrect]);
+      const prev = acc.get(k);
+      if (prev) prev.count += b.count;
+      else acc.set(k, { key: b.key, count: b.count, isCorrect: b.isCorrect });
+    }
+  }
+  return sortAnswerCounts([...acc.values()]);
 }
 
 /**
@@ -165,7 +235,7 @@ export function aggregateItemStats(
       acc.set(cellKey, cell);
     }
 
-    const answer = extractRawAnswer(r.value);
+    const answer = bucketKeyFor(r);
     const isCorrect = r.isCorrect === true;
 
     cell.students.add(r.studentId);
