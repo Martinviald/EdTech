@@ -11,7 +11,6 @@ import {
   classGroups,
   gradingScales,
   instruments,
-  itemTaxonomyTags,
   items,
   organizations,
   performanceBands,
@@ -45,8 +44,12 @@ import {
 } from '@soe/types';
 import type { JwtPayload } from '../auth/jwt-payload.types';
 import { InjectDb, type Database } from '../database/database.types';
-import { defaultLinearChileanScale, toResponseForCalculation } from './lib/result-aggregator';
-import { RECOMPUTE_FROM_RESPONSES_POLICY, persistAssessmentResults } from './lib/persist-results';
+import { defaultLinearChileanScale } from './lib/result-aggregator';
+import {
+  RECOMPUTE_FROM_RESPONSES_POLICY,
+  loadResponsesForPersist,
+  persistAssessmentResults,
+} from './lib/persist-results';
 import { loadInstrumentBands } from '../performance-bands/lib/load-instrument-bands';
 
 // Roles "administrativos" — ven todos los cursos de la org. Cualquier otro rol
@@ -148,23 +151,9 @@ export class AssessmentResultsService {
     instrumentId: string,
     scale: GradingScaleParams,
   ): Promise<CalculateAssessmentResultsResponse> {
-    const responseRows = await tx
-      .select({
-        studentId: responses.studentId,
-        itemId: responses.itemId,
-        value: responses.value,
-        itemContent: items.content,
-        isCorrect: responses.isCorrect,
-        rawScore: responses.rawScore,
-        finalScore: responses.finalScore,
-        maxScore: responses.maxScore,
-        itemPosition: items.position,
-      })
-      .from(responses)
-      .innerJoin(items, eq(items.id, responses.itemId))
-      .where(eq(responses.assessmentId, assessmentId));
+    const computed = await loadResponsesForPersist(tx, assessmentId);
 
-    if (responseRows.length === 0) {
+    if (computed.length === 0) {
       return {
         assessmentId,
         resultsCreated: 0,
@@ -175,16 +164,9 @@ export class AssessmentResultsService {
       };
     }
 
-    const tagsByItemId = await this.loadTagsByItemId(
-      tx,
-      Array.from(new Set(responseRows.map((r) => r.itemId))),
-    );
-
     // Bandas de logro del instrumento (fuente de verdad del nivel por
     // instrumento). Corre dentro de withOrgContext → RLS trae globales + org.
     const bands = await loadInstrumentBands(tx, instrumentId);
-
-    const computed = toResponseForCalculation(responseRows, tagsByItemId);
 
     // Cuántos resultados previos había — define created vs updated. Va ANTES del
     // delete + reinsert que hace persistAssessmentResults.
@@ -780,22 +762,6 @@ export class AssessmentResultsService {
       passingThreshold: Number(scale.passingThreshold),
       config: scale.config,
     };
-  }
-
-  private async loadTagsByItemId(tx: Database, itemIds: string[]): Promise<Map<string, string[]>> {
-    if (itemIds.length === 0) return new Map();
-    const rows = await tx
-      .select({ itemId: itemTaxonomyTags.itemId, nodeId: itemTaxonomyTags.nodeId })
-      .from(itemTaxonomyTags)
-      .where(inArray(itemTaxonomyTags.itemId, itemIds));
-
-    const map = new Map<string, string[]>();
-    for (const r of rows) {
-      const list = map.get(r.itemId) ?? [];
-      list.push(r.nodeId);
-      map.set(r.itemId, list);
-    }
-    return map;
   }
 
   private toAssessmentResultModel(r: {

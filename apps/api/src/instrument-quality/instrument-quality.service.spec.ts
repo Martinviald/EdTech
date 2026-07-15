@@ -111,6 +111,7 @@ function makeReport(items: AssessmentReportItemRow[]): AssessmentReportResponse 
       itemsCount: items.length,
       dataGranularity: 'item_level',
       capabilities: [...capabilitiesFor('item_level')],
+      hasItemLevelData: true,
     },
     summary: {
       studentsEvaluated: 0,

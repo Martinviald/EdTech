@@ -5,13 +5,12 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { and, eq, inArray, isNull, or, sql } from 'drizzle-orm';
+import { and, eq, isNull, or, sql } from 'drizzle-orm';
 import {
   assessments,
   gradingScales,
   importJobs,
   instruments,
-  itemTaxonomyTags,
   items,
   responses,
   withOrgContext,
@@ -39,8 +38,8 @@ import type { JwtPayload } from '../auth/jwt-payload.types';
 import { InjectDb, type Database } from '../database/database.types';
 import {
   ANSWER_SHEET_IMPORT_POLICY,
+  loadResponsesForPersist,
   persistAssessmentResults,
-  type ResponseForPersist,
 } from '../assessment-results/lib/persist-results';
 import { loadInstrumentBands } from '../performance-bands/lib/load-instrument-bands';
 import { getScoringStrategy } from './scoring/scoring-strategy';
@@ -59,18 +58,6 @@ interface ItemForAssessment {
   type: ItemType;
   content: ItemContent;
   maxScore: number;
-}
-
-/**
- * ¿El ítem ofrece alternativas (selección múltiple)?
- *
- * El read-model de cohorte lo necesita para no confundir un ítem de desarrollo con una
- * respuesta MC en blanco: ambos dan `extractRawAnswer → null`, y sin distinguirlos el
- * desarrollo colapsaría en un único bucket de blancos en vez de RC/RPC/RI.
- */
-function itemHasAlternatives(content: ItemContent): boolean {
-  const alternatives = (content as { alternatives?: unknown }).alternatives;
-  return Array.isArray(alternatives) && alternatives.length > 0;
 }
 
 interface UploadMetadataInput {
@@ -257,7 +244,8 @@ export class AnswerSheetsService {
     // 1. Resolver el instrumento (y reusar metadata).
     const instrument = await this.ensureInstrumentVisible(entry.instrumentId, orgId);
 
-    // 2. Cargar items + correctKey + tags.
+    // 2. Cargar items + correctKey. Los tags de habilidad NO se cargan acá: el
+    //    recálculo de resultados los resuelve al releer las `responses` persistidas.
     const instrumentItems = await this.loadInstrumentItems(entry.instrumentId);
     if (instrumentItems.length === 0) {
       throw new BadRequestException(
@@ -266,18 +254,6 @@ export class AnswerSheetsService {
     }
     const itemByPosition = new Map<number, ItemForAssessment>();
     for (const it of instrumentItems) itemByPosition.set(it.position, it);
-
-    const itemIds = instrumentItems.map((it) => it.id);
-    const tags = await this.db
-      .select({ itemId: itemTaxonomyTags.itemId, nodeId: itemTaxonomyTags.nodeId })
-      .from(itemTaxonomyTags)
-      .where(inArray(itemTaxonomyTags.itemId, itemIds));
-    const tagsByItemId = new Map<string, string[]>();
-    for (const t of tags) {
-      const list = tagsByItemId.get(t.itemId) ?? [];
-      list.push(t.nodeId);
-      tagsByItemId.set(t.itemId, list);
-    }
 
     // 3. Re-matchear alumnos (no confiamos en datos del preview).
     //    matchStudents consulta `students` (RLS): correr con contexto de org.
@@ -288,7 +264,6 @@ export class AnswerSheetsService {
     // 4. Construir responses + errores.
     const errors: AnswerSheetRowError[] = [];
     const responseRows: Array<typeof responses.$inferInsert> = [];
-    const calcResponses: ResponseForPersist[] = [];
     const processedStudentIds = new Set<string>();
     let rowsSkipped = 0;
     const now = new Date();
@@ -358,22 +333,6 @@ export class AnswerSheetsService {
             scoredBy: 'human',
             scoredAt: null,
           });
-
-          calcResponses.push({
-            studentId,
-            itemId: item.id,
-            itemPosition: item.position,
-            // Mismo objeto que se persiste en `responses.value`: el read-model de
-            // cohorte tiene que ver exactamente lo que verá el `GROUP BY` sobre la
-            // tabla.
-            value: { answer: rawAnswer },
-            hasAlternatives: itemHasAlternatives(item.content),
-            rawScore: null,
-            maxScore: item.maxScore,
-            finalScore: null,
-            isCorrect: null,
-            taxonomyNodeIds: tagsByItemId.get(item.id) ?? [],
-          });
           continue;
         }
 
@@ -391,19 +350,6 @@ export class AnswerSheetsService {
           finalScore: finalScore.toFixed(2),
           scoredBy: 'auto',
           scoredAt: now,
-        });
-
-        calcResponses.push({
-          studentId,
-          itemId: item.id,
-          itemPosition: item.position,
-          value: { answer: rawAnswer },
-          hasAlternatives: itemHasAlternatives(item.content),
-          rawScore,
-          maxScore: item.maxScore,
-          finalScore,
-          isCorrect: result.isCorrect,
-          taxonomyNodeIds: tagsByItemId.get(item.id) ?? [],
         });
       }
     }
@@ -502,12 +448,18 @@ export class AnswerSheetsService {
       // (pendientes fuera del total por alumno; completed_at siempre estampado);
       // están documentadas en persist-results.ts.
       //
+      // Se recalcula desde TODAS las `responses` del assessment (ya con el upsert de
+      // arriba aplicado), no sólo desde las filas de esta subida: el reemplazo es por
+      // assessment, así que alimentarlo con la subida actual borraría los resultados
+      // de los cursos cargados antes contra el mismo assessment (permitido más
+      // arriba, vía `body.assessmentId`). `responses` es la única fuente completa.
+      const allResponses = await loadResponsesForPersist(tx, assessmentId);
       // Bandas de logro del instrumento (fuente de verdad del nivel). Dentro de
       // withOrgContext → RLS trae globales (org_id NULL) + override de la org.
       const bands = await loadInstrumentBands(tx, entry.instrumentId);
       await persistAssessmentResults(tx, {
         assessmentId,
-        responses: calcResponses,
+        responses: allResponses,
         scale,
         bands,
         now,

@@ -28,6 +28,8 @@ const STUDENT_1 = '11110000-0000-0000-0000-000000000001';
 const NODE_1 = '22220000-0000-0000-0000-000000000001';
 const JOB_ID = '99990000-0000-0000-0000-000000000001';
 const CLASS_GROUP_1 = '33330000-0000-0000-0000-000000000001';
+const STUDENT_2 = '11110000-0000-0000-0000-000000000002';
+const CLASS_GROUP_2 = '33330000-0000-0000-0000-000000000002';
 
 /** Alternativas A–D como las guarda la BDD real, con `isCorrect` en la clave dada. */
 function mcqAlternatives(correctKey: string) {
@@ -36,6 +38,45 @@ function mcqAlternatives(correctKey: string) {
     text: `Alternativa ${key}`,
     isCorrect: key === correctKey,
   }));
+}
+
+/** Una fila tal como `confirm` la inserta en `responses`. */
+type InsertedResponse = {
+  studentId: string;
+  itemId: string;
+  value: Record<string, unknown> | null;
+  isCorrect: boolean | null;
+  rawScore: string | null;
+  finalScore: string | null;
+  maxScore: string;
+};
+
+type MockItemRow = { id: string; position: number; content: Record<string, unknown> };
+
+/**
+ * Simula el `responses ⋈ items` que hace `loadResponsesForPersist` sobre las filas ya
+ * upsertadas. Sin esto el mock diría que el assessment no tiene respuestas y el
+ * recálculo no escribiría nada.
+ */
+function joinResponsesWithItems(
+  rows: readonly InsertedResponse[],
+  itemRows: readonly MockItemRow[],
+) {
+  const itemById = new Map(itemRows.map((i) => [i.id, i]));
+  return rows.map((r) => {
+    const item = itemById.get(r.itemId);
+    return {
+      studentId: r.studentId,
+      itemId: r.itemId,
+      value: r.value,
+      itemContent: item?.content ?? null,
+      isCorrect: r.isCorrect,
+      rawScore: r.rawScore,
+      finalScore: r.finalScore,
+      maxScore: r.maxScore,
+      itemPosition: item?.position ?? 0,
+    };
+  });
 }
 
 function makeJwt(orgId: string | null = ORG_A, userId = USER_A_ID): JwtPayload {
@@ -105,6 +146,11 @@ function buildMockDb(plan: {
 
   let lastFromTable: string | null = null;
 
+  // `confirm` recalcula los resultados releyendo TODAS las `responses` del assessment
+  // (no sólo las de la subida). El mock tiene que devolver lo que se acaba de upsertar,
+  // ya joineado con `items`, o el recálculo vería una tabla vacía.
+  const upserted: InsertedResponse[] = [];
+
   const detectTable = (table: unknown): string => {
     try {
       // Drizzle expone el nombre de tabla vía getTableName().
@@ -139,6 +185,9 @@ function buildMockDb(plan: {
     if (name === 'student_enrollments') {
       return Promise.resolve(plan.enrollmentRows ?? []);
     }
+    if (name === 'responses') {
+      return Promise.resolve(joinResponsesWithItems(upserted, plan.itemRows ?? []));
+    }
     return Promise.resolve([]);
   };
 
@@ -165,10 +214,7 @@ function buildMockDb(plan: {
 
   const insertChain = () => ({
     values: (_values: unknown) => ({
-      returning: () =>
-        Promise.resolve([
-          { id: ASSESSMENT_ID, ...({} as Record<string, unknown>) },
-        ]),
+      returning: () => Promise.resolve([{ id: ASSESSMENT_ID, ...({} as Record<string, unknown>) }]),
       onConflictDoUpdate: () => Promise.resolve(undefined),
     }),
   });
@@ -193,7 +239,7 @@ function buildMockDb(plan: {
       // El returning depende de la tabla
       const tableName = detectTable(table);
       return {
-        values: (_values: unknown) => ({
+        values: (values: unknown) => ({
           returning: () => {
             if (tableName === 'assessments') {
               return Promise.resolve([{ id: ASSESSMENT_ID }]);
@@ -203,7 +249,12 @@ function buildMockDb(plan: {
             }
             return Promise.resolve([{ id: 'unknown' }]);
           },
-          onConflictDoUpdate: () => Promise.resolve(undefined),
+          onConflictDoUpdate: () => {
+            if (tableName === 'responses') {
+              upserted.push(...(values as InsertedResponse[]));
+            }
+            return Promise.resolve(undefined);
+          },
         }),
       };
     },
@@ -227,13 +278,26 @@ function buildMockDb(plan: {
 // Mock que captura los `values()` insertados en `responses` y `assessment_results`,
 // con un instrumento de 3 ítems (2 MCQ + 1 open_ended) para verificar el scoring
 // por estrategia end-to-end. Reusa el detector de tabla de Drizzle.
-function buildCapturingDb(captured: {
-  responses: unknown[][];
-  assessmentResults: unknown[][];
-  itemStats?: unknown[][];
-  skillStats?: unknown[][];
-  deletedTables?: string[];
-}): Database {
+function buildCapturingDb(
+  captured: {
+    responses: unknown[][];
+    assessmentResults: unknown[][];
+    itemStats?: unknown[][];
+    skillStats?: unknown[][];
+    deletedTables?: string[];
+  },
+  /**
+   * Estado previo de la BDD: respuestas de OTRO curso ya cargadas contra el mismo
+   * assessment, con sus alumnos y matrículas. Sirve para fijar que una segunda subida
+   * no borra los resultados de la primera.
+   */
+  existing: {
+    responses?: InsertedResponse[];
+    students?: Array<{ id: string; rut: string; firstName: string; lastName: string }>;
+    enrollments?: Array<{ studentId: string; classGroupId: string }>;
+    assessmentRow?: { id: string; orgId: string; dataGranularity: 'item_level' | 'aggregate_only' };
+  } = {},
+): Database {
   const detect = (table: unknown): string => {
     try {
       return getTableName(table as Parameters<typeof getTableName>[0]);
@@ -246,12 +310,31 @@ function buildCapturingDb(captured: {
   // MCQ en blanco de un ítem de desarrollo en el read-model. En la BDD real el 100%
   // de los multiple_choice lo trae y ningún open_ended lo tiene.
   const itemRows = [
-    { id: ITEM_1, position: 1, type: 'multiple_choice', content: { correctKey: 'A', alternatives: mcqAlternatives('A') }, scoringConfig: { points: 1 } },
-    { id: ITEM_2, position: 2, type: 'multiple_choice', content: { correctKey: 'B', alternatives: mcqAlternatives('B') }, scoringConfig: { points: 1 } },
-    { id: ITEM_3, position: 3, type: 'open_ended', content: { prompt: 'Explica...' }, scoringConfig: { points: 1 } },
+    {
+      id: ITEM_1,
+      position: 1,
+      type: 'multiple_choice',
+      content: { correctKey: 'A', alternatives: mcqAlternatives('A') },
+      scoringConfig: { points: 1 },
+    },
+    {
+      id: ITEM_2,
+      position: 2,
+      type: 'multiple_choice',
+      content: { correctKey: 'B', alternatives: mcqAlternatives('B') },
+      scoringConfig: { points: 1 },
+    },
+    {
+      id: ITEM_3,
+      position: 3,
+      type: 'open_ended',
+      content: { prompt: 'Explica...' },
+      scoringConfig: { points: 1 },
+    },
   ];
   const studentRows = [
     { id: STUDENT_1, rut: '12345678-5', firstName: 'Juan', lastName: 'Pérez' },
+    ...(existing.students ?? []),
   ];
 
   const rowsFor = (name: string): unknown[] => {
@@ -260,8 +343,21 @@ function buildCapturingDb(captured: {
     if (name === 'item_taxonomy_tags') return [{ itemId: ITEM_1, nodeId: NODE_1 }];
     if (name === 'students') return studentRows;
     if (name === 'grading_scales') return [];
+    if (name === 'assessments') return existing.assessmentRow ? [existing.assessmentRow] : [];
     if (name === 'student_enrollments') {
-      return [{ studentId: STUDENT_1, classGroupId: CLASS_GROUP_1 }];
+      return [
+        { studentId: STUDENT_1, classGroupId: CLASS_GROUP_1 },
+        ...(existing.enrollments ?? []),
+      ];
+    }
+    // El recálculo relee TODAS las responses del assessment: devolvemos las que ya
+    // estaban en la tabla más las que el propio confirm acaba de upsertar, joineadas
+    // con `items` — que es exactamente lo que haría Postgres.
+    if (name === 'responses') {
+      return joinResponsesWithItems(
+        [...(existing.responses ?? []), ...(captured.responses.flat() as InsertedResponse[])],
+        itemRows,
+      );
     }
     return [];
   };
@@ -320,8 +416,7 @@ function buildCapturingDb(captured: {
     select: () => ({ from: (table: unknown) => selectChain(table) }),
     insert: (table: unknown) => insertFor(table),
     delete: (table: unknown) => deleteFor(table),
-    transaction: async (cb: (t: Database) => Promise<unknown>) =>
-      cb(tx as unknown as Database),
+    transaction: async (cb: (t: Database) => Promise<unknown>) => cb(tx as unknown as Database),
   };
   return db as unknown as Database;
 }
@@ -350,9 +445,7 @@ describe('AnswerSheetsService', () => {
         { format: 'gradecam_csv', instrumentId: INSTRUMENT_ID },
       );
 
-      expect(result.previewToken).toMatch(
-        /^[0-9a-f-]{36}$/i,
-      );
+      expect(result.previewToken).toMatch(/^[0-9a-f-]{36}$/i);
       expect(result.format).toBe('gradecam_csv');
       expect(result.totalRows).toBe(2);
       expect(new Date(result.expiresAt).getTime()).toBeGreaterThan(Date.now());
@@ -420,9 +513,7 @@ describe('AnswerSheetsService', () => {
           },
         ],
         // Sólo "Juan" existe en la BD.
-        studentRows: [
-          { id: STUDENT_1, rut: '12345678-5', firstName: 'Juan', lastName: 'Pérez' },
-        ],
+        studentRows: [{ id: STUDENT_1, rut: '12345678-5', firstName: 'Juan', lastName: 'Pérez' }],
       });
       const service = new AnswerSheetsService(db, store);
 
@@ -469,9 +560,9 @@ describe('AnswerSheetsService', () => {
         instrumentRow: { id: INSTRUMENT_ID, orgId: ORG_B, gradingScaleId: null },
       });
       const serviceB = new AnswerSheetsService(dbB, store);
-      await expect(
-        serviceB.preview(makeJwt(ORG_B), upload.previewToken),
-      ).rejects.toThrow(ForbiddenException);
+      await expect(serviceB.preview(makeJwt(ORG_B), upload.previewToken)).rejects.toThrow(
+        ForbiddenException,
+      );
     });
   });
 
@@ -500,9 +591,7 @@ describe('AnswerSheetsService', () => {
           },
         ],
         taxonomyTags: [{ itemId: ITEM_1, nodeId: NODE_1 }],
-        studentRows: [
-          { id: STUDENT_1, rut: '12345678-5', firstName: 'Juan', lastName: 'Pérez' },
-        ],
+        studentRows: [{ id: STUDENT_1, rut: '12345678-5', firstName: 'Juan', lastName: 'Pérez' }],
         enrollmentRows: [{ studentId: STUDENT_1, classGroupId: CLASS_GROUP_1 }],
       });
     }
@@ -582,11 +671,13 @@ describe('AnswerSheetsService', () => {
 
       // Resultado del alumno: % = 100% (2/2 MCQ), NO 66% — el open_ended no
       // contamina el denominador. `isComplete` false porque hay pendiente.
-      const studentResult = (captured.assessmentResults.flat() as Array<{
-        studentId: string;
-        percentage: string;
-        isComplete: boolean;
-      }>)[0]!;
+      const studentResult = (
+        captured.assessmentResults.flat() as Array<{
+          studentId: string;
+          percentage: string;
+          isComplete: boolean;
+        }>
+      )[0]!;
       expect(Number(studentResult.percentage)).toBeCloseTo(100, 5);
       expect(studentResult.isComplete).toBe(false);
     });
@@ -677,6 +768,79 @@ describe('AnswerSheetsService', () => {
       });
     });
 
+    // Una coordinadora sube 3°A; después sube 3°B contra el MISMO assessment (permitido
+    // vía body.assessmentId). El reemplazo de resultados es POR ASSESSMENT: si se
+    // alimentara sólo con las filas de la segunda subida, 3°A desaparecería de
+    // assessment_results y del read-model aunque sus `responses` siguieran en la tabla.
+    it('una segunda subida contra el mismo assessment NO borra los resultados del curso ya cargado', async () => {
+      const captured = {
+        responses: [] as unknown[][],
+        assessmentResults: [] as unknown[][],
+        itemStats: [] as unknown[][],
+        skillStats: [] as unknown[][],
+        deletedTables: [] as string[],
+      };
+      // Estado previo: STUDENT_2 (otro curso) ya tiene respuestas en este assessment.
+      const db = buildCapturingDb(captured, {
+        assessmentRow: { id: ASSESSMENT_ID, orgId: ORG_A, dataGranularity: 'item_level' },
+        students: [{ id: STUDENT_2, rut: '9876543-3', firstName: 'María', lastName: 'González' }],
+        enrollments: [{ studentId: STUDENT_2, classGroupId: CLASS_GROUP_2 }],
+        responses: [
+          {
+            studentId: STUDENT_2,
+            itemId: ITEM_1,
+            value: { answer: 'A' },
+            isCorrect: true,
+            rawScore: '1.00',
+            finalScore: '1.00',
+            maxScore: '1.00',
+          },
+          {
+            studentId: STUDENT_2,
+            itemId: ITEM_2,
+            value: { answer: 'B' },
+            isCorrect: true,
+            rawScore: '1.00',
+            finalScore: '1.00',
+            maxScore: '1.00',
+          },
+        ],
+      });
+      const service = new AnswerSheetsService(db, store);
+
+      // La segunda hoja trae SOLO a STUDENT_1.
+      const csv = Buffer.from(
+        `Student ID,First Name,Last Name,Q1,Q2,Q3\n12345678-5,Juan,Pérez,A,B,respuesta libre\n`,
+      );
+      const upload = await service.upload(
+        makeJwt(),
+        { buffer: csv, originalname: 'curso-b.csv' },
+        { format: 'gradecam_csv', instrumentId: INSTRUMENT_ID, assessmentId: ASSESSMENT_ID },
+      );
+      await service.confirm(makeJwt(), {
+        previewToken: upload.previewToken,
+        createAssessment: false,
+        assessmentId: ASSESSMENT_ID,
+        skipErrorRows: true,
+      });
+
+      // assessment_results: los DOS alumnos, no sólo el de esta subida.
+      const studentIds = (captured.assessmentResults.flat() as Array<{ studentId: string }>).map(
+        (r) => r.studentId,
+      );
+      expect(studentIds).toEqual(expect.arrayContaining([STUDENT_1, STUDENT_2]));
+
+      // Read-model: los DOS cursos.
+      const itemStats = captured.itemStats.flat() as Array<{ classGroupId: string }>;
+      expect(new Set(itemStats.map((s) => s.classGroupId))).toEqual(
+        new Set([CLASS_GROUP_1, CLASS_GROUP_2]),
+      );
+      const skillStats = captured.skillStats.flat() as Array<{ classGroupId: string }>;
+      expect(new Set(skillStats.map((s) => s.classGroupId))).toEqual(
+        new Set([CLASS_GROUP_1, CLASS_GROUP_2]),
+      );
+    });
+
     it('rechaza con 409 ingestar contra un assessment aggregate_only', async () => {
       const db = buildMockDb({
         instrumentRow: { id: INSTRUMENT_ID, orgId: ORG_A, gradingScaleId: null },
@@ -689,9 +853,7 @@ describe('AnswerSheetsService', () => {
             scoringConfig: { points: 1 },
           },
         ],
-        studentRows: [
-          { id: STUDENT_1, rut: '12345678-5', firstName: 'Juan', lastName: 'Pérez' },
-        ],
+        studentRows: [{ id: STUDENT_1, rut: '12345678-5', firstName: 'Juan', lastName: 'Pérez' }],
         assessmentRow: {
           id: ASSESSMENT_ID,
           orgId: ORG_A,

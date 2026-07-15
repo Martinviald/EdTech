@@ -19,8 +19,15 @@
  * `tx` debe correr dentro de `withOrgContext` (CLAUDE.md §5.2): las cuatro tablas
  * tienen RLS.
  */
-import { eq } from 'drizzle-orm';
-import { assessmentResults, recomputeCohortStatsFromResponses, skillResults } from '@soe/db';
+import { eq, inArray } from 'drizzle-orm';
+import {
+  assessmentResults,
+  itemTaxonomyTags,
+  items,
+  recomputeCohortStatsFromResponses,
+  responses,
+  skillResults,
+} from '@soe/db';
 import {
   aggregateSkillResults,
   aggregateStudentResults,
@@ -32,6 +39,7 @@ import {
   type StudentAggregateResult,
 } from '@soe/types';
 import type { Database } from '../../database/database.types';
+import { toResponseForCalculation } from './result-aggregator';
 
 /**
  * Una respuesta lista para persistir: lo que piden los agregadores por alumno
@@ -82,6 +90,60 @@ export const ANSWER_SHEET_IMPORT_POLICY: ResultsPersistPolicy = {
   excludePendingFromStudentTotals: true,
   alwaysStampCompletedAt: true,
 };
+
+/**
+ * Lee TODAS las `responses` de un assessment y las deja listas para
+ * `persistAssessmentResults`.
+ *
+ * Existe porque `persistAssessmentResults` hace delete + reinsert POR ASSESSMENT: las
+ * cuatro tablas se borran enteras y se reescriben con lo que reciben. Alimentarlo con
+ * un subconjunto (p.ej. sólo las filas de la hoja recién subida) borra los resultados
+ * de los cursos que ya estaban. El caso es real: `answer-sheets.confirm` permite
+ * ingestar una segunda hoja contra un assessment existente, y `responses` conserva
+ * ambos cursos aunque los resultados no.
+ *
+ * La única fuente de verdad válida para el recálculo es la tabla `responses`, ya con
+ * el upsert de la subida aplicado.
+ *
+ * `tx` debe correr dentro de `withOrgContext` (`responses` tiene RLS).
+ */
+export async function loadResponsesForPersist(
+  tx: Database,
+  assessmentId: string,
+): Promise<ResponseForPersist[]> {
+  const rows = await tx
+    .select({
+      studentId: responses.studentId,
+      itemId: responses.itemId,
+      value: responses.value,
+      itemContent: items.content,
+      isCorrect: responses.isCorrect,
+      rawScore: responses.rawScore,
+      finalScore: responses.finalScore,
+      maxScore: responses.maxScore,
+      itemPosition: items.position,
+    })
+    .from(responses)
+    .innerJoin(items, eq(items.id, responses.itemId))
+    .where(eq(responses.assessmentId, assessmentId));
+
+  if (rows.length === 0) return [];
+
+  const itemIds = Array.from(new Set(rows.map((r) => r.itemId)));
+  const tagRows = await tx
+    .select({ itemId: itemTaxonomyTags.itemId, nodeId: itemTaxonomyTags.nodeId })
+    .from(itemTaxonomyTags)
+    .where(inArray(itemTaxonomyTags.itemId, itemIds));
+
+  const tagsByItemId = new Map<string, string[]>();
+  for (const t of tagRows) {
+    const list = tagsByItemId.get(t.itemId) ?? [];
+    list.push(t.nodeId);
+    tagsByItemId.set(t.itemId, list);
+  }
+
+  return toResponseForCalculation(rows, tagsByItemId);
+}
 
 export type PersistResultsInput = {
   assessmentId: string;

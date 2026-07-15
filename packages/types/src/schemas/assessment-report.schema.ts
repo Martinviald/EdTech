@@ -65,6 +65,28 @@ export type AssessmentReportMeta = {
   // agregado tienen el mismo `instrumentType` y capacidades distintas.
   dataGranularity: DataGranularity;
   capabilities: AnalyticsCapability[];
+  /**
+   * ¿Este informe se construyó con respuestas alumno×pregunta?
+   *
+   * Hermano exacto de `hasGradingScale`: un booleano de disponibilidad para que la UI
+   * COLAPSE lo que no aplica en vez de pintar un cero que parece un dato. Es
+   * `dataGranularity === 'item_level'`, servido y no derivado por la misma razón que
+   * `capabilities` (el backend decide, la web obedece).
+   *
+   * Qué queda sin sustituto agregado cuando es `false` — y por lo tanto la UI debe
+   * ocultar, no mostrar en cero ni con guión:
+   *  · `items[].discrimination` y el flag `low_discrimination` que deriva de ella:
+   *    D = p(27% superior) − p(27% inferior) necesita el puntaje de CADA alumno para
+   *    partir la cohorte en grupos. Es irreducible; no se deriva de conteos por curso.
+   *  · `studentsAtRisk[].weakestSkill`: es un ranking POR ALUMNO sobre `skill_results`.
+   *  · `summary.averageAchievement` / `performanceLevel` y `courseComparison[].*`
+   *    de logro: un informe oficial entrega el NIVEL de cada alumno, no su %.
+   *
+   * Lo que sí sigue completo con `false` (viene del read-model de cohorte, no de
+   * `responses`): `items[]` dificultad + distractor + blancos, `skills[]`, la
+   * distribución por banda y la nómina de alumnos con su nivel.
+   */
+  hasItemLevelData: boolean;
 };
 
 /** Síntesis ejecutiva: los números que responden "¿cómo nos fue?". */
@@ -124,6 +146,11 @@ export type AssessmentReportItemRow = {
   difficulty: number | null; // 0..100
   // Índice de discriminación D = p(27% superior) − p(27% inferior), −1..1. Bajo o
   // negativo = la pregunta no distingue a quienes dominan de quienes no.
+  //
+  // SIEMPRE null cuando `meta.hasItemLevelData === false`: partir la cohorte en 27%
+  // superior/inferior exige el puntaje de cada alumno, que un informe oficial no
+  // entrega. Es lo único de esta fila que no tiene sustituto agregado — dificultad,
+  // distractor y blancos salen del read-model de cohorte y vienen completos igual.
   discrimination: number | null; // -1..1
   topDistractorKey: string | null; // alternativa incorrecta más elegida
   topDistractorRate: number | null; // % que la eligió, 0..100

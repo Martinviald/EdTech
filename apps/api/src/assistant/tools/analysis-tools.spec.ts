@@ -161,6 +161,7 @@ describe('GetAssessmentReportTool', () => {
         itemsCount: 0,
         dataGranularity: 'item_level',
         capabilities: [...capabilitiesFor('item_level')],
+        hasItemLevelData: true,
       },
       summary: {
         studentsEvaluated: 1,

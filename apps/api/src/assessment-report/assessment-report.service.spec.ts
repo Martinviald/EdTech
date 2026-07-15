@@ -123,10 +123,27 @@ function baseSelectResults(): unknown[][] {
       { id: 'cg1', name: '3°A', gradeName: '3° Básico' },
       { id: 'cg2', name: '3°B', gradeName: '3° Básico' },
     ],
-    // 2. loadItemColumns → items
+    // 2. loadItemColumns → items. `alternatives` no es decorativo: es el predicado
+    // de `hasAlternatives` (idéntico al del escritor del read-model), y de él depende
+    // que los buckets se lean como alternativas marcadas y no como las categorías por
+    // puntaje ('RC'|'RPC'|'RI') de un ítem de desarrollo.
     [
-      { itemId: 'i1', position: 1, content: { correctKey: 'A' } },
-      { itemId: 'i2', position: 2, content: { correctKey: 'B' } },
+      {
+        itemId: 'i1',
+        position: 1,
+        content: {
+          correctKey: 'A',
+          alternatives: [{ key: 'A' }, { key: 'B' }, { key: 'C' }, { key: 'D' }],
+        },
+      },
+      {
+        itemId: 'i2',
+        position: 2,
+        content: {
+          correctKey: 'B',
+          alternatives: [{ key: 'A' }, { key: 'B' }, { key: 'C' }, { key: 'D' }],
+        },
+      },
     ],
     // 3. loadTagsByItems
     [
@@ -183,12 +200,27 @@ function baseSelectResults(): unknown[][] {
     [{ total: 5 }],
     // 6b. loadInstrumentBands (sin bandas configuradas → modo legacy 4 niveles)
     [],
-    // 7. loadItemDistribution (group by item, answer, isCorrect)
+    // 7. loadItemCohortStats → assessment_item_stats (read-model de cohorte).
+    // Una fila por (curso × ítem); acá un solo curso por ítem.
     [
-      { itemId: 'i1', answer: 'A', isCorrect: true, count: 3 },
-      { itemId: 'i1', answer: 'B', isCorrect: false, count: 1 },
-      { itemId: 'i2', answer: 'B', isCorrect: true, count: 1 },
-      { itemId: 'i2', answer: 'C', isCorrect: false, count: 3 },
+      {
+        itemId: 'i1',
+        responseCount: 4,
+        correctCount: 3,
+        answerCounts: [
+          { key: 'A', count: 3, isCorrect: true },
+          { key: 'B', count: 1, isCorrect: false },
+        ],
+      },
+      {
+        itemId: 'i2',
+        responseCount: 4,
+        correctCount: 1,
+        answerCounts: [
+          { key: 'B', count: 1, isCorrect: true },
+          { key: 'C', count: 3, isCorrect: false },
+        ],
+      },
     ],
     // 8. loadGroupCorrectness(top = s1)
     [
@@ -200,14 +232,18 @@ function baseSelectResults(): unknown[][] {
       { itemId: 'i1', total: 1, correct: 0 },
       { itemId: 'i2', total: 1, correct: 0 },
     ],
-    // 10. buildSkills
+    // 10. buildSkills → assessment_skill_stats, ya agregado en SQL al grano
+    // (nodo × curso). `pctSum`/`pctWeight` son el promedio ponderado por
+    // studentCount: 120/4 = 30% y 320/4 = 80%, los mismos números que daba el
+    // `avg(skill_results.percentage)` que reemplaza.
     [
       {
         nodeId: 'n2',
         nodeName: 'Interpretar',
         nodeType: 'skill',
         nodeCode: null,
-        avgPct: '30.00',
+        pctSum: '120.00',
+        pctWeight: 4,
         studentsAssessed: 4,
       },
       {
@@ -215,7 +251,8 @@ function baseSelectResults(): unknown[][] {
         nodeName: 'Localizar información',
         nodeType: 'skill',
         nodeCode: null,
-        avgPct: '80.00',
+        pctSum: '320.00',
+        pctWeight: 4,
         studentsAssessed: 4,
       },
     ],
@@ -324,9 +361,17 @@ describe('AssessmentReportService.getReport', () => {
     expect(types).toContain('support_students');
   });
 
-  it('devuelve un informe vacío bien formado cuando no hay alumnos evaluados', async () => {
+  // §9.5 del plan: en el importador `students` es OPCIONAL (para no atar cada carga
+  // al OCR de la Figura 1), así que una evaluación puede tener el read-model de
+  // cohorte poblado y CERO niveles por alumno. La capa agregable no depende de
+  // `assessment_results`: si se calculara después del corte por "sin alumnos
+  // evaluados", el informe saldría en ceros teniendo los datos en la mano.
+  it('sin alumnos evaluados sigue reportando la capa agregable (ítems y habilidades)', async () => {
     const results = baseSelectResults();
     results[4] = []; // loadEvaluatedStudents sin filas
+    results.splice(5, 1); // loadStudentClassGroups no consulta con 0 alumnos
+    results.splice(8, 2); // sin percentages no hay grupos 27/27 → no consulta
+
     const svc = makeService(makeDb(results));
     const res = await svc.getReport(makeUser(), { assessmentId: ASSESSMENT_ID });
 
@@ -334,9 +379,134 @@ describe('AssessmentReportService.getReport', () => {
     expect(res.summary.averageAchievement).toBeNull();
     expect(res.courseComparison).toEqual([]);
     expect(res.studentsAtRisk).toEqual([]);
-    // Los ítems siguen listándose (estructura), pero sin métricas.
+
+    // Lo agregable viene completo desde el read-model, no en cero.
     expect(res.items).toHaveLength(2);
-    expect(res.items[0].difficulty).toBeNull();
+    expect(res.items[0].difficulty).toBeCloseTo(75);
+    // …salvo la discriminación, que necesita el puntaje de cada alumno.
+    expect(res.items[0].discrimination).toBeNull();
+    expect(res.items[0].flags).not.toContain('low_discrimination');
+    expect(res.skills.map((s) => s.nodeName)).toEqual(['Interpretar', 'Localizar información']);
+  });
+
+  // ── Datos agregados (informe oficial DIA) ───────────────────────────────────
+  // El agujero que cierran estos tests: `meta.capabilities` declaraba que
+  // `cohort_item_stats` y `cohort_skill_stats` funcionaban mientras el propio
+  // informe seguía leyendo `responses` y `skill_results` → una evaluación
+  // `aggregate_only` renderizaba CEROS en el mismo endpoint que prometía lo
+  // contrario.
+
+  // 3 bandas (I/II/III). bandToLegacyLevel reparte por posición: I → insufficient,
+  // II → adequate, III → advanced.
+  const DIA_BANDS = [
+    {
+      id: 'b1',
+      orgId: null,
+      key: 'I',
+      label: 'Nivel I',
+      order: 1,
+      minThreshold: '0.00',
+      maxThreshold: '0.50',
+      color: null,
+    },
+    {
+      id: 'b2',
+      orgId: null,
+      key: 'II',
+      label: 'Nivel II',
+      order: 2,
+      minThreshold: '0.50',
+      maxThreshold: '0.80',
+      color: null,
+    },
+    {
+      id: 'b3',
+      orgId: null,
+      key: 'III',
+      label: 'Nivel III',
+      order: 3,
+      minThreshold: '0.80',
+      maxThreshold: '1.00',
+      color: null,
+    },
+  ];
+
+  // Como el importador (§6.3): `metric_type='band'` con `performance_band_id`, y
+  // `percentage`/`grade`/`performance_level` en NULL — el informe oficial entrega el
+  // NIVEL de cada alumno, no su porcentaje.
+  function aggregateSelectResults(): unknown[][] {
+    const results = baseSelectResults();
+    (results[0][0] as Record<string, unknown>).dataGranularity = 'aggregate_only';
+    results[4] = [
+      {
+        studentId: 's1',
+        studentRut: '1-9',
+        firstName: 'Ana',
+        lastName: 'A',
+        percentage: null,
+        grade: null,
+        performanceLevel: null,
+        performanceBandId: 'b3',
+      },
+      {
+        studentId: 's2',
+        studentRut: '2-7',
+        firstName: 'Beto',
+        lastName: 'B',
+        percentage: null,
+        grade: null,
+        performanceLevel: null,
+        performanceBandId: 'b1',
+      },
+    ];
+    results[5] = [
+      { studentId: 's1', classGroupId: 'cg1', classGroupName: '3°A' },
+      { studentId: 's2', classGroupId: 'cg1', classGroupName: '3°A' },
+    ];
+    results[7] = DIA_BANDS; // loadInstrumentBands
+    results.splice(9, 2); // sin percentages no hay grupos 27/27 → no consulta
+    return results;
+  }
+
+  it('con datos agregados sirve ítems y habilidades desde el read-model, y anula sólo lo irreducible', async () => {
+    const svc = makeService(makeDb(aggregateSelectResults()));
+    const res = await svc.getReport(makeUser(), { assessmentId: ASSESSMENT_ID });
+
+    expect(res.meta.dataGranularity).toBe('aggregate_only');
+    expect(res.meta.hasItemLevelData).toBe(false);
+    expect(res.meta.capabilities).toContain('cohort_item_stats');
+    expect(res.meta.capabilities).not.toContain('psychometrics');
+
+    // Lo que el endpoint PROMETE en `capabilities`, ahora lo cumple.
+    const i2 = res.items.find((i) => i.position === 2)!;
+    expect(i2.difficulty).toBeCloseTo(25);
+    expect(i2.totalResponses).toBe(4);
+    expect(i2.topDistractorKey).toBe('C');
+    expect(res.skills.map((s) => s.averageAchievement)).toEqual([30, 80]);
+
+    // Lo irreducible queda en null, no en cero: sin el puntaje de cada alumno no hay
+    // 27% superior/inferior. Y sin discriminación no se infla `low_discrimination`.
+    expect(res.items.every((i) => i.discrimination === null)).toBe(true);
+    expect(res.items.every((i) => !i.flags.includes('low_discrimination'))).toBe(true);
+    // §8.5 — el informe oficial no trae el % de cada alumno, así que no hay promedio.
+    expect(res.summary.averageAchievement).toBeNull();
+  });
+
+  it('con datos agregados distribuye por banda leyendo el nivel importado, no re-clasificando el %', async () => {
+    const svc = makeService(makeDb(aggregateSelectResults()));
+    const res = await svc.getReport(makeUser(), { assessmentId: ASSESSMENT_ID });
+
+    // El gráfico que el informe DIA existe para reproducir. Antes salía en cero: se
+    // derivaba clasificando `percentage`, que acá es NULL.
+    const dist = Object.fromEntries(res.bandDistribution!.map((b) => [b.key, b.count]));
+    expect(dist).toEqual({ I: 1, II: 0, III: 1 });
+    expect(res.summary.studentsEvaluated).toBe(2);
+    // Contar por curso NO puede depender de `percentage` (§8.5): 2 alumnos, no 0.
+    expect(res.courseComparison[0].studentsEvaluated).toBe(2);
+
+    // El nivel legacy se deriva de la banda, así que el foco de intervención existe.
+    expect(res.studentsAtRisk.map((s) => s.studentFullName)).toEqual(['Beto B']);
+    expect(res.studentsAtRisk[0].performanceBand?.key).toBe('I');
   });
 
   // Regresión §5.2: getReport DEBE correr dentro de withOrgContext. Con el mock

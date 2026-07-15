@@ -59,6 +59,7 @@ function makeReport(overrides: Partial<AssessmentReportResponse> = {}): Assessme
       itemsCount: 2,
       dataGranularity: 'item_level',
       capabilities: [...capabilitiesFor('item_level')],
+      hasItemLevelData: true,
       ...overrides.meta,
     },
     summary: {
