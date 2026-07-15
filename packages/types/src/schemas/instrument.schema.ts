@@ -4,6 +4,29 @@ import { INSTRUMENT_TYPES, type InstrumentType } from '../enums';
 export const INSTRUMENT_STATUS = ['draft', 'published', 'archived'] as const;
 export type InstrumentStatus = (typeof INSTRUMENT_STATUS)[number];
 
+/**
+ * Momento de aplicación del instrumento dentro del año escolar. Los valores son
+ * los que traen los JSON oficiales de extracción DIA; la etiqueta que ve el
+ * usuario vive en `INSTRUMENT_APPLICATION_PERIOD_LABELS` (el DIA llama
+ * "monitoreo" a la aplicación `intermedio`).
+ */
+export const INSTRUMENT_APPLICATION_PERIODS = ['diagnostico', 'intermedio', 'cierre'] as const;
+export type InstrumentApplicationPeriod = (typeof INSTRUMENT_APPLICATION_PERIODS)[number];
+
+export const INSTRUMENT_APPLICATION_PERIOD_LABELS: Record<InstrumentApplicationPeriod, string> = {
+  diagnostico: 'Diagnóstico',
+  intermedio: 'Monitoreo',
+  cierre: 'Cierre',
+};
+
+/** Narrowing de un texto libre (JSON de ingesta) al enum. Devuelve null si no calza. */
+export function toApplicationPeriod(
+  value: string | null | undefined,
+): InstrumentApplicationPeriod | null {
+  const normalized = value?.trim().toLowerCase();
+  return INSTRUMENT_APPLICATION_PERIODS.find((p) => p === normalized) ?? null;
+}
+
 export const SECTION_TYPES = [
   'multiple_choice',
   'open_ended',
@@ -33,6 +56,7 @@ export type AttachmentKind = (typeof ATTACHMENT_KINDS)[number];
 
 const instrumentTypeSchema = z.enum(INSTRUMENT_TYPES);
 const instrumentStatusSchema = z.enum(INSTRUMENT_STATUS);
+const instrumentApplicationPeriodSchema = z.enum(INSTRUMENT_APPLICATION_PERIODS);
 const sectionTypeSchema = z.enum(SECTION_TYPES);
 const gradingScaleTypeSchema = z.enum(GRADING_SCALE_TYPES);
 
@@ -170,6 +194,7 @@ export const createInstrumentSchema = z.object({
   subjectId: z.string().uuid().optional(),
   gradeId: z.string().uuid().optional(),
   year: z.number().int().min(2020).max(2100).optional(),
+  applicationPeriod: instrumentApplicationPeriodSchema.optional(),
   version: z.string().max(50).optional(),
   isOfficial: z.boolean().default(false),
   status: instrumentStatusSchema.default('draft'),
@@ -187,6 +212,7 @@ export const listInstrumentsQuerySchema = z.object({
   subjectId: z.string().uuid().optional(),
   gradeId: z.string().uuid().optional(),
   year: z.coerce.number().int().optional(),
+  applicationPeriod: instrumentApplicationPeriodSchema.optional(),
   status: instrumentStatusSchema.optional(),
   isOfficial: z.coerce.boolean().optional(),
   page: z.coerce.number().int().min(1).default(1),
@@ -241,6 +267,7 @@ export type InstrumentModel = {
   subjectId: string | null;
   gradeId: string | null;
   year: number | null;
+  applicationPeriod: InstrumentApplicationPeriod | null;
   version: string | null;
   isOfficial: boolean;
   status: InstrumentStatus;
@@ -257,6 +284,14 @@ export type InstrumentModel = {
    * Presente en la respuesta de detalle (`GET /instruments/:id`).
    */
   enunciadoPdf?: InstrumentAttachmentModel | null;
+};
+
+/**
+ * Facetas para poblar los filtros del banco de instrumentos sin ofrecer opciones
+ * vacías: sólo trae los años que tienen al menos un instrumento visible.
+ */
+export type InstrumentFacetsModel = {
+  years: number[];
 };
 
 export type GradingScaleModel = {

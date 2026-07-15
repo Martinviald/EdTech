@@ -6,3 +6,4 @@ export { Field } from './Field';
 export { Stepper, type Step } from './Stepper';
 export { EmptyState } from './EmptyState';
 export { MetricComparison, type MetricDelta } from './MetricComparison';
+export { PaginationControls } from './PaginationControls';

@@ -59,6 +59,16 @@ export class InstrumentsController {
     return this.instrumentsService.list(user, filters);
   }
 
+  /**
+   * GET /api/instruments/facets — valores disponibles para poblar los filtros.
+   * Debe declararse ANTES de `@Get(':id')` o Nest lo resolvería como un id.
+   */
+  @Get('facets')
+  @Roles(...INSTRUMENT_VIEWER_ROLES)
+  facets(@CurrentUser() user: JwtPayload) {
+    return this.instrumentsService.facets(user);
+  }
+
   /** GET /api/instruments/:id — single instrument with sections populated. */
   @Get(':id')
   @Roles(...INSTRUMENT_VIEWER_ROLES)

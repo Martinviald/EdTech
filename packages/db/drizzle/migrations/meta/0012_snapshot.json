@@ -1,6 +1,6 @@
 {
-  "id": "980a487a-e695-4f93-9287-c1f0aaa4e28a",
-  "prevId": "ff47a42d-415c-4ba4-a3e5-7a8b89209abe",
+  "id": "eb454f60-d72e-4185-a4a0-d774ec58dd74",
+  "prevId": "980a487a-e695-4f93-9287-c1f0aaa4e28a",
   "version": "7",
   "dialect": "postgresql",
   "tables": {
@@ -3301,6 +3301,14 @@
           "notNull": true,
           "default": "'scheduled'"
         },
+        "data_granularity": {
+          "name": "data_granularity",
+          "type": "data_granularity",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'item_level'"
+        },
         "scheduled_for": {
           "name": "scheduled_for",
           "type": "timestamp",
@@ -3811,6 +3819,181 @@
       "checkConstraints": {},
       "isRLSEnabled": false
     },
+    "public.assessment_item_stats": {
+      "name": "assessment_item_stats",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "assessment_id": {
+          "name": "assessment_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "class_group_id": {
+          "name": "class_group_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "item_id": {
+          "name": "item_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "student_count": {
+          "name": "student_count",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "response_count": {
+          "name": "response_count",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "correct_count": {
+          "name": "correct_count",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "answer_counts": {
+          "name": "answer_counts",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'[]'::jsonb"
+        },
+        "score_sum": {
+          "name": "score_sum",
+          "type": "numeric(9, 2)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "max_sum": {
+          "name": "max_sum",
+          "type": "numeric(9, 2)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "source": {
+          "name": "source",
+          "type": "stats_source",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "computed_at": {
+          "name": "computed_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {
+        "assessment_item_stats_item_idx": {
+          "name": "assessment_item_stats_item_idx",
+          "columns": [
+            {
+              "expression": "assessment_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "item_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "assessment_item_stats_assessment_id_assessments_id_fk": {
+          "name": "assessment_item_stats_assessment_id_assessments_id_fk",
+          "tableFrom": "assessment_item_stats",
+          "tableTo": "assessments",
+          "columnsFrom": [
+            "assessment_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "assessment_item_stats_class_group_id_class_groups_id_fk": {
+          "name": "assessment_item_stats_class_group_id_class_groups_id_fk",
+          "tableFrom": "assessment_item_stats",
+          "tableTo": "class_groups",
+          "columnsFrom": [
+            "class_group_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "assessment_item_stats_item_id_items_id_fk": {
+          "name": "assessment_item_stats_item_id_items_id_fk",
+          "tableFrom": "assessment_item_stats",
+          "tableTo": "items",
+          "columnsFrom": [
+            "item_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "assessment_item_stats_assessment_id_class_group_id_item_id_unique": {
+          "name": "assessment_item_stats_assessment_id_class_group_id_item_id_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "assessment_id",
+            "class_group_id",
+            "item_id"
+          ]
+        }
+      },
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
     "public.assessment_results": {
       "name": "assessment_results",
       "schema": "",
@@ -3969,6 +4152,146 @@
           "columns": [
             "assessment_id",
             "student_id"
+          ]
+        }
+      },
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.assessment_skill_stats": {
+      "name": "assessment_skill_stats",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "assessment_id": {
+          "name": "assessment_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "class_group_id": {
+          "name": "class_group_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "node_id": {
+          "name": "node_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "student_count": {
+          "name": "student_count",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "correct_count": {
+          "name": "correct_count",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "total_count": {
+          "name": "total_count",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "percentage": {
+          "name": "percentage",
+          "type": "numeric(5, 2)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "source": {
+          "name": "source",
+          "type": "stats_source",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "computed_at": {
+          "name": "computed_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "assessment_skill_stats_assessment_id_assessments_id_fk": {
+          "name": "assessment_skill_stats_assessment_id_assessments_id_fk",
+          "tableFrom": "assessment_skill_stats",
+          "tableTo": "assessments",
+          "columnsFrom": [
+            "assessment_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "assessment_skill_stats_class_group_id_class_groups_id_fk": {
+          "name": "assessment_skill_stats_class_group_id_class_groups_id_fk",
+          "tableFrom": "assessment_skill_stats",
+          "tableTo": "class_groups",
+          "columnsFrom": [
+            "class_group_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "assessment_skill_stats_node_id_taxonomy_nodes_id_fk": {
+          "name": "assessment_skill_stats_node_id_taxonomy_nodes_id_fk",
+          "tableFrom": "assessment_skill_stats",
+          "tableTo": "taxonomy_nodes",
+          "columnsFrom": [
+            "node_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "assessment_skill_stats_assessment_id_class_group_id_node_id_unique": {
+          "name": "assessment_skill_stats_assessment_id_class_group_id_node_id_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "assessment_id",
+            "class_group_id",
+            "node_id"
           ]
         }
       },
@@ -5807,6 +6130,14 @@
         "network"
       ]
     },
+    "public.data_granularity": {
+      "name": "data_granularity",
+      "schema": "public",
+      "values": [
+        "item_level",
+        "aggregate_only"
+      ]
+    },
     "public.enrollment_status": {
       "name": "enrollment_status",
       "schema": "public",
@@ -5866,7 +6197,8 @@
         "gradecam_csv",
         "zipgrade_csv",
         "aptus",
-        "student_roster"
+        "student_roster",
+        "dia_official_report"
       ]
     },
     "public.instrument_application_period": {
@@ -6068,6 +6400,14 @@
       "values": [
         "google",
         "microsoft"
+      ]
+    },
+    "public.stats_source": {
+      "name": "stats_source",
+      "schema": "public",
+      "values": [
+        "computed",
+        "imported"
       ]
     },
     "public.stimulus_kind": {

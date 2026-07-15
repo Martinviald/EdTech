@@ -5,12 +5,14 @@ import { auth } from '@/auth';
 import { apiGet } from '@/lib/api';
 import { Library } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { PageContainer, PageHeader, EmptyState } from '@/components/patterns';
+import { PageContainer, PageHeader, EmptyState, PaginationControls } from '@/components/patterns';
 import {
   canAccess,
   userHasAnyRole,
   ITEM_VIEWER_ROLES,
   ITEM_BANK_ROLES,
+  type CatalogEntryModel,
+  type InstrumentFacetsModel,
   type InstrumentModel,
 } from '@soe/types';
 import { InstrumentRow } from './InstrumentRow';
@@ -27,26 +29,41 @@ type PageProps = {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 };
 
+const PAGE_SIZE = 20;
+
+/** Filtros que el API acepta tal cual desde la querystring. */
+const FILTER_KEYS = [
+  'type',
+  'status',
+  'year',
+  'subjectId',
+  'gradeId',
+  'applicationPeriod',
+] as const;
+
 export default async function BancoItemsPage({ searchParams }: PageProps) {
   const session = await auth();
   if (!session?.user) redirect('/login');
   if (!canAccess(session.user.roles, ITEM_VIEWER_ROLES)) redirect('/dashboard');
 
   const params = await searchParams;
-  const type = typeof params.type === 'string' ? params.type : undefined;
-  const status = typeof params.status === 'string' ? params.status : undefined;
-  const year = typeof params.year === 'string' ? params.year : undefined;
   const page = typeof params.page === 'string' ? params.page : '1';
 
-  const queryParts: string[] = [`page=${page}`, 'limit=20'];
-  if (type) queryParts.push(`type=${type}`);
-  if (status) queryParts.push(`status=${status}`);
-  if (year) queryParts.push(`year=${year}`);
+  // `pageSize` (no `limit`) es el nombre que valida el DTO del API.
+  const query = new URLSearchParams({ page, pageSize: String(PAGE_SIZE) });
+  for (const key of FILTER_KEYS) {
+    const value = params[key];
+    if (typeof value === 'string' && value) query.set(key, value);
+  }
 
-  const { data: instruments, total } = await apiGet<InstrumentListResponse>(
-    `/instruments?${queryParts.join('&')}`,
-  );
+  const [instrumentList, subjects, grades, facets] = await Promise.all([
+    apiGet<InstrumentListResponse>(`/instruments?${query.toString()}`),
+    apiGet<CatalogEntryModel[]>('/catalog/subjects'),
+    apiGet<CatalogEntryModel[]>('/catalog/grades'),
+    apiGet<InstrumentFacetsModel>('/instruments/facets'),
+  ]);
 
+  const { data: instruments, total } = instrumentList;
   const canCreate = userHasAnyRole(session.user.roles, ITEM_BANK_ROLES);
 
   return (
@@ -68,7 +85,7 @@ export default async function BancoItemsPage({ searchParams }: PageProps) {
         }
       />
 
-      <InstrumentFilters />
+      <InstrumentFilters subjects={subjects} grades={grades} years={facets.years} />
 
       {instruments.length === 0 ? (
         <EmptyState
@@ -94,11 +111,12 @@ export default async function BancoItemsPage({ searchParams }: PageProps) {
               <InstrumentRow key={instrument.id} instrument={instrument} />
             ))}
           </div>
-          {total > 20 && (
-            <p className="text-center text-xs text-muted-foreground">
-              Mostrando {instruments.length} de {total} instrumentos
-            </p>
-          )}
+          <PaginationControls
+            page={Number(page)}
+            limit={PAGE_SIZE}
+            total={total}
+            basePath="/banco-items"
+          />
         </>
       )}
     </PageContainer>

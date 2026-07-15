@@ -76,6 +76,14 @@ export const instrumentTypeEnum = pgEnum('instrument_type', [
   'custom',
 ]);
 
+// Momento del año en que se aplica el instrumento. Nullable en `instruments`: los
+// instrumentos sin ciclo de aplicación definido (p. ej. un ensayo propio) no lo usan.
+export const instrumentApplicationPeriodEnum = pgEnum('instrument_application_period', [
+  'diagnostico',
+  'intermedio',
+  'cierre',
+]);
+
 export const instrumentStatusEnum = pgEnum('instrument_status', ['draft', 'published', 'archived']);
 
 export const sectionTypeEnum = pgEnum('section_type', [

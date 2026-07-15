@@ -13,6 +13,7 @@ import { relations } from 'drizzle-orm';
 import {
   attachmentKindEnum,
   gradingScaleTypeEnum,
+  instrumentApplicationPeriodEnum,
   instrumentStatusEnum,
   instrumentTypeEnum,
   passageFormatEnum,
@@ -50,6 +51,10 @@ export const instruments = pgTable('instruments', {
   subjectId: uuid('subject_id').references(() => subjects.id),
   gradeId: uuid('grade_id').references(() => grades.id),
   year: integer('year'),
+  // Momento de aplicación dentro del año (DIA: diagnóstico/intermedio/cierre). Es
+  // columna tipada y no JSONB porque se filtra en SQL (ver CLAUDE.md §5.4). Null =
+  // el instrumento no declara un momento de aplicación.
+  applicationPeriod: instrumentApplicationPeriodEnum('application_period'),
   version: text('version'),
   isOfficial: boolean('is_official').default(false).notNull(),
   status: instrumentStatusEnum('status').default('draft').notNull(),
