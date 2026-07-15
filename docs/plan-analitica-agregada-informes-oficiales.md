@@ -155,6 +155,16 @@ export const assessmentItemStats = pgTable('assessment_item_stats', {
 
 `blankCount` **no se almacena**: es la entrada de `answerCounts` con `key === null`. Se deriva en lectura (§5.4 — no se filtra ni indexa en SQL).
 
+#### 3.1.1 Los ítems de desarrollo van en `answerCounts`, no en un histograma aparte
+
+En un ítem de selección múltiple la clave del bucket es la alternativa marcada. En uno de desarrollo es la **categoría por puntaje**: `'RC'`, `'RPC'`, `'RI'`, y `key: null` para "no responde". Son las mismas claves que usa el informe oficial, así que los dos escritores convergen en un único tipo de dato sin ramificar.
+
+Esto **no estaba en el diseño original** y se descubrió al migrar `official-reports`: `scoreSum`/`maxSum` no alcanzan. Con `scoreSum=3, maxSum=6, responseCount=6` es imposible distinguir "3 RC + 3 RI" de "6 RPC" — los marginales coinciden y la distribución no. Una suma no se des-suma.
+
+Consecuencia práctica de haberlo dejado pasar: una evaluación importada habría mostrado 0 en todos los ítems de desarrollo. Y en 3°A Cierre 2025 el eje *Reflexionar* es 100% desarrollo (P14 y P19), así que habría desaparecido entero — el mismo síntoma que §9.6 discute por otra vía.
+
+Requiere que el caller informe `hasAlternatives` por respuesta: no es derivable de `value`, porque un ítem de desarrollo y un MC en blanco producen ambos `extractRawAnswer → null`.
+
 ### 3.2 `assessment_skill_stats` (nueva)
 
 Read-model de cohorte por eje/habilidad. Grano `(assessment_id, class_group_id, node_id)`.
