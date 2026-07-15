@@ -437,6 +437,9 @@ export class ItemAnalysisService {
         type: item.type,
         stem: typeof content.stem === 'string' ? content.stem : null,
         imageUrl: typeof content.imageUrl === 'string' ? content.imageUrl : null,
+        // La figura vive en `files` (owner_type='item'); acá solo se expone el flag
+        // para que la UI decida si ofrecer el botón, sin firmar una URL por ítem.
+        hasFigure: typeof item.scoringConfig?.imageRef === 'string',
         explanation: typeof content.explanation === 'string' ? content.explanation : null,
         correctKey,
         skill,
@@ -1049,6 +1052,7 @@ export class ItemAnalysisService {
     position: number;
     type: string;
     content: Record<string, unknown>;
+    scoringConfig: Record<string, unknown> | null;
   }> {
     const [row] = await tx
       .select({
@@ -1060,6 +1064,7 @@ export class ItemAnalysisService {
         position: items.position,
         type: sql<string>`${items.type}::text`,
         content: items.content,
+        scoringConfig: items.scoringConfig,
       })
       .from(items)
       .leftJoin(instruments, eq(instruments.id, items.instrumentId))
@@ -1087,6 +1092,7 @@ export class ItemAnalysisService {
       position: row.position,
       type: row.type,
       content: row.content,
+      scoringConfig: row.scoringConfig,
     };
   }
 
