@@ -65,7 +65,9 @@ describe('CapabilityGuard — contrato HTTP del 409', () => {
   });
 
   it('devuelve code y capability en la RAÍZ del body, sin envolver', async () => {
-    const res = await request(app.getHttpServer()).get('/probe?assessmentId=a-1');
+    const res = await request(app.getHttpServer()).get(
+      '/probe?assessmentId=aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa',
+    );
 
     expect(res.status).toBe(409);
     // Estos 3 campos son exactamente lo que lee asCapabilityUnavailable() en la web.

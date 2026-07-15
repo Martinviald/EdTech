@@ -47,6 +47,7 @@ function guardFor(capability: AnalyticsCapability | undefined, row: Row) {
 }
 
 const USER: Partial<JwtPayload> = { orgId: 'org-1', isPlatformAdmin: false };
+const UUID = 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa';
 
 describe('CapabilityGuard', () => {
   it('deja pasar cuando la ruta no declara capacidad', async () => {
@@ -56,12 +57,12 @@ describe('CapabilityGuard', () => {
 
   it('deja pasar una capacidad que la granularidad soporta', async () => {
     const guard = guardFor('student_matrix', { dataGranularity: 'item_level' });
-    await expect(guard.canActivate(mockContext(USER, { assessmentId: 'a-1' }))).resolves.toBe(true);
+    await expect(guard.canActivate(mockContext(USER, { assessmentId: UUID }))).resolves.toBe(true);
   });
 
   it('rechaza con 409 y código legible por máquina si la granularidad no la soporta', async () => {
     const guard = guardFor('student_matrix', { dataGranularity: 'aggregate_only' });
-    const ctx = mockContext(USER, { assessmentId: 'a-1' });
+    const ctx = mockContext(USER, { assessmentId: UUID });
 
     await expect(guard.canActivate(ctx)).rejects.toThrow(ConflictException);
     await guard.canActivate(ctx).catch((e: ConflictException) => {
@@ -76,18 +77,18 @@ describe('CapabilityGuard', () => {
 
   it('permite las capacidades agregables en aggregate_only', async () => {
     const guard = guardFor('cohort_item_stats', { dataGranularity: 'aggregate_only' });
-    await expect(guard.canActivate(mockContext(USER, { assessmentId: 'a-1' }))).resolves.toBe(true);
+    await expect(guard.canActivate(mockContext(USER, { assessmentId: UUID }))).resolves.toBe(true);
   });
 
   it('NO exime al platform_admin: es disponibilidad de dato, no permiso', async () => {
     const guard = guardFor('psychometrics', { dataGranularity: 'aggregate_only' });
-    const ctx = mockContext({ orgId: 'org-1', isPlatformAdmin: true }, { assessmentId: 'a-1' });
+    const ctx = mockContext({ orgId: 'org-1', isPlatformAdmin: true }, { assessmentId: UUID });
     await expect(guard.canActivate(ctx)).rejects.toThrow(ConflictException);
   });
 
   it('resuelve el assessmentId desde el query, no solo del path', async () => {
     const guard = guardFor('student_matrix', { dataGranularity: 'aggregate_only' });
-    await expect(guard.canActivate(mockContext(USER, {}, { assessmentId: 'a-1' }))).rejects.toThrow(
+    await expect(guard.canActivate(mockContext(USER, {}, { assessmentId: UUID }))).rejects.toThrow(
       ConflictException,
     );
   });
@@ -99,8 +100,14 @@ describe('CapabilityGuard', () => {
 
   it('deja pasar si el assessment no existe: el 404 lo da el service, no el guard', async () => {
     const guard = guardFor('student_matrix', undefined);
-    await expect(guard.canActivate(mockContext(USER, { assessmentId: 'fantasma' }))).resolves.toBe(
-      true,
-    );
+    await expect(guard.canActivate(mockContext(USER, { assessmentId: UUID }))).resolves.toBe(true);
+  });
+
+  it('ignora un assessmentId mal formado en vez de mandarlo a Postgres', async () => {
+    // Los guards corren antes de los pipes: acá el id todavía no pasó por Zod. Sin
+    // chequeo de forma, 'abc' llegaría como comparación de uuid → 22P02 → 500, en vez
+    // del 400 que devuelve el schema del handler.
+    const guard = guardFor('student_matrix', { dataGranularity: 'aggregate_only' });
+    await expect(guard.canActivate(mockContext(USER, { assessmentId: 'abc' }))).resolves.toBe(true);
   });
 });

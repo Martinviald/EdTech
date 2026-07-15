@@ -14,7 +14,7 @@
  * §5.2). Ambas tablas tienen RLS por `EXISTS` sobre `assessments.org_id`: sin contexto
  * los DELETE no borran nada y los INSERT fallan.
  */
-import { and, asc, desc, eq, inArray } from 'drizzle-orm';
+import { and, asc, eq, inArray, isNull, sql } from 'drizzle-orm';
 import {
   aggregateCohortSkillStats,
   aggregateItemStats,
@@ -25,7 +25,7 @@ import {
 } from '@soe/types';
 import type { Database } from '../client';
 import { classGroups } from '../schema/academic';
-import { assessmentCourseAssignments } from '../schema/assessments';
+import { assessmentCourseAssignments, assessments } from '../schema/assessments';
 import type { statsSourceEnum } from '../schema/enums';
 import { academicYears } from '../schema/organizations';
 import { assessmentItemStats, assessmentSkillStats } from '../schema/results';
@@ -59,19 +59,40 @@ const INSERT_CHUNK = 500;
  * "desincronizado y silenciosamente falso" que este refactor viene a matar. Al ser por
  * alumno y no global, sólo suma cobertura: nunca mueve de bucket a quien (1) resolvió.
  *
- * ⚠️ SOFT DELETE — divergencia preexistente que NO se unifica acá. Hoy
- * `attachCorrectRates` cuenta a los alumnos con `deleted_at` cuando no hay filtro de
- * curso (el % org-wide, que es el número destacado) y los excluye cuando sí lo hay
- * (`resolveAccessibleStudentIds` filtra `deleted_at IS NULL`). Las dos cosas no caben
- * en un read-model pre-agregado por curso: hay que elegir un lado al ESCRIBIR. Se
- * eligió INCLUIRLOS (sin filtro de `deleted_at`) porque preserva exacto el % del
- * colegio; el costo es que un curso con un alumno borrado sumaría a ese alumno donde
- * hoy no lo hace. En la BDD de desarrollo no hay ninguno (0 alumnos soft-deleted con
- * respuestas), así que hoy la elección es inerte en los números.
+ * ⚠️ SOFT DELETE — se EXCLUYEN (`deleted_at IS NULL`). Hoy los lectores se contradicen:
+ * `attachCorrectRates` cuenta a los alumnos borrados cuando no hay filtro de curso y
+ * los excluye cuando sí lo hay; heatmap y dashboards los excluyen siempre. Las dos
+ * semánticas no caben en un read-model pre-agregado por curso: hay que elegir un lado
+ * al ESCRIBIR, y es acá donde se elige POR TODOS los lectores.
+ *
+ * Se excluyen porque CLAUDE.md §5.1 lo dice explícitamente ("las queries deben filtrar
+ * WHERE deleted_at IS NULL por defecto") y porque el soft delete de alumnos existe por
+ * la Ley 19.628: un alumno borrado no debe influir en ningún número mostrado. El costo
+ * es que el % org-wide de `attachCorrectRates` deja de contarlos — lo que era el bug,
+ * no la referencia a preservar. Medido en la BDD real: 0 alumnos soft-deleted con
+ * respuestas, así que hoy no se mueve ningún número.
  *
  * ⚠️ El innerJoin a `students` no es decorativo aunque no filtre nada: `students` tiene
  * RLS y `student_enrollments` no, así que es lo que aísla el tenant en esta query.
  */
+/**
+ * Año lectivo de referencia de una evaluación: el de su aplicación, o el de su
+ * creación si nunca se aplicó. `assessments` no tiene `academic_year_id`, así que se
+ * deriva de la fecha; es la única señal disponible.
+ */
+async function resolveAssessmentYear(tx: Database, assessmentId: string): Promise<number | null> {
+  const rows = await tx
+    .select({
+      year: sql<
+        number | null
+      >`extract(year from coalesce(${assessments.administeredAt}, ${assessments.createdAt}))::int`,
+    })
+    .from(assessments)
+    .where(eq(assessments.id, assessmentId))
+    .limit(1);
+  return rows[0]?.year ?? null;
+}
+
 export async function loadEnrollmentByStudent(
   tx: Database,
   assessmentId: string,
@@ -98,7 +119,7 @@ export async function loadEnrollmentByStudent(
         eq(assessmentCourseAssignments.assessmentId, assessmentId),
       ),
     )
-    .where(inArray(studentEnrollments.studentId, ids))
+    .where(and(inArray(studentEnrollments.studentId, ids), isNull(students.deletedAt)))
     .orderBy(asc(studentEnrollments.studentId), asc(classGroups.name));
 
   for (const r of assigned) {
@@ -108,7 +129,18 @@ export async function loadEnrollmentByStudent(
   const unresolved = ids.filter((id) => !map.has(id));
   if (unresolved.length === 0) return map;
 
-  // Pasada 2 — cualquier matrícula, la del año más reciente.
+  // Pasada 2 — cualquier matrícula, la del año MÁS CERCANO al de la evaluación.
+  //
+  // Anclar al año de la evaluación y no al más reciente es lo que evita que, al
+  // renovar la matrícula, las filas de una evaluación de 2025 queden etiquetadas con
+  // el curso de 2026: un dashboard filtrado por 2025 dejaría de encontrarlas y los
+  // resultados desaparecerían en silencio. El caso NO es teórico — `answer-sheets`
+  // crea el assessment sin `assessment_course_assignments`, así que la pasada 1
+  // siempre falla ahí y toda la ingesta de hojas depende de esta pasada.
+  const targetYear = await resolveAssessmentYear(tx, assessmentId);
+  const yearProximity =
+    targetYear == null ? sql`0` : sql`abs(${academicYears.year} - ${targetYear})`;
+
   const fallback = await tx
     .select({
       studentId: studentEnrollments.studentId,
@@ -117,8 +149,8 @@ export async function loadEnrollmentByStudent(
     .from(studentEnrollments)
     .innerJoin(students, eq(students.id, studentEnrollments.studentId))
     .innerJoin(academicYears, eq(academicYears.id, studentEnrollments.academicYearId))
-    .where(inArray(studentEnrollments.studentId, unresolved))
-    .orderBy(desc(academicYears.year));
+    .where(and(inArray(studentEnrollments.studentId, unresolved), isNull(students.deletedAt)))
+    .orderBy(asc(yearProximity), asc(academicYears.year));
 
   for (const r of fallback) {
     if (!map.has(r.studentId)) map.set(r.studentId, r.classGroupId);

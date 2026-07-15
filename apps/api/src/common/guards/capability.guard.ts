@@ -90,15 +90,24 @@ export class CapabilityGuard implements CanActivate {
 
 const ASSESSMENT_ID_KEYS = ['assessmentId', 'assessment_id'] as const;
 
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+/**
+ * Los guards corren ANTES de los pipes, así que acá el `assessmentId` todavía no
+ * pasó por el Zod del handler. Sin el chequeo de forma, un `?assessmentId=abc`
+ * llegaría a Postgres como comparación de uuid y reventaría con 22P02 → 500, en vez
+ * del 400 limpio que devuelve el schema del handler. Un valor mal formado no es
+ * asunto de este guard: se deja pasar para que el pipe lo rechace como siempre.
+ */
 function resolveAssessmentId(
   params: Record<string, string> | undefined,
   query: Record<string, unknown> | undefined,
 ): string | null {
   for (const key of ASSESSMENT_ID_KEYS) {
     const fromParams = params?.[key];
-    if (typeof fromParams === 'string' && fromParams.length > 0) return fromParams;
+    if (typeof fromParams === 'string' && UUID_RE.test(fromParams)) return fromParams;
     const fromQuery = query?.[key];
-    if (typeof fromQuery === 'string' && fromQuery.length > 0) return fromQuery;
+    if (typeof fromQuery === 'string' && UUID_RE.test(fromQuery)) return fromQuery;
   }
   return null;
 }
