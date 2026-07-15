@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import type { AnalyticsCapability, DataGranularity } from '../analytics-capabilities';
 import type { PerformanceLevel } from '../enums';
 import type {
   PerformanceBandDistributionBucket,
@@ -50,6 +51,20 @@ export type AssessmentReportMeta = {
   administeredAt: string | Date | null;
   classGroups: { id: string; name: string }[];
   itemsCount: number;
+  // Granularidad del dato + capacidades derivadas. Mismo patrón que `hasGradingScale`
+  // de abajo: un flag de disponibilidad en el payload para que la UI colapse secciones
+  // en vez de renderizar ceros que parecen datos.
+  //
+  // `capabilities` va servido y no derivado en la web a propósito: el backend decide y
+  // la web obedece, igual que con `suppressed`/`suppressionReason` del benchmarking. Si
+  // mañana una capacidad depende de algo más que la granularidad (ej. que el instrumento
+  // tenga tags), el contrato no cambia.
+  //
+  // Ojo: `instrumentType === 'dia'` NO sirve para esto — es una propiedad del
+  // instrumento, no del dato. Un DIA cargado por planilla y uno cargado por PDF
+  // agregado tienen el mismo `instrumentType` y capacidades distintas.
+  dataGranularity: DataGranularity;
+  capabilities: AnalyticsCapability[];
 };
 
 /** Síntesis ejecutiva: los números que responden "¿cómo nos fue?". */

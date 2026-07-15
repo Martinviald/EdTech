@@ -93,9 +93,7 @@ function makeRlsAwareDb(selectResults: unknown[][]): Database {
 }
 
 function makeService(db: Database): AssessmentReportService {
-  return new (AssessmentReportService as new (db: Database) => AssessmentReportService)(
-    db,
-  );
+  return new (AssessmentReportService as new (db: Database) => AssessmentReportService)(db);
 }
 
 const ASSESSMENT_ID = 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa';
@@ -115,6 +113,7 @@ function baseSelectResults(): unknown[][] {
         instrumentType: 'dia',
         subjectName: 'Lenguaje',
         administeredAt: new Date('2026-05-10'),
+        dataGranularity: 'item_level',
         gradingScaleId: null,
         gradingScaleConfig: null,
       },
@@ -136,10 +135,42 @@ function baseSelectResults(): unknown[][] {
     ],
     // 4. loadEvaluatedStudents
     [
-      { studentId: 's1', studentRut: '1-9', firstName: 'Ana', lastName: 'A', percentage: '90.00', grade: '6.30', performanceLevel: 'advanced' },
-      { studentId: 's2', studentRut: '2-7', firstName: 'Beto', lastName: 'B', percentage: '75.00', grade: '5.00', performanceLevel: 'adequate' },
-      { studentId: 's3', studentRut: '3-5', firstName: 'Caro', lastName: 'C', percentage: '45.00', grade: '3.50', performanceLevel: 'elementary' },
-      { studentId: 's4', studentRut: '4-3', firstName: 'Dani', lastName: 'D', percentage: '20.00', grade: '2.00', performanceLevel: 'insufficient' },
+      {
+        studentId: 's1',
+        studentRut: '1-9',
+        firstName: 'Ana',
+        lastName: 'A',
+        percentage: '90.00',
+        grade: '6.30',
+        performanceLevel: 'advanced',
+      },
+      {
+        studentId: 's2',
+        studentRut: '2-7',
+        firstName: 'Beto',
+        lastName: 'B',
+        percentage: '75.00',
+        grade: '5.00',
+        performanceLevel: 'adequate',
+      },
+      {
+        studentId: 's3',
+        studentRut: '3-5',
+        firstName: 'Caro',
+        lastName: 'C',
+        percentage: '45.00',
+        grade: '3.50',
+        performanceLevel: 'elementary',
+      },
+      {
+        studentId: 's4',
+        studentRut: '4-3',
+        firstName: 'Dani',
+        lastName: 'D',
+        percentage: '20.00',
+        grade: '2.00',
+        performanceLevel: 'insufficient',
+      },
     ],
     // 5. loadStudentClassGroups
     [
@@ -171,8 +202,22 @@ function baseSelectResults(): unknown[][] {
     ],
     // 10. buildSkills
     [
-      { nodeId: 'n2', nodeName: 'Interpretar', nodeType: 'skill', nodeCode: null, avgPct: '30.00', studentsAssessed: 4 },
-      { nodeId: 'n1', nodeName: 'Localizar información', nodeType: 'skill', nodeCode: null, avgPct: '80.00', studentsAssessed: 4 },
+      {
+        nodeId: 'n2',
+        nodeName: 'Interpretar',
+        nodeType: 'skill',
+        nodeCode: null,
+        avgPct: '30.00',
+        studentsAssessed: 4,
+      },
+      {
+        nodeId: 'n1',
+        nodeName: 'Localizar información',
+        nodeType: 'skill',
+        nodeCode: null,
+        avgPct: '80.00',
+        studentsAssessed: 4,
+      },
     ],
     // 11. loadWeakestSkillPerStudent (atRisk = s3, s4)
     [

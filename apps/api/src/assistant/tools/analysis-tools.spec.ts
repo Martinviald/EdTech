@@ -4,6 +4,7 @@ import type {
   ProgressionResponse,
   StudentResultDetail,
 } from '@soe/types';
+import { capabilitiesFor } from '@soe/types';
 import type { JwtPayload } from '../../auth/jwt-payload.types';
 import type { AnalyticsService } from '../../analytics/analytics.service';
 import type { AssessmentReportService } from '../../assessment-report/assessment-report.service';
@@ -120,10 +121,7 @@ describe('GetGenerationalTool', () => {
       generational,
     } as unknown as AnalyticsService);
 
-    const result = await tool.execute(
-      { gradeId: '44444444-4444-4444-4444-444444444444' },
-      CTX,
-    );
+    const result = await tool.execute({ gradeId: '44444444-4444-4444-4444-444444444444' }, CTX);
 
     expect(generational).toHaveBeenCalledTimes(1);
     expect(generational.mock.calls[0][0]).toBe(USER);
@@ -161,6 +159,8 @@ describe('GetAssessmentReportTool', () => {
         administeredAt: null,
         classGroups: [],
         itemsCount: 0,
+        dataGranularity: 'item_level',
+        capabilities: [...capabilitiesFor('item_level')],
       },
       summary: {
         studentsEvaluated: 1,
@@ -275,10 +275,7 @@ describe('GetStudentDetailTool', () => {
       getStudentDetail,
     } as unknown as AssessmentResultsService);
 
-    const result = await tool.execute(
-      { assessmentId: ASSESSMENT_ID, studentId: STUDENT_ID },
-      CTX,
-    );
+    const result = await tool.execute({ assessmentId: ASSESSMENT_ID, studentId: STUDENT_ID }, CTX);
 
     expect(getStudentDetail).toHaveBeenCalledTimes(1);
     expect(getStudentDetail).toHaveBeenCalledWith(USER, ASSESSMENT_ID, STUDENT_ID);
