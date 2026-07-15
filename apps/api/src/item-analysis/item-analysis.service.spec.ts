@@ -555,12 +555,23 @@ describe('ItemAnalysisService.getQuestionAnalysis', () => {
           taggedBy: 'ai',
         },
       ],
-      // resolveAccessibleStudentIds → null (sin query)
+      // resolveAccessibleClassGroupIds → null (puro, sin query)
       [
-        // loadAnswerDistribution → group by answer, isCorrect
-        { answer: 'B', isCorrect: true, count: 6 },
-        { answer: 'A', isCorrect: false, count: 3 },
-        { answer: null, isCorrect: false, count: 1 },
+        // loadAnswerDistribution → filas del read-model de cohorte. Dos cursos:
+        // se recombinan SUMANDO conteos por (key, isCorrect), nunca promediando %.
+        {
+          answerCounts: [
+            { key: 'B', isCorrect: true, count: 4 },
+            { key: 'A', isCorrect: false, count: 1 },
+          ],
+        },
+        {
+          answerCounts: [
+            { key: 'B', isCorrect: true, count: 2 },
+            { key: 'A', isCorrect: false, count: 2 },
+            { key: null, isCorrect: false, count: 1 },
+          ],
+        },
       ],
     ]);
     const service = makeService(db);
@@ -600,6 +611,94 @@ describe('ItemAnalysisService.getQuestionAnalysis', () => {
     });
   });
 
+  // ⚠️ La regla central del read-model. Los cursos tienen N distinto, así que
+  // recombinarlos es SUMA de conteos y el % se recalcula al final sobre el total.
+  // Promediar los % de cada curso los ponderaría igual y daría otro número.
+  it('recombina cohortes de distinto N sumando conteos, NO promediando porcentajes', async () => {
+    const db = makeDb([
+      [itemVisibleRow], // requireItemVisible
+      [], // loadItemTags
+      [], // loadAllItemTags
+      [
+        // Curso grande: 9 de 10 correctas → 90%.
+        {
+          answerCounts: [
+            { key: 'B', isCorrect: true, count: 9 },
+            { key: 'A', isCorrect: false, count: 1 },
+          ],
+        },
+        // Curso chico: 0 de 2 correctas → 0%.
+        { answerCounts: [{ key: 'A', isCorrect: false, count: 2 }] },
+      ],
+    ]);
+    const service = makeService(db);
+
+    const res = await service.getQuestionAnalysis(makeUser(), ITEM_A, {});
+
+    // Suma de conteos: 9 correctas de 12 respuestas → 75%.
+    // El promedio de los % por curso habría dado (90 + 0) / 2 = 45%.
+    expect(res.totalResponses).toBe(12);
+    expect(res.correctCount).toBe(9);
+    expect(res.correctRate).toBe(75);
+    const altA = res.alternatives.find((a) => a.key === 'A')!;
+    expect(altA.count).toBe(3); // 1 + 2, sumados entre cohortes
+    expect(altA.percentage).toBe(25); // sobre el total recombinado, no por curso
+  });
+
+  // El `isCorrect` presentable de la alternativa NO viene del read-model: la clave
+  // derivada de items.content gana sobre el flag por alternativa. El isCorrect de
+  // los buckets es el de la fila de respuesta y sólo alimenta correctCount.
+  it('la correctKey derivada del contenido gana sobre el isCorrect de los buckets', async () => {
+    const db = makeDb([
+      [itemVisibleRow], // correctKey: 'B'
+      [],
+      [],
+      [
+        {
+          answerCounts: [
+            // Dato inconsistente a propósito: 'A' marcada como correcta en la fila.
+            { key: 'A', isCorrect: true, count: 2 },
+            { key: 'B', isCorrect: true, count: 8 },
+          ],
+        },
+      ],
+    ]);
+    const service = makeService(db);
+
+    const res = await service.getQuestionAnalysis(makeUser(), ITEM_A, {});
+    // La presentación sigue content.correctKey = 'B'.
+    expect(res.alternatives.find((a) => a.key === 'A')!.isCorrect).toBe(false);
+    expect(res.alternatives.find((a) => a.key === 'B')!.isCorrect).toBe(true);
+    // …pero correctCount respeta el bucket, igual que el coalesce(is_correct) viejo.
+    expect(res.correctCount).toBe(10);
+  });
+
+  // El assessmentId es opcional: el ítem se agrega across assessments sumando las
+  // filas del read-model de varios assessments.
+  it('sin assessmentId agrega el ítem across assessments (suma de filas)', async () => {
+    const db = makeDb([
+      [itemVisibleRow], // requireItemVisible
+      [], // loadItemTags
+      [], // loadAllItemTags
+      [
+        // Misma pregunta, dos evaluaciones distintas.
+        { answerCounts: [{ key: 'B', isCorrect: true, count: 3 }] },
+        {
+          answerCounts: [
+            { key: 'B', isCorrect: true, count: 1 },
+            { key: 'A', isCorrect: false, count: 4 },
+          ],
+        },
+      ],
+    ]);
+    const service = makeService(db);
+
+    const res = await service.getQuestionAnalysis(makeUser(), ITEM_A, {});
+    expect(res.totalResponses).toBe(8);
+    expect(res.correctCount).toBe(4);
+    expect(res.correctRate).toBe(50);
+  });
+
   it('lanza NotFound si el ítem no es visible para la org', async () => {
     const db = makeDb([
       // admin → sin scope query
@@ -635,7 +734,7 @@ describe('ItemAnalysisService.getQuestionAnalysis', () => {
       [officialRow], // requireItemVisible → oficial (org null)
       [], // loadItemTags
       [], // loadAllItemTags
-      [{ answer: 'B', isCorrect: true, count: 5 }], // loadAnswerDistribution
+      [{ answerCounts: [{ key: 'B', isCorrect: true, count: 5 }] }], // loadAnswerDistribution
     ]);
     const service = makeService(db);
 
@@ -677,8 +776,12 @@ describe('ItemAnalysisService.getQuestionAnalysis', () => {
       [], // loadItemTags → sin tags
       [], // loadAllItemTags → sin nodos
       [
-        { answer: null, isCorrect: false, count: 4 },
-        { answer: null, isCorrect: true, count: 1 },
+        {
+          answerCounts: [
+            { key: null, isCorrect: false, count: 4 },
+            { key: null, isCorrect: true, count: 1 },
+          ],
+        },
       ], // loadAnswerDistribution
     ]);
     const service = makeService(db);
@@ -714,8 +817,12 @@ describe('ItemAnalysisService.getQuestionAnalysis', () => {
       [], // loadItemTags
       [], // loadAllItemTags
       [
-        { answer: 'A', isCorrect: true, count: 5 },
-        { answer: 'B', isCorrect: false, count: 5 },
+        {
+          answerCounts: [
+            { key: 'A', isCorrect: true, count: 5 },
+            { key: 'B', isCorrect: false, count: 5 },
+          ],
+        },
       ], // loadAnswerDistribution
     ]);
     const service = makeService(db);
