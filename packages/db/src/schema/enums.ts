@@ -148,6 +148,9 @@ export const importJobTypeEnum = pgEnum('import_job_type', [
   'zipgrade_csv',
   'aptus',
   'student_roster',
+  // Informe oficial de resultados (PDF → JSON). A diferencia del resto, NO ingesta
+  // respuestas alumno×pregunta: solo agregados por curso + nivel por alumno.
+  'dia_official_report',
 ]);
 
 export const importJobStatusEnum = pgEnum('import_job_status', [
@@ -170,6 +173,21 @@ export const performanceLevelEnum = pgEnum('performance_level', [
 // Métrica raíz de un assessment_result (#3). `percentage` (DIA y la mayoría),
 // `scaled` (PAES 150–1000, IRT, stanine) o `band` (Cambridge CEFR, categóricas).
 export const metricTypeEnum = pgEnum('metric_type', ['percentage', 'scaled', 'band']);
+
+// Granularidad del dato de una evaluación (ver docs/plan-analitica-agregada-informes-oficiales.md).
+//  · `item_level`     = hay respuestas alumno×pregunta en `responses`. Todo derivable.
+//  · `aggregate_only` = el origen es un informe oficial: solo agregados por curso en
+//                       `assessment_item_stats` + nivel por alumno en `assessment_results`.
+//                       La analítica granular (matriz, psicometría) NO aplica y se cierra
+//                       por capacidad (packages/types/src/analytics-capabilities.ts).
+export const dataGranularityEnum = pgEnum('data_granularity', ['item_level', 'aggregate_only']);
+
+// Origen de una fila del read-model de cohorte. `computed` = agregado desde `responses`
+// por el calculador puro; `imported` = viene de un informe oficial. La distinción importa:
+// el % por eje en `computed` es la media de porcentajes por alumno (preserva los números
+// históricos de los dashboards) y en `imported` es la tasa agrupada ponderada por puntaje
+// (la definición del propio DIA). Ver §3.2 y §9.2 del plan.
+export const statsSourceEnum = pgEnum('stats_source', ['computed', 'imported']);
 
 export const rubricTypeEnum = pgEnum('rubric_type', ['analytic', 'holistic']);
 

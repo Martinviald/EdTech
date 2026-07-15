@@ -78,6 +78,13 @@
       "when": 1783903097516,
       "tag": "0010_brainy_switch",
       "breakpoints": true
+    },
+    {
+      "idx": 11,
+      "version": "7",
+      "when": 1784089240290,
+      "tag": "0011_nebulous_shriek",
+      "breakpoints": true
     }
   ]
 }
