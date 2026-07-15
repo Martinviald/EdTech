@@ -360,8 +360,29 @@ describe('DashboardsService.getPerformance', () => {
 // getSkills()
 // ──────────────────────────────────────────────────────────────────────────────
 
+// Fila del read-model ya agregada en SQL a (nodo × curso), como la devuelve
+// `loadSkillsFromCohortStats`.
+function cohortSkillRow(
+  nodeId: string,
+  classGroupPct: number,
+  studentCount: number,
+  overrides: Record<string, unknown> = {},
+) {
+  return {
+    nodeId,
+    nodeName: 'Localizar información',
+    nodeType: 'skill',
+    nodeCode: 'OA1',
+    parentId: null,
+    pctSum: (classGroupPct * studentCount).toFixed(2),
+    pctWeight: studentCount,
+    studentsAssessed: studentCount,
+    ...overrides,
+  };
+}
+
 describe('DashboardsService.getSkills', () => {
-  it('agrega skill_results por nodo con promedio y alumnos evaluados', async () => {
+  it('agrega el read-model de cohorte por nodo con promedio y alumnos evaluados', async () => {
     const db = makeDb([
       // 1. resolveScopedAssessmentIds
       [{ id: 'a1' }],
@@ -369,18 +390,8 @@ describe('DashboardsService.getSkills', () => {
       [],
       // 3. resolveScopedBands: >1 instrumento → sin bandas (legacy)
       [{ instrumentId: 'i1' }, { instrumentId: 'i2' }],
-      // 4. skills grouped
-      [
-        {
-          nodeId: 'n1',
-          nodeName: 'Localizar información',
-          nodeType: 'skill',
-          nodeCode: 'OA1',
-          parentId: null,
-          avgPct: '75.00',
-          studentsAssessed: 20,
-        },
-      ],
+      // 4. assessment_skill_stats agrupado por (nodo × curso)
+      [cohortSkillRow('n1', 75, 20)],
     ]);
     const svc = makeService(db);
     const res = await svc.getSkills(makeUser({ activeRole: 'academic_director' }), {});
@@ -391,6 +402,86 @@ describe('DashboardsService.getSkills', () => {
     expect(res.skills[0]!.performanceLevel).toBe('adequate'); // 0.75 ∈ [0.70,0.85)
   });
 
+  // ⚠️ El invariante de la Fase 5: recombinar cursos NO puede mover el número.
+  it('pondera por studentCount al recombinar cursos de distinto N (no promedia %)', async () => {
+    const db = makeDb([
+      [{ id: 'a1' }],
+      [],
+      [{ instrumentId: 'i1' }, { instrumentId: 'i2' }],
+      // Mismo nodo, dos cursos de N muy distinto: 90% con 10 alumnos y 40% con 30.
+      // Ponderado (lo que hacía avg() por alumno): (900 + 1200) / 40 = 52.5.
+      // Promedio simple de los % de cada curso daría 65 → sería un número movido.
+      [cohortSkillRow('n1', 90, 10), cohortSkillRow('n1', 40, 30)],
+    ]);
+    const svc = makeService(db);
+    const res = await svc.getSkills(makeUser({ activeRole: 'academic_director' }), {});
+    expect(res.skills).toHaveLength(1);
+    expect(res.skills[0]!.averageAchievement).toBeCloseTo(52.5, 6);
+    expect(res.skills[0]!.studentsAssessed).toBe(40);
+  });
+
+  // `count(distinct student_id)` de antes cuenta al alumno UNA vez aunque haya rendido
+  // dos evaluaciones. El SQL ya trae `max(student_count)` por curso; el fold suma esos
+  // max entre cursos, nunca entre evaluaciones.
+  it('no duplica alumnos evaluados cuando el scope abarca varias evaluaciones', async () => {
+    const db = makeDb([
+      [{ id: 'a1' }, { id: 'a2' }],
+      [],
+      [{ instrumentId: 'i1' }, { instrumentId: 'i2' }],
+      // Una fila por curso (el max sobre las 2 evaluaciones ya lo hizo SQL).
+      [cohortSkillRow('n1', 60, 20), cohortSkillRow('n1', 60, 25)],
+    ]);
+    const svc = makeService(db);
+    const res = await svc.getSkills(makeUser({ activeRole: 'academic_director' }), {});
+    expect(res.skills[0]!.studentsAssessed).toBe(45);
+  });
+
+  it('nodo sin porcentajes (pctWeight 0) → promedio null sin nivel', async () => {
+    const db = makeDb([
+      [{ id: 'a1' }],
+      [],
+      [{ instrumentId: 'i1' }, { instrumentId: 'i2' }],
+      [cohortSkillRow('n1', 0, 0, { pctSum: null, pctWeight: 0, studentsAssessed: 0 })],
+    ]);
+    const svc = makeService(db);
+    const res = await svc.getSkills(makeUser({ activeRole: 'academic_director' }), {});
+    expect(res.skills[0]!.averageAchievement).toBeNull();
+    expect(res.skills[0]!.performanceLevel).toBeNull();
+  });
+
+  // El read-model tiene grano curso: acotar a UN alumno exige skill_results.
+  it('con filtro studentId cae al camino por alumno (skill_results)', async () => {
+    const db = makeDb([
+      // 1. resolveScopedStudentIds (hay filtro de alumno → sí consulta)
+      [{ studentId: 's1' }],
+      // 2. resolveScopedAssessmentIds
+      [{ id: 'a1' }],
+      // 3. resolveThresholds → sin escala
+      [],
+      // 4. resolveScopedBands → >1 instrumento
+      [{ instrumentId: 'i1' }, { instrumentId: 'i2' }],
+      // 5. skill_results agrupado por nodo (forma vieja: avgPct + count distinct)
+      [
+        {
+          nodeId: 'n1',
+          nodeName: 'Localizar información',
+          nodeType: 'skill',
+          nodeCode: 'OA1',
+          parentId: null,
+          avgPct: '75.00',
+          studentsAssessed: 1,
+        },
+      ],
+    ]);
+    const svc = makeService(db);
+    const res = await svc.getSkills(makeUser({ activeRole: 'academic_director' }), {
+      studentId: 's1',
+    });
+    expect(res.skills[0]!.averageAchievement).toBe(75);
+    expect(res.skills[0]!.studentsAssessed).toBe(1);
+    expect(db.__selectIdx()).toBe(5);
+  });
+
   it('teacher sin asignaciones → skills vacío', async () => {
     const db = makeDb([
       // getAccessibleClassGroupIds → vacío
@@ -399,6 +490,27 @@ describe('DashboardsService.getSkills', () => {
     const svc = makeService(db);
     const res = await svc.getSkills(makeUser({ activeRole: 'teacher', roles: ['teacher'] }), {});
     expect(res.skills).toEqual([]);
+  });
+
+  it('teacher con cursos: resuelve sus class_groups y agrega el read-model', async () => {
+    const db = makeDb([
+      // 1. getAccessibleClassGroupIds
+      [{ classGroupId: 'cg1' }],
+      // 2. resolveScopedClassGroupIds
+      [{ id: 'cg1' }],
+      // 3. resolveScopedAssessmentIds
+      [{ id: 'a1' }],
+      // 4. resolveThresholds
+      [],
+      // 5. resolveScopedBands
+      [{ instrumentId: 'i1' }, { instrumentId: 'i2' }],
+      // 6. read-model
+      [cohortSkillRow('n1', 80, 18)],
+    ]);
+    const svc = makeService(db);
+    const res = await svc.getSkills(makeUser({ activeRole: 'teacher', roles: ['teacher'] }), {});
+    expect(res.skills[0]!.averageAchievement).toBe(80);
+    expect(res.skills[0]!.studentsAssessed).toBe(18);
   });
 });
 
@@ -415,10 +527,24 @@ describe('DashboardsService.getSkillBreakdown', () => {
       [{ id: 'a1' }],
       // 3. resolveThresholds → resolveApplicableScale (sin escala → defaults)
       [],
-      // 4. breakdown por classGroup
+      // 4. breakdown por classGroup sobre assessment_skill_stats
       [
-        { id: 'cg1', name: '2°A', gradeName: '2° Básico', avgPct: '80.00', studentsAssessed: 18 },
-        { id: 'cg2', name: '2°B', gradeName: '2° Básico', avgPct: '35.00', studentsAssessed: 15 },
+        {
+          id: 'cg1',
+          name: '2°A',
+          gradeName: '2° Básico',
+          pctSum: '1440.00',
+          pctWeight: 18,
+          studentsAssessed: 18,
+        },
+        {
+          id: 'cg2',
+          name: '2°B',
+          gradeName: '2° Básico',
+          pctSum: '525.00',
+          pctWeight: 15,
+          studentsAssessed: 15,
+        },
       ],
     ]);
     const svc = makeService(db);
@@ -445,15 +571,26 @@ describe('DashboardsService.getSkillBreakdown', () => {
       [{ name: 'Comprensión', type: 'skill', code: null }],
       [{ id: 'a1' }],
       [],
-      // breakdown por assessment con name null
+      // breakdown por assessment con name null — dos cursos de la MISMA evaluación,
+      // que el fold recombina en una sola fila ponderando por pctWeight.
       [
         {
           id: 'a1',
           name: null,
           instrumentName: 'DIA Lenguaje 2°',
           subjectName: 'Lenguaje',
-          avgPct: '60.00',
-          studentsAssessed: 30,
+          pctSum: '1400.00', // 70% × 20 alumnos
+          pctWeight: 20,
+          studentsAssessed: 20,
+        },
+        {
+          id: 'a1',
+          name: null,
+          instrumentName: 'DIA Lenguaje 2°',
+          subjectName: 'Lenguaje',
+          pctSum: '400.00', // 40% × 10 alumnos
+          pctWeight: 10,
+          studentsAssessed: 10,
         },
       ],
     ]);
@@ -462,8 +599,12 @@ describe('DashboardsService.getSkillBreakdown', () => {
       nodeId: 'n1',
       groupBy: 'assessment',
     });
+    expect(res.rows).toHaveLength(1);
     expect(res.rows[0]!.label).toBe('DIA Lenguaje 2°');
     expect(res.rows[0]!.sublabel).toBe('Lenguaje');
+    // (1400 + 400) / 30 = 60 — no 55, que sería el promedio simple de 70 y 40.
+    expect(res.rows[0]!.averageAchievement).toBeCloseTo(60, 6);
+    expect(res.rows[0]!.studentsAssessed).toBe(30);
   });
 
   it('teacher sin asignaciones → rows vacío (pero node se resuelve)', async () => {
