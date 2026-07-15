@@ -1,12 +1,12 @@
 import {
   BadRequestException,
+  ConflictException,
   ForbiddenException,
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
 import { and, eq, inArray, isNull, or, sql } from 'drizzle-orm';
 import {
-  assessmentResults,
   assessments,
   gradingScales,
   importJobs,
@@ -14,13 +14,12 @@ import {
   itemTaxonomyTags,
   items,
   responses,
-  skillResults,
   withOrgContext,
 } from '@soe/db';
 import {
+  CAPABILITY_UNAVAILABLE_CODE,
   DEFAULT_GRADING_SCALE,
-  aggregateSkillResults,
-  aggregateStudentResults,
+  capabilityUnavailableMessage,
   type AnswerSheetColumnMapping,
   type AnswerSheetConfirmRequestDto,
   type AnswerSheetConfirmResponse,
@@ -35,10 +34,14 @@ import {
   type ImportJobModel,
   type ItemContent,
   type ItemType,
-  type ResponseForCalculation,
 } from '@soe/types';
 import type { JwtPayload } from '../auth/jwt-payload.types';
 import { InjectDb, type Database } from '../database/database.types';
+import {
+  ANSWER_SHEET_IMPORT_POLICY,
+  persistAssessmentResults,
+  type ResponseForPersist,
+} from '../assessment-results/lib/persist-results';
 import { loadInstrumentBands } from '../performance-bands/lib/load-instrument-bands';
 import { getScoringStrategy } from './scoring/scoring-strategy';
 import { AnswerSheetPreviewStore } from './lib/preview-store';
@@ -56,6 +59,18 @@ interface ItemForAssessment {
   type: ItemType;
   content: ItemContent;
   maxScore: number;
+}
+
+/**
+ * ¿El ítem ofrece alternativas (selección múltiple)?
+ *
+ * El read-model de cohorte lo necesita para no confundir un ítem de desarrollo con una
+ * respuesta MC en blanco: ambos dan `extractRawAnswer → null`, y sin distinguirlos el
+ * desarrollo colapsaría en un único bucket de blancos en vez de RC/RPC/RI.
+ */
+function itemHasAlternatives(content: ItemContent): boolean {
+  const alternatives = (content as { alternatives?: unknown }).alternatives;
+  return Array.isArray(alternatives) && alternatives.length > 0;
 }
 
 interface UploadMetadataInput {
@@ -123,21 +138,14 @@ export class AnswerSheetsService {
    * Devuelve la previsualización de un upload previo: matchea alumnos por
    * RUT contra la org del caller y lista warnings, errores y filas.
    */
-  async preview(
-    user: JwtPayload,
-    previewToken: string,
-  ): Promise<AnswerSheetPreviewResponse> {
+  async preview(user: JwtPayload, previewToken: string): Promise<AnswerSheetPreviewResponse> {
     const orgId = this.requireOrgId(user);
     const entry = this.previewStore.get(previewToken);
     if (!entry) {
-      throw new NotFoundException(
-        'Token de previsualización no encontrado o expirado',
-      );
+      throw new NotFoundException('Token de previsualización no encontrado o expirado');
     }
     if (entry.orgId !== orgId) {
-      throw new ForbiddenException(
-        'Este token de previsualización pertenece a otra organización',
-      );
+      throw new ForbiddenException('Este token de previsualización pertenece a otra organización');
     }
 
     // matchStudents consulta `students` (RLS): correr con contexto de org.
@@ -172,9 +180,7 @@ export class AnswerSheetsService {
       if (matched) matchedRows++;
       else unmatchedRows++;
 
-      const answeredCount = Object.values(row.answers).filter(
-        (v) => v !== null,
-      ).length;
+      const answeredCount = Object.values(row.answers).filter((v) => v !== null).length;
 
       const errors = [...row.errors];
       if (!matched && m && !m.rutNormalized) {
@@ -225,9 +231,7 @@ export class AnswerSheetsService {
       warnings: [
         ...entry.warnings,
         ...(missingItemPositions.length > 0
-          ? [
-              `Faltan respuestas para ${missingItemPositions.length} pregunta(s) del instrumento`,
-            ]
+          ? [`Faltan respuestas para ${missingItemPositions.length} pregunta(s) del instrumento`]
           : []),
       ],
     };
@@ -244,14 +248,10 @@ export class AnswerSheetsService {
     const orgId = this.requireOrgId(user);
     const entry = this.previewStore.get(body.previewToken);
     if (!entry) {
-      throw new NotFoundException(
-        'Token de previsualización no encontrado o expirado',
-      );
+      throw new NotFoundException('Token de previsualización no encontrado o expirado');
     }
     if (entry.orgId !== orgId) {
-      throw new ForbiddenException(
-        'Este token de previsualización pertenece a otra organización',
-      );
+      throw new ForbiddenException('Este token de previsualización pertenece a otra organización');
     }
 
     // 1. Resolver el instrumento (y reusar metadata).
@@ -288,7 +288,7 @@ export class AnswerSheetsService {
     // 4. Construir responses + errores.
     const errors: AnswerSheetRowError[] = [];
     const responseRows: Array<typeof responses.$inferInsert> = [];
-    const calcResponses: ResponseForCalculation[] = [];
+    const calcResponses: ResponseForPersist[] = [];
     const processedStudentIds = new Set<string>();
     let rowsSkipped = 0;
     const now = new Date();
@@ -363,6 +363,11 @@ export class AnswerSheetsService {
             studentId,
             itemId: item.id,
             itemPosition: item.position,
+            // Mismo objeto que se persiste en `responses.value`: el read-model de
+            // cohorte tiene que ver exactamente lo que verá el `GROUP BY` sobre la
+            // tabla.
+            value: { answer: rawAnswer },
+            hasAlternatives: itemHasAlternatives(item.content),
             rawScore: null,
             maxScore: item.maxScore,
             finalScore: null,
@@ -392,6 +397,8 @@ export class AnswerSheetsService {
           studentId,
           itemId: item.id,
           itemPosition: item.position,
+          value: { answer: rawAnswer },
+          hasAlternatives: itemHasAlternatives(item.content),
           rawScore,
           maxScore: item.maxScore,
           finalScore,
@@ -418,13 +425,29 @@ export class AnswerSheetsService {
       let assessmentId: string;
       if (body.assessmentId) {
         const [existing] = await tx
-          .select({ id: assessments.id, orgId: assessments.orgId })
+          .select({
+            id: assessments.id,
+            orgId: assessments.orgId,
+            dataGranularity: assessments.dataGranularity,
+          })
           .from(assessments)
           .where(eq(assessments.id, body.assessmentId));
         if (!existing || existing.orgId !== orgId) {
           throw new ForbiddenException(
             'El assessment indicado no existe o no pertenece a tu organización',
           );
+        }
+        // Un assessment `aggregate_only` vino de un informe oficial: sus niveles y su
+        // read-model son `imported`. Ingestar respuestas encima lo dejaría mitad
+        // importado y mitad computado, con el delete + reinsert borrando lo primero.
+        if (existing.dataGranularity === 'aggregate_only') {
+          throw new ConflictException({
+            statusCode: 409,
+            error: 'CapabilityUnavailable',
+            code: CAPABILITY_UNAVAILABLE_CODE,
+            capability: 'answer_sheet_import',
+            message: capabilityUnavailableMessage('answer_sheet_import'),
+          });
         }
         assessmentId = existing.id;
       } else {
@@ -473,66 +496,23 @@ export class AnswerSheetsService {
           },
         });
 
-      // Limpiar resultados previos del assessment para reinsertar agregados.
-      await tx
-        .delete(assessmentResults)
-        .where(eq(assessmentResults.assessmentId, assessmentId));
-      await tx.delete(skillResults).where(eq(skillResults.assessmentId, assessmentId));
-
-      // Llamar al calculador puro.
+      // Delete + reinsert de assessment_results / skill_results / read-model de
+      // cohorte, compartido con `AssessmentResultsService.computeAndPersist`.
+      // `ANSWER_SHEET_IMPORT_POLICY` conserva las dos divergencias de este flujo
+      // (pendientes fuera del total por alumno; completed_at siempre estampado);
+      // están documentadas en persist-results.ts.
       //
-      // Los ítems pendientes de corrección humana/IA (`isCorrect === null`) NO
-      // deben contaminar el % autocorregido. `aggregateSkillResults` ya los
-      // excluye de su denominador ponderado; para el total por alumno los
-      // filtramos aquí (suman 0 al numerador pero su maxScore inflaría el
-      // denominador). Conservamos `isComplete` calculado sobre el set COMPLETO:
-      // un alumno con ítems pendientes no está "completo".
-      const autoScoredResponses = calcResponses.filter((r) => r.isCorrect !== null);
-      const studentsWithPending = new Set(
-        calcResponses.filter((r) => r.isCorrect === null).map((r) => r.studentId),
-      );
       // Bandas de logro del instrumento (fuente de verdad del nivel). Dentro de
       // withOrgContext → RLS trae globales (org_id NULL) + override de la org.
       const bands = await loadInstrumentBands(tx, entry.instrumentId);
-      const studentAgg = aggregateStudentResults(autoScoredResponses, scale, bands).map((a) => ({
-        ...a,
-        isComplete: a.isComplete && !studentsWithPending.has(a.studentId),
-      }));
-      const skillAgg = aggregateSkillResults(calcResponses, scale, bands);
-
-      if (studentAgg.length > 0) {
-        await tx.insert(assessmentResults).values(
-          studentAgg.map((a) => ({
-            assessmentId,
-            studentId: a.studentId,
-            totalScore: a.totalScore.toFixed(2),
-            maxScore: a.maxScore.toFixed(2),
-            // Model contract: percentage es 0..100 (decimal string)
-            percentage: (a.percentage * 100).toFixed(2),
-            grade: a.grade.toFixed(2),
-            performanceBandId: a.performanceBandId ?? null,
-            performanceLevel: a.performanceLevel,
-            isComplete: a.isComplete,
-            completedAt: now,
-          })),
-        );
-      }
-
-      if (skillAgg.length > 0) {
-        await tx.insert(skillResults).values(
-          skillAgg.map((a) => ({
-            assessmentId,
-            studentId: a.studentId,
-            nodeId: a.nodeId,
-            correctCount: a.correctCount,
-            totalCount: a.totalCount,
-            // Model contract: percentage es 0..100
-            percentage: (a.percentage * 100).toFixed(2),
-            performanceBandId: a.performanceBandId ?? null,
-            performanceLevel: a.performanceLevel,
-          })),
-        );
-      }
+      await persistAssessmentResults(tx, {
+        assessmentId,
+        responses: calcResponses,
+        scale,
+        bands,
+        now,
+        policy: ANSWER_SHEET_IMPORT_POLICY,
+      });
 
       // Crear el import_job.
       const importType = mapFormatToImportJobType(entry.format);
@@ -570,11 +550,7 @@ export class AnswerSheetsService {
     this.previewStore.delete(body.previewToken);
 
     const status: AnswerSheetConfirmResponse['status'] =
-      errors.length === 0
-        ? 'completed'
-        : processedStudentIds.size === 0
-          ? 'failed'
-          : 'partial';
+      errors.length === 0 ? 'completed' : processedStudentIds.size === 0 ? 'failed' : 'partial';
 
     return {
       jobId: transactionResult.jobId,
@@ -646,17 +622,13 @@ export class AnswerSheetsService {
         return parseZipgradeCsv(buffer);
       case 'generic_csv':
         if (!mapping) {
-          throw new BadRequestException(
-            'columnMapping es requerido para el formato generic_csv',
-          );
+          throw new BadRequestException('columnMapping es requerido para el formato generic_csv');
         }
         return parseGenericCsv(buffer, mapping);
       default: {
         // Exhaustiveness: TS marca error si se agrega un format y se olvida acá.
         const _exhaustive: never = format;
-        throw new BadRequestException(
-          `Formato no soportado: ${String(_exhaustive)}`,
-        );
+        throw new BadRequestException(`Formato no soportado: ${String(_exhaustive)}`);
       }
     }
   }
@@ -680,9 +652,7 @@ export class AnswerSheetsService {
         ),
       );
     if (!row) {
-      throw new NotFoundException(
-        'Instrumento no encontrado o no visible para tu organización',
-      );
+      throw new NotFoundException('Instrumento no encontrado o no visible para tu organización');
     }
     return { id: row.id, gradingScaleId: row.gradingScaleId ?? null };
   }
@@ -695,9 +665,7 @@ export class AnswerSheetsService {
     return row?.name ?? '';
   }
 
-  private async loadInstrumentItems(
-    instrumentId: string,
-  ): Promise<ItemForAssessment[]> {
+  private async loadInstrumentItems(instrumentId: string): Promise<ItemForAssessment[]> {
     const rows = await this.db
       .select({
         id: items.id,
@@ -728,9 +696,7 @@ export class AnswerSheetsService {
     return out;
   }
 
-  private async resolveGradingScale(
-    gradingScaleId: string | null,
-  ): Promise<GradingScaleParams> {
+  private async resolveGradingScale(gradingScaleId: string | null): Promise<GradingScaleParams> {
     if (!gradingScaleId) return DEFAULT_GRADING_SCALE;
     const [row] = await this.db
       .select()
@@ -753,11 +719,7 @@ export class AnswerSheetsService {
 
 function mapFormatToImportJobType(
   format: AnswerSheetFormat,
-):
-  | 'dia_official'
-  | 'gradecam_csv'
-  | 'zipgrade_csv'
-  | 'answer_sheet_csv' {
+): 'dia_official' | 'gradecam_csv' | 'zipgrade_csv' | 'answer_sheet_csv' {
   switch (format) {
     case 'dia_official':
       return 'dia_official';

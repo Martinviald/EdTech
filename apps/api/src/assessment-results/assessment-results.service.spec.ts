@@ -1,4 +1,4 @@
-import { NotFoundException, ForbiddenException } from '@nestjs/common';
+import { ConflictException, NotFoundException, ForbiddenException } from '@nestjs/common';
 import type { Database } from '@soe/db';
 import type { JwtPayload, } from '../auth/jwt-payload.types';
 import type { UserRole } from '@soe/types';
@@ -17,6 +17,12 @@ import { AssessmentResultsService } from './assessment-results.service';
 // service ejecuta múltiples queries por método; cada test agenda las
 // respuestas en el orden esperado.
 // ──────────────────────────────────────────────────────────────────────────────
+
+/** `items.content` de un MCQ como lo guarda la BDD real (todos traen alternativas). */
+const MCQ_CONTENT = {
+  stem: 'Pregunta',
+  alternatives: ['A', 'B', 'C', 'D'].map((key) => ({ key, text: key, isCorrect: key === 'A' })),
+};
 
 function makeUser(overrides: Partial<JwtPayload> = {}): JwtPayload {
   const role: UserRole = overrides.activeRole ?? overrides.role ?? 'school_admin';
@@ -179,14 +185,15 @@ describe('AssessmentResultsService.calculate', () => {
     //   6. priorResults                      → select 5
     // Rehacemos el mock con el orden correcto:
     const db2 = makeDb([
-      [{ id: 'a1', orgId: 'org-1', instrumentId: 'i1' }], // 1
+      [{ id: 'a1', orgId: 'org-1', instrumentId: 'i1', dataGranularity: 'item_level' }], // 1
       [{ gradingScaleId: null }],                          // 2 (instruments)
-      // 3 (responses+items)
+      // 3 (responses+items). `itemContent.alternatives` → hasAlternatives: sin él, un
+      // MCQ se bucketizaría como ítem de desarrollo (RC/RPC/RI) en el read-model.
       [
-        { studentId: 's1', itemId: 'it1', isCorrect: true, rawScore: '1.00', finalScore: '1.00', maxScore: '1.00', itemPosition: 1 },
-        { studentId: 's1', itemId: 'it2', isCorrect: false, rawScore: '0.00', finalScore: '0.00', maxScore: '1.00', itemPosition: 2 },
-        { studentId: 's2', itemId: 'it1', isCorrect: true, rawScore: '1.00', finalScore: '1.00', maxScore: '1.00', itemPosition: 1 },
-        { studentId: 's2', itemId: 'it2', isCorrect: true, rawScore: '1.00', finalScore: '1.00', maxScore: '1.00', itemPosition: 2 },
+        { studentId: 's1', itemId: 'it1', value: { raw: 'A' }, itemContent: MCQ_CONTENT, isCorrect: true, rawScore: '1.00', finalScore: '1.00', maxScore: '1.00', itemPosition: 1 },
+        { studentId: 's1', itemId: 'it2', value: { raw: 'C' }, itemContent: MCQ_CONTENT, isCorrect: false, rawScore: '0.00', finalScore: '0.00', maxScore: '1.00', itemPosition: 2 },
+        { studentId: 's2', itemId: 'it1', value: { raw: 'A' }, itemContent: MCQ_CONTENT, isCorrect: true, rawScore: '1.00', finalScore: '1.00', maxScore: '1.00', itemPosition: 1 },
+        { studentId: 's2', itemId: 'it2', value: { raw: 'B' }, itemContent: MCQ_CONTENT, isCorrect: true, rawScore: '1.00', finalScore: '1.00', maxScore: '1.00', itemPosition: 2 },
       ],
       // 4 (tags)
       [
@@ -198,6 +205,11 @@ describe('AssessmentResultsService.calculate', () => {
       [],
       // 6 (prior counts)
       [{ priorResults: 0, priorSkillResults: 0 }],
+      // 7 (loadEnrollmentByStudent — read-model de cohorte: ambos alumnos en cg-A)
+      [
+        { studentId: 's1', classGroupId: 'cg-A' },
+        { studentId: 's2', classGroupId: 'cg-A' },
+      ],
     ]);
 
     // El service en realidad llama responses ANTES de prior counts. Hagamos el orden real:
@@ -223,13 +235,56 @@ describe('AssessmentResultsService.calculate', () => {
     expect(db2.__transactionRan).toBe(true);
 
     // El service debe insertar TODOS los aggregates en UN SOLO insert por tabla
-    // (batch). Esperamos 2 inserts (assessmentResults + skillResults).
-    expect(db2.__insertCalls).toHaveLength(2);
+    // (batch): assessment_results + skill_results + las 2 del read-model de cohorte.
+    expect(db2.__insertCalls).toHaveLength(4);
     expect(db2.__insertCalls[0]!.rows).toHaveLength(2); // 2 students en assessmentResults
     expect(db2.__insertCalls[1]!.rows.length).toBeGreaterThanOrEqual(2); // skillResults por student×nodo
 
-    // También debe haber borrado los previos (idempotencia del recálculo).
-    expect(db2.__deleteCalls).toHaveLength(2);
+    // Read-model de cohorte: 1 curso × 2 ítems, con conteos (nunca porcentajes).
+    const itemStats = db2.__insertCalls[2]!.rows as Array<{
+      classGroupId: string;
+      itemId: string;
+      studentCount: number;
+      responseCount: number;
+      correctCount: number;
+      answerCounts: Array<{ key: string | null; count: number; isCorrect: boolean }>;
+      source: string;
+    }>;
+    expect(itemStats).toHaveLength(2);
+    const it1 = itemStats.find((s) => s.itemId === 'it1')!;
+    expect(it1).toMatchObject({
+      classGroupId: 'cg-A',
+      studentCount: 2,
+      responseCount: 2,
+      correctCount: 2,
+      source: 'computed',
+    });
+    expect(it1.answerCounts).toEqual([{ key: 'A', count: 2, isCorrect: true }]);
+    // it2: s1 respondió C (incorrecta) y s2 respondió B (correcta) → 2 buckets.
+    const it2 = itemStats.find((s) => s.itemId === 'it2')!;
+    expect(it2.correctCount).toBe(1);
+    expect(it2.answerCounts).toEqual([
+      { key: 'B', count: 1, isCorrect: true },
+      { key: 'C', count: 1, isCorrect: false },
+    ]);
+
+    // También debe haber borrado los previos (idempotencia del recálculo): las 2
+    // tablas de resultados + las 2 del read-model.
+    expect(db2.__deleteCalls).toHaveLength(4);
+  });
+
+  it('lanza ConflictException (409) al recalcular un assessment aggregate_only', async () => {
+    // El nivel de un aggregate_only vino dado por el informe oficial: no hay
+    // `percentage` que reclasificar y el delete + reinsert lo arrasaría.
+    const db = makeDb([
+      [{ id: 'a1', orgId: 'org-1', instrumentId: 'i1', dataGranularity: 'aggregate_only' }],
+    ]);
+    const svc = makeService(db);
+    await expect(svc.calculate(makeUser(), 'a1', { force: false })).rejects.toThrow(
+      ConflictException,
+    );
+    expect(db.__deleteCalls).toHaveLength(0);
+    expect(db.__insertCalls).toHaveLength(0);
   });
 
   it('cae al default linear_chilean cuando no hay escala en dto ni en el instrument', async () => {
