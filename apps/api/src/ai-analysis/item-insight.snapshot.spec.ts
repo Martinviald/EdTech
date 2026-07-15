@@ -66,6 +66,7 @@ function makeQuestion(
     type: 'multiple_choice',
     stem: '¿Qué quiso decir el autor?',
     imageUrl: null,
+    hasFigure: false,
     explanation: null,
     correctKey: 'B',
     skill: { nodeId: 'n-skill', nodeName: 'Inferir', nodeType: 'skill' },

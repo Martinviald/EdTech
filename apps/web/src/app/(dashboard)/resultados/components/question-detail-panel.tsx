@@ -64,8 +64,7 @@ export function QuestionDetailPanel(props: {
 }): JSX.Element {
   const { data, open, onClose } = props;
   const section = data?.section ?? null;
-  const passage =
-    section && hasPassageContent(section) ? questionSectionToPassage(section) : null;
+  const passage = section && hasPassageContent(section) ? questionSectionToPassage(section) : null;
 
   return (
     <QuestionDetailSheet
@@ -73,12 +72,11 @@ export function QuestionDetailPanel(props: {
       onClose={onClose}
       position={data?.position ?? null}
       headerBadges={
-        data?.correctKey ? (
-          <Badge variant="success">Clave correcta: {data.correctKey}</Badge>
-        ) : null
+        data?.correctKey ? <Badge variant="success">Clave correcta: {data.correctKey}</Badge> : null
       }
       description="Enunciado, distribución de respuestas, análisis de distractores y nodos asociados a la pregunta."
       passage={passage}
+      figureItemId={data?.hasFigure ? data.itemId : null}
       storageKey="soe.questionDetail.panelWidth"
     >
       {data === null ? (

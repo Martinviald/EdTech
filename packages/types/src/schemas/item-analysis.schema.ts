@@ -210,6 +210,9 @@ export type QuestionAnalysisResponse = {
   type: string; // item_type
   stem: string | null; // enunciado
   imageUrl: string | null;
+  /** ¿El ítem tiene una figura asociada (archivo en `files`)? La imagen se sirve
+   *  por `/items/{itemId}/figura`, no por URL en el payload (las presigned caducan). */
+  hasFigure: boolean;
   explanation: string | null;
   correctKey: string | null;
   skill: ItemTaxonomyRef | null; // habilidad principal (representativo, compat)

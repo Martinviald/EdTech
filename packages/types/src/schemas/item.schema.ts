@@ -392,3 +392,25 @@ export type ItemVersionModel = {
   changeNote: string | null;
   createdAt: string | Date;
 };
+
+/**
+ * Figura (imagen) asociada a un ítem: la banda recortada del PDF original que
+ * contiene el enunciado gráfico y/o las alternativas-imagen. Vive en el módulo
+ * genérico `files` (`owner_type='item'`, `purpose='item_figure'`); la storage key
+ * queda además en `items.scoring_config.imageRef`.
+ *
+ * Calcado de `InstrumentAttachmentModel`: las URLs prefirmadas son opcionales
+ * porque solo se emiten cuando el almacenamiento S3 está configurado.
+ */
+export type ItemFigureModel = {
+  id: string;
+  itemId: string;
+  storageKey: string | null;
+  fileName: string | null;
+  mimeType: string | null;
+  sizeBytes: number | null;
+  /** URL prefirmada de descarga (fuerza descarga). */
+  downloadUrl?: string;
+  /** URL prefirmada de previsualización (Content-Disposition: inline). */
+  previewUrl?: string;
+};
