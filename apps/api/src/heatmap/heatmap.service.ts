@@ -1,13 +1,11 @@
 import { ForbiddenException, Injectable } from '@nestjs/common';
 import { and, asc, eq, inArray, isNull, notInArray, sql, type SQL } from 'drizzle-orm';
 import {
+  assessmentSkillStats,
   assessments,
   classGroups,
   gradingScales,
   instruments,
-  skillResults,
-  studentEnrollments,
-  students,
   subjectClasses,
   subjects,
   taxonomyNodes,
@@ -29,6 +27,14 @@ import {
   type UserRole,
 } from '@soe/types';
 import type { JwtPayload } from '../auth/jwt-payload.types';
+import {
+  COHORT_PCT_SUM,
+  COHORT_PCT_WEIGHT,
+  COHORT_STUDENTS_ASSESSED,
+  addCohortRow,
+  cohortAverage,
+  type CohortAccumulator,
+} from '../common/helpers/cohort-skill-stats.helper';
 import { InjectDb, type Database } from '../database/database.types';
 
 // Roles "administrativos" — ven todos los cursos de la org. Cualquier otro rol
@@ -46,7 +52,13 @@ const ADMIN_LIKE_ROLES: readonly UserRole[] = [
 
 type Scope = { scopeAll: boolean; classGroupIds: string[] };
 
-/** Fila cruda de la agregación por (node, subject). */
+/**
+ * Fila cruda del read-model agregada al grano (node, subject, class_group).
+ *
+ * El curso NO es una dimensión de la matriz, pero sí del `group by`: es lo que permite
+ * ponderar el promedio por `studentCount` y contar alumnos sin duplicar entre
+ * evaluaciones (ver `cohort-skill-stats.helper`).
+ */
 type CellRow = {
   nodeId: string;
   nodeName: string;
@@ -54,14 +66,9 @@ type CellRow = {
   nodeCode: string | null;
   subjectId: string;
   subjectName: string;
-  avgPct: string | null;
+  pctSum: string | null;
+  pctWeight: number;
   studentsAssessed: number;
-};
-
-/** Fila cruda de la agregación por nodo (overall sobre todas las asignaturas). */
-type OverallRow = {
-  nodeId: string;
-  avgPct: string | null;
 };
 
 @Injectable()
@@ -71,13 +78,19 @@ export class HeatmapService {
   // ───────────────────────────────────────────────────────────────────────────
   // GET /api/heatmap  (H6.10)
   // Matriz habilidad (fila, taxonomy_node) × asignatura (columna, subject) de
-  // % logro promedio (0..100) agregado desde skill_results sobre el scope.
+  // % logro promedio (0..100) sobre el scope.
+  //
+  // Lee el read-model de cohorte `assessment_skill_stats` (grano curso), no
+  // `skill_results` (grano alumno): así una evaluación cargada desde un informe
+  // oficial DIA —sin respuestas por alumno— entra por el mismo camino que una
+  // calculada desde `responses` (plan §5 y Fase 5).
+  //
+  // Los números NO se mueven: el `percentage` de `source='computed'` es la media de
+  // los porcentajes por alumno del curso (decisión §9.2), y acá se recombina
+  // ponderado por `studentCount`, que es exactamente el `avg()` por alumno de antes.
   // ───────────────────────────────────────────────────────────────────────────
 
-  async getHeatmap(
-    user: JwtPayload,
-    query: HeatmapQueryDto,
-  ): Promise<HeatmapResponse> {
+  async getHeatmap(user: JwtPayload, query: HeatmapQueryDto): Promise<HeatmapResponse> {
     const orgId = this.requireOrgId(user);
 
     return withOrgContext(this.db, orgId, async (tx) => {
@@ -88,36 +101,31 @@ export class HeatmapService {
         return { subjects: [], rows: [] };
       }
 
-      // Set de alumnos visibles según scope + filtros de curso/grado/período
-      // (null = toda la org sin restricción de alumno).
-      const studentIds = await this.resolveScopedStudentIds(
-        tx,
-        orgId,
-        scope,
-        query,
-      );
-      if (studentIds !== null && studentIds.length === 0) {
+      // Set de cursos visibles según scope + filtros de curso/período
+      // (null = toda la org sin restricción).
+      const classGroupIds = await this.resolveScopedClassGroupIds(tx, orgId, scope, query);
+      if (classGroupIds !== null && classGroupIds.length === 0) {
         return { subjects: [], rows: [] };
       }
 
-      const baseConditions = this.buildConditions(orgId, query, studentIds);
+      const baseConditions = this.buildConditions(orgId, query, classGroupIds);
 
-      // 1 query: celdas agregadas por (node, subject).
+      // 1 query: celdas agregadas por (node, subject, class_group).
       const cellRows = await this.loadCellRows(tx, baseConditions);
       if (cellRows.length === 0) {
         return { subjects: [], rows: [] };
       }
-
-      // 1 query: overall por nodo (promedio del nodo sobre todas las asignaturas
-      // visibles). Es el promedio real student-weighted, no el promedio de celdas.
-      const overallRows = await this.loadOverallRows(tx, baseConditions);
 
       // BUG #8: los niveles de desempeño deben usar los thresholds de la escala
       // del instrumento, no los defaults fijos. Se resuelven una vez sobre el
       // scope y se pasan a percentageToPerformanceLevel en el ensamblado.
       const thresholds = await this.resolveThresholds(tx, baseConditions);
 
-      return this.assembleResponse(cellRows, overallRows, thresholds);
+      // El overall por nodo ya NO necesita query propia: cada fila del read-model
+      // pertenece a exactamente un (node, subject, class_group), así que sumar los
+      // numeradores y denominadores de sus celdas da el mismo promedio
+      // student-weighted que antes calculaba `loadOverallRows`.
+      return this.assembleResponse(cellRows, thresholds);
     });
   }
 
@@ -126,7 +134,7 @@ export class HeatmapService {
    * performanceThresholds` del primer instrumento (con grading_scale) que matchee
    * las condiciones; si ninguno define escala/thresholds, usa los defaults DIA.
    * Corre dentro de `withOrgContext` (recibe `tx`): toca tablas con RLS
-   * (skill_results, assessments, students), y las condiciones ya incluyen
+   * (assessment_skill_stats, assessments), y las condiciones ya incluyen
    * `eq(assessments.orgId, orgId)`.
    *
    * ⚠️ LIMITACIÓN (F1 OK / revisar en F2): asume escala HOMOGÉNEA en el scope.
@@ -137,17 +145,13 @@ export class HeatmapService {
    * se difiere a F2 multi-escala. El `orderBy(createdAt)` solo garantiza que la
    * escala elegida sea determinista, no que sea correcta para celdas de otra escala.
    */
-  private async resolveThresholds(
-    tx: Database,
-    conditions: SQL[],
-  ): Promise<PerformanceThresholds> {
+  private async resolveThresholds(tx: Database, conditions: SQL[]): Promise<PerformanceThresholds> {
     const [row] = await tx
       .select({ config: gradingScales.config })
-      .from(skillResults)
-      .innerJoin(assessments, eq(assessments.id, skillResults.assessmentId))
+      .from(assessmentSkillStats)
+      .innerJoin(assessments, eq(assessments.id, assessmentSkillStats.assessmentId))
       .innerJoin(instruments, eq(instruments.id, assessments.instrumentId))
       .innerJoin(subjects, eq(subjects.id, instruments.subjectId))
-      .innerJoin(students, eq(students.id, skillResults.studentId))
       .innerJoin(gradingScales, eq(gradingScales.id, instruments.gradingScaleId))
       .where(and(...conditions))
       // Determinista: el "primer instrumento" es el más antiguo del scope, no una
@@ -172,20 +176,23 @@ export class HeatmapService {
   // ───────────────────────────────────────────────────────────────────────────
 
   /**
-   * Condiciones base compartidas por las dos agregaciones. Filtra por org (del
-   * token), instrumentos no borrados, los filtros opcionales del query y — para
-   * profesores — los alumnos de sus cursos. Sólo considera asignaturas con
-   * subject_id (las columnas del heatmap son subjects).
+   * Condiciones base compartidas por la agregación y por `resolveThresholds`. Filtra
+   * por org (del token), instrumentos no borrados, los filtros opcionales del query y
+   * — para profesores — sus cursos. Sólo considera asignaturas con subject_id (las
+   * columnas del heatmap son subjects).
+   *
+   * Ya no filtra `students.deleted_at`: el read-model excluye a los alumnos con soft
+   * delete en el momento de calcularse (`loadEnrollmentByStudent` en @soe/db), no en
+   * la lectura. La diferencia sólo se nota entre el borrado y el siguiente recálculo.
    */
   private buildConditions(
     orgId: string,
     query: HeatmapQueryDto,
-    studentIds: string[] | null,
+    classGroupIds: string[] | null,
   ): SQL[] {
     const conditions: SQL[] = [
       eq(assessments.orgId, orgId),
       isNull(instruments.deletedAt),
-      isNull(students.deletedAt),
       // El heatmap es habilidad × asignatura: sólo evaluaciones con subject.
       sql`${instruments.subjectId} is not null`,
     ];
@@ -201,68 +208,49 @@ export class HeatmapService {
     }
     if (query.subjectId) conditions.push(eq(instruments.subjectId, query.subjectId));
     if (query.gradeId) conditions.push(eq(instruments.gradeId, query.gradeId));
-    // `classGroupId` / `academicYearId` se resuelven sobre el conjunto de
-    // alumnos (resolveScopedStudentIds), no como join a class_groups: un
-    // assessment puede tocar varios cursos y joinear inflaría los promedios.
 
-    if (studentIds !== null) {
-      conditions.push(inArray(skillResults.studentId, studentIds));
+    if (classGroupIds !== null) {
+      conditions.push(inArray(assessmentSkillStats.classGroupId, classGroupIds));
     }
 
     return conditions;
   }
 
-  /** UNA query: % logro promedio + alumnos distintos por (node, subject). */
-  private async loadCellRows(
-    tx: Database,
-    conditions: SQL[],
-  ): Promise<CellRow[]> {
-    return tx
-      .select({
-        nodeId: skillResults.nodeId,
-        nodeName: taxonomyNodes.name,
-        nodeType: taxonomyNodes.type,
-        nodeCode: taxonomyNodes.code,
-        subjectId: subjects.id,
-        subjectName: subjects.name,
-        avgPct: sql<string | null>`avg(${skillResults.percentage}::numeric)`,
-        studentsAssessed: sql<number>`count(distinct ${skillResults.studentId})::int`,
-      })
-      .from(skillResults)
-      .innerJoin(assessments, eq(assessments.id, skillResults.assessmentId))
-      .innerJoin(instruments, eq(instruments.id, assessments.instrumentId))
-      .innerJoin(subjects, eq(subjects.id, instruments.subjectId))
-      .innerJoin(taxonomyNodes, eq(taxonomyNodes.id, skillResults.nodeId))
-      .innerJoin(students, eq(students.id, skillResults.studentId))
-      // TKT-05 — el heatmap (habilidad × asignatura) no reporta filas de descriptor.
-      .where(and(...conditions, notInArray(taxonomyNodes.type, [...RESULT_HIDDEN_NODE_TYPES])))
-      .groupBy(
-        skillResults.nodeId,
-        taxonomyNodes.name,
-        taxonomyNodes.type,
-        taxonomyNodes.code,
-        subjects.id,
-        subjects.name,
-      );
-  }
-
-  /** UNA query: % logro promedio del nodo sobre todas las asignaturas visibles. */
-  private async loadOverallRows(
-    tx: Database,
-    conditions: SQL[],
-  ): Promise<OverallRow[]> {
-    return tx
-      .select({
-        nodeId: skillResults.nodeId,
-        avgPct: sql<string | null>`avg(${skillResults.percentage}::numeric)`,
-      })
-      .from(skillResults)
-      .innerJoin(assessments, eq(assessments.id, skillResults.assessmentId))
-      .innerJoin(instruments, eq(instruments.id, assessments.instrumentId))
-      .innerJoin(subjects, eq(subjects.id, instruments.subjectId))
-      .innerJoin(students, eq(students.id, skillResults.studentId))
-      .where(and(...conditions))
-      .groupBy(skillResults.nodeId);
+  /**
+   * UNA query: numerador/denominador del promedio ponderado + alumnos evaluados,
+   * agregados por (node, subject, class_group).
+   */
+  private async loadCellRows(tx: Database, conditions: SQL[]): Promise<CellRow[]> {
+    return (
+      tx
+        .select({
+          nodeId: assessmentSkillStats.nodeId,
+          nodeName: taxonomyNodes.name,
+          nodeType: taxonomyNodes.type,
+          nodeCode: taxonomyNodes.code,
+          subjectId: subjects.id,
+          subjectName: subjects.name,
+          pctSum: COHORT_PCT_SUM,
+          pctWeight: COHORT_PCT_WEIGHT,
+          studentsAssessed: COHORT_STUDENTS_ASSESSED,
+        })
+        .from(assessmentSkillStats)
+        .innerJoin(assessments, eq(assessments.id, assessmentSkillStats.assessmentId))
+        .innerJoin(instruments, eq(instruments.id, assessments.instrumentId))
+        .innerJoin(subjects, eq(subjects.id, instruments.subjectId))
+        .innerJoin(taxonomyNodes, eq(taxonomyNodes.id, assessmentSkillStats.nodeId))
+        // TKT-05 — el heatmap (habilidad × asignatura) no reporta filas de descriptor.
+        .where(and(...conditions, notInArray(taxonomyNodes.type, [...RESULT_HIDDEN_NODE_TYPES])))
+        .groupBy(
+          assessmentSkillStats.nodeId,
+          taxonomyNodes.name,
+          taxonomyNodes.type,
+          taxonomyNodes.code,
+          subjects.id,
+          subjects.name,
+          assessmentSkillStats.classGroupId,
+        )
+    );
   }
 
   // ───────────────────────────────────────────────────────────────────────────
@@ -271,7 +259,6 @@ export class HeatmapService {
 
   private assembleResponse(
     cellRows: CellRow[],
-    overallRows: OverallRow[],
     thresholds: PerformanceThresholds,
   ): HeatmapResponse {
     // Asignaturas (columnas), únicas y ordenadas por nombre.
@@ -288,13 +275,16 @@ export class HeatmapService {
       a.subjectName.localeCompare(b.subjectName, 'es'),
     );
 
-    // Celdas indexadas por nodo → subject.
+    // Acumuladores por nodo → subject, recombinando los cursos de cada celda. El
+    // overall del nodo acumula TODAS sus filas (todas las asignaturas), que es el
+    // mismo promedio student-weighted que antes daba la query `loadOverallRows`.
     type NodeAccumulator = {
       nodeId: string;
       nodeName: string;
       nodeType: string;
       nodeCode: string | null;
-      cellsBySubject: Map<string, HeatmapCell>;
+      cellsBySubject: Map<string, CohortAccumulator>;
+      overall: CohortAccumulator;
     };
     const nodeMap = new Map<string, NodeAccumulator>();
     for (const r of cellRows) {
@@ -306,37 +296,41 @@ export class HeatmapService {
           nodeType: r.nodeType,
           nodeCode: r.nodeCode,
           cellsBySubject: new Map(),
+          overall: { pctSum: 0, pctWeight: 0, studentsAssessed: 0 },
         };
         nodeMap.set(r.nodeId, node);
       }
-      const pct = r.avgPct == null ? null : Number(r.avgPct);
-      node.cellsBySubject.set(r.subjectId, {
-        subjectId: r.subjectId,
+      addCohortRow(node.cellsBySubject, r.subjectId, r);
+      node.overall.pctSum += r.pctSum == null ? 0 : Number(r.pctSum);
+      node.overall.pctWeight += Number(r.pctWeight ?? 0);
+    }
+
+    const toCell = (subjectId: string, acc: CohortAccumulator): HeatmapCell => {
+      const pct = cohortAverage(acc);
+      return {
+        subjectId,
         averageAchievement: pct,
         performanceLevel:
           pct == null
             ? null
             : percentageToPerformanceLevel(pct / 100, { performanceThresholds: thresholds }),
-        studentsAssessed: Number(r.studentsAssessed ?? 0),
-      });
-    }
-
-    const overallByNode = new Map<string, number | null>();
-    for (const r of overallRows) {
-      overallByNode.set(r.nodeId, r.avgPct == null ? null : Number(r.avgPct));
-    }
+        studentsAssessed: acc.studentsAssessed,
+      };
+    };
 
     const rows: HeatmapRow[] = Array.from(nodeMap.values()).map((node) => {
-      const cells: HeatmapCell[] = subjectList.map(
-        (s) =>
-          node.cellsBySubject.get(s.subjectId) ?? {
-            subjectId: s.subjectId,
-            averageAchievement: null,
-            performanceLevel: null,
-            studentsAssessed: 0,
-          },
-      );
-      const overall = overallByNode.get(node.nodeId) ?? null;
+      const cells: HeatmapCell[] = subjectList.map((s) => {
+        const acc = node.cellsBySubject.get(s.subjectId);
+        return acc
+          ? toCell(s.subjectId, acc)
+          : {
+              subjectId: s.subjectId,
+              averageAchievement: null,
+              performanceLevel: null,
+              studentsAssessed: 0,
+            };
+      });
+      const overall = cohortAverage(node.overall);
       return {
         nodeId: node.nodeId,
         nodeName: node.nodeName,
@@ -402,29 +396,26 @@ export class HeatmapService {
     const rows = await tx
       .select({ classGroupId: subjectClasses.classGroupId })
       .from(teacherAssignments)
-      .innerJoin(
-        subjectClasses,
-        eq(subjectClasses.id, teacherAssignments.subjectClassId),
-      )
+      .innerJoin(subjectClasses, eq(subjectClasses.id, teacherAssignments.subjectClassId))
       .innerJoin(classGroups, eq(classGroups.id, subjectClasses.classGroupId))
-      .where(
-        and(
-          eq(teacherAssignments.userId, user.userId),
-          eq(classGroups.orgId, orgId),
-        ),
-      );
+      .where(and(eq(teacherAssignments.userId, user.userId), eq(classGroups.orgId, orgId)));
 
     const ids = Array.from(new Set(rows.map((r) => r.classGroupId)));
     return { scopeAll: false, classGroupIds: ids };
   }
 
   /**
-   * Set de studentIds visibles dado el scope + los filtros de curso/período
+   * Set de class_groups visibles dado el scope + los filtros de curso/período
    * (`classGroupId`, `academicYearId`). Retorna `null` cuando el caller ve toda
-   * la org y no hay filtro que acote a un curso/período (sin restricción de
-   * alumno). Retorna `[]` cuando el filtro deja el set vacío.
+   * la org y no hay filtro que acote (sin restricción). Retorna `[]` cuando el
+   * filtro deja el set vacío.
+   *
+   * Antes esto resolvía alumnos (`resolveScopedStudentIds`) porque la agregación
+   * era por alumno. El read-model tiene grano curso y el filtro de la UI siempre
+   * nació de cursos, así que resolverlos directo es el mismo conjunto sin el rodeo
+   * por `student_enrollments`.
    */
-  private async resolveScopedStudentIds(
+  private async resolveScopedClassGroupIds(
     tx: Database,
     orgId: string,
     scope: Scope,
@@ -459,14 +450,10 @@ export class HeatmapService {
     }
 
     const rows = await tx
-      .select({ studentId: studentEnrollments.studentId })
-      .from(studentEnrollments)
-      .innerJoin(classGroups, eq(classGroups.id, studentEnrollments.classGroupId))
-      .innerJoin(students, eq(students.id, studentEnrollments.studentId))
-      .where(
-        and(...cgConditions, eq(students.orgId, orgId), isNull(students.deletedAt)),
-      );
+      .select({ id: classGroups.id })
+      .from(classGroups)
+      .where(and(...cgConditions));
 
-    return Array.from(new Set(rows.map((r) => r.studentId)));
+    return Array.from(new Set(rows.map((r) => r.id)));
   }
 }

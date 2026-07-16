@@ -1,5 +1,5 @@
 import type { Database } from '@soe/db';
-import type { AssessmentReportResponse } from '@soe/types';
+import { capabilitiesFor, type AssessmentReportResponse } from '@soe/types';
 import { SnapshotService } from './ai-analysis.snapshot';
 import { kr20, pointBiserial, type ScoreMatrix } from './ai-analysis.metrics';
 import type { AssessmentReportService } from '../assessment-report/assessment-report.service';
@@ -28,8 +28,7 @@ function makeDb(selectResults: unknown[][]): Database {
       groupBy: () => c,
       orderBy: () => c,
       limit: () => c,
-      then: (resolve: unknown) =>
-        Promise.resolve(rows).then(resolve as (v: unknown) => unknown),
+      then: (resolve: unknown) => Promise.resolve(rows).then(resolve as (v: unknown) => unknown),
     };
     return c;
   }
@@ -45,9 +44,7 @@ function makeDb(selectResults: unknown[][]): Database {
   return db;
 }
 
-function makeReport(
-  overrides: Partial<AssessmentReportResponse> = {},
-): AssessmentReportResponse {
+function makeReport(overrides: Partial<AssessmentReportResponse> = {}): AssessmentReportResponse {
   return {
     meta: {
       assessmentId: 'a1',
@@ -60,6 +57,9 @@ function makeReport(
       administeredAt: null,
       classGroups: [],
       itemsCount: 2,
+      dataGranularity: 'item_level',
+      capabilities: [...capabilitiesFor('item_level')],
+      hasItemLevelData: true,
       ...overrides.meta,
     },
     summary: {
@@ -131,10 +131,7 @@ function makeReportService(report: AssessmentReportResponse): AssessmentReportSe
   } as unknown as AssessmentReportService;
 }
 
-function makeService(
-  db: Database,
-  reportService: AssessmentReportService,
-): SnapshotService {
+function makeService(db: Database, reportService: AssessmentReportService): SnapshotService {
   return new (SnapshotService as new (
     db: Database,
     rs: AssessmentReportService,
@@ -402,13 +399,7 @@ describe('SnapshotService.build', () => {
       ],
     });
     const rs = makeReportService(report);
-    const queues: unknown[][] = [
-      [{ itemId: 'it1', position: 1, content: {} }],
-      [],
-      [],
-      [],
-      [],
-    ];
+    const queues: unknown[][] = [[{ itemId: 'it1', position: 1, content: {} }], [], [], [], []];
     const svc = makeService(makeDb(queues), rs);
 
     const snap = await svc.build('a1', 'org-1');

@@ -3,6 +3,7 @@ import { relations } from 'drizzle-orm';
 import {
   assessmentModeEnum,
   assessmentStatusEnum,
+  dataGranularityEnum,
   importJobStatusEnum,
   importJobTypeEnum,
 } from './enums';
@@ -23,6 +24,10 @@ export const assessments = pgTable('assessments', {
   administeredById: uuid('administered_by_id').references(() => users.id),
   mode: assessmentModeEnum('mode').default('paper').notNull(),
   status: assessmentStatusEnum('status').default('scheduled').notNull(),
+  // Granularidad del dato disponible. Columna tipada y no `config` JSONB porque se
+  // ramifica y se filtra en SQL (CLAUDE.md §5.4). `item_level` por defecto: la
+  // migración es inerte para todo lo existente.
+  dataGranularity: dataGranularityEnum('data_granularity').default('item_level').notNull(),
   scheduledFor: timestamp('scheduled_for'),
   administeredAt: timestamp('administered_at'),
   config: jsonb('config').$type<Record<string, unknown>>().default({}),

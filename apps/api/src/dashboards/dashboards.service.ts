@@ -3,6 +3,7 @@ import { and, asc, desc, eq, inArray, isNull, notInArray, sql } from 'drizzle-or
 import {
   academicYears,
   assessmentResults,
+  assessmentSkillStats,
   assessments,
   classGroups,
   gradingScales,
@@ -50,6 +51,14 @@ import {
   type UserRole,
 } from '@soe/types';
 import type { JwtPayload } from '../auth/jwt-payload.types';
+import {
+  COHORT_PCT_SUM,
+  COHORT_PCT_WEIGHT,
+  COHORT_STUDENTS_ASSESSED,
+  addCohortRow,
+  cohortAverage,
+  type CohortAccumulator,
+} from '../common/helpers/cohort-skill-stats.helper';
 import { InjectDb, type Database } from '../database/database.types';
 import { loadInstrumentBands } from '../performance-bands/lib/load-instrument-bands';
 
@@ -77,6 +86,30 @@ const ADMIN_LIKE_ROLES: readonly UserRole[] = [
 const DEFAULT_THRESHOLDS = DEFAULT_PERFORMANCE_THRESHOLDS;
 
 type Scope = { scopeAll: boolean; classGroupIds: string[] };
+
+/**
+ * Agregado por nodo, ya recombinado sobre el scope y antes de clasificar por
+ * banda/nivel. Es el contrato interno que comparten los dos orígenes de `getSkills`:
+ * el read-model de cohorte (camino normal) y `skill_results` (fallback por alumno).
+ */
+type SkillNodeAggregate = {
+  nodeId: string;
+  nodeName: string;
+  nodeType: string;
+  nodeCode: string | null;
+  parentId: string | null;
+  averageAchievement: number | null;
+  studentsAssessed: number;
+};
+
+/** Agregado por fila del desglose (`getSkillBreakdown`), antes de derivar el nivel. */
+type BreakdownAggregate = {
+  id: string;
+  label: string;
+  sublabel: string | null;
+  averageAchievement: number | null;
+  studentsAssessed: number;
+};
 
 @Injectable()
 export class DashboardsService {
@@ -410,6 +443,16 @@ export class DashboardsService {
 
   // ───────────────────────────────────────────────────────────────────────────
   // GET /api/dashboards/skills  (H6.5)
+  //
+  // Lee el read-model de cohorte `assessment_skill_stats` (grano curso), no
+  // `skill_results` (grano alumno). Así una evaluación cargada desde un informe
+  // oficial DIA —que no tiene respuestas por alumno pero sí datos de cohorte—
+  // alimenta esta vista por el MISMO camino que una evaluación calculada desde
+  // `responses` (plan §5: un lector, dos escritores).
+  //
+  // La única excepción es el filtro `studentId`: acotar a UN alumno exige dato por
+  // alumno, que es justo lo que el grano de cohorte no tiene. Ese caso cae al
+  // camino histórico sobre `skill_results` — ver `loadSkillsFromSkillResults`.
   // ───────────────────────────────────────────────────────────────────────────
 
   async getSkills(
@@ -423,8 +466,16 @@ export class DashboardsService {
       const scope = await this.getAccessibleClassGroupIds(tx, user, orgId);
       if (!scope.scopeAll && scope.classGroupIds.length === 0) return { skills: [] };
 
-      const studentIds = await this.resolveScopedStudentIds(tx, orgId, scope, query);
+      const perStudent = this.requiresPerStudentData(query);
+      const studentIds = perStudent
+        ? await this.resolveScopedStudentIds(tx, orgId, scope, query)
+        : null;
       if (studentIds !== null && studentIds.length === 0) return { skills: [] };
+
+      const classGroupIds = perStudent
+        ? null
+        : await this.resolveScopedClassGroupIds(tx, orgId, scope, query);
+      if (classGroupIds !== null && classGroupIds.length === 0) return { skills: [] };
 
       const assessmentIds = await this.resolveScopedAssessmentIds(tx, orgId, query);
       if (assessmentIds.length === 0) return { skills: [] };
@@ -441,47 +492,20 @@ export class DashboardsService {
 
       const bands = await this.resolveScopedBands(tx, query, assessmentIds);
 
-      const conditions = [
-        inArray(skillResults.assessmentId, assessmentIds),
-        // TKT-05 — la matriz de habilidades no reporta nodos tipo descriptor.
-        notInArray(taxonomyNodes.type, [...RESULT_HIDDEN_NODE_TYPES]),
-      ];
-      if (studentIds !== null) {
-        conditions.push(inArray(skillResults.studentId, studentIds));
-      }
+      const aggregates = perStudent
+        ? await this.loadSkillsFromSkillResults(tx, assessmentIds, studentIds)
+        : await this.loadSkillsFromCohortStats(tx, assessmentIds, classGroupIds);
 
-      const rows = await tx
-        .select({
-          nodeId: skillResults.nodeId,
-          nodeName: taxonomyNodes.name,
-          nodeType: taxonomyNodes.type,
-          nodeCode: taxonomyNodes.code,
-          parentId: taxonomyNodes.parentId,
-          avgPct: sql<string | null>`avg(${skillResults.percentage}::numeric)`,
-          studentsAssessed: sql<number>`count(distinct ${skillResults.studentId})::int`,
-        })
-        .from(skillResults)
-        .innerJoin(taxonomyNodes, eq(taxonomyNodes.id, skillResults.nodeId))
-        .where(and(...conditions))
-        .groupBy(
-          skillResults.nodeId,
-          taxonomyNodes.name,
-          taxonomyNodes.type,
-          taxonomyNodes.code,
-          taxonomyNodes.parentId,
-        )
-        .orderBy(taxonomyNodes.name);
-
-      const skills: SkillAchievementModel[] = rows.map((r) => {
-        const pct = r.avgPct == null ? null : Number(r.avgPct);
+      const skills: SkillAchievementModel[] = aggregates.map((a) => {
+        const pct = a.averageAchievement;
         const band = pct == null ? null : classifyByBands(pct / 100, bands);
         return {
-          nodeId: r.nodeId,
-          nodeName: r.nodeName,
-          nodeType: r.nodeType,
-          nodeCode: r.nodeCode,
-          parentId: r.parentId,
-          studentsAssessed: Number(r.studentsAssessed ?? 0),
+          nodeId: a.nodeId,
+          nodeName: a.nodeName,
+          nodeType: a.nodeType,
+          nodeCode: a.nodeCode,
+          parentId: a.parentId,
+          studentsAssessed: a.studentsAssessed,
           averageAchievement: pct,
           performanceLevel:
             pct == null
@@ -497,6 +521,129 @@ export class DashboardsService {
 
       return bands ? { skills, bands: bands.map(toBandView) } : { skills };
     });
+  }
+
+  /**
+   * Agrega el read-model de cohorte por nodo sobre el scope.
+   *
+   * El `group by` incluye `class_group_id` a propósito: el promedio se recombina
+   * ponderado por `studentCount` y los alumnos evaluados por curso se toman con `max`
+   * sobre las evaluaciones (ver `cohort-skill-stats.helper`). Agregar directo por nodo
+   * en SQL impediría ambas cosas.
+   */
+  private async loadSkillsFromCohortStats(
+    tx: Database,
+    assessmentIds: string[],
+    classGroupIds: string[] | null,
+  ): Promise<SkillNodeAggregate[]> {
+    const conditions = [
+      inArray(assessmentSkillStats.assessmentId, assessmentIds),
+      // TKT-05 — la matriz de habilidades no reporta nodos tipo descriptor.
+      notInArray(taxonomyNodes.type, [...RESULT_HIDDEN_NODE_TYPES]),
+    ];
+    if (classGroupIds !== null) {
+      conditions.push(inArray(assessmentSkillStats.classGroupId, classGroupIds));
+    }
+
+    const rows = await tx
+      .select({
+        nodeId: assessmentSkillStats.nodeId,
+        nodeName: taxonomyNodes.name,
+        nodeType: taxonomyNodes.type,
+        nodeCode: taxonomyNodes.code,
+        parentId: taxonomyNodes.parentId,
+        pctSum: COHORT_PCT_SUM,
+        pctWeight: COHORT_PCT_WEIGHT,
+        studentsAssessed: COHORT_STUDENTS_ASSESSED,
+      })
+      .from(assessmentSkillStats)
+      .innerJoin(taxonomyNodes, eq(taxonomyNodes.id, assessmentSkillStats.nodeId))
+      .where(and(...conditions))
+      .groupBy(
+        assessmentSkillStats.nodeId,
+        taxonomyNodes.name,
+        taxonomyNodes.type,
+        taxonomyNodes.code,
+        taxonomyNodes.parentId,
+        assessmentSkillStats.classGroupId,
+      )
+      .orderBy(taxonomyNodes.name);
+
+    const acc = new Map<string, CohortAccumulator>();
+    const meta = new Map<
+      string,
+      Omit<SkillNodeAggregate, 'averageAchievement' | 'studentsAssessed'>
+    >();
+    for (const r of rows) {
+      addCohortRow(acc, r.nodeId, r);
+      if (!meta.has(r.nodeId)) {
+        meta.set(r.nodeId, {
+          nodeId: r.nodeId,
+          nodeName: r.nodeName,
+          nodeType: r.nodeType,
+          nodeCode: r.nodeCode,
+          parentId: r.parentId,
+        });
+      }
+    }
+
+    // El orden de inserción del Map respeta el `orderBy(taxonomyNodes.name)`: todas las
+    // filas de un nodo comparten nombre, así que la primera aparición ya viene ordenada.
+    return [...acc.entries()].map(([nodeId, a]) => ({
+      ...meta.get(nodeId)!,
+      averageAchievement: cohortAverage(a),
+      studentsAssessed: a.studentsAssessed,
+    }));
+  }
+
+  /**
+   * Camino histórico sobre `skill_results` (grano alumno). Sólo se usa cuando el query
+   * trae `studentId`: el read-model de cohorte no puede acotar a un alumno.
+   */
+  private async loadSkillsFromSkillResults(
+    tx: Database,
+    assessmentIds: string[],
+    studentIds: string[] | null,
+  ): Promise<SkillNodeAggregate[]> {
+    const conditions = [
+      inArray(skillResults.assessmentId, assessmentIds),
+      notInArray(taxonomyNodes.type, [...RESULT_HIDDEN_NODE_TYPES]),
+    ];
+    if (studentIds !== null) {
+      conditions.push(inArray(skillResults.studentId, studentIds));
+    }
+
+    const rows = await tx
+      .select({
+        nodeId: skillResults.nodeId,
+        nodeName: taxonomyNodes.name,
+        nodeType: taxonomyNodes.type,
+        nodeCode: taxonomyNodes.code,
+        parentId: taxonomyNodes.parentId,
+        avgPct: sql<string | null>`avg(${skillResults.percentage}::numeric)`,
+        studentsAssessed: sql<number>`count(distinct ${skillResults.studentId})::int`,
+      })
+      .from(skillResults)
+      .innerJoin(taxonomyNodes, eq(taxonomyNodes.id, skillResults.nodeId))
+      .where(and(...conditions))
+      .groupBy(
+        skillResults.nodeId,
+        taxonomyNodes.name,
+        taxonomyNodes.type,
+        taxonomyNodes.code,
+        taxonomyNodes.parentId,
+      )
+      .orderBy(taxonomyNodes.name);
+
+    return rows.map((r) => ({
+      nodeId: r.nodeId,
+      nodeName: r.nodeName,
+      nodeType: r.nodeType,
+      nodeCode: r.nodeCode,
+      parentId: r.parentId,
+      averageAchievement: r.avgPct == null ? null : Number(r.avgPct),
+      studentsAssessed: Number(r.studentsAssessed ?? 0),
+    }));
   }
 
   // ───────────────────────────────────────────────────────────────────────────
@@ -545,8 +692,16 @@ export class DashboardsService {
       const scope = await this.getAccessibleClassGroupIds(tx, user, orgId);
       if (!scope.scopeAll && scope.classGroupIds.length === 0) return empty;
 
-      const studentIds = await this.resolveScopedStudentIds(tx, orgId, scope, query);
+      const perStudent = this.requiresPerStudentData(query);
+      const studentIds = perStudent
+        ? await this.resolveScopedStudentIds(tx, orgId, scope, query)
+        : null;
       if (studentIds !== null && studentIds.length === 0) return empty;
+
+      const classGroupIds = perStudent
+        ? null
+        : await this.resolveScopedClassGroupIds(tx, orgId, scope, query);
+      if (classGroupIds !== null && classGroupIds.length === 0) return empty;
 
       const assessmentIds = await this.resolveScopedAssessmentIds(tx, orgId, query);
       if (assessmentIds.length === 0) return empty;
@@ -562,146 +717,290 @@ export class DashboardsService {
           ? null
           : percentageToPerformanceLevel(pct / 100, { performanceThresholds: scaleThresholds });
 
-      // Filtro base sobre skill_results: ese nodo, en el scope de evaluaciones y
-      // (si aplica) alumnos ya resuelto por los helpers compartidos.
-      const base = [
-        eq(skillResults.nodeId, query.nodeId),
-        inArray(skillResults.assessmentId, assessmentIds),
-      ];
-      if (studentIds !== null) base.push(inArray(skillResults.studentId, studentIds));
+      const aggregates = perStudent
+        ? await this.loadBreakdownFromSkillResults(
+            tx,
+            orgId,
+            scope,
+            query,
+            assessmentIds,
+            studentIds,
+          )
+        : await this.loadBreakdownFromCohortStats(tx, orgId, query, assessmentIds, classGroupIds);
 
-      const avgPct = sql<string | null>`avg(${skillResults.percentage}::numeric)`;
-      const studentsAssessed = sql<number>`count(distinct ${skillResults.studentId})::int`;
-
-      let rows: SkillBreakdownRow[];
-
-      if (query.groupBy === 'assessment') {
-        const raw = await tx
-          .select({
-            id: assessments.id,
-            name: assessments.name,
-            instrumentName: instruments.name,
-            subjectName: subjects.name,
-            avgPct,
-            studentsAssessed,
-          })
-          .from(skillResults)
-          .innerJoin(assessments, eq(assessments.id, skillResults.assessmentId))
-          .innerJoin(instruments, eq(instruments.id, assessments.instrumentId))
-          .leftJoin(subjects, eq(subjects.id, instruments.subjectId))
-          .where(and(...base))
-          .groupBy(assessments.id, assessments.name, instruments.name, subjects.name)
-          .orderBy(desc(assessments.administeredAt), asc(assessments.createdAt));
-
-        rows = raw.map((r) => {
-          const pct = r.avgPct == null ? null : Number(r.avgPct);
-          return {
-            id: r.id,
-            label: r.name ?? r.instrumentName,
-            sublabel: r.subjectName,
-            averageAchievement: pct,
-            performanceLevel: toLevel(pct),
-            studentsAssessed: Number(r.studentsAssessed ?? 0),
-          };
-        });
-      } else if (query.groupBy === 'subject') {
-        const raw = await tx
-          .select({
-            id: subjects.id,
-            name: subjects.name,
-            avgPct,
-            studentsAssessed,
-          })
-          .from(skillResults)
-          .innerJoin(assessments, eq(assessments.id, skillResults.assessmentId))
-          .innerJoin(instruments, eq(instruments.id, assessments.instrumentId))
-          .innerJoin(subjects, eq(subjects.id, instruments.subjectId))
-          .where(and(...base))
-          .groupBy(subjects.id, subjects.name)
-          .orderBy(asc(subjects.name));
-
-        rows = raw.map((r) => {
-          const pct = r.avgPct == null ? null : Number(r.avgPct);
-          return {
-            id: r.id,
-            label: r.name,
-            sublabel: null,
-            averageAchievement: pct,
-            performanceLevel: toLevel(pct),
-            studentsAssessed: Number(r.studentsAssessed ?? 0),
-          };
-        });
-      } else {
-        // 'grade' | 'classGroup' — se agrupa vía la matrícula del alumno.
-        // ⚠️ Multi-matrícula: un alumno en >1 curso podría contarse en varios
-        // (mismo criterio best-effort que loadClassGroupByStudent). En una org/año
-        // es 1:1; acotamos por año y scope para minimizarlo (F1 OK).
-        const cgConditions = [eq(classGroups.orgId, orgId), ...base];
-        if (!scope.scopeAll) cgConditions.push(inArray(classGroups.id, scope.classGroupIds));
-        if (query.academicYearId) {
-          cgConditions.push(eq(classGroups.academicYearId, query.academicYearId));
-        }
-
-        if (query.groupBy === 'grade') {
-          const raw = await tx
-            .select({
-              id: grades.id,
-              name: grades.name,
-              avgPct,
-              studentsAssessed,
-            })
-            .from(skillResults)
-            .innerJoin(studentEnrollments, eq(studentEnrollments.studentId, skillResults.studentId))
-            .innerJoin(classGroups, eq(classGroups.id, studentEnrollments.classGroupId))
-            .innerJoin(grades, eq(grades.id, classGroups.gradeId))
-            .where(and(...cgConditions))
-            .groupBy(grades.id, grades.name)
-            .orderBy(asc(grades.name));
-
-          rows = raw.map((r) => {
-            const pct = r.avgPct == null ? null : Number(r.avgPct);
-            return {
-              id: r.id,
-              label: r.name,
-              sublabel: null,
-              averageAchievement: pct,
-              performanceLevel: toLevel(pct),
-              studentsAssessed: Number(r.studentsAssessed ?? 0),
-            };
-          });
-        } else {
-          const raw = await tx
-            .select({
-              id: classGroups.id,
-              name: classGroups.name,
-              gradeName: grades.name,
-              avgPct,
-              studentsAssessed,
-            })
-            .from(skillResults)
-            .innerJoin(studentEnrollments, eq(studentEnrollments.studentId, skillResults.studentId))
-            .innerJoin(classGroups, eq(classGroups.id, studentEnrollments.classGroupId))
-            .innerJoin(grades, eq(grades.id, classGroups.gradeId))
-            .where(and(...cgConditions))
-            .groupBy(classGroups.id, classGroups.name, grades.name)
-            .orderBy(asc(classGroups.name));
-
-          rows = raw.map((r) => {
-            const pct = r.avgPct == null ? null : Number(r.avgPct);
-            return {
-              id: r.id,
-              label: r.name,
-              sublabel: r.gradeName,
-              averageAchievement: pct,
-              performanceLevel: toLevel(pct),
-              studentsAssessed: Number(r.studentsAssessed ?? 0),
-            };
-          });
-        }
-      }
+      const rows: SkillBreakdownRow[] = aggregates.map((a) => ({
+        id: a.id,
+        label: a.label,
+        sublabel: a.sublabel,
+        averageAchievement: a.averageAchievement,
+        performanceLevel: toLevel(a.averageAchievement),
+        studentsAssessed: a.studentsAssessed,
+      }));
 
       return { node, groupBy: query.groupBy, rows };
     });
+  }
+
+  /**
+   * Desglose desde el read-model de cohorte. Las cuatro dimensiones comparten forma:
+   * se agrupa por (dimensión × curso) y se recombina en memoria — el curso en el
+   * `group by` es lo que permite ponderar el promedio y contar alumnos sin duplicar.
+   *
+   * `grade`/`classGroup` ya no pasan por `student_enrollments`: el read-model trae el
+   * curso resuelto. Eso además elimina la duplicación por multi-matrícula que el camino
+   * por alumno tenía que aceptar (un alumno con matrícula en dos años se contaba en los
+   * dos cursos); acá el escritor le asigna un único curso (el del año más reciente).
+   */
+  private async loadBreakdownFromCohortStats(
+    tx: Database,
+    orgId: string,
+    query: DashboardSkillBreakdownQueryDto,
+    assessmentIds: string[],
+    classGroupIds: string[] | null,
+  ): Promise<BreakdownAggregate[]> {
+    const base = [
+      eq(assessmentSkillStats.nodeId, query.nodeId),
+      inArray(assessmentSkillStats.assessmentId, assessmentIds),
+    ];
+    if (classGroupIds !== null) {
+      base.push(inArray(assessmentSkillStats.classGroupId, classGroupIds));
+    }
+
+    const stats = {
+      pctSum: COHORT_PCT_SUM,
+      pctWeight: COHORT_PCT_WEIGHT,
+      studentsAssessed: COHORT_STUDENTS_ASSESSED,
+    };
+
+    if (query.groupBy === 'assessment') {
+      const raw = await tx
+        .select({
+          id: assessments.id,
+          name: assessments.name,
+          instrumentName: instruments.name,
+          subjectName: subjects.name,
+          ...stats,
+        })
+        .from(assessmentSkillStats)
+        .innerJoin(assessments, eq(assessments.id, assessmentSkillStats.assessmentId))
+        .innerJoin(instruments, eq(instruments.id, assessments.instrumentId))
+        .leftJoin(subjects, eq(subjects.id, instruments.subjectId))
+        .where(and(...base))
+        .groupBy(
+          assessments.id,
+          assessments.name,
+          instruments.name,
+          subjects.name,
+          assessmentSkillStats.classGroupId,
+        )
+        .orderBy(desc(assessments.administeredAt), asc(assessments.createdAt));
+
+      return this.foldBreakdown(raw, (r) => ({
+        id: r.id,
+        label: r.name ?? r.instrumentName,
+        sublabel: r.subjectName,
+      }));
+    }
+
+    if (query.groupBy === 'subject') {
+      const raw = await tx
+        .select({ id: subjects.id, name: subjects.name, ...stats })
+        .from(assessmentSkillStats)
+        .innerJoin(assessments, eq(assessments.id, assessmentSkillStats.assessmentId))
+        .innerJoin(instruments, eq(instruments.id, assessments.instrumentId))
+        .innerJoin(subjects, eq(subjects.id, instruments.subjectId))
+        .where(and(...base))
+        .groupBy(subjects.id, subjects.name, assessmentSkillStats.classGroupId)
+        .orderBy(asc(subjects.name));
+
+      return this.foldBreakdown(raw, (r) => ({ id: r.id, label: r.name, sublabel: null }));
+    }
+
+    // 'grade' | 'classGroup' — el curso del read-model se joinea directo.
+    // `classGroupIds` ya trae aplicados el scope, `classGroupId`, `gradeId` y
+    // `academicYearId`; el filtro por org es defensa en profundidad.
+    const cgConditions = [...base, eq(classGroups.orgId, orgId)];
+
+    if (query.groupBy === 'grade') {
+      const raw = await tx
+        .select({ id: grades.id, name: grades.name, ...stats })
+        .from(assessmentSkillStats)
+        .innerJoin(classGroups, eq(classGroups.id, assessmentSkillStats.classGroupId))
+        .innerJoin(grades, eq(grades.id, classGroups.gradeId))
+        .where(and(...cgConditions))
+        .groupBy(grades.id, grades.name, assessmentSkillStats.classGroupId)
+        .orderBy(asc(grades.name));
+
+      return this.foldBreakdown(raw, (r) => ({ id: r.id, label: r.name, sublabel: null }));
+    }
+
+    const raw = await tx
+      .select({
+        id: classGroups.id,
+        name: classGroups.name,
+        gradeName: grades.name,
+        ...stats,
+      })
+      .from(assessmentSkillStats)
+      .innerJoin(classGroups, eq(classGroups.id, assessmentSkillStats.classGroupId))
+      .innerJoin(grades, eq(grades.id, classGroups.gradeId))
+      .where(and(...cgConditions))
+      .groupBy(classGroups.id, classGroups.name, grades.name)
+      .orderBy(asc(classGroups.name));
+
+    return this.foldBreakdown(raw, (r) => ({
+      id: r.id,
+      label: r.name,
+      sublabel: r.gradeName,
+    }));
+  }
+
+  /**
+   * Recombina las filas (dimensión × curso) del read-model en una fila por dimensión.
+   * El orden de inserción del Map preserva el `orderBy` de la query: la clave de orden
+   * es función de la dimensión, así que las filas de una misma dimensión son contiguas.
+   */
+  private foldBreakdown<
+    R extends { pctSum: string | null; pctWeight: number; studentsAssessed: number },
+  >(
+    raw: R[],
+    identity: (row: R) => { id: string; label: string; sublabel: string | null },
+  ): BreakdownAggregate[] {
+    const acc = new Map<string, CohortAccumulator>();
+    const meta = new Map<string, { id: string; label: string; sublabel: string | null }>();
+    for (const r of raw) {
+      const id = identity(r);
+      addCohortRow(acc, id.id, r);
+      if (!meta.has(id.id)) meta.set(id.id, id);
+    }
+    return [...acc.entries()].map(([key, a]) => ({
+      ...meta.get(key)!,
+      averageAchievement: cohortAverage(a),
+      studentsAssessed: a.studentsAssessed,
+    }));
+  }
+
+  /**
+   * Camino histórico sobre `skill_results` (grano alumno). Sólo cuando el query trae
+   * `studentId` — ver `requiresPerStudentData`.
+   */
+  private async loadBreakdownFromSkillResults(
+    tx: Database,
+    orgId: string,
+    scope: Scope,
+    query: DashboardSkillBreakdownQueryDto,
+    assessmentIds: string[],
+    studentIds: string[] | null,
+  ): Promise<BreakdownAggregate[]> {
+    const base = [
+      eq(skillResults.nodeId, query.nodeId),
+      inArray(skillResults.assessmentId, assessmentIds),
+    ];
+    if (studentIds !== null) base.push(inArray(skillResults.studentId, studentIds));
+
+    const avgPct = sql<string | null>`avg(${skillResults.percentage}::numeric)`;
+    const studentsAssessed = sql<number>`count(distinct ${skillResults.studentId})::int`;
+
+    if (query.groupBy === 'assessment') {
+      const raw = await tx
+        .select({
+          id: assessments.id,
+          name: assessments.name,
+          instrumentName: instruments.name,
+          subjectName: subjects.name,
+          avgPct,
+          studentsAssessed,
+        })
+        .from(skillResults)
+        .innerJoin(assessments, eq(assessments.id, skillResults.assessmentId))
+        .innerJoin(instruments, eq(instruments.id, assessments.instrumentId))
+        .leftJoin(subjects, eq(subjects.id, instruments.subjectId))
+        .where(and(...base))
+        .groupBy(assessments.id, assessments.name, instruments.name, subjects.name)
+        .orderBy(desc(assessments.administeredAt), asc(assessments.createdAt));
+
+      return raw.map((r) => ({
+        id: r.id,
+        label: r.name ?? r.instrumentName,
+        sublabel: r.subjectName,
+        averageAchievement: r.avgPct == null ? null : Number(r.avgPct),
+        studentsAssessed: Number(r.studentsAssessed ?? 0),
+      }));
+    }
+
+    if (query.groupBy === 'subject') {
+      const raw = await tx
+        .select({ id: subjects.id, name: subjects.name, avgPct, studentsAssessed })
+        .from(skillResults)
+        .innerJoin(assessments, eq(assessments.id, skillResults.assessmentId))
+        .innerJoin(instruments, eq(instruments.id, assessments.instrumentId))
+        .innerJoin(subjects, eq(subjects.id, instruments.subjectId))
+        .where(and(...base))
+        .groupBy(subjects.id, subjects.name)
+        .orderBy(asc(subjects.name));
+
+      return raw.map((r) => ({
+        id: r.id,
+        label: r.name,
+        sublabel: null,
+        averageAchievement: r.avgPct == null ? null : Number(r.avgPct),
+        studentsAssessed: Number(r.studentsAssessed ?? 0),
+      }));
+    }
+
+    // 'grade' | 'classGroup' — se agrupa vía la matrícula del alumno.
+    // ⚠️ Multi-matrícula: un alumno en >1 curso podría contarse en varios
+    // (mismo criterio best-effort que loadClassGroupByStudent). En una org/año
+    // es 1:1; acotamos por año y scope para minimizarlo (F1 OK).
+    const cgConditions = [eq(classGroups.orgId, orgId), ...base];
+    if (!scope.scopeAll) cgConditions.push(inArray(classGroups.id, scope.classGroupIds));
+    if (query.academicYearId) {
+      cgConditions.push(eq(classGroups.academicYearId, query.academicYearId));
+    }
+
+    if (query.groupBy === 'grade') {
+      const raw = await tx
+        .select({ id: grades.id, name: grades.name, avgPct, studentsAssessed })
+        .from(skillResults)
+        .innerJoin(studentEnrollments, eq(studentEnrollments.studentId, skillResults.studentId))
+        .innerJoin(classGroups, eq(classGroups.id, studentEnrollments.classGroupId))
+        .innerJoin(grades, eq(grades.id, classGroups.gradeId))
+        .where(and(...cgConditions))
+        .groupBy(grades.id, grades.name)
+        .orderBy(asc(grades.name));
+
+      return raw.map((r) => ({
+        id: r.id,
+        label: r.name,
+        sublabel: null,
+        averageAchievement: r.avgPct == null ? null : Number(r.avgPct),
+        studentsAssessed: Number(r.studentsAssessed ?? 0),
+      }));
+    }
+
+    const raw = await tx
+      .select({
+        id: classGroups.id,
+        name: classGroups.name,
+        gradeName: grades.name,
+        avgPct,
+        studentsAssessed,
+      })
+      .from(skillResults)
+      .innerJoin(studentEnrollments, eq(studentEnrollments.studentId, skillResults.studentId))
+      .innerJoin(classGroups, eq(classGroups.id, studentEnrollments.classGroupId))
+      .innerJoin(grades, eq(grades.id, classGroups.gradeId))
+      .where(and(...cgConditions))
+      .groupBy(classGroups.id, classGroups.name, grades.name)
+      .orderBy(asc(classGroups.name));
+
+    return raw.map((r) => ({
+      id: r.id,
+      label: r.name,
+      sublabel: r.gradeName,
+      averageAchievement: r.avgPct == null ? null : Number(r.avgPct),
+      studentsAssessed: Number(r.studentsAssessed ?? 0),
+    }));
   }
 
   // ───────────────────────────────────────────────────────────────────────────
@@ -919,6 +1218,67 @@ export class DashboardsService {
       .where(and(...cgConditions, ...enrollConditions));
 
     return Array.from(new Set(rows.map((r) => r.studentId)));
+  }
+
+  /**
+   * True si el query pide algo que el read-model de cohorte no puede responder.
+   *
+   * Hoy es sólo `studentId`: el grano del read-model es el curso, así que acotar a un
+   * alumno exige `skill_results`. No es una limitación accidental — una evaluación
+   * cargada desde un informe oficial tampoco tendría ese dato.
+   */
+  private requiresPerStudentData(query: DashboardFiltersQueryDto): boolean {
+    return !!query.studentId;
+  }
+
+  /**
+   * Set de class_groups visibles dado el scope + los filtros de curso/nivel/período.
+   * Es el equivalente por cohorte de `resolveScopedStudentIds`: mismo árbol de
+   * decisiones, mismos filtros (menos `studentId`, ver `requiresPerStudentData`).
+   *
+   * Retorna `null` si el caller ve toda la org y no hay filtro que acote (sin
+   * restricción), `[]` si el filtro deja el set vacío.
+   */
+  private async resolveScopedClassGroupIds(
+    tx: Database,
+    orgId: string,
+    scope: Scope,
+    query: DashboardFiltersQueryDto,
+  ): Promise<string[] | null> {
+    const hasScopingFilter = !!query.classGroupId || !!query.gradeId || !!query.academicYearId;
+
+    if (scope.scopeAll && !hasScopingFilter) return null;
+
+    let allowedClassGroupIds: string[] | null;
+    if (scope.scopeAll) {
+      allowedClassGroupIds = null; // todos los de la org
+    } else {
+      allowedClassGroupIds = scope.classGroupIds;
+      if (query.classGroupId) {
+        if (!scope.classGroupIds.includes(query.classGroupId)) return [];
+        allowedClassGroupIds = [query.classGroupId];
+      }
+      if (allowedClassGroupIds.length === 0) return [];
+    }
+
+    const cgConditions = [eq(classGroups.orgId, orgId)];
+    if (allowedClassGroupIds !== null) {
+      cgConditions.push(inArray(classGroups.id, allowedClassGroupIds));
+    }
+    if (scope.scopeAll && query.classGroupId) {
+      cgConditions.push(eq(classGroups.id, query.classGroupId));
+    }
+    if (query.gradeId) cgConditions.push(eq(classGroups.gradeId, query.gradeId));
+    if (query.academicYearId) {
+      cgConditions.push(eq(classGroups.academicYearId, query.academicYearId));
+    }
+
+    const rows = await tx
+      .select({ id: classGroups.id })
+      .from(classGroups)
+      .where(and(...cgConditions));
+
+    return Array.from(new Set(rows.map((r) => r.id)));
   }
 
   /**

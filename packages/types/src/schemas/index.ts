@@ -25,6 +25,7 @@ export * from './official-report-common.schema';
 export * from './official-report-course.schema';
 export * from './official-report-establishment.schema';
 export * from './official-report-student.schema';
+export * from './official-report-import.schema';
 export * from './heatmap.schema';
 export * from './item-analysis.schema';
 export * from './ai-analysis.schema';

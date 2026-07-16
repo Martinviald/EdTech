@@ -13,6 +13,10 @@
  *  - 10 evaluaciones históricas con assessment_course_assignments + respuestas +
  *    resultados calculados con el MISMO aggregate* que usa el backend, con
  *    mejora año-a-año (generacional) y dentro del año (progresión).
+ *  - El read-model de cohorte (`assessment_item_stats` / `assessment_skill_stats`)
+ *    de cada evaluación, vía el MISMO escritor que usa la API. Los dashboards de
+ *    habilidades, el heatmap y la matriz alumno×pregunta leen de ahí: sin estas
+ *    filas la analítica sale vacía aunque `responses` esté completa.
  *  - Asignaciones docentes del profesor demo a 2 cursos de 2026 (scoping).
  *
  * Además ESCRIBE archivos CSV de hojas de respuesta en
@@ -35,8 +39,11 @@ import {
   aggregateStudentResults,
   type GradingScaleParams,
   type ResponseForCalculation,
+  type ResponseForItemStats,
 } from '@soe/types';
 import { createDbClient } from '../client';
+import { withOrgContext } from '../with-org-context';
+import { recomputeCohortStatsFromResponses } from '../queries/cohort-stats';
 import { classGroups, grades, subjectClasses, subjects } from '../schema/academic';
 import { taxonomies, taxonomyNodes } from '../schema/taxonomy';
 import { academicYears } from '../schema/organizations';
@@ -209,6 +216,13 @@ const PERIOD_FACTOR: Record<string, number> = {
   intermedia: 0.05,
   final: 0.1,
 };
+
+/**
+ * Una respuesta del seed, lista para los DOS agregadores: el de resultados por alumno
+ * (`ResponseForCalculation`) y el del read-model de cohorte (`ResponseForItemStats`).
+ * Es la misma intersección que usa la API (`ResponseForPersist`).
+ */
+type SeedCalcRow = ResponseForCalculation & ResponseForItemStats;
 
 type SeedItem = { id: string; position: number; nodeId: string; correctKey: string };
 type SeedStudent = { id: string; rut: string; firstName: string; lastName: string };
@@ -524,7 +538,7 @@ async function main() {
     await db.insert(assessmentCourseAssignments).values({ assessmentId: a.id, classGroupId: a.cgId });
 
     const respRows: Array<typeof responses.$inferInsert> = [];
-    const calcRows: ResponseForCalculation[] = [];
+    const calcRows: SeedCalcRow[] = [];
     for (const st of cohort) {
       for (const it of a.instrumentItems) {
         const nodeCode = itemNodeCode.get(it.id)!;
@@ -539,6 +553,11 @@ async function main() {
           studentId: st.id, itemId: it.id, isCorrect, rawScore: isCorrect ? 1 : 0,
           finalScore: isCorrect ? 1 : 0, maxScore: 1, itemPosition: it.position,
           taxonomyNodeIds: [it.nodeId],
+          // Mismo objeto que se persiste en `responses.value`: el read-model tiene que
+          // ver exactamente lo que vería un `GROUP BY` sobre la tabla.
+          value: { raw: chosen },
+          // Todos los ítems del seed son multiple_choice con 4 alternativas.
+          hasAlternatives: true,
         });
       }
     }
@@ -563,7 +582,31 @@ async function main() {
         percentage: (s.percentage * 100).toFixed(2), performanceLevel: s.performanceLevel,
       })),
     );
-    console.log(`  ✓ ${a.name} — ${cohort.length} alumnos, ${respRows.length} respuestas`);
+
+    // Read-model de cohorte. NO es opcional: los dashboards de habilidades, el heatmap
+    // y la matriz alumno×pregunta LEEN de acá, no de `responses`. Un seed que escribe
+    // responses + results pero no esto deja la BDD en un estado que la app no sabe
+    // leer (analítica vacía). Se escribe con el MISMO escritor que la API para que el
+    // seed no sea un tercer camino que pueda divergir.
+    const cohortStats = await withOrgContext(db, DEMO_ORG_ID, (tx) =>
+      recomputeCohortStatsFromResponses(tx, {
+        assessmentId: a.id,
+        responses: calcRows,
+        skillResults: skillAgg.map((s) => ({
+          studentId: s.studentId, nodeId: s.nodeId,
+          correctCount: s.correctCount, totalCount: s.totalCount,
+          // El escritor trabaja en 0..1; la columna es 0..100.
+          percentage: s.percentage,
+        })),
+      }),
+    );
+    if (cohortStats.orphanResponses > 0) {
+      console.warn(`  ⚠️ ${a.name}: ${cohortStats.orphanResponses} respuesta(s) sin curso, fuera del read-model`);
+    }
+    console.log(
+      `  ✓ ${a.name} — ${cohort.length} alumnos, ${respRows.length} respuestas, ` +
+        `${cohortStats.itemRows} item stats, ${cohortStats.skillRows} skill stats`,
+    );
   }
 
   // ── 10. CSVs de hojas de respuesta para probar el flujo de UPLOAD ──────────
