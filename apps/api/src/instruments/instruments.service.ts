@@ -4,7 +4,7 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { and, count, eq, inArray, isNull, or } from 'drizzle-orm';
+import { and, count, desc, eq, inArray, isNull, or } from 'drizzle-orm';
 import {
   instruments,
   instrumentSections,
@@ -18,6 +18,7 @@ import {
   userHasRole,
   type ConfirmInstrumentAttachmentDto,
   type InstrumentAttachmentModel,
+  type InstrumentFacetsModel,
   type InstrumentUploadUrlRequestDto,
   type InstrumentUploadUrlResponse,
   type PassageDto,
@@ -74,6 +75,9 @@ export class InstrumentsService {
     if (filters.year !== undefined) {
       conditions.push(eq(instruments.year, filters.year));
     }
+    if (filters.applicationPeriod) {
+      conditions.push(eq(instruments.applicationPeriod, filters.applicationPeriod));
+    }
     if (filters.status) {
       conditions.push(eq(instruments.status, filters.status));
     }
@@ -98,6 +102,20 @@ export class InstrumentsService {
     const total = totalResult[0]?.total ?? 0;
 
     return { data, total, page, limit: pageSize };
+  }
+
+  /**
+   * Valores disponibles para poblar los filtros del banco, acotados a lo que el
+   * usuario puede ver: así el dropdown de año nunca ofrece un año sin resultados.
+   */
+  async facets(user: JwtPayload): Promise<InstrumentFacetsModel> {
+    const rows = await this.db
+      .selectDistinct({ year: instruments.year })
+      .from(instruments)
+      .where(and(...this.buildVisibilityConditions(user)))
+      .orderBy(desc(instruments.year));
+
+    return { years: rows.map((r) => r.year).filter((y): y is number => y !== null) };
   }
 
   async getById(id: string, user: JwtPayload) {
@@ -140,6 +158,7 @@ export class InstrumentsService {
         subjectId: dto.subjectId ?? null,
         gradeId: dto.gradeId ?? null,
         year: dto.year ?? null,
+        applicationPeriod: dto.applicationPeriod ?? null,
         version: dto.version ?? null,
         isOfficial: dto.isOfficial,
         status: dto.status,
@@ -193,6 +212,7 @@ export class InstrumentsService {
     if (dto.subjectId !== undefined) updateData.subjectId = dto.subjectId;
     if (dto.gradeId !== undefined) updateData.gradeId = dto.gradeId;
     if (dto.year !== undefined) updateData.year = dto.year;
+    if (dto.applicationPeriod !== undefined) updateData.applicationPeriod = dto.applicationPeriod;
     if (dto.version !== undefined) updateData.version = dto.version;
     if (dto.isOfficial !== undefined) {
       if (dto.isOfficial && !userHasRole(user.roles, 'platform_admin')) {

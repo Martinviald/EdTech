@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import type { AnalyticsCapability, DataGranularity } from '../analytics-capabilities';
 import type { PerformanceLevel } from '../enums';
 import type {
   PerformanceBandDistributionBucket,
@@ -50,6 +51,42 @@ export type AssessmentReportMeta = {
   administeredAt: string | Date | null;
   classGroups: { id: string; name: string }[];
   itemsCount: number;
+  // Granularidad del dato + capacidades derivadas. Mismo patrón que `hasGradingScale`
+  // de abajo: un flag de disponibilidad en el payload para que la UI colapse secciones
+  // en vez de renderizar ceros que parecen datos.
+  //
+  // `capabilities` va servido y no derivado en la web a propósito: el backend decide y
+  // la web obedece, igual que con `suppressed`/`suppressionReason` del benchmarking. Si
+  // mañana una capacidad depende de algo más que la granularidad (ej. que el instrumento
+  // tenga tags), el contrato no cambia.
+  //
+  // Ojo: `instrumentType === 'dia'` NO sirve para esto — es una propiedad del
+  // instrumento, no del dato. Un DIA cargado por planilla y uno cargado por PDF
+  // agregado tienen el mismo `instrumentType` y capacidades distintas.
+  dataGranularity: DataGranularity;
+  capabilities: AnalyticsCapability[];
+  /**
+   * ¿Este informe se construyó con respuestas alumno×pregunta?
+   *
+   * Hermano exacto de `hasGradingScale`: un booleano de disponibilidad para que la UI
+   * COLAPSE lo que no aplica en vez de pintar un cero que parece un dato. Es
+   * `dataGranularity === 'item_level'`, servido y no derivado por la misma razón que
+   * `capabilities` (el backend decide, la web obedece).
+   *
+   * Qué queda sin sustituto agregado cuando es `false` — y por lo tanto la UI debe
+   * ocultar, no mostrar en cero ni con guión:
+   *  · `items[].discrimination` y el flag `low_discrimination` que deriva de ella:
+   *    D = p(27% superior) − p(27% inferior) necesita el puntaje de CADA alumno para
+   *    partir la cohorte en grupos. Es irreducible; no se deriva de conteos por curso.
+   *  · `studentsAtRisk[].weakestSkill`: es un ranking POR ALUMNO sobre `skill_results`.
+   *  · `summary.averageAchievement` / `performanceLevel` y `courseComparison[].*`
+   *    de logro: un informe oficial entrega el NIVEL de cada alumno, no su %.
+   *
+   * Lo que sí sigue completo con `false` (viene del read-model de cohorte, no de
+   * `responses`): `items[]` dificultad + distractor + blancos, `skills[]`, la
+   * distribución por banda y la nómina de alumnos con su nivel.
+   */
+  hasItemLevelData: boolean;
 };
 
 /** Síntesis ejecutiva: los números que responden "¿cómo nos fue?". */
@@ -109,6 +146,11 @@ export type AssessmentReportItemRow = {
   difficulty: number | null; // 0..100
   // Índice de discriminación D = p(27% superior) − p(27% inferior), −1..1. Bajo o
   // negativo = la pregunta no distingue a quienes dominan de quienes no.
+  //
+  // SIEMPRE null cuando `meta.hasItemLevelData === false`: partir la cohorte en 27%
+  // superior/inferior exige el puntaje de cada alumno, que un informe oficial no
+  // entrega. Es lo único de esta fila que no tiene sustituto agregado — dificultad,
+  // distractor y blancos salen del read-model de cohorte y vienen completos igual.
   discrimination: number | null; // -1..1
   topDistractorKey: string | null; // alternativa incorrecta más elegida
   topDistractorRate: number | null; // % que la eligió, 0..100

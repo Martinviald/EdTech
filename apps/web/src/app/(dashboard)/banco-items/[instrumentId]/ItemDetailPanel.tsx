@@ -91,6 +91,10 @@ export function ItemDetailPanel(props: {
   const section = item?.sectionId ? (sections.find((s) => s.id === item.sectionId) ?? null) : null;
   const passage = section && hasPassageContent(section) ? sectionToPassage(section) : null;
 
+  // `GET /items?instrumentId=…` ya trae `scoringConfig` completo, así que el flag
+  // de figura se deriva del ítem que ya tenemos —sin un fetch extra—.
+  const figureItemId = item && typeof item.scoringConfig?.imageRef === 'string' ? item.id : null;
+
   return (
     <QuestionDetailSheet
       open={open}
@@ -101,6 +105,7 @@ export function ItemDetailPanel(props: {
       }
       description="Enunciado completo, alternativas y nodos de taxonomía asociados a la pregunta."
       passage={passage}
+      figureItemId={figureItemId}
       storageKey="soe.itemDetail.panelWidth"
     >
       {item ? (
@@ -216,4 +221,3 @@ function AlternativeRow({ alt }: { alt: Alternative }): JSX.Element {
     </li>
   );
 }
-

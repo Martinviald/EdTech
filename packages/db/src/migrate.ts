@@ -30,9 +30,15 @@ async function main() {
   console.log('Applying RLS policies (idempotent)...');
   const rlsSql = readFileSync(RLS_POLICIES_PATH, 'utf-8');
   await sql.unsafe(rlsSql);
-  console.log(
-    'RLS policies applied (9 tablas: students, assessments, import_jobs, responses, assessment_results, skill_results, performance_bands, ai_analyses, org_benchmark_settings).',
-  );
+  // El conteo se deriva del propio catálogo en vez de hardcodearse: la lista anterior
+  // decía "9 tablas" y ya se había quedado corta. Un número escrito a mano acá miente
+  // en silencio justo sobre lo que este archivo existe para garantizar.
+  const rows = await sql<{ count: number }[]>`
+    SELECT count(DISTINCT tablename)::int AS count
+    FROM pg_policies
+    WHERE schemaname = 'public' AND policyname LIKE '%_tenant_isolation'
+  `;
+  console.log(`RLS policies applied (${rows[0]?.count ?? 0} tablas con aislamiento por tenant).`);
 
   await sql.end();
   process.exit(0);

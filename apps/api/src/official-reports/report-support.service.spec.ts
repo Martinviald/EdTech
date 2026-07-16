@@ -42,10 +42,60 @@ describe('ReportSupportService — helpers de presentación', () => {
 
     it('respeta las preguntas configuradas en el instrumento', () => {
       const custom = ['¿Pregunta A?', '¿Pregunta B?'];
-      expect(service.resolveReflectionPrompts({ reportReflectionPrompts: custom })).toEqual(
-        custom,
-      );
+      expect(service.resolveReflectionPrompts({ reportReflectionPrompts: custom })).toEqual(custom);
     });
+  });
+});
+
+// El mapeo scope → class_groups que alimenta el read-model de cohorte. Debe seguir
+// rama por rama a resolveAccessibleStudentIds: es su primera mitad, sin la
+// expansión a alumnos.
+describe('ReportSupportService.resolveAccessibleClassGroupIds', () => {
+  const CG_A = 'cg-a';
+  const CG_B = 'cg-b';
+
+  it('admin sin filtro → null (sin filtro de curso)', () => {
+    // ⚠️ null, NO []: es lo que habilita el atajo de references.org en item-analysis
+    // (sin filtro → la población visible ya es todo el colegio).
+    expect(
+      service.resolveAccessibleClassGroupIds({ scopeAll: true, classGroupIds: [] }, undefined),
+    ).toBeNull();
+  });
+
+  it('admin con filtro por curso → ese único curso', () => {
+    expect(
+      service.resolveAccessibleClassGroupIds({ scopeAll: true, classGroupIds: [] }, CG_A),
+    ).toEqual([CG_A]);
+  });
+
+  it('profesor sin filtro → todos sus cursos (se recombinan sumando)', () => {
+    expect(
+      service.resolveAccessibleClassGroupIds(
+        { scopeAll: false, classGroupIds: [CG_A, CG_B] },
+        undefined,
+      ),
+    ).toEqual([CG_A, CG_B]);
+  });
+
+  it('profesor con filtro dentro de su scope → ese curso', () => {
+    expect(
+      service.resolveAccessibleClassGroupIds(
+        { scopeAll: false, classGroupIds: [CG_A, CG_B] },
+        CG_A,
+      ),
+    ).toEqual([CG_A]);
+  });
+
+  it('profesor pidiendo un curso fuera de su scope → [] (no null: filtra a nada)', () => {
+    expect(
+      service.resolveAccessibleClassGroupIds({ scopeAll: false, classGroupIds: [CG_A] }, CG_B),
+    ).toEqual([]);
+  });
+
+  it('profesor sin cursos → [] (no null)', () => {
+    expect(
+      service.resolveAccessibleClassGroupIds({ scopeAll: false, classGroupIds: [] }, undefined),
+    ).toEqual([]);
   });
 });
 

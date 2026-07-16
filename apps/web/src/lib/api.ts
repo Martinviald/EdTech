@@ -47,8 +47,13 @@ async function request<T>(
     const body = await res.json().catch(() => ({}));
     const err = new Error(
       (body as { message?: string }).message ?? `API error ${res.status}`,
-    ) as Error & { status?: number };
+    ) as Error & { status?: number; details?: unknown };
     err.status = res.status;
+    // Cuerpo crudo del error: algunos endpoints devuelven un código legible por
+    // máquina además del mensaje (p. ej. el 409 `REQUIRES_ITEM_LEVEL_DATA` del
+    // `CapabilityGuard`) y la UI necesita distinguirlo de un fallo genérico.
+    // Mismo trato que ya daba `apiPostFormData`.
+    err.details = body;
     throw err;
   }
 

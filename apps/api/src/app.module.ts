@@ -42,6 +42,7 @@ import { InstrumentQualityModule } from './instrument-quality/instrument-quality
 import { AiObservabilityModule } from './ai-observability/ai-observability.module';
 import { AssistantModule } from './assistant/assistant.module';
 import { OfficialReportsModule } from './official-reports/official-reports.module';
+import { OfficialReportImportModule } from './official-report-import/official-report-import.module';
 
 @Module({
   imports: [
@@ -100,6 +101,9 @@ import { OfficialReportsModule } from './official-reports/official-reports.modul
     AssistantModule,
     // ── Informes oficiales (TKT-24/25/26): por curso, establecimiento y por alumno ──
     OfficialReportsModule,
+    // Importa informes oficiales DIA (PDF→JSON) al read-model de cohorte. Distinto de
+    // OfficialReportsModule, que GENERA el informe desde nuestros datos.
+    OfficialReportImportModule,
   ],
   controllers: [AppController],
   providers: [

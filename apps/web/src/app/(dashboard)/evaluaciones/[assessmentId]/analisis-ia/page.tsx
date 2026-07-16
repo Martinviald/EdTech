@@ -1,9 +1,12 @@
+import type { ReactNode } from 'react';
 import { redirect } from 'next/navigation';
 import { Sparkles } from 'lucide-react';
 import { auth } from '@/auth';
 import { apiGet } from '@/lib/api';
+import { assessmentSupports } from '@/lib/assessment-capabilities';
 import {
   canAccess,
+  capabilityUnavailableMessage,
   AI_ANALYSIS_VIEWER_ROLES,
   INSTRUMENT_QUALITY_VIEWER_ROLES,
   assessmentInsightsOutputSchema,
@@ -49,6 +52,25 @@ export default async function EvaluacionAnalisisIaPage({
   const basePath = `/evaluaciones/${assessmentId}/analisis-ia`;
   const audience = activeRole === 'teacher' ? 'teacher' : 'director';
 
+  // El snapshot que alimenta al LLM lee `responses`. Sin ellas el informe se
+  // generaría sobre una matriz vacía y sin psicometría, pero sin ninguna señal de
+  // "no aplica" → alucinación probable. Se cierra sólo el GENERAR: un análisis ya
+  // existente se sigue viendo (se generó cuando el dato sí estaba).
+  const canGenerate = await assessmentSupports(assessmentId, 'ai_item_insight');
+
+  /** Botón de generar, o nada si la evaluación no da para generar. */
+  const generateAction = (opts?: { force?: boolean; label?: string }): ReactNode =>
+    canGenerate ? (
+      <GenerateButton
+        assessmentId={assessmentId}
+        classGroupId={classGroupId}
+        audience={audience}
+        basePath={basePath}
+        force={opts?.force}
+        label={opts?.label}
+      />
+    ) : null;
+
   // Resolver el análisis: por `analysisId` explícito (recién generado / polling) o,
   // si no viene (al abrir la pestaña), buscando el ÚLTIMO ya existente para esta
   // evaluación + audiencia + curso. Evita ofrecer "generar" cuando ya hay informe.
@@ -75,37 +97,37 @@ export default async function EvaluacionAnalisisIaPage({
         <EmptyState
           icon={Sparkles}
           title="No se pudo cargar el análisis"
-          description="No tienes acceso a este análisis o no existe. Puedes generar uno nuevo."
-          action={
-            <GenerateButton
-              assessmentId={assessmentId}
-              classGroupId={classGroupId}
-              audience={audience}
-              basePath={basePath}
-            />
+          description={
+            canGenerate
+              ? 'No tienes acceso a este análisis o no existe. Puedes generar uno nuevo.'
+              : 'No tienes acceso a este análisis o no existe.'
           }
+          action={generateAction()}
         />
       </div>
     );
   }
 
-  // No hay ningún análisis para esta evaluación todavía → ofrecer generarlo.
+  // No hay ningún análisis para esta evaluación todavía. Si además no se puede
+  // generar, el estado explica el motivo (dato agregado) en vez de ofrecer un
+  // botón que el backend rechazaría con un 409.
   if (!analysis) {
     return (
       <div className="space-y-6">
-        <EmptyState
-          icon={Sparkles}
-          title="Aún no hay análisis para esta evaluación"
-          description="Genera un informe IA que interpreta las métricas de la evaluación y propone acciones concretas. El proceso es asíncrono y puede tomar algunos segundos."
-          action={
-            <GenerateButton
-              assessmentId={assessmentId}
-              classGroupId={classGroupId}
-              audience={audience}
-              basePath={basePath}
-            />
-          }
-        />
+        {canGenerate ? (
+          <EmptyState
+            icon={Sparkles}
+            title="Aún no hay análisis para esta evaluación"
+            description="Genera un informe IA que interpreta las métricas de la evaluación y propone acciones concretas. El proceso es asíncrono y puede tomar algunos segundos."
+            action={generateAction()}
+          />
+        ) : (
+          <EmptyState
+            icon={Sparkles}
+            title="El análisis con IA no aplica a esta evaluación"
+            description={capabilityUnavailableMessage('ai_item_insight')}
+          />
+        )}
       </div>
     );
   }
@@ -127,18 +149,11 @@ export default async function EvaluacionAnalisisIaPage({
           title="El análisis no pudo completarse"
           description={
             analysis.error ??
-            'Ocurrió un error al generar el análisis. Intenta generarlo nuevamente.'
+            (canGenerate
+              ? 'Ocurrió un error al generar el análisis. Intenta generarlo nuevamente.'
+              : 'Ocurrió un error al generar el análisis.')
           }
-          action={
-            <GenerateButton
-              assessmentId={assessmentId}
-              classGroupId={classGroupId}
-              audience={audience}
-              basePath={basePath}
-              force
-              label="Reintentar"
-            />
-          }
+          action={generateAction({ force: true, label: 'Reintentar' })}
         />
       </div>
     );
@@ -152,17 +167,12 @@ export default async function EvaluacionAnalisisIaPage({
         <EmptyState
           icon={Sparkles}
           title="El análisis tiene un formato inesperado"
-          description="La salida del análisis no pudo validarse. Genera uno nuevo para reintentar."
-          action={
-            <GenerateButton
-              assessmentId={assessmentId}
-              classGroupId={classGroupId}
-              audience={audience}
-              basePath={basePath}
-              force
-              label="Regenerar"
-            />
+          description={
+            canGenerate
+              ? 'La salida del análisis no pudo validarse. Genera uno nuevo para reintentar.'
+              : 'La salida del análisis no pudo validarse.'
           }
+          action={generateAction({ force: true, label: 'Regenerar' })}
         />
       </div>
     );

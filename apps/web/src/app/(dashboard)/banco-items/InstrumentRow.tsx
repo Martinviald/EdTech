@@ -2,7 +2,7 @@ import Link from 'next/link';
 import type { Route } from 'next';
 import { ChevronRight } from 'lucide-react';
 import { StatusBadge, type StatusTone } from '@/components/patterns';
-import type { InstrumentModel } from '@soe/types';
+import { INSTRUMENT_APPLICATION_PERIOD_LABELS, type InstrumentModel } from '@soe/types';
 
 const TYPE_LABELS: Record<string, string> = {
   dia: 'DIA',
@@ -47,6 +47,9 @@ export function InstrumentRow({ instrument }: { instrument: InstrumentModel }) {
             {TYPE_LABELS[instrument.type] ?? instrument.type}
           </span>
           {instrument.year ? <span>Año {instrument.year}</span> : null}
+          {instrument.applicationPeriod ? (
+            <span>{INSTRUMENT_APPLICATION_PERIOD_LABELS[instrument.applicationPeriod]}</span>
+          ) : null}
           {instrument.version ? <span>v{instrument.version}</span> : null}
         </div>
       </div>

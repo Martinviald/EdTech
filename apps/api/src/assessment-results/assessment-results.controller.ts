@@ -16,12 +16,14 @@ import {
 } from '@soe/types';
 import { CurrentUser } from '../auth/current-user.decorator';
 import type { JwtPayload } from '../auth/jwt-payload.types';
+import { RequireCapability } from '../common/decorators/capability.decorator';
 import { Roles } from '../common/decorators/roles.decorator';
+import { CapabilityGuard } from '../common/guards/capability.guard';
 import { RolesGuard } from '../common/guards/roles.guard';
 import { AssessmentResultsService } from './assessment-results.service';
 
 @Controller('assessments/:assessmentId')
-@UseGuards(RolesGuard)
+@UseGuards(RolesGuard, CapabilityGuard)
 export class AssessmentResultsController {
   constructor(private readonly service: AssessmentResultsService) {}
 
@@ -62,9 +64,16 @@ export class AssessmentResultsController {
    * Detalle de un alumno: su assessment_result, los skill_results por nodo y la
    * lista de respuestas item-por-item. 404 si el alumno no está en la
    * evaluación o no es visible para el caller.
+   *
+   * `@RequireCapability('student_detail')`: la lista item-por-item sale de
+   * `responses`, que una evaluación cargada desde un informe oficial no tiene. Sin el
+   * guard devolvía el nivel del alumno con `responses: []` — un detalle vacío que
+   * parece "este alumno no respondió" en vez de "este dato no existe para esta
+   * evaluación".
    */
   @Get('results/:studentId')
   @Roles(...RESULTS_VIEWER_ROLES)
+  @RequireCapability('student_detail')
   detail(
     @Param('assessmentId', ParseUUIDPipe) assessmentId: string,
     @Param('studentId', ParseUUIDPipe) studentId: string,

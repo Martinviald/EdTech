@@ -3,7 +3,11 @@
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useCallback } from 'react';
 import type { Route } from 'next';
-import { Input } from '@/components/ui/input';
+import {
+  INSTRUMENT_APPLICATION_PERIODS,
+  INSTRUMENT_APPLICATION_PERIOD_LABELS,
+  type CatalogEntryModel,
+} from '@soe/types';
 import {
   Select,
   SelectContent,
@@ -11,6 +15,11 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+
+const ALL = 'all';
+
+/** Tipo cuyo ciclo de aplicación (diagnóstico/monitoreo/cierre) se puede filtrar. */
+const PERIODIC_TYPE = 'dia';
 
 const TYPE_OPTIONS = [
   { value: 'dia', label: 'DIA' },
@@ -29,21 +38,44 @@ const STATUS_OPTIONS = [
   { value: 'archived', label: 'Archivado' },
 ];
 
-export function InstrumentFilters() {
+interface InstrumentFiltersProps {
+  subjects: CatalogEntryModel[];
+  grades: CatalogEntryModel[];
+  /** Años con al menos un instrumento visible (facetas del API). */
+  years: number[];
+}
+
+/**
+ * Filtros del banco de instrumentos. Solo escriben la selección en la URL; el
+ * filtrado ocurre server-side (el Server Component refetchea). El dropdown de
+ * momento de aplicación se renderiza únicamente para los tipos que tienen ciclo
+ * de aplicación (hoy DIA).
+ */
+export function InstrumentFilters({ subjects, grades, years }: InstrumentFiltersProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
 
   const currentType = searchParams.get('type') ?? '';
   const currentStatus = searchParams.get('status') ?? '';
   const currentYear = searchParams.get('year') ?? '';
+  const currentSubject = searchParams.get('subjectId') ?? '';
+  const currentGrade = searchParams.get('gradeId') ?? '';
+  const currentPeriod = searchParams.get('applicationPeriod') ?? '';
+
+  const showPeriodFilter = currentType === PERIODIC_TYPE;
 
   const updateFilter = useCallback(
     (key: string, value: string) => {
       const params = new URLSearchParams(searchParams.toString());
-      if (value && value !== 'all') {
+      if (value && value !== ALL) {
         params.set(key, value);
       } else {
         params.delete(key);
+      }
+      // El momento solo aplica al tipo periódico: al salir de él se descarta, o
+      // quedaría filtrando de forma invisible (su dropdown ya no se renderiza).
+      if (key === 'type' && value !== PERIODIC_TYPE) {
+        params.delete('applicationPeriod');
       }
       params.set('page', '1');
       router.push(`/banco-items?${params.toString()}` as Route);
@@ -53,12 +85,12 @@ export function InstrumentFilters() {
 
   return (
     <div className="flex flex-wrap items-center gap-3">
-      <Select value={currentType || 'all'} onValueChange={(v) => updateFilter('type', v)}>
-        <SelectTrigger className="w-[160px]">
+      <Select value={currentType || ALL} onValueChange={(v) => updateFilter('type', v)}>
+        <SelectTrigger className="w-[160px]" aria-label="Tipo">
           <SelectValue placeholder="Tipo" />
         </SelectTrigger>
         <SelectContent>
-          <SelectItem value="all">Todos los tipos</SelectItem>
+          <SelectItem value={ALL}>Todos los tipos</SelectItem>
           {TYPE_OPTIONS.map((opt) => (
             <SelectItem key={opt.value} value={opt.value}>
               {opt.label}
@@ -67,12 +99,73 @@ export function InstrumentFilters() {
         </SelectContent>
       </Select>
 
-      <Select value={currentStatus || 'all'} onValueChange={(v) => updateFilter('status', v)}>
-        <SelectTrigger className="w-[160px]">
+      {showPeriodFilter ? (
+        <Select
+          value={currentPeriod || ALL}
+          onValueChange={(v) => updateFilter('applicationPeriod', v)}
+        >
+          <SelectTrigger className="w-[170px]" aria-label="Momento de aplicación">
+            <SelectValue placeholder="Momento" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value={ALL}>Todos los momentos</SelectItem>
+            {INSTRUMENT_APPLICATION_PERIODS.map((period) => (
+              <SelectItem key={period} value={period}>
+                {INSTRUMENT_APPLICATION_PERIOD_LABELS[period]}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      ) : null}
+
+      <Select value={currentSubject || ALL} onValueChange={(v) => updateFilter('subjectId', v)}>
+        <SelectTrigger className="w-[180px]" aria-label="Asignatura">
+          <SelectValue placeholder="Asignatura" />
+        </SelectTrigger>
+        <SelectContent>
+          <SelectItem value={ALL}>Todas las asignaturas</SelectItem>
+          {subjects.map((subject) => (
+            <SelectItem key={subject.id} value={subject.id}>
+              {subject.name}
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
+
+      <Select value={currentGrade || ALL} onValueChange={(v) => updateFilter('gradeId', v)}>
+        <SelectTrigger className="w-[160px]" aria-label="Nivel">
+          <SelectValue placeholder="Nivel" />
+        </SelectTrigger>
+        <SelectContent>
+          <SelectItem value={ALL}>Todos los niveles</SelectItem>
+          {grades.map((grade) => (
+            <SelectItem key={grade.id} value={grade.id}>
+              {grade.name}
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
+
+      <Select value={currentYear || ALL} onValueChange={(v) => updateFilter('year', v)}>
+        <SelectTrigger className="w-[130px]" aria-label="Año">
+          <SelectValue placeholder="Año" />
+        </SelectTrigger>
+        <SelectContent>
+          <SelectItem value={ALL}>Todos los años</SelectItem>
+          {years.map((year) => (
+            <SelectItem key={year} value={String(year)}>
+              {year}
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
+
+      <Select value={currentStatus || ALL} onValueChange={(v) => updateFilter('status', v)}>
+        <SelectTrigger className="w-[160px]" aria-label="Estado">
           <SelectValue placeholder="Estado" />
         </SelectTrigger>
         <SelectContent>
-          <SelectItem value="all">Todos los estados</SelectItem>
+          <SelectItem value={ALL}>Todos los estados</SelectItem>
           {STATUS_OPTIONS.map((opt) => (
             <SelectItem key={opt.value} value={opt.value}>
               {opt.label}
@@ -80,16 +173,6 @@ export function InstrumentFilters() {
           ))}
         </SelectContent>
       </Select>
-
-      <Input
-        type="number"
-        placeholder="Ano"
-        className="w-[100px]"
-        value={currentYear}
-        min={2000}
-        max={2100}
-        onChange={(e) => updateFilter('year', e.target.value)}
-      />
     </div>
   );
 }

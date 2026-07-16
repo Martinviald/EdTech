@@ -117,6 +117,28 @@ export class ReportSupportService {
     return { scopeAll: false, classGroupIds: ids };
   }
 
+  /**
+   * class_groups visibles combinando scope + filtro por classGroupId. `null` = sin
+   * filtro extra (scopeAll sin filtro).
+   *
+   * Gemelo de `resolveAccessibleStudentIds` para la capa agregable — de hecho es su
+   * primera mitad, sin la expansión a alumnos vía `student_enrollments`. Como el
+   * read-model de cohorte está pre-agregado por `class_group` recorriendo ese mismo
+   * camino, filtrar por curso selecciona la misma población que filtrar por los
+   * alumnos de esos cursos, y no necesita query.
+   */
+  resolveAccessibleClassGroupIds(
+    scope: ReportScope,
+    classGroupId: string | undefined,
+  ): string[] | null {
+    if (scope.scopeAll && !classGroupId) return null;
+    if (scope.scopeAll) return [classGroupId!];
+    if (classGroupId) {
+      return scope.classGroupIds.includes(classGroupId) ? [classGroupId] : [];
+    }
+    return scope.classGroupIds;
+  }
+
   /** studentIds visibles combinando scope + filtro por classGroupId. `null` = sin filtro extra. */
   async resolveAccessibleStudentIds(
     tx: Database,

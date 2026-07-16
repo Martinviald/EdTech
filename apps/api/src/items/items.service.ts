@@ -15,10 +15,11 @@ import {
   type Item,
 } from '@soe/db';
 import { validateItemContent } from '@soe/types';
-import type { ItemBankScope, ItemContent, ItemType } from '@soe/types';
+import type { ItemBankScope, ItemContent, ItemFigureModel, ItemType } from '@soe/types';
 import { ZodError } from 'zod';
 import type { JwtPayload } from '../auth/jwt-payload.types';
 import { InjectDb, type Database } from '../database/database.types';
+import { FilesService } from '../files/files.service';
 import type {
   CreateItemDto,
   UpdateItemDto,
@@ -49,9 +50,16 @@ export interface ItemContentForAssistant {
   skillName: string | null;
 }
 
+/** Scope del archivo de figura dentro del módulo genérico `files`. */
+const FIGURE_OWNER_TYPE = 'item' as const;
+const FIGURE_PURPOSE = 'item_figure' as const;
+
 @Injectable()
 export class ItemsService {
-  constructor(@InjectDb() private readonly db: Database) {}
+  constructor(
+    @InjectDb() private readonly db: Database,
+    private readonly files: FilesService,
+  ) {}
 
   // ── Items ───────────────────────────────────────────────────────────────
 
@@ -122,10 +130,7 @@ export class ItemsService {
               .select()
               .from(itemTaxonomyTags)
               .where(
-                and(
-                  eq(itemTaxonomyTags.itemId, items.id),
-                  inArray(itemTaxonomyTags.nodeId, group),
-                ),
+                and(eq(itemTaxonomyTags.itemId, items.id), inArray(itemTaxonomyTags.nodeId, group)),
               ),
           ),
         );
@@ -245,6 +250,51 @@ export class ItemsService {
       .where(eq(itemTaxonomyTags.itemId, id));
 
     return { ...row, tags };
+  }
+
+  /**
+   * Lee la figura de un ítem (con URLs prefirmadas si aplica). Devuelve `null` si
+   * el ítem no tiene figura registrada.
+   *
+   * El scope del archivo se deriva del RECURSO DUEÑO, no del usuario: `row.orgId`
+   * es `null` en los ítems oficiales, y `FilesService.run(null)` corre sin contexto
+   * de org, de modo que la policy RLS (`org_id IS NULL OR org_id = current_setting(…)`)
+   * deja ver las filas globales. Mismo criterio que `createEnunciadoUploadUrl`.
+   */
+  async getFigure(id: string, user: JwtPayload): Promise<ItemFigureModel | null> {
+    const [row] = await this.db
+      .select()
+      .from(items)
+      .where(and(eq(items.id, id), isNull(items.deletedAt)));
+
+    if (!row) throw new NotFoundException('Ítem no encontrado');
+    this.assertVisible(row, user);
+
+    const file = await this.files.getLatestByOwner(
+      row.orgId,
+      FIGURE_OWNER_TYPE,
+      row.id,
+      FIGURE_PURPOSE,
+    );
+    if (!file) return null;
+
+    const model: ItemFigureModel = {
+      id: file.id,
+      itemId: row.id,
+      storageKey: file.storageKey,
+      fileName: file.fileName,
+      mimeType: file.mimeType,
+      sizeBytes: file.sizeBytes,
+    };
+
+    // Las URLs prefirmadas solo existen si el almacenamiento está configurado; su
+    // ausencia nunca debe hacer fallar la lectura del ítem.
+    const downloadUrl = this.files.buildDownloadUrl(file);
+    if (downloadUrl) model.downloadUrl = downloadUrl;
+    const previewUrl = this.files.buildDownloadUrl(file, 'inline');
+    if (previewUrl) model.previewUrl = previewUrl;
+
+    return model;
   }
 
   /**

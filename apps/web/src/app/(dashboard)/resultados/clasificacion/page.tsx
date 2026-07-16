@@ -28,7 +28,7 @@ import {
 import { ResultadosNav } from '../components/resultados-nav';
 import { DistributionBar } from '../components/distribution-bar';
 import { PerformanceBadge } from '../components/performance-badge';
-import { PaginationControls } from '../components/pagination-controls';
+import { PaginationControls } from '@/components/patterns';
 import { PerformanceLevelFilter } from '../components/performance-level-filter';
 import { formatAchievement } from '../components/performance-level';
 

@@ -115,6 +115,12 @@ class FakeDb {
     };
   }
 
+  selectDistinct() {
+    return {
+      from: (table: unknown) => new ThenableRows(this.rowsByTable.get(table) ?? []),
+    };
+  }
+
   insert(table: unknown) {
     return {
       values: (values: unknown) => {
@@ -347,5 +353,30 @@ describe('InstrumentsService.assertEditable', () => {
         user({ role: 'platform_admin' }),
       ),
     ).not.toThrow();
+  });
+});
+
+describe('InstrumentsService.facets', () => {
+  function serviceWith(rows: { year: number | null }[]) {
+    const db = new FakeDb(new Map([[instruments, rows]]), new Map());
+    return new InstrumentsService(db as unknown as Database, makeFiles());
+  }
+
+  it('devuelve los años distintos para poblar el filtro', async () => {
+    const svc = serviceWith([{ year: 2026 }, { year: 2025 }]);
+
+    await expect(svc.facets(user())).resolves.toEqual({ years: [2026, 2025] });
+  });
+
+  it('descarta los años nulos (instrumentos sin año no ensucian el dropdown)', async () => {
+    const svc = serviceWith([{ year: 2026 }, { year: null }, { year: 2025 }]);
+
+    await expect(svc.facets(user())).resolves.toEqual({ years: [2026, 2025] });
+  });
+
+  it('sin instrumentos visibles devuelve la lista vacía', async () => {
+    const svc = serviceWith([]);
+
+    await expect(svc.facets(user())).resolves.toEqual({ years: [] });
   });
 });

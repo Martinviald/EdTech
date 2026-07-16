@@ -94,6 +94,12 @@ export class CourseReportService {
         scope,
         query.classGroupId,
       );
+      // El mismo scope resuelto a cursos, para la tabla de especificaciones (que lee
+      // el read-model de cohorte, de grano por curso). Ver resolveAccessibleClassGroupIds.
+      const classGroupFilter = this.support.resolveAccessibleClassGroupIds(
+        scope,
+        query.classGroupId,
+      );
 
       const reportClassGroups = await this.loadAssessmentClassGroups(
         tx,
@@ -181,7 +187,7 @@ export class CourseReportService {
         query.assessmentId,
         itemColumns,
         itemIds,
-        studentFilter,
+        classGroupFilter,
       );
       const studentResults = this.buildStudentResults(evaluated, classGroupByStudent);
 
@@ -281,22 +287,23 @@ export class CourseReportService {
 
   // ── Sección 4 ────────────────────────────────────────────────────────────
 
+  /** Toda la tabla es agregable: ambas distribuciones salen del read-model de cohorte. */
   private async buildSpecTable(
     tx: Database,
     assessmentId: string,
     itemColumns: ItemReportColumn[],
     itemIds: string[],
-    studentFilter: string[] | null,
+    classGroupFilter: string[] | null,
   ): Promise<OfficialSpecTableRow[]> {
     if (itemColumns.length === 0) return [];
 
-    const dist = await loadItemDistributions(tx, assessmentId, itemIds, studentFilter);
+    const dist = await loadItemDistributions(tx, assessmentId, itemIds, classGroupFilter);
     const devItemIds = itemColumns.filter((c) => !c.hasAlternatives).map((c) => c.itemId);
     const devDist = await loadDevelopmentDistributions(
       tx,
       assessmentId,
       devItemIds,
-      studentFilter,
+      classGroupFilter,
     );
 
     return itemColumns.map((col) => {
