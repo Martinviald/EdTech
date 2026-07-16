@@ -53,6 +53,14 @@ jobs:
       - name: Install deps
         run: pnpm install --frozen-lockfile
 
+      # El backfill (más abajo) importa el calculador puro de `@soe/types`, que se
+      # consume como paquete compilado (`dist/`). `pnpm install` solo enlaza el
+      # workspace; sin este build, `tsx src/scripts/backfill-cohort-stats.ts` falla con
+      # "Cannot find module @soe/types/dist/index.js". migrate.ts NO importa @soe/types,
+      # por eso el paso migrate sí funcionaba y el fallo aparecía recién en el backfill.
+      - name: Build @soe/types (lo consume el backfill)
+        run: pnpm --filter @soe/types build
+
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
