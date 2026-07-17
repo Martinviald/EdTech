@@ -1162,6 +1162,7 @@ export class ItemAnalysisService {
       .select({
         kind: sql<string>`${sectionAttachments.kind}::text`,
         url: sectionAttachments.url,
+        storageKey: sectionAttachments.storageKey,
         fileName: sectionAttachments.fileName,
         mimeType: sectionAttachments.mimeType,
         note: sectionAttachments.note,
@@ -1179,6 +1180,7 @@ export class ItemAnalysisService {
       attachments: atts.map((a) => ({
         kind: a.kind,
         url: a.url ?? null,
+        storageKey: a.storageKey ?? null,
         fileName: a.fileName ?? null,
         mimeType: a.mimeType ?? null,
         note: a.note ?? null,

@@ -23,6 +23,7 @@ import {
   type InstrumentUploadUrlResponse,
   type PassageDto,
   type SectionAttachmentInputDto,
+  type SectionFigureModel,
 } from '@soe/types';
 import type { JwtPayload } from '../auth/jwt-payload.types';
 import { InjectDb, type Database } from '../database/database.types';
@@ -41,6 +42,11 @@ const ENUNCIADO_OWNER_TYPE = 'instrument' as const;
 const ENUNCIADO_PURPOSE = 'enunciado_pdf' as const;
 /** Kind del adjunto en el modelo de API (el enunciado siempre es un PDF). */
 const ENUNCIADO_PDF_KIND = 'pdf' as const;
+
+// La ilustración/recorte del pasaje se almacena en `files` con esta asociación
+// (owner = la sección). 1 por sección, así que `getLatestByOwner` la resuelve.
+const SECTION_FIGURE_OWNER_TYPE = 'section' as const;
+const SECTION_FIGURE_PURPOSE = 'section_figure' as const;
 
 /** Cliente transaccional de Drizzle (mismo shape que `Database` dentro de un `.transaction`). */
 type Tx = Parameters<Parameters<Database['transaction']>[0]>[0];
@@ -330,6 +336,56 @@ export class InstrumentsService {
       instrument.id,
       ENUNCIADO_PURPOSE,
     );
+  }
+
+  /**
+   * Figura (ilustración) de una sección/pasaje, con URLs prefirmadas frescas. Espejo de
+   * `ItemsService#getFigure`: la vista la pide por la ruta estable
+   * `/instrumentos/secciones/{id}/imagen`, que la firma en cada request. Devuelve null si
+   * la sección no tiene ilustración. El scope (`orgId`) sale del instrumento dueño, no del
+   * usuario: los oficiales son globales (`org_id NULL`).
+   */
+  async getSectionFigure(
+    sectionId: string,
+    user: JwtPayload,
+  ): Promise<SectionFigureModel | null> {
+    const [section] = await this.db
+      .select()
+      .from(instrumentSections)
+      .where(eq(instrumentSections.id, sectionId));
+    // `instrumentId` es nullable (Ola 2.1a: estímulos generados por IA sin instrumento).
+    // Sin instrumento dueño no hay contra qué autorizar, y esas secciones no tienen
+    // ilustración de pasaje DIA, así que se tratan como no encontradas.
+    if (!section || !section.instrumentId) throw new NotFoundException('Sección no encontrada');
+
+    // Carga el instrumento dueño y valida visibilidad (oficial → visible para todos).
+    const instrument = await this.getByIdRaw(section.instrumentId, user);
+
+    const file = await this.files.getLatestByOwner(
+      instrument.orgId,
+      SECTION_FIGURE_OWNER_TYPE,
+      section.id,
+      SECTION_FIGURE_PURPOSE,
+    );
+    if (!file) return null;
+
+    const model: SectionFigureModel = {
+      id: file.id,
+      sectionId: section.id,
+      storageKey: file.storageKey,
+      fileName: file.fileName,
+      mimeType: file.mimeType,
+      sizeBytes: file.sizeBytes,
+    };
+
+    // Las URLs prefirmadas solo existen si el almacenamiento está configurado; su
+    // ausencia nunca debe hacer fallar la lectura.
+    const downloadUrl = this.files.buildDownloadUrl(file);
+    if (downloadUrl) model.downloadUrl = downloadUrl;
+    const previewUrl = this.files.buildDownloadUrl(file, 'inline');
+    if (previewUrl) model.previewUrl = previewUrl;
+
+    return model;
   }
 
   /**

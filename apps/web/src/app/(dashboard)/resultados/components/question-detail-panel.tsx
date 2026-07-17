@@ -9,7 +9,11 @@ import type {
   QuestionTaxonomyTag,
 } from '@soe/types';
 import { Badge } from '@/components/ui/badge';
-import { hasPassageContent, type PassageData } from '@/components/passage-dialog';
+import {
+  hasPassageContent,
+  toPassageAttachments,
+  type PassageData,
+} from '@/components/passage-dialog';
 import { cn } from '@/lib/utils';
 import { QuestionDetailSheet } from '@/components/question-detail/question-detail-sheet';
 import { QuestionNodes, type QuestionNodeTag } from '@/components/question-detail/question-nodes';
@@ -20,13 +24,7 @@ function questionSectionToPassage(section: QuestionSection): PassageData {
     passageTitle: section.passageTitle,
     passageText: section.passageText,
     passageFormat: section.passageFormat,
-    attachments: section.attachments.map((a) => ({
-      kind: a.kind,
-      url: a.url,
-      fileName: a.fileName,
-      mimeType: a.mimeType,
-      note: a.note,
-    })),
+    attachments: toPassageAttachments(section.id, section.attachments),
   };
 }
 
