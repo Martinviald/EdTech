@@ -241,6 +241,26 @@ export type SectionAttachmentModel = {
   updatedAt: string | Date;
 };
 
+/**
+ * Figura (ilustración) de una sección/pasaje, con URLs prefirmadas.
+ *
+ * Espejo de `ItemFigureModel`: la BDD guarda la storage key y las URLs se firman en cada
+ * request (una presigned persistida caducaría). Se sirve por la ruta estable
+ * `/instrumentos/secciones/{id}/imagen`.
+ */
+export type SectionFigureModel = {
+  id: string;
+  sectionId: string;
+  storageKey: string | null;
+  fileName: string | null;
+  mimeType: string | null;
+  sizeBytes: number | null;
+  /** URL prefirmada de descarga (fuerza descarga). */
+  downloadUrl?: string;
+  /** URL prefirmada de previsualización (Content-Disposition: inline). */
+  previewUrl?: string;
+};
+
 export type InstrumentSectionModel = {
   id: string;
   instrumentId: string;

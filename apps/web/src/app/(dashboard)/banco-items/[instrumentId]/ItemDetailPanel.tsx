@@ -6,7 +6,7 @@ import type { ItemModel, ItemTaxonomyTagModel, InstrumentSectionModel } from '@s
 import { Badge } from '@/components/ui/badge';
 import {
   hasPassageContent,
-  type PassageAttachment,
+  toPassageAttachments,
   type PassageData,
 } from '@/components/passage-dialog';
 import { cn } from '@/lib/utils';
@@ -20,13 +20,7 @@ function sectionToPassage(section: InstrumentSectionModel): PassageData {
     passageTitle: section.passageTitle,
     passageText: section.passageText,
     passageFormat: section.passageFormat,
-    attachments: (section.attachments ?? []).map<PassageAttachment>((a) => ({
-      kind: a.kind,
-      url: a.url,
-      fileName: a.fileName,
-      mimeType: a.mimeType,
-      note: a.note,
-    })),
+    attachments: toPassageAttachments(section.id, section.attachments ?? []),
   };
 }
 
