@@ -185,6 +185,8 @@ export type QuestionTaxonomyTag = {
 export type QuestionSectionAttachment = {
   kind: string; // image | audio | pdf | other
   url: string | null; // null si aún no se sube el archivo a S3
+  /** Storage key en S3 (null si aún no se sube). La vista arma la ruta de imagen con esto. */
+  storageKey: string | null;
   fileName: string | null;
   mimeType: string | null;
   note: string | null;
