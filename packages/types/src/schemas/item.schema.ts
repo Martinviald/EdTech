@@ -414,3 +414,21 @@ export type ItemFigureModel = {
   /** URL prefirmada de previsualización (Content-Disposition: inline). */
   previewUrl?: string;
 };
+
+/**
+ * Figura de UNA alternativa (los ítems cuyas opciones son imágenes). Espejo de
+ * `ItemFigureModel` + la `key` (A/B/C/D). Se sirve por `/items/{id}/alternativa/{key}/figura`.
+ */
+export type AltFigureModel = {
+  id: string;
+  itemId: string;
+  key: string;
+  storageKey: string | null;
+  fileName: string | null;
+  mimeType: string | null;
+  sizeBytes: number | null;
+  /** URL prefirmada de descarga (fuerza descarga). */
+  downloadUrl?: string;
+  /** URL prefirmada de previsualización (Content-Disposition: inline). */
+  previewUrl?: string;
+};

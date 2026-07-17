@@ -439,6 +439,12 @@ export class ItemAnalysisService {
 
       const correctRate = totalResponses > 0 ? (correctCount / totalResponses) * 100 : null;
 
+      // Recortes por alternativa (ítems con opciones-imagen). Se expone solo el flag; la
+      // imagen se sirve firmada por `/items/{id}/alternativa/{key}/figura`.
+      const altImageRefs = (item.scoringConfig?.altImageRefs ?? null) as Record<
+        string,
+        unknown
+      > | null;
       const alternatives: AlternativeDistribution[] = altDefs.map((alt) => {
         const count = countByKey.get(alt.key) ?? 0;
         return {
@@ -447,6 +453,7 @@ export class ItemAnalysisService {
           isCorrect: correctKey != null ? alt.key === correctKey : alt.isCorrect,
           count,
           percentage: totalResponses > 0 ? (count / totalResponses) * 100 : 0,
+          hasImage: !!altImageRefs && typeof altImageRefs[alt.key] === 'string',
         };
       });
 

@@ -158,7 +158,12 @@ function QuestionDetailContent({ data }: { data: QuestionAnalysisResponse }): JS
         ) : (
           <ul className="space-y-2.5">
             {data.alternatives.map((alt) => (
-              <AlternativeRow key={alt.key} alt={alt} isTopDistractor={alt.key === distractor} />
+              <AlternativeRow
+                key={alt.key}
+                alt={alt}
+                itemId={data.itemId}
+                isTopDistractor={alt.key === distractor}
+              />
             ))}
             {data.blankCount > 0 ? (
               <BlankRow count={data.blankCount} total={data.totalResponses} />
@@ -172,9 +177,11 @@ function QuestionDetailContent({ data }: { data: QuestionAnalysisResponse }): JS
 
 function AlternativeRow({
   alt,
+  itemId,
   isTopDistractor,
 }: {
   alt: AlternativeDistribution;
+  itemId: string;
   isTopDistractor: boolean;
 }): JSX.Element {
   const barClass = alt.isCorrect
@@ -197,7 +204,20 @@ function AlternativeRow({
           >
             {alt.key}
           </span>
-          <span className="truncate text-foreground">{alt.text ?? `Alternativa ${alt.key}`}</span>
+          {alt.hasImage ? (
+            // La alternativa es una imagen: miniatura en vez del `text` (descripción de IA
+            // que filtraría la respuesta). La descripción va sólo en `alt`.
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+              src={`/items/${itemId}/alternativa/${alt.key}/figura`}
+              alt={alt.text ?? `Alternativa ${alt.key}`}
+              className="max-h-12 min-w-0 rounded border bg-white object-contain"
+            />
+          ) : (
+            <span className="truncate text-foreground">
+              {alt.text ?? `Alternativa ${alt.key}`}
+            </span>
+          )}
           {alt.isCorrect ? (
             <CheckCircle2
               className="size-4 shrink-0 text-emerald-600 dark:text-emerald-400"
