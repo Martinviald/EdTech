@@ -87,10 +87,10 @@ function makeQuestion(
     correctCount: 7,
     correctRate: 28,
     alternatives: [
-      { key: 'A', text: 'a', isCorrect: false, count: 3, percentage: 12 },
-      { key: 'B', text: 'b', isCorrect: true, count: 7, percentage: 28 },
-      { key: 'C', text: 'c', isCorrect: false, count: 4, percentage: 16 },
-      { key: 'D', text: 'd', isCorrect: false, count: 11, percentage: 44 },
+      { key: 'A', text: 'a', isCorrect: false, count: 3, percentage: 12, hasImage: false },
+      { key: 'B', text: 'b', isCorrect: true, count: 7, percentage: 28, hasImage: false },
+      { key: 'C', text: 'c', isCorrect: false, count: 4, percentage: 16, hasImage: false },
+      { key: 'D', text: 'd', isCorrect: false, count: 11, percentage: 44, hasImage: false },
     ],
     ...overrides,
   };

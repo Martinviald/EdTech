@@ -165,6 +165,8 @@ export type AlternativeDistribution = {
   isCorrect: boolean;
   count: number; // nº de alumnos que la eligió
   percentage: number; // 0..100, proporción del total de respuestas
+  /** La alternativa ES una imagen: la vista la muestra vía /items/{id}/alternativa/{key}/figura. */
+  hasImage: boolean;
 };
 
 /**
