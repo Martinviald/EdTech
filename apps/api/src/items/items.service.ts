@@ -15,7 +15,13 @@ import {
   type Item,
 } from '@soe/db';
 import { validateItemContent } from '@soe/types';
-import type { ItemBankScope, ItemContent, ItemFigureModel, ItemType } from '@soe/types';
+import type {
+  AltFigureModel,
+  ItemBankScope,
+  ItemContent,
+  ItemFigureModel,
+  ItemType,
+} from '@soe/types';
 import { ZodError } from 'zod';
 import type { JwtPayload } from '../auth/jwt-payload.types';
 import { InjectDb, type Database } from '../database/database.types';
@@ -289,6 +295,47 @@ export class ItemsService {
 
     // Las URLs prefirmadas solo existen si el almacenamiento está configurado; su
     // ausencia nunca debe hacer fallar la lectura del ítem.
+    const downloadUrl = this.files.buildDownloadUrl(file);
+    if (downloadUrl) model.downloadUrl = downloadUrl;
+    const previewUrl = this.files.buildDownloadUrl(file, 'inline');
+    if (previewUrl) model.previewUrl = previewUrl;
+
+    return model;
+  }
+
+  /**
+   * Figura de UNA alternativa (ítems con opciones-imagen), con URLs prefirmadas frescas.
+   * Se resuelve por la storage key guardada en `scoringConfig.altImageRefs[key]`: las 4
+   * filas `files` de un ítem comparten owner/purpose, así que `getLatestByOwner` no las
+   * distingue — hay que ir por la key. La vista la pide por la ruta estable
+   * `/items/{id}/alternativa/{key}/figura`. Null si la alternativa no tiene imagen.
+   */
+  async getAltFigure(id: string, key: string, user: JwtPayload): Promise<AltFigureModel | null> {
+    const [row] = await this.db
+      .select()
+      .from(items)
+      .where(and(eq(items.id, id), isNull(items.deletedAt)));
+
+    if (!row) throw new NotFoundException('Ítem no encontrado');
+    this.assertVisible(row, user);
+
+    const refs = (row.scoringConfig?.altImageRefs ?? null) as Record<string, unknown> | null;
+    const storageKey = refs && typeof refs[key] === 'string' ? (refs[key] as string) : null;
+    if (!storageKey) return null;
+
+    const file = await this.files.findByStorageKey(row.orgId, storageKey);
+    if (!file) return null;
+
+    const model: AltFigureModel = {
+      id: file.id,
+      itemId: row.id,
+      key,
+      storageKey: file.storageKey,
+      fileName: file.fileName,
+      mimeType: file.mimeType,
+      sizeBytes: file.sizeBytes,
+    };
+
     const downloadUrl = this.files.buildDownloadUrl(file);
     if (downloadUrl) model.downloadUrl = downloadUrl;
     const previewUrl = this.files.buildDownloadUrl(file, 'inline');

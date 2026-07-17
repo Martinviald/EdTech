@@ -67,6 +67,20 @@ export class ItemsController {
     return this.itemsService.getFigure(id, user);
   }
 
+  /**
+   * GET /api/items/:id/alternativa/:key/figura — metadata + URLs prefirmadas de la figura
+   * de una alternativa (ítems con opciones-imagen), o null.
+   */
+  @Get(':id/alternativa/:key/figura')
+  @Roles(...ITEM_VIEWER_ROLES)
+  getAltFigure(
+    @Param('id') id: string,
+    @Param('key') key: string,
+    @CurrentUser() user: JwtPayload,
+  ) {
+    return this.itemsService.getAltFigure(id, key, user);
+  }
+
   /** POST /api/items — create item (optionally with tags inline). */
   @Post()
   @Roles(...ITEM_BANK_ROLES)
