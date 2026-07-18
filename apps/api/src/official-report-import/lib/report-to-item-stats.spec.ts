@@ -17,6 +17,48 @@ describe('isCorrectBucket', () => {
     // Espeja el flujo computed, donde responses.is_correct de una parcial es false.
     expect(isCorrectBucket({ key: 'RPC', pct: 41.86 })).toBe(false);
   });
+
+  it('sin flag del informe, la correcta la da la PAUTA DEL INSTRUMENTO (selección múltiple)', () => {
+    // El caso real: la negrita no es recuperable, así que el informe NO trae isCorrect.
+    // La clave viene del instrumento. Sin esto, ningún bucket MC matchearía → 0 aciertos.
+    expect(isCorrectBucket({ key: 'C', pct: 90.7 }, 'C')).toBe(true);
+    expect(isCorrectBucket({ key: 'A', pct: 4.65 }, 'C')).toBe(false);
+    // El flag explícito del informe, si viniera, sigue teniendo precedencia sobre la pauta.
+    expect(isCorrectBucket({ key: 'A', pct: 4.65, isCorrect: true }, 'C')).toBe(true);
+  });
+
+  it('bucketCredit da 1 a la alternativa correcta del instrumento y 0 al distractor', () => {
+    expect(bucketCredit({ key: 'C', pct: 90.7 }, 'C')).toBe(1);
+    expect(bucketCredit({ key: 'A', pct: 4.65 }, 'C')).toBe(0);
+  });
+});
+
+describe('translateReportToItemStats — clave desde el instrumento (sin negrita en el informe)', () => {
+  it('reproduce correctCount/scoreSum usando la pauta del instrumento, no el flag del informe', () => {
+    // Informe SIN isCorrect en los buckets (como los JSON reales que extrae la skill),
+    // e instrumento CON la pauta. El resultado debe ser idéntico al del informe que sí
+    // trae la negrita: la clave la pone el instrumento.
+    const sinNegrita = TABLA_1.map((item) => ({
+      ...item,
+      distribution: item.distribution.map(({ isCorrect: _drop, ...b }) => b),
+    }));
+    const conInstrumento = translateReportToItemStats(
+      buildReport({ items: sinNegrita }),
+      ITEMS_BY_POSITION,
+      CURSO,
+    );
+    const conNegrita = translateReportToItemStats(buildReport(), ITEMS_BY_POSITION, CURSO);
+
+    // Fila a fila: mismo correctCount y scoreSum por ambos caminos.
+    for (const a of conInstrumento.itemStats) {
+      const b = conNegrita.itemStats.find((s) => s.itemId === a.itemId)!;
+      expect(a.correctCount).toBe(b.correctCount);
+      expect(a.scoreSum).toBe(b.scoreSum);
+    }
+    // Y no es trivialmente cero: P4 (C correcta, 90.70%) → 39 aciertos sobre 43.
+    const p4 = conInstrumento.itemStats.find((s) => s.itemId === ITEMS_BY_POSITION.get(4)!.id)!;
+    expect(p4.correctCount).toBe(39);
+  });
 });
 
 describe('bucketCredit', () => {
@@ -83,7 +125,7 @@ describe('translateReportToItemStats', () => {
   });
 
   it('escala el puntaje por los points del ítem, no asume 1', () => {
-    const items = new Map([[14, { id: 'i14', position: 14, points: 2 }]]);
+    const items = new Map([[14, { id: 'i14', position: 14, points: 2, correctKey: null }]]);
     const out = translateReportToItemStats(
       buildReport({ items: [TABLA_1.find((i) => i.position === 14)!] }),
       items,

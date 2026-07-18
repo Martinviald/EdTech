@@ -612,6 +612,7 @@ export class OfficialReportImportService {
         id: items.id,
         position: items.position,
         scoringConfig: items.scoringConfig,
+        content: items.content,
       })
       .from(items)
       .where(and(eq(items.instrumentId, instrumentId), isNull(items.deletedAt)))
@@ -621,8 +622,31 @@ export class OfficialReportImportService {
       id: row.id,
       position: row.position,
       points: row.scoringConfig?.points ?? 1,
+      correctKey: deriveCorrectKey(row.content),
     }));
   }
+}
+
+/**
+ * Alternativa correcta de un ítem: `content.correctKey` explícito o, como fallback,
+ * la primera alternativa con `isCorrect`. `null` en ítems de desarrollo (sin
+ * alternativas). Misma lógica que `ItemAnalysisService.deriveCorrectKey`.
+ *
+ * Toma `unknown` y castea adentro: `content` es un JSONB polimórfico (`ItemContent` es
+ * una unión por tipo de ítem), así que se lee de forma defensiva, igual que item-analysis.
+ */
+function deriveCorrectKey(content: unknown): string | null {
+  if (!content || typeof content !== 'object') return null;
+  const c = content as { correctKey?: unknown; alternatives?: unknown };
+  if (typeof c.correctKey === 'string' && c.correctKey.length > 0) return c.correctKey;
+  if (!Array.isArray(c.alternatives)) return null;
+  for (const raw of c.alternatives) {
+    if (raw && typeof raw === 'object') {
+      const alt = raw as { key?: unknown; isCorrect?: unknown };
+      if (alt.isCorrect === true && typeof alt.key === 'string') return alt.key;
+    }
+  }
+  return null;
 }
 
 function toItemStatsRow(stats: ItemCohortStats, assessmentId: string, now: Date) {

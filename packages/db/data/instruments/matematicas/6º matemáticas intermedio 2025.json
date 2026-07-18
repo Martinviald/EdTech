@@ -570,12 +570,12 @@
             {
               "key": "A",
               "text": "2",
-              "isCorrect": false
+              "isCorrect": true
             },
             {
               "key": "B",
               "text": "4",
-              "isCorrect": true
+              "isCorrect": false
             },
             {
               "key": "C",
@@ -588,7 +588,7 @@
               "isCorrect": false
             }
           ],
-          "correctKey": "B",
+          "correctKey": "A",
           "skill": "Resolver problemas",
           "oa": "OA 11",
           "contentAxis": "Patrones y álgebra",

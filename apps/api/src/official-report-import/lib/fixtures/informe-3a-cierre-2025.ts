@@ -107,6 +107,10 @@ export const INSTRUMENT_ITEMS: InstrumentItemForImport[] = TABLA_1.map((item, i)
   id: `item-${item.position}-${i}`,
   position: item.position,
   points: 1,
+  // Pauta del instrumento: la alternativa marcada como correcta en la Tabla 1. En
+  // desarrollo (buckets RC/RPC/RI, sin una alternativa correcta) queda null.
+  correctKey:
+    item.distribution.find((b) => b.isCorrect && !['RC', 'RPC', 'RI'].includes(b.key))?.key ?? null,
 }));
 
 export const ITEMS_BY_POSITION = new Map(INSTRUMENT_ITEMS.map((i) => [i.position, i]));
