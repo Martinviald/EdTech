@@ -1,8 +1,9 @@
 import { ForbiddenException, Injectable } from '@nestjs/common';
-import { and, asc, eq, inArray, isNull, sql } from 'drizzle-orm';
+import { and, asc, eq, inArray, isNull, notInArray, sql } from 'drizzle-orm';
 import {
   assessmentCourseAssignments,
   assessmentResults,
+  assessmentSkillStats,
   classGroups,
   grades,
   skillResults,
@@ -14,6 +15,7 @@ import {
 import {
   REQUIRES_SUPPORT_LEVEL,
   OFFICIAL_REPORT_LEVEL_ORDER,
+  RESULT_HIDDEN_NODE_TYPES,
   percentageToPerformanceLevel,
   type OfficialAlternativeDistribution,
   type OfficialCourseGeneralResult,
@@ -28,6 +30,18 @@ import {
 } from '@soe/types';
 import type { JwtPayload } from '../auth/jwt-payload.types';
 import { InjectDb, type Database } from '../database/database.types';
+import {
+  COHORT_PCT_SUM,
+  COHORT_PCT_WEIGHT,
+  COHORT_STUDENTS_ASSESSED,
+  addCohortRow,
+  cohortAverage,
+  type CohortAccumulator,
+} from '../common/helpers/cohort-skill-stats.helper';
+import {
+  loadCohortOverallAchievement,
+  type CohortOverallAchievement,
+} from '../common/helpers/cohort-item-stats.helper';
 import { ReportSupportService, type ReportScope } from './report-support.service';
 import {
   loadDevelopmentDistributions,
@@ -60,12 +74,7 @@ export class CourseReportService {
     const orgId = this.support.requireOrgId(user);
 
     return withOrgContext(this.db, orgId, async (tx) => {
-      const assessment = await this.support.requireAssessment(
-        tx,
-        user,
-        orgId,
-        query.assessmentId,
-      );
+      const assessment = await this.support.requireAssessment(tx, user, orgId, query.assessmentId);
       const scope = await this.support.getAccessibleClassGroupIds(tx, user, orgId);
 
       if (!scope.scopeAll) {
@@ -79,12 +88,7 @@ export class CourseReportService {
         }
       }
       if (query.classGroupId) {
-        const ok = await this.support.classGroupInScope(
-          tx,
-          orgId,
-          scope,
-          query.classGroupId,
-        );
+        const ok = await this.support.classGroupInScope(tx, orgId, scope, query.classGroupId);
         if (!ok) throw new ForbiddenException('No tiene acceso a ese curso');
       }
 
@@ -138,11 +142,20 @@ export class CourseReportService {
         evaluated.map((s) => s.studentId),
       );
 
+      // Informe oficial cargado en modo agregado: sin filas por alumno. El logro del
+      // curso (§2) sale del read-model de ítems y los ejes de habilidad (§3) del
+      // read-model por eje, ambos ya persistidos por el importador. La distribución
+      // por nivel y "requiere apoyo" dependen del dato por alumno / de la Figura 1 y
+      // quedan fuera de esta capa (se ven vacíos hasta cargar los niveles).
+      const isAggregate = assessment.dataGranularity === 'aggregate_only';
+      const aggregate = isAggregate
+        ? await loadCohortOverallAchievement(tx, query.assessmentId, classGroupFilter)
+        : null;
+      const studentsConsidered = aggregate ? aggregate.studentsAssessed : evaluated.length;
+
       const variant = this.support.resolveVariant(assessment.period);
       const disclaimers = this.support.resolveDisclaimers(assessment.instrumentConfig);
-      const reflectionPrompts = this.support.resolveReflectionPrompts(
-        assessment.instrumentConfig,
-      );
+      const reflectionPrompts = this.support.resolveReflectionPrompts(assessment.instrumentConfig);
 
       const meta: OfficialCourseReportResponse['meta'] = {
         orgId: orgMeta.orgId,
@@ -171,17 +184,25 @@ export class CourseReportService {
           : null,
         teacherName,
         administeredAt: assessment.administeredAt,
-        studentsConsidered: evaluated.length,
+        studentsConsidered,
+        dataGranularity: assessment.dataGranularity,
       };
 
-      const generalResult = this.buildGeneralResult(evaluated);
-      const skillAxes = await this.buildSkillAxes(
-        tx,
-        query.assessmentId,
-        orgId,
-        studentFilter,
-        assessment.gradingScaleConfig,
-      );
+      const generalResult = this.buildGeneralResult(evaluated, aggregate);
+      const skillAxes = isAggregate
+        ? await this.buildSkillAxesFromCohort(
+            tx,
+            query.assessmentId,
+            classGroupFilter,
+            assessment.gradingScaleConfig,
+          )
+        : await this.buildSkillAxes(
+            tx,
+            query.assessmentId,
+            orgId,
+            studentFilter,
+            assessment.gradingScaleConfig,
+          );
       const specTable = await this.buildSpecTable(
         tx,
         query.assessmentId,
@@ -204,10 +225,29 @@ export class CourseReportService {
 
   // ── Sección 2 ────────────────────────────────────────────────────────────
 
-  private buildGeneralResult(evaluated: EvaluatedStudent[]): OfficialCourseGeneralResult {
-    const pcts = evaluated
-      .map((e) => e.percentage)
-      .filter((p): p is number => p !== null);
+  private buildGeneralResult(
+    evaluated: EvaluatedStudent[],
+    aggregate: CohortOverallAchievement | null,
+  ): OfficialCourseGeneralResult {
+    // Modo agregado: el logro del curso y el N vienen del read-model de ítems. La
+    // distribución por nivel y el conteo "requiere apoyo" necesitan el dato por
+    // alumno / la Figura 1 y quedan vacíos hasta cargar los niveles.
+    if (aggregate) {
+      const averageAchievement = aggregate.averageAchievement;
+      return {
+        studentsConsidered: aggregate.studentsAssessed,
+        averageAchievement,
+        performanceLevel:
+          averageAchievement === null
+            ? null
+            : percentageToPerformanceLevel(averageAchievement / 100),
+        requiresSupportCount: 0,
+        requiresSupportPercentage: null,
+        distribution: buildDistribution([]),
+      };
+    }
+
+    const pcts = evaluated.map((e) => e.percentage).filter((p): p is number => p !== null);
     const averageAchievement = pcts.length > 0 ? avg(pcts) : null;
     const requiresSupportCount = evaluated.filter(
       (e) => e.performanceLevel === REQUIRES_SUPPORT_LEVEL,
@@ -216,9 +256,7 @@ export class CourseReportService {
       studentsConsidered: evaluated.length,
       averageAchievement,
       performanceLevel:
-        averageAchievement === null
-          ? null
-          : percentageToPerformanceLevel(averageAchievement / 100),
+        averageAchievement === null ? null : percentageToPerformanceLevel(averageAchievement / 100),
       requiresSupportCount,
       requiresSupportPercentage:
         evaluated.length > 0 ? (requiresSupportCount / evaluated.length) * 100 : null,
@@ -280,9 +318,90 @@ export class CourseReportService {
     });
 
     // Brechas primero (menor logro). Sin datos al final.
-    return axes.sort(
-      (a, b) => (a.averageAchievement ?? 101) - (b.averageAchievement ?? 101),
-    );
+    return axes.sort((a, b) => (a.averageAchievement ?? 101) - (b.averageAchievement ?? 101));
+  }
+
+  /**
+   * Ejes de habilidad para un informe cargado en modo agregado: lee el read-model de
+   * cohorte (`assessment_skill_stats`) en vez de `skill_results`, que no existe sin
+   * dato por alumno. Misma aritmética ponderada por `studentCount` que
+   * `AssessmentReportService.buildSkills` (helper `cohort-skill-stats`), de modo que
+   * el eje del informe oficial y el del heatmap no discrepan.
+   */
+  private async buildSkillAxesFromCohort(
+    tx: Database,
+    assessmentId: string,
+    classGroupFilter: string[] | null,
+    scaleConfig: unknown,
+  ): Promise<OfficialCourseSkillAxis[]> {
+    if (classGroupFilter !== null && classGroupFilter.length === 0) return [];
+
+    const conditions = [
+      eq(assessmentSkillStats.assessmentId, assessmentId),
+      // Los descriptores no se reportan como eje/habilidad (igual que buildSkills).
+      notInArray(taxonomyNodes.type, [...RESULT_HIDDEN_NODE_TYPES]),
+    ];
+    if (classGroupFilter !== null) {
+      conditions.push(inArray(assessmentSkillStats.classGroupId, classGroupFilter));
+    }
+
+    const rows = await tx
+      .select({
+        nodeId: assessmentSkillStats.nodeId,
+        nodeName: taxonomyNodes.name,
+        nodeType: sql<string>`${taxonomyNodes.type}::text`,
+        nodeCode: taxonomyNodes.code,
+        pctSum: COHORT_PCT_SUM,
+        pctWeight: COHORT_PCT_WEIGHT,
+        studentsAssessed: COHORT_STUDENTS_ASSESSED,
+      })
+      .from(assessmentSkillStats)
+      .innerJoin(taxonomyNodes, eq(taxonomyNodes.id, assessmentSkillStats.nodeId))
+      .where(and(...conditions))
+      // El curso NO puede faltar del group by: hace correcto el `max` de
+      // COHORT_STUDENTS_ASSESSED, que después `addCohortRow` suma entre cursos.
+      .groupBy(
+        assessmentSkillStats.nodeId,
+        taxonomyNodes.name,
+        taxonomyNodes.type,
+        taxonomyNodes.code,
+        assessmentSkillStats.classGroupId,
+      );
+
+    const acc = new Map<string, CohortAccumulator>();
+    const meta = new Map<string, { nodeName: string; nodeType: string; nodeCode: string | null }>();
+    for (const r of rows) {
+      addCohortRow(acc, r.nodeId, r);
+      if (!meta.has(r.nodeId)) {
+        meta.set(r.nodeId, {
+          nodeName: r.nodeName,
+          nodeType: r.nodeType,
+          nodeCode: r.nodeCode ?? null,
+        });
+      }
+    }
+
+    const axes: OfficialCourseSkillAxis[] = [...acc.entries()].map(([nodeId, a]) => {
+      const averageAchievement = cohortAverage(a);
+      const m = meta.get(nodeId)!;
+      return {
+        nodeId,
+        nodeName: m.nodeName,
+        nodeType: m.nodeType,
+        nodeCode: m.nodeCode,
+        studentsAssessed: a.studentsAssessed,
+        averageAchievement,
+        performanceLevel:
+          averageAchievement === null
+            ? null
+            : percentageToPerformanceLevel(averageAchievement / 100, {
+                config: scaleConfig as never,
+              }),
+      };
+    });
+
+    // Brechas primero (menor logro). Sin datos al final.
+    return axes.sort((a, b) => (a.averageAchievement ?? 101) - (b.averageAchievement ?? 101));
   }
 
   // ── Sección 4 ────────────────────────────────────────────────────────────
@@ -510,9 +629,7 @@ function avg(values: number[]): number {
   return values.reduce((a, b) => a + b, 0) / values.length;
 }
 
-function buildDistribution(
-  levels: (PerformanceLevel | null)[],
-): PerformanceDistributionBucket[] {
+function buildDistribution(levels: (PerformanceLevel | null)[]): PerformanceDistributionBucket[] {
   const counts = new Map<PerformanceLevel, number>();
   for (const level of levels) {
     if (!level) continue;

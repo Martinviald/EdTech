@@ -79,12 +79,15 @@ export type AssessmentReportMeta = {
    *    D = p(27% superior) − p(27% inferior) necesita el puntaje de CADA alumno para
    *    partir la cohorte en grupos. Es irreducible; no se deriva de conteos por curso.
    *  · `studentsAtRisk[].weakestSkill`: es un ranking POR ALUMNO sobre `skill_results`.
-   *  · `summary.averageAchievement` / `performanceLevel` y `courseComparison[].*`
-   *    de logro: un informe oficial entrega el NIVEL de cada alumno, no su %.
+   *  · `courseComparison[].*` de logro y la distribución por nivel cuando el informe se
+   *    cargó SIN niveles por alumno: dependen del dato por alumno / de la Figura 1.
    *
    * Lo que sí sigue completo con `false` (viene del read-model de cohorte, no de
    * `responses`): `items[]` dificultad + distractor + blancos, `skills[]`, la
-   * distribución por banda y la nómina de alumnos con su nivel.
+   * distribución por banda y la nómina de alumnos con su nivel. Y `summary.averageAchievement`
+   * / `performanceLevel`: el % de LOGRO DEL CURSO (Σ score / Σ max de `assessment_item_stats`)
+   * sí es agregable —es el número que el propio informe DIA publica— y se deriva del
+   * read-model de ítems; sólo el % POR ALUMNO es irreducible.
    */
   hasItemLevelData: boolean;
 };

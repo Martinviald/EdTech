@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import type { DataGranularity } from '../analytics-capabilities';
 import type { PerformanceLevel } from '../enums';
 import type { PerformanceDistributionBucket } from './dashboard.schema';
 import type { OfficialReportMeta } from './official-report-common.schema';
@@ -29,6 +30,10 @@ export type OfficialCourseReportMeta = OfficialReportMeta & {
   teacherName: string | null; // docente de la asignatura (mejor esfuerzo)
   administeredAt: string | Date | null;
   studentsConsidered: number; // N° de estudiantes con resultados considerados
+  // Granularidad del dato de la evaluación. `aggregate_only` (informe oficial cargado
+  // sin niveles por alumno) → la web oculta los widgets que dependen del nivel por
+  // alumno (distribución por nivel y "requiere apoyo"), que no salen del agregado.
+  dataGranularity: DataGranularity;
 };
 
 // ── Sección 2: Resultado general del curso ───────────────────────────────────
