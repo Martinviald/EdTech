@@ -468,6 +468,42 @@ describe('AssessmentReportService.getReport', () => {
     return results;
   }
 
+  // Caso REAL de la carga histórica: informe agregado cargado SIN niveles por alumno
+  // (`studentMatches: []`), así que CERO filas en `assessment_results`. Antes esto
+  // caía en el corte "sin alumnos evaluados" y devolvía logro/cobertura en blanco; con
+  // el read-model de ítems poblado, el logro del curso (Σscore/Σmax) y el N sí se
+  // derivan. Igual que la variante item_level vacía, pero con un select extra al final
+  // (loadCohortOverallAchievement) que sólo dispara en modo agregado.
+  function aggregateEmptySelectResults(): unknown[][] {
+    const results = baseSelectResults();
+    (results[0][0] as Record<string, unknown>).dataGranularity = 'aggregate_only';
+    results[4] = []; // loadEvaluatedStudents sin filas
+    results.splice(5, 1); // loadStudentClassGroups no consulta con 0 alumnos
+    results.splice(8, 2); // sin percentages no hay grupos 27/27 → no consulta
+    // loadCohortOverallAchievement (agrupado por curso): Σscore/Σmax = 90/120 = 75%,
+    // N = 4. Reemplaza al slot de loadWeakestSkillPerStudent, que el corte no consulta.
+    results[9] = [{ scoreSum: '90.00', maxSum: '120.00', studentsAssessed: 4 }];
+    return results;
+  }
+
+  it('agregado sin niveles por alumno: deriva logro y N del read-model de ítems', async () => {
+    const svc = makeService(makeDb(aggregateEmptySelectResults()));
+    const res = await svc.getReport(makeUser(), { assessmentId: ASSESSMENT_ID });
+
+    expect(res.meta.dataGranularity).toBe('aggregate_only');
+    // Antes salían null/0: el logro del curso y el N ahora vienen de
+    // assessment_item_stats (Σ score_sum / Σ max_sum, y max(student_count) por curso).
+    expect(res.summary.averageAchievement).toBeCloseTo(75);
+    expect(res.summary.studentsEvaluated).toBe(4);
+    expect(res.summary.coverageRate).toBeCloseTo(80); // 4 de 5 matriculados
+    expect(res.summary.performanceLevel).not.toBeNull();
+
+    // La capa agregable sigue completa; la distribución por nivel queda vacía (Bloque B).
+    expect(res.skills.length).toBeGreaterThan(0);
+    expect(res.items).toHaveLength(2);
+    expect(res.distribution.every((b) => b.count === 0)).toBe(true);
+  });
+
   it('con datos agregados sirve ítems y habilidades desde el read-model, y anula sólo lo irreducible', async () => {
     const svc = makeService(makeDb(aggregateSelectResults()));
     const res = await svc.getReport(makeUser(), { assessmentId: ASSESSMENT_ID });
