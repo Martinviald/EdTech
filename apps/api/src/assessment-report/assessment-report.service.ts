@@ -57,6 +57,10 @@ import {
   cohortAverage,
   type CohortAccumulator,
 } from '../common/helpers/cohort-skill-stats.helper';
+import {
+  loadCohortOverallAchievement,
+  type CohortOverallAchievement,
+} from '../common/helpers/cohort-item-stats.helper';
 import { InjectDb, type Database } from '../database/database.types';
 import { loadInstrumentBands } from '../performance-bands/lib/load-instrument-bands';
 
@@ -254,19 +258,40 @@ export class AssessmentReportService {
 
       // Caso sin alumnos evaluados: informe vacío pero bien formado.
       if (evaluated.length === 0) {
+        // Informe oficial cargado en modo agregado (sin niveles por alumno): no hay
+        // `assessment_results`, pero el logro global del curso y el N de la cohorte SÍ
+        // salen del read-model de ítems (Σ score_sum / Σ max_sum, y Σ del max de
+        // student_count por curso). Sin esto la síntesis ejecutiva (logro promedio,
+        // cobertura) saldría en blanco teniendo el dato agregado en la mano. La
+        // distribución por nivel sigue dependiendo del dato por alumno / de la Figura 1
+        // y queda fuera de esta capa. (Un informe agregado CON niveles por alumno cae
+        // en el camino normal de abajo, que ya distribuye por banda; ver spec §8.5.)
+        const aggregateAchievement: CohortOverallAchievement | null =
+          assessment.dataGranularity === 'aggregate_only'
+            ? await loadCohortOverallAchievement(tx, query.assessmentId, classGroupFilter)
+            : null;
+
         return {
           meta,
-          summary: {
-            studentsEvaluated: 0,
-            studentsEnrolled,
-            coverageRate: studentsEnrolled > 0 ? 0 : null,
-            averageAchievement: null,
-            hasGradingScale,
-            averageGrade: null,
-            passingGrade,
-            passingRate: null,
-            performanceLevel: null,
-          },
+          summary: aggregateAchievement
+            ? this.buildAggregateSummary(
+                aggregateAchievement,
+                studentsEnrolled,
+                passingGrade,
+                assessment.gradingScaleConfig,
+                bands,
+              )
+            : {
+                studentsEvaluated: 0,
+                studentsEnrolled,
+                coverageRate: studentsEnrolled > 0 ? 0 : null,
+                averageAchievement: null,
+                hasGradingScale,
+                averageGrade: null,
+                passingGrade,
+                passingRate: null,
+                performanceLevel: null,
+              },
           distribution: this.emptyDistribution(),
           ...(bandView ? { bands: bandView, bandDistribution: [] } : {}),
           courseComparison: [],
@@ -395,6 +420,46 @@ export class AssessmentReportService {
       averageGrade,
       passingGrade,
       passingRate,
+      performanceLevel:
+        averageAchievement === null
+          ? null
+          : band
+            ? bandToLegacyLevel(band, bands)
+            : percentageToPerformanceLevel(averageAchievement / 100, {
+                config: scaleConfig as never,
+              }),
+      performanceBand: band ? toBandView(band) : null,
+    };
+  }
+
+  /**
+   * Síntesis ejecutiva para un informe cargado en modo agregado (sin filas por
+   * alumno). El logro promedio y el N vienen del read-model de ítems; los campos de
+   * nota no aplican (un informe oficial no trae puntajes crudos). La distribución por
+   * nivel se resuelve aparte (queda vacía hasta cargar los niveles / la Figura 1).
+   */
+  private buildAggregateSummary(
+    aggregate: CohortOverallAchievement,
+    studentsEnrolled: number,
+    passingGrade: number | null,
+    scaleConfig: unknown,
+    bands: PerformanceBandInput[],
+  ) {
+    const hasGradingScale = passingGrade !== null;
+    const averageAchievement = aggregate.averageAchievement;
+    const studentsEvaluated = aggregate.studentsAssessed;
+    const coverageRate = studentsEnrolled > 0 ? (studentsEvaluated / studentsEnrolled) * 100 : null;
+    const band =
+      averageAchievement === null ? null : classifyByBands(averageAchievement / 100, bands);
+    return {
+      studentsEvaluated,
+      studentsEnrolled,
+      coverageRate,
+      averageAchievement,
+      hasGradingScale,
+      averageGrade: null,
+      passingGrade,
+      passingRate: null,
       performanceLevel:
         averageAchievement === null
           ? null

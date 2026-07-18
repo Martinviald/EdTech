@@ -57,6 +57,11 @@ export function CourseReport({
   const { meta, generalResult, skillAxes, specTable, studentResults, reflectionPrompts } = report;
   const disclaimers = resolveDisclaimers(meta.disclaimers);
   const isDiagnostic = meta.variant === 'requires_support';
+  // Informe cargado de forma agregada (sin niveles por alumno): los widgets que
+  // dependen del nivel por estudiante (distribución por nivel, "requiere apoyo" y el
+  // listado individual) no tienen datos y se reemplazan por una nota, en vez de
+  // mostrar un 0 engañoso o una torta vacía.
+  const isAggregate = meta.dataGranularity === 'aggregate_only';
 
   const coverMeta = [
     { label: 'Establecimiento', value: meta.orgName },
@@ -108,9 +113,13 @@ export function CourseReport({
           />
           <GeneralStat
             label="Estudiantes que requieren mayor apoyo"
-            value={String(generalResult.requiresSupportCount)}
-            hint={`${fmtPct(generalResult.requiresSupportPercentage)} del curso`}
-            emphasized={isDiagnostic}
+            value={isAggregate ? '—' : String(generalResult.requiresSupportCount)}
+            hint={
+              isAggregate
+                ? 'No disponible en informes agregados'
+                : `${fmtPct(generalResult.requiresSupportPercentage)} del curso`
+            }
+            emphasized={isDiagnostic && !isAggregate}
           />
           <GeneralStat
             label="Estudiantes considerados"
@@ -121,7 +130,14 @@ export function CourseReport({
         {!isDiagnostic ? (
           <div className="rounded-md border p-4">
             <p className="mb-4 text-sm font-medium">Resultados según niveles de logro</p>
-            <DonutChart slices={levelSlices(generalResult.distribution)} />
+            {isAggregate ? (
+              <p className="text-sm text-muted-foreground">
+                No disponible: este informe se cargó de forma agregada, sin el nivel de logro de
+                cada estudiante.
+              </p>
+            ) : (
+              <DonutChart slices={levelSlices(generalResult.distribution)} />
+            )}
           </div>
         ) : null}
       </ReportSection>
@@ -174,15 +190,24 @@ export function CourseReport({
         title="Resultados por estudiante"
         description="Una fila por estudiante: el punto marca su porcentaje de logro sobre las bandas de nivel del instrumento (color por nivel), para leer visualmente en qué nivel cae cada alumno. El nivel más bajo (Insuficiente) corresponde a quienes requieren mayor apoyo."
       >
-        <StudentDotPlot students={studentResults} />
-        <p className="text-sm text-muted-foreground">
-          Estudiantes que requieren mayor apoyo:{' '}
-          <span className="font-semibold text-foreground">
-            {generalResult.requiresSupportCount}
-          </span>{' '}
-          de {generalResult.studentsConsidered}
-        </p>
-        <StudentTable students={studentResults} basePath={studentReportBasePath} />
+        {isAggregate ? (
+          <p className="text-sm text-muted-foreground">
+            Este informe se cargó de forma agregada por curso y no incluye los resultados
+            individuales de cada estudiante.
+          </p>
+        ) : (
+          <>
+            <StudentDotPlot students={studentResults} />
+            <p className="text-sm text-muted-foreground">
+              Estudiantes que requieren mayor apoyo:{' '}
+              <span className="font-semibold text-foreground">
+                {generalResult.requiresSupportCount}
+              </span>{' '}
+              de {generalResult.studentsConsidered}
+            </p>
+            <StudentTable students={studentResults} basePath={studentReportBasePath} />
+          </>
+        )}
       </ReportSection>
 
       {/* ── Sección 6 — Conclusiones / preguntas guía ── */}

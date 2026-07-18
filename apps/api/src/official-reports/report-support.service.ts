@@ -18,6 +18,7 @@ import {
 import {
   RESULTS_VIEWER_ROLES,
   userHasAnyRole,
+  type DataGranularity,
   type OfficialReportVariant,
   type UserRole,
 } from '@soe/types';
@@ -64,6 +65,7 @@ export type ReportAssessmentInfo = {
   administeredAt: Date | null;
   gradingScaleId: string | null;
   gradingScaleConfig: unknown;
+  dataGranularity: DataGranularity;
   period: string | null;
   periodLabel: string | null;
 };
@@ -110,9 +112,7 @@ export class ReportSupportService {
       .from(teacherAssignments)
       .innerJoin(subjectClasses, eq(subjectClasses.id, teacherAssignments.subjectClassId))
       .innerJoin(classGroups, eq(classGroups.id, subjectClasses.classGroupId))
-      .where(
-        and(eq(teacherAssignments.userId, user.userId), eq(classGroups.orgId, orgId)),
-      );
+      .where(and(eq(teacherAssignments.userId, user.userId), eq(classGroups.orgId, orgId)));
     const ids = Array.from(new Set(rows.map((r) => r.classGroupId)));
     return { scopeAll: false, classGroupIds: ids };
   }
@@ -232,6 +232,7 @@ export class ReportSupportService {
         subjectName: subjects.name,
         gradingScaleId: instruments.gradingScaleId,
         gradingScaleConfig: gradingScales.config,
+        dataGranularity: assessments.dataGranularity,
       })
       .from(assessments)
       .innerJoin(instruments, eq(instruments.id, assessments.instrumentId))
@@ -247,9 +248,7 @@ export class ReportSupportService {
     const config = (row.config ?? {}) as Record<string, unknown>;
     const period = typeof config.period === 'string' ? config.period : null;
     const periodLabel =
-      typeof config.periodLabel === 'string'
-        ? config.periodLabel
-        : humanizePeriod(period);
+      typeof config.periodLabel === 'string' ? config.periodLabel : humanizePeriod(period);
 
     return {
       id: row.id,
@@ -264,6 +263,7 @@ export class ReportSupportService {
       administeredAt: row.administeredAt,
       gradingScaleId: row.gradingScaleId,
       gradingScaleConfig: row.gradingScaleConfig,
+      dataGranularity: row.dataGranularity as DataGranularity,
       period,
       periodLabel,
     };
@@ -296,11 +296,7 @@ export class ReportSupportService {
    * directivo. Null si no hay. No es PII sensible de menores.
    */
   async loadDirectorName(tx: Database, orgId: string): Promise<string | null> {
-    const directorRoles: UserRole[] = [
-      'academic_director',
-      'school_admin',
-      'foundation_director',
-    ];
+    const directorRoles: UserRole[] = ['academic_director', 'school_admin', 'foundation_director'];
     const rows = await tx
       .select({
         role: sql<string>`${orgMemberships.role}::text`,
@@ -319,9 +315,7 @@ export class ReportSupportService {
     if (rows.length === 0) return null;
     // Preferencia por jerarquía del rol.
     const priority = new Map(directorRoles.map((r, i) => [r as string, i]));
-    rows.sort(
-      (a, b) => (priority.get(a.role) ?? 99) - (priority.get(b.role) ?? 99),
-    );
+    rows.sort((a, b) => (priority.get(a.role) ?? 99) - (priority.get(b.role) ?? 99));
     return rows[0]!.name;
   }
 
