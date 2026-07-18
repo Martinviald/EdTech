@@ -7688,6 +7688,11 @@
           "code": "MATH-SK-REPRESENTAR",
           "type": "skill",
           "tagType": "secondary"
+        },
+        {
+          "code": "CUR-CONTENIDO-MATH-3B-AX-NUMEROS-Y-OPERACIONES",
+          "type": "axis",
+          "tagType": "secondary"
         }
       ]
     },
@@ -7708,6 +7713,11 @@
         {
           "code": "MATH-SK-REPRESENTAR",
           "type": "skill",
+          "tagType": "secondary"
+        },
+        {
+          "code": "CUR-CONTENIDO-MATH-3B-AX-NUMEROS-Y-OPERACIONES",
+          "type": "axis",
           "tagType": "secondary"
         }
       ]
@@ -7730,6 +7740,11 @@
           "code": "MATH-SK-REPRESENTAR",
           "type": "skill",
           "tagType": "secondary"
+        },
+        {
+          "code": "CUR-CONTENIDO-MATH-3B-AX-NUMEROS-Y-OPERACIONES",
+          "type": "axis",
+          "tagType": "secondary"
         }
       ]
     },
@@ -7750,6 +7765,11 @@
         {
           "code": "MATH-SK-RESOLVER-PROBLEMAS",
           "type": "skill",
+          "tagType": "secondary"
+        },
+        {
+          "code": "CUR-CONTENIDO-MATH-3B-AX-NUMEROS-Y-OPERACIONES",
+          "type": "axis",
           "tagType": "secondary"
         }
       ]
@@ -7772,6 +7792,11 @@
           "code": "MATH-SK-REPRESENTAR",
           "type": "skill",
           "tagType": "secondary"
+        },
+        {
+          "code": "CUR-CONTENIDO-MATH-3B-AX-NUMEROS-Y-OPERACIONES",
+          "type": "axis",
+          "tagType": "secondary"
         }
       ]
     },
@@ -7793,6 +7818,11 @@
           "code": "MATH-SK-RESOLVER-PROBLEMAS",
           "type": "skill",
           "tagType": "secondary"
+        },
+        {
+          "code": "CUR-CONTENIDO-MATH-3B-AX-NUMEROS-Y-OPERACIONES",
+          "type": "axis",
+          "tagType": "secondary"
         }
       ]
     },
@@ -7813,6 +7843,11 @@
         {
           "code": "MATH-SK-RESOLVER-PROBLEMAS",
           "type": "skill",
+          "tagType": "secondary"
+        },
+        {
+          "code": "CUR-CONTENIDO-MATH-3B-AX-NUMEROS-Y-OPERACIONES",
+          "type": "axis",
           "tagType": "secondary"
         }
       ]
@@ -7835,6 +7870,11 @@
           "code": "MATH-SK-RESOLVER-PROBLEMAS",
           "type": "skill",
           "tagType": "secondary"
+        },
+        {
+          "code": "CUR-CONTENIDO-MATH-3B-AX-NUMEROS-Y-OPERACIONES",
+          "type": "axis",
+          "tagType": "secondary"
         }
       ]
     },
@@ -7855,6 +7895,11 @@
         {
           "code": "MATH-SK-REPRESENTAR",
           "type": "skill",
+          "tagType": "secondary"
+        },
+        {
+          "code": "CUR-CONTENIDO-MATH-3B-AX-PATRONES-Y-ALGEBRA",
+          "type": "axis",
           "tagType": "secondary"
         }
       ]
@@ -7877,6 +7922,11 @@
           "code": "MATH-SK-RESOLVER-PROBLEMAS",
           "type": "skill",
           "tagType": "secondary"
+        },
+        {
+          "code": "CUR-CONTENIDO-MATH-3B-AX-PATRONES-Y-ALGEBRA",
+          "type": "axis",
+          "tagType": "secondary"
         }
       ]
     },
@@ -7898,6 +7948,11 @@
           "code": "MATH-SK-RESOLVER-PROBLEMAS",
           "type": "skill",
           "tagType": "secondary"
+        },
+        {
+          "code": "CUR-CONTENIDO-MATH-3B-AX-GEOMETRIA",
+          "type": "axis",
+          "tagType": "secondary"
         }
       ]
     },
@@ -7918,6 +7973,11 @@
         {
           "code": "MATH-SK-RESOLVER-PROBLEMAS",
           "type": "skill",
+          "tagType": "secondary"
+        },
+        {
+          "code": "CUR-CONTENIDO-MATH-3B-AX-GEOMETRIA",
+          "type": "axis",
           "tagType": "secondary"
         }
       ]
@@ -7940,6 +8000,11 @@
           "code": "MATH-SK-RESOLVER-PROBLEMAS",
           "type": "skill",
           "tagType": "secondary"
+        },
+        {
+          "code": "CUR-CONTENIDO-MATH-3B-AX-MEDICION",
+          "type": "axis",
+          "tagType": "secondary"
         }
       ]
     },
@@ -7960,6 +8025,11 @@
         {
           "code": "MATH-SK-RESOLVER-PROBLEMAS",
           "type": "skill",
+          "tagType": "secondary"
+        },
+        {
+          "code": "CUR-CONTENIDO-MATH-3B-AX-MEDICION",
+          "type": "axis",
           "tagType": "secondary"
         }
       ]
@@ -7982,6 +8052,11 @@
           "code": "MATH-SK-REPRESENTAR",
           "type": "skill",
           "tagType": "secondary"
+        },
+        {
+          "code": "CUR-CONTENIDO-MATH-3B-AX-MEDICION",
+          "type": "axis",
+          "tagType": "secondary"
         }
       ]
     },
@@ -8002,6 +8077,11 @@
         {
           "code": "MATH-SK-RESOLVER-PROBLEMAS",
           "type": "skill",
+          "tagType": "secondary"
+        },
+        {
+          "code": "CUR-CONTENIDO-MATH-3B-AX-NUMEROS-Y-OPERACIONES",
+          "type": "axis",
           "tagType": "secondary"
         }
       ]
@@ -8024,6 +8104,11 @@
           "code": "MATH-SK-RESOLVER-PROBLEMAS",
           "type": "skill",
           "tagType": "secondary"
+        },
+        {
+          "code": "CUR-CONTENIDO-MATH-3B-AX-NUMEROS-Y-OPERACIONES",
+          "type": "axis",
+          "tagType": "secondary"
         }
       ]
     },
@@ -8044,6 +8129,11 @@
         {
           "code": "MATH-SK-RESOLVER-PROBLEMAS",
           "type": "skill",
+          "tagType": "secondary"
+        },
+        {
+          "code": "CUR-CONTENIDO-MATH-3B-AX-NUMEROS-Y-OPERACIONES",
+          "type": "axis",
           "tagType": "secondary"
         }
       ]
@@ -8066,6 +8156,11 @@
           "code": "MATH-SK-RESOLVER-PROBLEMAS",
           "type": "skill",
           "tagType": "secondary"
+        },
+        {
+          "code": "CUR-CONTENIDO-MATH-3B-AX-NUMEROS-Y-OPERACIONES",
+          "type": "axis",
+          "tagType": "secondary"
         }
       ]
     },
@@ -8087,6 +8182,11 @@
           "code": "MATH-SK-RESOLVER-PROBLEMAS",
           "type": "skill",
           "tagType": "secondary"
+        },
+        {
+          "code": "CUR-CONTENIDO-MATH-3B-AX-NUMEROS-Y-OPERACIONES",
+          "type": "axis",
+          "tagType": "secondary"
         }
       ]
     },
@@ -8107,6 +8207,11 @@
         {
           "code": "MATH-SK-REPRESENTAR",
           "type": "skill",
+          "tagType": "secondary"
+        },
+        {
+          "code": "CUR-CONTENIDO-MATH-3B-AX-NUMEROS-Y-OPERACIONES",
+          "type": "axis",
           "tagType": "secondary"
         }
       ]
@@ -8129,6 +8234,11 @@
           "code": "MATH-SK-REPRESENTAR",
           "type": "skill",
           "tagType": "secondary"
+        },
+        {
+          "code": "CUR-CONTENIDO-MATH-3B-AX-DATOS-Y-PROBABILIDADES",
+          "type": "axis",
+          "tagType": "secondary"
         }
       ]
     },
@@ -8149,6 +8259,11 @@
         {
           "code": "MATH-SK-RESOLVER-PROBLEMAS",
           "type": "skill",
+          "tagType": "secondary"
+        },
+        {
+          "code": "CUR-CONTENIDO-MATH-3B-AX-DATOS-Y-PROBABILIDADES",
+          "type": "axis",
           "tagType": "secondary"
         }
       ]
@@ -8171,6 +8286,11 @@
           "code": "MATH-SK-REPRESENTAR",
           "type": "skill",
           "tagType": "secondary"
+        },
+        {
+          "code": "CUR-CONTENIDO-MATH-3B-AX-NUMEROS-Y-OPERACIONES",
+          "type": "axis",
+          "tagType": "secondary"
         }
       ]
     },
@@ -8191,6 +8311,11 @@
         {
           "code": "MATH-SK-REPRESENTAR",
           "type": "skill",
+          "tagType": "secondary"
+        },
+        {
+          "code": "CUR-CONTENIDO-MATH-3B-AX-NUMEROS-Y-OPERACIONES",
+          "type": "axis",
           "tagType": "secondary"
         }
       ]
@@ -8213,6 +8338,11 @@
           "code": "MATH-SK-REPRESENTAR",
           "type": "skill",
           "tagType": "secondary"
+        },
+        {
+          "code": "CUR-CONTENIDO-MATH-3B-AX-NUMEROS-Y-OPERACIONES",
+          "type": "axis",
+          "tagType": "secondary"
         }
       ]
     },
@@ -8233,6 +8363,11 @@
         {
           "code": "MATH-SK-REPRESENTAR",
           "type": "skill",
+          "tagType": "secondary"
+        },
+        {
+          "code": "CUR-CONTENIDO-MATH-3B-AX-NUMEROS-Y-OPERACIONES",
+          "type": "axis",
           "tagType": "secondary"
         }
       ]
@@ -8255,6 +8390,11 @@
           "code": "MATH-SK-REPRESENTAR",
           "type": "skill",
           "tagType": "secondary"
+        },
+        {
+          "code": "CUR-CONTENIDO-MATH-3B-AX-NUMEROS-Y-OPERACIONES",
+          "type": "axis",
+          "tagType": "secondary"
         }
       ]
     },
@@ -8275,6 +8415,11 @@
         {
           "code": "MATH-SK-REPRESENTAR",
           "type": "skill",
+          "tagType": "secondary"
+        },
+        {
+          "code": "CUR-CONTENIDO-MATH-3B-AX-NUMEROS-Y-OPERACIONES",
+          "type": "axis",
           "tagType": "secondary"
         }
       ]
@@ -8297,6 +8442,11 @@
           "code": "MATH-SK-RESOLVER-PROBLEMAS",
           "type": "skill",
           "tagType": "secondary"
+        },
+        {
+          "code": "CUR-CONTENIDO-MATH-3B-AX-NUMEROS-Y-OPERACIONES",
+          "type": "axis",
+          "tagType": "secondary"
         }
       ]
     },
@@ -8317,6 +8467,11 @@
         {
           "code": "MATH-SK-RESOLVER-PROBLEMAS",
           "type": "skill",
+          "tagType": "secondary"
+        },
+        {
+          "code": "CUR-CONTENIDO-MATH-3B-AX-NUMEROS-Y-OPERACIONES",
+          "type": "axis",
           "tagType": "secondary"
         }
       ]
@@ -8339,6 +8494,11 @@
           "code": "MATH-SK-MODELAR",
           "type": "skill",
           "tagType": "secondary"
+        },
+        {
+          "code": "CUR-CONTENIDO-MATH-3B-AX-NUMEROS-Y-OPERACIONES",
+          "type": "axis",
+          "tagType": "secondary"
         }
       ]
     },
@@ -8359,6 +8519,11 @@
         {
           "code": "MATH-SK-REPRESENTAR",
           "type": "skill",
+          "tagType": "secondary"
+        },
+        {
+          "code": "CUR-CONTENIDO-MATH-3B-AX-NUMEROS-Y-OPERACIONES",
+          "type": "axis",
           "tagType": "secondary"
         }
       ]
@@ -8381,6 +8546,11 @@
           "code": "MATH-SK-ARGUMENTAR-Y-COMUNICAR",
           "type": "skill",
           "tagType": "secondary"
+        },
+        {
+          "code": "CUR-CONTENIDO-MATH-3B-AX-PATRONES-Y-ALGEBRA",
+          "type": "axis",
+          "tagType": "secondary"
         }
       ]
     },
@@ -8401,6 +8571,11 @@
         {
           "code": "MATH-SK-REPRESENTAR",
           "type": "skill",
+          "tagType": "secondary"
+        },
+        {
+          "code": "CUR-CONTENIDO-MATH-3B-AX-GEOMETRIA",
+          "type": "axis",
           "tagType": "secondary"
         }
       ]
@@ -8423,6 +8598,11 @@
           "code": "MATH-SK-REPRESENTAR",
           "type": "skill",
           "tagType": "secondary"
+        },
+        {
+          "code": "CUR-CONTENIDO-MATH-3B-AX-GEOMETRIA",
+          "type": "axis",
+          "tagType": "secondary"
         }
       ]
     },
@@ -8443,6 +8623,11 @@
         {
           "code": "MATH-SK-REPRESENTAR",
           "type": "skill",
+          "tagType": "secondary"
+        },
+        {
+          "code": "CUR-CONTENIDO-MATH-3B-AX-GEOMETRIA",
+          "type": "axis",
           "tagType": "secondary"
         }
       ]
@@ -8465,6 +8650,11 @@
           "code": "MATH-SK-RESOLVER-PROBLEMAS",
           "type": "skill",
           "tagType": "secondary"
+        },
+        {
+          "code": "CUR-CONTENIDO-MATH-3B-AX-DATOS-Y-PROBABILIDADES",
+          "type": "axis",
+          "tagType": "secondary"
         }
       ]
     },
@@ -8485,6 +8675,11 @@
         {
           "code": "MATH-SK-ARGUMENTAR-Y-COMUNICAR",
           "type": "skill",
+          "tagType": "secondary"
+        },
+        {
+          "code": "CUR-CONTENIDO-MATH-3B-AX-DATOS-Y-PROBABILIDADES",
+          "type": "axis",
           "tagType": "secondary"
         }
       ]
@@ -8507,6 +8702,11 @@
           "code": "MATH-SK-ARGUMENTAR-Y-COMUNICAR",
           "type": "skill",
           "tagType": "secondary"
+        },
+        {
+          "code": "CUR-CONTENIDO-MATH-3B-AX-DATOS-Y-PROBABILIDADES",
+          "type": "axis",
+          "tagType": "secondary"
         }
       ]
     },
@@ -8527,6 +8727,11 @@
         {
           "code": "MATH-SK-ARGUMENTAR-Y-COMUNICAR",
           "type": "skill",
+          "tagType": "secondary"
+        },
+        {
+          "code": "CUR-CONTENIDO-MATH-3B-AX-DATOS-Y-PROBABILIDADES",
+          "type": "axis",
           "tagType": "secondary"
         }
       ]
@@ -8549,6 +8754,11 @@
           "code": "MATH-SK-MODELAR",
           "type": "skill",
           "tagType": "secondary"
+        },
+        {
+          "code": "CUR-CONTENIDO-MATH-3B-AX-NUMEROS-Y-OPERACIONES",
+          "type": "axis",
+          "tagType": "secondary"
         }
       ]
     },
@@ -8569,6 +8779,11 @@
         {
           "code": "MATH-SK-RESOLVER-PROBLEMAS",
           "type": "skill",
+          "tagType": "secondary"
+        },
+        {
+          "code": "CUR-CONTENIDO-MATH-3B-AX-NUMEROS-Y-OPERACIONES",
+          "type": "axis",
           "tagType": "secondary"
         }
       ]
@@ -8591,6 +8806,11 @@
           "code": "MATH-SK-RESOLVER-PROBLEMAS",
           "type": "skill",
           "tagType": "secondary"
+        },
+        {
+          "code": "CUR-CONTENIDO-MATH-3B-AX-NUMEROS-Y-OPERACIONES",
+          "type": "axis",
+          "tagType": "secondary"
         }
       ]
     },
@@ -8611,6 +8831,11 @@
         {
           "code": "MATH-SK-MODELAR",
           "type": "skill",
+          "tagType": "secondary"
+        },
+        {
+          "code": "CUR-CONTENIDO-MATH-3B-AX-NUMEROS-Y-OPERACIONES",
+          "type": "axis",
           "tagType": "secondary"
         }
       ]
@@ -8633,6 +8858,11 @@
           "code": "MATH-SK-ARGUMENTAR-Y-COMUNICAR",
           "type": "skill",
           "tagType": "secondary"
+        },
+        {
+          "code": "CUR-CONTENIDO-MATH-3B-AX-PATRONES-Y-ALGEBRA",
+          "type": "axis",
+          "tagType": "secondary"
         }
       ]
     },
@@ -8653,6 +8883,11 @@
         {
           "code": "MATH-SK-REPRESENTAR",
           "type": "skill",
+          "tagType": "secondary"
+        },
+        {
+          "code": "CUR-CONTENIDO-MATH-3B-AX-NUMEROS-Y-OPERACIONES",
+          "type": "axis",
           "tagType": "secondary"
         }
       ]
@@ -8675,6 +8910,11 @@
           "code": "MATH-SK-REPRESENTAR",
           "type": "skill",
           "tagType": "secondary"
+        },
+        {
+          "code": "CUR-CONTENIDO-MATH-3B-AX-NUMEROS-Y-OPERACIONES",
+          "type": "axis",
+          "tagType": "secondary"
         }
       ]
     },
@@ -8695,6 +8935,11 @@
         {
           "code": "MATH-SK-REPRESENTAR",
           "type": "skill",
+          "tagType": "secondary"
+        },
+        {
+          "code": "CUR-CONTENIDO-MATH-3B-AX-NUMEROS-Y-OPERACIONES",
+          "type": "axis",
           "tagType": "secondary"
         }
       ]
@@ -8717,6 +8962,11 @@
           "code": "MATH-SK-RESOLVER-PROBLEMAS",
           "type": "skill",
           "tagType": "secondary"
+        },
+        {
+          "code": "CUR-CONTENIDO-MATH-3B-AX-NUMEROS-Y-OPERACIONES",
+          "type": "axis",
+          "tagType": "secondary"
         }
       ]
     },
@@ -8737,6 +8987,11 @@
         {
           "code": "MATH-SK-REPRESENTAR",
           "type": "skill",
+          "tagType": "secondary"
+        },
+        {
+          "code": "CUR-CONTENIDO-MATH-3B-AX-NUMEROS-Y-OPERACIONES",
+          "type": "axis",
           "tagType": "secondary"
         }
       ]
@@ -8759,6 +9014,11 @@
           "code": "MATH-SK-RESOLVER-PROBLEMAS",
           "type": "skill",
           "tagType": "secondary"
+        },
+        {
+          "code": "CUR-CONTENIDO-MATH-3B-AX-NUMEROS-Y-OPERACIONES",
+          "type": "axis",
+          "tagType": "secondary"
         }
       ]
     },
@@ -8779,6 +9039,11 @@
         {
           "code": "MATH-SK-RESOLVER-PROBLEMAS",
           "type": "skill",
+          "tagType": "secondary"
+        },
+        {
+          "code": "CUR-CONTENIDO-MATH-3B-AX-NUMEROS-Y-OPERACIONES",
+          "type": "axis",
           "tagType": "secondary"
         }
       ]
@@ -8801,6 +9066,11 @@
           "code": "MATH-SK-RESOLVER-PROBLEMAS",
           "type": "skill",
           "tagType": "secondary"
+        },
+        {
+          "code": "CUR-CONTENIDO-MATH-3B-AX-NUMEROS-Y-OPERACIONES",
+          "type": "axis",
+          "tagType": "secondary"
         }
       ]
     },
@@ -8821,6 +9091,11 @@
         {
           "code": "MATH-SK-REPRESENTAR",
           "type": "skill",
+          "tagType": "secondary"
+        },
+        {
+          "code": "CUR-CONTENIDO-MATH-3B-AX-PATRONES-Y-ALGEBRA",
+          "type": "axis",
           "tagType": "secondary"
         }
       ]
@@ -8843,6 +9118,11 @@
           "code": "MATH-SK-RESOLVER-PROBLEMAS",
           "type": "skill",
           "tagType": "secondary"
+        },
+        {
+          "code": "CUR-CONTENIDO-MATH-3B-AX-PATRONES-Y-ALGEBRA",
+          "type": "axis",
+          "tagType": "secondary"
         }
       ]
     },
@@ -8864,6 +9144,11 @@
           "code": "MATH-SK-RESOLVER-PROBLEMAS",
           "type": "skill",
           "tagType": "secondary"
+        },
+        {
+          "code": "CUR-CONTENIDO-MATH-3B-AX-GEOMETRIA",
+          "type": "axis",
+          "tagType": "secondary"
         }
       ]
     },
@@ -8884,6 +9169,11 @@
         {
           "code": "MATH-SK-RESOLVER-PROBLEMAS",
           "type": "skill",
+          "tagType": "secondary"
+        },
+        {
+          "code": "CUR-CONTENIDO-MATH-3B-AX-GEOMETRIA",
+          "type": "axis",
           "tagType": "secondary"
         }
       ]
@@ -8906,6 +9196,11 @@
           "code": "MATH-SK-RESOLVER-PROBLEMAS",
           "type": "skill",
           "tagType": "secondary"
+        },
+        {
+          "code": "CUR-CONTENIDO-MATH-3B-AX-MEDICION",
+          "type": "axis",
+          "tagType": "secondary"
         }
       ]
     },
@@ -8926,6 +9221,11 @@
         {
           "code": "MATH-SK-RESOLVER-PROBLEMAS",
           "type": "skill",
+          "tagType": "secondary"
+        },
+        {
+          "code": "CUR-CONTENIDO-MATH-3B-AX-MEDICION",
+          "type": "axis",
           "tagType": "secondary"
         }
       ]
@@ -8948,6 +9248,11 @@
           "code": "MATH-SK-REPRESENTAR",
           "type": "skill",
           "tagType": "secondary"
+        },
+        {
+          "code": "CUR-CONTENIDO-MATH-3B-AX-MEDICION",
+          "type": "axis",
+          "tagType": "secondary"
         }
       ]
     },
@@ -8968,6 +9273,11 @@
         {
           "code": "MATH-SK-RESOLVER-PROBLEMAS",
           "type": "skill",
+          "tagType": "secondary"
+        },
+        {
+          "code": "CUR-CONTENIDO-MATH-3B-AX-NUMEROS-Y-OPERACIONES",
+          "type": "axis",
           "tagType": "secondary"
         }
       ]
@@ -8990,6 +9300,11 @@
           "code": "MATH-SK-REPRESENTAR",
           "type": "skill",
           "tagType": "secondary"
+        },
+        {
+          "code": "CUR-CONTENIDO-MATH-3B-AX-NUMEROS-Y-OPERACIONES",
+          "type": "axis",
+          "tagType": "secondary"
         }
       ]
     },
@@ -9010,6 +9325,11 @@
         {
           "code": "MATH-SK-RESOLVER-PROBLEMAS",
           "type": "skill",
+          "tagType": "secondary"
+        },
+        {
+          "code": "CUR-CONTENIDO-MATH-3B-AX-NUMEROS-Y-OPERACIONES",
+          "type": "axis",
           "tagType": "secondary"
         }
       ]
@@ -9032,6 +9352,11 @@
           "code": "MATH-SK-RESOLVER-PROBLEMAS",
           "type": "skill",
           "tagType": "secondary"
+        },
+        {
+          "code": "CUR-CONTENIDO-MATH-3B-AX-NUMEROS-Y-OPERACIONES",
+          "type": "axis",
+          "tagType": "secondary"
         }
       ]
     },
@@ -9052,6 +9377,11 @@
         {
           "code": "MATH-SK-RESOLVER-PROBLEMAS",
           "type": "skill",
+          "tagType": "secondary"
+        },
+        {
+          "code": "CUR-CONTENIDO-MATH-3B-AX-NUMEROS-Y-OPERACIONES",
+          "type": "axis",
           "tagType": "secondary"
         }
       ]
@@ -9074,6 +9404,11 @@
           "code": "MATH-SK-REPRESENTAR",
           "type": "skill",
           "tagType": "secondary"
+        },
+        {
+          "code": "CUR-CONTENIDO-MATH-3B-AX-NUMEROS-Y-OPERACIONES",
+          "type": "axis",
+          "tagType": "secondary"
         }
       ]
     },
@@ -9094,6 +9429,11 @@
         {
           "code": "MATH-SK-REPRESENTAR",
           "type": "skill",
+          "tagType": "secondary"
+        },
+        {
+          "code": "CUR-CONTENIDO-MATH-3B-AX-DATOS-Y-PROBABILIDADES",
+          "type": "axis",
           "tagType": "secondary"
         }
       ]
@@ -9116,6 +9456,11 @@
           "code": "MATH-SK-RESOLVER-PROBLEMAS",
           "type": "skill",
           "tagType": "secondary"
+        },
+        {
+          "code": "CUR-CONTENIDO-MATH-3B-AX-DATOS-Y-PROBABILIDADES",
+          "type": "axis",
+          "tagType": "secondary"
         }
       ]
     },
@@ -9136,6 +9481,11 @@
         {
           "code": "MATH-SK-REPRESENTAR",
           "type": "skill",
+          "tagType": "secondary"
+        },
+        {
+          "code": "CUR-CONTENIDO-MATH-4B-AX-NUMEROS-Y-OPERACIONES",
+          "type": "axis",
           "tagType": "secondary"
         }
       ]
@@ -9158,6 +9508,11 @@
           "code": "MATH-SK-RESOLVER-PROBLEMAS",
           "type": "skill",
           "tagType": "secondary"
+        },
+        {
+          "code": "CUR-CONTENIDO-MATH-4B-AX-NUMEROS-Y-OPERACIONES",
+          "type": "axis",
+          "tagType": "secondary"
         }
       ]
     },
@@ -9178,6 +9533,11 @@
         {
           "code": "MATH-SK-RESOLVER-PROBLEMAS",
           "type": "skill",
+          "tagType": "secondary"
+        },
+        {
+          "code": "CUR-CONTENIDO-MATH-4B-AX-NUMEROS-Y-OPERACIONES",
+          "type": "axis",
           "tagType": "secondary"
         }
       ]
@@ -9200,6 +9560,11 @@
           "code": "MATH-SK-RESOLVER-PROBLEMAS",
           "type": "skill",
           "tagType": "secondary"
+        },
+        {
+          "code": "CUR-CONTENIDO-MATH-4B-AX-NUMEROS-Y-OPERACIONES",
+          "type": "axis",
+          "tagType": "secondary"
         }
       ]
     },
@@ -9220,6 +9585,11 @@
         {
           "code": "MATH-SK-REPRESENTAR",
           "type": "skill",
+          "tagType": "secondary"
+        },
+        {
+          "code": "CUR-CONTENIDO-MATH-4B-AX-NUMEROS-Y-OPERACIONES",
+          "type": "axis",
           "tagType": "secondary"
         }
       ]
@@ -9242,6 +9612,11 @@
           "code": "MATH-SK-RESOLVER-PROBLEMAS",
           "type": "skill",
           "tagType": "secondary"
+        },
+        {
+          "code": "CUR-CONTENIDO-MATH-4B-AX-NUMEROS-Y-OPERACIONES",
+          "type": "axis",
+          "tagType": "secondary"
         }
       ]
     },
@@ -9262,6 +9637,11 @@
         {
           "code": "MATH-SK-RESOLVER-PROBLEMAS",
           "type": "skill",
+          "tagType": "secondary"
+        },
+        {
+          "code": "CUR-CONTENIDO-MATH-4B-AX-NUMEROS-Y-OPERACIONES",
+          "type": "axis",
           "tagType": "secondary"
         }
       ]
@@ -9284,6 +9664,11 @@
           "code": "MATH-SK-RESOLVER-PROBLEMAS",
           "type": "skill",
           "tagType": "secondary"
+        },
+        {
+          "code": "CUR-CONTENIDO-MATH-4B-AX-PATRONES-Y-ALGEBRA",
+          "type": "axis",
+          "tagType": "secondary"
         }
       ]
     },
@@ -9304,6 +9689,11 @@
         {
           "code": "MATH-SK-RESOLVER-PROBLEMAS",
           "type": "skill",
+          "tagType": "secondary"
+        },
+        {
+          "code": "CUR-CONTENIDO-MATH-4B-AX-PATRONES-Y-ALGEBRA",
+          "type": "axis",
           "tagType": "secondary"
         }
       ]
@@ -9326,6 +9716,11 @@
           "code": "MATH-SK-RESOLVER-PROBLEMAS",
           "type": "skill",
           "tagType": "secondary"
+        },
+        {
+          "code": "CUR-CONTENIDO-MATH-4B-AX-PATRONES-Y-ALGEBRA",
+          "type": "axis",
+          "tagType": "secondary"
         }
       ]
     },
@@ -9346,6 +9741,11 @@
         {
           "code": "MATH-SK-REPRESENTAR",
           "type": "skill",
+          "tagType": "secondary"
+        },
+        {
+          "code": "CUR-CONTENIDO-MATH-4B-AX-MEDICION",
+          "type": "axis",
           "tagType": "secondary"
         }
       ]
@@ -9368,6 +9768,11 @@
           "code": "MATH-SK-REPRESENTAR",
           "type": "skill",
           "tagType": "secondary"
+        },
+        {
+          "code": "CUR-CONTENIDO-MATH-4B-AX-MEDICION",
+          "type": "axis",
+          "tagType": "secondary"
         }
       ]
     },
@@ -9388,6 +9793,11 @@
         {
           "code": "MATH-SK-RESOLVER-PROBLEMAS",
           "type": "skill",
+          "tagType": "secondary"
+        },
+        {
+          "code": "CUR-CONTENIDO-MATH-4B-AX-MEDICION",
+          "type": "axis",
           "tagType": "secondary"
         }
       ]
@@ -9410,6 +9820,11 @@
           "code": "MATH-SK-RESOLVER-PROBLEMAS",
           "type": "skill",
           "tagType": "secondary"
+        },
+        {
+          "code": "CUR-CONTENIDO-MATH-4B-AX-MEDICION",
+          "type": "axis",
+          "tagType": "secondary"
         }
       ]
     },
@@ -9430,6 +9845,11 @@
         {
           "code": "MATH-SK-RESOLVER-PROBLEMAS",
           "type": "skill",
+          "tagType": "secondary"
+        },
+        {
+          "code": "CUR-CONTENIDO-MATH-4B-AX-MEDICION",
+          "type": "axis",
           "tagType": "secondary"
         }
       ]
@@ -9452,6 +9872,11 @@
           "code": "MATH-SK-REPRESENTAR",
           "type": "skill",
           "tagType": "secondary"
+        },
+        {
+          "code": "CUR-CONTENIDO-MATH-4B-AX-GEOMETRIA",
+          "type": "axis",
+          "tagType": "secondary"
         }
       ]
     },
@@ -9472,6 +9897,11 @@
         {
           "code": "MATH-SK-REPRESENTAR",
           "type": "skill",
+          "tagType": "secondary"
+        },
+        {
+          "code": "CUR-CONTENIDO-MATH-4B-AX-GEOMETRIA",
+          "type": "axis",
           "tagType": "secondary"
         }
       ]
@@ -9494,6 +9924,11 @@
           "code": "MATH-SK-RESOLVER-PROBLEMAS",
           "type": "skill",
           "tagType": "secondary"
+        },
+        {
+          "code": "CUR-CONTENIDO-MATH-4B-AX-NUMEROS-Y-OPERACIONES",
+          "type": "axis",
+          "tagType": "secondary"
         }
       ]
     },
@@ -9514,6 +9949,11 @@
         {
           "code": "MATH-SK-RESOLVER-PROBLEMAS",
           "type": "skill",
+          "tagType": "secondary"
+        },
+        {
+          "code": "CUR-CONTENIDO-MATH-4B-AX-NUMEROS-Y-OPERACIONES",
+          "type": "axis",
           "tagType": "secondary"
         }
       ]
@@ -9536,6 +9976,11 @@
           "code": "MATH-SK-RESOLVER-PROBLEMAS",
           "type": "skill",
           "tagType": "secondary"
+        },
+        {
+          "code": "CUR-CONTENIDO-MATH-4B-AX-NUMEROS-Y-OPERACIONES",
+          "type": "axis",
+          "tagType": "secondary"
         }
       ]
     },
@@ -9556,6 +10001,11 @@
         {
           "code": "MATH-SK-RESOLVER-PROBLEMAS",
           "type": "skill",
+          "tagType": "secondary"
+        },
+        {
+          "code": "CUR-CONTENIDO-MATH-4B-AX-NUMEROS-Y-OPERACIONES",
+          "type": "axis",
           "tagType": "secondary"
         }
       ]
@@ -9578,6 +10028,11 @@
           "code": "MATH-SK-RESOLVER-PROBLEMAS",
           "type": "skill",
           "tagType": "secondary"
+        },
+        {
+          "code": "CUR-CONTENIDO-MATH-4B-AX-NUMEROS-Y-OPERACIONES",
+          "type": "axis",
+          "tagType": "secondary"
         }
       ]
     },
@@ -9598,6 +10053,11 @@
         {
           "code": "MATH-SK-RESOLVER-PROBLEMAS",
           "type": "skill",
+          "tagType": "secondary"
+        },
+        {
+          "code": "CUR-CONTENIDO-MATH-4B-AX-NUMEROS-Y-OPERACIONES",
+          "type": "axis",
           "tagType": "secondary"
         }
       ]
@@ -9620,6 +10080,11 @@
           "code": "MATH-SK-REPRESENTAR",
           "type": "skill",
           "tagType": "secondary"
+        },
+        {
+          "code": "CUR-CONTENIDO-MATH-4B-AX-DATOS-Y-PROBABILIDADES",
+          "type": "axis",
+          "tagType": "secondary"
         }
       ]
     },
@@ -9640,6 +10105,11 @@
         {
           "code": "MATH-SK-RESOLVER-PROBLEMAS",
           "type": "skill",
+          "tagType": "secondary"
+        },
+        {
+          "code": "CUR-CONTENIDO-MATH-4B-AX-DATOS-Y-PROBABILIDADES",
+          "type": "axis",
           "tagType": "secondary"
         }
       ]
@@ -9662,6 +10132,11 @@
           "code": "MATH-SK-REPRESENTAR",
           "type": "skill",
           "tagType": "secondary"
+        },
+        {
+          "code": "CUR-CONTENIDO-MATH-4B-AX-NUMEROS-Y-OPERACIONES",
+          "type": "axis",
+          "tagType": "secondary"
         }
       ]
     },
@@ -9682,6 +10157,11 @@
         {
           "code": "MATH-SK-REPRESENTAR",
           "type": "skill",
+          "tagType": "secondary"
+        },
+        {
+          "code": "CUR-CONTENIDO-MATH-4B-AX-NUMEROS-Y-OPERACIONES",
+          "type": "axis",
           "tagType": "secondary"
         }
       ]
@@ -9704,6 +10184,11 @@
           "code": "MATH-SK-REPRESENTAR",
           "type": "skill",
           "tagType": "secondary"
+        },
+        {
+          "code": "CUR-CONTENIDO-MATH-4B-AX-NUMEROS-Y-OPERACIONES",
+          "type": "axis",
+          "tagType": "secondary"
         }
       ]
     },
@@ -9724,6 +10209,11 @@
         {
           "code": "MATH-SK-MODELAR",
           "type": "skill",
+          "tagType": "secondary"
+        },
+        {
+          "code": "CUR-CONTENIDO-MATH-4B-AX-NUMEROS-Y-OPERACIONES",
+          "type": "axis",
           "tagType": "secondary"
         }
       ]
@@ -9746,6 +10236,11 @@
           "code": "MATH-SK-MODELAR",
           "type": "skill",
           "tagType": "secondary"
+        },
+        {
+          "code": "CUR-CONTENIDO-MATH-4B-AX-NUMEROS-Y-OPERACIONES",
+          "type": "axis",
+          "tagType": "secondary"
         }
       ]
     },
@@ -9766,6 +10261,11 @@
         {
           "code": "MATH-SK-RESOLVER-PROBLEMAS",
           "type": "skill",
+          "tagType": "secondary"
+        },
+        {
+          "code": "CUR-CONTENIDO-MATH-4B-AX-NUMEROS-Y-OPERACIONES",
+          "type": "axis",
           "tagType": "secondary"
         }
       ]
@@ -9788,6 +10288,11 @@
           "code": "MATH-SK-MODELAR",
           "type": "skill",
           "tagType": "secondary"
+        },
+        {
+          "code": "CUR-CONTENIDO-MATH-4B-AX-NUMEROS-Y-OPERACIONES",
+          "type": "axis",
+          "tagType": "secondary"
         }
       ]
     },
@@ -9808,6 +10313,11 @@
         {
           "code": "MATH-SK-REPRESENTAR",
           "type": "skill",
+          "tagType": "secondary"
+        },
+        {
+          "code": "CUR-CONTENIDO-MATH-4B-AX-NUMEROS-Y-OPERACIONES",
+          "type": "axis",
           "tagType": "secondary"
         }
       ]
@@ -9830,6 +10340,11 @@
           "code": "MATH-SK-RESOLVER-PROBLEMAS",
           "type": "skill",
           "tagType": "secondary"
+        },
+        {
+          "code": "CUR-CONTENIDO-MATH-4B-AX-NUMEROS-Y-OPERACIONES",
+          "type": "axis",
+          "tagType": "secondary"
         }
       ]
     },
@@ -9850,6 +10365,11 @@
         {
           "code": "MATH-SK-RESOLVER-PROBLEMAS",
           "type": "skill",
+          "tagType": "secondary"
+        },
+        {
+          "code": "CUR-CONTENIDO-MATH-4B-AX-NUMEROS-Y-OPERACIONES",
+          "type": "axis",
           "tagType": "secondary"
         }
       ]
@@ -9872,6 +10392,11 @@
           "code": "MATH-SK-MODELAR",
           "type": "skill",
           "tagType": "secondary"
+        },
+        {
+          "code": "CUR-CONTENIDO-MATH-4B-AX-NUMEROS-Y-OPERACIONES",
+          "type": "axis",
+          "tagType": "secondary"
         }
       ]
     },
@@ -9892,6 +10417,11 @@
         {
           "code": "MATH-SK-RESOLVER-PROBLEMAS",
           "type": "skill",
+          "tagType": "secondary"
+        },
+        {
+          "code": "CUR-CONTENIDO-MATH-4B-AX-NUMEROS-Y-OPERACIONES",
+          "type": "axis",
           "tagType": "secondary"
         }
       ]
@@ -9914,6 +10444,11 @@
           "code": "MATH-SK-REPRESENTAR",
           "type": "skill",
           "tagType": "secondary"
+        },
+        {
+          "code": "CUR-CONTENIDO-MATH-4B-AX-NUMEROS-Y-OPERACIONES",
+          "type": "axis",
+          "tagType": "secondary"
         }
       ]
     },
@@ -9934,6 +10469,11 @@
         {
           "code": "MATH-SK-REPRESENTAR",
           "type": "skill",
+          "tagType": "secondary"
+        },
+        {
+          "code": "CUR-CONTENIDO-MATH-4B-AX-NUMEROS-Y-OPERACIONES",
+          "type": "axis",
           "tagType": "secondary"
         }
       ]
@@ -9956,6 +10496,11 @@
           "code": "MATH-SK-ARGUMENTAR-Y-COMUNICAR",
           "type": "skill",
           "tagType": "secondary"
+        },
+        {
+          "code": "CUR-CONTENIDO-MATH-4B-AX-PATRONES-Y-ALGEBRA",
+          "type": "axis",
+          "tagType": "secondary"
         }
       ]
     },
@@ -9976,6 +10521,11 @@
         {
           "code": "MATH-SK-ARGUMENTAR-Y-COMUNICAR",
           "type": "skill",
+          "tagType": "secondary"
+        },
+        {
+          "code": "CUR-CONTENIDO-MATH-4B-AX-PATRONES-Y-ALGEBRA",
+          "type": "axis",
           "tagType": "secondary"
         }
       ]
@@ -9998,6 +10548,11 @@
           "code": "MATH-SK-REPRESENTAR",
           "type": "skill",
           "tagType": "secondary"
+        },
+        {
+          "code": "CUR-CONTENIDO-MATH-4B-AX-PATRONES-Y-ALGEBRA",
+          "type": "axis",
+          "tagType": "secondary"
         }
       ]
     },
@@ -10019,6 +10574,11 @@
           "code": "MATH-SK-REPRESENTAR",
           "type": "skill",
           "tagType": "secondary"
+        },
+        {
+          "code": "CUR-CONTENIDO-MATH-4B-AX-PATRONES-Y-ALGEBRA",
+          "type": "axis",
+          "tagType": "secondary"
         }
       ]
     },
@@ -10039,6 +10599,11 @@
         {
           "code": "MATH-SK-REPRESENTAR",
           "type": "skill",
+          "tagType": "secondary"
+        },
+        {
+          "code": "CUR-CONTENIDO-MATH-4B-AX-GEOMETRIA",
+          "type": "axis",
           "tagType": "secondary"
         }
       ]
@@ -10061,6 +10626,11 @@
           "code": "MATH-SK-ARGUMENTAR-Y-COMUNICAR",
           "type": "skill",
           "tagType": "secondary"
+        },
+        {
+          "code": "CUR-CONTENIDO-MATH-4B-AX-DATOS-Y-PROBABILIDADES",
+          "type": "axis",
+          "tagType": "secondary"
         }
       ]
     },
@@ -10081,6 +10651,11 @@
         {
           "code": "MATH-SK-ARGUMENTAR-Y-COMUNICAR",
           "type": "skill",
+          "tagType": "secondary"
+        },
+        {
+          "code": "CUR-CONTENIDO-MATH-4B-AX-DATOS-Y-PROBABILIDADES",
+          "type": "axis",
           "tagType": "secondary"
         }
       ]
@@ -10103,6 +10678,11 @@
           "code": "MATH-SK-RESOLVER-PROBLEMAS",
           "type": "skill",
           "tagType": "secondary"
+        },
+        {
+          "code": "CUR-CONTENIDO-MATH-4B-AX-NUMEROS-Y-OPERACIONES",
+          "type": "axis",
+          "tagType": "secondary"
         }
       ]
     },
@@ -10123,6 +10703,11 @@
         {
           "code": "MATH-SK-RESOLVER-PROBLEMAS",
           "type": "skill",
+          "tagType": "secondary"
+        },
+        {
+          "code": "CUR-CONTENIDO-MATH-4B-AX-NUMEROS-Y-OPERACIONES",
+          "type": "axis",
           "tagType": "secondary"
         }
       ]
@@ -10145,6 +10730,11 @@
           "code": "MATH-SK-RESOLVER-PROBLEMAS",
           "type": "skill",
           "tagType": "secondary"
+        },
+        {
+          "code": "CUR-CONTENIDO-MATH-4B-AX-NUMEROS-Y-OPERACIONES",
+          "type": "axis",
+          "tagType": "secondary"
         }
       ]
     },
@@ -10165,6 +10755,11 @@
         {
           "code": "MATH-SK-RESOLVER-PROBLEMAS",
           "type": "skill",
+          "tagType": "secondary"
+        },
+        {
+          "code": "CUR-CONTENIDO-MATH-4B-AX-NUMEROS-Y-OPERACIONES",
+          "type": "axis",
           "tagType": "secondary"
         }
       ]
@@ -10187,6 +10782,11 @@
           "code": "MATH-SK-MODELAR",
           "type": "skill",
           "tagType": "secondary"
+        },
+        {
+          "code": "CUR-CONTENIDO-MATH-4B-AX-GEOMETRIA",
+          "type": "axis",
+          "tagType": "secondary"
         }
       ]
     },
@@ -10207,6 +10807,11 @@
         {
           "code": "MATH-SK-RESOLVER-PROBLEMAS",
           "type": "skill",
+          "tagType": "secondary"
+        },
+        {
+          "code": "CUR-CONTENIDO-MATH-4B-AX-MEDICION",
+          "type": "axis",
           "tagType": "secondary"
         }
       ]
@@ -10229,6 +10834,11 @@
           "code": "MATH-SK-REPRESENTAR",
           "type": "skill",
           "tagType": "secondary"
+        },
+        {
+          "code": "CUR-CONTENIDO-MATH-4B-AX-NUMEROS-Y-OPERACIONES",
+          "type": "axis",
+          "tagType": "secondary"
         }
       ]
     },
@@ -10249,6 +10859,11 @@
         {
           "code": "MATH-SK-RESOLVER-PROBLEMAS",
           "type": "skill",
+          "tagType": "secondary"
+        },
+        {
+          "code": "CUR-CONTENIDO-MATH-4B-AX-NUMEROS-Y-OPERACIONES",
+          "type": "axis",
           "tagType": "secondary"
         }
       ]
@@ -10271,6 +10886,11 @@
           "code": "MATH-SK-RESOLVER-PROBLEMAS",
           "type": "skill",
           "tagType": "secondary"
+        },
+        {
+          "code": "CUR-CONTENIDO-MATH-4B-AX-NUMEROS-Y-OPERACIONES",
+          "type": "axis",
+          "tagType": "secondary"
         }
       ]
     },
@@ -10291,6 +10911,11 @@
         {
           "code": "MATH-SK-ARGUMENTAR-Y-COMUNICAR",
           "type": "skill",
+          "tagType": "secondary"
+        },
+        {
+          "code": "CUR-CONTENIDO-MATH-4B-AX-NUMEROS-Y-OPERACIONES",
+          "type": "axis",
           "tagType": "secondary"
         }
       ]
@@ -10313,6 +10938,11 @@
           "code": "MATH-SK-REPRESENTAR",
           "type": "skill",
           "tagType": "secondary"
+        },
+        {
+          "code": "CUR-CONTENIDO-MATH-4B-AX-NUMEROS-Y-OPERACIONES",
+          "type": "axis",
+          "tagType": "secondary"
         }
       ]
     },
@@ -10333,6 +10963,11 @@
         {
           "code": "MATH-SK-RESOLVER-PROBLEMAS",
           "type": "skill",
+          "tagType": "secondary"
+        },
+        {
+          "code": "CUR-CONTENIDO-MATH-4B-AX-NUMEROS-Y-OPERACIONES",
+          "type": "axis",
           "tagType": "secondary"
         }
       ]
@@ -10355,6 +10990,11 @@
           "code": "MATH-SK-RESOLVER-PROBLEMAS",
           "type": "skill",
           "tagType": "secondary"
+        },
+        {
+          "code": "CUR-CONTENIDO-MATH-4B-AX-NUMEROS-Y-OPERACIONES",
+          "type": "axis",
+          "tagType": "secondary"
         }
       ]
     },
@@ -10375,6 +11015,11 @@
         {
           "code": "MATH-SK-RESOLVER-PROBLEMAS",
           "type": "skill",
+          "tagType": "secondary"
+        },
+        {
+          "code": "CUR-CONTENIDO-MATH-4B-AX-PATRONES-Y-ALGEBRA",
+          "type": "axis",
           "tagType": "secondary"
         }
       ]
@@ -10397,6 +11042,11 @@
           "code": "MATH-SK-RESOLVER-PROBLEMAS",
           "type": "skill",
           "tagType": "secondary"
+        },
+        {
+          "code": "CUR-CONTENIDO-MATH-4B-AX-PATRONES-Y-ALGEBRA",
+          "type": "axis",
+          "tagType": "secondary"
         }
       ]
     },
@@ -10417,6 +11067,11 @@
         {
           "code": "MATH-SK-RESOLVER-PROBLEMAS",
           "type": "skill",
+          "tagType": "secondary"
+        },
+        {
+          "code": "CUR-CONTENIDO-MATH-4B-AX-PATRONES-Y-ALGEBRA",
+          "type": "axis",
           "tagType": "secondary"
         }
       ]
@@ -10439,6 +11094,11 @@
           "code": "MATH-SK-RESOLVER-PROBLEMAS",
           "type": "skill",
           "tagType": "secondary"
+        },
+        {
+          "code": "CUR-CONTENIDO-MATH-4B-AX-MEDICION",
+          "type": "axis",
+          "tagType": "secondary"
         }
       ]
     },
@@ -10459,6 +11119,11 @@
         {
           "code": "MATH-SK-REPRESENTAR",
           "type": "skill",
+          "tagType": "secondary"
+        },
+        {
+          "code": "CUR-CONTENIDO-MATH-4B-AX-MEDICION",
+          "type": "axis",
           "tagType": "secondary"
         }
       ]
@@ -10481,6 +11146,11 @@
           "code": "MATH-SK-RESOLVER-PROBLEMAS",
           "type": "skill",
           "tagType": "secondary"
+        },
+        {
+          "code": "CUR-CONTENIDO-MATH-4B-AX-MEDICION",
+          "type": "axis",
+          "tagType": "secondary"
         }
       ]
     },
@@ -10501,6 +11171,11 @@
         {
           "code": "MATH-SK-RESOLVER-PROBLEMAS",
           "type": "skill",
+          "tagType": "secondary"
+        },
+        {
+          "code": "CUR-CONTENIDO-MATH-4B-AX-MEDICION",
+          "type": "axis",
           "tagType": "secondary"
         }
       ]
@@ -10523,6 +11198,11 @@
           "code": "MATH-SK-RESOLVER-PROBLEMAS",
           "type": "skill",
           "tagType": "secondary"
+        },
+        {
+          "code": "CUR-CONTENIDO-MATH-4B-AX-MEDICION",
+          "type": "axis",
+          "tagType": "secondary"
         }
       ]
     },
@@ -10543,6 +11223,11 @@
         {
           "code": "MATH-SK-REPRESENTAR",
           "type": "skill",
+          "tagType": "secondary"
+        },
+        {
+          "code": "CUR-CONTENIDO-MATH-4B-AX-GEOMETRIA",
+          "type": "axis",
           "tagType": "secondary"
         }
       ]
@@ -10565,6 +11250,11 @@
           "code": "MATH-SK-REPRESENTAR",
           "type": "skill",
           "tagType": "secondary"
+        },
+        {
+          "code": "CUR-CONTENIDO-MATH-4B-AX-GEOMETRIA",
+          "type": "axis",
+          "tagType": "secondary"
         }
       ]
     },
@@ -10585,6 +11275,11 @@
         {
           "code": "MATH-SK-RESOLVER-PROBLEMAS",
           "type": "skill",
+          "tagType": "secondary"
+        },
+        {
+          "code": "CUR-CONTENIDO-MATH-4B-AX-GEOMETRIA",
+          "type": "axis",
           "tagType": "secondary"
         }
       ]
@@ -10607,6 +11302,11 @@
           "code": "MATH-SK-RESOLVER-PROBLEMAS",
           "type": "skill",
           "tagType": "secondary"
+        },
+        {
+          "code": "CUR-CONTENIDO-MATH-4B-AX-NUMEROS-Y-OPERACIONES",
+          "type": "axis",
+          "tagType": "secondary"
         }
       ]
     },
@@ -10627,6 +11327,11 @@
         {
           "code": "MATH-SK-RESOLVER-PROBLEMAS",
           "type": "skill",
+          "tagType": "secondary"
+        },
+        {
+          "code": "CUR-CONTENIDO-MATH-4B-AX-NUMEROS-Y-OPERACIONES",
+          "type": "axis",
           "tagType": "secondary"
         }
       ]
@@ -10649,6 +11354,11 @@
           "code": "MATH-SK-RESOLVER-PROBLEMAS",
           "type": "skill",
           "tagType": "secondary"
+        },
+        {
+          "code": "CUR-CONTENIDO-MATH-4B-AX-NUMEROS-Y-OPERACIONES",
+          "type": "axis",
+          "tagType": "secondary"
         }
       ]
     },
@@ -10669,6 +11379,11 @@
         {
           "code": "MATH-SK-RESOLVER-PROBLEMAS",
           "type": "skill",
+          "tagType": "secondary"
+        },
+        {
+          "code": "CUR-CONTENIDO-MATH-4B-AX-NUMEROS-Y-OPERACIONES",
+          "type": "axis",
           "tagType": "secondary"
         }
       ]
@@ -10691,6 +11406,11 @@
           "code": "MATH-SK-RESOLVER-PROBLEMAS",
           "type": "skill",
           "tagType": "secondary"
+        },
+        {
+          "code": "CUR-CONTENIDO-MATH-4B-AX-NUMEROS-Y-OPERACIONES",
+          "type": "axis",
+          "tagType": "secondary"
         }
       ]
     },
@@ -10711,6 +11431,11 @@
         {
           "code": "MATH-SK-REPRESENTAR",
           "type": "skill",
+          "tagType": "secondary"
+        },
+        {
+          "code": "CUR-CONTENIDO-MATH-4B-AX-DATOS-Y-PROBABILIDADES",
+          "type": "axis",
           "tagType": "secondary"
         }
       ]
@@ -10733,6 +11458,11 @@
           "code": "MATH-SK-RESOLVER-PROBLEMAS",
           "type": "skill",
           "tagType": "secondary"
+        },
+        {
+          "code": "CUR-CONTENIDO-MATH-4B-AX-DATOS-Y-PROBABILIDADES",
+          "type": "axis",
+          "tagType": "secondary"
         }
       ]
     },
@@ -10753,6 +11483,11 @@
         {
           "code": "MATH-SK-REPRESENTAR",
           "type": "skill",
+          "tagType": "secondary"
+        },
+        {
+          "code": "CUR-CONTENIDO-MATH-5B-AX-NUMEROS-Y-OPERACIONES",
+          "type": "axis",
           "tagType": "secondary"
         }
       ]
@@ -10775,6 +11510,11 @@
           "code": "MATH-SK-RESOLVER-PROBLEMAS",
           "type": "skill",
           "tagType": "secondary"
+        },
+        {
+          "code": "CUR-CONTENIDO-MATH-5B-AX-NUMEROS-Y-OPERACIONES",
+          "type": "axis",
+          "tagType": "secondary"
         }
       ]
     },
@@ -10795,6 +11535,11 @@
         {
           "code": "MATH-SK-RESOLVER-PROBLEMAS",
           "type": "skill",
+          "tagType": "secondary"
+        },
+        {
+          "code": "CUR-CONTENIDO-MATH-5B-AX-NUMEROS-Y-OPERACIONES",
+          "type": "axis",
           "tagType": "secondary"
         }
       ]
@@ -10817,6 +11562,11 @@
           "code": "MATH-SK-REPRESENTAR",
           "type": "skill",
           "tagType": "secondary"
+        },
+        {
+          "code": "CUR-CONTENIDO-MATH-5B-AX-NUMEROS-Y-OPERACIONES",
+          "type": "axis",
+          "tagType": "secondary"
         }
       ]
     },
@@ -10838,6 +11588,11 @@
           "code": "MATH-SK-RESOLVER-PROBLEMAS",
           "type": "skill",
           "tagType": "secondary"
+        },
+        {
+          "code": "CUR-CONTENIDO-MATH-5B-AX-NUMEROS-Y-OPERACIONES",
+          "type": "axis",
+          "tagType": "secondary"
         }
       ]
     },
@@ -10858,6 +11613,11 @@
         {
           "code": "MATH-SK-RESOLVER-PROBLEMAS",
           "type": "skill",
+          "tagType": "secondary"
+        },
+        {
+          "code": "CUR-CONTENIDO-MATH-5B-AX-NUMEROS-Y-OPERACIONES",
+          "type": "axis",
           "tagType": "secondary"
         }
       ]
@@ -10880,6 +11640,11 @@
           "code": "MATH-SK-ARGUMENTAR-Y-COMUNICAR",
           "type": "skill",
           "tagType": "secondary"
+        },
+        {
+          "code": "CUR-CONTENIDO-MATH-5B-AX-NUMEROS-Y-OPERACIONES",
+          "type": "axis",
+          "tagType": "secondary"
         }
       ]
     },
@@ -10900,6 +11665,11 @@
         {
           "code": "MATH-SK-RESOLVER-PROBLEMAS",
           "type": "skill",
+          "tagType": "secondary"
+        },
+        {
+          "code": "CUR-CONTENIDO-MATH-5B-AX-MEDICION",
+          "type": "axis",
           "tagType": "secondary"
         }
       ]
@@ -10922,6 +11692,11 @@
           "code": "MATH-SK-RESOLVER-PROBLEMAS",
           "type": "skill",
           "tagType": "secondary"
+        },
+        {
+          "code": "CUR-CONTENIDO-MATH-5B-AX-MEDICION",
+          "type": "axis",
+          "tagType": "secondary"
         }
       ]
     },
@@ -10942,6 +11717,11 @@
         {
           "code": "MATH-SK-RESOLVER-PROBLEMAS",
           "type": "skill",
+          "tagType": "secondary"
+        },
+        {
+          "code": "CUR-CONTENIDO-MATH-5B-AX-MEDICION",
+          "type": "axis",
           "tagType": "secondary"
         }
       ]
@@ -10964,6 +11744,11 @@
           "code": "MATH-SK-RESOLVER-PROBLEMAS",
           "type": "skill",
           "tagType": "secondary"
+        },
+        {
+          "code": "CUR-CONTENIDO-MATH-5B-AX-MEDICION",
+          "type": "axis",
+          "tagType": "secondary"
         }
       ]
     },
@@ -10984,6 +11769,11 @@
         {
           "code": "MATH-SK-RESOLVER-PROBLEMAS",
           "type": "skill",
+          "tagType": "secondary"
+        },
+        {
+          "code": "CUR-CONTENIDO-MATH-5B-AX-PATRONES-Y-ALGEBRA",
+          "type": "axis",
           "tagType": "secondary"
         }
       ]
@@ -11006,6 +11796,11 @@
           "code": "MATH-SK-MODELAR",
           "type": "skill",
           "tagType": "secondary"
+        },
+        {
+          "code": "CUR-CONTENIDO-MATH-5B-AX-PATRONES-Y-ALGEBRA",
+          "type": "axis",
+          "tagType": "secondary"
         }
       ]
     },
@@ -11026,6 +11821,11 @@
         {
           "code": "MATH-SK-RESOLVER-PROBLEMAS",
           "type": "skill",
+          "tagType": "secondary"
+        },
+        {
+          "code": "CUR-CONTENIDO-MATH-5B-AX-PATRONES-Y-ALGEBRA",
+          "type": "axis",
           "tagType": "secondary"
         }
       ]
@@ -11048,6 +11848,11 @@
           "code": "MATH-SK-RESOLVER-PROBLEMAS",
           "type": "skill",
           "tagType": "secondary"
+        },
+        {
+          "code": "CUR-CONTENIDO-MATH-5B-AX-GEOMETRIA",
+          "type": "axis",
+          "tagType": "secondary"
         }
       ]
     },
@@ -11068,6 +11873,11 @@
         {
           "code": "MATH-SK-RESOLVER-PROBLEMAS",
           "type": "skill",
+          "tagType": "secondary"
+        },
+        {
+          "code": "CUR-CONTENIDO-MATH-5B-AX-GEOMETRIA",
+          "type": "axis",
           "tagType": "secondary"
         }
       ]
@@ -11090,6 +11900,11 @@
           "code": "MATH-SK-RESOLVER-PROBLEMAS",
           "type": "skill",
           "tagType": "secondary"
+        },
+        {
+          "code": "CUR-CONTENIDO-MATH-5B-AX-GEOMETRIA",
+          "type": "axis",
+          "tagType": "secondary"
         }
       ]
     },
@@ -11110,6 +11925,11 @@
         {
           "code": "MATH-SK-RESOLVER-PROBLEMAS",
           "type": "skill",
+          "tagType": "secondary"
+        },
+        {
+          "code": "CUR-CONTENIDO-MATH-5B-AX-NUMEROS-Y-OPERACIONES",
+          "type": "axis",
           "tagType": "secondary"
         }
       ]
@@ -11132,6 +11952,11 @@
           "code": "MATH-SK-RESOLVER-PROBLEMAS",
           "type": "skill",
           "tagType": "secondary"
+        },
+        {
+          "code": "CUR-CONTENIDO-MATH-5B-AX-NUMEROS-Y-OPERACIONES",
+          "type": "axis",
+          "tagType": "secondary"
         }
       ]
     },
@@ -11152,6 +11977,11 @@
         {
           "code": "MATH-SK-RESOLVER-PROBLEMAS",
           "type": "skill",
+          "tagType": "secondary"
+        },
+        {
+          "code": "CUR-CONTENIDO-MATH-5B-AX-NUMEROS-Y-OPERACIONES",
+          "type": "axis",
           "tagType": "secondary"
         }
       ]
@@ -11174,6 +12004,11 @@
           "code": "MATH-SK-MODELAR",
           "type": "skill",
           "tagType": "secondary"
+        },
+        {
+          "code": "CUR-CONTENIDO-MATH-5B-AX-NUMEROS-Y-OPERACIONES",
+          "type": "axis",
+          "tagType": "secondary"
         }
       ]
     },
@@ -11194,6 +12029,11 @@
         {
           "code": "MATH-SK-REPRESENTAR",
           "type": "skill",
+          "tagType": "secondary"
+        },
+        {
+          "code": "CUR-CONTENIDO-MATH-5B-AX-NUMEROS-Y-OPERACIONES",
+          "type": "axis",
           "tagType": "secondary"
         }
       ]
@@ -11216,6 +12056,11 @@
           "code": "MATH-SK-RESOLVER-PROBLEMAS",
           "type": "skill",
           "tagType": "secondary"
+        },
+        {
+          "code": "CUR-CONTENIDO-MATH-5B-AX-NUMEROS-Y-OPERACIONES",
+          "type": "axis",
+          "tagType": "secondary"
         }
       ]
     },
@@ -11237,6 +12082,11 @@
           "code": "MATH-SK-RESOLVER-PROBLEMAS",
           "type": "skill",
           "tagType": "secondary"
+        },
+        {
+          "code": "CUR-CONTENIDO-MATH-5B-AX-NUMEROS-Y-OPERACIONES",
+          "type": "axis",
+          "tagType": "secondary"
         }
       ]
     },
@@ -11257,6 +12107,11 @@
         {
           "code": "MATH-SK-RESOLVER-PROBLEMAS",
           "type": "skill",
+          "tagType": "secondary"
+        },
+        {
+          "code": "CUR-CONTENIDO-MATH-5B-AX-DATOS-Y-PROBABILIDADES",
+          "type": "axis",
           "tagType": "secondary"
         }
       ]
@@ -11279,6 +12134,11 @@
           "code": "MATH-SK-RESOLVER-PROBLEMAS",
           "type": "skill",
           "tagType": "secondary"
+        },
+        {
+          "code": "CUR-CONTENIDO-MATH-5B-AX-DATOS-Y-PROBABILIDADES",
+          "type": "axis",
+          "tagType": "secondary"
         }
       ]
     },
@@ -11299,6 +12159,11 @@
         {
           "code": "MATH-SK-RESOLVER-PROBLEMAS",
           "type": "skill",
+          "tagType": "secondary"
+        },
+        {
+          "code": "CUR-CONTENIDO-MATH-5B-AX-DATOS-Y-PROBABILIDADES",
+          "type": "axis",
           "tagType": "secondary"
         }
       ]
@@ -11321,6 +12186,11 @@
           "code": "MATH-SK-REPRESENTAR",
           "type": "skill",
           "tagType": "secondary"
+        },
+        {
+          "code": "CUR-CONTENIDO-MATH-5B-AX-NUMEROS-Y-OPERACIONES",
+          "type": "axis",
+          "tagType": "secondary"
         }
       ]
     },
@@ -11341,6 +12211,11 @@
         {
           "code": "MATH-SK-REPRESENTAR",
           "type": "skill",
+          "tagType": "secondary"
+        },
+        {
+          "code": "CUR-CONTENIDO-MATH-5B-AX-NUMEROS-Y-OPERACIONES",
+          "type": "axis",
           "tagType": "secondary"
         }
       ]
@@ -11363,6 +12238,11 @@
           "code": "MATH-SK-RESOLVER-PROBLEMAS",
           "type": "skill",
           "tagType": "secondary"
+        },
+        {
+          "code": "CUR-CONTENIDO-MATH-5B-AX-NUMEROS-Y-OPERACIONES",
+          "type": "axis",
+          "tagType": "secondary"
         }
       ]
     },
@@ -11383,6 +12263,11 @@
         {
           "code": "MATH-SK-RESOLVER-PROBLEMAS",
           "type": "skill",
+          "tagType": "secondary"
+        },
+        {
+          "code": "CUR-CONTENIDO-MATH-5B-AX-NUMEROS-Y-OPERACIONES",
+          "type": "axis",
           "tagType": "secondary"
         }
       ]
@@ -11405,6 +12290,11 @@
           "code": "MATH-SK-RESOLVER-PROBLEMAS",
           "type": "skill",
           "tagType": "secondary"
+        },
+        {
+          "code": "CUR-CONTENIDO-MATH-5B-AX-NUMEROS-Y-OPERACIONES",
+          "type": "axis",
+          "tagType": "secondary"
         }
       ]
     },
@@ -11425,6 +12315,11 @@
         {
           "code": "MATH-SK-RESOLVER-PROBLEMAS",
           "type": "skill",
+          "tagType": "secondary"
+        },
+        {
+          "code": "CUR-CONTENIDO-MATH-5B-AX-NUMEROS-Y-OPERACIONES",
+          "type": "axis",
           "tagType": "secondary"
         }
       ]
@@ -11447,6 +12342,11 @@
           "code": "MATH-SK-RESOLVER-PROBLEMAS",
           "type": "skill",
           "tagType": "secondary"
+        },
+        {
+          "code": "CUR-CONTENIDO-MATH-5B-AX-NUMEROS-Y-OPERACIONES",
+          "type": "axis",
+          "tagType": "secondary"
         }
       ]
     },
@@ -11467,6 +12367,11 @@
         {
           "code": "MATH-SK-MODELAR",
           "type": "skill",
+          "tagType": "secondary"
+        },
+        {
+          "code": "CUR-CONTENIDO-MATH-5B-AX-NUMEROS-Y-OPERACIONES",
+          "type": "axis",
           "tagType": "secondary"
         }
       ]
@@ -11489,6 +12394,11 @@
           "code": "MATH-SK-REPRESENTAR",
           "type": "skill",
           "tagType": "secondary"
+        },
+        {
+          "code": "CUR-CONTENIDO-MATH-5B-AX-NUMEROS-Y-OPERACIONES",
+          "type": "axis",
+          "tagType": "secondary"
         }
       ]
     },
@@ -11509,6 +12419,11 @@
         {
           "code": "MATH-SK-REPRESENTAR",
           "type": "skill",
+          "tagType": "secondary"
+        },
+        {
+          "code": "CUR-CONTENIDO-MATH-5B-AX-NUMEROS-Y-OPERACIONES",
+          "type": "axis",
           "tagType": "secondary"
         }
       ]
@@ -11531,6 +12446,11 @@
           "code": "MATH-SK-RESOLVER-PROBLEMAS",
           "type": "skill",
           "tagType": "secondary"
+        },
+        {
+          "code": "CUR-CONTENIDO-MATH-5B-AX-NUMEROS-Y-OPERACIONES",
+          "type": "axis",
+          "tagType": "secondary"
         }
       ]
     },
@@ -11551,6 +12471,11 @@
         {
           "code": "MATH-SK-RESOLVER-PROBLEMAS",
           "type": "skill",
+          "tagType": "secondary"
+        },
+        {
+          "code": "CUR-CONTENIDO-MATH-5B-AX-NUMEROS-Y-OPERACIONES",
+          "type": "axis",
           "tagType": "secondary"
         }
       ]
@@ -11573,6 +12498,11 @@
           "code": "MATH-SK-MODELAR",
           "type": "skill",
           "tagType": "secondary"
+        },
+        {
+          "code": "CUR-CONTENIDO-MATH-5B-AX-NUMEROS-Y-OPERACIONES",
+          "type": "axis",
+          "tagType": "secondary"
         }
       ]
     },
@@ -11593,6 +12523,11 @@
         {
           "code": "MATH-SK-ARGUMENTAR-Y-COMUNICAR",
           "type": "skill",
+          "tagType": "secondary"
+        },
+        {
+          "code": "CUR-CONTENIDO-MATH-5B-AX-PATRONES-Y-ALGEBRA",
+          "type": "axis",
           "tagType": "secondary"
         }
       ]
@@ -11615,6 +12550,11 @@
           "code": "MATH-SK-RESOLVER-PROBLEMAS",
           "type": "skill",
           "tagType": "secondary"
+        },
+        {
+          "code": "CUR-CONTENIDO-MATH-5B-AX-PATRONES-Y-ALGEBRA",
+          "type": "axis",
+          "tagType": "secondary"
         }
       ]
     },
@@ -11635,6 +12575,11 @@
         {
           "code": "MATH-SK-ARGUMENTAR-Y-COMUNICAR",
           "type": "skill",
+          "tagType": "secondary"
+        },
+        {
+          "code": "CUR-CONTENIDO-MATH-5B-AX-NUMEROS-Y-OPERACIONES",
+          "type": "axis",
           "tagType": "secondary"
         }
       ]
@@ -11657,6 +12602,11 @@
           "code": "MATH-SK-REPRESENTAR",
           "type": "skill",
           "tagType": "secondary"
+        },
+        {
+          "code": "CUR-CONTENIDO-MATH-5B-AX-GEOMETRIA",
+          "type": "axis",
+          "tagType": "secondary"
         }
       ]
     },
@@ -11677,6 +12627,11 @@
         {
           "code": "MATH-SK-REPRESENTAR",
           "type": "skill",
+          "tagType": "secondary"
+        },
+        {
+          "code": "CUR-CONTENIDO-MATH-5B-AX-GEOMETRIA",
+          "type": "axis",
           "tagType": "secondary"
         }
       ]
@@ -11699,6 +12654,11 @@
           "code": "MATH-SK-MODELAR",
           "type": "skill",
           "tagType": "secondary"
+        },
+        {
+          "code": "CUR-CONTENIDO-MATH-5B-AX-GEOMETRIA",
+          "type": "axis",
+          "tagType": "secondary"
         }
       ]
     },
@@ -11719,6 +12679,11 @@
         {
           "code": "MATH-SK-RESOLVER-PROBLEMAS",
           "type": "skill",
+          "tagType": "secondary"
+        },
+        {
+          "code": "CUR-CONTENIDO-MATH-5B-AX-MEDICION",
+          "type": "axis",
           "tagType": "secondary"
         }
       ]
@@ -11741,6 +12706,11 @@
           "code": "MATH-SK-REPRESENTAR",
           "type": "skill",
           "tagType": "secondary"
+        },
+        {
+          "code": "CUR-CONTENIDO-MATH-5B-AX-MEDICION",
+          "type": "axis",
+          "tagType": "secondary"
         }
       ]
     },
@@ -11761,6 +12731,11 @@
         {
           "code": "MATH-SK-RESOLVER-PROBLEMAS",
           "type": "skill",
+          "tagType": "secondary"
+        },
+        {
+          "code": "CUR-CONTENIDO-MATH-5B-AX-MEDICION",
+          "type": "axis",
           "tagType": "secondary"
         }
       ]
@@ -11783,6 +12758,11 @@
           "code": "MATH-SK-REPRESENTAR",
           "type": "skill",
           "tagType": "secondary"
+        },
+        {
+          "code": "CUR-CONTENIDO-MATH-5B-AX-DATOS-Y-PROBABILIDADES",
+          "type": "axis",
+          "tagType": "secondary"
         }
       ]
     },
@@ -11803,6 +12783,11 @@
         {
           "code": "MATH-SK-RESOLVER-PROBLEMAS",
           "type": "skill",
+          "tagType": "secondary"
+        },
+        {
+          "code": "CUR-CONTENIDO-MATH-5B-AX-NUMEROS-Y-OPERACIONES",
+          "type": "axis",
           "tagType": "secondary"
         }
       ]
@@ -11825,6 +12810,11 @@
           "code": "MATH-SK-RESOLVER-PROBLEMAS",
           "type": "skill",
           "tagType": "secondary"
+        },
+        {
+          "code": "CUR-CONTENIDO-MATH-5B-AX-NUMEROS-Y-OPERACIONES",
+          "type": "axis",
+          "tagType": "secondary"
         }
       ]
     },
@@ -11845,6 +12835,11 @@
         {
           "code": "MATH-SK-RESOLVER-PROBLEMAS",
           "type": "skill",
+          "tagType": "secondary"
+        },
+        {
+          "code": "CUR-CONTENIDO-MATH-5B-AX-PATRONES-Y-ALGEBRA",
+          "type": "axis",
           "tagType": "secondary"
         }
       ]
@@ -11867,6 +12862,11 @@
           "code": "MATH-SK-RESOLVER-PROBLEMAS",
           "type": "skill",
           "tagType": "secondary"
+        },
+        {
+          "code": "CUR-CONTENIDO-MATH-5B-AX-MEDICION",
+          "type": "axis",
+          "tagType": "secondary"
         }
       ]
     },
@@ -11887,6 +12887,11 @@
         {
           "code": "MATH-SK-RESOLVER-PROBLEMAS",
           "type": "skill",
+          "tagType": "secondary"
+        },
+        {
+          "code": "CUR-CONTENIDO-MATH-5B-AX-DATOS-Y-PROBABILIDADES",
+          "type": "axis",
           "tagType": "secondary"
         }
       ]
@@ -11909,6 +12914,11 @@
           "code": "MATH-SK-RESOLVER-PROBLEMAS",
           "type": "skill",
           "tagType": "secondary"
+        },
+        {
+          "code": "CUR-CONTENIDO-MATH-5B-AX-DATOS-Y-PROBABILIDADES",
+          "type": "axis",
+          "tagType": "secondary"
         }
       ]
     },
@@ -11929,6 +12939,11 @@
         {
           "code": "MATH-SK-REPRESENTAR",
           "type": "skill",
+          "tagType": "secondary"
+        },
+        {
+          "code": "CUR-CONTENIDO-MATH-5B-AX-NUMEROS-Y-OPERACIONES",
+          "type": "axis",
           "tagType": "secondary"
         }
       ]
@@ -11951,6 +12966,11 @@
           "code": "MATH-SK-RESOLVER-PROBLEMAS",
           "type": "skill",
           "tagType": "secondary"
+        },
+        {
+          "code": "CUR-CONTENIDO-MATH-5B-AX-NUMEROS-Y-OPERACIONES",
+          "type": "axis",
+          "tagType": "secondary"
         }
       ]
     },
@@ -11971,6 +12991,11 @@
         {
           "code": "MATH-SK-RESOLVER-PROBLEMAS",
           "type": "skill",
+          "tagType": "secondary"
+        },
+        {
+          "code": "CUR-CONTENIDO-MATH-5B-AX-NUMEROS-Y-OPERACIONES",
+          "type": "axis",
           "tagType": "secondary"
         }
       ]
@@ -11993,6 +13018,11 @@
           "code": "MATH-SK-REPRESENTAR",
           "type": "skill",
           "tagType": "secondary"
+        },
+        {
+          "code": "CUR-CONTENIDO-MATH-5B-AX-NUMEROS-Y-OPERACIONES",
+          "type": "axis",
+          "tagType": "secondary"
         }
       ]
     },
@@ -12013,6 +13043,11 @@
         {
           "code": "MATH-SK-RESOLVER-PROBLEMAS",
           "type": "skill",
+          "tagType": "secondary"
+        },
+        {
+          "code": "CUR-CONTENIDO-MATH-5B-AX-NUMEROS-Y-OPERACIONES",
+          "type": "axis",
           "tagType": "secondary"
         }
       ]
@@ -12035,6 +13070,11 @@
           "code": "MATH-SK-RESOLVER-PROBLEMAS",
           "type": "skill",
           "tagType": "secondary"
+        },
+        {
+          "code": "CUR-CONTENIDO-MATH-5B-AX-NUMEROS-Y-OPERACIONES",
+          "type": "axis",
+          "tagType": "secondary"
         }
       ]
     },
@@ -12055,6 +13095,11 @@
         {
           "code": "MATH-SK-ARGUMENTAR-Y-COMUNICAR",
           "type": "skill",
+          "tagType": "secondary"
+        },
+        {
+          "code": "CUR-CONTENIDO-MATH-5B-AX-NUMEROS-Y-OPERACIONES",
+          "type": "axis",
           "tagType": "secondary"
         }
       ]
@@ -12077,6 +13122,11 @@
           "code": "MATH-SK-RESOLVER-PROBLEMAS",
           "type": "skill",
           "tagType": "secondary"
+        },
+        {
+          "code": "CUR-CONTENIDO-MATH-5B-AX-MEDICION",
+          "type": "axis",
+          "tagType": "secondary"
         }
       ]
     },
@@ -12097,6 +13147,11 @@
         {
           "code": "MATH-SK-RESOLVER-PROBLEMAS",
           "type": "skill",
+          "tagType": "secondary"
+        },
+        {
+          "code": "CUR-CONTENIDO-MATH-5B-AX-MEDICION",
+          "type": "axis",
           "tagType": "secondary"
         }
       ]
@@ -12119,6 +13174,11 @@
           "code": "MATH-SK-RESOLVER-PROBLEMAS",
           "type": "skill",
           "tagType": "secondary"
+        },
+        {
+          "code": "CUR-CONTENIDO-MATH-5B-AX-MEDICION",
+          "type": "axis",
+          "tagType": "secondary"
         }
       ]
     },
@@ -12139,6 +13199,11 @@
         {
           "code": "MATH-SK-RESOLVER-PROBLEMAS",
           "type": "skill",
+          "tagType": "secondary"
+        },
+        {
+          "code": "CUR-CONTENIDO-MATH-5B-AX-MEDICION",
+          "type": "axis",
           "tagType": "secondary"
         }
       ]
@@ -12161,6 +13226,11 @@
           "code": "MATH-SK-RESOLVER-PROBLEMAS",
           "type": "skill",
           "tagType": "secondary"
+        },
+        {
+          "code": "CUR-CONTENIDO-MATH-5B-AX-PATRONES-Y-ALGEBRA",
+          "type": "axis",
+          "tagType": "secondary"
         }
       ]
     },
@@ -12181,6 +13251,11 @@
         {
           "code": "MATH-SK-MODELAR",
           "type": "skill",
+          "tagType": "secondary"
+        },
+        {
+          "code": "CUR-CONTENIDO-MATH-5B-AX-PATRONES-Y-ALGEBRA",
+          "type": "axis",
           "tagType": "secondary"
         }
       ]
@@ -12203,6 +13278,11 @@
           "code": "MATH-SK-RESOLVER-PROBLEMAS",
           "type": "skill",
           "tagType": "secondary"
+        },
+        {
+          "code": "CUR-CONTENIDO-MATH-5B-AX-PATRONES-Y-ALGEBRA",
+          "type": "axis",
+          "tagType": "secondary"
         }
       ]
     },
@@ -12223,6 +13303,11 @@
         {
           "code": "MATH-SK-RESOLVER-PROBLEMAS",
           "type": "skill",
+          "tagType": "secondary"
+        },
+        {
+          "code": "CUR-CONTENIDO-MATH-5B-AX-GEOMETRIA",
+          "type": "axis",
           "tagType": "secondary"
         }
       ]
@@ -12245,6 +13330,11 @@
           "code": "MATH-SK-RESOLVER-PROBLEMAS",
           "type": "skill",
           "tagType": "secondary"
+        },
+        {
+          "code": "CUR-CONTENIDO-MATH-5B-AX-GEOMETRIA",
+          "type": "axis",
+          "tagType": "secondary"
         }
       ]
     },
@@ -12265,6 +13355,11 @@
         {
           "code": "MATH-SK-RESOLVER-PROBLEMAS",
           "type": "skill",
+          "tagType": "secondary"
+        },
+        {
+          "code": "CUR-CONTENIDO-MATH-5B-AX-GEOMETRIA",
+          "type": "axis",
           "tagType": "secondary"
         }
       ]
@@ -12287,6 +13382,11 @@
           "code": "MATH-SK-RESOLVER-PROBLEMAS",
           "type": "skill",
           "tagType": "secondary"
+        },
+        {
+          "code": "CUR-CONTENIDO-MATH-5B-AX-NUMEROS-Y-OPERACIONES",
+          "type": "axis",
+          "tagType": "secondary"
         }
       ]
     },
@@ -12307,6 +13407,11 @@
         {
           "code": "MATH-SK-RESOLVER-PROBLEMAS",
           "type": "skill",
+          "tagType": "secondary"
+        },
+        {
+          "code": "CUR-CONTENIDO-MATH-5B-AX-NUMEROS-Y-OPERACIONES",
+          "type": "axis",
           "tagType": "secondary"
         }
       ]
@@ -12329,6 +13434,11 @@
           "code": "MATH-SK-RESOLVER-PROBLEMAS",
           "type": "skill",
           "tagType": "secondary"
+        },
+        {
+          "code": "CUR-CONTENIDO-MATH-5B-AX-NUMEROS-Y-OPERACIONES",
+          "type": "axis",
+          "tagType": "secondary"
         }
       ]
     },
@@ -12349,6 +13459,11 @@
         {
           "code": "MATH-SK-MODELAR",
           "type": "skill",
+          "tagType": "secondary"
+        },
+        {
+          "code": "CUR-CONTENIDO-MATH-5B-AX-NUMEROS-Y-OPERACIONES",
+          "type": "axis",
           "tagType": "secondary"
         }
       ]
@@ -12371,6 +13486,11 @@
           "code": "MATH-SK-REPRESENTAR",
           "type": "skill",
           "tagType": "secondary"
+        },
+        {
+          "code": "CUR-CONTENIDO-MATH-5B-AX-NUMEROS-Y-OPERACIONES",
+          "type": "axis",
+          "tagType": "secondary"
         }
       ]
     },
@@ -12391,6 +13511,11 @@
         {
           "code": "MATH-SK-RESOLVER-PROBLEMAS",
           "type": "skill",
+          "tagType": "secondary"
+        },
+        {
+          "code": "CUR-CONTENIDO-MATH-5B-AX-NUMEROS-Y-OPERACIONES",
+          "type": "axis",
           "tagType": "secondary"
         }
       ]
@@ -12413,6 +13538,11 @@
           "code": "MATH-SK-RESOLVER-PROBLEMAS",
           "type": "skill",
           "tagType": "secondary"
+        },
+        {
+          "code": "CUR-CONTENIDO-MATH-5B-AX-NUMEROS-Y-OPERACIONES",
+          "type": "axis",
+          "tagType": "secondary"
         }
       ]
     },
@@ -12433,6 +13563,11 @@
         {
           "code": "MATH-SK-RESOLVER-PROBLEMAS",
           "type": "skill",
+          "tagType": "secondary"
+        },
+        {
+          "code": "CUR-CONTENIDO-MATH-5B-AX-DATOS-Y-PROBABILIDADES",
+          "type": "axis",
           "tagType": "secondary"
         }
       ]
@@ -12455,6 +13590,11 @@
           "code": "MATH-SK-RESOLVER-PROBLEMAS",
           "type": "skill",
           "tagType": "secondary"
+        },
+        {
+          "code": "CUR-CONTENIDO-MATH-5B-AX-DATOS-Y-PROBABILIDADES",
+          "type": "axis",
+          "tagType": "secondary"
         }
       ]
     },
@@ -12475,6 +13615,11 @@
         {
           "code": "MATH-SK-REPRESENTAR",
           "type": "skill",
+          "tagType": "secondary"
+        },
+        {
+          "code": "CUR-CONTENIDO-MATH-5B-AX-DATOS-Y-PROBABILIDADES",
+          "type": "axis",
           "tagType": "secondary"
         }
       ]
@@ -12497,6 +13642,11 @@
           "code": "MATH-SK-REPRESENTAR",
           "type": "skill",
           "tagType": "secondary"
+        },
+        {
+          "code": "CUR-CONTENIDO-MATH-6B-AX-NUMEROS-Y-OPERACIONES",
+          "type": "axis",
+          "tagType": "secondary"
         }
       ]
     },
@@ -12517,6 +13667,11 @@
         {
           "code": "MATH-SK-ARGUMENTAR-Y-COMUNICAR",
           "type": "skill",
+          "tagType": "secondary"
+        },
+        {
+          "code": "CUR-CONTENIDO-MATH-6B-AX-NUMEROS-Y-OPERACIONES",
+          "type": "axis",
           "tagType": "secondary"
         }
       ]
@@ -12539,6 +13694,11 @@
           "code": "MATH-SK-REPRESENTAR",
           "type": "skill",
           "tagType": "secondary"
+        },
+        {
+          "code": "CUR-CONTENIDO-MATH-6B-AX-NUMEROS-Y-OPERACIONES",
+          "type": "axis",
+          "tagType": "secondary"
         }
       ]
     },
@@ -12559,6 +13719,11 @@
         {
           "code": "MATH-SK-RESOLVER-PROBLEMAS",
           "type": "skill",
+          "tagType": "secondary"
+        },
+        {
+          "code": "CUR-CONTENIDO-MATH-6B-AX-NUMEROS-Y-OPERACIONES",
+          "type": "axis",
           "tagType": "secondary"
         }
       ]
@@ -12581,6 +13746,11 @@
           "code": "MATH-SK-RESOLVER-PROBLEMAS",
           "type": "skill",
           "tagType": "secondary"
+        },
+        {
+          "code": "CUR-CONTENIDO-MATH-6B-AX-NUMEROS-Y-OPERACIONES",
+          "type": "axis",
+          "tagType": "secondary"
         }
       ]
     },
@@ -12601,6 +13771,11 @@
         {
           "code": "MATH-SK-RESOLVER-PROBLEMAS",
           "type": "skill",
+          "tagType": "secondary"
+        },
+        {
+          "code": "CUR-CONTENIDO-MATH-6B-AX-NUMEROS-Y-OPERACIONES",
+          "type": "axis",
           "tagType": "secondary"
         }
       ]
@@ -12623,6 +13798,11 @@
           "code": "MATH-SK-RESOLVER-PROBLEMAS",
           "type": "skill",
           "tagType": "secondary"
+        },
+        {
+          "code": "CUR-CONTENIDO-MATH-6B-AX-NUMEROS-Y-OPERACIONES",
+          "type": "axis",
+          "tagType": "secondary"
         }
       ]
     },
@@ -12643,6 +13823,11 @@
         {
           "code": "MATH-SK-RESOLVER-PROBLEMAS",
           "type": "skill",
+          "tagType": "secondary"
+        },
+        {
+          "code": "CUR-CONTENIDO-MATH-6B-AX-PATRONES-Y-ALGEBRA",
+          "type": "axis",
           "tagType": "secondary"
         }
       ]
@@ -12665,6 +13850,11 @@
           "code": "MATH-SK-RESOLVER-PROBLEMAS",
           "type": "skill",
           "tagType": "secondary"
+        },
+        {
+          "code": "CUR-CONTENIDO-MATH-6B-AX-PATRONES-Y-ALGEBRA",
+          "type": "axis",
+          "tagType": "secondary"
         }
       ]
     },
@@ -12685,6 +13875,11 @@
         {
           "code": "MATH-SK-RESOLVER-PROBLEMAS",
           "type": "skill",
+          "tagType": "secondary"
+        },
+        {
+          "code": "CUR-CONTENIDO-MATH-6B-AX-PATRONES-Y-ALGEBRA",
+          "type": "axis",
           "tagType": "secondary"
         }
       ]
@@ -12707,6 +13902,11 @@
           "code": "MATH-SK-RESOLVER-PROBLEMAS",
           "type": "skill",
           "tagType": "secondary"
+        },
+        {
+          "code": "CUR-CONTENIDO-MATH-6B-AX-PATRONES-Y-ALGEBRA",
+          "type": "axis",
+          "tagType": "secondary"
         }
       ]
     },
@@ -12727,6 +13927,11 @@
         {
           "code": "MATH-SK-RESOLVER-PROBLEMAS",
           "type": "skill",
+          "tagType": "secondary"
+        },
+        {
+          "code": "CUR-CONTENIDO-MATH-6B-AX-MEDICION",
+          "type": "axis",
           "tagType": "secondary"
         }
       ]
@@ -12749,6 +13954,11 @@
           "code": "MATH-SK-REPRESENTAR",
           "type": "skill",
           "tagType": "secondary"
+        },
+        {
+          "code": "CUR-CONTENIDO-MATH-6B-AX-MEDICION",
+          "type": "axis",
+          "tagType": "secondary"
         }
       ]
     },
@@ -12769,6 +13979,11 @@
         {
           "code": "MATH-SK-RESOLVER-PROBLEMAS",
           "type": "skill",
+          "tagType": "secondary"
+        },
+        {
+          "code": "CUR-CONTENIDO-MATH-6B-AX-MEDICION",
+          "type": "axis",
           "tagType": "secondary"
         }
       ]
@@ -12791,6 +14006,11 @@
           "code": "MATH-SK-RESOLVER-PROBLEMAS",
           "type": "skill",
           "tagType": "secondary"
+        },
+        {
+          "code": "CUR-CONTENIDO-MATH-6B-AX-MEDICION",
+          "type": "axis",
+          "tagType": "secondary"
         }
       ]
     },
@@ -12811,6 +14031,11 @@
         {
           "code": "MATH-SK-RESOLVER-PROBLEMAS",
           "type": "skill",
+          "tagType": "secondary"
+        },
+        {
+          "code": "CUR-CONTENIDO-MATH-6B-AX-GEOMETRIA",
+          "type": "axis",
           "tagType": "secondary"
         }
       ]
@@ -12833,6 +14058,11 @@
           "code": "MATH-SK-RESOLVER-PROBLEMAS",
           "type": "skill",
           "tagType": "secondary"
+        },
+        {
+          "code": "CUR-CONTENIDO-MATH-6B-AX-GEOMETRIA",
+          "type": "axis",
+          "tagType": "secondary"
         }
       ]
     },
@@ -12854,6 +14084,11 @@
           "code": "MATH-SK-MODELAR",
           "type": "skill",
           "tagType": "secondary"
+        },
+        {
+          "code": "CUR-CONTENIDO-MATH-6B-AX-GEOMETRIA",
+          "type": "axis",
+          "tagType": "secondary"
         }
       ]
     },
@@ -12874,6 +14109,11 @@
         {
           "code": "MATH-SK-RESOLVER-PROBLEMAS",
           "type": "skill",
+          "tagType": "secondary"
+        },
+        {
+          "code": "CUR-CONTENIDO-MATH-6B-AX-GEOMETRIA",
+          "type": "axis",
           "tagType": "secondary"
         }
       ]
@@ -12896,6 +14136,11 @@
           "code": "MATH-SK-ARGUMENTAR-Y-COMUNICAR",
           "type": "skill",
           "tagType": "secondary"
+        },
+        {
+          "code": "CUR-CONTENIDO-MATH-6B-AX-DATOS-Y-PROBABILIDADES",
+          "type": "axis",
+          "tagType": "secondary"
         }
       ]
     },
@@ -12917,6 +14162,11 @@
           "code": "MATH-SK-ARGUMENTAR-Y-COMUNICAR",
           "type": "skill",
           "tagType": "secondary"
+        },
+        {
+          "code": "CUR-CONTENIDO-MATH-6B-AX-DATOS-Y-PROBABILIDADES",
+          "type": "axis",
+          "tagType": "secondary"
         }
       ]
     },
@@ -12937,6 +14187,11 @@
         {
           "code": "MATH-SK-REPRESENTAR",
           "type": "skill",
+          "tagType": "secondary"
+        },
+        {
+          "code": "CUR-CONTENIDO-MATH-6B-AX-DATOS-Y-PROBABILIDADES",
+          "type": "axis",
           "tagType": "secondary"
         }
       ]
@@ -12959,6 +14214,11 @@
           "code": "MATH-SK-REPRESENTAR",
           "type": "skill",
           "tagType": "secondary"
+        },
+        {
+          "code": "CUR-CONTENIDO-MATH-6B-AX-DATOS-Y-PROBABILIDADES",
+          "type": "axis",
+          "tagType": "secondary"
         }
       ]
     },
@@ -12979,6 +14239,11 @@
         {
           "code": "MATH-SK-RESOLVER-PROBLEMAS",
           "type": "skill",
+          "tagType": "secondary"
+        },
+        {
+          "code": "CUR-CONTENIDO-MATH-6B-AX-NUMEROS-Y-OPERACIONES",
+          "type": "axis",
           "tagType": "secondary"
         }
       ]
@@ -13001,6 +14266,11 @@
           "code": "MATH-SK-REPRESENTAR",
           "type": "skill",
           "tagType": "secondary"
+        },
+        {
+          "code": "CUR-CONTENIDO-MATH-6B-AX-NUMEROS-Y-OPERACIONES",
+          "type": "axis",
+          "tagType": "secondary"
         }
       ]
     },
@@ -13021,6 +14291,11 @@
         {
           "code": "MATH-SK-RESOLVER-PROBLEMAS",
           "type": "skill",
+          "tagType": "secondary"
+        },
+        {
+          "code": "CUR-CONTENIDO-MATH-6B-AX-NUMEROS-Y-OPERACIONES",
+          "type": "axis",
           "tagType": "secondary"
         }
       ]
@@ -13043,6 +14318,11 @@
           "code": "MATH-SK-RESOLVER-PROBLEMAS",
           "type": "skill",
           "tagType": "secondary"
+        },
+        {
+          "code": "CUR-CONTENIDO-MATH-6B-AX-NUMEROS-Y-OPERACIONES",
+          "type": "axis",
+          "tagType": "secondary"
         }
       ]
     },
@@ -13064,6 +14344,11 @@
           "code": "MATH-SK-RESOLVER-PROBLEMAS",
           "type": "skill",
           "tagType": "secondary"
+        },
+        {
+          "code": "CUR-CONTENIDO-MATH-6B-AX-NUMEROS-Y-OPERACIONES",
+          "type": "axis",
+          "tagType": "secondary"
         }
       ]
     },
@@ -13084,6 +14369,11 @@
         {
           "code": "MATH-SK-RESOLVER-PROBLEMAS",
           "type": "skill",
+          "tagType": "secondary"
+        },
+        {
+          "code": "CUR-CONTENIDO-MATH-6B-AX-NUMEROS-Y-OPERACIONES",
+          "type": "axis",
           "tagType": "secondary"
         }
       ]
@@ -13106,6 +14396,11 @@
           "code": "MATH-SK-RESOLVER-PROBLEMAS",
           "type": "skill",
           "tagType": "secondary"
+        },
+        {
+          "code": "CUR-CONTENIDO-MATH-6B-AX-NUMEROS-Y-OPERACIONES",
+          "type": "axis",
+          "tagType": "secondary"
         }
       ]
     },
@@ -13126,6 +14421,11 @@
         {
           "code": "MATH-SK-RESOLVER-PROBLEMAS",
           "type": "skill",
+          "tagType": "secondary"
+        },
+        {
+          "code": "CUR-CONTENIDO-MATH-6B-AX-NUMEROS-Y-OPERACIONES",
+          "type": "axis",
           "tagType": "secondary"
         }
       ]
@@ -13148,6 +14448,11 @@
           "code": "MATH-SK-RESOLVER-PROBLEMAS",
           "type": "skill",
           "tagType": "secondary"
+        },
+        {
+          "code": "CUR-CONTENIDO-MATH-6B-AX-NUMEROS-Y-OPERACIONES",
+          "type": "axis",
+          "tagType": "secondary"
         }
       ]
     },
@@ -13168,6 +14473,11 @@
         {
           "code": "MATH-SK-RESOLVER-PROBLEMAS",
           "type": "skill",
+          "tagType": "secondary"
+        },
+        {
+          "code": "CUR-CONTENIDO-MATH-6B-AX-NUMEROS-Y-OPERACIONES",
+          "type": "axis",
           "tagType": "secondary"
         }
       ]
@@ -13190,6 +14500,11 @@
           "code": "MATH-SK-REPRESENTAR",
           "type": "skill",
           "tagType": "secondary"
+        },
+        {
+          "code": "CUR-CONTENIDO-MATH-6B-AX-NUMEROS-Y-OPERACIONES",
+          "type": "axis",
+          "tagType": "secondary"
         }
       ]
     },
@@ -13210,6 +14525,11 @@
         {
           "code": "MATH-SK-REPRESENTAR",
           "type": "skill",
+          "tagType": "secondary"
+        },
+        {
+          "code": "CUR-CONTENIDO-MATH-6B-AX-NUMEROS-Y-OPERACIONES",
+          "type": "axis",
           "tagType": "secondary"
         }
       ]
@@ -13232,6 +14552,11 @@
           "code": "MATH-SK-REPRESENTAR",
           "type": "skill",
           "tagType": "secondary"
+        },
+        {
+          "code": "CUR-CONTENIDO-MATH-6B-AX-NUMEROS-Y-OPERACIONES",
+          "type": "axis",
+          "tagType": "secondary"
         }
       ]
     },
@@ -13252,6 +14577,11 @@
         {
           "code": "MATH-SK-REPRESENTAR",
           "type": "skill",
+          "tagType": "secondary"
+        },
+        {
+          "code": "CUR-CONTENIDO-MATH-6B-AX-NUMEROS-Y-OPERACIONES",
+          "type": "axis",
           "tagType": "secondary"
         }
       ]
@@ -13274,6 +14604,11 @@
           "code": "MATH-SK-REPRESENTAR",
           "type": "skill",
           "tagType": "secondary"
+        },
+        {
+          "code": "CUR-CONTENIDO-MATH-6B-AX-NUMEROS-Y-OPERACIONES",
+          "type": "axis",
+          "tagType": "secondary"
         }
       ]
     },
@@ -13294,6 +14629,11 @@
         {
           "code": "MATH-SK-RESOLVER-PROBLEMAS",
           "type": "skill",
+          "tagType": "secondary"
+        },
+        {
+          "code": "CUR-CONTENIDO-MATH-6B-AX-NUMEROS-Y-OPERACIONES",
+          "type": "axis",
           "tagType": "secondary"
         }
       ]
@@ -13316,6 +14656,11 @@
           "code": "MATH-SK-RESOLVER-PROBLEMAS",
           "type": "skill",
           "tagType": "secondary"
+        },
+        {
+          "code": "CUR-CONTENIDO-MATH-6B-AX-NUMEROS-Y-OPERACIONES",
+          "type": "axis",
+          "tagType": "secondary"
         }
       ]
     },
@@ -13336,6 +14681,11 @@
         {
           "code": "MATH-SK-RESOLVER-PROBLEMAS",
           "type": "skill",
+          "tagType": "secondary"
+        },
+        {
+          "code": "CUR-CONTENIDO-MATH-6B-AX-NUMEROS-Y-OPERACIONES",
+          "type": "axis",
           "tagType": "secondary"
         }
       ]
@@ -13358,6 +14708,11 @@
           "code": "MATH-SK-RESOLVER-PROBLEMAS",
           "type": "skill",
           "tagType": "secondary"
+        },
+        {
+          "code": "CUR-CONTENIDO-MATH-6B-AX-NUMEROS-Y-OPERACIONES",
+          "type": "axis",
+          "tagType": "secondary"
         }
       ]
     },
@@ -13378,6 +14733,11 @@
         {
           "code": "MATH-SK-REPRESENTAR",
           "type": "skill",
+          "tagType": "secondary"
+        },
+        {
+          "code": "CUR-CONTENIDO-MATH-6B-AX-NUMEROS-Y-OPERACIONES",
+          "type": "axis",
           "tagType": "secondary"
         }
       ]
@@ -13400,6 +14760,11 @@
           "code": "MATH-SK-RESOLVER-PROBLEMAS",
           "type": "skill",
           "tagType": "secondary"
+        },
+        {
+          "code": "CUR-CONTENIDO-MATH-6B-AX-PATRONES-Y-ALGEBRA",
+          "type": "axis",
+          "tagType": "secondary"
         }
       ]
     },
@@ -13420,6 +14785,11 @@
         {
           "code": "MATH-SK-RESOLVER-PROBLEMAS",
           "type": "skill",
+          "tagType": "secondary"
+        },
+        {
+          "code": "CUR-CONTENIDO-MATH-6B-AX-MEDICION",
+          "type": "axis",
           "tagType": "secondary"
         }
       ]
@@ -13442,6 +14812,11 @@
           "code": "MATH-SK-REPRESENTAR",
           "type": "skill",
           "tagType": "secondary"
+        },
+        {
+          "code": "CUR-CONTENIDO-MATH-6B-AX-GEOMETRIA",
+          "type": "axis",
+          "tagType": "secondary"
         }
       ]
     },
@@ -13462,6 +14837,11 @@
         {
           "code": "MATH-SK-REPRESENTAR",
           "type": "skill",
+          "tagType": "secondary"
+        },
+        {
+          "code": "CUR-CONTENIDO-MATH-6B-AX-GEOMETRIA",
+          "type": "axis",
           "tagType": "secondary"
         }
       ]
@@ -13484,6 +14864,11 @@
           "code": "MATH-SK-RESOLVER-PROBLEMAS",
           "type": "skill",
           "tagType": "secondary"
+        },
+        {
+          "code": "CUR-CONTENIDO-MATH-6B-AX-MEDICION",
+          "type": "axis",
+          "tagType": "secondary"
         }
       ]
     },
@@ -13504,6 +14889,11 @@
         {
           "code": "MATH-SK-REPRESENTAR",
           "type": "skill",
+          "tagType": "secondary"
+        },
+        {
+          "code": "CUR-CONTENIDO-MATH-6B-AX-DATOS-Y-PROBABILIDADES",
+          "type": "axis",
           "tagType": "secondary"
         }
       ]
@@ -13526,6 +14916,11 @@
           "code": "MATH-SK-RESOLVER-PROBLEMAS",
           "type": "skill",
           "tagType": "secondary"
+        },
+        {
+          "code": "CUR-CONTENIDO-MATH-6B-AX-DATOS-Y-PROBABILIDADES",
+          "type": "axis",
+          "tagType": "secondary"
         }
       ]
     },
@@ -13546,6 +14941,11 @@
         {
           "code": "MATH-SK-ARGUMENTAR-Y-COMUNICAR",
           "type": "skill",
+          "tagType": "secondary"
+        },
+        {
+          "code": "CUR-CONTENIDO-MATH-6B-AX-DATOS-Y-PROBABILIDADES",
+          "type": "axis",
           "tagType": "secondary"
         }
       ]
@@ -13568,6 +14968,11 @@
           "code": "MATH-SK-REPRESENTAR",
           "type": "skill",
           "tagType": "secondary"
+        },
+        {
+          "code": "CUR-CONTENIDO-MATH-6B-AX-DATOS-Y-PROBABILIDADES",
+          "type": "axis",
+          "tagType": "secondary"
         }
       ]
     },
@@ -13588,6 +14993,11 @@
         {
           "code": "MATH-SK-ARGUMENTAR-Y-COMUNICAR",
           "type": "skill",
+          "tagType": "secondary"
+        },
+        {
+          "code": "CUR-CONTENIDO-MATH-6B-AX-DATOS-Y-PROBABILIDADES",
+          "type": "axis",
           "tagType": "secondary"
         }
       ]
@@ -13610,6 +15020,11 @@
           "code": "MATH-SK-MODELAR",
           "type": "skill",
           "tagType": "secondary"
+        },
+        {
+          "code": "CUR-CONTENIDO-MATH-6B-AX-NUMEROS-Y-OPERACIONES",
+          "type": "axis",
+          "tagType": "secondary"
         }
       ]
     },
@@ -13630,6 +15045,11 @@
         {
           "code": "MATH-SK-RESOLVER-PROBLEMAS",
           "type": "skill",
+          "tagType": "secondary"
+        },
+        {
+          "code": "CUR-CONTENIDO-MATH-6B-AX-NUMEROS-Y-OPERACIONES",
+          "type": "axis",
           "tagType": "secondary"
         }
       ]
@@ -13652,6 +15072,11 @@
           "code": "MATH-SK-RESOLVER-PROBLEMAS",
           "type": "skill",
           "tagType": "secondary"
+        },
+        {
+          "code": "CUR-CONTENIDO-MATH-6B-AX-NUMEROS-Y-OPERACIONES",
+          "type": "axis",
+          "tagType": "secondary"
         }
       ]
     },
@@ -13672,6 +15097,11 @@
         {
           "code": "MATH-SK-MODELAR",
           "type": "skill",
+          "tagType": "secondary"
+        },
+        {
+          "code": "CUR-CONTENIDO-MATH-6B-AX-NUMEROS-Y-OPERACIONES",
+          "type": "axis",
           "tagType": "secondary"
         }
       ]
@@ -13694,6 +15124,11 @@
           "code": "MATH-SK-RESOLVER-PROBLEMAS",
           "type": "skill",
           "tagType": "secondary"
+        },
+        {
+          "code": "CUR-CONTENIDO-MATH-6B-AX-NUMEROS-Y-OPERACIONES",
+          "type": "axis",
+          "tagType": "secondary"
         }
       ]
     },
@@ -13714,6 +15149,11 @@
         {
           "code": "MATH-SK-MODELAR",
           "type": "skill",
+          "tagType": "secondary"
+        },
+        {
+          "code": "CUR-CONTENIDO-MATH-6B-AX-PATRONES-Y-ALGEBRA",
+          "type": "axis",
           "tagType": "secondary"
         }
       ]
@@ -13736,6 +15176,11 @@
           "code": "MATH-SK-REPRESENTAR",
           "type": "skill",
           "tagType": "secondary"
+        },
+        {
+          "code": "CUR-CONTENIDO-MATH-6B-AX-NUMEROS-Y-OPERACIONES",
+          "type": "axis",
+          "tagType": "secondary"
         }
       ]
     },
@@ -13756,6 +15201,11 @@
         {
           "code": "MATH-SK-ARGUMENTAR-Y-COMUNICAR",
           "type": "skill",
+          "tagType": "secondary"
+        },
+        {
+          "code": "CUR-CONTENIDO-MATH-6B-AX-NUMEROS-Y-OPERACIONES",
+          "type": "axis",
           "tagType": "secondary"
         }
       ]
@@ -13778,6 +15228,11 @@
           "code": "MATH-SK-REPRESENTAR",
           "type": "skill",
           "tagType": "secondary"
+        },
+        {
+          "code": "CUR-CONTENIDO-MATH-6B-AX-NUMEROS-Y-OPERACIONES",
+          "type": "axis",
+          "tagType": "secondary"
         }
       ]
     },
@@ -13798,6 +15253,11 @@
         {
           "code": "MATH-SK-RESOLVER-PROBLEMAS",
           "type": "skill",
+          "tagType": "secondary"
+        },
+        {
+          "code": "CUR-CONTENIDO-MATH-6B-AX-NUMEROS-Y-OPERACIONES",
+          "type": "axis",
           "tagType": "secondary"
         }
       ]
@@ -13820,6 +15280,11 @@
           "code": "MATH-SK-RESOLVER-PROBLEMAS",
           "type": "skill",
           "tagType": "secondary"
+        },
+        {
+          "code": "CUR-CONTENIDO-MATH-6B-AX-NUMEROS-Y-OPERACIONES",
+          "type": "axis",
+          "tagType": "secondary"
         }
       ]
     },
@@ -13840,6 +15305,11 @@
         {
           "code": "MATH-SK-RESOLVER-PROBLEMAS",
           "type": "skill",
+          "tagType": "secondary"
+        },
+        {
+          "code": "CUR-CONTENIDO-MATH-6B-AX-NUMEROS-Y-OPERACIONES",
+          "type": "axis",
           "tagType": "secondary"
         }
       ]
@@ -13862,6 +15332,11 @@
           "code": "MATH-SK-RESOLVER-PROBLEMAS",
           "type": "skill",
           "tagType": "secondary"
+        },
+        {
+          "code": "CUR-CONTENIDO-MATH-6B-AX-NUMEROS-Y-OPERACIONES",
+          "type": "axis",
+          "tagType": "secondary"
         }
       ]
     },
@@ -13882,6 +15357,11 @@
         {
           "code": "MATH-SK-RESOLVER-PROBLEMAS",
           "type": "skill",
+          "tagType": "secondary"
+        },
+        {
+          "code": "CUR-CONTENIDO-MATH-6B-AX-PATRONES-Y-ALGEBRA",
+          "type": "axis",
           "tagType": "secondary"
         }
       ]
@@ -13904,6 +15384,11 @@
           "code": "MATH-SK-RESOLVER-PROBLEMAS",
           "type": "skill",
           "tagType": "secondary"
+        },
+        {
+          "code": "CUR-CONTENIDO-MATH-6B-AX-PATRONES-Y-ALGEBRA",
+          "type": "axis",
+          "tagType": "secondary"
         }
       ]
     },
@@ -13924,6 +15409,11 @@
         {
           "code": "MATH-SK-RESOLVER-PROBLEMAS",
           "type": "skill",
+          "tagType": "secondary"
+        },
+        {
+          "code": "CUR-CONTENIDO-MATH-6B-AX-PATRONES-Y-ALGEBRA",
+          "type": "axis",
           "tagType": "secondary"
         }
       ]
@@ -13946,6 +15436,11 @@
           "code": "MATH-SK-RESOLVER-PROBLEMAS",
           "type": "skill",
           "tagType": "secondary"
+        },
+        {
+          "code": "CUR-CONTENIDO-MATH-6B-AX-PATRONES-Y-ALGEBRA",
+          "type": "axis",
+          "tagType": "secondary"
         }
       ]
     },
@@ -13966,6 +15461,11 @@
         {
           "code": "MATH-SK-RESOLVER-PROBLEMAS",
           "type": "skill",
+          "tagType": "secondary"
+        },
+        {
+          "code": "CUR-CONTENIDO-MATH-6B-AX-MEDICION",
+          "type": "axis",
           "tagType": "secondary"
         }
       ]
@@ -13988,6 +15488,11 @@
           "code": "MATH-SK-REPRESENTAR",
           "type": "skill",
           "tagType": "secondary"
+        },
+        {
+          "code": "CUR-CONTENIDO-MATH-6B-AX-MEDICION",
+          "type": "axis",
+          "tagType": "secondary"
         }
       ]
     },
@@ -14008,6 +15513,11 @@
         {
           "code": "MATH-SK-RESOLVER-PROBLEMAS",
           "type": "skill",
+          "tagType": "secondary"
+        },
+        {
+          "code": "CUR-CONTENIDO-MATH-6B-AX-MEDICION",
+          "type": "axis",
           "tagType": "secondary"
         }
       ]
@@ -14030,6 +15540,11 @@
           "code": "MATH-SK-RESOLVER-PROBLEMAS",
           "type": "skill",
           "tagType": "secondary"
+        },
+        {
+          "code": "CUR-CONTENIDO-MATH-6B-AX-MEDICION",
+          "type": "axis",
+          "tagType": "secondary"
         }
       ]
     },
@@ -14050,6 +15565,11 @@
         {
           "code": "MATH-SK-RESOLVER-PROBLEMAS",
           "type": "skill",
+          "tagType": "secondary"
+        },
+        {
+          "code": "CUR-CONTENIDO-MATH-6B-AX-GEOMETRIA",
+          "type": "axis",
           "tagType": "secondary"
         }
       ]
@@ -14072,6 +15592,11 @@
           "code": "MATH-SK-RESOLVER-PROBLEMAS",
           "type": "skill",
           "tagType": "secondary"
+        },
+        {
+          "code": "CUR-CONTENIDO-MATH-6B-AX-GEOMETRIA",
+          "type": "axis",
+          "tagType": "secondary"
         }
       ]
     },
@@ -14092,6 +15617,11 @@
         {
           "code": "MATH-SK-REPRESENTAR",
           "type": "skill",
+          "tagType": "secondary"
+        },
+        {
+          "code": "CUR-CONTENIDO-MATH-6B-AX-GEOMETRIA",
+          "type": "axis",
           "tagType": "secondary"
         }
       ]
@@ -14114,6 +15644,11 @@
           "code": "MATH-SK-RESOLVER-PROBLEMAS",
           "type": "skill",
           "tagType": "secondary"
+        },
+        {
+          "code": "CUR-CONTENIDO-MATH-6B-AX-GEOMETRIA",
+          "type": "axis",
+          "tagType": "secondary"
         }
       ]
     },
@@ -14134,6 +15669,11 @@
         {
           "code": "MATH-SK-RESOLVER-PROBLEMAS",
           "type": "skill",
+          "tagType": "secondary"
+        },
+        {
+          "code": "CUR-CONTENIDO-MATH-6B-AX-DATOS-Y-PROBABILIDADES",
+          "type": "axis",
           "tagType": "secondary"
         }
       ]
@@ -14156,6 +15696,11 @@
           "code": "MATH-SK-ARGUMENTAR-Y-COMUNICAR",
           "type": "skill",
           "tagType": "secondary"
+        },
+        {
+          "code": "CUR-CONTENIDO-MATH-6B-AX-DATOS-Y-PROBABILIDADES",
+          "type": "axis",
+          "tagType": "secondary"
         }
       ]
     },
@@ -14176,6 +15721,11 @@
         {
           "code": "MATH-SK-REPRESENTAR",
           "type": "skill",
+          "tagType": "secondary"
+        },
+        {
+          "code": "CUR-CONTENIDO-MATH-6B-AX-DATOS-Y-PROBABILIDADES",
+          "type": "axis",
           "tagType": "secondary"
         }
       ]
@@ -14198,6 +15748,11 @@
           "code": "MATH-SK-REPRESENTAR",
           "type": "skill",
           "tagType": "secondary"
+        },
+        {
+          "code": "CUR-CONTENIDO-MATH-6B-AX-DATOS-Y-PROBABILIDADES",
+          "type": "axis",
+          "tagType": "secondary"
         }
       ]
     },
@@ -14218,6 +15773,11 @@
         {
           "code": "MATH-SK-RESOLVER-PROBLEMAS",
           "type": "skill",
+          "tagType": "secondary"
+        },
+        {
+          "code": "CUR-CONTENIDO-MATH-6B-AX-NUMEROS-Y-OPERACIONES",
+          "type": "axis",
           "tagType": "secondary"
         }
       ]
@@ -14240,6 +15800,11 @@
           "code": "MATH-SK-REPRESENTAR",
           "type": "skill",
           "tagType": "secondary"
+        },
+        {
+          "code": "CUR-CONTENIDO-MATH-6B-AX-NUMEROS-Y-OPERACIONES",
+          "type": "axis",
+          "tagType": "secondary"
         }
       ]
     },
@@ -14260,6 +15825,11 @@
         {
           "code": "MATH-SK-RESOLVER-PROBLEMAS",
           "type": "skill",
+          "tagType": "secondary"
+        },
+        {
+          "code": "CUR-CONTENIDO-MATH-6B-AX-NUMEROS-Y-OPERACIONES",
+          "type": "axis",
           "tagType": "secondary"
         }
       ]
@@ -14282,6 +15852,11 @@
           "code": "MATH-SK-RESOLVER-PROBLEMAS",
           "type": "skill",
           "tagType": "secondary"
+        },
+        {
+          "code": "CUR-CONTENIDO-MATH-6B-AX-NUMEROS-Y-OPERACIONES",
+          "type": "axis",
+          "tagType": "secondary"
         }
       ]
     },
@@ -14303,6 +15878,11 @@
           "code": "MATH-SK-RESOLVER-PROBLEMAS",
           "type": "skill",
           "tagType": "secondary"
+        },
+        {
+          "code": "CUR-CONTENIDO-MATH-6B-AX-NUMEROS-Y-OPERACIONES",
+          "type": "axis",
+          "tagType": "secondary"
         }
       ]
     },
@@ -14323,6 +15903,11 @@
         {
           "code": "MATH-SK-RESOLVER-PROBLEMAS",
           "type": "skill",
+          "tagType": "secondary"
+        },
+        {
+          "code": "CUR-CONTENIDO-MATH-6B-AX-NUMEROS-Y-OPERACIONES",
+          "type": "axis",
           "tagType": "secondary"
         }
       ]

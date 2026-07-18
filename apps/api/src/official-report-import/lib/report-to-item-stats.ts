@@ -29,6 +29,18 @@ export type InstrumentItemForImport = {
   position: number;
   /** `items.scoring_config.points ?? 1` — el puntaje máximo del ítem. */
   points: number;
+  /**
+   * Alternativa correcta del ítem (`content.correctKey ?? alternatives[].isCorrect`),
+   * o `null` en ítems de desarrollo (sin alternativas).
+   *
+   * Es la PAUTA del instrumento, y es la fuente de la respuesta correcta en selección
+   * múltiple. El informe marca la correcta con NEGRITA, que la capa de texto del PDF
+   * NO captura (colapsa a Verdana); por eso la extracción de resultados no la trae y
+   * la clave se toma de acá (la pauta ya se leyó visualmente al cargar el instrumento
+   * — ver Histórico Pruebas DIA/Resultados/FLUJO_PAUTAS.md). El gate #3 valida que esta
+   * pauta reproduzca el % por eje que el informe reporta en su Gráfico 2.
+   */
+  correctKey: string | null;
 };
 
 export type ReportItemTranslation = {
@@ -56,22 +68,35 @@ export type TranslateReportResult = {
 /**
  * ¿Este bucket representa una respuesta correcta?
  *
- * Precedencia: el flag explícito del informe (la negrita de la alternativa) gana; si no
- * viene, la categoría `RC` es la correcta. Un `RPC` NO cuenta como correcto — aporta
- * puntaje, no acierto —, igual que en el flujo `computed`, donde `responses.is_correct`
- * de una respuesta parcial es false.
+ * Precedencia:
+ *  1. El flag explícito del informe (`bucket.isCorrect`), si alguna vez viniera — hoy
+ *     la extracción de resultados NO lo trae, porque la negrita no es recuperable por
+ *     capa de texto.
+ *  2. Selección múltiple: la correcta la da la PAUTA DEL INSTRUMENTO (`correctKey`).
+ *     Sin este paso, ningún bucket MC (A/B/C) matchearía y `correctCount` sería 0 en
+ *     toda pregunta de alternativas.
+ *  3. Desarrollo (sin alternativas → `correctKey` null): la categoría `RC` es la
+ *     correcta. Un `RPC` NO cuenta como acierto (aporta puntaje, no acierto), igual
+ *     que en el flujo `computed`, donde `responses.is_correct` de una parcial es false.
  */
-export function isCorrectBucket(bucket: OfficialReportDistributionBucket): boolean {
+export function isCorrectBucket(
+  bucket: OfficialReportDistributionBucket,
+  correctKey?: string | null,
+): boolean {
   if (bucket.isCorrect !== undefined) return bucket.isCorrect;
+  if (correctKey != null) return bucket.key === correctKey;
   return bucket.key === 'RC';
 }
 
 /** Crédito del bucket como fracción del puntaje del ítem (0..1). */
-export function bucketCredit(bucket: OfficialReportDistributionBucket): number {
+export function bucketCredit(
+  bucket: OfficialReportDistributionBucket,
+  correctKey?: string | null,
+): number {
   if (bucket.credit !== undefined) return bucket.credit;
   const byCategory = OFFICIAL_REPORT_CATEGORY_CREDIT[bucket.key];
   if (byCategory !== undefined) return byCategory;
-  return isCorrectBucket(bucket) ? 1 : 0;
+  return isCorrectBucket(bucket, correctKey) ? 1 : 0;
 }
 
 /** La clave "no responde" del informe es el blanco del read-model (`key: null`). */
@@ -92,7 +117,8 @@ export function translateReportToItemStats(
 
   for (const reportItem of file.items) {
     const item = itemsByPosition.get(reportItem.position);
-    const { answerCounts, countsSum } = buildAnswerCounts(reportItem, n);
+    const correctKey = item?.correctKey ?? null;
+    const { answerCounts, countsSum } = buildAnswerCounts(reportItem, n, correctKey);
     const countsMatch = countsSum === n;
     if (!countsMatch) countMismatchPositions.push(reportItem.position);
 
@@ -117,8 +143,8 @@ export function translateReportToItemStats(
     let scoreSum = 0;
     reportItem.distribution.forEach((bucket, i) => {
       const count = counts[i] ?? 0;
-      if (isCorrectBucket(bucket)) correctCount += count;
-      scoreSum += count * bucketCredit(bucket) * item.points;
+      if (isCorrectBucket(bucket, correctKey)) correctCount += count;
+      scoreSum += count * bucketCredit(bucket, correctKey) * item.points;
     });
 
     const stats: ItemCohortStats = {
@@ -152,6 +178,7 @@ export function translateReportToItemStats(
 function buildAnswerCounts(
   reportItem: OfficialReportItem,
   studentCount: number,
+  correctKey: string | null,
 ): { answerCounts: AnswerCount[]; countsSum: number } {
   const counts = reconstructCountsFromPercentages(
     reportItem.distribution.map((b) => b.pct),
@@ -160,7 +187,7 @@ function buildAnswerCounts(
   const answerCounts: AnswerCount[] = reportItem.distribution.map((bucket, i) => ({
     key: normalizeKey(bucket.key),
     count: counts[i] ?? 0,
-    isCorrect: isCorrectBucket(bucket),
+    isCorrect: isCorrectBucket(bucket, correctKey),
   }));
   return {
     answerCounts: sortAnswerCounts(answerCounts),
