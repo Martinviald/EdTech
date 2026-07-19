@@ -81,3 +81,67 @@ export async function loadCohortOverallAchievement(
     studentsAssessed,
   };
 }
+
+/** Logro global de cohorte de UN assessment dentro de un scope de cursos. */
+export type CohortAssessmentAchievement = {
+  assessmentId: string;
+} & CohortOverallAchievement;
+
+/**
+ * Igual que `loadCohortOverallAchievement` pero para VARIOS assessment de una vez,
+ * devolviendo una fila por assessment presente en el read-model de ítems dentro del
+ * scope. La usa `DashboardsService.getOverview` para (a) saber qué assessment tienen
+ * datos de cohorte —y así contarlos aunque no tengan filas per-alumno en
+ * `assessment_results`— y (b) obtener su logro y N de cohorte.
+ *
+ * El logro por assessment es Σ score_sum / Σ max_sum (ponderado por puntaje, admite
+ * crédito parcial); el N es Σ del `max(student_count)` por curso (mismo argumento de N
+ * que `COHORT_STUDENTS_ASSESSED`). Se agrupa por curso en SQL y se recombina en JS.
+ *
+ * `classGroupFilter === null` = todos los cursos (scopeAll); `[]` = ningún curso → [].
+ * Debe correr dentro de `withOrgContext` (FORCE RLS vía EXISTS sobre `assessments`).
+ */
+export async function loadCohortAchievementByAssessment(
+  db: Database,
+  assessmentIds: string[],
+  classGroupFilter: string[] | null,
+): Promise<CohortAssessmentAchievement[]> {
+  if (assessmentIds.length === 0) return [];
+  if (classGroupFilter !== null && classGroupFilter.length === 0) return [];
+
+  const conditions = [inArray(assessmentItemStats.assessmentId, assessmentIds)];
+  if (classGroupFilter !== null) {
+    conditions.push(inArray(assessmentItemStats.classGroupId, classGroupFilter));
+  }
+
+  const rows = await db
+    .select({
+      assessmentId: assessmentItemStats.assessmentId,
+      scoreSum: sql<string | null>`sum(${assessmentItemStats.scoreSum}::numeric)`,
+      maxSum: sql<string | null>`sum(${assessmentItemStats.maxSum}::numeric)`,
+      studentsAssessed: sql<number>`max(${assessmentItemStats.studentCount})::int`,
+    })
+    .from(assessmentItemStats)
+    .where(and(...conditions))
+    .groupBy(assessmentItemStats.assessmentId, assessmentItemStats.classGroupId);
+
+  // Recombina las filas (assessment × curso) en una fila por assessment: score_sum/
+  // max_sum son sumables; el N del scope es la SUMA de los max(student_count) por curso.
+  const acc = new Map<string, { score: number; max: number; students: number }>();
+  for (const r of rows) {
+    let cur = acc.get(r.assessmentId);
+    if (!cur) {
+      cur = { score: 0, max: 0, students: 0 };
+      acc.set(r.assessmentId, cur);
+    }
+    cur.score += r.scoreSum == null ? 0 : Number(r.scoreSum);
+    cur.max += r.maxSum == null ? 0 : Number(r.maxSum);
+    cur.students += Number(r.studentsAssessed ?? 0);
+  }
+
+  return [...acc.entries()].map(([assessmentId, a]) => ({
+    assessmentId,
+    averageAchievement: a.max > 0 ? (a.score / a.max) * 100 : null,
+    studentsAssessed: a.students,
+  }));
+}
