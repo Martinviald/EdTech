@@ -1,6 +1,7 @@
 import {
   OFFICIAL_REPORT_PCT_TOLERANCE_PP,
   deriveSkillStatsFromItemStats,
+  matchLevelToBand,
   type ItemCohortStats,
   type OfficialReportAxisPreview,
   type OfficialReportGateResult,
@@ -235,22 +236,13 @@ function axesGate(
 
 // ── Gate #4: la distribución de niveles derivada ≈ la reportada ──────────────
 
+// Delega en el helper puro de `@soe/types` (DRY): la misma semántica de matching se
+// comparte con el importador y el backfill, que no pueden importar de `apps/api`.
 export function resolveLevelBand(
   level: string,
   bands: readonly PerformanceBandInput[],
 ): PerformanceBandInput | null {
-  const target = normalizeName(level);
-  if (target.length === 0) return null;
-  const matches = bands.filter((b) => {
-    const key = normalizeName(b.key);
-    const label = normalizeName(b.label);
-    if (key === target || label === target) return true;
-    // "I" contra la banda "Nivel I": el último token, no un `endsWith` suelto —
-    // "NIVEL II" no debe cruzar con "I".
-    const lastLabelToken = label.split(' ').at(-1);
-    return lastLabelToken === target;
-  });
-  return matches.length === 1 ? matches[0]! : null;
+  return matchLevelToBand(level, bands);
 }
 
 function evaluateLevels(ctx: GateContext): OfficialReportLevelPreview[] {
