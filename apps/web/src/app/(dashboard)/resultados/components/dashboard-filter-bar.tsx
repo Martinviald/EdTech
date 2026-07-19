@@ -14,6 +14,8 @@ import {
 import { Button } from '@/components/ui/button';
 import {
   FILTER_KEYS,
+  classGroupSelectOptions,
+  isClassGroupInGrade,
   type DashboardFilterValues,
 } from './dashboard-filters';
 
@@ -58,8 +60,7 @@ export function DashboardFilterBar({
   );
 
   const updateFilter = useCallback(
-    (key: keyof DashboardFilterValues, next: string) =>
-      applyFilters({ [key]: next }),
+    (key: keyof DashboardFilterValues, next: string) => applyFilters({ [key]: next }),
     [applyFilters],
   );
 
@@ -69,12 +70,11 @@ export function DashboardFilterBar({
   const updateGrade = useCallback(
     (next: string) => {
       const nextGrade = next && next !== ALL ? next : null;
-      const courseStillValid =
-        !value.classGroupId ||
-        !nextGrade ||
-        options.classGroups.some(
-          (c) => c.id === value.classGroupId && c.gradeId === nextGrade,
-        );
+      const courseStillValid = isClassGroupInGrade(
+        options.classGroups,
+        value.classGroupId,
+        nextGrade,
+      );
       applyFilters({
         gradeId: nextGrade,
         ...(courseStillValid ? {} : { classGroupId: null }),
@@ -98,11 +98,9 @@ export function DashboardFilterBar({
     new Map(options.instruments.map((i) => [i.type, i.type])).values(),
   );
 
-  // El dropdown de Cursos solo muestra los cursos del nivel seleccionado.
-  // Sin nivel elegido, se muestran todos.
-  const coursesForGrade = value.gradeId
-    ? options.classGroups.filter((c) => c.gradeId === value.gradeId)
-    : options.classGroups;
+  // El dropdown de Cursos solo muestra los cursos del nivel seleccionado. Sin
+  // nivel elegido se muestran todos, con el nivel antepuesto en la etiqueta.
+  const courseOptions = classGroupSelectOptions(options.classGroups, options.grades, value.gradeId);
 
   return (
     <div className="flex flex-wrap items-end gap-3 rounded-lg border bg-card p-4">
@@ -131,7 +129,7 @@ export function DashboardFilterBar({
         label="Curso"
         placeholder="Todos los cursos"
         value={value.classGroupId}
-        options={coursesForGrade.map((c) => ({ id: c.id, label: c.label }))}
+        options={courseOptions}
         onChange={(v) => updateFilter('classGroupId', v)}
       />
       {instrumentTypes.length > 0 ? (

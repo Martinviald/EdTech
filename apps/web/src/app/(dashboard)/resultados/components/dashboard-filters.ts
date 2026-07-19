@@ -6,6 +6,8 @@
 // tipo y las claves. No mover estas funciones a un archivo cliente: Next prohíbe
 // invocar exports de un módulo cliente desde el servidor.
 
+import type { ClassGroupFilterOption, FilterOption } from '@soe/types';
+
 export type DashboardFilterValues = {
   subjectId?: string;
   gradeId?: string;
@@ -45,6 +47,49 @@ export function parseDashboardFilters(
     academicYearId: pick('academicYearId'),
     instrumentType: pick('instrumentType'),
   };
+}
+
+// ── Cascada Nivel → Curso ────────────────────────────────────────────────────
+// El nombre de un curso ("A", "B", "C") no dice a qué nivel pertenece, así que
+// todo dropdown de cursos se filtra por el nivel elegido y, mientras no haya
+// nivel, muestra el nombre calificado ("3° Básico A"). Helpers compartidos por
+// `DashboardFilterBar` y `ProgressionScopeBar` para no duplicar la regla.
+
+/** Cursos del nivel indicado; sin nivel elegido, todos los cursos. */
+export function classGroupsForGrade(
+  classGroups: ClassGroupFilterOption[],
+  gradeId: string | undefined,
+): ClassGroupFilterOption[] {
+  return gradeId ? classGroups.filter((c) => c.gradeId === gradeId) : classGroups;
+}
+
+/**
+ * `true` si el curso seleccionado sigue siendo válido para el nivel indicado.
+ * Sin curso o sin nivel no hay conflicto posible.
+ */
+export function isClassGroupInGrade(
+  classGroups: ClassGroupFilterOption[],
+  classGroupId: string | undefined,
+  gradeId: string | null | undefined,
+): boolean {
+  if (!classGroupId || !gradeId) return true;
+  return classGroups.some((c) => c.id === classGroupId && c.gradeId === gradeId);
+}
+
+/**
+ * Opciones de curso para un `Select`. Sin nivel elegido antepone el nombre del
+ * nivel para desambiguar los cursos homónimos de distintos niveles.
+ */
+export function classGroupSelectOptions(
+  classGroups: ClassGroupFilterOption[],
+  grades: FilterOption[],
+  gradeId: string | undefined,
+): FilterOption[] {
+  const gradeLabels = new Map(grades.map((g) => [g.id, g.label]));
+  return classGroupsForGrade(classGroups, gradeId).map((c) => {
+    const gradeLabel = gradeId || !c.gradeId ? undefined : gradeLabels.get(c.gradeId);
+    return { id: c.id, label: gradeLabel ? `${gradeLabel} ${c.label}` : c.label };
+  });
 }
 
 /** Serializa los filtros a una querystring (orden estable, sin claves vacías). */

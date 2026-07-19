@@ -22,6 +22,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import { classGroupSelectOptions, isClassGroupInGrade } from '../components/dashboard-filters';
 
 const SCOPE_LABELS: Record<ProgressionScope, string> = {
   student: 'Alumno',
@@ -36,10 +37,11 @@ export function ProgressionScopeBar(props: {
   basePath: string;
   scope: ProgressionScope;
   studentId?: string;
+  gradeId?: string;
   classGroupId?: string;
   nodeId?: string;
 }) {
-  const { options, basePath, scope, classGroupId } = props;
+  const { options, basePath, scope, gradeId, classGroupId } = props;
   const router = useRouter();
   const searchParams = useSearchParams();
 
@@ -66,6 +68,21 @@ export function ProgressionScopeBar(props: {
     [pushParams],
   );
 
+  // Al cambiar de nivel se descarta el curso elegido si ya no pertenece a él,
+  // para no seguir consultando la progresión de un curso que salió del dropdown.
+  const onGradeChange = useCallback(
+    (next: string) => {
+      const nextGrade = next === NONE ? null : next;
+      const keepClass = isClassGroupInGrade(options.classGroups, classGroupId, nextGrade);
+      pushParams((sp) => {
+        if (nextGrade) sp.set('gradeId', nextGrade);
+        else sp.delete('gradeId');
+        if (!keepClass) sp.delete('classGroupId');
+      });
+    },
+    [pushParams, options.classGroups, classGroupId],
+  );
+
   const onClassChange = useCallback(
     (next: string) => {
       pushParams((sp) => {
@@ -75,6 +92,10 @@ export function ProgressionScopeBar(props: {
     },
     [pushParams],
   );
+
+  // El nombre del curso ("A", "B") no dice de qué nivel es: el dropdown se acota
+  // al nivel elegido y, sin nivel, muestra la etiqueta calificada ("3° Básico A").
+  const courseOptions = classGroupSelectOptions(options.classGroups, options.grades, gradeId);
 
   return (
     <div className="flex flex-col gap-3 rounded-lg border bg-card p-4 sm:flex-row sm:flex-wrap sm:items-end">
@@ -95,22 +116,41 @@ export function ProgressionScopeBar(props: {
       </div>
 
       {scope === 'class' ? (
-        <div className="flex min-w-[14rem] flex-1 flex-col gap-1">
-          <label className="text-xs font-medium text-muted-foreground">Curso</label>
-          <Select value={classGroupId ?? NONE} onValueChange={onClassChange}>
-            <SelectTrigger>
-              <SelectValue placeholder="Selecciona un curso" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value={NONE}>Selecciona un curso</SelectItem>
-              {options.classGroups.map((c) => (
-                <SelectItem key={c.id} value={c.id}>
-                  {c.label}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
+        <>
+          <div className="flex min-w-[12rem] flex-1 flex-col gap-1">
+            <label className="text-xs font-medium text-muted-foreground">Nivel / Grado</label>
+            <Select value={gradeId ?? NONE} onValueChange={onGradeChange}>
+              <SelectTrigger>
+                <SelectValue placeholder="Todos los niveles" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value={NONE}>Todos los niveles</SelectItem>
+                {options.grades.map((g) => (
+                  <SelectItem key={g.id} value={g.id}>
+                    {g.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div className="flex min-w-[14rem] flex-1 flex-col gap-1">
+            <label className="text-xs font-medium text-muted-foreground">Curso</label>
+            <Select value={classGroupId ?? NONE} onValueChange={onClassChange}>
+              <SelectTrigger>
+                <SelectValue placeholder="Selecciona un curso" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value={NONE}>Selecciona un curso</SelectItem>
+                {courseOptions.map((c) => (
+                  <SelectItem key={c.id} value={c.id}>
+                    {c.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+        </>
       ) : (
         <p className="flex-1 self-center text-xs text-muted-foreground">
           {scope === 'student'
