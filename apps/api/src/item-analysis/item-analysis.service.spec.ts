@@ -910,4 +910,55 @@ describe('ItemAnalysisService.listAssessments', () => {
     expect(res.data).toHaveLength(1);
     expect(res.data[0].studentsCount).toBe(2);
   });
+
+  // Un informe oficial cargado en modo agregado no tiene filas por alumno: su N vive
+  // en el read-model de cohorte. La lista ya mostraba estas evaluaciones, pero con
+  // "0 alumnos" mientras su propio hub mostraba la asistencia correcta.
+  it('evaluación agregada (sin filas por alumno): toma el N del read-model de cohorte', async () => {
+    const db = makeDb([
+      [
+        {
+          assessmentId: ASSESSMENT_ID,
+          name: 'LANG diagnóstico 2025',
+          administeredAt: new Date('2026-03-10T00:00:00Z'),
+          instrumentName: 'DIA Lenguaje',
+          instrumentType: 'dia',
+          subjectName: 'Lenguaje',
+          gradeName: '3° básico',
+        },
+      ], // rows
+      [], // countRows: sin assessment_results
+      // cohorte: grano (assessment × curso); el N del scope es la SUMA de los max
+      [
+        { assessmentId: ASSESSMENT_ID, scoreSum: '600', maxSum: '1000', studentsAssessed: 41 },
+        { assessmentId: ASSESSMENT_ID, scoreSum: '300', maxSum: '500', studentsAssessed: 2 },
+      ],
+    ]);
+    const service = makeService(db);
+
+    const res = await service.listAssessments(makeUser(), {});
+    expect(res.data[0].studentsCount).toBe(43);
+  });
+
+  it('con ambas fuentes: manda el dato por alumno', async () => {
+    const db = makeDb([
+      [
+        {
+          assessmentId: ASSESSMENT_ID,
+          name: 'DIA Lectura',
+          administeredAt: new Date('2026-03-10T00:00:00Z'),
+          instrumentName: 'Instrumento Lectura',
+          instrumentType: 'dia',
+          subjectName: 'Lenguaje',
+          gradeName: '3° básico',
+        },
+      ],
+      [{ assessmentId: ASSESSMENT_ID, count: 40 }], // countRows
+      [{ assessmentId: ASSESSMENT_ID, scoreSum: '1', maxSum: '2', studentsAssessed: 999 }],
+    ]);
+    const service = makeService(db);
+
+    const res = await service.listAssessments(makeUser(), {});
+    expect(res.data[0].studentsCount).toBe(40);
+  });
 });

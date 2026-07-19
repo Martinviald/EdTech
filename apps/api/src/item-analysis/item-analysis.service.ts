@@ -43,6 +43,7 @@ import {
   type UserRole,
 } from '@soe/types';
 import type { JwtPayload } from '../auth/jwt-payload.types';
+import { loadCohortAchievementByAssessment } from '../common/helpers/cohort-item-stats.helper';
 import { InjectDb, type Database } from '../database/database.types';
 
 // Roles "administrativos" — ven todos los cursos de la org. Cualquier otro rol
@@ -193,6 +194,23 @@ export class ItemAnalysisService {
         .groupBy(assessmentResults.assessmentId);
       const countByAssessment = new Map(countRows.map((r) => [r.assessmentId, Number(r.count)]));
 
+      // Una evaluación cargada desde un informe oficial (`aggregate_only`) no tiene
+      // filas por alumno: su N vive en el read-model de cohorte. Esta lista ya las
+      // MUESTRA (ver la rama `exists(assessment_item_stats)` de arriba), así que sin
+      // este fallback aparecían con "0 alumnos" mientras su propio hub —que sí usa
+      // el read-model— mostraba la asistencia correcta.
+      //
+      // Misma definición de N que el resto de la app (`buildAggregateSummary`,
+      // `getOverview`): Σ del max(student_count) por curso, vía el helper compartido.
+      const cohortRows = await loadCohortAchievementByAssessment(
+        tx,
+        ids,
+        scope.scopeAll ? null : scope.classGroupIds,
+      );
+      const cohortByAssessment = new Map(
+        cohortRows.map((r) => [r.assessmentId, r.studentsAssessed]),
+      );
+
       const data: AssessmentOption[] = rows.map((r) => ({
         assessmentId: r.assessmentId,
         name: r.name,
@@ -201,7 +219,11 @@ export class ItemAnalysisService {
         subjectName: r.subjectName ?? null,
         gradeName: r.gradeName ?? null,
         administeredAt: r.administeredAt,
-        studentsCount: countByAssessment.get(r.assessmentId) ?? 0,
+        // El dato per-alumno manda cuando existe (es el N real de rendidores); el de
+        // cohorte sólo cubre a las que no lo tienen. Para una evaluación con ambos,
+        // los dos números son la misma cohorte.
+        studentsCount:
+          countByAssessment.get(r.assessmentId) ?? cohortByAssessment.get(r.assessmentId) ?? 0,
       }));
 
       return { data };
