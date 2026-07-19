@@ -6,9 +6,9 @@
 
 ## Estado de la carga
 
-| Asignatura | Cargados | Fuera |
-|---|---|---|
-| Matemática | **22/24** | 6° Intermedio A y B (ver §3) |
+| Asignatura         | Cargados  | Fuera                                            |
+| ------------------ | --------- | ------------------------------------------------ |
+| Matemática         | **22/24** | 6° Intermedio A y B (ver §3)                     |
 | Lenguaje (Lectura) | **16/16** | — (8 Intermedio excluidos por §9.3, ya granular) |
 
 Total: **38 cohortes** en `assessment_item_stats`/`assessment_skill_stats` (`source='imported'`), sin huérfanos.
@@ -20,10 +20,10 @@ era **la más elegida por los alumnos**, no la correcta real). Confirmadas 3 for
 ambos cursos (A/B) + el contenido del ítem. Corregidas en la **fuente** (`packages/db/data/instruments/matematicas/…`,
 commit `4e0f8a5`) y en **demo** (UPDATE de `items.content`).
 
-| Instrumento | Ítem | Pauta vieja | Pauta nueva | Verificación |
-|---|---|---|---|---|
-| DIA Matemática 4° Intermedio 2025 | **P25** (Datos y prob.) | A (=3) | **D (=9)** | "¿Cuántos se lavan los dientes 4 o más veces?" = (2+1) cepillos × 3 = 9 = D |
-| DIA Matemática 6° Intermedio 2025 | **P10** (Patrones) | B (=4) | **A (=2)** | "4y = 8" → y = 2 = A |
+| Instrumento                       | Ítem                    | Pauta vieja | Pauta nueva | Verificación                                                                |
+| --------------------------------- | ----------------------- | ----------- | ----------- | --------------------------------------------------------------------------- |
+| DIA Matemática 4° Intermedio 2025 | **P25** (Datos y prob.) | A (=3)      | **D (=9)**  | "¿Cuántos se lavan los dientes 4 o más veces?" = (2+1) cepillos × 3 = 9 = D |
+| DIA Matemática 6° Intermedio 2025 | **P10** (Patrones)      | B (=4)      | **A (=2)**  | "4y = 8" → y = 2 = A                                                        |
 
 ## 2. Valor de extracción corregido — REVISAR
 
@@ -31,10 +31,10 @@ Dos informes traían un valor de eje mal leído de su gráfico (raster). El valo
 OCR del PDF y/o por la Tabla 1 del propio informe) fue corregido en el JSON extraído
 (`Histórico Pruebas DIA/Resultados/extraccion/…`).
 
-| Informe | Eje | Valor JSON viejo | Valor real | Verificación |
-|---|---|---|---|---|
-| Matemática 5°A Intermedio | Geometría | 16.98 | **76.98** | Mis-lectura 7→1; OCR del Gráfico 2 del PDF confirma 76.98 (= derivado de Tabla 1). |
-| Lectura 4°A Diagnóstico | Localizar | 18.86 | **78.86** | El **Gráfico 1 del informe imprime 18.86 pero su propia Tabla 1 da 78.86** (typo del informe oficial DIA, dígito 7→1). Los 6 ítems de Localizar tienen pauta correcta y promedian 78.86. |
+| Informe                   | Eje       | Valor JSON viejo | Valor real | Verificación                                                                                                                                                                             |
+| ------------------------- | --------- | ---------------- | ---------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Matemática 5°A Intermedio | Geometría | 16.98            | **76.98**  | Mis-lectura 7→1; OCR del Gráfico 2 del PDF confirma 76.98 (= derivado de Tabla 1).                                                                                                       |
+| Lectura 4°A Diagnóstico   | Localizar | 18.86            | **78.86**  | El **Gráfico 1 del informe imprime 18.86 pero su propia Tabla 1 da 78.86** (typo del informe oficial DIA, dígito 7→1). Los 6 ítems de Localizar tienen pauta correcta y promedian 78.86. |
 
 ## 3. PENDIENTE — 6° Matemática Intermedio (A y B) NO cargados
 
@@ -61,3 +61,44 @@ contienen un ítem de desarrollo (reconstrucción lossy desde agregados), que no
   Re-confirmar el mismo informe → assessment duplicada + cohorte huérfana. Se limpiaron 3 (Lenguaje 3°)
   surgidas de un reintento. Arreglar reusando por (instrument, classGroup, period) antes de exponer la
   recarga en UI. `import_jobs` tampoco dedup (log de auditoría).
+
+## 5. Backfill de distribución por nivel — PASO MANUAL POST-DEPLOY
+
+La distribución por nivel (Gráfico 1 del informe → `assessment_level_stats`) **no** estaba en las
+cohortes cargadas en §1–2: se importaron cuando la extracción dejaba `levelDistribution` vacío. Al
+re-extraer los informes, **24 de los 48 JSON** traen ahora `levelDistribution` poblado (los 16
+Diagnóstico + 8 de cierre/intermedio siguen sin nivel y se saltan en silencio).
+
+El script `apps/api/scripts/backfill-level-stats.ts` escribe **solo** ese read-model contra los
+assessments `aggregate_only` que **ya existen**, sin re-importar (así se esquiva el bug de
+idempotencia del importador descrito en §4, que crearía assessments duplicados). Reusa la MISMA
+resolución que la carga original (`cargar-informes-dia.ts`): instrumento por (subject+grade+period,
+oficial `org_id NULL`) y class group por `courseLabel`; luego matchea el assessment existente vía
+`assessment_course_assignments` y hace delete+reinsert idempotente por `(assessmentId, classGroupId)`
+con `source='imported'`. Si no encuentra el assessment, hay ambigüedad, o los niveles no matchean las
+bandas del instrumento → **warn y skip** (no crea nada).
+
+⚠️ Los JSON re-extraídos viven **fuera del repo** (`Histórico Pruebas DIA/Resultados/extraccion/`),
+así que esto **NO va a CI**: es un paso manual que se corre a mano contra demo (con el túnel arriba,
+ver skill `demo-db-access`), igual que la carga original.
+
+Comando (relativo a `apps/api`; DRY-RUN por defecto — no escribe, muestra por informe el assessment
+resuelto, los conteos por banda `label=count` y `total/N`):
+
+```bash
+# Dry-run
+DATABASE_ADMIN_URL="postgresql://soe_admin:<pw>@<host>:5432/soe" \
+  pnpm --filter @soe/api exec tsx scripts/backfill-level-stats.ts \
+  "../../Histórico Pruebas DIA/Resultados/extraccion"
+
+# Persistir (agregar --confirm)
+DATABASE_ADMIN_URL="..." \
+  pnpm --filter @soe/api exec tsx scripts/backfill-level-stats.ts \
+  "../../Histórico Pruebas DIA/Resultados/extraccion" --confirm
+```
+
+**Cobertura esperada:** de las 24 cohortes con nivel, **~24 tienen nivel escribible**; quedan hasta
+**8 pendientes de revisión manual** de la re-extracción (5 por conflicto de romano en OCR —"II" vs
+"III"— y 3 por una tajada del Gráfico 1 demasiado chica que no se leyó). Las cohortes de Lenguaje
+Intermedio no tienen assessment `aggregate_only` (se excluyeron en la carga por §9.3, ya granular):
+el script las reporta como skip, es esperado.

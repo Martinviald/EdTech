@@ -25,11 +25,18 @@ import {
   type OfficialCourseStudentRow,
   type OfficialDevelopmentDistribution,
   type OfficialSpecTableRow,
+  type PerformanceBandInput,
   type PerformanceDistributionBucket,
   type PerformanceLevel,
 } from '@soe/types';
 import type { JwtPayload } from '../auth/jwt-payload.types';
 import { InjectDb, type Database } from '../database/database.types';
+import { loadInstrumentBands } from '../performance-bands/lib/load-instrument-bands';
+import {
+  loadCohortLevelCounts,
+  levelCountsToLegacyDistribution,
+  type CohortLevelCount,
+} from '../common/helpers/cohort-level-stats.helper';
 import {
   COHORT_PCT_SUM,
   COHORT_PCT_WEIGHT,
@@ -153,6 +160,18 @@ export class CourseReportService {
         : null;
       const studentsConsidered = aggregate ? aggregate.studentsAssessed : evaluated.length;
 
+      // Distribución por nivel del informe agregado (§2 torta + "requiere apoyo"):
+      // desde `assessment_level_stats`. Sin filas → se deja vacío como antes. Las
+      // bandas del instrumento aportan el mapeo banda→nivel legacy y cuál es la banda
+      // de menor logro ("requiere mayor apoyo").
+      const levelData: { counts: CohortLevelCount[]; bands: PerformanceBandInput[] } | null =
+        isAggregate
+          ? {
+              counts: await loadCohortLevelCounts(tx, query.assessmentId, classGroupFilter),
+              bands: await loadInstrumentBands(tx, assessment.instrumentId),
+            }
+          : null;
+
       const variant = this.support.resolveVariant(assessment.period);
       const disclaimers = this.support.resolveDisclaimers(assessment.instrumentConfig);
       const reflectionPrompts = this.support.resolveReflectionPrompts(assessment.instrumentConfig);
@@ -188,7 +207,7 @@ export class CourseReportService {
         dataGranularity: assessment.dataGranularity,
       };
 
-      const generalResult = this.buildGeneralResult(evaluated, aggregate);
+      const generalResult = this.buildGeneralResult(evaluated, aggregate, levelData);
       const skillAxes = isAggregate
         ? await this.buildSkillAxesFromCohort(
             tx,
@@ -228,19 +247,39 @@ export class CourseReportService {
   private buildGeneralResult(
     evaluated: EvaluatedStudent[],
     aggregate: CohortOverallAchievement | null,
+    levelData: { counts: CohortLevelCount[]; bands: PerformanceBandInput[] } | null,
   ): OfficialCourseGeneralResult {
-    // Modo agregado: el logro del curso y el N vienen del read-model de ítems. La
-    // distribución por nivel y el conteo "requiere apoyo" necesitan el dato por
-    // alumno / la Figura 1 y quedan vacíos hasta cargar los niveles.
+    // Modo agregado: el logro del curso y el N vienen del read-model de ítems; la
+    // distribución por nivel y "requiere apoyo" del read-model por nivel
+    // (`assessment_level_stats`, Gráfico 1). Sin filas de nivel quedan vacíos, como
+    // antes de cargar los niveles.
     if (aggregate) {
       const averageAchievement = aggregate.averageAchievement;
+      const performanceLevel =
+        averageAchievement === null ? null : percentageToPerformanceLevel(averageAchievement / 100);
+
+      if (levelData && levelData.counts.length > 0) {
+        const { counts, bands } = levelData;
+        const total = counts.reduce((acc, c) => acc + c.count, 0);
+        // "Requiere mayor apoyo" = alumnos en la banda de MENOR order (menor logro).
+        const lowestBand = [...bands].sort((a, b) => a.order - b.order)[0];
+        const requiresSupportCount = lowestBand
+          ? (counts.find((c) => c.performanceBandId === lowestBand.id)?.count ?? 0)
+          : 0;
+        return {
+          studentsConsidered: aggregate.studentsAssessed,
+          averageAchievement,
+          performanceLevel,
+          requiresSupportCount,
+          requiresSupportPercentage: total > 0 ? (requiresSupportCount / total) * 100 : null,
+          distribution: levelCountsToLegacyDistribution(counts, bands),
+        };
+      }
+
       return {
         studentsConsidered: aggregate.studentsAssessed,
         averageAchievement,
-        performanceLevel:
-          averageAchievement === null
-            ? null
-            : percentageToPerformanceLevel(averageAchievement / 100),
+        performanceLevel,
         requiresSupportCount: 0,
         requiresSupportPercentage: null,
         distribution: buildDistribution([]),

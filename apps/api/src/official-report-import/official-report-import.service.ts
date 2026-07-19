@@ -9,6 +9,7 @@ import { and, eq, inArray, isNull, or, sql } from 'drizzle-orm';
 import {
   assessmentCourseAssignments,
   assessmentItemStats,
+  assessmentLevelStats,
   assessmentResults,
   assessmentSkillStats,
   assessments,
@@ -23,6 +24,7 @@ import {
   withOrgContext,
 } from '@soe/db';
 import {
+  buildLevelStatCounts,
   officialReportImportFileSchema,
   type ImportJobStatus,
   type ItemCohortStats,
@@ -204,6 +206,37 @@ export class OfficialReportImportService {
         await tx
           .insert(assessmentSkillStats)
           .values(evaluation.skillStats.map((s) => toSkillStatsRow(s, assessmentId, now)));
+      }
+
+      // Distribución por nivel (Gráfico 1 del informe): conteos enteros por banda,
+      // reconstruidos del % + N con el helper puro. Delete+reinsert por curso, igual
+      // que item/skill stats. Si el informe no trae Gráfico 1 (`levelDistribution`
+      // vacío) o algún nivel no matchea una única banda, el helper devuelve [] y no
+      // se escribe nada (solo se limpian filas viejas del reimport).
+      const levelStatRows = buildLevelStatCounts({
+        levelDistribution: file.levelDistribution,
+        studentCount: file.report.studentCount,
+        bands: ctx.bands,
+      });
+      await tx
+        .delete(assessmentLevelStats)
+        .where(
+          and(
+            eq(assessmentLevelStats.assessmentId, assessmentId),
+            eq(assessmentLevelStats.classGroupId, classGroupId),
+          ),
+        );
+      if (levelStatRows.length > 0) {
+        await tx.insert(assessmentLevelStats).values(
+          levelStatRows.map((r) => ({
+            assessmentId,
+            classGroupId,
+            performanceBandId: r.performanceBandId,
+            studentCount: r.studentCount,
+            source: 'imported' as const,
+            computedAt: now,
+          })),
+        );
       }
 
       // Nivel por alumno. `percentage` va NULL a propósito: el informe entrega el

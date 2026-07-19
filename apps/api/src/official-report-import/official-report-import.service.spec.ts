@@ -53,6 +53,7 @@ function makeJwt(orgId: string | null = ORG_A): JwtPayload {
 type Captured = {
   itemStats: unknown[][];
   skillStats: unknown[][];
+  levelStats: unknown[][];
   assessmentResults: unknown[][];
   assessments: unknown[][];
   courseAssignments: unknown[][];
@@ -63,6 +64,7 @@ function emptyCaptured(): Captured {
   return {
     itemStats: [],
     skillStats: [],
+    levelStats: [],
     assessmentResults: [],
     assessments: [],
     courseAssignments: [],
@@ -163,6 +165,7 @@ function buildMockDb(
         const arr = Array.isArray(values) ? values : [values];
         if (name === 'assessment_item_stats') captured.itemStats.push(arr);
         if (name === 'assessment_skill_stats') captured.skillStats.push(arr);
+        if (name === 'assessment_level_stats') captured.levelStats.push(arr);
         if (name === 'assessment_results') captured.assessmentResults.push(arr);
         if (name === 'assessments') captured.assessments.push(arr);
         if (name === 'assessment_course_assignments') captured.courseAssignments.push(arr);
@@ -369,6 +372,43 @@ describe('OfficialReportImportService — confirm', () => {
     expect(skillRow.source).toBe('imported');
     // El calculador devuelve 0..1; la BD guarda 0..100.
     expect(Number(skillRow.percentage)).toBeGreaterThan(1);
+  });
+
+  it('escribe assessment_level_stats con los conteos por banda desde levelDistribution', async () => {
+    const captured = emptyCaptured();
+    const service = new OfficialReportImportService(buildMockDb({}, captured), store);
+    // Informe con Gráfico 1: 50% Nivel II, 50% Nivel III sobre N=43.
+    const { previewToken } = await uploadReport(service, reportWithStudents);
+
+    await service.confirm(makeJwt(), { previewToken, studentMatches: [] });
+
+    expect(captured.levelStats).toHaveLength(1);
+    const rows = captured.levelStats[0] as Record<string, unknown>[];
+    // round(50/100 × 43) = 22 en ambas bandas presentes; Nivel I (0%) no se escribe.
+    expect(rows).toEqual([
+      expect.objectContaining({
+        classGroupId: CLASS_GROUP_ID,
+        performanceBandId: 'band-2',
+        studentCount: 22,
+        source: 'imported',
+      }),
+      expect.objectContaining({
+        performanceBandId: 'band-3',
+        studentCount: 22,
+        source: 'imported',
+      }),
+    ]);
+  });
+
+  it('no escribe assessment_level_stats cuando el informe no trae Gráfico 1', async () => {
+    const captured = emptyCaptured();
+    const service = new OfficialReportImportService(buildMockDb({}, captured), store);
+    // buildReport() por defecto trae levelDistribution: [].
+    const { previewToken } = await uploadReport(service);
+
+    await service.confirm(makeJwt(), { previewToken, studentMatches: [] });
+
+    expect(captured.levelStats).toEqual([]);
   });
 
   it('registra el import_job ya completado, en la misma transacción', async () => {
