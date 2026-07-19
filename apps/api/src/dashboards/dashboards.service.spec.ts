@@ -94,16 +94,24 @@ describe('DashboardsService.getOverview', () => {
     const db = makeDb([
       // 1. resolveScopedAssessmentIds (assessments+instruments)
       [{ id: 'a1' }, { id: 'a2' }],
-      // 2. métricas globales
-      [{ avgPct: '72.50', studentsEvaluated: 30, assessmentsCount: 2 }],
-      // 3. computePerformanceDistribution (group by level)
+      // 2. métricas globales (per-alumno)
+      [{ avgPct: '72.50', studentsEvaluated: 30 }],
+      // 3. resultAssessmentIds (distinct assessment con datos per-alumno)
+      [{ assessmentId: 'a1' }, { assessmentId: 'a2' }],
+      // 4. loadCohortAchievementByAssessment — a1/a2 también en read-model (computed),
+      //    ya contados per-alumno → no aportan N ni logro extra.
+      [
+        { assessmentId: 'a1', scoreSum: '0', maxSum: '0', studentsAssessed: 0 },
+        { assessmentId: 'a2', scoreSum: '0', maxSum: '0', studentsAssessed: 0 },
+      ],
+      // 5. computePerformanceDistribution (group by level)
       [
         { level: 'adequate', count: 18 },
         { level: 'elementary', count: 12 },
       ],
-      // 4. loadRecentAssessments → resolveScopedAssessmentIds
+      // 6. loadRecentAssessments → resolveScopedAssessmentIds
       [{ id: 'a1' }, { id: 'a2' }],
-      // 5. loadRecentAssessments → assessments
+      // 7. loadRecentAssessments → assessments
       [
         {
           assessmentId: 'a1',
@@ -117,11 +125,11 @@ describe('DashboardsService.getOverview', () => {
           gradeName: '2° Básico',
         },
       ],
-      // 6. loadRecentAssessments → stats
+      // 8. loadRecentAssessments → stats
       [{ assessmentId: 'a1', studentsCount: 30, avgPct: '72.50' }],
-      // 7. deriveAlerts → courseAchievement
+      // 9. deriveAlerts → courseAchievement
       [{ classGroupId: 'cg1', classGroupName: '2°A', avgPct: '55.00' }],
-      // 8. deriveAlerts → skills
+      // 10. deriveAlerts → skills
       [{ nodeId: 'n1', nodeName: 'Inferir', avgPct: '40.00' }],
     ]);
     const svc = makeService(db);
@@ -177,6 +185,69 @@ describe('DashboardsService.getOverview', () => {
     expect(res.scope).toBe('org');
     expect(res.assessmentsCount).toBe(0);
     expect(db.__selectIdx()).toBe(0); // ninguna query ejecutada
+  });
+
+  // ── Informes agregados (aggregate_only) — no tienen filas per-alumno ──────────
+  it('org con SÓLO informes agregados: cuenta assessment y alumnos desde el read-model', async () => {
+    const db = makeDb([
+      // 1. resolveScopedAssessmentIds → el assessment agregado sí existe en `assessments`
+      [{ id: 'a1' }],
+      // 2. métricas per-alumno → sin resultados (informe agregado)
+      [{ avgPct: null, studentsEvaluated: 0 }],
+      // 3. resultAssessmentIds → ninguno
+      [],
+      // 4. loadCohortAchievementByAssessment → logro 150/200 = 75%, N = 25
+      [{ assessmentId: 'a1', scoreSum: '150', maxSum: '200', studentsAssessed: 25 }],
+      // 5+ resto (distribución, recientes, alertas) → vacío por defecto
+    ]);
+    const svc = makeService(db);
+    const res = await svc.getOverview(makeUser({ activeRole: 'academic_director' }), {});
+    // Antes daban 0: ahora salen del read-model de cohorte.
+    expect(res.assessmentsCount).toBe(1);
+    expect(res.studentsEvaluated).toBe(25);
+    expect(res.globalAchievement).toBe(75);
+  });
+
+  it('org mixta (item_level + agregado): cuenta ambos sin doble-contar', async () => {
+    const db = makeDb([
+      // 1. resolveScopedAssessmentIds → a1 (item_level) + a2 (agregado)
+      [{ id: 'a1' }, { id: 'a2' }],
+      // 2. métricas per-alumno de a1: 80% sobre 20 alumnos
+      [{ avgPct: '80.00', studentsEvaluated: 20 }],
+      // 3. resultAssessmentIds → sólo a1 tiene datos per-alumno
+      [{ assessmentId: 'a1' }],
+      // 4. read-model: a1 (computed, ya contado) + a2 (agregado, 90/200 = 45%, N 30)
+      [
+        { assessmentId: 'a1', scoreSum: '160', maxSum: '200', studentsAssessed: 20 },
+        { assessmentId: 'a2', scoreSum: '90', maxSum: '200', studentsAssessed: 30 },
+      ],
+    ]);
+    const svc = makeService(db);
+    const res = await svc.getOverview(makeUser({ activeRole: 'academic_director' }), {});
+    // Unión {a1} ∪ {a1,a2} = 2 (a1 NO se cuenta dos veces).
+    expect(res.assessmentsCount).toBe(2);
+    // 20 (per-alumno de a1) + 30 (cohorte de a2); a1 del read-model no re-suma.
+    expect(res.studentsEvaluated).toBe(50);
+    // Ponderado: (80×20 + 45×30) / (20+30) = (1600 + 1350) / 50 = 59.
+    expect(res.globalAchievement).toBeCloseTo(59, 6);
+  });
+
+  it('org item_level puro sin read-model: sin regresión respecto al cálculo per-alumno', async () => {
+    const db = makeDb([
+      // 1. resolveScopedAssessmentIds
+      [{ id: 'a1' }],
+      // 2. métricas per-alumno: 70% sobre 15 alumnos
+      [{ avgPct: '70.00', studentsEvaluated: 15 }],
+      // 3. resultAssessmentIds → a1
+      [{ assessmentId: 'a1' }],
+      // 4. read-model vacío (datos antiguos previos al backfill)
+      [],
+    ]);
+    const svc = makeService(db);
+    const res = await svc.getOverview(makeUser({ activeRole: 'school_admin' }), {});
+    expect(res.assessmentsCount).toBe(1);
+    expect(res.studentsEvaluated).toBe(15);
+    expect(res.globalAchievement).toBe(70);
   });
 });
 
