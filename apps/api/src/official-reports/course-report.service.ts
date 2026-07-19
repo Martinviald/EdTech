@@ -32,6 +32,7 @@ import {
 import type { JwtPayload } from '../auth/jwt-payload.types';
 import { InjectDb, type Database } from '../database/database.types';
 import { loadInstrumentBands } from '../performance-bands/lib/load-instrument-bands';
+import { hydrateBandForStudent } from '../performance-bands/lib/hydrate-band-level';
 import {
   loadCohortLevelCounts,
   levelCountsToLegacyDistribution,
@@ -64,7 +65,10 @@ type EvaluatedStudent = {
   lastName: string;
   percentage: number | null;
   grade: number | null;
+  /** Con datos agregados lo rellena `hydratePerformanceLevels` desde la banda. */
   performanceLevel: PerformanceLevel | null;
+  /** `performance_bands.id` de la fila; sólo viene con `metric_type='band'`. */
+  performanceBandId: string | null;
 };
 
 @Injectable()
@@ -149,6 +153,15 @@ export class CourseReportService {
         evaluated.map((s) => s.studentId),
       );
 
+      // Bandas del instrumento (fuente de verdad del nivel). Se cargan SIEMPRE —
+      // no sólo en la rama agregada— porque un informe agregado con filas
+      // por-alumno band-only (percentage/performanceLevel NULL, performance_band_id
+      // seteado, lo que escribe el importador oficial) necesita derivar el nivel
+      // desde la banda para poblar §5. Corre dentro de withOrgContext → RLS trae
+      // globales + override de la org.
+      const instrumentBands = await loadInstrumentBands(tx, assessment.instrumentId);
+      this.hydratePerformanceLevels(evaluated, instrumentBands);
+
       // Informe oficial cargado en modo agregado: sin filas por alumno. El logro del
       // curso (§2) sale del read-model de ítems y los ejes de habilidad (§3) del
       // read-model por eje, ambos ya persistidos por el importador. La distribución
@@ -168,7 +181,7 @@ export class CourseReportService {
         isAggregate
           ? {
               counts: await loadCohortLevelCounts(tx, query.assessmentId, classGroupFilter),
-              bands: await loadInstrumentBands(tx, assessment.instrumentId),
+              bands: instrumentBands,
             }
           : null;
 
@@ -526,6 +539,25 @@ export class CourseReportService {
 
   // ── Sección 5 ────────────────────────────────────────────────────────────
 
+  /**
+   * Deriva el nivel de desempeño de cada alumno desde su banda cuando el dato es
+   * agregado band-only (el importador oficial escribe `performance_band_id` pero
+   * deja `percentage` y `performanceLevel` NULL). Comparte el núcleo por alumno
+   * con `AssessmentReportService.hydrateBands` (helper `hydrateBandForStudent`),
+   * de modo que el nivel del informe oficial y el del heatmap no discrepan. El %
+   * por alumno no existe en un informe DIA, así que `percentage` queda NULL y §5
+   * muestra "—" en logro y el badge de nivel.
+   */
+  private hydratePerformanceLevels(
+    evaluated: EvaluatedStudent[],
+    bands: PerformanceBandInput[],
+  ): void {
+    if (bands.length === 0) return;
+    for (const e of evaluated) {
+      e.performanceLevel = hydrateBandForStudent(e, bands).performanceLevel;
+    }
+  }
+
   private buildStudentResults(
     evaluated: EvaluatedStudent[],
     classGroupByStudent: Map<string, { id: string; name: string }>,
@@ -578,6 +610,7 @@ export class CourseReportService {
         percentage: assessmentResults.percentage,
         grade: assessmentResults.grade,
         performanceLevel: assessmentResults.performanceLevel,
+        performanceBandId: assessmentResults.performanceBandId,
       })
       .from(assessmentResults)
       .innerJoin(students, eq(students.id, assessmentResults.studentId))
@@ -591,6 +624,7 @@ export class CourseReportService {
       percentage: r.percentage === null ? null : Number(r.percentage),
       grade: r.grade === null ? null : Number(r.grade),
       performanceLevel: r.performanceLevel,
+      performanceBandId: r.performanceBandId ?? null,
     }));
   }
 

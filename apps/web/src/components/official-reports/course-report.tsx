@@ -57,9 +57,6 @@ export function CourseReport({
   const { meta, generalResult, skillAxes, specTable, studentResults, reflectionPrompts } = report;
   const disclaimers = resolveDisclaimers(meta.disclaimers);
   const isDiagnostic = meta.variant === 'requires_support';
-  // Informe cargado de forma agregada (sin niveles por alumno): el listado individual
-  // (§5) nunca tiene datos y se reemplaza por una nota.
-  const isAggregate = meta.dataGranularity === 'aggregate_only';
   // La distribución por nivel (torta §2) y "requiere apoyo" SÍ pueden existir en un
   // informe agregado si trae el Gráfico 1 (`assessment_level_stats`). Se condicionan a
   // que la distribución venga con datos —no a la granularidad— para no ocultar una
@@ -193,14 +190,19 @@ export function CourseReport({
         title="Resultados por estudiante"
         description="Una fila por estudiante: el punto marca su porcentaje de logro sobre las bandas de nivel del instrumento (color por nivel), para leer visualmente en qué nivel cae cada alumno. El nivel más bajo (Insuficiente) corresponde a quienes requieren mayor apoyo."
       >
-        {isAggregate ? (
+        {studentResults.length === 0 ? (
           <p className="text-sm text-muted-foreground">
             Este informe se cargó de forma agregada por curso y no incluye los resultados
             individuales de cada estudiante.
           </p>
         ) : (
           <>
-            <StudentDotPlot students={studentResults} />
+            {/* El dot-plot posiciona cada punto por su % de logro; un informe
+                agregado band-only no trae %, así que se muestra sólo si hay al
+                menos una fila con logro. La nómina (nivel sin %) siempre se ve. */}
+            {studentResults.some((s) => s.achievement !== null) && (
+              <StudentDotPlot students={studentResults} />
+            )}
             <p className="text-sm text-muted-foreground">
               Estudiantes que requieren mayor apoyo:{' '}
               <span className="font-semibold text-foreground">
