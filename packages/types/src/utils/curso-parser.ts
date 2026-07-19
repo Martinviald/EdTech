@@ -101,6 +101,24 @@ function medioNum(n: number): string {
   return MEDIO_CODES[n - 1] ?? '';
 }
 
+/**
+ * Normaliza lo que un usuario escribe como "sección" de un curso al valor que se
+ * guarda en `class_groups.name`: sólo la sección ("A"), nunca el curso completo.
+ *
+ * El nivel ya vive en `grade_id`; repetirlo dentro del nombre produce catálogos
+ * inconsistentes ("4° Básico A" junto a "A" para el mismo nivel), que es cómo se
+ * ensució la data de demo. Si el texto trae el nivel adentro ("4B A", "4° Básico
+ * A") se queda con la sección; si no, se devuelve tal cual, sin inventar nada.
+ */
+export function normalizeClassGroupSection(input: string): string {
+  const trimmed = input.trim();
+  const parsed = parseCursoLabel(trimmed);
+  if (parsed) return parsed.section;
+  // Sin nivel reconocible: una sola letra se guarda en mayúscula ("a" → "A"),
+  // cualquier otro nombre se respeta (hay colegios con secciones no-literales).
+  return /^[a-zA-Z]$/.test(trimmed) ? trimmed.toUpperCase() : trimmed;
+}
+
 function prettyGrade(code: string): string {
   const labels: Record<string, string> = {
     PRE_KINDER: 'Pre-Kinder',
