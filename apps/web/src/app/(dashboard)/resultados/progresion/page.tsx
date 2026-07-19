@@ -13,7 +13,7 @@ import {
 } from '@soe/types';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { PageContainer, PageHeader, EmptyState } from '@/components/patterns';
-import { parseDashboardFilters } from '../components/dashboard-filters';
+import { isClassGroupInGrade, parseDashboardFilters } from '../components/dashboard-filters';
 import { ProgressionChart } from '../components/charts/progression-chart';
 import { ExportViewButton } from '../components/charts/export-view-button';
 import { PERFORMANCE_LEVEL_LABELS } from '../components/charts/performance-distribution';
@@ -67,14 +67,21 @@ export default async function ProgresionPage({
   const rawScope = pick(params, 'scope');
   const scope: ProgressionScope = isScope(rawScope) ? rawScope : 'class';
   const studentId = pick(params, 'studentId');
-  const classGroupId = pick(params, 'classGroupId') ?? filters.classGroupId;
+  const gradeId = filters.gradeId;
+  const rawClassGroupId = pick(params, 'classGroupId') ?? filters.classGroupId;
   const nodeId = pick(params, 'nodeId');
 
   const options = await apiGet<DashboardFilterOptionsResponse>('/dashboards/filters');
 
+  // Un curso heredado de otra vista puede no pertenecer al nivel filtrado (p. ej.
+  // al llegar desde el nav con gradeId ya puesto). En ese caso se ignora: el
+  // dropdown de Curso solo ofrece los cursos del nivel.
+  const classGroupId = isClassGroupInGrade(options.classGroups, rawClassGroupId, gradeId)
+    ? rawClassGroupId
+    : undefined;
+
   // El scope determina la entidad medida (contrato analytics.schema).
-  const entityId =
-    scope === 'student' ? studentId : scope === 'class' ? classGroupId : nodeId;
+  const entityId = scope === 'student' ? studentId : scope === 'class' ? classGroupId : nodeId;
 
   let data: ProgressionResponse | null = null;
   if (entityId) {
@@ -138,6 +145,7 @@ export default async function ProgresionPage({
         basePath={BASE_PATH}
         scope={scope}
         studentId={studentId}
+        gradeId={gradeId}
         classGroupId={classGroupId}
         nodeId={nodeId}
       />
