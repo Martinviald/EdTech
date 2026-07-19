@@ -229,6 +229,8 @@ ALTER TABLE "assessment_item_stats"  ENABLE ROW LEVEL SECURITY;
 ALTER TABLE "assessment_item_stats"  FORCE  ROW LEVEL SECURITY;
 ALTER TABLE "assessment_skill_stats" ENABLE ROW LEVEL SECURITY;
 ALTER TABLE "assessment_skill_stats" FORCE  ROW LEVEL SECURITY;
+ALTER TABLE "assessment_level_stats" ENABLE ROW LEVEL SECURITY;
+ALTER TABLE "assessment_level_stats" FORCE  ROW LEVEL SECURITY;
 
 DROP POLICY IF EXISTS "assessment_item_stats_tenant_isolation" ON "assessment_item_stats";
 CREATE POLICY "assessment_item_stats_tenant_isolation" ON "assessment_item_stats"
@@ -248,6 +250,17 @@ CREATE POLICY "assessment_skill_stats_tenant_isolation" ON "assessment_skill_sta
     EXISTS (
       SELECT 1 FROM "assessments"
       WHERE "assessments"."id" = "assessment_skill_stats"."assessment_id"
+        AND "assessments"."org_id"::text = current_setting('app.current_org_id', true)
+    )
+  );
+
+DROP POLICY IF EXISTS "assessment_level_stats_tenant_isolation" ON "assessment_level_stats";
+CREATE POLICY "assessment_level_stats_tenant_isolation" ON "assessment_level_stats"
+  AS PERMISSIVE FOR ALL
+  USING (
+    EXISTS (
+      SELECT 1 FROM "assessments"
+      WHERE "assessments"."id" = "assessment_level_stats"."assessment_id"
         AND "assessments"."org_id"::text = current_setting('app.current_org_id', true)
     )
   );

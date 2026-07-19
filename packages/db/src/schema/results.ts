@@ -212,6 +212,35 @@ export const assessmentSkillStats = pgTable(
   (table) => [unique().on(table.assessmentId, table.classGroupId, table.nodeId)],
 );
 
+// Read-model de cohorte por banda de desempeño. Alimenta la "distribución por nivel"
+// de los informes agregados (niveles I/II/III del DIA).
+//
+// Grano: assessment × curso × banda. Guarda CONTEOS ENTEROS de alumnos en cada nivel,
+// NUNCA porcentajes (recombinar cohortes es una suma exacta; ver nota de la sección).
+// Con `source='imported'` se puebla desde el informe oficial DIA (que entrega el conteo
+// o el % + N del curso, del que se reconstruye el conteo exacto).
+export const assessmentLevelStats = pgTable(
+  'assessment_level_stats',
+  {
+    id: uuid('id').defaultRandom().primaryKey(),
+    assessmentId: uuid('assessment_id')
+      .notNull()
+      .references(() => assessments.id, { onDelete: 'cascade' }),
+    classGroupId: uuid('class_group_id')
+      .notNull()
+      .references(() => classGroups.id, { onDelete: 'cascade' }),
+    performanceBandId: uuid('performance_band_id')
+      .notNull()
+      .references(() => performanceBands.id),
+    studentCount: integer('student_count').notNull(),
+    source: statsSourceEnum('source').notNull(),
+    computedAt: timestamp('computed_at').defaultNow().notNull(),
+    createdAt: timestamp('created_at').defaultNow().notNull(),
+    updatedAt: timestamp('updated_at').defaultNow().notNull(),
+  },
+  (table) => [unique().on(table.assessmentId, table.classGroupId, table.performanceBandId)],
+);
+
 export const assessmentItemStatsRelations = relations(assessmentItemStats, ({ one }) => ({
   assessment: one(assessments, {
     fields: [assessmentItemStats.assessmentId],
@@ -236,6 +265,21 @@ export const assessmentSkillStatsRelations = relations(assessmentSkillStats, ({ 
   node: one(taxonomyNodes, {
     fields: [assessmentSkillStats.nodeId],
     references: [taxonomyNodes.id],
+  }),
+}));
+
+export const assessmentLevelStatsRelations = relations(assessmentLevelStats, ({ one }) => ({
+  assessment: one(assessments, {
+    fields: [assessmentLevelStats.assessmentId],
+    references: [assessments.id],
+  }),
+  classGroup: one(classGroups, {
+    fields: [assessmentLevelStats.classGroupId],
+    references: [classGroups.id],
+  }),
+  performanceBand: one(performanceBands, {
+    fields: [assessmentLevelStats.performanceBandId],
+    references: [performanceBands.id],
   }),
 }));
 
@@ -292,3 +336,5 @@ export type AssessmentItemStat = typeof assessmentItemStats.$inferSelect;
 export type NewAssessmentItemStat = typeof assessmentItemStats.$inferInsert;
 export type AssessmentSkillStat = typeof assessmentSkillStats.$inferSelect;
 export type NewAssessmentSkillStat = typeof assessmentSkillStats.$inferInsert;
+export type AssessmentLevelStat = typeof assessmentLevelStats.$inferSelect;
+export type NewAssessmentLevelStat = typeof assessmentLevelStats.$inferInsert;
