@@ -504,6 +504,37 @@ describe('AssessmentReportService.getReport', () => {
     expect(res.distribution.every((b) => b.count === 0)).toBe(true);
   });
 
+  // Bloque B5: mismo caso agregado SIN alumnos evaluados, pero con `assessment_level_stats`
+  // poblado (el importador escribió el Gráfico 1). La distribución por nivel debe salir de
+  // ahí. Reusa la secuencia de selects vacía y le agrega: bandas del instrumento (para el
+  // mapeo banda→nivel) y las filas de nivel al final (loadCohortLevelCounts, el select que
+  // sólo dispara en la rama agregada del guard, justo tras loadCohortOverallAchievement).
+  function aggregateWithLevelStatsSelectResults(): unknown[][] {
+    const results = aggregateEmptySelectResults();
+    results[6] = DIA_BANDS; // loadInstrumentBands (índice tras los splices)
+    // loadCohortLevelCounts → conteos por banda sumados sobre el scope.
+    results[10] = [
+      { performanceBandId: 'b1', count: 2 },
+      { performanceBandId: 'b3', count: 2 },
+    ];
+    return results;
+  }
+
+  it('agregado sin alumnos evaluados: distribuye por nivel desde assessment_level_stats', async () => {
+    const svc = makeService(makeDb(aggregateWithLevelStatsSelectResults()));
+    const res = await svc.getReport(makeUser(), { assessmentId: ASSESSMENT_ID });
+
+    expect(res.meta.dataGranularity).toBe('aggregate_only');
+
+    // Distribución por banda: 2 en Nivel I, 0 en II, 2 en III (Nivel II sin filas → 0).
+    const band = Object.fromEntries(res.bandDistribution!.map((b) => [b.key, b.count]));
+    expect(band).toEqual({ I: 2, II: 0, III: 2 });
+
+    // Torta legacy derivada por bandToLegacyLevel: I→insuficiente, III→avanzado.
+    const legacy = Object.fromEntries(res.distribution.map((b) => [b.level, b.count]));
+    expect(legacy).toEqual({ insufficient: 2, elementary: 0, adequate: 0, advanced: 2 });
+  });
+
   it('con datos agregados sirve ítems y habilidades desde el read-model, y anula sólo lo irreducible', async () => {
     const svc = makeService(makeDb(aggregateSelectResults()));
     const res = await svc.getReport(makeUser(), { assessmentId: ASSESSMENT_ID });
