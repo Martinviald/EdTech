@@ -59,6 +59,7 @@ import {
   cohortAverage,
   type CohortAccumulator,
 } from '../common/helpers/cohort-skill-stats.helper';
+import { loadCohortAchievementByAssessment } from '../common/helpers/cohort-item-stats.helper';
 import { InjectDb, type Database } from '../database/database.types';
 import { loadInstrumentBands } from '../performance-bands/lib/load-instrument-bands';
 
@@ -150,18 +151,80 @@ export class DashboardsService {
 
       const resultConditions = this.buildResultConditions(assessmentIds, studentIds, undefined);
 
-      // Métricas globales: promedio de % logro, alumnos distintos evaluados.
+      // ── Parte per-alumno (`assessment_results`) — informes item_level ──────────
+      // Promedio de % logro y alumnos distintos evaluados.
       const [metrics] = await tx
         .select({
           avgPct: sql<string | null>`avg(${assessmentResults.percentage}::numeric)`,
           studentsEvaluated: sql<number>`count(distinct ${assessmentResults.studentId})::int`,
-          assessmentsCount: sql<number>`count(distinct ${assessmentResults.assessmentId})::int`,
         })
         .from(assessmentResults)
         .innerJoin(students, eq(students.id, assessmentResults.studentId))
         .where(and(...resultConditions, isNull(students.deletedAt)));
 
-      const globalAchievement = metrics?.avgPct == null ? null : Number(metrics.avgPct);
+      // AssessmentIds que SÍ tienen datos per-alumno en el scope. Se usa para no
+      // doble-contar contra el read-model de cohorte (un assessment computed escribe
+      // en ambos): sus alumnos ya salen del `count(distinct)` de arriba.
+      const resultAssessmentRows = await tx
+        .selectDistinct({ assessmentId: assessmentResults.assessmentId })
+        .from(assessmentResults)
+        .innerJoin(students, eq(students.id, assessmentResults.studentId))
+        .where(and(...resultConditions, isNull(students.deletedAt)));
+      const resultAssessmentIds = new Set(resultAssessmentRows.map((r) => r.assessmentId));
+
+      // ── Parte de cohorte (`assessment_item_stats`) — informes agregados ────────
+      // Un informe oficial DIA cargado en modo aggregate_only no tiene filas per-alumno
+      // pero sí read-model de cohorte. Su scope es por curso (no por alumno).
+      const cohortClassGroupIds = await this.resolveScopedClassGroupIds(tx, orgId, scope, query);
+      const cohortByAssessment = await loadCohortAchievementByAssessment(
+        tx,
+        assessmentIds,
+        cohortClassGroupIds,
+      );
+
+      const pctResults = metrics?.avgPct == null ? null : Number(metrics.avgPct);
+      const nResults = Number(metrics?.studentsEvaluated ?? 0);
+
+      // Acumula SÓLO los assessment agregados (los que no aparecen en
+      // `assessment_results`) para no doble-contar los computed.
+      const cohortAssessmentIds = new Set<string>();
+      let cohortStudents = 0; // Σ N_curso de los agregados (para studentsEvaluated)
+      let cohortAchNum = 0; //   Σ (logro_a × N_a) de los agregados con logro no nulo
+      let cohortAchWeight = 0; // Σ N_a de esos mismos agregados
+      for (const c of cohortByAssessment) {
+        cohortAssessmentIds.add(c.assessmentId);
+        if (resultAssessmentIds.has(c.assessmentId)) continue; // ya contado per-alumno
+        cohortStudents += c.studentsAssessed;
+        if (c.averageAchievement != null) {
+          cohortAchNum += c.averageAchievement * c.studentsAssessed;
+          cohortAchWeight += c.studentsAssessed;
+        }
+      }
+
+      // assessmentsCount = UNIÓN de assessment con datos per-alumno y con read-model de
+      // cohorte, sin doble-contar los que están en ambos (Set).
+      const assessmentsCount = new Set([...resultAssessmentIds, ...cohortAssessmentIds]).size;
+
+      // studentsEvaluated = alumnos distintos de results + N de cohorte de los agregados.
+      // ⚠️ Los informes agregados no tienen identidad de alumno, así que su N es un
+      // conteo de cohorte (Σ del max(studentCount) por curso). Un alumno del mismo curso
+      // evaluado en dos instrumentos agregados puede contarse dos veces: leve
+      // sobreconteo aceptable en un KPI de landing.
+      const studentsEvaluated = nResults + cohortStudents;
+
+      // globalAchievement = mezcla ponderada por N de ambas fuentes:
+      //   (pct_results × N_results + Σ logro_a × N_a) / (N_results + Σ N_a)
+      // Si una parte no tiene datos (null / peso 0) se pondera sólo la otra; si ninguna,
+      // el resultado es null (mismo contrato nullable de antes).
+      let achNum = 0;
+      let achWeight = 0;
+      if (pctResults != null && nResults > 0) {
+        achNum += pctResults * nResults;
+        achWeight += nResults;
+      }
+      achNum += cohortAchNum;
+      achWeight += cohortAchWeight;
+      const globalAchievement = achWeight > 0 ? achNum / achWeight : null;
 
       const distribution = await this.computePerformanceDistribution(tx, assessmentIds, studentIds);
 
@@ -178,8 +241,8 @@ export class DashboardsService {
       return {
         scope: isTeacherScope ? 'teacher' : 'org',
         globalAchievement,
-        studentsEvaluated: Number(metrics?.studentsEvaluated ?? 0),
-        assessmentsCount: Number(metrics?.assessmentsCount ?? 0),
+        studentsEvaluated,
+        assessmentsCount,
         performanceDistribution: distribution,
         recentAssessments,
         alerts,
