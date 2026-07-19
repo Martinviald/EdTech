@@ -68,6 +68,7 @@ import {
 } from '../common/helpers/cohort-level-stats.helper';
 import { InjectDb, type Database } from '../database/database.types';
 import { loadInstrumentBands } from '../performance-bands/lib/load-instrument-bands';
+import { hydrateBandForStudent } from '../performance-bands/lib/hydrate-band-level';
 
 /** PerformanceBandInput (con thresholds) → vista mínima para la respuesta. */
 function toBandView(b: PerformanceBandInput): PerformanceBandView {
@@ -393,15 +394,11 @@ export class AssessmentReportService {
   private hydrateBands(evaluated: EvaluatedStudent[], bands: PerformanceBandInput[]): void {
     if (bands.length === 0) return;
     for (const e of evaluated) {
-      if (e.percentage !== null) {
-        e.band = classifyByBands(e.percentage / 100, bands);
-        continue;
-      }
-      if (e.performanceLevel !== null || e.performanceBandId === null) continue;
-      const band = bands.find((b) => b.id === e.performanceBandId) ?? null;
-      if (!band) continue;
+      // Núcleo por alumno compartido con CourseReportService (informe oficial):
+      // ver hydrateBandForStudent en performance-bands/lib.
+      const { band, performanceLevel } = hydrateBandForStudent(e, bands);
       e.band = band;
-      e.performanceLevel = bandToLegacyLevel(band, bands);
+      e.performanceLevel = performanceLevel;
     }
   }
 
