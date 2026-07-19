@@ -102,3 +102,48 @@ DATABASE_ADMIN_URL="..." \
 "III"— y 3 por una tajada del Gráfico 1 demasiado chica que no se leyó). Las cohortes de Lenguaje
 Intermedio no tienen assessment `aggregate_only` (se excluyeron en la carga por §9.3, ya granular):
 el script las reporta como skip, es esperado.
+
+## 6. Backfill de NÓMINA POR ALUMNO (nivel) — PASO MANUAL POST-DEPLOY
+
+La nómina por alumno (nombre + nivel de la **Figura 1** del informe → `assessment_results`, una fila
+`metricType='band'` por alumno) es un backfill **manual post-deploy**, hermano del de §5. Solo aplica
+a los informes de **Monitoreo**: son los únicos cuya figura de niveles se extrajo al campo
+`students[]` (`{ listNumber, name, level }`). **Diagnóstico y Cierre NO traen `students[]`** y el
+script los salta en silencio (de los 48 JSON, **16 de Monitoreo** traen nómina).
+
+El script `apps/api/scripts/backfill-student-levels.ts` escribe **solo** esas filas contra los
+assessments `aggregate_only` que **ya existen** (misma resolución instrument/classGroup/period que
+§5 y el mismo `withOrgContext`), sin re-importar — así esquiva el bug de idempotencia del importador
+(§4). Por cada fila del informe matchea el nombre contra la nómina real del curso
+(`student_enrollments` activos) y, si resuelve el nivel a una banda del instrumento, escribe con
+`percentage=null` (el informe da el nivel, no el % del alumno). Idempotente por
+`(assessmentId, studentId)` con `onConflictDoUpdate`, idéntico al importador.
+
+⚠️ El `name` de la figura es un **prefijo OCR truncado** (el gráfico corta el nombre en su borde
+izquierdo). El match acepta dos caminos: **auto** (matcher difuso, `confidence >= 0.85 && !ambiguous`)
+y **prefijo** (un único alumno de la nómina cuya forma "APELLIDOS NOMBRE" normalizada _empieza con_ el
+prefijo OCR). El script los reporta por separado. Los que **no cruzan, son ambiguos, o su nivel no
+resuelve a una banda no se escriben**: quedan para revisión manual y se cuentan en el resumen (sin
+imprimir nombres — es PII; a lo sumo 1-2 ejemplos anonimizados por `listNumber`).
+
+⚠️ Igual que §5, los JSON viven **fuera del repo** y esto **NO va a CI**: se corre a mano contra demo
+con el túnel arriba (skill `demo-db-access`).
+
+Comando (relativo a `apps/api`; DRY-RUN por defecto — muestra por cohorte: assessment resuelto,
+conteos auto/prefijo/ambiguo/no-encontrado/sin-banda/conflicto, escribibles y tasa de match):
+
+```bash
+# Dry-run
+DATABASE_ADMIN_URL="postgresql://soe_admin:<pw>@<host>:5432/soe" \
+  pnpm --filter @soe/api exec tsx scripts/backfill-student-levels.ts \
+  "../../Histórico Pruebas DIA/Resultados/extraccion"
+
+# Persistir (agregar --confirm)
+DATABASE_ADMIN_URL="..." \
+  pnpm --filter @soe/api exec tsx scripts/backfill-student-levels.ts \
+  "../../Histórico Pruebas DIA/Resultados/extraccion" --confirm
+```
+
+Los alumnos **no matcheados quedan para revisión manual**: se asignan a mano (por ahora, vía el flujo
+`upload → preview → confirm` del importador con el `studentMatches` humano, o corrigiendo el prefijo
+en el JSON re-extraído y volviendo a correr el backfill).
