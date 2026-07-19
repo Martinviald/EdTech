@@ -127,9 +127,11 @@ describe('DashboardsService.getOverview', () => {
       ],
       // 8. loadRecentAssessments → stats
       [{ assessmentId: 'a1', studentsCount: 30, avgPct: '72.50' }],
-      // 9. deriveAlerts → courseAchievement
+      // 9. loadRecentAssessments → cohorte (fallback para agregadas; acá no aplica)
+      [],
+      // 10. deriveAlerts → courseAchievement
       [{ classGroupId: 'cg1', classGroupName: '2°A', avgPct: '55.00' }],
-      // 10. deriveAlerts → skills
+      // 11. deriveAlerts → skills
       [{ nodeId: 'n1', nodeName: 'Inferir', avgPct: '40.00' }],
     ]);
     const svc = makeService(db);
@@ -146,9 +148,46 @@ describe('DashboardsService.getOverview', () => {
     expect(adequate.percentage).toBeCloseTo(60);
     expect(res.recentAssessments).toHaveLength(1);
     expect(res.recentAssessments[0]!.instrumentName).toBe('DIA 2025 Lectura');
+    expect(res.recentAssessments[0]!.studentsCount).toBe(30);
     // Alertas: curso < 60 (low_achievement) + skill < 50 (critical_skill).
     expect(res.alerts).toHaveLength(2);
     expect(res.alerts.map((a) => a.type).sort()).toEqual(['critical_skill', 'low_achievement']);
+  });
+
+  // Espeja el fallback de `listAssessments`: una evaluación cargada desde un informe
+  // oficial no tiene filas por alumno, y la tarjeta mostraba "0 alumnos" y logro "—".
+  it('evaluación reciente agregada: N y logro salen del read-model de cohorte', async () => {
+    const db = makeDb([
+      [{ id: 'a1' }], // resolveScopedAssessmentIds
+      [{ avgPct: null, studentsEvaluated: 0 }], // métricas per-alumno
+      [], // resultAssessmentIds
+      [{ assessmentId: 'a1', scoreSum: '820', maxSum: '2000', studentsAssessed: 41 }], // read-model
+      [], // distribución
+      [{ id: 'a1' }], // loadRecentAssessments → resolveScopedAssessmentIds
+      [
+        {
+          assessmentId: 'a1',
+          name: 'LANG diagnóstico 2025',
+          administeredAt: new Date('2025-04-01'),
+          createdAt: new Date('2025-04-01'),
+          status: 'completed',
+          instrumentName: 'DIA Lenguaje',
+          instrumentType: 'dia',
+          subjectName: 'Lenguaje',
+          gradeName: '3° Básico',
+        },
+      ],
+      [], // stats per-alumno: vacío (aggregate_only)
+      [{ assessmentId: 'a1', scoreSum: '820', maxSum: '2000', studentsAssessed: 41 }], // cohorte
+      [], // deriveAlerts → courseAchievement
+      [], // deriveAlerts → skills
+    ]);
+    const svc = makeService(db);
+    const res = await svc.getOverview(makeUser({ activeRole: 'academic_director' }), {});
+
+    expect(res.recentAssessments).toHaveLength(1);
+    expect(res.recentAssessments[0]!.studentsCount).toBe(41);
+    expect(res.recentAssessments[0]!.averageAchievement).toBeCloseTo(41, 6); // 820/2000
   });
 
   it('sin evaluaciones que matcheen → overview vacío con distribución de ceros', async () => {
