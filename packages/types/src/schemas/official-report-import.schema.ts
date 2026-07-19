@@ -124,11 +124,30 @@ export const officialReportLevelShareSchema = z.object({
 });
 export type OfficialReportLevelShare = z.infer<typeof officialReportLevelShareSchema>;
 
-/** Nivel de un alumno según la figura del informe. El nombre viene de OCR. */
+/**
+ * Un alumno según la figura del informe. El nombre viene de OCR (prefijo truncado).
+ *
+ * Dos formas según el momento del informe, ambas compatibles:
+ *  - **Monitoreo/Cierre**: `level` — el nivel de logro discreto (I/II/III…) que
+ *    imprime la figura. Señal confiable.
+ *  - **Diagnóstico**: NO clasifica por niveles I/II/III, sino binario `requiresSupport`
+ *    ("requiere mayor apoyo", sí/no) — el lado del umbral, la señal CONFIABLE — más
+ *    `scorePct`, una posición/score APROXIMADO (0..100) sólo para mostrar la posición
+ *    del alumno. La banda importada manda sobre el % aproximado (§5 del plan).
+ *
+ * Los tres campos de clasificación son opcionales para no atar el contrato a un
+ * momento: un informe de Monitoreo trae `level`, uno de Diagnóstico `requiresSupport`
+ * (+ `scorePct`). El importador ramifica por cuál viene.
+ */
 export const officialReportStudentSchema = z.object({
   listNumber: z.string().max(10).optional(),
   name: z.string().min(1).max(200),
-  level: z.string().min(1).max(50),
+  /** Monitoreo/Cierre: nivel de logro discreto de la figura (I/II/III…). */
+  level: z.string().min(1).max(50).optional(),
+  /** Diagnóstico: "requiere mayor apoyo" (lado del umbral). Señal confiable. */
+  requiresSupport: z.boolean().optional(),
+  /** Diagnóstico: posición/score aproximado (0..100). Sólo para mostrar. */
+  scorePct: z.number().min(0).max(100).optional(),
 });
 export type OfficialReportStudent = z.infer<typeof officialReportStudentSchema>;
 
@@ -270,7 +289,8 @@ export type OfficialReportStudentProposal = {
   listNumber: string | null;
   /** Nombre tal como lo leyó el OCR. */
   name: string;
-  level: string;
+  /** Nivel de la figura (Monitoreo/Cierre). null en Diagnóstico (no clasifica por nivel). */
+  level: string | null;
   /** Propuesta del matcher. Requiere confirmación humana para escribirse. */
   proposedStudentId: string | null;
   proposedStudentName: string | null;
