@@ -1501,7 +1501,21 @@ export class DashboardsService {
             inArray(assessmentResults.studentId, studentIds),
           ),
         );
-      scopedAssessmentIds = withResults.map((r) => r.assessmentId);
+      // Una evaluación `aggregate_only` no tiene filas por alumno, así que la
+      // intersección per-alumno la dejaría fuera de la lista del profesor aunque sea
+      // de sus cursos. Su equivalente de cohorte es tener read-model para alguno de
+      // esos cursos.
+      const withCohort = await loadCohortAchievementByAssessment(
+        tx,
+        assessmentIds,
+        scope.classGroupIds,
+      );
+      scopedAssessmentIds = [
+        ...new Set([
+          ...withResults.map((r) => r.assessmentId),
+          ...withCohort.map((r) => r.assessmentId),
+        ]),
+      ];
       if (scopedAssessmentIds.length === 0) return [];
     }
 
@@ -1550,10 +1564,24 @@ export class DashboardsService {
       });
     }
 
-    void scope;
+    // Fallback de cohorte para las evaluaciones sin filas por alumno (informes
+    // oficiales cargados en modo agregado): sin esto la tarjeta muestra "0 alumnos"
+    // y logro "—" teniendo el dato en el read-model. Misma definición de N que usan
+    // el hub de la evaluación y `getOverview`.
+    const cohortStats = await loadCohortAchievementByAssessment(
+      tx,
+      summaryAssessmentIds,
+      scope.scopeAll ? null : scope.classGroupIds,
+    );
+    const cohortByAssessment = new Map(cohortStats.map((c) => [c.assessmentId, c]));
 
     return rows.map((r) => {
-      const stats = statsByAssessment.get(r.assessmentId);
+      const cohort = cohortByAssessment.get(r.assessmentId);
+      const stats =
+        statsByAssessment.get(r.assessmentId) ??
+        (cohort
+          ? { studentsCount: cohort.studentsAssessed, avgPct: cohort.averageAchievement }
+          : undefined);
       return {
         assessmentId: r.assessmentId,
         name: r.name,
