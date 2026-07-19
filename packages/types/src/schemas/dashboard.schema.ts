@@ -142,9 +142,20 @@ export type InstrumentFilterOption = {
 export type DashboardFilterOptionsResponse = {
   subjects: FilterOption[];
   grades: FilterOption[];
+  /**
+   * Cursos de UN solo año académico (el de `defaultAcademicYearId`). `class_groups`
+   * es por año, así que un catálogo sin acotar repetiría el mismo curso una vez
+   * por año existente.
+   */
   classGroups: ClassGroupFilterOption[];
   periods: PeriodFilterOption[];
   instruments: InstrumentFilterOption[];
+  /**
+   * Año académico al que está acotado el catálogo de cursos: el pedido en la
+   * query, o el vigente, o el más reciente con cursos. `null` si el usuario no
+   * ve ningún curso.
+   */
+  defaultAcademicYearId: string | null;
 };
 
 // ── H6.4 — GET /api/dashboards/performance ───────────────────────────────────

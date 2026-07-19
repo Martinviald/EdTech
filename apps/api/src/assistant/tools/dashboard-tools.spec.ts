@@ -42,6 +42,7 @@ describe('list_filter_options tool', () => {
       classGroups: [],
       periods: [],
       instruments: [],
+      defaultAcademicYearId: null,
     };
     const getFilterOptions = jest.fn().mockResolvedValue(response);
     const tool = new ListFilterOptionsTool({

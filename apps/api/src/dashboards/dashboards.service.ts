@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { and, asc, desc, eq, inArray, isNull, notInArray, sql } from 'drizzle-orm';
+import { and, asc, desc, eq, inArray, isNull, notInArray, sql, type SQL } from 'drizzle-orm';
 import {
   academicYears,
   assessmentResults,
@@ -256,7 +256,7 @@ export class DashboardsService {
 
   async getFilterOptions(
     user: JwtPayload,
-    _query: DashboardFiltersQueryDto,
+    query: DashboardFiltersQueryDto,
   ): Promise<DashboardFilterOptionsResponse> {
     const orgId = this.resolveOrgId(user);
     const empty: DashboardFilterOptionsResponse = {
@@ -265,6 +265,7 @@ export class DashboardsService {
       classGroups: [],
       periods: [],
       instruments: [],
+      defaultAcademicYearId: null,
     };
     if (!orgId) return empty;
 
@@ -282,6 +283,22 @@ export class DashboardsService {
       if (!scope.scopeAll) {
         cgConditions.push(inArray(classGroups.id, scope.classGroupIds));
       }
+
+      // `class_groups` es POR año académico: sin acotar el año, el mismo curso
+      // aparece una vez por cada año que exista y el dropdown se llena de
+      // entradas indistinguibles ("A" de 2025 vs "A" de 2026). El catálogo se
+      // resuelve siempre a UN año: el pedido, o el vigente, o —si ese no tiene
+      // cursos— el más reciente que sí tenga.
+      const academicYearId = await this.resolveCatalogAcademicYear(
+        tx,
+        orgId,
+        query.academicYearId,
+        cgConditions,
+      );
+      if (academicYearId) {
+        cgConditions.push(eq(classGroups.academicYearId, academicYearId));
+      }
+
       const classGroupRows = await tx
         .select({
           id: classGroups.id,
@@ -340,6 +357,7 @@ export class DashboardsService {
           academicYearId: r.academicYearId,
         })),
         periods,
+        defaultAcademicYearId: academicYearId,
         instruments: instrumentRows.map((r) => ({
           id: r.id,
           label: r.name,
@@ -1642,6 +1660,42 @@ export class DashboardsService {
   }
 
   /** Períodos = academic_years de la org, año desc. */
+  /**
+   * Año académico al que se acota el CATÁLOGO de cursos de `/dashboards/filters`.
+   *
+   * Precedencia: (1) el año pedido explícitamente; (2) el año vigente, si tiene
+   * cursos visibles; (3) el año más reciente que sí los tenga. Devuelve `null`
+   * cuando el scope no ve ningún curso (no hay nada que acotar).
+   *
+   * El fallback (3) existe porque un año vigente recién abierto todavía no tiene
+   * cursos cargados: sin él, el catálogo saldría vacío y las vistas de resultados
+   * quedarían en blanco pese a haber datos del año anterior.
+   */
+  private async resolveCatalogAcademicYear(
+    tx: Database,
+    orgId: string,
+    requested: string | undefined,
+    cgConditions: SQL[],
+  ): Promise<string | null> {
+    if (requested) return requested;
+
+    // Años que efectivamente tienen cursos visibles para este scope.
+    const yearsWithGroups = await tx
+      .selectDistinct({
+        academicYearId: classGroups.academicYearId,
+        year: academicYears.year,
+        isCurrent: academicYears.isCurrent,
+      })
+      .from(classGroups)
+      .innerJoin(academicYears, eq(academicYears.id, classGroups.academicYearId))
+      .where(and(...cgConditions))
+      .orderBy(desc(academicYears.year));
+
+    if (yearsWithGroups.length === 0) return null;
+    const current = yearsWithGroups.find((y) => y.isCurrent);
+    return (current ?? yearsWithGroups[0]).academicYearId;
+  }
+
   private async loadPeriods(orgId: string) {
     const rows = await this.db
       .select({

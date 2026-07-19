@@ -258,7 +258,9 @@ describe('DashboardsService.getOverview', () => {
 describe('DashboardsService.getFilterOptions', () => {
   it('admin: devuelve cursos, asignaturas, instrumentos y períodos', async () => {
     const db = makeDb([
-      // 1. classGroups + grades
+      // 1. resolveCatalogAcademicYear → años con cursos visibles
+      [{ academicYearId: 'ay1', year: 2025, isCurrent: true }],
+      // 2. classGroups + grades
       [
         {
           id: 'cg1',
@@ -268,9 +270,9 @@ describe('DashboardsService.getFilterOptions', () => {
           gradeName: '2° Básico',
         },
       ],
-      // 2. selectDistinct subjects
+      // 3. selectDistinct subjects
       [{ id: 'sub1', name: 'Lenguaje' }],
-      // 3. instruments
+      // 4. instruments
       [
         {
           id: 'i1',
@@ -280,7 +282,7 @@ describe('DashboardsService.getFilterOptions', () => {
           gradeId: 'g1',
         },
       ],
-      // 4. periods (academic_years)
+      // 5. periods (academic_years)
       [{ id: 'ay1', year: 2025, isCurrent: true }],
     ]);
     const svc = makeService(db);
@@ -292,6 +294,65 @@ describe('DashboardsService.getFilterOptions', () => {
     expect(res.subjects).toEqual([{ id: 'sub1', label: 'Lenguaje' }]);
     expect(res.instruments[0]!.type).toBe('dia');
     expect(res.periods).toEqual([{ id: 'ay1', year: 2025, label: '2025', isCurrent: true }]);
+    expect(res.defaultAcademicYearId).toBe('ay1');
+  });
+
+  // El catálogo de cursos se acota SIEMPRE a un año: `class_groups` es por año y
+  // el nombre del curso ("A") no distingue 2025 de 2026.
+  it('sin año pedido: usa el año vigente cuando tiene cursos', async () => {
+    const db = makeDb([
+      // resolveCatalogAcademicYear: 2026 vigente y con cursos, 2025 también tiene
+      [
+        { academicYearId: 'ay2026', year: 2026, isCurrent: true },
+        { academicYearId: 'ay2025', year: 2025, isCurrent: false },
+      ],
+      [{ id: 'cg1', name: 'A', gradeId: 'g1', academicYearId: 'ay2026', gradeName: '3° Básico' }],
+      [],
+      [],
+      [
+        { id: 'ay2026', year: 2026, isCurrent: true },
+        { id: 'ay2025', year: 2025, isCurrent: false },
+      ],
+    ]);
+    const svc = makeService(db);
+    const res = await svc.getFilterOptions(makeUser({ activeRole: 'school_admin' }), {});
+    expect(res.defaultAcademicYearId).toBe('ay2026');
+  });
+
+  // Un año vigente recién abierto no tiene cursos todavía: sin este fallback el
+  // catálogo saldría vacío y los dashboards en blanco pese a haber datos previos.
+  it('año vigente sin cursos: cae al año más reciente que sí tenga', async () => {
+    const db = makeDb([
+      // 2026 es el vigente pero NO aparece acá (no tiene cursos); sí 2025.
+      [{ academicYearId: 'ay2025', year: 2025, isCurrent: false }],
+      [{ id: 'cg1', name: 'A', gradeId: 'g1', academicYearId: 'ay2025', gradeName: '3° Básico' }],
+      [],
+      [],
+      [
+        { id: 'ay2026', year: 2026, isCurrent: true },
+        { id: 'ay2025', year: 2025, isCurrent: false },
+      ],
+    ]);
+    const svc = makeService(db);
+    const res = await svc.getFilterOptions(makeUser({ activeRole: 'school_admin' }), {});
+    expect(res.defaultAcademicYearId).toBe('ay2025');
+    expect(res.classGroups).toHaveLength(1);
+  });
+
+  it('año pedido explícitamente: lo respeta sin resolver el vigente', async () => {
+    const db = makeDb([
+      // Sin fila de resolveCatalogAcademicYear: no debe consultarse.
+      [{ id: 'cg1', name: 'B', gradeId: 'g1', academicYearId: 'ay2025', gradeName: '3° Básico' }],
+      [],
+      [],
+      [{ id: 'ay2025', year: 2025, isCurrent: false }],
+    ]);
+    const svc = makeService(db);
+    const res = await svc.getFilterOptions(makeUser({ activeRole: 'school_admin' }), {
+      academicYearId: 'ay2025',
+    });
+    expect(res.defaultAcademicYearId).toBe('ay2025');
+    expect(res.classGroups[0]!.label).toBe('B');
   });
 
   it('teacher sin cursos → sólo expone períodos, sin cursos ni asignaturas', async () => {
