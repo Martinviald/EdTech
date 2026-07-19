@@ -6,7 +6,7 @@
 // tipo y las claves. No mover estas funciones a un archivo cliente: Next prohíbe
 // invocar exports de un módulo cliente desde el servidor.
 
-import type { ClassGroupFilterOption, FilterOption } from '@soe/types';
+import { parseCursoLabel, type ClassGroupFilterOption, type FilterOption } from '@soe/types';
 
 export type DashboardFilterValues = {
   subjectId?: string;
@@ -79,6 +79,11 @@ export function isClassGroupInGrade(
 /**
  * Opciones de curso para un `Select`. Sin nivel elegido antepone el nombre del
  * nivel para desambiguar los cursos homónimos de distintos niveles.
+ *
+ * No todas las orgs nombran los cursos igual: unas guardan sólo la sección ("A")
+ * y otras el curso completo ("1° Medio B"). Anteponer el nivel a las segundas
+ * daba "1° Medio 1° Medio B", así que sólo se antepone cuando el nombre NO trae
+ * ya el nivel adentro (`parseCursoLabel` devuelve null para una sección suelta).
  */
 export function classGroupSelectOptions(
   classGroups: ClassGroupFilterOption[],
@@ -87,7 +92,9 @@ export function classGroupSelectOptions(
 ): FilterOption[] {
   const gradeLabels = new Map(grades.map((g) => [g.id, g.label]));
   return classGroupsForGrade(classGroups, gradeId).map((c) => {
-    const gradeLabel = gradeId || !c.gradeId ? undefined : gradeLabels.get(c.gradeId);
+    const alreadyQualified = parseCursoLabel(c.label) !== null;
+    const gradeLabel =
+      gradeId || !c.gradeId || alreadyQualified ? undefined : gradeLabels.get(c.gradeId);
     return { id: c.id, label: gradeLabel ? `${gradeLabel} ${c.label}` : c.label };
   });
 }
