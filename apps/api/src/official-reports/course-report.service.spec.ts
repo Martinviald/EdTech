@@ -63,6 +63,50 @@ function buildGeneralResult(
   return (svc as unknown as { buildGeneralResult: BuildGeneralResult }).buildGeneralResult(...args);
 }
 
+type EvaluatedLike = {
+  studentId: string;
+  studentRut: string;
+  firstName: string;
+  lastName: string;
+  percentage: number | null;
+  grade: number | null;
+  performanceLevel: string | null;
+  performanceBandId: string | null;
+};
+
+type StudentRowLike = {
+  studentId: string;
+  achievement: number | null;
+  performanceLevel: string | null;
+  requiresSupport: boolean;
+};
+
+function hydratePerformanceLevels(
+  svc: CourseReportService,
+  evaluated: EvaluatedLike[],
+  bands: PerformanceBandInput[],
+): void {
+  (
+    svc as unknown as {
+      hydratePerformanceLevels: (e: EvaluatedLike[], b: PerformanceBandInput[]) => void;
+    }
+  ).hydratePerformanceLevels(evaluated, bands);
+}
+
+function buildStudentResults(
+  svc: CourseReportService,
+  evaluated: EvaluatedLike[],
+): StudentRowLike[] {
+  return (
+    svc as unknown as {
+      buildStudentResults: (
+        e: EvaluatedLike[],
+        cg: Map<string, { id: string; name: string }>,
+      ) => StudentRowLike[];
+    }
+  ).buildStudentResults(evaluated, new Map());
+}
+
 describe('CourseReportService.buildGeneralResult — informe agregado (Bloque B5)', () => {
   it('agregado con filas de nivel: distribución y "requiere apoyo" desde assessment_level_stats', () => {
     const svc = makeService();
@@ -133,5 +177,79 @@ describe('CourseReportService.buildGeneralResult — informe agregado (Bloque B5
     const dist = Object.fromEntries(res.distribution.map((b) => [b.level, b.count]));
     expect(dist.insufficient).toBe(1);
     expect(dist.advanced).toBe(1);
+  });
+});
+
+// §5 — Resultados por estudiante. El informe agregado escribe filas por alumno
+// band-only (percentage/performanceLevel NULL, performance_band_id seteado). El
+// nivel se DERIVA en la lectura desde la banda; el % no existe en un informe DIA
+// y queda null. Se prueba el par puro hydratePerformanceLevels + buildStudentResults.
+describe('CourseReportService §5 — nómina + nivel por estudiante', () => {
+  it('(a) agregado band-only: deriva el nivel desde la banda y deja achievement null', () => {
+    const svc = makeService();
+    const evaluated: EvaluatedLike[] = [
+      {
+        studentId: 's1',
+        studentRut: '1',
+        firstName: 'Ana',
+        lastName: 'A',
+        percentage: null,
+        grade: null,
+        performanceLevel: null,
+        performanceBandId: 'b1', // banda de menor order → requiere apoyo
+      },
+      {
+        studentId: 's2',
+        studentRut: '2',
+        firstName: 'Beto',
+        lastName: 'B',
+        percentage: null,
+        grade: null,
+        performanceLevel: null,
+        performanceBandId: 'b3',
+      },
+    ];
+
+    hydratePerformanceLevels(svc, evaluated, DIA_BANDS);
+    const rows = buildStudentResults(svc, evaluated);
+
+    expect(rows).toHaveLength(2);
+    const byId = Object.fromEntries(rows.map((r) => [r.studentId, r]));
+    // I → insufficient (REQUIRES_SUPPORT_LEVEL); III → advanced. Sin % en ninguno.
+    expect(byId.s1.performanceLevel).toBe('insufficient');
+    expect(byId.s1.achievement).toBeNull();
+    expect(byId.s1.requiresSupport).toBe(true);
+    expect(byId.s2.performanceLevel).toBe('advanced');
+    expect(byId.s2.achievement).toBeNull();
+    expect(byId.s2.requiresSupport).toBe(false);
+  });
+
+  it('(b) agregado sin filas: studentResults vacío', () => {
+    const svc = makeService();
+    const evaluated: EvaluatedLike[] = [];
+    hydratePerformanceLevels(svc, evaluated, DIA_BANDS);
+    expect(buildStudentResults(svc, evaluated)).toEqual([]);
+  });
+
+  it('(c) item_level: sin regresión, mantiene el % como achievement y no re-deriva el nivel', () => {
+    const svc = makeService();
+    const evaluated: EvaluatedLike[] = [
+      {
+        studentId: 's1',
+        studentRut: '1',
+        firstName: 'Ana',
+        lastName: 'A',
+        percentage: 90,
+        grade: null,
+        performanceLevel: 'advanced',
+        performanceBandId: null,
+      },
+    ];
+
+    hydratePerformanceLevels(svc, evaluated, DIA_BANDS);
+    const rows = buildStudentResults(svc, evaluated);
+
+    expect(rows[0].achievement).toBe(90);
+    expect(rows[0].performanceLevel).toBe('advanced');
   });
 });
