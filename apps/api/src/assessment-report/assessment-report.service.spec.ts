@@ -159,6 +159,7 @@ function baseSelectResults(): unknown[][] {
         lastName: 'A',
         percentage: '90.00',
         grade: '6.30',
+        metricType: 'percentage',
         performanceLevel: 'advanced',
       },
       {
@@ -168,6 +169,7 @@ function baseSelectResults(): unknown[][] {
         lastName: 'B',
         percentage: '75.00',
         grade: '5.00',
+        metricType: 'percentage',
         performanceLevel: 'adequate',
       },
       {
@@ -177,6 +179,7 @@ function baseSelectResults(): unknown[][] {
         lastName: 'C',
         percentage: '45.00',
         grade: '3.50',
+        metricType: 'percentage',
         performanceLevel: 'elementary',
       },
       {
@@ -186,6 +189,7 @@ function baseSelectResults(): unknown[][] {
         lastName: 'D',
         percentage: '20.00',
         grade: '2.00',
+        metricType: 'percentage',
         performanceLevel: 'insufficient',
       },
     ],
@@ -445,6 +449,7 @@ describe('AssessmentReportService.getReport', () => {
         lastName: 'A',
         percentage: null,
         grade: null,
+        metricType: 'band',
         performanceLevel: null,
         performanceBandId: 'b3',
       },
@@ -455,6 +460,7 @@ describe('AssessmentReportService.getReport', () => {
         lastName: 'B',
         percentage: null,
         grade: null,
+        metricType: 'band',
         performanceLevel: null,
         performanceBandId: 'b1',
       },

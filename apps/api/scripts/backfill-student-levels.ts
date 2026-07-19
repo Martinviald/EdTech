@@ -4,19 +4,26 @@
  * el nivel por alumno (se importaron por API sólo con datos de cohorte, o la figura de
  * niveles se extrajo después).
  *
- * Re-extrajimos la "Figura 1" de los informes de MONITOREO: ahora sus JSON traen
- * `students[]` (`{ listNumber, name, level }`), donde `name` es un PREFIJO por OCR —el
- * gráfico corta el nombre en su borde izquierdo, así que al apellido/nombre le puede
- * faltar el final. Este script matchea cada fila contra la nómina real del curso y
- * escribe una fila `metricType: 'band'` en `assessment_results` con la banda del nivel.
+ * Re-extrajimos la figura de niveles: los JSON traen `students[]` donde `name` es un
+ * PREFIJO por OCR —el gráfico corta el nombre en su borde izquierdo, así que al
+ * apellido/nombre le puede faltar el final. Este script matchea cada fila contra la
+ * nómina real del curso y escribe una fila `metricType: 'band'` en `assessment_results`.
+ * Dos formas de fila según el momento del informe:
+ *   · MONITOREO/CIERRE: `{ listNumber, name, level }` → banda del nivel (I/II/III…),
+ *     `percentage` NULL (el informe entrega el nivel, no el % del alumno).
+ *   · DIAGNÓSTICO: `{ listNumber, name, requiresSupport, scorePct }` → NO clasifica por
+ *     niveles I/II/III sino binario "requiere mayor apoyo": banda Nivel I (menor order)
+ *     si `requiresSupport===true`, si no SIN banda; `percentage = scorePct`, una posición
+ *     APROXIMADA guardada sólo para mostrar. La banda importada es la señal confiable
+ *     (la lectura es band-autoritativa por metric_type='band' e ignora el % al clasificar).
  *
  * NO re-importa (esquiva el bug de idempotencia del importador, que crea assessments
  * duplicados: ver docs/revision-carga-informes-dia-2025.md §4). Matchea el assessment
  * `aggregate_only` de informe oficial EXISTENTE y escribe directo, con la MISMA
  * resolución de instrument/classGroup/period que `backfill-level-stats.ts` (su hermano).
  *
- * Sólo aplica a informes de Monitoreo: Diagnóstico/Cierre no traen `students[]` (su
- * figura de niveles no se extrajo) y se saltan en silencio.
+ * Aplica a cualquier informe cuyo JSON traiga `students[]` (Monitoreo, Cierre o
+ * Diagnóstico). Un informe sin `students[]` (figura no extraída) se salta en silencio.
  *
  * Para cada JSON con `students[]` NO vacío:
  *   1. Resuelve instrument + classGroup → assessment `aggregate_only` de informe oficial
@@ -314,7 +321,7 @@ async function main() {
       continue;
     }
     if (!parsed.data.students || parsed.data.students.length === 0) {
-      noStudentsCount++; // Diag/Cierre sin figura de niveles: se saltan en silencio.
+      noStudentsCount++; // Informe sin figura de niveles extraída: se salta en silencio.
       continue;
     }
     withStudents.push({ file: f, doc: parsed.data, label: labelFor(parsed.data) });
@@ -380,9 +387,21 @@ async function main() {
 
       const roster = await loadRoster(tx, CSCJ_ORG, classGroupId);
       const bands: PerformanceBandInput[] = await loadInstrumentBands(tx, instrumentId);
+      // Banda "requiere mayor apoyo" del Diagnóstico = la de MENOR order (Nivel I),
+      // misma convención que el informe por curso (§2 "requiere apoyo").
+      const lowestBand = [...bands].sort((a, b) => a.order - b.order)[0] ?? null;
 
-      // Resolver cada fila del informe. Se acumula por (studentId → {band, kind}).
-      const byStudent = new Map<string, { band: PerformanceBandInput; kind: 'auto' | 'prefix' }>();
+      // Resolver cada fila del informe. Se acumula por studentId. Dos momentos:
+      //  · Monitoreo/Cierre: `level` → banda del nivel; percentage NULL (el informe
+      //    entrega el nivel, no el % del alumno).
+      //  · Diagnóstico: `requiresSupport` (+ `scorePct`) → banda Nivel I si requiere
+      //    apoyo, si no SIN banda (nivel no determinado); percentage = scorePct, una
+      //    posición APROXIMADA que se guarda sólo para mostrar. La banda importada
+      //    manda sobre el % (la lectura es band-autoritativa por metric_type='band').
+      const byStudent = new Map<
+        string,
+        { band: PerformanceBandInput | null; percentage: string | null; kind: 'auto' | 'prefix' }
+      >();
       let auto = 0;
       let prefix = 0;
       let ambiguous = 0;
@@ -402,11 +421,37 @@ async function main() {
           }
           continue;
         }
-        const band = resolveLevelBand(s.level, bands);
-        if (!band) {
+
+        // Banda + posición de la fila según el momento del informe.
+        let band: PerformanceBandInput | null;
+        let percentage: string | null;
+        if (s.level != null) {
+          // Monitoreo/Cierre: nivel discreto → banda; sin %.
+          band = resolveLevelBand(s.level, bands);
+          if (!band) {
+            noBand++;
+            continue;
+          }
+          percentage = null;
+        } else if (s.requiresSupport !== undefined) {
+          // Diagnóstico: binario "requiere apoyo" + posición aproximada.
+          if (s.requiresSupport) {
+            if (!lowestBand) {
+              // Instrumento sin bandas: no hay banda "requiere apoyo" que asignar.
+              noBand++;
+              continue;
+            }
+            band = lowestBand;
+          } else {
+            band = null; // No requiere apoyo → nivel no determinado (sin banda).
+          }
+          percentage = s.scorePct != null ? s.scorePct.toFixed(2) : null;
+        } else {
+          // Fila sin señal de clasificación (ni level ni requiresSupport): no se escribe.
           noBand++;
           continue;
         }
+
         // Un mismo alumno de la nómina cruzado por 2 filas → conflicto: no se escribe
         // ninguna (igual criterio que el importador, que rechaza el par duplicado).
         if (byStudent.has(res.studentId)) {
@@ -414,7 +459,7 @@ async function main() {
           byStudent.delete(res.studentId);
           continue;
         }
-        byStudent.set(res.studentId, { band, kind: res.kind });
+        byStudent.set(res.studentId, { band, percentage, kind: res.kind });
         if (res.kind === 'auto') auto++;
         else prefix++;
       }
@@ -440,22 +485,24 @@ async function main() {
       }
 
       // Idempotente: onConflictDoUpdate sobre (assessmentId, studentId) — idéntico al
-      // importador (official-report-import.service.ts). `percentage` va NULL a
-      // propósito: el informe entrega el nivel, no el % del alumno.
+      // importador (official-report-import.service.ts). En Monitoreo `percentage` va
+      // NULL (el informe entrega el nivel, no el %); en Diagnóstico guarda la posición
+      // aproximada (`scorePct`) sólo para mostrar, con la banda como señal confiable
+      // (metric_type='band' → la lectura ignora el % para clasificar).
       const now = new Date();
       await tx
         .insert(assessmentResults)
         .values(
-          [...byStudent.entries()].map(([studentId, { band }]) => ({
+          [...byStudent.entries()].map(([studentId, { band, percentage }]) => ({
             assessmentId: found.id,
             studentId,
             totalScore: null,
             maxScore: null,
-            percentage: null,
+            percentage,
             grade: null,
             metricType: 'band' as const,
-            bandLabel: band.label,
-            performanceBandId: band.id,
+            bandLabel: band?.label ?? null,
+            performanceBandId: band?.id ?? null,
             performanceLevel: null,
             isComplete: true,
             completedAt: now,

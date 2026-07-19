@@ -246,7 +246,11 @@ export function resolveLevelBand(
 }
 
 function evaluateLevels(ctx: GateContext): OfficialReportLevelPreview[] {
-  const students = ctx.file.students ?? [];
+  // La figura de niveles es de Monitoreo/Cierre: sólo las filas con `level` cuentan.
+  // Las de Diagnóstico (sin nivel, con `requiresSupport`) no participan de este gate.
+  const students = (ctx.file.students ?? []).filter(
+    (s): s is typeof s & { level: string } => s.level != null,
+  );
   const derivedCount = new Map<string, number>();
   for (const s of students) {
     const key = normalizeName(s.level);
@@ -286,7 +290,7 @@ function levelsGate(
   levels: readonly OfficialReportLevelPreview[],
   ctx: GateContext,
 ): OfficialReportGateResult {
-  const students = ctx.file.students ?? [];
+  const students = (ctx.file.students ?? []).filter((s) => s.level != null);
   if (students.length === 0 || ctx.file.levelDistribution.length === 0) {
     return {
       gate: 'level_distribution',
@@ -335,7 +339,7 @@ function proposeStudents(ctx: GateContext): OfficialReportStudentProposal[] {
       reportIndex,
       listNumber: s.listNumber ?? null,
       name: s.name,
-      level: s.level,
+      level: s.level ?? null,
       proposedStudentId: match.studentId,
       proposedStudentName: match.studentName,
       confidence: match.confidence,

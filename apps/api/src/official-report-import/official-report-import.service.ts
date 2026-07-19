@@ -514,6 +514,11 @@ export class OfficialReportImportService {
       }
       seenStudents.add(match.studentId);
 
+      if (student.level == null) {
+        throw new BadRequestException(
+          `La fila "${student.name}" no trae nivel de logro. Este importador sólo carga informes con niveles por estudiante (Monitoreo/Cierre); los de Diagnóstico se cargan por el backfill de nómina.`,
+        );
+      }
       const band = resolveLevelBand(student.level, ctx.bands);
       if (!band) {
         throw new BadRequestException(
