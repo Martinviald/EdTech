@@ -61,6 +61,11 @@ import {
   loadCohortOverallAchievement,
   type CohortOverallAchievement,
 } from '../common/helpers/cohort-item-stats.helper';
+import {
+  loadCohortLevelCounts,
+  levelCountsToBandDistribution,
+  levelCountsToLegacyDistribution,
+} from '../common/helpers/cohort-level-stats.helper';
 import { InjectDb, type Database } from '../database/database.types';
 import { loadInstrumentBands } from '../performance-bands/lib/load-instrument-bands';
 
@@ -271,6 +276,21 @@ export class AssessmentReportService {
             ? await loadCohortOverallAchievement(tx, query.assessmentId, classGroupFilter)
             : null;
 
+        // Distribución por nivel del informe agregado: desde `assessment_level_stats`
+        // (Gráfico 1 del informe oficial). Sin filas → se deja vacío como antes. La
+        // torta legacy (4 niveles) se deriva de las bandas vía `bandToLegacyLevel`.
+        const levelCounts =
+          assessment.dataGranularity === 'aggregate_only'
+            ? await loadCohortLevelCounts(tx, query.assessmentId, classGroupFilter)
+            : [];
+        const hasLevels = levelCounts.length > 0;
+        const aggregateDistribution = hasLevels
+          ? levelCountsToLegacyDistribution(levelCounts, bands)
+          : this.emptyDistribution();
+        const aggregateBandDistribution = hasLevels
+          ? levelCountsToBandDistribution(levelCounts, bands)
+          : [];
+
         return {
           meta,
           summary: aggregateAchievement
@@ -292,8 +312,8 @@ export class AssessmentReportService {
                 passingRate: null,
                 performanceLevel: null,
               },
-          distribution: this.emptyDistribution(),
-          ...(bandView ? { bands: bandView, bandDistribution: [] } : {}),
+          distribution: aggregateDistribution,
+          ...(bandView ? { bands: bandView, bandDistribution: aggregateBandDistribution } : {}),
           courseComparison: [],
           skills,
           highlights,
