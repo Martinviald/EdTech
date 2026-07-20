@@ -387,9 +387,11 @@ async function main() {
 
       const roster = await loadRoster(tx, CSCJ_ORG, classGroupId);
       const bands: PerformanceBandInput[] = await loadInstrumentBands(tx, instrumentId);
-      // Banda "requiere mayor apoyo" del Diagnóstico = la de MENOR order (Nivel I),
-      // misma convención que el informe por curso (§2 "requiere apoyo").
-      const lowestBand = [...bands].sort((a, b) => a.order - b.order)[0] ?? null;
+      // Diagnóstico (2 bandas): "requiere mayor apoyo" = MENOR order; "no requiere" =
+      // MAYOR order. Misma convención que el informe por curso (§2 "requiere apoyo").
+      const sortedBands = [...bands].sort((a, b) => a.order - b.order);
+      const lowestBand = sortedBands[0] ?? null;
+      const highestBand = sortedBands[sortedBands.length - 1] ?? null;
 
       // Resolver cada fila del informe. Se acumula por studentId. Dos momentos:
       //  · Monitoreo/Cierre: `level` → banda del nivel; percentage NULL (el informe
@@ -435,15 +437,11 @@ async function main() {
           percentage = null;
         } else if (s.requiresSupport !== undefined) {
           // Diagnóstico: binario "requiere apoyo" + posición aproximada.
-          if (s.requiresSupport) {
-            if (!lowestBand) {
-              // Instrumento sin bandas: no hay banda "requiere apoyo" que asignar.
-              noBand++;
-              continue;
-            }
-            band = lowestBand;
-          } else {
-            band = null; // No requiere apoyo → nivel no determinado (sin banda).
+          band = s.requiresSupport ? lowestBand : highestBand;
+          if (!band) {
+            // Instrumento sin bandas configuradas: nada que asignar.
+            noBand++;
+            continue;
           }
           percentage = s.scorePct != null ? s.scorePct.toFixed(2) : null;
         } else {
