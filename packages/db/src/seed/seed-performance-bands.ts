@@ -43,24 +43,45 @@ import { instruments } from '../schema/instruments';
 import { performanceBands as performanceBandsTable } from '../schema/results';
 import { grades, subjects } from '../schema/academic';
 
-// Corte de nivel de un instrumento DIA. Fracciones 0..1 del % de logro.
-// `iToII` = corte Nivel I→II ; `iiToIII` = corte Nivel II→III.
-type DiaCut = { iToII: number; iiToIII: number };
+// El DIA usa DISTINTA cantidad de niveles según el período:
+//  · Diagnóstico → BINARIO ("Requiere mayor apoyo" / "No requiere") — 2 bandas.
+//  · Monitoreo (Intermedio) / Cierre → 3 niveles (Nivel I / II / III).
+// Por eso el seed siembra 2 o 3 bandas según el período (detectado por el NOMBRE del
+// instrumento). Ver docs/plan-fidelidad-niveles-informe-dia.md.
 
-// Cortes REALES reverse-engineered (docs/analisis-clasificacion-niveles-dia.md).
-// Solo existen para Lectura Intermedio 3°–6° 2025 (la única cohorte con datos por-alumno
-// para el standard-setting). Clave: `${subjectCode}|${gradeCode}|${version}`.
-const DIA_KNOWN_CUTS: Readonly<Record<string, DiaCut>> = {
-  'LANG|3RD_BASIC|intermedio': { iToII: 0.32, iiToIII: 0.89 },
-  'LANG|4TH_BASIC|intermedio': { iToII: 0.35, iiToIII: 0.73 },
-  'LANG|5TH_BASIC|intermedio': { iToII: 0.34, iiToIII: 0.78 },
-  'LANG|6TH_BASIC|intermedio': { iToII: 0.35, iiToIII: 0.75 },
+// ── Monitoreo/Cierre: 3 bandas, corte por (subject|grade) ────────────────────────
+// `iToII` = corte Nivel I→II ; `iiToIII` = corte Nivel II→III (fracciones 0..1).
+// Monitoreo y Cierre comparten la geometría del gráfico → mismo corte por instrumento.
+type Cut3 = { iToII: number; iiToIII: number };
+const DIA_3BAND_CUTS: Readonly<Record<string, Cut3>> = {
+  // LANG: cortes REALES reverse-engineered (docs/analisis-clasificacion-niveles-dia.md).
+  'LANG|3RD_BASIC': { iToII: 0.32, iiToIII: 0.89 },
+  'LANG|4TH_BASIC': { iToII: 0.35, iiToIII: 0.73 },
+  'LANG|5TH_BASIC': { iToII: 0.34, iiToIII: 0.78 },
+  'LANG|6TH_BASIC': { iToII: 0.35, iiToIII: 0.75 },
+  // MATH: derivados de la geometría de la Figura 1 (aprox, err ~0.03; 5°/6° baja
+  // confianza). Corregibles vía el endpoint platform_admin cuando haya corte oficial.
+  'MATH|3RD_BASIC': { iToII: 0.478, iiToIII: 0.804 },
+  'MATH|4TH_BASIC': { iToII: 0.439, iiToIII: 0.76 },
+  'MATH|5TH_BASIC': { iToII: 0.444, iiToIII: 0.741 },
+  'MATH|6TH_BASIC': { iToII: 0.448, iiToIII: 0.776 },
 };
+const DIA_3BAND_GENERIC: Cut3 = { iToII: 0.34, iiToIII: 0.79 };
 
-// Corte GENÉRICO provisional para los instrumentos DIA sin corte propio derivable.
-// Promedio de los 4 conocidos (iToII≈0.34, iiToIII≈0.79). Documentado como aproximado:
-// no afecta la distribución por nivel ni "requiere apoyo" (que vienen del informe).
-const DIA_GENERIC_CUT: DiaCut = { iToII: 0.34, iiToIII: 0.79 };
+// ── Diagnóstico: 2 bandas, corte binario por (subject|grade) ─────────────────────
+// Derivado del roster de la Figura 1 (posición del umbral "requiere mayor apoyo").
+// No afecta el display (el flag "requiere apoyo" viene del informe); aproximado.
+const DIA_DIAG_CUTS: Readonly<Record<string, number>> = {
+  'LANG|3RD_BASIC': 0.691,
+  'LANG|4TH_BASIC': 0.654,
+  'LANG|5TH_BASIC': 0.66,
+  'LANG|6TH_BASIC': 0.75,
+  'MATH|3RD_BASIC': 0.772,
+  'MATH|4TH_BASIC': 0.768,
+  'MATH|5TH_BASIC': 0.789,
+  'MATH|6TH_BASIC': 0.792,
+};
+const DIA_DIAG_GENERIC = 0.72;
 
 // Presentación de las 3 bandas DIA (I / II / III), de menor a mayor logro.
 const DIA_BANDS_META = [
@@ -68,6 +89,19 @@ const DIA_BANDS_META = [
   { key: 'dia_nivel_2', label: 'Nivel II', order: 1, color: '#f59e0b' },
   { key: 'dia_nivel_3', label: 'Nivel III', order: 2, color: '#10b981' },
 ] as const;
+
+// Presentación de las 2 bandas del Diagnóstico (binario).
+const DIA_DIAG_BANDS_META = [
+  { key: 'dia_diag_apoyo', label: 'Requiere mayor apoyo', order: 0, color: '#ef4444' },
+  { key: 'dia_diag_logrado', label: 'No requiere mayor apoyo', order: 1, color: '#10b981' },
+] as const;
+
+/** Período DIA del instrumento, por su nombre (robusto: `version` no siempre viene). */
+function diaPeriod(name: string): 'diagnostico' | 'cierre' | 'intermedio' {
+  if (/diagn/i.test(name)) return 'diagnostico';
+  if (/cierre/i.test(name)) return 'cierre';
+  return 'intermedio';
+}
 
 export async function seedPerformanceBands(db: Database): Promise<void> {
   // Todos los instrumentos DIA oficiales (org_id NULL → reference-data global).
@@ -86,14 +120,13 @@ export async function seedPerformanceBands(db: Database): Promise<void> {
       and(eq(instruments.type, 'dia'), isNull(instruments.orgId), isNull(instruments.deletedAt)),
     );
 
-  let seededReal = 0;
-  let seededProvisional = 0;
+  let seeded3 = 0;
+  let seeded2 = 0;
   let skipped = 0;
 
   for (const inst of diaInstruments) {
-    const key = `${inst.subjectCode}|${inst.gradeCode}|${inst.version ?? ''}`;
-    const known = DIA_KNOWN_CUTS[key];
-    const cut = known ?? DIA_GENERIC_CUT;
+    const sg = `${inst.subjectCode}|${inst.gradeCode}`;
+    const period = diaPeriod(inst.name);
 
     // Idempotencia: si ya hay bandas globales activas, no recrear.
     const existing = await db
@@ -113,37 +146,52 @@ export async function seedPerformanceBands(db: Database): Promise<void> {
       continue;
     }
 
-    const ranges: Record<string, [number, number]> = {
-      dia_nivel_1: [0, cut.iToII],
-      dia_nivel_2: [cut.iToII, cut.iiToIII],
-      dia_nivel_3: [cut.iiToIII, 1],
-    };
+    // Diagnóstico → 2 bandas (binario); Monitoreo/Cierre → 3 bandas (I/II/III).
+    const rows =
+      period === 'diagnostico'
+        ? (() => {
+            const cut = DIA_DIAG_CUTS[sg] ?? DIA_DIAG_GENERIC;
+            const ranges: Record<string, [number, number]> = {
+              dia_diag_apoyo: [0, cut],
+              dia_diag_logrado: [cut, 1],
+            };
+            return DIA_DIAG_BANDS_META.map((b) => ({ b, r: ranges[b.key]! }));
+          })()
+        : (() => {
+            const cut = DIA_3BAND_CUTS[sg] ?? DIA_3BAND_GENERIC;
+            const ranges: Record<string, [number, number]> = {
+              dia_nivel_1: [0, cut.iToII],
+              dia_nivel_2: [cut.iToII, cut.iiToIII],
+              dia_nivel_3: [cut.iiToIII, 1],
+            };
+            return DIA_BANDS_META.map((b) => ({ b, r: ranges[b.key]! }));
+          })();
 
     await db.insert(performanceBandsTable).values(
-      DIA_BANDS_META.map((b) => ({
+      rows.map(({ b, r }) => ({
         instrumentId: inst.id,
         scaleId: null,
         orgId: null, // banda global compartida por todas las orgs
         key: b.key,
         label: b.label,
         order: b.order,
-        minThreshold: ranges[b.key]![0].toFixed(4),
-        maxThreshold: ranges[b.key]![1].toFixed(4),
+        minThreshold: r[0].toFixed(4),
+        maxThreshold: r[1].toFixed(4),
         color: b.color,
       })),
     );
 
-    if (known) {
-      seededReal++;
-      console.log(`  ✓ Bandas DIA (corte real) — ${inst.name}`);
+    if (period === 'diagnostico') {
+      seeded2++;
+      console.log(`  ✓ 2 bandas (Diagnóstico) — ${inst.name}`);
     } else {
-      seededProvisional++;
-      console.log(`  ✓ Bandas DIA (corte provisional) — ${inst.name}`);
+      seeded3++;
+      console.log(`  ✓ 3 bandas (${period}) — ${inst.name}`);
     }
   }
 
   console.log(
-    `Performance bands DIA: ${seededReal} con corte real · ${seededProvisional} con corte provisional · ${skipped} ya existentes (de ${diaInstruments.length} instrumentos DIA).`,
+    `Performance bands DIA: ${seeded3} con 3 bandas (Mon/Cierre) · ${seeded2} con 2 bandas (Diagnóstico) · ${skipped} ya existentes (de ${diaInstruments.length} instrumentos DIA).`,
   );
 }
 
