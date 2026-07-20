@@ -80,7 +80,69 @@ type StudentRowLike = {
   achievement: number | null;
   performanceLevel: string | null;
   requiresSupport: boolean;
+  bandLabel: string | null;
+  bandKey: string | null;
 };
+
+type BandBucketLike = {
+  key: string;
+  label: string;
+  order: number;
+  count: number;
+  percentage: number;
+};
+
+// Diagnóstico: set de 2 bandas (requiere apoyo / adecuado para el año).
+const DIA_DIAG_BANDS: PerformanceBandInput[] = [
+  {
+    id: 'd1',
+    key: 'REQ',
+    label: 'Requiere apoyo',
+    order: 1,
+    minThreshold: 0,
+    maxThreshold: 0.5,
+    color: null,
+  },
+  {
+    id: 'd2',
+    key: 'OK',
+    label: 'Adecuado para el año',
+    order: 2,
+    minThreshold: 0.5,
+    maxThreshold: 1,
+    color: null,
+  },
+];
+
+/** Fila por-alumno band-only (informe oficial): banda seteada, sin %. */
+function mkBandStudent(studentId: string, performanceBandId: string): EvaluatedLike {
+  return {
+    studentId,
+    studentRut: studentId,
+    firstName: studentId,
+    lastName: studentId,
+    percentage: null,
+    grade: null,
+    metricType: 'band',
+    performanceLevel: null,
+    performanceBandId,
+  };
+}
+
+function buildBandDistributionFromStudents(
+  svc: CourseReportService,
+  evaluated: EvaluatedLike[],
+  bands: PerformanceBandInput[],
+): BandBucketLike[] {
+  return (
+    svc as unknown as {
+      buildBandDistributionFromStudents: (
+        e: EvaluatedLike[],
+        b: PerformanceBandInput[],
+      ) => BandBucketLike[];
+    }
+  ).buildBandDistributionFromStudents(evaluated, bands);
+}
 
 function hydratePerformanceLevels(
   svc: CourseReportService,
@@ -215,6 +277,9 @@ describe('CourseReportService §5 — nómina + nivel por estudiante', () => {
     expect(rows[0].requiresSupport).toBe(true);
     // El % se conserva como posición aproximada para mostrar (no se re-clasifica).
     expect(rows[0].achievement).toBe(90);
+    // §5 expone el label/key REAL de la banda (para el badge fiel del informe).
+    expect(rows[0].bandLabel).toBe('Nivel I');
+    expect(rows[0].bandKey).toBe('I');
   });
 
   it('(b) Diagnóstico sin banda (no requiere apoyo): nivel no determinado; muestra la posición', () => {
@@ -240,6 +305,9 @@ describe('CourseReportService §5 — nómina + nivel por estudiante', () => {
     expect(rows[0].performanceLevel).toBeNull();
     expect(rows[0].requiresSupport).toBe(false);
     expect(rows[0].achievement).toBe(20);
+    // Sin banda resuelta → sin label real; la web cae a la etiqueta legacy.
+    expect(rows[0].bandLabel).toBeNull();
+    expect(rows[0].bandKey).toBeNull();
   });
 
   it('(c) Monitoreo band-only (percentage NULL): deriva el nivel desde la banda, sin regresión', () => {
@@ -278,9 +346,11 @@ describe('CourseReportService §5 — nómina + nivel por estudiante', () => {
     expect(byId.s1.performanceLevel).toBe('insufficient');
     expect(byId.s1.achievement).toBeNull();
     expect(byId.s1.requiresSupport).toBe(true);
+    expect(byId.s1.bandLabel).toBe('Nivel I');
     expect(byId.s2.performanceLevel).toBe('advanced');
     expect(byId.s2.achievement).toBeNull();
     expect(byId.s2.requiresSupport).toBe(false);
+    expect(byId.s2.bandLabel).toBe('Nivel III');
   });
 
   it('agregado sin filas: studentResults vacío', () => {
@@ -311,5 +381,49 @@ describe('CourseReportService §5 — nómina + nivel por estudiante', () => {
 
     expect(rows[0].achievement).toBe(90);
     expect(rows[0].performanceLevel).toBe('advanced');
+    // 90% cae en la banda superior (Nivel III) por clasificación por umbral.
+    expect(rows[0].bandLabel).toBe('Nivel III');
+    expect(rows[0].bandKey).toBe('III');
+  });
+});
+
+// §2 — Distribución por banda del informe fiel: la torta usa las bandas reales del
+// instrumento (cantidad + labels), no la escala fija de 4 niveles. En dato granular
+// se arma desde las filas por-alumno ya hidratadas.
+describe('CourseReportService.buildBandDistributionFromStudents — torta fiel a bandas (§2)', () => {
+  it('instrumento con 3 bandas (DIA I/II/III): 3 buckets con labels reales, incl. conteo 0', () => {
+    const svc = makeService();
+    const evaluated: EvaluatedLike[] = [
+      mkBandStudent('s1', 'b1'),
+      mkBandStudent('s2', 'b1'),
+      mkBandStudent('s3', 'b3'),
+    ];
+    hydratePerformanceLevels(svc, evaluated, DIA_BANDS);
+
+    const dist = buildBandDistributionFromStudents(svc, evaluated, DIA_BANDS);
+
+    expect(dist.map((b) => b.label)).toEqual(['Nivel I', 'Nivel II', 'Nivel III']);
+    const byKey = Object.fromEntries(dist.map((b) => [b.key, b.count]));
+    // I: 2 alumnos, II: 0 (banda vacía presente), III: 1.
+    expect(byKey).toEqual({ I: 2, II: 0, III: 1 });
+    const nivelI = dist.find((b) => b.key === 'I')!;
+    expect(nivelI.percentage).toBeCloseTo((2 / 3) * 100);
+  });
+
+  it('instrumento con 2 bandas (Diagnóstico): 2 buckets con labels reales', () => {
+    const svc = makeService();
+    const evaluated: EvaluatedLike[] = [
+      mkBandStudent('s1', 'd1'),
+      mkBandStudent('s2', 'd2'),
+      mkBandStudent('s3', 'd2'),
+    ];
+    hydratePerformanceLevels(svc, evaluated, DIA_DIAG_BANDS);
+
+    const dist = buildBandDistributionFromStudents(svc, evaluated, DIA_DIAG_BANDS);
+
+    expect(dist).toHaveLength(2);
+    expect(dist.map((b) => b.label)).toEqual(['Requiere apoyo', 'Adecuado para el año']);
+    const byKey = Object.fromEntries(dist.map((b) => [b.key, b.count]));
+    expect(byKey).toEqual({ REQ: 1, OK: 2 });
   });
 });
