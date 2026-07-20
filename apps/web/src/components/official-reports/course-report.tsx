@@ -188,7 +188,11 @@ export function CourseReport({
       <ReportSection
         index={4}
         title="Resultados por estudiante"
-        description="Una fila por estudiante: el punto marca su porcentaje de logro sobre las bandas de nivel del instrumento (color por nivel), para leer visualmente en qué nivel cae cada alumno. El nivel más bajo (Insuficiente) corresponde a quienes requieren mayor apoyo."
+        description={
+          isDiagnostic
+            ? 'Una fila por estudiante: si requiere mayor apoyo (lado del umbral, señal confiable del diagnóstico) y su posición estimada. El diagnóstico no clasifica en niveles I/II/III, y la posición es una estimación, no un puntaje oficial.'
+            : 'Una fila por estudiante: el punto marca su porcentaje de logro sobre las bandas de nivel del instrumento (color por nivel), para leer visualmente en qué nivel cae cada alumno. El nivel más bajo (Insuficiente) corresponde a quienes requieren mayor apoyo.'
+        }
       >
         {studentResults.length === 0 ? (
           <p className="text-sm text-muted-foreground">
@@ -197,10 +201,12 @@ export function CourseReport({
           </p>
         ) : (
           <>
-            {/* El dot-plot posiciona cada punto por su % de logro; un informe
-                agregado band-only no trae %, así que se muestra sólo si hay al
-                menos una fila con logro. La nómina (nivel sin %) siempre se ve. */}
-            {studentResults.some((s) => s.achievement !== null) && (
+            {/* El dot-plot posiciona cada punto por su % de logro sobre las bandas.
+                En Diagnóstico el "logro" es una posición APROXIMADA (no un score sobre
+                las bandas), así que no se muestra para no presentarla como oficial.
+                Fuera de Diagnóstico se muestra sólo si hay al menos una fila con logro
+                (un informe agregado band-only no trae %). La nómina siempre se ve. */}
+            {!isDiagnostic && studentResults.some((s) => s.achievement !== null) && (
               <StudentDotPlot students={studentResults} />
             )}
             <p className="text-sm text-muted-foreground">
@@ -210,7 +216,11 @@ export function CourseReport({
               </span>{' '}
               de {generalResult.studentsConsidered}
             </p>
-            <StudentTable students={studentResults} basePath={studentReportBasePath} />
+            <StudentTable
+              students={studentResults}
+              basePath={studentReportBasePath}
+              isDiagnostic={isDiagnostic}
+            />
           </>
         )}
       </ReportSection>
@@ -347,9 +357,15 @@ function ResponseDistribution({ row }: { row: OfficialSpecTableRow }) {
 function StudentTable({
   students,
   basePath,
+  isDiagnostic = false,
 }: {
   students: OfficialCourseStudentRow[];
   basePath?: string;
+  /**
+   * Diagnóstico: no clasifica por niveles I/II/III. Se muestra "Requiere apoyo"
+   * (Sí/No, la señal confiable) + "Posición (est.)" en vez de "% Logro" + "Nivel".
+   */
+  isDiagnostic?: boolean;
 }) {
   if (students.length === 0) return null;
   return (
@@ -359,8 +375,17 @@ function StudentTable({
           <tr className="border-b bg-muted/50 text-left text-xs uppercase tracking-wide text-muted-foreground">
             <th className="px-3 py-2 font-medium">Estudiante</th>
             <th className="px-3 py-2 font-medium">RUT</th>
-            <th className="px-3 py-2 text-right font-medium">% Logro</th>
-            <th className="px-3 py-2 font-medium">Nivel</th>
+            {isDiagnostic ? (
+              <>
+                <th className="px-3 py-2 font-medium">Requiere apoyo</th>
+                <th className="px-3 py-2 text-right font-medium">Posición (est.)</th>
+              </>
+            ) : (
+              <>
+                <th className="px-3 py-2 text-right font-medium">% Logro</th>
+                <th className="px-3 py-2 font-medium">Nivel</th>
+              </>
+            )}
             {basePath ? <th className="px-3 py-2 font-medium print:hidden">Informe</th> : null}
           </tr>
         </thead>
@@ -369,26 +394,50 @@ function StudentTable({
             <tr key={s.studentId} className="border-b align-middle last:border-0">
               <td className="px-3 py-2 font-medium">
                 {s.studentFullName}
-                {s.requiresSupport ? (
+                {/* Fuera de Diagnóstico el aviso "Requiere apoyo" va junto al nombre;
+                    en Diagnóstico tiene su propia columna, así que no se duplica. */}
+                {!isDiagnostic && s.requiresSupport ? (
                   <span className="ml-2 rounded-sm bg-red-100 px-1.5 py-0.5 text-xs font-medium text-red-800 dark:bg-red-950 dark:text-red-200">
                     Requiere apoyo
                   </span>
                 ) : null}
               </td>
               <td className="px-3 py-2 tabular-nums text-muted-foreground">{s.studentRut}</td>
-              <td className="px-3 py-2 text-right tabular-nums">{fmtPct(s.achievement)}</td>
-              <td className="px-3 py-2">
-                <span
-                  className={cn(
-                    'inline-flex items-center rounded-full border px-2 py-0.5 text-xs font-semibold',
-                    s.performanceLevel
-                      ? PERFORMANCE_LEVEL_BADGE_CLASS[s.performanceLevel]
-                      : 'text-muted-foreground',
-                  )}
-                >
-                  {performanceLevelLabel(s.performanceLevel)}
-                </span>
-              </td>
+              {isDiagnostic ? (
+                <>
+                  <td className="px-3 py-2">
+                    {s.requiresSupport ? (
+                      <span className="inline-flex items-center rounded-sm bg-red-100 px-1.5 py-0.5 text-xs font-semibold text-red-800 dark:bg-red-950 dark:text-red-200">
+                        Sí
+                      </span>
+                    ) : (
+                      <span className="text-muted-foreground">No</span>
+                    )}
+                  </td>
+                  <td
+                    className="px-3 py-2 text-right tabular-nums text-muted-foreground"
+                    title="Posición estimada del diagnóstico; no es un puntaje oficial."
+                  >
+                    {s.achievement === null ? '—' : `≈ ${fmtPct(s.achievement)}`}
+                  </td>
+                </>
+              ) : (
+                <>
+                  <td className="px-3 py-2 text-right tabular-nums">{fmtPct(s.achievement)}</td>
+                  <td className="px-3 py-2">
+                    <span
+                      className={cn(
+                        'inline-flex items-center rounded-full border px-2 py-0.5 text-xs font-semibold',
+                        s.performanceLevel
+                          ? PERFORMANCE_LEVEL_BADGE_CLASS[s.performanceLevel]
+                          : 'text-muted-foreground',
+                      )}
+                    >
+                      {performanceLevelLabel(s.performanceLevel)}
+                    </span>
+                  </td>
+                </>
+              )}
               {basePath ? (
                 <td className="px-3 py-2 print:hidden">
                   <Link

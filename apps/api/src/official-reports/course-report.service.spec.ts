@@ -1,5 +1,5 @@
 import type { Database } from '@soe/db';
-import type { PerformanceBandInput } from '@soe/types';
+import type { MetricType, PerformanceBandInput } from '@soe/types';
 import { CourseReportService } from './course-report.service';
 import type { ReportSupportService } from './report-support.service';
 import type { CohortLevelCount } from '../common/helpers/cohort-level-stats.helper';
@@ -70,6 +70,7 @@ type EvaluatedLike = {
   lastName: string;
   percentage: number | null;
   grade: number | null;
+  metricType: MetricType;
   performanceLevel: string | null;
   performanceBandId: string | null;
 };
@@ -180,12 +181,68 @@ describe('CourseReportService.buildGeneralResult — informe agregado (Bloque B5
   });
 });
 
-// §5 — Resultados por estudiante. El informe agregado escribe filas por alumno
-// band-only (percentage/performanceLevel NULL, performance_band_id seteado). El
-// nivel se DERIVA en la lectura desde la banda; el % no existe en un informe DIA
-// y queda null. Se prueba el par puro hydratePerformanceLevels + buildStudentResults.
+// §5 — Resultados por estudiante. La hidratación es band-autoritativa por
+// `metricType`: las filas `metric_type='band'` (informe oficial) derivan el nivel de
+// la banda guardada IGNORANDO `percentage`; el resto (item_level) clasifica por %.
+//
+// - Monitoreo/Cierre band-only: `percentage` NULL, banda seteada → nivel desde banda.
+// - Diagnóstico: NO usa niveles I/II/III sino binario "requiere apoyo" + una posición
+//   `scorePct` APROXIMADA. La banda importada (Nivel I cuando requiere apoyo, o ninguna)
+//   manda sobre el % aproximado. `percentage` guarda esa posición sólo para mostrarla.
 describe('CourseReportService §5 — nómina + nivel por estudiante', () => {
-  it('(a) agregado band-only: deriva el nivel desde la banda y deja achievement null', () => {
+  it('(a) Diagnóstico requiere-apoyo: banda Nivel I manda sobre el % aproximado; muestra la posición', () => {
+    const svc = makeService();
+    const evaluated: EvaluatedLike[] = [
+      {
+        studentId: 's1',
+        studentRut: '1',
+        firstName: 'Ana',
+        lastName: 'A',
+        // scorePct=90 (posición aprox., alto) pero la banda dice Nivel I: la banda manda.
+        percentage: 90,
+        grade: null,
+        metricType: 'band',
+        performanceLevel: null,
+        performanceBandId: 'b1', // Nivel I → "requiere mayor apoyo"
+      },
+    ];
+
+    hydratePerformanceLevels(svc, evaluated, DIA_BANDS);
+    const rows = buildStudentResults(svc, evaluated);
+
+    // El nivel sale de la banda (I → insufficient = REQUIRES_SUPPORT_LEVEL), NO del 90%.
+    expect(rows[0].performanceLevel).toBe('insufficient');
+    expect(rows[0].requiresSupport).toBe(true);
+    // El % se conserva como posición aproximada para mostrar (no se re-clasifica).
+    expect(rows[0].achievement).toBe(90);
+  });
+
+  it('(b) Diagnóstico sin banda (no requiere apoyo): nivel no determinado; muestra la posición', () => {
+    const svc = makeService();
+    const evaluated: EvaluatedLike[] = [
+      {
+        studentId: 's1',
+        studentRut: '1',
+        firstName: 'Ana',
+        lastName: 'A',
+        // scorePct bajo pero NO requiere apoyo (sin banda): el % no re-clasifica el nivel.
+        percentage: 20,
+        grade: null,
+        metricType: 'band',
+        performanceLevel: null,
+        performanceBandId: null,
+      },
+    ];
+
+    hydratePerformanceLevels(svc, evaluated, DIA_BANDS);
+    const rows = buildStudentResults(svc, evaluated);
+
+    expect(rows[0].performanceLevel).toBeNull();
+    expect(rows[0].requiresSupport).toBe(false);
+    expect(rows[0].achievement).toBe(20);
+  });
+
+  it('(c) Monitoreo band-only (percentage NULL): deriva el nivel desde la banda, sin regresión', () => {
     const svc = makeService();
     const evaluated: EvaluatedLike[] = [
       {
@@ -195,6 +252,7 @@ describe('CourseReportService §5 — nómina + nivel por estudiante', () => {
         lastName: 'A',
         percentage: null,
         grade: null,
+        metricType: 'band',
         performanceLevel: null,
         performanceBandId: 'b1', // banda de menor order → requiere apoyo
       },
@@ -205,6 +263,7 @@ describe('CourseReportService §5 — nómina + nivel por estudiante', () => {
         lastName: 'B',
         percentage: null,
         grade: null,
+        metricType: 'band',
         performanceLevel: null,
         performanceBandId: 'b3',
       },
@@ -224,14 +283,14 @@ describe('CourseReportService §5 — nómina + nivel por estudiante', () => {
     expect(byId.s2.requiresSupport).toBe(false);
   });
 
-  it('(b) agregado sin filas: studentResults vacío', () => {
+  it('agregado sin filas: studentResults vacío', () => {
     const svc = makeService();
     const evaluated: EvaluatedLike[] = [];
     hydratePerformanceLevels(svc, evaluated, DIA_BANDS);
     expect(buildStudentResults(svc, evaluated)).toEqual([]);
   });
 
-  it('(c) item_level: sin regresión, mantiene el % como achievement y no re-deriva el nivel', () => {
+  it('(d) item_level (metric_type percentage): clasifica por %, no re-deriva el nivel', () => {
     const svc = makeService();
     const evaluated: EvaluatedLike[] = [
       {
@@ -241,6 +300,7 @@ describe('CourseReportService §5 — nómina + nivel por estudiante', () => {
         lastName: 'A',
         percentage: 90,
         grade: null,
+        metricType: 'percentage',
         performanceLevel: 'advanced',
         performanceBandId: null,
       },
