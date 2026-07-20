@@ -73,6 +73,8 @@ type EvaluatedLike = {
   metricType: MetricType;
   performanceLevel: string | null;
   performanceBandId: string | null;
+  /** Cierre: banda del nivel previo (Monitoreo). Ausente/NULL fuera de Cierre. */
+  priorPerformanceBandId?: string | null;
 };
 
 type StudentRowLike = {
@@ -82,6 +84,8 @@ type StudentRowLike = {
   requiresSupport: boolean;
   bandLabel: string | null;
   bandKey: string | null;
+  priorBandLabel: string | null;
+  priorBandKey: string | null;
 };
 
 type BandBucketLike = {
@@ -350,6 +354,76 @@ describe('CourseReportService §5 — nómina + nivel por estudiante', () => {
     expect(byId.s2.performanceLevel).toBe('advanced');
     expect(byId.s2.achievement).toBeNull();
     expect(byId.s2.requiresSupport).toBe(false);
+    expect(byId.s2.bandLabel).toBe('Nivel III');
+  });
+
+  it('(c2) Cierre con nivel previo: expone priorBandLabel/priorBandKey (avance Monitoreo→Cierre)', () => {
+    const svc = makeService();
+    const evaluated: EvaluatedLike[] = [
+      {
+        studentId: 's1',
+        studentRut: '1',
+        firstName: 'Ana',
+        lastName: 'A',
+        percentage: null,
+        grade: null,
+        metricType: 'band',
+        performanceLevel: null,
+        performanceBandId: 'b2', // nivel de Cierre: Nivel II
+        priorPerformanceBandId: 'b1', // nivel de Monitoreo: Nivel I
+      },
+    ];
+
+    hydratePerformanceLevels(svc, evaluated, DIA_BANDS);
+    const rows = buildStudentResults(svc, evaluated);
+
+    // Banda de Cierre = Nivel II; banda previa (Monitoreo) = Nivel I → avance I → II.
+    expect(rows[0].bandLabel).toBe('Nivel II');
+    expect(rows[0].bandKey).toBe('II');
+    expect(rows[0].priorBandLabel).toBe('Nivel I');
+    expect(rows[0].priorBandKey).toBe('I');
+    expect(rows[0].achievement).toBeNull();
+  });
+
+  it('(c3) sin nivel previo (Monitoreo/Diagnóstico/item_level): priorBand queda NULL, sin regresión', () => {
+    const svc = makeService();
+    const evaluated: EvaluatedLike[] = [
+      // Monitoreo band-only (sin priorPerformanceBandId).
+      {
+        studentId: 's1',
+        studentRut: '1',
+        firstName: 'Ana',
+        lastName: 'A',
+        percentage: null,
+        grade: null,
+        metricType: 'band',
+        performanceLevel: null,
+        performanceBandId: 'b3',
+      },
+      // item_level clasificado por %.
+      {
+        studentId: 's2',
+        studentRut: '2',
+        firstName: 'Beto',
+        lastName: 'B',
+        percentage: 90,
+        grade: null,
+        metricType: 'percentage',
+        performanceLevel: 'advanced',
+        performanceBandId: null,
+      },
+    ];
+
+    hydratePerformanceLevels(svc, evaluated, DIA_BANDS);
+    const rows = buildStudentResults(svc, evaluated);
+
+    for (const r of rows) {
+      expect(r.priorBandLabel).toBeNull();
+      expect(r.priorBandKey).toBeNull();
+    }
+    // Banda de Cierre intacta (sin regresión).
+    const byId = Object.fromEntries(rows.map((r) => [r.studentId, r]));
+    expect(byId.s1.bandLabel).toBe('Nivel III');
     expect(byId.s2.bandLabel).toBe('Nivel III');
   });
 
