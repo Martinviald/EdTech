@@ -269,9 +269,12 @@ export class CourseReportService {
       const bandDistribution =
         instrumentBands.length === 0
           ? undefined
-          : levelData
-            ? levelCountsToBandDistribution(levelData.counts, instrumentBands)
-            : this.buildBandDistributionFromStudents(evaluated, instrumentBands);
+          : levelData && levelData.counts.length > 0
+            ? // Monitoreo/Cierre: la torta (Gráfico 1) es la distribución oficial.
+              levelCountsToBandDistribution(levelData.counts, instrumentBands)
+            : // Diagnóstico (sin torta I/II/III) o dato granular: contar las filas
+              // por-alumno hidratadas. Mismo criterio que `buildGeneralResult`.
+              this.buildBandDistributionFromStudents(evaluated, instrumentBands);
 
       return {
         meta,
@@ -319,13 +322,23 @@ export class CourseReportService {
         };
       }
 
+      // Sin torta I/II/III (ej. Diagnóstico): "requiere apoyo" y la distribución
+      // salen de las filas por-alumno hidratadas (su banda de menor order), no de la
+      // torta. Coherente con `bandDistribution`.
+      const supportBands = levelData?.bands ?? [];
+      const lowestBand = [...supportBands].sort((a, b) => a.order - b.order)[0] ?? null;
+      const withBand = evaluated.filter((e) => e.band != null);
+      const requiresSupportCount = lowestBand
+        ? withBand.filter((e) => e.band!.id === lowestBand.id).length
+        : 0;
       return {
         studentsConsidered: aggregate.studentsAssessed,
         averageAchievement,
         performanceLevel,
-        requiresSupportCount: 0,
-        requiresSupportPercentage: null,
-        distribution: buildDistribution([]),
+        requiresSupportCount,
+        requiresSupportPercentage:
+          withBand.length > 0 ? (requiresSupportCount / withBand.length) * 100 : null,
+        distribution: buildDistribution(withBand.map((e) => e.performanceLevel)),
       };
     }
 
