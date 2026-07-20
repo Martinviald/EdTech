@@ -1,7 +1,11 @@
 import { z } from 'zod';
 import type { DataGranularity } from '../analytics-capabilities';
 import type { PerformanceLevel } from '../enums';
-import type { PerformanceDistributionBucket } from './dashboard.schema';
+import type {
+  PerformanceBandDistributionBucket,
+  PerformanceDistributionBucket,
+} from './dashboard.schema';
+import type { PerformanceBandView } from './performance-band.schema';
 import type { OfficialReportMeta } from './official-report-common.schema';
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -132,6 +136,11 @@ export type OfficialCourseStudentRow = {
   grade: number | null;
   performanceLevel: PerformanceLevel | null;
   requiresSupport: boolean; // cae en el nivel de logro más bajo
+  // Banda real del instrumento resuelta para el alumno (ej. DIA "Nivel II"). El
+  // color/orden lo aporta `bands` a nivel de respuesta. `null` cuando el
+  // instrumento no tiene bandas → la web usa la etiqueta del enum legacy.
+  bandLabel?: string | null;
+  bandKey?: string | null;
 };
 
 // ── Respuesta ────────────────────────────────────────────────────────────────
@@ -145,4 +154,11 @@ export type OfficialCourseReportResponse = {
   // Sección 6: preguntas reflexivas para completar (data-driven vía
   // `instruments.config.reportReflectionPrompts`, con un set genérico por defecto).
   reflectionPrompts: string[];
+  // Bandas configuradas del instrumento (N niveles data-driven, ej. DIA I/II/III) y
+  // su distribución por banda para §2. Presentes SÓLO cuando el instrumento tiene
+  // bandas; en ese caso la UI las prefiere sobre `generalResult.distribution` (la
+  // escala fija de 4 niveles). Sin bandas quedan `undefined` → la web cae a los 4
+  // niveles legacy, sin regresión para instrumentos no-DIA.
+  bands?: PerformanceBandView[];
+  bandDistribution?: PerformanceBandDistributionBucket[];
 };

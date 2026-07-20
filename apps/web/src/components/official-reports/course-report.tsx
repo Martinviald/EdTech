@@ -4,6 +4,8 @@ import type {
   OfficialCourseReportResponse,
   OfficialSpecTableRow,
   OfficialCourseStudentRow,
+  PerformanceBandDistributionBucket,
+  PerformanceLevel,
 } from '@soe/types';
 import { cn } from '@/lib/utils';
 import {
@@ -62,6 +64,11 @@ export function CourseReport({
   // que la distribución venga con datos —no a la granularidad— para no ocultar una
   // torta poblada ni mostrar un 0 engañoso cuando falta el Gráfico 1.
   const hasLevelDistribution = generalResult.distribution.some((b) => b.count > 0);
+  // Bandas reales del instrumento (ej. DIA I/II/III). Cuando vienen con datos, la
+  // torta §2 y el badge §5 se renderizan con sus labels/colores en lugar de la
+  // escala fija de 4 niveles. Sin bandas → fallback a los 4 niveles (sin regresión).
+  const bandDistribution = report.bandDistribution;
+  const hasBandDistribution = !!bandDistribution && bandDistribution.some((b) => b.count > 0);
 
   const coverMeta = [
     { label: 'Establecimiento', value: meta.orgName },
@@ -130,7 +137,9 @@ export function CourseReport({
         {!isDiagnostic ? (
           <div className="rounded-md border p-4">
             <p className="mb-4 text-sm font-medium">Resultados según niveles de logro</p>
-            {hasLevelDistribution ? (
+            {hasBandDistribution ? (
+              <DonutChart slices={bandSlices(bandDistribution!)} />
+            ) : hasLevelDistribution ? (
               <DonutChart slices={levelSlices(generalResult.distribution)} />
             ) : (
               <p className="text-sm text-muted-foreground">
@@ -272,6 +281,44 @@ function levelSlices(
       percentage: bucket?.percentage ?? 0,
     };
   });
+}
+
+/**
+ * Nivel legacy equivalente de una banda por la posición relativa de su `order`
+ * dentro del set (misma proyección que `bandToLegacyLevel` del backend). Sólo se
+ * usa para heredar el color/estilo de la paleta de niveles cuando la banda no trae
+ * un color propio — la etiqueta mostrada es SIEMPRE la real de la banda.
+ */
+function bandLegacyLevel(order: number, orders: readonly number[]): PerformanceLevel {
+  const n = orders.length;
+  if (n <= 1) return 'adequate';
+  const sorted = [...orders].sort((a, b) => a - b);
+  const idx = sorted.indexOf(order);
+  const ratio = idx / (n - 1);
+  const bucket = Math.min(
+    PERFORMANCE_LEVEL_ORDER.length - 1,
+    Math.round(ratio * (PERFORMANCE_LEVEL_ORDER.length - 1)),
+  );
+  return PERFORMANCE_LEVEL_ORDER[bucket]!;
+}
+
+/** Color (hex) de una banda: el suyo si es hex, si no el del nivel equivalente. */
+function bandColor(bucket: PerformanceBandDistributionBucket, orders: readonly number[]): string {
+  if (bucket.color && bucket.color.startsWith('#')) return bucket.color;
+  return PERFORMANCE_LEVEL_CHART_COLOR[bandLegacyLevel(bucket.order, orders)];
+}
+
+/** Torta desde la distribución por banda del instrumento (labels/colores reales). */
+function bandSlices(distribution: PerformanceBandDistributionBucket[]): DonutSlice[] {
+  const ordered = [...distribution].sort((a, b) => a.order - b.order);
+  const orders = ordered.map((b) => b.order);
+  return ordered.map((b) => ({
+    key: b.key,
+    label: b.label,
+    value: b.count,
+    color: bandColor(b, orders),
+    percentage: b.percentage,
+  }));
 }
 
 // ── Tabla de especificaciones ─────────────────────────────────────────────────
@@ -433,7 +480,10 @@ function StudentTable({
                           : 'text-muted-foreground',
                       )}
                     >
-                      {performanceLevelLabel(s.performanceLevel)}
+                      {/* Label REAL de la banda del instrumento (ej. "Nivel II"); sin
+                          bandas cae a la etiqueta legacy. El color viene del nivel
+                          equivalente ya resuelto en el backend (`performanceLevel`). */}
+                      {s.bandLabel ?? performanceLevelLabel(s.performanceLevel)}
                     </span>
                   </td>
                 </>
