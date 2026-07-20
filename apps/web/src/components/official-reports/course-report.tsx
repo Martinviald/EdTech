@@ -61,6 +61,13 @@ export function CourseReport({
   const { meta, generalResult, skillAxes, specTable, studentResults, reflectionPrompts } = report;
   const disclaimers = resolveDisclaimers(meta.disclaimers);
   const isDiagnostic = meta.variant === 'requires_support';
+  // Cierre: la figura "Estudiantes que muestran avance o mejora" lista el SUBCONJUNTO
+  // del curso que avanzó respecto del Monitoreo Intermedio, cada alumno con su nivel
+  // previo (Monitoreo) y su nivel de Cierre. Se muestra el avance sólo cuando el
+  // informe es de Cierre y trae el nivel previo por alumno (`priorBandLabel`); en
+  // Monitoreo/Diagnóstico §5 queda como está (sin columna de nivel previo).
+  const isCierre = meta.period?.toLowerCase().includes('cierre') ?? false;
+  const showAdvance = isCierre && studentResults.some((s) => s.priorBandLabel != null);
   // La distribución por nivel (torta §2) y "requiere apoyo" SÍ pueden existir en un
   // informe agregado si trae el Gráfico 1 (`assessment_level_stats`). Se condicionan a
   // que la distribución venga con datos —no a la granularidad— para no ocultar una
@@ -198,11 +205,17 @@ export function CourseReport({
       {/* ── Sección 5 — Resultados por estudiante ── */}
       <ReportSection
         index={4}
-        title="Resultados por estudiante"
+        title={
+          showAdvance
+            ? 'Estudiantes que avanzaron o mejoraron respecto del Monitoreo Intermedio'
+            : 'Resultados por estudiante'
+        }
         description={
-          isDiagnostic
-            ? 'Una fila por estudiante: si requiere mayor apoyo (lado del umbral, señal confiable del diagnóstico) y su posición estimada. El diagnóstico no clasifica en niveles I/II/III, y la posición es una estimación, no un puntaje oficial.'
-            : 'Una fila por estudiante: el punto marca su porcentaje de logro sobre las bandas de nivel del instrumento (color por nivel), para leer visualmente en qué nivel cae cada alumno. El nivel más bajo (Insuficiente) corresponde a quienes requieren mayor apoyo.'
+          showAdvance
+            ? 'Subconjunto del curso (no toda la clase): sólo los estudiantes que avanzaron de nivel respecto del Monitoreo Intermedio. Cada fila muestra el avance de su nivel previo (Monitoreo) a su nivel de Cierre.'
+            : isDiagnostic
+              ? 'Una fila por estudiante: si requiere mayor apoyo (lado del umbral, señal confiable del diagnóstico) y su posición estimada. El diagnóstico no clasifica en niveles I/II/III, y la posición es una estimación, no un puntaje oficial.'
+              : 'Una fila por estudiante: el punto marca su porcentaje de logro sobre las bandas de nivel del instrumento (color por nivel), para leer visualmente en qué nivel cae cada alumno. El nivel más bajo (Insuficiente) corresponde a quienes requieren mayor apoyo.'
         }
       >
         {studentResults.length === 0 ? (
@@ -221,16 +234,29 @@ export function CourseReport({
               <StudentDotPlot students={studentResults} />
             )}
             <p className="text-sm text-muted-foreground">
-              Estudiantes que requieren mayor apoyo:{' '}
-              <span className="font-semibold text-foreground">
-                {generalResult.requiresSupportCount}
-              </span>{' '}
-              de {generalResult.studentsConsidered}
+              {showAdvance ? (
+                <>
+                  Estudiantes que avanzaron o mejoraron:{' '}
+                  <span className="font-semibold text-foreground">
+                    {studentResults.filter((s) => s.priorBandLabel != null).length}
+                  </span>{' '}
+                  (subconjunto del curso, no toda la clase)
+                </>
+              ) : (
+                <>
+                  Estudiantes que requieren mayor apoyo:{' '}
+                  <span className="font-semibold text-foreground">
+                    {generalResult.requiresSupportCount}
+                  </span>{' '}
+                  de {generalResult.studentsConsidered}
+                </>
+              )}
             </p>
             <StudentTable
               students={studentResults}
               basePath={studentReportBasePath}
               isDiagnostic={isDiagnostic}
+              showAdvance={showAdvance}
             />
           </>
         )}
@@ -407,6 +433,7 @@ function StudentTable({
   students,
   basePath,
   isDiagnostic = false,
+  showAdvance = false,
 }: {
   students: OfficialCourseStudentRow[];
   basePath?: string;
@@ -415,6 +442,11 @@ function StudentTable({
    * (Sí/No, la señal confiable) + "Posición (est.)" en vez de "% Logro" + "Nivel".
    */
   isDiagnostic?: boolean;
+  /**
+   * Cierre con nivel previo por alumno: se agrega la columna "Avance" que muestra el
+   * paso `nivel previo (Monitoreo) → nivel de Cierre`. Sólo aplica a Cierre.
+   */
+  showAdvance?: boolean;
 }) {
   if (students.length === 0) return null;
   return (
@@ -429,6 +461,7 @@ function StudentTable({
               <>
                 <th className="px-3 py-2 text-right font-medium">% Logro</th>
                 <th className="px-3 py-2 font-medium">Nivel</th>
+                {showAdvance ? <th className="px-3 py-2 font-medium">Avance</th> : null}
               </>
             )}
             {basePath ? (
@@ -479,6 +512,26 @@ function StudentTable({
                       {s.bandLabel ?? performanceLevelLabel(s.performanceLevel)}
                     </span>
                   </td>
+                  {showAdvance ? (
+                    <td className="px-3 py-2">
+                      {/* Avance del nivel previo (Monitoreo) al nivel de Cierre. Sin
+                          nivel previo → "—" (alumno del curso que no está en el
+                          subconjunto que avanzó). */}
+                      {s.priorBandLabel != null ? (
+                        <span className="inline-flex items-center gap-1 whitespace-nowrap text-xs font-medium">
+                          <span className="text-muted-foreground">{s.priorBandLabel}</span>
+                          <span aria-hidden className="text-muted-foreground">
+                            →
+                          </span>
+                          <span className="font-semibold text-foreground">
+                            {s.bandLabel ?? performanceLevelLabel(s.performanceLevel)}
+                          </span>
+                        </span>
+                      ) : (
+                        <span className="text-muted-foreground">—</span>
+                      )}
+                    </td>
+                  ) : null}
                 </>
               )}
               {basePath ? (

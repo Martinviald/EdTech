@@ -141,6 +141,11 @@ export type OfficialCourseStudentRow = {
   // instrumento no tiene bandas → la web usa la etiqueta del enum legacy.
   bandLabel?: string | null;
   bandKey?: string | null;
+  // Banda del nivel PREVIO (Monitoreo Intermedio) del alumno, sólo en informes de
+  // Cierre. Cuando está presente, §5 muestra el avance `priorBandLabel → bandLabel`
+  // (ej. "Nivel I → Nivel II"). `null`/ausente en Monitoreo/Diagnóstico/item_level.
+  priorBandLabel?: string | null;
+  priorBandKey?: string | null;
 };
 
 // ── Respuesta ────────────────────────────────────────────────────────────────
