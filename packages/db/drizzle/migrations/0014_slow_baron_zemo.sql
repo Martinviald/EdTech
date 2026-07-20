@@ -1,0 +1,2 @@
+ALTER TABLE "assessment_results" ADD COLUMN "prior_performance_band_id" uuid;--> statement-breakpoint
+ALTER TABLE "assessment_results" ADD CONSTRAINT "assessment_results_prior_performance_band_id_performance_bands_id_fk" FOREIGN KEY ("prior_performance_band_id") REFERENCES "public"."performance_bands"("id") ON DELETE no action ON UPDATE no action;

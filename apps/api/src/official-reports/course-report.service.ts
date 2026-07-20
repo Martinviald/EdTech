@@ -78,8 +78,18 @@ type EvaluatedStudent = {
   performanceLevel: PerformanceLevel | null;
   /** `performance_bands.id` de la fila; sólo viene con `metric_type='band'`. */
   performanceBandId: string | null;
+  /**
+   * `performance_bands.id` del nivel PREVIO (Monitoreo Intermedio); sólo lo escribe la
+   * ingesta de Cierre. NULL fuera de Cierre.
+   */
+  priorPerformanceBandId: string | null;
   /** Banda del instrumento resuelta por `hydratePerformanceLevels` (§5 label/key). */
   band: PerformanceBandInput | null;
+  /**
+   * Banda del nivel PREVIO (Cierre) resuelta por `hydratePerformanceLevels`. Alimenta el
+   * avance `priorBand → band` de §5. NULL cuando no hay nivel previo.
+   */
+  priorBand: PerformanceBandInput | null;
 };
 
 /** PerformanceBandInput (con thresholds) → vista mínima para la respuesta. */
@@ -602,6 +612,21 @@ export class CourseReportService {
       const { band, performanceLevel } = hydrateBandForStudent(e, bands);
       e.band = band;
       e.performanceLevel = performanceLevel;
+      // Cierre: banda del nivel PREVIO (Monitoreo). Es una banda ya decidida por su id
+      // (misma semántica band-only que la actual), así que se resuelve con el mismo
+      // helper (DRY) forzando la rama `band` sobre `priorPerformanceBandId`.
+      e.priorBand =
+        e.priorPerformanceBandId === null
+          ? null
+          : hydrateBandForStudent(
+              {
+                metricType: 'band',
+                percentage: null,
+                performanceLevel: null,
+                performanceBandId: e.priorPerformanceBandId,
+              },
+              bands,
+            ).band;
     }
   }
 
@@ -629,6 +654,10 @@ export class CourseReportService {
           // web muestra la etiqueta legacy de `performanceLevel`.
           bandLabel: e.band?.label ?? null,
           bandKey: e.band?.key ?? null,
+          // Cierre: banda del nivel PREVIO (Monitoreo). `null` fuera de Cierre → §5
+          // no muestra la columna de avance.
+          priorBandLabel: e.priorBand?.label ?? null,
+          priorBandKey: e.priorBand?.key ?? null,
         };
       });
   }
@@ -697,6 +726,7 @@ export class CourseReportService {
         metricType: assessmentResults.metricType,
         performanceLevel: assessmentResults.performanceLevel,
         performanceBandId: assessmentResults.performanceBandId,
+        priorPerformanceBandId: assessmentResults.priorPerformanceBandId,
       })
       .from(assessmentResults)
       .innerJoin(students, eq(students.id, assessmentResults.studentId))
@@ -712,7 +742,9 @@ export class CourseReportService {
       metricType: r.metricType,
       performanceLevel: r.performanceLevel,
       performanceBandId: r.performanceBandId ?? null,
+      priorPerformanceBandId: r.priorPerformanceBandId ?? null,
       band: null,
+      priorBand: null,
     }));
   }
 

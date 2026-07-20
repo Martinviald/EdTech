@@ -86,6 +86,11 @@ export const assessmentResults = pgTable(
     bandLabel: text('band_label'),
     // Nivel de desempeño como dato (#2). FK nullable a performance_bands.
     performanceBandId: uuid('performance_band_id').references(() => performanceBands.id),
+    // Banda del nivel PREVIO (Monitoreo Intermedio) para informes de Cierre. FK
+    // nullable a performance_bands. La escribe la ingesta de Cierre desde el
+    // `priorLevel` del informe; §5 la expone como el avance `priorBand → band`.
+    // Sólo aplica a Cierre; NULL en Monitoreo/Diagnóstico/item_level.
+    priorPerformanceBandId: uuid('prior_performance_band_id').references(() => performanceBands.id),
     // DEPRECATED (soft migration): enum cerrado de 4 niveles. Se mantiene como
     // fallback para no romper datos/queries existentes. Nuevos cálculos pueblan
     // además performanceBandId cuando hay bandas configuradas.
