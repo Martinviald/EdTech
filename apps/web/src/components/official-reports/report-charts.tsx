@@ -415,6 +415,79 @@ export function StudentDotPlot({ students }: { students: OfficialCourseStudentRo
   );
 }
 
+/** Color de la banda que contiene `pct` (para colorear el punto sin `performanceLevel`). */
+function bandColorForPct(pct: number): string {
+  const band = LEVEL_BANDS.find((b) => pct >= b.min && pct < b.max) ?? LEVEL_BANDS.at(-1);
+  return band?.color ?? '#94a3b8';
+}
+
+/**
+ * Franja de nivel de logro de UN estudiante: la misma "línea horizontal" del
+ * dot-plot del informe de monitoreo (bandas de nivel + divisiones), con el punto
+ * ubicado en su % de logro. Quienes requieren mayor apoyo caen a la izquierda.
+ * Presentacional: sin tooltip interactivo (se usa dentro de las filas de tabla).
+ */
+export function StudentBandStrip({
+  achievement,
+  performanceLevel,
+  requiresSupport,
+}: {
+  achievement: number | null;
+  performanceLevel: PerformanceLevel | null;
+  requiresSupport: boolean;
+}) {
+  const x = achievement === null ? null : clampPct(achievement);
+  const dotColor = performanceLevel
+    ? PERFORMANCE_LEVEL_CHART_COLOR[performanceLevel]
+    : x !== null
+      ? bandColorForPct(x)
+      : '#94a3b8';
+  return (
+    <div className="relative h-6 w-full min-w-[160px]" role="img" aria-label="Nivel de logro">
+      {LEVEL_BANDS.map((b) => (
+        <div
+          key={b.level}
+          className="absolute inset-y-0"
+          style={{
+            left: `${b.min}%`,
+            width: `${b.max - b.min}%`,
+            backgroundColor: `${b.color}22`,
+          }}
+          aria-hidden
+        />
+      ))}
+      {LEVEL_BANDS.slice(1).map((b) => (
+        <div
+          key={`div-${b.level}`}
+          className="absolute inset-y-0 w-px bg-border"
+          style={{ left: `${b.min}%` }}
+          aria-hidden
+        />
+      ))}
+      <div
+        className="absolute inset-x-0 top-1/2 -translate-y-1/2 border-t border-dashed border-border/70"
+        aria-hidden
+      />
+      {x !== null ? (
+        <span
+          className="absolute top-1/2 flex size-6 -translate-x-1/2 -translate-y-1/2 items-center justify-center"
+          style={{ left: `${x}%` }}
+          title={`${fmtPct(achievement)}${requiresSupport ? ' · Requiere mayor apoyo' : ''}`}
+        >
+          <span
+            className="size-2.5 rounded-full ring-2 ring-card"
+            style={{ backgroundColor: dotColor }}
+          />
+        </span>
+      ) : (
+        <span className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 text-xs text-muted-foreground">
+          —
+        </span>
+      )}
+    </div>
+  );
+}
+
 function StudentDotTooltip({ row, index }: { row: OfficialCourseStudentRow; index: number }) {
   const color = row.performanceLevel
     ? PERFORMANCE_LEVEL_CHART_COLOR[row.performanceLevel]

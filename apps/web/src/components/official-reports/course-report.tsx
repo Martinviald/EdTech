@@ -1,5 +1,6 @@
 import type { Route } from 'next';
 import Link from 'next/link';
+import { ArrowRight } from 'lucide-react';
 import type {
   OfficialCourseReportResponse,
   OfficialSpecTableRow,
@@ -29,6 +30,7 @@ import {
   HBarChart,
   DonutChart,
   StudentDotPlot,
+  StudentBandStrip,
   type BarDatum,
   type DonutSlice,
 } from './report-charts';
@@ -421,19 +423,19 @@ function StudentTable({
         <thead>
           <tr className="border-b bg-muted/50 text-left text-xs uppercase tracking-wide text-muted-foreground">
             <th className="px-3 py-2 font-medium">Estudiante</th>
-            <th className="px-3 py-2 font-medium">RUT</th>
             {isDiagnostic ? (
-              <>
-                <th className="px-3 py-2 font-medium">Requiere apoyo</th>
-                <th className="px-3 py-2 text-right font-medium">Posición (est.)</th>
-              </>
+              <th className="px-3 py-2 font-medium">Nivel de logro</th>
             ) : (
               <>
                 <th className="px-3 py-2 text-right font-medium">% Logro</th>
                 <th className="px-3 py-2 font-medium">Nivel</th>
               </>
             )}
-            {basePath ? <th className="px-3 py-2 font-medium print:hidden">Informe</th> : null}
+            {basePath ? (
+              <th className="w-10 px-3 py-2 font-medium print:hidden">
+                <span className="sr-only">Informe</span>
+              </th>
+            ) : null}
           </tr>
         </thead>
         <tbody>
@@ -442,32 +444,23 @@ function StudentTable({
               <td className="px-3 py-2 font-medium">
                 {s.studentFullName}
                 {/* Fuera de Diagnóstico el aviso "Requiere apoyo" va junto al nombre;
-                    en Diagnóstico tiene su propia columna, así que no se duplica. */}
+                    en Diagnóstico la franja de logro lo muestra por posición. */}
                 {!isDiagnostic && s.requiresSupport ? (
                   <span className="ml-2 rounded-sm bg-red-100 px-1.5 py-0.5 text-xs font-medium text-red-800 dark:bg-red-950 dark:text-red-200">
                     Requiere apoyo
                   </span>
                 ) : null}
               </td>
-              <td className="px-3 py-2 tabular-nums text-muted-foreground">{s.studentRut}</td>
               {isDiagnostic ? (
-                <>
-                  <td className="px-3 py-2">
-                    {s.requiresSupport ? (
-                      <span className="inline-flex items-center rounded-sm bg-red-100 px-1.5 py-0.5 text-xs font-semibold text-red-800 dark:bg-red-950 dark:text-red-200">
-                        Sí
-                      </span>
-                    ) : (
-                      <span className="text-muted-foreground">No</span>
-                    )}
-                  </td>
-                  <td
-                    className="px-3 py-2 text-right tabular-nums text-muted-foreground"
-                    title="Posición estimada del diagnóstico; no es un puntaje oficial."
-                  >
-                    {s.achievement === null ? '—' : `≈ ${fmtPct(s.achievement)}`}
-                  </td>
-                </>
+                <td className="px-3 py-2">
+                  {/* Misma figura del informe de monitoreo: bandas de nivel con el
+                      punto en el % de logro; requiere apoyo cae a la izquierda. */}
+                  <StudentBandStrip
+                    achievement={s.achievement}
+                    performanceLevel={s.performanceLevel}
+                    requiresSupport={s.requiresSupport}
+                  />
+                </td>
               ) : (
                 <>
                   <td className="px-3 py-2 text-right tabular-nums">{fmtPct(s.achievement)}</td>
@@ -489,12 +482,14 @@ function StudentTable({
                 </>
               )}
               {basePath ? (
-                <td className="px-3 py-2 print:hidden">
+                <td className="px-3 py-2 text-right print:hidden">
                   <Link
                     href={`${basePath}/${s.studentId}` as Route}
-                    className="text-sm font-medium text-primary hover:underline"
+                    aria-label={`Ver informe de ${s.studentFullName}`}
+                    title="Ver informe del estudiante"
+                    className="inline-flex size-7 items-center justify-center rounded-md text-primary hover:bg-muted"
                   >
-                    Ver informe
+                    <ArrowRight className="size-4" aria-hidden />
                   </Link>
                 </td>
               ) : null}
