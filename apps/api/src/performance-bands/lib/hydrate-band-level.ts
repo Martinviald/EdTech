@@ -4,19 +4,26 @@
 // informe oficial (`CourseReportService`) derive el nivel con EXACTAMENTE la
 // misma lógica (DRY) y ambos no discrepen.
 //
-// Dos ramas:
-//  - Dato granular (`percentage` presente): clasifica por umbral, como siempre.
-//    No toca `performanceLevel` (se deriva del % en otra capa).
-//  - Dato agregado band-only: la fila trae `performanceBandId` pero sin
-//    `percentage` ni `performanceLevel` (lo que escribe el importador de
-//    informes oficiales con `metric_type='band'`). Deriva el nivel legacy desde
-//    la banda guardada. Es, por construcción, la única fila que cae en esta rama:
-//    exige las tres condiciones a la vez (sin %, sin nivel, con banda).
+// La prioridad es **band-autoritativa por `metricType`**:
+//  - `metricType === 'band'`: la fila representa una banda ya decidida (lo que
+//    escribe el importador/backfill de informes oficiales). El nivel se deriva de
+//    la banda guardada, IGNORANDO `percentage`. Esto cubre dos casos:
+//      · Monitoreo/Cierre band-only: `percentage` NULL, `performanceBandId` seteado
+//        → nivel desde la banda.
+//      · Diagnóstico: `percentage` = posición APROXIMADA (no un score que se pueda
+//        re-clasificar) + `performanceBandId` = banda "requiere mayor apoyo" (Nivel I)
+//        cuando corresponde, o NULL si no requiere apoyo → nivel desde la banda (o
+//        null si no hay banda). La banda importada manda sobre el % aproximado.
+//    Sin `performanceBandId`, el nivel queda no determinado (null).
+//  - `metricType !== 'band'` (`percentage`/`scaled`, p.ej. item_level): clasifica por
+//    umbral sobre `percentage`, como siempre. No toca `performanceLevel` (se deriva
+//    del % en otra capa).
 
 import { bandToLegacyLevel, classifyByBands } from '@soe/types';
-import type { PerformanceBandInput, PerformanceLevel } from '@soe/types';
+import type { MetricType, PerformanceBandInput, PerformanceLevel } from '@soe/types';
 
 export type BandHydrationInput = {
+  metricType: MetricType;
   percentage: number | null;
   performanceLevel: PerformanceLevel | null;
   performanceBandId: string | null;
@@ -39,16 +46,22 @@ export function hydrateBandForStudent(
   if (bands.length === 0) {
     return { band: null, performanceLevel: student.performanceLevel };
   }
+  // Band-autoritativa: la banda guardada manda; `percentage` se ignora por completo
+  // (en Diagnóstico es una posición aproximada, no un score clasificable).
+  if (student.metricType === 'band') {
+    if (student.performanceBandId === null) {
+      return { band: null, performanceLevel: null };
+    }
+    const band = bands.find((b) => b.id === student.performanceBandId) ?? null;
+    if (!band) return { band: null, performanceLevel: null };
+    return { band, performanceLevel: bandToLegacyLevel(band, bands) };
+  }
+  // Dato granular (item_level): clasifica por umbral sobre el % del alumno.
   if (student.percentage !== null) {
     return {
       band: classifyByBands(student.percentage / 100, bands),
       performanceLevel: student.performanceLevel,
     };
   }
-  if (student.performanceLevel !== null || student.performanceBandId === null) {
-    return { band: null, performanceLevel: student.performanceLevel };
-  }
-  const band = bands.find((b) => b.id === student.performanceBandId) ?? null;
-  if (!band) return { band: null, performanceLevel: student.performanceLevel };
-  return { band, performanceLevel: bandToLegacyLevel(band, bands) };
+  return { band: null, performanceLevel: student.performanceLevel };
 }

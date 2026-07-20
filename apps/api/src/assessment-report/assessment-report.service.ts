@@ -41,6 +41,7 @@ import {
   type AssessmentReportSkillRow,
   type DataGranularity,
   type ItemReportFlag,
+  type MetricType,
   type PerformanceBandDistributionBucket,
   type PerformanceBandInput,
   type PerformanceBandView,
@@ -1058,6 +1059,8 @@ export class AssessmentReportService {
         lastName: students.lastName,
         percentage: assessmentResults.percentage,
         grade: assessmentResults.grade,
+        // Decide la prioridad de `hydrateBands`: 'band' → nivel desde la banda.
+        metricType: assessmentResults.metricType,
         performanceLevel: assessmentResults.performanceLevel,
         // Sólo lo usa `hydrateBands`, y sólo cuando no hay `percentage` que
         // clasificar: es la banda que el informe oficial trae ya decidida.
@@ -1074,6 +1077,7 @@ export class AssessmentReportService {
       lastName: r.lastName,
       percentage: r.percentage === null ? null : Number(r.percentage),
       grade: r.grade === null ? null : Number(r.grade),
+      metricType: r.metricType,
       performanceLevel: r.performanceLevel,
       performanceBandId: r.performanceBandId ?? null,
       band: null,
@@ -1533,6 +1537,8 @@ type EvaluatedStudent = {
   lastName: string;
   percentage: number | null;
   grade: number | null;
+  /** Decide la prioridad de hidratación: `'band'` deriva el nivel de la banda. */
+  metricType: MetricType;
   /** Con datos agregados lo rellena `hydrateBands` desde la banda del informe. */
   performanceLevel: PerformanceLevel | null;
   /** `performance_bands.id` de la fila; sólo viene con `metric_type='band'`. */

@@ -25,6 +25,7 @@ import {
   type OfficialCourseStudentRow,
   type OfficialDevelopmentDistribution,
   type OfficialSpecTableRow,
+  type MetricType,
   type PerformanceBandInput,
   type PerformanceDistributionBucket,
   type PerformanceLevel,
@@ -65,6 +66,11 @@ type EvaluatedStudent = {
   lastName: string;
   percentage: number | null;
   grade: number | null;
+  /**
+   * Tipo de métrica de la fila. Decide la prioridad de hidratación: `'band'` deriva
+   * el nivel de la banda guardada (informe oficial), el resto clasifica por `%`.
+   */
+  metricType: MetricType;
   /** Con datos agregados lo rellena `hydratePerformanceLevels` desde la banda. */
   performanceLevel: PerformanceLevel | null;
   /** `performance_bands.id` de la fila; sólo viene con `metric_type='band'`. */
@@ -609,6 +615,7 @@ export class CourseReportService {
         lastName: students.lastName,
         percentage: assessmentResults.percentage,
         grade: assessmentResults.grade,
+        metricType: assessmentResults.metricType,
         performanceLevel: assessmentResults.performanceLevel,
         performanceBandId: assessmentResults.performanceBandId,
       })
@@ -623,6 +630,7 @@ export class CourseReportService {
       lastName: r.lastName,
       percentage: r.percentage === null ? null : Number(r.percentage),
       grade: r.grade === null ? null : Number(r.grade),
+      metricType: r.metricType,
       performanceLevel: r.performanceLevel,
       performanceBandId: r.performanceBandId ?? null,
     }));
