@@ -144,6 +144,13 @@ export const officialReportStudentSchema = z.object({
   name: z.string().min(1).max(200),
   /** Monitoreo/Cierre: nivel de logro discreto de la figura (I/II/III…). */
   level: z.string().min(1).max(50).optional(),
+  /**
+   * Cierre: nivel PREVIO del alumno en el Monitoreo Intermedio (I/II/III…). La figura
+   * "Estudiantes que muestran avance o mejora" del informe de Cierre lista el SUBCONJUNTO
+   * que avanzó, cada uno con su nivel de Monitoreo (`priorLevel`) y su nivel de Cierre
+   * (`level`). Sólo presente en Cierre; el importador lo resuelve a la banda previa.
+   */
+  priorLevel: z.string().min(1).max(50).optional(),
   /** Diagnóstico: "requiere mayor apoyo" (lado del umbral). Señal confiable. */
   requiresSupport: z.boolean().optional(),
   /** Diagnóstico: posición/score aproximado (0..100). Sólo para mostrar. */

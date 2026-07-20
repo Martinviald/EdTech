@@ -402,7 +402,13 @@ async function main() {
       //    manda sobre el % (la lectura es band-autoritativa por metric_type='band').
       const byStudent = new Map<
         string,
-        { band: PerformanceBandInput | null; percentage: string | null; kind: 'auto' | 'prefix' }
+        {
+          band: PerformanceBandInput | null;
+          // Cierre: banda del nivel PREVIO (Monitoreo). NULL fuera de Cierre.
+          priorBand: PerformanceBandInput | null;
+          percentage: string | null;
+          kind: 'auto' | 'prefix';
+        }
       >();
       let auto = 0;
       let prefix = 0;
@@ -426,6 +432,9 @@ async function main() {
 
         // Banda + posición de la fila según el momento del informe.
         let band: PerformanceBandInput | null;
+        // Cierre: banda del nivel PREVIO (Monitoreo). Se resuelve del mismo modo que
+        // `band` (resolveLevelBand). NULL cuando el informe no trae `priorLevel`.
+        let priorBand: PerformanceBandInput | null = null;
         let percentage: string | null;
         if (s.level != null) {
           // Monitoreo/Cierre: nivel discreto → banda; sin %.
@@ -434,6 +443,9 @@ async function main() {
             noBand++;
             continue;
           }
+          // Cierre: si viene el nivel de Monitoreo, resolver su banda (para el avance
+          // priorBand → band en §5). No bloquea la escritura si no resuelve.
+          priorBand = s.priorLevel != null ? resolveLevelBand(s.priorLevel, bands) : null;
           percentage = null;
         } else if (s.requiresSupport !== undefined) {
           // Diagnóstico: binario "requiere apoyo" + posición aproximada.
@@ -457,7 +469,7 @@ async function main() {
           byStudent.delete(res.studentId);
           continue;
         }
-        byStudent.set(res.studentId, { band, percentage, kind: res.kind });
+        byStudent.set(res.studentId, { band, priorBand, percentage, kind: res.kind });
         if (res.kind === 'auto') auto++;
         else prefix++;
       }
@@ -491,7 +503,7 @@ async function main() {
       await tx
         .insert(assessmentResults)
         .values(
-          [...byStudent.entries()].map(([studentId, { band, percentage }]) => ({
+          [...byStudent.entries()].map(([studentId, { band, priorBand, percentage }]) => ({
             assessmentId: found.id,
             studentId,
             totalScore: null,
@@ -501,6 +513,8 @@ async function main() {
             metricType: 'band' as const,
             bandLabel: band?.label ?? null,
             performanceBandId: band?.id ?? null,
+            // Cierre: banda del nivel previo (Monitoreo). NULL en el resto.
+            priorPerformanceBandId: priorBand?.id ?? null,
             performanceLevel: null,
             isComplete: true,
             completedAt: now,
@@ -516,6 +530,7 @@ async function main() {
             metricType: sql`excluded.metric_type`,
             bandLabel: sql`excluded.band_label`,
             performanceBandId: sql`excluded.performance_band_id`,
+            priorPerformanceBandId: sql`excluded.prior_performance_band_id`,
             performanceLevel: sql`excluded.performance_level`,
             isComplete: sql`excluded.is_complete`,
             completedAt: sql`excluded.completed_at`,
