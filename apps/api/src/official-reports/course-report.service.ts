@@ -94,7 +94,16 @@ type EvaluatedStudent = {
 
 /** PerformanceBandInput (con thresholds) → vista mínima para la respuesta. */
 function toBandView(b: PerformanceBandInput): PerformanceBandView {
-  return { key: b.key, label: b.label, order: b.order, color: b.color ?? null };
+  // Se incluyen los umbrales (0..1): §5 dibuja la franja posicional por estudiante
+  // sobre las bandas REALES del instrumento (dot-plot / band-strip), no la fija de 4.
+  return {
+    key: b.key,
+    label: b.label,
+    order: b.order,
+    color: b.color ?? null,
+    minThreshold: b.minThreshold,
+    maxThreshold: b.maxThreshold,
+  };
 }
 
 @Injectable()
