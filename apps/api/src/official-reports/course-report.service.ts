@@ -26,7 +26,9 @@ import {
   type OfficialDevelopmentDistribution,
   type OfficialSpecTableRow,
   type MetricType,
+  type PerformanceBandDistributionBucket,
   type PerformanceBandInput,
+  type PerformanceBandView,
   type PerformanceDistributionBucket,
   type PerformanceLevel,
 } from '@soe/types';
@@ -36,6 +38,7 @@ import { loadInstrumentBands } from '../performance-bands/lib/load-instrument-ba
 import { hydrateBandForStudent } from '../performance-bands/lib/hydrate-band-level';
 import {
   loadCohortLevelCounts,
+  levelCountsToBandDistribution,
   levelCountsToLegacyDistribution,
   type CohortLevelCount,
 } from '../common/helpers/cohort-level-stats.helper';
@@ -75,7 +78,14 @@ type EvaluatedStudent = {
   performanceLevel: PerformanceLevel | null;
   /** `performance_bands.id` de la fila; sólo viene con `metric_type='band'`. */
   performanceBandId: string | null;
+  /** Banda del instrumento resuelta por `hydratePerformanceLevels` (§5 label/key). */
+  band: PerformanceBandInput | null;
 };
+
+/** PerformanceBandInput (con thresholds) → vista mínima para la respuesta. */
+function toBandView(b: PerformanceBandInput): PerformanceBandView {
+  return { key: b.key, label: b.label, order: b.order, color: b.color ?? null };
+}
 
 @Injectable()
 export class CourseReportService {
@@ -250,6 +260,19 @@ export class CourseReportService {
       );
       const studentResults = this.buildStudentResults(evaluated, classGroupByStudent);
 
+      // Bandas del instrumento para el informe fiel (§2 torta + §5 badge): cuando el
+      // instrumento las define, la web las prefiere sobre la escala fija de 4 niveles.
+      // La distribución por banda sale de `assessment_level_stats` en modo agregado
+      // (Gráfico 1) o de las filas por-alumno hidratadas en dato granular. Sin bandas
+      // quedan `undefined` → la web cae a los 4 niveles legacy (sin regresión no-DIA).
+      const bandView = instrumentBands.length > 0 ? instrumentBands.map(toBandView) : undefined;
+      const bandDistribution =
+        instrumentBands.length === 0
+          ? undefined
+          : levelData
+            ? levelCountsToBandDistribution(levelData.counts, instrumentBands)
+            : this.buildBandDistributionFromStudents(evaluated, instrumentBands);
+
       return {
         meta,
         generalResult,
@@ -257,6 +280,7 @@ export class CourseReportService {
         specTable,
         studentResults,
         reflectionPrompts,
+        ...(bandView ? { bands: bandView, bandDistribution } : {}),
       };
     });
   }
@@ -560,7 +584,11 @@ export class CourseReportService {
   ): void {
     if (bands.length === 0) return;
     for (const e of evaluated) {
-      e.performanceLevel = hydrateBandForStudent(e, bands).performanceLevel;
+      // Núcleo por alumno compartido con AssessmentReportService.hydrateBands:
+      // la banda alimenta §5 (bandLabel/bandKey) y la distribución por banda de §2.
+      const { band, performanceLevel } = hydrateBandForStudent(e, bands);
+      e.band = band;
+      e.performanceLevel = performanceLevel;
     }
   }
 
@@ -584,6 +612,44 @@ export class CourseReportService {
           grade: e.grade,
           performanceLevel: e.performanceLevel,
           requiresSupport: e.performanceLevel === REQUIRES_SUPPORT_LEVEL,
+          // Banda real del instrumento (ej. DIA "Nivel II"). `null` sin bandas → la
+          // web muestra la etiqueta legacy de `performanceLevel`.
+          bandLabel: e.band?.label ?? null,
+          bandKey: e.band?.key ?? null,
+        };
+      });
+  }
+
+  // ── Distribución por banda (§2) ────────────────────────────────────────────
+
+  /**
+   * Distribución por banda del instrumento a partir de las filas por-alumno ya
+   * hidratadas (dato granular / no agregado). Itera TODAS las bandas —incluidas las
+   * de conteo 0— para una torta estable, igual que
+   * `AssessmentReportService.buildBandDistribution` y `levelCountsToBandDistribution`.
+   */
+  private buildBandDistributionFromStudents(
+    evaluated: EvaluatedStudent[],
+    bands: PerformanceBandInput[],
+  ): PerformanceBandDistributionBucket[] {
+    const counts = new Map<string, number>();
+    let total = 0;
+    for (const e of evaluated) {
+      if (!e.band) continue;
+      counts.set(e.band.key, (counts.get(e.band.key) ?? 0) + 1);
+      total += 1;
+    }
+    return [...bands]
+      .sort((a, b) => a.order - b.order)
+      .map((b) => {
+        const count = counts.get(b.key) ?? 0;
+        return {
+          key: b.key,
+          label: b.label,
+          order: b.order,
+          color: b.color ?? null,
+          count,
+          percentage: total > 0 ? (count / total) * 100 : 0,
         };
       });
   }
@@ -633,6 +699,7 @@ export class CourseReportService {
       metricType: r.metricType,
       performanceLevel: r.performanceLevel,
       performanceBandId: r.performanceBandId ?? null,
+      band: null,
     }));
   }
 
