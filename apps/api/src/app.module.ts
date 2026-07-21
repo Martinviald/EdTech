@@ -1,12 +1,13 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
-import { APP_GUARD } from '@nestjs/core';
+import { APP_FILTER, APP_GUARD } from '@nestjs/core';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { DatabaseModule } from './database/database.module';
 import { HealthModule } from './health/health.module';
 import { AuthModule } from './auth/auth.module';
 import { AuthGuard } from './auth/auth.guard';
+import { GlobalExceptionFilter } from './common/filters/global-exception.filter';
 import { PrivacyModule } from './privacy/privacy.module';
 import { OrganizationsModule } from './organizations/organizations.module';
 import { TaxonomiesModule } from './taxonomies/taxonomies.module';
@@ -108,6 +109,13 @@ import { OfficialReportsModule } from './official-reports/official-reports.modul
       // AuthGuard aplicado globalmente: toda ruta requiere JWT salvo @Public().
       provide: APP_GUARD,
       useClass: AuthGuard,
+    },
+    {
+      // Filtro global: los HttpException (4xx/negocio) pasan tal cual; los
+      // errores no controlados (5xx) se loguean server-side vía reportServerError
+      // antes de responder. Ver .claude/rules/backend/06-error-handling-observability.md.
+      provide: APP_FILTER,
+      useClass: GlobalExceptionFilter,
     },
   ],
 })
