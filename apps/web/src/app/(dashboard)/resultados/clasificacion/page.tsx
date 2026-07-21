@@ -1,16 +1,21 @@
+import { Suspense } from 'react';
 import { redirect } from 'next/navigation';
 import { Users } from 'lucide-react';
 import { auth } from '@/auth';
-import { apiGet } from '@/lib/api';
+import { ROUTES } from '@/lib/routes';
 import {
   canAccess,
   DASHBOARD_VIEWER_ROLES,
   PERFORMANCE_LEVELS,
   type PerformanceLevel,
-  type DashboardPerformanceResponse,
-  type DashboardFilterOptionsResponse,
 } from '@soe/types';
-import { PageContainer, PageHeader, EmptyState } from '@/components/patterns';
+import {
+  PageHeader,
+  EmptyState,
+  FilterBarSkeleton,
+  CardSkeleton,
+  TableSkeleton,
+} from '@/components/shared';
 import { Card, CardContent } from '@/components/ui/card';
 import {
   Table,
@@ -24,17 +29,19 @@ import { DashboardFilterBar } from '../components/dashboard-filter-bar';
 import {
   parseDashboardFilters,
   buildDashboardQuery,
+  type DashboardFilterValues,
 } from '../components/dashboard-filters';
-import { ResultadosNav } from '../components/resultados-nav';
 import { DistributionBar } from '../components/distribution-bar';
 import { PerformanceBadge } from '../components/performance-badge';
 import { PaginationControls } from '../components/pagination-controls';
 import { PerformanceLevelFilter } from '../components/performance-level-filter';
 import { formatAchievement } from '../components/performance-level';
+import { getDashboardFilters } from '../data';
+import { getDashboardPerformance } from './data';
 
 export const dynamic = 'force-dynamic';
 
-const BASE_PATH = '/resultados/clasificacion';
+const BASE_PATH = ROUTES.resultadosClasificacion;
 
 function parsePage(raw: string | string[] | undefined): number {
   const value = Array.isArray(raw) ? raw[0] : raw;
@@ -57,8 +64,8 @@ export default async function ClasificacionPage({
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
   const session = await auth();
-  if (!session?.user) redirect('/login');
-  if (!canAccess(session.user.roles, DASHBOARD_VIEWER_ROLES)) redirect('/dashboard');
+  if (!session?.user) redirect(ROUTES.login);
+  if (!canAccess(session.user.roles, DASHBOARD_VIEWER_ROLES)) redirect(ROUTES.dashboard);
 
   const params = await searchParams;
   const filters = parseDashboardFilters(params);
@@ -71,25 +78,57 @@ export default async function ClasificacionPage({
   perfParams.set('page', String(page));
   perfParams.set('limit', String(limit));
   if (performanceLevel) perfParams.set('performanceLevel', performanceLevel);
-
-  const [performance, options] = await Promise.all([
-    apiGet<DashboardPerformanceResponse>(`/dashboards/performance?${perfParams.toString()}`),
-    apiGet<DashboardFilterOptionsResponse>(`/dashboards/filters${filterQuery}`),
-  ]);
-
-  const students = performance.students;
+  const perfQuery = `?${perfParams.toString()}`;
 
   return (
-    <PageContainer>
-      <PageHeader
+    <>
+      <PageHeader variant="secondary"
         title="Clasificación por nivel"
         description="Distribución de niveles de desempeño y clasificación de cada alumno (H6.4)."
       />
 
-      <ResultadosNav />
+      <Suspense fallback={<FilterBarSkeleton />}>
+        <FiltersSection query={filterQuery} filters={filters} />
+      </Suspense>
 
-      <DashboardFilterBar options={options} value={filters} basePath={BASE_PATH} />
+      <Suspense
+        key={`perf-${perfQuery}`}
+        fallback={
+          <>
+            <CardSkeleton rows={2} />
+            <TableSkeleton />
+          </>
+        }
+      >
+        <PerformanceSection query={perfQuery} performanceLevel={performanceLevel} />
+      </Suspense>
+    </>
+  );
+}
 
+async function FiltersSection({
+  query,
+  filters,
+}: {
+  query: string;
+  filters: DashboardFilterValues;
+}) {
+  const options = await getDashboardFilters(query);
+  return <DashboardFilterBar options={options} value={filters} basePath={BASE_PATH} />;
+}
+
+async function PerformanceSection({
+  query,
+  performanceLevel,
+}: {
+  query: string;
+  performanceLevel: PerformanceLevel | undefined;
+}) {
+  const performance = await getDashboardPerformance(query);
+  const students = performance.students;
+
+  return (
+    <>
       <DistributionBar
         distribution={performance.distribution}
         bands={performance.bands}
@@ -161,6 +200,6 @@ export default async function ClasificacionPage({
           )}
         </CardContent>
       </Card>
-    </PageContainer>
+    </>
   );
 }

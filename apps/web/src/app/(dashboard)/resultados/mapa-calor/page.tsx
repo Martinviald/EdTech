@@ -1,29 +1,42 @@
+import { Suspense } from 'react';
 import { redirect } from 'next/navigation';
 import { LayoutGrid } from 'lucide-react';
 import { auth } from '@/auth';
-import { apiGet } from '@/lib/api';
+import { ROUTES } from '@/lib/routes';
 import {
   canAccess,
   HEATMAP_VIEWER_ROLES,
   userHasAnyRole,
   TEACHER_ROLES,
-  type HeatmapResponse,
   type HeatmapRow,
   type DashboardFilterOptionsResponse,
 } from '@soe/types';
-import { PageContainer, PageHeader, EmptyState } from '@/components/patterns';
+import {
+  PageHeader,
+  EmptyState,
+  FilterBarSkeleton,
+  TableSkeleton,
+} from '@/components/shared';
 import { AskAiButton, RegisterAssistantContext } from '@/components/assistant';
 import { DashboardFilterBar } from '../components/dashboard-filter-bar';
-import { parseDashboardFilters, buildDashboardQuery } from '../components/dashboard-filters';
+import {
+  parseDashboardFilters,
+  buildDashboardQuery,
+  type DashboardFilterValues,
+} from '../components/dashboard-filters';
 import { dashboardFiltersToAssistantRefs } from '../components/assistant-context';
-import { ResultadosNav } from '../components/resultados-nav';
 import { formatAchievement } from '../components/performance-level';
 import { ExportButton, type ExportColumn } from '../components/export/export-button';
 import { HeatmapTable, HeatmapLegend } from './heatmap-table';
+import { getDashboardFilters } from '../data';
+import { getHeatmap } from './data';
 
 export const dynamic = 'force-dynamic';
 
-const BASE_PATH = '/resultados/mapa-calor';
+const BASE_PATH = ROUTES.resultadosMapaCalor;
+
+const ASK_AI_PROMPT =
+  'Según este mapa de calor, ¿cuáles son las habilidades más críticas y en qué asignaturas/cursos debería enfocar primero?';
 
 export default async function MapaCalorPage({
   searchParams,
@@ -31,20 +44,82 @@ export default async function MapaCalorPage({
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
   const session = await auth();
-  if (!session?.user) redirect('/login');
-  if (!canAccess(session.user.roles, HEATMAP_VIEWER_ROLES)) redirect('/dashboard');
+  if (!session?.user) redirect(ROUTES.login);
+  if (!canAccess(session.user.roles, HEATMAP_VIEWER_ROLES)) redirect(ROUTES.dashboard);
 
   const params = await searchParams;
   const filters = parseDashboardFilters(params);
   const query = buildDashboardQuery(filters);
-
-  const [heatmap, options] = await Promise.all([
-    apiGet<HeatmapResponse>(`/heatmap${query}`),
-    apiGet<DashboardFilterOptionsResponse>(`/dashboards/filters${query}`),
-  ]);
-
   const isTeacher = userHasAnyRole(session.user.roles, TEACHER_ROLES);
+
+  return (
+    <>
+      <RegisterAssistantContext refs={dashboardFiltersToAssistantRefs(filters)} />
+      <PageHeader variant="secondary"
+        title="Mapa de calor"
+        description="% de logro promedio por habilidad (filas) y asignatura (columnas). Las habilidades más críticas aparecen primero (H6.10)."
+        actions={
+          <Suspense fallback={null}>
+            <MapaCalorAction query={query} />
+          </Suspense>
+        }
+      />
+
+      <Suspense fallback={<FilterBarSkeleton />}>
+        <FiltersSection query={query} filters={filters} />
+      </Suspense>
+
+      <Suspense fallback={<TableSkeleton rows={6} />}>
+        <HeatmapSection query={query} filters={filters} isTeacher={isTeacher} />
+      </Suspense>
+    </>
+  );
+}
+
+async function FiltersSection({
+  query,
+  filters,
+}: {
+  query: string;
+  filters: DashboardFilterValues;
+}) {
+  const options = await getDashboardFilters(query);
+  return <DashboardFilterBar options={options} value={filters} basePath={BASE_PATH} />;
+}
+
+async function MapaCalorAction({ query }: { query: string }) {
+  const heatmap = await getHeatmap(query);
   const hasData = heatmap.rows.length > 0 && heatmap.subjects.length > 0;
+  if (!hasData) return null;
+  return <AskAiButton prompt={ASK_AI_PROMPT} />;
+}
+
+async function HeatmapSection({
+  query,
+  filters,
+  isTeacher,
+}: {
+  query: string;
+  filters: DashboardFilterValues;
+  isTeacher: boolean;
+}) {
+  const [heatmap, options] = await Promise.all([getHeatmap(query), getDashboardFilters(query)]);
+
+  const hasData = heatmap.rows.length > 0 && heatmap.subjects.length > 0;
+
+  if (!hasData) {
+    return (
+      <EmptyState
+        icon={LayoutGrid}
+        title={isTeacher ? 'No hay datos para tus cursos' : 'No hay datos para el mapa de calor'}
+        description={
+          isTeacher
+            ? 'No se encontraron resultados de habilidades en los cursos que tienes asignados con los filtros aplicados.'
+            : 'No se encontraron resultados de habilidades para los filtros aplicados. Ajusta los filtros o importa más resultados.'
+        }
+      />
+    );
+  }
 
   // ── Datos de exportación (filas planas) ────────────────────────────────────
   // Aplana la matriz: una fila por habilidad, una columna por asignatura + Total.
@@ -57,48 +132,19 @@ export default async function MapaCalorPage({
   const filtersSummary = buildFiltersSummary(filters, options);
 
   return (
-    <PageContainer>
-      <RegisterAssistantContext refs={dashboardFiltersToAssistantRefs(filters)} />
-      <PageHeader
-        title="Mapa de calor"
-        description="% de logro promedio por habilidad (filas) y asignatura (columnas). Las habilidades más críticas aparecen primero (H6.10)."
-        actions={
-          hasData ? (
-            <AskAiButton prompt="Según este mapa de calor, ¿cuáles son las habilidades más críticas y en qué asignaturas/cursos debería enfocar primero?" />
-          ) : undefined
-        }
-      />
-
-      <ResultadosNav />
-
-      <DashboardFilterBar options={options} value={filters} basePath={BASE_PATH} />
-
-      {!hasData ? (
-        <EmptyState
-          icon={LayoutGrid}
-          title={isTeacher ? 'No hay datos para tus cursos' : 'No hay datos para el mapa de calor'}
-          description={
-            isTeacher
-              ? 'No se encontraron resultados de habilidades en los cursos que tienes asignados con los filtros aplicados.'
-              : 'No se encontraron resultados de habilidades para los filtros aplicados. Ajusta los filtros o importa más resultados.'
-          }
+    <div className="space-y-4">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <HeatmapLegend />
+        <ExportButton
+          rows={exportRows}
+          columns={exportColumns}
+          filename="mapa-calor"
+          title="Mapa de calor — Logro por habilidad y asignatura"
+          filtersSummary={filtersSummary}
         />
-      ) : (
-        <div className="space-y-4">
-          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-            <HeatmapLegend />
-            <ExportButton
-              rows={exportRows}
-              columns={exportColumns}
-              filename="mapa-calor"
-              title="Mapa de calor — Logro por habilidad y asignatura"
-              filtersSummary={filtersSummary}
-            />
-          </div>
-          <HeatmapTable data={heatmap} />
-        </div>
-      )}
-    </PageContainer>
+      </div>
+      <HeatmapTable data={heatmap} />
+    </div>
   );
 }
 

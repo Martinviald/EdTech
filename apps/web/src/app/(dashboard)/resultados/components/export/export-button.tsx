@@ -12,9 +12,6 @@
 
 import type { JSX } from 'react';
 import { useState } from 'react';
-import * as XLSX from 'xlsx';
-import { jsPDF } from 'jspdf';
-import autoTable from 'jspdf-autotable';
 import { Download } from 'lucide-react';
 import {
   DropdownMenu,
@@ -64,9 +61,10 @@ export function ExportButton<T extends Record<string, unknown>>({
   const hasData = rows.length > 0;
   const offered = formats.length > 0 ? formats : DEFAULT_FORMATS;
 
-  function exportExcel() {
+  async function exportExcel() {
     setBusy(true);
     try {
+      const XLSX = await import('xlsx');
       // Construye objetos planos con los encabezados como claves para json_to_sheet.
       const data = rows.map((row) => {
         const record: Record<string, string | number> = {};
@@ -87,9 +85,11 @@ export function ExportButton<T extends Record<string, unknown>>({
     }
   }
 
-  function exportPdf() {
+  async function exportPdf() {
     setBusy(true);
     try {
+      const { jsPDF } = await import('jspdf');
+      const autoTable = (await import('jspdf-autotable')).default;
       const doc = new jsPDF({ orientation: 'landscape' });
       doc.setFontSize(14);
       doc.text(title, 14, 16);

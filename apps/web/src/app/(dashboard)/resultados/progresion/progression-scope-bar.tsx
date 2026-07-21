@@ -7,7 +7,7 @@
 // catálogo de alumnos/habilidades en el contrato de filters).
 // ─────────────────────────────────────────────────────────────────────────────
 
-import { useCallback } from 'react';
+import { useCallback, useTransition } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import type { Route } from 'next';
 import {
@@ -22,6 +22,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import { TopProgressBar } from '@/components/shared';
 
 const SCOPE_LABELS: Record<ProgressionScope, string> = {
   student: 'Alumno',
@@ -42,13 +43,16 @@ export function ProgressionScopeBar(props: {
   const { options, basePath, scope, classGroupId } = props;
   const router = useRouter();
   const searchParams = useSearchParams();
+  const [isPending, startTransition] = useTransition();
 
   const pushParams = useCallback(
     (mutate: (sp: URLSearchParams) => void) => {
       const sp = new URLSearchParams(searchParams.toString());
       mutate(sp);
       const qs = sp.toString();
-      router.push((qs ? `${basePath}?${qs}` : basePath) as Route);
+      startTransition(() => {
+        router.push((qs ? `${basePath}?${qs}` : basePath) as Route);
+      });
     },
     [router, searchParams, basePath],
   );
@@ -77,7 +81,8 @@ export function ProgressionScopeBar(props: {
   );
 
   return (
-    <div className="flex flex-col gap-3 rounded-lg border bg-card p-4 sm:flex-row sm:flex-wrap sm:items-end">
+    <div className="relative flex flex-col gap-3 overflow-hidden rounded-lg border bg-card p-4 sm:flex-row sm:flex-wrap sm:items-end">
+      <TopProgressBar active={isPending} position="bottom" />
       <div className="flex min-w-[12rem] flex-1 flex-col gap-1">
         <label className="text-xs font-medium text-muted-foreground">Alcance</label>
         <Select value={scope} onValueChange={onScopeChange}>

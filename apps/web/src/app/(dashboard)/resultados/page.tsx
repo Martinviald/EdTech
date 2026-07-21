@@ -1,17 +1,24 @@
+import { Suspense } from 'react';
 import { redirect } from 'next/navigation';
-import { BarChart3, GraduationCap, ClipboardList, TriangleAlert, Inbox } from 'lucide-react';
+import { BarChart3, GraduationCap, ClipboardList, TriangleAlert, Inbox, CircleCheck } from 'lucide-react';
 import { auth } from '@/auth';
-import { apiGet } from '@/lib/api';
+import { ROUTES } from '@/lib/routes';
 import {
   canAccess,
   DASHBOARD_VIEWER_ROLES,
-  type DashboardOverviewResponse,
-  type DashboardFilterOptionsResponse,
-  type DashboardTeacherKpisResponse,
   type DashboardAlert,
   type DashboardAssessmentSummary,
+  type DashboardTeacherKpisResponse,
 } from '@soe/types';
-import { PageContainer, PageHeader, EmptyState } from '@/components/patterns';
+import {
+  PageHeader,
+  EmptyState,
+  StatCard,
+  FilterBarSkeleton,
+  KpiGridSkeleton,
+  CardSkeleton,
+  TableSkeleton,
+} from '@/components/shared';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import {
   Table,
@@ -22,18 +29,25 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { DashboardFilterBar } from './components/dashboard-filter-bar';
-import { parseDashboardFilters, buildDashboardQuery } from './components/dashboard-filters';
-import { SummaryCard } from './components/summary-card';
+import {
+  parseDashboardFilters,
+  buildDashboardQuery,
+  type DashboardFilterValues,
+} from './components/dashboard-filters';
 import { DistributionBar } from './components/distribution-bar';
-import { ResultadosNav } from './components/resultados-nav';
 import { formatAchievement } from './components/performance-level';
+import {
+  getDashboardOverview,
+  getDashboardFilters,
+  getDashboardTeacherKpis,
+} from './data';
 
 export const dynamic = 'force-dynamic';
 
 const ALERT_TONE: Record<DashboardAlert['severity'], string> = {
-  high: 'border-l-red-500 bg-red-50 dark:bg-red-950/30',
-  medium: 'border-l-amber-500 bg-amber-50 dark:bg-amber-950/30',
-  low: 'border-l-blue-500 bg-blue-50 dark:bg-blue-950/30',
+  high: 'border-l-destructive bg-destructive/10',
+  medium: 'border-l-warning bg-warning/10',
+  low: 'border-l-info bg-info/10',
 };
 
 export default async function ResultadosOverviewPage({
@@ -42,57 +56,71 @@ export default async function ResultadosOverviewPage({
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
   const session = await auth();
-  if (!session?.user) redirect('/login');
-  if (!canAccess(session.user.roles, DASHBOARD_VIEWER_ROLES)) redirect('/dashboard');
+  if (!session?.user) redirect(ROUTES.login);
+  if (!canAccess(session.user.roles, DASHBOARD_VIEWER_ROLES)) redirect(ROUTES.dashboard);
 
-  const params = await searchParams;
-  const filters = parseDashboardFilters(params);
+  const filters = parseDashboardFilters(await searchParams);
   const query = buildDashboardQuery(filters);
 
-  const [overview, options] = await Promise.all([
-    apiGet<DashboardOverviewResponse>(`/dashboards/overview${query}`),
-    apiGet<DashboardFilterOptionsResponse>(`/dashboards/filters${query}`),
-  ]);
+  // El shell (encabezado, tabs) renderiza al instante; los datos streamean por
+  // sección. `key={query}` reinicia el skeleton al cambiar los filtros.
+  return (
+    <>
+      <PageHeader variant="secondary" title="Resumen" />
 
-  // KPIs de profesor (H6.8) sólo cuando el scope resuelto por el backend es teacher.
-  const teacherKpis =
-    overview.scope === 'teacher'
-      ? await apiGet<DashboardTeacherKpisResponse>(`/dashboards/teacher-kpis${query}`)
-      : null;
+      <Suspense fallback={<FilterBarSkeleton />}>
+        <FiltersSection query={query} filters={filters} />
+      </Suspense>
+
+      <Suspense
+        fallback={
+          <>
+            <KpiGridSkeleton />
+            <CardSkeleton />
+            <TableSkeleton />
+          </>
+        }
+      >
+        <OverviewSections query={query} />
+      </Suspense>
+    </>
+  );
+}
+
+async function FiltersSection({
+  query,
+  filters,
+}: {
+  query: string;
+  filters: DashboardFilterValues;
+}) {
+  const options = await getDashboardFilters(query);
+  return <DashboardFilterBar options={options} value={filters} basePath={ROUTES.resultados} />;
+}
+
+async function OverviewSections({ query }: { query: string }) {
+  const overview = await getDashboardOverview(query);
 
   return (
-    <PageContainer>
-      <PageHeader
-        title="Panorama pedagógico"
-        description={
-          overview.scope === 'teacher'
-            ? 'Panorama de tus cursos asignados: logro, evaluaciones y alertas.'
-            : 'Panorama del colegio: logro global, evaluaciones recientes y alertas.'
-        }
-      />
-
-      <ResultadosNav />
-
-      <DashboardFilterBar options={options} value={filters} basePath="/resultados" />
-
+    <>
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <SummaryCard
+        <StatCard
           label="% Logro global"
           value={formatAchievement(overview.globalAchievement)}
           hint="Promedio sobre el alcance filtrado"
           icon={BarChart3}
         />
-        <SummaryCard
+        <StatCard
           label="Alumnos evaluados"
           value={overview.studentsEvaluated.toLocaleString('es-CL')}
           icon={GraduationCap}
         />
-        <SummaryCard
+        <StatCard
           label="Evaluaciones"
           value={overview.assessmentsCount.toLocaleString('es-CL')}
           icon={ClipboardList}
         />
-        <SummaryCard
+        <StatCard
           label="Alertas"
           value={overview.alerts.length.toLocaleString('es-CL')}
           hint="Cursos/habilidades que requieren atención"
@@ -106,9 +134,18 @@ export default async function ResultadosOverviewPage({
 
       <RecentAssessments assessments={overview.recentAssessments} />
 
-      {teacherKpis ? <TeacherKpisSection kpis={teacherKpis} /> : null}
-    </PageContainer>
+      {overview.scope === 'teacher' ? (
+        <Suspense fallback={<TableSkeleton />}>
+          <TeacherKpisSection query={query} />
+        </Suspense>
+      ) : null}
+    </>
   );
+}
+
+async function TeacherKpisSection({ query }: { query: string }) {
+  const kpis = await getDashboardTeacherKpis(query);
+  return <TeacherKpisTable kpis={kpis} />;
 }
 
 function AlertsSection({ alerts }: { alerts: DashboardAlert[] }) {
@@ -119,9 +156,12 @@ function AlertsSection({ alerts }: { alerts: DashboardAlert[] }) {
       </CardHeader>
       <CardContent>
         {alerts.length === 0 ? (
-          <p className="text-sm text-muted-foreground">
-            Sin alertas. Todos los cursos y habilidades del alcance están sobre los umbrales.
-          </p>
+          <EmptyState
+            tone="success"
+            icon={CircleCheck}
+            title="Sin alertas"
+            description="Todos los cursos y habilidades del alcance están sobre los umbrales."
+          />
         ) : (
           <ul className="space-y-2">
             {alerts.map((alert, idx) => (
@@ -197,7 +237,7 @@ function RecentAssessments({ assessments }: { assessments: DashboardAssessmentSu
   );
 }
 
-function TeacherKpisSection({ kpis }: { kpis: DashboardTeacherKpisResponse }) {
+function TeacherKpisTable({ kpis }: { kpis: DashboardTeacherKpisResponse }) {
   return (
     <Card>
       <CardHeader>
@@ -242,9 +282,7 @@ function TeacherKpisSection({ kpis }: { kpis: DashboardTeacherKpisResponse }) {
                       {formatAchievement(c.passingRate)}
                     </TableCell>
                     <TableCell className="text-right">
-                      <span
-                        className={c.criticalStudents > 0 ? 'font-medium text-destructive' : ''}
-                      >
+                      <span className={c.criticalStudents > 0 ? 'font-medium text-destructive' : ''}>
                         {c.criticalStudents}
                       </span>
                     </TableCell>

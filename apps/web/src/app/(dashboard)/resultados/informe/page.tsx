@@ -1,5 +1,5 @@
 import { redirect } from 'next/navigation';
-import type { Route } from 'next';
+import { ROUTES } from '@/lib/routes';
 
 export const dynamic = 'force-dynamic';
 
@@ -25,10 +25,10 @@ export default async function InformeRedirect({
 
   if (assessmentId) {
     const qs = classGroupId ? `?classGroupId=${classGroupId}` : '';
-    redirect(`/evaluaciones/${assessmentId}/resultados${qs}` as Route);
+    redirect(`${ROUTES.evaluacionResultados(assessmentId)}${qs}`);
   }
 
   redirect(
-    (classGroupId ? `/evaluaciones?classGroupId=${classGroupId}` : '/evaluaciones') as Route,
+    classGroupId ? `${ROUTES.evaluaciones}?classGroupId=${classGroupId}` : ROUTES.evaluaciones,
   );
 }
