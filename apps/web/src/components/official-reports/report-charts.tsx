@@ -293,7 +293,15 @@ function toDisplayBands(bands: PerformanceBandView[] | undefined): DisplayBand[]
 }
 
 type DotHover =
-  | { kind: 'student'; row: OfficialCourseStudentRow; index: number }
+  | {
+      kind: 'student';
+      row: OfficialCourseStudentRow;
+      index: number;
+      // Banda real resuelta para el alumno (label + color), para que el tooltip
+      // sea consistente con la figura (ej. "Nivel II" y su color, no el legacy).
+      bandLabel: string | null;
+      color: string;
+    }
   | { kind: 'band'; band: DisplayBand; count: number };
 
 /**
@@ -368,7 +376,19 @@ export function StudentDotPlot({
                 <span className="tabular-nums text-muted-foreground">{idx}</span>{' '}
                 {s.studentFullName}
               </div>
-              <div className="relative h-6 flex-1">
+              {/* Toda la franja de la fila es zona de hover (no sólo el punto de 24px):
+                  en un curso con muchas filas el punto es un blanco chico y el tooltip
+                  "no aparecía". El tooltip muestra la banda real del alumno + su color. */}
+              <div
+                className="relative h-6 flex-1"
+                {...bind({
+                  kind: 'student',
+                  row: s,
+                  index: i,
+                  bandLabel: useBands ? (s.bandLabel ?? null) : null,
+                  color: dotColor,
+                })}
+              >
                 {displayBands.map((b) => (
                   <div
                     key={b.key}
@@ -393,14 +413,13 @@ export function StudentDotPlot({
                   className="absolute inset-x-0 top-1/2 -translate-y-1/2 border-t border-dashed border-border/70"
                   aria-hidden
                 />
-                {/* Punto = % de logro, coloreado por su nivel. Área de hover ampliada. */}
+                {/* Punto = % de logro, coloreado por su banda. */}
                 <span
-                  className="absolute top-1/2 flex size-6 -translate-x-1/2 -translate-y-1/2 items-center justify-center"
+                  className="pointer-events-none absolute top-1/2 flex size-6 -translate-x-1/2 -translate-y-1/2 items-center justify-center"
                   style={{ left: `${x}%` }}
-                  {...bind({ kind: 'student', row: s, index: i })}
                 >
                   <span
-                    className="size-2.5 rounded-full ring-2 ring-card transition-transform hover:scale-125"
+                    className="size-2.5 rounded-full ring-2 ring-card transition-transform"
                     style={{ backgroundColor: dotColor }}
                   />
                 </span>
@@ -448,7 +467,12 @@ export function StudentDotPlot({
       {tip ? (
         <ChartTooltipPortal x={tip.x} y={tip.y}>
           {tip.data.kind === 'student' ? (
-            <StudentDotTooltip row={tip.data.row} index={tip.data.index} />
+            <StudentDotTooltip
+              row={tip.data.row}
+              index={tip.data.index}
+              bandLabel={tip.data.bandLabel}
+              color={tip.data.color}
+            />
           ) : (
             <ChartTooltipCard
               title={tip.data.band.label}
@@ -548,16 +572,26 @@ export function StudentBandStrip({
   );
 }
 
-function StudentDotTooltip({ row, index }: { row: OfficialCourseStudentRow; index: number }) {
-  const color = row.performanceLevel
-    ? PERFORMANCE_LEVEL_CHART_COLOR[row.performanceLevel]
-    : undefined;
+function StudentDotTooltip({
+  row,
+  index,
+  bandLabel,
+  color,
+}: {
+  row: OfficialCourseStudentRow;
+  index: number;
+  // Banda real del instrumento (ej. "Nivel II") + su color, ya resueltos en el
+  // dot-plot. Con bandas, el tooltip muestra la banda; sin ellas, el nivel legacy.
+  bandLabel: string | null;
+  color: string;
+}) {
+  const levelLabel = bandLabel ?? performanceLevelLabel(row.performanceLevel);
   const rows: ChartTooltipRow[] = [
     { label: '% de logro', value: fmtPct(row.achievement) },
     {
       label: 'Nivel',
-      value: performanceLevelLabel(row.performanceLevel),
-      color: color ?? null,
+      value: levelLabel,
+      color,
     },
   ];
   if (row.grade !== null) rows.push({ label: 'Nota', value: row.grade.toFixed(1) });
