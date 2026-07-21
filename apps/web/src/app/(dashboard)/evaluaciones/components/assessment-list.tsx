@@ -1,8 +1,8 @@
 import Link from 'next/link';
-import type { Route } from 'next';
 import { ArrowRight, CalendarDays, GraduationCap, Users } from 'lucide-react';
 import type { AssessmentOption } from '@soe/types';
 import { Badge } from '@/components/ui/badge';
+import { ROUTES } from '@/lib/routes';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Lista de evaluaciones (H6 / hub de evaluación). Cada fila es el punto de
@@ -32,7 +32,7 @@ export function AssessmentList({ assessments }: { assessments: AssessmentOption[
         return (
           <Link
             key={a.assessmentId}
-            href={`/evaluaciones/${a.assessmentId}` as Route}
+            href={ROUTES.evaluacion(a.assessmentId)}
             className="group flex items-center gap-3 px-4 py-3 transition-colors hover:bg-muted/50 focus-visible:bg-muted/50 focus-visible:outline-none"
           >
             <div className="min-w-0 flex-1">

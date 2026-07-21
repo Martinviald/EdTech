@@ -2,6 +2,7 @@ import { redirect } from 'next/navigation';
 import { Inbox } from 'lucide-react';
 import { auth } from '@/auth';
 import { apiGet } from '@/lib/api';
+import { ROUTES } from '@/lib/routes';
 import {
   canAccess,
   ANALYTICS_VIEWER_ROLES,
@@ -9,7 +10,7 @@ import {
   type DashboardFilterOptionsResponse,
   type DashboardSkillsResponse,
 } from '@soe/types';
-import { EmptyState } from '@/components/patterns';
+import { EmptyState } from '@/components/shared';
 import { DashboardFilterBar } from '../../../resultados/components/dashboard-filter-bar';
 import {
   parseDashboardFilters,
@@ -27,15 +28,15 @@ export default async function EvaluacionResultadosPage({
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
   const session = await auth();
-  if (!session?.user) redirect('/login');
-  if (!canAccess(session.user.roles, ANALYTICS_VIEWER_ROLES)) redirect('/dashboard');
+  if (!session?.user) redirect(ROUTES.login);
+  if (!canAccess(session.user.roles, ANALYTICS_VIEWER_ROLES)) redirect(ROUTES.dashboard);
 
   const { assessmentId } = await params;
   const sp = await searchParams;
   const filters = parseDashboardFilters(sp);
   const filterQuery = buildDashboardQuery(filters);
   const classGroupId = filters.classGroupId;
-  const basePath = `/evaluaciones/${assessmentId}/resultados`;
+  const basePath = ROUTES.evaluacionResultados(assessmentId);
 
   const reportQuery = new URLSearchParams({ assessmentId });
   if (classGroupId) reportQuery.set('classGroupId', classGroupId);

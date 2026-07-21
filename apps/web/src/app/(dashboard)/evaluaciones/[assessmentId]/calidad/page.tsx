@@ -1,13 +1,15 @@
+import { Suspense } from 'react';
 import { redirect } from 'next/navigation';
 import { Inbox } from 'lucide-react';
 import { auth } from '@/auth';
 import { apiGet } from '@/lib/api';
+import { ROUTES } from '@/lib/routes';
 import {
   canAccess,
   INSTRUMENT_QUALITY_VIEWER_ROLES,
   type InstrumentQualityResponse,
 } from '@soe/types';
-import { EmptyState } from '@/components/patterns';
+import { EmptyState, KpiGridSkeleton, CardSkeleton } from '@/components/shared';
 import { QualityPanel } from '../../../analisis-ia/components/quality-panel';
 
 export const dynamic = 'force-dynamic';
@@ -25,13 +27,36 @@ export default async function EvaluacionCalidadPage({
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
   const session = await auth();
-  if (!session?.user) redirect('/login');
-  if (!canAccess(session.user.roles, INSTRUMENT_QUALITY_VIEWER_ROLES)) redirect('/dashboard');
+  if (!session?.user) redirect(ROUTES.login);
+  if (!canAccess(session.user.roles, INSTRUMENT_QUALITY_VIEWER_ROLES)) redirect(ROUTES.dashboard);
 
   const { assessmentId } = await params;
   const sp = await searchParams;
   const classGroupId = pickParam(sp.classGroupId);
 
+  return (
+    <Suspense fallback={<CalidadSkeleton />}>
+      <CalidadContent assessmentId={assessmentId} classGroupId={classGroupId} />
+    </Suspense>
+  );
+}
+
+function CalidadSkeleton() {
+  return (
+    <div className="space-y-6">
+      <KpiGridSkeleton count={3} />
+      <CardSkeleton rows={6} />
+    </div>
+  );
+}
+
+async function CalidadContent({
+  assessmentId,
+  classGroupId,
+}: {
+  assessmentId: string;
+  classGroupId: string | undefined;
+}) {
   const query = new URLSearchParams({ assessmentId });
   if (classGroupId) query.set('classGroupId', classGroupId);
 

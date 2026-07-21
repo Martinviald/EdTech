@@ -1,7 +1,9 @@
+import { Suspense } from 'react';
 import { redirect } from 'next/navigation';
 import { Sparkles } from 'lucide-react';
 import { auth } from '@/auth';
 import { apiGet } from '@/lib/api';
+import { ROUTES } from '@/lib/routes';
 import {
   canAccess,
   AI_ANALYSIS_VIEWER_ROLES,
@@ -12,8 +14,9 @@ import {
   type InstrumentQualityResponse,
   type ItemMatrixResponse,
   type MatrixQuestionColumn,
+  type UserRole,
 } from '@soe/types';
-import { EmptyState } from '@/components/patterns';
+import { EmptyState, CardSkeleton } from '@/components/shared';
 import { FeatureUpgradeNotice } from '@/components/feature-gate';
 import { isFeatureEnabled } from '@/lib/features';
 import { GenerateButton } from '../../../analisis-ia/components/generate-button';
@@ -35,18 +38,54 @@ export default async function EvaluacionAnalisisIaPage({
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
   const session = await auth();
-  if (!session?.user) redirect('/login');
-  if (!canAccess(session.user.roles, AI_ANALYSIS_VIEWER_ROLES)) redirect('/dashboard');
-  if (!(await isFeatureEnabled('ai_analysis'))) {
-    return <FeatureUpgradeNotice feature="ai_analysis" />;
-  }
+  if (!session?.user) redirect(ROUTES.login);
+  if (!canAccess(session.user.roles, AI_ANALYSIS_VIEWER_ROLES)) redirect(ROUTES.dashboard);
 
-  const activeRole = session.user.activeRole;
   const { assessmentId } = await params;
   const sp = await searchParams;
   const analysisId = pickParam(sp.analysisId);
   const classGroupId = pickParam(sp.classGroupId);
-  const basePath = `/evaluaciones/${assessmentId}/analisis-ia`;
+
+  return (
+    <Suspense fallback={<AnalisisIaSkeleton />}>
+      <AnalisisIaContent
+        assessmentId={assessmentId}
+        analysisId={analysisId}
+        classGroupId={classGroupId}
+        activeRole={session.user.activeRole}
+        roles={session.user.roles}
+      />
+    </Suspense>
+  );
+}
+
+function AnalisisIaSkeleton() {
+  return (
+    <div className="space-y-6">
+      <CardSkeleton rows={4} />
+      <CardSkeleton rows={4} />
+    </div>
+  );
+}
+
+async function AnalisisIaContent({
+  assessmentId,
+  analysisId,
+  classGroupId,
+  activeRole,
+  roles,
+}: {
+  assessmentId: string;
+  analysisId: string | undefined;
+  classGroupId: string | undefined;
+  activeRole: UserRole;
+  roles: readonly UserRole[];
+}) {
+  if (!(await isFeatureEnabled('ai_analysis'))) {
+    return <FeatureUpgradeNotice feature="ai_analysis" />;
+  }
+
+  const basePath = ROUTES.evaluacionAnalisisIa(assessmentId);
   const audience = activeRole === 'teacher' ? 'teacher' : 'director';
 
   // Resolver el análisis: por `analysisId` explícito (recién generado / polling) o,
@@ -177,7 +216,7 @@ export default async function EvaluacionAnalisisIaPage({
   const matrixQuery = new URLSearchParams({ assessmentId, limit: '1' });
   if (classGroupId) matrixQuery.set('classGroupId', classGroupId);
 
-  const canViewQuality = canAccess(session.user.roles, INSTRUMENT_QUALITY_VIEWER_ROLES);
+  const canViewQuality = canAccess(roles, INSTRUMENT_QUALITY_VIEWER_ROLES);
 
   const [quality, matrix] = await Promise.all([
     canViewQuality
