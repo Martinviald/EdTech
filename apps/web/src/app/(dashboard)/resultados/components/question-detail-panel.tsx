@@ -9,7 +9,11 @@ import type {
   QuestionTaxonomyTag,
 } from '@soe/types';
 import { Badge } from '@/components/ui/badge';
-import { hasPassageContent, type PassageData } from '@/components/passage-dialog';
+import {
+  hasPassageContent,
+  toPassageAttachments,
+  type PassageData,
+} from '@/components/passage-dialog';
 import { cn } from '@/lib/utils';
 import { QuestionDetailSheet } from '@/components/question-detail/question-detail-sheet';
 import { QuestionNodes, type QuestionNodeTag } from '@/components/question-detail/question-nodes';
@@ -20,13 +24,7 @@ function questionSectionToPassage(section: QuestionSection): PassageData {
     passageTitle: section.passageTitle,
     passageText: section.passageText,
     passageFormat: section.passageFormat,
-    attachments: section.attachments.map((a) => ({
-      kind: a.kind,
-      url: a.url,
-      fileName: a.fileName,
-      mimeType: a.mimeType,
-      note: a.note,
-    })),
+    attachments: toPassageAttachments(section.id, section.attachments),
   };
 }
 
@@ -64,8 +62,7 @@ export function QuestionDetailPanel(props: {
 }): JSX.Element {
   const { data, open, onClose } = props;
   const section = data?.section ?? null;
-  const passage =
-    section && hasPassageContent(section) ? questionSectionToPassage(section) : null;
+  const passage = section && hasPassageContent(section) ? questionSectionToPassage(section) : null;
 
   return (
     <QuestionDetailSheet
@@ -73,12 +70,11 @@ export function QuestionDetailPanel(props: {
       onClose={onClose}
       position={data?.position ?? null}
       headerBadges={
-        data?.correctKey ? (
-          <Badge variant="success">Clave correcta: {data.correctKey}</Badge>
-        ) : null
+        data?.correctKey ? <Badge variant="success">Clave correcta: {data.correctKey}</Badge> : null
       }
       description="Enunciado, distribución de respuestas, análisis de distractores y nodos asociados a la pregunta."
       passage={passage}
+      figureItemId={data?.hasFigure ? data.itemId : null}
       storageKey="soe.questionDetail.panelWidth"
     >
       {data === null ? (
@@ -162,7 +158,12 @@ function QuestionDetailContent({ data }: { data: QuestionAnalysisResponse }): JS
         ) : (
           <ul className="space-y-2.5">
             {data.alternatives.map((alt) => (
-              <AlternativeRow key={alt.key} alt={alt} isTopDistractor={alt.key === distractor} />
+              <AlternativeRow
+                key={alt.key}
+                alt={alt}
+                itemId={data.itemId}
+                isTopDistractor={alt.key === distractor}
+              />
             ))}
             {data.blankCount > 0 ? (
               <BlankRow count={data.blankCount} total={data.totalResponses} />
@@ -176,9 +177,11 @@ function QuestionDetailContent({ data }: { data: QuestionAnalysisResponse }): JS
 
 function AlternativeRow({
   alt,
+  itemId,
   isTopDistractor,
 }: {
   alt: AlternativeDistribution;
+  itemId: string;
   isTopDistractor: boolean;
 }): JSX.Element {
   const barClass = alt.isCorrect
@@ -201,7 +204,20 @@ function AlternativeRow({
           >
             {alt.key}
           </span>
-          <span className="truncate text-foreground">{alt.text ?? `Alternativa ${alt.key}`}</span>
+          {alt.hasImage ? (
+            // La alternativa es una imagen: miniatura en vez del `text` (descripción de IA
+            // que filtraría la respuesta). La descripción va sólo en `alt`.
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+              src={`/items/${itemId}/alternativa/${alt.key}/figura`}
+              alt={alt.text ?? `Alternativa ${alt.key}`}
+              className="max-h-12 min-w-0 rounded border bg-white object-contain"
+            />
+          ) : (
+            <span className="truncate text-foreground">
+              {alt.text ?? `Alternativa ${alt.key}`}
+            </span>
+          )}
           {alt.isCorrect ? (
             <CheckCircle2
               className="size-4 shrink-0 text-success"

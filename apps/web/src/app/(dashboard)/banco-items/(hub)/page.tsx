@@ -6,12 +6,15 @@ import { apiGet } from '@/lib/api';
 import { ROUTES } from '@/lib/routes';
 import { Library } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { EmptyState, TableSkeleton } from '@/components/shared';
+import { Skeleton } from '@/components/ui/skeleton';
+import { EmptyState, PaginationControls, TableSkeleton } from '@/components/shared';
 import {
   canAccess,
   userHasAnyRole,
   ITEM_VIEWER_ROLES,
   ITEM_BANK_ROLES,
+  type CatalogEntryModel,
+  type InstrumentFacetsModel,
   type InstrumentModel,
 } from '@soe/types';
 import { InstrumentRow } from '../InstrumentRow';
@@ -24,21 +27,25 @@ type InstrumentListResponse = {
   limit: number;
 };
 
+type SearchParams = Record<string, string | string[] | undefined>;
+
 type PageProps = {
-  searchParams: Promise<Record<string, string | string[] | undefined>>;
+  searchParams: Promise<SearchParams>;
 };
 
-function buildInstrumentsQuery(params: Record<string, string | string[] | undefined>): string {
-  const type = typeof params.type === 'string' ? params.type : undefined;
-  const status = typeof params.status === 'string' ? params.status : undefined;
-  const year = typeof params.year === 'string' ? params.year : undefined;
-  const page = typeof params.page === 'string' ? params.page : '1';
+const PAGE_SIZE = 20;
 
-  const queryParts: string[] = [`page=${page}`, 'limit=20'];
-  if (type) queryParts.push(`type=${type}`);
-  if (status) queryParts.push(`status=${status}`);
-  if (year) queryParts.push(`year=${year}`);
-  return queryParts.join('&');
+/** Filtros que el API acepta tal cual desde la querystring. */
+const FILTER_KEYS = ['type', 'status', 'year', 'subjectId', 'gradeId', 'applicationPeriod'] as const;
+
+function buildInstrumentsQuery(params: SearchParams, page: string): string {
+  // `pageSize` (no `limit`) es el nombre que valida el DTO del API.
+  const query = new URLSearchParams({ page, pageSize: String(PAGE_SIZE) });
+  for (const key of FILTER_KEYS) {
+    const value = params[key];
+    if (typeof value === 'string' && value) query.set(key, value);
+  }
+  return query.toString();
 }
 
 export default async function BancoItemsPage({ searchParams }: PageProps) {
@@ -47,7 +54,8 @@ export default async function BancoItemsPage({ searchParams }: PageProps) {
   if (!canAccess(session.user.roles, ITEM_VIEWER_ROLES)) redirect(ROUTES.dashboard);
 
   const params = await searchParams;
-  const query = buildInstrumentsQuery(params);
+  const page = typeof params.page === 'string' ? params.page : '1';
+  const query = buildInstrumentsQuery(params, page);
   const canCreate = userHasAnyRole(session.user.roles, ITEM_BANK_ROLES);
 
   const nuevoButton = canCreate ? (
@@ -59,23 +67,42 @@ export default async function BancoItemsPage({ searchParams }: PageProps) {
   return (
     <>
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <InstrumentFilters />
+        <Suspense fallback={<FiltersRowSkeleton />}>
+          <FiltersSection />
+        </Suspense>
         {nuevoButton}
       </div>
 
       <Suspense fallback={<TableSkeleton />}>
-        <InstrumentsSection query={query} canCreate={canCreate} nuevoButton={nuevoButton} />
+        <InstrumentsSection
+          query={query}
+          page={Number(page)}
+          canCreate={canCreate}
+          nuevoButton={nuevoButton}
+        />
       </Suspense>
     </>
   );
 }
 
+async function FiltersSection() {
+  const [subjects, grades] = await Promise.all([
+    apiGet<CatalogEntryModel[]>('/catalog/subjects'),
+    apiGet<CatalogEntryModel[]>('/catalog/grades'),
+  ]);
+  const facets = await apiGet<InstrumentFacetsModel>('/instruments/facets');
+
+  return <InstrumentFilters subjects={subjects} grades={grades} years={facets.years} />;
+}
+
 async function InstrumentsSection({
   query,
+  page,
   canCreate,
   nuevoButton,
 }: {
   query: string;
+  page: number;
   canCreate: boolean;
   nuevoButton: React.ReactNode;
 }) {
@@ -105,11 +132,24 @@ async function InstrumentsSection({
           <InstrumentRow key={instrument.id} instrument={instrument} />
         ))}
       </div>
-      {total > 20 && (
-        <p className="text-center text-xs text-muted-foreground">
-          Mostrando {instruments.length} de {total} instrumentos
-        </p>
-      )}
+      <PaginationControls
+        page={page}
+        limit={PAGE_SIZE}
+        total={total}
+        basePath={ROUTES.bancoItems}
+      />
     </>
+  );
+}
+
+function FiltersRowSkeleton() {
+  return (
+    <div className="flex flex-wrap items-center gap-3">
+      <Skeleton className="h-10 w-[160px]" />
+      <Skeleton className="h-10 w-[180px]" />
+      <Skeleton className="h-10 w-[160px]" />
+      <Skeleton className="h-10 w-[130px]" />
+      <Skeleton className="h-10 w-[160px]" />
+    </div>
   );
 }

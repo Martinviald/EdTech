@@ -16,6 +16,10 @@ describe('StorageService (presigned S3)', () => {
     'AWS_ACCESS_KEY_ID',
     'AWS_SECRET_ACCESS_KEY',
     'AWS_SESSION_TOKEN',
+    'AWS_CONTAINER_CREDENTIALS_RELATIVE_URI',
+    'AWS_CONTAINER_CREDENTIALS_FULL_URI',
+    'AWS_CONTAINER_AUTHORIZATION_TOKEN',
+    'AWS_CONTAINER_AUTHORIZATION_TOKEN_FILE',
   ] as const;
   const saved: Record<string, string | undefined> = {};
 
@@ -231,5 +235,127 @@ describe('StorageService (presigned S3)', () => {
     expect(svc.isConfigured()).toBe(false);
     await expect(svc.deleteObject('k/x.pdf')).rejects.toThrow(ServiceUnavailableException);
     await expect(svc.headObject('k/x.pdf')).rejects.toThrow(ServiceUnavailableException);
+  });
+
+  // ── Credenciales por rol de instancia (container credentials: ECS / App Runner) ──
+
+  /** Mock de fetch que responde el JSON de credenciales del endpoint del contenedor. */
+  function mockCredentialsFetch(
+    ...bodies: Array<Record<string, unknown>>
+  ): jest.Mock {
+    const fn = jest.fn();
+    for (const body of bodies) {
+      fn.mockResolvedValueOnce({ ok: true, status: 200, json: () => Promise.resolve(body) });
+    }
+    global.fetch = fn as unknown as typeof fetch;
+    return fn;
+  }
+
+  it('resuelve credenciales del rol de instancia (RELATIVE_URI) cuando no hay env', async () => {
+    process.env.AWS_S3_BUCKET = 'soe-sst-bucket';
+    process.env.STORAGE_S3_REGION = 'us-east-1';
+    process.env.AWS_CONTAINER_CREDENTIALS_RELATIVE_URI = '/v2/credentials/abc';
+    const fetchMock = mockCredentialsFetch({
+      AccessKeyId: 'ASIAROLEEXAMPLE',
+      SecretAccessKey: 'roleSecretExample',
+      Token: 'ROLESESSIONTOKEN',
+      Expiration: '2999-01-01T00:00:00Z',
+    });
+
+    const svc = new StorageService();
+    // Sin env, el constructor no resuelve credenciales: aún no configurado.
+    expect(svc.isConfigured()).toBe(false);
+
+    await svc.onModuleInit();
+    expect(svc.isConfigured()).toBe(true);
+
+    // Pegó al endpoint link-local del contenedor (host fijo + RELATIVE_URI).
+    const [url] = fetchMock.mock.calls[0] as [string, RequestInit];
+    expect(url).toBe('http://169.254.170.2/v2/credentials/abc');
+
+    // La URL firmada usa la credencial del rol e incluye el session token.
+    const dl = svc.createDownloadUrl({ key: 'a/b.pdf' });
+    expect(dl).toContain('X-Amz-Credential=ASIAROLEEXAMPLE%2F');
+    expect(dl).toContain('X-Amz-Security-Token=ROLESESSIONTOKEN');
+
+    svc.onModuleDestroy();
+  });
+
+  it('usa FULL_URI + Authorization token del contenedor', async () => {
+    process.env.AWS_S3_BUCKET = 'soe-sst-bucket';
+    process.env.AWS_CONTAINER_CREDENTIALS_FULL_URI = 'http://169.254.170.23/creds';
+    process.env.AWS_CONTAINER_AUTHORIZATION_TOKEN = 'tok-secreto';
+    const fetchMock = mockCredentialsFetch({
+      AccessKeyId: 'ASIA2',
+      SecretAccessKey: 's2',
+      Token: 't2',
+    });
+
+    const svc = new StorageService();
+    await svc.onModuleInit();
+    expect(svc.isConfigured()).toBe(true);
+
+    const [url, init] = fetchMock.mock.calls[0] as [string, RequestInit];
+    expect(url).toBe('http://169.254.170.23/creds');
+    expect((init.headers as Record<string, string>).Authorization).toBe('tok-secreto');
+
+    svc.onModuleDestroy();
+  });
+
+  it('queda no-configurado si hay bucket pero ninguna fuente de credenciales', async () => {
+    process.env.AWS_S3_BUCKET = 'soe-sst-bucket';
+    const svc = new StorageService();
+    await svc.onModuleInit();
+    expect(svc.isConfigured()).toBe(false);
+    expect(() => svc.createDownloadUrl({ key: 'a/b.pdf' })).toThrow(
+      ServiceUnavailableException,
+    );
+    svc.onModuleDestroy();
+  });
+
+  it('las credenciales de env tienen prioridad y no llaman al endpoint del rol', async () => {
+    configureEnv();
+    process.env.AWS_CONTAINER_CREDENTIALS_RELATIVE_URI = '/v2/credentials/abc';
+    const fetchMock = mockCredentialsFetch({ AccessKeyId: 'X', SecretAccessKey: 'Y' });
+
+    const svc = new StorageService();
+    expect(svc.isConfigured()).toBe(true); // resuelto por env en el constructor
+    await svc.onModuleInit();
+    expect(fetchMock).not.toHaveBeenCalled();
+
+    svc.onModuleDestroy();
+  });
+
+  it('refresca las credenciales temporales antes de expirar', async () => {
+    jest.useFakeTimers();
+    process.env.AWS_S3_BUCKET = 'soe-sst-bucket';
+    process.env.AWS_CONTAINER_CREDENTIALS_RELATIVE_URI = '/creds';
+    const now = Date.now();
+    const fetchMock = mockCredentialsFetch(
+      {
+        AccessKeyId: 'A1',
+        SecretAccessKey: 's1',
+        Token: 't1',
+        Expiration: new Date(now + 10 * 60 * 1000).toISOString(),
+      },
+      {
+        AccessKeyId: 'A2',
+        SecretAccessKey: 's2',
+        Token: 't2',
+        Expiration: new Date(now + 30 * 60 * 1000).toISOString(),
+      },
+    );
+
+    const svc = new StorageService();
+    await svc.onModuleInit();
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+    expect(svc.createDownloadUrl({ key: 'x' })).toContain('X-Amz-Credential=A1%2F');
+
+    // Expira en 10 min, se refresca 5 min antes → ~5 min.
+    await jest.advanceTimersByTimeAsync(5 * 60 * 1000 + 1000);
+    expect(fetchMock).toHaveBeenCalledTimes(2);
+    expect(svc.createDownloadUrl({ key: 'x' })).toContain('X-Amz-Credential=A2%2F');
+
+    svc.onModuleDestroy();
   });
 });

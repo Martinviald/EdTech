@@ -19,8 +19,9 @@ import {
 // pregunta (resultados). Como es un Dialog (Radix, portal a body) se monta por
 // encima de los `Sheet` laterales (que son `z-50`); el content va en `z-[60]`.
 //
-// Las figuras aún no tienen archivo en S3 (`section_attachments.url` = null):
-// para esas se muestra un aviso "no disponible aún" en vez de una imagen rota.
+// La imagen de la sección se sirve por la ruta estable `/instrumentos/secciones/{id}/imagen`
+// (302 → presigned fresca): `toPassageAttachments` resuelve el `url` a esa ruta. Un adjunto
+// sin archivo (kind image sin storageKey) muestra el aviso "no disponible aún".
 // ─────────────────────────────────────────────────────────────────────────────
 
 export type PassageAttachment = {
@@ -38,6 +39,43 @@ export type PassageData = {
   passageFormat: string | null; // 'plain' | 'markdown' | 'html'
   attachments?: PassageAttachment[];
 };
+
+/** Shape mínima de un adjunto de sección (basta con esto para resolver su URL). */
+type RawSectionAttachment = {
+  kind: string;
+  url: string | null;
+  storageKey?: string | null;
+  fileName: string | null;
+  mimeType: string | null;
+  note: string | null;
+};
+
+/**
+ * Mapea los adjuntos de una sección a `PassageAttachment`, resolviendo la imagen a la
+ * ruta ESTABLE que la sirve prefirmada (`/instrumentos/secciones/{id}/imagen`) en vez de
+ * la `url` cruda de la BDD (que es null). Descarta las imágenes sin `storageKey`: son las
+ * descripciones que escribió la IA, redundantes con el recorte del pasaje y sin archivo.
+ *
+ * Compartido por los tres orígenes de pasaje (banco de ítems, detalle de ítem y detalle de
+ * pregunta en resultados) para no duplicar la lógica de la ruta.
+ */
+export function toPassageAttachments(
+  sectionId: string,
+  attachments: RawSectionAttachment[],
+): PassageAttachment[] {
+  return attachments
+    .filter((a) => !(a.kind === 'image' && !a.storageKey))
+    .map((a) => ({
+      kind: a.kind,
+      url:
+        a.kind === 'image' && a.storageKey
+          ? `/instrumentos/secciones/${sectionId}/imagen`
+          : a.url,
+      fileName: a.fileName,
+      mimeType: a.mimeType,
+      note: a.note,
+    }));
+}
 
 /** ¿La sección tiene algo que mostrar (texto o multimedia)? */
 export function hasPassageContent(

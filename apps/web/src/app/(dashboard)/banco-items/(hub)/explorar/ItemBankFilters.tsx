@@ -18,14 +18,15 @@ import { useTransition } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import type { Route } from 'next';
 import { FilterX } from 'lucide-react';
-import { TAXONOMY_NODE_TYPES, type TaxonomyNodeModel } from '@soe/types';
+import { TAXONOMY_NODE_TYPES, type CatalogEntryModel, type TaxonomyNodeModel } from '@soe/types';
 import { Button } from '@/components/ui/button';
 import { FilterBar, type FilterField } from '@/components/shared';
 import { nodeTypeLabel, nodeOptionLabel } from '@/lib/taxonomy-labels';
 import { ROUTES } from '@/lib/routes';
 import { NodeTypeFilter } from './NodeTypeFilter';
 
-export type CatalogEntry = { id: string; name: string; shortName: string };
+/** @deprecated Alias del contrato compartido; importar `CatalogEntryModel` de `@soe/types`. */
+export type CatalogEntry = CatalogEntryModel;
 
 interface ItemBankFiltersProps {
   subjects: CatalogEntry[];

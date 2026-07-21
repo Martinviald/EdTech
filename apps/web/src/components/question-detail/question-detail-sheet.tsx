@@ -7,7 +7,7 @@
 // Cada panel pasa su cuerpo específico como `children`.
 
 import { useState, type JSX, type ReactNode } from 'react';
-import { BookOpen } from 'lucide-react';
+import { BookOpen, ImageIcon } from 'lucide-react';
 import {
   Sheet,
   SheetContent,
@@ -18,6 +18,7 @@ import {
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { PassageDialog, type PassageData } from '@/components/passage-dialog';
+import { ItemFigureDialog } from '@/components/item-figure-dialog';
 import { useResizablePanelWidth, PanelResizeHandle } from '@/hooks/use-resizable-panel-width';
 
 export function QuestionDetailSheet(props: {
@@ -31,6 +32,11 @@ export function QuestionDetailSheet(props: {
   description: string;
   /** Pasaje de lectura ya mapeado; si viene, se muestra el botón + diálogo. */
   passage?: PassageData | null;
+  /**
+   * Id del ítem cuya figura se puede ver; si viene, se muestra el botón + diálogo.
+   * Null/undefined cuando la pregunta no tiene figura asociada.
+   */
+  figureItemId?: string | null;
   /** Clave de localStorage donde persiste el ancho (una por panel). */
   storageKey: string;
   defaultWidth?: number;
@@ -44,6 +50,7 @@ export function QuestionDetailSheet(props: {
     headerBadges,
     description,
     passage = null,
+    figureItemId = null,
     storageKey,
     defaultWidth = 560,
     minWidth = 400,
@@ -51,6 +58,7 @@ export function QuestionDetailSheet(props: {
   } = props;
 
   const [passageOpen, setPassageOpen] = useState(false);
+  const [figureOpen, setFigureOpen] = useState(false);
   const { width, onPointerDown, onKeyDown } = useResizablePanelWidth({
     storageKey,
     defaultWidth,
@@ -80,23 +88,50 @@ export function QuestionDetailSheet(props: {
           <SheetDescription>{description}</SheetDescription>
         </SheetHeader>
 
-        {passage ? (
-          <Button
-            variant="outline"
-            size="sm"
-            className="mt-4 w-full justify-start gap-2"
-            onClick={() => setPassageOpen(true)}
-          >
-            <BookOpen className="size-4" aria-hidden />
-            Ver texto de lectura
-          </Button>
+        {passage || figureItemId ? (
+          <div className="mt-4 flex flex-col gap-2">
+            {passage ? (
+              <Button
+                variant="outline"
+                size="sm"
+                className="w-full justify-start gap-2"
+                onClick={() => setPassageOpen(true)}
+              >
+                <BookOpen className="size-4" aria-hidden />
+                Ver texto de lectura
+              </Button>
+            ) : null}
+
+            {figureItemId ? (
+              <Button
+                variant="outline"
+                size="sm"
+                className="w-full justify-start gap-2"
+                onClick={() => setFigureOpen(true)}
+              >
+                <ImageIcon className="size-4" aria-hidden />
+                Ver imagen
+              </Button>
+            ) : null}
+          </div>
         ) : null}
 
         {children}
       </SheetContent>
 
+      {/* Los diálogos van FUERA del SheetContent: son portales de Radix que deben
+          montarse por encima del panel, no dentro de su stacking context. */}
       {passage ? (
         <PassageDialog open={passageOpen} onOpenChange={setPassageOpen} passage={passage} />
+      ) : null}
+
+      {figureItemId ? (
+        <ItemFigureDialog
+          open={figureOpen}
+          onOpenChange={setFigureOpen}
+          itemId={figureItemId}
+          position={position}
+        />
       ) : null}
     </Sheet>
   );

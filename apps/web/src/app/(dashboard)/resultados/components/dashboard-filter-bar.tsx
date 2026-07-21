@@ -7,7 +7,12 @@ import type { DashboardFilterOptionsResponse } from '@soe/types';
 import { FilterX } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { FilterBar, type FilterField } from '@/components/shared';
-import { FILTER_KEYS, type DashboardFilterValues } from './dashboard-filters';
+import {
+  FILTER_KEYS,
+  classGroupSelectOptions,
+  isClassGroupInGrade,
+  type DashboardFilterValues,
+} from './dashboard-filters';
 
 // La lógica pura de filtros (tipo, claves, parse/serialize) vive en
 // `./dashboard-filters` (módulo sin 'use client') para que las páginas server la
@@ -62,12 +67,7 @@ export function DashboardFilterBar({
   const updateGrade = useCallback(
     (next: string) => {
       const nextGrade = next || null;
-      const courseStillValid =
-        !value.classGroupId ||
-        !nextGrade ||
-        options.classGroups.some(
-          (c) => c.id === value.classGroupId && c.gradeId === nextGrade,
-        );
+      const courseStillValid = isClassGroupInGrade(options.classGroups, value.classGroupId, nextGrade);
       applyFilters({
         gradeId: nextGrade,
         ...(courseStillValid ? {} : { classGroupId: null }),
@@ -93,11 +93,9 @@ export function DashboardFilterBar({
     new Map(options.instruments.map((i) => [i.type, i.type])).values(),
   );
 
-  // El dropdown de Cursos solo muestra los cursos del nivel seleccionado.
-  // Sin nivel elegido, se muestran todos.
-  const coursesForGrade = value.gradeId
-    ? options.classGroups.filter((c) => c.gradeId === value.gradeId)
-    : options.classGroups;
+  // El dropdown de Cursos solo muestra los cursos del nivel seleccionado. Sin
+  // nivel elegido se muestran todos, con el nivel antepuesto en la etiqueta.
+  const courseOptions = classGroupSelectOptions(options.classGroups, options.grades, value.gradeId);
 
   const fields: FilterField[] = [
     {
@@ -129,7 +127,7 @@ export function DashboardFilterBar({
       label: 'Curso',
       placeholder: 'Todos los cursos',
       value: value.classGroupId,
-      options: coursesForGrade.map((c) => ({ id: c.id, label: c.label })),
+      options: courseOptions,
       onChange: (v) => updateFilter('classGroupId', v),
     },
     {

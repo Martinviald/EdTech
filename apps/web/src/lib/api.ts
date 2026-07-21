@@ -48,7 +48,12 @@ async function request<T>(
     const body = await res.json().catch(() => ({}));
     const message = (body as { message?: string }).message ?? `API error ${res.status}`;
     if (res.status >= 500) reportServerError(new Error(message), { path, status: res.status });
-    throw new ApiRequestError(res.status, message);
+    // Cuerpo crudo del error: algunos endpoints devuelven un código legible por
+    // máquina además del mensaje (p. ej. el 409 `REQUIRES_ITEM_LEVEL_DATA` del
+    // `CapabilityGuard`) y la UI necesita distinguirlo de un fallo genérico
+    // (`asCapabilityUnavailable`, `lib/errors.ts`). Mismo trato que ya daba
+    // `apiPostFormData` — antes solo esa función pasaba `body` como `details`.
+    throw new ApiRequestError(res.status, message, body);
   }
 
   // 204 No Content

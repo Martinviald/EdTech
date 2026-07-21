@@ -6,7 +6,7 @@ import type { ItemModel, ItemTaxonomyTagModel, InstrumentSectionModel } from '@s
 import { Badge } from '@/components/ui/badge';
 import {
   hasPassageContent,
-  type PassageAttachment,
+  toPassageAttachments,
   type PassageData,
 } from '@/components/passage-dialog';
 import { cn } from '@/lib/utils';
@@ -20,13 +20,7 @@ function sectionToPassage(section: InstrumentSectionModel): PassageData {
     passageTitle: section.passageTitle,
     passageText: section.passageText,
     passageFormat: section.passageFormat,
-    attachments: (section.attachments ?? []).map<PassageAttachment>((a) => ({
-      kind: a.kind,
-      url: a.url,
-      fileName: a.fileName,
-      mimeType: a.mimeType,
-      note: a.note,
-    })),
+    attachments: toPassageAttachments(section.id, section.attachments ?? []),
   };
 }
 
@@ -78,6 +72,13 @@ function getStringField(content: Record<string, unknown>, field: string): string
   return typeof content[field] === 'string' && content[field] ? (content[field] as string) : null;
 }
 
+/** Keys de las alternativas que SON imágenes (scoring_config.altImageRefs). */
+function altImageKeys(item: ItemModel): Set<string> {
+  const refs = (item.scoringConfig?.altImageRefs ?? null) as Record<string, unknown> | null;
+  if (!refs) return new Set();
+  return new Set(Object.keys(refs).filter((k) => typeof refs[k] === 'string'));
+}
+
 export function ItemDetailPanel(props: {
   item: ItemModel | null;
   sections?: InstrumentSectionModel[];
@@ -91,6 +92,10 @@ export function ItemDetailPanel(props: {
   const section = item?.sectionId ? (sections.find((s) => s.id === item.sectionId) ?? null) : null;
   const passage = section && hasPassageContent(section) ? sectionToPassage(section) : null;
 
+  // `GET /items?instrumentId=…` ya trae `scoringConfig` completo, así que el flag
+  // de figura se deriva del ítem que ya tenemos —sin un fetch extra—.
+  const figureItemId = item && typeof item.scoringConfig?.imageRef === 'string' ? item.id : null;
+
   return (
     <QuestionDetailSheet
       open={open}
@@ -101,6 +106,7 @@ export function ItemDetailPanel(props: {
       }
       description="Enunciado completo, alternativas y nodos de taxonomía asociados a la pregunta."
       passage={passage}
+      figureItemId={figureItemId}
       storageKey="soe.itemDetail.panelWidth"
     >
       {item ? (
@@ -139,6 +145,7 @@ function ItemDetailContent({
   const alternatives = getAlternatives(content);
   const imageUrl = getStringField(content, 'imageUrl');
   const explanation = getStringField(content, 'explanation');
+  const imageKeys = altImageKeys(item);
 
   return (
     <div className="mt-6 space-y-6">
@@ -171,7 +178,12 @@ function ItemDetailContent({
         ) : (
           <ul className="space-y-2">
             {alternatives.map((alt) => (
-              <AlternativeRow key={alt.key} alt={alt} />
+              <AlternativeRow
+                key={alt.key}
+                alt={alt}
+                itemId={item.id}
+                hasImage={imageKeys.has(alt.key)}
+              />
             ))}
           </ul>
         )}
@@ -186,7 +198,15 @@ function ItemDetailContent({
   );
 }
 
-function AlternativeRow({ alt }: { alt: Alternative }): JSX.Element {
+function AlternativeRow({
+  alt,
+  itemId,
+  hasImage,
+}: {
+  alt: Alternative;
+  itemId: string;
+  hasImage: boolean;
+}): JSX.Element {
   return (
     <li
       className={cn(
@@ -202,7 +222,20 @@ function AlternativeRow({ alt }: { alt: Alternative }): JSX.Element {
       >
         {alt.key}
       </span>
-      <span className="min-w-0 flex-1 text-foreground">{alt.text ?? `Alternativa ${alt.key}`}</span>
+      {hasImage ? (
+        // La alternativa ES una imagen: se muestra la figura, no el `text` (que es una
+        // descripción de IA y filtraría la respuesta). La descripción va sólo en `alt`.
+        // eslint-disable-next-line @next/next/no-img-element
+        <img
+          src={`/items/${itemId}/alternativa/${alt.key}/figura`}
+          alt={alt.text ?? `Alternativa ${alt.key}`}
+          className="min-w-0 flex-1 max-h-48 rounded-md border bg-white object-contain"
+        />
+      ) : (
+        <span className="min-w-0 flex-1 text-foreground">
+          {alt.text ?? `Alternativa ${alt.key}`}
+        </span>
+      )}
       {alt.isCorrect ? (
         <CheckCircle2
           className="mt-0.5 size-4 shrink-0 text-success"
@@ -212,4 +245,3 @@ function AlternativeRow({ alt }: { alt: Alternative }): JSX.Element {
     </li>
   );
 }
-

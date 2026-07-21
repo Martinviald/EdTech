@@ -1,9 +1,12 @@
 import type { Route } from 'next';
 import Link from 'next/link';
+import { ArrowRight } from 'lucide-react';
 import type {
   OfficialCourseReportResponse,
   OfficialSpecTableRow,
   OfficialCourseStudentRow,
+  PerformanceBandDistributionBucket,
+  PerformanceLevel,
 } from '@soe/types';
 import { cn } from '@/lib/utils';
 import {
@@ -27,6 +30,7 @@ import {
   HBarChart,
   DonutChart,
   StudentDotPlot,
+  StudentBandStrip,
   type BarDatum,
   type DonutSlice,
 } from './report-charts';
@@ -57,6 +61,23 @@ export function CourseReport({
   const { meta, generalResult, skillAxes, specTable, studentResults, reflectionPrompts } = report;
   const disclaimers = resolveDisclaimers(meta.disclaimers);
   const isDiagnostic = meta.variant === 'requires_support';
+  // Cierre: la figura "Estudiantes que muestran avance o mejora" lista el SUBCONJUNTO
+  // del curso que avanzó respecto del Monitoreo Intermedio, cada alumno con su nivel
+  // previo (Monitoreo) y su nivel de Cierre. Se muestra el avance sólo cuando el
+  // informe es de Cierre y trae el nivel previo por alumno (`priorBandLabel`); en
+  // Monitoreo/Diagnóstico §5 queda como está (sin columna de nivel previo).
+  const isCierre = meta.period?.toLowerCase().includes('cierre') ?? false;
+  const showAdvance = isCierre && studentResults.some((s) => s.priorBandLabel != null);
+  // La distribución por nivel (torta §2) y "requiere apoyo" SÍ pueden existir en un
+  // informe agregado si trae el Gráfico 1 (`assessment_level_stats`). Se condicionan a
+  // que la distribución venga con datos —no a la granularidad— para no ocultar una
+  // torta poblada ni mostrar un 0 engañoso cuando falta el Gráfico 1.
+  const hasLevelDistribution = generalResult.distribution.some((b) => b.count > 0);
+  // Bandas reales del instrumento (ej. DIA I/II/III). Cuando vienen con datos, la
+  // torta §2 y el badge §5 se renderizan con sus labels/colores en lugar de la
+  // escala fija de 4 niveles. Sin bandas → fallback a los 4 niveles (sin regresión).
+  const bandDistribution = report.bandDistribution;
+  const hasBandDistribution = !!bandDistribution && bandDistribution.some((b) => b.count > 0);
 
   const coverMeta = [
     { label: 'Establecimiento', value: meta.orgName },
@@ -108,9 +129,13 @@ export function CourseReport({
           />
           <GeneralStat
             label="Estudiantes que requieren mayor apoyo"
-            value={String(generalResult.requiresSupportCount)}
-            hint={`${fmtPct(generalResult.requiresSupportPercentage)} del curso`}
-            emphasized={isDiagnostic}
+            value={hasLevelDistribution ? String(generalResult.requiresSupportCount) : '—'}
+            hint={
+              hasLevelDistribution
+                ? `${fmtPct(generalResult.requiresSupportPercentage)} del curso`
+                : 'No disponible: este informe no incluye la distribución por nivel de logro.'
+            }
+            emphasized={isDiagnostic && hasLevelDistribution}
           />
           <GeneralStat
             label="Estudiantes considerados"
@@ -121,7 +146,16 @@ export function CourseReport({
         {!isDiagnostic ? (
           <div className="rounded-md border p-4">
             <p className="mb-4 text-sm font-medium">Resultados según niveles de logro</p>
-            <DonutChart slices={levelSlices(generalResult.distribution)} />
+            {hasBandDistribution ? (
+              <DonutChart slices={bandSlices(bandDistribution!)} />
+            ) : hasLevelDistribution ? (
+              <DonutChart slices={levelSlices(generalResult.distribution)} />
+            ) : (
+              <p className="text-sm text-muted-foreground">
+                No disponible: este informe no incluye la distribución por nivel de logro de los
+                estudiantes.
+              </p>
+            )}
           </div>
         ) : null}
       </ReportSection>
@@ -171,18 +205,61 @@ export function CourseReport({
       {/* ── Sección 5 — Resultados por estudiante ── */}
       <ReportSection
         index={4}
-        title="Resultados por estudiante"
-        description="Una fila por estudiante: el punto marca su porcentaje de logro sobre las bandas de nivel del instrumento (color por nivel), para leer visualmente en qué nivel cae cada alumno. El nivel más bajo (Insuficiente) corresponde a quienes requieren mayor apoyo."
+        title={
+          showAdvance
+            ? 'Estudiantes que avanzaron o mejoraron respecto del Monitoreo Intermedio'
+            : 'Resultados por estudiante'
+        }
+        description={
+          showAdvance
+            ? 'Subconjunto del curso (no toda la clase): sólo los estudiantes que avanzaron de nivel respecto del Monitoreo Intermedio. Cada fila muestra el avance de su nivel previo (Monitoreo) a su nivel de Cierre.'
+            : isDiagnostic
+              ? 'Una fila por estudiante: si requiere mayor apoyo (lado del umbral, señal confiable del diagnóstico) y su posición estimada. El diagnóstico no clasifica en niveles I/II/III, y la posición es una estimación, no un puntaje oficial.'
+              : 'Una fila por estudiante: el punto marca su porcentaje de logro sobre las bandas de nivel del instrumento (color por nivel), para leer visualmente en qué nivel cae cada alumno. El nivel más bajo (Insuficiente) corresponde a quienes requieren mayor apoyo.'
+        }
       >
-        <StudentDotPlot students={studentResults} />
-        <p className="text-sm text-muted-foreground">
-          Estudiantes que requieren mayor apoyo:{' '}
-          <span className="font-semibold text-foreground">
-            {generalResult.requiresSupportCount}
-          </span>{' '}
-          de {generalResult.studentsConsidered}
-        </p>
-        <StudentTable students={studentResults} basePath={studentReportBasePath} />
+        {studentResults.length === 0 ? (
+          <p className="text-sm text-muted-foreground">
+            Este informe se cargó de forma agregada por curso y no incluye los resultados
+            individuales de cada estudiante.
+          </p>
+        ) : (
+          <>
+            {/* El dot-plot posiciona cada punto por su % de logro sobre las bandas.
+                En Diagnóstico el "logro" es una posición APROXIMADA (no un score sobre
+                las bandas), así que no se muestra para no presentarla como oficial.
+                Fuera de Diagnóstico se muestra sólo si hay al menos una fila con logro
+                (un informe agregado band-only no trae %). La nómina siempre se ve. */}
+            {!isDiagnostic && studentResults.some((s) => s.achievement !== null) && (
+              <StudentDotPlot students={studentResults} />
+            )}
+            <p className="text-sm text-muted-foreground">
+              {showAdvance ? (
+                <>
+                  Estudiantes que avanzaron o mejoraron:{' '}
+                  <span className="font-semibold text-foreground">
+                    {studentResults.filter((s) => s.priorBandLabel != null).length}
+                  </span>{' '}
+                  (subconjunto del curso, no toda la clase)
+                </>
+              ) : (
+                <>
+                  Estudiantes que requieren mayor apoyo:{' '}
+                  <span className="font-semibold text-foreground">
+                    {generalResult.requiresSupportCount}
+                  </span>{' '}
+                  de {generalResult.studentsConsidered}
+                </>
+              )}
+            </p>
+            <StudentTable
+              students={studentResults}
+              basePath={studentReportBasePath}
+              isDiagnostic={isDiagnostic}
+              showAdvance={showAdvance}
+            />
+          </>
+        )}
       </ReportSection>
 
       {/* ── Sección 6 — Conclusiones / preguntas guía ── */}
@@ -232,6 +309,44 @@ function levelSlices(
       percentage: bucket?.percentage ?? 0,
     };
   });
+}
+
+/**
+ * Nivel legacy equivalente de una banda por la posición relativa de su `order`
+ * dentro del set (misma proyección que `bandToLegacyLevel` del backend). Sólo se
+ * usa para heredar el color/estilo de la paleta de niveles cuando la banda no trae
+ * un color propio — la etiqueta mostrada es SIEMPRE la real de la banda.
+ */
+function bandLegacyLevel(order: number, orders: readonly number[]): PerformanceLevel {
+  const n = orders.length;
+  if (n <= 1) return 'adequate';
+  const sorted = [...orders].sort((a, b) => a - b);
+  const idx = sorted.indexOf(order);
+  const ratio = idx / (n - 1);
+  const bucket = Math.min(
+    PERFORMANCE_LEVEL_ORDER.length - 1,
+    Math.round(ratio * (PERFORMANCE_LEVEL_ORDER.length - 1)),
+  );
+  return PERFORMANCE_LEVEL_ORDER[bucket]!;
+}
+
+/** Color (hex) de una banda: el suyo si es hex, si no el del nivel equivalente. */
+function bandColor(bucket: PerformanceBandDistributionBucket, orders: readonly number[]): string {
+  if (bucket.color && bucket.color.startsWith('#')) return bucket.color;
+  return PERFORMANCE_LEVEL_CHART_COLOR[bandLegacyLevel(bucket.order, orders)];
+}
+
+/** Torta desde la distribución por banda del instrumento (labels/colores reales). */
+function bandSlices(distribution: PerformanceBandDistributionBucket[]): DonutSlice[] {
+  const ordered = [...distribution].sort((a, b) => a.order - b.order);
+  const orders = ordered.map((b) => b.order);
+  return ordered.map((b) => ({
+    key: b.key,
+    label: b.label,
+    value: b.count,
+    color: bandColor(b, orders),
+    percentage: b.percentage,
+  }));
 }
 
 // ── Tabla de especificaciones ─────────────────────────────────────────────────
@@ -317,9 +432,21 @@ function ResponseDistribution({ row }: { row: OfficialSpecTableRow }) {
 function StudentTable({
   students,
   basePath,
+  isDiagnostic = false,
+  showAdvance = false,
 }: {
   students: OfficialCourseStudentRow[];
   basePath?: string;
+  /**
+   * Diagnóstico: no clasifica por niveles I/II/III. Se muestra "Requiere apoyo"
+   * (Sí/No, la señal confiable) + "Posición (est.)" en vez de "% Logro" + "Nivel".
+   */
+  isDiagnostic?: boolean;
+  /**
+   * Cierre con nivel previo por alumno: se agrega la columna "Avance" que muestra el
+   * paso `nivel previo (Monitoreo) → nivel de Cierre`. Sólo aplica a Cierre.
+   */
+  showAdvance?: boolean;
 }) {
   if (students.length === 0) return null;
   return (
@@ -328,10 +455,20 @@ function StudentTable({
         <thead>
           <tr className="border-b bg-muted/50 text-left text-xs uppercase tracking-wide text-muted-foreground">
             <th className="px-3 py-2 font-medium">Estudiante</th>
-            <th className="px-3 py-2 font-medium">RUT</th>
-            <th className="px-3 py-2 text-right font-medium">% Logro</th>
-            <th className="px-3 py-2 font-medium">Nivel</th>
-            {basePath ? <th className="px-3 py-2 font-medium print:hidden">Informe</th> : null}
+            {isDiagnostic ? (
+              <th className="px-3 py-2 font-medium">Nivel de logro</th>
+            ) : (
+              <>
+                <th className="px-3 py-2 text-right font-medium">% Logro</th>
+                <th className="px-3 py-2 font-medium">Nivel</th>
+                {showAdvance ? <th className="px-3 py-2 font-medium">Avance</th> : null}
+              </>
+            )}
+            {basePath ? (
+              <th className="w-10 px-3 py-2 font-medium print:hidden">
+                <span className="sr-only">Informe</span>
+              </th>
+            ) : null}
           </tr>
         </thead>
         <tbody>
@@ -339,33 +476,74 @@ function StudentTable({
             <tr key={s.studentId} className="border-b align-middle last:border-0">
               <td className="px-3 py-2 font-medium">
                 {s.studentFullName}
-                {s.requiresSupport ? (
+                {/* Fuera de Diagnóstico el aviso "Requiere apoyo" va junto al nombre;
+                    en Diagnóstico la franja de logro lo muestra por posición. */}
+                {!isDiagnostic && s.requiresSupport ? (
                   <span className="ml-2 rounded-sm bg-destructive/10 px-1.5 py-0.5 text-xs font-medium text-destructive">
+
                     Requiere apoyo
                   </span>
                 ) : null}
               </td>
-              <td className="px-3 py-2 tabular-nums text-muted-foreground">{s.studentRut}</td>
-              <td className="px-3 py-2 text-right tabular-nums">{fmtPct(s.achievement)}</td>
-              <td className="px-3 py-2">
-                <span
-                  className={cn(
-                    'inline-flex items-center rounded-full border px-2 py-0.5 text-xs font-semibold',
-                    s.performanceLevel
-                      ? PERFORMANCE_LEVEL_BADGE_CLASS[s.performanceLevel]
-                      : 'text-muted-foreground',
-                  )}
-                >
-                  {performanceLevelLabel(s.performanceLevel)}
-                </span>
-              </td>
+              {isDiagnostic ? (
+                <td className="px-3 py-2">
+                  {/* Misma figura del informe de monitoreo: bandas de nivel con el
+                      punto en el % de logro; requiere apoyo cae a la izquierda. */}
+                  <StudentBandStrip
+                    achievement={s.achievement}
+                    performanceLevel={s.performanceLevel}
+                    requiresSupport={s.requiresSupport}
+                  />
+                </td>
+              ) : (
+                <>
+                  <td className="px-3 py-2 text-right tabular-nums">{fmtPct(s.achievement)}</td>
+                  <td className="px-3 py-2">
+                    <span
+                      className={cn(
+                        'inline-flex items-center rounded-full border px-2 py-0.5 text-xs font-semibold',
+                        s.performanceLevel
+                          ? PERFORMANCE_LEVEL_BADGE_CLASS[s.performanceLevel]
+                          : 'text-muted-foreground',
+                      )}
+                    >
+                      {/* Label REAL de la banda del instrumento (ej. "Nivel II"); sin
+                          bandas cae a la etiqueta legacy. El color viene del nivel
+                          equivalente ya resuelto en el backend (`performanceLevel`). */}
+                      {s.bandLabel ?? performanceLevelLabel(s.performanceLevel)}
+                    </span>
+                  </td>
+                  {showAdvance ? (
+                    <td className="px-3 py-2">
+                      {/* Avance del nivel previo (Monitoreo) al nivel de Cierre. Sin
+                          nivel previo → "—" (alumno del curso que no está en el
+                          subconjunto que avanzó). */}
+                      {s.priorBandLabel != null ? (
+                        <span className="inline-flex items-center gap-1 whitespace-nowrap text-xs font-medium">
+                          <span className="text-muted-foreground">{s.priorBandLabel}</span>
+                          <span aria-hidden className="text-muted-foreground">
+                            →
+                          </span>
+                          <span className="font-semibold text-foreground">
+                            {s.bandLabel ?? performanceLevelLabel(s.performanceLevel)}
+                          </span>
+                        </span>
+                      ) : (
+                        <span className="text-muted-foreground">—</span>
+                      )}
+                    </td>
+                  ) : null}
+                </>
+              )}
               {basePath ? (
-                <td className="px-3 py-2 print:hidden">
+                <td className="px-3 py-2 text-right print:hidden">
                   <Link
                     href={`${basePath}/${s.studentId}` as Route}
-                    className="text-sm font-medium text-primary hover:underline"
+                    aria-label={`Ver informe de ${s.studentFullName}`}
+                    title="Ver informe del estudiante"
+                    className="inline-flex size-7 items-center justify-center rounded-md text-primary hover:bg-muted"
                   >
-                    Ver informe
+                    <ArrowRight className="size-4" aria-hidden />
                   </Link>
                 </td>
               ) : null}

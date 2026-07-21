@@ -19,6 +19,7 @@ import {
   CardSkeleton,
 } from '@/components/shared';
 import {
+  isClassGroupInGrade,
   parseDashboardFilters,
   type DashboardFilterValues,
 } from '../components/dashboard-filters';
@@ -100,21 +101,13 @@ export default async function ProgresionPage({
   const rawScope = pick(params, 'scope');
   const scope: ProgressionScope = isScope(rawScope) ? rawScope : 'class';
   const studentId = pick(params, 'studentId');
-  const classGroupId = pick(params, 'classGroupId') ?? filters.classGroupId;
+  const gradeId = filters.gradeId;
+  // Curso heredado de otra vista (p. ej. desde el nav con gradeId ya puesto):
+  // puede no pertenecer al nivel filtrado. Sin validar contra `options.classGroups`
+  // (fetch cacheado, ver `resolveClassGroupId`) porque eso bloquearía el shell —
+  // cada sección async abajo valida por su cuenta con el mismo helper.
+  const rawClassGroupId = pick(params, 'classGroupId') ?? filters.classGroupId;
   const nodeId = pick(params, 'nodeId');
-
-  // El scope determina la entidad medida (contrato analytics.schema).
-  const entityId =
-    scope === 'student' ? studentId : scope === 'class' ? classGroupId : nodeId;
-
-  const progressionQuery = buildProgressionQuery({
-    scope,
-    studentId,
-    classGroupId,
-    nodeId,
-    filters,
-    entityId,
-  });
 
   return (
     <>
@@ -123,28 +116,61 @@ export default async function ProgresionPage({
         description="Sigue la evolución del % de logro a través de las evaluaciones de un alumno, curso o habilidad."
         actions={
           <Suspense fallback={null}>
-            <ProgresionAction query={progressionQuery} />
+            <ProgresionAction
+              scope={scope}
+              studentId={studentId}
+              rawClassGroupId={rawClassGroupId}
+              gradeId={gradeId}
+              nodeId={nodeId}
+              filters={filters}
+            />
           </Suspense>
         }
       />
 
       <Suspense
-        key={`scope-${scope}-${classGroupId ?? ''}`}
+        key={`scope-${scope}-${rawClassGroupId ?? ''}-${gradeId ?? ''}`}
         fallback={<FilterBarSkeleton fields={2} />}
       >
         <ScopeSection
           scope={scope}
           studentId={studentId}
-          classGroupId={classGroupId}
+          rawClassGroupId={rawClassGroupId}
+          gradeId={gradeId}
           nodeId={nodeId}
         />
       </Suspense>
 
       <Suspense fallback={<CardSkeleton rows={6} />}>
-        <ProgresionSection query={progressionQuery} scope={scope} entityId={entityId} />
+        <ProgresionSection
+          scope={scope}
+          studentId={studentId}
+          rawClassGroupId={rawClassGroupId}
+          gradeId={gradeId}
+          nodeId={nodeId}
+          filters={filters}
+        />
       </Suspense>
     </>
   );
+}
+
+/**
+ * Un curso heredado de otra vista puede no pertenecer al nivel filtrado. El
+ * dropdown de Curso solo ofrece los cursos del nivel, así que un `classGroupId`
+ * que no calce se descarta silenciosamente. `getDashboardFilters` está cacheado
+ * por-request (`React.cache`), así que llamarlo desde varias secciones async no
+ * repite el fetch.
+ */
+async function resolveClassGroupId(
+  rawClassGroupId: string | undefined,
+  gradeId: string | undefined,
+): Promise<string | undefined> {
+  if (!rawClassGroupId) return undefined;
+  const options = await getDashboardFilters('');
+  return isClassGroupInGrade(options.classGroups, rawClassGroupId, gradeId)
+    ? rawClassGroupId
+    : undefined;
 }
 
 function buildProgressionQuery({
@@ -172,31 +198,44 @@ function buildProgressionQuery({
   return `?${qs.toString()}`;
 }
 
-async function ScopeSection({
-  scope,
-  studentId,
-  classGroupId,
-  nodeId,
-}: {
+type ScopeParams = {
   scope: ProgressionScope;
   studentId?: string;
-  classGroupId?: string;
+  rawClassGroupId?: string;
+  gradeId?: string;
   nodeId?: string;
-}) {
-  const options = await getDashboardFilters('');
+};
+
+async function resolveProgression(
+  params: ScopeParams & { filters: DashboardFilterValues },
+): Promise<{ entityId: string | undefined; query: string | null }> {
+  const { scope, studentId, rawClassGroupId, gradeId, nodeId, filters } = params;
+  const classGroupId = await resolveClassGroupId(rawClassGroupId, gradeId);
+  const entityId = scope === 'student' ? studentId : scope === 'class' ? classGroupId : nodeId;
+  const query = buildProgressionQuery({ scope, studentId, classGroupId, nodeId, filters, entityId });
+  return { entityId, query };
+}
+
+async function ScopeSection({ scope, studentId, rawClassGroupId, gradeId, nodeId }: ScopeParams) {
+  const [options, classGroupId] = await Promise.all([
+    getDashboardFilters(''),
+    resolveClassGroupId(rawClassGroupId, gradeId),
+  ]);
   return (
     <ProgressionScopeBar
       options={options}
       basePath={BASE_PATH}
       scope={scope}
       studentId={studentId}
+      gradeId={gradeId}
       classGroupId={classGroupId}
       nodeId={nodeId}
     />
   );
 }
 
-async function ProgresionAction({ query }: { query: string | null }) {
+async function ProgresionAction(params: ScopeParams & { filters: DashboardFilterValues }) {
+  const { query } = await resolveProgression(params);
   if (!query) return null;
   const data = await getProgression(query);
   if (data.points.length === 0) return null;
@@ -210,15 +249,10 @@ async function ProgresionAction({ query }: { query: string | null }) {
   );
 }
 
-async function ProgresionSection({
-  query,
-  scope,
-  entityId,
-}: {
-  query: string | null;
-  scope: ProgressionScope;
-  entityId?: string;
-}) {
+async function ProgresionSection(params: ScopeParams & { filters: DashboardFilterValues }) {
+  const { scope } = params;
+  const { entityId, query } = await resolveProgression(params);
+
   if (!entityId || !query) {
     return (
       <EmptyState

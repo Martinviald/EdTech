@@ -1424,7 +1424,7 @@
             {
               "key": "A",
               "text": "3",
-              "isCorrect": true
+              "isCorrect": false
             },
             {
               "key": "B",
@@ -1439,10 +1439,10 @@
             {
               "key": "D",
               "text": "9",
-              "isCorrect": false
+              "isCorrect": true
             }
           ],
-          "correctKey": "A",
+          "correctKey": "D",
           "skill": "Resolver problemas",
           "oa": "OA 27",
           "contentAxis": "Datos y probabilidades",

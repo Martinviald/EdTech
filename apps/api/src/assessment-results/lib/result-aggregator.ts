@@ -1,11 +1,16 @@
 // Helpers para leer responses + grading scale + tags y delegarlos al
 // calculador puro de @soe/types. Mantiene el service delgado y testeable.
 
-import type { GradingScaleParams, ResponseForCalculation } from '@soe/types';
+import type { GradingScaleParams } from '@soe/types';
+import type { ResponseForPersist } from './persist-results';
 
 export type ResponseRow = {
   studentId: string;
   itemId: string;
+  /** JSONB crudo de `responses.value` — lo consume el read-model de cohorte. */
+  value: Record<string, unknown> | null;
+  /** JSONB crudo de `items.content` — de acá sale `hasAlternatives`. */
+  itemContent: Record<string, unknown> | null;
   isCorrect: boolean | null;
   rawScore: string | null;
   finalScore: string | null;
@@ -14,19 +19,34 @@ export type ResponseRow = {
 };
 
 /**
+ * ¿El ítem ofrece alternativas (selección múltiple)?
+ *
+ * El read-model lo necesita para no confundir un ítem de desarrollo con una respuesta
+ * MC en blanco: ambos dan `extractRawAnswer → null`, y sin distinguirlos el desarrollo
+ * colapsaría en un único bucket de blancos en vez de RC/RPC/RI.
+ */
+function hasAlternatives(content: Record<string, unknown> | null): boolean {
+  const alternatives = content?.alternatives;
+  return Array.isArray(alternatives) && alternatives.length > 0;
+}
+
+/**
  * Convierte responses tal como vienen de la DB (decimales como strings) a la
- * forma que esperan los agregadores puros (`ResponseForCalculation`).
+ * forma que esperan los agregadores puros.
  */
 export function toResponseForCalculation(
   rows: readonly ResponseRow[],
   tagsByItemId: Map<string, string[]>,
-): ResponseForCalculation[] {
+): ResponseForPersist[] {
   return rows.map((r) => ({
     studentId: r.studentId,
     itemId: r.itemId,
+    value: r.value,
+    hasAlternatives: hasAlternatives(r.itemContent),
     isCorrect: r.isCorrect,
     // Preferimos finalScore (override humano + AI consolidado) sobre rawScore.
-    rawScore: r.finalScore != null ? Number(r.finalScore) : r.rawScore != null ? Number(r.rawScore) : null,
+    rawScore:
+      r.finalScore != null ? Number(r.finalScore) : r.rawScore != null ? Number(r.rawScore) : null,
     maxScore: Number(r.maxScore),
     itemPosition: r.itemPosition,
     taxonomyNodeIds: tagsByItemId.get(r.itemId) ?? [],

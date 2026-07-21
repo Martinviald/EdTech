@@ -3,6 +3,7 @@ import {
   decimal,
   index,
   integer,
+  jsonb,
   pgTable,
   text,
   timestamp,
@@ -10,9 +11,12 @@ import {
   uuid,
 } from 'drizzle-orm/pg-core';
 import { relations } from 'drizzle-orm';
-import { metricTypeEnum, performanceLevelEnum } from './enums';
+import type { AnswerCount } from '@soe/types';
+import { metricTypeEnum, performanceLevelEnum, statsSourceEnum } from './enums';
+import { classGroups } from './academic';
 import { assessments } from './assessments';
 import { gradingScales, instruments } from './instruments';
+import { items } from './items';
 import { organizations } from './organizations';
 import { students } from './students';
 import { taxonomyNodes } from './taxonomy';
@@ -82,6 +86,11 @@ export const assessmentResults = pgTable(
     bandLabel: text('band_label'),
     // Nivel de desempeño como dato (#2). FK nullable a performance_bands.
     performanceBandId: uuid('performance_band_id').references(() => performanceBands.id),
+    // Banda del nivel PREVIO (Monitoreo Intermedio) para informes de Cierre. FK
+    // nullable a performance_bands. La escribe la ingesta de Cierre desde el
+    // `priorLevel` del informe; §5 la expone como el avance `priorBand → band`.
+    // Sólo aplica a Cierre; NULL en Monitoreo/Diagnóstico/item_level.
+    priorPerformanceBandId: uuid('prior_performance_band_id').references(() => performanceBands.id),
     // DEPRECATED (soft migration): enum cerrado de 4 niveles. Se mantiene como
     // fallback para no romper datos/queries existentes. Nuevos cálculos pueblan
     // además performanceBandId cuando hay bandas configuradas.
@@ -119,6 +128,165 @@ export const skillResults = pgTable(
   },
   (table) => [unique().on(table.assessmentId, table.studentId, table.nodeId)],
 );
+
+// ── Read-model de cohorte (analítica agregada) ───────────────────────────────
+// Ver docs/plan-analitica-agregada-informes-oficiales.md.
+//
+// Existe para que la analítica por curso tenga UNA sola fuente de lectura, poblada
+// por DOS escritores: el cálculo desde `responses` (calculador puro `aggregateItemStats`)
+// y el importador de informes oficiales DIA (que no tiene respuestas por alumno).
+//
+// ⚠️ Guarda CONTEOS ENTEROS, nunca porcentajes. Dos razones, ambas verificadas:
+//  1. Recombinar cohortes es una SUMA exacta (un profesor con N cursos, la referencia
+//     org = todas las filas del assessment). Promediar porcentajes entre cursos de
+//     distinto tamaño sería incorrecto.
+//  2. El informe oficial entrega % + el N del curso, y `round(pct/100 * N)` reconstruye
+//     el conteo exacto (suma exactamente N). Así lo importado es idéntico EN TIPO a lo
+//     computado, y la paridad con el `GROUP BY` viejo es verificable fila a fila.
+export const assessmentItemStats = pgTable(
+  'assessment_item_stats',
+  {
+    id: uuid('id').defaultRandom().primaryKey(),
+    assessmentId: uuid('assessment_id')
+      .notNull()
+      .references(() => assessments.id, { onDelete: 'cascade' }),
+    // Grano por curso. El scope de un profesor siempre se resuelve a una unión de
+    // class_groups (nunca a una lista arbitraria de alumnos), por eso este grano
+    // responde todas las consultas actuales.
+    classGroupId: uuid('class_group_id')
+      .notNull()
+      .references(() => classGroups.id, { onDelete: 'cascade' }),
+    itemId: uuid('item_id')
+      .notNull()
+      .references(() => items.id),
+    // N de la cohorte considerada (el "Cantidad de estudiantes que considera este
+    // informe" del PDF; los alumnos matriculados con resultados en el flujo computed).
+    studentCount: integer('student_count').notNull(),
+    // Denominador de correctRate. Equivale al `totalResponses` actual e incluye blancos.
+    // Puede ser < studentCount si un alumno no tiene fila de respuesta para el ítem.
+    responseCount: integer('response_count').notNull(),
+    correctCount: integer('correct_count').notNull(),
+    // [{ key, count, isCorrect }]. `key: null` = blanco/nulo (la opción "N" del informe).
+    answerCounts: jsonb('answer_counts').$type<AnswerCount[]>().notNull().default([]),
+    // Puntaje acumulado del curso en el ítem. Necesarios para derivar el % por eje,
+    // que es ponderado por puntaje y admite crédito parcial (RPC del DIA = 0.5).
+    scoreSum: decimal('score_sum', { precision: 9, scale: 2 }).notNull(),
+    maxSum: decimal('max_sum', { precision: 9, scale: 2 }).notNull(),
+    source: statsSourceEnum('source').notNull(),
+    computedAt: timestamp('computed_at').defaultNow().notNull(),
+    createdAt: timestamp('created_at').defaultNow().notNull(),
+    updatedAt: timestamp('updated_at').defaultNow().notNull(),
+  },
+  (table) => [
+    unique().on(table.assessmentId, table.classGroupId, table.itemId),
+    index('assessment_item_stats_item_idx').on(table.assessmentId, table.itemId),
+  ],
+);
+
+// Read-model de cohorte por eje/habilidad. Alimenta dashboards `getSkills` y heatmap.
+//
+// ⚠️ `percentage` NO significa lo mismo según `source` (decisión §9.2 del plan):
+//  · computed  → media de los porcentajes por alumno de `skill_results`. Se conserva
+//                así deliberadamente para que los números ya publicados no se muevan.
+//  · imported  → tasa agrupada ponderada por puntaje, derivada de assessment_item_stats.
+//                Es la definición del propio DIA (reproduce el informe con error <0.01pp).
+// Coinciden cuando todos los alumnos responden todos los ítems; divergen si faltan
+// respuestas. Unificar a la tasa agrupada es más limpio pero cambiaría números vivos.
+export const assessmentSkillStats = pgTable(
+  'assessment_skill_stats',
+  {
+    id: uuid('id').defaultRandom().primaryKey(),
+    assessmentId: uuid('assessment_id')
+      .notNull()
+      .references(() => assessments.id, { onDelete: 'cascade' }),
+    classGroupId: uuid('class_group_id')
+      .notNull()
+      .references(() => classGroups.id, { onDelete: 'cascade' }),
+    nodeId: uuid('node_id')
+      .notNull()
+      .references(() => taxonomyNodes.id, { onDelete: 'cascade' }),
+    studentCount: integer('student_count').notNull(),
+    correctCount: integer('correct_count').notNull(),
+    totalCount: integer('total_count').notNull(),
+    percentage: decimal('percentage', { precision: 5, scale: 2 }), // 0..100
+    source: statsSourceEnum('source').notNull(),
+    computedAt: timestamp('computed_at').defaultNow().notNull(),
+    createdAt: timestamp('created_at').defaultNow().notNull(),
+    updatedAt: timestamp('updated_at').defaultNow().notNull(),
+  },
+  (table) => [unique().on(table.assessmentId, table.classGroupId, table.nodeId)],
+);
+
+// Read-model de cohorte por banda de desempeño. Alimenta la "distribución por nivel"
+// de los informes agregados (niveles I/II/III del DIA).
+//
+// Grano: assessment × curso × banda. Guarda CONTEOS ENTEROS de alumnos en cada nivel,
+// NUNCA porcentajes (recombinar cohortes es una suma exacta; ver nota de la sección).
+// Con `source='imported'` se puebla desde el informe oficial DIA (que entrega el conteo
+// o el % + N del curso, del que se reconstruye el conteo exacto).
+export const assessmentLevelStats = pgTable(
+  'assessment_level_stats',
+  {
+    id: uuid('id').defaultRandom().primaryKey(),
+    assessmentId: uuid('assessment_id')
+      .notNull()
+      .references(() => assessments.id, { onDelete: 'cascade' }),
+    classGroupId: uuid('class_group_id')
+      .notNull()
+      .references(() => classGroups.id, { onDelete: 'cascade' }),
+    performanceBandId: uuid('performance_band_id')
+      .notNull()
+      .references(() => performanceBands.id),
+    studentCount: integer('student_count').notNull(),
+    source: statsSourceEnum('source').notNull(),
+    computedAt: timestamp('computed_at').defaultNow().notNull(),
+    createdAt: timestamp('created_at').defaultNow().notNull(),
+    updatedAt: timestamp('updated_at').defaultNow().notNull(),
+  },
+  (table) => [unique().on(table.assessmentId, table.classGroupId, table.performanceBandId)],
+);
+
+export const assessmentItemStatsRelations = relations(assessmentItemStats, ({ one }) => ({
+  assessment: one(assessments, {
+    fields: [assessmentItemStats.assessmentId],
+    references: [assessments.id],
+  }),
+  classGroup: one(classGroups, {
+    fields: [assessmentItemStats.classGroupId],
+    references: [classGroups.id],
+  }),
+  item: one(items, { fields: [assessmentItemStats.itemId], references: [items.id] }),
+}));
+
+export const assessmentSkillStatsRelations = relations(assessmentSkillStats, ({ one }) => ({
+  assessment: one(assessments, {
+    fields: [assessmentSkillStats.assessmentId],
+    references: [assessments.id],
+  }),
+  classGroup: one(classGroups, {
+    fields: [assessmentSkillStats.classGroupId],
+    references: [classGroups.id],
+  }),
+  node: one(taxonomyNodes, {
+    fields: [assessmentSkillStats.nodeId],
+    references: [taxonomyNodes.id],
+  }),
+}));
+
+export const assessmentLevelStatsRelations = relations(assessmentLevelStats, ({ one }) => ({
+  assessment: one(assessments, {
+    fields: [assessmentLevelStats.assessmentId],
+    references: [assessments.id],
+  }),
+  classGroup: one(classGroups, {
+    fields: [assessmentLevelStats.classGroupId],
+    references: [classGroups.id],
+  }),
+  performanceBand: one(performanceBands, {
+    fields: [assessmentLevelStats.performanceBandId],
+    references: [performanceBands.id],
+  }),
+}));
 
 export const performanceBandsRelations = relations(performanceBands, ({ one }) => ({
   instrument: one(instruments, {
@@ -169,3 +337,9 @@ export type AssessmentResult = typeof assessmentResults.$inferSelect;
 export type NewAssessmentResult = typeof assessmentResults.$inferInsert;
 export type SkillResult = typeof skillResults.$inferSelect;
 export type NewSkillResult = typeof skillResults.$inferInsert;
+export type AssessmentItemStat = typeof assessmentItemStats.$inferSelect;
+export type NewAssessmentItemStat = typeof assessmentItemStats.$inferInsert;
+export type AssessmentSkillStat = typeof assessmentSkillStats.$inferSelect;
+export type NewAssessmentSkillStat = typeof assessmentSkillStats.$inferInsert;
+export type AssessmentLevelStat = typeof assessmentLevelStats.$inferSelect;
+export type NewAssessmentLevelStat = typeof assessmentLevelStats.$inferInsert;

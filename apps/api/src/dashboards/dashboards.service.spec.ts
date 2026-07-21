@@ -94,16 +94,24 @@ describe('DashboardsService.getOverview', () => {
     const db = makeDb([
       // 1. resolveScopedAssessmentIds (assessments+instruments)
       [{ id: 'a1' }, { id: 'a2' }],
-      // 2. métricas globales
-      [{ avgPct: '72.50', studentsEvaluated: 30, assessmentsCount: 2 }],
-      // 3. computePerformanceDistribution (group by level)
+      // 2. métricas globales (per-alumno)
+      [{ avgPct: '72.50', studentsEvaluated: 30 }],
+      // 3. resultAssessmentIds (distinct assessment con datos per-alumno)
+      [{ assessmentId: 'a1' }, { assessmentId: 'a2' }],
+      // 4. loadCohortAchievementByAssessment — a1/a2 también en read-model (computed),
+      //    ya contados per-alumno → no aportan N ni logro extra.
+      [
+        { assessmentId: 'a1', scoreSum: '0', maxSum: '0', studentsAssessed: 0 },
+        { assessmentId: 'a2', scoreSum: '0', maxSum: '0', studentsAssessed: 0 },
+      ],
+      // 5. computePerformanceDistribution (group by level)
       [
         { level: 'adequate', count: 18 },
         { level: 'elementary', count: 12 },
       ],
-      // 4. loadRecentAssessments → resolveScopedAssessmentIds
+      // 6. loadRecentAssessments → resolveScopedAssessmentIds
       [{ id: 'a1' }, { id: 'a2' }],
-      // 5. loadRecentAssessments → assessments
+      // 7. loadRecentAssessments → assessments
       [
         {
           assessmentId: 'a1',
@@ -117,11 +125,13 @@ describe('DashboardsService.getOverview', () => {
           gradeName: '2° Básico',
         },
       ],
-      // 6. loadRecentAssessments → stats
+      // 8. loadRecentAssessments → stats
       [{ assessmentId: 'a1', studentsCount: 30, avgPct: '72.50' }],
-      // 7. deriveAlerts → courseAchievement
+      // 9. loadRecentAssessments → cohorte (fallback para agregadas; acá no aplica)
+      [],
+      // 10. deriveAlerts → courseAchievement
       [{ classGroupId: 'cg1', classGroupName: '2°A', avgPct: '55.00' }],
-      // 8. deriveAlerts → skills
+      // 11. deriveAlerts → skills
       [{ nodeId: 'n1', nodeName: 'Inferir', avgPct: '40.00' }],
     ]);
     const svc = makeService(db);
@@ -138,9 +148,46 @@ describe('DashboardsService.getOverview', () => {
     expect(adequate.percentage).toBeCloseTo(60);
     expect(res.recentAssessments).toHaveLength(1);
     expect(res.recentAssessments[0]!.instrumentName).toBe('DIA 2025 Lectura');
+    expect(res.recentAssessments[0]!.studentsCount).toBe(30);
     // Alertas: curso < 60 (low_achievement) + skill < 50 (critical_skill).
     expect(res.alerts).toHaveLength(2);
     expect(res.alerts.map((a) => a.type).sort()).toEqual(['critical_skill', 'low_achievement']);
+  });
+
+  // Espeja el fallback de `listAssessments`: una evaluación cargada desde un informe
+  // oficial no tiene filas por alumno, y la tarjeta mostraba "0 alumnos" y logro "—".
+  it('evaluación reciente agregada: N y logro salen del read-model de cohorte', async () => {
+    const db = makeDb([
+      [{ id: 'a1' }], // resolveScopedAssessmentIds
+      [{ avgPct: null, studentsEvaluated: 0 }], // métricas per-alumno
+      [], // resultAssessmentIds
+      [{ assessmentId: 'a1', scoreSum: '820', maxSum: '2000', studentsAssessed: 41 }], // read-model
+      [], // distribución
+      [{ id: 'a1' }], // loadRecentAssessments → resolveScopedAssessmentIds
+      [
+        {
+          assessmentId: 'a1',
+          name: 'LANG diagnóstico 2025',
+          administeredAt: new Date('2025-04-01'),
+          createdAt: new Date('2025-04-01'),
+          status: 'completed',
+          instrumentName: 'DIA Lenguaje',
+          instrumentType: 'dia',
+          subjectName: 'Lenguaje',
+          gradeName: '3° Básico',
+        },
+      ],
+      [], // stats per-alumno: vacío (aggregate_only)
+      [{ assessmentId: 'a1', scoreSum: '820', maxSum: '2000', studentsAssessed: 41 }], // cohorte
+      [], // deriveAlerts → courseAchievement
+      [], // deriveAlerts → skills
+    ]);
+    const svc = makeService(db);
+    const res = await svc.getOverview(makeUser({ activeRole: 'academic_director' }), {});
+
+    expect(res.recentAssessments).toHaveLength(1);
+    expect(res.recentAssessments[0]!.studentsCount).toBe(41);
+    expect(res.recentAssessments[0]!.averageAchievement).toBeCloseTo(41, 6); // 820/2000
   });
 
   it('sin evaluaciones que matcheen → overview vacío con distribución de ceros', async () => {
@@ -178,6 +225,69 @@ describe('DashboardsService.getOverview', () => {
     expect(res.assessmentsCount).toBe(0);
     expect(db.__selectIdx()).toBe(0); // ninguna query ejecutada
   });
+
+  // ── Informes agregados (aggregate_only) — no tienen filas per-alumno ──────────
+  it('org con SÓLO informes agregados: cuenta assessment y alumnos desde el read-model', async () => {
+    const db = makeDb([
+      // 1. resolveScopedAssessmentIds → el assessment agregado sí existe en `assessments`
+      [{ id: 'a1' }],
+      // 2. métricas per-alumno → sin resultados (informe agregado)
+      [{ avgPct: null, studentsEvaluated: 0 }],
+      // 3. resultAssessmentIds → ninguno
+      [],
+      // 4. loadCohortAchievementByAssessment → logro 150/200 = 75%, N = 25
+      [{ assessmentId: 'a1', scoreSum: '150', maxSum: '200', studentsAssessed: 25 }],
+      // 5+ resto (distribución, recientes, alertas) → vacío por defecto
+    ]);
+    const svc = makeService(db);
+    const res = await svc.getOverview(makeUser({ activeRole: 'academic_director' }), {});
+    // Antes daban 0: ahora salen del read-model de cohorte.
+    expect(res.assessmentsCount).toBe(1);
+    expect(res.studentsEvaluated).toBe(25);
+    expect(res.globalAchievement).toBe(75);
+  });
+
+  it('org mixta (item_level + agregado): cuenta ambos sin doble-contar', async () => {
+    const db = makeDb([
+      // 1. resolveScopedAssessmentIds → a1 (item_level) + a2 (agregado)
+      [{ id: 'a1' }, { id: 'a2' }],
+      // 2. métricas per-alumno de a1: 80% sobre 20 alumnos
+      [{ avgPct: '80.00', studentsEvaluated: 20 }],
+      // 3. resultAssessmentIds → sólo a1 tiene datos per-alumno
+      [{ assessmentId: 'a1' }],
+      // 4. read-model: a1 (computed, ya contado) + a2 (agregado, 90/200 = 45%, N 30)
+      [
+        { assessmentId: 'a1', scoreSum: '160', maxSum: '200', studentsAssessed: 20 },
+        { assessmentId: 'a2', scoreSum: '90', maxSum: '200', studentsAssessed: 30 },
+      ],
+    ]);
+    const svc = makeService(db);
+    const res = await svc.getOverview(makeUser({ activeRole: 'academic_director' }), {});
+    // Unión {a1} ∪ {a1,a2} = 2 (a1 NO se cuenta dos veces).
+    expect(res.assessmentsCount).toBe(2);
+    // 20 (per-alumno de a1) + 30 (cohorte de a2); a1 del read-model no re-suma.
+    expect(res.studentsEvaluated).toBe(50);
+    // Ponderado: (80×20 + 45×30) / (20+30) = (1600 + 1350) / 50 = 59.
+    expect(res.globalAchievement).toBeCloseTo(59, 6);
+  });
+
+  it('org item_level puro sin read-model: sin regresión respecto al cálculo per-alumno', async () => {
+    const db = makeDb([
+      // 1. resolveScopedAssessmentIds
+      [{ id: 'a1' }],
+      // 2. métricas per-alumno: 70% sobre 15 alumnos
+      [{ avgPct: '70.00', studentsEvaluated: 15 }],
+      // 3. resultAssessmentIds → a1
+      [{ assessmentId: 'a1' }],
+      // 4. read-model vacío (datos antiguos previos al backfill)
+      [],
+    ]);
+    const svc = makeService(db);
+    const res = await svc.getOverview(makeUser({ activeRole: 'school_admin' }), {});
+    expect(res.assessmentsCount).toBe(1);
+    expect(res.studentsEvaluated).toBe(15);
+    expect(res.globalAchievement).toBe(70);
+  });
 });
 
 // ──────────────────────────────────────────────────────────────────────────────
@@ -187,7 +297,9 @@ describe('DashboardsService.getOverview', () => {
 describe('DashboardsService.getFilterOptions', () => {
   it('admin: devuelve cursos, asignaturas, instrumentos y períodos', async () => {
     const db = makeDb([
-      // 1. classGroups + grades
+      // 1. resolveCatalogAcademicYear → años con cursos visibles
+      [{ academicYearId: 'ay1', year: 2025, isCurrent: true }],
+      // 2. classGroups + grades
       [
         {
           id: 'cg1',
@@ -197,9 +309,9 @@ describe('DashboardsService.getFilterOptions', () => {
           gradeName: '2° Básico',
         },
       ],
-      // 2. selectDistinct subjects
+      // 3. selectDistinct subjects
       [{ id: 'sub1', name: 'Lenguaje' }],
-      // 3. instruments
+      // 4. instruments
       [
         {
           id: 'i1',
@@ -209,7 +321,7 @@ describe('DashboardsService.getFilterOptions', () => {
           gradeId: 'g1',
         },
       ],
-      // 4. periods (academic_years)
+      // 5. periods (academic_years)
       [{ id: 'ay1', year: 2025, isCurrent: true }],
     ]);
     const svc = makeService(db);
@@ -221,6 +333,65 @@ describe('DashboardsService.getFilterOptions', () => {
     expect(res.subjects).toEqual([{ id: 'sub1', label: 'Lenguaje' }]);
     expect(res.instruments[0]!.type).toBe('dia');
     expect(res.periods).toEqual([{ id: 'ay1', year: 2025, label: '2025', isCurrent: true }]);
+    expect(res.defaultAcademicYearId).toBe('ay1');
+  });
+
+  // El catálogo de cursos se acota SIEMPRE a un año: `class_groups` es por año y
+  // el nombre del curso ("A") no distingue 2025 de 2026.
+  it('sin año pedido: usa el año vigente cuando tiene cursos', async () => {
+    const db = makeDb([
+      // resolveCatalogAcademicYear: 2026 vigente y con cursos, 2025 también tiene
+      [
+        { academicYearId: 'ay2026', year: 2026, isCurrent: true },
+        { academicYearId: 'ay2025', year: 2025, isCurrent: false },
+      ],
+      [{ id: 'cg1', name: 'A', gradeId: 'g1', academicYearId: 'ay2026', gradeName: '3° Básico' }],
+      [],
+      [],
+      [
+        { id: 'ay2026', year: 2026, isCurrent: true },
+        { id: 'ay2025', year: 2025, isCurrent: false },
+      ],
+    ]);
+    const svc = makeService(db);
+    const res = await svc.getFilterOptions(makeUser({ activeRole: 'school_admin' }), {});
+    expect(res.defaultAcademicYearId).toBe('ay2026');
+  });
+
+  // Un año vigente recién abierto no tiene cursos todavía: sin este fallback el
+  // catálogo saldría vacío y los dashboards en blanco pese a haber datos previos.
+  it('año vigente sin cursos: cae al año más reciente que sí tenga', async () => {
+    const db = makeDb([
+      // 2026 es el vigente pero NO aparece acá (no tiene cursos); sí 2025.
+      [{ academicYearId: 'ay2025', year: 2025, isCurrent: false }],
+      [{ id: 'cg1', name: 'A', gradeId: 'g1', academicYearId: 'ay2025', gradeName: '3° Básico' }],
+      [],
+      [],
+      [
+        { id: 'ay2026', year: 2026, isCurrent: true },
+        { id: 'ay2025', year: 2025, isCurrent: false },
+      ],
+    ]);
+    const svc = makeService(db);
+    const res = await svc.getFilterOptions(makeUser({ activeRole: 'school_admin' }), {});
+    expect(res.defaultAcademicYearId).toBe('ay2025');
+    expect(res.classGroups).toHaveLength(1);
+  });
+
+  it('año pedido explícitamente: lo respeta sin resolver el vigente', async () => {
+    const db = makeDb([
+      // Sin fila de resolveCatalogAcademicYear: no debe consultarse.
+      [{ id: 'cg1', name: 'B', gradeId: 'g1', academicYearId: 'ay2025', gradeName: '3° Básico' }],
+      [],
+      [],
+      [{ id: 'ay2025', year: 2025, isCurrent: false }],
+    ]);
+    const svc = makeService(db);
+    const res = await svc.getFilterOptions(makeUser({ activeRole: 'school_admin' }), {
+      academicYearId: 'ay2025',
+    });
+    expect(res.defaultAcademicYearId).toBe('ay2025');
+    expect(res.classGroups[0]!.label).toBe('B');
   });
 
   it('teacher sin cursos → sólo expone períodos, sin cursos ni asignaturas', async () => {
@@ -360,8 +531,29 @@ describe('DashboardsService.getPerformance', () => {
 // getSkills()
 // ──────────────────────────────────────────────────────────────────────────────
 
+// Fila del read-model ya agregada en SQL a (nodo × curso), como la devuelve
+// `loadSkillsFromCohortStats`.
+function cohortSkillRow(
+  nodeId: string,
+  classGroupPct: number,
+  studentCount: number,
+  overrides: Record<string, unknown> = {},
+) {
+  return {
+    nodeId,
+    nodeName: 'Localizar información',
+    nodeType: 'skill',
+    nodeCode: 'OA1',
+    parentId: null,
+    pctSum: (classGroupPct * studentCount).toFixed(2),
+    pctWeight: studentCount,
+    studentsAssessed: studentCount,
+    ...overrides,
+  };
+}
+
 describe('DashboardsService.getSkills', () => {
-  it('agrega skill_results por nodo con promedio y alumnos evaluados', async () => {
+  it('agrega el read-model de cohorte por nodo con promedio y alumnos evaluados', async () => {
     const db = makeDb([
       // 1. resolveScopedAssessmentIds
       [{ id: 'a1' }],
@@ -369,18 +561,8 @@ describe('DashboardsService.getSkills', () => {
       [],
       // 3. resolveScopedBands: >1 instrumento → sin bandas (legacy)
       [{ instrumentId: 'i1' }, { instrumentId: 'i2' }],
-      // 4. skills grouped
-      [
-        {
-          nodeId: 'n1',
-          nodeName: 'Localizar información',
-          nodeType: 'skill',
-          nodeCode: 'OA1',
-          parentId: null,
-          avgPct: '75.00',
-          studentsAssessed: 20,
-        },
-      ],
+      // 4. assessment_skill_stats agrupado por (nodo × curso)
+      [cohortSkillRow('n1', 75, 20)],
     ]);
     const svc = makeService(db);
     const res = await svc.getSkills(makeUser({ activeRole: 'academic_director' }), {});
@@ -391,6 +573,86 @@ describe('DashboardsService.getSkills', () => {
     expect(res.skills[0]!.performanceLevel).toBe('adequate'); // 0.75 ∈ [0.70,0.85)
   });
 
+  // ⚠️ El invariante de la Fase 5: recombinar cursos NO puede mover el número.
+  it('pondera por studentCount al recombinar cursos de distinto N (no promedia %)', async () => {
+    const db = makeDb([
+      [{ id: 'a1' }],
+      [],
+      [{ instrumentId: 'i1' }, { instrumentId: 'i2' }],
+      // Mismo nodo, dos cursos de N muy distinto: 90% con 10 alumnos y 40% con 30.
+      // Ponderado (lo que hacía avg() por alumno): (900 + 1200) / 40 = 52.5.
+      // Promedio simple de los % de cada curso daría 65 → sería un número movido.
+      [cohortSkillRow('n1', 90, 10), cohortSkillRow('n1', 40, 30)],
+    ]);
+    const svc = makeService(db);
+    const res = await svc.getSkills(makeUser({ activeRole: 'academic_director' }), {});
+    expect(res.skills).toHaveLength(1);
+    expect(res.skills[0]!.averageAchievement).toBeCloseTo(52.5, 6);
+    expect(res.skills[0]!.studentsAssessed).toBe(40);
+  });
+
+  // `count(distinct student_id)` de antes cuenta al alumno UNA vez aunque haya rendido
+  // dos evaluaciones. El SQL ya trae `max(student_count)` por curso; el fold suma esos
+  // max entre cursos, nunca entre evaluaciones.
+  it('no duplica alumnos evaluados cuando el scope abarca varias evaluaciones', async () => {
+    const db = makeDb([
+      [{ id: 'a1' }, { id: 'a2' }],
+      [],
+      [{ instrumentId: 'i1' }, { instrumentId: 'i2' }],
+      // Una fila por curso (el max sobre las 2 evaluaciones ya lo hizo SQL).
+      [cohortSkillRow('n1', 60, 20), cohortSkillRow('n1', 60, 25)],
+    ]);
+    const svc = makeService(db);
+    const res = await svc.getSkills(makeUser({ activeRole: 'academic_director' }), {});
+    expect(res.skills[0]!.studentsAssessed).toBe(45);
+  });
+
+  it('nodo sin porcentajes (pctWeight 0) → promedio null sin nivel', async () => {
+    const db = makeDb([
+      [{ id: 'a1' }],
+      [],
+      [{ instrumentId: 'i1' }, { instrumentId: 'i2' }],
+      [cohortSkillRow('n1', 0, 0, { pctSum: null, pctWeight: 0, studentsAssessed: 0 })],
+    ]);
+    const svc = makeService(db);
+    const res = await svc.getSkills(makeUser({ activeRole: 'academic_director' }), {});
+    expect(res.skills[0]!.averageAchievement).toBeNull();
+    expect(res.skills[0]!.performanceLevel).toBeNull();
+  });
+
+  // El read-model tiene grano curso: acotar a UN alumno exige skill_results.
+  it('con filtro studentId cae al camino por alumno (skill_results)', async () => {
+    const db = makeDb([
+      // 1. resolveScopedStudentIds (hay filtro de alumno → sí consulta)
+      [{ studentId: 's1' }],
+      // 2. resolveScopedAssessmentIds
+      [{ id: 'a1' }],
+      // 3. resolveThresholds → sin escala
+      [],
+      // 4. resolveScopedBands → >1 instrumento
+      [{ instrumentId: 'i1' }, { instrumentId: 'i2' }],
+      // 5. skill_results agrupado por nodo (forma vieja: avgPct + count distinct)
+      [
+        {
+          nodeId: 'n1',
+          nodeName: 'Localizar información',
+          nodeType: 'skill',
+          nodeCode: 'OA1',
+          parentId: null,
+          avgPct: '75.00',
+          studentsAssessed: 1,
+        },
+      ],
+    ]);
+    const svc = makeService(db);
+    const res = await svc.getSkills(makeUser({ activeRole: 'academic_director' }), {
+      studentId: 's1',
+    });
+    expect(res.skills[0]!.averageAchievement).toBe(75);
+    expect(res.skills[0]!.studentsAssessed).toBe(1);
+    expect(db.__selectIdx()).toBe(5);
+  });
+
   it('teacher sin asignaciones → skills vacío', async () => {
     const db = makeDb([
       // getAccessibleClassGroupIds → vacío
@@ -399,6 +661,27 @@ describe('DashboardsService.getSkills', () => {
     const svc = makeService(db);
     const res = await svc.getSkills(makeUser({ activeRole: 'teacher', roles: ['teacher'] }), {});
     expect(res.skills).toEqual([]);
+  });
+
+  it('teacher con cursos: resuelve sus class_groups y agrega el read-model', async () => {
+    const db = makeDb([
+      // 1. getAccessibleClassGroupIds
+      [{ classGroupId: 'cg1' }],
+      // 2. resolveScopedClassGroupIds
+      [{ id: 'cg1' }],
+      // 3. resolveScopedAssessmentIds
+      [{ id: 'a1' }],
+      // 4. resolveThresholds
+      [],
+      // 5. resolveScopedBands
+      [{ instrumentId: 'i1' }, { instrumentId: 'i2' }],
+      // 6. read-model
+      [cohortSkillRow('n1', 80, 18)],
+    ]);
+    const svc = makeService(db);
+    const res = await svc.getSkills(makeUser({ activeRole: 'teacher', roles: ['teacher'] }), {});
+    expect(res.skills[0]!.averageAchievement).toBe(80);
+    expect(res.skills[0]!.studentsAssessed).toBe(18);
   });
 });
 
@@ -415,10 +698,24 @@ describe('DashboardsService.getSkillBreakdown', () => {
       [{ id: 'a1' }],
       // 3. resolveThresholds → resolveApplicableScale (sin escala → defaults)
       [],
-      // 4. breakdown por classGroup
+      // 4. breakdown por classGroup sobre assessment_skill_stats
       [
-        { id: 'cg1', name: '2°A', gradeName: '2° Básico', avgPct: '80.00', studentsAssessed: 18 },
-        { id: 'cg2', name: '2°B', gradeName: '2° Básico', avgPct: '35.00', studentsAssessed: 15 },
+        {
+          id: 'cg1',
+          name: '2°A',
+          gradeName: '2° Básico',
+          pctSum: '1440.00',
+          pctWeight: 18,
+          studentsAssessed: 18,
+        },
+        {
+          id: 'cg2',
+          name: '2°B',
+          gradeName: '2° Básico',
+          pctSum: '525.00',
+          pctWeight: 15,
+          studentsAssessed: 15,
+        },
       ],
     ]);
     const svc = makeService(db);
@@ -445,15 +742,26 @@ describe('DashboardsService.getSkillBreakdown', () => {
       [{ name: 'Comprensión', type: 'skill', code: null }],
       [{ id: 'a1' }],
       [],
-      // breakdown por assessment con name null
+      // breakdown por assessment con name null — dos cursos de la MISMA evaluación,
+      // que el fold recombina en una sola fila ponderando por pctWeight.
       [
         {
           id: 'a1',
           name: null,
           instrumentName: 'DIA Lenguaje 2°',
           subjectName: 'Lenguaje',
-          avgPct: '60.00',
-          studentsAssessed: 30,
+          pctSum: '1400.00', // 70% × 20 alumnos
+          pctWeight: 20,
+          studentsAssessed: 20,
+        },
+        {
+          id: 'a1',
+          name: null,
+          instrumentName: 'DIA Lenguaje 2°',
+          subjectName: 'Lenguaje',
+          pctSum: '400.00', // 40% × 10 alumnos
+          pctWeight: 10,
+          studentsAssessed: 10,
         },
       ],
     ]);
@@ -462,8 +770,12 @@ describe('DashboardsService.getSkillBreakdown', () => {
       nodeId: 'n1',
       groupBy: 'assessment',
     });
+    expect(res.rows).toHaveLength(1);
     expect(res.rows[0]!.label).toBe('DIA Lenguaje 2°');
     expect(res.rows[0]!.sublabel).toBe('Lenguaje');
+    // (1400 + 400) / 30 = 60 — no 55, que sería el promedio simple de 70 y 40.
+    expect(res.rows[0]!.averageAchievement).toBeCloseTo(60, 6);
+    expect(res.rows[0]!.studentsAssessed).toBe(30);
   });
 
   it('teacher sin asignaciones → rows vacío (pero node se resuelve)', async () => {

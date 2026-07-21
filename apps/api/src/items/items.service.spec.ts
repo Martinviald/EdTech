@@ -7,7 +7,9 @@ import type { CreateItemDto, UpdateItemDto } from './dto/item.dto';
 
 function makeService() {
   const db = {} as never;
-  return new ItemsService(db);
+  // Ninguno de estos tests ejerce la figura del ítem; basta un doble inerte.
+  const files = {} as never;
+  return new ItemsService(db, files);
 }
 
 function user(overrides: Partial<JwtPayload> = {}): JwtPayload {
@@ -224,7 +226,7 @@ describe('ItemsService.create — validación de content polimórfico', () => {
     'acepta content válido para el tipo %s',
     async (type) => {
       const created = item({ type, content: VALID_CONTENT[type] });
-      const svc = new ItemsService(dbMockForCreate(created));
+      const svc = new ItemsService(dbMockForCreate(created), {} as never);
       await expect(
         svc.create(createDto(type, VALID_CONTENT[type]), user()),
       ).resolves.toBeDefined();
@@ -311,7 +313,7 @@ describe('ItemsService.create — validación de content polimórfico', () => {
       ],
     };
     const created = item({ type: 'multiple_choice', content: seedLikeContent as Item['content'] });
-    const svc = new ItemsService(dbMockForCreate(created));
+    const svc = new ItemsService(dbMockForCreate(created), {} as never);
     await expect(
       svc.create(createDto('multiple_choice', seedLikeContent), user()),
     ).resolves.toBeDefined();
@@ -353,7 +355,7 @@ describe('ItemsService.update — validación de content polimórfico', () => {
       type: 'multiple_choice',
       content: VALID_CONTENT.multiple_choice,
     });
-    const svc = new ItemsService(dbMockForUpdate(existing));
+    const svc = new ItemsService(dbMockForUpdate(existing), {} as never);
     const dto = { content: VALID_CONTENT.multiple_choice } as UpdateItemDto;
     await expect(svc.update('item-1', dto, user({ orgId: 'org-1' }))).resolves.toBeDefined();
   });
@@ -364,7 +366,7 @@ describe('ItemsService.update — validación de content polimórfico', () => {
       type: 'true_false',
       content: VALID_CONTENT.true_false,
     });
-    const svc = new ItemsService(dbMockForUpdate(existing));
+    const svc = new ItemsService(dbMockForUpdate(existing), {} as never);
     const dto = { content: { stem: 'sin correctAnswer' } } as UpdateItemDto;
     await expect(
       svc.update('item-1', dto, user({ orgId: 'org-1' })),
@@ -379,7 +381,7 @@ describe('ItemsService.update — validación de content polimórfico', () => {
       type: 'multiple_choice',
       content: VALID_CONTENT.multiple_choice,
     });
-    const svc = new ItemsService(dbMockForUpdate(existing));
+    const svc = new ItemsService(dbMockForUpdate(existing), {} as never);
     const dto = { type: 'gap_fill' } as UpdateItemDto;
     await expect(
       svc.update('item-1', dto, user({ orgId: 'org-1' })),
@@ -392,7 +394,7 @@ describe('ItemsService.update — validación de content polimórfico', () => {
       type: 'multiple_choice',
       content: VALID_CONTENT.multiple_choice,
     });
-    const svc = new ItemsService(dbMockForUpdate(existing));
+    const svc = new ItemsService(dbMockForUpdate(existing), {} as never);
     const dto = { position: 5 } as UpdateItemDto;
     await expect(
       svc.update('item-1', dto, user({ orgId: 'org-1' })),
@@ -448,7 +450,7 @@ describe('ItemsService.getContentForAssistant — normalización', () => {
         ],
       } as Item['content'],
     });
-    const svc = new ItemsService(dbMockForAssistant(row, 'Operatoria'));
+    const svc = new ItemsService(dbMockForAssistant(row, 'Operatoria'), {} as never);
 
     const result = await svc.getContentForAssistant(user({ orgId: 'org-1' }), {
       itemId: ITEM_UUID,
@@ -476,7 +478,7 @@ describe('ItemsService.getContentForAssistant — normalización', () => {
       type: 'true_false',
       content: { stem: 'El cielo es azul', correctAnswer: true } as Item['content'],
     });
-    const svc = new ItemsService(dbMockForAssistant(row, null));
+    const svc = new ItemsService(dbMockForAssistant(row, null), {} as never);
 
     const result = await svc.getContentForAssistant(user({ orgId: 'org-1' }), {
       itemId: ITEM_UUID,
@@ -496,7 +498,7 @@ describe('ItemsService.getContentForAssistant — normalización', () => {
       type: 'open_ended',
       content: { prompt: 'Explica el ciclo del agua' } as Item['content'],
     });
-    const svc = new ItemsService(dbMockForAssistant(row, null));
+    const svc = new ItemsService(dbMockForAssistant(row, null), {} as never);
 
     const result = await svc.getContentForAssistant(user({ orgId: 'org-1' }), {
       itemId: ITEM_UUID,
@@ -512,9 +514,12 @@ describe('ItemsService.getContentForAssistant — normalización', () => {
       from: jest.fn().mockReturnThis(),
       where: jest.fn().mockResolvedValue([]),
     };
-    const svc = new ItemsService({
-      select: jest.fn().mockReturnValue(itemSelect),
-    } as never);
+    const svc = new ItemsService(
+      {
+        select: jest.fn().mockReturnValue(itemSelect),
+      } as never,
+      {} as never,
+    );
 
     await expect(
       svc.getContentForAssistant(user({ orgId: 'org-1' }), { itemId: ITEM_UUID }),
@@ -577,7 +582,7 @@ describe('ItemsService.getContentForAssistant — normalización', () => {
       .mockReturnValueOnce(itemSelect)
       .mockReturnValueOnce(skillSelect);
 
-    const svc = new ItemsService({ select, transaction } as never);
+    const svc = new ItemsService({ select, transaction } as never, {} as never);
 
     const result = await svc.getContentForAssistant(user({ orgId: 'org-1' }), {
       assessmentId: '99999999-9999-9999-9999-999999999999',

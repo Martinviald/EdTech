@@ -1,5 +1,6 @@
 import { and, asc, eq, inArray, isNull, sql } from 'drizzle-orm';
-import { itemTaxonomyTags, items, responses, taxonomyNodes } from '@soe/db';
+import { assessmentItemStats, itemTaxonomyTags, items, taxonomyNodes } from '@soe/db';
+import { mergeAnswerCounts, type AnswerCount } from '@soe/types';
 import type { Database } from '../../database/database.types';
 
 // Carga de datos por ítem para la tabla de especificaciones (TKT-24) y el detalle
@@ -105,10 +106,7 @@ function emptyTagColumns(): TagColumns {
   };
 }
 
-async function loadTagColumns(
-  tx: Database,
-  itemIds: string[],
-): Promise<Map<string, TagColumns>> {
+async function loadTagColumns(tx: Database, itemIds: string[]): Promise<Map<string, TagColumns>> {
   const map = new Map<string, TagColumns>();
   if (itemIds.length === 0) return map;
 
@@ -150,109 +148,151 @@ async function loadTagColumns(
   return map;
 }
 
-/** Distribución de respuestas por ítem y alternativa (1 query). */
+/**
+ * Distribución de respuestas por ítem y alternativa, desde el read-model de
+ * cohorte (1 query).
+ *
+ * Antes esto era la SEGUNDA copia del mismo `GROUP BY` sobre `responses` (la otra
+ * vivía en `item-analysis.service.ts`), con la precedencia `raw | key | answer`
+ * duplicada en SQL y en TypeScript. Ahora ambas leen el mismo read-model y la
+ * precedencia vive una sola vez, en el calculador puro de `@soe/types`.
+ *
+ * ⚠️ Recombinar cursos es SUMA de conteos, nunca promedio de porcentajes: los
+ * porcentajes se recalculan en el caller sobre el total recombinado.
+ *
+ * Paridad con el `GROUP BY` que reemplaza:
+ *  · `totalResponses` = `sum(response_count)` = el `count(*)` de filas de respuesta
+ *    → incluye los blancos en el denominador, igual que antes.
+ *  · `answeredCount` sólo suma los buckets con `key !== null` (el blanco es el
+ *    bucket `key: null`), y `blankCount` sigue derivándose como la diferencia.
+ *  · Los ítems sin filas en el read-model quedan AUSENTES del Map (no en cero),
+ *    para que el caller los resuelva con su propio default.
+ */
 export async function loadItemDistributions(
   tx: Database,
   assessmentId: string,
   itemIds: string[],
-  studentFilter: string[] | null,
+  classGroupFilter: string[] | null,
 ): Promise<Map<string, ItemAnswerDistribution>> {
   const result = new Map<string, ItemAnswerDistribution>();
-  if (itemIds.length === 0) return result;
-  if (studentFilter !== null && studentFilter.length === 0) return result;
+  const byItem = await loadCohortStatsByItem(tx, assessmentId, itemIds, classGroupFilter);
 
-  const conditions = [
-    eq(responses.assessmentId, assessmentId),
-    inArray(responses.itemId, itemIds),
-  ];
-  if (studentFilter !== null) {
-    conditions.push(inArray(responses.studentId, studentFilter));
-  }
-
-  const answerExpr = sql<
-    string | null
-  >`nullif(coalesce(${responses.value}->>'raw', ${responses.value}->>'key', ${responses.value}->>'answer'), '')`;
-
-  const rows = await tx
-    .select({
-      itemId: responses.itemId,
-      answer: answerExpr,
-      isCorrect: sql<boolean>`coalesce(${responses.isCorrect}, false)`,
-      count: sql<number>`count(*)::int`,
-    })
-    .from(responses)
-    .where(and(...conditions))
-    .groupBy(responses.itemId, answerExpr, responses.isCorrect);
-
-  for (const r of rows) {
-    const count = Number(r.count);
-    let entry = result.get(r.itemId);
-    if (!entry) {
-      entry = { totalResponses: 0, answeredCount: 0, correctCount: 0, byAnswer: new Map() };
-      result.set(r.itemId, entry);
+  for (const [itemId, stat] of byItem) {
+    const entry: ItemAnswerDistribution = {
+      totalResponses: stat.responseCount,
+      answeredCount: 0,
+      correctCount: stat.correctCount,
+      byAnswer: new Map(),
+    };
+    for (const bucket of stat.answerCounts) {
+      if (bucket.key === null) continue; // blanco: cuenta en totalResponses, no en answeredCount
+      entry.answeredCount += bucket.count;
+      // Suma sobre las variantes de isCorrect de una misma clave.
+      entry.byAnswer.set(bucket.key, (entry.byAnswer.get(bucket.key) ?? 0) + bucket.count);
     }
-    entry.totalResponses += count;
-    if (r.answer !== null) {
-      entry.answeredCount += count;
-      entry.byAnswer.set(r.answer, (entry.byAnswer.get(r.answer) ?? 0) + count);
-    }
-    if (r.isCorrect === true) entry.correctCount += count;
+    result.set(itemId, entry);
   }
   return result;
 }
 
 /**
- * Distribución RC/RPC/RI/N por ítem de desarrollo (1 query). Categoriza cada
- * respuesta por su puntaje (final_score o raw_score) sobre el máximo del ítem.
+ * Filas del read-model de cohorte recombinadas por ítem (1 query).
+ *
+ * Las cohortes se juntan SUMANDO conteos — `mergeAnswerCounts` del calculador puro
+ * es la primitiva compartida con `item-analysis`. Los porcentajes los recalcula el
+ * caller sobre el total ya recombinado, nunca promediando los de cada curso.
+ */
+async function loadCohortStatsByItem(
+  tx: Database,
+  assessmentId: string,
+  itemIds: string[],
+  classGroupFilter: string[] | null,
+): Promise<
+  Map<string, { responseCount: number; correctCount: number; answerCounts: AnswerCount[] }>
+> {
+  const result = new Map<
+    string,
+    { responseCount: number; correctCount: number; answerCounts: AnswerCount[] }
+  >();
+  if (itemIds.length === 0) return result;
+  if (classGroupFilter !== null && classGroupFilter.length === 0) return result;
+
+  const conditions = [
+    eq(assessmentItemStats.assessmentId, assessmentId),
+    inArray(assessmentItemStats.itemId, itemIds),
+  ];
+  if (classGroupFilter !== null) {
+    conditions.push(inArray(assessmentItemStats.classGroupId, classGroupFilter));
+  }
+
+  const rows = await tx
+    .select({
+      itemId: assessmentItemStats.itemId,
+      responseCount: assessmentItemStats.responseCount,
+      correctCount: assessmentItemStats.correctCount,
+      answerCounts: assessmentItemStats.answerCounts,
+    })
+    .from(assessmentItemStats)
+    .where(and(...conditions));
+
+  // Agrupar las cohortes por ítem antes de recombinar sus distribuciones.
+  const bucketsByItem = new Map<string, AnswerCount[][]>();
+  for (const r of rows) {
+    let acc = result.get(r.itemId);
+    if (!acc) {
+      acc = { responseCount: 0, correctCount: 0, answerCounts: [] };
+      result.set(r.itemId, acc);
+      bucketsByItem.set(r.itemId, []);
+    }
+    acc.responseCount += Number(r.responseCount);
+    acc.correctCount += Number(r.correctCount);
+    bucketsByItem.get(r.itemId)!.push(r.answerCounts ?? []);
+  }
+  for (const [itemId, buckets] of bucketsByItem) {
+    result.get(itemId)!.answerCounts = mergeAnswerCounts(buckets);
+  }
+  return result;
+}
+
+/**
+ * Distribución RC/RPC/RI/N por ítem de desarrollo, desde el read-model (1 query).
+ *
+ * Ya no categoriza nada: para un ítem sin alternativas el read-model guarda la
+ * categoría por puntaje COMO la clave del bucket ('RC'|'RPC'|'RI', y `key: null`
+ * para N). La clasificación vive una sola vez, en `classifyDevelopmentResponse` del
+ * calculador puro, que replica el `case` SQL que este lector usaba antes. Son las
+ * mismas claves que trae el informe oficial DIA → computed e imported convergen y
+ * este lector sirve a los dos sin ramificar por origen.
+ *
+ * ⚠️ Cambio de semántica en `blankCount` (no en esta función, sí en su caller): el
+ * `answeredCount` de un ítem de desarrollo antes daba 0 — la respuesta cruda no
+ * lleva alternativa, así que todas contaban como blanco y `blankCount` salía igual
+ * al total. Ahora RC/RPC/RI son claves no nulas, y el blanco queda reducido a N (sin
+ * puntaje), que es lo que el propio informe llama "No responde".
  */
 export async function loadDevelopmentDistributions(
   tx: Database,
   assessmentId: string,
   itemIds: string[],
-  studentFilter: string[] | null,
+  classGroupFilter: string[] | null,
 ): Promise<Map<string, DevelopmentDistribution>> {
   const result = new Map<string, DevelopmentDistribution>();
-  if (itemIds.length === 0) return result;
-  if (studentFilter !== null && studentFilter.length === 0) return result;
+  const byItem = await loadCohortStatsByItem(tx, assessmentId, itemIds, classGroupFilter);
 
-  const conditions = [
-    eq(responses.assessmentId, assessmentId),
-    inArray(responses.itemId, itemIds),
-  ];
-  if (studentFilter !== null) {
-    conditions.push(inArray(responses.studentId, studentFilter));
-  }
-
-  // Categoría por puntaje: N (sin puntaje) / RI (0) / RC (== max) / RPC (0<score<max).
-  const categoryExpr = sql<string>`
-    case
-      when coalesce(${responses.finalScore}, ${responses.rawScore}) is null then 'N'
-      when coalesce(${responses.finalScore}, ${responses.rawScore}) <= 0 then 'RI'
-      when coalesce(${responses.finalScore}, ${responses.rawScore}) >= ${responses.maxScore} then 'RC'
-      else 'RPC'
-    end`;
-
-  const rows = await tx
-    .select({
-      itemId: responses.itemId,
-      category: categoryExpr,
-      count: sql<number>`count(*)::int`,
-    })
-    .from(responses)
-    .where(and(...conditions))
-    .groupBy(responses.itemId, categoryExpr);
-
-  for (const r of rows) {
-    let entry = result.get(r.itemId);
-    if (!entry) {
-      entry = { rc: 0, rpc: 0, ri: 0, n: 0 };
-      result.set(r.itemId, entry);
+  for (const [itemId, stat] of byItem) {
+    const entry: DevelopmentDistribution = { rc: 0, rpc: 0, ri: 0, n: 0 };
+    for (const bucket of stat.answerCounts) {
+      // Se suma sobre las variantes de isCorrect de una misma categoría: el bucket
+      // está agrupado por (key, isCorrect) y acá sólo importa la categoría.
+      if (bucket.key === 'RC') entry.rc += bucket.count;
+      else if (bucket.key === 'RPC') entry.rpc += bucket.count;
+      else if (bucket.key === 'RI') entry.ri += bucket.count;
+      else if (bucket.key === null) entry.n += bucket.count;
+      // Una clave ajena al set (un ítem con alternativas colado en devItemIds) se
+      // ignora en vez de caer en `n`: antes el `else` del case la habría contado
+      // como "no responde", inventando blancos.
     }
-    const count = Number(r.count);
-    if (r.category === 'RC') entry.rc += count;
-    else if (r.category === 'RPC') entry.rpc += count;
-    else if (r.category === 'RI') entry.ri += count;
-    else entry.n += count;
+    result.set(itemId, entry);
   }
   return result;
 }

@@ -7,7 +7,7 @@ import {
   taxonomyNodes,
   taxonomies,
 } from '@soe/db';
-import { validateItemContent, type InstrumentType } from '@soe/types';
+import { toApplicationPeriod, validateItemContent, type InstrumentType } from '@soe/types';
 import type { JwtPayload } from '../auth/jwt-payload.types';
 import { InjectDb, type Database } from '../database/database.types';
 import { parseDiaPayload, type DiaParseResult } from './lib/dia-parser';
@@ -143,14 +143,13 @@ export class DiaIngestionService {
           name: parseResult.instrument.name,
           type: DIA_INSTRUMENT_TYPE,
           year: parseResult.instrument.year,
-          version: parseResult.instrument.applicationPeriod,
+          applicationPeriod: toApplicationPeriod(parseResult.instrument.applicationPeriod),
           isOfficial: metadata.isOfficial ?? false,
           status: 'published',
           createdById: user.userId,
           config: {
             subject: parseResult.instrument.subject,
             grade: parseResult.instrument.grade,
-            applicationPeriod: parseResult.instrument.applicationPeriod,
           },
         })
         .returning();
