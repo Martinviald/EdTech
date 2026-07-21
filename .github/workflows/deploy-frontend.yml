@@ -9,7 +9,6 @@ on:
     paths:
       - "apps/web/**"
       - "packages/types/**"
-      - "packages/ui/**"
       - "sst.config.ts"
       - ".github/workflows/deploy-frontend.yml"
   workflow_dispatch:
