@@ -1,6 +1,7 @@
 import 'server-only';
 import { cookies } from 'next/headers';
-import { ApiConnectionError } from './errors';
+import { ApiConnectionError, ApiRequestError } from './errors';
+import { reportServerError } from './observability';
 
 const API_BASE = process.env.API_URL;
 if (!API_BASE) throw new Error('API_URL is required');
@@ -45,11 +46,9 @@ async function request<T>(
 
   if (!res.ok) {
     const body = await res.json().catch(() => ({}));
-    const err = new Error(
-      (body as { message?: string }).message ?? `API error ${res.status}`,
-    ) as Error & { status?: number };
-    err.status = res.status;
-    throw err;
+    const message = (body as { message?: string }).message ?? `API error ${res.status}`;
+    if (res.status >= 500) reportServerError(new Error(message), { path, status: res.status });
+    throw new ApiRequestError(res.status, message);
   }
 
   // 204 No Content
@@ -114,13 +113,9 @@ export async function apiPostFormData<T>(path: string, formData: FormData): Prom
       newClassGroups?: unknown;
       unknownGrades?: unknown;
     };
-    const err = new Error(body.message ?? `API error ${res.status}`) as Error & {
-      status?: number;
-      details?: unknown;
-    };
-    err.status = res.status;
-    err.details = body;
-    throw err;
+    const message = body.message ?? `API error ${res.status}`;
+    if (res.status >= 500) reportServerError(new Error(message), { path, status: res.status });
+    throw new ApiRequestError(res.status, message, body);
   }
 
   if (res.status === 204) return undefined as T;
