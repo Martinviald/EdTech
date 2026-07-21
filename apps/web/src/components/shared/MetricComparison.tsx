@@ -50,8 +50,8 @@ function deltaTone(value: number | null, higherIsBetter: boolean): 'up' | 'down'
 }
 
 const TONE_CLASS: Record<'up' | 'down' | 'flat', string> = {
-  up: 'text-emerald-700 dark:text-emerald-300',
-  down: 'text-red-700 dark:text-red-300',
+  up: 'text-success',
+  down: 'text-destructive',
   flat: 'text-muted-foreground',
 };
 
