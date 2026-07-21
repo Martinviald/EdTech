@@ -1,5 +1,6 @@
 import { redirect } from 'next/navigation';
 import { auth } from '@/auth';
+import { ROUTES } from '@/lib/routes';
 import { Sidebar } from '@/components/layout/Sidebar';
 import { Topbar } from '@/components/layout/Topbar';
 import { SkipLink } from '@/components/layout/SkipLink';
@@ -7,8 +8,8 @@ import { Toaster } from '@/components/ui/sonner';
 
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {
   const session = await auth();
-  if (!session?.user) redirect('/login');
-  if (!session.user.isPlatformAdmin) redirect('/dashboard');
+  if (!session?.user) redirect(ROUTES.login);
+  if (!session.user.isPlatformAdmin) redirect(ROUTES.dashboard);
 
   const orgPlaceholder = {
     id: '00000000-0000-0000-0000-000000000000',
@@ -28,7 +29,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
           activeRole={session.user.activeRole}
           orgs={session.user.orgs}
           platformLink={
-            session.user.orgId ? { href: '/dashboard', label: 'Ir a mi colegio' } : undefined
+            session.user.orgId ? { href: ROUTES.dashboard, label: 'Ir a mi colegio' } : undefined
           }
         />
         <main id="main-content" className="flex-1 overflow-y-auto p-6">

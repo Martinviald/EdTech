@@ -1,3 +1,4 @@
+import { Suspense } from 'react';
 import Link from 'next/link';
 import type { InstrumentModel } from '@soe/types';
 import { apiGet } from '@/lib/api';
@@ -11,6 +12,8 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
+import { TableSkeleton } from '@/components/shared';
+import { ROUTES } from '@/lib/routes';
 
 export const dynamic = 'force-dynamic';
 
@@ -27,13 +30,6 @@ type InstrumentsListResponse = {
  * aplican a todas las organizaciones que usan el instrumento.
  */
 export default async function InstrumentBandsListPage() {
-  // Solo instrumentos del sistema (oficiales): sus niveles/umbrales son globales
-  // y compartidos por todas las orgs. Los instrumentos propios de un colegio no
-  // son configurables aquí (el endpoint también los rechaza).
-  const instruments = await apiGet<InstrumentsListResponse>(
-    '/instruments?isOfficial=true&limit=200',
-  );
-
   return (
     <div className="space-y-6">
       <div>
@@ -45,40 +41,55 @@ export default async function InstrumentBandsListPage() {
         </p>
       </div>
 
-      <Card>
-        <CardContent className="p-0">
-          <div className="overflow-x-auto">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Instrumento</TableHead>
-                  <TableHead className="hidden sm:table-cell">Tipo</TableHead>
-                  <TableHead className="hidden md:table-cell">Año</TableHead>
-                  <TableHead className="hidden md:table-cell">Versión</TableHead>
-                  <TableHead className="text-right">Niveles</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {instruments.data.map((ins) => (
-                  <TableRow key={ins.id}>
-                    <TableCell className="font-medium">{ins.name}</TableCell>
-                    <TableCell className="hidden sm:table-cell uppercase text-xs text-muted-foreground">
-                      {ins.type}
-                    </TableCell>
-                    <TableCell className="hidden md:table-cell">{ins.year ?? '—'}</TableCell>
-                    <TableCell className="hidden md:table-cell">{ins.version ?? '—'}</TableCell>
-                    <TableCell className="text-right">
-                      <Button asChild variant="outline" size="sm">
-                        <Link href={`/admin/instrumentos-bandas/${ins.id}`}>Configurar</Link>
-                      </Button>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </div>
-        </CardContent>
-      </Card>
+      <Suspense fallback={<TableSkeleton />}>
+        <BandsTableSection />
+      </Suspense>
     </div>
+  );
+}
+
+async function BandsTableSection() {
+  // Solo instrumentos del sistema (oficiales): sus niveles/umbrales son globales
+  // y compartidos por todas las orgs. Los instrumentos propios de un colegio no
+  // son configurables aquí (el endpoint también los rechaza).
+  const instruments = await apiGet<InstrumentsListResponse>(
+    '/instruments?isOfficial=true&limit=200',
+  );
+
+  return (
+    <Card>
+      <CardContent className="p-0">
+        <div className="overflow-x-auto">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Instrumento</TableHead>
+                <TableHead className="hidden sm:table-cell">Tipo</TableHead>
+                <TableHead className="hidden md:table-cell">Año</TableHead>
+                <TableHead className="hidden md:table-cell">Versión</TableHead>
+                <TableHead className="text-right">Niveles</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {instruments.data.map((ins) => (
+                <TableRow key={ins.id}>
+                  <TableCell className="font-medium">{ins.name}</TableCell>
+                  <TableCell className="hidden sm:table-cell uppercase text-xs text-muted-foreground">
+                    {ins.type}
+                  </TableCell>
+                  <TableCell className="hidden md:table-cell">{ins.year ?? '—'}</TableCell>
+                  <TableCell className="hidden md:table-cell">{ins.version ?? '—'}</TableCell>
+                  <TableCell className="text-right">
+                    <Button asChild variant="outline" size="sm">
+                      <Link href={ROUTES.adminInstrumentoBandas(ins.id)}>Configurar</Link>
+                    </Button>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </div>
+      </CardContent>
+    </Card>
   );
 }

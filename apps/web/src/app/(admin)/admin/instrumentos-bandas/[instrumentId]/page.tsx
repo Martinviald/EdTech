@@ -3,6 +3,7 @@ import { ArrowLeft } from 'lucide-react';
 import type { InstrumentModel, PerformanceBandListResponse } from '@soe/types';
 import { apiGet } from '@/lib/api';
 import { BandsForm } from '@/components/instrument-bands/bands-form';
+import { ROUTES } from '@/lib/routes';
 
 export const dynamic = 'force-dynamic';
 
@@ -28,7 +29,7 @@ export default async function InstrumentBandsEditorPage({
     <div className="space-y-6">
       <div className="space-y-2">
         <Link
-          href="/admin/instrumentos-bandas"
+          href={ROUTES.adminInstrumentosBandas}
           className="text-muted-foreground hover:text-foreground inline-flex items-center gap-1 text-sm"
         >
           <ArrowLeft className="h-4 w-4" />

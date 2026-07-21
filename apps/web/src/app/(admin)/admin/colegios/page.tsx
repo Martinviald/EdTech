@@ -1,6 +1,6 @@
-import type { Route } from 'next';
 import Link from 'next/link';
 import { listOrgs } from '@/lib/adminApi';
+import { ROUTES } from '@/lib/routes';
 import {
   Table,
   TableBody,
@@ -9,7 +9,7 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import { EmptyState } from '@/components/EmptyState';
+import { EmptyState } from '@/components/shared';
 import { School } from 'lucide-react';
 import { CreateOrgDialog } from './CreateOrgDialog';
 
@@ -57,7 +57,7 @@ export default async function AdminOrgsPage() {
                   <TableCell>{org.dependence ?? '—'}</TableCell>
                   <TableCell>
                     <Link
-                      href={`/admin/colegios/${org.id}` as Route}
+                      href={ROUTES.adminColegio(org.id)}
                       className="text-sm text-primary underline-offset-4 hover:underline"
                     >
                       Ver

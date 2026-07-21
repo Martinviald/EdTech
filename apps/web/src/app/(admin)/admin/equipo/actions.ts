@@ -1,6 +1,7 @@
 'use server';
 
 import { revalidatePath } from 'next/cache';
+import { ROUTES } from '@/lib/routes';
 import { grantPlatformAdminSchema } from '@soe/types';
 import {
   grantPlatformAdmin,
@@ -21,8 +22,8 @@ export async function grantPlatformAdminAction(formData: FormData): Promise<Acti
 
   try {
     await grantPlatformAdmin(parsed.data);
-    revalidatePath('/admin/equipo');
-    revalidatePath('/admin');
+    revalidatePath(ROUTES.adminEquipo);
+    revalidatePath(ROUTES.admin);
     return { ok: true };
   } catch (err) {
     return { ok: false, error: err instanceof Error ? err.message : 'Error desconocido' };
@@ -32,8 +33,8 @@ export async function grantPlatformAdminAction(formData: FormData): Promise<Acti
 export async function revokePlatformAdminAction(userId: string): Promise<ActionResult> {
   try {
     await revokePlatformAdmin(userId);
-    revalidatePath('/admin/equipo');
-    revalidatePath('/admin');
+    revalidatePath(ROUTES.adminEquipo);
+    revalidatePath(ROUTES.admin);
     return { ok: true };
   } catch (err) {
     return { ok: false, error: err instanceof Error ? err.message : 'Error desconocido' };
