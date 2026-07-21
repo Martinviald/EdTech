@@ -11,11 +11,12 @@ import {
   SheetTrigger,
 } from '@/components/ui/sheet';
 import { BRAND } from '@/lib/brand';
+import { ROUTES } from '@/lib/routes';
 import { NAV_LINKS, PRIMARY_CTA_HREF } from './content';
 
 function BrandMark() {
   return (
-    <Link href="/" className="flex items-center gap-2 font-semibold tracking-tight">
+    <Link href={ROUTES.home} className="flex items-center gap-2 font-semibold tracking-tight">
       <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-primary-foreground">
         <GraduationCap className="h-5 w-5" />
       </span>

@@ -1,6 +1,6 @@
 import { Lock } from 'lucide-react';
 import { FEATURE_LABELS, type FeatureKey } from '@soe/types';
-import { PageContainer, PageHeader, EmptyState } from '@/components/patterns';
+import { PageContainer, PageHeader, EmptyState } from '@/components/shared';
 
 /**
  * Aviso de feature paga no habilitada (H18.1 — gating de tier pago). Se muestra
