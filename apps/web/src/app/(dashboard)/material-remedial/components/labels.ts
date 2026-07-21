@@ -1,5 +1,5 @@
 import type { RemedialMaterialType, RemedialMethod, RemedialStatus } from '@soe/types';
-import type { StatusTone } from '@/components/patterns';
+import type { StatusTone } from '@/components/shared';
 
 /** Etiquetas en español por tipo de material remedial. */
 export const REMEDIAL_TYPE_LABELS: Record<RemedialMaterialType, string> = {

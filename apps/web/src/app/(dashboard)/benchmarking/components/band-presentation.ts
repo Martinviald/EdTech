@@ -27,22 +27,18 @@ export const BENCHMARK_BAND_LABELS: Record<BenchmarkBandKey, string> = {
 
 /** Clase de relleno (barra) por banda, con soporte dark mode. */
 export const BENCHMARK_BAND_BAR_CLASS: Record<BenchmarkBandKey, string> = {
-  insufficient: 'bg-red-500 dark:bg-red-600',
-  elementary: 'bg-amber-500 dark:bg-amber-600',
-  adequate: 'bg-emerald-500 dark:bg-emerald-600',
-  advanced: 'bg-blue-500 dark:bg-blue-600',
+  insufficient: 'bg-level-insufficient',
+  elementary: 'bg-level-elementary',
+  adequate: 'bg-level-adequate',
+  advanced: 'bg-level-advanced',
 };
 
 /** Clase de chip (texto + fondo) por banda, para leyendas. */
 export const BENCHMARK_BAND_BADGE_CLASS: Record<BenchmarkBandKey, string> = {
-  insufficient:
-    'border-transparent bg-red-100 text-red-800 dark:bg-red-950 dark:text-red-200',
-  elementary:
-    'border-transparent bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-200',
-  adequate:
-    'border-transparent bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-200',
-  advanced:
-    'border-transparent bg-blue-100 text-blue-800 dark:bg-blue-950 dark:text-blue-200',
+  insufficient: 'border-transparent bg-level-insufficient/15 text-level-insufficient',
+  elementary: 'border-transparent bg-level-elementary/15 text-level-elementary',
+  adequate: 'border-transparent bg-level-adequate/15 text-level-adequate',
+  advanced: 'border-transparent bg-level-advanced/15 text-level-advanced',
 };
 
 /** Total de alumnos sumando todas las bandas de una distribución. */

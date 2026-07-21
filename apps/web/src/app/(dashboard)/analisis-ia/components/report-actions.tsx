@@ -5,7 +5,8 @@ import { useRouter } from 'next/navigation';
 import { Loader2, RefreshCw, X } from 'lucide-react';
 import type { UserRole } from '@soe/types';
 import { Button } from '@/components/ui/button';
-import { AlertCallout } from '@/components/patterns';
+import { AlertCallout } from '@/components/shared';
+import { ROUTES } from '@/lib/routes';
 import { generateAssessmentAnalysis } from '../actions';
 
 interface ReportActionsProps {
@@ -25,7 +26,7 @@ export function ReportActions({
   assessmentId,
   classGroupId,
   activeRole,
-  basePath = '/analisis-ia',
+  basePath = ROUTES.analisisIa,
 }: ReportActionsProps) {
   const router = useRouter();
   const [isRegenerating, startRegenerate] = useTransition();

@@ -12,9 +12,9 @@
 
 import type { JSX } from 'react';
 import { useState } from 'react';
-import * as XLSX from 'xlsx';
-import { jsPDF } from 'jspdf';
-import autoTable, { type CellHookData } from 'jspdf-autotable';
+import type { WorkBook, WorkSheet } from 'xlsx';
+import type { jsPDF } from 'jspdf';
+import type { CellHookData } from 'jspdf-autotable';
 import { FileDown } from 'lucide-react';
 import type {
   AssessmentInsightsOutput,
@@ -98,18 +98,18 @@ export function AiExportButton({
   const [busy, setBusy] = useState(false);
   const base = `analisis-ia-${sanitize(title)}`.slice(0, 80);
 
-  function exportExcel() {
+  async function exportExcel() {
     setBusy(true);
     try {
-      buildWorkbook(output, quality, title, base);
+      await buildWorkbook(output, quality, title, base);
     } finally {
       setBusy(false);
     }
   }
-  function exportPdf() {
+  async function exportPdf() {
     setBusy(true);
     try {
-      buildPdf(output, quality, title, base);
+      await buildPdf(output, quality, title, base);
     } finally {
       setBusy(false);
     }
@@ -135,18 +135,18 @@ export function AiExportButton({
   );
 }
 
-function appendSheet(wb: XLSX.WorkBook, name: string, ws: XLSX.WorkSheet) {
-  XLSX.utils.book_append_sheet(wb, ws, name.slice(0, 31));
-}
 
 // ── Excel ─────────────────────────────────────────────────────────────────────
 
-function buildWorkbook(
+async function buildWorkbook(
   output: AssessmentInsightsOutput,
   quality: InstrumentQualityResponse | null,
   title: string,
   base: string,
 ) {
+  const XLSX = await import('xlsx');
+  const appendSheet = (wb: WorkBook, name: string, ws: WorkSheet) =>
+    XLSX.utils.book_append_sheet(wb, ws, name.slice(0, 31));
   const wb = XLSX.utils.book_new();
 
   // Hoja 1 — Resumen / narrativa.
@@ -274,12 +274,14 @@ function buildWorkbook(
 
 // ── PDF ───────────────────────────────────────────────────────────────────────
 
-function buildPdf(
+async function buildPdf(
   output: AssessmentInsightsOutput,
   quality: InstrumentQualityResponse | null,
   title: string,
   base: string,
 ) {
+  const { jsPDF } = await import('jspdf');
+  const autoTable = (await import('jspdf-autotable')).default;
   const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
   const pageW = doc.internal.pageSize.getWidth();
   const marginX = 14;

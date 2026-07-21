@@ -1,17 +1,15 @@
+import { Suspense } from 'react';
 import { redirect } from 'next/navigation';
 import { Inbox } from 'lucide-react';
 import { auth } from '@/auth';
-import { apiGet } from '@/lib/api';
-import {
-  canAccess,
-  ESTABLISHMENT_REPORT_ROLES,
-  type OfficialEstablishmentReportResponse,
-  type DashboardFilterOptionsResponse,
-} from '@soe/types';
-import { PageContainer, PageHeader, EmptyState } from '@/components/patterns';
+import { canAccess, ESTABLISHMENT_REPORT_ROLES } from '@soe/types';
+import { ROUTES } from '@/lib/routes';
+import { PageContainer, PageHeader, EmptyState, TableSkeleton } from '@/components/shared';
+import { Skeleton } from '@/components/ui/skeleton';
 import { EstablishmentReport } from '@/components/official-reports/establishment-report';
 import { EstablishmentReportFilters } from '@/components/official-reports/establishment-report-filters';
 import { PrintToolbar } from '@/components/official-reports/print-toolbar';
+import { getEstablishmentFilterOptions, getEstablishmentReport } from './data';
 
 export const dynamic = 'force-dynamic';
 
@@ -34,27 +32,19 @@ export default async function InformeEstablecimientoPage({
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
   const session = await auth();
-  if (!session?.user) redirect('/login');
-  if (!canAccess(session.user.roles, ESTABLISHMENT_REPORT_ROLES)) redirect('/dashboard');
+  if (!session?.user) redirect(ROUTES.login);
+  if (!canAccess(session.user.roles, ESTABLISHMENT_REPORT_ROLES)) redirect(ROUTES.dashboard);
 
   const sp = await searchParams;
   const academicYearId = pickParam(sp.academicYearId);
   const period = pickParam(sp.period);
-  const basePath = '/establecimiento/informe-oficial';
+  const basePath = ROUTES.establecimientoInformeOficial;
 
   const reportQuery = new URLSearchParams();
   if (academicYearId) reportQuery.set('academicYearId', academicYearId);
   if (period) reportQuery.set('period', period);
   const reportQs = reportQuery.toString();
-
-  const [options, report] = await Promise.all([
-    apiGet<DashboardFilterOptionsResponse>('/dashboards/filters').catch(
-      (): DashboardFilterOptionsResponse | null => null,
-    ),
-    apiGet<OfficialEstablishmentReportResponse>(
-      `/reports/establishment${reportQs ? `?${reportQs}` : ''}`,
-    ).catch((): OfficialEstablishmentReportResponse | null => null),
-  ]);
+  const querySuffix = reportQs ? `?${reportQs}` : '';
 
   return (
     <PageContainer>
@@ -64,27 +54,62 @@ export default async function InformeEstablecimientoPage({
       />
 
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        {options ? (
-          <EstablishmentReportFilters
-            academicYears={options.periods}
-            value={{ academicYearId }}
-            basePath={basePath}
-          />
-        ) : (
-          <div />
-        )}
-        {report ? <PrintToolbar /> : null}
+        <Suspense fallback={<Skeleton className="h-10 w-56" />}>
+          <FiltersSlot academicYearId={academicYearId} basePath={basePath} />
+        </Suspense>
+        <Suspense fallback={null}>
+          <PrintToolbarSlot querySuffix={querySuffix} />
+        </Suspense>
       </div>
 
-      {report ? (
-        <EstablishmentReport report={report} />
-      ) : (
-        <EmptyState
-          icon={Inbox}
-          title="No se pudo generar el informe de establecimiento"
-          description="No hay resultados agregados para el año seleccionado, o no tienes acceso. Verifica que existan evaluaciones con resultados calculados."
-        />
-      )}
+      <Suspense fallback={<ReportSkeleton />}>
+        <ReportBody querySuffix={querySuffix} />
+      </Suspense>
     </PageContainer>
+  );
+}
+
+async function FiltersSlot({
+  academicYearId,
+  basePath,
+}: {
+  academicYearId: string | undefined;
+  basePath: string;
+}) {
+  const options = await getEstablishmentFilterOptions();
+  if (!options) return <div />;
+  return (
+    <EstablishmentReportFilters
+      academicYears={options.periods}
+      value={{ academicYearId }}
+      basePath={basePath}
+    />
+  );
+}
+
+async function PrintToolbarSlot({ querySuffix }: { querySuffix: string }) {
+  const report = await getEstablishmentReport(querySuffix);
+  return report ? <PrintToolbar /> : null;
+}
+
+async function ReportBody({ querySuffix }: { querySuffix: string }) {
+  const report = await getEstablishmentReport(querySuffix);
+  return report ? (
+    <EstablishmentReport report={report} />
+  ) : (
+    <EmptyState
+      icon={Inbox}
+      title="No se pudo generar el informe de establecimiento"
+      description="No hay resultados agregados para el año seleccionado, o no tienes acceso. Verifica que existan evaluaciones con resultados calculados."
+    />
+  );
+}
+
+function ReportSkeleton() {
+  return (
+    <div className="space-y-4">
+      <TableSkeleton rows={6} />
+      <TableSkeleton rows={6} />
+    </div>
   );
 }

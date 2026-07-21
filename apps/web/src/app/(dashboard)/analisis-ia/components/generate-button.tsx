@@ -4,7 +4,8 @@ import { useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
 import { Loader2, Sparkles } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { AlertCallout } from '@/components/patterns';
+import { AlertCallout } from '@/components/shared';
+import { ROUTES } from '@/lib/routes';
 import { generateAssessmentAnalysis } from '../actions';
 
 interface GenerateButtonProps {
@@ -34,7 +35,7 @@ export function GenerateButton({
   force = false,
   label,
   variant = 'default',
-  basePath = '/analisis-ia',
+  basePath = ROUTES.analisisIa,
 }: GenerateButtonProps) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();

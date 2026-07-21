@@ -1,7 +1,7 @@
 import { ShieldCheck, Network, Users } from 'lucide-react';
 import type { BenchmarkComparisonResponse } from '@soe/types';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { AlertCallout } from '@/components/patterns';
+import { AlertCallout } from '@/components/shared';
 import { BandComparison } from './band-comparison';
 import { SkillHeatmap } from './skill-heatmap';
 import { NetworkTable } from './network-table';

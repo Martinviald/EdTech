@@ -32,9 +32,9 @@ const PAR_THRESHOLD = 2;
 type DeltaTone = 'above' | 'below' | 'par' | 'none';
 
 const DELTA_CELL_CLASS: Record<DeltaTone, string> = {
-  above: 'bg-emerald-100 text-emerald-900 dark:bg-emerald-950 dark:text-emerald-100',
-  below: 'bg-red-100 text-red-900 dark:bg-red-950 dark:text-red-100',
-  par: 'bg-amber-100 text-amber-900 dark:bg-amber-950 dark:text-amber-100',
+  above: 'bg-success/15 text-success',
+  below: 'bg-destructive/15 text-destructive',
+  par: 'bg-warning/15 text-warning',
   none: 'bg-muted/40 text-muted-foreground',
 };
 

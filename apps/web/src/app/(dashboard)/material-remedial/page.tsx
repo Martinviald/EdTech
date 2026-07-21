@@ -1,9 +1,9 @@
 import { redirect } from 'next/navigation';
 import Link from 'next/link';
-import type { Route } from 'next';
 import { Sparkles } from 'lucide-react';
 import { auth } from '@/auth';
 import { apiGet } from '@/lib/api';
+import { ROUTES } from '@/lib/routes';
 import {
   canAccess,
   REMEDIAL_VIEWER_ROLES,
@@ -15,7 +15,7 @@ import {
   type RemedialMaterialType,
   type RemedialStatus,
 } from '@soe/types';
-import { PageContainer, PageHeader, EmptyState, AlertCallout } from '@/components/patterns';
+import { PageContainer, PageHeader, EmptyState, AlertCallout } from '@/components/shared';
 import { FeatureUpgradeNotice } from '@/components/feature-gate';
 import { isFeatureEnabled } from '@/lib/features';
 import { AssessmentSelect } from '../resultados/detalle/assessment-select';
@@ -49,8 +49,8 @@ export default async function MaterialRemedialPage({
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
   const session = await auth();
-  if (!session?.user) redirect('/login');
-  if (!canAccess(session.user.roles, REMEDIAL_VIEWER_ROLES)) redirect('/dashboard');
+  if (!session?.user) redirect(ROUTES.login);
+  if (!canAccess(session.user.roles, REMEDIAL_VIEWER_ROLES)) redirect(ROUTES.dashboard);
   if (!(await isFeatureEnabled('remedial'))) {
     return <FeatureUpgradeNotice feature="remedial" />;
   }
@@ -150,7 +150,7 @@ export default async function MaterialRemedialPage({
           y se hace desde el Análisis IA de la evaluación ("Generar material remedial"
           en cada brecha), por eso ofrecemos un enlace directo a ese flujo. */}
       <div className="flex flex-wrap items-end gap-3 rounded-lg border bg-card p-4">
-        <AssessmentSelect options={assessments} basePath="/material-remedial" />
+        <AssessmentSelect options={assessments} basePath={ROUTES.materialRemedial} />
         <p className="max-w-sm text-sm text-muted-foreground">
           Elige una evaluación para ver su material. Para generar material nuevo, abre su Análisis
           IA y usa “Generar material remedial” en cada brecha.
@@ -167,17 +167,15 @@ export default async function MaterialRemedialPage({
           </span>
           .{' '}
           <Link
-            href={
-              `/analisis-ia?assessmentId=${assessmentId}${
-                classGroupId ? `&classGroupId=${classGroupId}` : ''
-              }` as Route
-            }
+            href={`${ROUTES.analisisIa}?assessmentId=${assessmentId}${
+              classGroupId ? `&classGroupId=${classGroupId}` : ''
+            }`}
             className="font-medium underline"
           >
             Ver brechas y generar material
           </Link>
           {' · '}
-          <Link href="/material-remedial" className="font-medium underline">
+          <Link href={ROUTES.materialRemedial} className="font-medium underline">
             Ver todo el banco
           </Link>
         </AlertCallout>

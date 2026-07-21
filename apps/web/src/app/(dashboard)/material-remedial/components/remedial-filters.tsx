@@ -10,6 +10,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import { ROUTES } from '@/lib/routes';
 import { REMEDIAL_STATUS_OPTIONS, REMEDIAL_TYPE_OPTIONS } from './labels';
 
 /**
@@ -20,7 +21,7 @@ import { REMEDIAL_STATUS_OPTIONS, REMEDIAL_TYPE_OPTIONS } from './labels';
  * Material en `/evaluaciones/[id]/material-remedial`); por defecto, el banco
  * global top-level.
  */
-export function RemedialFilters({ basePath = '/material-remedial' }: { basePath?: string }) {
+export function RemedialFilters({ basePath = ROUTES.materialRemedial }: { basePath?: string }) {
   const router = useRouter();
   const searchParams = useSearchParams();
 

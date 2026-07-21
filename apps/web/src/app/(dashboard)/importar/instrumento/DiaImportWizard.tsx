@@ -7,7 +7,7 @@ import type {
   DiaPreviewResponse,
   DiaConfirmResponse,
 } from '@soe/types';
-import { Stepper } from '@/components/patterns';
+import { Stepper } from '@/components/shared';
 import { previewDiaImport, confirmDiaImport } from './actions';
 import { UploadStep, type CatalogOptions } from './steps/UploadStep';
 import { PreviewStep } from './steps/PreviewStep';
