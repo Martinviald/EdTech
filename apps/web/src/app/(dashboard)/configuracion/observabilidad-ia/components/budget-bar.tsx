@@ -11,9 +11,9 @@ import { formatUsd, formatPct } from './format';
 // ─────────────────────────────────────────────────────────────────────────────
 
 const BAR_CLASS: Record<AiBudgetAlertLevel, string> = {
-  ok: 'bg-emerald-500',
-  warning: 'bg-amber-500',
-  over: 'bg-red-500',
+  ok: 'bg-success',
+  warning: 'bg-warning',
+  over: 'bg-destructive',
 };
 
 const ALERT_LABEL: Record<AiBudgetAlertLevel, string> = {
@@ -23,9 +23,9 @@ const ALERT_LABEL: Record<AiBudgetAlertLevel, string> = {
 };
 
 const ALERT_TEXT_CLASS: Record<AiBudgetAlertLevel, string> = {
-  ok: 'text-emerald-700 dark:text-emerald-400',
-  warning: 'text-amber-700 dark:text-amber-400',
-  over: 'text-red-700 dark:text-red-400',
+  ok: 'text-success',
+  warning: 'text-warning',
+  over: 'text-destructive',
 };
 
 export function BudgetBar({ budget }: { budget: AiBudgetStatus }): JSX.Element {
@@ -67,7 +67,7 @@ export function BudgetBar({ budget }: { budget: AiBudgetStatus }): JSX.Element {
             aria-label="Porcentaje de presupuesto IA usado"
           >
             <div
-              className={cn('h-full rounded-full transition-all', BAR_CLASS[budget.alertLevel])}
+              className={cn('h-full rounded-full transition-[width] motion-reduce:transition-none', BAR_CLASS[budget.alertLevel])}
               style={{ width: `${fillPct}%` }}
             />
           </div>

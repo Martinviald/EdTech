@@ -1,11 +1,11 @@
-import Link from 'next/link';
-import type { Route } from 'next';
 import { redirect } from 'next/navigation';
-import { UsersRound } from 'lucide-react';
+
 import { auth } from '@/auth';
-import { apiGet } from '@/lib/api';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
+import { ROUTES } from '@/lib/routes';
+import { AlertCallout, PageContainer } from '@/components/shared';
+
+import { OrgHubHeader } from './components/OrgHubHeader';
+import { getOrgOverview } from './overview';
 
 const DEPENDENCE_LABELS: Record<string, string> = {
   municipal: 'Municipal',
@@ -14,119 +14,78 @@ const DEPENDENCE_LABELS: Record<string, string> = {
   delegada: 'Corporación Delegada',
 };
 
-type OrgOverview = {
-  org: {
-    id: string;
-    name: string;
-    rbd: string | null;
-    commune: string | null;
-    region: string | null;
-    dependence: string | null;
-  };
-  academicYear: { id: string; year: number } | null;
-  classGroupCount: number;
-  isSetupComplete: boolean;
-};
-
 export default async function OrganizacionPage() {
   const session = await auth();
-  if (!session?.user?.orgId) redirect('/login');
+  if (!session?.user?.orgId) redirect(ROUTES.login);
 
-  const overview = await apiGet<OrgOverview>('/organizations/me/overview');
-  const { org, classGroupCount, isSetupComplete, academicYear } = overview;
-
+  const { org, academicYear, classGroupCount, isSetupComplete } =
+    await getOrgOverview();
   const currentYear = new Date().getFullYear();
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-semibold">{org.name}</h1>
-          <p className="text-muted-foreground mt-1 text-sm">Perfil institucional</p>
-        </div>
-        {!isSetupComplete && (
-          <Button asChild variant="outline">
-            <Link href={'/organizacion/configurar' as Route}>Completar configuración</Link>
-          </Button>
-        )}
-      </div>
+    <PageContainer>
+      <OrgHubHeader />
 
-      {!isSetupComplete && (
-        <Card className="border-amber-200 bg-amber-50 dark:border-amber-800 dark:bg-amber-950/20">
-          <CardContent className="pt-4">
-            <p className="text-sm text-amber-800 dark:text-amber-200">
-              La configuración del año académico {currentYear} aún no está completa. Ingresa los
-              ciclos, cursos y asignaturas para comenzar a usar la plataforma.
-            </p>
-          </CardContent>
-        </Card>
-      )}
+      {!isSetupComplete ? (
+        <AlertCallout tone="warning">
+          La configuración del año académico {currentYear} aún no está completa. Ingresa los
+          ciclos, cursos y asignaturas para comenzar a usar la plataforma.
+        </AlertCallout>
+      ) : null}
 
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-base">Información básica</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-2 text-sm">
-            <Row label="RBD" value={org.rbd ?? '—'} />
-            <Row
+      <div className="space-y-8">
+        <InfoSection title="Información básica">
+          <dl className="grid gap-x-8 gap-y-4 sm:grid-cols-2 lg:grid-cols-3">
+            <InfoItem label="RBD" value={org.rbd ?? '—'} />
+            <InfoItem
               label="Dependencia"
-              value={org.dependence ? (DEPENDENCE_LABELS[org.dependence] ?? org.dependence) : '—'}
+              value={
+                org.dependence
+                  ? (DEPENDENCE_LABELS[org.dependence] ?? org.dependence)
+                  : '—'
+              }
             />
-            <Row label="Comuna" value={org.commune ?? '—'} />
-            <Row label="Región" value={org.region ?? '—'} />
-          </CardContent>
-        </Card>
+            <InfoItem label="Comuna" value={org.commune ?? '—'} />
+            <InfoItem label="Región" value={org.region ?? '—'} />
+          </dl>
+        </InfoSection>
 
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-base">
-              Año académico {academicYear?.year ?? currentYear}
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-2 text-sm">
-            {isSetupComplete ? (
-              <Row label="Cursos configurados" value={String(classGroupCount)} />
-            ) : (
-              <p className="text-muted-foreground">Sin configurar</p>
-            )}
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader>
-            <div className="flex items-center gap-2">
-              <UsersRound className="size-5 text-primary" aria-hidden />
-              <CardTitle className="text-base">Asignaciones docentes</CardTitle>
-            </div>
-          </CardHeader>
-          <CardContent className="space-y-3">
-            <p className="text-sm text-muted-foreground">
-              Asigna profesores a los cursos y asignaturas del año académico.
-            </p>
-            {isSetupComplete ? (
-              <Button asChild variant="outline" size="sm">
-                <Link href={'/organizacion/asignaciones' as Route}>
-                  Gestionar asignaciones
-                </Link>
-              </Button>
-            ) : (
-              <p className="text-xs text-muted-foreground">
-                Configurá el año académico primero para habilitar las asignaciones.
-              </p>
-            )}
-          </CardContent>
-        </Card>
+        <InfoSection title={`Año académico ${academicYear?.year ?? currentYear}`}>
+          {isSetupComplete ? (
+            <dl className="grid gap-x-8 gap-y-4 sm:grid-cols-2 lg:grid-cols-3">
+              <InfoItem label="Cursos configurados" value={String(classGroupCount)} />
+            </dl>
+          ) : (
+            <p className="text-sm text-muted-foreground">Sin configurar</p>
+          )}
+        </InfoSection>
       </div>
-    </div>
+    </PageContainer>
   );
 }
 
-function Row({ label, value }: { label: string; value: string }) {
+function InfoSection({
+  title,
+  children,
+}: {
+  title: string;
+  children: React.ReactNode;
+}) {
   return (
-    <div className="flex justify-between">
-      <span className="text-muted-foreground">{label}</span>
-      <span className="font-medium">{value}</span>
+    <section className="border-t pt-6 first:border-t-0 first:pt-0">
+      <h2 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">
+        {title}
+      </h2>
+      <div className="mt-4">{children}</div>
+    </section>
+  );
+}
+
+function InfoItem({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="space-y-0.5">
+      <dt className="text-xs text-muted-foreground">{label}</dt>
+      <dd className="text-sm font-medium">{value}</dd>
     </div>
   );
 }

@@ -171,7 +171,7 @@ export function ConversionPreview({ scaleId }: { scaleId: string }) {
                   <TableCell>{formatGrade(row.grade)}</TableCell>
                   <TableCell>
                     {row.isPassing ? (
-                      <Badge className="bg-emerald-500/15 text-emerald-700 dark:text-emerald-300">
+                      <Badge variant="success">
                         Aprobado
                       </Badge>
                     ) : (
