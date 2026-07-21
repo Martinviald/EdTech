@@ -1,3 +1,4 @@
+import { Building2 } from 'lucide-react';
 import type { UserRole } from '@soe/types';
 import { MobileSidebar } from './MobileSidebar';
 import { ThemeToggle } from './ThemeToggle';
@@ -20,13 +21,20 @@ interface TopbarProps {
 
 export function Topbar({ org, user, roles, activeRole, orgs = [], platformLink }: TopbarProps) {
   return (
-    <header className="sticky top-0 z-30 flex h-14 items-center gap-3 border-b bg-background/95 px-4 backdrop-blur supports-[backdrop-filter]:bg-background/80 md:px-6">
+    <header className="sticky top-0 z-30 flex h-14 items-center gap-3 rounded-b-2xl border-x border-b border-border/60 bg-card/80 px-4 backdrop-blur-md md:px-6">
       <MobileSidebar roles={roles} />
-      <span className="hidden text-sm font-medium text-muted-foreground md:block" title={org.name}>
-        {org.name}
-      </span>
+      {org.name ? (
+        <span
+          className="hidden items-center gap-2 rounded-full bg-muted px-3 py-1 text-sm font-medium text-muted-foreground md:inline-flex"
+          title={org.name}
+        >
+          <Building2 className="size-4 shrink-0" aria-hidden />
+          {org.name}
+        </span>
+      ) : null}
       <div className="flex-1" />
       <ThemeToggle />
+      <div className="mx-1 hidden h-6 w-px bg-border md:block" aria-hidden />
       <UserNav
         user={user}
         roles={roles}

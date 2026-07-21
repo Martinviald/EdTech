@@ -2,11 +2,11 @@
 
 import type { Route } from 'next';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
-import { GraduationCap, PanelLeftClose, PanelLeftOpen } from 'lucide-react';
+import { ChevronLeft, ChevronRight, GraduationCap } from 'lucide-react';
 import type { UserRole } from '@soe/types';
-import { Button } from '@/components/ui/button';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { HoverCard, HoverCardContent, HoverCardTrigger } from '@/components/ui/hover-card';
+import { useOptimisticRoute } from '@/components/shared';
 import { cn } from '@/lib/utils';
 import { BRAND } from '@/lib/brand';
 import { ADMIN_NAV_ITEMS, visibleNavGroups, type NavItem } from './nav-items';
@@ -32,17 +32,35 @@ export function SidebarNav({
   onToggle,
   variant = 'main',
 }: SidebarNavProps) {
-  const pathname = usePathname();
+  // El path activo es optimista: al hacer click salta de inmediato al destino
+  // (sin esperar el commit) — ver use-optimistic-route.ts y la rule 07.
+  const { activePath, navigate } = useOptimisticRoute();
   const sections: NavSection[] =
     variant === 'admin' ? [{ id: 'admin', items: ADMIN_NAV_ITEMS }] : visibleNavGroups(roles);
   const activeHref = findActiveHref(
-    pathname,
+    activePath,
     sections.flatMap((s) => s.items),
   );
 
   return (
     <TooltipProvider delayDuration={200} skipDelayDuration={100}>
-      <div className="flex h-full flex-col">
+      <div className="relative flex h-full flex-col">
+        {onToggle ? (
+          <button
+            type="button"
+            onClick={onToggle}
+            aria-label={collapsed ? 'Expandir menú' : 'Colapsar menú'}
+            aria-expanded={!collapsed}
+            className="absolute -right-3 top-5 z-10 flex size-6 items-center justify-center rounded-full border bg-card text-muted-foreground shadow-sm transition-colors duration-fast hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+          >
+            {collapsed ? (
+              <ChevronRight className="size-3.5" aria-hidden />
+            ) : (
+              <ChevronLeft className="size-3.5" aria-hidden />
+            )}
+          </button>
+        ) : null}
+
         <div
           className={cn(
             'flex h-14 shrink-0 items-center gap-2 border-b',
@@ -56,17 +74,18 @@ export function SidebarNav({
             <span className="text-base font-semibold tracking-tight">{BRAND.name}</span>
           ) : null}
         </div>
+
         <nav
           aria-label="Navegación principal"
-          className={cn('flex-1 overflow-y-auto', collapsed ? 'p-2' : 'p-3')}
+          className={cn('scrollbar-none flex-1 overflow-y-auto', collapsed ? 'p-2' : 'p-3')}
         >
           {sections.map((section, idx) => (
             <div
               key={section.id}
-              className={cn('space-y-1', idx > 0 && (collapsed ? 'mt-2 border-t pt-2' : 'mt-4'))}
+              className={cn('space-y-0.5', idx > 0 && (collapsed ? 'mt-2 border-t pt-2' : 'mt-3'))}
             >
               {!collapsed && section.label ? (
-                <p className="px-3 pb-1 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground/70">
+                <p className="px-3 pb-1 text-2xs font-semibold uppercase tracking-wider text-muted-foreground/70">
                   {section.label}
                 </p>
               ) : null}
@@ -76,34 +95,14 @@ export function SidebarNav({
                   item={item}
                   isActive={item.href === activeHref}
                   collapsed={collapsed}
+                  activePath={activePath}
+                  navigate={navigate}
                   onNavigate={onNavigate}
                 />
               ))}
             </div>
           ))}
         </nav>
-        {onToggle ? (
-          <div className="shrink-0 border-t p-2">
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={onToggle}
-              aria-label={collapsed ? 'Expandir menú' : 'Colapsar menú'}
-              aria-expanded={!collapsed}
-              className={cn(
-                'w-full gap-2 text-muted-foreground',
-                collapsed ? 'justify-center px-0' : 'justify-start',
-              )}
-            >
-              {collapsed ? (
-                <PanelLeftOpen className="size-4" aria-hidden />
-              ) : (
-                <PanelLeftClose className="size-4" aria-hidden />
-              )}
-              {!collapsed ? <span>Colapsar</span> : null}
-            </Button>
-          </div>
-        ) : null}
       </div>
     </TooltipProvider>
   );
@@ -134,15 +133,18 @@ interface NavRowProps {
   item: NavItem;
   isActive: boolean;
   collapsed: boolean;
+  activePath: string | null;
+  navigate: (event: React.MouseEvent<HTMLAnchorElement>, href: string) => void;
   onNavigate?: () => void;
 }
 
-function NavRow({ item, isActive, collapsed, onNavigate }: NavRowProps) {
+function NavRow({ item, isActive, collapsed, activePath, navigate, onNavigate }: NavRowProps) {
   const Icon = item.icon;
-  const baseClasses = 'flex items-center gap-3 rounded-md text-sm font-medium transition-colors';
+  const baseClasses =
+    'flex items-center gap-2.5 rounded-lg text-[13px] font-medium transition-colors duration-fast';
   const focusClasses =
     'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2';
-  const sizeClasses = collapsed ? 'h-10 w-10 justify-center' : 'px-3 py-2';
+  const sizeClasses = collapsed ? 'w-full justify-center py-2' : 'px-3 py-1.5';
 
   if (item.status === 'soon') {
     const content = (
@@ -151,14 +153,14 @@ function NavRow({ item, isActive, collapsed, onNavigate }: NavRowProps) {
         className={cn(
           baseClasses,
           sizeClasses,
-          'cursor-not-allowed text-muted-foreground/70 opacity-70',
+          'cursor-not-allowed text-muted-foreground/60',
         )}
       >
         <Icon className="size-4 shrink-0" aria-hidden />
         {!collapsed ? (
           <>
             <span>{item.label}</span>
-            <span className="ml-auto rounded bg-muted px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
+            <span className="ml-auto rounded bg-muted px-1.5 py-0.5 text-2xs font-semibold uppercase tracking-wide text-muted-foreground">
               Próx.
             </span>
           </>
@@ -178,19 +180,23 @@ function NavRow({ item, isActive, collapsed, onNavigate }: NavRowProps) {
     );
   }
 
+  const targetHref = item.children?.[0]?.href ?? item.href;
   const link = (
     <Link
-      href={item.href as Route}
+      href={targetHref as Route}
       aria-current={isActive ? 'page' : undefined}
       aria-label={collapsed ? item.label : undefined}
-      onClick={onNavigate}
+      onClick={(event) => {
+        navigate(event, targetHref);
+        onNavigate?.();
+      }}
       className={cn(
         baseClasses,
         focusClasses,
         sizeClasses,
         isActive
-          ? 'bg-accent text-accent-foreground'
-          : 'text-foreground/80 hover:bg-accent/50 hover:text-foreground',
+          ? 'bg-primary/10 text-primary'
+          : 'text-foreground/70 hover:bg-muted hover:text-foreground',
       )}
     >
       <Icon className="size-4 shrink-0" aria-hidden />
@@ -199,6 +205,42 @@ function NavRow({ item, isActive, collapsed, onNavigate }: NavRowProps) {
   );
 
   if (!collapsed) return link;
+
+  if (item.children && item.children.length > 0) {
+    return (
+      <HoverCard openDelay={100} closeDelay={100}>
+        <HoverCardTrigger asChild>{link}</HoverCardTrigger>
+        <HoverCardContent side="right" align="start" className="w-56 p-0">
+          <p className="border-b px-3 py-2 text-sm font-semibold">{item.label}</p>
+          <div className="p-1">
+            {item.children.map((child) => {
+              const childActive = activePath === child.href;
+              return (
+                <Link
+                  key={child.href}
+                  href={child.href as Route}
+                  aria-current={childActive ? 'page' : undefined}
+                  onClick={(event) => {
+                    navigate(event, child.href);
+                    onNavigate?.();
+                  }}
+                  className={cn(
+                    'block rounded-md px-3 py-1.5 text-sm transition-colors duration-fast',
+                    childActive
+                      ? 'bg-primary/10 text-primary'
+                      : 'text-foreground/80 hover:bg-muted hover:text-foreground',
+                  )}
+                >
+                  {child.label}
+                </Link>
+              );
+            })}
+          </div>
+        </HoverCardContent>
+      </HoverCard>
+    );
+  }
+
   return (
     <Tooltip>
       <TooltipTrigger asChild>{link}</TooltipTrigger>
