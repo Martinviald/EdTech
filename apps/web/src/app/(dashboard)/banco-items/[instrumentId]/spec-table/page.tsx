@@ -9,6 +9,7 @@ import {
   type InstrumentModel,
   type ItemModel,
 } from '@soe/types';
+import { ROUTES } from '@/lib/routes';
 import { SpecTableView } from './SpecTableView';
 
 type ItemsListResponse = {
@@ -24,10 +25,10 @@ interface PageProps {
 
 export default async function SpecTablePage({ params }: PageProps) {
   const session = await auth();
-  if (!session?.user) redirect('/login');
+  if (!session?.user) redirect(ROUTES.login);
   // La tabla de especificaciones es de LECTURA para todo rol que puede ver el
   // banco de ítems. La acción de cargar/editar se gatea aparte con `canEdit`.
-  if (!canAccess(session.user.roles, ITEM_VIEWER_ROLES)) redirect('/dashboard');
+  if (!canAccess(session.user.roles, ITEM_VIEWER_ROLES)) redirect(ROUTES.dashboard);
 
   const { instrumentId } = await params;
 
@@ -47,8 +48,8 @@ export default async function SpecTablePage({ params }: PageProps) {
       instrument={instrument}
       items={items}
       canEdit={canEdit}
-      basePath="/banco-items"
-      breadcrumb={{ href: '/banco-items', label: 'Banco de Instrumentos' }}
+      basePath={ROUTES.bancoItems}
+      breadcrumb={{ href: ROUTES.bancoItems, label: 'Banco de Instrumentos' }}
     />
   );
 }

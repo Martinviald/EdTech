@@ -14,6 +14,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { ITEM_BANK_SCOPES, type ItemBankScope } from '@soe/types';
+import { ROUTES } from '@/lib/routes';
 
 const SCOPE_LABELS: Record<ItemBankScope, string> = {
   own: 'Mis ítems',
@@ -28,7 +29,7 @@ export function ItemBankScopeSelect({ value }: { value: ItemBankScope }) {
   const onChange = (next: string) => {
     const params = new URLSearchParams(searchParams.toString());
     params.set('scope', next);
-    router.push(`/banco-items/explorar?${params.toString()}` as Route);
+    router.push(`${ROUTES.bancoItemsExplorar}?${params.toString()}` as Route);
   };
 
   return (

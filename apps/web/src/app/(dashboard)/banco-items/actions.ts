@@ -1,6 +1,7 @@
 'use server';
 
 import { revalidatePath } from 'next/cache';
+import { ROUTES } from '@/lib/routes';
 import { apiPost, apiPatch, apiDelete } from '@/lib/api';
 import type {
   CreateInstrumentDto,
@@ -18,20 +19,20 @@ export type AiTaggingResponse = {
 
 export async function createInstrument(data: CreateInstrumentDto) {
   const result = await apiPost<InstrumentModel>('/instruments', data);
-  revalidatePath('/banco-items');
+  revalidatePath(ROUTES.bancoItems);
   return result;
 }
 
 export async function updateInstrument(id: string, data: UpdateInstrumentDto) {
   const result = await apiPatch<InstrumentModel>(`/instruments/${id}`, data);
-  revalidatePath('/banco-items');
+  revalidatePath(ROUTES.bancoItems);
   revalidatePath(`/banco-items/${id}`);
   return result;
 }
 
 export async function deleteInstrument(id: string) {
   await apiDelete(`/instruments/${id}`);
-  revalidatePath('/banco-items');
+  revalidatePath(ROUTES.bancoItems);
 }
 
 export async function requestAiTagging(data: AiTagRequestDto) {
@@ -55,6 +56,6 @@ export async function confirmTags(data: BatchTagItemsDto) {
     })),
   };
   const result = await apiPost<ConfirmTagsResponse>('/ai-tagging/confirm', payload);
-  revalidatePath('/banco-items');
+  revalidatePath(ROUTES.bancoItems);
   return result;
 }

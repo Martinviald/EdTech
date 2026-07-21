@@ -15,18 +15,30 @@ import {
   DropdownMenuContent,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import { cn } from '@/lib/utils';
 
 export type NodeOption = { id: string; label: string };
 
 interface NodeTypeFilterProps {
   /** Etiqueta del tipo de nodo (p. ej. "Objetivo de aprendizaje"). */
   label: string;
+  /** Texto del botón cuando se usa con una etiqueta externa (grid del FilterBar). */
+  placeholder?: string;
+  /** Ocupa todo el ancho de su contenedor (celda de grilla). */
+  fullWidth?: boolean;
   options: NodeOption[];
   selected: string[];
   onChange: (nodeIds: string[]) => void;
 }
 
-export function NodeTypeFilter({ label, options, selected, onChange }: NodeTypeFilterProps) {
+export function NodeTypeFilter({
+  label,
+  placeholder,
+  fullWidth,
+  options,
+  selected,
+  onChange,
+}: NodeTypeFilterProps) {
   const selectedSet = new Set(selected);
 
   const toggle = (nodeId: string) => {
@@ -40,11 +52,18 @@ export function NodeTypeFilter({ label, options, selected, onChange }: NodeTypeF
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="outline" size="sm" className="gap-2" disabled={options.length === 0}>
-          <ListFilter className="size-4" aria-hidden />
-          {label}
+        <Button
+          variant="outline"
+          size="sm"
+          className={cn('gap-2', fullWidth && 'w-full justify-between')}
+          disabled={options.length === 0}
+        >
+          <span className="flex min-w-0 items-center gap-2">
+            <ListFilter className="size-4 shrink-0" aria-hidden />
+            <span className="truncate">{placeholder ?? label}</span>
+          </span>
           {selected.length > 0 && (
-            <Badge variant="secondary" className="ml-1 h-5 px-1.5 text-[10px]">
+            <Badge variant="secondary" className="h-5 px-1.5 text-[10px]">
               {selected.length}
             </Badge>
           )}

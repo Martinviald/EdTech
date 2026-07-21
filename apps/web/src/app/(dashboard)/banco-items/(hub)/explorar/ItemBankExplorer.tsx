@@ -11,9 +11,9 @@ import { useState } from 'react';
 import { Library } from 'lucide-react';
 import type { ItemModel } from '@soe/types';
 import { Badge } from '@/components/ui/badge';
-import { EmptyState } from '@/components/patterns';
-import { TagBadge } from '../[instrumentId]/TagBadge';
-import { ItemDetailPanel } from '../[instrumentId]/ItemDetailPanel';
+import { EmptyState } from '@/components/shared';
+import { TagBadge } from '../../[instrumentId]/TagBadge';
+import { ItemDetailPanel } from '../../[instrumentId]/ItemDetailPanel';
 
 const ITEM_TYPE_LABELS: Record<string, string> = {
   multiple_choice: 'Selección múltiple',

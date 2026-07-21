@@ -1,8 +1,8 @@
 import Link from 'next/link';
-import type { Route } from 'next';
 import { ChevronRight } from 'lucide-react';
-import { StatusBadge, type StatusTone } from '@/components/patterns';
+import { StatusBadge, type StatusTone } from '@/components/shared';
 import type { InstrumentModel } from '@soe/types';
+import { ROUTES } from '@/lib/routes';
 
 const TYPE_LABELS: Record<string, string> = {
   dia: 'DIA',
@@ -35,7 +35,7 @@ const STATUS_LABELS: Record<string, string> = {
 export function InstrumentRow({ instrument }: { instrument: InstrumentModel }) {
   return (
     <Link
-      href={`/banco-items/${instrument.id}` as Route}
+      href={ROUTES.bancoItem(instrument.id)}
       className="group flex items-center gap-3 px-4 py-3 transition-colors hover:bg-muted/50 focus-visible:bg-muted/50 focus-visible:outline-none"
     >
       <div className="min-w-0 flex-1">

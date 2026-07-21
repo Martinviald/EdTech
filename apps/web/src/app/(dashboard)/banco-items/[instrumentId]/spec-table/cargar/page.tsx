@@ -1,8 +1,8 @@
 import Link from 'next/link';
-import type { Route } from 'next';
 import { redirect } from 'next/navigation';
 import { auth } from '@/auth';
 import { apiGet } from '@/lib/api';
+import { ROUTES } from '@/lib/routes';
 import {
   canAccess,
   ITEM_BANK_ROLES,
@@ -17,8 +17,8 @@ interface PageProps {
 
 export default async function SpecTableUploadPage({ params }: PageProps) {
   const session = await auth();
-  if (!session?.user) redirect('/login');
-  if (!canAccess(session.user.roles, ITEM_BANK_ROLES)) redirect('/dashboard');
+  if (!session?.user) redirect(ROUTES.login);
+  if (!canAccess(session.user.roles, ITEM_BANK_ROLES)) redirect(ROUTES.dashboard);
 
   const { instrumentId } = await params;
 
@@ -29,26 +29,26 @@ export default async function SpecTableUploadPage({ params }: PageProps) {
 
   // Los instrumentos OFICIALES del sistema sólo los edita platform_admin.
   if (instrument.isOfficial && !session.user.isPlatformAdmin) {
-    redirect(`/banco-items/${instrumentId}/spec-table`);
+    redirect(ROUTES.bancoItemSpecTable(instrumentId));
   }
 
   return (
     <div className="space-y-6">
       <div>
         <div className="flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
-          <Link href={'/banco-items' as Route} className="hover:text-foreground">
+          <Link href={ROUTES.bancoItems} className="hover:text-foreground">
             Banco de Instrumentos
           </Link>
           <span>/</span>
           <Link
-            href={`/banco-items/${instrumentId}` as Route}
+            href={ROUTES.bancoItem(instrumentId)}
             className="hover:text-foreground"
           >
             {instrument.name}
           </Link>
           <span>/</span>
           <Link
-            href={`/banco-items/${instrumentId}/spec-table` as Route}
+            href={ROUTES.bancoItemSpecTable(instrumentId)}
             className="hover:text-foreground"
           >
             Tabla de especificaciones

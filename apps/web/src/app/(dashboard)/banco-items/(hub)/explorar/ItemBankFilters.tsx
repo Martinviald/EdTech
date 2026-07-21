@@ -2,41 +2,28 @@
 
 // Filtros del banco de ítems — modelo "Ámbito → Dimensión".
 //
-//   Fila 1 (ámbito):     Asignatura + Nivel  → acotan todo lo de abajo.
-//   Fila 2 (dimensión):  un control por cada TIPO HOJA presente en el ámbito
-//                        (Objetivo de aprendizaje, Habilidad, Tipo de texto…),
-//                        poblado dinámicamente desde el árbol de taxonomía.
+//   Ámbito:     Asignatura + Nivel  → acotan todo lo demás.
+//   Dimensión:  un control por cada TIPO HOJA presente en el ámbito
+//               (Objetivo de aprendizaje, Habilidad, Tipo de texto…),
+//               poblado dinámicamente desde el árbol de taxonomía.
 //
-// Lo que evita la confusión previa (dropdowns planos por `type`):
-//   · Solo se ofrecen los TIPOS HOJA (los que etiquetan ítems). El andamiaje
-//     estructural (dominio/subdominio/eje) NO es un filtro por sí mismo.
-//   · Un tipo hoja con MUCHOS nodos y >1 padre en el ámbito muestra un
-//     "narrower" = el tipo del nivel padre (p. ej. Eje para OA). Es genérico:
-//     se deriva del árbol, no está hardcodeado a "Eje".
-//   · Asignatura/Nivel son el ámbito superior (no un dropdown más), y acotan
-//     cada lista respetando NULL = transversal (una Habilidad sin nivel no
-//     desaparece al elegir un nivel).
+// Solo se ofrecen los TIPOS HOJA (los que etiquetan ítems); el andamiaje
+// estructural (dominio/subdominio/eje) no es un filtro por sí mismo salvo como
+// "narrower" cuando un tipo hoja tiene muchos nodos con >1 padre en el ámbito.
 //
-// El acotamiento de OPCIONES es client-side e instantáneo (el set curricular es
-// pequeño). El filtrado de ÍTEMS es server-side: esto solo escribe la selección
-// en la URL (patrón de `ItemBankScopeSelect`) y el Server Component refetchea.
+// El acotamiento de OPCIONES es client-side; el filtrado de ÍTEMS es server-side:
+// esto solo escribe la selección en la URL y el Server Component refetchea.
 
+import { useTransition } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import type { Route } from 'next';
-import { X } from 'lucide-react';
+import { FilterX } from 'lucide-react';
 import { TAXONOMY_NODE_TYPES, type TaxonomyNodeModel } from '@soe/types';
 import { Button } from '@/components/ui/button';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
+import { FilterBar, type FilterField } from '@/components/shared';
 import { nodeTypeLabel, nodeOptionLabel } from '@/lib/taxonomy-labels';
+import { ROUTES } from '@/lib/routes';
 import { NodeTypeFilter } from './NodeTypeFilter';
-
-const ALL = '__all__';
 
 export type CatalogEntry = { id: string; name: string; shortName: string };
 
@@ -64,12 +51,15 @@ export function ItemBankFilters({
 }: ItemBankFiltersProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const [isPending, startTransition] = useTransition();
 
   const pushParams = (mutate: (params: URLSearchParams) => void) => {
     const params = new URLSearchParams(searchParams.toString());
     mutate(params);
     const qs = params.toString();
-    router.push((qs ? `/banco-items/explorar?${qs}` : '/banco-items/explorar') as Route);
+    startTransition(() => {
+      router.push((qs ? `${ROUTES.bancoItemsExplorar}?${qs}` : ROUTES.bancoItemsExplorar) as Route);
+    });
   };
 
   /** Borra toda la selección de nodos (tipos hoja y padres) al cambiar el ámbito. */
@@ -79,15 +69,15 @@ export function ItemBankFilters({
 
   const onSubjectChange = (next: string) =>
     pushParams((params) => {
-      if (next === ALL) params.delete('subjectId');
-      else params.set('subjectId', next);
+      if (next) params.set('subjectId', next);
+      else params.delete('subjectId');
       clearNodeSelections(params);
     });
 
   const onGradeChange = (next: string) =>
     pushParams((params) => {
-      if (next === ALL) params.delete('gradeId');
-      else params.set('gradeId', next);
+      if (next) params.set('gradeId', next);
+      else params.delete('gradeId');
       clearNodeSelections(params);
     });
 
@@ -100,8 +90,8 @@ export function ItemBankFilters({
   // Cambiar el narrower (padre) limpia la selección del tipo hoja que acota.
   const onParentChange = (parentType: string, leafType: string, id: string) =>
     pushParams((params) => {
-      if (id === ALL) params.delete(parentType);
-      else params.set(parentType, id);
+      if (id) params.set(parentType, id);
+      else params.delete(parentType);
       params.delete(leafType);
     });
 
@@ -117,9 +107,7 @@ export function ItemBankFilters({
 
   // Un nodo es "estructural" si es padre de otro; su TIPO es estructural.
   const parentIds = new Set(nodes.map((n) => n.parentId).filter((p): p is string => Boolean(p)));
-  const structuralTypes = new Set(
-    nodes.filter((n) => parentIds.has(n.id)).map((n) => n.type),
-  );
+  const structuralTypes = new Set(nodes.filter((n) => parentIds.has(n.id)).map((n) => n.type));
   // Dimensiones = tipos HOJA presentes (los que etiquetan ítems), en orden canónico.
   const presentTypes = new Set(nodes.map((n) => n.type));
   const leafTypes = TAXONOMY_NODE_TYPES.filter(
@@ -190,98 +178,71 @@ export function ItemBankFilters({
     Object.values(selectedLeaf).some((ids) => ids.length > 0) ||
     Object.keys(selectedParent).length > 0;
 
+  const fields: FilterField[] = [
+    {
+      key: 'subjectId',
+      label: 'Asignatura',
+      placeholder: 'Todas las asignaturas',
+      value: subjectId,
+      options: availableSubjects.map((s) => ({ id: s.id, label: s.name })),
+      onChange: onSubjectChange,
+    },
+    {
+      key: 'gradeId',
+      label: 'Nivel',
+      placeholder: 'Todos los niveles',
+      value: gradeId,
+      options: availableGrades.map((g) => ({ id: g.id, label: g.name })),
+      onChange: onGradeChange,
+    },
+    ...dimensions.flatMap((dim): FilterField[] => {
+      const cells: FilterField[] = [];
+      const narrower = dim.narrower;
+      if (narrower) {
+        cells.push({
+          key: narrower.parentType,
+          label: narrower.label,
+          placeholder: `Todos`,
+          value: narrower.selected || undefined,
+          options: narrower.options,
+          onChange: (id) => onParentChange(narrower.parentType, dim.leafType, id),
+        });
+      }
+      cells.push({
+        key: dim.leafType,
+        label: dim.label,
+        control: (
+          <NodeTypeFilter
+            label={dim.label}
+            placeholder="Seleccionar"
+            fullWidth
+            options={dim.options}
+            selected={dim.selected}
+            onChange={(ids) => onLeafChange(dim.leafType, ids)}
+          />
+        ),
+      });
+      return cells;
+    }),
+  ];
+
   return (
-    <div className="flex flex-wrap items-end gap-3">
-      <div className="flex flex-col gap-1">
-        <span className="text-[10px] font-medium uppercase tracking-wide text-muted-foreground">
-          Asignatura
-        </span>
-        <Select value={subjectId ?? ALL} onValueChange={onSubjectChange}>
-          <SelectTrigger className="w-[180px]">
-            <SelectValue placeholder="Asignatura" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value={ALL}>Todas las asignaturas</SelectItem>
-            {availableSubjects.map((subject) => (
-              <SelectItem key={subject.id} value={subject.id}>
-                {subject.name}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      </div>
-
-      <div className="flex flex-col gap-1">
-        <span className="text-[10px] font-medium uppercase tracking-wide text-muted-foreground">
-          Nivel
-        </span>
-        <Select value={gradeId ?? ALL} onValueChange={onGradeChange}>
-          <SelectTrigger className="w-[160px]">
-            <SelectValue placeholder="Nivel" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value={ALL}>Todos los niveles</SelectItem>
-            {availableGrades.map((grade) => (
-              <SelectItem key={grade.id} value={grade.id}>
-                {grade.name}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      </div>
-
-      {dimensions.map((dim) => (
-        <div key={dim.leafType} className="flex flex-wrap items-end gap-3">
-          {dim.narrower && (
-            <div className="flex flex-col gap-1">
-              <span className="text-[10px] font-medium uppercase tracking-wide text-muted-foreground">
-                {dim.narrower.label}
-              </span>
-              <Select
-                value={dim.narrower.selected || ALL}
-                onValueChange={(id) =>
-                  onParentChange(dim.narrower!.parentType, dim.leafType, id)
-                }
-              >
-                <SelectTrigger className="w-[190px]">
-                  <SelectValue placeholder={dim.narrower.label} />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value={ALL}>Todos</SelectItem>
-                  {dim.narrower.options.map((opt) => (
-                    <SelectItem key={opt.id} value={opt.id}>
-                      {opt.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-          )}
-          <div className="flex flex-col gap-1">
-            <span className="text-[10px] font-medium uppercase tracking-wide text-muted-foreground">
-              {dim.label}
-            </span>
-            <NodeTypeFilter
-              label={dim.label}
-              options={dim.options}
-              selected={dim.selected}
-              onChange={(ids) => onLeafChange(dim.leafType, ids)}
-            />
-          </div>
-        </div>
-      ))}
-
-      {hasAnyFilter && (
+    <FilterBar
+      layout="grid"
+      fields={fields}
+      pending={isPending}
+      actions={
         <Button
           variant="ghost"
-          size="sm"
-          className="h-8 gap-1 px-2 text-xs text-muted-foreground"
+          size="icon"
           onClick={clearAll}
+          disabled={!hasAnyFilter}
+          title="Limpiar filtros"
+          aria-label="Limpiar filtros"
         >
-          <X className="size-3" aria-hidden />
-          Limpiar filtros
+          <FilterX />
         </Button>
-      )}
-    </div>
+      }
+    />
   );
 }
