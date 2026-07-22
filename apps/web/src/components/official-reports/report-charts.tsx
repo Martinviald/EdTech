@@ -12,6 +12,7 @@
 import {
   DEFAULT_PERFORMANCE_THRESHOLDS,
   type OfficialCourseStudentRow,
+  type PerformanceBandView,
   type PerformanceLevel,
 } from '@soe/types';
 import { cn } from '@/lib/utils';
@@ -251,27 +252,88 @@ const LEVEL_BANDS: LevelBand[] = (() => {
   }));
 })();
 
+// ── Bandas a dibujar: las reales del instrumento o los 4 niveles fijos ────────
+type DisplayBand = {
+  key: string;
+  label: string;
+  color: string;
+  min: number; // 0..100
+  max: number; // 0..100
+};
+
+// Escala fija de 4 niveles (fallback para instrumentos SIN bandas configuradas).
+const LEGACY_DISPLAY_BANDS: DisplayBand[] = LEVEL_BANDS.map((b) => ({
+  key: b.level,
+  label: b.label,
+  color: b.color,
+  min: b.min,
+  max: b.max,
+}));
+
+/**
+ * Bandas a dibujar en la franja: las REALES del instrumento (DIA I/II/III, con sus
+ * cortes y labels) cuando existen; si no, la escala fija de 4 (sin regresión para
+ * instrumentos no-DIA). Los umbrales del instrumento son fracciones 0..1 → a %.
+ */
+function toDisplayBands(bands: PerformanceBandView[] | undefined): DisplayBand[] {
+  if (!bands || bands.length === 0) return LEGACY_DISPLAY_BANDS;
+  // Sin umbrales no se pueden ubicar las zonas → fallback a la escala fija de 4.
+  if (bands.some((b) => b.minThreshold == null || b.maxThreshold == null)) {
+    return LEGACY_DISPLAY_BANDS;
+  }
+  return [...bands]
+    .sort((a, b) => a.order - b.order)
+    .map((b) => ({
+      key: b.key,
+      label: b.label,
+      color: b.color ?? '#94a3b8',
+      min: b.minThreshold! * 100,
+      max: b.maxThreshold! * 100,
+    }));
+}
+
 type DotHover =
-  | { kind: 'student'; row: OfficialCourseStudentRow; index: number }
-  | { kind: 'band'; band: LevelBand; count: number };
+  | {
+      kind: 'student';
+      row: OfficialCourseStudentRow;
+      index: number;
+      // Banda real resuelta para el alumno (label + color), para que el tooltip
+      // sea consistente con la figura (ej. "Nivel II" y su color, no el legacy).
+      bandLabel: string | null;
+      color: string;
+    }
+  | { kind: 'band'; band: DisplayBand; count: number };
 
 /**
  * Réplica de la Figura 1: una fila por estudiante con su % de logro como punto
  * sobre las bandas de nivel del instrumento. Tooltip por punto (detalle del
  * estudiante) y por banda (nivel + conteo).
  */
-export function StudentDotPlot({ students }: { students: OfficialCourseStudentRow[] }) {
+export function StudentDotPlot({
+  students,
+  bands,
+}: {
+  students: OfficialCourseStudentRow[];
+  bands?: PerformanceBandView[];
+}) {
   const { tip, bind } = useChartTooltip<DotHover>();
   const withData = students.filter((s) => s.achievement !== null);
   if (withData.length === 0) {
     return <p className="text-sm text-muted-foreground">Sin resultados por estudiante.</p>;
   }
 
-  const countByLevel = new Map<PerformanceLevel, number>();
+  const displayBands = toDisplayBands(bands);
+  const useBands = !!bands && bands.length > 0;
+  const colorByKey = new Map(displayBands.map((b) => [b.key, b.color]));
+  // Clave de banda del alumno: la banda REAL del instrumento (`bandKey`) o, sin
+  // bandas configuradas, el nivel legacy. Alimenta el color del punto y el conteo.
+  const bandKeyOf = (s: OfficialCourseStudentRow): string | null =>
+    useBands ? (s.bandKey ?? null) : s.performanceLevel;
+
+  const countByKey = new Map<string, number>();
   for (const s of withData) {
-    if (s.performanceLevel) {
-      countByLevel.set(s.performanceLevel, (countByLevel.get(s.performanceLevel) ?? 0) + 1);
-    }
+    const k = bandKeyOf(s);
+    if (k) countByKey.set(k, (countByKey.get(k) ?? 0) + 1);
   }
 
   return (
@@ -280,12 +342,12 @@ export function StudentDotPlot({ students }: { students: OfficialCourseStudentRo
       <div className={cn('flex items-end', ROW_GAP)}>
         <div className={NAME_COL} aria-hidden />
         <div className="relative h-4 flex-1">
-          {LEVEL_BANDS.map((b) => (
+          {displayBands.map((b) => (
             <div
-              key={b.level}
+              key={b.key}
               className="absolute inset-y-0 flex items-end justify-center overflow-hidden px-0.5"
               style={{ left: `${b.min}%`, width: `${b.max - b.min}%` }}
-              {...bind({ kind: 'band', band: b, count: countByLevel.get(b.level) ?? 0 })}
+              {...bind({ kind: 'band', band: b, count: countByKey.get(b.key) ?? 0 })}
             >
               <span
                 className="truncate text-[10px] font-semibold uppercase tracking-wide sm:text-xs"
@@ -303,9 +365,8 @@ export function StudentDotPlot({ students }: { students: OfficialCourseStudentRo
         {withData.map((s, i) => {
           const x = clampPct(s.achievement ?? 0);
           const idx = String(i + 1).padStart(2, '0');
-          const dotColor = s.performanceLevel
-            ? PERFORMANCE_LEVEL_CHART_COLOR[s.performanceLevel]
-            : '#94a3b8';
+          const k = bandKeyOf(s);
+          const dotColor = (k ? colorByKey.get(k) : undefined) ?? bandColorForPct(displayBands, x);
           return (
             <div key={s.studentId} className={cn('flex items-center break-inside-avoid', ROW_GAP)}>
               <div
@@ -315,10 +376,22 @@ export function StudentDotPlot({ students }: { students: OfficialCourseStudentRo
                 <span className="tabular-nums text-muted-foreground">{idx}</span>{' '}
                 {s.studentFullName}
               </div>
-              <div className="relative h-6 flex-1">
-                {LEVEL_BANDS.map((b) => (
+              {/* Toda la franja de la fila es zona de hover (no sólo el punto de 24px):
+                  en un curso con muchas filas el punto es un blanco chico y el tooltip
+                  "no aparecía". El tooltip muestra la banda real del alumno + su color. */}
+              <div
+                className="relative h-6 flex-1"
+                {...bind({
+                  kind: 'student',
+                  row: s,
+                  index: i,
+                  bandLabel: useBands ? (s.bandLabel ?? null) : null,
+                  color: dotColor,
+                })}
+              >
+                {displayBands.map((b) => (
                   <div
-                    key={b.level}
+                    key={b.key}
                     className="absolute inset-y-0"
                     style={{
                       left: `${b.min}%`,
@@ -328,9 +401,9 @@ export function StudentDotPlot({ students }: { students: OfficialCourseStudentRo
                     aria-hidden
                   />
                 ))}
-                {LEVEL_BANDS.slice(1).map((b) => (
+                {displayBands.slice(1).map((b) => (
                   <div
-                    key={`div-${b.level}`}
+                    key={`div-${b.key}`}
                     className="absolute inset-y-0 w-px bg-border"
                     style={{ left: `${b.min}%` }}
                     aria-hidden
@@ -340,14 +413,13 @@ export function StudentDotPlot({ students }: { students: OfficialCourseStudentRo
                   className="absolute inset-x-0 top-1/2 -translate-y-1/2 border-t border-dashed border-border/70"
                   aria-hidden
                 />
-                {/* Punto = % de logro, coloreado por su nivel. Área de hover ampliada. */}
+                {/* Punto = % de logro, coloreado por su banda. */}
                 <span
-                  className="absolute top-1/2 flex size-6 -translate-x-1/2 -translate-y-1/2 items-center justify-center"
+                  className="pointer-events-none absolute top-1/2 flex size-6 -translate-x-1/2 -translate-y-1/2 items-center justify-center"
                   style={{ left: `${x}%` }}
-                  {...bind({ kind: 'student', row: s, index: i })}
                 >
                   <span
-                    className="size-2.5 rounded-full ring-2 ring-card transition-transform hover:scale-125"
+                    className="size-2.5 rounded-full ring-2 ring-card transition-transform"
                     style={{ backgroundColor: dotColor }}
                   />
                 </span>
@@ -362,9 +434,9 @@ export function StudentDotPlot({ students }: { students: OfficialCourseStudentRo
         <div className={NAME_COL} aria-hidden />
         <div className="relative h-4 flex-1 text-xs text-muted-foreground">
           <span className="absolute left-0 tabular-nums">0%</span>
-          {LEVEL_BANDS.slice(1).map((b) => (
+          {displayBands.slice(1).map((b) => (
             <span
-              key={`tick-${b.level}`}
+              key={`tick-${b.key}`}
               className="absolute hidden -translate-x-1/2 tabular-nums sm:inline"
               style={{ left: `${b.min}%` }}
             >
@@ -377,8 +449,8 @@ export function StudentDotPlot({ students }: { students: OfficialCourseStudentRo
 
       {/* Leyenda: nivel + rango de % + n° de estudiantes. */}
       <figcaption className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-muted-foreground">
-        {LEVEL_BANDS.map((b) => (
-          <span key={b.level} className="inline-flex items-center gap-1.5">
+        {displayBands.map((b) => (
+          <span key={b.key} className="inline-flex items-center gap-1.5">
             <span
               className="inline-block size-2.5 rounded-full"
               style={{ backgroundColor: b.color }}
@@ -386,7 +458,7 @@ export function StudentDotPlot({ students }: { students: OfficialCourseStudentRo
             />
             <span className="text-foreground">{b.label}</span>
             <span className="tabular-nums">
-              {roundPct(b.min)}–{roundPct(b.max)}% · {countByLevel.get(b.level) ?? 0}
+              {roundPct(b.min)}–{roundPct(b.max)}% · {countByKey.get(b.key) ?? 0}
             </span>
           </span>
         ))}
@@ -395,7 +467,12 @@ export function StudentDotPlot({ students }: { students: OfficialCourseStudentRo
       {tip ? (
         <ChartTooltipPortal x={tip.x} y={tip.y}>
           {tip.data.kind === 'student' ? (
-            <StudentDotTooltip row={tip.data.row} index={tip.data.index} />
+            <StudentDotTooltip
+              row={tip.data.row}
+              index={tip.data.index}
+              bandLabel={tip.data.bandLabel}
+              color={tip.data.color}
+            />
           ) : (
             <ChartTooltipCard
               title={tip.data.band.label}
@@ -415,9 +492,9 @@ export function StudentDotPlot({ students }: { students: OfficialCourseStudentRo
   );
 }
 
-/** Color de la banda que contiene `pct` (para colorear el punto sin `performanceLevel`). */
-function bandColorForPct(pct: number): string {
-  const band = LEVEL_BANDS.find((b) => pct >= b.min && pct < b.max) ?? LEVEL_BANDS.at(-1);
+/** Color de la banda de `displayBands` que contiene `pct` (para colorear el punto). */
+function bandColorForPct(displayBands: DisplayBand[], pct: number): string {
+  const band = displayBands.find((b) => pct >= b.min && pct < b.max) ?? displayBands.at(-1);
   return band?.color ?? '#94a3b8';
 }
 
@@ -431,22 +508,29 @@ export function StudentBandStrip({
   achievement,
   performanceLevel,
   requiresSupport,
+  bands,
 }: {
   achievement: number | null;
   performanceLevel: PerformanceLevel | null;
   requiresSupport: boolean;
+  bands?: PerformanceBandView[];
 }) {
+  const displayBands = toDisplayBands(bands);
+  const useBands = !!bands && bands.length > 0;
   const x = achievement === null ? null : clampPct(achievement);
-  const dotColor = performanceLevel
-    ? PERFORMANCE_LEVEL_CHART_COLOR[performanceLevel]
-    : x !== null
-      ? bandColorForPct(x)
-      : '#94a3b8';
+  // Con bandas del instrumento, el color sale de la banda que contiene el %; sin
+  // ellas, del nivel legacy (fallback sin regresión).
+  const dotColor =
+    !useBands && performanceLevel
+      ? PERFORMANCE_LEVEL_CHART_COLOR[performanceLevel]
+      : x !== null
+        ? bandColorForPct(displayBands, x)
+        : '#94a3b8';
   return (
     <div className="relative h-6 w-full min-w-[160px]" role="img" aria-label="Nivel de logro">
-      {LEVEL_BANDS.map((b) => (
+      {displayBands.map((b) => (
         <div
-          key={b.level}
+          key={b.key}
           className="absolute inset-y-0"
           style={{
             left: `${b.min}%`,
@@ -456,9 +540,9 @@ export function StudentBandStrip({
           aria-hidden
         />
       ))}
-      {LEVEL_BANDS.slice(1).map((b) => (
+      {displayBands.slice(1).map((b) => (
         <div
-          key={`div-${b.level}`}
+          key={`div-${b.key}`}
           className="absolute inset-y-0 w-px bg-border"
           style={{ left: `${b.min}%` }}
           aria-hidden
@@ -488,16 +572,26 @@ export function StudentBandStrip({
   );
 }
 
-function StudentDotTooltip({ row, index }: { row: OfficialCourseStudentRow; index: number }) {
-  const color = row.performanceLevel
-    ? PERFORMANCE_LEVEL_CHART_COLOR[row.performanceLevel]
-    : undefined;
+function StudentDotTooltip({
+  row,
+  index,
+  bandLabel,
+  color,
+}: {
+  row: OfficialCourseStudentRow;
+  index: number;
+  // Banda real del instrumento (ej. "Nivel II") + su color, ya resueltos en el
+  // dot-plot. Con bandas, el tooltip muestra la banda; sin ellas, el nivel legacy.
+  bandLabel: string | null;
+  color: string;
+}) {
+  const levelLabel = bandLabel ?? performanceLevelLabel(row.performanceLevel);
   const rows: ChartTooltipRow[] = [
     { label: '% de logro', value: fmtPct(row.achievement) },
     {
       label: 'Nivel',
-      value: performanceLevelLabel(row.performanceLevel),
-      color: color ?? null,
+      value: levelLabel,
+      color,
     },
   ];
   if (row.grade !== null) rows.push({ label: 'Nota', value: row.grade.toFixed(1) });

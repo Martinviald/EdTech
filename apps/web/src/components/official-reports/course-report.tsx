@@ -231,7 +231,7 @@ export function CourseReport({
                 Fuera de Diagnóstico se muestra sólo si hay al menos una fila con logro
                 (un informe agregado band-only no trae %). La nómina siempre se ve. */}
             {!isDiagnostic && studentResults.some((s) => s.achievement !== null) && (
-              <StudentDotPlot students={studentResults} />
+              <StudentDotPlot students={studentResults} bands={report.bands} />
             )}
             <p className="text-sm text-muted-foreground">
               {showAdvance ? (
@@ -257,6 +257,7 @@ export function CourseReport({
               basePath={studentReportBasePath}
               isDiagnostic={isDiagnostic}
               showAdvance={showAdvance}
+              bands={report.bands}
             />
           </>
         )}
@@ -434,6 +435,7 @@ function StudentTable({
   basePath,
   isDiagnostic = false,
   showAdvance = false,
+  bands,
 }: {
   students: OfficialCourseStudentRow[];
   basePath?: string;
@@ -447,6 +449,8 @@ function StudentTable({
    * paso `nivel previo (Monitoreo) → nivel de Cierre`. Sólo aplica a Cierre.
    */
   showAdvance?: boolean;
+  /** Bandas del instrumento para dibujar la franja de logro de Diagnóstico. */
+  bands?: OfficialCourseReportResponse['bands'];
 }) {
   if (students.length === 0) return null;
   return (
@@ -492,6 +496,7 @@ function StudentTable({
                     achievement={s.achievement}
                     performanceLevel={s.performanceLevel}
                     requiresSupport={s.requiresSupport}
+                    bands={bands}
                   />
                 </td>
               ) : (

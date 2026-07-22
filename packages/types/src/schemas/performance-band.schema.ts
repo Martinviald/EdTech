@@ -130,4 +130,10 @@ export type PerformanceBandView = {
   label: string;
   order: number;
   color?: string | null;
+  // Umbrales de corte de la banda (fracciones 0..1). Opcionales: los emiten sólo
+  // los productores que los necesitan para dibujar la franja posicional del
+  // informe (ej. el dot-plot por estudiante). Ausentes → la UI cae a la escala
+  // fija de 4 niveles para las zonas.
+  minThreshold?: number;
+  maxThreshold?: number;
 };
