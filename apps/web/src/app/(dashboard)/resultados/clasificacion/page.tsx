@@ -33,7 +33,7 @@ import {
 } from '../components/dashboard-filters';
 import { DistributionBar } from '../components/distribution-bar';
 import { PerformanceBadge } from '../components/performance-badge';
-import { PaginationControls } from '../components/pagination-controls';
+import { PaginationControls } from '@/components/shared';
 import { PerformanceLevelFilter } from '../components/performance-level-filter';
 import { formatAchievement } from '../components/performance-level';
 import { getDashboardFilters } from '../data';

@@ -29,3 +29,4 @@ export {
 } from './skeletons';
 export { StatCard } from './StatCard';
 export { MetricTrendChip, type MetricTrend } from './metric-trend';
+export { PaginationControls } from './PaginationControls';

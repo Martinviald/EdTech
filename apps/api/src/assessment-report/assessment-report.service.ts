@@ -1,12 +1,10 @@
-import {
-  ForbiddenException,
-  Injectable,
-  NotFoundException,
-} from '@nestjs/common';
+import { ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
 import { and, asc, eq, inArray, isNull, notInArray, sql } from 'drizzle-orm';
 import {
   assessmentCourseAssignments,
+  assessmentItemStats,
   assessmentResults,
+  assessmentSkillStats,
   assessments,
   classGroups,
   gradingScales,
@@ -28,9 +26,12 @@ import {
   RESULTS_VIEWER_ROLES,
   RESULT_HIDDEN_NODE_TYPES,
   bandToLegacyLevel,
+  capabilitiesFor,
   classifyByBands,
+  mergeAnswerCounts,
   percentageToPerformanceLevel,
   userHasAnyRole,
+  type AnswerCount,
   type AssessmentReportCourseRow,
   type AssessmentReportItemRow,
   type AssessmentReportQueryDto,
@@ -38,7 +39,9 @@ import {
   type AssessmentReportResponse,
   type AssessmentReportRiskStudent,
   type AssessmentReportSkillRow,
+  type DataGranularity,
   type ItemReportFlag,
+  type MetricType,
   type PerformanceBandDistributionBucket,
   type PerformanceBandInput,
   type PerformanceBandView,
@@ -47,8 +50,26 @@ import {
   type UserRole,
 } from '@soe/types';
 import type { JwtPayload } from '../auth/jwt-payload.types';
+import {
+  COHORT_PCT_SUM,
+  COHORT_PCT_WEIGHT,
+  COHORT_STUDENTS_ASSESSED,
+  addCohortRow,
+  cohortAverage,
+  type CohortAccumulator,
+} from '../common/helpers/cohort-skill-stats.helper';
+import {
+  loadCohortOverallAchievement,
+  type CohortOverallAchievement,
+} from '../common/helpers/cohort-item-stats.helper';
+import {
+  loadCohortLevelCounts,
+  levelCountsToBandDistribution,
+  levelCountsToLegacyDistribution,
+} from '../common/helpers/cohort-level-stats.helper';
 import { InjectDb, type Database } from '../database/database.types';
 import { loadInstrumentBands } from '../performance-bands/lib/load-instrument-bands';
+import { hydrateBandForStudent } from '../performance-bands/lib/hydrate-band-level';
 
 /** PerformanceBandInput (con thresholds) → vista mínima para la respuesta. */
 function toBandView(b: PerformanceBandInput): PerformanceBandView {
@@ -130,9 +151,7 @@ export class AssessmentReportService {
           scope.classGroupIds,
         );
         if (!hasScope) {
-          throw new ForbiddenException(
-            'No tiene acceso a los resultados de esta evaluación',
-          );
+          throw new ForbiddenException('No tiene acceso a los resultados de esta evaluación');
         }
       }
       if (query.classGroupId) {
@@ -140,6 +159,13 @@ export class AssessmentReportService {
         if (!ok) throw new ForbiddenException('No tiene acceso a ese curso');
       }
 
+      // Dos resoluciones del MISMO scope, para las dos capas del informe (mismo
+      // patrón y misma semántica que `ItemAnalysisService.getMatrix`):
+      //  · classGroupFilter → la capa agregable (read-model de cohorte, grano curso).
+      //  · studentFilter    → lo irreducible sobre `responses` (la discriminación
+      //    necesita el puntaje de cada alumno para partir la cohorte en 27%/27%).
+      // `null` significa lo mismo en ambas: scopeAll sin filtro.
+      const classGroupFilter = this.resolveAccessibleClassGroupIds(scope, query.classGroupId);
       const studentFilter = await this.resolveAccessibleStudentIds(
         tx,
         orgId,
@@ -190,6 +216,12 @@ export class AssessmentReportService {
       const bands = await loadInstrumentBands(tx, assessment.instrumentId);
       const bandView = bands.length > 0 ? bands.map(toBandView) : undefined;
 
+      // Resuelve la banda de cada alumno UNA vez, para que las 3 vistas que la usan
+      // (distribución, comparativa por curso, alumnos en foco) no la re-deriven cada
+      // una a su manera. Ver `hydrateBands`: para el dato granular es exactamente el
+      // `classifyByBands(percentage)` de siempre.
+      this.hydrateBands(evaluated, bands);
+
       const meta = {
         assessmentId: assessment.id,
         assessmentName: assessment.name,
@@ -201,29 +233,93 @@ export class AssessmentReportService {
         administeredAt: assessment.administeredAt,
         classGroups: reportClassGroups.map((c) => ({ id: c.id, name: c.name })),
         itemsCount: itemColumns.length,
+        dataGranularity: assessment.dataGranularity,
+        capabilities: [...capabilitiesFor(assessment.dataGranularity)],
+        hasItemLevelData: assessment.dataGranularity === 'item_level',
       };
+
+      // ── Capa agregable: ítems y habilidades ─────────────────────────────────
+      // Se resuelven ANTES del corte por "sin alumnos evaluados" porque no dependen
+      // de él: salen del read-model de cohorte, no de `assessment_results`. Un
+      // informe oficial se puede cargar SIN los niveles por alumno (§9.5 del plan:
+      // `students` es opcional en el importador, para no atar cada carga al OCR de
+      // la Figura 1) — y en ese caso ésta es toda la analítica que existe. Calcularla
+      // después del corte la habría tirado a la basura y devuelto un informe de ceros
+      // teniendo los datos en la mano.
+      const items = await this.buildItemAnalysis(
+        tx,
+        query.assessmentId,
+        itemColumns,
+        itemIds,
+        evaluated,
+        classGroupFilter,
+      );
+      const skills = await this.buildSkills(
+        tx,
+        query.assessmentId,
+        classGroupFilter,
+        assessment.gradingScaleConfig,
+        bands,
+      );
+      const highlights = this.buildHighlights(skills);
 
       // Caso sin alumnos evaluados: informe vacío pero bien formado.
       if (evaluated.length === 0) {
+        // Informe oficial cargado en modo agregado (sin niveles por alumno): no hay
+        // `assessment_results`, pero el logro global del curso y el N de la cohorte SÍ
+        // salen del read-model de ítems (Σ score_sum / Σ max_sum, y Σ del max de
+        // student_count por curso). Sin esto la síntesis ejecutiva (logro promedio,
+        // cobertura) saldría en blanco teniendo el dato agregado en la mano. La
+        // distribución por nivel sigue dependiendo del dato por alumno / de la Figura 1
+        // y queda fuera de esta capa. (Un informe agregado CON niveles por alumno cae
+        // en el camino normal de abajo, que ya distribuye por banda; ver spec §8.5.)
+        const aggregateAchievement: CohortOverallAchievement | null =
+          assessment.dataGranularity === 'aggregate_only'
+            ? await loadCohortOverallAchievement(tx, query.assessmentId, classGroupFilter)
+            : null;
+
+        // Distribución por nivel del informe agregado: desde `assessment_level_stats`
+        // (Gráfico 1 del informe oficial). Sin filas → se deja vacío como antes. La
+        // torta legacy (4 niveles) se deriva de las bandas vía `bandToLegacyLevel`.
+        const levelCounts =
+          assessment.dataGranularity === 'aggregate_only'
+            ? await loadCohortLevelCounts(tx, query.assessmentId, classGroupFilter)
+            : [];
+        const hasLevels = levelCounts.length > 0;
+        const aggregateDistribution = hasLevels
+          ? levelCountsToLegacyDistribution(levelCounts, bands)
+          : this.emptyDistribution();
+        const aggregateBandDistribution = hasLevels
+          ? levelCountsToBandDistribution(levelCounts, bands)
+          : [];
+
         return {
           meta,
-          summary: {
-            studentsEvaluated: 0,
-            studentsEnrolled,
-            coverageRate: studentsEnrolled > 0 ? 0 : null,
-            averageAchievement: null,
-            hasGradingScale,
-            averageGrade: null,
-            passingGrade,
-            passingRate: null,
-            performanceLevel: null,
-          },
-          distribution: this.emptyDistribution(),
-          ...(bandView ? { bands: bandView, bandDistribution: [] } : {}),
+          summary: aggregateAchievement
+            ? this.buildAggregateSummary(
+                aggregateAchievement,
+                studentsEnrolled,
+                passingGrade,
+                assessment.gradingScaleConfig,
+                bands,
+              )
+            : {
+                studentsEvaluated: 0,
+                studentsEnrolled,
+                coverageRate: studentsEnrolled > 0 ? 0 : null,
+                averageAchievement: null,
+                hasGradingScale,
+                averageGrade: null,
+                passingGrade,
+                passingRate: null,
+                performanceLevel: null,
+              },
+          distribution: aggregateDistribution,
+          ...(bandView ? { bands: bandView, bandDistribution: aggregateBandDistribution } : {}),
           courseComparison: [],
-          skills: [],
-          highlights: { strengths: [], gaps: [] },
-          items: itemColumns.map((c) => this.emptyItemRow(c)),
+          skills,
+          highlights,
+          items,
           studentsAtRisk: [],
           recommendations: [],
         };
@@ -249,43 +345,16 @@ export class AssessmentReportService {
         summary.averageAchievement,
       );
 
-      // ── Análisis psicométrico de ítems ──────────────────────────────────────
-      const items = await this.buildItemAnalysis(
-        tx,
-        query.assessmentId,
-        itemColumns,
-        itemIds,
-        evaluated,
-        studentFilter,
-      );
-
-      // ── Fortalezas y brechas por habilidad ──────────────────────────────────
-      const skills = await this.buildSkills(
-        tx,
-        query.assessmentId,
-        orgId,
-        studentFilter,
-        assessment.gradingScaleConfig,
-        bands,
-      );
-      const highlights = this.buildHighlights(skills);
-
       // ── Alumnos en foco ─────────────────────────────────────────────────────
       const studentsAtRisk = await this.buildRiskStudents(
         tx,
         query.assessmentId,
         evaluated,
         classGroupByStudent,
-        bands,
       );
 
       // ── Recomendaciones (reglas) ────────────────────────────────────────────
-      const recommendations = this.buildRecommendations(
-        summary,
-        skills,
-        items,
-        studentsAtRisk,
-      );
+      const recommendations = this.buildRecommendations(summary, skills, items, studentsAtRisk);
 
       return {
         meta,
@@ -306,6 +375,34 @@ export class AssessmentReportService {
   // Síntesis ejecutiva / distribución
   // ───────────────────────────────────────────────────────────────────────────
 
+  /**
+   * Resuelve, para cada alumno, la banda de logro del instrumento — y con datos
+   * agregados también su nivel legacy, que el importador deja NULL.
+   *
+   * Con dato granular esto es EXACTAMENTE lo de siempre: `classifyByBands` sobre el
+   * `percentage` del alumno. La rama nueva sólo puede tocar filas que hoy no aportan
+   * a ningún número, porque exige las tres condiciones a la vez: sin `percentage`,
+   * sin `performanceLevel` y con `performance_band_id`. Ésa es, por construcción, la
+   * fila que escribe el importador de informes oficiales (§6.3 del plan: `metric_type
+   * = 'band'`, `percentage` NULL) y nadie más.
+   *
+   * Sin esto, `student_levels` —capacidad que el modelo declara disponible con datos
+   * agregados— era mentira en este endpoint: la distribución por banda se derivaba
+   * re-clasificando `percentage`, que en un informe oficial es NULL, así que el
+   * gráfico principal salía en cero teniendo la banda de cada alumno guardada en la
+   * fila. Es el gráfico que el informe DIA existe para reproducir.
+   */
+  private hydrateBands(evaluated: EvaluatedStudent[], bands: PerformanceBandInput[]): void {
+    if (bands.length === 0) return;
+    for (const e of evaluated) {
+      // Núcleo por alumno compartido con CourseReportService (informe oficial):
+      // ver hydrateBandForStudent en performance-bands/lib.
+      const { band, performanceLevel } = hydrateBandForStudent(e, bands);
+      e.band = band;
+      e.performanceLevel = performanceLevel;
+    }
+  }
+
   private buildSummary(
     evaluated: EvaluatedStudent[],
     studentsEnrolled: number,
@@ -318,20 +415,16 @@ export class AssessmentReportService {
     // % de logro y el nivel de desempeño sí, porque no dependen de la escala.
     const hasGradingScale = passingGrade !== null;
 
-    const pcts = evaluated
-      .map((e) => e.percentage)
-      .filter((p): p is number => p !== null);
+    const pcts = evaluated.map((e) => e.percentage).filter((p): p is number => p !== null);
     const grades = evaluated.map((e) => e.grade).filter((g): g is number => g !== null);
 
     const averageAchievement = pcts.length > 0 ? avg(pcts) : null;
-    const averageGrade =
-      hasGradingScale && grades.length > 0 ? avg(grades) : null;
+    const averageGrade = hasGradingScale && grades.length > 0 ? avg(grades) : null;
     const passingRate =
       hasGradingScale && grades.length > 0
         ? (grades.filter((g) => g >= passingGrade!).length / grades.length) * 100
         : null;
-    const coverageRate =
-      studentsEnrolled > 0 ? (evaluated.length / studentsEnrolled) * 100 : null;
+    const coverageRate = studentsEnrolled > 0 ? (evaluated.length / studentsEnrolled) * 100 : null;
 
     const band =
       averageAchievement === null ? null : classifyByBands(averageAchievement / 100, bands);
@@ -357,9 +450,47 @@ export class AssessmentReportService {
     };
   }
 
-  private buildDistribution(
-    evaluated: EvaluatedStudent[],
-  ): PerformanceDistributionBucket[] {
+  /**
+   * Síntesis ejecutiva para un informe cargado en modo agregado (sin filas por
+   * alumno). El logro promedio y el N vienen del read-model de ítems; los campos de
+   * nota no aplican (un informe oficial no trae puntajes crudos). La distribución por
+   * nivel se resuelve aparte (queda vacía hasta cargar los niveles / la Figura 1).
+   */
+  private buildAggregateSummary(
+    aggregate: CohortOverallAchievement,
+    studentsEnrolled: number,
+    passingGrade: number | null,
+    scaleConfig: unknown,
+    bands: PerformanceBandInput[],
+  ) {
+    const hasGradingScale = passingGrade !== null;
+    const averageAchievement = aggregate.averageAchievement;
+    const studentsEvaluated = aggregate.studentsAssessed;
+    const coverageRate = studentsEnrolled > 0 ? (studentsEvaluated / studentsEnrolled) * 100 : null;
+    const band =
+      averageAchievement === null ? null : classifyByBands(averageAchievement / 100, bands);
+    return {
+      studentsEvaluated,
+      studentsEnrolled,
+      coverageRate,
+      averageAchievement,
+      hasGradingScale,
+      averageGrade: null,
+      passingGrade,
+      passingRate: null,
+      performanceLevel:
+        averageAchievement === null
+          ? null
+          : band
+            ? bandToLegacyLevel(band, bands)
+            : percentageToPerformanceLevel(averageAchievement / 100, {
+                config: scaleConfig as never,
+              }),
+      performanceBand: band ? toBandView(band) : null,
+    };
+  }
+
+  private buildDistribution(evaluated: EvaluatedStudent[]): PerformanceDistributionBucket[] {
     const counts = new Map<PerformanceLevel, number>();
     for (const e of evaluated) {
       if (!e.performanceLevel) continue;
@@ -372,7 +503,7 @@ export class AssessmentReportService {
     });
   }
 
-  /** Distribución por banda del instrumento (clasifica el % de cada alumno). */
+  /** Distribución por banda del instrumento (ver `hydrateBands`). */
   private buildBandDistribution(
     evaluated: EvaluatedStudent[],
     bands: PerformanceBandInput[],
@@ -380,10 +511,8 @@ export class AssessmentReportService {
     const counts = new Map<string, number>();
     let total = 0;
     for (const e of evaluated) {
-      if (e.percentage === null) continue;
-      const band = classifyByBands(e.percentage / 100, bands);
-      if (!band) continue;
-      counts.set(band.key, (counts.get(band.key) ?? 0) + 1);
+      if (!e.band) continue;
+      counts.set(e.band.key, (counts.get(e.band.key) ?? 0) + 1);
       total += 1;
     }
     return [...bands]
@@ -413,16 +542,17 @@ export class AssessmentReportService {
   ): AssessmentReportCourseRow[] {
     const byCourse = new Map<
       string,
-      { name: string; pcts: number[]; grades: number[]; critical: number }
+      { name: string; evaluated: number; pcts: number[]; grades: number[]; critical: number }
     >();
     for (const e of evaluated) {
       const cg = classGroupByStudent.get(e.studentId);
       if (!cg) continue;
       let entry = byCourse.get(cg.id);
       if (!entry) {
-        entry = { name: cg.name, pcts: [], grades: [], critical: 0 };
+        entry = { name: cg.name, evaluated: 0, pcts: [], grades: [], critical: 0 };
         byCourse.set(cg.id, entry);
       }
+      entry.evaluated += 1;
       if (e.percentage !== null) entry.pcts.push(e.percentage);
       if (e.grade !== null) entry.grades.push(e.grade);
       if (e.performanceLevel && AT_RISK_LEVELS.includes(e.performanceLevel)) {
@@ -436,14 +566,17 @@ export class AssessmentReportService {
       // TKT-04 — sin escala (passingGrade null) no hay tasa de aprobación por curso.
       const passingRate =
         passingGrade !== null && entry.grades.length > 0
-          ? (entry.grades.filter((g) => g >= passingGrade).length /
-              entry.grades.length) *
-            100
+          ? (entry.grades.filter((g) => g >= passingGrade).length / entry.grades.length) * 100
           : null;
       rows.push({
         classGroupId,
         classGroupName: entry.name,
-        studentsEvaluated: entry.pcts.length,
+        // Alumnos con resultado en el curso, NO los que traen `percentage`: un
+        // informe oficial entrega el nivel de cada alumno sin su %, y contar por
+        // `pcts` habría reportado "0 alumnos evaluados" en un curso con resultados.
+        // Es además la misma definición que `summary.studentsEvaluated`, que ya
+        // contaba filas; sólo pueden diferir donde hoy ya se contradicen en pantalla.
+        studentsEvaluated: entry.evaluated,
         averageAchievement,
         passingRate,
         criticalStudents: entry.critical,
@@ -455,9 +588,7 @@ export class AssessmentReportService {
     }
 
     // Mejor logro primero (los cursos al fondo de la lista son los que necesitan apoyo).
-    return rows.sort(
-      (a, b) => (b.averageAchievement ?? -1) - (a.averageAchievement ?? -1),
-    );
+    return rows.sort((a, b) => (b.averageAchievement ?? -1) - (a.averageAchievement ?? -1));
   }
 
   // ───────────────────────────────────────────────────────────────────────────
@@ -470,16 +601,23 @@ export class AssessmentReportService {
     itemColumns: ItemColumn[],
     itemIds: string[],
     evaluated: EvaluatedStudent[],
-    studentFilter: string[] | null,
+    classGroupFilter: string[] | null,
   ): Promise<AssessmentReportItemRow[]> {
     if (itemIds.length === 0) return [];
 
     // Distribución de respuestas por ítem y alternativa (1 query) → dificultad +
-    // distractor dominante.
-    const dist = await this.loadItemDistribution(db, assessmentId, itemIds, studentFilter);
+    // distractor dominante. Sale del read-model de cohorte, que ambos escritores
+    // pueblan (cálculo desde `responses` e importador de informes oficiales), así
+    // que este informe deja de ser el tercer lugar que hace su propio `GROUP BY`
+    // sobre `responses` — y funciona con las dos granularidades sin ramificar.
+    const stats = await this.loadItemCohortStats(db, assessmentId, itemIds, classGroupFilter);
 
-    // Discriminación: grupos alto/bajo (27%) por puntaje total. Sólo se calcula si
-    // hay alumnos suficientes en cada grupo.
+    // Discriminación: grupos alto/bajo (27%) por puntaje total. Es lo ÚNICO de esta
+    // sección que sigue en `responses`: partir la cohorte en 27% superior/inferior
+    // exige el puntaje de cada alumno, y eso no se deriva de conteos por curso. Con
+    // datos agregados `evaluated` no trae `percentage` → `sorted` vacío → groupSize 0
+    // → `discrimination: null` sin disparar ninguna query (y sin flag de baja
+    // discriminación, que sería un falso positivo). Ver `meta.hasItemLevelData`.
     const sorted = [...evaluated]
       .filter((e) => e.percentage !== null)
       .sort((a, b) => (b.percentage ?? 0) - (a.percentage ?? 0));
@@ -496,13 +634,19 @@ export class AssessmentReportService {
     }
 
     return itemColumns.map((col) => {
-      const d = dist.get(col.itemId);
-      const totalResponses = d?.totalResponses ?? 0;
-      const answeredCount = d?.answeredCount ?? 0;
+      const s = stats.get(col.itemId);
+      const answerCounts = s?.answerCounts ?? [];
+      const totalResponses = s?.responseCount ?? 0;
+      // El blanco es el bucket `key === null`; todo lo demás cuenta como respondido.
+      // Paridad con el `GROUP BY` que reemplaza: `response_count` = el `count(*)` de
+      // filas de respuesta, o sea los blancos siguen en el denominador.
+      const answeredCount = answerCounts.reduce(
+        (acc, b) => (b.key === null ? acc : acc + b.count),
+        0,
+      );
       const blankCount = totalResponses - answeredCount;
-      const correctCount = d?.correctCount ?? 0;
-      const difficulty =
-        totalResponses > 0 ? (correctCount / totalResponses) * 100 : null;
+      const correctCount = s?.correctCount ?? 0;
+      const difficulty = totalResponses > 0 ? (correctCount / totalResponses) * 100 : null;
 
       const top = topCorrect.get(col.itemId);
       const bottom = bottomCorrect.get(col.itemId);
@@ -511,12 +655,12 @@ export class AssessmentReportService {
         discrimination = top.correct / top.total - bottom.correct / bottom.total;
       }
 
-      const topDistractorKey = d?.topDistractorKey ?? null;
-      const topDistractorCount = d?.topDistractorCount ?? 0;
+      const { key: topDistractorKey, count: topDistractorCount } = this.pickTopDistractor(
+        col,
+        answerCounts,
+      );
       const topDistractorRate =
-        totalResponses > 0 && topDistractorKey
-          ? (topDistractorCount / totalResponses) * 100
-          : null;
+        totalResponses > 0 && topDistractorKey ? (topDistractorCount / totalResponses) * 100 : null;
 
       const flags = this.deriveItemFlags({
         difficulty,
@@ -543,6 +687,40 @@ export class AssessmentReportService {
     });
   }
 
+  /**
+   * Alternativa incorrecta más elegida del ítem, desde los buckets del read-model.
+   *
+   * ⚠️ Sólo aplica a ítems CON alternativas, y el predicado es el MISMO que usa el
+   * escritor del read-model (`result-aggregator.ts`): `content.alternatives` no vacío.
+   * En un ítem de desarrollo la clave del bucket no es una alternativa marcada sino la
+   * categoría por puntaje ('RC'|'RPC'|'RI'), así que sin este corte 'RI' pasaría por
+   * "distractor dominante" y dispararía `strong_distractor` en preguntas que no tienen
+   * distractores. Preserva exacto el comportamiento anterior: sobre `responses`, un
+   * ítem de desarrollo daba `answer = null` y nunca entraba al conteo de distractores.
+   *
+   * `isCorrect` es el del bucket (lo fija el calculador puro con la precedencia
+   * `correctKey ?? alt.isCorrect`), igual que el `coalesce(is_correct,false)` de la
+   * fila de respuesta que se usaba antes.
+   */
+  private pickTopDistractor(
+    col: ItemColumn,
+    answerCounts: AnswerCount[],
+  ): { key: string | null; count: number } {
+    if (!col.hasAlternatives) return { key: null, count: 0 };
+
+    const byKey = new Map<string, number>();
+    for (const bucket of answerCounts) {
+      if (bucket.key === null || bucket.isCorrect) continue;
+      byKey.set(bucket.key, (byKey.get(bucket.key) ?? 0) + bucket.count);
+    }
+
+    let best: { key: string | null; count: number } = { key: null, count: 0 };
+    for (const [key, count] of byKey) {
+      if (count > best.count) best = { key, count };
+    }
+    return best;
+  }
+
   private deriveItemFlags(input: {
     difficulty: number | null;
     discrimination: number | null;
@@ -556,10 +734,7 @@ export class AssessmentReportService {
     if (input.difficulty !== null && input.difficulty >= DIFFICULTY_EASY) {
       flags.push('easy');
     }
-    if (
-      input.discrimination !== null &&
-      input.discrimination < DISCRIMINATION_LOW
-    ) {
+    if (input.discrimination !== null && input.discrimination < DISCRIMINATION_LOW) {
       flags.push('low_discrimination');
     }
     // Distractor potente: una alternativa incorrecta atrae a más alumnos que la
@@ -574,52 +749,86 @@ export class AssessmentReportService {
   // Habilidades / fortalezas y brechas
   // ───────────────────────────────────────────────────────────────────────────
 
+  /**
+   * Logro por habilidad desde el read-model de cohorte (`assessment_skill_stats`),
+   * el mismo que leen los dashboards de habilidades y el heatmap desde la Fase 5 —
+   * de modo que el informe y el heatmap ya no pueden discrepar sobre el mismo eje.
+   *
+   * La aritmética de recombinación NO se reimplementa acá: vive una sola vez en
+   * `cohort-skill-stats.helper` (CLAUDE.md §4.2). Es un promedio PONDERADO por
+   * `studentCount`, y esa ponderación es justo lo que lo hace numéricamente neutro
+   * frente al `avg(skill_results.percentage)` que reemplaza: con `source='computed'`
+   * el `percentage` del read-model es, por decisión §9.2 del plan, la media de los
+   * porcentajes por alumno del curso, así que
+   *   Σ_alumnos pct / N  =  Σ_curso (pct_curso × n_curso) / Σ_curso n_curso.
+   * Un promedio simple de los cursos NO sería equivalente.
+   *
+   * `studentsAssessed` usa `max` por curso y se suma entre cursos (ver el helper).
+   * Un informe es SIEMPRE de una única evaluación, que es el caso donde `max`
+   * reproduce exacto el `count(distinct student_id)` anterior.
+   */
   private async buildSkills(
     db: Database,
     assessmentId: string,
-    orgId: string,
-    studentFilter: string[] | null,
+    classGroupFilter: string[] | null,
     scaleConfig: unknown,
     bands: PerformanceBandInput[],
   ): Promise<AssessmentReportSkillRow[]> {
-    if (studentFilter !== null && studentFilter.length === 0) return [];
+    if (classGroupFilter !== null && classGroupFilter.length === 0) return [];
 
     const conditions = [
-      eq(skillResults.assessmentId, assessmentId),
-      eq(students.orgId, orgId),
-      isNull(students.deletedAt),
+      eq(assessmentSkillStats.assessmentId, assessmentId),
       // TKT-05 — los descriptores no se reportan como habilidad/eje en resultados.
       notInArray(taxonomyNodes.type, [...RESULT_HIDDEN_NODE_TYPES]),
     ];
-    if (studentFilter !== null) {
-      conditions.push(inArray(skillResults.studentId, studentFilter));
+    if (classGroupFilter !== null) {
+      conditions.push(inArray(assessmentSkillStats.classGroupId, classGroupFilter));
     }
 
     const rows = await db
       .select({
-        nodeId: taxonomyNodes.id,
+        nodeId: assessmentSkillStats.nodeId,
         nodeName: taxonomyNodes.name,
         nodeType: sql<string>`${taxonomyNodes.type}::text`,
         nodeCode: taxonomyNodes.code,
-        avgPct: sql<string | null>`avg(${skillResults.percentage}::numeric)`,
-        studentsAssessed: sql<number>`count(distinct ${skillResults.studentId})::int`,
+        pctSum: COHORT_PCT_SUM,
+        pctWeight: COHORT_PCT_WEIGHT,
+        studentsAssessed: COHORT_STUDENTS_ASSESSED,
       })
-      .from(skillResults)
-      .innerJoin(taxonomyNodes, eq(taxonomyNodes.id, skillResults.nodeId))
-      .innerJoin(students, eq(students.id, skillResults.studentId))
+      .from(assessmentSkillStats)
+      .innerJoin(taxonomyNodes, eq(taxonomyNodes.id, assessmentSkillStats.nodeId))
       .where(and(...conditions))
-      .groupBy(taxonomyNodes.id, taxonomyNodes.name, taxonomyNodes.type, taxonomyNodes.code);
+      // El curso NO puede faltar del group by: es lo que hace correcto el `max` de
+      // COHORT_STUDENTS_ASSESSED, que después `addCohortRow` suma entre cursos.
+      .groupBy(
+        assessmentSkillStats.nodeId,
+        taxonomyNodes.name,
+        taxonomyNodes.type,
+        taxonomyNodes.code,
+        assessmentSkillStats.classGroupId,
+      );
 
-    const skills: AssessmentReportSkillRow[] = rows.map((r) => {
-      const averageAchievement = r.avgPct === null ? null : Number(r.avgPct);
+    const acc = new Map<string, CohortAccumulator>();
+    const meta = new Map<string, { nodeName: string; nodeType: string; nodeCode: string | null }>();
+    for (const r of rows) {
+      addCohortRow(acc, r.nodeId, r);
+      if (!meta.has(r.nodeId)) {
+        meta.set(r.nodeId, {
+          nodeName: r.nodeName,
+          nodeType: r.nodeType,
+          nodeCode: r.nodeCode ?? null,
+        });
+      }
+    }
+
+    const skills: AssessmentReportSkillRow[] = [...acc.entries()].map(([nodeId, a]) => {
+      const averageAchievement = cohortAverage(a);
       const band =
         averageAchievement === null ? null : classifyByBands(averageAchievement / 100, bands);
       return {
-        nodeId: r.nodeId,
-        nodeName: r.nodeName,
-        nodeType: r.nodeType,
-        nodeCode: r.nodeCode ?? null,
-        studentsAssessed: Number(r.studentsAssessed),
+        nodeId,
+        ...meta.get(nodeId)!,
+        studentsAssessed: a.studentsAssessed,
         averageAchievement,
         performanceLevel:
           averageAchievement === null
@@ -634,9 +843,7 @@ export class AssessmentReportService {
     });
 
     // Brechas primero (menor logro). Habilidades sin datos al final.
-    return skills.sort(
-      (a, b) => (a.averageAchievement ?? 101) - (b.averageAchievement ?? 101),
-    );
+    return skills.sort((a, b) => (a.averageAchievement ?? 101) - (b.averageAchievement ?? 101));
   }
 
   private buildHighlights(skills: AssessmentReportSkillRow[]): {
@@ -662,7 +869,6 @@ export class AssessmentReportService {
     assessmentId: string,
     evaluated: EvaluatedStudent[],
     classGroupByStudent: Map<string, { id: string; name: string }>,
-    bands: PerformanceBandInput[],
   ): Promise<AssessmentReportRiskStudent[]> {
     const atRisk = evaluated
       .filter((e) => e.performanceLevel && AT_RISK_LEVELS.includes(e.performanceLevel))
@@ -678,7 +884,7 @@ export class AssessmentReportService {
     );
 
     return atRisk.map((e) => {
-      const band = e.percentage === null ? null : classifyByBands(e.percentage / 100, bands);
+      const band = e.band;
       return {
         studentId: e.studentId,
         studentRut: e.studentRut,
@@ -721,7 +927,10 @@ export class AssessmentReportService {
     // 2. Revisar ítems con baja discriminación (posible problema de la pregunta).
     const flagged = items.filter((i) => i.flags.includes('low_discrimination'));
     if (flagged.length > 0) {
-      const positions = flagged.slice(0, 5).map((i) => `N°${i.position}`).join(', ');
+      const positions = flagged
+        .slice(0, 5)
+        .map((i) => `N°${i.position}`)
+        .join(', ');
       recs.push({
         type: 'review_item',
         priority: 'medium',
@@ -739,10 +948,7 @@ export class AssessmentReportService {
     }
 
     // 4. Celebrar fortalezas si el desempeño global es bueno.
-    if (
-      summary.performanceLevel === 'adequate' ||
-      summary.performanceLevel === 'advanced'
-    ) {
+    if (summary.performanceLevel === 'adequate' || summary.performanceLevel === 'advanced') {
       const strength = skills.filter((s) => s.averageAchievement !== null).at(-1);
       recs.push({
         type: 'celebrate',
@@ -761,10 +967,7 @@ export class AssessmentReportService {
   // ───────────────────────────────────────────────────────────────────────────
 
   /** Ítems del instrumento + skill/content representativos. */
-  private async loadItemColumns(
-    db: Database,
-    instrumentId: string,
-  ): Promise<ItemColumn[]> {
+  private async loadItemColumns(db: Database, instrumentId: string): Promise<ItemColumn[]> {
     const rows = await db
       .select({
         itemId: items.id,
@@ -787,6 +990,7 @@ export class AssessmentReportService {
         skillName: refs.skill,
         contentName: refs.contentRef,
         correctKey: this.deriveCorrectKey(content),
+        hasAlternatives: Array.isArray(content.alternatives) && content.alternatives.length > 0,
       };
     });
   }
@@ -855,7 +1059,12 @@ export class AssessmentReportService {
         lastName: students.lastName,
         percentage: assessmentResults.percentage,
         grade: assessmentResults.grade,
+        // Decide la prioridad de `hydrateBands`: 'band' → nivel desde la banda.
+        metricType: assessmentResults.metricType,
         performanceLevel: assessmentResults.performanceLevel,
+        // Sólo lo usa `hydrateBands`, y sólo cuando no hay `percentage` que
+        // clasificar: es la banda que el informe oficial trae ya decidida.
+        performanceBandId: assessmentResults.performanceBandId,
       })
       .from(assessmentResults)
       .innerJoin(students, eq(students.id, assessmentResults.studentId))
@@ -868,7 +1077,10 @@ export class AssessmentReportService {
       lastName: r.lastName,
       percentage: r.percentage === null ? null : Number(r.percentage),
       grade: r.grade === null ? null : Number(r.grade),
+      metricType: r.metricType,
       performanceLevel: r.performanceLevel,
+      performanceBandId: r.performanceBandId ?? null,
+      band: null,
     }));
   }
 
@@ -946,10 +1158,7 @@ export class AssessmentReportService {
   }
 
   /** Matriculados (distinct) en los cursos dados — base de la cobertura. */
-  private async countEnrolled(
-    db: Database,
-    classGroupIds: string[],
-  ): Promise<number> {
+  private async countEnrolled(db: Database, classGroupIds: string[]): Promise<number> {
     if (classGroupIds.length === 0) return 0;
     const [row] = await db
       .select({
@@ -958,94 +1167,68 @@ export class AssessmentReportService {
       .from(studentEnrollments)
       .innerJoin(students, eq(students.id, studentEnrollments.studentId))
       .where(
-        and(
-          inArray(studentEnrollments.classGroupId, classGroupIds),
-          isNull(students.deletedAt),
-        ),
+        and(inArray(studentEnrollments.classGroupId, classGroupIds), isNull(students.deletedAt)),
       );
     return Number(row?.total ?? 0);
   }
 
   /**
-   * Distribución de respuestas por ítem y alternativa (1 query group by).
-   * Devuelve por ítem: total, respondidas (no en blanco), aciertos y el distractor
-   * (alternativa incorrecta) más elegido.
+   * Filas del read-model de cohorte (`assessment_item_stats`) recombinadas por ítem
+   * (1 query). Devuelve por ítem: respuestas, aciertos y la distribución de buckets.
+   *
+   * ⚠️ Las cohortes se juntan SUMANDO conteos — nunca promediando porcentajes: los
+   * cursos tienen distinto N y el promedio de porcentajes sería incorrecto (§2.2 del
+   * plan). `mergeAnswerCounts` es la primitiva compartida del calculador puro, la
+   * misma que usan `item-analysis` y `official-reports`; acá sólo se la alimenta.
+   *
+   * El filtro es por CURSO y no por alumno porque ése es el grano del read-model. Es
+   * el mismo scope: `resolveAccessibleStudentIds` deriva sus alumnos de esos mismos
+   * cursos vía `student_enrollments` (§2.4), así que la cohorte no cambia.
    */
-  private async loadItemDistribution(
+  private async loadItemCohortStats(
     db: Database,
     assessmentId: string,
     itemIds: string[],
-    studentFilter: string[] | null,
-  ): Promise<Map<string, ItemDistribution>> {
-    const result = new Map<string, ItemDistribution>();
+    classGroupFilter: string[] | null,
+  ): Promise<Map<string, ItemCohortRow>> {
+    const result = new Map<string, ItemCohortRow>();
     if (itemIds.length === 0) return result;
-    if (studentFilter !== null && studentFilter.length === 0) return result;
+    if (classGroupFilter !== null && classGroupFilter.length === 0) return result;
 
     const conditions = [
-      eq(responses.assessmentId, assessmentId),
-      inArray(responses.itemId, itemIds),
+      eq(assessmentItemStats.assessmentId, assessmentId),
+      inArray(assessmentItemStats.itemId, itemIds),
     ];
-    if (studentFilter !== null) {
-      conditions.push(inArray(responses.studentId, studentFilter));
+    if (classGroupFilter !== null) {
+      conditions.push(inArray(assessmentItemStats.classGroupId, classGroupFilter));
     }
-
-    const answerExpr = sql<
-      string | null
-    >`nullif(coalesce(${responses.value}->>'raw', ${responses.value}->>'key', ${responses.value}->>'answer'), '')`;
 
     const rows = await db
       .select({
-        itemId: responses.itemId,
-        answer: answerExpr,
-        isCorrect: sql<boolean>`coalesce(${responses.isCorrect}, false)`,
-        count: sql<number>`count(*)::int`,
+        itemId: assessmentItemStats.itemId,
+        responseCount: assessmentItemStats.responseCount,
+        correctCount: assessmentItemStats.correctCount,
+        answerCounts: assessmentItemStats.answerCounts,
       })
-      .from(responses)
-      .where(and(...conditions))
-      .groupBy(responses.itemId, answerExpr, responses.isCorrect);
+      .from(assessmentItemStats)
+      .where(and(...conditions));
 
-    // Acumular por ítem: total, respondidas, aciertos y mejor distractor.
-    const distractorByItem = new Map<string, Map<string, number>>();
+    // Agrupar las cohortes por ítem antes de recombinar sus distribuciones.
+    const bucketsByItem = new Map<string, AnswerCount[][]>();
     for (const r of rows) {
-      const count = Number(r.count);
       let entry = result.get(r.itemId);
       if (!entry) {
-        entry = {
-          totalResponses: 0,
-          answeredCount: 0,
-          correctCount: 0,
-          topDistractorKey: null,
-          topDistractorCount: 0,
-        };
+        entry = { responseCount: 0, correctCount: 0, answerCounts: [] };
         result.set(r.itemId, entry);
+        bucketsByItem.set(r.itemId, []);
       }
-      entry.totalResponses += count;
-      if (r.answer !== null) entry.answeredCount += count;
-      if (r.isCorrect === true) {
-        entry.correctCount += count;
-      } else if (r.answer !== null) {
-        // Distractor: alternativa marcada e incorrecta.
-        const map = distractorByItem.get(r.itemId) ?? new Map<string, number>();
-        map.set(r.answer, (map.get(r.answer) ?? 0) + count);
-        distractorByItem.set(r.itemId, map);
-      }
+      entry.responseCount += Number(r.responseCount);
+      entry.correctCount += Number(r.correctCount);
+      bucketsByItem.get(r.itemId)!.push(r.answerCounts ?? []);
     }
-
-    for (const [itemId, map] of distractorByItem) {
-      const entry = result.get(itemId);
-      if (!entry) continue;
-      let bestKey: string | null = null;
-      let bestCount = 0;
-      for (const [key, count] of map) {
-        if (count > bestCount) {
-          bestKey = key;
-          bestCount = count;
-        }
-      }
-      entry.topDistractorKey = bestKey;
-      entry.topDistractorCount = bestCount;
+    for (const [itemId, buckets] of bucketsByItem) {
+      result.get(itemId)!.answerCounts = mergeAnswerCounts(buckets);
     }
-
     return result;
   }
 
@@ -1160,6 +1343,7 @@ export class AssessmentReportService {
     administeredAt: Date | null;
     gradingScaleId: string | null;
     gradingScaleConfig: unknown;
+    dataGranularity: DataGranularity;
   }> {
     const [row] = await db
       .select({
@@ -1171,6 +1355,7 @@ export class AssessmentReportService {
         instrumentType: sql<string>`${instruments.type}::text`,
         subjectName: subjects.name,
         administeredAt: assessments.administeredAt,
+        dataGranularity: assessments.dataGranularity,
         gradingScaleId: instruments.gradingScaleId,
         gradingScaleConfig: gradingScales.config,
       })
@@ -1194,6 +1379,7 @@ export class AssessmentReportService {
       administeredAt: row.administeredAt,
       gradingScaleId: row.gradingScaleId,
       gradingScaleConfig: row.gradingScaleConfig,
+      dataGranularity: row.dataGranularity as DataGranularity,
     };
   }
 
@@ -1215,12 +1401,7 @@ export class AssessmentReportService {
       .from(teacherAssignments)
       .innerJoin(subjectClasses, eq(subjectClasses.id, teacherAssignments.subjectClassId))
       .innerJoin(classGroups, eq(classGroups.id, subjectClasses.classGroupId))
-      .where(
-        and(
-          eq(teacherAssignments.userId, user.userId),
-          eq(classGroups.orgId, orgId),
-        ),
-      );
+      .where(and(eq(teacherAssignments.userId, user.userId), eq(classGroups.orgId, orgId)));
 
     const ids = Array.from(new Set(rows.map((r) => r.classGroupId)));
     return { scopeAll: false, classGroupIds: ids };
@@ -1262,6 +1443,32 @@ export class AssessmentReportService {
     return scope.classGroupIds.includes(classGroupId);
   }
 
+  /**
+   * classGroupIds visibles combinando scope + filtro por curso. `null` = scopeAll sin
+   * filtro (sin filtro extra de curso).
+   *
+   * Es el scope de la capa AGREGABLE (read-model de cohorte, grano por curso). Espeja
+   * `resolveAccessibleStudentIds` —el de la capa granular— para que ambas resuelvan
+   * la MISMA cohorte: los alumnos de aquélla salen de estos mismos cursos vía
+   * `student_enrollments` (§2.4 del plan). Idéntico a `ItemAnalysisService`.
+   */
+  private resolveAccessibleClassGroupIds(
+    scope: ScopeResult,
+    classGroupId: string | undefined,
+  ): string[] | null {
+    if (scope.scopeAll && !classGroupId) return null;
+    if (scope.scopeAll) return [classGroupId!];
+    if (classGroupId) {
+      return scope.classGroupIds.includes(classGroupId) ? [classGroupId] : [];
+    }
+    return scope.classGroupIds;
+  }
+
+  /**
+   * studentIds visibles combinando scope + filtro por curso. `null` = scopeAll sin
+   * filtro. Sólo para lo irreducible sobre `responses` (la discriminación); la capa
+   * agregable usa `resolveAccessibleClassGroupIds`.
+   */
   private async resolveAccessibleStudentIds(
     db: Database,
     orgId: string,
@@ -1319,24 +1526,6 @@ export class AssessmentReportService {
       percentage: 0,
     }));
   }
-
-  private emptyItemRow(col: ItemColumn): AssessmentReportItemRow {
-    return {
-      itemId: col.itemId,
-      position: col.position,
-      skillName: col.skillName,
-      contentName: col.contentName,
-      correctKey: col.correctKey,
-      answeredCount: 0,
-      blankCount: 0,
-      totalResponses: 0,
-      difficulty: null,
-      discrimination: null,
-      topDistractorKey: null,
-      topDistractorRate: null,
-      flags: [],
-    };
-  }
 }
 
 // ── Tipos internos ────────────────────────────────────────────────────────────
@@ -1348,7 +1537,14 @@ type EvaluatedStudent = {
   lastName: string;
   percentage: number | null;
   grade: number | null;
+  /** Decide la prioridad de hidratación: `'band'` deriva el nivel de la banda. */
+  metricType: MetricType;
+  /** Con datos agregados lo rellena `hydrateBands` desde la banda del informe. */
   performanceLevel: PerformanceLevel | null;
+  /** `performance_bands.id` de la fila; sólo viene con `metric_type='band'`. */
+  performanceBandId: string | null;
+  /** Banda resuelta por `hydrateBands`. */
+  band: PerformanceBandInput | null;
 };
 
 type ItemColumn = {
@@ -1357,14 +1553,19 @@ type ItemColumn = {
   skillName: string | null;
   contentName: string | null;
   correctKey: string | null;
+  /**
+   * ¿El ítem ofrece alternativas? Predicado idéntico al del escritor del read-model
+   * (`result-aggregator.ts`), del que depende que 'RC'/'RPC'/'RI' sean las claves de
+   * bucket de un ítem de desarrollo. Ver `pickTopDistractor`.
+   */
+  hasAlternatives: boolean;
 };
 
-type ItemDistribution = {
-  totalResponses: number;
-  answeredCount: number;
+/** Fila del read-model de cohorte ya recombinada entre los cursos del scope. */
+type ItemCohortRow = {
+  responseCount: number;
   correctCount: number;
-  topDistractorKey: string | null;
-  topDistractorCount: number;
+  answerCounts: AnswerCount[];
 };
 
 function avg(values: number[]): number {

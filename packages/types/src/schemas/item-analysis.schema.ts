@@ -165,6 +165,8 @@ export type AlternativeDistribution = {
   isCorrect: boolean;
   count: number; // nº de alumnos que la eligió
   percentage: number; // 0..100, proporción del total de respuestas
+  /** La alternativa ES una imagen: la vista la muestra vía /items/{id}/alternativa/{key}/figura. */
+  hasImage: boolean;
 };
 
 /**
@@ -185,6 +187,8 @@ export type QuestionTaxonomyTag = {
 export type QuestionSectionAttachment = {
   kind: string; // image | audio | pdf | other
   url: string | null; // null si aún no se sube el archivo a S3
+  /** Storage key en S3 (null si aún no se sube). La vista arma la ruta de imagen con esto. */
+  storageKey: string | null;
   fileName: string | null;
   mimeType: string | null;
   note: string | null;
@@ -210,6 +214,9 @@ export type QuestionAnalysisResponse = {
   type: string; // item_type
   stem: string | null; // enunciado
   imageUrl: string | null;
+  /** ¿El ítem tiene una figura asociada (archivo en `files`)? La imagen se sirve
+   *  por `/items/{itemId}/figura`, no por URL en el payload (las presigned caducan). */
+  hasFigure: boolean;
   explanation: string | null;
   correctKey: string | null;
   skill: ItemTaxonomyRef | null; // habilidad principal (representativo, compat)

@@ -1,4 +1,5 @@
 import {
+  ConflictException,
   ForbiddenException,
   Injectable,
   NotFoundException,
@@ -10,7 +11,6 @@ import {
   classGroups,
   gradingScales,
   instruments,
-  itemTaxonomyTags,
   items,
   organizations,
   performanceBands,
@@ -24,14 +24,15 @@ import {
   withOrgContext,
 } from '@soe/db';
 import {
+  CAPABILITY_UNAVAILABLE_CODE,
   RESULTS_VIEWER_ROLES,
-  aggregateSkillResults,
-  aggregateStudentResults,
+  capabilityUnavailableMessage,
   userHasAnyRole,
   type AssessmentResultModel,
   type AssessmentResultsListResponse,
   type CalculateAssessmentResultsRequestDto,
   type CalculateAssessmentResultsResponse,
+  type DataGranularity,
   type GradingScaleParams,
   type ListAssessmentResultsQueryDto,
   type PerformanceBandView,
@@ -43,10 +44,12 @@ import {
 } from '@soe/types';
 import type { JwtPayload } from '../auth/jwt-payload.types';
 import { InjectDb, type Database } from '../database/database.types';
+import { defaultLinearChileanScale } from './lib/result-aggregator';
 import {
-  defaultLinearChileanScale,
-  toResponseForCalculation,
-} from './lib/result-aggregator';
+  RECOMPUTE_FROM_RESPONSES_POLICY,
+  loadResponsesForPersist,
+  persistAssessmentResults,
+} from './lib/persist-results';
 import { loadInstrumentBands } from '../performance-bands/lib/load-instrument-bands';
 
 // Roles "administrativos" — ven todos los cursos de la org. Cualquier otro rol
@@ -98,6 +101,21 @@ export class AssessmentResultsService {
     return withOrgContext(this.db, orgId, async (tx) => {
       const assessment = await this.requireAssessmentOwnedByUser(tx, user, assessmentId);
 
+      // Un assessment `aggregate_only` no tiene `responses` que recalcular: sus
+      // niveles vinieron dados por el informe oficial. Recalcularlo sería un
+      // delete + reinsert que arrasa con lo importado (el early-return de
+      // computeAndPersist lo salva sólo mientras haya CERO responses — con
+      // responses parciales, no).
+      if (assessment.dataGranularity === 'aggregate_only') {
+        throw new ConflictException({
+          statusCode: 409,
+          error: 'CapabilityUnavailable',
+          code: CAPABILITY_UNAVAILABLE_CODE,
+          capability: 'student_matrix',
+          message: `${capabilityUnavailableMessage('student_matrix')} Sus resultados no se recalculan.`,
+        });
+      }
+
       // Teacher scoping: si el caller no tiene roles administrativos y no es
       // platform_admin, debe ser teacher con al menos un course assignment que
       // toque algún curso elegible. Si no, 403.
@@ -133,21 +151,9 @@ export class AssessmentResultsService {
     instrumentId: string,
     scale: GradingScaleParams,
   ): Promise<CalculateAssessmentResultsResponse> {
-    const responseRows = await tx
-      .select({
-        studentId: responses.studentId,
-        itemId: responses.itemId,
-        isCorrect: responses.isCorrect,
-        rawScore: responses.rawScore,
-        finalScore: responses.finalScore,
-        maxScore: responses.maxScore,
-        itemPosition: items.position,
-      })
-      .from(responses)
-      .innerJoin(items, eq(items.id, responses.itemId))
-      .where(eq(responses.assessmentId, assessmentId));
+    const computed = await loadResponsesForPersist(tx, assessmentId);
 
-    if (responseRows.length === 0) {
+    if (computed.length === 0) {
       return {
         assessmentId,
         resultsCreated: 0,
@@ -158,20 +164,12 @@ export class AssessmentResultsService {
       };
     }
 
-    const tagsByItemId = await this.loadTagsByItemId(
-      tx,
-      Array.from(new Set(responseRows.map((r) => r.itemId))),
-    );
-
     // Bandas de logro del instrumento (fuente de verdad del nivel por
     // instrumento). Corre dentro de withOrgContext → RLS trae globales + org.
     const bands = await loadInstrumentBands(tx, instrumentId);
 
-    const computed = toResponseForCalculation(responseRows, tagsByItemId);
-    const studentAggregates = aggregateStudentResults(computed, scale, bands);
-    const skillAggregates = aggregateSkillResults(computed, scale, bands);
-
-    // Cuántos resultados previos había — define created vs updated.
+    // Cuántos resultados previos había — define created vs updated. Va ANTES del
+    // delete + reinsert que hace persistAssessmentResults.
     const [{ priorResults, priorSkillResults }] = await tx
       .select({
         priorResults: sql<number>`(select count(*)::int from ${assessmentResults} where ${assessmentResults.assessmentId} = ${assessmentId})`,
@@ -179,42 +177,14 @@ export class AssessmentResultsService {
       })
       .from(sql`(values (1)) as _`);
 
-    // Recálculo = delete + reinsert. Las tablas no tienen deletedAt.
-    await tx.delete(assessmentResults).where(eq(assessmentResults.assessmentId, assessmentId));
-    await tx.delete(skillResults).where(eq(skillResults.assessmentId, assessmentId));
-
-    if (studentAggregates.length > 0) {
-      const now = new Date();
-      await tx.insert(assessmentResults).values(
-        studentAggregates.map((a) => ({
-          assessmentId,
-          studentId: a.studentId,
-          totalScore: a.totalScore.toFixed(2),
-          maxScore: a.maxScore.toFixed(2),
-          percentage: (a.percentage * 100).toFixed(2),
-          grade: a.grade.toFixed(2),
-          performanceBandId: a.performanceBandId ?? null,
-          performanceLevel: a.performanceLevel,
-          isComplete: a.isComplete,
-          completedAt: a.isComplete ? now : null,
-        })),
-      );
-    }
-
-    if (skillAggregates.length > 0) {
-      await tx.insert(skillResults).values(
-        skillAggregates.map((a) => ({
-          assessmentId,
-          studentId: a.studentId,
-          nodeId: a.nodeId,
-          correctCount: a.correctCount,
-          totalCount: a.totalCount,
-          percentage: (a.percentage * 100).toFixed(2),
-          performanceBandId: a.performanceBandId ?? null,
-          performanceLevel: a.performanceLevel,
-        })),
-      );
-    }
+    const { studentAggregates, skillAggregates } = await persistAssessmentResults(tx, {
+      assessmentId,
+      responses: computed,
+      scale,
+      bands,
+      now: new Date(),
+      policy: RECOMPUTE_FROM_RESPONSES_POLICY,
+    });
 
     return {
       assessmentId,
@@ -235,33 +205,47 @@ export class AssessmentResultsService {
    *
    * Recorre org por org dentro de `withOrgContext` (RLS aísla cada tenant). Las
    * `organizations` no tienen RLS, así que se enumeran directamente.
+   *
+   * Los assessments `aggregate_only` se SALTAN y se reportan en
+   * `assessmentsSkipped`. No tienen `percentage` que reclasificar (el nivel vino
+   * dado por el informe oficial) y el delete + reinsert los borraría. Se reporta en
+   * vez de lanzar: es un recálculo masivo cross-org y no puede fallar entero por uno.
    */
-  async recalculateByInstrument(
-    instrumentId: string,
-  ): Promise<{ assessmentsRecalculated: number; orgsAffected: number; studentsProcessed: number }> {
+  async recalculateByInstrument(instrumentId: string): Promise<{
+    assessmentsRecalculated: number;
+    orgsAffected: number;
+    studentsProcessed: number;
+    assessmentsSkipped: string[];
+  }> {
     const orgs = await this.db.select({ id: organizations.id }).from(organizations);
 
     let assessmentsRecalculated = 0;
     let studentsProcessed = 0;
     let orgsAffected = 0;
+    const assessmentsSkipped: string[] = [];
 
     for (const org of orgs) {
       const summary = await withOrgContext(this.db, org.id, async (tx) => {
         const rows = await tx
-          .select({ id: assessments.id })
+          .select({ id: assessments.id, dataGranularity: assessments.dataGranularity })
           .from(assessments)
           .where(and(eq(assessments.instrumentId, instrumentId), eq(assessments.orgId, org.id)));
-        if (rows.length === 0) return { assessments: 0, students: 0 };
+        if (rows.length === 0) return { assessments: 0, students: 0, skipped: [] as string[] };
+
+        const recalculable = rows.filter((a) => a.dataGranularity !== 'aggregate_only');
+        const skipped = rows.filter((a) => a.dataGranularity === 'aggregate_only').map((a) => a.id);
+        if (recalculable.length === 0) return { assessments: 0, students: 0, skipped };
 
         const scale = await this.resolveInstrumentScaleOrDefault(tx, instrumentId);
         let students = 0;
-        for (const a of rows) {
+        for (const a of recalculable) {
           const res = await this.computeAndPersist(tx, a.id, instrumentId, scale);
           students += res.studentsProcessed;
         }
-        return { assessments: rows.length, students };
+        return { assessments: recalculable.length, students, skipped };
       });
 
+      assessmentsSkipped.push(...summary.skipped);
       if (summary.assessments > 0) {
         orgsAffected += 1;
         assessmentsRecalculated += summary.assessments;
@@ -269,7 +253,7 @@ export class AssessmentResultsService {
       }
     }
 
-    return { assessmentsRecalculated, orgsAffected, studentsProcessed };
+    return { assessmentsRecalculated, orgsAffected, studentsProcessed, assessmentsSkipped };
   }
 
   // ───────────────────────────────────────────────────────────────────────────
@@ -558,9 +542,7 @@ export class AssessmentResultsService {
         })
         .from(responses)
         .innerJoin(items, eq(items.id, responses.itemId))
-        .where(
-          and(eq(responses.assessmentId, assessmentId), eq(responses.studentId, studentId)),
-        )
+        .where(and(eq(responses.assessmentId, assessmentId), eq(responses.studentId, studentId)))
         .orderBy(items.position);
 
       return {
@@ -613,10 +595,7 @@ export class AssessmentResultsService {
       .innerJoin(subjectClasses, eq(subjectClasses.id, teacherAssignments.subjectClassId))
       .innerJoin(classGroups, eq(classGroups.id, subjectClasses.classGroupId))
       .where(
-        and(
-          eq(teacherAssignments.userId, user.userId),
-          eq(classGroups.orgId, assessmentOrgId),
-        ),
+        and(eq(teacherAssignments.userId, user.userId), eq(classGroups.orgId, assessmentOrgId)),
       );
 
     const ids = Array.from(new Set(rows.map((r) => r.classGroupId)));
@@ -684,12 +663,18 @@ export class AssessmentResultsService {
     tx: Database,
     user: JwtPayload,
     assessmentId: string,
-  ): Promise<{ id: string; orgId: string; instrumentId: string }> {
+  ): Promise<{
+    id: string;
+    orgId: string;
+    instrumentId: string;
+    dataGranularity: DataGranularity;
+  }> {
     const [row] = await tx
       .select({
         id: assessments.id,
         orgId: assessments.orgId,
         instrumentId: assessments.instrumentId,
+        dataGranularity: assessments.dataGranularity,
       })
       .from(assessments)
       .where(eq(assessments.id, assessmentId))
@@ -779,25 +764,6 @@ export class AssessmentResultsService {
     };
   }
 
-  private async loadTagsByItemId(
-    tx: Database,
-    itemIds: string[],
-  ): Promise<Map<string, string[]>> {
-    if (itemIds.length === 0) return new Map();
-    const rows = await tx
-      .select({ itemId: itemTaxonomyTags.itemId, nodeId: itemTaxonomyTags.nodeId })
-      .from(itemTaxonomyTags)
-      .where(inArray(itemTaxonomyTags.itemId, itemIds));
-
-    const map = new Map<string, string[]>();
-    for (const r of rows) {
-      const list = map.get(r.itemId) ?? [];
-      list.push(r.nodeId);
-      map.set(r.itemId, list);
-    }
-    return map;
-  }
-
   private toAssessmentResultModel(r: {
     id: string;
     assessmentId: string;
@@ -880,7 +846,10 @@ export class AssessmentResultsService {
    */
   private extractRawAnswer(value: Record<string, unknown>): string | null {
     if (!value || typeof value !== 'object') return null;
-    const raw = (value as Record<string, unknown>).raw ?? (value as Record<string, unknown>).key ?? (value as Record<string, unknown>).answer;
+    const raw =
+      (value as Record<string, unknown>).raw ??
+      (value as Record<string, unknown>).key ??
+      (value as Record<string, unknown>).answer;
     if (raw == null) return null;
     return typeof raw === 'string' ? raw : String(raw);
   }

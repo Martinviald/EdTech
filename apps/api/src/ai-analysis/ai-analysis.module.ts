@@ -16,6 +16,7 @@ import { InstrumentComparisonController } from './instrument-comparison.controll
 import { InstrumentComparisonRunner } from './instrument-comparison.runner';
 import { InstrumentComparisonSnapshotService } from './instrument-comparison.snapshot';
 import { FeatureGuard } from '../common/guards/feature.guard';
+import { CapabilityGuard } from '../common/guards/capability.guard';
 
 /**
  * Motor IA base (H19.23) + informe IA de evaluación (F2 S1, E20) + análisis IA
@@ -26,11 +27,7 @@ import { FeatureGuard } from '../common/guards/feature.guard';
  */
 @Module({
   imports: [LlmModule, JobsModule, AssessmentReportModule, ItemAnalysisModule],
-  controllers: [
-    AiAnalysisController,
-    ItemInsightController,
-    InstrumentComparisonController,
-  ],
+  controllers: [AiAnalysisController, ItemInsightController, InstrumentComparisonController],
   providers: [
     AiAnalysisService,
     AiAnalysisRunner,
@@ -40,6 +37,7 @@ import { FeatureGuard } from '../common/guards/feature.guard';
     InstrumentComparisonRunner,
     InstrumentComparisonSnapshotService,
     FeatureGuard,
+    CapabilityGuard,
   ],
   exports: [AiAnalysisService],
 })

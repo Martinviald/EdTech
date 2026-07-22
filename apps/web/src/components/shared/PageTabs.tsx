@@ -4,6 +4,7 @@ import type { ReactNode } from 'react';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import type { Route } from 'next';
+import { Info } from 'lucide-react';
 
 import { cn } from '@/lib/utils';
 import { TopProgressBar } from './TopProgressBar';
@@ -22,6 +23,16 @@ export type PageTab = {
   count?: number;
   /** Activa solo con match exacto de ruta; por defecto también hace match de subrutas. */
   exact?: boolean;
+  /**
+   * La pestaña existe para el rol pero su contenido no aplica al dato actual
+   * (p. ej. una evaluación sin `psychometrics` en sus `capabilities`). Se
+   * renderiza apagada y sin enlace en vez de ocultarse: la forma del hub no
+   * cambia de un registro a otro y el usuario no queda buscando una pestaña
+   * que "desapareció".
+   */
+  disabled?: boolean;
+  /** Motivo de la deshabilitación, tal como lo manda el backend. Obligatorio si `disabled`. */
+  disabledReason?: string;
 };
 
 interface PageTabsProps {
@@ -61,6 +72,23 @@ export function PageTabs({ tabs, sticky = false, className }: PageTabsProps) {
         const active = tab.exact
           ? activePath === tab.href
           : activePath === tab.href || activePath.startsWith(`${tab.href}/`);
+
+        if (tab.disabled) {
+          return (
+            <span
+              key={tab.href}
+              aria-disabled
+              title={tab.disabledReason}
+              className="inline-flex cursor-not-allowed items-center gap-1.5 whitespace-nowrap border-b-2 border-transparent px-3 py-2 text-sm font-medium text-muted-foreground/60 [&_svg]:size-4 [&_svg]:shrink-0"
+            >
+              {tab.icon}
+              {tab.label}
+              <Info className="size-3.5" aria-hidden />
+              {tab.disabledReason ? <span className="sr-only">{tab.disabledReason}</span> : null}
+            </span>
+          );
+        }
+
         return (
           <Link
             key={tab.href}

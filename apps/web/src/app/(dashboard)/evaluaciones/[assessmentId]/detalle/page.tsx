@@ -1,10 +1,13 @@
 import { redirect } from 'next/navigation';
-import { Inbox, Table2 } from 'lucide-react';
+import { Inbox, Table2, Users } from 'lucide-react';
 import { auth } from '@/auth';
 import { apiGet } from '@/lib/api';
 import { ROUTES } from '@/lib/routes';
+import { asCapabilityUnavailable } from '@/lib/errors';
+import { assessmentSupports } from '@/lib/assessment-capabilities';
 import {
   canAccess,
+  capabilityUnavailableMessage,
   ITEM_ANALYSIS_VIEWER_ROLES,
   type DashboardFilterOptionsResponse,
   type ItemMatrixResponse,
@@ -43,12 +46,22 @@ export default async function EvaluacionDetallePage({
   const matrixQuery = new URLSearchParams({ assessmentId, all: 'true' });
   if (classGroupId) matrixQuery.set('classGroupId', classGroupId);
 
-  const [options, matrix] = await Promise.all([
+  const [options, matrixResult, hasStudentMatrix] = await Promise.all([
     apiGet<DashboardFilterOptionsResponse>(`/dashboards/filters${filterQuery}`),
-    apiGet<ItemMatrixResponse>(`/item-analysis/matrix?${matrixQuery.toString()}`).catch(
-      (): ItemMatrixResponse | null => null,
-    ),
+    apiGet<ItemMatrixResponse>(`/item-analysis/matrix?${matrixQuery.toString()}`)
+      .then((matrix) => ({ matrix, unavailableReason: null as string | null }))
+      .catch((error: unknown) => ({
+        matrix: null,
+        // 409 del `CapabilityGuard` ⇒ "no aplica" con motivo, no un fallo.
+        unavailableReason: asCapabilityUnavailable(error)?.message ?? null,
+      })),
+    // Una evaluación cargada desde un informe oficial trae los agregados por
+    // pregunta pero no las respuestas de cada alumno: la matriz sale sin filas y
+    // el motivo NO es "aún no cargan respuestas", es el origen del dato.
+    assessmentSupports(assessmentId, 'student_matrix'),
   ]);
+
+  const { matrix, unavailableReason } = matrixResult;
 
   return (
     <div className="space-y-6">
@@ -56,9 +69,16 @@ export default async function EvaluacionDetallePage({
 
       {!matrix ? (
         <EmptyState
-          icon={Inbox}
-          title="No se pudo cargar la tabla cruzada"
-          description="No hay respuestas para el curso seleccionado o no tienes acceso. Ajusta el filtro de curso o verifica tus cursos asignados."
+          icon={unavailableReason ? Users : Inbox}
+          title={
+            unavailableReason
+              ? 'Esta evaluación no tiene respuestas por estudiante'
+              : 'No se pudo cargar la tabla cruzada'
+          }
+          description={
+            unavailableReason ??
+            'No hay respuestas para el curso seleccionado o no tienes acceso. Ajusta el filtro de curso o verifica tus cursos asignados.'
+          }
         />
       ) : matrix.questions.length === 0 || matrix.students.total === 0 ? (
         <Card>
@@ -72,15 +92,28 @@ export default async function EvaluacionDetallePage({
                 {matrix.students.total} alumnos
               </p>
             </div>
-            <EmptyState
-              icon={Table2}
-              title="Sin respuestas para mostrar"
-              description={
-                matrix.students.total === 0
-                  ? 'No hay alumnos con respuestas registradas en esta evaluación dentro de tu alcance.'
-                  : 'Esta evaluación aún no tiene preguntas en su instrumento.'
-              }
-            />
+            {matrix.questions.length === 0 ? (
+              <EmptyState
+                icon={Table2}
+                title="Sin respuestas para mostrar"
+                description="Esta evaluación aún no tiene preguntas en su instrumento."
+              />
+            ) : hasStudentMatrix ? (
+              <EmptyState
+                icon={Table2}
+                title="Sin respuestas para mostrar"
+                description="No hay alumnos con respuestas registradas en esta evaluación dentro de tu alcance."
+              />
+            ) : (
+              // El caso que antes mentía: decía "sin respuestas registradas"
+              // (suena a carga pendiente) cuando la causa real es el origen del
+              // dato y no hay nada que cargar. El texto lo pone el backend.
+              <EmptyState
+                icon={Users}
+                title="Esta evaluación no tiene respuestas por estudiante"
+                description={capabilityUnavailableMessage('student_matrix')}
+              />
+            )}
           </CardContent>
         </Card>
       ) : (

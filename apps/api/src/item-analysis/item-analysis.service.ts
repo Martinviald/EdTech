@@ -2,6 +2,7 @@ import { ForbiddenException, Injectable, NotFoundException } from '@nestjs/commo
 import { and, asc, desc, eq, inArray, isNull, sql } from 'drizzle-orm';
 import {
   assessmentCourseAssignments,
+  assessmentItemStats,
   assessmentResults,
   assessments,
   classGroups,
@@ -23,6 +24,7 @@ import {
 import {
   RESULTS_VIEWER_ROLES,
   RESULT_HIDDEN_NODE_TYPES,
+  mergeAnswerCounts,
   userHasAnyRole,
   type AlternativeDistribution,
   type AssessmentListQueryDto,
@@ -41,6 +43,7 @@ import {
   type UserRole,
 } from '@soe/types';
 import type { JwtPayload } from '../auth/jwt-payload.types';
+import { loadCohortAchievementByAssessment } from '../common/helpers/cohort-item-stats.helper';
 import { InjectDb, type Database } from '../database/database.types';
 
 // Roles "administrativos" — ven todos los cursos de la org. Cualquier otro rol
@@ -100,10 +103,20 @@ export class ItemAnalysisService {
       }
 
       // Sólo evaluaciones con resultados (para que la matriz nunca salga vacía).
+      //
+      // §2.7 del plan — "resultados" es niveles por alumno (assessment_results) O
+      // analítica de cohorte (assessment_item_stats). Sin la segunda rama, una
+      // evaluación cargada desde un informe oficial (que puede no traer niveles por
+      // alumno) desaparecería de TODA la app: no la listarían /evaluaciones,
+      // /dashboard ni /material-remedial, y su hub sólo sería alcanzable por URL.
+      // Esto desacopla la visibilidad del pipeline de OCR de la Figura 1, que es el
+      // frágil de los dos. No cambia nada para lo existente: todo assessment con
+      // responses tiene assessment_results.
       const conditions = [
         eq(assessments.orgId, orgId),
         isNull(instruments.deletedAt),
-        sql`exists (select 1 from ${assessmentResults} where ${assessmentResults.assessmentId} = ${assessments.id})`,
+        sql`(exists (select 1 from ${assessmentResults} where ${assessmentResults.assessmentId} = ${assessments.id})
+          or exists (select 1 from ${assessmentItemStats} where ${assessmentItemStats.assessmentId} = ${assessments.id}))`,
       ];
       if (query.subjectId) conditions.push(eq(instruments.subjectId, query.subjectId));
       if (query.instrumentType) {
@@ -181,6 +194,23 @@ export class ItemAnalysisService {
         .groupBy(assessmentResults.assessmentId);
       const countByAssessment = new Map(countRows.map((r) => [r.assessmentId, Number(r.count)]));
 
+      // Una evaluación cargada desde un informe oficial (`aggregate_only`) no tiene
+      // filas por alumno: su N vive en el read-model de cohorte. Esta lista ya las
+      // MUESTRA (ver la rama `exists(assessment_item_stats)` de arriba), así que sin
+      // este fallback aparecían con "0 alumnos" mientras su propio hub —que sí usa
+      // el read-model— mostraba la asistencia correcta.
+      //
+      // Misma definición de N que el resto de la app (`buildAggregateSummary`,
+      // `getOverview`): Σ del max(student_count) por curso, vía el helper compartido.
+      const cohortRows = await loadCohortAchievementByAssessment(
+        tx,
+        ids,
+        scope.scopeAll ? null : scope.classGroupIds,
+      );
+      const cohortByAssessment = new Map(
+        cohortRows.map((r) => [r.assessmentId, r.studentsAssessed]),
+      );
+
       const data: AssessmentOption[] = rows.map((r) => ({
         assessmentId: r.assessmentId,
         name: r.name,
@@ -189,7 +219,11 @@ export class ItemAnalysisService {
         subjectName: r.subjectName ?? null,
         gradeName: r.gradeName ?? null,
         administeredAt: r.administeredAt,
-        studentsCount: countByAssessment.get(r.assessmentId) ?? 0,
+        // El dato per-alumno manda cuando existe (es el N real de rendidores); el de
+        // cohorte sólo cubre a las que no lo tienen. Para una evaluación con ambos,
+        // los dos números son la misma cohorte.
+        studentsCount:
+          countByAssessment.get(r.assessmentId) ?? cohortByAssessment.get(r.assessmentId) ?? 0,
       }));
 
       return { data };
@@ -243,8 +277,12 @@ export class ItemAnalysisService {
       );
       const itemIds = questions.map((q) => q.itemId);
 
-      // Empaquetar tasa de acierto por ítem (1 query agregada group by item_id) y
-      // adjuntarla a las columnas.
+      // Dos resoluciones del MISMO scope, para dos capas distintas:
+      //  · classGroupFilter → la capa agregable (read-model de cohorte, grano por curso).
+      //  · studentFilter    → la matriz alumno×pregunta, irreducible sobre `responses`.
+      // Ambas derivan de (scope, classGroupId) y `null` significa lo mismo en las dos:
+      // scopeAll sin filtro. Ver resolveAccessibleClassGroupIds.
+      const classGroupFilter = this.resolveAccessibleClassGroupIds(scope, query.classGroupId);
       const studentFilter = await this.resolveAccessibleStudentIds(
         tx,
         orgId,
@@ -257,7 +295,7 @@ export class ItemAnalysisService {
         query.assessmentId,
         questions,
         itemIds,
-        studentFilter,
+        classGroupFilter,
       );
 
       // TKT-22 — línea de referencia "% de logro del colegio" por pregunta: el
@@ -269,7 +307,7 @@ export class ItemAnalysisService {
         query.assessmentId,
         questionsWithRate,
         itemIds,
-        studentFilter,
+        classGroupFilter,
       );
 
       // ── Alumnos visibles con respuestas en la evaluación ──────────────────────
@@ -386,12 +424,10 @@ export class ItemAnalysisService {
         }
       }
 
-      const studentFilter = await this.resolveAccessibleStudentIds(
-        tx,
-        orgId,
-        scope,
-        query.classGroupId,
-      );
+      // Todo el detalle por pregunta es agregable → basta el scope resuelto a cursos.
+      // (Antes se resolvía a alumnos con una query a student_enrollments que ya no
+      // hace falta: el read-model tiene grano por curso.)
+      const classGroupFilter = this.resolveAccessibleClassGroupIds(scope, query.classGroupId);
 
       const content = (item.content ?? {}) as ItemContent;
       const correctKey = this.deriveCorrectKey(content);
@@ -401,8 +437,13 @@ export class ItemAnalysisService {
       const tags = await this.loadAllItemTags(tx, itemId);
       const section = item.sectionId ? await this.loadQuestionSection(tx, item.sectionId) : null;
 
-      // ── Distribución agregada por valor de respuesta (1 query group by) ───────
-      const dist = await this.loadAnswerDistribution(tx, itemId, query.assessmentId, studentFilter);
+      // ── Distribución agregada por valor de respuesta (read-model de cohorte) ──
+      const dist = await this.loadAnswerDistribution(
+        tx,
+        itemId,
+        query.assessmentId,
+        classGroupFilter,
+      );
 
       let totalResponses = 0;
       let blankCount = 0;
@@ -420,6 +461,12 @@ export class ItemAnalysisService {
 
       const correctRate = totalResponses > 0 ? (correctCount / totalResponses) * 100 : null;
 
+      // Recortes por alternativa (ítems con opciones-imagen). Se expone solo el flag; la
+      // imagen se sirve firmada por `/items/{id}/alternativa/{key}/figura`.
+      const altImageRefs = (item.scoringConfig?.altImageRefs ?? null) as Record<
+        string,
+        unknown
+      > | null;
       const alternatives: AlternativeDistribution[] = altDefs.map((alt) => {
         const count = countByKey.get(alt.key) ?? 0;
         return {
@@ -428,6 +475,7 @@ export class ItemAnalysisService {
           isCorrect: correctKey != null ? alt.key === correctKey : alt.isCorrect,
           count,
           percentage: totalResponses > 0 ? (count / totalResponses) * 100 : 0,
+          hasImage: !!altImageRefs && typeof altImageRefs[alt.key] === 'string',
         };
       });
 
@@ -437,6 +485,9 @@ export class ItemAnalysisService {
         type: item.type,
         stem: typeof content.stem === 'string' ? content.stem : null,
         imageUrl: typeof content.imageUrl === 'string' ? content.imageUrl : null,
+        // La figura vive en `files` (owner_type='item'); acá solo se expone el flag
+        // para que la UI decida si ofrecer el botón, sin firmar una URL por ítem.
+        hasFigure: typeof item.scoringConfig?.imageRef === 'string',
         explanation: typeof content.explanation === 'string' ? content.explanation : null,
         correctKey,
         skill,
@@ -529,36 +580,48 @@ export class ItemAnalysisService {
     return columns;
   }
 
-  /** Tasa de acierto por ítem (1 query agregada group by item_id). */
+  /**
+   * Tasa de acierto por ítem, desde el read-model de cohorte (1 query agregada).
+   *
+   * ⚠️ Recombinar cursos es SUMA de conteos, nunca promedio de porcentajes: los
+   * cursos tienen N distinto y promediar sus % los ponderaría igual. Por eso el
+   * read-model guarda enteros y el % se recalcula acá sobre el total recombinado.
+   *
+   * Paridad con el `GROUP BY` sobre `responses` que reemplaza:
+   *  · `responseCount` es el `count(*)` de filas de respuesta del ítem → incluye los
+   *    blancos en el denominador, igual que antes.
+   *  · `correctCount` es el `sum(case when is_correct = true ...)` → `null` sigue
+   *    contando como incorrecto (no se excluye del denominador).
+   */
   private async attachCorrectRates(
     tx: Database,
     assessmentId: string,
     questions: MatrixQuestionColumn[],
     itemIds: string[],
-    studentFilter: string[] | null,
+    classGroupFilter: string[] | null,
   ): Promise<MatrixQuestionColumn[]> {
     if (itemIds.length === 0) return questions;
-    if (studentFilter !== null && studentFilter.length === 0) {
+    if (classGroupFilter !== null && classGroupFilter.length === 0) {
       return questions.map((q) => ({ ...q, correctRate: null }));
     }
 
     const conditions = [
-      eq(responses.assessmentId, assessmentId),
-      inArray(responses.itemId, itemIds),
+      eq(assessmentItemStats.assessmentId, assessmentId),
+      inArray(assessmentItemStats.itemId, itemIds),
     ];
-    if (studentFilter !== null) {
-      conditions.push(inArray(responses.studentId, studentFilter));
+    if (classGroupFilter !== null) {
+      conditions.push(inArray(assessmentItemStats.classGroupId, classGroupFilter));
     }
 
     const rows = await tx
       .select({
-        itemId: responses.itemId,
-        total: sql<number>`count(*)::int`,
-        correct: sql<number>`sum(case when ${responses.isCorrect} = true then 1 else 0 end)::int`,
+        itemId: assessmentItemStats.itemId,
+        total: sql<number>`sum(${assessmentItemStats.responseCount})::int`,
+        correct: sql<number>`sum(${assessmentItemStats.correctCount})::int`,
       })
-      .from(responses)
+      .from(assessmentItemStats)
       .where(and(...conditions))
-      .groupBy(responses.itemId);
+      .groupBy(assessmentItemStats.itemId);
 
     const rateByItem = new Map<string, number>();
     for (const r of rows) {
@@ -581,10 +644,14 @@ export class ItemAnalysisService {
    * la evaluación fue validada como propia de la org → agregar SIN filtro de
    * alumno es el promedio del colegio, nunca de otra org.
    *
-   * Optimización: cuando `studentFilter === null` (admin sin filtro de curso) la
+   * Optimización: cuando `classGroupFilter === null` (admin sin filtro de curso) la
    * población visible YA es toda la org, así que `references.org = correctRate`
    * sin una query extra. Sólo cuando el scope está acotado (profesor, o filtro por
    * curso) se lanza la agregación org-wide adicional.
+   *
+   * Sobre el read-model, "toda la org" = TODAS las filas del assessment sin filtrar
+   * por curso (la suma de las cohortes), que es exactamente la recombinación que
+   * habilita el grano por `class_group`.
    *
    * `references.sample` (muestra de colegios / benchmark inter-colegio) queda
    * DIFERIDO: requiere pool multi-colegio (TKT-20). Se deja el hueco en el
@@ -595,12 +662,12 @@ export class ItemAnalysisService {
     assessmentId: string,
     questions: MatrixQuestionColumn[],
     itemIds: string[],
-    studentFilter: string[] | null,
+    classGroupFilter: string[] | null,
   ): Promise<MatrixQuestionColumn[]> {
     if (itemIds.length === 0) return questions;
 
     // Sin acotar el scope, la tasa visible es la del colegio completo.
-    if (studentFilter === null) {
+    if (classGroupFilter === null) {
       return questions.map((q) => ({
         ...q,
         references: { ...q.references, org: q.correctRate },
@@ -609,13 +676,18 @@ export class ItemAnalysisService {
 
     const rows = await tx
       .select({
-        itemId: responses.itemId,
-        total: sql<number>`count(*)::int`,
-        correct: sql<number>`sum(case when ${responses.isCorrect} = true then 1 else 0 end)::int`,
+        itemId: assessmentItemStats.itemId,
+        total: sql<number>`sum(${assessmentItemStats.responseCount})::int`,
+        correct: sql<number>`sum(${assessmentItemStats.correctCount})::int`,
       })
-      .from(responses)
-      .where(and(eq(responses.assessmentId, assessmentId), inArray(responses.itemId, itemIds)))
-      .groupBy(responses.itemId);
+      .from(assessmentItemStats)
+      .where(
+        and(
+          eq(assessmentItemStats.assessmentId, assessmentId),
+          inArray(assessmentItemStats.itemId, itemIds),
+        ),
+      )
+      .groupBy(assessmentItemStats.itemId);
 
     const orgRateByItem = new Map<string, number>();
     for (const r of rows) {
@@ -830,45 +902,49 @@ export class ItemAnalysisService {
     return result;
   }
 
-  /** Distribución agregada de respuestas por valor de alternativa (1 query group by). */
+  /**
+   * Distribución agregada de respuestas por valor de alternativa, desde el
+   * read-model de cohorte (1 query).
+   *
+   * `assessmentId` es OPCIONAL: sin él, el ítem se agrega across assessments, que
+   * sobre el read-model es la suma de las filas de varios assessments. Es legítimo
+   * aunque mezcle orígenes (`computed`/`imported`), porque el read-model es
+   * homogéneo en tipo: siempre conteos con la misma semántica.
+   *
+   * Los buckets llegan pre-agrupados por (key, isCorrect) — el mismo agrupamiento
+   * que hacía el `group by answer, is_correct` sobre `responses`, incluida la
+   * precedencia `raw ?? key ?? answer` que ahora vive una sola vez en el calculador
+   * puro (`extractRawAnswer` de @soe/types). `key: null` = blanco.
+   *
+   * En ítems de desarrollo la clave es la categoría por puntaje ('RC'|'RPC'|'RI'),
+   * no una alternativa. No estorba acá: `alternatives` se arma cruzando contra las
+   * altDefs de `items.content`, que en desarrollo están vacías, así que esos buckets
+   * sólo alimentan totalResponses/correctCount.
+   */
   private async loadAnswerDistribution(
     tx: Database,
     itemId: string,
     assessmentId: string | undefined,
-    studentFilter: string[] | null,
+    classGroupFilter: string[] | null,
   ): Promise<{ answer: string | null; isCorrect: boolean; count: number }[]> {
-    if (studentFilter !== null && studentFilter.length === 0) return [];
+    if (classGroupFilter !== null && classGroupFilter.length === 0) return [];
 
-    const conditions = [eq(responses.itemId, itemId)];
+    const conditions = [eq(assessmentItemStats.itemId, itemId)];
     if (assessmentId) {
-      conditions.push(eq(responses.assessmentId, assessmentId));
+      conditions.push(eq(assessmentItemStats.assessmentId, assessmentId));
     }
-    if (studentFilter !== null) {
-      conditions.push(inArray(responses.studentId, studentFilter));
+    if (classGroupFilter !== null) {
+      conditions.push(inArray(assessmentItemStats.classGroupId, classGroupFilter));
     }
-
-    // coalesce de las claves candidatas raw | key | answer del JSONB. Mismo
-    // orden de precedencia que extractRawAnswer (celdas de la matriz) para que la
-    // distribución y las celdas reporten la misma alternativa.
-    const answerExpr = sql<
-      string | null
-    >`nullif(coalesce(${responses.value}->>'raw', ${responses.value}->>'key', ${responses.value}->>'answer'), '')`;
 
     const rows = await tx
-      .select({
-        answer: answerExpr,
-        isCorrect: sql<boolean>`coalesce(${responses.isCorrect}, false)`,
-        count: sql<number>`count(*)::int`,
-      })
-      .from(responses)
-      .where(and(...conditions))
-      .groupBy(answerExpr, responses.isCorrect);
+      .select({ answerCounts: assessmentItemStats.answerCounts })
+      .from(assessmentItemStats)
+      .where(and(...conditions));
 
-    return rows.map((r) => ({
-      answer: r.answer === null || r.answer === '' ? null : r.answer,
-      isCorrect: r.isCorrect === true,
-      count: Number(r.count),
-    }));
+    // Recombinación entre cohortes: SUMA de conteos por (key, isCorrect).
+    const merged = mergeAnswerCounts(rows.map((r) => r.answerCounts ?? []));
+    return merged.map((b) => ({ answer: b.key, isCorrect: b.isCorrect, count: b.count }));
   }
 
   /**
@@ -1049,6 +1125,7 @@ export class ItemAnalysisService {
     position: number;
     type: string;
     content: Record<string, unknown>;
+    scoringConfig: Record<string, unknown> | null;
   }> {
     const [row] = await tx
       .select({
@@ -1060,6 +1137,7 @@ export class ItemAnalysisService {
         position: items.position,
         type: sql<string>`${items.type}::text`,
         content: items.content,
+        scoringConfig: items.scoringConfig,
       })
       .from(items)
       .leftJoin(instruments, eq(instruments.id, items.instrumentId))
@@ -1087,6 +1165,7 @@ export class ItemAnalysisService {
       position: row.position,
       type: row.type,
       content: row.content,
+      scoringConfig: row.scoringConfig,
     };
   }
 
@@ -1112,6 +1191,7 @@ export class ItemAnalysisService {
       .select({
         kind: sql<string>`${sectionAttachments.kind}::text`,
         url: sectionAttachments.url,
+        storageKey: sectionAttachments.storageKey,
         fileName: sectionAttachments.fileName,
         mimeType: sectionAttachments.mimeType,
         note: sectionAttachments.note,
@@ -1129,6 +1209,7 @@ export class ItemAnalysisService {
       attachments: atts.map((a) => ({
         kind: a.kind,
         url: a.url ?? null,
+        storageKey: a.storageKey ?? null,
         fileName: a.fileName ?? null,
         mimeType: a.mimeType ?? null,
         note: a.note ?? null,
@@ -1175,8 +1256,41 @@ export class ItemAnalysisService {
   }
 
   /**
+   * class_groups visibles combinando scope + filtro por classGroupId. `null` =
+   * scopeAll sin filtro (sin filtro extra de curso → todo el assessment).
+   *
+   * Es el gemelo de `resolveAccessibleStudentIds` para la capa agregable, y sigue
+   * exactamente sus mismas ramas — de hecho es su primera mitad: aquel resuelve
+   * (scope, classGroupId) → class_groups permitidos y RECIÉN AHÍ los expande a
+   * alumnos vía `student_enrollments`. El read-model está pre-agregado por
+   * `class_group` usando ese mismo camino (`student_enrollments`, nunca
+   * `assessment_course_assignments` — §2.4 del plan), así que filtrar por curso y
+   * filtrar por los alumnos de esos cursos seleccionan la misma población. Sin la
+   * expansión, acá no hace falta ninguna query.
+   *
+   * `null` se preserva con cuidado: es lo que habilita el atajo de
+   * `attachOrgReferences` (sin filtro → `references.org = correctRate`, sin query
+   * extra). Si esto devolviera `[]` en vez de `null` para un admin sin filtro, la
+   * referencia del colegio se caería a null en silencio.
+   */
+  private resolveAccessibleClassGroupIds(
+    scope: ScopeResult,
+    classGroupId: string | undefined,
+  ): string[] | null {
+    if (scope.scopeAll && !classGroupId) return null;
+    if (scope.scopeAll) return [classGroupId!];
+    if (classGroupId) {
+      return scope.classGroupIds.includes(classGroupId) ? [classGroupId] : [];
+    }
+    return scope.classGroupIds;
+  }
+
+  /**
    * studentIds visibles combinando scope + filtro por classGroupId. `null` =
    * scopeAll sin filtro (sin filtro extra de student).
+   *
+   * Sólo para la capa granular (matriz alumno×pregunta). La capa agregable usa
+   * `resolveAccessibleClassGroupIds`.
    */
   private async resolveAccessibleStudentIds(
     tx: Database,

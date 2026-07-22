@@ -28,6 +28,7 @@ import { students } from '../schema/students';
 import { assessments, assessmentCourseAssignments, importJobs } from '../schema/assessments';
 import { responses } from '../schema/responses';
 import { assessmentResults, skillResults } from '../schema/results';
+import { recomputeCohortStatsFromResponses } from '../queries/cohort-stats';
 import {
   aggregateStudentResults,
   aggregateSkillResults,
@@ -35,7 +36,21 @@ import {
   normalizeRut,
   isAutoScorable,
   type ResponseForCalculation,
+  type ResponseForItemStats,
 } from '@soe/types';
+
+/**
+ * Una respuesta lista para los DOS agregadores: resultados por alumno
+ * (`ResponseForCalculation`) y read-model de cohorte (`ResponseForItemStats`). Es la
+ * misma intersección que usa la API (`ResponseForPersist`).
+ */
+type CalcRow = ResponseForCalculation & ResponseForItemStats;
+
+/** Ver la nota de `hasAlternatives` en `@soe/types/utils/item-stats-calculator`. */
+function itemHasAlternatives(content: unknown): boolean {
+  const alternatives = (content as { alternatives?: unknown } | null)?.alternatives;
+  return Array.isArray(alternatives) && alternatives.length > 0;
+}
 
 // ── Args ─────────────────────────────────────────────────────────────────────
 const argv = process.argv.slice(2);
@@ -189,7 +204,7 @@ async function main() {
       studentIds: string[];
       unmatched: string[];
       responseRows: Array<typeof responses.$inferInsert>;
-      calc: ResponseForCalculation[];
+      calc: CalcRow[];
     };
     const pending: PendingCourse[] = [];
     let totalUnmatched = 0;
@@ -206,7 +221,7 @@ async function main() {
         console.warn(`  ⚠ ${course.sheet}: posiciones MC no calzan inst=[${instMcPos}] sheet=[${sheetPos}]`);
 
       const responseRows: Array<typeof responses.$inferInsert> = [];
-      const calc: ResponseForCalculation[] = [];
+      const calc: CalcRow[] = [];
       const studentIds: string[] = [];
       const unmatched: string[] = [];
 
@@ -228,7 +243,7 @@ async function main() {
               isCorrect: null, rawScore: null, maxScore: maxScore.toFixed(2), finalScore: null,
               scoredBy: 'human', scoredAt: null,
             });
-            calc.push({ studentId, itemId: item.id, itemPosition: item.position, rawScore: null, maxScore, finalScore: null, isCorrect: null, taxonomyNodeIds: nodeIds });
+            calc.push({ studentId, itemId: item.id, itemPosition: item.position, rawScore: null, maxScore, finalScore: null, isCorrect: null, taxonomyNodeIds: nodeIds, value: { answer: rawAnswer }, hasAlternatives: itemHasAlternatives(item.content) });
             continue;
           }
           // autocorregible: nuestros ítems son multiple_choice
@@ -241,7 +256,7 @@ async function main() {
             isCorrect, rawScore: rawScore.toFixed(2), maxScore: maxScore.toFixed(2), finalScore: rawScore.toFixed(2),
             scoredBy: 'auto', scoredAt: now,
           });
-          calc.push({ studentId, itemId: item.id, itemPosition: item.position, rawScore, maxScore, finalScore: rawScore, isCorrect, taxonomyNodeIds: nodeIds });
+          calc.push({ studentId, itemId: item.id, itemPosition: item.position, rawScore, maxScore, finalScore: rawScore, isCorrect, taxonomyNodeIds: nodeIds, value: { answer: rawAnswer }, hasAlternatives: itemHasAlternatives(item.content) });
         }
       }
       pending.push({ course, instId: inst.id, classGroupId: cgId, studentIds, unmatched, responseRows, calc });
@@ -283,10 +298,11 @@ async function main() {
       }),
     );
 
-    // 8. Responses (chunked), results y skills por curso.
+    // 8. Responses (chunked), results, skills y read-model de cohorte por curso.
     const allResponses: Array<typeof responses.$inferInsert> = [];
     const arValues: Array<typeof assessmentResults.$inferInsert> = [];
     const srValues: Array<typeof skillResults.$inferInsert> = [];
+    const cohortStatsInput: Array<{ assessmentId: string; calc: CalcRow[]; skills: Array<{ studentId: string; nodeId: string; correctCount: number; totalCount: number; percentage: number | null }> }> = [];
     for (let i = 0; i < pending.length; i++) {
       const p = pending[i];
       const assessmentId = assessIdByIdx[i];
@@ -315,10 +331,38 @@ async function main() {
           percentage: (a.percentage * 100).toFixed(2), performanceLevel: a.performanceLevel,
         });
       }
+      cohortStatsInput.push({
+        assessmentId,
+        calc: p.calc,
+        // El escritor del read-model trabaja en 0..1; la columna es 0..100.
+        skills: skillAgg.map((a) => ({ studentId: a.studentId, nodeId: a.nodeId, correctCount: a.correctCount, totalCount: a.totalCount, percentage: a.percentage })),
+      });
     }
     for (const c of chunk(allResponses, CHUNK)) await tx.insert(responses).values(c);
     for (const c of chunk(arValues, CHUNK)) await tx.insert(assessmentResults).values(c);
     for (const c of chunk(srValues, CHUNK)) await tx.insert(skillResults).values(c);
+
+    // 8b. Read-model de cohorte (assessment_item_stats / assessment_skill_stats).
+    // NO es opcional: los dashboards de habilidades, el heatmap y la matriz
+    // alumno×pregunta LEEN de acá, no de `responses`. Sin estas filas la carga deja la
+    // analítica vacía aunque las respuestas estén completas. Se usa el MISMO escritor
+    // que la API para que este script no sea un camino paralelo que pueda divergir.
+    let itemStatRows = 0;
+    let skillStatRows = 0;
+    let orphanTotal = 0;
+    for (const s of cohortStatsInput) {
+      const res = await recomputeCohortStatsFromResponses(tx, {
+        assessmentId: s.assessmentId,
+        responses: s.calc,
+        skillResults: s.skills,
+      });
+      itemStatRows += res.itemRows;
+      skillStatRows += res.skillRows;
+      orphanTotal += res.orphanResponses;
+    }
+    if (orphanTotal > 0) {
+      console.warn(`  ⚠️ ${orphanTotal} respuesta(s) de alumnos sin matrícula quedaron FUERA del read-model`);
+    }
 
     // 9. import_jobs (1 insert, uno por assessment/curso).
     await tx.insert(importJobs).values(
@@ -333,7 +377,7 @@ async function main() {
       })),
     );
 
-    console.log(`\n✅ COMMIT: ${insertedAssess.length} assessments · ${allResponses.length} responses · ${arValues.length} assessment_results · ${srValues.length} skill_results`);
+    console.log(`\n✅ COMMIT: ${insertedAssess.length} assessments · ${allResponses.length} responses · ${arValues.length} assessment_results · ${srValues.length} skill_results · ${itemStatRows} assessment_item_stats · ${skillStatRows} assessment_skill_stats`);
   });
 
   await client.end();

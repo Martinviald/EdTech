@@ -22,6 +22,7 @@ import {
   withOrgContext,
 } from '@soe/db';
 import {
+  normalizeClassGroupSection,
   orgConfigSchema,
   resolveAllowedFeatures,
   type AcademicSetupDto,
@@ -59,7 +60,7 @@ export class OrganizationsService {
     if (!org) throw new NotFoundException('Organización no encontrada');
 
     const parsed = orgConfigSchema.safeParse(org.config ?? {});
-    const aiBudgetUsd = parsed.success ? parsed.data.aiBudgetUsd ?? null : null;
+    const aiBudgetUsd = parsed.success ? (parsed.data.aiBudgetUsd ?? null) : null;
     return {
       orgId: org.id,
       allowedFeatures: resolveAllowedFeatures(org.config),
@@ -93,11 +94,7 @@ export class OrganizationsService {
     return this.getFeatures(orgId);
   }
 
-  async updateProfile(
-    orgId: string,
-    requestingOrgId: string,
-    dto: UpdateOrganizationProfileDto,
-  ) {
+  async updateProfile(orgId: string, requestingOrgId: string, dto: UpdateOrganizationProfileDto) {
     if (orgId !== requestingOrgId) {
       throw new ForbiddenException('Solo puedes modificar tu propio colegio');
     }
@@ -136,10 +133,7 @@ export class OrganizationsService {
         .where(eq(organizations.id, orgId));
     });
 
-    const [updated] = await this.db
-      .select()
-      .from(organizations)
-      .where(eq(organizations.id, orgId));
+    const [updated] = await this.db.select().from(organizations).where(eq(organizations.id, orgId));
     if (!updated) throw new NotFoundException('Colegio no encontrado');
     return updated;
   }
@@ -196,12 +190,7 @@ export class OrganizationsService {
       ? await this.db
           .select({ total: count() })
           .from(classGroups)
-          .where(
-            and(
-              eq(classGroups.orgId, orgId),
-              eq(classGroups.academicYearId, academicYear.id),
-            ),
-          )
+          .where(and(eq(classGroups.orgId, orgId), eq(classGroups.academicYearId, academicYear.id)))
           .then((rows) => rows[0]?.total ?? 0)
       : 0;
 
@@ -214,17 +203,11 @@ export class OrganizationsService {
   }
 
   async listGrades() {
-    return this.db
-      .select()
-      .from(grades)
-      .orderBy(grades.order);
+    return this.db.select().from(grades).orderBy(grades.order);
   }
 
   async listSubjects() {
-    return this.db
-      .select()
-      .from(subjects)
-      .orderBy(subjects.name);
+    return this.db.select().from(subjects).orderBy(subjects.name);
   }
 
   /**
@@ -285,12 +268,7 @@ export class OrganizationsService {
       .innerJoin(classGroups, eq(classGroups.id, subjectClasses.classGroupId))
       .innerJoin(grades, eq(grades.id, classGroups.gradeId))
       .innerJoin(subjects, eq(subjects.id, subjectClasses.subjectId))
-      .where(
-        and(
-          eq(classGroups.orgId, orgId),
-          eq(subjectClasses.academicYearId, currentYear.id),
-        ),
-      )
+      .where(and(eq(classGroups.orgId, orgId), eq(subjectClasses.academicYearId, currentYear.id)))
       .orderBy(grades.order, classGroups.name, subjects.name);
 
     return rows.map((r) => ({
@@ -343,9 +321,7 @@ export class OrganizationsService {
       })
       .from(classGroups)
       .innerJoin(grades, eq(grades.id, classGroups.gradeId))
-      .where(
-        and(eq(classGroups.orgId, orgId), eq(classGroups.academicYearId, academicYear.id)),
-      )
+      .where(and(eq(classGroups.orgId, orgId), eq(classGroups.academicYearId, academicYear.id)))
       .orderBy(grades.order, classGroups.name);
 
     const cells = await this.db
@@ -356,9 +332,7 @@ export class OrganizationsService {
       })
       .from(subjectClasses)
       .innerJoin(classGroups, eq(classGroups.id, subjectClasses.classGroupId))
-      .where(
-        and(eq(classGroups.orgId, orgId), eq(subjectClasses.academicYearId, academicYear.id)),
-      );
+      .where(and(eq(classGroups.orgId, orgId), eq(subjectClasses.academicYearId, academicYear.id)));
 
     return {
       academicYear,
@@ -386,9 +360,7 @@ export class OrganizationsService {
     const cgRows = await this.db
       .select({ id: classGroups.id })
       .from(classGroups)
-      .where(
-        and(eq(classGroups.orgId, orgId), eq(classGroups.academicYearId, academicYear.id)),
-      );
+      .where(and(eq(classGroups.orgId, orgId), eq(classGroups.academicYearId, academicYear.id)));
     if (cgRows.length === 0) {
       throw new BadRequestException(
         'El año vigente no tiene cursos. Configurá primero los cursos del colegio.',
@@ -525,6 +497,11 @@ export class OrganizationsService {
       .where(eq(grades.id, dto.gradeId));
     if (!grade) throw new BadRequestException('Nivel no encontrado');
 
+    // Se guarda sólo la sección: si el usuario tipea el curso completo ("4B A"),
+    // el nivel quedaría duplicado dentro del nombre. La verificación de duplicado
+    // corre sobre el nombre ya normalizado.
+    const name = normalizeClassGroupSection(dto.name);
+
     const [duplicate] = await this.db
       .select({ id: classGroups.id })
       .from(classGroups)
@@ -533,7 +510,7 @@ export class OrganizationsService {
           eq(classGroups.orgId, orgId),
           eq(classGroups.academicYearId, academicYear.id),
           eq(classGroups.gradeId, dto.gradeId),
-          eq(classGroups.name, dto.name),
+          eq(classGroups.name, name),
         ),
       );
     if (duplicate) {
@@ -550,7 +527,7 @@ export class OrganizationsService {
           orgId,
           academicYearId: academicYear.id,
           gradeId: dto.gradeId,
-          name: dto.name,
+          name,
         })
         .returning({ id: classGroups.id });
       if (!row) throw new Error('classGroups insert returned no row');
@@ -562,10 +539,7 @@ export class OrganizationsService {
         .from(subjectClasses)
         .innerJoin(classGroups, eq(classGroups.id, subjectClasses.classGroupId))
         .where(
-          and(
-            eq(classGroups.orgId, orgId),
-            eq(subjectClasses.academicYearId, academicYear.id),
-          ),
+          and(eq(classGroups.orgId, orgId), eq(subjectClasses.academicYearId, academicYear.id)),
         )
         .then((rows) => rows.map((r) => r.subjectId));
 
@@ -637,18 +611,12 @@ export class OrganizationsService {
   private async requireCurrentAcademicYear(orgId: string) {
     const row = await this.findCurrentAcademicYear(orgId);
     if (!row) {
-      throw new BadRequestException(
-        'El colegio no tiene un año académico vigente configurado.',
-      );
+      throw new BadRequestException('El colegio no tiene un año académico vigente configurado.');
     }
     return row;
   }
 
-  async setupAcademicYear(
-    orgId: string,
-    requestingOrgId: string,
-    dto: AcademicSetupDto,
-  ) {
+  async setupAcademicYear(orgId: string, requestingOrgId: string, dto: AcademicSetupDto) {
     if (orgId !== requestingOrgId) {
       throw new ForbiddenException('Solo puedes configurar tu propio colegio');
     }
@@ -689,6 +657,14 @@ export class OrganizationsService {
         throw new ConflictException(`El año académico ${dto.year} ya está configurado`);
       }
 
+      // El año nuevo pasa a ser el vigente: los anteriores dejan de serlo. Sin
+      // esto la org queda con varios `is_current` y no hay un año vigente único
+      // del cual dependen los catálogos y la creación de cursos.
+      await tx
+        .update(academicYears)
+        .set({ isCurrent: false })
+        .where(and(eq(academicYears.orgId, orgId), eq(academicYears.isCurrent, true)));
+
       // Crear año académico
       const [newAcademicYear] = await tx
         .insert(academicYears)
@@ -710,7 +686,8 @@ export class OrganizationsService {
               orgId,
               academicYearId,
               gradeId: cgInput.gradeId,
-              name: sectionName,
+              // Sólo la sección: el nivel ya está en `gradeId`.
+              name: normalizeClassGroupSection(sectionName),
             })
             .returning({ id: classGroups.id });
 

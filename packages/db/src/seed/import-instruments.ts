@@ -13,21 +13,42 @@ config({ path: resolve(__dirname, '../../../../.env') });
 
 import { readFileSync, readdirSync } from 'node:fs';
 import { and, eq, sql } from 'drizzle-orm';
-import { validateItemContent } from '@soe/types';
+import { toApplicationPeriod, validateItemContent } from '@soe/types';
 import { createDbClient, type Database } from '../client';
 import { instruments, instrumentSections, sectionAttachments } from '../schema/instruments';
 import { items } from '../schema/items';
 import { subjects, grades } from '../schema/academic';
 import { taxonomies } from '../schema/taxonomy';
 
-const DATA_DIR = resolve(__dirname, '../../data/instruments');
+// Override opcional (INSTRUMENTS_DATA_DIR) para cargar un set aislado sin re-importar el resto
+// (ej. la tanda DIA 2026 en su propio dir, sin tocar los instrumentos 2025 ya cargados).
+const DATA_DIR = process.env.INSTRUMENTS_DATA_DIR
+  ? resolve(process.env.INSTRUMENTS_DATA_DIR)
+  : resolve(__dirname, '../../data/instruments');
 
-type Alt = { key: string; text: string; isCorrect?: boolean };
+type Alt = {
+  key: string;
+  text: string;
+  isCorrect?: boolean;
+  /** `true` si la alternativa ES una figura (su `text` es una descripción, no el contenido real). */
+  isImage?: boolean;
+  /** Storage key en S3 del recorte de esa alternativa (contrato v1.1). No es una URL. */
+  imageRef?: string | null;
+};
 type Item = {
   position: number; type: string; stem: string; alternatives?: Alt[];
   correctKey?: string | null; responseFormat?: string; hasFigure?: boolean; figureNote?: string | null;
+  /** Storage key en S3 del recorte de la figura (contrato v1.1). No es una URL. */
+  imageRef?: string | null;
 };
-type Passage = { title?: string; text: string; format?: string; attachments?: { kind: string; note?: string }[] };
+type Passage = {
+  title?: string;
+  text: string;
+  format?: string;
+  attachments?: { kind: string; note?: string }[];
+  /** Storage key en S3 del recorte de la región completa del pasaje (contrato v1.1). */
+  imageRef?: string | null;
+};
 type Section = { order: number; name: string; type: string; instructions?: string; passage?: Passage | null; items: Item[] };
 type InstrumentJson = {
   instrument: { name: string; subject: string; subjectCode: string; grade: string; gradeCode: string;
@@ -36,6 +57,17 @@ type InstrumentJson = {
   pauta?: { source?: { instrumentJson?: string } };
   extraction?: { itemCount?: number };
 };
+
+/**
+ * `{ altImageRefs: {A: key, …} }` si el ítem tiene recortes por alternativa; si no, `null`.
+ * Se guarda en `scoringConfig` — ver el comentario en el insert de `items`.
+ */
+function altImageRefs(it: Item): Record<string, unknown> | null {
+  const refs = Object.fromEntries(
+    (it.alternatives ?? []).filter((a) => a.imageRef).map((a) => [a.key, a.imageRef]),
+  );
+  return Object.keys(refs).length ? { altImageRefs: refs } : null;
+}
 
 function buildContent(it: Item): Record<string, unknown> {
   if (it.type === 'multiple_choice' || it.type === 'true_false') {
@@ -100,10 +132,10 @@ export async function importInstruments(db: Database): Promise<void> {
           subjectId: sId,
           gradeId: gId,
           year: ins.year,
-          version: ins.applicationPeriod,
+          applicationPeriod: toApplicationPeriod(ins.applicationPeriod),
           isOfficial: ins.isOfficial ?? true,
           status: 'published',
-          config: { sourceJson, applicationPeriod: ins.applicationPeriod, subject: ins.subject, grade: ins.grade },
+          config: { sourceJson, subject: ins.subject, grade: ins.grade },
         })
         .returning({ id: instruments.id });
       const instrumentId = inst!.id;
@@ -128,13 +160,30 @@ export async function importInstruments(db: Database): Promise<void> {
           .returning({ id: instrumentSections.id });
         const sectionId = sec!.id;
         nSec++;
-        if (p?.attachments?.length) {
-          await tx.insert(sectionAttachments).values(
-            p.attachments.map((a, i) => ({
-              sectionId, kind: a.kind as typeof sectionAttachments.$inferInsert.kind,
-              order: i, note: a.note ?? null,
-            })),
-          );
+        // Recorte de la región completa del pasaje (contrato v1.1). Va primero (order 0) porque es
+        // el único adjunto con archivo real: los `p.attachments` son descripciones escritas por IA
+        // y no son fiables (funden varias imágenes en una entrada y a veces las omiten).
+        const attachments: (typeof sectionAttachments.$inferInsert)[] = [];
+        if (p?.imageRef) {
+          attachments.push({
+            sectionId,
+            kind: 'image',
+            order: 0,
+            storageKey: p.imageRef,
+            mimeType: 'image/png',
+            note: 'Pasaje completo tal como aparece en el cuadernillo (recorte determinístico).',
+          });
+        }
+        for (const [i, a] of (p?.attachments ?? []).entries()) {
+          attachments.push({
+            sectionId,
+            kind: a.kind as typeof sectionAttachments.$inferInsert.kind,
+            order: i + 1,
+            note: a.note ?? null,
+          });
+        }
+        if (attachments.length) {
+          await tx.insert(sectionAttachments).values(attachments);
         }
         for (const it of s.items) {
           const content = validateItemContent(
@@ -153,6 +202,14 @@ export async function importInstruments(db: Database): Promise<void> {
               partialCredit: it.type !== 'multiple_choice' && it.type !== 'true_false',
               ...(it.responseFormat ? { responseFormat: it.responseFormat } : {}),
               ...(it.hasFigure ? { hasFigure: true, figureNote: it.figureNote ?? null } : {}),
+              // Storage key de la figura recortada (contrato v1.1). Va en scoringConfig y no
+              // en `content` porque el schema Zod de content strippea claves desconocidas y
+              // `imageUrl` exige una URL absoluta — el bucket es privado y las presigned
+              // expiran. Cómo se sirve la imagen es una decisión aparte, aún abierta.
+              ...(it.imageRef ? { imageRef: it.imageRef } : {}),
+              // Recortes por alternativa: {A: key, B: key, …}. Mismo motivo para NO ponerlos en
+              // `content`: el schema de alternativa es {key,text,isCorrect} y Zod descarta el resto.
+              ...(altImageRefs(it) ?? {}),
             },
             status: 'published',
             source: 'imported',

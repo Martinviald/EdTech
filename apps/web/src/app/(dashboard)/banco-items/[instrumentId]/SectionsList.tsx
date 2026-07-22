@@ -7,7 +7,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import {
   PassageDialog,
   hasPassageContent,
-  type PassageAttachment,
+  toPassageAttachments,
   type PassageData,
 } from '@/components/passage-dialog';
 
@@ -21,13 +21,7 @@ function toPassage(section: InstrumentSectionModel): PassageData {
     passageTitle: section.passageTitle,
     passageText: section.passageText,
     passageFormat: section.passageFormat,
-    attachments: (section.attachments ?? []).map<PassageAttachment>((a) => ({
-      kind: a.kind,
-      url: a.url,
-      fileName: a.fileName,
-      mimeType: a.mimeType,
-      note: a.note,
-    })),
+    attachments: toPassageAttachments(section.id, section.attachments ?? []),
   };
 }
 

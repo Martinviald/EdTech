@@ -171,3 +171,20 @@ Confirmar con las **hojas físicas** de los 2 casos:
 | 6°B | 26 | 40 | 40 | 20/26 (77%) | 0 / 21 / 19 |
 
 *(Diferencias de N entre "nivel" y "BDD" se deben a alumnos presentes en un origen y no en el otro; el cruce es por nombre.)*
+
+---
+
+## Anexo — Sembrado de bandas para instrumentos sin corte derivable (2026-07-19)
+
+Los cortes reverse-engineered de arriba solo existen para **Lectura Intermedio 3°–6°** (la única
+cohorte con datos por-alumno). Los demás instrumentos DIA (Matemática, y Lectura Cierre/Diagnóstico)
+no tienen datos por-alumno para su standard-setting, pero necesitan las 3 bandas (Nivel I/II/III)
+sembradas para colgar la **distribución por nivel** de sus informes agregados
+(`assessment_level_stats`).
+
+**Decisión:** `seed-performance-bands.ts` siembra las bandas de **todos** los instrumentos DIA
+oficiales — con el corte real donde se conoce, y un **corte genérico provisional** (promedio de los 4
+conocidos: `iToII≈0.34`, `iiToIII≈0.79`) donde no. El corte provisional **no afecta** la distribución
+por nivel ni "requiere apoyo" (que vienen del informe, colgados por identidad de banda), solo la
+etiqueta derivada logro→nivel del curso — que el DIA no reporta. Se corrige por instrumento vía el
+endpoint platform_admin cuando haya cortes oficiales.

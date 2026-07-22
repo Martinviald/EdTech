@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common';
 import { AssessmentReportModule } from '../assessment-report/assessment-report.module';
+import { CapabilityGuard } from '../common/guards/capability.guard';
 import { InstrumentQualityController } from './instrument-quality.controller';
 import { InstrumentQualityService } from './instrument-quality.service';
 
@@ -13,7 +14,7 @@ import { InstrumentQualityService } from './instrument-quality.service';
 @Module({
   imports: [AssessmentReportModule],
   controllers: [InstrumentQualityController],
-  providers: [InstrumentQualityService],
+  providers: [InstrumentQualityService, CapabilityGuard],
   exports: [InstrumentQualityService],
 })
 export class InstrumentQualityModule {}

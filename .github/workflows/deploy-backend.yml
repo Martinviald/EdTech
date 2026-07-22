@@ -1,7 +1,8 @@
-name: Deploy Backend (migrate → ECR → App Runner)
+name: Deploy Backend (migrate + backfill → ECR → App Runner)
 
-# Push a dev que toca el backend → (1) migra el RDS, (2) rebuildea la imagen y la pushea
-# a ECR. App Runner (autoDeploymentsEnabled) redeploya al detectar :latest nuevo.
+# Push a main que toca el backend → (1) migra el RDS y puebla el read-model de cohorte,
+# (2) rebuildea la imagen y la pushea a ECR. App Runner (autoDeploymentsEnabled)
+# redeploya al detectar :latest nuevo.
 #
 # La migración corre ANTES del build/push y lo GATEA (needs: migrate): las migraciones
 # son ADITIVAS, así que el código viejo que sigue corriendo no se rompe, y cuando App
@@ -11,7 +12,7 @@ name: Deploy Backend (migrate → ECR → App Runner)
 # Requiere el secret de GitHub DB_MASTER_PASSWORD (= SST secret DbMasterPassword, stage demo).
 on:
   push:
-    branches: [dev]
+    branches: [main]
     paths:
       - "apps/api/**"
       - "packages/db/**"
@@ -51,6 +52,14 @@ jobs:
 
       - name: Install deps
         run: pnpm install --frozen-lockfile
+
+      # El backfill (más abajo) importa el calculador puro de `@soe/types`, que se
+      # consume como paquete compilado (`dist/`). `pnpm install` solo enlaza el
+      # workspace; sin este build, `tsx src/scripts/backfill-cohort-stats.ts` falla con
+      # "Cannot find module @soe/types/dist/index.js". migrate.ts NO importa @soe/types,
+      # por eso el paso migrate sí funcionaba y el fallo aparecía recién en el backfill.
+      - name: Build @soe/types (lo consume el backfill)
+        run: pnpm --filter @soe/types build
 
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
@@ -108,8 +117,21 @@ jobs:
           export DATABASE_ADMIN_URL="postgresql://soe_admin:${PW_ENC}@127.0.0.1:5432/soe?sslmode=require"
           pnpm --filter @soe/db db:migrate
 
+          # Read-model de cohorte: la migración crea las tablas VACÍAS, y los lectores
+          # de la imagen nueva (item-analysis, dashboards, heatmap, official-reports)
+          # ya no derivan de `responses` — leen de acá. Sin este paso, el deploy dejaría
+          # la analítica en blanco: correctRate null, skills [] y heatmap [].
+          #
+          # Va dentro del mismo túnel y ANTES de `build-and-push` (que depende de este
+          # job), así que cuando App Runner levanta la imagen nueva el read-model ya está
+          # poblado. Es idempotente (delete+reinsert por assessment), así que correrlo en
+          # cada deploy es seguro; no recalcula assessment_results/skill_results, sólo
+          # los agrega por curso.
+          # Ver docs/plan-analitica-agregada-informes-oficiales.md §7 (Fase 1).
+          pnpm --filter @soe/db db:backfill:cohort-stats
+
           kill "$SSM_PID" 2>/dev/null || true
-          echo "✓ RDS migrado (stage ${STAGE})"
+          echo "✓ RDS migrado + read-model de cohorte poblado (stage ${STAGE})"
 
   build-and-push:
     needs: migrate # el deploy no publica imagen nueva si la migración falló

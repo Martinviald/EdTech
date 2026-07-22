@@ -213,3 +213,54 @@ CREATE POLICY "files_tenant_isolation" ON "files"
     org_id IS NULL
     OR org_id::text = current_setting('app.current_org_id', true)
   );
+
+-- ── Read-model de cohorte (analítica agregada) ──────────────────────────────
+-- `assessment_item_stats` / `assessment_skill_stats` no tienen org_id propio: heredan
+-- la pertenencia de tenant vía EXISTS sobre assessments, exactamente igual que
+-- responses / assessment_results / skill_results (ver más arriba). Se mantiene ese
+-- patrón —y no una columna org_id denormalizada— para que la forma de la política sea
+-- idéntica a la de sus tablas hermanas de resultados y no haya dos criterios conviviendo.
+--
+-- Nota: NO confundir con benchmark_aggregates, que es la única tabla SIN RLS del
+-- proyecto (se lee cross-tenant a propósito). Estas dos SÍ son datos de un colegio.
+--
+-- Ver docs/plan-analitica-agregada-informes-oficiales.md §3.5.
+ALTER TABLE "assessment_item_stats"  ENABLE ROW LEVEL SECURITY;
+ALTER TABLE "assessment_item_stats"  FORCE  ROW LEVEL SECURITY;
+ALTER TABLE "assessment_skill_stats" ENABLE ROW LEVEL SECURITY;
+ALTER TABLE "assessment_skill_stats" FORCE  ROW LEVEL SECURITY;
+ALTER TABLE "assessment_level_stats" ENABLE ROW LEVEL SECURITY;
+ALTER TABLE "assessment_level_stats" FORCE  ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "assessment_item_stats_tenant_isolation" ON "assessment_item_stats";
+CREATE POLICY "assessment_item_stats_tenant_isolation" ON "assessment_item_stats"
+  AS PERMISSIVE FOR ALL
+  USING (
+    EXISTS (
+      SELECT 1 FROM "assessments"
+      WHERE "assessments"."id" = "assessment_item_stats"."assessment_id"
+        AND "assessments"."org_id"::text = current_setting('app.current_org_id', true)
+    )
+  );
+
+DROP POLICY IF EXISTS "assessment_skill_stats_tenant_isolation" ON "assessment_skill_stats";
+CREATE POLICY "assessment_skill_stats_tenant_isolation" ON "assessment_skill_stats"
+  AS PERMISSIVE FOR ALL
+  USING (
+    EXISTS (
+      SELECT 1 FROM "assessments"
+      WHERE "assessments"."id" = "assessment_skill_stats"."assessment_id"
+        AND "assessments"."org_id"::text = current_setting('app.current_org_id', true)
+    )
+  );
+
+DROP POLICY IF EXISTS "assessment_level_stats_tenant_isolation" ON "assessment_level_stats";
+CREATE POLICY "assessment_level_stats_tenant_isolation" ON "assessment_level_stats"
+  AS PERMISSIVE FOR ALL
+  USING (
+    EXISTS (
+      SELECT 1 FROM "assessments"
+      WHERE "assessments"."id" = "assessment_level_stats"."assessment_id"
+        AND "assessments"."org_id"::text = current_setting('app.current_org_id', true)
+    )
+  );

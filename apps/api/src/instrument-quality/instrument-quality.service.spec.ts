@@ -1,9 +1,6 @@
 import type { Database } from '@soe/db';
-import type {
-  AssessmentReportItemRow,
-  AssessmentReportResponse,
-  UserRole,
-} from '@soe/types';
+import type { AssessmentReportItemRow, AssessmentReportResponse, UserRole } from '@soe/types';
+import { capabilitiesFor } from '@soe/types';
 import type { JwtPayload } from '../auth/jwt-payload.types';
 import type { AssessmentReportService } from '../assessment-report/assessment-report.service';
 import { InstrumentQualityService } from './instrument-quality.service';
@@ -112,6 +109,9 @@ function makeReport(items: AssessmentReportItemRow[]): AssessmentReportResponse 
       administeredAt: null,
       classGroups: [{ id: CLASS_GROUP_ID, name: '4°A' }],
       itemsCount: items.length,
+      dataGranularity: 'item_level',
+      capabilities: [...capabilitiesFor('item_level')],
+      hasItemLevelData: true,
     },
     summary: {
       studentsEvaluated: 0,
@@ -177,12 +177,7 @@ describe('InstrumentQualityService', () => {
     const items = [itemRow({ itemId: ITEM(1), position: 1 })];
     const { service: reportService } = makeReportService(makeReport(items));
     // Matriz con discriminación clara para que el ítem NO levante banderas.
-    const matrix = [
-      [true],
-      [true],
-      [false],
-      [false],
-    ];
+    const matrix = [[true], [true], [false], [false]];
     const db = makeDb(adminSelects(responseRows(matrix, [ITEM(1)])));
     const svc = makeService(db, reportService);
 
@@ -229,9 +224,7 @@ describe('InstrumentQualityService', () => {
   });
 
   it('flag strong_distractor cuando un distractor supera el 35%', async () => {
-    const items = [
-      itemRow({ difficulty: 50, discrimination: 0.4, topDistractorRate: 40 }),
-    ];
+    const items = [itemRow({ difficulty: 50, discrimination: 0.4, topDistractorRate: 40 })];
     const { service: reportService } = makeReportService(makeReport(items));
     const matrix = [[true], [false]];
     const db = makeDb(adminSelects(responseRows(matrix, [ITEM(1)])));
@@ -244,9 +237,7 @@ describe('InstrumentQualityService', () => {
 
   it('flag strong_distractor cuando el distractor iguala o supera a la clave (tasa ≥ p)', async () => {
     // distractor 30% ≥ dificultad 25% → distractor potente aunque < 35%.
-    const items = [
-      itemRow({ difficulty: 25, discrimination: 0.4, topDistractorRate: 30 }),
-    ];
+    const items = [itemRow({ difficulty: 25, discrimination: 0.4, topDistractorRate: 30 })];
     const { service: reportService } = makeReportService(makeReport(items));
     const matrix = [[true], [false]];
     const db = makeDb(adminSelects(responseRows(matrix, [ITEM(1)])));
@@ -258,9 +249,7 @@ describe('InstrumentQualityService', () => {
   });
 
   it('flag misaligned cuando el ítem no tiene tags (skill y content null)', async () => {
-    const items = [
-      itemRow({ skillName: null, contentName: null, discrimination: 0.4 }),
-    ];
+    const items = [itemRow({ skillName: null, contentName: null, discrimination: 0.4 })];
     const { service: reportService } = makeReportService(makeReport(items));
     const matrix = [[true], [false]];
     const db = makeDb(adminSelects(responseRows(matrix, [ITEM(1)])));

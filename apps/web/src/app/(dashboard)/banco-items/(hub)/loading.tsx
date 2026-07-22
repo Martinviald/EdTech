@@ -9,8 +9,10 @@ export default function BancoItemsLoading() {
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div className="flex flex-wrap items-center gap-3">
           <Skeleton className="h-10 w-[160px]" />
+          <Skeleton className="h-10 w-[180px]" />
           <Skeleton className="h-10 w-[160px]" />
-          <Skeleton className="h-10 w-[100px]" />
+          <Skeleton className="h-10 w-[130px]" />
+          <Skeleton className="h-10 w-[160px]" />
         </div>
         <Skeleton className="h-10 w-[160px]" />
       </div>
