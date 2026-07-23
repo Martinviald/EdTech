@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { BookOpen, Upload } from 'lucide-react';
+import { ArrowRight, BookOpen, Upload } from 'lucide-react';
 import { redirect } from 'next/navigation';
 import { canAccess, IMPORT_ROLES } from '@soe/types';
 import { auth } from '@/auth';
@@ -7,7 +7,6 @@ import { ROUTES } from '@/lib/routes';
 import { listClassGroupsForUser } from '@/lib/teacherAssignmentsApi';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { EmptyState } from '@/components/shared';
 
 export default async function MyClassesPage() {
@@ -82,42 +81,53 @@ export default async function MyClassesPage() {
           description="Aún no tienes asignaciones académicas. Contacta a tu director o coordinador para que te asigne carga."
         />
       ) : (
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+        <div className="divide-y overflow-hidden rounded-lg border">
           {cards.map((c) => (
             <Link
               key={c.classGroupId}
               href={ROUTES.myClass(c.classGroupId)}
-              className="group block rounded-lg focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+              className="group flex items-center gap-3 px-4 py-3 transition-colors hover:bg-muted/50 focus-visible:bg-muted/50 focus-visible:outline-none"
             >
-              <Card className="h-full transition-colors group-hover:bg-muted/30">
-                <CardHeader>
-                  <CardTitle className="text-base">
+              <div className="min-w-0 flex-1">
+                <div className="flex items-center gap-2">
+                  <h2 className="truncate text-sm font-medium leading-tight group-hover:text-primary">
                     {c.gradeShortName} · {c.className}
-                  </CardTitle>
-                  <p className="text-xs text-muted-foreground">Año {c.academicYear}</p>
-                </CardHeader>
-                <CardContent className="space-y-2">
+                  </h2>
+                  <span className="shrink-0 text-xs text-muted-foreground">
+                    Año {c.academicYear}
+                  </span>
+                </div>
+                <div className="mt-1 flex flex-wrap items-center gap-1.5">
                   {c.subjects.length === 0 ? (
-                    <p className="text-sm text-muted-foreground">Sin asignaturas asignadas.</p>
+                    <span className="text-xs text-muted-foreground">Sin asignaturas asignadas</span>
                   ) : (
                     c.subjects.map((s) => (
-                      <div
+                      <Badge
                         key={s.subjectClassId}
-                        className="flex items-center justify-between rounded-md border px-3 py-2 text-sm"
+                        variant={
+                          s.role === 'primary'
+                            ? 'default'
+                            : s.role === 'assistant'
+                              ? 'secondary'
+                              : 'outline'
+                        }
+                        className="font-normal"
                       >
-                        <span className="font-medium">{s.subjectName}</span>
-                        {s.role === 'primary' ? (
-                          <Badge variant="default">Titular</Badge>
-                        ) : s.role === 'assistant' ? (
-                          <Badge variant="secondary">Asistente</Badge>
-                        ) : (
-                          <Badge variant="outline">Sin asignar</Badge>
-                        )}
-                      </div>
+                        {s.subjectShortName}
+                        {s.role === 'primary'
+                          ? ' · Titular'
+                          : s.role === 'assistant'
+                            ? ' · Asistente'
+                            : ''}
+                      </Badge>
                     ))
                   )}
-                </CardContent>
-              </Card>
+                </div>
+              </div>
+              <ArrowRight
+                className="size-4 shrink-0 text-muted-foreground transition-colors group-hover:text-primary"
+                aria-hidden
+              />
             </Link>
           ))}
         </div>
