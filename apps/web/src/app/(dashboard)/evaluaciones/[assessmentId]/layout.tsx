@@ -155,6 +155,15 @@ export default async function EvaluacionLayout({
       <HubAssistantContext assessmentId={assessmentId} label={title} />
 
       <PageHeader
+        breadcrumb={
+          <nav className="flex items-center gap-2 text-sm text-muted-foreground">
+            <Link href={ROUTES.evaluaciones} className="hover:text-foreground">
+              Evaluaciones
+            </Link>
+            <span aria-hidden>/</span>
+            <span className="truncate text-foreground">{title}</span>
+          </nav>
+        }
         title={title}
         description={description}
         actions={
