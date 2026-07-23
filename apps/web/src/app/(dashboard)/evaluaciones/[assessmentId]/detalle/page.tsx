@@ -2,6 +2,7 @@ import { redirect } from 'next/navigation';
 import { Inbox, Table2, Users } from 'lucide-react';
 import { auth } from '@/auth';
 import { apiGet } from '@/lib/api';
+import { ROUTES } from '@/lib/routes';
 import { asCapabilityUnavailable } from '@/lib/errors';
 import { assessmentSupports } from '@/lib/assessment-capabilities';
 import {
@@ -11,7 +12,7 @@ import {
   type DashboardFilterOptionsResponse,
   type ItemMatrixResponse,
 } from '@soe/types';
-import { EmptyState } from '@/components/patterns';
+import { EmptyState } from '@/components/shared';
 import { Card, CardContent } from '@/components/ui/card';
 import { DashboardFilterBar } from '../../../resultados/components/dashboard-filter-bar';
 import {
@@ -30,15 +31,15 @@ export default async function EvaluacionDetallePage({
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
   const session = await auth();
-  if (!session?.user) redirect('/login');
-  if (!canAccess(session.user.roles, ITEM_ANALYSIS_VIEWER_ROLES)) redirect('/dashboard');
+  if (!session?.user) redirect(ROUTES.login);
+  if (!canAccess(session.user.roles, ITEM_ANALYSIS_VIEWER_ROLES)) redirect(ROUTES.dashboard);
 
   const { assessmentId } = await params;
   const sp = await searchParams;
   const filters = parseDashboardFilters(sp);
   const filterQuery = buildDashboardQuery(filters);
   const classGroupId = filters.classGroupId;
-  const basePath = `/evaluaciones/${assessmentId}/detalle`;
+  const basePath = ROUTES.evaluacionDetalle(assessmentId);
 
   // TKT-09 — el ordenamiento (alumnos/preguntas por % de logro) se resuelve en el
   // cliente, por lo que se pide el curso COMPLETO sin paginar (`all=true`).

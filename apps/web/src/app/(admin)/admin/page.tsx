@@ -1,7 +1,7 @@
-import type { Route } from 'next';
 import Link from 'next/link';
 import { School, ShieldCheck } from 'lucide-react';
 import { listOrgs, listPlatformAdmins } from '@/lib/adminApi';
+import { ROUTES } from '@/lib/routes';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 
 export const dynamic = 'force-dynamic';
@@ -22,7 +22,7 @@ export default async function AdminLandingPage() {
       </div>
 
       <div className="grid gap-4 sm:grid-cols-2">
-        <Link href={'/admin/colegios' as Route} className="group">
+        <Link href={ROUTES.adminColegios} className="group">
           <Card className="transition-colors group-hover:border-primary/50">
             <CardHeader>
               <div className="flex items-center gap-2">
@@ -37,7 +37,7 @@ export default async function AdminLandingPage() {
           </Card>
         </Link>
 
-        <Link href={'/admin/equipo' as Route} className="group">
+        <Link href={ROUTES.adminEquipo} className="group">
           <Card className="transition-colors group-hover:border-primary/50">
             <CardHeader>
               <div className="flex items-center gap-2">

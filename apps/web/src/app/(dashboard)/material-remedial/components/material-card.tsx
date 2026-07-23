@@ -1,9 +1,9 @@
 import Link from 'next/link';
-import type { Route } from 'next';
 import { ArrowRight } from 'lucide-react';
 import type { RemedialMaterialModel } from '@soe/types';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { StatusBadge } from '@/components/patterns';
+import { StatusBadge } from '@/components/shared';
+import { ROUTES } from '@/lib/routes';
 import { REMEDIAL_STATUS_LABELS, REMEDIAL_STATUS_TONE, REMEDIAL_TYPE_LABELS } from './labels';
 
 function formatDate(iso: string): string {
@@ -24,7 +24,7 @@ export function MaterialCard({ material }: { material: RemedialMaterialModel }) 
 
   return (
     <Link
-      href={`/material-remedial/${material.id}` as Route}
+      href={ROUTES.materialRemedialDetalle(material.id)}
       className="block rounded-lg outline-none ring-offset-background transition focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
     >
       <Card className="h-full transition hover:border-primary/50 hover:shadow-sm">

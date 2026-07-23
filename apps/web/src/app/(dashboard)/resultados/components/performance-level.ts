@@ -24,24 +24,20 @@ export const PERFORMANCE_LEVEL_ORDER: readonly PerformanceLevel[] = [
   'advanced',
 ];
 
-/** Clases de badge (texto + fondo) por nivel, con soporte dark mode. */
+/** Clases de badge (texto + fondo) por nivel, vía tokens `--level-*` (theme-aware). */
 export const PERFORMANCE_LEVEL_BADGE_CLASS: Record<PerformanceLevel, string> = {
-  insufficient:
-    'border-transparent bg-red-100 text-red-800 dark:bg-red-950 dark:text-red-200',
-  elementary:
-    'border-transparent bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-200',
-  adequate:
-    'border-transparent bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-200',
-  advanced:
-    'border-transparent bg-blue-100 text-blue-800 dark:bg-blue-950 dark:text-blue-200',
+  insufficient: 'border-transparent bg-level-insufficient/15 text-level-insufficient',
+  elementary: 'border-transparent bg-level-elementary/15 text-level-elementary',
+  adequate: 'border-transparent bg-level-adequate/15 text-level-adequate',
+  advanced: 'border-transparent bg-level-advanced/15 text-level-advanced',
 };
 
-/** Clase de relleno (barra) por nivel, para la distribución apilada. */
+/** Clase de relleno (barra) por nivel, para la distribución apilada. Vía tokens. */
 export const PERFORMANCE_LEVEL_BAR_CLASS: Record<PerformanceLevel, string> = {
-  insufficient: 'bg-red-500 dark:bg-red-600',
-  elementary: 'bg-amber-500 dark:bg-amber-600',
-  adequate: 'bg-emerald-500 dark:bg-emerald-600',
-  advanced: 'bg-blue-500 dark:bg-blue-600',
+  insufficient: 'bg-level-insufficient',
+  elementary: 'bg-level-elementary',
+  adequate: 'bg-level-adequate',
+  advanced: 'bg-level-advanced',
 };
 
 /**

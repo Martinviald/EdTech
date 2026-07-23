@@ -1,9 +1,18 @@
 import type { ReactNode } from 'react';
 import Link from 'next/link';
-import type { Route } from 'next';
 import { notFound, redirect } from 'next/navigation';
+import {
+  BadgeCheck,
+  BarChart3,
+  BookOpen,
+  FileText,
+  LayoutDashboard,
+  ListChecks,
+  Sparkles,
+} from 'lucide-react';
 import { auth } from '@/auth';
 import { apiGet } from '@/lib/api';
+import { ROUTES } from '@/lib/routes';
 import { Button } from '@/components/ui/button';
 import {
   canAccess,
@@ -18,7 +27,7 @@ import {
   type AssessmentReportResponse,
   type InstrumentAttachmentModel,
 } from '@soe/types';
-import { PageContainer, PageHeader } from '@/components/patterns';
+import { PageContainer, PageHeader } from '@/components/shared';
 import { AskAiButton } from '@/components/assistant';
 import { EnunciadoViewButton } from '@/components/instruments/EnunciadoViewButton';
 import { AssessmentTabsNav, type HubTab } from './components/assessment-tabs-nav';
@@ -48,8 +57,8 @@ export default async function EvaluacionLayout({
   params: Promise<{ assessmentId: string }>;
 }) {
   const session = await auth();
-  if (!session?.user) redirect('/login');
-  if (!canAccess(session.user.roles, DASHBOARD_VIEWER_ROLES)) redirect('/dashboard');
+  if (!session?.user) redirect(ROUTES.login);
+  if (!canAccess(session.user.roles, DASHBOARD_VIEWER_ROLES)) redirect(ROUTES.dashboard);
 
   const { assessmentId } = await params;
 
@@ -68,7 +77,6 @@ export default async function EvaluacionLayout({
 
   const meta = report.meta;
   const roles = session.user.roles;
-  const base = `/evaluaciones/${assessmentId}`;
   const title = meta.assessmentName ?? meta.instrumentName;
 
   // PDF del enunciado del instrumento de esta evaluación (si existe). Se ofrece en
@@ -101,24 +109,25 @@ export default async function EvaluacionLayout({
   const canSeeQuality = capabilities.includes('psychometrics');
 
   const tabs: HubTab[] = [
-    { href: base, label: 'Resumen', exact: true },
+    { href: ROUTES.evaluacion(assessmentId), label: 'Resumen', icon: <LayoutDashboard />, exact: true },
     ...(canAccess(roles, ANALYTICS_VIEWER_ROLES)
-      ? [{ href: `${base}/resultados`, label: 'Resultados' }]
+      ? [{ href: ROUTES.evaluacionResultados(assessmentId), label: 'Resultados', icon: <BarChart3 /> }]
       : []),
     ...(canAccess(roles, ITEM_ANALYSIS_VIEWER_ROLES)
-      ? [{ href: `${base}/detalle`, label: 'Detalle por pregunta' }]
+      ? [{ href: ROUTES.evaluacionDetalle(assessmentId), label: 'Detalle por pregunta', icon: <ListChecks /> }]
       : []),
     ...(canAccess(roles, AI_ANALYSIS_VIEWER_ROLES)
-      ? [{ href: `${base}/analisis-ia`, label: 'Análisis IA' }]
+      ? [{ href: ROUTES.evaluacionAnalisisIa(assessmentId), label: 'Análisis IA', icon: <Sparkles /> }]
       : []),
     ...(canAccess(roles, REMEDIAL_VIEWER_ROLES)
-      ? [{ href: `${base}/material-remedial`, label: 'Material remedial' }]
+      ? [{ href: ROUTES.evaluacionMaterialRemedial(assessmentId), label: 'Material remedial', icon: <BookOpen /> }]
       : []),
     ...(canAccess(roles, INSTRUMENT_QUALITY_VIEWER_ROLES)
       ? [
           {
-            href: `${base}/calidad`,
+            href: ROUTES.evaluacionCalidad(assessmentId),
             label: 'Calidad',
+            icon: <BadgeCheck />,
             disabled: !canSeeQuality,
             disabledReason: canSeeQuality
               ? undefined
@@ -127,7 +136,7 @@ export default async function EvaluacionLayout({
         ]
       : []),
     ...(canAccess(roles, OFFICIAL_REPORT_VIEWER_ROLES)
-      ? [{ href: `${base}/informe-oficial`, label: 'Informe oficial' }]
+      ? [{ href: ROUTES.evaluacionInformeOficial(assessmentId), label: 'Informe oficial', icon: <FileText /> }]
       : []),
   ];
 
@@ -155,7 +164,7 @@ export default async function EvaluacionLayout({
         actions={
           <>
             {enunciadoPdf ? <EnunciadoViewButton instrumentId={meta.instrumentId} /> : null}
-            <Link href={`/banco-items/${meta.instrumentId}/spec-table` as Route}>
+            <Link href={ROUTES.bancoItemSpecTable(meta.instrumentId)}>
               <Button variant="outline" size="sm">
                 Tabla de especificaciones
               </Button>

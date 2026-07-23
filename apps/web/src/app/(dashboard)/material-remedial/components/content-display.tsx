@@ -7,7 +7,7 @@ import {
   type RemedialPracticeItemPreview,
   type RemedialStimulus,
 } from '@soe/types';
-import { AlertCallout } from '@/components/patterns';
+import { AlertCallout } from '@/components/shared';
 import { GuideView } from './guide-view';
 import { PracticeView } from './practice-view';
 import { PlanView } from './plan-view';

@@ -1,6 +1,7 @@
 'use server';
 
 import { revalidatePath } from 'next/cache';
+import { ROUTES } from '@/lib/routes';
 import {
   gradingScaleCreateSchema,
   gradingScaleUpdateSchema,
@@ -17,7 +18,7 @@ export async function createGradingScaleAction(
 ): Promise<GradingScaleResponseModel> {
   const validated = gradingScaleCreateSchema.parse(input);
   const created = await apiPost<GradingScaleResponseModel>('/grading-scales', validated);
-  revalidatePath('/configuracion/escalas');
+  revalidatePath(ROUTES.configEscalas);
   return created;
 }
 
@@ -30,14 +31,14 @@ export async function updateGradingScaleAction(
     `/grading-scales/${id}`,
     validated,
   );
-  revalidatePath('/configuracion/escalas');
+  revalidatePath(ROUTES.configEscalas);
   revalidatePath(`/configuracion/escalas/${id}`);
   return updated;
 }
 
 export async function deleteGradingScaleAction(id: string): Promise<void> {
   await apiDelete(`/grading-scales/${id}`);
-  revalidatePath('/configuracion/escalas');
+  revalidatePath(ROUTES.configEscalas);
 }
 
 export async function previewConversionAction(

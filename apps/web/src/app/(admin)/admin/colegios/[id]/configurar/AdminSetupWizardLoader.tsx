@@ -7,6 +7,7 @@ import type {
   Subject,
 } from '@/app/(dashboard)/organizacion/configurar/types';
 import type { AcademicSetupDto, UpdateOrganizationProfileDto } from '@soe/types';
+import { ROUTES } from '@/lib/routes';
 
 type Props = {
   orgId: string;
@@ -38,7 +39,7 @@ export function AdminSetupWizardLoader({
         updateOrgProfile: updateAction,
         setupAcademicYear: setupAction,
       }}
-      successRedirect={`/admin/colegios/${orgId}`}
+      successRedirect={ROUTES.adminColegio(orgId)}
     />
   );
 }

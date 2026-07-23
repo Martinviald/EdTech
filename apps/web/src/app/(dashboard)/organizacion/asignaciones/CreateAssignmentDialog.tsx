@@ -227,12 +227,12 @@ export function CreateAssignmentDialog({
           </div>
 
           {primaryConflictMsg ? (
-            <div className="rounded-md border border-amber-300 bg-amber-50 p-3 text-sm dark:border-amber-700 dark:bg-amber-950/30">
-              <p className="font-medium text-amber-900 dark:text-amber-100">
+            <div className="rounded-md border border-warning/30 bg-warning/15 p-3 text-sm">
+              <p className="font-medium text-warning">
                 Conflicto de profesor titular
               </p>
-              <p className="mt-1 text-amber-800 dark:text-amber-200">{primaryConflictMsg}</p>
-              <p className="mt-2 text-amber-800 dark:text-amber-200">
+              <p className="mt-1 text-warning">{primaryConflictMsg}</p>
+              <p className="mt-2 text-warning">
                 Puedes asignar a este profesor como <strong>asistente / co-docente</strong> en su
                 lugar.
               </p>

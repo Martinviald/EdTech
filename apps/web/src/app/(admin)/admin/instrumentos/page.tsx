@@ -1,7 +1,8 @@
-import type { Route } from 'next';
+import { Suspense } from 'react';
 import Link from 'next/link';
 import { Library } from 'lucide-react';
 import { apiGet } from '@/lib/api';
+import { ROUTES } from '@/lib/routes';
 import type { InstrumentModel } from '@soe/types';
 import {
   Table,
@@ -12,7 +13,8 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
-import { EmptyState } from '@/components/EmptyState';
+import { Skeleton } from '@/components/ui/skeleton';
+import { EmptyState, TableSkeleton } from '@/components/shared';
 
 export const dynamic = 'force-dynamic';
 
@@ -35,9 +37,9 @@ const TYPE_LABELS: Record<string, string> = {
 };
 
 const STATUS_COLORS: Record<string, string> = {
-  draft: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-950 dark:text-yellow-200',
-  published: 'bg-green-100 text-green-800 dark:bg-green-950 dark:text-green-200',
-  archived: 'bg-gray-100 text-gray-800 dark:bg-gray-950 dark:text-gray-200',
+  draft: 'bg-warning/15 text-warning',
+  published: 'bg-success/10 text-success',
+  archived: 'bg-muted text-muted-foreground',
 };
 
 const STATUS_LABELS: Record<string, string> = {
@@ -53,6 +55,28 @@ const STATUS_LABELS: Record<string, string> = {
  * donde se configura el enunciado, secciones e ítems.
  */
 export default async function AdminInstrumentosPage() {
+  return (
+    <div className="space-y-6">
+      <Suspense fallback={<InstrumentosListFallback />}>
+        <InstrumentosListSection />
+      </Suspense>
+    </div>
+  );
+}
+
+function InstrumentosListFallback() {
+  return (
+    <>
+      <div className="space-y-2">
+        <Skeleton className="h-7 w-64" />
+        <Skeleton className="h-4 w-96 max-w-full" />
+      </div>
+      <TableSkeleton />
+    </>
+  );
+}
+
+async function InstrumentosListSection() {
   const { data: instruments, total } = await apiGet<InstrumentListResponse>(
     '/instruments?isOfficial=true&pageSize=100',
   );
@@ -60,7 +84,7 @@ export default async function AdminInstrumentosPage() {
   const sorted = [...instruments].sort((a, b) => a.name.localeCompare(b.name, 'es'));
 
   return (
-    <div className="space-y-6">
+    <>
       <div>
         <h1 className="text-2xl font-semibold tracking-tight">Instrumentos oficiales</h1>
         <p className="text-sm text-muted-foreground">
@@ -109,7 +133,7 @@ export default async function AdminInstrumentosPage() {
                   </TableCell>
                   <TableCell>
                     <Link
-                      href={`/admin/instrumentos/${instrument.id}` as Route}
+                      href={ROUTES.adminInstrumento(instrument.id)}
                       className="text-sm text-primary underline-offset-4 hover:underline"
                     >
                       Gestionar
@@ -121,6 +145,6 @@ export default async function AdminInstrumentosPage() {
           </Table>
         </div>
       )}
-    </div>
+    </>
   );
 }

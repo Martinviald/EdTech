@@ -9,7 +9,7 @@ import type {
 } from '@soe/types';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { AlertCallout } from '@/components/patterns';
+import { AlertCallout } from '@/components/shared';
 
 interface ComparisonReportProps {
   output: InstrumentComparisonOutput;
@@ -25,9 +25,9 @@ const DIRECTION_META: Record<
   improved: {
     label: 'Mejoró',
     icon: ArrowUpRight,
-    className: 'text-emerald-600 dark:text-emerald-400',
+    className: 'text-success',
   },
-  declined: { label: 'Bajó', icon: ArrowDownRight, className: 'text-red-600 dark:text-red-400' },
+  declined: { label: 'Bajó', icon: ArrowDownRight, className: 'text-destructive' },
   stable: { label: 'Estable', icon: ArrowRight, className: 'text-muted-foreground' },
 };
 

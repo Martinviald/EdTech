@@ -26,7 +26,7 @@ import {
 import { cn } from '@/lib/utils';
 import { DistributionBar } from '../components/distribution-bar';
 import { PerformanceBadge } from '../components/performance-badge';
-import { SummaryCard } from '../components/summary-card';
+import { StatCard } from '@/components/shared';
 import {
   bandLabel,
   formatAchievement,
@@ -51,37 +51,36 @@ const DISCRIMINATION_MID = 0.3;
 const FLAG_META: Record<ItemReportFlag, { label: string; className: string }> = {
   critical: {
     label: 'Crítico',
-    className: 'border-transparent bg-red-100 text-red-800 dark:bg-red-950 dark:text-red-200',
+    className: 'border-transparent bg-destructive/10 text-destructive',
   },
   low_discrimination: {
     label: 'Baja discriminación',
-    className:
-      'border-transparent bg-purple-100 text-purple-800 dark:bg-purple-950 dark:text-purple-200',
+    className: 'border-transparent bg-accent text-accent-foreground',
   },
   strong_distractor: {
     label: 'Distractor potente',
     className:
-      'border-transparent bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-200',
+      'border-transparent bg-warning/15 text-warning',
   },
   easy: {
     label: 'Muy fácil',
     className:
-      'border-transparent bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-200',
+      'border-transparent bg-muted text-muted-foreground',
   },
 };
 
 const PRIORITY_META: Record<'high' | 'medium' | 'low', { label: string; className: string }> = {
   high: {
     label: 'Alta',
-    className: 'bg-red-100 text-red-800 dark:bg-red-950 dark:text-red-200',
+    className: 'bg-destructive/10 text-destructive',
   },
   medium: {
     label: 'Media',
-    className: 'bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-200',
+    className: 'bg-warning/15 text-warning',
   },
   low: {
     label: 'Baja',
-    className: 'bg-blue-100 text-blue-800 dark:bg-blue-950 dark:text-blue-200',
+    className: 'bg-info/10 text-info',
   },
 };
 
@@ -109,16 +108,16 @@ function fmtDiscrimination(value: number | null): string {
 
 function difficultyClass(value: number | null): string {
   if (value === null) return 'text-muted-foreground';
-  if (value < DIFFICULTY_LOW) return 'text-red-600 dark:text-red-400 font-semibold';
-  if (value < DIFFICULTY_MID) return 'text-amber-600 dark:text-amber-400 font-medium';
-  return 'text-emerald-600 dark:text-emerald-400 font-medium';
+  if (value < DIFFICULTY_LOW) return 'text-destructive font-semibold';
+  if (value < DIFFICULTY_MID) return 'text-warning font-medium';
+  return 'text-success font-medium';
 }
 
 function discriminationClass(value: number | null): string {
   if (value === null) return 'text-muted-foreground';
-  if (value < DISCRIMINATION_LOW) return 'text-red-600 dark:text-red-400 font-semibold';
-  if (value < DISCRIMINATION_MID) return 'text-amber-600 dark:text-amber-400 font-medium';
-  return 'text-emerald-600 dark:text-emerald-400 font-medium';
+  if (value < DISCRIMINATION_LOW) return 'text-destructive font-semibold';
+  if (value < DISCRIMINATION_MID) return 'text-warning font-medium';
+  return 'text-success font-medium';
 }
 
 export function ReportBody({
@@ -156,7 +155,7 @@ export function ReportBody({
 
       {/* 1. Síntesis ejecutiva */}
       <section className={`grid grid-cols-1 gap-4 ${summaryGridCols}`}>
-        <SummaryCard
+        <StatCard
           label="% Logro promedio"
           value={formatAchievement(summary.averageAchievement)}
           hint={`Nivel: ${bandLabel(summary.performanceBand, summary.performanceLevel)}`}
@@ -166,7 +165,7 @@ export function ReportBody({
             Sin escala, se ocultan estas tarjetas (no se muestra el default 4.0). */}
         {summary.hasGradingScale ? (
           <>
-            <SummaryCard
+            <StatCard
               label="Aprobación"
               value={summary.passingRate === null ? '—' : `${summary.passingRate.toFixed(1)}%`}
               hint={
@@ -177,7 +176,7 @@ export function ReportBody({
               icon={CheckCircle2}
             />
             {isDia ? null : (
-              <SummaryCard
+              <StatCard
                 label="Nota promedio"
                 value={summary.averageGrade === null ? '—' : summary.averageGrade.toFixed(1)}
                 hint={summary.averageGrade === null ? undefined : 'Promedio del curso evaluado'}
@@ -186,7 +185,7 @@ export function ReportBody({
             )}
           </>
         ) : null}
-        <SummaryCard
+        <StatCard
           label="Asistencia"
           value={`${summary.studentsEvaluated}/${summary.studentsEnrolled}`}
           hint={
@@ -283,7 +282,7 @@ function Highlights({ report }: { report: AssessmentReportResponse }) {
       <Card>
         <CardHeader className="pb-2">
           <CardTitle className="flex items-center gap-2 text-base">
-            <TrendingUp className="size-4 text-emerald-600 dark:text-emerald-400" aria-hidden />
+            <TrendingUp className="size-4 text-success" aria-hidden />
             Fortalezas
           </CardTitle>
         </CardHeader>
@@ -294,7 +293,7 @@ function Highlights({ report }: { report: AssessmentReportResponse }) {
             <ul className="space-y-1.5">
               {strengths.map((s) => (
                 <li key={s} className="flex items-start gap-2 text-sm">
-                  <span className="mt-1.5 size-1.5 shrink-0 rounded-full bg-emerald-500" />
+                  <span className="mt-1.5 size-1.5 shrink-0 rounded-full bg-success" />
                   {s}
                 </li>
               ))}
@@ -305,7 +304,7 @@ function Highlights({ report }: { report: AssessmentReportResponse }) {
       <Card>
         <CardHeader className="pb-2">
           <CardTitle className="flex items-center gap-2 text-base">
-            <TrendingDown className="size-4 text-red-600 dark:text-red-400" aria-hidden />
+            <TrendingDown className="size-4 text-destructive" aria-hidden />
             Brechas prioritarias
           </CardTitle>
         </CardHeader>
@@ -316,7 +315,7 @@ function Highlights({ report }: { report: AssessmentReportResponse }) {
             <ul className="space-y-1.5">
               {gaps.map((g) => (
                 <li key={g} className="flex items-start gap-2 text-sm">
-                  <span className="mt-1.5 size-1.5 shrink-0 rounded-full bg-red-500" />
+                  <span className="mt-1.5 size-1.5 shrink-0 rounded-full bg-destructive" />
                   {g}
                 </li>
               ))}
@@ -364,9 +363,9 @@ function CourseComparison({ report }: { report: AssessmentReportResponse }) {
                     className={cn(
                       'text-right tabular-nums',
                       r.gapVsAverage !== null && r.gapVsAverage < 0
-                        ? 'text-red-600 dark:text-red-400'
+                        ? 'text-destructive'
                         : r.gapVsAverage !== null && r.gapVsAverage > 0
-                          ? 'text-emerald-600 dark:text-emerald-400'
+                          ? 'text-success'
                           : 'text-muted-foreground',
                     )}
                   >
@@ -601,7 +600,7 @@ function RiskStudents({ report }: { report: AssessmentReportResponse }) {
     <Card>
       <CardHeader>
         <CardTitle className="flex items-center gap-2 text-base">
-          <AlertTriangle className="size-4 text-amber-600 dark:text-amber-400" aria-hidden />
+          <AlertTriangle className="size-4 text-warning" aria-hidden />
           Alumnos en foco de intervención
         </CardTitle>
         <p className="text-sm text-muted-foreground">
@@ -657,7 +656,7 @@ function Recommendations({ report }: { report: AssessmentReportResponse }) {
     <Card>
       <CardHeader>
         <CardTitle className="flex items-center gap-2 text-base">
-          <Lightbulb className="size-4 text-blue-600 dark:text-blue-400" aria-hidden />
+          <Lightbulb className="size-4 text-info" aria-hidden />
           Recomendaciones
         </CardTitle>
         <p className="text-sm text-muted-foreground">

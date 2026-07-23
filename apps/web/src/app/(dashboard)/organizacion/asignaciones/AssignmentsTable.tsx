@@ -22,7 +22,7 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import { EmptyState } from '@/components/EmptyState';
+import { EmptyState } from '@/components/shared';
 import { deleteAssignmentAction } from './actions';
 
 const ALL = '__all__';

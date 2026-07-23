@@ -16,6 +16,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { createTaxonomy } from './actions';
 import type { CreateTaxonomyDto } from '@soe/types';
+import { ROUTES } from '@/lib/routes';
 
 const TYPE_OPTIONS: Array<{ value: CreateTaxonomyDto['type']; label: string }> = [
   { value: 'custom', label: 'Personalizado' },
@@ -63,7 +64,7 @@ export function NewTaxonomyButton({ isPlatformAdmin }: { isPlatformAdmin: boolea
         setOpen(false);
         reset();
         router.refresh();
-        router.push(`/marcos-academicos/${created.id}`);
+        router.push(ROUTES.marcoAcademico(created.id));
       } catch (err) {
         toast.error(err instanceof Error ? err.message : 'Error al crear');
       }

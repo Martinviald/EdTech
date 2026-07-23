@@ -22,9 +22,9 @@ const TYPE_LABELS: Record<string, string> = {
 };
 
 const STATUS_COLORS: Record<string, string> = {
-  draft: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-950 dark:text-yellow-200',
-  published: 'bg-green-100 text-green-800 dark:bg-green-950 dark:text-green-200',
-  archived: 'bg-gray-100 text-gray-800 dark:bg-gray-950 dark:text-gray-200',
+  draft: 'bg-warning/15 text-warning',
+  published: 'bg-success/10 text-success',
+  archived: 'bg-muted text-muted-foreground',
 };
 
 const STATUS_LABELS: Record<string, string> = {
@@ -93,7 +93,7 @@ export function InstrumentDetailView({
             {instrument.isOfficial && (
               <Badge
                 variant="outline"
-                className="border-0 bg-blue-100 text-xs text-blue-800 dark:bg-blue-950 dark:text-blue-200"
+                className="border-0 bg-info/10 text-xs text-info"
               >
                 Oficial
               </Badge>

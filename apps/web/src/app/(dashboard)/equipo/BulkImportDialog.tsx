@@ -125,12 +125,12 @@ export function BulkImportDialog() {
           {parsed && !result && (
             <div className="space-y-3">
               <div className="flex flex-wrap gap-3 text-sm">
-                <span className="inline-flex items-center gap-1 rounded-md bg-emerald-100 px-2 py-1 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-200">
+                <span className="inline-flex items-center gap-1 rounded-md bg-success/10 px-2 py-1 text-success">
                   <CheckCircle2 className="size-4" />
                   {parsed.valid.length} válidos
                 </span>
                 {parsed.errors.length > 0 && (
-                  <span className="inline-flex items-center gap-1 rounded-md bg-amber-100 px-2 py-1 text-amber-800 dark:bg-amber-950 dark:text-amber-200">
+                  <span className="inline-flex items-center gap-1 rounded-md bg-warning/15 px-2 py-1 text-warning">
                     <XCircle className="size-4" />
                     {parsed.errors.length} con errores
                   </span>
@@ -159,7 +159,7 @@ export function BulkImportDialog() {
 
           {result && (
             <div className="space-y-3">
-              <div className="rounded-md border bg-emerald-50 p-3 text-sm text-emerald-900 dark:bg-emerald-950 dark:text-emerald-100">
+              <div className="rounded-md border bg-success/10 p-3 text-sm text-success">
                 <strong>{result.created}</strong> miembro(s) agregado(s) correctamente.
                 {result.skipped.length > 0 && (
                   <>

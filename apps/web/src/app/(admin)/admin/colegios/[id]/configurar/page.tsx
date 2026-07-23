@@ -1,4 +1,3 @@
-import type { Route } from 'next';
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
 import { ArrowLeft } from 'lucide-react';
@@ -13,6 +12,7 @@ import {
   adminUpdateOrgProfileAction,
 } from './actions';
 import { AdminSetupWizardLoader } from './AdminSetupWizardLoader';
+import { ROUTES } from '@/lib/routes';
 
 export const dynamic = 'force-dynamic';
 
@@ -29,7 +29,7 @@ export default async function AdminConfigurarPage({
   ]);
 
   if (org.type !== 'school') {
-    redirect(`/admin/colegios/${id}` as Route);
+    redirect(ROUTES.adminColegio(id));
   }
 
   // `.bind` produce nuevas referencias de Server Action atadas al orgId del path.
@@ -40,7 +40,7 @@ export default async function AdminConfigurarPage({
     <div className="space-y-6">
       <div>
         <Link
-          href={`/admin/colegios/${id}` as Route}
+          href={ROUTES.adminColegio(id)}
           className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground"
         >
           <ArrowLeft className="size-3.5" />

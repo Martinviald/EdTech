@@ -6,9 +6,6 @@
 // ─────────────────────────────────────────────────────────────────────────────
 
 import { useState } from 'react';
-import * as XLSX from 'xlsx';
-import { jsPDF } from 'jspdf';
-import autoTable from 'jspdf-autotable';
 import { Download } from 'lucide-react';
 import {
   DropdownMenu,
@@ -49,9 +46,10 @@ export function ExportViewButton({
   const [busy, setBusy] = useState(false);
   const hasData = tables.some((t) => t.table.rows.length > 0);
 
-  function exportExcel() {
+  async function exportExcel() {
     setBusy(true);
     try {
+      const XLSX = await import('xlsx');
       const wb = XLSX.utils.book_new();
       for (const { name, table } of tables) {
         const aoa: (string | number | null)[][] = [table.columns, ...table.rows];
@@ -66,9 +64,11 @@ export function ExportViewButton({
     }
   }
 
-  function exportPdf() {
+  async function exportPdf() {
     setBusy(true);
     try {
+      const { jsPDF } = await import('jspdf');
+      const autoTable = (await import('jspdf-autotable')).default;
       const doc = new jsPDF({ orientation: 'landscape' });
       doc.setFontSize(14);
       doc.text(title, 14, 16);

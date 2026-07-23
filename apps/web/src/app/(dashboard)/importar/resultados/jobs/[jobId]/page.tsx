@@ -1,11 +1,12 @@
 import Link from 'next/link';
-import type { Route } from 'next';
 import { redirect } from 'next/navigation';
 import { AlertCircle, ArrowLeft, ArrowRight, Sparkles } from 'lucide-react';
 import { ANSWER_SHEET_IMPORT_ROLES, canAccess } from '@soe/types';
 import { auth } from '@/auth';
+import { ROUTES } from '@/lib/routes';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
+import { PageContainer, PageHeader } from '@/components/shared';
 import { getImportJobAction } from '../../actions';
 import { JobStatusCard } from '../../components/job-status-card';
 
@@ -15,22 +16,20 @@ type PageProps = {
 
 export default async function JobStatusPage({ params }: PageProps) {
   const session = await auth();
-  if (!session?.user?.orgId) redirect('/login');
+  if (!session?.user?.orgId) redirect(ROUTES.login);
   if (!canAccess(session.user.roles, ANSWER_SHEET_IMPORT_ROLES)) {
-    redirect('/dashboard');
+    redirect(ROUTES.dashboard);
   }
 
   const { jobId } = await params;
   const result = await getImportJobAction(jobId);
 
   return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-semibold">Estado de la importación</h1>
-        <p className="text-muted-foreground mt-1 text-sm">
-          Detalle del job que procesa las respuestas y calcula los resultados.
-        </p>
-      </div>
+    <PageContainer>
+      <PageHeader
+        title="Estado de la importación"
+        description="Detalle del job que procesa las respuestas y calcula los resultados."
+      />
 
       {!result.ok ? (
         <div className="space-y-4">
@@ -44,7 +43,7 @@ export default async function JobStatusPage({ params }: PageProps) {
             </CardContent>
           </Card>
           <Button asChild variant="outline">
-            <Link href={'/importar/resultados' as Route}>
+            <Link href={ROUTES.importarResultados}>
               <ArrowLeft className="mr-2 h-4 w-4" />
               Volver a importar resultados
             </Link>
@@ -56,7 +55,7 @@ export default async function JobStatusPage({ params }: PageProps) {
 
           <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-between">
             <Button asChild variant="outline">
-              <Link href={'/importar/resultados' as Route}>
+              <Link href={ROUTES.importarResultados}>
                 <ArrowLeft className="mr-2 h-4 w-4" />
                 Volver a importar resultados
               </Link>
@@ -68,13 +67,13 @@ export default async function JobStatusPage({ params }: PageProps) {
                   {/* Cierre de loop: ir directo a la evaluación recién importada,
                       no al dashboard genérico. */}
                   <Button asChild variant="outline">
-                    <Link href={`/evaluaciones/${result.data.assessmentId}/analisis-ia` as Route}>
+                    <Link href={ROUTES.evaluacionAnalisisIa(result.data.assessmentId)}>
                       <Sparkles className="mr-2 h-4 w-4" />
                       Generar análisis IA
                     </Link>
                   </Button>
                   <Button asChild>
-                    <Link href={`/evaluaciones/${result.data.assessmentId}/resultados` as Route}>
+                    <Link href={ROUTES.evaluacionResultados(result.data.assessmentId)}>
                       Ver resultados de la evaluación
                       <ArrowRight className="ml-2 h-4 w-4" />
                     </Link>
@@ -84,6 +83,6 @@ export default async function JobStatusPage({ params }: PageProps) {
           </div>
         </>
       )}
-    </div>
+    </PageContainer>
   );
 }

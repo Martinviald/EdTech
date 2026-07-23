@@ -15,6 +15,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import { ROUTES } from '@/lib/routes';
 import { ROLE_LABELS } from './nav-items';
 import { RoleSwitcher } from './RoleSwitcher';
 import { OrgSwitcher } from './OrgSwitcher';
@@ -50,7 +51,7 @@ export function UserNav({
 
   async function handleSignOut() {
     toast.success('Sesión cerrada');
-    await signOut({ callbackUrl: '/login' });
+    await signOut({ callbackUrl: ROUTES.login });
   }
 
   return (

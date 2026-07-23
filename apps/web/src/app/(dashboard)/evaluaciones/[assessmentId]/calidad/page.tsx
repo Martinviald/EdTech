@@ -1,9 +1,10 @@
+import { Suspense } from 'react';
 import Link from 'next/link';
-import type { Route } from 'next';
 import { redirect } from 'next/navigation';
 import { Inbox, ShieldOff } from 'lucide-react';
 import { auth } from '@/auth';
 import { apiGet } from '@/lib/api';
+import { ROUTES } from '@/lib/routes';
 import { asCapabilityUnavailable } from '@/lib/errors';
 import { assessmentSupports } from '@/lib/assessment-capabilities';
 import {
@@ -12,7 +13,7 @@ import {
   INSTRUMENT_QUALITY_VIEWER_ROLES,
   type InstrumentQualityResponse,
 } from '@soe/types';
-import { EmptyState } from '@/components/patterns';
+import { EmptyState, KpiGridSkeleton, CardSkeleton } from '@/components/shared';
 import { Button } from '@/components/ui/button';
 import { QualityPanel } from '../../../analisis-ia/components/quality-panel';
 
@@ -43,7 +44,7 @@ function QualityUnavailable({ reason, assessmentId }: { reason: string; assessme
       description={reason}
       action={
         <Button asChild variant="outline" size="sm">
-          <Link href={`/evaluaciones/${assessmentId}/resultados` as Route}>Ver resultados</Link>
+          <Link href={ROUTES.evaluacionResultados(assessmentId)}>Ver resultados</Link>
         </Button>
       }
     />
@@ -58,13 +59,36 @@ export default async function EvaluacionCalidadPage({
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
   const session = await auth();
-  if (!session?.user) redirect('/login');
-  if (!canAccess(session.user.roles, INSTRUMENT_QUALITY_VIEWER_ROLES)) redirect('/dashboard');
+  if (!session?.user) redirect(ROUTES.login);
+  if (!canAccess(session.user.roles, INSTRUMENT_QUALITY_VIEWER_ROLES)) redirect(ROUTES.dashboard);
 
   const { assessmentId } = await params;
   const sp = await searchParams;
   const classGroupId = pickParam(sp.classGroupId);
 
+  return (
+    <Suspense fallback={<CalidadSkeleton />}>
+      <CalidadContent assessmentId={assessmentId} classGroupId={classGroupId} />
+    </Suspense>
+  );
+}
+
+function CalidadSkeleton() {
+  return (
+    <div className="space-y-6">
+      <KpiGridSkeleton count={3} />
+      <CardSkeleton rows={6} />
+    </div>
+  );
+}
+
+async function CalidadContent({
+  assessmentId,
+  classGroupId,
+}: {
+  assessmentId: string;
+  classGroupId: string | undefined;
+}) {
   // Gating por capacidad ANTES de pedir la calidad. El layout ya apagó la pestaña,
   // pero se llega por URL directa; además evita un fetch condenado al 409.
   if (!(await assessmentSupports(assessmentId, 'psychometrics'))) {

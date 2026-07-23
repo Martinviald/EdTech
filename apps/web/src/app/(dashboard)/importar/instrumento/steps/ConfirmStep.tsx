@@ -3,7 +3,7 @@
 import { RotateCcw } from 'lucide-react';
 import type { DiaConfirmResponse } from '@soe/types';
 import { Button } from '@/components/ui/button';
-import { AlertCallout } from '@/components/patterns';
+import { AlertCallout } from '@/components/shared';
 
 interface ConfirmStepProps {
   result: DiaConfirmResponse;

@@ -87,16 +87,6 @@ export async function getCandidateStimuli(
 }
 
 /**
- * Reconsulta el estado de un material remedial (polling desde el cliente). Solo
- * devuelve el `status`: el render del contenido lo hace el Server Component tras
- * `refresh`.
- */
-export async function pollRemedialStatus(materialId: string): Promise<{ status: RemedialStatus }> {
-  const material = await apiGet<RemedialMaterialModel>(`/remedial/${materialId}`);
-  return { status: material.status };
-}
-
-/**
  * Revisión humana (H9.5): aprobar o descartar un material en estado `ready`. Al
  * aprobar se puede enviar el `content` editado por el humano (override) — la IA
  * propone, el humano ajusta y aprueba. La autorización efectiva la aplica el guard

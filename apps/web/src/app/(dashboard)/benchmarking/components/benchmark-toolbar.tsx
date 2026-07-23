@@ -26,8 +26,9 @@ import {
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { cn } from '@/lib/utils';
+import { ROUTES } from '@/lib/routes';
 
-const BASE_PATH = '/benchmarking';
+const BASE_PATH = ROUTES.benchmarking;
 
 /** Filtros de cohorte (texto libre) que solo aplican en modo global. */
 const COHORT_FILTER_KEYS = ['dependence', 'region', 'commune'] as const;

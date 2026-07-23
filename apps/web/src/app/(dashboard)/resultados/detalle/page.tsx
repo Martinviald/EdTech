@@ -1,5 +1,5 @@
 import { redirect } from 'next/navigation';
-import type { Route } from 'next';
+import { ROUTES } from '@/lib/routes';
 
 export const dynamic = 'force-dynamic';
 
@@ -32,10 +32,10 @@ export default async function DetalleRedirect({
     if (classGroupId) qs.set('classGroupId', classGroupId);
     if (page) qs.set('page', page);
     const suffix = qs.toString() ? `?${qs.toString()}` : '';
-    redirect(`/evaluaciones/${assessmentId}/detalle${suffix}` as Route);
+    redirect(`${ROUTES.evaluacionDetalle(assessmentId)}${suffix}`);
   }
 
   redirect(
-    (classGroupId ? `/evaluaciones?classGroupId=${classGroupId}` : '/evaluaciones') as Route,
+    classGroupId ? `${ROUTES.evaluaciones}?classGroupId=${classGroupId}` : ROUTES.evaluaciones,
   );
 }

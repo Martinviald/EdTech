@@ -33,12 +33,14 @@ export function Sidebar({ roles, className, variant }: SidebarProps) {
     <aside
       data-collapsed={collapsed}
       className={cn(
-        'hidden shrink-0 flex-col border-r bg-card transition-[width] duration-200 ease-out md:flex',
-        collapsed ? 'w-16' : 'w-64',
+        'relative hidden shrink-0 p-3 transition-[width] duration-base ease-out-soft md:block',
+        collapsed ? 'w-[4.75rem]' : 'w-64',
         className,
       )}
     >
-      <SidebarNav roles={roles} collapsed={collapsed} onToggle={toggle} variant={variant} />
+      <div className="flex h-full flex-col rounded-2xl border bg-card shadow-lg">
+        <SidebarNav roles={roles} collapsed={collapsed} onToggle={toggle} variant={variant} />
+      </div>
     </aside>
   );
 }

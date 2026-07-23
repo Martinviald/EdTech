@@ -1,6 +1,6 @@
 import Link from 'next/link';
-import type { Route } from 'next';
 import type { GradingScaleResponseModel } from '@soe/types';
+import { ROUTES } from '@/lib/routes';
 import { Badge } from '@/components/ui/badge';
 import {
   Table,
@@ -10,7 +10,7 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import { EmptyState } from '@/components/EmptyState';
+import { EmptyState } from '@/components/shared';
 import { SCALE_TYPE_LABELS, formatGrade, formatThresholdPercent } from './scale-format';
 
 export function EscalasTable({ scales }: { scales?: GradingScaleResponseModel[] }) {
@@ -67,7 +67,7 @@ export function EscalasTable({ scales }: { scales?: GradingScaleResponseModel[] 
               </TableCell>
               <TableCell className="text-right">
                 <Link
-                  href={`/configuracion/escalas/${scale.id}` as Route}
+                  href={ROUTES.configEscala(scale.id)}
                   className="text-sm font-medium text-primary hover:underline"
                 >
                   Ver

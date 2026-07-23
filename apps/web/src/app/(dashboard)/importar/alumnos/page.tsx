@@ -5,23 +5,22 @@ import { auth } from '@/auth';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { StudentImportFlow } from '@/components/import/student-import-flow';
+import { PageContainer, PageHeader } from '@/components/shared';
+import { ROUTES } from '@/lib/routes';
 
 export default async function ImportarPage() {
   const session = await auth();
-  if (!session?.user?.orgId) redirect('/login');
+  if (!session?.user?.orgId) redirect(ROUTES.login);
   if (!canAccess(session.user.roles, IMPORT_ROLES)) {
-    redirect('/dashboard');
+    redirect(ROUTES.dashboard);
   }
 
   return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-semibold">Importar alumnos</h1>
-        <p className="text-muted-foreground mt-1 text-sm">
-          Sube tu nómina en formato CSV. El sistema validará cada fila y te dará un resumen antes
-          de confirmar.
-        </p>
-      </div>
+    <PageContainer>
+      <PageHeader
+        title="Importar alumnos"
+        description="Sube tu nómina en formato CSV. El sistema validará cada fila y te dará un resumen antes de confirmar."
+      />
 
       <Card>
         <CardHeader>
@@ -52,6 +51,6 @@ export default async function ImportarPage() {
           <StudentImportFlow />
         </CardContent>
       </Card>
-    </div>
+    </PageContainer>
   );
 }

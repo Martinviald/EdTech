@@ -8,15 +8,14 @@ loadEnv({ path: resolve(__dirname, '../../.env') });
 
 const nextConfig: NextConfig = {
   reactStrictMode: true,
-  transpilePackages: ['@soe/ui', '@soe/types', '@soe/db'],
+  transpilePackages: ['@soe/types', '@soe/db'],
   // Oculta el indicador/botón flotante de desarrollo de Next (logo + estado de build).
   devIndicators: false,
   // typedRoutes desactivado: sus tipos RouteImpl solo se generan en `next build`
   // (no en `pnpm typecheck`), y rechazan rutas con query string (`?...`) que en
   // runtime funcionan bien. Bloqueaba el build de producción del demo.
-  experimental: {
-    typedRoutes: false,
-  },
+  // (En Next 15.5 salió de `experimental` y es una clave top-level.)
+  typedRoutes: false,
 };
 
 export default nextConfig;

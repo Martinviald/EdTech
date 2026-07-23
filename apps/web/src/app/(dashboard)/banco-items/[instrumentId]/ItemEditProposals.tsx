@@ -22,15 +22,15 @@ const textareaClass =
 const STATUS_META: Record<ItemEditProposalStatus, { label: string; className: string }> = {
   pending: {
     label: 'Pendiente',
-    className: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-950 dark:text-yellow-200',
+    className: 'bg-warning/15 text-warning',
   },
   approved: {
     label: 'Aprobada',
-    className: 'bg-green-100 text-green-800 dark:bg-green-950 dark:text-green-200',
+    className: 'bg-success/10 text-success',
   },
   rejected: {
     label: 'Rechazada',
-    className: 'bg-gray-100 text-gray-700 dark:bg-gray-900 dark:text-gray-300',
+    className: 'bg-muted text-muted-foreground',
   },
 };
 
@@ -282,7 +282,7 @@ function ContentColumn({
               key={alt.key}
               className={cn(
                 'flex items-start gap-1.5',
-                alt.isCorrect ? 'font-medium text-emerald-700 dark:text-emerald-300' : '',
+                alt.isCorrect ? 'font-medium text-success' : '',
               )}
             >
               <span className="tabular-nums">{alt.key}.</span>

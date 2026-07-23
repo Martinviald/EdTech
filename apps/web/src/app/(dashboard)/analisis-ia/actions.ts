@@ -35,17 +35,6 @@ export async function generateAssessmentAnalysis(input: {
 }
 
 /**
- * Reconsulta el estado de un análisis (polling desde el cliente). Solo devuelve
- * el `status`: el render del output lo hace el Server Component tras `refresh`.
- */
-export async function pollAnalysisStatus(
-  analysisId: string,
-): Promise<{ status: AiAnalysisStatus }> {
-  const analysis = await apiGet<AiAnalysisModel>(`/ai-analysis/${analysisId}`);
-  return { status: analysis.status };
-}
-
-/**
  * Gatilla la generación (o regeneración con `force`) del análisis IA por-pregunta
  * (H20.8). El backend crea/reutiliza el registro y encola la ejecución async;
  * responde `{ analysisId, status }` para que el cliente haga polling con
