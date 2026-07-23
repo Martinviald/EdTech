@@ -45,7 +45,9 @@
 
 ## Estado final de esta corrida y PENDIENTES (con deltas accionables)
 
-**Completados y verificados (typecheck+lint verdes, commiteados):** Ola 1 (T2-01…T2-05), Ola 2A (T2-24, T2-09, T2-08, T2-07), T2-06, T2-10, T2-25(UI), T2-26, T2-16, T2-18(verificado), T2-13 = **18 tickets**.
+**Completados y verificados (typecheck+lint verdes, commiteados):** Ola 1 (T2-01…T2-05), Ola 2A (T2-24, T2-09, T2-08, T2-07), T2-06, T2-10, T2-25(UI), T2-26, T2-16, T2-18(verificado), T2-13, **T2-11** = **19 tickets**.
+
+**T2-11 (tabla de especificaciones) — implementado:** (a) se abre en pestaña nueva desde el hub (no se pierde el contexto); (b) filtros de encabezado por dimensión reutilizando `TagMultiFilter`+`deriveTagFacets`; (c) tab "Resumen" (matriz ↔ resumen) con panorama del instrumento (cantidad de preguntas por dimensión/nodo). El "eje temático estricto" (axis, padre del OA) queda para cuando se exponga el ancestro (backend) — se muestran las dimensiones ya etiquetadas. Commit `3eb626f`.
 
 **Pendientes** — se detienen aquí porque son (a) cambios al **subsistema core de filtros del dashboard** (lo consume todo `/resultados` + `/evaluaciones`; romperlo es transversal) o (b) **features grandes con migraciones de BD** que no se pueden aplicar/validar en este entorno. La decisión recomendada: implementarlos **con E2E en el loop** (build → validar en vivo → iterar), no a ciegas. Deltas exactos del recon (líneas del dev actual):
 
