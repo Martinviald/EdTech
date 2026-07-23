@@ -3,8 +3,9 @@ import { Button } from '@/components/ui/button';
 import { ROUTES } from '@/lib/routes';
 
 /**
- * Botón "Ver enunciado": abre el PDF del enunciado en una PESTAÑA NUEVA, para
- * poder consultarlo junto a la vista de resultados al mismo tiempo.
+ * Botón "Ver instrumento": abre el PDF del enunciado (cuadernillo) en una
+ * PESTAÑA NUEVA, para poder consultarlo junto a la vista de resultados al mismo
+ * tiempo.
  *
  * Enlaza al handler `/instrumentos/:id/enunciado`, que genera una URL prefirmada
  * FRESCA en el momento del click y redirige a ella. Así el enlace nunca está
@@ -18,14 +19,10 @@ import { ROUTES } from '@/lib/routes';
  */
 export function EnunciadoViewButton({ instrumentId }: { instrumentId: string }) {
   return (
-    <a
-      href={ROUTES.instrumentoEnunciado(instrumentId)}
-      target="_blank"
-      rel="noopener noreferrer"
-    >
+    <a href={ROUTES.instrumentoEnunciado(instrumentId)} target="_blank" rel="noopener noreferrer">
       <Button variant="outline" size="sm" className="gap-2">
         <FileText className="size-4" aria-hidden />
-        Ver enunciado
+        Ver instrumento
         <ExternalLink className="size-3.5 text-muted-foreground" aria-hidden />
         <span className="sr-only">(se abre en una pestaña nueva)</span>
       </Button>
