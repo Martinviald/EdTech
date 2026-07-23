@@ -68,6 +68,23 @@ function buildTree(nodes: TaxonomyNode[]): Tree[] {
   return roots;
 }
 
+/** Agrupa los nodos raíz por asignatura (T2-16); los sin asignatura van a "General". */
+function groupRootsBySubject(
+  roots: Tree[],
+  subjectNames: Record<string, string>,
+): { key: string; label: string; nodes: Tree[] }[] {
+  const bySubject = new Map<string, { key: string; label: string; nodes: Tree[] }>();
+  for (const root of roots) {
+    const key = root.subjectId ?? '__none__';
+    if (!bySubject.has(key)) {
+      const label = root.subjectId ? (subjectNames[root.subjectId] ?? 'Asignatura') : 'General';
+      bySubject.set(key, { key, label, nodes: [] });
+    }
+    bySubject.get(key)!.nodes.push(root);
+  }
+  return [...bySubject.values()];
+}
+
 function filterTree(tree: Tree[], q: string): Tree[] {
   if (!q.trim()) return tree;
   const needle = q.toLowerCase();
@@ -90,10 +107,12 @@ export function TreeView({
   taxonomyId,
   nodes,
   editable,
+  subjectNames = {},
 }: {
   taxonomyId: string;
   nodes: TaxonomyNode[];
   editable: boolean;
+  subjectNames?: Record<string, string>;
 }) {
   const [query, setQuery] = useState('');
   const [expanded, setExpanded] = useState<Set<string>>(new Set());
@@ -101,6 +120,11 @@ export function TreeView({
 
   const tree = useMemo(() => buildTree(nodes), [nodes]);
   const filtered = useMemo(() => filterTree(tree, query), [tree, query]);
+  const subjectGroups = useMemo(
+    () => groupRootsBySubject(filtered, subjectNames),
+    [filtered, subjectNames],
+  );
+  const showSubjectHeaders = subjectGroups.length > 1;
 
   const toggle = (id: string) =>
     setExpanded((prev) => {
@@ -133,21 +157,32 @@ export function TreeView({
             : 'Ningún nodo coincide con la búsqueda.'}
         </div>
       ) : (
-        <ul className="space-y-1">
-          {filtered.map((n) => (
-            <NodeRow
-              key={n.id}
-              node={n}
-              depth={0}
-              expanded={expanded}
-              onToggle={toggle}
-              editable={editable}
-              onAddChild={(parent) => setForm({ kind: 'create', parent })}
-              onEdit={(node) => setForm({ kind: 'edit', node })}
-              taxonomyId={taxonomyId}
-            />
+        <div className="space-y-3">
+          {subjectGroups.map((group) => (
+            <div key={group.key} className="space-y-1">
+              {showSubjectHeaders ? (
+                <p className="px-1 pt-1 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                  {group.label}
+                </p>
+              ) : null}
+              <ul className="space-y-1">
+                {group.nodes.map((n) => (
+                  <NodeRow
+                    key={n.id}
+                    node={n}
+                    depth={0}
+                    expanded={expanded}
+                    onToggle={toggle}
+                    editable={editable}
+                    onAddChild={(parent) => setForm({ kind: 'create', parent })}
+                    onEdit={(node) => setForm({ kind: 'edit', node })}
+                    taxonomyId={taxonomyId}
+                  />
+                ))}
+              </ul>
+            </div>
           ))}
-        </ul>
+        </div>
       )}
 
       <NodeFormDialog

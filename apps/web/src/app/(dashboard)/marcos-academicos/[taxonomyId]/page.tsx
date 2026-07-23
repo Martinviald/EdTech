@@ -12,6 +12,7 @@ import {
   TAXONOMY_ROLES,
   taxonomyKind,
   userHasRole,
+  type CatalogEntryModel,
   type UserRole,
   type TaxonomyTreeResponse,
 } from '@soe/types';
@@ -56,6 +57,10 @@ async function TaxonomyDetail({
   } catch {
     notFound();
   }
+
+  // T2-16: nombres de asignatura para agrupar el árbol por asignatura.
+  const subjects = await apiGet<CatalogEntryModel[]>('/catalog/subjects').catch(() => []);
+  const subjectNames = Object.fromEntries(subjects.map((s) => [s.id, s.name]));
 
   const { taxonomy, nodes } = data;
   const { groupLabel, typeLabel } = taxonomyKind(taxonomy.type, taxonomy.isOfficial);
@@ -102,7 +107,12 @@ async function TaxonomyDetail({
         )}
       </div>
 
-      <TreeView taxonomyId={taxonomy.id} nodes={nodes} editable={editable} />
+      <TreeView
+        taxonomyId={taxonomy.id}
+        nodes={nodes}
+        editable={editable}
+        subjectNames={subjectNames}
+      />
     </>
   );
 }
