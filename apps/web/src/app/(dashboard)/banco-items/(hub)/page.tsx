@@ -1,18 +1,14 @@
 import { Suspense } from 'react';
-import Link from 'next/link';
 import { redirect } from 'next/navigation';
 import { auth } from '@/auth';
 import { apiGet } from '@/lib/api';
 import { ROUTES } from '@/lib/routes';
 import { Library } from 'lucide-react';
-import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { EmptyState, PaginationControls, TableSkeleton } from '@/components/shared';
 import {
   canAccess,
-  userHasAnyRole,
   ITEM_VIEWER_ROLES,
-  ITEM_BANK_ROLES,
   type CatalogEntryModel,
   type InstrumentFacetsModel,
   type InstrumentModel,
@@ -56,30 +52,15 @@ export default async function BancoItemsPage({ searchParams }: PageProps) {
   const params = await searchParams;
   const page = typeof params.page === 'string' ? params.page : '1';
   const query = buildInstrumentsQuery(params, page);
-  const canCreate = userHasAnyRole(session.user.roles, ITEM_BANK_ROLES);
-
-  const nuevoButton = canCreate ? (
-    <Link href={ROUTES.bancoItemsNuevo}>
-      <Button>Nuevo instrumento</Button>
-    </Link>
-  ) : null;
 
   return (
     <>
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <Suspense fallback={<FiltersRowSkeleton />}>
-          <FiltersSection />
-        </Suspense>
-        {nuevoButton}
-      </div>
+      <Suspense fallback={<FiltersRowSkeleton />}>
+        <FiltersSection />
+      </Suspense>
 
       <Suspense fallback={<TableSkeleton />}>
-        <InstrumentsSection
-          query={query}
-          page={Number(page)}
-          canCreate={canCreate}
-          nuevoButton={nuevoButton}
-        />
+        <InstrumentsSection query={query} page={Number(page)} />
       </Suspense>
     </>
   );
@@ -95,17 +76,7 @@ async function FiltersSection() {
   return <InstrumentFilters subjects={subjects} grades={grades} years={facets.years} />;
 }
 
-async function InstrumentsSection({
-  query,
-  page,
-  canCreate,
-  nuevoButton,
-}: {
-  query: string;
-  page: number;
-  canCreate: boolean;
-  nuevoButton: React.ReactNode;
-}) {
+async function InstrumentsSection({ query, page }: { query: string; page: number }) {
   const { data: instruments, total } = await apiGet<InstrumentListResponse>(
     `/instruments?${query}`,
   );
@@ -115,12 +86,7 @@ async function InstrumentsSection({
       <EmptyState
         icon={Library}
         title="No se encontraron instrumentos"
-        description={
-          canCreate
-            ? 'Crea el primer instrumento para empezar a construir tu banco de ítems.'
-            : 'Aún no hay instrumentos disponibles para tu colegio.'
-        }
-        action={nuevoButton}
+        description="Aún no hay instrumentos disponibles para tu colegio. Se cargan al importar una prueba."
       />
     );
   }
