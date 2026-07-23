@@ -84,10 +84,19 @@ export function ItemDetailPanel(props: {
   sections?: InstrumentSectionModel[];
   canEdit?: boolean;
   instrumentId?: string;
+  instrumentName?: string;
   open: boolean;
   onClose: () => void;
 }): JSX.Element {
-  const { item, sections = [], canEdit = false, instrumentId, open, onClose } = props;
+  const {
+    item,
+    sections = [],
+    canEdit = false,
+    instrumentId,
+    instrumentName,
+    open,
+    onClose,
+  } = props;
 
   const section = item?.sectionId ? (sections.find((s) => s.id === item.sectionId) ?? null) : null;
   const passage = section && hasPassageContent(section) ? sectionToPassage(section) : null;
@@ -114,6 +123,7 @@ export function ItemDetailPanel(props: {
           item={item}
           canEdit={canEdit}
           instrumentId={instrumentId ?? item.instrumentId ?? ''}
+          instrumentName={instrumentName}
         />
       ) : null}
     </QuestionDetailSheet>
@@ -135,10 +145,12 @@ function ItemDetailContent({
   item,
   canEdit,
   instrumentId,
+  instrumentName,
 }: {
   item: ItemModel;
   canEdit: boolean;
   instrumentId: string;
+  instrumentName?: string;
 }): JSX.Element {
   const content = item.content ?? {};
   const stem = getStem(content);
@@ -149,6 +161,13 @@ function ItemDetailContent({
 
   return (
     <div className="mt-6 space-y-6">
+      {instrumentName ? (
+        <p className="text-xs text-muted-foreground">
+          Instrumento de origen:{' '}
+          <span className="font-medium text-foreground">{instrumentName}</span>
+        </p>
+      ) : null}
+
       {/* Enunciado */}
       <section className="space-y-1.5">
         <h3 className="text-sm font-semibold text-foreground">Enunciado</h3>
