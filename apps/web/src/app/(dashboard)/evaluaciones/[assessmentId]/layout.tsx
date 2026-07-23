@@ -102,7 +102,7 @@ export default async function EvaluacionLayout({
       ? [
           {
             href: ROUTES.evaluacionDetalle(assessmentId),
-            label: 'Detalle por pregunta',
+            label: 'Tablero maestro',
             icon: <ListChecks />,
           },
         ]
