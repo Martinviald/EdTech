@@ -1,14 +1,9 @@
 'use client';
 
 import { useMemo, useState } from 'react';
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/components/ui/table';
+import { LayoutGrid, ListChecks } from 'lucide-react';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { Button } from '@/components/ui/button';
 import {
   TAXONOMY_NODE_TYPES,
   type ItemModel,
@@ -16,6 +11,8 @@ import {
   type InstrumentSectionModel,
 } from '@soe/types';
 import { nodeTypeLabel } from '@/lib/taxonomy-labels';
+import { deriveTagFacets, filterItemsByTags, type TagFacet } from '../../tag-facets';
+import { TagMultiFilter } from '../../TagMultiFilter';
 import { TagBadge } from '../TagBadge';
 import { ItemDetailPanel } from '../ItemDetailPanel';
 import { NodeDetailDialog } from './NodeDetailDialog';
@@ -34,13 +31,11 @@ function orderNodeTypes(types: string[]): string[] {
 }
 
 /**
- * Vista de REVISIÓN de la tabla de especificaciones (TKT-16), en formato matriz:
- * una fila por pregunta y una columna por cada tipo de nodo de clasificación
- * (OA, habilidad, contenido, tipo de texto…) presente en el instrumento. Cada
- * celda muestra los nodos de ese tipo vinculados a la pregunta.
- *
- * El N° de pregunta es clickeable y abre el panel de detalle del ítem (mismo
- * panel que la tabla de ítems del instrumento).
+ * Vista de REVISIÓN de la tabla de especificaciones (TKT-16 / T2-11), en dos
+ * modos: MATRIZ (una fila por pregunta × una columna por tipo de nodo, con
+ * filtros de encabezado por dimensión) y RESUMEN (panorama del instrumento:
+ * cantidad de preguntas por cada dimensión/nodo). El N° de pregunta abre el
+ * panel de detalle del ítem.
  */
 export function SpecTableReview({
   items,
@@ -55,6 +50,14 @@ export function SpecTableReview({
 }) {
   const [selected, setSelected] = useState<ItemModel | null>(null);
   const [selectedTag, setSelectedTag] = useState<ItemTaxonomyTagModel | null>(null);
+  const [selectedTagIds, setSelectedTagIds] = useState<string[]>([]);
+  const [view, setView] = useState<'matriz' | 'resumen'>('matriz');
+
+  const facets = useMemo(() => deriveTagFacets(items), [items]);
+  const filteredItems = useMemo(
+    () => filterItemsByTags(items, selectedTagIds),
+    [items, selectedTagIds],
+  );
 
   // Tipos de nodo presentes en el instrumento → columnas de la matriz.
   const nodeTypes = useMemo(() => {
@@ -69,72 +72,104 @@ export function SpecTableReview({
 
   return (
     <>
-      <div className="overflow-x-auto rounded-md border">
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead className="w-[120px]">N° pregunta</TableHead>
-              {nodeTypes.length > 0 ? (
-                nodeTypes.map((type) => (
-                  <TableHead key={type} className="min-w-[160px]">
-                    {nodeTypeLabel(type) ?? type}
-                  </TableHead>
-                ))
-              ) : (
-                <TableHead className="min-w-[240px]">Nodos de taxonomía</TableHead>
-              )}
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {items.map((item) => (
-              <TableRow key={item.id}>
-                <TableCell className="align-top">
-                  <button
-                    type="button"
-                    onClick={() => setSelected(item)}
-                    aria-label={`Ver detalle de la pregunta ${item.position}`}
-                    className="rounded-sm font-mono text-xs font-medium text-primary underline-offset-2 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                  >
-                    {item.position}
-                  </button>
-                </TableCell>
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <div className="inline-flex rounded-md border p-0.5">
+          <Button
+            type="button"
+            variant={view === 'matriz' ? 'secondary' : 'ghost'}
+            size="sm"
+            className="gap-2"
+            onClick={() => setView('matriz')}
+          >
+            <LayoutGrid className="size-4" aria-hidden />
+            Matriz
+          </Button>
+          <Button
+            type="button"
+            variant={view === 'resumen' ? 'secondary' : 'ghost'}
+            size="sm"
+            className="gap-2"
+            onClick={() => setView('resumen')}
+          >
+            <ListChecks className="size-4" aria-hidden />
+            Resumen
+          </Button>
+        </div>
+        {view === 'matriz' ? (
+          <TagMultiFilter facets={facets} selected={selectedTagIds} onChange={setSelectedTagIds} />
+        ) : null}
+      </div>
+
+      {view === 'resumen' ? (
+        <SpecTableSummary total={items.length} facets={facets} />
+      ) : (
+        <div className="overflow-x-auto rounded-md border">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead className="w-[120px]">N° pregunta</TableHead>
                 {nodeTypes.length > 0 ? (
-                  nodeTypes.map((type) => {
-                    const tags = (item.tags ?? []).filter(
-                      (tag) => (tag.node?.type ?? 'unknown') === type,
-                    );
-                    return (
-                      <TableCell key={type} className="align-top">
-                        {tags.length > 0 ? (
-                          <div className="flex flex-wrap gap-1">
-                            {tags.map((tag) => (
-                              <button
-                                key={tag.id}
-                                type="button"
-                                onClick={() => setSelectedTag(tag)}
-                                aria-label={`Ver detalle del nodo ${tag.node?.name ?? ''}`}
-                                className="rounded-sm transition-opacity hover:opacity-80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                              >
-                                <TagBadge tag={tag} />
-                              </button>
-                            ))}
-                          </div>
-                        ) : (
-                          <span className="text-xs text-muted-foreground">—</span>
-                        )}
-                      </TableCell>
-                    );
-                  })
+                  nodeTypes.map((type) => (
+                    <TableHead key={type} className="min-w-[160px]">
+                      {nodeTypeLabel(type) ?? type}
+                    </TableHead>
+                  ))
                 ) : (
-                  <TableCell className="align-top">
-                    <span className="text-xs text-muted-foreground">Sin nodos vinculados</span>
-                  </TableCell>
+                  <TableHead className="min-w-[240px]">Nodos de taxonomía</TableHead>
                 )}
               </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </div>
+            </TableHeader>
+            <TableBody>
+              {filteredItems.map((item) => (
+                <TableRow key={item.id}>
+                  <TableCell className="align-top">
+                    <button
+                      type="button"
+                      onClick={() => setSelected(item)}
+                      aria-label={`Ver detalle de la pregunta ${item.position}`}
+                      className="rounded-sm font-mono text-xs font-medium text-primary underline-offset-2 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                    >
+                      {item.position}
+                    </button>
+                  </TableCell>
+                  {nodeTypes.length > 0 ? (
+                    nodeTypes.map((type) => {
+                      const tags = (item.tags ?? []).filter(
+                        (tag) => (tag.node?.type ?? 'unknown') === type,
+                      );
+                      return (
+                        <TableCell key={type} className="align-top">
+                          {tags.length > 0 ? (
+                            <div className="flex flex-wrap gap-1">
+                              {tags.map((tag) => (
+                                <button
+                                  key={tag.id}
+                                  type="button"
+                                  onClick={() => setSelectedTag(tag)}
+                                  aria-label={`Ver detalle del nodo ${tag.node?.name ?? ''}`}
+                                  className="rounded-sm transition-opacity hover:opacity-80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                                >
+                                  <TagBadge tag={tag} />
+                                </button>
+                              ))}
+                            </div>
+                          ) : (
+                            <span className="text-xs text-muted-foreground">—</span>
+                          )}
+                        </TableCell>
+                      );
+                    })
+                  ) : (
+                    <TableCell className="align-top">
+                      <span className="text-xs text-muted-foreground">Sin nodos vinculados</span>
+                    </TableCell>
+                  )}
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </div>
+      )}
 
       <ItemDetailPanel
         item={selected}
@@ -151,5 +186,53 @@ export function SpecTableReview({
         onClose={() => setSelectedTag(null)}
       />
     </>
+  );
+}
+
+/** Panorama del instrumento: cantidad de preguntas por cada dimensión y nodo. */
+function SpecTableSummary({ total, facets }: { total: number; facets: TagFacet[] }) {
+  const byType = facets.reduce<Record<string, TagFacet[]>>((acc, facet) => {
+    if (facet.type === 'descriptor') return acc;
+    (acc[facet.type] ??= []).push(facet);
+    return acc;
+  }, {});
+  const types = orderNodeTypes(Object.keys(byType));
+
+  return (
+    <div className="space-y-4">
+      <div className="rounded-md border bg-muted/30 p-4 text-sm">
+        <span className="font-medium">{total}</span> pregunta{total === 1 ? '' : 's'} en el
+        instrumento.
+      </div>
+      {types.length === 0 ? (
+        <p className="text-sm text-muted-foreground">
+          Este instrumento aún no tiene preguntas etiquetadas por dimensión.
+        </p>
+      ) : (
+        types.map((type) => (
+          <div key={type} className="overflow-hidden rounded-md border">
+            <div className="flex items-center justify-between border-b bg-muted/30 px-4 py-2 text-sm font-semibold">
+              <span>{nodeTypeLabel(type) ?? type}</span>
+              <span className="text-xs font-normal text-muted-foreground">
+                {byType[type]!.length} categoría{byType[type]!.length === 1 ? '' : 's'}
+              </span>
+            </div>
+            <ul className="divide-y">
+              {byType[type]!.map((facet) => (
+                <li
+                  key={facet.nodeId}
+                  className="flex items-center justify-between gap-3 px-4 py-2 text-sm"
+                >
+                  <span className="min-w-0 truncate">{facet.label}</span>
+                  <span className="shrink-0 tabular-nums text-muted-foreground">
+                    {facet.count} preg.
+                  </span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        ))
+      )}
+    </div>
   );
 }

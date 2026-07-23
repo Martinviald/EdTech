@@ -169,7 +169,11 @@ export default async function EvaluacionLayout({
         actions={
           <>
             {enunciadoPdf ? <EnunciadoViewButton instrumentId={meta.instrumentId} /> : null}
-            <Link href={ROUTES.bancoItemSpecTable(meta.instrumentId)}>
+            <Link
+              href={ROUTES.bancoItemSpecTable(meta.instrumentId)}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
               <Button variant="outline" size="sm">
                 Tabla de especificaciones
               </Button>
