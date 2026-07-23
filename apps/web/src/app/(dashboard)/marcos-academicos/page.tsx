@@ -1,9 +1,12 @@
+import { Suspense } from 'react';
 import Link from 'next/link';
-import type { Route } from 'next';
 import { redirect } from 'next/navigation';
 import { auth } from '@/auth';
 import { apiGet } from '@/lib/api';
+import { ROUTES } from '@/lib/routes';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { CardSkeleton } from '@/components/shared';
+import { Skeleton } from '@/components/ui/skeleton';
 import {
   canAccess,
   TAXONOMY_ROLES,
@@ -24,25 +27,18 @@ const GROUP_DESCRIPTION: Record<TaxonomyKind, string> = {
 };
 
 const CHIP_CLASS: Record<TaxonomyKind, string> = {
-  curriculum: 'bg-blue-100 text-blue-800 dark:bg-blue-950 dark:text-blue-200',
-  evaluacion: 'bg-violet-100 text-violet-800 dark:bg-violet-950 dark:text-violet-200',
-  externo: 'bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-200',
-  propio: 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-200',
+  curriculum: 'bg-info/10 text-info',
+  evaluacion: 'bg-primary/10 text-primary',
+  externo: 'bg-warning/15 text-warning',
+  propio: 'bg-success/10 text-success',
 };
 
 export default async function MarcosAcademicosPage() {
   const session = await auth();
-  if (!session?.user) redirect('/login');
-  if (!canAccess(session.user.roles, TAXONOMY_ROLES)) redirect('/dashboard');
+  if (!session?.user) redirect(ROUTES.login);
+  if (!canAccess(session.user.roles, TAXONOMY_ROLES)) redirect(ROUTES.dashboard);
 
-  const taxonomies = await apiGet<TaxonomyModel[]>('/taxonomies');
   const canCreate = userHasAnyRole(session.user.roles, ['platform_admin', 'school_admin']);
-
-  const byKind = new Map<TaxonomyKind, TaxonomyModel[]>();
-  for (const t of taxonomies) {
-    const { kind } = taxonomyKind(t.type, t.isOfficial);
-    byKind.set(kind, [...(byKind.get(kind) ?? []), t]);
-  }
 
   return (
     <div className="space-y-6">
@@ -60,6 +56,24 @@ export default async function MarcosAcademicosPage() {
         )}
       </div>
 
+      <Suspense fallback={<TaxonomyGroupsSkeleton />}>
+        <TaxonomyGroups />
+      </Suspense>
+    </div>
+  );
+}
+
+async function TaxonomyGroups() {
+  const taxonomies = await apiGet<TaxonomyModel[]>('/taxonomies');
+
+  const byKind = new Map<TaxonomyKind, TaxonomyModel[]>();
+  for (const t of taxonomies) {
+    const { kind } = taxonomyKind(t.type, t.isOfficial);
+    byKind.set(kind, [...(byKind.get(kind) ?? []), t]);
+  }
+
+  return (
+    <>
       {TAXONOMY_KIND_ORDER.map((kind) => {
         const items = byKind.get(kind) ?? [];
         // El grupo "Propio del colegio" se muestra siempre (invita a crear); el
@@ -92,7 +106,24 @@ export default async function MarcosAcademicosPage() {
           </section>
         );
       })}
-    </div>
+    </>
+  );
+}
+
+function TaxonomyGroupsSkeleton() {
+  return (
+    <>
+      {Array.from({ length: 2 }).map((_, section) => (
+        <section key={section} className="space-y-3">
+          <Skeleton className="h-4 w-48" />
+          <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-3">
+            {Array.from({ length: 3 }).map((_, card) => (
+              <CardSkeleton key={card} rows={2} />
+            ))}
+          </div>
+        </section>
+      ))}
+    </>
   );
 }
 
@@ -100,7 +131,7 @@ function TaxonomyCard({ taxonomy }: { taxonomy: TaxonomyModel }) {
   const { kind, typeLabel } = taxonomyKind(taxonomy.type, taxonomy.isOfficial);
   return (
     <Link
-      href={`/marcos-academicos/${taxonomy.id}` as Route}
+      href={ROUTES.marcoAcademico(taxonomy.id)}
       className="group block rounded-lg border bg-card transition-shadow hover:shadow-md"
     >
       <Card className="border-0 shadow-none">

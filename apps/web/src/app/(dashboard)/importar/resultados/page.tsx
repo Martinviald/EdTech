@@ -7,14 +7,16 @@ import {
 } from '@soe/types';
 import { auth } from '@/auth';
 import { Card, CardContent } from '@/components/ui/card';
+import { PageContainer, PageHeader } from '@/components/shared';
+import { ROUTES } from '@/lib/routes';
 import { listTemplatesAction } from './actions';
 import { FormatCard } from './components/format-card';
 
 export default async function ImportarResultadosPage() {
   const session = await auth();
-  if (!session?.user?.orgId) redirect('/login');
+  if (!session?.user?.orgId) redirect(ROUTES.login);
   if (!canAccess(session.user.roles, ANSWER_SHEET_IMPORT_ROLES)) {
-    redirect('/dashboard');
+    redirect(ROUTES.dashboard);
   }
 
   const templatesResult = await listTemplatesAction();
@@ -24,15 +26,11 @@ export default async function ImportarResultadosPage() {
   const templatesError = templatesResult.ok ? null : templatesResult.message;
 
   return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-semibold">Importar resultados</h1>
-        <p className="text-muted-foreground mt-1 text-sm">
-          Sube hojas de respuesta en formato DIA oficial, Gradecam, ZipGrade o
-          un CSV genérico. El sistema parseará el archivo, hará match con tus
-          alumnos y calculará los resultados.
-        </p>
-      </div>
+    <PageContainer>
+      <PageHeader
+        title="Importar resultados"
+        description="Sube hojas de respuesta en formato DIA oficial, Gradecam, ZipGrade o un CSV genérico. El sistema parseará el archivo, hará match con tus alumnos y calculará los resultados."
+      />
 
       <Card>
         <CardContent className="flex items-start gap-3 pt-6 text-sm">
@@ -91,6 +89,6 @@ export default async function ImportarResultadosPage() {
           </Card>
         ) : null}
       </section>
-    </div>
+    </PageContainer>
   );
 }

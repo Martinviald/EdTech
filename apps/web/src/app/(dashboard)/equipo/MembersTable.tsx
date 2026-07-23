@@ -30,7 +30,7 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import { EmptyState, StatusBadge } from '@/components/patterns';
+import { EmptyState, StatusBadge } from '@/components/shared';
 import { revokeMember } from './actions';
 
 const ROLE_LABELS: Record<string, string> = {

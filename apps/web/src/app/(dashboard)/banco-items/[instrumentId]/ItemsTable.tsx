@@ -30,10 +30,10 @@ const ITEM_TYPE_LABELS: Record<string, string> = {
 };
 
 const ITEM_STATUS_COLORS: Record<string, string> = {
-  draft: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-950 dark:text-yellow-200',
-  review: 'bg-blue-100 text-blue-800 dark:bg-blue-950 dark:text-blue-200',
-  published: 'bg-green-100 text-green-800 dark:bg-green-950 dark:text-green-200',
-  deprecated: 'bg-gray-100 text-gray-800 dark:bg-gray-950 dark:text-gray-200',
+  draft: 'bg-warning/15 text-warning',
+  review: 'bg-info/10 text-info',
+  published: 'bg-success/10 text-success',
+  deprecated: 'bg-muted text-muted-foreground',
 };
 
 const ITEM_STATUS_LABELS: Record<string, string> = {

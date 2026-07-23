@@ -1,15 +1,17 @@
+import { Suspense } from 'react';
 import Link from 'next/link';
 import type { Route } from 'next';
 import { redirect } from 'next/navigation';
 import { ArrowLeft, Inbox } from 'lucide-react';
 import { auth } from '@/auth';
 import { apiGet } from '@/lib/api';
+import { ROUTES } from '@/lib/routes';
 import {
   canAccess,
   OFFICIAL_REPORT_VIEWER_ROLES,
   type OfficialStudentReportResponse,
 } from '@soe/types';
-import { EmptyState } from '@/components/patterns';
+import { EmptyState, CardSkeleton } from '@/components/shared';
 import { StudentReport } from '@/components/official-reports/student-report';
 import { PrintToolbar } from '@/components/official-reports/print-toolbar';
 
@@ -30,12 +32,51 @@ export default async function InformeAlumnoPage({
   params: Promise<{ assessmentId: string; studentId: string }>;
 }) {
   const session = await auth();
-  if (!session?.user) redirect('/login');
-  if (!canAccess(session.user.roles, OFFICIAL_REPORT_VIEWER_ROLES)) redirect('/dashboard');
+  if (!session?.user) redirect(ROUTES.login);
+  if (!canAccess(session.user.roles, OFFICIAL_REPORT_VIEWER_ROLES)) redirect(ROUTES.dashboard);
 
   const { assessmentId, studentId } = await params;
-  const backHref = `/evaluaciones/${assessmentId}/informe-oficial` as Route;
+  const backHref = ROUTES.evaluacionInformeOficial(assessmentId);
 
+  return (
+    <Suspense fallback={<InformeAlumnoSkeleton backHref={backHref} />}>
+      <InformeAlumnoContent assessmentId={assessmentId} studentId={studentId} backHref={backHref} />
+    </Suspense>
+  );
+}
+
+function BackLink({ backHref }: { backHref: Route }) {
+  return (
+    <Link
+      href={backHref}
+      className="inline-flex items-center gap-1.5 text-sm font-medium text-muted-foreground hover:text-foreground"
+    >
+      <ArrowLeft className="size-4" aria-hidden />
+      Volver al informe del curso
+    </Link>
+  );
+}
+
+function InformeAlumnoSkeleton({ backHref }: { backHref: Route }) {
+  return (
+    <div className="space-y-6">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between print:hidden">
+        <BackLink backHref={backHref} />
+      </div>
+      <CardSkeleton rows={6} />
+    </div>
+  );
+}
+
+async function InformeAlumnoContent({
+  assessmentId,
+  studentId,
+  backHref,
+}: {
+  assessmentId: string;
+  studentId: string;
+  backHref: Route;
+}) {
   const query = new URLSearchParams({ assessmentId, studentId });
   const report = await apiGet<OfficialStudentReportResponse>(
     `/reports/student?${query.toString()}`,
@@ -44,13 +85,7 @@ export default async function InformeAlumnoPage({
   return (
     <div className="space-y-6">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between print:hidden">
-        <Link
-          href={backHref}
-          className="inline-flex items-center gap-1.5 text-sm font-medium text-muted-foreground hover:text-foreground"
-        >
-          <ArrowLeft className="size-4" aria-hidden />
-          Volver al informe del curso
-        </Link>
+        <BackLink backHref={backHref} />
         {report ? <PrintToolbar /> : null}
       </div>
 

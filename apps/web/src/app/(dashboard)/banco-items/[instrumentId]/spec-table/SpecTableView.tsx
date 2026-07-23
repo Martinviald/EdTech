@@ -2,7 +2,7 @@ import Link from 'next/link';
 import type { Route } from 'next';
 import { Table2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { EmptyState } from '@/components/patterns';
+import { EmptyState } from '@/components/shared';
 import type { InstrumentModel, ItemModel } from '@soe/types';
 import { SpecTableReview } from './SpecTableReview';
 

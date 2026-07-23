@@ -1,8 +1,8 @@
-import type { Route } from 'next';
 import Link from 'next/link';
 import { ArrowLeft } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { getOrg } from '@/lib/adminApi';
+import { ROUTES } from '@/lib/routes';
 import { TabNav } from './TabNav';
 
 export const dynamic = 'force-dynamic';
@@ -21,7 +21,7 @@ export default async function AdminOrgLayout({
     <div className="space-y-6">
       <div>
         <Link
-          href={'/admin/colegios' as Route}
+          href={ROUTES.adminColegios}
           className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground"
         >
           <ArrowLeft className="size-3.5" />

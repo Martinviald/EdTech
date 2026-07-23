@@ -1,7 +1,11 @@
+import { Suspense } from 'react';
 import { notFound, redirect } from 'next/navigation';
 import { apiGet } from '@/lib/api';
 import type { InstrumentModel, ItemModel } from '@soe/types';
 import { SpecTableView } from '@/app/(dashboard)/banco-items/[instrumentId]/spec-table/SpecTableView';
+import { ROUTES } from '@/lib/routes';
+import { Skeleton } from '@/components/ui/skeleton';
+import { PageContainer, TableSkeleton } from '@/components/shared';
 
 type ItemsListResponse = {
   data: ItemModel[];
@@ -24,6 +28,27 @@ type PageProps = {
 export default async function AdminSpecTablePage({ params }: PageProps) {
   const { instrumentId } = await params;
 
+  return (
+    <Suspense fallback={<SpecTableFallback />}>
+      <SpecTableSection instrumentId={instrumentId} />
+    </Suspense>
+  );
+}
+
+function SpecTableFallback() {
+  return (
+    <PageContainer>
+      <Skeleton className="h-4 w-48" />
+      <div className="space-y-2">
+        <Skeleton className="h-7 w-64" />
+        <Skeleton className="h-4 w-96 max-w-full" />
+      </div>
+      <TableSkeleton rows={8} />
+    </PageContainer>
+  );
+}
+
+async function SpecTableSection({ instrumentId }: { instrumentId: string }) {
   let instrument: InstrumentModel;
   try {
     instrument = await apiGet<InstrumentModel>(`/instruments/${instrumentId}`);
@@ -32,7 +57,7 @@ export default async function AdminSpecTablePage({ params }: PageProps) {
   }
 
   // Este backoffice es sólo para instrumentos oficiales.
-  if (!instrument.isOfficial) redirect('/admin/instrumentos');
+  if (!instrument.isOfficial) redirect(ROUTES.adminInstrumentos);
 
   const itemsResponse = await apiGet<ItemsListResponse>(
     `/items?instrumentId=${instrumentId}&limit=200`,
@@ -43,8 +68,8 @@ export default async function AdminSpecTablePage({ params }: PageProps) {
       instrument={instrument}
       items={itemsResponse.data ?? []}
       canEdit={false}
-      basePath="/admin/instrumentos"
-      breadcrumb={{ href: '/admin/instrumentos', label: 'Instrumentos oficiales' }}
+      basePath={ROUTES.adminInstrumentos}
+      breadcrumb={{ href: ROUTES.adminInstrumentos, label: 'Instrumentos oficiales' }}
     />
   );
 }

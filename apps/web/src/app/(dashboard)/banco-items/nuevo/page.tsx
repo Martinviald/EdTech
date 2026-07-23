@@ -3,7 +3,6 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import type { Route } from 'next';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -16,6 +15,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import type { CreateInstrumentDto, CreateInstrumentSectionDto } from '@soe/types';
+import { ROUTES } from '@/lib/routes';
 import { createInstrument } from '../actions';
 
 const TYPE_OPTIONS = [
@@ -91,7 +91,7 @@ export default function NuevoInstrumentoPage() {
     setIsSubmitting(true);
     try {
       const result = await createInstrument(data);
-      router.push(`/banco-items/${result.id}` as Route);
+      router.push(ROUTES.bancoItem(result.id));
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Error al crear el instrumento.');
     } finally {
@@ -103,7 +103,7 @@ export default function NuevoInstrumentoPage() {
     <div className="space-y-6">
       <div>
         <div className="flex items-center gap-2 text-sm text-muted-foreground">
-          <Link href={'/banco-items' as Route} className="hover:text-foreground">
+          <Link href={ROUTES.bancoItems} className="hover:text-foreground">
             Banco de Instrumentos
           </Link>
           <span>/</span>
@@ -256,7 +256,7 @@ export default function NuevoInstrumentoPage() {
           <Button type="submit" disabled={isSubmitting}>
             {isSubmitting ? 'Creando...' : 'Crear instrumento'}
           </Button>
-          <Link href={'/banco-items' as Route}>
+          <Link href={ROUTES.bancoItems}>
             <Button type="button" variant="outline">
               Cancelar
             </Button>

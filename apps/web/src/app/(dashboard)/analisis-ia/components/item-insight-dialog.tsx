@@ -33,7 +33,7 @@ import {
 } from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { AlertCallout } from '@/components/patterns';
+import { AlertCallout } from '@/components/shared';
 import { causeLabel } from './format';
 import { generateItemInsight, fetchItemInsight } from '../actions';
 

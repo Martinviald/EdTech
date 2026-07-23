@@ -32,15 +32,15 @@ export function PreviewStep({ preview, onConfirm, onCancel, isPending }: Preview
       </div>
 
       {hasWarnings && (
-        <Card className="border-amber-200 bg-amber-50 dark:border-amber-900 dark:bg-amber-950/20">
+        <Card className="border-warning/40 bg-warning/10">
           <CardHeader className="pb-2">
-            <CardTitle className="flex items-center gap-2 text-sm text-amber-900 dark:text-amber-200">
+            <CardTitle className="flex items-center gap-2 text-sm text-warning">
               <AlertCircle className="h-4 w-4" />
               Advertencias
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <ul className="list-disc space-y-1 pl-5 text-sm text-amber-900 dark:text-amber-200">
+            <ul className="list-disc space-y-1 pl-5 text-sm text-warning">
               {warnings.map((w, i) => (
                 <li key={i}>{w}</li>
               ))}

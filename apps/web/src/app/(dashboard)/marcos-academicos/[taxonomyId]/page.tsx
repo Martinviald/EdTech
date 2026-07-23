@@ -1,14 +1,18 @@
+import { Suspense } from 'react';
 import Link from 'next/link';
-import type { Route } from 'next';
 import { notFound, redirect } from 'next/navigation';
 import { ChevronLeft } from 'lucide-react';
 import { auth } from '@/auth';
 import { apiGet } from '@/lib/api';
+import { ROUTES } from '@/lib/routes';
+import { TableSkeleton } from '@/components/shared';
+import { Skeleton } from '@/components/ui/skeleton';
 import {
   canAccess,
   TAXONOMY_ROLES,
   taxonomyKind,
   userHasRole,
+  type UserRole,
   type TaxonomyTreeResponse,
 } from '@soe/types';
 import { TreeView } from './TreeView';
@@ -19,11 +23,33 @@ export default async function MarcoAcademicoDetailPage({
   params: Promise<{ taxonomyId: string }>;
 }) {
   const session = await auth();
-  if (!session?.user) redirect('/login');
-  if (!canAccess(session.user.roles, TAXONOMY_ROLES)) redirect('/dashboard');
+  if (!session?.user) redirect(ROUTES.login);
+  if (!canAccess(session.user.roles, TAXONOMY_ROLES)) redirect(ROUTES.dashboard);
 
   const { taxonomyId } = await params;
 
+  return (
+    <div className="space-y-6">
+      <Suspense fallback={<TaxonomyDetailSkeleton />}>
+        <TaxonomyDetail
+          taxonomyId={taxonomyId}
+          orgId={session.user.orgId}
+          roles={session.user.roles}
+        />
+      </Suspense>
+    </div>
+  );
+}
+
+async function TaxonomyDetail({
+  taxonomyId,
+  orgId,
+  roles,
+}: {
+  taxonomyId: string;
+  orgId: string | null;
+  roles: readonly UserRole[];
+}) {
   let data: TaxonomyTreeResponse;
   try {
     data = await apiGet<TaxonomyTreeResponse>(`/taxonomies/${taxonomyId}/tree`);
@@ -35,13 +61,13 @@ export default async function MarcoAcademicoDetailPage({
   const { groupLabel, typeLabel } = taxonomyKind(taxonomy.type, taxonomy.isOfficial);
   const editable =
     !taxonomy.isOfficial &&
-    (taxonomy.orgId === session.user.orgId || userHasRole(session.user.roles, 'platform_admin'));
+    (taxonomy.orgId === orgId || userHasRole(roles, 'platform_admin'));
 
   return (
-    <div className="space-y-6">
+    <>
       <div className="space-y-2">
         <Link
-          href={'/marcos-academicos' as Route}
+          href={ROUTES.marcosAcademicos}
           className="text-muted-foreground hover:text-foreground inline-flex items-center gap-1 text-sm"
         >
           <ChevronLeft className="size-4" /> Volver a marcos académicos
@@ -53,8 +79,8 @@ export default async function MarcoAcademicoDetailPage({
               <span
                 className={`rounded-full px-2 py-0.5 text-xs font-medium ${
                   taxonomy.isOfficial
-                    ? 'bg-blue-100 text-blue-800 dark:bg-blue-950 dark:text-blue-200'
-                    : 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-200'
+                    ? 'bg-info/10 text-info'
+                    : 'bg-success/10 text-success'
                 }`}
               >
                 {taxonomy.isOfficial ? groupLabel : 'Propio del colegio'}
@@ -77,6 +103,19 @@ export default async function MarcoAcademicoDetailPage({
       </div>
 
       <TreeView taxonomyId={taxonomy.id} nodes={nodes} editable={editable} />
-    </div>
+    </>
+  );
+}
+
+function TaxonomyDetailSkeleton() {
+  return (
+    <>
+      <Skeleton className="h-4 w-52" />
+      <div className="space-y-2">
+        <Skeleton className="h-7 w-64" />
+        <Skeleton className="h-4 w-80 max-w-full" />
+      </div>
+      <TableSkeleton rows={8} />
+    </>
   );
 }

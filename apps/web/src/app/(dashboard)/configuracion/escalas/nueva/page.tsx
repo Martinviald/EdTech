@@ -1,36 +1,36 @@
 import Link from 'next/link';
-import type { Route } from 'next';
 import { redirect } from 'next/navigation';
 import { ChevronLeft } from 'lucide-react';
 import { auth } from '@/auth';
+import { ROUTES } from '@/lib/routes';
 import { canAccess, GRADING_SCALE_ROLES, userHasRole } from '@soe/types';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { PageContainer, PageHeader } from '@/components/shared';
 import { EscalaForm } from '../components/escala-form';
 
 export default async function NuevaEscalaPage() {
   const session = await auth();
-  if (!session?.user?.orgId) redirect('/login');
+  if (!session?.user?.orgId) redirect(ROUTES.login);
   if (!canAccess(session.user.roles, GRADING_SCALE_ROLES)) {
-    redirect('/dashboard');
+    redirect(ROUTES.dashboard);
   }
 
   const canManageGlobal = userHasRole(session.user.roles, 'platform_admin');
 
   return (
-    <div className="space-y-6">
-      <div className="space-y-2">
-        <Link
-          href={'/configuracion/escalas' as Route}
-          className="text-muted-foreground hover:text-foreground inline-flex items-center gap-1 text-sm"
-        >
-          <ChevronLeft className="size-4" /> Volver a escalas
-        </Link>
-        <h1 className="text-2xl font-semibold">Nueva escala de notas</h1>
-        <p className="text-muted-foreground text-sm">
-          Configura el tipo de escala, su rango y el umbral de aprobación. Podrás previsualizar las
-          conversiones desde el detalle una vez creada.
-        </p>
-      </div>
+    <PageContainer>
+      <PageHeader
+        breadcrumb={
+          <Link
+            href={ROUTES.configEscalas}
+            className="text-muted-foreground hover:text-foreground inline-flex items-center gap-1 text-sm"
+          >
+            <ChevronLeft className="size-4" /> Volver a escalas
+          </Link>
+        }
+        title="Nueva escala de notas"
+        description="Configura el tipo de escala, su rango y el umbral de aprobación. Podrás previsualizar las conversiones desde el detalle una vez creada."
+      />
 
       <Card>
         <CardHeader>
@@ -40,6 +40,6 @@ export default async function NuevaEscalaPage() {
           <EscalaForm mode="create" canManageGlobal={canManageGlobal} />
         </CardContent>
       </Card>
-    </div>
+    </PageContainer>
   );
 }

@@ -24,6 +24,9 @@ import {
   academicSetupSchema,
   updateOrgFeaturesSchema,
   FEATURE_MANAGEMENT_ROLES,
+  ORG_PROFILE_VIEWER_ROLES,
+  ORG_ACADEMIC_ADMIN_ROLES,
+  ORG_OWNER_ROLES,
   type OrgFeaturesResponse,
 } from '@soe/types';
 
@@ -34,14 +37,14 @@ export class OrganizationsController {
 
   /** GET /api/organizations/me — perfil del colegio del usuario autenticado. */
   @Get('me')
-  @Roles('school_admin', 'academic_director', 'cycle_director', 'teacher', 'platform_admin')
+  @Roles(...ORG_PROFILE_VIEWER_ROLES)
   getMyOrg(@CurrentUser() user: JwtPayload, @Query('orgId') orgId?: string) {
     return this.organizationsService.getProfile(getEffectiveOrgId(user, orgId));
   }
 
   /** GET /api/organizations/me/overview — perfil + estado del setup del año académico. */
   @Get('me/overview')
-  @Roles('school_admin', 'academic_director', 'platform_admin')
+  @Roles(...ORG_ACADEMIC_ADMIN_ROLES)
   getOverview(@CurrentUser() user: JwtPayload, @Query('orgId') orgId?: string) {
     return this.organizationsService.getOverview(getEffectiveOrgId(user, orgId));
   }
@@ -83,21 +86,21 @@ export class OrganizationsController {
 
   /** GET /api/organizations/grades — lista global de niveles educativos. */
   @Get('grades')
-  @Roles('school_admin', 'academic_director', 'platform_admin')
+  @Roles(...ORG_ACADEMIC_ADMIN_ROLES)
   listGrades() {
     return this.organizationsService.listGrades();
   }
 
   /** GET /api/organizations/subjects — lista global de asignaturas. */
   @Get('subjects')
-  @Roles('school_admin', 'academic_director', 'platform_admin')
+  @Roles(...ORG_ACADEMIC_ADMIN_ROLES)
   listSubjects() {
     return this.organizationsService.listSubjects();
   }
 
   /** GET /api/organizations/:orgId/teachers — usuarios elegibles como profesores. */
   @Get(':orgId/teachers')
-  @Roles('school_admin', 'academic_director', 'platform_admin')
+  @Roles(...ORG_ACADEMIC_ADMIN_ROLES)
   listTeachers(
     @Param('orgId', ParseUUIDPipe) orgId: string,
     @CurrentUser() user: JwtPayload,
@@ -108,7 +111,7 @@ export class OrganizationsController {
 
   /** GET /api/organizations/:orgId/subject-classes — subject_classes del año vigente. */
   @Get(':orgId/subject-classes')
-  @Roles('school_admin', 'academic_director', 'platform_admin')
+  @Roles(...ORG_ACADEMIC_ADMIN_ROLES)
   listSubjectClasses(
     @Param('orgId', ParseUUIDPipe) orgId: string,
     @CurrentUser() user: JwtPayload,
@@ -119,7 +122,7 @@ export class OrganizationsController {
 
   /** PATCH /api/organizations/:id — actualizar perfil del colegio. */
   @Patch(':id')
-  @Roles('school_admin', 'platform_admin')
+  @Roles(...ORG_OWNER_ROLES)
   updateProfile(@Param('id') id: string, @Body() body: unknown, @CurrentUser() user: JwtPayload) {
     const dto = updateOrganizationProfileSchema.parse(body);
     const effectiveOrgId = getEffectiveOrgId(user, id);
@@ -128,7 +131,7 @@ export class OrganizationsController {
 
   /** POST /api/organizations/:id/setup — configurar estructura académica del año. */
   @Post(':id/setup')
-  @Roles('school_admin', 'platform_admin')
+  @Roles(...ORG_OWNER_ROLES)
   setupAcademicYear(
     @Param('id') id: string,
     @Body() body: unknown,
@@ -157,7 +160,7 @@ export class OrganizationsController {
 
   /** GET /api/organizations/:orgId/subject-matrix — cursos × asignaturas del año vigente. */
   @Get(':orgId/subject-matrix')
-  @Roles('school_admin', 'academic_director', 'platform_admin')
+  @Roles(...ORG_ACADEMIC_ADMIN_ROLES)
   getSubjectMatrix(
     @Param('orgId', ParseUUIDPipe) orgId: string,
     @CurrentUser() user: JwtPayload,
@@ -168,7 +171,7 @@ export class OrganizationsController {
 
   /** POST /api/organizations/:orgId/subject-classes/bulk — agrega asignaturas a TODOS los cursos del año. */
   @Post(':orgId/subject-classes/bulk')
-  @Roles('school_admin', 'academic_director', 'platform_admin')
+  @Roles(...ORG_ACADEMIC_ADMIN_ROLES)
   bulkAddSubjects(
     @Param('orgId', ParseUUIDPipe) orgId: string,
     @Body() body: unknown,
@@ -181,7 +184,7 @@ export class OrganizationsController {
 
   /** POST /api/organizations/:orgId/class-groups/:classGroupId/subjects — agrega una asignatura a UN curso. */
   @Post(':orgId/class-groups/:classGroupId/subjects')
-  @Roles('school_admin', 'academic_director', 'platform_admin')
+  @Roles(...ORG_ACADEMIC_ADMIN_ROLES)
   addSubjectToClassGroup(
     @Param('orgId', ParseUUIDPipe) orgId: string,
     @Param('classGroupId', ParseUUIDPipe) classGroupId: string,
@@ -199,7 +202,7 @@ export class OrganizationsController {
 
   /** DELETE /api/organizations/:orgId/subject-classes/:subjectClassId — quita una asignatura de un curso. */
   @Delete(':orgId/subject-classes/:subjectClassId')
-  @Roles('school_admin', 'academic_director', 'platform_admin')
+  @Roles(...ORG_ACADEMIC_ADMIN_ROLES)
   removeSubjectClass(
     @Param('orgId', ParseUUIDPipe) orgId: string,
     @Param('subjectClassId', ParseUUIDPipe) subjectClassId: string,
@@ -213,7 +216,7 @@ export class OrganizationsController {
 
   /** POST /api/organizations/:orgId/class-groups — crea un curso suelto en el año vigente. */
   @Post(':orgId/class-groups')
-  @Roles('school_admin', 'academic_director', 'platform_admin')
+  @Roles(...ORG_ACADEMIC_ADMIN_ROLES)
   createClassGroup(
     @Param('orgId', ParseUUIDPipe) orgId: string,
     @Body() body: unknown,
@@ -226,7 +229,7 @@ export class OrganizationsController {
 
   /** DELETE /api/organizations/:orgId/class-groups/:classGroupId — borra un curso (valida sin datos). */
   @Delete(':orgId/class-groups/:classGroupId')
-  @Roles('school_admin', 'academic_director', 'platform_admin')
+  @Roles(...ORG_ACADEMIC_ADMIN_ROLES)
   deleteClassGroup(
     @Param('orgId', ParseUUIDPipe) orgId: string,
     @Param('classGroupId', ParseUUIDPipe) classGroupId: string,

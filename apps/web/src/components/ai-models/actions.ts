@@ -8,6 +8,7 @@ import {
   type UpdateLlmSettingDto,
 } from '@soe/types';
 import { apiPatch } from '@/lib/api';
+import { ROUTES } from '@/lib/routes';
 
 /**
  * Fija el proveedor + modelo GLOBAL de una funcionalidad de IA. Sólo platform_admin
@@ -24,7 +25,7 @@ export async function updateLlmModelAction(
     `/llm-settings/${parsedFeature}`,
     validated,
   );
-  revalidatePath('/admin/modelos-ia');
-  revalidatePath('/configuracion/modelos-ia');
+  revalidatePath(ROUTES.adminModelosIa);
+  revalidatePath(ROUTES.configModelosIa);
   return updated;
 }

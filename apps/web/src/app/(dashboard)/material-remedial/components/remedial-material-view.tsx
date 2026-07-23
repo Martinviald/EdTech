@@ -10,7 +10,7 @@ import {
 } from '@soe/types';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
-import { AlertCallout } from '@/components/patterns';
+import { AlertCallout } from '@/components/shared';
 import { ContentDisplay } from './content-display';
 import { StudentContentDisplay } from './student-content-display';
 import { ReviewPanel } from './review-panel';

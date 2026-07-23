@@ -2,16 +2,17 @@
 
 import { useEffect, useState, useTransition } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import type { Route } from 'next';
 import { AlertCircle, ArrowLeft, CheckCircle2, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 import type { AnswerSheetPreviewResponse } from '@soe/types';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { PageContainer, PageHeader } from '@/components/shared';
 import { cn } from '@/lib/utils';
 import { confirmAnswerSheetAction, previewAnswerSheetAction } from '../actions';
 import { PreviewTable } from '../components/preview-table';
+import { ROUTES } from '@/lib/routes';
 
 const FORMAT_LABELS: Record<string, string> = {
   gradecam_csv: 'Gradecam (CSV)',
@@ -72,7 +73,7 @@ export default function PreviewPage() {
         return;
       }
       toast.success('Importación confirmada.');
-      router.push(`/importar/resultados/jobs/${result.data.jobId}` as Route);
+      router.push(ROUTES.importarResultadosJob(result.data.jobId));
     });
   };
 
@@ -98,7 +99,7 @@ export default function PreviewPage() {
         <div>
           <Button
             variant="outline"
-            onClick={() => router.push('/importar/resultados/cargar' as Route)}
+            onClick={() => router.push(ROUTES.importarResultadosCargar)}
           >
             <ArrowLeft className="mr-2 h-4 w-4" />
             Volver a cargar archivo
@@ -112,19 +113,18 @@ export default function PreviewPage() {
   const canConfirm = summary.matchedStudents > 0 && (skipErrorRows || summary.rowsWithErrors === 0);
 
   return (
-    <div className="space-y-6">
-      <div className="space-y-1">
-        <h1 className="text-2xl font-semibold">Previsualización</h1>
-        <p className="text-muted-foreground text-sm">
-          Revisa las filas detectadas. Aún no se ha guardado nada — confirma abajo para crear la
-          evaluación y registrar las respuestas.
-        </p>
-        <div className="flex flex-wrap items-center gap-2 pt-2 text-sm">
-          <Badge variant="secondary">{FORMAT_LABELS[format] ?? format}</Badge>
-          <span className="text-muted-foreground">·</span>
-          <span className="font-medium">{instrumentName}</span>
-        </div>
-      </div>
+    <PageContainer>
+      <PageHeader
+        title="Previsualización"
+        description="Revisa las filas detectadas. Aún no se ha guardado nada — confirma abajo para crear la evaluación y registrar las respuestas."
+        meta={
+          <div className="flex flex-wrap items-center gap-2 text-sm">
+            <Badge variant="secondary">{FORMAT_LABELS[format] ?? format}</Badge>
+            <span className="text-muted-foreground">·</span>
+            <span className="font-medium">{instrumentName}</span>
+          </div>
+        }
+      />
 
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
         <Stat label="Filas totales" value={summary.totalRows} variant="neutral" />
@@ -167,13 +167,13 @@ export default function PreviewPage() {
       </Card>
 
       {warnings.length > 0 && (
-        <Card className="border-amber-200 bg-amber-50 dark:border-amber-900 dark:bg-amber-950/20">
+        <Card className="border-warning/40 bg-warning/10">
           <CardHeader>
-            <CardTitle className="text-sm text-amber-900 dark:text-amber-200">
+            <CardTitle className="text-sm text-warning">
               Advertencias ({warnings.length})
             </CardTitle>
           </CardHeader>
-          <CardContent className="space-y-1 text-sm text-amber-900 dark:text-amber-200">
+          <CardContent className="space-y-1 text-sm text-warning">
             <ul className="list-disc pl-5">
               {warnings.map((w, i) => (
                 <li key={i}>{w}</li>
@@ -230,7 +230,7 @@ export default function PreviewPage() {
       <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
         <Button
           variant="outline"
-          onClick={() => router.push('/importar/resultados/cargar' as Route)}
+          onClick={() => router.push(ROUTES.importarResultadosCargar)}
           disabled={isConfirming}
         >
           <ArrowLeft className="mr-2 h-4 w-4" />
@@ -245,7 +245,7 @@ export default function PreviewPage() {
           {isConfirming ? 'Confirmando…' : 'Confirmar importación'}
         </Button>
       </div>
-    </div>
+    </PageContainer>
   );
 }
 
@@ -259,10 +259,9 @@ function Stat({
   variant: 'success' | 'warn' | 'info' | 'neutral';
 }) {
   const colors: Record<typeof variant, string> = {
-    success:
-      'border-emerald-200 bg-emerald-50 text-emerald-900 dark:border-emerald-900 dark:bg-emerald-950/20 dark:text-emerald-200',
-    warn: 'border-amber-200 bg-amber-50 text-amber-900 dark:border-amber-900 dark:bg-amber-950/20 dark:text-amber-200',
-    info: 'border-blue-200 bg-blue-50 text-blue-900 dark:border-blue-900 dark:bg-blue-950/20 dark:text-blue-200',
+    success: 'border-success/30 bg-success/10 text-success',
+    warn: 'border-warning/40 bg-warning/10 text-warning',
+    info: 'border-info/30 bg-info/10 text-info',
     neutral: 'border-muted bg-muted/30 text-foreground',
   };
   return (

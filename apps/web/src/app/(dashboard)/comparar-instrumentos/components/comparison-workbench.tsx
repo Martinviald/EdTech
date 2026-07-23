@@ -18,7 +18,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { AlertCallout, EmptyState, Field } from '@/components/patterns';
+import { AlertCallout, EmptyState, Field } from '@/components/shared';
 import { pollInstrumentComparison, startInstrumentComparison } from '../actions';
 import { ComparisonReport } from './comparison-report';
 

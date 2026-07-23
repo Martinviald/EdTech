@@ -71,9 +71,9 @@ const LEVEL_PROMPT: Record<BreakdownLevel, string> = {
 
 function correctRateClass(rate: number | null): string {
   if (rate === null) return 'text-muted-foreground';
-  if (rate < 40) return 'text-red-700 dark:text-red-300';
-  if (rate < 60) return 'text-amber-700 dark:text-amber-300';
-  return 'text-emerald-700 dark:text-emerald-300';
+  if (rate < 40) return 'text-destructive';
+  if (rate < 60) return 'text-warning';
+  return 'text-success';
 }
 
 function formatPct(value: number | null): string {
@@ -422,7 +422,7 @@ function BreakdownRowButton({
         aria-label={`Logro de ${row.label}`}
       >
         <div
-          className={cn('h-full rounded-full transition-all', barClass)}
+          className={cn('h-full rounded-full transition-[width] motion-reduce:transition-none', barClass)}
           style={{ width: `${Math.min(100, Math.max(0, pct))}%` }}
         />
       </div>

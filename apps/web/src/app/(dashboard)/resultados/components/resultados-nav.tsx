@@ -1,53 +1,13 @@
 'use client';
 
-import Link from 'next/link';
-import { usePathname, useSearchParams } from 'next/navigation';
-import type { Route } from 'next';
-import { cn } from '@/lib/utils';
+import { PageTabs } from '@/components/shared';
+import { RESULTADOS_TABS, toPageTabs } from '@/components/layout/view-tabs';
 
 /**
- * Sub-navegación de la sección Resultados. Mantiene la querystring (filtros)
- * al cambiar de vista para que los filtros aplicados se conserven (H6.2).
- *
- * Sólo agrupa las vistas AGREGADAS (cross-evaluación, filtradas por
- * asignatura/grado/curso). Las vistas por-evaluación (Informe, Detalle por
- * pregunta, Análisis IA) viven ahora en el hub `/evaluaciones/[id]`, al que se
- * entra eligiendo una evaluación en la lista `/evaluaciones`.
+ * Sub-navegación de la sección Resultados. Preserva la querystring (filtros) al
+ * cambiar de vista (H6.2), vía `PageTabs`. Las tabs viven en `view-tabs.ts`
+ * (fuente única compartida con los `children` del sidebar).
  */
-const TABS: { href: string; label: string }[] = [
-  { href: '/resultados', label: 'Resumen' },
-  { href: '/resultados/clasificacion', label: 'Clasificación' },
-  { href: '/resultados/habilidades', label: 'Habilidades' },
-  { href: '/resultados/mapa-calor', label: 'Mapa de calor' },
-  { href: '/resultados/comparacion', label: 'Comparación' },
-  { href: '/resultados/progresion', label: 'Progresión' },
-];
-
 export function ResultadosNav() {
-  const pathname = usePathname();
-  const searchParams = useSearchParams();
-  const qs = searchParams.toString();
-  const suffix = qs ? `?${qs}` : '';
-
-  return (
-    <nav className="flex flex-wrap gap-1 border-b">
-      {TABS.map((tab) => {
-        const active = pathname === tab.href;
-        return (
-          <Link
-            key={tab.href}
-            href={`${tab.href}${suffix}` as Route}
-            className={cn(
-              'border-b-2 px-3 py-2 text-sm font-medium transition-colors',
-              active
-                ? 'border-primary text-foreground'
-                : 'border-transparent text-muted-foreground hover:text-foreground',
-            )}
-          >
-            {tab.label}
-          </Link>
-        );
-      })}
-    </nav>
-  );
+  return <PageTabs tabs={toPageTabs(RESULTADOS_TABS)} sticky />;
 }

@@ -1,3 +1,4 @@
+import { Suspense } from 'react';
 import { redirect } from 'next/navigation';
 import Link from 'next/link';
 import type { Route } from 'next';
@@ -14,6 +15,7 @@ import {
 } from 'lucide-react';
 import { auth } from '@/auth';
 import { apiGet } from '@/lib/api';
+import { ROUTES } from '@/lib/routes';
 import {
   canAccess,
   DASHBOARD_VIEWER_ROLES,
@@ -25,9 +27,8 @@ import {
   type AssessmentReportResponse,
   type UserRole,
 } from '@soe/types';
-import { EmptyState } from '@/components/patterns';
+import { EmptyState, StatCard, KpiGridSkeleton, CardSkeleton } from '@/components/shared';
 import { Card, CardContent } from '@/components/ui/card';
-import { SummaryCard } from '../../resultados/components/summary-card';
 import {
   formatAchievement,
   performanceLevelLabel,
@@ -56,12 +57,46 @@ export default async function EvaluacionResumenPage({
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
   const session = await auth();
-  if (!session?.user) redirect('/login');
-  if (!canAccess(session.user.roles, DASHBOARD_VIEWER_ROLES)) redirect('/dashboard');
+  if (!session?.user) redirect(ROUTES.login);
+  if (!canAccess(session.user.roles, DASHBOARD_VIEWER_ROLES)) redirect(ROUTES.dashboard);
 
   const { assessmentId } = await params;
   const sp = await searchParams;
   const classGroupId = pickParam(sp.classGroupId);
+
+  return (
+    <Suspense fallback={<ResumenSkeleton />}>
+      <ResumenContent
+        assessmentId={assessmentId}
+        classGroupId={classGroupId}
+        roles={session.user.roles}
+      />
+    </Suspense>
+  );
+}
+
+function ResumenSkeleton() {
+  return (
+    <div className="space-y-6">
+      <KpiGridSkeleton />
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <CardSkeleton rows={2} />
+        <CardSkeleton rows={2} />
+        <CardSkeleton rows={2} />
+      </div>
+    </div>
+  );
+}
+
+async function ResumenContent({
+  assessmentId,
+  classGroupId,
+  roles,
+}: {
+  assessmentId: string;
+  classGroupId: string | undefined;
+  roles: readonly UserRole[];
+}) {
   const suffix = classGroupId ? `?classGroupId=${classGroupId}` : '';
 
   const query = new URLSearchParams({ assessmentId });
@@ -89,8 +124,6 @@ export default async function EvaluacionResumenPage({
   }
 
   const { summary } = report;
-  const base = `/evaluaciones/${assessmentId}`;
-  const roles = session.user.roles;
 
   // El DIA es un diagnóstico por niveles de logro (I/II/III), no por notas:
   // ocultamos "Nota promedio" para este tipo de instrumento aunque tenga escala.
@@ -108,35 +141,35 @@ export default async function EvaluacionResumenPage({
 
   const sections: SectionLink[] = [
     {
-      href: `${base}/resultados`,
+      href: ROUTES.evaluacionResultados(assessmentId),
       label: 'Resultados',
       description: 'Informe consolidado: síntesis, comparativa por curso, habilidades e ítems.',
       icon: Target,
       policy: ANALYTICS_VIEWER_ROLES,
     },
     {
-      href: `${base}/detalle`,
+      href: ROUTES.evaluacionDetalle(assessmentId),
       label: 'Detalle por pregunta',
       description: 'Tabla cruzada alumno × pregunta con distractores.',
       icon: Table2,
       policy: ITEM_ANALYSIS_VIEWER_ROLES,
     },
     {
-      href: `${base}/analisis-ia`,
+      href: ROUTES.evaluacionAnalisisIa(assessmentId),
       label: 'Análisis IA',
       description: 'Informe pedagógico generado por IA con brechas y recomendaciones.',
       icon: Sparkles,
       policy: AI_ANALYSIS_VIEWER_ROLES,
     },
     {
-      href: `${base}/material-remedial`,
+      href: ROUTES.evaluacionMaterialRemedial(assessmentId),
       label: 'Material remedial',
       description: 'Material remedial generado para las brechas de esta evaluación.',
       icon: Lightbulb,
       policy: REMEDIAL_VIEWER_ROLES,
     },
     {
-      href: `${base}/calidad`,
+      href: ROUTES.evaluacionCalidad(assessmentId),
       label: 'Calidad del instrumento',
       description: 'Confiabilidad (KR-20) y banderas psicométricas de los ítems.',
       icon: ShieldCheck,
@@ -149,7 +182,7 @@ export default async function EvaluacionResumenPage({
   return (
     <div className="space-y-6">
       <section className={`grid grid-cols-1 gap-4 ${summaryGridCols}`}>
-        <SummaryCard
+        <StatCard
           label="% Logro promedio"
           value={formatAchievement(summary.averageAchievement)}
           hint={`Nivel: ${performanceLevelLabel(summary.performanceLevel)}`}
@@ -159,7 +192,7 @@ export default async function EvaluacionResumenPage({
             Sin escala, se ocultan estas tarjetas (no se muestra el default 4.0). */}
         {summary.hasGradingScale ? (
           <>
-            <SummaryCard
+            <StatCard
               label="Aprobación"
               value={summary.passingRate === null ? '—' : `${summary.passingRate.toFixed(1)}%`}
               hint={
@@ -170,7 +203,7 @@ export default async function EvaluacionResumenPage({
               icon={CheckCircle2}
             />
             {isDia ? null : (
-              <SummaryCard
+              <StatCard
                 label="Nota promedio"
                 value={summary.averageGrade === null ? '—' : summary.averageGrade.toFixed(1)}
                 hint={summary.averageGrade === null ? undefined : 'Promedio del curso evaluado'}
@@ -179,7 +212,7 @@ export default async function EvaluacionResumenPage({
             )}
           </>
         ) : null}
-        <SummaryCard
+        <StatCard
           label="Asistencia"
           value={`${summary.studentsEvaluated}/${summary.studentsEnrolled}`}
           hint={

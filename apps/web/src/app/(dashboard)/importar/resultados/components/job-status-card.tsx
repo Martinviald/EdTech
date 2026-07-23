@@ -21,8 +21,7 @@ function statusVisual(status: ImportJobStatus) {
     case 'completed':
       return {
         Icon: CheckCircle2,
-        className:
-          'border-emerald-200 bg-emerald-50 text-emerald-900 dark:border-emerald-900 dark:bg-emerald-950/20 dark:text-emerald-200',
+        className: 'border-success/30 bg-success/10 text-success',
       };
     case 'failed':
       return {
@@ -33,14 +32,12 @@ function statusVisual(status: ImportJobStatus) {
     case 'partial':
       return {
         Icon: AlertCircle,
-        className:
-          'border-amber-200 bg-amber-50 text-amber-900 dark:border-amber-900 dark:bg-amber-950/20 dark:text-amber-200',
+        className: 'border-warning/40 bg-warning/10 text-warning',
       };
     case 'processing':
       return {
         Icon: Loader2,
-        className:
-          'border-blue-200 bg-blue-50 text-blue-900 dark:border-blue-900 dark:bg-blue-950/20 dark:text-blue-200',
+        className: 'border-info/30 bg-info/10 text-info',
       };
     case 'pending':
     default:
@@ -71,7 +68,11 @@ export function JobStatusCard({ job }: JobStatusCardProps) {
   return (
     <div className="space-y-4">
       <Card className={cn(className)}>
-        <CardContent className="flex flex-col gap-3 pt-6 sm:flex-row sm:items-start">
+        <CardContent
+          role="status"
+          aria-live="polite"
+          className="flex flex-col gap-3 pt-6 sm:flex-row sm:items-start"
+        >
           <Icon
             className={cn(
               'mt-0.5 h-6 w-6 shrink-0',

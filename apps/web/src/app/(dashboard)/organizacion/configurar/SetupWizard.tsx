@@ -7,6 +7,7 @@ import { toast } from 'sonner';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { ROUTES } from '@/lib/routes';
 import {
   updateOrgProfile as defaultUpdateOrgProfile,
   setupAcademicYear as defaultSetupAcademicYear,
@@ -86,7 +87,7 @@ export function SetupWizard({
   grades,
   subjects,
   actions,
-  successRedirect = '/organizacion',
+  successRedirect = ROUTES.organizacion,
 }: SetupWizardProps) {
   const router = useRouter();
   const updateOrgProfile = actions?.updateOrgProfile ?? defaultUpdateOrgProfile;

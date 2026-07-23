@@ -1,9 +1,9 @@
-import type { Route } from 'next';
 import { redirect } from 'next/navigation';
 import { canAccess, ASSISTANT_USER_ROLES } from '@soe/types';
 import { auth } from '@/auth';
 import { getCurrentOrg } from '@/lib/getCurrentOrg';
 import { isFeatureEnabled } from '@/lib/features';
+import { ROUTES } from '@/lib/routes';
 import { Sidebar } from '@/components/layout/Sidebar';
 import { SkipLink } from '@/components/layout/SkipLink';
 import { Topbar } from '@/components/layout/Topbar';
@@ -12,9 +12,9 @@ import { AssistantProvider, AssistantWidget } from '@/components/assistant';
 
 export default async function DashboardLayout({ children }: { children: React.ReactNode }) {
   const session = await auth();
-  if (!session?.user) redirect('/login');
-  if (session.user.isPlatformAdmin && !session.user.orgId) redirect('/admin' as Route);
-  if (!session.user.orgId) redirect('/login');
+  if (!session?.user) redirect(ROUTES.login);
+  if (session.user.isPlatformAdmin && !session.user.orgId) redirect(ROUTES.admin);
+  if (!session.user.orgId) redirect(ROUTES.login);
 
   const org = await getCurrentOrg(session.user.orgId);
 
@@ -39,7 +39,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
             orgs={session.user.orgs}
             platformLink={
               session.user.isPlatformAdmin
-                ? { href: '/admin', label: 'Panel de plataforma' }
+                ? { href: ROUTES.admin, label: 'Panel de plataforma' }
                 : undefined
             }
           />

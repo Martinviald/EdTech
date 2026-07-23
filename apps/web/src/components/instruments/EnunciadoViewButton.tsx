@@ -1,5 +1,6 @@
 import { ExternalLink, FileText } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { ROUTES } from '@/lib/routes';
 
 /**
  * Botón "Ver enunciado": abre el PDF del enunciado en una PESTAÑA NUEVA, para
@@ -18,7 +19,7 @@ import { Button } from '@/components/ui/button';
 export function EnunciadoViewButton({ instrumentId }: { instrumentId: string }) {
   return (
     <a
-      href={`/instrumentos/${instrumentId}/enunciado`}
+      href={ROUTES.instrumentoEnunciado(instrumentId)}
       target="_blank"
       rel="noopener noreferrer"
     >

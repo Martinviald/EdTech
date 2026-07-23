@@ -79,7 +79,7 @@ export function StudentReport({ report }: { report: OfficialStudentReportRespons
           />
         </div>
         {result.requiresSupport ? (
-          <div className="rounded-md border border-red-300 bg-red-50 p-3 text-sm text-red-900 dark:border-red-900 dark:bg-red-950/40 dark:text-red-100">
+          <div className="rounded-md border border-destructive/30 bg-destructive/10 p-3 text-sm text-destructive">
             Este estudiante se ubica en el nivel de logro más bajo y requiere mayor apoyo.
           </div>
         ) : null}
@@ -212,10 +212,10 @@ function ResultMark({ item }: { item: OfficialStudentItemRow }) {
         className={cn(
           'text-xs font-medium',
           item.score >= item.maxScore
-            ? 'text-emerald-600 dark:text-emerald-400'
+            ? 'text-success'
             : partial
-              ? 'text-amber-600 dark:text-amber-400'
-              : 'text-red-600 dark:text-red-400',
+              ? 'text-warning'
+              : 'text-destructive',
         )}
       >
         {item.score}/{item.maxScore}
@@ -223,11 +223,11 @@ function ResultMark({ item }: { item: OfficialStudentItemRow }) {
     );
   }
   return item.isCorrect ? (
-    <span className="text-emerald-600 dark:text-emerald-400" title="Correcta">
+    <span className="text-success" title="Correcta">
       ✓
     </span>
   ) : (
-    <span className="text-red-600 dark:text-red-400" title="Incorrecta">
+    <span className="text-destructive" title="Incorrecta">
       ✗
     </span>
   );

@@ -1,8 +1,10 @@
 'use client';
 
 import { useRouter, useSearchParams } from 'next/navigation';
-import { useCallback } from 'react';
+import { useCallback, useTransition } from 'react';
 import type { Route } from 'next';
+import { ROUTES } from '@/lib/routes';
+import { TopProgressBar } from '@/components/shared';
 import {
   INSTRUMENT_APPLICATION_PERIODS,
   INSTRUMENT_APPLICATION_PERIOD_LABELS,
@@ -54,6 +56,9 @@ interface InstrumentFiltersProps {
 export function InstrumentFilters({ subjects, grades, years }: InstrumentFiltersProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
+  // La transición mantiene visible el listado previo mientras llega el nuevo y
+  // expone `isPending` para la barra de progreso (sin flash de skeleton).
+  const [isPending, startTransition] = useTransition();
 
   const currentType = searchParams.get('type') ?? '';
   const currentStatus = searchParams.get('status') ?? '';
@@ -78,13 +83,16 @@ export function InstrumentFilters({ subjects, grades, years }: InstrumentFilters
         params.delete('applicationPeriod');
       }
       params.set('page', '1');
-      router.push(`/banco-items?${params.toString()}` as Route);
+      startTransition(() => {
+        router.push(`${ROUTES.bancoItems}?${params.toString()}` as Route);
+      });
     },
     [router, searchParams],
   );
 
   return (
-    <div className="flex flex-wrap items-center gap-3">
+    <div className="relative flex flex-wrap items-center gap-3">
+      <TopProgressBar active={isPending} />
       <Select value={currentType || ALL} onValueChange={(v) => updateFilter('type', v)}>
         <SelectTrigger className="w-[160px]" aria-label="Tipo">
           <SelectValue placeholder="Tipo" />

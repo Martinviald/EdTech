@@ -17,11 +17,12 @@ import {
   type EnrollmentStatus,
 } from '@soe/types';
 import { auth } from '@/auth';
+import { ROUTES } from '@/lib/routes';
 import { getClassGroupDetail } from '@/lib/teacherAssignmentsApi';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { EmptyState } from '@/components/EmptyState';
+import { EmptyState } from '@/components/shared';
 import {
   Table,
   TableBody,
@@ -54,8 +55,8 @@ export default async function ClassGroupDetailPage({
   params: Promise<{ classGroupId: string }>;
 }) {
   const session = await auth();
-  if (!session?.user?.orgId) redirect('/login');
-  if (!canAccess(session.user.roles, CLASS_VIEWER_ROLES)) redirect('/dashboard');
+  if (!session?.user?.orgId) redirect(ROUTES.login);
+  if (!canAccess(session.user.roles, CLASS_VIEWER_ROLES)) redirect(ROUTES.dashboard);
 
   const { classGroupId } = await params;
 
@@ -72,7 +73,7 @@ export default async function ClassGroupDetailPage({
     <div className="space-y-6">
       <div className="space-y-2">
         <Link
-          href={'/dashboard/my-classes' as Route}
+          href={ROUTES.myClasses}
           className="text-muted-foreground hover:text-foreground inline-flex items-center gap-1 text-sm"
         >
           <ChevronLeft className="size-4" /> Volver a mis cursos
@@ -93,7 +94,7 @@ export default async function ClassGroupDetailPage({
           <div className="flex flex-wrap gap-2">
             {canAccess(session.user.roles, RESULTS_VIEWER_ROLES) ? (
               <Button asChild variant="outline" size="sm">
-                <Link href={`/resultados?classGroupId=${classGroupId}` as Route}>
+                <Link href={`${ROUTES.resultados}?classGroupId=${classGroupId}` as Route}>
                   <BarChart3 className="mr-2 size-4" aria-hidden />
                   Ver resultados del curso
                 </Link>
@@ -101,7 +102,7 @@ export default async function ClassGroupDetailPage({
             ) : null}
             {canAccess(session.user.roles, RESULTS_VIEWER_ROLES) ? (
               <Button asChild variant="outline" size="sm">
-                <Link href={`/evaluaciones?classGroupId=${classGroupId}` as Route}>
+                <Link href={`${ROUTES.evaluaciones}?classGroupId=${classGroupId}` as Route}>
                   <ClipboardList className="mr-2 size-4" aria-hidden />
                   Ver evaluaciones del curso
                 </Link>

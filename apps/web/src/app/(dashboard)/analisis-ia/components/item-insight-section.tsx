@@ -12,7 +12,7 @@ import { Search, Sparkles } from 'lucide-react';
 import type { MatrixQuestionColumn, UserRole } from '@soe/types';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { EmptyState } from '@/components/patterns';
+import { EmptyState } from '@/components/shared';
 import {
   Select,
   SelectContent,

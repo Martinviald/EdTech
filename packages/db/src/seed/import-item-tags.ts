@@ -19,9 +19,12 @@ type PlanTag = { code: string; type: string; tagType: 'primary' | 'secondary' };
 type PlanEntry = { instrument: string; position: number; tags: PlanTag[] };
 
 export async function applyItemTags(db: Database): Promise<void> {
-  const plan = (JSON.parse(
-    readFileSync(resolve(__dirname, '../../data/instruments/item-tags-plan.json'), 'utf-8'),
-  ) as { plan: PlanEntry[] }).plan;
+  // Override opcional (ITEM_TAGS_PLAN) para cargar un plan aislado (ej. la tanda DIA 2026)
+  // sin fusionar con el plan 2025.
+  const planPath = process.env.ITEM_TAGS_PLAN
+    ? resolve(process.env.ITEM_TAGS_PLAN)
+    : resolve(__dirname, '../../data/instruments/item-tags-plan.json');
+  const plan = (JSON.parse(readFileSync(planPath, 'utf-8')) as { plan: PlanEntry[] }).plan;
 
   // Mapas de resolución
   const instRows = await db.select({ id: instruments.id, config: instruments.config }).from(instruments);

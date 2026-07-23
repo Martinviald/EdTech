@@ -2,7 +2,6 @@
 
 import { useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
-import type { Route } from 'next';
 import { toast } from 'sonner';
 import {
   GRADING_SCALE_TYPE_VALUES,
@@ -11,6 +10,7 @@ import {
   type GradingScaleTypeValue,
   type GradingScaleUpdateDto,
 } from '@soe/types';
+import { ROUTES } from '@/lib/routes';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -120,7 +120,7 @@ export function EscalaForm({ mode, initial, canManageGlobal = false }: EscalaFor
         if (mode === 'create') {
           const created = await createGradingScaleAction(payload as GradingScaleCreateDto);
           toast.success('Escala creada');
-          router.push(`/configuracion/escalas/${created.id}` as Route);
+          router.push(ROUTES.configEscala(created.id));
           router.refresh();
         } else if (initial) {
           await updateGradingScaleAction(initial.id, payload as GradingScaleUpdateDto);

@@ -211,17 +211,13 @@ function AlternativeRow({
     <li
       className={cn(
         'flex items-start gap-2.5 rounded-md border px-3 py-2 text-sm',
-        alt.isCorrect
-          ? 'border-emerald-500/60 bg-emerald-50 dark:bg-emerald-950/30'
-          : 'border-border',
+        alt.isCorrect ? 'border-success/60 bg-success/10' : 'border-border',
       )}
     >
       <span
         className={cn(
           'inline-flex size-6 shrink-0 items-center justify-center rounded-full border text-xs font-semibold',
-          alt.isCorrect
-            ? 'border-emerald-500 text-emerald-700 dark:text-emerald-300'
-            : 'border-border text-muted-foreground',
+          alt.isCorrect ? 'border-success text-success' : 'border-border text-muted-foreground',
         )}
       >
         {alt.key}
@@ -242,7 +238,7 @@ function AlternativeRow({
       )}
       {alt.isCorrect ? (
         <CheckCircle2
-          className="mt-0.5 size-4 shrink-0 text-emerald-600 dark:text-emerald-400"
+          className="mt-0.5 size-4 shrink-0 text-success"
           aria-label="Alternativa correcta"
         />
       ) : null}

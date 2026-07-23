@@ -4,7 +4,8 @@ import type { RemedialMaterialType, SkillDiagnosis } from '@soe/types';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { EmptyState } from '@/components/patterns';
+import { EmptyState } from '@/components/shared';
+import { ROUTES } from '@/lib/routes';
 import { formatAchievement } from './format';
 
 /**
@@ -27,7 +28,7 @@ function buildGenerateHref(params: {
     type: params.type,
     generate: '1',
   });
-  return `/material-remedial?${search.toString()}`;
+  return `${ROUTES.materialRemedial}?${search.toString()}`;
 }
 
 /** Brechas por habilidad con causa raíz, misconcepción y estrategia (H20.4). */

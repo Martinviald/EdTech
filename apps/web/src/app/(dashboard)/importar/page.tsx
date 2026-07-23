@@ -12,12 +12,14 @@ import {
 import { auth } from '@/auth';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
+import { PageHeader } from '@/components/shared';
+import { ROUTES } from '@/lib/routes';
 
 export const dynamic = 'force-dynamic';
 
 type Step = {
   n: number;
-  href: string;
+  href: Route;
   title: string;
   description: string;
   icon: typeof Users;
@@ -27,7 +29,7 @@ type Step = {
 const STEPS: Step[] = [
   {
     n: 1,
-    href: '/importar/alumnos',
+    href: ROUTES.importarAlumnos,
     title: 'Nómina de alumnos',
     description: 'Carga el listado de alumnos por curso desde un CSV. Base de todo lo demás.',
     icon: Users,
@@ -35,7 +37,7 @@ const STEPS: Step[] = [
   },
   {
     n: 2,
-    href: '/importar/instrumento',
+    href: ROUTES.importarInstrumento,
     title: 'Pauta / Instrumento',
     description:
       'Importa la pauta oficial del instrumento (ítems, claves y habilidades) para poder corregir.',
@@ -44,7 +46,7 @@ const STEPS: Step[] = [
   },
   {
     n: 3,
-    href: '/importar/resultados',
+    href: ROUTES.importarResultados,
     title: 'Resultados (hojas de respuesta)',
     description:
       'Sube las respuestas de los alumnos. Requiere tener la pauta cargada. Crea la evaluación y calcula resultados.',
@@ -55,23 +57,20 @@ const STEPS: Step[] = [
 
 export default async function ImportarHubPage() {
   const session = await auth();
-  if (!session?.user?.orgId) redirect('/login');
+  if (!session?.user?.orgId) redirect(ROUTES.login);
   // El hub es accesible para cualquiera que pueda hacer al menos una de las cargas.
   if (!canAccess(session.user.roles, ANSWER_SHEET_IMPORT_ROLES)) {
-    redirect('/dashboard');
+    redirect(ROUTES.dashboard);
   }
 
   const roles = session.user.roles;
 
   return (
     <div className="mx-auto flex max-w-3xl flex-col gap-6">
-      <div>
-        <h1 className="text-2xl font-semibold">Importar</h1>
-        <p className="text-muted-foreground mt-1 text-sm">
-          Sigue los pasos en orden para poner en marcha una evaluación: primero la nómina, luego la
-          pauta del instrumento y al final las hojas de respuesta.
-        </p>
-      </div>
+      <PageHeader
+        title="Importar"
+        description="Sigue los pasos en orden para poner en marcha una evaluación: primero la nómina, luego la pauta del instrumento y al final las hojas de respuesta."
+      />
 
       <ol className="space-y-3">
         {STEPS.map((step) => {
@@ -95,7 +94,7 @@ export default async function ImportarHubPage() {
                   </div>
                   {allowed ? (
                     <Button asChild size="sm" className="shrink-0 self-center">
-                      <Link href={step.href as Route}>
+                      <Link href={step.href}>
                         Ir <ArrowRight className="ml-1.5 size-3.5" aria-hidden />
                       </Link>
                     </Button>

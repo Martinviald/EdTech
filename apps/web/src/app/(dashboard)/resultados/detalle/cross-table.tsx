@@ -73,18 +73,18 @@ function formatPct(value: number | null): string {
 /** Color de cabecera de columna por % de logro (resalta preguntas críticas). */
 function correctRateHeaderClass(rate: number | null): string {
   if (rate === null) return 'text-muted-foreground';
-  if (rate < 40) return 'text-red-700 dark:text-red-300 font-semibold';
-  if (rate < 60) return 'text-amber-700 dark:text-amber-300';
-  return 'text-emerald-700 dark:text-emerald-300';
+  if (rate < 40) return 'text-destructive font-semibold';
+  if (rate < 60) return 'text-warning';
+  return 'text-success';
 }
 
 /** Estilo de celda por estado de la respuesta del alumno. */
 function cellClass(cell: MatrixCell): string {
   if (cell.isCorrect === true) {
-    return 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-200';
+    return 'bg-success/10 text-success';
   }
   if (cell.isCorrect === false) {
-    return 'bg-red-100 text-red-800 dark:bg-red-950 dark:text-red-200';
+    return 'bg-destructive/10 text-destructive';
   }
   // Sin respuesta / sin corrección.
   return 'bg-muted/40 text-muted-foreground';
@@ -474,9 +474,9 @@ export function CrossTable({
 /** Color de texto de la referencia del colegio por % de logro (mismos cortes). */
 function referenceCellClass(rate: number | null): string {
   if (rate === null) return 'text-muted-foreground';
-  if (rate < 40) return 'text-red-700 dark:text-red-300 font-semibold';
-  if (rate < 60) return 'text-amber-700 dark:text-amber-300';
-  return 'text-emerald-700 dark:text-emerald-300';
+  if (rate < 40) return 'text-destructive font-semibold';
+  if (rate < 60) return 'text-warning';
+  return 'text-success';
 }
 
 /**

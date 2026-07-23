@@ -1,18 +1,18 @@
 import Link from 'next/link';
-import type { Route } from 'next';
 import { BookOpen, Upload } from 'lucide-react';
 import { redirect } from 'next/navigation';
 import { canAccess, IMPORT_ROLES } from '@soe/types';
 import { auth } from '@/auth';
+import { ROUTES } from '@/lib/routes';
 import { listClassGroupsForUser } from '@/lib/teacherAssignmentsApi';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { EmptyState } from '@/components/EmptyState';
+import { EmptyState } from '@/components/shared';
 
 export default async function MyClassesPage() {
   const session = await auth();
-  if (!session?.user?.orgId) redirect('/login');
+  if (!session?.user?.orgId) redirect(ROUTES.login);
 
   const rows = await listClassGroupsForUser(session.user.orgId);
 
@@ -67,7 +67,7 @@ export default async function MyClassesPage() {
         </div>
         {canImport ? (
           <Button asChild variant="outline" size="sm">
-            <Link href={'/importar/alumnos' as Route}>
+            <Link href={ROUTES.importarAlumnos}>
               <Upload className="mr-2 size-4" aria-hidden />
               Importar alumnos
             </Link>
@@ -86,7 +86,7 @@ export default async function MyClassesPage() {
           {cards.map((c) => (
             <Link
               key={c.classGroupId}
-              href={`/dashboard/my-classes/${c.classGroupId}` as Route}
+              href={ROUTES.myClass(c.classGroupId)}
               className="group block rounded-lg focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
             >
               <Card className="h-full transition-colors group-hover:bg-muted/30">

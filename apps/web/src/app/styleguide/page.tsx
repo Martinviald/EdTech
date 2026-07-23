@@ -18,15 +18,34 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
-import { Inbox, UserPlus } from 'lucide-react';
+import {
+  Inbox,
+  UserPlus,
+  BarChart3,
+  GraduationCap,
+  DollarSign,
+  Timer,
+  AlertTriangle,
+  GitBranch,
+  Rocket,
+  Sparkles,
+  ShieldCheck,
+} from 'lucide-react';
 import {
   AlertCallout,
   EmptyState,
   Field,
+  HeaderIcon,
+  HeaderLead,
+  MetaItem,
+  MetricsGroup,
   PageHeader,
+  StatCard,
   StatusBadge,
+  StatusDot,
   Stepper,
-} from '@/components/patterns';
+} from '@/components/shared';
+import { FilterBarDemo } from './filter-bar-demo';
 import { BRAND } from '@/lib/brand';
 
 const PALETTE = [
@@ -40,6 +59,46 @@ const PALETTE = [
   { label: 'muted', bg: 'bg-muted border' },
   { label: 'background', bg: 'bg-background border' },
   { label: 'foreground', bg: 'bg-foreground' },
+];
+
+// Ramp de marca (Capa 1 · indigo) + acento violeta, vía var(--brand-*)/var(--violet-*).
+const BRAND_RAMP = [50, 100, 200, 300, 400, 500, 600, 700, 800, 900, 950];
+const VIOLET_RAMP = [100, 200, 400, 500, 600, 900];
+
+// 4 niveles de logro (tokens de dominio --level-*).
+const LEVELS = [
+  { label: 'insufficient', bg: 'bg-level-insufficient', fg: 'text-level-insufficient-foreground' },
+  { label: 'elementary', bg: 'bg-level-elementary', fg: 'text-level-elementary-foreground' },
+  { label: 'adequate', bg: 'bg-level-adequate', fg: 'text-level-adequate-foreground' },
+  { label: 'advanced', bg: 'bg-level-advanced', fg: 'text-level-advanced-foreground' },
+];
+
+// Escala de radios (derivan de --radius).
+const RADII = [
+  { label: 'sm', cls: 'rounded-sm' },
+  { label: 'md', cls: 'rounded-md' },
+  { label: 'lg', cls: 'rounded-lg' },
+  { label: 'xl', cls: 'rounded-xl' },
+  { label: 'full', cls: 'rounded-full' },
+];
+
+// Escala de elevación (sombras suaves en capas).
+const SHADOWS = [
+  { label: 'shadow-sm', cls: 'shadow-sm' },
+  { label: 'shadow', cls: 'shadow' },
+  { label: 'shadow-md', cls: 'shadow-md' },
+  { label: 'shadow-lg', cls: 'shadow-lg' },
+  { label: 'shadow-xl', cls: 'shadow-xl' },
+];
+
+// Escala tipográfica tokenizada (roles + 2xs).
+const TYPE_SCALE = [
+  { label: 'text-display', cls: 'text-display', sample: 'Display' },
+  { label: 'text-heading', cls: 'text-heading', sample: 'Heading' },
+  { label: 'text-title', cls: 'text-title', sample: 'Title' },
+  { label: 'text-body', cls: 'text-body', sample: 'Body — párrafo estándar.' },
+  { label: 'text-caption', cls: 'text-caption text-muted-foreground', sample: 'Caption — metadatos.' },
+  { label: 'text-2xs', cls: 'text-2xs text-muted-foreground', sample: 'text-2xs — 10px (cierra text-[10px]/[11px]).' },
 ];
 
 export default function StyleguidePage() {
@@ -65,17 +124,119 @@ export default function StyleguidePage() {
         </div>
       </section>
 
+      {/* Ramp de marca (Capa 1) */}
+      <section className="space-y-4">
+        <h2 className="text-xl font-semibold border-b pb-2">Ramp de marca (indigo + violeta)</h2>
+        <div>
+          <p className="text-sm font-medium text-muted-foreground mb-2">brand · indigo (--brand-*)</p>
+          <div className="flex gap-1 flex-wrap">
+            {BRAND_RAMP.map((step) => (
+              <div key={step} className="flex flex-col items-center gap-1">
+                <div
+                  className="w-12 h-12 rounded-md border"
+                  style={{ backgroundColor: `hsl(var(--brand-${step}))` }}
+                />
+                <span className="text-2xs text-muted-foreground">{step}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+        <div>
+          <p className="text-sm font-medium text-muted-foreground mb-2">accent · violet (--violet-*)</p>
+          <div className="flex gap-1 flex-wrap">
+            {VIOLET_RAMP.map((step) => (
+              <div key={step} className="flex flex-col items-center gap-1">
+                <div
+                  className="w-12 h-12 rounded-md border"
+                  style={{ backgroundColor: `hsl(var(--violet-${step}))` }}
+                />
+                <span className="text-2xs text-muted-foreground">{step}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Niveles de logro */}
+      <section className="space-y-4">
+        <h2 className="text-xl font-semibold border-b pb-2">Niveles de logro (--level-*)</h2>
+        <p className="text-sm text-muted-foreground">
+          Token de dominio para los 4 niveles; distinguibles entre sí y del primario indigo.
+        </p>
+        <div className="flex gap-3 flex-wrap">
+          {LEVELS.map(({ label, bg, fg }) => (
+            <div
+              key={label}
+              className={`w-32 h-16 rounded-lg flex items-center justify-center text-sm font-medium ${bg} ${fg}`}
+            >
+              {label}
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* Colores categóricos */}
+      <section className="space-y-4">
+        <h2 className="text-xl font-semibold border-b pb-2">Colores categóricos (--cat-*)</h2>
+        <p className="text-sm text-muted-foreground">
+          Paleta NO semántica para codificar categorías sin implicar estado (tipos de nodo de
+          taxonomía, series de charts…). Uso: <code>bg-cat-N/15 text-cat-N</code>.
+        </p>
+        <div className="flex gap-2 flex-wrap">
+          {[
+            'bg-cat-1/15 text-cat-1',
+            'bg-cat-2/15 text-cat-2',
+            'bg-cat-3/15 text-cat-3',
+            'bg-cat-4/15 text-cat-4',
+            'bg-cat-5/15 text-cat-5',
+            'bg-cat-6/15 text-cat-6',
+          ].map((cls, i) => (
+            <span
+              key={cls}
+              className={`rounded-full px-2.5 py-0.5 text-xs font-medium ${cls}`}
+            >
+              cat-{i + 1}
+            </span>
+          ))}
+        </div>
+      </section>
+
+      {/* Radios */}
+      <section className="space-y-4">
+        <h2 className="text-xl font-semibold border-b pb-2">Radios (--radius = 0.75rem)</h2>
+        <div className="flex gap-6 flex-wrap items-end">
+          {RADII.map(({ label, cls }) => (
+            <div key={label} className="flex flex-col items-center gap-2">
+              <div className={`w-16 h-16 bg-secondary border ${cls}`} />
+              <span className="text-xs text-muted-foreground">{label}</span>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* Sombras */}
+      <section className="space-y-4">
+        <h2 className="text-xl font-semibold border-b pb-2">Elevación (sombras suaves)</h2>
+        <div className="flex gap-8 flex-wrap p-2">
+          {SHADOWS.map(({ label, cls }) => (
+            <div key={label} className="flex flex-col items-center gap-2">
+              <div className={`w-20 h-20 rounded-lg bg-card ${cls}`} />
+              <span className="text-xs text-muted-foreground">{label}</span>
+            </div>
+          ))}
+        </div>
+      </section>
+
       {/* Tipografía */}
       <section className="space-y-4">
         <h2 className="text-xl font-semibold border-b pb-2">Tipografía (Inter)</h2>
-        <div className="space-y-2">
-          <p className="text-4xl font-bold">Heading 1 — 36px Bold</p>
-          <p className="text-3xl font-bold">Heading 2 — 30px Bold</p>
-          <p className="text-2xl font-semibold">Heading 3 — 24px Semibold</p>
-          <p className="text-xl font-semibold">Heading 4 — 20px Semibold</p>
-          <p className="text-base">Body — 16px Regular. Texto de párrafo estándar.</p>
-          <p className="text-sm text-muted-foreground">Small — 14px Muted. Texto secundario.</p>
-          <p className="text-xs text-muted-foreground">XSmall — 12px. Etiquetas y metadatos.</p>
+        <div className="space-y-3">
+          {TYPE_SCALE.map(({ label, cls, sample }) => (
+            <div key={label} className="flex items-baseline gap-4">
+              <span className="w-28 shrink-0 text-2xs text-muted-foreground">{label}</span>
+              <span className={cls}>{sample}</span>
+            </div>
+          ))}
         </div>
       </section>
 
@@ -191,16 +352,108 @@ export default function StyleguidePage() {
 
       {/* Patrones */}
       <section className="space-y-6">
-        <h2 className="text-xl font-semibold border-b pb-2">Patrones (components/patterns)</h2>
+        <h2 className="text-xl font-semibold border-b pb-2">Patrones (components/shared)</h2>
 
         <div className="space-y-2">
           <p className="text-sm font-medium text-muted-foreground">PageHeader</p>
-          <div className="rounded-lg border p-4">
+          <div className="space-y-4 rounded-lg border p-4">
             <PageHeader
               title="Banco de Items"
               description="Encabezado de página estándar con acciones."
               actions={<Button>Acción</Button>}
             />
+            <PageHeader
+              icon={Rocket}
+              title="Con ícono (mismo átomo que HeaderLead)"
+              description="El ícono queda del alto de título + descripción juntos."
+              actions={<Button variant="outline">Acción</Button>}
+            />
+          </div>
+        </div>
+
+        <div className="space-y-2">
+          <p className="text-sm font-medium text-muted-foreground">
+            HeaderLead / HeaderIcon (ícono + título + subtítulo, para CardHeader · DialogHeader · TabHeader)
+          </p>
+          <div className="space-y-3 rounded-lg border p-4">
+            <div className="flex flex-wrap items-center gap-4">
+              <HeaderIcon icon={Sparkles} variant="filled" tone="primary" className="size-10" />
+              <HeaderIcon icon={ShieldCheck} variant="filled" tone="success" className="size-10" />
+              <HeaderIcon icon={AlertTriangle} variant="filled" tone="warning" className="size-10" />
+              <HeaderIcon icon={Rocket} variant="outlined" tone="primary" className="size-10" />
+              <HeaderIcon icon={ShieldCheck} variant="outlined" tone="success" className="size-10" />
+              <HeaderIcon icon={AlertTriangle} variant="outlined" tone="destructive" className="size-10" />
+            </div>
+            <div className="grid gap-3 sm:grid-cols-2">
+              <div className="rounded-lg border p-4">
+                <HeaderLead
+                  icon={Rocket}
+                  title="Filled (default)"
+                  description="Caja sólida con color de marca, como la del dashboard."
+                />
+              </div>
+              <div className="rounded-lg border p-4">
+                <HeaderLead
+                  icon={ShieldCheck}
+                  iconVariant="outlined"
+                  iconTone="success"
+                  title="Outlined · success"
+                  description="Borde + tinte, para acentos más suaves."
+                />
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div className="space-y-2">
+          <p className="text-sm font-medium text-muted-foreground">StatCard (una métrica)</p>
+          <div className="grid gap-4 sm:grid-cols-3">
+            <StatCard
+              label="% Logro global"
+              value="72,4 %"
+              hint="Promedio del alcance filtrado"
+              icon={BarChart3}
+            />
+            <StatCard
+              label="Alumnos evaluados"
+              value="1.284"
+              icon={GraduationCap}
+              trend={{ value: 8 }}
+            />
+            <StatCard label="Alertas" value="3" trend={{ value: -12, higherIsBetter: false }} />
+          </div>
+        </div>
+
+        <div className="space-y-2">
+          <p className="text-sm font-medium text-muted-foreground">
+            MetricsGroup (varias métricas en una card)
+          </p>
+          <MetricsGroup
+            metrics={[
+              { label: 'Costo total', value: 'US$ 12,40', icon: DollarSign },
+              { label: 'Latencia promedio', value: '1,2 s', icon: Timer, trend: { value: -4.05 } },
+              {
+                label: 'Jobs fallidos',
+                value: '2',
+                icon: AlertTriangle,
+                tone: 'danger',
+              },
+            ]}
+          />
+        </div>
+
+        <div className="space-y-2">
+          <p className="text-sm font-medium text-muted-foreground">FilterBar</p>
+          <FilterBarDemo />
+        </div>
+
+        <div className="space-y-2">
+          <p className="text-sm font-medium text-muted-foreground">MetaItem / StatusDot</p>
+          <div className="flex flex-wrap items-center gap-4 rounded-lg border p-4">
+            <MetaItem icon={GitBranch}>main</MetaItem>
+            <StatusDot tone="success">Activo</StatusDot>
+            <StatusDot tone="warning">Pendiente</StatusDot>
+            <StatusDot tone="danger">Bloqueado</StatusDot>
           </div>
         </div>
 
