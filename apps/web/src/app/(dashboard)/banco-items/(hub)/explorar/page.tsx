@@ -159,7 +159,7 @@ async function ExplorerSection({ params, page }: { params: SearchParams; page: n
   const itemsQuery = new URLSearchParams();
   itemsQuery.set('scope', scope);
   itemsQuery.set('page', String(page));
-  itemsQuery.set('limit', String(PAGE_SIZE));
+  itemsQuery.set('pageSize', String(PAGE_SIZE));
   if (subjectId) itemsQuery.set('subjectId', subjectId);
   if (gradeId) itemsQuery.set('gradeId', gradeId);
   for (const group of groups) itemsQuery.append('taxonomyNodeGroups', group.join(','));
