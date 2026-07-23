@@ -50,8 +50,8 @@ function parseCsvIds(raw: string | string[] | undefined): string[] {
 }
 
 type TaxonomySelection = {
-  subjectId: string | undefined;
-  gradeId: string | undefined;
+  subjectIds: string[];
+  gradeIds: string[];
   selectedLeaf: Record<string, string[]>;
   selectedParent: Record<string, string>;
   groups: string[][];
@@ -61,8 +61,8 @@ function deriveTaxonomySelection(
   nodes: TaxonomyNodeModel[],
   params: SearchParams,
 ): TaxonomySelection {
-  const subjectId = parseSingle(params.subjectId);
-  const gradeId = parseSingle(params.gradeId);
+  const subjectIds = parseCsvIds(params.subjectId);
+  const gradeIds = parseCsvIds(params.gradeId);
 
   const parentIds = new Set(nodes.map((n) => n.parentId).filter((p): p is string => Boolean(p)));
   const structuralTypes = new Set(nodes.filter((n) => parentIds.has(n.id)).map((n) => n.type));
@@ -72,8 +72,8 @@ function deriveTaxonomySelection(
   );
 
   const matchesScope = (n: TaxonomyNodeModel) => {
-    if (subjectId && n.subjectId && n.subjectId !== subjectId) return false;
-    if (gradeId && n.gradeId && n.gradeId !== gradeId) return false;
+    if (subjectIds.length > 0 && n.subjectId && !subjectIds.includes(n.subjectId)) return false;
+    if (gradeIds.length > 0 && n.gradeId && !gradeIds.includes(n.gradeId)) return false;
     return true;
   };
 
@@ -103,7 +103,7 @@ function deriveTaxonomySelection(
     }
   }
 
-  return { subjectId, gradeId, selectedLeaf, selectedParent, groups };
+  return { subjectIds, gradeIds, selectedLeaf, selectedParent, groups };
 }
 
 export default async function BancoItemsExplorarPage({ searchParams }: PageProps) {
@@ -133,7 +133,7 @@ async function FiltersSection({ params }: { params: SearchParams }) {
     getCatalogGrades(),
     getCurriculumNodes(),
   ]);
-  const { subjectId, gradeId, selectedLeaf, selectedParent } = deriveTaxonomySelection(
+  const { subjectIds, gradeIds, selectedLeaf, selectedParent } = deriveTaxonomySelection(
     nodes,
     params,
   );
@@ -143,8 +143,8 @@ async function FiltersSection({ params }: { params: SearchParams }) {
       subjects={subjects}
       grades={grades}
       nodes={nodes}
-      subjectId={subjectId}
-      gradeId={gradeId}
+      subjectIds={subjectIds}
+      gradeIds={gradeIds}
       selectedLeaf={selectedLeaf}
       selectedParent={selectedParent}
     />
@@ -154,14 +154,14 @@ async function FiltersSection({ params }: { params: SearchParams }) {
 async function ExplorerSection({ params, page }: { params: SearchParams; page: number }) {
   const scope = parseScope(params.scope);
   const nodes = await getCurriculumNodes();
-  const { subjectId, gradeId, groups } = deriveTaxonomySelection(nodes, params);
+  const { subjectIds, gradeIds, groups } = deriveTaxonomySelection(nodes, params);
 
   const itemsQuery = new URLSearchParams();
   itemsQuery.set('scope', scope);
   itemsQuery.set('page', String(page));
   itemsQuery.set('pageSize', String(PAGE_SIZE));
-  if (subjectId) itemsQuery.set('subjectId', subjectId);
-  if (gradeId) itemsQuery.set('gradeId', gradeId);
+  if (subjectIds.length > 0) itemsQuery.set('subjectId', subjectIds.join(','));
+  if (gradeIds.length > 0) itemsQuery.set('gradeId', gradeIds.join(','));
   for (const group of groups) itemsQuery.append('taxonomyNodeGroups', group.join(','));
 
   const [itemsResponse, instrumentsResponse] = await Promise.all([

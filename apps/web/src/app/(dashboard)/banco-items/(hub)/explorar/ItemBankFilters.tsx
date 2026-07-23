@@ -33,8 +33,8 @@ interface ItemBankFiltersProps {
   grades: CatalogEntry[];
   /** Todos los nodos del marco curricular (para poblar y acotar los filtros). */
   nodes: TaxonomyNodeModel[];
-  subjectId?: string;
-  gradeId?: string;
+  subjectIds: string[];
+  gradeIds: string[];
   /** Ids seleccionados por tipo HOJA (clave = TaxonomyNodeType hoja). */
   selectedLeaf: Record<string, string[]>;
   /** Id del padre elegido por tipo PADRE/narrower (clave = TaxonomyNodeType padre). */
@@ -45,8 +45,8 @@ export function ItemBankFilters({
   subjects,
   grades,
   nodes,
-  subjectId,
-  gradeId,
+  subjectIds,
+  gradeIds,
   selectedLeaf,
   selectedParent,
 }: ItemBankFiltersProps) {
@@ -57,6 +57,7 @@ export function ItemBankFilters({
   const pushParams = (mutate: (params: URLSearchParams) => void) => {
     const params = new URLSearchParams(searchParams.toString());
     mutate(params);
+    params.delete('page');
     const qs = params.toString();
     startTransition(() => {
       router.push((qs ? `${ROUTES.bancoItemsExplorar}?${qs}` : ROUTES.bancoItemsExplorar) as Route);
@@ -68,16 +69,16 @@ export function ItemBankFilters({
     for (const type of TAXONOMY_NODE_TYPES) params.delete(type);
   };
 
-  const onSubjectChange = (next: string) =>
+  const onSubjectChange = (ids: string[]) =>
     pushParams((params) => {
-      if (next) params.set('subjectId', next);
+      if (ids.length > 0) params.set('subjectId', ids.join(','));
       else params.delete('subjectId');
       clearNodeSelections(params);
     });
 
-  const onGradeChange = (next: string) =>
+  const onGradeChange = (ids: string[]) =>
     pushParams((params) => {
-      if (next) params.set('gradeId', next);
+      if (ids.length > 0) params.set('gradeId', ids.join(','));
       else params.delete('gradeId');
       clearNodeSelections(params);
     });
@@ -117,8 +118,8 @@ export function ItemBankFilters({
 
   // Un nodo pasa el ámbito si su asignatura/nivel coincide o es NULL (transversal).
   const matchesScope = (n: TaxonomyNodeModel) => {
-    if (subjectId && n.subjectId && n.subjectId !== subjectId) return false;
-    if (gradeId && n.gradeId && n.gradeId !== gradeId) return false;
+    if (subjectIds.length > 0 && n.subjectId && !subjectIds.includes(n.subjectId)) return false;
+    if (gradeIds.length > 0 && n.gradeId && !gradeIds.includes(n.gradeId)) return false;
     return true;
   };
 
@@ -174,8 +175,8 @@ export function ItemBankFilters({
     .filter((d): d is NonNullable<typeof d> => d !== null);
 
   const hasAnyFilter =
-    Boolean(subjectId) ||
-    Boolean(gradeId) ||
+    subjectIds.length > 0 ||
+    gradeIds.length > 0 ||
     Object.values(selectedLeaf).some((ids) => ids.length > 0) ||
     Object.keys(selectedParent).length > 0;
 
@@ -183,18 +184,30 @@ export function ItemBankFilters({
     {
       key: 'subjectId',
       label: 'Asignatura',
-      placeholder: 'Todas las asignaturas',
-      value: subjectId,
-      options: availableSubjects.map((s) => ({ id: s.id, label: s.name })),
-      onChange: onSubjectChange,
+      control: (
+        <NodeTypeFilter
+          label="Asignatura"
+          placeholder="Todas las asignaturas"
+          fullWidth
+          options={availableSubjects.map((s) => ({ id: s.id, label: s.name }))}
+          selected={subjectIds}
+          onChange={onSubjectChange}
+        />
+      ),
     },
     {
       key: 'gradeId',
       label: 'Nivel',
-      placeholder: 'Todos los niveles',
-      value: gradeId,
-      options: availableGrades.map((g) => ({ id: g.id, label: g.name })),
-      onChange: onGradeChange,
+      control: (
+        <NodeTypeFilter
+          label="Nivel"
+          placeholder="Todos los niveles"
+          fullWidth
+          options={availableGrades.map((g) => ({ id: g.id, label: g.name }))}
+          selected={gradeIds}
+          onChange={onGradeChange}
+        />
+      ),
     },
     ...dimensions.flatMap((dim): FilterField[] => {
       const cells: FilterField[] = [];
