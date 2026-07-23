@@ -28,7 +28,8 @@ export const ROUTES = {
   evaluacionResultados: (assessmentId: string) => route(`/evaluaciones/${assessmentId}/resultados`),
   evaluacionDetalle: (assessmentId: string) => route(`/evaluaciones/${assessmentId}/detalle`),
   evaluacionCalidad: (assessmentId: string) => route(`/evaluaciones/${assessmentId}/calidad`),
-  evaluacionAnalisisIa: (assessmentId: string) => route(`/evaluaciones/${assessmentId}/analisis-ia`),
+  evaluacionAnalisisIa: (assessmentId: string) =>
+    route(`/evaluaciones/${assessmentId}/analisis-ia`),
   evaluacionMaterialRemedial: (assessmentId: string) =>
     route(`/evaluaciones/${assessmentId}/material-remedial`),
   evaluacionInformeOficial: (assessmentId: string) =>
@@ -42,7 +43,7 @@ export const ROUTES = {
   resultadosClasificacion: route('/resultados/clasificacion'),
   resultadosComparacion: route('/resultados/comparacion'),
   resultadosDetalle: route('/resultados/detalle'),
-  resultadosHabilidades: route('/resultados/habilidades'),
+  resultadosDimensiones: route('/resultados/dimensiones'),
   resultadosInforme: route('/resultados/informe'),
   resultadosMapaCalor: route('/resultados/mapa-calor'),
   resultadosProgresion: route('/resultados/progresion'),
@@ -82,8 +83,7 @@ export const ROUTES = {
   compararInstrumentos: route('/comparar-instrumentos'),
   equipo: route('/equipo'),
   alumnos: route('/alumnos'),
-  instrumentoEnunciado: (instrumentId: string) =>
-    route(`/instrumentos/${instrumentId}/enunciado`),
+  instrumentoEnunciado: (instrumentId: string) => route(`/instrumentos/${instrumentId}/enunciado`),
   marcosAcademicos: route('/marcos-academicos'),
   marcoAcademico: (taxonomyId: string) => route(`/marcos-academicos/${taxonomyId}`),
   materialRemedial: route('/material-remedial'),

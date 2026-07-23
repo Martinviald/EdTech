@@ -4,12 +4,7 @@ import { Sparkles } from 'lucide-react';
 import { auth } from '@/auth';
 import { ROUTES } from '@/lib/routes';
 import { canAccess, DASHBOARD_VIEWER_ROLES } from '@soe/types';
-import {
-  PageHeader,
-  EmptyState,
-  FilterBarSkeleton,
-  CardSkeleton,
-} from '@/components/shared';
+import { PageHeader, EmptyState, FilterBarSkeleton, CardSkeleton } from '@/components/shared';
 import { AskAiButton, RegisterAssistantContext } from '@/components/assistant';
 import { DashboardFilterBar } from '../components/dashboard-filter-bar';
 import {
@@ -24,7 +19,7 @@ import { getDashboardSkills } from './data';
 
 export const dynamic = 'force-dynamic';
 
-const BASE_PATH = ROUTES.resultadosHabilidades;
+const BASE_PATH = ROUTES.resultadosDimensiones;
 
 const ASK_AI_PROMPT =
   '¿Qué habilidades están más descendidas y qué acciones remediales priorizarías?';
@@ -34,7 +29,7 @@ function pickParam(raw: string | string[] | undefined): string | undefined {
   return value && value.length > 0 ? value : undefined;
 }
 
-export default async function HabilidadesPage({
+export default async function DimensionesPage({
   searchParams,
 }: {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
@@ -61,12 +56,13 @@ export default async function HabilidadesPage({
   return (
     <>
       <RegisterAssistantContext refs={dashboardFiltersToAssistantRefs(filters)} />
-      <PageHeader variant="secondary"
+      <PageHeader
+        variant="secondary"
         title="Logro por dimensión"
         description="% de logro promedio por dimensión de la tabla de especificaciones (habilidad, contenido, OA…). Toca un logro para ver las preguntas asociadas (H6.5)."
         actions={
           <Suspense fallback={null}>
-            <HabilidadesAction query={skillsQuery} />
+            <DimensionesAction query={skillsQuery} />
           </Suspense>
         }
       />
@@ -93,7 +89,7 @@ async function FiltersSection({
   return <DashboardFilterBar options={options} value={filters} basePath={BASE_PATH} />;
 }
 
-async function HabilidadesAction({ query }: { query: string }) {
+async function DimensionesAction({ query }: { query: string }) {
   const skillsResponse = await getDashboardSkills(query);
   if (skillsResponse.skills.length === 0) return null;
   return <AskAiButton prompt={ASK_AI_PROMPT} />;

@@ -25,7 +25,7 @@ export type ViewTab = { href: string; label: string; icon: LucideIcon; exact?: b
 export const RESULTADOS_TABS: readonly ViewTab[] = [
   { href: ROUTES.resultados, label: 'Resumen', icon: LayoutDashboard, exact: true },
   { href: ROUTES.resultadosClasificacion, label: 'Clasificación', icon: Layers, exact: true },
-  { href: ROUTES.resultadosHabilidades, label: 'Habilidades', icon: Lightbulb, exact: true },
+  { href: ROUTES.resultadosDimensiones, label: 'Dimensiones', icon: Lightbulb, exact: true },
   { href: ROUTES.resultadosMapaCalor, label: 'Mapa de calor', icon: Grid3x3, exact: true },
   { href: ROUTES.resultadosComparacion, label: 'Comparación', icon: ArrowLeftRight, exact: true },
   { href: ROUTES.resultadosProgresion, label: 'Progresión', icon: TrendingUp, exact: true },
