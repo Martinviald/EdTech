@@ -2,7 +2,7 @@ import { Suspense } from 'react';
 import { redirect } from 'next/navigation';
 import { auth } from '@/auth';
 import { ROUTES } from '@/lib/routes';
-import { FilterBarSkeleton, TableSkeleton } from '@/components/shared';
+import { FilterBarSkeleton, PaginationControls, TableSkeleton } from '@/components/shared';
 import {
   canAccess,
   ITEM_VIEWER_ROLES,
@@ -11,7 +11,6 @@ import {
   type ItemBankScope,
   type TaxonomyNodeModel,
 } from '@soe/types';
-import { ItemBankScopeSelect } from './ItemBankScopeSelect';
 import { ItemBankFilters } from './ItemBankFilters';
 import { ItemBankExplorer } from './ItemBankExplorer';
 import {
@@ -21,6 +20,8 @@ import {
   getItems,
   getInstruments,
 } from './data';
+
+const PAGE_SIZE = 20;
 
 type SearchParams = Record<string, string | string[] | undefined>;
 
@@ -49,8 +50,8 @@ function parseCsvIds(raw: string | string[] | undefined): string[] {
 }
 
 type TaxonomySelection = {
-  subjectId: string | undefined;
-  gradeId: string | undefined;
+  subjectIds: string[];
+  gradeIds: string[];
   selectedLeaf: Record<string, string[]>;
   selectedParent: Record<string, string>;
   groups: string[][];
@@ -60,8 +61,8 @@ function deriveTaxonomySelection(
   nodes: TaxonomyNodeModel[],
   params: SearchParams,
 ): TaxonomySelection {
-  const subjectId = parseSingle(params.subjectId);
-  const gradeId = parseSingle(params.gradeId);
+  const subjectIds = parseCsvIds(params.subjectId);
+  const gradeIds = parseCsvIds(params.gradeId);
 
   const parentIds = new Set(nodes.map((n) => n.parentId).filter((p): p is string => Boolean(p)));
   const structuralTypes = new Set(nodes.filter((n) => parentIds.has(n.id)).map((n) => n.type));
@@ -71,8 +72,8 @@ function deriveTaxonomySelection(
   );
 
   const matchesScope = (n: TaxonomyNodeModel) => {
-    if (subjectId && n.subjectId && n.subjectId !== subjectId) return false;
-    if (gradeId && n.gradeId && n.gradeId !== gradeId) return false;
+    if (subjectIds.length > 0 && n.subjectId && !subjectIds.includes(n.subjectId)) return false;
+    if (gradeIds.length > 0 && n.gradeId && !gradeIds.includes(n.gradeId)) return false;
     return true;
   };
 
@@ -102,7 +103,7 @@ function deriveTaxonomySelection(
     }
   }
 
-  return { subjectId, gradeId, selectedLeaf, selectedParent, groups };
+  return { subjectIds, gradeIds, selectedLeaf, selectedParent, groups };
 }
 
 export default async function BancoItemsExplorarPage({ searchParams }: PageProps) {
@@ -111,20 +112,16 @@ export default async function BancoItemsExplorarPage({ searchParams }: PageProps
   if (!canAccess(session.user.roles, ITEM_VIEWER_ROLES)) redirect(ROUTES.dashboard);
 
   const params = await searchParams;
-  const scope = parseScope(params.scope);
+  const page = typeof params.page === 'string' ? Math.max(1, Number(params.page) || 1) : 1;
 
   return (
     <>
-      <div className="flex flex-wrap items-center gap-3">
-        <ItemBankScopeSelect value={scope} />
-      </div>
-
       <Suspense fallback={<FilterBarSkeleton />}>
         <FiltersSection params={params} />
       </Suspense>
 
       <Suspense fallback={<TableSkeleton />}>
-        <ExplorerSection params={params} />
+        <ExplorerSection params={params} page={page} />
       </Suspense>
     </>
   );
@@ -136,7 +133,7 @@ async function FiltersSection({ params }: { params: SearchParams }) {
     getCatalogGrades(),
     getCurriculumNodes(),
   ]);
-  const { subjectId, gradeId, selectedLeaf, selectedParent } = deriveTaxonomySelection(
+  const { subjectIds, gradeIds, selectedLeaf, selectedParent } = deriveTaxonomySelection(
     nodes,
     params,
   );
@@ -146,24 +143,25 @@ async function FiltersSection({ params }: { params: SearchParams }) {
       subjects={subjects}
       grades={grades}
       nodes={nodes}
-      subjectId={subjectId}
-      gradeId={gradeId}
+      subjectIds={subjectIds}
+      gradeIds={gradeIds}
       selectedLeaf={selectedLeaf}
       selectedParent={selectedParent}
     />
   );
 }
 
-async function ExplorerSection({ params }: { params: SearchParams }) {
+async function ExplorerSection({ params, page }: { params: SearchParams; page: number }) {
   const scope = parseScope(params.scope);
   const nodes = await getCurriculumNodes();
-  const { subjectId, gradeId, groups } = deriveTaxonomySelection(nodes, params);
+  const { subjectIds, gradeIds, groups } = deriveTaxonomySelection(nodes, params);
 
   const itemsQuery = new URLSearchParams();
   itemsQuery.set('scope', scope);
-  itemsQuery.set('pageSize', '100');
-  if (subjectId) itemsQuery.set('subjectId', subjectId);
-  if (gradeId) itemsQuery.set('gradeId', gradeId);
+  itemsQuery.set('page', String(page));
+  itemsQuery.set('pageSize', String(PAGE_SIZE));
+  if (subjectIds.length > 0) itemsQuery.set('subjectId', subjectIds.join(','));
+  if (gradeIds.length > 0) itemsQuery.set('gradeId', gradeIds.join(','));
   for (const group of groups) itemsQuery.append('taxonomyNodeGroups', group.join(','));
 
   const [itemsResponse, instrumentsResponse] = await Promise.all([
@@ -176,18 +174,15 @@ async function ExplorerSection({ params }: { params: SearchParams }) {
     instrumentsResponse.data.map((inst) => [inst.id, inst.name]),
   );
 
-  const truncated = itemsResponse.total > items.length;
-
   return (
     <>
       <ItemBankExplorer items={items} instrumentNames={instrumentNames} />
-
-      {truncated && (
-        <p className="text-center text-xs text-muted-foreground">
-          Mostrando {items.length} de {itemsResponse.total} ítems. Afina el alcance o los filtros
-          para acotar la búsqueda.
-        </p>
-      )}
+      <PaginationControls
+        page={page}
+        limit={PAGE_SIZE}
+        total={itemsResponse.total}
+        basePath={ROUTES.bancoItemsExplorar}
+      />
     </>
   );
 }

@@ -549,14 +549,16 @@ function StudentRow({
             desborda su propio scroll horizontal y se desplaza (swipe) para ver el
             resto; `scrollbar-none` oculta la barra para no ensuciar cada fila. */}
         <div className="w-[134px]">
-          <div className="overflow-x-auto whitespace-nowrap scrollbar-none">{displayName}</div>
-          <span className="block truncate text-xs font-normal text-muted-foreground">
-            {row.studentRut}
-            {row.classGroupName ? ` · ${row.classGroupName}` : ''}
-          </span>
-          <span className="block text-xs font-normal text-muted-foreground">
-            {row.correctCount}/{row.answeredCount} correctas
-          </span>
+          {/* Densificado (T2-06): solo el nombre en la fila para ver más alumnos
+              por pantalla; RUT, curso y correctas quedan en el tooltip. */}
+          <div
+            className="overflow-x-auto whitespace-nowrap scrollbar-none"
+            title={`${row.studentFullName}${row.studentRut ? ` · ${row.studentRut}` : ''}${
+              row.classGroupName ? ` · ${row.classGroupName}` : ''
+            } · ${row.correctCount}/${row.answeredCount} correctas`}
+          >
+            {displayName}
+          </div>
         </div>
       </TableCell>
       <TableCell className="w-[68px] px-2 text-right font-medium tabular-nums">

@@ -1,8 +1,9 @@
 'use client';
 
+import { useCallback, useEffect, useState } from 'react';
 import type { Route } from 'next';
 import Link from 'next/link';
-import { ChevronLeft, ChevronRight, GraduationCap } from 'lucide-react';
+import { ChevronDown, ChevronLeft, ChevronRight, GraduationCap } from 'lucide-react';
 import type { UserRole } from '@soe/types';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { HoverCard, HoverCardContent, HoverCardTrigger } from '@/components/ui/hover-card';
@@ -10,6 +11,8 @@ import { useOptimisticRoute } from '@/components/shared';
 import { cn } from '@/lib/utils';
 import { BRAND } from '@/lib/brand';
 import { ADMIN_NAV_ITEMS, visibleNavGroups, type NavItem } from './nav-items';
+
+const GROUPS_STORAGE_KEY = 'soe:sidebar-groups-collapsed';
 
 /** Sección renderizable del sidebar. La variante 'admin' usa una sola sección sin título. */
 type NavSection = { id: string; label?: string; items: readonly NavItem[] };
@@ -35,6 +38,27 @@ export function SidebarNav({
   // El path activo es optimista: al hacer click salta de inmediato al destino
   // (sin esperar el commit) — ver use-optimistic-route.ts y la rule 07.
   const { activePath, navigate } = useOptimisticRoute();
+
+  // Colapso por sección (T2-08): persiste qué grupos están plegados para despejar
+  // los accesos menos frecuentes. Solo aplica en el sidebar expandido.
+  const [collapsedGroups, setCollapsedGroups] = useState<Record<string, boolean>>({});
+  useEffect(() => {
+    const stored = window.localStorage.getItem(GROUPS_STORAGE_KEY);
+    if (!stored) return;
+    try {
+      setCollapsedGroups(JSON.parse(stored) as Record<string, boolean>);
+    } catch {
+      setCollapsedGroups({});
+    }
+  }, []);
+  const toggleGroup = useCallback((id: string) => {
+    setCollapsedGroups((prev) => {
+      const next = { ...prev, [id]: !prev[id] };
+      window.localStorage.setItem(GROUPS_STORAGE_KEY, JSON.stringify(next));
+      return next;
+    });
+  }, []);
+
   const sections: NavSection[] =
     variant === 'admin' ? [{ id: 'admin', items: ADMIN_NAV_ITEMS }] : visibleNavGroups(roles);
   const activeHref = findActiveHref(
@@ -79,29 +103,44 @@ export function SidebarNav({
           aria-label="Navegación principal"
           className={cn('scrollbar-none flex-1 overflow-y-auto', collapsed ? 'p-2' : 'p-3')}
         >
-          {sections.map((section, idx) => (
-            <div
-              key={section.id}
-              className={cn('space-y-0.5', idx > 0 && (collapsed ? 'mt-2 border-t pt-2' : 'mt-3'))}
-            >
-              {!collapsed && section.label ? (
-                <p className="px-3 pb-1 text-2xs font-semibold uppercase tracking-wider text-muted-foreground/70">
-                  {section.label}
-                </p>
-              ) : null}
-              {section.items.map((item) => (
-                <NavRow
-                  key={item.href}
-                  item={item}
-                  isActive={item.href === activeHref}
-                  collapsed={collapsed}
-                  activePath={activePath}
-                  navigate={navigate}
-                  onNavigate={onNavigate}
-                />
-              ))}
-            </div>
-          ))}
+          {sections.map((section, idx) => {
+            const groupCollapsed =
+              !collapsed && Boolean(section.label) && Boolean(collapsedGroups[section.id]);
+            return (
+              <div
+                key={section.id}
+                className={cn('space-y-0.5', idx > 0 && (collapsed ? 'mt-2 border-t pt-2' : 'mt-3'))}
+              >
+                {!collapsed && section.label ? (
+                  <button
+                    type="button"
+                    onClick={() => toggleGroup(section.id)}
+                    aria-expanded={!groupCollapsed}
+                    className="flex w-full items-center justify-between rounded px-3 pb-1 text-2xs font-semibold uppercase tracking-wider text-muted-foreground/70 transition-colors duration-fast hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                  >
+                    <span>{section.label}</span>
+                    <ChevronDown
+                      className={cn('size-3.5 transition-transform', groupCollapsed && '-rotate-90')}
+                      aria-hidden
+                    />
+                  </button>
+                ) : null}
+                {!groupCollapsed
+                  ? section.items.map((item) => (
+                      <NavRow
+                        key={item.href}
+                        item={item}
+                        isActive={item.href === activeHref}
+                        collapsed={collapsed}
+                        activePath={activePath}
+                        navigate={navigate}
+                        onNavigate={onNavigate}
+                      />
+                    ))
+                  : null}
+              </div>
+            );
+          })}
         </nav>
       </div>
     </TooltipProvider>

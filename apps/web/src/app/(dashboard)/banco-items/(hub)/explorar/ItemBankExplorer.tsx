@@ -98,7 +98,18 @@ export function ItemBankExplorer({ items, instrumentNames }: ItemBankExplorerPro
         </ul>
       )}
 
-      <ItemDetailPanel item={detail} open={detail !== null} onClose={() => setDetail(null)} />
+      <ItemDetailPanel
+        item={detail}
+        instrumentName={
+          detail
+            ? detail.instrumentId
+              ? (instrumentNames[detail.instrumentId] ?? 'Instrumento')
+              : 'Ítem sin instrumento'
+            : undefined
+        }
+        open={detail !== null}
+        onClose={() => setDetail(null)}
+      />
     </div>
   );
 }

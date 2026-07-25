@@ -5,7 +5,6 @@ import {
   ClipboardList,
   Cpu,
   FileText,
-  FileUp,
   FolderTree,
   GitCompareArrows,
   LayoutDashboard,
@@ -14,7 +13,6 @@ import {
   School,
   Settings,
   ShieldCheck,
-  Sparkles,
   TrendingUp,
   UserCog,
   Users,
@@ -24,11 +22,9 @@ import type { UserRole } from '@soe/types';
 import {
   canAccess,
   DASHBOARD_VIEWER_ROLES,
-  AI_ANALYSIS_VIEWER_ROLES,
   AI_ANALYSIS_GENERATOR_ROLES,
   REMEDIAL_VIEWER_ROLES,
   BENCHMARKING_VIEWER_ROLES,
-  ANSWER_SHEET_IMPORT_ROLES,
   ESTABLISHMENT_REPORT_ROLES,
 } from '@soe/types';
 import { ROUTES } from '@/lib/routes';
@@ -103,13 +99,6 @@ export const NAV_GROUPS: readonly NavGroup[] = [
         roles: ALL_ROLES,
       },
       {
-        href: ROUTES.myClasses,
-        label: 'Mis cursos',
-        icon: BookOpen,
-        status: 'live',
-        roles: ALL_STAFF_ROLES,
-      },
-      {
         href: ROUTES.evaluaciones,
         label: 'Evaluaciones',
         icon: ClipboardList,
@@ -123,13 +112,6 @@ export const NAV_GROUPS: readonly NavGroup[] = [
         status: 'live',
         roles: DASHBOARD_VIEWER_ROLES,
         children: toNavChildren(RESULTADOS_TABS),
-      },
-      {
-        href: ROUTES.analisisIa,
-        label: 'Análisis IA',
-        icon: Sparkles,
-        status: 'live',
-        roles: AI_ANALYSIS_VIEWER_ROLES,
       },
       {
         // TKT-23: diagnóstico IA de la variación entre instrumentos comparables.
@@ -160,19 +142,21 @@ export const NAV_GROUPS: readonly NavGroup[] = [
         status: 'live',
         roles: ESTABLISHMENT_REPORT_ROLES,
       },
+      {
+        // Vista del profesor (sus cursos): acceso menos frecuente para directivos,
+        // por eso va al final del grupo (T2-08).
+        href: ROUTES.myClasses,
+        label: 'Mis cursos',
+        icon: BookOpen,
+        status: 'live',
+        roles: ALL_STAFF_ROLES,
+      },
     ],
   },
   {
     id: 'contenido',
     label: 'Contenido y datos',
     items: [
-      {
-        href: ROUTES.importar,
-        label: 'Importar',
-        icon: FileUp,
-        status: 'live',
-        roles: ANSWER_SHEET_IMPORT_ROLES,
-      },
       {
         href: ROUTES.bancoItems,
         label: 'Banco de contenido',

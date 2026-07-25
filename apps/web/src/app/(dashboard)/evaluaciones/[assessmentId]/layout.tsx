@@ -1,15 +1,7 @@
 import type { ReactNode } from 'react';
 import Link from 'next/link';
 import { notFound, redirect } from 'next/navigation';
-import {
-  BadgeCheck,
-  BarChart3,
-  BookOpen,
-  FileText,
-  LayoutDashboard,
-  ListChecks,
-  Sparkles,
-} from 'lucide-react';
+import { BarChart3, BookOpen, FileText, LayoutDashboard, ListChecks, Sparkles } from 'lucide-react';
 import { auth } from '@/auth';
 import { apiGet } from '@/lib/api';
 import { ROUTES } from '@/lib/routes';
@@ -21,9 +13,7 @@ import {
   ITEM_ANALYSIS_VIEWER_ROLES,
   AI_ANALYSIS_VIEWER_ROLES,
   REMEDIAL_VIEWER_ROLES,
-  INSTRUMENT_QUALITY_VIEWER_ROLES,
   OFFICIAL_REPORT_VIEWER_ROLES,
-  capabilityUnavailableMessage,
   type AssessmentReportResponse,
   type InstrumentAttachmentModel,
 } from '@soe/types';
@@ -92,51 +82,57 @@ export default async function EvaluacionLayout({
     enunciadoPdf = null;
   }
 
-  // Disponibilidad por granularidad del dato (§4.4 del plan). El rol dice qué
-  // pestañas PUEDE ver el usuario; `capabilities` dice cuáles tienen algo que
-  // mostrar para ESTA evaluación. Se sirve desde el backend, no se deriva acá.
-  //
-  // Criterio de gating, distinto por pestaña según lo que quede en pie:
-  // - `Calidad` requiere psicometría (KR-20, biserial), que no tiene sustituto
-  //   agregado: sin `responses` la pestaña entera es un callejón sin salida →
-  //   se deshabilita con el motivo a la vista (mismo patrón que
-  //   `generate-panel.tsx`: apagar lo imposible y decir por qué), en vez de
-  //   ocultarla, para que el hub no cambie de forma entre evaluaciones.
-  // - `Detalle por pregunta` y `Análisis IA` NO se apagan: la primera conserva
-  //   los agregados por pregunta y la segunda deja ver análisis ya generados.
-  //   Lo que falta lo explica cada página en su propio cuerpo.
-  const capabilities = meta.capabilities;
-  const canSeeQuality = capabilities.includes('psychometrics');
-
   const tabs: HubTab[] = [
-    { href: ROUTES.evaluacion(assessmentId), label: 'Resumen', icon: <LayoutDashboard />, exact: true },
+    {
+      href: ROUTES.evaluacion(assessmentId),
+      label: 'Resumen',
+      icon: <LayoutDashboard />,
+      exact: true,
+    },
     ...(canAccess(roles, ANALYTICS_VIEWER_ROLES)
-      ? [{ href: ROUTES.evaluacionResultados(assessmentId), label: 'Resultados', icon: <BarChart3 /> }]
-      : []),
-    ...(canAccess(roles, ITEM_ANALYSIS_VIEWER_ROLES)
-      ? [{ href: ROUTES.evaluacionDetalle(assessmentId), label: 'Detalle por pregunta', icon: <ListChecks /> }]
-      : []),
-    ...(canAccess(roles, AI_ANALYSIS_VIEWER_ROLES)
-      ? [{ href: ROUTES.evaluacionAnalisisIa(assessmentId), label: 'Análisis IA', icon: <Sparkles /> }]
-      : []),
-    ...(canAccess(roles, REMEDIAL_VIEWER_ROLES)
-      ? [{ href: ROUTES.evaluacionMaterialRemedial(assessmentId), label: 'Material remedial', icon: <BookOpen /> }]
-      : []),
-    ...(canAccess(roles, INSTRUMENT_QUALITY_VIEWER_ROLES)
       ? [
           {
-            href: ROUTES.evaluacionCalidad(assessmentId),
-            label: 'Calidad',
-            icon: <BadgeCheck />,
-            disabled: !canSeeQuality,
-            disabledReason: canSeeQuality
-              ? undefined
-              : capabilityUnavailableMessage('psychometrics'),
+            href: ROUTES.evaluacionResultados(assessmentId),
+            label: 'Resultados',
+            icon: <BarChart3 />,
+          },
+        ]
+      : []),
+    ...(canAccess(roles, ITEM_ANALYSIS_VIEWER_ROLES)
+      ? [
+          {
+            href: ROUTES.evaluacionDetalle(assessmentId),
+            label: 'Tablero maestro',
+            icon: <ListChecks />,
+          },
+        ]
+      : []),
+    ...(canAccess(roles, AI_ANALYSIS_VIEWER_ROLES)
+      ? [
+          {
+            href: ROUTES.evaluacionAnalisisIa(assessmentId),
+            label: 'Análisis IA',
+            icon: <Sparkles />,
+          },
+        ]
+      : []),
+    ...(canAccess(roles, REMEDIAL_VIEWER_ROLES)
+      ? [
+          {
+            href: ROUTES.evaluacionMaterialRemedial(assessmentId),
+            label: 'Material remedial',
+            icon: <BookOpen />,
           },
         ]
       : []),
     ...(canAccess(roles, OFFICIAL_REPORT_VIEWER_ROLES)
-      ? [{ href: ROUTES.evaluacionInformeOficial(assessmentId), label: 'Informe oficial', icon: <FileText /> }]
+      ? [
+          {
+            href: ROUTES.evaluacionInformeOficial(assessmentId),
+            label: 'Informe oficial',
+            icon: <FileText />,
+          },
+        ]
       : []),
   ];
 
@@ -159,12 +155,25 @@ export default async function EvaluacionLayout({
       <HubAssistantContext assessmentId={assessmentId} label={title} />
 
       <PageHeader
+        breadcrumb={
+          <nav className="flex items-center gap-2 text-sm text-muted-foreground">
+            <Link href={ROUTES.evaluaciones} className="hover:text-foreground">
+              Evaluaciones
+            </Link>
+            <span aria-hidden>/</span>
+            <span className="truncate text-foreground">{title}</span>
+          </nav>
+        }
         title={title}
         description={description}
         actions={
           <>
             {enunciadoPdf ? <EnunciadoViewButton instrumentId={meta.instrumentId} /> : null}
-            <Link href={ROUTES.bancoItemSpecTable(meta.instrumentId)}>
+            <Link
+              href={ROUTES.bancoItemSpecTable(meta.instrumentId)}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
               <Button variant="outline" size="sm">
                 Tabla de especificaciones
               </Button>

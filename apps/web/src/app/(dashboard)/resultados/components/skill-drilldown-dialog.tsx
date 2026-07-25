@@ -21,7 +21,7 @@ import {
   fetchNodeQuestions,
   fetchSkillBreakdown,
   type SkillBreakdownConstraints,
-} from '../habilidades/actions';
+} from '../dimensiones/actions';
 import { fetchQuestionAnalysis } from '../detalle/actions';
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -422,7 +422,10 @@ function BreakdownRowButton({
         aria-label={`Logro de ${row.label}`}
       >
         <div
-          className={cn('h-full rounded-full transition-[width] motion-reduce:transition-none', barClass)}
+          className={cn(
+            'h-full rounded-full transition-[width] motion-reduce:transition-none',
+            barClass,
+          )}
           style={{ width: `${Math.min(100, Math.max(0, pct))}%` }}
         />
       </div>
