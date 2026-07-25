@@ -15,6 +15,17 @@
 
 ---
 
+## Definiciones del equipo (2026-07-25)
+
+- **Secuencia:** primero **E2E de estos ~17 tickets** (PR [#85](https://github.com/Martinviald/EdTech/pull/85)); recién después se retoma la fase grande con la app corriendo. La construcción está **en pausa** hasta el go.
+- **T2-25 rename de ruta — SÍ:** al retomar, renombrar `/banco-items` → `/banco-contenido` (tabs por subruta: `/banco-contenido` + `/banco-contenido/explorar`) + redirects de compatibilidad.
+- **T2-03 idioma:** se **mantiene "español de Chile"** en los prompts (sin cambios). Las fugas de inglés en UI ya se corrigieron.
+- **T2-09 Comparar instrumentos — DOS accesos:** (a) botón **"Comparar con otra evaluación"** en el hub de una evaluación, que la preselecciona como base (vía `?baseId`, ya listo en T2-10); **y** (b) un botón/sección **"Comparar instrumentos"** dentro de `/evaluaciones`. Se saca del sidebar cuando existan ambos.
+
+**Aún por confirmar al retomar (defaults ya asumidos):** T2-08 degrade de "Mis cursos" (asumido: al final de "Análisis") · T2-11 ¿eje-axis estricto? (asumido: dimensiones etiquetadas) · T2-22 RLS de colecciones (asumido: `org_id`+`withOrgContext` sin política, por precedente `items`/`instruments`) · T2-19 nombre del "Estudio de material" · T2-23 confirmar que es el `status` de evaluaciones (vestigial).
+
+---
+
 ## Avance por ola
 
 ### Ola 1 — Quick wins ✅ (5/5)
