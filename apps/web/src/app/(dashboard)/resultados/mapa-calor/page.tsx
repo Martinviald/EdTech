@@ -157,25 +157,31 @@ function buildFiltersSummary(
   options: DashboardFilterOptionsResponse,
 ): string {
   const parts: string[] = [];
-  const find = (
+  const findAll = (
     list: { id: string; label: string }[],
-    id: string | undefined,
-  ): string | undefined => (id ? list.find((o) => o.id === id)?.label : undefined);
+    ids: string[] | undefined,
+  ): string | undefined => {
+    if (!ids || ids.length === 0) return undefined;
+    const labels = ids
+      .map((id) => list.find((o) => o.id === id)?.label)
+      .filter((l): l is string => !!l);
+    return labels.length > 0 ? labels.join(', ') : undefined;
+  };
 
   const period = filters.academicYearId
     ? options.periods.find((p) => p.id === filters.academicYearId)?.label
     : undefined;
-  const subject = find(options.subjects, filters.subjectId);
-  const grade = find(options.grades, filters.gradeId);
-  const classGroup = filters.classGroupId
-    ? options.classGroups.find((c) => c.id === filters.classGroupId)?.label
-    : undefined;
+  const subject = findAll(options.subjects, filters.subjectId);
+  const grade = findAll(options.grades, filters.gradeId);
+  const classGroup = findAll(options.classGroups, filters.classGroupId);
 
   if (period) parts.push(period);
   if (subject) parts.push(subject);
   if (grade) parts.push(grade);
   if (classGroup) parts.push(classGroup);
-  if (filters.instrumentType) parts.push(filters.instrumentType.toUpperCase());
+  if (filters.instrumentType?.length) {
+    parts.push(filters.instrumentType.map((t) => t.toUpperCase()).join(', '));
+  }
 
   return parts.length > 0 ? `Filtros: ${parts.join(' · ')}` : 'Sin filtros aplicados';
 }

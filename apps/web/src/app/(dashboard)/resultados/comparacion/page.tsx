@@ -52,10 +52,15 @@ function historicalDelta(
 }
 
 function buildGenerationalQuery(filters: DashboardFilterValues): string | null {
-  if (!filters.gradeId) return null;
-  const qs = new URLSearchParams({ gradeId: filters.gradeId });
-  if (filters.subjectId) qs.set('subjectId', filters.subjectId);
-  if (filters.instrumentType) qs.set('instrumentType', filters.instrumentType);
+  // La comparación generacional es por UN nivel: se toma el primero de cada
+  // filtro multi-select del dashboard.
+  const gradeId = filters.gradeId?.[0];
+  if (!gradeId) return null;
+  const qs = new URLSearchParams({ gradeId });
+  const subjectId = filters.subjectId?.[0];
+  if (subjectId) qs.set('subjectId', subjectId);
+  const instrumentType = filters.instrumentType?.[0];
+  if (instrumentType) qs.set('instrumentType', instrumentType);
   return `?${qs.toString()}`;
 }
 
@@ -113,7 +118,10 @@ export default async function ComparacionPage({
     <>
       <PageActions>
         <Suspense fallback={null}>
-          <ComparacionAction query={generationalQuery} instrumentType={filters.instrumentType} />
+          <ComparacionAction
+            query={generationalQuery}
+            instrumentType={filters.instrumentType?.[0]}
+          />
         </Suspense>
       </PageActions>
 
@@ -188,7 +196,7 @@ async function ComparacionSection({
     );
   }
 
-  const filterSummary = filterSummaryOf(data, filters.instrumentType);
+  const filterSummary = filterSummaryOf(data, filters.instrumentType?.[0]);
   const latest = series[series.length - 1];
   const previous = series[series.length - 2];
 

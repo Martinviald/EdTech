@@ -284,7 +284,7 @@ describe('HeatmapService.getHeatmap', () => {
     ]);
     const service = makeService(db);
 
-    const res = await service.getHeatmap(makeUser(), { subjectId: 's-leng' });
+    const res = await service.getHeatmap(makeUser(), { subjectId: ['s-leng'] });
 
     expect(res.subjects).toHaveLength(1);
     expect(res.subjects[0].subjectId).toBe('s-leng');
@@ -382,7 +382,7 @@ describe('HeatmapService.getHeatmap', () => {
     ]);
     const service = makeService(db);
 
-    const res = await service.getHeatmap(makeUser(), { classGroupId: 'cg-1' });
+    const res = await service.getHeatmap(makeUser(), { classGroupId: ['cg-1'] });
 
     expect(db.__selectIdx()).toBe(3);
     expect(res.rows[0].cells[0].performanceLevel).toBe('advanced');

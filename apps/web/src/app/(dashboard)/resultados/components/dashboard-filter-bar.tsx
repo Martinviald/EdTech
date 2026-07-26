@@ -6,11 +6,10 @@ import type { Route } from 'next';
 import type { DashboardFilterOptionsResponse } from '@soe/types';
 import { FilterX } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { FilterBar, type FilterField } from '@/components/shared';
+import { FilterBar, MultiSelectFilter, type FilterField } from '@/components/shared';
 import {
   FILTER_KEYS,
-  classGroupSelectOptions,
-  isClassGroupInGrade,
+  classGroupSelectOptionsMulti,
   type DashboardFilterValues,
 } from './dashboard-filters';
 
@@ -35,13 +34,17 @@ export function DashboardFilterBar({
   // (sin flash de skeleton) y expone `isPending` para la barra de progreso.
   const [isPending, startTransition] = useTransition();
 
-  // Aplica varias claves de filtro en un solo router.push (atómico). Un valor
-  // vacío borra la clave. Cambiar filtros reinicia la paginación (H6.4).
+  // Aplica varias claves de filtro en un solo router.push (atómico). Un array se
+  // serializa como CSV; vacío/null borra la clave. Cambiar filtros reinicia la
+  // paginación (H6.4).
   const applyFilters = useCallback(
-    (updates: Partial<Record<keyof DashboardFilterValues, string | null>>) => {
+    (updates: Partial<Record<keyof DashboardFilterValues, string | string[] | null>>) => {
       const params = new URLSearchParams(searchParams.toString());
       for (const [key, next] of Object.entries(updates)) {
-        if (next) {
+        if (Array.isArray(next)) {
+          if (next.length > 0) params.set(key, next.join(','));
+          else params.delete(key);
+        } else if (next) {
           params.set(key, next);
         } else {
           params.delete(key);
@@ -56,21 +59,32 @@ export function DashboardFilterBar({
     [router, searchParams, basePath],
   );
 
-  const updateFilter = useCallback(
-    (key: keyof DashboardFilterValues, next: string) => applyFilters({ [key]: next }),
+  const updateSingle = useCallback(
+    (key: keyof DashboardFilterValues, next: string) => applyFilters({ [key]: next || null }),
     [applyFilters],
   );
 
-  // Al elegir un nivel, si el curso ya seleccionado no pertenece a ese nivel,
-  // se limpia junto con el cambio de grado (evita filtrar por un curso que ni
-  // siquiera aparece en el dropdown de Cursos).
-  const updateGrade = useCallback(
-    (next: string) => {
-      const nextGrade = next || null;
-      const courseStillValid = isClassGroupInGrade(options.classGroups, value.classGroupId, nextGrade);
+  const updateMulti = useCallback(
+    (key: keyof DashboardFilterValues, ids: string[]) => applyFilters({ [key]: ids }),
+    [applyFilters],
+  );
+
+  // Al cambiar los niveles, poda los cursos seleccionados que ya no pertenezcan
+  // a ningún nivel elegido (no filtrar por un curso que desaparece del dropdown).
+  const updateGrades = useCallback(
+    (gradeIds: string[]) => {
+      const selectedGrades = new Set(gradeIds);
+      const current = value.classGroupId ?? [];
+      const pruned =
+        selectedGrades.size === 0
+          ? current
+          : current.filter((cgId) => {
+              const cg = options.classGroups.find((c) => c.id === cgId);
+              return cg?.gradeId != null && selectedGrades.has(cg.gradeId);
+            });
       applyFilters({
-        gradeId: nextGrade,
-        ...(courseStillValid ? {} : { classGroupId: null }),
+        gradeId: gradeIds,
+        ...(pruned.length !== current.length ? { classGroupId: pruned } : {}),
       });
     },
     [applyFilters, options.classGroups, value.classGroupId],
@@ -86,16 +100,21 @@ export function DashboardFilterBar({
     });
   }, [router, searchParams, basePath]);
 
-  const hasActive = FILTER_KEYS.some((k) => Boolean(value[k]));
+  const hasActive = FILTER_KEYS.some((k) => {
+    const v = value[k];
+    return Array.isArray(v) ? v.length > 0 : Boolean(v);
+  });
 
   // Tipos de instrumento únicos derivados de las opciones de instrumentos.
-  const instrumentTypes = Array.from(
-    new Map(options.instruments.map((i) => [i.type, i.type])).values(),
-  );
+  const instrumentTypes = Array.from(new Set(options.instruments.map((i) => i.type)));
 
-  // El dropdown de Cursos solo muestra los cursos del nivel seleccionado. Sin
-  // nivel elegido se muestran todos, con el nivel antepuesto en la etiqueta.
-  const courseOptions = classGroupSelectOptions(options.classGroups, options.grades, value.gradeId);
+  // El dropdown de Cursos solo muestra los cursos de los niveles seleccionados.
+  // Sin nivel elegido se muestran todos, con el nivel antepuesto en la etiqueta.
+  const courseOptions = classGroupSelectOptionsMulti(
+    options.classGroups,
+    options.grades,
+    value.gradeId,
+  );
 
   const fields: FilterField[] = [
     {
@@ -104,40 +123,60 @@ export function DashboardFilterBar({
       placeholder: 'Todos los períodos',
       value: value.academicYearId,
       options: options.periods.map((p) => ({ id: p.id, label: p.label })),
-      onChange: (v) => updateFilter('academicYearId', v),
+      onChange: (v) => updateSingle('academicYearId', v),
     },
     {
       key: 'subjectId',
       label: 'Asignatura',
-      placeholder: 'Todas las asignaturas',
-      value: value.subjectId,
-      options: options.subjects,
-      onChange: (v) => updateFilter('subjectId', v),
+      control: (
+        <MultiSelectFilter
+          label="asignaturas"
+          placeholder="Todas las asignaturas"
+          options={options.subjects}
+          selected={value.subjectId ?? []}
+          onChange={(ids) => updateMulti('subjectId', ids)}
+        />
+      ),
     },
     {
       key: 'gradeId',
       label: 'Nivel / Grado',
-      placeholder: 'Todos los grados',
-      value: value.gradeId,
-      options: options.grades,
-      onChange: updateGrade,
+      control: (
+        <MultiSelectFilter
+          label="niveles"
+          placeholder="Todos los grados"
+          options={options.grades}
+          selected={value.gradeId ?? []}
+          onChange={updateGrades}
+        />
+      ),
     },
     {
       key: 'classGroupId',
       label: 'Curso',
-      placeholder: 'Todos los cursos',
-      value: value.classGroupId,
-      options: courseOptions,
-      onChange: (v) => updateFilter('classGroupId', v),
+      control: (
+        <MultiSelectFilter
+          label="cursos"
+          placeholder="Todos los cursos"
+          options={courseOptions}
+          selected={value.classGroupId ?? []}
+          onChange={(ids) => updateMulti('classGroupId', ids)}
+        />
+      ),
     },
     {
       key: 'instrumentType',
       label: 'Tipo de instrumento',
-      placeholder: 'Todos los tipos',
-      value: value.instrumentType,
-      options: instrumentTypes.map((t) => ({ id: t, label: t.toUpperCase() })),
-      onChange: (v) => updateFilter('instrumentType', v),
       hidden: instrumentTypes.length === 0,
+      control: (
+        <MultiSelectFilter
+          label="tipos"
+          placeholder="Todos los tipos"
+          options={instrumentTypes.map((t) => ({ id: t, label: t.toUpperCase() }))}
+          selected={value.instrumentType ?? []}
+          onChange={(ids) => updateMulti('instrumentType', ids)}
+        />
+      ),
     },
   ];
 

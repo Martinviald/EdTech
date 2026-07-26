@@ -40,7 +40,8 @@ export default async function InformeOficialPage({
   const sp = await searchParams;
   const filters = parseDashboardFilters(sp);
   const filterQuery = buildDashboardQuery(filters);
-  const classGroupId = filters.classGroupId;
+  // El informe oficial por-evaluación se acota a UN curso: el primero seleccionado.
+  const classGroupId = filters.classGroupId?.[0];
   const basePath = ROUTES.evaluacionInformeOficial(assessmentId);
 
   const reportQuery = new URLSearchParams({ assessmentId });
@@ -48,9 +49,9 @@ export default async function InformeOficialPage({
 
   const [options, report] = await Promise.all([
     apiGet<DashboardFilterOptionsResponse>(`/dashboards/filters${filterQuery}`),
-    apiGet<OfficialCourseReportResponse>(
-      `/reports/course?${reportQuery.toString()}`,
-    ).catch((): OfficialCourseReportResponse | null => null),
+    apiGet<OfficialCourseReportResponse>(`/reports/course?${reportQuery.toString()}`).catch(
+      (): OfficialCourseReportResponse | null => null,
+    ),
   ]);
 
   return (
