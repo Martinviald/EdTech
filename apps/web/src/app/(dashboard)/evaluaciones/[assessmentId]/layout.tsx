@@ -169,15 +169,11 @@ export default async function EvaluacionLayout({
         actions={
           <>
             {enunciadoPdf ? <EnunciadoViewButton instrumentId={meta.instrumentId} /> : null}
-            <Link
-              href={ROUTES.bancoItemSpecTable(meta.instrumentId)}
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              <Button variant="outline" size="sm">
+            <Button asChild variant="outline" size="sm">
+              <Link href={ROUTES.bancoItemSpecTable(meta.instrumentId)}>
                 Tabla de especificaciones
-              </Button>
-            </Link>
+              </Link>
+            </Button>
             <AskAiButton prompt="Analiza esta evaluación: ¿qué cursos y habilidades están más descendidos y qué priorizar?" />
           </>
         }

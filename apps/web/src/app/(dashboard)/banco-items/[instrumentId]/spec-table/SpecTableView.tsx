@@ -2,7 +2,7 @@ import Link from 'next/link';
 import type { Route } from 'next';
 import { Table2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { EmptyState } from '@/components/shared';
+import { BackLink, EmptyState } from '@/components/shared';
 import type { InstrumentModel, ItemModel } from '@soe/types';
 import { SpecTableReview } from './SpecTableReview';
 
@@ -41,7 +41,8 @@ export function SpecTableView({
     <div className="space-y-6">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
         <div>
-          <div className="flex items-center gap-2 text-sm text-muted-foreground">
+          <BackLink href={`${basePath}/${instrument.id}`} label="Volver al instrumento" />
+          <div className="mt-2 flex items-center gap-2 text-sm text-muted-foreground">
             <Link href={breadcrumb.href as Route} className="hover:text-foreground">
               {breadcrumb.label}
             </Link>
