@@ -119,6 +119,9 @@ export const itemSourceEnum = pgEnum('item_source', [
   'imported',
 ]);
 
+// Dificultad del ítem (T2-21). Etiqueta editable a mano; el etiquetado IA es F2.
+export const itemDifficultyEnum = pgEnum('item_difficulty', ['easy', 'medium', 'hard']);
+
 export const itemTagTypeEnum = pgEnum('item_tag_type', ['primary', 'secondary']);
 export const taggedByEnum = pgEnum('tagged_by', ['human', 'ai']);
 

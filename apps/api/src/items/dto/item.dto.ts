@@ -1,5 +1,11 @@
 import { z } from 'zod';
-import { itemBankScopeSchema, paginationSchema, uuidCsvSchema } from '@soe/types';
+import {
+  ITEM_DIFFICULTIES,
+  csvArraySchema,
+  itemBankScopeSchema,
+  paginationSchema,
+  uuidCsvSchema,
+} from '@soe/types';
 
 // ── Item Type / Status / Source enums ───────────────────────────────────────
 const ITEM_TYPES = [
@@ -110,6 +116,8 @@ export const listItemsQuerySchema = paginationSchema.extend({
   type: z.enum(ITEM_TYPES).optional(),
   status: z.enum(ITEM_STATUSES).optional(),
   source: z.enum(ITEM_SOURCES).optional(),
+  // Dificultad (T2-21): multi-select CSV.
+  difficulty: csvArraySchema(z.enum(ITEM_DIFFICULTIES)),
   // Filtro por un nodo (retrocompatible).
   taxonomyNodeId: z.string().uuid().optional(),
   // Filtro multi-tag con lógica OR (TKT-12/TKT-14).

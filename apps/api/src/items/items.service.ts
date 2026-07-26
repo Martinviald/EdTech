@@ -90,6 +90,9 @@ export class ItemsService {
     if (filters.source) {
       conditions.push(eq(items.source, filters.source));
     }
+    if (filters.difficulty?.length) {
+      conditions.push(inArray(items.difficulty, filters.difficulty));
+    }
 
     // Filtro facetado del banco (dropdowns en cascada): asignatura, nivel y cada
     // grupo de nodos elegido se combinan con AND (intersección). Los `items` no
