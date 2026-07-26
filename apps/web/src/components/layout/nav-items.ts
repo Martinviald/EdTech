@@ -1,11 +1,9 @@
 import {
   BarChart3,
   BookOpen,
-  Building2,
   ClipboardList,
   Cpu,
   FileText,
-  FolderTree,
   GitCompareArrows,
   LayoutDashboard,
   Library,
@@ -14,8 +12,6 @@ import {
   Settings,
   ShieldCheck,
   TrendingUp,
-  UserCog,
-  Users,
   type LucideIcon,
 } from 'lucide-react';
 import type { UserRole } from '@soe/types';
@@ -28,7 +24,8 @@ import {
   ESTABLISHMENT_REPORT_ROLES,
 } from '@soe/types';
 import { ROUTES } from '@/lib/routes';
-import { BANCO_TABS, ORGANIZACION_TABS, RESULTADOS_TABS, toNavChildren } from './view-tabs';
+import { ADMIN_HUB_PATHS, ADMIN_HUB_ROLES } from './admin-hub';
+import { BANCO_TABS, RESULTADOS_TABS, toNavChildren } from './view-tabs';
 
 export type NavStatus = 'live' | 'soon';
 
@@ -45,12 +42,19 @@ export type NavItem = {
   requiresPlatformAdmin?: boolean;
   /** Tabs de la vista, para acceso rápido desde el flyout colapsado del sidebar. */
   children?: readonly NavChild[];
+  /**
+   * Rutas adicionales que marcan este item como activo. Lo necesita el hub de
+   * Administración, cuyas vistas (`/equipo`, `/organizacion`…) conservan su
+   * ruta propia y ya no tienen un item dedicado en el sidebar.
+   */
+  matchPaths?: readonly string[];
 };
 
 /** Sección del sidebar: agrupa items por propósito/frecuencia de uso. */
 export type NavGroup = {
   id: string;
-  label: string;
+  /** Sin label la sección se separa con un borde pero no muestra encabezado. */
+  label?: string;
   items: readonly NavItem[];
 };
 
@@ -172,55 +176,21 @@ export const NAV_GROUPS: readonly NavGroup[] = [
         ],
         children: toNavChildren(BANCO_TABS),
       },
-      {
-        href: ROUTES.marcosAcademicos,
-        label: 'Marcos Académicos',
-        icon: FolderTree,
-        status: 'live',
-        roles: ['platform_admin', 'school_admin', 'academic_director'],
-      },
     ],
   },
   {
+    // Las vistas administrativas (colegio, equipo, alumnos, marcos, config) se
+    // usan muy de vez en cuando: ya no ocupan un item cada una, se alcanzan
+    // desde la grilla de `/administracion` (ver admin-hub.ts).
     id: 'administracion',
-    label: 'Administración',
     items: [
       {
-        href: ROUTES.alumnos,
-        label: 'Alumnos',
-        icon: Users,
-        status: 'soon',
-        roles: [
-          'homeroom_teacher',
-          'school_admin',
-          'academic_director',
-          'cycle_director',
-          'dept_head',
-          'coordinator',
-          'platform_admin',
-        ],
-      },
-      {
-        href: ROUTES.organizacion,
-        label: 'Mi Colegio',
-        icon: Building2,
-        status: 'live',
-        roles: ['school_admin', 'academic_director', 'platform_admin'],
-        children: toNavChildren(ORGANIZACION_TABS),
-      },
-      {
-        href: ROUTES.equipo,
-        label: 'Equipo',
-        icon: UserCog,
-        status: 'live',
-        roles: ['school_admin', 'platform_admin'],
-      },
-      {
-        href: ROUTES.configuracion,
-        label: 'Configuración',
+        href: ROUTES.administracion,
+        label: 'Administración',
         icon: Settings,
         status: 'live',
-        roles: ['platform_admin', 'school_admin', 'academic_director'],
+        roles: ADMIN_HUB_ROLES,
+        matchPaths: ADMIN_HUB_PATHS,
       },
     ],
   },

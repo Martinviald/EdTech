@@ -5,7 +5,7 @@ import { auth } from '@/auth';
 import { apiGet } from '@/lib/api';
 import { ROUTES } from '@/lib/routes';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { CardSkeleton } from '@/components/shared';
+import { CardSkeleton, PageActions, PageContainer } from '@/components/shared';
 import { Skeleton } from '@/components/ui/skeleton';
 import {
   canAccess,
@@ -21,7 +21,8 @@ import { NewTaxonomyButton } from './NewTaxonomyButton';
 
 const GROUP_DESCRIPTION: Record<TaxonomyKind, string> = {
   curriculum: 'Currículum nacional del MINEDUC: ejes y objetivos de aprendizaje. Solo lectura.',
-  evaluacion: 'Marcos de pruebas estandarizadas (DIA, SIMCE, PAES): habilidades y ejes que evalúan.',
+  evaluacion:
+    'Marcos de pruebas estandarizadas (DIA, SIMCE, PAES): habilidades y ejes que evalúan.',
   externo: 'Programas y certificaciones externas (Cambridge, Aptus, Desafío).',
   propio: 'Marcos creados por tu colegio: plan lector, escalas internas, adaptaciones.',
 };
@@ -41,25 +42,17 @@ export default async function MarcosAcademicosPage() {
   const canCreate = userHasAnyRole(session.user.roles, ['platform_admin', 'school_admin']);
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-semibold">Marcos Académicos</h1>
-          <p className="text-muted-foreground mt-1 text-sm">
-            Currículum, marcos de evaluación y taxonomías de habilidades contra los que se etiquetan
-            las preguntas. Los marcos oficiales son de solo lectura; puedes crear y editar los
-            propios de tu colegio.
-          </p>
-        </div>
-        {canCreate && (
+    <PageContainer>
+      {canCreate ? (
+        <PageActions>
           <NewTaxonomyButton isPlatformAdmin={session.user.role === 'platform_admin'} />
-        )}
-      </div>
+        </PageActions>
+      ) : null}
 
       <Suspense fallback={<TaxonomyGroupsSkeleton />}>
         <TaxonomyGroups />
       </Suspense>
-    </div>
+    </PageContainer>
   );
 }
 

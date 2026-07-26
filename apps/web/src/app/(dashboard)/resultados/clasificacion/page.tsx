@@ -9,13 +9,7 @@ import {
   PERFORMANCE_LEVELS,
   type PerformanceLevel,
 } from '@soe/types';
-import {
-  PageHeader,
-  EmptyState,
-  FilterBarSkeleton,
-  CardSkeleton,
-  TableSkeleton,
-} from '@/components/shared';
+import { EmptyState, FilterBarSkeleton, CardSkeleton, TableSkeleton } from '@/components/shared';
 import { Card, CardContent } from '@/components/ui/card';
 import {
   Table,
@@ -49,9 +43,7 @@ function parsePage(raw: string | string[] | undefined): number {
   return Number.isFinite(n) && n >= 1 ? n : 1;
 }
 
-function parsePerformanceLevel(
-  raw: string | string[] | undefined,
-): PerformanceLevel | undefined {
+function parsePerformanceLevel(raw: string | string[] | undefined): PerformanceLevel | undefined {
   const value = Array.isArray(raw) ? raw[0] : raw;
   return PERFORMANCE_LEVELS.includes(value as PerformanceLevel)
     ? (value as PerformanceLevel)
@@ -82,11 +74,6 @@ export default async function ClasificacionPage({
 
   return (
     <>
-      <PageHeader variant="secondary"
-        title="Clasificación por nivel"
-        description="Distribución de niveles de desempeño y clasificación de cada alumno (H6.4)."
-      />
-
       <Suspense fallback={<FilterBarSkeleton />}>
         <FiltersSection query={filterQuery} filters={filters} />
       </Suspense>

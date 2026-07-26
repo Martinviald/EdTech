@@ -37,8 +37,8 @@ interface ItemBankFiltersProps {
   gradeIds: string[];
   /** Ids seleccionados por tipo HOJA (clave = TaxonomyNodeType hoja). */
   selectedLeaf: Record<string, string[]>;
-  /** Id del padre elegido por tipo PADRE/narrower (clave = TaxonomyNodeType padre). */
-  selectedParent: Record<string, string>;
+  /** Ids elegidos por tipo PADRE/narrower (clave = TaxonomyNodeType padre). */
+  selectedParent: Record<string, string[]>;
 }
 
 export function ItemBankFilters({
@@ -90,9 +90,9 @@ export function ItemBankFilters({
     });
 
   // Cambiar el narrower (padre) limpia la selección del tipo hoja que acota.
-  const onParentChange = (parentType: string, leafType: string, id: string) =>
+  const onParentChange = (parentType: string, leafType: string, ids: string[]) =>
     pushParams((params) => {
-      if (id) params.set(parentType, id);
+      if (ids.length > 0) params.set(parentType, ids.join(','));
       else params.delete(parentType);
       params.delete(leafType);
     });
@@ -144,13 +144,13 @@ export function ItemBankFilters({
         parentType: string;
         label: string;
         options: { id: string; label: string }[];
-        selected: string;
+        selected: string[];
       } | null = null;
       let optionNodes = scoped;
 
       if (parentNodes.length > 1) {
         const parentType = parentNodes[0]!.type;
-        const selected = selectedParent[parentType] ?? '';
+        const selected = selectedParent[parentType] ?? [];
         narrower = {
           parentType,
           label: nodeTypeLabel(parentType) ?? parentType,
@@ -159,7 +159,9 @@ export function ItemBankFilters({
             .sort((a, b) => a.label.localeCompare(b.label)),
           selected,
         };
-        if (selected) optionNodes = scoped.filter((n) => n.parentId === selected);
+        if (selected.length > 0) {
+          optionNodes = scoped.filter((n) => n.parentId != null && selected.includes(n.parentId));
+        }
       }
 
       return {
@@ -178,7 +180,7 @@ export function ItemBankFilters({
     subjectIds.length > 0 ||
     gradeIds.length > 0 ||
     Object.values(selectedLeaf).some((ids) => ids.length > 0) ||
-    Object.keys(selectedParent).length > 0;
+    Object.values(selectedParent).some((ids) => ids.length > 0);
 
   const fields: FilterField[] = [
     {
@@ -216,10 +218,16 @@ export function ItemBankFilters({
         cells.push({
           key: narrower.parentType,
           label: narrower.label,
-          placeholder: `Todos`,
-          value: narrower.selected || undefined,
-          options: narrower.options,
-          onChange: (id) => onParentChange(narrower.parentType, dim.leafType, id),
+          control: (
+            <NodeTypeFilter
+              label={narrower.label}
+              placeholder="Todos"
+              fullWidth
+              options={narrower.options}
+              selected={narrower.selected}
+              onChange={(ids) => onParentChange(narrower.parentType, dim.leafType, ids)}
+            />
+          ),
         });
       }
       cells.push({

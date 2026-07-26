@@ -9,6 +9,7 @@
 
 export * from './taxonomy';
 export * from './staff-org';
+export * from './students';
 export * from './import';
 export * from './teacher-assignments';
 export * from './class-groups';

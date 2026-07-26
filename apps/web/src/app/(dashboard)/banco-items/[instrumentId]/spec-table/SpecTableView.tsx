@@ -2,13 +2,14 @@ import Link from 'next/link';
 import type { Route } from 'next';
 import { Table2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { EmptyState } from '@/components/shared';
+import { EmptyState, PageActions } from '@/components/shared';
+import { SetPageTitle } from '@/components/layout/page-title-context';
 import type { InstrumentModel, ItemModel } from '@soe/types';
 import { SpecTableReview } from './SpecTableReview';
 
 /**
- * Vista de la tabla de especificaciones de un instrumento (breadcrumb + encabezado
- * + revisión de ítems ↔ nodos de taxonomía). Compartida por dos rutas, igual que
+ * Vista de la tabla de especificaciones de un instrumento (revisión de ítems ↔
+ * nodos de taxonomía). Compartida por dos rutas, igual que
  * `InstrumentDetailView`:
  *   · `/banco-items/[id]/spec-table`          (dashboard del colegio)
  *   · `/admin/instrumentos/[id]/spec-table`   (backoffice de plataforma)
@@ -18,20 +19,17 @@ import { SpecTableReview } from './SpecTableReview';
  * backoffice se pasa `canEdit={false}`: la tabla es de solo lectura y el flujo de
  * carga vive en el dashboard del colegio.
  * `basePath` prefija el enlace al detalle del instrumento y al flujo de carga;
- * `breadcrumb` es la raíz (banco de ítems / instrumentos oficiales).
  */
 export function SpecTableView({
   instrument,
   items,
   canEdit,
   basePath,
-  breadcrumb,
 }: {
   instrument: InstrumentModel;
   items: ItemModel[];
   canEdit: boolean;
   basePath: string;
-  breadcrumb: { href: string; label: string };
 }) {
   const hasItems = items.length > 0;
   const taggedCount = items.filter((it) => (it.tags?.length ?? 0) > 0).length;
@@ -39,32 +37,20 @@ export function SpecTableView({
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-        <div>
-          <div className="flex items-center gap-2 text-sm text-muted-foreground">
-            <Link href={breadcrumb.href as Route} className="hover:text-foreground">
-              {breadcrumb.label}
-            </Link>
-            <span>/</span>
-            <Link href={`${basePath}/${instrument.id}` as Route} className="hover:text-foreground">
-              {instrument.name}
-            </Link>
-            <span>/</span>
-            <span>Tabla de especificaciones</span>
-          </div>
-          <h1 className="mt-2 text-2xl font-semibold">Tabla de especificaciones</h1>
-          <p className="mt-1 text-sm text-muted-foreground">
-            Revisa los ítems del instrumento con los nodos de taxonomía (OA, habilidad, contenido,
-            tipo de texto) vinculados a cada uno.
-          </p>
-        </div>
-
-        {hasItems && canEdit && (
+      {/* El título va en la barra superior; el camino de vuelta es el propio
+          instrumento (el hub queda a un salto más, en el sidebar). */}
+      <SetPageTitle
+        title="Tabla de especificaciones"
+        parentHref={`${basePath}/${instrument.id}`}
+        parentLabel={instrument.name}
+      />
+      {hasItems && canEdit && (
+        <PageActions>
           <Link href={cargarHref}>
             <Button variant="outline">Cargar tabla de especificaciones</Button>
           </Link>
-        )}
-      </div>
+        </PageActions>
+      )}
 
       {hasItems ? (
         <div className="space-y-3">

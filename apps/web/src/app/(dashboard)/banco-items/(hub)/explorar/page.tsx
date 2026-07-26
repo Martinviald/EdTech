@@ -36,11 +36,6 @@ function parseScope(raw: string | string[] | undefined): ItemBankScope {
     : 'all';
 }
 
-function parseSingle(raw: string | string[] | undefined): string | undefined {
-  const value = typeof raw === 'string' ? raw.trim() : undefined;
-  return value ? value : undefined;
-}
-
 function parseCsvIds(raw: string | string[] | undefined): string[] {
   const value = typeof raw === 'string' ? raw : Array.isArray(raw) ? raw.join(',') : '';
   return value
@@ -53,7 +48,8 @@ type TaxonomySelection = {
   subjectIds: string[];
   gradeIds: string[];
   selectedLeaf: Record<string, string[]>;
-  selectedParent: Record<string, string>;
+  /** Ids elegidos por tipo PADRE/narrower (p. ej. varios ejes a la vez). */
+  selectedParent: Record<string, string[]>;
   groups: string[][];
 };
 
@@ -82,19 +78,25 @@ function deriveTaxonomySelection(
     const ids = parseCsvIds(params[type]);
     if (ids.length > 0) selectedLeaf[type] = ids;
   }
-  const selectedParent: Record<string, string> = {};
+  const selectedParent: Record<string, string[]> = {};
   for (const type of structuralTypes) {
-    const id = parseSingle(params[type]);
-    if (id) selectedParent[type] = id;
+    const ids = parseCsvIds(params[type]);
+    if (ids.length > 0) selectedParent[type] = ids;
   }
 
   const groups: string[][] = [];
   for (const [, ids] of Object.entries(selectedLeaf)) {
     if (ids.length > 0) groups.push(ids);
   }
-  for (const parentId of Object.values(selectedParent)) {
+  // Un tipo padre con varios seleccionados (p. ej. dos ejes) es UN grupo: sus
+  // hojas se combinan con OR entre sí, igual que dentro de un multi-select.
+  for (const parentIds of Object.values(selectedParent)) {
     const children = nodes.filter(
-      (n) => n.parentId === parentId && leafTypes.includes(n.type) && matchesScope(n),
+      (n) =>
+        n.parentId != null &&
+        parentIds.includes(n.parentId) &&
+        leafTypes.includes(n.type) &&
+        matchesScope(n),
     );
     const childLeafTypes = new Set(children.map((n) => n.type));
     const alreadySelected = [...childLeafTypes].some((t) => (selectedLeaf[t]?.length ?? 0) > 0);

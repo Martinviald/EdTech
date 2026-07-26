@@ -21,7 +21,6 @@ export default async function EscalasPage() {
   return (
     <PageContainer>
       <ConfigHubHeader
-        description="Configura cómo se convierten los porcentajes de logro en notas. Las escalas globales son compartidas por todos los colegios; las propias de tu organización solo aplican a tus evaluaciones."
         actions={
           <Button asChild>
             <Link href={ROUTES.configEscalasNueva}>

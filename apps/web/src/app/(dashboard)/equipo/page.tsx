@@ -4,7 +4,7 @@ import { canAccess, STAFF_MANAGEMENT_ROLES, type MemberModel } from '@soe/types'
 import { auth } from '@/auth';
 import { apiGet } from '@/lib/api';
 import { ROUTES } from '@/lib/routes';
-import { PageContainer, PageHeader, TableSkeleton } from '@/components/shared';
+import { PageActions, PageContainer, TableSkeleton } from '@/components/shared';
 import { AddMemberDialog } from './AddMemberDialog';
 import { BulkImportDialog } from './BulkImportDialog';
 import { MembersTable } from './MembersTable';
@@ -16,16 +16,10 @@ export default async function EquipoPage() {
 
   return (
     <PageContainer>
-      <PageHeader
-        title="Equipo"
-        description="Invita docentes y coordinadores a tu colegio. No enviamos correos: avísale a tu equipo que ya pueden iniciar sesión con su cuenta Google institucional."
-        actions={
-          <>
-            <BulkImportDialog />
-            <AddMemberDialog />
-          </>
-        }
-      />
+      <PageActions>
+        <BulkImportDialog />
+        <AddMemberDialog />
+      </PageActions>
 
       <Suspense fallback={<TableSkeleton />}>
         <MembersSection currentUserId={session.user.id} />

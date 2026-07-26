@@ -15,7 +15,7 @@ import {
   type RemedialMaterialType,
   type RemedialStatus,
 } from '@soe/types';
-import { PageContainer, PageHeader, EmptyState, AlertCallout } from '@/components/shared';
+import { PageContainer, EmptyState, AlertCallout } from '@/components/shared';
 import { FeatureUpgradeNotice } from '@/components/feature-gate';
 import { isFeatureEnabled } from '@/lib/features';
 import { AssessmentSelect } from '../resultados/detalle/assessment-select';
@@ -67,13 +67,6 @@ export default async function MaterialRemedialPage({
   const pageRaw = pickParam(params.page);
   const page = pageRaw && /^\d+$/.test(pageRaw) ? Math.max(1, Number(pageRaw)) : 1;
 
-  const header = (
-    <PageHeader
-      title="Material Remedial"
-      description="Banco de material remedial generado por IA a partir de las brechas diagnosticadas: guías de reenseñanza, sets de práctica y planes por grupo. La IA propone; tú revisas y apruebas (H9.6)."
-    />
-  );
-
   // Modo "generar desde brecha": requiere ?nodeId=&generate=1 explícito (enlace
   // desde el Análisis IA). Sin `generate`, `type`/`nodeId` filtran el banco — así
   // filtrar por tipo nunca cae por error en modo generación.
@@ -81,7 +74,6 @@ export default async function MaterialRemedialPage({
   if (nodeId && generate) {
     return (
       <PageContainer>
-        {header}
         <GeneratePanel
           nodeId={nodeId}
           nodeName={nodeName}
@@ -126,7 +118,6 @@ export default async function MaterialRemedialPage({
   if (loadError || !list) {
     return (
       <PageContainer>
-        {header}
         <AlertCallout tone="danger" title="No se pudo cargar el material">
           Ocurrió un error al cargar el banco de material remedial. Intenta nuevamente.
         </AlertCallout>
@@ -141,8 +132,6 @@ export default async function MaterialRemedialPage({
 
   return (
     <PageContainer>
-      {header}
-
       <AlertCallout tone="info">{AI_DISCLAIMER}</AlertCallout>
 
       {/* Selector de evaluación: filtra el banco por evaluación EN ESTA misma página

@@ -78,6 +78,7 @@ export const ROUTES = {
   configModelosIa: route('/configuracion/modelos-ia'),
   configObservabilidadIa: route('/configuracion/observabilidad-ia'),
 
+  administracion: route('/administracion'),
   analisisIa: route('/analisis-ia'),
   benchmarking: route('/benchmarking'),
   compararInstrumentos: route('/comparar-instrumentos'),

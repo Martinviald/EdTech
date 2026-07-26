@@ -4,6 +4,7 @@ import { auth } from '@/auth';
 import { getCurrentOrg } from '@/lib/getCurrentOrg';
 import { isFeatureEnabled } from '@/lib/features';
 import { ROUTES } from '@/lib/routes';
+import { PageTitleProvider } from '@/components/layout/page-title-context';
 import { Sidebar } from '@/components/layout/Sidebar';
 import { SkipLink } from '@/components/layout/SkipLink';
 import { Topbar } from '@/components/layout/Topbar';
@@ -27,29 +28,31 @@ export default async function DashboardLayout({ children }: { children: React.Re
 
   return (
     <AssistantProvider enabled={assistantEnabled}>
-      <div className="flex h-screen bg-background">
-        <SkipLink />
-        <Sidebar roles={session.user.roles} />
-        <div className="flex flex-1 flex-col overflow-hidden">
-          <Topbar
-            org={org}
-            user={session.user}
-            roles={session.user.roles}
-            activeRole={session.user.activeRole}
-            orgs={session.user.orgs}
-            platformLink={
-              session.user.isPlatformAdmin
-                ? { href: ROUTES.admin, label: 'Panel de plataforma' }
-                : undefined
-            }
-          />
-          <main id="main-content" className="flex-1 overflow-y-auto p-6">
-            {children}
-          </main>
+      <PageTitleProvider>
+        <div className="flex h-screen bg-background">
+          <SkipLink />
+          <Sidebar roles={session.user.roles} />
+          <div className="flex flex-1 flex-col overflow-hidden">
+            <Topbar
+              org={org}
+              user={session.user}
+              roles={session.user.roles}
+              activeRole={session.user.activeRole}
+              orgs={session.user.orgs}
+              platformLink={
+                session.user.isPlatformAdmin
+                  ? { href: ROUTES.admin, label: 'Panel de plataforma' }
+                  : undefined
+              }
+            />
+            <main id="main-content" className="flex-1 overflow-y-auto p-6">
+              {children}
+            </main>
+          </div>
+          <Toaster position="top-right" richColors closeButton />
+          {assistantEnabled && <AssistantWidget />}
         </div>
-        <Toaster position="top-right" richColors closeButton />
-        {assistantEnabled && <AssistantWidget />}
-      </div>
+      </PageTitleProvider>
     </AssistantProvider>
   );
 }
