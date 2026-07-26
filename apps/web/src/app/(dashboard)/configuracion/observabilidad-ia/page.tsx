@@ -32,7 +32,7 @@ export default async function ObservabilidadIaPage() {
 
   return (
     <PageContainer>
-      <ConfigHubHeader description="Costo, tokens y latencia del uso de IA de tu colegio (Análisis IA y Material remedial), con seguimiento del presupuesto mensual. Sólo lectura — no genera gasto adicional (E20 — H19.25)." />
+      <ConfigHubHeader />
 
       <Suspense fallback={<BudgetBarSkeleton />}>
         <BudgetSection />

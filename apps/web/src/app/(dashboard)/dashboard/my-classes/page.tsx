@@ -57,13 +57,7 @@ export default async function MyClassesPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-wrap items-start justify-between gap-3">
-        <div>
-          <h1 className="text-2xl font-semibold">Mis cursos</h1>
-          <p className="text-muted-foreground mt-1 text-sm">
-            Cursos y asignaturas que tienes asignadas en el año académico vigente.
-          </p>
-        </div>
+      <div className="flex flex-wrap items-center justify-end gap-3">
         {canImport ? (
           <Button asChild variant="outline" size="sm">
             <Link href={ROUTES.importarAlumnos}>

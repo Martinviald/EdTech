@@ -1,7 +1,5 @@
 import { Suspense } from 'react';
-import Link from 'next/link';
 import { notFound, redirect } from 'next/navigation';
-import { ChevronLeft } from 'lucide-react';
 import { auth } from '@/auth';
 import { apiGet } from '@/lib/api';
 import { ROUTES } from '@/lib/routes';
@@ -15,17 +13,14 @@ import {
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
-import { PageContainer, PageHeader, CardSkeleton } from '@/components/shared';
+import { PageActions, PageContainer, CardSkeleton } from '@/components/shared';
+import { SetPageTitle } from '@/components/layout/page-title-context';
 import { EscalaForm } from '../components/escala-form';
 import { ConversionPreview } from '../components/conversion-preview';
 import { DeleteButton } from '../components/delete-button';
 import { SCALE_TYPE_LABELS } from '../components/scale-format';
 
-export default async function EscalaDetailPage({
-  params,
-}: {
-  params: Promise<{ id: string }>;
-}) {
+export default async function EscalaDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const session = await auth();
   if (!session?.user?.orgId) redirect(ROUTES.login);
   if (!canAccess(session.user.roles, GRADING_SCALE_ROLES)) {
@@ -37,11 +32,7 @@ export default async function EscalaDetailPage({
   return (
     <PageContainer>
       <Suspense fallback={<EscalaDetailSkeleton />}>
-        <EscalaDetailSection
-          id={id}
-          orgId={session.user.orgId}
-          roles={session.user.roles}
-        />
+        <EscalaDetailSection id={id} orgId={session.user.orgId} roles={session.user.roles} />
       </Suspense>
     </PageContainer>
   );
@@ -84,35 +75,25 @@ async function EscalaDetailSection({
   // Las escalas globales (orgId null) solo pueden editarlas platform_admin.
   // Las de la org solo pueden editarlas usuarios de esa org (el filtro real
   // ya lo hace el backend; acá decidimos solo el shape de la UI).
-  const editable = scale.isGlobal
-    ? isPlatformAdmin
-    : scale.orgId === orgId || isPlatformAdmin;
+  const editable = scale.isGlobal ? isPlatformAdmin : scale.orgId === orgId || isPlatformAdmin;
 
   return (
     <>
-      <PageHeader
-        breadcrumb={
-          <Link
-            href={ROUTES.configEscalas}
-            className="text-muted-foreground hover:text-foreground inline-flex items-center gap-1 text-sm"
-          >
-            <ChevronLeft className="size-4" /> Volver a escalas
-          </Link>
-        }
-        title={scale.name}
-        badges={
-          scale.isGlobal ? (
-            <Badge variant="secondary">Global</Badge>
-          ) : (
-            <Badge variant="outline">Mi colegio</Badge>
-          )
-        }
-        description={SCALE_TYPE_LABELS[scale.type] ?? scale.type}
-      />
+      <SetPageTitle title={scale.name} />
+      <PageActions>
+        <span className="mr-auto text-sm text-muted-foreground">
+          {SCALE_TYPE_LABELS[scale.type] ?? scale.type}
+        </span>
+        {scale.isGlobal ? (
+          <Badge variant="secondary">Global</Badge>
+        ) : (
+          <Badge variant="outline">Mi colegio</Badge>
+        )}
+      </PageActions>
       {!editable ? (
         <p className="bg-muted text-muted-foreground rounded-md px-3 py-2 text-xs">
-          Esta escala es de solo lectura para tu cuenta. Las escalas globales solo pueden
-          editarlas administradores de plataforma.
+          Esta escala es de solo lectura para tu cuenta. Las escalas globales solo pueden editarlas
+          administradores de plataforma.
         </p>
       ) : null}
 

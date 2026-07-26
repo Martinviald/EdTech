@@ -7,20 +7,10 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 export const dynamic = 'force-dynamic';
 
 export default async function AdminLandingPage() {
-  const [orgs, admins] = await Promise.all([
-    listOrgs({ limit: 1 }),
-    listPlatformAdmins(),
-  ]);
+  const [orgs, admins] = await Promise.all([listOrgs({ limit: 1 }), listPlatformAdmins()]);
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-semibold tracking-tight">Panel de plataforma</h1>
-        <p className="text-sm text-muted-foreground">
-          Gestiona colegios, cuentas y operadores con permisos globales.
-        </p>
-      </div>
-
       <div className="grid gap-4 sm:grid-cols-2">
         <Link href={ROUTES.adminColegios} className="group">
           <Card className="transition-colors group-hover:border-primary/50">

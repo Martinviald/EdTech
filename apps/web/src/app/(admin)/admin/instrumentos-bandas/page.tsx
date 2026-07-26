@@ -32,15 +32,6 @@ type InstrumentsListResponse = {
 export default async function InstrumentBandsListPage() {
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-semibold">Niveles de logro por instrumento</h1>
-        <p className="text-muted-foreground mt-1 text-sm">
-          Define los niveles de clasificación (ej. DIA I / II / III) y sus umbrales de corte para
-          cada instrumento. Son globales: aplican a todas las organizaciones que usan el
-          instrumento y se reflejan en la sección de resultados al recalcular la evaluación.
-        </p>
-      </div>
-
       <Suspense fallback={<TableSkeleton />}>
         <BandsTableSection />
       </Suspense>

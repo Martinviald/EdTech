@@ -3,7 +3,7 @@ import { redirect } from 'next/navigation';
 import { auth } from '@/auth';
 import { apiGet } from '@/lib/api';
 import { canAccess, AI_ANALYSIS_GENERATOR_ROLES, type ComparableAssessment } from '@soe/types';
-import { PageContainer, PageHeader, CardSkeleton } from '@/components/shared';
+import { PageContainer, CardSkeleton } from '@/components/shared';
 import { FeatureUpgradeNotice } from '@/components/feature-gate';
 import { isFeatureEnabled } from '@/lib/features';
 import { ROUTES } from '@/lib/routes';
@@ -27,10 +27,6 @@ export default async function CompararInstrumentosPage() {
 
   return (
     <PageContainer>
-      <PageHeader
-        title="Comparar instrumentos con IA"
-        description="Ante una variación en el % de logro entre dos instrumentos comparables (p. ej. el mismo diagnóstico en dos años), la IA analiza el contenido y los resultados de ambos y propone una hipótesis de qué explica la diferencia. Es una hipótesis a validar, no una conclusión definitiva."
-      />
       <Suspense
         fallback={
           <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">

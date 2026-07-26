@@ -4,7 +4,7 @@ import { Inbox } from 'lucide-react';
 import { auth } from '@/auth';
 import { canAccess, ESTABLISHMENT_REPORT_ROLES } from '@soe/types';
 import { ROUTES } from '@/lib/routes';
-import { PageContainer, PageHeader, EmptyState, TableSkeleton } from '@/components/shared';
+import { PageContainer, EmptyState, TableSkeleton } from '@/components/shared';
 import { Skeleton } from '@/components/ui/skeleton';
 import { EstablishmentReport } from '@/components/official-reports/establishment-report';
 import { EstablishmentReportFilters } from '@/components/official-reports/establishment-report-filters';
@@ -48,11 +48,6 @@ export default async function InformeEstablecimientoPage({
 
   return (
     <PageContainer>
-      <PageHeader
-        title="Informe oficial de establecimiento"
-        description="Resultados agregados por grado y asignatura de toda la organización (Área Académica)."
-      />
-
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <Suspense fallback={<Skeleton className="h-10 w-56" />}>
           <FiltersSlot academicYearId={academicYearId} basePath={basePath} />

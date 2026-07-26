@@ -5,7 +5,7 @@ import { auth } from '@/auth';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { StudentImportFlow } from '@/components/import/student-import-flow';
-import { PageContainer, PageHeader } from '@/components/shared';
+import { PageContainer } from '@/components/shared';
 import { ROUTES } from '@/lib/routes';
 
 export default async function ImportarPage() {
@@ -17,11 +17,6 @@ export default async function ImportarPage() {
 
   return (
     <PageContainer>
-      <PageHeader
-        title="Importar alumnos"
-        description="Sube tu nómina en formato CSV. El sistema validará cada fila y te dará un resumen antes de confirmar."
-      />
-
       <Card>
         <CardHeader>
           <CardTitle className="text-base">1. Descarga la plantilla</CardTitle>

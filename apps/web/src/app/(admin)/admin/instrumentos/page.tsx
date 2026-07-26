@@ -85,13 +85,10 @@ async function InstrumentosListSection() {
 
   return (
     <>
-      <div>
-        <h1 className="text-2xl font-semibold tracking-tight">Instrumentos oficiales</h1>
-        <p className="text-sm text-muted-foreground">
-          {total} instrumento{total === 1 ? '' : 's'} oficial{total === 1 ? '' : 'es'} de la
-          plataforma. Son de solo lectura para los colegios; aquí puedes configurarlos.
-        </p>
-      </div>
+      <p className="text-sm text-muted-foreground">
+        {total} instrumento{total === 1 ? '' : 's'} oficial{total === 1 ? '' : 'es'} de la
+        plataforma. Son de solo lectura para los colegios; aquí puedes configurarlos.
+      </p>
 
       {sorted.length === 0 ? (
         <EmptyState

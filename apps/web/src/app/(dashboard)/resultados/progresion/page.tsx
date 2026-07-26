@@ -12,12 +12,7 @@ import {
   type ProgressionScope,
 } from '@soe/types';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import {
-  PageHeader,
-  EmptyState,
-  FilterBarSkeleton,
-  CardSkeleton,
-} from '@/components/shared';
+import { PageActions, EmptyState, FilterBarSkeleton, CardSkeleton } from '@/components/shared';
 import {
   isClassGroupInGrade,
   parseDashboardFilters,
@@ -111,22 +106,18 @@ export default async function ProgresionPage({
 
   return (
     <>
-      <PageHeader variant="secondary"
-        title="Progresión a lo largo del período"
-        description="Sigue la evolución del % de logro a través de las evaluaciones de un alumno, curso o habilidad."
-        actions={
-          <Suspense fallback={null}>
-            <ProgresionAction
-              scope={scope}
-              studentId={studentId}
-              rawClassGroupId={rawClassGroupId}
-              gradeId={gradeId}
-              nodeId={nodeId}
-              filters={filters}
-            />
-          </Suspense>
-        }
-      />
+      <PageActions>
+        <Suspense fallback={null}>
+          <ProgresionAction
+            scope={scope}
+            studentId={studentId}
+            rawClassGroupId={rawClassGroupId}
+            gradeId={gradeId}
+            nodeId={nodeId}
+            filters={filters}
+          />
+        </Suspense>
+      </PageActions>
 
       <Suspense
         key={`scope-${scope}-${rawClassGroupId ?? ''}-${gradeId ?? ''}`}
@@ -212,7 +203,14 @@ async function resolveProgression(
   const { scope, studentId, rawClassGroupId, gradeId, nodeId, filters } = params;
   const classGroupId = await resolveClassGroupId(rawClassGroupId, gradeId);
   const entityId = scope === 'student' ? studentId : scope === 'class' ? classGroupId : nodeId;
-  const query = buildProgressionQuery({ scope, studentId, classGroupId, nodeId, filters, entityId });
+  const query = buildProgressionQuery({
+    scope,
+    studentId,
+    classGroupId,
+    nodeId,
+    filters,
+    entityId,
+  });
   return { entityId, query };
 }
 

@@ -18,15 +18,14 @@ export default async function ModelosIaPage() {
   // Un platform_admin siempre puede (mirror del bypass del RolesGuard); canAccess
   // cubre el futuro caso de que LLM_SETTINGS_ROLES incluya más roles.
   const allowed =
-    Boolean(session.user.isPlatformAdmin) ||
-    canAccess(session.user.roles, LLM_SETTINGS_ROLES);
+    Boolean(session.user.isPlatformAdmin) || canAccess(session.user.roles, LLM_SETTINGS_ROLES);
   if (!allowed) {
     redirect(ROUTES.dashboard);
   }
 
   return (
     <PageContainer>
-      <ConfigHubHeader description="Elige el proveedor y el modelo que usa cada funcionalidad de IA. La configuración es global: aplica a todas las organizaciones. El límite de tokens se ajusta automáticamente según el modelo elegido." />
+      <ConfigHubHeader />
 
       <Suspense
         fallback={

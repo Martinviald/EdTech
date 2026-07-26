@@ -9,7 +9,7 @@ import {
 } from '@soe/types';
 import { auth } from '@/auth';
 import { apiGet } from '@/lib/api';
-import { PageContainer, PageHeader, CardSkeleton } from '@/components/shared';
+import { PageContainer, CardSkeleton } from '@/components/shared';
 import { ROUTES } from '@/lib/routes';
 import { UploadForm } from '../components/upload-form';
 
@@ -21,8 +21,7 @@ type InstrumentsListResponse = {
 type SearchParams = Promise<{ format?: string }>;
 
 function isAnswerSheetFormat(value: string | undefined): value is AnswerSheetFormat {
-  return typeof value === 'string'
-    && (ANSWER_SHEET_FORMATS as readonly string[]).includes(value);
+  return typeof value === 'string' && (ANSWER_SHEET_FORMATS as readonly string[]).includes(value);
 }
 
 async function fetchInstruments(): Promise<InstrumentModel[]> {
@@ -37,11 +36,7 @@ async function fetchInstruments(): Promise<InstrumentModel[]> {
   }
 }
 
-export default async function CargarPage({
-  searchParams,
-}: {
-  searchParams: SearchParams;
-}) {
+export default async function CargarPage({ searchParams }: { searchParams: SearchParams }) {
   const session = await auth();
   if (!session?.user?.orgId) redirect(ROUTES.login);
   if (!canAccess(session.user.roles, ANSWER_SHEET_IMPORT_ROLES)) {
@@ -53,11 +48,6 @@ export default async function CargarPage({
 
   return (
     <PageContainer>
-      <PageHeader
-        title="Cargar archivo de respuestas"
-        description="Sube el archivo con las respuestas de los alumnos. El sistema lo analizará y te mostrará una previsualización antes de guardarlo."
-      />
-
       <Suspense fallback={<CardSkeleton rows={4} />}>
         <UploadFormSection defaultFormat={defaultFormat} />
       </Suspense>

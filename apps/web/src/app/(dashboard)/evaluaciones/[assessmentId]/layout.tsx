@@ -17,7 +17,8 @@ import {
   type AssessmentReportResponse,
   type InstrumentAttachmentModel,
 } from '@soe/types';
-import { PageContainer, PageHeader } from '@/components/shared';
+import { PageActions, PageContainer } from '@/components/shared';
+import { SetPageTitle } from '@/components/layout/page-title-context';
 import { AskAiButton } from '@/components/assistant';
 import { EnunciadoViewButton } from '@/components/instruments/EnunciadoViewButton';
 import { AssessmentTabsNav, type HubTab } from './components/assessment-tabs-nav';
@@ -154,32 +155,19 @@ export default async function EvaluacionLayout({
       {/* Contexto del asistente (E21) para todo el hub — una sola vez. */}
       <HubAssistantContext assessmentId={assessmentId} label={title} />
 
-      <PageHeader
-        breadcrumb={
-          <nav className="flex items-center gap-2 text-sm text-muted-foreground">
-            <Link href={ROUTES.evaluaciones} className="hover:text-foreground">
-              Evaluaciones
-            </Link>
-            <span aria-hidden>/</span>
-            <span className="truncate text-foreground">{title}</span>
-          </nav>
-        }
-        title={title}
-        description={description}
-        actions={
-          <>
-            {enunciadoPdf ? <EnunciadoViewButton instrumentId={meta.instrumentId} /> : null}
-            <Button asChild variant="outline" size="sm">
-              <Link href={ROUTES.bancoItemSpecTable(meta.instrumentId)}>
-                Tabla de especificaciones
-              </Link>
-            </Button>
-            <AskAiButton prompt="Analiza esta evaluación: ¿qué cursos y habilidades están más descendidos y qué priorizar?" />
-          </>
-        }
-      />
+      {/* El título del hub (nombre de la evaluación) lo pinta la barra superior. */}
+      <SetPageTitle title={title} />
 
       <AssessmentTabsNav tabs={tabs} />
+
+      <PageActions>
+        <span className="mr-auto truncate text-sm text-muted-foreground">{description}</span>
+        {enunciadoPdf ? <EnunciadoViewButton instrumentId={meta.instrumentId} /> : null}
+        <Button asChild variant="outline" size="sm">
+          <Link href={ROUTES.bancoItemSpecTable(meta.instrumentId)}>Tabla de especificaciones</Link>
+        </Button>
+        <AskAiButton prompt="Analiza esta evaluación: ¿qué cursos y habilidades están más descendidos y qué priorizar?" />
+      </PageActions>
 
       {children}
     </PageContainer>

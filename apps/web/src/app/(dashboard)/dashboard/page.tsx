@@ -16,15 +16,9 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { CardSkeleton, MetricsGroup } from '@/components/shared';
-import { ROLE_LABELS } from '@/components/layout/nav-items';
 import { RecentAssessmentsCard } from './components/recent-assessments-card';
 import { OnboardingChecklist, type OnboardingStep } from './components/onboarding-checklist';
-import {
-  getAssessments,
-  getClassGroupsForUser,
-  getInstrumentsTotal,
-  getOrgOverview,
-} from './data';
+import { getAssessments, getClassGroupsForUser, getInstrumentsTotal, getOrgOverview } from './data';
 
 export const dynamic = 'force-dynamic';
 
@@ -40,16 +34,6 @@ export default async function DashboardPage() {
   const user = session?.user;
   if (!user?.orgId) return null;
   const orgId = user.orgId;
-  const roleLabel = ROLE_LABELS[user.activeRole] ?? user.activeRole;
-
-  const greeting = (
-    <header className="space-y-1">
-      <h1 className="text-2xl font-semibold tracking-tight">
-        Hola, <span className="text-primary">{user.name ?? 'bienvenido'}</span>
-      </h1>
-      <p className="text-sm text-muted-foreground">{roleLabel}</p>
-    </header>
-  );
 
   // La vista del profesor se decide por el rol ACTIVO (no la unión), para que un
   // usuario admin+profesor pueda alternar — coherente con shouldShowTeacherView.
@@ -58,7 +42,6 @@ export default async function DashboardPage() {
   if (isTeacherView) {
     return (
       <div className="mx-auto flex max-w-5xl flex-col gap-6">
-        {greeting}
         <section className="grid gap-6 lg:grid-cols-2">
           <div className="space-y-3">
             <div className="flex items-center justify-between">
@@ -86,8 +69,6 @@ export default async function DashboardPage() {
 
   return (
     <div className="mx-auto flex max-w-5xl flex-col gap-6">
-      {greeting}
-
       <Suspense fallback={<Skeleton className="h-[92px] w-full rounded-xl" />}>
         <DirectorMetrics />
       </Suspense>
@@ -252,7 +233,12 @@ function QuickAccess({ roles, canImport }: { roles: readonly UserRole[]; canImpo
       icon: Lightbulb,
       show: canAccess(roles, REMEDIAL_VIEWER_ROLES),
     },
-    { href: ROUTES.importarResultados, label: 'Importar resultados', icon: FileUp, show: canImport },
+    {
+      href: ROUTES.importarResultados,
+      label: 'Importar resultados',
+      icon: FileUp,
+      show: canImport,
+    },
   ];
   const visible = links.filter((l) => l.show);
   if (visible.length === 0) return null;

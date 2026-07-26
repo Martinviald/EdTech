@@ -9,13 +9,7 @@ import {
   type BenchmarkInstrumentOption,
   type BenchmarkMode,
 } from '@soe/types';
-import {
-  PageContainer,
-  PageHeader,
-  EmptyState,
-  FilterBarSkeleton,
-  CardSkeleton,
-} from '@/components/shared';
+import { PageContainer, EmptyState, FilterBarSkeleton, CardSkeleton } from '@/components/shared';
 import { Skeleton } from '@/components/ui/skeleton';
 import { FeatureUpgradeNotice } from '@/components/feature-gate';
 import { isFeatureEnabled } from '@/lib/features';
@@ -107,11 +101,6 @@ export default async function BenchmarkingPage({
 
   return (
     <PageContainer>
-      <PageHeader
-        title="Benchmarking"
-        description="Compara el desempeño de tu colegio contra una cohorte de perfil similar (global anónima) o contra los colegios de tu red/sostenedor (identificada). Comparación mismo-instrumento, apples-to-apples (E7 — H7.5)."
-      />
-
       <Suspense fallback={<FilterBarSkeleton />}>
         <BenchmarkingBody selection={selection} />
       </Suspense>

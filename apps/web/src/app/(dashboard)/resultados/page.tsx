@@ -1,6 +1,13 @@
 import { Suspense } from 'react';
 import { redirect } from 'next/navigation';
-import { BarChart3, GraduationCap, ClipboardList, TriangleAlert, Inbox, CircleCheck } from 'lucide-react';
+import {
+  BarChart3,
+  GraduationCap,
+  ClipboardList,
+  TriangleAlert,
+  Inbox,
+  CircleCheck,
+} from 'lucide-react';
 import { auth } from '@/auth';
 import { ROUTES } from '@/lib/routes';
 import {
@@ -11,7 +18,6 @@ import {
   type DashboardTeacherKpisResponse,
 } from '@soe/types';
 import {
-  PageHeader,
   EmptyState,
   StatCard,
   FilterBarSkeleton,
@@ -36,11 +42,7 @@ import {
 } from './components/dashboard-filters';
 import { DistributionBar } from './components/distribution-bar';
 import { formatAchievement } from './components/performance-level';
-import {
-  getDashboardOverview,
-  getDashboardFilters,
-  getDashboardTeacherKpis,
-} from './data';
+import { getDashboardOverview, getDashboardFilters, getDashboardTeacherKpis } from './data';
 
 export const dynamic = 'force-dynamic';
 
@@ -66,8 +68,6 @@ export default async function ResultadosOverviewPage({
   // sección. `key={query}` reinicia el skeleton al cambiar los filtros.
   return (
     <>
-      <PageHeader variant="secondary" title="Resumen" />
-
       <Suspense fallback={<FilterBarSkeleton />}>
         <FiltersSection query={query} filters={filters} />
       </Suspense>
@@ -282,7 +282,9 @@ function TeacherKpisTable({ kpis }: { kpis: DashboardTeacherKpisResponse }) {
                       {formatAchievement(c.passingRate)}
                     </TableCell>
                     <TableCell className="text-right">
-                      <span className={c.criticalStudents > 0 ? 'font-medium text-destructive' : ''}>
+                      <span
+                        className={c.criticalStudents > 0 ? 'font-medium text-destructive' : ''}
+                      >
                         {c.criticalStudents}
                       </span>
                     </TableCell>

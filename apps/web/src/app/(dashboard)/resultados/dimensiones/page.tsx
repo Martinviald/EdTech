@@ -4,7 +4,7 @@ import { Sparkles } from 'lucide-react';
 import { auth } from '@/auth';
 import { ROUTES } from '@/lib/routes';
 import { canAccess, DASHBOARD_VIEWER_ROLES } from '@soe/types';
-import { PageHeader, EmptyState, FilterBarSkeleton, CardSkeleton } from '@/components/shared';
+import { PageActions, EmptyState, FilterBarSkeleton, CardSkeleton } from '@/components/shared';
 import { AskAiButton, RegisterAssistantContext } from '@/components/assistant';
 import { DashboardFilterBar } from '../components/dashboard-filter-bar';
 import {
@@ -56,16 +56,11 @@ export default async function DimensionesPage({
   return (
     <>
       <RegisterAssistantContext refs={dashboardFiltersToAssistantRefs(filters)} />
-      <PageHeader
-        variant="secondary"
-        title="Logro por dimensión"
-        description="% de logro promedio por dimensión de la tabla de especificaciones (habilidad, contenido, OA…). Toca un logro para ver las preguntas asociadas (H6.5)."
-        actions={
-          <Suspense fallback={null}>
-            <DimensionesAction query={skillsQuery} />
-          </Suspense>
-        }
-      />
+      <PageActions>
+        <Suspense fallback={null}>
+          <DimensionesAction query={skillsQuery} />
+        </Suspense>
+      </PageActions>
 
       <Suspense fallback={<FilterBarSkeleton />}>
         <FiltersSection query={query} filters={filters} />

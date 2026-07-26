@@ -12,7 +12,6 @@ import {
 import { auth } from '@/auth';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { PageHeader } from '@/components/shared';
 import { ROUTES } from '@/lib/routes';
 
 export const dynamic = 'force-dynamic';
@@ -67,11 +66,6 @@ export default async function ImportarHubPage() {
 
   return (
     <div className="mx-auto flex max-w-3xl flex-col gap-6">
-      <PageHeader
-        title="Importar"
-        description="Sigue los pasos en orden para poner en marcha una evaluación: primero la nómina, luego la pauta del instrumento y al final las hojas de respuesta."
-      />
-
       <ol className="space-y-3">
         {STEPS.map((step) => {
           const Icon = step.icon;

@@ -21,12 +21,9 @@ export default async function AdminOrgsPage() {
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-semibold tracking-tight">Colegios</h1>
-          <p className="text-sm text-muted-foreground">
-            {data.total} colegios registrados en la plataforma.
-          </p>
-        </div>
+        <p className="text-sm text-muted-foreground">
+          {data.total} colegios registrados en la plataforma.
+        </p>
         <CreateOrgDialog />
       </div>
 
