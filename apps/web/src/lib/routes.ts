@@ -58,14 +58,15 @@ export const ROUTES = {
   importarDia: route('/importar-dia'),
   importarResultadosLegacy: route('/importar-resultados'),
 
-  bancoItems: route('/banco-items'),
-  bancoItemsExplorar: route('/banco-items/explorar'),
-  bancoItemsNuevo: route('/banco-items/nuevo'),
-  bancoItem: (instrumentId: string) => route(`/banco-items/${instrumentId}`),
-  bancoItemEtiquetar: (instrumentId: string) => route(`/banco-items/${instrumentId}/etiquetar`),
-  bancoItemSpecTable: (instrumentId: string) => route(`/banco-items/${instrumentId}/spec-table`),
+  bancoItems: route('/banco-contenido'),
+  bancoItemsExplorar: route('/banco-contenido/explorar'),
+  bancoItemsNuevo: route('/banco-contenido/nuevo'),
+  bancoItem: (instrumentId: string) => route(`/banco-contenido/${instrumentId}`),
+  bancoItemEtiquetar: (instrumentId: string) => route(`/banco-contenido/${instrumentId}/etiquetar`),
+  bancoItemSpecTable: (instrumentId: string) =>
+    route(`/banco-contenido/${instrumentId}/spec-table`),
   bancoItemSpecTableCargar: (instrumentId: string) =>
-    route(`/banco-items/${instrumentId}/spec-table/cargar`),
+    route(`/banco-contenido/${instrumentId}/spec-table/cargar`),
 
   organizacion: route('/organizacion'),
   organizacionAsignaciones: route('/organizacion/asignaciones'),

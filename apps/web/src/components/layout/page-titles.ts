@@ -129,28 +129,28 @@ const DYNAMIC_TITLES: readonly { pattern: RegExp; resolve: (m: RegExpMatchArray)
       }),
     },
     {
-      pattern: /^\/banco-items\/([^/]+)\/spec-table\/cargar$/,
+      pattern: /^\/banco-contenido\/([^/]+)\/spec-table\/cargar$/,
       resolve: (m) => ({
         title: 'Cargar tabla de especificaciones',
         parent: { href: ROUTES.bancoItemSpecTable(m[1]!), label: 'Tabla de especificaciones' },
       }),
     },
     {
-      pattern: /^\/banco-items\/([^/]+)\/spec-table$/,
+      pattern: /^\/banco-contenido\/([^/]+)\/spec-table$/,
       resolve: (m) => ({
         title: 'Tabla de especificaciones',
         parent: { href: ROUTES.bancoItem(m[1]!), label: 'Instrumento' },
       }),
     },
     {
-      pattern: /^\/banco-items\/([^/]+)\/etiquetar$/,
+      pattern: /^\/banco-contenido\/([^/]+)\/etiquetar$/,
       resolve: (m) => ({
         title: 'Etiquetado con IA',
         parent: { href: ROUTES.bancoItem(m[1]!), label: 'Instrumento' },
       }),
     },
     {
-      pattern: /^\/banco-items\/[^/]+$/,
+      pattern: /^\/banco-contenido\/[^/]+$/,
       resolve: () => ({
         title: 'Instrumento',
         parent: { href: ROUTES.bancoItems, label: 'Banco de contenido' },

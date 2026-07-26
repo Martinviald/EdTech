@@ -26,7 +26,7 @@ export async function createInstrument(data: CreateInstrumentDto) {
 export async function updateInstrument(id: string, data: UpdateInstrumentDto) {
   const result = await apiPatch<InstrumentModel>(`/instruments/${id}`, data);
   revalidatePath(ROUTES.bancoItems);
-  revalidatePath(`/banco-items/${id}`);
+  revalidatePath(`/banco-contenido/${id}`);
   return result;
 }
 

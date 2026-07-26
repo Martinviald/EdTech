@@ -11,7 +11,7 @@ import { SpecTableReview } from './SpecTableReview';
  * Vista de la tabla de especificaciones de un instrumento (revisión de ítems ↔
  * nodos de taxonomía). Compartida por dos rutas, igual que
  * `InstrumentDetailView`:
- *   · `/banco-items/[id]/spec-table`          (dashboard del colegio)
+ *   · `/banco-contenido/[id]/spec-table`          (dashboard del colegio)
  *   · `/admin/instrumentos/[id]/spec-table`   (backoffice de plataforma)
  *
  * `canEdit` habilita la edición inline y el botón "Cargar tabla de
