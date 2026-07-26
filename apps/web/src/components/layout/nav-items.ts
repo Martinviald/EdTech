@@ -12,6 +12,7 @@ import {
   Settings,
   ShieldCheck,
   TrendingUp,
+  UserSearch,
   type LucideIcon,
 } from 'lucide-react';
 import type { UserRole } from '@soe/types';
@@ -116,6 +117,15 @@ export const NAV_GROUPS: readonly NavGroup[] = [
         status: 'live',
         roles: DASHBOARD_VIEWER_ROLES,
         children: toNavChildren(RESULTADOS_TABS),
+      },
+      {
+        // Vista 360 del estudiante (T2-20): panorama consolidado de un alumno.
+        // Misma audiencia que los dashboards de resultados.
+        href: ROUTES.estudiantes,
+        label: 'Vista 360 del estudiante',
+        icon: UserSearch,
+        status: 'live',
+        roles: DASHBOARD_VIEWER_ROLES,
       },
       {
         // TKT-23: diagnóstico IA de la variación entre instrumentos comparables.

@@ -29,6 +29,10 @@ const STATIC_TITLES: Record<string, PageTitle> = {
 
   [ROUTES.evaluaciones]: { title: 'Evaluaciones' },
 
+  // Vista 360 del estudiante: el picker usa este título estático; la ficha de un
+  // alumno (`/estudiantes/[studentId]`) lo sobre-escribe con `<SetPageTitle>`.
+  [ROUTES.estudiantes]: { title: 'Vista 360 del estudiante' },
+
   // Hub de Panorama pedagógico: todas las tabs comparten título (la tab activa
   // ya se identifica en la barra de pestañas del cuerpo).
   [ROUTES.resultados]: { title: 'Panorama pedagógico' },

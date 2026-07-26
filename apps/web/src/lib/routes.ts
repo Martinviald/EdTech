@@ -39,6 +39,9 @@ export const ROUTES = {
   evaluacionInformeAlumnoBase: (assessmentId: string) =>
     route(`/evaluaciones/${assessmentId}/informe-alumno`),
 
+  estudiantes: route('/estudiantes'),
+  estudiante: (studentId: string) => route(`/estudiantes/${studentId}`),
+
   resultados: route('/resultados'),
   resultadosClasificacion: route('/resultados/clasificacion'),
   resultadosComparacion: route('/resultados/comparacion'),
