@@ -11,12 +11,7 @@ import {
   type HeatmapRow,
   type DashboardFilterOptionsResponse,
 } from '@soe/types';
-import {
-  PageHeader,
-  EmptyState,
-  FilterBarSkeleton,
-  TableSkeleton,
-} from '@/components/shared';
+import { PageActions, EmptyState, FilterBarSkeleton, TableSkeleton } from '@/components/shared';
 import { AskAiButton, RegisterAssistantContext } from '@/components/assistant';
 import { DashboardFilterBar } from '../components/dashboard-filter-bar';
 import {
@@ -55,15 +50,11 @@ export default async function MapaCalorPage({
   return (
     <>
       <RegisterAssistantContext refs={dashboardFiltersToAssistantRefs(filters)} />
-      <PageHeader variant="secondary"
-        title="Mapa de calor"
-        description="% de logro promedio por habilidad (filas) y asignatura (columnas). Las habilidades más críticas aparecen primero (H6.10)."
-        actions={
-          <Suspense fallback={null}>
-            <MapaCalorAction query={query} />
-          </Suspense>
-        }
-      />
+      <PageActions>
+        <Suspense fallback={null}>
+          <MapaCalorAction query={query} />
+        </Suspense>
+      </PageActions>
 
       <Suspense fallback={<FilterBarSkeleton />}>
         <FiltersSection query={query} filters={filters} />

@@ -1,10 +1,9 @@
 import { Suspense } from 'react';
-import Link from 'next/link';
 import { notFound, redirect } from 'next/navigation';
-import { ChevronLeft } from 'lucide-react';
 import { auth } from '@/auth';
 import { apiGet } from '@/lib/api';
 import { ROUTES } from '@/lib/routes';
+import { SetPageTitle } from '@/components/layout/page-title-context';
 import { TableSkeleton } from '@/components/shared';
 import { Skeleton } from '@/components/ui/skeleton';
 import {
@@ -65,27 +64,18 @@ async function TaxonomyDetail({
   const { taxonomy, nodes } = data;
   const { groupLabel, typeLabel } = taxonomyKind(taxonomy.type, taxonomy.isOfficial);
   const editable =
-    !taxonomy.isOfficial &&
-    (taxonomy.orgId === orgId || userHasRole(roles, 'platform_admin'));
+    !taxonomy.isOfficial && (taxonomy.orgId === orgId || userHasRole(roles, 'platform_admin'));
 
   return (
     <>
       <div className="space-y-2">
-        <Link
-          href={ROUTES.marcosAcademicos}
-          className="text-muted-foreground hover:text-foreground inline-flex items-center gap-1 text-sm"
-        >
-          <ChevronLeft className="size-4" /> Volver a marcos académicos
-        </Link>
-        <div className="flex flex-wrap items-start justify-between gap-3">
+        <SetPageTitle title={taxonomy.name} />
+        <div className="flex flex-wrap items-center justify-between gap-3">
           <div>
             <div className="flex items-center gap-2">
-              <h1 className="text-2xl font-semibold">{taxonomy.name}</h1>
               <span
                 className={`rounded-full px-2 py-0.5 text-xs font-medium ${
-                  taxonomy.isOfficial
-                    ? 'bg-info/10 text-info'
-                    : 'bg-success/10 text-success'
+                  taxonomy.isOfficial ? 'bg-info/10 text-info' : 'bg-success/10 text-success'
                 }`}
               >
                 {taxonomy.isOfficial ? groupLabel : 'Propio del colegio'}

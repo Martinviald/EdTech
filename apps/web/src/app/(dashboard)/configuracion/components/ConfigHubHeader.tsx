@@ -2,8 +2,7 @@ import type { ReactNode } from 'react';
 
 import type { UserRole } from '@soe/types';
 import { auth } from '@/auth';
-import { ROUTES } from '@/lib/routes';
-import { BackLink, PageHeader, PageTabs, type PageTab } from '@/components/shared';
+import { PageActions, PageTabs, type PageTab } from '@/components/shared';
 import {
   accessibleHubOptions,
   CONFIG_HUB_OPTIONS,
@@ -22,17 +21,12 @@ export function accessibleConfigOptions(
 }
 
 /**
- * Encabezado + pestañas compartidas del hub de Configuración. Cross-feature: lo
- * usan `configuracion/*` y `observabilidad-ia` (esta última vive en otra ruta
- * pero es parte del mismo hub). Cada tab-page pasa su propia `description`/`actions`.
+ * Pestañas compartidas del hub de Configuración. Cross-feature: las usan
+ * `configuracion/*` y `observabilidad-ia` (esta última vive en otra ruta pero es
+ * parte del mismo hub). El título del hub lo pinta la barra superior; cada
+ * tab-page pasa sus propias `actions`.
  */
-export async function ConfigHubHeader({
-  description,
-  actions,
-}: {
-  description?: string;
-  actions?: ReactNode;
-}) {
+export async function ConfigHubHeader({ actions }: { actions?: ReactNode }) {
   const session = await auth();
   const roles = session?.user.roles ?? [];
   const isAdmin = Boolean(session?.user.isPlatformAdmin);
@@ -44,13 +38,8 @@ export async function ConfigHubHeader({
 
   return (
     <>
-      <PageHeader
-        breadcrumb={<BackLink href={ROUTES.administracion} label="Administración" />}
-        title="Configuración"
-        description={description}
-        actions={actions}
-      />
       <PageTabs tabs={tabs} sticky />
+      {actions ? <PageActions>{actions}</PageActions> : null}
     </>
   );
 }

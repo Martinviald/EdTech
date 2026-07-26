@@ -8,7 +8,7 @@ import type { AnswerSheetPreviewResponse } from '@soe/types';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { PageContainer, PageHeader } from '@/components/shared';
+import { PageContainer } from '@/components/shared';
 import { cn } from '@/lib/utils';
 import { confirmAnswerSheetAction, previewAnswerSheetAction } from '../actions';
 import { PreviewTable } from '../components/preview-table';
@@ -97,10 +97,7 @@ export default function PreviewPage() {
           </div>
         </div>
         <div>
-          <Button
-            variant="outline"
-            onClick={() => router.push(ROUTES.importarResultadosCargar)}
-          >
+          <Button variant="outline" onClick={() => router.push(ROUTES.importarResultadosCargar)}>
             <ArrowLeft className="mr-2 h-4 w-4" />
             Volver a cargar archivo
           </Button>
@@ -114,17 +111,11 @@ export default function PreviewPage() {
 
   return (
     <PageContainer>
-      <PageHeader
-        title="Previsualización"
-        description="Revisa las filas detectadas. Aún no se ha guardado nada — confirma abajo para crear la evaluación y registrar las respuestas."
-        meta={
-          <div className="flex flex-wrap items-center gap-2 text-sm">
-            <Badge variant="secondary">{FORMAT_LABELS[format] ?? format}</Badge>
-            <span className="text-muted-foreground">·</span>
-            <span className="font-medium">{instrumentName}</span>
-          </div>
-        }
-      />
+      <div className="flex flex-wrap items-center gap-2 text-sm">
+        <Badge variant="secondary">{FORMAT_LABELS[format] ?? format}</Badge>
+        <span className="text-muted-foreground">·</span>
+        <span className="font-medium">{instrumentName}</span>
+      </div>
 
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
         <Stat label="Filas totales" value={summary.totalRows} variant="neutral" />
@@ -169,9 +160,7 @@ export default function PreviewPage() {
       {warnings.length > 0 && (
         <Card className="border-warning/40 bg-warning/10">
           <CardHeader>
-            <CardTitle className="text-sm text-warning">
-              Advertencias ({warnings.length})
-            </CardTitle>
+            <CardTitle className="text-sm text-warning">Advertencias ({warnings.length})</CardTitle>
           </CardHeader>
           <CardContent className="space-y-1 text-sm text-warning">
             <ul className="list-disc pl-5">

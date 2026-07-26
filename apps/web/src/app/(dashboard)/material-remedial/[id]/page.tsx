@@ -1,7 +1,6 @@
 import { Suspense } from 'react';
-import Link from 'next/link';
 import { notFound, redirect } from 'next/navigation';
-import { ArrowLeft, Sparkles } from 'lucide-react';
+import { Sparkles } from 'lucide-react';
 import { auth } from '@/auth';
 import { apiGet } from '@/lib/api';
 import { ROUTES } from '@/lib/routes';
@@ -17,12 +16,13 @@ import {
 import { Skeleton } from '@/components/ui/skeleton';
 import {
   PageContainer,
-  PageHeader,
+  PageActions,
   EmptyState,
   AlertCallout,
   StatusBadge,
   CardSkeleton,
 } from '@/components/shared';
+import { SetPageTitle } from '@/components/layout/page-title-context';
 import { RemedialPoller } from '../components/remedial-poller';
 import { RemedialMaterialView } from '../components/remedial-material-view';
 import {
@@ -66,7 +66,6 @@ async function MaterialDetailSection({ id, canApprove }: { id: string; canApprov
   if (loadError) {
     return (
       <>
-        <PageHeader title="Material remedial" />
         <AlertCallout tone="danger" title="No se pudo cargar el material">
           No tienes acceso a este material o no existe.
         </AlertCallout>
@@ -80,33 +79,27 @@ async function MaterialDetailSection({ id, canApprove }: { id: string; canApprov
     material.title ??
     `${REMEDIAL_TYPE_LABELS[material.type]} · ${material.nodeName ?? 'Sin habilidad'}`;
 
-  const backLink = (
-    <Link
-      href={ROUTES.materialRemedial}
-      className="inline-flex items-center gap-1 text-sm text-muted-foreground transition hover:text-foreground"
-    >
-      <ArrowLeft className="size-4" aria-hidden />
-      Volver al banco
-    </Link>
-  );
-
+  // El título (nombre del material) lo pinta la barra superior; acá queda solo
+  // el subtítulo de tipo/habilidad junto al estado.
   const header = (
-    <PageHeader
-      title={title}
-      description={`${REMEDIAL_TYPE_LABELS[material.type]}${material.nodeName ? ` · ${material.nodeName}` : ''}`}
-      actions={
+    <>
+      <SetPageTitle title={title} />
+      <PageActions>
+        <span className="mr-auto text-sm text-muted-foreground">
+          {REMEDIAL_TYPE_LABELS[material.type]}
+          {material.nodeName ? ` · ${material.nodeName}` : ''}
+        </span>
         <StatusBadge tone={REMEDIAL_STATUS_TONE[material.status]}>
           {REMEDIAL_STATUS_LABELS[material.status]}
         </StatusBadge>
-      }
-    />
+      </PageActions>
+    </>
   );
 
   // En curso: el cliente reconsulta GET /:id hasta salir de pending/processing.
   if (material.status === 'pending' || material.status === 'processing') {
     return (
       <>
-        {backLink}
         {header}
         <RemedialPoller materialId={material.id} status={material.status} />
       </>
@@ -116,7 +109,6 @@ async function MaterialDetailSection({ id, canApprove }: { id: string; canApprov
   if (material.status === 'failed') {
     return (
       <>
-        {backLink}
         {header}
         <EmptyState
           icon={Sparkles}
@@ -136,7 +128,6 @@ async function MaterialDetailSection({ id, canApprove }: { id: string; canApprov
   if (!effectiveContent) {
     return (
       <>
-        {backLink}
         {header}
         <AlertCallout tone="warning">Este material no tiene contenido.</AlertCallout>
       </>
@@ -149,7 +140,6 @@ async function MaterialDetailSection({ id, canApprove }: { id: string; canApprov
   } catch {
     return (
       <>
-        {backLink}
         {header}
         <AlertCallout tone="danger" title="Formato inesperado">
           El contenido del material no pudo validarse.
@@ -169,7 +159,6 @@ async function MaterialDetailSection({ id, canApprove }: { id: string; canApprov
 
   return (
     <>
-      {backLink}
       {header}
       <RemedialMaterialView
         material={material}

@@ -3,15 +3,11 @@ import { redirect } from 'next/navigation';
 import { BarChart3, LineChart as LineChartIcon } from 'lucide-react';
 import { auth } from '@/auth';
 import { ROUTES } from '@/lib/routes';
-import {
-  ANALYTICS_VIEWER_ROLES,
-  canAccess,
-  type GenerationalComparisonResponse,
-} from '@soe/types';
+import { ANALYTICS_VIEWER_ROLES, canAccess, type GenerationalComparisonResponse } from '@soe/types';
 import { GraduationCap, Target, Users } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import {
-  PageHeader,
+  PageActions,
   EmptyState,
   MetricComparison,
   FilterBarSkeleton,
@@ -19,10 +15,7 @@ import {
   type MetricDelta,
 } from '@/components/shared';
 import { DashboardFilterBar } from '../components/dashboard-filter-bar';
-import {
-  parseDashboardFilters,
-  type DashboardFilterValues,
-} from '../components/dashboard-filters';
+import { parseDashboardFilters, type DashboardFilterValues } from '../components/dashboard-filters';
 import { GenerationalChart } from '../components/charts/generational-chart';
 import { GenerationalDistributionChart } from '../components/charts/generational-distribution-chart';
 import { ExportViewButton } from '../components/charts/export-view-button';
@@ -118,15 +111,11 @@ export default async function ComparacionPage({
 
   return (
     <>
-      <PageHeader variant="secondary"
-        title="Comparación de generaciones"
-        description="Compara el desempeño de un mismo nivel entre años académicos distintos para detectar tendencias."
-        actions={
-          <Suspense fallback={null}>
-            <ComparacionAction query={generationalQuery} instrumentType={filters.instrumentType} />
-          </Suspense>
-        }
-      />
+      <PageActions>
+        <Suspense fallback={null}>
+          <ComparacionAction query={generationalQuery} instrumentType={filters.instrumentType} />
+        </Suspense>
+      </PageActions>
 
       <Suspense fallback={<FilterBarSkeleton />}>
         <FiltersSection filters={filters} />

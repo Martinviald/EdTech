@@ -69,7 +69,6 @@ async function SpecTableSection({ instrumentId }: { instrumentId: string }) {
       items={itemsResponse.data ?? []}
       canEdit={false}
       basePath={ROUTES.adminInstrumentos}
-      breadcrumb={{ href: ROUTES.adminInstrumentos, label: 'Instrumentos oficiales' }}
     />
   );
 }

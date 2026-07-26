@@ -1,14 +1,9 @@
-import Link from 'next/link';
 import { redirect } from 'next/navigation';
 import { auth } from '@/auth';
 import { apiGet } from '@/lib/api';
 import { ROUTES } from '@/lib/routes';
-import {
-  canAccess,
-  ITEM_BANK_ROLES,
-  type InstrumentModel,
-  type TaxonomyModel,
-} from '@soe/types';
+import { canAccess, ITEM_BANK_ROLES, type InstrumentModel, type TaxonomyModel } from '@soe/types';
+import { SetPageTitle } from '@/components/layout/page-title-context';
 import { SpecTableWizard } from '../SpecTableWizard';
 
 interface PageProps {
@@ -34,34 +29,11 @@ export default async function SpecTableUploadPage({ params }: PageProps) {
 
   return (
     <div className="space-y-6">
-      <div>
-        <div className="flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
-          <Link href={ROUTES.bancoItems} className="hover:text-foreground">
-            Banco de Instrumentos
-          </Link>
-          <span>/</span>
-          <Link
-            href={ROUTES.bancoItem(instrumentId)}
-            className="hover:text-foreground"
-          >
-            {instrument.name}
-          </Link>
-          <span>/</span>
-          <Link
-            href={ROUTES.bancoItemSpecTable(instrumentId)}
-            className="hover:text-foreground"
-          >
-            Tabla de especificaciones
-          </Link>
-          <span>/</span>
-          <span>Cargar</span>
-        </div>
-        <h1 className="mt-2 text-2xl font-semibold">Cargar tabla de especificaciones</h1>
-        <p className="mt-1 text-sm text-muted-foreground">
-          Sube un archivo Excel o CSV con la tabla de especificaciones del instrumento.
-          Mapea las columnas y vincula los ítems automáticamente.
-        </p>
-      </div>
+      <SetPageTitle
+        title="Cargar tabla de especificaciones"
+        parentHref={ROUTES.bancoItemSpecTable(instrumentId)}
+        parentLabel={instrument.name}
+      />
       <SpecTableWizard instrumentId={instrumentId} taxonomies={taxonomies} />
     </div>
   );

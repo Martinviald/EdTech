@@ -49,7 +49,6 @@ export default async function SpecTablePage({ params }: PageProps) {
       items={items}
       canEdit={canEdit}
       basePath={ROUTES.bancoItems}
-      breadcrumb={{ href: ROUTES.bancoItems, label: 'Banco de Instrumentos' }}
     />
   );
 }

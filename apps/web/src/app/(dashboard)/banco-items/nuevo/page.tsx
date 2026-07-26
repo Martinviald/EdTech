@@ -56,9 +56,7 @@ export default function NuevoInstrumentoPage() {
   }
 
   function updateSection(index: number, updates: Partial<CreateInstrumentSectionDto>) {
-    setSections((prev) =>
-      prev.map((s, i) => (i === index ? { ...s, ...updates } : s)),
-    );
+    setSections((prev) => prev.map((s, i) => (i === index ? { ...s, ...updates } : s)));
   }
 
   function removeSection(index: number) {
@@ -101,20 +99,6 @@ export default function NuevoInstrumentoPage() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <div className="flex items-center gap-2 text-sm text-muted-foreground">
-          <Link href={ROUTES.bancoItems} className="hover:text-foreground">
-            Banco de Instrumentos
-          </Link>
-          <span>/</span>
-          <span>Nuevo instrumento</span>
-        </div>
-        <h1 className="mt-2 text-2xl font-semibold">Crear instrumento</h1>
-        <p className="text-muted-foreground mt-1 text-sm">
-          Define el instrumento de evaluacion y sus secciones.
-        </p>
-      </div>
-
       <form onSubmit={handleSubmit} className="max-w-2xl space-y-6">
         {error && (
           <div className="rounded-md border border-destructive bg-destructive/10 p-3 text-sm text-destructive">

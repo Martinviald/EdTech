@@ -1,14 +1,7 @@
 import Link from 'next/link';
 import type { Route } from 'next';
 import { notFound, redirect } from 'next/navigation';
-import {
-  BarChart3,
-  BookOpen,
-  ChevronLeft,
-  ClipboardList,
-  GraduationCap,
-  Users,
-} from 'lucide-react';
+import { BarChart3, BookOpen, ClipboardList, GraduationCap, Users } from 'lucide-react';
 import {
   canAccess,
   CLASS_VIEWER_ROLES,
@@ -18,6 +11,7 @@ import {
 } from '@soe/types';
 import { auth } from '@/auth';
 import { ROUTES } from '@/lib/routes';
+import { SetPageTitle } from '@/components/layout/page-title-context';
 import { getClassGroupDetail } from '@/lib/teacherAssignmentsApi';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -72,18 +66,10 @@ export default async function ClassGroupDetailPage({
   return (
     <div className="space-y-6">
       <div className="space-y-2">
-        <Link
-          href={ROUTES.myClasses}
-          className="text-muted-foreground hover:text-foreground inline-flex items-center gap-1 text-sm"
-        >
-          <ChevronLeft className="size-4" /> Volver a mis cursos
-        </Link>
-        <div className="flex flex-wrap items-start justify-between gap-3">
+        <SetPageTitle title={`${classGroup.gradeShortName} · ${classGroup.name}`} />
+        <div className="flex flex-wrap items-center justify-between gap-3">
           <div>
-            <h1 className="text-2xl font-semibold">
-              {classGroup.gradeShortName} · {classGroup.name}
-            </h1>
-            <p className="text-muted-foreground mt-1 text-sm">
+            <p className="text-muted-foreground text-sm">
               Año {classGroup.academicYear} · {students.length}{' '}
               {students.length === 1 ? 'alumno' : 'alumnos'} · {subjects.length}{' '}
               {subjects.length === 1 ? 'asignatura' : 'asignaturas'}

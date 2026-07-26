@@ -37,11 +37,14 @@ interface PageHeaderProps {
 }
 
 /**
- * Encabezado de página estándar. Slots opcionales (todos `ReactNode`, por
- * composición) que cubren desde la lista simple hasta el detalle rico:
- * breadcrumb · eyebrow · título + badges · descripción · fila de metadata ·
- * acciones a la derecha · pestañas abajo. Unifica el patrón que hoy se reescribe
- * inline en cada vista.
+ * Encabezado de SECCIÓN dentro de una vista. Slots opcionales (todos
+ * `ReactNode`, por composición): breadcrumb · eyebrow · título + badges ·
+ * descripción · fila de metadata · acciones a la derecha · pestañas abajo.
+ *
+ * ⚠️ NO usar para el título de la vista: ese vive en la barra superior
+ * (`page-titles.ts` por ruta, o `<SetPageTitle>` si depende de datos) para no
+ * gastar una fila del contenido en repetirlo. Para las acciones de la vista, usar
+ * `PageActions`.
  */
 export function PageHeader({
   title,
@@ -81,9 +84,7 @@ export function PageHeader({
         </div>
         {description ? <p className="text-[13px] text-muted-foreground">{description}</p> : null}
       </div>
-      {meta ? (
-        <div className="flex flex-wrap items-center gap-x-4 gap-y-1.5">{meta}</div>
-      ) : null}
+      {meta ? <div className="flex flex-wrap items-center gap-x-4 gap-y-1.5">{meta}</div> : null}
     </div>
   );
 

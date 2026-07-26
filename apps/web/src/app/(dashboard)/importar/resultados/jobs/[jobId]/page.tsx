@@ -6,7 +6,7 @@ import { auth } from '@/auth';
 import { ROUTES } from '@/lib/routes';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { PageContainer, PageHeader } from '@/components/shared';
+import { PageContainer } from '@/components/shared';
 import { getImportJobAction } from '../../actions';
 import { JobStatusCard } from '../../components/job-status-card';
 
@@ -26,11 +26,6 @@ export default async function JobStatusPage({ params }: PageProps) {
 
   return (
     <PageContainer>
-      <PageHeader
-        title="Estado de la importación"
-        description="Detalle del job que procesa las respuestas y calcula los resultados."
-      />
-
       {!result.ok ? (
         <div className="space-y-4">
           <Card className="border-destructive/30 bg-destructive/5">

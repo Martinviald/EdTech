@@ -4,18 +4,8 @@ import Link from 'next/link';
 import { ClipboardList, FileUp } from 'lucide-react';
 import { auth } from '@/auth';
 import { ROUTES } from '@/lib/routes';
-import {
-  canAccess,
-  DASHBOARD_VIEWER_ROLES,
-  ANSWER_SHEET_IMPORT_ROLES,
-} from '@soe/types';
-import {
-  PageContainer,
-  PageHeader,
-  EmptyState,
-  FilterBarSkeleton,
-  TableSkeleton,
-} from '@/components/shared';
+import { canAccess, DASHBOARD_VIEWER_ROLES, ANSWER_SHEET_IMPORT_ROLES } from '@soe/types';
+import { PageContainer, EmptyState, FilterBarSkeleton, TableSkeleton } from '@/components/shared';
 import { Button } from '@/components/ui/button';
 import { DashboardFilterBar } from '../resultados/components/dashboard-filter-bar';
 import {
@@ -46,11 +36,6 @@ export default async function EvaluacionesPage({
 
   return (
     <PageContainer>
-      <PageHeader
-        title="Evaluaciones"
-        description="Todas las evaluaciones a tu alcance. Elige una para entrar a su hub: resumen, resultados, análisis IA, material remedial y calidad del instrumento, sin re-seleccionar la evaluación en cada vista."
-      />
-
       <Suspense fallback={<FilterBarSkeleton />}>
         <FiltersSection filters={filters} query={filterQuery} />
       </Suspense>
@@ -73,13 +58,7 @@ async function FiltersSection({
   return <DashboardFilterBar options={options} value={filters} basePath={BASE_PATH} />;
 }
 
-async function AssessmentsSection({
-  query,
-  canImport,
-}: {
-  query: string;
-  canImport: boolean;
-}) {
+async function AssessmentsSection({ query, canImport }: { query: string; canImport: boolean }) {
   const assessmentList = await getEvaluacionesAssessments(query);
   const assessments = assessmentList.data;
 

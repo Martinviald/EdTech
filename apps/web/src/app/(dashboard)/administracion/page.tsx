@@ -5,7 +5,7 @@ import { redirect } from 'next/navigation';
 import { auth } from '@/auth';
 import { ROUTES } from '@/lib/routes';
 import { cn } from '@/lib/utils';
-import { PageContainer, PageHeader } from '@/components/shared';
+import { PageContainer } from '@/components/shared';
 import { Card, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import {
   accessibleHubOptions,
@@ -31,11 +31,6 @@ export default async function AdministracionPage() {
 
   return (
     <PageContainer>
-      <PageHeader
-        title="Administración"
-        description="Gestión del colegio, del equipo y de la configuración de la plataforma."
-      />
-
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {options.map((option) => (
           <OptionCard key={option.href} option={option} />

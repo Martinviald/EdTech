@@ -5,7 +5,7 @@ import { auth } from '@/auth';
 import { apiGet } from '@/lib/api';
 import { ROUTES } from '@/lib/routes';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { BackLink, CardSkeleton, PageContainer, PageHeader } from '@/components/shared';
+import { CardSkeleton, PageActions, PageContainer } from '@/components/shared';
 import { Skeleton } from '@/components/ui/skeleton';
 import {
   canAccess,
@@ -43,16 +43,11 @@ export default async function MarcosAcademicosPage() {
 
   return (
     <PageContainer>
-      <PageHeader
-        breadcrumb={<BackLink href={ROUTES.administracion} label="Administración" />}
-        title="Marcos Académicos"
-        description="Currículum, marcos de evaluación y taxonomías de habilidades contra los que se etiquetan las preguntas. Los marcos oficiales son de solo lectura; puedes crear y editar los propios de tu colegio."
-        actions={
-          canCreate ? (
-            <NewTaxonomyButton isPlatformAdmin={session.user.role === 'platform_admin'} />
-          ) : undefined
-        }
-      />
+      {canCreate ? (
+        <PageActions>
+          <NewTaxonomyButton isPlatformAdmin={session.user.role === 'platform_admin'} />
+        </PageActions>
+      ) : null}
 
       <Suspense fallback={<TaxonomyGroupsSkeleton />}>
         <TaxonomyGroups />
