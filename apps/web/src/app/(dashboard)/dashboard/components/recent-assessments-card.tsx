@@ -1,9 +1,9 @@
 import Link from 'next/link';
-import type { Route } from 'next';
 import { ChevronRight, ClipboardList } from 'lucide-react';
 import type { AssessmentOption } from '@soe/types';
+import { ROUTES } from '@/lib/routes';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { EmptyState } from '@/components/EmptyState';
+import { EmptyState } from '@/components/shared';
 
 function formatDate(value: string | Date | null): string | null {
   if (!value) return null;
@@ -48,7 +48,7 @@ export function RecentAssessmentsCard({
               return (
                 <li key={a.assessmentId}>
                   <Link
-                    href={`/evaluaciones/${a.assessmentId}` as Route}
+                    href={ROUTES.evaluacion(a.assessmentId)}
                     className="flex items-center justify-between gap-3 px-4 py-3 transition-colors hover:bg-muted/40"
                   >
                     <div className="min-w-0">

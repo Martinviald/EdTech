@@ -2,7 +2,7 @@ import { ListChecks } from 'lucide-react';
 import type { AiRecommendation, UserRole } from '@soe/types';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { EmptyState } from '@/components/patterns';
+import { EmptyState } from '@/components/shared';
 import { priorityLabel, priorityTone, priorityRank } from './format';
 
 interface RecommendationsCardProps {

@@ -106,7 +106,7 @@ export class ItemsService {
             .where(
               and(
                 eq(itemTaxonomyTags.itemId, items.id),
-                eq(taxonomyNodes.subjectId, filters.subjectId),
+                inArray(taxonomyNodes.subjectId, filters.subjectId),
               ),
             ),
         ),
@@ -122,7 +122,7 @@ export class ItemsService {
             .where(
               and(
                 eq(itemTaxonomyTags.itemId, items.id),
-                eq(taxonomyNodes.gradeId, filters.gradeId),
+                inArray(taxonomyNodes.gradeId, filters.gradeId),
               ),
             ),
         ),

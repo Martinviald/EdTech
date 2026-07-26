@@ -179,7 +179,7 @@ function SkillRow({
             aria-label={`Logro de ${skill.nodeName}`}
           >
             <div
-              className={cn('h-full rounded-full transition-all', barClass)}
+              className={cn('h-full rounded-full transition-[width] motion-reduce:transition-none', barClass)}
               style={{ width: `${Math.min(100, Math.max(0, pct))}%` }}
             />
           </div>

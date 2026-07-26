@@ -1,6 +1,7 @@
 'use server';
 
 import { revalidatePath } from 'next/cache';
+import { ROUTES } from '@/lib/routes';
 import { updateOrganizationProfileSchema } from '@soe/types';
 import { restoreOrg, softDeleteOrg, updateOrg } from '@/lib/adminApi';
 
@@ -30,7 +31,7 @@ export async function updateOrgAction(
 
   try {
     await updateOrg(orgId, parsed.data);
-    revalidatePath('/admin/colegios');
+    revalidatePath(ROUTES.adminColegios);
     revalidatePath(`/admin/colegios/${orgId}`);
     return { ok: true };
   } catch (err) {
@@ -41,7 +42,7 @@ export async function updateOrgAction(
 export async function softDeleteOrgAction(orgId: string): Promise<ActionResult> {
   try {
     await softDeleteOrg(orgId);
-    revalidatePath('/admin/colegios');
+    revalidatePath(ROUTES.adminColegios);
     revalidatePath(`/admin/colegios/${orgId}`);
     return { ok: true };
   } catch (err) {
@@ -52,7 +53,7 @@ export async function softDeleteOrgAction(orgId: string): Promise<ActionResult> 
 export async function restoreOrgAction(orgId: string): Promise<ActionResult> {
   try {
     await restoreOrg(orgId);
-    revalidatePath('/admin/colegios');
+    revalidatePath(ROUTES.adminColegios);
     revalidatePath(`/admin/colegios/${orgId}`);
     return { ok: true };
   } catch (err) {

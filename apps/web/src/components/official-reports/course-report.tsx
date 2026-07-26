@@ -286,7 +286,7 @@ function GeneralStat({
     <div
       className={cn(
         'rounded-md border p-4',
-        emphasized && 'border-red-300 bg-red-50 dark:border-red-900 dark:bg-red-950/40',
+        emphasized && 'border-destructive/30 bg-destructive/10',
       )}
     >
       <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">{label}</p>
@@ -483,7 +483,8 @@ function StudentTable({
                 {/* Fuera de Diagnóstico el aviso "Requiere apoyo" va junto al nombre;
                     en Diagnóstico la franja de logro lo muestra por posición. */}
                 {!isDiagnostic && s.requiresSupport ? (
-                  <span className="ml-2 rounded-sm bg-red-100 px-1.5 py-0.5 text-xs font-medium text-red-800 dark:bg-red-950 dark:text-red-200">
+                  <span className="ml-2 rounded-sm bg-destructive/10 px-1.5 py-0.5 text-xs font-medium text-destructive">
+
                     Requiere apoyo
                   </span>
                 ) : null}

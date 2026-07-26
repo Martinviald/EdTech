@@ -2,7 +2,7 @@ import { TrendingUp, TrendingDown } from 'lucide-react';
 import type { ItemPracticeCard, ItemDiagnosisCard } from '@soe/types';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { EmptyState } from '@/components/patterns';
+import { EmptyState } from '@/components/shared';
 import { formatMetric, causeLabel } from './format';
 
 function MetricChips({

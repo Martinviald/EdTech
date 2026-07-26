@@ -2,7 +2,6 @@
 
 import { useState, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
-import type { Route } from 'next';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import {
@@ -28,6 +27,7 @@ import type {
   CreateItemTagDto,
 } from '@soe/types';
 import { requestAiTagging, confirmTags } from '../../actions';
+import { ROUTES } from '@/lib/routes';
 
 /** Local type that associates an AiTagSuggestion with its parent itemId */
 type FlatSuggestion = AiTagSuggestion & { itemId: string };
@@ -43,9 +43,9 @@ function getContentPreview(content: Record<string, unknown>): string {
 }
 
 function confidenceColor(confidence: number): string {
-  if (confidence >= 0.8) return 'bg-green-500';
-  if (confidence >= 0.5) return 'bg-yellow-500';
-  return 'bg-red-500';
+  if (confidence >= 0.8) return 'bg-success';
+  if (confidence >= 0.5) return 'bg-warning';
+  return 'bg-destructive';
 }
 
 function confidenceLabel(confidence: number): string {
@@ -184,7 +184,7 @@ export function AiTaggingWizard({ instrumentId, items, taxonomies }: Props) {
           <p className="text-sm text-muted-foreground">
             Los items seleccionados han sido etiquetados.
           </p>
-          <Button onClick={() => router.push(`/banco-items/${instrumentId}` as Route)}>
+          <Button onClick={() => router.push(ROUTES.bancoItem(instrumentId))}>
             Volver al instrumento
           </Button>
         </CardContent>
@@ -252,7 +252,7 @@ export function AiTaggingWizard({ instrumentId, items, taxonomies }: Props) {
                             type="checkbox"
                             checked={selectedItemIds.size === items.length && items.length > 0}
                             onChange={toggleAll}
-                            className="h-4 w-4 rounded border-gray-300"
+                            className="h-4 w-4 rounded border-input"
                           />
                         </TableHead>
                         <TableHead className="w-[50px]">#</TableHead>
@@ -269,7 +269,7 @@ export function AiTaggingWizard({ instrumentId, items, taxonomies }: Props) {
                               type="checkbox"
                               checked={selectedItemIds.has(item.id)}
                               onChange={() => toggleItem(item.id)}
-                              className="h-4 w-4 rounded border-gray-300"
+                              className="h-4 w-4 rounded border-input"
                             />
                           </TableCell>
                           <TableCell className="font-mono text-xs">{item.position + 1}</TableCell>
@@ -378,7 +378,7 @@ export function AiTaggingWizard({ instrumentId, items, taxonomies }: Props) {
                         key={key}
                         className={cn(
                           'rounded-md border p-3 transition-colors',
-                          isAccepted ? 'border-green-300 bg-green-50 dark:border-green-800 dark:bg-green-950/30' : 'border-gray-200 dark:border-gray-800',
+                          isAccepted ? 'border-success/40 bg-success/10' : 'border-border',
                         )}
                       >
                         <div className="flex items-start justify-between gap-3">
@@ -399,7 +399,7 @@ export function AiTaggingWizard({ instrumentId, items, taxonomies }: Props) {
                               <div className="h-2 w-20 overflow-hidden rounded-full bg-muted">
                                 <div
                                   className={cn(
-                                    'h-full rounded-full transition-all',
+                                    'h-full rounded-full transition-[width] motion-reduce:transition-none',
                                     confidenceColor(suggestion.confidence),
                                   )}
                                   style={{ width: `${suggestion.confidence * 100}%` }}

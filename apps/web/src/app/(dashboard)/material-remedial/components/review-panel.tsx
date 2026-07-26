@@ -12,7 +12,7 @@ import {
   type RemedialMaterialModel,
 } from '@soe/types';
 import { Button } from '@/components/ui/button';
-import { AlertCallout } from '@/components/patterns';
+import { AlertCallout } from '@/components/shared';
 import { reviewRemedial, updateRemedialContent } from '../actions';
 import { AI_DISCLAIMER } from './labels';
 import { ContentDisplay } from './content-display';

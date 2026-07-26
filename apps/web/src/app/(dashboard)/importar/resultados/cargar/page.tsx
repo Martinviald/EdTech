@@ -1,3 +1,4 @@
+import { Suspense } from 'react';
 import { redirect } from 'next/navigation';
 import {
   ANSWER_SHEET_IMPORT_ROLES,
@@ -8,6 +9,8 @@ import {
 } from '@soe/types';
 import { auth } from '@/auth';
 import { apiGet } from '@/lib/api';
+import { PageContainer, CardSkeleton } from '@/components/shared';
+import { ROUTES } from '@/lib/routes';
 import { UploadForm } from '../components/upload-form';
 
 type InstrumentsListResponse = {
@@ -18,8 +21,7 @@ type InstrumentsListResponse = {
 type SearchParams = Promise<{ format?: string }>;
 
 function isAnswerSheetFormat(value: string | undefined): value is AnswerSheetFormat {
-  return typeof value === 'string'
-    && (ANSWER_SHEET_FORMATS as readonly string[]).includes(value);
+  return typeof value === 'string' && (ANSWER_SHEET_FORMATS as readonly string[]).includes(value);
 }
 
 async function fetchInstruments(): Promise<InstrumentModel[]> {
@@ -34,32 +36,27 @@ async function fetchInstruments(): Promise<InstrumentModel[]> {
   }
 }
 
-export default async function CargarPage({
-  searchParams,
-}: {
-  searchParams: SearchParams;
-}) {
+export default async function CargarPage({ searchParams }: { searchParams: SearchParams }) {
   const session = await auth();
-  if (!session?.user?.orgId) redirect('/login');
+  if (!session?.user?.orgId) redirect(ROUTES.login);
   if (!canAccess(session.user.roles, ANSWER_SHEET_IMPORT_ROLES)) {
-    redirect('/dashboard');
+    redirect(ROUTES.dashboard);
   }
 
   const params = await searchParams;
   const defaultFormat = isAnswerSheetFormat(params.format) ? params.format : null;
-  const instruments = await fetchInstruments();
 
   return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-semibold">Cargar archivo de respuestas</h1>
-        <p className="text-muted-foreground mt-1 text-sm">
-          Sube el archivo con las respuestas de los alumnos. El sistema lo
-          analizará y te mostrará una previsualización antes de guardarlo.
-        </p>
-      </div>
-
-      <UploadForm defaultFormat={defaultFormat} instruments={instruments} />
-    </div>
+    <PageContainer>
+      <Suspense fallback={<CardSkeleton rows={4} />}>
+        <UploadFormSection defaultFormat={defaultFormat} />
+      </Suspense>
+    </PageContainer>
   );
+}
+
+async function UploadFormSection({ defaultFormat }: { defaultFormat: AnswerSheetFormat | null }) {
+  const instruments = await fetchInstruments();
+
+  return <UploadForm defaultFormat={defaultFormat} instruments={instruments} />;
 }

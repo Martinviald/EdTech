@@ -1,6 +1,6 @@
 import { Lock } from 'lucide-react';
 import { FEATURE_LABELS, type FeatureKey } from '@soe/types';
-import { PageContainer, PageHeader, EmptyState } from '@/components/patterns';
+import { PageContainer, EmptyState } from '@/components/shared';
 
 /**
  * Aviso de feature paga no habilitada (H18.1 — gating de tier pago). Se muestra
@@ -12,7 +12,6 @@ export function FeatureUpgradeNotice({ feature }: { feature: FeatureKey }) {
   const label = FEATURE_LABELS[feature];
   return (
     <PageContainer>
-      <PageHeader title={label} description="Función del plan avanzado" />
       <EmptyState
         icon={Lock}
         title={`${label} no está incluida en tu plan`}

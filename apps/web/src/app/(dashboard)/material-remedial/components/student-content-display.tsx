@@ -8,7 +8,7 @@ import {
   type RemedialStudentContent,
 } from '@soe/types';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { AlertCallout } from '@/components/patterns';
+import { AlertCallout } from '@/components/shared';
 
 /**
  * Render de solo lectura de la versión ESTUDIANTE de un material remedial

@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useSession } from 'next-auth/react';
 import { Building2, Loader2 } from 'lucide-react';
 import { switchOrgAction } from '@/lib/sessionActions';
+import { ROUTES } from '@/lib/routes';
 
 /**
  * Lista de colegios a los que el usuario tiene acceso. Al elegir uno:
@@ -26,7 +27,7 @@ export function OrgSelector({ orgs }: { orgs: readonly { id: string; name: strin
     try {
       const result = await switchOrgAction(orgId);
       await update({ activeOrg: result });
-      router.push('/dashboard');
+      router.push(ROUTES.dashboard);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'No se pudo entrar al colegio');
       setPendingId(null);

@@ -2,62 +2,177 @@
 @tailwind components;
 @tailwind utilities;
 
+/*
+ * Arquitectura de tokens en 3 capas (ver docs/design-system-migration-plan.md,
+ * sección "Principio arquitectónico: el diseño vive en 3 capas de tokens").
+ *
+ *   Capa 1 · Referencia  (aquí abajo, `:root`/`.dark`): la paleta cruda como
+ *     ramp con nombre (--brand-*, --neutral-*, --red-*, --amber-*, --emerald-*,
+ *     --sky-*). Es la única fuente de verdad de color. Editar aquí cambia todo
+ *     el producto (incluida la futura vía de theming multi-tenant vía
+ *     `[data-org] { --brand-500: … }`).
+ *   Capa 2 · Semántica   (también aquí abajo): el rol de uso (--primary,
+ *     --border, --success, …) que consume `tailwind.config.ts`. Cada token
+ *     apunta a un peldaño de la Capa 1 vía `var(--brand-500)` etc. — no
+ *     redefine valores HSL sueltos, salvo los pocos casos sin un peldaño de
+ *     referencia limpio (documentados inline con comentario).
+ *   Capa 3 · Consumo     vive en `apps/web/tailwind.config.ts` (`theme.extend.colors`),
+ *     que traduce cada token semántico a `hsl(var(--token))` para las clases
+ *     Tailwind (`bg-primary`, `text-muted-foreground`, …).
+ *
+ * Esta reestructuración (Fase 0 / 0-T2) NO cambia ningún valor de color: es
+ * solo plumbing. El reskin de marca (0-T3) edita únicamente la Capa 1.
+ */
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 222 47% 11%;
-    --card: 0 0% 100%;
-    --card-foreground: 222 47% 11%;
-    --popover: 0 0% 100%;
-    --popover-foreground: 222 47% 11%;
-    --primary: 221.2 83.2% 53.3%;
-    --primary-foreground: 0 0% 100%;
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222 47% 11%;
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215 16% 47%;
-    --accent: 213 94% 68%;
-    --accent-foreground: 222 47% 11%;
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 0 0% 100%;
-    --success: 142 76% 36%;
-    --success-foreground: 0 0% 100%;
-    --warning: 38 92% 50%;
-    --warning-foreground: 38 92% 16%;
-    --info: 199 89% 48%;
-    --info-foreground: 0 0% 100%;
-    --border: 214 32% 91%;
-    --input: 214 32% 91%;
-    --ring: 221.2 83.2% 53.3%;
-    --radius: 0.5rem;
+    /* ============ Capa 1 · Referencia (paleta cruda) ============ */
+    /* Neutrales fríos = Tailwind `slate` (fondo / texto / borde). */
+    --neutral-0: 0 0% 100%;
+    --neutral-50: 210 40% 98%;
+    --neutral-100: 210 40% 96.1%;
+    --neutral-200: 214 32% 91%;
+    --neutral-300: 213 27% 84%;
+    --neutral-400: 215 20% 65%;
+    --neutral-500: 215 16% 47%;
+    --neutral-600: 215 19% 35%;
+    --neutral-700: 215 25% 27%;
+    --neutral-800: 217 33% 17%;
+    --neutral-900: 222 47% 11%;
+    --neutral-950: 229 84% 5%;
+
+    /* Marca = Tailwind `blue` (primario). brand-600 = #2463eb. Ramp completo 50→950. */
+    --brand-50: 214 100% 97%;
+    --brand-100: 214 95% 93%;
+    --brand-200: 213 97% 87%;
+    --brand-300: 212 96% 78%;
+    --brand-400: 213 94% 68%;
+    --brand-500: 217 91% 60%;
+    --brand-600: 221 83% 53%;
+    --brand-700: 224 76% 48%;
+    --brand-800: 226 71% 40%;
+    --brand-900: 224 64% 33%;
+    --brand-950: 226 57% 21%;
+
+    /* Acento de marca = Tailwind `violet`. */
+    --violet-100: 251 91% 95%;
+    --violet-200: 251 95% 92%;
+    --violet-400: 255 92% 76%;
+    --violet-500: 258 90% 66%;
+    --violet-600: 262 83% 58%;
+    --violet-900: 264 67% 35%;
+
+    /* Acentos semánticos (estado / feedback) */
+    --red-500: 0 84.2% 60.2%;
+    --red-600: 0 72% 51%;
+    --red-700: 0 63% 31%;
+    --amber-100: 48 96% 89%;
+    --amber-500: 38 92% 50%;
+    --amber-900: 38 92% 16%;
+    --amber-950: 38 90% 12%;
+    --emerald-600: 142 76% 36%;
+    --emerald-700: 161 94% 24%;
+    --sky-500: 199 89% 48%;
+    --sky-600: 200 98% 39%;
+    --sky-700: 201 96% 32%;
+
+    /* ============ Capa 2 · Semántica (consumida por tailwind.config.ts) ============ */
+    /* Fondo "papel": un peldaño bajo el blanco puro para que las cards (--card =
+       blanco) floten con contraste. */
+    --background: var(--neutral-50);
+    --foreground: var(--neutral-900);
+    --card: var(--neutral-0);
+    --card-foreground: var(--neutral-900);
+    --popover: var(--neutral-0);
+    --popover-foreground: var(--neutral-900);
+    /* blue-600 (#2463eb) sobre blanco = 5.17:1 (AA). blue-500 sería ~4:1 → falla. */
+    --primary: var(--brand-600);
+    --primary-foreground: var(--neutral-0);
+    --secondary: var(--neutral-100);
+    --secondary-foreground: var(--neutral-900);
+    --muted: var(--neutral-100);
+    --muted-foreground: var(--neutral-500);
+    /* Acento suave violeta (tinte claro + texto oscuro). */
+    --accent: var(--violet-100);
+    --accent-foreground: var(--neutral-900);
+    /* red-600 sobre blanco = 4.83:1 (AA). */
+    --destructive: var(--red-600);
+    --destructive-foreground: var(--neutral-0);
+    --success: var(--emerald-600);
+    --success-foreground: var(--neutral-0);
+    --warning: var(--amber-500);
+    --warning-foreground: var(--amber-900);
+    --info: var(--sky-500);
+    --info-foreground: var(--neutral-0);
+    --border: var(--neutral-200);
+    --input: var(--neutral-200);
+    --ring: var(--brand-500);
+
+    /* Tokens de dominio · 4 niveles de logro (audit H2). Colores gráficos
+       (bandas / dot plot / barras) mutuamente distinguibles entre sí y del
+       primario indigo. Cada uno con su foreground legible. */
+    --level-insufficient: var(--red-600); /* rojo   · white 4.83:1 (AA) */
+    --level-insufficient-foreground: var(--neutral-0);
+    --level-elementary: var(--amber-500); /* ámbar  · texto oscuro (AA) */
+    --level-elementary-foreground: var(--amber-950);
+    --level-adequate: var(--emerald-600); /* verde  · white 3.77:1 (gráfico ≥3:1) */
+    --level-adequate-foreground: var(--neutral-0);
+    --level-advanced: var(--sky-600); /* azul/sky · white 4.09:1 (gráfico ≥3:1) */
+    --level-advanced-foreground: var(--neutral-0);
+
+    /* Paleta CATEGÓRICA (no semántica): 6 hues mutuamente distinguibles para
+       codificar categorías sin implicar estado (tipos de nodo de taxonomía,
+       series de charts, etc.). Se usan con tinte + texto: `bg-cat-N/15 text-cat-N`.
+       Idénticos en claro/oscuro (como los niveles); legibles como texto sobre su
+       propio tinte /15. */
+    --cat-1: 217 91% 45%; /* azul */
+    --cat-2: 262 83% 58%; /* violeta */
+    --cat-3: 160 84% 30%; /* verde */
+    --cat-4: 25 90% 45%; /* naranjo */
+    --cat-5: 346 77% 50%; /* rosa */
+    --cat-6: 192 85% 32%; /* cyan */
+
+    /* Radio base algo mayor (lectura moderna); lg/md/sm/xl derivan de aquí. */
+    --radius: 0.75rem;
   }
 
   .dark {
-    --background: 222 47% 11%;
-    --foreground: 210 40% 98%;
-    --card: 222 47% 11%;
-    --card-foreground: 210 40% 98%;
-    --popover: 222 47% 11%;
-    --popover-foreground: 210 40% 98%;
-    --primary: 221.2 83.2% 53.3%;
-    --primary-foreground: 0 0% 100%;
-    --secondary: 217 33% 17%;
-    --secondary-foreground: 210 40% 98%;
-    --muted: 217 33% 17%;
-    --muted-foreground: 215 20% 65%;
-    --accent: 213 94% 68%;
-    --accent-foreground: 222 47% 11%;
-    --destructive: 0 63% 31%;
-    --destructive-foreground: 210 40% 98%;
-    --success: 142 76% 36%;
-    --success-foreground: 0 0% 100%;
-    --warning: 38 92% 50%;
-    --warning-foreground: 48 96% 89%;
-    --info: 199 89% 48%;
-    --info-foreground: 0 0% 100%;
-    --border: 217 33% 17%;
-    --input: 217 33% 17%;
-    --ring: 221.2 83.2% 53.3%;
+    /* Capa 1 (neutrales/acentos) se reutiliza tal cual desde :root; solo se
+       re-mapea la Capa 2 a otros peldaños (y a valores directos donde el
+       modo oscuro usa un tono que no tiene peldaño de referencia propio en
+       Capa 1 — ver comentarios). */
+    /* Fondo "papel" oscuro: un peldaño bajo las cards (--card = neutral-900)
+       para que floten con contraste, igual que en claro. */
+    --background: var(--neutral-950);
+    --foreground: var(--neutral-50);
+    --card: var(--neutral-900);
+    --card-foreground: var(--neutral-50);
+    --popover: var(--neutral-900);
+    --popover-foreground: var(--neutral-50);
+    /* En oscuro el primario sube a blue-400 (claro) con texto oscuro:
+       blue-400 vs slate-950 ≈ 7.4:1 (texto botón AA) y
+       blue-400 vs fondo slate-900 ≈ 6.9:1 (text-primary legible AA). */
+    --primary: var(--brand-400);
+    --primary-foreground: var(--neutral-950);
+    --secondary: var(--neutral-800);
+    --secondary-foreground: var(--neutral-50);
+    --muted: var(--neutral-800);
+    --muted-foreground: var(--neutral-400);
+    /* Acento violeta profundo con texto claro (violet-900 / violet-100 ≈ 9.2:1). */
+    --accent: var(--violet-900);
+    --accent-foreground: var(--violet-100);
+    --destructive: var(--red-600);
+    --destructive-foreground: var(--neutral-50);
+    --success: var(--emerald-600);
+    --success-foreground: var(--neutral-0);
+    --warning: var(--amber-500);
+    --warning-foreground: var(--amber-100);
+    --info: var(--sky-500);
+    --info-foreground: var(--neutral-0);
+    --border: var(--neutral-800);
+    --input: var(--neutral-800);
+    --ring: var(--brand-400);
+    /* Los --level-* de :root se heredan tal cual (colores gráficos idénticos
+       en ambos modos); no se re-mapean aquí. */
   }
 }
 

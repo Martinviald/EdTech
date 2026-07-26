@@ -4,6 +4,7 @@ import { Download, ArrowRight } from 'lucide-react';
 import type { AnswerSheetTemplate } from '@soe/types';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { ROUTES } from '@/lib/routes';
 
 interface FormatCardProps {
   template: AnswerSheetTemplate;
@@ -58,7 +59,7 @@ export function FormatCard({ template }: FormatCardProps) {
             </Button>
           )}
           <Button asChild size="sm" className="flex-1">
-            <Link href={`/importar/resultados/cargar?format=${template.format}` as Route}>
+            <Link href={`${ROUTES.importarResultadosCargar}?format=${template.format}` as Route}>
               Usar este formato
               <ArrowRight className="ml-2 h-4 w-4" />
             </Link>

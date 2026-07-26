@@ -1,6 +1,7 @@
 'use server';
 
 import { revalidatePath } from 'next/cache';
+import { ROUTES } from '@/lib/routes';
 import {
   createTaxonomySchema,
   createTaxonomyNodeSchema,
@@ -18,21 +19,21 @@ import { apiDelete, apiPatch, apiPost } from '@/lib/api';
 export async function createTaxonomy(dto: CreateTaxonomyDto) {
   const validated = createTaxonomySchema.parse(dto);
   const created = await apiPost<TaxonomyModel>('/taxonomies', validated);
-  revalidatePath('/marcos-academicos');
+  revalidatePath(ROUTES.marcosAcademicos);
   return created;
 }
 
 export async function updateTaxonomy(id: string, dto: UpdateTaxonomyDto) {
   const validated = updateTaxonomySchema.parse(dto);
   const updated = await apiPatch<TaxonomyModel>(`/taxonomies/${id}`, validated);
-  revalidatePath('/marcos-academicos');
+  revalidatePath(ROUTES.marcosAcademicos);
   revalidatePath(`/marcos-academicos/${id}`);
   return updated;
 }
 
 export async function deleteTaxonomy(id: string) {
   await apiDelete(`/taxonomies/${id}`);
-  revalidatePath('/marcos-academicos');
+  revalidatePath(ROUTES.marcosAcademicos);
 }
 
 export async function createTaxonomyNode(dto: CreateTaxonomyNodeDto) {

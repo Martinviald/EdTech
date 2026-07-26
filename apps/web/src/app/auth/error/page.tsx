@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import { ROUTES } from '@/lib/routes';
 
 type SearchParams = Promise<{ error?: string }>;
 
@@ -32,7 +33,7 @@ export default async function AuthErrorPage({ searchParams }: { searchParams: Se
         <h1 className="text-xl font-semibold text-foreground">{msg.title}</h1>
         <p className="mt-3 text-sm text-foreground/70">{msg.body}</p>
         <Link
-          href={{ pathname: '/login' }}
+          href={ROUTES.login}
           className="mt-6 inline-block rounded-md border border-border bg-background px-4 py-2 text-sm font-medium text-foreground transition hover:bg-muted"
         >
           Volver al login

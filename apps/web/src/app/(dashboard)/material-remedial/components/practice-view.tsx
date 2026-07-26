@@ -7,7 +7,7 @@ import type {
   RemedialStimulus,
 } from '@soe/types';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { AlertCallout } from '@/components/patterns';
+import { AlertCallout } from '@/components/shared';
 import { cn } from '@/lib/utils';
 import { REMEDIAL_JUDGE_LABELS } from './labels';
 

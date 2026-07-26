@@ -10,18 +10,11 @@
 // ─────────────────────────────────────────────────────────────────────────────
 
 import { useCallback, useEffect, useRef, useState } from 'react';
-import {
-  AlertCircle,
-  Image as ImageIcon,
-  Loader2,
-  RefreshCw,
-  Sparkles,
-} from 'lucide-react';
+import { AlertCircle, Image as ImageIcon, Loader2, RefreshCw, Sparkles } from 'lucide-react';
 import {
   itemInsightOutputSchema,
   type AiAnalysisStatus,
   type ItemInsightOutput,
-  type ItemInsightQualityVerdict,
   type UserRole,
 } from '@soe/types';
 import {
@@ -33,7 +26,7 @@ import {
 } from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { AlertCallout } from '@/components/patterns';
+import { AlertCallout } from '@/components/shared';
 import { causeLabel } from './format';
 import { generateItemInsight, fetchItemInsight } from '../actions';
 
@@ -64,23 +57,7 @@ type Phase =
   | { kind: 'done'; output: ItemInsightOutput; model: string | null }
   | { kind: 'error'; message: string };
 
-const VERDICT_LABEL: Record<ItemInsightQualityVerdict, string> = {
-  solid: 'Ítem sólido',
-  review: 'Revisar ítem',
-  flawed: 'Ítem defectuoso',
-};
-
-function verdictTone(
-  verdict: ItemInsightQualityVerdict,
-): 'success' | 'warning' | 'destructive' {
-  if (verdict === 'solid') return 'success';
-  if (verdict === 'review') return 'warning';
-  return 'destructive';
-}
-
-function confidenceTone(
-  confidence: number,
-): 'success' | 'warning' | 'destructive' {
+function confidenceTone(confidence: number): 'success' | 'warning' | 'destructive' {
   if (confidence >= 0.7) return 'success';
   if (confidence >= 0.4) return 'warning';
   return 'destructive';
@@ -96,8 +73,7 @@ export function ItemInsightDialog({
 }: ItemInsightDialogProps) {
   const [phase, setPhase] = useState<Phase>({ kind: 'idle' });
   const stopped = useRef(false);
-  const audience: 'director' | 'teacher' =
-    activeRole === 'teacher' ? 'teacher' : 'director';
+  const audience: 'director' | 'teacher' = activeRole === 'teacher' ? 'teacher' : 'director';
 
   const run = useCallback(
     async (force: boolean) => {
@@ -157,9 +133,7 @@ export function ItemInsightDialog({
         setPhase({
           kind: 'error',
           message:
-            err instanceof Error
-              ? err.message
-              : 'No se pudo generar el análisis de la pregunta.',
+            err instanceof Error ? err.message : 'No se pudo generar el análisis de la pregunta.',
         });
       }
     },
@@ -200,12 +174,8 @@ export function ItemInsightDialog({
         {target ? <ItemContext target={target} /> : null}
 
         {/* Disclaimer IA siempre visible. */}
-        <AlertCallout
-          tone="warning"
-          title="Sugerencia generada por IA — validar antes de actuar"
-        >
-          Revisa cada conclusión con tu criterio pedagógico antes de tomar
-          decisiones.
+        <AlertCallout tone="warning" title="Sugerencia generada por IA — validar antes de actuar">
+          Revisa cada conclusión con tu criterio pedagógico antes de tomar decisiones.
         </AlertCallout>
 
         {phase.kind === 'running' ? <RunningState status={phase.status} /> : null}
@@ -309,12 +279,8 @@ function ItemInsightBody({
       </div>
 
       <div>
-        <h3 className="text-base font-semibold text-foreground">
-          {output.headline}
-        </h3>
-        <p className="mt-1 text-sm text-muted-foreground">
-          {output.performanceSummary}
-        </p>
+        <h3 className="text-base font-semibold text-foreground">{output.headline}</h3>
+        <p className="mt-1 text-sm text-muted-foreground">{output.performanceSummary}</p>
       </div>
 
       {output.misconception ? (
@@ -349,9 +315,7 @@ function ItemInsightBody({
           <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
             Lectura del pasaje
           </p>
-          <p className="mt-1 text-sm text-muted-foreground">
-            {output.passageInsight}
-          </p>
+          <p className="mt-1 text-sm text-muted-foreground">{output.passageInsight}</p>
         </div>
       ) : null}
 
@@ -360,25 +324,9 @@ function ItemInsightBody({
           <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
             Lectura de la imagen
           </p>
-          <p className="mt-1 text-sm text-muted-foreground">
-            {output.visualInsight}
-          </p>
+          <p className="mt-1 text-sm text-muted-foreground">{output.visualInsight}</p>
         </div>
       ) : null}
-
-      <div className="rounded-lg border p-3">
-        <div className="flex items-center gap-2">
-          <Badge variant={verdictTone(output.itemQuality.verdict)}>
-            {VERDICT_LABEL[output.itemQuality.verdict]}
-          </Badge>
-          <span className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-            Calidad del ítem
-          </span>
-        </div>
-        <p className="mt-2 text-sm text-muted-foreground">
-          {output.itemQuality.notes}
-        </p>
-      </div>
 
       <div className="rounded-md bg-muted/40 p-3">
         <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">

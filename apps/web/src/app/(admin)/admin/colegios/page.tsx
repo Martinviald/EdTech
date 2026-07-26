@@ -1,6 +1,6 @@
-import type { Route } from 'next';
 import Link from 'next/link';
 import { listOrgs } from '@/lib/adminApi';
+import { ROUTES } from '@/lib/routes';
 import {
   Table,
   TableBody,
@@ -9,7 +9,7 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import { EmptyState } from '@/components/EmptyState';
+import { EmptyState } from '@/components/shared';
 import { School } from 'lucide-react';
 import { CreateOrgDialog } from './CreateOrgDialog';
 
@@ -21,12 +21,9 @@ export default async function AdminOrgsPage() {
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-semibold tracking-tight">Colegios</h1>
-          <p className="text-sm text-muted-foreground">
-            {data.total} colegios registrados en la plataforma.
-          </p>
-        </div>
+        <p className="text-sm text-muted-foreground">
+          {data.total} colegios registrados en la plataforma.
+        </p>
         <CreateOrgDialog />
       </div>
 
@@ -57,7 +54,7 @@ export default async function AdminOrgsPage() {
                   <TableCell>{org.dependence ?? '—'}</TableCell>
                   <TableCell>
                     <Link
-                      href={`/admin/colegios/${org.id}` as Route}
+                      href={ROUTES.adminColegio(org.id)}
                       className="text-sm text-primary underline-offset-4 hover:underline"
                     >
                       Ver

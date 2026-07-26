@@ -9,6 +9,7 @@ import { ItemsTable } from './ItemsTable';
 import { SectionsList } from './SectionsList';
 import { EnunciadoPdfCard } from './EnunciadoPdfCard';
 import { EnunciadoViewButton } from '@/components/instruments/EnunciadoViewButton';
+import { SetPageTitle } from '@/components/layout/page-title-context';
 
 const TYPE_LABELS: Record<string, string> = {
   dia: 'DIA',
@@ -22,9 +23,9 @@ const TYPE_LABELS: Record<string, string> = {
 };
 
 const STATUS_COLORS: Record<string, string> = {
-  draft: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-950 dark:text-yellow-200',
-  published: 'bg-green-100 text-green-800 dark:bg-green-950 dark:text-green-200',
-  archived: 'bg-gray-100 text-gray-800 dark:bg-gray-950 dark:text-gray-200',
+  draft: 'bg-warning/15 text-warning',
+  published: 'bg-success/10 text-success',
+  archived: 'bg-muted text-muted-foreground',
 };
 
 const STATUS_LABELS: Record<string, string> = {
@@ -67,19 +68,15 @@ export function InstrumentDetailView({
 
   return (
     <div className="space-y-6">
-      {/* Header */}
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-        <div className="space-y-2">
-          <div className="flex items-center gap-2">
-            <Link
-              href={breadcrumb.href as Route}
-              className="text-sm text-muted-foreground hover:text-foreground"
-            >
-              {breadcrumb.label}
-            </Link>
-            <span className="text-sm text-muted-foreground">/</span>
-          </div>
-          <h1 className="text-2xl font-semibold">{instrument.name}</h1>
+      {/* El nombre del instrumento es el título de la vista: lo pinta la barra
+          superior. Acá quedan sus atributos y las acciones. */}
+      <SetPageTitle
+        title={instrument.name}
+        parentHref={breadcrumb.href}
+        parentLabel={breadcrumb.label}
+      />
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div>
           <div className="flex flex-wrap items-center gap-2">
             <Badge variant="outline" className="text-xs">
               {TYPE_LABELS[instrument.type] ?? instrument.type}
@@ -91,10 +88,7 @@ export function InstrumentDetailView({
               {STATUS_LABELS[instrument.status] ?? instrument.status}
             </Badge>
             {instrument.isOfficial && (
-              <Badge
-                variant="outline"
-                className="border-0 bg-blue-100 text-xs text-blue-800 dark:bg-blue-950 dark:text-blue-200"
-              >
+              <Badge variant="outline" className="border-0 bg-info/10 text-xs text-info">
                 Oficial
               </Badge>
             )}

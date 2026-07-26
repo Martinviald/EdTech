@@ -27,7 +27,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { Field } from '@/components/patterns';
+import { Field } from '@/components/shared';
 import { inviteMember } from './actions';
 
 const ROLE_LABELS: Record<AssignableSchoolRole, string> = {

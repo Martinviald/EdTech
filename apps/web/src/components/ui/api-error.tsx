@@ -14,9 +14,9 @@ export function ApiError({ type, message, onRetry }: ApiErrorProps) {
 
   return (
     <div className="flex flex-col items-center justify-center gap-5 py-20 text-center">
-      <div className={`rounded-full p-4 ${isConnection ? 'bg-amber-100 dark:bg-amber-950/40' : 'bg-destructive/10'}`}>
+      <div className={`rounded-full p-4 ${isConnection ? 'bg-warning/15' : 'bg-destructive/10'}`}>
         {isConnection ? (
-          <WifiOff className="h-8 w-8 text-amber-600 dark:text-amber-400" />
+          <WifiOff className="h-8 w-8 text-warning" />
         ) : (
           <AlertCircle className="h-8 w-8 text-destructive" />
         )}

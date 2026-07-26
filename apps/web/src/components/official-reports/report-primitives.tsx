@@ -118,7 +118,7 @@ export function ReportSection({
 export function DisclaimerBox({ disclaimers }: { disclaimers: string[] }) {
   if (disclaimers.length === 0) return null;
   return (
-    <div className="rounded-md border border-amber-300 bg-amber-50 p-4 text-sm text-amber-900 dark:border-amber-900 dark:bg-amber-950/50 dark:text-amber-100">
+    <div className="rounded-md border border-warning/40 bg-warning/10 p-4 text-sm text-warning-foreground">
       <div className="mb-1 flex items-center gap-2 font-semibold">
         <AlertTriangle className="size-4 shrink-0" aria-hidden />
         Usos que este informe NO permite

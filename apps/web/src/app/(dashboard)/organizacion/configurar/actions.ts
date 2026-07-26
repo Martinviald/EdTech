@@ -1,6 +1,7 @@
 'use server';
 
 import { revalidatePath } from 'next/cache';
+import { ROUTES } from '@/lib/routes';
 import { auth } from '@/auth';
 import { apiPatch, apiPost } from '@/lib/api';
 import {
@@ -19,7 +20,7 @@ export async function updateOrgProfile(dto: UpdateOrganizationProfileDto) {
   const orgId = await getOrgId();
   const validated = updateOrganizationProfileSchema.parse(dto);
   await apiPatch(`/organizations/${orgId}`, validated);
-  revalidatePath('/organizacion');
+  revalidatePath(ROUTES.organizacion);
 }
 
 export async function setupAcademicYear(dto: AcademicSetupDto) {
@@ -30,6 +31,6 @@ export async function setupAcademicYear(dto: AcademicSetupDto) {
     classGroupsCreated: number;
     subjectClassesCreated: number;
   }>(`/organizations/${orgId}/setup`, validated);
-  revalidatePath('/organizacion');
+  revalidatePath(ROUTES.organizacion);
   return result;
 }

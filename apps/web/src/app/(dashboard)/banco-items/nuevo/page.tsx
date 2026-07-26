@@ -3,7 +3,6 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import type { Route } from 'next';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -16,6 +15,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import type { CreateInstrumentDto, CreateInstrumentSectionDto } from '@soe/types';
+import { ROUTES } from '@/lib/routes';
 import { createInstrument } from '../actions';
 
 const TYPE_OPTIONS = [
@@ -56,9 +56,7 @@ export default function NuevoInstrumentoPage() {
   }
 
   function updateSection(index: number, updates: Partial<CreateInstrumentSectionDto>) {
-    setSections((prev) =>
-      prev.map((s, i) => (i === index ? { ...s, ...updates } : s)),
-    );
+    setSections((prev) => prev.map((s, i) => (i === index ? { ...s, ...updates } : s)));
   }
 
   function removeSection(index: number) {
@@ -91,7 +89,7 @@ export default function NuevoInstrumentoPage() {
     setIsSubmitting(true);
     try {
       const result = await createInstrument(data);
-      router.push(`/banco-items/${result.id}` as Route);
+      router.push(ROUTES.bancoItem(result.id));
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Error al crear el instrumento.');
     } finally {
@@ -101,20 +99,6 @@ export default function NuevoInstrumentoPage() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <div className="flex items-center gap-2 text-sm text-muted-foreground">
-          <Link href={'/banco-items' as Route} className="hover:text-foreground">
-            Banco de Instrumentos
-          </Link>
-          <span>/</span>
-          <span>Nuevo instrumento</span>
-        </div>
-        <h1 className="mt-2 text-2xl font-semibold">Crear instrumento</h1>
-        <p className="text-muted-foreground mt-1 text-sm">
-          Define el instrumento de evaluacion y sus secciones.
-        </p>
-      </div>
-
       <form onSubmit={handleSubmit} className="max-w-2xl space-y-6">
         {error && (
           <div className="rounded-md border border-destructive bg-destructive/10 p-3 text-sm text-destructive">
@@ -256,7 +240,7 @@ export default function NuevoInstrumentoPage() {
           <Button type="submit" disabled={isSubmitting}>
             {isSubmitting ? 'Creando...' : 'Crear instrumento'}
           </Button>
-          <Link href={'/banco-items' as Route}>
+          <Link href={ROUTES.bancoItems}>
             <Button type="button" variant="outline">
               Cancelar
             </Button>

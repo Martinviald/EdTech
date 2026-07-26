@@ -185,9 +185,9 @@ function AlternativeRow({
   isTopDistractor: boolean;
 }): JSX.Element {
   const barClass = alt.isCorrect
-    ? 'bg-emerald-500 dark:bg-emerald-600'
+    ? 'bg-success'
     : isTopDistractor
-      ? 'bg-amber-500 dark:bg-amber-600'
+      ? 'bg-warning'
       : 'bg-muted-foreground/40';
 
   return (
@@ -198,7 +198,7 @@ function AlternativeRow({
             className={cn(
               'inline-flex size-6 shrink-0 items-center justify-center rounded-full border text-xs font-semibold',
               alt.isCorrect
-                ? 'border-emerald-500 text-emerald-700 dark:text-emerald-300'
+                ? 'border-success text-success'
                 : 'border-border text-muted-foreground',
             )}
           >
@@ -220,7 +220,7 @@ function AlternativeRow({
           )}
           {alt.isCorrect ? (
             <CheckCircle2
-              className="size-4 shrink-0 text-emerald-600 dark:text-emerald-400"
+              className="size-4 shrink-0 text-success"
               aria-label="Correcta"
             />
           ) : isTopDistractor ? (
@@ -235,7 +235,7 @@ function AlternativeRow({
       </div>
       <div className="h-2 w-full overflow-hidden rounded-full bg-muted" role="presentation">
         <div
-          className={cn('h-full rounded-full transition-all', barClass)}
+          className={cn('h-full rounded-full transition-[width] motion-reduce:transition-none', barClass)}
           style={{ width: `${Math.min(100, Math.max(0, alt.percentage))}%` }}
         />
       </div>
@@ -255,7 +255,7 @@ function BlankRow({ count, total }: { count: number; total: number }): JSX.Eleme
       </div>
       <div className="h-2 w-full overflow-hidden rounded-full bg-muted">
         <div
-          className="h-full rounded-full bg-muted-foreground/30 transition-all"
+          className="h-full rounded-full bg-muted-foreground/30 transition-[width] motion-reduce:transition-none"
           style={{ width: `${Math.min(100, Math.max(0, pct))}%` }}
         />
       </div>
@@ -282,9 +282,9 @@ function MetricCard({
   tone: Tone;
 }): JSX.Element {
   const toneClass: Record<Tone, string> = {
-    good: 'text-emerald-700 dark:text-emerald-300',
-    warning: 'text-amber-700 dark:text-amber-300',
-    bad: 'text-red-700 dark:text-red-300',
+    good: 'text-success',
+    warning: 'text-warning',
+    bad: 'text-destructive',
     neutral: 'text-foreground',
   };
   return (

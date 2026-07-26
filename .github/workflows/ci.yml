@@ -1,0 +1,40 @@
+name: CI
+
+# Gate de calidad en PRs: typecheck + lint + guard del Design System.
+# (El repo antes solo tenía workflows de deploy; nada bloqueaba un PR roto.)
+on:
+  pull_request:
+    branches: [dev, main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  web:
+    name: Web (typecheck · lint · design-system)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+
+      - run: pnpm install --frozen-lockfile
+
+      # apps/web resuelve @soe/types; se construye para que typecheck lo encuentre.
+      - name: Build workspace deps
+        run: pnpm --filter @soe/types build
+
+      - name: Typecheck
+        run: pnpm --filter @soe/web typecheck
+
+      - name: Lint
+        run: pnpm --filter @soe/web lint
+
+      - name: Design System guard
+        run: pnpm --filter @soe/web lint:ds

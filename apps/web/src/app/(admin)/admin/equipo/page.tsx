@@ -8,7 +8,7 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import { EmptyState } from '@/components/EmptyState';
+import { EmptyState } from '@/components/shared';
 import { AddAdminDialog } from './AddAdminDialog';
 import { RevokeButton } from './RevokeButton';
 
@@ -20,12 +20,9 @@ export default async function AdminTeamPage() {
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-semibold tracking-tight">Equipo plataforma</h1>
-          <p className="text-sm text-muted-foreground">
-            {admins.length} administradores con permisos globales.
-          </p>
-        </div>
+        <p className="text-sm text-muted-foreground">
+          {admins.length} administradores con permisos globales.
+        </p>
         <AddAdminDialog />
       </div>
 
@@ -52,9 +49,7 @@ export default async function AdminTeamPage() {
                 <TableRow key={a.id}>
                   <TableCell className="font-medium">{a.user.name}</TableCell>
                   <TableCell className="text-muted-foreground">{a.user.email}</TableCell>
-                  <TableCell className="text-xs text-muted-foreground">
-                    {a.notes ?? '—'}
-                  </TableCell>
+                  <TableCell className="text-xs text-muted-foreground">{a.notes ?? '—'}</TableCell>
                   <TableCell className="text-xs text-muted-foreground">
                     {new Date(a.grantedAt).toLocaleDateString('es-CL')}
                   </TableCell>

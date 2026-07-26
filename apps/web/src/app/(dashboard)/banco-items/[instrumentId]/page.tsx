@@ -9,6 +9,7 @@ import {
   type InstrumentModel,
   type ItemModel,
 } from '@soe/types';
+import { ROUTES } from '@/lib/routes';
 import { InstrumentDetailView } from './InstrumentDetailView';
 
 type ItemsListResponse = {
@@ -24,8 +25,8 @@ type PageProps = {
 
 export default async function InstrumentDetailPage({ params }: PageProps) {
   const session = await auth();
-  if (!session?.user) redirect('/login');
-  if (!canAccess(session.user.roles, ITEM_VIEWER_ROLES)) redirect('/dashboard');
+  if (!session?.user) redirect(ROUTES.login);
+  if (!canAccess(session.user.roles, ITEM_VIEWER_ROLES)) redirect(ROUTES.dashboard);
 
   const { instrumentId } = await params;
 
@@ -46,8 +47,8 @@ export default async function InstrumentDetailPage({ params }: PageProps) {
       instrument={instrument}
       items={itemsResponse.data}
       canEdit={canEdit}
-      basePath="/banco-items"
-      breadcrumb={{ href: '/banco-items', label: 'Banco de Instrumentos' }}
+      basePath={ROUTES.bancoItems}
+      breadcrumb={{ href: ROUTES.bancoItems, label: 'Banco de Instrumentos' }}
     />
   );
 }

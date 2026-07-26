@@ -28,10 +28,10 @@ import { formatNodeCode, nodeTypeLabel } from '@/lib/taxonomy-labels';
  * app. Sin datos → fondo neutro. Todo via tokens Tailwind, sin hex inline.
  */
 const HEAT_CELL_CLASS: Record<PerformanceLevel, string> = {
-  insufficient: 'bg-red-100 text-red-900 dark:bg-red-950 dark:text-red-100',
-  elementary: 'bg-amber-100 text-amber-900 dark:bg-amber-950 dark:text-amber-100',
-  adequate: 'bg-emerald-100 text-emerald-900 dark:bg-emerald-950 dark:text-emerald-100',
-  advanced: 'bg-blue-100 text-blue-900 dark:bg-blue-950 dark:text-blue-100',
+  insufficient: 'bg-level-insufficient/15 text-level-insufficient',
+  elementary: 'bg-level-elementary/15 text-level-elementary',
+  adequate: 'bg-level-adequate/15 text-level-adequate',
+  advanced: 'bg-level-advanced/15 text-level-advanced',
 };
 
 const NO_DATA_CELL_CLASS = 'bg-muted/40 text-muted-foreground';

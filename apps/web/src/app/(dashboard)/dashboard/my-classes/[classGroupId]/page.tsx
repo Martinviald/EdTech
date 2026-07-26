@@ -1,14 +1,7 @@
 import Link from 'next/link';
 import type { Route } from 'next';
 import { notFound, redirect } from 'next/navigation';
-import {
-  BarChart3,
-  BookOpen,
-  ChevronLeft,
-  ClipboardList,
-  GraduationCap,
-  Users,
-} from 'lucide-react';
+import { BarChart3, BookOpen, ClipboardList, GraduationCap, Users } from 'lucide-react';
 import {
   canAccess,
   CLASS_VIEWER_ROLES,
@@ -17,11 +10,13 @@ import {
   type EnrollmentStatus,
 } from '@soe/types';
 import { auth } from '@/auth';
+import { ROUTES } from '@/lib/routes';
+import { SetPageTitle } from '@/components/layout/page-title-context';
 import { getClassGroupDetail } from '@/lib/teacherAssignmentsApi';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { EmptyState } from '@/components/EmptyState';
+import { EmptyState } from '@/components/shared';
 import {
   Table,
   TableBody,
@@ -54,8 +49,8 @@ export default async function ClassGroupDetailPage({
   params: Promise<{ classGroupId: string }>;
 }) {
   const session = await auth();
-  if (!session?.user?.orgId) redirect('/login');
-  if (!canAccess(session.user.roles, CLASS_VIEWER_ROLES)) redirect('/dashboard');
+  if (!session?.user?.orgId) redirect(ROUTES.login);
+  if (!canAccess(session.user.roles, CLASS_VIEWER_ROLES)) redirect(ROUTES.dashboard);
 
   const { classGroupId } = await params;
 
@@ -71,18 +66,10 @@ export default async function ClassGroupDetailPage({
   return (
     <div className="space-y-6">
       <div className="space-y-2">
-        <Link
-          href={'/dashboard/my-classes' as Route}
-          className="text-muted-foreground hover:text-foreground inline-flex items-center gap-1 text-sm"
-        >
-          <ChevronLeft className="size-4" /> Volver a mis cursos
-        </Link>
-        <div className="flex flex-wrap items-start justify-between gap-3">
+        <SetPageTitle title={`${classGroup.gradeShortName} · ${classGroup.name}`} />
+        <div className="flex flex-wrap items-center justify-between gap-3">
           <div>
-            <h1 className="text-2xl font-semibold">
-              {classGroup.gradeShortName} · {classGroup.name}
-            </h1>
-            <p className="text-muted-foreground mt-1 text-sm">
+            <p className="text-muted-foreground text-sm">
               Año {classGroup.academicYear} · {students.length}{' '}
               {students.length === 1 ? 'alumno' : 'alumnos'} · {subjects.length}{' '}
               {subjects.length === 1 ? 'asignatura' : 'asignaturas'}
@@ -93,7 +80,7 @@ export default async function ClassGroupDetailPage({
           <div className="flex flex-wrap gap-2">
             {canAccess(session.user.roles, RESULTS_VIEWER_ROLES) ? (
               <Button asChild variant="outline" size="sm">
-                <Link href={`/resultados?classGroupId=${classGroupId}` as Route}>
+                <Link href={`${ROUTES.resultados}?classGroupId=${classGroupId}` as Route}>
                   <BarChart3 className="mr-2 size-4" aria-hidden />
                   Ver resultados del curso
                 </Link>
@@ -101,7 +88,7 @@ export default async function ClassGroupDetailPage({
             ) : null}
             {canAccess(session.user.roles, RESULTS_VIEWER_ROLES) ? (
               <Button asChild variant="outline" size="sm">
-                <Link href={`/evaluaciones?classGroupId=${classGroupId}` as Route}>
+                <Link href={`${ROUTES.evaluaciones}?classGroupId=${classGroupId}` as Route}>
                   <ClipboardList className="mr-2 size-4" aria-hidden />
                   Ver evaluaciones del curso
                 </Link>

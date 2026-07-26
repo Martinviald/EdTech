@@ -1,28 +1,18 @@
-import type { Route } from 'next';
 import Link from 'next/link';
 import { School, ShieldCheck } from 'lucide-react';
 import { listOrgs, listPlatformAdmins } from '@/lib/adminApi';
+import { ROUTES } from '@/lib/routes';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 
 export const dynamic = 'force-dynamic';
 
 export default async function AdminLandingPage() {
-  const [orgs, admins] = await Promise.all([
-    listOrgs({ limit: 1 }),
-    listPlatformAdmins(),
-  ]);
+  const [orgs, admins] = await Promise.all([listOrgs({ limit: 1 }), listPlatformAdmins()]);
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-semibold tracking-tight">Panel de plataforma</h1>
-        <p className="text-sm text-muted-foreground">
-          Gestiona colegios, cuentas y operadores con permisos globales.
-        </p>
-      </div>
-
       <div className="grid gap-4 sm:grid-cols-2">
-        <Link href={'/admin/colegios' as Route} className="group">
+        <Link href={ROUTES.adminColegios} className="group">
           <Card className="transition-colors group-hover:border-primary/50">
             <CardHeader>
               <div className="flex items-center gap-2">
@@ -37,7 +27,7 @@ export default async function AdminLandingPage() {
           </Card>
         </Link>
 
-        <Link href={'/admin/equipo' as Route} className="group">
+        <Link href={ROUTES.adminEquipo} className="group">
           <Card className="transition-colors group-hover:border-primary/50">
             <CardHeader>
               <div className="flex items-center gap-2">

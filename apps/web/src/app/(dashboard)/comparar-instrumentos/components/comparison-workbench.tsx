@@ -1,6 +1,8 @@
 'use client';
 
 import { useEffect, useMemo, useRef, useState } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
+import type { Route } from 'next';
 import { GitCompareArrows, Loader2 } from 'lucide-react';
 import {
   instrumentComparisonOutputSchema,
@@ -18,7 +20,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { AlertCallout, EmptyState, Field } from '@/components/patterns';
+import { AlertCallout, EmptyState, Field } from '@/components/shared';
+import { ROUTES } from '@/lib/routes';
 import { pollInstrumentComparison, startInstrumentComparison } from '../actions';
 import { ComparisonReport } from './comparison-report';
 
@@ -47,15 +50,33 @@ function groupLabel(a: ComparableAssessment): string {
  * comparar dos evaluaciones del mismo `comparableKey` (mismo tipo/grado/asignatura).
  */
 export function ComparisonWorkbench({ candidates }: ComparisonWorkbenchProps) {
-  const [baseId, setBaseId] = useState<string | null>(null);
-  const [comparisonId, setComparisonId] = useState<string | null>(null);
-  const [audience, setAudience] = useState<Audience>('general');
+  // T2-10: la selección (base/comparación/enfoque) vive en la URL para que
+  // persista al refrescar/volver y sea compartible (p. ej. link desde el hub con
+  // ?baseId=…). El resultado generado (analysisId/output) sí es estado local.
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const baseId = searchParams.get('baseId');
+  const comparisonId = searchParams.get('comparisonId');
+  const audience: Audience = (searchParams.get('audience') as Audience) || 'general';
+
   const [isStarting, setIsStarting] = useState(false);
   const [analysisId, setAnalysisId] = useState<string | null>(null);
   const [status, setStatus] = useState<AiAnalysisStatus | null>(null);
   const [output, setOutput] = useState<InstrumentComparisonOutput | null>(null);
   const [error, setError] = useState<string | null>(null);
   const stopped = useRef(false);
+
+  const updateSelection = (updates: Record<string, string | null>) => {
+    const params = new URLSearchParams(searchParams.toString());
+    for (const [key, value] of Object.entries(updates)) {
+      if (value) params.set(key, value);
+      else params.delete(key);
+    }
+    const qs = params.toString();
+    router.replace(
+      (qs ? `${ROUTES.compararInstrumentos}?${qs}` : ROUTES.compararInstrumentos) as Route,
+    );
+  };
 
   const byId = useMemo(() => new Map(candidates.map((c) => [c.assessmentId, c])), [candidates]);
 
@@ -158,8 +179,7 @@ export function ComparisonWorkbench({ candidates }: ComparisonWorkbenchProps) {
               <Select
                 value={baseId ?? undefined}
                 onValueChange={(v) => {
-                  setBaseId(v);
-                  setComparisonId(null);
+                  updateSelection({ baseId: v, comparisonId: null });
                   resetResult();
                 }}
               >
@@ -180,7 +200,7 @@ export function ComparisonWorkbench({ candidates }: ComparisonWorkbenchProps) {
               <Select
                 value={comparisonId ?? undefined}
                 onValueChange={(v) => {
-                  setComparisonId(v);
+                  updateSelection({ comparisonId: v });
                   resetResult();
                 }}
                 disabled={!base}
@@ -212,7 +232,7 @@ export function ComparisonWorkbench({ candidates }: ComparisonWorkbenchProps) {
 
           <div className="flex flex-wrap items-end justify-between gap-3">
             <Field label="Enfoque del diagnóstico" className="w-full max-w-xs">
-              <Select value={audience} onValueChange={(v) => setAudience(v as Audience)}>
+              <Select value={audience} onValueChange={(v) => updateSelection({ audience: v })}>
                 <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>

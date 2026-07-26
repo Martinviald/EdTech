@@ -8,6 +8,7 @@ import {
   type UpsertInstrumentBandsDto,
 } from '@soe/types';
 import { apiPost, apiPut } from '@/lib/api';
+import { ROUTES } from '@/lib/routes';
 
 /**
  * Reemplaza el set completo de bandas de logro (niveles/umbrales) de un
@@ -23,8 +24,8 @@ export async function upsertInstrumentBandsAction(
     `/instruments/${instrumentId}/performance-bands`,
     validated,
   );
-  revalidatePath('/admin/instrumentos-bandas');
-  revalidatePath(`/admin/instrumentos-bandas/${instrumentId}`);
+  revalidatePath(ROUTES.adminInstrumentosBandas);
+  revalidatePath(ROUTES.adminInstrumentoBandas(instrumentId));
   return res;
 }
 

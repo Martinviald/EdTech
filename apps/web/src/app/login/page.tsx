@@ -3,7 +3,8 @@ import { GraduationCap } from 'lucide-react';
 import { auth } from '@/auth';
 import { internalGet } from '@/lib/api';
 import { BRAND } from '@/lib/brand';
-import { AlertCallout } from '@/components/patterns';
+import { ROUTES } from '@/lib/routes';
+import { AlertCallout } from '@/components/shared';
 import { LoginButtons } from './LoginButtons';
 import { MockLoginForm } from './MockLoginForm';
 
@@ -16,7 +17,7 @@ export default async function LoginPage() {
   // resolver post-login, que decide el destino según org/rol (multi-org,
   // platform_admin o dashboard directo).
   const session = await auth();
-  if (session?.user) redirect('/seleccionar-colegio');
+  if (session?.user) redirect(ROUTES.selectOrg);
 
   const isMock = process.env.AUTH_MODE === 'mock';
 

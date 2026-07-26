@@ -104,6 +104,21 @@ const taxonomyNodeGroupsSchema = z
   })
   .pipe(z.array(z.array(z.string().uuid())).optional());
 
+/** Coacciona un query param (CSV o repetido) a `string[]` de uuids, o undefined. */
+const uuidCsvSchema = z
+  .union([z.array(z.string()), z.string()])
+  .optional()
+  .transform((v) => {
+    if (v === undefined) return undefined;
+    const raw = Array.isArray(v) ? v : [v];
+    const ids = raw
+      .flatMap((s) => s.split(','))
+      .map((s) => s.trim())
+      .filter((s) => s.length > 0);
+    return ids.length > 0 ? ids : undefined;
+  })
+  .pipe(z.array(z.string().uuid()).optional());
+
 export const listItemsQuerySchema = paginationSchema.extend({
   instrumentId: z.string().uuid().optional(),
   sectionId: z.string().uuid().optional(),
@@ -116,9 +131,9 @@ export const listItemsQuerySchema = paginationSchema.extend({
   taxonomyNodeIds: taxonomyNodeIdsSchema,
   // Filtro facetado del banco: el ítem debe estar etiquetado con un nodo de la
   // asignatura (transitivo vía item_taxonomy_tags → taxonomy_nodes.subject_id).
-  subjectId: z.string().uuid().optional(),
-  // Ídem por nivel (taxonomy_nodes.grade_id).
-  gradeId: z.string().uuid().optional(),
+  subjectId: uuidCsvSchema,
+  // Ídem por nivel (taxonomy_nodes.grade_id). Multi-valor (CSV) — T2-13.
+  gradeId: uuidCsvSchema,
   // Grupos AND (OR dentro de cada grupo): un grupo por tipo de nodo elegido.
   taxonomyNodeGroups: taxonomyNodeGroupsSchema,
   // Alcance del banco de ítems (TKT-14): 'own' | 'global' | 'all' (default).

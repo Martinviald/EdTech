@@ -6,8 +6,9 @@ import type {
   MatrixQuestionColumn,
   UserRole,
 } from '@soe/types';
-import { AlertCallout } from '@/components/patterns';
+import { AlertCallout } from '@/components/shared';
 import { Badge } from '@/components/ui/badge';
+import { ROUTES } from '@/lib/routes';
 import { ExecutiveSummary } from './executive-summary';
 import { TopItemsCard, BottomItemsCard } from './item-cards';
 import { SkillGapsCard } from './skill-gaps';
@@ -57,7 +58,7 @@ export function AnalysisReport({
   quality,
   questions,
   exportTitle,
-  basePath = '/analisis-ia',
+  basePath = ROUTES.analisisIa,
 }: AnalysisReportProps) {
   const generatedAt = formatDate(analysis.completedAt ?? analysis.createdAt);
 

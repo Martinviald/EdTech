@@ -1,7 +1,11 @@
+import { Suspense } from 'react';
 import { notFound, redirect } from 'next/navigation';
 import { apiGet } from '@/lib/api';
 import type { InstrumentModel, ItemModel } from '@soe/types';
 import { InstrumentDetailView } from '@/app/(dashboard)/banco-items/[instrumentId]/InstrumentDetailView';
+import { ROUTES } from '@/lib/routes';
+import { Skeleton } from '@/components/ui/skeleton';
+import { PageContainer, TableSkeleton } from '@/components/shared';
 
 type ItemsListResponse = {
   data: ItemModel[];
@@ -24,6 +28,27 @@ type PageProps = {
 export default async function AdminInstrumentoDetailPage({ params }: PageProps) {
   const { instrumentId } = await params;
 
+  return (
+    <Suspense fallback={<InstrumentoDetailFallback />}>
+      <InstrumentoDetailSection instrumentId={instrumentId} />
+    </Suspense>
+  );
+}
+
+function InstrumentoDetailFallback() {
+  return (
+    <PageContainer>
+      <Skeleton className="h-4 w-48" />
+      <div className="space-y-2">
+        <Skeleton className="h-7 w-64" />
+        <Skeleton className="h-4 w-96 max-w-full" />
+      </div>
+      <TableSkeleton rows={8} />
+    </PageContainer>
+  );
+}
+
+async function InstrumentoDetailSection({ instrumentId }: { instrumentId: string }) {
   let instrument: InstrumentModel;
   try {
     instrument = await apiGet<InstrumentModel>(`/instruments/${instrumentId}`);
@@ -33,7 +58,7 @@ export default async function AdminInstrumentoDetailPage({ params }: PageProps) 
 
   // Este backoffice es sólo para instrumentos oficiales. Un instrumento propio de
   // un colegio se gestiona desde el dashboard del colegio, no desde aquí.
-  if (!instrument.isOfficial) redirect('/admin/instrumentos');
+  if (!instrument.isOfficial) redirect(ROUTES.adminInstrumentos);
 
   const itemsResponse = await apiGet<ItemsListResponse>(
     `/items?instrumentId=${instrumentId}&limit=200`,
@@ -44,8 +69,8 @@ export default async function AdminInstrumentoDetailPage({ params }: PageProps) 
       instrument={instrument}
       items={itemsResponse.data}
       canEdit
-      basePath="/admin/instrumentos"
-      breadcrumb={{ href: '/admin/instrumentos', label: 'Instrumentos oficiales' }}
+      basePath={ROUTES.adminInstrumentos}
+      breadcrumb={{ href: ROUTES.adminInstrumentos, label: 'Instrumentos oficiales' }}
       showAuthoringLinks={false}
     />
   );

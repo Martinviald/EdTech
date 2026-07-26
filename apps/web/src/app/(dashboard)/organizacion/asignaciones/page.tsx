@@ -1,18 +1,21 @@
 import { redirect } from 'next/navigation';
 import { ASSIGNMENTS_ROLES, canAccess } from '@soe/types';
 import { auth } from '@/auth';
+import { ROUTES } from '@/lib/routes';
+import { PageContainer } from '@/components/shared';
 import {
   listAssignments,
   listOrgTeachers,
   listSubjectClasses,
 } from '@/lib/teacherAssignmentsApi';
+import { OrgHubHeader } from '../components/OrgHubHeader';
 import { AssignmentsTable } from './AssignmentsTable';
 import { CreateAssignmentDialog } from './CreateAssignmentDialog';
 
 export default async function AsignacionesPage() {
   const session = await auth();
-  if (!session?.user?.orgId) redirect('/login');
-  if (!canAccess(session.user.roles, ASSIGNMENTS_ROLES)) redirect('/organizacion');
+  if (!session?.user?.orgId) redirect(ROUTES.login);
+  if (!canAccess(session.user.roles, ASSIGNMENTS_ROLES)) redirect(ROUTES.organizacion);
 
   const orgId = session.user.orgId;
 
@@ -23,15 +26,14 @@ export default async function AsignacionesPage() {
   ]);
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-semibold">Carga académica</h1>
-          <p className="text-muted-foreground mt-1 text-sm">
-            Asigna profesores a las asignaturas de cada curso. Los profesores solo verán los
-            cursos donde tengan una asignación activa.
-          </p>
-        </div>
+    <PageContainer>
+      <OrgHubHeader />
+
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <p className="max-w-2xl text-sm text-muted-foreground">
+          Asigna profesores a las asignaturas de cada curso. Los profesores solo verán los
+          cursos donde tengan una asignación activa.
+        </p>
         <CreateAssignmentDialog
           orgId={orgId}
           teachers={teachers}
@@ -40,6 +42,6 @@ export default async function AsignacionesPage() {
       </div>
 
       <AssignmentsTable orgId={orgId} rows={assignments} />
-    </div>
+    </PageContainer>
   );
 }

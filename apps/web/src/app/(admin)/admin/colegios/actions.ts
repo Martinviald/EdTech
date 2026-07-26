@@ -1,6 +1,7 @@
 'use server';
 
 import { revalidatePath } from 'next/cache';
+import { ROUTES } from '@/lib/routes';
 import {
   adminCreateOrganizationSchema,
   adminCreateUserSchema,
@@ -34,8 +35,8 @@ export async function createOrganizationAction(formData: FormData): Promise<Acti
 
   try {
     await createOrg(parsed.data);
-    revalidatePath('/admin/colegios');
-    revalidatePath('/admin');
+    revalidatePath(ROUTES.adminColegios);
+    revalidatePath(ROUTES.admin);
     return { ok: true };
   } catch (err) {
     return { ok: false, error: err instanceof Error ? err.message : 'Error desconocido' };

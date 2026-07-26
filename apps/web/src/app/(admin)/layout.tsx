@@ -1,5 +1,7 @@
 import { redirect } from 'next/navigation';
 import { auth } from '@/auth';
+import { ROUTES } from '@/lib/routes';
+import { PageTitleProvider } from '@/components/layout/page-title-context';
 import { Sidebar } from '@/components/layout/Sidebar';
 import { Topbar } from '@/components/layout/Topbar';
 import { SkipLink } from '@/components/layout/SkipLink';
@@ -7,8 +9,8 @@ import { Toaster } from '@/components/ui/sonner';
 
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {
   const session = await auth();
-  if (!session?.user) redirect('/login');
-  if (!session.user.isPlatformAdmin) redirect('/dashboard');
+  if (!session?.user) redirect(ROUTES.login);
+  if (!session.user.isPlatformAdmin) redirect(ROUTES.dashboard);
 
   const orgPlaceholder = {
     id: '00000000-0000-0000-0000-000000000000',
@@ -17,25 +19,27 @@ export default async function AdminLayout({ children }: { children: React.ReactN
   };
 
   return (
-    <div className="flex h-screen bg-background">
-      <SkipLink />
-      <Sidebar roles={['platform_admin']} variant="admin" />
-      <div className="flex flex-1 flex-col overflow-hidden">
-        <Topbar
-          org={orgPlaceholder}
-          user={session.user}
-          roles={session.user.roles}
-          activeRole={session.user.activeRole}
-          orgs={session.user.orgs}
-          platformLink={
-            session.user.orgId ? { href: '/dashboard', label: 'Ir a mi colegio' } : undefined
-          }
-        />
-        <main id="main-content" className="flex-1 overflow-y-auto p-6">
-          {children}
-        </main>
+    <PageTitleProvider>
+      <div className="flex h-screen bg-background">
+        <SkipLink />
+        <Sidebar roles={['platform_admin']} variant="admin" />
+        <div className="flex flex-1 flex-col overflow-hidden">
+          <Topbar
+            org={orgPlaceholder}
+            user={session.user}
+            roles={session.user.roles}
+            activeRole={session.user.activeRole}
+            orgs={session.user.orgs}
+            platformLink={
+              session.user.orgId ? { href: ROUTES.dashboard, label: 'Ir a mi colegio' } : undefined
+            }
+          />
+          <main id="main-content" className="flex-1 overflow-y-auto p-6">
+            {children}
+          </main>
+        </div>
+        <Toaster position="top-right" richColors closeButton />
       </div>
-      <Toaster position="top-right" richColors closeButton />
-    </div>
+    </PageTitleProvider>
   );
 }

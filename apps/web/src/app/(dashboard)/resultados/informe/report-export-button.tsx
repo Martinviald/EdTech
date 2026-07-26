@@ -16,9 +16,9 @@
 
 import type { JSX } from 'react';
 import { useState } from 'react';
-import * as XLSX from 'xlsx';
-import { jsPDF } from 'jspdf';
-import autoTable, { type CellHookData } from 'jspdf-autotable';
+import type { WorkBook, WorkSheet } from 'xlsx';
+import type { jsPDF } from 'jspdf';
+import type { CellHookData } from 'jspdf-autotable';
 import { FileDown } from 'lucide-react';
 import type { AssessmentReportResponse, ItemReportFlag, PerformanceLevel } from '@soe/types';
 import {
@@ -122,18 +122,18 @@ export function ReportExportButton({ report }: { report: AssessmentReportRespons
   const base =
     `informe-${sanitize(report.meta.assessmentName ?? report.meta.instrumentName)}`.slice(0, 80);
 
-  function exportExcel() {
+  async function exportExcel() {
     setBusy(true);
     try {
-      buildWorkbook(report, base);
+      await buildWorkbook(report, base);
     } finally {
       setBusy(false);
     }
   }
-  function exportPdf() {
+  async function exportPdf() {
     setBusy(true);
     try {
-      buildPdf(report, base);
+      await buildPdf(report, base);
     } finally {
       setBusy(false);
     }
@@ -159,7 +159,10 @@ export function ReportExportButton({ report }: { report: AssessmentReportRespons
 
 // ── Excel: un libro multi-hoja ────────────────────────────────────────────────
 
-function buildWorkbook(report: AssessmentReportResponse, base: string) {
+async function buildWorkbook(report: AssessmentReportResponse, base: string) {
+  const XLSX = await import('xlsx');
+  const appendSheet = (wb: WorkBook, name: string, ws: WorkSheet) =>
+    XLSX.utils.book_append_sheet(wb, ws, name.slice(0, 31));
   const { meta, summary } = report;
   const wb = XLSX.utils.book_new();
 
@@ -301,13 +304,12 @@ function buildWorkbook(report: AssessmentReportResponse, base: string) {
   XLSX.writeFile(wb, `${base}.xlsx`);
 }
 
-function appendSheet(wb: XLSX.WorkBook, name: string, ws: XLSX.WorkSheet) {
-  XLSX.utils.book_append_sheet(wb, ws, name.slice(0, 31));
-}
 
 // ── PDF: documento completo con estilo ────────────────────────────────────────
 
-function buildPdf(report: AssessmentReportResponse, base: string) {
+async function buildPdf(report: AssessmentReportResponse, base: string) {
+  const { jsPDF } = await import('jspdf');
+  const autoTable = (await import('jspdf-autotable')).default;
   const { meta, summary } = report;
   const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
   const pageW = doc.internal.pageSize.getWidth();

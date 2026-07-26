@@ -2,13 +2,14 @@ import { redirect } from 'next/navigation';
 import { Inbox } from 'lucide-react';
 import { auth } from '@/auth';
 import { apiGet } from '@/lib/api';
+import { ROUTES } from '@/lib/routes';
 import {
   canAccess,
   OFFICIAL_REPORT_VIEWER_ROLES,
   type OfficialCourseReportResponse,
   type DashboardFilterOptionsResponse,
 } from '@soe/types';
-import { EmptyState } from '@/components/patterns';
+import { EmptyState } from '@/components/shared';
 import { CourseReport } from '@/components/official-reports/course-report';
 import { PrintToolbar } from '@/components/official-reports/print-toolbar';
 import { DashboardFilterBar } from '../../../resultados/components/dashboard-filter-bar';
@@ -32,15 +33,15 @@ export default async function InformeOficialPage({
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
   const session = await auth();
-  if (!session?.user) redirect('/login');
-  if (!canAccess(session.user.roles, OFFICIAL_REPORT_VIEWER_ROLES)) redirect('/dashboard');
+  if (!session?.user) redirect(ROUTES.login);
+  if (!canAccess(session.user.roles, OFFICIAL_REPORT_VIEWER_ROLES)) redirect(ROUTES.dashboard);
 
   const { assessmentId } = await params;
   const sp = await searchParams;
   const filters = parseDashboardFilters(sp);
   const filterQuery = buildDashboardQuery(filters);
   const classGroupId = filters.classGroupId;
-  const basePath = `/evaluaciones/${assessmentId}/informe-oficial`;
+  const basePath = ROUTES.evaluacionInformeOficial(assessmentId);
 
   const reportQuery = new URLSearchParams({ assessmentId });
   if (classGroupId) reportQuery.set('classGroupId', classGroupId);
@@ -62,7 +63,7 @@ export default async function InformeOficialPage({
       {report ? (
         <CourseReport
           report={report}
-          studentReportBasePath={`/evaluaciones/${assessmentId}/informe-alumno`}
+          studentReportBasePath={ROUTES.evaluacionInformeAlumnoBase(assessmentId)}
         />
       ) : (
         <EmptyState

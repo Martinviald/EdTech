@@ -3,8 +3,6 @@
 import Link from 'next/link';
 import type { Route } from 'next';
 import { ArrowLeftRight, ChevronDown, LogOut, Settings } from 'lucide-react';
-import { signOut } from 'next-auth/react';
-import { toast } from 'sonner';
 import type { UserRole } from '@soe/types';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
@@ -15,6 +13,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import { signOutToLogin } from '@/lib/sign-out';
 import { ROLE_LABELS } from './nav-items';
 import { RoleSwitcher } from './RoleSwitcher';
 import { OrgSwitcher } from './OrgSwitcher';
@@ -47,11 +46,6 @@ export function UserNav({
   const role = activeRole;
   const name = user.name ?? user.email ?? 'Usuario';
   const initials = getInitials(name);
-
-  async function handleSignOut() {
-    toast.success('Sesión cerrada');
-    await signOut({ callbackUrl: '/login' });
-  }
 
   return (
     <DropdownMenu>
@@ -117,7 +111,7 @@ export function UserNav({
         </DropdownMenuItem>
         <DropdownMenuSeparator />
         <DropdownMenuItem
-          onSelect={handleSignOut}
+          onSelect={() => void signOutToLogin()}
           className="text-destructive focus:text-destructive"
         >
           <LogOut className="size-4" aria-hidden />

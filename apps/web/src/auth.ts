@@ -5,6 +5,7 @@ import MicrosoftEntraID from 'next-auth/providers/microsoft-entra-id';
 import { pickDefaultActiveRole, USER_ROLES, type UserRole } from '@soe/types';
 import { authConfig } from '@/auth.config';
 import { internalPost } from '@/lib/api';
+import { ROUTES } from '@/lib/routes';
 
 const authMode = process.env.AUTH_MODE === 'mock' ? 'mock' : 'sso';
 
@@ -125,10 +126,10 @@ const config: NextAuthConfig = {
       if (account?.provider === 'mock') return true;
 
       const email = profile?.email ?? user.email;
-      if (!email) return '/auth/error?error=EmailNotWhitelisted';
+      if (!email) return `${ROUTES.authError}?error=EmailNotWhitelisted`;
 
       const result = await internalPost<ValidateUserResponse>('/auth/validate-user', { email });
-      if (!result) return '/auth/error?error=EmailNotWhitelisted';
+      if (!result) return `${ROUTES.authError}?error=EmailNotWhitelisted`;
 
       const dbProvider: 'google' | 'microsoft' =
         account?.provider === 'microsoft-entra-id' ? 'microsoft' : 'google';
@@ -161,7 +162,7 @@ const config: NextAuthConfig = {
       }
 
       // Caso B: user real (incluye platform_admin con o sin membership).
-      if (!result.user) return '/auth/error?error=EmailNotWhitelisted';
+      if (!result.user) return `${ROUTES.authError}?error=EmailNotWhitelisted`;
 
       const realName = profile?.name ?? user.name ?? result.user.name;
       await internalPost('/auth/sync-user', {

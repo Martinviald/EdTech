@@ -2,7 +2,7 @@
 
 import { useCallback, useState, useTransition } from 'react';
 import Link from 'next/link';
-import type { Route } from 'next';
+import { ROUTES } from '@/lib/routes';
 import { CheckCircle2, Loader2, RotateCcw, Upload, AlertCircle } from 'lucide-react';
 import { useDropzone, type FileRejection } from 'react-dropzone';
 import { toast } from 'sonner';
@@ -332,29 +332,27 @@ function DoneSection({
       {/* Resumen */}
       <Card
         className={cn(
-          isPartial
-            ? 'border-amber-200 bg-amber-50 dark:border-amber-900 dark:bg-amber-950/20'
-            : 'border-emerald-200 bg-emerald-50 dark:border-emerald-900 dark:bg-emerald-950/20',
+          isPartial ? 'border-warning/40 bg-warning/10' : 'border-success/40 bg-success/10',
         )}
       >
         <CardContent className="flex items-start gap-3 pt-6">
           {isPartial ? (
-            <AlertCircle className="mt-0.5 h-5 w-5 text-amber-600 dark:text-amber-400" />
+            <AlertCircle className="mt-0.5 h-5 w-5 text-warning" />
           ) : (
-            <CheckCircle2 className="mt-0.5 h-5 w-5 text-emerald-600 dark:text-emerald-400" />
+            <CheckCircle2 className="mt-0.5 h-5 w-5 text-success" />
           )}
           <div className="space-y-1 text-sm">
             <p className="font-medium">
               {isPartial ? 'Vinculación parcial' : 'Vinculación completada'}
             </p>
             <div className="flex flex-wrap items-center gap-2">
-              <Badge className="bg-emerald-600 hover:bg-emerald-600">
+              <Badge variant="success">
                 {linkedItems.length} vinculado{linkedItems.length === 1 ? '' : 's'}
               </Badge>
               {hasUnlinked && (
                 <Badge
                   variant="outline"
-                  className="border-amber-400 text-amber-700 dark:text-amber-300"
+                  className="border-warning/50 text-warning"
                 >
                   {unlinkedItems.length} sin vincular
                 </Badge>
@@ -369,7 +367,7 @@ function DoneSection({
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-sm">
-              <CheckCircle2 className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
+              <CheckCircle2 className="h-4 w-4 text-success" />
               Ítems vinculados ({linkedItems.length})
             </CardTitle>
           </CardHeader>
@@ -412,7 +410,7 @@ function DoneSection({
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-sm">
-              <AlertCircle className="h-4 w-4 text-amber-600 dark:text-amber-400" />
+              <AlertCircle className="h-4 w-4 text-warning" />
               Ítems sin vincular ({unlinkedItems.length})
             </CardTitle>
           </CardHeader>
@@ -460,7 +458,7 @@ function DoneSection({
           <RotateCcw className="mr-2 h-4 w-4" />
           Subir otra tabla
         </Button>
-        <Link href={`/banco-items/${instrumentId}/spec-table` as Route}>
+        <Link href={ROUTES.bancoItemSpecTable(instrumentId)}>
           <Button>Ver tabla de especificaciones</Button>
         </Link>
       </div>

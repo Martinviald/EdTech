@@ -1,12 +1,9 @@
 import {
   BarChart3,
   BookOpen,
-  Building2,
   ClipboardList,
   Cpu,
   FileText,
-  FileUp,
-  FolderTree,
   GitCompareArrows,
   LayoutDashboard,
   Library,
@@ -14,24 +11,26 @@ import {
   School,
   Settings,
   ShieldCheck,
-  Sparkles,
   TrendingUp,
-  UserCog,
-  Users,
   type LucideIcon,
 } from 'lucide-react';
 import type { UserRole } from '@soe/types';
 import {
+  canAccess,
   DASHBOARD_VIEWER_ROLES,
-  AI_ANALYSIS_VIEWER_ROLES,
   AI_ANALYSIS_GENERATOR_ROLES,
   REMEDIAL_VIEWER_ROLES,
   BENCHMARKING_VIEWER_ROLES,
-  ANSWER_SHEET_IMPORT_ROLES,
   ESTABLISHMENT_REPORT_ROLES,
 } from '@soe/types';
+import { ROUTES } from '@/lib/routes';
+import { ADMIN_HUB_PATHS, ADMIN_HUB_ROLES } from './admin-hub';
+import { BANCO_TABS, RESULTADOS_TABS, toNavChildren } from './view-tabs';
 
 export type NavStatus = 'live' | 'soon';
+
+/** Sub-destino de un item (= las tabs de esa vista). Se muestran en el flyout colapsado. */
+export type NavChild = { href: string; label: string };
 
 export type NavItem = {
   href: string;
@@ -41,12 +40,21 @@ export type NavItem = {
   roles: readonly UserRole[];
   /** Si true, solo se muestra cuando el usuario es platform_admin (independiente de role). */
   requiresPlatformAdmin?: boolean;
+  /** Tabs de la vista, para acceso rápido desde el flyout colapsado del sidebar. */
+  children?: readonly NavChild[];
+  /**
+   * Rutas adicionales que marcan este item como activo. Lo necesita el hub de
+   * Administración, cuyas vistas (`/equipo`, `/organizacion`…) conservan su
+   * ruta propia y ya no tienen un item dedicado en el sidebar.
+   */
+  matchPaths?: readonly string[];
 };
 
 /** Sección del sidebar: agrupa items por propósito/frecuencia de uso. */
 export type NavGroup = {
   id: string;
-  label: string;
+  /** Sin label la sección se separa con un borde pero no muestra encabezado. */
+  label?: string;
   items: readonly NavItem[];
 };
 
@@ -88,68 +96,64 @@ export const NAV_GROUPS: readonly NavGroup[] = [
     label: 'Análisis',
     items: [
       {
-        href: '/dashboard',
+        href: ROUTES.dashboard,
         label: 'Inicio',
         icon: LayoutDashboard,
         status: 'live',
         roles: ALL_ROLES,
       },
       {
-        href: '/dashboard/my-classes',
-        label: 'Mis cursos',
-        icon: BookOpen,
-        status: 'live',
-        roles: ALL_STAFF_ROLES,
-      },
-      {
-        href: '/evaluaciones',
+        href: ROUTES.evaluaciones,
         label: 'Evaluaciones',
         icon: ClipboardList,
         status: 'live',
         roles: DASHBOARD_VIEWER_ROLES,
       },
       {
-        href: '/resultados',
+        href: ROUTES.resultados,
         label: 'Panorama pedagógico',
         icon: BarChart3,
         status: 'live',
         roles: DASHBOARD_VIEWER_ROLES,
-      },
-      {
-        href: '/analisis-ia',
-        label: 'Análisis IA',
-        icon: Sparkles,
-        status: 'live',
-        roles: AI_ANALYSIS_VIEWER_ROLES,
+        children: toNavChildren(RESULTADOS_TABS),
       },
       {
         // TKT-23: diagnóstico IA de la variación entre instrumentos comparables.
-        href: '/comparar-instrumentos',
+        href: ROUTES.compararInstrumentos,
         label: 'Comparar instrumentos',
         icon: GitCompareArrows,
         status: 'live',
         roles: AI_ANALYSIS_GENERATOR_ROLES,
       },
       {
-        href: '/material-remedial',
+        href: ROUTES.materialRemedial,
         label: 'Material Remedial',
         icon: Lightbulb,
         status: 'live',
         roles: REMEDIAL_VIEWER_ROLES,
       },
       {
-        href: '/benchmarking',
+        href: ROUTES.benchmarking,
         label: 'Benchmarking',
         icon: TrendingUp,
         status: 'live',
         roles: BENCHMARKING_VIEWER_ROLES,
       },
       {
-        href: '/establecimiento/informe-oficial',
+        href: ROUTES.establecimientoInformeOficial,
         label: 'Informe establecimiento',
         icon: FileText,
         status: 'live',
         roles: ESTABLISHMENT_REPORT_ROLES,
+      },
+      {
+        // Vista del profesor (sus cursos): acceso menos frecuente para directivos,
+        // por eso va al final del grupo (T2-08).
+        href: ROUTES.myClasses,
+        label: 'Mis cursos',
+        icon: BookOpen,
+        status: 'live',
+        roles: ALL_STAFF_ROLES,
       },
     ],
   },
@@ -158,15 +162,8 @@ export const NAV_GROUPS: readonly NavGroup[] = [
     label: 'Contenido y datos',
     items: [
       {
-        href: '/importar',
-        label: 'Importar',
-        icon: FileUp,
-        status: 'live',
-        roles: ANSWER_SHEET_IMPORT_ROLES,
-      },
-      {
-        href: '/banco-items',
-        label: 'Banco de Instrumentos',
+        href: ROUTES.bancoItems,
+        label: 'Banco de contenido',
         icon: Library,
         status: 'live',
         roles: [
@@ -177,70 +174,23 @@ export const NAV_GROUPS: readonly NavGroup[] = [
           'teacher',
           'homeroom_teacher',
         ],
-      },
-      {
-        // TKT-14: banco de ítems global (cross-instrumento, propio + global).
-        href: '/banco-items/explorar',
-        label: 'Banco de ítems',
-        icon: Library,
-        status: 'live',
-        roles: [
-          'platform_admin',
-          'school_admin',
-          'academic_director',
-          'eval_coordinator',
-          'teacher',
-          'homeroom_teacher',
-        ],
-      },
-      {
-        href: '/marcos-academicos',
-        label: 'Marcos Académicos',
-        icon: FolderTree,
-        status: 'live',
-        roles: ['platform_admin', 'school_admin', 'academic_director'],
+        children: toNavChildren(BANCO_TABS),
       },
     ],
   },
   {
+    // Las vistas administrativas (colegio, equipo, alumnos, marcos, config) se
+    // usan muy de vez en cuando: ya no ocupan un item cada una, se alcanzan
+    // desde la grilla de `/administracion` (ver admin-hub.ts).
     id: 'administracion',
-    label: 'Administración',
     items: [
       {
-        href: '/alumnos',
-        label: 'Alumnos',
-        icon: Users,
-        status: 'soon',
-        roles: [
-          'homeroom_teacher',
-          'school_admin',
-          'academic_director',
-          'cycle_director',
-          'dept_head',
-          'coordinator',
-          'platform_admin',
-        ],
-      },
-      {
-        href: '/organizacion',
-        label: 'Mi Colegio',
-        icon: Building2,
-        status: 'live',
-        roles: ['school_admin', 'academic_director', 'platform_admin'],
-      },
-      {
-        href: '/equipo',
-        label: 'Equipo',
-        icon: UserCog,
-        status: 'live',
-        roles: ['school_admin', 'platform_admin'],
-      },
-      {
-        href: '/configuracion',
-        label: 'Configuración',
+        href: ROUTES.administracion,
+        label: 'Administración',
         icon: Settings,
         status: 'live',
-        roles: ['platform_admin', 'school_admin', 'academic_director'],
+        roles: ADMIN_HUB_ROLES,
+        matchPaths: ADMIN_HUB_PATHS,
       },
     ],
   },
@@ -255,7 +205,7 @@ export const NAV_ITEMS: readonly NavItem[] = NAV_GROUPS.flatMap((g) => g.items);
  */
 export const ADMIN_NAV_ITEMS: readonly NavItem[] = [
   {
-    href: '/admin',
+    href: ROUTES.admin,
     label: 'Resumen',
     icon: LayoutDashboard,
     status: 'live',
@@ -263,7 +213,7 @@ export const ADMIN_NAV_ITEMS: readonly NavItem[] = [
     requiresPlatformAdmin: true,
   },
   {
-    href: '/admin/colegios',
+    href: ROUTES.adminColegios,
     label: 'Colegios',
     icon: School,
     status: 'live',
@@ -271,7 +221,7 @@ export const ADMIN_NAV_ITEMS: readonly NavItem[] = [
     requiresPlatformAdmin: true,
   },
   {
-    href: '/admin/instrumentos',
+    href: ROUTES.adminInstrumentos,
     label: 'Instrumentos oficiales',
     icon: Library,
     status: 'live',
@@ -279,7 +229,7 @@ export const ADMIN_NAV_ITEMS: readonly NavItem[] = [
     requiresPlatformAdmin: true,
   },
   {
-    href: '/admin/equipo',
+    href: ROUTES.adminEquipo,
     label: 'Equipo plataforma',
     icon: ShieldCheck,
     status: 'live',
@@ -287,7 +237,7 @@ export const ADMIN_NAV_ITEMS: readonly NavItem[] = [
     requiresPlatformAdmin: true,
   },
   {
-    href: '/admin/modelos-ia',
+    href: ROUTES.adminModelosIa,
     label: 'Modelos de IA',
     icon: Cpu,
     status: 'live',
@@ -295,7 +245,7 @@ export const ADMIN_NAV_ITEMS: readonly NavItem[] = [
     requiresPlatformAdmin: true,
   },
   {
-    href: '/admin/instrumentos-bandas',
+    href: ROUTES.adminInstrumentosBandas,
     label: 'Niveles de logro',
     icon: BarChart3,
     status: 'live',
@@ -310,7 +260,7 @@ export const ADMIN_NAV_ITEMS: readonly NavItem[] = [
  * en `item.roles`. Coherente con la regla de autorización del backend.
  */
 export function visibleNavItems(roles: readonly UserRole[]): readonly NavItem[] {
-  return NAV_ITEMS.filter((item) => item.roles.some((r) => roles.includes(r)));
+  return NAV_ITEMS.filter((item) => canAccess(roles, item.roles));
 }
 
 /**
@@ -321,7 +271,7 @@ export function visibleNavItems(roles: readonly UserRole[]): readonly NavItem[] 
 export function visibleNavGroups(roles: readonly UserRole[]): NavGroup[] {
   return NAV_GROUPS.map((group) => ({
     ...group,
-    items: group.items.filter((item) => item.roles.some((r) => roles.includes(r))),
+    items: group.items.filter((item) => canAccess(roles, item.roles)),
   })).filter((group) => group.items.length > 0);
 }
 

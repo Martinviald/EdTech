@@ -21,6 +21,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { cn } from '@/lib/utils';
+import { ROUTES } from '@/lib/routes';
 import { uploadAnswerSheetAction } from '../actions';
 
 const MAX_BYTES = 10 * 1024 * 1024;
@@ -202,7 +203,7 @@ export function UploadForm({ defaultFormat, instruments }: UploadFormProps) {
       }
       toast.success('Archivo procesado. Revisa la previsualización.');
       router.push(
-        `/importar/resultados/preview?token=${encodeURIComponent(result.data.previewToken)}` as Route,
+        `${ROUTES.importarResultadosPreview}?token=${encodeURIComponent(result.data.previewToken)}` as Route,
       );
     });
   };
@@ -310,7 +311,7 @@ export function UploadForm({ defaultFormat, instruments }: UploadFormProps) {
               {instruments.length === 0 && (
                 <p className="text-muted-foreground text-xs">
                   Primero debes importar la pauta del instrumento desde{' '}
-                  <a href="/importar/instrumento" className="underline hover:text-foreground">
+                  <a href={ROUTES.importarInstrumento} className="underline hover:text-foreground">
                     Pauta / Instrumento
                   </a>
                   .
@@ -474,7 +475,7 @@ export function UploadForm({ defaultFormat, instruments }: UploadFormProps) {
         <Button
           type="button"
           variant="outline"
-          onClick={() => router.push('/importar/resultados' as Route)}
+          onClick={() => router.push(ROUTES.importarResultados)}
           disabled={isPending}
         >
           Cancelar

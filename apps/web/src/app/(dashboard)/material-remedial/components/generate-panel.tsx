@@ -2,7 +2,6 @@
 
 import { useEffect, useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
-import type { Route } from 'next';
 import { BookOpen, Loader2, Sparkles } from 'lucide-react';
 import type { RemedialMaterialType, RemedialMethod } from '@soe/types';
 import { Button } from '@/components/ui/button';
@@ -15,8 +14,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { AlertCallout } from '@/components/patterns';
+import { AlertCallout } from '@/components/shared';
 import { cn } from '@/lib/utils';
+import { ROUTES } from '@/lib/routes';
 import {
   generateRemedial,
   getCandidateStimuli,
@@ -208,7 +208,7 @@ export function GeneratePanel({
           stimulusId:
             effectiveMethod === 'reuse_stimulus' ? stimulusId : undefined,
         });
-        router.replace(`/material-remedial/${materialId}` as Route);
+        router.replace(ROUTES.materialRemedialDetalle(materialId));
         router.refresh();
       } catch (err) {
         setError(err instanceof Error ? err.message : 'No se pudo generar el material remedial.');

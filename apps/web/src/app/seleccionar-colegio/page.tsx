@@ -1,7 +1,7 @@
-import type { Route } from 'next';
 import { redirect } from 'next/navigation';
 import { GraduationCap } from 'lucide-react';
 import { auth } from '@/auth';
+import { ROUTES } from '@/lib/routes';
 import { OrgSelector } from './OrgSelector';
 
 export const dynamic = 'force-dynamic';
@@ -18,9 +18,9 @@ export const dynamic = 'force-dynamic';
  */
 export default async function SelectOrgPage() {
   const session = await auth();
-  if (!session?.user) redirect('/login');
-  if (session.user.isPlatformAdmin && !session.user.orgId) redirect('/admin' as Route);
-  if (session.user.orgs.length <= 1) redirect('/dashboard');
+  if (!session?.user) redirect(ROUTES.login);
+  if (session.user.isPlatformAdmin && !session.user.orgId) redirect(ROUTES.admin);
+  if (session.user.orgs.length <= 1) redirect(ROUTES.dashboard);
 
   return (
     <main className="flex min-h-screen items-center justify-center bg-background px-4">

@@ -1,5 +1,6 @@
 import { redirect } from 'next/navigation';
 import { auth } from '@/auth';
+import { ROUTES } from '@/lib/routes';
 import { HeroSection } from '@/components/marketing/HeroSection';
 import { TrustStrip } from '@/components/marketing/TrustStrip';
 import { ProblemSection } from '@/components/marketing/ProblemSection';
@@ -15,7 +16,7 @@ export default async function LandingPage() {
   // resolver post-login (`/seleccionar-colegio`), que centraliza el destino
   // según org/rol. Consultar la sesión vuelve dinámica esta página (esperado).
   const session = await auth();
-  if (session?.user) redirect('/seleccionar-colegio');
+  if (session?.user) redirect(ROUTES.selectOrg);
 
   return (
     <>

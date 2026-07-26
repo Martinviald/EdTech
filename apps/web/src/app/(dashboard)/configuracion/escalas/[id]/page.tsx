@@ -1,35 +1,69 @@
-import Link from 'next/link';
-import type { Route } from 'next';
+import { Suspense } from 'react';
 import { notFound, redirect } from 'next/navigation';
-import { ChevronLeft } from 'lucide-react';
 import { auth } from '@/auth';
 import { apiGet } from '@/lib/api';
+import { ROUTES } from '@/lib/routes';
 import {
   canAccess,
   GRADING_SCALE_ROLES,
   userHasRole,
   type GradingScaleResponseModel,
+  type UserRole,
 } from '@soe/types';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Skeleton } from '@/components/ui/skeleton';
+import { PageActions, PageContainer, CardSkeleton } from '@/components/shared';
+import { SetPageTitle } from '@/components/layout/page-title-context';
 import { EscalaForm } from '../components/escala-form';
 import { ConversionPreview } from '../components/conversion-preview';
 import { DeleteButton } from '../components/delete-button';
 import { SCALE_TYPE_LABELS } from '../components/scale-format';
 
-export default async function EscalaDetailPage({
-  params,
-}: {
-  params: Promise<{ id: string }>;
-}) {
+export default async function EscalaDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const session = await auth();
-  if (!session?.user?.orgId) redirect('/login');
+  if (!session?.user?.orgId) redirect(ROUTES.login);
   if (!canAccess(session.user.roles, GRADING_SCALE_ROLES)) {
-    redirect('/dashboard');
+    redirect(ROUTES.dashboard);
   }
 
   const { id } = await params;
 
+  return (
+    <PageContainer>
+      <Suspense fallback={<EscalaDetailSkeleton />}>
+        <EscalaDetailSection id={id} orgId={session.user.orgId} roles={session.user.roles} />
+      </Suspense>
+    </PageContainer>
+  );
+}
+
+function EscalaDetailSkeleton() {
+  return (
+    <>
+      <Skeleton className="h-4 w-40" />
+      <div className="space-y-2">
+        <Skeleton className="h-7 w-64" />
+        <Skeleton className="h-4 w-80 max-w-full" />
+      </div>
+      <div className="grid gap-6 lg:grid-cols-2">
+        <CardSkeleton rows={5} />
+        <CardSkeleton rows={5} />
+      </div>
+      <CardSkeleton rows={2} />
+    </>
+  );
+}
+
+async function EscalaDetailSection({
+  id,
+  orgId,
+  roles,
+}: {
+  id: string;
+  orgId: string;
+  roles: readonly UserRole[];
+}) {
   let scale: GradingScaleResponseModel;
   try {
     scale = await apiGet<GradingScaleResponseModel>(`/grading-scales/${id}`);
@@ -37,45 +71,31 @@ export default async function EscalaDetailPage({
     notFound();
   }
 
-  const isPlatformAdmin = userHasRole(session.user.roles, 'platform_admin');
+  const isPlatformAdmin = userHasRole(roles, 'platform_admin');
   // Las escalas globales (orgId null) solo pueden editarlas platform_admin.
   // Las de la org solo pueden editarlas usuarios de esa org (el filtro real
   // ya lo hace el backend; acá decidimos solo el shape de la UI).
-  const editable = scale.isGlobal
-    ? isPlatformAdmin
-    : scale.orgId === session.user.orgId || isPlatformAdmin;
+  const editable = scale.isGlobal ? isPlatformAdmin : scale.orgId === orgId || isPlatformAdmin;
 
   return (
-    <div className="space-y-6">
-      <div className="space-y-2">
-        <Link
-          href={'/configuracion/escalas' as Route}
-          className="text-muted-foreground hover:text-foreground inline-flex items-center gap-1 text-sm"
-        >
-          <ChevronLeft className="size-4" /> Volver a escalas
-        </Link>
-        <div className="flex flex-wrap items-start justify-between gap-3">
-          <div>
-            <div className="flex flex-wrap items-center gap-2">
-              <h1 className="text-2xl font-semibold">{scale.name}</h1>
-              {scale.isGlobal ? (
-                <Badge variant="secondary">Global</Badge>
-              ) : (
-                <Badge variant="outline">Mi colegio</Badge>
-              )}
-            </div>
-            <p className="text-muted-foreground mt-1 text-sm">
-              {SCALE_TYPE_LABELS[scale.type] ?? scale.type}
-            </p>
-          </div>
-        </div>
-        {!editable ? (
-          <p className="bg-muted text-muted-foreground rounded-md px-3 py-2 text-xs">
-            Esta escala es de solo lectura para tu cuenta. Las escalas globales solo pueden
-            editarlas administradores de plataforma.
-          </p>
-        ) : null}
-      </div>
+    <>
+      <SetPageTitle title={scale.name} />
+      <PageActions>
+        <span className="mr-auto text-sm text-muted-foreground">
+          {SCALE_TYPE_LABELS[scale.type] ?? scale.type}
+        </span>
+        {scale.isGlobal ? (
+          <Badge variant="secondary">Global</Badge>
+        ) : (
+          <Badge variant="outline">Mi colegio</Badge>
+        )}
+      </PageActions>
+      {!editable ? (
+        <p className="bg-muted text-muted-foreground rounded-md px-3 py-2 text-xs">
+          Esta escala es de solo lectura para tu cuenta. Las escalas globales solo pueden editarlas
+          administradores de plataforma.
+        </p>
+      ) : null}
 
       <div className="grid gap-6 lg:grid-cols-2">
         <Card>
@@ -115,7 +135,7 @@ export default async function EscalaDetailPage({
           </CardContent>
         </Card>
       ) : null}
-    </div>
+    </>
   );
 }
 

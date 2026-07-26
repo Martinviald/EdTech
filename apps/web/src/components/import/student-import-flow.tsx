@@ -197,13 +197,13 @@ function PreviewStep({
       </div>
 
       {hasUnknownGrades && (
-        <Card className="border-red-200 bg-red-50 dark:border-red-900 dark:bg-red-950/20">
+        <Card className="border-destructive/30 bg-destructive/10">
           <CardHeader>
-            <CardTitle className="text-sm text-red-900 dark:text-red-200">
+            <CardTitle className="text-sm text-destructive">
               Cursos sin nivel reconocido
             </CardTitle>
           </CardHeader>
-          <CardContent className="space-y-1 text-sm text-red-900 dark:text-red-200">
+          <CardContent className="space-y-1 text-sm text-destructive">
             <p>
               Los siguientes cursos no se pudieron mapear a un nivel conocido. Corrígelos en el CSV
               y vuelve a subirlo:
@@ -220,13 +220,13 @@ function PreviewStep({
       )}
 
       {hasNewCourses && (
-        <Card className="border-blue-200 bg-blue-50 dark:border-blue-900 dark:bg-blue-950/20">
+        <Card className="border-info/30 bg-info/10">
           <CardHeader>
-            <CardTitle className="text-sm text-blue-900 dark:text-blue-200">
+            <CardTitle className="text-sm text-info">
               Cursos nuevos detectados
             </CardTitle>
           </CardHeader>
-          <CardContent className="space-y-3 text-sm text-blue-900 dark:text-blue-200">
+          <CardContent className="space-y-3 text-sm text-info">
             <ul className="list-disc pl-5">
               {preview.newClassGroups.map((c) => (
                 <li key={c.label}>{c.label}</li>
@@ -306,17 +306,15 @@ function DoneStep({
       <Card
         className={cn(
           variant === 'success'
-            ? 'border-emerald-200 bg-emerald-50 dark:border-emerald-900 dark:bg-emerald-950/20'
-            : 'border-amber-200 bg-amber-50 dark:border-amber-900 dark:bg-amber-950/20',
+            ? 'border-success/30 bg-success/10'
+            : 'border-warning/40 bg-warning/15',
         )}
       >
         <CardContent className="flex items-start gap-3 pt-6">
           <Icon
             className={cn(
               'mt-0.5 h-5 w-5',
-              variant === 'success'
-                ? 'text-emerald-600 dark:text-emerald-400'
-                : 'text-amber-600 dark:text-amber-400',
+              variant === 'success' ? 'text-success' : 'text-warning',
             )}
           />
           <div className="space-y-1 text-sm">
@@ -386,10 +384,9 @@ function Stat({
   variant: 'success' | 'warn' | 'info' | 'neutral';
 }) {
   const colors: Record<typeof variant, string> = {
-    success:
-      'border-emerald-200 bg-emerald-50 text-emerald-900 dark:border-emerald-900 dark:bg-emerald-950/20 dark:text-emerald-200',
-    warn: 'border-amber-200 bg-amber-50 text-amber-900 dark:border-amber-900 dark:bg-amber-950/20 dark:text-amber-200',
-    info: 'border-blue-200 bg-blue-50 text-blue-900 dark:border-blue-900 dark:bg-blue-950/20 dark:text-blue-200',
+    success: 'border-success/30 bg-success/10 text-success',
+    warn: 'border-warning/40 bg-warning/15 text-warning',
+    info: 'border-info/30 bg-info/10 text-info',
     neutral: 'border-muted bg-muted/30 text-foreground',
   };
   return (

@@ -1,4 +1,6 @@
 import type { LucideIcon } from 'lucide-react';
+
+import { ROUTES } from '@/lib/routes';
 import {
   AlertTriangle,
   BarChart3,
@@ -23,7 +25,7 @@ export const NAV_LINKS = [
 ] as const;
 
 /** Destino del CTA principal (login SSO existente). */
-export const PRIMARY_CTA_HREF = '/login';
+export const PRIMARY_CTA_HREF = ROUTES.login;
 
 export interface PainPoint {
   icon: LucideIcon;

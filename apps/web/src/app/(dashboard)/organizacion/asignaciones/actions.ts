@@ -1,6 +1,7 @@
 'use server';
 
 import { revalidatePath } from 'next/cache';
+import { ROUTES } from '@/lib/routes';
 import { createTeacherAssignmentSchema } from '@soe/types';
 import {
   createAssignment,
@@ -34,7 +35,7 @@ export async function createAssignmentAction(
 
   try {
     await createAssignment(orgId, parsed.data);
-    revalidatePath('/organizacion/asignaciones');
+    revalidatePath(ROUTES.organizacionAsignaciones);
     return { ok: true };
   } catch (err) {
     if (err instanceof Error) {
@@ -74,7 +75,7 @@ export async function deleteAssignmentAction(
 ): Promise<{ ok: true } | { ok: false; error: string }> {
   try {
     await deleteAssignment(orgId, assignmentId);
-    revalidatePath('/organizacion/asignaciones');
+    revalidatePath(ROUTES.organizacionAsignaciones);
     return { ok: true };
   } catch (err) {
     return { ok: false, error: err instanceof Error ? err.message : 'Error desconocido' };

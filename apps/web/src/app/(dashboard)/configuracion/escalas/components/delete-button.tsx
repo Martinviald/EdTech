@@ -2,7 +2,6 @@
 
 import { useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
-import type { Route } from 'next';
 import { Trash2 } from 'lucide-react';
 import { toast } from 'sonner';
 import {
@@ -17,6 +16,7 @@ import {
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
 import { Button } from '@/components/ui/button';
+import { ROUTES } from '@/lib/routes';
 import { deleteGradingScaleAction } from '../actions';
 
 function isInUseError(message: string): boolean {
@@ -43,7 +43,7 @@ export function DeleteButton({ scaleId, scaleName }: { scaleId: string; scaleNam
         await deleteGradingScaleAction(scaleId);
         toast.success('Escala eliminada');
         setOpen(false);
-        router.push('/configuracion/escalas' as Route);
+        router.push(ROUTES.configEscalas);
         router.refresh();
       } catch (err) {
         const raw = err instanceof Error ? err.message : 'No se pudo eliminar la escala.';
