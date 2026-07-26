@@ -71,17 +71,19 @@
 
 > **✅ FASE A COMPLETA (2026-07-26):** T2-25, T2-12, T2-27, T2-14 (14b `nodeId` diferido), T2-15, T2-17, T2-11 integrados en `sprint-feedback-v2b`, typecheck+lint verdes, tests de API OK (salvo `privacy.*` que exige `DATABASE_URL` — entorno). Falta E2E manual. Sigue **Fase B** (T2-21 `0015` → T2-22 `0016` → T2-20).
 
-### Ola 4 — Features grandes ⬜ (0/3)
-- [ ] **T2-21** etiqueta de dificultad por ítem — *migración `0015`*
-- [ ] **T2-22** listas/colecciones de ítems — *migración `0016`*
-- [ ] **T2-20** vista 360 del estudiante — *endpoint nuevo, sin migración*
+### Ola 4 — Features grandes 🟢 (3/3 + 1 diferido)
+- [x] **T2-21** etiqueta de dificultad por ítem — Fase B `7bd2b22`+`c99f0c5` (migración `0015`; editar difficulty diferido)
+- [x] **T2-22** listas/colecciones de ítems — Fase B (agente, `d76c9fb`, migración `0016`; puente lista→evaluación clona ítems, sin tags/figuras/secciones — diferido)
+- [x] **T2-20** vista 360 del estudiante — Fase B (agente, `4f791d1`, endpoint panorama + perfil + picker)
 - ⏸️ **T2-19** Crear material IA (canvas) — **DIFERIDO a fase futura (F2)** (decisión 2026-07-26)
 
-### Ola 5 — Limpieza ⬜ (0/1)
-- [ ] **T2-23** ocultar estados de instrumentos (Borrador/Publicado/Archivado) en UI + traer todos los estados — *sin migración (redefinido)*
+### Ola 5 — Limpieza 🟢 (1/1)
+- [x] **T2-23** ocultar estados de instrumentos (Borrador/Publicado/Archivado) en UI + traer todos los estados — Fase C `8fb2e93` (sin migración)
 
-### Ola 3 (extra) — ⬜
-- [ ] **T2-27** filtro de momento DIA en `/evaluaciones` *(depende del stack de filtros)*
+### Ola 3 (extra) — 🟢
+- [x] **T2-27** filtro de momento DIA en `/evaluaciones` — Fase A `6645dc5`
+
+> **✅ PLAN COMPLETO (2026-07-26):** las 3 fases integradas en `sprint-feedback-v2b` (pusheada). Fase A (7 tickets), Fase B (T2-21/22/20), Fase C (T2-23). **10 tickets construidos + T2-19 diferido a fase futura.** typecheck 6/6 · lint 6/6 · **828 tests de API OK** (sólo `privacy.*` falla por `DATABASE_URL` de entorno). Diferidos documentados: T2-14b (filtro `nodeId`), editar dificultad (T2-21), puente lista→evaluación sin tags/figuras/secciones (T2-22). **Pendiente: E2E manual.**
 
 ---
 
