@@ -63,11 +63,13 @@
 - [x] T2-16 taxonomía agrupada por asignatura
 - [x] T2-13 multi-select asignatura/nivel en el banco
 - [x] T2-18 (verificado: panel de pregunta ya unificado; sin cambio)
-- [x] T2-11 tabla de especificaciones (pestaña nueva + filtros + tab Resumen). ⏳ Residual "eje curricular estricto" en curso (agente, `wt-t11`).
+- [x] T2-11 tabla de especificaciones + ✅ residual "eje curricular estricto" (agente, `cf6e4c6`).
 - [x] **T2-12** multi-selección transversal en filtros — Fase A `b236933`
 - [x] **T2-14** jerarquía Asig›instrumento (selector concreto) — Fase A `1b67814`. ⏸️ **T2-14b** (filtro habilidad/eje por `nodeId`) DIFERIDO: ya está en el schema; la exploración por habilidad/eje la cubre el drill-down (SkillsBreakdown/SkillDrilldownDialog).
 - [x] **T2-15** panorama pedagógico select-first — Fase A `48c36c6`
-- [ ] **T2-17** informes clickeable + comparativa contra el nivel — ⏳ en curso (agente, `wt-t17`)
+- [x] **T2-17** informes clickeable + comparativa contra el nivel — Fase A (agente, `998b7cc`)
+
+> **✅ FASE A COMPLETA (2026-07-26):** T2-25, T2-12, T2-27, T2-14 (14b `nodeId` diferido), T2-15, T2-17, T2-11 integrados en `sprint-feedback-v2b`, typecheck+lint verdes, tests de API OK (salvo `privacy.*` que exige `DATABASE_URL` — entorno). Falta E2E manual. Sigue **Fase B** (T2-21 `0015` → T2-22 `0016` → T2-20).
 
 ### Ola 4 — Features grandes ⬜ (0/3)
 - [ ] **T2-21** etiqueta de dificultad por ítem — *migración `0015`*
