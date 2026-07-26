@@ -137,6 +137,21 @@ export function DashboardFilterBar({
   // El filtro de "Momento" sólo se muestra si hay un tipo con ciclo seleccionado.
   const showPeriod = value.instrumentType?.includes(PERIODIC_TYPE) ?? false;
 
+  // Instrumento concreto (T2-14): jerarquía Asignatura/Nivel/Tipo → instrumento.
+  const selectedSubjects = new Set(value.subjectId ?? []);
+  const selectedTypes = new Set(value.instrumentType ?? []);
+  const selectedGrades = new Set(value.gradeId ?? []);
+  const instrumentOptions = options.instruments
+    .filter(
+      (i) =>
+        selectedSubjects.size === 0 || (i.subjectId != null && selectedSubjects.has(i.subjectId)),
+    )
+    .filter((i) => selectedTypes.size === 0 || selectedTypes.has(i.type))
+    .filter(
+      (i) => selectedGrades.size === 0 || (i.gradeId != null && selectedGrades.has(i.gradeId)),
+    )
+    .map((i) => ({ id: i.id, label: i.label }));
+
   const fields: FilterField[] = [
     {
       key: 'academicYearId',
@@ -198,6 +213,15 @@ export function DashboardFilterBar({
           onChange={updateInstrumentTypes}
         />
       ),
+    },
+    {
+      key: 'instrumentId',
+      label: 'Instrumento',
+      placeholder: 'Todos los instrumentos',
+      value: value.instrumentId,
+      options: instrumentOptions,
+      onChange: (v) => updateSingle('instrumentId', v),
+      hidden: instrumentOptions.length === 0,
     },
     {
       key: 'applicationPeriod',
