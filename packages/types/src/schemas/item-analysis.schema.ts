@@ -87,12 +87,18 @@ export type ItemTaxonomyRef = {
  *   TODA la org, independiente del scope del usuario (un profesor ve su curso en
  *   `correctRate` y el colegio completo aquí). Sale del token; nunca expone datos
  *   de otra org (RLS + withOrgContext).
+ * - `grade` (T2-17): % de logro del NIVEL/grado para la pregunta = promedio de
+ *   todos los cursos del MISMO grado de la org que rindieron la evaluación
+ *   (subconjunto de `org`). Sólo se puebla en el detalle por pregunta
+ *   (`QuestionAnalysisResponse`); la cabecera de la matriz no lo usa y queda
+ *   `undefined`.
  * - `sample` (DIFERIDO): % de logro de la MUESTRA de colegios (benchmark
  *   inter-colegio). Bloqueado hasta existir un pool multi-colegio (TKT-20). El
  *   campo se deja opcional para poblarlo después sin cambiar el contrato.
  */
 export type QuestionReferences = {
   org: number | null; // 0..100 — % logro del colegio (toda la org)
+  grade?: number | null; // 0..100 — % logro del nivel/grado (T2-17)
   sample?: number | null; // 0..100 — muestra de colegios (DIFERIDO, TKT-20)
 };
 
@@ -227,5 +233,11 @@ export type QuestionAnalysisResponse = {
   blankCount: number; // alumnos sin alternativa elegida
   correctCount: number;
   correctRate: number | null; // 0..100 sobre totalResponses
+  // T2-17 — referencias comparativas de la MISMA pregunta, independientes del scope
+  // del usuario (un profesor ve su curso en `correctRate` y estas referencias más
+  // amplias aquí): `org` = % de logro en todo el colegio; `grade` = % de logro en el
+  // nivel/grado (todos los cursos del mismo grado que rindieron la evaluación). Ambas
+  // `null` sin evaluación en contexto o sin datos agregados. `sample` queda DIFERIDO.
+  references: QuestionReferences;
   alternatives: AlternativeDistribution[]; // incluye la correcta y los distractores
 };

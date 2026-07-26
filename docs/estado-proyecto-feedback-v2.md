@@ -1,8 +1,8 @@
 # Estado del proyecto — Iteración Feedback v2
 
 > Instantánea del progreso de la ejecución del plan `docs/plan-iteracion-feedback-v2.md`.
-> **Rama:** `sprint-feedback-v2` (worktree, desde `dev`) · **PR:** [#85](https://github.com/Martinviald/EdTech/pull/85) → `dev`
-> **Decisiones detalladas:** `docs/decisiones-feedback-v2.md` · **Última actualización:** ronda de ejecución autónoma.
+> **Rama actual:** `sprint-feedback-v2b` (worktree fuera de Dropbox, desde `dev`) · **Merged:** PR [#85](https://github.com/Martinviald/EdTech/pull/85) (→dev) y PR #84 (dev→main, release `9c38da7`).
+> **Decisiones detalladas:** `docs/decisiones-feedback-v2.md` · **Última actualización:** 2026-07-26 (arranca la fase grande, Fase A).
 
 ---
 
@@ -26,6 +26,19 @@
 
 ---
 
+## Actualización (2026-07-26) — merge a main + arranca la fase grande
+
+- **PRs mergeadas:** #85 (→dev) y **#84 (dev→main**, release `9c38da7`, deploy demo corrido). Verificado vía RDS demo (skill `demo-db-access`): **no requería backfill** (read-models poblados, analítica sin cambios en el delta) ni **cambio de taxonomía** (T2-16 es UI-only; `order`/`subjectId` ya poblados).
+- **E2E de los ~17: aprobado.** Arranca la fase grande en worktree **`sprint-feedback-v2b`** (fuera de Dropbox).
+- **Arranque = Fase A** (sin migraciones, E2E en el loop): T2-25 rename, T2-12 multi-select transversal, T2-14 jerarquía, T2-15 panorama select-first, T2-27 momento DIA, T2-17 informes clickeable + comparativa nivel. Luego **Fase B** (T2-21 `0015`, T2-22 `0016`, T2-20) y **Fase C** (T2-23, sin migración).
+- **Decisiones nuevas (confirmadas):**
+  - **T2-19 "Crear material" — DIFERIDO a fase futura (F2).** No se construye en esta iteración; "Material Remedial" queda tal cual en el sidebar.
+  - **T2-11 eje temático — SÍ estricto:** se agrega backend para exponer el ancestro (padre del OA) y agrupar por eje curricular.
+  - **T2-23 REDEFINIDO:** son los estados **Borrador/Publicado/Archivado** de instrumentos (visibles) → **ocultar en UI + traer todos los estados**, **sin migración** (no era el `assessment_status` vestigial).
+  - **T2-22 colecciones — sin RLS** (confirmado, precedente `items`/`instruments`).
+
+---
+
 ## Avance por ola
 
 ### Ola 1 — Quick wins ✅ (5/5)
@@ -43,30 +56,34 @@
 - [x] T2-06 "Tablero maestro" (rótulo + densidad)
 - [x] T2-10 query params en comparar + breadcrumb "Volver" en el hub
 - [x] T2-25 (parcial) header en una fila + quitar "Nuevo instrumento"
-- [ ] **T2-25 (resto)** rename de ruta `/banco-items` → `/banco-contenido`
+- [x] **T2-25 (resto)** rename de ruta `/banco-items` → `/banco-contenido` (Fase A, `16f35ee`)
 
-### Ola 3 — Filtros y dashboards 🟡 (5/9)
+### Ola 3 — Filtros y dashboards 🟢 (Fase A casi completa)
 - [x] T2-26 paginación banco de ítems 20/pág (+ fix `pageSize`)
 - [x] T2-16 taxonomía agrupada por asignatura
 - [x] T2-13 multi-select asignatura/nivel en el banco
 - [x] T2-18 (verificado: panel de pregunta ya unificado; sin cambio)
-- [x] T2-11 tabla de especificaciones (pestaña nueva + filtros + tab Resumen)
-- [ ] **T2-12** multi-selección transversal en filtros *(core, alto riesgo)*
-- [ ] **T2-14** jerarquía Asignatura›instrumento›habilidad/eje›nivel
-- [ ] **T2-15** panorama pedagógico select-first
-- [ ] **T2-17** informes clickeable + comparativa contra el nivel
+- [x] T2-11 tabla de especificaciones + ✅ residual "eje curricular estricto" (agente, `cf6e4c6`).
+- [x] **T2-12** multi-selección transversal en filtros — Fase A `b236933`
+- [x] **T2-14** jerarquía Asig›instrumento (selector concreto) — Fase A `1b67814`. ⏸️ **T2-14b** (filtro habilidad/eje por `nodeId`) DIFERIDO: ya está en el schema; la exploración por habilidad/eje la cubre el drill-down (SkillsBreakdown/SkillDrilldownDialog).
+- [x] **T2-15** panorama pedagógico select-first — Fase A `48c36c6`
+- [x] **T2-17** informes clickeable + comparativa contra el nivel — Fase A (agente, `998b7cc`)
 
-### Ola 4 — Features grandes ⬜ (0/4)
-- [ ] **T2-19** Estudio de material IA (canvas + lenguaje natural + rename) — *migración*
-- [ ] **T2-20** vista 360 del estudiante — *endpoint nuevo*
-- [ ] **T2-21** etiqueta de dificultad por ítem — *migración*
-- [ ] **T2-22** listas/colecciones de ítems — *migración*
+> **✅ FASE A COMPLETA (2026-07-26):** T2-25, T2-12, T2-27, T2-14 (14b `nodeId` diferido), T2-15, T2-17, T2-11 integrados en `sprint-feedback-v2b`, typecheck+lint verdes, tests de API OK (salvo `privacy.*` que exige `DATABASE_URL` — entorno). Falta E2E manual. Sigue **Fase B** (T2-21 `0015` → T2-22 `0016` → T2-20).
 
-### Ola 5 — Limpieza ⬜ (0/1)
-- [ ] **T2-23** eliminar estados de evaluaciones — *migración*
+### Ola 4 — Features grandes 🟢 (3/3 + 1 diferido)
+- [x] **T2-21** etiqueta de dificultad por ítem — Fase B `7bd2b22`+`c99f0c5` (migración `0015`; editar difficulty diferido)
+- [x] **T2-22** listas/colecciones de ítems — Fase B (agente, `d76c9fb`, migración `0016`; puente lista→evaluación clona ítems, sin tags/figuras/secciones — diferido)
+- [x] **T2-20** vista 360 del estudiante — Fase B (agente, `4f791d1`, endpoint panorama + perfil + picker)
+- ⏸️ **T2-19** Crear material IA (canvas) — **DIFERIDO a fase futura (F2)** (decisión 2026-07-26)
 
-### Ola 3 (extra) — ⬜
-- [ ] **T2-27** filtro de momento DIA en `/evaluaciones` *(depende del stack de filtros)*
+### Ola 5 — Limpieza 🟢 (1/1)
+- [x] **T2-23** ocultar estados de instrumentos (Borrador/Publicado/Archivado) en UI + traer todos los estados — Fase C `8fb2e93` (sin migración)
+
+### Ola 3 (extra) — 🟢
+- [x] **T2-27** filtro de momento DIA en `/evaluaciones` — Fase A `6645dc5`
+
+> **✅ PLAN COMPLETO (2026-07-26):** las 3 fases integradas en `sprint-feedback-v2b` (pusheada). Fase A (7 tickets), Fase B (T2-21/22/20), Fase C (T2-23). **10 tickets construidos + T2-19 diferido a fase futura.** typecheck 6/6 · lint 6/6 · **828 tests de API OK** (sólo `privacy.*` falla por `DATABASE_URL` de entorno). Diferidos documentados: T2-14b (filtro `nodeId`), editar dificultad (T2-21), puente lista→evaluación sin tags/figuras/secciones (T2-22). **Pendiente: E2E manual.**
 
 ---
 

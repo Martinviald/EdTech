@@ -11,6 +11,7 @@ export {
 } from './header-icon.consts';
 export { PageTabs, type PageTab } from './PageTabs';
 export { FilterBar, type FilterField, type FilterOption } from './FilterBar';
+export { MultiSelectFilter, type MultiSelectOption } from './MultiSelectFilter';
 export { TopProgressBar } from './TopProgressBar';
 export { useOptimisticRoute } from './use-optimistic-route';
 export { MetaItem } from './MetaItem';

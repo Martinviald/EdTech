@@ -461,6 +461,16 @@ export class ItemAnalysisService {
 
       const correctRate = totalResponses > 0 ? (correctCount / totalResponses) * 100 : null;
 
+      // T2-17 — referencias comparativas: % de logro de la MISMA pregunta en el
+      // colegio (toda la org) y en el nivel/grado. Independientes del scope del
+      // usuario (líneas de referencia), acotadas a la org por `assessmentId`.
+      const references = await this.loadQuestionReferences(
+        tx,
+        query.assessmentId,
+        itemId,
+        query.classGroupId,
+      );
+
       // Recortes por alternativa (ítems con opciones-imagen). Se expone solo el flag; la
       // imagen se sirve firmada por `/items/{id}/alternativa/{key}/figura`.
       const altImageRefs = (item.scoringConfig?.altImageRefs ?? null) as Record<
@@ -498,6 +508,7 @@ export class ItemAnalysisService {
         blankCount,
         correctCount,
         correctRate,
+        references,
         alternatives,
       };
     });
@@ -703,6 +714,94 @@ export class ItemAnalysisService {
         org: orgRateByItem.has(q.itemId) ? orgRateByItem.get(q.itemId)! : null,
       },
     }));
+  }
+
+  /**
+   * T2-17 — Referencias comparativas de UNA pregunta para el panel de detalle: el
+   * % de logro de la MISMA pregunta en el COLEGIO (toda la org) y en el NIVEL/grado
+   * (todos los cursos del mismo grado que rindieron la evaluación). Es el análogo
+   * por-pregunta de `attachOrgReferences` (que puebla la cabecera de la matriz),
+   * extendido con el corte por grado.
+   *
+   * Semántica (idéntica a `attachOrgReferences`):
+   *  · Ambas referencias IGNORAN el scope del usuario — son líneas de comparación:
+   *    un profesor ve su curso en `correctRate` y el colegio/nivel completos aquí.
+   *  · Se acotan a la org por construcción: la query corre dentro de `withOrgContext`
+   *    y filtra por `assessmentId`, ya validado como propio de la org → agregar sin
+   *    filtro de alumno es el promedio del colegio, nunca de otra org.
+   *  · Recombinar cursos es SUMA de conteos, nunca promedio de % (los cursos tienen
+   *    N distinto): se suman `response_count`/`correct_count` y el % se recalcula
+   *    sobre el total, igual que el resto del read-model de cohorte.
+   *
+   * `org`   = Σ de TODOS los cursos que rindieron la evaluación.
+   * `grade` = Σ acotada a los cursos cuyo `grade_id` = el grado en contexto (el del
+   *           `classGroupId` si viene; si no, los grados presentes en la evaluación).
+   *           En una evaluación de un solo grado (caso típico DIA) coincide con `org`.
+   *
+   * Sin `assessmentId` no hay una referencia agregada bien definida (el read-model
+   * se recombina por evaluación) → ambas `null`.
+   */
+  private async loadQuestionReferences(
+    tx: Database,
+    assessmentId: string | undefined,
+    itemId: string,
+    classGroupId: string | undefined,
+  ): Promise<{ org: number | null; grade: number | null }> {
+    if (!assessmentId) return { org: null, grade: null };
+
+    // Conteos de la pregunta en la evaluación, agrupados por grado del curso.
+    const rows = await tx
+      .select({
+        gradeId: classGroups.gradeId,
+        total: sql<number>`sum(${assessmentItemStats.responseCount})::int`,
+        correct: sql<number>`sum(${assessmentItemStats.correctCount})::int`,
+      })
+      .from(assessmentItemStats)
+      .innerJoin(classGroups, eq(classGroups.id, assessmentItemStats.classGroupId))
+      .where(
+        and(
+          eq(assessmentItemStats.assessmentId, assessmentId),
+          eq(assessmentItemStats.itemId, itemId),
+        ),
+      )
+      .groupBy(classGroups.gradeId);
+
+    if (rows.length === 0) return { org: null, grade: null };
+
+    // Grado(s) en contexto: el del curso filtrado (si viene); si no, todos los
+    // grados que rindieron la evaluación (⇒ `grade` == `org` en evaluación de un
+    // solo grado).
+    let targetGradeIds: Set<string>;
+    if (classGroupId) {
+      const [cg] = await tx
+        .select({ gradeId: classGroups.gradeId })
+        .from(classGroups)
+        .where(eq(classGroups.id, classGroupId))
+        .limit(1);
+      targetGradeIds = new Set(cg?.gradeId ? [cg.gradeId] : []);
+    } else {
+      targetGradeIds = new Set(rows.map((r) => r.gradeId));
+    }
+
+    let orgTotal = 0;
+    let orgCorrect = 0;
+    let gradeTotal = 0;
+    let gradeCorrect = 0;
+    for (const r of rows) {
+      const total = Number(r.total);
+      const correct = Number(r.correct);
+      orgTotal += total;
+      orgCorrect += correct;
+      if (targetGradeIds.has(r.gradeId)) {
+        gradeTotal += total;
+        gradeCorrect += correct;
+      }
+    }
+
+    return {
+      org: orgTotal > 0 ? (orgCorrect / orgTotal) * 100 : null,
+      grade: gradeTotal > 0 ? (gradeCorrect / gradeTotal) * 100 : null,
+    };
   }
 
   /** Alumnos con respuestas en la evaluación dentro del scope, paginados. */

@@ -96,12 +96,12 @@ export default async function ProgresionPage({
   const rawScope = pick(params, 'scope');
   const scope: ProgressionScope = isScope(rawScope) ? rawScope : 'class';
   const studentId = pick(params, 'studentId');
-  const gradeId = filters.gradeId;
+  const gradeId = filters.gradeId?.[0];
   // Curso heredado de otra vista (p. ej. desde el nav con gradeId ya puesto):
   // puede no pertenecer al nivel filtrado. Sin validar contra `options.classGroups`
   // (fetch cacheado, ver `resolveClassGroupId`) porque eso bloquearía el shell —
   // cada sección async abajo valida por su cuenta con el mismo helper.
-  const rawClassGroupId = pick(params, 'classGroupId') ?? filters.classGroupId;
+  const rawClassGroupId = pick(params, 'classGroupId') ?? filters.classGroupId?.[0];
   const nodeId = pick(params, 'nodeId');
 
   return (
@@ -184,7 +184,8 @@ function buildProgressionQuery({
   if (scope === 'student' && studentId) qs.set('studentId', studentId);
   if (scope === 'class' && classGroupId) qs.set('classGroupId', classGroupId);
   if (scope === 'skill' && nodeId) qs.set('nodeId', nodeId);
-  if (filters.subjectId) qs.set('subjectId', filters.subjectId);
+  const subjectId = filters.subjectId?.[0];
+  if (subjectId) qs.set('subjectId', subjectId);
   if (filters.academicYearId) qs.set('academicYearId', filters.academicYearId);
   return `?${qs.toString()}`;
 }

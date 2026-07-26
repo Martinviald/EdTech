@@ -35,7 +35,8 @@ export default async function EvaluacionResultadosPage({
   const sp = await searchParams;
   const filters = parseDashboardFilters(sp);
   const filterQuery = buildDashboardQuery(filters);
-  const classGroupId = filters.classGroupId;
+  // El informe por-evaluación se acota a UN curso: el primero seleccionado.
+  const classGroupId = filters.classGroupId?.[0];
   const basePath = ROUTES.evaluacionResultados(assessmentId);
 
   const reportQuery = new URLSearchParams({ assessmentId });

@@ -10,6 +10,7 @@ import { DashboardFilterBar } from '../components/dashboard-filter-bar';
 import {
   parseDashboardFilters,
   buildDashboardQuery,
+  toScalarFilters,
   type DashboardFilterValues,
 } from '../components/dashboard-filters';
 import { dashboardFiltersToAssistantRefs } from '../components/assistant-context';
@@ -112,5 +113,11 @@ async function SkillsSection({
     );
   }
 
-  return <SkillsBreakdown skills={skills} filters={filters} assessmentId={assessmentId} />;
+  return (
+    <SkillsBreakdown
+      skills={skills}
+      filters={toScalarFilters(filters)}
+      assessmentId={assessmentId}
+    />
+  );
 }

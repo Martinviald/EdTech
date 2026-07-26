@@ -335,6 +335,7 @@ export class DashboardsService {
           type: instruments.type,
           subjectId: instruments.subjectId,
           gradeId: instruments.gradeId,
+          applicationPeriod: instruments.applicationPeriod,
         })
         .from(instruments)
         .where(
@@ -364,6 +365,7 @@ export class DashboardsService {
           type: r.type,
           subjectId: r.subjectId,
           gradeId: r.gradeId,
+          applicationPeriod: r.applicationPeriod,
         })),
       };
     });
@@ -1102,8 +1104,9 @@ export class DashboardsService {
       // Cursos del scope (filtrados por gradeId/classGroupId/academicYearId si vienen).
       const cgConditions = [eq(classGroups.orgId, orgId)];
       if (!scope.scopeAll) cgConditions.push(inArray(classGroups.id, scope.classGroupIds));
-      if (query.classGroupId) cgConditions.push(eq(classGroups.id, query.classGroupId));
-      if (query.gradeId) cgConditions.push(eq(classGroups.gradeId, query.gradeId));
+      if (query.classGroupId?.length)
+        cgConditions.push(inArray(classGroups.id, query.classGroupId));
+      if (query.gradeId?.length) cgConditions.push(inArray(classGroups.gradeId, query.gradeId));
       if (query.academicYearId) {
         cgConditions.push(eq(classGroups.academicYearId, query.academicYearId));
       }
@@ -1260,7 +1263,10 @@ export class DashboardsService {
     query: DashboardFiltersQueryDto,
   ): Promise<string[] | null> {
     const hasStudentScopingFilter =
-      !!query.classGroupId || !!query.gradeId || !!query.studentId || !!query.academicYearId;
+      !!query.classGroupId?.length ||
+      !!query.gradeId?.length ||
+      !!query.studentId ||
+      !!query.academicYearId;
 
     if (scope.scopeAll && !hasStudentScopingFilter) return null;
 
@@ -1270,9 +1276,10 @@ export class DashboardsService {
       allowedClassGroupIds = null; // todos los de la org
     } else {
       allowedClassGroupIds = scope.classGroupIds;
-      if (query.classGroupId) {
-        if (!scope.classGroupIds.includes(query.classGroupId)) return [];
-        allowedClassGroupIds = [query.classGroupId];
+      if (query.classGroupId?.length) {
+        const requested = query.classGroupId.filter((id) => scope.classGroupIds.includes(id));
+        if (requested.length === 0) return [];
+        allowedClassGroupIds = requested;
       }
       if (allowedClassGroupIds.length === 0) return [];
     }
@@ -1281,10 +1288,10 @@ export class DashboardsService {
     if (allowedClassGroupIds !== null) {
       cgConditions.push(inArray(classGroups.id, allowedClassGroupIds));
     }
-    if (scope.scopeAll && query.classGroupId) {
-      cgConditions.push(eq(classGroups.id, query.classGroupId));
+    if (scope.scopeAll && query.classGroupId?.length) {
+      cgConditions.push(inArray(classGroups.id, query.classGroupId));
     }
-    if (query.gradeId) cgConditions.push(eq(classGroups.gradeId, query.gradeId));
+    if (query.gradeId?.length) cgConditions.push(inArray(classGroups.gradeId, query.gradeId));
     if (query.academicYearId)
       cgConditions.push(eq(classGroups.academicYearId, query.academicYearId));
 
@@ -1326,7 +1333,8 @@ export class DashboardsService {
     scope: Scope,
     query: DashboardFiltersQueryDto,
   ): Promise<string[] | null> {
-    const hasScopingFilter = !!query.classGroupId || !!query.gradeId || !!query.academicYearId;
+    const hasScopingFilter =
+      !!query.classGroupId?.length || !!query.gradeId?.length || !!query.academicYearId;
 
     if (scope.scopeAll && !hasScopingFilter) return null;
 
@@ -1335,9 +1343,10 @@ export class DashboardsService {
       allowedClassGroupIds = null; // todos los de la org
     } else {
       allowedClassGroupIds = scope.classGroupIds;
-      if (query.classGroupId) {
-        if (!scope.classGroupIds.includes(query.classGroupId)) return [];
-        allowedClassGroupIds = [query.classGroupId];
+      if (query.classGroupId?.length) {
+        const requested = query.classGroupId.filter((id) => scope.classGroupIds.includes(id));
+        if (requested.length === 0) return [];
+        allowedClassGroupIds = requested;
       }
       if (allowedClassGroupIds.length === 0) return [];
     }
@@ -1346,10 +1355,10 @@ export class DashboardsService {
     if (allowedClassGroupIds !== null) {
       cgConditions.push(inArray(classGroups.id, allowedClassGroupIds));
     }
-    if (scope.scopeAll && query.classGroupId) {
-      cgConditions.push(eq(classGroups.id, query.classGroupId));
+    if (scope.scopeAll && query.classGroupId?.length) {
+      cgConditions.push(inArray(classGroups.id, query.classGroupId));
     }
-    if (query.gradeId) cgConditions.push(eq(classGroups.gradeId, query.gradeId));
+    if (query.gradeId?.length) cgConditions.push(inArray(classGroups.gradeId, query.gradeId));
     if (query.academicYearId) {
       cgConditions.push(eq(classGroups.academicYearId, query.academicYearId));
     }
@@ -1374,11 +1383,11 @@ export class DashboardsService {
     const conditions = [eq(assessments.orgId, orgId), isNull(instruments.deletedAt)];
     if (query.assessmentId) conditions.push(eq(assessments.id, query.assessmentId));
     if (query.instrumentId) conditions.push(eq(assessments.instrumentId, query.instrumentId));
-    if (query.instrumentType) {
-      conditions.push(sql`${instruments.type}::text = ${query.instrumentType}`);
+    if (query.instrumentType?.length) {
+      conditions.push(inArray(sql`${instruments.type}::text`, query.instrumentType));
     }
-    if (query.subjectId) conditions.push(eq(instruments.subjectId, query.subjectId));
-    if (query.gradeId) conditions.push(eq(instruments.gradeId, query.gradeId));
+    if (query.subjectId?.length) conditions.push(inArray(instruments.subjectId, query.subjectId));
+    if (query.gradeId?.length) conditions.push(inArray(instruments.gradeId, query.gradeId));
 
     const rows = await tx
       .select({ id: assessments.id })
@@ -1615,8 +1624,8 @@ export class DashboardsService {
     // 1) Cursos con bajo logro (< 60% promedio).
     const cgConditions = [eq(classGroups.orgId, orgId)];
     if (!scope.scopeAll) cgConditions.push(inArray(classGroups.id, scope.classGroupIds));
-    if (query.classGroupId) cgConditions.push(eq(classGroups.id, query.classGroupId));
-    if (query.gradeId) cgConditions.push(eq(classGroups.gradeId, query.gradeId));
+    if (query.classGroupId?.length) cgConditions.push(inArray(classGroups.id, query.classGroupId));
+    if (query.gradeId?.length) cgConditions.push(inArray(classGroups.gradeId, query.gradeId));
     if (query.academicYearId)
       cgConditions.push(eq(classGroups.academicYearId, query.academicYearId));
 

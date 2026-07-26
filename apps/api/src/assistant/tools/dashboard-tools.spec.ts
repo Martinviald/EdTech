@@ -78,7 +78,10 @@ describe('get_dashboard_overview tool', () => {
 
     const result = await tool.execute({ classGroupId: UUID }, CTX);
 
-    expect(getOverview).toHaveBeenCalledWith(USER, expect.objectContaining({ classGroupId: UUID }));
+    expect(getOverview).toHaveBeenCalledWith(
+      USER,
+      expect.objectContaining({ classGroupId: [UUID] }),
+    );
     expect(JSON.parse(result.content)).toEqual(response);
   });
 
@@ -105,7 +108,7 @@ describe('get_dashboard_skills tool', () => {
 
     const result = await tool.execute({ subjectId: UUID }, CTX);
 
-    expect(getSkills).toHaveBeenCalledWith(USER, expect.objectContaining({ subjectId: UUID }));
+    expect(getSkills).toHaveBeenCalledWith(USER, expect.objectContaining({ subjectId: [UUID] }));
     expect(JSON.parse(result.content)).toEqual(response);
   });
 
@@ -217,7 +220,7 @@ describe('get_heatmap tool', () => {
 
     const result = await tool.execute({ gradeId: UUID }, CTX);
 
-    expect(getHeatmap).toHaveBeenCalledWith(USER, expect.objectContaining({ gradeId: UUID }));
+    expect(getHeatmap).toHaveBeenCalledWith(USER, expect.objectContaining({ gradeId: [UUID] }));
     expect(JSON.parse(result.content)).toEqual(response);
   });
 

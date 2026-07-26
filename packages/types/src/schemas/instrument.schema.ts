@@ -112,7 +112,12 @@ export type PassageDto = z.infer<typeof passageSchema>;
 export const instrumentUploadUrlRequestSchema = z.object({
   fileName: z.string().min(1).max(300),
   mimeType: z.string().min(1).max(150).default('application/pdf'),
-  sizeBytes: z.number().int().min(1).max(50 * 1024 * 1024).optional(),
+  sizeBytes: z
+    .number()
+    .int()
+    .min(1)
+    .max(50 * 1024 * 1024)
+    .optional(),
 });
 
 /** Paso 3: confirmar la subida (persistir el adjunto) tras el PUT a S3. */
@@ -203,9 +208,7 @@ export const createInstrumentSchema = z.object({
   sections: z.array(createInstrumentSectionSchema).optional(),
 });
 
-export const updateInstrumentSchema = createInstrumentSchema
-  .omit({ sections: true })
-  .partial();
+export const updateInstrumentSchema = createInstrumentSchema.omit({ sections: true }).partial();
 
 export const listInstrumentsQuerySchema = z.object({
   type: instrumentTypeSchema.optional(),
@@ -213,7 +216,6 @@ export const listInstrumentsQuerySchema = z.object({
   gradeId: z.string().uuid().optional(),
   year: z.coerce.number().int().optional(),
   applicationPeriod: instrumentApplicationPeriodSchema.optional(),
-  status: instrumentStatusSchema.optional(),
   isOfficial: z.coerce.boolean().optional(),
   page: z.coerce.number().int().min(1).default(1),
   limit: z.coerce.number().int().min(1).max(100).default(20),

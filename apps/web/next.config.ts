@@ -16,6 +16,15 @@ const nextConfig: NextConfig = {
   // runtime funcionan bien. Bloqueaba el build de producción del demo.
   // (En Next 15.5 salió de `experimental` y es una clave top-level.)
   typedRoutes: false,
+  // Compatibilidad tras renombrar la ruta /banco-items → /banco-contenido (T2-25).
+  // Temporales (permanent: false) para no dejar cacheado el redirect en el
+  // navegador mientras dura la transición.
+  async redirects() {
+    return [
+      { source: '/banco-items', destination: '/banco-contenido', permanent: false },
+      { source: '/banco-items/:path*', destination: '/banco-contenido/:path*', permanent: false },
+    ];
+  },
 };
 
 export default nextConfig;

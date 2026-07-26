@@ -8,6 +8,7 @@ export * from './taxonomy';
 export * from './instruments';
 export * from './files';
 export * from './items';
+export * from './item-collections';
 export * from './item-edit-proposals';
 export * from './assessments';
 export * from './responses';

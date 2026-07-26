@@ -201,13 +201,18 @@ export class HeatmapService {
     if (query.instrumentId) {
       conditions.push(eq(assessments.instrumentId, query.instrumentId));
     }
-    if (query.instrumentType) {
-      // `instruments.type` es un pgEnum; el DTO entrega string. Comparamos por
+    if (query.instrumentType?.length) {
+      // `instruments.type` es un pgEnum; el DTO entrega strings. Comparamos por
       // texto para no acoplar el contrato al enum de Drizzle.
-      conditions.push(sql`${instruments.type}::text = ${query.instrumentType}`);
+      conditions.push(inArray(sql`${instruments.type}::text`, query.instrumentType));
     }
-    if (query.subjectId) conditions.push(eq(instruments.subjectId, query.subjectId));
-    if (query.gradeId) conditions.push(eq(instruments.gradeId, query.gradeId));
+    if (query.subjectId?.length) conditions.push(inArray(instruments.subjectId, query.subjectId));
+    if (query.gradeId?.length) conditions.push(inArray(instruments.gradeId, query.gradeId));
+    if (query.applicationPeriod?.length) {
+      conditions.push(
+        inArray(sql`${instruments.applicationPeriod}::text`, query.applicationPeriod),
+      );
+    }
 
     if (classGroupIds !== null) {
       conditions.push(inArray(assessmentSkillStats.classGroupId, classGroupIds));
@@ -421,7 +426,7 @@ export class HeatmapService {
     scope: Scope,
     query: HeatmapQueryDto,
   ): Promise<string[] | null> {
-    const hasCourseFilter = !!query.classGroupId || !!query.academicYearId;
+    const hasCourseFilter = !!query.classGroupId?.length || !!query.academicYearId;
 
     if (scope.scopeAll && !hasCourseFilter) return null;
 
@@ -432,9 +437,10 @@ export class HeatmapService {
     } else {
       if (scope.classGroupIds.length === 0) return [];
       allowedClassGroupIds = scope.classGroupIds;
-      if (query.classGroupId) {
-        if (!scope.classGroupIds.includes(query.classGroupId)) return [];
-        allowedClassGroupIds = [query.classGroupId];
+      if (query.classGroupId?.length) {
+        const requested = query.classGroupId.filter((id) => scope.classGroupIds.includes(id));
+        if (requested.length === 0) return [];
+        allowedClassGroupIds = requested;
       }
     }
 
@@ -442,8 +448,8 @@ export class HeatmapService {
     if (allowedClassGroupIds !== null) {
       cgConditions.push(inArray(classGroups.id, allowedClassGroupIds));
     }
-    if (scope.scopeAll && query.classGroupId) {
-      cgConditions.push(eq(classGroups.id, query.classGroupId));
+    if (scope.scopeAll && query.classGroupId?.length) {
+      cgConditions.push(inArray(classGroups.id, query.classGroupId));
     }
     if (query.academicYearId) {
       cgConditions.push(eq(classGroups.academicYearId, query.academicYearId));

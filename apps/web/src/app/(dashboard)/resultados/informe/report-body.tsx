@@ -8,12 +8,7 @@ import {
   TrendingUp,
   Users,
 } from 'lucide-react';
-import type {
-  AssessmentReportItemRow,
-  AssessmentReportResponse,
-  ItemReportFlag,
-  SkillAchievementModel,
-} from '@soe/types';
+import type { AssessmentReportResponse, SkillAchievementModel } from '@soe/types';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import {
   Table,
@@ -33,6 +28,7 @@ import {
   PERFORMANCE_LEVEL_BAR_CLASS,
 } from '../components/performance-level';
 import { ReportExportButton } from './report-export-button';
+import { ItemsAnalysisTable } from './items-analysis-table';
 import { SkillsBreakdown } from '../components/skills-breakdown';
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -40,34 +36,6 @@ import { SkillsBreakdown } from '../components/skills-breakdown';
 // datos ya calculados por el backend. Los botones de exportación son los únicos
 // fragmentos cliente (ExportButton).
 // ─────────────────────────────────────────────────────────────────────────────
-
-// Umbrales de color para dificultad (p) y discriminación (D). Mismos cortes que
-// usa el backend para los flags, replicados aquí sólo para la codificación visual.
-const DIFFICULTY_LOW = 40;
-const DIFFICULTY_MID = 60;
-const DISCRIMINATION_LOW = 0.2;
-const DISCRIMINATION_MID = 0.3;
-
-const FLAG_META: Record<ItemReportFlag, { label: string; className: string }> = {
-  critical: {
-    label: 'Crítico',
-    className: 'border-transparent bg-destructive/10 text-destructive',
-  },
-  low_discrimination: {
-    label: 'Baja discriminación',
-    className: 'border-transparent bg-accent text-accent-foreground',
-  },
-  strong_distractor: {
-    label: 'Distractor potente',
-    className:
-      'border-transparent bg-warning/15 text-warning',
-  },
-  easy: {
-    label: 'Muy fácil',
-    className:
-      'border-transparent bg-muted text-muted-foreground',
-  },
-};
 
 const PRIORITY_META: Record<'high' | 'medium' | 'low', { label: string; className: string }> = {
   high: {
@@ -99,25 +67,6 @@ function fmtSigned(value: number | null): string {
   if (value === null || Number.isNaN(value)) return '—';
   const sign = value > 0 ? '+' : '';
   return `${sign}${value.toFixed(1)}`;
-}
-
-function fmtDiscrimination(value: number | null): string {
-  if (value === null || Number.isNaN(value)) return '—';
-  return value.toFixed(2);
-}
-
-function difficultyClass(value: number | null): string {
-  if (value === null) return 'text-muted-foreground';
-  if (value < DIFFICULTY_LOW) return 'text-destructive font-semibold';
-  if (value < DIFFICULTY_MID) return 'text-warning font-medium';
-  return 'text-success font-medium';
-}
-
-function discriminationClass(value: number | null): string {
-  if (value === null) return 'text-muted-foreground';
-  if (value < DISCRIMINATION_LOW) return 'text-destructive font-semibold';
-  if (value < DISCRIMINATION_MID) return 'text-warning font-medium';
-  return 'text-success font-medium';
 }
 
 export function ReportBody({
@@ -217,8 +166,12 @@ export function ReportBody({
         classGroupId={classGroupId}
       />
 
-      {/* 5. Análisis psicométrico de ítems */}
-      <ItemsSection report={report} />
+      {/* 5. Análisis psicométrico de ítems (T2-17: clickeable → panel de detalle) */}
+      <ItemsAnalysisTable
+        items={report.items}
+        assessmentId={assessmentId}
+        classGroupId={classGroupId}
+      />
 
       {/* 6. Alumnos en foco */}
       <RiskStudents report={report} />
@@ -470,123 +423,6 @@ function SkillsSection({
         })}
       </CardContent>
     </Card>
-  );
-}
-
-// ── Ítems (psicometría) ───────────────────────────────────────────────────────
-
-function ItemsSection({ report }: { report: AssessmentReportResponse }) {
-  const items = report.items;
-  if (items.length === 0) return null;
-
-  return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="text-base">Análisis de preguntas</CardTitle>
-        <p className="text-sm text-muted-foreground">
-          Dificultad (p): % de logro — bajo = difícil. Discriminación (D): distingue a quienes
-          dominan el contenido — D&nbsp;&lt;&nbsp;0,2 sugiere revisar la pregunta, no el
-          aprendizaje.
-        </p>
-      </CardHeader>
-      <CardContent className="space-y-4">
-        <div className="overflow-x-auto">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead className="w-12">N°</TableHead>
-                <TableHead>Habilidad / contenido</TableHead>
-                <TableHead className="text-center">Clave</TableHead>
-                <TableHead className="text-right">Dificultad</TableHead>
-                <TableHead className="text-right">Discrim.</TableHead>
-                <TableHead className="hidden md:table-cell">Distractor top</TableHead>
-                <TableHead>Alertas</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {items.map((i) => (
-                <ItemRow key={i.itemId} item={i} />
-              ))}
-            </TableBody>
-          </Table>
-        </div>
-        <FlagsLegend />
-      </CardContent>
-    </Card>
-  );
-}
-
-function ItemRow({ item }: { item: AssessmentReportItemRow }) {
-  const label = item.skillName ?? item.contentName ?? '—';
-  const secondary = item.skillName && item.contentName ? item.contentName : null;
-  return (
-    <TableRow>
-      <TableCell className="font-medium">{item.position}</TableCell>
-      <TableCell>
-        <span className="block text-sm">{label}</span>
-        {secondary ? (
-          <span className="block text-xs text-muted-foreground">{secondary}</span>
-        ) : null}
-      </TableCell>
-      <TableCell className="text-center font-mono text-xs">{item.correctKey ?? '—'}</TableCell>
-      <TableCell className={cn('text-right tabular-nums', difficultyClass(item.difficulty))}>
-        {item.difficulty === null ? '—' : `${item.difficulty.toFixed(0)}%`}
-      </TableCell>
-      <TableCell
-        className={cn('text-right tabular-nums', discriminationClass(item.discrimination))}
-      >
-        {fmtDiscrimination(item.discrimination)}
-      </TableCell>
-      <TableCell className="hidden md:table-cell text-sm">
-        {item.topDistractorKey ? (
-          <span>
-            <span className="font-mono">{item.topDistractorKey}</span>
-            {item.topDistractorRate !== null ? (
-              <span className="text-muted-foreground"> ({item.topDistractorRate.toFixed(0)}%)</span>
-            ) : null}
-          </span>
-        ) : (
-          '—'
-        )}
-      </TableCell>
-      <TableCell>
-        <div className="flex flex-wrap gap-1">
-          {item.flags.map((f) => (
-            <span
-              key={f}
-              className={cn(
-                'inline-flex items-center rounded-full border px-2 py-0.5 text-[11px] font-semibold',
-                FLAG_META[f].className,
-              )}
-            >
-              {FLAG_META[f].label}
-            </span>
-          ))}
-        </div>
-      </TableCell>
-    </TableRow>
-  );
-}
-
-function FlagsLegend() {
-  return (
-    <div className="flex flex-wrap gap-x-5 gap-y-1.5 text-xs text-muted-foreground">
-      <span>
-        <strong className="text-foreground">Crítico</strong>: &lt;40% de logro — contenido no
-        logrado.
-      </span>
-      <span>
-        <strong className="text-foreground">Baja discriminación</strong>: D&nbsp;&lt;&nbsp;0,2 —
-        posible problema de redacción/clave.
-      </span>
-      <span>
-        <strong className="text-foreground">Distractor potente</strong>: una alternativa incorrecta
-        atrae más que la clave.
-      </span>
-      <span>
-        <strong className="text-foreground">Muy fácil</strong>: ≥85% de logro.
-      </span>
-    </div>
   );
 }
 

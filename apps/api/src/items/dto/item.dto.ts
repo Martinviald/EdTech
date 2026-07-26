@@ -1,5 +1,11 @@
 import { z } from 'zod';
-import { itemBankScopeSchema, paginationSchema } from '@soe/types';
+import {
+  ITEM_DIFFICULTIES,
+  csvArraySchema,
+  itemBankScopeSchema,
+  paginationSchema,
+  uuidCsvSchema,
+} from '@soe/types';
 
 // ── Item Type / Status / Source enums ───────────────────────────────────────
 const ITEM_TYPES = [
@@ -104,27 +110,14 @@ const taxonomyNodeGroupsSchema = z
   })
   .pipe(z.array(z.array(z.string().uuid())).optional());
 
-/** Coacciona un query param (CSV o repetido) a `string[]` de uuids, o undefined. */
-const uuidCsvSchema = z
-  .union([z.array(z.string()), z.string()])
-  .optional()
-  .transform((v) => {
-    if (v === undefined) return undefined;
-    const raw = Array.isArray(v) ? v : [v];
-    const ids = raw
-      .flatMap((s) => s.split(','))
-      .map((s) => s.trim())
-      .filter((s) => s.length > 0);
-    return ids.length > 0 ? ids : undefined;
-  })
-  .pipe(z.array(z.string().uuid()).optional());
-
 export const listItemsQuerySchema = paginationSchema.extend({
   instrumentId: z.string().uuid().optional(),
   sectionId: z.string().uuid().optional(),
   type: z.enum(ITEM_TYPES).optional(),
   status: z.enum(ITEM_STATUSES).optional(),
   source: z.enum(ITEM_SOURCES).optional(),
+  // Dificultad (T2-21): multi-select CSV.
+  difficulty: csvArraySchema(z.enum(ITEM_DIFFICULTIES)),
   // Filtro por un nodo (retrocompatible).
   taxonomyNodeId: z.string().uuid().optional(),
   // Filtro multi-tag con lógica OR (TKT-12/TKT-14).

@@ -2,7 +2,7 @@ import { Suspense } from 'react';
 import { notFound, redirect } from 'next/navigation';
 import { apiGet } from '@/lib/api';
 import type { InstrumentModel, ItemModel } from '@soe/types';
-import { SpecTableView } from '@/app/(dashboard)/banco-items/[instrumentId]/spec-table/SpecTableView';
+import { SpecTableView } from '@/app/(dashboard)/banco-contenido/[instrumentId]/spec-table/SpecTableView';
 import { ROUTES } from '@/lib/routes';
 import { Skeleton } from '@/components/ui/skeleton';
 import { PageContainer, TableSkeleton } from '@/components/shared';

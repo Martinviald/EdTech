@@ -38,7 +38,8 @@ export default async function EvaluacionDetallePage({
   const sp = await searchParams;
   const filters = parseDashboardFilters(sp);
   const filterQuery = buildDashboardQuery(filters);
-  const classGroupId = filters.classGroupId;
+  // El detalle por-evaluación se acota a UN curso: el primero seleccionado.
+  const classGroupId = filters.classGroupId?.[0];
   const basePath = ROUTES.evaluacionDetalle(assessmentId);
 
   // TKT-09 — el ordenamiento (alumnos/preguntas por % de logro) se resuelve en el
