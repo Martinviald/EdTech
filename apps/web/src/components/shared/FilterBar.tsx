@@ -68,6 +68,9 @@ export function FilterBar({
 }: FilterBarProps) {
   const visible = fields.filter((field) => !field.hidden);
   const isGrid = layout === 'grid';
+  // En grilla las acciones comparten celda con el ÚLTIMO filtro, para no gastar
+  // una fila entera en un botón. Sin campos visibles, van solas.
+  const actionsInLastCell = isGrid && Boolean(actions) && visible.length > 0;
 
   return (
     <div
@@ -84,12 +87,23 @@ export function FilterBar({
             : 'flex flex-wrap items-end gap-3',
         )}
       >
-        {visible.map((field) => (
-          <FilterFieldCell key={field.key} field={field} isGrid={isGrid} />
-        ))}
+        {visible.map((field, index) =>
+          actionsInLastCell && index === visible.length - 1 ? (
+            <div key={field.key} className="flex w-full items-end gap-2">
+              <div className="min-w-0 flex-1">
+                <FilterFieldCell field={field} isGrid />
+              </div>
+              <div className="flex shrink-0 items-end">{actions}</div>
+            </div>
+          ) : (
+            <FilterFieldCell key={field.key} field={field} isGrid={isGrid} />
+          ),
+        )}
         {actions && !isGrid ? <div className="flex flex-none items-end">{actions}</div> : null}
       </div>
-      {actions && isGrid ? <div className="mt-3 flex justify-end">{actions}</div> : null}
+      {actions && isGrid && !actionsInLastCell ? (
+        <div className="mt-3 flex justify-end">{actions}</div>
+      ) : null}
     </div>
   );
 }
