@@ -37,7 +37,7 @@ const STATUS_LABELS: Record<string, string> = {
 /**
  * Vista de detalle de un instrumento (encabezado + metadata + PDF de enunciado +
  * secciones + ítems). Es compartida por dos rutas:
- *  · `/banco-items/[id]`            (dashboard del colegio)
+ *  · `/banco-contenido/[id]`            (dashboard del colegio)
  *  · `/admin/instrumentos/[id]`     (backoffice de plataforma)
  *
  * `canEdit` decide si se muestran las acciones de modificación (subir/eliminar PDF,

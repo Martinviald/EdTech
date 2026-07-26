@@ -63,7 +63,7 @@ export async function confirmEnunciadoPdf(
       `/instruments/${instrumentId}/enunciado-pdf`,
       input,
     );
-    revalidatePath(`/banco-items/${instrumentId}`);
+    revalidatePath(`/banco-contenido/${instrumentId}`);
     return { ok: true, data };
   } catch (e) {
     const err = e as ApiError;
@@ -72,12 +72,10 @@ export async function confirmEnunciadoPdf(
 }
 
 /** Elimina el PDF del enunciado del instrumento. */
-export async function deleteEnunciadoPdf(
-  instrumentId: string,
-): Promise<EnunciadoDeleteResult> {
+export async function deleteEnunciadoPdf(instrumentId: string): Promise<EnunciadoDeleteResult> {
   try {
     await apiDelete(`/instruments/${instrumentId}/enunciado-pdf`);
-    revalidatePath(`/banco-items/${instrumentId}`);
+    revalidatePath(`/banco-contenido/${instrumentId}`);
     return { ok: true };
   } catch (e) {
     const err = e as ApiError;

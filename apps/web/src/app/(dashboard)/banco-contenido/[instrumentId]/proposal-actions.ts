@@ -62,7 +62,7 @@ export async function reviewItemEditProposal(
     // Aprobar cambia el content del ítem → revalidar la vista del instrumento
     // (si lo conocemos; en el explorador cross-instrumento puede no venir).
     if (action === 'approve' && instrumentId) {
-      revalidatePath(`/banco-items/${instrumentId}`);
+      revalidatePath(`/banco-contenido/${instrumentId}`);
     }
     return { ok: true, data };
   } catch (e) {
