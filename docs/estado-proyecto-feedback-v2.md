@@ -1,8 +1,8 @@
 # Estado del proyecto — Iteración Feedback v2
 
 > Instantánea del progreso de la ejecución del plan `docs/plan-iteracion-feedback-v2.md`.
-> **Rama:** `sprint-feedback-v2` (worktree, desde `dev`) · **PR:** [#85](https://github.com/Martinviald/EdTech/pull/85) → `dev`
-> **Decisiones detalladas:** `docs/decisiones-feedback-v2.md` · **Última actualización:** ronda de ejecución autónoma.
+> **Rama actual:** `sprint-feedback-v2b` (worktree fuera de Dropbox, desde `dev`) · **Merged:** PR [#85](https://github.com/Martinviald/EdTech/pull/85) (→dev) y PR #84 (dev→main, release `9c38da7`).
+> **Decisiones detalladas:** `docs/decisiones-feedback-v2.md` · **Última actualización:** 2026-07-26 (arranca la fase grande, Fase A).
 
 ---
 
@@ -23,6 +23,19 @@
 - **T2-09 Comparar instrumentos — DOS accesos:** (a) botón **"Comparar con otra evaluación"** en el hub de una evaluación, que la preselecciona como base (vía `?baseId`, ya listo en T2-10); **y** (b) un botón/sección **"Comparar instrumentos"** dentro de `/evaluaciones`. Se saca del sidebar cuando existan ambos.
 
 **Aún por confirmar al retomar (defaults ya asumidos):** T2-08 degrade de "Mis cursos" (asumido: al final de "Análisis") · T2-11 ¿eje-axis estricto? (asumido: dimensiones etiquetadas) · T2-22 RLS de colecciones (asumido: `org_id`+`withOrgContext` sin política, por precedente `items`/`instruments`) · T2-19 nombre del "Estudio de material" · T2-23 confirmar que es el `status` de evaluaciones (vestigial).
+
+---
+
+## Actualización (2026-07-26) — merge a main + arranca la fase grande
+
+- **PRs mergeadas:** #85 (→dev) y **#84 (dev→main**, release `9c38da7`, deploy demo corrido). Verificado vía RDS demo (skill `demo-db-access`): **no requería backfill** (read-models poblados, analítica sin cambios en el delta) ni **cambio de taxonomía** (T2-16 es UI-only; `order`/`subjectId` ya poblados).
+- **E2E de los ~17: aprobado.** Arranca la fase grande en worktree **`sprint-feedback-v2b`** (fuera de Dropbox).
+- **Arranque = Fase A** (sin migraciones, E2E en el loop): T2-25 rename, T2-12 multi-select transversal, T2-14 jerarquía, T2-15 panorama select-first, T2-27 momento DIA, T2-17 informes clickeable + comparativa nivel. Luego **Fase B** (T2-21 `0015`, T2-22 `0016`, T2-20) y **Fase C** (T2-23, sin migración).
+- **Decisiones nuevas (confirmadas):**
+  - **T2-19 "Crear material" — DIFERIDO a fase futura (F2).** No se construye en esta iteración; "Material Remedial" queda tal cual en el sidebar.
+  - **T2-11 eje temático — SÍ estricto:** se agrega backend para exponer el ancestro (padre del OA) y agrupar por eje curricular.
+  - **T2-23 REDEFINIDO:** son los estados **Borrador/Publicado/Archivado** de instrumentos (visibles) → **ocultar en UI + traer todos los estados**, **sin migración** (no era el `assessment_status` vestigial).
+  - **T2-22 colecciones — sin RLS** (confirmado, precedente `items`/`instruments`).
 
 ---
 
@@ -56,14 +69,14 @@
 - [ ] **T2-15** panorama pedagógico select-first
 - [ ] **T2-17** informes clickeable + comparativa contra el nivel
 
-### Ola 4 — Features grandes ⬜ (0/4)
-- [ ] **T2-19** Estudio de material IA (canvas + lenguaje natural + rename) — *migración*
-- [ ] **T2-20** vista 360 del estudiante — *endpoint nuevo*
-- [ ] **T2-21** etiqueta de dificultad por ítem — *migración*
-- [ ] **T2-22** listas/colecciones de ítems — *migración*
+### Ola 4 — Features grandes ⬜ (0/3)
+- [ ] **T2-21** etiqueta de dificultad por ítem — *migración `0015`*
+- [ ] **T2-22** listas/colecciones de ítems — *migración `0016`*
+- [ ] **T2-20** vista 360 del estudiante — *endpoint nuevo, sin migración*
+- ⏸️ **T2-19** Crear material IA (canvas) — **DIFERIDO a fase futura (F2)** (decisión 2026-07-26)
 
 ### Ola 5 — Limpieza ⬜ (0/1)
-- [ ] **T2-23** eliminar estados de evaluaciones — *migración*
+- [ ] **T2-23** ocultar estados de instrumentos (Borrador/Publicado/Archivado) en UI + traer todos los estados — *sin migración (redefinido)*
 
 ### Ola 3 (extra) — ⬜
 - [ ] **T2-27** filtro de momento DIA en `/evaluaciones` *(depende del stack de filtros)*
