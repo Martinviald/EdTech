@@ -793,6 +793,42 @@ export class ItemsService {
     return item;
   }
 
+  async findVisibleByIds(ids: string[], user: JwtPayload): Promise<Item[]> {
+    if (ids.length === 0) return [];
+    const conditions = [inArray(items.id, ids), ...this.buildVisibilityConditions(user)];
+    return this.db
+      .select()
+      .from(items)
+      .where(and(...conditions));
+  }
+
+  async cloneIntoInstrument(
+    instrumentId: string,
+    sourceItems: Item[],
+    user: JwtPayload,
+  ): Promise<number> {
+    if (sourceItems.length === 0) return 0;
+
+    const values = sourceItems.map((source, index) => ({
+      orgId: user.orgId,
+      instrumentId,
+      sectionId: null,
+      position: index,
+      type: source.type,
+      content: source.content,
+      scoringConfig: source.scoringConfig ?? {},
+      irtParams: source.irtParams ?? {},
+      status: 'draft' as const,
+      source: 'custom' as const,
+      difficulty: source.difficulty ?? null,
+      version: 1,
+      createdById: user.userId,
+    }));
+
+    await this.db.insert(items).values(values);
+    return values.length;
+  }
+
   /** Fetch raw item (no tags), checking soft-delete. */
   private async getByIdRaw(id: string, user?: JwtPayload): Promise<Item> {
     const [row] = await this.db

@@ -6,9 +6,11 @@ import { FilterBarSkeleton, PaginationControls, TableSkeleton } from '@/componen
 import {
   canAccess,
   ITEM_VIEWER_ROLES,
+  ITEM_BANK_ROLES,
   ITEM_BANK_SCOPES,
   TAXONOMY_NODE_TYPES,
   type ItemBankScope,
+  type ItemCollectionListResponse,
   type TaxonomyNodeModel,
 } from '@soe/types';
 import { ItemBankFilters } from './ItemBankFilters';
@@ -19,6 +21,7 @@ import {
   getCurriculumNodes,
   getItems,
   getInstruments,
+  getItemCollections,
 } from './data';
 
 const PAGE_SIZE = 20;
@@ -115,6 +118,7 @@ export default async function BancoItemsExplorarPage({ searchParams }: PageProps
 
   const params = await searchParams;
   const page = typeof params.page === 'string' ? Math.max(1, Number(params.page) || 1) : 1;
+  const canManageCollections = canAccess(session.user.roles, ITEM_BANK_ROLES);
 
   return (
     <>
@@ -123,7 +127,7 @@ export default async function BancoItemsExplorarPage({ searchParams }: PageProps
       </Suspense>
 
       <Suspense fallback={<TableSkeleton />}>
-        <ExplorerSection params={params} page={page} />
+        <ExplorerSection params={params} page={page} canManageCollections={canManageCollections} />
       </Suspense>
     </>
   );
@@ -155,7 +159,15 @@ async function FiltersSection({ params }: { params: SearchParams }) {
   );
 }
 
-async function ExplorerSection({ params, page }: { params: SearchParams; page: number }) {
+async function ExplorerSection({
+  params,
+  page,
+  canManageCollections,
+}: {
+  params: SearchParams;
+  page: number;
+  canManageCollections: boolean;
+}) {
   const scope = parseScope(params.scope);
   const nodes = await getCurriculumNodes();
   const { subjectIds, gradeIds, groups } = deriveTaxonomySelection(nodes, params);
@@ -170,9 +182,11 @@ async function ExplorerSection({ params, page }: { params: SearchParams; page: n
   if (difficultyIds.length > 0) itemsQuery.set('difficulty', difficultyIds.join(','));
   for (const group of groups) itemsQuery.append('taxonomyNodeGroups', group.join(','));
 
-  const [itemsResponse, instrumentsResponse] = await Promise.all([
+  const emptyCollections: ItemCollectionListResponse = { data: [], total: 0, page: 1, limit: 100 };
+  const [itemsResponse, instrumentsResponse, collectionsResponse] = await Promise.all([
     getItems(itemsQuery.toString()),
     getInstruments(),
+    canManageCollections ? getItemCollections() : Promise.resolve(emptyCollections),
   ]);
 
   const items = itemsResponse.data;
@@ -182,7 +196,12 @@ async function ExplorerSection({ params, page }: { params: SearchParams; page: n
 
   return (
     <>
-      <ItemBankExplorer items={items} instrumentNames={instrumentNames} />
+      <ItemBankExplorer
+        items={items}
+        instrumentNames={instrumentNames}
+        collections={collectionsResponse.data}
+        canManageCollections={canManageCollections}
+      />
       <PaginationControls
         page={page}
         limit={PAGE_SIZE}
