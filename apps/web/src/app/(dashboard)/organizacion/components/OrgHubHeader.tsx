@@ -4,7 +4,7 @@ import { auth } from '@/auth';
 import { ASSIGNMENTS_ROLES, canAccess } from '@soe/types';
 import { ROUTES } from '@/lib/routes';
 import { Button } from '@/components/ui/button';
-import { PageHeader, PageTabs } from '@/components/shared';
+import { BackLink, PageHeader, PageTabs } from '@/components/shared';
 import { ORGANIZACION_TABS, toPageTabs } from '@/components/layout/view-tabs';
 
 import { getOrgOverview } from '../overview';
@@ -26,14 +26,13 @@ export async function OrgHubHeader() {
   return (
     <>
       <PageHeader
+        breadcrumb={<BackLink href={ROUTES.administracion} label="Administración" />}
         title={org.name}
         description="Perfil institucional"
         actions={
           !isSetupComplete ? (
             <Button asChild variant="outline">
-              <Link href={ROUTES.organizacionConfigurar}>
-                Completar configuración
-              </Link>
+              <Link href={ROUTES.organizacionConfigurar}>Completar configuración</Link>
             </Button>
           ) : undefined
         }

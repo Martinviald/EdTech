@@ -109,7 +109,10 @@ export function SidebarNav({
             return (
               <div
                 key={section.id}
-                className={cn('space-y-0.5', idx > 0 && (collapsed ? 'mt-2 border-t pt-2' : 'mt-3'))}
+                className={cn(
+                  'space-y-0.5',
+                  idx > 0 && (collapsed ? 'mt-2 border-t pt-2' : 'mt-3'),
+                )}
               >
                 {!collapsed && section.label ? (
                   <button
@@ -120,7 +123,10 @@ export function SidebarNav({
                   >
                     <span>{section.label}</span>
                     <ChevronDown
-                      className={cn('size-3.5 transition-transform', groupCollapsed && '-rotate-90')}
+                      className={cn(
+                        'size-3.5 transition-transform',
+                        groupCollapsed && '-rotate-90',
+                      )}
                       aria-hidden
                     />
                   </button>
@@ -150,19 +156,22 @@ export function SidebarNav({
 /**
  * Devuelve el href del item con el match más específico respecto al pathname.
  *
- * Un item matchea si su href es igual al pathname o si es un prefijo de carpeta
- * (pathname.startsWith(href + '/')). Cuando varios items matchean (e.g. /admin
- * y /admin/colegios cuando estás en /admin/colegios), gana el href más largo —
- * así sólo el item más específico queda marcado como activo.
+ * Un item matchea si su href —o alguna de sus `matchPaths`— es igual al
+ * pathname o es un prefijo de carpeta (pathname.startsWith(path + '/')). Cuando
+ * varios items matchean (e.g. /admin y /admin/colegios cuando estás en
+ * /admin/colegios), gana la ruta que matcheó más larga — así sólo el item más
+ * específico queda marcado como activo.
  */
 function findActiveHref(pathname: string | null, items: readonly NavItem[]): string | null {
   if (!pathname) return null;
-  let best: NavItem | null = null;
+  let best: { href: string; matchedLength: number } | null = null;
   for (const item of items) {
-    const matches = pathname === item.href || pathname.startsWith(`${item.href}/`);
-    if (!matches) continue;
-    if (!best || item.href.length > best.href.length) {
-      best = item;
+    for (const path of [item.href, ...(item.matchPaths ?? [])]) {
+      const matches = pathname === path || pathname.startsWith(`${path}/`);
+      if (!matches) continue;
+      if (!best || path.length > best.matchedLength) {
+        best = { href: item.href, matchedLength: path.length };
+      }
     }
   }
   return best?.href ?? null;
@@ -189,11 +198,7 @@ function NavRow({ item, isActive, collapsed, activePath, navigate, onNavigate }:
     const content = (
       <span
         aria-disabled="true"
-        className={cn(
-          baseClasses,
-          sizeClasses,
-          'cursor-not-allowed text-muted-foreground/60',
-        )}
+        className={cn(baseClasses, sizeClasses, 'cursor-not-allowed text-muted-foreground/60')}
       >
         <Icon className="size-4 shrink-0" aria-hidden />
         {!collapsed ? (
