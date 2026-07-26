@@ -6,6 +6,7 @@ import {
   Layers,
   LayoutDashboard,
   Library,
+  ListChecks,
   Lightbulb,
   TrendingUp,
   UsersRound,
@@ -39,6 +40,7 @@ export const ORGANIZACION_TABS: readonly ViewTab[] = [
 export const BANCO_TABS: readonly ViewTab[] = [
   { href: ROUTES.bancoItems, label: 'Instrumentos', icon: Library, exact: true },
   { href: ROUTES.bancoItemsExplorar, label: 'Ítems', icon: FileQuestion },
+  { href: ROUTES.bancoColecciones, label: 'Colecciones', icon: ListChecks },
 ];
 
 /** Adapta las `ViewTab` al shape de `PageTabs` (icono como elemento renderizado). */

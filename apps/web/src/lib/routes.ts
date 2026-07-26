@@ -61,6 +61,8 @@ export const ROUTES = {
   bancoItems: route('/banco-contenido'),
   bancoItemsExplorar: route('/banco-contenido/explorar'),
   bancoItemsNuevo: route('/banco-contenido/nuevo'),
+  bancoColecciones: route('/banco-contenido/colecciones'),
+  bancoColeccion: (collectionId: string) => route(`/banco-contenido/colecciones/${collectionId}`),
   bancoItem: (instrumentId: string) => route(`/banco-contenido/${instrumentId}`),
   bancoItemEtiquetar: (instrumentId: string) => route(`/banco-contenido/${instrumentId}/etiquetar`),
   bancoItemSpecTable: (instrumentId: string) =>
