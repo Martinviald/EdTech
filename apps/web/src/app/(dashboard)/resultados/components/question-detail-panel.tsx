@@ -102,6 +102,10 @@ function toNodeTags(tags: QuestionTaxonomyTag[]): QuestionNodeTag[] {
 
 function QuestionDetailContent({ data }: { data: QuestionAnalysisResponse }): JSX.Element {
   const distractor = topDistractorKey(data.alternatives);
+  // T2-17 — referencias comparativas (colegio / nivel). `grade` es opcional en el
+  // contrato (sólo el detalle por pregunta lo puebla); se normaliza a `null`.
+  const orgReference = data.references.org;
+  const gradeReference = data.references.grade ?? null;
 
   return (
     <div className="mt-6 space-y-6">
@@ -139,6 +143,25 @@ function QuestionDetailContent({ data }: { data: QuestionAnalysisResponse }): JS
           tone={data.blankCount > 0 ? 'warning' : 'neutral'}
         />
       </div>
+
+      {/* T2-17 — Comparativa: % de logro de la MISMA pregunta en el colegio (toda la
+          org) y en el nivel/grado, junto al % del scope en contexto (arriba). El
+          colegio/nivel trascienden el scope del usuario: un profesor ve su curso
+          arriba y estas referencias más amplias aquí. */}
+      {orgReference !== null || gradeReference !== null ? (
+        <div className="grid grid-cols-2 gap-3">
+          <MetricCard
+            label="% de logro · colegio"
+            value={formatPct(orgReference)}
+            tone={achievementTone(orgReference)}
+          />
+          <MetricCard
+            label="% de logro · nivel"
+            value={formatPct(gradeReference)}
+            tone={achievementTone(gradeReference)}
+          />
+        </div>
+      ) : null}
 
       {/* Todos los nodos de taxonomía asociados a la pregunta. TKT-05: en
           resultados los descriptores no se muestran (solo en el banco de ítems). */}
@@ -197,9 +220,7 @@ function AlternativeRow({
           <span
             className={cn(
               'inline-flex size-6 shrink-0 items-center justify-center rounded-full border text-xs font-semibold',
-              alt.isCorrect
-                ? 'border-success text-success'
-                : 'border-border text-muted-foreground',
+              alt.isCorrect ? 'border-success text-success' : 'border-border text-muted-foreground',
             )}
           >
             {alt.key}
@@ -214,15 +235,10 @@ function AlternativeRow({
               className="max-h-12 min-w-0 rounded border bg-white object-contain"
             />
           ) : (
-            <span className="truncate text-foreground">
-              {alt.text ?? `Alternativa ${alt.key}`}
-            </span>
+            <span className="truncate text-foreground">{alt.text ?? `Alternativa ${alt.key}`}</span>
           )}
           {alt.isCorrect ? (
-            <CheckCircle2
-              className="size-4 shrink-0 text-success"
-              aria-label="Correcta"
-            />
+            <CheckCircle2 className="size-4 shrink-0 text-success" aria-label="Correcta" />
           ) : isTopDistractor ? (
             <Badge variant="warning" className="shrink-0">
               Distractor
@@ -235,7 +251,10 @@ function AlternativeRow({
       </div>
       <div className="h-2 w-full overflow-hidden rounded-full bg-muted" role="presentation">
         <div
-          className={cn('h-full rounded-full transition-[width] motion-reduce:transition-none', barClass)}
+          className={cn(
+            'h-full rounded-full transition-[width] motion-reduce:transition-none',
+            barClass,
+          )}
           style={{ width: `${Math.min(100, Math.max(0, alt.percentage))}%` }}
         />
       </div>
