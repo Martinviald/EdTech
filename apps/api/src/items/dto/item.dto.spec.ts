@@ -20,8 +20,8 @@ describe('listItemsQuerySchema — filtro facetado del banco', () => {
 
   it('acepta subjectId y gradeId como uuid', () => {
     const q = listItemsQuerySchema.parse({ subjectId: UUID_A, gradeId: UUID_B });
-    expect(q.subjectId).toBe(UUID_A);
-    expect(q.gradeId).toBe(UUID_B);
+    expect(q.subjectId).toEqual([UUID_A]);
+    expect(q.gradeId).toEqual([UUID_B]);
   });
 
   it('un solo grupo (string CSV) → un grupo con sus ids', () => {
