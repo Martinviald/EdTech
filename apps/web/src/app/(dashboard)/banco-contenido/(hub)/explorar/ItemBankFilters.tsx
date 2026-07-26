@@ -18,7 +18,13 @@ import { useTransition } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import type { Route } from 'next';
 import { FilterX } from 'lucide-react';
-import { TAXONOMY_NODE_TYPES, type CatalogEntryModel, type TaxonomyNodeModel } from '@soe/types';
+import {
+  ITEM_DIFFICULTIES,
+  ITEM_DIFFICULTY_LABELS,
+  TAXONOMY_NODE_TYPES,
+  type CatalogEntryModel,
+  type TaxonomyNodeModel,
+} from '@soe/types';
 import { Button } from '@/components/ui/button';
 import { FilterBar, type FilterField } from '@/components/shared';
 import { nodeTypeLabel, nodeOptionLabel } from '@/lib/taxonomy-labels';
@@ -39,6 +45,8 @@ interface ItemBankFiltersProps {
   selectedLeaf: Record<string, string[]>;
   /** Ids elegidos por tipo PADRE/narrower (clave = TaxonomyNodeType padre). */
   selectedParent: Record<string, string[]>;
+  /** Dificultades seleccionadas (T2-21). */
+  difficultyIds: string[];
 }
 
 export function ItemBankFilters({
@@ -49,6 +57,7 @@ export function ItemBankFilters({
   gradeIds,
   selectedLeaf,
   selectedParent,
+  difficultyIds,
 }: ItemBankFiltersProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -97,10 +106,17 @@ export function ItemBankFilters({
       params.delete(leafType);
     });
 
+  const onDifficultyChange = (ids: string[]) =>
+    pushParams((params) => {
+      if (ids.length > 0) params.set('difficulty', ids.join(','));
+      else params.delete('difficulty');
+    });
+
   const clearAll = () =>
     pushParams((params) => {
       params.delete('subjectId');
       params.delete('gradeId');
+      params.delete('difficulty');
       clearNodeSelections(params);
     });
 
@@ -179,6 +195,7 @@ export function ItemBankFilters({
   const hasAnyFilter =
     subjectIds.length > 0 ||
     gradeIds.length > 0 ||
+    difficultyIds.length > 0 ||
     Object.values(selectedLeaf).some((ids) => ids.length > 0) ||
     Object.values(selectedParent).some((ids) => ids.length > 0);
 
@@ -208,6 +225,20 @@ export function ItemBankFilters({
           options={availableGrades.map((g) => ({ id: g.id, label: g.name }))}
           selected={gradeIds}
           onChange={onGradeChange}
+        />
+      ),
+    },
+    {
+      key: 'difficulty',
+      label: 'Dificultad',
+      control: (
+        <NodeTypeFilter
+          label="Dificultad"
+          placeholder="Todas las dificultades"
+          fullWidth
+          options={ITEM_DIFFICULTIES.map((d) => ({ id: d, label: ITEM_DIFFICULTY_LABELS[d] }))}
+          selected={difficultyIds}
+          onChange={onDifficultyChange}
         />
       ),
     },

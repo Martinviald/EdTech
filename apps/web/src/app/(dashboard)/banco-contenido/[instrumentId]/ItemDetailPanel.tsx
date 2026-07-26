@@ -3,6 +3,7 @@
 import type { JSX } from 'react';
 import { CheckCircle2, FileQuestion } from 'lucide-react';
 import type { ItemModel, ItemTaxonomyTagModel, InstrumentSectionModel } from '@soe/types';
+import { ITEM_DIFFICULTY_LABELS } from '@soe/types';
 import { Badge } from '@/components/ui/badge';
 import {
   hasPassageContent,
@@ -111,7 +112,14 @@ export function ItemDetailPanel(props: {
       onClose={onClose}
       position={item?.position ?? null}
       headerBadges={
-        item ? <Badge variant="outline">{ITEM_TYPE_LABELS[item.type] ?? item.type}</Badge> : null
+        item ? (
+          <>
+            <Badge variant="outline">{ITEM_TYPE_LABELS[item.type] ?? item.type}</Badge>
+            {item.difficulty ? (
+              <Badge variant="secondary">{ITEM_DIFFICULTY_LABELS[item.difficulty]}</Badge>
+            ) : null}
+          </>
+        ) : null
       }
       description="Enunciado completo, alternativas y nodos de taxonomía asociados a la pregunta."
       passage={passage}

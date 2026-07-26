@@ -139,6 +139,7 @@ async function FiltersSection({ params }: { params: SearchParams }) {
     nodes,
     params,
   );
+  const difficultyIds = parseCsvIds(params.difficulty);
 
   return (
     <ItemBankFilters
@@ -149,6 +150,7 @@ async function FiltersSection({ params }: { params: SearchParams }) {
       gradeIds={gradeIds}
       selectedLeaf={selectedLeaf}
       selectedParent={selectedParent}
+      difficultyIds={difficultyIds}
     />
   );
 }
@@ -157,6 +159,7 @@ async function ExplorerSection({ params, page }: { params: SearchParams; page: n
   const scope = parseScope(params.scope);
   const nodes = await getCurriculumNodes();
   const { subjectIds, gradeIds, groups } = deriveTaxonomySelection(nodes, params);
+  const difficultyIds = parseCsvIds(params.difficulty);
 
   const itemsQuery = new URLSearchParams();
   itemsQuery.set('scope', scope);
@@ -164,6 +167,7 @@ async function ExplorerSection({ params, page }: { params: SearchParams; page: n
   itemsQuery.set('pageSize', String(PAGE_SIZE));
   if (subjectIds.length > 0) itemsQuery.set('subjectId', subjectIds.join(','));
   if (gradeIds.length > 0) itemsQuery.set('gradeId', gradeIds.join(','));
+  if (difficultyIds.length > 0) itemsQuery.set('difficulty', difficultyIds.join(','));
   for (const group of groups) itemsQuery.append('taxonomyNodeGroups', group.join(','));
 
   const [itemsResponse, instrumentsResponse] = await Promise.all([
