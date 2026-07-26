@@ -3,16 +3,27 @@
 import { useCallback, useEffect, useState } from 'react';
 import type { Route } from 'next';
 import Link from 'next/link';
-import { ChevronDown, ChevronLeft, ChevronRight, GraduationCap } from 'lucide-react';
+import { ChevronDown, ChevronLeft, ChevronRight, GraduationCap, LogOut } from 'lucide-react';
 import type { UserRole } from '@soe/types';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { HoverCard, HoverCardContent, HoverCardTrigger } from '@/components/ui/hover-card';
 import { useOptimisticRoute } from '@/components/shared';
 import { cn } from '@/lib/utils';
 import { BRAND } from '@/lib/brand';
+import { signOutToLogin } from '@/lib/sign-out';
 import { ADMIN_NAV_ITEMS, visibleNavGroups, type NavItem } from './nav-items';
 
 const GROUPS_STORAGE_KEY = 'soe:sidebar-groups-collapsed';
+
+/** Clases compartidas por las filas del sidebar: items de navegación y pie. */
+const ROW_BASE_CLASSES =
+  'flex items-center gap-2.5 rounded-lg text-[13px] font-medium transition-colors duration-fast';
+const ROW_FOCUS_CLASSES =
+  'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2';
+
+function rowSizeClasses(collapsed: boolean): string {
+  return collapsed ? 'w-full justify-center py-2' : 'px-3 py-1.5';
+}
 
 /** Sección renderizable del sidebar. La variante 'admin' usa una sola sección sin título. */
 type NavSection = { id: string; label?: string; items: readonly NavItem[] };
@@ -21,7 +32,15 @@ export type SidebarVariant = 'main' | 'admin';
 
 interface SidebarNavProps {
   roles: readonly UserRole[];
+  /** Estado VISUAL: incluye el despliegue temporal por hover. Define qué se renderiza. */
   collapsed?: boolean;
+  /**
+   * Estado FIJADO por el usuario. Es sobre lo que actúa el botón, así que define
+   * su ícono y su etiqueta: estando fijado colapsado el botón ofrece "Expandir"
+   * aunque el hover lo tenga desplegado en ese momento. Por defecto sigue a
+   * `collapsed` (sin hover ambos coinciden).
+   */
+  pinnedCollapsed?: boolean;
   onNavigate?: () => void;
   onToggle?: () => void;
   /** Cambia el set de items renderizados. 'main' = navegación normal, 'admin' = panel plataforma. */
@@ -31,10 +50,12 @@ interface SidebarNavProps {
 export function SidebarNav({
   roles,
   collapsed = false,
+  pinnedCollapsed,
   onNavigate,
   onToggle,
   variant = 'main',
 }: SidebarNavProps) {
+  const toggleCollapsed = pinnedCollapsed ?? collapsed;
   // El path activo es optimista: al hacer click salta de inmediato al destino
   // (sin esperar el commit) — ver use-optimistic-route.ts y la rule 07.
   const { activePath, navigate } = useOptimisticRoute();
@@ -73,11 +94,11 @@ export function SidebarNav({
           <button
             type="button"
             onClick={onToggle}
-            aria-label={collapsed ? 'Expandir menú' : 'Colapsar menú'}
-            aria-expanded={!collapsed}
+            aria-label={toggleCollapsed ? 'Expandir menú' : 'Colapsar menú'}
+            aria-expanded={!toggleCollapsed}
             className="absolute -right-3 top-5 z-10 flex size-6 items-center justify-center rounded-full border bg-card text-muted-foreground shadow-sm transition-colors duration-fast hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
           >
-            {collapsed ? (
+            {toggleCollapsed ? (
               <ChevronRight className="size-3.5" aria-hidden />
             ) : (
               <ChevronLeft className="size-3.5" aria-hidden />
@@ -148,8 +169,42 @@ export function SidebarNav({
             );
           })}
         </nav>
+
+        <div className={cn('shrink-0 border-t', collapsed ? 'p-2' : 'p-3')}>
+          <SignOutRow collapsed={collapsed} />
+        </div>
       </div>
     </TooltipProvider>
+  );
+}
+
+/** Cierre de sesión al pie del sidebar. Mismo destino que el menú de usuario de la topbar. */
+function SignOutRow({ collapsed }: { collapsed: boolean }) {
+  const button = (
+    <button
+      type="button"
+      onClick={() => void signOutToLogin()}
+      aria-label={collapsed ? 'Cerrar sesión' : undefined}
+      className={cn(
+        ROW_BASE_CLASSES,
+        ROW_FOCUS_CLASSES,
+        rowSizeClasses(collapsed),
+        !collapsed && 'w-full',
+        'text-foreground/70 hover:bg-destructive/10 hover:text-destructive',
+      )}
+    >
+      <LogOut className="size-4 shrink-0" aria-hidden />
+      {!collapsed ? <span>Cerrar sesión</span> : null}
+    </button>
+  );
+
+  if (!collapsed) return button;
+
+  return (
+    <Tooltip>
+      <TooltipTrigger asChild>{button}</TooltipTrigger>
+      <TooltipContent side="right">Cerrar sesión</TooltipContent>
+    </Tooltip>
   );
 }
 
@@ -188,11 +243,9 @@ interface NavRowProps {
 
 function NavRow({ item, isActive, collapsed, activePath, navigate, onNavigate }: NavRowProps) {
   const Icon = item.icon;
-  const baseClasses =
-    'flex items-center gap-2.5 rounded-lg text-[13px] font-medium transition-colors duration-fast';
-  const focusClasses =
-    'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2';
-  const sizeClasses = collapsed ? 'w-full justify-center py-2' : 'px-3 py-1.5';
+  const baseClasses = ROW_BASE_CLASSES;
+  const focusClasses = ROW_FOCUS_CLASSES;
+  const sizeClasses = rowSizeClasses(collapsed);
 
   if (item.status === 'soon') {
     const content = (
