@@ -56,6 +56,47 @@ export function deriveTagFacets(
 }
 
 /**
+ * Tipo de nodo (genérico, transversal a todo currículo) del Objetivo de
+ * Aprendizaje. El EJE curricular estricto es el nodo PADRE de un OA en el árbol
+ * de `taxonomy_nodes`. No referencia ningún instrumento ni currículo concreto.
+ */
+const OBJECTIVE_NODE_TYPE = 'learning_objective';
+
+/**
+ * Deriva las facetas de EJE CURRICULAR ESTRICTO (T2-11): el nodo ANCESTRO (padre)
+ * de los OA etiquetados. Cuenta PREGUNTAS por eje deduplicando por ítem — una
+ * pregunta con dos OA del mismo eje suma una sola vez en ese eje. Se apoya sólo en
+ * la relación padre del árbol (`node.parentId`/`node.parentName`) y en el tipo de
+ * nodo OA; no hay nada atado a un currículo específico.
+ */
+export function deriveEjeFacets(
+  items: ReadonlyArray<{ tags?: ItemTaxonomyTagModel[] }>,
+): TagFacet[] {
+  const byEje = new Map<string, TagFacet>();
+  for (const item of items) {
+    // Dedupe por ítem: los ejes que toca esta pregunta (vía sus OA).
+    const ejesInItem = new Set<string>();
+    for (const tag of item.tags ?? []) {
+      const node = tag.node;
+      if (!node || node.type !== OBJECTIVE_NODE_TYPE || !node.parentId) continue;
+      ejesInItem.add(node.parentId);
+      if (!byEje.has(node.parentId)) {
+        byEje.set(node.parentId, {
+          nodeId: node.parentId,
+          label: node.parentName ?? node.parentId.slice(0, 8),
+          type: 'axis',
+          count: 0,
+        });
+      }
+    }
+    for (const ejeId of ejesInItem) {
+      byEje.get(ejeId)!.count += 1;
+    }
+  }
+  return [...byEje.values()].sort((a, b) => a.label.localeCompare(b.label));
+}
+
+/**
  * Filtra ítems por nodos seleccionados con lógica OR: un ítem pasa si tiene
  * CUALQUIERA de los nodos seleccionados. Si no hay selección, devuelve todo.
  */

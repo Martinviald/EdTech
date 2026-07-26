@@ -11,7 +11,12 @@ import {
   type InstrumentSectionModel,
 } from '@soe/types';
 import { nodeTypeLabel } from '@/lib/taxonomy-labels';
-import { deriveTagFacets, filterItemsByTags, type TagFacet } from '../../tag-facets';
+import {
+  deriveEjeFacets,
+  deriveTagFacets,
+  filterItemsByTags,
+  type TagFacet,
+} from '../../tag-facets';
 import { TagMultiFilter } from '../../TagMultiFilter';
 import { TagBadge } from '../TagBadge';
 import { ItemDetailPanel } from '../ItemDetailPanel';
@@ -54,6 +59,10 @@ export function SpecTableReview({
   const [view, setView] = useState<'matriz' | 'resumen'>('matriz');
 
   const facets = useMemo(() => deriveTagFacets(items), [items]);
+  // Eje curricular estricto = nodo padre del OA (T2-11). Dimensión extra del
+  // resumen; NO entra en `facets` porque los ejes no etiquetan ítems y romperían
+  // el filtro por tag de la matriz.
+  const ejeFacets = useMemo(() => deriveEjeFacets(items), [items]);
   const filteredItems = useMemo(
     () => filterItemsByTags(items, selectedTagIds),
     [items, selectedTagIds],
@@ -101,7 +110,7 @@ export function SpecTableReview({
       </div>
 
       {view === 'resumen' ? (
-        <SpecTableSummary total={items.length} facets={facets} />
+        <SpecTableSummary total={items.length} facets={facets} ejeFacets={ejeFacets} />
       ) : (
         <div className="overflow-x-auto rounded-md border">
           <Table>
@@ -190,13 +199,23 @@ export function SpecTableReview({
 }
 
 /** Panorama del instrumento: cantidad de preguntas por cada dimensión y nodo. */
-function SpecTableSummary({ total, facets }: { total: number; facets: TagFacet[] }) {
+function SpecTableSummary({
+  total,
+  facets,
+  ejeFacets,
+}: {
+  total: number;
+  facets: TagFacet[];
+  /** Facetas por EJE curricular estricto (padre del OA) — dimensión extra (T2-11). */
+  ejeFacets: TagFacet[];
+}) {
   const byType = facets.reduce<Record<string, TagFacet[]>>((acc, facet) => {
     if (facet.type === 'descriptor') return acc;
     (acc[facet.type] ??= []).push(facet);
     return acc;
   }, {});
   const types = orderNodeTypes(Object.keys(byType));
+  const hasDimensions = ejeFacets.length > 0 || types.length > 0;
 
   return (
     <div className="space-y-4">
@@ -204,35 +223,48 @@ function SpecTableSummary({ total, facets }: { total: number; facets: TagFacet[]
         <span className="font-medium">{total}</span> pregunta{total === 1 ? '' : 's'} en el
         instrumento.
       </div>
-      {types.length === 0 ? (
+      {!hasDimensions ? (
         <p className="text-sm text-muted-foreground">
           Este instrumento aún no tiene preguntas etiquetadas por dimensión.
         </p>
       ) : (
-        types.map((type) => (
-          <div key={type} className="overflow-hidden rounded-md border">
-            <div className="flex items-center justify-between border-b bg-muted/30 px-4 py-2 text-sm font-semibold">
-              <span>{nodeTypeLabel(type) ?? type}</span>
-              <span className="text-xs font-normal text-muted-foreground">
-                {byType[type]!.length} categoría{byType[type]!.length === 1 ? '' : 's'}
-              </span>
-            </div>
-            <ul className="divide-y">
-              {byType[type]!.map((facet) => (
-                <li
-                  key={facet.nodeId}
-                  className="flex items-center justify-between gap-3 px-4 py-2 text-sm"
-                >
-                  <span className="min-w-0 truncate">{facet.label}</span>
-                  <span className="shrink-0 tabular-nums text-muted-foreground">
-                    {facet.count} preg.
-                  </span>
-                </li>
-              ))}
-            </ul>
-          </div>
-        ))
+        <>
+          {/* El eje va primero: es la agrupación curricular más amplia. */}
+          {ejeFacets.length > 0 ? <SummaryDimension title="Eje" facets={ejeFacets} /> : null}
+          {types.map((type) => (
+            <SummaryDimension
+              key={type}
+              title={nodeTypeLabel(type) ?? type}
+              facets={byType[type]!}
+            />
+          ))}
+        </>
       )}
+    </div>
+  );
+}
+
+/** Una dimensión del resumen: encabezado + lista de categorías con su conteo de preguntas. */
+function SummaryDimension({ title, facets }: { title: string; facets: TagFacet[] }) {
+  return (
+    <div className="overflow-hidden rounded-md border">
+      <div className="flex items-center justify-between border-b bg-muted/30 px-4 py-2 text-sm font-semibold">
+        <span>{title}</span>
+        <span className="text-xs font-normal text-muted-foreground">
+          {facets.length} categoría{facets.length === 1 ? '' : 's'}
+        </span>
+      </div>
+      <ul className="divide-y">
+        {facets.map((facet) => (
+          <li
+            key={facet.nodeId}
+            className="flex items-center justify-between gap-3 px-4 py-2 text-sm"
+          >
+            <span className="min-w-0 truncate">{facet.label}</span>
+            <span className="shrink-0 tabular-nums text-muted-foreground">{facet.count} preg.</span>
+          </li>
+        ))}
+      </ul>
     </div>
   );
 }

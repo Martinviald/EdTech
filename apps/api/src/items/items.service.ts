@@ -181,7 +181,7 @@ export class ItemsService {
 
     if (data.length === 0) return { data: [], total, page, limit: pageSize };
 
-    const allTags = await this.db
+    const rawTags = await this.db
       .select({
         id: itemTaxonomyTags.id,
         itemId: itemTaxonomyTags.itemId,
@@ -197,6 +197,8 @@ export class ItemsService {
           type: taxonomyNodes.type,
           description: taxonomyNodes.description,
           taxonomyId: taxonomyNodes.taxonomyId,
+          // Eje curricular estricto: el nodo PADRE del OA (T2-11).
+          parentId: taxonomyNodes.parentId,
         },
       })
       .from(itemTaxonomyTags)
@@ -207,6 +209,8 @@ export class ItemsService {
           data.map((i) => i.id),
         ),
       );
+
+    const allTags = await this.attachParentNames(rawTags);
 
     const tagsByItem = new Map<string, typeof allTags>();
     for (const tag of allTags) {
@@ -233,7 +237,7 @@ export class ItemsService {
     this.assertVisible(row, user);
 
     // Populate tags with taxonomy node info
-    const tags = await this.db
+    const rawTags = await this.db
       .select({
         id: itemTaxonomyTags.id,
         itemId: itemTaxonomyTags.itemId,
@@ -249,13 +253,46 @@ export class ItemsService {
           type: taxonomyNodes.type,
           description: taxonomyNodes.description,
           taxonomyId: taxonomyNodes.taxonomyId,
+          // Eje curricular estricto: el nodo PADRE del OA (T2-11).
+          parentId: taxonomyNodes.parentId,
         },
       })
       .from(itemTaxonomyTags)
       .innerJoin(taxonomyNodes, eq(itemTaxonomyTags.nodeId, taxonomyNodes.id))
       .where(eq(itemTaxonomyTags.itemId, id));
 
+    const tags = await this.attachParentNames(rawTags);
+
     return { ...row, tags };
+  }
+
+  /**
+   * Pliega el `parentName` (nombre del nodo PADRE = EJE curricular estricto del OA,
+   * T2-11) dentro de cada `node` de los tags. El padre no etiqueta a los ítems, así
+   * que se resuelve en una consulta aparte por sus `parentId` (Drizzle no admite el
+   * self-join dentro del objeto `node` anidado). Nodos raíz → `parentName` null.
+   */
+  private async attachParentNames<T extends { node: { parentId: string | null } }>(tags: T[]) {
+    const parentIds = [
+      ...new Set(tags.map((t) => t.node?.parentId).filter((pid): pid is string => Boolean(pid))),
+    ];
+
+    const nameById = new Map<string, string>();
+    if (parentIds.length > 0) {
+      const parents = await this.db
+        .select({ id: taxonomyNodes.id, name: taxonomyNodes.name })
+        .from(taxonomyNodes)
+        .where(inArray(taxonomyNodes.id, parentIds));
+      for (const p of parents) nameById.set(p.id, p.name);
+    }
+
+    return tags.map((t) => ({
+      ...t,
+      node: {
+        ...t.node,
+        parentName: t.node?.parentId ? (nameById.get(t.node.parentId) ?? null) : null,
+      },
+    }));
   }
 
   /**
