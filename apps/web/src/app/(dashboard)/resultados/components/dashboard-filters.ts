@@ -14,6 +14,8 @@ export type DashboardFilterValues = {
   gradeId?: string[];
   classGroupId?: string[];
   instrumentType?: string[];
+  // Momento DIA (T2-27): sólo aplica a instrumentos con ciclo de aplicación.
+  applicationPeriod?: string[];
   // Escalares: el alumno es una entidad de drill; el período es único.
   studentId?: string;
   academicYearId?: string;
@@ -24,9 +26,10 @@ export const FILTER_KEYS: readonly (keyof DashboardFilterValues)[] = [
   'subjectId',
   'gradeId',
   'classGroupId',
+  'instrumentType',
+  'applicationPeriod',
   'studentId',
   'academicYearId',
-  'instrumentType',
 ];
 
 /**
@@ -55,6 +58,7 @@ export function parseDashboardFilters(
     gradeId: pickAll('gradeId'),
     classGroupId: pickAll('classGroupId'),
     instrumentType: pickAll('instrumentType'),
+    applicationPeriod: pickAll('applicationPeriod'),
     studentId: pick('studentId'),
     academicYearId: pick('academicYearId'),
   };

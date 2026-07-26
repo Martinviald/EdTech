@@ -3,7 +3,11 @@
 import { useCallback, useTransition } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import type { Route } from 'next';
-import type { DashboardFilterOptionsResponse } from '@soe/types';
+import {
+  INSTRUMENT_APPLICATION_PERIODS,
+  INSTRUMENT_APPLICATION_PERIOD_LABELS,
+  type DashboardFilterOptionsResponse,
+} from '@soe/types';
 import { FilterX } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { FilterBar, MultiSelectFilter, type FilterField } from '@/components/shared';
@@ -17,6 +21,10 @@ import {
 // `./dashboard-filters` (módulo sin 'use client') para que las páginas server la
 // reutilicen. Re-exportamos el tipo por compatibilidad de imports existentes.
 export type { DashboardFilterValues };
+
+// El "momento" (Diagnóstico/Monitoreo/Cierre) sólo aplica a instrumentos con
+// ciclo de aplicación; hoy ese tipo es DIA (mismo criterio que InstrumentFilters).
+const PERIODIC_TYPE = 'dia';
 
 export function DashboardFilterBar({
   options,
@@ -69,6 +77,16 @@ export function DashboardFilterBar({
     [applyFilters],
   );
 
+  // Al quitar el tipo con ciclo (DIA), se descarta también el filtro de momento.
+  const updateInstrumentTypes = useCallback(
+    (ids: string[]) =>
+      applyFilters({
+        instrumentType: ids,
+        ...(ids.includes(PERIODIC_TYPE) ? {} : { applicationPeriod: [] }),
+      }),
+    [applyFilters],
+  );
+
   // Al cambiar los niveles, poda los cursos seleccionados que ya no pertenezcan
   // a ningún nivel elegido (no filtrar por un curso que desaparece del dropdown).
   const updateGrades = useCallback(
@@ -115,6 +133,9 @@ export function DashboardFilterBar({
     options.grades,
     value.gradeId,
   );
+
+  // El filtro de "Momento" sólo se muestra si hay un tipo con ciclo seleccionado.
+  const showPeriod = value.instrumentType?.includes(PERIODIC_TYPE) ?? false;
 
   const fields: FilterField[] = [
     {
@@ -174,7 +195,24 @@ export function DashboardFilterBar({
           placeholder="Todos los tipos"
           options={instrumentTypes.map((t) => ({ id: t, label: t.toUpperCase() }))}
           selected={value.instrumentType ?? []}
-          onChange={(ids) => updateMulti('instrumentType', ids)}
+          onChange={updateInstrumentTypes}
+        />
+      ),
+    },
+    {
+      key: 'applicationPeriod',
+      label: 'Momento',
+      hidden: !showPeriod,
+      control: (
+        <MultiSelectFilter
+          label="momentos"
+          placeholder="Todos los momentos"
+          options={INSTRUMENT_APPLICATION_PERIODS.map((p) => ({
+            id: p,
+            label: INSTRUMENT_APPLICATION_PERIOD_LABELS[p],
+          }))}
+          selected={value.applicationPeriod ?? []}
+          onChange={(ids) => updateMulti('applicationPeriod', ids)}
         />
       ),
     },
