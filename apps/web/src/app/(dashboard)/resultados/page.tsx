@@ -7,7 +7,9 @@ import {
   TriangleAlert,
   Inbox,
   CircleCheck,
+  ArrowRight,
 } from 'lucide-react';
+import Link from 'next/link';
 import { auth } from '@/auth';
 import { ROUTES } from '@/lib/routes';
 import {
@@ -25,7 +27,7 @@ import {
   CardSkeleton,
   TableSkeleton,
 } from '@/components/shared';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import {
   Table,
   TableBody,
@@ -186,7 +188,10 @@ function RecentAssessments({ assessments }: { assessments: DashboardAssessmentSu
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="text-base">Evaluaciones recientes</CardTitle>
+        <CardTitle className="text-base">Evaluaciones</CardTitle>
+        <CardDescription>
+          Selecciona una evaluación para ver su análisis en profundidad.
+        </CardDescription>
       </CardHeader>
       <CardContent>
         {assessments.length === 0 ? (
@@ -212,10 +217,18 @@ function RecentAssessments({ assessments }: { assessments: DashboardAssessmentSu
                 {assessments.map((a) => (
                   <TableRow key={a.assessmentId}>
                     <TableCell className="font-medium">
-                      {a.name ?? a.instrumentName}
-                      <span className="block text-xs text-muted-foreground md:hidden">
-                        {[a.subjectName, a.gradeName].filter(Boolean).join(' · ')}
-                      </span>
+                      <Link
+                        href={ROUTES.evaluacionResultados(a.assessmentId)}
+                        className="group inline-flex items-center gap-1.5 hover:text-primary"
+                      >
+                        <span>
+                          {a.name ?? a.instrumentName}
+                          <span className="block text-xs font-normal text-muted-foreground md:hidden">
+                            {[a.subjectName, a.gradeName].filter(Boolean).join(' · ')}
+                          </span>
+                        </span>
+                        <ArrowRight className="size-3.5 shrink-0 opacity-0 transition-opacity group-hover:opacity-100" />
+                      </Link>
                     </TableCell>
                     <TableCell className="hidden md:table-cell">{a.subjectName ?? '—'}</TableCell>
                     <TableCell className="hidden md:table-cell">{a.gradeName ?? '—'}</TableCell>
