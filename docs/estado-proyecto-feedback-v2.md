@@ -56,18 +56,18 @@
 - [x] T2-06 "Tablero maestro" (rótulo + densidad)
 - [x] T2-10 query params en comparar + breadcrumb "Volver" en el hub
 - [x] T2-25 (parcial) header en una fila + quitar "Nuevo instrumento"
-- [ ] **T2-25 (resto)** rename de ruta `/banco-items` → `/banco-contenido`
+- [x] **T2-25 (resto)** rename de ruta `/banco-items` → `/banco-contenido` (Fase A, `16f35ee`)
 
-### Ola 3 — Filtros y dashboards 🟡 (5/9)
+### Ola 3 — Filtros y dashboards 🟢 (Fase A casi completa)
 - [x] T2-26 paginación banco de ítems 20/pág (+ fix `pageSize`)
 - [x] T2-16 taxonomía agrupada por asignatura
 - [x] T2-13 multi-select asignatura/nivel en el banco
 - [x] T2-18 (verificado: panel de pregunta ya unificado; sin cambio)
-- [x] T2-11 tabla de especificaciones (pestaña nueva + filtros + tab Resumen)
-- [ ] **T2-12** multi-selección transversal en filtros *(core, alto riesgo)*
-- [ ] **T2-14** jerarquía Asignatura›instrumento›habilidad/eje›nivel
-- [ ] **T2-15** panorama pedagógico select-first
-- [ ] **T2-17** informes clickeable + comparativa contra el nivel
+- [x] T2-11 tabla de especificaciones (pestaña nueva + filtros + tab Resumen). ⏳ Residual "eje curricular estricto" en curso (agente, `wt-t11`).
+- [x] **T2-12** multi-selección transversal en filtros — Fase A `b236933`
+- [x] **T2-14** jerarquía Asig›instrumento (selector concreto) — Fase A `1b67814`. ⏸️ **T2-14b** (filtro habilidad/eje por `nodeId`) DIFERIDO: ya está en el schema; la exploración por habilidad/eje la cubre el drill-down (SkillsBreakdown/SkillDrilldownDialog).
+- [x] **T2-15** panorama pedagógico select-first — Fase A `48c36c6`
+- [ ] **T2-17** informes clickeable + comparativa contra el nivel — ⏳ en curso (agente, `wt-t17`)
 
 ### Ola 4 — Features grandes ⬜ (0/3)
 - [ ] **T2-21** etiqueta de dificultad por ítem — *migración `0015`*

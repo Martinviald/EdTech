@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { itemBankScopeSchema, paginationSchema } from '@soe/types';
+import { itemBankScopeSchema, paginationSchema, uuidCsvSchema } from '@soe/types';
 
 // ── Item Type / Status / Source enums ───────────────────────────────────────
 const ITEM_TYPES = [
@@ -103,21 +103,6 @@ const taxonomyNodeGroupsSchema = z
     return groups.length > 0 ? groups : undefined;
   })
   .pipe(z.array(z.array(z.string().uuid())).optional());
-
-/** Coacciona un query param (CSV o repetido) a `string[]` de uuids, o undefined. */
-const uuidCsvSchema = z
-  .union([z.array(z.string()), z.string()])
-  .optional()
-  .transform((v) => {
-    if (v === undefined) return undefined;
-    const raw = Array.isArray(v) ? v : [v];
-    const ids = raw
-      .flatMap((s) => s.split(','))
-      .map((s) => s.trim())
-      .filter((s) => s.length > 0);
-    return ids.length > 0 ? ids : undefined;
-  })
-  .pipe(z.array(z.string().uuid()).optional());
 
 export const listItemsQuerySchema = paginationSchema.extend({
   instrumentId: z.string().uuid().optional(),
