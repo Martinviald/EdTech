@@ -34,12 +34,6 @@ const TYPE_OPTIONS = [
   { value: 'custom', label: 'Personalizado' },
 ];
 
-const STATUS_OPTIONS = [
-  { value: 'draft', label: 'Borrador' },
-  { value: 'published', label: 'Publicado' },
-  { value: 'archived', label: 'Archivado' },
-];
-
 interface InstrumentFiltersProps {
   subjects: CatalogEntryModel[];
   grades: CatalogEntryModel[];
@@ -61,7 +55,6 @@ export function InstrumentFilters({ subjects, grades, years }: InstrumentFilters
   const [isPending, startTransition] = useTransition();
 
   const currentType = searchParams.get('type') ?? '';
-  const currentStatus = searchParams.get('status') ?? '';
   const currentYear = searchParams.get('year') ?? '';
   const currentSubject = searchParams.get('subjectId') ?? '';
   const currentGrade = searchParams.get('gradeId') ?? '';
@@ -163,20 +156,6 @@ export function InstrumentFilters({ subjects, grades, years }: InstrumentFilters
           {years.map((year) => (
             <SelectItem key={year} value={String(year)}>
               {year}
-            </SelectItem>
-          ))}
-        </SelectContent>
-      </Select>
-
-      <Select value={currentStatus || ALL} onValueChange={(v) => updateFilter('status', v)}>
-        <SelectTrigger className="w-[160px]" aria-label="Estado">
-          <SelectValue placeholder="Estado" />
-        </SelectTrigger>
-        <SelectContent>
-          <SelectItem value={ALL}>Todos los estados</SelectItem>
-          {STATUS_OPTIONS.map((opt) => (
-            <SelectItem key={opt.value} value={opt.value}>
-              {opt.label}
             </SelectItem>
           ))}
         </SelectContent>

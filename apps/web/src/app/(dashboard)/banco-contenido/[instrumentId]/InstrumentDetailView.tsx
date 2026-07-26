@@ -22,18 +22,6 @@ const TYPE_LABELS: Record<string, string> = {
   custom: 'Personalizado',
 };
 
-const STATUS_COLORS: Record<string, string> = {
-  draft: 'bg-warning/15 text-warning',
-  published: 'bg-success/10 text-success',
-  archived: 'bg-muted text-muted-foreground',
-};
-
-const STATUS_LABELS: Record<string, string> = {
-  draft: 'Borrador',
-  published: 'Publicado',
-  archived: 'Archivado',
-};
-
 /**
  * Vista de detalle de un instrumento (encabezado + metadata + PDF de enunciado +
  * secciones + ítems). Es compartida por dos rutas:
@@ -80,12 +68,6 @@ export function InstrumentDetailView({
           <div className="flex flex-wrap items-center gap-2">
             <Badge variant="outline" className="text-xs">
               {TYPE_LABELS[instrument.type] ?? instrument.type}
-            </Badge>
-            <Badge
-              variant="outline"
-              className={`border-0 text-xs ${STATUS_COLORS[instrument.status] ?? ''}`}
-            >
-              {STATUS_LABELS[instrument.status] ?? instrument.status}
             </Badge>
             {instrument.isOfficial && (
               <Badge variant="outline" className="border-0 bg-info/10 text-xs text-info">

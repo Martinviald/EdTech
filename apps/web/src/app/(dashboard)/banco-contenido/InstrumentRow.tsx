@@ -1,6 +1,5 @@
 import Link from 'next/link';
 import { ChevronRight } from 'lucide-react';
-import { StatusBadge, type StatusTone } from '@/components/shared';
 import { INSTRUMENT_APPLICATION_PERIOD_LABELS, type InstrumentModel } from '@soe/types';
 import { ROUTES } from '@/lib/routes';
 
@@ -13,18 +12,6 @@ const TYPE_LABELS: Record<string, string> = {
   desafio: 'Desafio',
   pal: 'PAL',
   custom: 'Personalizado',
-};
-
-const STATUS_TONES: Record<string, StatusTone> = {
-  draft: 'warning',
-  published: 'success',
-  archived: 'neutral',
-};
-
-const STATUS_LABELS: Record<string, string> = {
-  draft: 'Borrador',
-  published: 'Publicado',
-  archived: 'Archivado',
 };
 
 /**
@@ -53,9 +40,6 @@ export function InstrumentRow({ instrument }: { instrument: InstrumentModel }) {
           {instrument.version ? <span>v{instrument.version}</span> : null}
         </div>
       </div>
-      <StatusBadge tone={STATUS_TONES[instrument.status] ?? 'warning'}>
-        {STATUS_LABELS[instrument.status] ?? instrument.status}
-      </StatusBadge>
       <ChevronRight
         className="size-4 shrink-0 text-muted-foreground transition-colors group-hover:text-primary"
         aria-hidden
