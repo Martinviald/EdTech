@@ -359,6 +359,13 @@ export type ItemTaxonomyTagModel = {
     code: string | null;
     description: string | null;
     taxonomyId: string;
+    /**
+     * Nodo ANCESTRO directo (padre) en el árbol de `taxonomy_nodes`. Para un OA
+     * su padre es el EJE curricular estricto; se usa para agrupar el resumen de
+     * la tabla de especificaciones por eje (T2-11). `null` si el nodo es raíz.
+     */
+    parentId: string | null;
+    parentName: string | null;
   };
 };
 
