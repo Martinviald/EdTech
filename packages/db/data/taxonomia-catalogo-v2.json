@@ -13245,7 +13245,7 @@
   {
    "code": "MATH-8B-OA03-I4",
    "type": "descriptor",
-   "name": "Aplican la propiedad de la multiplicación de 2 potencias de igual base (natural) y distinto",
+   "name": "Aplican la propiedad de la multiplicación de potencias de igual base (natural) y distinto exponente (natural hasta 3) para obtener una potencia equivalente.",
    "parentCode": "DIA-MATH-8B",
    "marco": "dia",
    "subjectCode": "MATH",
@@ -14015,7 +14015,7 @@
   {
    "code": "MATH-1M-OA02-I2",
    "type": "descriptor",
-   "name": "Identifican el modelo que contiene una 2 potencia de base racional y exponente",
+   "name": "Identifican el modelo que contiene una potencia de base racional y exponente natural en el contexto de la resolución de un problema.",
    "parentCode": "DIA-MATH-1M",
    "marco": "dia",
    "subjectCode": "MATH",
@@ -14026,7 +14026,7 @@
   {
    "code": "MATH-1M-OA02-I3",
    "type": "descriptor",
-   "name": "potencia de base racional y exponente 2 natural en el contexto de la resolución de un problema.",
+   "name": "Identifican el modelo que contiene una potencia de base racional y exponente natural en el contexto de la resolución de un problema.",
    "parentCode": "DIA-MATH-1M",
    "marco": "dia",
    "subjectCode": "MATH",
@@ -14532,7 +14532,7 @@
   {
    "code": "MATH-2M-OA10-I4",
    "type": "descriptor",
-   "name": "Identifican la variable aleatoria finita representada en un gráfico de una función de probabilidad. Calculan la cantidad total de permutaciones de",
+   "name": "Identifican la variable aleatoria finita representada en un gráfico de una función de probabilidad. Calculan la cantidad total de permutaciones de elementos de un conjunto.",
    "parentCode": "DIA-MATH-2M",
    "marco": "dia",
    "subjectCode": "MATH",
@@ -15316,7 +15316,7 @@
   {
    "code": "HIST-7B-OA05-I1",
    "type": "descriptor",
-   "name": "Caracterizan los diversos espacios geográficos estudiados en el nivel, utilizando mapas a diferentes escalas, herramientas geográficas y/o tecnológicas",
+   "name": "Caracterizan los diversos espacios geográficos estudiados en el nivel, utilizando mapas a diferentes escalas, herramientas geográficas y/o tecnológicas.",
    "parentCode": "DIA-HIST-7B",
    "marco": "dia",
    "subjectCode": "HIST",
@@ -15360,7 +15360,7 @@
   {
    "code": "HIST-7B-OA08-I1",
    "type": "descriptor",
-   "name": "Infieren información que se encuentra implícita en fuentes primarias o secundarias",
+   "name": "Infieren información que se encuentra implícita en fuentes primarias o secundarias.",
    "parentCode": "DIA-HIST-7B",
    "marco": "dia",
    "subjectCode": "HIST",
@@ -15382,7 +15382,7 @@
   {
    "code": "HIST-7B-OA10-I1",
    "type": "descriptor",
-   "name": "Infieren información que se encuentra implícita en fuentes primarias o secundarias",
+   "name": "Infieren información que se encuentra implícita en fuentes primarias o secundarias.",
    "parentCode": "DIA-HIST-7B",
    "marco": "dia",
    "subjectCode": "HIST",
@@ -15437,7 +15437,7 @@
   {
    "code": "HIST-7B-OA15-I1",
    "type": "descriptor",
-   "name": "Distinguen una pregunta de investigación que puede responderse a partir de información obtenida de una fuente primaria o secundaria",
+   "name": "Distinguen una pregunta de investigación que puede responderse a partir de información obtenida de una fuente primaria o secundaria.",
    "parentCode": "DIA-HIST-7B",
    "marco": "dia",
    "subjectCode": "HIST",
@@ -17052,7 +17052,7 @@
   {
    "code": "HIST-8B-OA09-I1",
    "type": "descriptor",
-   "name": "Identifican información que se encuentra explícita en fuentes primarias o secundarias",
+   "name": "Identifican información que se encuentra explícita en fuentes primarias o secundarias.",
    "parentCode": "DIA-HIST-8B",
    "marco": "dia",
    "subjectCode": "HIST",
@@ -17129,7 +17129,7 @@
   {
    "code": "HIST-8B-OA14-I2",
    "type": "descriptor",
-   "name": "Identifican información que se encuentra explícita en fuentes primarias o secundarias",
+   "name": "Identifican información que se encuentra explícita en fuentes primarias o secundarias.",
    "parentCode": "DIA-HIST-8B",
    "marco": "dia",
    "subjectCode": "HIST",

@@ -1,770 +1,775 @@
 {
-  "schemaVersion": "1.0",
-  "source": {
-    "file": "3_prueba_lectura_monitoreo_2026_3_basico.pdf",
-    "subjectFolder": "Lenguaje"
-  },
-  "instrument": {
-    "name": "DIA Lectura 3° Básico 2026 — Intermedio",
-    "subject": "Lenguaje y Comunicación",
-    "subjectCode": "LANG",
-    "grade": "3° Básico",
-    "gradeCode": "3RD_BASIC",
-    "year": 2026,
-    "applicationPeriod": "intermedio",
-    "type": "dia",
-    "isOfficial": true,
-    "source": "imported"
-  },
-  "sections": [
+ "schemaVersion": "1.0",
+ "source": {
+  "file": "3_prueba_lectura_monitoreo_2026_3_basico.pdf",
+  "subjectFolder": "Lenguaje"
+ },
+ "instrument": {
+  "name": "DIA Lectura 3° Básico 2026 — Intermedio",
+  "subject": "Lenguaje y Comunicación",
+  "subjectCode": "LANG",
+  "grade": "3° Básico",
+  "gradeCode": "3RD_BASIC",
+  "year": 2026,
+  "applicationPeriod": "intermedio",
+  "type": "dia",
+  "isOfficial": true,
+  "source": "imported"
+ },
+ "sections": [
+  {
+   "order": 1,
+   "name": "Texto 1: «Los vecinos del abeto»",
+   "type": "mixed",
+   "instructions": "Lee el siguiente texto y responde las preguntas 1 a 6.",
+   "passage": {
+    "title": "Los vecinos del abeto",
+    "text": "En el gran abeto del bosque Verde vivía una comunidad de vecinos muy felices. En la primera rama no vivía nadie. En la segunda, había un nido de pajarillos. La tercera rama era la de don Búho, que solía dormir de día. En la mitad del tronco vivía la familia de ardillas Hacendosas. Dos ramas más arriba, vivía un famoso cantante: don Ruiseñor. Y en la última rama no vivía nadie: era muy alta.\n\nUn martes de otoño, llegó un nuevo inquilino y, como es natural, todos se asomaron con curiosidad para ver quién era. Se trataba de un pájaro carpintero que se instaló en la última rama y empezó a golpear el tronco con su pico: toc, toc, toc, toc.\n\n—¿Qué escándalo es este? —se quejó don Búho.\n\n—¡Tanto ruido…! —protestaron las ardillas.\n\n—¡Con ese toc, toc, ni siquiera escucho mis propias notas! —dijo don Ruiseñor.\n\nLos pajarillos, asustados por el estruendo, se pusieron a llorar. Y así, la comunidad de vecinos se reunió, dispuesta a echar de su abeto a aquel vecino molesto. Pero ocurrió que, justo entonces, descubrieron en el tronco una plaga de termitas que se estaba comiendo la madera del árbol, amenazándolos con perder sus casas.\n\nEstaban desesperados, pensando en el derrumbe de su querido abeto, cuando de pronto vieron que el pájaro carpintero se estaba comiendo todas las termitas.\n\nY así, el peor vecino se convirtió en el favorito, salvándolos de perder sus hogares. Así es que los animalitos organizaron una linda fiesta para darle la bienvenida al nuevo vecino.\n\nMaría Mañeru. Cuentos del bosque. Colección Mis nuevos cuentos no tradicionales. Chile: Mundicrom, 2018.",
+    "format": "plain",
+    "attachments": []
+   },
+   "items": [
     {
-      "order": 1,
-      "name": "Texto 1: «Los vecinos del abeto»",
-      "type": "mixed",
-      "instructions": "Lee el siguiente texto y responde las preguntas 1 a 6.",
-      "passage": {
-        "title": "Los vecinos del abeto",
-        "text": "En el gran abeto del bosque Verde vivía una comunidad de vecinos muy felices. En la primera rama no vivía nadie. En la segunda, había un nido de pajarillos. La tercera rama era la de don Búho, que solía dormir de día. En la mitad del tronco vivía la familia de ardillas Hacendosas. Dos ramas más arriba, vivía un famoso cantante: don Ruiseñor. Y en la última rama no vivía nadie: era muy alta.\n\nUn martes de otoño, llegó un nuevo inquilino y, como es natural, todos se asomaron con curiosidad para ver quién era. Se trataba de un pájaro carpintero que se instaló en la última rama y empezó a golpear el tronco con su pico: toc, toc, toc, toc.\n\n—¿Qué escándalo es este? —se quejó don Búho.\n\n—¡Tanto ruido…! —protestaron las ardillas.\n\n—¡Con ese toc, toc, ni siquiera escucho mis propias notas! —dijo don Ruiseñor.\n\nLos pajarillos, asustados por el estruendo, se pusieron a llorar. Y así, la comunidad de vecinos se reunió, dispuesta a echar de su abeto a aquel vecino molesto. Pero ocurrió que, justo entonces, descubrieron en el tronco una plaga de termitas que se estaba comiendo la madera del árbol, amenazándolos con perder sus casas.\n\nEstaban desesperados, pensando en el derrumbe de su querido abeto, cuando de pronto vieron que el pájaro carpintero se estaba comiendo todas las termitas.\n\nY así, el peor vecino se convirtió en el favorito, salvándolos de perder sus hogares. Así es que los animalitos organizaron una linda fiesta para darle la bienvenida al nuevo vecino.\n\nMaría Mañeru. Cuentos del bosque. Colección Mis nuevos cuentos no tradicionales. Chile: Mundicrom, 2018.",
-        "format": "plain",
-        "attachments": []
+     "position": 1,
+     "type": "multiple_choice",
+     "stem": "¿Por qué le molestaba el ruido al Ruiseñor?",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "Porque no podía dormir durante el día.",
+       "isCorrect": false
       },
-      "items": [
-        {
-          "position": 1,
-          "type": "multiple_choice",
-          "stem": "¿Por qué le molestaba el ruido al Ruiseñor?",
-          "alternatives": [
-            {
-              "key": "A",
-              "text": "Porque no podía dormir durante el día.",
-              "isCorrect": false
-            },
-            {
-              "key": "B",
-              "text": "Porque no podía comer termitas tranquilo.",
-              "isCorrect": false
-            },
-            {
-              "key": "C",
-              "text": "Porque no podía escuchar su propio canto.",
-              "isCorrect": true
-            }
-          ],
-          "responseFormat": "choice",
-          "correctKey": "C",
-          "skill": "Interpretar y relacionar",
-          "oa": "OA 4",
-          "contentAxis": "Narración",
-          "hasFigure": false,
-          "figureNote": null,
-          "indicador": null
-        },
-        {
-          "position": 2,
-          "type": "multiple_choice",
-          "stem": "¿Cuándo descubrieron a las termitas los vecinos del abeto?",
-          "alternatives": [
-            {
-              "key": "A",
-              "text": "Cuando se reunieron para echar al nuevo vecino.",
-              "isCorrect": true
-            },
-            {
-              "key": "B",
-              "text": "Cuando se molestaron por el ruido del nuevo vecino.",
-              "isCorrect": false
-            },
-            {
-              "key": "C",
-              "text": "Cuando se asomaron para ver quién era el nuevo vecino.",
-              "isCorrect": false
-            }
-          ],
-          "responseFormat": "choice",
-          "correctKey": "A",
-          "skill": "Interpretar y relacionar",
-          "oa": "OA 4",
-          "contentAxis": "Narración",
-          "hasFigure": false,
-          "figureNote": null,
-          "indicador": null
-        },
-        {
-          "position": 3,
-          "type": "multiple_choice",
-          "stem": "¿Cómo se sintieron los vecinos al comprender que el abeto estaba en peligro?",
-          "alternatives": [
-            {
-              "key": "A",
-              "text": "Curiosos.",
-              "isCorrect": false
-            },
-            {
-              "key": "B",
-              "text": "Molestos.",
-              "isCorrect": false
-            },
-            {
-              "key": "C",
-              "text": "Desesperados.",
-              "isCorrect": true
-            }
-          ],
-          "responseFormat": "choice",
-          "correctKey": "C",
-          "skill": "Interpretar y relacionar",
-          "oa": "OA 4",
-          "contentAxis": "Narración",
-          "hasFigure": false,
-          "figureNote": null,
-          "indicador": null
-        },
-        {
-          "position": 4,
-          "type": "multiple_choice",
-          "stem": "¿Por qué el pájaro carpintero se convirtió en el vecino favorito?",
-          "alternatives": [
-            {
-              "key": "A",
-              "text": "Porque salvó al abeto.",
-              "isCorrect": true
-            },
-            {
-              "key": "B",
-              "text": "Porque preparó una fiesta.",
-              "isCorrect": false
-            },
-            {
-              "key": "C",
-              "text": "Porque se instaló en la rama más alta.",
-              "isCorrect": false
-            }
-          ],
-          "responseFormat": "choice",
-          "correctKey": "A",
-          "skill": "Interpretar y relacionar",
-          "oa": "OA 4",
-          "contentAxis": "Narración",
-          "hasFigure": false,
-          "figureNote": null,
-          "indicador": null
-        },
-        {
-          "position": 5,
-          "type": "multiple_choice",
-          "stem": "¿Para qué se organizó una fiesta?",
-          "alternatives": [
-            {
-              "key": "A",
-              "text": "Para celebrar que el abeto estaba bien.",
-              "isCorrect": false
-            },
-            {
-              "key": "B",
-              "text": "Para darle la bienvenida al pájaro carpintero.",
-              "isCorrect": true
-            },
-            {
-              "key": "C",
-              "text": "Para consolar a los pajarillos que estaban llorando.",
-              "isCorrect": false
-            }
-          ],
-          "responseFormat": "choice",
-          "correctKey": "B",
-          "skill": "Localizar",
-          "oa": "OA 4",
-          "contentAxis": "Narración",
-          "hasFigure": false,
-          "figureNote": null,
-          "indicador": null
-        },
-        {
-          "position": 6,
-          "type": "open_ended",
-          "stem": "¿Qué opinas sobre la reacción de los vecinos al escuchar el ruido del nuevo vecino? Justifica tu respuesta con información del texto.",
-          "alternatives": [],
-          "responseFormat": "develop",
-          "correctKey": null,
-          "skill": "Reflexionar",
-          "oa": "OA 4",
-          "contentAxis": "Narración",
-          "hasFigure": false,
-          "figureNote": null,
-          "indicador": null,
-          "rubric": "Tipos de respuestas Respuestas correctas Respuestas parcialmente correctas Respuestas incorrectas (Código 2) (Código 1) (Código 0) La o el estudiante opina sobre La o el estudiante opina sobre La o el estudiante responde algún aspecto de la lectura, algún aspecto de la lectura, su fundamentando su respuesta en un fundamentando su respuesta con fundamento evidencia una error de lectura o lo hace base en información extraída del comprensión parcial, considerando basándose en información que no texto que da cuenta de la aspectos locales del texto y no la tiene relación con la pregunta. comprensión de este. Además, la comprensión global de este. Su Otras respuestas incorrectas son respuesta puede estar respuesta, por ejemplo, está las tautológicas, vagas, complementada con información basada, en las acciones del pájaro contradictorias, incoherentes, en de su conocimiento de mundo . carpintero sin considerar la actitud 4 blanco. de los vecinos, en este sentido, En este caso, la o el estudiante es podría mencionar, el ruido que capaz de opinar respecto a la hacía el pájaro o cómo se comía molestia que generó en los vecinos las termitas. del abeto el ruido que hacía el nuevo vecino. También puede considerar lo prejuiciosos que fueron los vecinos en un comienzo y la ayuda que generó el pájaro carpintero para el abeto. Ejemplos: Ejemplos: Ejemplos: Opino que estuvo bien que No me gusta cuando los El árbol tenía termitas. - - - se enojaran porque el pájaro vecinos son tan molestosos. El árbol tenía muchos - hacía mucho ruido y Opino que el pájaro vecinos. - molestaba a los vecinos. carpintero hacía mucho Llegó un nuevo vecino. - Creo que los vecinos ruido. - debieron hablar primero con Los vecinos se dieron - el pájaro carpintero antes de cuenta que el pájaro se enojarse porque después el comía las termitas. nuevo vecino los ayudó. Opino que los vecinos al - comienzo fueron enojones y eso no me gustó, pero después se dieron cuenta de lo bueno que era el pájaro carpintero. No es requisito que el o la estudiante incorpore conocimiento de mundo en su respuesta para asignarle Código 2. 4 9 Ficha Técnica Prueba de Lectura 3° básico"
-        }
-      ]
-    },
-    {
-      "order": 2,
-      "name": "Texto 2: «¡Vivan los murciélagos!»",
-      "type": "multiple_choice",
-      "instructions": "Lee el siguiente texto y responde las preguntas 7 a 10.",
-      "passage": {
-        "title": "¡Vivan los murciélagos!",
-        "text": "Existen casi 1300 especies de murciélagos. ¡Un cuarto de todas las especies de mamíferos! Se encuentran por todo el mundo excepto en el Ártico y en la Antártica.\n\nAlgunas especies:\n\nMurciélago blanco hondureño “Bolita peluda” · Murciélago de nariz corta “¡No soy un perro!” · Murciélago fantasma “Cara de susto” · Murciélago orejudo “Para escucharte mejor”\n\nExisten murciélagos de todos los tamaños. El zorro volador es el más grande: ¡sus alas abiertas miden casi lo mismo que una persona alta! En cambio, el murciélago moscardón es tan pequeño como el dedo de una mano.\n\nLos murciélagos son los únicos mamíferos que pueden volar. Para hacerlo en la oscuridad, la mayoría de las especies usa la ecolocalización. Esto funciona así: el murciélago lanza un sonido que rebota contra los objetos que lo rodean. Al escuchar ese “eco”, el murciélago puede orientarse, es decir, puede saber dónde está. Esta capacidad también les permite localizar a sus presas.\n\nLa mayoría de los murciélagos come insectos, pero otros comen frutas, néctar, mamíferos pequeños y aves. Se alimentan de tantos bichos que ayudan a mantener la población de insectos bajo control.\n\nLos murciélagos hacen mucho por el medioambiente: son polinizadores importantes y ayudan a esparcir semillas.\n\nGlosario\npolinizadores: son animales que ayudan a las plantas a tener frutos o semillas. Llevan el polen de una flor a otra.\n\nJim Jourdane y otros. Desventuras de la ciencia. Chile: Nautacolecciones Editores, 2011. (Adaptación).",
-        "format": "plain",
-        "attachments": [
-          {
-            "kind": "image",
-            "note": "Ilustraciones de cuatro especies de murciélagos con sus nombres y apodos (blanco hondureño, de nariz corta, fantasma, orejudo) y una imagen del murciélago moscardón junto al dedo de una mano; ilustraciones de apoyo."
-          }
-        ]
+      {
+       "key": "B",
+       "text": "Porque no podía comer termitas tranquilo.",
+       "isCorrect": false
       },
-      "items": [
-        {
-          "position": 7,
-          "type": "multiple_choice",
-          "stem": "¿De qué se alimentan los murciélagos? Marca todas las opciones correctas:",
-          "alternatives": [
-            {
-              "key": "1",
-              "text": "Frutas."
-            },
-            {
-              "key": "2",
-              "text": "Néctar."
-            },
-            {
-              "key": "3",
-              "text": "Semillas."
-            },
-            {
-              "key": "4",
-              "text": "Insectos."
-            }
-          ],
-          "responseFormat": "choice",
-          "correctKey": null,
-          "skill": "Localizar",
-          "oa": "OA 6",
-          "contentAxis": "Texto no literario",
-          "hasFigure": false,
-          "figureNote": null,
-          "indicador": null,
-          "multiAnswer": "Frutas; Néctar;",
-          "needsHumanReview": true
-        },
-        {
-          "position": 8,
-          "type": "multiple_choice",
-          "stem": "Además de orientarse, ¿para qué les sirve la ecolocalización a los murciélagos?",
-          "alternatives": [
-            {
-              "key": "A",
-              "text": "Para encontrar su alimento.",
-              "isCorrect": true
-            },
-            {
-              "key": "B",
-              "text": "Para esparcir el polen de las flores.",
-              "isCorrect": false
-            },
-            {
-              "key": "C",
-              "text": "Para comunicarse con otras especies.",
-              "isCorrect": false
-            }
-          ],
-          "responseFormat": "choice",
-          "correctKey": "A",
-          "skill": "Interpretar y relacionar",
-          "oa": "OA 6",
-          "contentAxis": "Texto no literario",
-          "hasFigure": false,
-          "figureNote": null,
-          "indicador": null
-        },
-        {
-          "position": 9,
-          "type": "multiple_choice",
-          "stem": "¿Para qué sirve esta imagen en el texto?",
-          "alternatives": [
-            {
-              "key": "A",
-              "text": "Para saber cuánto pesa el murciélago moscardón.",
-              "isCorrect": false
-            },
-            {
-              "key": "B",
-              "text": "Para ver qué tan pequeño es el murciélago moscardón.",
-              "isCorrect": true
-            },
-            {
-              "key": "C",
-              "text": "Para mostrar lo tranquilo que es el murciélago moscardón.",
-              "isCorrect": false
-            }
-          ],
-          "responseFormat": "choice",
-          "correctKey": "B",
-          "skill": "Interpretar y relacionar",
-          "oa": "OA 6",
-          "contentAxis": "Texto no literario",
-          "hasFigure": true,
-          "figureNote": "Imagen del murciélago moscardón junto al dedo de una mano para mostrar su tamaño; la pregunta se refiere a esta imagen.",
-          "indicador": null
-        },
-        {
-          "position": 10,
-          "type": "multiple_choice",
-          "stem": "¿De qué trata este texto?",
-          "alternatives": [
-            {
-              "key": "A",
-              "text": "De las diferencias entre los murciélagos.",
-              "isCorrect": false
-            },
-            {
-              "key": "B",
-              "text": "De las distintas especies de murciélagos.",
-              "isCorrect": false
-            },
-            {
-              "key": "C",
-              "text": "De las características de los murciélagos.",
-              "isCorrect": true
-            }
-          ],
-          "responseFormat": "choice",
-          "correctKey": "C",
-          "skill": "Interpretar y relacionar",
-          "oa": "OA 6",
-          "contentAxis": "Texto no literario",
-          "hasFigure": false,
-          "figureNote": null,
-          "indicador": "Infieren de qué trata un texto no literario o un fragmento de este. Interpretan el sentido de expresiones en lenguaje"
-        }
-      ]
-    },
-    {
-      "order": 3,
-      "name": "Texto 3: «Llega el invierno»",
-      "type": "multiple_choice",
-      "instructions": "Lee el siguiente texto y responde las preguntas 11 a 13.",
-      "passage": {
-        "title": "Llega el invierno",
-        "text": "El señor invierno\nse viste de blanco,\nse pone el abrigo\nporque está temblando.\nSe va a la montaña,\nse mete en el río,\ny el parque y la calle\nse llenan de frío.\nSe encuentra a la lluvia\nllorando, llorando,\ny también al viento\nque viene soplando.\n¡Ven amigo sol!\nGrita en el camino,\npero el sol no viene\nporque se ha dormido.\n\nMarisol Perales. Versos con pijama para meterse a la cama. Madrid: Editorial Verbum, 2015.",
-        "format": "plain",
-        "attachments": []
-      },
-      "items": [
-        {
-          "position": 11,
-          "type": "multiple_choice",
-          "stem": "Lee los siguientes versos:\n\nEl señor invierno\nse viste de blanco\n\n¿Qué significa que el señor invierno se vista de blanco?",
-          "alternatives": [
-            {
-              "key": "A",
-              "text": "Que en invierno cae nieve.",
-              "isCorrect": true
-            },
-            {
-              "key": "B",
-              "text": "Que en invierno sopla el viento.",
-              "isCorrect": false
-            },
-            {
-              "key": "C",
-              "text": "Que en invierno se esconde el sol.",
-              "isCorrect": false
-            }
-          ],
-          "responseFormat": "choice",
-          "correctKey": "A",
-          "skill": "Interpretar y relacionar",
-          "oa": "OA 5",
-          "contentAxis": "Poema",
-          "hasFigure": false,
-          "figureNote": null,
-          "indicador": "Interpretan el sentido de expresiones en lenguaje figurado presentes en un poema."
-        },
-        {
-          "position": 12,
-          "type": "multiple_choice",
-          "stem": "Al final del poema, ¿por qué el sol no viene?",
-          "alternatives": [
-            {
-              "key": "A",
-              "text": "Porque está temblando.",
-              "isCorrect": false
-            },
-            {
-              "key": "B",
-              "text": "Porque está dormido.",
-              "isCorrect": true
-            },
-            {
-              "key": "C",
-              "text": "Porque está llorando.",
-              "isCorrect": false
-            }
-          ],
-          "responseFormat": "choice",
-          "correctKey": "B",
-          "skill": "Localizar",
-          "oa": "OA 5",
-          "contentAxis": "Poema",
-          "hasFigure": false,
-          "figureNote": null,
-          "indicador": "Localizan información explícita relevante en un poema."
-        },
-        {
-          "position": 13,
-          "type": "multiple_choice",
-          "stem": "¿De qué trata este poema?",
-          "alternatives": [
-            {
-              "key": "A",
-              "text": "De cuando cae la lluvia.",
-              "isCorrect": false
-            },
-            {
-              "key": "B",
-              "text": "De cuando se hace de noche.",
-              "isCorrect": false
-            },
-            {
-              "key": "C",
-              "text": "De cuando comienza el invierno.",
-              "isCorrect": true
-            }
-          ],
-          "responseFormat": "choice",
-          "correctKey": "C",
-          "skill": "Interpretar y relacionar",
-          "oa": "OA 5",
-          "contentAxis": "Poema",
-          "hasFigure": false,
-          "figureNote": null,
-          "indicador": "Infieren el sentido global de un poema. Localizan información explícita relevante en un texto no"
-        }
-      ]
-    },
-    {
-      "order": 4,
-      "name": "Texto 4: «Los rompecabezas»",
-      "type": "mixed",
-      "instructions": "Lee el siguiente texto y responde las preguntas 14 a 18.",
-      "passage": {
-        "title": "Los rompecabezas",
-        "text": "Si te gustan los rompecabezas, esta actividad te va a encantar. Sobre todo, porque es muy fácil y te va a permitir convertir tus dibujos en divertidos rompecabezas. Desafía a tu familia, a tus amigos y amigas a armar el dibujo que has pintado.\n\nMateriales\n\n• 6 palitos de helado\n• Témpera de colores\n• Marcadores de colores\n• Pincel\n• Cinta adhesiva\n\nPasos\n\n1. Lo primero que debes hacer es juntar todos los palitos, unos 5 o 6, y colocarlos uno después del otro, tal como muestra la imagen.\n\n2. Pega los palitos con la cinta adhesiva para fijarlos y evitar que se muevan.\n\n3. Pinta tu obra de arte con témpera directamente sobre los palitos. Luego, déjalos secar.\n\n4. Despega los palitos sacando la cinta adhesiva. Ahora tu rompecabezas está listo para jugar.\n\n• Opcional\nTambién puedes pintar un fondo de color claro, dejar que se seque y luego pintar encima con los marcadores de colores.\n\nGema Casado. Manualidades para niños rebuenos. Barcelona: Altea, 2015. (Adaptación).",
-        "format": "plain",
-        "attachments": [
-          {
-            "kind": "image",
-            "note": "Ilustraciones de los pasos del instructivo: palitos alineados, palitos pegados con cinta, palitos pintados y rompecabezas terminado; ilustraciones de apoyo."
-          }
-        ]
-      },
-      "items": [
-        {
-          "position": 14,
-          "type": "multiple_choice",
-          "stem": "¿Qué materiales se usan en el paso 1?",
-          "alternatives": [
-            {
-              "key": "A",
-              "text": "Témperas.",
-              "isCorrect": false
-            },
-            {
-              "key": "B",
-              "text": "Palitos.",
-              "isCorrect": true
-            },
-            {
-              "key": "C",
-              "text": "Lápices.",
-              "isCorrect": false
-            }
-          ],
-          "responseFormat": "choice",
-          "correctKey": "B",
-          "skill": "Localizar",
-          "oa": "OA 6",
-          "contentAxis": "Texto no literario",
-          "hasFigure": false,
-          "figureNote": null,
-          "indicador": "Localizan información explícita relevante en un texto no literario. Localizan información explícita relevante en un texto no"
-        },
-        {
-          "position": 15,
-          "type": "multiple_choice",
-          "stem": "¿Para qué se deben pegar los palitos con cinta adhesiva?",
-          "alternatives": [
-            {
-              "key": "A",
-              "text": "Para fijarlos.",
-              "isCorrect": true
-            },
-            {
-              "key": "B",
-              "text": "Para dejarlos secar.",
-              "isCorrect": false
-            },
-            {
-              "key": "C",
-              "text": "Para colocarlos uno después del otro.",
-              "isCorrect": false
-            }
-          ],
-          "responseFormat": "choice",
-          "correctKey": "A",
-          "skill": "Localizar",
-          "oa": "OA 6",
-          "contentAxis": "Texto no literario",
-          "hasFigure": false,
-          "figureNote": null,
-          "indicador": "Localizan información explícita relevante en un texto no literario. Infieren información relevante que aportan los"
-        },
-        {
-          "position": 16,
-          "type": "multiple_choice",
-          "stem": "¿Qué muestra la primera imagen del texto?",
-          "alternatives": [
-            {
-              "key": "A",
-              "text": "Muestra cómo se usa el rompecabezas terminado.",
-              "isCorrect": true
-            },
-            {
-              "key": "B",
-              "text": "Muestra cómo se empieza a hacer el rompecabezas.",
-              "isCorrect": false
-            },
-            {
-              "key": "C",
-              "text": "Muestra qué materiales se necesitan para el rompecabezas.",
-              "isCorrect": false
-            }
-          ],
-          "responseFormat": "choice",
-          "correctKey": "A",
-          "skill": "Interpretar y relacionar",
-          "oa": "OA 6",
-          "contentAxis": "Texto no literario",
-          "hasFigure": true,
-          "figureNote": "Primera ilustración del instructivo (palitos de helado alineados uno después del otro); la pregunta se refiere a esta imagen.",
-          "indicador": "Infieren información relevante que aportan los elementos discontinuos en un texto no literario. Infieren el sentido global de un texto no literario o un"
-        },
-        {
-          "position": 17,
-          "type": "multiple_choice",
-          "stem": "¿Qué te enseña a hacer este texto?",
-          "alternatives": [
-            {
-              "key": "A",
-              "text": "Un dibujo.",
-              "isCorrect": false
-            },
-            {
-              "key": "B",
-              "text": "Un adorno.",
-              "isCorrect": false
-            },
-            {
-              "key": "C",
-              "text": "Un juguete.",
-              "isCorrect": true
-            }
-          ],
-          "responseFormat": "choice",
-          "correctKey": "C",
-          "skill": "Interpretar y relacionar",
-          "oa": "OA 6",
-          "contentAxis": "Texto no literario",
-          "hasFigure": false,
-          "figureNote": null,
-          "indicador": "Infieren el sentido global de un texto no literario o un fragmento de este. Opinan sobre algún aspecto relevante en un texto no"
-        },
-        {
-          "position": 18,
-          "type": "open_ended",
-          "stem": "¿Qué te pareció el rompecabezas propuesto? Justifica tu respuesta con información del texto.",
-          "alternatives": [],
-          "responseFormat": "develop",
-          "correctKey": null,
-          "skill": "Reflexionar",
-          "oa": "OA 6",
-          "contentAxis": "Texto no literario",
-          "hasFigure": false,
-          "figureNote": null,
-          "indicador": "literario con fundamentos que integran información del texto.",
-          "rubric": "Tipos de respuestas Respuestas correctas Respuestas parcialmente correctas Respuestas incorrectas (Código 2) (Código 1) (Código 0) La o el estudiante opina sobre La o el estudiante opina sobre La o el estudiante responde algún aspecto de la lectura, algún aspecto de la lectura, en este fundamentando su respuesta en un fundamentando su respuesta con caso, entrega su apreciación error de lectura o lo hace base en información extraída del respecto al rompecabezas basándose en información que no texto que da cuenta de la propuesto. tiene relación con la pregunta. comprensión de este. Además, la En su respuesta no evidencia una Otras respuestas incorrectas son respuesta puede estar comprensión global, y su las tautológicas, vagas, complementada con información de fundamento no se sustenta en contradictorias, incoherentes, en su conocimiento de mundo . 5 elementos del texto, por ejemplo, blanco. En este caso, la o el estudiante es puede referirse a su gusto por los capaz de opinar respecto al rompecabezas en general o lo fácil producto final que se obtiene de o difícil que pueda resultar para él o este texto instructivo. En su ella sin considerar el proceso respuesta debe reflejar la descrito. comprensión de los pasos, los materiales usados o el objetivo de este producto. Ejemplos: Ejemplos: Ejemplos: Me pareció entretenido, Me pareció bueno, porque Me gustan los marcadores - - - porque puedo hacer muchos me gusta armar de colores. rompecabezas con distintos rompecabezas. dibujos. Me pareció muy fácil para - Me pareció fácil, porque solo mí. - necesitamos palitos de helados. Me pareció fome, porque si - usamos palitos de helados será un rompecabezas muy chico. No es requisito que el o la estudiante incorpore conocimiento de mundo en su respuesta para asignarle Código 2. 5 10 &gt; Diagnóstico Integral de Aprendizajes Instrumentos de Evaluación 2026 agenciaeducacion.cl"
-        }
-      ]
-    },
-    {
-      "order": 5,
-      "name": "Texto 5: «El cuervo y la vasija»",
-      "type": "multiple_choice",
-      "instructions": "Lee el siguiente texto y responde las preguntas 19 a 22.",
-      "passage": {
-        "title": "El cuervo y la vasija",
-        "text": "Había una vez un cuervo que tenía mucha sed. Pasó por una plaza, por una iglesia y de pronto vio una vasija en el patio de una casa. Se acercó y se dio cuenta de que contenía un poco de agua. Trató de beber, pero la vasija era honda y no pudo alcanzar el agua con el pico.\n\nEl cuervo se lamentó porque estaba sediento. Pensó que debía beber esa agua para seguir volando. Entonces, se le ocurrió una idea: volcar la vasija.\n\nLe pegó con las alas, pero era demasiado pesada. No podía moverla. Luego, pensó en otra idea: romper la vasija y beber el agua cuando se derramara. Estaría muy rica.\n\nEntonces, se lanzó contra la vasija con pico, garras y alas. Pero esta era demasiado resistente para romperla.\n\nEl triste cuervo se tomó un descanso y pensó:\n\n—¿Qué haré ahora? No puedo morir de sed con el agua tan cerca. Tiene que haber una manera. Solo necesito pensar hasta descubrirla.\n\nAl cabo de un rato, el cuervo tuvo una idea brillante. Había muchas piedrecitas alrededor. Las tomó una por una y las arrojó dentro de la vasija.\n\nPoco a poco el agua subió, hasta que al fin pudo beberla.\n\nEntonces, el cuervo comprobó que siempre hay un modo de vencer los obstáculos, solo hay que usar el ingenio.\n\nEsopo. Colección Cuento contigo I. Chile: Centro de Estudios Públicos, 2004. (Adaptación).",
-        "format": "plain",
-        "attachments": [
-          {
-            "kind": "image",
-            "note": "Ilustración del cuervo junto a la vasija; ilustración de apoyo."
-          }
-        ]
-      },
-      "items": [
-        {
-          "position": 19,
-          "type": "multiple_choice",
-          "stem": "¿Dónde encontró la vasija el cuervo?",
-          "alternatives": [
-            {
-              "key": "A",
-              "text": "En una casa.",
-              "isCorrect": true
-            },
-            {
-              "key": "B",
-              "text": "En una plaza.",
-              "isCorrect": false
-            },
-            {
-              "key": "C",
-              "text": "En una iglesia.",
-              "isCorrect": false
-            }
-          ],
-          "responseFormat": "choice",
-          "correctKey": "A",
-          "skill": "Localizar",
-          "oa": "OA 4",
-          "contentAxis": "Narración",
-          "hasFigure": false,
-          "figureNote": null,
-          "indicador": "Localizan información explícita relevante en un texto narrativo."
-        },
-        {
-          "position": 20,
-          "type": "multiple_choice",
-          "stem": "¿Cómo estaba el cuervo cuando encontró la vasija?",
-          "alternatives": [
-            {
-              "key": "A",
-              "text": "Triste.",
-              "isCorrect": false
-            },
-            {
-              "key": "B",
-              "text": "Sediento.",
-              "isCorrect": true
-            },
-            {
-              "key": "C",
-              "text": "Cansado.",
-              "isCorrect": false
-            }
-          ],
-          "responseFormat": "choice",
-          "correctKey": "B",
-          "skill": "Interpretar y relacionar",
-          "oa": "OA 4",
-          "contentAxis": "Narración",
-          "hasFigure": false,
-          "figureNote": null,
-          "indicador": "Infieren características físicas o sentimientos de personajes en un texto narrativo."
-        },
-        {
-          "position": 21,
-          "type": "multiple_choice",
-          "stem": "¿De qué manera el cuervo logra tomarse el agua de la vasija?",
-          "alternatives": [
-            {
-              "key": "A",
-              "text": "Volcando la vasija para tomar el agua.",
-              "isCorrect": false
-            },
-            {
-              "key": "B",
-              "text": "Golpeando la vasija para derramar el agua.",
-              "isCorrect": false
-            },
-            {
-              "key": "C",
-              "text": "Echando piedras a la vasija para que suba el agua.",
-              "isCorrect": true
-            }
-          ],
-          "responseFormat": "choice",
-          "correctKey": "C",
-          "skill": "Interpretar y relacionar",
-          "oa": "OA 4",
-          "contentAxis": "Narración",
-          "hasFigure": false,
-          "figureNote": null,
-          "indicador": "Identifican un hecho o acción relevante en un texto narrativo."
-        },
-        {
-          "position": 22,
-          "type": "multiple_choice",
-          "stem": "¿Cuál es la enseñanza que entrega el texto?",
-          "alternatives": [
-            {
-              "key": "A",
-              "text": "Debemos ser insistentes para obtener lo que queremos.",
-              "isCorrect": false
-            },
-            {
-              "key": "B",
-              "text": "Debemos usar la inteligencia para superar las dificultades.",
-              "isCorrect": true
-            },
-            {
-              "key": "C",
-              "text": "Debemos mantenernos positivos para enfrentar los problemas.",
-              "isCorrect": false
-            }
-          ],
-          "responseFormat": "choice",
-          "correctKey": "B",
-          "skill": "Interpretar y relacionar",
-          "oa": "OA 4",
-          "contentAxis": "Narración",
-          "hasFigure": false,
-          "figureNote": null,
-          "indicador": "Infieren de qué trata un texto narrativo."
-        }
-      ]
-    }
-  ],
-  "extraction": {
-    "itemCount": 22,
-    "warnings": [
-      "Ítems de alternativas con solo 3 opciones (A, B, C), típico de 3° básico DIA; cumple el mínimo de 2 alternativas.",
-      "Q6 y Q18 son ítems de desarrollo (open_ended, develop).",
-      "Q7 es ítem de respuesta múltiple («Marca todas las opciones correctas»): 4 opciones etiquetadas 1–4; puede haber más de una respuesta correcta.",
-      "Q9 depende de una imagen (murciélago moscardón) para responderse; hasFigure=true, needsHumanReview.",
-      "Q16 depende de una imagen (primera ilustración del instructivo) para responderse; hasFigure=true, needsHumanReview.",
-      "Textos transcritos desde la capa de texto del PDF (pdftotext), verbatim."
-    ],
-    "needsHumanReview": true,
-    "crossCheck": {
-      "hardIssues": [],
-      "softWarnings": [
-        "#7: respuesta múltiple por texto ('Frutas; Néctar;') — isCorrect a resolver"
-      ],
-      "counts": {
-        "cuadernillo": 22,
-        "ficha": 22,
-        "hoja": 22
+      {
+       "key": "C",
+       "text": "Porque no podía escuchar su propio canto.",
+       "isCorrect": true
       }
-    }
-  },
-  "pauta": {
-    "source": {
-      "ficha": "3_ficha_tecnica_lectura_monitoreo_2026_3_basico.pdf",
-      "hoja": "3_hoja_de_respuestas_lectura_monitoreo_2026_3_basico.pdf"
+     ],
+     "responseFormat": "choice",
+     "correctKey": "C",
+     "skill": "Interpretar y relacionar",
+     "oa": "OA 4",
+     "contentAxis": "Narración",
+     "hasFigure": false,
+     "figureNote": null,
+     "indicador": null
     },
-    "appliedKeys": 19,
-    "rubrics": 2
+    {
+     "position": 2,
+     "type": "multiple_choice",
+     "stem": "¿Cuándo descubrieron a las termitas los vecinos del abeto?",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "Cuando se reunieron para echar al nuevo vecino.",
+       "isCorrect": true
+      },
+      {
+       "key": "B",
+       "text": "Cuando se molestaron por el ruido del nuevo vecino.",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "Cuando se asomaron para ver quién era el nuevo vecino.",
+       "isCorrect": false
+      }
+     ],
+     "responseFormat": "choice",
+     "correctKey": "A",
+     "skill": "Interpretar y relacionar",
+     "oa": "OA 4",
+     "contentAxis": "Narración",
+     "hasFigure": false,
+     "figureNote": null,
+     "indicador": null
+    },
+    {
+     "position": 3,
+     "type": "multiple_choice",
+     "stem": "¿Cómo se sintieron los vecinos al comprender que el abeto estaba en peligro?",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "Curiosos.",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "Molestos.",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "Desesperados.",
+       "isCorrect": true
+      }
+     ],
+     "responseFormat": "choice",
+     "correctKey": "C",
+     "skill": "Interpretar y relacionar",
+     "oa": "OA 4",
+     "contentAxis": "Narración",
+     "hasFigure": false,
+     "figureNote": null,
+     "indicador": null
+    },
+    {
+     "position": 4,
+     "type": "multiple_choice",
+     "stem": "¿Por qué el pájaro carpintero se convirtió en el vecino favorito?",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "Porque salvó al abeto.",
+       "isCorrect": true
+      },
+      {
+       "key": "B",
+       "text": "Porque preparó una fiesta.",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "Porque se instaló en la rama más alta.",
+       "isCorrect": false
+      }
+     ],
+     "responseFormat": "choice",
+     "correctKey": "A",
+     "skill": "Interpretar y relacionar",
+     "oa": "OA 4",
+     "contentAxis": "Narración",
+     "hasFigure": false,
+     "figureNote": null,
+     "indicador": null
+    },
+    {
+     "position": 5,
+     "type": "multiple_choice",
+     "stem": "¿Para qué se organizó una fiesta?",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "Para celebrar que el abeto estaba bien.",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "Para darle la bienvenida al pájaro carpintero.",
+       "isCorrect": true
+      },
+      {
+       "key": "C",
+       "text": "Para consolar a los pajarillos que estaban llorando.",
+       "isCorrect": false
+      }
+     ],
+     "responseFormat": "choice",
+     "correctKey": "B",
+     "skill": "Localizar",
+     "oa": "OA 4",
+     "contentAxis": "Narración",
+     "hasFigure": false,
+     "figureNote": null,
+     "indicador": null
+    },
+    {
+     "position": 6,
+     "type": "open_ended",
+     "stem": "¿Qué opinas sobre la reacción de los vecinos al escuchar el ruido del nuevo vecino? Justifica tu respuesta con información del texto.",
+     "alternatives": [],
+     "responseFormat": "develop",
+     "correctKey": null,
+     "skill": "Reflexionar",
+     "oa": "OA 4",
+     "contentAxis": "Narración",
+     "hasFigure": false,
+     "figureNote": null,
+     "indicador": null,
+     "rubric": "Tipos de respuestas Respuestas correctas Respuestas parcialmente correctas Respuestas incorrectas (Código 2) (Código 1) (Código 0) La o el estudiante opina sobre La o el estudiante opina sobre La o el estudiante responde algún aspecto de la lectura, algún aspecto de la lectura, su fundamentando su respuesta en un fundamentando su respuesta con fundamento evidencia una error de lectura o lo hace base en información extraída del comprensión parcial, considerando basándose en información que no texto que da cuenta de la aspectos locales del texto y no la tiene relación con la pregunta. comprensión de este. Además, la comprensión global de este. Su Otras respuestas incorrectas son respuesta puede estar respuesta, por ejemplo, está las tautológicas, vagas, complementada con información basada, en las acciones del pájaro contradictorias, incoherentes, en de su conocimiento de mundo . carpintero sin considerar la actitud 4 blanco. de los vecinos, en este sentido, En este caso, la o el estudiante es podría mencionar, el ruido que capaz de opinar respecto a la hacía el pájaro o cómo se comía molestia que generó en los vecinos las termitas. del abeto el ruido que hacía el nuevo vecino. También puede considerar lo prejuiciosos que fueron los vecinos en un comienzo y la ayuda que generó el pájaro carpintero para el abeto. Ejemplos: Ejemplos: Ejemplos: Opino que estuvo bien que No me gusta cuando los El árbol tenía termitas. - - - se enojaran porque el pájaro vecinos son tan molestosos. El árbol tenía muchos - hacía mucho ruido y Opino que el pájaro vecinos. - molestaba a los vecinos. carpintero hacía mucho Llegó un nuevo vecino. - Creo que los vecinos ruido. - debieron hablar primero con Los vecinos se dieron - el pájaro carpintero antes de cuenta que el pájaro se enojarse porque después el comía las termitas. nuevo vecino los ayudó. Opino que los vecinos al - comienzo fueron enojones y eso no me gustó, pero después se dieron cuenta de lo bueno que era el pájaro carpintero. No es requisito que el o la estudiante incorpore conocimiento de mundo en su respuesta para asignarle Código 2. 4 9 Ficha Técnica Prueba de Lectura 3° básico"
+    }
+   ]
+  },
+  {
+   "order": 2,
+   "name": "Texto 2: «¡Vivan los murciélagos!»",
+   "type": "multiple_choice",
+   "instructions": "Lee el siguiente texto y responde las preguntas 7 a 10.",
+   "passage": {
+    "title": "¡Vivan los murciélagos!",
+    "text": "Existen casi 1300 especies de murciélagos. ¡Un cuarto de todas las especies de mamíferos! Se encuentran por todo el mundo excepto en el Ártico y en la Antártica.\n\nAlgunas especies:\n\nMurciélago blanco hondureño “Bolita peluda” · Murciélago de nariz corta “¡No soy un perro!” · Murciélago fantasma “Cara de susto” · Murciélago orejudo “Para escucharte mejor”\n\nExisten murciélagos de todos los tamaños. El zorro volador es el más grande: ¡sus alas abiertas miden casi lo mismo que una persona alta! En cambio, el murciélago moscardón es tan pequeño como el dedo de una mano.\n\nLos murciélagos son los únicos mamíferos que pueden volar. Para hacerlo en la oscuridad, la mayoría de las especies usa la ecolocalización. Esto funciona así: el murciélago lanza un sonido que rebota contra los objetos que lo rodean. Al escuchar ese “eco”, el murciélago puede orientarse, es decir, puede saber dónde está. Esta capacidad también les permite localizar a sus presas.\n\nLa mayoría de los murciélagos come insectos, pero otros comen frutas, néctar, mamíferos pequeños y aves. Se alimentan de tantos bichos que ayudan a mantener la población de insectos bajo control.\n\nLos murciélagos hacen mucho por el medioambiente: son polinizadores importantes y ayudan a esparcir semillas.\n\nGlosario\npolinizadores: son animales que ayudan a las plantas a tener frutos o semillas. Llevan el polen de una flor a otra.\n\nJim Jourdane y otros. Desventuras de la ciencia. Chile: Nautacolecciones Editores, 2011. (Adaptación).",
+    "format": "plain",
+    "attachments": [
+     {
+      "kind": "image",
+      "note": "Ilustraciones de cuatro especies de murciélagos con sus nombres y apodos (blanco hondureño, de nariz corta, fantasma, orejudo) y una imagen del murciélago moscardón junto al dedo de una mano; ilustraciones de apoyo."
+     }
+    ]
+   },
+   "items": [
+    {
+     "position": 7,
+     "type": "multiple_choice",
+     "stem": "¿De qué se alimentan los murciélagos? Marca todas las opciones correctas:",
+     "alternatives": [
+      {
+       "key": "1",
+       "text": "Frutas.",
+       "isCorrect": true
+      },
+      {
+       "key": "2",
+       "text": "Néctar.",
+       "isCorrect": true
+      },
+      {
+       "key": "3",
+       "text": "Semillas.",
+       "isCorrect": false
+      },
+      {
+       "key": "4",
+       "text": "Insectos.",
+       "isCorrect": true
+      }
+     ],
+     "responseFormat": "choice",
+     "correctKey": "124",
+     "skill": "Localizar",
+     "oa": "OA 6",
+     "contentAxis": "Texto no literario",
+     "hasFigure": false,
+     "figureNote": null,
+     "indicador": null,
+     "needsHumanReview": true,
+     "isMultiAnswer": true,
+     "fixNote": "Ficha: «Frutas; Néctar; Insectos» (3 respuestas, partidas en 2 líneas del PDF)."
+    },
+    {
+     "position": 8,
+     "type": "multiple_choice",
+     "stem": "Además de orientarse, ¿para qué les sirve la ecolocalización a los murciélagos?",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "Para encontrar su alimento.",
+       "isCorrect": true
+      },
+      {
+       "key": "B",
+       "text": "Para esparcir el polen de las flores.",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "Para comunicarse con otras especies.",
+       "isCorrect": false
+      }
+     ],
+     "responseFormat": "choice",
+     "correctKey": "A",
+     "skill": "Interpretar y relacionar",
+     "oa": "OA 6",
+     "contentAxis": "Texto no literario",
+     "hasFigure": false,
+     "figureNote": null,
+     "indicador": null
+    },
+    {
+     "position": 9,
+     "type": "multiple_choice",
+     "stem": "¿Para qué sirve esta imagen en el texto?",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "Para saber cuánto pesa el murciélago moscardón.",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "Para ver qué tan pequeño es el murciélago moscardón.",
+       "isCorrect": true
+      },
+      {
+       "key": "C",
+       "text": "Para mostrar lo tranquilo que es el murciélago moscardón.",
+       "isCorrect": false
+      }
+     ],
+     "responseFormat": "choice",
+     "correctKey": "B",
+     "skill": "Interpretar y relacionar",
+     "oa": "OA 6",
+     "contentAxis": "Texto no literario",
+     "hasFigure": true,
+     "figureNote": "Imagen del murciélago moscardón junto al dedo de una mano para mostrar su tamaño; la pregunta se refiere a esta imagen.",
+     "indicador": null
+    },
+    {
+     "position": 10,
+     "type": "multiple_choice",
+     "stem": "¿De qué trata este texto?",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "De las diferencias entre los murciélagos.",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "De las distintas especies de murciélagos.",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "De las características de los murciélagos.",
+       "isCorrect": true
+      }
+     ],
+     "responseFormat": "choice",
+     "correctKey": "C",
+     "skill": "Interpretar y relacionar",
+     "oa": "OA 6",
+     "contentAxis": "Texto no literario",
+     "hasFigure": false,
+     "figureNote": null,
+     "indicador": "Infieren de qué trata un texto no literario o un fragmento de este. Interpretan el sentido de expresiones en lenguaje"
+    }
+   ]
+  },
+  {
+   "order": 3,
+   "name": "Texto 3: «Llega el invierno»",
+   "type": "multiple_choice",
+   "instructions": "Lee el siguiente texto y responde las preguntas 11 a 13.",
+   "passage": {
+    "title": "Llega el invierno",
+    "text": "El señor invierno\nse viste de blanco,\nse pone el abrigo\nporque está temblando.\nSe va a la montaña,\nse mete en el río,\ny el parque y la calle\nse llenan de frío.\nSe encuentra a la lluvia\nllorando, llorando,\ny también al viento\nque viene soplando.\n¡Ven amigo sol!\nGrita en el camino,\npero el sol no viene\nporque se ha dormido.\n\nMarisol Perales. Versos con pijama para meterse a la cama. Madrid: Editorial Verbum, 2015.",
+    "format": "plain",
+    "attachments": []
+   },
+   "items": [
+    {
+     "position": 11,
+     "type": "multiple_choice",
+     "stem": "Lee los siguientes versos:\n\nEl señor invierno\nse viste de blanco\n\n¿Qué significa que el señor invierno se vista de blanco?",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "Que en invierno cae nieve.",
+       "isCorrect": true
+      },
+      {
+       "key": "B",
+       "text": "Que en invierno sopla el viento.",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "Que en invierno se esconde el sol.",
+       "isCorrect": false
+      }
+     ],
+     "responseFormat": "choice",
+     "correctKey": "A",
+     "skill": "Interpretar y relacionar",
+     "oa": "OA 5",
+     "contentAxis": "Poema",
+     "hasFigure": false,
+     "figureNote": null,
+     "indicador": "Interpretan el sentido de expresiones en lenguaje figurado presentes en un poema."
+    },
+    {
+     "position": 12,
+     "type": "multiple_choice",
+     "stem": "Al final del poema, ¿por qué el sol no viene?",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "Porque está temblando.",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "Porque está dormido.",
+       "isCorrect": true
+      },
+      {
+       "key": "C",
+       "text": "Porque está llorando.",
+       "isCorrect": false
+      }
+     ],
+     "responseFormat": "choice",
+     "correctKey": "B",
+     "skill": "Localizar",
+     "oa": "OA 5",
+     "contentAxis": "Poema",
+     "hasFigure": false,
+     "figureNote": null,
+     "indicador": "Localizan información explícita relevante en un poema."
+    },
+    {
+     "position": 13,
+     "type": "multiple_choice",
+     "stem": "¿De qué trata este poema?",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "De cuando cae la lluvia.",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "De cuando se hace de noche.",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "De cuando comienza el invierno.",
+       "isCorrect": true
+      }
+     ],
+     "responseFormat": "choice",
+     "correctKey": "C",
+     "skill": "Interpretar y relacionar",
+     "oa": "OA 5",
+     "contentAxis": "Poema",
+     "hasFigure": false,
+     "figureNote": null,
+     "indicador": "Infieren el sentido global de un poema. Localizan información explícita relevante en un texto no"
+    }
+   ]
+  },
+  {
+   "order": 4,
+   "name": "Texto 4: «Los rompecabezas»",
+   "type": "mixed",
+   "instructions": "Lee el siguiente texto y responde las preguntas 14 a 18.",
+   "passage": {
+    "title": "Los rompecabezas",
+    "text": "Si te gustan los rompecabezas, esta actividad te va a encantar. Sobre todo, porque es muy fácil y te va a permitir convertir tus dibujos en divertidos rompecabezas. Desafía a tu familia, a tus amigos y amigas a armar el dibujo que has pintado.\n\nMateriales\n\n• 6 palitos de helado\n• Témpera de colores\n• Marcadores de colores\n• Pincel\n• Cinta adhesiva\n\nPasos\n\n1. Lo primero que debes hacer es juntar todos los palitos, unos 5 o 6, y colocarlos uno después del otro, tal como muestra la imagen.\n\n2. Pega los palitos con la cinta adhesiva para fijarlos y evitar que se muevan.\n\n3. Pinta tu obra de arte con témpera directamente sobre los palitos. Luego, déjalos secar.\n\n4. Despega los palitos sacando la cinta adhesiva. Ahora tu rompecabezas está listo para jugar.\n\n• Opcional\nTambién puedes pintar un fondo de color claro, dejar que se seque y luego pintar encima con los marcadores de colores.\n\nGema Casado. Manualidades para niños rebuenos. Barcelona: Altea, 2015. (Adaptación).",
+    "format": "plain",
+    "attachments": [
+     {
+      "kind": "image",
+      "note": "Ilustraciones de los pasos del instructivo: palitos alineados, palitos pegados con cinta, palitos pintados y rompecabezas terminado; ilustraciones de apoyo."
+     }
+    ]
+   },
+   "items": [
+    {
+     "position": 14,
+     "type": "multiple_choice",
+     "stem": "¿Qué materiales se usan en el paso 1?",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "Témperas.",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "Palitos.",
+       "isCorrect": true
+      },
+      {
+       "key": "C",
+       "text": "Lápices.",
+       "isCorrect": false
+      }
+     ],
+     "responseFormat": "choice",
+     "correctKey": "B",
+     "skill": "Localizar",
+     "oa": "OA 6",
+     "contentAxis": "Texto no literario",
+     "hasFigure": false,
+     "figureNote": null,
+     "indicador": "Localizan información explícita relevante en un texto no literario. Localizan información explícita relevante en un texto no"
+    },
+    {
+     "position": 15,
+     "type": "multiple_choice",
+     "stem": "¿Para qué se deben pegar los palitos con cinta adhesiva?",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "Para fijarlos.",
+       "isCorrect": true
+      },
+      {
+       "key": "B",
+       "text": "Para dejarlos secar.",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "Para colocarlos uno después del otro.",
+       "isCorrect": false
+      }
+     ],
+     "responseFormat": "choice",
+     "correctKey": "A",
+     "skill": "Localizar",
+     "oa": "OA 6",
+     "contentAxis": "Texto no literario",
+     "hasFigure": false,
+     "figureNote": null,
+     "indicador": "Localizan información explícita relevante en un texto no literario. Infieren información relevante que aportan los"
+    },
+    {
+     "position": 16,
+     "type": "multiple_choice",
+     "stem": "¿Qué muestra la primera imagen del texto?",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "Muestra cómo se usa el rompecabezas terminado.",
+       "isCorrect": true
+      },
+      {
+       "key": "B",
+       "text": "Muestra cómo se empieza a hacer el rompecabezas.",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "Muestra qué materiales se necesitan para el rompecabezas.",
+       "isCorrect": false
+      }
+     ],
+     "responseFormat": "choice",
+     "correctKey": "A",
+     "skill": "Interpretar y relacionar",
+     "oa": "OA 6",
+     "contentAxis": "Texto no literario",
+     "hasFigure": true,
+     "figureNote": "Primera ilustración del instructivo (palitos de helado alineados uno después del otro); la pregunta se refiere a esta imagen.",
+     "indicador": "Infieren información relevante que aportan los elementos discontinuos en un texto no literario. Infieren el sentido global de un texto no literario o un"
+    },
+    {
+     "position": 17,
+     "type": "multiple_choice",
+     "stem": "¿Qué te enseña a hacer este texto?",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "Un dibujo.",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "Un adorno.",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "Un juguete.",
+       "isCorrect": true
+      }
+     ],
+     "responseFormat": "choice",
+     "correctKey": "C",
+     "skill": "Interpretar y relacionar",
+     "oa": "OA 6",
+     "contentAxis": "Texto no literario",
+     "hasFigure": false,
+     "figureNote": null,
+     "indicador": "Infieren el sentido global de un texto no literario o un fragmento de este. Opinan sobre algún aspecto relevante en un texto no"
+    },
+    {
+     "position": 18,
+     "type": "open_ended",
+     "stem": "¿Qué te pareció el rompecabezas propuesto? Justifica tu respuesta con información del texto.",
+     "alternatives": [],
+     "responseFormat": "develop",
+     "correctKey": null,
+     "skill": "Reflexionar",
+     "oa": "OA 6",
+     "contentAxis": "Texto no literario",
+     "hasFigure": false,
+     "figureNote": null,
+     "indicador": "literario con fundamentos que integran información del texto.",
+     "rubric": "Tipos de respuestas Respuestas correctas Respuestas parcialmente correctas Respuestas incorrectas (Código 2) (Código 1) (Código 0) La o el estudiante opina sobre La o el estudiante opina sobre La o el estudiante responde algún aspecto de la lectura, algún aspecto de la lectura, en este fundamentando su respuesta en un fundamentando su respuesta con caso, entrega su apreciación error de lectura o lo hace base en información extraída del respecto al rompecabezas basándose en información que no texto que da cuenta de la propuesto. tiene relación con la pregunta. comprensión de este. Además, la En su respuesta no evidencia una Otras respuestas incorrectas son respuesta puede estar comprensión global, y su las tautológicas, vagas, complementada con información de fundamento no se sustenta en contradictorias, incoherentes, en su conocimiento de mundo . 5 elementos del texto, por ejemplo, blanco. En este caso, la o el estudiante es puede referirse a su gusto por los capaz de opinar respecto al rompecabezas en general o lo fácil producto final que se obtiene de o difícil que pueda resultar para él o este texto instructivo. En su ella sin considerar el proceso respuesta debe reflejar la descrito. comprensión de los pasos, los materiales usados o el objetivo de este producto. Ejemplos: Ejemplos: Ejemplos: Me pareció entretenido, Me pareció bueno, porque Me gustan los marcadores - - - porque puedo hacer muchos me gusta armar de colores. rompecabezas con distintos rompecabezas. dibujos. Me pareció muy fácil para - Me pareció fácil, porque solo mí. - necesitamos palitos de helados. Me pareció fome, porque si - usamos palitos de helados será un rompecabezas muy chico. No es requisito que el o la estudiante incorpore conocimiento de mundo en su respuesta para asignarle Código 2. 5 10 &gt; Diagnóstico Integral de Aprendizajes Instrumentos de Evaluación 2026 agenciaeducacion.cl"
+    }
+   ]
+  },
+  {
+   "order": 5,
+   "name": "Texto 5: «El cuervo y la vasija»",
+   "type": "multiple_choice",
+   "instructions": "Lee el siguiente texto y responde las preguntas 19 a 22.",
+   "passage": {
+    "title": "El cuervo y la vasija",
+    "text": "Había una vez un cuervo que tenía mucha sed. Pasó por una plaza, por una iglesia y de pronto vio una vasija en el patio de una casa. Se acercó y se dio cuenta de que contenía un poco de agua. Trató de beber, pero la vasija era honda y no pudo alcanzar el agua con el pico.\n\nEl cuervo se lamentó porque estaba sediento. Pensó que debía beber esa agua para seguir volando. Entonces, se le ocurrió una idea: volcar la vasija.\n\nLe pegó con las alas, pero era demasiado pesada. No podía moverla. Luego, pensó en otra idea: romper la vasija y beber el agua cuando se derramara. Estaría muy rica.\n\nEntonces, se lanzó contra la vasija con pico, garras y alas. Pero esta era demasiado resistente para romperla.\n\nEl triste cuervo se tomó un descanso y pensó:\n\n—¿Qué haré ahora? No puedo morir de sed con el agua tan cerca. Tiene que haber una manera. Solo necesito pensar hasta descubrirla.\n\nAl cabo de un rato, el cuervo tuvo una idea brillante. Había muchas piedrecitas alrededor. Las tomó una por una y las arrojó dentro de la vasija.\n\nPoco a poco el agua subió, hasta que al fin pudo beberla.\n\nEntonces, el cuervo comprobó que siempre hay un modo de vencer los obstáculos, solo hay que usar el ingenio.\n\nEsopo. Colección Cuento contigo I. Chile: Centro de Estudios Públicos, 2004. (Adaptación).",
+    "format": "plain",
+    "attachments": [
+     {
+      "kind": "image",
+      "note": "Ilustración del cuervo junto a la vasija; ilustración de apoyo."
+     }
+    ]
+   },
+   "items": [
+    {
+     "position": 19,
+     "type": "multiple_choice",
+     "stem": "¿Dónde encontró la vasija el cuervo?",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "En una casa.",
+       "isCorrect": true
+      },
+      {
+       "key": "B",
+       "text": "En una plaza.",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "En una iglesia.",
+       "isCorrect": false
+      }
+     ],
+     "responseFormat": "choice",
+     "correctKey": "A",
+     "skill": "Localizar",
+     "oa": "OA 4",
+     "contentAxis": "Narración",
+     "hasFigure": false,
+     "figureNote": null,
+     "indicador": "Localizan información explícita relevante en un texto narrativo."
+    },
+    {
+     "position": 20,
+     "type": "multiple_choice",
+     "stem": "¿Cómo estaba el cuervo cuando encontró la vasija?",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "Triste.",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "Sediento.",
+       "isCorrect": true
+      },
+      {
+       "key": "C",
+       "text": "Cansado.",
+       "isCorrect": false
+      }
+     ],
+     "responseFormat": "choice",
+     "correctKey": "B",
+     "skill": "Interpretar y relacionar",
+     "oa": "OA 4",
+     "contentAxis": "Narración",
+     "hasFigure": false,
+     "figureNote": null,
+     "indicador": "Infieren características físicas o sentimientos de personajes en un texto narrativo."
+    },
+    {
+     "position": 21,
+     "type": "multiple_choice",
+     "stem": "¿De qué manera el cuervo logra tomarse el agua de la vasija?",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "Volcando la vasija para tomar el agua.",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "Golpeando la vasija para derramar el agua.",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "Echando piedras a la vasija para que suba el agua.",
+       "isCorrect": true
+      }
+     ],
+     "responseFormat": "choice",
+     "correctKey": "C",
+     "skill": "Interpretar y relacionar",
+     "oa": "OA 4",
+     "contentAxis": "Narración",
+     "hasFigure": false,
+     "figureNote": null,
+     "indicador": "Identifican un hecho o acción relevante en un texto narrativo."
+    },
+    {
+     "position": 22,
+     "type": "multiple_choice",
+     "stem": "¿Cuál es la enseñanza que entrega el texto?",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "Debemos ser insistentes para obtener lo que queremos.",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "Debemos usar la inteligencia para superar las dificultades.",
+       "isCorrect": true
+      },
+      {
+       "key": "C",
+       "text": "Debemos mantenernos positivos para enfrentar los problemas.",
+       "isCorrect": false
+      }
+     ],
+     "responseFormat": "choice",
+     "correctKey": "B",
+     "skill": "Interpretar y relacionar",
+     "oa": "OA 4",
+     "contentAxis": "Narración",
+     "hasFigure": false,
+     "figureNote": null,
+     "indicador": "Infieren de qué trata un texto narrativo."
+    }
+   ]
   }
+ ],
+ "extraction": {
+  "itemCount": 22,
+  "warnings": [
+   "Ítems de alternativas con solo 3 opciones (A, B, C), típico de 3° básico DIA; cumple el mínimo de 2 alternativas.",
+   "Q6 y Q18 son ítems de desarrollo (open_ended, develop).",
+   "Q7 es ítem de respuesta múltiple («Marca todas las opciones correctas»): 4 opciones etiquetadas 1–4; puede haber más de una respuesta correcta.",
+   "Q9 depende de una imagen (murciélago moscardón) para responderse; hasFigure=true, needsHumanReview.",
+   "Q16 depende de una imagen (primera ilustración del instructivo) para responderse; hasFigure=true, needsHumanReview.",
+   "Textos transcritos desde la capa de texto del PDF (pdftotext), verbatim."
+  ],
+  "needsHumanReview": true,
+  "crossCheck": {
+   "hardIssues": [],
+   "softWarnings": [
+    "#7: respuesta múltiple por texto ('Frutas; Néctar;') — isCorrect a resolver"
+   ],
+   "counts": {
+    "cuadernillo": 22,
+    "ficha": 22,
+    "hoja": 22
+   }
+  }
+ },
+ "pauta": {
+  "source": {
+   "ficha": "3_ficha_tecnica_lectura_monitoreo_2026_3_basico.pdf",
+   "hoja": "3_hoja_de_respuestas_lectura_monitoreo_2026_3_basico.pdf"
+  },
+  "appliedKeys": 19,
+  "rubrics": 2
+ }
 }

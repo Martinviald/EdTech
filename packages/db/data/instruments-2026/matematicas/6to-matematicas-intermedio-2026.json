@@ -1,1233 +1,1240 @@
 {
-  "schemaVersion": "1.0",
-  "source": {
-    "file": "6_prueba_matematica_monitoreo_2026_6_basico.pdf",
-    "subjectFolder": "matematicas"
-  },
-  "instrument": {
-    "name": "DIA Matemática 6° Básico 2026 — Intermedio",
-    "subject": "Matemática",
-    "subjectCode": "MATH",
-    "grade": "6° Básico",
-    "gradeCode": "6TH_BASIC",
-    "year": 2026,
-    "applicationPeriod": "intermedio",
-    "type": "dia",
-    "isOfficial": true,
-    "source": "imported"
-  },
-  "sections": [
+ "schemaVersion": "1.0",
+ "source": {
+  "file": "6_prueba_matematica_monitoreo_2026_6_basico.pdf",
+  "subjectFolder": "matematicas"
+ },
+ "instrument": {
+  "name": "DIA Matemática 6° Básico 2026 — Intermedio",
+  "subject": "Matemática",
+  "subjectCode": "MATH",
+  "grade": "6° Básico",
+  "gradeCode": "6TH_BASIC",
+  "year": 2026,
+  "applicationPeriod": "intermedio",
+  "type": "dia",
+  "isOfficial": true,
+  "source": "imported"
+ },
+ "sections": [
+  {
+   "order": 1,
+   "name": "Prueba de Matemática 6° básico",
+   "type": "mixed",
+   "instructions": "Esta prueba tiene 35 preguntas de alternativas, desarrollo, completación y respuesta múltiple.",
+   "passage": null,
+   "items": [
     {
-      "order": 1,
-      "name": "Prueba de Matemática 6° básico",
-      "type": "mixed",
-      "instructions": "Esta prueba tiene 35 preguntas de alternativas, desarrollo, completación y respuesta múltiple.",
-      "passage": null,
-      "items": [
-        {
-          "position": 1,
-          "type": "multiple_choice",
-          "stem": "Observa los siguientes números:\n\n4   7   17   68\n\n¿Qué número es un factor de 34?",
-          "alternatives": [
-            {
-              "key": "A",
-              "text": "4",
-              "isCorrect": false
-            },
-            {
-              "key": "B",
-              "text": "7",
-              "isCorrect": false
-            },
-            {
-              "key": "C",
-              "text": "17",
-              "isCorrect": true
-            },
-            {
-              "key": "D",
-              "text": "68",
-              "isCorrect": false
-            }
-          ],
-          "responseFormat": "choice",
-          "correctKey": "C",
-          "skill": "Resolver problemas",
-          "oa": "OA 1",
-          "contentAxis": "Números y operaciones",
-          "hasFigure": false,
-          "figureNote": null,
-          "indicador": "Identifican factores de números naturales menores de 100. Identifican razones entre las cantidades involucradas"
-        },
-        {
-          "position": 2,
-          "type": "multiple_choice",
-          "stem": "La siguiente imagen muestra un conjunto de verduras. ¿Cuál es la razón entre la cantidad de [verdura destacada en la imagen, no legible en el texto] y la cantidad total de verduras?",
-          "alternatives": [
-            {
-              "key": "A",
-              "text": "4 : 10",
-              "isCorrect": false
-            },
-            {
-              "key": "B",
-              "text": "6 : 10",
-              "isCorrect": true
-            },
-            {
-              "key": "C",
-              "text": "6:4",
-              "isCorrect": false
-            },
-            {
-              "key": "D",
-              "text": "10 : 6",
-              "isCorrect": false
-            }
-          ],
-          "responseFormat": "choice",
-          "correctKey": "B",
-          "skill": "Representar",
-          "oa": "OA 3",
-          "contentAxis": "Números y operaciones",
-          "hasFigure": true,
-          "figureNote": "imagen con un conjunto de verduras; el tipo de verdura destacado en el enunciado no es legible en el texto extraído",
-          "indicador": "Identifican razones entre las cantidades involucradas en una situación dada."
-        },
-        {
-          "position": 3,
-          "type": "multiple_choice",
-          "stem": "Lucas compró cajas que contienen 6 barritas de cereal cada una. ¿Cuál de los siguientes números podría ser la cantidad de barritas de cereal que compró en total Lucas?",
-          "alternatives": [
-            {
-              "key": "A",
-              "text": "26",
-              "isCorrect": false
-            },
-            {
-              "key": "B",
-              "text": "33",
-              "isCorrect": false
-            },
-            {
-              "key": "C",
-              "text": "48",
-              "isCorrect": true
-            },
-            {
-              "key": "D",
-              "text": "61",
-              "isCorrect": false
-            }
-          ],
-          "responseFormat": "choice",
-          "correctKey": "C",
-          "skill": "Resolver problemas",
-          "oa": "OA 1",
-          "contentAxis": "Números y operaciones",
-          "hasFigure": false,
-          "figureNote": null,
-          "indicador": "Resuelven problemas que involucran múltiplos. Interpretan información cotidiana entregada como"
-        },
-        {
-          "position": 4,
-          "type": "multiple_choice",
-          "stem": "Se realizó una encuesta a 1 000 personas y se concluyó que el 80% de ellas compra frutas en la feria. Al respecto, ¿cuál de estas afirmaciones es verdadera?",
-          "alternatives": [
-            {
-              "key": "A",
-              "text": "8 de cada 100 personas encuestadas compran frutas en la feria.",
-              "isCorrect": false
-            },
-            {
-              "key": "B",
-              "text": "8 de cada 1 000 personas encuestadas compran frutas en la feria.",
-              "isCorrect": false
-            },
-            {
-              "key": "C",
-              "text": "80 de cada 100 personas encuestadas compran frutas en la feria.",
-              "isCorrect": true
-            },
-            {
-              "key": "D",
-              "text": "80 de cada 1 000 personas encuestadas compran frutas en la feria.",
-              "isCorrect": false
-            }
-          ],
-          "responseFormat": "choice",
-          "correctKey": "C",
-          "skill": "Argumentar",
-          "oa": "OA 4",
-          "contentAxis": "Números y operaciones",
-          "hasFigure": false,
-          "figureNote": null,
-          "indicador": "Interpretan información cotidiana entregada como porcentajes. Identifican equivalencias entre un número mixto y una"
-        },
-        {
-          "position": 5,
-          "type": "multiple_choice",
-          "stem": "¿Cuál de las siguientes fracciones es equivalente al número mixto 2 4/5?",
-          "alternatives": [
-            {
-              "key": "A",
-              "text": "6/5",
-              "isCorrect": false
-            },
-            {
-              "key": "B",
-              "text": "8/5",
-              "isCorrect": false
-            },
-            {
-              "key": "C",
-              "text": "13/5",
-              "isCorrect": false
-            },
-            {
-              "key": "D",
-              "text": "14/5",
-              "isCorrect": true
-            }
-          ],
-          "responseFormat": "choice",
-          "correctKey": "D",
-          "skill": "Representar",
-          "oa": "OA 5",
-          "contentAxis": "Números y operaciones",
-          "hasFigure": false,
-          "figureNote": null,
-          "indicador": "Identifican equivalencias entre un número mixto y una fracción impropia. Identifican representaciones de números mixtos en la"
-        },
-        {
-          "position": 6,
-          "type": "multiple_choice",
-          "stem": "Observa el punto P en la siguiente recta numérica:\n\n0        1        2        3\n\n(el punto P se ubica a la derecha del 3, su posición exacta no es legible en el texto)\n\n¿Cuál de los siguientes números se ubica en el punto P de la recta anterior?",
-          "alternatives": [
-            {
-              "key": "A",
-              "text": "23/5",
-              "isCorrect": true
-            },
-            {
-              "key": "B",
-              "text": "23/4",
-              "isCorrect": false
-            },
-            {
-              "key": "C",
-              "text": "22/5",
-              "isCorrect": false
-            },
-            {
-              "key": "D",
-              "text": "24/6",
-              "isCorrect": false
-            }
-          ],
-          "responseFormat": "choice",
-          "correctKey": "A",
-          "skill": "Representar",
-          "oa": "OA 5",
-          "contentAxis": "Números y operaciones",
-          "hasFigure": true,
-          "figureNote": "recta numérica de 0 a 3 con el punto P ubicado más allá del 3; su posición exacta no es legible en el texto",
-          "indicador": "Identifican representaciones de números mixtos en la recta numérica. Calculan multiplicaciones de números decimales por"
-        },
-        {
-          "position": 7,
-          "type": "open_ended",
-          "stem": "Resuelve:\n\n0,25 • 10 =",
-          "alternatives": [],
-          "responseFormat": "fill_in",
-          "correctKey": null,
-          "skill": "Resolver problemas",
-          "oa": "OA 7",
-          "contentAxis": "Números y operaciones",
-          "hasFigure": false,
-          "figureNote": null,
-          "indicador": "Calculan multiplicaciones de números decimales por múltiplos de 10. Resuelven problemas que requieren calcular",
-          "fillAnswer": "2,5"
-        },
-        {
-          "position": 8,
-          "type": "multiple_choice",
-          "stem": "Mario tenía 2 3/8 kilogramos de mermelada y utilizó 5/8 kilogramos para hacer una torta. ¿Cuántos kilogramos de mermelada le quedan disponibles para hacer otra preparación?",
-          "alternatives": [
-            {
-              "key": "A",
-              "text": "12/8",
-              "isCorrect": false
-            },
-            {
-              "key": "B",
-              "text": "16/8",
-              "isCorrect": true
-            },
-            {
-              "key": "C",
-              "text": "2",
-              "isCorrect": false
-            },
-            {
-              "key": "D",
-              "text": "3",
-              "isCorrect": false
-            }
-          ],
-          "responseFormat": "choice",
-          "correctKey": "B",
-          "skill": "Resolver problemas",
-          "oa": "OA 8",
-          "contentAxis": "Números y operaciones",
-          "hasFigure": false,
-          "figureNote": null,
-          "indicador": "sustracciones de números mixtos y fracciones propias con el mismo denominador. Resuelven ecuaciones de primer grado con una"
-        },
-        {
-          "position": 9,
-          "type": "multiple_choice",
-          "stem": "¿Cuál es el valor de x en la ecuación x – 4 = 12?",
-          "alternatives": [
-            {
-              "key": "A",
-              "text": "3",
-              "isCorrect": false
-            },
-            {
-              "key": "B",
-              "text": "8",
-              "isCorrect": false
-            },
-            {
-              "key": "C",
-              "text": "16",
-              "isCorrect": true
-            },
-            {
-              "key": "D",
-              "text": "48",
-              "isCorrect": false
-            }
-          ],
-          "responseFormat": "choice",
-          "correctKey": "C",
-          "skill": "Resolver problemas",
-          "oa": "OA 11",
-          "contentAxis": "Patrones y álgebra",
-          "hasFigure": false,
-          "figureNote": null,
-          "indicador": "Resuelven ecuaciones de primer grado con una incógnita representadas algebraicamente. Identifican la regla que relaciona los valores de una"
-        },
-        {
-          "position": 10,
-          "type": "multiple_choice",
-          "stem": "Observa la siguiente tabla, donde el número de entrada se relaciona con el número de salida:\n\nEntrada | Salida\n6 | 2\n9 | 3\n12 | 4\n15 | 5\n\nSi x es el número de entrada, ¿con qué expresión se obtiene el número de salida?",
-          "alternatives": [
-            {
-              "key": "A",
-              "text": "x•3",
-              "isCorrect": false
-            },
-            {
-              "key": "B",
-              "text": "x–4",
-              "isCorrect": false
-            },
-            {
-              "key": "C",
-              "text": "x:3",
-              "isCorrect": true
-            },
-            {
-              "key": "D",
-              "text": "x+4",
-              "isCorrect": false
-            }
-          ],
-          "responseFormat": "choice",
-          "correctKey": "C",
-          "skill": "Modelar",
-          "oa": "OA 9",
-          "contentAxis": "Patrones y álgebra",
-          "hasFigure": false,
-          "figureNote": null,
-          "indicador": "tabla de entrada y salida, expresándola en lenguaje matemático. Calculan el área de la superficie de paralelepípedos,"
-        },
-        {
-          "position": 11,
-          "type": "multiple_choice",
-          "stem": "A continuación, se muestran algunas medidas de una red y el paralelepípedo rectangular que se arma con ella (12 cm y 8 cm). ¿Cuál es el área de la superficie del paralelepípedo?",
-          "alternatives": [
-            {
-              "key": "A",
-              "text": "768 cm2",
-              "isCorrect": false
-            },
-            {
-              "key": "B",
-              "text": "512 cm2",
-              "isCorrect": true
-            },
-            {
-              "key": "C",
-              "text": "224 cm2",
-              "isCorrect": false
-            },
-            {
-              "key": "D",
-              "text": "36 cm2",
-              "isCorrect": false
-            }
-          ],
-          "responseFormat": "choice",
-          "correctKey": "B",
-          "skill": "Resolver problemas",
-          "oa": "OA 13",
-          "contentAxis": "Geometría",
-          "hasFigure": true,
-          "figureNote": "red del paralelepípedo con medidas 12 cm en una arista y 8 cm en las otras",
-          "indicador": "a partir de información entregada en una de sus redes. Identifican la medida de un ángulo a partir de la"
-        },
-        {
-          "position": 12,
-          "type": "multiple_choice",
-          "stem": "Observa los ángulos formados por las rectas L1 y L2, donde uno de los ángulos mide 38° y se destaca el ángulo x. ¿Cuánto mide el ángulo x?",
-          "alternatives": [
-            {
-              "key": "A",
-              "text": "38°",
-              "isCorrect": false
-            },
-            {
-              "key": "B",
-              "text": "52°",
-              "isCorrect": false
-            },
-            {
-              "key": "C",
-              "text": "142°",
-              "isCorrect": true
-            },
-            {
-              "key": "D",
-              "text": "322°",
-              "isCorrect": false
-            }
-          ],
-          "responseFormat": "choice",
-          "correctKey": "C",
-          "skill": "Resolver problemas",
-          "oa": "OA 16",
-          "contentAxis": "Geometría",
-          "hasFigure": true,
-          "figureNote": "dos rectas L1 y L2 que se intersectan formando ángulos, uno de 38° y el ángulo x; la posición relativa de x respecto al de 38° no es explícita en el texto",
-          "indicador": "Identifican la medida de un ángulo a partir de la medida de un ángulo adyacente suplementario."
-        },
-        {
-          "position": 13,
-          "type": "multiple_choice",
-          "stem": "Observa el cubo y la medida de una de sus aristas: 10 cm. ¿Cuánto mide el área de la superficie del cubo?",
-          "alternatives": [
-            {
-              "key": "A",
-              "text": "120 cm2",
-              "isCorrect": false
-            },
-            {
-              "key": "B",
-              "text": "140 cm2",
-              "isCorrect": false
-            },
-            {
-              "key": "C",
-              "text": "240 cm2",
-              "isCorrect": false
-            },
-            {
-              "key": "D",
-              "text": "600 cm2",
-              "isCorrect": true
-            }
-          ],
-          "responseFormat": "choice",
-          "correctKey": "D",
-          "skill": "Resolver problemas",
-          "oa": "OA 18",
-          "contentAxis": "Medición",
-          "hasFigure": true,
-          "figureNote": "imagen de un cubo con arista de 10 cm",
-          "indicador": "Calculan el área de la superficie de cubos."
-        },
-        {
-          "position": 14,
-          "type": "multiple_choice",
-          "stem": "¿Cuál es el volumen de un paralelepípedo de 6 cm de largo, 4 cm de alto y 5 cm de ancho?",
-          "alternatives": [
-            {
-              "key": "A",
-              "text": "148 cm3",
-              "isCorrect": false
-            },
-            {
-              "key": "B",
-              "text": "120 cm3",
-              "isCorrect": true
-            },
-            {
-              "key": "C",
-              "text": "74 cm3",
-              "isCorrect": false
-            },
-            {
-              "key": "D",
-              "text": "15 cm3",
-              "isCorrect": false
-            }
-          ],
-          "responseFormat": "choice",
-          "correctKey": "B",
-          "skill": "Resolver problemas",
-          "oa": "OA 19",
-          "contentAxis": "Medición",
-          "hasFigure": false,
-          "figureNote": null,
-          "indicador": "Calculan el volumen de paralelepípedos. Identifican la medida de ángulos usando un"
-        },
-        {
-          "position": 15,
-          "type": "open_ended",
-          "stem": "Observa el transportador y el ángulo destacado de color celeste. ¿Cuántos grados mide el ángulo destacado de color celeste?\n\nRespuesta: El ángulo mide ___ grados.",
-          "alternatives": [],
-          "responseFormat": "fill_in",
-          "correctKey": null,
-          "skill": "Resolver problemas",
-          "oa": "OA 20",
-          "contentAxis": "Medición",
-          "hasFigure": true,
-          "figureNote": "transportador (0° a 180°) con un ángulo marcado en color celeste; el valor exacto no es legible en el texto",
-          "indicador": "Identifican la medida de ángulos usando un transportador dibujado. Comparan distribuciones de dos grupos de datos,",
-          "fillAnswer": "70"
-        },
-        {
-          "position": 16,
-          "type": "multiple_choice",
-          "stem": "Dos personas lanzaron un dado de seis caras numeradas del 1 al 6. Los diagramas muestran la cantidad de veces que salió cada número del dado luego de ser lanzado 25 veces por cada persona (Persona 1 y Persona 2). ¿Qué número del dado salió la misma cantidad de veces a ambas personas?",
-          "alternatives": [
-            {
-              "key": "A",
-              "text": "2",
-              "isCorrect": false
-            },
-            {
-              "key": "B",
-              "text": "4",
-              "isCorrect": false
-            },
-            {
-              "key": "C",
-              "text": "5",
-              "isCorrect": true
-            },
-            {
-              "key": "D",
-              "text": "6",
-              "isCorrect": false
-            }
-          ],
-          "responseFormat": "choice",
-          "correctKey": "C",
-          "skill": "Representar",
-          "oa": "OA 22",
-          "contentAxis": "Datos y probabilidades",
-          "hasFigure": true,
-          "figureNote": "dos gráficos de barras (Persona 1 y Persona 2) con la frecuencia de cada número del dado (1 al 6); los valores no son legibles en el texto",
-          "indicador": "provenientes de muestras aleatorias, usando diagramas de puntos. Determinan el resultado más o menos probable al repetir un experimento aleatorio, conociendo la"
-        },
-        {
-          "position": 17,
-          "type": "multiple_choice",
-          "stem": "Una ruleta está dividida en 4 sectores de distintos tamaños y cada uno está pintado de un solo color: azul, verde, rojo o amarillo. La siguiente tabla muestra los resultados obtenidos al hacer girar la ruleta cierta cantidad de veces:\n\nCantidad de veces que se hace girar la ruleta | Azul | Verde | Rojo | Amarillo\n100 | 36 | 34 | 9 | 21\n200 | 56 | 68 | 35 | 41\n500 | 152 | 198 | 57 | 93\n600 | 186 | 225 | 61 | 128\n\n¿Qué color es más probable que salga al hacer girar la ruleta una vez más?",
-          "alternatives": [
-            {
-              "key": "A",
-              "text": "Azul",
-              "isCorrect": false
-            },
-            {
-              "key": "B",
-              "text": "Verde",
-              "isCorrect": true
-            },
-            {
-              "key": "C",
-              "text": "Rojo",
-              "isCorrect": false
-            },
-            {
-              "key": "D",
-              "text": "Amarillo",
-              "isCorrect": false
-            }
-          ],
-          "responseFormat": "choice",
-          "correctKey": "B",
-          "skill": "Resolver problemas",
-          "oa": "OA 23",
-          "contentAxis": "Datos y probabilidades",
-          "hasFigure": false,
-          "figureNote": null,
-          "indicador": "repetir un experimento aleatorio, conociendo la tendencia de los resultados de una serie de repeticiones anteriores. Comunican conclusiones obtenidas a partir de"
-        },
-        {
-          "position": 18,
-          "type": "open_ended",
-          "stem": "El siguiente gráfico muestra la población urbana y la población rural de Chile, obtenidas en los censos de Población y Vivienda que se realizaron entre 1952 y 2017 (gráfico de barras dobles, años 1952, 1960, 1970, 1982, 1992, 2002 y 2017; eje de cantidad de personas de 0 a 16 000 000; series Población Urbana y Población Rural. Fuente: INE). Considerando la información de todos los censos que se muestran en el gráfico, ¿qué ocurrió con la población urbana y la población rural en Chile?\n\nEscribe tu respuesta señalando qué elementos del gráfico usaste para tu conclusión.",
-          "alternatives": [],
-          "responseFormat": "develop",
-          "correctKey": null,
-          "skill": "Argumentar",
-          "oa": "OA 24",
-          "contentAxis": "Datos y probabilidades",
-          "hasFigure": true,
-          "figureNote": "gráfico de barras dobles (población urbana/rural) 1952-2017; los valores exactos de cada barra no son legibles en el texto",
-          "indicador": "Comunican conclusiones obtenidas a partir de información presentada en gráficos de barra doble. Resuelven problemas que requieren calcular"
-        },
-        {
-          "position": 19,
-          "type": "multiple_choice",
-          "stem": "Emilio tiene 4 500 huevos para vender. Recibió un pedido de 210 cajas con 6 huevos cada una y 240 cajas con 12 huevos cada una.\n\n¿Cuántos huevos le quedarán en total después de entregar el pedido anterior?",
-          "alternatives": [
-            {
-              "key": "A",
-              "text": "360",
-              "isCorrect": true
-            },
-            {
-              "key": "B",
-              "text": "700",
-              "isCorrect": false
-            },
-            {
-              "key": "C",
-              "text": "4 032",
-              "isCorrect": false
-            },
-            {
-              "key": "D",
-              "text": "4 445",
-              "isCorrect": false
-            }
-          ],
-          "responseFormat": "choice",
-          "correctKey": "A",
-          "skill": "Resolver problemas",
-          "oa": "OA 2",
-          "contentAxis": "Números y operaciones",
-          "hasFigure": false,
-          "figureNote": null,
-          "indicador": "Resuelven problemas que requieren calcular combinaciones de las operaciones básicas. Interpretan razones entre cantidades involucradas en"
-        },
-        {
-          "position": 20,
-          "type": "multiple_choice",
-          "stem": "Sara rindió una prueba. La razón entre la cantidad de preguntas correctas que respondió y el total de preguntas de la prueba es 5 : 8. ¿Cómo se interpreta esa información?",
-          "alternatives": [
-            {
-              "key": "A",
-              "text": "Por cada 5 preguntas que respondió correctamente, hay 3 preguntas que respondió incorrectamente.",
-              "isCorrect": true
-            },
-            {
-              "key": "B",
-              "text": "Por cada 5 preguntas que respondió correctamente, hay 8 preguntas que respondió incorrectamente.",
-              "isCorrect": false
-            },
-            {
-              "key": "C",
-              "text": "Por cada 5 preguntas que respondió correctamente, hay 13 preguntas que respondió incorrectamente.",
-              "isCorrect": false
-            }
-          ],
-          "responseFormat": "choice",
-          "correctKey": "A",
-          "skill": "Resolver problemas",
-          "oa": "OA 3",
-          "contentAxis": "Números y operaciones",
-          "hasFigure": false,
-          "figureNote": null,
-          "indicador": "Interpretan razones entre cantidades involucradas en una situación dada."
-        },
-        {
-          "position": 21,
-          "type": "multiple_choice",
-          "stem": "La siguiente cuadrícula está dividida en 50 cuadrados iguales, algunos de color gris. ¿Qué porcentaje de la cuadrícula representan los cuadrados grises?",
-          "alternatives": [
-            {
-              "key": "A",
-              "text": "50%",
-              "isCorrect": false
-            },
-            {
-              "key": "B",
-              "text": "40%",
-              "isCorrect": true
-            },
-            {
-              "key": "C",
-              "text": "20%",
-              "isCorrect": false
-            },
-            {
-              "key": "D",
-              "text": "10%",
-              "isCorrect": false
-            }
-          ],
-          "responseFormat": "choice",
-          "correctKey": "B",
-          "skill": "Representar",
-          "oa": "OA 4",
-          "contentAxis": "Números y operaciones",
-          "hasFigure": true,
-          "figureNote": "cuadrícula de 50 cuadrados con algunos pintados de gris; la cantidad exacta no es legible en el texto",
-          "indicador": "Identifican representaciones simbólicas de porcentajes, dada su representación pictórica. Calculan adiciones de fracciones propias y números"
-        },
-        {
-          "position": 22,
-          "type": "multiple_choice",
-          "stem": "¿Cuál es el resultado de 3 5/7 + 1/3?",
-          "alternatives": [
-            {
-              "key": "A",
-              "text": "27/10",
-              "isCorrect": false
-            },
-            {
-              "key": "B",
-              "text": "36/21",
-              "isCorrect": false
-            },
-            {
-              "key": "C",
-              "text": "36/10",
-              "isCorrect": false
-            },
-            {
-              "key": "D",
-              "text": "85/21",
-              "isCorrect": true
-            }
-          ],
-          "responseFormat": "choice",
-          "correctKey": "D",
-          "skill": "Resolver problemas",
-          "oa": "OA 6",
-          "contentAxis": "Números y operaciones",
-          "hasFigure": false,
-          "figureNote": null,
-          "indicador": "mixtos con numeradores y denominadores de hasta dos dígitos."
-        },
-        {
-          "position": 23,
-          "type": "multiple_choice",
-          "stem": "¿Cuál es el resultado de 0,5 : 0,002?",
-          "alternatives": [
-            {
-              "key": "A",
-              "text": "0,250",
-              "isCorrect": false
-            },
-            {
-              "key": "B",
-              "text": "2,5",
-              "isCorrect": false
-            },
-            {
-              "key": "C",
-              "text": "25",
-              "isCorrect": false
-            },
-            {
-              "key": "D",
-              "text": "250",
-              "isCorrect": true
-            }
-          ],
-          "responseFormat": "choice",
-          "correctKey": "D",
-          "skill": "Resolver problemas",
-          "oa": "OA 7",
-          "contentAxis": "Números y operaciones",
-          "hasFigure": false,
-          "figureNote": null,
-          "indicador": "Calculan divisiones de números decimales. Resuelven problemas que requieren calcular"
-        },
-        {
-          "position": 24,
-          "type": "multiple_choice",
-          "stem": "En una comuna cayeron 110,17 mm de lluvia en junio y 64,685 mm en julio. ¿Cuánta lluvia cayó en total en estos dos meses?",
-          "alternatives": [
-            {
-              "key": "A",
-              "text": "174,755 mm",
-              "isCorrect": false
-            },
-            {
-              "key": "B",
-              "text": "174,855 mm",
-              "isCorrect": true
-            },
-            {
-              "key": "C",
-              "text": "757,02 mm",
-              "isCorrect": false
-            },
-            {
-              "key": "D",
-              "text": "756,92 mm",
-              "isCorrect": false
-            }
-          ],
-          "responseFormat": "choice",
-          "correctKey": "B",
-          "skill": "Resolver problemas",
-          "oa": "OA 8",
-          "contentAxis": "Números y operaciones",
-          "hasFigure": false,
-          "figureNote": null,
-          "indicador": "adiciones de números decimales con distinta cantidad de cifras decimales. Identifican un término desconocido en la relación"
-        },
-        {
-          "position": 25,
-          "type": "multiple_choice",
-          "stem": "Una máquina envasa frascos de crema siempre con la misma rapidez. La siguiente tabla relaciona la cantidad de frascos de crema envasados y el tiempo que se demora la máquina en envasarlos:\n\nTiempo (en minutos) | Cantidad de frascos de crema envasados\n4 | 36\n7 | 63\n10 | 90\n15 | ¿?\n20 | 180\n\n¿Cuál es la cantidad de frascos de crema envasados en 15 minutos?",
-          "alternatives": [
-            {
-              "key": "A",
-              "text": "105",
-              "isCorrect": false
-            },
-            {
-              "key": "B",
-              "text": "117",
-              "isCorrect": false
-            },
-            {
-              "key": "C",
-              "text": "135",
-              "isCorrect": true
-            },
-            {
-              "key": "D",
-              "text": "175",
-              "isCorrect": false
-            }
-          ],
-          "responseFormat": "choice",
-          "correctKey": "C",
-          "skill": "Resolver problemas",
-          "oa": "OA 9",
-          "contentAxis": "Patrones y álgebra",
-          "hasFigure": false,
-          "figureNote": null,
-          "indicador": "entre los valores de una tabla, en el contexto de la resolución de problemas. Identifican la generalización de una secuencia"
-        },
-        {
-          "position": 26,
-          "type": "multiple_choice",
-          "stem": "Observa los términos de la siguiente secuencia, donde n representa cualquier posición:\n\nTérmino | 10 | 20 | 30 | 40 | 50 | ... | ¿?\nPosición | 1 | 2 | 3 | 4 | 5 | ... | n\n\n¿Cuál es la regla que permite encontrar cualquier término de la secuencia usando la posición n?",
-          "alternatives": [
-            {
-              "key": "A",
-              "text": "n+1",
-              "isCorrect": false
-            },
-            {
-              "key": "B",
-              "text": "n + 10",
-              "isCorrect": false
-            },
-            {
-              "key": "C",
-              "text": "n•2",
-              "isCorrect": false
-            },
-            {
-              "key": "D",
-              "text": "n • 10",
-              "isCorrect": true
-            }
-          ],
-          "responseFormat": "choice",
-          "correctKey": "D",
-          "skill": "Modelar",
-          "oa": "OA 20",
-          "contentAxis": "Patrones y álgebra",
-          "hasFigure": false,
-          "figureNote": null,
-          "indicador": "Identifican la generalización de una secuencia numérica para determinar un término. Resuelven ecuaciones de primer grado con una"
-        },
-        {
-          "position": 27,
-          "type": "multiple_choice",
-          "stem": "Observa la siguiente balanza equilibrada, con tres figuras (x) en un platillo y una figura (x) distinta en el otro. ¿Cuántos [figura del primer platillo] equivalen a la masa de un [figura del segundo platillo]?",
-          "alternatives": [
-            {
-              "key": "A",
-              "text": "18",
-              "isCorrect": false
-            },
-            {
-              "key": "B",
-              "text": "15",
-              "isCorrect": false
-            },
-            {
-              "key": "C",
-              "text": "5",
-              "isCorrect": true
-            },
-            {
-              "key": "D",
-              "text": "3",
-              "isCorrect": false
-            }
-          ],
-          "responseFormat": "choice",
-          "correctKey": "C",
-          "skill": "Resolver problemas",
-          "oa": "OA 11",
-          "contentAxis": "Patrones y álgebra",
-          "hasFigure": true,
-          "figureNote": "balanza equilibrada con figuras (no descritas en el texto) representando pesos; el detalle de las figuras no es legible",
-          "indicador": "Resuelven ecuaciones de primer grado con una incógnita representadas pictóricamente. Calculan el área de la superficie de cubos, a partir de"
-        },
-        {
-          "position": 28,
-          "type": "multiple_choice",
-          "stem": "En la siguiente imagen se muestra una red con la medida del área de uno de sus cuadrados (16 cm2) y el cubo que se arma con ella. ¿Cuál es el área de la superficie del cubo?",
-          "alternatives": [
-            {
-              "key": "A",
-              "text": "48 cm2",
-              "isCorrect": false
-            },
-            {
-              "key": "B",
-              "text": "56 cm2",
-              "isCorrect": false
-            },
-            {
-              "key": "C",
-              "text": "64 cm2",
-              "isCorrect": false
-            },
-            {
-              "key": "D",
-              "text": "96 cm2",
-              "isCorrect": true
-            }
-          ],
-          "responseFormat": "choice",
-          "correctKey": "D",
-          "skill": "Resolver problemas",
-          "oa": "OA 13",
-          "contentAxis": "Geometría",
-          "hasFigure": true,
-          "figureNote": "red de un cubo con un cuadrado de área 16 cm2 destacado",
-          "indicador": "Calculan el área de la superficie de cubos, a partir de información entregada en una de sus redes."
-        },
-        {
-          "position": 29,
-          "type": "multiple_choice",
-          "stem": "Observa los ángulos que se forman entre las rectas L1 y L2, marcados como α, β, δ y μ.\n\nEn el siguiente listado, marca todos los pares de ángulos que son siempre suplementarios:\n\n1. α y β\n2. α y μ\n3. μ y δ\n4. β y δ\n5. δ y α\n6. μ y β",
-          "alternatives": [
-            {
-              "key": "1",
-              "text": "α y β"
-            },
-            {
-              "key": "2",
-              "text": "α y μ"
-            },
-            {
-              "key": "3",
-              "text": "μ y δ"
-            },
-            {
-              "key": "4",
-              "text": "β y δ"
-            },
-            {
-              "key": "5",
-              "text": "δ y α"
-            },
-            {
-              "key": "6",
-              "text": "μ y β"
-            }
-          ],
-          "responseFormat": "choice",
-          "correctKey": null,
-          "skill": "Representar",
-          "oa": "OA 16",
-          "contentAxis": "Geometría",
-          "hasFigure": true,
-          "figureNote": "dos rectas L1 y L2 con cuatro ángulos marcados (α, β, δ, μ); la disposición exacta no es legible en el texto",
-          "indicador": "Identifican pares de ángulos suplementarios. Identifican la operación que permite calcular el área",
-          "fillAnswer": "1, 3, 5 y 6"
-        },
-        {
-          "position": 30,
-          "type": "multiple_choice",
-          "stem": "Observa el siguiente paralelepípedo rectangular con medidas 9 cm, 4 cm y 4 cm. ¿Cuál de las siguientes operaciones permite calcular la superficie del paralelepípedo en centímetros cuadrados?",
-          "alternatives": [
-            {
-              "key": "A",
-              "text": "9•4•4",
-              "isCorrect": false
-            },
-            {
-              "key": "B",
-              "text": "9+4+4",
-              "isCorrect": false
-            },
-            {
-              "key": "C",
-              "text": "9•2+2•4",
-              "isCorrect": false
-            },
-            {
-              "key": "D",
-              "text": "4•9•4+2•4•4",
-              "isCorrect": true
-            }
-          ],
-          "responseFormat": "choice",
-          "correctKey": "D",
-          "skill": "Representar",
-          "oa": "OA 18",
-          "contentAxis": "Medición",
-          "hasFigure": true,
-          "figureNote": "paralelepípedo rectangular con medidas 9 cm, 4 cm y 4 cm",
-          "indicador": "Identifican la operación que permite calcular el área de la superficie de un paralelepípedo."
-        },
-        {
-          "position": 31,
-          "type": "multiple_choice",
-          "stem": "Observa el cubo con arista de 3 cm. ¿Cuál es el volumen del cubo en centímetros cúbicos?",
-          "alternatives": [
-            {
-              "key": "A",
-              "text": "27",
-              "isCorrect": true
-            },
-            {
-              "key": "B",
-              "text": "36",
-              "isCorrect": false
-            },
-            {
-              "key": "C",
-              "text": "54",
-              "isCorrect": false
-            },
-            {
-              "key": "D",
-              "text": "72",
-              "isCorrect": false
-            }
-          ],
-          "responseFormat": "choice",
-          "correctKey": "A",
-          "skill": "Resolver problemas",
-          "oa": "OA 19",
-          "contentAxis": "Medición",
-          "hasFigure": true,
-          "figureNote": "imagen de un cubo con arista de 3 cm",
-          "indicador": "Calculan el volumen de cubos. Calculan la medida de ángulos formados en rectas"
-        },
-        {
-          "position": 32,
-          "type": "multiple_choice",
-          "stem": "Observa los ángulos que se forman cuando las rectas paralelas L1 y L2 son cortadas por una transversal L3. Se destaca el ángulo β en L1 y un ángulo de 65° en L2. ¿Cuánto mide el ángulo β?",
-          "alternatives": [
-            {
-              "key": "A",
-              "text": "25°",
-              "isCorrect": false
-            },
-            {
-              "key": "B",
-              "text": "65°",
-              "isCorrect": true
-            },
-            {
-              "key": "C",
-              "text": "90°",
-              "isCorrect": false
-            },
-            {
-              "key": "D",
-              "text": "115°",
-              "isCorrect": false
-            }
-          ],
-          "responseFormat": "choice",
-          "correctKey": "B",
-          "skill": "Resolver problemas",
-          "oa": "OA 21",
-          "contentAxis": "Medición",
-          "hasFigure": true,
-          "figureNote": "rectas paralelas L1 y L2 cortadas por transversal L3, con ángulo β en L1 y 65° en L2; la relación posicional exacta no es explícita en el texto",
-          "indicador": "Calculan la medida de ángulos formados en rectas paralelas cortadas por una transversal."
-        },
-        {
-          "position": 33,
-          "type": "multiple_choice",
-          "stem": "Observa los ángulos en el siguiente triángulo, donde se destacan un ángulo x y dos ángulos de 147° y 72° junto al triángulo. ¿Cuál es la medida del ángulo x?",
-          "alternatives": [
-            {
-              "key": "A",
-              "text": "33°",
-              "isCorrect": false
-            },
-            {
-              "key": "B",
-              "text": "39°",
-              "isCorrect": true
-            },
-            {
-              "key": "C",
-              "text": "75°",
-              "isCorrect": false
-            },
-            {
-              "key": "D",
-              "text": "219°",
-              "isCorrect": false
-            }
-          ],
-          "responseFormat": "choice",
-          "correctKey": "B",
-          "skill": "Resolver problemas",
-          "oa": "OA 21",
-          "contentAxis": "Medición",
-          "hasFigure": true,
-          "figureNote": "triángulo con ángulo x y dos ángulos (147° y 72°) marcados junto a él; no es explícito en el texto si son interiores o exteriores al triángulo",
-          "indicador": "Calculan la medida de ángulos en triángulos. Comparan distribuciones de dos grupos de datos,"
-        },
-        {
-          "position": 34,
-          "type": "multiple_choice",
-          "stem": "En el siguiente diagrama de tallo y hojas se registraron las temperaturas máximas (°C) de algunos días de otoño, en dos ciudades diferentes:\n\nCiudad A (hojas, leídas de derecha a izquierda) | Tallo | Ciudad B (hojas)\n8 | 0 | \n8 8 6 5 4 1 0 | 1 | 3 3 4 4 5 5 6 7 8 8 9\n5 4 3 1 | 2 | 1\n\nComparando las temperaturas máximas de ambas ciudades, ¿cuál de las siguientes afirmaciones es correcta?",
-          "alternatives": [
-            {
-              "key": "A",
-              "text": "En la ciudad B se registró la mayor temperatura.",
-              "isCorrect": false
-            },
-            {
-              "key": "B",
-              "text": "En la ciudad A se registró una temperatura de 0 °C.",
-              "isCorrect": false
-            },
-            {
-              "key": "C",
-              "text": "En la ciudad A se registró una temperatura menor de 10 °C.",
-              "isCorrect": true
-            },
-            {
-              "key": "D",
-              "text": "En la ciudad B la temperatura máxima registrada fue de 19 °C.",
-              "isCorrect": false
-            }
-          ],
-          "responseFormat": "choice",
-          "correctKey": "C",
-          "skill": "Representar",
-          "oa": "OA 22",
-          "contentAxis": "Datos y probabilidades",
-          "hasFigure": false,
-          "figureNote": null,
-          "indicador": "provenientes de muestras aleatorias, usando diagramas de tallo y hojas. Interpretan información presentada en gráficos"
-        },
-        {
-          "position": 35,
-          "type": "multiple_choice",
-          "stem": "El siguiente gráfico muestra la distribución de las diferentes especies de árboles nativos que hay en un invernadero (gráfico circular con categorías: Boldo, Litre, Quillay, Peumo y Otros). ¿De qué especie hay menos árboles en el invernadero?",
-          "alternatives": [
-            {
-              "key": "A",
-              "text": "Litre",
-              "isCorrect": true
-            },
-            {
-              "key": "B",
-              "text": "Quillay",
-              "isCorrect": false
-            },
-            {
-              "key": "C",
-              "text": "Boldo",
-              "isCorrect": false
-            },
-            {
-              "key": "D",
-              "text": "Peumo",
-              "isCorrect": false
-            }
-          ],
-          "responseFormat": "choice",
-          "correctKey": "A",
-          "skill": "Representar",
-          "oa": "OA 24",
-          "contentAxis": "Datos y probabilidades",
-          "hasFigure": true,
-          "figureNote": "gráfico circular de especies de árboles nativos; las proporciones de cada sector no son legibles en el texto",
-          "indicador": "Interpretan información presentada en gráficos circulares."
-        }
-      ]
-    }
-  ],
-  "extraction": {
-    "itemCount": 35,
-    "warnings": [
-      "#2: imagen de verdura destacada en el enunciado no es legible en el texto",
-      "#6: posición exacta del punto P en la recta numérica no determinable solo con el texto",
-      "#12: posición relativa del ángulo x respecto al de 38° no explícita en el texto",
-      "#15: valor del ángulo marcado en el transportador no legible en el texto",
-      "#16: valores de los gráficos de barras (Persona 1 y 2) no legibles en el texto",
-      "#18: valores exactos del gráfico de población urbana/rural no legibles en el texto",
-      "#20: solo 3 alternativas (A-C) en el PDF original, no hay alternativa D",
-      "#21: cantidad de cuadrados grises en la cuadrícula no legible en el texto",
-      "#27: figuras de la balanza no descritas/legibles en el texto",
-      "#29: 'marca todas las correctas' (selección múltiple) + relaciones angulares no explícitas en el texto",
-      "#32: relación posicional entre el ángulo β y el de 65° no explícita en el texto",
-      "#33: relación entre los ángulos 147°/72° y el triángulo no explícita en el texto (interiores vs. exteriores)",
-      "#35: proporciones del gráfico circular no legibles en el texto"
-    ],
-    "needsHumanReview": true,
-    "crossCheck": {
-      "hardIssues": [],
-      "softWarnings": [
-        "#29: responseFormat cuadernillo=choice vs ficha=fill_in",
-        "partición no-choice difiere: cuadernillo=[7, 15, 18] vs ficha=[7, 15, 18, 29]"
-      ],
-      "counts": {
-        "cuadernillo": 35,
-        "ficha": 35,
-        "hoja": 35
+     "position": 1,
+     "type": "multiple_choice",
+     "stem": "Observa los siguientes números:\n\n4   7   17   68\n\n¿Qué número es un factor de 34?",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "4",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "7",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "17",
+       "isCorrect": true
+      },
+      {
+       "key": "D",
+       "text": "68",
+       "isCorrect": false
       }
-    }
-  },
-  "pauta": {
-    "source": {
-      "ficha": "6_ficha_tecnica_matematica_monitoreo_2026_6_basico.pdf",
-      "hoja": "6_hoja_de_respuestas_matematica_monitoreo_2026_6_basico.pdf"
+     ],
+     "responseFormat": "choice",
+     "correctKey": "C",
+     "skill": "Resolver problemas",
+     "oa": "OA 1",
+     "contentAxis": "Números y operaciones",
+     "hasFigure": false,
+     "figureNote": null,
+     "indicador": "Identifican factores de números naturales menores de 100. Identifican razones entre las cantidades involucradas"
     },
-    "appliedKeys": 31,
-    "rubrics": 0
+    {
+     "position": 2,
+     "type": "multiple_choice",
+     "stem": "La siguiente imagen muestra un conjunto de verduras. ¿Cuál es la razón entre la cantidad de [verdura destacada en la imagen, no legible en el texto] y la cantidad total de verduras?",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "4 : 10",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "6 : 10",
+       "isCorrect": true
+      },
+      {
+       "key": "C",
+       "text": "6:4",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "10 : 6",
+       "isCorrect": false
+      }
+     ],
+     "responseFormat": "choice",
+     "correctKey": "B",
+     "skill": "Representar",
+     "oa": "OA 3",
+     "contentAxis": "Números y operaciones",
+     "hasFigure": true,
+     "figureNote": "imagen con un conjunto de verduras; el tipo de verdura destacado en el enunciado no es legible en el texto extraído",
+     "indicador": "Identifican razones entre las cantidades involucradas en una situación dada."
+    },
+    {
+     "position": 3,
+     "type": "multiple_choice",
+     "stem": "Lucas compró cajas que contienen 6 barritas de cereal cada una. ¿Cuál de los siguientes números podría ser la cantidad de barritas de cereal que compró en total Lucas?",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "26",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "33",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "48",
+       "isCorrect": true
+      },
+      {
+       "key": "D",
+       "text": "61",
+       "isCorrect": false
+      }
+     ],
+     "responseFormat": "choice",
+     "correctKey": "C",
+     "skill": "Resolver problemas",
+     "oa": "OA 1",
+     "contentAxis": "Números y operaciones",
+     "hasFigure": false,
+     "figureNote": null,
+     "indicador": "Resuelven problemas que involucran múltiplos. Interpretan información cotidiana entregada como"
+    },
+    {
+     "position": 4,
+     "type": "multiple_choice",
+     "stem": "Se realizó una encuesta a 1 000 personas y se concluyó que el 80% de ellas compra frutas en la feria. Al respecto, ¿cuál de estas afirmaciones es verdadera?",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "8 de cada 100 personas encuestadas compran frutas en la feria.",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "8 de cada 1 000 personas encuestadas compran frutas en la feria.",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "80 de cada 100 personas encuestadas compran frutas en la feria.",
+       "isCorrect": true
+      },
+      {
+       "key": "D",
+       "text": "80 de cada 1 000 personas encuestadas compran frutas en la feria.",
+       "isCorrect": false
+      }
+     ],
+     "responseFormat": "choice",
+     "correctKey": "C",
+     "skill": "Argumentar",
+     "oa": "OA 4",
+     "contentAxis": "Números y operaciones",
+     "hasFigure": false,
+     "figureNote": null,
+     "indicador": "Interpretan información cotidiana entregada como porcentajes. Identifican equivalencias entre un número mixto y una"
+    },
+    {
+     "position": 5,
+     "type": "multiple_choice",
+     "stem": "¿Cuál de las siguientes fracciones es equivalente al número mixto 2 4/5?",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "6/5",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "8/5",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "13/5",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "14/5",
+       "isCorrect": true
+      }
+     ],
+     "responseFormat": "choice",
+     "correctKey": "D",
+     "skill": "Representar",
+     "oa": "OA 5",
+     "contentAxis": "Números y operaciones",
+     "hasFigure": false,
+     "figureNote": null,
+     "indicador": "Identifican equivalencias entre un número mixto y una fracción impropia. Identifican representaciones de números mixtos en la"
+    },
+    {
+     "position": 6,
+     "type": "multiple_choice",
+     "stem": "Observa el punto P en la siguiente recta numérica:\n\n0        1        2        3\n\n(el punto P se ubica a la derecha del 3, su posición exacta no es legible en el texto)\n\n¿Cuál de los siguientes números se ubica en el punto P de la recta anterior?",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "23/5",
+       "isCorrect": true
+      },
+      {
+       "key": "B",
+       "text": "23/4",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "22/5",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "24/6",
+       "isCorrect": false
+      }
+     ],
+     "responseFormat": "choice",
+     "correctKey": "A",
+     "skill": "Representar",
+     "oa": "OA 5",
+     "contentAxis": "Números y operaciones",
+     "hasFigure": true,
+     "figureNote": "recta numérica de 0 a 3 con el punto P ubicado más allá del 3; su posición exacta no es legible en el texto",
+     "indicador": "Identifican representaciones de números mixtos en la recta numérica. Calculan multiplicaciones de números decimales por"
+    },
+    {
+     "position": 7,
+     "type": "open_ended",
+     "stem": "Resuelve:\n\n0,25 • 10 =",
+     "alternatives": [],
+     "responseFormat": "fill_in",
+     "correctKey": null,
+     "skill": "Resolver problemas",
+     "oa": "OA 7",
+     "contentAxis": "Números y operaciones",
+     "hasFigure": false,
+     "figureNote": null,
+     "indicador": "Calculan multiplicaciones de números decimales por múltiplos de 10. Resuelven problemas que requieren calcular",
+     "fillAnswer": "2,5"
+    },
+    {
+     "position": 8,
+     "type": "multiple_choice",
+     "stem": "Mario tenía 2 3/8 kilogramos de mermelada y utilizó 5/8 kilogramos para hacer una torta. ¿Cuántos kilogramos de mermelada le quedan disponibles para hacer otra preparación?",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "12/8",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "16/8",
+       "isCorrect": true
+      },
+      {
+       "key": "C",
+       "text": "2",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "3",
+       "isCorrect": false
+      }
+     ],
+     "responseFormat": "choice",
+     "correctKey": "B",
+     "skill": "Resolver problemas",
+     "oa": "OA 8",
+     "contentAxis": "Números y operaciones",
+     "hasFigure": false,
+     "figureNote": null,
+     "indicador": "sustracciones de números mixtos y fracciones propias con el mismo denominador. Resuelven ecuaciones de primer grado con una"
+    },
+    {
+     "position": 9,
+     "type": "multiple_choice",
+     "stem": "¿Cuál es el valor de x en la ecuación x – 4 = 12?",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "3",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "8",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "16",
+       "isCorrect": true
+      },
+      {
+       "key": "D",
+       "text": "48",
+       "isCorrect": false
+      }
+     ],
+     "responseFormat": "choice",
+     "correctKey": "C",
+     "skill": "Resolver problemas",
+     "oa": "OA 11",
+     "contentAxis": "Patrones y álgebra",
+     "hasFigure": false,
+     "figureNote": null,
+     "indicador": "Resuelven ecuaciones de primer grado con una incógnita representadas algebraicamente. Identifican la regla que relaciona los valores de una"
+    },
+    {
+     "position": 10,
+     "type": "multiple_choice",
+     "stem": "Observa la siguiente tabla, donde el número de entrada se relaciona con el número de salida:\n\nEntrada | Salida\n6 | 2\n9 | 3\n12 | 4\n15 | 5\n\nSi x es el número de entrada, ¿con qué expresión se obtiene el número de salida?",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "x•3",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "x–4",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "x:3",
+       "isCorrect": true
+      },
+      {
+       "key": "D",
+       "text": "x+4",
+       "isCorrect": false
+      }
+     ],
+     "responseFormat": "choice",
+     "correctKey": "C",
+     "skill": "Modelar",
+     "oa": "OA 9",
+     "contentAxis": "Patrones y álgebra",
+     "hasFigure": false,
+     "figureNote": null,
+     "indicador": "tabla de entrada y salida, expresándola en lenguaje matemático. Calculan el área de la superficie de paralelepípedos,"
+    },
+    {
+     "position": 11,
+     "type": "multiple_choice",
+     "stem": "A continuación, se muestran algunas medidas de una red y el paralelepípedo rectangular que se arma con ella (12 cm y 8 cm). ¿Cuál es el área de la superficie del paralelepípedo?",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "768 cm2",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "512 cm2",
+       "isCorrect": true
+      },
+      {
+       "key": "C",
+       "text": "224 cm2",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "36 cm2",
+       "isCorrect": false
+      }
+     ],
+     "responseFormat": "choice",
+     "correctKey": "B",
+     "skill": "Resolver problemas",
+     "oa": "OA 13",
+     "contentAxis": "Geometría",
+     "hasFigure": true,
+     "figureNote": "red del paralelepípedo con medidas 12 cm en una arista y 8 cm en las otras",
+     "indicador": "a partir de información entregada en una de sus redes. Identifican la medida de un ángulo a partir de la"
+    },
+    {
+     "position": 12,
+     "type": "multiple_choice",
+     "stem": "Observa los ángulos formados por las rectas L1 y L2, donde uno de los ángulos mide 38° y se destaca el ángulo x. ¿Cuánto mide el ángulo x?",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "38°",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "52°",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "142°",
+       "isCorrect": true
+      },
+      {
+       "key": "D",
+       "text": "322°",
+       "isCorrect": false
+      }
+     ],
+     "responseFormat": "choice",
+     "correctKey": "C",
+     "skill": "Resolver problemas",
+     "oa": "OA 16",
+     "contentAxis": "Geometría",
+     "hasFigure": true,
+     "figureNote": "dos rectas L1 y L2 que se intersectan formando ángulos, uno de 38° y el ángulo x; la posición relativa de x respecto al de 38° no es explícita en el texto",
+     "indicador": "Identifican la medida de un ángulo a partir de la medida de un ángulo adyacente suplementario."
+    },
+    {
+     "position": 13,
+     "type": "multiple_choice",
+     "stem": "Observa el cubo y la medida de una de sus aristas: 10 cm. ¿Cuánto mide el área de la superficie del cubo?",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "120 cm2",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "140 cm2",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "240 cm2",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "600 cm2",
+       "isCorrect": true
+      }
+     ],
+     "responseFormat": "choice",
+     "correctKey": "D",
+     "skill": "Resolver problemas",
+     "oa": "OA 18",
+     "contentAxis": "Medición",
+     "hasFigure": true,
+     "figureNote": "imagen de un cubo con arista de 10 cm",
+     "indicador": "Calculan el área de la superficie de cubos."
+    },
+    {
+     "position": 14,
+     "type": "multiple_choice",
+     "stem": "¿Cuál es el volumen de un paralelepípedo de 6 cm de largo, 4 cm de alto y 5 cm de ancho?",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "148 cm3",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "120 cm3",
+       "isCorrect": true
+      },
+      {
+       "key": "C",
+       "text": "74 cm3",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "15 cm3",
+       "isCorrect": false
+      }
+     ],
+     "responseFormat": "choice",
+     "correctKey": "B",
+     "skill": "Resolver problemas",
+     "oa": "OA 19",
+     "contentAxis": "Medición",
+     "hasFigure": false,
+     "figureNote": null,
+     "indicador": "Calculan el volumen de paralelepípedos. Identifican la medida de ángulos usando un"
+    },
+    {
+     "position": 15,
+     "type": "open_ended",
+     "stem": "Observa el transportador y el ángulo destacado de color celeste. ¿Cuántos grados mide el ángulo destacado de color celeste?\n\nRespuesta: El ángulo mide ___ grados.",
+     "alternatives": [],
+     "responseFormat": "fill_in",
+     "correctKey": null,
+     "skill": "Resolver problemas",
+     "oa": "OA 20",
+     "contentAxis": "Medición",
+     "hasFigure": true,
+     "figureNote": "transportador (0° a 180°) con un ángulo marcado en color celeste; el valor exacto no es legible en el texto",
+     "indicador": "Identifican la medida de ángulos usando un transportador dibujado. Comparan distribuciones de dos grupos de datos,",
+     "fillAnswer": "70"
+    },
+    {
+     "position": 16,
+     "type": "multiple_choice",
+     "stem": "Dos personas lanzaron un dado de seis caras numeradas del 1 al 6. Los diagramas muestran la cantidad de veces que salió cada número del dado luego de ser lanzado 25 veces por cada persona (Persona 1 y Persona 2). ¿Qué número del dado salió la misma cantidad de veces a ambas personas?",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "2",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "4",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "5",
+       "isCorrect": true
+      },
+      {
+       "key": "D",
+       "text": "6",
+       "isCorrect": false
+      }
+     ],
+     "responseFormat": "choice",
+     "correctKey": "C",
+     "skill": "Representar",
+     "oa": "OA 22",
+     "contentAxis": "Datos y probabilidades",
+     "hasFigure": true,
+     "figureNote": "dos gráficos de barras (Persona 1 y Persona 2) con la frecuencia de cada número del dado (1 al 6); los valores no son legibles en el texto",
+     "indicador": "provenientes de muestras aleatorias, usando diagramas de puntos. Determinan el resultado más o menos probable al repetir un experimento aleatorio, conociendo la"
+    },
+    {
+     "position": 17,
+     "type": "multiple_choice",
+     "stem": "Una ruleta está dividida en 4 sectores de distintos tamaños y cada uno está pintado de un solo color: azul, verde, rojo o amarillo. La siguiente tabla muestra los resultados obtenidos al hacer girar la ruleta cierta cantidad de veces:\n\nCantidad de veces que se hace girar la ruleta | Azul | Verde | Rojo | Amarillo\n100 | 36 | 34 | 9 | 21\n200 | 56 | 68 | 35 | 41\n500 | 152 | 198 | 57 | 93\n600 | 186 | 225 | 61 | 128\n\n¿Qué color es más probable que salga al hacer girar la ruleta una vez más?",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "Azul",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "Verde",
+       "isCorrect": true
+      },
+      {
+       "key": "C",
+       "text": "Rojo",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "Amarillo",
+       "isCorrect": false
+      }
+     ],
+     "responseFormat": "choice",
+     "correctKey": "B",
+     "skill": "Resolver problemas",
+     "oa": "OA 23",
+     "contentAxis": "Datos y probabilidades",
+     "hasFigure": false,
+     "figureNote": null,
+     "indicador": "repetir un experimento aleatorio, conociendo la tendencia de los resultados de una serie de repeticiones anteriores. Comunican conclusiones obtenidas a partir de"
+    },
+    {
+     "position": 18,
+     "type": "open_ended",
+     "stem": "El siguiente gráfico muestra la población urbana y la población rural de Chile, obtenidas en los censos de Población y Vivienda que se realizaron entre 1952 y 2017 (gráfico de barras dobles, años 1952, 1960, 1970, 1982, 1992, 2002 y 2017; eje de cantidad de personas de 0 a 16 000 000; series Población Urbana y Población Rural. Fuente: INE). Considerando la información de todos los censos que se muestran en el gráfico, ¿qué ocurrió con la población urbana y la población rural en Chile?\n\nEscribe tu respuesta señalando qué elementos del gráfico usaste para tu conclusión.",
+     "alternatives": [],
+     "responseFormat": "develop",
+     "correctKey": null,
+     "skill": "Argumentar",
+     "oa": "OA 24",
+     "contentAxis": "Datos y probabilidades",
+     "hasFigure": true,
+     "figureNote": "gráfico de barras dobles (población urbana/rural) 1952-2017; los valores exactos de cada barra no son legibles en el texto",
+     "indicador": "Comunican conclusiones obtenidas a partir de información presentada en gráficos de barra doble. Resuelven problemas que requieren calcular"
+    },
+    {
+     "position": 19,
+     "type": "multiple_choice",
+     "stem": "Emilio tiene 4 500 huevos para vender. Recibió un pedido de 210 cajas con 6 huevos cada una y 240 cajas con 12 huevos cada una.\n\n¿Cuántos huevos le quedarán en total después de entregar el pedido anterior?",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "360",
+       "isCorrect": true
+      },
+      {
+       "key": "B",
+       "text": "700",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "4 032",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "4 445",
+       "isCorrect": false
+      }
+     ],
+     "responseFormat": "choice",
+     "correctKey": "A",
+     "skill": "Resolver problemas",
+     "oa": "OA 2",
+     "contentAxis": "Números y operaciones",
+     "hasFigure": false,
+     "figureNote": null,
+     "indicador": "Resuelven problemas que requieren calcular combinaciones de las operaciones básicas. Interpretan razones entre cantidades involucradas en"
+    },
+    {
+     "position": 20,
+     "type": "multiple_choice",
+     "stem": "Sara rindió una prueba. La razón entre la cantidad de preguntas correctas que respondió y el total de preguntas de la prueba es 5 : 8. ¿Cómo se interpreta esa información?",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "Por cada 5 preguntas que respondió correctamente, hay 3 preguntas que respondió incorrectamente.",
+       "isCorrect": true
+      },
+      {
+       "key": "B",
+       "text": "Por cada 5 preguntas que respondió correctamente, hay 8 preguntas que respondió incorrectamente.",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "Por cada 5 preguntas que respondió correctamente, hay 13 preguntas que respondió incorrectamente.",
+       "isCorrect": false
+      }
+     ],
+     "responseFormat": "choice",
+     "correctKey": "A",
+     "skill": "Resolver problemas",
+     "oa": "OA 3",
+     "contentAxis": "Números y operaciones",
+     "hasFigure": false,
+     "figureNote": null,
+     "indicador": "Interpretan razones entre cantidades involucradas en una situación dada."
+    },
+    {
+     "position": 21,
+     "type": "multiple_choice",
+     "stem": "La siguiente cuadrícula está dividida en 50 cuadrados iguales, algunos de color gris. ¿Qué porcentaje de la cuadrícula representan los cuadrados grises?",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "50%",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "40%",
+       "isCorrect": true
+      },
+      {
+       "key": "C",
+       "text": "20%",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "10%",
+       "isCorrect": false
+      }
+     ],
+     "responseFormat": "choice",
+     "correctKey": "B",
+     "skill": "Representar",
+     "oa": "OA 4",
+     "contentAxis": "Números y operaciones",
+     "hasFigure": true,
+     "figureNote": "cuadrícula de 50 cuadrados con algunos pintados de gris; la cantidad exacta no es legible en el texto",
+     "indicador": "Identifican representaciones simbólicas de porcentajes, dada su representación pictórica. Calculan adiciones de fracciones propias y números"
+    },
+    {
+     "position": 22,
+     "type": "multiple_choice",
+     "stem": "¿Cuál es el resultado de 3 5/7 + 1/3?",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "27/10",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "36/21",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "36/10",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "85/21",
+       "isCorrect": true
+      }
+     ],
+     "responseFormat": "choice",
+     "correctKey": "D",
+     "skill": "Resolver problemas",
+     "oa": "OA 6",
+     "contentAxis": "Números y operaciones",
+     "hasFigure": false,
+     "figureNote": null,
+     "indicador": "mixtos con numeradores y denominadores de hasta dos dígitos."
+    },
+    {
+     "position": 23,
+     "type": "multiple_choice",
+     "stem": "¿Cuál es el resultado de 0,5 : 0,002?",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "0,250",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "2,5",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "25",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "250",
+       "isCorrect": true
+      }
+     ],
+     "responseFormat": "choice",
+     "correctKey": "D",
+     "skill": "Resolver problemas",
+     "oa": "OA 7",
+     "contentAxis": "Números y operaciones",
+     "hasFigure": false,
+     "figureNote": null,
+     "indicador": "Calculan divisiones de números decimales. Resuelven problemas que requieren calcular"
+    },
+    {
+     "position": 24,
+     "type": "multiple_choice",
+     "stem": "En una comuna cayeron 110,17 mm de lluvia en junio y 64,685 mm en julio. ¿Cuánta lluvia cayó en total en estos dos meses?",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "174,755 mm",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "174,855 mm",
+       "isCorrect": true
+      },
+      {
+       "key": "C",
+       "text": "757,02 mm",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "756,92 mm",
+       "isCorrect": false
+      }
+     ],
+     "responseFormat": "choice",
+     "correctKey": "B",
+     "skill": "Resolver problemas",
+     "oa": "OA 8",
+     "contentAxis": "Números y operaciones",
+     "hasFigure": false,
+     "figureNote": null,
+     "indicador": "adiciones de números decimales con distinta cantidad de cifras decimales. Identifican un término desconocido en la relación"
+    },
+    {
+     "position": 25,
+     "type": "multiple_choice",
+     "stem": "Una máquina envasa frascos de crema siempre con la misma rapidez. La siguiente tabla relaciona la cantidad de frascos de crema envasados y el tiempo que se demora la máquina en envasarlos:\n\nTiempo (en minutos) | Cantidad de frascos de crema envasados\n4 | 36\n7 | 63\n10 | 90\n15 | ¿?\n20 | 180\n\n¿Cuál es la cantidad de frascos de crema envasados en 15 minutos?",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "105",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "117",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "135",
+       "isCorrect": true
+      },
+      {
+       "key": "D",
+       "text": "175",
+       "isCorrect": false
+      }
+     ],
+     "responseFormat": "choice",
+     "correctKey": "C",
+     "skill": "Resolver problemas",
+     "oa": "OA 9",
+     "contentAxis": "Patrones y álgebra",
+     "hasFigure": false,
+     "figureNote": null,
+     "indicador": "entre los valores de una tabla, en el contexto de la resolución de problemas. Identifican la generalización de una secuencia"
+    },
+    {
+     "position": 26,
+     "type": "multiple_choice",
+     "stem": "Observa los términos de la siguiente secuencia, donde n representa cualquier posición:\n\nTérmino | 10 | 20 | 30 | 40 | 50 | ... | ¿?\nPosición | 1 | 2 | 3 | 4 | 5 | ... | n\n\n¿Cuál es la regla que permite encontrar cualquier término de la secuencia usando la posición n?",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "n+1",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "n + 10",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "n•2",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "n • 10",
+       "isCorrect": true
+      }
+     ],
+     "responseFormat": "choice",
+     "correctKey": "D",
+     "skill": "Modelar",
+     "oa": "OA 20",
+     "contentAxis": "Patrones y álgebra",
+     "hasFigure": false,
+     "figureNote": null,
+     "indicador": "Identifican la generalización de una secuencia numérica para determinar un término. Resuelven ecuaciones de primer grado con una"
+    },
+    {
+     "position": 27,
+     "type": "multiple_choice",
+     "stem": "Observa la siguiente balanza equilibrada, con tres figuras (x) en un platillo y una figura (x) distinta en el otro. ¿Cuántos [figura del primer platillo] equivalen a la masa de un [figura del segundo platillo]?",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "18",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "15",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "5",
+       "isCorrect": true
+      },
+      {
+       "key": "D",
+       "text": "3",
+       "isCorrect": false
+      }
+     ],
+     "responseFormat": "choice",
+     "correctKey": "C",
+     "skill": "Resolver problemas",
+     "oa": "OA 11",
+     "contentAxis": "Patrones y álgebra",
+     "hasFigure": true,
+     "figureNote": "balanza equilibrada con figuras (no descritas en el texto) representando pesos; el detalle de las figuras no es legible",
+     "indicador": "Resuelven ecuaciones de primer grado con una incógnita representadas pictóricamente. Calculan el área de la superficie de cubos, a partir de"
+    },
+    {
+     "position": 28,
+     "type": "multiple_choice",
+     "stem": "En la siguiente imagen se muestra una red con la medida del área de uno de sus cuadrados (16 cm2) y el cubo que se arma con ella. ¿Cuál es el área de la superficie del cubo?",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "48 cm2",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "56 cm2",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "64 cm2",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "96 cm2",
+       "isCorrect": true
+      }
+     ],
+     "responseFormat": "choice",
+     "correctKey": "D",
+     "skill": "Resolver problemas",
+     "oa": "OA 13",
+     "contentAxis": "Geometría",
+     "hasFigure": true,
+     "figureNote": "red de un cubo con un cuadrado de área 16 cm2 destacado",
+     "indicador": "Calculan el área de la superficie de cubos, a partir de información entregada en una de sus redes."
+    },
+    {
+     "position": 29,
+     "type": "multiple_choice",
+     "stem": "Observa los ángulos que se forman entre las rectas L1 y L2, marcados como α, β, δ y μ.\n\nEn el siguiente listado, marca todos los pares de ángulos que son siempre suplementarios:\n\n1. α y β\n2. α y μ\n3. μ y δ\n4. β y δ\n5. δ y α\n6. μ y β",
+     "alternatives": [
+      {
+       "key": "1",
+       "text": "α y β",
+       "isCorrect": true
+      },
+      {
+       "key": "2",
+       "text": "α y μ",
+       "isCorrect": false
+      },
+      {
+       "key": "3",
+       "text": "μ y δ",
+       "isCorrect": true
+      },
+      {
+       "key": "4",
+       "text": "β y δ",
+       "isCorrect": false
+      },
+      {
+       "key": "5",
+       "text": "δ y α",
+       "isCorrect": true
+      },
+      {
+       "key": "6",
+       "text": "μ y β",
+       "isCorrect": true
+      }
+     ],
+     "responseFormat": "choice",
+     "correctKey": "1356",
+     "skill": "Representar",
+     "oa": "OA 16",
+     "contentAxis": "Geometría",
+     "hasFigure": true,
+     "figureNote": "dos rectas L1 y L2 con cuatro ángulos marcados (α, β, δ, μ); la disposición exacta no es legible en el texto",
+     "indicador": "Identifican pares de ángulos suplementarios. Identifican la operación que permite calcular el área",
+     "isMultiAnswer": true,
+     "fixNote": "Multi-respuesta; la clave estaba en fillAnswer («1, 3, 5 y 6»)."
+    },
+    {
+     "position": 30,
+     "type": "multiple_choice",
+     "stem": "Observa el siguiente paralelepípedo rectangular con medidas 9 cm, 4 cm y 4 cm. ¿Cuál de las siguientes operaciones permite calcular la superficie del paralelepípedo en centímetros cuadrados?",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "9•4•4",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "9+4+4",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "9•2+2•4",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "4•9•4+2•4•4",
+       "isCorrect": true
+      }
+     ],
+     "responseFormat": "choice",
+     "correctKey": "D",
+     "skill": "Representar",
+     "oa": "OA 18",
+     "contentAxis": "Medición",
+     "hasFigure": true,
+     "figureNote": "paralelepípedo rectangular con medidas 9 cm, 4 cm y 4 cm",
+     "indicador": "Identifican la operación que permite calcular el área de la superficie de un paralelepípedo."
+    },
+    {
+     "position": 31,
+     "type": "multiple_choice",
+     "stem": "Observa el cubo con arista de 3 cm. ¿Cuál es el volumen del cubo en centímetros cúbicos?",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "27",
+       "isCorrect": true
+      },
+      {
+       "key": "B",
+       "text": "36",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "54",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "72",
+       "isCorrect": false
+      }
+     ],
+     "responseFormat": "choice",
+     "correctKey": "A",
+     "skill": "Resolver problemas",
+     "oa": "OA 19",
+     "contentAxis": "Medición",
+     "hasFigure": true,
+     "figureNote": "imagen de un cubo con arista de 3 cm",
+     "indicador": "Calculan el volumen de cubos. Calculan la medida de ángulos formados en rectas"
+    },
+    {
+     "position": 32,
+     "type": "multiple_choice",
+     "stem": "Observa los ángulos que se forman cuando las rectas paralelas L1 y L2 son cortadas por una transversal L3. Se destaca el ángulo β en L1 y un ángulo de 65° en L2. ¿Cuánto mide el ángulo β?",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "25°",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "65°",
+       "isCorrect": true
+      },
+      {
+       "key": "C",
+       "text": "90°",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "115°",
+       "isCorrect": false
+      }
+     ],
+     "responseFormat": "choice",
+     "correctKey": "B",
+     "skill": "Resolver problemas",
+     "oa": "OA 21",
+     "contentAxis": "Medición",
+     "hasFigure": true,
+     "figureNote": "rectas paralelas L1 y L2 cortadas por transversal L3, con ángulo β en L1 y 65° en L2; la relación posicional exacta no es explícita en el texto",
+     "indicador": "Calculan la medida de ángulos formados en rectas paralelas cortadas por una transversal."
+    },
+    {
+     "position": 33,
+     "type": "multiple_choice",
+     "stem": "Observa los ángulos en el siguiente triángulo, donde se destacan un ángulo x y dos ángulos de 147° y 72° junto al triángulo. ¿Cuál es la medida del ángulo x?",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "33°",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "39°",
+       "isCorrect": true
+      },
+      {
+       "key": "C",
+       "text": "75°",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "219°",
+       "isCorrect": false
+      }
+     ],
+     "responseFormat": "choice",
+     "correctKey": "B",
+     "skill": "Resolver problemas",
+     "oa": "OA 21",
+     "contentAxis": "Medición",
+     "hasFigure": true,
+     "figureNote": "triángulo con ángulo x y dos ángulos (147° y 72°) marcados junto a él; no es explícito en el texto si son interiores o exteriores al triángulo",
+     "indicador": "Calculan la medida de ángulos en triángulos. Comparan distribuciones de dos grupos de datos,"
+    },
+    {
+     "position": 34,
+     "type": "multiple_choice",
+     "stem": "En el siguiente diagrama de tallo y hojas se registraron las temperaturas máximas (°C) de algunos días de otoño, en dos ciudades diferentes:\n\nCiudad A (hojas, leídas de derecha a izquierda) | Tallo | Ciudad B (hojas)\n8 | 0 | \n8 8 6 5 4 1 0 | 1 | 3 3 4 4 5 5 6 7 8 8 9\n5 4 3 1 | 2 | 1\n\nComparando las temperaturas máximas de ambas ciudades, ¿cuál de las siguientes afirmaciones es correcta?",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "En la ciudad B se registró la mayor temperatura.",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "En la ciudad A se registró una temperatura de 0 °C.",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "En la ciudad A se registró una temperatura menor de 10 °C.",
+       "isCorrect": true
+      },
+      {
+       "key": "D",
+       "text": "En la ciudad B la temperatura máxima registrada fue de 19 °C.",
+       "isCorrect": false
+      }
+     ],
+     "responseFormat": "choice",
+     "correctKey": "C",
+     "skill": "Representar",
+     "oa": "OA 22",
+     "contentAxis": "Datos y probabilidades",
+     "hasFigure": false,
+     "figureNote": null,
+     "indicador": "provenientes de muestras aleatorias, usando diagramas de tallo y hojas. Interpretan información presentada en gráficos"
+    },
+    {
+     "position": 35,
+     "type": "multiple_choice",
+     "stem": "El siguiente gráfico muestra la distribución de las diferentes especies de árboles nativos que hay en un invernadero (gráfico circular con categorías: Boldo, Litre, Quillay, Peumo y Otros). ¿De qué especie hay menos árboles en el invernadero?",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "Litre",
+       "isCorrect": true
+      },
+      {
+       "key": "B",
+       "text": "Quillay",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "Boldo",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "Peumo",
+       "isCorrect": false
+      }
+     ],
+     "responseFormat": "choice",
+     "correctKey": "A",
+     "skill": "Representar",
+     "oa": "OA 24",
+     "contentAxis": "Datos y probabilidades",
+     "hasFigure": true,
+     "figureNote": "gráfico circular de especies de árboles nativos; las proporciones de cada sector no son legibles en el texto",
+     "indicador": "Interpretan información presentada en gráficos circulares."
+    }
+   ]
   }
+ ],
+ "extraction": {
+  "itemCount": 35,
+  "warnings": [
+   "#2: imagen de verdura destacada en el enunciado no es legible en el texto",
+   "#6: posición exacta del punto P en la recta numérica no determinable solo con el texto",
+   "#12: posición relativa del ángulo x respecto al de 38° no explícita en el texto",
+   "#15: valor del ángulo marcado en el transportador no legible en el texto",
+   "#16: valores de los gráficos de barras (Persona 1 y 2) no legibles en el texto",
+   "#18: valores exactos del gráfico de población urbana/rural no legibles en el texto",
+   "#20: solo 3 alternativas (A-C) en el PDF original, no hay alternativa D",
+   "#21: cantidad de cuadrados grises en la cuadrícula no legible en el texto",
+   "#27: figuras de la balanza no descritas/legibles en el texto",
+   "#29: 'marca todas las correctas' (selección múltiple) + relaciones angulares no explícitas en el texto",
+   "#32: relación posicional entre el ángulo β y el de 65° no explícita en el texto",
+   "#33: relación entre los ángulos 147°/72° y el triángulo no explícita en el texto (interiores vs. exteriores)",
+   "#35: proporciones del gráfico circular no legibles en el texto"
+  ],
+  "needsHumanReview": true,
+  "crossCheck": {
+   "hardIssues": [],
+   "softWarnings": [
+    "#29: responseFormat cuadernillo=choice vs ficha=fill_in",
+    "partición no-choice difiere: cuadernillo=[7, 15, 18] vs ficha=[7, 15, 18, 29]"
+   ],
+   "counts": {
+    "cuadernillo": 35,
+    "ficha": 35,
+    "hoja": 35
+   }
+  }
+ },
+ "pauta": {
+  "source": {
+   "ficha": "6_ficha_tecnica_matematica_monitoreo_2026_6_basico.pdf",
+   "hoja": "6_hoja_de_respuestas_matematica_monitoreo_2026_6_basico.pdf"
+  },
+  "appliedKeys": 31,
+  "rubrics": 0
+ }
 }
