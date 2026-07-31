@@ -1,16 +1,16 @@
 {
   "schemaVersion": "1.0",
   "source": {
-    "file": "3º lenguaje diagnóstico 2025.pdf",
+    "file": "3_prueba_lectura_diagnostico_2026_03_basico.pdf",
     "subjectFolder": "Lenguaje"
   },
   "instrument": {
-    "name": "DIA Lectura 3° Básico 2025 — Diagnóstico",
+    "name": "DIA Lectura 3° Básico 2026 — Diagnóstico",
     "subject": "Lenguaje y Comunicación",
     "subjectCode": "LANG",
     "grade": "3° Básico",
     "gradeCode": "3RD_BASIC",
-    "year": 2025,
+    "year": 2026,
     "applicationPeriod": "diagnostico",
     "type": "dia",
     "isOfficial": true,
@@ -26,8 +26,7 @@
         "title": "La avispa agradecida",
         "text": "Una vez, una avispa se enredó en una tela de araña. Un ratón que pasaba por ese lugar, al ver a la asustada avispa, se compadeció de ella y la ayudó. Rompió la tela de araña con sus filudos dientes y la avispa pudo escapar.\n\n—¡Gracias! Nunca olvidaré esta buena acción —le dijo a su amigo ratón. Luego, se fue volando.\n\nPoco tiempo después, mientras el ratón comía un delicioso queso, un gato lo esperaba para atraparlo. En ese momento, llegó la avispa volando y, al darse cuenta del peligro que corría su amigo, rápidamente picó la oreja del gato. Ante el gran dolor, el goloso gato desapareció de inmediato.",
         "format": "plain",
-        "attachments": [],
-        "imageRef": "item/global/3ro-lenguaje-diagnostico-2025/section_figure/01.png"
+        "attachments": []
       },
       "items": [
         {
@@ -58,34 +57,7 @@
           "contentAxis": "Narración",
           "hasFigure": false,
           "figureNote": null,
-          "taxonomy": [
-            {
-              "type": "descriptor",
-              "code": null,
-              "name": "Localizan información explícita relevante en un texto narrativo.",
-              "parentCode": "LANG-2B-OA05",
-              "tagType": "primary"
-            },
-            {
-              "type": "learning_objective",
-              "code": "LANG-2B-OA05",
-              "name": "OA 5",
-              "level": "2_basico",
-              "tagType": "secondary"
-            },
-            {
-              "type": "skill",
-              "code": "LANG-SK-LOCALIZAR",
-              "name": "Localizar",
-              "tagType": "secondary"
-            },
-            {
-              "type": "text_type",
-              "code": "LANG-TT-NARRACION",
-              "name": "Narración",
-              "tagType": "secondary"
-            }
-          ]
+          "indicador": "Localizan información explícita relevante en un texto narrativo. Infieren causa o consecuencia de hechos o acciones"
         },
         {
           "position": 2,
@@ -115,34 +87,7 @@
           "contentAxis": "Narración",
           "hasFigure": false,
           "figureNote": null,
-          "taxonomy": [
-            {
-              "type": "descriptor",
-              "code": null,
-              "name": "Infieren causa o consecuencia de hechos o acciones relevantes en un texto narrativo.",
-              "parentCode": "LANG-2B-OA05",
-              "tagType": "primary"
-            },
-            {
-              "type": "learning_objective",
-              "code": "LANG-2B-OA05",
-              "name": "OA 5",
-              "level": "2_basico",
-              "tagType": "secondary"
-            },
-            {
-              "type": "skill",
-              "code": "LANG-SK-INTERPRETAR-Y-RELACIONAR",
-              "name": "Interpretar y relacionar",
-              "tagType": "secondary"
-            },
-            {
-              "type": "text_type",
-              "code": "LANG-TT-NARRACION",
-              "name": "Narración",
-              "tagType": "secondary"
-            }
-          ]
+          "indicador": "Infieren causa o consecuencia de hechos o acciones relevantes en un texto narrativo. Infieren causa o consecuencia de hechos o acciones"
         },
         {
           "position": 3,
@@ -172,34 +117,7 @@
           "contentAxis": "Narración",
           "hasFigure": false,
           "figureNote": null,
-          "taxonomy": [
-            {
-              "type": "descriptor",
-              "code": null,
-              "name": "Infieren causa o consecuencia de hechos o acciones relevantes en un texto narrativo.",
-              "parentCode": "LANG-2B-OA05",
-              "tagType": "primary"
-            },
-            {
-              "type": "learning_objective",
-              "code": "LANG-2B-OA05",
-              "name": "OA 5",
-              "level": "2_basico",
-              "tagType": "secondary"
-            },
-            {
-              "type": "skill",
-              "code": "LANG-SK-INTERPRETAR-Y-RELACIONAR",
-              "name": "Interpretar y relacionar",
-              "tagType": "secondary"
-            },
-            {
-              "type": "text_type",
-              "code": "LANG-TT-NARRACION",
-              "name": "Narración",
-              "tagType": "secondary"
-            }
-          ]
+          "indicador": "Infieren causa o consecuencia de hechos o acciones relevantes en un texto narrativo. Infieren causa o consecuencia de hechos o acciones"
         },
         {
           "position": 4,
@@ -213,34 +131,8 @@
           "contentAxis": "Narración",
           "hasFigure": false,
           "figureNote": null,
-          "taxonomy": [
-            {
-              "type": "descriptor",
-              "code": null,
-              "name": "Infieren causa o consecuencia de hechos o acciones relevantes en un texto narrativo.",
-              "parentCode": "LANG-2B-OA05",
-              "tagType": "primary"
-            },
-            {
-              "type": "learning_objective",
-              "code": "LANG-2B-OA05",
-              "name": "OA 5",
-              "level": "2_basico",
-              "tagType": "secondary"
-            },
-            {
-              "type": "skill",
-              "code": "LANG-SK-INTERPRETAR-Y-RELACIONAR",
-              "name": "Interpretar y relacionar",
-              "tagType": "secondary"
-            },
-            {
-              "type": "text_type",
-              "code": "LANG-TT-NARRACION",
-              "name": "Narración",
-              "tagType": "secondary"
-            }
-          ]
+          "indicador": "Infieren causa o consecuencia de hechos o acciones relevantes en un texto narrativo. Localizan información explícita relevante en un texto no",
+          "rubric": "Tipos de respuestas Respuestas correctas Respuestas parcialmente Respuestas incorrectas (Código 2) correctas (Código 1) (Código 0) El/la estudiante infiere la causa de un El/la estudiante reconoce la El/la estudiante responde sin inferir hecho en un texto narrativo, a partir de la información explícita, sin embargo, no cuál es la causa del hecho por el que relación que puede establecer, utilizando la relaciona para realizar la inferencia, se pregunta. Su respuesta no da información presente en el texto para cuenta de una comprensión del texto, quedándose en un paso previo. elaborar una respuesta y marcas textuales fundamenta con información que no Para responder, utiliza solo que dan cuenta de la comprensión de lo responde a lo solicitado o confunde a información de manera textual. En leído. los personajes. este caso, acciones de los personajes. En este caso, el estudiante relaciona los Otras respuestas incorrectas son las hechos ocurridos a lo largo de la narración: tautológicas, vagas, contradictorias, la avispa fue ayudada primero por el ratón incoherentes o en blanco. y, como una forma de devolver la ayuda, lo rescata de ser comido por un gato. De esta manera, infiere que la avispa es agradecida, porque en cuanto tuvo la oportunidad de ayudar al ratón (quien le había salvado la vida) y así devolverle el favor, salvándolo de ser comido por el gato, lo hizo sin dudarlo. Ejemplos: Ejemplos: Ejemplos: Porque la avispa ayudó al ratón cuando Porque la avispa es buena. - - El ratón rompió la tela de araña con - este la necesitó, salvándole la vida. sus filudos dientes y la avispa pudo - Porque le picó fuerte al gato. - Porque la avispa le debía un favor al escapar. - Porque el gato quería comerse al ratón y ella se lo devolvió. - Porque ayudó al ratón. ratón. Porque el ratón necesitaba ayuda y ella Porque salvó al ratón del gato. Porque la avispa ayudó al gato. - - - lo ayudó salvándolo. - ¡Gracias! Nunca olvidaré esta buena - Porque nunca olvidó su promesa y acción. llegado el momento la cumplió. 9 Ficha Técnica Prueba de Lectura 3° básico"
         }
       ]
     },
@@ -258,8 +150,7 @@
             "kind": "image",
             "note": "Ilustraciones de los pasos del instructivo: jarra vertiendo pintura, botella siendo agitada, botellas pintadas de colores, embudo con arena y bolos decorados. Las imágenes acompañan los pasos descritos en el texto."
           }
-        ],
-        "imageRef": "item/global/3ro-lenguaje-diagnostico-2025/section_figure/02.png"
+        ]
       },
       "items": [
         {
@@ -290,34 +181,7 @@
           "contentAxis": "Texto no literario",
           "hasFigure": false,
           "figureNote": null,
-          "taxonomy": [
-            {
-              "type": "descriptor",
-              "code": null,
-              "name": "Localizan información explícita relevante en un texto no literario.",
-              "parentCode": "LANG-2B-OA07",
-              "tagType": "primary"
-            },
-            {
-              "type": "learning_objective",
-              "code": "LANG-2B-OA07",
-              "name": "OA 7",
-              "level": "2_basico",
-              "tagType": "secondary"
-            },
-            {
-              "type": "skill",
-              "code": "LANG-SK-LOCALIZAR",
-              "name": "Localizar",
-              "tagType": "secondary"
-            },
-            {
-              "type": "text_type",
-              "code": "LANG-TT-TEXTO-NO-LITERARIO",
-              "name": "Texto no literario",
-              "tagType": "secondary"
-            }
-          ]
+          "indicador": "Localizan información explícita relevante en un texto no literario."
         },
         {
           "position": 6,
@@ -347,34 +211,7 @@
           "contentAxis": "Texto no literario",
           "hasFigure": false,
           "figureNote": null,
-          "taxonomy": [
-            {
-              "type": "descriptor",
-              "code": null,
-              "name": "Infieren información relevante en un texto no literario.",
-              "parentCode": "LANG-2B-OA07",
-              "tagType": "primary"
-            },
-            {
-              "type": "learning_objective",
-              "code": "LANG-2B-OA07",
-              "name": "OA 7",
-              "level": "2_basico",
-              "tagType": "secondary"
-            },
-            {
-              "type": "skill",
-              "code": "LANG-SK-INTERPRETAR-Y-RELACIONAR",
-              "name": "Interpretar y relacionar",
-              "tagType": "secondary"
-            },
-            {
-              "type": "text_type",
-              "code": "LANG-TT-TEXTO-NO-LITERARIO",
-              "name": "Texto no literario",
-              "tagType": "secondary"
-            }
-          ]
+          "indicador": "Infieren información relevante en un texto no literario."
         },
         {
           "position": 7,
@@ -404,34 +241,7 @@
           "contentAxis": "Texto no literario",
           "hasFigure": false,
           "figureNote": null,
-          "taxonomy": [
-            {
-              "type": "descriptor",
-              "code": null,
-              "name": "Infieren información relevante en un texto no literario.",
-              "parentCode": "LANG-2B-OA07",
-              "tagType": "primary"
-            },
-            {
-              "type": "learning_objective",
-              "code": "LANG-2B-OA07",
-              "name": "OA 7",
-              "level": "2_basico",
-              "tagType": "secondary"
-            },
-            {
-              "type": "skill",
-              "code": "LANG-SK-INTERPRETAR-Y-RELACIONAR",
-              "name": "Interpretar y relacionar",
-              "tagType": "secondary"
-            },
-            {
-              "type": "text_type",
-              "code": "LANG-TT-TEXTO-NO-LITERARIO",
-              "name": "Texto no literario",
-              "tagType": "secondary"
-            }
-          ]
+          "indicador": "Infieren información relevante en un texto no literario."
         },
         {
           "position": 8,
@@ -461,34 +271,7 @@
           "contentAxis": "Texto no literario",
           "hasFigure": false,
           "figureNote": null,
-          "taxonomy": [
-            {
-              "type": "descriptor",
-              "code": null,
-              "name": "Infieren información relevante en un texto no literario.",
-              "parentCode": "LANG-2B-OA07",
-              "tagType": "primary"
-            },
-            {
-              "type": "learning_objective",
-              "code": "LANG-2B-OA07",
-              "name": "OA 7",
-              "level": "2_basico",
-              "tagType": "secondary"
-            },
-            {
-              "type": "skill",
-              "code": "LANG-SK-INTERPRETAR-Y-RELACIONAR",
-              "name": "Interpretar y relacionar",
-              "tagType": "secondary"
-            },
-            {
-              "type": "text_type",
-              "code": "LANG-TT-TEXTO-NO-LITERARIO",
-              "name": "Texto no literario",
-              "tagType": "secondary"
-            }
-          ]
+          "indicador": "Infieren información relevante en un texto no literario."
         },
         {
           "position": 9,
@@ -518,34 +301,7 @@
           "contentAxis": "Texto no literario",
           "hasFigure": false,
           "figureNote": null,
-          "taxonomy": [
-            {
-              "type": "descriptor",
-              "code": null,
-              "name": "Infieren el sentido global de un texto no literario.",
-              "parentCode": "LANG-2B-OA07",
-              "tagType": "primary"
-            },
-            {
-              "type": "learning_objective",
-              "code": "LANG-2B-OA07",
-              "name": "OA 7",
-              "level": "2_basico",
-              "tagType": "secondary"
-            },
-            {
-              "type": "skill",
-              "code": "LANG-SK-INTERPRETAR-Y-RELACIONAR",
-              "name": "Interpretar y relacionar",
-              "tagType": "secondary"
-            },
-            {
-              "type": "text_type",
-              "code": "LANG-TT-TEXTO-NO-LITERARIO",
-              "name": "Texto no literario",
-              "tagType": "secondary"
-            }
-          ]
+          "indicador": "Infieren el sentido global de un texto no literario. Identifican un hecho o acción relevante en un texto"
         }
       ]
     },
@@ -563,8 +319,7 @@
             "kind": "image",
             "note": "Ilustraciones del topo Amable a lo largo del cuento (decorativas, acompañan el relato)."
           }
-        ],
-        "imageRef": "item/global/3ro-lenguaje-diagnostico-2025/section_figure/03.png"
+        ]
       },
       "items": [
         {
@@ -595,34 +350,7 @@
           "contentAxis": "Narración",
           "hasFigure": false,
           "figureNote": null,
-          "taxonomy": [
-            {
-              "type": "descriptor",
-              "code": null,
-              "name": "Identifican un hecho o acción relevante en un texto narrativo.",
-              "parentCode": "LANG-2B-OA05",
-              "tagType": "primary"
-            },
-            {
-              "type": "learning_objective",
-              "code": "LANG-2B-OA05",
-              "name": "OA 5",
-              "level": "2_basico",
-              "tagType": "secondary"
-            },
-            {
-              "type": "skill",
-              "code": "LANG-SK-INTERPRETAR-Y-RELACIONAR",
-              "name": "Interpretar y relacionar",
-              "tagType": "secondary"
-            },
-            {
-              "type": "text_type",
-              "code": "LANG-TT-NARRACION",
-              "name": "Narración",
-              "tagType": "secondary"
-            }
-          ]
+          "indicador": "Identifican un hecho o acción relevante en un texto narrativo. Localizan información explícita relevante en un texto"
         },
         {
           "position": 11,
@@ -652,34 +380,7 @@
           "contentAxis": "Narración",
           "hasFigure": false,
           "figureNote": null,
-          "taxonomy": [
-            {
-              "type": "descriptor",
-              "code": null,
-              "name": "Localizan información explícita relevante en un texto narrativo.",
-              "parentCode": "LANG-2B-OA05",
-              "tagType": "primary"
-            },
-            {
-              "type": "learning_objective",
-              "code": "LANG-2B-OA05",
-              "name": "OA 5",
-              "level": "2_basico",
-              "tagType": "secondary"
-            },
-            {
-              "type": "skill",
-              "code": "LANG-SK-LOCALIZAR",
-              "name": "Localizar",
-              "tagType": "secondary"
-            },
-            {
-              "type": "text_type",
-              "code": "LANG-TT-NARRACION",
-              "name": "Narración",
-              "tagType": "secondary"
-            }
-          ]
+          "indicador": "Localizan información explícita relevante en un texto narrativo."
         },
         {
           "position": 12,
@@ -709,34 +410,7 @@
           "contentAxis": "Narración",
           "hasFigure": false,
           "figureNote": null,
-          "taxonomy": [
-            {
-              "type": "descriptor",
-              "code": null,
-              "name": "Infieren causa o consecuencia de hechos o acciones relevantes en un texto narrativo.",
-              "parentCode": "LANG-2B-OA05",
-              "tagType": "primary"
-            },
-            {
-              "type": "learning_objective",
-              "code": "LANG-2B-OA05",
-              "name": "OA 5",
-              "level": "2_basico",
-              "tagType": "secondary"
-            },
-            {
-              "type": "skill",
-              "code": "LANG-SK-INTERPRETAR-Y-RELACIONAR",
-              "name": "Interpretar y relacionar",
-              "tagType": "secondary"
-            },
-            {
-              "type": "text_type",
-              "code": "LANG-TT-NARRACION",
-              "name": "Narración",
-              "tagType": "secondary"
-            }
-          ]
+          "indicador": "Infieren causa o consecuencia de hechos o acciones relevantes en un texto narrativo. Identifican un hecho o acción relevante en un texto"
         },
         {
           "position": 13,
@@ -766,34 +440,7 @@
           "contentAxis": "Narración",
           "hasFigure": false,
           "figureNote": null,
-          "taxonomy": [
-            {
-              "type": "descriptor",
-              "code": null,
-              "name": "Identifican un hecho o acción relevante en un texto narrativo.",
-              "parentCode": "LANG-2B-OA05",
-              "tagType": "primary"
-            },
-            {
-              "type": "learning_objective",
-              "code": "LANG-2B-OA05",
-              "name": "OA 5",
-              "level": "2_basico",
-              "tagType": "secondary"
-            },
-            {
-              "type": "skill",
-              "code": "LANG-SK-INTERPRETAR-Y-RELACIONAR",
-              "name": "Interpretar y relacionar",
-              "tagType": "secondary"
-            },
-            {
-              "type": "text_type",
-              "code": "LANG-TT-NARRACION",
-              "name": "Narración",
-              "tagType": "secondary"
-            }
-          ]
+          "indicador": "Identifican un hecho o acción relevante en un texto narrativo. Infieren características y sentimientos de personajes en"
         },
         {
           "position": 14,
@@ -823,34 +470,7 @@
           "contentAxis": "Narración",
           "hasFigure": false,
           "figureNote": null,
-          "taxonomy": [
-            {
-              "type": "descriptor",
-              "code": null,
-              "name": "Infieren características y sentimientos de personajes en un texto narrativo.",
-              "parentCode": "LANG-2B-OA05",
-              "tagType": "primary"
-            },
-            {
-              "type": "learning_objective",
-              "code": "LANG-2B-OA05",
-              "name": "OA 5",
-              "level": "2_basico",
-              "tagType": "secondary"
-            },
-            {
-              "type": "skill",
-              "code": "LANG-SK-INTERPRETAR-Y-RELACIONAR",
-              "name": "Interpretar y relacionar",
-              "tagType": "secondary"
-            },
-            {
-              "type": "text_type",
-              "code": "LANG-TT-NARRACION",
-              "name": "Narración",
-              "tagType": "secondary"
-            }
-          ]
+          "indicador": "Infieren características y sentimientos de personajes en un texto narrativo. Opinan sobre algún aspecto controversial en un texto"
         },
         {
           "position": 15,
@@ -864,34 +484,8 @@
           "contentAxis": "Narración",
           "hasFigure": false,
           "figureNote": null,
-          "taxonomy": [
-            {
-              "type": "descriptor",
-              "code": null,
-              "name": "Opinan sobre algún aspecto controversial en un texto narrativo.",
-              "parentCode": "LANG-2B-OA05",
-              "tagType": "primary"
-            },
-            {
-              "type": "learning_objective",
-              "code": "LANG-2B-OA05",
-              "name": "OA 5",
-              "level": "2_basico",
-              "tagType": "secondary"
-            },
-            {
-              "type": "skill",
-              "code": "LANG-SK-REFLEXIONAR",
-              "name": "Reflexionar",
-              "tagType": "secondary"
-            },
-            {
-              "type": "text_type",
-              "code": "LANG-TT-NARRACION",
-              "name": "Narración",
-              "tagType": "secondary"
-            }
-          ]
+          "indicador": "Opinan sobre algún aspecto controversial en un texto narrativo. Localizan información explícita relevante en un texto no",
+          "rubric": "Tipos de respuestas Respuestas correctas Respuestas parcialmente Respuestas incorrectas (Código 2) correctas (Código 1) (Código 0) El/la estudiante opina sobre algún El/la estudiante opina sobre algún El/la estudiante responde, pero no aspecto de la lectura, fundamentando su aspecto de la lectura, fundamentando fundamenta a partir de la información respuesta con base en información su respuesta solo en su conocimiento del texto o lo hace basándose en extraída del texto que da cuenta de la de mundo, dando argumentos información que no tiene relación con la comprensión de este. Además, la relacionados con el tema, pero no pregunta. También puede entregar una respuesta puede estar complementada utiliza información extraída del texto. fundamentación que da cuenta de una con información de su conocimiento de confusión de acciones o de mundo. personajes. En este caso, el estudiante es capaz de opinar respecto a una acción ocurrida al Otras respuestas incorrectas son las personaje principal, topo Amable, al tautológicas, vagas, contradictorias, darse cuenta de que había confundido incoherentes o en blanco. los pantalones. En su respuesta debe reflejar que comprendió las intenciones del personaje al comprar los pantalones mágicos y al realizar la fiesta para estrenarlos. Ejemplos: Ejemplos: Ejemplos: - Me parece bien porque se dio cuenta - Me parece bien su reacción, cuando - Me parece bien. de que los pantalones no eran yo me equivoco no me enojo. - Me parece bien que usara los mágicos, sino que estaba en él la - Me parece que estuvo muy bien, pantalones mágicos. magia o la actitud positiva. porque hay que reírse cuando uno - Mal porque no reconoce su error. - Me parece bien porque reaccionó está despistado. - Me parece bien que le haga caso a riéndose de su error, ya que no tenía - Yo opino que su reacción fue buena, su abuelito. importancia cómo estuviera vestido, porque algunas veces nos - Mal porque no usó los pantalones los pantalones mágicos eran una equivocamos, pero debemos mágicos. ilusión. aceptarlo. - Está bien usar el pijama para una - Me parece bien porque aceptó su error fiesta. y se rio, recordando lo que le decía su abuelo “que era un distraído”. 10 &gt; Diagnóstico Integral de Aprendizajes Instrumentos de Evaluación 2026 agenciaeducacion.cl"
         }
       ]
     },
@@ -909,8 +503,7 @@
             "kind": "image",
             "note": "Diagrama de cangrejos violinistas (macho y hembra) con recuadros de texto rotulados. Los textos de los rótulos están transcritos dentro del passage; las ilustraciones son de apoyo."
           }
-        ],
-        "imageRef": "item/global/3ro-lenguaje-diagnostico-2025/section_figure/04.png"
+        ]
       },
       "items": [
         {
@@ -941,34 +534,7 @@
           "contentAxis": "Texto no literario",
           "hasFigure": false,
           "figureNote": null,
-          "taxonomy": [
-            {
-              "type": "descriptor",
-              "code": null,
-              "name": "Localizan información explícita relevante en un texto no literario.",
-              "parentCode": "LANG-2B-OA07",
-              "tagType": "primary"
-            },
-            {
-              "type": "learning_objective",
-              "code": "LANG-2B-OA07",
-              "name": "OA 7",
-              "level": "2_basico",
-              "tagType": "secondary"
-            },
-            {
-              "type": "skill",
-              "code": "LANG-SK-LOCALIZAR",
-              "name": "Localizar",
-              "tagType": "secondary"
-            },
-            {
-              "type": "text_type",
-              "code": "LANG-TT-TEXTO-NO-LITERARIO",
-              "name": "Texto no literario",
-              "tagType": "secondary"
-            }
-          ]
+          "indicador": "Localizan información explícita relevante en un texto no literario."
         },
         {
           "position": 17,
@@ -998,34 +564,7 @@
           "contentAxis": "Texto no literario",
           "hasFigure": false,
           "figureNote": null,
-          "taxonomy": [
-            {
-              "type": "descriptor",
-              "code": null,
-              "name": "Infieren información relevante en un texto no literario.",
-              "parentCode": "LANG-2B-OA07",
-              "tagType": "primary"
-            },
-            {
-              "type": "learning_objective",
-              "code": "LANG-2B-OA07",
-              "name": "OA 7",
-              "level": "2_basico",
-              "tagType": "secondary"
-            },
-            {
-              "type": "skill",
-              "code": "LANG-SK-INTERPRETAR-Y-RELACIONAR",
-              "name": "Interpretar y relacionar",
-              "tagType": "secondary"
-            },
-            {
-              "type": "text_type",
-              "code": "LANG-TT-TEXTO-NO-LITERARIO",
-              "name": "Texto no literario",
-              "tagType": "secondary"
-            }
-          ]
+          "indicador": "Infieren información relevante en un texto no literario. Localizan información explícita relevante en un texto no"
         },
         {
           "position": 18,
@@ -1055,34 +594,7 @@
           "contentAxis": "Texto no literario",
           "hasFigure": false,
           "figureNote": null,
-          "taxonomy": [
-            {
-              "type": "descriptor",
-              "code": null,
-              "name": "Localizan información explícita relevante en un texto no literario.",
-              "parentCode": "LANG-2B-OA07",
-              "tagType": "primary"
-            },
-            {
-              "type": "learning_objective",
-              "code": "LANG-2B-OA07",
-              "name": "OA 7",
-              "level": "2_basico",
-              "tagType": "secondary"
-            },
-            {
-              "type": "skill",
-              "code": "LANG-SK-LOCALIZAR",
-              "name": "Localizar",
-              "tagType": "secondary"
-            },
-            {
-              "type": "text_type",
-              "code": "LANG-TT-TEXTO-NO-LITERARIO",
-              "name": "Texto no literario",
-              "tagType": "secondary"
-            }
-          ]
+          "indicador": "Localizan información explícita relevante en un texto no literario."
         },
         {
           "position": 19,
@@ -1112,34 +624,7 @@
           "contentAxis": "Texto no literario",
           "hasFigure": false,
           "figureNote": null,
-          "taxonomy": [
-            {
-              "type": "descriptor",
-              "code": null,
-              "name": "Infieren información relevante en un texto no literario.",
-              "parentCode": "LANG-2B-OA07",
-              "tagType": "primary"
-            },
-            {
-              "type": "learning_objective",
-              "code": "LANG-2B-OA07",
-              "name": "OA 7",
-              "level": "2_basico",
-              "tagType": "secondary"
-            },
-            {
-              "type": "skill",
-              "code": "LANG-SK-INTERPRETAR-Y-RELACIONAR",
-              "name": "Interpretar y relacionar",
-              "tagType": "secondary"
-            },
-            {
-              "type": "text_type",
-              "code": "LANG-TT-TEXTO-NO-LITERARIO",
-              "name": "Texto no literario",
-              "tagType": "secondary"
-            }
-          ]
+          "indicador": "Infieren información relevante en un texto no literario."
         }
       ]
     }
@@ -1150,20 +635,25 @@
       "Ítems de alternativas con solo 3 opciones (A, B, C), típico de 3° básico DIA; cumple el mínimo de 2 alternativas.",
       "Q4 y Q15 son ítems de desarrollo (open_ended).",
       "Texto 2 (instructivo «¡Juguemos a los bolos!») y Texto 4 («El cangrejo violinista») incluyen ilustraciones de apoyo; todo el texto necesario para responder está transcrito en el passage.",
-      "Textos transcritos desde la capa de texto del PDF (pdftotext), verbatim."
+      "El contenido de este cuadernillo Diagnóstico 2026 es idéntico al del cuadernillo 2025 (mismos 4 textos e ítems); transcrito verbatim desde la capa de texto del PDF (pdftotext)."
     ],
-    "needsHumanReview": false
+    "needsHumanReview": false,
+    "crossCheck": {
+      "hardIssues": [],
+      "softWarnings": [],
+      "counts": {
+        "cuadernillo": 19,
+        "ficha": 19,
+        "hoja": 19
+      }
+    }
   },
   "pauta": {
     "source": {
-      "report": "RBD25520_DIA_LECTURA_3_A_Resultados_Asignatura_Diagnostico_2025.pdf",
-      "subjectCode": "LANG",
-      "gradeCode": "3RD_BASIC",
-      "applicationPeriod": "diagnostico",
-      "year": 2025,
-      "instrumentJson": "extraccion/lenguaje/3º lenguaje diagnóstico 2025.json"
+      "ficha": "3_TE DIA Diagnóstico lectura 3° básico 2026.pdf",
+      "hoja": "3_Hoja de respuestas DIA Diagnóstico lectura 3° básico 2026.pdf"
     },
     "appliedKeys": 17,
-    "issues": []
+    "rubrics": 2
   }
 }

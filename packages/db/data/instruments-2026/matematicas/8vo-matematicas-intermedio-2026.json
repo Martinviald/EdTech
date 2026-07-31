@@ -1,0 +1,1306 @@
+{
+  "schemaVersion": "1.0",
+  "source": {
+    "file": "8_prueba_matematica_monitoreo_2026_8_basico.pdf",
+    "subjectFolder": "matematicas"
+  },
+  "instrument": {
+    "name": "DIA Matemática 8° Básico 2026 — Intermedio",
+    "subject": "Matemática",
+    "subjectCode": "MATH",
+    "grade": "8° Básico",
+    "gradeCode": "8TH_BASIC",
+    "year": 2026,
+    "applicationPeriod": "intermedio",
+    "type": "dia",
+    "isOfficial": true,
+    "source": "imported"
+  },
+  "sections": [
+    {
+      "order": 1,
+      "name": "Preguntas",
+      "type": "mixed",
+      "instructions": "Esta prueba tiene 37 preguntas que debes responder de la siguiente forma. En las preguntas de alternativas debes contestar marcando con una X la respuesta que consideres correcta. En las preguntas de desarrollo debes escribir tu respuesta en la cuadrícula. En las preguntas de completación debes anotar tu respuesta en los recuadros correspondientes.",
+      "passage": null,
+      "items": [
+        {
+          "position": 1,
+          "type": "open_ended",
+          "stem": "Resuelve: 9 • (−15) =",
+          "alternatives": [],
+          "responseFormat": "fill_in",
+          "correctKey": null,
+          "skill": "Resolver problemas",
+          "oa": "OA 1",
+          "contentAxis": null,
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Calculan multiplicaciones de números enteros.",
+          "fillAnswer": "-135"
+        },
+        {
+          "position": 2,
+          "type": "multiple_choice",
+          "stem": "Observa la flecha en la siguiente recta numérica (entre −2 y 0, pasando por −1). ¿Qué número se ubica en la posición que indica la flecha?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "−1/5",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "−4/5",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "−6/5",
+              "isCorrect": true
+            },
+            {
+              "key": "D",
+              "text": "−12/5",
+              "isCorrect": false
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "C",
+          "skill": "Representar",
+          "oa": "OA 2",
+          "contentAxis": null,
+          "hasFigure": true,
+          "figureNote": "Recta numérica con marcas en −2, −1 y 0; una flecha señala un punto exacto entre esas marcas que no se puede determinar solo con el texto.",
+          "indicador": "Representan números racionales en la recta numérica. Calculan multiplicaciones de potencias de base natural y"
+        },
+        {
+          "position": 3,
+          "type": "multiple_choice",
+          "stem": "¿Cuál de estas potencias es equivalente a 7³ • 6³?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "42¹",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "42³",
+              "isCorrect": true
+            },
+            {
+              "key": "C",
+              "text": "42⁶",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "42⁹",
+              "isCorrect": false
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "B",
+          "skill": "Resolver problemas",
+          "oa": "OA 3",
+          "contentAxis": null,
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Calculan multiplicaciones de potencias de base natural y exponente natural hasta 3, aplicando propiedades. Resuelven problemas que requieren calcular una división"
+        },
+        {
+          "position": 4,
+          "type": "multiple_choice",
+          "stem": "Sin considerar el roce, la aceleración a de una bolita (medida en m/s²) se puede calcular usando la siguiente fórmula: a = F/m, donde F es la fuerza que actúa sobre la bolita (medida en N) y m es su masa (medida en kg). Si sobre una bolita de 0,5 kg de masa actúa una fuerza de −10,5 N, ¿cuál será su aceleración?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "−21,00 m/s²",
+              "isCorrect": true
+            },
+            {
+              "key": "B",
+              "text": "−5,25 m/s²",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "5,25 m/s²",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "21,00 m/s²",
+              "isCorrect": false
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "A",
+          "skill": "Resolver problemas",
+          "oa": "OA 2",
+          "contentAxis": null,
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Resuelven problemas que requieren calcular una división de números racionales. Identifican ecuaciones de primer grado con coeficientes"
+        },
+        {
+          "position": 5,
+          "type": "multiple_choice",
+          "stem": "Observa la siguiente balanza equilibrada: en un platillo hay una caja de X kg junto con varias bolitas de 0,5 kg; en el otro platillo hay varias bolitas de 0,5 kg. Si cada bolita tiene una masa de 0,5 kg y la caja de X kg, ¿cuál de las siguientes ecuaciones modela la balanza anterior?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "2,5 • X = 4,5",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "5,5 • X = 9,5",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "2,5 + X = 4,5",
+              "isCorrect": true
+            },
+            {
+              "key": "D",
+              "text": "5,5 + X = 9,5",
+              "isCorrect": false
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "C",
+          "skill": "Modelar",
+          "oa": "OA 8",
+          "contentAxis": null,
+          "hasFigure": true,
+          "figureNote": "Balanza con dos platillos mostrando la cantidad exacta de bolitas de 0,5 kg de cada lado (y la caja X en uno de ellos); el conteo de bolitas por lado no está en el texto.",
+          "indicador": "Identifican ecuaciones de primer grado con coeficientes racionales que modelan diversas situaciones. Encuentran la imagen de un número real bajo una"
+        },
+        {
+          "position": 6,
+          "type": "multiple_choice",
+          "stem": "En la función f(x) = x + 5, ¿cuál es el valor de f(−2)?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "−7",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "−3",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "3",
+              "isCorrect": true
+            },
+            {
+              "key": "D",
+              "text": "7",
+              "isCorrect": false
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "C",
+          "skill": "Resolver problemas",
+          "oa": "OA 10",
+          "contentAxis": null,
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Encuentran la imagen de un número real bajo una función afín. Identifican expresiones algebraicas equivalentes"
+        },
+        {
+          "position": 7,
+          "type": "multiple_choice",
+          "stem": "¿Cuál de las siguientes expresiones es una factorización de x + x⁴ + xy?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "x • (x³ + y)",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "x • (1 + x³ + y)",
+              "isCorrect": true
+            },
+            {
+              "key": "C",
+              "text": "x • (1 + x⁴ + xy)",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "x • (x + x³ + xy)",
+              "isCorrect": false
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "B",
+          "skill": "Representar",
+          "oa": "OA 6",
+          "contentAxis": null,
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Identifican expresiones algebraicas equivalentes relacionadas por factorización. Identifican la expresión que permite resolver un"
+        },
+        {
+          "position": 8,
+          "type": "multiple_choice",
+          "stem": "Un balancín tiene 3 metros de largo. Cuando el extremo derecho del balancín está tocando el suelo, el extremo izquierdo queda verticalmente sobre un punto del suelo que está a 2,8 metros del extremo derecho (imagen del balancín inclinado, con 3 m como largo total y 2,8 m como distancia horizontal). Cuando el extremo derecho del balancín está tocando el suelo, ¿qué expresión permite calcular a cuántos metros sobre el suelo se ubica su extremo izquierdo?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "√(3² + 2,8²)",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "√(3² − 2,8²)",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "3² + 2,8²",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "3² − 2,8²",
+              "isCorrect": true
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "D",
+          "skill": "Modelar",
+          "oa": "OA 12",
+          "contentAxis": "Geometría",
+          "hasFigure": true,
+          "figureNote": "Diagrama del balancín inclinado (contexto; las medidas 3 m y 2,8 m ya están en el enunciado). Los exponentes de las alternativas A y B, bajo el signo √, se perdieron en la extracción de texto y se reconstruyeron por análisis (teorema de Pitágoras) a partir del patrón visible en C y D.",
+          "indicador": "Identifican la expresión que permite resolver un problema cotidiano mediante el teorema de Pitágoras. Identifican el vector de traslación, dada una figura y su"
+        },
+        {
+          "position": 9,
+          "type": "multiple_choice",
+          "stem": "En este plano cartesiano, la Figura 2 se obtuvo al aplicar una traslación a la Figura 1. ¿Cuáles son las coordenadas del vector de traslación aplicado a la Figura 1?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "(4 , 2)",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "(3 , 5)",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "(2 , 3)",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "(2 , 4)",
+              "isCorrect": true
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "D",
+          "skill": "Resolver problemas",
+          "oa": "OA 13",
+          "contentAxis": "Geometría",
+          "hasFigure": true,
+          "figureNote": "Plano cartesiano con la Figura 1 y la Figura 2 dibujadas; las posiciones exactas de ambas figuras no están en el texto.",
+          "indicador": "Identifican el vector de traslación, dada una figura y su imagen en el plano cartesiano."
+        },
+        {
+          "position": 10,
+          "type": "multiple_choice",
+          "stem": "Observa el siguiente prisma recto de base triangular, con medidas 5 cm, 12 cm y 8 cm indicadas en la figura. ¿Cuál es el volumen del prisma anterior?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "136 cm³",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "196 cm³",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "240 cm³",
+              "isCorrect": true
+            },
+            {
+              "key": "D",
+              "text": "480 cm³",
+              "isCorrect": false
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "C",
+          "skill": "Resolver problemas",
+          "oa": "OA 11",
+          "contentAxis": "Geometría",
+          "hasFigure": true,
+          "figureNote": "Prisma triangular con las medidas 5 cm, 12 cm y 8 cm rotuladas en el dibujo; no está claro por el texto cuáles corresponden a los catetos de la base y cuál a la longitud del prisma.",
+          "indicador": "Calculan el volumen de un prisma recto. Identifican la imagen final de la aplicación de un par de"
+        },
+        {
+          "position": 11,
+          "type": "multiple_choice",
+          "stem": "Observa la figura en el plano cartesiano. A la figura anterior se le aplica una traslación según el vector (6 , 1) y luego una reflexión respecto del eje x. ¿Cuál es la figura resultante?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Gráfico con la figura ubicada en el primer cuadrante, cerca del origen.",
+              "isImage": true,
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Gráfico con la figura ubicada más arriba y a la derecha, sobre el eje x.",
+              "isImage": true,
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Gráfico con la figura ubicada bajo el eje x, hacia la derecha.",
+              "isImage": true,
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "Gráfico con la figura ubicada bajo el eje x, más hacia la derecha que en C.",
+              "isImage": true,
+              "isCorrect": true
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "D",
+          "skill": "Resolver problemas",
+          "oa": "OA 14",
+          "contentAxis": "Geometría",
+          "hasFigure": true,
+          "figureNote": "El enunciado muestra una figura original en el plano cartesiano y las 4 alternativas son gráficos distintos; requieren captura de imagen para ser usables.",
+          "indicador": "Identifican la imagen final de la aplicación de un par de transformaciones isométricas cualquiera."
+        },
+        {
+          "position": 12,
+          "type": "multiple_choice",
+          "stem": "Para participar en el torneo regional de judo, se debe informar la edad, la masa corporal y la categoría de cada participante. En la categoría \"Ligeros masculino\" se estableció que el percentil 25 de la masa corporal de los participantes es 68 kg. ¿Cuál de las siguientes afirmaciones se puede concluir siempre a partir de la información anterior?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "25 participantes de esa categoría tienen una masa corporal de 68 kg.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "25 participantes de esa categoría tienen como máximo una masa corporal de 68 kg.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "El 25% de los participantes de esa categoría tienen una masa corporal de 68 kg.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "El 25% de los participantes de esa categoría tienen como máximo una masa corporal de 68 kg.",
+              "isCorrect": true
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "D",
+          "skill": "Argumentar",
+          "oa": "OA 15",
+          "contentAxis": null,
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Interpretan percentiles en conjuntos de datos. Identifican la expresión para determinar las maneras en"
+        },
+        {
+          "position": 13,
+          "type": "multiple_choice",
+          "stem": "En una empresa se necesita formar un equipo de 3 personas. Los siguientes listados muestran los nombres de las personas que trabajan en cada área de la empresa: Carpintería (Paula, René), Pintura (Inés, Francisco, Roberto), Construcción (Daniel, Laura, Ángela, Carlos). Cada una de las tres personas del equipo que se formará debe pertenecer a un área diferente de la empresa. ¿Cuál de las siguientes operaciones permite obtener la cantidad total de equipos distintos que se pueden formar?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "2 • 3 • 4",
+              "isCorrect": true
+            },
+            {
+              "key": "B",
+              "text": "2 + 3 + 4",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "3 • 9",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "3 • (2 • 3 • 4)",
+              "isCorrect": false
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "A",
+          "skill": "Modelar",
+          "oa": "OA 17",
+          "contentAxis": null,
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "que ocurre un evento compuesto, usando el principio combinatorio multiplicativo. Calculan probabilidades de eventos compuestos usando"
+        },
+        {
+          "position": 14,
+          "type": "multiple_choice",
+          "stem": "Para hacer un sándwich se puede elegir entre 2 tipos de harina del pan (harina blanca o harina integral), 3 tipos de carne (vacuno, pollo o pescado) y 3 tipos de verduras (lechuga, tomate o palta). Si cada sándwich se prepara con un ingrediente de cada tipo escogido al azar, ¿cuál es la probabilidad de escoger un sándwich en pan de harina blanca con pollo y palta?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "1/8",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "3/8",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "1/18",
+              "isCorrect": true
+            },
+            {
+              "key": "D",
+              "text": "3/18",
+              "isCorrect": false
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "C",
+          "skill": "Resolver problemas",
+          "oa": "OA 17",
+          "contentAxis": null,
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Calculan probabilidades de eventos compuestos usando el principio multiplicativo. Identifican manipulaciones de representaciones gráficas"
+        },
+        {
+          "position": 15,
+          "type": "multiple_choice",
+          "stem": "En un negocio se desea mostrar que existe una baja variación en las ganancias diarias durante una semana. Para ello, el encargado de local construye el siguiente gráfico de líneas \"Variación en las ganancias diarias\": eje Y \"Ganancias en miles de pesos\" con marcas 0, 50, 100, 200, 400; eje X con los días Lunes a Viernes. ¿Cuál de las siguientes características del gráfico distorsiona los datos representados para mostrar una variación de las ganancias menor a la real?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Que presenta solo 5 de los 7 días de la semana.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Que usa líneas para mostrar variaciones en las ganancias.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Que utiliza una escala con valores desproporcionados en el eje vertical.",
+              "isCorrect": true
+            },
+            {
+              "key": "D",
+              "text": "Que marca los puntos correspondientes a las ganancias diarias sobre la línea del gráfico.",
+              "isCorrect": false
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "C",
+          "skill": "Argumentar",
+          "oa": "OA 16",
+          "contentAxis": null,
+          "hasFigure": true,
+          "figureNote": "Gráfico de líneas con eje Y de escala no uniforme (0, 50, 100, 200, 400); los valores del eje ya están transcritos en el enunciado.",
+          "indicador": "Identifican manipulaciones de representaciones gráficas de datos. Resuelven problemas que requieren calcular"
+        },
+        {
+          "position": 16,
+          "type": "open_ended",
+          "stem": "El cráter del volcán Ojos del Salado se ubica a una altura de 6 893 metros sobre el nivel del mar. Un montañista desciende desde el cráter con una rapidez aproximada de 110 metros por cada 20 minutos. ¿A cuántos metros de altura, sobre el nivel del mar, se encontrará el montañista después de 4 horas de comenzar su descenso? A continuación, escribe el procedimiento que uses para llegar a la respuesta.",
+          "alternatives": [],
+          "responseFormat": "develop",
+          "correctKey": null,
+          "skill": "Resolver problemas",
+          "oa": "OA 1",
+          "contentAxis": null,
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Resuelven problemas que requieren calcular multiplicaciones de números enteros."
+        },
+        {
+          "position": 17,
+          "type": "multiple_choice",
+          "stem": "¿Cuál es el resultado de −3,2 • 0,4?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "12,8",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "1,28",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "−1,28",
+              "isCorrect": true
+            },
+            {
+              "key": "D",
+              "text": "−12,8",
+              "isCorrect": false
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "C",
+          "skill": "Resolver problemas",
+          "oa": "OA 2",
+          "contentAxis": null,
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Calculan multiplicaciones de números racionales. Resuelven problemas que involucran variaciones"
+        },
+        {
+          "position": 18,
+          "type": "multiple_choice",
+          "stem": "Este año, en una corrida familiar de una municipalidad participaron 260 personas. Esta cifra indica que los participantes aumentaron un 30% respecto del año anterior. ¿Cuántos participantes más que el año anterior participaron este año?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "30",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "60",
+              "isCorrect": true
+            },
+            {
+              "key": "C",
+              "text": "78",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "182",
+              "isCorrect": false
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "B",
+          "skill": "Resolver problemas",
+          "oa": "OA 5",
+          "contentAxis": null,
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Resuelven problemas que involucran variaciones porcentuales en diversos contextos."
+        },
+        {
+          "position": 19,
+          "type": "multiple_choice",
+          "stem": "Una persona está en el punto P del siguiente mapa de una plaza cuadrada. La plaza está rodeada por cuatro calles. La persona dará una vuelta completa siguiendo el recorrido marcado en las calles que rodean la plaza. Si el área de la plaza es 2 500 m², ¿aproximadamente cuántos metros recorrerá en total la persona?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "5 000",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "1 000",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "200",
+              "isCorrect": true
+            },
+            {
+              "key": "D",
+              "text": "100",
+              "isCorrect": false
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "C",
+          "skill": "Resolver problemas",
+          "oa": "OA 4",
+          "contentAxis": null,
+          "hasFigure": true,
+          "figureNote": "Mapa de una plaza cuadrada rodeada de calles, con el punto P marcado; el área (2 500 m²) ya está en el enunciado.",
+          "indicador": "Resuelven problemas de la vida diaria que involucran raíces cuadradas de números naturales. Identifican ecuaciones de primer grado con coeficientes"
+        },
+        {
+          "position": 20,
+          "type": "multiple_choice",
+          "stem": "Se registró tres veces en una semana la cantidad de agua almacenada en un estanque: el lunes se registraron x litros, el miércoles había 1 500 litros menos que el lunes y el viernes se registraron 1 800 litros, lo que representa la mitad de lo que había el miércoles. ¿Cuál de las siguientes ecuaciones permite determinar la cantidad inicial de litros x que tenía el estanque el lunes?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "1/2 (x − 1 500) = 1 800",
+              "isCorrect": true
+            },
+            {
+              "key": "B",
+              "text": "1/2 (x + 1 500) = 1 800",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "x − 1 500 = 1/2 • 1 800",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "x + 1 500 = 1/2 • 1 800",
+              "isCorrect": false
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "A",
+          "skill": "Modelar",
+          "oa": "OA 8",
+          "contentAxis": null,
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Identifican ecuaciones de primer grado con coeficientes racionales que modelan diversas situaciones. Relacionan funciones afines y lineales mediante la"
+        },
+        {
+          "position": 21,
+          "type": "multiple_choice",
+          "stem": "La gráfica de la función f(x) = −7x se traslada verticalmente en 2 unidades hacia abajo en el plano cartesiano y se obtiene la gráfica de una nueva función g. ¿Cuál de las siguientes expresiones corresponde a la función g?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "g(x) = −7x − 2",
+              "isCorrect": true
+            },
+            {
+              "key": "B",
+              "text": "g(x) = −7x + 2",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "g(x) = −7 (x − 2)",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "g(x) = −7 (x + 2)",
+              "isCorrect": false
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "A",
+          "skill": "Resolver problemas",
+          "oa": "OA 10",
+          "contentAxis": null,
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Relacionan funciones afines y lineales mediante la traslación del gráfico de una función lineal. Encuentran el conjunto solución de inecuaciones de"
+        },
+        {
+          "position": 22,
+          "type": "multiple_choice",
+          "stem": "¿Cuál es el conjunto solución de la inecuación 0,3 + 0,2x ≥ 4,7?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Todos los números mayores o iguales a 1.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Todos los números mayores o iguales a 9,4.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Todos los números mayores o iguales a 22.",
+              "isCorrect": true
+            },
+            {
+              "key": "D",
+              "text": "Todos los números mayores o iguales a 0,88.",
+              "isCorrect": false
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "C",
+          "skill": "Resolver problemas",
+          "oa": "OA 9",
+          "contentAxis": null,
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Encuentran el conjunto solución de inecuaciones de primer grado con coeficientes racionales. Relacionan dos representaciones de una misma función"
+        },
+        {
+          "position": 23,
+          "type": "multiple_choice",
+          "stem": "Observa la representación gráfica de la relación entre las variables x e y (recta que pasa por el origen en el plano cartesiano). ¿Cuál de las siguientes expresiones es la regla que relaciona a x e y?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "y = x",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "y = 3x",
+              "isCorrect": true
+            },
+            {
+              "key": "C",
+              "text": "y = x/3",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "y = −x/3",
+              "isCorrect": false
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "B",
+          "skill": "Representar",
+          "oa": "OA 7",
+          "contentAxis": null,
+          "hasFigure": true,
+          "figureNote": "Recta en el plano cartesiano que pasa por el origen; la pendiente exacta (qué puntos toca la recta) no está en el texto.",
+          "indicador": "Relacionan dos representaciones de una misma función lineal: gráfico con expresión algebraica. Calculan medidas desconocidas en triángulos"
+        },
+        {
+          "position": 24,
+          "type": "multiple_choice",
+          "stem": "Observa las medidas del siguiente triángulo rectángulo: catetos de 6 cm y 8 cm, hipotenusa x cm. ¿Cuál es el valor de x?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "4",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "7",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "10",
+              "isCorrect": true
+            },
+            {
+              "key": "D",
+              "text": "14",
+              "isCorrect": false
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "C",
+          "skill": "Resolver problemas",
+          "oa": "OA 12",
+          "contentAxis": "Geometría",
+          "hasFigure": true,
+          "figureNote": "Triángulo rectángulo con los catetos 6 cm y 8 cm rotulados y la hipotenusa marcada como x; las medidas ya están en el enunciado.",
+          "indicador": "Calculan medidas desconocidas en triángulos rectángulos, usando el teorema de Pitágoras. Identifican la imagen de una figura rotada en torno a"
+        },
+        {
+          "position": 25,
+          "type": "multiple_choice",
+          "stem": "La Figura B se obtiene al rotar en sentido antihorario la Figura A en torno al punto F y con ángulo de rotación de 150°. ¿Qué imagen muestra las figuras A y B?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Gráfico con la Figura B (triángulo) sobre el eje x, cerca de F, y la Figura A en el primer cuadrante.",
+              "isImage": true,
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Gráfico con la Figura B bajo el eje x, a la izquierda de F, y la Figura A en el primer cuadrante.",
+              "isImage": true,
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Gráfico con la Figura B bajo el eje x, más a la derecha, y la Figura A en el primer cuadrante.",
+              "isImage": true,
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "Gráfico con la Figura B bajo el eje x, a la izquierda de F (variante de B), y la Figura A en el primer cuadrante.",
+              "isImage": true,
+              "isCorrect": true
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "D",
+          "skill": "Resolver problemas",
+          "oa": "OA 13",
+          "contentAxis": "Geometría",
+          "hasFigure": true,
+          "figureNote": "Las 4 alternativas son gráficos con las figuras A y B en distintas posiciones respecto del punto F; requieren captura de imagen para ser usables.",
+          "indicador": "Identifican la imagen de una figura rotada en torno a puntos del plano cartesiano y en un ángulo dado."
+        },
+        {
+          "position": 26,
+          "type": "multiple_choice",
+          "stem": "¿Cuál es el volumen de un cilindro cuya base tiene un radio de 6 cm y su altura mide 8 cm?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "72π cm³",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "96π cm³",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "168π cm³",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "288π cm³",
+              "isCorrect": true
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "D",
+          "skill": "Resolver problemas",
+          "oa": "OA 11",
+          "contentAxis": "Geometría",
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Calculan el volumen de un cilindro."
+        },
+        {
+          "position": 27,
+          "type": "multiple_choice",
+          "stem": "El prisma recto que se muestra a continuación tiene un pentágono regular como base, con una altura del prisma de 15 cm y una medida de 8 cm indicada en el dibujo. El área de la base del prisma es aproximadamente 110 cm². ¿Cuál es el área aproximada de toda la superficie del prisma?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "600 cm²",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "820 cm²",
+              "isCorrect": true
+            },
+            {
+              "key": "C",
+              "text": "1 650 cm²",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "3 300 cm²",
+              "isCorrect": false
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "B",
+          "skill": "Resolver problemas",
+          "oa": "OA 11",
+          "contentAxis": "Geometría",
+          "hasFigure": true,
+          "figureNote": "Prisma pentagonal con la altura (15 cm) y otra medida (8 cm, probablemente el lado del pentágono) rotuladas en el dibujo; no está claro por el texto a qué corresponde cada valor.",
+          "indicador": "Calculan el área de la superficie total de un prisma recto."
+        },
+        {
+          "position": 28,
+          "type": "multiple_choice",
+          "stem": "Observa el siguiente diagrama de cajón que da a conocer la distribución de la cantidad de preguntas contestadas por un grupo de personas en un examen (eje con marcas de 42 a 74). ¿Qué cantidad de preguntas contestadas corresponden al segundo cuartil?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "53",
+              "isCorrect": true
+            },
+            {
+              "key": "B",
+              "text": "55",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "56",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "58",
+              "isCorrect": false
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "A",
+          "skill": "Representar",
+          "oa": "OA 15",
+          "contentAxis": null,
+          "hasFigure": true,
+          "figureNote": "Diagrama de cajón (boxplot) sobre un eje de 42 a 74; el valor exacto de la mediana (segundo cuartil) solo se puede leer en la imagen.",
+          "indicador": "Leen información presentada en diagramas de cajón."
+        },
+        {
+          "position": 29,
+          "type": "multiple_choice",
+          "stem": "Durante una cosecha, se recolectaron 100 manzanas de distintos árboles y se registró el peso de cada una de ellas. Considerando los 100 datos registrados, ¿en cuál de los siguientes conjuntos se puede asegurar que solo hay valores menores o iguales al primer cuartil?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Los pesos de las 75 manzanas más livianas de la muestra.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Los pesos de las 25 manzanas más livianas de la muestra.",
+              "isCorrect": true
+            },
+            {
+              "key": "C",
+              "text": "Los pesos de las 60 manzanas más livianas de la muestra.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "Los pesos de las 40 manzanas más livianas de la muestra.",
+              "isCorrect": false
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "B",
+          "skill": "Argumentar",
+          "oa": "OA 15",
+          "contentAxis": null,
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Interpretan cuartiles de conjuntos de datos."
+        },
+        {
+          "position": 30,
+          "type": "multiple_choice",
+          "stem": "En una competencia de ciclismo se registró el tiempo, en minutos, que demoraron todos los competidores de dos categorías en completar el recorrido. La siguiente tabla presenta algunos de los percentiles de los tiempos de llegada registrados para cada categoría:\nPercentil: 10, 20, 25, 40, 50, 75, 99\nCategoría 1: 30, 35, 40, 50, 60, 90, 120\nCategoría 2: 30, 60, 85, 90, 95, 115, 120\nSi en cada categoría había la misma cantidad de competidores, ¿cuál de las siguientes afirmaciones se puede concluir de los datos de la tabla?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "En la categoría 1 hay más competidores con tiempos de llegada mayores o iguales a 90 minutos que en la categoría 2.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "En la categoría 1 hay más competidores con tiempos de llegada menores o iguales a 40 minutos que en la categoría 2.",
+              "isCorrect": true
+            },
+            {
+              "key": "C",
+              "text": "En las dos categorías el competidor con mayor tiempo de llegada se demoró 120 minutos en completar el recorrido.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "En las dos categorías hubo 30 competidores que se demoraron 10 minutos o menos en completar el recorrido.",
+              "isCorrect": false
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "B",
+          "skill": "Argumentar",
+          "oa": "OA 15",
+          "contentAxis": null,
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Comparan dos poblaciones mediante percentiles. Representan gráficamente una función afín dada"
+        },
+        {
+          "position": 31,
+          "type": "multiple_choice",
+          "stem": "¿Cuál de los siguientes gráficos representa la función f(x) = 5x − 3?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Recta y = f(x) con intersección y pendiente en una posición.",
+              "isImage": true,
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Recta y = f(x), variante con distinta pendiente o intersección.",
+              "isImage": true,
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Recta y = f(x), variante con distinta pendiente o intersección.",
+              "isImage": true,
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "Recta y = f(x), variante con distinta pendiente o intersección.",
+              "isImage": true,
+              "isCorrect": true
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "D",
+          "skill": "Representar",
+          "oa": "OA 10",
+          "contentAxis": null,
+          "hasFigure": true,
+          "figureNote": "Las 4 alternativas son gráficos de la recta y = f(x) con distinta pendiente/intersección; requieren captura de imagen para ser usables.",
+          "indicador": "Representan gráficamente una función afín dada algebraicamente. Identifican la inecuación con coeficientes fraccionarios"
+        },
+        {
+          "position": 32,
+          "type": "multiple_choice",
+          "stem": "Francisca debe llenar una botella de agua. Ella sabe que en la mitad de la botella caben como máximo 3/4 de un litro de agua. ¿Cuál de las siguientes inecuaciones permite determinar la cantidad máxima x de litros de agua que se pueden poner en la botella?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "1/2 x ≤ 3/4",
+              "isCorrect": true
+            },
+            {
+              "key": "B",
+              "text": "1/2 x ≥ 3/4",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "x + 1/2 ≤ 3/4",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "x − 1/2 ≥ 3/4",
+              "isCorrect": false
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "A",
+          "skill": "Modelar",
+          "oa": "OA 9",
+          "contentAxis": null,
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Identifican la inecuación con coeficientes fraccionarios que permite resolver un problema. Resuelven problemas que se modelan con funciones"
+        },
+        {
+          "position": 33,
+          "type": "multiple_choice",
+          "stem": "Un transportista cobra un monto fijo por viaje y un valor adicional por cada kilómetro recorrido. El costo total y, en pesos, se modela con la función y = 3 000 + 400 • x, donde x representa los kilómetros recorridos. ¿Cuánto debe pagar un cliente por un viaje de 10 kilómetros?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "$3 400",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "$7 000",
+              "isCorrect": true
+            },
+            {
+              "key": "C",
+              "text": "$7 400",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "$34 000",
+              "isCorrect": false
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "B",
+          "skill": "Resolver problemas",
+          "oa": "OA 10",
+          "contentAxis": null,
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Resuelven problemas que se modelan con funciones afines, dado el modelo. Resuelven problemas que requieren identificar cambios"
+        },
+        {
+          "position": 34,
+          "type": "multiple_choice",
+          "stem": "El año 2024, una persona cobraba $10 000 por un trabajo. En la actualidad cobra $12 500 por el mismo trabajo. ¿En qué porcentaje aumentó su tarifa respecto de lo que cobraba en el año 2024?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "20%",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "25%",
+              "isCorrect": true
+            },
+            {
+              "key": "C",
+              "text": "80%",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "125%",
+              "isCorrect": false
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "B",
+          "skill": "Resolver problemas",
+          "oa": "OA 5",
+          "contentAxis": null,
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Resuelven problemas que requieren identificar cambios porcentuales en diversos contextos. Estiman raíces cuadradas no exactas de números"
+        },
+        {
+          "position": 35,
+          "type": "multiple_choice",
+          "stem": "¿Entre qué números se encuentra el valor de √27?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Entre 5 y 6.",
+              "isCorrect": true
+            },
+            {
+              "key": "B",
+              "text": "Entre 13 y 14.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Entre 26 y 28.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "Entre 53 y 55.",
+              "isCorrect": false
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "A",
+          "skill": "Resolver problemas",
+          "oa": "OA 4",
+          "contentAxis": null,
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Estiman raíces cuadradas no exactas de números naturales. Calculan divisiones de potencias de base natural y"
+        },
+        {
+          "position": 36,
+          "type": "multiple_choice",
+          "stem": "¿Cuál de estas potencias es equivalente a 8³ : 8¹?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "8¹",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "8²",
+              "isCorrect": true
+            },
+            {
+              "key": "C",
+              "text": "8³",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "8⁴",
+              "isCorrect": false
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "B",
+          "skill": "Resolver problemas",
+          "oa": "OA 3",
+          "contentAxis": null,
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Calculan divisiones de potencias de base natural y exponente natural hasta 3, aplicando propiedades."
+        },
+        {
+          "position": 37,
+          "type": "open_ended",
+          "stem": "Resuelve: −798 : −6 =",
+          "alternatives": [],
+          "responseFormat": "fill_in",
+          "correctKey": null,
+          "skill": "Resolver problemas",
+          "oa": "OA 1",
+          "contentAxis": null,
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Calculan divisiones de números enteros.",
+          "fillAnswer": "133"
+        }
+      ]
+    }
+  ],
+  "extraction": {
+    "itemCount": 37,
+    "warnings": [
+      "responseFormat: 'fill_in' en ítems 1, 37 (cálculo directo, se resuelve en recuadro) → modelados como open_ended.",
+      "responseFormat: 'develop' en ítem 16 (única pregunta de desarrollo: descenso del montañista, con procedimiento escrito).",
+      "Alternativas-imagen (isImage:true) en ítems 11, 25, 31: las 4 opciones son gráficos; requieren captura de imagen para ser usables.",
+      "Figura imprescindible para responder en ítems 2, 5, 9, 11, 23, 25, 27, 28, 31 (además de las alternativas-imagen ya listadas): la posición/lectura exacta del dato solo está en la imagen.",
+      "Figuras de contexto no imprescindibles (datos ya transcritos en el stem) en ítems 8, 10, 15, 19, 24.",
+      "Ítem 8 (balancín): los exponentes bajo el signo √ de las alternativas A y B se perdieron en pdftotext (superíndices no capturados); se reconstruyeron por análisis matemático (teorema de Pitágoras) a partir del patrón de C y D — revisar contra el PDF.",
+      "Texto, exponentes y fracciones transcritos y reconstruidos desde la capa de texto del PDF (pdftotext -layout, sin render de imagen); superíndices normalizados a notación unicode (², ³, etc.)."
+    ],
+    "needsHumanReview": true,
+    "crossCheck": {
+      "hardIssues": [],
+      "softWarnings": [],
+      "counts": {
+        "cuadernillo": 37,
+        "ficha": 37,
+        "hoja": 37
+      }
+    }
+  },
+  "pauta": {
+    "source": {
+      "ficha": "8_ficha_tecnica_matematica_monitoreo_2026_8_basico.pdf",
+      "hoja": "8_hoja_de_respuestas_matematica_monitoreo_2026_8_basico.pdf"
+    },
+    "appliedKeys": 34,
+    "rubrics": 0
+  }
+}

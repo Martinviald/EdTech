@@ -1,0 +1,1343 @@
+{
+  "schemaVersion": "1.0",
+  "source": {
+    "file": "I_prueba_lectura_monitoreo_2026_I_medio.pdf",
+    "subjectFolder": "Lenguaje"
+  },
+  "instrument": {
+    "name": "DIA Lectura I° Medio 2026 — Intermedio",
+    "subject": "Lenguaje y Comunicación",
+    "subjectCode": "LANG",
+    "grade": "I° Medio",
+    "gradeCode": "1ST_MEDIO",
+    "year": 2026,
+    "applicationPeriod": "intermedio",
+    "type": "dia",
+    "isOfficial": true,
+    "source": "imported"
+  },
+  "sections": [
+    {
+      "order": 1,
+      "name": "Texto 1: «Corría lindo el bayo»",
+      "type": "mixed",
+      "instructions": "Lee el siguiente texto y responde las preguntas 1 a 6.",
+      "passage": {
+        "title": "Corría lindo el bayo",
+        "text": "Justo ahora que tengo a los viejos casi convencidos para que me dejen venir a la escuela en el bayo, se complica lo de las carreras a la salida, la señorita se enteró y muy seria, nos explicó lo peligrosas que eran las carreras, que si uno se caía del caballo los otros lo pasaríamos por encima y sería una tragedia. ¿Quién se iba a caer del caballo? Si casi nacimos andando a caballo y a los dos años ya galopábamos solos, caerse del caballo más que una tragedia sería un papelón. Ella dijo que se habían acabado las carreras, que todo terminaba ahí y que quizá, cuando la Cooperadora organizara cuadreras se podría hacer algo con los chicos más grandes, pero con autorización de los padres y bajo la vigilancia de los adultos.\n\nFue el día que por fin me dejaron ir a la escuela en el bayo, los desafié, se prendieron y ahí, no más, en la salida primero el bayo, lejos, ni castigarlo necesité, solo apreté las piernas y le avisé con los talones, de punta a punta ganó el bayo, cómodo él, triunfante yo.\n\nNo sé cómo pero, la señorita se enteró, lo vi en su cara al otro día cuando nos saludó, no era la misma, nada de sonrisas o chistes, más que enojada parecía triste ¿así que volvieron a las carreras? preguntó, les previne, siguió, hoy la cosa no queda acá, el culpable será castigado ¿quién es el organizador?\n\nMe temblaban las piernas, alguien dirá mi nombre pensé, para colmo ella era de las que cumplía las promesas, las buenas y también las otras.\n\nEl silencio era total, me pesaba sobre los hombros, nadie habló, el silencio se espesó más todavía, bueno dijo, si nadie organiza todos serán castigados por igual. Me puse de pie a pesar del temblor de mis piernas y el fuerte golpeteo de mi corazón, y dije: yo señorita, yo Roberto Carbajal, organicé, lo sospechaba dijo ella, estás en penitencia, pero te felicito por tu valentía, en esta semana no tendrás recreos, estarás al lado de un árbol.\n\nTocó la campana para el recreo. Salimos todos, me fui derechito a la casuarina, apoyé el pie derecho en el suelo, el otro doblado en la rodilla apretando el tronco, las manos en los bolsillos de la bombacha.\n\n¡Qué largo era ese recreo! Nada que ver con los otros cortitos de todos los días cuando jugábamos a la pelota u organizábamos las carreras. La señorita se me acercó, me abrazó y me dijo, te quiero mucho Roberto, esta penitencia me duele más a mí que a vos y tenía los ojos brillosos, bajé la cabeza por tres razones, primero por respeto, segundo porque la seguía queriendo a pesar de todo y tercero porque no quería llorar, no tenía que llorar y no lloré. De repente, sin sonar la campana, era como si hubiese terminado el recreo, levanté la vista y vi asombro en el rostro de la maestra, gran asombro, recorrí con la mirada mi alrededor y la comprendí, todos los que corríamos carreras, los que me ganaban y a los que les ganaba, todos estaban ahí, asumiendo mi penitencia, acompañándome, el pie derecho en el suelo, el otro doblado en la rodilla apretando el tronco, las manos en los bolsillos de la bombacha.\n\nNilda Tomassi. De poesía y narrativa breve. Argentina: Ediciones Raíz Alternativa, 2013.\n\nGlosario\nbayo: caballo.\ncasuarina: especie de árbol perenne (que dura siempre o por mucho tiempo).",
+        "format": "plain",
+        "attachments": []
+      },
+      "items": [
+        {
+          "position": 1,
+          "type": "multiple_choice",
+          "stem": "Según Roberto, ¿qué sintió la profesora cuando se enteró de que los alumnos habían vuelto a las carreras?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Arrepentimiento.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Asombro.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Tristeza.",
+              "isCorrect": true
+            },
+            {
+              "key": "D",
+              "text": "Enojo.",
+              "isCorrect": false
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "C",
+          "skill": "Localizar",
+          "oa": "OA 3",
+          "contentAxis": "Narración",
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Localizan información explícita relevante en un texto narrativo. Infieren cómo influyen acciones y acontecimientos"
+        },
+        {
+          "position": 2,
+          "type": "multiple_choice",
+          "stem": "¿Qué quería evitar la profesora con la advertencia que hace al inicio del cuento?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Un accidente escolar.",
+              "isCorrect": true
+            },
+            {
+              "key": "B",
+              "text": "Una pelea entre alumnos.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "La transgresión de normas.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "El maltrato hacia los animales.",
+              "isCorrect": false
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "A",
+          "skill": "Interpretar y relacionar",
+          "oa": "OA 3",
+          "contentAxis": "Narración",
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Infieren cómo influyen acciones y acontecimientos relevantes en el desarrollo de un texto narrativo. Infieren información relevante sobre personajes en"
+        },
+        {
+          "position": 3,
+          "type": "multiple_choice",
+          "stem": "¿Por qué la profesora castiga a Roberto?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Por haber obligado a otros niños a competir en carreras.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Por haber tardado en asumir su culpabilidad.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Por haber llegado a la escuela a caballo.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "Por haber organizado carreras a caballo.",
+              "isCorrect": true
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "D",
+          "skill": "Interpretar y relacionar",
+          "oa": "OA 3",
+          "contentAxis": "Narración",
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Infieren información relevante sobre personajes en un texto narrativo. Caracterizan las relaciones entre los personajes en"
+        },
+        {
+          "position": 4,
+          "type": "multiple_choice",
+          "stem": "¿Cómo es la señorita con Roberto?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Indiferente.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Tolerante.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Cariñosa.",
+              "isCorrect": true
+            },
+            {
+              "key": "D",
+              "text": "Cruel.",
+              "isCorrect": false
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "C",
+          "skill": "Interpretar y relacionar",
+          "oa": "OA 3",
+          "contentAxis": "Narración",
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Caracterizan las relaciones entre los personajes en un texto narrativo. Realizan inferencias sobre el ambiente y las"
+        },
+        {
+          "position": 5,
+          "type": "multiple_choice",
+          "stem": "¿Por qué los estudiantes desobedecen las órdenes de la profesora?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Porque prefieren desafiar a la autoridad corriendo en los caballos.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Porque creen que compitiendo juntos a caballo no serán castigados.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Porque están tan acostumbrados a los caballos que no los consideran riesgosos.",
+              "isCorrect": true
+            },
+            {
+              "key": "D",
+              "text": "Porque saben que el único momento que tienen para correr a caballo es a la salida de la escuela.",
+              "isCorrect": false
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "C",
+          "skill": "Interpretar y relacionar",
+          "oa": "OA 3",
+          "contentAxis": "Narración",
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Realizan inferencias sobre el ambiente y las costumbres en un texto narrativo. Formulan una interpretación o postura personal"
+        },
+        {
+          "position": 6,
+          "type": "open_ended",
+          "stem": "¿Por qué crees que el resto de los estudiantes se incorporó voluntariamente al castigo? Justifica tu respuesta con información del texto.",
+          "alternatives": [],
+          "responseFormat": "develop",
+          "correctKey": null,
+          "skill": "Reflexionar",
+          "oa": "OA 8",
+          "contentAxis": "Narración",
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "sobre el sentido de un texto narrativo o un aspecto de este. Localizan información explícita relevante en un texto",
+          "rubric": "Tipos de respuestas Respuestas correctas Respuestas parcialmente correctas Respuestas incorrectas (Código 2) (Código 1) (Código 0) La o el estudiante formula una La o el estudiante formula una La o el estudiante evidencia en interpretación sobre el aspecto solicitado interpretación sobre el aspecto su respuesta una comprensión en la pregunta, la cual evidencia una solicitado en la pregunta, la cual errónea del texto, pues no comprensión correcta del texto y un evidencia una comprensión parcial realiza una interpretación análisis coherente de la información. En del texto y un análisis parcialmente adecuada de la situación y evidencia errores en la este caso, una interpretación adecuada correcto de la información. En este del sentido de la obra es considerar que caso, una interpretación parcial del comprensión lectora sentido de la obra es considerar (respuestas incoherentes, los estudiantes se sumaron voluntariamente al castigo por sentirse aspectos locales del cuento y no vagas, tautológicas, etc.). tan responsables como Roberto de comprensión global (por ejemplo, También son incorrectas las haber participado en las carreras. Los que temían una futura represalia de respuestas en blanco. elementos textuales que pueden utilizar la profesora, que no querían que la para justificar son: “si casi nacimos profesora se molestara o se sintiera andando a caballo y a los dos años triste, porque querían disculparse galopábamos solos”, “los desafié, se con la profesora por haber ocultado prendieron” o alusiones a que nadie la verdad, etc.). delata a Roberto cuando la profesora pregunta o que todos se sumaron (vencedores y vencidos). Ejemplos: Ejemplos: Ejemplos: Yo creo que se sumaron porque Yo creo se sumaron al Se sumaron al castigo - - - sentían que también había sido castigo porque estaban porque sí. culpa de ellos el haber corrido a arrepentidos de no haberle Se pusieron con Roberto - caballo, por lo tanto, eran tan dicho a la profesora que fue en el árbol porque responsables como Roberto de Roberto quien organizó las Roberto los iba a la situación y las carreras eran carreras, entonces es como encontrar cobardes y no parte de su costumbre. una manera de disculparse los iba a dejar andar más con ella. Yo creo que se sumaron al a caballo. - castigo porque querían apoyar a Yo creo que lo hicieron - Yo creo que se sumaron - Roberto y era una manera de porque no querían que la al castigo porque la decirle que también fueron profesora se sintiera triste profesora les dijo. responsables de las carreras, por lo que habían hecho. Lo hicieron para correr - porque, aunque Roberto la haya después a caballo. organizado, todos son parte de Yo encuentro que lo - ese mundo y también hicieron bien. desobedecieron a la profesora. 10 &gt; Diagnóstico Integral de Aprendizajes Instrumentos de Evaluación 2026 agenciaeducacion.cl"
+        }
+      ]
+    },
+    {
+      "order": 2,
+      "name": "Textos 1 y 2: «La imagen del espíritu olímpico» / «Desempate, por favor»",
+      "type": "multiple_choice",
+      "instructions": "Lee los siguientes textos y responde las preguntas 7 a 13.",
+      "passage": {
+        "title": "Juegos Olímpicos, Tokio 2020",
+        "text": "Texto 1\n\nLa imagen del espíritu olímpico: Italia y Qatar comparten el oro en el salto alto\n\nGianmarco Tamberi y Mutaz Essa Barshim decidieron dejar de competir y subirse juntos a lo más alto del podio. Un momento que ha llamado la atención del planeta entero, demostrando esa aura especial que solo se da en los Juegos.\n\n[Fotografía: Gianmarco Tamberi y Mutaz Essa Barshim (REUTERS/Hannah McKay)]\n\nGianmarco Tamberi y Mutaz Essa Barshim se miran de forma cómplice. Están conversando con el juez de pista en medio de un Estadio Olímpico que cada vez tiene más asistentes. Ambos vienen de fallar sus tres intentos en la definición por el oro del salto alto y están igualados en la prueba. Esa casualidad les ofrecía dos caminos. Uno era intentar un salto más y jugársela por ser el único medallista en lo más alto del podio. La otra era dejar de lado la rivalidad y compartir la presea dorada. No lo dudaron ni un poco.\n\nEstiraron sus manos y concretaron la doble medalla con un saludo formal que rápidamente se transformaría en un abrazo que ahora da vueltas por el mundo.\n\nFue uno de esos momentos que quedarán en el recuerdo colectivo. La figura del italiano dando vueltas por el recortan japonés. Llantos, gritos, miradas de asombro y vueltas en el piso. Gianmarco lo celebró de forma expresiva y distendida.\n\nPor otra parte, y unos metros más allá, Mutaz Essa Barshim gritaba al viento y alzaba sus brazos frente a las graderías. Luego lloraba y abrazaba a su entrenador.\n\nPero volvieron a juntarse y caminaron con las banderas de sus países en las espaldas. Son los campeones olímpicos del salto alto y sus rostros merecían posar juntos frente a los miles de flash que explotaban a esas horas en Tokio.\n\nLa increíble historia se dio luego de que ambos atletas llegaran a la definición por el oro intentando superar los 2,39 metros. Primero lo hizo el qatarí de 30 años. Falló sus tres saltos. Después vendría el turno de Tamberi quien tampoco pudo superar la marca. Antes de eso ambos venían con un rendimiento perfecto, sin sumar ningún nulo a su cuenta.\n\nAhí llegó el árbitro y les dijo: “Están iguales en altura y en cantidad de nulos. Pueden solicitar un salto más para definir”. Pero el qatarí lanzó inmediatamente, “¿Tenemos que saltar o podemos compartir el oro?”.\n\nY el juez les dijo lo que sus mentes ya sospechaban: “Es posible, están empatados. Depende de lo que ustedes decidan”. Y la seguridad y el espíritu de respeto deportivo prevalecieron.\n\nEn Tokio 2020 hay dos oros y ninguna plata. Una postal peculiar, pero que realza el aura olímpica. No solo es competencia en el escenario deportivo más importante del mundo. También hay historias de enseñanza y admiración. Italia y Qatar le dicen al planeta que no hay que estar solo en la cima, que la compañía también tiene un sabor especial.\n\nAquiles Cornejo. “La imagen del espíritu olímpico: Italia y Qatar comparten el oro en el salto alto”. La Tercera. [Santiago, Chile]. 2 Ago 2021. Web. 9 Ago 2021. (Adaptación).\n\nGlosario\npresea: medalla que se otorga al ganador de una competición.\nrecortan: material sintético para pistas de atletismo.\n\n\nTexto 2\n\nJuegos Olímpicos, Tokio 2020\nDesempate, por favor\n\nMe parece vergonzoso que se plantee la posibilidad de no seguir compitiendo en salto de altura y se pacte un empate para ganar dos atletas el oro.\n\nOpinión | Por Ramón Cid | 03 AGO 2021\n\nCuando éramos pequeños y el barrio era barrio, jugábamos a todo. Finalizada la escuela o el curso e iniciadas las vacaciones de verano, llegaba la retransmisión de Roland Garros. Entonces, con palas de madera, una pelota pelona y una cuerda atada a dos árboles, jugábamos al tenis o a algo parecido; cuando era la carrera de ciclismo del Tour de Francia, tocaba dar pedales. Lo hacíamos a turnos con la bici de algún privilegiado al que le habían regalado una; y cuando lo que veíamos eran los Juegos Olímpicos, jugábamos a “echar carreras”. Las había de velocidad y de resistencia. Para las primeras, se establecía una distancia, normalmente de poste a poste, y “a la de tres” salías zumbando en pos de la victoria. Ser el más rápido confería un estatus y un respeto importante al protagonista. Pero ese honor solo podía corresponder a uno, y si había alguna duda, se retaba al intruso a otra carrera.\n\nEsa esencia es la que siempre han tenido los Juegos Olímpicos. Los mejores del mundo se citan para “echarse carreras” y ver quién es el más rápido, el que más salta o llega más lejos lanzando. Pero esto es algo que no ha ocurrido en la final de salto de altura de hombres en Tokio. Me parece vergonzoso que se plantee la posibilidad de no seguir compitiendo y se pacte un empate para ganar los dos el oro [el catarí Barshim y el italiano Tamberi saltaron ambos 2,37 m]. La situación es la siguiente: están empatados y ahora mismo, ya son campeones olímpicos; si continúan compitiendo, pueden dejar de serlo. Hay mucho que perder y poco que ganar, solo te juegas la exclusividad en el podio.\n\nMe surgen algunas dudas: ¿Si en lugar de dos atletas, son tres o cuatro los que deciden pactar un empate, serían todos campeones olímpicos? Si en una final de boxeo los dos púgiles deciden abrazarse y no pelear, ¿serían campeones los dos? Si al final de una tanda de penales los equipos siguen empatados tras el quinto lanzamiento, ¿estaría bien que ambos fueran campeones? Los Juegos tienen un valor añadido sobre los mundiales de atletismo: la historia y la carga mítica que les acompaña. Que yo recuerde, nunca se ha dado el caso de dos campeones olímpicos en una especialidad de atletismo. No se trata de bondad ni de generosidad; hay otras maneras y lugares para ejercerlas. Es mejor saltar que pactar. No hay abrazo más noble que el de un vencedor y un vencido tras una dura pugna.\n\nRamón Cid. “Desempate, por favor”. El País [Madrid, España]. 3 Ago 2021. Web. 9 Ago 2021.\n\nGlosario\nRoland Garros: torneo abierto de tenis en Francia.\npúgiles: contendores.",
+        "format": "plain",
+        "attachments": [
+          {
+            "kind": "image",
+            "note": "Fotografía de prensa (REUTERS/Hannah McKay) de Gianmarco Tamberi y Mutaz Essa Barshim, decorativa; el texto necesario para responder está transcrito en el passage."
+          }
+        ]
+      },
+      "items": [
+        {
+          "position": 7,
+          "type": "multiple_choice",
+          "stem": "Según la información del Texto 1, ¿quién planteó la opción de compartir el oro?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "El qatarí.",
+              "isCorrect": true
+            },
+            {
+              "key": "B",
+              "text": "El árbitro.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "El público.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "El italiano.",
+              "isCorrect": false
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "A",
+          "skill": "Localizar",
+          "oa": "OA 10",
+          "contentAxis": null,
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Localizan información explícita relevante en un texto de los medios de comunicación."
+        },
+        {
+          "position": 8,
+          "type": "multiple_choice",
+          "stem": "¿Qué opinión tiene el autor del Texto 1 sobre lo ocurrido en los juegos olímpicos?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Que compartir el oro fue un gesto honorable.",
+              "isCorrect": true
+            },
+            {
+              "key": "B",
+              "text": "Que compartir el oro fue un acto antideportivo.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Que compartir el oro fue un hecho que estaba planeado.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "Que compartir el oro fue un acto que debiese replicarse a otros deportes.",
+              "isCorrect": false
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "A",
+          "skill": "Reflexionar",
+          "oa": "OA 10",
+          "contentAxis": null,
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Determinan los prejuicios, estereotipos y creencias en un texto de los medios de comunicación. Determinan propósitos explícitos e implícitos en un"
+        },
+        {
+          "position": 9,
+          "type": "multiple_choice",
+          "stem": "¿Cuál es el propósito del Texto 1?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Incentivar actitudes similares a las observadas en la competencia de salto alto.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Promover el comportamiento deportivo que se observa en los Juegos Olímpicos de Tokio.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Informar sobre la particular decisión que tomaron dos atletas en la prueba de salto alto.",
+              "isCorrect": true
+            },
+            {
+              "key": "D",
+              "text": "Argumentar sobre la superioridad de los Juegos Olímpicos de Tokio por sobre otras versiones.",
+              "isCorrect": false
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "C",
+          "skill": "Reflexionar",
+          "oa": "OA 10",
+          "contentAxis": null,
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Determinan propósitos explícitos e implícitos en un texto de los medios de comunicación. Infieren la tesis del autor en un texto"
+        },
+        {
+          "position": 10,
+          "type": "multiple_choice",
+          "stem": "¿Cuál es la tesis que plantea el autor del Texto 2?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Que en los deportes solo los vencedores pueden demostrar nobleza.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Que en los deportes se debe sancionar la decisión de empatar.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Que en los deportes tiene que prevalecer la generosidad.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "Que en los deportes debe haber un único vencedor.",
+              "isCorrect": true
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "D",
+          "skill": "Interpretar y relacionar",
+          "oa": "OA 9",
+          "contentAxis": null,
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Infieren la tesis del autor en un texto argumentativo. Distinguen un hecho de una opinión en un texto"
+        },
+        {
+          "position": 11,
+          "type": "multiple_choice",
+          "stem": "¿Qué opción presenta un hecho planteado por el autor del Texto 2?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "“Es mejor saltar que pactar”.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "“No hay abrazo más noble que el de un vencedor y un vencido”.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "“El catarí Barshim y el italiano Tamberi saltaron ambos 2,37 metros”.",
+              "isCorrect": true
+            },
+            {
+              "key": "D",
+              "text": "“Los Juegos tienen un valor añadido sobre los mundiales de atletismo”.",
+              "isCorrect": false
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "C",
+          "skill": "Reflexionar",
+          "oa": "OA 9",
+          "contentAxis": null,
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Distinguen un hecho de una opinión en un texto argumentativo. Comparan información relevante entre dos textos"
+        },
+        {
+          "position": 12,
+          "type": "multiple_choice",
+          "stem": "¿En qué acontecimiento se basa la escritura de ambos textos?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "En el resultado de Gianmarco Tamberi en salto alto.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "En el empate obtenido en la competencia de salto alto.",
+              "isCorrect": true
+            },
+            {
+              "key": "C",
+              "text": "En el récord de altura alcanzado en atletismo en los Juegos Olímpicos.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "En el inicio de la temporada de competencias de los Juegos Olímpicos.",
+              "isCorrect": false
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "B",
+          "skill": "Interpretar y relacionar",
+          "oa": "OA 10",
+          "contentAxis": null,
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Comparan información relevante entre dos textos de los medios de comunicación. Evalúan la forma en que se aborda el tema en"
+        },
+        {
+          "position": 13,
+          "type": "multiple_choice",
+          "stem": "¿En qué se diferencia la mirada que ambos autores tienen del hecho ocurrido?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "El primer autor tiene una mirada positiva y el segundo, crítica.",
+              "isCorrect": true
+            },
+            {
+              "key": "B",
+              "text": "El primer autor tiene una mirada objetiva y el segundo, subjetiva.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "El primer autor tiene una mirada conformista y el segundo, intolerante.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "El primer autor tiene una mirada optimista y el segundo, desesperanzada.",
+              "isCorrect": false
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "A",
+          "skill": "Reflexionar",
+          "oa": "OA 10",
+          "contentAxis": null,
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Evalúan la forma en que se aborda el tema en textos de los medios de comunicación. Localizan información explícita relevante en un"
+        }
+      ]
+    },
+    {
+      "order": 3,
+      "name": "Texto 3: «Hechos consumados» (fragmento)",
+      "type": "multiple_choice",
+      "instructions": "Lee el siguiente texto y responde las preguntas 14 a 18.",
+      "passage": {
+        "title": "Hechos consumados (fragmento)",
+        "text": "Personajes:\nMiguel\nMarta\nEmilio\n\nLa acción ocurre en un sitio baldío, en el que Marta y Emilio, que se encuentran en situación de calle, hacen su vida cotidiana. Miguel es el cuidador del recinto, quien debe cumplir una tarea.\n\nMIGUEL: Hola.\nMARTA: Hola...\nMIGUEL: (Afirma el palo en su cuerpo, se soba las manos). ¿Ta helá la tarde, ah?\nEMILIO: Es que es invierno; lo raro sería que hiciera calor.\nMIGUEL: (Sonriendo). Claro.\nMARTA: No seai roto po.\nMIGUEL: (Siempre sonriendo). No, si no es ná. (Pausa). ¿Terminaron de conversar?\nEMILIO: Yo sí, ella no. Ella es como un pozo interminable de palabras.\nMIGUEL: ¿Ella? ¿No son yunta?\nEMILIO: En yunta andan los güeyes.\nMIGUEL: ¿Ta enojao, amigazo?\nMARTA: No, si es así: dice que no le gusta hablar, pero después hay que hacerlo callar a palos.\nMIGUEL: (Con intención). Entonces yo’stoy flor pa hacerlo callar.\nEMILIO: No creo.\nMARTA: (Rápida). ¿Quiere sentarse? ¿Quiere conversar un rato?\nMIGUEL: No, gracias, le preguntaba si habían terminao nomás... Es que endenantes vine a dar una vuelta, pero no quise molestarlos.\nEMILIO: ¿Y en qué los iba a molestar?\nMIGUEL: Es que soy cuidaor. Me mandaron a decirles que esta es propiedá privá. Y que no pueden tar aquí.\nMARTA: Claro, si ya los íbamos a ir… O sea él por su lao y yo por el mío.\nEMILIO: ¿Por qué no podímos tar aquí?\nMARTA: Porque no es casa de nosotros, si ya los dijo. (A Miguel). Pero nosotros no estábamos a la mala, ¿ah? no sabíamos que era propiedá privá.\nEMILIO: La verdá es que no sabíamos que el mundo era propiedá privá, por eso nacimos. (Se sienta). Si alguien se hubiera tomao la molestia de avi…\nMIGUEL: ¿Por qué se sienta?... Le estoy hablando en serio. (Emilio no contesta). Los dejé estar aquí todo el día, no puede quejarse. (A Marta, que intenta sentarse). ¡Le estoy hablando en serio, señora!\nMARTA: No soy señora.\nMIGUEL: Bueno, lo que sea. (A Emilio). ¡Ya po!\nEMILIO: (Sacándose un zapato). No me voy a poder ir. Me torcí un pie.\nMIGUEL: Chis, ¿cómo se iba torcer un pie si estaba parao ahí?\nEMILIO: Cosas de la vida po.\nMIGUEL: No, no se las venga na a dar de vivaracho conmigo, gancho, mire que no tengo na muy buen genio. Vine hablarles con buenas palabras, incluso esperé que terminaran la conversa, pero no se me pase, no se me pase.\nMARTA: Nosotros tampoco le hemos dicho ningún atrevimiento; si ya los vamos a ir ya, pucha que está apurao.\nEMILIO: ¿Por qué quiere que los vamos? Este es un pelaero, aquí no molestamos a nadie.\nMIGUEL: Yo no sé, yo no tengo nada que ver, él me mandó a decir que no quería encontrarlos aquí cuando llegara: yo soy mandao.\nMARTA: ¿Quién es «Él»?\nMIGUEL: El patrón po.\n\nJuan Radrigán. Hechos consumados. Teatro 11 obras. Chile: LOM, 1998. (Adaptación).",
+        "format": "plain",
+        "attachments": []
+      },
+      "items": [
+        {
+          "position": 14,
+          "type": "multiple_choice",
+          "stem": "¿Dónde ocurren las acciones del fragmento anterior?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "En una de las casas del patrón.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "En un terreno del cuidador.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "En una calle desierta.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "En un sitio baldío.",
+              "isCorrect": true
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "D",
+          "skill": "Localizar",
+          "oa": "OA 5",
+          "contentAxis": null,
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Localizan información explícita relevante en un texto dramático. Infieren la evolución de los personajes en un texto"
+        },
+        {
+          "position": 15,
+          "type": "multiple_choice",
+          "stem": "¿Cómo cambia la actitud de Miguel hacia Marta y Emilio a lo largo del fragmento?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Va perdiendo la amabilidad con la pareja.",
+              "isCorrect": true
+            },
+            {
+              "key": "B",
+              "text": "Va conmoviéndose con la situación de la pareja.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Va tornándose burlesco con lo que le dice la pareja.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "Va mostrándose confundido con las respuestas de la pareja.",
+              "isCorrect": false
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "A",
+          "skill": "Interpretar y relacionar",
+          "oa": "OA 5",
+          "contentAxis": null,
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Infieren la evolución de los personajes en un texto dramático. Interpretan el sentido de expresiones en lenguaje"
+        },
+        {
+          "position": 16,
+          "type": "multiple_choice",
+          "stem": "¿Qué expresa Emilio con la siguiente intervención?\n“EMILIO: La verdá es que no sabíamos que el mundo era propiedá privá, por eso nacimos. (Se sienta) Si alguien se hubiera tomao la molestia de avi…”",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Ironía frente a las injusticias sociales.",
+              "isCorrect": true
+            },
+            {
+              "key": "B",
+              "text": "Tristeza frente a la ignorancia de algunos.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Angustia frente a las palabras del cuidador.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "Rabia frente a las personas en situación de calle.",
+              "isCorrect": false
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "A",
+          "skill": "Interpretar y relacionar",
+          "oa": "OA 5",
+          "contentAxis": null,
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Interpretan el sentido de expresiones en lenguaje figurado presentes en un texto dramático. Infieren información relevante sobre personajes en"
+        },
+        {
+          "position": 17,
+          "type": "multiple_choice",
+          "stem": "Frente a la situación de Marta y Emilio, ¿qué actitud del patrón se ve reflejada en el texto?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Negligencia.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Desagrado.",
+              "isCorrect": true
+            },
+            {
+              "key": "C",
+              "text": "Tolerancia.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "Empatía.",
+              "isCorrect": false
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "B",
+          "skill": "Interpretar y relacionar",
+          "oa": "OA 5",
+          "contentAxis": null,
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Infieren información relevante sobre personajes en un texto dramático. Determinan prejuicios, estereotipos y creencias en"
+        },
+        {
+          "position": 18,
+          "type": "multiple_choice",
+          "stem": "Al final del texto, ¿qué estereotipo sobre los “empleados” se refuerza en las intervenciones de Miguel?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Que son flojos.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Que son sumisos.",
+              "isCorrect": true
+            },
+            {
+              "key": "C",
+              "text": "Que son porfiados.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "Que son aduladores.",
+              "isCorrect": false
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "B",
+          "skill": "Reflexionar",
+          "oa": "OA 5",
+          "contentAxis": null,
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Determinan prejuicios, estereotipos y creencias en un texto dramático. Infieren información relevante en un texto"
+        }
+      ]
+    },
+    {
+      "order": 4,
+      "name": "Texto 4: «El reciclaje empieza en casa: ¿Estamos listos para asumirlo?»",
+      "type": "multiple_choice",
+      "instructions": "Lee el siguiente texto y responde las preguntas 19 a 24.",
+      "passage": {
+        "title": "El reciclaje empieza en casa: ¿Estamos listos para asumirlo?",
+        "text": "Michel Compagnon\nPresidente Asociación Gremial de Industriales del Plástico (ASIPLA)\n\nEl 17 de mayo conmemoramos el Día Internacional del Reciclaje, pero en Chile esta fecha debe ser más que un hito en el calendario: tiene que ser un llamado a transformar nuestra relación con los residuos. Desde ASIPLA, creemos que reciclar no es una moda, sino un compromiso que debe asumirse los 365 días del año. Sin embargo, a pesar de los avances que ha significado la implementación de la Ley de Responsabilidad Extendida al Productor (REP) para envases y embalajes, puesta en marcha hace un año y medio, la participación ciudadana aún es tibia.\n\nLa encuesta “Reciclando Ando 2024” de Chile 3D y Fundación Chile, revela datos preocupantes: el cuidado del medio ambiente ocupa el décimo lugar entre las prioridades de los chilenos. Apenas un 16% de los ciudadanos conoce la Ley REP, y conceptos como “economía circular” o “cuidado de los recursos” suenan abstractos, lejanos, casi irrelevantes. Más sorprendente aún es que los jóvenes, a quienes asociamos con el activismo ambiental, se muestran menos comprometidos que las generaciones mayores.\n\n¿Qué nos falta para tomar acción? En un país geográficamente tan diferente y complejo como el nuestro, pero con ecosistemas tan ricos y particulares —desde el desierto de Atacama hasta los hielos patagónicos—, no nos podemos permitir ser indiferentes frente a la gestión de residuos.\n\nLa ley REP es una herramienta poderosa, validada internacionalmente y base de regulaciones globales como el Tratado Internacional Contra la Contaminación por Plásticos de la ONU (Organización de las Naciones Unidas). Sin embargo, su implementación en Chile enfrenta numerosos desafíos estructurales. La recolección de residuos domiciliarios, pilar clave para cumplir las metas de reciclaje, no está alcanzando los volúmenes necesarios. Los puntos limpios y los servicios de recolección diferenciada existen, pero dependen en gran medida de la voluntad ciudadana. Y aquí radica el gran problema: generar basura en Chile es gratis. No hay incentivos claros para reciclar ni consecuencias efectivas por no hacerlo. Países como Alemania o Noruega han implementado sistemas de depósito y reembolso o multas por no separar residuos, logrando tasas de reciclaje que superan el 50%. ¿Por qué no explorar modelos similares?\n\nEl reciclaje empieza en casa: ¿Estamos listos para asumirlo?\nNo todo es culpa del sistema. Como ciudadanos, también debemos asumir nuestro rol. Separar residuos, limpiarlos, aplastarlos y llevarlos a un punto limpio requiere esfuerzo, pero cada uno de esos esfuerzos es un grano de arena que suma a la causa común final.\n\nMuchos se frustran al ver que, en ocasiones, el camión de reciclaje mezcla los materiales que con tanto cuidado separaron. Sin embargo, esto no significa que el esfuerzo sea en vano. En el ecosistema del reciclaje existe un eslabón importantísimo conocido como “pretratamiento” —que incluye traslado, acopio y clasificación— y es ahí donde nuestros queridos recicladores de base y empresas gestoras seleccionan los materiales valorizables. Pero, para que esto funcione, la ciudadanía debe colaborar entregando los residuos en condiciones óptimas.\n\nLa buena noticia es que la Ley REP está pavimentando el camino. Su Decreto de Envases y Embalajes, vigente desde septiembre de 2023, cuenta con el brazo armado para la gestión de residuos domiciliarios y no domiciliarios, entidades que centralizan y gestionan las distintas etapas de recuperación y valorización de residuos, incorporando, por ejemplo, la recolección puerta a puerta.\n\nPero aun facilitando esta etapa a las personas, seguimos teniendo el deber y responsabilidad de entregar los residuos reciclables, preocupándonos al mismo tiempo de que estos no lleguen a los vertederos. Reciclar, a fin de cuentas, debe convertirse en un hábito tan natural como ahorrar agua o usar el cinturón de seguridad.\n\nEl futuro de nuestro país no se construye solo con leyes o infraestructura. Son fundamentales las pequeñas acciones colectivas, con la convicción de que cada envase reciclado cuenta. Dejemos de lado la indiferencia y los mitos. Reciclemos con sentido, entendiendo que nuestro esfuerzo es la base de una economía circular. Por nuestras ciudades, por nuestros mares, por el Chile que queremos heredar. El cambio empieza en casa. ¿Estamos listos para asumirlo?\n\nMichel Compagnon. Biobiochile [Chile]. Web. 16 mayo 2025. (Adaptación).\n\nGlosario\nLey de Responsabilidad Extendida al Productor (REP): obliga a las empresas en Chile a hacerse cargo de sus residuos.\npuntos limpios: lugares donde se depositan de manera separada los residuos generados en los hogares para ser reciclados posteriormente.\nacopio: acumulación.\nrecicladores de base: personas que recolectan, separan y comercializan residuos (plástico, papel, vidrio, metales) de forma artesanal.",
+        "format": "plain",
+        "attachments": []
+      },
+      "items": [
+        {
+          "position": 19,
+          "type": "multiple_choice",
+          "stem": "¿Cuál es el principal obstáculo para que el reciclaje en Chile sea eficiente?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "El escaso compromiso de los jóvenes.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "La cantidad de puntos limpios disponibles.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "El breve periodo durante el cual se ha implementado la Ley REP.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "La falta de conciencia de la gente en el manejo de sus desechos.",
+              "isCorrect": true
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "D",
+          "skill": "Interpretar y relacionar",
+          "oa": "OA 9",
+          "contentAxis": null,
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Infieren información relevante en un texto argumentativo. Infieren información relevante en un texto"
+        },
+        {
+          "position": 20,
+          "type": "multiple_choice",
+          "stem": "¿Qué acción de parte de las personas es fundamental para que la cadena de gestión de residuos sea eficiente?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Valorizar los materiales reciclados.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Respetar las leyes que rigen el reciclaje.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Entregar los materiales reciclados de manera óptima.",
+              "isCorrect": true
+            },
+            {
+              "key": "D",
+              "text": "Cambiar los vertederos por puntos limpios de reciclaje.",
+              "isCorrect": false
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "C",
+          "skill": "Interpretar y relacionar",
+          "oa": "OA 9",
+          "contentAxis": null,
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Infieren información relevante en un texto argumentativo. Infieren la tesis del autor en un texto"
+        },
+        {
+          "position": 21,
+          "type": "multiple_choice",
+          "stem": "¿Cuál es la tesis del autor del texto con respecto al reciclaje en Chile?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Las empresas deben cumplir con las normas impuestas por la Ley REP sobre el reciclaje.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Las fundaciones ambientalistas deben educar a las personas sobre el valor del reciclaje.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Los jóvenes deben transformarse en activistas ambientales para fomentar el reciclaje.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "Los ciudadanos deben considerar el reciclaje como parte de su quehacer cotidiano.",
+              "isCorrect": true
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "D",
+          "skill": "Interpretar y relacionar",
+          "oa": "OA 9",
+          "contentAxis": null,
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Infieren la tesis del autor en un texto argumentativo. Infieren los argumentos que respaldan la tesis del"
+        },
+        {
+          "position": 22,
+          "type": "multiple_choice",
+          "stem": "¿Qué argumento entrega el autor del texto para apoyar su postura sobre la importancia del reciclaje?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Los puntos limpios para reciclaje se encuentran distribuidos a lo largo de todo Chile.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Chile posee una diversidad natural única que debe ser preservada a través del reciclaje.",
+              "isCorrect": true
+            },
+            {
+              "key": "C",
+              "text": "El Día Internacional del Reciclaje debiese ser celebrado durante todo el año en Chile.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "Las normas aplicadas en Chile sobre reciclaje están validadas por organismos internacionales.",
+              "isCorrect": false
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "B",
+          "skill": "Interpretar y relacionar",
+          "oa": "OA 9",
+          "contentAxis": null,
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Infieren los argumentos que respaldan la tesis del autor en un texto argumentativo. Evalúan la función o propósito con que el autor"
+        },
+        {
+          "position": 23,
+          "type": "multiple_choice",
+          "stem": "¿Qué recurso usa el autor del texto para apelar al lector?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Destaca diversos estudios.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Realiza distintas preguntas.",
+              "isCorrect": true
+            },
+            {
+              "key": "C",
+              "text": "Presenta porcentajes objetivos.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "Menciona a organizaciones internacionales.",
+              "isCorrect": false
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "B",
+          "skill": "Reflexionar",
+          "oa": "OA 9",
+          "contentAxis": null,
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "utiliza diversos recursos en un texto argumentativo. Determinan propósitos explícitos e implícitos de un"
+        },
+        {
+          "position": 24,
+          "type": "multiple_choice",
+          "stem": "¿Con qué propósito el autor del texto escribe este texto?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Criticar la implementación de la Ley REP en el país.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Recordar el aniversario del Día Internacional del Reciclaje.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Informar sobre los resultados de la encuesta Reciclando Ando.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "Convencer a la gente de ser parte de la solución de un problema-país.",
+              "isCorrect": true
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "D",
+          "skill": "Reflexionar",
+          "oa": "OA 10",
+          "contentAxis": null,
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Determinan propósitos explícitos e implícitos de un texto argumentativo."
+        }
+      ]
+    },
+    {
+      "order": 5,
+      "name": "Texto 5: «Segundo poema en la alameda»",
+      "type": "multiple_choice",
+      "instructions": "Lee el siguiente texto y responde las preguntas 25 a 29.",
+      "passage": {
+        "title": "SEGUNDO POEMA EN LA ALAMEDA",
+        "text": "No sé por qué he venido de nuevo a la alameda.\nTú no la conocías. Yo, casi no la conozco.\nY, sin embargo, un día me embriagué de ternura\nbajo estas frondas quietas, entre estos viejos troncos.\n\nHoy, que sé que jamás he de volver con ella,\ncon la que todavía me entristece los ojos;\nhoy, que ya para siempre nos separa la vida,\nvengo contigo, acaso para no venir solo...\n\nAquí todo ha cambiado, como yo, como ella...\nLos pájaros volaron con el viento de otoño,\ny entre las hojas secas que caen en la tarde,\nel eco de sus pasos va surgiendo del polvo...\n\nY tú vienes conmigo... Tú, que quizás me quieres,\ny que quizás me olvides pronto;\ncon tu chaqueta gris y tus ojos alegres\nte apoyas en mi brazo, bajo el crepúsculo de oro.\n\nSeis veces estos árboles se han quedado sin hojas\ndesde la última vez... Seis veces: es bien poco.\nY, aunque realmente acaso no haya cambiado nada,\nhoy vuelvo, y me parece que es diferente todo.\n\nAquí, junto a esta verja, yo le di el primer beso...\nYo entonces era soñador y loco,\ny todavía entonces me sonreía sin motivo,\ny mi alma era una playa frente a un océano sonoro...\n\nYa apenas la recuerdo, pero nunca la olvido.\nNos separó la vida... así, sin saber cómo.\nY hoy, tú que no eres ella,\nte apoyas en mi brazo, que es casi el brazo de otro...\n\nJosé Ángel Buesa. “Yo poeta, poesía completa”. Comp. Virgilio López Lemus. 2018.",
+        "format": "plain",
+        "attachments": []
+      },
+      "items": [
+        {
+          "position": 25,
+          "type": "multiple_choice",
+          "stem": "¿Qué sentimiento expresa el hablante en el poema?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Desgana.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Severidad.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Nostalgia.",
+              "isCorrect": true
+            },
+            {
+              "key": "D",
+              "text": "Desesperanza.",
+              "isCorrect": false
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "C",
+          "skill": "Interpretar y relacionar",
+          "oa": "OA 4",
+          "contentAxis": "Poema",
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Establecen conclusiones sobre distintos aspectos en un poema. Establecen conclusiones sobre distintos aspectos"
+        },
+        {
+          "position": 26,
+          "type": "multiple_choice",
+          "stem": "¿A quién se dirige el hablante?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "A su pareja pasada.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "A su antigua versión.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "A su actual acompañante.",
+              "isCorrect": true
+            },
+            {
+              "key": "D",
+              "text": "A los árboles de la alameda.",
+              "isCorrect": false
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "C",
+          "skill": "Interpretar y relacionar",
+          "oa": "OA 4",
+          "contentAxis": "Poema",
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Establecen conclusiones sobre distintos aspectos en un poema."
+        },
+        {
+          "position": 27,
+          "type": "multiple_choice",
+          "stem": "¿De qué trata el poema?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Del deseo de volver a amar.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "De los problemas amorosos.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "De la reunión de dos amantes.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "Del recuerdo de un antiguo amor.",
+              "isCorrect": true
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "D",
+          "skill": "Interpretar y relacionar",
+          "oa": "OA 4",
+          "contentAxis": "Poema",
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Infieren el sentido global de un poema. Interpretan el sentido de expresiones en lenguaje"
+        },
+        {
+          "position": 28,
+          "type": "multiple_choice",
+          "stem": "¿Por qué el hablante afirma que su brazo “es casi el brazo de otro…”?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Porque siente que él ya no es el mismo enamorado que alguna vez fue.",
+              "isCorrect": true
+            },
+            {
+              "key": "B",
+              "text": "Porque sabe que su acompañante lo reemplazará luego por otro.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Porque siente desprecio por el cariño que le entrega su acompañante.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "Porque está confundido por lo diferente que luce la alameda.",
+              "isCorrect": false
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "A",
+          "skill": "Interpretar y relacionar",
+          "oa": "OA 4",
+          "contentAxis": "Poema",
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Interpretan el sentido de expresiones en lenguaje figurado presentes en un poema. Establecen conclusiones sobre distintos aspectos"
+        },
+        {
+          "position": 29,
+          "type": "multiple_choice",
+          "stem": "¿Qué siente el hablante por su actual acompañante?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Odio.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Recelo.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Rencor.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "Desinterés.",
+              "isCorrect": true
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "D",
+          "skill": "Interpretar y relacionar",
+          "oa": "OA 4",
+          "contentAxis": "Poema",
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Establecen conclusiones sobre distintos aspectos en un poema. Localizan información explícita relevante en un"
+        }
+      ]
+    },
+    {
+      "order": 6,
+      "name": "Texto 6: «Recolectoras de algas marinas de Coquimbo se convierten en sembradoras...»",
+      "type": "multiple_choice",
+      "instructions": "Lee el siguiente texto y responde las preguntas 30 a 35.",
+      "passage": {
+        "title": "Recolectoras de algas marinas de Coquimbo se convierten en sembradoras para recuperar los bosques submarinos",
+        "text": "El Desconcierto - Medioambiente\n\nPor: Astrid Arellano | 27.09.2025\n\nSusana Galleguillos nunca había reparado demasiado en las algas que arrancaba del mar con las manos. En Caleta Punta de Talca, en la región de Coquimbo, Chile, la sobreexplotación de los huirales —grandes bosques submarinos de macroalgas— destinados a la exportación, ha transformado el fondo marino en un paisaje vacío. “No me importaba, yo sacaba algas y ganaba plata”, dice. Hasta que un día, sin querer, bajó la vista hacia la base de una planta y la miró con atención: parecía una casa. Y ella la había destruido. “Sentí un arrepentimiento”, dice con pesar. “Vi que maté tanto… le destruí la casa a tantas familias del mar que había allí”.\n\nDebajo de los huiros, Galleguillos descubrió un mundo oculto. La recolectora de algas lo describe como una casita infantil de juguete, de esas en las que una se mete siendo niña, repletas de curiosidades pequeñitas. Con la excepción de que esta casa submarina estaba viva: se movía, respiraba y las “curiosidades” no eran juguetes, sino larvas de moluscos, diminutos caracoles, lombrices y peces recién nacidos que se escondían en los hoyuelos del lecho marino, al abrigo de los huirales. “Yo dije: ‘No arranco más huiro; voy a trabajar solamente con el que está varado’”, recuerda Galleguillos. Su compromiso con la conservación de estos ecosistemas vitales y su liderazgo social en la pesca de su caleta la llevó, en 2018, a convertirse en la primera mujer elegida como “Alcaldesa de Mar” (autoridad marítima local), en representación de Caleta Punta de Talca. Desde entonces —y aún en el cargo— se dedica a fiscalizar el cumplimiento de las normas marítimas y pesqueras. También es presidenta de Algamar, un sindicato que agrupa a pescadores y recolectores de algas, mujeres y hombres, con un nuevo enfoque hacia el mar: uno que busca proteger, no arrasar.\n\nLa plataforma de noticias Mongabay Latam conversó con Susana sobre los retos de la pesca artesanal en su caleta y los desafíos para las mujeres que trabajan en ella y el siguiente es un extracto:\n\n—¿Cuáles han sido los principales desafíos que ha enfrentado como mujer en un rubro dominado por hombres?\n—El mayor desafío siendo Alcaldesa de Mar y también dirigenta es enfrentarme al machismo del hombre. Las actividades siempre son realizadas por ellos y a la mujer la dejan a un lado. Ellos no saben que ya estamos en otro siglo. Nuestro rol como mujeres es importantísimo porque podemos tener la visión de unir la producción con la conservación. Los hombres suelen ser depredadores, sin preocuparse por conservar. Somos capaces de hacer las mismas cosas, pero de diferente manera. No somos una competencia porque podemos ser un complemento para lograr fines compartidos y salir exitosos, porque nos vamos a unir.\n\n—Usted ha sido una voz clave frente a la sobreexplotación de los huirales. ¿Qué medidas han tomado en la caleta para aminorar el impacto en el ecosistema marino?\n—Nosotros tenemos un Área de Manejo y Explotación de Recursos Bentónicos (AMERB) desde 1995, cuando se fundó el sindicato. No es muy grande, pero la dividimos: durante un año trabajamos en un sector y dejamos crecer y descansar la otra mitad. La partimos como una manzana: un año trabajamos la mitad derecha y otro, la izquierda.\n\n—Usted ha trabajado con científicos en la reforestación de algas en áreas marinas degradadas. ¿Qué aprendizajes le ha dejado esa experiencia y qué resultados han logrado hasta ahora?\n—Creo que desde antes de que yo fuera socia en el sindicato, cuando era niña, conocí a los primeros biólogos marinos que venían a hacer sembríos, cuando todavía no era área de manejo. Yo andaba siempre “intruseándome” con ellos porque me gustaba aprender. No voy a mentir: pongámosle que de 200 matas que se siembren, quizás saldrán unas 50. Pero eso ya es un logro, porque el mar de nosotros tiene hartas olas. Y el huiro sale muy, muy largo, como una súper alga gigante. Una vez, recuerdo que me tocó arrancar el alga número 74 y creo que medía como cinco metros de largo, y tenía poco más de un año. Ponemos alga donde ya no hay y ahí se ve el resultado.\n\n—¿Cómo ha sido recibida la idea de reforestar los bosques de algas por parte de otros recolectores de la caleta? ¿Ha sido difícil generar conciencia sobre su importancia?\n—Como que estaban incrédulos. Siempre somos mujeres las que vamos, y ellos decían: “Las mujeres están locas, ¿cuándo les van a salir estas plantas ahí?” Pero después vieron que sí resulta. Al final se está repoblando y se están dejando más recursos, porque las algas atraen a los locos (molusco) para que se vengan a vivir ahí. Ellos crecen y también se alimentan del huiro. Una cosa lleva a la otra. Pienso que ahora los recolectores están agradecidos por eso. Y ahora invitan a los niños a aprender para que tomen también un poquito de conciencia.\n\nAstrid Arellano. El Desconcierto. Web. 27 de sept 2025. (Fragmento).",
+        "format": "plain",
+        "attachments": []
+      },
+      "items": [
+        {
+          "position": 30,
+          "type": "multiple_choice",
+          "stem": "¿Cuál es el principal desafío que ha enfrentado Susana Galleguillos como Alcaldesa del mar?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "El manejo de recursos bentónicos.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "La preocupación por la conservación.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "El machismo del hombre en las labores.",
+              "isCorrect": true
+            },
+            {
+              "key": "D",
+              "text": "La reforestación de algas en áreas marinas.",
+              "isCorrect": false
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "C",
+          "skill": "Localizar",
+          "oa": "OA 10",
+          "contentAxis": null,
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Localizan información explícita relevante en un texto de los medios de comunicación. Infieren información relevante en un texto de los"
+        },
+        {
+          "position": 31,
+          "type": "multiple_choice",
+          "stem": "¿Para qué Susana Galleguillos decide trabajar solo con huiro varado?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Para cumplir con las normas marítimas con respecto a la recolección de algas.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Para reducir el daño que genera el arranque de algas al fondo marino.",
+              "isCorrect": true
+            },
+            {
+              "key": "C",
+              "text": "Para disminuir el tiempo de recolección de las algas.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "Para conseguir ejemplares de algas más grandes.",
+              "isCorrect": false
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "B",
+          "skill": "Interpretar y relacionar",
+          "oa": "OA 10",
+          "contentAxis": null,
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Infieren información relevante en un texto de los medios de comunicación. Realizan inferencias globales en un texto de los"
+        },
+        {
+          "position": 32,
+          "type": "multiple_choice",
+          "stem": "¿Qué práctica es cuestionada en el texto?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "La pesca artesanal.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "La sobreexplotación de recursos marinos.",
+              "isCorrect": true
+            },
+            {
+              "key": "C",
+              "text": "La competencia laboral entre hombres y mujeres.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "La intrusión de biólogos marinos en los sembríos y áreas de manejo.",
+              "isCorrect": false
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "B",
+          "skill": "Interpretar y relacionar",
+          "oa": "OA 10",
+          "contentAxis": null,
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Realizan inferencias globales en un texto de los medios de comunicación. Distinguen un hecho de una opinión en un texto de"
+        },
+        {
+          "position": 33,
+          "type": "multiple_choice",
+          "stem": "¿Cuál de las siguientes afirmaciones corresponde a un hecho mencionado en el texto?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "“Y el huiro sale muy, muy largo, como una súper alga gigante”.",
+              "isCorrect": true
+            },
+            {
+              "key": "B",
+              "text": "“Somos capaces de hacer las mismas cosas, pero de diferente manera”.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "“Una cosa lleva a la otra. Pienso que ahora los recolectores están agradecidos por eso”.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "“Nuestro rol como mujeres es importantísimo porque podemos tener la visión de unir la producción con la conservación”.",
+              "isCorrect": false
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "A",
+          "skill": "Reflexionar",
+          "oa": "OA 10",
+          "contentAxis": null,
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Distinguen un hecho de una opinión en un texto de los medios de comunicación. Determinan propósitos explícitos e implícitos en un"
+        },
+        {
+          "position": 34,
+          "type": "multiple_choice",
+          "stem": "¿Cuál es el propósito del texto?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Enseñar en detalle el método actual de cultivo de algas marinas.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Denunciar el riesgo ecológico al que está expuesto un área del fondo marino.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Criticar la reacción de los pescadores frente a la innovación de recolección de algas.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "Visibilizar el liderazgo femenino en la conservación de los ecosistemas marinos.",
+              "isCorrect": true
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "D",
+          "skill": "Reflexionar",
+          "oa": "OA 10",
+          "contentAxis": null,
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Determinan propósitos explícitos e implícitos en un texto de los medios de comunicación. Determinan los prejuicios, estereotipos y creencias"
+        },
+        {
+          "position": 35,
+          "type": "multiple_choice",
+          "stem": "¿Qué creencia se refleja en la actitud de los recolectores hombres con respecto a sus pares mujeres?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Que las mujeres desconocen la naturaleza del trabajo marino.",
+              "isCorrect": true
+            },
+            {
+              "key": "B",
+              "text": "Que las mujeres deben preocuparse por la conservación marina.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Que el cargo de autoridad marítima es inadecuado para una mujer.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "Que el sindicato pierde validez al incluir a las mujeres como socias.",
+              "isCorrect": false
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "A",
+          "skill": "Reflexionar",
+          "oa": "OA 10",
+          "contentAxis": null,
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Determinan los prejuicios, estereotipos y creencias en un texto de los medios de comunicación."
+        }
+      ]
+    }
+  ],
+  "extraction": {
+    "itemCount": 35,
+    "warnings": [
+      "Q6 es ítem de desarrollo (open_ended / develop); las 34 restantes son alternativas de 4 opciones (A/B/C/D).",
+      "La sección 2 (preguntas 7 a 13) agrupa DOS textos bajo una sola instrucción de lectura («Lee los siguientes textos…»); ambos textos se transcribieron en un único passage con sus encabezados «Texto 1» / «Texto 2». Las preguntas 12 y 13 comparan ambos textos.",
+      "El Texto 1 de la sección 2 incluye una fotografía de prensa decorativa (REUTERS/Hannah McKay); no es necesaria para responder y el texto está completo en el passage.",
+      "Glosarios de cada texto transcritos al final del passage correspondiente.",
+      "Textos transcritos verbatim desde la capa de texto del PDF (pdftotext -layout)."
+    ],
+    "needsHumanReview": false,
+    "crossCheck": {
+      "hardIssues": [],
+      "softWarnings": [],
+      "counts": {
+        "cuadernillo": 35,
+        "ficha": 35,
+        "hoja": 35
+      }
+    }
+  },
+  "pauta": {
+    "source": {
+      "ficha": "I_ficha_tecnica_lectura_monitoreo_2026_I_medio.pdf",
+      "hoja": "I_hoja_de_respuestas_lectura_monitoreo_2026_I_medio.pdf"
+    },
+    "appliedKeys": 34,
+    "rubrics": 1
+  }
+}

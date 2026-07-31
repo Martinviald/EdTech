@@ -1,0 +1,927 @@
+{
+  "schemaVersion": "1.0",
+  "source": {
+    "file": "3_prueba_matematica_monitoreo_2026_3_basico.pdf",
+    "subjectFolder": "Matematicas"
+  },
+  "instrument": {
+    "name": "DIA Matemática 3° Básico 2026 — Intermedio",
+    "subject": "Matemática",
+    "subjectCode": "MATH",
+    "grade": "3° Básico",
+    "gradeCode": "3RD_BASIC",
+    "year": 2026,
+    "applicationPeriod": "intermedio",
+    "type": "dia",
+    "isOfficial": true,
+    "source": "imported"
+  },
+  "sections": [
+    {
+      "order": 1,
+      "name": "Preguntas",
+      "type": "mixed",
+      "instructions": "Esta prueba tiene 31 preguntas que debes responder de la siguiente forma: en las preguntas de alternativas debes contestar marcando con una X la respuesta que consideres correcta; en las preguntas de desarrollo debes escribir tu respuesta en la cuadrícula; en las preguntas de completación debes anotar tu respuesta en los recuadros correspondientes.",
+      "passage": null,
+      "items": [
+        {
+          "position": 1,
+          "type": "multiple_choice",
+          "responseFormat": "choice",
+          "stem": "¿Cómo se escribe con dígitos el número “quinientos setenta y dos”?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "275",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "527",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "572",
+              "isCorrect": true
+            }
+          ],
+          "correctKey": "C",
+          "skill": "Representar",
+          "oa": "OA 2",
+          "contentAxis": "Números y operaciones",
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Leen números naturales del 0 al 1 000."
+        },
+        {
+          "position": 2,
+          "type": "multiple_choice",
+          "responseFormat": "choice",
+          "stem": "Observa la recta numérica (con las marcas 800, 850 y 950, y un recuadro ubicado entre 850 y 950). ¿Qué número se podría ubicar en el recuadro?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "851",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "875",
+              "isCorrect": true
+            },
+            {
+              "key": "C",
+              "text": "900",
+              "isCorrect": false
+            }
+          ],
+          "correctKey": "B",
+          "skill": "Representar",
+          "oa": "OA 3",
+          "contentAxis": "Números y operaciones",
+          "hasFigure": true,
+          "figureNote": "Recta numérica con marcas 800, 850 y 950 y un recuadro entre 850 y 950; se debe estimar el número del recuadro según su posición. Requiere la imagen.",
+          "indicador": "Ubican números naturales en la recta numérica."
+        },
+        {
+          "position": 3,
+          "type": "open_ended",
+          "responseFormat": "fill_in",
+          "stem": "Resuelve: 900 – 273 =",
+          "alternatives": [],
+          "correctKey": null,
+          "skill": "Resolver problemas",
+          "oa": "OA 6",
+          "contentAxis": "Números y operaciones",
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "1 000. Resuelven problemas que requieren calcular",
+          "fillAnswer": "627"
+        },
+        {
+          "position": 4,
+          "type": "open_ended",
+          "responseFormat": "develop",
+          "stem": "Paola está leyendo un libro que tiene 237 páginas en total. El primer día leyó 67 páginas. El segundo día leyó 55 páginas. El tercer día leyó 20 páginas. ¿Cuántas páginas le falta leer para terminar el libro? Escribe en la siguiente cuadrícula tus cálculos y tu respuesta.",
+          "alternatives": [],
+          "correctKey": null,
+          "skill": "Resolver problemas",
+          "oa": "OA 6",
+          "contentAxis": "Números y operaciones",
+          "hasFigure": false,
+          "figureNote": "Única pregunta de desarrollo de la prueba; se responde en la cuadrícula.",
+          "indicador": "operaciones combinadas (adición y sustracción) de números naturales hasta 1 000."
+        },
+        {
+          "position": 5,
+          "type": "open_ended",
+          "responseFormat": "fill_in",
+          "stem": "Resuelve: 5 • 5 =",
+          "alternatives": [],
+          "correctKey": null,
+          "skill": "Resolver problemas",
+          "oa": "OA 8",
+          "contentAxis": "Números y operaciones",
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "10 · 10. Representan divisiones como repartición y agrupación",
+          "fillAnswer": "25"
+        },
+        {
+          "position": 6,
+          "type": "multiple_choice",
+          "responseFormat": "choice",
+          "stem": "¿En qué imagen se representa la división 12 : 2?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Dos óvalos: uno con 10 puntos (2 filas de 5) y otro con 4 puntos (2 filas de 2).",
+              "isImage": true,
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Dos óvalos, cada uno con 6 puntos (2 filas de 3).",
+              "isImage": true,
+              "isCorrect": true
+            },
+            {
+              "key": "C",
+              "text": "Dos óvalos, cada uno con 12 puntos (3 filas de 4).",
+              "isImage": true,
+              "isCorrect": false
+            }
+          ],
+          "correctKey": "B",
+          "skill": "Representar",
+          "oa": "OA 9",
+          "contentAxis": "Números y operaciones",
+          "hasFigure": true,
+          "figureNote": "Las 3 alternativas son grupos de puntos dentro de óvalos que representan repartos. Requiere captura de imagen de cada alternativa.",
+          "indicador": "Representan divisiones como repartición y agrupación en partes iguales."
+        },
+        {
+          "position": 7,
+          "type": "multiple_choice",
+          "responseFormat": "choice",
+          "stem": "Susana compró un lápiz que costó $370. Si pagó con $500, ¿cuánto dinero recibió de vuelto?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "$130",
+              "isCorrect": true
+            },
+            {
+              "key": "B",
+              "text": "$270",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "$870",
+              "isCorrect": false
+            }
+          ],
+          "correctKey": "A",
+          "skill": "Resolver problemas",
+          "oa": "OA 10",
+          "contentAxis": "Números y operaciones",
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "requieren calcular sustracciones de números naturales. Identifican representaciones de las fracciones de uso"
+        },
+        {
+          "position": 8,
+          "type": "open_ended",
+          "responseFormat": "fill_in",
+          "stem": "Observa la siguiente figura que está dividida en partes iguales. ¿Qué fracción del total de la figura representa la parte pintada de gris? Respuesta: ___ / ___",
+          "alternatives": [],
+          "correctKey": null,
+          "skill": "Representar",
+          "oa": "OA 11",
+          "contentAxis": "Números y operaciones",
+          "hasFigure": true,
+          "figureNote": "Cuadrado dividido en 4 partes iguales con 3 partes pintadas de gris. Requiere la imagen para determinar la fracción.",
+          "indicador": "Identifican representaciones de las fracciones de uso común como partes de un todo. Identifican la regla de formación de una secuencia",
+          "fillAnswer": "3/4 o equivalente"
+        },
+        {
+          "position": 9,
+          "type": "multiple_choice",
+          "responseFormat": "choice",
+          "stem": "Observa la secuencia numérica pintada en la tabla (tabla numérica del 1 al 100; se indica el inicio de la secuencia y se pintan algunos términos). ¿Cómo se obtienen los términos de la secuencia?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Se suma 8 al término anterior.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Se suma 9 al término anterior.",
+              "isCorrect": true
+            },
+            {
+              "key": "C",
+              "text": "Se suma 10 al término anterior.",
+              "isCorrect": false
+            }
+          ],
+          "correctKey": "B",
+          "skill": "Modelar",
+          "oa": "OA 12",
+          "contentAxis": "Patrones y álgebra",
+          "hasFigure": true,
+          "figureNote": "Tabla del 1 al 100 con las celdas pintadas que forman la secuencia. Requiere la imagen para ver qué celdas están pintadas.",
+          "indicador": "Identifican la regla de formación de una secuencia numérica presentada en una tabla del 100. Resuelven ecuaciones de un paso que involucran un"
+        },
+        {
+          "position": 10,
+          "type": "multiple_choice",
+          "responseFormat": "choice",
+          "stem": "Observa la balanza en equilibrio (en un platillo hay una caja de 50 kg; en el otro platillo hay una esfera y una pirámide de 30 kg). ¿De cuántos kg es la esfera?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "80",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "20",
+              "isCorrect": true
+            },
+            {
+              "key": "C",
+              "text": "50",
+              "isCorrect": false
+            }
+          ],
+          "correctKey": "B",
+          "skill": "Resolver problemas",
+          "oa": "OA 13",
+          "contentAxis": null,
+          "hasFigure": true,
+          "figureNote": "Imagen de una balanza en equilibrio con 50 kg en un lado y una esfera más 30 kg en el otro; los valores están transcritos en el enunciado.",
+          "indicador": "símbolo geométrico que represente un número desconocido, en forma pictórica. Identifican la posición de objetos en mapas simples"
+        },
+        {
+          "position": 11,
+          "type": "multiple_choice",
+          "responseFormat": "choice",
+          "stem": "Observa el siguiente mapa y la ubicación de algunos lugares que se representan (cuadrícula con filas 1 a 5 y columnas A a E; simbología: Bosque, Faro, Puerto, Aeropuerto). ¿En qué coordenadas está el faro en el mapa?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "B2",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "B4",
+              "isCorrect": true
+            },
+            {
+              "key": "C",
+              "text": "D2",
+              "isCorrect": false
+            }
+          ],
+          "correctKey": "B",
+          "skill": "Representar",
+          "oa": "OA 14",
+          "contentAxis": "Geometría",
+          "hasFigure": true,
+          "figureNote": "Mapa en cuadrícula (columnas A–E, filas 1–5) con la ubicación del faro. Requiere la imagen para leer la coordenada.",
+          "indicador": "Identifican la posición de objetos en mapas simples que tienen superpuesta una cuadrícula."
+        },
+        {
+          "position": 12,
+          "type": "multiple_choice",
+          "responseFormat": "choice",
+          "stem": "Observa la siguiente red de una figura 3D (red formada por un rectángulo con un círculo arriba y otro círculo abajo). ¿Qué figura 3D se puede armar con la red?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Un paralelepípedo (prisma rectangular).",
+              "isImage": true,
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Un cono.",
+              "isImage": true,
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Un cilindro.",
+              "isImage": true,
+              "isCorrect": true
+            }
+          ],
+          "correctKey": "C",
+          "skill": "Representar",
+          "oa": "OA 15",
+          "contentAxis": "Geometría",
+          "hasFigure": true,
+          "figureNote": "El enunciado muestra la red (rectángulo + 2 círculos) y las 3 alternativas son figuras 3D. Requiere captura de imagen.",
+          "indicador": "Relacionan figuras 3D con una de sus redes. Identifican en el entorno figuras 2D que están"
+        },
+        {
+          "position": 13,
+          "type": "multiple_choice",
+          "responseFormat": "choice",
+          "stem": "Observa la siguiente fotografía (un ave y su imagen reflejada en el agua). ¿Qué relación hay entre el ave y la imagen del ave en el agua?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Están rotadas.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Están reflejadas.",
+              "isCorrect": true
+            },
+            {
+              "key": "C",
+              "text": "Están trasladadas.",
+              "isCorrect": false
+            }
+          ],
+          "correctKey": "B",
+          "skill": "Representar",
+          "oa": "OA 17",
+          "contentAxis": "Geometría",
+          "hasFigure": true,
+          "figureNote": "Fotografía de un ave y su reflejo en el agua; la relación entre ambas se determina observando la imagen.",
+          "indicador": "Identifican en el entorno figuras 2D que están reflejadas."
+        },
+        {
+          "position": 14,
+          "type": "multiple_choice",
+          "responseFormat": "choice",
+          "stem": "Este calendario muestra el mes de enero. Dani está de cumpleaños el tercer lunes de ese mes. Calendario de enero (Lu Ma Mi Ju Vi Sa Do): fila 1: -, 1, 2, 3, 4, 5, 6; fila 2: 7, 8, 9, 10, 11, 12, 13; fila 3: 14, 15, 16, 17, 18, 19, 20; fila 4: 21, 22, 23, 24, 25, 26, 27; fila 5: 28, 29, 30, 31. ¿Cuál es la fecha de cumpleaños de Dani?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "15 de enero.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "21 de enero.",
+              "isCorrect": true
+            },
+            {
+              "key": "C",
+              "text": "28 de enero.",
+              "isCorrect": false
+            }
+          ],
+          "correctKey": "B",
+          "skill": "Representar",
+          "oa": "OA 19",
+          "contentAxis": "Medición",
+          "hasFigure": true,
+          "figureNote": "Calendario de enero; transcrito en el enunciado.",
+          "indicador": "Interpretan calendarios. Leen horas, medias horas, cuartos de hora y minutos"
+        },
+        {
+          "position": 15,
+          "type": "multiple_choice",
+          "responseFormat": "choice",
+          "stem": "Observa la hora en el siguiente reloj (reloj analógico). ¿Qué hora marca el reloj?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Las 6 con 3 minutos.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Las 3 con 30 minutos.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Las 6 con 15 minutos.",
+              "isCorrect": true
+            }
+          ],
+          "correctKey": "C",
+          "skill": "Representar",
+          "oa": "OA 20",
+          "contentAxis": "Medición",
+          "hasFigure": true,
+          "figureNote": "Reloj analógico con manecillas; requiere la imagen para leer la hora.",
+          "indicador": "Leen horas, medias horas, cuartos de hora y minutos en relojes análogos."
+        },
+        {
+          "position": 16,
+          "type": "multiple_choice",
+          "responseFormat": "choice",
+          "stem": "Teresa pintó el perímetro de esta cancha de básquetbol, tardando 1 minuto por cada metro. La cancha es un rectángulo de 28 m de largo y 15 m de ancho. ¿Cuántos minutos tardó Teresa en pintar el perímetro de la cancha?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "43",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "66",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "86",
+              "isCorrect": true
+            }
+          ],
+          "correctKey": "C",
+          "skill": "Resolver problemas",
+          "oa": "OA 21",
+          "contentAxis": "Medición",
+          "hasFigure": true,
+          "figureNote": "Imagen de una cancha rectangular con lados rotulados 28 m y 15 m; las medidas están en el enunciado.",
+          "indicador": "perímetro de un rectángulo. Identifican el diagrama de puntos que representa"
+        },
+        {
+          "position": 17,
+          "type": "multiple_choice",
+          "responseFormat": "choice",
+          "stem": "La siguiente tabla muestra los resultados de una encuesta sobre la cantidad de vasos de agua que beben al día un grupo de estudiantes: 1 vaso → 1 respuesta; 2 vasos → 6 respuestas; 3 vasos → 3 respuestas; 4 vasos → 5 respuestas. ¿Cuál de los siguientes diagramas de puntos representa correctamente los datos de la tabla?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Diagrama de puntos con eje 1, 2, 3, 4 y cantidades crecientes: 1 punto en 1, 3 puntos en 2, 5 puntos en 3 y 6 puntos en 4.",
+              "isImage": true,
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Diagrama de puntos con eje 1, 3, 5, 6: 1 punto en 1, 4 puntos en 3, 4 puntos en 5 y 1 punto en 6.",
+              "isImage": true,
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Diagrama de puntos con eje 1, 2, 3, 4: 1 punto en 1, 6 puntos en 2, 3 puntos en 3 y 5 puntos en 4.",
+              "isImage": true,
+              "isCorrect": true
+            }
+          ],
+          "correctKey": "C",
+          "skill": "Representar",
+          "oa": "OA 26",
+          "contentAxis": "Datos y probabilidades",
+          "hasFigure": true,
+          "figureNote": "Las 3 alternativas son diagramas de puntos. Requiere captura de imagen para comparar cada una con la tabla.",
+          "indicador": "Identifican el diagrama de puntos que representa información dada. Leen información presentada en gráficos de barra"
+        },
+        {
+          "position": 18,
+          "type": "multiple_choice",
+          "responseFormat": "choice",
+          "stem": "Un grupo de estudiantes respondió una encuesta. El gráfico de barras muestra los resultados de “¿Cuál es tu sabor de helado favorito?” con las categorías Frutilla, Manjar, Chocolate y Otros (eje de cantidad de respuestas de 0 a 30). Según el gráfico, ¿cuál es el sabor de helado elegido por más estudiantes?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Frutilla.",
+              "isCorrect": true
+            },
+            {
+              "key": "B",
+              "text": "Manjar.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Chocolate.",
+              "isCorrect": false
+            }
+          ],
+          "correctKey": "A",
+          "skill": "Representar",
+          "oa": "OA 25",
+          "contentAxis": "Datos y probabilidades",
+          "hasFigure": true,
+          "figureNote": "Gráfico de barras con las cantidades por sabor; requiere la imagen para leer las alturas de las barras.",
+          "indicador": "Leen información presentada en gráficos de barra simple."
+        },
+        {
+          "position": 19,
+          "type": "multiple_choice",
+          "responseFormat": "choice",
+          "stem": "Observa los cubos ordenados en grupos de 100 (placas), grupos de 10 (barras) y cubos sueltos. ¿Cuántos cubos hay en total?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "245",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "254",
+              "isCorrect": true
+            },
+            {
+              "key": "C",
+              "text": "452",
+              "isCorrect": false
+            }
+          ],
+          "correctKey": "B",
+          "skill": "Representar",
+          "oa": "OA 2",
+          "contentAxis": "Números y operaciones",
+          "hasFigure": true,
+          "figureNote": "Bloques base 10 (placas de 100, barras de 10 y cubos sueltos). Requiere la imagen para contar las cantidades.",
+          "indicador": "Identifican representaciones de números naturales del 0 al 1 000. Identifican el valor posicional de los dígitos en números"
+        },
+        {
+          "position": 20,
+          "type": "multiple_choice",
+          "responseFormat": "choice",
+          "stem": "¿Cuántas unidades representa el dígito 7 en el número 674?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "7",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "70",
+              "isCorrect": true
+            },
+            {
+              "key": "C",
+              "text": "700",
+              "isCorrect": false
+            }
+          ],
+          "correctKey": "B",
+          "skill": "Representar",
+          "oa": "OA 5",
+          "contentAxis": "Números y operaciones",
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Identifican el valor posicional de los dígitos en números naturales hasta 1 000."
+        },
+        {
+          "position": 21,
+          "type": "multiple_choice",
+          "responseFormat": "choice",
+          "stem": "Observa los alimentos que consumió Aldo durante una mañana: Leche 250 ml, Manzana 120 g, Agua 190 ml, Pan 210 g, Jugo 220 ml. ¿Cuántos ml de líquido consumió en total Aldo durante esa mañana?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "330",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "660",
+              "isCorrect": true
+            },
+            {
+              "key": "C",
+              "text": "990",
+              "isCorrect": false
+            }
+          ],
+          "correctKey": "B",
+          "skill": "Resolver problemas",
+          "oa": "OA 6",
+          "contentAxis": "Números y operaciones",
+          "hasFigure": true,
+          "figureNote": "Imágenes de los alimentos con sus cantidades rotuladas; los valores están en el enunciado.",
+          "indicador": "de números naturales hasta 1 000."
+        },
+        {
+          "position": 22,
+          "type": "multiple_choice",
+          "responseFormat": "choice",
+          "stem": "Una máquina se demora 8 segundos en fabricar un tornillo. ¿Cuántos segundos se demorará en fabricar 3 tornillos?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "5",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "11",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "24",
+              "isCorrect": true
+            }
+          ],
+          "correctKey": "C",
+          "skill": "Resolver problemas",
+          "oa": "OA 8",
+          "contentAxis": "Números y operaciones",
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "multiplicaciones de números naturales hasta 10 · 10. Resuelven problemas que requieren calcular divisiones"
+        },
+        {
+          "position": 23,
+          "type": "multiple_choice",
+          "responseFormat": "choice",
+          "stem": "Un curso de 32 estudiantes se organiza en grupos para realizar un trabajo. ¿Cuántos grupos de 4 estudiantes se pueden formar en total?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "7",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "8",
+              "isCorrect": true
+            },
+            {
+              "key": "C",
+              "text": "28",
+              "isCorrect": false
+            }
+          ],
+          "correctKey": "B",
+          "skill": "Resolver problemas",
+          "oa": "OA 9",
+          "contentAxis": "Números y operaciones",
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "de números naturales en el contexto de las tablas de hasta 10 · 10."
+        },
+        {
+          "position": 24,
+          "type": "multiple_choice",
+          "responseFormat": "choice",
+          "stem": "Observa las siguientes fracciones: 2/4, 3/4, 1/4. ¿Cuál es la fracción menor?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "2/4",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "3/4",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "1/4",
+              "isCorrect": true
+            }
+          ],
+          "correctKey": "C",
+          "skill": "Resolver problemas",
+          "oa": "OA 11",
+          "contentAxis": "Números y operaciones",
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "con igual denominador. Completan una secuencia numérica presentada en una"
+        },
+        {
+          "position": 25,
+          "type": "multiple_choice",
+          "responseFormat": "choice",
+          "stem": "En la siguiente tabla se pintaron los términos de una secuencia. La secuencia empieza en 3 y se completa sumando 4 a cada término (tabla numérica del 1 al 30 con los términos 3, 7, 11, 15 y 19 pintados). ¿Qué número se debe pintar después del 19 para continuar la secuencia anterior?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "21",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "23",
+              "isCorrect": true
+            },
+            {
+              "key": "C",
+              "text": "24",
+              "isCorrect": false
+            }
+          ],
+          "correctKey": "B",
+          "skill": "Modelar",
+          "oa": "OA 12",
+          "contentAxis": "Patrones y álgebra",
+          "hasFigure": true,
+          "figureNote": "Tabla del 1 al 30 con la secuencia pintada; la regla (empieza en 3, suma 4) está en el enunciado.",
+          "indicador": "Completan una secuencia numérica presentada en una tabla."
+        },
+        {
+          "position": 26,
+          "type": "open_ended",
+          "responseFormat": "fill_in",
+          "stem": "Observa la siguiente figura 3D (un paralelepípedo / cubo). ¿Cuántas aristas tiene en total esta figura 3D? Respuesta: Tiene ___ aristas en total.",
+          "alternatives": [],
+          "correctKey": null,
+          "skill": "Representar",
+          "oa": "OA 16",
+          "contentAxis": "Geometría",
+          "hasFigure": true,
+          "figureNote": "Imagen de un paralelepípedo (prisma rectangular); es un sólido estándar, la imagen lo ilustra.",
+          "indicador": "Identifican la cantidad de aristas de una figura 3D.",
+          "fillAnswer": "12"
+        },
+        {
+          "position": 27,
+          "type": "multiple_choice",
+          "responseFormat": "choice",
+          "stem": "¿En cuál de estas opciones la Figura 2 es una rotación de la Figura 1?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Par de hojas: la Figura 1 arriba y la Figura 2 abajo, girada (rotación).",
+              "isImage": true,
+              "isCorrect": true
+            },
+            {
+              "key": "B",
+              "text": "Par de hojas verticales enfrentadas (una reflexión respecto de un eje vertical).",
+              "isImage": true,
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Par de hojas en diagonal, la Figura 2 desplazada respecto de la Figura 1 (traslación).",
+              "isImage": true,
+              "isCorrect": false
+            }
+          ],
+          "correctKey": "A",
+          "skill": "Representar",
+          "oa": "OA 17",
+          "contentAxis": "Geometría",
+          "hasFigure": true,
+          "figureNote": "Las 3 alternativas son pares de hojas (Figura 1 y Figura 2) con distintas transformaciones. Requiere captura de imagen.",
+          "indicador": "Identifican en el entorno figuras 2D que están rotadas. Estiman la medida de ángulos en el entorno, usando"
+        },
+        {
+          "position": 28,
+          "type": "multiple_choice",
+          "responseFormat": "choice",
+          "stem": "Observa el ángulo de color celeste que se muestra en el reloj (formado entre las manecillas). Aproximadamente, ¿cuánto mide el ángulo de color celeste?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "45°",
+              "isCorrect": true
+            },
+            {
+              "key": "B",
+              "text": "90°",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "180°",
+              "isCorrect": false
+            }
+          ],
+          "correctKey": "A",
+          "skill": "Representar",
+          "oa": "OA 18",
+          "contentAxis": "Geometría",
+          "hasFigure": true,
+          "figureNote": "Reloj analógico con un ángulo celeste sombreado entre las manecillas; requiere la imagen para estimar la medida del ángulo.",
+          "indicador": "Estiman la medida de ángulos en el entorno, usando como referente ángulos de 45° o de 90°. Registran horas, medias horas, cuartos de hora y"
+        },
+        {
+          "position": 29,
+          "type": "multiple_choice",
+          "responseFormat": "choice",
+          "stem": "¿Cuál de estos relojes marca las ocho y media?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "08:15",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "08:30",
+              "isCorrect": true
+            },
+            {
+              "key": "C",
+              "text": "08:06",
+              "isCorrect": false
+            }
+          ],
+          "correctKey": "B",
+          "skill": "Representar",
+          "oa": "OA 20",
+          "contentAxis": "Medición",
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Registran horas, medias horas, cuartos de hora y minutos en relojes digitales. Leen el peso de objetos del entorno, usando"
+        },
+        {
+          "position": 30,
+          "type": "multiple_choice",
+          "responseFormat": "choice",
+          "stem": "Matías puso en una balanza estas tres naranjas. El dial de la balanza está graduado hasta 1 kg con marcas en 200, 400, 600 y 800 (gramos) y la aguja apunta hacia abajo, entre 400 y 600. ¿Cuántos gramos marcó la balanza?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "420",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "450",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "500",
+              "isCorrect": true
+            }
+          ],
+          "correctKey": "C",
+          "skill": "Representar",
+          "oa": "OA 22",
+          "contentAxis": "Medición",
+          "hasFigure": true,
+          "figureNote": "Balanza de aguja con dial graduado (1 kg; marcas 200/400/600/800); requiere la imagen para leer la posición de la aguja.",
+          "indicador": "representaciones de instrumentos de medición que entregan medidas en unidades estandarizadas. Interpretan información presentada en pictogramas con"
+        },
+        {
+          "position": 31,
+          "type": "multiple_choice",
+          "responseFormat": "choice",
+          "stem": "El siguiente pictograma representa la cantidad de participantes en una maratón escolar: fila Apoderados con 3 zapatillas y fila Estudiantes con 5 zapatillas, donde cada zapatilla equivale a 10 participantes. ¿Cuántas personas participaron en total en la maratón?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "8",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "10",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "80",
+              "isCorrect": true
+            }
+          ],
+          "correctKey": "C",
+          "skill": "Representar",
+          "oa": "OA 25",
+          "contentAxis": "Datos y probabilidades",
+          "hasFigure": true,
+          "figureNote": "Pictograma con íconos de zapatilla (cada uno = 10 participantes); requiere la imagen para contar los íconos por categoría.",
+          "indicador": "Interpretan información presentada en pictogramas con escala."
+        }
+      ]
+    }
+  ],
+  "extraction": {
+    "itemCount": 31,
+    "warnings": [
+      "responseFormat: 'fill_in' (completación) en ítems 3, 5, 8, 26 → modelados como open_ended; se promoverán a gap_fill (auto-corregible) al cargar la pauta.",
+      "responseFormat: 'develop' en ítem 4 (única pregunta de desarrollo).",
+      "Alternativas-imagen (isImage:true) en ítems 6, 12, 17, 27: requieren captura de imagen para ser usables.",
+      "Figura imprescindible para responder (enunciado o alternativas) en ítems 2, 6, 8, 9, 11, 12, 13, 15, 17, 18, 19, 27, 28, 30, 31.",
+      "Grado 3° básico: alternativas con 3 opciones (A/B/C).",
+      "Texto y símbolos transcritos desde la capa de texto del PDF (pdftotext -layout); estructura y figuras confirmadas con las páginas renderizadas."
+    ],
+    "needsHumanReview": true,
+    "crossCheck": {
+      "hardIssues": [],
+      "softWarnings": [
+        "#17: nAlt cuadernillo=3 vs hoja=4"
+      ],
+      "counts": {
+        "cuadernillo": 31,
+        "ficha": 31,
+        "hoja": 31
+      }
+    }
+  },
+  "pauta": {
+    "source": {
+      "ficha": "3_ficha_tecnica_matematica_monitoreo_2026_3_basico.pdf",
+      "hoja": "3_hoja_de_respuestas_matematica_monitoreo_2026_3_basico.pdf"
+    },
+    "appliedKeys": 26,
+    "rubrics": 0
+  }
+}

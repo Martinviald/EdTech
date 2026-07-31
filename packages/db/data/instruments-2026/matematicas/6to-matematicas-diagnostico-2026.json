@@ -1,0 +1,1045 @@
+{
+  "schemaVersion": "1.0",
+  "source": {
+    "file": "6_prueba_matematica_diagnostico_2026_06_basico.pdf",
+    "subjectFolder": "Matematicas"
+  },
+  "instrument": {
+    "name": "DIA Matemática 6° Básico 2026 — Diagnóstico",
+    "subject": "Matemática",
+    "subjectCode": "MATH",
+    "grade": "6° Básico",
+    "gradeCode": "6TH_BASIC",
+    "year": 2026,
+    "applicationPeriod": "diagnostico",
+    "type": "dia",
+    "isOfficial": true,
+    "source": "imported"
+  },
+  "sections": [
+    {
+      "order": 1,
+      "name": "Preguntas",
+      "type": "mixed",
+      "instructions": "Esta prueba tiene 30 preguntas: de alternativas (marcar con una X la respuesta correcta), de completación (anotar la respuesta en los recuadros) y de desarrollo (escribir la respuesta).",
+      "passage": null,
+      "items": [
+        {
+          "position": 1,
+          "type": "multiple_choice",
+          "responseFormat": "choice",
+          "stem": "¿Cuál es el resultado de 317 • 8?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "2 436",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "2 466",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "2 536",
+              "isCorrect": true
+            },
+            {
+              "key": "D",
+              "text": "5 704",
+              "isCorrect": false
+            }
+          ],
+          "correctKey": "C",
+          "skill": "Resolver problemas",
+          "oa": "OA 5",
+          "contentAxis": "Números y operaciones",
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "de un número natural de tres dígitos por un 2, 7 número natural de un dígito."
+        },
+        {
+          "position": 2,
+          "type": "open_ended",
+          "responseFormat": "fill_in",
+          "stem": "Resuelve: 174 : 3 =",
+          "alternatives": [],
+          "correctKey": null,
+          "skill": "Resolver problemas",
+          "oa": "OA 4",
+          "contentAxis": "Números y operaciones",
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "números naturales con dividendo de tres 2, 7 dígitos y divisor de un dígito. Calculan el resultado de una adición sin 2, 8, 11, 13,",
+          "fillAnswer": "58"
+        },
+        {
+          "position": 3,
+          "type": "multiple_choice",
+          "responseFormat": "choice",
+          "stem": "¿Cuál es el resultado de 200 + 203 + 32 + 1?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "436",
+              "isCorrect": true
+            },
+            {
+              "key": "B",
+              "text": "706",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "733",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "823",
+              "isCorrect": false
+            }
+          ],
+          "correctKey": "A",
+          "skill": "Resolver problemas",
+          "oa": "OA 3",
+          "contentAxis": "Números y operaciones",
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "2, 8, 11, 13, reserva de números naturales del 0 al 16, 18 1 000. Calculan el resultado de una sustracción"
+        },
+        {
+          "position": 4,
+          "type": "open_ended",
+          "responseFormat": "fill_in",
+          "stem": "Resuelve: 990 – 357 =",
+          "alternatives": [],
+          "correctKey": null,
+          "skill": "Resolver problemas",
+          "oa": "OA 3",
+          "contentAxis": "Números y operaciones",
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "con canje de números naturales del 0 al 2, 8, 11, 16 1 000. Representan una fracción propia como una",
+          "fillAnswer": "633"
+        },
+        {
+          "position": 5,
+          "type": "multiple_choice",
+          "responseFormat": "choice",
+          "stem": "Cada uno de estos enteros está dividido en partes del mismo tamaño. ¿Qué entero tiene 3/7 de su superficie pintada gris?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Barra dividida en 10 partes iguales, con 3 partes pintadas gris (3/10).",
+              "isImage": true,
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Barra dividida en 7 partes iguales, con 3 partes pintadas gris (3/7).",
+              "isImage": true,
+              "isCorrect": true
+            },
+            {
+              "key": "C",
+              "text": "Barra dividida en 7 partes iguales, con 4 partes pintadas gris (4/7).",
+              "isImage": true,
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "Barra dividida en 10 partes iguales, con 7 partes pintadas gris (7/10).",
+              "isImage": true,
+              "isCorrect": false
+            }
+          ],
+          "correctKey": "B",
+          "skill": "Representar",
+          "oa": "OA 7",
+          "contentAxis": "Números y operaciones",
+          "hasFigure": true,
+          "figureNote": "Las 4 alternativas son barras divididas en partes iguales con algunas pintadas gris. Requiere captura de imagen de cada alternativa.",
+          "indicador": "parte de un todo, usando un entero dividido 3, 4, 5 en partes iguales. Identifican una fracción impropia"
+        },
+        {
+          "position": 6,
+          "type": "multiple_choice",
+          "responseFormat": "choice",
+          "stem": "¿Cuál de estas fracciones es equivalente a 7/5?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "10/8",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "21/15",
+              "isCorrect": true
+            },
+            {
+              "key": "C",
+              "text": "14/5",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "5/3",
+              "isCorrect": false
+            }
+          ],
+          "correctKey": "B",
+          "skill": "Representar",
+          "oa": "OA 8",
+          "contentAxis": "Números y operaciones",
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "equivalente a una fracción dada, 3, 4, 8 amplificando. Transforman una fracción propia, con"
+        },
+        {
+          "position": 7,
+          "type": "multiple_choice",
+          "responseFormat": "choice",
+          "stem": "¿Qué número decimal equivale a la fracción 4/10?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "0,4",
+              "isCorrect": true
+            },
+            {
+              "key": "B",
+              "text": "1,4",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "4,1",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "10,4",
+              "isCorrect": false
+            }
+          ],
+          "correctKey": "A",
+          "skill": "Representar",
+          "oa": "OA 10",
+          "contentAxis": "Números y operaciones",
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Transforman una fracción propia, con 4, 5 denominador 10, a decimal. Representan un número decimal centésimo"
+        },
+        {
+          "position": 8,
+          "type": "multiple_choice",
+          "responseFormat": "choice",
+          "stem": "Cada una de estas figuras representa un entero dividido en partes del mismo tamaño. ¿En qué figura las partes pintadas de gris representan al número decimal 0,02?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Barra de 10 cuadrados en fila, con 1 cuadrado pintado gris (1/10).",
+              "isImage": true,
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Cuadrícula de 10×10, con las 2 filas superiores completas pintadas gris (20/100).",
+              "isImage": true,
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Cuadrícula de 10×10, con 2 cuadrados pintados gris en la esquina superior izquierda (2/100).",
+              "isImage": true,
+              "isCorrect": true
+            },
+            {
+              "key": "D",
+              "text": "Barra de 10 cuadrados en fila, con 1 cuadrado pintado gris (1/10).",
+              "isImage": true,
+              "isCorrect": false
+            }
+          ],
+          "correctKey": "C",
+          "skill": "Representar",
+          "oa": "OA 11",
+          "contentAxis": "Números y operaciones",
+          "hasFigure": true,
+          "figureNote": "Las 4 alternativas son figuras (barras y cuadrículas 10×10) con cuadros pintados gris. Requiere captura de imagen.",
+          "indicador": "Representan un número decimal centésimo 4 de manera pictórica. Ubican una fracción propia en la recta"
+        },
+        {
+          "position": 9,
+          "type": "multiple_choice",
+          "responseFormat": "choice",
+          "stem": "¿En qué recta numérica P indica la posición de la fracción 7/9?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Recta de 0 a 1 dividida en 9 partes iguales; P está cerca de la 2.ª marca (≈2/9).",
+              "isImage": true,
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Recta de 0 a 1 con más marcas; P está cerca de la mitad de la recta.",
+              "isImage": true,
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Recta de 0 a 1 dividida en 9 partes iguales; P está en la 7.ª marca (≈7/9).",
+              "isImage": true,
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "Recta de 0 a 1 dividida en 9 partes iguales; P está en la 8.ª marca (≈8/9).",
+              "isImage": true,
+              "isCorrect": true
+            }
+          ],
+          "correctKey": "D",
+          "skill": "Representar",
+          "oa": "OA 7",
+          "contentAxis": "Números y operaciones",
+          "hasFigure": true,
+          "figureNote": "Las 4 alternativas son rectas numéricas de 0 a 1 con una marca P. Requiere captura de imagen de cada alternativa.",
+          "indicador": "Ubican una fracción propia en la recta 5 numérica entre el 0 y el 1. Ordenan números decimales hasta la"
+        },
+        {
+          "position": 10,
+          "type": "multiple_choice",
+          "responseFormat": "choice",
+          "stem": "El tamaño de los archivos que se guardan en un computador se mide en MB (Mega Bytes). En esta tabla se muestra el tamaño de los archivos de una carpeta: Carpeta de archivos — Carta 4,528 MB; Saludo 3,596 MB; Poema 4,53 MB; Informe 3,509 MB. ¿Cómo se ordenan de mayor a menor tamaño los archivos de la carpeta?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Carta – poema – informe – saludo",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Carta – poema – saludo – informe",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Poema – carta – saludo – informe",
+              "isCorrect": true
+            },
+            {
+              "key": "D",
+              "text": "Poema – saludo – carta – informe",
+              "isCorrect": false
+            }
+          ],
+          "correctKey": "C",
+          "skill": "Resolver problemas",
+          "oa": "OA 11",
+          "contentAxis": "Números y operaciones",
+          "hasFigure": true,
+          "figureNote": "Tabla 'Carpeta de archivos' con nombre y tamaño; valores transcritos en el enunciado.",
+          "indicador": "Ordenan números decimales hasta la 7 milésima. Calculan el resultado de una sustracción de"
+        },
+        {
+          "position": 11,
+          "type": "multiple_choice",
+          "responseFormat": "choice",
+          "stem": "¿Cuál es el resultado de 5/8 − 3/8?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "2/16",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "2/8",
+              "isCorrect": true
+            },
+            {
+              "key": "C",
+              "text": "8/16",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "8/8",
+              "isCorrect": false
+            }
+          ],
+          "correctKey": "B",
+          "skill": "Resolver problemas",
+          "oa": "OA 9",
+          "contentAxis": "Números y operaciones",
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Calculan el resultado de una sustracción de 8 fracciones propias con igual denominador. Calculan el resultado de una adición con"
+        },
+        {
+          "position": 12,
+          "type": "multiple_choice",
+          "responseFormat": "choice",
+          "stem": "¿Cuál es el resultado de 2,085 + 1,24?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "3,325",
+              "isCorrect": true
+            },
+            {
+              "key": "B",
+              "text": "3,225",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "2,209",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "2,109",
+              "isCorrect": false
+            }
+          ],
+          "correctKey": "A",
+          "skill": "Resolver problemas",
+          "oa": "OA 12",
+          "contentAxis": "Números y operaciones",
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "reserva de números decimales hasta la 8 milésima. Calculan el resultado de una sustracción"
+        },
+        {
+          "position": 13,
+          "type": "open_ended",
+          "responseFormat": "fill_in",
+          "stem": "Resuelve: 4,218 ‒ 0,03 =",
+          "alternatives": [],
+          "correctKey": null,
+          "skill": "Resolver problemas",
+          "oa": "OA 12",
+          "contentAxis": "Números y operaciones",
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "con canje de números decimales hasta la 8 milésima. Identifican la relación inversa entre adición y",
+          "fillAnswer": "4,188"
+        },
+        {
+          "position": 14,
+          "type": "multiple_choice",
+          "responseFormat": "choice",
+          "stem": "Si se cumple que 75 – △ = 25 ¿Cuál de estas igualdades es verdadera? (△ representa el mismo número desconocido en todas las igualdades).",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "25 – △ = 75",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "△ + 25 = 75",
+              "isCorrect": true
+            },
+            {
+              "key": "C",
+              "text": "75 + 25 = △",
+              "isCorrect": false
+            }
+          ],
+          "correctKey": "B",
+          "skill": "Representar",
+          "oa": "OA 7",
+          "contentAxis": "Números y operaciones",
+          "hasFigure": false,
+          "figureNote": "El valor desconocido se representa con un triángulo (△) tanto en el enunciado como en las alternativas.",
+          "indicador": "Identifican la relación inversa entre adición y 11 sustracción en el ámbito del 0 al 100. Resuelven una ecuación de un paso que"
+        },
+        {
+          "position": 15,
+          "type": "open_ended",
+          "responseFormat": "fill_in",
+          "stem": "¿Cuál es el valor de x en la ecuación x – 19 = 35? Respuesta: x =",
+          "alternatives": [],
+          "correctKey": null,
+          "skill": "Resolver problemas",
+          "oa": "OA 15",
+          "contentAxis": "Patrones y álgebra",
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Resuelven una ecuación de un paso que 11 requiere de una adición o una sustracción. Calculan el área de un rectángulo",
+          "fillAnswer": "54"
+        },
+        {
+          "position": 16,
+          "type": "multiple_choice",
+          "responseFormat": "choice",
+          "stem": "Observa el rectángulo gris en esta cuadrícula (cada cuadrado de la cuadrícula mide 1 cm por 1 cm). ¿Cuál es el área del rectángulo gris?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "7 cm2",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "8 cm2",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "12 cm2",
+              "isCorrect": true
+            },
+            {
+              "key": "D",
+              "text": "14 cm2",
+              "isCorrect": false
+            }
+          ],
+          "correctKey": "C",
+          "skill": "Resolver problemas",
+          "oa": "OA 23",
+          "contentAxis": "Medición",
+          "hasFigure": true,
+          "figureNote": "Rectángulo gris dibujado sobre una cuadrícula de cuadrados de 1 cm de lado. Requiere la imagen para contar/medir el área.",
+          "indicador": "Calculan el área de un rectángulo 13, 18 presentado en una cuadrícula. Identifican la red geométrica de un"
+        },
+        {
+          "position": 17,
+          "type": "multiple_choice",
+          "responseFormat": "choice",
+          "stem": "Observa el siguiente paralelepípedo. ¿Con cuál de estas redes se puede armar el paralelepípedo anterior?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Red con una fila horizontal de 3 rectángulos y 1 rectángulo debajo del central (forma de T).",
+              "isImage": true,
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Red con una fila horizontal larga de rectángulos (con caras a los extremos) y 1 rectángulo debajo hacia el centro.",
+              "isImage": true,
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Red en forma de cruz vertical: columna de 4 rectángulos con un rectángulo saliendo a cada lado del segundo desde arriba.",
+              "isImage": true,
+              "isCorrect": true
+            },
+            {
+              "key": "D",
+              "text": "Red en forma de cruz: columna vertical de 3 rectángulos con un rectángulo saliendo a cada lado del central.",
+              "isImage": true,
+              "isCorrect": false
+            }
+          ],
+          "correctKey": "C",
+          "skill": "Representar",
+          "oa": "OA 15",
+          "contentAxis": "Geometría",
+          "hasFigure": true,
+          "figureNote": "El enunciado muestra un paralelepípedo y las 4 alternativas son redes (desarrollos planos). Requiere captura de imagen.",
+          "indicador": "Identifican la red geométrica de un 13, 18 paralelepípedo."
+        },
+        {
+          "position": 18,
+          "type": "multiple_choice",
+          "responseFormat": "choice",
+          "stem": "¿En cuál de estas cuadrículas los dos lados marcados en la figura forman un ángulo de 90°?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Polígono sobre cuadrícula; están marcados en negrita el lado vertical izquierdo y el lado horizontal superior (se juntan en la esquina superior izquierda).",
+              "isImage": true,
+              "isCorrect": true
+            },
+            {
+              "key": "B",
+              "text": "Polígono sobre cuadrícula; están marcados en negrita el lado horizontal superior y el lado diagonal del extremo derecho.",
+              "isImage": true,
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Polígono sobre cuadrícula; están marcados en negrita el lado horizontal superior y el lado horizontal inferior (paralelos).",
+              "isImage": true,
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "Polígono sobre cuadrícula; están marcados en negrita dos lados diagonales (uno abajo-izquierda y otro arriba-derecha).",
+              "isImage": true,
+              "isCorrect": false
+            }
+          ],
+          "correctKey": "A",
+          "skill": "Representar",
+          "oa": "OA 18",
+          "contentAxis": "Geometría",
+          "hasFigure": true,
+          "figureNote": "Las 4 alternativas son un mismo polígono sobre cuadrícula con dos lados marcados en negrita en distintas posiciones. Requiere captura de imagen.",
+          "indicador": "Identifican dos lados de una figura 2D que 16 forman un ángulo de 90º. Resuelven un problema que requiere el"
+        },
+        {
+          "position": 19,
+          "type": "multiple_choice",
+          "responseFormat": "choice",
+          "stem": "Se quiere llenar la siguiente caja de vidrio con cubos como el que se muestra (cubo unitario). Observa la caja parcialmente llena. ¿Cuál es el volumen de la caja, medido en cubos unitarios?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "36",
+              "isCorrect": true
+            },
+            {
+              "key": "B",
+              "text": "33",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "27",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "24",
+              "isCorrect": false
+            }
+          ],
+          "correctKey": "A",
+          "skill": "Resolver problemas",
+          "oa": "OA 24",
+          "contentAxis": "Medición",
+          "hasFigure": true,
+          "figureNote": "Imagen de una caja de vidrio en perspectiva parcialmente llena con cubos unitarios. Requiere la imagen para determinar las dimensiones y el volumen.",
+          "indicador": "cálculo del volumen de un cuerpo en 19 unidades de cubo. Leen la información presentada en un"
+        },
+        {
+          "position": 20,
+          "type": "multiple_choice",
+          "responseFormat": "choice",
+          "stem": "El siguiente gráfico muestra los resultados de una encuesta. Cada persona respondió una vez por su fruta favorita: Plátano 12, Durazno 7, Frutilla 9, Naranja 4. ¿Cuántas personas respondieron que la frutilla era su fruta favorita?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "8",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "9",
+              "isCorrect": true
+            },
+            {
+              "key": "C",
+              "text": "10",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "11",
+              "isCorrect": false
+            }
+          ],
+          "correctKey": "B",
+          "skill": "Representar",
+          "oa": "OA 26",
+          "contentAxis": "Datos y probabilidades",
+          "hasFigure": true,
+          "figureNote": "Gráfico de barras 'Fruta favorita' (Plátano 12, Durazno 7, Frutilla 9, Naranja 4); valores transcritos en el enunciado.",
+          "indicador": "Leen la información presentada en un 23, 24 gráfico de barras con escala. Identifican el espacio muestral de un"
+        },
+        {
+          "position": 21,
+          "type": "multiple_choice",
+          "responseFormat": "choice",
+          "stem": "Fran tiene una ruleta como la que se muestra. La ruleta está dividida en 5 sectores iguales rotulados con los números 1, 2, 2, 1 y 3. ¿Cuáles son todos los resultados que puede obtener Fran al girar la ruleta una vez?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "1",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "1 y 2",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "1, 2 y 3",
+              "isCorrect": true
+            },
+            {
+              "key": "D",
+              "text": "1, 2, 3, 4 y 5",
+              "isCorrect": false
+            }
+          ],
+          "correctKey": "C",
+          "skill": "Resolver problemas",
+          "oa": "OA 26",
+          "contentAxis": "Datos y probabilidades",
+          "hasFigure": true,
+          "figureNote": "Ruleta de 5 sectores rotulados 1, 2, 2, 1, 3; números transcritos en el enunciado.",
+          "indicador": "Identifican el espacio muestral de un 23 experimento aleatorio. Identifican un evento seguro a partir de un"
+        },
+        {
+          "position": 22,
+          "type": "multiple_choice",
+          "responseFormat": "choice",
+          "stem": "Al lanzar un dado de 6 caras numeradas del 1 al 6, ¿cuál de estos eventos es seguro que ocurrirá?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Que salga el 5.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Que salga el 0.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Que salga un número mayor que 5.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "Que salga un número menor que 7.",
+              "isCorrect": true
+            }
+          ],
+          "correctKey": "D",
+          "skill": "Argumentar",
+          "oa": "OA 24",
+          "contentAxis": "Datos y probabilidades",
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Identifican un evento seguro a partir de un 23 experimento aleatorio. Identifican el gráfico de barra simple que"
+        },
+        {
+          "position": 23,
+          "type": "multiple_choice",
+          "responseFormat": "choice",
+          "stem": "Una ferretería vende cajas con clavos, tornillos y tuercas. En el último trimestre vendieron 400 cajas de clavos, 500 cajas de tornillos y 100 cajas de tuercas. ¿Cuál de los siguientes gráficos representa correctamente la cantidad de cajas de clavos, tornillos y tuercas que vendió la ferretería?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Gráfico de barras: Clavos 500, Tornillos 400, Tuercas 100.",
+              "isImage": true,
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Gráfico de barras: Clavos 400, Tornillos 500, Tuercas 100.",
+              "isImage": true,
+              "isCorrect": true
+            },
+            {
+              "key": "C",
+              "text": "Gráfico de barras: Clavos 100, Tornillos 400, Tuercas 500.",
+              "isImage": true,
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "Gráfico de barras: Clavos 100, Tornillos 500, Tuercas 400.",
+              "isImage": true,
+              "isCorrect": false
+            }
+          ],
+          "correctKey": "B",
+          "skill": "Representar",
+          "oa": "OA 26",
+          "contentAxis": "Datos y probabilidades",
+          "hasFigure": true,
+          "figureNote": "Las 4 alternativas son gráficos de barras 'Cantidad de cajas vendidas'. Requiere captura de imagen de cada alternativa.",
+          "indicador": "Identifican el gráfico de barra simple que 23 representa un conjunto de datos. Interpretan la información presentada en"
+        },
+        {
+          "position": 24,
+          "type": "multiple_choice",
+          "responseFormat": "choice",
+          "stem": "En la bodega de una librería tienen lápices de tres colores para reponer los que se van vendiendo. Observa la información sobre los lápices en bodega y los que vendieron la semana pasada. Lápices almacenados en la bodega: Rojo 500, Azul ≈450, Negro 200. Lápices vendidos la semana pasada: Rojo ≈150, Azul 400, Negro 300. Se dan cuenta de que no podrán reponer todos los lápices de cada color que vendieron la semana pasada con los que tienen en la bodega. Marca todos los colores de lápices que tendrán que conseguir en otra parte y explica tu respuesta.",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Rojo"
+            },
+            {
+              "key": "B",
+              "text": "Azul"
+            },
+            {
+              "key": "C",
+              "text": "Negro"
+            }
+          ],
+          "correctKey": null,
+          "skill": "Argumentar",
+          "oa": "OA 28",
+          "contentAxis": "Datos y probabilidades",
+          "hasFigure": true,
+          "figureNote": "Dos gráficos de barras (lápices en bodega vs. vendidos la semana pasada) para los colores Rojo, Azul y Negro. Ítem de respuesta múltiple ('Marca todos') más una parte de desarrollo ('Explica tu respuesta'). Requiere la imagen para comparar las cantidades.",
+          "indicador": "Interpretan la información presentada en 24 gráficos de barras. Identifican el modelo que contiene una",
+          "rubric": "Tipos de respuestas Respuestas correctas Respuestas parcialmente correctas Respuestas incorrectas (Código 2) (Código 1) (Código 0) Marca el color negro o lo menciona en Marca el color negro o lo menciona en su Entrega otras respuestas que no su respuesta. Luego la justifica respuesta. Sin embargo, justifica su cumplen con los criterios de las señalando que, de acuerdo a la respuesta aludiendo a información de solo descripciones anteriores, o bien, no información de los gráficos, hay en uno de los gráficos. responde. bodega menos lápices de ese color de los que se vendieron la semana anterior. Ejemplos: Ejemplos: Ejemplo: ● ● ● Negro, porque hay 200 lápices de Negro, porque hay 200 lápices en Azul, porque es el color de lápiz ese color en la bodega y la semana bodega. que más se vendió la semana anterior se vendieron 300. pasada. ● Negro, porque la semana anterior se ● vendieron 300 lápices. Negro, porque faltan 100 lápices de ese color para vender 300 como en la semana pasada. ● Negro, porque en bodega hay menos lápices de ese color de los que se vendieron la semana anterior. 11 &gt; Diagnóstico Integral de Aprendizajes Instrumentos de Evaluación 2026 agenciaeducacion.cl"
+        },
+        {
+          "position": 25,
+          "type": "multiple_choice",
+          "responseFormat": "choice",
+          "stem": "En un club quieren comprar un instrumento que vale $45 000 y han reunido $15 000. Los 8 integrantes del club deciden aportar todo el dinero que falta por medio de una cuota extra igual para cada persona. ¿Qué operación permite calcular el monto en pesos de la cuota extra que pagará cada integrante del club?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "(45 000 – 15 000) • 8",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "(45 000 – 15 000) : 8",
+              "isCorrect": true
+            },
+            {
+              "key": "C",
+              "text": "(45 000 + 15 000) • 8",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "(45 000 + 15 000) : 8",
+              "isCorrect": false
+            }
+          ],
+          "correctKey": "B",
+          "skill": "Modelar",
+          "oa": "OA 6",
+          "contentAxis": "Números y operaciones",
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "sustracción y una división en el contexto de 2 la resolución de un problema. Resuelven un problema que requiere de"
+        },
+        {
+          "position": 26,
+          "type": "multiple_choice",
+          "responseFormat": "choice",
+          "stem": "Marcos compró una pizarra en $23 750 y 3 plumones en $690 cada uno. ¿Cuánto dinero gastó en total?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "$25 820",
+              "isCorrect": true
+            },
+            {
+              "key": "B",
+              "text": "$24 443",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "$23 980",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "$21 680",
+              "isCorrect": false
+            }
+          ],
+          "correctKey": "A",
+          "skill": "Resolver problemas",
+          "oa": "OA 6",
+          "contentAxis": "Números y operaciones",
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "una adición y una multiplicación de números 2 naturales. Resuelven un problema que requiere de"
+        },
+        {
+          "position": 27,
+          "type": "multiple_choice",
+          "responseFormat": "choice",
+          "stem": "Una persona se compromete a pagar una deuda de $60 000 en cuotas de $12 000 cada una. Sin embargo, al momento de pagar la primera cuota, solo pudo pagar la mitad de ella. ¿Cuál es el monto de la deuda que aún le queda por pagar a la persona?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "$36 000",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "$48 000",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "$54 000",
+              "isCorrect": true
+            },
+            {
+              "key": "D",
+              "text": "$72 000",
+              "isCorrect": false
+            }
+          ],
+          "correctKey": "C",
+          "skill": "Resolver problemas",
+          "oa": "OA 6",
+          "contentAxis": "Números y operaciones",
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "una sustracción y una división de números 2 naturales. Identifican el modelo que contiene una"
+        },
+        {
+          "position": 28,
+          "type": "multiple_choice",
+          "responseFormat": "choice",
+          "stem": "Antonia compra esta bandeja de huevos en $6 390 (la bandeja contiene 30 huevos). Si quiere obtener $2 500 de ganancia al vender todos los huevos de la bandeja, ¿qué operación permite calcular el precio, en pesos, al que debe vender cada huevo para lograr esta ganancia?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "(6 390 + 2 500) • 30",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "(6 390 – 2 500) : 30",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "(6 390 – 2 500) • 30",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "(6 390 + 2 500) : 30",
+              "isCorrect": true
+            }
+          ],
+          "correctKey": "D",
+          "skill": "Modelar",
+          "oa": "OA 6",
+          "contentAxis": "Números y operaciones",
+          "hasFigure": true,
+          "figureNote": "Fotografía de una bandeja de 30 huevos; el 30 se obtiene de la imagen y aparece en las alternativas.",
+          "indicador": "adición y una división en el contexto de la 2 resolución de un problema. Resuelven un problema que requiere de"
+        },
+        {
+          "position": 29,
+          "type": "multiple_choice",
+          "responseFormat": "choice",
+          "stem": "Una fundación repartirá 810 entradas para su bingo anual en 9 colegios. Todos los colegios recibirán la misma cantidad de entradas y deben venderlas a $1 500 cada una. Además del dinero que obtendrán por las entradas, la fundación les dará $50 000 extra si venden todas las entradas. ¿Cuánto dinero recibirá en total cada colegio cuando vendan todas sus entradas?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "$63 500",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "$85 000",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "$140 000",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "$185 000",
+              "isCorrect": true
+            }
+          ],
+          "correctKey": "D",
+          "skill": "Resolver problemas",
+          "oa": "OA 6",
+          "contentAxis": "Números y operaciones",
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "una adición, una multiplicación y una 2 división de números naturales. Identifican la ecuación representada en una"
+        },
+        {
+          "position": 30,
+          "type": "multiple_choice",
+          "responseFormat": "choice",
+          "stem": "En esta balanza equilibrada se muestran las masas de los distintos objetos medidas en kilogramos. En el platillo izquierdo hay un objeto de masa x junto con 6 cubos de 1 kg; en el platillo derecho hay 10 cubos de 1 kg. ¿Cuál de estas ecuaciones está representada en la balanza anterior?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "x + 6 = 10",
+              "isCorrect": true
+            },
+            {
+              "key": "B",
+              "text": "x – 6 = 10",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "x + 6 = 16",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "x – 6 = 16",
+              "isCorrect": false
+            }
+          ],
+          "correctKey": "A",
+          "skill": "Modelar",
+          "oa": "OA 15",
+          "contentAxis": "Patrones y álgebra",
+          "hasFigure": true,
+          "figureNote": "Balanza equilibrada: platillo izquierdo con un bloque 'x' y 6 cubos de '1'; platillo derecho con 10 cubos de '1'. Requiere la imagen para contar los cubos.",
+          "indicador": "Identifican la ecuación representada en una 11 balanza."
+        }
+      ]
+    }
+  ],
+  "extraction": {
+    "itemCount": 30,
+    "warnings": [
+      "responseFormat: 'fill_in' (completación/cálculo) en ítems 2, 4, 13, 15 → modelados como open_ended; se promoverán a gap_fill (auto-corregible) al cargar la pauta.",
+      "Alternativas-imagen (isImage:true) en ítems 5, 8, 9, 17, 18, 23: requieren captura de imagen para ser usables.",
+      "Figura imprescindible para responder en ítems 5, 8, 9, 16, 17, 18, 19, 23, 24, 30 → needsHumanReview.",
+      "Ítem 24: pregunta de respuesta múltiple ('Marca todos los colores') modelada como multiple_choice con keys A=Rojo, B=Azul, C=Negro; incluye además una parte de desarrollo ('Explica tu respuesta'). Depende de dos gráficos de barras.",
+      "Ítem 14: el valor desconocido se representa con un triángulo (△) en enunciado y alternativas; transcrito como △. Solo 3 alternativas (A, B, C).",
+      "Valores de tablas/gráficos transcritos desde la imagen en ítems 10, 20, 21, 28 (contexto legible en el enunciado).",
+      "Texto y símbolos transcritos desde la capa de texto del PDF (pdftotext); estructura y figuras confirmadas con las páginas renderizadas."
+    ],
+    "needsHumanReview": true,
+    "crossCheck": {
+      "hardIssues": [],
+      "softWarnings": [
+        "#24: responseFormat cuadernillo=choice vs ficha=develop",
+        "partición no-choice difiere: cuadernillo=[2, 4, 13, 15] vs ficha=[2, 4, 13, 15, 24]"
+      ],
+      "counts": {
+        "cuadernillo": 30,
+        "ficha": 30,
+        "hoja": 30
+      }
+    }
+  },
+  "pauta": {
+    "source": {
+      "ficha": "6_TE DIA Diagnóstico matemática 6° básico 2026.pdf",
+      "hoja": "6_Hoja de respuestas Diagnóstico matemática 6° básico 2026.pdf"
+    },
+    "appliedKeys": 25,
+    "rubrics": 1
+  }
+}

@@ -1,0 +1,1447 @@
+{
+  "schemaVersion": "1.0",
+  "source": {
+    "file": "II_prueba_lectura_monitoreo_2026_II_medio.pdf",
+    "subjectFolder": "Lenguaje"
+  },
+  "instrument": {
+    "name": "DIA Lectura II° Medio 2026 — Intermedio",
+    "subject": "Lenguaje y Comunicación",
+    "subjectCode": "LANG",
+    "grade": "II° Medio",
+    "gradeCode": "2ND_MEDIO",
+    "year": 2026,
+    "applicationPeriod": "intermedio",
+    "type": "dia",
+    "isOfficial": true,
+    "source": "imported"
+  },
+  "sections": [
+    {
+      "order": 1,
+      "name": "Texto 1: «La mancha de humedad»",
+      "type": "multiple_choice",
+      "instructions": "Lee el siguiente texto y responde las preguntas 1 a 6.",
+      "passage": {
+        "title": "La mancha de humedad",
+        "text": "Hace algunos años, en los pueblos del interior del país no se conocía el empapelado de las paredes. Era este un lujo reservado apenas para alguna casa importante, como el despacho del Jefe de Policía o la sala de alguna vieja y rica dama de campanillas. No existía el empapelado, pero sí la humedad sobre los muros pintados a la cal. Para descubrir cosas y soñar con ellas, da lo mismo. Frente a mi vieja camita de jacarandá, con un deforme manojo de rosas talladas a cuchillo en el remate del respaldo, las lluvias fueron filtrando, para mi regalo, una gran mancha de diversos tonos amarillentos, rodeada de salpicaduras irregulares capaces de suplir las flores y los paisajes del papel más abigarrado. En esa mancha yo tuve todo cuanto quise: descubrí las Islas de Coral, encontré el perfil de Barba Azul y el rostro anguloso de Abraham Lincoln, libertador de esclavos, que reverenciaba mi abuelo; tuve el collar de lágrimas de Arminda, el caballo de Blanca Flor y la gallina que pone los huevos de oro; vi el tricornio de Napoleón, la cabra que amamantó a Desdichado de Brabante y montañas echando humo de las pipas de cristal que fuman sus gigantes o sus enanos. Todo lo que oía o adivinaba, cobraba vida en mi mancha de humedad y me daba su tumulto o sus líneas. Cuando mi madre venía a despertarme todas las mañanas, generalmente ya me encontraba con los ojos abiertos, haciendo mis descubrimientos maravillosos. Yo le decía con las pupilas brillantes, tomándole las manos:\n—Mamita, mira aquel gran río que baja por la pared. ¡Cuántos árboles en sus orillas! Tal vez sea el Amazonas. Escucha, mamita, cómo chillan los monos y cómo gritan los guacamayos.\nElla me miraba espantada:\n—¿Pero es que estás dormida con los ojos abiertos, mi tesoro? Oh, Dios mío, esta criatura no tiene bien su cabeza, Juan Luis.\nPero mi padre movía la suya entre dubitativo y sonriente, y contestaba posando sobre mi corona de trenzas su ancha mano protectora:\n—No te preocupes, Isabel. Tiene mucha imaginación, eso es todo.\nY yo seguía viendo en la pared manchada por la humedad del invierno, cuanto apetecía mi imaginación: duendes y rosas, ríos y negros, mundos y cielos. Una tarde, sin embargo, me encontré dentro de mi cuarto a Yango, el pintor. Tenía un gran balde lleno de cal y un pincel grueso como un puño de hombre, que introducía en el balde y pasaba luego concienzudamente por la pared dejándola inmaculada. Fue esto en los primeros días de mi iniciación escolar. Regresaba del colegio, con mi cartera de charol llena de migajas de bizcochos y lápices despuntados. De pie en el umbral del cuarto, contemplé un instante, atónita, casi sin respirar, la obra de Yango que para mí tenía toda la magnitud de un desastre. Mi mancha de humedad había desaparecido, y con ella mi universo. Ya no tendría más ríos ni selvas. Inflexible como la fatalidad, Yango me había desposeído de mi mundo. Algo, una sorda rebelión, empezó a fermentar en mi pecho como burbuja que, creciendo, iba a ahogarme. Fue de incubación rápida cual las tormentas del trópico. Tirando al suelo mi cartera de escolar, me abalancé frenética hasta donde me alcanzaban los brazos, con los puños cerrados. Yango abrió una bocaza redonda como una “O” de gigantes, se quedó unos minutos enarbolando en el vacío su pincel que chorreaba líquida cal y pudo preguntar por fin lleno de asombro:\n—¿Qué le pasa a la niña? ¿Le duele un diente, tal vez?\nY yo, ciega y desesperada, gritaba como un rey que ha perdido sus estados:\n—¡Ladrón! Eres un ladrón, Yango. No te lo perdonaré nunca. Ni a papá, ni a mamá que te lo mandaron. ¿Qué voy a hacer ahora cuando me despierte temprano o cuando tía Fernanda me obligue a dormir la siesta? Bruto, odioso, me has robado mis países llenos de gente y de animales. ¡Te odio, te odio; los odio a todos!\nEl buen hombre no podía comprender aquel chaparrón de llanto y palabras irritadas. Yo me tiré de bruces sobre la cama a sollozar tan desconsoladamente, como solo he llorado después cuando la vida, como Yango el pintor, me ha ido robando todos mis sueños. Tan desconsolada e inútilmente. Porque ninguna lágrima rescata el mundo que se pierde ni el sueño que se desvanece… ¡Ay, yo lo sé bien!\n\nJuana De Ibarbourou. La mancha de humedad. Montevideo: Banda oriental, 2014.\n\nGlosario\ncal: óxido de calcio. Sustancia de color blanco o blanco grisáceo, que al contacto del agua se hidrata y puede usarse como pintura.",
+        "format": "plain",
+        "attachments": []
+      },
+      "items": [
+        {
+          "position": 1,
+          "type": "multiple_choice",
+          "stem": "¿Por qué en los pueblos del interior del país no se utilizaba el empapelado de las paredes?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Porque preferían a los pintores.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Porque había mucha humedad.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Porque elegían usar la cal.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "Porque era un lujo.",
+              "isCorrect": true
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "D",
+          "skill": "Localizar",
+          "oa": "OA 3",
+          "contentAxis": "Narración",
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Localizan información explícita relevante en un texto narrativo. Infieren información relevante sobre personajes en"
+        },
+        {
+          "position": 2,
+          "type": "multiple_choice",
+          "stem": "¿Qué actitud muestra la madre de la niña al escuchar sus relatos todas las mañanas?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Preocupación.",
+              "isCorrect": true
+            },
+            {
+              "key": "B",
+              "text": "Compasión.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Vergüenza.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "Irritación.",
+              "isCorrect": false
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "A",
+          "skill": "Interpretar y relacionar",
+          "oa": "OA 3",
+          "contentAxis": "Narración",
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Infieren información relevante sobre personajes en un texto narrativo. Interpretan elementos simbólicos en un texto"
+        },
+        {
+          "position": 3,
+          "type": "multiple_choice",
+          "stem": "¿Qué representa la mancha de humedad?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "El inicio de la locura.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "La posibilidad de soñar.",
+              "isCorrect": true
+            },
+            {
+              "key": "C",
+              "text": "El rencor hacia la familia.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "La incertidumbre ante la vida.",
+              "isCorrect": false
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "B",
+          "skill": "Interpretar y relacionar",
+          "oa": "OA 3",
+          "contentAxis": "Narración",
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Interpretan elementos simbólicos en un texto narrativo."
+        },
+        {
+          "position": 4,
+          "type": "multiple_choice",
+          "stem": "¿Por qué la niña se enfureció?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Porque le dolía un diente.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Porque la obligaron a dormir siesta.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Porque le pintaron la pared sin su consentimiento.",
+              "isCorrect": true
+            },
+            {
+              "key": "D",
+              "text": "Porque la enviaron al colegio en contra de su voluntad.",
+              "isCorrect": false
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "C",
+          "skill": "Interpretar y relacionar",
+          "oa": "OA 3",
+          "contentAxis": "Narración",
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Infieren el conflicto en un texto narrativo."
+        },
+        {
+          "position": 5,
+          "type": "multiple_choice",
+          "stem": "¿Qué temática aborda el cuento leído?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "La fragilidad de la familia.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "La pérdida de las ilusiones.",
+              "isCorrect": true
+            },
+            {
+              "key": "C",
+              "text": "La ingenuidad de los niños.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "La inestabilidad emocional.",
+              "isCorrect": false
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "B",
+          "skill": "Interpretar y relacionar",
+          "oa": "OA 3",
+          "contentAxis": "Narración",
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Infieren el tema central de un texto narrativo. Evalúan el efecto o visión del uso de un"
+        },
+        {
+          "position": 6,
+          "type": "multiple_choice",
+          "stem": "¿Cómo concibe la vida la narradora?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Como un momento efímero.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Como una batalla incesante.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Como un continuo aprendizaje.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "Como una constante desilusión.",
+              "isCorrect": true
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "D",
+          "skill": "Reflexionar",
+          "oa": "OA 3",
+          "contentAxis": "Narración",
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Evalúan el efecto o visión del uso de un determinado narrador en un texto narrativo."
+        }
+      ]
+    },
+    {
+      "order": 2,
+      "name": "Textos 1 y 2: Hinchas que limpian los estadios",
+      "type": "multiple_choice",
+      "instructions": "Lee los siguientes textos y responde las preguntas 7 a 15.",
+      "passage": {
+        "title": "Textos 1 y 2: Hinchas que limpian los estadios",
+        "text": "Texto 1\n\nDigno de aplausos: hinchas de Iquique se quedaron a limpiar el estadio tras triunfazo ante Audax Italiano\nUna vez terminado el partido, hinchas de Deportes Iquique recogieron la basura y limpiaron la galería del Estadio Municipal de La Pintana, gesto que hizo recordar a los fanáticos japoneses en el Mundial de 2022.\nMartes 20 de febrero de 2024 | 09:28\n\nUn retorno tremendo fue el que tuvo Deportes Iquique a la Primera División, luego de derrotar 3-2 a Audax Italiano en un partido para el infarto.\nLos dragones perdían hasta el minuto 95, pero los goles agónicos de Carlos Villanueva (en contra) y Lázaro Romero le entregaron los primeros tres puntos en el Campeonato Nacional.\nEl compromiso, disputado en el Estadio Municipal de La Pintana, estuvo marcado por la gran cantidad de hinchas que viajaron desde el norte a la capital.\nFuncionarios e hinchas de los dragones tuvieron un lindo gesto con los jugadores contrarios tras la histórica final de la liga, donde se determinó el retorno de los nortinos a Primera División.\nAdemás del mismo encuentro, otro aspecto que llamó la atención fue el gran gesto de los hinchas de Iquique una vez terminado el duelo frente a los itálicos.\nLos fanáticos se dedicaron a limpiar la galería del recinto que ocuparon, al más puro estilo de los japoneses en el Mundial de Catar 2022.\nEn las imágenes, subidas a las redes sociales por el propio club, se puede ver a hombres y mujeres con enormes bolsas recopilando la basura, para luego botarla donde corresponde.\n\nChilevisión Noticias. [Chile]. Web. 20 feb 2024. (Adaptación).\n\n\nTexto 2\n\nUna tendencia aplaudida en el Mundial Sub 20: por qué los japoneses limpian la basura en los estadios\nTal como se pudo apreciar después del encuentro contra Chile, los fanáticos nipones fueron captados limpiando el Estadio Nacional.\nPor Pablo Retamal                3 octubre de 2025\n\nHinchas japoneses se quedaron recogiendo basura en el Estadio Nacional.\nFoto: Photosport. Jonnathan Oyarzun\n\nLa selección de Japón consiguió un importante triunfo sobre la Roja (Selección Nacional de fútbol de Chile) en el Mundial Sub 20. El cuadro nipón se impuso por 2-0 en el Estadio Nacional, lo que les permite afrontar el último duelo de la fase de grupos con algo de tranquilidad.\nPor cierto, no solo los jugadores japoneses se llevaron los elogios, sino que también los hinchas que estuvieron presentes en el recinto de Ñuñoa. Como viene siendo costumbre en diversos eventos deportivos, parte de la fanaticada se quedó en el recinto tras el duelo para limpiar la zona.\nEste comportamiento obedece a que la mantención del orden y la limpieza de los espacios es parte de la formación que reciben desde la infancia. No solo se les enseña a limpiar en casa, sino que también en las escuelas, donde son los mismos estudiantes los encargados de mantener libre de basura los recintos educacionales.\nEstos se dividen en las llamadas “alineaciones de limpieza”, turnándose para barrer y limpiar los suelos.\nAllí se utiliza el zokin, un paño hecho con capas de tela usada o retazos de ropa de tela resistente en la que se apoyan con las manos mientras avanzan caminando, en especial para quitar las impurezas de los pisos de madera. Esta práctica de limpieza (Zokin-gake, en japonés) es tan popular que incluso se realizan competencias de velocidad.\nAsí mismo, en 2008, Japón transformó algunas operaciones de servicio comunitario de recolección de basura en competencias. Allí equipos de entre tres y cinco personas buscan recoger la mayor cantidad de desperdicios dentro de un área y tiempo designado.\n\nUna actividad reconocida por la FIFA\nDurante el Mundial de Catar 2022, la FIFA reconoció a los hinchas japoneses que se quedaron recolectando residuos tras imponerse a Alemania en su primer partido de la Copa del Mundo.\nTsun-san, autoproclamado capitán del grupo de fanáticos llamado Chonmage (nombre del peinado tradicional usado por los samuráis), recibió un reconocimiento del ente rector del fútbol mundial por esta actividad.\n“A decir verdad, no estoy seguro de cuándo empezaron los aficionados japoneses a recoger la basura en los estadios del extranjero. Pero no es algo que suceda únicamente fuera, es algo que los aficionados del país también llevan haciendo por mucho tiempo en los partidos japoneses. Así que no es que hayamos creado tendencia o abierto un nuevo camino ni nada por el estilo”, comentó en diálogo con la FIFA. Y agregó: “Fui al partido Catar-Ecuador el primer día y la cantidad de basura era impactante. Todos llevábamos bolsas, así que junto a una treintena de aficionados japoneses recogimos la basura lo más rápido posible. Lo que pasó fue que un conocido YouTuber de Oriente Medio lo grabó, publicó el vídeo en Instagram y se hizo viral enseguida con 12 millones de reproducciones”.\n“Como ya he dicho, no vamos a adjudicarnos el mérito de ser los pioneros en lo que respecta a la recogida de basura. Es algo que se ve muy a menudo en los estadios de la J-League en Japón. Solo hacemos lo mismo que otros hicieron antes que nosotros, porque creemos que es lo correcto”, concluyó Tsun-san.\n\nPablo Retamal. La Tercera. [Chile]. Web. 3 oct 2025. (Adaptación).",
+        "format": "plain",
+        "attachments": [
+          {
+            "kind": "image",
+            "note": "Fotografía de apoyo en el Texto 2: hinchas japoneses recogiendo basura en el Estadio Nacional (Foto: Photosport, Jonnathan Oyarzun). Decorativa; no se requiere para responder."
+          }
+        ]
+      },
+      "items": [
+        {
+          "position": 7,
+          "type": "multiple_choice",
+          "stem": "De acuerdo al Texto 1, ¿qué cualidad de los hinchas chilenos se asemeja a la de los japoneses?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "El orden que exhibió la hinchada durante todo el partido de fútbol.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "El espíritu competitivo de la hinchada durante un encuentro deportivo.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "La preocupación por mantener el espacio usado en buenas condiciones.",
+              "isCorrect": true
+            },
+            {
+              "key": "D",
+              "text": "La tranquilidad con la que enfrentaron la última fase del campeonato de fútbol.",
+              "isCorrect": false
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "C",
+          "skill": "Interpretar y relacionar",
+          "oa": "OA 10",
+          "contentAxis": null,
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Infieren información relevante en un texto de los medios de comunicación. Infieren información relevante que entregan los"
+        },
+        {
+          "position": 8,
+          "type": "multiple_choice",
+          "stem": "Según el Texto 1, ¿a qué situación se atribuye la expresión “partido para el infarto”?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "A un encuentro de fútbol peligroso para los asistentes.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "A un jugador de fútbol que sufrió problemas cardíacos.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "A un enfrentamiento entre equipos de fútbol lleno de tensión.",
+              "isCorrect": true
+            },
+            {
+              "key": "D",
+              "text": "A una experiencia dolorosa para los hinchas de un equipo de fútbol.",
+              "isCorrect": false
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "C",
+          "skill": "Interpretar y relacionar",
+          "oa": "OA 10",
+          "contentAxis": null,
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "recursos lingüísticos en un texto de los medios de comunicación. Localizan información explícita relevante en un"
+        },
+        {
+          "position": 9,
+          "type": "multiple_choice",
+          "stem": "Según el Texto 2, ¿a qué se refiere el concepto de Zokin-gake?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "A un paño hecho con capas de tela usada.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "A una práctica popular de limpieza.",
+              "isCorrect": true
+            },
+            {
+              "key": "C",
+              "text": "A un tipo de ropa de tela resistente.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "A una competencia de velocidad.",
+              "isCorrect": false
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "B",
+          "skill": "Localizar",
+          "oa": "OA 10",
+          "contentAxis": null,
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Localizan información explícita relevante en un texto de los medios de comunicación. Infieren el tema central de un texto de los medios"
+        },
+        {
+          "position": 10,
+          "type": "multiple_choice",
+          "stem": "¿Cuál es el tema central desarrollado en el Texto 2?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "La viralización de los partidos de la liga japonesa de fútbol J-League.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "El triunfo de Japón sobre Chile en el Mundial de fútbol del año 2022.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "El resultado del equipo de fútbol de Japón en el Mundial de Catar.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "La costumbre de los hinchas japoneses de limpiar los estadios.",
+              "isCorrect": true
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "D",
+          "skill": "Interpretar y relacionar",
+          "oa": "OA 10",
+          "contentAxis": null,
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Infieren el tema central de un texto de los medios de comunicación o un fragmento relevante de este. Distinguen un hecho de una opinión en un texto de"
+        },
+        {
+          "position": 11,
+          "type": "multiple_choice",
+          "stem": "En el Texto 2, ¿cuál de las siguientes afirmaciones corresponde a una opinión?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "“La selección de Japón consiguió un importante triunfo sobre la Roja (Selección Nacional de fútbol de Chile) en el Mundial Sub 20”.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "“Durante el Mundial de Catar 2022, la FIFA reconoció a los hinchas japoneses que se quedaron recolectando residuos”.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "“Solo hacemos lo mismo que otros hicieron antes que nosotros, porque creemos que es lo correcto”.",
+              "isCorrect": true
+            },
+            {
+              "key": "D",
+              "text": "“No solo se les enseña a limpiar en casa, sino que también en las escuelas”.",
+              "isCorrect": false
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "C",
+          "skill": "Reflexionar",
+          "oa": "OA 10",
+          "contentAxis": null,
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Distinguen un hecho de una opinión en un texto de los medios de comunicación. Infieren información relevante en un texto de los"
+        },
+        {
+          "position": 12,
+          "type": "multiple_choice",
+          "stem": "Según el Texto 2, ¿qué explicación entrega el líder de los hinchas japoneses frente a la acción viralizada?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Que las acciones realizadas al final del partido son muy comunes en su país.",
+              "isCorrect": true
+            },
+            {
+              "key": "B",
+              "text": "Que fueron reconocidos por acciones realizadas por otro grupo en un partido.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Que las acciones realizadas al final del partido suceden solo en los mundiales.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "Que fueron los pioneros en realizar este tipo de acciones al terminar los partidos.",
+              "isCorrect": false
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "A",
+          "skill": "Interpretar y relacionar",
+          "oa": "OA 10",
+          "contentAxis": null,
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Infieren información relevante en un texto de los medios de comunicación. Comparan información relevante entre dos textos"
+        },
+        {
+          "position": 13,
+          "type": "multiple_choice",
+          "stem": "¿Qué se puede concluir sobre los hinchas de fútbol mencionados en ambos textos?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Que demuestran respeto por el equipo contrario.",
+              "isCorrect": true
+            },
+            {
+              "key": "B",
+              "text": "Que son capaces de aceptar la derrota de sus equipos.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Que utilizan las redes sociales para viralizar los partidos.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "Que se comportan mejor cuando asisten una copa mundial.",
+              "isCorrect": false
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "A",
+          "skill": "Interpretar y relacionar",
+          "oa": "OA 10",
+          "contentAxis": null,
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Comparan información relevante entre dos textos de los medios de comunicación. Determinan propósitos explícitos e implícitos en un"
+        },
+        {
+          "position": 14,
+          "type": "multiple_choice",
+          "stem": "¿Qué propósito tienen en común ambos textos?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Demostrar la importancia de las redes sociales para la difusión del fútbol.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Destacar un comportamiento pocas veces asociado a los hinchas de fútbol.",
+              "isCorrect": true
+            },
+            {
+              "key": "C",
+              "text": "Informar sobre el resultado de dos partidos importantes de un mundial de fútbol.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "Comparar las costumbres de distintas culturas presentes en un mundial de fútbol.",
+              "isCorrect": false
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "B",
+          "skill": "Reflexionar",
+          "oa": "OA 10",
+          "contentAxis": null,
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Determinan propósitos explícitos e implícitos en un texto de los medios de comunicación. Evalúan la forma en que dos fuentes abordan un"
+        },
+        {
+          "position": 15,
+          "type": "multiple_choice",
+          "stem": "Con respecto a ambos textos, ¿cómo se aborda principalmente la temática de estas noticias?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "En el Texto 1, de manera exagerada al darle importancia a un partido menor. En el Texto 2, de manera dispersa al cambiar de un tema a otro.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "En el Texto 1, de manera apreciativa al destacar un buen gesto en el estadio. En el Texto 2, de manera didáctica al explicar el origen de una conducta.",
+              "isCorrect": true
+            },
+            {
+              "key": "C",
+              "text": "En el Texto 1, de manera sensacionalista al transmitir la tensión del partido. En el Texto 2, de manera crítica con los asistentes que ensucian los estadios.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "En el Texto 1, de una manera emotiva al comunicar las experiencias de los asistentes. En el Texto 2, de manera objetiva al dar cifras sobre los resultados de los partidos.",
+              "isCorrect": false
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "B",
+          "skill": "Reflexionar",
+          "oa": "OA 10",
+          "contentAxis": null,
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "mismo hecho o tema en textos de los medios de comunicación. Localizan información explícita relevante en un"
+        }
+      ]
+    },
+    {
+      "order": 3,
+      "name": "Texto 3: «El casting»",
+      "type": "multiple_choice",
+      "instructions": "Lee el siguiente texto y responde las preguntas 16 a 21.",
+      "passage": {
+        "title": "El casting",
+        "text": "Aparece en escena José María. Se para frente al gran portón de una mansión. Toca timbre. Se emprolija el pelo para las cámaras de seguridad.\nMUCAMA: ¿Sí?\nJOSÉ MARÍA: (Por el portero eléctrico). Qué tal, ¿se encuentra el señor Rosemburf?\nMUCAMA: (Voz filtrada). ¿De parte de quién?\nJOSÉ MARÍA: José María Villate. Dígale: de “El príncipe encantado”, 1997.\nMUCAMA: Un momento, por favor.\nJOSÉ MARÍA: Sí, cómo no.\nJosé María camina algo nervioso. Se arregla un poco.\nRICARDO ROSEMBURF: (Voz filtrada). ¿Sí?\nJOSÉ MARÍA: ¡¿Ricardo…?!\nRICARDO ROSEMBURF: Sí, ¿quién es?\nJOSÉ MARÍA: ¡Ricardo! ¡Tienes la voz igualita…! (Hablando a la cámara de seguridad). ¿Me estás mirando? ¿Vos me ves a mí?... (Se señala). José María, “El príncipe encantado”, Centro cultural de Moreno. 1997… ¡Qué recuerdos! Pensar que éramos tan jóvenes, con tantas ganas de trabajar, de viajar por el mundo con el teatro... ¡Y ahora, mírate...! Productor comercial en las ligas mayores. ¡Qué linda casa...! Felicitaciones, Ricardo... Te veo en los carteles cuando paso por la avenida Corrientes y pienso: “Compartíamos el camarín en ‘El príncipe encantado’”... ¿Eh, te acuerdas?\nRICARDO ROSEMBURF: (Intentando recordar). José María... José María. Sí,... actor...\nJOSÉ MARÍA: ¡Sí!\nRICARDO ROSEMBURF: ¿Me esperas un momentito?\nJOSÉ MARÍA: Sí, cómo no. ¡Todo el tiempo que quieras...!\nJosé María espera un rato que al espectador le tiene que parecer largo.\nJOSÉ MARÍA: (Hablándole al portero eléctrico). ¡Ricardo! ¿Ya estás? Perdóname que te moleste... Es que pasaba por acá, y como me acordé de la fachada de tu casa por una revista que leí, me dije: “voy a pasar a saludarlo, a ver en qué anda, después de tantos años...” ¿Sabes a quién vi el otro día en un casting? ¡Al gordo Ruiz! También está igualito... audicionaba para “gordo”... Yo iba para “amigo del gordo”, pero no me interesó la propuesta, un cachet muy bajo... Cómo nos reíamos con Ruiz, eh... Sí que eran buenas épocas... ¿Estás ahí, Ricardo?... Ahora escribo también... Mira... (Comienza a buscar dentro de su bolso el texto). ¡Espérame eh...!\nEntra Julia corriendo.\nJULIA: Disculpe, señor…\nJOSÉ MARÍA: (Dirigiéndose al texto, mientras revuelve su bolso). ¿Dónde estás carajo?... Ya va Ricardo, ¿eh…? Ya va…\nJULIA: Señor… Señor… ¡Señor!\nJosé María encuentra el texto.\nJOSÉ MARÍA: (Aferrando el texto). Sí, sí, ¿qué pasa?\nJULIA: ¡Me robaron el celular! Por favor…\nJOSÉ MARÍA: Uy… ¿Estás bien?\nJULIA: Algo aturdida… Se bajó de una moto, eran dos tipos… Sí, dos, uno se bajó de una moto ¡y zas!\nJOSÉ MARÍA: (Como distraído). Sí, pobre…\nJULIA: Tenía un arma… No sé… estoy confundida….\nJOSÉ MARÍA: Terrible, che… A tres cuadras hay una comisaría.\nJULIA: ¿Tres cuadras? ¿Hacia dónde?\nJOSÉ MARÍA: (Apurado). No me acuerdo muy bien, es la primera vez que vengo por acá, pero vi una desde el bondi. Fíjate por ahí… (Señala una dirección).\nJULIA: ¿Hacia ahí? No, pero yo vine por esa dirección y estoy segura de que… (Pausa). Bueno, gracias igual.\nJOSÉ MARÍA: (Hablándole al portero eléctrico). Ricardo, ya estoy con vos, ¿eh…?\nJULIA: ¡Ayúdeme, señor! Por favor… (Llora). ¡Mi celular nuevo…! Por favor… Tenía toda mi agenda ahí… Había terminado de pagarlo… Encima voy a llegar tarde y no tengo cómo avisar. (Intenta asomarse a la cámara de seguridad y le habla al portero eléctrico). Hola… ¿Hay alguien allí? Seguridad… ¿Hola?\nJOSÉ MARÍA: (Duda dos segundos y le da su celular). Toma, habla, rápido, que tengo poco crédito. (Vuelve hacia la cámara desde donde miraría Ricardo Rosemburf).\nJulia toma el celular y marca.\nJOSÉ MARÍA: (Hablándole a Ricardo). Estoy, eh… No me fui…\nJULIA: (Mientras marca). Me lo había comprado con la última publicidad que hice…\nPausa. José María la mira: es actriz, es competencia.\n\nS. Kirszner. El casting. En Panorama Interzona. Narrativas emergentes de la Argentina. Buenos Aires, 2012. (Fragmento).\n\nGlosario\ncachet: pago que recibe un artista por una actuación en vivo.\nbondi: autobús.",
+        "format": "plain",
+        "attachments": []
+      },
+      "items": [
+        {
+          "position": 16,
+          "type": "multiple_choice",
+          "stem": "¿Dónde ocurren las acciones del fragmento anterior?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "En la comisaría.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "En la Avenida Corrientes.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "En el portón de una mansión.",
+              "isCorrect": true
+            },
+            {
+              "key": "D",
+              "text": "En el Centro cultural de Moreno.",
+              "isCorrect": false
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "C",
+          "skill": "Localizar",
+          "oa": "OA 5",
+          "contentAxis": null,
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Localizan información explícita relevante en un texto dramático. Infieren información relevante sobre personajes en"
+        },
+        {
+          "position": 17,
+          "type": "multiple_choice",
+          "stem": "Considerando el fragmento leído, ¿cómo es José María?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Resentido.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Insistente.",
+              "isCorrect": true
+            },
+            {
+              "key": "C",
+              "text": "Violento.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "Quejoso.",
+              "isCorrect": false
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "B",
+          "skill": "Interpretar y relacionar",
+          "oa": "OA 5",
+          "contentAxis": null,
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Infieren información relevante sobre personajes en un texto dramático. Infieren información relevante sobre personajes en"
+        },
+        {
+          "position": 18,
+          "type": "multiple_choice",
+          "stem": "¿Cuál es la verdadera motivación de José María al contactar a Ricardo Rosemburf?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Conocer su casa.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Mostrarle lo que escribe.",
+              "isCorrect": true
+            },
+            {
+              "key": "C",
+              "text": "Advertirle sobre unos ladrones.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "Recordar anécdotas del pasado.",
+              "isCorrect": false
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "B",
+          "skill": "Interpretar y relacionar",
+          "oa": "OA 5",
+          "contentAxis": null,
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Infieren información relevante sobre personajes en un texto dramático. Caracterizan las relaciones entre los personajes de"
+        },
+        {
+          "position": 19,
+          "type": "multiple_choice",
+          "stem": "¿Cómo se muestra Ricardo frente a José María?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Enojado.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Ansioso.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Desconfiado.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "Desinteresado.",
+              "isCorrect": true
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "D",
+          "skill": "Interpretar y relacionar",
+          "oa": "OA 5",
+          "contentAxis": null,
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Caracterizan las relaciones entre los personajes de un texto dramático. Infieren información relevante sobre personajes en"
+        },
+        {
+          "position": 20,
+          "type": "multiple_choice",
+          "stem": "En el final del fragmento, ¿por qué José María se fija repentinamente en Julia?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Porque se entera de que Julia también es actriz.",
+              "isCorrect": true
+            },
+            {
+              "key": "B",
+              "text": "Porque se imagina que Ricardo los está observando.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Porque se percata de que Julia le habla al portero eléctrico.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "Porque se da cuenta de que tenía poco crédito en su teléfono.",
+              "isCorrect": false
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "A",
+          "skill": "Interpretar y relacionar",
+          "oa": "OA 5",
+          "contentAxis": null,
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Infieren información relevante sobre personajes en un texto dramático. Determinan la visión de mundo que se presenta en"
+        },
+        {
+          "position": 21,
+          "type": "multiple_choice",
+          "stem": "¿Qué problemática humana se observa en el personaje de José María?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "El engaño, porque está inventando que conoce a Ricardo.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "La envidia, porque no quiere que Julia tenga más éxito que él.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "La hipocresía, porque está adulando a Ricardo para beneficiarse de él.",
+              "isCorrect": true
+            },
+            {
+              "key": "D",
+              "text": "El egocentrismo, porque no desea compartir sus privilegios con Julia.",
+              "isCorrect": false
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "C",
+          "skill": "Reflexionar",
+          "oa": "OA 5",
+          "contentAxis": null,
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Determinan la visión de mundo que se presenta en un texto dramático. Localizan información explícita relevante en un"
+        }
+      ]
+    },
+    {
+      "order": 4,
+      "name": "Texto 4: «Garbage Café: el innovador restaurante de India»",
+      "type": "mixed",
+      "instructions": "Lee el siguiente texto y responde las preguntas 22 a 27.",
+      "passage": {
+        "title": "Garbage Café: el innovador restaurante de India",
+        "text": "Noticias Ambientales - Residuos\n\nGarbage Café: el innovador restaurante de India\n15 septiembre, 2025\n\nEn la ciudad india de Ambikapur, un pequeño local de nombre curioso está transformando la relación entre basura y alimentación. Se trata del Garbage Café (Café de la basura, en español), un espacio donde las personas intercambian plástico por comida.\nLa iniciativa surgió en 2019 como parte de la estrategia municipal para reducir la presencia de plásticos en calles y vertederos. Desde entonces, el proyecto ha recuperado más de veinte toneladas de residuos que de otro modo habrían terminado en ríos u océanos.\nEl sistema es sencillo: un kilo de plástico equivale a un almuerzo completo, mientras que medio kilo puede canjearse por un desayuno. El material reunido se canaliza a los centros locales de gestión de residuos, donde se clasifica y aprovecha en nuevas cadenas de valor. En un país que produce millones de toneladas de plásticos al año y enfrenta enormes dificultades para su reciclaje, esta fórmula muestra cómo las soluciones locales pueden marcar la diferencia. Más allá de la comida servida, el Garbage Café puso a Ambikapur en el mapa de la innovación social y ambiental.\n\nEl poder de unir reciclaje y alimentación\nEl modelo del Garbage Café genera beneficios en tres frentes: ambiental, social y económico. En primer lugar, contribuye a limpiar la ciudad, evitando que plásticos de un solo uso lleguen a vertederos, cursos de agua o espacios públicos. Al ser canjeados por alimentos, estos residuos encuentran un destino más útil, que incluye su transformación en material para carreteras o combustible alternativo.\nEn segundo lugar, el café atiende necesidades básicas de quienes viven en situación de vulnerabilidad. Para recolectores informales y familias de bajos ingresos, entregar envases, botellas o envoltorios representa la posibilidad de acceder a un plato caliente y nutritivo. Esto convierte el plástico, antes desecho, en una especie de moneda solidaria que garantiza seguridad alimentaria.\nEn tercer lugar, el modelo impulsa la economía circular al generar empleo en centros de gestión de residuos. Decenas de mujeres clasifican el material en múltiples categorías, promoviendo inclusión laboral y reduciendo la dependencia de vertederos. De esta manera, la cafetería actúa como un puente entre la ciudadanía y el sistema de reciclaje formal.\nEl impacto no se mide únicamente en toneladas recuperadas, sino en la conciencia colectiva que fomenta. Comer gracias al plástico recogido transmite un mensaje claro: cada residuo separado es un recurso con valor.\n\nMás allá de Ambikapur: un modelo replicable\nEl Garbage Café no quedó como una experiencia aislada. En otras ciudades indias también se implementaron programas similares. En los lugares donde funciona, se observa una disminución en la cantidad de plástico sin recolectar, un mayor involucramiento de la población y un alivio concreto para familias que padecen hambre.\nEl modelo, además, puede servir de inspiración a otras naciones que enfrentan crisis similares. La combinación de reciclaje y alimentación ofrece una herramienta sencilla, adaptable y cargada de simbolismo. No resuelve por completo el problema del plástico ni garantiza la erradicación del hambre, pero abre la puerta a soluciones comunitarias que dignifican y transforman.\nEsta experiencia recuerda que los grandes desafíos ambientales no siempre requieren respuestas complejas o costosas. A veces basta con vincular necesidades humanas urgentes con soluciones prácticas. Al convertir el plástico en comida, esta iniciativa logró unir dos crisis —la de los residuos y la del hambre— en un mismo acto de justicia ambiental y social.\nSi más ciudades siguen este camino, el plástico podría dejar de ser un enemigo para convertirse en una oportunidad de regeneración. La experiencia de Ambikapur demuestra que, cuando se combina creatividad con compromiso, los residuos pueden alimentar no solo a las personas, sino también la esperanza de un futuro más sostenible.\n\nNoticias Ambientales. [Argentina]. Web. 15 sep 2025. (Adaptación).\n\nGlosario\ncadenas de valor: conjunto completo de actividades necesarias para crear un producto o servicio y ponerlo a disposición de los consumidores.",
+        "format": "plain",
+        "attachments": []
+      },
+      "items": [
+        {
+          "position": 22,
+          "type": "multiple_choice",
+          "stem": "De acuerdo al texto, ¿en qué contribuye, en primer lugar, el café?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "A la transformación del material.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "A la generación de empleo.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "A la seguridad alimentaria.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "A la limpieza de la ciudad.",
+              "isCorrect": true
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "D",
+          "skill": "Localizar",
+          "oa": "OA 10",
+          "contentAxis": null,
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Localizan información explícita relevante en un texto de los medios de comunicación. Infieren el tema central de un texto de los medios"
+        },
+        {
+          "position": 23,
+          "type": "multiple_choice",
+          "stem": "¿Cuál es el tema central del texto?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Un curioso nombre de un café indio.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "El ciclo de plásticos de un solo uso en India.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Un original sistema de gestión de residuos indio.",
+              "isCorrect": true
+            },
+            {
+              "key": "D",
+              "text": "El escenario actual de vulnerabilidad social en India.",
+              "isCorrect": false
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "C",
+          "skill": "Interpretar y relacionar",
+          "oa": "OA 10",
+          "contentAxis": null,
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Infieren el tema central de un texto de los medios de comunicación o un fragmento relevante de este."
+        },
+        {
+          "position": 24,
+          "type": "multiple_choice",
+          "stem": "Según el texto, ¿por qué se presenta al Garbage Café como un modelo replicable?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Porque incrementa el valor de los residuos.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Porque garantiza la erradicación del hambre.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Porque elimina el problema de la contaminación.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "Porque motiva el compromiso con la comunidad.",
+              "isCorrect": true
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "D",
+          "skill": "Interpretar y relacionar",
+          "oa": "OA 10",
+          "contentAxis": null,
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Infieren información relevante en un texto de los medios de comunicación. Infieren información relevante en un texto de los"
+        },
+        {
+          "position": 25,
+          "type": "multiple_choice",
+          "stem": "Según el texto, ¿cuál de las siguientes situaciones es un ejemplo de economía circular impulsada por el Garbage Café?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "La reducción de la cantidad de familias con hambre.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "La incorporación de las mujeres a la fuerza de trabajo.",
+              "isCorrect": true
+            },
+            {
+              "key": "C",
+              "text": "La disminución de la cantidad de plástico sin recuperar.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "La estrategia municipal para mantener los océanos limpios.",
+              "isCorrect": false
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "B",
+          "skill": "Interpretar y relacionar",
+          "oa": "OA 10",
+          "contentAxis": null,
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Infieren información relevante en un texto de los medios de comunicación. Determinan propósitos explícitos e implícitos en un"
+        },
+        {
+          "position": 26,
+          "type": "multiple_choice",
+          "stem": "¿Cuál es el propósito del autor del texto?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Denunciar un caso de injusticia social.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Fomentar la adhesión a una causa justa.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Difundir los alcances de un proyecto ecológico local.",
+              "isCorrect": true
+            },
+            {
+              "key": "D",
+              "text": "Explicar la manera de aplicar una estrategia ecológica.",
+              "isCorrect": false
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "C",
+          "skill": "Reflexionar",
+          "oa": "OA 10",
+          "contentAxis": null,
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Determinan propósitos explícitos e implícitos en un texto de los medios de comunicación. Formulan una postura personal sobre algún aspecto"
+        },
+        {
+          "position": 27,
+          "type": "open_ended",
+          "stem": "¿Consideras que la idea del Garbage Café es una iniciativa efectiva para resolver definitivamente problemas sociales y ambientales? Fundamenta tu postura utilizando información del texto.\nSí.\nNo.\n¿Por qué?",
+          "alternatives": [],
+          "responseFormat": "develop",
+          "correctKey": null,
+          "skill": "Reflexionar",
+          "oa": "OA 10",
+          "contentAxis": null,
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "controversial de un texto de los medios de comunicación. Establecen conclusiones sobre distintos aspectos",
+          "rubric": "Tipos de respuestas Respuestas correctas Respuestas parcialmente Respuestas incorrectas correctas (Código 2) (Código 0) (Código 1) La o el estudiante formula una opinión crítica La o el estudiante formula una opinión La o el estudiante formula una a partir de un aspecto controversial de la a partir de un aspecto controversial de opinión respecto a la situación por lectura, con fundamentos que integren la lectura, pero no demuestra un la que se pregunta, pero evidencia información del texto de los medios de análisis profundo de la situación en su respuesta una comprensión comunicación y/o sus conocimientos previos, expuesta en su respuesta. errónea del texto y/o la información evidenciando en su respuesta una solicitada en la pregunta, pues no comprensión y análisis adecuado del texto. En este caso, se consideraría una realiza un análisis crítico de la respuesta parcial, cuando el/la información global y evidencia En este caso, se consideraría una respuesta estudiante formula una opinión errores en la comprensión lectora correcta aquella en el que el/la estudiante (respuestas incoherentes, vagas, personal, comprendiendo el texto de formule una postura personal sobre la manera general, pero sin aludir a los tautológicas, etc.). efectividad de una iniciativa para solucionar resultados obtenidos por la problemáticas sociales asociadas a la También son incorrectas las implementación de la iniciativa en situación ambiental y social de las personas. respuestas en blanco. cuestión en términos globales. En este Los elementos que podría considerar en caso sentido, pueden aludir a un aspecto de responder sí, serían, por ejemplo: los puntual mencionado (problema de resultados inmediatos y a largo plazo de la alimentación, recolección de basura, medida (crear conciencia ecológica, apoyo a etc.), pero no evalúan la proyección de las personas de menor ingreso, etc.). los efectos de la iniciativa como Los elementos que podría considerar en caso resolución definitiva a problemáticas de responder no, serían, por ejemplo: los sociales. O bien, pueden aludir a la resultados inmediatos, pero que no sugieren responsabilidad de la resolución de los un cambio real (conciencia ecológica, problemas expuestos. cantidad de personas a las que ayuda, etc.). Ejemplos: Ejemplos: Ejemplos: - Sí, porque es un paso para que las - Sí, porque las personas que no - Sí, porque se solucionaron los personas desarrollen conciencia sobre el pueden alimentarse, lo pueden dos problemas. manejo de la basura y, al mismo tiempo, hacer de forma gratuita. - No, porque no es apropiado se ayuda a las familias que no tienen qué - No, porque el Estado debería juntar basura en un café. comer. resolver los problemas de las - No, porque solo mejora la situación personas y no un negocio básica de algunas familias, pero no de particular. toda la población, y lo mismo pasa con la basura, ya que la gente sigue produciéndola. 10 &gt; Diagnóstico Integral de Aprendizajes Instrumentos de Evaluación 2026 agenciaeducacion.cl"
+        }
+      ]
+    },
+    {
+      "order": 5,
+      "name": "Texto 5: «Prehistoria»",
+      "type": "multiple_choice",
+      "instructions": "Lee el siguiente texto y responde las preguntas 28 a 33.",
+      "passage": {
+        "title": "Prehistoria",
+        "text": "Al contemplar por primera vez la noche\nme pregunté: ¿será eterna?\nQuise indagar la razón del sol, la inconstante\nmovilidad de la luna,\nla misteriosa armada de estrellas\nque navegan sin desplomarse.\nEnseguida pensé que Dios es dos:\nla luna y el sol, la tierra y el mar, el aire y el fuego,\nO es dos en uno:\nla lluvia / la planta, el relámpago / el trueno.\n¿De dónde viene la lumbre del fuego?\n¿La produce el estruendo? ¿O es la llama\nla que suena al desgarrar el espacio?\n(como la grieta al muro antes de caer\npor los espasmos del planeta siempre en trance de hacerse).\n¿Dios es el bien porque regala la lluvia?\n¿Dios es el mal por ser la piedra que mata?\n¿Dios es el agua que cuando falta aniquila\ny cuando crece nos arrastra y ahoga?\nA la parte de mí que me da miedo\nla llamaré Demonio.\n¿O es el doble de Dios, su inmensa sombra?\nPorque sin el dolor y sin el mal\nno existirían el bien y el placer\ndel mismo modo que para la luz\nson necesarias las tinieblas.\nNunca jamás encontraré la respuesta.\nNo tengo tiempo. Me perdí en el tiempo.\nSe acabó el que me dieron.\n\nJosé Emilio Pacheco. La fábula del tiempo. Santiago: LOM Ediciones, 2007.",
+        "format": "plain",
+        "attachments": []
+      },
+      "items": [
+        {
+          "position": 28,
+          "type": "multiple_choice",
+          "stem": "A lo largo del poema, ¿qué actitud tiene el hablante?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Confiada.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Reflexiva.",
+              "isCorrect": true
+            },
+            {
+              "key": "C",
+              "text": "Temerosa.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "Desconsolada.",
+              "isCorrect": false
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "B",
+          "skill": "Interpretar y relacionar",
+          "oa": "OA 4",
+          "contentAxis": "Poema",
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Establecen conclusiones sobre distintos aspectos en un poema. Establecen conclusiones sobre distintos aspectos"
+        },
+        {
+          "position": 29,
+          "type": "multiple_choice",
+          "stem": "¿Qué se cuestiona el hablante sobre Dios?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Su origen.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Su dualidad.",
+              "isCorrect": true
+            },
+            {
+              "key": "C",
+              "text": "Su autoridad.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "Su inmortalidad.",
+              "isCorrect": false
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "B",
+          "skill": "Interpretar y relacionar",
+          "oa": "OA 4",
+          "contentAxis": "Poema",
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Establecen conclusiones sobre distintos aspectos en un poema."
+        },
+        {
+          "position": 30,
+          "type": "multiple_choice",
+          "stem": "¿De qué trata este poema?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "De la meditación sobre la existencia.",
+              "isCorrect": true
+            },
+            {
+              "key": "B",
+              "text": "De la contemplación de la naturaleza.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "De la percepción de los hechos históricos.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "De la observación de las emociones humanas.",
+              "isCorrect": false
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "A",
+          "skill": "Interpretar y relacionar",
+          "oa": "OA 4",
+          "contentAxis": "Poema",
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Infieren el sentido global de un poema. Establecen conclusiones sobre distintos aspectos"
+        },
+        {
+          "position": 31,
+          "type": "multiple_choice",
+          "stem": "En la última estrofa del poema, ¿qué concluye el hablante?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Que su duda se aclara al momento de la muerte.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Que su forma de gestionar el tiempo es ineficiente.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Que su búsqueda de respuestas es guiada por Dios.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "Que su capacidad para entender la vida es limitada.",
+              "isCorrect": true
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "D",
+          "skill": "Interpretar y relacionar",
+          "oa": "OA 4",
+          "contentAxis": "Poema",
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Establecen conclusiones sobre distintos aspectos en un poema. Interpretan el sentido de elementos simbólicos"
+        },
+        {
+          "position": 32,
+          "type": "multiple_choice",
+          "stem": "¿Qué representa la sombra en la penúltima estrofa?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "El mal.",
+              "isCorrect": true
+            },
+            {
+              "key": "B",
+              "text": "El placer.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "La muerte.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "La ignorancia.",
+              "isCorrect": false
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "A",
+          "skill": "Interpretar y relacionar",
+          "oa": "OA 4",
+          "contentAxis": "Poema",
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Interpretan el sentido de elementos simbólicos presentes en un poema. Evalúan el efecto o función que tienen las"
+        },
+        {
+          "position": 33,
+          "type": "multiple_choice",
+          "stem": "¿Para qué el hablante usa las preguntas en el poema?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Para exigir respuestas.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Para demostrar que es ignorante.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Para reforzar el sentimiento de incertidumbre.",
+              "isCorrect": true
+            },
+            {
+              "key": "D",
+              "text": "Para enfatizar la desconfianza frente a lo desconocido.",
+              "isCorrect": false
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "C",
+          "skill": "Reflexionar",
+          "oa": "OA 4",
+          "contentAxis": "Poema",
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Evalúan el efecto o función que tienen las repeticiones o el lenguaje figurado en un poema. Evalúan la forma en que se aborda el tema en un"
+        }
+      ]
+    },
+    {
+      "order": 6,
+      "name": "Texto 6: «Prisioneros del celular»",
+      "type": "multiple_choice",
+      "instructions": "Lee el siguiente texto y responde las preguntas 34 a 38.",
+      "passage": {
+        "title": "Prisioneros del celular",
+        "text": "NACIONAL     CARTA AL DIRECTOR\n\nViernes 12 de abril de 2019\n\nPrisioneros del celular\n\nSeñor director:\n\nQué duda cabe de que la sociedad actual está dominada por los teléfonos celulares. Qué más democrático que un celular: lo usa todo tipo de gente, sin importar su posición social o credo político. Aquí no vale ni el estilo de vida, grado de instrucción, estatura, grado de religiosidad o si es del Colo Colo, la Chile o la Católica. El celular también se usa como “ayudamemoria” en las pruebas y exámenes escritos. Las personas recurren a él en la consulta médica, cuando van manejando, solos o acompañados, en el restorán, en la playa o en la montaña; y después de acostarse a dormir lo dejan prendido, por si acaso. Sagradamente lo usan en la iglesia. ¡No vaya a ser cosa que nos llame Dios y cometamos la falta de respeto de tener el celular apagado! Se cumple, de esta manera, la observación de un ayudante de Graham Bell, en la segunda mitad del siglo XIX, cuando informó que el ideal es que “todo el mundo lleve un teléfono del tamaño de un reloj y que si llamamos a alguien y no contesta, la única razón es que haya muerto”. Podemos decir que su aspiración de partir de este mundo con un teléfono del tamaño de un reloj en la mano, o en el bolsillo, se ha hecho realidad.\n\nMauricio Pilleux Dresdner.\n\nMauricio Pilleux Dresdner. LUN. [Santiago:Chile]. Web. 20 de marzo 2021.",
+        "format": "plain",
+        "attachments": []
+      },
+      "items": [
+        {
+          "position": 34,
+          "type": "multiple_choice",
+          "stem": "¿De qué manera trata el tema el autor del texto?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Emotiva.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Irónica.",
+              "isCorrect": true
+            },
+            {
+              "key": "C",
+              "text": "Objetiva.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "Nostálgica.",
+              "isCorrect": false
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "B",
+          "skill": "Reflexionar",
+          "oa": "OA 10",
+          "contentAxis": null,
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Evalúan la forma en que se aborda el tema en un texto argumentativo."
+        },
+        {
+          "position": 35,
+          "type": "multiple_choice",
+          "stem": "¿Cuál es la postura del autor del texto respecto de los celulares?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Representan una herramienta de la vida moderna.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Disminuyen la convivencia entre la gente.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Generan dependencia en las personas.",
+              "isCorrect": true
+            },
+            {
+              "key": "D",
+              "text": "Marcan un hito clave de la humanidad.",
+              "isCorrect": false
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "C",
+          "skill": "Interpretar y relacionar",
+          "oa": "OA 9",
+          "contentAxis": null,
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Infieren la tesis del autor en un texto argumentativo. Infieren los argumentos que respaldan tesis del"
+        },
+        {
+          "position": 36,
+          "type": "multiple_choice",
+          "stem": "¿En qué se basa la opinión del autor?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "En datos científicos.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "En ejemplos de la vida cotidiana.",
+              "isCorrect": true
+            },
+            {
+              "key": "C",
+              "text": "En hechos históricos comprobados.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "En la opinión de expertos sobre el tema.",
+              "isCorrect": false
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "B",
+          "skill": "Interpretar y relacionar",
+          "oa": "OA 9",
+          "contentAxis": null,
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Infieren los argumentos que respaldan tesis del autor en un texto argumentativo. Infieren información relevante (datos, hechos,"
+        },
+        {
+          "position": 37,
+          "type": "multiple_choice",
+          "stem": "¿Por qué Mauricio Pilleux considera que el celular es democrático?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Porque todos pueden tener acceso a uno.",
+              "isCorrect": true
+            },
+            {
+              "key": "B",
+              "text": "Porque permite estar conectado con todas las personas.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Porque fomenta distintos estilos de vida para todos por igual.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "Porque todos tienen la opción de resolver sus dudas a través de él.",
+              "isCorrect": false
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "A",
+          "skill": "Interpretar y relacionar",
+          "oa": "OA 9",
+          "contentAxis": null,
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Infieren información relevante (datos, hechos, opiniones, etc.) en un texto argumentativo. Determinan los prejuicios, estereotipos y creencias"
+        },
+        {
+          "position": 38,
+          "type": "multiple_choice",
+          "stem": "¿Qué actitud tiene el autor hacia la sociedad actual en cuanto al uso de celulares?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Comprensiva.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Indiferente.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Tolerante.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "Crítica.",
+              "isCorrect": true
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "D",
+          "skill": "Reflexionar",
+          "oa": "OA 9",
+          "contentAxis": null,
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Determinan los prejuicios, estereotipos y creencias en un texto argumentativo."
+        }
+      ]
+    }
+  ],
+  "extraction": {
+    "itemCount": 38,
+    "warnings": [
+      "Q27 es ítem de desarrollo (open_ended / develop): pide postura Sí/No y fundamentar con información del texto.",
+      "La Sección 2 (preguntas 7 a 15) es un conjunto de dos textos periodísticos (Texto 1: hinchas de Iquique; Texto 2: hinchas japoneses) que se leen juntos; ambos se transcribieron completos dentro de un mismo passage.",
+      "El Texto 2 (Sección 2) incluye una fotografía de apoyo (hinchas japoneses en el Estadio Nacional) que es decorativa y no se requiere para responder.",
+      "Textos transcritos verbatim desde la capa de texto del PDF (pdftotext -layout)."
+    ],
+    "needsHumanReview": false,
+    "crossCheck": {
+      "hardIssues": [],
+      "softWarnings": [],
+      "counts": {
+        "cuadernillo": 38,
+        "ficha": 38,
+        "hoja": 38
+      }
+    }
+  },
+  "pauta": {
+    "source": {
+      "ficha": "II_ficha_tecnica_lectura_monitoreo_2026_II_medio.pdf",
+      "hoja": "II_hoja_de_respuestas_lectura_monitoreo_2026_II_medio.pdf"
+    },
+    "appliedKeys": 37,
+    "rubrics": 1
+  }
+}

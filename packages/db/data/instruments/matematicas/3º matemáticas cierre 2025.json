@@ -193,7 +193,8 @@
               "name": "Números y operaciones",
               "tagType": "secondary"
             }
-          ]
+          ],
+          "imageRef": "item/global/3ro-matematicas-cierre-2025/item_figure/03.png"
         },
         {
           "position": 4,
@@ -262,19 +263,22 @@
               "key": "A",
               "text": "2 grupos de fichas, cada uno con 9 fichas (2 × 9).",
               "isImage": true,
-              "isCorrect": false
+              "isCorrect": false,
+              "imageRef": "item/global/3ro-matematicas-cierre-2025/alt_figure/05_A.png"
             },
             {
               "key": "B",
               "text": "3 grupos de fichas: dos grupos de 9 y 7 fichas, y un grupo de 3 fichas (agrupación desigual).",
               "isImage": true,
-              "isCorrect": false
+              "isCorrect": false,
+              "imageRef": "item/global/3ro-matematicas-cierre-2025/alt_figure/05_B.png"
             },
             {
               "key": "C",
               "text": "3 grupos de fichas, cada uno con 6 fichas (3 × 6 = 18).",
               "isImage": true,
-              "isCorrect": true
+              "isCorrect": true,
+              "imageRef": "item/global/3ro-matematicas-cierre-2025/alt_figure/05_C.png"
             }
           ],
           "correctKey": "C",
@@ -310,7 +314,8 @@
               "name": "Números y operaciones",
               "tagType": "secondary"
             }
-          ]
+          ],
+          "imageRef": "item/global/3ro-matematicas-cierre-2025/item_figure/05.png"
         },
         {
           "position": 6,
@@ -506,7 +511,8 @@
               "name": "Patrones y álgebra",
               "tagType": "secondary"
             }
-          ]
+          ],
+          "imageRef": "item/global/3ro-matematicas-cierre-2025/item_figure/09.png"
         },
         {
           "position": 10,
@@ -563,7 +569,8 @@
               "name": "Patrones y álgebra",
               "tagType": "secondary"
             }
-          ]
+          ],
+          "imageRef": "item/global/3ro-matematicas-cierre-2025/item_figure/10.png"
         },
         {
           "position": 11,
@@ -575,19 +582,22 @@
               "key": "A",
               "text": "Red en forma de cruz: fila horizontal de 4 cuadrados con un cuadrado arriba y otro abajo del tercer cuadrado (red válida de cubo).",
               "isImage": true,
-              "isCorrect": true
+              "isCorrect": true,
+              "imageRef": "item/global/3ro-matematicas-cierre-2025/alt_figure/11_A.png"
             },
             {
               "key": "B",
               "text": "Fila horizontal de 4 cuadrados con un cuadrado arriba y otro abajo, ambos sobre el segundo cuadrado y de forma irregular (no es red válida de cubo).",
               "isImage": true,
-              "isCorrect": false
+              "isCorrect": false,
+              "imageRef": "item/global/3ro-matematicas-cierre-2025/alt_figure/11_B.png"
             },
             {
               "key": "C",
               "text": "Fila horizontal de 4 cuadrados con un cuadrado arriba y otro abajo del cuarto cuadrado (red en forma de cruz desplazada).",
               "isImage": true,
-              "isCorrect": false
+              "isCorrect": false,
+              "imageRef": "item/global/3ro-matematicas-cierre-2025/alt_figure/11_C.png"
             }
           ],
           "correctKey": "A",
@@ -623,7 +633,8 @@
               "name": "Geometría",
               "tagType": "secondary"
             }
-          ]
+          ],
+          "imageRef": "item/global/3ro-matematicas-cierre-2025/item_figure/11.png"
         },
         {
           "position": 12,
@@ -635,19 +646,22 @@
               "key": "A",
               "text": "Un tetraedro / pirámide de base triangular.",
               "isImage": true,
-              "isCorrect": false
+              "isCorrect": false,
+              "imageRef": "item/global/3ro-matematicas-cierre-2025/alt_figure/12_A.png"
             },
             {
               "key": "B",
               "text": "Un cono.",
               "isImage": true,
-              "isCorrect": false
+              "isCorrect": false,
+              "imageRef": "item/global/3ro-matematicas-cierre-2025/alt_figure/12_B.png"
             },
             {
               "key": "C",
               "text": "Una pirámide de base cuadrada.",
               "isImage": true,
-              "isCorrect": true
+              "isCorrect": true,
+              "imageRef": "item/global/3ro-matematicas-cierre-2025/alt_figure/12_C.png"
             }
           ],
           "correctKey": "C",
@@ -683,7 +697,8 @@
               "name": "Geometría",
               "tagType": "secondary"
             }
-          ]
+          ],
+          "imageRef": "item/global/3ro-matematicas-cierre-2025/item_figure/12.png"
         },
         {
           "position": 13,
@@ -740,7 +755,8 @@
               "name": "Medición",
               "tagType": "secondary"
             }
-          ]
+          ],
+          "imageRef": "item/global/3ro-matematicas-cierre-2025/item_figure/13.png"
         },
         {
           "position": 14,
@@ -752,19 +768,22 @@
               "key": "A",
               "text": "Trozo de madera de 400 cm.",
               "isImage": true,
-              "isCorrect": true
+              "isCorrect": true,
+              "imageRef": "item/global/3ro-matematicas-cierre-2025/alt_figure/14_A.png"
             },
             {
               "key": "B",
               "text": "Trozo de madera de 200 cm.",
               "isImage": true,
-              "isCorrect": false
+              "isCorrect": false,
+              "imageRef": "item/global/3ro-matematicas-cierre-2025/alt_figure/14_B.png"
             },
             {
               "key": "C",
               "text": "Trozo de madera de 40 cm.",
               "isImage": true,
-              "isCorrect": false
+              "isCorrect": false,
+              "imageRef": "item/global/3ro-matematicas-cierre-2025/alt_figure/14_C.png"
             }
           ],
           "correctKey": "A",
@@ -800,7 +819,8 @@
               "name": "Medición",
               "tagType": "secondary"
             }
-          ]
+          ],
+          "imageRef": "item/global/3ro-matematicas-cierre-2025/item_figure/14.png"
         },
         {
           "position": 15,
@@ -857,7 +877,8 @@
               "name": "Medición",
               "tagType": "secondary"
             }
-          ]
+          ],
+          "imageRef": "item/global/3ro-matematicas-cierre-2025/item_figure/15.png"
         },
         {
           "position": 16,
@@ -955,7 +976,8 @@
               "name": "Números y operaciones",
               "tagType": "secondary"
             }
-          ]
+          ],
+          "imageRef": "item/global/3ro-matematicas-cierre-2025/item_figure/17.png"
         },
         {
           "position": 18,
@@ -1012,7 +1034,8 @@
               "name": "Números y operaciones",
               "tagType": "secondary"
             }
-          ]
+          ],
+          "imageRef": "item/global/3ro-matematicas-cierre-2025/item_figure/18.png"
         },
         {
           "position": 19,
@@ -1122,19 +1145,22 @@
               "key": "A",
               "text": "Rectángulo dividido en 4 partes iguales, con 2 partes pintadas gris (2/4).",
               "isImage": true,
-              "isCorrect": true
+              "isCorrect": true,
+              "imageRef": "item/global/3ro-matematicas-cierre-2025/alt_figure/21_A.png"
             },
             {
               "key": "B",
               "text": "Rectángulo dividido en 6 partes iguales, con 2 partes pintadas gris (2/6).",
               "isImage": true,
-              "isCorrect": false
+              "isCorrect": false,
+              "imageRef": "item/global/3ro-matematicas-cierre-2025/alt_figure/21_B.png"
             },
             {
               "key": "C",
               "text": "Rectángulo dividido en 4 partes desiguales, con la mitad izquierda (2 partes pequeñas) pintada gris.",
               "isImage": true,
-              "isCorrect": false
+              "isCorrect": false,
+              "imageRef": "item/global/3ro-matematicas-cierre-2025/alt_figure/21_C.png"
             }
           ],
           "correctKey": "A",
@@ -1170,7 +1196,8 @@
               "name": "Números y operaciones",
               "tagType": "secondary"
             }
-          ]
+          ],
+          "imageRef": "item/global/3ro-matematicas-cierre-2025/item_figure/21.png"
         },
         {
           "position": 22,
@@ -1227,7 +1254,8 @@
               "name": "Datos y probabilidades",
               "tagType": "secondary"
             }
-          ]
+          ],
+          "imageRef": "item/global/3ro-matematicas-cierre-2025/item_figure/22.png"
         },
         {
           "position": 23,
@@ -1284,7 +1312,8 @@
               "name": "Datos y probabilidades",
               "tagType": "secondary"
             }
-          ]
+          ],
+          "imageRef": "item/global/3ro-matematicas-cierre-2025/item_figure/23.png"
         }
       ]
     }

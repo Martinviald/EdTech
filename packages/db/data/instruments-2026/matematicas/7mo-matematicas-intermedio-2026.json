@@ -1,0 +1,1200 @@
+{
+  "schemaVersion": "1.0",
+  "source": {
+    "file": "7_prueba_matematica_monitoreo_2026_7_basico.pdf",
+    "subjectFolder": "matematicas"
+  },
+  "instrument": {
+    "name": "DIA Matemática 7° Básico 2026 — Intermedio",
+    "subject": "Matemática",
+    "subjectCode": "MATH",
+    "grade": "7° Básico",
+    "gradeCode": "7TH_BASIC",
+    "year": 2026,
+    "applicationPeriod": "intermedio",
+    "type": "dia",
+    "isOfficial": true,
+    "source": "imported"
+  },
+  "sections": [
+    {
+      "order": 1,
+      "name": "Prueba de Matemática 7° básico",
+      "type": "mixed",
+      "instructions": "Esta prueba tiene 35 preguntas que debes responder de la siguiente forma: en las preguntas de alternativas debes contestar marcando con una X la respuesta que consideres correcta; en las preguntas de desarrollo debes escribir tu respuesta en la cuadrícula; en las preguntas de completación debes anotar tu respuesta en los recuadros correspondientes. Utiliza lápiz grafito para contestar las preguntas y si te equivocas usa goma de borrar. Esta prueba es sin nota.",
+      "passage": null,
+      "items": [
+        {
+          "position": 1,
+          "type": "multiple_choice",
+          "stem": "¿En cuál de las siguientes rectas los números 5, -7, 3 y -1 están ubicados correctamente?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "recta numérica con los puntos ubicados (ver imagen)",
+              "isImage": true,
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "recta numérica con los puntos ubicados (ver imagen)",
+              "isImage": true,
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "recta numérica con los puntos ubicados (ver imagen)",
+              "isImage": true,
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "recta numérica con los puntos ubicados (ver imagen)",
+              "isImage": true,
+              "isCorrect": true
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "D",
+          "skill": "Representar",
+          "oa": "OA 1",
+          "contentAxis": null,
+          "hasFigure": true,
+          "figureNote": "Cada alternativa es una recta numérica graficada con los puntos 5, -7, 3 y -1 en distinto orden; la posición exacta de cada punto no es determinable de forma confiable solo con el texto extraído.",
+          "indicador": "Representan números enteros en la recta numérica. Resuelven problemas que requieren calcular"
+        },
+        {
+          "position": 2,
+          "type": "multiple_choice",
+          "stem": "Camila participó en una competencia de atletismo donde debía correr una carrera de 3/4 de una pista. Cuando llevaba 2/3 de la carrera tuvo que abandonar la competencia. ¿Qué fracción de la pista alcanzó a recorrer Camila?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "1/12",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "1/4",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "1/2",
+              "isCorrect": true
+            },
+            {
+              "key": "D",
+              "text": "8/9",
+              "isCorrect": false
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "C",
+          "skill": "Resolver problemas",
+          "oa": "OA 3",
+          "contentAxis": null,
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Resuelven problemas que requieren calcular multiplicaciones de fracciones positivas. Identifican representaciones pictóricas de"
+        },
+        {
+          "position": 3,
+          "type": "multiple_choice",
+          "stem": "En las imágenes de las opciones, cada figura está dividida en partes del mismo tamaño. ¿En qué figura la zona pintada de gris representa el 15% de su superficie total?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "figura dividida en partes iguales con zona sombreada (ver imagen)",
+              "isImage": true,
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "figura dividida en partes iguales con zona sombreada (ver imagen)",
+              "isImage": true,
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "figura dividida en partes iguales con zona sombreada (ver imagen)",
+              "isImage": true,
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "figura dividida en partes iguales con zona sombreada (ver imagen)",
+              "isImage": true,
+              "isCorrect": true
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "D",
+          "skill": "Representar",
+          "oa": "OA 4",
+          "contentAxis": null,
+          "hasFigure": true,
+          "figureNote": "Las cuatro alternativas son figuras geométricas con zonas sombreadas; no hay texto que las distinga, solo son legibles como imagen.",
+          "indicador": "Identifican representaciones pictóricas de porcentajes. Expresan en lenguaje algebraico la regla de"
+        },
+        {
+          "position": 4,
+          "type": "multiple_choice",
+          "stem": "Observa la siguiente tabla de datos:\ng: 3, 4, 5, 6\nh: 6, 8, 10, 12\n¿Cuál de las siguientes relaciones entre g y h se cumple para todos los valores de la tabla?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "h = g + 3",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "g = h + 3",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "h = 2•g",
+              "isCorrect": true
+            },
+            {
+              "key": "D",
+              "text": "g = h/3",
+              "isCorrect": false
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "C",
+          "skill": "Representar",
+          "oa": "OA 6",
+          "contentAxis": null,
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "formación de secuencias numéricas presentadas en una tabla. Traducen expresiones entregadas en lenguaje natural"
+        },
+        {
+          "position": 5,
+          "type": "multiple_choice",
+          "stem": "¿Cuál de las siguientes expresiones corresponde a la frase “el triple de la diferencia entre la cuarta parte de un número p y el doble de un número q”?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "3•(p/4 – 2q)",
+              "isCorrect": true
+            },
+            {
+              "key": "B",
+              "text": "(1/3)•4p – 2q [transcripción incierta, formato de fracción apilada]",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "3•(4p – q/2)",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "(1/3)•(4p – 2q) [transcripción incierta, formato de fracción apilada]",
+              "isCorrect": false
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "A",
+          "skill": "Representar",
+          "oa": "OA 6",
+          "contentAxis": null,
+          "hasFigure": true,
+          "figureNote": "Las alternativas usan fracciones apiladas cuyo orden en el texto extraído (tanto con -layout como en modo crudo) resultó ambiguo/desordenado; se requiere revisión visual de la página para confirmar las expresiones B y D.",
+          "indicador": "Traducen expresiones entregadas en lenguaje natural al lenguaje algebraico. Determinan valores faltantes en una tabla de"
+        },
+        {
+          "position": 6,
+          "type": "open_ended",
+          "stem": "Las variables X e Y de la siguiente tabla son inversamente proporcionales:\nX: 8, 6, 3\nY: 9, 12, p\n¿Cuál es el valor de p?\nRespuesta: p = ___.",
+          "alternatives": [],
+          "responseFormat": "fill_in",
+          "correctKey": null,
+          "skill": "Resolver problemas",
+          "oa": "OA 8",
+          "contentAxis": null,
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Determinan valores faltantes en una tabla de variables inversamente proporcionales. Identifican las coordenadas de un punto en el plano",
+          "fillAnswer": "24"
+        },
+        {
+          "position": 7,
+          "type": "multiple_choice",
+          "stem": "En la siguiente imagen se muestra el punto P en el plano cartesiano (ejes x e y graduados de -9 a 9). ¿Cuáles son las coordenadas del punto P?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "(6, 7)",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "(-6, -7)",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "(-7, 6)",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "(6, -7)",
+              "isCorrect": true
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "D",
+          "skill": "Representar",
+          "oa": "OA 14",
+          "contentAxis": "Geometría",
+          "hasFigure": true,
+          "figureNote": "La posición exacta del punto P en el plano cartesiano solo es visible en la imagen; el texto no aporta coordenadas.",
+          "indicador": "Identifican las coordenadas de un punto en el plano cartesiano."
+        },
+        {
+          "position": 8,
+          "type": "multiple_choice",
+          "stem": "En la siguiente imagen se muestra la medida del radio de un círculo: 8 cm. ¿Cuál es el perímetro del círculo?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "8π cm",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "16π cm",
+              "isCorrect": true
+            },
+            {
+              "key": "C",
+              "text": "64π cm",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "128π cm",
+              "isCorrect": false
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "B",
+          "skill": "Resolver problemas",
+          "oa": "OA 11",
+          "contentAxis": "Geometría",
+          "hasFigure": true,
+          "figureNote": "Diagrama de un círculo con el radio de 8 cm rotulado.",
+          "indicador": "Calculan perímetros de círculos. Resuelven problemas que requieren calcular áreas"
+        },
+        {
+          "position": 9,
+          "type": "multiple_choice",
+          "stem": "La punta metálica de un compás se sitúa en el centro de un papel lustre y el compás se abre para dibujar un círculo, tal como se muestra en la siguiente imagen. Luego, se recorta el círculo y el resto del papel se desecha. Si cada lado de la hoja de papel lustre mide 10 cm, ¿cuánto papel se desecha luego de la construcción del círculo?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "(100 – 5π) cm2",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "(100 – 10π) cm2",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "(100 – 25π) cm2",
+              "isCorrect": true
+            },
+            {
+              "key": "D",
+              "text": "(100 – 50π) cm2",
+              "isCorrect": false
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "C",
+          "skill": "Resolver problemas",
+          "oa": "OA 11",
+          "contentAxis": "Geometría",
+          "hasFigure": true,
+          "figureNote": "El radio del círculo (apertura del compás) no está indicado numéricamente en el texto, solo se aprecia en la imagen.",
+          "indicador": "Resuelven problemas que requieren calcular áreas de círculos. Calculan la medida de ángulos interiores de"
+        },
+        {
+          "position": 10,
+          "type": "multiple_choice",
+          "stem": "En el siguiente pentágono se indican los ángulos 80°, 110°, 100° y 130°, y un ángulo x. ¿Cuál es la medida del ángulo x?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "100°",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "110°",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "120°",
+              "isCorrect": true
+            },
+            {
+              "key": "D",
+              "text": "140°",
+              "isCorrect": false
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "C",
+          "skill": "Resolver problemas",
+          "oa": "OA 10",
+          "contentAxis": "Geometría",
+          "hasFigure": true,
+          "figureNote": "Diagrama del pentágono con los ángulos rotulados.",
+          "indicador": "Calculan la medida de ángulos interiores de polígonos. Resuelven problemas que requieren calcular el área"
+        },
+        {
+          "position": 11,
+          "type": "multiple_choice",
+          "stem": "A un arco de futbolito se le pondrá malla en los laterales. Los lados de los laterales forman un trapecio con estas medidas: 1 m, 2 m y 1,5 m (ver imagen). ¿Cuántos metros cuadrados de malla se necesita, como mínimo, para cubrir uno de los laterales del arco?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "2,0",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "2,5",
+              "isCorrect": true
+            },
+            {
+              "key": "C",
+              "text": "3,0",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "6,5",
+              "isCorrect": false
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "B",
+          "skill": "Resolver problemas",
+          "oa": "OA 13",
+          "contentAxis": "Geometría",
+          "hasFigure": true,
+          "figureNote": "La imagen muestra el trapecio con las medidas 1 m, 2 m y 1,5 m, pero el texto no aclara cuál es la altura y cuáles son los lados paralelos; se requiere revisión visual.",
+          "indicador": "Resuelven problemas que requieren calcular el área de trapecios. Leen datos presentados en tablas de frecuencias"
+        },
+        {
+          "position": 12,
+          "type": "open_ended",
+          "stem": "La siguiente tabla muestra los resultados de una encuesta respecto al número de calzado que utiliza un grupo de personas:\nNúmero de calzado 38 (frecuencia absoluta 30), 39 (25), 40 (42), 41 (38).\n¿Cuántas personas utilizan calzado número 38?\nRespuesta: ___ personas.",
+          "alternatives": [],
+          "responseFormat": "fill_in",
+          "correctKey": null,
+          "skill": "Representar",
+          "oa": "OA 16",
+          "contentAxis": null,
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Leen datos presentados en tablas de frecuencias absolutas.",
+          "fillAnswer": "30"
+        },
+        {
+          "position": 13,
+          "type": "multiple_choice",
+          "stem": "El siguiente gráfico muestra la cantidad de clientes atendidos mensualmente en un negocio durante el año pasado (eje Y de 0 a 400 en tramos de 50, eje X con los meses de enero a diciembre). ¿Cuántos clientes fueron atendidos en agosto?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "100",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "150",
+              "isCorrect": true
+            },
+            {
+              "key": "C",
+              "text": "300",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "350",
+              "isCorrect": false
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "B",
+          "skill": "Representar",
+          "oa": "OA 16",
+          "contentAxis": null,
+          "hasFigure": true,
+          "figureNote": "Gráfico de barras con la cantidad de clientes por mes; los valores exactos de cada barra (incluido agosto) no están disponibles en el texto extraído, solo la escala del eje Y.",
+          "indicador": "Leen datos presentados en gráficos de línea. Calculan el promedio de un conjunto de datos dado"
+        },
+        {
+          "position": 14,
+          "type": "multiple_choice",
+          "stem": "Los siguientes datos corresponden a los kilómetros recorridos en bicicleta por una persona durante 9 días: 9, 8, 6, 10, 10, 7, 9, 10, 3. ¿Cuál es el promedio de kilómetros recorridos por día?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "7",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "8",
+              "isCorrect": true
+            },
+            {
+              "key": "C",
+              "text": "9",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "10",
+              "isCorrect": false
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "B",
+          "skill": "Resolver problemas",
+          "oa": "OA 17",
+          "contentAxis": null,
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Calculan el promedio de un conjunto de datos dado en diversos contextos. Resuelven problemas que requieren determinar la"
+        },
+        {
+          "position": 15,
+          "type": "open_ended",
+          "stem": "Manuel diseñó en su computador una ruleta dividida en partes del mismo tamaño y marcó cada parte con una de las siguientes letras: P, Q, T o S. Luego, usó un simulador para obtener los resultados de girar esa ruleta 2 000 veces. Esta tabla muestra las frecuencias relativas que obtuvieron las distintas letras en la simulación: P 508/2000, Q 493/2000, T 503/2000, S 496/2000. De acuerdo con esos resultados, ¿cuál de las siguientes ruletas (A, B o C, mostradas como imágenes) podría ser la que diseñó Manuel? Indica la ruleta que elegiste y justifica tu respuesta usando las frecuencias relativas presentadas en la tabla.",
+          "alternatives": [],
+          "responseFormat": "develop",
+          "correctKey": null,
+          "skill": "Argumentar",
+          "oa": "OA 18",
+          "contentAxis": null,
+          "hasFigure": true,
+          "figureNote": "Se muestran tres ruletas (A, B, C) como imágenes con las letras P, Q, T, S distribuidas en sus secciones; la distribución exacta de cada ruleta no es legible de forma confiable solo con el texto extraído.",
+          "indicador": "cantidad de elementos de un experimento a partir de su frecuencia relativa. Resuelven problemas que requieren calcular"
+        },
+        {
+          "position": 16,
+          "type": "multiple_choice",
+          "stem": "Una ballena jorobada se encontraba a 20 metros bajo el nivel del mar, es decir, su posición era –20 metros respecto al nivel del mar. En un instante, ascendió 15 metros. ¿Cuál era la posición de la ballena respecto al nivel del mar justo después de ascender?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "–5 m",
+              "isCorrect": true
+            },
+            {
+              "key": "B",
+              "text": "–15 m",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "–35 m",
+              "isCorrect": false
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "A",
+          "skill": "Resolver problemas",
+          "oa": "OA 1",
+          "contentAxis": null,
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Resuelven problemas que requieren calcular adiciones de números enteros."
+        },
+        {
+          "position": 17,
+          "type": "multiple_choice",
+          "stem": "¿Cuál es el resultado de 2/5 • 1/7?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "2/35",
+              "isCorrect": true
+            },
+            {
+              "key": "B",
+              "text": "5/14",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "35/2",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "14/5",
+              "isCorrect": false
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "A",
+          "skill": "Resolver problemas",
+          "oa": "OA 2",
+          "contentAxis": null,
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Calculan multiplicaciones de fracciones positivas. Resuelven problemas que requieren calcular"
+        },
+        {
+          "position": 18,
+          "type": "multiple_choice",
+          "stem": "Un bus consume 1/8 de su estanque de gasolina cada vez que completa su recorrido. En la siguiente imagen se muestra el medidor del bus (con marcas de referencia en 0, 1/4, 1/2, 3/4 y 1), cuya flecha indica la fracción de estanque que tiene gasolina en este momento. Con la gasolina que tiene en este momento en el estanque, ¿cuántas veces más alcanzaría a completar su recorrido este bus?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "5",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "6",
+              "isCorrect": true
+            },
+            {
+              "key": "C",
+              "text": "7",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "8",
+              "isCorrect": false
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "B",
+          "skill": "Resolver problemas",
+          "oa": "OA 3",
+          "contentAxis": null,
+          "hasFigure": true,
+          "figureNote": "La posición exacta de la flecha del medidor (nivel actual de gasolina) no está indicada en el texto, solo las marcas de referencia 0, 1/4, 1/2, 3/4 y 1.",
+          "indicador": "Resuelven problemas que requieren calcular divisiones de fracciones."
+        },
+        {
+          "position": 19,
+          "type": "multiple_choice",
+          "stem": "Un coleccionista tiene 150 monedas de países africanos. Si estas monedas corresponden al 30% de su colección total, ¿cuántas monedas tiene en total?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "20",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "45",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "350",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "500",
+              "isCorrect": true
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "D",
+          "skill": "Resolver problemas",
+          "oa": "OA 4",
+          "contentAxis": null,
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Resuelven problemas en que se calcula el total conociendo el porcentaje que representa una parte. Identifican la representación gráfica de variables"
+        },
+        {
+          "position": 20,
+          "type": "multiple_choice",
+          "stem": "¿Cuál de los siguientes gráficos representa una relación directamente proporcional entre las variables x e y? (cuatro gráficos A, B, C, D, cada uno con ejes x de 0 a 10 e y de 0 a 7)",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "gráfico x-y (ver imagen)",
+              "isImage": true,
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "gráfico x-y (ver imagen)",
+              "isImage": true,
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "gráfico x-y (ver imagen)",
+              "isImage": true,
+              "isCorrect": true
+            },
+            {
+              "key": "D",
+              "text": "gráfico x-y (ver imagen)",
+              "isImage": true,
+              "isCorrect": false
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "C",
+          "skill": "Representar",
+          "oa": "OA 8",
+          "contentAxis": null,
+          "hasFigure": true,
+          "figureNote": "Las cuatro alternativas son gráficos sobre ejes idénticos; lo que las distingue (la forma de la línea/curva) es solo visual, no está en el texto extraído.",
+          "indicador": "Identifican la representación gráfica de variables directamente proporcionales. Reducen términos semejantes en expresiones"
+        },
+        {
+          "position": 21,
+          "type": "multiple_choice",
+          "stem": "¿Qué expresión se obtiene al reducir los términos semejantes 5x – 8y + 3x + 7x + 2y?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "9xy",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "9x3y3",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "15x3 – 6y2",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "15x – 6y",
+              "isCorrect": true
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "D",
+          "skill": "Resolver problemas",
+          "oa": "OA 7",
+          "contentAxis": null,
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Reducen términos semejantes en expresiones algebraicas. Resuelven problemas en diversos contextos que"
+        },
+        {
+          "position": 22,
+          "type": "multiple_choice",
+          "stem": "Un camión de reparto puede transportar menos de 8 toneladas en cada viaje. Si en una jornada el camión realizó 10 viajes con su capacidad completa en cada viaje, ¿cuál de las siguientes opciones describe la cantidad total de toneladas que transportó el camión en esa jornada?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Trasladó exactamente 18 toneladas.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Trasladó exactamente 80 toneladas.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Trasladó menos de 18 toneladas.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "Trasladó menos de 80 toneladas.",
+              "isCorrect": true
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "D",
+          "skill": "Resolver problemas",
+          "oa": "OA 9",
+          "contentAxis": null,
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Resuelven problemas en diversos contextos que involucran inecuaciones lineales."
+        },
+        {
+          "position": 23,
+          "type": "multiple_choice",
+          "stem": "Observa el siguiente cuadrilátero ABCD, en el que se muestran puntos adicionales E, F, G, H y los ángulos: 100° (en A), 55° (en D) y 70° (en B). ¿Cuál es la medida del ángulo exterior γ (en C)?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "135°",
+              "isCorrect": true
+            },
+            {
+              "key": "B",
+              "text": "125°",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "110°",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "100°",
+              "isCorrect": false
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "A",
+          "skill": "Resolver problemas",
+          "oa": "OA 10",
+          "contentAxis": "Geometría",
+          "hasFigure": true,
+          "figureNote": "La disposición exacta del cuadrilátero ABCD y los puntos E, F, G, H, necesaria para aplicar la relación de ángulos correcta, solo es visible en la imagen.",
+          "indicador": "Calculan ángulos exteriores de polígonos."
+        },
+        {
+          "position": 24,
+          "type": "multiple_choice",
+          "stem": "¿Cuál es el área de un círculo con radio de 7 cm?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "7π cm2",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "14π cm2",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "49π cm2",
+              "isCorrect": true
+            },
+            {
+              "key": "D",
+              "text": "196π cm2",
+              "isCorrect": false
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "C",
+          "skill": "Resolver problemas",
+          "oa": "OA 11",
+          "contentAxis": "Geometría",
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Calculan áreas de círculos."
+        },
+        {
+          "position": 25,
+          "type": "multiple_choice",
+          "stem": "En el siguiente paralelogramo se indican las medidas de sus lados y una de sus alturas: 8 cm, 10 cm y una altura de 7 cm. ¿Cuál es el área del paralelogramo?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "28 cm2",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "34 cm2",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "56 cm2",
+              "isCorrect": true
+            },
+            {
+              "key": "D",
+              "text": "70 cm2",
+              "isCorrect": false
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "C",
+          "skill": "Resolver problemas",
+          "oa": "OA 13",
+          "contentAxis": "Geometría",
+          "hasFigure": true,
+          "figureNote": "No es posible determinar por el texto a cuál lado (8 cm o 10 cm) corresponde la base asociada a la altura de 7 cm; se requiere revisión visual de la figura.",
+          "indicador": "Calculan el área de paralelogramos. Identifican las coordenadas de un vector en el plano"
+        },
+        {
+          "position": 26,
+          "type": "multiple_choice",
+          "stem": "El vector v del siguiente plano cartesiano parte en el punto A y termina en el punto B (ejes x e y de -7 a 7). ¿Cuáles son las coordenadas del vector v?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "(-4, 5)",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "(-3, 6)",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "(4, -5)",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "(3, -6)",
+              "isCorrect": true
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "D",
+          "skill": "Representar",
+          "oa": "OA 14",
+          "contentAxis": "Geometría",
+          "hasFigure": true,
+          "figureNote": "Las posiciones exactas de los puntos A y B en el plano solo son visibles en la imagen; el texto no incluye sus coordenadas.",
+          "indicador": "Identifican las coordenadas de un vector en el plano cartesiano. Interpretan datos presentados en tablas de"
+        },
+        {
+          "position": 27,
+          "type": "multiple_choice",
+          "stem": "Un colegio aplicó una encuesta a 300 de sus estudiantes para identificar qué talleres deportivos tienen mayor preferencia. La siguiente tabla muestra los resultados de la encuesta (frecuencia relativa): Tenis 0,15; Fútbol 0,35; Patinaje 0,3; Básquetbol 0,1; Otros 0,1. A partir de la tabla anterior, ¿cuál de las siguientes afirmaciones es correcta?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "La respuesta que más se repitió fue “Básquetbol”.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "15 estudiantes encuestados respondieron “Tenis”.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "105 estudiantes encuestados respondieron “Fútbol”.",
+              "isCorrect": true
+            },
+            {
+              "key": "D",
+              "text": "El 3% de los estudiantes encuestados respondió “Patinaje”.",
+              "isCorrect": false
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "C",
+          "skill": "Argumentar",
+          "oa": "OA 16",
+          "contentAxis": null,
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Interpretan datos presentados en tablas de frecuencias relativas. Interpretan el significado de la mediana en diversos"
+        },
+        {
+          "position": 28,
+          "type": "multiple_choice",
+          "stem": "Se registró la estatura de los 30 participantes de un taller escolar y dentro de los resultados, se obtuvo que la mediana de las alturas es 1,65 m. ¿Qué significa esta información?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "La mitad de los participantes mide 1,65 m o más.",
+              "isCorrect": true
+            },
+            {
+              "key": "B",
+              "text": "La estatura que más se repite en el taller es 1,65 m.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "La estatura promedio de los participantes es mayor a 1,65 m.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "La diferencia entre la mayor y la menor estatura del taller es de 1,65 m.",
+              "isCorrect": false
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "A",
+          "skill": "Argumentar",
+          "oa": "OA 17",
+          "contentAxis": null,
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Interpretan el significado de la mediana en diversos contextos. Modifican espacios muestrales de un experimento"
+        },
+        {
+          "position": 29,
+          "type": "open_ended",
+          "stem": "En la siguiente imagen se muestra el contenido de dos cajas (Caja A y Caja B). Todas las bolitas tienen igual forma y tamaño. ¿Cuántas bolitas grises se deben quitar de la caja B para que la probabilidad de extraer al azar una bolita de ese color sea la misma en ambas cajas?\nRespuesta: Hay que sacar ___ bolitas grises.",
+          "alternatives": [],
+          "responseFormat": "fill_in",
+          "correctKey": null,
+          "skill": "Representar",
+          "oa": "OA 18",
+          "contentAxis": null,
+          "hasFigure": true,
+          "figureNote": "La cantidad y color de las bolitas en cada caja (A y B) solo se muestra en la imagen; el texto no incluye esos datos.",
+          "indicador": "Modifican espacios muestrales de un experimento para que un evento sea equiprobable. Calculan probabilidades teóricas de eventos en",
+          "fillAnswer": "2"
+        },
+        {
+          "position": 30,
+          "type": "multiple_choice",
+          "stem": "Observa los premios que se pueden ganar al hacer girar esta ruleta dividida en 10 partes iguales. Si se hace girar esta ruleta, ¿cuál es la probabilidad de ganar [premio mostrado como imagen en el enunciado, no legible en el texto]?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "1/5",
+              "isCorrect": true
+            },
+            {
+              "key": "B",
+              "text": "2/5",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "1/2",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "1/4",
+              "isCorrect": false
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "A",
+          "skill": "Resolver problemas",
+          "oa": "OA 19",
+          "contentAxis": null,
+          "hasFigure": true,
+          "figureNote": "La ruleta con la distribución de premios y el premio específico mencionado en la pregunta (insertado como imagen dentro del enunciado) no son legibles en el texto extraído.",
+          "indicador": "experimentos aleatorios con resultados equiprobables. Modelan diversas situaciones con ecuaciones de"
+        },
+        {
+          "position": 31,
+          "type": "multiple_choice",
+          "stem": "La familia de Leonor ahorró $420 000. Leonor también ahorró dinero. El dinero ahorrado por la familia de Leonor es el triple de lo que Leonor ahorró. ¿Cuál de las siguientes ecuaciones permite calcular la cantidad x de dinero, en pesos, que Leonor ahorró?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "3x = 420 000",
+              "isCorrect": true
+            },
+            {
+              "key": "B",
+              "text": "x/3 = 420 000",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "3 + x = 420 000",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "3x + x = 420 000",
+              "isCorrect": false
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "A",
+          "skill": "Modelar",
+          "oa": "OA 9",
+          "contentAxis": null,
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Modelan diversas situaciones con ecuaciones de primer grado."
+        },
+        {
+          "position": 32,
+          "type": "multiple_choice",
+          "stem": "Se deben preparar dos mezclas de agua y sales, que tengan la misma proporción de esos dos ingredientes. La siguiente imagen indica los ingredientes de la primera mezcla (4 g de sal en 100 ml de agua) y la cantidad de sales de la segunda mezcla (3 g de sal en x ml de agua). ¿Cuánta agua se debe usar en la segunda mezcla?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "33 ml",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "75 ml",
+              "isCorrect": true
+            },
+            {
+              "key": "C",
+              "text": "99 ml",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "101 ml",
+              "isCorrect": false
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "B",
+          "skill": "Resolver problemas",
+          "oa": "OA 8",
+          "contentAxis": null,
+          "hasFigure": true,
+          "figureNote": "Diagrama con los ingredientes de ambas mezclas; los valores numéricos ya están presentes en el texto.",
+          "indicador": "Resuelven problemas de proporcionalidad directa."
+        },
+        {
+          "position": 33,
+          "type": "open_ended",
+          "stem": "Resuelve: 7/5 : 2/3 = ___",
+          "alternatives": [],
+          "responseFormat": "fill_in",
+          "correctKey": null,
+          "skill": "Resolver problemas",
+          "oa": "OA 2",
+          "contentAxis": null,
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Calculan divisiones de fracciones positivas. Resuelven problemas que requieran usar la notación",
+          "fillAnswer": "21/10 o equivalente"
+        },
+        {
+          "position": 34,
+          "type": "multiple_choice",
+          "stem": "La distancia aproximada entre la Tierra y el Sol es 150 000 000 km. ¿Cuál de estas expresiones equivale a esta distancia?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "1,5 • 10^6 km",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "1,5 • 10^7 km",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "1,5 • 10^8 km",
+              "isCorrect": true
+            },
+            {
+              "key": "D",
+              "text": "1,5 • 10^9 km",
+              "isCorrect": false
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "C",
+          "skill": "Resolver problemas",
+          "oa": "OA 5",
+          "contentAxis": null,
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Resuelven problemas que requieran usar la notación científica."
+        },
+        {
+          "position": 35,
+          "type": "multiple_choice",
+          "stem": "¿Cuál es el resultado de (–14) – (–8)?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "–22",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "–6",
+              "isCorrect": true
+            },
+            {
+              "key": "C",
+              "text": "6",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "22",
+              "isCorrect": false
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "B",
+          "skill": "Resolver problemas",
+          "oa": "OA 1",
+          "contentAxis": null,
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Calculan sustracciones de números enteros."
+        }
+      ]
+    }
+  ],
+  "extraction": {
+    "itemCount": 35,
+    "warnings": [
+      "position 1: alternativas son rectas numéricas graficadas, orden de puntos no confiable solo con texto",
+      "position 3: alternativas son figuras sombreadas sin texto distintivo, solo imagen",
+      "position 5: alternativas con fracciones apiladas, extracción de texto ambigua/desordenada (B y D inciertas)",
+      "position 7: coordenadas del punto P solo visibles en la imagen del plano cartesiano",
+      "position 9: radio del círculo (apertura del compás) no indicado numéricamente en el texto",
+      "position 11: no se puede determinar por el texto cuál medida del trapecio es la altura",
+      "position 13: valores del gráfico de barras (clientes por mes) no están en el texto",
+      "position 15: alternativas son ruletas graficadas (imágenes), distribución no legible en texto",
+      "position 16: solo se detectaron 3 alternativas (A, B, C) en el texto extraído; no se encontró alternativa D — verificar el PDF original",
+      "position 18: posición de la flecha del medidor de combustible no indicada en el texto",
+      "position 20: alternativas son gráficos x-y graficados, forma de la línea no distinguible en texto",
+      "position 23: disposición del cuadrilátero ABCD y puntos E,F,G,H solo visibles en la imagen",
+      "position 25: no se puede determinar por el texto a cuál lado corresponde la altura de 7 cm",
+      "position 26: coordenadas de los puntos A y B del vector solo visibles en la imagen",
+      "position 29: cantidad y color de bolitas en cada caja solo visibles en la imagen",
+      "position 30: premio preguntado (imagen inline) y distribución de la ruleta no legibles en el texto"
+    ],
+    "needsHumanReview": true,
+    "crossCheck": {
+      "hardIssues": [],
+      "softWarnings": [],
+      "counts": {
+        "cuadernillo": 35,
+        "ficha": 35,
+        "hoja": 35
+      }
+    }
+  },
+  "pauta": {
+    "source": {
+      "ficha": "7_ficha_tecnica_matematica_monitoreo_2026_7_basico.pdf",
+      "hoja": "7_hoja_de_respuestas_matematica_monitoreo_2026_7_basico.pdf"
+    },
+    "appliedKeys": 30,
+    "rubrics": 0
+  }
+}

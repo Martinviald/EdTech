@@ -26,7 +26,7 @@ import { grades, subjects } from '../schema/academic';
 type Marco = 'curriculum' | 'dia';
 type CatNode = {
   code: string; type: string; name: string; parentCode: string | null;
-  marco: Marco; subjectCode: 'LANG' | 'MATH' | null;
+  marco: Marco; subjectCode: string | null;
   level?: string; oaNumber?: number; shortName?: string; source: string; order?: number;
 };
 type Mapping = { sourceCode: string; targetCode: string; mappingType: string };

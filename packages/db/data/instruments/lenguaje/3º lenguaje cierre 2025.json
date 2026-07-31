@@ -31,7 +31,8 @@
             "kind": "image",
             "note": "Ilustración decorativa de un mago con sombrero y una varita mágica (no aporta información para responder)."
           }
-        ]
+        ],
+        "imageRef": "item/global/3ro-lenguaje-cierre-2025/section_figure/01.png"
       },
       "items": [
         {
@@ -330,7 +331,8 @@
             "kind": "image",
             "note": "Ilustraciones decorativas asociadas al texto informativo sobre el chicle (no aportan información indispensable para responder)."
           }
-        ]
+        ],
+        "imageRef": "item/global/3ro-lenguaje-cierre-2025/section_figure/02.png"
       },
       "items": [
         {
@@ -629,7 +631,8 @@
             "kind": "image",
             "note": "Ilustraciones decorativas de un anciano caminando, árboles de colores y un pájaro multicolor (no aportan información indispensable para responder)."
           }
-        ]
+        ],
+        "imageRef": "item/global/3ro-lenguaje-cierre-2025/section_figure/03.png"
       },
       "items": [
         {
@@ -856,7 +859,8 @@
             "kind": "image",
             "note": "Instructivo ilustrado con los pasos para construir un disco de Newton: círculo de cartón dividido en colores, agujeros con hilo, y el disco terminado."
           }
-        ]
+        ],
+        "imageRef": "item/global/3ro-lenguaje-cierre-2025/section_figure/04.png"
       },
       "items": [
         {
@@ -969,7 +973,8 @@
               "name": "Texto no literario",
               "tagType": "secondary"
             }
-          ]
+          ],
+          "imageRef": "item/global/3ro-lenguaje-cierre-2025/item_figure/16.png"
         },
         {
           "position": 17,
@@ -1139,7 +1144,8 @@
             "kind": "image",
             "note": "Ilustración decorativa de castillos a la orilla de un río (no aporta información indispensable para responder)."
           }
-        ]
+        ],
+        "imageRef": "item/global/3ro-lenguaje-cierre-2025/section_figure/05.png"
       },
       "items": [
         {

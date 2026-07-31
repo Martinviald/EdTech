@@ -1,0 +1,1217 @@
+{
+  "schemaVersion": "1.0",
+  "source": {
+    "file": "II_prueba_matematica_diagnostico_2026_II_medio.pdf",
+    "subjectFolder": "matematicas"
+  },
+  "instrument": {
+    "name": "DIA Matemática II° Medio 2026 — Diagnóstico",
+    "subject": "Matemática",
+    "subjectCode": "MATH",
+    "grade": "II° Medio",
+    "gradeCode": "2ND_MEDIO",
+    "year": 2026,
+    "applicationPeriod": "diagnostico",
+    "type": "dia",
+    "isOfficial": true,
+    "source": "imported"
+  },
+  "sections": [
+    {
+      "order": 1,
+      "name": "Prueba completa",
+      "type": "mixed",
+      "instructions": null,
+      "passage": null,
+      "items": [
+        {
+          "position": 1,
+          "type": "multiple_choice",
+          "stem": "–0,3 + 1/3 =",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "–1/30",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "1/30",
+              "isCorrect": true
+            },
+            {
+              "key": "C",
+              "text": "–19/30",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "19/30",
+              "isCorrect": false
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "B",
+          "skill": "Resolver problemas",
+          "oa": "OA 1",
+          "contentAxis": null,
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Calculan el resultado de una adición de 1 números racionales. Calculan el resultado de una sustracción de"
+        },
+        {
+          "position": 2,
+          "type": "multiple_choice",
+          "stem": "1,2 – 1 1/2 =",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "0",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "–3/10",
+              "isCorrect": true
+            },
+            {
+              "key": "C",
+              "text": "7/10",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "–69/50",
+              "isCorrect": false
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "B",
+          "skill": "Resolver problemas",
+          "oa": "OA 1",
+          "contentAxis": null,
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Calculan el resultado de una sustracción de 1 números racionales. Calculan el resultado de una multiplicación"
+        },
+        {
+          "position": 3,
+          "type": "multiple_choice",
+          "stem": "0,2 • 3/4 =",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "0,15",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "0,15",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "0,16",
+              "isCorrect": true
+            },
+            {
+              "key": "D",
+              "text": "0,016",
+              "isCorrect": false
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "C",
+          "skill": "Resolver problemas",
+          "oa": "OA 1",
+          "contentAxis": null,
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Calculan el resultado de una multiplicación 1 de números racionales. Calculan el resultado de una división de"
+        },
+        {
+          "position": 4,
+          "type": "multiple_choice",
+          "stem": "–1/3 : –0,5 =",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "–3/2",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "–2/3",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "2/3",
+              "isCorrect": true
+            },
+            {
+              "key": "D",
+              "text": "5/9",
+              "isCorrect": false
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "C",
+          "skill": "Resolver problemas",
+          "oa": "OA 1",
+          "contentAxis": null,
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Calculan el resultado de una división de 1 números racionales. Calculan una potencia de base racional y"
+        },
+        {
+          "position": 5,
+          "type": "multiple_choice",
+          "stem": "(3/5)^–2 =",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "25/9",
+              "isCorrect": true
+            },
+            {
+              "key": "B",
+              "text": "10/6",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "–6/10",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "–9/25",
+              "isCorrect": false
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "A",
+          "skill": "Resolver problemas",
+          "oa": "OA 2",
+          "contentAxis": null,
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Calculan una potencia de base racional y 2 exponente entero. Calculan el resultado de una adición de"
+        },
+        {
+          "position": 6,
+          "type": "multiple_choice",
+          "stem": "–2/3 + 5/2 =",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "3/5",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "3/6",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "7/5",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "11/6",
+              "isCorrect": true
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "D",
+          "skill": "Resolver problemas",
+          "oa": "OA 1",
+          "contentAxis": null,
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Calculan el resultado de una adición de 2, 3, 5 números racionales. Calculan el resultado de una sustracción de"
+        },
+        {
+          "position": 7,
+          "type": "open_ended",
+          "stem": "12 – 2/5 =",
+          "alternatives": [],
+          "responseFormat": "fill_in",
+          "correctKey": null,
+          "skill": "Resolver problemas",
+          "oa": "OA 1",
+          "contentAxis": null,
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Calculan el resultado de una sustracción de 2, 3, 5 números racionales. Calculan el resultado de una multiplicación",
+          "fillAnswer": "2/5 o equivalente"
+        },
+        {
+          "position": 8,
+          "type": "multiple_choice",
+          "stem": "7/5 • 2/3 =",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "14/15",
+              "isCorrect": true
+            },
+            {
+              "key": "B",
+              "text": "15/14",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "10/21",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "21/10",
+              "isCorrect": false
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "A",
+          "skill": "Resolver problemas",
+          "oa": "OA 1",
+          "contentAxis": null,
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Calculan el resultado de una multiplicación 2, 3, 5 de números racionales. Calculan el resultado de una división de"
+        },
+        {
+          "position": 9,
+          "type": "open_ended",
+          "stem": "8/5 : 5/2 =",
+          "alternatives": [],
+          "responseFormat": "fill_in",
+          "correctKey": null,
+          "skill": "Resolver problemas",
+          "oa": "OA 1",
+          "contentAxis": null,
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Calculan el resultado de una división de 2, 3, 5 números racionales. Calculan una potencia de base natural y",
+          "fillAnswer": "16/25 o equivalente"
+        },
+        {
+          "position": 10,
+          "type": "multiple_choice",
+          "stem": "6² =",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "8",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "12",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "36",
+              "isCorrect": true
+            },
+            {
+              "key": "D",
+              "text": "64",
+              "isCorrect": false
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "C",
+          "skill": "Resolver problemas",
+          "oa": "OA 3",
+          "contentAxis": null,
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Calculan una potencia de base natural y 2, 3, 5 exponente natural hasta 3. Factorizan un trinomio en binomios con un"
+        },
+        {
+          "position": 11,
+          "type": "multiple_choice",
+          "stem": "¿Qué expresión es equivalente a x² + 5x − 6?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "(x − 2)(x + 3)",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "(x + 2)(x − 3)",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "(x + 6)(x − 1)",
+              "isCorrect": true
+            },
+            {
+              "key": "D",
+              "text": "(x − 6)(x + 1)",
+              "isCorrect": false
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "C",
+          "skill": "Resolver problemas",
+          "oa": "OA 3",
+          "contentAxis": null,
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Factorizan un trinomio en binomios con un 3 término en común. Determinan las coordenadas de un punto"
+        },
+        {
+          "position": 12,
+          "type": "open_ended",
+          "stem": "Observa el punto P en el plano cartesiano. ¿Cuáles son las coordenadas del punto P? Respuesta: Las coordenadas del punto P son ( ; ).",
+          "alternatives": [],
+          "responseFormat": "fill_in",
+          "correctKey": null,
+          "skill": "Representar",
+          "oa": "OA 14",
+          "contentAxis": "Geometría",
+          "hasFigure": true,
+          "figureNote": "Plano cartesiano con el punto P marcado; las coordenadas exactas requieren ver la figura.",
+          "indicador": "Determinan las coordenadas de un punto 3, 5 en el plano cartesiano. Identifican el gráfico que corresponde a una",
+          "fillAnswer": "(2, -4)"
+        },
+        {
+          "position": 13,
+          "type": "multiple_choice",
+          "stem": "Esta tabla muestra algunos valores de las variables directamente proporcionales x e y: x=1→y=4; x=2→y=8; x=3→y=12. ¿En qué gráfico se representa la relación entre las variables x e y?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Gráfico A: relación x,y en el plano cartesiano",
+              "isImage": true,
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Gráfico B: relación x,y en el plano cartesiano",
+              "isImage": true,
+              "isCorrect": true
+            },
+            {
+              "key": "C",
+              "text": "Gráfico C: relación x,y en el plano cartesiano",
+              "isImage": true,
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "Gráfico D: relación x,y en el plano cartesiano",
+              "isImage": true,
+              "isCorrect": false
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "B",
+          "skill": "Representar",
+          "oa": "OA 8",
+          "contentAxis": null,
+          "hasFigure": true,
+          "figureNote": "4 gráficos (A-D) en el plano cartesiano; se requiere ver las figuras para elegir el correcto.",
+          "indicador": "relación entre variables directamente 3, 5 proporcionales, presentada en una tabla. Interpretan gráficamente los parámetros de"
+        },
+        {
+          "position": 14,
+          "type": "multiple_choice",
+          "stem": "Considera la función f(x) = mx + n, con m > 0 y n ≠ 0. ¿Cuál de las siguientes rectas puede ser la gráfica de f?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Gráfico A: recta f en el plano",
+              "isImage": true,
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Gráfico B: recta f en el plano",
+              "isImage": true,
+              "isCorrect": true
+            },
+            {
+              "key": "C",
+              "text": "Gráfico C: recta f en el plano",
+              "isImage": true,
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "Gráfico D: recta f en el plano",
+              "isImage": true,
+              "isCorrect": false
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "B",
+          "skill": "Representar",
+          "oa": "OA 10",
+          "contentAxis": null,
+          "hasFigure": true,
+          "figureNote": "4 gráficos (A-D) de rectas; se requiere ver las figuras para elegir el correcto.",
+          "indicador": "una función afín dada de manera 3, 5 algebraica. Relacionan gráficamente la constante de"
+        },
+        {
+          "position": 15,
+          "type": "multiple_choice",
+          "stem": "La siguiente gráfica representa a la función f. Se define una nueva función g por g(x) = f(x) − 2 para cualquier valor real de x. ¿Cuál de las siguientes gráficas representa a g?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Gráfico A: función g en el plano",
+              "isImage": true,
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Gráfico B: función g en el plano",
+              "isImage": true,
+              "isCorrect": true
+            },
+            {
+              "key": "C",
+              "text": "Gráfico C: función g en el plano",
+              "isImage": true,
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "Gráfico D: función g en el plano",
+              "isImage": true,
+              "isCorrect": false
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "B",
+          "skill": "Representar",
+          "oa": "OA 10",
+          "contentAxis": null,
+          "hasFigure": true,
+          "figureNote": "Gráfica de f más 4 opciones (A-D) de g(x)=f(x)-2; se requiere ver las figuras para elegir el correcto.",
+          "indicador": "una función afín con la traslación de una 3, 5 función lineal."
+        },
+        {
+          "position": 16,
+          "type": "multiple_choice",
+          "stem": "Considera la función f(x) = 5/4 x – 5. ¿Cuál es el punto de intersección de la gráfica de f con el eje x?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "(0 ; –5)",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "(−5 ; 0)",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "(4 ; 0)",
+              "isCorrect": true
+            },
+            {
+              "key": "D",
+              "text": "(0 ; 4)",
+              "isCorrect": false
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "C",
+          "skill": "Resolver problemas",
+          "oa": "OA 10",
+          "contentAxis": null,
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "intersección de la gráfica de una función 3, 5 afín con el eje x del plano cartesiano. Identifican el valor de f(x) dado el valor de x"
+        },
+        {
+          "position": 17,
+          "type": "open_ended",
+          "stem": "Para la función g(x) = 3x – 10, ¿cuál es el valor de g(2)? Respuesta: g(2) =",
+          "alternatives": [],
+          "responseFormat": "fill_in",
+          "correctKey": null,
+          "skill": "Resolver problemas",
+          "oa": "OA 10",
+          "contentAxis": null,
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Identifican el valor de f(x) dado el valor de x 3, 5 en una función afín. Determinan las coordenadas del punto de",
+          "fillAnswer": "-4"
+        },
+        {
+          "position": 18,
+          "type": "open_ended",
+          "stem": "La gráfica de la función h(x) = 4x + 6 intersecta al eje y en el punto Q. ¿Cuáles son las coordenadas del punto Q? Respuesta: Las coordenadas del punto Q son ( ; ).",
+          "alternatives": [],
+          "responseFormat": "fill_in",
+          "correctKey": null,
+          "skill": "Resolver problemas",
+          "oa": "OA 10",
+          "contentAxis": null,
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "intersección de la gráfica de una función 3, 5 afín con el eje y del plano cartesiano. Identifican el valor de f(x) dado el valor de x",
+          "fillAnswer": "(0, 6)"
+        },
+        {
+          "position": 19,
+          "type": "multiple_choice",
+          "stem": "La función f se define como f(x) = −2x + 8, con x en el conjunto de los números reales. Cuando x = −4, ¿qué valor toma f(x)?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "2",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "6",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "8",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "16",
+              "isCorrect": true
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "D",
+          "skill": "Resolver problemas",
+          "oa": "OA 10",
+          "contentAxis": null,
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Identifican el valor de f(x) dado el valor de x 3, 5 en una función afín. Calculan una raíz cuadrada de un número"
+        },
+        {
+          "position": 20,
+          "type": "multiple_choice",
+          "stem": "¿Cuál de estos números equivale a √196?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "9",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "14",
+              "isCorrect": true
+            },
+            {
+              "key": "C",
+              "text": "98",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "392",
+              "isCorrect": false
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "B",
+          "skill": "Resolver problemas",
+          "oa": "OA 4",
+          "contentAxis": null,
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Calculan una raíz cuadrada de un número 1, 3, 5, 8 natural. Resuelven una ecuación de la forma"
+        },
+        {
+          "position": 21,
+          "type": "multiple_choice",
+          "stem": "¿Cuál es el valor de x en la ecuación x/0,5 = 1,12?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "0,56",
+              "isCorrect": true
+            },
+            {
+              "key": "B",
+              "text": "0,62",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "1,62",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "2,24",
+              "isCorrect": false
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "A",
+          "skill": "Resolver problemas",
+          "oa": "OA 8",
+          "contentAxis": null,
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Resuelven una ecuación de la forma 5, 8 x/a = b, a ≠ 0 y con a, b ϵ Q. Resuelven una ecuación de la forma"
+        },
+        {
+          "position": 22,
+          "type": "multiple_choice",
+          "stem": "¿Cuál es el valor de x en la ecuación 3x/5 = 2/7?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "–6/35",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "–11/35",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "10/21",
+              "isCorrect": true
+            },
+            {
+              "key": "D",
+              "text": "21/10",
+              "isCorrect": false
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "C",
+          "skill": "Resolver problemas",
+          "oa": "OA 8",
+          "contentAxis": null,
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Resuelven una ecuación de la forma 5, 8 ax = b, a ≠ 0, con a, b Q. ϵ Identifican la reflexión de una figura 2D"
+        },
+        {
+          "position": 23,
+          "type": "multiple_choice",
+          "stem": "Observa el segmento AB en el plano cartesiano. Al aplicar una reflexión al segmento AB respecto al eje y, se obtiene el segmento CD. ¿Cuál de estas opciones muestra la ubicación correcta del segmento CD?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Opción A: ubicación del segmento CD",
+              "isImage": true,
+              "isCorrect": true
+            },
+            {
+              "key": "B",
+              "text": "Opción B: ubicación del segmento CD",
+              "isImage": true,
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Opción C: ubicación del segmento CD",
+              "isImage": true,
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "Opción D: ubicación del segmento CD",
+              "isImage": true,
+              "isCorrect": false
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "A",
+          "skill": "Resolver problemas",
+          "oa": "OA 13",
+          "contentAxis": "Geometría",
+          "hasFigure": true,
+          "figureNote": "Segmento AB en el plano y 4 opciones (A-D) con la ubicación de CD; se requiere ver las figuras para elegir el correcto.",
+          "indicador": "Identifican la reflexión de una figura 2D 5 respecto del eje y del plano cartesiano."
+        },
+        {
+          "position": 24,
+          "type": "multiple_choice",
+          "stem": "Para hacer un adorno se usaron 20 globos blancos y 44 globos verdes. ¿Cuál es la razón entre la cantidad de globos blancos y la cantidad de globos verdes del adorno?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "5 : 11",
+              "isCorrect": true
+            },
+            {
+              "key": "B",
+              "text": "5 : 16",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "11 : 5",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "16 : 5",
+              "isCorrect": false
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "A",
+          "skill": "Resolver problemas",
+          "oa": "OA 3",
+          "contentAxis": "Números y operaciones",
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Identifican la razón entre dos cantidades. 8 Calculan todos los posibles resultados de"
+        },
+        {
+          "position": 25,
+          "type": "multiple_choice",
+          "stem": "Leo lanza una moneda y después lanza un dado. El dado tiene seis caras de colores: 1 cara es roja, 2 caras son verdes y 3 caras son azules. ¿Cuántos resultados diferentes tiene en total este experimento?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "5",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "6",
+              "isCorrect": true
+            },
+            {
+              "key": "C",
+              "text": "8",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "12",
+              "isCorrect": false
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "B",
+          "skill": "Resolver problemas",
+          "oa": "OA 17",
+          "contentAxis": null,
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "un experimento aleatorio usando el principio 11 combinatorio multiplicativo. Calculan la probabilidad de un evento de un"
+        },
+        {
+          "position": 26,
+          "type": "multiple_choice",
+          "stem": "Se lanzó 100 veces un dado de 6 caras cargado. En esta tabla se registraron los resultados obtenidos: Cara del dado 1,2,3,4,5,6 → Cantidad de veces: 8, 17, 26, 33, 11, 5. Según los datos de la tabla, ¿qué fracción es una mejor estimación de la probabilidad de obtener [cara del dado mostrada como ícono/imagen, no capturada en el texto] al lanzar este dado?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "1/2",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "1/3",
+              "isCorrect": true
+            },
+            {
+              "key": "C",
+              "text": "1/4",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "1/6",
+              "isCorrect": false
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "B",
+          "skill": "Resolver problemas",
+          "oa": "OA 18",
+          "contentAxis": null,
+          "hasFigure": true,
+          "figureNote": "La pregunta referencia una cara específica del dado mostrada como ícono/imagen inline en el enunciado; no capturada por extracción de texto.",
+          "indicador": "experimento, utilizando frecuencias 11 relativas. Calculan todos los posibles resultados de"
+        },
+        {
+          "position": 27,
+          "type": "multiple_choice",
+          "stem": "Un concurso ofrece un viaje gratis para dos personas. Para conocer el premio, hacen girar estas 2 ruletas con el destino y el mes. Ruleta destino: Punta Arenas, Viña del Mar, Arica. Ruleta mes: Enero, Abril, Febrero, Marzo. ¿Cuántos resultados distintos se pueden obtener?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "7",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "9",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "12",
+              "isCorrect": true
+            },
+            {
+              "key": "D",
+              "text": "24",
+              "isCorrect": false
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "C",
+          "skill": "Resolver problemas",
+          "oa": "OA 17",
+          "contentAxis": null,
+          "hasFigure": true,
+          "figureNote": "Dos ruletas ilustradas (destino y mes); todas las opciones de cada ruleta están en el texto, no se requiere ver la imagen para responder.",
+          "indicador": "un experimento aleatorio usando el principio 11 combinatorio multiplicativo. Calculan la probabilidad de un evento de un"
+        },
+        {
+          "position": 28,
+          "type": "multiple_choice",
+          "stem": "Jorge dibujó en el piso un cuadrado y en su interior pintó los dos sectores P y Q. Jorge lanzó al azar 1 000 veces una ficha dentro del cuadrado y en el 12% de los lanzamientos la ficha cayó en el sector P, mientras que en el 23% de los lanzamientos la ficha cayó en el sector Q. Si Jorge se ubica en el mismo lugar en que lanzó la ficha anteriormente y la lanza nuevamente dentro del cuadrado, ¿qué fracción es una mejor estimación de la probabilidad de que la ficha caiga en la zona que está fuera de los sectores P y Q?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "2/4",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "1/35",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "1/65",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "65/100",
+              "isCorrect": true
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "D",
+          "skill": "Resolver problemas",
+          "oa": "OA 18",
+          "contentAxis": null,
+          "hasFigure": true,
+          "figureNote": "Cuadrado con sectores P y Q ilustrados; los porcentajes necesarios están en el texto, no se requiere ver la imagen para responder.",
+          "indicador": "11 experimento aleatorio, utilizando frecuencias relativas. Identifican el modelo que contiene"
+        },
+        {
+          "position": 29,
+          "type": "multiple_choice",
+          "stem": "Los segundos medios de un colegio recolectaron firmas para apoyar la construcción de una cancha al costado del colegio. Esta tabla muestra la parte del total de firmas que aportaron algunos cursos: 2° medio A = 2/5; 2° medio B = 1/4; 2° medio C = ?; 2° medio D = ?. Si el 2° medio C y el 2° medio D aportaron la misma cantidad de firmas cada uno, ¿cuál de estas operaciones permite calcular la parte del total de firmas que aportó el 2° medio C?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "(2/5 + 1/4) / 2",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "(2/5 – 1/4) / 2",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "[1 – (2/5 + 1/4)] / 2",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "1 – (2/5 + 1/4) / 2",
+              "isCorrect": true
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "D",
+          "skill": "Modelar",
+          "oa": "OA 1",
+          "contentAxis": null,
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "operaciones entre números racionales en el 1 contexto de la resolución de un problema. Resuelven un problema que requiere de"
+        },
+        {
+          "position": 30,
+          "type": "open_ended",
+          "stem": "Dani vende batidos de fruta. Su producto más vendido es el vaso de 1 litro que contiene leche y la siguiente cantidad de jugos de frutas: 0,2 litros de jugo de naranja; 2/5 litros de jugo de frutilla; 1/10 litros de jugo de piña. ¿Qué cantidad de leche contiene el vaso de batido más vendido por Dani? Justifica tu respuesta con los cálculos realizados.",
+          "alternatives": [],
+          "responseFormat": "develop",
+          "correctKey": null,
+          "skill": "Resolver problemas",
+          "oa": "OA 1",
+          "contentAxis": null,
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "adición y sustracción de números 1 racionales.",
+          "rubric": "Tipos de respuestas Respuestas correctas Respuestas incorrectas Respuestas parcialmente correctas (Código 1) (Código 2) (Código 0) Resuelve el problema definiendo una Resuelve el problema definiendo una Entrega otras respuestas que no estrategia pertinente. Concluyendo que el estrategia pertinente. Sin embargo, al cumplen con los criterios de las vaso de batido contiene 0,3 litros de aplicar esta estrategia omite la descripciones anteriores, o bien, no sustracción que se debe realizar entre responde. 3 leche o litros de leche. el contenido total del batido y la 10 cantidad total de jugos de frutas que contiene el batido, por lo que concluye que el vaso de batido contiene 0,7 litros 7 o litros de leche. 10 O bien, resuelve el problema definiendo una estrategia pertinente, sin omisión de procedimientos, pero cometiendo errores de cálculo. Ejemplos: Ejemplos : Ejemplos : Estrategia con números decimales: Estrategia con números decimales: Estrategia con números decimales: ● ● ● 0,2 + 0,4 + 0,1 = 0,7 0,2 + 0,4 + 0,1 = 0,7 0,2 + 0,25 + 0,11 = 0,56 1 - 0,7 = 0,3 El vaso contiene 0,7 litros de leche. Estrategia con fracciones: ● El vaso contiene 0,3 litros de leche. Estrategia con fracciones: 2/10 + 2/5 + 1/10 = 5/25 = 1/5 ● Estrategia con fracciones: 2/10 + 2/5 + 1/10 = 7/10 ● 2/10 + 2/5 +1/10 = 7/10 El vaso contiene 7/10 litros de leche. 10/10 – 7/10 = 3/10 Estrategia con números decimales: ● El vaso contiene 3/10 litros de leche. 0,2 + 0,25 + 0,11 = 0,56 1 – 0,56 = 0,44 El vaso contiene 0,44 litros de leche. Estrategia con fracciones: ● 2/10 + 2/5 + 1/10 = 5/25 = 1/5 1 – 1/5 = 4/5 El vaso contiene 4/5 litros de leche. 12 &gt; Diagnóstico Integral de Aprendizajes Instrumentos de Evaluación 2026 agenciaeducacion.cl"
+        },
+        {
+          "position": 31,
+          "type": "multiple_choice",
+          "stem": "Un proyecto de conservación de fauna silvestre comienza a trabajar con una población de 80 ranitas de Darwin y busca que cada año la población sea 1,5 veces la población del año anterior. ¿Cuál de estas expresiones corresponde a la población de ranitas de Darwin que se espera tener al completar 3 años del proyecto?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "80 • 1,5³",
+              "isCorrect": true
+            },
+            {
+              "key": "B",
+              "text": "(80 • 1,5)³",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "80 • 1,5 • 3",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "80 + 1,5 • 3",
+              "isCorrect": false
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "A",
+          "skill": "Modelar",
+          "oa": "OA 2",
+          "contentAxis": null,
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Identifican el modelo que contiene una 2 potencia de base racional y exponente"
+        },
+        {
+          "position": 32,
+          "type": "multiple_choice",
+          "stem": "Una hoja de papel tamaño carta tiene un área aproximada de 605 cm². La hoja se dobla por la mitad, dividiéndola en dos partes del mismo tamaño. Si se vuelve a doblar por la mitad, se divide en cuatro partes del mismo tamaño. Después de doblar la hoja por la mitad 6 veces, ¿cuál de las siguientes expresiones representa el área de cada parte en que quedó dividida la hoja?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "(605 • 0,5)^6 cm²",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "605 • (0,5)^6 cm²",
+              "isCorrect": true
+            },
+            {
+              "key": "C",
+              "text": "605 • (0,5 • 6) cm²",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "605 : (0,5 • 6) cm²",
+              "isCorrect": false
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "B",
+          "skill": "Modelar",
+          "oa": "OA 2",
+          "contentAxis": null,
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "potencia de base racional y exponente 2 natural en el contexto de la resolución de un problema. Analizan la expresión que representa una"
+        },
+        {
+          "position": 33,
+          "type": "multiple_choice",
+          "stem": "La capacidad de la batería del celular de Pía se reduce cada 3 meses en un porcentaje de la capacidad que tenía en el período anterior. Pía compró su celular con una capacidad inicial de 5 000 mAh y justo un año después la capacidad es de 0,94 • 5 000 mAh. ¿Cuál es el porcentaje en que se reduce la capacidad de la batería del celular de Pía cada 3 meses?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "10%",
+              "isCorrect": true
+            },
+            {
+              "key": "B",
+              "text": "30%",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "40%",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "90%",
+              "isCorrect": false
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "A",
+          "skill": "Resolver problemas",
+          "oa": "OA 2",
+          "contentAxis": null,
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "situación de decrecimiento en el contexto 2 de la resolución de problemas. Identifican la función afín que permite"
+        },
+        {
+          "position": 34,
+          "type": "multiple_choice",
+          "stem": "Para reunir fondos, una Junta Vecinal decide arrendar su sede en $250 000 por el día. Además, ofrecen el servicio de almuerzo con un costo de $4 000 por persona. ¿Cuál de estas funciones entrega el costo total de arrendar por un día la sede y contratar el servicio de almuerzo para x personas?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "h(x) = 4 000x + 250 000",
+              "isCorrect": true
+            },
+            {
+              "key": "B",
+              "text": "h(x) = 250 000x + 4 000",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "h(x) = 4 000x + 250 000x",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "h(x) = 250 000 + 4 000 + x",
+              "isCorrect": false
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "A",
+          "skill": "Modelar",
+          "oa": "OA 10",
+          "contentAxis": null,
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Identifican la función afín que permite 3 resolver un problema. Resuelven un problema que requiere"
+        },
+        {
+          "position": 35,
+          "type": "multiple_choice",
+          "stem": "La siguiente función relaciona la cantidad de cajas de galletas g que se producirán al mes en una fábrica con el precio de venta p de cada caja: g(p) = 10p + 100. Si se requiere que el precio de venta de cada caja de galletas sea de 1 100 pesos, ¿cuántas cajas se deben producir en total?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "100",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "11 100",
+              "isCorrect": true
+            },
+            {
+              "key": "C",
+              "text": "12 000",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "121 000",
+              "isCorrect": false
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "B",
+          "skill": "Resolver problemas",
+          "oa": "OA 10",
+          "contentAxis": null,
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Resuelven un problema que requiere 3 valorar una función afín dada. Calculan la probabilidad de un evento"
+        },
+        {
+          "position": 36,
+          "type": "multiple_choice",
+          "stem": "Ana tiene una caja con 6 bolas numeradas del 1 al 6. Extrae una bola de la caja al azar, anota su número y la devuelve a la caja. Luego, extrae por segunda vez una bola al azar y anota su número. ¿Cuál es la probabilidad de que Ana obtenga dos números diferentes en ambas extracciones?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "5/36",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "30/36",
+              "isCorrect": true
+            },
+            {
+              "key": "C",
+              "text": "1/36",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "11/36",
+              "isCorrect": false
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "B",
+          "skill": "Resolver problemas",
+          "oa": "OA 17",
+          "contentAxis": null,
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "compuesto aplicando el principio 11 combinatorio multiplicativo."
+        }
+      ]
+    }
+  ],
+  "extraction": {
+    "itemCount": 36,
+    "warnings": [
+      "Pos 3: alternativas A y B se extraen ambas como '0,15' (confirmado con bbox: mismo texto, mismo ancho) — posible duplicado real en el instrumento, verificar contra el PDF original.",
+      "Pos 12: coordenadas del punto P dependen de la figura (plano cartesiano) — no capturable por texto.",
+      "Pos 13: 4 alternativas gráficas — requieren ver las figuras.",
+      "Pos 14: 4 alternativas gráficas — requieren ver las figuras.",
+      "Pos 15: 4 alternativas gráficas — requieren ver las figuras.",
+      "Pos 23: 4 alternativas gráficas — requieren ver las figuras.",
+      "Pos 26: la pregunta referencia una cara específica del dado como ícono inline, no capturado en texto.",
+      "Pos 29: estructura de paréntesis de las alternativas C y D reconstruida desde el layout del PDF (fracciones apiladas); verificar contra el original antes de usar como pauta."
+    ],
+    "needsHumanReview": true,
+    "crossCheck": {
+      "hardIssues": [],
+      "softWarnings": [],
+      "counts": {
+        "cuadernillo": 36,
+        "ficha": 36,
+        "hoja": 36
+      }
+    }
+  },
+  "pauta": {
+    "source": {
+      "ficha": "II_TE DIA Diagnóstico matemática II° medio 2026.pdf",
+      "hoja": "II_Hoja de respuestas DIA Diagnóstico matemática II° medio 2026.pdf"
+    },
+    "appliedKeys": 30,
+    "rubrics": 1
+  }
+}

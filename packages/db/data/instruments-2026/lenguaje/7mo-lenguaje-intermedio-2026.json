@@ -1,0 +1,1163 @@
+{
+  "schemaVersion": "1.0",
+  "source": {
+    "file": "7_prueba_lectura_monitoreo_2026_7_basico.pdf",
+    "subjectFolder": "Lenguaje"
+  },
+  "instrument": {
+    "name": "DIA Lectura 7° Básico 2026 — Intermedio",
+    "subject": "Lenguaje y Comunicación",
+    "subjectCode": "LANG",
+    "grade": "7° Básico",
+    "gradeCode": "7TH_BASIC",
+    "year": 2026,
+    "applicationPeriod": "intermedio",
+    "type": "dia",
+    "isOfficial": true,
+    "source": "imported"
+  },
+  "sections": [
+    {
+      "order": 1,
+      "name": "Texto 1: «La osa mayor»",
+      "type": "multiple_choice",
+      "instructions": "Lee el siguiente texto y responde las preguntas 1 a 6.",
+      "passage": {
+        "title": "La osa mayor",
+        "text": "La historia de Calisto y Arcas\n\nEn una ocasión, Júpiter, el dios de los cielos, se enamoró de una joven doncella llamada Calisto. Cuando más tarde, la celosa Juno, esposa del dios, supo que Calisto había dado a luz a Arcas, hijo de Júpiter, estalló en terrible ira. Rauda, descendió del Olimpo y buscó en los bosques hasta encontrar a Calisto, quien estaba jugando con su pequeño hijo.\n\nCuando la joven vio a Juno, gritó de miedo, pues todos los mortales sabían de los ataques de celos de la diosa.\n\n—¡Así que tu belleza cautivó a mi esposo! —profirió Juno—. Pues bien, ¡veamos qué tanto vas a gustarle cuando te vea así!\n\nMientras Calisto pedía perdón, su piel se iba cubriendo de tosco pelo negro; sus manos y pies quedaron convertidos en garras enormes de las que brotaban agudas uñas. La boca se le llenó de aterradores y gigantescos dientes y la voz quedó transformada en un profundo gruñido. Juno había convertido a la joven en un oso de aspecto feroz.\n\nComo Calisto aún amaba a su hijito, con pasos torpes se dirigió hacia él; pero este, asustado, comenzó a gritar. Las ninfas del bosque vinieron entonces y se lo arrebataron.\n\nTodos le temían a Calisto, ahora que era una inmensa osa negra, y nadie se daba cuenta de que aún era tan dulce y amorosa como siempre había sido. Perseguida por hombres y perros, se vio obligada a esconderse y vagar por los bosques. También tuvo que huir de otros animales salvajes —incluso de los mismos osos— porque no sabía cómo pelear, ni quería aprender.\n\nAl comienzo, Calisto intentó permanecer cerca de la cabaña donde su hijo vivía con sus padres adoptivos. Cuando el niño se paseaba solo, caminaba cerca de él, escondiéndose detrás de los árboles; y en las noches, se deslizaba hasta su ventana para verlo dormir. Arcas le relató a sus nuevos padres que un enorme oso negro venía a mirarlo, pero ellos le contestaron que esto solo era un sueño.\n\nLa gran osa se vio perseguida a tal punto por cazadores y perros, que finalmente tuvo que refugiarse lejos de su hijo, en lo más profundo de la floresta.\n\nNo obstante, muchos años después, durante una noche de invierno soñó con Arcas, su hijo. Sintió entonces una nostalgia tal, que tan pronto llegó la primavera dejó su guarida del bosque y se dirigió hacia la región en donde una vez había vivido.\n\nUna tarde, a la hora del crepúsculo, cuando la osa recorría su familiar bosque recordando el pasado, llegó cerca de un cazador que apuntaba su flecha hacia un pájaro distante. Cuando lo vio, sintió que la sangre se le helaba en las venas porque reconoció a Arcas, su hijo y el de Júpiter. Sobrecogida de amor por él, Calisto lo miraba templar el arco y disparar contra el pájaro.\n\nSe sintió feliz cuando la flecha falló, porque siendo ella misma un animal salvaje, no quería que ninguna criatura fuera víctima de un cazador; pero cuando Arcas dio la vuelta y vio a la osa mirándolo, Calisto sintió que el terror tensaba sus músculos; el joven lentamente levantó el arco y lo dirigió exactamente hacia ella. Calisto, incapaz de moverse, solo pudo mirarlo, muda de pesadumbre.\n\nMas, en ese mismo instante, Júpiter observaba la Tierra desde el Monte Olimpo y, viendo lo que iba a suceder, raudo corrió a salvar a aquella a quien antes, joven doncella, había amado tanto. Más rápido que un relámpago, se precipitó desde la montaña, se apoderó de Calisto, y se lanzó con ella a través del nocturno firmamento. Luego, arrancando a Arcas de la Tierra, lo transportó a los cielos en donde, convertido en un pequeño oso, permanece cerca de su madre.\n\nAllí, ambos se transformaron en estrellas. Desde entonces, viven juntos en el cielo y son conocidos como las constelaciones de la Osa Mayor y la Osa Menor. Sin embargo, cuando la celosa Juno los descubrió, mandó a Neptuno, dios del Mar, a que les prohibiera descender hasta el océano, como lo hacen las demás estrellas. Por esta razón, la Osa Mayor y la Osa Menor son las únicas constelaciones que nunca se sitúan por debajo del horizonte.\n\nMary Pope Osborne. Mitos griegos. Bogotá: Norma, 1996.",
+        "format": "plain",
+        "attachments": []
+      },
+      "items": [
+        {
+          "position": 1,
+          "type": "multiple_choice",
+          "stem": "¿Cómo es Calisto?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Rencorosa.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Miedosa.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Sensible.",
+              "isCorrect": true
+            },
+            {
+              "key": "D",
+              "text": "Astuta.",
+              "isCorrect": false
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "C",
+          "skill": "Interpretar y relacionar",
+          "oa": "OA 3",
+          "contentAxis": "Narración",
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Infieren información relevante sobre personajes en un texto narrativo. Localizan información explícita relevante en un"
+        },
+        {
+          "position": 2,
+          "type": "multiple_choice",
+          "stem": "¿En qué convierte Juno a Calisto?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "En un oso.",
+              "isCorrect": true
+            },
+            {
+              "key": "B",
+              "text": "En un perro.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "En una ninfa.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "En una constelación.",
+              "isCorrect": false
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "A",
+          "skill": "Localizar",
+          "oa": "OA 3",
+          "contentAxis": "Narración",
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Localizan información explícita relevante en un texto narrativo. Infieren información relevante sobre personajes en"
+        },
+        {
+          "position": 3,
+          "type": "multiple_choice",
+          "stem": "¿Qué es lo que más anhelaba Calisto?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Estar con su hijo.",
+              "isCorrect": true
+            },
+            {
+              "key": "B",
+              "text": "Casarse con Júpiter.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Ser perdonada por Juno.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "Recuperar su forma humana.",
+              "isCorrect": false
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "A",
+          "skill": "Interpretar y relacionar",
+          "oa": "OA 3",
+          "contentAxis": "Narración",
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Infieren información relevante sobre personajes en un texto narrativo."
+        },
+        {
+          "position": 4,
+          "type": "multiple_choice",
+          "stem": "¿Qué busca explicar este relato?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "El origen de los osos.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "El surgimiento del horizonte.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "La trayectoria de las estrellas.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "La creación de dos constelaciones.",
+              "isCorrect": true
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "D",
+          "skill": "Interpretar y relacionar",
+          "oa": "OA 3",
+          "contentAxis": "Narración",
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Infieren el sentido global de un texto narrativo. Infieren información relevante sobre personajes en"
+        },
+        {
+          "position": 5,
+          "type": "multiple_choice",
+          "stem": "¿Por qué Arcas apunta su arco contra Calisto?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Porque Calisto asustó a sus padres.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Porque Calisto lo había abandonado.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Porque Arcas creía que era un oso común.",
+              "isCorrect": true
+            },
+            {
+              "key": "D",
+              "text": "Porque Arcas odiaba a los animales salvajes.",
+              "isCorrect": false
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "C",
+          "skill": "Interpretar y relacionar",
+          "oa": "OA 3",
+          "contentAxis": "Narración",
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Infieren información relevante sobre personajes en un texto narrativo."
+        },
+        {
+          "position": 6,
+          "type": "multiple_choice",
+          "stem": "¿Qué origina el conflicto de la historia?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "El amor de Calisto por Arcas.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "La infidelidad de Júpiter a Juno.",
+              "isCorrect": true
+            },
+            {
+              "key": "C",
+              "text": "El rapto del hijo de Calisto por las ninfas.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "La protección de Arcas por parte de Júpiter.",
+              "isCorrect": false
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "B",
+          "skill": "Interpretar y relacionar",
+          "oa": "OA 3",
+          "contentAxis": "Narración",
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Infieren el conflicto de un texto narrativo. Infieren la postura del autor en un texto"
+        }
+      ]
+    },
+    {
+      "order": 2,
+      "name": "Texto 2: «Ir al cine» (Cartas al director)",
+      "type": "multiple_choice",
+      "instructions": "Lee el siguiente texto y responde las preguntas 7 a 11.",
+      "passage": {
+        "title": "Ir al cine",
+        "text": "Cartas al director\n\nIr al cine\n9 sep 2025 - 05:56\n\nEstimado director:\nCada vez quedan menos cines. Su época dorada terminó hace tiempo, cuando ir a ver una película era toda una experiencia colectiva. Las salas se llenaban con historias de todo tipo: bélicas, del oeste, románticas, españolas, de terror, de culto… incluso aquellas que marcaron la transición democrática. Y junto a las películas, estaba la emoción del público: risas, miedo, lágrimas… y el inevitable “¡Sssshhh!” que imponía silencio.\nEl cine fue también una gran fábrica de sueños, que impulsaba a directores y actores hasta el estrellato. Pero esa etapa quedó atrás. Hoy las pantallas del hogar han sustituido a las de las salas, gracias a las plataformas digitales. Los intérpretes y los equipos de rodaje siguen existiendo, pero ahora la industria se enfrenta a un nuevo desafío: la irrupción de la Inteligencia Artificial (IA) y las recreaciones digitales, capaces de abaratar costos y transformar la producción audiovisual.\nNos preguntamos entonces: ¿qué se pierde en el camino? Quizá ir al cine era mucho más que ver una película; era un reflejo de la sociabilidad en tiempo real, donde se compartía espacio, emociones y lenguaje corporal. En cambio, las redes sociales —aunque nos conectan— también fomentan el individualismo y ocultan a menudo la verdadera imagen de quienes se expresan en ellas.\nLas innovaciones no siempre son sinónimo de progreso para todos. Ganamos comodidad y tiempo, sí, pero también corremos el riesgo de perder algo esencial: el instinto humano de compartir y vivir experiencias juntos.\n¿Es este el futuro de la humanidad?\nPedro Marín Usón\n\nLa Región. [España]. Web. 9 de septiembre de 2025.\n\nGlosario\nbélicas: relacionado a la guerra. En este caso, son películas sobre alguna guerra.\n¡Sssshhh!: imitación del sonido usado para hacer callar a alguien.",
+        "format": "plain",
+        "attachments": []
+      },
+      "items": [
+        {
+          "position": 7,
+          "type": "multiple_choice",
+          "stem": "¿Cuál es la postura del autor del texto con respecto al cine en la actualidad?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "El uso de la tecnología acabó con las grandes estrellas de la actuación.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "La irrupción de la IA permitirá recuperar la época dorada cinematográfica.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "La mayoría de las personas ha perdido el interés en ver películas antiguas.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "El alejamiento del cine ha influido en la pérdida de sociabilidad entre las personas.",
+              "isCorrect": true
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "D",
+          "skill": "Interpretar y relacionar",
+          "oa": "OA 8",
+          "contentAxis": null,
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Infieren la postura del autor en un texto argumentativo. Determinan propósitos explícitos e implícitos en un"
+        },
+        {
+          "position": 8,
+          "type": "multiple_choice",
+          "stem": "¿Con qué propósito el autor del texto finaliza su carta con una pregunta?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Culpar a las personas por el mal uso que se da a la tecnología.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Cuestionar a las personas sobre su comportamiento en las salas de cine.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Hacer reflexionar a las personas sobre la implicancia de depender de la tecnología.",
+              "isCorrect": true
+            },
+            {
+              "key": "D",
+              "text": "Criticar a las personas por el desinterés demostrado por el cine en los últimos años.",
+              "isCorrect": false
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "C",
+          "skill": "Reflexionar",
+          "oa": "OA 9",
+          "contentAxis": null,
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Determinan propósitos explícitos e implícitos en un texto argumentativo. Determinan propósitos explícitos e implícitos en un"
+        },
+        {
+          "position": 9,
+          "type": "multiple_choice",
+          "stem": "¿Cuál es el propósito del autor del texto?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Entregar información específica sobre la disminución de salas de cine.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Advertir que el avance tecnológico puede debilitar las relaciones sociales.",
+              "isCorrect": true
+            },
+            {
+              "key": "C",
+              "text": "Recomendar ciertos géneros de películas acorde al interés de las personas.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "Explicar cómo la IA ha mejorado la producción audiovisual reduciendo los costos.",
+              "isCorrect": false
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "B",
+          "skill": "Reflexionar",
+          "oa": "OA 9",
+          "contentAxis": null,
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Determinan propósitos explícitos e implícitos en un texto argumentativo. Infieren argumentos que respaldan la postura del"
+        },
+        {
+          "position": 10,
+          "type": "multiple_choice",
+          "stem": "¿En cuál de las siguientes ideas se apoya el autor para respaldar su punto de vista?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Las plataformas digitales hacen innecesarias las salas de cine.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Las salas de cine favorecían la interacción emotiva entre los asistentes.",
+              "isCorrect": true
+            },
+            {
+              "key": "C",
+              "text": "La IA ha transformado la producción audiovisual en una experiencia masiva.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "La variedad de géneros de películas era mucho más amplia antes de la llegada de la IA.",
+              "isCorrect": false
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "B",
+          "skill": "Interpretar y relacionar",
+          "oa": "OA 8",
+          "contentAxis": null,
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Infieren argumentos que respaldan la postura del autor en un texto argumentativo."
+        },
+        {
+          "position": 11,
+          "type": "multiple_choice",
+          "stem": "¿Cuál afirmación corresponde a una opinión del autor del texto?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "“Cada vez quedan menos cines”.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "“Las salas se llenaban con historias de todo tipo”.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "“Hoy las pantallas del hogar han sustituido a las de las salas”.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "“Las innovaciones no siempre son sinónimo de progreso para todos”.",
+              "isCorrect": true
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "D",
+          "skill": "Reflexionar",
+          "oa": "OA 8",
+          "contentAxis": null,
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Distinguen un hecho de una opinión en un texto argumentativo. Establecen conclusiones sobre distintos aspectos en"
+        }
+      ]
+    },
+    {
+      "order": 3,
+      "name": "Texto 3: «¿Te acuerdah, mujer, te acuerdah?»",
+      "type": "multiple_choice",
+      "instructions": "Lee el siguiente texto y responde las preguntas 12 a 15.",
+      "passage": {
+        "title": "¿Te acuerdah, mujer, te acuerdah?",
+        "text": "Tropezaste en el camino\ncaíste sobre la arena\nyo te levanté del brazo\n¿te acuerdah, mujer, te acuerdah?\n\nTe compraste una guitarra,\nyo te regalé lah cuerdah\ncantamos toda la noche\n¿te acuerdah, mujer, te acuerdah?\n\nUn anillo de brillante\nte puse en la mano izquierda\nen la parroquia del pueblo\n¿te acuerdah, mujer, te acuerdah?\n\nAhora te vah de negro\ncon tu corazón de piedra\nte olvidaste de mi amor\n¡recuerda, mujer, recuerda!\n\nCuando mireh el anillo\ny en el mundo te pierdah\nte acompañará mi sombra\n¡recuerda, mujer, recuerda!\n\nSolo tendráh la guitarra\nque compraste en la tienda\ncolgada pasa llorando\n¡recuerda, mujer, recuerda!\n\nSon mih últimah palabrah\nsiento la muerte muy cerca\ny se va lo que dejaste\n¡recuerda, mujer, recuerda!\n\nRoberto Parra. La vida que yo he pasado. Santiago, Chile: Pehuén, 2012.",
+        "format": "plain",
+        "attachments": []
+      },
+      "items": [
+        {
+          "position": 12,
+          "type": "multiple_choice",
+          "stem": "¿Qué sentimiento predomina en el hablante?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Vergüenza.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Indignación.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Resignación.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "Desconsuelo.",
+              "isCorrect": true
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "D",
+          "skill": "Interpretar y relacionar",
+          "oa": "OA 4",
+          "contentAxis": "Poema",
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Establecen conclusiones sobre distintos aspectos en un poema. Interpretan el sentido de expresiones en lenguaje"
+        },
+        {
+          "position": 13,
+          "type": "multiple_choice",
+          "stem": "¿Por qué el hablante dice que su amada tiene un corazón de piedra?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Porque le resulta difícil recordar la vida con el hablante.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Porque su amor por el hablante perdura en el tiempo.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Porque es indiferente al sufrimiento del hablante.",
+              "isCorrect": true
+            },
+            {
+              "key": "D",
+              "text": "Porque niega el amor que siente por el hablante.",
+              "isCorrect": false
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "C",
+          "skill": "Interpretar y relacionar",
+          "oa": "OA 4",
+          "contentAxis": "Poema",
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Interpretan el sentido de expresiones en lenguaje figurado presentes en un poema."
+        },
+        {
+          "position": 14,
+          "type": "multiple_choice",
+          "stem": "¿De qué trata el poema leído?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Del sufrimiento que causa el desamor.",
+              "isCorrect": true
+            },
+            {
+              "key": "B",
+              "text": "Del dolor ante la muerte del ser amado.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "De la pérdida de memoria del ser amado.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "De la dificultad de mantener una relación amorosa.",
+              "isCorrect": false
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "A",
+          "skill": "Interpretar y relacionar",
+          "oa": "OA 4",
+          "contentAxis": "Poema",
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Infieren el sentido global de poema. Establecen conclusiones sobre distintos aspectos en"
+        },
+        {
+          "position": 15,
+          "type": "multiple_choice",
+          "stem": "¿Qué le pide el hablante a su amada?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Que no lo deje.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Que no lo olvide.",
+              "isCorrect": true
+            },
+            {
+              "key": "C",
+              "text": "Que no se muera.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "Que no pare de cantar.",
+              "isCorrect": false
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "B",
+          "skill": "Interpretar y relacionar",
+          "oa": "OA 4",
+          "contentAxis": "Poema",
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Establecen conclusiones sobre distintos aspectos en un poema. Localizan información explícita relevante en un texto"
+        }
+      ]
+    },
+    {
+      "order": 4,
+      "name": "Texto 4: «Cerebro de palomita de maíz»",
+      "type": "multiple_choice",
+      "instructions": "Lee el siguiente texto y responde las preguntas 16 a 20.",
+      "passage": {
+        "title": "Cerebro de palomita de maíz: el mal de los que scrollean sin parar en su teléfono",
+        "text": "Salud y Bienestar > Noticia\n\nCerebro de palomita de maíz: el mal de los que scrollean sin parar en su teléfono\nPor Denisse Charpentier - 21 febrero de 2024 | 10:41\n\nSi al despertar lo primero que haces en la mañana es tomar tu teléfono y comenzar a scrollear (deslizar el dedo por la pantalla para navegar en internet) en tus redes sociales o aplicaciones, y al terminar el día, vas a la cama también con tu celular y haces lo mismo, probablemente estés experimentando o muy cerca de llegar al denominado “cerebro de palomita de maíz”.\n\nComo estallar granos de maíz\nEl psicólogo clínico Daniel Glazer explicó que el “cerebro de palomita de maíz” hace referencia “a la tendencia de nuestra atención a saltar rápidamente de una cosa a otra, como hacer estallar granos de maíz. Esto condiciona a nuestro cerebro a acostumbrarse y esperar distracciones frecuentes y gratificación inmediata”, expresó. De este modo, “las actividades que requieren una concentración sostenida como la lectura, los proyectos de trabajo o las conversaciones en persona se vuelven más difíciles”.\nCon esto coincide la psicóloga Dannielle Haig, quien dijo al periódico The Guardian que la manera en que funcionan estas plataformas desencadena una liberación de dopamina, recompensando nuestro cerebro y animándonos a continuar este ciclo de búsqueda y recepción de nuevos estímulos. “Con el tiempo, esta demanda constante de atención y el cambio rápido entre tareas pueden provocar una sensación de inquietud mental o que el cerebro ‘rebote’ mientras lucha por mantener la concentración en una tarea durante un período prolongado”, afirmó.\n\nSíntomas de que tal vez tienes un cerebro de palomita de maíz\nSi bien no se trata de una condición médica como tal, este síndrome da cuenta de un patrón de comportamiento nocivo para las personas.\nLos síntomas del cerebro de palomita de maíz son: capacidad de atención reducida, necesidad constante de estimulación, inquietud cuando no se interactúa con los medios digitales y desafíos para administrar el tiempo de forma eficaz.\nDaniel Glazer enfatizó que algunas aplicaciones populares —como TikTok o Instagram— están diseñadas para fomentar ese comportamiento con “programas de recompensa, dosis de dopamina y diseños intencionalmente adictivos”.\nAsimismo, una investigación de la psicóloga Gloria Mark concluyó que, durante las últimas dos décadas, la capacidad de atención promedio disminuyó de 2 minutos a unos 47 segundos.\n\n¿Cómo salir del cerebro de palomita de maíz?\nGlazer indicó que para evitar que tu cerebro se “acostumbre y espere distracciones frecuentes y gratificaciones inmediatas”, puedes tomar algunas medidas.\nUna buena idea es establecer periodos determinados sin tecnología. Si te cuesta, incluso puedes dejar el teléfono en otra habitación. Este tiempo, sin pantallas, puede ayudarte a reconfigurar tu cerebro y tu capacidad de atención.\nOtra recomendación es “hacer una pausa consciente para concentrarse en una sola tarea”. Por ejemplo, si tienes que enviar un correo electrónico, hazlo, pero sin desviarte de lo que estás haciendo.\nTambién, puedes cortar por lo sano y eliminar las aplicaciones que más capturan tu atención. Esto te ayudará a “recuperar algo de control”.\nY si nada resulta… siempre puedes lanzar tu teléfono por la ventana.\n\nDenisse Charpentier. BioBio Chile. [Chile]. Web. 21 de febrero 2024. (Adaptación).\n\nGlosario\ndopamina: neurotransmisor (un mensajero químico del cerebro) clave que regula el placer, la motivación y la recompensa, haciendo que sintamos felicidad y nos impulse a repetir comportamientos beneficiosos.",
+        "format": "plain",
+        "attachments": []
+      },
+      "items": [
+        {
+          "position": 16,
+          "type": "multiple_choice",
+          "stem": "Según el psicólogo Daniel Glazer, ¿a qué hace referencia el “cerebro de palomita de maíz”?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "A las actividades que requieren una concentración sostenida.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "A una condición médica que se produce por el uso de redes sociales.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "A la acción de desplazar el dedo por la pantalla para navegar en internet.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "A la tendencia de nuestra atención a saltar rápidamente de una cosa a otra.",
+              "isCorrect": true
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "D",
+          "skill": "Localizar",
+          "oa": "OA 9",
+          "contentAxis": null,
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Localizan información explícita relevante en un texto de los medios de comunicación. Infieren información relevante en un texto de los"
+        },
+        {
+          "position": 17,
+          "type": "multiple_choice",
+          "stem": "Según el texto, ¿cuál de las siguientes acciones ayuda a recuperarse del “cerebro de palomita de maíz”?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Acudir a un psicólogo para tratar la condición médica.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Limitar el acceso al celular dejándolo en otra habitación.",
+              "isCorrect": true
+            },
+            {
+              "key": "C",
+              "text": "Evitar el uso del teléfono destruyéndolo de manera voluntaria.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "Dejar de interactuar por completo en las redes sociales más famosas.",
+              "isCorrect": false
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "B",
+          "skill": "Interpretar y relacionar",
+          "oa": "OA 9",
+          "contentAxis": null,
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Infieren información relevante en un texto de los medios de comunicación. Infieren el tema central de un texto de los medios de"
+        },
+        {
+          "position": 18,
+          "type": "multiple_choice",
+          "stem": "¿Cuál es el tema central del texto?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "El problema de salud mental de las personas producido por el uso del teléfono.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "El efecto del uso excesivo del celular en la concentración de las personas.",
+              "isCorrect": true
+            },
+            {
+              "key": "C",
+              "text": "La adicción generada en las personas por el uso excesivo de redes sociales.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "La condición médica asociada a comportamientos nocivos de las personas.",
+              "isCorrect": false
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "B",
+          "skill": "Interpretar y relacionar",
+          "oa": "OA 9",
+          "contentAxis": null,
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Infieren el tema central de un texto de los medios de comunicación o de un fragmento relevante de este. Distinguen un hecho de una opinión en un texto de"
+        },
+        {
+          "position": 19,
+          "type": "multiple_choice",
+          "stem": "¿Cuál de las siguientes afirmaciones corresponde a una opinión mencionada en el texto?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "La manera en que funcionan estas plataformas desencadena una liberación de dopamina.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "La capacidad de atención promedio disminuyó de 2 minutos a unos 47 segundos.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "El tiempo sin pantallas puede ayudar a reconfigurar tu cerebro.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "Las conversaciones en persona se vuelven más difíciles.",
+              "isCorrect": true
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "D",
+          "skill": "Reflexionar",
+          "oa": "OA 9",
+          "contentAxis": null,
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Distinguen un hecho de una opinión en un texto de los medios de comunicación. Determinan propósitos explícitos e implícitos en un"
+        },
+        {
+          "position": 20,
+          "type": "multiple_choice",
+          "stem": "¿Cuál es el propósito principal del texto?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Recomendar técnicas probadas para evitar la adicción a redes sociales.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Comparar las investigaciones recientes sobre el funcionamiento del cerebro.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Analizar las rutinas diarias de interacción en redes sociales de los usuarios jóvenes.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "Advertir sobre las consecuencias en la función del cerebro de los usuarios de teléfonos.",
+              "isCorrect": true
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "D",
+          "skill": "Reflexionar",
+          "oa": "OA 9",
+          "contentAxis": null,
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Determinan propósitos explícitos e implícitos en un texto de los medios de comunicación. Localizan información explícita relevante en un texto"
+        }
+      ]
+    },
+    {
+      "order": 5,
+      "name": "Texto 5: «Un mojado miedo verde»",
+      "type": "mixed",
+      "instructions": "Lee el siguiente texto y responde las preguntas 21 a 25.",
+      "passage": {
+        "title": "Un mojado miedo verde",
+        "text": "Hay alguien atragantado de miedo, metido hasta el cuello, en las aguas quietas de Laguna Verde.\n\nHoy, precisamente hoy, empieza la Gran Fiesta del Pescado Frito y, como todos los años, Laguna Verde se llena de pescadores que llegan desde lugares lejanos, alegres, con sus lanzas, sus cañas, sus anzuelos. Si supieran lo que está pasando, no se meterían con sus frágiles botes en las aguas, en apariencia tranquilas, de la laguna, ni remarían, buscando peces, hasta el centro mismo de las aguas mansas.\n\nTampoco las parejas de enamorados se perderían entre los juncos para besarse al sol. Porque... hay un monstruo verde en la Laguna Verde. No existe en el mundo nada más horripilante que este monstruo lagunoso. Tiene dos pares de patas que terminan en sólidas garras afiladas. Su cuerpo es verde mate cocido, como el agua de la laguna. Su piel, rugosa y áspera y también viscosa por el lado de atrás. Sus ojos son amarillos, pero, cuando empieza a oscurecer, se vuelven rojos como la sangre... Y, además, tiene una cola oblicua llena de púas que hace cimbrar, como una serpiente negra. De la cabeza a las patas, el monstruo mide casi cuatro metros. Sin embargo, nadie lo ha visto nunca porque su piel verde se confunde con el agua verde de la laguna.\n\nNadie sabe que está ahí.\n\nNadie, no..., alguien sí lo sabe. Alguien que, sumergido hasta el cuello en el agua, está viendo algo que lo deja mudo, algo que lo paraliza de terror...\n\nLos botecitos de los pescadores comienzan a deslizarse por la laguna, livianos como mosquitas de colores. Avanzan lentamente, sigilosos, para no alertar a los peces. Todo está ligeramente envuelto en un tranquilo silencio; apenas si se escucha el chapoteo suave de los remos al cortar el agua, y el canto alegre de las chicharras.\n\nNinguno imagina que, a pocos metros, alguien paralizado por el terror, con el agua hasta el cuello, tirita de miedo.\n\nEl monstruo de la laguna verde es carnívoro.\n\nSu larguísima lengua roja actúa como un látigo de acero que atrapa, tritura y muele, igual que una multiprocesadora. Gracias a su vertiginosa lengua, el monstruo sería capaz de devorarse hasta un buey y digerirlo como a una aceituna.\n\nEn la oscuridad de la noche, sus ojos rojo sangre parecen dos estigmas de fuego, capaces de aterrar al más valiente.\n\nPero ahora es de día, y alguien tiembla en la laguna; tiembla sin poder gritar, sin atinar a moverse, sin sentirse capaz de poder abrir la boca para pedir ayuda siquiera.\n\nLos pescadores ya tiraron sus hilos (las carnadas flotan apenas unos centímetros bajo el agua...) y se disponen a esperar. Algunos toman mate para pasar el tiempo. En medio del silencio, de los juncos, del sol, el día tiene la paz de esos paisajes de almanaque. ¿Quién, mecido por la paz del lugar, podría suponer que alguien desmaya de terror en la laguna?\n\nEl monstruo pesa como doscientos treinta kilos; su cuerpo está semienterrado en el barro. Sus garras traseras salen de unas patas que tienen una poderosa musculatura, como un resorte capaz de permitirle un salto mortal. Sin embargo, su mejor arma, la invencible, es mimetizarse con el agua hasta casi desaparecer. Cualquiera, desprevenido, podría pasar por encima de él sin advertir que su gran bocaza oscura, con sus setenta y ocho colmillos, afilados como estiletes, podría estar abierta, a la espera de que un cuerpo o dos o cincuenta y seis le penetren hasta el fondo de la garganta para... ¡¡ÑÑÑÑAMM!! cerrarse de golpe, como una poderosa compactadora de metales.\n\nLos pescadores lo ignoran y solo sueñan con sus botes desbordando de pescados y con la hermosa copa que adornará la vitrina del campeón de la Gran Fiesta Anual del Pescado Frito.\n\nAjenas a todo, las parejas de enamorados siguen felices entre los juncos...\n\nSolo alguien, con el alma en un hilo, ya al borde del pánico en la Laguna Verde, ve que la situación se vuelve cada vez más difícil, ingobernable, inminente...\n\nLas embarcaciones se van acercando perezosamente; buscando peces, se acercan más y más hacia el centro de la laguna, donde el monstruo se confunde con el agua.\n\nSe acercan sin imaginar lo que hay allí; ya rozan con los remos, sin querer, la horrible piel viscosa, la gruesa piel verde del monstruo verde de la laguna.\n\nY el monstruo, que ya hace rato los ha estado viendo aproximarse, con sus cañas, sus lanzas y sus anzuelos, no puede evitarlo y tirita de miedo, se hace pipí del terror. Trata de hacerse chiquito mientras se pregunta por qué su mamá se fue y lo dejó tan solito en ese terrible lugar.\n\nGraciela Falbo. La aventura de leer: Antología literaria. Chile: Aguilar Chilena de Ediciones, 2011.",
+        "format": "plain",
+        "attachments": []
+      },
+      "items": [
+        {
+          "position": 21,
+          "type": "multiple_choice",
+          "stem": "¿Cuál es la mejor arma del monstruo?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Hacerse chiquito.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Mimetizarse con el agua.",
+              "isCorrect": true
+            },
+            {
+              "key": "C",
+              "text": "Paralizar de terror a sus presas.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "Atrapar a sus presas con la lengua.",
+              "isCorrect": false
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "B",
+          "skill": "Localizar",
+          "oa": "OA 3",
+          "contentAxis": "Narración",
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Localizan información explícita relevante en un texto narrativo. Realizan inferencias sobre el ambiente y las"
+        },
+        {
+          "position": 22,
+          "type": "multiple_choice",
+          "stem": "¿Cómo es el ambiente de la Gran Fiesta del Pescado Frito?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Sereno y alegre.",
+              "isCorrect": true
+            },
+            {
+              "key": "B",
+              "text": "Tenebroso y oscuro.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Solitario y misterioso.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "Romántico y apasionado.",
+              "isCorrect": false
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "A",
+          "skill": "Interpretar y relacionar",
+          "oa": "OA 3",
+          "contentAxis": "Narración",
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Realizan inferencias sobre el ambiente y las costumbres en un texto narrativo."
+        },
+        {
+          "position": 23,
+          "type": "multiple_choice",
+          "stem": "¿Cuál de los siguientes personajes se encuentra realmente asustado en el cuento?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Un pez.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Un pescador.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Un monstruo.",
+              "isCorrect": true
+            },
+            {
+              "key": "D",
+              "text": "Un enamorado.",
+              "isCorrect": false
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "C",
+          "skill": "Interpretar y relacionar",
+          "oa": "OA 3",
+          "contentAxis": "Narración",
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Infieren el sentido global de un texto narrativo. Infieren información relevante sobre personajes en"
+        },
+        {
+          "position": 24,
+          "type": "multiple_choice",
+          "stem": "¿Cómo se describe al monstruo en el relato?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Como un monstruo astuto.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Como un monstruo irritable.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Como un monstruo aterrador.",
+              "isCorrect": true
+            },
+            {
+              "key": "D",
+              "text": "Como un monstruo imaginario.",
+              "isCorrect": false
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "C",
+          "skill": "Interpretar y relacionar",
+          "oa": "OA 3",
+          "contentAxis": "Narración",
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Infieren información relevante sobre personajes en un texto narrativo. Formulan una interpretación o postura personal"
+        },
+        {
+          "position": 25,
+          "type": "open_ended",
+          "stem": "De acuerdo con lo leído, ¿quién crees que debería tener más miedo?\nEl monstruo\nLos pescadores\n¿Por qué? Justifica tu respuesta dando, al menos, un ejemplo del texto.",
+          "alternatives": [],
+          "responseFormat": "develop",
+          "correctKey": null,
+          "skill": "Reflexionar",
+          "oa": "OA 7",
+          "contentAxis": "Narración",
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "sobre el sentido de un texto narrativo o un aspecto de este. Localizan información explícita relevante en un texto",
+          "rubric": "Tipos de respuestas Respuestas correctas Respuestas parcialmente Respuestas incorrectas correctas (Código 2) (Código 0) (Código 1) La o el estudiante formula una La o el estudiante formula una La o el estudiante interpretación sobre el aspecto interpretación sobre el aspecto evidencia en su solicitado en la pregunta, la cual solicitado en la pregunta, la cual respuesta una evidencia una comprensión correcta del evidencia una comprensión comprensión errónea del texto y un análisis coherente de la parcial de lo solicitado y un texto y de lo solicitado, información. En este caso, una análisis parcialmente correcto de pues no realiza una interpretación adecuada del sentido de la información. En este caso, una interpretación adecuada la obra es considerar, al momento de su interpretación parcial de lo de la situación y elección, aquellos elementos textuales solicitado es considerar, al evidencia errores en la que evidencian aspectos “aterradores”, momento de su elección, comprensión lectora tanto del monstruo como de los aspectos más locales del cuento (respuestas humanos. que no se relacionan incoherentes, vagas, directamente con el factor del tautológicas, etc.). En caso de seleccionar al monstruo, “miedo” / “terror”. aquellos elementos textuales que También son incorrectas podrían considerarse, entre otros, son las respuestas en También en esta categoría se los siguientes: las cañas, lanzas y blanco. pueden encontrar aquellas anzuelos de los pescadores; el pavor respuestas en las que el/la del monstruo frente a la especie estudiante evidencia una humana; el hecho de que el monstruo comprensión adecuada del sentido esté solo. global del texto, pero no realiza En caso de seleccionar a los pescadores, una interpretación sobre el aspecto aquellos elementos textuales que podrían solicitado en la pregunta (por considerarse, entre otros, son los ejemplo, identificar que el monstruo siguientes: el hecho de que el monstruo es el que tiene miedo, pero no es carnívoro, alusiones al aspecto, el interpretar quién debiese estar más tamaño o la voracidad, etc. asustado). Ejemplos: Ejemplos: Ejemplos: Yo creo que el monstruo, porque los Yo creo que las personas, Los pescadores - - - pescadores vienen a invadirlo en su porque están súper porque son personas. lugar y él es solo un bebé abandonado desconcentradas pensando El monstruo porque - que los desconoce. en pescar algo para ganar la los pescadores Fiesta del Pescado Frito. Yo creo que los humanos deberían mataron a su mamá. - sentir más miedo, porque se dice que Los pescadores, porque no - Está mal comer - el monstruo es aterrador y los puede conocen la laguna porque pescado frito. comer muy rápido. vienen de otros lados lejanos. Los pescadores, porque no se El monstruo, porque - - imaginan lo grande que es el efectivamente es él el que está monstruo y que los puede matar. muerto de miedo en la laguna. 9 &gt; Diagnóstico Integral de Aprendizajes Instrumentos de Evaluación 2026 agenciaeducacion.cl"
+        }
+      ]
+    },
+    {
+      "order": 6,
+      "name": "Texto 6: «Cultura kawaii»",
+      "type": "multiple_choice",
+      "instructions": "Lee el siguiente texto y responde las preguntas 26 a 30.",
+      "passage": {
+        "title": "Cultura kawaii: ¿Qué significa y por qué es tan popular?",
+        "text": "Japón desde Japón   Blog   Turismo   Afiliados   Conócenos\n\nCultura kawaii: ¿Qué significa y por qué es tan popular?\nLa palabra kawaii en japonés significa “lindo” o “adorable”, y está en el corazón de una de las subculturas más famosas y encantadoras de Japón. Pero, ¿qué hace que el kawaii sea tan especial? En este artículo exploraremos qué es la cultura kawaii, su origen, cómo influye en la moda, el entretenimiento y la vida cotidiana, y por qué sigue siendo desde la década de los 70, un elemento esencial de la cultura japonesa.\n\nEl origen del término Kawaii\nEl término kawaii es relativamente reciente, pero sus raíces se extienden mucho más atrás en la historia de Japón. En la década de 1970, la palabra comenzó a ser utilizada para describir a los personajes, objetos y comportamientos que evocaban una sensación de dulzura y ternura. Aunque la adoración por lo “lindo” existía en la cultura japonesa desde mucho antes, fue durante los últimos años de los 60, principios de los 70, cuando comenzó a formarse el fenómeno cultural que hoy conocemos como kawaii.\n\nKawaii en la moda: combinando lo auténtico con lo lindo\nUno de los aspectos más visibles y admirados de la cultura kawaii es su influencia en la moda. Japón es un país famoso por ser líder en tendencias de moda, y esta cultura ha logrado crear un impacto significativo, especialmente en localidades como Harajuku, en Tokio. Harajuku se ha convertido en el centro de la moda japonesa. En este lugar se pueden ver personas vistiendo ropa con colores brillantes, patrones infantiles y accesorios llamativos. Estos estilos reflejan una mezcla de creatividad, diversión y, por supuesto, ternura.\nLa moda kawaii no solo se limita a la ropa. Los accesorios, el maquillaje y las uñas también juegan un papel importante. Los ojos agrandados y el maquillaje suave completan el look. Además, los productos con personajes adorables como llaveros, mochilas y joyas también lo hacen.\n\nKawaii en el mundo del entretenimiento y el diseño de personajes\nUno de los pilares más reconocidos de la cultura kawaii es el diseño de personajes. Los personajes de animé y manga, como Hello Kitty, Totoro y Rilakkuma, son la cara de la cultura kawaii de talla global. Estos personajes no solo son populares en Japón, sino que han logrado cruzar fronteras y ganarse corazones alrededor del mundo.\nLos personajes kawaii a menudo están diseñados con proporciones exageradas: ojos grandes, caras suaves, y colores pastel predominantes. Esta estética visual está diseñada para evocar ternura, y sus características suaves y amigables hacen que estos personajes sean accesibles y queridos por todas las edades. Los diseños se centran en la simplicidad y la limpieza, lo que permite que las emociones y las intenciones detrás de los personajes se perciban de manera clara y directa.\n\nLa filosofía del kawaii: más allá de lo adorable\nAunque la cultura kawaii a menudo se asocia con la apariencia superficial y la ternura visual, en realidad tiene un trasfondo más profundo. Esta estética refleja un deseo de escapar de las durezas de la vida diaria, especialmente en una sociedad tan intensa y competitiva como la japonesa.\nLos principios de este concepto ofrecen un refugio emocional. Es un recordatorio de que, en medio de las preocupaciones y las responsabilidades del día a día, siempre existe un espacio para la dulzura y la felicidad.\nLa cultura kawaii de Japón es mucho más que un estilo visual; es una forma de vida que busca generar bienestar emocional y conexión a través de la ternura. Así que la próxima vez que veas un personaje adorable o un diseño lleno de colores brillantes, recuerda que detrás de ese pequeño detalle se encuentra una filosofía que promueve la alegría y la dulzura en todos los aspectos de nuestra vida.\n\nDiego Alamada Ozuna. Japón desde Japón. [Japón]. Web. 11 de enero de 2025. (Adaptación).",
+        "format": "plain",
+        "attachments": []
+      },
+      "items": [
+        {
+          "position": 26,
+          "type": "multiple_choice",
+          "stem": "Según el texto, ¿cuál es uno de los pilares más reconocidos de la cultura kawaii?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "El maquillaje.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "El diseño de personajes.",
+              "isCorrect": true
+            },
+            {
+              "key": "C",
+              "text": "La variedad de accesorios.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "La exageración de los rasgos.",
+              "isCorrect": false
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "B",
+          "skill": "Localizar",
+          "oa": "OA 9",
+          "contentAxis": null,
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Localizan información explícita relevante en un texto de los medios de comunicación. Infieren información relevante en un texto de los"
+        },
+        {
+          "position": 27,
+          "type": "multiple_choice",
+          "stem": "Según el texto, ¿qué objetivo tiene el uso de proporciones exageradas en los personajes kawaii?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Conectar emocionalmente con gente de distintas edades.",
+              "isCorrect": true
+            },
+            {
+              "key": "B",
+              "text": "Alcanzar un lugar importante en mercados mundiales.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Reflejar la singularidad de su localidad de origen.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "Criticar el estándar de vida de los adultos.",
+              "isCorrect": false
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "A",
+          "skill": "Interpretar y relacionar",
+          "oa": "OA 9",
+          "contentAxis": null,
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Infieren información relevante en un texto de los medios de comunicación. Infieren información relevante en un texto de los"
+        },
+        {
+          "position": 28,
+          "type": "multiple_choice",
+          "stem": "¿Cómo perciben a la sociedad japonesa los miembros de la cultura kawaii?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Simple.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Ambiciosa.",
+              "isCorrect": true
+            },
+            {
+              "key": "C",
+              "text": "Emocional.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "Superficial.",
+              "isCorrect": false
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "B",
+          "skill": "Interpretar y relacionar",
+          "oa": "OA 9",
+          "contentAxis": null,
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Infieren información relevante en un texto de los medios de comunicación."
+        },
+        {
+          "position": 29,
+          "type": "multiple_choice",
+          "stem": "¿Cuál es el tema central del texto?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "El origen de la palabra kawaii.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "El diseño de personajes kawaii.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "El desarrollo de la moda kawaii.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "El fenómeno de la cultura kawaii.",
+              "isCorrect": true
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "D",
+          "skill": "Interpretar y relacionar",
+          "oa": "OA 9",
+          "contentAxis": null,
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Infieren el tema central de un texto de los medios de comunicación o de un fragmento relevante de este. Determinan los prejuicios, estereotipos y creencias"
+        },
+        {
+          "position": 30,
+          "type": "multiple_choice",
+          "stem": "¿Qué prejuicio sobre la cultura kawaii confronta el texto?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Que es adorable.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Que es influyente.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Que es superficial.",
+              "isCorrect": true
+            },
+            {
+              "key": "D",
+              "text": "Que es exagerada.",
+              "isCorrect": false
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "C",
+          "skill": "Reflexionar",
+          "oa": "OA 9",
+          "contentAxis": null,
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Determinan los prejuicios, estereotipos y creencias presentes en textos de los medios de comunicación."
+        }
+      ]
+    }
+  ],
+  "extraction": {
+    "itemCount": 30,
+    "warnings": [
+      "Q25 es ítem de desarrollo (open_ended, responseFormat develop): pide elegir entre «El monstruo» / «Los pescadores» y justificar con un ejemplo del texto.",
+      "Texto 3 es un poema («¿Te acuerdah, mujer, te acuerdah?») dispuesto en dos columnas (4 estrofas a la izquierda, 3 a la derecha); se transcribió leyendo primero la columna izquierda completa y luego la derecha. Ortografía dialectal verbatim (acuerdah, cuerdah, mireh, etc.).",
+      "Textos con glosario incorporado al passage: Texto 2 (bélicas, ¡Sssshhh!) y Texto 4 (dopamina).",
+      "Todos los ítems son de alternativas A/B/C/D salvo Q25; ninguna figura es necesaria para responder.",
+      "Textos transcritos desde la capa de texto del PDF (pdftotext -layout), verbatim."
+    ],
+    "needsHumanReview": false,
+    "crossCheck": {
+      "hardIssues": [],
+      "softWarnings": [],
+      "counts": {
+        "cuadernillo": 30,
+        "ficha": 30,
+        "hoja": 30
+      }
+    }
+  },
+  "pauta": {
+    "source": {
+      "ficha": "7_ficha_tecnica_lectura_monitoreo_2026_7_basico.pdf",
+      "hoja": "7_hoja_de_respuestas_lectura_monitoreo_2026_7_basico.pdf"
+    },
+    "appliedKeys": 29,
+    "rubrics": 1
+  }
+}

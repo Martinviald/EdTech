@@ -1,0 +1,1086 @@
+{
+  "schemaVersion": "1.0",
+  "source": {
+    "file": "6_prueba_lectura_monitoreo_2026_6_basico.pdf",
+    "subjectFolder": "Lenguaje"
+  },
+  "instrument": {
+    "name": "DIA Lectura 6° Básico 2026 — Intermedio",
+    "subject": "Lenguaje y Comunicación",
+    "subjectCode": "LANG",
+    "grade": "6° Básico",
+    "gradeCode": "6TH_BASIC",
+    "year": 2026,
+    "applicationPeriod": "intermedio",
+    "type": "dia",
+    "isOfficial": true,
+    "source": "imported"
+  },
+  "sections": [
+    {
+      "order": 1,
+      "name": "Texto 1: «El joven cangrejo»",
+      "type": "mixed",
+      "instructions": "Lee el siguiente texto y responde las preguntas 1 a 5.",
+      "passage": {
+        "title": "El joven cangrejo",
+        "text": "Un joven cangrejo pensó: “¿Por qué todos los miembros de mi familia caminan hacia atrás? Quiero aprender a caminar hacia adelante, como las ranas, y que se me caiga la cola si no lo consigo”.\n\nEmpezó a entrenarse a escondidas, entre las piedras de su arroyuelo nativo, y los primeros días le costaba muchísimo trabajo lograrlo. Chocaba contra todo, se magullaba la coraza y una pata se le enredaba con la otra. Pero las cosas fueron mejorando lentamente, porque todo puede aprenderse cuando se desea de verdad.\n\nCuando estuvo bien seguro de sí mismo, se presentó ante su familia y le dijo:\n\n—Fíjense.\n\nY dio una magnífica caminata hacia adelante.\n\n—Hijo mío —dijo llorando la madre— ¿has perdido el juicio? Vuelve en ti y camina como te hemos enseñado tu padre y yo, camina como tus hermanos, que tanto te quieren.\n\nSus hermanos, no obstante, se mataban de risa.\n\nEl padre se le quedó mirando un rato severamente, y luego dijo:\n\n—¡Ya basta! Si quieres quedarte con nosotros, camina como todos los cangrejos. Si quieres hacer lo que te parezca, el arroyo es bastante grande. Vete y no regreses más.\n\nEl buen cangrejo quería a su familia, pero estaba convencido de que tenía la razón. Abrazó a su madre, se despidió de su padre y de sus hermanos y se marchó.\n\nSu paso despertó inmediatamente la sorpresa de un grupo de ranas que, como buenas comadres, se habían reunido en torno a una hoja de nenúfar para charlar.\n\n—El mundo va al revés —dijo una rana—. Miren a aquel cangrejo y díganme si me equivoco.\n\n—Ya no hay educación —dijo la otra rana.\n\n—Vaya, vaya —dijo una tercera.\n\nPero el cangrejo continuó adelante por el camino que había elegido. En cierto momento oyó que lo llamaba un viejo cangrejote de expresión melancólica, que estaba solitario junto a un guijarro.\n\n—Buenos días —dijo el joven cangrejo.\n\nEl viejo le observó atentamente y luego le preguntó:\n\n—¿Qué crees que estás haciendo? También yo, cuando era joven, pensaba enseñar a caminar hacia adelante a los cangrejos. Y mira lo que he conseguido: vivo solo y la gente se cortaría la lengua antes de dirigirme la palabra. Mientras estés a tiempo de hacerlo, hazme caso: resígnate a caminar como los demás y un día me agradecerás el consejo.\n\nEl joven cangrejo no sabía qué responder y no dijo nada. Pero pensaba: “Yo tengo la razón”.\n\nY después de saludar atentamente al viejo, volvió a emprender de nuevo su camino orgullosamente.\n\n¿Llegará muy lejos? ¿Tendrá suerte? Nosotros no lo sabemos, porque está todavía caminando con el coraje y la decisión del primer día. Solo podemos desearle, de todo corazón: ¡Buen viaje!\n\nGianni Rodari. El joven Cangrejo. Biblioteca Digital E-libro. Web. 2008. (Adaptación).",
+        "format": "plain",
+        "attachments": []
+      },
+      "items": [
+        {
+          "position": 1,
+          "type": "multiple_choice",
+          "stem": "¿Qué condición le puso el padre al joven cangrejo para que pudiera quedarse a vivir con ellos?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Que demostrara que estaba en lo correcto.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Que se disculpara con su madre y hermanos.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Que fuera a pedirle un consejo al viejo cangrejote.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "Que renunciara a seguir caminando hacia adelante.",
+              "isCorrect": true
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "D",
+          "skill": null,
+          "oa": "OA 4",
+          "contentAxis": null,
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Realizan inferencias sobre acontecimientos o acciones Interpretar y 4 Narración relevantes en un texto narrativo. relacionar Infieren información relevante sobre personajes en un Interpretar y"
+        },
+        {
+          "position": 2,
+          "type": "multiple_choice",
+          "stem": "Según el texto, ¿cómo era el joven cangrejo?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Perseverante.",
+              "isCorrect": true
+            },
+            {
+              "key": "B",
+              "text": "Maleducado.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Orgulloso.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "Solitario.",
+              "isCorrect": false
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "A",
+          "skill": null,
+          "oa": "OA 4",
+          "contentAxis": null,
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Infieren información relevante sobre personajes en un Interpretar y 4 Narración texto narrativo. relacionar Realizan inferencias sobre acontecimientos o acciones Interpretar y"
+        },
+        {
+          "position": 3,
+          "type": "multiple_choice",
+          "stem": "¿Cuál fue el consejo que le dio el viejo cangrejote al joven cangrejo?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Que le enseñara a caminar hacia adelante a los demás cangrejos.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Que se resignara a caminar como un cangrejo normal.",
+              "isCorrect": true
+            },
+            {
+              "key": "C",
+              "text": "Que siguiera caminando con coraje y decisión.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "Que fuera un cangrejo solitario como él.",
+              "isCorrect": false
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "B",
+          "skill": null,
+          "oa": "OA 4",
+          "contentAxis": null,
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Realizan inferencias sobre acontecimientos o acciones Interpretar y 4 Narración relevantes en un texto narrativo. relacionar Relacionan las actitudes o reacciones de los Interpretar y"
+        },
+        {
+          "position": 4,
+          "type": "multiple_choice",
+          "stem": "¿Cómo se sintió el joven cangrejo luego de escuchar al viejo cangrejote?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Molesto por su opinión.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Seguro de su propia decisión.",
+              "isCorrect": true
+            },
+            {
+              "key": "C",
+              "text": "Arrepentido por el camino tomado.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "Agradecido por el consejo recibido.",
+              "isCorrect": false
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "B",
+          "skill": null,
+          "oa": "OA 4",
+          "contentAxis": null,
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Interpretar y 4 Narración personajes con sus motivaciones o las situaciones que relacionar enfrentan en un texto narrativo. Opinan sobre algún aspecto controversial de un texto"
+        },
+        {
+          "position": 5,
+          "type": "open_ended",
+          "stem": "¿Qué opinas sobre la decisión que tomó el joven cangrejo de caminar hacia adelante? Fundamenta tu opinión dando ejemplos del texto.",
+          "alternatives": [],
+          "responseFormat": "develop",
+          "correctKey": null,
+          "skill": null,
+          "oa": "OA 4",
+          "contentAxis": null,
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "4 Narración Reflexionar narrativo con fundamentos que integran información del texto. Infieren de qué trata un texto no literario o un fragmento Texto no Interpretar y",
+          "rubric": "Tipos de respuestas Respuestas correctas Respuestas parcialmente Respuestas incorrectas correctas (Código 2) (Código 0) (Código 1) El o la estudiante opina sobre las El o la estudiante opina sobre El o la estudiante actitudes o acciones de los personajes, las actitudes o acciones de responde, exponiendo una fundamentando con elementos del texto los personajes, pero la opinión general sobre las que dan cuenta de su comprensión. fundamentación evidencia actitudes o acciones de Además, la respuesta puede estar una comprensión parcial del los personajes, pero no complementada con información de su texto. fundamenta o lo hace conocimiento de mundo. utilizando información que En este caso, fundamenta su no tiene relación con el En este caso, el o la estudiante opina respuesta a partir de texto o la pregunta. sobre la decisión del joven cangrejo de elementos locales del texto También es una respuesta caminar hacia adelante, a diferencia de que no se relacionan incorrecta si él o la los otros cangrejos, y fundamente su directamente con la decisión estudiante no opina, o si respuesta aludiendo, por ejemplo, a que del joven cangrejo de caminar su respuesta es el cangrejo deseaba caminar de otro hacia adelante, o bien, tautológica, vaga, modo y que se esforzó para lograrlo. centrándose únicamente en contradictoria, También se puede referir a las su conocimiento de mundo incoherente, en blanco. consecuencias de su decisión: su madre para responder. sufrió, su padre se enojó y lo echó de la casa, sus hermanos se rieron de él; las ranas hablaron mal de él, el viejo cangrejote le dijo que se quedaría solo, etc. En cuanto a los conocimientos previos, el o la estudiante puede complementar su respuesta aludiendo a la perseverancia, el esfuerzo, la libertad, los deseos de aprender cosas nuevas, al valor de ser diferente; a los vínculos familiares, a la soledad, etc. Ejemplos: Ejemplos: Ejemplos: Yo opino que la decisión que tomó el Opino que está bien porque - - Me parece que estuvo - joven cangrejo estuvo bien ya que él el cangrejo quería caminar bien porque el cangrejo pensó que, si otros animales podían como las ranas. es gracioso. hacerlo, él también podría. Entonces, se Opino que estuvo mal lo Estoy de acuerdo porque - - lo propuso cuando dijo: “Quiero que hizo. todos somos libres de aprender a caminar hacia adelante” y lo Yo opino que el joven - caminar como queramos. hizo porque estaba seguro de lograr su cangrejo era bueno. No estoy de acuerdo - objetivo. Creo que si uno tiene un Me gusta que el joven - porque es malo ser propósito en la vida debe perseguirlo cangrejo haya desobediente. hasta lograrlo. practicado mucho. 9 Ficha Técnica Prueba de Lectura 6° básico Yo creo que lo que hizo el joven cangrejo - No creo que haya sido una - Porque se lo dijeron. - estuvo bien porque estaba convencido de buena decisión porque las Hizo lo que quiso. - que tenía razón y por eso empezó a personas sufren cuando se entrenarse a escondidas y así demostrar quedan solas. que todo se puede lograr cuando de verdad se desea y se trabaja para conseguirlo. Yo opino que su decisión estuvo mal - porque su familia sufrió, hizo llorar a su mamá y su papá se enojó, incluso lo echaron de su casa por no aceptar lo que le decían, solo porque él no quería caminar como ellos le habían enseñado. Yo creo que lo que hizo el joven - cangrejo estuvo mal, incluso sus hermanos se rieron de él y cuando otros animales lo vieron, por ejemplo, las ranas, dijeron que era una falta de educación, que el mundo estaba al revés. Yo opino que él debía haber hecho lo que todos los cangrejos hacían, de esa forma no habría tenido problemas ni nadie lo habría molestado. 10 Ficha Técnica Prueba de Lectura 6° básico"
+        }
+      ]
+    },
+    {
+      "order": 2,
+      "name": "Texto 2: «Lágrimas para todos los gustos»",
+      "type": "multiple_choice",
+      "instructions": "Lee el siguiente texto y responde las preguntas 6 a 9.",
+      "passage": {
+        "title": "Lágrimas para todos los gustos",
+        "text": "Las otras lágrimas\n\nAdemás de las lágrimas que mantienen los ojos húmedos y limpios, hay otras que se producen cuando algo irrita o puede dañar los ojos, como habrás comprobado cuando estuviste en un lugar con mucho humo, cuando alguien cortaba una cebolla cerca de ti o cuando se te metió en algún ojo “algo” qué volaba por ahí. En todos estos casos, se desencadena una respuesta automática que aumenta sensiblemente la producción de lágrimas, que limpian el o los ojos.\n\nPero también están las lágrimas emocionales, que son las que aparecen cuando sientes mucho dolor, mucha tristeza e, incluso, mucha felicidad. Estas lágrimas contienen algunas sustancias distintas de las que tienen las “lágrimas limpiadoras”. Esas sustancias actúan como un calmante natural y ayudan a que te tranquilices. Muchas investigaciones indican que estas lágrimas son exclusivas de los humanos. Y también hay quienes dicen que estas lágrimas, sobre todo las relacionadas con la tristeza y el dolor, ayudan a que otras personas perciban cómo te sientes, se preocupen por ti y te acompañen.\n\nLágrimas de cocodrilo\n\nEl cocodrilo también es de lagrimear.\n\nComo ocurre con las personas, las lágrimas limpian, humectan y protegen los ojos.\n\nPero, además, el cocodrilo llora mientras come. Hay varias hipótesis sobre por qué lo hace: una propone que, al triturar a su presa, sus mandíbulas presionan las glándulas lagrimales; otra sostiene que, al masticar, se estimulan las glándulas salivales y también las lagrimales, que en el cocodrilo se encuentran muy próximas. Sea cual fuere el motivo, hay acuerdo en que no siente ninguna pena por la presa que está saboreando. Derrama, simplemente, “lágrimas de cocodrilo”.\n\nLágrimas de sangre\n\nEl lagarto cornudo, un lagarto regordete con cuernos en la cabeza, tiene una forma muy particular de defenderse. Cuando se encuentra en peligro, enfrenta a su atacante y ¡expulsa chorros de sangre por los ojos! Puede lanzar sangre a más de un metro de distancia, lo que generalmente disgusta tanto a sus depredadores que se alejan sin probar bocado.\n\n¿Quieres un pañuelo?\nCuando lloras produces tantas lágrimas que no solo se derraman por tus mejillas, sino que también drenan hacia tu nariz. ¡Por eso moqueas tanto cuando lloras!\n\nRomina Carnevale y Paola Vetere. ¡Qué ojos tan curiosos tienes! Argentina: Iamiqué, 2020. (Adaptación)",
+        "format": "plain",
+        "attachments": [
+          {
+            "kind": "image",
+            "note": "Ilustraciones de apoyo del texto informativo: un cocodrilo y un lagarto cornudo. Son decorativas; todo el texto necesario para responder está transcrito en el passage."
+          }
+        ]
+      },
+      "items": [
+        {
+          "position": 6,
+          "type": "multiple_choice",
+          "stem": "¿Qué pregunta se responde principalmente en la sección “Las otras lágrimas”?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "¿Qué son las lágrimas?",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "¿Para qué sirven las lágrimas?",
+              "isCorrect": true
+            },
+            {
+              "key": "C",
+              "text": "¿Dónde se producen las lágrimas?",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "¿De qué están hechas las lágrimas?",
+              "isCorrect": false
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "B",
+          "skill": null,
+          "oa": "OA 6",
+          "contentAxis": null,
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Infieren de qué trata un texto no literario o un fragmento Texto no Interpretar y 6 relevante de este. literario relacionar Infieren información relevante en un texto no literario. Texto no Interpretar y"
+        },
+        {
+          "position": 7,
+          "type": "multiple_choice",
+          "stem": "Lee el siguiente fragmento:\n\nMuchas investigaciones indican que estas lágrimas son exclusivas de los humanos. Y también hay quienes dicen que estas lágrimas, sobre todo las relacionadas con la tristeza y el dolor, ayudan a que otras personas perciban cómo te sientes, se preocupen por ti y te acompañen.\n\nA partir del fragmento anterior, ¿qué efecto tendrían las “lágrimas emocionales” en las otras personas?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Calmar los nervios.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Disminuir las penas.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Despertar la empatía.",
+              "isCorrect": true
+            },
+            {
+              "key": "D",
+              "text": "Estimular la confianza.",
+              "isCorrect": false
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "C",
+          "skill": null,
+          "oa": "OA 6",
+          "contentAxis": null,
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Infieren información relevante en un texto no literario. Texto no Interpretar y 6 literario relacionar Localizan información explícita relevante en un texto no Texto no"
+        },
+        {
+          "position": 8,
+          "type": "multiple_choice",
+          "stem": "Según el texto, ¿en qué situación lanza sangre el lagarto cornudo?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Cuando llora.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Cuando come.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Cuando siente dolor.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "Cuando está en peligro.",
+              "isCorrect": true
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "D",
+          "skill": null,
+          "oa": "OA 6",
+          "contentAxis": null,
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Localizan información explícita relevante en un texto no Texto no 6 Localizar literario. literario Determinan el propósito del emisor de un texto no Texto no"
+        },
+        {
+          "position": 9,
+          "type": "multiple_choice",
+          "stem": "¿Cuál es el propósito principal de este texto?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Contar una historia sobre el origen de las lágrimas.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Explicar las funciones y características de las lágrimas.",
+              "isCorrect": true
+            },
+            {
+              "key": "C",
+              "text": "Opinar sobre la importancia de las lágrimas para los seres vivos.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "Convencer sobre la superioridad de las lágrimas de los seres humanos.",
+              "isCorrect": false
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "B",
+          "skill": null,
+          "oa": "OA 7",
+          "contentAxis": null,
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Determinan el propósito del emisor de un texto no Texto no 7 Reflexionar literario. literario Interpretar y"
+        }
+      ]
+    },
+    {
+      "order": 3,
+      "name": "Texto 3: «Oda al día feliz»",
+      "type": "multiple_choice",
+      "instructions": "Lee el siguiente texto y responde las preguntas 10 a 12.",
+      "passage": {
+        "title": "ODA AL DÍA FELIZ",
+        "text": "Esta vez dejadme\nser feliz,\nnada ha pasado a nadie,\nno estoy en parte alguna,\nsucede solamente\nque soy feliz\npor los cuatro costados\ndel corazón, andando,\ndurmiendo o escribiendo.\nQué voy a hacerle, soy\nfeliz.\nSoy más innumerable\nque el pasto\nen las praderas,\nsiento la piel como un árbol rugoso\ny el agua abajo,\nlos pájaros arriba,\nel mar como un anillo\nen mi cintura,\nhecha de pan y piedra la tierra\nel aire canta como una guitarra.\n\nTú a mi lado en la arena\neres arena,\ntú cantas y eres canto,\nel mundo\nes hoy mi alma,\ncanto y arena,\nel mundo\nes hoy tu boca,\ndejadme\nen tu boca y en la arena\nser feliz,\nser feliz porque sí, porque respiro\ny porque tú respiras,\nser feliz porque toco\ntu rodilla\ny es como si tocara\nla piel azul del cielo\ny su frescura.\n\nHoy dejadme\na mí solo\nser feliz,\ncon todos o sin todos,\nser feliz\ncon el pasto\ny la arena,\nser feliz\ncon el aire y la tierra,\nser feliz,\ncontigo, con tu boca,\nser feliz.\n\nPablo Neruda. Odas elementales. Chile: Planeta, 1999.",
+        "format": "plain",
+        "attachments": []
+      },
+      "items": [
+        {
+          "position": 10,
+          "type": "multiple_choice",
+          "stem": "¿Cuál es el tema central que se aborda en este poema?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "El placer que produce la soledad.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "El bienestar que provoca el amor.",
+              "isCorrect": true
+            },
+            {
+              "key": "C",
+              "text": "La calma que transmite la naturaleza.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "La libertad que causa la incertidumbre.",
+              "isCorrect": false
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "B",
+          "skill": null,
+          "oa": "OA 5",
+          "contentAxis": null,
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Interpretar y 5 Poema Infieren de qué trata un poema. relacionar"
+        },
+        {
+          "position": 11,
+          "type": "multiple_choice",
+          "stem": "¿Cuál es el estado de ánimo de la voz que habla en el poema?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Plenitud.",
+              "isCorrect": true
+            },
+            {
+              "key": "B",
+              "text": "Asombro.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Extrañeza.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "Desconcierto.",
+              "isCorrect": false
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "A",
+          "skill": null,
+          "oa": "OA 5",
+          "contentAxis": null,
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Interpretar y Establecen conclusiones sobre distintos aspectos en un 5 Poema relacionar poema. Evalúan el efecto o función que tiene el uso de lenguaje"
+        },
+        {
+          "position": 12,
+          "type": "multiple_choice",
+          "stem": "Lee estos versos:\n\nHoy dejadme\na mí solo\nser feliz,\ncon todos o sin todos,\nser feliz\ncon el pasto\ny la arena,\nser feliz\ncon el aire y la tierra,\nser feliz,\ncontigo, con tu boca,\nser feliz.\n\n¿Qué efecto busca producir la repetición de los sonidos en los versos destacados?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Destacar la emoción que siente la voz que habla en el poema.",
+              "isCorrect": true
+            },
+            {
+              "key": "B",
+              "text": "Transmitir la sensación de soledad de la voz que habla en el poema.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Descubrir la relación que hay entre la voz que habla y la persona amada.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "Recrear el lugar donde la voz que habla se encuentra con la persona amada.",
+              "isCorrect": false
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "A",
+          "skill": null,
+          "oa": "OA 5",
+          "contentAxis": null,
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Evalúan el efecto o función que tiene el uso de lenguaje 5 Poema Reflexionar figurado en el poema. Interpretan el sentido de expresiones en lenguaje Interpretar y"
+        }
+      ]
+    },
+    {
+      "order": 4,
+      "name": "Texto 4: «Primer viaje de Simbad el Marino»",
+      "type": "multiple_choice",
+      "instructions": "Lee el siguiente texto y responde las preguntas 13 a 17.",
+      "passage": {
+        "title": "Primer viaje de Simbad el Marino",
+        "text": "Un día reuní el poco dinero que me quedaba y salí de Bassora con algunos comerciantes en un barco que arrendamos.\n\nFuimos a diversos países, tomando y dejando mercancías, y una mañana vimos una isla casi a flor de agua y semejante a una pradera, por su fertilidad y su aspecto. Cuatro pasajeros desembarcamos para comer y beber en tierra, libres del balanceo del barco, cuando de repente, la isla tembló en brusca sacudida. Nos gritaron de a bordo que estábamos a lomos de una ballena, y cada cual se salvó como pudo; uno a nado y los otros en la chalupa, dejándome a mí sobre el monstruoso animal, que poco a poco se hundió en el mar. Me aferré a un trozo de madera que habíamos llevado para hacer fuego, y vi con dolor que el barco se alejaba a toda vela, creyéndome muerto.\n\nDos días estuve a merced de las olas en la situación más angustiosa del mundo, hasta que las aguas me arrojaron a una isla de grata apariencia. Bebí el agua cristalina de un manantial que encontré junto a unos árboles frutales. Ya más repuesto, avancé hasta una llanura donde comía una yegua, atada a un poste de madera. Me acerqué a contemplar la belleza del animal, y en eso salió un hombre del centro de la tierra y me preguntó quién era. Le conté mi aventura, entonces me llevó a una gruta donde había varios hombres que me dijeron ser palafreneros del rey Mihrage, soberano de la isla.\n\nAl día siguiente, fui con ellos a la capital, y el rey Mihrage me recibió a las mil maravillas y dio orden de que no me faltara nada de lo necesario. Visité a los mercaderes por si encontraba el medio de regresar a Bagdad, frecuenté a los sabios de la India y a los señores de la Corte, para instruirme en las ciencias y costumbres del país.\n\nUn día llegó al puerto un barco que comenzó a descargar mercancías en las que reconocí mi propia marca, y convencido de que el barco era mío, pregunté al capitán a quién pertenecían los géneros. El capitán me respondió:\n\n—Teníamos a bordo un mercader de Bagdad, llamado Simbad, que desembarcó con tres hombres en lo que creyeron una isla y no era más que una ballena colosal, dormida a flor de agua. Todos se salvaron a excepción de Simbad, cuyas mercancías traigo aquí para venderlas y entregar luego el dinero a la familia del náufrago.\n\n—Capitán —le dije—, yo soy Simbad, por lo tanto, puede entregarme los géneros que me pertenecen.\n\nLe relaté el verdadero milagro de mi salvación, pero el capitán no quería creerme, creyéndome algún impostor que tomaba el nombre de Simbad para hacerme dueño de las mercancías, hasta que desembarcaron unos tripulantes que me reconocieron en seguida. El capitán, confuso, me pidió disculpas.\n\nObsequié al rey Mihrage lo más selecto que poseía, a lo que él correspondió con regalos de gran valor. Me embarqué con abundante mercadería. Con las ganancias de mi primer viaje compré tierras y una casa magnífica para establecerme, decidido a olvidar los pasados peligros.\n\nGlosario\nchalupa: embarcación pequeña con cubierta y dos palos para las velas.\npalafreneros: trabajadores que llevan el freno del caballo.\n\nAnónimo. Las mil y una noches. Chile: Zig-Zag, 1990. (Adaptación).",
+        "format": "plain",
+        "attachments": []
+      },
+      "items": [
+        {
+          "position": 13,
+          "type": "multiple_choice",
+          "stem": "En el texto, ¿a qué hace referencia que la isla esté “casi a flor de agua”?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "A una isla fértil.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "A una isla de tierra firme.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "A una isla semejante a una ballena.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "A una isla que apenas sobresale del agua.",
+              "isCorrect": true
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "D",
+          "skill": null,
+          "oa": "OA 4",
+          "contentAxis": null,
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Interpretan el sentido de expresiones en lenguaje Interpretar y 4 Narración figurado presentes en un texto literario. relacionar Realizan inferencias sobre acontecimientos o acciones Interpretar y"
+        },
+        {
+          "position": 14,
+          "type": "multiple_choice",
+          "stem": "¿Qué hace Simbad para intentar salvar su vida cuando la ballena se hunde?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Nada con fuerza.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Se aferra a la ballena.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Se afirma de un trozo de madera.",
+              "isCorrect": true
+            },
+            {
+              "key": "D",
+              "text": "Sube a la chalupa que los transportaba.",
+              "isCorrect": false
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "C",
+          "skill": null,
+          "oa": "OA 4",
+          "contentAxis": null,
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Realizan inferencias sobre acontecimientos o acciones Interpretar y 4 Narración relevantes en un texto narrativo. relacionar Infieren información relevante sobre personajes en un Interpretar y"
+        },
+        {
+          "position": 15,
+          "type": "multiple_choice",
+          "stem": "A partir del texto, ¿cómo era el rey Mihrage?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Generoso.",
+              "isCorrect": true
+            },
+            {
+              "key": "B",
+              "text": "Ambicioso.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Aventurero.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "Desconfiado.",
+              "isCorrect": false
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "A",
+          "skill": null,
+          "oa": "OA 4",
+          "contentAxis": null,
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Interpretar y 4 Narración texto narrativo. relacionar Relacionan las actitudes o reacciones de los Interpretar y"
+        },
+        {
+          "position": 16,
+          "type": "multiple_choice",
+          "stem": "¿Qué pretendía hacer el capitán con las mercancías de Simbad?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Quedarse con ellas y estafar a Simbad.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Distribuirlas entre los tripulantes del barco.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Entregarlas como obsequio al rey Mihrage.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "Venderlas para ayudar a la familia de Simbad.",
+              "isCorrect": true
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "D",
+          "skill": null,
+          "oa": "OA 4",
+          "contentAxis": null,
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Interpretar y 4 Narración personajes con sus motivaciones o las situaciones que relacionar enfrentan en un texto narrativo. Infieren de qué trata un texto narrativo. Interpretar y"
+        },
+        {
+          "position": 17,
+          "type": "multiple_choice",
+          "stem": "¿Cuál es el tema central del texto?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Las ganancias de Simbad durante su primer viaje.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Las nuevas amistades que hizo Simbad en su primer viaje.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Los diversos lugares que conoció Simbad durante su primer viaje.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "Las experiencias de Simbad producto del naufragio en su primer viaje.",
+              "isCorrect": true
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "D",
+          "skill": null,
+          "oa": "OA 4",
+          "contentAxis": null,
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Infieren de qué trata un texto narrativo. Interpretar y 4 Narración relacionar Localizan información explícita relevante en un texto no Texto no"
+        }
+      ]
+    },
+    {
+      "order": 5,
+      "name": "Texto 5: «Lorena Ramírez, una deportista con pies ligeros»",
+      "type": "mixed",
+      "instructions": "Lee el siguiente texto y responde las preguntas 18 a 23.",
+      "passage": {
+        "title": "Lorena Ramírez, una deportista con pies ligeros",
+        "text": "Lorena Ramírez (1995) es una mujer mexicana perteneciente al pueblo rarámuri, una etnia indígena cuyo nombre significa «pies ligeros» o «corredores a pie». Los rarámuri viven en la sierra, un conjunto de montañas y cordilleras, y son conocidos por recorrer hasta 270 kilómetros sin detenerse. Para este pueblo, acostumbrado a los caminos rocosos y altas montañas, correr es una forma de vida y una tradición.\n\nLa fama de corredores de los rarámuri es tal que ellos mismos organizan ultramaratones, carreras a pie cuya distancia supera los 42 kilómetros. A estas carreras llegan competidores de todo el mundo a probarse contra ellos. Hoy, los rarámuri son aún más conocidos gracias a Lorena Ramírez, quien se ha vuelto corredora internacional. Una corredora que no usa ropa deportiva, sino sandalias y los vestidos tradicionales de su pueblo.\n\nLorena creció recorriendo su natal Sierra Tarahumara para buscar comida en otros pueblos o para seguir rebaños de cabras junto a sus hermanos. A los diecisiete años comenzó a competir profesionalmente y llegó cuarta en la Maratón de los Cañones de 2015, la misma donde llegó segunda en 2018. Pero fue el 2017 cuando Lorena se hizo famosa, ya que ganó la competencia UltraTrail Cerro Rojo, una maratón de 50 kilómetros en Tlatlauquitepec. Además de destacar por competir con su atuendo tradicional (que incluye el modelo de sandalias planas que usa desde niña), a Lorena se la conoce por su gran destreza para correr, ya que no aterriza con el talón, sino con su mediopié, una técnica que los maratonistas demoran años en aprender y dominar.\n\nEn junio de 2018 Lorena se convirtió en la primera mujer de su etnia en participar en una ultramaratón europea, la Bluetrail 2018 de Tenerife. En esta competencia de categoría mundial, ella llegó tercera luego de recorrer 102 kilómetros a una altitud de 3.500 metros sobre el nivel del mar.\n\nPara las carreras, Lorena sigue reanimando su cuerpo con el tradicional pinole, bebida energizante preparada con harina de maíz y agua. Habiendo participado en más de quince maratones en el mundo, la mexicana se niega a vestir ropa especializada para competir, rechaza los auspicios de marcas deportivas y sigue entrenando con su hermano Mario en las montañas de la sierra.\n\nIsabel Plant. Mujeres bacanas latinas. Chile: Catalonia, 2019. (Adaptación).",
+        "format": "plain",
+        "attachments": [
+          {
+            "kind": "image",
+            "note": "Fotografía de Lorena Ramírez corriendo con su vestimenta tradicional (decorativa; acompaña el título del texto)."
+          }
+        ]
+      },
+      "items": [
+        {
+          "position": 18,
+          "type": "multiple_choice",
+          "stem": "Según el texto, ¿cuál es uno de los significados de “rarámuri”?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Conjunto de montañas.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Corredores a pie.",
+              "isCorrect": true
+            },
+            {
+              "key": "C",
+              "text": "Etnia indígena.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "Deportista.",
+              "isCorrect": false
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "B",
+          "skill": null,
+          "oa": "OA 6",
+          "contentAxis": null,
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Localizan información explícita relevante en un texto no Texto no 6 Localizar literario. literario Localizan información explícita relevante en un texto no Texto no"
+        },
+        {
+          "position": 19,
+          "type": "multiple_choice",
+          "stem": "¿Qué competencia ganó Lorena Ramírez?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "La carrera de Sierra Tarahumara.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "La Maratón de los Cañones.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "UltraTrail Cerro Rojo.",
+              "isCorrect": true
+            },
+            {
+              "key": "D",
+              "text": "Bluetrail de Tenerife.",
+              "isCorrect": false
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "C",
+          "skill": null,
+          "oa": "OA 6",
+          "contentAxis": null,
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Localizan información explícita relevante en un texto no Texto no 6 Localizar literario. literario Infieren de qué trata un texto no literario o un fragmento Texto no Interpretar y"
+        },
+        {
+          "position": 20,
+          "type": "multiple_choice",
+          "stem": "¿Cuál es el tema central del primer párrafo del texto?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Las características de Lorena Ramírez.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Las características del pueblo rarámuri.",
+              "isCorrect": true
+            },
+            {
+              "key": "C",
+              "text": "Las características de la sierra mexicana.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "Las características de los pueblos mexicanos.",
+              "isCorrect": false
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "B",
+          "skill": null,
+          "oa": "OA 6",
+          "contentAxis": null,
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Infieren de qué trata un texto no literario o un fragmento Texto no Interpretar y 6 relevante de este. literario relacionar Localizan información explícita relevante en un texto no Texto no"
+        },
+        {
+          "position": 21,
+          "type": "multiple_choice",
+          "stem": "Según el texto, ¿por qué se destaca Lorena Ramírez en las carreras?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Por rechazar auspicios de marcas deportivas.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Por ser mujer y pertenecer a un pueblo indígena de México.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Por tomar una bebida energizante para reanimar su cuerpo antes de correr.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "Por su técnica para correr y por usar la vestimenta tradicional de su pueblo.",
+              "isCorrect": true
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "D",
+          "skill": null,
+          "oa": "OA 6",
+          "contentAxis": null,
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Localizan información explícita relevante en un texto no Texto no 6 Localizar literario. literario Interpretan el sentido de expresiones en lenguaje Texto no Interpretar y"
+        },
+        {
+          "position": 22,
+          "type": "multiple_choice",
+          "stem": "¿A qué hace referencia el título al señalar que Lorena Ramírez es “una deportista con pies ligeros”?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "A la forma que tienen sus pies.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Al tipo de calzado que usa para correr.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "A su participación en muchas maratones.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "A su habilidad para correr largas distancias.",
+              "isCorrect": true
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "D",
+          "skill": null,
+          "oa": "OA 6",
+          "contentAxis": null,
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Interpretan el sentido de expresiones en lenguaje Texto no Interpretar y 6 figurado en un texto no literario. literario relacionar Opinan sobre algún aspecto relevante en un texto no Texto no"
+        },
+        {
+          "position": 23,
+          "type": "open_ended",
+          "stem": "¿Qué opinas de que Lorena Ramírez se niegue a vestir ropa especializada para competir en las maratones? Fundamenta tu opinión utilizando información del texto.",
+          "alternatives": [],
+          "responseFormat": "develop",
+          "correctKey": null,
+          "skill": null,
+          "oa": "OA 6",
+          "contentAxis": null,
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Texto no 6 Reflexionar literario con fundamentos que integran información del literario texto. Localizan información explícita relevante en un texto",
+          "rubric": "Tipos de respuestas Respuestas correctas Respuestas parcialmente Respuestas incorrectas correctas (Código 1) (Código 2) (Código 0) El o la estudiante opina sobre algún El o la estudiante opina sobre El o la estudiante responde, aspecto de la lectura, fundamentando con algún aspecto de la lectura, pero la exponiendo su opinión, pero no elementos del texto que dan cuenta de su fundamentación evidencia una fundamenta o lo hace comprensión. Además, la respuesta puede comprensión parcial del texto. utilizando información que no estar complementada con información de En este caso, fundamenta su tiene relación con el texto o la su conocimiento de mundo. respuesta a partir de elementos pregunta. En este caso, la o el estudiante es capaz locales del texto que no se También es una respuesta de opinar sobre la negación de Lorena relacionan directamente con la incorrecta si el o la estudiante Ramírez a vestir ropa especializada en las negación de Lorena Ramírez a no opina sobre lo preguntado, competencias, y fundamenta su respuesta vestir ropa especializada en las o si su respuesta es aludiendo, por ejemplo: a que Lorena competencias, por ejemplo, que tautológica, vaga, Ramírez ha corrido desde muy pequeña, está acostumbrada a transitar por contradictoria, incoherente, en que ha ganado u obtenido lugares caminos rocosos, que se trata de blanco. importantes en competencias una cualidad particular del pueblo internacionales sin requerir ropa deportiva rarámuri o bien, atribuir su ni calzado especializado, que mantiene desempeño en algunas aspectos de la cultura de su pueblo como competencias exclusivamente a la la vestimenta o la alimentación, entre vestimenta utilizada. otros. En cuanto a los conocimientos previos, puede complementar su respuesta aludiendo a las desventajas que se puede enfrentar por competir sin calzado especializado, al aporte de los auspicios en la ropa deportiva para el desarrollo de su carrera, a la fama que puede obtener compitiendo con ropa tradicional de su pueblo, entre otros. Ejemplos: Ejemplos: Ejemplos: - Opino que está muy bien que Lorena - Me parece que está muy bien - Opino que está bien lo que Ramírez mantenga su ropa tradicional porque ella está acostumbrada a hace. para competir porque así se convierte en andar por esos caminos - No estoy de acuerdo con una deportista única y es más reconocida. rocosos. Lorena Ramírez. - Me gusta que a Lorena Ramírez no le - Estoy de acuerdo porque los - Me encanta esa deportista. importe usar ropa deportiva rarámuri tienen fama de - Prefiero las zapatillas para especializada ni tener auspicios porque corredores. correr. demuestra que no necesita nada más - No estoy de acuerdo porque por - Su hermano la entrena en que su talento para ganar. eso obtuvo el cuarto lugar en las montañas por eso no - Pienso que es un error no querer utilizar una de las competencias. gana. ropa especializada para competir porque si lo hiciera probablemente ganaría más carreras de las que ha ganado o ha salido en segundo o cuarto lugar. 11 &gt; Diagnóstico Integral de Aprendizajes Instrumentos de Evaluación 2026 agenciaeducacion.cl"
+        }
+      ]
+    },
+    {
+      "order": 6,
+      "name": "Texto 6: «El dragón y el campesino»",
+      "type": "multiple_choice",
+      "instructions": "Lee el siguiente texto y responde las preguntas 24 a 28.",
+      "passage": {
+        "title": "El dragón y el campesino",
+        "text": "Un joven dragón se vio sorprendido por una riada que se lo llevó por delante y lo dejó después aislado, cuando las aguas se retiraron, en un promontorio seco del lecho del río. Incapaz de echar a volar a causa de las heridas que le había producido un tronco que bajaba con la riada. Estaba allí sentado preguntándose qué iba a hacer cuando llegó un campesino con su burra para recoger los maderos que el agua había traído a la deriva.\n\n—¡Ayúdame a salir de aquí! —le pidió el dragón—. Te daré grandes riquezas.\n\n—¿Y cómo se yo que, en lugar de recompensarme, no me vas a despedazar en cuanto hayamos salido del río? —le preguntó el campesino.\n\n—Átame con fuerza y llévame a lomos de esa burra tuya —le sugirió el dragón—. Así, no podré hacerte ningún daño. Aunque lo cierto es que no te deseo más que una buena fortuna, oro y plata, de los cuales poseo grandes cantidades.\n\nY así fue como el campesino ató con fuerza al joven dragón, lo subió a lomos de su burra y se lo llevó hasta su propia casa, no muy lejos de allí. Cuando llegaron, el campesino estaba tan encandilado por la gentileza del dragón —y por sus promesas de un tesoro —que lo bajó de la burra y le quitó las ataduras con las que lo había sujetado.\n\n—Y ahora —dijo el campesino, frotándose las manos en un gesto de codicia—, ¡vayamos por esa recompensa de oro y plata que me has prometido!\n\n—¿Oro y plata? —se burló el dragón con un bufido, mientras estiraba las garras y arqueaba el lomo para asegurarse de que se encontraba en perfectas condiciones—. Me has atado tan fuerte que me has hecho daño, ¡y encima me exiges que te dé oro y plata!\n\n—¡Pero si has sido tú quien me ha dicho que te ate! —se quejó el campesino, inquieto.\n\n—¡Sí, pero me has atado con una fuerza excesiva! —dijo el dragón—. ¡Y ahora te devoraré como recompensa!\n\nEl campesino protestó ante aquello, le suplicó y rogó por su vida, y mientras se desarrollaba aquella discusión, pasó por allí una sabia zorra.\n\n—Hola —dijo la zorra—. ¿Qué está pasando aquí?\n\nY después de oír la historia, la zorra le dijo al campesino:\n\n—Menuda torpeza la tuya al atar al dragón, pero la cuestión es esta: ¿cómo lo ataste? Si me enseñas, podré juzgar tu caso como corresponde.\n\nEl dragón accedió a aquello y, una vez que el campesino terminó de atarlo de nuevo, le preguntó a la zorra:\n\n—¿Te ató así de fuerte la primera vez?\n\n—Ah, mucho más fuerte —dijo el dragón—. Tanto que me hacía daño de verdad.\n\n—Pues déjame ver cómo lo hizo —dijo la zorra, y el campesino apretó con más fuerza la cuerda alrededor del cuerpo del dragón, hasta que este apenas podía respirar.\n\n—Ahora —dijo la zorra con aire de eficiencia—, sube al dragón a lomos de la burra y llévalo de regreso al lugar donde lo encontraste. Déjalo allí y no lo desates. Así, no podrá devorarte.\n\nY justo eso fue lo que hizo el campesino.\n\nGlosario\nriada: aluvión, inundación.\npromontorio: colina.\nencandilado: impresionado, maravillado.\nbufido: rugido.\n\nRoger Lancelyn Green. El libro de los dragones. España: Ediciones Siruela, 2021. (Adaptación).",
+        "format": "plain",
+        "attachments": [
+          {
+            "kind": "image",
+            "note": "Ilustración de apoyo del cuento: el campesino con su burra frente al dragón junto al río (decorativa; todo el texto necesario para responder está transcrito en el passage)."
+          }
+        ]
+      },
+      "items": [
+        {
+          "position": 24,
+          "type": "multiple_choice",
+          "stem": "Al inicio de la historia, ¿por qué el dragón era incapaz de volar?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Porque había quedado aislado en el lecho de un río.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Porque había quedado atrapado con los maderos.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Porque había sido atado por el campesino.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "Porque había sido herido por un tronco.",
+              "isCorrect": true
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "D",
+          "skill": null,
+          "oa": "OA 4",
+          "contentAxis": null,
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Localizan información explícita relevante en un texto 4 Narración Localizar narrativo. Infieren información relevante sobre personajes en un Interpretar y"
+        },
+        {
+          "position": 25,
+          "type": "multiple_choice",
+          "stem": "¿Por qué el campesino decidió ayudar al dragón?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Porque quería evitar que lo atacara.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Porque deseaba obtener sus riquezas.",
+              "isCorrect": true
+            },
+            {
+              "key": "C",
+              "text": "Porque buscaba agradecerle su gentileza.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "Porque necesitaba recoger los maderos del río.",
+              "isCorrect": false
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "B",
+          "skill": null,
+          "oa": "OA 4",
+          "contentAxis": null,
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Infieren información relevante sobre personajes en un Interpretar y 4 Narración texto narrativo. relacionar Realizan inferencias sobre acontecimientos o acciones Interpretar y"
+        },
+        {
+          "position": 26,
+          "type": "multiple_choice",
+          "stem": "¿Qué hizo la zorra luego de escuchar la discusión entre el campesino y el dragón?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Amarró al dragón con mucha más fuerza que el campesino.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Pidió al campesino que le enseñara cómo había atado al dragón.",
+              "isCorrect": true
+            },
+            {
+              "key": "C",
+              "text": "Llevó al dragón al lugar donde el campesino lo había encontrado.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "Criticó al campesino por haber confiado en las palabras del dragón.",
+              "isCorrect": false
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "B",
+          "skill": null,
+          "oa": "OA 4",
+          "contentAxis": null,
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Realizan inferencias sobre acontecimientos o acciones Interpretar y 4 Narración relevantes en un texto narrativo. relacionar Comparan personajes en un texto narrativo. Interpretar y"
+        },
+        {
+          "position": 27,
+          "type": "multiple_choice",
+          "stem": "A partir de sus acciones, ¿qué diferencia a la zorra del campesino?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Era más justa.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Era más astuta.",
+              "isCorrect": true
+            },
+            {
+              "key": "C",
+              "text": "Era más confiada.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "Era más codiciosa.",
+              "isCorrect": false
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "B",
+          "skill": null,
+          "oa": "OA 4",
+          "contentAxis": null,
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Comparan personajes en un texto narrativo. Interpretar y 4 Narración relacionar Infieren el conflicto en un texto narrativo. Interpretar y"
+        },
+        {
+          "position": 28,
+          "type": "multiple_choice",
+          "stem": "¿Qué problema enfrentó el campesino al comienzo de la historia?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Creer en el dragón o desconfiar de él.",
+              "isCorrect": true
+            },
+            {
+              "key": "B",
+              "text": "Seguir con su trabajo o desatar al dragón.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Ser honrado o robarle el tesoro al dragón.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "Ser gentil con el dragón o dejarlo en el río.",
+              "isCorrect": false
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "A",
+          "skill": null,
+          "oa": "OA 4",
+          "contentAxis": null,
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Infieren el conflicto en un texto narrativo. Interpretar y 4 Narración relacionar"
+        }
+      ]
+    }
+  ],
+  "extraction": {
+    "itemCount": 28,
+    "warnings": [
+      "Q5 y Q23 son ítems de desarrollo (open_ended, responseFormat develop).",
+      "Textos 2 («Lágrimas para todos los gustos»), 5 («Lorena Ramírez…») y 6 («El dragón y el campesino») incluyen ilustraciones/fotografía de apoyo, decorativas; todo el texto necesario para responder está transcrito en el passage.",
+      "Textos transcritos desde la capa de texto del PDF (pdftotext -layout), verbatim; el poema del Texto 3 está en dos columnas y se transcribió en orden de lectura (columna izquierda y luego derecha)."
+    ],
+    "needsHumanReview": false,
+    "crossCheck": {
+      "hardIssues": [],
+      "softWarnings": [],
+      "counts": {
+        "cuadernillo": 28,
+        "ficha": 28,
+        "hoja": 28
+      }
+    }
+  },
+  "pauta": {
+    "source": {
+      "ficha": "6_ficha_tecnica_lectura_monitoreo_2026_6_basico.pdf",
+      "hoja": "6_hoja_de_respuestas_lectura_monitoreo_2026_6_basico.pdf"
+    },
+    "appliedKeys": 26,
+    "rubrics": 2
+  }
+}

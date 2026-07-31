@@ -1,0 +1,1184 @@
+{
+  "schemaVersion": "1.0",
+  "source": {
+    "file": "I_prueba_matematica_diagnostico_2026_I_medio.pdf",
+    "subjectFolder": "Matematicas"
+  },
+  "instrument": {
+    "name": "DIA Matemática I° Medio 2026 — Diagnóstico",
+    "subject": "Matemática",
+    "subjectCode": "MATH",
+    "grade": "I° Medio",
+    "gradeCode": "1ST_MEDIO",
+    "year": 2026,
+    "applicationPeriod": "diagnostico",
+    "type": "dia",
+    "isOfficial": true,
+    "source": "imported"
+  },
+  "sections": [
+    {
+      "order": 1,
+      "name": "Preguntas",
+      "type": "mixed",
+      "instructions": "Esta prueba tiene 36 preguntas que debes responder de la siguiente forma. En las preguntas de alternativas debes contestar marcando con una X la respuesta que consideres correcta. En las preguntas de desarrollo debes escribir tu respuesta. En las preguntas de completación debes anotar tu respuesta en los recuadros correspondientes.",
+      "passage": null,
+      "items": [
+        {
+          "position": 1,
+          "type": "multiple_choice",
+          "responseFormat": "choice",
+          "stem": "197,06 + 4,038 =",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "60,086",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "191,098",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "201,098",
+              "isCorrect": true
+            },
+            {
+              "key": "D",
+              "text": "237,440",
+              "isCorrect": false
+            }
+          ],
+          "correctKey": "C",
+          "skill": "Resolver problemas",
+          "oa": "OA 8",
+          "contentAxis": "Números y operaciones",
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Calculan el resultado de una adición de 1 números decimales hasta la milésima. Calculan el resultado de una sustracción de"
+        },
+        {
+          "position": 2,
+          "type": "multiple_choice",
+          "responseFormat": "choice",
+          "stem": "84,3 – 7,581 =",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "6,738",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "7,262",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "76,719",
+              "isCorrect": true
+            },
+            {
+              "key": "D",
+              "text": "76,881",
+              "isCorrect": false
+            }
+          ],
+          "correctKey": "C",
+          "skill": "Resolver problemas",
+          "oa": "OA 8",
+          "contentAxis": "Números y operaciones",
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Calculan el resultado de una sustracción de 1 números decimales hasta la milésima. Calculan el resultado de una división de"
+        },
+        {
+          "position": 3,
+          "type": "open_ended",
+          "responseFormat": "fill_in",
+          "stem": "-3/8 : -5/11 =",
+          "alternatives": [],
+          "correctKey": null,
+          "skill": "Resolver problemas",
+          "oa": "OA 2",
+          "contentAxis": null,
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Calculan el resultado de una división de 1, 2 fracciones negativas. Calculan el resultado de una multiplicación",
+          "fillAnswer": "33/40 o equivalente"
+        },
+        {
+          "position": 4,
+          "type": "multiple_choice",
+          "responseFormat": "choice",
+          "stem": "0,63 • 4,2 =",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "0,126",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "1,512",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "2,646",
+              "isCorrect": true
+            },
+            {
+              "key": "D",
+              "text": "6,846",
+              "isCorrect": false
+            }
+          ],
+          "correctKey": "C",
+          "skill": "Resolver problemas",
+          "oa": "OA 2",
+          "contentAxis": null,
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Calculan el resultado de una multiplicación 1, 2 de números decimales hasta la milésima. Calculan el resultado de una división de"
+        },
+        {
+          "position": 5,
+          "type": "multiple_choice",
+          "responseFormat": "choice",
+          "stem": "8,55 : 2,5 =",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "2,565",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "3,42",
+              "isCorrect": true
+            },
+            {
+              "key": "C",
+              "text": "4,11",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "34,2",
+              "isCorrect": false
+            }
+          ],
+          "correctKey": "B",
+          "skill": "Resolver problemas",
+          "oa": "OA 2",
+          "contentAxis": null,
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Calculan el resultado de una división de 1, 2 números decimales hasta la milésima."
+        },
+        {
+          "position": 6,
+          "type": "multiple_choice",
+          "responseFormat": "choice",
+          "stem": "8² • 8³ =",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "8⁵",
+              "isCorrect": true
+            },
+            {
+              "key": "B",
+              "text": "8⁶",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "64⁵",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "64⁶",
+              "isCorrect": false
+            }
+          ],
+          "correctKey": "A",
+          "skill": "Resolver problemas",
+          "oa": "OA 3",
+          "contentAxis": null,
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Aplican la propiedad de la multiplicación de 2 potencias de igual base (natural) y distinto"
+        },
+        {
+          "position": 7,
+          "type": "multiple_choice",
+          "responseFormat": "choice",
+          "stem": "15³ : 5³ =",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "3⁰",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "3¹",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "3³",
+              "isCorrect": true
+            },
+            {
+              "key": "D",
+              "text": "3⁶",
+              "isCorrect": false
+            }
+          ],
+          "correctKey": "C",
+          "skill": "Resolver problemas",
+          "oa": "OA 3",
+          "contentAxis": null,
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "potencias de distinta base (natural) e igual 2 exponente (natural hasta 3) para obtener una potencia equivalente. Aplican la propiedad de la división de potencias de igual base (natural) y distinto"
+        },
+        {
+          "position": 8,
+          "type": "multiple_choice",
+          "responseFormat": "choice",
+          "stem": "5³ : 5¹ =",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "0²",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "1³",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "5²",
+              "isCorrect": true
+            },
+            {
+              "key": "D",
+              "text": "5³",
+              "isCorrect": false
+            }
+          ],
+          "correctKey": "C",
+          "skill": "Resolver problemas",
+          "oa": "OA 3",
+          "contentAxis": null,
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "potencias de igual base (natural) y distinto 2 exponente (natural hasta 3) para obtener una potencia equivalente. Aplican la propiedad de la multiplicación de potencias de distinta base (natural) e igual"
+        },
+        {
+          "position": 9,
+          "type": "multiple_choice",
+          "responseFormat": "choice",
+          "stem": "4³ • 7³ =",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "11³",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "11⁹",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "28³",
+              "isCorrect": true
+            },
+            {
+              "key": "D",
+              "text": "28⁹",
+              "isCorrect": false
+            }
+          ],
+          "correctKey": "C",
+          "skill": "Resolver problemas",
+          "oa": "OA 3",
+          "contentAxis": null,
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "potencias de distinta base (natural) e igual 2 exponente (natural hasta 3) para obtener una potencia equivalente. Calculan una potencia de base natural y"
+        },
+        {
+          "position": 10,
+          "type": "multiple_choice",
+          "responseFormat": "choice",
+          "stem": "3² =",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "5",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "6",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "8",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "9",
+              "isCorrect": true
+            }
+          ],
+          "correctKey": "D",
+          "skill": "Resolver problemas",
+          "oa": "OA 3",
+          "contentAxis": null,
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Calculan una potencia de base natural y 2, 3 exponente natural hasta 3. Calculan una potencia de una potencia de"
+        },
+        {
+          "position": 11,
+          "type": "multiple_choice",
+          "responseFormat": "choice",
+          "stem": "(2³)² =",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "12",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "32",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "36",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "64",
+              "isCorrect": true
+            }
+          ],
+          "correctKey": "D",
+          "skill": "Resolver problemas",
+          "oa": "OA 3",
+          "contentAxis": null,
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "base natural y exponentes naturales hasta 2, 3 3. Calculan el resultado de adiciones de"
+        },
+        {
+          "position": 12,
+          "type": "open_ended",
+          "responseFormat": "fill_in",
+          "stem": "(– 8) + 5 + 4 + (–2) =",
+          "alternatives": [],
+          "correctKey": null,
+          "skill": "Resolver problemas",
+          "oa": "OA 1",
+          "contentAxis": null,
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Calculan el resultado de adiciones de 1, 2, 4 números enteros. Calculan el resultado de una sustracción de",
+          "fillAnswer": "-1"
+        },
+        {
+          "position": 13,
+          "type": "multiple_choice",
+          "responseFormat": "choice",
+          "stem": "–17 – (– 4) =",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "–21",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "–13",
+              "isCorrect": true
+            },
+            {
+              "key": "C",
+              "text": "13",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "21",
+              "isCorrect": false
+            }
+          ],
+          "correctKey": "B",
+          "skill": "Resolver problemas",
+          "oa": "OA 1",
+          "contentAxis": null,
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Calculan el resultado de una sustracción de 1, 2, 4 números enteros. Calculan el resultado de una división de"
+        },
+        {
+          "position": 14,
+          "type": "open_ended",
+          "responseFormat": "fill_in",
+          "stem": "138 : (– 6) =",
+          "alternatives": [],
+          "correctKey": null,
+          "skill": "Resolver problemas",
+          "oa": "OA 1",
+          "contentAxis": null,
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Calculan el resultado de una división de 1, 4 números enteros. Calculan el resultado de una multiplicación",
+          "fillAnswer": "-23"
+        },
+        {
+          "position": 15,
+          "type": "open_ended",
+          "responseFormat": "fill_in",
+          "stem": "-1/4 • 9/5 =",
+          "alternatives": [],
+          "correctKey": null,
+          "skill": "Resolver problemas",
+          "oa": "OA 2",
+          "contentAxis": null,
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Calculan el resultado de una multiplicación 1, 2, 8, 10, 14 de fracciones. Calculan el resultado de una multiplicación",
+          "fillAnswer": "-9/20 o equivalente"
+        },
+        {
+          "position": 16,
+          "type": "open_ended",
+          "responseFormat": "fill_in",
+          "stem": "7 • (– 15) =",
+          "alternatives": [],
+          "correctKey": null,
+          "skill": "Resolver problemas",
+          "oa": "OA 1",
+          "contentAxis": null,
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Calculan el resultado de una multiplicación 1, 3, 4, 8, 10 de números enteros. Calculan el resultado de una adición de",
+          "fillAnswer": "-105"
+        },
+        {
+          "position": 17,
+          "type": "multiple_choice",
+          "responseFormat": "choice",
+          "stem": "4/5 + 1/6 =",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "5/11",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "5/30",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "29/11",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "29/30",
+              "isCorrect": true
+            }
+          ],
+          "correctKey": "D",
+          "skill": "Resolver problemas",
+          "oa": "OA 8",
+          "contentAxis": "Números y operaciones",
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Calculan el resultado de una adición de 1, 14 fracciones positivas. Calculan el resultado de una sustracción de"
+        },
+        {
+          "position": 18,
+          "type": "multiple_choice",
+          "responseFormat": "choice",
+          "stem": "7/9 – 1/2 =",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "5/8",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "6/7",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "5/18",
+              "isCorrect": true
+            },
+            {
+              "key": "D",
+              "text": "6/18",
+              "isCorrect": false
+            }
+          ],
+          "correctKey": "C",
+          "skill": "Resolver problemas",
+          "oa": "OA 8",
+          "contentAxis": "Números y operaciones",
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Calculan el resultado de una sustracción de 1, 14 fracciones positivas. Calculan el valor de una raíz cuadrada de"
+        },
+        {
+          "position": 19,
+          "type": "multiple_choice",
+          "responseFormat": "choice",
+          "stem": "¿Cuál de estos números equivale a √64?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "6",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "8",
+              "isCorrect": true
+            },
+            {
+              "key": "C",
+              "text": "32",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "128",
+              "isCorrect": false
+            }
+          ],
+          "correctKey": "B",
+          "skill": "Resolver problemas",
+          "oa": "OA 4",
+          "contentAxis": null,
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Calculan el valor de una raíz cuadrada de 3 un número natural."
+        },
+        {
+          "position": 20,
+          "type": "multiple_choice",
+          "responseFormat": "choice",
+          "stem": "¿Cuál de estas expresiones equivale a 4x + 3y + 5 + 2(x – y + 4)?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "19xy",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "7xy + 13",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "6x + y + 13",
+              "isCorrect": true
+            },
+            {
+              "key": "D",
+              "text": "6x + 2y + 9",
+              "isCorrect": false
+            }
+          ],
+          "correctKey": "C",
+          "skill": "Resolver problemas",
+          "oa": "OA 7",
+          "contentAxis": null,
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Reducen términos semejantes. 3 Identifican el producto de un monomio por"
+        },
+        {
+          "position": 21,
+          "type": "multiple_choice",
+          "responseFormat": "choice",
+          "stem": "¿Cuál de estas expresiones equivale a 3x(x – 4)?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "x² – 12",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "3x² – 4",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "6x – 12x",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "3x² – 12x",
+              "isCorrect": true
+            }
+          ],
+          "correctKey": "D",
+          "skill": "Resolver problemas",
+          "oa": "OA 6",
+          "contentAxis": null,
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Identifican el producto de un monomio por 3 un binomio. Identifican una expresión algebraica que"
+        },
+        {
+          "position": 22,
+          "type": "multiple_choice",
+          "responseFormat": "choice",
+          "stem": "El rectángulo ABCD se dividió en 4 rectángulos más pequeños, como se muestra en la siguiente figura: el lado superior AB está dividido en dos segmentos que miden 4 cm y (x + 1) cm; el lado derecho BC está dividido en dos segmentos que miden (x – 2) cm y 3 cm. ¿Cuál de estas expresiones permite encontrar el área del rectángulo ABCD en cm²?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "(4x + 1) (3x – 2)",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "4 • 3 • (x + 1) (x – 2)",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "(4 + x + 1) (x – 2 + 3)",
+              "isCorrect": true
+            },
+            {
+              "key": "D",
+              "text": "(x + 1) (x – 2) + 4 • 3",
+              "isCorrect": false
+            }
+          ],
+          "correctKey": "C",
+          "skill": "Representar",
+          "oa": "OA 6",
+          "contentAxis": null,
+          "hasFigure": true,
+          "figureNote": "Figura del rectángulo ABCD dividido en 4 rectángulos, con las medidas rotuladas 4 cm, (x + 1) cm, (x – 2) cm y 3 cm. Las medidas están transcritas en el enunciado.",
+          "indicador": "Identifican una expresión algebraica que 3 representa el área de una figura compuesta."
+        },
+        {
+          "position": 23,
+          "type": "multiple_choice",
+          "responseFormat": "choice",
+          "stem": "¿Cuál es el valor de x en la ecuación 4x – 6 = 14?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "2",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "5",
+              "isCorrect": true
+            },
+            {
+              "key": "C",
+              "text": "16",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "80",
+              "isCorrect": false
+            }
+          ],
+          "correctKey": "B",
+          "skill": "Resolver problemas",
+          "oa": "OA 8",
+          "contentAxis": null,
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "4, 8, 10 ax - b = c, con a, b, c ϵ N y resultado natural. Determinan las coordenadas de un punto"
+        },
+        {
+          "position": 24,
+          "type": "open_ended",
+          "responseFormat": "fill_in",
+          "stem": "Observa el punto P en el plano cartesiano. ¿Cuáles son las coordenadas del punto P? Respuesta: Las coordenadas del punto P son ( ___ ; ___ ).",
+          "alternatives": [],
+          "correctKey": null,
+          "skill": "Representar",
+          "oa": "OA 14",
+          "contentAxis": "Geometría",
+          "hasFigure": true,
+          "figureNote": "Plano cartesiano con el punto P ubicado en el primer cuadrante (aparente (3; 4)). Se requiere leer las coordenadas de la figura para responder.",
+          "indicador": "Determinan las coordenadas de un punto 4, 12 en el plano cartesiano.",
+          "fillAnswer": "(3; 4)"
+        },
+        {
+          "position": 25,
+          "type": "multiple_choice",
+          "responseFormat": "choice",
+          "stem": "Fran preparó líquido para hacer burbujas. Por cada 5 medidas de agua agregó 3 medidas de jabón líquido. ¿Cuál es la razón entre la cantidad de medidas de jabón líquido y la cantidad de medidas de agua?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "3 : 5",
+              "isCorrect": true
+            },
+            {
+              "key": "B",
+              "text": "3 : 8",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "5 : 3",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "8 : 5",
+              "isCorrect": false
+            }
+          ],
+          "correctKey": "A",
+          "skill": "Resolver problemas",
+          "oa": "OA 3",
+          "contentAxis": "Números y operaciones",
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Identifican la razón entre dos cantidades. 8, 10 Resuelven un problema que requiere de"
+        },
+        {
+          "position": 26,
+          "type": "multiple_choice",
+          "responseFormat": "choice",
+          "stem": "Las indicaciones de un tarro de pintura de 3 litros dicen que el tarro rinde para pintar 15 m² de superficie. Según esas indicaciones, ¿cuántos litros de pintura se usarían para pintar 35 m² de superficie?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "4",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "7",
+              "isCorrect": true
+            },
+            {
+              "key": "C",
+              "text": "17",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "23",
+              "isCorrect": false
+            }
+          ],
+          "correctKey": "B",
+          "skill": "Resolver problemas",
+          "oa": "OA 8",
+          "contentAxis": null,
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Resuelven un problema que requiere de 8, 10 proporcionalidad directa. Interpretan información presentada en un"
+        },
+        {
+          "position": 27,
+          "type": "multiple_choice",
+          "responseFormat": "choice",
+          "stem": "Este gráfico muestra la temperatura media en Santiago entre 1914 y 2022 (Temperatura media en Santiago 1914-2022; eje Y en °C de 13 a 17, eje X en años de 1925 a 2025). Fuente: Reporte anual de la evolución del clima en Chile (2022). Dirección Meteorológica de Chile. (Adaptación). Si se compara la temperatura media en Santiago en el año 2022 con la del año 1914 del gráfico anterior, ¿entre qué valores se encuentra la variación de esas temperaturas medias?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Entre 1 °C y 2 °C",
+              "isCorrect": true
+            },
+            {
+              "key": "B",
+              "text": "Entre 2 °C y 3 °C",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Entre 15 °C y 16 °C",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "Entre 30 °C y 31 °C",
+              "isCorrect": false
+            }
+          ],
+          "correctKey": "A",
+          "skill": "Resolver problemas",
+          "oa": "OA 26",
+          "contentAxis": "Datos y probabilidades",
+          "hasFigure": true,
+          "figureNote": "Gráfico de línea de la temperatura media en Santiago (1914–2022), eje Y de 13 a 17 °C. Se requiere leer los valores del gráfico para calcular la variación.",
+          "indicador": "Interpretan información presentada en un 12 gráfico de línea. Interpretan información presentada en una"
+        },
+        {
+          "position": 28,
+          "type": "multiple_choice",
+          "responseFormat": "choice",
+          "stem": "Esta tabla resume el registro de las velocidades que tenían los autos que pasaron por un control de velocidad en una carretera durante una hora: Velocidad (km/h) 60 – 80: frecuencia 5; 81 – 100: frecuencia 40; 101 – 120: frecuencia 16; 121 – 140: frecuencia 4. Si la velocidad máxima permitida en esa carretera es de 100 km/h, ¿cuántos autos controlados sobrepasaron el límite permitido?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "4",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "16",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "20",
+              "isCorrect": true
+            },
+            {
+              "key": "D",
+              "text": "80",
+              "isCorrect": false
+            }
+          ],
+          "correctKey": "C",
+          "skill": "Representar",
+          "oa": "OA 16",
+          "contentAxis": null,
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Interpretan información presentada en una 12 tabla de frecuencia absoluta. Estiman la probabilidad de un evento de un"
+        },
+        {
+          "position": 29,
+          "type": "multiple_choice",
+          "responseFormat": "choice",
+          "stem": "En una simulación computacional hay una bolsa con bolitas rojas, verdes y negras. Se simuló extraer al azar una bolita, anotar su color y luego devolverla a la bolsa en 1 000 ocasiones. Esta tabla muestra los resultados obtenidos: Rojo 203 extracciones; Verde 464 extracciones; Negro 333 extracciones. Según los resultados de la simulación, ¿qué fracción es una mejor estimación de la probabilidad de sacar una bolita roja de esa bolsa?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "1/2",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "1/3",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "1/4",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "1/5",
+              "isCorrect": true
+            }
+          ],
+          "correctKey": "D",
+          "skill": "Resolver problemas",
+          "oa": "OA 18",
+          "contentAxis": null,
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Estiman la probabilidad de un evento de un 14 experimento aleatorio. Calculan la cantidad de casos favorables de"
+        },
+        {
+          "position": 30,
+          "type": "multiple_choice",
+          "responseFormat": "choice",
+          "stem": "Pedro juega lanzando un dado de 12 caras numeradas del 1 al 12 y un dado de 6 caras numeradas del 1 al 6. El juego se gana si en ambos dados se obtienen puntuaciones mayores o iguales a 5. En total, ¿cuántos resultados permiten ganar este juego?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "10",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "16",
+              "isCorrect": true
+            },
+            {
+              "key": "C",
+              "text": "60",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "72",
+              "isCorrect": false
+            }
+          ],
+          "correctKey": "B",
+          "skill": "Resolver problemas",
+          "oa": "OA 17",
+          "contentAxis": null,
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "un experimento aleatorio usando el principio 14 combinatorio multiplicativo. Factorizan un binomio con un término en"
+        },
+        {
+          "position": 31,
+          "type": "multiple_choice",
+          "responseFormat": "choice",
+          "stem": "¿Cuál de estas expresiones corresponde a una factorización de 6x + 9xy?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "9x (6 + y)",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "3x (2 + 3y)",
+              "isCorrect": true
+            },
+            {
+              "key": "C",
+              "text": "3xy (2y + 3)",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "3x (2x + 3xy)",
+              "isCorrect": false
+            }
+          ],
+          "correctKey": "B",
+          "skill": "Resolver problemas",
+          "oa": "OA 6",
+          "contentAxis": null,
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Factorizan un binomio con un término en 3 común en factor común monomio. Identifican la ecuación de la forma"
+        },
+        {
+          "position": 32,
+          "type": "multiple_choice",
+          "responseFormat": "choice",
+          "stem": "En la boleta de consumo de agua, se detalla que el monto total a pagar es la suma de un cobro fijo de $668 y un cobro de $367 por cada metro cúbico de agua consumido. Si el monto total de la boleta es $13 458, ¿cuál de las siguientes ecuaciones permite encontrar la cantidad x de metros cúbicos de agua consumidos?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "668 x = 13 458",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "1 035 x = 13 458",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "367 x + 668 = 13 458",
+              "isCorrect": true
+            },
+            {
+              "key": "D",
+              "text": "668 x + 367 = 13 458",
+              "isCorrect": false
+            }
+          ],
+          "correctKey": "C",
+          "skill": "Modelar",
+          "oa": "OA 8",
+          "contentAxis": null,
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "4 ax + b = c, con a, b, c ϵ N, que permite resolver un problema. Identifican el gráfico que corresponde a una"
+        },
+        {
+          "position": 33,
+          "type": "multiple_choice",
+          "responseFormat": "choice",
+          "stem": "En esta tabla se presentan algunos valores de las variables directamente proporcionales x e y: x=1, y=3; x=2, y=6; x=4, y=12. ¿Cuál de estos gráficos representa la relación entre las variables x e y?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Recta que pasa por el origen con pendiente positiva pronunciada (pasa por (1,3) y (2,6)).",
+              "isImage": true,
+              "isCorrect": true
+            },
+            {
+              "key": "B",
+              "text": "Recta creciente que corta el eje y en 2 (no pasa por el origen).",
+              "isImage": true,
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Recta decreciente que parte cerca de (0,6) y baja hacia la derecha.",
+              "isImage": true,
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "Recta creciente de poca pendiente que pasa por el origen (llega a ~(4,2)).",
+              "isImage": true,
+              "isCorrect": false
+            }
+          ],
+          "correctKey": "A",
+          "skill": "Representar",
+          "oa": "OA 8",
+          "contentAxis": null,
+          "hasFigure": true,
+          "figureNote": "Las 4 alternativas son gráficos de rectas en el plano cartesiano; requieren captura de imagen. La tabla del enunciado está transcrita.",
+          "indicador": "relación entre variables directamente 4 proporcionales, presentada en una tabla. Resuelven un problema que requiere de"
+        },
+        {
+          "position": 34,
+          "type": "open_ended",
+          "responseFormat": "develop",
+          "stem": "Una receta pide estos ingredientes para preparar un queque de 20 porciones: 3 huevos; 2 tazas de azúcar (400 g); 4 tazas de harina (560 g); 1 taza de leche (250 ml). Luis tiene una bandeja con 24 huevos, 2 bolsas de 1 000 g de azúcar cada una, un paquete de 3 500 g de harina y una caja de leche de 1 000 ml. Si sigue estrictamente la receta anterior, ¿cuál es el máximo de porciones de queque, según la receta, que puede obtener Luis con los ingredientes que tiene? Escribe a continuación tu procedimiento y explica cómo llegaste a tu respuesta.",
+          "alternatives": [],
+          "correctKey": null,
+          "skill": "Resolver problemas",
+          "oa": "OA 8",
+          "contentAxis": null,
+          "hasFigure": false,
+          "figureNote": "Única pregunta de desarrollo de la prueba.",
+          "indicador": "Resuelven un problema que requiere de 8, 10 proporcionalidad directa. Identifican la proporción directa que permite",
+          "rubric": "Tipos de respuestas Respuestas correctas Respuestas parcialmente Respuestas incorrectas (Código 2) correctas (Código 1) (Código 0) Resuelve el problema identificando que Resuelve el problema identificando que Entrega otras respuestas que no la cantidad total de ingredientes la cantidad total de ingredientes cumplen con los criterios de las necesarios para hacer la máxima necesarios para hacer la máxima descripciones anteriores, o bien, no cantidad de queques debe ser cantidad de queques debe ser responde. proporcional a la cantidad de proporcional a la cantidad de ingredientes necesarios para preparar ingredientes necesarios para preparar un solo queque. un solo queque. Posteriormente, define una estrategia Posteriormente, define una estrategia para calcular la cantidad máxima de para calcular la cantidad de queques queques que se pueden preparar, y así, que se pueden preparar con los determinar la cantidad total de ingredientes en la despensa. Sin porciones que alcanzan con los embargo, determina de forma incorrecta queques preparados según los la cantidad máxima de queques que se ingredientes disponibles. pueden preparar. Por lo que, al calcular la cantidad total de porciones para las que alcanzan los queques preparados también es incorrecta, pero coherente con el cálculo anterior. O no calcula la cantidad de porciones. 11 Ficha Técnica Prueba de Matemática I medio Ejemplos: Ejemplos : Ejemplos : Huevos: 8 * 3 = 24, alcanza para 8 Huevos: 3 * 8 = 24, alcanza para 3 huevos + 2 tazas de azúcar + 4 ● ● ● queques. 8 queques. tazas de harina + 1 taza de leche son Azúcar: 5 * 400 = 2 000, alcanza para Azúcar: 5 * 400 = 2 000, alcanza para 10 ingredientes. 5 queques. 5 queques. 3 huevos + 2 tazas de azúcar + 4 Harina: 6 * 560 = 3 360, alcanza para Harina: 6 * 560 = 3 360, alcanza para ● 6 queques. 6 queques. tazas de harina + 1 taza de leche son 10 ingredientes. Leche: 4 * 250 = 1000, alcanza para Leche: 4 * 250 = 1000, alcanza para 4 queques. 4 queques. 10 ∙ 20 = 200 Como la leche alcanza para Como la leche alcanza para Los 10 queques alcanzan para 200 4 queques y es la menor cantidad 4 queques y es la menor cantidad porciones. obtenida, los ingredientes que hay obtenida, los ingredientes que hay alcanzan para 4 queques como alcanzan para 4 queques como máximo. máximo. O bien, O bien, Huevos: 24 : 3 = 8, alcanza para Huevos: 24 : 3 = 8, alcanza para ● ● 8 queques. 8 queques. Azúcar: 2000: 400 = 5, alcanza para Azúcar: 2000: 400 = 5, alcanza para 5 queques. 5 queques. Harina: 3500 : 560 = 6, alcanza al Harina: 3500 : 560 = 6, alcanza al menos para 6 queques. menos para 6 queques. Leche: 1000 : 250 = 4, alcanza para Leche: 1000 : 250 = 4, alcanza para 4 queques. 4 queques. 1 queque alcanza para 20 porciones, 1 queque alcanza para 20 porciones, entonces 4 queques alcanzan para entonces 4 queques alcanzan para 4 * 20 = 80 porciones. 4 + 20 = 24 porciones. O bien, Huevos: 3 * 8 = 24, alcanza para ● 8 queques. Azúcar: 5 * 400 = 2 000, alcanza para 5 queques. Harina: 6 * 560 = 3 360, alcanza para 6 queques. Leche: 4 * 250 = 1000, alcanza para 4 queques. Como los huevos alcanzan para 8 queques y es la mayor cantidad obtenida, los ingredientes que hay alcanzan para 8 queques como máximo. Entonces si, 1 queque alcanza para 20 porciones, 8 queques alcanzan para 8 * 20 = 160 porciones. 12 &gt; Diagnóstico Integral de Aprendizajes Instrumentos de Evaluación 2026 agenciaeducacion.cl"
+        },
+        {
+          "position": 35,
+          "type": "multiple_choice",
+          "responseFormat": "choice",
+          "stem": "Un 1º medio vendió 500 pizzas individuales y usaron 25 kg de queso para prepararlas. Debido al éxito que tuvo la actividad, volverán a vender pizzas individuales. Si siempre se pone la misma cantidad de queso a cada pizza, ¿cuál de estas igualdades permite encontrar la cantidad x de kg de queso que usarán para preparar 750 pizzas?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "25/500 = 750/x",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "25/500 = x/750",
+              "isCorrect": true
+            },
+            {
+              "key": "C",
+              "text": "25 • 500 = 750 • x",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "750 – 500 = x – 25",
+              "isCorrect": false
+            }
+          ],
+          "correctKey": "B",
+          "skill": "Modelar",
+          "oa": "OA 8",
+          "contentAxis": null,
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Identifican la proporción directa que permite 8, 10 resolver un problema. Calculan la probabilidad de un evento"
+        },
+        {
+          "position": 36,
+          "type": "multiple_choice",
+          "responseFormat": "choice",
+          "stem": "Al lanzar una moneda y luego un dado de 6 caras, ¿cuál es la probabilidad de obtener sello y una puntuación mayor que 4?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "1/6",
+              "isCorrect": true
+            },
+            {
+              "key": "B",
+              "text": "1/4",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "5/6",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "3/8",
+              "isCorrect": false
+            }
+          ],
+          "correctKey": "A",
+          "skill": "Resolver problemas",
+          "oa": "OA 17",
+          "contentAxis": null,
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "compuesto aplicando el principio 14 combinatorio multiplicativo."
+        }
+      ]
+    }
+  ],
+  "extraction": {
+    "itemCount": 36,
+    "warnings": [
+      "responseFormat: 'fill_in' (completación) en ítems 3, 12, 14, 15, 16 y 24 → modelados como open_ended; se promoverán a gap_fill (auto-corregible) al cargar la pauta.",
+      "responseFormat: 'develop' en ítem 34 (única pregunta de desarrollo).",
+      "Alternativas-imagen (isImage:true) en ítem 33: las 4 opciones son gráficos de rectas; requieren captura de imagen para ser usables.",
+      "Figura imprescindible en el enunciado de ítems 24 (leer coordenadas de P en el plano) y 27 (leer temperaturas del gráfico) → needsHumanReview.",
+      "Figura con datos transcritos al stem (no imprescindible): ítem 22 (rectángulo con medidas 4, x+1, x-2, 3).",
+      "Tablas de datos transcritas como texto en el stem: ítems 28, 29 y 33.",
+      "Exponentes, radicales y fracciones se perdieron/aplastaron en pdftotext; transcritos y confirmados con las imágenes renderizadas (150 dpi) de cada página."
+    ],
+    "needsHumanReview": true,
+    "crossCheck": {
+      "hardIssues": [],
+      "softWarnings": [],
+      "counts": {
+        "cuadernillo": 36,
+        "ficha": 36,
+        "hoja": 36
+      }
+    }
+  },
+  "pauta": {
+    "source": {
+      "ficha": "I_TE DIA Diagnóstico matemática I° medio 2026.pdf",
+      "hoja": "I_Hoja de respuestas DIA Diagnóstico matemática I° medio 2026.pdf"
+    },
+    "appliedKeys": 29,
+    "rubrics": 1
+  }
+}

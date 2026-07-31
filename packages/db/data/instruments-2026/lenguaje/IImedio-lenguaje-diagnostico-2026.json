@@ -1,0 +1,1281 @@
+{
+  "schemaVersion": "1.0",
+  "source": {
+    "file": "II_prueba_lectura_diagnostico_2026_II_medio.pdf",
+    "subjectFolder": "Lenguaje"
+  },
+  "instrument": {
+    "name": "DIA Lectura II° Medio 2026 — Diagnóstico",
+    "subject": "Lenguaje y Comunicación",
+    "subjectCode": "LANG",
+    "grade": "II° Medio",
+    "gradeCode": "2ND_MEDIO",
+    "year": 2026,
+    "applicationPeriod": "diagnostico",
+    "type": "dia",
+    "isOfficial": true,
+    "source": "imported"
+  },
+  "sections": [
+    {
+      "order": 1,
+      "name": "Texto 1: «Algo muy grave va a suceder en este pueblo»",
+      "type": "multiple_choice",
+      "instructions": "Lee el siguiente texto y responde las preguntas 1 a 6.",
+      "passage": {
+        "title": "ALGO MUY GRAVE VA A SUCEDER EN ESTE PUEBLO",
+        "text": "Imagínese usted un pueblo muy pequeño donde hay una señora vieja que tiene dos hijos, uno de 17 y una hija de 14. Está sirviéndoles el desayuno y tiene una expresión de preocupación. Los hijos le preguntan qué le pasa y ella les responde:\n—No sé, pero he amanecido con el presentimiento de que algo muy grave va a sucederle a este pueblo.\nEllos se ríen de la madre. Dicen que esos son presentimientos de vieja, cosas que pasan. El hijo se va a jugar al billar, y en el momento en que va a tirar una carambola sencillísima, el otro jugador le dice:\n—Te apuesto un peso a que no la haces.\nTodos se ríen. Él se ríe. Tira la carambola y no la hace. Paga su peso y todos le preguntan qué pasó, si era una carambola sencilla. Contesta:\n—Es cierto, pero me ha quedado la preocupación de una cosa que me dijo mi madre esta mañana sobre algo grave que va a suceder a este pueblo.\nTodos se ríen de él, y el que se ha ganado su peso regresa a su casa, donde está con su mamá o una nieta o en fin, cualquier pariente. Feliz con su peso, dice:\n—Le gané este peso a Dámaso en la forma más sencilla porque es un tonto.\n—¿Y por qué es un tonto?\n—Hombre, porque no pudo hacer una carambola sencillísima estorbado con la idea de que su mamá amaneció hoy con la idea de que algo muy grave va a suceder en este pueblo.\nEntonces le dice su madre:\n—No te burles de los presentimientos de los viejos porque a veces salen.\nLa pariente lo oye y va a comprar carne. Ella le dice al carnicero:\n—Véndame una libra de carne —y en el momento que se la están cortando, agrega—: Mejor véndame dos, porque andan diciendo que algo grave va a pasar y lo mejor es estar preparado.\nEl carnicero despacha su carne y cuando llega otra señora a comprar una libra de carne, le dice:\n—Lleve dos porque hasta aquí llega la gente diciendo que algo muy grave va a pasar, y se están preparando y comprando cosas.\nEntonces la vieja responde:\n—Tengo varios hijos, mire, mejor deme cuatro libras.\nSe lleva las cuatro libras; y para no hacer largo el cuento, diré que el carnicero en media hora agota la carne, mata otra vaca, se vende toda y se va esparciendo el rumor. Llega el momento en que todo el mundo, en el pueblo, está esperando que pase algo. Se paralizan las actividades y de pronto, a las dos de la tarde, hace calor como siempre. Alguien dice:\n—¿Se ha dado cuenta del calor que está haciendo?\n—¡Pero si en este pueblo siempre ha hecho calor!\n(Tanto calor que es pueblo donde los músicos tenían instrumentos remendados con brea y tocaban siempre a la sombra porque si tocaban al sol se les caían a pedazos).\n—Sin embargo —dice uno—, a esta hora nunca ha hecho tanto calor.\n—Pero a las dos de la tarde es cuando hay más calor.\n—Sí, pero no tanto calor como ahora.\nAl pueblo desierto, a la plaza desierta, baja de pronto un pajarito y se corre la voz:\n—Hay un pajarito en la plaza.\nY viene todo el mundo, espantado, a ver el pajarito.\n—Pero señores, siempre ha habido pajaritos que bajan.\n—Sí, pero nunca a esta hora.\nLlega un momento de tal tensión para los habitantes del pueblo, que todos están desesperados por irse y no tienen el valor de hacerlo.\n—Yo sí soy muy macho —grita uno—. Yo me voy.\nAgarra sus muebles, sus hijos, sus animales, los mete en una carreta y atraviesa la calle central donde está el pobre pueblo viéndolo. Hasta el momento en que dicen:\n—Si este se atreve, pues nosotros también nos vamos.\nY empiezan a desmantelar literalmente el pueblo. Se llevan las cosas, los animales, todo.\nY uno de los últimos que abandona el pueblo, dice:\n—Que no venga la desgracia a caer sobre lo que queda de nuestra casa —y entonces la incendia y otros incendian también sus casas.\nHuyen en un tremendo y verdadero pánico, como en un éxodo de guerra, y en medio de ellos va la señora que tuvo el presagio, clamando:\n—Yo dije que algo muy grave iba a pasar, y me dijeron que estaba loca.\n\nGlosario\nCarambola: Jugada del billar que consiste en golpear con el taco una bola de modo que esta toque a otras dos bolas, una tras otra.\n\nGabriel García Márquez. Algo muy grave va a suceder. XIII Congreso Interamericano de Literatura, Caracas, 1967. Ciudad Seva. Web. 7 nov. 2019.",
+        "format": "plain",
+        "attachments": []
+      },
+      "items": [
+        {
+          "position": 1,
+          "type": "multiple_choice",
+          "stem": "Según Dámaso, ¿por qué no hizo la carambola?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Porque estaba inquieto por el gran calor que hacía.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Porque estaba nervioso por perder un peso en la apuesta.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Porque estaba ansioso por conseguir el peso de su amigo.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "Porque estaba preocupado por el presentimiento de su madre.",
+              "isCorrect": true
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "D",
+          "skill": "Interpretar y relacionar",
+          "oa": "OA 3",
+          "contentAxis": "Narración",
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Infieren información relevante sobre personajes en un texto literario. Infieren información relevante sobre personajes en un"
+        },
+        {
+          "position": 2,
+          "type": "multiple_choice",
+          "stem": "¿Qué motiva las acciones de los habitantes del pueblo frente al rumor esparcido?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "El temor.",
+              "isCorrect": true
+            },
+            {
+              "key": "B",
+              "text": "El aburrimiento.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "La incredulidad.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "La incomodidad.",
+              "isCorrect": false
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "A",
+          "skill": "Interpretar y relacionar",
+          "oa": "OA 3",
+          "contentAxis": "Narración",
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Infieren información relevante sobre personajes en un texto literario. Infieren la evolución de los personajes en un texto"
+        },
+        {
+          "position": 3,
+          "type": "multiple_choice",
+          "stem": "¿Cómo cambia la actitud de los habitantes del pueblo a lo largo del relato?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Se vuelven egoístas con sus pertenencias.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Se vuelven desconfiados de quienes los rodean.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Se vuelven paranoicos frente a sucesos normales.",
+              "isCorrect": true
+            },
+            {
+              "key": "D",
+              "text": "Se vuelven irrespetuosos frente a las advertencias de los ancianos.",
+              "isCorrect": false
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "C",
+          "skill": "Interpretar y relacionar",
+          "oa": "OA 3",
+          "contentAxis": "Narración",
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Infieren la evolución de los personajes en un texto literario."
+        },
+        {
+          "position": 4,
+          "type": "multiple_choice",
+          "stem": "¿Cuál es el tema central de este relato?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "El arraigado machismo que influye en el pueblo.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "La violencia dada entre vecinos en tiempos difíciles.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "El desprecio por quienes creen en algo que parece absurdo.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "La ingenuidad de la gente que cree en todo sin cuestionamientos.",
+              "isCorrect": true
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "D",
+          "skill": "Interpretar y relacionar",
+          "oa": "OA 3",
+          "contentAxis": "Narración",
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Infieren el sentido global de un texto literario. Infieren información relevante sobre personajes en un"
+        },
+        {
+          "position": 5,
+          "type": "multiple_choice",
+          "stem": "¿Cómo eran los habitantes del pueblo?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Astutos.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Codiciosos.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Chismosos.",
+              "isCorrect": true
+            },
+            {
+              "key": "D",
+              "text": "Irrespetuosos.",
+              "isCorrect": false
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "C",
+          "skill": "Interpretar y relacionar",
+          "oa": "OA 3",
+          "contentAxis": "Narración",
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Infieren información relevante sobre personajes en un texto literario. Realizan inferencias sobre acontecimientos o acciones"
+        },
+        {
+          "position": 6,
+          "type": "multiple_choice",
+          "stem": "¿Cuál fue el primer hecho que generó la inquietud de todos los habitantes del pueblo?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Que haya bajado un pájaro a la plaza.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Que se haya ido una familia del pueblo.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Que Dámaso haya perdido una apuesta.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "Que haya aumentado la sensación de calor.",
+              "isCorrect": true
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "D",
+          "skill": "Interpretar y relacionar",
+          "oa": "OA 3",
+          "contentAxis": "Narración",
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Realizan inferencias sobre acontecimientos o acciones relevantes en un texto literario. Localizan información explícita relevante en un texto"
+        }
+      ]
+    },
+    {
+      "order": 2,
+      "name": "Texto 2: «¡Subiendo… último hombre!»",
+      "type": "mixed",
+      "instructions": "Lee el siguiente texto y responde las preguntas 7 a 13.",
+      "passage": {
+        "title": "¡Subiendo… último hombre!",
+        "text": "Personajes:\n• Meche\n• Luisa\n• La Abuela\n• Rosa\n• El Guía\n• El Guía 2\n• El Hijo\n\nEscena 1\n\nEl escenario representa simbólicamente el interior del pique de una mina de carbón. Hay simultaneidad de tiempo y lugares, mediante telones que permiten crear espacios para escenas en presente o en racontos (evocaciones). Con música incidental de guitarra (que se sugiere basada en canciones de Violeta Parra), hay escenas mudas que ocurren simultáneamente:\nEsposas de los ex mineros reunidas en el horno comunitario para amasar y cocer el “pan de mina”, como lo hacían antes del cierre. Son ellas: Meche, Luisa (la más joven) y la Abuela (mujer de mediana edad que usa peluca gris como abuela) a las que luego se unirá Rosa.\nEn otro espacio un ex minero con casco, pero con usada ropa de diario, (El Guía de los turistas), instala un cartel que reza: “Turismo aventura en el Chiflón del diablo”. “La visita dura una hora y 45 minutos”… Y un panel con una foto de unos turistas con casco, posando sonrientes luego de un tour.\nAl cesar la música, las mujeres continuarán con su trabajo y El Guía, un hombre mayor, habla a unos turistas y por la sala entra el personaje El Hijo…\nEl Hijo, que viste algo mejor que El Guía, viene con gorra y mochila como si llegara de un viaje. Sube al escenario desde donde, sorprendido, escucha al Guía, aunque no ve su rostro…\n\nEl Guía: Dentro de unos instantes, señoras y señores, iniciamos la segunda visita del día al Pique del Chiflón del Diablo. Recorrerán ustedes unas galerías que están a 40 metros de profundidad bajo el mar. Deben encender sus lámparas al entrar al ascensor, “La Jaula” como la llamaban los mineros, y mantenerlas encendidas durante la visita. Bajaremos en cuanto suban a la superficie los turistas del primer tour que está ahora por terminar.\nEl Hijo: (Hacia el público). Me habían dicho que el Chiflón del Diablo se había convertido en esto ¡pero no podía creerlo!\n(Por un extremo entra Rosa para ir a reunirse con las demás mujeres, pero se detiene un instante al escuchar lo que está diciendo El Guía).\nEl Guía: Algunos datos históricos: en el año 1837 parte el desarrollo de la minería carbonífera de Lota, desde la parte continental hacia el oeste, hacia el mar. Lota tiene sus propias raíces, su propia cultura y también su cruda realidad.\nRosa: (Repite para sí) “Su cruda realidad”… (Entra al lugar donde están las mujeres y exclama) ¡Qué cosas tiene la vida! Hoy, cuando este pueblo vive su más “cruda realidad”, cesantía, pobreza, inseguridad… ¡el pique del Chiflón es un alegre paseo para los turistas!\n(Se sienta junto a Meche para trabajar la masa, deja ver su enojo).\nMeche: Cierto, señora Rosa… Duele pensar que esas galerías en las que los mineros se afanaban sacando carbón con tantísimo esfuerzo, se llenen ahora de personas extrañas.\nLuisa: ¡A las que uno de ellos entretiene contándoles cosas de antes!\nMeche: ¡Seguro que no se atreven a hablarles del desamparo en que quedamos!...\nAbuela: Malo estuvo que cerraran la mina, aunque yo siempre odié al Chiflón, y los piques donde el padre, el esposo o el hijo de una se mortificaban, sudando en lo oscuro, llenándose los pulmones de polvillo. Y una siempre con el alma en un hilo cuando se oía la sirena anunciando derrumbe o explosión…\nMeche: ¡Jesús! Ahí corríamos al pique, esperando que el marido no estuviera entre los accidentados.\nLuisa: El padre mío desapareció entre los escombros en ese pique del Chiflón… Ahora apuntalaron la techumbre, y lo acondicionaron para que no haya peligro para los turistas.\nMeche: ¡Ellos importan, pues!\nRosa: (Deja de amasar y exclama, con enojo) ¡Qué cosas tiene la vida!\nMeche: Ha sido mucha fatalidad, más que para una, para el marido. (Pausa). “Se quiere a la mina”, decía mi hombre, “como a la mujer de uno”. Otra, que tenía el orgullo del oficio, ¿no ve que entregaban un producto al país? Él siempre supo ser patriota. ¡La mina era su vida!... Ahora, señora Rosa, no sé cómo estarán los otros, pero mi hombre, donde no halla trabajo, anda por ahí, el alma en pena, todo le parece mal. Y ese dinero que le dieron cuando el “despido”, hace tiempo que se terminó.\nRosa: Del cierre han pasado años ya, y hay muchos que como su esposo siguen en mala situación. Los que quedaron cesantes tenían derecho a un pago, y no lo están recibiendo. (Breve melodía de guitarra, baja la luz en el espacio Mujeres. Al cesar la música se escucha el grito que viene desde abajo, es decir, del Pique).\nVoz del Guía 2: (Joven) ¡Subiendo… último hombre!\nEl Hijo: (Comenta al público) ¡Subiendo... último hombre!\nAbajo en el pique, el Guía del primer “Tour” avisa que se completó el ascensor con los turistas, para que lo hagan subir a la superficie.\nEl Hijo: (Con algo de nostalgia). Un grito que escuchaba a diario cuando trabajé en el Chiflón... (Pausa, se desplaza, pensativo). Los mineros lo oyeron por última vez al finalizar el turno de la mañana el día en que, sin previo aviso, ¡cerraron la mina! Pero ignoraban, entonces, que no volverían a escucharlo. Que no habría más turnos, ni subida a la superficie apretujados en “La Jaula” con las tallas y comentarios del día. No más vida comunitaria. (Pausa) “Aquí, me decía un anciano, ahora somos ajenos. Las calles de Lota se llenaron de afuerinos y las minas de carbón, sirven de paseo para los ociosos. Eso es como remedar lo que fue la vida de uno”.\nEn el espacio Chiflón, el Guía 2, ex minero, joven, trae una carpeta con folletos. Se dirige a unos actores con máscaras, los turistas.\nEl Guía 2: ¡Viva un safari bajo tierra en la mina Chiflón del Diablo junto a su familia! Esta es, señores, la única mina en el mundo abierta al público y ventilada naturalmente. Este tour lo interna a usted bajo el mar por 850 metros que recorrerá en hora y media, o poco más. En suma, ¡una interesante visita por estas galerías subterráneas, que gracias al empuje de la familia Cousiño, estaban ya en explotación en el siglo diecinueve! Durante este tour usted se irá enterando y de primera fuente, de la vida de los mineros que ahí laboraban.\nUn golpe musical marca un cambio de actitud del Guía: bajando algo la voz, y buscando complicidad, se dirige a un par de turistas más cercanos.\nEl Guía 2: Esto, para ustedes no más… Aunque trabajábamos igual que los topos bajo tierra, arriesgando un derrumbe o una explosión, no podemos aceptar el cierre de la mina, es un crimen, porque queda aquí una riqueza que se está perdiendo. Aunque me llamen loco, palabra de hombre que de ser rico ¡compro la mina y la abro, miércales!... (Con otro golpe musical retorna su actitud anterior con leve carraspera, sonríe y continúa con su discurso). De estas minas, señores, se extraían diariamente 250 toneladas métricas de carbón metalúrgico. Si lo desean, pueden ustedes llevarse de recuerdo un pedazo de carbón de nada menos que ¡100 millones de años!\n\nIsidora Aguirre. ¡Subiendo... último hombre! Archivo patrimonial Universidad Santiago de Chile. Web. 10 oct. 2019. (Adaptación).",
+        "format": "plain",
+        "attachments": []
+      },
+      "items": [
+        {
+          "position": 7,
+          "type": "multiple_choice",
+          "stem": "¿Cómo se llama la mina de carbón?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "El Pique.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "La Jaula.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "El Chiflón.",
+              "isCorrect": true
+            },
+            {
+              "key": "D",
+              "text": "La Galería.",
+              "isCorrect": false
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "C",
+          "skill": "Localizar",
+          "oa": "OA 5",
+          "contentAxis": null,
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Localizan información explícita relevante en un texto literario."
+        },
+        {
+          "position": 8,
+          "type": "multiple_choice",
+          "stem": "Según el marido de Meche, ¿cómo se quiere a la mina?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Como a la mujer.",
+              "isCorrect": true
+            },
+            {
+              "key": "B",
+              "text": "Como a la vida.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Como al padre.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "Como al país.",
+              "isCorrect": false
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "A",
+          "skill": "Localizar",
+          "oa": "OA 5",
+          "contentAxis": null,
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Localizan información explícita relevante en un texto literario. Infieren cómo influyen acciones y acontecimientos"
+        },
+        {
+          "position": 9,
+          "type": "multiple_choice",
+          "stem": "¿Por qué Meche dice que quedaron en el desamparo?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Porque el pueblo tuvo prohibido el acceso a la mina.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Porque el pueblo se empobreció tras el cierre de la mina.",
+              "isCorrect": true
+            },
+            {
+              "key": "C",
+              "text": "Porque las mujeres se vieron obligadas a trabajar tras el cierre de la mina.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "Porque los hombres que trabajaban en la mina murieron en un derrumbe.",
+              "isCorrect": false
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "B",
+          "skill": "Interpretar y relacionar",
+          "oa": "OA 5",
+          "contentAxis": null,
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Infieren cómo influyen acciones y acontecimientos relevantes en el desarrollo de un texto literario. Infieren información relevante sobre personajes en un"
+        },
+        {
+          "position": 10,
+          "type": "multiple_choice",
+          "stem": "¿Cómo se muestra El Hijo frente a la actividad turística de la mina?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Furioso.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Esperanzado.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Comprensivo.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "Apesadumbrado.",
+              "isCorrect": true
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "D",
+          "skill": "Interpretar y relacionar",
+          "oa": "OA 5",
+          "contentAxis": null,
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Infieren información relevante sobre personajes en un texto literario. Infieren información relevante sobre personajes en un"
+        },
+        {
+          "position": 11,
+          "type": "multiple_choice",
+          "stem": "Según Meche, ¿por qué los mineros se enorgullecían de su trabajo?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Porque favorecían la vida comunitaria.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Porque sus hazañas entretenían a los afuerinos.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Porque podían acondicionar la mina para los turistas.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "Porque sus esfuerzos contribuían al desarrollo del país.",
+              "isCorrect": true
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "D",
+          "skill": "Interpretar y relacionar",
+          "oa": "OA 5",
+          "contentAxis": null,
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Infieren información relevante sobre personajes en un texto literario. Determinan prejuicios, estereotipos y creencias en un"
+        },
+        {
+          "position": 12,
+          "type": "multiple_choice",
+          "stem": "¿Qué visión sobre los turistas se manifiesta en el fragmento leído?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Son personas que conocen la historia del país.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Son personas esenciales para la economía del país.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Son personas que abusan de la amabilidad de los lugareños.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "Son personas indiferentes a las problemáticas de los lugareños.",
+              "isCorrect": true
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "D",
+          "skill": "Reflexionar",
+          "oa": "OA 5",
+          "contentAxis": null,
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Determinan prejuicios, estereotipos y creencias en un texto literario. Formulan una interpretación o postura personal sobre el"
+        },
+        {
+          "position": 13,
+          "type": "open_ended",
+          "stem": "Considerando el fragmento leído, ¿qué problemática social se evidencia con el uso turístico que se hace de la mina? Fundamenta tu respuesta con la información del texto.",
+          "alternatives": [],
+          "responseFormat": "develop",
+          "correctKey": null,
+          "skill": "Reflexionar",
+          "oa": "OA 5",
+          "contentAxis": null,
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Formulan una interpretación o postura personal sobre el sentido de un texto literario o un aspecto de este. Infieren información relevante en un texto de los medios",
+          "rubric": "Tipos de respuestas Respuestas correctas Respuestas parcialmente Respuestas incorrectas (Código 2) correctas (Código 1) (Código 0) El/la estudiante formula una El/la estudiante formula una El/la estudiante formula una interpretación coherente sobre lo interpretación parcial/local sobre lo interpretación errónea sobre lo solicitado en la pregunta (problemática solicitado en la pregunta (problemática solicitado en la pregunta, social evidenciada en el uso turístico de social evidenciado en el uso turístico de o bien, la mina) y fundamenta su respuesta, la mina) y fundamenta con información formula una interpretación sobre algo aludiendo a información del texto referida a aspectos locales/parciales distinto a lo solicitado en la pregunta (explícita o implícita). del texto, sin considerar el sentido (con o sin fundamentación), global del mismo. Se considerará una interpretación También se considerarán incorrectas coherente aquella que aluda a las Se considerará una interpretación aquellas respuestas que sean siguientes problemáticas sociales*: parcial/local aquella que aluda a los tautológicas, vagas, contradictorias, problemas específicos de los - pobreza de los habitantes al no incluir a incoherentes y en blanco. lugareños, pero que no refieran a los mineros en el nuevo uso de la mina; problemáticas sociales relacionadas - falta de consideración/respeto al trabajo con el uso turístico de la mina (que y/o historia de los mineros; afecten a la sociedad en su conjunto). - falta de empatía frente al sufrimiento Ejemplo*: ajeno al considerar la mina un - que la mina solo se acondicione para espectáculo turístico; los turistas. - carencia de identidad y/o trabajo de los - que solo puedan trabajar los guías y mineros al ser ajenos en un espacio que no los mineros. antes sentían como propio. - que se mueran los mineros en la mina. *Estas problemáticas no deben También se considerarán parciales considerarse textuales, sino como ideas aquellas respuestas que aludan a una generales. problemática social coherente con el sentido de la obra, pero no se encuentren justificadas. *Estas problemáticas no deben considerarse textuales, sino como ideas generales. 10 Ficha Técnica Prueba de Lectura II medio Ejemplos: Ejemplos : Ejemplos : La cesantía de la gente del pueblo, Solo hay unos pocos trabajos para Yo creo que está bien que los - - - porque al cerrar la mina a nadie le ser guía en la mina. turistas puedan conocer lugares. importó que consiguieran trabajo y no A las mujeres de la mina se sienten La mina la cerraron. - - los consideraron. incómodas con la llegada de los Yo creo que evidencia una cosa - El desprecio por los mineros, ya que el afuerinos. - super machista porque las mujeres turismo en la mina es una falta de Que ahora hay mucha cesantía. solo cocinan y no las dejan trabajar - respeto del oficio de los mineros y de en la mina. Que muchos mineros morían por los - su historia. Los mineros fueron parte peligros de la mina y dejaban viudas A veces hay que buscar otros - importante para el desarrollo a sus mujeres. trabajos, cambiar la vida. económico del país, pero ahora son Los mineros aportan desarrollo al - objetos de turismo. país. El problema es la indiferencia de la - sociedad. Primero, porque la mina se cierra y toda la gente queda sin dinero. Pero después, por el turismo la gente queda invisible. Yo creo que muestra la falta de - empatía porque los turistas se ven super alegres y no consideran a las personas que están sufriendo. 11 Ficha Técnica Prueba de Lectura II medio"
+        }
+      ]
+    },
+    {
+      "order": 3,
+      "name": "Texto 3: «Cómo Noruega convierte basura en combustible ecológico»",
+      "type": "multiple_choice",
+      "instructions": "Lee el siguiente texto y responde las preguntas 14 a 18.",
+      "passage": {
+        "title": "CÓMO NORUEGA CONVIERTE BASURA EN COMBUSTIBLE ECOLÓGICO",
+        "text": "Matthew Price BBC Oslo 25 septiembre de 2013\n\nOlvídese del carbón, la gasolina, el gas de esquisto (shale gas), incluso de la energía nuclear. La bolsa de la basura llena de desperdicios del hogar se ha convertido en Noruega en una de las fuentes de combustible.\nTrate de imaginar el olor cuando pasa el camión de la basura en un caluroso día de verano. Respire por la nariz. ¿Hiede, cierto? Ahora multiplique ese olor por mil.\nEso es lo que se siente dentro de las instalaciones de la planta de recuperación de energía más grande de Noruega, la planta Klemetsrud. Un gran espacio de concreto lleno de basura.\nDecenas de miles de toneladas de basura amontonadas. Una banda transportadora que cruje para verter más. Camiones de basura estacionan en reversa hacia los enormes vertederos y depositan más bolsas repletas de desperdicios.\nUna enorme garra industrial desciende. Sus pinzas recogen una tonelada de basura y la transporta hasta el otro extremo de la sala donde la deja caer. Una nube de polvo blanco se acumula y pronto inunda todo el lugar. No es bueno estar aquí por mucho tiempo.\nAquí es donde los residuos expulsados por millones de hogares de Noruega, el Reino Unido y otros lugares se convierten en calor y electricidad para la ciudad de Oslo.\n\nCALEFACCIÓN BARATA\nLa basura es preseleccionada. Todo lo que se puede reciclar ha sido sacado ya. Sin embargo, todavía quedan más de 300 000 toneladas cada año.\nEllos no lo ven como un residuo, lo ven como energía.\n“Cuatro toneladas de residuos tienen la misma energía que una tonelada de combustible”, dice Pal Mikkelsen, director de la agencia Waste-to-energy —basura para energía, en español—, en Oslo.\n“Es una gran cantidad de energía y nosotros usamos muy poca energía para transportarla”, agrega.\nEl proceso es simple. Los residuos, tonelada por tonelada, caen en un incinerador. La temperatura se eleva a 850 grados. Al mirar a través de la ventanilla de cristal endurecido, se ve el fuego arder en color naranja mientras rugen las llamas.\n\nESCUELAS MÁS VERDES\nNo todo se quema. Quedan latas viejas y algunos resortes de colchones entre las cenizas y metales —que luego se reciclan—, y mucho calor.\nEl calor hierve el agua. El vapor impulsa una turbina que produce electricidad. Y el agua hirviendo se canaliza hacia fuera de la planta, a las casas y las escuelas públicas de todo Oslo.\nLo que significa que el gerente técnico de la escuela Bjoernholt, Agnar Andersen, ya no tiene que preocuparse más por el suministro de combustible durante el duro invierno noruego.\n“No tenemos que pensar en los aceites combustibles o en los combustibles fósiles. Están siendo eliminados de la última escuela este año”, dice Andersen.\nCon la capacidad completa la planta proveerá de calor y electricidad a todas las escuelas de Oslo y calor a 56 000 hogares.\nEs el sueño de todos los ecologistas, debe estar pensando usted, pero no necesariamente, advierte Lars Haltbrekken, del Consejo de Amigos del Este de Noruega.\n“La meta primordial desde una perspectiva ambiental debería ser reducir la cantidad de basura, reusar lo que se pueda reusar, reciclar y después, la cuarta opción es quemarla para producir energía. Hemos creado sobrecapacidad en las plantas de Noruega y Suecia. Y ahora dependemos de producir más y más basura”.\n\nMÁNDENOS SU BASURA\nLos entusiastas no están de acuerdo. Señalan que, usadas todas las plantas de conversión de basura de energía de Europa, solo alcanzan a consumir el 5% del total de rellenos sanitarios. Aseguran que Noruega está ayudando a deshacerse de parte de la basura de la mejor manera posible.\nEsto es especialmente cierto en el caso de ciudades como Leeds y Bristol, en Reino Unido. Ambas exportan residuos a Oslo. En lugar de pagar por llevarlos a un vertedero de basura después de que los elementos reciclables han sido retirados, lo que hace es pagarle a Oslo para que se ocupe de ellos.\nAsí, Oslo recibe dinero por recibir la basura y obtiene además la energía a partir de ella.\nLa revolución de conversión de residuos en energía también se puede escuchar en las calles de la capital Noruega, con el bus número 144. Está alimentado por biogás creado a partir de la materia orgánica en descomposición de la ciudad.\nUn kilogramo de residuos de alimentos produce la mitad de un litro de combustible. Con todos los residuos orgánicos que tienen podrían darle energía a 135 buses durante un año entero en Oslo.\nSi este proyecto fuera replicado en toda Europa, Pal Mikkelsen cree que haría una gran diferencia.\n“Significaría conseguir un mejor nivel de autosuficiencia en lo que respecta a la energía. Si se hace correctamente, permitiría además la recuperación de materiales y una fuerte disminución en los rellenos sanitarios”, dice Mikkelsen a la BBC.\nCon los estrictos controles de limpieza de gases producidos por la combustión, Oslo cree que convertir basura en energía ayudará a reducir a la mitad las emisiones de carbono en los próximos 20 años, haciendo de la ciudad una de las ciudades verdes del planeta.\n\nGlosario\nShale gas: es un tipo de gas que se encuentra ubicado dentro de rocas que están a gran profundidad. También se conoce como gas de esquisto, de lulita o de pizarra.\n\nMatthew Price. “Cómo Noruega convierte basura en combustible ecológico”. BBC [Oslo]. 25 de septiembre de 2013. Web.",
+        "format": "plain",
+        "attachments": []
+      },
+      "items": [
+        {
+          "position": 14,
+          "type": "multiple_choice",
+          "stem": "Según el texto, ¿con qué fin Noruega decidió convertir basura en energía?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Reducir las emisiones de carbono.",
+              "isCorrect": true
+            },
+            {
+              "key": "B",
+              "text": "Lograr ser el país más verde del planeta.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Vender la energía para generar mayores ingresos.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "Generar más energía para poder abastecer a otros países.",
+              "isCorrect": false
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "A",
+          "skill": "Interpretar y relacionar",
+          "oa": "OA 10",
+          "contentAxis": null,
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Infieren información relevante en un texto de los medios de comunicación. Infieren información relevante en un texto de los medios"
+        },
+        {
+          "position": 15,
+          "type": "multiple_choice",
+          "stem": "¿De dónde recibirán las escuelas de Oslo la energía suficiente para calefaccionar las aulas?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "De la energía nuclear.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "De una planta de residuos.",
+              "isCorrect": true
+            },
+            {
+              "key": "C",
+              "text": "De los combustibles fósiles.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "De un aporte energético de Inglaterra.",
+              "isCorrect": false
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "B",
+          "skill": "Interpretar y relacionar",
+          "oa": "OA 10",
+          "contentAxis": null,
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Infieren información relevante en un texto de los medios de comunicación. Infieren información relevante en un texto de los medios"
+        },
+        {
+          "position": 16,
+          "type": "multiple_choice",
+          "stem": "Según Lars Haltbrekken, ¿por qué la iniciativa de Noruega podría ser cuestionable?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Porque la energía generada con basura es ineficiente.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Porque algunas ciudades del mundo exportan basura a Oslo.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Porque las plantas de Oslo dependerán de la producción de basura.",
+              "isCorrect": true
+            },
+            {
+              "key": "D",
+              "text": "Porque el proceso para transformar basura en energía es muy costoso.",
+              "isCorrect": false
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "C",
+          "skill": "Interpretar y relacionar",
+          "oa": "OA 10",
+          "contentAxis": null,
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Infieren información relevante en un texto de los medios de comunicación. Distinguen un hecho de una opinión en un texto de los"
+        },
+        {
+          "position": 17,
+          "type": "multiple_choice",
+          "stem": "¿Cuál de las siguientes alternativas del texto corresponde a una opinión?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "“Un kilogramo de residuos de alimentos produce la mitad de un litro de combustible”.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "“Es una gran cantidad de energía y nosotros usamos muy poca energía para transportarla”.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "“Es el sueño de todos los ecologistas, debe estar pensando usted, pero no necesariamente”.",
+              "isCorrect": true
+            },
+            {
+              "key": "D",
+              "text": "“Sus pinzas recogen una tonelada de basura y la transporta hasta el otro extremo de la sala donde la deja caer”.",
+              "isCorrect": false
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "C",
+          "skill": "Reflexionar",
+          "oa": "OA 10",
+          "contentAxis": null,
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Distinguen un hecho de una opinión en un texto de los medios de comunicación. Determinan propósitos explícitos e implícitos en un texto"
+        },
+        {
+          "position": 18,
+          "type": "multiple_choice",
+          "stem": "¿Cuál es el propósito del texto?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Explicar las razones que tiene Noruega para importar basura de países europeos.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Informar sobre la innovadora iniciativa de Noruega en la generación de energía.",
+              "isCorrect": true
+            },
+            {
+              "key": "C",
+              "text": "Recomendar el modelo que utiliza Noruega en el uso eficiente de la energía.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "Contrastar diversas opiniones sobre el manejo de basura en Noruega.",
+              "isCorrect": false
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "B",
+          "skill": "Reflexionar",
+          "oa": "OA 10",
+          "contentAxis": null,
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Determinan propósitos explícitos e implícitos en un texto de los medios de comunicación. Evalúan el efecto o función que tienen las repeticiones o"
+        }
+      ]
+    },
+    {
+      "order": 4,
+      "name": "Texto 4: «Chile»",
+      "type": "multiple_choice",
+      "instructions": "Lee el siguiente texto y responde las preguntas 19 a 22.",
+      "passage": {
+        "title": "Chile",
+        "text": "Chile: una rosa de hierro,\nfija y ardiente en el pecho\nde una mujer de ojos negros.\nTu rosa quiero.\n\nDe Antofagasta vengo,\nvoy para Iquique;\ntan solo una mirada\nme ha puesto triste.\n\nChile: el salitral violento.\nLa pampa de puño seco.\nUna bandera de fuego.\nTu pampa quiero.\n\nAnduve caminando\nsobre el salitre;\nla muerte me miraba,\nyo estaba triste.\n\nChile: tu blanco lucero.\nTu pie sur en un estrecho,\nzapato de espuma y viento.\nTu viento quiero.\n\nEl ovejero ladra,\nla tropa sigue;\nla oveja mira al perro\ncon ojos tristes.\n\nChile: tu blanco lucero.\nTu largo grito de hielo.\nTu cueca de polvo pueblo.\nTu pueblo quiero.\n\nEn la cresta de un monte\nla luna gime;\nagua y nieve le lavan\nla frente triste.\n\nNicolás Guillén. Selección Poética. España: Faktoria K de Libros, 2013.",
+        "format": "plain",
+        "attachments": []
+      },
+      "items": [
+        {
+          "position": 19,
+          "type": "multiple_choice",
+          "stem": "¿Qué busca generar el hablante a través de la organización de las estrofas del poema?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Que el lector se haga una noción del clima de Chile.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Que el lector se haga una imagen panorámica de Chile de norte a sur.",
+              "isCorrect": true
+            },
+            {
+              "key": "C",
+              "text": "Que el lector recree las distintas etapas de la vida del hablante en Chile.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "Que el lector recree el viaje que hizo el hablante en Chile de norte a sur.",
+              "isCorrect": false
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "B",
+          "skill": "Reflexionar",
+          "oa": "OA 8",
+          "contentAxis": "Poema",
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Evalúan el efecto o función que tienen las repeticiones o el lenguaje figurado en un poema. Establecen conclusiones sobre distintos aspectos en un"
+        },
+        {
+          "position": 20,
+          "type": "multiple_choice",
+          "stem": "¿Qué sentimiento predomina en el poema?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Tranquilidad.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Esperanza.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Añoranza.",
+              "isCorrect": true
+            },
+            {
+              "key": "D",
+              "text": "Enfado.",
+              "isCorrect": false
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "C",
+          "skill": "Interpretar y relacionar",
+          "oa": "OA 8",
+          "contentAxis": "Poema",
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Establecen conclusiones sobre distintos aspectos en un poema."
+        },
+        {
+          "position": 21,
+          "type": "multiple_choice",
+          "stem": "¿Qué se describe a lo largo del poema?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "La bandera de Chile.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Las mujeres de Chile.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "La geografía de Chile.",
+              "isCorrect": true
+            },
+            {
+              "key": "D",
+              "text": "Los animales de Chile.",
+              "isCorrect": false
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "C",
+          "skill": "Interpretar y relacionar",
+          "oa": "OA 8",
+          "contentAxis": "Poema",
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Infieren el sentido global de un texto literario. Interpretan el sentido de expresiones en lenguaje"
+        },
+        {
+          "position": 22,
+          "type": "multiple_choice",
+          "stem": "¿Qué representa la expresión “puño seco” en la tercera estrofa del poema?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "El frío de la pampa.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "La dureza de la pampa.",
+              "isCorrect": true
+            },
+            {
+              "key": "C",
+              "text": "El abandono de la pampa.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "La destrucción de la pampa.",
+              "isCorrect": false
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "B",
+          "skill": "Interpretar y relacionar",
+          "oa": "OA 8",
+          "contentAxis": "Poema",
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Interpretan el sentido de expresiones en lenguaje figurado presentes en un texto literario. Infieren argumentos que respaldan la postura o tesis del"
+        }
+      ]
+    },
+    {
+      "order": 5,
+      "name": "Texto 5: «Jóvenes, Internet y privacidad: los retos de la identidad en la era digital»",
+      "type": "mixed",
+      "instructions": "Lee el siguiente texto y responde las preguntas 23 a 28.",
+      "passage": {
+        "title": "Jóvenes, Internet y privacidad: los retos de la identidad en la era digital",
+        "text": "Por qué es importante la privacidad de los jóvenes que experimentan en Internet y las redes sociales.\nLiliana Arroyo, 15 de septiembre de 2015\n\nPara los adolescentes Internet supone un espacio de ocio, de interacción y de construcción de la propia identidad. Pocas veces se preguntan el origen y el destino de la información que circula por esa red infinita y aparentemente volátil. La actividad en línea abre espacios de relación y admite temáticas impensables en el mundo presencial. Definir la esfera privada y la capacidad de controlar la información que se expone sobre uno mismo son retos actuales que hay que explicar, entender y abordar desde los agentes involucrados en la educación. Este post explora por qué es importante la privacidad de los jóvenes que experimentan a corazón abierto en la eternidad digital.\nLa revolución comunicativa no ha hecho más que empezar. Jóvenes y mayores nos hemos sumado al carro de la modernidad porque promete hacernos la vida más fácil, más cómoda o más divertida, pero aún tenemos que entender qué es, cómo funciona y cuáles son las contrapartidas. El hecho de que podamos tener cuentas de correo o perfiles «gratuitos» nos altera el esquema clásico basado en la transacción económica. Todavía estamos aprendiendo que cuando no pagamos por un servicio, como contrapartida, el producto es nuestra información personal. Nuestro nombre, nuestra dirección, nuestros gustos, nuestros contactos, nuestro historial médico, los lugares que visitamos ayer o el libro que nos gustaría comprar. ¿Aceptaríamos una barra de pan a cambio de la agenda o las fotos del móvil? Rotundamente no. Cada vez que descargamos una aplicación en forma gratuita, entregamos nuestros datos a cambio. Socialmente estamos aceptando la invasión constante de nuestra dimensión más personal y sensible, sin plantearnos sus consecuencias.\nSegún el Pew Research Centre, el 90% de los adolescentes se conecta al menos una vez al día y una cuarta parte lo hace constantemente. Internet es herramienta, medio y escaparate, mientras los jóvenes desempeñan un doble papel como consumidores y a la vez productores de información. En este contexto la definición de la esfera privada en el siglo XXI –esto es, distinguir entre lo público y lo íntimo– se convierte en un ejercicio complejo. Por un lado, está la privacidad física y la identidad propia del mundo off-line (desconectado), pero hay que sumarle la privacidad en línea y la gestión de la «huella digital». Con la llegada de los smartphones (teléfonos inteligentes) y la conexión permanente, gestionar esta identidad múltiple y entender los códigos de los dos mundos requiere acompañamiento y guía. La privacidad es algo que se aprecia cuando falta y, como decía Cory Doctorow en una entrevista en el CCCB, las consecuencias de la pérdida de privacidad no son inmediatas.\nA continuación, se exploran 3 factores claves que hay que conocer para comprender por qué es importante la privacidad digital para los adolescentes del siglo XXI.\n\nFactor #1 – Un laboratorio de identidad\nLas redes sociales suponen un escaparate nuevo y accesible donde presentarse y representarse a uno mismo. Prácticamente el 80% de adolescentes tiene un perfil propio en alguna red social (FAD, 2015). Facebook, Twitter y otras plataformas forman parte de su día a día. El entorno en línea facilita la superficialidad e invita a generar contenidos de forma espontánea e impulsiva. Publicar va acompañado de la «recompensa» o el «fracaso» según cómo reaccionen los demás, cuántos son y cómo lo hacen. El número de dedos con el pulgar arriba implica una nueva forma de medir la popularidad de una persona y crecer en un medio voraz puede conllevar crisis que deben abordarse desde el uso responsable y el acompañamiento consciente.\n\nFactor #2 – El escaparate constante\nLa cantidad de información accesible sobre cualquier persona no tiene precedentes. Controlar, comparar y hacer seguimiento de uno mismo y de los demás es mucho más sencillo en un espacio donde prácticamente todo se hace a la vista de los demás. De acuerdo con Ballesteros y Megías, los jóvenes afirman que se renuncia en gran medida a los espacios de intimidad y que incluso personas desconocidas pueden tener mucha información sobre ellos. Tener un perfil en una red social no predispone automáticamente a ser una víctima de ciberacoso por parte de un desconocido, no es un factor de riesgo per se. El riesgo está en los usos: dar mucha información personal y ser proclive a comunicarse con desconocidos duplican las probabilidades, como explica el artículo de Sengupta y Chaudhuri (2013).\nDe hecho, los adolescentes son cada vez más conscientes y recelosos de su espacio, y las chicas son especialmente críticas. Que sean reflexivos sobre la relación entre lo que posibilita la red y el detrimento de la privacidad, es importante. Pero, en un contexto carente de alternativas, las opciones son o la no participación (desaprovechando las oportunidades que puedan brindar) o el uso indiscriminado (sin conocer el coste de oportunidad).\n\nFactor #3 – En directo y para todos\nOtra de las novedades importantes es que utilizando las redes sociales se desdibuja el esquema tradicional de emisor y receptor. En el caso del muro de Facebook, por ejemplo, cada persona tiene de media unos 130 «amigos», que generalmente incluyen contactos de conocidos del entorno familiar, la escuela y otros espacios de su día a día. Todos estos contactos son potencialmente receptores de cualquier mensaje que se lance. En las redes sociales funcionamos por el mecanismo de la audiencia imaginada: producimos los mensajes teniendo en cuenta solo a aquellas personas de la red que puedan estar relacionadas de alguna forma y no todas las personas de la lista de los contactos. Es lo que los expertos en privacidad denominan los «modelos de amenaza».\nEste estudio demuestra que ser consciente de la diversidad de la audiencia ayuda a ser más estratégico a la hora de publicar información o estados sobre uno mismo. Por ejemplo, el hecho de ver fotografías de los contactos seleccionadas aleatoriamente que pertenecen a diferentes ámbitos puede generar un efecto disuasorio. Para un adolescente, su «enemigo» pueden ser los padres y los familiares y buena parte de ellos desarrollan estrategias de protección (por ejemplo, modificando la configuración de la privacidad). Pero, hay que ampliar el debate para que la audiencia imaginada no sea solo la explícita y sincrónica: potencialmente y cada vez más, hay jefes, aseguradoras, universidades o empresas de marketing, por poner algunos ejemplos, dispuestos a hacer uso de esta información para su beneficio.\n\nLa importancia de educar en el uso responsable\nInternet y particularmente las redes sociales son plataformas interactivas donde los adolescentes vierten una gran cantidad de información sobre ellos mismos de forma poco dirigida y reflexiva. Los tres factores explican cómo el entorno en línea tiene un efecto multiplicador sobre situaciones que existían previamente. La gran diferencia, y posiblemente el aprendizaje más urgente, es que Internet y las compañías que hay detrás de las redes sociales constituyen un registro perenne y permanente, con un negocio basado en la monetización de los datos personales de los usuarios. Los riesgos para la privacidad en el uso de Internet y las redes sociales son poco tangibles y quedan invisibilizados.\nEducar y formar a adolescentes en el siglo XXI implica enseñarles a comprender y relacionarse con el mundo en línea. Las herramientas disponibles todavía son escasas y limitadas, pero suscitar su debate en el aula y la toma de conciencia de buena parte de la comunidad educativa es imprescindible. De ello depende el futuro individual de nuestros jóvenes y el mañana colectivo con respecto a la reconquista de la privacidad como derecho fundamental.\n\nLiliana Arroyo. Jóvenes, Internet y privacidad: los retos de la identidad en la era digital. Centre de Cultura Contemporània de Barcelona (CCCBLAB). 15 sept 2015 Web.",
+        "format": "plain",
+        "attachments": []
+      },
+      "items": [
+        {
+          "position": 23,
+          "type": "multiple_choice",
+          "stem": "¿Por qué la autora afirma que la comunidad educativa debe abordar el tema de la privacidad digital?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Porque es fundamental que los jóvenes dejen de utilizar las redes sociales.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Porque es importante formar jóvenes conscientes de los riesgos del Internet.",
+              "isCorrect": true
+            },
+            {
+              "key": "C",
+              "text": "Porque es la única forma de prevenir el ciberacoso de los jóvenes que usan Internet.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "Porque es indispensable que los jóvenes dejen de publicar mensajes personales en redes.",
+              "isCorrect": false
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "B",
+          "skill": "Interpretar y relacionar",
+          "oa": "OA 9",
+          "contentAxis": null,
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Infieren argumentos que respaldan la postura o tesis del autor en un texto de los medios de comunicación. Infieren información relevante en un texto de los medios"
+        },
+        {
+          "position": 24,
+          "type": "multiple_choice",
+          "stem": "Según lo señalado en la sección Factor #3, ¿a qué se refiere la autora con “audiencia imaginada”?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "A los contactos de una red social a quienes el emisor cree que se dirige.",
+              "isCorrect": true
+            },
+            {
+              "key": "B",
+              "text": "A la imagen que proyecta el adolescente al ingresar a una red social.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "A la vitrina digital en donde las personas se muestran públicamente.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "A los usuarios que interactúan dentro de una misma red social.",
+              "isCorrect": false
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "A",
+          "skill": "Interpretar y relacionar",
+          "oa": "OA 9",
+          "contentAxis": null,
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Infieren información relevante en un texto de los medios de comunicación. Infieren información relevante en un texto de los medios"
+        },
+        {
+          "position": 25,
+          "type": "multiple_choice",
+          "stem": "En la sección Factor #2, ¿qué plantea la autora respecto del ciberacoso?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Que las víctimas potenciales son solo los adolescentes.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Que las redes sociales son una herramienta de prevención.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Que la entrega de información personal puede ser peligrosa.",
+              "isCorrect": true
+            },
+            {
+              "key": "D",
+              "text": "Que la prevención debiese estar a cargo de los padres de los jóvenes.",
+              "isCorrect": false
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "C",
+          "skill": "Interpretar y relacionar",
+          "oa": "OA 9",
+          "contentAxis": null,
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Infieren información relevante en un texto de los medios de comunicación."
+        },
+        {
+          "position": 26,
+          "type": "multiple_choice",
+          "stem": "En la sección Factor #1, ¿a qué se refiere la expresión “un laboratorio de identidad”?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "A la falta de privacidad a la que se ven expuestos los usuarios de las redes sociales.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "A la imagen que un usuario construye en base a la interacción en las redes sociales.",
+              "isCorrect": true
+            },
+            {
+              "key": "C",
+              "text": "A la manipulación que hacen las redes sociales de los datos personales de los usuarios.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "A la relación superficial que establecen los usuarios cuando interactúan en una red social.",
+              "isCorrect": false
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "B",
+          "skill": "Interpretar y relacionar",
+          "oa": "OA 9",
+          "contentAxis": null,
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Infieren información relevante en un texto de los medios de comunicación. Distinguen un hecho de una opinión en un texto de los"
+        },
+        {
+          "position": 27,
+          "type": "multiple_choice",
+          "stem": "Considerando el texto leído, ¿cuál de las siguientes alternativas corresponde a una opinión?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "“Educar y formar a adolescentes en el siglo XXI implica enseñarles a comprender y relacionarse con el mundo en línea”.",
+              "isCorrect": true
+            },
+            {
+              "key": "B",
+              "text": "“El 90% de adolescentes se conecta al menos una vez al día y una cuarta parte lo hace constantemente”.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "“Cada vez que descargamos una aplicación en forma gratuita, entregamos nuestros datos a cambio”.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "“Prácticamente el 80% de adolescentes tiene un perfil propio en alguna red social”.",
+              "isCorrect": false
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "A",
+          "skill": "Reflexionar",
+          "oa": "OA 9",
+          "contentAxis": null,
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Distinguen un hecho de una opinión en un texto de los medios de comunicación. Formulan una postura personal sobre algún aspecto"
+        },
+        {
+          "position": 28,
+          "type": "open_ended",
+          "stem": "¿Crees que las personas de tu generación tienen consciencia de los riesgos alertados en el texto respecto de las redes sociales? Marca tu respuesta: Sí / No. Justifica tu respuesta considerando la información leída.",
+          "alternatives": [],
+          "responseFormat": "develop",
+          "correctKey": null,
+          "skill": "Reflexionar",
+          "oa": "OA 9",
+          "contentAxis": null,
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "controversial de un texto de los medios de comunicación. Localizan información explícita relevante en un texto de",
+          "rubric": "Tipos de respuestas Respuestas correctas Respuestas parcialmente Respuestas incorrectas (Código 2) correctas (Código 1) (Código 0) El/la estudiante manifiesta una postura E/la estudiante manifiesta una postura El/la estudiante puede o no manifestar frente a la situación que se le presenta y frente a la situación que se le presenta, una postura frente a la situación que se responde vinculando su propia pero no muestra una compresión le presenta, pero evidencia que no experiencia con la información del texto profunda de lo que implican los riesgos comprendió el texto o la pregunta, relacionada con los riesgos alertados alertados sobre redes sociales, sino puesto que su fundamentación se basa sobre las redes sociales. Por ejemplo, que su fundamentación recoge una únicamente en elementos provenientes puede aludir a estar consciente o no de comprensión parcial del texto y/o de de su experiencia, sin demostrar la lista de contactos que se tiene a la algunas ideas generales sobre redes comprensión sobre los riesgos de hora de hacer publicaciones, al manejo sociales. redes sociales que se exponen en el de la privacidad que tiene cada uno al texto. vincularse con personas en las redes, al Otras respuestas incorrectas son las uso de los datos personales, entre otras tautológicas, vagas, contradictorias, ideas que se mencionan en el texto. incoherentes y en blanco. Ejemplos: Ejemplos: Ejemplos: Sí, porque el texto dice que los jóvenes Sí, porque en las aulas se debate Yo nunca he sido parte del - - - son más conscientes sobre la sobre estos temas. ciberacoso. privacidad, y yo creo que, sabiendo Sí, porque se puede modificar la No creo, porque la gente usa internet - - sobre los casos de ciberacoso, somos configuración de privacidad. para divertirse. más cuidadosos con quién No, porque se ven muchos casos de Yo creo que depende de cada uno - - compartimos nuestra información. acoso virtual. que información comparte. Creo que sí, porque uno ya no es - No, porque a la gente solo le importa Yo creo que sí. - - amigo de cualquiera, ya sabemos que la popularidad en las redes. hay peligros en internet. Ya hemos aprendido a no comunicarnos con desconocidos. Creo que no, porque más allá de saber - los riesgos que hay en internet, a nadie le importa el destino de los datos personales que se comparten en las aplicaciones. No, porque es verdad que cuando se - comparte información la gente piensa que solo la van a ver los contactos que conocidos. 12 &gt; Diagnóstico Integral de Aprendizajes Instrumentos de Evaluación 2026 agenciaeducacion.cl"
+        }
+      ]
+    },
+    {
+      "order": 6,
+      "name": "Texto 6: «Un 69% de alimentos marinos está contaminado por microplásticos»",
+      "type": "multiple_choice",
+      "instructions": "Lee el siguiente texto y responde las preguntas 29 a 34.",
+      "passage": {
+        "title": "Un 69% de alimentos marinos está contaminado por microplásticos",
+        "text": "Tras analizar 102 alimentos de origen marino, la Organización de Consumidores y Usuarios (OCU), una organización española, ha descubierto la presencia de microplásticos en el 69% de ellos.\n\nUna estimación de entre 5 y 50 billones de fragmentos de plástico infecta ya nuestros océanos, lo que supone más de 260 000 toneladas de este residuo flotando en el mar. Así lo alertan las cifras del estudio “Un Mediterráneo lleno de plásticos” de Greenpeace, que no incluyen los residuos que se acumulan en el fondo marino o en las playas. Las imágenes de mares de plástico que nos asaltan a diario son solo la punta del iceberg: el 70% se acumula en el fondo marino y tan solo el 15% se encuentra en la superficie, donde flotan ya cinco gigantescas islas de plástico en el Pacífico, el Atlántico y el Índico.\nA raíz de esta plaga, la OCU ha analizado 102 alimentos de origen marino, entre los que incluye crustáceos, moluscos y sal, y ha descubierto la presencia de microplásticos en el 69% de ellos. A pesar de que los moluscos, como mejillones, almejas o chirlas, son sometidos a una limpieza cuando se destinan a consumo humano, un 71% de las muestras analizadas estaban contaminadas.\nTambién el 66% de la sal estudiada contenía microplásticos, sin existir diferencias derivadas de su procedencia, de la forma de procesarlos o de envasarlos, según informan desde la organización en un comunicado al respecto. La única diferencia significativa se ha apreciado sobre la llamada “flor de sal”, que sí presentaba una mayor cantidad de plásticos, por su estructura escamosa – que acumula mayor cantidad de plásticos – y por cristalizar en la superficie del agua.\nAsí mismo, el 66% de los crustáceos ha obtenido el mismo resultado en el análisis, y aunque no había grandes diferencias entre langostas, gambas o langostinos, sí se observó una disminución de los microplásticos en aquellos alimentos que se comercializan pelados, ya que, al no disponer de la cabeza o el tracto digestivo, gran parte de los microplásticos desaparece. Este dato se vuelve especialmente importante en aquellos alimentos de los que se come también la parte blanda, como el estómago, que presenta mayor acumulación de este material.\nLa plaga de plásticos en el mar es un grave problema que arrasa y contamina los ecosistemas, mata la flora y la fauna e impacta de forma directa sobre actividades como la pesca o el turismo. “La contaminación de los mares amenaza con convertirse en un problema de salud pública, especialmente por la presencia de microplásticos y nanoplásticos en los alimentos”, alertan desde la OCU. “De hecho, a pesar de no conocer bien los posibles efectos en la salud humana, la Autoridad Europea de Seguridad Alimentaria (EFSA), ya lo considera un riesgo emergente”.\nAdemás de los moluscos y crustáceos, casi 1 de cada 6 peces de alto valor comercial de las costas españolas contiene plásticos en su estómago, según alertaba el Instituto Español de Oceanografía hace dos años. Más de 212 peces fueron analizados, incluyendo 72 pintarrojas, 12 merluzas y 128 salmonetes de fango. “Las especies marinas ingieren los microplásticos de distintas formas: los mejillones y las ostras, al alimentarse por filtración; los cangrejos los inspiran a través de las branquias e ingieren a través de la boca; al igual que los peces”, explica Greenpeace en su estudio “Plásticos en el pescado y el marisco”.\n“En España, se venden 50 millones de envases de bebidas cada día, de los cuales 30 millones no se reciclan, o bien van al vertedero, o se queman o van directamente al medio ambiente”, afirma Julio Barea, responsable de campañas de Greenpeace.\nAlgunas comunidades autónomas españolas tratan de legislar medidas como la prohibición de las pajitas de plásticos, como la Comunidad Foral de Navarra, que acaba de plantearlo, o las Islas Baleares, pero a menudo se encuentran con problemas para llevarlo a cabo por parte de algunos comercios y empresas. “Los que están bloqueando las soluciones y las alternativas que se están dando para intentar luchar contra esto son precisamente quienes están lucrando del plástico”, afirma Julio Barea.\nEl océano es el destino más sensible al impacto de esta invasión de plástico: según cifras de Greenpeace, 8 millones de toneladas de basura llegan al año a mares y océanos. Se han convertido en vertederos plásticos. La solución pasa ineludiblemente por la concienciación, sumada a un esfuerzo legislativo global y transversal.\n“Lo que hay que hacer es frenar el flujo del plástico, dejando de consumir de forma masiva los productos o envoltorios de un solo uso. Es algo crucial y urgente, algunos expertos indican que en pocos años habrá más plásticos que seres vivos en el océano. La situación se ha vuelto crítica en pocos años, no se libra ningún océano, ningún río, ningún lago de ninguna parte del mundo”, afirma Julio Barea. Estos trabajos marcan la hoja de ruta para futuros seguimientos de contaminación por plásticos, una grave amenaza que arruina el equilibrio de los ecosistemas e intoxica la cadena alimentaria, poniendo en serio peligro el planeta del que respiramos.\n\nCristina Crespo Garay. “Un 69% de alimentos marinos está contaminado por microplásticos”. National Geographic [España]. 22 de agosto de 2018. Web.\n\nGlosario\nConcienciación: adquirir conciencia de algo.",
+        "format": "plain",
+        "attachments": []
+      },
+      "items": [
+        {
+          "position": 29,
+          "type": "multiple_choice",
+          "stem": "Según el texto, ¿qué porcentaje de los residuos plásticos se acumula en el fondo marino?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "15%",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "66%",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "70%",
+              "isCorrect": true
+            },
+            {
+              "key": "D",
+              "text": "71%",
+              "isCorrect": false
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "C",
+          "skill": "Localizar",
+          "oa": "OA 10",
+          "contentAxis": null,
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Localizan información explícita relevante en un texto de los medios de comunicación. Infieren el sentido global de un texto de los medios de"
+        },
+        {
+          "position": 30,
+          "type": "multiple_choice",
+          "stem": "¿De qué trata el texto leído?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Del impacto de la presencia de plástico en alimentos marinos.",
+              "isCorrect": true
+            },
+            {
+              "key": "B",
+              "text": "De la intoxicación de personas producto del consumo de plástico.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "De la legislación del uso del plástico en las diferentes comunidades.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "Del trabajo que hace Greenpeace limpiando el plástico de los océanos.",
+              "isCorrect": false
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "A",
+          "skill": "Interpretar y relacionar",
+          "oa": "OA 10",
+          "contentAxis": null,
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Infieren el sentido global de un texto de los medios de comunicación. Infieren información relevante en un texto de los medios"
+        },
+        {
+          "position": 31,
+          "type": "multiple_choice",
+          "stem": "Según Julio Barea, ¿quiénes son los principales responsables de obstaculizar la lucha contra la contaminación?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Quienes se enriquecen con la producción de plástico.",
+              "isCorrect": true
+            },
+            {
+              "key": "B",
+              "text": "Quienes priorizan el consumo de plástico de un solo uso.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Quienes venden alimentos marinos contaminados con plástico.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "Quienes se encargan de legislar sobre la producción de plástico.",
+              "isCorrect": false
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "A",
+          "skill": "Interpretar y relacionar",
+          "oa": "OA 10",
+          "contentAxis": null,
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Infieren información relevante en un texto de los medios de comunicación. Infieren información relevante en un texto de los medios"
+        },
+        {
+          "position": 32,
+          "type": "multiple_choice",
+          "stem": "¿Por qué la Autoridad Europea de Seguridad Alimentaria considera que la acumulación de microplásticos en el mar es un riesgo?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Porque la cadena alimenticia se vería alterada si desaparecen los ecosistemas marinos.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Porque la disponibilidad para consumo de alimentos marinos disminuiría drásticamente.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Porque las personas podrían desarrollar enfermedades al ingerir alimentos contaminados.",
+              "isCorrect": true
+            },
+            {
+              "key": "D",
+              "text": "Porque las personas podrían debilitar sus defensas al dejar de consumir alimentos marinos.",
+              "isCorrect": false
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "C",
+          "skill": "Interpretar y relacionar",
+          "oa": "OA 10",
+          "contentAxis": null,
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Infieren información relevante en un texto de los medios de comunicación. Distinguen un hecho de una opinión en un texto de los"
+        },
+        {
+          "position": 33,
+          "type": "multiple_choice",
+          "stem": "¿Cuál de las siguientes citas del texto corresponde a una opinión?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "“8 millones de toneladas de basura llegan al año a mares y océanos”.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "“Una estimación de entre 5 y 50 billones de fragmentos de plástico infecta ya nuestros océanos”.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "“Algunas comunidades autónomas españolas tratan de legislar medidas como la prohibición de las pajitas de plástico”.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "“Lo que hay que hacer es frenar el flujo de plástico, dejando de consumir de forma masiva los productos o envoltorios de un solo uso”.",
+              "isCorrect": true
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "D",
+          "skill": "Reflexionar",
+          "oa": "OA 10",
+          "contentAxis": null,
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Distinguen un hecho de una opinión en un texto de los medios de comunicación. Infieren información relevante en un texto de los medios"
+        },
+        {
+          "position": 34,
+          "type": "multiple_choice",
+          "stem": "¿Cómo cree Greenpeace que se podría solucionar el problema de la contaminación?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Multando a quienes generan contaminación.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Limpiando la basura que contamina los océanos.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Reduciendo la cantidad de vertederos de basura.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "Concientizando a la población de los riesgos de la contaminación.",
+              "isCorrect": true
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "D",
+          "skill": "Interpretar y relacionar",
+          "oa": "OA 10",
+          "contentAxis": null,
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Infieren información relevante en un texto de los medios de comunicación."
+        }
+      ]
+    }
+  ],
+  "extraction": {
+    "itemCount": 34,
+    "warnings": [
+      "Q13 y Q28 son ítems de desarrollo (open_ended, responseFormat develop). Q28 pide además marcar Sí/No antes de justificar; la marca se integró en el stem.",
+      "Texto 4 es un poema («Chile», Nicolás Guillén); se conservaron los saltos de verso y de estrofa.",
+      "Textos, glosarios y atribuciones transcritos verbatim desde la capa de texto del PDF (pdftotext -layout). Guiones de diálogo normalizados a raya (—)."
+    ],
+    "needsHumanReview": false,
+    "crossCheck": {
+      "hardIssues": [],
+      "softWarnings": [],
+      "counts": {
+        "cuadernillo": 34,
+        "ficha": 34,
+        "hoja": 34
+      }
+    }
+  },
+  "pauta": {
+    "source": {
+      "ficha": "II_TE DIA Diagnóstico lectura II° medio 2026.pdf",
+      "hoja": "II_Hoja de respuestas DIA Diagnóstico lectura II° medio 2026.pdf"
+    },
+    "appliedKeys": 32,
+    "rubrics": 2
+  }
+}

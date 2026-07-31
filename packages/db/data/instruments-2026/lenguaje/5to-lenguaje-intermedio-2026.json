@@ -1,0 +1,1047 @@
+{
+  "schemaVersion": "1.0",
+  "source": {
+    "file": "5_prueba_lectura_monitoreo_2026_5_basico.pdf",
+    "subjectFolder": "Lenguaje"
+  },
+  "instrument": {
+    "name": "DIA Lectura 5° Básico 2026 — Intermedio",
+    "subject": "Lenguaje y Comunicación",
+    "subjectCode": "LANG",
+    "grade": "5° Básico",
+    "gradeCode": "5TH_BASIC",
+    "year": 2026,
+    "applicationPeriod": "intermedio",
+    "type": "dia",
+    "isOfficial": true,
+    "source": "imported"
+  },
+  "sections": [
+    {
+      "order": 1,
+      "name": "Texto 1: «La apuesta con un campeón»",
+      "type": "mixed",
+      "instructions": "Lee el siguiente texto y responde las preguntas 1 a 5.",
+      "passage": {
+        "title": "La apuesta con un campeón",
+        "text": "Una helada mañana de invierno, camino de la ciudad, Pedro Urdemales encontró un gorrión casi congelado, que ni podía caminar, mucho menos volar.\n\nCompadecido, lo recogió y se lo echó al bolsillo. Entrando a la ciudad pasó por el estadio, donde se entretuvo mirando a un atleta que se entrenaba en el lanzamiento de la bala.\n\nPedro parecía tan interesado, que el deportista pensó en jugarle una broma y lo llamó a la pista.\n\n—Pareces un huaso forzudo —le dijo a modo de saludo— y si me ganas a lanzar la bala, te invitaré a una parrillada en el restaurante del frente.\n\nDe una cancha vecina había caído una teñida pelota de tenis, y el lanzador la tomó, simulando que pesaba como las balas de hierro con que se estaba entrenando. Luego, tomando impulso, lanzó con tal fuerza, que fue a caer debajo de las galerías de la cancha de fútbol.\n\n—¡Lejazos la tiró! —comentó Pedro agachándose a recoger algo—. Allá en el campo solo lanzo peñascazos —explicó—, de modo que lanzaré esta piedra.\n\nY mientras el atleta aprobaba sin preocuparse de lo que lanzara, Urdemales cambió la piedra por el gorrión que llevaba en el bolsillo.\n\n—¡Allá va! —exclamó Pedro lanzando el pajarillo que, repuestas sus energías y recobrada su libertad, voló, voló y voló en línea recta.\n\nEl atleta no salía de su asombro, mientras eso que creía una piedra cruzaba sobre la pileta, las galerías y hasta las blancas murallas del Estadio Municipal.\n\nPor un momento temió que el peñascazo fuera a caer justo en los ventanales del restaurante del frente, donde ahora debería ir a pagar su apuesta a Pedro Urdemales, que ya lo esperaba con un hambre olímpica.\n\nFloridor Pérez. La vuelta de Pedro Urdemales. Chile: Ediciones Lo que leo, 2019. (Adaptación).",
+        "format": "plain",
+        "attachments": []
+      },
+      "items": [
+        {
+          "position": 1,
+          "type": "multiple_choice",
+          "stem": "¿Por qué Pedro Urdemales recoge un gorrión?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Porque cree que le servirá para ganar una parrillada.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Porque siente lástima por el estado en que se encuentra.",
+              "isCorrect": true
+            },
+            {
+              "key": "C",
+              "text": "Porque piensa que será mejor dejarlo en libertad en la ciudad.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "Porque considera que puede ser su cómplice para hacer una broma.",
+              "isCorrect": false
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "B",
+          "skill": "Interpretar y relacionar",
+          "oa": "OA 4",
+          "contentAxis": "Narración",
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Realizan inferencias sobre acontecimientos o acciones relevantes en un texto narrativo. Localizan información explícita relevante en un texto"
+        },
+        {
+          "position": 2,
+          "type": "multiple_choice",
+          "stem": "¿Qué pensó el deportista al ver que Pedro lo miraba interesado?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Proponerle jugar un partido de tenis.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Invitarlo a comer una parrillada.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Demostrarle su fuerza.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "Jugarle una broma.",
+              "isCorrect": true
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "D",
+          "skill": "Localizar",
+          "oa": "OA 4",
+          "contentAxis": "Narración",
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Localizan información explícita relevante en un texto narrativo. Infieren información relevante sobre personajes en un"
+        },
+        {
+          "position": 3,
+          "type": "multiple_choice",
+          "stem": "En el texto, ¿qué fue lo que asombró al atleta?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Que Pedro Urdemales lanzara tan lejos.",
+              "isCorrect": true
+            },
+            {
+              "key": "B",
+              "text": "Que Pedro Urdemales utilizara una bala.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Que Pedro Urdemales aceptara la apuesta.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "Que Pedro Urdemales convirtiera una piedra en gorrión.",
+              "isCorrect": false
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "A",
+          "skill": "Interpretar y relacionar",
+          "oa": "OA 4",
+          "contentAxis": "Narración",
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Infieren información relevante sobre personajes en un texto narrativo."
+        },
+        {
+          "position": 4,
+          "type": "multiple_choice",
+          "stem": "¿De qué trata el texto?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "De la astucia de Pedro Urdemales para engañar al atleta.",
+              "isCorrect": true
+            },
+            {
+              "key": "B",
+              "text": "De las habilidades de Pedro Urdemales para lanzar la bala.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "De cómo Pedro Urdemales logra salvar la vida de un gorrión.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "Del esfuerzo de Pedro Urdemales para ganarse una parrillada.",
+              "isCorrect": false
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "A",
+          "skill": "Interpretar y relacionar",
+          "oa": "OA 4",
+          "contentAxis": "Narración",
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Infieren de qué trata un texto narrativo. Opinan sobre actitudes o acciones de los personajes de"
+        },
+        {
+          "position": 5,
+          "type": "open_ended",
+          "stem": "¿Estás de acuerdo con lo que hizo Pedro Urdemales para ganar la apuesta?\n\nSí\nNo\n\n¿Por qué? Fundamenta tu opinión dando ejemplos del texto.",
+          "alternatives": [],
+          "responseFormat": "develop",
+          "correctKey": null,
+          "skill": "Reflexionar",
+          "oa": "OA 4",
+          "contentAxis": "Narración",
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "un texto narrativo con fundamentos que integran información del texto. Localizan información explícita relevante en un texto no",
+          "rubric": "Tipos de respuestas Respuestas correctas Respuestas parcialmente Respuestas incorrectas correctas (Código 2) (Código 0) (Código 1) El o la estudiante opina sobre las El o la estudiante opina El o la estudiante puede actitudes o acciones de los personajes, sobre las actitudes o expresar una opinión sobre las fundamentando con elementos del texto acciones de los personajes, actitudes o acciones de los que dan cuenta de su comprensión. pero la fundamentación personajes, pero no Además, la respuesta puede estar evidencia una comprensión fundamenta o lo hace complementada con información de su parcial del texto. utilizando información que no conocimiento de mundo. tiene relación con el texto ni En este caso, fundamenta su con la pregunta. En este caso, el o la estudiante opina respuesta centrándose en sobre el engaño de Pedro para ganar la elementos locales del texto También son incorrectas las apuesta (simular que el gorrión era una que no se relacionan respuestas tautológicas, piedra), y fundamenta su respuesta directamente con el engaño vagas, contradictorias, aludiendo, por ejemplo, a que fue el de Pedro para ganar la incoherentes o en blanco. atleta quien intentó jugarle una broma a apuesta. Pedro en primer lugar, o bien a las consecuencias asociadas al engaño (liberar/salvar a un gorrión, ser invitado a comer a un restaurante, entre otras). En cuanto a los conocimientos previos, el o la estudiante puede complementar su respuesta aludiendo a valores como la honestidad y la astucia. Ejemplos: Ejemplos: Ejemplos: Sí, porque Pedro Urdemales Estoy de acuerdo - - Sí, porque el pájaro - engaña al atleta, pero este le con Pedro porque se estaba escarchado. quiso hacer una broma. Fue más compadeció de un Sí porque ganó la - inteligente que el atleta y se burló gorrión que estaba apuesta. de él. congelado. No, porque el atleta era - Sí porque, aunque engañó al Me parece bien porque - - mejor que él. tenía hambre y querría atleta, pudo liberar al gorrión que No, porque fue malo. - comerse una parrillada. recogió y que ya se había recuperado. No estoy de acuerdo - porque lanzó a un No, porque Pedro Urdemales le - pajarito que no podía hizo creer al atleta que lanzaba volar. una piedra, cuando en realidad lanzó al gorrión. No se debe engañar a la gente, aunque a uno le hagan una broma. 9 Ficha Técnica Prueba de Lectura 5° básico"
+        }
+      ]
+    },
+    {
+      "order": 2,
+      "name": "Texto 2: «Más de cien años de dibujos animados»",
+      "type": "multiple_choice",
+      "instructions": "Lee el siguiente texto y responde las preguntas 6 a 9.",
+      "passage": {
+        "title": "Más de cien años de dibujos animados",
+        "text": "Las películas de dibujos animados no reproducen imágenes reales, sino que se crean usando técnicas de animación. Hace ya noventa años, un hombre llamado Walt Disney y un ratón llamado Mickey conquistaron juntos el mundo del cine de animación.\n\nEl cine de animación nació gracias a una serie de inventos y juguetes ópticos con nombres muy raros. Uno de ellos, el fenaquistoscopio, permitía ver una sucesión de dibujos en movimiento. Otro, el praxinoscopio, proyectaba imágenes animadas en una pantalla. En 1908 Émile Cohl presentó Fantasmagorie, uno de los primeros cortos de dibujos animados. ¡Solo duraba un minuto y veinte segundos! Era corto, sí, pero fue suficiente para conquistar al público, que pedía más. Por eso, en los años que vinieron surgieron nuevos inventos, mejoraron las técnicas y empezaron a aparecer personajes, como Betty Boop, Félix el gato o Popeye, que no solo gustaban a los más pequeños, sino también a los adultos.\n\nWalt Disney apareció en el mundo de la animación y se convirtió en un fenómeno. Pero antes de eso, investigó mucho y aprendió nuevas técnicas de animación. Luego, creó su propia productora de películas animadas basadas en cuentos infantiles. En 1928 nació el ratón Mickey. Tuvo otros compañeros, Minnie, Pluto y Donald, y Disney hizo las primeras películas, como Los tres cerditos o Blancanieves y los siete enanitos, a las que siguieron otras muchas. Hasta hoy, los Estudios Disney siguen produciendo y fascinando al público de todas las edades. Inspirados por las obras de Disney, en la segunda década del siglo XX se empezaron a crear en Japón una serie de cortometrajes de animación, conocidos como anime. Osamu Tezuka, Yoji Kuri y Hayao Miyazaki son algunos creadores. Doraemon, Chihiro o Son Goku son algunos personajes. Pero la lista es interminable.\n\nMercè Fabregat. 100 momentos que cambiaron la historia. España: RBA, 2020. (Adaptación).",
+        "format": "plain",
+        "attachments": []
+      },
+      "items": [
+        {
+          "position": 6,
+          "type": "multiple_choice",
+          "stem": "Según el texto, ¿para qué servía el fenaquistoscopio?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Para crear personajes animados como Betty Boop.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Para proyectar imágenes animadas en una pantalla.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Para desarrollar juguetes ópticos con nombres raros.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "Para mostrar una sucesión de dibujos en movimientos.",
+              "isCorrect": true
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "D",
+          "skill": "Localizar",
+          "oa": "OA 6",
+          "contentAxis": "Texto no literario",
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Localizan información explícita relevante en un texto no literario. Localizan información explícita relevante en un texto no"
+        },
+        {
+          "position": 7,
+          "type": "multiple_choice",
+          "stem": "¿Qué hizo Walt Disney antes de crear su productora?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Inventó al personaje del ratón Mickey.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Presentó un corto de dibujos animados.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Aprendió nuevas técnicas de animación.",
+              "isCorrect": true
+            },
+            {
+              "key": "D",
+              "text": "Realizó sus primeras películas animadas.",
+              "isCorrect": false
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "C",
+          "skill": "Localizar",
+          "oa": "OA 6",
+          "contentAxis": "Texto no literario",
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Localizan información explícita relevante en un texto no literario."
+        },
+        {
+          "position": 8,
+          "type": "multiple_choice",
+          "stem": "A partir del texto, ¿qué se puede concluir sobre Walt Disney?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Que fue exitoso porque hizo películas basadas en cuentos infantiles.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Que fue muy importante para el desarrollo del cine de animación.",
+              "isCorrect": true
+            },
+            {
+              "key": "C",
+              "text": "Que fue el primero en proyectar cortometrajes de animación.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "Que fue quien inventó las técnicas de animación existentes.",
+              "isCorrect": false
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "B",
+          "skill": "Interpretar y relacionar",
+          "oa": "OA 6",
+          "contentAxis": "Texto no literario",
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Infieren información relevante en un texto no literario."
+        },
+        {
+          "position": 9,
+          "type": "multiple_choice",
+          "stem": "¿Cuál es el propósito de este texto?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Presentar la vida y obra de Walt Disney.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Dar a conocer los inventos del cine animado.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Explicar el origen y evolución del cine animado.",
+              "isCorrect": true
+            },
+            {
+              "key": "D",
+              "text": "Mostrar a los personajes famosos de Walt Disney.",
+              "isCorrect": false
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "C",
+          "skill": "Reflexionar",
+          "oa": "OA 7",
+          "contentAxis": "Texto no literario",
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "literario. Interpretan el sentido de expresiones en lenguaje"
+        }
+      ]
+    },
+    {
+      "order": 3,
+      "name": "Texto 3: «El zorzal»",
+      "type": "multiple_choice",
+      "instructions": "Lee el siguiente texto y responde las preguntas 10 a 12.",
+      "passage": {
+        "title": "El zorzal",
+        "text": "Con su pechera rosada\ny su levita marrón;\ncon ese cuerpo robusto\ny ese aire de gran señor,\nnadie lo imaginaría\ntan delicado cantor.\n\nMuere el sol y, junto al río,\nda sus silbidos el zorzal;\nla tarde que se marchaba,\nse volvió para escuchar;\nel agua, que iba corriendo,\nse detuvo hecha un cristal;\nel aire se quedó en suspenso;\nla brisa, sin respirar;\nabrió la boca tamaña\nla luna sobre el sauzal,\ny con lágrimas de estrellas\nel cielo rompió a llorar…\nAnochece… Junto al río,\nsigue cantando el zorzal.\n\nGlosario\nlevita: chaqueta.\nsauzal: sitio poblado de sauces.\n\nJuan Burghi. Arcoíris de Poesía infantil. Comp. Lucía Araya y Clementina Maldonado. Chile: Universitaria, 1987.",
+        "format": "plain",
+        "attachments": []
+      },
+      "items": [
+        {
+          "position": 10,
+          "type": "multiple_choice",
+          "stem": "¿Qué quieren decir los siguientes versos del poema?\n\nabrió la boca tamaña\nla luna sobre el sauzal",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Que la luna se ve muy grande sobre los sauces.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Que la luna se escondió entre los sauces.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Que la luna apareció sobre los sauces.",
+              "isCorrect": true
+            },
+            {
+              "key": "D",
+              "text": "Que la luna iluminó los sauces.",
+              "isCorrect": false
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "C",
+          "skill": "Interpretar y relacionar",
+          "oa": "OA 5",
+          "contentAxis": "Poema",
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Interpretan el sentido de expresiones en lenguaje figurado presentes en un poema."
+        },
+        {
+          "position": 11,
+          "type": "multiple_choice",
+          "stem": "¿Qué siente por el zorzal quien habla en el poema?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Tristeza.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Compasión.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Curiosidad.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "Admiración.",
+              "isCorrect": true
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "D",
+          "skill": "Interpretar y relacionar",
+          "oa": "OA 5",
+          "contentAxis": "Poema",
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Establecen conclusiones sobre distintos aspectos en un poema."
+        },
+        {
+          "position": 12,
+          "type": "multiple_choice",
+          "stem": "¿Qué cualidad del zorzal se destaca en el poema?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Su vida nocturna.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Su hermoso canto.",
+              "isCorrect": true
+            },
+            {
+              "key": "C",
+              "text": "La forma de su cuerpo.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "El color de sus plumas.",
+              "isCorrect": false
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "B",
+          "skill": "Interpretar y relacionar",
+          "oa": "OA 5",
+          "contentAxis": "Poema",
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Infieren información relevante en un poema. Localizan información explícita relevante en un texto no"
+        }
+      ]
+    },
+    {
+      "order": 4,
+      "name": "Texto 4: «El descubrimiento de restos de un dinosaurio que revoluciona Chile»",
+      "type": "mixed",
+      "instructions": "Lee el siguiente texto y responde las preguntas 13 a 17.",
+      "passage": {
+        "title": "El descubrimiento de restos de un dinosaurio que revoluciona Chile",
+        "text": "Redacción MDZ\nLunes, 19 de junio de 2023 · 19:44\n\nUn grupo de investigadores de la Universidad de Chile identificó una nueva especie de dinosaurio “pico de pato” que vivió hace 72 millones de años en el extremo sur de Chile.\n\nLos restos de esta nueva especie fueron descubiertos en una expedición realizada en la Patagonia chilena el año 2013. Esta zona se ha vuelto muy importante en los últimos años porque ha sido el centro de muchos descubrimientos paleontológicos.\n\nEste descubrimiento dio inicio a una investigación a cargo de la Universidad de Chile. Después de casi diez años de trabajo, los investigadores no solo lograron identificar a una nueva especie de dinosaurio herbívoro, sino que también pudieron reconstruir digitalmente la totalidad de su esqueleto.\n\nEl nombre de este dinosaurio es Gonkoken nanoi y está asociado a los hadrosaurios, conocidos también como dinosaurios pico de pato. Se piensa que esta especie medía entre los 3,5 a 4 metros de largo y que podría haber alcanzado hasta una tonelada de peso.\n\nAlexander Vargas, profesor de la Facultad de Ciencias y uno de los autores de la investigación, explicó que “estos eran dinosaurios de apariencia esbelta, que podían caminar fácilmente en cuatro patas y también en dos patas. De esta forma, podían alcanzar vegetación en altura y también a nivel del suelo. Tenían grandes picos aplanados, semejantes al pico de un pato (de ahí su nombre popular), pero con bordes más afilados. Sus mandíbulas estaban formadas por numerosas corridas de cientos de dientes con los cuales podían moler, triturar y cortar prácticamente cualquier material vegetal, incluyendo madera. Además, eran muy sociables y cuidaban de sus crías”.\n\nEl nombre “Gonkoken” proviene de la lengua de los Tehuelches del sur, un pueblo originario que vivió en esa zona hasta fines del siglo diecinueve. El investigador de la Universidad de Chile, Jonathan Alarcón, explicó que al igual que todos los hadrosaurios conocidos, el Gonkoken nanoi poseía un pico muy parecido al de los patos. Entonces, para que en su nombre se notara esa característica, usaron las palabras ‘gon’, que significa “parecido o similar a” y ‘koken’, que quiere decir “pato silvestre” o “cisne”. De esta manera, crearon el nombre Gonkoken, que significa ‘parecido al pato silvestre o al cisne’. En cuanto al término ‘nanoi’, lo utilizaron para reconocer a Mario “Nano” Ulloa, quien fue un trabajador de gran apoyo en los primeros descubrimientos de animales y plantas fósiles en la zona.\n\nGlosario\npaleontológicos: relativo a la paleontología, que es la ciencia que estudia los restos de organismos que existieron en el pasado de la Tierra.\nesbelta: alta y delgada.\nmandíbulas: son los dos huesos que conforman la boca de los vertebrados donde se ubican los dientes.\n\n“El descubrimiento de restos de un dinosaurio que revoluciona Chile”. MDZ Online. 19 de junio de 2023. Web. 20 de junio de 2023. (Adaptación).",
+        "format": "plain",
+        "attachments": [
+          {
+            "kind": "image",
+            "note": "Fotografías/ilustraciones que acompañan la noticia (reconstrucción y restos del dinosaurio Gonkoken nanoi). Son de apoyo; todo el texto necesario para responder está transcrito en el passage."
+          }
+        ]
+      },
+      "items": [
+        {
+          "position": 13,
+          "type": "multiple_choice",
+          "stem": "Según el texto, ¿qué significa la palabra ‘gon’?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Pico de pato.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Hadrosaurio.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Parecido o similar.",
+              "isCorrect": true
+            },
+            {
+              "key": "D",
+              "text": "Pato silvestre o cisne.",
+              "isCorrect": false
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "C",
+          "skill": "Localizar",
+          "oa": "OA 6",
+          "contentAxis": "Texto no literario",
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Localizan información explícita relevante en un texto no literario."
+        },
+        {
+          "position": 14,
+          "type": "multiple_choice",
+          "stem": "¿Qué ventaja tenía para este dinosaurio poder desplazarse en dos y cuatro patas?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Poder ser más sociables.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Poder cuidar de sus crías.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Caminar equilibrando su talla y peso.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "Alcanzar vegetación en altura y en suelo.",
+              "isCorrect": true
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "D",
+          "skill": "Interpretar y relacionar",
+          "oa": "OA 6",
+          "contentAxis": "Texto no literario",
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Infieren información relevante en un texto no literario."
+        },
+        {
+          "position": 15,
+          "type": "multiple_choice",
+          "stem": "¿Por qué el dinosaurio podía triturar tanto vegetales como madera?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Por ser un dinosaurio esbelto.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Por ser un dinosaurio herbívoro.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Por tener numerosas corridas de dientes.",
+              "isCorrect": true
+            },
+            {
+              "key": "D",
+              "text": "Por tener su pico aplanado parecido al de un pato.",
+              "isCorrect": false
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "C",
+          "skill": "Interpretar y relacionar",
+          "oa": "OA 6",
+          "contentAxis": "Texto no literario",
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Infieren información relevante en un texto no literario."
+        },
+        {
+          "position": 16,
+          "type": "multiple_choice",
+          "stem": "¿Cuál es el propósito de este texto?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Explicar las características del dinosaurio Gonkoken nanoi.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Dar a conocer una investigación de la Universidad de Chile.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Mostrar la forma en que trabajan los paleontólogos en Chile.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "Informar el descubrimiento de una nueva especie de dinosaurio.",
+              "isCorrect": true
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "D",
+          "skill": "Reflexionar",
+          "oa": "OA 7",
+          "contentAxis": "Texto no literario",
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "literario. Opinan sobre algún aspecto relevante en un texto no"
+        },
+        {
+          "position": 17,
+          "type": "open_ended",
+          "stem": "¿Qué opinas de la forma en que se decidió nombrar a este dinosaurio tras su descubrimiento? Justifica tu respuesta usando información del texto.",
+          "alternatives": [],
+          "responseFormat": "develop",
+          "correctKey": null,
+          "skill": "Reflexionar",
+          "oa": "OA 6",
+          "contentAxis": "Texto no literario",
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "literario con fundamentos que integran información del texto y sus conocimientos previos. Identifican un acontecimiento o acción relevante en una",
+          "rubric": "Tipos de respuestas Respuestas correctas Respuestas parcialmente Respuestas incorrectas correctas (Código 2) (Código 0) (Código 1) El o la estudiante entrega una El o la estudiante entrega una El o la estudiante no opina sobre opinión sobre el aspecto opinión sobre el aspecto el aspecto de la lectura solicitado en la pregunta que solicitado en la pregunta, pero la solicitado, no evidencia, en su evidencia una comprensión justificación es general, respuesta, comprensión del global del texto. evidenciando una comprensión texto, o bien, evidencia una parcial del texto. compresión errónea del texto. En este caso, el o la estudiante En este caso, fundamenta su opina sobre la forma en que se Otras respuestas incorrectas son respuesta con elementos decidió nombrar a este las tautológicas, vagas, secundarios de la noticia, que no dinosaurio y fundamenta su contradictorias, incoherentes, en se relacionan directamente con la blanco. respuesta con información del forma en que se decidió nombrar texto. (Por ejemplo, la valoración al dinosaurio. O bien, la conexión del pueblo Tehuelche y/o el entre su opinión y la información reconocimiento al trabajador que del texto es débil o poco clara. ha aportado en los descubrimientos en la zona, entre otras). Ejemplos: Ejemplos: Ejemplos: Me parece bien porque al Opino que fue una forma Creo que fue muy - - - utilizar la lengua Tehuelche original de nombrarlo ya importante para Chile. en el nombre se da un valor a que tomaron cosas de Que está bien porque - los pueblos originarios de Chile. todos los dinosaurios Chile. Creo que estuvo bien deben tener un nombre - Creo que es importante porque porque ese trabajador cuando los descubren. - se reconoce al pueblo merecía un La forma me pareció bien. - originario que habitaba la zona reconocimiento. Fue ingenioso. - y además a un trabajador que Estoy de acuerdo porque si - ha ayudado con las ellos trabajaron diez años investigaciones y en esa investigación tenían descubrimientos. que nombrarlo como ellos Bien porque el nombre rescata quisieran. - una parte característica de este dinosaurio (su pico de pato) y además lo hace usando la lengua de los Tehuelches. 10 &gt; Diagnóstico Integral de Aprendizajes Instrumentos de Evaluación 2026 agenciaeducacion.cl"
+        }
+      ]
+    },
+    {
+      "order": 5,
+      "name": "Texto 5: «Bucéfalo»",
+      "type": "multiple_choice",
+      "instructions": "Lee el siguiente texto y responde las preguntas 18 a 22.",
+      "passage": {
+        "title": "Bucéfalo",
+        "text": "Cuando el príncipe Alejandro tenía doce años, su padre Filipo, rey de Macedonia, lo mandó a llamar.\n—Hijo —dijo el monarca—, ya sabes cabalgar. Cuando seas mayor y te conviertas en rey, deberás tener un caballo fuerte y valiente.\n—Sí, padre —dijo Alejandro.\n—Mañana iremos a Pella, a la feria de caballos —dijo Filipo—. Los hay de todas las clases y de todas las tierras. Tú elegirás el mejor.\nAl día siguiente, el rey y su hijo, con la corte, se encontraban en la gran explanada de Pella, donde los mercaderes mostraban centenares de caballos. El chico andaba y miraba, acariciaba hocicos y cuellos, hacía preguntas y montaba alguno que otro animal.\nDe repente oyó un alboroto. Aceleró el paso y vio que, dentro de un recinto, un gran caballo negro, con un lucero blanco en la frente, pateaba y saltaba, regañando y relinchando.\n—¡Estupendo! —exclamó.\n—Sí, príncipe —dijo el mercader que estaba allí al lado—. Claro que solo para mirarlo, porque nadie consigue cabalgarlo.\n—Dejadme ver —dijo el príncipe.\nUn jinete se acercó al caballo y lo cogió por la rienda. Como se acostumbraba en las ferias, antes de montarlo le hizo dar una vuelta sobre sí mismo, para hacer que los presentes lo admiraran. Y entonces el caballo se levantó, relinchando, y se escapó, arrancando las riendas del puño del hombre.\n—¿Habéis visto, príncipe? ¡Siempre hace lo mismo! —dijo el mercader.\n—Intentadlo una vez más, por favor —pidió Alejandro.\nOtro jinete se acercó al caballo, que se dejó tomar por las riendas, pero en medio de la vuelta se levantó y se escapó.\n—¡No hay quien lo monte, príncipe! —dijo el mercader.\n—Quiero montarlo yo —dijo Alejandro.\n—Pero… No lo han logrado los mejores jinetes… —dijo el mercader—. Si el caballo se rebela, podríais heriros…\n—Quiero intentarlo —dijo Alejandro.\n—Inténtalo entonces —dijo el rey, que había escuchado todo en silencio.\nEl mercader suspiró, y levantó la barra del recinto.\nAlejandro se acercó al caballo, que se había calmado. Tomó las riendas muy despacio. Luego le acarició el hocico y, sin hacer que se diera la vuelta, lo montó de un salto.\nEl caballo se quedó inmóvil.\nLa gente, a su alrededor, murmuraba con asombro.\nAlejandro llevó al caballo junto a la cerca.\n—¿Cómo lo has conseguido, hijo mío? —preguntó Filipo.\n—Padre —explicó el chico—, he notado que el caballo se asustaba cuando, durante la vuelta que le hacían dar, el sol le daba en los ojos. Yo no le he hecho dar la vuelta y el sol se ha quedado a sus espaldas, por eso no se ha levantado.\nEl rey, contento y orgulloso, dijo:\n—¿Es este el caballo que eliges, Alejandro?\n—Sí —respondió el chico, acariciando al animal en el cuello—. Lo llamaré Bucéfalo.\nAsí, a lomos de Bucéfalo, Alejandro cabalgó toda su vida, viajando y conquistando fabulosos países de Oriente.\n\nRoberto Piumini. Mil caballos. España: Siruela, 2009.",
+        "format": "plain",
+        "attachments": [
+          {
+            "kind": "image",
+            "note": "Ilustración de Alejandro sobre el caballo Bucéfalo (decorativa, acompaña el relato)."
+          }
+        ]
+      },
+      "items": [
+        {
+          "position": 18,
+          "type": "multiple_choice",
+          "stem": "¿Qué advertencia realizó el mercader a Alejandro?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Que el caballo podía escaparse.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Que nadie podría montar ese caballo.",
+              "isCorrect": true
+            },
+            {
+              "key": "C",
+              "text": "Que las riendas del caballo se debían tomar lentamente.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "Que debía acariciar el hocico del caballo antes de montarlo.",
+              "isCorrect": false
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "B",
+          "skill": "Interpretar y relacionar",
+          "oa": "OA 4",
+          "contentAxis": "Narración",
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Identifican un acontecimiento o acción relevante en una secuencia narrativa. Infieren información relevante sobre personajes en un"
+        },
+        {
+          "position": 19,
+          "type": "multiple_choice",
+          "stem": "¿Qué actitud mostró Alejandro al intentar montar el caballo por primera vez?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Fuerza.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Soberbia.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Confianza.",
+              "isCorrect": true
+            },
+            {
+              "key": "D",
+              "text": "Curiosidad.",
+              "isCorrect": false
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "C",
+          "skill": "Interpretar y relacionar",
+          "oa": "OA 4",
+          "contentAxis": "Narración",
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Infieren información relevante sobre personajes en un texto narrativo. Realizan inferencias sobre acontecimientos o acciones"
+        },
+        {
+          "position": 20,
+          "type": "multiple_choice",
+          "stem": "¿Por qué el caballo se volvía incontrolable cuando los jinetes intentaban lucirlo?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Porque el sol lo encandilaba al girar sobre sí mismo.",
+              "isCorrect": true
+            },
+            {
+              "key": "B",
+              "text": "Porque no le gustaba que los mercaderes lo tocaran.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Porque se asustaba con el ruido de la gente en la feria.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "Porque las riendas eran demasiado cortas para su tamaño.",
+              "isCorrect": false
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "A",
+          "skill": "Interpretar y relacionar",
+          "oa": "OA 4",
+          "contentAxis": "Narración",
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Realizan inferencias sobre acontecimientos o acciones relevantes en un texto narrativo. Realizan inferencias sobre acontecimientos o acciones"
+        },
+        {
+          "position": 21,
+          "type": "multiple_choice",
+          "stem": "¿Por qué Alejandro logró dominar al caballo?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Porque le entregó cariño al acariciarle el hocico.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Porque utilizó su fuerza para saltar sobre el animal.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Porque tomó lentamente las riendas antes de montarlo.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "Porque usó su inteligencia para saber lo que le molestaba.",
+              "isCorrect": true
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "D",
+          "skill": "Interpretar y relacionar",
+          "oa": "OA 4",
+          "contentAxis": "Narración",
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Realizan inferencias sobre acontecimientos o acciones relevantes en un texto narrativo. Infieren información relevante sobre personajes en un"
+        },
+        {
+          "position": 22,
+          "type": "multiple_choice",
+          "stem": "¿Quién era Bucéfalo?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "El Rey de Macedonia",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "El príncipe heredero.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "El mercader.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "El caballo.",
+              "isCorrect": true
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "D",
+          "skill": "Interpretar y relacionar",
+          "oa": "OA 4",
+          "contentAxis": "Narración",
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Infieren información relevante sobre personajes en un texto narrativo. Infieren información relevante sobre personajes en un"
+        }
+      ]
+    },
+    {
+      "order": 6,
+      "name": "Texto 6: «Cómo nacieron los delfines (Mito Ona)»",
+      "type": "multiple_choice",
+      "instructions": "Lee el siguiente texto y responde las preguntas 23 a 27.",
+      "passage": {
+        "title": "Cómo nacieron los delfines (Mito Ona)",
+        "text": "Una mujer había ido a la playa a recoger mejillones. Mientras estaba allí, le pareció oír un ruido a lo lejos.\n\nComo tenía un oído muy agudo, prestó más atención. Del sur parecía acercarse un murmullo apagado, como si la tierra estuviera temblando levemente. El sonido provenía de lejos, pero se oía cada vez más cerca. Rápidamente, la mujer corrió hacia el campamento para avisar a su gente. Allí nadie había oído nada, pero todos fueron a la playa para ver de qué se trataba. Cuando llegaron pudieron oír este retumbar lejano del aire, que cada vez se hacía más próximo.\n\n—Una tormenta terrible se acerca —dijo la mujer que primero había oído el ruido—; debemos irnos de aquí cuanto antes.\n\nLa mujer tenía razón: nunca había visto a Xosé, el espíritu de la nieve; pero su intuición le decía que una catástrofe estaba por caer sobre ellos. Los demás estuvieron de acuerdo, y decidieron que el mejor lugar para escapar era mar adentro. Solo Kemanta, el marido de la mujer, se mantuvo aparte.\n\n—Yo no iré. Me treparé en esa roca, y cuando pase la tormenta volveré a casa —dijo con obstinación. En realidad, no sabía nadar, y por eso no quería meterse en el mar.\n\n—Vamos, todos te ayudaremos —le replicaron los demás—. No hay nada que hacer aquí. La nieve y el viento arrasarán con todo. Además, dentro del mar hay un hermoso lugar para vivir…\n\nPero él seguía con su postura. Finalmente lo convencieron; pero cada vez que sus pies tocaban el agua fría, volvía hacia atrás. Hubo que hacer varios intentos, hasta que por fin pudieron introducirse todos en el mar. Kemanta no tocaba fondo y se hundió. Pero de inmediato volvió a la superficie, ayudado por sus compañeros. Volvió a hundirse y volvieron a sacarlo a flote. Así Kemanta siguió avanzando todo el tiempo. Iban siempre juntos, hasta que al fin Kemanta aprendió a nadar.\n\nEsta gente no volvió jamás a tierra; se quedaron a vivir en el mar, empujados por Xosé, el espíritu de la nieve. Son los bellos delfines, que siempre andan juntos y que, como Kemanta, se hunden en el mar para emerger después un poco más adelante.\n\nJuan Andrés Piña y Marcela Recabarren. Un viaje por las letras. Antología literaria. Chile: Alfaguara infantil, 2011.",
+        "format": "plain",
+        "attachments": []
+      },
+      "items": [
+        {
+          "position": 23,
+          "type": "multiple_choice",
+          "stem": "¿Cómo reaccionó la mujer cuando escuchó que el ruido se oía cada vez más cerca?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Con preocupación.",
+              "isCorrect": true
+            },
+            {
+              "key": "B",
+              "text": "Con impaciencia.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Con curiosidad.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "Con asombro.",
+              "isCorrect": false
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "A",
+          "skill": "Interpretar y relacionar",
+          "oa": "OA 4",
+          "contentAxis": "Narración",
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Infieren información relevante sobre personajes en un texto narrativo. Realizan inferencias sobre acontecimientos o acciones"
+        },
+        {
+          "position": 24,
+          "type": "multiple_choice",
+          "stem": "¿Por qué las personas decidieron irse del campamento?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Porque creían que se acercaba una tormenta terrible.",
+              "isCorrect": true
+            },
+            {
+              "key": "B",
+              "text": "Porque querían transformarse en delfines.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Porque habían discutido con Kemanta.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "Porque deseaban vivir en el mar.",
+              "isCorrect": false
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "A",
+          "skill": "Interpretar y relacionar",
+          "oa": "OA 4",
+          "contentAxis": "Narración",
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Realizan inferencias sobre acontecimientos o acciones relevantes en un texto narrativo. Localizan información explícita relevante en un texto"
+        },
+        {
+          "position": 25,
+          "type": "multiple_choice",
+          "stem": "¿Quién era Xosé?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "La persona que alertó de la tormenta.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "El hombre que quería trepar la roca.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "La mujer que escuchó el ruido.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "El espíritu de la nieve.",
+              "isCorrect": true
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "D",
+          "skill": "Localizar",
+          "oa": "OA 5",
+          "contentAxis": "Poema",
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Localizan información explícita relevante en un texto narrativo. Realizan inferencias sobre acontecimientos o acciones"
+        },
+        {
+          "position": 26,
+          "type": "multiple_choice",
+          "stem": "¿Por qué Kemanta rechazaba meterse al mar?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Porque creía que la roca era un lugar más seguro.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Porque sabía que se transformaría en delfín.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Porque sentía temor al no saber nadar.",
+              "isCorrect": true
+            },
+            {
+              "key": "D",
+              "text": "Porque deseaba quedarse en su casa.",
+              "isCorrect": false
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "C",
+          "skill": "Interpretar y relacionar",
+          "oa": "OA 5",
+          "contentAxis": "Poema",
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Realizan inferencias sobre acontecimientos o acciones relevantes en un texto narrativo. Localizan información explícita relevante en un texto"
+        },
+        {
+          "position": 27,
+          "type": "multiple_choice",
+          "stem": "¿Qué hicieron los compañeros de Kemanta cuando este volvió a hundirse?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Lo dejaron solo.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Lo sacaron a flote.",
+              "isCorrect": true
+            },
+            {
+              "key": "C",
+              "text": "Lo llevaron a tierra.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "Lo enviaron con Xosé.",
+              "isCorrect": false
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "B",
+          "skill": "Localizar",
+          "oa": "OA 5",
+          "contentAxis": "Poema",
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Localizan información explícita relevante en un texto narrativo."
+        }
+      ]
+    }
+  ],
+  "extraction": {
+    "itemCount": 27,
+    "warnings": [
+      "Q5 (Texto 1) y Q17 (Texto 4) son ítems de desarrollo (open_ended / develop).",
+      "Texto 4 («El descubrimiento... dinosaurio») incluye fotografías/ilustraciones de apoyo; todo el texto necesario para responder está transcrito en el passage.",
+      "Texto 5 («Bucéfalo») incluye una ilustración decorativa.",
+      "Textos y glosarios (Texto 3 y Texto 4) transcritos verbatim desde la capa de texto del PDF (pdftotext -layout)."
+    ],
+    "needsHumanReview": false,
+    "crossCheck": {
+      "hardIssues": [],
+      "softWarnings": [],
+      "counts": {
+        "cuadernillo": 27,
+        "ficha": 27,
+        "hoja": 27
+      }
+    }
+  },
+  "pauta": {
+    "source": {
+      "ficha": "5_ficha_tecnica_lectura_monitoreo_2026_5_basico.pdf",
+      "hoja": "5_hoja_de_respuestas_lectura_monitoreo_2026_5_basico.pdf"
+    },
+    "appliedKeys": 25,
+    "rubrics": 2
+  }
+}
