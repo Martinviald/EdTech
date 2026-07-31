@@ -1,0 +1,784 @@
+{
+ "plan": [
+  {
+   "instrument": "imported/DIA Inglés 6° Básico 2026 — Monitoreo Intermedio",
+   "position": 1,
+   "tags": [
+    {
+     "code": "ENG-SK-COMPRENSION-AUDITIVA",
+     "type": "skill",
+     "tagType": "secondary"
+    },
+    {
+     "code": "ENG-6B-OA02",
+     "type": "learning_objective",
+     "tagType": "secondary"
+    },
+    {
+     "code": "CUR-CONTENIDO-ENG-6B-AX-LISTENING",
+     "type": "axis",
+     "tagType": "secondary"
+    },
+    {
+     "code": "ENG-6B-OA02-I1",
+     "type": "descriptor",
+     "tagType": "primary"
+    }
+   ]
+  },
+  {
+   "instrument": "imported/DIA Inglés 6° Básico 2026 — Monitoreo Intermedio",
+   "position": 2,
+   "tags": [
+    {
+     "code": "ENG-SK-COMPRENSION-AUDITIVA",
+     "type": "skill",
+     "tagType": "secondary"
+    },
+    {
+     "code": "ENG-6B-OA01",
+     "type": "learning_objective",
+     "tagType": "secondary"
+    },
+    {
+     "code": "CUR-CONTENIDO-ENG-6B-AX-LISTENING",
+     "type": "axis",
+     "tagType": "secondary"
+    },
+    {
+     "code": "ENG-6B-OA01-I1",
+     "type": "descriptor",
+     "tagType": "primary"
+    }
+   ]
+  },
+  {
+   "instrument": "imported/DIA Inglés 6° Básico 2026 — Monitoreo Intermedio",
+   "position": 3,
+   "tags": [
+    {
+     "code": "ENG-SK-COMPRENSION-AUDITIVA",
+     "type": "skill",
+     "tagType": "secondary"
+    },
+    {
+     "code": "ENG-6B-OA01",
+     "type": "learning_objective",
+     "tagType": "secondary"
+    },
+    {
+     "code": "CUR-CONTENIDO-ENG-6B-AX-LISTENING",
+     "type": "axis",
+     "tagType": "secondary"
+    },
+    {
+     "code": "ENG-6B-OA01-I1",
+     "type": "descriptor",
+     "tagType": "primary"
+    }
+   ]
+  },
+  {
+   "instrument": "imported/DIA Inglés 6° Básico 2026 — Monitoreo Intermedio",
+   "position": 4,
+   "tags": [
+    {
+     "code": "ENG-SK-COMPRENSION-AUDITIVA",
+     "type": "skill",
+     "tagType": "secondary"
+    },
+    {
+     "code": "ENG-6B-OA01",
+     "type": "learning_objective",
+     "tagType": "secondary"
+    },
+    {
+     "code": "CUR-CONTENIDO-ENG-6B-AX-LISTENING",
+     "type": "axis",
+     "tagType": "secondary"
+    },
+    {
+     "code": "ENG-6B-OA01-I1",
+     "type": "descriptor",
+     "tagType": "primary"
+    }
+   ]
+  },
+  {
+   "instrument": "imported/DIA Inglés 6° Básico 2026 — Monitoreo Intermedio",
+   "position": 5,
+   "tags": [
+    {
+     "code": "ENG-SK-COMPRENSION-AUDITIVA",
+     "type": "skill",
+     "tagType": "secondary"
+    },
+    {
+     "code": "ENG-6B-OA02",
+     "type": "learning_objective",
+     "tagType": "secondary"
+    },
+    {
+     "code": "CUR-CONTENIDO-ENG-6B-AX-LISTENING",
+     "type": "axis",
+     "tagType": "secondary"
+    },
+    {
+     "code": "ENG-6B-OA02-I2",
+     "type": "descriptor",
+     "tagType": "primary"
+    }
+   ]
+  },
+  {
+   "instrument": "imported/DIA Inglés 6° Básico 2026 — Monitoreo Intermedio",
+   "position": 6,
+   "tags": [
+    {
+     "code": "ENG-SK-COMPRENSION-AUDITIVA",
+     "type": "skill",
+     "tagType": "secondary"
+    },
+    {
+     "code": "ENG-6B-OA02",
+     "type": "learning_objective",
+     "tagType": "secondary"
+    },
+    {
+     "code": "CUR-CONTENIDO-ENG-6B-AX-LISTENING",
+     "type": "axis",
+     "tagType": "secondary"
+    },
+    {
+     "code": "ENG-6B-OA02-I3",
+     "type": "descriptor",
+     "tagType": "primary"
+    }
+   ]
+  },
+  {
+   "instrument": "imported/DIA Inglés 6° Básico 2026 — Monitoreo Intermedio",
+   "position": 7,
+   "tags": [
+    {
+     "code": "ENG-SK-COMPRENSION-AUDITIVA",
+     "type": "skill",
+     "tagType": "secondary"
+    },
+    {
+     "code": "ENG-6B-OA01",
+     "type": "learning_objective",
+     "tagType": "secondary"
+    },
+    {
+     "code": "CUR-CONTENIDO-ENG-6B-AX-LISTENING",
+     "type": "axis",
+     "tagType": "secondary"
+    },
+    {
+     "code": "ENG-6B-OA01-I1",
+     "type": "descriptor",
+     "tagType": "primary"
+    }
+   ]
+  },
+  {
+   "instrument": "imported/DIA Inglés 6° Básico 2026 — Monitoreo Intermedio",
+   "position": 8,
+   "tags": [
+    {
+     "code": "ENG-SK-COMPRENSION-AUDITIVA",
+     "type": "skill",
+     "tagType": "secondary"
+    },
+    {
+     "code": "ENG-6B-OA01",
+     "type": "learning_objective",
+     "tagType": "secondary"
+    },
+    {
+     "code": "CUR-CONTENIDO-ENG-6B-AX-LISTENING",
+     "type": "axis",
+     "tagType": "secondary"
+    },
+    {
+     "code": "ENG-6B-OA01-I2",
+     "type": "descriptor",
+     "tagType": "primary"
+    }
+   ]
+  },
+  {
+   "instrument": "imported/DIA Inglés 6° Básico 2026 — Monitoreo Intermedio",
+   "position": 9,
+   "tags": [
+    {
+     "code": "ENG-SK-COMPRENSION-AUDITIVA",
+     "type": "skill",
+     "tagType": "secondary"
+    },
+    {
+     "code": "ENG-6B-OA01",
+     "type": "learning_objective",
+     "tagType": "secondary"
+    },
+    {
+     "code": "CUR-CONTENIDO-ENG-6B-AX-LISTENING",
+     "type": "axis",
+     "tagType": "secondary"
+    },
+    {
+     "code": "ENG-6B-OA01-I1",
+     "type": "descriptor",
+     "tagType": "primary"
+    }
+   ]
+  },
+  {
+   "instrument": "imported/DIA Inglés 6° Básico 2026 — Monitoreo Intermedio",
+   "position": 10,
+   "tags": [
+    {
+     "code": "ENG-SK-COMPRENSION-AUDITIVA",
+     "type": "skill",
+     "tagType": "secondary"
+    },
+    {
+     "code": "ENG-6B-OA02",
+     "type": "learning_objective",
+     "tagType": "secondary"
+    },
+    {
+     "code": "CUR-CONTENIDO-ENG-6B-AX-LISTENING",
+     "type": "axis",
+     "tagType": "secondary"
+    },
+    {
+     "code": "ENG-6B-OA02-I3",
+     "type": "descriptor",
+     "tagType": "primary"
+    }
+   ]
+  },
+  {
+   "instrument": "imported/DIA Inglés 6° Básico 2026 — Monitoreo Intermedio",
+   "position": 11,
+   "tags": [
+    {
+     "code": "ENG-SK-COMPRENSION-AUDITIVA",
+     "type": "skill",
+     "tagType": "secondary"
+    },
+    {
+     "code": "ENG-6B-OA02",
+     "type": "learning_objective",
+     "tagType": "secondary"
+    },
+    {
+     "code": "CUR-CONTENIDO-ENG-6B-AX-LISTENING",
+     "type": "axis",
+     "tagType": "secondary"
+    },
+    {
+     "code": "ENG-6B-OA02-I2",
+     "type": "descriptor",
+     "tagType": "primary"
+    }
+   ]
+  },
+  {
+   "instrument": "imported/DIA Inglés 6° Básico 2026 — Monitoreo Intermedio",
+   "position": 12,
+   "tags": [
+    {
+     "code": "ENG-SK-COMPRENSION-AUDITIVA",
+     "type": "skill",
+     "tagType": "secondary"
+    },
+    {
+     "code": "ENG-6B-OA02",
+     "type": "learning_objective",
+     "tagType": "secondary"
+    },
+    {
+     "code": "CUR-CONTENIDO-ENG-6B-AX-LISTENING",
+     "type": "axis",
+     "tagType": "secondary"
+    },
+    {
+     "code": "ENG-6B-OA02-I1",
+     "type": "descriptor",
+     "tagType": "primary"
+    }
+   ]
+  },
+  {
+   "instrument": "imported/DIA Inglés 6° Básico 2026 — Monitoreo Intermedio",
+   "position": 13,
+   "tags": [
+    {
+     "code": "ENG-SK-COMPRENSION-DE-LECTURA",
+     "type": "skill",
+     "tagType": "secondary"
+    },
+    {
+     "code": "ENG-6B-OA06",
+     "type": "learning_objective",
+     "tagType": "secondary"
+    },
+    {
+     "code": "CUR-CONTENIDO-ENG-6B-AX-READING",
+     "type": "axis",
+     "tagType": "secondary"
+    },
+    {
+     "code": "ENG-6B-OA06-I1",
+     "type": "descriptor",
+     "tagType": "primary"
+    }
+   ]
+  },
+  {
+   "instrument": "imported/DIA Inglés 6° Básico 2026 — Monitoreo Intermedio",
+   "position": 14,
+   "tags": [
+    {
+     "code": "ENG-SK-COMPRENSION-DE-LECTURA",
+     "type": "skill",
+     "tagType": "secondary"
+    },
+    {
+     "code": "ENG-6B-OA06",
+     "type": "learning_objective",
+     "tagType": "secondary"
+    },
+    {
+     "code": "CUR-CONTENIDO-ENG-6B-AX-READING",
+     "type": "axis",
+     "tagType": "secondary"
+    },
+    {
+     "code": "ENG-6B-OA06-I2",
+     "type": "descriptor",
+     "tagType": "primary"
+    }
+   ]
+  },
+  {
+   "instrument": "imported/DIA Inglés 6° Básico 2026 — Monitoreo Intermedio",
+   "position": 15,
+   "tags": [
+    {
+     "code": "ENG-SK-COMPRENSION-DE-LECTURA",
+     "type": "skill",
+     "tagType": "secondary"
+    },
+    {
+     "code": "ENG-6B-OA06",
+     "type": "learning_objective",
+     "tagType": "secondary"
+    },
+    {
+     "code": "CUR-CONTENIDO-ENG-6B-AX-READING",
+     "type": "axis",
+     "tagType": "secondary"
+    },
+    {
+     "code": "ENG-6B-OA06-I1",
+     "type": "descriptor",
+     "tagType": "primary"
+    }
+   ]
+  },
+  {
+   "instrument": "imported/DIA Inglés 6° Básico 2026 — Monitoreo Intermedio",
+   "position": 16,
+   "tags": [
+    {
+     "code": "ENG-SK-COMPRENSION-DE-LECTURA",
+     "type": "skill",
+     "tagType": "secondary"
+    },
+    {
+     "code": "ENG-6B-OA06",
+     "type": "learning_objective",
+     "tagType": "secondary"
+    },
+    {
+     "code": "CUR-CONTENIDO-ENG-6B-AX-READING",
+     "type": "axis",
+     "tagType": "secondary"
+    },
+    {
+     "code": "ENG-6B-OA06-I2",
+     "type": "descriptor",
+     "tagType": "primary"
+    }
+   ]
+  },
+  {
+   "instrument": "imported/DIA Inglés 6° Básico 2026 — Monitoreo Intermedio",
+   "position": 17,
+   "tags": [
+    {
+     "code": "ENG-SK-COMPRENSION-DE-LECTURA",
+     "type": "skill",
+     "tagType": "secondary"
+    },
+    {
+     "code": "ENG-6B-OA06",
+     "type": "learning_objective",
+     "tagType": "secondary"
+    },
+    {
+     "code": "CUR-CONTENIDO-ENG-6B-AX-READING",
+     "type": "axis",
+     "tagType": "secondary"
+    },
+    {
+     "code": "ENG-6B-OA06-I3",
+     "type": "descriptor",
+     "tagType": "primary"
+    }
+   ]
+  },
+  {
+   "instrument": "imported/DIA Inglés 6° Básico 2026 — Monitoreo Intermedio",
+   "position": 18,
+   "tags": [
+    {
+     "code": "ENG-SK-COMPRENSION-DE-LECTURA",
+     "type": "skill",
+     "tagType": "secondary"
+    },
+    {
+     "code": "ENG-6B-OA06",
+     "type": "learning_objective",
+     "tagType": "secondary"
+    },
+    {
+     "code": "CUR-CONTENIDO-ENG-6B-AX-READING",
+     "type": "axis",
+     "tagType": "secondary"
+    },
+    {
+     "code": "ENG-6B-OA06-I3",
+     "type": "descriptor",
+     "tagType": "primary"
+    }
+   ]
+  },
+  {
+   "instrument": "imported/DIA Inglés 6° Básico 2026 — Monitoreo Intermedio",
+   "position": 19,
+   "tags": [
+    {
+     "code": "ENG-SK-COMPRENSION-DE-LECTURA",
+     "type": "skill",
+     "tagType": "secondary"
+    },
+    {
+     "code": "ENG-6B-OA06",
+     "type": "learning_objective",
+     "tagType": "secondary"
+    },
+    {
+     "code": "CUR-CONTENIDO-ENG-6B-AX-READING",
+     "type": "axis",
+     "tagType": "secondary"
+    },
+    {
+     "code": "ENG-6B-OA06-I3",
+     "type": "descriptor",
+     "tagType": "primary"
+    }
+   ]
+  },
+  {
+   "instrument": "imported/DIA Inglés 6° Básico 2026 — Monitoreo Intermedio",
+   "position": 20,
+   "tags": [
+    {
+     "code": "ENG-SK-COMPRENSION-DE-LECTURA",
+     "type": "skill",
+     "tagType": "secondary"
+    },
+    {
+     "code": "ENG-6B-OA06",
+     "type": "learning_objective",
+     "tagType": "secondary"
+    },
+    {
+     "code": "CUR-CONTENIDO-ENG-6B-AX-READING",
+     "type": "axis",
+     "tagType": "secondary"
+    },
+    {
+     "code": "ENG-6B-OA06-I4",
+     "type": "descriptor",
+     "tagType": "primary"
+    }
+   ]
+  },
+  {
+   "instrument": "imported/DIA Inglés 6° Básico 2026 — Monitoreo Intermedio",
+   "position": 21,
+   "tags": [
+    {
+     "code": "ENG-SK-COMPRENSION-DE-LECTURA",
+     "type": "skill",
+     "tagType": "secondary"
+    },
+    {
+     "code": "ENG-6B-OA07",
+     "type": "learning_objective",
+     "tagType": "secondary"
+    },
+    {
+     "code": "CUR-CONTENIDO-ENG-6B-AX-READING",
+     "type": "axis",
+     "tagType": "secondary"
+    },
+    {
+     "code": "ENG-6B-OA07-I1",
+     "type": "descriptor",
+     "tagType": "primary"
+    }
+   ]
+  },
+  {
+   "instrument": "imported/DIA Inglés 6° Básico 2026 — Monitoreo Intermedio",
+   "position": 22,
+   "tags": [
+    {
+     "code": "ENG-SK-COMPRENSION-DE-LECTURA",
+     "type": "skill",
+     "tagType": "secondary"
+    },
+    {
+     "code": "ENG-6B-OA07",
+     "type": "learning_objective",
+     "tagType": "secondary"
+    },
+    {
+     "code": "CUR-CONTENIDO-ENG-6B-AX-READING",
+     "type": "axis",
+     "tagType": "secondary"
+    },
+    {
+     "code": "ENG-6B-OA07-I2",
+     "type": "descriptor",
+     "tagType": "primary"
+    }
+   ]
+  },
+  {
+   "instrument": "imported/DIA Inglés 6° Básico 2026 — Monitoreo Intermedio",
+   "position": 23,
+   "tags": [
+    {
+     "code": "ENG-SK-COMPRENSION-DE-LECTURA",
+     "type": "skill",
+     "tagType": "secondary"
+    },
+    {
+     "code": "ENG-6B-OA07",
+     "type": "learning_objective",
+     "tagType": "secondary"
+    },
+    {
+     "code": "CUR-CONTENIDO-ENG-6B-AX-READING",
+     "type": "axis",
+     "tagType": "secondary"
+    },
+    {
+     "code": "ENG-6B-OA07-I3",
+     "type": "descriptor",
+     "tagType": "primary"
+    }
+   ]
+  },
+  {
+   "instrument": "imported/DIA Inglés 6° Básico 2026 — Monitoreo Intermedio",
+   "position": 24,
+   "tags": [
+    {
+     "code": "ENG-SK-COMPRENSION-DE-LECTURA",
+     "type": "skill",
+     "tagType": "secondary"
+    },
+    {
+     "code": "ENG-6B-OA07",
+     "type": "learning_objective",
+     "tagType": "secondary"
+    },
+    {
+     "code": "CUR-CONTENIDO-ENG-6B-AX-READING",
+     "type": "axis",
+     "tagType": "secondary"
+    },
+    {
+     "code": "ENG-6B-OA07-I4",
+     "type": "descriptor",
+     "tagType": "primary"
+    }
+   ]
+  },
+  {
+   "instrument": "imported/DIA Inglés 6° Básico 2026 — Monitoreo Intermedio",
+   "position": 25,
+   "tags": [
+    {
+     "code": "ENG-SK-EXPRESION-ESCRITA",
+     "type": "skill",
+     "tagType": "secondary"
+    },
+    {
+     "code": "ENG-6B-OA14",
+     "type": "learning_objective",
+     "tagType": "secondary"
+    },
+    {
+     "code": "CUR-CONTENIDO-ENG-6B-AX-WRITING",
+     "type": "axis",
+     "tagType": "secondary"
+    },
+    {
+     "code": "ENG-6B-OA14-I1",
+     "type": "descriptor",
+     "tagType": "primary"
+    }
+   ]
+  },
+  {
+   "instrument": "imported/DIA Inglés 6° Básico 2026 — Monitoreo Intermedio",
+   "position": 26,
+   "tags": [
+    {
+     "code": "ENG-SK-EXPRESION-ESCRITA",
+     "type": "skill",
+     "tagType": "secondary"
+    },
+    {
+     "code": "ENG-6B-OA14",
+     "type": "learning_objective",
+     "tagType": "secondary"
+    },
+    {
+     "code": "CUR-CONTENIDO-ENG-6B-AX-WRITING",
+     "type": "axis",
+     "tagType": "secondary"
+    },
+    {
+     "code": "ENG-6B-OA14-I1",
+     "type": "descriptor",
+     "tagType": "primary"
+    }
+   ]
+  },
+  {
+   "instrument": "imported/DIA Inglés 6° Básico 2026 — Monitoreo Intermedio",
+   "position": 27,
+   "tags": [
+    {
+     "code": "ENG-SK-EXPRESION-ESCRITA",
+     "type": "skill",
+     "tagType": "secondary"
+    },
+    {
+     "code": "ENG-6B-OA14",
+     "type": "learning_objective",
+     "tagType": "secondary"
+    },
+    {
+     "code": "CUR-CONTENIDO-ENG-6B-AX-WRITING",
+     "type": "axis",
+     "tagType": "secondary"
+    },
+    {
+     "code": "ENG-6B-OA14-I1",
+     "type": "descriptor",
+     "tagType": "primary"
+    }
+   ]
+  },
+  {
+   "instrument": "imported/DIA Inglés 6° Básico 2026 — Monitoreo Intermedio",
+   "position": 28,
+   "tags": [
+    {
+     "code": "ENG-SK-EXPRESION-ESCRITA",
+     "type": "skill",
+     "tagType": "secondary"
+    },
+    {
+     "code": "ENG-6B-OA15",
+     "type": "learning_objective",
+     "tagType": "secondary"
+    },
+    {
+     "code": "CUR-CONTENIDO-ENG-6B-AX-WRITING",
+     "type": "axis",
+     "tagType": "secondary"
+    },
+    {
+     "code": "ENG-6B-OA15-I1",
+     "type": "descriptor",
+     "tagType": "primary"
+    }
+   ]
+  },
+  {
+   "instrument": "imported/DIA Inglés 6° Básico 2026 — Monitoreo Intermedio",
+   "position": 29,
+   "tags": [
+    {
+     "code": "ENG-SK-EXPRESION-ESCRITA",
+     "type": "skill",
+     "tagType": "secondary"
+    },
+    {
+     "code": "ENG-6B-OA15",
+     "type": "learning_objective",
+     "tagType": "secondary"
+    },
+    {
+     "code": "CUR-CONTENIDO-ENG-6B-AX-WRITING",
+     "type": "axis",
+     "tagType": "secondary"
+    },
+    {
+     "code": "ENG-6B-OA15-I1",
+     "type": "descriptor",
+     "tagType": "primary"
+    }
+   ]
+  },
+  {
+   "instrument": "imported/DIA Inglés 6° Básico 2026 — Monitoreo Intermedio",
+   "position": 30,
+   "tags": [
+    {
+     "code": "ENG-SK-EXPRESION-ESCRITA",
+     "type": "skill",
+     "tagType": "secondary"
+    },
+    {
+     "code": "ENG-6B-OA15",
+     "type": "learning_objective",
+     "tagType": "secondary"
+    },
+    {
+     "code": "CUR-CONTENIDO-ENG-6B-AX-WRITING",
+     "type": "axis",
+     "tagType": "secondary"
+    },
+    {
+     "code": "ENG-6B-OA15-I1",
+     "type": "descriptor",
+     "tagType": "primary"
+    }
+   ]
+  }
+ ]
+}

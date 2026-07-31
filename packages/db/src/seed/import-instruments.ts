@@ -36,8 +36,14 @@ type Alt = {
   imageRef?: string | null;
 };
 type Item = {
-  position: number; type: string; stem: string; alternatives?: Alt[];
-  correctKey?: string | null; responseFormat?: string; hasFigure?: boolean; figureNote?: string | null;
+  position: number;
+  type: string;
+  stem: string;
+  alternatives?: Alt[];
+  correctKey?: string | null;
+  responseFormat?: string;
+  hasFigure?: boolean;
+  figureNote?: string | null;
   /** Storage key en S3 del recorte de la figura (contrato v1.1). No es una URL. */
   imageRef?: string | null;
 };
@@ -49,12 +55,35 @@ type Passage = {
   /** Storage key en S3 del recorte de la región completa del pasaje (contrato v1.1). */
   imageRef?: string | null;
 };
-type Section = { order: number; name: string; type: string; instructions?: string; passage?: Passage | null; items: Item[] };
+type Section = {
+  order: number;
+  name: string;
+  type: string;
+  instructions?: string;
+  passage?: Passage | null;
+  /**
+   * Storage key del recorte del estímulo de la sección, cuando el estímulo NO es un pasaje de
+   * texto: la ilustración de contexto de un Listening, la grilla de apoyo de un bloque de
+   * Writing. Va a nivel de sección y no dentro de `passage` porque esas secciones no tienen
+   * pasaje (`passage: null`) y su imagen se perdería.
+   */
+  imageRef?: string | null;
+  items: Item[];
+};
 type InstrumentJson = {
-  instrument: { name: string; subject: string; subjectCode: string; grade: string; gradeCode: string;
-    year: number; applicationPeriod: string; type: string; isOfficial?: boolean };
+  instrument: {
+    name: string;
+    subject: string;
+    subjectCode: string;
+    grade: string;
+    gradeCode: string;
+    year: number;
+    applicationPeriod: string;
+    type: string;
+    isOfficial?: boolean;
+  };
   sections: Section[];
-  pauta?: { source?: { instrumentJson?: string } };
+  pauta?: { source?: { instrumentJson?: string }; rubrics?: unknown[] };
   extraction?: { itemCount?: number };
 };
 
@@ -74,7 +103,9 @@ function buildContent(it: Item): Record<string, unknown> {
     return {
       stem: it.stem,
       alternatives: (it.alternatives ?? []).map((a) => ({
-        key: a.key, text: a.text, isCorrect: a.isCorrect === true,
+        key: a.key,
+        text: a.text,
+        isCorrect: a.isCorrect === true,
       })),
     };
   }
@@ -91,15 +122,19 @@ export async function importInstruments(db: Database): Promise<void> {
     .select({ id: taxonomies.id })
     .from(taxonomies)
     .where(and(eq(taxonomies.type, 'dia'), eq(taxonomies.version, 'vigente')));
-  if (!diaMarco) throw new Error('Falta el marco DIA (type=dia, version=vigente). Corre db:seed:taxonomy.');
+  if (!diaMarco)
+    throw new Error('Falta el marco DIA (type=dia, version=vigente). Corre db:seed:taxonomy.');
 
   const files: string[] = [];
-  for (const sub of ['lenguaje', 'matematicas']) {
-    const dir = resolve(DATA_DIR, sub);
+  for (const entry of readdirSync(DATA_DIR, { withFileTypes: true })) {
+    if (!entry.isDirectory()) continue;
+    const dir = resolve(DATA_DIR, entry.name);
     for (const f of readdirSync(dir)) if (f.endsWith('.json')) files.push(resolve(dir, f));
   }
 
-  let nInst = 0, nSec = 0, nItem = 0;
+  let nInst = 0,
+    nSec = 0,
+    nItem = 0;
   const issues: string[] = [];
 
   for (const file of files.sort()) {
@@ -108,7 +143,10 @@ export async function importInstruments(db: Database): Promise<void> {
     const sourceJson = d.pauta?.source?.instrumentJson ?? `imported/${ins.name}`;
     const sId = subjId.get(ins.subjectCode) ?? null;
     const gId = gradeId.get(ins.gradeCode) ?? null;
-    if (!sId || !gId) { issues.push(`${ins.name}: subject/grade no resuelto (${ins.subjectCode}/${ins.gradeCode})`); continue; }
+    if (!sId || !gId) {
+      issues.push(`${ins.name}: subject/grade no resuelto (${ins.subjectCode}/${ins.gradeCode})`);
+      continue;
+    }
 
     await db.transaction(async (tx) => {
       // 1) borrar import previo (idempotencia) por sourceJson — bottom-up
@@ -135,7 +173,15 @@ export async function importInstruments(db: Database): Promise<void> {
           applicationPeriod: toApplicationPeriod(ins.applicationPeriod),
           isOfficial: ins.isOfficial ?? true,
           status: 'published',
-          config: { sourceJson, subject: ins.subject, grade: ins.grade },
+          config: {
+            sourceJson,
+            subject: ins.subject,
+            grade: ins.grade,
+            // Rúbricas de las preguntas de desarrollo, tal como vienen de la pauta oficial.
+            // Se preservan aquí porque las tablas `rubrics`/`rubric_criteria`/`rubric_levels`
+            // todavía no tienen camino de carga; así el dato no se pierde en la extracción.
+            ...(d.pauta?.rubrics?.length ? { rubrics: d.pauta.rubrics } : {}),
+          },
         })
         .returning({ id: instruments.id });
       const instrumentId = inst!.id;
@@ -155,7 +201,9 @@ export async function importInstruments(db: Database): Promise<void> {
             instructions: s.instructions ?? null,
             passageTitle: p?.title ?? null,
             passageText: p?.text ?? null,
-            passageFormat: p ? ((p.format ?? 'plain') as typeof instrumentSections.$inferInsert.passageFormat) : null,
+            passageFormat: p
+              ? ((p.format ?? 'plain') as typeof instrumentSections.$inferInsert.passageFormat)
+              : null,
           })
           .returning({ id: instrumentSections.id });
         const sectionId = sec!.id;
@@ -164,14 +212,20 @@ export async function importInstruments(db: Database): Promise<void> {
         // el único adjunto con archivo real: los `p.attachments` son descripciones escritas por IA
         // y no son fiables (funden varias imágenes en una entrada y a veces las omiten).
         const attachments: (typeof sectionAttachments.$inferInsert)[] = [];
-        if (p?.imageRef) {
+        // `s.imageRef` cubre las secciones cuyo estímulo no es un pasaje de texto (ilustración de
+        // un Listening, grilla de apoyo de un Writing): ahí `passage` es null y el recorte se
+        // declara a nivel de sección.
+        const sectionImageRef = p?.imageRef ?? s.imageRef ?? null;
+        if (sectionImageRef) {
           attachments.push({
             sectionId,
             kind: 'image',
             order: 0,
-            storageKey: p.imageRef,
+            storageKey: sectionImageRef,
             mimeType: 'image/png',
-            note: 'Pasaje completo tal como aparece en el cuadernillo (recorte determinístico).',
+            note: p
+              ? 'Pasaje completo tal como aparece en el cuadernillo (recorte determinístico).'
+              : 'Estímulo de la sección tal como aparece en el cuadernillo (recorte determinístico).',
           });
         }
         for (const [i, a] of (p?.attachments ?? []).entries()) {
@@ -214,23 +268,36 @@ export async function importInstruments(db: Database): Promise<void> {
             status: 'published',
             source: 'imported',
           });
-          nItem++; itemCount++;
+          nItem++;
+          itemCount++;
         }
       }
       const declared = d.extraction?.itemCount;
-      const flag = declared != null && declared !== itemCount ? ` ⚠️ itemCount JSON=${declared} ≠ ${itemCount}` : '';
+      const flag =
+        declared != null && declared !== itemCount
+          ? ` ⚠️ itemCount JSON=${declared} ≠ ${itemCount}`
+          : '';
       console.log(`  ✓ ${ins.name}: ${itemCount} ítems${flag}`);
     });
   }
 
   console.log(`\nImport: ${nInst} instrumentos · ${nSec} secciones · ${nItem} ítems`);
-  if (issues.length) { console.log('Issues:'); issues.forEach((i) => console.log('  ✗', i)); }
+  if (issues.length) {
+    console.log('Issues:');
+    issues.forEach((i) => console.log('  ✗', i));
+  }
 }
 
 if (require.main === module) {
   const url = process.env.DATABASE_ADMIN_URL ?? process.env.DATABASE_URL;
   if (!url) throw new Error('DATABASE_ADMIN_URL o DATABASE_URL es requerido');
   importInstruments(createDbClient(url))
-    .then(() => { console.log('✅ Instrumentos importados.'); process.exit(0); })
-    .catch((e) => { console.error('ERROR import instrumentos:', e); process.exit(1); });
+    .then(() => {
+      console.log('✅ Instrumentos importados.');
+      process.exit(0);
+    })
+    .catch((e) => {
+      console.error('ERROR import instrumentos:', e);
+      process.exit(1);
+    });
 }
