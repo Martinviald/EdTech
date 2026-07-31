@@ -1,0 +1,1784 @@
+{
+ "schemaVersion": "1.0",
+ "source": {
+  "file": "7_prueba_ciencias_monitoreo_2026_7_basico.pdf",
+  "subjectFolder": "Ciencias"
+ },
+ "instrument": {
+  "name": "DIA Ciencias Naturales 7° Básico 2026 — Monitoreo Intermedio",
+  "subject": "Ciencias Naturales",
+  "subjectCode": "SCI",
+  "grade": "7° Básico",
+  "gradeCode": "7TH_BASIC",
+  "year": 2026,
+  "applicationPeriod": "intermedio",
+  "type": "dia",
+  "isOfficial": true,
+  "source": "imported"
+ },
+ "sections": [
+  {
+   "order": 1,
+   "name": "Pregunta 1 — Encuesta sobre los ámbitos de la sexualidad humana",
+   "type": "multiple_choice",
+   "instructions": null,
+   "passage": null,
+   "items": [
+    {
+     "position": 1,
+     "printedNumber": "1",
+     "type": "multiple_choice",
+     "responseFormat": "choice",
+     "stem": "Un grupo de investigadores realizó un estudio para determinar el nivel de conocimientos sobre los diferentes ámbitos de la sexualidad humana que tienen las y los adolescentes de una escuela. Para ello, realizaron lo siguiente:\n• Seleccionaron a 56 adolescentes de sexo femenino y a 56 adolescentes de sexo masculino, todos entre 12 y 14 años.\n• Encuestaron a cada adolescente con 23 preguntas asociadas a los distintos ámbitos de la sexualidad humana.\n\nEsta tabla muestra la cantidad de preguntas para cada ámbito:\n\nÁmbito de la sexualidad | Cantidad de preguntas en la encuesta\nPsicológico | 10\nBiológico | 3\nSocial | 10\n\n¿Cuál de estos temas pudo ser abordado en las preguntas del ámbito biológico de la sexualidad humana?",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "Los cambios en la percepción de sí mismo durante la adolescencia.",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "El desarrollo de la afectividad y el noviazgo durante la adolescencia.",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "La importancia de la relación con sus pares durante la adolescencia.",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "Los cambios en las características físicas durante la adolescencia.",
+       "isCorrect": true
+      }
+     ],
+     "correctKey": "D",
+     "skill": null,
+     "oa": "OA 1",
+     "contentAxis": "Biología",
+     "hasFigure": false,
+     "figureNote": null,
+     "indicador": "Identifican aspectos biológicos, afectivos y sociales de la sexualidad humana.",
+     "oaLevel": null,
+     "imageRef": null
+    }
+   ]
+  },
+  {
+   "order": 2,
+   "name": "Pregunta 2 — Afirmaciones sobre la sexualidad humana (respuesta múltiple)",
+   "type": "multiple_choice",
+   "instructions": "Marca todas las opciones que consideres correctas.",
+   "passage": null,
+   "items": [
+    {
+     "position": 2,
+     "printedNumber": "2",
+     "type": "multiple_choice",
+     "responseFormat": "choice",
+     "stem": "¿Cuáles de las siguientes afirmaciones son verdaderas con relación a la sexualidad humana?\n\nMarca todas las opciones que consideres correctas.",
+     "alternatives": [
+      {
+       "key": "1",
+       "text": "Está presente a lo largo de toda la vida de las personas.",
+       "isCorrect": true
+      },
+      {
+       "key": "2",
+       "text": "Se define como el grado de coincidencia entre las características biológicas de una persona e identificarse con ser hombre o mujer.",
+       "isCorrect": false
+      },
+      {
+       "key": "3",
+       "text": "En el ser humano, comienza a expresarse con el inicio de la pubertad.",
+       "isCorrect": false
+      },
+      {
+       "key": "4",
+       "text": "La búsqueda de la identidad es un aspecto presente en la sexualidad de las personas.",
+       "isCorrect": true
+      },
+      {
+       "key": "5",
+       "text": "La afectividad es un aspecto de la sexualidad que puede cambiar al adquirir nuevas experiencias.",
+       "isCorrect": true
+      }
+     ],
+     "correctKey": "145",
+     "skill": null,
+     "oa": "OA 1",
+     "contentAxis": "Biología",
+     "hasFigure": false,
+     "figureNote": null,
+     "isMultiAnswer": true,
+     "indicador": "Explican aspectos biológicos, afectivos y sociales que se integran en la sexualidad humana.",
+     "oaLevel": null,
+     "imageRef": null
+    }
+   ]
+  },
+  {
+   "order": 3,
+   "name": "Preguntas 3 y 4 — Calendario de abril y mayo: el ciclo menstrual de Fran",
+   "type": "multiple_choice",
+   "instructions": "Lee la siguiente información y responde las preguntas 3 y 4.",
+   "passage": {
+    "title": "Calendario de abril y mayo con los días de menstruación de Fran",
+    "text": "Fran marcó en el mes de abril de su calendario los días en que se produjo su menstruación:\n\nABRIL\nLunes | Martes | Miércoles | Jueves | Viernes | Sábado | Domingo\n1 | 2 | 3 | 4 | 5 | 6 | 7\n8 | 9 | 10 | 11 | 12 | 13 | 14\n15 | 16 | 17 | 18 | 19 | 20 | 21\n22 | 23 | 24 | 25 | 26 | 27 | 28\n29 | 30\n\nMAYO\nLunes | Martes | Miércoles | Jueves | Viernes | Sábado | Domingo\n— | — | 1 | 2 | 3 | 4 | 5\n6 | 7 | 8 | 9 | 10 | 11 | 12\n13 | 14 | 15 | 16 | 17 | 18 | 19\n20 | 21 | 22 | 23 | 24 | 25 | 26\n27 | 28 | 29 | 30 | 31\n\nEn el calendario de ABRIL los días 4, 5, 6 y 7 y los días 25, 26, 27, 28, 29 y 30 aparecen encerrados en un círculo (marcas de menstruación). Esas marcas SOLO existen en la imagen: no están en la capa de texto del PDF y sin ellas las preguntas 3 y 4 no se pueden responder.",
+    "format": "plain",
+    "attachments": [
+     {
+      "kind": "image",
+      "note": "Dos calendarios ilustrados (ABRIL y MAYO) con encabezado naranja y chinches de papel; en ABRIL los días 4-7 y 25-30 están encerrados en círculos azules. Estímulo compartido por las preguntas 3 y 4."
+     }
+    ],
+    "imageRef": "item/global/7mo-ciencias-intermedio-2026/section_figure/03.png"
+   },
+   "items": [
+    {
+     "position": 3,
+     "printedNumber": "3",
+     "type": "multiple_choice",
+     "responseFormat": "choice",
+     "stem": "Según la información anterior, ¿cuánto dura el ciclo menstrual de Fran?",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "10 días.",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "21 días.",
+       "isCorrect": true
+      },
+      {
+       "key": "C",
+       "text": "25 días.",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "26 días.",
+       "isCorrect": false
+      }
+     ],
+     "correctKey": "B",
+     "skill": "Procesar y analizar la evidencia",
+     "oa": "OA 2",
+     "contentAxis": "Biología",
+     "hasFigure": true,
+     "figureNote": "Depende del calendario de abril y mayo del estímulo compartido de la sección (los días de menstruación están marcados con círculos solo en la imagen). La figura es de la SECCIÓN, no del ítem.",
+     "figureScope": "section",
+     "indicador": "Interpretan información relacionada con el ciclo menstrual (días fértiles, menstruación y ovulación).",
+     "oaLevel": null,
+     "imageRef": null
+    },
+    {
+     "position": 4,
+     "printedNumber": "4",
+     "type": "multiple_choice",
+     "responseFormat": "choice",
+     "stem": "Si el ciclo de Fran es regular, ¿cuándo se volverá a producir su menstruación?",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "El 16 de mayo.",
+       "isCorrect": true
+      },
+      {
+       "key": "B",
+       "text": "El 22 de mayo.",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "El 23 de mayo.",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "El 25 de mayo.",
+       "isCorrect": false
+      }
+     ],
+     "correctKey": "A",
+     "skill": "Observar y plantear preguntas",
+     "oa": "OA 2",
+     "contentAxis": "Biología",
+     "hasFigure": true,
+     "figureNote": "Depende del calendario de abril y mayo del estímulo compartido de la sección (los días de menstruación están marcados con círculos solo en la imagen). La figura es de la SECCIÓN, no del ítem.",
+     "figureScope": "section",
+     "indicador": "Formulan predicciones basadas en observaciones previamente realizadas relacionadas con el ciclo menstrual (días fértiles, menstruación y ovulación).",
+     "oaLevel": null,
+     "imageRef": null
+    }
+   ],
+   "imageRef": "item/global/7mo-ciencias-intermedio-2026/section_figure/03.png"
+  },
+  {
+   "order": 4,
+   "name": "Pregunta 5 — Encuesta de paternidad y maternidad responsables: elegir el gráfico adecuado",
+   "type": "multiple_choice",
+   "instructions": null,
+   "passage": null,
+   "items": [
+    {
+     "position": 5,
+     "printedNumber": "5",
+     "type": "multiple_choice",
+     "responseFormat": "choice",
+     "stem": "Durante un taller de paternidad y maternidad responsables, se realizó una encuesta a las y los estudiantes de 7º básico de un colegio acerca de algunas conductas de sus madres, padres o tutores.\n\nEn esta tabla se muestran las preguntas realizadas y el porcentaje de las respuestas obtenidas:\n\nN° de pregunta | ¿Mi madre, padre o tutor(a)… | Porcentaje de respuestas Sí | No\n1 | …me demuestra cariño con frecuencia? | 80% | 20%\n2 | …está pendiente de que estudie y realice mis tareas escolares? | 30% | 70%\n3 | …realiza actividades recreativas conmigo? | 40% | 60%\n4 | …me motiva a que comparta con otras personas de mi edad? | 70% | 30%\n5 | …se ocupa de que me alimente de forma saludable? | 90% | 10%\n6 | …me estimula a realizar actividad física en forma regular? | 45% | 55%\n7 | …se ocupa de que tenga ropa limpia y adecuada al clima? | 75% | 25%\n8 | …me lleva a la consulta médica cuando estoy enfermo(a)? | 85% | 15%\nPromedio de los porcentajes de respuestas | 64% | 36%\n\n¿Cuál de los siguientes gráficos es el más adecuado para comparar la información obtenida en cada pregunta de la encuesta?",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "Gráfico circular titulado «Promedio de los porcentajes de respuesta por pregunta»: dos sectores, Sí 64 % (celeste) y No 36 % (negro).",
+       "isImage": true,
+       "isCorrect": false,
+       "imageRef": "item/global/7mo-ciencias-intermedio-2026/alt_figure/05_A.png"
+      },
+      {
+       "key": "B",
+       "text": "Gráfico de barras horizontales dobles titulado «Porcentaje de respuestas por pregunta»: una barra Sí (celeste) y una barra No (negra) para cada una de las 8 preguntas; eje horizontal Porcentaje (%) de 0 a 100.",
+       "isImage": true,
+       "isCorrect": true,
+       "imageRef": "item/global/7mo-ciencias-intermedio-2026/alt_figure/05_B.png"
+      },
+      {
+       "key": "C",
+       "text": "Gráfico de líneas titulado «Porcentaje de respuestas por pregunta»: dos curvas (Sí celeste continua, No negra segmentada) sobre las 8 preguntas en el eje horizontal; eje vertical Porcentaje (%) de 10 a 90.",
+       "isImage": true,
+       "isCorrect": false,
+       "imageRef": "item/global/7mo-ciencias-intermedio-2026/alt_figure/05_C.png"
+      }
+     ],
+     "correctKey": "B",
+     "skill": "Comunicar",
+     "oa": "OA 2",
+     "contentAxis": "Biología",
+     "hasFigure": true,
+     "figureNote": "Las tres alternativas son GRÁFICOS (figuras): A gráfico circular (pág. 9), B barras horizontales dobles (pág. 9) y C gráfico de líneas (pág. 10). El texto de cada alternativa es una descripción, no una transcripción. Figuras de las ALTERNATIVAS del ítem; la tabla del enunciado es texto y está transcrita.",
+     "figureScope": "alternatives",
+     "indicador": "Seleccionan estrategias adecuadas para comunicar resultados de una investigación relacionada con la paternidad y maternidad responsables.",
+     "oaLevel": null,
+     "imageRef": null
+    }
+   ]
+  },
+  {
+   "order": 5,
+   "name": "Pregunta 6 — Afiches de campaña sobre infecciones de transmisión sexual (ITS)",
+   "type": "multiple_choice",
+   "instructions": null,
+   "passage": null,
+   "items": [
+    {
+     "position": 6,
+     "printedNumber": "6",
+     "type": "multiple_choice",
+     "responseFormat": "choice",
+     "stem": "Se aplicó una encuesta a las y los estudiantes de 8° básico de un colegio. Uno de los resultados encontrados fue que el 42,3% de las y los adolescentes entrevistados manifestaron no estar preocupados por el contagio de infecciones de transmisión sexual (ITS) como el VIH, entre otros.\n\nSi tuvieras que realizar una campaña para revertir estos resultados, mostrando el impacto global de las ITS, ¿cuál de los siguientes afiches sería el más adecuado?",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "Afiche «¡Protege tu Salud! Conoce y previene las ITS». ¿Cuáles son las consecuencias? De salud: daños irreversibles al sistema inmunológico, enfermedades crónicas y complicaciones de salud. Emocionales: estrés, ansiedad y depresión. Sociales: estigmatización y problemas en relaciones personales. Económicas: gastos médicos continuos y pérdida de productividad laboral. Cierre: «Una sola vez puede cambiar tu vida para siempre. ¡No te arriesgues!».",
+       "isImage": true,
+       "isCorrect": true,
+       "imageRef": "item/global/7mo-ciencias-intermedio-2026/alt_figure/06_A.png"
+      },
+      {
+       "key": "B",
+       "text": "Afiche «Conoce las vías de transmisión de las ITS», con iconos: relaciones sexuales sin protección; compartir agujas; contacto con sangre infectada; transmisión de madre a hijo. Cierre: «¡Solo recibe transfusiones de sangre en centros de salud certificados!».",
+       "isImage": true,
+       "isCorrect": false,
+       "imageRef": "item/global/7mo-ciencias-intermedio-2026/alt_figure/06_B.png"
+      },
+      {
+       "key": "C",
+       "text": "Afiche «¡INFÓRMATE! Conoce algunos de los síntomas comunes de las ITS», con iconos: flujo anormal en el pene o la vagina; dolor al orinar y al tener relaciones sexuales; úlceras, heridas, ampollas o verrugas en el área genital, anal u oral; picazón, irritación o ardor en el área genital; erupciones o manchas en la piel. Nota: «Algunas ITS, incluido el VIH en sus etapas iniciales, pueden no presentar síntomas».",
+       "isImage": true,
+       "isCorrect": false,
+       "imageRef": "item/global/7mo-ciencias-intermedio-2026/alt_figure/06_C.png"
+      }
+     ],
+     "correctKey": "A",
+     "skill": "Comunicar",
+     "oa": "OA 3",
+     "contentAxis": "Biología",
+     "hasFigure": true,
+     "figureNote": "Las tres alternativas son AFICHES ilustrados (figuras compuestas con texto e iconos). Su texto sí está en la capa de texto del PDF y se transcribió, pero la alternativa se lee como imagen. Figuras de las ALTERNATIVAS del ítem.",
+     "figureScope": "alternatives",
+     "indicador": "Seleccionan estrategias adecuadas para comunicar información relacionada con las infecciones de transmisión sexual (ITS), considerando sus mecanismos de transmisión, medidas de prevención, síntomas generales y consecuencias y posibles secuelas.",
+     "oaLevel": null,
+     "imageRef": null
+    }
+   ]
+  },
+  {
+   "order": 6,
+   "name": "Pregunta 7 — Uso de preservativo en Chile: 1998 vs. 2022-2023",
+   "type": "multiple_choice",
+   "instructions": null,
+   "passage": null,
+   "items": [
+    {
+     "position": 7,
+     "printedNumber": "7",
+     "type": "multiple_choice",
+     "responseFormat": "choice",
+     "stem": "Revisa la siguiente información:\n• Los resultados del Estudio de Comportamiento Sexual en el Cono Sur, aplicado en 1998 en Chile, indican que un 12,0% de los hombres, entre 18 a 29 años, utilizó preservativo o condón en su primera relación sexual, versus un 11,2% de las mujeres entre 18 a 29 años.\n• Los resultados de la Encuesta Nacional de Salud, Sexualidad y Género 2022-2023 en Chile, indican que 58,9% de los hombres, entre 18 a 29 años, usó preservativo o condón en su primera relación sexual, versus un 58,6% de las mujeres entre 18 a 29 años.\n\n¿Cuál de las siguientes afirmaciones está respaldada por la información anterior?",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "Actualmente en Chile no hay necesidad de campañas de promoción del uso de condones entre las y los jóvenes como en 1998.",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "El uso de métodos anticonceptivos distintos a los preservativos ha disminuido entre las y los jóvenes en Chile.",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "El mayor uso de preservativos entre las y los jóvenes en Chile, durante su primera relación sexual, ha generado una reducción de las infecciones de transmisión sexual.",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "Los jóvenes en Chile tienen una mayor conciencia sobre la importancia del uso de preservativos en las relaciones sexuales que en 1998.",
+       "isCorrect": true
+      }
+     ],
+     "correctKey": "D",
+     "skill": "Procesar y analizar la evidencia",
+     "oa": "OA 3",
+     "contentAxis": "Biología",
+     "hasFigure": false,
+     "figureNote": null,
+     "indicador": "Formulan conclusiones a partir de contextos relacionados con las infecciones de transmisión sexual (ITS).",
+     "oaLevel": null,
+     "imageRef": null
+    }
+   ]
+  },
+  {
+   "order": 7,
+   "name": "Pregunta 8 — Predicción sobre el rechazo de un riñón trasplantado",
+   "type": "multiple_choice",
+   "instructions": null,
+   "passage": null,
+   "items": [
+    {
+     "position": 8,
+     "printedNumber": "8",
+     "type": "multiple_choice",
+     "responseFormat": "choice",
+     "stem": "Daniela investiga sobre el sistema inmunológico y aprende que una de sus características es su capacidad para reconocer lo que le pertenece al propio cuerpo y lo que no. A partir de esto, Daniela predice que, si a una persona le trasplantan un riñón sano, su cuerpo podría no aceptarlo.\n\n¿Cuál de las siguientes explicaciones fundamenta la predicción de Daniela?",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "El sistema inmunológico no reconoce la nueva forma del riñón y activa una respuesta de incompatibilidad.",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "El sistema inmunológico detecta moléculas ajenas en el riñón trasplantado y activa una respuesta de defensa.",
+       "isCorrect": true
+      },
+      {
+       "key": "C",
+       "text": "El sistema inmunológico recibe señales agresivas del riñón trasplantado y genera una respuesta de rechazo.",
+       "isCorrect": false
+      }
+     ],
+     "correctKey": "B",
+     "skill": "Observar y plantear preguntas",
+     "oa": "OA 4",
+     "contentAxis": "Biología",
+     "hasFigure": false,
+     "figureNote": null,
+     "indicador": "Fundamentan predicciones relacionadas con las barreras defensivas del cuerpo humano.",
+     "oaLevel": null,
+     "imageRef": null
+    }
+   ]
+  },
+  {
+   "order": 8,
+   "name": "Pregunta 9 — Clasificación de los componentes del sistema inmunológico (9.1 a 9.8)",
+   "type": "multiple_choice",
+   "instructions": "Clasifica los componentes del sistema inmunológico de la tabla, marcando su categoría según corresponda. La tabla tiene una fila por componente (9.1 a 9.8) y tres columnas de marcado: (A) Barrera primaria, (B) Barrera secundaria y (C) Barrera terciaria.",
+   "passage": null,
+   "items": [
+    {
+     "position": 9,
+     "printedNumber": "9.1",
+     "type": "multiple_choice",
+     "responseFormat": "choice",
+     "stem": "El sistema inmunológico consta de tres tipos de barreras: primaria, secundaria y terciaria.\n\nClasifica los componentes del sistema inmunológico de la tabla, marcando su categoría según corresponda.\n\nComponente: Fagocitos",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "Barrera primaria",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "Barrera secundaria",
+       "isCorrect": true
+      },
+      {
+       "key": "C",
+       "text": "Barrera terciaria",
+       "isCorrect": false
+      }
+     ],
+     "correctKey": "B",
+     "skill": null,
+     "oa": "OA 4",
+     "contentAxis": "Biología",
+     "hasFigure": false,
+     "figureNote": null,
+     "isClassification": true,
+     "scoredBy": "match",
+     "indicador": "Identifican componentes de las barreras defensivas (primaria, secundaria y terciaria) del cuerpo humano.",
+     "oaLevel": null,
+     "imageRef": null
+    },
+    {
+     "position": 10,
+     "printedNumber": "9.2",
+     "type": "multiple_choice",
+     "responseFormat": "choice",
+     "stem": "El sistema inmunológico consta de tres tipos de barreras: primaria, secundaria y terciaria.\n\nClasifica los componentes del sistema inmunológico de la tabla, marcando su categoría según corresponda.\n\nComponente: Piel",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "Barrera primaria",
+       "isCorrect": true
+      },
+      {
+       "key": "B",
+       "text": "Barrera secundaria",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "Barrera terciaria",
+       "isCorrect": false
+      }
+     ],
+     "correctKey": "A",
+     "skill": null,
+     "oa": "OA 4",
+     "contentAxis": "Biología",
+     "hasFigure": false,
+     "figureNote": null,
+     "isClassification": true,
+     "scoredBy": "match",
+     "indicador": "Identifican componentes de las barreras defensivas (primaria, secundaria y terciaria) del cuerpo humano.",
+     "oaLevel": null,
+     "imageRef": null
+    },
+    {
+     "position": 11,
+     "printedNumber": "9.3",
+     "type": "multiple_choice",
+     "responseFormat": "choice",
+     "stem": "El sistema inmunológico consta de tres tipos de barreras: primaria, secundaria y terciaria.\n\nClasifica los componentes del sistema inmunológico de la tabla, marcando su categoría según corresponda.\n\nComponente: Linfocitos B",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "Barrera primaria",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "Barrera secundaria",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "Barrera terciaria",
+       "isCorrect": true
+      }
+     ],
+     "correctKey": "C",
+     "skill": null,
+     "oa": "OA 4",
+     "contentAxis": "Biología",
+     "hasFigure": false,
+     "figureNote": null,
+     "isClassification": true,
+     "scoredBy": "match",
+     "indicador": "Identifican componentes de las barreras defensivas (primaria, secundaria y terciaria) del cuerpo humano.",
+     "oaLevel": null,
+     "imageRef": null
+    },
+    {
+     "position": 12,
+     "printedNumber": "9.4",
+     "type": "multiple_choice",
+     "responseFormat": "choice",
+     "stem": "El sistema inmunológico consta de tres tipos de barreras: primaria, secundaria y terciaria.\n\nClasifica los componentes del sistema inmunológico de la tabla, marcando su categoría según corresponda.\n\nComponente: Linfocitos T",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "Barrera primaria",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "Barrera secundaria",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "Barrera terciaria",
+       "isCorrect": true
+      }
+     ],
+     "correctKey": "C",
+     "skill": null,
+     "oa": "OA 4",
+     "contentAxis": "Biología",
+     "hasFigure": false,
+     "figureNote": null,
+     "isClassification": true,
+     "scoredBy": "match",
+     "indicador": "Identifican componentes de las barreras defensivas (primaria, secundaria y terciaria) del cuerpo humano.",
+     "oaLevel": null,
+     "imageRef": null
+    },
+    {
+     "position": 13,
+     "printedNumber": "9.5",
+     "type": "multiple_choice",
+     "responseFormat": "choice",
+     "stem": "El sistema inmunológico consta de tres tipos de barreras: primaria, secundaria y terciaria.\n\nClasifica los componentes del sistema inmunológico de la tabla, marcando su categoría según corresponda.\n\nComponente: Mucosas",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "Barrera primaria",
+       "isCorrect": true
+      },
+      {
+       "key": "B",
+       "text": "Barrera secundaria",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "Barrera terciaria",
+       "isCorrect": false
+      }
+     ],
+     "correctKey": "A",
+     "skill": null,
+     "oa": "OA 4",
+     "contentAxis": "Biología",
+     "hasFigure": false,
+     "figureNote": null,
+     "isClassification": true,
+     "scoredBy": "match",
+     "indicador": "Identifican componentes de las barreras defensivas (primaria, secundaria y terciaria) del cuerpo humano.",
+     "oaLevel": null,
+     "imageRef": null
+    },
+    {
+     "position": 14,
+     "printedNumber": "9.6",
+     "type": "multiple_choice",
+     "responseFormat": "choice",
+     "stem": "El sistema inmunológico consta de tres tipos de barreras: primaria, secundaria y terciaria.\n\nClasifica los componentes del sistema inmunológico de la tabla, marcando su categoría según corresponda.\n\nComponente: Ácido gástrico",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "Barrera primaria",
+       "isCorrect": true
+      },
+      {
+       "key": "B",
+       "text": "Barrera secundaria",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "Barrera terciaria",
+       "isCorrect": false
+      }
+     ],
+     "correctKey": "A",
+     "skill": null,
+     "oa": "OA 4",
+     "contentAxis": "Biología",
+     "hasFigure": false,
+     "figureNote": null,
+     "isClassification": true,
+     "scoredBy": "match",
+     "indicador": "Identifican componentes de las barreras defensivas (primaria, secundaria y terciaria) del cuerpo humano.",
+     "oaLevel": null,
+     "imageRef": null
+    },
+    {
+     "position": 15,
+     "printedNumber": "9.7",
+     "type": "multiple_choice",
+     "responseFormat": "choice",
+     "stem": "El sistema inmunológico consta de tres tipos de barreras: primaria, secundaria y terciaria.\n\nClasifica los componentes del sistema inmunológico de la tabla, marcando su categoría según corresponda.\n\nComponente: Lágrimas",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "Barrera primaria",
+       "isCorrect": true
+      },
+      {
+       "key": "B",
+       "text": "Barrera secundaria",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "Barrera terciaria",
+       "isCorrect": false
+      }
+     ],
+     "correctKey": "A",
+     "skill": null,
+     "oa": "OA 4",
+     "contentAxis": "Biología",
+     "hasFigure": false,
+     "figureNote": null,
+     "isClassification": true,
+     "scoredBy": "match",
+     "indicador": "Identifican componentes de las barreras defensivas (primaria, secundaria y terciaria) del cuerpo humano.",
+     "oaLevel": null,
+     "imageRef": null
+    },
+    {
+     "position": 16,
+     "printedNumber": "9.8",
+     "type": "multiple_choice",
+     "responseFormat": "choice",
+     "stem": "El sistema inmunológico consta de tres tipos de barreras: primaria, secundaria y terciaria.\n\nClasifica los componentes del sistema inmunológico de la tabla, marcando su categoría según corresponda.\n\nComponente: Células NK",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "Barrera primaria",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "Barrera secundaria",
+       "isCorrect": true
+      },
+      {
+       "key": "C",
+       "text": "Barrera terciaria",
+       "isCorrect": false
+      }
+     ],
+     "correctKey": "B",
+     "skill": null,
+     "oa": "OA 4",
+     "contentAxis": "Biología",
+     "hasFigure": false,
+     "figureNote": null,
+     "isClassification": true,
+     "scoredBy": "match",
+     "indicador": "Identifican componentes de las barreras defensivas (primaria, secundaria y terciaria) del cuerpo humano.",
+     "oaLevel": null,
+     "imageRef": null
+    }
+   ]
+  },
+  {
+   "order": 9,
+   "name": "Pregunta 10 — Gráfico: anticuerpos contra la influenza en personas jóvenes y mayores",
+   "type": "multiple_choice",
+   "instructions": null,
+   "passage": null,
+   "items": [
+    {
+     "position": 17,
+     "printedNumber": "10",
+     "type": "multiple_choice",
+     "responseFormat": "choice",
+     "stem": "Un equipo de investigación analizó la sangre de personas jóvenes (20 a 30 años) y mayores (60 a 70 años) vacunadas contra el virus de la influenza y detectaron la presencia de anticuerpos producidos en respuesta a la vacuna contra distintas cepas del virus. Los resultados se muestran en el siguiente gráfico:\n\nPorcentaje de personas con anticuerpos detectables contra el virus de la influenza, según la cantidad de cepas virales detectadas\nEje vertical: Porcentaje de personas (%), de 0 a 50.\nEje horizontal: Cantidad de cepas distintas del virus detectadas (Ninguna, 1, 2, 3).\nLeyenda: Personas mayores / Personas jóvenes.\n\nFurman, D. y colaboradores. En revista Molecular Systems Biology N° 9, artículo 659, 2013. Adaptación.\n\nDe acuerdo con los resultados presentados en el gráfico, ¿cuál de las siguientes interpretaciones es correcta?",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "La mayoría de las personas mayores no generaron anticuerpos contra las cepas virales.",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "La mayoría de las personas jóvenes generaron anticuerpos contra más de una cepa viral.",
+       "isCorrect": true
+      },
+      {
+       "key": "C",
+       "text": "La mayoría de las personas jóvenes generan anticuerpos contra menos de dos cepas virales.",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "La mayoría de las personas mayores generaron anticuerpos contra más de dos cepas virales.",
+       "isCorrect": false
+      }
+     ],
+     "correctKey": "B",
+     "skill": "Procesar y analizar la evidencia",
+     "oa": "OA 4",
+     "contentAxis": "Biología",
+     "hasFigure": true,
+     "figureNote": "Gráfico de barras dobles (pág. 14): barras blancas = personas mayores, barras azules = personas jóvenes; categorías Ninguna / 1 / 2 / 3 cepas. Valores aproximados leídos del gráfico: Ninguna → mayores 34, jóvenes 14; 1 → mayores 45, jóvenes 26; 2 → mayores 14, jóvenes 45; 3 → mayores 6, jóvenes 14. Figura propia del ÍTEM.",
+     "figureScope": "item",
+     "indicador": "Interpretan información relacionada con las barreras defensivas del cuerpo humano y el uso de vacunas contra infecciones comunes.",
+     "oaLevel": null,
+     "imageRef": "item/global/7mo-ciencias-intermedio-2026/item_figure/17.png"
+    }
+   ]
+  },
+  {
+   "order": 10,
+   "name": "Pregunta 11 — Microfotografía: células humanas y bacterianas en una muestra con gonorrea",
+   "type": "multiple_choice",
+   "instructions": null,
+   "passage": null,
+   "items": [
+    {
+     "position": 18,
+     "printedNumber": "11",
+     "type": "multiple_choice",
+     "responseFormat": "choice",
+     "stem": "La siguiente imagen corresponde a una muestra de tejidos extraída de una persona que tiene gonorrea. En ella se pueden observar células humanas y células bacterianas (Neisseria gonorrhoeae y algunos bacilos).\n\nRótulos de la imagen: «Células humanas», «Bacilos», «Neisseria gonorrhoeae» y escala «10 μm/0,01 mm».\n\n¿Qué se puede inferir a partir de la observación de esta imagen?",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "Solo las células bacterianas tienen citoplasma.",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "Solo las células humanas tienen proteínas.",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "Tanto las células bacterianas como las humanas tienen núcleo.",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "Tanto las células bacterianas como las humanas tienen membrana plasmática.",
+       "isCorrect": true
+      }
+     ],
+     "correctKey": "D",
+     "skill": "Observar y plantear preguntas",
+     "oa": "OA 5",
+     "contentAxis": "Biología",
+     "hasFigure": true,
+     "figureNote": "Microfotografía teñida (pág. 15) con células humanas de núcleo lobulado en rojo, bacilos alargados y un recuadro de acercamiento a diplococos de Neisseria gonorrhoeae; incluye barra de escala 10 μm/0,01 mm. Figura propia del ÍTEM.",
+     "figureScope": "item",
+     "indicador": "Describen en base a imágenes o antecedentes las características de microorganismos como virus, bacterias y hongos.",
+     "oaLevel": null,
+     "imageRef": "item/global/7mo-ciencias-intermedio-2026/item_figure/18.png"
+    }
+   ]
+  },
+  {
+   "order": 11,
+   "name": "Pregunta 12 — Montajes experimentales: descomposición de materia orgánica en composteras",
+   "type": "multiple_choice",
+   "instructions": null,
+   "passage": null,
+   "items": [
+    {
+     "position": 19,
+     "printedNumber": "12",
+     "type": "multiple_choice",
+     "responseFormat": "choice",
+     "stem": "Sebastián y su grupo quieren participar en la feria científica de su colegio con una investigación sobre la descomposición de materia orgánica. Les llama la atención que algunos microorganismos, como bacterias y hongos, pueden acelerar este proceso cuando los residuos se acumulan en composteras, donde se transforman en abono natural. Su objetivo es comparar el efecto de ambos tipos de microorganismos para saber cuál es más eficiente para descomponer los residuos. Para este propósito disponen de:\n• Composteras iguales con agujeros en la tapa y la misma cantidad de materia orgánica.\n• Termómetros.\n• Hongos (representados con un icono de hongo).\n• Bacterias (representadas con un icono de bacilo).\n\nSi ellos medirán cuánto disminuye el volumen de materia orgánica cada semana, ¿cuál de los siguientes montajes experimentales les permite cumplir con el objetivo de la investigación?",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "Dos composteras iguales, una rotulada «Bacterias» y otra «Hongos», ambas a temperatura ambiente (cada una con su termómetro).",
+       "isImage": true,
+       "isCorrect": true,
+       "imageRef": "item/global/7mo-ciencias-intermedio-2026/alt_figure/19_A.png"
+      },
+      {
+       "key": "B",
+       "text": "Dos composteras iguales, una rotulada «Bacterias» a temperatura a 25 °C y otra rotulada «Hongos» a temperatura a 5 °C.",
+       "isImage": true,
+       "isCorrect": false,
+       "imageRef": "item/global/7mo-ciencias-intermedio-2026/alt_figure/19_B.png"
+      },
+      {
+       "key": "C",
+       "text": "Dos composteras iguales, ambas con «Bacterias y hongos»: una a temperatura ambiente y expuesta a la luz, y otra a temperatura ambiente y expuesta a la oscuridad.",
+       "isImage": true,
+       "isCorrect": false,
+       "imageRef": "item/global/7mo-ciencias-intermedio-2026/alt_figure/19_C.png"
+      },
+      {
+       "key": "D",
+       "text": "Dos composteras iguales, ambas con «Bacterias y hongos»: una a temperatura a 25 °C y otra a temperatura a 5 °C.",
+       "isImage": true,
+       "isCorrect": false,
+       "imageRef": "item/global/7mo-ciencias-intermedio-2026/alt_figure/19_D.png"
+      }
+     ],
+     "correctKey": "A",
+     "skill": "Planificar y conducir una investigación",
+     "oa": "OA 6",
+     "contentAxis": "Biología",
+     "hasFigure": true,
+     "figureNote": "Las cuatro alternativas son ILUSTRACIONES de montajes experimentales (A y B en pág. 16; C y D en pág. 17): frascos-compostera con termómetros y rótulos. El texto de cada alternativa es una descripción del montaje. Figuras de las ALTERNATIVAS del ítem.",
+     "figureScope": "alternatives",
+     "indicador": "Identifican un procedimiento que permita responder una pregunta de investigación relacionada con el rol de microorganismos (bacterias y hongos) en la biotecnología.",
+     "oaLevel": null,
+     "imageRef": null
+    }
+   ]
+  },
+  {
+   "order": 12,
+   "name": "Pregunta 13 — El descubrimiento de la penicilina por Alexander Fleming",
+   "type": "multiple_choice",
+   "instructions": null,
+   "passage": null,
+   "items": [
+    {
+     "position": 20,
+     "printedNumber": "13",
+     "type": "multiple_choice",
+     "responseFormat": "choice",
+     "stem": "En 1928, Alexander Fleming trabajaba cultivando bacterias cuando un moho comenzó a crecer en sus cultivos. Notó que donde estaba el moho ya no había bacterias, algo muy parecido a lo que se aprecia en la imagen.\n\nA partir de esta observación, descubrió más tarde que el moho producía una sustancia que mataba bacterias. Esta sustancia es la penicilina, un antibiótico que actualmente se usa para el tratamiento de infecciones bacterianas como la neumonía.\n\nAl respecto, ¿cuál de las siguientes afirmaciones es correcta?",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "Existen hongos que pueden destruir bacterias.",
+       "isCorrect": true
+      },
+      {
+       "key": "B",
+       "text": "Algunos hongos favorecen las infecciones bacterianas.",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "El moho de los alimentos puede eliminar cualquier bacteria.",
+       "isCorrect": false
+      }
+     ],
+     "correctKey": "A",
+     "skill": "Procesar y analizar la evidencia",
+     "oa": "OA 5",
+     "contentAxis": "Biología",
+     "hasFigure": true,
+     "figureNote": "Fotografía de una placa de Petri (pág. 18) con colonias bacterianas blancas y un halo oscuro de inhibición alrededor de dos discos centrales. Figura propia del ÍTEM.",
+     "figureScope": "item",
+     "indicador": "Interpretan información relacionada con microorganismos como virus, bacterias y hongos.",
+     "oaLevel": null,
+     "imageRef": "item/global/7mo-ciencias-intermedio-2026/item_figure/20.png"
+    }
+   ]
+  },
+  {
+   "order": 13,
+   "name": "Pregunta 14 — Esquema: microalgas expuestas a agua contaminada con metales pesados",
+   "type": "multiple_choice",
+   "instructions": null,
+   "passage": null,
+   "items": [
+    {
+     "position": 21,
+     "printedNumber": "14",
+     "type": "multiple_choice",
+     "responseFormat": "choice",
+     "stem": "Camila analiza un estudio donde una especie de microalga es expuesta a agua de río contaminada con metales pesados (cadmio y mercurio), durante 10 días. En el esquema se resumen los resultados del estudio:\n\nSimbología: Microalgas / Cadmio / Mercurio.\nEl esquema compara «Día 1» y «Día 10» en agua contaminada con cadmio y mercurio.\n\nDe acuerdo a la información presentada, ¿qué función desempeñan estas microalgas?",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "Descomponen los metales pesados encontrados en el agua.",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "Reducen la cantidad de metales pesados disueltos en el agua.",
+       "isCorrect": true
+      },
+      {
+       "key": "C",
+       "text": "Mantienen constante los niveles de metales pesados presentes en el agua.",
+       "isCorrect": false
+      }
+     ],
+     "correctKey": "B",
+     "skill": "Procesar y analizar la evidencia",
+     "oa": "OA 6",
+     "contentAxis": "Biología",
+     "hasFigure": true,
+     "figureNote": "Esquema ilustrado (pág. 19): frasco con cultivo verde y lupa de acercamiento, más dos viñetas «Día 1» y «Día 10». En el Día 1 los símbolos de cadmio (círculos negros) y mercurio (rombos) están fuera de la microalga con flechas que apuntan hacia ella; en el Día 10 aparecen dentro de la microalga y quedan menos en el agua. Sin la figura el ítem no se puede responder. Figura propia del ÍTEM.",
+     "figureScope": "item",
+     "indicador": "Interpretan información relacionada con el rol de microorganismos (bacterias y hongos) en la biotecnología.",
+     "oaLevel": null,
+     "imageRef": "item/global/7mo-ciencias-intermedio-2026/item_figure/21.png"
+    }
+   ]
+  },
+  {
+   "order": 14,
+   "name": "Preguntas 15 y 16 — Investigación de Ale y Fran: fuerzas sobre un papel que cae",
+   "type": "multiple_choice",
+   "instructions": "Lee la siguiente información y responde las preguntas 15 y 16.",
+   "passage": {
+    "title": "Fuerzas que actúan sobre un papel que cae",
+    "text": "Ale y Fran investigaron sobre las fuerzas que actúan sobre un papel que cae. Para eso tienen tres hojas de papel iguales, pero dobladas de manera diferente. Dejan caer las hojas al mismo tiempo desde el mismo lugar. Ale y Fran registraron sus observaciones en la siguiente tabla.\n\nHoja | Observación\nEstirada (ilustración de una hoja extendida) | Cae lentamente oscilando de un lado al otro. Es la que más demora en caer.\nDoblada por la mitad (ilustración de la hoja doblada en dos) | Cae casi sin oscilar y demora un poco menos que la hoja sin doblar.\nDoblada en cuatro partes iguales (ilustración de la hoja doblada en cuatro) | Cae directamente y es la primera en llegar al suelo.",
+    "format": "plain",
+    "attachments": [
+     {
+      "kind": "image",
+      "note": "Tabla con tres ilustraciones de una hoja de papel (estirada, doblada por la mitad y doblada en cuatro partes iguales). Es ilustrativa: los rótulos y las observaciones están en la capa de texto. Estímulo compartido por las preguntas 15 y 16."
+     }
+    ],
+    "imageRef": "item/global/7mo-ciencias-intermedio-2026/section_figure/14.png"
+   },
+   "items": [
+    {
+     "position": 22,
+     "printedNumber": "15",
+     "type": "multiple_choice",
+     "responseFormat": "choice",
+     "stem": "En el procedimiento realizado por Ale y Fran, ¿cuál es la variable dependiente o de resultado?",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "El tiempo que tarda la hoja en caer.",
+       "isCorrect": true
+      },
+      {
+       "key": "B",
+       "text": "El área de contacto entre la hoja y el aire.",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "La altura desde donde se deja caer la hoja.",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "La cantidad de dobleces que se hacen a la hoja.",
+       "isCorrect": false
+      }
+     ],
+     "correctKey": "A",
+     "skill": "Planificar y conducir una investigación",
+     "oa": "OA 7",
+     "contentAxis": "Física",
+     "hasFigure": true,
+     "figureNote": "Depende de la tabla ilustrada de las tres hojas de papel del estímulo compartido de la sección. La figura es de la SECCIÓN, no del ítem, y es ILUSTRATIVA: los rótulos y las observaciones están en la capa de texto y se transcribieron.",
+     "figureScope": "section",
+     "indicador": "Identifican las variables de una investigación relacionada con los efectos de las fuerzas gravitacional, de roce o elástica.",
+     "oaLevel": null,
+     "imageRef": null
+    },
+    {
+     "position": 23,
+     "printedNumber": "16",
+     "type": "multiple_choice",
+     "responseFormat": "choice",
+     "stem": "¿Cuál de las siguientes conclusiones pueden obtener Ale y Fran a partir de sus resultados?",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "Los objetos de mayor masa son atraídos con mayor fuerza por la Tierra.",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "La aceleración de un cuerpo depende de la fuerza neta que actúa sobre él y de su masa.",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "La fuerza de roce entre un objeto y el aire depende del tamaño de la superficie de contacto.",
+       "isCorrect": true
+      },
+      {
+       "key": "D",
+       "text": "Los cuerpos que caen en la cercanía de la superficie terrestre tienen aproximadamente la misma aceleración.",
+       "isCorrect": false
+      }
+     ],
+     "correctKey": "C",
+     "skill": "Procesar y analizar la evidencia",
+     "oa": "OA 7",
+     "contentAxis": "Física",
+     "hasFigure": true,
+     "figureNote": "Depende de la tabla ilustrada de las tres hojas de papel del estímulo compartido de la sección. La figura es de la SECCIÓN, no del ítem, y es ILUSTRATIVA: los rótulos y las observaciones están en la capa de texto y se transcribieron.",
+     "figureScope": "section",
+     "indicador": "Formulan conclusiones a partir de contextos relacionados con los efectos de las fuerzas gravitacional, de roce o elástica.",
+     "oaLevel": null,
+     "imageRef": null
+    }
+   ],
+   "imageRef": "item/global/7mo-ciencias-intermedio-2026/section_figure/14.png"
+  },
+  {
+   "order": 15,
+   "name": "Pregunta 17 — Peso de un cuerpo y aceleración de gravedad",
+   "type": "multiple_choice",
+   "instructions": null,
+   "passage": null,
+   "items": [
+    {
+     "position": 24,
+     "printedNumber": "17",
+     "type": "multiple_choice",
+     "responseFormat": "choice",
+     "stem": "Ignacio leyó que el peso de un cuerpo en un planeta depende de la aceleración de gravedad, por lo que el peso de un cuerpo en la Tierra cambia dependiendo de la distancia al centro del planeta.\n\n¿Cuál de los siguientes procedimientos debería realizar para verificar la información leída?",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "Pesar cuatro esferas de distinta masa en un lugar del planeta que se encuentre al nivel del mar.",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "Pesar una misma esfera en cuatro lugares del planeta que se encuentren a diferente altura.",
+       "isCorrect": true
+      },
+      {
+       "key": "C",
+       "text": "Pesar una misma esfera en cuatro lugares del planeta que se encuentren a igual altura.",
+       "isCorrect": false
+      }
+     ],
+     "correctKey": "B",
+     "skill": "Planificar y conducir una investigación",
+     "oa": "OA 7",
+     "contentAxis": "Física",
+     "hasFigure": false,
+     "figureNote": null,
+     "indicador": "Identifican un procedimiento que permita resolver un problema de investigación relacionado con los efectos de las fuerzas gravitacional, de roce o elástica.",
+     "oaLevel": null,
+     "imageRef": null
+    }
+   ]
+  },
+  {
+   "order": 16,
+   "name": "Pregunta 18 — Sistema cerrado de dos jeringas: transmisión de la presión en un fluido",
+   "type": "multiple_choice",
+   "instructions": null,
+   "passage": null,
+   "items": [
+    {
+     "position": 25,
+     "printedNumber": "18",
+     "type": "multiple_choice",
+     "responseFormat": "choice",
+     "stem": "En clases Amaro ha aprendido que la presión de un fluido se transmite por igual en todas las direcciones. A partir de esta idea, construye el siguiente sistema cerrado con dos jeringas de diferente volumen, conectadas por una manguera y con agua en su interior. Como es un sistema cerrado, el agua no puede salir de las jeringas y la manguera.\n\nRótulos de la imagen: «Pistón 1», «Jeringa 1» (graduada hasta 5 ml), «Manguera transparente», «Agua», «Pistón 2», «Jeringa 2» (graduada 2, 4, 6, 8, 10 ml).\n\nSi se ejerce una fuerza sobre el pistón 1, ¿cuál de las siguientes predicciones de lo que ocurrirá es coherente con lo aprendido por Amaro?\n\nConsidera que P = F/A, donde P es presión, F es fuerza y A es área.",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "Se ejercerá una fuerza de igual magnitud en el pistón 2.",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "Se ejercerá una presión de igual magnitud en el pistón 2.",
+       "isCorrect": true
+      },
+      {
+       "key": "C",
+       "text": "El agua se comprimirá y el pistón 2 se mantendrá inmóvil.",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "Se ejercerá una fuerza de menor magnitud en el pistón 2.",
+       "isCorrect": false
+      }
+     ],
+     "correctKey": "B",
+     "skill": "Observar y plantear preguntas",
+     "oa": "OA 8",
+     "contentAxis": "Física",
+     "hasFigure": true,
+     "figureNote": "Ilustración (pág. 22) de dos jeringas de distinto diámetro (Jeringa 1 de 5 ml y Jeringa 2 de 10 ml) unidas por una manguera transparente con agua; rótulos Pistón 1, Pistón 2, Agua y Manguera transparente. La diferencia de áreas solo se aprecia en la figura. Figura propia del ÍTEM.",
+     "figureScope": "item",
+     "indicador": "Formulan predicciones basadas en observaciones previamente realizadas relacionadas con los efectos de la presión sobre sólidos, líquidos o gases.",
+     "oaLevel": null,
+     "imageRef": "item/global/7mo-ciencias-intermedio-2026/item_figure/25.png"
+    }
+   ]
+  },
+  {
+   "order": 17,
+   "name": "Pregunta 19 — Gráfico: presión atmosférica en función de la altura",
+   "type": "multiple_choice",
+   "instructions": null,
+   "passage": null,
+   "items": [
+    {
+     "position": 26,
+     "printedNumber": "19",
+     "type": "multiple_choice",
+     "responseFormat": "choice",
+     "stem": "El siguiente gráfico muestra la forma en que cambia la presión atmosférica en función de la altura, considerando el nivel del mar como altura 0:\n\nPresión atmosférica en función de la altura\nEje vertical: Presión (kPa), de 0 a 120.\nEje horizontal: Altura (km), de 0 a 50 (marcas cada 5 km).\n\n¿Cuál de las siguientes afirmaciones es correcta a partir de la información del gráfico?",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "La presión atmosférica aumenta de forma importante a partir de los 20 km de altura.",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "A los 5 km de altura la presión es cerca de la mitad de su valor a nivel del mar.",
+       "isCorrect": true
+      },
+      {
+       "key": "C",
+       "text": "Por encima de los 20 km, la presión está entre los 10 y 15 kPa.",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "La máxima presión atmosférica se experimenta a los 50 km.",
+       "isCorrect": false
+      }
+     ],
+     "correctKey": "B",
+     "skill": "Procesar y analizar la evidencia",
+     "oa": "OA 8",
+     "contentAxis": "Física",
+     "hasFigure": true,
+     "figureNote": "Gráfico de línea decreciente exponencial (pág. 23): parte en ~100 kPa a 0 km, cae a ~55 kPa a 5 km y se aplana cerca de 0 kPa desde los 25 km. Sin la curva el ítem no se puede responder. Figura propia del ÍTEM.",
+     "figureScope": "item",
+     "indicador": "Interpretan información relacionada con los efectos de la presión sobre sólidos, líquidos o gases.",
+     "oaLevel": null,
+     "imageRef": "item/global/7mo-ciencias-intermedio-2026/item_figure/26.png"
+    }
+   ]
+  },
+  {
+   "order": 18,
+   "name": "Pregunta 20 — Validez de una conclusión sobre los sismos",
+   "type": "multiple_choice",
+   "instructions": null,
+   "passage": null,
+   "items": [
+    {
+     "position": 27,
+     "printedNumber": "20",
+     "type": "multiple_choice",
+     "responseFormat": "choice",
+     "stem": "En la ciudad donde viven Iván y Camila ocurrió un sismo que muchas personas sintieron. Ese día la temperatura máxima fue de 22 °C. Como en esa ciudad las temperaturas máximas suelen estar en torno a los 15 °C, Iván concluyó que los temblores ocurren debido a las altas temperaturas. Sin embargo, Camila le señaló que su afirmación no era válida de acuerdo al método empleado en las ciencias para investigar.\n\n¿En qué se basa Camila para decir que la conclusión de Iván no tiene validez?",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "En que usó un solo caso para generalizar.",
+       "isCorrect": true
+      },
+      {
+       "key": "B",
+       "text": "En que olvidó investigar la magnitud del sismo.",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "En que omitió que el temblor también pudo sentirse en otras ciudades.",
+       "isCorrect": false
+      }
+     ],
+     "correctKey": "A",
+     "skill": "Evaluar",
+     "oa": "OA 9",
+     "contentAxis": "Física",
+     "hasFigure": false,
+     "figureNote": null,
+     "indicador": "Evalúan la validez de los elementos de una investigación relacionada con la actividad geológica (volcanes y sismos).",
+     "oaLevel": null,
+     "imageRef": null
+    }
+   ]
+  },
+  {
+   "order": 19,
+   "name": "Pregunta 21 — Imagen: trayectorias del manto y desplazamiento de las placas tectónicas",
+   "type": "multiple_choice",
+   "instructions": null,
+   "passage": null,
+   "items": [
+    {
+     "position": 28,
+     "printedNumber": "21",
+     "type": "multiple_choice",
+     "responseFormat": "choice",
+     "stem": "En la imagen se representan las trayectorias que describe el manto terrestre y la dirección y sentido del desplazamiento de algunas placas tectónicas.\n\nSimbología: Límite entre placas / Trayectoria del manto / Desplazamiento de las placas.\nRótulos de la imagen: Sudamérica, Océano Atlántico, Dorsal Centroatlántica, Placa Sudamericana, Placa Africana, Fosa de Perú-Chile, Placa de Nazca, Océano Pacífico, Manto, África, Núcleo externo, Núcleo interno.\n\nA partir de la imagen, ¿qué produce el desplazamiento de las placas tectónicas?",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "La posición de las placas una encima de la otra.",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "El movimiento de los materiales del manto terrestre.",
+       "isCorrect": true
+      },
+      {
+       "key": "C",
+       "text": "La gran actividad sísmica en los bordes de las placas.",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "El material que asciende desde el manto a la superficie terrestre.",
+       "isCorrect": false
+      }
+     ],
+     "correctKey": "B",
+     "skill": "Procesar y analizar la evidencia",
+     "oa": "OA 9",
+     "contentAxis": "Física",
+     "hasFigure": true,
+     "figureNote": "Corte esquemático del interior de la Tierra (pág. 25): corteza y océanos arriba, manto naranja con flechas de corrientes de convección en circuito cerrado, núcleo externo e interno; flechas negras sobre la superficie indican el desplazamiento de las placas. Figura propia del ÍTEM.",
+     "figureScope": "item",
+     "indicador": "Explican a partir del modelo de tectónica de placas, los efectos de la interacción entre las placas (convergente, divergente y transformante).",
+     "oaLevel": null,
+     "imageRef": "item/global/7mo-ciencias-intermedio-2026/item_figure/28.png"
+    }
+   ]
+  },
+  {
+   "order": 20,
+   "name": "Pregunta 22 — Flujo de lava avanzando hacia un valle con un río",
+   "type": "multiple_choice",
+   "instructions": null,
+   "passage": null,
+   "items": [
+    {
+     "position": 29,
+     "printedNumber": "22",
+     "type": "multiple_choice",
+     "responseFormat": "choice",
+     "stem": "La siguiente imagen muestra un flujo de lava avanzando lentamente por la ladera de un volcán hacia un valle con un río.\n\n¿Qué cambio ocurrirá en el paisaje del valle una vez que la lava se enfríe?",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "El valle se volverá más profundo y ancho debido al calor de la lava.",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "La lava se evaporará al contacto con el río, sin dejar cambios permanentes en la geografía.",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "El área se convertirá en pocos años en un suelo extremadamente fértil, ideal para la agricultura.",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "El curso del río podría ser bloqueado o desviado al formarse una nueva capa de roca sólida sobre el terreno.",
+       "isCorrect": true
+      }
+     ],
+     "correctKey": "D",
+     "skill": "Procesar y analizar la evidencia",
+     "oa": "OA 10",
+     "contentAxis": "Física",
+     "hasFigure": true,
+     "figureNote": "Ilustración a color (pág. 26) de un volcán humeante con coladas de lava incandescente que bajan por la ladera y avanzan sobre roca oscura hacia un valle verde por el que serpentea un río azul. Figura propia del ÍTEM.",
+     "figureScope": "item",
+     "indicador": "Explican a partir de una imagen algunas consecuencias de la actividad volcánica en la naturaleza y sociedad.",
+     "oaLevel": null,
+     "imageRef": "item/global/7mo-ciencias-intermedio-2026/item_figure/29.png"
+    }
+   ]
+  },
+  {
+   "order": 21,
+   "name": "Pregunta 23 — Modelo del ciclo de las rocas",
+   "type": "multiple_choice",
+   "instructions": null,
+   "passage": null,
+   "items": [
+    {
+     "position": 30,
+     "printedNumber": "23",
+     "type": "multiple_choice",
+     "responseFormat": "choice",
+     "stem": "El siguiente modelo representa una parte del ciclo de las rocas, en donde se muestran los tres tipos principales de rocas (ígneas, sedimentarias y metamórficas) y algunos procesos que permiten su transformación:\n\nCiclo de las rocas\nRoca ígnea → (Erosión y compactación) → Roca sedimentaria → (Presión y calor) → Roca metamórfica → (Fusión y solidificación) → Roca ígnea.\n\nSegún este modelo, ¿cuál de las siguientes explicaciones justifica por qué las rocas metamórficas suelen tener mayor densidad que los otros tipos de rocas?",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "Porque se comprimen bastante, lo que reduce los espacios entre sus minerales.",
+       "isCorrect": true
+      },
+      {
+       "key": "B",
+       "text": "Porque se forman por enfriamiento del magma, lo que les da una estructura más porosa.",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "Porque están hechas de capas de sedimentos, lo que permite una organización más densa.",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "Porque contienen restos orgánicos comprimidos, lo que aumenta su masa sin ocupar más volumen.",
+       "isCorrect": false
+      }
+     ],
+     "correctKey": "A",
+     "skill": "Procesar y analizar la evidencia",
+     "oa": "OA 11",
+     "contentAxis": "Física",
+     "hasFigure": true,
+     "figureNote": "Diagrama circular ilustrado (pág. 27) titulado «Ciclo de las rocas» con imágenes de las tres rocas y flechas curvas rotuladas Erosión y compactación, Presión y calor, y Fusión y solidificación. Los rótulos están en la capa de texto; la secuencia se lee de la figura. Figura propia del ÍTEM.",
+     "figureScope": "item",
+     "indicador": "Explican a partir de un modelo del ciclo de las rocas la modificación de las rocas ígneas, metamórficas y sedimentarias, en función de la temperatura, la presión y la erosión.",
+     "oaLevel": null,
+     "imageRef": "item/global/7mo-ciencias-intermedio-2026/item_figure/30.png"
+    }
+   ]
+  },
+  {
+   "order": 22,
+   "name": "Preguntas 24 y 25 — Mapa y gráfico de temperaturas: Antofagasta y Santos",
+   "type": "multiple_choice",
+   "instructions": "Lee la siguiente información y responde las preguntas 24 y 25.",
+   "passage": {
+    "title": "Ubicación y temperaturas promedio de Antofagasta (Chile) y Santos (Brasil)",
+    "text": "En el mapa se muestra la ubicación relativa de dos ciudades costeras: Antofagasta en Chile y Santos en Brasil.\n\nMapa de América del Sur con los países Perú, Bolivia, Brasil, Paraguay, Chile, Argentina y Uruguay, el Océano Pacífico y el Océano Atlántico, y las marcas de Antofagasta y Santos. Simbología: corriente fría (flecha azul segmentada que asciende por la costa del Pacífico) y corriente cálida (flecha roja segmentada que desciende por la costa del Atlántico). Incluye rosa de los vientos.\n\nEl gráfico muestra las temperaturas mínimas y máximas promedio de ambas ciudades.\n\nTemperatura máxima y mínima promedio\nEje vertical: Temperatura (ºC), de 12 a 36.\nEje horizontal: Meses del año (Ene., Feb., Mar., Abr., May., Jun., Jul., Ago., Sept., Oct., Nov., Dic.).\nSeries: Santos (curvas verdes continuas) y Antofagasta (curvas moradas segmentadas). Valores rotulados en el gráfico: 31, 26, 25, 25, 19, 19, 18 y 13.",
+    "format": "plain",
+    "attachments": [
+     {
+      "kind": "image",
+      "note": "Mapa de América del Sur con Antofagasta y Santos y las corrientes fría y cálida. Estímulo compartido por las preguntas 24 y 25."
+     },
+     {
+      "kind": "image",
+      "note": "Gráfico de líneas «Temperatura máxima y mínima promedio» con dos pares de curvas (Santos en verde, Antofagasta en morado) a lo largo de los 12 meses. Estímulo compartido por las preguntas 24 y 25."
+     }
+    ],
+    "imageRef": "item/global/7mo-ciencias-intermedio-2026/section_figure/22.png"
+   },
+   "items": [
+    {
+     "position": 31,
+     "printedNumber": "24",
+     "type": "multiple_choice",
+     "responseFormat": "choice",
+     "stem": "Considerando la información del gráfico y el mapa, ¿cuál de los siguientes factores del clima explica la diferencia entre las temperaturas promedio de Antofagasta y Santos?",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "La cercanía al mar.",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "Las corrientes marinas.",
+       "isCorrect": true
+      },
+      {
+       "key": "C",
+       "text": "La altura respecto al nivel del mar.",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "La distancia a la línea del ecuador terrestre.",
+       "isCorrect": false
+      }
+     ],
+     "correctKey": "B",
+     "skill": "Procesar y analizar la evidencia",
+     "oa": "OA 12",
+     "contentAxis": "Física",
+     "hasFigure": true,
+     "figureNote": "Depende del mapa y del gráfico del estímulo compartido de la sección. Las figuras son de la SECCIÓN, no del ítem.",
+     "figureScope": "section",
+     "indicador": "Explican a partir de contextos los factores que afectan el clima y el tiempo atmosférico.",
+     "oaLevel": null,
+     "imageRef": null
+    },
+    {
+     "position": 32,
+     "printedNumber": "25",
+     "type": "multiple_choice",
+     "responseFormat": "choice",
+     "stem": "¿Cuál de las siguientes afirmaciones puede realizarse a partir de la información del gráfico?",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "Entre los meses de abril y junio las temperaturas máximas promedio indican que es primavera en Santos y otoño en Antofagasta.",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "La temperatura máxima que puede tener la ciudad de Santos es de 31 °C.",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "La temperatura mínima promedio que puede tener la ciudad de Antofagasta es de 19 °C.",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "En Santos y Antofagasta la época de menores temperaturas mínimas promedio ocurre entre los meses de junio y agosto.",
+       "isCorrect": true
+      }
+     ],
+     "correctKey": "D",
+     "skill": "Procesar y analizar la evidencia",
+     "oa": "OA 12",
+     "contentAxis": "Física",
+     "hasFigure": true,
+     "figureNote": "Depende del gráfico de temperaturas del estímulo compartido de la sección. La figura es de la SECCIÓN, no del ítem.",
+     "figureScope": "section",
+     "indicador": "Interpretan información relacionada con los elementos del clima y el tiempo atmosférico.",
+     "oaLevel": null,
+     "imageRef": null
+    }
+   ],
+   "imageRef": "item/global/7mo-ciencias-intermedio-2026/section_figure/22.png"
+  },
+  {
+   "order": 23,
+   "name": "Preguntas 26 y 27 — Experimento de Dani: globos en botellas con agua a distintas temperaturas",
+   "type": "multiple_choice",
+   "instructions": "Lee la siguiente información y responde las preguntas 26 y 27.",
+   "passage": {
+    "title": "Experimento de Dani con botellas y globos",
+    "text": "Dani hizo un experimento usando 3 botellas de plástico rígido y 3 globos iguales. En la boca de cada botella, puso un globo desinflado como se muestra en la imagen:\n\n(Imagen 1: tres botellas iguales, cada una con un globo desinflado colgando de su boca.)\n\nIntrodujo cada botella en un recipiente distinto con agua a diferentes temperaturas. Esperó unos minutos y observó lo que sucedió con los globos. En la siguiente imagen se muestra lo que observó Dani al cabo de unos minutos:\n\n(Imagen 2: tres botellas dentro de recipientes con agua; los globos quedan inflados con tamaño creciente.)\nAgua a 40 ºC — Agua a 60 ºC — Agua a 80 ºC",
+    "format": "plain",
+    "attachments": [
+     {
+      "kind": "image",
+      "note": "Ilustración de las 3 botellas con globos desinflados en la boca (montaje inicial). Estímulo compartido por las preguntas 26 y 27."
+     },
+     {
+      "kind": "image",
+      "note": "Ilustración del resultado: 3 botellas en recipientes con agua a 40 ºC, 60 ºC y 80 ºC; el globo se infla más a mayor temperatura (pequeño, mediano, grande). El tamaño relativo de los globos SOLO se aprecia en la imagen. Estímulo compartido por las preguntas 26 y 27."
+     }
+    ],
+    "imageRef": "item/global/7mo-ciencias-intermedio-2026/section_figure/23.png"
+   },
+   "items": [
+    {
+     "position": 33,
+     "printedNumber": "26",
+     "type": "multiple_choice",
+     "responseFormat": "choice",
+     "stem": "Dani estimó el volumen que alcanzó cada globo.\n\n¿Cuál de estas representaciones gráficas permite visualizar directamente la relación entre el volumen del gas en el globo y su temperatura cuando la presión es constante?",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "Un gráfico de barras doble que presente la temperatura en una de las barras y el volumen en la otra, para cada globo.",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "Un gráfico de línea que presente la temperatura de los globos en el eje horizontal y su volumen en el eje vertical.",
+       "isCorrect": true
+      },
+      {
+       "key": "C",
+       "text": "Un gráfico circular con la temperatura y otro con el volumen a esa temperatura.",
+       "isCorrect": false
+      }
+     ],
+     "correctKey": "B",
+     "skill": "Procesar y analizar la evidencia",
+     "oa": "OA 13",
+     "contentAxis": "Química",
+     "hasFigure": true,
+     "figureNote": "Depende de las imágenes del experimento del estímulo compartido de la sección. Las figuras son de la SECCIÓN, no del ítem; las alternativas de este ítem son texto.",
+     "figureScope": "section",
+     "indicador": "Seleccionan el elemento de registro que contiene la información necesaria para realizar una tarea relacionada con el comportamiento de los gases ideales.",
+     "oaLevel": null,
+     "imageRef": null
+    },
+    {
+     "position": 34,
+     "printedNumber": "27",
+     "type": "multiple_choice",
+     "responseFormat": "choice",
+     "stem": "Dani continuó su experimento solo con el recipiente con agua a 60 °C, agregándole varios cubos de hielo al agua.\n\n¿Cuál de estas imágenes muestra lo que observaría Dani luego de unos minutos?",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "Botella dentro de un recipiente con agua y cubos de hielo; el globo queda pequeño y flácido. Rótulo: «Disminuiría el volumen observado en el globo.»",
+       "isImage": true,
+       "isCorrect": true,
+       "imageRef": "item/global/7mo-ciencias-intermedio-2026/alt_figure/34_A.png"
+      },
+      {
+       "key": "B",
+       "text": "Botella dentro de un recipiente con agua y cubos de hielo; el globo mantiene un tamaño mediano. Rótulo: «El volumen observado en el globo se mantiene.»",
+       "isImage": true,
+       "isCorrect": false,
+       "imageRef": "item/global/7mo-ciencias-intermedio-2026/alt_figure/34_B.png"
+      },
+      {
+       "key": "C",
+       "text": "Botella dentro de un recipiente con agua y cubos de hielo; el globo queda grande e inflado. Rótulo: «Aumentaría el volumen observado en el globo.»",
+       "isImage": true,
+       "isCorrect": false,
+       "imageRef": "item/global/7mo-ciencias-intermedio-2026/alt_figure/34_C.png"
+      }
+     ],
+     "correctKey": "A",
+     "skill": "Observar y plantear preguntas",
+     "oa": "OA 13",
+     "contentAxis": "Química",
+     "hasFigure": true,
+     "figureNote": "Las tres alternativas son ILUSTRACIONES (pág. 31) de la botella con globo dentro de un recipiente con hielo, cada una con su rótulo de texto. Figuras de las ALTERNATIVAS del ítem; además el ítem se apoya en el estímulo compartido de la sección.",
+     "figureScope": "alternatives",
+     "indicador": "Formulan predicciones basadas en observaciones previamente realizadas relacionadas con el comportamiento de los gases ideales.",
+     "oaLevel": null,
+     "imageRef": null
+    }
+   ],
+   "imageRef": "item/global/7mo-ciencias-intermedio-2026/section_figure/23.png"
+  },
+  {
+   "order": 24,
+   "name": "Preguntas 28 y 29 — Separación de una mezcla de arena y limaduras de hierro con un imán",
+   "type": "multiple_choice",
+   "instructions": "Lee la siguiente información y responde las preguntas 28 y 29.",
+   "passage": {
+    "title": "Separación de arena y limaduras de hierro a distintas temperaturas",
+    "text": "Un estudiante tiene tres vasos iguales. En cada uno de ellos puso 200 g de arena y 100 g de limaduras de hierro y los mezcló. Luego les agregó agua a distinta temperatura:\n• Vaso 1: 200 mL de agua recién sacada del refrigerador.\n• Vaso 2: 200 mL de agua recién hervida.\n• Vaso 3: 200 mL de agua de la llave.\n\nEsperó 3 minutos, acercó un imán y extrajo el hierro de las mezclas, tal como se representa en la imagen. Por último, midió la masa de hierro recuperada de cada muestra.\n\nRótulos de la imagen: «Limadura de hierro», «Imán», «Agua», «Mezcla de arena y limadura de hierro».",
+    "format": "plain",
+    "attachments": [
+     {
+      "kind": "image",
+      "note": "Ilustración de una mano sosteniendo un imán de herradura con limaduras de hierro adheridas en sus polos, sobre un vaso de precipitado con agua y una mezcla de arena y limadura de hierro. Es ilustrativa: el procedimiento está descrito en el texto. Estímulo compartido por las preguntas 28 y 29."
+     }
+    ],
+    "imageRef": "item/global/7mo-ciencias-intermedio-2026/section_figure/24.png"
+   },
+   "items": [
+    {
+     "position": 35,
+     "printedNumber": "28",
+     "type": "multiple_choice",
+     "responseFormat": "choice",
+     "stem": "¿Cuál de las siguientes preguntas puede responder el estudiante con el procedimiento realizado?",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "¿Qué cantidad de hierro puede contener la arena?",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "¿Cuál es el método adecuado para separar metales de elementos no metálicos?",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "¿Cuál es la relación entre el tamaño de un imán y la cantidad de metal que puede atraer?",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "¿Cómo influye la temperatura de una mezcla en la efectividad de su separación por imantación?",
+       "isCorrect": true
+      }
+     ],
+     "correctKey": "D",
+     "skill": "Observar y plantear preguntas",
+     "oa": "OA 14",
+     "contentAxis": "Química",
+     "hasFigure": true,
+     "figureNote": "Depende de la ilustración del imán y el vaso con la mezcla del estímulo compartido de la sección. La figura es de la SECCIÓN, no del ítem, y es ILUSTRATIVA: el procedimiento completo está descrito en el texto.",
+     "figureScope": "section",
+     "indicador": "Establecen la pregunta que se busca responder en una investigación relacionada con la separación de mezclas o las características de las sustancias puras y mezclas.",
+     "oaLevel": null,
+     "imageRef": null
+    },
+    {
+     "position": 36,
+     "printedNumber": "29",
+     "type": "multiple_choice",
+     "responseFormat": "choice",
+     "stem": "El estudiante quiere recuperar la mezcla seca de arena y hierro de los vasos para usarla después en otros experimentos.\n\n¿Cuál de los siguientes procedimientos debería realizar?",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "Filtrar y dejar que el agua del residuo se evapore al aire libre.",
+       "isCorrect": true
+      },
+      {
+       "key": "B",
+       "text": "Hacer pasar las mezclas por un colador, reteniendo la arena con hierro arriba y el agua en un vaso.",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "Dejar reposar la arena con hierro hasta que se vaya al fondo y verter el agua de la parte superior en otro vaso.",
+       "isCorrect": false
+      }
+     ],
+     "correctKey": "A",
+     "skill": "Planificar y conducir una investigación",
+     "oa": "OA 14",
+     "contentAxis": "Química",
+     "hasFigure": true,
+     "figureNote": "Depende de la ilustración del imán y el vaso con la mezcla del estímulo compartido de la sección. La figura es de la SECCIÓN, no del ítem, y es ILUSTRATIVA: el procedimiento completo está descrito en el texto.",
+     "figureScope": "section",
+     "indicador": "Identifican un procedimiento que permita responder una pregunta de investigación relacionada con la separación de mezclas o las características de las sustancias puras y mezclas.",
+     "oaLevel": null,
+     "imageRef": null
+    }
+   ],
+   "imageRef": "item/global/7mo-ciencias-intermedio-2026/section_figure/24.png"
+  },
+  {
+   "order": 25,
+   "name": "Pregunta 30 — Experimento con levadura: cambio físico o cambio químico",
+   "type": "multiple_choice",
+   "instructions": null,
+   "passage": null,
+   "items": [
+    {
+     "position": 37,
+     "printedNumber": "30",
+     "type": "multiple_choice",
+     "responseFormat": "choice",
+     "stem": "Fernanda realizó un experimento para estudiar los cambios de la materia. A temperatura ambiente, preparó dos frascos con agua tibia, azúcar y un globo ajustado en la boca de cada frasco.\n\nEn el frasco 1 agregó 10 g de levadura, un organismo unicelular que se alimenta de azúcar, mientras que en el frasco 2 no la agregó.\n\nLos resultados se muestran en la siguiente imagen:\n\nRótulos de la imagen: «Frasco 1 con levadura» y «Frasco 2 sin levadura».\n\nEn base a lo observado, ¿cuál de las siguientes inferencias es correcta respecto del tipo de cambio que se produce en este experimento?",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "En el frasco 2 se produjo un cambio químico, porque el agua tibia transformó el azúcar en gas.",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "En el frasco 1 se produjo un cambio físico, porque la levadura ayudó a disolver el azúcar en el agua.",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "En el frasco 1 se produjo un cambio químico, porque la levadura transformó el azúcar y se liberó gas.",
+       "isCorrect": true
+      },
+      {
+       "key": "D",
+       "text": "En el frasco 2 se produjo un cambio físico, porque la ausencia de levadura permitió que el agua se evaporara.",
+       "isCorrect": false
+      }
+     ],
+     "correctKey": "C",
+     "skill": "Procesar y analizar la evidencia",
+     "oa": "OA 15",
+     "contentAxis": "Química",
+     "hasFigure": true,
+     "figureNote": "Ilustración (pág. 34) de dos frascos: el Frasco 1 (con levadura) muestra burbujas en el líquido y el globo inflado y erguido; el Frasco 2 (sin levadura) muestra el líquido sin burbujas y el globo desinflado colgando. El resultado del experimento SOLO está en la imagen. Figura propia del ÍTEM.",
+     "figureScope": "item",
+     "indicador": "Formulan inferencias a partir de contextos relacionados con los cambios físicos y químicos de la materia.",
+     "oaLevel": null,
+     "imageRef": "item/global/7mo-ciencias-intermedio-2026/item_figure/37.png"
+    }
+   ]
+  },
+  {
+   "order": 26,
+   "name": "Pregunta 31 — Ejemplos de cambios de la materia en la vida diaria",
+   "type": "multiple_choice",
+   "instructions": null,
+   "passage": null,
+   "items": [
+    {
+     "position": 38,
+     "printedNumber": "31",
+     "type": "multiple_choice",
+     "responseFormat": "choice",
+     "stem": "Alejandra encontró una serie de ejemplos de cambios que experimenta la materia en la vida diaria.\n\n¿Cuál de los cambios que encontró Alejandra es un cambio físico?",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "Secuencia con flecha: mantequilla en un sartén → mantequilla derretida sobre la llama. Rótulos: «Mantequilla» y «Mantequilla derretida».",
+       "isImage": true,
+       "isCorrect": true,
+       "imageRef": "item/global/7mo-ciencias-intermedio-2026/alt_figure/38_A.png"
+      },
+      {
+       "key": "B",
+       "text": "Secuencia con flecha: clavo gris → clavo oxidado (anaranjado). Rótulos: «Clavo» y «Clavo oxidado».",
+       "isImage": true,
+       "isCorrect": false,
+       "imageRef": "item/global/7mo-ciencias-intermedio-2026/alt_figure/38_B.png"
+      },
+      {
+       "key": "C",
+       "text": "Secuencia con flecha: masa estirada con un uslero → pan rebanado sobre una tabla. Rótulos: «Masa» y «Pan».",
+       "isImage": true,
+       "isCorrect": false,
+       "imageRef": "item/global/7mo-ciencias-intermedio-2026/alt_figure/38_C.png"
+      },
+      {
+       "key": "D",
+       "text": "Secuencia con flecha: huevo crudo → huevo frito en un sartén. Rótulos: «Huevo crudo» y «Huevo frito».",
+       "isImage": true,
+       "isCorrect": false,
+       "imageRef": "item/global/7mo-ciencias-intermedio-2026/alt_figure/38_D.png"
+      }
+     ],
+     "correctKey": "A",
+     "skill": "Procesar y analizar la evidencia",
+     "oa": "OA 15",
+     "contentAxis": "Química",
+     "hasFigure": true,
+     "figureNote": "Las cuatro alternativas son ILUSTRACIONES (pág. 35) de una transformación «antes → después» con flecha azul; solo los rótulos están en la capa de texto. Figuras de las ALTERNATIVAS del ítem.",
+     "figureScope": "alternatives",
+     "indicador": "Distinguen cambios físicos y químicos de la materia en situaciones cotidianas.",
+     "oaLevel": null,
+     "imageRef": null
+    }
+   ]
+  }
+ ],
+ "extraction": {
+  "itemCount": 38,
+  "warnings": [
+   "El cuadernillo imprime 31 preguntas; la pregunta 9 es una tabla de CLASIFICACIÓN con 8 filas (9.1 a 9.8), por lo que hay 38 posiciones puntuables. `position` es el correlativo global 1..38 y `printedNumber` conserva el número impreso.",
+   "Las 8 posiciones SUB-NUMERADAS son 9.1 a 9.8 (posiciones 9 a 16) — todas del mismo ítem impreso 9 («Clasifica los componentes del sistema inmunológico»). Cada fila (Fagocitos, Piel, Linfocitos B, Linfocitos T, Mucosas, Ácido gástrico, Lágrimas, Células NK) se modela como un multiple_choice con las 3 columnas de la tabla como alternativas: A Barrera primaria, B Barrera secundaria, C Barrera terciaria. Llevan `isClassification: true`. Coincide 1:1 con las claves 9.1–9.8 de la ficha técnica.",
+   "#2 (impresa 2) es de RESPUESTA MÚLTIPLE («Marca todas las opciones que consideres correctas») con 5 afirmaciones NUMERADAS 1–5, no A–D: keys numéricas «1» a «5» y `isMultiAnswer: true`. Es el único ítem de respuesta múltiple de la prueba (la ficha le asigna correctKey «145», consistente con 5 alternativas).",
+   "GRILLA DE NÚMEROS junto al ítem 2: es el CALENDARIO de ABRIL y MAYO de la sección 3 (estímulo compartido de las preguntas 3 y 4), no una hoja de marcado ni una tabla periódica. Son 7 columnas (Lunes a Domingo) con los días 1–30 de abril y 1–31 de mayo. Los días de menstruación (4-7 y 25-30 de abril) están encerrados en círculos que SOLO existen en la imagen, no en la capa de texto: la figura es imprescindible y se marcó como figura de SECCIÓN.",
+   "CRITERIO DE ATRIBUCIÓN DE FIGURAS (campo `figureScope`, además de `hasFigure`/`figureNote`): `section` = el gráfico/imagen está en el bloque «Lee la siguiente información y responde las preguntas X e Y» y lo comparten 2 o más ítems → la figura se registra en `sections[].passage.attachments` y NO debe recortarse una copia por ítem; `item` = la figura está dentro del recuadro del ítem y no la comparte nadie; `alternatives` = las opciones A–D son en sí mismas imágenes (`alternatives[].isImage: true`) y su `text` es una descripción, no una transcripción. Regla uniforme aplicada: todo ítem que se apoya en una figura lleva `hasFigure: true`, y `figureScope` dice DÓNDE vive esa figura.",
+   "Figuras de SECCIÓN (estímulo compartido), con las posiciones que las usan: sección 3 = calendarios abril/mayo (pos. 3-4, IMPRESCINDIBLE: los círculos solo están en la imagen); sección 14 = tabla ilustrada de las hojas de papel (pos. 22-23, ilustrativa); sección 22 = mapa de Sudamérica + gráfico de temperaturas (pos. 31-32, imprescindibles); sección 23 = montaje inicial de botellas y resultado de los globos a 40/60/80 ºC (pos. 33-34, imprescindible el tamaño relativo de los globos); sección 24 = imán y vaso con la mezcla (pos. 35-36, ilustrativa).",
+   "Figuras propias del ÍTEM: posiciones 17 (gráfico de barras de anticuerpos), 18 (microfotografía de gonorrea), 20 (placa de Petri de Fleming), 21 (esquema microalgas día 1/día 10), 25 (jeringas conectadas), 26 (gráfico presión vs. altura), 28 (corte de la Tierra y placas tectónicas), 29 (flujo de lava), 30 (ciclo de las rocas) y 37 (frascos con y sin levadura).",
+   "Ítems con ALTERNATIVAS-IMAGEN (`isImage: true`): posiciones 5 (3 gráficos), 6 (3 afiches), 19 (4 montajes experimentales), 34 (3 ilustraciones del globo con hielo) y 38 (4 secuencias antes→después). El texto de esas alternativas es una descripción redactada a partir del render, no una transcripción literal.",
+   "Tablas de datos que NO se marcaron como figura porque su contenido está íntegro en la capa de texto y se transcribió en el `stem`: ítem 1 (ámbitos de la sexualidad), ítem 5 (encuesta de paternidad/maternidad) e ítem 9 (tabla de clasificación, cuyas columnas son las alternativas). El recorte de imagen para ellas sería redundante.",
+   "NO hay ítems de desarrollo: se revisaron las 36 páginas y las 31 preguntas impresas son de selección (alternativas, clasificación o respuesta múltiple); ninguna pide fundamentar o redactar. Coincide con la ficha técnica (`isDevelop: false` en las 30 posiciones que sí resolvió) y con el conteo autoritativo del brief.",
+   "Número de alternativas por ítem (verificado contra el render, no solo contra pdftotext): 19 ítems con 4 alternativas A–D (posiciones 1, 3, 4, 7, 17, 18, 19, 22, 23, 25, 26, 28, 29, 30, 31, 32, 35, 37, 38); 18 ítems con 3 alternativas A–C (posiciones 5, 6, 8, 9 a 16, 20, 21, 24, 27, 33, 34, 36); 1 ítem con 5 alternativas numeradas (posición 2). El DIA de este nivel mezcla ítems de 3 y de 4 alternativas dentro de la misma prueba: no es un error de extracción.",
+   "Cross-check doble cuadernillo↔ficha (no existe hoja de respuestas): las 38 llaves de `byPosition` de la ficha coinciden EXACTAMENTE con los 38 `printedNumber` del cuadernillo, en el mismo orden. Las 30 claves que la ficha sí resolvió caen todas dentro del rango de alternativas del ítem correspondiente (0 claves fuera de rango). Las 8 sin resolver son 9.1–9.8, para las que la ficha trae la respuesta como TEXTO («A. Barrera primaria», «B. Barrera secundaria», «C. Barrera terciaria»): ese texto mapea 1:1 con las keys A/B/C que se definieron aquí, así que el merge puede resolverlas sin ambigüedad.",
+   "`validate.py` ya acepta `subjectCode: \"SCI\"` (la whitelist `SUBJ` fue ampliada por el orquestador a las 15:53). No se editó el validador. El archivo valida limpio: 0 errores.",
+   "La ficha técnica de Ciencias 7° (`fichas/ciencias/7mo-ciencias-intermedio-2026.ficha.json`) está incompleta (skill y contentAxis en null, 30/38 claves) y su `source.subject` dice \"LANG\" por error. No se usó como fuente de verdad de la estructura ni se modificó; solo se cruzó la numeración 9.1–9.8, que coincide exactamente con el cuadernillo.",
+   "Sin hoja de respuestas oficial: el cross-check quedó en DOBLE (cuadernillo vs ficha técnica), no triple."
+  ],
+  "needsHumanReview": false
+ },
+ "pauta": {
+  "source": {
+   "instrumentJson": "imported/DIA Ciencias Naturales 7° Básico 2026 — Monitoreo Intermedio",
+   "ficha": "7mo-ciencias-intermedio-2026.ficha.json"
+  }
+ }
+}
