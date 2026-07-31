@@ -6,8 +6,8 @@ description: >-
   demo). Usar cuando el usuario pida consultar, actualizar, insertar, borrar o
   cargar datos (seeds, usuarios, accesos, resultados, evaluaciones) en la BDD demo
   del ambiente AWS. Cubre el acceso temporal al RDS privado (abrir→trabajar→revertir),
-  las credenciales, ejecución de SQL vía tsx, el manejo de Row Level Security (RLS)
-  y los gotchas aprendidos.
+  las credenciales, ejecución de SQL vía tsx, el manejo de Row Level Security (RLS),
+  la convención de acceso concurrente/en paralelo (túnel compartido) y los gotchas aprendidos.
 ---
 
 # Acceso a la BDD demo (RDS) — EdTech en AWS
@@ -34,6 +34,42 @@ npx sst tunnel --stage demo     # dejar CORRIENDO (no cerrar la terminal)
 
 Con el túnel arriba, el endpoint del RDS resuelve a su IP privada (10.0.x.x) y se rutea por
 el túnel. Luego corres scripts con `DATABASE_ADMIN_URL` (§3/§4). No hay que revertir infra.
+
+---
+
+## 0. Concurrencia — acceso en paralelo (LEER antes de tocar el túnel)
+
+Varias sesiones/agentes pueden trabajar contra la BDD demo a la vez. Postgres maneja las
+conexiones concurrentes sin problema; lecturas y escrituras en datos **disjuntos** no chocan.
+El viejo riesgo de "ventanas de acceso solapadas" **ya no aplica** (era del hack
+`publicly-accessible` + `modify-db-instance`; el túnel SST no toca infra AWS).
+
+**El único recurso contendido es el túnel: hay UN solo proceso por máquina, y se COMPARTE.**
+Una vez que un túnel está arriba, es una ruta a nivel de máquina que **todas** las sesiones
+usan. No levantes el tuyo si ya hay uno. Reglas:
+
+1. **Antes de levantar, chequea si ya hay túnel:**
+   `nc -z edtech-demo-dbinstance-cauoeshr.cm9sce4qi665.us-east-1.rds.amazonaws.com 5432`
+   → si responde, **reúsalo** (conéctate directo con `DATABASE_ADMIN_URL`, no levantes otro;
+   un segundo `sst tunnel` falla con *"Another tunnel process is already running"*).
+2. **NUNCA `pkill -f "sst tunnel"` a ciegas** — eso mata el túnel de *todas* las sesiones.
+   Baja solo el que tú levantaste, y solo si nadie más lo usa.
+3. **Al terminar, deja el túnel ARRIBA** si otras sesiones pueden estar usándolo (no lo mates
+   "por prolijidad"): cortarlo tumba las conexiones ajenas. Levantarlo de nuevo cuesta ~10s.
+4. Si el `select 1` da `CONNECT_TIMEOUT` pero el DNS resuelve a `10.0.x.x`, es un túnel
+   **muerto con caché DNS vieja** (o un lock stale): no hay proceso vivo → levántalo tú (§2).
+
+**Coordinación de ESCRITURAS en reference-data compartida.** Estas tablas globales
+(`orgId=null`) las comparten todas las sesiones; coordinar el timing si más de una las escribe:
+
+| Tabla | Riesgo concurrente | Mitigación |
+|---|---|---|
+| `instruments` / `instrument_sections` / `items` | Bajo — `db:import:instruments` es idempotente por `config->>'sourceJson'` | Sin choque si los `sourceJson` difieren |
+| `item_taxonomy_tags` | Choque solo si dos sesiones tocan los **mismos** ítems | Repartir por instrumento |
+| **`taxonomy_nodes`** (re-seed / extensión de catálogo) | **Alto** — otras sesiones LEEN la taxonomía; un re-seed momentáneo puede afectar sus resolves/consultas | **Anunciar antes** de correrlo; no re-sembrar mientras otra sesión importa tags o lee taxonomía |
+
+No hay canal directo entre sesiones: la coordinación es por el usuario (que avise) o por esta
+convención. Ante duda con `taxonomy_nodes`, avisa antes de escribir.
 
 ---
 
@@ -159,6 +195,25 @@ los que asumen bypass (ej. el seed base `index.ts`) requieren la opción (b) en 
 - **Idempotencia**: usar UUIDs fijos + `onConflictDoNothing` (o `onConflictDoUpdate`) para
   poder re-correr sin duplicar.
 - Los **modify-db-instance tardan minutos**; corré el comando en background y no solapes ventanas.
+- **⚠️ NO re-importar reference-data por delete+recreate una vez que tiene tags/relaciones dependientes.**
+  `import-instruments.ts` borra+recrea instrumentos→ítems (regenera los UUID). Si ya cargaste
+  `item_taxonomy_tags` (o cualquier fila que referencie `items.id`), un re-import los **orfana**
+  (con `ON DELETE CASCADE` los **borra**). Para agregar un campo a ítems ya cargados (ej. `imageRef`
+  en `scoring_config`), usá **UPDATE in-place** matcheando por `instrument.config->>'sourceJson'` +
+  `position`, no re-import. (Aprendido cargando figuras DIA 2026 sobre ítems ya tagueados.)
+- **Imports largos por el túnel se caen** (`CONNECTION_CLOSED`/`ECONNRESET` a mitad), sobre todo con
+  otra sesión usando el túnel a la vez. Solución: **chunkear** — dividir el input en lotes chicos y
+  correr un **proceso corto por lote** (idempotente, así re-correr un lote fallido es gratis). Un import
+  de 34 instrumentos que se caía a los ~2 min se completó en chunks de 5 sin problemas.
+- **Si un seed/script `tsx` falla con `X is not a function` / `undefined` de `@soe/types`** (ej.
+  `toApplicationPeriod`), el **dist está stale**: `pnpm --filter @soe/types build` y reintentá. `tsx`
+  no typechequea, así que el error solo aparece en runtime.
+- **El helper del túnel corre como root** (`sudo -n /opt/sst/tunnel`), así que un `pkill` no-root da
+  `Operation not permitted` — no se puede matar sin sudo. Si el túnel quedó zombie, levantá uno
+  **fresco** (suele arrancar igual, el lock stale no lo bloquea) en vez de intentar matar el viejo.
+- **DNS puede resolver a `10.0.x.x` pero las conexiones dan `ECONNRESET/timeout`**: es túnel muerto +
+  caché DNS vieja, o agotamiento de conexiones del RDS por reintentos/otra sesión. Esperá ~30-60 s a
+  que el RDS reape las idle, o levantá túnel fresco; no asumas que `nc -z` OK = conexión sana.
 
 ## 7. Seguridad
 

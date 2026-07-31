@@ -1388,6 +1388,11 @@ export class DashboardsService {
     }
     if (query.subjectId?.length) conditions.push(inArray(instruments.subjectId, query.subjectId));
     if (query.gradeId?.length) conditions.push(inArray(instruments.gradeId, query.gradeId));
+    if (query.applicationPeriod?.length) {
+      conditions.push(
+        inArray(sql`${instruments.applicationPeriod}::text`, query.applicationPeriod),
+      );
+    }
 
     const rows = await tx
       .select({ id: assessments.id })
