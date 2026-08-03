@@ -8,9 +8,9 @@
 
 ## 1. Antes de promover (en `dev`)
 
-- [ ] Commitear los sueltos que aún están sin trackear: `docs/testing-manual-feedback-v2.md` y este runbook. *(Ojo: hay WIP de carga DIA/seed sin commitear en el checkout — decidir explícitamente qué entra al `dev → main` y qué no.)*
+- [x] Commitear los sueltos que aún estaban sin trackear: `docs/testing-manual-feedback-v2.md` y este runbook. *(Ojo: hay WIP de carga DIA/seed sin commitear en el checkout — decidir explícitamente qué entra al `dev → main` y qué no.)*
 - [ ] CI verde en `dev` (`typecheck` / `lint` / tests).
-- [ ] Confirmar migraciones del sprint presentes: **`0015_outstanding_naoko`** (dificultad de ítem) y **`0016_pretty_warbound`** (colecciones).
+- [ ] Confirmar migraciones presentes: **`0015_outstanding_naoko`** (dificultad de ítem), **`0016_pretty_warbound`** (colecciones) y **`0017_moaning_arachne`** (`ALTER TYPE item_type ADD VALUE 'multi_select'`). La `0017` **ya está aplicada al demo a mano** (§4.2), así que el deploy la encontrará aplicada y no hará nada — pero tiene que viajar igual, o un ambiente nuevo quedaría sin el valor del enum.
 - [ ] Confirmar que `item_collections` / `item_collection_items` **no** requieren política RLS (decisión T2-22: sin RLS, precedente `items`/`instruments`; no guardan PII). `rls-policies.sql` sin cambios.
 - [ ] Confirmar que el arreglo de B3 (§4.1) entra completo: `packages/db/src/seed/{e2e-testing,e2e-andes,benchmark-demo,seed-performance-bands}.ts`, el script nuevo `packages/db/src/scripts/backfill-application-period.ts` + su entrada en `packages/db/package.json`, y `inferApplicationPeriodFromName` en `packages/types/src/schemas/instrument.schema.ts`. **No trae migración**: `application_period` ya existe desde `0011`; el arreglo es de datos y de seeds.
 
@@ -23,11 +23,18 @@
 
 `deploy-backend.yml` (push a `main` que toca backend), vía SSM port-forward por el bastión, como admin (`DATABASE_ADMIN_URL` → `soe_admin`):
 
-1. **Migra el RDS** — `db:migrate`: aplica `0015`/`0016` y **re-aplica `rls-policies.sql`**.
+1. **Migra el RDS** — `db:migrate`: aplica `0015`/`0016`/`0017` y **re-aplica `rls-policies.sql`**.
 2. **Backfill del read-model de cohorte** — `db:backfill:cohort-stats`: puebla `assessment_item_stats` / `assessment_skill_stats`. **Resuelve B2**: sin esto, Dimensiones / Mapa de calor / heatmap / skills / informe salen en blanco. Idempotente.
 3. **Gatea** el build/push de la imagen a que la migración pase (`needs: migrate`).
 
 → **No corras migrate ni backfill a mano.** Si migrate falla, la imagen nueva no se publica.
+
+⚠️ **Lo que el deploy NO corre:** `db:retype:items` (§4.2) ni `db:backfill:application-period`
+(§4.1). Son scripts de datos y quedan manuales. En el demo actual ya están aplicados; la advertencia
+vale para **cualquier ambiente nuevo o re-seedeado**.
+
+📌 **`main` despliega al stage `demo`** (`STAGE: demo` en `deploy-backend.yml`) — no hay un stage
+`prod` separado hoy. Cuando lo haya, todo el §4 hay que repetirlo ahí.
 
 ## 4. Acciones MANUALES sobre el demo desplegado (lo que el deploy NO cubre)
 
@@ -137,12 +144,15 @@ Los importadores siguen **escribiendo** `config.period`, pero como procedencia d
 > re-aplicó las políticas RLS (19 tablas).
 >
 > Script único para los tres grupos: `pnpm --filter @soe/db db:retype:items [--apply]`
-> (idempotente, dry-run por defecto). **Hay que correrlo en cualquier ambiente cargado con datos
-> previos a #94** — prod incluido, tras la promoción y DESPUÉS de que corra la migración.
+> (idempotente, dry-run por defecto). **El deploy NO lo corre**: hay que ejecutarlo a mano en
+> cualquier ambiente cargado con datos previos a #94, y siempre DESPUÉS de que la `0017` esté
+> aplicada. Hoy `main` despliega al mismo demo donde ya se aplicó, así que la promoción no requiere
+> ninguna acción extra por este punto.
 
 Código: **PR #89** (`matching` + numeración impresa), **#90** (UI de V/F), **#92** (Historia 5°) y
 **#94** (`multi_select` + guard de import), todos en `dev`.
-No hay migración de schema: `matching` y `true_false` ya existían en el enum. Lo que hay que
+`matching` y `true_false` ya existían en el enum; `multi_select` **sí trajo migración** (`0017`).
+Fuera de eso, lo que hay que
 arreglar son **datos ya cargados con el tipo equivocado**, porque el importador no tenía cómo
 producirlos bien cuando corrió la carga de la tanda 2026 (`a9974ce`).
 
@@ -227,6 +237,18 @@ re-import futuro ya lo carga bien solo. Nota histórica: le faltaba el dato en l
 extracción (ni `matchColumns` en el cuadernillo ni `matchPairs` en la ficha), y a diferencia de los
 otros 5 tampoco tiene `matchPairs` en `scoring_config`.
 
+📌 **Dos hallazgos menores del levantamiento, no bloqueantes para el deploy:**
+
+1. **Puntaje máximo de los ítems de rúbrica.** El ítem 22 de Historia 5° vale **2 puntos** según
+   GradeCam (es de desarrollo, `type: rubric`) y en la BDD está en `points: 1`. No afecta el % de
+   logro automático —los de desarrollo quedan pendientes de corrección humana y se excluyen del
+   denominador— pero el puntaje máximo del instrumento queda corto. **No se barrió el resto del
+   corpus** buscando el mismo desfase.
+2. **Los JSON de la carpeta de extracción de Historia 5° siguen sin `matchPairs`.** El arreglo del
+   ítem 9 (#92) se hizo sobre el JSON **del repo**, que es el que consume el importador. Si alguien
+   re-corre el merge del pipeline sobre ese instrumento, regenera el con-pauta viejo y **pisa el
+   arreglo**. La solución de fondo es re-correr `parse_ficha.py` en la carpeta de extracción.
+
 📌 **Nota de operación, no bloqueante:** `soe_admin` **no queda sujeto a RLS** pese a que las 9
 tablas tienen `FORCE ROW LEVEL SECURITY` y el rol no declara `BYPASSRLS` (verificado: con un
 `app.current_org_id` inventado igual devuelve los 1385 alumnos de las 3 orgs). Para los scripts de
@@ -253,13 +275,29 @@ Recorrer con `docs/testing-manual-feedback-v2.md`. Mínimo imprescindible:
 - [ ] `/banco-contenido` carga y `/banco-items` **redirige**.
 - [ ] **Colecciones:** crear lista → "Crear evaluación".
 - [ ] **Vista 360 del estudiante** (`/estudiantes`).
-- [ ] **Términos pareados** (si entró #89): en `/banco-contenido`, abrir Ciencias 8° ítem 7 → el
-      panel muestra las **dos columnas con los pares correctos y los distractores marcados**, no un
-      ítem vacío. En la matriz por alumno, un acierto parcial se ve como **`2/4`**, no "incorrecto".
+- [ ] **Términos pareados**: en `/banco-contenido`, abrir Ciencias 8° ítem 7 → el panel muestra las
+      **dos columnas con los pares correctos y los distractores marcados**, no un ítem vacío. En la
+      matriz por alumno, un acierto parcial se ve como **`2/4`**, no "incorrecto".
+- [ ] **Verdadero/Falso**: abrir Ciencias 8° pos 19 (impreso 15.1) → el panel muestra **V/F con la
+      correcta marcada**, no el cartel "no tiene alternativas". En el análisis de la pregunta hay
+      **distribución y clave correcta** (antes salían vacías).
+- [ ] **Multi-selección**: abrir Ciencias 8° pos 40 (impreso 29) → badge **"Multi-selección"** y
+      **3 alternativas marcadas como correctas**. En el análisis, los porcentajes por opción
+      **suman más de 100 a propósito** (cada alumno marca varias): es "% que marcó esta opción".
+- [ ] Que no quede ningún ítem mal tipado — ambos conteos deben dar **0**:
+      ```sql
+      select count(*) filter (where type='multiple_choice' and jsonb_array_length(content->'alternatives')=2
+               and content->'alternatives' @> '[{"text":"Verdadero"}]') as vf_pendientes,
+             count(*) filter (where type='multiple_choice'
+               and (select count(*) from jsonb_array_elements(content->'alternatives') e
+                    where (e->>'isCorrect')::boolean) > 1) as multi_pendientes
+      from items where deleted_at is null;
+      ```
 
 ## 6. Riesgos / notas
 
-- **Migraciones irreversibles** en demo/prod. `0015`/`0016` son **aditivas** (enum + columna + 2 tablas) → bajo riesgo.
+- **Migraciones irreversibles** en demo/prod. `0015`/`0016`/`0017` son **aditivas** (enum + columna + 2 tablas + un valor de enum) → bajo riesgo. `ALTER TYPE … ADD VALUE` corre dentro de transacción desde PG 12; el demo es **17.9**.
+- **Re-importar un instrumento ya cargado borra sus tags EN SILENCIO** (`ON DELETE CASCADE`): la tanda 2026 tiene ~5.000. Desde #94 hay un **guard** que aborta y exige `--force`. Para cambiar ítems ya cargados el camino es `db:retype:items` (UPDATE in-place), nunca `db:import:instruments`.
 - **`item_collections` sin RLS** por decisión (aislamiento por `org_id` + `withOrgContext`). Si a futuro guardan algo sensible, agregar su política a `rls-policies.sql` (§5.2 CLAUDE.md).
 - **Backfill idempotente** (delete + reinsert por assessment) → re-correrlo no mueve números publicados; no recalcula `assessment_results`/`skill_results`.
 - **No re-seedear** el demo con datos existentes (destructivo). Para el demo vivo, usar **UPDATEs dirigidos**, no el seed. Única excepción a evaluar: §4.1 opción (b), que es una decisión consciente con su costo declarado.
