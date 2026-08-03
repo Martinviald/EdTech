@@ -9,12 +9,17 @@
 import { parseCursoLabel, type ClassGroupFilterOption, type FilterOption } from '@soe/types';
 
 export type DashboardFilterValues = {
-  subjectId?: string;
-  gradeId?: string;
-  classGroupId?: string;
+  // Multi-select (T2-12): CSV en la querystring → array.
+  subjectId?: string[];
+  gradeId?: string[];
+  classGroupId?: string[];
+  instrumentType?: string[];
+  // Momento DIA (T2-27): sólo aplica a instrumentos con ciclo de aplicación.
+  applicationPeriod?: string[];
+  // Escalares: instrumento concreto (T2-14), alumno de drill, período único.
+  instrumentId?: string;
   studentId?: string;
   academicYearId?: string;
-  instrumentType?: string;
 };
 
 /** Claves de filtro que viven en la querystring. */
@@ -22,10 +27,20 @@ export const FILTER_KEYS: readonly (keyof DashboardFilterValues)[] = [
   'subjectId',
   'gradeId',
   'classGroupId',
+  'instrumentType',
+  'applicationPeriod',
+  'instrumentId',
   'studentId',
   'academicYearId',
-  'instrumentType',
 ];
+
+/** ¿Hay algún filtro aplicado? Decide si un resultado vacío se explica por los filtros. */
+export function hasActiveFilters(value: DashboardFilterValues): boolean {
+  return FILTER_KEYS.some((key) => {
+    const v = value[key];
+    return Array.isArray(v) ? v.length > 0 : Boolean(v);
+  });
+}
 
 /**
  * Parsea los filtros del dashboard desde el objeto `searchParams` resuelto de
@@ -34,18 +49,29 @@ export const FILTER_KEYS: readonly (keyof DashboardFilterValues)[] = [
 export function parseDashboardFilters(
   params: Record<string, string | string[] | undefined>,
 ): DashboardFilterValues {
-  const pick = (key: keyof DashboardFilterValues): string | undefined => {
+  const pick = (key: string): string | undefined => {
     const raw = params[key];
     const value = Array.isArray(raw) ? raw[0] : raw;
     return value && value.length > 0 ? value : undefined;
   };
+  const pickAll = (key: string): string[] | undefined => {
+    const raw = params[key];
+    const values = Array.isArray(raw) ? raw : raw != null ? [raw] : [];
+    const parts = values
+      .flatMap((v) => v.split(','))
+      .map((v) => v.trim())
+      .filter((v) => v.length > 0);
+    return parts.length > 0 ? parts : undefined;
+  };
   return {
-    subjectId: pick('subjectId'),
-    gradeId: pick('gradeId'),
-    classGroupId: pick('classGroupId'),
+    subjectId: pickAll('subjectId'),
+    gradeId: pickAll('gradeId'),
+    classGroupId: pickAll('classGroupId'),
+    instrumentType: pickAll('instrumentType'),
+    applicationPeriod: pickAll('applicationPeriod'),
+    instrumentId: pick('instrumentId'),
     studentId: pick('studentId'),
     academicYearId: pick('academicYearId'),
-    instrumentType: pick('instrumentType'),
   };
 }
 
@@ -61,6 +87,16 @@ export function classGroupsForGrade(
   gradeId: string | undefined,
 ): ClassGroupFilterOption[] {
   return gradeId ? classGroups.filter((c) => c.gradeId === gradeId) : classGroups;
+}
+
+/** Cursos de CUALQUIERA de los niveles indicados; sin niveles, todos (T2-12). */
+export function classGroupsForGrades(
+  classGroups: ClassGroupFilterOption[],
+  gradeIds: string[] | undefined,
+): ClassGroupFilterOption[] {
+  if (!gradeIds || gradeIds.length === 0) return classGroups;
+  const set = new Set(gradeIds);
+  return classGroups.filter((c) => c.gradeId != null && set.has(c.gradeId));
 }
 
 /**
@@ -99,12 +135,58 @@ export function classGroupSelectOptions(
   });
 }
 
+/** Igual que {@link classGroupSelectOptions} pero para multi-nivel (T2-12). */
+export function classGroupSelectOptionsMulti(
+  classGroups: ClassGroupFilterOption[],
+  grades: FilterOption[],
+  gradeIds: string[] | undefined,
+): FilterOption[] {
+  const gradeLabels = new Map(grades.map((g) => [g.id, g.label]));
+  const noGradeFilter = !gradeIds || gradeIds.length === 0;
+  return classGroupsForGrades(classGroups, gradeIds).map((c) => {
+    const alreadyQualified = parseCursoLabel(c.label) !== null;
+    const gradeLabel =
+      noGradeFilter && c.gradeId && !alreadyQualified ? gradeLabels.get(c.gradeId) : undefined;
+    return { id: c.id, label: gradeLabel ? `${gradeLabel} ${c.label}` : c.label };
+  });
+}
+
+/**
+ * Vista escalar de los filtros para consumidores single-value (drill-down por
+ * un camino, comparación generacional): un valor sólo si hay EXACTAMENTE uno
+ * seleccionado; con multi-selección el filtro se considera "no fijado" (T2-12).
+ */
+export type DashboardScalarFilters = {
+  subjectId?: string;
+  gradeId?: string;
+  classGroupId?: string;
+  studentId?: string;
+  academicYearId?: string;
+  instrumentType?: string;
+};
+
+export function toScalarFilters(f: DashboardFilterValues): DashboardScalarFilters {
+  const one = (a?: string[]): string | undefined => (a?.length === 1 ? a[0] : undefined);
+  return {
+    subjectId: one(f.subjectId),
+    gradeId: one(f.gradeId),
+    classGroupId: one(f.classGroupId),
+    instrumentType: one(f.instrumentType),
+    studentId: f.studentId,
+    academicYearId: f.academicYearId,
+  };
+}
+
 /** Serializa los filtros a una querystring (orden estable, sin claves vacías). */
 export function buildDashboardQuery(value: DashboardFilterValues): string {
   const params = new URLSearchParams();
   for (const key of FILTER_KEYS) {
     const v = value[key];
-    if (v) params.set(key, v);
+    if (Array.isArray(v)) {
+      if (v.length > 0) params.set(key, v.join(','));
+    } else if (v) {
+      params.set(key, v);
+    }
   }
   const qs = params.toString();
   return qs ? `?${qs}` : '';

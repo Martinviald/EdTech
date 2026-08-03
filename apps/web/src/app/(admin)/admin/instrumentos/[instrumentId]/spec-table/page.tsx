@@ -1,18 +1,13 @@
 import { Suspense } from 'react';
 import { notFound, redirect } from 'next/navigation';
 import { apiGet } from '@/lib/api';
-import type { InstrumentModel, ItemModel } from '@soe/types';
-import { SpecTableView } from '@/app/(dashboard)/banco-items/[instrumentId]/spec-table/SpecTableView';
+import type { InstrumentModel, ItemModel, PaginatedResponse } from '@soe/types';
+import { SpecTableView } from '@/app/(dashboard)/banco-contenido/[instrumentId]/spec-table/SpecTableView';
 import { ROUTES } from '@/lib/routes';
 import { Skeleton } from '@/components/ui/skeleton';
 import { PageContainer, TableSkeleton } from '@/components/shared';
 
-type ItemsListResponse = {
-  data: ItemModel[];
-  total: number;
-  page: number;
-  limit: number;
-};
+type ItemsListResponse = PaginatedResponse<ItemModel>;
 
 type PageProps = {
   params: Promise<{ instrumentId: string }>;

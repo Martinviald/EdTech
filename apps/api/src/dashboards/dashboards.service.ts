@@ -2,6 +2,8 @@ import { Injectable } from '@nestjs/common';
 import { and, asc, desc, eq, inArray, isNull, notInArray, sql, type SQL } from 'drizzle-orm';
 import {
   academicYears,
+  assessmentCourseAssignments,
+  assessmentItemStats,
   assessmentResults,
   assessmentSkillStats,
   assessments,
@@ -38,6 +40,7 @@ import {
   type DashboardSkillBreakdownQueryDto,
   type DashboardSkillBreakdownResponse,
   type DashboardSkillsResponse,
+  type InstrumentApplicationPeriod,
   type SkillBreakdownRow,
   type DashboardTeacherKpisResponse,
   type PerformanceBandDistributionBucket,
@@ -112,6 +115,8 @@ type BreakdownAggregate = {
   studentsAssessed: number;
 };
 
+const EMPTY_RECENT_ASSESSMENTS = { data: [] as DashboardAssessmentSummary[], total: 0 };
+
 @Injectable()
 export class DashboardsService {
   constructor(@InjectDb() private readonly db: Database) {}
@@ -133,6 +138,7 @@ export class DashboardsService {
       assessmentsCount: 0,
       performanceDistribution: this.emptyDistribution(),
       recentAssessments: [],
+      recentAssessmentsTotal: 0,
       alerts: [],
     };
     if (!orgId) return empty;
@@ -244,7 +250,8 @@ export class DashboardsService {
         studentsEvaluated,
         assessmentsCount,
         performanceDistribution: distribution,
-        recentAssessments,
+        recentAssessments: recentAssessments.data,
+        recentAssessmentsTotal: recentAssessments.total,
         alerts,
       };
     });
@@ -265,6 +272,7 @@ export class DashboardsService {
       classGroups: [],
       periods: [],
       instruments: [],
+      applicationPeriodsWithData: [],
       defaultAcademicYearId: null,
     };
     if (!orgId) return empty;
@@ -335,6 +343,7 @@ export class DashboardsService {
           type: instruments.type,
           subjectId: instruments.subjectId,
           gradeId: instruments.gradeId,
+          applicationPeriod: instruments.applicationPeriod,
         })
         .from(instruments)
         .where(
@@ -347,7 +356,69 @@ export class DashboardsService {
 
       const periods = await this.loadPeriods(orgId);
 
+      // Momentos que REALMENTE tienen evaluaciones en el alcance visible. Dos cosas
+      // que NO sirven acá:
+      //  · el catálogo de `instruments` — un momento puede tener instrumentos
+      //    oficiales y ninguna evaluación del colegio;
+      //  · `visibleClassGroupIds` — está acotado a UN año académico (el del
+      //    catálogo de cursos), y las evaluaciones de otros años quedarían fuera,
+      //    marcando como "sin evaluaciones" un momento que sí devuelve filas.
+      // Por eso se resuelven los cursos accesibles SIN filtro de año.
+      const scopedCgRows = await tx
+        .select({ id: classGroups.id })
+        .from(classGroups)
+        .where(
+          and(
+            eq(classGroups.orgId, orgId),
+            ...(scope.scopeAll ? [] : [inArray(classGroups.id, scope.classGroupIds)]),
+          ),
+        );
+      const scopedCgIds = scopedCgRows.map((r) => r.id);
+
+      const periodRows =
+        scopedCgIds.length === 0
+          ? []
+          : await tx
+              .selectDistinct({ applicationPeriod: instruments.applicationPeriod })
+              .from(assessments)
+              .innerJoin(instruments, eq(instruments.id, assessments.instrumentId))
+              .innerJoin(
+                assessmentCourseAssignments,
+                eq(assessmentCourseAssignments.assessmentId, assessments.id),
+              )
+              .where(
+                and(
+                  eq(assessments.orgId, orgId),
+                  isNull(instruments.deletedAt),
+                  inArray(assessmentCourseAssignments.classGroupId, scopedCgIds),
+                ),
+              );
+
+      // T2-14/P3 — Instrumentos que REALMENTE tienen datos en el alcance visible: se
+      // filtra el catálogo a los que tienen read-model de cohorte (`assessment_item_stats`,
+      // el poblado por ambos escritores: cálculo desde `responses` e informes oficiales)
+      // en alguno de los cursos accesibles. Así el selector de instrumento no ofrece
+      // instrumentos oficiales sin evaluaciones o evaluaciones sin resultados, que
+      // dejarían el dashboard en blanco al elegirlos.
+      const dataInstrumentRows =
+        scopedCgIds.length === 0
+          ? []
+          : await tx
+              .selectDistinct({ instrumentId: assessments.instrumentId })
+              .from(assessments)
+              .innerJoin(assessmentItemStats, eq(assessmentItemStats.assessmentId, assessments.id))
+              .where(
+                and(
+                  eq(assessments.orgId, orgId),
+                  inArray(assessmentItemStats.classGroupId, scopedCgIds),
+                ),
+              );
+      const instrumentIdsWithData = new Set(dataInstrumentRows.map((r) => r.instrumentId));
+
       return {
+        applicationPeriodsWithData: periodRows
+          .map((r) => r.applicationPeriod)
+          .filter((p): p is InstrumentApplicationPeriod => p !== null),
         subjects: subjectRows.map((r) => ({ id: r.id, label: r.name })),
         grades: Array.from(gradeMap.entries()).map(([id, label]) => ({ id, label })),
         classGroups: classGroupRows.map((r) => ({
@@ -358,13 +429,16 @@ export class DashboardsService {
         })),
         periods,
         defaultAcademicYearId: academicYearId,
-        instruments: instrumentRows.map((r) => ({
-          id: r.id,
-          label: r.name,
-          type: r.type,
-          subjectId: r.subjectId,
-          gradeId: r.gradeId,
-        })),
+        instruments: instrumentRows
+          .filter((r) => instrumentIdsWithData.has(r.id))
+          .map((r) => ({
+            id: r.id,
+            label: r.name,
+            type: r.type,
+            subjectId: r.subjectId,
+            gradeId: r.gradeId,
+            applicationPeriod: r.applicationPeriod,
+          })),
       };
     });
   }
@@ -1102,8 +1176,9 @@ export class DashboardsService {
       // Cursos del scope (filtrados por gradeId/classGroupId/academicYearId si vienen).
       const cgConditions = [eq(classGroups.orgId, orgId)];
       if (!scope.scopeAll) cgConditions.push(inArray(classGroups.id, scope.classGroupIds));
-      if (query.classGroupId) cgConditions.push(eq(classGroups.id, query.classGroupId));
-      if (query.gradeId) cgConditions.push(eq(classGroups.gradeId, query.gradeId));
+      if (query.classGroupId?.length)
+        cgConditions.push(inArray(classGroups.id, query.classGroupId));
+      if (query.gradeId?.length) cgConditions.push(inArray(classGroups.gradeId, query.gradeId));
       if (query.academicYearId) {
         cgConditions.push(eq(classGroups.academicYearId, query.academicYearId));
       }
@@ -1260,7 +1335,10 @@ export class DashboardsService {
     query: DashboardFiltersQueryDto,
   ): Promise<string[] | null> {
     const hasStudentScopingFilter =
-      !!query.classGroupId || !!query.gradeId || !!query.studentId || !!query.academicYearId;
+      !!query.classGroupId?.length ||
+      !!query.gradeId?.length ||
+      !!query.studentId ||
+      !!query.academicYearId;
 
     if (scope.scopeAll && !hasStudentScopingFilter) return null;
 
@@ -1270,9 +1348,10 @@ export class DashboardsService {
       allowedClassGroupIds = null; // todos los de la org
     } else {
       allowedClassGroupIds = scope.classGroupIds;
-      if (query.classGroupId) {
-        if (!scope.classGroupIds.includes(query.classGroupId)) return [];
-        allowedClassGroupIds = [query.classGroupId];
+      if (query.classGroupId?.length) {
+        const requested = query.classGroupId.filter((id) => scope.classGroupIds.includes(id));
+        if (requested.length === 0) return [];
+        allowedClassGroupIds = requested;
       }
       if (allowedClassGroupIds.length === 0) return [];
     }
@@ -1281,10 +1360,10 @@ export class DashboardsService {
     if (allowedClassGroupIds !== null) {
       cgConditions.push(inArray(classGroups.id, allowedClassGroupIds));
     }
-    if (scope.scopeAll && query.classGroupId) {
-      cgConditions.push(eq(classGroups.id, query.classGroupId));
+    if (scope.scopeAll && query.classGroupId?.length) {
+      cgConditions.push(inArray(classGroups.id, query.classGroupId));
     }
-    if (query.gradeId) cgConditions.push(eq(classGroups.gradeId, query.gradeId));
+    if (query.gradeId?.length) cgConditions.push(inArray(classGroups.gradeId, query.gradeId));
     if (query.academicYearId)
       cgConditions.push(eq(classGroups.academicYearId, query.academicYearId));
 
@@ -1326,7 +1405,8 @@ export class DashboardsService {
     scope: Scope,
     query: DashboardFiltersQueryDto,
   ): Promise<string[] | null> {
-    const hasScopingFilter = !!query.classGroupId || !!query.gradeId || !!query.academicYearId;
+    const hasScopingFilter =
+      !!query.classGroupId?.length || !!query.gradeId?.length || !!query.academicYearId;
 
     if (scope.scopeAll && !hasScopingFilter) return null;
 
@@ -1335,9 +1415,10 @@ export class DashboardsService {
       allowedClassGroupIds = null; // todos los de la org
     } else {
       allowedClassGroupIds = scope.classGroupIds;
-      if (query.classGroupId) {
-        if (!scope.classGroupIds.includes(query.classGroupId)) return [];
-        allowedClassGroupIds = [query.classGroupId];
+      if (query.classGroupId?.length) {
+        const requested = query.classGroupId.filter((id) => scope.classGroupIds.includes(id));
+        if (requested.length === 0) return [];
+        allowedClassGroupIds = requested;
       }
       if (allowedClassGroupIds.length === 0) return [];
     }
@@ -1346,10 +1427,10 @@ export class DashboardsService {
     if (allowedClassGroupIds !== null) {
       cgConditions.push(inArray(classGroups.id, allowedClassGroupIds));
     }
-    if (scope.scopeAll && query.classGroupId) {
-      cgConditions.push(eq(classGroups.id, query.classGroupId));
+    if (scope.scopeAll && query.classGroupId?.length) {
+      cgConditions.push(inArray(classGroups.id, query.classGroupId));
     }
-    if (query.gradeId) cgConditions.push(eq(classGroups.gradeId, query.gradeId));
+    if (query.gradeId?.length) cgConditions.push(inArray(classGroups.gradeId, query.gradeId));
     if (query.academicYearId) {
       cgConditions.push(eq(classGroups.academicYearId, query.academicYearId));
     }
@@ -1374,11 +1455,16 @@ export class DashboardsService {
     const conditions = [eq(assessments.orgId, orgId), isNull(instruments.deletedAt)];
     if (query.assessmentId) conditions.push(eq(assessments.id, query.assessmentId));
     if (query.instrumentId) conditions.push(eq(assessments.instrumentId, query.instrumentId));
-    if (query.instrumentType) {
-      conditions.push(sql`${instruments.type}::text = ${query.instrumentType}`);
+    if (query.instrumentType?.length) {
+      conditions.push(inArray(sql`${instruments.type}::text`, query.instrumentType));
     }
-    if (query.subjectId) conditions.push(eq(instruments.subjectId, query.subjectId));
-    if (query.gradeId) conditions.push(eq(instruments.gradeId, query.gradeId));
+    if (query.subjectId?.length) conditions.push(inArray(instruments.subjectId, query.subjectId));
+    if (query.gradeId?.length) conditions.push(inArray(instruments.gradeId, query.gradeId));
+    if (query.applicationPeriod?.length) {
+      conditions.push(
+        inArray(sql`${instruments.applicationPeriod}::text`, query.applicationPeriod),
+      );
+    }
 
     const rows = await tx
       .select({ id: assessments.id })
@@ -1481,9 +1567,9 @@ export class DashboardsService {
     scope: Scope,
     query: DashboardFiltersQueryDto,
     studentIds: string[] | null,
-  ): Promise<DashboardAssessmentSummary[]> {
+  ): Promise<{ data: DashboardAssessmentSummary[]; total: number }> {
     const assessmentIds = await this.resolveScopedAssessmentIds(tx, orgId, query);
-    if (assessmentIds.length === 0) return [];
+    if (assessmentIds.length === 0) return EMPTY_RECENT_ASSESSMENTS;
 
     // Teacher scoping: si el caller está acotado a un set de alumnos
     // (studentIds !== null), las evaluaciones recientes deben intersectarse con
@@ -1491,7 +1577,7 @@ export class DashboardsService {
     // lista nombres de evaluaciones de toda la org que no tocan a sus cursos.
     let scopedAssessmentIds = assessmentIds;
     if (studentIds !== null) {
-      if (studentIds.length === 0) return [];
+      if (studentIds.length === 0) return EMPTY_RECENT_ASSESSMENTS;
       const withResults = await tx
         .selectDistinct({ assessmentId: assessmentResults.assessmentId })
         .from(assessmentResults)
@@ -1516,7 +1602,7 @@ export class DashboardsService {
           ...withCohort.map((r) => r.assessmentId),
         ]),
       ];
-      if (scopedAssessmentIds.length === 0) return [];
+      if (scopedAssessmentIds.length === 0) return EMPTY_RECENT_ASSESSMENTS;
     }
 
     const rows = await tx
@@ -1539,7 +1625,7 @@ export class DashboardsService {
       .orderBy(desc(assessments.administeredAt), desc(assessments.createdAt))
       .limit(5);
 
-    if (rows.length === 0) return [];
+    if (rows.length === 0) return EMPTY_RECENT_ASSESSMENTS;
 
     const summaryAssessmentIds = rows.map((r) => r.assessmentId);
     const statsConditions = [inArray(assessmentResults.assessmentId, summaryAssessmentIds)];
@@ -1575,7 +1661,7 @@ export class DashboardsService {
     );
     const cohortByAssessment = new Map(cohortStats.map((c) => [c.assessmentId, c]));
 
-    return rows.map((r) => {
+    const data = rows.map((r) => {
       const cohort = cohortByAssessment.get(r.assessmentId);
       const stats =
         statsByAssessment.get(r.assessmentId) ??
@@ -1595,6 +1681,8 @@ export class DashboardsService {
         status: r.status as AssessmentStatus,
       };
     });
+
+    return { data, total: scopedAssessmentIds.length };
   }
 
   /**
@@ -1615,8 +1703,8 @@ export class DashboardsService {
     // 1) Cursos con bajo logro (< 60% promedio).
     const cgConditions = [eq(classGroups.orgId, orgId)];
     if (!scope.scopeAll) cgConditions.push(inArray(classGroups.id, scope.classGroupIds));
-    if (query.classGroupId) cgConditions.push(eq(classGroups.id, query.classGroupId));
-    if (query.gradeId) cgConditions.push(eq(classGroups.gradeId, query.gradeId));
+    if (query.classGroupId?.length) cgConditions.push(inArray(classGroups.id, query.classGroupId));
+    if (query.gradeId?.length) cgConditions.push(inArray(classGroups.gradeId, query.gradeId));
     if (query.academicYearId)
       cgConditions.push(eq(classGroups.academicYearId, query.academicYearId));
 

@@ -42,6 +42,7 @@ describe('list_filter_options tool', () => {
       classGroups: [],
       periods: [],
       instruments: [],
+      applicationPeriodsWithData: [],
       defaultAcademicYearId: null,
     };
     const getFilterOptions = jest.fn().mockResolvedValue(response);
@@ -78,7 +79,10 @@ describe('get_dashboard_overview tool', () => {
 
     const result = await tool.execute({ classGroupId: UUID }, CTX);
 
-    expect(getOverview).toHaveBeenCalledWith(USER, expect.objectContaining({ classGroupId: UUID }));
+    expect(getOverview).toHaveBeenCalledWith(
+      USER,
+      expect.objectContaining({ classGroupId: [UUID] }),
+    );
     expect(JSON.parse(result.content)).toEqual(response);
   });
 
@@ -105,7 +109,7 @@ describe('get_dashboard_skills tool', () => {
 
     const result = await tool.execute({ subjectId: UUID }, CTX);
 
-    expect(getSkills).toHaveBeenCalledWith(USER, expect.objectContaining({ subjectId: UUID }));
+    expect(getSkills).toHaveBeenCalledWith(USER, expect.objectContaining({ subjectId: [UUID] }));
     expect(JSON.parse(result.content)).toEqual(response);
   });
 
@@ -217,7 +221,7 @@ describe('get_heatmap tool', () => {
 
     const result = await tool.execute({ gradeId: UUID }, CTX);
 
-    expect(getHeatmap).toHaveBeenCalledWith(USER, expect.objectContaining({ gradeId: UUID }));
+    expect(getHeatmap).toHaveBeenCalledWith(USER, expect.objectContaining({ gradeId: [UUID] }));
     expect(JSON.parse(result.content)).toEqual(response);
   });
 
@@ -257,9 +261,10 @@ describe('list_assessments tool', () => {
 
     const result = await tool.execute({ instrumentType: 'dia' }, CTX);
 
+    // El DTO es multi-valor (T2-12): un escalar se normaliza a array de uno.
     expect(listAssessments).toHaveBeenCalledWith(
       USER,
-      expect.objectContaining({ instrumentType: 'dia' }),
+      expect.objectContaining({ instrumentType: ['dia'] }),
     );
     expect(result.isError).toBeUndefined();
     expect(JSON.parse(result.content)).toEqual(response);

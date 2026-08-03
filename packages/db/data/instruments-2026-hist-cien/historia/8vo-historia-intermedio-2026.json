@@ -1,0 +1,1452 @@
+{
+ "schemaVersion": "1.0",
+ "source": {
+  "file": "8_prueba_historia_monitoreo_2026_8_basico.pdf",
+  "subjectFolder": "Historia"
+ },
+ "instrument": {
+  "name": "DIA Historia, Geografía y Ciencias Sociales 8° Básico 2026 — Monitoreo Intermedio",
+  "subject": "Historia, Geografía y Ciencias Sociales",
+  "subjectCode": "HIST",
+  "grade": "8° Básico",
+  "gradeCode": "8TH_BASIC",
+  "year": 2026,
+  "applicationPeriod": "intermedio",
+  "type": "dia",
+  "isOfficial": true,
+  "source": "imported"
+ },
+ "sections": [
+  {
+   "order": 1,
+   "name": "Pregunta 1 — Investigación sobre el humanismo",
+   "type": "multiple_choice",
+   "instructions": null,
+   "passage": null,
+   "items": [
+    {
+     "position": 1,
+     "printedNumber": "1",
+     "type": "multiple_choice",
+     "responseFormat": "choice",
+     "stem": "Una profesora de octavo básico le pide al curso realizar una investigación para responder la siguiente pregunta:\n\n¿Por qué el desarrollo del humanismo significó un cambio radical de mentalidad?\n\nA partir de fuentes confiables, los estudiantes obtienen la siguiente información:\n\n• Los pensadores del siglo XVI ponen al ser humano como su principal tema de interés, el cual consideran como algo grande y valioso.\n• El hombre es la medida de todas las cosas.\n• Se despierta la tendencia crítica, el deseo de observar, meditar y experimentar, descartando todo lo que la razón rechaza.\n\nConsiderando la información obtenida, ¿cuál es una conclusión coherente con la pregunta de investigación?",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "La mentalidad cambia radicalmente debido a que el hombre genera un movimiento contrario a la religión.",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "La mentalidad cambia radicalmente debido a que el hombre pierde la fe en un dios supremo.",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "La mentalidad cambia radicalmente debido a valoración del presente por sobre el pasado del hombre.",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "La mentalidad cambia radicalmente debido al énfasis que se da al hombre como centro del universo.",
+       "isCorrect": true
+      }
+     ],
+     "correctKey": "D",
+     "skill": "Análisis y trabajo con fuentes de información",
+     "oa": "OA 1",
+     "contentAxis": "Historia",
+     "hasFigure": false,
+     "figureNote": null,
+     "indicador": "Establecen conclusiones coherentes con las preguntas iniciales y los resultados de una investigación.",
+     "oaLevel": null,
+     "imageRef": null
+    }
+   ]
+  },
+  {
+   "order": 2,
+   "name": "Pregunta 2 — Fuente: el pensamiento renacentista",
+   "type": "multiple_choice",
+   "instructions": "Lee la siguiente fuente que muestra características del pensamiento renacentista que lo diferencian de la mentalidad medieval:",
+   "passage": {
+    "title": "Características del pensamiento renacentista",
+    "text": "El hombre renacentista cree que la iglesia constituye el puente entre Dios y el hombre, así como también tiene fe en Cristo, aunque ahora cree que la religión ya no es más la reguladora universal de su conducta, y considera que la iglesia ya no está dotada con la facultad y el derecho de determinar públicamente lo que debe hacer. La religión se convierte en un asunto subjetivo, sujeto a la consideración privada de cada hombre, cuya conducta en esta vida se encuentra regida por otras reglas: sus principios éticos personales, las leyes de su ciudad y sus intereses personales. La iglesia es solo la institución autorizada para administrar los sacramentos, que aún son considerados los instrumentos de la gracia divina. No tiene autoridad para regular la vida pública. El hombre renacentista está esencialmente comprometido a mejorar su vida, considerada estrictamente desde un punto de vista mundano o terrenal.\n\nJaguaribe, H. Un estudio crítico de la historia, tomo II, 2002. Adaptación.",
+    "format": "plain",
+    "attachments": []
+   },
+   "items": [
+    {
+     "position": 2,
+     "printedNumber": "2",
+     "type": "multiple_choice",
+     "responseFormat": "choice",
+     "stem": "A partir de la información que entrega la fuente anterior, ¿qué idea se puede inferir sobre el pensamiento del hombre renacentista?",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "Ve a la iglesia como la respuesta a sus inquietudes morales.",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "Cree que su comportamiento debe estar guiado por su creencia en Cristo.",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "Considera que su vida en la Tierra depende de normas establecidas por él.",
+       "isCorrect": true
+      },
+      {
+       "key": "D",
+       "text": "Valora los sacramentos como herramientas que le ayudarán a mejorar su vida terrenal.",
+       "isCorrect": false
+      }
+     ],
+     "correctKey": "C",
+     "skill": "Pensamiento crítico",
+     "oa": "OA 2",
+     "contentAxis": "Historia",
+     "hasFigure": false,
+     "figureNote": null,
+     "indicador": "Establecen inferencias que pueden concluirse a partir de evidencia, respecto de algún tema estudiado en el nivel.",
+     "oaLevel": null,
+     "imageRef": null
+    }
+   ]
+  },
+  {
+   "order": 3,
+   "name": "Pregunta 3 — Fuente: los orígenes del Estado moderno",
+   "type": "multiple_choice",
+   "instructions": "Lee la siguiente fuente sobre los orígenes del Estado moderno a fines de la Edad Media:",
+   "passage": {
+    "title": "Los orígenes del Estado moderno a fines de la Edad Media",
+    "text": "A partir del siglo XV los Estados buscaron expandirse territorialmente, y para lograrlo conformaron ejércitos cada vez más numerosos y poderosos. Su sostenimiento administrativo, financiero y económico convirtió a los Estados en unas complejas unidades burocráticas deseosas de recursos. En un principio, las ciudades Estados fueron unidades independientes, de una extensión territorial menor a las actuales, que concentraban sus actividades principalmente en los ámbitos militares, fiscales, en la protección de sus súbditos y administración de justicia. Debemos afirmar entonces que el Estado tiene una estrecha relación con la utilización del poder para encontrar obediencia y conseguir de esta manera la dominación.\n\nGarabedián, M. El Estado moderno. Breve recorrido por su desarrollo teórico, 2020. Adaptación.",
+    "format": "plain",
+    "attachments": []
+   },
+   "items": [
+    {
+     "position": 3,
+     "printedNumber": "3",
+     "type": "multiple_choice",
+     "responseFormat": "choice",
+     "stem": "Si tuvieras que buscar más información sobre el desarrollo del Estado moderno hacia el siglo XV, ¿cuál de las siguientes preguntas sirve para guiar tu búsqueda de información?",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "¿Cuándo los Estados fueron unidades independientes?",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "¿Por qué los Estados buscaban expandirse territorialmente?",
+       "isCorrect": true
+      },
+      {
+       "key": "C",
+       "text": "¿Con qué objetivo los Estados conformaban y mantenían ejércitos?",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "¿Por qué los Estados se convirtieron en complejas unidades burocráticas?",
+       "isCorrect": false
+      }
+     ],
+     "correctKey": "B",
+     "skill": "Pensamiento crítico",
+     "oa": "OA 3",
+     "contentAxis": "Historia",
+     "hasFigure": false,
+     "figureNote": null,
+     "indicador": "Distinguen preguntas que permiten profundizar en temas de interés estudiados en el nivel.",
+     "oaLevel": null,
+     "imageRef": null
+    }
+   ]
+  },
+  {
+   "order": 4,
+   "name": "Pregunta 4 — Fuente: el mercantilismo en la Edad Moderna",
+   "type": "multiple_choice",
+   "instructions": "Lee la siguiente fuente sobre el funcionamiento del modelo económico mercantilista en la Europa de la Edad Moderna:",
+   "passage": {
+    "title": "El modelo económico mercantilista en la Europa de la Edad Moderna",
+    "text": "La esencia de la actividad económica mercantilista se centra en la adquisición de monedas de oro y plata como única forma de enriquecerse. Esta política es centralista al considerar que es el propio Estado el que debe organizar y programar la adquisición de estos metales preciosos. Con ella aparece por primera vez el concepto de balanza comercial, ya que los países se ven forzados a desarrollar al máximo las exportaciones de productos pagados en oro y plata y reducir en lo posible las importaciones que supongan pagos en este tipo de moneda.\n\nVallejo, P. Historia de las relaciones internacionales, 2006. Adaptación.",
+    "format": "plain",
+    "attachments": []
+   },
+   "items": [
+    {
+     "position": 4,
+     "printedNumber": "4",
+     "type": "multiple_choice",
+     "responseFormat": "choice",
+     "stem": "Considerando lo expuesto en la fuente, ¿con qué objetivo los países buscaban aumentar las exportaciones y disminuir las importaciones?",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "Para asegurar la adquisición de productos internacionales.",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "Para asegurar la centralización de la política económica.",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "Para garantizar la circulación de mercancías nacionales.",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "Para garantizar la acumulación de metales preciosos.",
+       "isCorrect": true
+      }
+     ],
+     "correctKey": "D",
+     "skill": "Análisis y trabajo con fuentes de información",
+     "oa": "OA 4",
+     "contentAxis": "Historia",
+     "hasFigure": false,
+     "figureNote": null,
+     "indicador": "Infieren información que se encuentra implícita en fuentes primarias o secundarias.",
+     "oaLevel": null,
+     "imageRef": null
+    }
+   ]
+  },
+  {
+   "order": 5,
+   "name": "Pregunta 5 — La llegada de los europeos a América",
+   "type": "multiple_choice",
+   "instructions": null,
+   "passage": null,
+   "items": [
+    {
+     "position": 5,
+     "printedNumber": "5",
+     "type": "multiple_choice",
+     "responseFormat": "choice",
+     "stem": "La llegada de los europeos a América implicó un proceso de grandes transformaciones, en que las comunidades indígenas vieron alteradas sus costumbres y tradiciones. Lo anterior provocó la modificación de su visión de mundo y el avance del cristianismo.\n\nConsiderando lo expuesto, ¿qué pregunta permite profundizar en el impacto cultural de la llegada de los españoles para los pueblos americanos?",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "¿Qué elementos de los pueblos americanos fueron adoptados por los europeos?",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "¿De qué forma se organizó la llegada de las distintas órdenes religiosas a América?",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "¿Cuál fue la relación entre la Iglesia Católica y la Corona durante la dominación española?",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "¿Qué prácticas religiosas desarrollaron los indígenas desde el periodo de la Conquista?",
+       "isCorrect": true
+      }
+     ],
+     "correctKey": "D",
+     "skill": "Pensamiento crítico",
+     "oa": "OA 5",
+     "contentAxis": "Historia",
+     "hasFigure": false,
+     "figureNote": null,
+     "indicador": "Distinguen preguntas que permiten profundizar en temas de interés estudiados en el nivel.",
+     "oaLevel": null,
+     "imageRef": null
+    }
+   ]
+  },
+  {
+   "order": 6,
+   "name": "Preguntas 6 y 7 — Fuente: la conquista de América desde la mirada europea",
+   "type": "multiple_choice",
+   "instructions": "Lee la siguiente fuente sobre la conquista de América desde la mirada de los europeos y contesta las preguntas 6 y 7.",
+   "passage": {
+    "title": "La conquista de América desde la mirada de los europeos",
+    "text": "Diversas son las impresiones que el hallazgo de los nuevos territorios americanos produjo en los europeos, así como variada fue la realidad descubierta. Para unos el indígena se constituyó en una suerte de felicidad idealizada expresada en la ausencia del mortal dinero, pues en sí mismo representaba renta y otorgaba valor a la tierra, su sola presencia significó fuerza de trabajo gratuita, acceso a la tierra y desde luego, su dominación significó para el encomendero jerarquía social y un poder que se sostenía en códigos jurídicos que mostraban la moral occidental ante la desvergonzada desnudez corporal que mostraba su condición bárbara; para otros, tal cosa resultó al contrario, el indio debía ser perdonado, cristianizado y occidentalizado, puesto que poseía razón, una humanidad que no podía ser negada ante los ojos del cristianismo, porque innegable era su naturaleza de hombre libre.\n\nViáfara, A. El indio entre la libertad formal y la servidumbre natural durante la conquista. 2014.",
+    "format": "plain",
+    "attachments": []
+   },
+   "items": [
+    {
+     "position": 6,
+     "printedNumber": "6",
+     "type": "multiple_choice",
+     "responseFormat": "choice",
+     "stem": "Según el autor, ¿qué razón explicaría que la presencia de los indígenas en América haya provocado “felicidad idealizada” en los europeos?",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "Porque eran cristianizados.",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "Porque eran hombres libres.",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "Porque eran mano de obra gratuita.",
+       "isCorrect": true
+      },
+      {
+       "key": "D",
+       "text": "Porque eran seres dotados de razón.",
+       "isCorrect": false
+      }
+     ],
+     "correctKey": "C",
+     "skill": "Análisis y trabajo con fuentes de información",
+     "oa": "OA 7",
+     "contentAxis": "Historia",
+     "hasFigure": false,
+     "figureNote": null,
+     "indicador": "Identifican información que se encuentra explícita en fuentes primarias o secundarias.",
+     "oaLevel": null,
+     "imageRef": null
+    },
+    {
+     "position": 7,
+     "printedNumber": "7",
+     "type": "multiple_choice",
+     "responseFormat": "choice",
+     "stem": "A partir de lo que señala la fuente, ¿qué impacto provocó la conquista de América en la cultura europea?",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "La impresión generalizada del estado de barbarie de los indígenas americanos por su falta de ropas.",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "El surgimiento de distintas visiones respecto de cómo eran y debían ser tratados los indígenas americanos.",
+       "isCorrect": true
+      },
+      {
+       "key": "C",
+       "text": "El desprestigio social de aquellos europeos que sometían a trabajos forzados a los indígenas americanos.",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "La afirmación de la condición de seres humanos de los indígenas americanos por parte de los encomenderos.",
+       "isCorrect": false
+      }
+     ],
+     "correctKey": "B",
+     "skill": "Pensamiento crítico",
+     "oa": "OA 7",
+     "contentAxis": "Historia",
+     "hasFigure": false,
+     "figureNote": null,
+     "indicador": "Establecen inferencias que pueden concluirse a partir de evidencia, respecto de algún tema estudiado en el nivel.",
+     "oaLevel": null,
+     "imageRef": null
+    }
+   ]
+  },
+  {
+   "order": 7,
+   "name": "Pregunta 8 — Fuente: Caída de Tenochtitlán",
+   "type": "multiple_choice",
+   "instructions": "Lee la siguiente fuente:",
+   "passage": {
+    "title": "Caída de Tenochtitlán",
+    "text": "El bando español llega a tierras mesoamericanas motivado por conquistar tierras para la Corona, recabar oro y convertir indígenas. El sistema tributario fue un factor determinante para que los grupos sometidos se aliaran con Cortés en contra de los aztecas a fin de suspender el tributo. Esto beneficia a los españoles, pues miles y miles de contingentes indígenas van a participar a su lado en la guerra contra Tenochtitlan.\n\nA lo anterior hay que añadir las armas de fuego de largo alcance por la parte peninsular, aunque del lado indígena se cuenta con macanas, lanzas, flechas y hondas que causan estragos en el enemigo.\n\nMatos, E. ¿Cuáles fueron las causas que incidieron en la caída de Tenochtitlán?, 2015. En www.arqueologiamexicana.mx. Adaptación.",
+    "format": "plain",
+    "attachments": []
+   },
+   "items": [
+    {
+     "position": 8,
+     "printedNumber": "8",
+     "type": "multiple_choice",
+     "responseFormat": "choice",
+     "stem": "¿Qué aspecto de la caída de Tenochtitlán se destaca en la fuente anterior?",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "La respuesta de las autoridades indígenas a la llegada de los españoles.",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "Los cambios en la estructura de la ciudad indígena a la llegada de los españoles.",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "La presencia de varias causas que explican la facilidad de la conquista española.",
+       "isCorrect": true
+      },
+      {
+       "key": "D",
+       "text": "Las consecuencias en los indígenas que deberán pagar un impuesto a los españoles.",
+       "isCorrect": false
+      }
+     ],
+     "correctKey": "C",
+     "skill": "Pensamiento crítico",
+     "oa": "OA 6",
+     "contentAxis": "Historia",
+     "hasFigure": false,
+     "figureNote": null,
+     "indicador": "Distinguen las causas de procesos históricos y/o geográficos estudiados en el nivel.",
+     "oaLevel": null,
+     "imageRef": null
+    }
+   ]
+  },
+  {
+   "order": 8,
+   "name": "Pregunta 9 — Fuente: El Cabildo colonial",
+   "type": "multiple_choice",
+   "instructions": "Lee la siguiente fuente:",
+   "passage": {
+    "title": "El Cabildo colonial",
+    "text": "Los cabildos, corporaciones municipales originadas en el medioevo español y trasplantadas a América por los conquistadores, fueron una de las instituciones más importantes, a partir de los primeros años de la Conquista, ya que constituyeron un eficaz mecanismo de representación de las elites locales frente a lxa burocracia real. Los cabildos más importantes, como los de Santiago, Concepción y La Serena, mantuvieron una alta cuota de poder en el sistema colonial, convirtiéndose en las instituciones más representativas de la elite criolla. Las funciones del Cabildo fueron múltiples, y abarcaron los más diversos ámbitos. Velaron por la defensa de la ciudad a través de las milicias, administraron justicia en primera instancia, estuvieron encargados de supervisar a los médicos y cuidar la salubridad pública, tuvieron a su cargo la construcción de obras públicas y la mantención de escuelas de primeras letras, y llevaron el registro de cada uno de los cargos públicos, oficios, títulos de nobleza, marcas de ganado, etc.\n\nMemoria Chilena, web. Consultado en febrero de 2026. Adaptación.",
+    "format": "plain",
+    "attachments": []
+   },
+   "items": [
+    {
+     "position": 9,
+     "printedNumber": "9",
+     "type": "multiple_choice",
+     "responseFormat": "choice",
+     "stem": "A partir de la información, ¿en qué aspecto del periodo colonial en América contribuyó la institución del Cabildo?",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "En la fundación del ejército profesional en América.",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "En la administración política del Imperio español.",
+       "isCorrect": true
+      },
+      {
+       "key": "C",
+       "text": "En el surgimiento de la sociedad estamental.",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "En el control del monopolio comercial.",
+       "isCorrect": false
+      }
+     ],
+     "correctKey": "B",
+     "skill": "Análisis y trabajo con fuentes de información",
+     "oa": "OA 8",
+     "contentAxis": "Historia",
+     "hasFigure": false,
+     "figureNote": null,
+     "indicador": "Infieren información que se encuentra implícita en fuentes primarias o secundarias.",
+     "oaLevel": null,
+     "imageRef": null
+    }
+   ]
+  },
+  {
+   "order": 9,
+   "name": "Pregunta 10 — Pintura: Bautizo de Ixtlixóchitl (arte barroco en América)",
+   "type": "multiple_choice",
+   "instructions": "Observa la siguiente pintura representativa del arte barroco en América:",
+   "passage": null,
+   "items": [
+    {
+     "position": 10,
+     "printedNumber": "10",
+     "type": "multiple_choice",
+     "responseFormat": "choice",
+     "stem": "Observa la siguiente pintura representativa del arte barroco en América:\n\n(Vivar y Valderrama, J. Bautizo de Ixtlixóchitl. Siglo XVIII. En Museo Nacional de Historia (México).)\n\n¿Qué característica del arte barroco en América se destaca en la escena?",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "La expresión de los ritos indígenas.",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "La importancia de la mitología clásica.",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "La idealización física de los personajes.",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "La manifestación de una integración cultural.",
+       "isCorrect": true
+      }
+     ],
+     "correctKey": "D",
+     "skill": "Análisis y trabajo con fuentes de información",
+     "oa": "OA 9",
+     "contentAxis": "Historia",
+     "hasFigure": true,
+     "figureNote": "Figura DEL ÍTEM (p. 12): pintura barroca colonial del bautizo de Ixtlixóchitl — un sacerdote bautiza a un personaje indígena arrodillado ante una pila, rodeado de soldados españoles con armadura, indígenas con penachos y estandartes; abajo una cartela con texto",
+     "indicador": "Identifican información que se encuentra explícita en fuentes primarias o secundarias",
+     "oaLevel": null,
+     "imageRef": "item/global/8vo-historia-intermedio-2026/item_figure/10.png"
+    }
+   ]
+  },
+  {
+   "order": 10,
+   "name": "Pregunta 11 — Gráfico: esclavos llegados desde África a América 1526-1811",
+   "type": "multiple_choice",
+   "instructions": "Observa el siguiente gráfico:",
+   "passage": null,
+   "items": [
+    {
+     "position": 11,
+     "printedNumber": "11",
+     "type": "multiple_choice",
+     "responseFormat": "choice",
+     "stem": "Observa el siguiente gráfico:\n\nEsclavos llegados desde África a América 1526-1811\nEje Y: Miles (0 a 70). Eje X: 1526, 1576, 1626, 1676, 1721, 1761, 1811.\nSeries: Colonias españolas en América (línea segmentada); Brasil (línea de puntos y rayas); Total en América (línea continua).\n\nKlein, H. Las características demográficas del comercio atlántico de esclavos hacia Latinoamérica, 1993. En Boletín del Instituto de Historia Argentina y Americana. Adaptación.\n\nConsiderando la información del gráfico, ¿cuál es una conclusión válida respecto al tráfico de esclavos?",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "A fines del siglo XVIII la llegada de esclavos a Brasil alcanzó una cantidad similar a la que llegó al resto del continente americano.",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "Desde el siglo XVII hasta el siglo XVIII la llegada de esclavos a Brasil fue decreciendo en comparación con toda América.",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "A fines del siglo XVIII la llegada de esclavos a Brasil disminuyó al igual que en el resto del continente americano.",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "A partir del siglo XVII la llegada de esclavos a Brasil se incrementó en mayor medida que en las colonias españolas de América.",
+       "isCorrect": true
+      }
+     ],
+     "correctKey": "D",
+     "skill": "Pensamiento crítico",
+     "oa": "OA 10",
+     "contentAxis": "Historia",
+     "hasFigure": true,
+     "figureNote": "Figura DEL ÍTEM (p. 13): gráfico de líneas con tres series (Colonias españolas en América, Brasil, Total en América) entre 1526 y 1811, eje Y en miles hasta 70; incluye leyenda al pie. El ítem no se puede responder sin ver el gráfico",
+     "indicador": "Interpretan información cuantitativa pertinente para responder preguntas históricas o geográficas.",
+     "oaLevel": null,
+     "imageRef": "item/global/8vo-historia-intermedio-2026/item_figure/11.png"
+    }
+   ]
+  },
+  {
+   "order": 11,
+   "name": "Pregunta 12 — Ilustraciones de Guamán Poma de Ayala",
+   "type": "multiple_choice",
+   "instructions": null,
+   "passage": null,
+   "items": [
+    {
+     "position": 12,
+     "printedNumber": "12",
+     "type": "multiple_choice",
+     "responseFormat": "choice",
+     "stem": "Las siguientes imágenes del periodo colonial corresponden a parte de la obra de Felipe Guamán Poma de Ayala, cronista indígena de ascendencia incaica, nacido en Cuzco en 1534 durante el funcionamiento del virreinato del Perú:\n\n(Imagen 1: Capítulo de los mayordomos: mayordomos, mineros y trajineadores de vino de los corregidores y encomenderos, hacia 1600.)\n(Imagen 2: Corregidor de minas: como lo castiga cruelmente a los caciques principales, hacia 1600.)\n\nConsiderando quién es el autor de las fuentes anteriores y la información que estas presentan, ¿cuál es la intencionalidad del autor al crear estas ilustraciones?",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "Publicar los beneficios que trajo a los indígenas la llegada de los españoles a América.",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "Denunciar los malos tratos que los españoles daban a los indígenas durante la Colonia.",
+       "isCorrect": true
+      },
+      {
+       "key": "C",
+       "text": "Mostrar la forma en que se comportaban los indígenas americanos a inicios del siglo XVII.",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "Informar sobre los distintos cargos que ocupaban los españoles en América durante la Colonia.",
+       "isCorrect": false
+      }
+     ],
+     "correctKey": "B",
+     "skill": "Análisis y trabajo con fuentes de información",
+     "oa": "OA 11",
+     "contentAxis": "Historia",
+     "hasFigure": true,
+     "figureNote": "Figura DEL ÍTEM (p. 14): recuadro único con DOS grabados en blanco y negro de Guamán Poma de Ayala, con sus pies de imagen; recortar el recuadro completo (ambas imágenes) como una sola figura",
+     "indicador": "Infieren la intención del autor o autora de fuentes primarias o secundarias.",
+     "oaLevel": null,
+     "imageRef": "item/global/8vo-historia-intermedio-2026/item_figure/12.png"
+    }
+   ]
+  },
+  {
+   "order": 12,
+   "name": "Pregunta 13 — Fuentes iconográficas de la sociedad estamental colonial (alternativas-imagen)",
+   "type": "multiple_choice",
+   "instructions": null,
+   "passage": null,
+   "items": [
+    {
+     "position": 13,
+     "printedNumber": "13",
+     "type": "multiple_choice",
+     "responseFormat": "choice",
+     "stem": "Durante el periodo colonial en América se estableció un modelo de sociedad estamental basada en el origen étnico de las personas y que intentó separar a españoles, indígenas, mestizos y africanos en grupos distintos.\n\n¿Cuál de las siguientes fuentes iconográficas permite obtener información sobre la sociedad estamental implementada en la época colonial americana?",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "Pintura religiosa colonial: un ángel se dirige a la Virgen ante un atril, con querubines en el cielo. Pie de imagen: «La anunciación de la virgen, Luis de Riaño, Lima, 1632.»",
+       "isImage": true,
+       "isCorrect": false,
+       "imageRef": "item/global/8vo-historia-intermedio-2026/alt_figure/13_A.png"
+      },
+      {
+       "key": "B",
+       "text": "Retrato de cuerpo entero de un gobernador con casaca bordada, bastón y bicornio sobre una mesa, en un interior con cortinaje. Pie de imagen: «Retrato de Ambrosio O'Higgins, Pedro Díaz, 1798.»",
+       "isImage": true,
+       "isCorrect": false,
+       "imageRef": "item/global/8vo-historia-intermedio-2026/alt_figure/13_B.png"
+      },
+      {
+       "key": "C",
+       "text": "Pintura de castas: una mujer española, un hombre negro y un niño mulato en un paisaje, con una cartela que dice «De negro y española sale mulato». Pie de imagen: «De negro y española sale mulato, anónimo, 1780.»",
+       "isImage": true,
+       "isCorrect": true,
+       "imageRef": "item/global/8vo-historia-intermedio-2026/alt_figure/13_C.png"
+      }
+     ],
+     "correctKey": "C",
+     "skill": "Análisis y trabajo con fuentes de información",
+     "oa": "OA 11",
+     "contentAxis": "Historia",
+     "hasFigure": true,
+     "figureNote": "Figuras POR ALTERNATIVA (p. 15): las tres alternativas A, B y C son pinturas; el ítem sólo se puede responder viéndolas. Recortar una figura por alternativa (A, B, C), incluyendo su pie de imagen",
+     "indicador": "Seleccionan fuentes de información pertinentes para abordar un tema estudiado en el nivel",
+     "oaLevel": null,
+     "imageRef": null
+    }
+   ]
+  },
+  {
+   "order": 13,
+   "name": "Pregunta 14 — Fuente: la Guerra de Arauco",
+   "type": "multiple_choice",
+   "instructions": "Lee la siguiente fuente sobre la relación entre mapuches y españoles durante la Guerra de Arauco:",
+   "passage": {
+    "title": "La relación entre mapuches y españoles durante la Guerra de Arauco",
+    "text": "(...) Es más pertinente hablar de guerra y estado de guerra o de “guerra abierta o latente”–como afirma A. Leiva– porque sin ella no se podría dar a los contactos el calificativo de “pacíficos”; de hecho, la “convivencia fronteriza” fue violenta: “robos, asaltos, disputas, es decir, antagonismo no militar” (Leiva, 1984: 205). Son esos antagonismos (militares y no militares) los que marcan el periodo de las llamadas “relaciones pacíficas”. Hasta finales del siglo XVIII el conquistador hispano no había asegurado su dominación frente a los araucanos. Las armas habían perdido el ímpetu de los primeros tiempos de la conquista, pero el problema político permaneció: relaciones de fuerza, seguridad del territorio controlado por los españoles, etc. Desde luego, no se puede hablar de guerra con las características del primer siglo (1550-1656), pero nos parece engañoso sostener que después predominaron las “relaciones pacíficas” solo salpicadas de “choques bélicos” de poca o ninguna trascendencia.\n\nChihuailaf, A. La prolongada Guerra de Arauco: ¿un mito plurisecular?, 2010. Extracto. Adaptación.",
+    "format": "plain",
+    "attachments": []
+   },
+   "items": [
+    {
+     "position": 14,
+     "printedNumber": "14",
+     "type": "multiple_choice",
+     "responseFormat": "choice",
+     "stem": "En el texto anterior, ¿qué evidencia utiliza el autor para señalar que las relaciones entre españoles e indígenas no fueron pacíficas?",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "La referencia a un concepto que menciona: “convivencia fronteriza”.",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "La referencia temporal que establece entre 1550 y 1656.",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "La cita que hace a otro investigador: A. Leiva, 1984.",
+       "isCorrect": true
+      },
+      {
+       "key": "D",
+       "text": "La formulación respecto a lo realizado por los españoles a fines del siglo XVIII.",
+       "isCorrect": false
+      }
+     ],
+     "correctKey": "C",
+     "skill": "Pensamiento crítico",
+     "oa": "OA 12",
+     "contentAxis": "Historia",
+     "hasFigure": false,
+     "figureNote": null,
+     "indicador": "Identifican evidencia que permite fundamentar una inferencia, respecto de algún tema estudiado en el nivel.",
+     "oaLevel": null,
+     "imageRef": null
+    }
+   ]
+  },
+  {
+   "order": 14,
+   "name": "Pregunta 15 — Fuente: Economía colonial",
+   "type": "multiple_choice",
+   "instructions": "Lee la siguiente fuente:",
+   "passage": {
+    "title": "Economía colonial",
+    "text": "Desde fines del siglo XVII en adelante, la demanda peruana de trigo y el crecimiento constante de la población comenzaron a transformar lentamente el campo chileno. [...] A comienzos del siglo XVIII, el volumen de exportaciones subió a cerca de 190 mil quintales métricos, para luego estabilizarse. (Un quintal métrico equivale a 100 kilos). A la demanda peruana se agregó un lento incremento del consumo interno, a medida que los mestizos y la población indígena adoptaban los hábitos alimenticios de los europeos. A mediados del siglo XVIII, en Chile se producían 400 mil quintales métricos de trigo, lo que implica que cerca de 45 mil hectáreas estaban dedicadas a esa actividad.\n\nBauer A. La Sociedad Rural Chilena: desde la conquista española a nuestros días, 1994. Editorial Andrés Bello.",
+    "format": "plain",
+    "attachments": []
+   },
+   "items": [
+    {
+     "position": 15,
+     "printedNumber": "15",
+     "type": "multiple_choice",
+     "responseFormat": "choice",
+     "stem": "Considerando la información que entrega la fuente, ¿qué característica de la economía colonial se evidencia a partir del caso del trigo?",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "Su dependencia del mercado interno.",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "Su carácter predominantemente rural.",
+       "isCorrect": true
+      },
+      {
+       "key": "C",
+       "text": "La relevancia de la demanda europea.",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "La constante disminución de las exportaciones.",
+       "isCorrect": false
+      }
+     ],
+     "correctKey": "B",
+     "skill": "Análisis y trabajo con fuentes de información",
+     "oa": "OA 13",
+     "contentAxis": "Historia",
+     "hasFigure": false,
+     "figureNote": null,
+     "indicador": "Infieren información que se encuentra implícita en fuentes primarias o secundarias.",
+     "oaLevel": null,
+     "imageRef": null
+    }
+   ]
+  },
+  {
+   "order": 15,
+   "name": "Preguntas 16 y 17 — Fuentes: Rousseau y Montesquieu sobre la Monarquía",
+   "type": "multiple_choice",
+   "instructions": "Lee las siguientes fuentes y responde las preguntas 16 y 17.",
+   "passage": {
+    "title": "Rousseau y Montesquieu sobre la Monarquía",
+    "text": "Fuente 1: Rousseau y su planteamiento sobre la Monarquía\nUn defecto esencial e inevitable que hará siempre inferior el gobierno monárquico al republicano, es que en este último el voto popular casi siempre lleva a los primeros puestos a hombres ilustres y capaces, que hacen honor a sus cargos, en tanto que los que surgen en las monarquías no son a menudo sino chismosos, pillos e intrigantes, talentos mediocres que una vez elevados a las altas dignidades de la corte, no sirven sino para demostrar al público su ineptitud.\n\nRousseau, J. J. El contrato social, 1762. Adaptación.\n\nFuente 2: Montesquieu y su planteamiento sobre la Monarquía\nLa monarquía se destruye cuando el príncipe (...) priva a unos de sus funciones naturales para darlas caprichosamente a otros, y cuando es más amante de sus deseos que de sus deberes. La monarquía se pierde también (...) cuando el príncipe desconoce su autoridad, su situación y el amor de sus pueblos, y cuando llega a olvidarse de que un monarca debe reputarse siempre seguro, así como un déspota constantemente debe considerarse en peligro.\n\nMontesquieu. El Espíritu de las Leyes, 1748. Adaptación.",
+    "format": "plain",
+    "attachments": []
+   },
+   "items": [
+    {
+     "position": 16,
+     "printedNumber": "16",
+     "type": "multiple_choice",
+     "responseFormat": "choice",
+     "stem": "¿Cuál era el contexto histórico de Europa cuando se escribieron estas opiniones?",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "Se extendía el proceso de la Ilustración.",
+       "isCorrect": true
+      },
+      {
+       "key": "B",
+       "text": "Se consolidaban las revoluciones liberales.",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "Se producía la formación del sistema feudal.",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "Se conformaban los primeros Estados modernos.",
+       "isCorrect": false
+      }
+     ],
+     "correctKey": "A",
+     "skill": "Análisis y trabajo con fuentes de información",
+     "oa": "OA 14",
+     "contentAxis": "Historia",
+     "hasFigure": false,
+     "figureNote": null,
+     "indicador": "Relacionan información sobre el contexto histórico presentada en fuentes históricas o geográficas, con periodos o procesos históricos estudiados en el nivel.",
+     "oaLevel": null,
+     "imageRef": null
+    },
+    {
+     "position": 17,
+     "printedNumber": "17",
+     "type": "multiple_choice",
+     "responseFormat": "choice",
+     "stem": "Considerando la información que entrega la fuente 1, ¿qué visión tiene Rousseau respecto del gobierno republicano?",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "Que es un sistema que impide el nombramiento de hombres talentosos en los cargos públicos.",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "Que es un sistema corrompido porque permite la llegada de hombres tramposos a los cargos públicos.",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "Que es un sistema que asegura la elección de hombres competentes para ocupar los cargos de poder.",
+       "isCorrect": true
+      },
+      {
+       "key": "D",
+       "text": "Que es un sistema inferior a la monarquía ya que permite que hombres poco brillantes ocupen cargos de poder.",
+       "isCorrect": false
+      }
+     ],
+     "correctKey": "C",
+     "skill": "Análisis y trabajo con fuentes de información",
+     "oa": "OA 14",
+     "contentAxis": "Historia",
+     "hasFigure": false,
+     "figureNote": null,
+     "indicador": "Identifican información que se encuentra explícita en fuentes primarias o secundarias",
+     "oaLevel": null,
+     "imageRef": null
+    }
+   ]
+  },
+  {
+   "order": 16,
+   "name": "Pregunta 18 — Causas de la Revolución francesa",
+   "type": "multiple_choice",
+   "instructions": null,
+   "passage": null,
+   "items": [
+    {
+     "position": 18,
+     "printedNumber": "18",
+     "type": "multiple_choice",
+     "responseFormat": "choice",
+     "stem": "La Revolución francesa fue un proceso donde se desarrollaron una serie de transformaciones políticas, que dieron cuerpo a un sistema republicano basado en los principios de soberanía popular, igualdad ante la ley y supremacía constitucional.\n\nAl respecto, ¿cuál de las siguientes alternativas presenta algunas de las causas de la Revolución Francesa?",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "El avance de la industrialización y el surgimiento de nuevas clases sociales.",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "El desarrollo del pensamiento ilustrado y la persistencia del Antiguo Régimen.",
+       "isCorrect": true
+      },
+      {
+       "key": "C",
+       "text": "La existencia de una sociedad de clases y el ascenso de los sectores populares.",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "La fragmentación del poder político y la pérdida de influencia de la Iglesia Católica.",
+       "isCorrect": false
+      }
+     ],
+     "correctKey": "B",
+     "skill": "Pensamiento crítico",
+     "oa": "OA 15",
+     "contentAxis": "Historia",
+     "hasFigure": false,
+     "figureNote": null,
+     "indicador": "Distinguen las causas de procesos históricos y/o geográficos estudiados en el nivel.",
+     "oaLevel": null,
+     "imageRef": null
+    }
+   ]
+  },
+  {
+   "order": 17,
+   "name": "Pregunta 19 — Legitimidad de la conquista española en América",
+   "type": "multiple_choice",
+   "instructions": null,
+   "passage": null,
+   "items": [
+    {
+     "position": 19,
+     "printedNumber": "19",
+     "type": "multiple_choice",
+     "responseFormat": "choice",
+     "stem": "En el contexto de la discusión sobre la legitimidad de la conquista española en América, ¿qué pregunta permite profundizar en el debate sobre la situación legal de los indígenas con respecto a los españoles?",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "¿Qué prácticas indígenas fueron adoptadas por los conquistadores españoles?",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "¿En qué aspectos se diferenciaban las sociedades indígenas de la sociedad española?",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "¿Cómo se organizaban políticamente los indígenas antes de la llegada de los españoles?",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "¿Qué acciones se realizaron para regular el trato a los indígenas dado por los españoles?",
+       "isCorrect": true
+      }
+     ],
+     "correctKey": "D",
+     "skill": "Pensamiento crítico",
+     "oa": "OA 17",
+     "contentAxis": "Formación ciudadana",
+     "hasFigure": false,
+     "figureNote": null,
+     "indicador": "Distinguen preguntas que permiten profundizar en temas de interés estudiados en el nivel.",
+     "oaLevel": null,
+     "imageRef": null
+    }
+   ]
+  },
+  {
+   "order": 18,
+   "name": "Pregunta 20 — Líneas de tiempo: independencias de Colombia, Chile y Argentina",
+   "type": "multiple_choice",
+   "instructions": "Observa las siguientes líneas de tiempo que secuencian hitos de los procesos de independencia de algunos países americanos.",
+   "passage": null,
+   "items": [
+    {
+     "position": 20,
+     "printedNumber": "20",
+     "type": "multiple_choice",
+     "responseFormat": "choice",
+     "stem": "Observa las siguientes líneas de tiempo que secuencian hitos de los procesos de independencia de algunos países americanos.\n\nProceso de Independencia de Colombia (1810–1824): 1810 Declaración de Independencia de la Nueva Granada; 1811 Junta provisional de las ciudades amigas del Valle del Cauca; 1814 Derrota patriota en la Batalla de Pasto; 1819 Primera Constitución Política de Colombia; 1824 Triunfo patriota en la Batalla de Barbacoas.\n\nProceso de Independencia de Chile (1810–1823): 1810 Primera Junta Nacional de Gobierno; 1811 Apertura del Primer Congreso Nacional; 1814 Derrota del Ejército patriota en Rancagua; 1818 Firma del Acta de Independencia; 1823 Abdicación de Bernardo O'Higgins.\n\nProceso de Independencia de Argentina (1810–1820): 1810 Primera Junta; 1811 Instauración de la Junta Grande; 1813 Primera Asamblea Constituyente; 1816 Independencia de las Provincias Unidas; 1820 Fin de los gobiernos de Directores Supremos.\n\nA partir de la observación de las líneas de tiempo anteriores, ¿qué conclusión es posible establecer respecto de los procesos independentistas de las colonias hispanoamericanas?",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "Tuvieron la misma duración.",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "Tuvieron su inicio en años distintos.",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "Se desarrollaron en décadas distintas.",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "Se desarrollaron de manera simultánea.",
+       "isCorrect": true
+      }
+     ],
+     "correctKey": "D",
+     "skill": "Pensamiento temporal y espacial",
+     "oa": "OA 16",
+     "contentAxis": "Historia",
+     "hasFigure": true,
+     "figureNote": "Figura DEL ÍTEM (p. 22, ocupa la página completa): tres líneas de tiempo paralelas con flechas azules y cajas de hitos (Colombia 1810-1824, Chile 1810-1823, Argentina 1810-1820). La pregunta y sus alternativas están en la p. 23",
+     "indicador": "Reconocen la simultaneidad de hechos, procesos y/o periodos históricos estudiados en el nivel, en líneas de tiempo simples o paralelas.",
+     "oaLevel": null,
+     "imageRef": "item/global/8vo-historia-intermedio-2026/item_figure/20.png"
+    }
+   ]
+  },
+  {
+   "order": 19,
+   "name": "Pregunta 21 — Fuentes: Declaración de los Derechos del Hombre y del Ciudadano / Declaración Universal de Derechos Humanos",
+   "type": "multiple_choice",
+   "instructions": "Lee las siguientes fuentes:",
+   "passage": {
+    "title": "Declaración de los Derechos del Hombre y del Ciudadano / Declaración Universal de Derechos Humanos",
+    "text": "Declaración de los Derechos del Hombre y del Ciudadano\nFue una declaración de principios realizada por la Asamblea Constituyente Francesa, el 26 de agosto de 1789, que pasó a ser la introducción a la Constitución de 1791 del mismo país. En ella se definen y reconocen con el carácter de universales los derechos personales y colectivos de los hombres franceses, entre los cuales encontramos: la libertad, la igualdad ante la ley y en el ejercicio de los derechos, el derecho de propiedad, la presunción de inocencia y el principio de la separación de poderes.\n\nLa declaración establece los principios de la sociedad que serán la base de la nueva legitimidad, acabando con los principios, las instituciones y las prácticas del Antiguo Régimen: «El principio de toda soberanía reside esencialmente en la nación». La Declaración de los Derechos del Hombre y del Ciudadano considera legítima la revuelta de los diputados en contra de la monarquía absoluta, al declarar derecho imprescindible del hombre la «resistencia a la opresión».\n\nDiario Constitucional, consultado el 11 de junio de 2024. Adaptación.\n\n¿Qué es la Declaración Universal de Derechos Humanos y por qué se creó?\nAmnistía Internacional sostiene que la Declaración Universal de Derechos Humanos (DUDH) es un documento que sirve de plan de acción global para la libertad y la igualdad protegiendo los derechos de todas las personas en todos los lugares. En 1948, después de la Segunda Guerra Mundial, fue la primera vez que los países acordaron las libertades y derechos que merecen protección universal para que todas las personas vivan su vida en libertad, igualdad y dignidad.\n\nAmnistía afirma que la DUDH marca un hito. Por primera vez, el mundo tenía un documento acordado globalmente que señalaba que todos los seres humanos son libres e iguales con independencia de su sexo, color, creencias, religión u otras características.\n\nLos 30 derechos y libertades contenidos en la DUDH incluyen el derecho a no ser sometido a tortura, el derecho a la libertad de expresión, el derecho a la educación y el derecho a buscar asilo. La Declaración incluye derechos civiles y políticos, como los derechos a la vida, a la libertad y a la vida privada. También incluye derechos económicos, sociales y culturales, como los derechos a la seguridad social, la salud y a una vivienda adecuada.\n\nDiario Constitucional, 23 de noviembre de 2018. Extracto.",
+    "format": "plain",
+    "attachments": []
+   },
+   "items": [
+    {
+     "position": 21,
+     "printedNumber": "21",
+     "type": "multiple_choice",
+     "responseFormat": "choice",
+     "stem": "A partir de lo planteado por las fuentes anteriores, ¿qué elemento de continuidad y qué elemento de cambio se reconocen entre la Declaración de los Derechos del Hombre y del Ciudadano y la Declaración Universal de Derechos Humanos?",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "Mientras ambas establecen los derechos de libertad e igualdad, la Declaración Universal incluye derechos económicos, sociales y culturales.",
+       "isCorrect": true
+      },
+      {
+       "key": "B",
+       "text": "Mientras ambas establecen el derecho a la vivienda, la Declaración Universal no considera la igualdad ante la ley.",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "Mientras ambas incluyen a toda la humanidad, la Declaración Universal solo integra derechos civiles y políticos.",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "Mientras ambas integran el derecho a la educación, la Declaración Universal tiene vigencia solo en territorio francés.",
+       "isCorrect": false
+      }
+     ],
+     "correctKey": "A",
+     "skill": "Pensamiento temporal y espacial",
+     "oa": "OA 18",
+     "contentAxis": "Formación ciudadana",
+     "hasFigure": false,
+     "figureNote": null,
+     "indicador": "Reconocen elementos de continuidad y cambio entre períodos o procesos históricos estudiados en el nivel.",
+     "oaLevel": null,
+     "imageRef": null
+    }
+   ]
+  },
+  {
+   "order": 20,
+   "name": "Pregunta 22 — Fuente: la consolidación del Estado tras la independencia de Chile (alternativas-esquema)",
+   "type": "multiple_choice",
+   "instructions": "Lee la siguiente fuente:",
+   "passage": {
+    "title": "La consolidación del Estado tras la independencia de Chile",
+    "text": "El surgimiento y consolidación del Estado nacional en el siglo XIX involucró: la creación de la nación, la formación de una identidad y de ciudadanos, los que son los soportes de la nueva legitimidad del naciente orden político republicano que se sostuvo en la soberanía nacional y la representación política. Para el ejercicio de la soberanía nacional se requirió de la formación de los atributos republicanos en la población chilena por medio de varios mecanismos que el Estado consideró apropiados. Para la elite lo más apto para dicha formación era la educación y, por lo tanto, era necesario promover y estimular su implementación.\n\nIglesias, R. La conformación del Estado nacional chileno durante el siglo XIX: educación, nación y ciudadanía, 2017. Adaptación.",
+    "format": "plain",
+    "attachments": []
+   },
+   "items": [
+    {
+     "position": 22,
+     "printedNumber": "22",
+     "type": "multiple_choice",
+     "responseFormat": "choice",
+     "stem": "¿Cuál de los siguientes esquemas representa correctamente la información contenida en la fuente anterior?",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "Esquema: «Consolidación del Estado» → Involucró la → Creación de la nación · Formación de identidad · Formación de ciudadanos → Que legitimaron el → «Orden político republicano» → Basado en → Soberanía nacional · Representación pública → A través de → Educación.",
+       "isImage": true,
+       "isCorrect": true,
+       "imageRef": "item/global/8vo-historia-intermedio-2026/alt_figure/22_A.png"
+      },
+      {
+       "key": "B",
+       "text": "Esquema: «Consolidación del Estado» → Involucró la → Creación de la nación · Formación de identidad · Formación de ciudadanos · Orden político republicano → Legitimado en la → «Educación de la elite» → Soberanía nacional · Representación pública → En base a → Mecanismos del Estado (con flechas «Sobre» hacia ambas).",
+       "isImage": true,
+       "isCorrect": false,
+       "imageRef": "item/global/8vo-historia-intermedio-2026/alt_figure/22_B.png"
+      },
+      {
+       "key": "C",
+       "text": "Esquema: «Consolidación del Estado» → Involucró la → Creación de la nación · Formación de identidad · Formación de ciudadanos · Soberanía nacional · Representación pública · La elite (Representación pública → En base a → Educación); y «Consolidación del Estado» → Legitimado en un → Orden político republicano → Que requiere → Mecanismos del Estado.",
+       "isImage": true,
+       "isCorrect": false,
+       "imageRef": "item/global/8vo-historia-intermedio-2026/alt_figure/22_C.png"
+      }
+     ],
+     "correctKey": "A",
+     "skill": "Análisis y trabajo con fuentes de información",
+     "oa": "OA 19",
+     "contentAxis": "Formación ciudadana",
+     "hasFigure": true,
+     "figureNote": "Figuras POR ALTERNATIVA (pp. 26-27): las tres alternativas son organizadores gráficos (diagramas de cajas y conectores). A está en la p. 26; B y C en la p. 27. Su text es una descripción del diagrama, no una transcripción literal",
+     "indicador": "Organizan la información obtenida en fuentes sobre un tema pertinente al nivel, utilizando organizadores gráficos, tablas, listas de ideas principales y esquemas, entre otros.",
+     "oaLevel": null,
+     "imageRef": null
+    }
+   ]
+  },
+  {
+   "order": 21,
+   "name": "Pregunta 23 (23.1–23.5) — Mapa de recursos naturales de la Zona Sur: clasificación por tipo de región",
+   "type": "multiple_choice",
+   "instructions": "Observa el siguiente mapa y lee la información adjunta a él. Luego, considerando la información presentada y tus conocimientos previos, marca con una X a qué tipo de región corresponde cada una de las características de la Zona Sur presentadas en el cuadro.",
+   "passage": {
+    "title": "Mapa de recursos naturales de la Zona Sur / Características de la Zona Sur",
+    "text": "Mapa de recursos naturales de la Zona Sur\nMapa temático de la Zona Sur de Chile con las ciudades de Temuco, Valdivia, Osorno y Puerto Montt, rosa de los vientos y símbolos distribuidos por el territorio.\n\nSimbología: Carbón, Recursos forestales, Peces, Acuicultura, Crustáceos, Moluscos, Cultivos agrícolas, Cerdos, Vacunos.\n\nCaracterísticas de la Zona Sur\nLa Zona Sur de Chile se encuentra en la parte meridional del país, al sur del río Biobío. Cuenta con un clima templado y lluvioso, con vegetación adaptada a la humedad y una fauna compuesta por aves y mamíferos.\n\nLa zona también tiene una rica historia y cultura mapuche, que se refleja en su arte, gastronomía y tradiciones.",
+    "format": "plain",
+    "attachments": [
+     {
+      "kind": "image",
+      "note": "Mapa de recursos naturales de la Zona Sur con simbología de recursos (carbón, forestales, peces, acuicultura, crustáceos, moluscos, cultivos agrícolas, cerdos, vacunos) y las ciudades de Temuco, Valdivia, Osorno y Puerto Montt"
+     }
+    ],
+    "imageRef": "item/global/8vo-historia-intermedio-2026/section_figure/21.png"
+   },
+   "items": [
+    {
+     "position": 23,
+     "printedNumber": "23.1",
+     "type": "multiple_choice",
+     "responseFormat": "choice",
+     "stem": "Considerando la información presentada y tus conocimientos previos, marca con una X a qué tipo de región corresponde cada una de las características de la Zona Sur presentadas en el cuadro.\n\nEl desarrollo de la actividad forestal.",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "Región Cultural",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "Región Natural",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "Región Administrativa",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "Región Económica",
+       "isCorrect": true
+      }
+     ],
+     "correctKey": "D",
+     "skill": "Pensamiento temporal y espacial",
+     "oa": "OA 20",
+     "contentAxis": "Geografía",
+     "hasFigure": true,
+     "figureNote": "Depende del ESTÍMULO COMPARTIDO de la sección (mapa de recursos naturales de la Zona Sur, p. 28); el subítem en sí no tiene figura propia",
+     "indicador": "Caracterizan los diversos espacios geográficos estudiados en el nivel, utilizando mapas a diferentes escalas, herramientas geográficas y/o tecnológicas.",
+     "oaLevel": null,
+     "imageRef": null
+    },
+    {
+     "position": 24,
+     "printedNumber": "23.2",
+     "type": "multiple_choice",
+     "responseFormat": "choice",
+     "stem": "Considerando la información presentada y tus conocimientos previos, marca con una X a qué tipo de región corresponde cada una de las características de la Zona Sur presentadas en el cuadro.\n\nLa presencia de un clima templado y lluvioso.",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "Región Cultural",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "Región Natural",
+       "isCorrect": true
+      },
+      {
+       "key": "C",
+       "text": "Región Administrativa",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "Región Económica",
+       "isCorrect": false
+      }
+     ],
+     "correctKey": "B",
+     "skill": "Pensamiento temporal y espacial",
+     "oa": "OA 20",
+     "contentAxis": "Geografía",
+     "hasFigure": true,
+     "figureNote": "Depende del ESTÍMULO COMPARTIDO de la sección (mapa de recursos naturales de la Zona Sur, p. 28); el subítem en sí no tiene figura propia",
+     "indicador": "Caracterizan los diversos espacios geográficos estudiados en el nivel, utilizando mapas a diferentes escalas, herramientas geográficas y/o tecnológicas.",
+     "oaLevel": null,
+     "imageRef": null
+    },
+    {
+     "position": 25,
+     "printedNumber": "23.3",
+     "type": "multiple_choice",
+     "responseFormat": "choice",
+     "stem": "Considerando la información presentada y tus conocimientos previos, marca con una X a qué tipo de región corresponde cada una de las características de la Zona Sur presentadas en el cuadro.\n\nLa existencia de capitales provinciales (Temuco, Valdivia, Osorno y Puerto Montt).",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "Región Cultural",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "Región Natural",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "Región Administrativa",
+       "isCorrect": true
+      },
+      {
+       "key": "D",
+       "text": "Región Económica",
+       "isCorrect": false
+      }
+     ],
+     "correctKey": "C",
+     "skill": "Pensamiento temporal y espacial",
+     "oa": "OA 20",
+     "contentAxis": "Geografía",
+     "hasFigure": true,
+     "figureNote": "Depende del ESTÍMULO COMPARTIDO de la sección (mapa de recursos naturales de la Zona Sur, p. 28); el subítem en sí no tiene figura propia",
+     "indicador": "Caracterizan los diversos espacios geográficos estudiados en el nivel, utilizando mapas a diferentes escalas, herramientas geográficas y/o tecnológicas.",
+     "oaLevel": null,
+     "imageRef": null
+    },
+    {
+     "position": 26,
+     "printedNumber": "23.4",
+     "type": "multiple_choice",
+     "responseFormat": "choice",
+     "stem": "Considerando la información presentada y tus conocimientos previos, marca con una X a qué tipo de región corresponde cada una de las características de la Zona Sur presentadas en el cuadro.\n\nLa presencia del pueblo mapuche.",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "Región Cultural",
+       "isCorrect": true
+      },
+      {
+       "key": "B",
+       "text": "Región Natural",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "Región Administrativa",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "Región Económica",
+       "isCorrect": false
+      }
+     ],
+     "correctKey": "A",
+     "skill": "Pensamiento temporal y espacial",
+     "oa": "OA 20",
+     "contentAxis": "Geografía",
+     "hasFigure": true,
+     "figureNote": "Depende del ESTÍMULO COMPARTIDO de la sección (mapa de recursos naturales de la Zona Sur, p. 28); el subítem en sí no tiene figura propia",
+     "indicador": "Caracterizan los diversos espacios geográficos estudiados en el nivel, utilizando mapas a diferentes escalas, herramientas geográficas y/o tecnológicas.",
+     "oaLevel": null,
+     "imageRef": null
+    },
+    {
+     "position": 27,
+     "printedNumber": "23.5",
+     "type": "multiple_choice",
+     "responseFormat": "choice",
+     "stem": "Considerando la información presentada y tus conocimientos previos, marca con una X a qué tipo de región corresponde cada una de las características de la Zona Sur presentadas en el cuadro.\n\nLa existencia de vegetación adaptada a la humedad.",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "Región Cultural",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "Región Natural",
+       "isCorrect": true
+      },
+      {
+       "key": "C",
+       "text": "Región Administrativa",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "Región Económica",
+       "isCorrect": false
+      }
+     ],
+     "correctKey": "B",
+     "skill": "Pensamiento temporal y espacial",
+     "oa": "OA 20",
+     "contentAxis": "Geografía",
+     "hasFigure": true,
+     "figureNote": "Depende del ESTÍMULO COMPARTIDO de la sección (mapa de recursos naturales de la Zona Sur, p. 28); el subítem en sí no tiene figura propia",
+     "indicador": "Caracterizan los diversos espacios geográficos estudiados en el nivel, utilizando mapas a diferentes escalas, herramientas geográficas y/o tecnológicas.",
+     "oaLevel": null,
+     "imageRef": null
+    }
+   ],
+   "imageRef": "item/global/8vo-historia-intermedio-2026/section_figure/21.png"
+  },
+  {
+   "order": 22,
+   "name": "Pregunta 24 — Gráficos: médicos especialistas por región (desarrollo)",
+   "type": "open_ended",
+   "instructions": "Lee los siguientes gráficos que entregan información sobre la presencia de médicos especialistas por región en Chile:",
+   "passage": null,
+   "items": [
+    {
+     "position": 28,
+     "printedNumber": "24",
+     "type": "open_ended",
+     "responseFormat": "develop",
+     "stem": "Lee los siguientes gráficos que entregan información sobre la presencia de médicos especialistas por región en Chile:\n\nGráfico 1: Total de médicos especialistas por región (Región · Total · % respecto al total nacional)\nMetropolitana 22 740 — 50,77%\nValparaíso 4 503 — 10,05%\nBiobío 3 557 — 7,94%\nO’Higgins 2 440 — 5,45%\nÑuble 2 010 — 4,49%\nMaule 1 651 — 3,69%\nLa Araucanía 1 533 — 3,42%\nLos Lagos 1 504 — 3,36%\nNo informada 1 248 — 2,79%\nCoquimbo 990 — 2,21%\nAntofagasta 772 — 1,72%\nLos Ríos 695 — 1,55%\nAtacama 338 — 0,75%\nArica y Parinacota 271 — 0,51%\nAysén 195 — 0,44%\nMagallanes y Antártica Chilena 181 — 0,40%\nTarapacá 165 — 0,37%\n(Superintendencia de Salud. 2023. UFRO. Adaptación.)\n\nGráfico 2: Total de especialidades con un solo médico por región\nArica y Parinacota 9; Tarapacá 8; Antofagasta 9; Atacama 12; Coquimbo 7; Valparaíso 1; Metropolitana 0; O’Higgins 2; Maule 3; Ñuble 2; Biobío 0; La Araucanía 1; Los Ríos 7; Los Lagos 4; Aysén 14; Magallanes y Antártica Chilena 15.\n(Superintendencia de Salud. 2023. UFRO. Adaptación.)\n\nA continuación, lee las siguientes conclusiones que se desprenden del análisis de los gráficos.\n\n1. En las regiones de la Zona Central del país desempeñan su trabajo la mayoría de los médicos especialistas.\n\n2. En las regiones extremas del país desempeñan su trabajo la minoría de los médicos especialistas.\n\nElige una de estas conclusiones y explica cómo esta se refleja en los datos entregados en los gráficos anteriores.\n\nConclusión 1 / Conclusión 2",
+     "correctKey": null,
+     "skill": "Pensamiento crítico",
+     "oa": "OA 21",
+     "contentAxis": "Geografía",
+     "hasFigure": true,
+     "figureNote": "Figuras DEL ÍTEM (pp. 30 y 31): dos gráficos separados — Gráfico 1 (barras horizontales rosadas con totales y minigráficos circulares de %) en la p. 30 y Gráfico 2 (barras horizontales por región) en la p. 31. Ambos son necesarios para responder; la pregunta y la hoja de respuesta están en la p. 32",
+     "rubricId": null,
+     "indicador": "Fundamentan inferencias a partir de evidencia, respecto de algún tema estudiado en el nivel (Pregunta Abierta).",
+     "oaLevel": null,
+     "imageRef": "item/global/8vo-historia-intermedio-2026/item_figure/28.png"
+    }
+   ]
+  },
+  {
+   "order": 23,
+   "name": "Pregunta 25 — Desarrollo sostenible y política estatal",
+   "type": "multiple_choice",
+   "instructions": null,
+   "passage": null,
+   "items": [
+    {
+     "position": 29,
+     "printedNumber": "25",
+     "type": "multiple_choice",
+     "responseFormat": "choice",
+     "stem": "En Chile existen problemas graves de contaminación del aire, especialmente en las grandes ciudades, a lo que se suman los efectos del calentamiento global que impactan a nivel planetario. En este contexto, resulta muy importante que el Estado incentive políticas que fomenten el desarrollo sustentable, entendiendo que esto podría significar la mejora en la calidad de nuestras vidas, la protección de nuestros ecosistemas y la preservación de los recursos naturales para generaciones futuras.\n\nConsiderando la situación descrita, ¿cuál de las siguientes propuestas de política estatal está fundamentada de manera coherente con el concepto de desarrollo sostenible?",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "Promover el uso de combustibles fósiles en el transporte, ya que son de fácil extracción encontrándose en forma masiva en el mercado y a un bajo costo.",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "Aumentar la utilización de las aguas de los glaciares, ya que son numerosos en el país, procurando su derretimiento para convertirla en aguas disponibles.",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "Crear una mayor cantidad de agroindustrias, ya que estas trabajan en base a materias primas que provienen de la actividad agrícola, que no producen sustancias contaminantes.",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "Fomentar el uso de energías renovables, ya que se encuentran en grandes cantidades en la naturaleza y permiten disminuir los gases de efecto invernadero.",
+       "isCorrect": true
+      }
+     ],
+     "correctKey": "D",
+     "skill": "Pensamiento crítico",
+     "oa": "OA 22",
+     "contentAxis": "Geografía",
+     "hasFigure": false,
+     "figureNote": null,
+     "indicador": "Identifican argumentos que fundamentan la elección de una solución frente a un determinado problema. Identifican distribuciones espaciales y patrones (por",
+     "oaLevel": null,
+     "imageRef": null
+    }
+   ]
+  },
+  {
+   "order": 24,
+   "name": "Pregunta 26 — Tabla: IDH Regional en Chile 2018",
+   "type": "multiple_choice",
+   "instructions": "Observa la siguiente tabla que muestra los datos de IDH, por regiones, el año 2018:",
+   "passage": null,
+   "items": [
+    {
+     "position": 30,
+     "printedNumber": "26",
+     "type": "multiple_choice",
+     "responseFormat": "choice",
+     "stem": "El Índice de Desarrollo Humano (IDH) a nivel nacional en Chile fue de 0,847 el año 2018.\n\nObserva la siguiente tabla que muestra los datos de IDH, por regiones, el año 2018:\n\nIDH Regional en Chile 2018 (Región · 2018)\nMetropolitana 0,864\nTarapacá (incluye Región de Arica y Parinacota) 0,862\nAntofagasta 0,860\nValparaíso 0,848\nMagallanes y de la Antártica Chilena 0,845\nAtacama 0,836\nCoquimbo 0,811\nBiobío (incluye Región de Ñuble) 0,808\nDel Libertador General Bernardo O'Higgins 0,802\nAysén 0,790\nLos Lagos (incluye Región de Los Ríos) 0,778\nMaule 0,774\nLa Araucanía 0,770\n(Global Data Lab en Biblioteca del Congreso Nacional. Índice de Desarrollo Humano (IDH) en Chile, julio de 2020. Adaptación.)\n\nA partir de la información que se entrega en el enunciado y en la tabla anterior, ¿qué conclusión se puede establecer respecto del Índice de Desarrollo Humano en Chile?",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "El año 2018 más de la mitad de las regiones tenía un IDH superior al valor nacional.",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "El año 2018 la mayoría de las regiones presentaban un IDH por debajo del valor nacional.",
+       "isCorrect": true
+      },
+      {
+       "key": "C",
+       "text": "El año 2018 las regiones de Valparaíso y Antofagasta tenían un IDH bajo el valor nacional.",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "El año 2018 las regiones de la Zona Sur presentaban un IDH sobre el valor nacional.",
+       "isCorrect": false
+      }
+     ],
+     "correctKey": "B",
+     "skill": "Pensamiento temporal y espacial",
+     "oa": "OA 22",
+     "contentAxis": "Geografía",
+     "hasFigure": true,
+     "figureNote": "Figura DEL ÍTEM (p. 34): tabla «IDH Regional en Chile 2018» maquetada (13 filas). Su contenido está transcrito íntegro en el stem, así que el recorte es opcional/estético",
+     "indicador": "ejemplo, población, cultivo, ciudades, regiones, entre otros) en los diversos espacios geográficos estudiados en el nivel, utilizando herramientas geográficas y/o tecnológicas.",
+     "oaLevel": null,
+     "imageRef": "item/global/8vo-historia-intermedio-2026/item_figure/30.png"
+    }
+   ]
+  }
+ ],
+ "extraction": {
+  "itemCount": 30,
+  "warnings": [
+   "La prueba imprime 26 preguntas; la 23 se abre en 5 subítems (23.1–23.5), por lo que hay 30 posiciones puntuables. Cada ítem conserva su número impreso en `printedNumber` y `position` es el correlativo global 1..30. Cruce verificado contra las claves de la ficha técnica (`fichas/historia/8vo-historia-intermedio-2026.ficha.json`), que trae exactamente 30 claves: 1..22, 23.1..23.5, 24, 25, 26.",
+   "Mapeo posición→impreso: 1..22 → \"1\"..\"22\"; 23..27 → \"23.1\"..\"23.5\"; 28 → \"24\" (desarrollo); 29 → \"25\"; 30 → \"26\". OJO: el brief dice «posición 24 es de desarrollo» refiriéndose al NÚMERO IMPRESO 24; en posición global la de desarrollo es la 28.",
+   "#23–27 (impresas 23.1–23.5) NO son verdadero/falso (a diferencia del precedente de 7°): es una tabla de clasificación con 4 columnas rotuladas (A) Región Cultural, (B) Región Natural, (C) Región Administrativa y (D) Región Económica. Se modelan como `multiple_choice` con alternativas A–D usando esas etiquetas. Coincide con las claves de la ficha (D, B, C, A, B), todas dentro de A–D.",
+   "CRITERIO DE FUENTES: una fuente de PROSA (texto histórico, noticia, fuente 1/fuente 2) va como `passage` de la sección — es un estímulo transcribible y reutilizable; una fuente sólo GRÁFICA (mapa, pintura, gráfico, línea de tiempo, esquema) se describe dentro del `stem` de su ítem con `hasFigure: true` y `passage: null`. Mismo criterio del precedente 7°.",
+   "EXCEPCIÓN al criterio anterior: la sección 21 (pregunta 23) lleva `passage` aunque su estímulo principal sea un mapa, porque el estímulo (mapa + recuadro «Características de la Zona Sur») es COMPARTIDO por los 5 subítems puntuables; la imagen va en `passage.attachments`.",
+   "#13 (impresa 13) tiene sólo 3 alternativas (A, B, C) y las tres son pinturas: `isImage: true` y su `text` es una descripción, no una transcripción. No se puede responder sin ver las imágenes.",
+   "#22 (impresa 22) tiene sólo 3 alternativas (A, B, C) y las tres son organizadores gráficos (esquemas de cajas): `isImage: true`, `text` descriptivo. Alternativa A en p. 26; B y C en p. 27.",
+   "#28 (impresa 24) es de desarrollo: el alumno elige Conclusión 1 o Conclusión 2 y fundamenta con datos de dos gráficos. `open_ended` + `responseFormat: \"develop\"`, sin `alternatives`. Su pauta (códigos 2/1/0) viene en la ficha técnica.",
+   "FIGURAS marcadas para la ola 2 (NO recortadas aquí): ítem-figura en posiciones 10 (pintura), 11 (gráfico de líneas), 12 (dos grabados en un solo recuadro), 20 (tres líneas de tiempo), 28 (dos gráficos en pp. 30 y 31), 30 (tabla IDH, recorte opcional); alternativa-figura en posiciones 13 (A/B/C) y 22 (A/B/C); sección-figura (estímulo compartido) en la sección order 21 (mapa Zona Sur, p. 28), heredada por las posiciones 23–27.",
+   "TRANSCRIPCIÓN LITERAL: la fuente «El Cabildo colonial» (posición 9) trae en el PDF original la errata «frente a lxa burocracia real»; se conserva tal cual, sin corregir.",
+   "DISCREPANCIA MENOR CON EL PRECEDENTE: el brief fija `instrument.subject` = \"Historia, Geografía y Cs. Sociales\" (abreviado), mientras que el JSON ya cargado de 7° usa \"Historia, Geografía y Ciencias Sociales\". Se siguió el brief (manda sobre decisión propia); si el orquestador prefiere homologar con 7°, es un cambio de un campo. `instrument.name` sí es idéntico al literal del brief.",
+   "Sin hoja de respuestas oficial: el cross-check quedó en DOBLE (cuadernillo vs ficha técnica), no triple."
+  ],
+  "needsHumanReview": false
+ },
+ "pauta": {
+  "source": {
+   "instrumentJson": "imported/DIA Historia, Geografía y Ciencias Sociales 8° Básico 2026 — Monitoreo Intermedio",
+   "ficha": "8vo-historia-intermedio-2026.ficha.json"
+  },
+  "rubrics": {
+   "24": "Tipos de respuestas Respuestas parcialmente Respuestas correctas Respuestas incorrectas correctas (Código 2) (Código 0) (Código 1) El o la estudiante elige una conclusión El o la estudiante expresa una El o la estudiante solo (ya sea marcando una de las opciones postura (ya sea marcando una de marca Conclusión 1 o Conclusión 1, Conclusión 2, o las opciones Conclusión 1, Conclusión 2, sin evidenciándola en la redacción de su Conclusión 2, o evidenciándola en desarrollar una respuesta), la redacción de su respuesta), argumentación que respalde su elección, y y o bien, formula una inferencia que establece formula una inferencia que una relación coherente entre la establece una relación coherente no contesta la pregunta, conclusión marcada y la información entre la conclusión marcada y la o bien, sobre la cantidad de especialistas y información sobre la cantidad de responde de manera especialidades médicas por región especialistas y especialidades contenida en los gráficos presentados, médicas por región contenida en tautológica, incoherente o presenta cualquier otra los gráficos presentados, e respuesta no descrita en pero, incluye datos extraídos de uno o ambos esta pauta. gráficos como evidencia que sustenta No incluye datos extraídos de uno su inferencia. o ambos gráficos como evidencia que sustente su inferencia. Ejemplos: Ejemplos: Ejemplos: - Conclusión 1. La mayor cantidad de - Conclusión 1. Se ve que la - Conclusión 1. Hay más médicos especialistas en Chile se región Metropolitana y otras de médicos en la zona concentra en regiones de la zona la zona central como Biobío y central porque tienen central del país ya que el gráfico 1 Valparaíso tienen la mayoría más población. muestra que más de la mitad de los de los médicos especialistas - Conclusión 1. En las médicos especialistas se concentra del país. regiones extremas hay en tres regiones de esta zona del - Conclusión 2. Se observa que, menos médicos. país. en las regiones extremas, - Conclusión 1. Se evidencia que la como Magallanes y Aysén, solo mayoría de los médicos especialistas un 0,40% y un 0,44% de en Chile realiza sus labores en médicos especialistas trabajan regiones de la zona central del país en esas regiones. ya que el gráfico 1 muestra que más del 60% trabaja en las regiones Metropolitana, de Valparaíso y Biobío, lo cual se ve también en el gráfico 2 cuando este indica que dos de estas regiones tienen todas las especialidades cubiertas por más de un médico. 9 Ficha Técnica Prueba de Historia, Geografía y Ciencias Sociales 8° básico - Conclusión 2. En el caso de las regiones extremas del país se nota que existe una minoría de médicos que trabaja allí puesto que el gráfico 1 muestra que las dos primeras regiones de Chile (Arica y Parinacota y Tarapacá) y las dos últimas (Aysén y Magallanes) tienen en conjunto un porcentaje muy bajo de la dotación de médicos especialistas del país (menos del 2%) lo que se comprueba al observar el gráfico 2 el cual presenta a estas 4 regiones como aquellas que más especialidades tienen con solo un médico. 10 &gt; Diagnóstico Integral de Aprendizajes Instrumentos de Evaluación 2026 agenciaeducacion.cl"
+  }
+ }
+}

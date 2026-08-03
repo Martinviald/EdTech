@@ -120,7 +120,8 @@
               "name": "Números y operaciones",
               "tagType": "secondary"
             }
-          ]
+          ],
+          "imageRef": "item/global/3ro-matematicas-diagnostico-2025/item_figure/02.png"
         },
         {
           "position": 3,
@@ -234,7 +235,8 @@
               "name": "Números y operaciones",
               "tagType": "secondary"
             }
-          ]
+          ],
+          "imageRef": "item/global/3ro-matematicas-diagnostico-2025/item_figure/04.png"
         },
         {
           "position": 5,
@@ -471,7 +473,8 @@
               "name": "Números y operaciones",
               "tagType": "secondary"
             }
-          ]
+          ],
+          "imageRef": "item/global/3ro-matematicas-diagnostico-2025/item_figure/09.png"
         },
         {
           "position": 10,
@@ -597,19 +600,22 @@
               "key": "A",
               "text": "Rectángulo (más ancho que alto) dibujado sobre la cuadrícula.",
               "isImage": true,
-              "isCorrect": false
+              "isCorrect": false,
+              "imageRef": "item/global/3ro-matematicas-diagnostico-2025/alt_figure/12_A.png"
             },
             {
               "key": "B",
               "text": "Triángulo dibujado sobre la cuadrícula.",
               "isImage": true,
-              "isCorrect": false
+              "isCorrect": false,
+              "imageRef": "item/global/3ro-matematicas-diagnostico-2025/alt_figure/12_B.png"
             },
             {
               "key": "C",
               "text": "Cuadrado dibujado sobre la cuadrícula.",
               "isImage": true,
-              "isCorrect": true
+              "isCorrect": true,
+              "imageRef": "item/global/3ro-matematicas-diagnostico-2025/alt_figure/12_C.png"
             }
           ],
           "correctKey": "C",
@@ -645,7 +651,8 @@
               "name": "Geometría",
               "tagType": "secondary"
             }
-          ]
+          ],
+          "imageRef": "item/global/3ro-matematicas-diagnostico-2025/item_figure/12.png"
         },
         {
           "position": 13,
@@ -657,19 +664,22 @@
               "key": "A",
               "text": "Grupo de 6 figuras 2D: 4 rectángulos y 2 cuadrados pequeños.",
               "isImage": true,
-              "isCorrect": true
+              "isCorrect": true,
+              "imageRef": "item/global/3ro-matematicas-diagnostico-2025/alt_figure/13_A.png"
             },
             {
               "key": "B",
               "text": "Grupo de 4 figuras 2D: 2 rectángulos y 2 cuadrados pequeños.",
               "isImage": true,
-              "isCorrect": false
+              "isCorrect": false,
+              "imageRef": "item/global/3ro-matematicas-diagnostico-2025/alt_figure/13_B.png"
             },
             {
               "key": "C",
               "text": "Grupo de 3 figuras 2D: 2 rectángulos y 1 cuadrado pequeño.",
               "isImage": true,
-              "isCorrect": false
+              "isCorrect": false,
+              "imageRef": "item/global/3ro-matematicas-diagnostico-2025/alt_figure/13_C.png"
             }
           ],
           "correctKey": "A",
@@ -705,7 +715,8 @@
               "name": "Geometría",
               "tagType": "secondary"
             }
-          ]
+          ],
+          "imageRef": "item/global/3ro-matematicas-diagnostico-2025/item_figure/13.png"
         },
         {
           "position": 14,
@@ -717,19 +728,22 @@
               "key": "A",
               "text": "Cubo (sólido con caras cuadradas iguales).",
               "isImage": true,
-              "isCorrect": true
+              "isCorrect": true,
+              "imageRef": "item/global/3ro-matematicas-diagnostico-2025/alt_figure/14_A.png"
             },
             {
               "key": "B",
               "text": "Cono.",
               "isImage": true,
-              "isCorrect": false
+              "isCorrect": false,
+              "imageRef": "item/global/3ro-matematicas-diagnostico-2025/alt_figure/14_B.png"
             },
             {
               "key": "C",
               "text": "Prisma rectangular más alto que ancho.",
               "isImage": true,
-              "isCorrect": false
+              "isCorrect": false,
+              "imageRef": "item/global/3ro-matematicas-diagnostico-2025/alt_figure/14_C.png"
             }
           ],
           "correctKey": "A",
@@ -765,7 +779,8 @@
               "name": "Geometría",
               "tagType": "secondary"
             }
-          ]
+          ],
+          "imageRef": "item/global/3ro-matematicas-diagnostico-2025/item_figure/14.png"
         },
         {
           "position": 15,
@@ -806,7 +821,8 @@
               "name": "Medición",
               "tagType": "secondary"
             }
-          ]
+          ],
+          "imageRef": "item/global/3ro-matematicas-diagnostico-2025/item_figure/15.png"
         },
         {
           "position": 16,
@@ -863,7 +879,8 @@
               "name": "Patrones y álgebra",
               "tagType": "secondary"
             }
-          ]
+          ],
+          "imageRef": "item/global/3ro-matematicas-diagnostico-2025/item_figure/16.png"
         },
         {
           "position": 17,
@@ -920,7 +937,8 @@
               "name": "Datos y probabilidades",
               "tagType": "secondary"
             }
-          ]
+          ],
+          "imageRef": "item/global/3ro-matematicas-diagnostico-2025/item_figure/17.png"
         },
         {
           "position": 18,
@@ -977,7 +995,8 @@
               "name": "Datos y probabilidades",
               "tagType": "secondary"
             }
-          ]
+          ],
+          "imageRef": "item/global/3ro-matematicas-diagnostico-2025/item_figure/18.png"
         },
         {
           "position": 19,
@@ -1173,7 +1192,8 @@
               "name": "Números y operaciones",
               "tagType": "secondary"
             }
-          ]
+          ],
+          "imageRef": "item/global/3ro-matematicas-diagnostico-2025/item_figure/22.png"
         },
         {
           "position": 23,

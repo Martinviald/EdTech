@@ -54,6 +54,7 @@ export type InstrumentType = (typeof INSTRUMENT_TYPES)[number];
 
 export const ITEM_TYPES = [
   'multiple_choice',
+  'multi_select',
   'true_false',
   'open_ended',
   'oral_reading',
@@ -65,6 +66,26 @@ export const ITEM_TYPES = [
   'gap_fill',
 ] as const;
 export type ItemType = (typeof ITEM_TYPES)[number];
+
+/**
+ * Etiqueta de cada tipo de ítem para la UI. Vive acá y no en `apps/web` porque
+ * estaba duplicada en 5 componentes con textos distintos (unos con acento, otros
+ * sin) — y al agregar `multi_select` uno quedó sin actualizar, mostrando el
+ * string crudo. Un tipo nuevo en `ITEM_TYPES` obliga a completar este Record.
+ */
+export const ITEM_TYPE_LABELS: Record<ItemType, string> = {
+  multiple_choice: 'Selección múltiple',
+  multi_select: 'Multi-selección',
+  true_false: 'Verdadero/Falso',
+  open_ended: 'Desarrollo',
+  oral_reading: 'Lectura oral',
+  oral_expression: 'Expresión oral',
+  writing: 'Escritura',
+  listening: 'Comprensión auditiva',
+  matching: 'Términos pareados',
+  ordering: 'Ordenamiento',
+  gap_fill: 'Completar',
+};
 
 export const TAXONOMY_NODE_TYPES = [
   'domain',

@@ -7,6 +7,15 @@ export type ItemStatus = (typeof ITEM_STATUS)[number];
 export const ITEM_SOURCES = ['official', 'ai_generated', 'custom', 'imported'] as const;
 export type ItemSource = (typeof ITEM_SOURCES)[number];
 
+// Dificultad del ítem (T2-21). Etiqueta editable a mano; etiquetado IA = F2.
+export const ITEM_DIFFICULTIES = ['easy', 'medium', 'hard'] as const;
+export type ItemDifficulty = (typeof ITEM_DIFFICULTIES)[number];
+export const ITEM_DIFFICULTY_LABELS: Record<ItemDifficulty, string> = {
+  easy: 'Fácil',
+  medium: 'Media',
+  hard: 'Difícil',
+};
+
 export const ITEM_TAG_TYPES = ['primary', 'secondary'] as const;
 export type ItemTagType = (typeof ITEM_TAG_TYPES)[number];
 
@@ -28,6 +37,7 @@ export const itemBankScopeSchema = z.enum(ITEM_BANK_SCOPES);
 const itemTypeSchema = z.enum(ITEM_TYPES);
 const itemStatusSchema = z.enum(ITEM_STATUS);
 const itemSourceSchema = z.enum(ITEM_SOURCES);
+const itemDifficultySchema = z.enum(ITEM_DIFFICULTIES);
 const itemTagTypeSchema = z.enum(ITEM_TAG_TYPES);
 const taggedBySchema = z.enum(TAGGED_BY);
 
@@ -45,10 +55,38 @@ export type IrtParams = z.infer<typeof irtParamsSchema>;
 
 // ── Scoring Config ───────────────────────────────────────────────────────────
 
+/**
+ * Política de puntaje de un ítem de términos pareados. Todo es configuración:
+ * el caso DIA (un punto por par, sin penalización) es sólo el default.
+ *
+ * `pointsPerPair` omitido ⇒ se deriva de `points / nº de pares correctos`, así
+ * un ítem que sólo declara `points` se comporta bien sin saber cuántos pares tiene.
+ */
+export const matchingScoringSchema = z.object({
+  pointsPerPair: z.number().min(0).optional(),
+  penaltyPerIncorrectPair: z.number().min(0).optional(),
+});
+
+export type MatchingScoring = z.infer<typeof matchingScoringSchema>;
+
+/**
+ * Política de puntaje de un ítem de multi-selección. Default: todo-o-nada
+ * (`requireExact`), que es como puntúa la Agencia — verificado contra los scans.
+ */
+export const multiSelectScoringSchema = z.object({
+  pointsPerCorrect: z.number().min(0).optional(),
+  penaltyPerIncorrect: z.number().min(0).optional(),
+  requireExact: z.boolean().optional(),
+});
+
+export type MultiSelectScoring = z.infer<typeof multiSelectScoringSchema>;
+
 export const scoringConfigSchema = z
   .object({
     points: z.number().min(0).optional(),
     partialCredit: z.boolean().optional(),
+    matching: matchingScoringSchema.optional(),
+    multiSelect: multiSelectScoringSchema.optional(),
   })
   .passthrough()
   .optional();
@@ -59,13 +97,15 @@ export type ScoringConfig = z.infer<typeof scoringConfigSchema>;
 
 export const multipleChoiceContentSchema = z.object({
   stem: z.string().min(1),
-  alternatives: z.array(
-    z.object({
-      key: z.string().min(1).max(5),
-      text: z.string().min(1),
-      isCorrect: z.boolean(),
-    }),
-  ).min(2),
+  alternatives: z
+    .array(
+      z.object({
+        key: z.string().min(1).max(5),
+        text: z.string().min(1),
+        isCorrect: z.boolean(),
+      }),
+    )
+    .min(2),
   imageUrl: z.string().url().optional(),
   explanation: z.string().optional(),
 });
@@ -91,7 +131,8 @@ function refineContentByType(
 
   // Import perezoso para evitar el ciclo item.schema ↔ item-content.schema.
   // eslint-disable-next-line @typescript-eslint/no-var-requires
-  const { ITEM_CONTENT_SCHEMAS } = require('./item-content.schema') as typeof import('./item-content.schema');
+  const { ITEM_CONTENT_SCHEMAS } =
+    require('./item-content.schema') as typeof import('./item-content.schema');
   const schema = ITEM_CONTENT_SCHEMAS[data.type];
 
   const result = schema.safeParse(data.content);
@@ -117,6 +158,7 @@ export const createItemSchema = z
     irtParams: irtParamsSchema,
     status: itemStatusSchema.default('draft'),
     source: itemSourceSchema.default('custom'),
+    difficulty: itemDifficultySchema.nullish(),
     tags: z
       .array(
         z.object({
@@ -171,31 +213,8 @@ const taxonomyNodeGroupsSchema = z
   })
   .pipe(z.array(z.array(z.string().uuid())).optional());
 
-export const listItemsQuerySchema = z.object({
-  instrumentId: z.string().uuid().optional(),
-  sectionId: z.string().uuid().optional(),
-  type: itemTypeSchema.optional(),
-  status: itemStatusSchema.optional(),
-  source: itemSourceSchema.optional(),
-  // Filtro por un nodo (retrocompatible).
-  taxonomyNodeId: z.string().uuid().optional(),
-  // Filtro multi-tag con lógica OR (TKT-12/TKT-14): el ítem se incluye si tiene
-  // CUALQUIERA de estos nodos etiquetado. Se combina con `taxonomyNodeId` (OR).
-  taxonomyNodeIds: taxonomyNodeIdsSchema,
-  // Filtro facetado del banco: asignatura Y nivel (transitivo vía tags → nodos).
-  subjectId: z.string().uuid().optional(),
-  gradeId: z.string().uuid().optional(),
-  // Grupos AND (OR dentro de cada grupo): un grupo por tipo de nodo elegido.
-  taxonomyNodeGroups: taxonomyNodeGroupsSchema,
-  // Alcance del banco de ítems (TKT-14): 'own' | 'global' | 'all' (default).
-  scope: itemBankScopeSchema.default('all'),
-  page: z.coerce.number().int().min(1).default(1),
-  limit: z.coerce.number().int().min(1).max(200).default(50),
-});
-
 export type CreateItemDto = z.infer<typeof createItemSchema>;
 export type UpdateItemDto = z.infer<typeof updateItemSchema>;
-export type ListItemsQueryDto = z.infer<typeof listItemsQuerySchema>;
 
 // ── Taxonomy Tags ────────────────────────────────────────────────────────────
 
@@ -208,15 +227,17 @@ export const createItemTagSchema = z.object({
 });
 
 export const batchTagItemsSchema = z.object({
-  tags: z.array(
-    z.object({
-      itemId: z.string().uuid(),
-      nodeId: z.string().uuid(),
-      tagType: itemTagTypeSchema.default('primary'),
-      confidence: z.coerce.number().min(0).max(1).default(1),
-      taggedBy: taggedBySchema.default('human'),
-    }),
-  ).min(1),
+  tags: z
+    .array(
+      z.object({
+        itemId: z.string().uuid(),
+        nodeId: z.string().uuid(),
+        tagType: itemTagTypeSchema.default('primary'),
+        confidence: z.coerce.number().min(0).max(1).default(1),
+        taggedBy: taggedBySchema.default('human'),
+      }),
+    )
+    .min(1),
 });
 
 export type CreateItemTagDto = z.infer<typeof createItemTagSchema>;
@@ -248,14 +269,16 @@ export const aiTagRequestSchema = z.object({
 });
 
 export const confirmAiTagsSchema = z.object({
-  tags: z.array(
-    z.object({
-      itemId: z.string().uuid(),
-      nodeId: z.string().uuid(),
-      tagType: itemTagTypeSchema.default('primary'),
-      confirmed: z.boolean(),
-    }),
-  ).min(1),
+  tags: z
+    .array(
+      z.object({
+        itemId: z.string().uuid(),
+        nodeId: z.string().uuid(),
+        tagType: itemTagTypeSchema.default('primary'),
+        confirmed: z.boolean(),
+      }),
+    )
+    .min(1),
 });
 
 export type AiTagSuggestion = z.infer<typeof aiTagSuggestionSchema>;
@@ -359,6 +382,13 @@ export type ItemTaxonomyTagModel = {
     code: string | null;
     description: string | null;
     taxonomyId: string;
+    /**
+     * Nodo ANCESTRO directo (padre) en el árbol de `taxonomy_nodes`. Para un OA
+     * su padre es el EJE curricular estricto; se usa para agrupar el resumen de
+     * la tabla de especificaciones por eje (T2-11). `null` si el nodo es raíz.
+     */
+    parentId: string | null;
+    parentName: string | null;
   };
 };
 
@@ -375,6 +405,7 @@ export type ItemModel = {
   status: ItemStatus;
   version: number;
   source: ItemSource;
+  difficulty: ItemDifficulty | null;
   createdById: string | null;
   deletedAt: string | Date | null;
   createdAt: string | Date;

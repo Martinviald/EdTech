@@ -362,7 +362,12 @@ export function SkillDrilldownDialog({
         </DialogContent>
       </Dialog>
 
-      <QuestionDetailPanel data={detail} open={detailOpen} onClose={closeDetail} />
+      <QuestionDetailPanel
+        data={detail}
+        open={detailOpen}
+        onClose={closeDetail}
+        canAddToCollection
+      />
     </>
   );
 }

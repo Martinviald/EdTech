@@ -1,0 +1,1168 @@
+{
+  "schemaVersion": "1.0",
+  "source": {
+    "file": "5_prueba_matematica_monitoreo_2026_5_basico.pdf",
+    "subjectFolder": "Matematicas"
+  },
+  "instrument": {
+    "name": "DIA Matemática 5° Básico 2026 — Intermedio",
+    "subject": "Matemática",
+    "subjectCode": "MATH",
+    "grade": "5° Básico",
+    "gradeCode": "5TH_BASIC",
+    "year": 2026,
+    "applicationPeriod": "intermedio",
+    "type": "dia",
+    "isOfficial": true,
+    "source": "imported"
+  },
+  "sections": [
+    {
+      "order": 1,
+      "name": "Preguntas",
+      "type": "mixed",
+      "instructions": "Esta prueba tiene 35 preguntas que debes responder de la siguiente forma. En las preguntas de alternativas debes contestar marcando con una X la respuesta que consideres correcta. En las preguntas de desarrollo debes escribir tu respuesta en la cuadrícula. En las preguntas de completación y de ordenación debes escribir el número correspondiente en el recuadro. Utiliza lápiz grafito para contestar las preguntas y si te equivocas usa goma de borrar. Esta prueba es sin nota.",
+      "passage": null,
+      "items": [
+        {
+          "position": 1,
+          "type": "multiple_choice",
+          "responseFormat": "choice",
+          "stem": "¿Cuántas unidades representa el dígito 5 en el número 6 584 927?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "5",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "50",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "500 000",
+              "isCorrect": true
+            },
+            {
+              "key": "D",
+              "text": "5 000 000",
+              "isCorrect": false
+            }
+          ],
+          "correctKey": "C",
+          "skill": "Representar",
+          "oa": "OA 1",
+          "contentAxis": "Números y operaciones",
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "número natural de más de 6 dígitos y menores que 1 000 millones. Calculan multiplicaciones de números naturales de"
+        },
+        {
+          "position": 2,
+          "type": "multiple_choice",
+          "responseFormat": "choice",
+          "stem": "¿Cuál es el resultado de 42 • 31?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "168",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "546",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "1 202",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "1 302",
+              "isCorrect": true
+            }
+          ],
+          "correctKey": "D",
+          "skill": "Resolver problemas",
+          "oa": "OA 3",
+          "contentAxis": "Números y operaciones",
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Calculan multiplicaciones de números naturales de dos dígitos por números naturales de dos dígitos. Ordenan números naturales con más de 6 dígitos y"
+        },
+        {
+          "position": 3,
+          "type": "open_ended",
+          "responseFormat": "fill_in",
+          "stem": "Observa los precios de las motos y escribe en los recuadros los números del 1 al 4, donde el 1 corresponde al precio más bajo y el 4 al precio más alto. Precios: $4 320 779 — $4 209 999 — $4 321 990 — $4 220 690.",
+          "alternatives": [],
+          "correctKey": null,
+          "skill": "Resolver problemas",
+          "oa": "OA 1",
+          "contentAxis": "Números y operaciones",
+          "hasFigure": true,
+          "figureNote": "Imagen de 4 motos junto a sus precios; los precios ya están transcritos en el enunciado (imagen decorativa, no imprescindible para responder).",
+          "indicador": "Ordenan números naturales con más de 6 dígitos y menores que 1 000 millones en contextos diversos. Resuelven problemas en situaciones de dinero que",
+          "fillAnswer": "3-1-4-2"
+        },
+        {
+          "position": 4,
+          "type": "multiple_choice",
+          "responseFormat": "choice",
+          "stem": "Sofía compró un libro que vale $11 000. Pagó con un billete de $10 000 y un billete de $2 000. ¿Cuánto dinero le deben dar de vuelto?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "$23 000",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "$19 000",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "$3 000",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "$1 000",
+              "isCorrect": true
+            }
+          ],
+          "correctKey": "D",
+          "skill": "Resolver problemas",
+          "oa": "OA 6",
+          "contentAxis": "Números y operaciones",
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "requieren calcular combinaciones de operaciones con números naturales. Resuelven problemas que requieren calcular"
+        },
+        {
+          "position": 5,
+          "type": "multiple_choice",
+          "responseFormat": "choice",
+          "stem": "Diego compró esta caja de lápices grafito en oferta: $990 por una caja de 6 lápices grafito. ¿Cuánto pagó por cada lápiz grafito?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "$110",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "$160",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "$165",
+              "isCorrect": true
+            },
+            {
+              "key": "D",
+              "text": "$330",
+              "isCorrect": false
+            }
+          ],
+          "correctKey": "C",
+          "skill": "Resolver problemas",
+          "oa": "OA 4",
+          "contentAxis": "Números y operaciones",
+          "hasFigure": true,
+          "figureNote": "Imagen de la caja de lápices; el precio ($990) y la cantidad (6 lápices) ya están transcritos en el enunciado.",
+          "indicador": "Resuelven problemas que requieren calcular divisiones de números naturales. Identifican representaciones de fracciones propias"
+        },
+        {
+          "position": 6,
+          "type": "multiple_choice",
+          "responseFormat": "choice",
+          "stem": "Una fábrica vende productos dentro y fuera de Chile. La imagen muestra todas las cajas que se enviarán hoy. Las cajas que viajarán fuera de Chile se marcan con un símbolo distintivo. ¿Qué fracción de las cajas que se enviarán hoy viajarán fuera de Chile?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "3/12",
+              "isCorrect": true
+            },
+            {
+              "key": "B",
+              "text": "9/12",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "3/9",
+              "isCorrect": false
+            }
+          ],
+          "correctKey": "A",
+          "skill": "Representar",
+          "oa": "OA 7",
+          "contentAxis": "Números y operaciones",
+          "hasFigure": true,
+          "figureNote": "Imagen con un conjunto de cajas, algunas marcadas con símbolo de 'fuera de Chile'; imprescindible contarlas para responder.",
+          "indicador": "Identifican representaciones de fracciones propias como partes de un grupo de elementos. Calculan sustracciones de fracciones propias con"
+        },
+        {
+          "position": 7,
+          "type": "open_ended",
+          "responseFormat": "develop",
+          "stem": "Resuelve: 6/8 – 1/4 =",
+          "alternatives": [],
+          "correctKey": null,
+          "skill": "Resolver problemas",
+          "oa": "OA 9",
+          "contentAxis": "Números y operaciones",
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Calculan sustracciones de fracciones propias con denominadores distintos y menores a 12. Identifican la equivalencia entre un número mixto y",
+          "fillAnswer": "4/8 o 2/4 o equivalente"
+        },
+        {
+          "position": 8,
+          "type": "multiple_choice",
+          "responseFormat": "choice",
+          "stem": "¿Cuál de las siguientes fracciones es equivalente al número mixto 2 1/8?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "10/8",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "11/8",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "17/8",
+              "isCorrect": true
+            },
+            {
+              "key": "D",
+              "text": "21/8",
+              "isCorrect": false
+            }
+          ],
+          "correctKey": "C",
+          "skill": "Representar",
+          "oa": "OA 8",
+          "contentAxis": "Números y operaciones",
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Identifican la equivalencia entre un número mixto y una fracción impropia. Identifican el decimal equivalente a fracciones con"
+        },
+        {
+          "position": 9,
+          "type": "multiple_choice",
+          "responseFormat": "choice",
+          "stem": "¿Cuál de estos números decimales equivale a 3/10?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "3,1",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "0,3",
+              "isCorrect": true
+            },
+            {
+              "key": "C",
+              "text": "0,03",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "10,3",
+              "isCorrect": false
+            }
+          ],
+          "correctKey": "B",
+          "skill": "Representar",
+          "oa": "OA 10",
+          "contentAxis": "Números y operaciones",
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Identifican el decimal equivalente a fracciones con denominador 10. Identifican términos faltantes en una secuencia dados"
+        },
+        {
+          "position": 10,
+          "type": "multiple_choice",
+          "responseFormat": "choice",
+          "stem": "Las figuras de esta secuencia se construyen siguiendo una regla (Figura 1, Figura 2, Figura 3, Figura 4, Figura 5). ¿Cuántas unidades se usarán para formar la Figura 5?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "12",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "13",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "15",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "16",
+              "isCorrect": true
+            }
+          ],
+          "correctKey": "D",
+          "skill": "Resolver problemas",
+          "oa": "OA 14",
+          "contentAxis": "Patrones y álgebra",
+          "hasFigure": true,
+          "figureNote": "Secuencia de 5 figuras construidas con unidades; imprescindible ver el patrón visual para determinar el conteo.",
+          "indicador": "Identifican términos faltantes en una secuencia dados algunos de sus términos. Resuelven problemas usando inecuaciones de un"
+        },
+        {
+          "position": 11,
+          "type": "multiple_choice",
+          "responseFormat": "choice",
+          "stem": "Rocío compró un pasaje en avión que le permite llevar una maleta con estas condiciones: maleta de mano, 1 por pasajero, peso menor a 10 kg. Rocío lleva 4 kg de ropa y 3 kg de comida en su maleta de mano. ¿Cuánto puede pesar la maleta vacía para que cumpla las condiciones?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "2 kg",
+              "isCorrect": true
+            },
+            {
+              "key": "B",
+              "text": "3 kg",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "4 kg",
+              "isCorrect": false
+            }
+          ],
+          "correctKey": "A",
+          "skill": "Resolver problemas",
+          "oa": "OA 15",
+          "contentAxis": "Patrones y álgebra",
+          "hasFigure": true,
+          "figureNote": "Imagen ilustrativa de la maleta de mano; decorativa, todos los datos numéricos están en el enunciado.",
+          "indicador": "Resuelven problemas usando inecuaciones de un paso que involucran adiciones. Identifican las coordenadas de un punto en el primer"
+        },
+        {
+          "position": 12,
+          "type": "open_ended",
+          "responseFormat": "fill_in",
+          "stem": "Observa el punto Q en el plano cartesiano. ¿Cuáles son las coordenadas del punto Q? Respuesta: ( , )",
+          "alternatives": [],
+          "correctKey": null,
+          "skill": "Representar",
+          "oa": "OA 16",
+          "contentAxis": "Geometría",
+          "hasFigure": true,
+          "figureNote": "Plano cartesiano de 0 a 8 en ambos ejes con el punto Q marcado; imprescindible ver la imagen para leer las coordenadas.",
+          "indicador": "Identifican las coordenadas de un punto en el primer cuadrante del plano cartesiano. Identifican lados que son perpendiculares en figuras",
+          "fillAnswer": "(5,6)"
+        },
+        {
+          "position": 13,
+          "type": "multiple_choice",
+          "responseFormat": "choice",
+          "stem": "Observa la figura en la siguiente cuadrícula, con vértices P, Q, R, S, T. ¿Qué lado es perpendicular al lado PQ?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Lado QR",
+              "isCorrect": true
+            },
+            {
+              "key": "B",
+              "text": "Lado RS",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Lado ST",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "Lado TP",
+              "isCorrect": false
+            }
+          ],
+          "correctKey": "A",
+          "skill": "Representar",
+          "oa": "OA 17",
+          "contentAxis": "Geometría",
+          "hasFigure": true,
+          "figureNote": "Figura geométrica en cuadrícula con vértices P, Q, R, S, T; imprescindible ver la imagen para determinar perpendicularidad.",
+          "indicador": "Identifican lados que son perpendiculares en figuras 2D."
+        },
+        {
+          "position": 14,
+          "type": "multiple_choice",
+          "responseFormat": "choice",
+          "stem": "La Figura 2 se obtuvo al aplicar una reflexión a la Figura 1 respecto del eje L (Figura 1 con vértices A, B, C, D; Figura 2 con vértices T/U/S/R). ¿Qué lado de la Figura 2 es congruente con el lado BC?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Lado UR",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Lado RS",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Lado ST",
+              "isCorrect": true
+            },
+            {
+              "key": "D",
+              "text": "Lado TU",
+              "isCorrect": false
+            }
+          ],
+          "correctKey": "C",
+          "skill": "Representar",
+          "oa": "OA 18",
+          "contentAxis": "Geometría",
+          "hasFigure": true,
+          "figureNote": "Figuras 1 y 2 (reflexión respecto del eje L) con vértices rotulados; imprescindible ver la imagen para identificar correspondencias.",
+          "indicador": "Identifican lados congruentes en figuras reflejadas. Realizan transformaciones entre unidades de medida"
+        },
+        {
+          "position": 15,
+          "type": "multiple_choice",
+          "responseFormat": "choice",
+          "stem": "¿Cuántos centímetros son 23 metros?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "230",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "2 300",
+              "isCorrect": true
+            },
+            {
+              "key": "C",
+              "text": "23 000",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "230 000",
+              "isCorrect": false
+            }
+          ],
+          "correctKey": "B",
+          "skill": "Representar",
+          "oa": "OA 20",
+          "contentAxis": "Medición",
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Realizan transformaciones entre unidades de medida de longitud (m a cm)."
+        },
+        {
+          "position": 16,
+          "type": "multiple_choice",
+          "responseFormat": "choice",
+          "stem": "¿Cuál de estos pares de longitudes corresponde a los lados de un rectángulo con perímetro 20 cm y área 24 cm²?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "1 cm y 5 cm",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "6 cm y 8 cm",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "4 cm y 6 cm",
+              "isCorrect": true
+            },
+            {
+              "key": "D",
+              "text": "2 cm y 10 cm",
+              "isCorrect": false
+            }
+          ],
+          "correctKey": "C",
+          "skill": "Resolver problemas",
+          "oa": "OA 21",
+          "contentAxis": "Medición",
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Identifican rectángulos con perímetro y área dados."
+        },
+        {
+          "position": 17,
+          "type": "multiple_choice",
+          "responseFormat": "choice",
+          "stem": "En la siguiente cuadrícula, cada cuadrado tiene un área de 1 cm². Observa la figura que se ha dibujado en ella. ¿Cuál es el área estimada de la figura anterior?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Aproximadamente 6 cm²",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Aproximadamente 10 cm²",
+              "isCorrect": true
+            },
+            {
+              "key": "C",
+              "text": "Aproximadamente 15 cm²",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "Aproximadamente 20 cm²",
+              "isCorrect": false
+            }
+          ],
+          "correctKey": "B",
+          "skill": "Resolver problemas",
+          "oa": "OA 22",
+          "contentAxis": "Medición",
+          "hasFigure": true,
+          "figureNote": "Cuadrícula con una figura irregular dibujada; imprescindible ver la imagen para estimar el área.",
+          "indicador": "Estiman el área de figuras irregulares."
+        },
+        {
+          "position": 18,
+          "type": "multiple_choice",
+          "responseFormat": "choice",
+          "stem": "En una ciudad la temperatura máxima un día sábado fue de 23 °C y el día domingo fue de 21 °C. ¿Cuál es el promedio de las temperaturas máximas de esos dos días?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "1 °C",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "2 °C",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "22 °C",
+              "isCorrect": true
+            },
+            {
+              "key": "D",
+              "text": "88 °C",
+              "isCorrect": false
+            }
+          ],
+          "correctKey": "C",
+          "skill": "Resolver problemas",
+          "oa": "OA 23",
+          "contentAxis": "Datos y probabilidades",
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Calculan el promedio de dos datos."
+        },
+        {
+          "position": 19,
+          "type": "multiple_choice",
+          "responseFormat": "choice",
+          "stem": "Este gráfico muestra las temperaturas mínimas de una comuna durante 5 días (lunes a viernes). ¿Qué día de la semana se registró la temperatura más baja?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Martes",
+              "isCorrect": true
+            },
+            {
+              "key": "B",
+              "text": "Miércoles",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Jueves",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "Viernes",
+              "isCorrect": false
+            }
+          ],
+          "correctKey": "A",
+          "skill": "Representar",
+          "oa": "OA 26",
+          "contentAxis": "Datos y probabilidades",
+          "hasFigure": true,
+          "figureNote": "Gráfico de temperaturas mínimas por día (eje 0-10 °C); imprescindible ver la imagen para leer los valores por día.",
+          "indicador": "Leen información presentada en gráficos de línea."
+        },
+        {
+          "position": 20,
+          "type": "multiple_choice",
+          "responseFormat": "choice",
+          "stem": "En un gimnasio se escogió al azar a un grupo de personas para registrar la cantidad de abdominales que realizan durante 1 minuto. Registro: 17, 18, 20, 22, 22, 23, 25, 29, 30, 31. ¿Cuál de los siguientes diagramas de tallo y hojas representa correctamente los datos del registro?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Tallo | Hojas — 1 | 7 8; 2 | 0 2 3 5 9; 3 | 0 1",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Tallo | Hojas — 1 | 7 8; 2 | 0 2 2 3 5 9; 3 | 0 1",
+              "isCorrect": true
+            },
+            {
+              "key": "C",
+              "text": "Tallo | Hojas — 10 | 7 8; 20 | 0 2 2 3 5 9; 30 | 0 1",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "Tallo | Hojas — 10 | 17 18; 20 | 20 22 22 23 25 29; 30 | 30 31",
+              "isCorrect": false
+            }
+          ],
+          "correctKey": "B",
+          "skill": "Representar",
+          "oa": "OA 21",
+          "contentAxis": "Datos y probabilidades",
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Identifican el diagrama de tallo y hojas que representa un conjunto de datos. Resuelven problemas no rutinarios que involucran"
+        },
+        {
+          "position": 21,
+          "type": "open_ended",
+          "responseFormat": "develop",
+          "stem": "Esta tabla muestra la duración, en horas, de las películas que Tomás tiene disponibles para ver en su celular durante un viaje: Zootopia 1,8 h; Ratatouille 1,85 h; Up: una aventura de altura 1,6 h; Coco 1,75 h; Grandes héroes 1,7 h; Cars 1,95 h; Los increíbles 2 2,1 h. El viaje de Tomás durará 6 horas y quiere aprovechar ese tiempo para ver la mayor cantidad de películas completas. ¿Cuáles son todas las películas completas que podría ver Tomás durante su viaje? ¿Cuántas horas del viaje le quedarían sin ver películas completas? Escribe las películas que seleccionaste y las horas que quedaría Tomás sin ver películas.",
+          "alternatives": [],
+          "correctKey": null,
+          "skill": "Argumentar",
+          "oa": "OA 13",
+          "contentAxis": "Números y operaciones",
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Resuelven problemas no rutinarios que involucran adiciones y sustracciones de números decimales. Ordenan números decimales hasta la milésima con",
+          "rubric": "Tipos de respuestas Respuestas Respuestas parcialmente Respuestas correctas correctas incorrectas (Código 2) (Código 1) (Código 0) Selecciona una estrategia que 1. Selecciona una estrategia adecuada Entrega otras respuestas distintas permite resolver el problema, para resolver el problema, pero elige a las esperadas en los códigos elige todas (tres) las películas dos películas, por lo que no cumple con anteriores, o bien, no responde. que podría ver completas la condición de escoger todas las Tomás durante el viaje, películas que podría ver completas resuelve correctamente la Tomás durante el viaje, resuelve operatoria seleccionada y correctamente la operatoria calcula las horas de viaje que seleccionada y calcula las horas de viaje quedaría sin ver películas que quedaría sin ver películas Tomás. Tomás. 2. Selecciona una estrategia adecuada para resolver el problema, elige tres películas que podría ver completas Tomás durante el viaje, pero resuelve con errores de cálculo la operatoria seleccionada, por lo que al calcular las horas de viaje que quedaría sin ver películas no obtiene el valor esperado. 9 Ficha Técnica Prueba de Matemática 5° básico Ejemplos: Ejemplos: Ejemplos: 1. Puede ver Zootopia, Coco 1. Puede ver Los increíbles 2 y Cars, 1. Puede ver Zootopia, Coco, y Cars, porque porque 2,1 + 1,95 = 4,05 Grandes héroes y Cars, porque 1,8 + 1,75 + 1,7 + 1,8 + 1,75 + 1,95 = 5,5 y el tiempo sin ver películas es 1,95 1,95 = 4,10 horas, porque 6,0 – 4,05 = 1,95 y el tiempo sin ver y el tiempo sin ver películas películas es 0,5 horas, es 1,90 horas, porque 6,00 – 2. Puede ver Zootopia, Coco y Cars, porque 4,10 = 1,90 porque 1,8 + 1,75 + 1,95 = 3,40 6,0 – 5,5 = 0,5 y el tiempo sin ver películas es 2,60 2. Debe ver todas las películas horas, porque 6,00 – 3,40 = 2,60 porque 1,8 + 1,85 + 1,6 + 2. Puede ver Up, Los 1,75 + 1,7 + 1,35 + 1,95 + increíbles 2 y Ratatouille, 2,1 = 14,1 porque Se va a demorar 14,1 horas 1,6 + 2,1 + 1,85 = 5,55 en verlas todas. y el tiempo sin ver películas es 0,45 horas, porque 6,0 – 5,55 = 0,45 10 &gt; Diagnóstico Integral de Aprendizajes Instrumentos de Evaluación 2026 agenciaeducacion.cl"
+        },
+        {
+          "position": 22,
+          "type": "multiple_choice",
+          "responseFormat": "choice",
+          "stem": "Observa los siguientes números: 1,67 — 1,9 — 1,105 — 1,08. ¿Cómo se ordenan estos números de mayor a menor?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "1,9 — 1,08 — 1,67 — 1,105",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "1,9 — 1,67 — 1,105 — 1,08",
+              "isCorrect": true
+            },
+            {
+              "key": "C",
+              "text": "1,105 — 1,67 — 1,08 — 1,9",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "1,67 — 1,105 — 1,9 — 1,08",
+              "isCorrect": false
+            }
+          ],
+          "correctKey": "B",
+          "skill": "Resolver problemas",
+          "oa": "OA 11",
+          "contentAxis": "Números y operaciones",
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Ordenan números decimales hasta la milésima con distinta cantidad de cifras decimales. Calculan sustracciones de números decimales hasta"
+        },
+        {
+          "position": 23,
+          "type": "multiple_choice",
+          "responseFormat": "choice",
+          "stem": "¿Cuál es el resultado de 5,07 – 2,138?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "2,932",
+              "isCorrect": true
+            },
+            {
+              "key": "B",
+              "text": "2,942",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "3,148",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "3,942",
+              "isCorrect": false
+            }
+          ],
+          "correctKey": "A",
+          "skill": "Resolver problemas",
+          "oa": "OA 12",
+          "contentAxis": "Números y operaciones",
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Calculan sustracciones de números decimales hasta la milésima con distinta cantidad de cifras decimales. Calculan operaciones combinadas con paréntesis"
+        },
+        {
+          "position": 24,
+          "type": "multiple_choice",
+          "responseFormat": "choice",
+          "stem": "¿Cuál es el resultado de 124 – (3 + 6) • 12?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "16",
+              "isCorrect": true
+            },
+            {
+              "key": "B",
+              "text": "49",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "1 380",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "1 524",
+              "isCorrect": false
+            }
+          ],
+          "correctKey": "A",
+          "skill": "Resolver problemas",
+          "oa": "OA 5",
+          "contentAxis": "Números y operaciones",
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Calculan operaciones combinadas con paréntesis aplicando la prioridad de las operaciones. Interpretan el resto de una división de números"
+        },
+        {
+          "position": 25,
+          "type": "multiple_choice",
+          "responseFormat": "choice",
+          "stem": "Se necesita guardar 128 bolsos en cajas y cada caja tiene capacidad para guardar 6 bolsos. Se hizo la siguiente división para saber cuántas cajas como mínimo se necesitan para guardar todos los bolsos: 128 : 6 = 21, resto 2. A partir de la información anterior, ¿cuál de las siguientes afirmaciones es correcta?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Se necesitan 21 cajas para guardar todos los bolsos.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Se necesitan 22 cajas para guardar todos los bolsos.",
+              "isCorrect": true
+            },
+            {
+              "key": "C",
+              "text": "Se necesitan 23 cajas para guardar todos los bolsos.",
+              "isCorrect": false
+            }
+          ],
+          "correctKey": "B",
+          "skill": "Resolver problemas",
+          "oa": "OA 4",
+          "contentAxis": "Números y operaciones",
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Interpretan el resto de una división de números naturales en un contexto determinado. Comparan fracciones propias con distinto"
+        },
+        {
+          "position": 26,
+          "type": "multiple_choice",
+          "responseFormat": "choice",
+          "stem": "Observa las siguientes fracciones: 3/12, 2/3, 3/4, 1/6. ¿Cuál de las fracciones anteriores es la mayor?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "3/12",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "2/3",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "3/4",
+              "isCorrect": true
+            },
+            {
+              "key": "D",
+              "text": "1/6",
+              "isCorrect": false
+            }
+          ],
+          "correctKey": "C",
+          "skill": "Resolver problemas",
+          "oa": "OA 7",
+          "contentAxis": "Números y operaciones",
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Comparan fracciones propias con distinto denominador. Resuelven problemas que involucran adiciones de"
+        },
+        {
+          "position": 27,
+          "type": "multiple_choice",
+          "responseFormat": "choice",
+          "stem": "Milena usó el agua de un bidón para regar. Usó 7/10 del agua para regar su huerto y 1/5 del agua para regar el pasto de su jardín. ¿Qué fracción del agua del bidón usó Milena para regar?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "6/5",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "5/10",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "9/10",
+              "isCorrect": true
+            },
+            {
+              "key": "D",
+              "text": "8/15",
+              "isCorrect": false
+            }
+          ],
+          "correctKey": "C",
+          "skill": "Resolver problemas",
+          "oa": "OA 13",
+          "contentAxis": "Números y operaciones",
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Resuelven problemas que involucran adiciones de fracciones propias. Identifican términos faltantes en una secuencia dada"
+        },
+        {
+          "position": 28,
+          "type": "multiple_choice",
+          "responseFormat": "choice",
+          "stem": "El primer término de una secuencia numérica es 2. Cada uno de los términos de esta secuencia se obtiene multiplicando por 3 cada número encontrado. ¿Cuál es el cuarto término?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "9",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "12",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "34",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "54",
+              "isCorrect": true
+            }
+          ],
+          "correctKey": "D",
+          "skill": "Modelar",
+          "oa": "OA 14",
+          "contentAxis": "Patrones y álgebra",
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Identifican términos faltantes en una secuencia dada su regla de formación. Identifican la ecuación de un paso que permite"
+        },
+        {
+          "position": 29,
+          "type": "multiple_choice",
+          "responseFormat": "choice",
+          "stem": "Mateo y su hermana coleccionan llaveros. Mateo ha juntado 18 llaveros y tiene 7 menos que su hermana. ¿Qué ecuación permite conocer la cantidad de llaveros que tiene su hermana?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "18 – x = 7",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "18 – 7 = x",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "x – 7 = 18",
+              "isCorrect": true
+            }
+          ],
+          "correctKey": "C",
+          "skill": "Modelar",
+          "oa": "OA 15",
+          "contentAxis": "Patrones y álgebra",
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Identifican la ecuación de un paso que permite resolver un problema. Identifican figuras congruentes obtenidas a partir de"
+        },
+        {
+          "position": 30,
+          "type": "multiple_choice",
+          "responseFormat": "choice",
+          "stem": "¿En cuál de las siguientes cuadrículas la Figura 1 es congruente con la Figura 2?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Cuadrícula A: Figura 1 y Figura 2.",
+              "isImage": true,
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Cuadrícula B: Figura 1 y Figura 2.",
+              "isImage": true,
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Cuadrícula C: Figura 1 y Figura 2.",
+              "isImage": true,
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "Cuadrícula D: Figura 1 y Figura 2.",
+              "isImage": true,
+              "isCorrect": true
+            }
+          ],
+          "correctKey": "D",
+          "skill": "Resolver problemas",
+          "oa": "OA 18",
+          "contentAxis": "Geometría",
+          "hasFigure": true,
+          "figureNote": "4 cuadrículas con pares de figuras congruentes/no congruentes; imprescindible ver las 4 imágenes para comparar.",
+          "indicador": "Identifican figuras congruentes obtenidas a partir de rotaciones."
+        },
+        {
+          "position": 31,
+          "type": "open_ended",
+          "responseFormat": "fill_in",
+          "stem": "Observa la siguiente imagen: una brocha sobre una regla graduada en centímetros (0 a 15 cm) y milímetros. ¿Cuántos centímetros de largo mide la brocha? Respuesta: Mide ___ centímetros.",
+          "alternatives": [],
+          "correctKey": null,
+          "skill": "Resolver problemas",
+          "oa": "OA 19",
+          "contentAxis": "Medición",
+          "hasFigure": true,
+          "figureNote": "Imagen de una brocha superpuesta a una regla graduada; imprescindible ver la imagen para determinar la medida.",
+          "indicador": "Miden objetos usando una regla.",
+          "fillAnswer": "11,5"
+        },
+        {
+          "position": 32,
+          "type": "multiple_choice",
+          "responseFormat": "choice",
+          "stem": "Observa las longitudes de las bases y la altura del trapecio de color celeste: base menor 4 cm, altura 3 cm, base mayor 10 cm. ¿Cuál es el área del trapecio de color celeste?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "15 cm²",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "21 cm²",
+              "isCorrect": true
+            },
+            {
+              "key": "C",
+              "text": "30 cm²",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "42 cm²",
+              "isCorrect": false
+            }
+          ],
+          "correctKey": "B",
+          "skill": "Resolver problemas",
+          "oa": "OA 22",
+          "contentAxis": "Medición",
+          "hasFigure": true,
+          "figureNote": "Imagen del trapecio con las 3 medidas rotuladas en la figura; datos ya transcritos en el enunciado.",
+          "indicador": "Calculan el área de trapecios. Interpretan información presentada en gráficos de"
+        },
+        {
+          "position": 33,
+          "type": "multiple_choice",
+          "responseFormat": "choice",
+          "stem": "El siguiente gráfico muestra la cantidad de estufas que vendió una empresa los primeros 6 meses del año (enero a junio, eje 0-13). Según la información anterior, ¿cuál de las siguientes afirmaciones es correcta?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Las ventas de febrero fueron la mitad de las ventas de abril.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Las ventas de junio fueron tres veces las ventas de enero.",
+              "isCorrect": true
+            },
+            {
+              "key": "C",
+              "text": "Las ventas de mayo fueron seis veces las ventas de marzo.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "Las ventas de los tres primeros meses juntos fueron menores que las ventas de mayo.",
+              "isCorrect": false
+            }
+          ],
+          "correctKey": "B",
+          "skill": "Representar",
+          "oa": "OA 26",
+          "contentAxis": "Datos y probabilidades",
+          "hasFigure": true,
+          "figureNote": "Gráfico de barras de ventas mensuales de estufas; imprescindible ver la imagen para leer los valores por mes.",
+          "indicador": "Interpretan información presentada en gráficos de barra simple. Comparan probabilidades de distintos eventos, sin"
+        },
+        {
+          "position": 34,
+          "type": "multiple_choice",
+          "responseFormat": "choice",
+          "stem": "Observa la ruleta dividida en 10 partes de igual tamaño. La flecha indica el premio que gana la persona que hace girar la ruleta. ¿Qué premio es más probable ganar en esta ruleta?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Auto",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Pelota",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Peluche",
+              "isCorrect": true
+            },
+            {
+              "key": "D",
+              "text": "Muñeca",
+              "isCorrect": false
+            }
+          ],
+          "correctKey": "C",
+          "skill": "Resolver problemas",
+          "oa": "OA 25",
+          "contentAxis": "Datos y probabilidades",
+          "hasFigure": true,
+          "figureNote": "Ruleta de 10 secciones rotuladas con premios (Auto, Pelota, Peluche, Muñeca); imprescindible ver la imagen para contar secciones por premio.",
+          "indicador": "Comparan probabilidades de distintos eventos, sin calcularlas. Identifican la posibilidad de ocurrencia de un evento"
+        },
+        {
+          "position": 35,
+          "type": "multiple_choice",
+          "responseFormat": "choice",
+          "stem": "Al lanzar un dado de 6 caras numeradas del 1 al 6, ¿cuál de estos resultados es imposible que ocurra?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Que salga el número 1.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Que salga el número 6.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Que salga un número menor que 6.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "Que salga un número mayor que 6.",
+              "isCorrect": true
+            }
+          ],
+          "correctKey": "D",
+          "skill": "Resolver problemas",
+          "oa": "OA 24",
+          "contentAxis": "Datos y probabilidades",
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Identifican la posibilidad de ocurrencia de un evento imposible en un experimento aleatorio simple."
+        }
+      ]
+    }
+  ],
+  "extraction": {
+    "itemCount": 35,
+    "warnings": [
+      "Figura imprescindible en el enunciado de ítems 6, 10, 12, 13, 14, 17, 19, 30, 31, 33, 34: requieren imagen para responder o confirmar respuesta.",
+      "Ítem 26: la alternativa A (3/12) se transcribió a partir de una columna de texto con diseño ambiguo (pdftotext -layout); se infirió por consistencia con las 4 fracciones del enunciado, sin confirmación visual.",
+      "Alternativas-imagen (isImage:true) en ítem 30 (4 cuadrículas con figuras).",
+      "Ítems 3, 5, 11, 32: llevan imagen de apoyo pero los datos numéricos necesarios ya están transcritos en el enunciado (no imprescindible ver la imagen)."
+    ],
+    "needsHumanReview": true,
+    "crossCheck": {
+      "hardIssues": [],
+      "softWarnings": [
+        "#7: responseFormat cuadernillo=develop vs ficha=fill_in"
+      ],
+      "counts": {
+        "cuadernillo": 35,
+        "ficha": 35,
+        "hoja": 35
+      }
+    }
+  },
+  "pauta": {
+    "source": {
+      "ficha": "5_ficha_tecnica_matematica_monitoreo_2026_5_basico.pdf",
+      "hoja": "5_hoja_de_respuestas_matematica_monitoreo_2026_5_basico.pdf"
+    },
+    "appliedKeys": 30,
+    "rubrics": 1
+  }
+}

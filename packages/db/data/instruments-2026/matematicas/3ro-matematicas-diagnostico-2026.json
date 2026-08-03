@@ -1,0 +1,667 @@
+{
+  "schemaVersion": "1.0",
+  "source": {
+    "file": "3_prueba_matematica_diagnostico_2026_03_basico.pdf",
+    "subjectFolder": "Matematicas"
+  },
+  "instrument": {
+    "name": "DIA Matemática 3° Básico 2026 — Diagnóstico",
+    "subject": "Matemática",
+    "subjectCode": "MATH",
+    "grade": "3° Básico",
+    "gradeCode": "3RD_BASIC",
+    "year": 2026,
+    "applicationPeriod": "diagnostico",
+    "type": "dia",
+    "isOfficial": true,
+    "source": "imported"
+  },
+  "sections": [
+    {
+      "order": 1,
+      "name": "Preguntas",
+      "type": "mixed",
+      "instructions": "Esta prueba tiene 23 preguntas: de alternativas (marcar con una X la respuesta correcta), de desarrollo (escribir la respuesta en la cuadrícula) y de completación (anotar la respuesta en los recuadros correspondientes). Utiliza lápiz grafito para contestar las preguntas y si te equivocas usa goma de borrar. Esta prueba es sin nota.",
+      "passage": null,
+      "items": [
+        {
+          "position": 1,
+          "type": "multiple_choice",
+          "responseFormat": "choice",
+          "stem": "¿Cómo se escribe el número ochenta y siete?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "78",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "80",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "87",
+              "isCorrect": true
+            }
+          ],
+          "correctKey": "C",
+          "skill": "Representar",
+          "oa": "OA 2",
+          "contentAxis": "Números y operaciones",
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Leen un número del 0 al 100. 2 Representan números del 0 al 100 usando"
+        },
+        {
+          "position": 2,
+          "type": "open_ended",
+          "responseFormat": "fill_in",
+          "stem": "Observa esta representación de un número: ¿Qué número está representado? Respuesta: ___",
+          "alternatives": [],
+          "correctKey": null,
+          "skill": "Representar",
+          "oa": "OA 2",
+          "contentAxis": "Números y operaciones",
+          "hasFigure": true,
+          "figureNote": "Representación con bloques base 10: 4 barras de decenas y varios cubos de unidades sueltos. Requiere la imagen para leer el número.",
+          "indicador": "barras y cubos unitarios de manera 2 pictórica.",
+          "fillAnswer": "47"
+        },
+        {
+          "position": 3,
+          "type": "multiple_choice",
+          "responseFormat": "choice",
+          "stem": "¿En qué opción los números están ordenados de menor a mayor?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "89   90   98",
+              "isCorrect": true
+            },
+            {
+              "key": "B",
+              "text": "89   98   90",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "98   90   89",
+              "isCorrect": false
+            }
+          ],
+          "correctKey": "A",
+          "skill": "Representar",
+          "oa": "OA 3",
+          "contentAxis": "Números y operaciones",
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Ordenan números del 0 al 100. 3, 22 Ubican un número del 0 al 100 en la recta"
+        },
+        {
+          "position": 4,
+          "type": "multiple_choice",
+          "responseFormat": "choice",
+          "stem": "Observa la recta numérica: 60, 62, ▢, 66, 68. ¿Qué número se ubica en ▢ (entre 62 y 66)?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "63",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "64",
+              "isCorrect": true
+            },
+            {
+              "key": "C",
+              "text": "65",
+              "isCorrect": false
+            }
+          ],
+          "correctKey": "B",
+          "skill": "Representar",
+          "oa": "OA 3",
+          "contentAxis": "Números y operaciones",
+          "hasFigure": true,
+          "figureNote": "Recta numérica con marcas 60, 62, __, 66, 68 y un recuadro en la posición faltante; los valores están transcritos en el enunciado.",
+          "indicador": "Ubican un número del 0 al 100 en la recta 3 numérica, con graduación de 2 en 2. Identifican el valor posicional de la decena"
+        },
+        {
+          "position": 5,
+          "type": "open_ended",
+          "responseFormat": "fill_in",
+          "stem": "¿Cuál es el valor posicional de 8 en el número 82? Respuesta: ___ unidades.",
+          "alternatives": [],
+          "correctKey": null,
+          "skill": "Representar",
+          "oa": "OA 7",
+          "contentAxis": "Números y operaciones",
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Identifican el valor posicional de la decena 5 en un número del 0 al 100. Descomponen aditivamente un número del",
+          "fillAnswer": "80"
+        },
+        {
+          "position": 6,
+          "type": "multiple_choice",
+          "responseFormat": "choice",
+          "stem": "¿Cómo se puede descomponer el número 68?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "6 + 8",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "60 + 8",
+              "isCorrect": true
+            },
+            {
+              "key": "C",
+              "text": "80 + 6",
+              "isCorrect": false
+            }
+          ],
+          "correctKey": "B",
+          "skill": "Representar",
+          "oa": "OA 5",
+          "contentAxis": "Números y operaciones",
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Descomponen aditivamente un número del 5 0 al 100, según su valor posicional. Calculan el resultado de una adición sin"
+        },
+        {
+          "position": 7,
+          "type": "open_ended",
+          "responseFormat": "fill_in",
+          "stem": "Resuelve: 65 + 24 =",
+          "alternatives": [],
+          "correctKey": null,
+          "skill": "Resolver problemas",
+          "oa": "OA 9",
+          "contentAxis": "Números y operaciones",
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Calculan el resultado de una adición sin reserva de números naturales del 0 al 100. 6, 8, 10, 12, 21",
+          "fillAnswer": "89"
+        },
+        {
+          "position": 8,
+          "type": "open_ended",
+          "responseFormat": "fill_in",
+          "stem": "Resuelve: 98 – 55 =",
+          "alternatives": [],
+          "correctKey": null,
+          "skill": "Resolver problemas",
+          "oa": "OA 9",
+          "contentAxis": "Números y operaciones",
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Calculan el resultado de una sustracción sin 6, 9, 10, 12 canje de números naturales del 0 al 100. Identifican la multiplicación que representa",
+          "fillAnswer": "43"
+        },
+        {
+          "position": 9,
+          "type": "multiple_choice",
+          "responseFormat": "choice",
+          "stem": "Manuel compró los siguientes yogures: ¿Con qué operación se puede calcular la cantidad total de yogures que compró Manuel?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "4 • 4",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "5 • 4",
+              "isCorrect": true
+            },
+            {
+              "key": "C",
+              "text": "5 + 4",
+              "isCorrect": false
+            }
+          ],
+          "correctKey": "B",
+          "skill": "Modelar",
+          "oa": "OA 11",
+          "contentAxis": "Números y operaciones",
+          "hasFigure": true,
+          "figureNote": "Yogures agrupados en filas de 4 (una fila superior de más cantidad y otra inferior). La operación correcta depende de contar la disposición en la imagen.",
+          "indicador": "el total de elementos agrupados con igual 8, 9, 10 cantidad. Identifican una adición de sumandos iguales"
+        },
+        {
+          "position": 10,
+          "type": "multiple_choice",
+          "responseFormat": "choice",
+          "stem": "¿Con qué adición se puede calcular 9 • 5?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "5 + 9 + 5 + 9 + 5 + 9 + 5 + 9 + 5 + 9",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "9 + 9 + 9 + 9 + 9 + 9 + 9 + 9 + 9",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "5 + 5 + 5 + 5 + 5 + 5 + 5 + 5 + 5",
+              "isCorrect": true
+            }
+          ],
+          "correctKey": "C",
+          "skill": "Representar",
+          "oa": "OA 11",
+          "contentAxis": "Números y operaciones",
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Identifican una adición de sumandos iguales 8, 9, 10 que representa una multiplicación dada."
+        },
+        {
+          "position": 11,
+          "type": "multiple_choice",
+          "responseFormat": "choice",
+          "stem": "Observa la secuencia de números: 4 8 2 4 8 2 4 8 2 4 8 2. ¿Cuál es un patrón en la secuencia anterior?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "2 8 4",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "4 8 2",
+              "isCorrect": true
+            },
+            {
+              "key": "C",
+              "text": "8 4 2",
+              "isCorrect": false
+            }
+          ],
+          "correctKey": "B",
+          "skill": "Argumentar",
+          "oa": "OA 11",
+          "contentAxis": "Patrones y álgebra",
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Identifican un patrón numérico repetitivo. 12 Identifican una figura 2D a partir de una de"
+        },
+        {
+          "position": 12,
+          "type": "multiple_choice",
+          "responseFormat": "choice",
+          "stem": "Observa las figuras dibujadas sobre una cuadrícula. ¿Qué figura tiene 4 lados de igual medida?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Rectángulo dibujado sobre la cuadrícula (más ancho que alto).",
+              "isImage": true,
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Triángulo dibujado sobre la cuadrícula.",
+              "isImage": true,
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Cuadrado dibujado sobre la cuadrícula (4 lados iguales).",
+              "isImage": true,
+              "isCorrect": true
+            }
+          ],
+          "correctKey": "C",
+          "skill": "Representar",
+          "oa": "OA 15",
+          "contentAxis": "Geometría",
+          "hasFigure": true,
+          "figureNote": "Las 3 alternativas son figuras dibujadas sobre una cuadrícula (rectángulo, triángulo, cuadrado). Requiere captura de imagen.",
+          "indicador": "Identifican una figura 2D a partir de una de 15 sus características. Identifican las figuras 2D que permiten"
+        },
+        {
+          "position": 13,
+          "type": "multiple_choice",
+          "responseFormat": "choice",
+          "stem": "Observa esta figura 3D (un paralelepípedo / prisma rectangular): ¿Con qué grupo de figuras 2D se forma la figura 3D?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Grupo de 6 rectángulos (4 grandes y 2 pequeños).",
+              "isImage": true,
+              "isCorrect": true
+            },
+            {
+              "key": "B",
+              "text": "Grupo de 4 figuras 2D (2 rectángulos grandes y 2 pequeños).",
+              "isImage": true,
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Grupo de 3 figuras 2D (2 rectángulos y 1 cuadrado).",
+              "isImage": true,
+              "isCorrect": false
+            }
+          ],
+          "correctKey": "A",
+          "skill": "Representar",
+          "oa": "OA 16",
+          "contentAxis": "Geometría",
+          "hasFigure": true,
+          "figureNote": "El enunciado muestra un prisma rectangular 3D y cada alternativa es un grupo de figuras 2D (redes). Requiere captura de imagen.",
+          "indicador": "Identifican las figuras 2D que permiten 15 construir una figura 3D."
+        },
+        {
+          "position": 14,
+          "type": "multiple_choice",
+          "responseFormat": "choice",
+          "stem": "¿Cuál de estas figuras 3D es un cubo?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Cubo (prisma con todas las caras cuadradas iguales).",
+              "isImage": true,
+              "isCorrect": true
+            },
+            {
+              "key": "B",
+              "text": "Cono.",
+              "isImage": true,
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Prisma rectangular alargado (paralelepípedo).",
+              "isImage": true,
+              "isCorrect": false
+            }
+          ],
+          "correctKey": "A",
+          "skill": "Representar",
+          "oa": "OA 16",
+          "contentAxis": "Geometría",
+          "hasFigure": true,
+          "figureNote": "Las 3 alternativas son cuerpos geométricos 3D (cubo, cono, prisma). Requiere captura de imagen.",
+          "indicador": "Identifican una figura 3D. 15 Miden la longitud de un objeto a partir de un"
+        },
+        {
+          "position": 15,
+          "type": "open_ended",
+          "responseFormat": "fill_in",
+          "stem": "Observa esta imagen (un clip sobre una regla graduada de 0 a 10 cm). ¿Cuánto mide el clip? Respuesta: El clip mide ___ cm.",
+          "alternatives": [],
+          "correctKey": null,
+          "skill": "Resolver problemas",
+          "oa": "OA 19",
+          "contentAxis": "Medición",
+          "hasFigure": true,
+          "figureNote": "Clip sobre una regla de 0 a 10 cm. Requiere la imagen para leer la medida.",
+          "indicador": "Miden la longitud de un objeto a partir de un 21 instrumento estandarizado. Identifican una desigualdad a partir de su",
+          "fillAnswer": "3"
+        },
+        {
+          "position": 16,
+          "type": "multiple_choice",
+          "responseFormat": "choice",
+          "stem": "Observa la balanza: ¿Cuál de estas comparaciones se representa en la balanza?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "5 = 3",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "5 > 3",
+              "isCorrect": true
+            },
+            {
+              "key": "C",
+              "text": "5 < 3",
+              "isCorrect": false
+            }
+          ],
+          "correctKey": "B",
+          "skill": "Representar",
+          "oa": "OA 13",
+          "contentAxis": "Patrones y álgebra",
+          "hasFigure": true,
+          "figureNote": "Balanza con 5 pelotas en el platillo izquierdo (más bajo) y 3 en el derecho (más alto). Requiere la imagen para elegir la comparación.",
+          "indicador": "Identifican una desigualdad a partir de su 22 representación en una balanza. Leen la información presentada en un"
+        },
+        {
+          "position": 17,
+          "type": "multiple_choice",
+          "responseFormat": "choice",
+          "stem": "Este pictograma muestra la cantidad de instrumentos que tiene una banda. Cada nota representa 1 instrumento (Guitarra, Metalófono, Violín, Trompeta, Piano). ¿Cuántas trompetas tiene en total la banda?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "8",
+              "isCorrect": true
+            },
+            {
+              "key": "B",
+              "text": "9",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "10",
+              "isCorrect": false
+            }
+          ],
+          "correctKey": "A",
+          "skill": "Argumentar",
+          "oa": "OA 20",
+          "contentAxis": "Datos y probabilidades",
+          "hasFigure": true,
+          "figureNote": "Pictograma con notas musicales por instrumento; hay que contar las notas de la fila Trompeta. Requiere la imagen.",
+          "indicador": "Leen la información presentada en un 25 pictograma sin escala. Leen la información presentada en un"
+        },
+        {
+          "position": 18,
+          "type": "multiple_choice",
+          "responseFormat": "choice",
+          "stem": "Este gráfico muestra la cantidad de estudiantes inscritos en los talleres de un colegio (Astronomía, Ecología, Computación). Según el gráfico, ¿qué taller tiene más estudiantes inscritos?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Astronomía.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Ecología.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Computación.",
+              "isCorrect": true
+            }
+          ],
+          "correctKey": "C",
+          "skill": "Argumentar",
+          "oa": "OA 22",
+          "contentAxis": "Datos y probabilidades",
+          "hasFigure": true,
+          "figureNote": "Gráfico de barras 'Inscritos en talleres' con eje de 0 a 16. Requiere la imagen para comparar las barras.",
+          "indicador": "Leen la información presentada en un 25 gráfico de barras con escala. Identifican la sustracción que permite"
+        },
+        {
+          "position": 19,
+          "type": "multiple_choice",
+          "responseFormat": "choice",
+          "stem": "En un juego, Laura ganó 35 fichas y luego, perdió 14 fichas. ¿Con qué operación puede calcular cuántas fichas le quedaron?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "35 + 14",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "35 – 14",
+              "isCorrect": true
+            },
+            {
+              "key": "C",
+              "text": "14 – 35",
+              "isCorrect": false
+            }
+          ],
+          "correctKey": "B",
+          "skill": "Modelar",
+          "oa": "OA 9",
+          "contentAxis": "Números y operaciones",
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "resolver un problema con números del 0 al 6, 10 100. Resuelven un problema directo de adición"
+        },
+        {
+          "position": 20,
+          "type": "multiple_choice",
+          "responseFormat": "choice",
+          "stem": "Daniel leyó 43 páginas de su libro el sábado y 33 páginas el domingo. ¿Cuántas páginas leyó en total los dos días?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "10",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "67",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "76",
+              "isCorrect": true
+            }
+          ],
+          "correctKey": "C",
+          "skill": "Resolver problemas",
+          "oa": "OA 9",
+          "contentAxis": "Números y operaciones",
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Resuelven un problema directo de adición 6, 10 con números naturales del 0 al 100. Resuelven un problema directo de"
+        },
+        {
+          "position": 21,
+          "type": "open_ended",
+          "responseFormat": "develop",
+          "stem": "Camila tiene 18 años y su hermano Diego tiene 8 años. ¿Cuántos años mayor es Camila que Diego? Escribe aquí tus cálculos y tu respuesta.",
+          "alternatives": [],
+          "correctKey": null,
+          "skill": "Resolver problemas",
+          "oa": "OA 9",
+          "contentAxis": "Números y operaciones",
+          "hasFigure": false,
+          "figureNote": "Única pregunta de desarrollo de la prueba; incluye una cuadrícula en blanco para escribir los cálculos y la respuesta.",
+          "indicador": "sustracción con números naturales del 0 al 6, 10 100. Identifican la multiplicación que permite",
+          "rubric": "Tipos de respuestas Respuestas correctas Respuestas parcialmente correctas Respuestas incorrectas (Código 2) (Código 1) (Código 0) Responde escribiendo una sustracción Responde correctamente que Camila tiene Interpreta que se deben sumar y resolviéndola correctamente, así 10 años más que Diego, sin mostrar ambas edades, entrega otras identifica que Camila tiene 10 años procedimientos. respuestas que no cumplen con los más que Diego, mostrando el cálculo y criterios anteriores, o bien, no O bien, responde 9 u 11, escribiendo comunicando su resultado. responde. correctamente la operación que resuelve el O bien, responde con la operación problema, pero entregando, a través de su inversa (comprobación de la respuesta, evidencia de que cometió sustracción). errores en su resolución. Ejemplos: Ejemplos: Ejemplos: • • • 18 – 8 = 10 10 18 + 8 = 26 Camila es 10 años mayor que Diego. Camila es 10 años mayor que Diego. • Responde cualquier otro resultado Diego es 10 años menor que Camila. • 10 + 8 =18 distinto de 9, 10, 11 o 26 años. • Camila es 10 años mayor que Diego. 18 – 8 = 11 • Camila es mayor que Diego. Camila es 11 años mayor que Diego. • 8 + 10 = 18 • Diego es menor que Camila. • Diego es 10 años menor que Camila. 18 – 8 = 9 Camila es 9 años mayor que Diego. 10 &gt; Diagnóstico Integral de Aprendizajes Instrumentos de Evaluación 2026 agenciaeducacion.cl"
+        },
+        {
+          "position": 22,
+          "type": "multiple_choice",
+          "responseFormat": "choice",
+          "stem": "Elena compra estos packs de jugos: Al pagar en caja, le regalan 2 packs adicionales de jugos. ¿Con qué multiplicación se puede calcular la cantidad total de jugos que se lleva Elena?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "3 • 2",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "6 • 3",
+              "isCorrect": true
+            },
+            {
+              "key": "C",
+              "text": "4 • 2",
+              "isCorrect": false
+            }
+          ],
+          "correctKey": "B",
+          "skill": "Argumentar",
+          "oa": "OA 11",
+          "contentAxis": "Números y operaciones",
+          "hasFigure": true,
+          "figureNote": "Imagen de 4 packs de jugos, cada pack con 3 botellas. La multiplicación correcta depende de contar los packs (4 + 2 regalados) y las botellas por pack (3) en la imagen.",
+          "indicador": "Identifican la multiplicación que permite 8, 10 resolver un problema. Completan una secuencia numérica hasta"
+        },
+        {
+          "position": 23,
+          "type": "multiple_choice",
+          "responseFormat": "choice",
+          "stem": "Esta secuencia numérica se completa sumando 2 al término anterior: 11, __, __, ▢, 19. ¿Qué número debe ir en ▢?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "14",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "17",
+              "isCorrect": true
+            },
+            {
+              "key": "C",
+              "text": "18",
+              "isCorrect": false
+            }
+          ],
+          "correctKey": "B",
+          "skill": "Argumentar",
+          "oa": "OA 12",
+          "contentAxis": "Patrones y álgebra",
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Completan una secuencia numérica hasta 12 20, dado su patrón."
+        }
+      ]
+    }
+  ],
+  "extraction": {
+    "itemCount": 23,
+    "warnings": [
+      "responseFormat: 'fill_in' (completación/cálculo) en ítems 2, 5, 7, 8, 15 → modelados como open_ended; se promoverán a gap_fill (auto-corregible) al cargar la pauta.",
+      "responseFormat: 'develop' en ítem 21 (única pregunta de desarrollo).",
+      "Alternativas-imagen (isImage:true) en ítems 12, 13, 14: requieren captura de imagen para ser usables.",
+      "Figura imprescindible para responder en ítems 2, 9, 12, 13, 14, 15, 16, 17, 18, 22.",
+      "3° básico usa 3 alternativas (A/B/C). Texto y símbolos transcritos desde pdftotext; estructura y figuras confirmadas con las imágenes renderizadas."
+    ],
+    "needsHumanReview": true,
+    "crossCheck": {
+      "hardIssues": [],
+      "softWarnings": [],
+      "counts": {
+        "cuadernillo": 23,
+        "ficha": 23,
+        "hoja": 23
+      }
+    }
+  },
+  "pauta": {
+    "source": {
+      "ficha": "3_TE DIA Diagnóstico matemática 3° básico 2026.pdf",
+      "hoja": "3_Hoja de respuestas DIA Diagnóstico matemática 3° básico 2026.pdf"
+    },
+    "appliedKeys": 17,
+    "rubrics": 1
+  }
+}

@@ -84,7 +84,8 @@
               "name": "Números y operaciones",
               "tagType": "secondary"
             }
-          ]
+          ],
+          "imageRef": "item/global/4to-matematicas-intermedio-2025/item_figure/01.png"
         },
         {
           "position": 2,
@@ -228,7 +229,8 @@
               "name": "Números y operaciones",
               "tagType": "secondary"
             }
-          ]
+          ],
+          "imageRef": "item/global/4to-matematicas-intermedio-2025/item_figure/04.png"
         },
         {
           "position": 5,
@@ -290,7 +292,8 @@
               "name": "Números y operaciones",
               "tagType": "secondary"
             }
-          ]
+          ],
+          "imageRef": "item/global/4to-matematicas-intermedio-2025/item_figure/05.png"
         },
         {
           "position": 6,
@@ -620,7 +623,8 @@
               "name": "Medición",
               "tagType": "secondary"
             }
-          ]
+          ],
+          "imageRef": "item/global/4to-matematicas-intermedio-2025/item_figure/11.png"
         },
         {
           "position": 12,
@@ -744,7 +748,8 @@
               "name": "Medición",
               "tagType": "secondary"
             }
-          ]
+          ],
+          "imageRef": "item/global/4to-matematicas-intermedio-2025/item_figure/13.png"
         },
         {
           "position": 14,
@@ -806,7 +811,8 @@
               "name": "Medición",
               "tagType": "secondary"
             }
-          ]
+          ],
+          "imageRef": "item/global/4to-matematicas-intermedio-2025/item_figure/14.png"
         },
         {
           "position": 15,
@@ -868,7 +874,8 @@
               "name": "Medición",
               "tagType": "secondary"
             }
-          ]
+          ],
+          "imageRef": "item/global/4to-matematicas-intermedio-2025/item_figure/15.png"
         },
         {
           "position": 16,
@@ -930,7 +937,8 @@
               "name": "Geometría",
               "tagType": "secondary"
             }
-          ]
+          ],
+          "imageRef": "item/global/4to-matematicas-intermedio-2025/item_figure/16.png"
         },
         {
           "position": 17,
@@ -942,25 +950,29 @@
               "key": "A",
               "text": "Cuadrícula con eje de simetría horizontal; dos figuras tipo 'T', una arriba y otra abajo del eje.",
               "isImage": true,
-              "isCorrect": false
+              "isCorrect": false,
+              "imageRef": "item/global/4to-matematicas-intermedio-2025/alt_figure/17_A.png"
             },
             {
               "key": "B",
               "text": "Cuadrícula con eje de simetría horizontal; figura tipo 'L' arriba y figura distinta abajo.",
               "isImage": true,
-              "isCorrect": false
+              "isCorrect": false,
+              "imageRef": "item/global/4to-matematicas-intermedio-2025/alt_figure/17_B.png"
             },
             {
               "key": "C",
               "text": "Cuadrícula con eje de simetría horizontal; figura tipo 'T' arriba y figura abajo del eje.",
               "isImage": true,
-              "isCorrect": true
+              "isCorrect": true,
+              "imageRef": "item/global/4to-matematicas-intermedio-2025/alt_figure/17_C.png"
             },
             {
               "key": "D",
               "text": "Cuadrícula con eje de simetría horizontal; figura tipo 'T' arriba y figura distinta abajo.",
               "isImage": true,
-              "isCorrect": false
+              "isCorrect": false,
+              "imageRef": "item/global/4to-matematicas-intermedio-2025/alt_figure/17_D.png"
             }
           ],
           "correctKey": "C",
@@ -996,7 +1008,8 @@
               "name": "Geometría",
               "tagType": "secondary"
             }
-          ]
+          ],
+          "imageRef": "item/global/4to-matematicas-intermedio-2025/item_figure/17.png"
         },
         {
           "position": 18,
@@ -1008,25 +1021,29 @@
               "key": "A",
               "text": "Figura 1 y Figura 2 (trapecios con un punto negro) dispuestas lado a lado horizontalmente.",
               "isImage": true,
-              "isCorrect": false
+              "isCorrect": false,
+              "imageRef": "item/global/4to-matematicas-intermedio-2025/alt_figure/18_A.png"
             },
             {
               "key": "B",
               "text": "Figura 1 y Figura 2 (trapecios con un punto negro) dispuestas lado a lado horizontalmente, posición distinta del punto.",
               "isImage": true,
-              "isCorrect": false
+              "isCorrect": false,
+              "imageRef": "item/global/4to-matematicas-intermedio-2025/alt_figure/18_B.png"
             },
             {
               "key": "C",
               "text": "Figura 1 abajo y Figura 2 arriba a la derecha (trapecios con un punto negro), conectadas en diagonal.",
               "isImage": true,
-              "isCorrect": false
+              "isCorrect": false,
+              "imageRef": "item/global/4to-matematicas-intermedio-2025/alt_figure/18_C.png"
             },
             {
               "key": "D",
               "text": "Figura 1 abajo y Figura 2 arriba a la derecha (trapecios con un punto negro), conectadas en diagonal, posición distinta del punto.",
               "isImage": true,
-              "isCorrect": true
+              "isCorrect": true,
+              "imageRef": "item/global/4to-matematicas-intermedio-2025/alt_figure/18_D.png"
             }
           ],
           "correctKey": "D",
@@ -1062,7 +1079,8 @@
               "name": "Geometría",
               "tagType": "secondary"
             }
-          ]
+          ],
+          "imageRef": "item/global/4to-matematicas-intermedio-2025/item_figure/18.png"
         },
         {
           "position": 19,
@@ -1413,7 +1431,8 @@
               "name": "Datos y probabilidades",
               "tagType": "secondary"
             }
-          ]
+          ],
+          "imageRef": "item/global/4to-matematicas-intermedio-2025/item_figure/24.png"
         },
         {
           "position": 25,
@@ -1475,7 +1494,8 @@
               "name": "Datos y probabilidades",
               "tagType": "secondary"
             }
-          ]
+          ],
+          "imageRef": "item/global/4to-matematicas-intermedio-2025/item_figure/25.png"
         }
       ]
     }

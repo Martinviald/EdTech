@@ -2,8 +2,7 @@ import Papa from 'papaparse';
 import type { AnswerSheetRowError } from '@soe/types';
 import {
   decodeCsvBuffer,
-  normalizeAnswerValue,
-  questionColumnToPosition,
+  assignAnswer,
   type ParsedAnswerSheetRow,
   type ParserResult,
 } from './parser.types';
@@ -34,9 +33,7 @@ export function parseDiaOfficialCsv(buffer: Buffer): ParserResult {
 
   const questionColumns = detectedColumns.filter((c) => /^p\d+$/i.test(c));
   if (questionColumns.length === 0) {
-    warnings.push(
-      'No se detectaron columnas de preguntas con formato "p1", "p2", etc. en el CSV.',
-    );
+    warnings.push('No se detectaron columnas de preguntas con formato "p1", "p2", etc. en el CSV.');
   }
 
   const rows: ParsedAnswerSheetRow[] = [];
@@ -47,8 +44,7 @@ export function parseDiaOfficialCsv(buffer: Buffer): ParserResult {
     const studentRut = (raw['RUT'] ?? '').trim() || null;
     const apellidos = (raw['Apellidos'] ?? '').trim();
     const nombres = (raw['Nombres'] ?? '').trim();
-    const studentFullName =
-      apellidos || nombres ? `${nombres} ${apellidos}`.trim() : null;
+    const studentFullName = apellidos || nombres ? `${nombres} ${apellidos}`.trim() : null;
 
     if (!studentRut) {
       errors.push({ rowNumber, field: 'RUT', message: 'Falta el RUT del alumno' });
@@ -56,9 +52,7 @@ export function parseDiaOfficialCsv(buffer: Buffer): ParserResult {
 
     const answers: Record<string, string | null> = {};
     for (const col of questionColumns) {
-      const position = questionColumnToPosition(col);
-      if (!position) continue;
-      answers[position] = normalizeAnswerValue(raw[col]);
+      assignAnswer(answers, col, raw[col]);
     }
 
     if (!studentRut && Object.values(answers).every((v) => v === null) && !studentFullName) {

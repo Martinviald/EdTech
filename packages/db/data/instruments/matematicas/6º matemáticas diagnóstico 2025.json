@@ -240,25 +240,29 @@
               "key": "A",
               "text": "Barra dividida en 10 partes iguales, con 3 partes pintadas gris (3/10).",
               "isImage": true,
-              "isCorrect": false
+              "isCorrect": false,
+              "imageRef": "item/global/6to-matematicas-diagnostico-2025/alt_figure/05_A.png"
             },
             {
               "key": "B",
               "text": "Barra dividida en 7 partes iguales, con 3 partes pintadas gris (3/7).",
               "isImage": true,
-              "isCorrect": true
+              "isCorrect": true,
+              "imageRef": "item/global/6to-matematicas-diagnostico-2025/alt_figure/05_B.png"
             },
             {
               "key": "C",
               "text": "Barra dividida en 7 partes iguales, con 4 partes pintadas gris (4/7).",
               "isImage": true,
-              "isCorrect": false
+              "isCorrect": false,
+              "imageRef": "item/global/6to-matematicas-diagnostico-2025/alt_figure/05_C.png"
             },
             {
               "key": "D",
               "text": "Barra dividida en 10 partes iguales, con 7 partes pintadas gris (7/10).",
               "isImage": true,
-              "isCorrect": false
+              "isCorrect": false,
+              "imageRef": "item/global/6to-matematicas-diagnostico-2025/alt_figure/05_D.png"
             }
           ],
           "correctKey": "B",
@@ -294,7 +298,8 @@
               "name": "Números y operaciones",
               "tagType": "secondary"
             }
-          ]
+          ],
+          "imageRef": "item/global/6to-matematicas-diagnostico-2025/item_figure/05.png"
         },
         {
           "position": 6,
@@ -430,25 +435,29 @@
               "key": "A",
               "text": "Barra de 10 partes iguales con 2 partes pintadas gris (≈ 2/10 = 0,2).",
               "isImage": true,
-              "isCorrect": false
+              "isCorrect": false,
+              "imageRef": "item/global/6to-matematicas-diagnostico-2025/alt_figure/08_A.png"
             },
             {
               "key": "B",
               "text": "Cuadrado dividido en 100 partes (10×10) con la fila superior completa pintada gris (10 partes ≈ 0,10).",
               "isImage": true,
-              "isCorrect": false
+              "isCorrect": false,
+              "imageRef": "item/global/6to-matematicas-diagnostico-2025/alt_figure/08_B.png"
             },
             {
               "key": "C",
               "text": "Cuadrado dividido en 100 partes (10×10) con 2 cuadritos pintados gris en la esquina superior izquierda (2/100 = 0,02).",
               "isImage": true,
-              "isCorrect": true
+              "isCorrect": true,
+              "imageRef": "item/global/6to-matematicas-diagnostico-2025/alt_figure/08_C.png"
             },
             {
               "key": "D",
               "text": "Barra de 10 partes iguales con 2 partes pintadas gris al inicio (≈ 2/10 = 0,2).",
               "isImage": true,
-              "isCorrect": false
+              "isCorrect": false,
+              "imageRef": "item/global/6to-matematicas-diagnostico-2025/alt_figure/08_D.png"
             }
           ],
           "correctKey": "C",
@@ -484,7 +493,8 @@
               "name": "Números y operaciones",
               "tagType": "secondary"
             }
-          ]
+          ],
+          "imageRef": "item/global/6to-matematicas-diagnostico-2025/item_figure/08.png"
         },
         {
           "position": 9,
@@ -496,25 +506,29 @@
               "key": "A",
               "text": "Recta de 0 a 1 dividida en 9 partes; P cerca de la 2.ª marca (≈ 2/9).",
               "isImage": true,
-              "isCorrect": false
+              "isCorrect": false,
+              "imageRef": "item/global/6to-matematicas-diagnostico-2025/alt_figure/09_A.png"
             },
             {
               "key": "B",
               "text": "Recta de 0 a 1 dividida en 9 partes; P aproximadamente en la mitad (≈ 4/9 o 5/9).",
               "isImage": true,
-              "isCorrect": false
+              "isCorrect": false,
+              "imageRef": "item/global/6to-matematicas-diagnostico-2025/alt_figure/09_B.png"
             },
             {
               "key": "C",
               "text": "Recta de 0 a 1 dividida en 9 partes; P cerca de la 7.ª marca (≈ 7/9).",
               "isImage": true,
-              "isCorrect": false
+              "isCorrect": false,
+              "imageRef": "item/global/6to-matematicas-diagnostico-2025/alt_figure/09_C.png"
             },
             {
               "key": "D",
               "text": "Recta de 0 a 1 dividida en 9 partes; P cerca de la 8.ª marca (≈ 8/9).",
               "isImage": true,
-              "isCorrect": true
+              "isCorrect": true,
+              "imageRef": "item/global/6to-matematicas-diagnostico-2025/alt_figure/09_D.png"
             }
           ],
           "correctKey": "D",
@@ -550,7 +564,8 @@
               "name": "Números y operaciones",
               "tagType": "secondary"
             }
-          ]
+          ],
+          "imageRef": "item/global/6to-matematicas-diagnostico-2025/item_figure/09.png"
         },
         {
           "position": 10,
@@ -612,7 +627,8 @@
               "name": "Números y operaciones",
               "tagType": "secondary"
             }
-          ]
+          ],
+          "imageRef": "item/global/6to-matematicas-diagnostico-2025/item_figure/10.png"
         },
         {
           "position": 11,
@@ -937,7 +953,8 @@
               "name": "Medición",
               "tagType": "secondary"
             }
-          ]
+          ],
+          "imageRef": "item/global/6to-matematicas-diagnostico-2025/item_figure/16.png"
         },
         {
           "position": 17,
@@ -949,25 +966,29 @@
               "key": "A",
               "text": "Red de 4 caras: tres en fila horizontal y una colgando debajo de la del centro.",
               "isImage": true,
-              "isCorrect": false
+              "isCorrect": false,
+              "imageRef": "item/global/6to-matematicas-diagnostico-2025/alt_figure/17_A.png"
             },
             {
               "key": "B",
               "text": "Red de 6 caras: cuatro en fila horizontal y una colgando arriba y otra debajo de la misma cara (cruz horizontal).",
               "isImage": true,
-              "isCorrect": false
+              "isCorrect": false,
+              "imageRef": "item/global/6to-matematicas-diagnostico-2025/alt_figure/17_B.png"
             },
             {
               "key": "C",
               "text": "Red en forma de cruz vertical: una columna de tres caras con una cara a cada lado de la del medio (5 caras).",
               "isImage": true,
-              "isCorrect": true
+              "isCorrect": true,
+              "imageRef": "item/global/6to-matematicas-diagnostico-2025/alt_figure/17_C.png"
             },
             {
               "key": "D",
               "text": "Red en forma de cruz: columna de tres caras con una cara a izquierda y derecha de la del medio (6 caras), tipo desarrollo de prisma rectangular.",
               "isImage": true,
-              "isCorrect": false
+              "isCorrect": false,
+              "imageRef": "item/global/6to-matematicas-diagnostico-2025/alt_figure/17_D.png"
             }
           ],
           "correctKey": "C",
@@ -1003,7 +1024,8 @@
               "name": "Geometría",
               "tagType": "secondary"
             }
-          ]
+          ],
+          "imageRef": "item/global/6to-matematicas-diagnostico-2025/item_figure/17.png"
         },
         {
           "position": 18,
@@ -1015,25 +1037,29 @@
               "key": "A",
               "text": "Figura sobre cuadrícula con un lado vertical y un lado horizontal marcados en negrita en el vértice superior izquierdo (forman ángulo recto).",
               "isImage": true,
-              "isCorrect": true
+              "isCorrect": true,
+              "imageRef": "item/global/6to-matematicas-diagnostico-2025/alt_figure/18_A.png"
             },
             {
               "key": "B",
               "text": "Figura sobre cuadrícula con el lado superior horizontal y un lado oblicuo descendente marcados en negrita (ángulo no recto).",
               "isImage": true,
-              "isCorrect": false
+              "isCorrect": false,
+              "imageRef": "item/global/6to-matematicas-diagnostico-2025/alt_figure/18_B.png"
             },
             {
               "key": "C",
               "text": "Figura sobre cuadrícula con el lado inferior horizontal y un lado oblicuo marcados en negrita (ángulo no recto).",
               "isImage": true,
-              "isCorrect": false
+              "isCorrect": false,
+              "imageRef": "item/global/6to-matematicas-diagnostico-2025/alt_figure/18_C.png"
             },
             {
               "key": "D",
               "text": "Figura sobre cuadrícula con dos lados oblicuos marcados en negrita (ángulo no recto).",
               "isImage": true,
-              "isCorrect": false
+              "isCorrect": false,
+              "imageRef": "item/global/6to-matematicas-diagnostico-2025/alt_figure/18_D.png"
             }
           ],
           "correctKey": "A",
@@ -1069,7 +1095,8 @@
               "name": "Geometría",
               "tagType": "secondary"
             }
-          ]
+          ],
+          "imageRef": "item/global/6to-matematicas-diagnostico-2025/item_figure/18.png"
         },
         {
           "position": 19,
@@ -1131,7 +1158,8 @@
               "name": "Medición",
               "tagType": "secondary"
             }
-          ]
+          ],
+          "imageRef": "item/global/6to-matematicas-diagnostico-2025/item_figure/19.png"
         },
         {
           "position": 20,
@@ -1193,7 +1221,8 @@
               "name": "Datos y probabilidades",
               "tagType": "secondary"
             }
-          ]
+          ],
+          "imageRef": "item/global/6to-matematicas-diagnostico-2025/item_figure/20.png"
         },
         {
           "position": 21,
@@ -1255,7 +1284,8 @@
               "name": "Datos y probabilidades",
               "tagType": "secondary"
             }
-          ]
+          ],
+          "imageRef": "item/global/6to-matematicas-diagnostico-2025/item_figure/21.png"
         },
         {
           "position": 22,
@@ -1329,25 +1359,29 @@
               "key": "A",
               "text": "Gráfico de barras: Clavos 500, Tornillos 400, Tuercas 100.",
               "isImage": true,
-              "isCorrect": false
+              "isCorrect": false,
+              "imageRef": "item/global/6to-matematicas-diagnostico-2025/alt_figure/23_A.png"
             },
             {
               "key": "B",
               "text": "Gráfico de barras: Clavos 400, Tornillos 500, Tuercas 100.",
               "isImage": true,
-              "isCorrect": true
+              "isCorrect": true,
+              "imageRef": "item/global/6to-matematicas-diagnostico-2025/alt_figure/23_B.png"
             },
             {
               "key": "C",
               "text": "Gráfico de barras (cuarto valor según figura; requiere imagen para confirmar las alturas).",
               "isImage": true,
-              "isCorrect": false
+              "isCorrect": false,
+              "imageRef": "item/global/6to-matematicas-diagnostico-2025/alt_figure/23_C.png"
             },
             {
               "key": "D",
               "text": "Gráfico de barras (cuarto valor según figura; requiere imagen para confirmar las alturas).",
               "isImage": true,
-              "isCorrect": false
+              "isCorrect": false,
+              "imageRef": "item/global/6to-matematicas-diagnostico-2025/alt_figure/23_D.png"
             }
           ],
           "correctKey": "B",
@@ -1383,7 +1417,8 @@
               "name": "Datos y probabilidades",
               "tagType": "secondary"
             }
-          ]
+          ],
+          "imageRef": "item/global/6to-matematicas-diagnostico-2025/item_figure/23.png"
         },
         {
           "position": 24,
@@ -1424,7 +1459,8 @@
               "name": "Datos y probabilidades",
               "tagType": "secondary"
             }
-          ]
+          ],
+          "imageRef": "item/global/6to-matematicas-diagnostico-2025/item_figure/24.png"
         },
         {
           "position": 25,
@@ -1672,7 +1708,8 @@
               "name": "Números y operaciones",
               "tagType": "secondary"
             }
-          ]
+          ],
+          "imageRef": "item/global/6to-matematicas-diagnostico-2025/item_figure/28.png"
         },
         {
           "position": 29,
@@ -1796,7 +1833,8 @@
               "name": "Patrones y álgebra",
               "tagType": "secondary"
             }
-          ]
+          ],
+          "imageRef": "item/global/6to-matematicas-diagnostico-2025/item_figure/30.png"
         }
       ]
     }

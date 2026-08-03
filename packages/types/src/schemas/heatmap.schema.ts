@@ -1,5 +1,7 @@
 import { z } from 'zod';
 import type { PerformanceLevel } from '../enums';
+import { csvArraySchema, stringCsvSchema, uuidCsvSchema } from './common.schema';
+import { INSTRUMENT_APPLICATION_PERIODS } from './instrument.schema';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Sprint 5 — Mapa de calor de % logro por habilidad × asignatura (H6.10)
@@ -17,10 +19,13 @@ import type { PerformanceLevel } from '../enums';
 export const heatmapQuerySchema = z.object({
   assessmentId: z.string().uuid().optional(),
   instrumentId: z.string().uuid().optional(),
-  instrumentType: z.string().min(1).optional(),
-  subjectId: z.string().uuid().optional(),
-  gradeId: z.string().uuid().optional(),
-  classGroupId: z.string().uuid().optional(),
+  // Multi-select (T2-12): CSV o param repetido → array.
+  instrumentType: stringCsvSchema,
+  subjectId: uuidCsvSchema,
+  gradeId: uuidCsvSchema,
+  classGroupId: uuidCsvSchema,
+  // Momento DIA (T2-27): sólo aplica a instrumentos con ciclo (ej. DIA).
+  applicationPeriod: csvArraySchema(z.enum(INSTRUMENT_APPLICATION_PERIODS)),
   academicYearId: z.string().uuid().optional(),
 });
 export type HeatmapQueryDto = z.infer<typeof heatmapQuerySchema>;

@@ -38,6 +38,49 @@ const baseContent = {
 // ── Schemas de content por tipo ──────────────────────────────────────────────
 // (multiple_choice se importa de item.schema.ts — ver arriba)
 
+// ── Multi-selección (`multi_select`) ─────────────────────────────────────────
+//
+// Selección múltiple donde el alumno debe marcar VARIAS opciones. Reutiliza el
+// shape de alternativas de `multiple_choice` a propósito: el render del banco y
+// el análisis por ítem funcionan sin inventar una forma nueva. Lo que lo hace un
+// tipo distinto es la SEMÁNTICA de corrección, no la del contenido — y por eso
+// tiene su propio `type`, en vez de un flag dentro de multiple_choice: el tipo
+// es lo que elige la estrategia de scoring.
+//
+// La invariante que lo separa de `multiple_choice` es tener **≥2 correctas**.
+
+export const multiSelectContentSchema = z
+  .object({
+    stem: z.string().min(1),
+    alternatives: z.array(alternativeSchema).min(3),
+    ...baseContent,
+  })
+  .superRefine((content, ctx) => {
+    const correct = content.alternatives.filter((alt) => alt.isCorrect).length;
+    if (correct < 2) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ['alternatives'],
+        message: `multi_select exige al menos 2 alternativas correctas (tiene ${correct}); con una sola es multiple_choice`,
+      });
+    }
+    if (correct === content.alternatives.length) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ['alternatives'],
+        message: 'todas las alternativas son correctas: el ítem no discrimina',
+      });
+    }
+    const keys = content.alternatives.map((alt) => alt.key);
+    if (new Set(keys).size !== keys.length) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ['alternatives'],
+        message: 'las keys de las alternativas deben ser únicas',
+      });
+    }
+  });
+
 export const trueFalseContentSchema = z.object({
   stem: z.string().min(1),
   correctAnswer: z.boolean(),
@@ -80,13 +123,80 @@ export const listeningContentSchema = z.object({
   imageUrl: baseContent.imageUrl,
 });
 
-export const matchingContentSchema = z.object({
-  prompt: z.string().min(1).optional(),
-  leftItems: z.array(z.object({ id: z.string(), text: z.string().min(1) })).min(2),
-  rightItems: z.array(z.object({ id: z.string(), text: z.string().min(1) })).min(2),
-  correctPairs: z.array(z.object({ leftId: z.string(), rightId: z.string() })).min(1),
-  ...baseContent,
+// ── Términos pareados (`matching`) ───────────────────────────────────────────
+//
+// Abstracción genérica, NO una transcripción del formato DIA. Invariantes:
+//
+//   · `leftItems` es el lado RESPONDIBLE: cada elemento recibe exactamente una
+//     respuesta del alumno, y por eso `correctPairs` tiene una entrada por
+//     elemento y `leftId` es único. La corrección indexa por `leftId`.
+//   · `rightItems` es el BANCO DE OPCIONES. Un elemento del banco que no aparece
+//     en ningún `correctPairs` es, por definición, un distractor.
+//   · `rightId` PUEDE repetirse: varios elementos respondibles pueden apuntar a
+//     la misma opción (pareados de clasificación N → k categorías).
+//   · Las dos columnas pueden tener tamaños distintos y arbitrarios.
+//
+// Qué lado del documento impreso queda en `leftItems` lo decide el adaptador de
+// carga, no este schema: en unos instrumentos los distractores están en la
+// columna A y en otros en la B. `label` preserva el rótulo impreso ("A.3") para
+// no perder la traza al documento original.
+
+const matchingElementSchema = z.object({
+  id: z.string().min(1),
+  /** Texto del elemento; si `isImage`, es la descripción textual de la figura. */
+  text: z.string().min(1),
+  /** Rótulo impreso en el documento de origen ("A.3", "1", "a"). Trazabilidad. */
+  label: z.string().min(1).optional(),
+  /** El contenido real es una figura — `text` la describe, no la reemplaza. */
+  isImage: z.boolean().optional(),
 });
+
+export const matchingContentSchema = z
+  .object({
+    prompt: z.string().min(1).optional(),
+    leftItems: z.array(matchingElementSchema).min(1),
+    rightItems: z.array(matchingElementSchema).min(2),
+    correctPairs: z.array(z.object({ leftId: z.string(), rightId: z.string() })).min(1),
+    ...baseContent,
+  })
+  .superRefine((content, ctx) => {
+    const leftIds = new Set(content.leftItems.map((el) => el.id));
+    const rightIds = new Set(content.rightItems.map((el) => el.id));
+    const seenLeftIds = new Set<string>();
+
+    content.correctPairs.forEach((pair, index) => {
+      if (!leftIds.has(pair.leftId)) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          path: ['correctPairs', index, 'leftId'],
+          message: `leftId "${pair.leftId}" no existe en leftItems`,
+        });
+      }
+      if (!rightIds.has(pair.rightId)) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          path: ['correctPairs', index, 'rightId'],
+          message: `rightId "${pair.rightId}" no existe en rightItems`,
+        });
+      }
+      if (seenLeftIds.has(pair.leftId)) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          path: ['correctPairs', index, 'leftId'],
+          message: `leftId "${pair.leftId}" está repetido: cada elemento respondible admite un único par`,
+        });
+      }
+      seenLeftIds.add(pair.leftId);
+    });
+
+    if (seenLeftIds.size !== leftIds.size) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ['correctPairs'],
+        message: `correctPairs debe cubrir los ${leftIds.size} elementos de leftItems (cubre ${seenLeftIds.size})`,
+      });
+    }
+  });
 
 export const orderingContentSchema = z.object({
   prompt: z.string().min(1).optional(),
@@ -113,6 +223,7 @@ export const gapFillContentSchema = z.object({
 
 export const ITEM_CONTENT_SCHEMAS = {
   multiple_choice: multipleChoiceContentSchema,
+  multi_select: multiSelectContentSchema,
   true_false: trueFalseContentSchema,
   open_ended: openEndedContentSchema,
   writing: writingContentSchema,
@@ -126,6 +237,7 @@ export const ITEM_CONTENT_SCHEMAS = {
 
 // ── Tipos derivados ──────────────────────────────────────────────────────────
 
+export type MultiSelectContent = z.infer<typeof multiSelectContentSchema>;
 export type TrueFalseContent = z.infer<typeof trueFalseContentSchema>;
 export type OpenEndedContent = z.infer<typeof openEndedContentSchema>;
 export type WritingContent = z.infer<typeof writingContentSchema>;
@@ -139,6 +251,7 @@ export type GapFillContent = z.infer<typeof gapFillContentSchema>;
 /** Unión de todos los contenidos posibles. Tipo a usar en `items.content.$type<ItemContent>()`. */
 export type ItemContent =
   | MultipleChoiceContent
+  | MultiSelectContent
   | TrueFalseContent
   | OpenEndedContent
   | WritingContent
@@ -156,6 +269,7 @@ export type ItemContent =
 
 export const AUTO_SCORABLE_ITEM_TYPES = [
   'multiple_choice',
+  'multi_select',
   'true_false',
   'matching',
   'ordering',

@@ -1,0 +1,918 @@
+{
+  "schemaVersion": "1.0",
+  "source": {
+    "file": "4_prueba_lectura_monitoreo_2026_4_basico.pdf",
+    "subjectFolder": "Lenguaje"
+  },
+  "instrument": {
+    "name": "DIA Lectura 4° Básico 2026 — Intermedio",
+    "subject": "Lenguaje y Comunicación",
+    "subjectCode": "LANG",
+    "grade": "4° Básico",
+    "gradeCode": "4TH_BASIC",
+    "year": 2026,
+    "applicationPeriod": "intermedio",
+    "type": "dia",
+    "isOfficial": true,
+    "source": "imported"
+  },
+  "sections": [
+    {
+      "order": 1,
+      "name": "Texto 1: «ZETA»",
+      "type": "multiple_choice",
+      "instructions": "Lee el siguiente texto y responde las preguntas 1 a 5.",
+      "passage": {
+        "title": "ZETA",
+        "text": "Guiado por la luz de la única ventana iluminada de la cuadra, ZZZ ubicó el punto de aterrizaje. Apuntó la parte delantera de su nave hacia el pequeño jardín, aseguró su cinturón de seguridad, desconectó el piloto automático y se aferró al volante.\nCon mucha habilidad esquivó la piscina de lona y apoyó las patas de descanso de la pequeña nave entre una hamaca y un espacio con flores y plantas. Luego abrió la compuerta y descendió de un salto. Apuntó sus llamativos bigotes hacia el cielo y olió el aire de la noche. Había oxígeno, un poco contaminado, sin duda, pero suficientemente bueno para respirar. Se llenó los pulmones con satisfacción, estiró sus músculos y empujó la nave tras un arbusto.\n\nDesde la ventana, con la boca abierta y un grito congelado en la garganta, Lucas lo miraba estupefacto. ZZZ le sonrió, aunque nunca supo si su gesto había sido bien interpretado por el niño, que seguía quieto como una estatua.\nUn rato después, Lucas daba vueltas por su habitación, tratando de no despertar a sus padres. ZZZ lo miraba divertido, recostado en la almohada. Ya le había explicado cuál era su misión y ahora solo quería dormir. Tenía mucho sueño, y no podía evitar un leve ronroneo que lo iba adormeciendo. Lucas seguía hablando, solo.\n—¡¿Pero cómo le digo a mamá?! ¡Le va a dar alergia, va a empezar a estornudar, se le van a hinchar los ojos! ¡Esto me pasa por no dormirme cuando me dicen que me duerma!\nPero ZZZ no escuchó ninguna de las quejas del chico hasta la mañana siguiente, en que se despertó con un hambre de lobo y le pidió algo de comer.\nLucas bajó a la cocina, sirvió una taza de leche y unas galletas en una bandeja y empezó a subir las escaleras. Justo en ese momento apareció su madre.\n—Lucas, ¿adónde vas? ¿Qué pasa con el desayuno?\n—Es que…— empezó a contestar el chico, pero tuvo que interrumpirse: ZZZ bajaba la escalera, con su paso ágil y elegante.\n—¡Lucas! —exclamó la mamá—. ¿Y mi alergia?\nLucas no sabía qué decir. Aún no pasaba nada, estaba congelado, sabía que la verdadera locura empezaría apenas ZZZ se pusiera a hablar. ZZZ abrió la boca, Lucas se puso blanco, y el viajero del espacio lanzó un encantador maullido. Lucas miró a su madre.\nZZZ se frotaba suavemente contra las piernas de la mamá, que parecía maravillada.\n—¿Y tu alergia, mami?— preguntó Lucas.\n—Parece que no me hace nada— contestó ella encantada—. ¿Cómo se llama?\n—Zeta— dijo Lucas, para simplificar.\nLuego dejó la taza de leche en el piso y ZZZ empezó a tomarla de inmediato, sacando la lengua y lamiendo con placer, como si fuera un gato común y corriente.\nA partir de ese día y durante todas las vacaciones, Lucas y Zeta fueron inseparables. El chico aprendió mucho y casi ni se sorprendió cuando Zeta le confesó que muchos de los gatos que habitan la Tierra, y algunos perros, son originarios de su mundo.\nY a los tres meses exactos, ZZZ se despidió de Lucas con un abrazo, y así como había venido, desapareció en el cielo, montado en su pequeña nave.\n—Andará por los techos— le dijo Lucas a su madre, al otro día, cuando ella se sorprendió por la repentina ausencia—. Y ya va a volver, no te preocupes— agregó con una misteriosa sonrisa.\n\nMario Méndez. Cuentos y poemas para niños de hoy y siempre. Chile: Planeta, 2010.",
+        "format": "plain",
+        "attachments": [
+          {
+            "kind": "image",
+            "note": "Ilustraciones decorativas del gato Zeta y su pequeña nave espacial que acompañan el relato."
+          }
+        ]
+      },
+      "items": [
+        {
+          "position": 1,
+          "type": "multiple_choice",
+          "stem": "¿Por qué Zeta aterrizó en el pequeño jardín?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Porque estaba buscando a Lucas.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Porque tenía un arbusto para esconder la nave.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Porque había una luz que facilitaba el aterrizaje.",
+              "isCorrect": true
+            },
+            {
+              "key": "D",
+              "text": "Porque necesitaba descansar y respirar fuera de su nave.",
+              "isCorrect": false
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "C",
+          "skill": "Interpretar y relacionar",
+          "oa": "OA 4",
+          "contentAxis": "Narración",
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Realizan inferencias sobre acontecimientos o acciones relevantes en un texto narrativo. Infieren características, sentimientos, intenciones o"
+        },
+        {
+          "position": 2,
+          "type": "multiple_choice",
+          "stem": "¿Cómo se sintió Lucas cuando vio a Zeta por primera vez?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Divertido.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Tranquilo.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Sorprendido.",
+              "isCorrect": true
+            },
+            {
+              "key": "D",
+              "text": "Avergonzado.",
+              "isCorrect": false
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "C",
+          "skill": "Interpretar y relacionar",
+          "oa": "OA 4",
+          "contentAxis": "Narración",
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "motivaciones de personajes en un texto narrativo. Infieren el conflicto en un texto narrativo."
+        },
+        {
+          "position": 3,
+          "type": "multiple_choice",
+          "stem": "¿Cuál fue la preocupación de Lucas cuando Zeta llegó a su casa?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Que su mamá no entendiera la misión de Zeta.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Que su mamá descubriera quién era Zeta realmente.",
+              "isCorrect": true
+            },
+            {
+              "key": "C",
+              "text": "Que su mamá encontrara la nave escondida en el jardín.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "Que su mamá se diera cuenta de que no se durmió temprano.",
+              "isCorrect": false
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "B",
+          "skill": "Interpretar y relacionar",
+          "oa": "OA 4",
+          "contentAxis": "Narración",
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Infieren el conflicto en un texto narrativo. Identifican un acontecimiento relevante en una"
+        },
+        {
+          "position": 4,
+          "type": "multiple_choice",
+          "stem": "¿Qué hizo Zeta al final de la historia?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Se fue volando en su pequeña nave.",
+              "isCorrect": true
+            },
+            {
+              "key": "B",
+              "text": "Se transformó en la mascota de Lucas.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Desapareció sin que nadie supiera de él.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "Salió a recorrer los techos del vecindario.",
+              "isCorrect": false
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "A",
+          "skill": "Interpretar y relacionar",
+          "oa": "OA 4",
+          "contentAxis": "Narración",
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Identifican un acontecimiento relevante en una secuencia narrativa. Infieren de qué trata un texto narrativo."
+        },
+        {
+          "position": 5,
+          "type": "multiple_choice",
+          "stem": "¿De qué trata el texto?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "De un niño que quería adoptar un gato común y corriente.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "De un gato de otro mundo que llegó a la casa de un niño.",
+              "isCorrect": true
+            },
+            {
+              "key": "C",
+              "text": "De un niño que soñó la llegada de un gato en una nave.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "De un gato perdido que buscaba un hogar para vivir.",
+              "isCorrect": false
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "B",
+          "skill": "Interpretar y relacionar",
+          "oa": "OA 4",
+          "contentAxis": "Narración",
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Infieren de qué trata un texto narrativo. Localizan información explícita relevante en un texto"
+        }
+      ]
+    },
+    {
+      "order": 2,
+      "name": "Texto 2: «Una estrella y un exoplaneta reciben el nombre de dos flores que solo crecen en Chile: Añañuca y Tahay»",
+      "type": "mixed",
+      "instructions": "Lee el siguiente texto y responde las preguntas 6 a 11.",
+      "passage": {
+        "title": "Una estrella y un exoplaneta reciben el nombre de dos flores que solo crecen en Chile: Añañuca y Tahay",
+        "text": "Jueves 08 junio de 2023\n\nUna estrella y un exoplaneta reciben el nombre de dos flores que solo crecen en Chile: Añañuca y Tahay\nPor Sara Jerez\n\nUn exoplaneta que está a 31 años luz de la Tierra y su estrella enana roja reciben el nombre de dos flores que solo crecen en Chile.\n\nChile continúa haciéndose un lugar en la astronomía mundial. Resulta que una estrella y un exoplaneta fueron bautizados con nombres de flores originarias del país, Añañuca y Tahay.\nEsto fue posible gracias a una campaña realizada por la Unión Astronómica Internacional. Allí, científicos de distintas partes del mundo postularon diferentes nombres para muchos objetos espaciales que ahora fueron bautizados.\nEn el caso de Chile, la propuesta fue presentada por destacados astrónomos nacionales que se dedican a estudiar el espacio. Se revisaron más de 600 propuestas de 91 países diferentes y se seleccionaron 20, entre ellas la propuesta de Chile.\n\nAñañuca y Tahay: una estrella y un exoplaneta\nAñañuca corresponde a la estrella GJ 367, que se encuentra muy lejos de la Tierra y se caracteriza por ser una estrella enana roja. Este cuerpo celeste recibió el nombre de la flor endémica de Chile que crece entre la región de Coquimbo y el Maule y que se caracteriza por ser de color rojo, igual que la estrella.\nFlor Añañuca\n\nPor otra parte, el exoplaneta GJ 367 B que gira alrededor de esta estrella fue llamado Tahay, como una flor endémica de la zona central de Chile que solo florece y permanece entre 7 y 8 horas al año. Así, el periodo de duración de la flor es casi el mismo que tiene la duración de un año en este exoplaneta, que en solo 7,7 horas da una vuelta completa alrededor de la estrella.\nFlor Tahay\nEsta no sería la primera vez que objetos del espacio reciben nombres asociados a Chile. De hecho, en 2019 un planeta y su estrella fueron llamados Caleuche y Pincoya, respectivamente, inspirados en la cultura de Chiloé.\n\nGlosario\nexoplaneta: planeta que se encuentra fuera de nuestro sistema solar.\nendémica: especie que solo crece en un determinado lugar o región.\n\nSara Jerez. “Nombran una estrella y un exoplaneta como flores endémicas de Chile: Añañuca y Tahay”. Bío Bío Chile [Santiago, Chile]. 8 jun. 2023. Web. 2 julio 2023. (Adaptación).",
+        "format": "plain",
+        "attachments": [
+          {
+            "kind": "image",
+            "note": "Dos fotografías rotuladas «Flor Añañuca» (flor roja) y «Flor Tahay», que muestran cómo son las flores endémicas mencionadas. La pregunta 10 se refiere a estas imágenes."
+          }
+        ]
+      },
+      "items": [
+        {
+          "position": 6,
+          "type": "multiple_choice",
+          "stem": "¿Cuántos países diferentes presentaron sus propuestas para nombrar a estos objetos espaciales?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "20",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "31",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "91",
+              "isCorrect": true
+            },
+            {
+              "key": "D",
+              "text": "600",
+              "isCorrect": false
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "C",
+          "skill": "Localizar",
+          "oa": "OA 6",
+          "contentAxis": "Texto no literario",
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Localizan información explícita relevante en un texto no literario. Localizan información explícita relevante en un texto"
+        },
+        {
+          "position": 7,
+          "type": "multiple_choice",
+          "stem": "¿Qué nombre recibió la estrella enana roja?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Tahay.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Pincoya.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Añañuca.",
+              "isCorrect": true
+            },
+            {
+              "key": "D",
+              "text": "Caleuche.",
+              "isCorrect": false
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "C",
+          "skill": "Localizar",
+          "oa": "OA 6",
+          "contentAxis": "Texto no literario",
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Localizan información explícita relevante en un texto no literario. Infieren información relevante en un texto no"
+        },
+        {
+          "position": 8,
+          "type": "multiple_choice",
+          "stem": "¿Qué característica de la flor Tahay tomaron en cuenta los astrónomos para hacer el nombramiento?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Que es una flor endémica.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Que tiene un color llamativo.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Que solo florece ocho horas al año.",
+              "isCorrect": true
+            },
+            {
+              "key": "D",
+              "text": "Que crece en la zona central de Chile.",
+              "isCorrect": false
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "C",
+          "skill": "Interpretar y relacionar",
+          "oa": "OA 6",
+          "contentAxis": "Texto no literario",
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Infieren información relevante en un texto no literario. Infieren información relevante en un texto no"
+        },
+        {
+          "position": 9,
+          "type": "multiple_choice",
+          "stem": "¿Qué tienen en común la flor Añañuca y el objeto espacial que recibió su nombre?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Su color.",
+              "isCorrect": true
+            },
+            {
+              "key": "B",
+              "text": "Su forma.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Su ubicación distante.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "Su periodo de duración.",
+              "isCorrect": false
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "A",
+          "skill": "Interpretar y relacionar",
+          "oa": "OA 6",
+          "contentAxis": "Texto no literario",
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Infieren información relevante en un texto no literario. Infieren información relevante que aportan los"
+        },
+        {
+          "position": 10,
+          "type": "multiple_choice",
+          "stem": "¿Qué muestran las imágenes incluidas en la noticia?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Qué flores endémicas existen en el país.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Cómo son las flores endémicas que se nombran.",
+              "isCorrect": true
+            },
+            {
+              "key": "C",
+              "text": "Dónde brotan las flores endémicas que se nombran.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "Cuál es el parecido entre dos flores endémicas del país.",
+              "isCorrect": false
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "B",
+          "skill": "Interpretar y relacionar",
+          "oa": "OA 6",
+          "contentAxis": "Texto no literario",
+          "hasFigure": true,
+          "figureNote": "La pregunta se refiere directamente a las dos fotografías de flores («Flor Añañuca» y «Flor Tahay») incluidas en la noticia; se requiere ver las imágenes para responder con seguridad.",
+          "indicador": "Infieren información relevante que aportan los elementos discontinuos en un texto no literario."
+        },
+        {
+          "position": 11,
+          "type": "open_ended",
+          "stem": "¿Crees que estos nombramientos son importantes para Chile?\nSí\nNo\n¿Por qué? Justifica tu respuesta con información del texto.",
+          "alternatives": [],
+          "responseFormat": "develop",
+          "correctKey": null,
+          "skill": "Reflexionar",
+          "oa": "OA 6",
+          "contentAxis": "Texto no literario",
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "literario con fundamentos que integran información del texto y sus conocimientos previos. Interpretan el sentido de expresiones en lenguaje",
+          "rubric": "Tipos de respuestas Respuestas correctas Respuestas parcialmente Respuestas incorrectas correctas (Código 2) (Código 0) (Código 1) El o la estudiante entrega una opinión El o la estudiante entrega una El o la estudiante no opina sobre el aspecto de la lectura sobre el aspecto solicitado en la opinión sobre el aspecto pregunta que evidencia una solicitado en la pregunta, pero la solicitado, no evidencia, en su comprensión global del texto. justificación es general, respuesta, comprensión del evidenciando una comprensión texto, o bien, evidencia una En este caso, el o la estudiante opina parcial del texto. compresión errónea del texto. sobre el hecho de que se haya bautizado a un exoplaneta y su En este caso, fundamenta su Otras respuestas incorrectas son estrella con el nombre de dos flores respuesta con elementos las tautológicas, vagas, endémicas de Chile y fundamenta su secundarios que no se relacionan contradictorias, incoherentes, en respuesta con información del texto. directamente con la relevancia blanco. (Por ejemplo, la importancia de este del nombramiento de estos hecho para la astronomía en Chile o la objetos espaciales, o bien, la posibilidad de que las flores de Chile conexión entre su opinión y la se conozcan fuera del territorio, entre información del texto es débil o otras). poco clara. Ejemplos: Ejemplos: Ejemplos: Sí, porque así la gente de otros Sí, porque las flores son de Si, es algo bueno para - - - países puede conocer nuestras Chile. Chile. flores, como la Añañuca. Puede ser algo importante Sí, porque esas flores - - Yo creo que sí es muy porque había muchos merecen ser reconocidas. - importante, porque el texto dice astrónomos. Tal vez, no podemos - que Chile se está haciendo un No porque ya había saberlo. - lugar en la astronomía mundial. pasado antes. No me parece algo - Tal vez no mucho porque en la - importante. noticia dice que el 2019 habían nombrado a otra estrella y planeta como Pincoya y Caleuche, pero esto no es muy conocido, entonces como que no es tan importante. 9 Ficha Técnica Prueba de Lectura 4° básico"
+        }
+      ]
+    },
+    {
+      "order": 3,
+      "name": "Texto 3: «Con mi abuelo»",
+      "type": "mixed",
+      "instructions": "Lee el siguiente texto y responde las preguntas 12 a 14.",
+      "passage": {
+        "title": "Con mi abuelo",
+        "text": "Sucedió hace muchos años,\npero nunca lo he olvidado.\nCaminaba con mi abuelo…\nmás bien brincaba a su lado\ntratando de no pisar\nlas rayas de las aceras.\nMe veo como aquellas tardes:\nradiante de primavera.\n\nDe repente daba un salto\nen las tapas de metal\nque abundaban en la ruta;\nme gustaba oírlas sonar.\nY subíamos la cuesta\ny volvíamos a bajar.\nÉl y yo y nuestro paseo,\nno existía nada más.\n\nMi mano en la de mi abuelo;\nsu mirada, toda mía.\nMe parecía que en mi vida\nnada malo ocurría.\nTodavía siento su mano,\nsu mirada, su sonrisa.\nUn recuerdo que a mi lado\npasa como dulce brisa.\n\nGlosario\nacera: vereda.\n\nGeorgina Lázaro. “Con mi abuelo”. EE.UU.: Fundación Cuatrogatos. Web. 30 abr. 2023.",
+        "format": "plain",
+        "attachments": []
+      },
+      "items": [
+        {
+          "position": 12,
+          "type": "multiple_choice",
+          "stem": "Lee el siguiente fragmento:\n\nSucedió hace muchos años,\npero nunca lo he olvidado.\nCaminaba con mi abuelo…\nmás bien brincaba a su lado\ntratando de no pisar\nlas rayas de las aceras.\nMe veo como aquellas tardes:\nradiante de primavera.\n\nSegún el fragmento, ¿qué significan los versos “Me veo como aquellas tardes: radiante de primavera”?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Que la persona que habla prefiere la primavera.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Que la persona que habla se siente como su abuelo.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Que la persona que habla cree que nada ha cambiado.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "Que la persona que habla se recuerda llena de felicidad.",
+              "isCorrect": true
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "D",
+          "skill": "Interpretar y relacionar",
+          "oa": "OA 5",
+          "contentAxis": "Poema",
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Interpretan el sentido de expresiones en lenguaje figurado presentes en un poema. Interpretan el sentido de expresiones en lenguaje"
+        },
+        {
+          "position": 13,
+          "type": "multiple_choice",
+          "stem": "¿Qué significan los siguientes versos para la persona que habla en el poema?\n\nTodavía siento su mano,\nsu mirada, su sonrisa.",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Que aún vive con su abuelo.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Que aún recuerda a su abuelo.",
+              "isCorrect": true
+            },
+            {
+              "key": "C",
+              "text": "Que aún toma la mano de su abuelo.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "Que aún sale a pasear con su abuelo.",
+              "isCorrect": false
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "B",
+          "skill": "Interpretar y relacionar",
+          "oa": "OA 5",
+          "contentAxis": "Poema",
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Interpretan el sentido de expresiones en lenguaje figurado presentes en un poema. Interpretan el sentido de expresiones en lenguaje"
+        },
+        {
+          "position": 14,
+          "type": "open_ended",
+          "stem": "¿Qué significan en el poema los siguientes versos?\n\nÉl y yo y nuestro paseo,\nno existía nada más.\n\nResponde a partir de lo leído.",
+          "alternatives": [],
+          "responseFormat": "develop",
+          "correctKey": null,
+          "skill": "Interpretar y relacionar",
+          "oa": "OA 5",
+          "contentAxis": "Poema",
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Interpretan el sentido de expresiones en lenguaje figurado presentes en un poema. Localizan información explícita relevante en un",
+          "rubric": "Tipos de respuestas Respuestas correctas Respuestas incorrectas (Código 2) (Código 0) El o la estudiante interpreta los versos seleccionados El o la estudiante realiza una interpretación literal de de un poema, evidenciando en su justificación, la los versos que es errónea, o bien, evidencia la falta de comprensión del lenguaje figurado de dichos versos en comprensión de los versos mismos en relación al contexto con el poema. poema. En este caso, el o la estudiante es capaz de interpretar También son incorrectas las respuestas en blanco. los versos alusivos a la manera en que el nieto/a recuerda la compañía de su abuelo, y de fundamentar su respuesta con información del texto, por ejemplo, aquello que implica dar un paseo acompañado por el abuelo, tanto en términos emocionales como prácticos (la compenetración de la relación abuelo/nieto, el paseo como tiempo dedicado exclusivamente a esa relación, la sensación de protección y confianza, entre otros). Ejemplos: Ejemplos: Que el nieto disfrutaba tanto de los paseos con Que nadie los acompañaba a pasear. - - su abuelo que solo puede recordar eso, no le Que no se acuerda de los paseos con su abuelo. - presta atención a nada más. Que lo pasaban tan bien juntos que no se daban - cuenta de lo que había alrededor. Que la nieta valora tanto el tiempo con su abuelo - que olvida todo lo demás, sus problemas, y todo lo que pasa alrededor. 10 Ficha Técnica Prueba de Lectura 4° básico"
+        }
+      ]
+    },
+    {
+      "order": 4,
+      "name": "Texto 4: «La leyenda del atrapasueños»",
+      "type": "mixed",
+      "instructions": "Lee el siguiente texto y responde las preguntas 15 a 20.",
+      "passage": {
+        "title": "La leyenda del atrapasueños",
+        "text": "Había una araña que hilaba pacientemente su tela al lado del lugar donde dormía Nokomis, la abuela. Cada día, Nokomis observaba cómo la araña trabajaba, haciendo su tejido con toda calma. Un día, cuando la estaba mirando, entró su nieto.\n–¡Nokomis! –gritó, lanzando una mirada a la araña. Y el niño empezó a dar patadas en su dirección. Luego, tomó un zapato, con el que fue a golpearla.\n–No –susurró la anciana –no le hagas daño.\n–Nokomis, ¿por qué proteges a la araña? –preguntó el niño.\nLa abuela sonrió, pero no contestó. Cuando el niño se fue, la araña se le acercó y le agradeció. Luego, le dijo:\n–Durante muchos días me has mirado hilar y tejer mi tela. Has admirado mi trabajo. Te daré un regalo por haberme salvado la vida.\nSonrió con su especial sonrisa de araña y se alejó, hilando todo el tiempo.\nPronto, la luna resplandeció en una mágica telaraña plateada que se movía suavemente en la ventana.\n–¿Ves cómo hilo? –preguntó la araña a la abuela– observa y verás que cada hilo atrapará los malos sueños. Solo los sueños felices pasarán a través del agujero pequeño.\nEste es mi regalo para ti. Úsalo para recordar nada más que los buenos sueños, pues los otros, quedarán atrapados en la red para siempre.\n\nGlosario\natrapasueños: es un amuleto ancestral que se cree protege a quien lo porta de las pesadillas y las energías negativas.\n\nCecilia Beuchat y otros, sel. De sur a Norte: Relatos de América. Chile: Liberalia, 2012. (Adaptación).",
+        "format": "plain",
+        "attachments": [
+          {
+            "kind": "image",
+            "note": "Ilustración decorativa de la araña tejiendo su tela junto a la abuela Nokomis."
+          }
+        ]
+      },
+      "items": [
+        {
+          "position": 15,
+          "type": "multiple_choice",
+          "stem": "Según el texto, ¿qué acción realizaba Nokomis cada día?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Hacía su tejido con toda calma.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Observaba cómo la araña trabajaba.",
+              "isCorrect": true
+            },
+            {
+              "key": "C",
+              "text": "Atrapaba los malos sueños con el hilo.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "Recordaba nada más que los buenos sueños.",
+              "isCorrect": false
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "B",
+          "skill": "Localizar",
+          "oa": "OA 4",
+          "contentAxis": "Narración",
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Localizan información explícita relevante en un texto narrativo. Infieren características, sentimientos, intenciones o"
+        },
+        {
+          "position": 16,
+          "type": "multiple_choice",
+          "stem": "¿Por qué la abuela quiso salvar la vida de la araña?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Porque la araña atrapaba los malos sueños de la abuela.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Porque la araña acompañaba a la abuela cuando dormía.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Porque la abuela quería que la araña le hiciera un regalo.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "Porque la abuela admiraba el trabajo que hacía la araña.",
+              "isCorrect": true
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "D",
+          "skill": "Interpretar y relacionar",
+          "oa": "OA 4",
+          "contentAxis": "Narración",
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Infieren características, sentimientos, intenciones o motivaciones de personajes en un texto narrativo. Realizan inferencias sobre acontecimientos o"
+        },
+        {
+          "position": 17,
+          "type": "multiple_choice",
+          "stem": "¿De qué manera la araña recompensó a Nokomis?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Dejó que la observara hilar su tela.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Le enseñó a tejer como lo hace ella.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Acompañó sus sueños mientras dormía.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "Le fabricó un protector de malos sueños.",
+              "isCorrect": true
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "D",
+          "skill": "Interpretar y relacionar",
+          "oa": "OA 4",
+          "contentAxis": "Narración",
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Realizan inferencias sobre acontecimientos o acciones relevantes en un texto narrativo. Comparan personajes de un texto narrativo."
+        },
+        {
+          "position": 18,
+          "type": "multiple_choice",
+          "stem": "A partir de sus acciones, ¿en qué se parecen la abuela y la araña?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Ambas son valientes.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Ambas son confiadas.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Ambas son generosas.",
+              "isCorrect": true
+            },
+            {
+              "key": "D",
+              "text": "Ambas son trabajadoras.",
+              "isCorrect": false
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "C",
+          "skill": "Interpretar y relacionar",
+          "oa": "OA 4",
+          "contentAxis": "Narración",
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Comparan personajes de un texto narrativo. Infieren de qué trata un texto narrativo."
+        },
+        {
+          "position": 19,
+          "type": "multiple_choice",
+          "stem": "¿Qué se explica en este texto?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "El significado de los sueños.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "El origen de los atrapasueños.",
+              "isCorrect": true
+            },
+            {
+              "key": "C",
+              "text": "La causa del temor a las arañas.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "La función de las telas de arañas.",
+              "isCorrect": false
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "B",
+          "skill": "Interpretar y relacionar",
+          "oa": "OA 4",
+          "contentAxis": "Narración",
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Infieren de qué trata un texto narrativo. Opinan sobre actitudes o acciones de los"
+        },
+        {
+          "position": 20,
+          "type": "open_ended",
+          "stem": "¿Qué opinas de la actitud de Nokomis al proteger a la araña? ¿Por qué? Justifica tu respuesta utilizando información del texto.",
+          "alternatives": [],
+          "responseFormat": "develop",
+          "correctKey": null,
+          "skill": "Reflexionar",
+          "oa": "OA 4",
+          "contentAxis": "Narración",
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "personajes de un texto narrativo con fundamentos que integran información del texto. Localizan información explícita relevante en un",
+          "rubric": "Tipos de respuestas Respuestas correctas Respuestas parcialmente correctas Respuestas incorrectas (Código 2) (Código 1) (Código 0) El o la estudiante entrega una El o la estudiante entrega una El o la estudiante no opina sobre el opinión sobre el aspecto solicitado opinión sobre el aspecto solicitado aspecto de la lectura solicitado, o en la pregunta, la cual evidencia, en la pregunta, pero la justificación bien, evidencia una compresión en su justificación, la comprensión evidencia una comprensión parcial errada del texto. global del texto. del texto. Otras respuestas incorrectas son En este caso, el o la estudiante es En este caso, fundamenta su las tautológicas, vagas, capaz de opinar sobre la actitud de respuesta centrándose en contradictorias, incoherentes, en Nokomis (sabia, respetuosa, elementos locales del texto que no blanco. buena, arriesgada, entre otras), y se relacionan directamente con la actitud demostrada por el de fundamentar su respuesta con información del texto (por ejemplo, personaje. O bien, únicamente a mencionar que ella observaba el partir de su conocimiento de trabajo de la araña, que recibió un mundo, sin recurrir a información regalo al final, entre otras). del texto. Ejemplos: Ejemplos: Ejemplos: Ella fue muy respetuosa al Que ella miraba a la araña Que fue muy buena. - - - ver que la araña solo hacía hilar su tela con mucha Me gustó porque al final la - su trabajo y no molestaba a paciencia. abuela le dio un regalo a la nadie. Fue valiente porque la araña araña. - La abuela fue muy sabia y la podía picar, pero ella igual - Las arañas pican. - generosa, y al final recibió un la salvó. Creo que fue peligroso. - regalo de la araña. Creo que la abuela estuvo - Un poco arriesgada, aunque bien porque las arañas no - ella admiraba el trabajo de la hacen nada si no las araña tal vez su nieto solo la molestas. quería proteger. 11 &gt; Diagnóstico Integral de Aprendizajes Instrumentos de Evaluación 2026 agenciaeducacion.cl"
+        }
+      ]
+    },
+    {
+      "order": 5,
+      "name": "Texto 5: «EL PINGÜINO EMPERADOR»",
+      "type": "multiple_choice",
+      "instructions": "Lee el siguiente texto y responde las preguntas 21 a 24.",
+      "passage": {
+        "title": "EL PINGÜINO EMPERADOR",
+        "text": "Los pingüinos son aves cuyas alas se transformaron en aletas a lo largo de la evolución. No pueden volar y son bastante torpes en tierra firme, pero son magníficos buceadores. El más grande de todos ellos es el pingüino emperador, que llega a medir 1,1 metros de altura (como un niño de 5 años) y a pesar 38 kilogramos, aproximadamente.\nAunque hay pingüinos que viven cerca del Ecuador, el hábitat del pingüino emperador es el suelo helado de la Antártida, un lugar donde las temperaturas llegan a caer hasta 60 grados bajo cero. Ese frío es un verdadero problema para los huevos, que necesitan calor constante durante la incubación, ya que los pingüinos emperador incuban en espacios abiertos durante los meses del invierno.\nLa hembra pone un único huevo, pero es el macho quien lo incuba. Lo aísla del hielo manteniéndolo sobre sus pies y dándole calor con su cuerpo. Aunque el huevo tiene una cáscara bastante gruesa, si lo dejara en el suelo, incluso solo durante unos minutos, el pollito que se desarrolla dentro se congelaría y moriría. En otras especies de pingüinos, los dos progenitores se turnan para cuidar al huevo, pero, en el caso del emperador, la hembra se lanza al mar y nada kilómetros y kilómetros durante tres meses comiendo peces, calamares y crustáceos. Tiene que prepararse y almacenar reservas para cuando nazca su polluelo, pues entonces todo el alimento será para él. Entre tanto, el macho hace el sacrificio de no comer ni beber, pues no puede abandonar el huevo ni por un minuto.\nLos pingüinos emperador viven en bandadas y van rotando para que todos pasen un tiempo en el centro del grupo, que es el lugar más protegido y agradable, y también se abrazan unos a otros para darse calor.\nCuando la madre vuelve y el pingüino comienza a salir del huevo, ella devuelve desde su estómago un montón de comida con la que el polluelo se empieza a alimentar. Entonces, el macho se lanza al mar para poder, por fin, comer y beber.\n\nJosé Ramón Alonso. Seres Asombrosos. España: A buen paso, 2017. (Adaptación).",
+        "format": "plain",
+        "attachments": [
+          {
+            "kind": "image",
+            "note": "Ilustración decorativa de pingüinos emperador que acompaña el texto."
+          }
+        ]
+      },
+      "items": [
+        {
+          "position": 21,
+          "type": "multiple_choice",
+          "stem": "Según el texto, ¿qué necesita el huevo del pingüino emperador?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Calor constante durante la incubación.",
+              "isCorrect": true
+            },
+            {
+              "key": "B",
+              "text": "Que la hembra lo proteja.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Una cáscara más gruesa.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "Reserva de alimento.",
+              "isCorrect": false
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "A",
+          "skill": "Localizar",
+          "oa": "OA 6",
+          "contentAxis": "Texto no literario",
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Localizan información explícita relevante en un texto no literario. Localizan información explícita relevante en un"
+        },
+        {
+          "position": 22,
+          "type": "multiple_choice",
+          "stem": "¿Qué sacrificio hace el macho para cuidar al huevo?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Deja de comer y de beber.",
+              "isCorrect": true
+            },
+            {
+              "key": "B",
+              "text": "Debe alejarse de su bandada.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Nada en el mar muchos kilómetros.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "Come sin detenerse durante tres meses.",
+              "isCorrect": false
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "A",
+          "skill": "Localizar",
+          "oa": "OA 6",
+          "contentAxis": "Texto no literario",
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Localizan información explícita relevante en un texto no literario. Infieren información relevante en un texto no"
+        },
+        {
+          "position": 23,
+          "type": "multiple_choice",
+          "stem": "¿Cómo consigue su alimento el polluelo recién nacido?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "El padre le trae la comida que necesita.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Se lanza al mar en busca de su propia comida.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "La madre le da la comida que ha juntado en su estómago.",
+              "isCorrect": true
+            },
+            {
+              "key": "D",
+              "text": "Va rotando con otros miembros de la bandada para poder comer.",
+              "isCorrect": false
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "C",
+          "skill": "Interpretar y relacionar",
+          "oa": "OA 6",
+          "contentAxis": "Texto no literario",
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Infieren información relevante en un texto no literario. Infieren de qué trata un texto no literario o un"
+        },
+        {
+          "position": 24,
+          "type": "multiple_choice",
+          "stem": "¿Cuál es el tema central de este texto?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "El ciclo de vida de los pingüinos emperador.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Las características del hábitat de los pingüinos emperador.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "La forma en que se dan calor los pingüinos emperador durante el invierno.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "Las dificultades que enfrentan los pingüinos emperador para cuidar a sus huevos.",
+              "isCorrect": true
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "D",
+          "skill": "Interpretar y relacionar",
+          "oa": "OA 6",
+          "contentAxis": "Texto no literario",
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Infieren de qué trata un texto no literario o un fragmento relevante de este."
+        }
+      ]
+    }
+  ],
+  "extraction": {
+    "itemCount": 24,
+    "warnings": [
+      "Q11, Q14 y Q20 son ítems de desarrollo (open_ended, responseFormat develop).",
+      "Q10 se refiere a las fotografías de las flores («Flor Añañuca» y «Flor Tahay») incluidas en la noticia; depende de esas imágenes para responderse con seguridad (hasFigure:true, needsHumanReview).",
+      "Ítems de alternativas de 4° básico con 4 opciones (A–D).",
+      "Textos transcritos verbatim desde la capa de texto del PDF (pdftotext -layout)."
+    ],
+    "needsHumanReview": true,
+    "crossCheck": {
+      "hardIssues": [],
+      "softWarnings": [],
+      "counts": {
+        "cuadernillo": 24,
+        "ficha": 24,
+        "hoja": 24
+      }
+    }
+  },
+  "pauta": {
+    "source": {
+      "ficha": "4_ficha_tecnica_lectura_monitoreo_2026_4_basico.pdf",
+      "hoja": "4_hoja_de_respuestas_lectura_monitoreo_2026_4_basico.pdf"
+    },
+    "appliedKeys": 21,
+    "rubrics": 3
+  }
+}

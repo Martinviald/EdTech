@@ -1,0 +1,1377 @@
+{
+  "schemaVersion": "1.0",
+  "source": {
+    "file": "II_prueba_matematica_monitoreo_2026_II_medio.pdf",
+    "subjectFolder": "matematicas"
+  },
+  "instrument": {
+    "name": "DIA Matemática II° Medio 2026 — Intermedio",
+    "subject": "Matemática",
+    "subjectCode": "MATH",
+    "grade": "II° Medio",
+    "gradeCode": "2ND_MEDIO",
+    "year": 2026,
+    "applicationPeriod": "intermedio",
+    "type": "dia",
+    "isOfficial": true,
+    "source": "imported"
+  },
+  "sections": [
+    {
+      "order": 1,
+      "name": "Matemática",
+      "type": "mixed",
+      "instructions": "Esta prueba tiene 39 preguntas que debes responder de la siguiente forma: en las preguntas de alternativas debes contestar marcando con una X la respuesta que consideres correcta; en las preguntas de desarrollo debes escribir tu respuesta en la cuadrícula; en las preguntas de completación debes anotar tu respuesta en los recuadros correspondientes. Utiliza lápiz grafito para contestar las preguntas y si te equivocas usa goma de borrar. Esta prueba es sin nota.",
+      "passage": null,
+      "items": [
+        {
+          "position": 1,
+          "type": "multiple_choice",
+          "stem": "Observa estos números:\n\n3   √12   2   √6\n\n¿Cuál es el orden de menor a mayor?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "2, 3, √6, √12",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "√6, √12, 2, 3",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "2, √6, 3, √12",
+              "isCorrect": true
+            },
+            {
+              "key": "D",
+              "text": "√6, 2, 3, √12",
+              "isCorrect": false
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "C",
+          "skill": "Resolver problemas",
+          "oa": "OA 1",
+          "contentAxis": null,
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Ordenan conjuntos de números racionales e irracionales."
+        },
+        {
+          "position": 2,
+          "type": "multiple_choice",
+          "stem": "¿Cuál de estos números es equivalente a √180?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "6√5",
+              "isCorrect": true
+            },
+            {
+              "key": "B",
+              "text": "9√5",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "22",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "90",
+              "isCorrect": false
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "A",
+          "skill": "Resolver problemas",
+          "oa": "OA 1",
+          "contentAxis": null,
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Calculan raíces usando la descomposición. Convierten raíces enésimas a potencias de"
+        },
+        {
+          "position": 3,
+          "type": "multiple_choice",
+          "stem": "¿Cuál de las siguientes potencias es equivalente a ∛27?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "(27)^-3",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "1^-3 / 27 / 7",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "23 / 3",
+              "isCorrect": true
+            },
+            {
+              "key": "D",
+              "text": "27",
+              "isCorrect": false
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "C",
+          "skill": "Representar",
+          "oa": "OA 2",
+          "contentAxis": null,
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Convierten raíces enésimas a potencias de exponente racional."
+        },
+        {
+          "position": 4,
+          "type": "multiple_choice",
+          "stem": "¿Cuál de las siguientes igualdades es correcta?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "log4 81 = 3",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "log4 3 = 81",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "log3 81 = 4",
+              "isCorrect": true
+            },
+            {
+              "key": "D",
+              "text": "log3 4 = 81",
+              "isCorrect": false
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "C",
+          "skill": "Resolver problemas",
+          "oa": "OA 2",
+          "contentAxis": null,
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Identifican la definición de logaritmo."
+        },
+        {
+          "position": 5,
+          "type": "multiple_choice",
+          "stem": "¿Cuál es el valor de log2 (1/32)?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "16",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "1/5",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "-1/5",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "-5",
+              "isCorrect": true
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "D",
+          "skill": "Resolver problemas",
+          "oa": "OA 2",
+          "contentAxis": null,
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Calculan logaritmos a partir de su definición. Identifican el vértice de la representación gráfica de"
+        },
+        {
+          "position": 6,
+          "type": "multiple_choice",
+          "stem": "En el siguiente plano cartesiano se muestra el gráfico de una función cuadrática f. ¿Cuáles son las coordenadas del vértice del gráfico de f?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "(0 , 5)",
+              "isImage": true,
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "(–1 , –5)",
+              "isImage": true,
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "(–5 , 0)",
+              "isImage": true,
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "(–3 , –4)",
+              "isImage": true,
+              "isCorrect": true
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "D",
+          "skill": "Representar",
+          "oa": "OA 3",
+          "contentAxis": null,
+          "hasFigure": true,
+          "figureNote": "Gráfico de función cuadrática f en plano cartesiano; se necesita leer el vértice directamente del gráfico.",
+          "indicador": "Identifican el vértice de la representación gráfica de una función cuadrática. Identifican la gráfica que representa una función"
+        },
+        {
+          "position": 7,
+          "type": "multiple_choice",
+          "stem": "¿Cuál de las siguientes gráficas representa a la función f definida por f(x) = x² + 1?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "gráfico de función en plano cartesiano",
+              "isImage": true,
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "gráfico de función en plano cartesiano",
+              "isImage": true,
+              "isCorrect": true
+            },
+            {
+              "key": "C",
+              "text": "gráfico de función en plano cartesiano",
+              "isImage": true,
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "gráfico de función en plano cartesiano",
+              "isImage": true,
+              "isCorrect": false
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "B",
+          "skill": "Representar",
+          "oa": "OA 3",
+          "contentAxis": null,
+          "hasFigure": true,
+          "figureNote": "Las 4 alternativas son gráficos (parábolas) distintos; imprescindible ver las imágenes para diferenciarlas.",
+          "indicador": "Identifican la gráfica que representa una función cuadrática. Identifican la función cuadrática que modela una"
+        },
+        {
+          "position": 8,
+          "type": "multiple_choice",
+          "stem": "Una persona hará una caja sin tapa a partir de un rectángulo de cartón que tiene 6 cm más de largo que de ancho. Para armar la caja, recortará cuadrados de 4 cm por 4 cm de las esquinas del rectángulo de cartón y hará los dobleces que se muestran en las siguientes imágenes (secuencia de 3 pasos ilustrados). Si el ancho del rectángulo de cartón mide x cm y V(x) es el volumen de la caja, medido en cm³, ¿cuál de las siguientes expresiones modela V en función de x?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "V(x) = 4x (x + 6)",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "V(x) = 4 (x + 2)(x – 4)",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "V(x) = 4 (x – 8)(x – 2)",
+              "isCorrect": true
+            },
+            {
+              "key": "D",
+              "text": "V(x) = x (x – 8)(x – 2)",
+              "isCorrect": false
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "C",
+          "skill": "Modelar",
+          "oa": "OA 3",
+          "contentAxis": null,
+          "hasFigure": true,
+          "figureNote": "Secuencia de 3 imágenes mostrando el doblez de la caja; ilustrativa, el problema es resoluble con el texto (medidas ya descritas).",
+          "indicador": "Identifican la función cuadrática que modela una situación. Resuelven ecuaciones cuadráticas de la forma:"
+        },
+        {
+          "position": 9,
+          "type": "multiple_choice",
+          "stem": "¿Cuáles son las soluciones de la ecuación cuadrática 2x² = 16?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "2 y −2",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "4 y −4",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "[valor con radical no legible] y −[valor con radical no legible]",
+              "isCorrect": true
+            },
+            {
+              "key": "D",
+              "text": "[valor con radical no legible] y −[valor con radical no legible]",
+              "isCorrect": false
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "C",
+          "skill": "Resolver problemas",
+          "oa": "OA 4",
+          "contentAxis": null,
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Resuelven ecuaciones cuadráticas de la forma: ax^2=b. Identifican la expresión algebraica de la función"
+        },
+        {
+          "position": 10,
+          "type": "multiple_choice",
+          "stem": "La función g definida por g(x) = x² – 1 tiene como dominio el conjunto de los números reales positivos. En ese dominio, g tiene función inversa g⁻¹. ¿Cuál es la expresión algebraica de g⁻¹?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "g⁻¹(x) = √x + 1 (posición del +1 respecto de la raíz no distinguible tras extracción)",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "g⁻¹(x) = √x + 1 (posición del +1 respecto de la raíz no distinguible tras extracción)",
+              "isCorrect": true
+            },
+            {
+              "key": "C",
+              "text": "g⁻¹(x) = –x² + 1",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "g⁻¹(x) = 1/(x² – 1)",
+              "isCorrect": false
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "B",
+          "skill": "Resolver problemas",
+          "oa": "OA 5",
+          "contentAxis": null,
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "inversa de una función cuadrática con dominio restringido en el cual es biyectiva. Identifican tablas de valores correspondientes a una"
+        },
+        {
+          "position": 11,
+          "type": "multiple_choice",
+          "stem": "La función k posee función inversa k⁻¹ que se define como k⁻¹(x) = –3x, con x en el conjunto de los números reales. ¿Cuál de estas tablas representa un par de puntos pertenecientes a la gráfica de k en el plano cartesiano?\n\nA: x=–6→k(x)=–2 ; x=–12→k(x)=–4\nB: x=–6→k(x)=–3 ; x=–12→k(x)=–9\nC: x=–6→k(x)=2 ; x=–12→k(x)=4\nD: x=–6→k(x)=18 ; x=–12→k(x)=36",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "x=–6→k(x)=–2 ; x=–12→k(x)=–4",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "x=–6→k(x)=–3 ; x=–12→k(x)=–9",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "x=–6→k(x)=2 ; x=–12→k(x)=4",
+              "isCorrect": true
+            },
+            {
+              "key": "D",
+              "text": "x=–6→k(x)=18 ; x=–12→k(x)=36",
+              "isCorrect": false
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "C",
+          "skill": "Representar",
+          "oa": "OA 5",
+          "contentAxis": null,
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Identifican tablas de valores correspondientes a una función lineal a partir de su inversa. Identifican gráficos que representan situaciones de"
+        },
+        {
+          "position": 12,
+          "type": "multiple_choice",
+          "stem": "El número de usuarios activos de una aplicación baja un 12% cada mes. Si inicialmente la aplicación tenía 1 200 usuarios activos, ¿cuál de los siguientes gráficos representa correctamente esta tendencia durante los primeros 10 meses?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "gráfico de tendencia de usuarios vs meses",
+              "isImage": true,
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "gráfico de tendencia de usuarios vs meses",
+              "isImage": true,
+              "isCorrect": true
+            },
+            {
+              "key": "C",
+              "text": "gráfico de tendencia de usuarios vs meses",
+              "isImage": true,
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "gráfico de tendencia de usuarios vs meses",
+              "isImage": true,
+              "isCorrect": false
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "B",
+          "skill": "Representar",
+          "oa": "OA 6",
+          "contentAxis": null,
+          "hasFigure": true,
+          "figureNote": "Las 4 alternativas son gráficos de curva de decrecimiento distintos; imprescindible ver las imágenes.",
+          "indicador": "Identifican gráficos que representan situaciones de cambio porcentual constante."
+        },
+        {
+          "position": 13,
+          "type": "multiple_choice",
+          "stem": "La siguiente esfera tiene centro O y radio 9 cm. ¿Cuál es su volumen medido en centímetros cúbicos?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "108π",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "324π",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "729π",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "972π",
+              "isCorrect": true
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "D",
+          "skill": "Resolver problemas",
+          "oa": "OA 7",
+          "contentAxis": "Geometría",
+          "hasFigure": true,
+          "figureNote": "Ilustración de esfera con centro O y radio 9 cm; dato ya en el texto, figura no imprescindible.",
+          "indicador": "Calculan el volumen de esferas. Calculan medidas de lados de triángulos rectángulos"
+        },
+        {
+          "position": 14,
+          "type": "multiple_choice",
+          "stem": "En el triángulo rectángulo de la siguiente imagen se sabe que tan(β) = √3, con cateto opuesto x cm y cateto adyacente 36 cm. ¿Cuál es el valor de x?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "36/√3",
+              "isCorrect": true
+            },
+            {
+              "key": "B",
+              "text": "36√3",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "72",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "18",
+              "isCorrect": false
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "A",
+          "skill": "Resolver problemas",
+          "oa": "OA 8",
+          "contentAxis": "Geometría",
+          "hasFigure": true,
+          "figureNote": "Triángulo rectángulo con ángulo β, cateto x y cateto 36 cm; datos ya en el texto.",
+          "indicador": "Calculan medidas de lados de triángulos rectángulos a partir de razones trigonométricas. Utilizan propiedades de la semejanza de triángulos"
+        },
+        {
+          "position": 15,
+          "type": "multiple_choice",
+          "stem": "En la siguiente imagen, los triángulos rectángulos escalenos ABC y DEF son semejantes y DE = 3AB. ¿Cuál de las siguientes expresiones es equivalente a cos(α)?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "sen(β)",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "cos(β)",
+              "isCorrect": true
+            },
+            {
+              "key": "C",
+              "text": "sen(β)/3",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "cos(β)/3",
+              "isCorrect": false
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "B",
+          "skill": "Resolver problemas",
+          "oa": "OA 8",
+          "contentAxis": "Geometría",
+          "hasFigure": true,
+          "figureNote": "Dos triángulos semejantes ABC y DEF con ángulos α y β marcados; relación DE=3AB ya en el texto.",
+          "indicador": "Utilizan propiedades de la semejanza de triángulos para identificar razones trigonométricas. Identifican las proyecciones de un vector dado,"
+        },
+        {
+          "position": 16,
+          "type": "multiple_choice",
+          "stem": "Observa el vector w de coordenadas (Wx, Wy) y longitud 10 unidades en el plano cartesiano, formando un ángulo de 50º. ¿Cuáles son las coordenadas del vector que corresponde a la proyección del vector w sobre el eje y?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "(0, −10 cos 50º)",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "(0, −10 sen 50º)",
+              "isCorrect": true
+            },
+            {
+              "key": "C",
+              "text": "(0, 10 cos 50º)",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "(0, 10 sen 50º)",
+              "isCorrect": false
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "B",
+          "skill": "Representar",
+          "oa": "OA 9",
+          "contentAxis": "Geometría",
+          "hasFigure": true,
+          "figureNote": "Vector w en plano cartesiano con ángulo 50º; datos ya en el texto.",
+          "indicador": "Identifican las proyecciones de un vector dado, usando razones trigonométricas. Determinan la variable aleatoria finita presente en"
+        },
+        {
+          "position": 17,
+          "type": "multiple_choice",
+          "stem": "Una persona participa en un concurso en el que se hace girar una ruleta que está dividida en 12 partes iguales: unas tienen un regalo y las otras tienen una cara triste. Una persona hace girar la ruleta 5 veces y gana si obtiene al menos 4 regalos. En caso contrario, pierde. ¿Cuál de las siguientes cantidades es una variable aleatoria de la situación descrita?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "La cantidad de regalos que hay en la ruleta.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "La cantidad de partes en la que está dividida la ruleta.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "La cantidad de veces que la persona hace girar la ruleta.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "La cantidad de veces que se obtiene un regalo en la ruleta.",
+              "isCorrect": true
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "D",
+          "skill": "Argumentar",
+          "oa": "OA 10",
+          "contentAxis": null,
+          "hasFigure": true,
+          "figureNote": "Imagen de la ruleta con íconos de regalo y cara triste; ilustrativa, no imprescindible (pregunta es conceptual).",
+          "indicador": "Determinan la variable aleatoria finita presente en una situación."
+        },
+        {
+          "position": 18,
+          "type": "multiple_choice",
+          "stem": "En cierto país, el estado civil de una persona puede ser soltera, casada, viuda o divorciada. La variable aleatoria X se define como el estado civil de una persona escogida al azar en este país, asignando: Soltera=1, Casada=2, Viuda=3, Divorciada=4. Al escoger al azar a una persona de un grupo que tiene la misma cantidad de personas solteras, casadas, viudas y divorciadas, ¿cuál es la probabilidad de que X sea igual a 2?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "1/2",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "1/4",
+              "isCorrect": true
+            },
+            {
+              "key": "C",
+              "text": "1/8",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "2/3",
+              "isCorrect": false
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "B",
+          "skill": "Resolver problemas",
+          "oa": "OA 10",
+          "contentAxis": null,
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Calculan la probabilidad de que una variable aleatoria discreta finita tome un valor determinado. Calculan la cantidad total de combinaciones de"
+        },
+        {
+          "position": 19,
+          "type": "multiple_choice",
+          "stem": "Un restaurante tiene las siguientes frutas disponibles para hacer jugos naturales: piña, mango, manzana, pera y durazno. Si se tienen que elegir 3 tipos de frutas distintas para hacer cada jugo, ¿cuántos jugos distintos se pueden hacer?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "10",
+              "isCorrect": true
+            },
+            {
+              "key": "B",
+              "text": "15",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "120",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "125",
+              "isCorrect": false
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "A",
+          "skill": "Resolver problemas",
+          "oa": "OA 11",
+          "contentAxis": null,
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Calculan la cantidad total de combinaciones de elementos de un conjunto. Resuelven problemas que requieren calcular"
+        },
+        {
+          "position": 20,
+          "type": "multiple_choice",
+          "stem": "Una tómbola contiene 3 bolitas de igual tamaño y masa, numeradas del 1 al 3. Se extraen las bolitas al azar, una a una sin reposición, y se forma un número de 3 cifras respetando el orden en que salen las bolitas. ¿Cuál es la probabilidad de que el número formado sea mayor a 200?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "1/6",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "1/3",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "1/2",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "2/3",
+              "isCorrect": true
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "D",
+          "skill": "Resolver problemas",
+          "oa": "OA 11",
+          "contentAxis": null,
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Resuelven problemas que requieren calcular probabilidades usando permutaciones sencillas. Reducen expresiones numéricas simples que"
+        },
+        {
+          "position": 21,
+          "type": "multiple_choice",
+          "stem": "¿Qué raíz es equivalente a ³√(√10)?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "³√5",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "³√10",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "⁵√10",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "⁶√10",
+              "isCorrect": true
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "D",
+          "skill": "Resolver problemas",
+          "oa": "OA 1",
+          "contentAxis": null,
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Reducen expresiones numéricas simples que involucren raíces y sus propiedades. Reducen expresiones numéricas que involucran"
+        },
+        {
+          "position": 22,
+          "type": "multiple_choice",
+          "stem": "¿Cuál es el valor de log8 √2 + log2 8?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "11/3",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "19/6",
+              "isCorrect": true
+            },
+            {
+              "key": "C",
+              "text": "1/2",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "33/8",
+              "isCorrect": false
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "B",
+          "skill": "Resolver problemas",
+          "oa": "OA 2",
+          "contentAxis": null,
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Reducen expresiones numéricas que involucran logaritmos y sus propiedades. Reducen expresiones numéricas que involucran"
+        },
+        {
+          "position": 23,
+          "type": "multiple_choice",
+          "stem": "¿Cuál de las siguientes expresiones es igual a 1/√8 + 1/√2?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "5/8",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "3√5/5",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "3√2/4",
+              "isCorrect": true
+            },
+            {
+              "key": "D",
+              "text": "(1 + √2)/4",
+              "isCorrect": false
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "C",
+          "skill": "Resolver problemas",
+          "oa": "OA 1",
+          "contentAxis": null,
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Reducen expresiones numéricas que involucran raíces irracionales."
+        },
+        {
+          "position": 24,
+          "type": "multiple_choice",
+          "stem": "La cantidad de dólares C que cuesta producir p unidades de cierto producto está dada por la expresión: C = 5 + log(2p + 10)10. ¿Cuántos dólares cuesta producir 45 unidades de ese producto?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "106",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "25",
+              "isCorrect": true
+            },
+            {
+              "key": "C",
+              "text": "15",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "8",
+              "isCorrect": false
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "B",
+          "skill": "Resolver problemas",
+          "oa": "OA 2",
+          "contentAxis": null,
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Resuelven problemas que involucran logaritmos. Identifican el eje de simetría de la representación"
+        },
+        {
+          "position": 25,
+          "type": "multiple_choice",
+          "stem": "En el siguiente plano cartesiano se ha graficado una función cuadrática f. ¿Cuál es la ecuación del eje de simetría del gráfico de f?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "x=–2",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "x=–4",
+              "isCorrect": true
+            },
+            {
+              "key": "C",
+              "text": "x=6",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "x=0",
+              "isCorrect": false
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "B",
+          "skill": "Representar",
+          "oa": "OA 3",
+          "contentAxis": null,
+          "hasFigure": true,
+          "figureNote": "Gráfico de función cuadrática f; se necesita leer el eje de simetría directamente del gráfico.",
+          "indicador": "Identifican el eje de simetría de la representación gráfica de una función cuadrática."
+        },
+        {
+          "position": 26,
+          "type": "multiple_choice",
+          "stem": "Esta tabla representa algunos puntos que pertenecen a la gráfica de una función cuadrática f: x=0→f(x)=6 ; x=2→f(x)=0 ; x=3→f(x)=0. ¿Cuál es la expresión algebraica de la función f?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "f(x) = x² + 5x + 6",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "f(x) = x² – 5x + 6",
+              "isCorrect": true
+            },
+            {
+              "key": "C",
+              "text": "f(x) = x² + 2x – 3",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "f(x) = x² – 3x – 2",
+              "isCorrect": false
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "B",
+          "skill": "Modelar",
+          "oa": "OA 3",
+          "contentAxis": null,
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Representan algebraicamente funciones cuadráticas. Determinan la intersección de la representación"
+        },
+        {
+          "position": 27,
+          "type": "open_ended",
+          "stem": "En el siguiente plano cartesiano se presenta el gráfico de una función cuadrática f. ¿Cuáles son las coordenadas de la intersección del gráfico de f con el eje y? Respuesta: ( , )",
+          "alternatives": [],
+          "responseFormat": "fill_in",
+          "correctKey": null,
+          "skill": "Representar",
+          "oa": "OA 3",
+          "contentAxis": null,
+          "hasFigure": true,
+          "figureNote": "Gráfico de función cuadrática f; imprescindible leer el punto de intersección con el eje y directamente del gráfico.",
+          "indicador": "gráfica de una función cuadrática con el eje de las ordenadas. Resuelven ecuaciones cuadráticas de la forma:",
+          "fillAnswer": "(0;4)"
+        },
+        {
+          "position": 28,
+          "type": "multiple_choice",
+          "stem": "¿Cuál de los siguientes valores es una solución de −x² + x = −6?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "1",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "3",
+              "isCorrect": true
+            },
+            {
+              "key": "C",
+              "text": "6",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "7",
+              "isCorrect": false
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "B",
+          "skill": "Resolver problemas",
+          "oa": "OA 4",
+          "contentAxis": null,
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Resuelven ecuaciones cuadráticas de la forma: ax^2+bx=c. Determinan y evalúan la expresión algebraica de la"
+        },
+        {
+          "position": 29,
+          "type": "open_ended",
+          "stem": "La función f definida por f(x) = 6x – 1 tiene como dominio el conjunto de los números reales y f⁻¹ es su función inversa. Escribe en la cuadrícula el procedimiento que permite obtener la expresión algebraica de f⁻¹ en general y calcula f⁻¹(17).",
+          "alternatives": [],
+          "responseFormat": "develop",
+          "correctKey": null,
+          "skill": "Argumentar",
+          "oa": "OA 5",
+          "contentAxis": null,
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Determinan y evalúan la expresión algebraica de la función inversa de una función afín dada. Identifican la expresión que representa el cambio"
+        },
+        {
+          "position": 30,
+          "type": "multiple_choice",
+          "stem": "La población de una colonia de pingüinos aumenta en un 3% cada año, respecto a la población del año anterior. Si f(t) es la cantidad de pingüinos luego de t años, ¿cuál de las siguientes expresiones representa la variación en la cantidad de pingüinos entre dos años consecutivos?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "f(t + 1) – f(t) = 0,03 • f(t)",
+              "isCorrect": true
+            },
+            {
+              "key": "B",
+              "text": "f(t + 1) – f(t) = 0,3 • f(t)",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "f(t + 1) – f(t) = 1,03 • f(t)",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "f(t + 1) – f(t) = 3 • f(t)",
+              "isCorrect": false
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "A",
+          "skill": "Modelar",
+          "oa": "OA 6",
+          "contentAxis": null,
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Identifican la expresión que representa el cambio porcentual constante en intervalos de tiempo. Resuelven problemas en situaciones de cambio"
+        },
+        {
+          "position": 31,
+          "type": "multiple_choice",
+          "stem": "Una deportista de alto rendimiento aumentará cada semana su consumo diario de kilocalorías en un 10% respecto a las kilocalorías consumidas diariamente en la semana anterior. La deportista consumió 3 000 kilocalorías diarias en la primera semana. ¿Cuántas kilocalorías diarias consumirá en la cuarta semana?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "3 030",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "3 900",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "3 993",
+              "isCorrect": true
+            },
+            {
+              "key": "D",
+              "text": "4 200",
+              "isCorrect": false
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "C",
+          "skill": "Resolver problemas",
+          "oa": "OA 6",
+          "contentAxis": null,
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Resuelven problemas en situaciones de cambio porcentual constante en intervalos de tiempo. Identifican la expresión que permite calcular el área"
+        },
+        {
+          "position": 32,
+          "type": "multiple_choice",
+          "stem": "Observa la esfera de centro O y radio 6 cm. ¿Cuál de las siguientes opciones presenta la expresión que permite calcular el área de la esfera, en cm²?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "4 • 6² • π",
+              "isCorrect": true
+            },
+            {
+              "key": "B",
+              "text": "4 • 12² • π",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "(4/3) • 6² • π",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "(4/3) • 12² • π",
+              "isCorrect": false
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "A",
+          "skill": "Modelar",
+          "oa": "OA 7",
+          "contentAxis": "Geometría",
+          "hasFigure": true,
+          "figureNote": "Ilustración de esfera con centro O y radio 6 cm; dato ya en el texto, figura no imprescindible.",
+          "indicador": "Identifican la expresión que permite calcular el área de la superficie de una esfera. Resuelven problemas que requieren calcular el"
+        },
+        {
+          "position": 33,
+          "type": "open_ended",
+          "stem": "Un vaso contiene 128 cm³ de agua, lo que corresponde a la mitad de su capacidad máxima. Para enfriar el agua, se le agregarán bolitas esféricas de hielo de 2 cm de radio. ¿Cuántas bolitas de hielo, como máximo, se le pueden agregar al vaso sin sobrepasar su capacidad máxima? (Aproxima π a 3). Respuesta: Se pueden agregar ___ bolitas esféricas de hielo como máximo.",
+          "alternatives": [],
+          "responseFormat": "fill_in",
+          "correctKey": null,
+          "skill": "Resolver problemas",
+          "oa": "OA 7",
+          "contentAxis": "Geometría",
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Resuelven problemas que requieren calcular el volumen de esferas. Identifican una razón trigonométrica en triángulos",
+          "fillAnswer": "4"
+        },
+        {
+          "position": 34,
+          "type": "multiple_choice",
+          "stem": "El triángulo ABC que se muestra a continuación es rectángulo en C, con ángulo α en B. ¿Cuál de las siguientes expresiones corresponde al sen(α)?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "BC/AB",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "AC/BC",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "BC/AC",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "AC/AB",
+              "isCorrect": true
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "D",
+          "skill": "Representar",
+          "oa": "OA 8",
+          "contentAxis": "Geometría",
+          "hasFigure": true,
+          "figureNote": "Triángulo ABC rectángulo en C con ángulo α marcado en B; posición de vértices relevante.",
+          "indicador": "Identifican una razón trigonométrica en triángulos rectángulos. Resuelven problemas que requieren usar razones"
+        },
+        {
+          "position": 35,
+          "type": "multiple_choice",
+          "stem": "Una cercha es un elemento estructural de los techos de casas y edificios. La imagen muestra el diseño de la cercha con forma de triángulo rectángulo que reforzará una ampliación, con ángulo de 20º y base de 3 m. A partir de las medidas dadas en la imagen, ¿cuántos metros de largo medirá la viga superior? Para tus cálculos considera sen 20° ≈ 3/10; cos 20° ≈ 9/10 y tan 20° ≈ 1/3",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "9",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "10",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "27/10",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "10/3",
+              "isCorrect": true
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "D",
+          "skill": "Resolver problemas",
+          "oa": "OA 8",
+          "contentAxis": "Geometría",
+          "hasFigure": true,
+          "figureNote": "Diagrama de cercha triangular con ángulo 20º y base 3 m; datos ya en el texto.",
+          "indicador": "Resuelven problemas que requieren usar razones trigonométricas."
+        },
+        {
+          "position": 36,
+          "type": "multiple_choice",
+          "stem": "Carmen pone las siguientes fichas (letras) dentro de una bolsa negra. Si saca 3 fichas al azar y define la variable aleatoria X = cantidad de vocales, ¿cuáles son los valores que puede tomar la variable aleatoria X?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "{0}",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "{0, 3}",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "{0, 1, 2}",
+              "isCorrect": true
+            },
+            {
+              "key": "D",
+              "text": "{0, 1, 2, 3}",
+              "isCorrect": false
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "C",
+          "skill": "Resolver problemas",
+          "oa": "OA 10",
+          "contentAxis": null,
+          "hasFigure": true,
+          "figureNote": "Imagen con fichas de letras dentro de una bolsa; imprescindible ver cuántas fichas y cuáles son vocales/consonantes (no hay texto alternativo con el detalle).",
+          "indicador": "Identifican los posibles valores de una variable aleatoria discreta finita. Identifican la variable aleatoria finita representada en"
+        },
+        {
+          "position": 37,
+          "type": "multiple_choice",
+          "stem": "Cuando una variable aleatoria es discreta, se utiliza una función que a cada valor de la variable le asigna una probabilidad (función de probabilidad). Observa la representación gráfica de la función de probabilidad P de la variable aleatoria X (valores en el eje X: 1, 2, 3; con P(X)=0,5 marcado en el eje). ¿Cuál de estas definiciones puede corresponder a X?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "El número que sale al extraer una bola al azar de una urna con dos bolas numeradas con 1 y 2.",
+              "isCorrect": true
+            },
+            {
+              "key": "B",
+              "text": "El número que sale al extraer una bola al azar de una urna con tres bolas numeradas con 1, 2 y 3.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "La cantidad de bolas que hay en una urna con dos bolas numeradas con 1 y 2.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "La cantidad de bolas que hay en una urna con tres bolas numeradas con 1, 2 y 3.",
+              "isCorrect": false
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "A",
+          "skill": "Resolver problemas",
+          "oa": "OA 10",
+          "contentAxis": null,
+          "hasFigure": true,
+          "figureNote": "Gráfico de función de probabilidad P(X) con barras en X=1,2,3; ayuda a confirmar cuántos valores toma X y su probabilidad.",
+          "indicador": "Identifican la variable aleatoria finita representada en un gráfico de una función de probabilidad. Calculan la cantidad total de permutaciones de elementos de un conjunto. Resuelven problemas que requieren calcular"
+        },
+        {
+          "position": 38,
+          "type": "multiple_choice",
+          "stem": "Una persona quiere poner tres fotos en una pared, una al lado de la otra. ¿De cuántas maneras diferentes puede poner las fotos en la pared?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "6",
+              "isCorrect": true
+            },
+            {
+              "key": "B",
+              "text": "9",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "12",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "27",
+              "isCorrect": false
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "A",
+          "skill": null,
+          "oa": null,
+          "contentAxis": null,
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": null
+        },
+        {
+          "position": 39,
+          "type": "multiple_choice",
+          "stem": "Una caja contiene 6 bombones de distintos sabores y solo uno de ellos es de naranja. Si una persona saca dos bombones al azar de la caja, ¿cuál es la probabilidad de que saque el bombón de naranja?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "1/30",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "1/6",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "2/7",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "1/3",
+              "isCorrect": true
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "D",
+          "skill": "Resolver problemas",
+          "oa": "OA 11",
+          "contentAxis": null,
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Resuelven problemas que requieren calcular probabilidades usando combinaciones sencillas."
+        }
+      ]
+    }
+  ],
+  "extraction": {
+    "itemCount": 39,
+    "warnings": [
+      "responseFormat 'fill_in' (completación) en ítems 27 y 33 → modelados como open_ended.",
+      "responseFormat 'develop' en ítem 29 (única pregunta de desarrollo).",
+      "Alternativas-imagen (isImage:true) en ítems 7 y 12: las 4 opciones son gráficos distintos; requieren captura de imagen para ser usables. → needsHumanReview.",
+      "Figura imprescindible en el enunciado de ítems 6 (leer vértice del gráfico), 25 (leer eje de simetría), 27 (leer intersección con eje y) y 36 (contar vocales/consonantes en las fichas de la imagen) → needsHumanReview.",
+      "Ítem 3: alternativas B y C con exponentes/fracciones fragmentados por pdftotext -layout (formato no recuperable de forma confiable sin ver el PDF); transcritas literalmente en el orden de línea original → needsHumanReview.",
+      "Ítem 9: alternativas C y D con valores bajo radical no capturados por pdftotext (solo se extrajo el conector 'y −'); posiciones marcadas para revisión → needsHumanReview.",
+      "Ítem 10: alternativas A y B quedaron con texto idéntico ('√x + 1') tras el aplanado de pdftotext; no es posible distinguir si el +1 va dentro o fuera de la raíz sin ver el PDF → needsHumanReview.",
+      "Ítem 2: alternativas C ('22') y D ('90') se transcribieron verbatim tal como las extrajo pdftotext; no se pudo confirmar visualmente si corresponden a exponentes aplanados."
+    ],
+    "needsHumanReview": true,
+    "crossCheck": {
+      "hardIssues": [],
+      "softWarnings": [],
+      "counts": {
+        "cuadernillo": 39,
+        "ficha": 39,
+        "hoja": 39
+      }
+    }
+  },
+  "pauta": {
+    "source": {
+      "ficha": "II_ficha_tecnica_matematica_monitoreo_2026_II_medio.pdf",
+      "hoja": "II_hoja_de_respuestas_matematica_monitoreo_2026_II_medio.pdf"
+    },
+    "appliedKeys": 36,
+    "rubrics": 0
+  }
+}

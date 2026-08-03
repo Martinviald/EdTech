@@ -1,0 +1,1238 @@
+{
+ "schemaVersion": "1.0",
+ "source": {
+  "file": "prueba_ingles_parte_1_monitoreo_2026_6_basico.pdf",
+  "subjectFolder": "Inglés"
+ },
+ "instrument": {
+  "name": "DIA Inglés 6° Básico 2026 — Monitoreo Intermedio",
+  "subject": "Inglés",
+  "subjectCode": "ENG",
+  "grade": "6° Básico",
+  "gradeCode": "6TH_BASIC",
+  "year": 2026,
+  "applicationPeriod": "intermedio",
+  "type": "dia",
+  "isOfficial": true,
+  "source": "imported"
+ },
+ "sections": [
+  {
+   "order": 1,
+   "name": "Listening No 1 — Conversation between Tomás and his mom",
+   "type": "multiple_choice",
+   "instructions": "Listening comprehension\n\nListening No 1\nYou will listen to a conversation between Tomás and his mom.\nTake a minute to read the questions.\nFor each question (1 to 4), choose the correct answer (A, B or C).\nYou will listen to the audio twice. Now, pay attention to the audio.",
+   "passage": null,
+   "items": [
+    {
+     "position": 1,
+     "printedNumber": "1",
+     "type": "multiple_choice",
+     "responseFormat": "choice",
+     "stem": "What is the problem in the conversation?",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "Tomás doesn’t feel well.",
+       "isCorrect": true
+      },
+      {
+       "key": "B",
+       "text": "Tomás doesn’t like doctors.",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "Tomás doesn’t want to go to school.",
+       "isCorrect": false
+      }
+     ],
+     "correctKey": "A",
+     "skill": "Comprensión Auditiva",
+     "oa": "OA 2",
+     "contentAxis": "Listening",
+     "hasFigure": false,
+     "figureNote": null,
+     "oaCode": "ENG-6B-OA02",
+     "indicador": "Establecer el tema o propósito general del texto escuchado, cuando este no se encuentra explícito, a partir de claves evidentes (como palabras o expresiones familiares asociadas al tema o ideas que se repiten) que permiten inferirlo.",
+     "oaLevel": null,
+     "imageRef": null
+    },
+    {
+     "position": 2,
+     "printedNumber": "2",
+     "type": "multiple_choice",
+     "responseFormat": "choice",
+     "stem": "What did Tomás eat?",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "Chocolate ice cream.",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "Chocolate cookies.",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "Chocolate cake.",
+       "isCorrect": true
+      }
+     ],
+     "correctKey": "C",
+     "skill": "Comprensión Auditiva",
+     "oa": "OA 1",
+     "contentAxis": "Listening",
+     "hasFigure": false,
+     "figureNote": null,
+     "oaCode": "ENG-6B-OA01",
+     "indicador": "Identificar información explícita en el texto escuchado que responda a las preguntas ¿quién?, ¿cómo?, ¿dónde?, ¿qué?, cuando no hay información que compite.",
+     "oaLevel": null,
+     "imageRef": null
+    },
+    {
+     "position": 3,
+     "printedNumber": "3",
+     "type": "multiple_choice",
+     "responseFormat": "choice",
+     "stem": "What is Tomás going to tell his friends?",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "That he is not going to school today.",
+       "isCorrect": true
+      },
+      {
+       "key": "B",
+       "text": "That he loves chocolate cake.",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "That he has a headache.",
+       "isCorrect": false
+      }
+     ],
+     "correctKey": "A",
+     "skill": "Comprensión Auditiva",
+     "oa": "OA 1",
+     "contentAxis": "Listening",
+     "hasFigure": false,
+     "figureNote": null,
+     "oaCode": "ENG-6B-OA01",
+     "indicador": "Identificar información explícita en el texto escuchado que responda a las preguntas ¿quién?, ¿cómo?, ¿dónde?, ¿qué?, cuando no hay información que compite.",
+     "oaLevel": null,
+     "imageRef": null
+    },
+    {
+     "position": 4,
+     "printedNumber": "4",
+     "type": "multiple_choice",
+     "responseFormat": "choice",
+     "stem": "Who is Tomás’ mom going to call?",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "Tomás’ dad.",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "Tomás’ teacher.",
+       "isCorrect": true
+      },
+      {
+       "key": "C",
+       "text": "Tomás’ friends.",
+       "isCorrect": false
+      }
+     ],
+     "correctKey": "B",
+     "skill": "Comprensión Auditiva",
+     "oa": "OA 1",
+     "contentAxis": "Listening",
+     "hasFigure": false,
+     "figureNote": null,
+     "oaCode": "ENG-6B-OA01",
+     "indicador": "Identificar información explícita en el texto escuchado que responda a las preguntas ¿quién?, ¿cómo?, ¿dónde?, ¿qué?, cuando no hay información que compite.",
+     "oaLevel": null,
+     "imageRef": null
+    }
+   ],
+   "imageRef": "item/global/6to-ingles-intermedio-2026/section_figure/1.png"
+  },
+  {
+   "order": 2,
+   "name": "Listening No 2 — Phone conversation between Emilia and Martín",
+   "type": "multiple_choice",
+   "instructions": "Listening comprehension\n\nListening No 2\nYou will listen to a phone conversation between Emilia and Martín.\nTake a minute to read the questions.\nFor each question (5 to 8), choose the correct answer (A, B or C).\nYou will listen to the audio twice. Now, pay attention to the audio.",
+   "passage": null,
+   "items": [
+    {
+     "position": 5,
+     "printedNumber": "5",
+     "type": "multiple_choice",
+     "responseFormat": "choice",
+     "stem": "What is Martín’s reaction to Emilia’s invitation?",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "He likes the idea.",
+       "isCorrect": true
+      },
+      {
+       "key": "B",
+       "text": "He gets confused.",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "He says he is busy.",
+       "isCorrect": false
+      }
+     ],
+     "correctKey": "A",
+     "skill": "Comprensión Auditiva",
+     "oa": "OA 2",
+     "contentAxis": "Listening",
+     "hasFigure": false,
+     "figureNote": null,
+     "oaCode": "ENG-6B-OA02",
+     "indicador": "Extraer información específica asociada a personas, lugares y tiempo, cuando esta no se encuentra explícita y requiere realizar inferencias o establecer relaciones evidentes.",
+     "oaLevel": null,
+     "imageRef": null
+    },
+    {
+     "position": 6,
+     "printedNumber": "6",
+     "type": "multiple_choice",
+     "responseFormat": "choice",
+     "stem": "When Emilia says “and I thought of you”, what does she mean?",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "That it is a new movie.",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "That the movie is very long.",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "That she wants to go with Martín.",
+       "isCorrect": true
+      }
+     ],
+     "correctKey": "C",
+     "skill": "Comprensión Auditiva",
+     "oa": "OA 2",
+     "contentAxis": "Listening",
+     "hasFigure": false,
+     "figureNote": null,
+     "oaCode": "ENG-6B-OA02",
+     "indicador": "Extraer expresiones de uso frecuente relacionadas con los temas y las funciones del año (por ejemplo, seguir y dar instrucciones; decir y preguntar la hora; expresar habilidad e inhabilidad; expresar necesidad, etc.) que se encuentran explícitas en el texto escuchado, cuando no hay información que compite.",
+     "oaLevel": null,
+     "imageRef": null
+    },
+    {
+     "position": 7,
+     "printedNumber": "7",
+     "type": "multiple_choice",
+     "responseFormat": "choice",
+     "stem": "How will Martín get to the mall?",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "By bus.",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "By bike.",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "By subway.",
+       "isCorrect": true
+      }
+     ],
+     "correctKey": "C",
+     "skill": "Comprensión Auditiva",
+     "oa": "OA 1",
+     "contentAxis": "Listening",
+     "hasFigure": false,
+     "figureNote": null,
+     "oaCode": "ENG-6B-OA01",
+     "indicador": "Identificar información explícita en el texto escuchado que responda a las preguntas ¿quién?, ¿cómo?, ¿dónde?, ¿qué?, cuando no hay información que compite.",
+     "oaLevel": null,
+     "imageRef": null
+    },
+    {
+     "position": 8,
+     "printedNumber": "8",
+     "type": "multiple_choice",
+     "responseFormat": "choice",
+     "stem": "Who are Emilia and Martín?",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "Best friends.",
+       "isCorrect": true
+      },
+      {
+       "key": "B",
+       "text": "Mother and son.",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "Sister and brother.",
+       "isCorrect": false
+      }
+     ],
+     "correctKey": "A",
+     "skill": "Comprensión Auditiva",
+     "oa": "OA 1",
+     "contentAxis": "Listening",
+     "hasFigure": false,
+     "figureNote": null,
+     "oaCode": "ENG-6B-OA01",
+     "indicador": "Identificar información explícita en el texto escuchado referida a características de personas (por ejemplo, edad, color de pelo, etc.), lugares (por ejemplo, clima, temperatura, ubicación, etc.) u objetos (por ejemplo, tamaño, color, etc.), cuando no hay información que compite.",
+     "oaLevel": null,
+     "imageRef": null
+    }
+   ],
+   "imageRef": "item/global/6to-ingles-intermedio-2026/section_figure/2.png"
+  },
+  {
+   "order": 3,
+   "name": "Listening No 3 — Conversation between Amanda and Gabriel",
+   "type": "multiple_choice",
+   "instructions": "Listening comprehension\n\nListening No 3\nYou will listen to a conversation between Amanda and Gabriel.\nTake a minute to read the questions.\nFor each question (9 to 12), choose the correct answer (A, B or C).\nYou will listen to the audio twice. Now, pay attention to the audio.",
+   "passage": null,
+   "items": [
+    {
+     "position": 9,
+     "printedNumber": "9",
+     "type": "multiple_choice",
+     "responseFormat": "choice",
+     "stem": "What did Gabriel do during his vacation?",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "He stayed in the city.",
+       "isCorrect": true
+      },
+      {
+       "key": "B",
+       "text": "He went to the mountains.",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "He visited his grandparents.",
+       "isCorrect": false
+      }
+     ],
+     "correctKey": "A",
+     "skill": "Comprensión Auditiva",
+     "oa": "OA 1",
+     "contentAxis": "Listening",
+     "hasFigure": false,
+     "figureNote": null,
+     "oaCode": "ENG-6B-OA01",
+     "indicador": "Identificar información explícita en el texto escuchado que responda a las preguntas ¿quién?, ¿cómo?, ¿dónde?, ¿qué?, cuando no hay información que compite.",
+     "oaLevel": null,
+     "imageRef": null
+    },
+    {
+     "position": 10,
+     "printedNumber": "10",
+     "type": "multiple_choice",
+     "responseFormat": "choice",
+     "stem": "When Gabriel asks Amanda “What about you?”, what information is he asking for?",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "What her name is.",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "Where she is now.",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "What she did on her vacation.",
+       "isCorrect": true
+      }
+     ],
+     "correctKey": "C",
+     "skill": "Comprensión Auditiva",
+     "oa": "OA 2",
+     "contentAxis": "Listening",
+     "hasFigure": false,
+     "figureNote": null,
+     "oaCode": "ENG-6B-OA02",
+     "indicador": "Extraer expresiones de uso frecuente relacionadas con los temas y las funciones del año (por ejemplo, seguir y dar instrucciones; decir y preguntar la hora; expresar habilidad e inhabilidad; expresar necesidad, etc.) que se encuentran explícitas en el texto escuchado, cuando no hay información que compite.",
+     "oaLevel": null,
+     "imageRef": null
+    },
+    {
+     "position": 11,
+     "printedNumber": "11",
+     "type": "multiple_choice",
+     "responseFormat": "choice",
+     "stem": "Who did Amanda spend her vacation with?",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "With part of her family.",
+       "isCorrect": true
+      },
+      {
+       "key": "B",
+       "text": "With her friends.",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "With Gabriel.",
+       "isCorrect": false
+      }
+     ],
+     "correctKey": "A",
+     "skill": "Comprensión Auditiva",
+     "oa": "OA 2",
+     "contentAxis": "Listening",
+     "hasFigure": false,
+     "figureNote": null,
+     "oaCode": "ENG-6B-OA02",
+     "indicador": "Extraer información específica asociada a personas, lugares y tiempo, cuando esta no se encuentra explícita y requiere realizar inferencias o establecer relaciones evidentes.",
+     "oaLevel": null,
+     "imageRef": null
+    },
+    {
+     "position": 12,
+     "printedNumber": "12",
+     "type": "multiple_choice",
+     "responseFormat": "choice",
+     "stem": "What is the conversation about?",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "Activities in the city.",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "Activities with friends.",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "Activities during winter vacation.",
+       "isCorrect": true
+      }
+     ],
+     "correctKey": "C",
+     "skill": "Comprensión Auditiva",
+     "oa": "OA 2",
+     "contentAxis": "Listening",
+     "hasFigure": false,
+     "figureNote": null,
+     "oaCode": "ENG-6B-OA02",
+     "indicador": "Establecer el tema o propósito general del texto escuchado, cuando este no se encuentra explícito, a partir de claves evidentes (como palabras o expresiones familiares asociadas al tema o ideas que se repiten) que permiten inferirlo.",
+     "oaLevel": null,
+     "imageRef": null
+    }
+   ],
+   "imageRef": "item/global/6to-ingles-intermedio-2026/section_figure/3.png"
+  },
+  {
+   "order": 4,
+   "name": "Reading No 1 — Infografía: «FOLLOW THE PARK RULES TO PROTECT THE ANIMALS!»",
+   "type": "multiple_choice",
+   "instructions": "Reading comprehension\n\nReading No 1\nRead the following infographic about a National Park where protected animals live.\nTake a minute to read the questions.\nFor each question (13 to 16), choose the correct answer (A, B or C).",
+   "passage": {
+    "title": "FOLLOW THE PARK RULES TO PROTECT THE ANIMALS!",
+    "text": "FOLLOW THE PARK RULES\nTO PROTECT THE ANIMALS!\n\nIt is important to respect the animals that live in this park.\nLearn how to protect our penguins, pumas, condors, and guanacos.\n\nDo Not Feed Animals\nAnimals know what they can eat. Let them get their own food.\n\nDo Not Touch Animals\nGetting too close can stress animals. Keep your distance.\n\nDo Not Make Noise\nAnimals prefer silence. Be quiet and respect them, especially birds.\n\nObserve and enjoy!\nHelp protect Chilean animals!\nIt is your responsibility.\n\n(Images from www.freepik.com)",
+    "format": "plain",
+    "attachments": [
+     {
+      "kind": "image",
+      "note": "Infografía diseñada del parque nacional: título en dos líneas, tres íconos circulares de prohibición (mano ofreciendo comida a un ave, mano acariciando un animal, persona gritando) sobre las tres reglas, y una franja inferior oscura con un corazón entre dos manos y fotos circulares de un pingüino y un puma. El texto completo necesario para responder está transcrito en `text`."
+     }
+    ],
+    "imageRef": "item/global/6to-ingles-intermedio-2026/section_figure/4.png"
+   },
+   "items": [
+    {
+     "position": 13,
+     "printedNumber": "13",
+     "type": "multiple_choice",
+     "responseFormat": "choice",
+     "stem": "Why can’t we touch the animals?",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "Because they can get their own food.",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "Because they can get stressed.",
+       "isCorrect": true
+      },
+      {
+       "key": "C",
+       "text": "Because they can get hungry.",
+       "isCorrect": false
+      }
+     ],
+     "correctKey": "B",
+     "skill": "Comprensión de Lectura",
+     "oa": "OA 6",
+     "contentAxis": "Reading",
+     "hasFigure": false,
+     "figureNote": null,
+     "oaCode": "ENG-6B-OA06",
+     "indicador": "Identificar el tema o idea general de un texto no literario de tema familiar o una sección de este, reconociendo de qué trata a partir de su sentido global, cuando el texto contiene apoyo visual o contextual (por ejemplo, títulos y/o subtítulos).",
+     "oaLevel": null,
+     "imageRef": null
+    },
+    {
+     "position": 14,
+     "printedNumber": "14",
+     "type": "multiple_choice",
+     "responseFormat": "choice",
+     "stem": "Which of these animals live in this park?",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "Rabbits",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "Pumas",
+       "isCorrect": true
+      },
+      {
+       "key": "C",
+       "text": "Snakes",
+       "isCorrect": false
+      }
+     ],
+     "correctKey": "B",
+     "skill": "Comprensión de Lectura",
+     "oa": "OA 6",
+     "contentAxis": "Reading",
+     "hasFigure": false,
+     "figureNote": null,
+     "oaCode": "ENG-6B-OA06",
+     "indicador": "Identificar información entregada por palabras clave, expresiones de uso común y vocabulario temático presentes en textos no literarios simples en los que la información se presenta de manera clara y evidente.",
+     "oaLevel": null,
+     "imageRef": null
+    },
+    {
+     "position": 15,
+     "printedNumber": "15",
+     "type": "multiple_choice",
+     "responseFormat": "choice",
+     "stem": "What is our responsibility in the park?",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "To feed the animals.",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "To follow the animals.",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "To protect the animals.",
+       "isCorrect": true
+      }
+     ],
+     "correctKey": "C",
+     "skill": "Comprensión de Lectura",
+     "oa": "OA 6",
+     "contentAxis": "Reading",
+     "hasFigure": false,
+     "figureNote": null,
+     "oaCode": "ENG-6B-OA06",
+     "indicador": "Identificar el tema o idea general de un texto no literario de tema familiar o una sección de este, reconociendo de qué trata a partir de su sentido global, cuando el texto contiene apoyo visual o contextual (por ejemplo, títulos y/o subtítulos).",
+     "oaLevel": null,
+     "imageRef": null
+    },
+    {
+     "position": 16,
+     "printedNumber": "16",
+     "type": "multiple_choice",
+     "responseFormat": "choice",
+     "stem": "What can we do in the park?",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "Call the animals loudly.",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "Observe the animals.",
+       "isCorrect": true
+      },
+      {
+       "key": "C",
+       "text": "Feed the animals.",
+       "isCorrect": false
+      }
+     ],
+     "correctKey": "B",
+     "skill": "Comprensión de Lectura",
+     "oa": "OA 6",
+     "contentAxis": "Reading",
+     "hasFigure": false,
+     "figureNote": null,
+     "oaCode": "ENG-6B-OA06",
+     "indicador": "Identificar información entregada por palabras clave, expresiones de uso común y vocabulario temático presentes en textos no literarios simples en los que la información se presenta de manera clara y evidente.",
+     "oaLevel": null,
+     "imageRef": null
+    }
+   ],
+   "imageRef": "item/global/6to-ingles-intermedio-2026/section_figure/4.png"
+  },
+  {
+   "order": 5,
+   "name": "Reading No 2 — Artículo: «CHILE’S FUTURE SPORTS STARS»",
+   "type": "multiple_choice",
+   "instructions": "Reading comprehension\n\nReading No 2\nRead the following article about two young Chilean athletes.\nTake a minute to read the questions.\nFor each question (17 to 20), choose the correct answer (A, B or C).",
+   "passage": {
+    "title": "CHILE’S FUTURE SPORTS STARS",
+    "text": "CHILE’S FUTURE SPORTS STARS\n\nJaviera and Nicolás are two great Chilean athletes. They live in different parts of the country. They are very good athletes because they practice everyday, they have a balanced diet, and their lifestyles are healthy.\n\nJaviera, The Swimming Queen\nJaviera is 20 years old. She lives in Puerto Varas and enjoys going out with her friends.\nShe is a great swimmer, but she can’t run fast.\nHer diet includes healthy food: she can eat meat, rice, pasta and vegetables, but she can’t eat fried food.\nIn the future, she wants to participate in the Olympic Games.\n\nNicolás, The Golden Feet\nNicolás is 18 years old. He lives in La Serena and loves walking on the beach with his friends.\nHe is a great football player, but he can’t play basketball.\nHis diet includes healthy food: he can eat meat, eggs and vegetables every day, but he can’t have sweets or soda.\nIn the future, Nicolás wants to play football with his idols in the World Cup.\n\n(Images from www.freepik.com)",
+    "format": "plain",
+    "attachments": [
+     {
+      "kind": "image",
+      "note": "Artículo diseñado tipo revista: titular azul con tres estrellas, ilustración cuadrada de una nadadora ajustándose los lentes y gorra junto al bloque de Javiera, e ilustración de un futbolista pateando un balón frente al arco junto al bloque de Nicolás. El texto completo necesario para responder está transcrito en `text`."
+     }
+    ],
+    "imageRef": "item/global/6to-ingles-intermedio-2026/section_figure/5.png"
+   },
+   "items": [
+    {
+     "position": 17,
+     "printedNumber": "17",
+     "type": "multiple_choice",
+     "responseFormat": "choice",
+     "stem": "What can’t Javiera do?",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "She can’t run fast.",
+       "isCorrect": true
+      },
+      {
+       "key": "B",
+       "text": "She can’t eat meat.",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "She can’t swim well.",
+       "isCorrect": false
+      }
+     ],
+     "correctKey": "A",
+     "skill": "Comprensión de Lectura",
+     "oa": "OA 6",
+     "contentAxis": "Reading",
+     "hasFigure": false,
+     "figureNote": null,
+     "oaCode": "ENG-6B-OA06",
+     "indicador": "Identificar información explícita y relevante asociada a datos concretos como personas, acciones, lugares, cantidades o momentos, cuando esta es fácil de localizar en el texto (por ejemplo, por encontrarse al inicio, destacada, repetida dentro del texto, etc.).",
+     "oaLevel": null,
+     "imageRef": null
+    },
+    {
+     "position": 18,
+     "printedNumber": "18",
+     "type": "multiple_choice",
+     "responseFormat": "choice",
+     "stem": "What do Nicolás and Javiera do to be good at sports?",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "They watch their favorite athletes.",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "They go out with their friends.",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "They eat well and excercise.",
+       "isCorrect": true
+      }
+     ],
+     "correctKey": "C",
+     "skill": "Comprensión de Lectura",
+     "oa": "OA 6",
+     "contentAxis": "Reading",
+     "hasFigure": false,
+     "figureNote": null,
+     "oaCode": "ENG-6B-OA06",
+     "indicador": "Identificar información explícita y relevante asociada a datos concretos como personas, acciones, lugares, cantidades o momentos, cuando esta es fácil de localizar en el texto (por ejemplo, por encontrarse al inicio, destacada, repetida dentro del texto, etc.).",
+     "oaLevel": null,
+     "imageRef": null
+    },
+    {
+     "position": 19,
+     "printedNumber": "19",
+     "type": "multiple_choice",
+     "responseFormat": "choice",
+     "stem": "According to the text, what does Nicolás want to do in the future?",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "He wants to go to the beach.",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "He wants to go to the Olympic Games.",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "He wants to go to the World Cup.",
+       "isCorrect": true
+      }
+     ],
+     "correctKey": "C",
+     "skill": "Comprensión de Lectura",
+     "oa": "OA 6",
+     "contentAxis": "Reading",
+     "hasFigure": false,
+     "figureNote": null,
+     "oaCode": "ENG-6B-OA06",
+     "indicador": "Identificar información explícita y relevante asociada a datos concretos como personas, acciones, lugares, cantidades o momentos, cuando esta es fácil de localizar en el texto (por ejemplo, por encontrarse al inicio, destacada, repetida dentro del texto, etc.).",
+     "oaLevel": null,
+     "imageRef": null
+    },
+    {
+     "position": 20,
+     "printedNumber": "20",
+     "type": "multiple_choice",
+     "responseFormat": "choice",
+     "stem": "What is the purpose of the article?",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "To give information about two athletes.",
+       "isCorrect": true
+      },
+      {
+       "key": "B",
+       "text": "To give information about healthy food.",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "To give information about the Olympic Games.",
+       "isCorrect": false
+      }
+     ],
+     "correctKey": "A",
+     "skill": "Comprensión de Lectura",
+     "oa": "OA 6",
+     "contentAxis": "Reading",
+     "hasFigure": false,
+     "figureNote": null,
+     "oaCode": "ENG-6B-OA06",
+     "indicador": "Reconocer el propósito de un texto no literario, infiriendo para qué sirve o qué busca comunicar (invitar, informar, saludar, instruir), a partir de su sentido global y/o de claves contextuales como imágenes o títulos.",
+     "oaLevel": null,
+     "imageRef": null
+    }
+   ],
+   "imageRef": "item/global/6to-ingles-intermedio-2026/section_figure/5.png"
+  },
+  {
+   "order": 6,
+   "name": "Reading No 3 — Cuento: «No Dogs in the Playground!»",
+   "type": "multiple_choice",
+   "instructions": "Reading comprehension\n\nReading No 3\nRead the following story.\nTake a minute to read the questions.\nFor each question (21 to 24), choose the correct answer (A, B o C).",
+   "passage": {
+    "title": "No Dogs in the Playground!",
+    "text": "No Dogs in the Playground!\n\nBobby the dog wanted to have a fun day at the park with Katie.\n\nFirst, they went to the playground. At the gate, Bobby saw a big sign: “No dogs in the playground.” He stayed on a bench and waited.\n\nKatie played on the swings and the slide with other children. Bobby watched them and felt sad. He wanted to play, too.\n\nThen, Bobby and Katie went home. That night, Bobby couldn’t sleep. He thought about the playground. When everyone was sleeping, he went back to the playground. The gate was open and there were many dogs inside!\n\nBobby climbed, jumped, and went very high on the swing. He also made a lot of new friends.\n\nFinally, he went home happy and slept. He thought, “I had so much fun!”. The next morning he woke up smiling.\n\nAdapted from No Dogs! (British Council, 2017)",
+    "format": "plain",
+    "attachments": [
+     {
+      "kind": "image",
+      "note": "Cuento ilustrado: cabecera azul con el título en amarillo entre dos huellas de perro, e ilustración de una niña con jockey sosteniendo la correa de un perro dorado frente a la reja del área de juegos, con el letrero de “no perros” a la derecha. El texto completo necesario para responder está transcrito en `text`."
+     }
+    ],
+    "imageRef": "item/global/6to-ingles-intermedio-2026/section_figure/6.png"
+   },
+   "items": [
+    {
+     "position": 21,
+     "printedNumber": "21",
+     "type": "multiple_choice",
+     "responseFormat": "choice",
+     "stem": "What happened first in the story?",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "Bobby and Katie went to the playground.",
+       "isCorrect": true
+      },
+      {
+       "key": "B",
+       "text": "Bobby went to the playground alone.",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "Katie played on the swings.",
+       "isCorrect": false
+      }
+     ],
+     "correctKey": "A",
+     "skill": "Comprensión de Lectura",
+     "oa": "OA 7",
+     "contentAxis": "Reading",
+     "hasFigure": false,
+     "figureNote": null,
+     "oaCode": "ENG-6B-OA07",
+     "indicador": "Identificar acciones, según el momento en que ocurren en el relato, cuando existen claves evidentes para identificar la secuencia de las mismas (first, then, finally, beginning, middle, end y/o mediante la separación de párrafos o imágenes).",
+     "oaLevel": null,
+     "imageRef": null
+    },
+    {
+     "position": 22,
+     "printedNumber": "22",
+     "type": "multiple_choice",
+     "responseFormat": "choice",
+     "stem": "Why did Bobby feel sad at the playground?",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "Because he couldn’t sleep.",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "Because he wanted to play.",
+       "isCorrect": true
+      },
+      {
+       "key": "C",
+       "text": "Because he had to go home.",
+       "isCorrect": false
+      }
+     ],
+     "correctKey": "B",
+     "skill": "Comprensión de Lectura",
+     "oa": "OA 7",
+     "contentAxis": "Reading",
+     "hasFigure": false,
+     "figureNote": null,
+     "oaCode": "ENG-6B-OA07",
+     "indicador": "Identificar información entregada por expresiones de uso común (por ejemplo, excuse me, I'm sorry, how old...? entre otras) y vocabulario temático presentes en textos literarios simples en los que la información se presenta de manera clara y evidente.",
+     "oaLevel": null,
+     "imageRef": null
+    },
+    {
+     "position": 23,
+     "printedNumber": "23",
+     "type": "multiple_choice",
+     "responseFormat": "choice",
+     "stem": "What is the main problem in the story?",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "The children weren’t playing on the swings.",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "Katie didn’t want to take Bobby to the park.",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "Bobby couldn’t play in the playground.",
+       "isCorrect": true
+      }
+     ],
+     "correctKey": "C",
+     "skill": "Comprensión de Lectura",
+     "oa": "OA 7",
+     "contentAxis": "Reading",
+     "hasFigure": false,
+     "figureNote": null,
+     "oaCode": "ENG-6B-OA07",
+     "indicador": "Identificar ideas generales presentes en un texto literario (por ejemplo, de qué trata, cuál es el conflicto, cómo se solucionó el conflicto, etc.) cuando el texto contiene claves que facilitan la tarea.",
+     "oaLevel": null,
+     "imageRef": null
+    },
+    {
+     "position": 24,
+     "printedNumber": "24",
+     "type": "multiple_choice",
+     "responseFormat": "choice",
+     "stem": "When did Bobby make new friends?",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "When everyone was sleeping.",
+       "isCorrect": true
+      },
+      {
+       "key": "B",
+       "text": "When he was waiting on the bench.",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "When he woke up the next morning.",
+       "isCorrect": false
+      }
+     ],
+     "correctKey": "A",
+     "skill": "Comprensión de Lectura",
+     "oa": "OA 7",
+     "contentAxis": "Reading",
+     "hasFigure": false,
+     "figureNote": null,
+     "oaCode": "ENG-6B-OA07",
+     "indicador": "Extraer información específica asociada a personajes, lugares y tiempo, cuando esta no se encuentra explícita y requiere realizar inferencias evidentes o establecer relaciones entre información que se encuentra próxima en el texto.",
+     "oaLevel": null,
+     "imageRef": null
+    }
+   ],
+   "imageRef": "item/global/6to-ingles-intermedio-2026/section_figure/6.png"
+  },
+  {
+   "order": 7,
+   "name": "Writing No 1 — Describir lo que hacen los niños de cada imagen",
+   "type": "open_ended",
+   "instructions": "Writing\n\nInstructions:\nLook at each picture carefully.\nWrite a complete sentence describing what the children are doing in each picture.\nFollow the example:\n\nEjemplo resuelto (no es un ítem puntuable): junto a la ilustración de una niña bailando, el cuadernillo imprime «Julia» y muestra la línea de respuesta completada a mano, formando «Julia is dancing.»",
+   "passage": null,
+   "items": [
+    {
+     "position": 25,
+     "printedNumber": "25",
+     "type": "open_ended",
+     "responseFormat": "develop",
+     "stem": "Write a complete sentence describing what the child is doing in the picture.\n\nPedro ______________________________",
+     "correctKey": null,
+     "skill": "Expresión escrita",
+     "oa": "OA 14",
+     "contentAxis": "Writing",
+     "hasFigure": true,
+     "figureNote": "Ilustración de un niño con delantal sosteniendo un bol con un batidor (está cocinando/mezclando) junto a una mesa con un frasco, huevos y un tarro.",
+     "rubricId": "eng-6b-writing-25-27",
+     "oaCode": "ENG-6B-OA14",
+     "indicador": "Completar oraciones (siguiendo un modelo y/o formato dado) sobre temas de la vida cotidiana, del contexto inmediato del estudiante y de actualidad y/o interés global, usando vocabulario temático o funciones del año.",
+     "oaLevel": null,
+     "imageRef": "item/global/6to-ingles-intermedio-2026/item_figure/25.png"
+    },
+    {
+     "position": 26,
+     "printedNumber": "26",
+     "type": "open_ended",
+     "responseFormat": "develop",
+     "stem": "Write a complete sentence describing what the children are doing in the picture.\n\nAna and María ______________________________",
+     "correctKey": null,
+     "skill": "Expresión escrita",
+     "oa": "OA 14",
+     "contentAxis": "Writing",
+     "hasFigure": true,
+     "figureNote": "Ilustración de dos niñas jugando tenis en una cancha: una espera con la raqueta y la otra golpea la pelota sobre la red.",
+     "rubricId": "eng-6b-writing-25-27",
+     "oaCode": "ENG-6B-OA14",
+     "indicador": "Completar oraciones (siguiendo un modelo y/o formato dado) sobre temas de la vida cotidiana, del contexto inmediato del estudiante y de actualidad y/o interés global, usando vocabulario temático o funciones del año.",
+     "oaLevel": null,
+     "imageRef": "item/global/6to-ingles-intermedio-2026/item_figure/26.png"
+    },
+    {
+     "position": 27,
+     "printedNumber": "27",
+     "type": "open_ended",
+     "responseFormat": "develop",
+     "stem": "Write a complete sentence describing what the children are doing in the picture.\n\nTomás and Elisa ______________________________",
+     "correctKey": null,
+     "skill": "Expresión escrita",
+     "oa": "OA 14",
+     "contentAxis": "Writing",
+     "hasFigure": true,
+     "figureNote": "Ilustración de dos niños sentados en pupitres con pilas de libros y cuadernos, escribiendo/estudiando en la sala de clases.",
+     "rubricId": "eng-6b-writing-25-27",
+     "oaCode": "ENG-6B-OA14",
+     "indicador": "Completar oraciones (siguiendo un modelo y/o formato dado) sobre temas de la vida cotidiana, del contexto inmediato del estudiante y de actualidad y/o interés global, usando vocabulario temático o funciones del año.",
+     "oaLevel": null,
+     "imageRef": "item/global/6to-ingles-intermedio-2026/item_figure/27.png"
+    }
+   ],
+   "imageRef": "item/global/6to-ingles-intermedio-2026/section_figure/7.png"
+  },
+  {
+   "order": 8,
+   "name": "Writing No 2 — Escribir sobre la rutina diaria",
+   "type": "open_ended",
+   "instructions": "Writing\n\nInstructions:\nLook at the pictures. These are examples of things people do everyday.\nChoose one of the words in each box and write a sentence to describe something you do everyday.\nFollow the example:\n\nEjemplo resuelto (no es un ítem puntuable): la caja imprime «clothes / shoes / hat» con «shoes» encerrada en un círculo y la línea de respuesta completada a mano, formando «I put on my shoes.»\n\nLa misma página incluye una grilla de 9 ilustraciones de acciones cotidianas (levantarse de la cama, lavarse los dientes, bañarse, desayunar/tomar leche, peinarse, ir al colegio, hacer las tareas, jugar fútbol, ponerse los zapatos) que sirve de banco visual para las preguntas 28 a 30.",
+   "passage": null,
+   "items": [
+    {
+     "position": 28,
+     "printedNumber": "28",
+     "type": "open_ended",
+     "responseFormat": "develop",
+     "stem": "Choose one of the words in the box and write a sentence to describe something you do everyday.\n\nI ______________________________\n\nbreakfast\nmilk\ndinner",
+     "correctKey": null,
+     "skill": "Expresión escrita",
+     "oa": "OA 15",
+     "contentAxis": "Writing",
+     "hasFigure": false,
+     "figureNote": "El recuadro del ítem no trae ilustración propia; el apoyo visual del bloque es la grilla de 9 ilustraciones de la sección.",
+     "rubricId": "eng-6b-writing-28-30",
+     "oaCode": "ENG-6B-OA15",
+     "indicador": "Escribir oraciones breves sobre imágenes dadas, que permiten describir acciones que ocurren al momento de hablar.",
+     "oaLevel": null,
+     "imageRef": null
+    },
+    {
+     "position": 29,
+     "printedNumber": "29",
+     "type": "open_ended",
+     "responseFormat": "develop",
+     "stem": "Choose one of the words in the box and write a sentence to describe something you do everyday.\n\nI ______________________________\n\nteeth\nbath\nhair",
+     "correctKey": null,
+     "skill": "Expresión escrita",
+     "oa": "OA 15",
+     "contentAxis": "Writing",
+     "hasFigure": false,
+     "figureNote": "El recuadro del ítem no trae ilustración propia; el apoyo visual del bloque es la grilla de 9 ilustraciones de la sección.",
+     "rubricId": "eng-6b-writing-28-30",
+     "oaCode": "ENG-6B-OA15",
+     "indicador": "Escribir oraciones breves sobre imágenes dadas, que permiten describir acciones que ocurren al momento de hablar.",
+     "oaLevel": null,
+     "imageRef": null
+    },
+    {
+     "position": 30,
+     "printedNumber": "30",
+     "type": "open_ended",
+     "responseFormat": "develop",
+     "stem": "Choose one of the words in the box and write a sentence to describe something you do everyday.\n\nI ______________________________\n\nschool\nhomework\nfootball",
+     "correctKey": null,
+     "skill": "Expresión escrita",
+     "oa": "OA 15",
+     "contentAxis": "Writing",
+     "hasFigure": false,
+     "figureNote": "El recuadro del ítem no trae ilustración propia; el apoyo visual del bloque es la grilla de 9 ilustraciones de la sección.",
+     "rubricId": "eng-6b-writing-28-30",
+     "oaCode": "ENG-6B-OA15",
+     "indicador": "Escribir oraciones breves sobre imágenes dadas, que permiten describir acciones que ocurren al momento de hablar.",
+     "oaLevel": null,
+     "imageRef": null
+    }
+   ],
+   "imageRef": "item/global/6to-ingles-intermedio-2026/section_figure/8.png"
+  }
+ ],
+ "extraction": {
+  "itemCount": 30,
+  "warnings": [
+   "Listening 1-3: audio no disponible públicamente; ítems 1-12 cargados sin recurso de audio",
+   "Este cuadernillo es la Parte 1 (Listening + Reading + Writing). La Parte 2 (Speaking) es un instrumento aparte y NO está incluida aquí.",
+   "Secciones 1-3 (Listening): `passage: null` porque no hay texto base, solo audio. Cada una SÍ trae una ilustración de contexto a página completa (p. 4 Tomás decaído en la cocina; p. 6 Emilia y Martín hablando por teléfono en pantalla partida; p. 8 díptico de vacaciones: niña en carpa en la nieve y niño jugando videojuegos). El contrato no define campos de figura a nivel de sección, así que quedan anotadas aquí para A2 (candidatas a `section_figure/{1,2,3}.png`).",
+   "Secciones 4-6 (Reading): los tres pasajes son artefactos DISEÑADOS (infografía, artículo con fotos, cuento ilustrado). Su ilustración queda declarada en `passage.attachments[].note`; el texto completo necesario para responder está transcrito verbatim en `passage.text`. Candidatas a `section_figure/{4,5,6}.png` para A2.",
+   "Secciones 7-8 (Writing): cada una imprime un EJEMPLO RESUELTO («Julia is dancing.» y «I put on my shoes.») que NO es un ítem puntuable; va en `instructions` de la sección, no como `position`.",
+   "Ítems 28-30: el recuadro del ítem NO trae ilustración propia (solo «I ___» y la caja de 3 palabras). Se marcan `hasFigure: true` por instrucción del brief, pero el apoyo visual real es la grilla de 9 ilustraciones impresa en la página 18, compartida por toda la sección 8. A2 debe recortarla como figura de SECCIÓN (`section_figure/8.png`), no como tres figuras de ítem distintas.",
+   "`pdftotext` imprime glifos espurios de la maqueta ('25' bajo los números 26/27 y 28/29/30; '26' en la cabecera de la p. 18). Los `printedNumber` 25-30 fueron verificados uno a uno contra las páginas renderizadas (p. 17 → 25, 26, 27; p. 19 → 28, 29, 30).",
+   "Transcripción verbatim con `pdftotext -layout`: se conservan las erratas del original — «They eat well and excercise.» (alt. C del ítem 18) y «(A, B o C)» en las instrucciones de Reading No 3.",
+   "Reading No 1 (infografía): las tres reglas están maquetadas en columnas lado a lado, así que `pdftotext -layout` las entrega intercaladas línea a línea. En `passage.text` se re-serializaron en orden de lectura (cada título seguido de su propio cuerpo), verificado contra la página 10 renderizada. Palabras y puntuación son verbatim; solo cambia el orden columna→lineal.",
+   "`subjectCode: \"ENG\"` viene fijado por el brief, pero `validate.py` sólo acepta {LANG, MATH, HIST}: el validador reporta 'subjectCode inválido: ENG'. Es una limitación del validador, no del JSON; el orquestador debe agregar ENG a su whitelist (no lo edité por no tocar infraestructura compartida).",
+   "Sin hoja de respuestas oficial para Inglés: el cross-check quedó en DOBLE (cuadernillo vs guía docente), no triple. Las 24 claves se verificaron además visualmente sobre la página renderizada.",
+   "Discrepancia del documento oficial (se cargó LITERAL, por decisión del equipo): el Anexo 1 de la guía asigna a los ítems 25-27 el indicador de OA14 «Completar oraciones (siguiendo un modelo y/o formato dado)» y a los 28-30 el de OA15 «Escribir oraciones breves sobre imágenes dadas», mientras que el cuadernillo pide lo inverso (25-27 describen una ilustración, 28-30 completan con una palabra de la caja). Los tags siguen la guía.",
+   "Rúbricas de los ítems 25-30 transcritas completas y preservadas en `instruments.config.rubrics`: las tablas rubrics/rubric_criteria/rubric_levels todavía no tienen camino de carga."
+  ],
+  "needsHumanReview": false
+ },
+ "pauta": {
+  "source": {
+   "instrumentJson": "imported/DIA Inglés 6° Básico 2026 — Monitoreo Intermedio",
+   "ficha": "6to-ingles-intermedio-2026.ficha.json",
+   "guia": "guia_docente_ingles_monitoreo_2026.pdf"
+  },
+  "rubrics": [
+   {
+    "id": "eng-6b-writing-25-27",
+    "page": 34,
+    "header": [
+     "DIA INGLÉS - 6° BÁSICO",
+     "MONITOREO INTERMEDIO",
+     "PAUTA DE CORRECCIÓN ÍTEMS 25, 26 Y 27"
+    ],
+    "title": "PAUTA DE CORRECCIÓN ÍTEMS 25, 26 Y 27",
+    "subtitle": "(EXPRESIÓN ESCRITA - WRITING)",
+    "positions": [
+     25,
+     26,
+     27
+    ],
+    "criteria": [
+     {
+      "n": 1,
+      "name": "Vocabulario y pertinencia",
+      "description": "Completa la oración haciendo referencia a la imagen, incluyendo palabras que permiten describirla.",
+      "text": "1. Vocabulario y pertinencia Completa la oración haciendo referencia a la imagen, incluyendo palabras que permiten describirla."
+     },
+     {
+      "n": 2,
+      "name": "Estructura de la respuesta",
+      "description": "Estructura de forma correcta la respuesta, ya sea en presente simple o presente continuo.",
+      "text": "2. Estructura de la respuesta Estructura de forma correcta la respuesta, ya sea en presente simple o presente continuo."
+     }
+    ],
+    "levels": [
+     {
+      "code": "2",
+      "score": 2,
+      "label": "Código 2 (Nivel A1) Correcta",
+      "level": "Nivel A1",
+      "judgement": "Correcta",
+      "descriptor": "Escribe en inglés, con o sin faltas de ortografía, y cumple con los dos criterios de evaluación.",
+      "examples": [
+       "“Pedro is cooking.”",
+       "“Pedro cooks.”"
+      ],
+      "text": "Escribe en inglés, con o sin faltas de ortografía, y cumple con los dos criterios de evaluación. Ejemplos: • “Pedro is cooking.” • “Pedro cooks.”"
+     },
+     {
+      "code": "1",
+      "score": 1,
+      "label": "Código 1 (Nivel Pre-A1) Parcialmente correcta",
+      "level": "Nivel Pre-A1",
+      "judgement": "Parcialmente correcta",
+      "descriptor": "Escribe en inglés, con o sin faltas de ortografía y cumple solamente con el criterio 1.",
+      "examples": [
+       "“Pedro cooking.” (cumple el criterio 1, pero no el 2, porque al usar presente continuo omite el verbo “is”)",
+       "“Pedro cook.” (cumple el criterio 1, pero no el 2, porque al usar presente simple omite la “s” final del verbo)"
+      ],
+      "text": "Escribe en inglés, con o sin faltas de ortografía y cumple solamente con el criterio 1. Ejemplos: • “Pedro cooking.” (cumple el criterio 1, pero no el 2, porque al usar presente continuo omite el verbo “is”) • “Pedro cook.” (cumple el criterio 1, pero no el 2, porque al usar presente simple omite la “s” final del verbo)"
+     },
+     {
+      "code": "0",
+      "score": 0,
+      "label": "Código 0 Incorrecta",
+      "level": null,
+      "judgement": "Incorrecta",
+      "descriptor": "Escribe o no en inglés y cumple únicamente con el criterio 2, o con ninguno de los criterios de evaluación.",
+      "examples": [
+       "“Pedro is playing.” (cumple el criterio 2, pero no el 1, porque el vocabulario no se refiere a la imagen).",
+       "Responde en español.",
+       "No responde."
+      ],
+      "text": "Escribe o no en inglés y cumple únicamente con el criterio 2, o con ninguno de los criterios de evaluación. Ejemplos: • “Pedro is playing.” (cumple el criterio 2, pero no el 1, porque el vocabulario no se refiere a la imagen). • Responde en español. • No responde."
+     }
+    ],
+    "notes": [
+     "1. Se considera correcto que el estudiante escriba una palabra con faltas de ortografía si se comprende su significado (por ejemplo, si la escribe como suena).",
+     "2. Los ejemplos en la pauta no constituyen una guía acabada de todas las posibilidades que pueden presentarse en una respuesta."
+    ]
+   },
+   {
+    "id": "eng-6b-writing-28-30",
+    "page": 35,
+    "header": [
+     "DIA INGLÉS - 6° BÁSICO",
+     "MONITOREO INTERMEDIO",
+     "PAUTA DE CORRECCIÓN ÍTEMS 28, 29 Y 30"
+    ],
+    "title": "PAUTA DE CORRECCIÓN ÍTEMS 28, 29 Y 30",
+    "subtitle": "(EXPRESIÓN ESCRITA - WRITING)",
+    "positions": [
+     28,
+     29,
+     30
+    ],
+    "criteria": [
+     {
+      "n": 1,
+      "name": "Uso de la palabra de la caja",
+      "description": "Utiliza correctamente una de las palabras de la caja para describir una de las imágenes.",
+      "text": "1. Uso de la palabra de la caja Utiliza correctamente una de las palabras de la caja para describir una de las imágenes."
+     },
+     {
+      "n": 2,
+      "name": "Estructura de la respuesta",
+      "description": "Estructura de forma correcta la respuesta respecto del inicio entregado.",
+      "text": "2. Estructura de la respuesta Estructura de forma correcta la respuesta respecto del inicio entregado."
+     }
+    ],
+    "levels": [
+     {
+      "code": "2",
+      "score": 2,
+      "label": "Código 2 (Nivel A1) Correcta",
+      "level": "Nivel A1",
+      "judgement": "Correcta",
+      "descriptor": "Escribe en inglés, con o sin faltas de ortografía, y cumple con los dos criterios de evaluación.",
+      "examples": [
+       "“I brush my teeth.”",
+       "“I go to school.”"
+      ],
+      "text": "Escribe en inglés, con o sin faltas de ortografía, y cumple con los dos criterios de evaluación. Ejemplos • “I brush my teeth.” • “I go to school.”"
+     },
+     {
+      "code": "1",
+      "score": 1,
+      "label": "Código 1 (Nivel Pre-A1) Parcialmente correcta",
+      "level": "Nivel Pre-A1",
+      "judgement": "Parcialmente correcta",
+      "descriptor": "Escribe en inglés, con o sin faltas de ortografía, y cumple solamente con el criterio 1.",
+      "examples": [
+       "“I brushes teeth.” (cumple el criterio 1, pero no el 2, porque escribe el verbo en tercera persona)",
+       "“I go school.” (cumple el criterio 1, pero no el 2, porque omite la preposición “to”)"
+      ],
+      "text": "Escribe en inglés, con o sin faltas de ortografía, y cumple solamente con el criterio 1. Ejemplos: • “I brushes teeth.” (cumple el criterio 1, pero no el 2, porque escribe el verbo en tercera persona) • “I go school.” (cumple el criterio 1, pero no el 2, porque omite la preposición “to”)"
+     },
+     {
+      "code": "0",
+      "score": 0,
+      "label": "Código 0 Incorrecta",
+      "level": null,
+      "judgement": "Incorrecta",
+      "descriptor": "Escribe o no en inglés y cumple únicamente con el criterio 2, o con ninguno de los criterios de evaluación.",
+      "examples": [
+       "“I school.” (solamente copia la palabra de la caja, sin describir una de las imágenes)",
+       "Responde en español.",
+       "No responde."
+      ],
+      "text": "Escribe o no en inglés y cumple únicamente con el criterio 2, o con ninguno de los criterios de evaluación. Ejemplos: • “I school.” (solamente copia la palabra de la caja, sin describir una de las imágenes) • Responde en español. • No responde."
+     }
+    ],
+    "notes": [
+     "1. Se considera correcto que el estudiante escriba una palabra con faltas de ortografía si se comprende su significado (por ejemplo, si la escribe como suena).",
+     "2. Los ejemplos en la pauta no constituyen una guía acabada de todas las posibilidades que pueden presentarse en una respuesta."
+    ]
+   }
+  ]
+ }
+}

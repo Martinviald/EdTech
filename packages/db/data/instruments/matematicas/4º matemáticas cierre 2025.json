@@ -84,7 +84,8 @@
               "name": "Números y operaciones",
               "tagType": "secondary"
             }
-          ]
+          ],
+          "imageRef": "item/global/4to-matematicas-cierre-2025/item_figure/01.png"
         },
         {
           "position": 2,
@@ -249,7 +250,8 @@
               "name": "Números y operaciones",
               "tagType": "secondary"
             }
-          ]
+          ],
+          "imageRef": "item/global/4to-matematicas-cierre-2025/item_figure/04.png"
         },
         {
           "position": 5,
@@ -261,25 +263,29 @@
               "key": "A",
               "text": "Círculo con dos sectores grises laterales que dejan en blanco un triángulo central (aprox. 2/3 gris).",
               "isImage": true,
-              "isCorrect": false
+              "isCorrect": false,
+              "imageRef": "item/global/4to-matematicas-cierre-2025/alt_figure/05_A.png"
             },
             {
               "key": "B",
               "text": "Círculo dividido en tres franjas verticales; la franja central está pintada gris (1/3).",
               "isImage": true,
-              "isCorrect": false
+              "isCorrect": false,
+              "imageRef": "item/global/4to-matematicas-cierre-2025/alt_figure/05_B.png"
             },
             {
               "key": "C",
               "text": "Círculo dividido en 3 partes iguales con 1 parte (la inferior) pintada gris (1/3).",
               "isImage": true,
-              "isCorrect": true
+              "isCorrect": true,
+              "imageRef": "item/global/4to-matematicas-cierre-2025/alt_figure/05_C.png"
             },
             {
               "key": "D",
               "text": "Círculo dividido en 4 partes iguales con 1 parte (superior izquierda) pintada gris (1/4).",
               "isImage": true,
-              "isCorrect": false
+              "isCorrect": false,
+              "imageRef": "item/global/4to-matematicas-cierre-2025/alt_figure/05_D.png"
             }
           ],
           "correctKey": "C",
@@ -315,7 +321,8 @@
               "name": "Números y operaciones",
               "tagType": "secondary"
             }
-          ]
+          ],
+          "imageRef": "item/global/4to-matematicas-cierre-2025/item_figure/05.png"
         },
         {
           "position": 6,
@@ -707,7 +714,8 @@
               "name": "Medición",
               "tagType": "secondary"
             }
-          ]
+          ],
+          "imageRef": "item/global/4to-matematicas-cierre-2025/item_figure/12.png"
         },
         {
           "position": 13,
@@ -769,7 +777,8 @@
               "name": "Medición",
               "tagType": "secondary"
             }
-          ]
+          ],
+          "imageRef": "item/global/4to-matematicas-cierre-2025/item_figure/13.png"
         },
         {
           "position": 14,
@@ -831,7 +840,8 @@
               "name": "Medición",
               "tagType": "secondary"
             }
-          ]
+          ],
+          "imageRef": "item/global/4to-matematicas-cierre-2025/item_figure/14.png"
         },
         {
           "position": 15,
@@ -893,7 +903,8 @@
               "name": "Medición",
               "tagType": "secondary"
             }
-          ]
+          ],
+          "imageRef": "item/global/4to-matematicas-cierre-2025/item_figure/15.png"
         },
         {
           "position": 16,
@@ -905,25 +916,29 @@
               "key": "A",
               "text": "Figura de cruz con una línea diagonal que no es eje de simetría.",
               "isImage": true,
-              "isCorrect": false
+              "isCorrect": false,
+              "imageRef": "item/global/4to-matematicas-cierre-2025/alt_figure/16_A.png"
             },
             {
               "key": "B",
               "text": "Figura de cruz con una línea horizontal que pasa por su centro (eje de simetría horizontal).",
               "isImage": true,
-              "isCorrect": false
+              "isCorrect": false,
+              "imageRef": "item/global/4to-matematicas-cierre-2025/alt_figure/16_B.png"
             },
             {
               "key": "C",
               "text": "Figura de cruz con una línea vertical que pasa por su centro (eje de simetría vertical).",
               "isImage": true,
-              "isCorrect": true
+              "isCorrect": true,
+              "imageRef": "item/global/4to-matematicas-cierre-2025/alt_figure/16_C.png"
             },
             {
               "key": "D",
               "text": "Figura de cruz con una línea vertical desplazada hacia un costado, fuera del centro (no es eje de simetría).",
               "isImage": true,
-              "isCorrect": false
+              "isCorrect": false,
+              "imageRef": "item/global/4to-matematicas-cierre-2025/alt_figure/16_D.png"
             }
           ],
           "correctKey": "C",
@@ -959,7 +974,8 @@
               "name": "Geometría",
               "tagType": "secondary"
             }
-          ]
+          ],
+          "imageRef": "item/global/4to-matematicas-cierre-2025/item_figure/16.png"
         },
         {
           "position": 17,
@@ -971,25 +987,29 @@
               "key": "A",
               "text": "Dos figuras sobre cuadrícula con eje horizontal; la figura inferior no es reflejo de la superior.",
               "isImage": true,
-              "isCorrect": true
+              "isCorrect": true,
+              "imageRef": "item/global/4to-matematicas-cierre-2025/alt_figure/17_A.png"
             },
             {
               "key": "B",
               "text": "Dos figuras sobre cuadrícula con eje horizontal; la figura inferior es el reflejo de la superior (simétricas).",
               "isImage": true,
-              "isCorrect": false
+              "isCorrect": false,
+              "imageRef": "item/global/4to-matematicas-cierre-2025/alt_figure/17_B.png"
             },
             {
               "key": "C",
               "text": "Dos figuras sobre cuadrícula con eje horizontal; la figura inferior no es reflejo de la superior.",
               "isImage": true,
-              "isCorrect": false
+              "isCorrect": false,
+              "imageRef": "item/global/4to-matematicas-cierre-2025/alt_figure/17_C.png"
             },
             {
               "key": "D",
               "text": "Dos figuras sobre cuadrícula con eje horizontal; la figura inferior no es reflejo de la superior.",
               "isImage": true,
-              "isCorrect": false
+              "isCorrect": false,
+              "imageRef": "item/global/4to-matematicas-cierre-2025/alt_figure/17_D.png"
             }
           ],
           "correctKey": "A",
@@ -1025,7 +1045,8 @@
               "name": "Geometría",
               "tagType": "secondary"
             }
-          ]
+          ],
+          "imageRef": "item/global/4to-matematicas-cierre-2025/item_figure/17.png"
         },
         {
           "position": 18,
@@ -1459,7 +1480,8 @@
               "name": "Datos y probabilidades",
               "tagType": "secondary"
             }
-          ]
+          ],
+          "imageRef": "item/global/4to-matematicas-cierre-2025/item_figure/24.png"
         },
         {
           "position": 25,
@@ -1521,7 +1543,8 @@
               "name": "Datos y probabilidades",
               "tagType": "secondary"
             }
-          ]
+          ],
+          "imageRef": "item/global/4to-matematicas-cierre-2025/item_figure/25.png"
         }
       ]
     }

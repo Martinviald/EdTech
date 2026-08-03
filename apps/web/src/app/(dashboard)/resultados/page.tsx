@@ -7,7 +7,10 @@ import {
   TriangleAlert,
   Inbox,
   CircleCheck,
+  ArrowRight,
+  FilterX,
 } from 'lucide-react';
+import Link from 'next/link';
 import { auth } from '@/auth';
 import { ROUTES } from '@/lib/routes';
 import {
@@ -25,7 +28,8 @@ import {
   CardSkeleton,
   TableSkeleton,
 } from '@/components/shared';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import {
   Table,
   TableBody,
@@ -38,6 +42,7 @@ import { DashboardFilterBar } from './components/dashboard-filter-bar';
 import {
   parseDashboardFilters,
   buildDashboardQuery,
+  hasActiveFilters,
   type DashboardFilterValues,
 } from './components/dashboard-filters';
 import { DistributionBar } from './components/distribution-bar';
@@ -81,7 +86,7 @@ export default async function ResultadosOverviewPage({
           </>
         }
       >
-        <OverviewSections query={query} />
+        <OverviewSections query={query} filters={filters} />
       </Suspense>
     </>
   );
@@ -98,7 +103,13 @@ async function FiltersSection({
   return <DashboardFilterBar options={options} value={filters} basePath={ROUTES.resultados} />;
 }
 
-async function OverviewSections({ query }: { query: string }) {
+async function OverviewSections({
+  query,
+  filters,
+}: {
+  query: string;
+  filters: DashboardFilterValues;
+}) {
   const overview = await getDashboardOverview(query);
 
   return (
@@ -132,7 +143,11 @@ async function OverviewSections({ query }: { query: string }) {
 
       <AlertsSection alerts={overview.alerts} />
 
-      <RecentAssessments assessments={overview.recentAssessments} />
+      <RecentAssessments
+        assessments={overview.recentAssessments}
+        total={overview.recentAssessmentsTotal}
+        filters={filters}
+      />
 
       {overview.scope === 'teacher' ? (
         <Suspense fallback={<TableSkeleton />}>
@@ -182,19 +197,59 @@ function AlertsSection({ alerts }: { alerts: DashboardAlert[] }) {
   );
 }
 
-function RecentAssessments({ assessments }: { assessments: DashboardAssessmentSummary[] }) {
+function RecentAssessments({
+  assessments,
+  total,
+  filters,
+}: {
+  assessments: DashboardAssessmentSummary[];
+  total: number;
+  filters: DashboardFilterValues;
+}) {
+  const filtered = hasActiveFilters(filters);
+  // La tabla muestra sólo las más recientes. Sin decirlo, una lista recortada se lee
+  // como "esto es todo lo que hay" — y al filtrar aparecían evaluaciones que antes
+  // no estaban, lo que parecía un filtro roto.
+  const isTruncated = total > assessments.length;
+  const periodFilterOnly =
+    (filters.applicationPeriod?.length ?? 0) > 0 &&
+    assessments.length === 0 &&
+    filters.instrumentType?.includes('dia') === true;
+
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="text-base">Evaluaciones recientes</CardTitle>
+        <CardTitle className="text-base">Evaluaciones</CardTitle>
+        <CardDescription>
+          {isTruncated
+            ? `Mostrando las ${assessments.length} más recientes de ${total}. Selecciona una para ver su análisis en profundidad.`
+            : 'Selecciona una evaluación para ver su análisis en profundidad.'}
+        </CardDescription>
       </CardHeader>
       <CardContent>
         {assessments.length === 0 ? (
-          <EmptyState
-            icon={Inbox}
-            title="Aún no hay evaluaciones"
-            description="Cuando importes resultados de evaluaciones aparecerán aquí las más recientes."
-          />
+          filtered ? (
+            <EmptyState
+              icon={FilterX}
+              title="Ninguna evaluación coincide con los filtros"
+              description={
+                periodFilterOnly
+                  ? 'El momento es una propiedad del instrumento: ningún instrumento del alcance seleccionado declara el momento que elegiste.'
+                  : 'Prueba quitando alguno de los filtros aplicados.'
+              }
+              action={
+                <Button variant="outline" size="sm" asChild>
+                  <Link href={ROUTES.resultados}>Quitar filtros</Link>
+                </Button>
+              }
+            />
+          ) : (
+            <EmptyState
+              icon={Inbox}
+              title="Aún no hay evaluaciones"
+              description="Cuando importes resultados de evaluaciones aparecerán aquí las más recientes."
+            />
+          )
         ) : (
           <div className="overflow-x-auto">
             <Table>
@@ -212,10 +267,18 @@ function RecentAssessments({ assessments }: { assessments: DashboardAssessmentSu
                 {assessments.map((a) => (
                   <TableRow key={a.assessmentId}>
                     <TableCell className="font-medium">
-                      {a.name ?? a.instrumentName}
-                      <span className="block text-xs text-muted-foreground md:hidden">
-                        {[a.subjectName, a.gradeName].filter(Boolean).join(' · ')}
-                      </span>
+                      <Link
+                        href={ROUTES.evaluacionResultados(a.assessmentId)}
+                        className="group inline-flex items-center gap-1.5 hover:text-primary"
+                      >
+                        <span>
+                          {a.name ?? a.instrumentName}
+                          <span className="block text-xs font-normal text-muted-foreground md:hidden">
+                            {[a.subjectName, a.gradeName].filter(Boolean).join(' · ')}
+                          </span>
+                        </span>
+                        <ArrowRight className="size-3.5 shrink-0 opacity-0 transition-opacity group-hover:opacity-100" />
+                      </Link>
                     </TableCell>
                     <TableCell className="hidden md:table-cell">{a.subjectName ?? '—'}</TableCell>
                     <TableCell className="hidden md:table-cell">{a.gradeName ?? '—'}</TableCell>

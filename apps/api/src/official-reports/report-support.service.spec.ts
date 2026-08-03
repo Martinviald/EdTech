@@ -55,7 +55,7 @@ describe('ReportSupportService.resolveAccessibleClassGroupIds', () => {
   const CG_B = 'cg-b';
 
   it('admin sin filtro → null (sin filtro de curso)', () => {
-    // ⚠️ null, NO []: es lo que habilita el atajo de references.org en item-analysis
+    // ⚠️ null, NO []: distingue "admin sin filtro" de "scope vacío" en item-analysis
     // (sin filtro → la población visible ya es todo el colegio).
     expect(
       service.resolveAccessibleClassGroupIds({ scopeAll: true, classGroupIds: [] }, undefined),

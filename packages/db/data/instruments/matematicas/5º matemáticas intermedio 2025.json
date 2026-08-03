@@ -220,25 +220,29 @@
               "key": "A",
               "text": "Círculo dividido en 8 partes iguales; 4 sectores (la mitad superior) pintados gris (4/8).",
               "isImage": true,
-              "isCorrect": false
+              "isCorrect": false,
+              "imageRef": "item/global/5to-matematicas-intermedio-2025/alt_figure/04_A.png"
             },
             {
               "key": "B",
               "text": "Círculo dividido en 8 partes iguales; 3 sectores pintados gris (3/8).",
               "isImage": true,
-              "isCorrect": false
+              "isCorrect": false,
+              "imageRef": "item/global/5to-matematicas-intermedio-2025/alt_figure/04_B.png"
             },
             {
               "key": "C",
               "text": "Círculo dividido en 4 partes iguales; 2 sectores pintados gris (2/4).",
               "isImage": true,
-              "isCorrect": false
+              "isCorrect": false,
+              "imageRef": "item/global/5to-matematicas-intermedio-2025/alt_figure/04_C.png"
             },
             {
               "key": "D",
               "text": "Círculo dividido en 4 partes iguales; 3 sectores pintados gris (3/4).",
               "isImage": true,
-              "isCorrect": true
+              "isCorrect": true,
+              "imageRef": "item/global/5to-matematicas-intermedio-2025/alt_figure/04_D.png"
             }
           ],
           "correctKey": "D",
@@ -274,7 +278,8 @@
               "name": "Números y operaciones",
               "tagType": "secondary"
             }
-          ]
+          ],
+          "imageRef": "item/global/5to-matematicas-intermedio-2025/item_figure/04.png"
         },
         {
           "position": 5,
@@ -398,7 +403,8 @@
               "name": "Números y operaciones",
               "tagType": "secondary"
             }
-          ]
+          ],
+          "imageRef": "item/global/5to-matematicas-intermedio-2025/item_figure/06.png"
         },
         {
           "position": 7,
@@ -480,7 +486,8 @@
               "name": "Medición",
               "tagType": "secondary"
             }
-          ]
+          ],
+          "imageRef": "item/global/5to-matematicas-intermedio-2025/item_figure/08.png"
         },
         {
           "position": 9,
@@ -604,7 +611,8 @@
               "name": "Medición",
               "tagType": "secondary"
             }
-          ]
+          ],
+          "imageRef": "item/global/5to-matematicas-intermedio-2025/item_figure/10.png"
         },
         {
           "position": 11,
@@ -666,7 +674,8 @@
               "name": "Medición",
               "tagType": "secondary"
             }
-          ]
+          ],
+          "imageRef": "item/global/5to-matematicas-intermedio-2025/item_figure/11.png"
         },
         {
           "position": 12,
@@ -728,7 +737,8 @@
               "name": "Patrones y álgebra",
               "tagType": "secondary"
             }
-          ]
+          ],
+          "imageRef": "item/global/5to-matematicas-intermedio-2025/item_figure/12.png"
         },
         {
           "position": 13,
@@ -847,7 +857,8 @@
               "name": "Patrones y álgebra",
               "tagType": "secondary"
             }
-          ]
+          ],
+          "imageRef": "item/global/5to-matematicas-intermedio-2025/item_figure/14.png"
         },
         {
           "position": 15,
@@ -859,25 +870,29 @@
               "key": "A",
               "text": "Paralelepípedo con las dos aristas superiores frontal-izquierda y posterior-izquierda marcadas (no paralelas entre sí).",
               "isImage": true,
-              "isCorrect": true
+              "isCorrect": true,
+              "imageRef": "item/global/5to-matematicas-intermedio-2025/alt_figure/15_A.png"
             },
             {
               "key": "B",
               "text": "Paralelepípedo con dos aristas superiores marcadas que sí son paralelas.",
               "isImage": true,
-              "isCorrect": false
+              "isCorrect": false,
+              "imageRef": "item/global/5to-matematicas-intermedio-2025/alt_figure/15_B.png"
             },
             {
               "key": "C",
               "text": "Paralelepípedo con una arista vertical derecha y una arista inferior marcadas.",
               "isImage": true,
-              "isCorrect": false
+              "isCorrect": false,
+              "imageRef": "item/global/5to-matematicas-intermedio-2025/alt_figure/15_C.png"
             },
             {
               "key": "D",
               "text": "Paralelepípedo con dos aristas inferiores marcadas (que se cortan, no paralelas).",
               "isImage": true,
-              "isCorrect": false
+              "isCorrect": false,
+              "imageRef": "item/global/5to-matematicas-intermedio-2025/alt_figure/15_D.png"
             }
           ],
           "correctKey": "A",
@@ -913,7 +928,8 @@
               "name": "Geometría",
               "tagType": "secondary"
             }
-          ]
+          ],
+          "imageRef": "item/global/5to-matematicas-intermedio-2025/item_figure/15.png"
         },
         {
           "position": 16,
@@ -925,25 +941,29 @@
               "key": "A",
               "text": "Figura 1 (letra E) y Figura 2 (E reflejada, Ǝ) del mismo tamaño.",
               "isImage": true,
-              "isCorrect": false
+              "isCorrect": false,
+              "imageRef": "item/global/5to-matematicas-intermedio-2025/alt_figure/16_A.png"
             },
             {
               "key": "B",
               "text": "Figura 1 (letra E) y Figura 2 (E reflejada, Ǝ) del mismo tamaño.",
               "isImage": true,
-              "isCorrect": true
+              "isCorrect": true,
+              "imageRef": "item/global/5to-matematicas-intermedio-2025/alt_figure/16_B.png"
             },
             {
               "key": "C",
               "text": "Figura 1 (letra E grande) y Figura 2 (forma E más pequeña/distinta).",
               "isImage": true,
-              "isCorrect": false
+              "isCorrect": false,
+              "imageRef": "item/global/5to-matematicas-intermedio-2025/alt_figure/16_C.png"
             },
             {
               "key": "D",
               "text": "Figura 1 (letra E) y Figura 2 (letra E de mayor tamaño).",
               "isImage": true,
-              "isCorrect": false
+              "isCorrect": false,
+              "imageRef": "item/global/5to-matematicas-intermedio-2025/alt_figure/16_D.png"
             }
           ],
           "correctKey": "B",
@@ -979,7 +999,8 @@
               "name": "Geometría",
               "tagType": "secondary"
             }
-          ]
+          ],
+          "imageRef": "item/global/5to-matematicas-intermedio-2025/item_figure/16.png"
         },
         {
           "position": 17,
@@ -991,25 +1012,29 @@
               "key": "A",
               "text": "Figura 1 (forma escalonada) y Figura 2 más pequeña, distinto tamaño.",
               "isImage": true,
-              "isCorrect": false
+              "isCorrect": false,
+              "imageRef": "item/global/5to-matematicas-intermedio-2025/alt_figure/17_A.png"
             },
             {
               "key": "B",
               "text": "Figura 1 (forma escalonada) y Figura 2 de mayor tamaño.",
               "isImage": true,
-              "isCorrect": false
+              "isCorrect": false,
+              "imageRef": "item/global/5to-matematicas-intermedio-2025/alt_figure/17_B.png"
             },
             {
               "key": "C",
               "text": "Figura 1 (forma escalonada) y Figura 2 de menor tamaño.",
               "isImage": true,
-              "isCorrect": false
+              "isCorrect": false,
+              "imageRef": "item/global/5to-matematicas-intermedio-2025/alt_figure/17_C.png"
             },
             {
               "key": "D",
               "text": "Figura 1 (forma escalonada) y Figura 2 del mismo tamaño y forma.",
               "isImage": true,
-              "isCorrect": true
+              "isCorrect": true,
+              "imageRef": "item/global/5to-matematicas-intermedio-2025/alt_figure/17_D.png"
             }
           ],
           "correctKey": "D",
@@ -1045,7 +1070,8 @@
               "name": "Geometría",
               "tagType": "secondary"
             }
-          ]
+          ],
+          "imageRef": "item/global/5to-matematicas-intermedio-2025/item_figure/17.png"
         },
         {
           "position": 18,
@@ -1086,7 +1112,8 @@
               "name": "Números y operaciones",
               "tagType": "secondary"
             }
-          ]
+          ],
+          "imageRef": "item/global/5to-matematicas-intermedio-2025/item_figure/18.png"
         },
         {
           "position": 19,
@@ -1272,7 +1299,8 @@
               "name": "Números y operaciones",
               "tagType": "secondary"
             }
-          ]
+          ],
+          "imageRef": "item/global/5to-matematicas-intermedio-2025/item_figure/21.png"
         },
         {
           "position": 22,
@@ -1582,7 +1610,8 @@
               "name": "Datos y probabilidades",
               "tagType": "secondary"
             }
-          ]
+          ],
+          "imageRef": "item/global/5to-matematicas-intermedio-2025/item_figure/26.png"
         },
         {
           "position": 27,
@@ -1644,7 +1673,8 @@
               "name": "Datos y probabilidades",
               "tagType": "secondary"
             }
-          ]
+          ],
+          "imageRef": "item/global/5to-matematicas-intermedio-2025/item_figure/27.png"
         }
       ]
     }

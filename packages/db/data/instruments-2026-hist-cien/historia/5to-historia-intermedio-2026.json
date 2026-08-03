@@ -1,0 +1,1333 @@
+{
+  "schemaVersion": "1.0",
+  "source": {
+    "file": "5_prueba_historia_monitoreo_2026_5_basico.pdf",
+    "subjectFolder": "Historia"
+  },
+  "instrument": {
+    "name": "DIA Historia, Geografía y Ciencias Sociales 5° Básico 2026 — Monitoreo Intermedio",
+    "subject": "Historia, Geografía y Ciencias Sociales",
+    "subjectCode": "HIST",
+    "grade": "5° Básico",
+    "gradeCode": "5TH_BASIC",
+    "year": 2026,
+    "applicationPeriod": "intermedio",
+    "type": "dia",
+    "isOfficial": true,
+    "source": "imported"
+  },
+  "sections": [
+    {
+      "order": 1,
+      "name": "Pregunta 1 — Línea de tiempo: avances tecnológicos que facilitaron la navegación",
+      "type": "multiple_choice",
+      "instructions": "Observa y lee la siguiente línea de tiempo:",
+      "passage": null,
+      "items": [
+        {
+          "position": 1,
+          "printedNumber": "1",
+          "type": "multiple_choice",
+          "responseFormat": "choice",
+          "stem": "Observa y lee la siguiente línea de tiempo:\n\nAvances tecnológicos que facilitaron la navegación\n\nUso de la brújula (1450 aproximadamente)\nMejoras mapas portulanos (1460 aproximadamente)\nInvención y uso de la carabela (1470 aproximadamente)\nUso del astrolabio (1480 aproximadamente)\n\nEje temporal: 1450 · 1460 · 1470 · 1480\n\n(Elaboración propia.)\n\n¿Cuándo se desarrollaron los avances tecnológicos incluidos en la línea de tiempo?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "A finales del siglo XIV.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "A inicios del siglo XV.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "En la segunda mitad del siglo XV.",
+              "isCorrect": true
+            },
+            {
+              "key": "D",
+              "text": "En las primeras décadas del siglo XVI.",
+              "isCorrect": false
+            }
+          ],
+          "correctKey": "C",
+          "skill": "Pensamiento temporal y espacial",
+          "oa": "OA 1",
+          "contentAxis": "Historia",
+          "hasFigure": true,
+          "figureNote": "Figura propia del ítem: línea de tiempo horizontal 1450–1480 con cuatro fotografías (brújula, carabela, mapa portulano y astrolabio) unidas por conectores a sus hitos y rótulos",
+          "oaLevel": null,
+          "indicador": "Utilizan unidades temporales para referirse a procesos y/o periodos históricos estudiados en el nivel.",
+          "imageRef": "item/global/5to-historia-intermedio-2026/item_figure/01.png"
+        }
+      ]
+    },
+    {
+      "order": 2,
+      "name": "Pregunta 2 — Fuente: motivaciones de los conquistadores españoles (respuesta múltiple)",
+      "type": "multiple_choice",
+      "instructions": "Lee la siguiente fuente referida a las motivaciones de los conquistadores españoles para venir a América:",
+      "passage": {
+        "title": "Las motivaciones de los conquistadores españoles para venir a América",
+        "text": "Su lealtad es permanente, constante no sólo en sus compromisos, sino consciente de que los premios y recompensas eran obtenidos a través del monarca, tanto en la España peninsular como en la ultramarina: tierras y encomiendas, puestos en la administración eran concedidos, en gran medida y cantidad, por el rey a los conquistadores y sus descendientes en razón de sus servicios al Estado. Así el conquistador, desde el jefe al menor de la hueste, actúa al servicio de Dios y de Su Majestad.\n\nDe Solano, F. Proceso histórico al conquistador. 1988. Adaptación.",
+        "format": "plain",
+        "attachments": [],
+        "imageRef": null
+      },
+      "items": [
+        {
+          "position": 2,
+          "printedNumber": "2",
+          "type": "multiple_choice",
+          "responseFormat": "choice",
+          "stem": "¿Qué motivaciones de los conquistadores españoles para venir a América se mencionan en la fuente?\n\nMarca todas las respuestas correctas.",
+          "alternatives": [
+            {
+              "key": "1",
+              "text": "Obtener beneficios económicos.",
+              "isCorrect": true
+            },
+            {
+              "key": "2",
+              "text": "Crear una nueva forma de gobierno.",
+              "isCorrect": false
+            },
+            {
+              "key": "3",
+              "text": "Evangelizar a los indígenas.",
+              "isCorrect": true
+            },
+            {
+              "key": "4",
+              "text": "Servir a la Corona española.",
+              "isCorrect": true
+            },
+            {
+              "key": "5",
+              "text": "Establecer relaciones con la población nativa.",
+              "isCorrect": false
+            }
+          ],
+          "correctKey": "134",
+          "skill": "Análisis y trabajo con fuentes de información",
+          "oa": "OA 2",
+          "contentAxis": "Historia",
+          "hasFigure": false,
+          "figureNote": null,
+          "isMultiAnswer": true,
+          "oaLevel": null,
+          "indicador": "Infieren información que se encuentra implícita en fuentes primarias o secundarias.",
+          "imageRef": null
+        }
+      ]
+    },
+    {
+      "order": 3,
+      "name": "Pregunta 3 — Fuentes: las consecuencias de la conquista de América",
+      "type": "multiple_choice",
+      "instructions": "Lee las siguientes fuentes sobre la conquista de América:",
+      "passage": {
+        "title": "La conquista de América",
+        "text": "Fuente 1\nEl descubrimiento de América, o más bien el de los americanos, es sin duda el encuentro más asombroso de nuestra historia. Al comienzo del siglo XVI, los indios de América están bien presentes, pero ignoramos todo de ellos. El encuentro nunca volverá a alcanzar tal intensidad, si esa es la palabra que se debe emplear: el siglo XVI habrá visto perpetrarse el mayor genocidio de la historia humana.\n\nTodorov, T. La conquista de América, el problema del otro. 1998.\n\nFuente 2\nEn nuestra memoria colectiva, la aventura de los conquistadores evoca imágenes de triunfo, de riqueza y de gloria, y aparece como una epopeya. La expedición de Cristóbal Colón coincide con el comienzo de una nueva era. Pero se trata de una nueva era para Europa. Desde la perspectiva de los indios vencidos, la conquista significa un final: la ruina de sus civilizaciones.\n\nWachtel, N. Los vencidos. Los indios del Perú frente a la conquista española (1530 – 1570). 1976.",
+        "format": "plain",
+        "attachments": [],
+        "imageRef": null
+      },
+      "items": [
+        {
+          "position": 3,
+          "printedNumber": "3",
+          "type": "multiple_choice",
+          "responseFormat": "choice",
+          "stem": "¿En qué coinciden ambos autores respecto de las consecuencias de la conquista de América?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "En el impacto negativo que tuvo para la población indígena.",
+              "isCorrect": true
+            },
+            {
+              "key": "B",
+              "text": "En el papel que jugó en la formación de una sociedad mestiza.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "En el rol que tuvo para el desarrollo de la economía europea.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "En el valor que tuvo para el desarrollo de la fusión cultural.",
+              "isCorrect": false
+            }
+          ],
+          "correctKey": "A",
+          "skill": "Pensamiento crítico",
+          "oa": "OA 3",
+          "contentAxis": "Historia",
+          "hasFigure": false,
+          "figureNote": null,
+          "oaLevel": null,
+          "indicador": "Identifican similitudes y/o diferencias entre distintos puntos de vista respecto de un mismo tema.",
+          "imageRef": null
+        }
+      ]
+    },
+    {
+      "order": 4,
+      "name": "Pregunta 4 — Fuente: la población indígena en América Latina",
+      "type": "multiple_choice",
+      "instructions": "Lee la siguiente fuente sobre la historia de América:",
+      "passage": {
+        "title": "Los pueblos indígenas en América Latina",
+        "text": "La situación actual de la población indígena en América Latina solo puede ser comprendida como el resultado histórico del proceso que comenzó con la llegada de los europeos hace más de cinco siglos, mediante el cual se le despojó de los territorios que habitaban, de sus espacios de reproducción social y cultural y también de su propia cultura, cosmovisiones y modos de vinculación con la naturaleza.\n\nCEPAL. Los pueblos indígenas en América Latina. (Síntesis). Avances en el último decenio y retos pendientes para la garantía de sus derechos. 2014. Adaptación.",
+        "format": "plain",
+        "attachments": [],
+        "imageRef": null
+      },
+      "items": [
+        {
+          "position": 4,
+          "printedNumber": "4",
+          "type": "multiple_choice",
+          "responseFormat": "choice",
+          "stem": "¿Qué pregunta de investigación histórica puedes responder a partir de esta fuente?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "¿Cuáles fueron las causas de la conquista de América?",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "¿Qué factores influyeron en la disminución de la población indígena?",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "¿Cómo se enfrentó la población indígena a la dominación europea?",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "¿Cuáles fueron algunos de los efectos de la conquista en los pueblos indígenas?",
+              "isCorrect": true
+            }
+          ],
+          "correctKey": "D",
+          "skill": "Análisis y trabajo con fuentes de información",
+          "oa": "OA 4",
+          "contentAxis": "Historia",
+          "hasFigure": false,
+          "figureNote": null,
+          "oaLevel": null,
+          "indicador": "Distinguen una pregunta de investigación que puede responderse a partir de información obtenida de una fuente primaria o secundaria.",
+          "imageRef": null
+        }
+      ]
+    },
+    {
+      "order": 5,
+      "name": "Pregunta 5 — Fuente: la sociedad colonial en Chile (alternativas-esquema)",
+      "type": "multiple_choice",
+      "instructions": "Lee la siguiente fuente sobre la sociedad durante la Colonia en Chile.",
+      "passage": {
+        "title": "La sociedad durante la Colonia en Chile",
+        "text": "Durante la época colonial en Chile, la sociedad se organizaba jerárquicamente en un sistema de castas. En la cúspide estaban los peninsulares, españoles nacidos en la península ibérica, quienes ocupaban los cargos más altos en la administración colonial. Les seguían los criollos, hijos de españoles nacidos en América, que tenían acceso limitado a ciertos cargos y propiedades. Más abajo se encontraban los mestizos, producto de la mezcla entre españoles e indígenas, quienes desempeñaban oficios diversos. Luego estaban los indígenas, obligados a trabajar en encomiendas y sujetos a tributos. En la base social estaban los esclavos africanos, traídos forzosamente y sin derechos.\n\nMemoria Chilena, web. Consultado en mayo de 2025. Adaptación.",
+        "format": "plain",
+        "attachments": [],
+        "imageRef": null
+      },
+      "items": [
+        {
+          "position": 5,
+          "printedNumber": "5",
+          "type": "multiple_choice",
+          "responseFormat": "choice",
+          "stem": "¿Cuál de los siguientes esquemas representa el orden social durante la Colonia descrito en la fuente?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Esquema con «Peninsulares» dentro de un óvalo al centro, rodeado por cuatro recuadros: «Mestizos» y «Criollos» arriba, «Esclavos» e «Indígenas» abajo.",
+              "isImage": true,
+              "isCorrect": false,
+              "imageRef": "item/global/5to-historia-intermedio-2026/alt_figure/05_A.png"
+            },
+            {
+              "key": "B",
+              "text": "Pirámide dividida en cinco franjas horizontales, de la cúspide a la base: «Peninsulares», «Criollos», «Mestizos», «Indígenas» y «Esclavos».",
+              "isImage": true,
+              "isCorrect": true,
+              "imageRef": "item/global/5to-historia-intermedio-2026/alt_figure/05_B.png"
+            },
+            {
+              "key": "C",
+              "text": "Organigrama descendente: «Peninsulares» arriba, «Criollos» en el segundo nivel y, conectados bajo él, tres recuadros al mismo nivel: «Esclavos», «Indígenas» y «Mestizos».",
+              "isImage": true,
+              "isCorrect": false,
+              "imageRef": "item/global/5to-historia-intermedio-2026/alt_figure/05_C.png"
+            },
+            {
+              "key": "D",
+              "text": "Cuadro dividido en cuatro celdas —«Criollos» y «Mestizos» arriba, «Esclavos» e «Indígenas» abajo— con «Peninsulares» en un recuadro superpuesto al centro.",
+              "isImage": true,
+              "isCorrect": false,
+              "imageRef": "item/global/5to-historia-intermedio-2026/alt_figure/05_D.png"
+            }
+          ],
+          "correctKey": "B",
+          "skill": "Análisis y trabajo con fuentes de información",
+          "oa": "OA 5",
+          "contentAxis": "Historia",
+          "hasFigure": true,
+          "figureNote": "Las cuatro alternativas son esquemas/diagramas propios del ítem (requiere alt_figure para A, B, C y D); el texto de cada alternativa es una descripción del diagrama, no una transcripción literal. La fuente de la sección es solo texto.",
+          "oaLevel": null,
+          "indicador": "Organizan la información obtenida de una fuente sobre un tema pertinente al nivel, utilizando organizadores gráficos, tablas, lista de ideas",
+          "imageRef": null
+        }
+      ]
+    },
+    {
+      "order": 6,
+      "name": "Pregunta 6 — Fuente: la Iglesia durante la Colonia",
+      "type": "multiple_choice",
+      "instructions": "Lee la siguiente fuente referida a la Iglesia durante la Colonia:",
+      "passage": {
+        "title": "La Iglesia colonial",
+        "text": "Así, el rol desempeñado por la Iglesia durante este periodo se caracterizó por la estrecha cooperación con el poder político, procurando la mantención de la cohesión de la sociedad.\n\nEs necesario señalar que la organización eclesiástica, durante el periodo colonial chileno, proporcionaba sanciones tanto positivas como negativas a las diversas conductas de los miembros de la sociedad, elaborando verdaderas pautas de comportamiento sobre la base de determinados valores, tales como la obediencia, la sumisión, la lealtad, entre otros. Esto permitió asegurar la constitución, vigencia y continuidad de la estructura social, teniendo como premisa básica el respeto a la autoridad política.\n\nSánchez, M. 2009. Historia de la Iglesia en Chile. Vol I. Adaptación.",
+        "format": "plain",
+        "attachments": [],
+        "imageRef": null
+      },
+      "items": [
+        {
+          "position": 6,
+          "printedNumber": "6",
+          "type": "multiple_choice",
+          "responseFormat": "choice",
+          "stem": "¿Qué rol de la Iglesia colonial está descrito en la fuente?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "La defensa de la población indígena.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "La contribución al desarrollo económico.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "El desarrollo de la tarea evangelizadora.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "El aporte al mantenimiento del orden establecido.",
+              "isCorrect": true
+            }
+          ],
+          "correctKey": "D",
+          "skill": "Análisis y trabajo con fuentes de información",
+          "oa": "OA 6",
+          "contentAxis": "Historia",
+          "hasFigure": false,
+          "figureNote": null,
+          "oaLevel": null,
+          "indicador": "Infieren información que se encuentra implícita en fuentes primarias o secundarias.",
+          "imageRef": null
+        }
+      ]
+    },
+    {
+      "order": 7,
+      "name": "Pregunta 7 — Continuidad y cambio en el ámbito político del periodo colonial",
+      "type": "multiple_choice",
+      "instructions": null,
+      "passage": null,
+      "items": [
+        {
+          "position": 7,
+          "printedNumber": "7",
+          "type": "multiple_choice",
+          "responseFormat": "choice",
+          "stem": "Durante el largo tiempo en que se extiende el periodo colonial, ¿qué afirmación corresponde a una continuidad y cuál a un cambio en el ámbito político dentro del periodo?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Continuidad: Durante todo el periodo los criollos ocuparon los más altos cargos de gobierno.\nCambio: Al final del periodo los mestizos obtienen el derecho a voto.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Continuidad: Durante todo el periodo existió un sistema de gobierno monárquico.\nCambio: En el transcurso del periodo surgen nuevas instituciones.",
+              "isCorrect": true
+            },
+            {
+              "key": "C",
+              "text": "Continuidad: Durante todo el periodo se realizaron elecciones populares de las principales autoridades.\nCambio: En los últimos años del periodo se aprueba una nueva Constitución.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "Continuidad: Durante todo el periodo los Habsburgo ocuparon el trono español.\nCambio: En la parte final del periodo las mujeres consiguen ocupar cargos de gobierno.",
+              "isCorrect": false
+            }
+          ],
+          "correctKey": "B",
+          "skill": "Pensamiento temporal y espacial",
+          "oa": "OA 6",
+          "contentAxis": "Historia",
+          "hasFigure": false,
+          "figureNote": null,
+          "oaLevel": null,
+          "indicador": "Reconocen elementos de continuidad y cambio entre períodos o procesos históricos estudiados en el nivel.",
+          "imageRef": null
+        }
+      ]
+    },
+    {
+      "order": 8,
+      "name": "Pregunta 8 — Guerra de Arauco: causas de la menor agresividad (respuesta múltiple)",
+      "type": "multiple_choice",
+      "instructions": null,
+      "passage": null,
+      "items": [
+        {
+          "position": 8,
+          "printedNumber": "8",
+          "type": "multiple_choice",
+          "responseFormat": "choice",
+          "stem": "En el contexto de la Guerra de Arauco, durante el periodo colonial fue disminuyendo la agresividad en la relación entre españoles y mapuches.\n\n¿Cuáles fueron algunas de las causas que explican esta situación?\n\nMarca todas las respuestas correctas.",
+          "alternatives": [
+            {
+              "key": "1",
+              "text": "La derrota definitiva de los españoles frente a las tácticas armadas del pueblo mapuche.",
+              "isCorrect": false
+            },
+            {
+              "key": "2",
+              "text": "El otorgamiento de derechos políticos a la población mapuche.",
+              "isCorrect": false
+            },
+            {
+              "key": "3",
+              "text": "La influencia de la labor misionera dentro del territorio mapuche.",
+              "isCorrect": true
+            },
+            {
+              "key": "4",
+              "text": "La disminución del interés de la monarquía española en la zona mapuche.",
+              "isCorrect": false
+            },
+            {
+              "key": "5",
+              "text": "El establecimiento de un intercambio comercial entre mapuches y españoles.",
+              "isCorrect": true
+            }
+          ],
+          "correctKey": "35",
+          "skill": "Pensamiento crítico",
+          "oa": "OA 7",
+          "contentAxis": "Historia",
+          "hasFigure": false,
+          "figureNote": null,
+          "isMultiAnswer": true,
+          "oaLevel": null,
+          "indicador": "Distinguen las causas de procesos históricos estudiados en el nivel.",
+          "imageRef": null
+        }
+      ]
+    },
+    {
+      "order": 9,
+      "name": "Pregunta 9 — Términos pareados: hechos de la Guerra de Arauco y siglo en que ocurren",
+      "type": "open_ended",
+      "instructions": null,
+      "passage": null,
+      "items": [
+        {
+          "position": 9,
+          "printedNumber": "9",
+          "type": "open_ended",
+          "responseFormat": "match_pairs",
+          "stem": "Une con una línea los recuadros de algunos hechos de la Guerra de Arauco durante la Colonia, presentes en la columna A, con el siglo en el que ocurren que se encuentra en la columna B. Ten en cuenta que en la columna B hay una opción de más.\n\nColumna A — Hechos de la Guerra de Arauco\nA.1 Batalla de Curalaba 1598\nA.2 Legalización de la esclavitud indígena 1608\nA.3 Sublevación general mapuche 1655\nA.4 Parlamento de Negrete 1726\n\nColumna B — Siglo en el que ocurren\nB.1 Segunda mitad del siglo XVII\nB.2 Segunda década del siglo XVIII\nB.3 Primera mitad del siglo XVI\nB.4 Primera década del siglo XVII\nB.5 Fines del siglo XVI",
+          "correctKey": null,
+          "skill": "Pensamiento temporal y espacial",
+          "oa": "OA 7",
+          "contentAxis": "Historia",
+          "hasFigure": false,
+          "figureNote": null,
+          "oaLevel": null,
+          "indicador": "Utilizan unidades temporales para referirse a procesos y/o periodos históricos estudiados en el nivel.",
+          "imageRef": null,
+          "matchColumns": {
+            "A": [
+              {
+                "key": "A.1",
+                "text": "Batalla de Curalaba 1598"
+              },
+              {
+                "key": "A.2",
+                "text": "Legalización de la esclavitud indígena 1608"
+              },
+              {
+                "key": "A.3",
+                "text": "Sublevación general mapuche 1655"
+              },
+              {
+                "key": "A.4",
+                "text": "Parlamento de Negrete 1726"
+              }
+            ],
+            "B": [
+              {
+                "key": "B.1",
+                "text": "Segunda mitad del siglo XVII"
+              },
+              {
+                "key": "B.2",
+                "text": "Segunda década del siglo XVIII"
+              },
+              {
+                "key": "B.3",
+                "text": "Primera mitad del siglo XVI"
+              },
+              {
+                "key": "B.4",
+                "text": "Primera década del siglo XVII"
+              },
+              {
+                "key": "B.5",
+                "text": "Fines del siglo XVI"
+              }
+            ]
+          },
+          "scoredBy": "pairs",
+          "matchPairs": [
+            {
+              "left": "A.1",
+              "right": "B.5"
+            },
+            {
+              "left": "A.2",
+              "right": "B.4"
+            },
+            {
+              "left": "A.3",
+              "right": "B.1"
+            },
+            {
+              "left": "A.4",
+              "right": "B.2"
+            }
+          ],
+          "matchRawAnswer": "(1,5)-(2,4)-(3,1)-(4,2)"
+        }
+      ]
+    },
+    {
+      "order": 10,
+      "name": "Pregunta 10 — Línea de tiempo: la Guerra de Arauco durante la Colonia",
+      "type": "multiple_choice",
+      "instructions": "Observa y lee la siguiente línea de tiempo de la Guerra de Arauco y responde la pregunta.",
+      "passage": null,
+      "items": [
+        {
+          "position": 10,
+          "printedNumber": "10",
+          "type": "multiple_choice",
+          "responseFormat": "choice",
+          "stem": "Observa y lee la siguiente línea de tiempo de la Guerra de Arauco y responde la pregunta.\n\nGuerra de Arauco durante la Colonia\n\nSobre el eje:\n1604 Instauración del ejército profesional.\n1608 Legalización de la esclavitud indígena.\n1641 Parlamento de Quilín. Primer encuentro celebrado entre españoles y mapuches.\n1683 Fin de la esclavitud indígena en Chile.\n1726 Parlamento de Negrete.\n1774 Parlamento de Tapihue.\n\nBajo el eje:\n1598 Batalla de Curalaba.\n1612 Padre Luis de Valdivia inicia intento de Guerra Defensiva.\n1655 Sublevación general mapuche.\n1810 Primera Junta de Gobierno. Inicio del Proceso de Independencia. Término del periodo colonial.\n\nLa franja central del eje está rotulada «La Colonia».\n\n(Elaboración propia.)\n\nConsiderando la secuencia de acontecimientos de la Guerra de Arauco, ¿cuál fue una característica del conflicto durante la Colonia?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "El conflicto no tuvo momentos de tregua durante la Colonia.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Las mismas estrategias de lucha se mantuvieron durante toda la Colonia.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "La resistencia mapuche frente al avance español fracasó en los inicios de la Colonia.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "Las reuniones para lograr acuerdos fueron el mecanismo principal en la parte final de la Colonia.",
+              "isCorrect": true
+            }
+          ],
+          "correctKey": "D",
+          "skill": "Pensamiento temporal y espacial",
+          "oa": "OA 7",
+          "contentAxis": "Historia",
+          "hasFigure": true,
+          "figureNote": "Figura propia del ítem: línea de tiempo de doble fila (hitos sobre y bajo el eje) entre 1598 y 1810, con la franja «La Colonia»",
+          "oaLevel": null,
+          "indicador": "Interpretan información sobre secuencias de hechos, procesos y/o periodos históricos estudiados en el nivel, a partir de líneas de tiempo simples.",
+          "imageRef": "item/global/5to-historia-intermedio-2026/item_figure/10.png"
+        }
+      ]
+    },
+    {
+      "order": 11,
+      "name": "Pregunta 11 — Imágenes: la Plaza de Armas de Santiago en el periodo colonial y en la actualidad",
+      "type": "multiple_choice",
+      "instructions": "Observa las imágenes de la Plaza de Armas de Santiago.",
+      "passage": null,
+      "items": [
+        {
+          "position": 11,
+          "printedNumber": "11",
+          "type": "multiple_choice",
+          "responseFormat": "choice",
+          "stem": "Observa las imágenes de la Plaza de Armas de Santiago.\n\nPeriodo colonial: grabado de la Plaza de Armas con explanada de tierra sin vegetación, edificaciones bajas de uno y dos pisos, la Catedral a la derecha, y personas a pie, a caballo y en carretas.\n(Museo Histórico Nacional, web. Consultado el 20 de marzo de 2026. Adaptación.)\n\nActualidad: fotografía de la Plaza de Armas con palmeras y árboles, la Catedral al centro, edificios altos alrededor y numerosos peatones.\n(All accor, web. Consultado el 20 de marzo de 2026. Adaptación.)\n\n¿Qué elementos de continuidad y cambio histórico se observan entre ambas imágenes?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Continuidad: La presencia de vegetación alrededor de la plaza.\nCambio: La ubicación de la Iglesia Catedral.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Continuidad: El uso de la plaza como lugar de encuentro social.\nCambio: La cantidad de edificaciones alrededor de la plaza.",
+              "isCorrect": true
+            },
+            {
+              "key": "C",
+              "text": "Continuidad: El uso de carrozas para transportarse.\nCambio: La existencia de actividades económicas.",
+              "isCorrect": false
+            }
+          ],
+          "correctKey": "B",
+          "skill": "Pensamiento temporal y espacial",
+          "oa": "OA 8",
+          "contentAxis": "Historia",
+          "hasFigure": true,
+          "figureNote": "Figura propia del ítem: par de imágenes contrastadas de la Plaza de Armas de Santiago (grabado del periodo colonial y fotografía actual), imprescindibles para responder",
+          "oaLevel": null,
+          "indicador": "Reconocen elementos de continuidad y cambio entre períodos o procesos históricos estudiados en el nivel.",
+          "imageRef": "item/global/5to-historia-intermedio-2026/item_figure/11.png"
+        }
+      ]
+    },
+    {
+      "order": 12,
+      "name": "Preguntas 12 y 13 — Mapa: Norte Grande de Chile",
+      "type": "multiple_choice",
+      "instructions": "Observa el siguiente mapa y responde las preguntas 12 y 13.",
+      "passage": {
+        "title": "Norte Grande de Chile",
+        "text": "Mapa del Norte Grande de Chile. Al oeste, el océano Pacífico; al este, el altiplano y el límite con Bolivia y Argentina.\n\nCiudades y localidades rotuladas: Arica, Putre, Parinacota, Lago Chungará, Colchane, Iquique, La Tirana, Matilla, Tocopilla, Calama, San Pedro de Atacama y Antofagasta. Río rotulado: río Loa. Volcanes rotulados: Guallatiri, Isluga, San Pablo, Linzor, Licancabur y Lascar.\n\nLa Ruta 5 aparece destacada en rojo recorriendo el territorio de norte a sur, desde Arica hasta Antofagasta, pasando al interior de Iquique y de Tocopilla y al oeste de Calama; La Tirana y Matilla quedan al oriente de la Ruta 5, al sureste de Iquique.\n\nSimbología: capital regional; parque o reserva nacional; volcán.\n\nChile Turismo, web. Consultado el 28 de mayo de 2024. Adaptación.",
+        "format": "plain",
+        "attachments": [
+          {
+            "kind": "image",
+            "note": "Mapa a color del Norte Grande de Chile con relieve sombreado, Ruta 5 en rojo, ciudades, volcanes, parques y reservas nacionales, y rosa de los vientos"
+          }
+        ],
+        "imageRef": "item/global/5to-historia-intermedio-2026/section_figure/12.png"
+      },
+      "items": [
+        {
+          "position": 12,
+          "printedNumber": "12",
+          "type": "multiple_choice",
+          "responseFormat": "choice",
+          "stem": "Pedro vive en una localidad del Norte Grande y desea viajar a la fiesta de La Tirana, y mirando el mapa dice: \"viajaré por la ruta 5 hacia el sur y luego giraré hacia el este\". Según los antecedentes, ¿en cuál de las siguientes ciudades del Norte Grande podría vivir Pedro?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "En Calama.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "En Tocopilla.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "En Antofagasta.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "En Arica.",
+              "isCorrect": true
+            }
+          ],
+          "correctKey": "D",
+          "skill": "Pensamiento temporal y espacial",
+          "oa": "OA 9",
+          "contentAxis": "Geografía",
+          "hasFigure": true,
+          "figureNote": "Depende del mapa del Norte Grande de Chile: la figura pertenece al estímulo COMPARTIDO de la sección (preguntas 12 y 13), no al ítem",
+          "oaLevel": null,
+          "indicador": "Aplican categorías de ubicación absoluta (coordenadas geográficas) y/o relativa para orientarse en el espacio geográfico.",
+          "imageRef": null
+        },
+        {
+          "position": 13,
+          "printedNumber": "13",
+          "type": "multiple_choice",
+          "responseFormat": "choice",
+          "stem": "Considerando el mapa, ¿cuál de las siguientes señaléticas sobre riesgos socio - naturales es más probable encontrar en la ciudad de Iquique?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Señalética verde con la figura de una persona corriendo sobre una ola y una flecha hacia la derecha; texto «VÍA DE EVACUACIÓN TSUNAMI / EVACUATION ROUTE».",
+              "isImage": true,
+              "isCorrect": true,
+              "imageRef": "item/global/5to-historia-intermedio-2026/alt_figure/13_A.png"
+            },
+            {
+              "key": "B",
+              "text": "Señalética verde oscura con la silueta de un volcán humeante, dos personas huyendo y una flecha hacia la derecha; texto «VÍA DE EVACUACIÓN / EVACUATION ROUTE».",
+              "isImage": true,
+              "isCorrect": false,
+              "imageRef": "item/global/5to-historia-intermedio-2026/alt_figure/13_B.png"
+            },
+            {
+              "key": "C",
+              "text": "Señalética amarilla verdosa con el texto «PRECAUCIÓN PAVIMENTO RESBALADIZO POR NIEVE Y ESCARCHA».",
+              "isImage": true,
+              "isCorrect": false,
+              "imageRef": "item/global/5to-historia-intermedio-2026/alt_figure/13_C.png"
+            },
+            {
+              "key": "D",
+              "text": "Señalética verde de CONAF con un logotipo rojo de llama; texto «Alto a los Incendios Forestales» y el número telefónico 130.",
+              "isImage": true,
+              "isCorrect": false,
+              "imageRef": "item/global/5to-historia-intermedio-2026/alt_figure/13_D.png"
+            }
+          ],
+          "correctKey": "A",
+          "skill": "Pensamiento temporal y espacial",
+          "oa": "OA 12",
+          "contentAxis": "Geografía",
+          "hasFigure": true,
+          "figureNote": "Doble dependencia gráfica: (a) el mapa del Norte Grande es el estímulo COMPARTIDO de la sección; (b) las cuatro alternativas son fotografías de señaléticas propias del ítem y requieren alt_figure para A, B, C y D (su `text` es una descripción, no una transcripción literal)",
+          "oaLevel": null,
+          "indicador": "Establecen relaciones entre regiones, climas, paisajes, población, recursos y riesgos naturales estudiados en el nivel, utilizando herramientas geográficas.",
+          "imageRef": null
+        }
+      ],
+      "imageRef": "item/global/5to-historia-intermedio-2026/section_figure/12.png"
+    },
+    {
+      "order": 13,
+      "name": "Preguntas 14 y 15 — Mapas de la Zona Sur de Chile: recursos naturales y relieve",
+      "type": "multiple_choice",
+      "instructions": "Observa los siguientes mapas que corresponden a la Zona Sur de Chile y responde las preguntas 14 y 15.",
+      "passage": {
+        "title": "Zona Sur de Chile: Mapa de Recursos Naturales y Mapa de Relieve",
+        "text": "Dos mapas contiguos de la Zona Sur de Chile, ambos con las ciudades de Temuco, Valdivia y Puerto Montt rotuladas.\n\nMapa de Recursos Naturales: sobre la silueta de la zona se distribuyen íconos de recursos. El ícono de carbón aparece una sola vez, en el extremo nororiente del mapa. Los íconos de recursos forestales y de cultivos agrícolas se reparten por el interior; los de cerdos y vacunos se concentran en la franja central del territorio, entre Temuco y Puerto Montt; los de peces, acuicultura, crustáceos y moluscos se ubican en el borde costero y en el sector sur, en torno a Puerto Montt y los canales.\nSimbología: Carbón · Recursos forestales · Peces · Acuicultura · Crustáceos · Moluscos · Cultivos agrícolas · Cerdos · Vacunos.\n\nMapa de Relieve: franjas longitudinales de color de oeste a este — Planicies Litorales (verde), Cordillera de la Costa (amarillo), Depresión Intermedia (naranja rayado) y Cordillera de los Andes (café).\nSimbología: Planicies Litorales · Cordillera de la Costa · Depresión Intermedia · Cordillera de los Andes.\n\nElaboración propia a partir de Atlas escolar IGM-SM, 2015 y Mapa Geomorfológico de Chile. IGM.",
+        "format": "plain",
+        "attachments": [
+          {
+            "kind": "image",
+            "note": "Par de mapas temáticos de la Zona Sur de Chile (recursos naturales con íconos y relieve por franjas de color), cada uno con su rosa de los vientos y su simbología"
+          }
+        ],
+        "imageRef": "item/global/5to-historia-intermedio-2026/section_figure/13.png"
+      },
+      "items": [
+        {
+          "position": 14,
+          "printedNumber": "14",
+          "type": "multiple_choice",
+          "responseFormat": "choice",
+          "stem": "Considerando la información que entregan ambos mapas, ¿en qué unidad de relieve se concentra principalmente la actividad ganadera?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Planicies Litorales.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Cordillera de la Costa.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Depresión Intermedia.",
+              "isCorrect": true
+            },
+            {
+              "key": "D",
+              "text": "Cordillera de los Andes.",
+              "isCorrect": false
+            }
+          ],
+          "correctKey": "C",
+          "skill": "Pensamiento temporal y espacial",
+          "oa": "OA 9",
+          "contentAxis": "Geografía",
+          "hasFigure": true,
+          "figureNote": "Depende de los dos mapas de la Zona Sur: la figura pertenece al estímulo COMPARTIDO de la sección (preguntas 14 y 15), no al ítem",
+          "oaLevel": null,
+          "indicador": "Localizan regiones, climas, paisajes, población, recursos y riesgos naturales, estudiados en el nivel, utilizando herramientas geográficas.",
+          "imageRef": null
+        },
+        {
+          "position": 15,
+          "printedNumber": "15",
+          "type": "multiple_choice",
+          "responseFormat": "choice",
+          "stem": "De acuerdo al mapa de Recursos Naturales de la Zona Sur de Chile, ¿en qué sector de la zona indicada se concentra un recurso no renovable?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "En el Sur - Este.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "En el Sur - Oeste.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "En el Nor - Este.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "En el Nor - Oeste.",
+              "isCorrect": true
+            }
+          ],
+          "correctKey": "D",
+          "skill": "Pensamiento temporal y espacial",
+          "oa": "OA 10",
+          "contentAxis": "Geografía",
+          "hasFigure": true,
+          "figureNote": "Depende del Mapa de Recursos Naturales de la Zona Sur: la figura pertenece al estímulo COMPARTIDO de la sección (preguntas 14 y 15), no al ítem",
+          "oaLevel": null,
+          "indicador": "Aplican categorías de ubicación absoluta (coordenadas geográficas) y/o relativa para orientarse en el espacio geográfico.",
+          "imageRef": null
+        }
+      ],
+      "imageRef": "item/global/5to-historia-intermedio-2026/section_figure/13.png"
+    },
+    {
+      "order": 14,
+      "name": "Preguntas 16, 17 y 18 — Afiche: cómo enfrentar un sismo en los establecimientos educacionales",
+      "type": "multiple_choice",
+      "instructions": "Lee el siguiente afiche y responde las preguntas 16, 17 y 18.",
+      "passage": {
+        "title": "Cómo enfrentar un sismo en los establecimientos educacionales",
+        "text": "Los sismos se pueden originar en cualquier momento, de allí la importancia de practicar una cultura preventiva que permita controlar los riesgos asociados a ellos y minimizar sus consecuencias.\n\nLa mejor forma de enfrentar un hecho de esta naturaleza es estar debidamente preparado, para ese efecto nos permitimos recomendar las siguientes medidas.\n\n1\n• Conocer las zonas de seguridad.\n• Procurar que las vías de evacuación se mantengan expeditas, libres de materiales, mochilas u otros objetos.\n• Evitar colocar objetos en altura sin fijar.\n• Motivar a los alumnos a mantener el orden y aseo.\n• Mantener informados a los alumnos sobre el procedimiento a seguir en caso de sismo.\n• Informar a la dirección toda situación de riesgo detectada.\n\n2\nEn la sala de clases\n• Quedarse en la sala y mantener la calma, evitando correr y gritar.\n• Alejarse de ventanales u objetos que puedan caer.\n• Abrir las puertas y mantenerlas en esa posición. Si se encuentra en el laboratorio o sala taller, desconectar de la energía eléctrica los equipos, artefactos o herramientas y cortar el suministro de gas.\n\nEn el patio\n• Ordenar a los alumnos que se encuentren en ese momento en el patio, ubicándolos en la zona de seguridad que debe estar alejada de cables, árboles u objetos que puedan caer.\n\n3\n• Requerir asistencia médica si fuese necesario.\n• Solicitar inspección de las instalaciones para evaluar el estado de la estructura y servicio de luz, agua y gas.\n• En la sala, continuar las actividades si las condiciones lo permiten, de lo contrario trasladar calmadamente a los alumnos a la zona de seguridad.\n• Aquellos que permanecen en la zona de seguridad exterior, podrán reingresar y reiniciar las actividades, una vez que la dirección lo autorice y sólo si el estado de las instalaciones lo permiten.\n• Si la dirección del establecimiento determina la suspensión de las actividades, procurar que los alumnos se retiren en compañía de sus padres o apoderados.\n\nMutual, web. Consultado el 10 de marzo de 2026. Adaptación.",
+        "format": "plain",
+        "attachments": [
+          {
+            "kind": "image",
+            "note": "Afiche de Mutual de Seguridad CChC: logotipo, fotografía de estudiantes evacuando una sala, recuadro verde introductorio y tres bloques numerados 1, 2 y 3 encabezados por una franja con lápices de colores. La numeración visual de los bloques 1, 2 y 3 es lo que interrogan las preguntas 16 y 17."
+          }
+        ],
+        "imageRef": "item/global/5to-historia-intermedio-2026/section_figure/14.png"
+      },
+      "items": [
+        {
+          "position": 16,
+          "printedNumber": "16",
+          "type": "multiple_choice",
+          "responseFormat": "choice",
+          "stem": "¿Cuál sería el título más adecuado para organizar la información de cada una de las secciones identificadas con los números 1, 2 y 3?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "1. Qué debes saber de los sismos.\n2. Cuáles son las consecuencias de un sismo.\n3. Qué son las réplicas de un sismo.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "1. Cómo prepararse ante un eventual sismo.\n2. Qué hacer en caso de sismo.\n3. Qué hacer después de un sismo.",
+              "isCorrect": true
+            },
+            {
+              "key": "C",
+              "text": "1. Cuál es la causa de los sismos.\n2. Cuáles son los diferentes tipos de sismo.\n3. Cómo saber la intensidad de un sismo.",
+              "isCorrect": false
+            }
+          ],
+          "correctKey": "B",
+          "skill": "Análisis y trabajo con fuentes de información",
+          "oa": "OA 12",
+          "contentAxis": "Geografía",
+          "hasFigure": true,
+          "figureNote": "Depende del afiche: la figura pertenece al estímulo COMPARTIDO de la sección (preguntas 16, 17 y 18). La organización visual en bloques numerados 1, 2 y 3 es necesaria para responder",
+          "oaLevel": null,
+          "indicador": "Organizan la información obtenida de una fuente sobre un tema pertinente al nivel, utilizando organizadores gráficos, tablas, lista de ideas principales y esquemas, entre otros.",
+          "imageRef": null
+        },
+        {
+          "position": 17,
+          "printedNumber": "17",
+          "type": "multiple_choice",
+          "responseFormat": "choice",
+          "stem": "Considerando el criterio usado para organizar las medidas presentadas en el afiche, ¿cuál de las siguientes acciones adicionales se puede incorporar en la sección identificada con el número 1?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Mantener la calma y pedir auxilio en caso de quedar atrapado/a.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Cortar los suministros de gas, de electricidad y de agua.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Ubicarse en un lugar de protección sísmica.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "Preparar un kit de emergencia.",
+              "isCorrect": true
+            }
+          ],
+          "correctKey": "D",
+          "skill": "Análisis y trabajo con fuentes de información",
+          "oa": "OA 12",
+          "contentAxis": "Geografía",
+          "hasFigure": true,
+          "figureNote": "Depende del afiche: la figura pertenece al estímulo COMPARTIDO de la sección (preguntas 16, 17 y 18). La organización visual en bloques numerados es necesaria para responder",
+          "oaLevel": null,
+          "indicador": "Organizan la información obtenida de una fuente sobre un tema pertinente al nivel, utilizando organizadores gráficos, tablas, lista de ideas principales y esquemas, entre otros.",
+          "imageRef": null
+        },
+        {
+          "position": 18,
+          "printedNumber": "18",
+          "type": "multiple_choice",
+          "responseFormat": "choice",
+          "stem": "¿Cuál es el objetivo de las medidas presentadas en el afiche anterior?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Reconocer las consecuencias que puede provocar un sismo.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Educar a la comunidad sobre medidas de protección.",
+              "isCorrect": true
+            },
+            {
+              "key": "C",
+              "text": "Conocer la historia de la actividad sísmica en Chile.",
+              "isCorrect": false
+            }
+          ],
+          "correctKey": "B",
+          "skill": "Análisis y trabajo con fuentes de información",
+          "oa": "OA 12",
+          "contentAxis": "Geografía",
+          "hasFigure": true,
+          "figureNote": "Depende del afiche: la figura pertenece al estímulo COMPARTIDO de la sección (preguntas 16, 17 y 18)",
+          "oaLevel": null,
+          "indicador": "Infieren información que se encuentra implícita en fuentes primarias o secundarias.",
+          "imageRef": null
+        }
+      ],
+      "imageRef": "item/global/5to-historia-intermedio-2026/section_figure/14.png"
+    },
+    {
+      "order": 15,
+      "name": "Pregunta 19 — Noticia: Chile destaca en avance hacia un futuro más limpio y sin emisiones",
+      "type": "multiple_choice",
+      "instructions": "Lee la siguiente noticia sobre energías renovables.",
+      "passage": {
+        "title": "Chile destaca en avance hacia un futuro más limpio y sin emisiones",
+        "text": "Chile destaca en avance hacia un futuro más limpio y sin emisiones\nEnero 01, 2025 #Chile Sustentable\n\nChile continúa consolidándose como uno de los líderes mundiales en la generación de energías renovables, gracias a su ventajosa posición geográfica, condiciones climáticas y políticas públicas favorables, que buscan integrar las energías limpias y reducir las emisiones de carbono. Las energías solar y eólica son los pilares fundamentales que sostienen este liderazgo, lo que ayuda a una reducción significativa de las emisiones de carbono.\n\nFundación Imagen de Chile, web. Consultado el 5 de marzo de 2026. Adaptación.",
+        "format": "plain",
+        "attachments": [
+          {
+            "kind": "image",
+            "note": "Maqueta de nota de prensa: logotipo «Chile», barra de íconos de redes sociales y fotografía de un parque eólico en la costa. Ilustrativa: la pregunta se responde con el texto transcrito"
+          }
+        ],
+        "imageRef": "item/global/5to-historia-intermedio-2026/section_figure/15.png"
+      },
+      "items": [
+        {
+          "position": 19,
+          "printedNumber": "19",
+          "type": "multiple_choice",
+          "responseFormat": "choice",
+          "stem": "¿Cuál de las siguientes preguntas permite profundizar la temática presentada en la noticia?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "¿Qué usos se les da a las energías renovables?",
+              "isCorrect": true
+            },
+            {
+              "key": "B",
+              "text": "¿Cuál es un ejemplo de energía renovable limpia?",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "¿Qué efecto tiene el uso de energías limpias sobre las emisiones de carbono?",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "¿Cuál es una condición de Chile que favorece la generación de energías renovables?",
+              "isCorrect": false
+            }
+          ],
+          "correctKey": "A",
+          "skill": null,
+          "oa": "OA 11",
+          "contentAxis": "Geografía",
+          "hasFigure": false,
+          "figureNote": null,
+          "oaLevel": null,
+          "indicador": "Distinguen preguntas que permiten profundizar en temas de interés estudiados en el nivel.",
+          "imageRef": null
+        }
+      ],
+      "imageRef": "item/global/5to-historia-intermedio-2026/section_figure/15.png"
+    },
+    {
+      "order": 16,
+      "name": "Pregunta 20 — Opinión de un lector sobre el libro «Somos diferentes, somos iguales»",
+      "type": "multiple_choice",
+      "instructions": "Lee la siguiente opinión de un lector sobre un libro:",
+      "passage": {
+        "title": "Opinión del libro Somos diferentes, somos iguales",
+        "text": "Cristi\n★★★★★\n\nUn libro en el que se pretende mostrar las diferencias físicas y psicológicas entre las personas y aun así ver qué todos son iguales.\n\nTodos los niños y niñas son geniales y auténticos. Todos los niños y niñas de este mundo son maravillosos simplemente por ser como son.\n\nOpinión del libro Somos diferentes, somos iguales. Amazon. Adaptación.",
+        "format": "plain",
+        "attachments": [
+          {
+            "kind": "image",
+            "note": "Maqueta de reseña en línea: avatar de usuario, cinco estrellas naranjas y portada del libro «Somos diferentes, somos iguales». Ilustrativa: la pregunta se responde con el texto transcrito"
+          }
+        ],
+        "imageRef": "item/global/5to-historia-intermedio-2026/section_figure/16.png"
+      },
+      "items": [
+        {
+          "position": 20,
+          "printedNumber": "20",
+          "type": "multiple_choice",
+          "responseFormat": "choice",
+          "stem": "A partir de la opinión presentada, ¿qué conclusión se puede obtener respecto de los derechos de niños y niñas?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Los niños y niñas tienen más derechos que otros grupos de la población.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Como los niños y niñas son diferentes, pueden tener distintos derechos.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Los derechos van cambiando de acuerdo con cómo son los niños y niñas.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "Aunque los niños y niñas son distintos, tienen los mismos derechos.",
+              "isCorrect": true
+            }
+          ],
+          "correctKey": "D",
+          "skill": "Análisis y trabajo con fuentes de información",
+          "oa": "OA 13",
+          "contentAxis": "Formación ciudadana",
+          "hasFigure": false,
+          "figureNote": null,
+          "oaLevel": null,
+          "indicador": "Infieren información que se encuentra implícita en fuentes primarias o secundarias.",
+          "imageRef": null
+        }
+      ],
+      "imageRef": "item/global/5to-historia-intermedio-2026/section_figure/16.png"
+    },
+    {
+      "order": 17,
+      "name": "Pregunta 21 — Constitución: el derecho a la educación",
+      "type": "multiple_choice",
+      "instructions": "Lee el siguiente extracto del artículo 19, inciso 10°, de la Constitución Política de la República de Chile.",
+      "passage": {
+        "title": "10º. El derecho a la educación",
+        "text": "10º. El derecho a la educación.\n\nLa educación tiene por objeto el pleno desarrollo de la persona en las distintas etapas de su vida. [...]\n\nLa educación básica y la educación media son obligatorias, debiendo el Estado financiar un sistema gratuito con tal objeto, destinado a asegurar el acceso a ellas de toda la población.\n\nConstitución Política de la República de Chile. (2005). Artículo 19, inciso 10°. (Fragmento).",
+        "format": "plain",
+        "attachments": [],
+        "imageRef": null
+      },
+      "items": [
+        {
+          "position": 21,
+          "printedNumber": "21",
+          "type": "multiple_choice",
+          "responseFormat": "choice",
+          "stem": "Considerando lo planteado en el extracto, ¿cuál es el rol que debe cumplir el Estado en el ámbito educacional?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Imponer la obligación de estudiar toda la vida.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Establecer el principio de libertad de la educación.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Controlar el uso de los recursos destinados a educación.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "Garantizar que todas las personas puedan recibir educación.",
+              "isCorrect": true
+            }
+          ],
+          "correctKey": "D",
+          "skill": "Análisis y trabajo con fuentes de información",
+          "oa": "OA 14",
+          "contentAxis": "Formación ciudadana",
+          "hasFigure": false,
+          "figureNote": null,
+          "oaLevel": null,
+          "indicador": "Infieren información que se encuentra implícita en fuentes primarias o secundarias.",
+          "imageRef": null
+        }
+      ]
+    },
+    {
+      "order": 18,
+      "name": "Pregunta 22 — Fuentes: la responsabilidad por el cuidado del medio ambiente (desarrollo)",
+      "type": "open_ended",
+      "instructions": "Lee las siguientes fuentes:",
+      "passage": {
+        "title": "El reciclaje y la responsabilidad por el cuidado del medio ambiente",
+        "text": "Fuente 1\nLey de reciclaje: en qué consiste el nuevo reglamento que busca no convertir en basura a los envases y embalajes\nPor Claudia Soto\n16 marzo 2021\n\n“Quisimos cambiar la forma en que reciclamos en nuestro país, que no seamos solo las personas las que vayamos a los puntos limpios, sino que crear un sistema de gestión que vaya y recolecte en nuestras casas el reciclaje, puerta a puerta, de manera de poder masificar esto en Chile”, agregó la ministra de Medio Ambiente.\n\nEs decir, y tal como lo explica la ministra: “si compro una bebida, ¿qué pasa con el envase plástico o la lata después de que la tomé? El decreto busca que las empresas que las producen organicen y financien un sistema que permita reciclarlos”. Las empresas estarán obligadas a informar de los distintos productos que se venden para que el Ministerio del Medio Ambiente tenga una cuantificación de la cantidad de envases y embalajes que entrarán al mercado.\n\nLa Tercera, web. Consultado el 22 de julio de 2025. Adaptación.\n\nFuente 2\nEl reciclaje empieza en casa: ¿Estamos listos para asumirlo?\nMichel Compagnon\nPresidente Asociación Gremial de Industriales del Plástico (ASIPLA)\nViernes 16 mayo de 2025\n\nLa encuesta “Reciclando Ando 2024”, revela datos preocupantes: el cuidado del medio ambiente ocupa el décimo lugar en las prioridades de los chilenos. Apenas un 16% conoce conceptos como “economía circular” o “cuidado de los recursos” y suenan lejanos, casi irrelevantes.\n\nMás sorprendente aún es que los jóvenes, a quienes asociamos con el activismo ambiental, se encuentran menos involucrados que las personas mayores. Como ciudadanos, también debemos asumir nuestro rol. Separar residuos, limpiarlos, aplastarlos y llevarlos a un punto limpio requiere esfuerzo, pero cada uno de esos esfuerzos es un grano de arena que suma a la causa común final.\n\nBioBioChile. Columna de opinión, web. Consultado el 25 de febrero de 2026. Adaptación.",
+        "format": "plain",
+        "attachments": [],
+        "imageRef": null
+      },
+      "items": [
+        {
+          "position": 22,
+          "printedNumber": "22",
+          "type": "open_ended",
+          "responseFormat": "develop",
+          "stem": "Considerando lo expuesto y de acuerdo a tu opinión, ¿quién debe tener la responsabilidad por el cuidado del medio ambiente?\n\nElige a continuación marcando una X en el recuadro.\n\n☐ Las empresas.\n☐ Las personas.\n☐ Ambos.\n\nA continuación, fundamenta tu respuesta utilizando información de las fuentes.",
+          "correctKey": null,
+          "skill": "Pensamiento crítico",
+          "oa": "OA 20",
+          "contentAxis": "Formación ciudadana",
+          "hasFigure": false,
+          "figureNote": null,
+          "oaLevel": null,
+          "indicador": "Fundamentan una opinión respaldada con evidencia sobre temas estudiados en el nivel.",
+          "imageRef": null,
+          "rubricId": null
+        }
+      ]
+    },
+    {
+      "order": 19,
+      "name": "Pregunta 23 — Situación: opiniones sobre cómo resolver la falta de un lugar para jugar en el barrio",
+      "type": "multiple_choice",
+      "instructions": "Lee la siguiente situación:",
+      "passage": {
+        "title": "Opiniones de los vecinos sobre un lugar para jugar en el barrio",
+        "text": "En un barrio los vecinos y vecinas se quejan porque sus hijos e hijas no tienen un lugar apropiado donde jugar. Algunos vecinos plantean sus opiniones.\n\nMatías opina: Yo creo que la mejor forma de resolver el problema es con la fundación MI PARQUE, así los vecinos se pueden organizar y traer materiales y la fundación les enseña cómo poner pasto, plantas y lo dejan muy bonito, luego la Municipalidad se encarga de mantener el lugar.\n\nLaura opina: Me parece mejor que nosotros mismos organicemos a los vecinos y hagamos una campaña para reunir fondos, luego diseñamos lo que queremos hacer y lo construimos entre todos. Así los propios vecinos van a querer mantener el lugar bonito, sin apoyo de ninguna fundación ni autoridad.",
+        "format": "plain",
+        "attachments": [
+          {
+            "kind": "image",
+            "note": "Ilustración de dos personas conversando en un banco de plaza, con globos de diálogo. Ilustrativa: la pregunta se responde con el texto transcrito"
+          }
+        ],
+        "imageRef": "item/global/5to-historia-intermedio-2026/section_figure/19.png"
+      },
+      "items": [
+        {
+          "position": 23,
+          "printedNumber": "23",
+          "type": "multiple_choice",
+          "responseFormat": "choice",
+          "stem": "¿En qué se diferencian las opiniones de Matías y Laura sobre la forma de resolver el problema en su barrio?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "En la necesidad de la participación de la comunidad.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "En el rol de las instituciones en la organización de la comunidad.",
+              "isCorrect": true
+            },
+            {
+              "key": "C",
+              "text": "En la necesidad de contar con un espacio de recreación para las personas.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "En la dificultad de resolver la situación prontamente.",
+              "isCorrect": false
+            }
+          ],
+          "correctKey": "B",
+          "skill": "Pensamiento crítico",
+          "oa": "OA 19",
+          "contentAxis": "Formación ciudadana",
+          "hasFigure": false,
+          "figureNote": null,
+          "oaLevel": null,
+          "indicador": "Identifican similitudes y/o diferencias entre distintos puntos de vista respecto de un mismo tema.",
+          "imageRef": null
+        }
+      ],
+      "imageRef": "item/global/5to-historia-intermedio-2026/section_figure/19.png"
+    },
+    {
+      "order": 20,
+      "name": "Pregunta 24 — Situación: justificar la elección de alimentos para una convivencia",
+      "type": "multiple_choice",
+      "instructions": null,
+      "passage": null,
+      "items": [
+        {
+          "position": 24,
+          "printedNumber": "24",
+          "type": "multiple_choice",
+          "responseFormat": "choice",
+          "stem": "Los estudiantes de un 5° básico están organizando una convivencia. Sin embargo, algunos están en desacuerdo en consumir bebidas azucaradas, papas fritas y ramitas ese día, ante lo cual proponen llevar jugos y comida elaborada en la casa, como queques, kuchen y sándwich.\n\nPara decidir entre estas dos posibilidades, la profesora les pide que elijan y justifiquen su elección.\n\n¿Cuál de los siguientes estudiantes justifica su elección considerando beneficios para la salud?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Jaime: Yo prefiero que traigamos alimentos más naturales, sin tantos químicos.",
+              "isCorrect": true
+            },
+            {
+              "key": "B",
+              "text": "Ernesto: Yo prefiero consumir cosas envasadas que no son tan caras.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Mariana: Voto por traer bebidas y papas fritas porque son más ricas.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "Carolina: Me parece que es mejor traer los alimentos que escoja la mayoría.",
+              "isCorrect": false
+            }
+          ],
+          "correctKey": "A",
+          "skill": "Pensamiento crítico",
+          "oa": "OA 21",
+          "contentAxis": "Formación ciudadana",
+          "hasFigure": false,
+          "figureNote": null,
+          "oaLevel": null,
+          "indicador": "Distinguen puntos de vista a partir de distintas visiones presentadas respecto de un mismo tema.",
+          "imageRef": null
+        }
+      ]
+    },
+    {
+      "order": 21,
+      "name": "Pregunta 25 — Situación: fundamentar con evidencia una campaña de reciclaje",
+      "type": "multiple_choice",
+      "instructions": "Lee la siguiente situación ocurrida en un colegio en Chile:",
+      "passage": {
+        "title": "Campaña de reciclaje en un colegio",
+        "text": "En un colegio, las y los estudiantes quieren realizar una campaña de reciclaje porque opinan que esto es urgente para ayudar al planeta. La directora les pide redactar una carta para que fundamenten con evidencias su propuesta sobre el reciclaje.",
+        "format": "plain",
+        "attachments": [],
+        "imageRef": null
+      },
+      "items": [
+        {
+          "position": 25,
+          "printedNumber": "25",
+          "type": "multiple_choice",
+          "responseFormat": "choice",
+          "stem": "¿Cuál de las siguientes informaciones les serviría a las y los estudiantes para fundamentar con evidencia su opinión a favor del reciclaje?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Para el reciclaje, destinamos recursos municipales para educar y concientizar a la comunidad. La puesta en marcha de tres puntos limpios fijos habilitados para recibir y segmentar los residuos ayudará a que los vecinos incorporen en sus rutinas uno de los actos más amables con el medio ambiente, como es reciclar.\n(En: https://codexverde.cl)",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "La Ley de Reciclaje establece que todos los productores o importadores de “productos prioritarios” deben hacerse cargo de los bienes, una vez que terminan su vida útil. Es decir, estos productos “inservibles” deben volver a las industrias donde fueron fabricados, o a las bodegas donde comenzó su distribución.\n(En: https://chile.gob.cl)",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "8 millones de toneladas de plástico son vertidas cada año a los océanos, esto equivale a vaciar un camión de basura lleno de plásticos cada minuto. Si no cambiamos de tendencia, en 2025 nuestros océanos tendrán 1 tonelada de plástico por cada 3 toneladas de pescado, y en 2050 habrá más plásticos que peces.\n(En: https://ecodes.org)",
+              "isCorrect": true
+            }
+          ],
+          "correctKey": "C",
+          "skill": "Pensamiento crítico",
+          "oa": "OA 22",
+          "contentAxis": "Formación ciudadana",
+          "hasFigure": false,
+          "figureNote": null,
+          "oaLevel": null,
+          "indicador": "Distinguen opiniones fundamentadas con evidencia de opiniones no fundamentadas, sobre temas estudiados en el nivel.",
+          "imageRef": null
+        }
+      ]
+    }
+  ],
+  "extraction": {
+    "itemCount": 25,
+    "warnings": [
+      "CONTEO: el cuadernillo imprime 25 preguntas (numeradas 1–25) y la extracción da 25 posiciones puntuables, sin sub-numeración. Coincide con el conteo autoritativo de la ficha técnica (25 posiciones, posición 22 de desarrollo).",
+      "CRITERIO pasaje vs. stem (aplicado de forma uniforme, copiando el precedente 7mo-historia-intermedio-2026): (a) si el estímulo es TEXTO (fuente histórica, noticia, columna, extracto legal, situación descrita), va completo en `sections[].passage` y el `stem` lleva solo la pregunta; (b) si el estímulo es GRÁFICO y lo usa un solo ítem (líneas de tiempo de las preguntas 1 y 10, imágenes de la Plaza de Armas de la 11), va transcrito dentro del `stem` con `passage: null` y `hasFigure: true`; (c) si el estímulo lo comparten VARIOS ítems, siempre va en `passage` y cada ítem lleva `hasFigure: true` con `figureNote` que dice que la figura es de la sección. Hay 3 estímulos compartidos: mapa del Norte Grande (preguntas 12 y 13), mapas de la Zona Sur (14 y 15) y afiche de sismos (16, 17 y 18).",
+      "RESPUESTA MÚLTIPLE: las preguntas 2 y 8 son de 'Marca todas las respuestas correctas' con alternativas NUMERADAS 1–5 en vez de A–D. Se modelan como `multiple_choice` con esas keys y llevan `isMultiAnswer: true`. La ficha confirma claves multi-valor ('134' y '35').",
+      "DESARROLLO: la posición 22 es `open_ended` / `responseFormat: \"develop\"`, sin alternativas. El cuadernillo antepone una elección con casillas (Las empresas / Las personas / Ambos) que forma parte del enunciado y no se modela como alternativas; la pauta de corrección (códigos 2/1/0) está en la ficha técnica, no en el cuadernillo.",
+      "TÉRMINOS PAREADOS: la posición 9 es de unir con líneas dos columnas (A.1–A.4 con B.1–B.5, con un distractor de más en la columna B). Se modela como `open_ended` / `responseFormat: \"fill_in\"` sin alternativas, con ambas columnas transcritas en el `stem`. La ficha confirma `fill_in` con respuesta '(1,5)-(2,4)-(3,1)-(4,2)'. No se marca `hasFigure`: el bloque es solo texto en recuadros, no una figura.",
+      "ALTERNATIVAS-IMAGEN: la pregunta 5 (cuatro esquemas del orden social colonial) y la pregunta 13 (cuatro fotografías de señaléticas) tienen alternativas que SON imágenes; van con `isImage: true` y su `text` es una descripción, no una transcripción literal. Ambas necesitan recorte por alternativa (alt_figure A–D) en la ola de figuras.",
+      "ALTERNATIVAS: las preguntas 11, 16, 18 y 25 tienen solo 3 alternativas (A–C); el resto tiene 4 (A–D), salvo las de respuesta múltiple (5 alternativas, keys 1–5). Cruzado con la ficha: las claves de esas cuatro preguntas (B, B, B y C) caen dentro del rango A–C.",
+      "FIGURAS DECORATIVAS NO MARCADAS: las preguntas 19 (noticia con foto de parque eólico), 20 (reseña con portada de libro y estrellas) y 23 (situación con ilustración de dos vecinos) traen imágenes de maqueta que NO son necesarias para responder — su contenido está íntegro en el texto transcrito. Se dejaron con `hasFigure: false` y la imagen se documentó en `passage.attachments` para que el orquestador decida si igual quiere recortarlas.",
+      "IDENTIDAD: `instrument.subject` usa el literal fijado por el brief ('Historia, Geografía y Cs. Sociales'), que difiere del precedente 7° básico ya cargado ('Historia, Geografía y Ciencias Sociales'). Se respetó el brief; si el importador cruza por `subject` en texto, revisar antes de cargar.",
+      "CRUCE CON LA FICHA (solo informativo, la pauta se aplica en capa B): 25 posiciones en ambos lados y los `responseFormat` coinciden posición a posición — 23 `choice` (dos de ellas multi-respuesta: 2 y 8), 1 `fill_in` (9) y 1 `develop` (22).",
+      "Sin hoja de respuestas oficial: el cross-check quedó en DOBLE (cuadernillo vs ficha técnica), no triple."
+    ],
+    "needsHumanReview": false
+  },
+  "pauta": {
+    "source": {
+      "instrumentJson": "imported/DIA Historia, Geografía y Ciencias Sociales 5° Básico 2026 — Monitoreo Intermedio",
+      "ficha": "5to-historia-intermedio-2026.ficha.json"
+    },
+    "rubrics": {
+      "22": "Tipos de respuestas Respuestas parcialmente Respuestas correctas Respuestas incorrectas correctas (Código 2) (Código 0) (Código 1) El o la estudiante fundamenta su El o la estudiante fundamenta su El o la estudiante no respuesta considerando quiénes son respuesta considerando quiénes fundamenta su respuesta responsables del cuidado del medio son responsables del cuidado del con un argumento o ambiente marcando una de las tres medio ambiente, sin utilizar expresa ideas aisladas o opciones de respuesta, es decir; las evidencia o información concreta de que no se relacionan con empresas, las personas o ambos y la noticia, puede dar otro tipo de lo que se está entrega un argumento coherente con argumento o en el argumento utiliza preguntando. esa elección, utilizando información o ideas generales. evidencia de las noticias. Ejemplos: Ejemplos: Ejemplos: - Estoy de acuerdo con que las - Las empresas deben ser - Las empresas son empresas deban hacerse cargo de responsables porque son las responsables. los desechos ya que es su deber que reciben mayores - Las personas no asociado por lo que comercializan, ganancias con lo que cuidan el ambiente. para disminuir la producción de producen. - Todos. basura. - La responsabilidad comienza - Es importante que las empresas se en el hogar porque en mi hagan cargo de sus residuos, porque familia todos reciclamos y es su obligación revalorizar los cuidamos de apagar las luces materiales que ellas mismas y cortar el agua. producen. - Ambos se deben hacer - Yo creo que es deber de las responsables, ya que tanto personas reciclar, ya que como las empresas como las sociedad existe poca conciencia del familias contaminan el medio cuidado del medio ambiente y esto ambiente a diario. debe cambiar, debería ser una prioridad. - Considero que tanto las empresas como las personas deben asumir la responsabilidad del reciclaje y el cuidado del medioambiente. Por un lado, las empresas deberían hacerse cargo de los residuos que generan los productos que comercializan. Por otro lado, las personas también deben comprometerse, llevando sus desechos a los puntos limpios y adoptando prácticas responsables en su vida cotidiana. 9 &gt; Diagnóstico Integral de Aprendizajes Instrumentos de Evaluación 2026 agenciaeducacion.cl"
+    }
+  }
+}

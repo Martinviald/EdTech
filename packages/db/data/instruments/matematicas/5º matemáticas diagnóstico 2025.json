@@ -467,25 +467,29 @@
               "key": "A",
               "text": "Recta numérica de 0 a 1 dividida en 10 partes; la flecha apunta cerca de la 3.ª marca (≈ 3/10).",
               "isImage": true,
-              "isCorrect": false
+              "isCorrect": false,
+              "imageRef": "item/global/5to-matematicas-diagnostico-2025/alt_figure/09_A.png"
             },
             {
               "key": "B",
               "text": "Recta numérica de 0 a 10 dividida en 10 partes; la flecha apunta cerca de la 3.ª marca (≈ 3).",
               "isImage": true,
-              "isCorrect": false
+              "isCorrect": false,
+              "imageRef": "item/global/5to-matematicas-diagnostico-2025/alt_figure/09_B.png"
             },
             {
               "key": "C",
               "text": "Recta numérica de 0 a 1 dividida en 10 partes; la flecha apunta a la marca central (≈ 5/10).",
               "isImage": true,
-              "isCorrect": false
+              "isCorrect": false,
+              "imageRef": "item/global/5to-matematicas-diagnostico-2025/alt_figure/09_C.png"
             },
             {
               "key": "D",
               "text": "Recta numérica de 0 a 10 dividida en 10 partes; la flecha apunta cerca de la 3.ª marca (≈ 3).",
               "isImage": true,
-              "isCorrect": true
+              "isCorrect": true,
+              "imageRef": "item/global/5to-matematicas-diagnostico-2025/alt_figure/09_D.png"
             }
           ],
           "correctKey": "D",
@@ -521,7 +525,8 @@
               "name": "Números y operaciones",
               "tagType": "secondary"
             }
-          ]
+          ],
+          "imageRef": "item/global/5to-matematicas-diagnostico-2025/item_figure/09.png"
         },
         {
           "position": 10,
@@ -533,25 +538,29 @@
               "key": "A",
               "text": "Círculo dividido en 5 partes iguales, con 1 parte pintada gris (1/5).",
               "isImage": true,
-              "isCorrect": false
+              "isCorrect": false,
+              "imageRef": "item/global/5to-matematicas-diagnostico-2025/alt_figure/10_A.png"
             },
             {
               "key": "B",
               "text": "Círculo dividido en 4 partes iguales, con 1 parte pintada gris (1/4).",
               "isImage": true,
-              "isCorrect": true
+              "isCorrect": true,
+              "imageRef": "item/global/5to-matematicas-diagnostico-2025/alt_figure/10_B.png"
             },
             {
               "key": "C",
               "text": "Círculo dividido en 4 partes iguales, con 2 partes pintadas gris (2/4).",
               "isImage": true,
-              "isCorrect": false
+              "isCorrect": false,
+              "imageRef": "item/global/5to-matematicas-diagnostico-2025/alt_figure/10_C.png"
             },
             {
               "key": "D",
               "text": "Círculo dividido en 5 partes iguales, con 3 partes pintadas gris (3/5).",
               "isImage": true,
-              "isCorrect": false
+              "isCorrect": false,
+              "imageRef": "item/global/5to-matematicas-diagnostico-2025/alt_figure/10_D.png"
             }
           ],
           "correctKey": "B",
@@ -587,7 +596,8 @@
               "name": "Números y operaciones",
               "tagType": "secondary"
             }
-          ]
+          ],
+          "imageRef": "item/global/5to-matematicas-diagnostico-2025/item_figure/10.png"
         },
         {
           "position": 11,
@@ -599,19 +609,22 @@
               "key": "A",
               "text": "Ícono de batería pintado en aproximadamente sus 3/4 (más de la mitad).",
               "isImage": true,
-              "isCorrect": true
+              "isCorrect": true,
+              "imageRef": "item/global/5to-matematicas-diagnostico-2025/alt_figure/11_A.png"
             },
             {
               "key": "B",
               "text": "Ícono de batería pintado aproximadamente hasta la mitad.",
               "isImage": true,
-              "isCorrect": false
+              "isCorrect": false,
+              "imageRef": "item/global/5to-matematicas-diagnostico-2025/alt_figure/11_B.png"
             },
             {
               "key": "C",
               "text": "Ícono de batería pintado solo en una pequeña porción inferior (menos de la mitad).",
               "isImage": true,
-              "isCorrect": false
+              "isCorrect": false,
+              "imageRef": "item/global/5to-matematicas-diagnostico-2025/alt_figure/11_C.png"
             }
           ],
           "correctKey": "A",
@@ -647,7 +660,8 @@
               "name": "Números y operaciones",
               "tagType": "secondary"
             }
-          ]
+          ],
+          "imageRef": "item/global/5to-matematicas-diagnostico-2025/item_figure/11.png"
         },
         {
           "position": 12,
@@ -750,7 +764,8 @@
               "name": "Números y operaciones",
               "tagType": "secondary"
             }
-          ]
+          ],
+          "imageRef": "item/global/5to-matematicas-diagnostico-2025/item_figure/13.png"
         },
         {
           "position": 14,
@@ -807,7 +822,8 @@
               "name": "Patrones y álgebra",
               "tagType": "secondary"
             }
-          ]
+          ],
+          "imageRef": "item/global/5to-matematicas-diagnostico-2025/item_figure/14.png"
         },
         {
           "position": 15,
@@ -967,7 +983,8 @@
               "name": "Geometría",
               "tagType": "secondary"
             }
-          ]
+          ],
+          "imageRef": "item/global/5to-matematicas-diagnostico-2025/item_figure/17.png"
         },
         {
           "position": 18,
@@ -1029,7 +1046,8 @@
               "name": "Geometría",
               "tagType": "secondary"
             }
-          ]
+          ],
+          "imageRef": "item/global/5to-matematicas-diagnostico-2025/item_figure/18.png"
         },
         {
           "position": 19,
@@ -1041,19 +1059,22 @@
               "key": "A",
               "text": "Par de baldosas: la original a la izquierda y a la derecha una con triángulo oscuro arriba-derecha y rombos hacia el centro.",
               "isImage": true,
-              "isCorrect": true
+              "isCorrect": true,
+              "imageRef": "item/global/5to-matematicas-diagnostico-2025/alt_figure/19_A.png"
             },
             {
               "key": "B",
               "text": "Par de baldosas reflejadas horizontalmente (la diagonal y el rombo se invierten respecto del eje vertical).",
               "isImage": true,
-              "isCorrect": false
+              "isCorrect": false,
+              "imageRef": "item/global/5to-matematicas-diagnostico-2025/alt_figure/19_B.png"
             },
             {
               "key": "C",
               "text": "Par de baldosas con la diagonal en sentido contrario y el rombo en posición distinta.",
               "isImage": true,
-              "isCorrect": false
+              "isCorrect": false,
+              "imageRef": "item/global/5to-matematicas-diagnostico-2025/alt_figure/19_C.png"
             }
           ],
           "correctKey": "A",
@@ -1089,7 +1110,8 @@
               "name": "Geometría",
               "tagType": "secondary"
             }
-          ]
+          ],
+          "imageRef": "item/global/5to-matematicas-diagnostico-2025/item_figure/19.png"
         },
         {
           "position": 20,
@@ -1130,7 +1152,8 @@
               "name": "Medición",
               "tagType": "secondary"
             }
-          ]
+          ],
+          "imageRef": "item/global/5to-matematicas-diagnostico-2025/item_figure/20.png"
         },
         {
           "position": 21,
@@ -1192,7 +1215,8 @@
               "name": "Medición",
               "tagType": "secondary"
             }
-          ]
+          ],
+          "imageRef": "item/global/5to-matematicas-diagnostico-2025/item_figure/21.png"
         },
         {
           "position": 22,
@@ -1233,7 +1257,8 @@
               "name": "Medición",
               "tagType": "secondary"
             }
-          ]
+          ],
+          "imageRef": "item/global/5to-matematicas-diagnostico-2025/item_figure/22.png"
         },
         {
           "position": 23,
@@ -1480,7 +1505,8 @@
               "name": "Medición",
               "tagType": "secondary"
             }
-          ]
+          ],
+          "imageRef": "item/global/5to-matematicas-diagnostico-2025/item_figure/27.png"
         },
         {
           "position": 28,
@@ -1492,19 +1518,22 @@
               "key": "A",
               "text": "Celular y smartwatch.",
               "isImage": true,
-              "isCorrect": false
+              "isCorrect": false,
+              "imageRef": "item/global/5to-matematicas-diagnostico-2025/alt_figure/28_A.png"
             },
             {
               "key": "B",
               "text": "Bicicleta, celular y smartwatch.",
               "isImage": true,
-              "isCorrect": false
+              "isCorrect": false,
+              "imageRef": "item/global/5to-matematicas-diagnostico-2025/alt_figure/28_B.png"
             },
             {
               "key": "C",
               "text": "Bicicleta, notebook, celular y smartwatch.",
               "isImage": true,
-              "isCorrect": true
+              "isCorrect": true,
+              "imageRef": "item/global/5to-matematicas-diagnostico-2025/alt_figure/28_C.png"
             }
           ],
           "correctKey": "C",
@@ -1540,7 +1569,8 @@
               "name": "Datos y Probabilidades",
               "tagType": "secondary"
             }
-          ]
+          ],
+          "imageRef": "item/global/5to-matematicas-diagnostico-2025/item_figure/28.png"
         },
         {
           "position": 29,
@@ -1602,7 +1632,8 @@
               "name": "Datos y Probabilidades",
               "tagType": "secondary"
             }
-          ]
+          ],
+          "imageRef": "item/global/5to-matematicas-diagnostico-2025/item_figure/29.png"
         }
       ]
     }

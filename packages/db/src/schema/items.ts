@@ -12,6 +12,7 @@ import {
 import { relations } from 'drizzle-orm';
 import type { ItemContent } from '@soe/types';
 import {
+  itemDifficultyEnum,
   itemSourceEnum,
   itemStatusEnum,
   itemTagTypeEnum,
@@ -35,7 +36,10 @@ export const items = pgTable('items', {
   // Contenido polimórfico por `type`: cada valor de `item_type` tiene su shape Zod
   // en `ITEM_CONTENT_SCHEMAS` (@soe/types). La validación ocurre en la capa de
   // aplicación (items.service) con `validateItemContent`; aquí solo tipamos (CLAUDE.md §5.4).
-  content: jsonb('content').$type<ItemContent>().notNull().default({} as ItemContent),
+  content: jsonb('content')
+    .$type<ItemContent>()
+    .notNull()
+    .default({} as ItemContent),
   scoringConfig: jsonb('scoring_config')
     .$type<{
       points?: number;
@@ -53,6 +57,8 @@ export const items = pgTable('items', {
   status: itemStatusEnum('status').default('draft').notNull(),
   version: integer('version').default(1).notNull(),
   source: itemSourceEnum('source').default('custom').notNull(),
+  // Dificultad editable a mano (T2-21); nullable = sin etiquetar. IA = F2.
+  difficulty: itemDifficultyEnum('difficulty'),
   createdById: uuid('created_by_id').references(() => users.id),
   deletedAt: timestamp('deleted_at'),
   createdAt: timestamp('created_at').defaultNow().notNull(),

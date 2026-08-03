@@ -2,6 +2,7 @@
 
 import type { DiaItemPreview } from '@soe/types';
 import { Badge } from '@/components/ui/badge';
+import { asMatchingContent } from '@/components/items/matching-content-view';
 import {
   Table,
   TableBody,
@@ -39,16 +40,14 @@ export function PreviewTable({ items }: PreviewTableProps) {
         <TableBody>
           {items.map((item, idx) => (
             <TableRow key={idx}>
-              <TableCell className="font-mono text-sm">
-                {item.position}
-              </TableCell>
+              <TableCell className="font-mono text-sm">{item.position}</TableCell>
               <TableCell>
                 <Badge variant="outline" className="text-xs">
                   {formatType(item.type)}
                 </Badge>
               </TableCell>
               <TableCell className="font-mono font-medium">
-                {item.correctKey ?? '—'}
+                <CorrectAnswerCell item={item} />
               </TableCell>
               <TableCell className="text-sm">
                 {item.skill ?? <span className="text-muted-foreground">—</span>}
@@ -64,9 +63,26 @@ export function PreviewTable({ items }: PreviewTableProps) {
   );
 }
 
+/**
+ * Un pareado no tiene una clave única: su respuesta correcta son los pares. Se
+ * muestran compactos para que quepan en la celda; el detalle completo (con
+ * distractores) vive en el panel del banco de ítems.
+ */
+function CorrectAnswerCell({ item }: { item: DiaItemPreview }) {
+  const matching = asMatchingContent(item.content ?? {});
+  if (!matching) return <>{item.correctKey ?? '—'}</>;
+
+  return (
+    <span className="text-xs leading-relaxed">
+      {matching.correctPairs.map((pair) => `${pair.leftId}→${pair.rightId}`).join('  ')}
+    </span>
+  );
+}
+
 function formatType(type: string): string {
   const map: Record<string, string> = {
     multiple_choice: 'Sel. multiple',
+    multi_select: 'Multi-selección',
     true_false: 'V/F',
     open_ended: 'Abierta',
     oral_reading: 'Lectura oral',

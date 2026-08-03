@@ -1,0 +1,2367 @@
+{
+ "plan": [
+  {
+   "instrument": "imported/DIA Historia, Geografía y Ciencias Sociales 5° Básico 2026 — Monitoreo Intermedio",
+   "position": 1,
+   "tags": [
+    {
+     "code": "HIST-SK-PENSAMIENTO-TEMPORAL-Y-ESPACIAL",
+     "type": "skill",
+     "tagType": "secondary"
+    },
+    {
+     "code": "HIST-5B-OA01",
+     "type": "learning_objective",
+     "tagType": "secondary"
+    },
+    {
+     "code": "CUR-CONTENIDO-HIST-5B-AX-HISTORIA",
+     "type": "axis",
+     "tagType": "secondary"
+    },
+    {
+     "code": "HIST-5B-OA01-I1",
+     "type": "descriptor",
+     "tagType": "primary"
+    }
+   ]
+  },
+  {
+   "instrument": "imported/DIA Historia, Geografía y Ciencias Sociales 5° Básico 2026 — Monitoreo Intermedio",
+   "position": 2,
+   "tags": [
+    {
+     "code": "HIST-SK-ANALISIS-Y-TRABAJO-CON-FUENTES-DE-INFORMACION",
+     "type": "skill",
+     "tagType": "secondary"
+    },
+    {
+     "code": "HIST-5B-OA02",
+     "type": "learning_objective",
+     "tagType": "secondary"
+    },
+    {
+     "code": "CUR-CONTENIDO-HIST-5B-AX-HISTORIA",
+     "type": "axis",
+     "tagType": "secondary"
+    },
+    {
+     "code": "HIST-5B-OA02-I1",
+     "type": "descriptor",
+     "tagType": "primary"
+    }
+   ]
+  },
+  {
+   "instrument": "imported/DIA Historia, Geografía y Ciencias Sociales 5° Básico 2026 — Monitoreo Intermedio",
+   "position": 3,
+   "tags": [
+    {
+     "code": "HIST-SK-PENSAMIENTO-CRITICO",
+     "type": "skill",
+     "tagType": "secondary"
+    },
+    {
+     "code": "HIST-5B-OA03",
+     "type": "learning_objective",
+     "tagType": "secondary"
+    },
+    {
+     "code": "CUR-CONTENIDO-HIST-5B-AX-HISTORIA",
+     "type": "axis",
+     "tagType": "secondary"
+    },
+    {
+     "code": "HIST-5B-OA03-I1",
+     "type": "descriptor",
+     "tagType": "primary"
+    }
+   ]
+  },
+  {
+   "instrument": "imported/DIA Historia, Geografía y Ciencias Sociales 5° Básico 2026 — Monitoreo Intermedio",
+   "position": 4,
+   "tags": [
+    {
+     "code": "HIST-SK-ANALISIS-Y-TRABAJO-CON-FUENTES-DE-INFORMACION",
+     "type": "skill",
+     "tagType": "secondary"
+    },
+    {
+     "code": "HIST-5B-OA04",
+     "type": "learning_objective",
+     "tagType": "secondary"
+    },
+    {
+     "code": "CUR-CONTENIDO-HIST-5B-AX-HISTORIA",
+     "type": "axis",
+     "tagType": "secondary"
+    },
+    {
+     "code": "HIST-5B-OA04-I1",
+     "type": "descriptor",
+     "tagType": "primary"
+    }
+   ]
+  },
+  {
+   "instrument": "imported/DIA Historia, Geografía y Ciencias Sociales 5° Básico 2026 — Monitoreo Intermedio",
+   "position": 5,
+   "tags": [
+    {
+     "code": "HIST-SK-ANALISIS-Y-TRABAJO-CON-FUENTES-DE-INFORMACION",
+     "type": "skill",
+     "tagType": "secondary"
+    },
+    {
+     "code": "HIST-5B-OA05",
+     "type": "learning_objective",
+     "tagType": "secondary"
+    },
+    {
+     "code": "CUR-CONTENIDO-HIST-5B-AX-HISTORIA",
+     "type": "axis",
+     "tagType": "secondary"
+    },
+    {
+     "code": "HIST-5B-OA05-I1",
+     "type": "descriptor",
+     "tagType": "primary"
+    }
+   ]
+  },
+  {
+   "instrument": "imported/DIA Historia, Geografía y Ciencias Sociales 5° Básico 2026 — Monitoreo Intermedio",
+   "position": 6,
+   "tags": [
+    {
+     "code": "HIST-SK-ANALISIS-Y-TRABAJO-CON-FUENTES-DE-INFORMACION",
+     "type": "skill",
+     "tagType": "secondary"
+    },
+    {
+     "code": "HIST-5B-OA06",
+     "type": "learning_objective",
+     "tagType": "secondary"
+    },
+    {
+     "code": "CUR-CONTENIDO-HIST-5B-AX-HISTORIA",
+     "type": "axis",
+     "tagType": "secondary"
+    },
+    {
+     "code": "HIST-5B-OA06-I1",
+     "type": "descriptor",
+     "tagType": "primary"
+    }
+   ]
+  },
+  {
+   "instrument": "imported/DIA Historia, Geografía y Ciencias Sociales 5° Básico 2026 — Monitoreo Intermedio",
+   "position": 7,
+   "tags": [
+    {
+     "code": "HIST-SK-PENSAMIENTO-TEMPORAL-Y-ESPACIAL",
+     "type": "skill",
+     "tagType": "secondary"
+    },
+    {
+     "code": "HIST-5B-OA06",
+     "type": "learning_objective",
+     "tagType": "secondary"
+    },
+    {
+     "code": "CUR-CONTENIDO-HIST-5B-AX-HISTORIA",
+     "type": "axis",
+     "tagType": "secondary"
+    },
+    {
+     "code": "HIST-5B-OA06-I2",
+     "type": "descriptor",
+     "tagType": "primary"
+    }
+   ]
+  },
+  {
+   "instrument": "imported/DIA Historia, Geografía y Ciencias Sociales 5° Básico 2026 — Monitoreo Intermedio",
+   "position": 8,
+   "tags": [
+    {
+     "code": "HIST-SK-PENSAMIENTO-CRITICO",
+     "type": "skill",
+     "tagType": "secondary"
+    },
+    {
+     "code": "HIST-5B-OA07",
+     "type": "learning_objective",
+     "tagType": "secondary"
+    },
+    {
+     "code": "CUR-CONTENIDO-HIST-5B-AX-HISTORIA",
+     "type": "axis",
+     "tagType": "secondary"
+    },
+    {
+     "code": "HIST-5B-OA07-I1",
+     "type": "descriptor",
+     "tagType": "primary"
+    }
+   ]
+  },
+  {
+   "instrument": "imported/DIA Historia, Geografía y Ciencias Sociales 5° Básico 2026 — Monitoreo Intermedio",
+   "position": 9,
+   "tags": [
+    {
+     "code": "HIST-SK-PENSAMIENTO-TEMPORAL-Y-ESPACIAL",
+     "type": "skill",
+     "tagType": "secondary"
+    },
+    {
+     "code": "HIST-5B-OA07",
+     "type": "learning_objective",
+     "tagType": "secondary"
+    },
+    {
+     "code": "CUR-CONTENIDO-HIST-5B-AX-HISTORIA",
+     "type": "axis",
+     "tagType": "secondary"
+    },
+    {
+     "code": "HIST-5B-OA07-I2",
+     "type": "descriptor",
+     "tagType": "primary"
+    }
+   ]
+  },
+  {
+   "instrument": "imported/DIA Historia, Geografía y Ciencias Sociales 5° Básico 2026 — Monitoreo Intermedio",
+   "position": 10,
+   "tags": [
+    {
+     "code": "HIST-SK-PENSAMIENTO-TEMPORAL-Y-ESPACIAL",
+     "type": "skill",
+     "tagType": "secondary"
+    },
+    {
+     "code": "HIST-5B-OA07",
+     "type": "learning_objective",
+     "tagType": "secondary"
+    },
+    {
+     "code": "CUR-CONTENIDO-HIST-5B-AX-HISTORIA",
+     "type": "axis",
+     "tagType": "secondary"
+    },
+    {
+     "code": "HIST-5B-OA07-I3",
+     "type": "descriptor",
+     "tagType": "primary"
+    }
+   ]
+  },
+  {
+   "instrument": "imported/DIA Historia, Geografía y Ciencias Sociales 5° Básico 2026 — Monitoreo Intermedio",
+   "position": 11,
+   "tags": [
+    {
+     "code": "HIST-SK-PENSAMIENTO-TEMPORAL-Y-ESPACIAL",
+     "type": "skill",
+     "tagType": "secondary"
+    },
+    {
+     "code": "HIST-5B-OA08",
+     "type": "learning_objective",
+     "tagType": "secondary"
+    },
+    {
+     "code": "CUR-CONTENIDO-HIST-5B-AX-HISTORIA",
+     "type": "axis",
+     "tagType": "secondary"
+    },
+    {
+     "code": "HIST-5B-OA08-I1",
+     "type": "descriptor",
+     "tagType": "primary"
+    }
+   ]
+  },
+  {
+   "instrument": "imported/DIA Historia, Geografía y Ciencias Sociales 5° Básico 2026 — Monitoreo Intermedio",
+   "position": 12,
+   "tags": [
+    {
+     "code": "HIST-SK-PENSAMIENTO-TEMPORAL-Y-ESPACIAL",
+     "type": "skill",
+     "tagType": "secondary"
+    },
+    {
+     "code": "HIST-5B-OA09",
+     "type": "learning_objective",
+     "tagType": "secondary"
+    },
+    {
+     "code": "CUR-CONTENIDO-HIST-5B-AX-GEOGRAFIA",
+     "type": "axis",
+     "tagType": "secondary"
+    },
+    {
+     "code": "HIST-5B-OA09-I1",
+     "type": "descriptor",
+     "tagType": "primary"
+    }
+   ]
+  },
+  {
+   "instrument": "imported/DIA Historia, Geografía y Ciencias Sociales 5° Básico 2026 — Monitoreo Intermedio",
+   "position": 13,
+   "tags": [
+    {
+     "code": "HIST-SK-PENSAMIENTO-TEMPORAL-Y-ESPACIAL",
+     "type": "skill",
+     "tagType": "secondary"
+    },
+    {
+     "code": "HIST-5B-OA12",
+     "type": "learning_objective",
+     "tagType": "secondary"
+    },
+    {
+     "code": "CUR-CONTENIDO-HIST-5B-AX-GEOGRAFIA",
+     "type": "axis",
+     "tagType": "secondary"
+    },
+    {
+     "code": "HIST-5B-OA12-I1",
+     "type": "descriptor",
+     "tagType": "primary"
+    }
+   ]
+  },
+  {
+   "instrument": "imported/DIA Historia, Geografía y Ciencias Sociales 5° Básico 2026 — Monitoreo Intermedio",
+   "position": 14,
+   "tags": [
+    {
+     "code": "HIST-SK-PENSAMIENTO-TEMPORAL-Y-ESPACIAL",
+     "type": "skill",
+     "tagType": "secondary"
+    },
+    {
+     "code": "HIST-5B-OA09",
+     "type": "learning_objective",
+     "tagType": "secondary"
+    },
+    {
+     "code": "CUR-CONTENIDO-HIST-5B-AX-GEOGRAFIA",
+     "type": "axis",
+     "tagType": "secondary"
+    },
+    {
+     "code": "HIST-5B-OA09-I2",
+     "type": "descriptor",
+     "tagType": "primary"
+    }
+   ]
+  },
+  {
+   "instrument": "imported/DIA Historia, Geografía y Ciencias Sociales 5° Básico 2026 — Monitoreo Intermedio",
+   "position": 15,
+   "tags": [
+    {
+     "code": "HIST-SK-PENSAMIENTO-TEMPORAL-Y-ESPACIAL",
+     "type": "skill",
+     "tagType": "secondary"
+    },
+    {
+     "code": "HIST-5B-OA10",
+     "type": "learning_objective",
+     "tagType": "secondary"
+    },
+    {
+     "code": "CUR-CONTENIDO-HIST-5B-AX-GEOGRAFIA",
+     "type": "axis",
+     "tagType": "secondary"
+    },
+    {
+     "code": "HIST-5B-OA10-I1",
+     "type": "descriptor",
+     "tagType": "primary"
+    }
+   ]
+  },
+  {
+   "instrument": "imported/DIA Historia, Geografía y Ciencias Sociales 5° Básico 2026 — Monitoreo Intermedio",
+   "position": 16,
+   "tags": [
+    {
+     "code": "HIST-SK-ANALISIS-Y-TRABAJO-CON-FUENTES-DE-INFORMACION",
+     "type": "skill",
+     "tagType": "secondary"
+    },
+    {
+     "code": "HIST-5B-OA12",
+     "type": "learning_objective",
+     "tagType": "secondary"
+    },
+    {
+     "code": "CUR-CONTENIDO-HIST-5B-AX-GEOGRAFIA",
+     "type": "axis",
+     "tagType": "secondary"
+    },
+    {
+     "code": "HIST-5B-OA12-I2",
+     "type": "descriptor",
+     "tagType": "primary"
+    }
+   ]
+  },
+  {
+   "instrument": "imported/DIA Historia, Geografía y Ciencias Sociales 5° Básico 2026 — Monitoreo Intermedio",
+   "position": 17,
+   "tags": [
+    {
+     "code": "HIST-SK-ANALISIS-Y-TRABAJO-CON-FUENTES-DE-INFORMACION",
+     "type": "skill",
+     "tagType": "secondary"
+    },
+    {
+     "code": "HIST-5B-OA12",
+     "type": "learning_objective",
+     "tagType": "secondary"
+    },
+    {
+     "code": "CUR-CONTENIDO-HIST-5B-AX-GEOGRAFIA",
+     "type": "axis",
+     "tagType": "secondary"
+    },
+    {
+     "code": "HIST-5B-OA12-I2",
+     "type": "descriptor",
+     "tagType": "primary"
+    }
+   ]
+  },
+  {
+   "instrument": "imported/DIA Historia, Geografía y Ciencias Sociales 5° Básico 2026 — Monitoreo Intermedio",
+   "position": 18,
+   "tags": [
+    {
+     "code": "HIST-SK-ANALISIS-Y-TRABAJO-CON-FUENTES-DE-INFORMACION",
+     "type": "skill",
+     "tagType": "secondary"
+    },
+    {
+     "code": "HIST-5B-OA12",
+     "type": "learning_objective",
+     "tagType": "secondary"
+    },
+    {
+     "code": "CUR-CONTENIDO-HIST-5B-AX-GEOGRAFIA",
+     "type": "axis",
+     "tagType": "secondary"
+    },
+    {
+     "code": "HIST-5B-OA12-I3",
+     "type": "descriptor",
+     "tagType": "primary"
+    }
+   ]
+  },
+  {
+   "instrument": "imported/DIA Historia, Geografía y Ciencias Sociales 5° Básico 2026 — Monitoreo Intermedio",
+   "position": 19,
+   "tags": [
+    {
+     "code": "HIST-5B-OA11",
+     "type": "learning_objective",
+     "tagType": "secondary"
+    },
+    {
+     "code": "CUR-CONTENIDO-HIST-5B-AX-GEOGRAFIA",
+     "type": "axis",
+     "tagType": "secondary"
+    },
+    {
+     "code": "HIST-5B-OA11-I1",
+     "type": "descriptor",
+     "tagType": "primary"
+    }
+   ]
+  },
+  {
+   "instrument": "imported/DIA Historia, Geografía y Ciencias Sociales 5° Básico 2026 — Monitoreo Intermedio",
+   "position": 20,
+   "tags": [
+    {
+     "code": "HIST-SK-ANALISIS-Y-TRABAJO-CON-FUENTES-DE-INFORMACION",
+     "type": "skill",
+     "tagType": "secondary"
+    },
+    {
+     "code": "HIST-5B-OA13",
+     "type": "learning_objective",
+     "tagType": "secondary"
+    },
+    {
+     "code": "CUR-CONTENIDO-HIST-5B-AX-FORMACION-CIUDADANA",
+     "type": "axis",
+     "tagType": "secondary"
+    },
+    {
+     "code": "HIST-5B-OA13-I1",
+     "type": "descriptor",
+     "tagType": "primary"
+    }
+   ]
+  },
+  {
+   "instrument": "imported/DIA Historia, Geografía y Ciencias Sociales 5° Básico 2026 — Monitoreo Intermedio",
+   "position": 21,
+   "tags": [
+    {
+     "code": "HIST-SK-ANALISIS-Y-TRABAJO-CON-FUENTES-DE-INFORMACION",
+     "type": "skill",
+     "tagType": "secondary"
+    },
+    {
+     "code": "HIST-5B-OA14",
+     "type": "learning_objective",
+     "tagType": "secondary"
+    },
+    {
+     "code": "CUR-CONTENIDO-HIST-5B-AX-FORMACION-CIUDADANA",
+     "type": "axis",
+     "tagType": "secondary"
+    },
+    {
+     "code": "HIST-5B-OA14-I1",
+     "type": "descriptor",
+     "tagType": "primary"
+    }
+   ]
+  },
+  {
+   "instrument": "imported/DIA Historia, Geografía y Ciencias Sociales 5° Básico 2026 — Monitoreo Intermedio",
+   "position": 22,
+   "tags": [
+    {
+     "code": "HIST-SK-PENSAMIENTO-CRITICO",
+     "type": "skill",
+     "tagType": "secondary"
+    },
+    {
+     "code": "HIST-5B-OA20",
+     "type": "learning_objective",
+     "tagType": "secondary"
+    },
+    {
+     "code": "CUR-CONTENIDO-HIST-5B-AX-FORMACION-CIUDADANA",
+     "type": "axis",
+     "tagType": "secondary"
+    },
+    {
+     "code": "HIST-5B-OA20-I1",
+     "type": "descriptor",
+     "tagType": "primary"
+    }
+   ]
+  },
+  {
+   "instrument": "imported/DIA Historia, Geografía y Ciencias Sociales 5° Básico 2026 — Monitoreo Intermedio",
+   "position": 23,
+   "tags": [
+    {
+     "code": "HIST-SK-PENSAMIENTO-CRITICO",
+     "type": "skill",
+     "tagType": "secondary"
+    },
+    {
+     "code": "HIST-5B-OA19",
+     "type": "learning_objective",
+     "tagType": "secondary"
+    },
+    {
+     "code": "CUR-CONTENIDO-HIST-5B-AX-FORMACION-CIUDADANA",
+     "type": "axis",
+     "tagType": "secondary"
+    },
+    {
+     "code": "HIST-5B-OA19-I1",
+     "type": "descriptor",
+     "tagType": "primary"
+    }
+   ]
+  },
+  {
+   "instrument": "imported/DIA Historia, Geografía y Ciencias Sociales 5° Básico 2026 — Monitoreo Intermedio",
+   "position": 24,
+   "tags": [
+    {
+     "code": "HIST-SK-PENSAMIENTO-CRITICO",
+     "type": "skill",
+     "tagType": "secondary"
+    },
+    {
+     "code": "HIST-5B-OA21",
+     "type": "learning_objective",
+     "tagType": "secondary"
+    },
+    {
+     "code": "CUR-CONTENIDO-HIST-5B-AX-FORMACION-CIUDADANA",
+     "type": "axis",
+     "tagType": "secondary"
+    },
+    {
+     "code": "HIST-5B-OA21-I1",
+     "type": "descriptor",
+     "tagType": "primary"
+    }
+   ]
+  },
+  {
+   "instrument": "imported/DIA Historia, Geografía y Ciencias Sociales 5° Básico 2026 — Monitoreo Intermedio",
+   "position": 25,
+   "tags": [
+    {
+     "code": "HIST-SK-PENSAMIENTO-CRITICO",
+     "type": "skill",
+     "tagType": "secondary"
+    },
+    {
+     "code": "HIST-5B-OA22",
+     "type": "learning_objective",
+     "tagType": "secondary"
+    },
+    {
+     "code": "CUR-CONTENIDO-HIST-5B-AX-FORMACION-CIUDADANA",
+     "type": "axis",
+     "tagType": "secondary"
+    },
+    {
+     "code": "HIST-5B-OA22-I1",
+     "type": "descriptor",
+     "tagType": "primary"
+    }
+   ]
+  },
+  {
+   "instrument": "imported/DIA Historia, Geografía y Ciencias Sociales 8° Básico 2026 — Monitoreo Intermedio",
+   "position": 1,
+   "tags": [
+    {
+     "code": "HIST-SK-ANALISIS-Y-TRABAJO-CON-FUENTES-DE-INFORMACION",
+     "type": "skill",
+     "tagType": "secondary"
+    },
+    {
+     "code": "HIST-8B-OA01",
+     "type": "learning_objective",
+     "tagType": "secondary"
+    },
+    {
+     "code": "CUR-CONTENIDO-HIST-8B-AX-HISTORIA",
+     "type": "axis",
+     "tagType": "secondary"
+    },
+    {
+     "code": "HIST-8B-OA01-I1",
+     "type": "descriptor",
+     "tagType": "primary"
+    }
+   ]
+  },
+  {
+   "instrument": "imported/DIA Historia, Geografía y Ciencias Sociales 8° Básico 2026 — Monitoreo Intermedio",
+   "position": 2,
+   "tags": [
+    {
+     "code": "HIST-SK-PENSAMIENTO-CRITICO",
+     "type": "skill",
+     "tagType": "secondary"
+    },
+    {
+     "code": "HIST-8B-OA02",
+     "type": "learning_objective",
+     "tagType": "secondary"
+    },
+    {
+     "code": "CUR-CONTENIDO-HIST-8B-AX-HISTORIA",
+     "type": "axis",
+     "tagType": "secondary"
+    },
+    {
+     "code": "HIST-8B-OA02-I1",
+     "type": "descriptor",
+     "tagType": "primary"
+    }
+   ]
+  },
+  {
+   "instrument": "imported/DIA Historia, Geografía y Ciencias Sociales 8° Básico 2026 — Monitoreo Intermedio",
+   "position": 3,
+   "tags": [
+    {
+     "code": "HIST-SK-PENSAMIENTO-CRITICO",
+     "type": "skill",
+     "tagType": "secondary"
+    },
+    {
+     "code": "HIST-8B-OA03",
+     "type": "learning_objective",
+     "tagType": "secondary"
+    },
+    {
+     "code": "CUR-CONTENIDO-HIST-8B-AX-HISTORIA",
+     "type": "axis",
+     "tagType": "secondary"
+    },
+    {
+     "code": "HIST-8B-OA03-I1",
+     "type": "descriptor",
+     "tagType": "primary"
+    }
+   ]
+  },
+  {
+   "instrument": "imported/DIA Historia, Geografía y Ciencias Sociales 8° Básico 2026 — Monitoreo Intermedio",
+   "position": 4,
+   "tags": [
+    {
+     "code": "HIST-SK-ANALISIS-Y-TRABAJO-CON-FUENTES-DE-INFORMACION",
+     "type": "skill",
+     "tagType": "secondary"
+    },
+    {
+     "code": "HIST-8B-OA04",
+     "type": "learning_objective",
+     "tagType": "secondary"
+    },
+    {
+     "code": "CUR-CONTENIDO-HIST-8B-AX-HISTORIA",
+     "type": "axis",
+     "tagType": "secondary"
+    },
+    {
+     "code": "HIST-8B-OA04-I1",
+     "type": "descriptor",
+     "tagType": "primary"
+    }
+   ]
+  },
+  {
+   "instrument": "imported/DIA Historia, Geografía y Ciencias Sociales 8° Básico 2026 — Monitoreo Intermedio",
+   "position": 5,
+   "tags": [
+    {
+     "code": "HIST-SK-PENSAMIENTO-CRITICO",
+     "type": "skill",
+     "tagType": "secondary"
+    },
+    {
+     "code": "HIST-8B-OA05",
+     "type": "learning_objective",
+     "tagType": "secondary"
+    },
+    {
+     "code": "CUR-CONTENIDO-HIST-8B-AX-HISTORIA",
+     "type": "axis",
+     "tagType": "secondary"
+    },
+    {
+     "code": "HIST-8B-OA05-I1",
+     "type": "descriptor",
+     "tagType": "primary"
+    }
+   ]
+  },
+  {
+   "instrument": "imported/DIA Historia, Geografía y Ciencias Sociales 8° Básico 2026 — Monitoreo Intermedio",
+   "position": 6,
+   "tags": [
+    {
+     "code": "HIST-SK-ANALISIS-Y-TRABAJO-CON-FUENTES-DE-INFORMACION",
+     "type": "skill",
+     "tagType": "secondary"
+    },
+    {
+     "code": "HIST-8B-OA07",
+     "type": "learning_objective",
+     "tagType": "secondary"
+    },
+    {
+     "code": "CUR-CONTENIDO-HIST-8B-AX-HISTORIA",
+     "type": "axis",
+     "tagType": "secondary"
+    },
+    {
+     "code": "HIST-8B-OA07-I1",
+     "type": "descriptor",
+     "tagType": "primary"
+    }
+   ]
+  },
+  {
+   "instrument": "imported/DIA Historia, Geografía y Ciencias Sociales 8° Básico 2026 — Monitoreo Intermedio",
+   "position": 7,
+   "tags": [
+    {
+     "code": "HIST-SK-PENSAMIENTO-CRITICO",
+     "type": "skill",
+     "tagType": "secondary"
+    },
+    {
+     "code": "HIST-8B-OA07",
+     "type": "learning_objective",
+     "tagType": "secondary"
+    },
+    {
+     "code": "CUR-CONTENIDO-HIST-8B-AX-HISTORIA",
+     "type": "axis",
+     "tagType": "secondary"
+    },
+    {
+     "code": "HIST-8B-OA07-I2",
+     "type": "descriptor",
+     "tagType": "primary"
+    }
+   ]
+  },
+  {
+   "instrument": "imported/DIA Historia, Geografía y Ciencias Sociales 8° Básico 2026 — Monitoreo Intermedio",
+   "position": 8,
+   "tags": [
+    {
+     "code": "HIST-SK-PENSAMIENTO-CRITICO",
+     "type": "skill",
+     "tagType": "secondary"
+    },
+    {
+     "code": "HIST-8B-OA06",
+     "type": "learning_objective",
+     "tagType": "secondary"
+    },
+    {
+     "code": "CUR-CONTENIDO-HIST-8B-AX-HISTORIA",
+     "type": "axis",
+     "tagType": "secondary"
+    },
+    {
+     "code": "HIST-8B-OA06-I1",
+     "type": "descriptor",
+     "tagType": "primary"
+    }
+   ]
+  },
+  {
+   "instrument": "imported/DIA Historia, Geografía y Ciencias Sociales 8° Básico 2026 — Monitoreo Intermedio",
+   "position": 9,
+   "tags": [
+    {
+     "code": "HIST-SK-ANALISIS-Y-TRABAJO-CON-FUENTES-DE-INFORMACION",
+     "type": "skill",
+     "tagType": "secondary"
+    },
+    {
+     "code": "HIST-8B-OA08",
+     "type": "learning_objective",
+     "tagType": "secondary"
+    },
+    {
+     "code": "CUR-CONTENIDO-HIST-8B-AX-HISTORIA",
+     "type": "axis",
+     "tagType": "secondary"
+    },
+    {
+     "code": "HIST-8B-OA08-I1",
+     "type": "descriptor",
+     "tagType": "primary"
+    }
+   ]
+  },
+  {
+   "instrument": "imported/DIA Historia, Geografía y Ciencias Sociales 8° Básico 2026 — Monitoreo Intermedio",
+   "position": 10,
+   "tags": [
+    {
+     "code": "HIST-SK-ANALISIS-Y-TRABAJO-CON-FUENTES-DE-INFORMACION",
+     "type": "skill",
+     "tagType": "secondary"
+    },
+    {
+     "code": "HIST-8B-OA09",
+     "type": "learning_objective",
+     "tagType": "secondary"
+    },
+    {
+     "code": "CUR-CONTENIDO-HIST-8B-AX-HISTORIA",
+     "type": "axis",
+     "tagType": "secondary"
+    },
+    {
+     "code": "HIST-8B-OA09-I1",
+     "type": "descriptor",
+     "tagType": "primary"
+    }
+   ]
+  },
+  {
+   "instrument": "imported/DIA Historia, Geografía y Ciencias Sociales 8° Básico 2026 — Monitoreo Intermedio",
+   "position": 11,
+   "tags": [
+    {
+     "code": "HIST-SK-PENSAMIENTO-CRITICO",
+     "type": "skill",
+     "tagType": "secondary"
+    },
+    {
+     "code": "HIST-8B-OA10",
+     "type": "learning_objective",
+     "tagType": "secondary"
+    },
+    {
+     "code": "CUR-CONTENIDO-HIST-8B-AX-HISTORIA",
+     "type": "axis",
+     "tagType": "secondary"
+    },
+    {
+     "code": "HIST-8B-OA10-I1",
+     "type": "descriptor",
+     "tagType": "primary"
+    }
+   ]
+  },
+  {
+   "instrument": "imported/DIA Historia, Geografía y Ciencias Sociales 8° Básico 2026 — Monitoreo Intermedio",
+   "position": 12,
+   "tags": [
+    {
+     "code": "HIST-SK-ANALISIS-Y-TRABAJO-CON-FUENTES-DE-INFORMACION",
+     "type": "skill",
+     "tagType": "secondary"
+    },
+    {
+     "code": "HIST-8B-OA11",
+     "type": "learning_objective",
+     "tagType": "secondary"
+    },
+    {
+     "code": "CUR-CONTENIDO-HIST-8B-AX-HISTORIA",
+     "type": "axis",
+     "tagType": "secondary"
+    },
+    {
+     "code": "HIST-8B-OA11-I1",
+     "type": "descriptor",
+     "tagType": "primary"
+    }
+   ]
+  },
+  {
+   "instrument": "imported/DIA Historia, Geografía y Ciencias Sociales 8° Básico 2026 — Monitoreo Intermedio",
+   "position": 13,
+   "tags": [
+    {
+     "code": "HIST-SK-ANALISIS-Y-TRABAJO-CON-FUENTES-DE-INFORMACION",
+     "type": "skill",
+     "tagType": "secondary"
+    },
+    {
+     "code": "HIST-8B-OA11",
+     "type": "learning_objective",
+     "tagType": "secondary"
+    },
+    {
+     "code": "CUR-CONTENIDO-HIST-8B-AX-HISTORIA",
+     "type": "axis",
+     "tagType": "secondary"
+    },
+    {
+     "code": "HIST-8B-OA11-I2",
+     "type": "descriptor",
+     "tagType": "primary"
+    }
+   ]
+  },
+  {
+   "instrument": "imported/DIA Historia, Geografía y Ciencias Sociales 8° Básico 2026 — Monitoreo Intermedio",
+   "position": 14,
+   "tags": [
+    {
+     "code": "HIST-SK-PENSAMIENTO-CRITICO",
+     "type": "skill",
+     "tagType": "secondary"
+    },
+    {
+     "code": "HIST-8B-OA12",
+     "type": "learning_objective",
+     "tagType": "secondary"
+    },
+    {
+     "code": "CUR-CONTENIDO-HIST-8B-AX-HISTORIA",
+     "type": "axis",
+     "tagType": "secondary"
+    },
+    {
+     "code": "HIST-8B-OA12-I1",
+     "type": "descriptor",
+     "tagType": "primary"
+    }
+   ]
+  },
+  {
+   "instrument": "imported/DIA Historia, Geografía y Ciencias Sociales 8° Básico 2026 — Monitoreo Intermedio",
+   "position": 15,
+   "tags": [
+    {
+     "code": "HIST-SK-ANALISIS-Y-TRABAJO-CON-FUENTES-DE-INFORMACION",
+     "type": "skill",
+     "tagType": "secondary"
+    },
+    {
+     "code": "HIST-8B-OA13",
+     "type": "learning_objective",
+     "tagType": "secondary"
+    },
+    {
+     "code": "CUR-CONTENIDO-HIST-8B-AX-HISTORIA",
+     "type": "axis",
+     "tagType": "secondary"
+    },
+    {
+     "code": "HIST-8B-OA13-I1",
+     "type": "descriptor",
+     "tagType": "primary"
+    }
+   ]
+  },
+  {
+   "instrument": "imported/DIA Historia, Geografía y Ciencias Sociales 8° Básico 2026 — Monitoreo Intermedio",
+   "position": 16,
+   "tags": [
+    {
+     "code": "HIST-SK-ANALISIS-Y-TRABAJO-CON-FUENTES-DE-INFORMACION",
+     "type": "skill",
+     "tagType": "secondary"
+    },
+    {
+     "code": "HIST-8B-OA14",
+     "type": "learning_objective",
+     "tagType": "secondary"
+    },
+    {
+     "code": "CUR-CONTENIDO-HIST-8B-AX-HISTORIA",
+     "type": "axis",
+     "tagType": "secondary"
+    },
+    {
+     "code": "HIST-8B-OA14-I1",
+     "type": "descriptor",
+     "tagType": "primary"
+    }
+   ]
+  },
+  {
+   "instrument": "imported/DIA Historia, Geografía y Ciencias Sociales 8° Básico 2026 — Monitoreo Intermedio",
+   "position": 17,
+   "tags": [
+    {
+     "code": "HIST-SK-ANALISIS-Y-TRABAJO-CON-FUENTES-DE-INFORMACION",
+     "type": "skill",
+     "tagType": "secondary"
+    },
+    {
+     "code": "HIST-8B-OA14",
+     "type": "learning_objective",
+     "tagType": "secondary"
+    },
+    {
+     "code": "CUR-CONTENIDO-HIST-8B-AX-HISTORIA",
+     "type": "axis",
+     "tagType": "secondary"
+    },
+    {
+     "code": "HIST-8B-OA14-I2",
+     "type": "descriptor",
+     "tagType": "primary"
+    }
+   ]
+  },
+  {
+   "instrument": "imported/DIA Historia, Geografía y Ciencias Sociales 8° Básico 2026 — Monitoreo Intermedio",
+   "position": 18,
+   "tags": [
+    {
+     "code": "HIST-SK-PENSAMIENTO-CRITICO",
+     "type": "skill",
+     "tagType": "secondary"
+    },
+    {
+     "code": "HIST-8B-OA15",
+     "type": "learning_objective",
+     "tagType": "secondary"
+    },
+    {
+     "code": "CUR-CONTENIDO-HIST-8B-AX-HISTORIA",
+     "type": "axis",
+     "tagType": "secondary"
+    },
+    {
+     "code": "HIST-8B-OA15-I1",
+     "type": "descriptor",
+     "tagType": "primary"
+    }
+   ]
+  },
+  {
+   "instrument": "imported/DIA Historia, Geografía y Ciencias Sociales 8° Básico 2026 — Monitoreo Intermedio",
+   "position": 19,
+   "tags": [
+    {
+     "code": "HIST-SK-PENSAMIENTO-CRITICO",
+     "type": "skill",
+     "tagType": "secondary"
+    },
+    {
+     "code": "HIST-8B-OA17",
+     "type": "learning_objective",
+     "tagType": "secondary"
+    },
+    {
+     "code": "CUR-CONTENIDO-HIST-8B-AX-FORMACION-CIUDADANA",
+     "type": "axis",
+     "tagType": "secondary"
+    },
+    {
+     "code": "HIST-8B-OA17-I1",
+     "type": "descriptor",
+     "tagType": "primary"
+    }
+   ]
+  },
+  {
+   "instrument": "imported/DIA Historia, Geografía y Ciencias Sociales 8° Básico 2026 — Monitoreo Intermedio",
+   "position": 20,
+   "tags": [
+    {
+     "code": "HIST-SK-PENSAMIENTO-TEMPORAL-Y-ESPACIAL",
+     "type": "skill",
+     "tagType": "secondary"
+    },
+    {
+     "code": "HIST-8B-OA16",
+     "type": "learning_objective",
+     "tagType": "secondary"
+    },
+    {
+     "code": "CUR-CONTENIDO-HIST-8B-AX-HISTORIA",
+     "type": "axis",
+     "tagType": "secondary"
+    },
+    {
+     "code": "HIST-8B-OA16-I1",
+     "type": "descriptor",
+     "tagType": "primary"
+    }
+   ]
+  },
+  {
+   "instrument": "imported/DIA Historia, Geografía y Ciencias Sociales 8° Básico 2026 — Monitoreo Intermedio",
+   "position": 21,
+   "tags": [
+    {
+     "code": "HIST-SK-PENSAMIENTO-TEMPORAL-Y-ESPACIAL",
+     "type": "skill",
+     "tagType": "secondary"
+    },
+    {
+     "code": "HIST-8B-OA18",
+     "type": "learning_objective",
+     "tagType": "secondary"
+    },
+    {
+     "code": "CUR-CONTENIDO-HIST-8B-AX-FORMACION-CIUDADANA",
+     "type": "axis",
+     "tagType": "secondary"
+    },
+    {
+     "code": "HIST-8B-OA18-I1",
+     "type": "descriptor",
+     "tagType": "primary"
+    }
+   ]
+  },
+  {
+   "instrument": "imported/DIA Historia, Geografía y Ciencias Sociales 8° Básico 2026 — Monitoreo Intermedio",
+   "position": 22,
+   "tags": [
+    {
+     "code": "HIST-SK-ANALISIS-Y-TRABAJO-CON-FUENTES-DE-INFORMACION",
+     "type": "skill",
+     "tagType": "secondary"
+    },
+    {
+     "code": "HIST-8B-OA19",
+     "type": "learning_objective",
+     "tagType": "secondary"
+    },
+    {
+     "code": "CUR-CONTENIDO-HIST-8B-AX-FORMACION-CIUDADANA",
+     "type": "axis",
+     "tagType": "secondary"
+    },
+    {
+     "code": "HIST-8B-OA19-I1",
+     "type": "descriptor",
+     "tagType": "primary"
+    }
+   ]
+  },
+  {
+   "instrument": "imported/DIA Historia, Geografía y Ciencias Sociales 8° Básico 2026 — Monitoreo Intermedio",
+   "position": 23,
+   "tags": [
+    {
+     "code": "HIST-SK-PENSAMIENTO-TEMPORAL-Y-ESPACIAL",
+     "type": "skill",
+     "tagType": "secondary"
+    },
+    {
+     "code": "HIST-8B-OA20",
+     "type": "learning_objective",
+     "tagType": "secondary"
+    },
+    {
+     "code": "CUR-CONTENIDO-HIST-8B-AX-GEOGRAFIA",
+     "type": "axis",
+     "tagType": "secondary"
+    },
+    {
+     "code": "HIST-8B-OA20-I1",
+     "type": "descriptor",
+     "tagType": "primary"
+    }
+   ]
+  },
+  {
+   "instrument": "imported/DIA Historia, Geografía y Ciencias Sociales 8° Básico 2026 — Monitoreo Intermedio",
+   "position": 24,
+   "tags": [
+    {
+     "code": "HIST-SK-PENSAMIENTO-TEMPORAL-Y-ESPACIAL",
+     "type": "skill",
+     "tagType": "secondary"
+    },
+    {
+     "code": "HIST-8B-OA20",
+     "type": "learning_objective",
+     "tagType": "secondary"
+    },
+    {
+     "code": "CUR-CONTENIDO-HIST-8B-AX-GEOGRAFIA",
+     "type": "axis",
+     "tagType": "secondary"
+    },
+    {
+     "code": "HIST-8B-OA20-I1",
+     "type": "descriptor",
+     "tagType": "primary"
+    }
+   ]
+  },
+  {
+   "instrument": "imported/DIA Historia, Geografía y Ciencias Sociales 8° Básico 2026 — Monitoreo Intermedio",
+   "position": 25,
+   "tags": [
+    {
+     "code": "HIST-SK-PENSAMIENTO-TEMPORAL-Y-ESPACIAL",
+     "type": "skill",
+     "tagType": "secondary"
+    },
+    {
+     "code": "HIST-8B-OA20",
+     "type": "learning_objective",
+     "tagType": "secondary"
+    },
+    {
+     "code": "CUR-CONTENIDO-HIST-8B-AX-GEOGRAFIA",
+     "type": "axis",
+     "tagType": "secondary"
+    },
+    {
+     "code": "HIST-8B-OA20-I1",
+     "type": "descriptor",
+     "tagType": "primary"
+    }
+   ]
+  },
+  {
+   "instrument": "imported/DIA Historia, Geografía y Ciencias Sociales 8° Básico 2026 — Monitoreo Intermedio",
+   "position": 26,
+   "tags": [
+    {
+     "code": "HIST-SK-PENSAMIENTO-TEMPORAL-Y-ESPACIAL",
+     "type": "skill",
+     "tagType": "secondary"
+    },
+    {
+     "code": "HIST-8B-OA20",
+     "type": "learning_objective",
+     "tagType": "secondary"
+    },
+    {
+     "code": "CUR-CONTENIDO-HIST-8B-AX-GEOGRAFIA",
+     "type": "axis",
+     "tagType": "secondary"
+    },
+    {
+     "code": "HIST-8B-OA20-I1",
+     "type": "descriptor",
+     "tagType": "primary"
+    }
+   ]
+  },
+  {
+   "instrument": "imported/DIA Historia, Geografía y Ciencias Sociales 8° Básico 2026 — Monitoreo Intermedio",
+   "position": 27,
+   "tags": [
+    {
+     "code": "HIST-SK-PENSAMIENTO-TEMPORAL-Y-ESPACIAL",
+     "type": "skill",
+     "tagType": "secondary"
+    },
+    {
+     "code": "HIST-8B-OA20",
+     "type": "learning_objective",
+     "tagType": "secondary"
+    },
+    {
+     "code": "CUR-CONTENIDO-HIST-8B-AX-GEOGRAFIA",
+     "type": "axis",
+     "tagType": "secondary"
+    },
+    {
+     "code": "HIST-8B-OA20-I1",
+     "type": "descriptor",
+     "tagType": "primary"
+    }
+   ]
+  },
+  {
+   "instrument": "imported/DIA Historia, Geografía y Ciencias Sociales 8° Básico 2026 — Monitoreo Intermedio",
+   "position": 28,
+   "tags": [
+    {
+     "code": "HIST-SK-PENSAMIENTO-CRITICO",
+     "type": "skill",
+     "tagType": "secondary"
+    },
+    {
+     "code": "HIST-8B-OA21",
+     "type": "learning_objective",
+     "tagType": "secondary"
+    },
+    {
+     "code": "CUR-CONTENIDO-HIST-8B-AX-GEOGRAFIA",
+     "type": "axis",
+     "tagType": "secondary"
+    },
+    {
+     "code": "HIST-8B-OA21-I1",
+     "type": "descriptor",
+     "tagType": "primary"
+    }
+   ]
+  },
+  {
+   "instrument": "imported/DIA Historia, Geografía y Ciencias Sociales 8° Básico 2026 — Monitoreo Intermedio",
+   "position": 29,
+   "tags": [
+    {
+     "code": "HIST-SK-PENSAMIENTO-CRITICO",
+     "type": "skill",
+     "tagType": "secondary"
+    },
+    {
+     "code": "HIST-8B-OA22",
+     "type": "learning_objective",
+     "tagType": "secondary"
+    },
+    {
+     "code": "CUR-CONTENIDO-HIST-8B-AX-GEOGRAFIA",
+     "type": "axis",
+     "tagType": "secondary"
+    },
+    {
+     "code": "HIST-8B-OA22-I1",
+     "type": "descriptor",
+     "tagType": "primary"
+    }
+   ]
+  },
+  {
+   "instrument": "imported/DIA Historia, Geografía y Ciencias Sociales 8° Básico 2026 — Monitoreo Intermedio",
+   "position": 30,
+   "tags": [
+    {
+     "code": "HIST-SK-PENSAMIENTO-TEMPORAL-Y-ESPACIAL",
+     "type": "skill",
+     "tagType": "secondary"
+    },
+    {
+     "code": "HIST-8B-OA22",
+     "type": "learning_objective",
+     "tagType": "secondary"
+    },
+    {
+     "code": "CUR-CONTENIDO-HIST-8B-AX-GEOGRAFIA",
+     "type": "axis",
+     "tagType": "secondary"
+    },
+    {
+     "code": "HIST-8B-OA22-I2",
+     "type": "descriptor",
+     "tagType": "primary"
+    }
+   ]
+  },
+  {
+   "instrument": "imported/DIA Ciencias Naturales 7° Básico 2026 — Monitoreo Intermedio",
+   "position": 1,
+   "tags": [
+    {
+     "code": "SCI-7B-OA01",
+     "type": "learning_objective",
+     "tagType": "secondary"
+    },
+    {
+     "code": "CUR-CONTENIDO-SCI-7B-AX-BIOLOGIA",
+     "type": "axis",
+     "tagType": "secondary"
+    },
+    {
+     "code": "SCI-7B-OA01-I1",
+     "type": "descriptor",
+     "tagType": "primary"
+    }
+   ]
+  },
+  {
+   "instrument": "imported/DIA Ciencias Naturales 7° Básico 2026 — Monitoreo Intermedio",
+   "position": 2,
+   "tags": [
+    {
+     "code": "SCI-7B-OA01",
+     "type": "learning_objective",
+     "tagType": "secondary"
+    },
+    {
+     "code": "CUR-CONTENIDO-SCI-7B-AX-BIOLOGIA",
+     "type": "axis",
+     "tagType": "secondary"
+    },
+    {
+     "code": "SCI-7B-OA01-I2",
+     "type": "descriptor",
+     "tagType": "primary"
+    }
+   ]
+  },
+  {
+   "instrument": "imported/DIA Ciencias Naturales 7° Básico 2026 — Monitoreo Intermedio",
+   "position": 3,
+   "tags": [
+    {
+     "code": "SCI-SK-PROCESAR-Y-ANALIZAR-LA-EVIDENCIA",
+     "type": "skill",
+     "tagType": "secondary"
+    },
+    {
+     "code": "SCI-7B-OA02",
+     "type": "learning_objective",
+     "tagType": "secondary"
+    },
+    {
+     "code": "CUR-CONTENIDO-SCI-7B-AX-BIOLOGIA",
+     "type": "axis",
+     "tagType": "secondary"
+    },
+    {
+     "code": "SCI-7B-OA02-I1",
+     "type": "descriptor",
+     "tagType": "primary"
+    }
+   ]
+  },
+  {
+   "instrument": "imported/DIA Ciencias Naturales 7° Básico 2026 — Monitoreo Intermedio",
+   "position": 4,
+   "tags": [
+    {
+     "code": "SCI-SK-OBSERVAR-Y-PLANTEAR-PREGUNTAS",
+     "type": "skill",
+     "tagType": "secondary"
+    },
+    {
+     "code": "SCI-7B-OA02",
+     "type": "learning_objective",
+     "tagType": "secondary"
+    },
+    {
+     "code": "CUR-CONTENIDO-SCI-7B-AX-BIOLOGIA",
+     "type": "axis",
+     "tagType": "secondary"
+    },
+    {
+     "code": "SCI-7B-OA02-I2",
+     "type": "descriptor",
+     "tagType": "primary"
+    }
+   ]
+  },
+  {
+   "instrument": "imported/DIA Ciencias Naturales 7° Básico 2026 — Monitoreo Intermedio",
+   "position": 5,
+   "tags": [
+    {
+     "code": "SCI-SK-COMUNICAR",
+     "type": "skill",
+     "tagType": "secondary"
+    },
+    {
+     "code": "SCI-7B-OA02",
+     "type": "learning_objective",
+     "tagType": "secondary"
+    },
+    {
+     "code": "CUR-CONTENIDO-SCI-7B-AX-BIOLOGIA",
+     "type": "axis",
+     "tagType": "secondary"
+    },
+    {
+     "code": "SCI-7B-OA02-I3",
+     "type": "descriptor",
+     "tagType": "primary"
+    }
+   ]
+  },
+  {
+   "instrument": "imported/DIA Ciencias Naturales 7° Básico 2026 — Monitoreo Intermedio",
+   "position": 6,
+   "tags": [
+    {
+     "code": "SCI-SK-COMUNICAR",
+     "type": "skill",
+     "tagType": "secondary"
+    },
+    {
+     "code": "SCI-7B-OA03",
+     "type": "learning_objective",
+     "tagType": "secondary"
+    },
+    {
+     "code": "CUR-CONTENIDO-SCI-7B-AX-BIOLOGIA",
+     "type": "axis",
+     "tagType": "secondary"
+    },
+    {
+     "code": "SCI-7B-OA03-I1",
+     "type": "descriptor",
+     "tagType": "primary"
+    }
+   ]
+  },
+  {
+   "instrument": "imported/DIA Ciencias Naturales 7° Básico 2026 — Monitoreo Intermedio",
+   "position": 7,
+   "tags": [
+    {
+     "code": "SCI-SK-PROCESAR-Y-ANALIZAR-LA-EVIDENCIA",
+     "type": "skill",
+     "tagType": "secondary"
+    },
+    {
+     "code": "SCI-7B-OA03",
+     "type": "learning_objective",
+     "tagType": "secondary"
+    },
+    {
+     "code": "CUR-CONTENIDO-SCI-7B-AX-BIOLOGIA",
+     "type": "axis",
+     "tagType": "secondary"
+    },
+    {
+     "code": "SCI-7B-OA03-I2",
+     "type": "descriptor",
+     "tagType": "primary"
+    }
+   ]
+  },
+  {
+   "instrument": "imported/DIA Ciencias Naturales 7° Básico 2026 — Monitoreo Intermedio",
+   "position": 8,
+   "tags": [
+    {
+     "code": "SCI-SK-OBSERVAR-Y-PLANTEAR-PREGUNTAS",
+     "type": "skill",
+     "tagType": "secondary"
+    },
+    {
+     "code": "SCI-7B-OA04",
+     "type": "learning_objective",
+     "tagType": "secondary"
+    },
+    {
+     "code": "CUR-CONTENIDO-SCI-7B-AX-BIOLOGIA",
+     "type": "axis",
+     "tagType": "secondary"
+    },
+    {
+     "code": "SCI-7B-OA04-I1",
+     "type": "descriptor",
+     "tagType": "primary"
+    }
+   ]
+  },
+  {
+   "instrument": "imported/DIA Ciencias Naturales 7° Básico 2026 — Monitoreo Intermedio",
+   "position": 9,
+   "tags": [
+    {
+     "code": "SCI-7B-OA04",
+     "type": "learning_objective",
+     "tagType": "secondary"
+    },
+    {
+     "code": "CUR-CONTENIDO-SCI-7B-AX-BIOLOGIA",
+     "type": "axis",
+     "tagType": "secondary"
+    },
+    {
+     "code": "SCI-7B-OA04-I2",
+     "type": "descriptor",
+     "tagType": "primary"
+    }
+   ]
+  },
+  {
+   "instrument": "imported/DIA Ciencias Naturales 7° Básico 2026 — Monitoreo Intermedio",
+   "position": 10,
+   "tags": [
+    {
+     "code": "SCI-7B-OA04",
+     "type": "learning_objective",
+     "tagType": "secondary"
+    },
+    {
+     "code": "CUR-CONTENIDO-SCI-7B-AX-BIOLOGIA",
+     "type": "axis",
+     "tagType": "secondary"
+    },
+    {
+     "code": "SCI-7B-OA04-I2",
+     "type": "descriptor",
+     "tagType": "primary"
+    }
+   ]
+  },
+  {
+   "instrument": "imported/DIA Ciencias Naturales 7° Básico 2026 — Monitoreo Intermedio",
+   "position": 11,
+   "tags": [
+    {
+     "code": "SCI-7B-OA04",
+     "type": "learning_objective",
+     "tagType": "secondary"
+    },
+    {
+     "code": "CUR-CONTENIDO-SCI-7B-AX-BIOLOGIA",
+     "type": "axis",
+     "tagType": "secondary"
+    },
+    {
+     "code": "SCI-7B-OA04-I2",
+     "type": "descriptor",
+     "tagType": "primary"
+    }
+   ]
+  },
+  {
+   "instrument": "imported/DIA Ciencias Naturales 7° Básico 2026 — Monitoreo Intermedio",
+   "position": 12,
+   "tags": [
+    {
+     "code": "SCI-7B-OA04",
+     "type": "learning_objective",
+     "tagType": "secondary"
+    },
+    {
+     "code": "CUR-CONTENIDO-SCI-7B-AX-BIOLOGIA",
+     "type": "axis",
+     "tagType": "secondary"
+    },
+    {
+     "code": "SCI-7B-OA04-I2",
+     "type": "descriptor",
+     "tagType": "primary"
+    }
+   ]
+  },
+  {
+   "instrument": "imported/DIA Ciencias Naturales 7° Básico 2026 — Monitoreo Intermedio",
+   "position": 13,
+   "tags": [
+    {
+     "code": "SCI-7B-OA04",
+     "type": "learning_objective",
+     "tagType": "secondary"
+    },
+    {
+     "code": "CUR-CONTENIDO-SCI-7B-AX-BIOLOGIA",
+     "type": "axis",
+     "tagType": "secondary"
+    },
+    {
+     "code": "SCI-7B-OA04-I2",
+     "type": "descriptor",
+     "tagType": "primary"
+    }
+   ]
+  },
+  {
+   "instrument": "imported/DIA Ciencias Naturales 7° Básico 2026 — Monitoreo Intermedio",
+   "position": 14,
+   "tags": [
+    {
+     "code": "SCI-7B-OA04",
+     "type": "learning_objective",
+     "tagType": "secondary"
+    },
+    {
+     "code": "CUR-CONTENIDO-SCI-7B-AX-BIOLOGIA",
+     "type": "axis",
+     "tagType": "secondary"
+    },
+    {
+     "code": "SCI-7B-OA04-I2",
+     "type": "descriptor",
+     "tagType": "primary"
+    }
+   ]
+  },
+  {
+   "instrument": "imported/DIA Ciencias Naturales 7° Básico 2026 — Monitoreo Intermedio",
+   "position": 15,
+   "tags": [
+    {
+     "code": "SCI-7B-OA04",
+     "type": "learning_objective",
+     "tagType": "secondary"
+    },
+    {
+     "code": "CUR-CONTENIDO-SCI-7B-AX-BIOLOGIA",
+     "type": "axis",
+     "tagType": "secondary"
+    },
+    {
+     "code": "SCI-7B-OA04-I2",
+     "type": "descriptor",
+     "tagType": "primary"
+    }
+   ]
+  },
+  {
+   "instrument": "imported/DIA Ciencias Naturales 7° Básico 2026 — Monitoreo Intermedio",
+   "position": 16,
+   "tags": [
+    {
+     "code": "SCI-7B-OA04",
+     "type": "learning_objective",
+     "tagType": "secondary"
+    },
+    {
+     "code": "CUR-CONTENIDO-SCI-7B-AX-BIOLOGIA",
+     "type": "axis",
+     "tagType": "secondary"
+    },
+    {
+     "code": "SCI-7B-OA04-I2",
+     "type": "descriptor",
+     "tagType": "primary"
+    }
+   ]
+  },
+  {
+   "instrument": "imported/DIA Ciencias Naturales 7° Básico 2026 — Monitoreo Intermedio",
+   "position": 17,
+   "tags": [
+    {
+     "code": "SCI-SK-PROCESAR-Y-ANALIZAR-LA-EVIDENCIA",
+     "type": "skill",
+     "tagType": "secondary"
+    },
+    {
+     "code": "SCI-7B-OA04",
+     "type": "learning_objective",
+     "tagType": "secondary"
+    },
+    {
+     "code": "CUR-CONTENIDO-SCI-7B-AX-BIOLOGIA",
+     "type": "axis",
+     "tagType": "secondary"
+    },
+    {
+     "code": "SCI-7B-OA04-I3",
+     "type": "descriptor",
+     "tagType": "primary"
+    }
+   ]
+  },
+  {
+   "instrument": "imported/DIA Ciencias Naturales 7° Básico 2026 — Monitoreo Intermedio",
+   "position": 18,
+   "tags": [
+    {
+     "code": "SCI-SK-OBSERVAR-Y-PLANTEAR-PREGUNTAS",
+     "type": "skill",
+     "tagType": "secondary"
+    },
+    {
+     "code": "SCI-7B-OA05",
+     "type": "learning_objective",
+     "tagType": "secondary"
+    },
+    {
+     "code": "CUR-CONTENIDO-SCI-7B-AX-BIOLOGIA",
+     "type": "axis",
+     "tagType": "secondary"
+    },
+    {
+     "code": "SCI-7B-OA05-I1",
+     "type": "descriptor",
+     "tagType": "primary"
+    }
+   ]
+  },
+  {
+   "instrument": "imported/DIA Ciencias Naturales 7° Básico 2026 — Monitoreo Intermedio",
+   "position": 19,
+   "tags": [
+    {
+     "code": "SCI-SK-PLANIFICAR-Y-CONDUCIR-UNA-INVESTIGACION",
+     "type": "skill",
+     "tagType": "secondary"
+    },
+    {
+     "code": "SCI-7B-OA06",
+     "type": "learning_objective",
+     "tagType": "secondary"
+    },
+    {
+     "code": "CUR-CONTENIDO-SCI-7B-AX-BIOLOGIA",
+     "type": "axis",
+     "tagType": "secondary"
+    },
+    {
+     "code": "SCI-7B-OA06-I1",
+     "type": "descriptor",
+     "tagType": "primary"
+    }
+   ]
+  },
+  {
+   "instrument": "imported/DIA Ciencias Naturales 7° Básico 2026 — Monitoreo Intermedio",
+   "position": 20,
+   "tags": [
+    {
+     "code": "SCI-SK-PROCESAR-Y-ANALIZAR-LA-EVIDENCIA",
+     "type": "skill",
+     "tagType": "secondary"
+    },
+    {
+     "code": "SCI-7B-OA05",
+     "type": "learning_objective",
+     "tagType": "secondary"
+    },
+    {
+     "code": "CUR-CONTENIDO-SCI-7B-AX-BIOLOGIA",
+     "type": "axis",
+     "tagType": "secondary"
+    },
+    {
+     "code": "SCI-7B-OA05-I2",
+     "type": "descriptor",
+     "tagType": "primary"
+    }
+   ]
+  },
+  {
+   "instrument": "imported/DIA Ciencias Naturales 7° Básico 2026 — Monitoreo Intermedio",
+   "position": 21,
+   "tags": [
+    {
+     "code": "SCI-SK-PROCESAR-Y-ANALIZAR-LA-EVIDENCIA",
+     "type": "skill",
+     "tagType": "secondary"
+    },
+    {
+     "code": "SCI-7B-OA06",
+     "type": "learning_objective",
+     "tagType": "secondary"
+    },
+    {
+     "code": "CUR-CONTENIDO-SCI-7B-AX-BIOLOGIA",
+     "type": "axis",
+     "tagType": "secondary"
+    },
+    {
+     "code": "SCI-7B-OA06-I2",
+     "type": "descriptor",
+     "tagType": "primary"
+    }
+   ]
+  },
+  {
+   "instrument": "imported/DIA Ciencias Naturales 7° Básico 2026 — Monitoreo Intermedio",
+   "position": 22,
+   "tags": [
+    {
+     "code": "SCI-SK-PLANIFICAR-Y-CONDUCIR-UNA-INVESTIGACION",
+     "type": "skill",
+     "tagType": "secondary"
+    },
+    {
+     "code": "SCI-7B-OA07",
+     "type": "learning_objective",
+     "tagType": "secondary"
+    },
+    {
+     "code": "CUR-CONTENIDO-SCI-7B-AX-FISICA",
+     "type": "axis",
+     "tagType": "secondary"
+    },
+    {
+     "code": "SCI-7B-OA07-I1",
+     "type": "descriptor",
+     "tagType": "primary"
+    }
+   ]
+  },
+  {
+   "instrument": "imported/DIA Ciencias Naturales 7° Básico 2026 — Monitoreo Intermedio",
+   "position": 23,
+   "tags": [
+    {
+     "code": "SCI-SK-PROCESAR-Y-ANALIZAR-LA-EVIDENCIA",
+     "type": "skill",
+     "tagType": "secondary"
+    },
+    {
+     "code": "SCI-7B-OA07",
+     "type": "learning_objective",
+     "tagType": "secondary"
+    },
+    {
+     "code": "CUR-CONTENIDO-SCI-7B-AX-FISICA",
+     "type": "axis",
+     "tagType": "secondary"
+    },
+    {
+     "code": "SCI-7B-OA07-I2",
+     "type": "descriptor",
+     "tagType": "primary"
+    }
+   ]
+  },
+  {
+   "instrument": "imported/DIA Ciencias Naturales 7° Básico 2026 — Monitoreo Intermedio",
+   "position": 24,
+   "tags": [
+    {
+     "code": "SCI-SK-PLANIFICAR-Y-CONDUCIR-UNA-INVESTIGACION",
+     "type": "skill",
+     "tagType": "secondary"
+    },
+    {
+     "code": "SCI-7B-OA07",
+     "type": "learning_objective",
+     "tagType": "secondary"
+    },
+    {
+     "code": "CUR-CONTENIDO-SCI-7B-AX-FISICA",
+     "type": "axis",
+     "tagType": "secondary"
+    },
+    {
+     "code": "SCI-7B-OA07-I3",
+     "type": "descriptor",
+     "tagType": "primary"
+    }
+   ]
+  },
+  {
+   "instrument": "imported/DIA Ciencias Naturales 7° Básico 2026 — Monitoreo Intermedio",
+   "position": 25,
+   "tags": [
+    {
+     "code": "SCI-SK-OBSERVAR-Y-PLANTEAR-PREGUNTAS",
+     "type": "skill",
+     "tagType": "secondary"
+    },
+    {
+     "code": "SCI-7B-OA08",
+     "type": "learning_objective",
+     "tagType": "secondary"
+    },
+    {
+     "code": "CUR-CONTENIDO-SCI-7B-AX-FISICA",
+     "type": "axis",
+     "tagType": "secondary"
+    },
+    {
+     "code": "SCI-7B-OA08-I1",
+     "type": "descriptor",
+     "tagType": "primary"
+    }
+   ]
+  },
+  {
+   "instrument": "imported/DIA Ciencias Naturales 7° Básico 2026 — Monitoreo Intermedio",
+   "position": 26,
+   "tags": [
+    {
+     "code": "SCI-SK-PROCESAR-Y-ANALIZAR-LA-EVIDENCIA",
+     "type": "skill",
+     "tagType": "secondary"
+    },
+    {
+     "code": "SCI-7B-OA08",
+     "type": "learning_objective",
+     "tagType": "secondary"
+    },
+    {
+     "code": "CUR-CONTENIDO-SCI-7B-AX-FISICA",
+     "type": "axis",
+     "tagType": "secondary"
+    },
+    {
+     "code": "SCI-7B-OA08-I2",
+     "type": "descriptor",
+     "tagType": "primary"
+    }
+   ]
+  },
+  {
+   "instrument": "imported/DIA Ciencias Naturales 7° Básico 2026 — Monitoreo Intermedio",
+   "position": 27,
+   "tags": [
+    {
+     "code": "SCI-SK-EVALUAR",
+     "type": "skill",
+     "tagType": "secondary"
+    },
+    {
+     "code": "SCI-7B-OA09",
+     "type": "learning_objective",
+     "tagType": "secondary"
+    },
+    {
+     "code": "CUR-CONTENIDO-SCI-7B-AX-FISICA",
+     "type": "axis",
+     "tagType": "secondary"
+    },
+    {
+     "code": "SCI-7B-OA09-I1",
+     "type": "descriptor",
+     "tagType": "primary"
+    }
+   ]
+  },
+  {
+   "instrument": "imported/DIA Ciencias Naturales 7° Básico 2026 — Monitoreo Intermedio",
+   "position": 28,
+   "tags": [
+    {
+     "code": "SCI-SK-PROCESAR-Y-ANALIZAR-LA-EVIDENCIA",
+     "type": "skill",
+     "tagType": "secondary"
+    },
+    {
+     "code": "SCI-7B-OA09",
+     "type": "learning_objective",
+     "tagType": "secondary"
+    },
+    {
+     "code": "CUR-CONTENIDO-SCI-7B-AX-FISICA",
+     "type": "axis",
+     "tagType": "secondary"
+    },
+    {
+     "code": "SCI-7B-OA09-I2",
+     "type": "descriptor",
+     "tagType": "primary"
+    }
+   ]
+  },
+  {
+   "instrument": "imported/DIA Ciencias Naturales 7° Básico 2026 — Monitoreo Intermedio",
+   "position": 29,
+   "tags": [
+    {
+     "code": "SCI-SK-PROCESAR-Y-ANALIZAR-LA-EVIDENCIA",
+     "type": "skill",
+     "tagType": "secondary"
+    },
+    {
+     "code": "SCI-7B-OA10",
+     "type": "learning_objective",
+     "tagType": "secondary"
+    },
+    {
+     "code": "CUR-CONTENIDO-SCI-7B-AX-FISICA",
+     "type": "axis",
+     "tagType": "secondary"
+    },
+    {
+     "code": "SCI-7B-OA10-I1",
+     "type": "descriptor",
+     "tagType": "primary"
+    }
+   ]
+  },
+  {
+   "instrument": "imported/DIA Ciencias Naturales 7° Básico 2026 — Monitoreo Intermedio",
+   "position": 30,
+   "tags": [
+    {
+     "code": "SCI-SK-PROCESAR-Y-ANALIZAR-LA-EVIDENCIA",
+     "type": "skill",
+     "tagType": "secondary"
+    },
+    {
+     "code": "SCI-7B-OA11",
+     "type": "learning_objective",
+     "tagType": "secondary"
+    },
+    {
+     "code": "CUR-CONTENIDO-SCI-7B-AX-FISICA",
+     "type": "axis",
+     "tagType": "secondary"
+    },
+    {
+     "code": "SCI-7B-OA11-I1",
+     "type": "descriptor",
+     "tagType": "primary"
+    }
+   ]
+  },
+  {
+   "instrument": "imported/DIA Ciencias Naturales 7° Básico 2026 — Monitoreo Intermedio",
+   "position": 31,
+   "tags": [
+    {
+     "code": "SCI-SK-PROCESAR-Y-ANALIZAR-LA-EVIDENCIA",
+     "type": "skill",
+     "tagType": "secondary"
+    },
+    {
+     "code": "SCI-7B-OA12",
+     "type": "learning_objective",
+     "tagType": "secondary"
+    },
+    {
+     "code": "CUR-CONTENIDO-SCI-7B-AX-FISICA",
+     "type": "axis",
+     "tagType": "secondary"
+    },
+    {
+     "code": "SCI-7B-OA12-I1",
+     "type": "descriptor",
+     "tagType": "primary"
+    }
+   ]
+  },
+  {
+   "instrument": "imported/DIA Ciencias Naturales 7° Básico 2026 — Monitoreo Intermedio",
+   "position": 32,
+   "tags": [
+    {
+     "code": "SCI-SK-PROCESAR-Y-ANALIZAR-LA-EVIDENCIA",
+     "type": "skill",
+     "tagType": "secondary"
+    },
+    {
+     "code": "SCI-7B-OA12",
+     "type": "learning_objective",
+     "tagType": "secondary"
+    },
+    {
+     "code": "CUR-CONTENIDO-SCI-7B-AX-FISICA",
+     "type": "axis",
+     "tagType": "secondary"
+    },
+    {
+     "code": "SCI-7B-OA12-I2",
+     "type": "descriptor",
+     "tagType": "primary"
+    }
+   ]
+  },
+  {
+   "instrument": "imported/DIA Ciencias Naturales 7° Básico 2026 — Monitoreo Intermedio",
+   "position": 33,
+   "tags": [
+    {
+     "code": "SCI-SK-PROCESAR-Y-ANALIZAR-LA-EVIDENCIA",
+     "type": "skill",
+     "tagType": "secondary"
+    },
+    {
+     "code": "SCI-7B-OA13",
+     "type": "learning_objective",
+     "tagType": "secondary"
+    },
+    {
+     "code": "CUR-CONTENIDO-SCI-7B-AX-QUIMICA",
+     "type": "axis",
+     "tagType": "secondary"
+    },
+    {
+     "code": "SCI-7B-OA13-I1",
+     "type": "descriptor",
+     "tagType": "primary"
+    }
+   ]
+  },
+  {
+   "instrument": "imported/DIA Ciencias Naturales 7° Básico 2026 — Monitoreo Intermedio",
+   "position": 34,
+   "tags": [
+    {
+     "code": "SCI-SK-OBSERVAR-Y-PLANTEAR-PREGUNTAS",
+     "type": "skill",
+     "tagType": "secondary"
+    },
+    {
+     "code": "SCI-7B-OA13",
+     "type": "learning_objective",
+     "tagType": "secondary"
+    },
+    {
+     "code": "CUR-CONTENIDO-SCI-7B-AX-QUIMICA",
+     "type": "axis",
+     "tagType": "secondary"
+    },
+    {
+     "code": "SCI-7B-OA13-I2",
+     "type": "descriptor",
+     "tagType": "primary"
+    }
+   ]
+  },
+  {
+   "instrument": "imported/DIA Ciencias Naturales 7° Básico 2026 — Monitoreo Intermedio",
+   "position": 35,
+   "tags": [
+    {
+     "code": "SCI-SK-OBSERVAR-Y-PLANTEAR-PREGUNTAS",
+     "type": "skill",
+     "tagType": "secondary"
+    },
+    {
+     "code": "SCI-7B-OA14",
+     "type": "learning_objective",
+     "tagType": "secondary"
+    },
+    {
+     "code": "CUR-CONTENIDO-SCI-7B-AX-QUIMICA",
+     "type": "axis",
+     "tagType": "secondary"
+    },
+    {
+     "code": "SCI-7B-OA14-I1",
+     "type": "descriptor",
+     "tagType": "primary"
+    }
+   ]
+  },
+  {
+   "instrument": "imported/DIA Ciencias Naturales 7° Básico 2026 — Monitoreo Intermedio",
+   "position": 36,
+   "tags": [
+    {
+     "code": "SCI-SK-PLANIFICAR-Y-CONDUCIR-UNA-INVESTIGACION",
+     "type": "skill",
+     "tagType": "secondary"
+    },
+    {
+     "code": "SCI-7B-OA14",
+     "type": "learning_objective",
+     "tagType": "secondary"
+    },
+    {
+     "code": "CUR-CONTENIDO-SCI-7B-AX-QUIMICA",
+     "type": "axis",
+     "tagType": "secondary"
+    },
+    {
+     "code": "SCI-7B-OA14-I2",
+     "type": "descriptor",
+     "tagType": "primary"
+    }
+   ]
+  },
+  {
+   "instrument": "imported/DIA Ciencias Naturales 7° Básico 2026 — Monitoreo Intermedio",
+   "position": 37,
+   "tags": [
+    {
+     "code": "SCI-SK-PROCESAR-Y-ANALIZAR-LA-EVIDENCIA",
+     "type": "skill",
+     "tagType": "secondary"
+    },
+    {
+     "code": "SCI-7B-OA15",
+     "type": "learning_objective",
+     "tagType": "secondary"
+    },
+    {
+     "code": "CUR-CONTENIDO-SCI-7B-AX-QUIMICA",
+     "type": "axis",
+     "tagType": "secondary"
+    },
+    {
+     "code": "SCI-7B-OA15-I1",
+     "type": "descriptor",
+     "tagType": "primary"
+    }
+   ]
+  },
+  {
+   "instrument": "imported/DIA Ciencias Naturales 7° Básico 2026 — Monitoreo Intermedio",
+   "position": 38,
+   "tags": [
+    {
+     "code": "SCI-SK-PROCESAR-Y-ANALIZAR-LA-EVIDENCIA",
+     "type": "skill",
+     "tagType": "secondary"
+    },
+    {
+     "code": "SCI-7B-OA15",
+     "type": "learning_objective",
+     "tagType": "secondary"
+    },
+    {
+     "code": "CUR-CONTENIDO-SCI-7B-AX-QUIMICA",
+     "type": "axis",
+     "tagType": "secondary"
+    },
+    {
+     "code": "SCI-7B-OA15-I2",
+     "type": "descriptor",
+     "tagType": "primary"
+    }
+   ]
+  }
+ ]
+}

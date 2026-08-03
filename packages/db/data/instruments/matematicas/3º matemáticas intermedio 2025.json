@@ -132,19 +132,22 @@
               "key": "A",
               "text": "Bandeja con 3 compartimentos, cada uno con 6 bolitas (3 grupos de 6).",
               "isImage": true,
-              "isCorrect": false
+              "isCorrect": false,
+              "imageRef": "item/global/3ro-matematicas-intermedio-2025/alt_figure/03_A.png"
             },
             {
               "key": "B",
               "text": "Bandeja con 5 compartimentos, cada uno con 6 bolitas (5 grupos de 6).",
               "isImage": true,
-              "isCorrect": false
+              "isCorrect": false,
+              "imageRef": "item/global/3ro-matematicas-intermedio-2025/alt_figure/03_B.png"
             },
             {
               "key": "C",
               "text": "Bandeja con 6 compartimentos, cada uno con 6 bolitas (6 grupos de 6).",
               "isImage": true,
-              "isCorrect": true
+              "isCorrect": true,
+              "imageRef": "item/global/3ro-matematicas-intermedio-2025/alt_figure/03_C.png"
             }
           ],
           "correctKey": "C",
@@ -180,7 +183,8 @@
               "name": "Números y operaciones",
               "tagType": "secondary"
             }
-          ]
+          ],
+          "imageRef": "item/global/3ro-matematicas-intermedio-2025/item_figure/03.png"
         },
         {
           "position": 4,
@@ -249,19 +253,22 @@
               "key": "A",
               "text": "Dos óvalos: uno con 10 puntos y otro con 2 puntos.",
               "isImage": true,
-              "isCorrect": false
+              "isCorrect": false,
+              "imageRef": "item/global/3ro-matematicas-intermedio-2025/alt_figure/05_A.png"
             },
             {
               "key": "B",
               "text": "Dos óvalos, cada uno con 6 puntos.",
               "isImage": true,
-              "isCorrect": true
+              "isCorrect": true,
+              "imageRef": "item/global/3ro-matematicas-intermedio-2025/alt_figure/05_B.png"
             },
             {
               "key": "C",
               "text": "Dos óvalos, cada uno con 12 puntos.",
               "isImage": true,
-              "isCorrect": false
+              "isCorrect": false,
+              "imageRef": "item/global/3ro-matematicas-intermedio-2025/alt_figure/05_C.png"
             }
           ],
           "correctKey": "B",
@@ -297,7 +304,8 @@
               "name": "Números y operaciones",
               "tagType": "secondary"
             }
-          ]
+          ],
+          "imageRef": "item/global/3ro-matematicas-intermedio-2025/item_figure/05.png"
         },
         {
           "position": 6,
@@ -493,7 +501,8 @@
               "name": "Patrones y álgebra",
               "tagType": "secondary"
             }
-          ]
+          ],
+          "imageRef": "item/global/3ro-matematicas-intermedio-2025/item_figure/09.png"
         },
         {
           "position": 10,
@@ -550,7 +559,8 @@
               "name": "Patrones y álgebra",
               "tagType": "secondary"
             }
-          ]
+          ],
+          "imageRef": "item/global/3ro-matematicas-intermedio-2025/item_figure/10.png"
         },
         {
           "position": 11,
@@ -562,19 +572,22 @@
               "key": "A",
               "text": "Red en forma de cruz: fila central de 4 cuadrados con un cuadrado arriba y uno abajo del segundo (6 caras).",
               "isImage": true,
-              "isCorrect": true
+              "isCorrect": true,
+              "imageRef": "item/global/3ro-matematicas-intermedio-2025/alt_figure/11_A.png"
             },
             {
               "key": "B",
               "text": "Red con una fila de 5 cuadrados y un cuadrado arriba y otro abajo del segundo (7 cuadrados).",
               "isImage": true,
-              "isCorrect": false
+              "isCorrect": false,
+              "imageRef": "item/global/3ro-matematicas-intermedio-2025/alt_figure/11_B.png"
             },
             {
               "key": "C",
               "text": "Red con una fila de 4 cuadrados y un cuadrado arriba y otro abajo del segundo (6 cuadrados, en T/distinta disposición).",
               "isImage": true,
-              "isCorrect": false
+              "isCorrect": false,
+              "imageRef": "item/global/3ro-matematicas-intermedio-2025/alt_figure/11_C.png"
             }
           ],
           "correctKey": "A",
@@ -610,7 +623,8 @@
               "name": "Geometría",
               "tagType": "secondary"
             }
-          ]
+          ],
+          "imageRef": "item/global/3ro-matematicas-intermedio-2025/item_figure/11.png"
         },
         {
           "position": 12,
@@ -622,19 +636,22 @@
               "key": "A",
               "text": "Un paralelepípedo (prisma rectangular).",
               "isImage": true,
-              "isCorrect": false
+              "isCorrect": false,
+              "imageRef": "item/global/3ro-matematicas-intermedio-2025/alt_figure/12_A.png"
             },
             {
               "key": "B",
               "text": "Un cono.",
               "isImage": true,
-              "isCorrect": false
+              "isCorrect": false,
+              "imageRef": "item/global/3ro-matematicas-intermedio-2025/alt_figure/12_B.png"
             },
             {
               "key": "C",
               "text": "Un cilindro.",
               "isImage": true,
-              "isCorrect": true
+              "isCorrect": true,
+              "imageRef": "item/global/3ro-matematicas-intermedio-2025/alt_figure/12_C.png"
             }
           ],
           "correctKey": "C",
@@ -670,7 +687,8 @@
               "name": "Geometría",
               "tagType": "secondary"
             }
-          ]
+          ],
+          "imageRef": "item/global/3ro-matematicas-intermedio-2025/item_figure/12.png"
         },
         {
           "position": 13,
@@ -711,7 +729,8 @@
               "name": "Medición",
               "tagType": "secondary"
             }
-          ]
+          ],
+          "imageRef": "item/global/3ro-matematicas-intermedio-2025/item_figure/13.png"
         },
         {
           "position": 14,
@@ -768,7 +787,8 @@
               "name": "Medición",
               "tagType": "secondary"
             }
-          ]
+          ],
+          "imageRef": "item/global/3ro-matematicas-intermedio-2025/item_figure/14.png"
         },
         {
           "position": 15,
@@ -825,7 +845,8 @@
               "name": "Medición",
               "tagType": "secondary"
             }
-          ]
+          ],
+          "imageRef": "item/global/3ro-matematicas-intermedio-2025/item_figure/15.png"
         },
         {
           "position": 16,
@@ -923,7 +944,8 @@
               "name": "Números y operaciones",
               "tagType": "secondary"
             }
-          ]
+          ],
+          "imageRef": "item/global/3ro-matematicas-intermedio-2025/item_figure/17.png"
         },
         {
           "position": 18,
@@ -980,7 +1002,8 @@
               "name": "Números y operaciones",
               "tagType": "secondary"
             }
-          ]
+          ],
+          "imageRef": "item/global/3ro-matematicas-intermedio-2025/item_figure/18.png"
         },
         {
           "position": 19,
@@ -1135,7 +1158,8 @@
               "name": "Números y operaciones",
               "tagType": "secondary"
             }
-          ]
+          ],
+          "imageRef": "item/global/3ro-matematicas-intermedio-2025/item_figure/21.png"
         },
         {
           "position": 22,
@@ -1192,7 +1216,8 @@
               "name": "Datos y probabilidades",
               "tagType": "secondary"
             }
-          ]
+          ],
+          "imageRef": "item/global/3ro-matematicas-intermedio-2025/item_figure/22.png"
         },
         {
           "position": 23,
@@ -1249,7 +1274,8 @@
               "name": "Datos y probabilidades",
               "tagType": "secondary"
             }
-          ]
+          ],
+          "imageRef": "item/global/3ro-matematicas-intermedio-2025/item_figure/23.png"
         }
       ]
     }

@@ -1,0 +1,745 @@
+{
+  "_note": "A3 · Rama ENG (Idioma Extranjero: Inglés) para taxonomia-catalogo-v2.json. Asignatura NUEVA: el catálogo solo tenía LANG, MATH y HIST. Mismo esquema de nodo y misma jerarquía que el precedente HIST (extender_catalogo_historia.py). Los OA salen de las Bases Curriculares (ver ingles-6b-oas.json); los descriptores, de la columna «Indicador de evaluación» del Anexo 1 · Parte 1 · 6° básico de la guía docente DIA 2026 (las Bases no publican indicadores DIA). Los descriptores de Speaking (Parte 2) NO se incluyen: fuera de alcance. FUSIÓN ADITIVA — no re-seedear el catálogo completo.",
+  "_auxFields": "`_positions`, `_positionsCuadernillo` y `_positionsNote` son AUXILIARES para el cruce con A4: NO deben copiarse al catálogo final. `_positions` es literal de la tabla de la guía; `_positionsCuadernillo` es la corrección según el cuadernillo real (solo Writing).",
+  "subjectCode": "ENG",
+  "subjectName": "Idioma Extranjero: Inglés",
+  "level": "6_basico",
+  "skillCodesForA4": {
+    "LISTENING": "ENG-SK-COMPRENSION-AUDITIVA",
+    "READING": "ENG-SK-COMPRENSION-DE-LECTURA",
+    "SPEAKING": "ENG-SK-EXPRESION-ORAL",
+    "WRITING": "ENG-SK-EXPRESION-ESCRITA"
+  },
+  "counts": {
+    "nodes": 44,
+    "descriptors": 15,
+    "mappings": 30,
+    "byType": {
+      "axis": 4,
+      "descriptor": 15,
+      "domain": 1,
+      "learning_objective": 16,
+      "skill": 4,
+      "subdomain": 4
+    }
+  },
+  "nodes": [
+    {
+      "code": "CUR-CONTENIDO-ENG",
+      "type": "subdomain",
+      "name": "Idioma Extranjero: Inglés",
+      "parentCode": "CUR-CONTENIDO",
+      "marco": "curriculum",
+      "subjectCode": "ENG",
+      "source": "curriculumnacional.cl",
+      "order": 3
+    },
+    {
+      "code": "CUR-CONTENIDO-ENG-6B",
+      "type": "subdomain",
+      "name": "6° básico",
+      "parentCode": "CUR-CONTENIDO-ENG",
+      "marco": "curriculum",
+      "subjectCode": "ENG",
+      "level": "6_basico",
+      "source": "curriculumnacional.cl",
+      "order": 6
+    },
+    {
+      "code": "CUR-CONTENIDO-ENG-6B-AX-LISTENING",
+      "type": "axis",
+      "name": "Comprensión auditiva",
+      "parentCode": "CUR-CONTENIDO-ENG-6B",
+      "marco": "curriculum",
+      "subjectCode": "ENG",
+      "level": "6_basico",
+      "source": "curriculumnacional.cl",
+      "order": 1
+    },
+    {
+      "code": "CUR-CONTENIDO-ENG-6B-AX-READING",
+      "type": "axis",
+      "name": "Comprensión de lectura",
+      "parentCode": "CUR-CONTENIDO-ENG-6B",
+      "marco": "curriculum",
+      "subjectCode": "ENG",
+      "level": "6_basico",
+      "source": "curriculumnacional.cl",
+      "order": 2
+    },
+    {
+      "code": "CUR-CONTENIDO-ENG-6B-AX-SPEAKING",
+      "type": "axis",
+      "name": "Expresión oral",
+      "parentCode": "CUR-CONTENIDO-ENG-6B",
+      "marco": "curriculum",
+      "subjectCode": "ENG",
+      "level": "6_basico",
+      "source": "curriculumnacional.cl",
+      "order": 3
+    },
+    {
+      "code": "CUR-CONTENIDO-ENG-6B-AX-WRITING",
+      "type": "axis",
+      "name": "Expresión escrita",
+      "parentCode": "CUR-CONTENIDO-ENG-6B",
+      "marco": "curriculum",
+      "subjectCode": "ENG",
+      "level": "6_basico",
+      "source": "curriculumnacional.cl",
+      "order": 4
+    },
+    {
+      "code": "ENG-6B-OA01",
+      "type": "learning_objective",
+      "name": "Escuchar y demostrar comprensión de información explícita en textos adaptados y auténticos simples, tanto no literarios (textos expositivos, diálogos) como literarios (rimas, poemas, canciones, cuentos) que estén enunciados en forma clara, tengan repetición de palabras y apoyo visual y gestual, y estén relacionados con las funciones del año y los siguientes temas: - la comida y la bebida, la salud, lugares de la ciudad, ocupaciones, el mundo natural, viajes y medios de transporte; - temas relacionados con el contexto inmediato de los estudiantes, como experiencias personales pasadas, sentimientos, historias ficticias e información de interés relativa a eventos y aspectos de su entorno y de nuestro país; - temas de otras asignaturas: hábitos de limpieza e higiene, beneficios de actividad física, alimentación saludable (Ciencias Naturales); características geográficas como relieve y clima de Chile (Geografía); - temas de actualidad e interés global, como cultura de otros países, cuidado del medioambiente, avances tecnológicos (redes sociales, medios de comunicación).",
+      "parentCode": "CUR-CONTENIDO-ENG-6B-AX-LISTENING",
+      "marco": "curriculum",
+      "subjectCode": "ENG",
+      "level": "6_basico",
+      "oaNumber": 1,
+      "source": "curriculumnacional.cl",
+      "order": 1
+    },
+    {
+      "code": "ENG-6B-OA02",
+      "type": "learning_objective",
+      "name": "Identificar en los textos escuchados: - tema e ideas generales; - información específica asociada a personas, lugares, tiempo y acciones; - palabras, familias de palabras, expresiones de uso frecuente y vocabulario temático; - repetición de sonidos y sonidos propios del idioma inglés que interfieren con la comunicación, como los sonidos ch/sh en palabras como chip/ship; b/v en palabras como boat/vote.",
+      "parentCode": "CUR-CONTENIDO-ENG-6B-AX-LISTENING",
+      "marco": "curriculum",
+      "subjectCode": "ENG",
+      "level": "6_basico",
+      "oaNumber": 2,
+      "source": "curriculumnacional.cl",
+      "order": 2
+    },
+    {
+      "code": "ENG-6B-OA03",
+      "type": "learning_objective",
+      "name": "Escuchar textos orales en diversos formatos audiovisuales, usando las siguientes estrategias para apoyar la comprensión: - hacer predicciones, basándose en conocimientos previos; - usar claves contextuales (tema, hablantes, lugar, tiempo, imágenes); - focalizar la atención en palabras claves; - visualizar diferentes aspectos del texto; - usar apoyo visual.",
+      "parentCode": "CUR-CONTENIDO-ENG-6B-AX-LISTENING",
+      "marco": "curriculum",
+      "subjectCode": "ENG",
+      "level": "6_basico",
+      "oaNumber": 3,
+      "source": "curriculumnacional.cl",
+      "order": 3
+    },
+    {
+      "code": "ENG-6B-OA04",
+      "type": "learning_objective",
+      "name": "Reaccionar a los textos escuchados, expresando opiniones y sentimientos o haciendo conexiones con experiencias personales, en forma oral o escrita.",
+      "parentCode": "CUR-CONTENIDO-ENG-6B-AX-LISTENING",
+      "marco": "curriculum",
+      "subjectCode": "ENG",
+      "level": "6_basico",
+      "oaNumber": 4,
+      "source": "curriculumnacional.cl",
+      "order": 4
+    },
+    {
+      "code": "ENG-6B-OA05",
+      "type": "learning_objective",
+      "name": "Leer y demostrar comprensión de textos adaptados y auténticos simples, no literarios, que contengan palabras de uso frecuente, familias de palabras y repetición de frases, y estén acompañados de apoyo visual y relacionados con los temas y las siguientes funciones del año: - expresar habilidad e inhabilidad; - dar direcciones e indicar posición; - solicitar y contrastar información; - decir y preguntar la hora; - referirse a acciones cotidianas que ocurren al momento de hablar y en el pasado; - describir personas y acciones y cómo estas se realizan; - expresar cantidades, necesidad y posesiones.",
+      "parentCode": "CUR-CONTENIDO-ENG-6B-AX-READING",
+      "marco": "curriculum",
+      "subjectCode": "ENG",
+      "level": "6_basico",
+      "oaNumber": 5,
+      "source": "curriculumnacional.cl",
+      "order": 5
+    },
+    {
+      "code": "ENG-6B-OA06",
+      "type": "learning_objective",
+      "name": "Leer comprensivamente textos no literarios, como notas, postales, invitaciones, tarjetas de saludo, menús, recetas, instrucciones, avisos publicitarios, emails, diálogos o textos expositivos, identificando: - propósito del texto; - ideas generales; - información explícita; - palabras clave, expresiones de uso común asociadas a las funciones del nivel (por ejemplo: have lunch, catch a cold) y vocabulario temático.",
+      "parentCode": "CUR-CONTENIDO-ENG-6B-AX-READING",
+      "marco": "curriculum",
+      "subjectCode": "ENG",
+      "level": "6_basico",
+      "oaNumber": 6,
+      "source": "curriculumnacional.cl",
+      "order": 6
+    },
+    {
+      "code": "ENG-6B-OA07",
+      "type": "learning_objective",
+      "name": "Leer comprensivamente textos literarios adaptados y auténticos simples, como rimas, poemas, tiras cómicas y cuentos, que contengan palabras de uso frecuente, familias de palabras, repetición de frases y estén acompañados de apoyo visual, identificando: - tema general del texto; - personajes, lugares, tiempo y acciones; - secuencia de eventos (beginning – middle – end); - vocabulario temático y expresiones de uso común.",
+      "parentCode": "CUR-CONTENIDO-ENG-6B-AX-READING",
+      "marco": "curriculum",
+      "subjectCode": "ENG",
+      "level": "6_basico",
+      "oaNumber": 7,
+      "source": "curriculumnacional.cl",
+      "order": 7
+    },
+    {
+      "code": "ENG-6B-OA08",
+      "type": "learning_objective",
+      "name": "Reaccionar a los textos leídos, expresando opiniones y sentimientos o haciendo conexiones con experiencias personales, en forma oral o escrita.",
+      "parentCode": "CUR-CONTENIDO-ENG-6B-AX-READING",
+      "marco": "curriculum",
+      "subjectCode": "ENG",
+      "level": "6_basico",
+      "oaNumber": 8,
+      "source": "curriculumnacional.cl",
+      "order": 8
+    },
+    {
+      "code": "ENG-6B-OA09",
+      "type": "learning_objective",
+      "name": "Usar las siguientes estrategias para apoyar la comprensión de los textos leídos, tanto en formato digital como impreso: - prelectura: hacer predicciones, basándose en conocimientos previos, elementos visuales y contextuales; - lectura: usar organizadores, como títulos, subtítulos, ilustraciones, imágenes y notas; - poslectura: organizar información en diagramas, releer, usar el texto leído como modelo para la expresión escrita.",
+      "parentCode": "CUR-CONTENIDO-ENG-6B-AX-READING",
+      "marco": "curriculum",
+      "subjectCode": "ENG",
+      "level": "6_basico",
+      "oaNumber": 9,
+      "source": "curriculumnacional.cl",
+      "order": 9
+    },
+    {
+      "code": "ENG-6B-OA10",
+      "type": "learning_objective",
+      "name": "Reproducir y producir textos orales, como monólogos, canciones, poemas, adivinanzas y diálogos, para identificar y familiarizarse con los sonidos propios del idioma, como, ch/sh en palabras como chip/ship; b/v en palabras como boat/vote.",
+      "parentCode": "CUR-CONTENIDO-ENG-6B-AX-SPEAKING",
+      "marco": "curriculum",
+      "subjectCode": "ENG",
+      "level": "6_basico",
+      "oaNumber": 10,
+      "source": "curriculumnacional.cl",
+      "order": 10
+    },
+    {
+      "code": "ENG-6B-OA11",
+      "type": "learning_objective",
+      "name": "Expresarse oralmente, ya sea en diálogos, presentaciones o actividades grupales, con apoyo visual y/o digital, en torno a los temas del año.",
+      "parentCode": "CUR-CONTENIDO-ENG-6B-AX-SPEAKING",
+      "marco": "curriculum",
+      "subjectCode": "ENG",
+      "level": "6_basico",
+      "oaNumber": 11,
+      "source": "curriculumnacional.cl",
+      "order": 11
+    },
+    {
+      "code": "ENG-6B-OA12",
+      "type": "learning_objective",
+      "name": "Participar en diálogos con pares y profesores al realizar las siguientes funciones: - expresar habilidad e inhabilidad; por ejemplo: I can/can’t; - describir posición y dar indicaciones de dirección y su secuencia; por ejemplo: The zoo is in front of the park; turn right/left, then go straight; - describir personas en cuanto a personalidad o estado; por ejemplo: he is quiet/friendly; I feel sad/angry/tired; - contrastar información; por ejemplo: it can run but it can’t jump; there is cheese but there isn’t bread; - expresar necesidad; por ejemplo: I have to...; - pedir y decir la hora; por ejemplo: What time is it? It’s 4 o’clock; - describir y preguntar por acciones que ocurren al momento de hablar; por ejemplo: He is/isn’t reading; Is he reading? Yes, he is/No, he isn’t; Are they playing? Yes, they are/No, they aren’t; - expresar cantidad y números hasta el 50; por ejemplo: there is/are a/many/a lot of...child/children; there are 30 cars; - describir acciones que ocurren en el pasado; por ejemplo: I was/made/did/felt...; - describir acciones y cómo se realizan; por ejemplo: he reads fast/very slowly; - expresar posesión; por ejemplo: it is his/her/our car; this is Pedro’s pet; - formular y responder preguntas; por ejemplo: Who...?/How much/many...?/Can...?/ Where...?; - dar información general sobre un tema conocido; por ejemplo: the/he/they... is/are/have/eat/read; - re-contar cuentos con apoyo de ilustraciones; por ejemplo: the...run/play/have...; there is/are...",
+      "parentCode": "CUR-CONTENIDO-ENG-6B-AX-SPEAKING",
+      "marco": "curriculum",
+      "subjectCode": "ENG",
+      "level": "6_basico",
+      "oaNumber": 12,
+      "source": "curriculumnacional.cl",
+      "order": 12
+    },
+    {
+      "code": "ENG-6B-OA13",
+      "type": "learning_objective",
+      "name": "Demostrar conocimiento y uso del vocabulario aprendido: - vocabulario temático; - palabras de uso frecuente; - expresiones de uso común asociadas a las funciones del nivel (por ejemplo: have lunch, catch a cold).",
+      "parentCode": "CUR-CONTENIDO-ENG-6B-AX-SPEAKING",
+      "marco": "curriculum",
+      "subjectCode": "ENG",
+      "level": "6_basico",
+      "oaNumber": 13,
+      "source": "curriculumnacional.cl",
+      "order": 13
+    },
+    {
+      "code": "ENG-6B-OA14",
+      "type": "learning_objective",
+      "name": "Escribir, de acuerdo a un modelo y con apoyo de lenguaje visual, textos no literarios (como email, postal, agenda, invitación) y textos literarios (como cuentos, rimas, tiras cómicas) con el propósito de compartir información en torno a los temas del año.",
+      "parentCode": "CUR-CONTENIDO-ENG-6B-AX-WRITING",
+      "marco": "curriculum",
+      "subjectCode": "ENG",
+      "level": "6_basico",
+      "oaNumber": 14,
+      "source": "curriculumnacional.cl",
+      "order": 14
+    },
+    {
+      "code": "ENG-6B-OA15",
+      "type": "learning_objective",
+      "name": "Escribir para realizar las siguientes funciones: - indicar posición; por ejemplo: The zoo is in front of the park; - describir personas en cuanto a personalidad o estado; por ejemplo: he is quiet/friendly; I feel sad/happy/angry; - contrastar información; por ejemplo: it can fly but it can’t swim; - expresar necesidad; por ejemplo: I have to...; - describir y preguntar por acciones que ocurren al momento de hablar; por ejemplo: He is/isn’t reading; Is he reading? Yes, he is/No, he isn’t; Are they playing? Yes, they are/No, they aren’t; - expresar cantidad e identificar sustantivos plurales irregulares; por ejemplo: there is/are a/many/a lot of...child/children; - describir acciones que ocurren en el pasado; por ejemplo: I was/made/did/felt...; - describir acciones y cómo estas se realizan; por ejemplo: he reads fast/very slowly; - expresar posesión; por ejemplo: it is his/her/our car; this is Pedro’s pet; - expresar cantidad numérica hasta el 20; - formular y responder preguntas; por ejemplo: Who...?/How much/many...?/Can...?/ Where...?",
+      "parentCode": "CUR-CONTENIDO-ENG-6B-AX-WRITING",
+      "marco": "curriculum",
+      "subjectCode": "ENG",
+      "level": "6_basico",
+      "oaNumber": 15,
+      "source": "curriculumnacional.cl",
+      "order": 15
+    },
+    {
+      "code": "ENG-6B-OA16",
+      "type": "learning_objective",
+      "name": "Utilizar los pasos del proceso de escritura (organización de ideas, escritura, corrección y publicación), recurriendo a herramientas como diccionario en línea y procesador de texto para: - crear sus propias oraciones y párrafos breves o diálogos con la ayuda del docente; - utilizar los elementos ortográficos del nivel: mayúscula (en pronombre I) y signos de interrogación; - demostrar conocimiento y uso del vocabulario temático, palabras de uso frecuente y expresiones de uso común asociadas a las funciones del nivel (por ejemplo: have lunch, catch a cold).",
+      "parentCode": "CUR-CONTENIDO-ENG-6B-AX-WRITING",
+      "marco": "curriculum",
+      "subjectCode": "ENG",
+      "level": "6_basico",
+      "oaNumber": 16,
+      "source": "curriculumnacional.cl",
+      "order": 16
+    },
+    {
+      "code": "CUR-HAB-ENG",
+      "type": "subdomain",
+      "name": "Idioma Extranjero: Inglés",
+      "parentCode": "CUR-HABILIDADES",
+      "marco": "curriculum",
+      "subjectCode": "ENG",
+      "source": "curriculumnacional.cl",
+      "order": 3
+    },
+    {
+      "code": "ENG-SK-COMPRENSION-AUDITIVA",
+      "type": "skill",
+      "name": "Comprensión auditiva",
+      "parentCode": "CUR-HAB-ENG",
+      "marco": "curriculum",
+      "subjectCode": "ENG",
+      "source": "curriculumnacional.cl",
+      "order": 1
+    },
+    {
+      "code": "ENG-SK-COMPRENSION-DE-LECTURA",
+      "type": "skill",
+      "name": "Comprensión de lectura",
+      "parentCode": "CUR-HAB-ENG",
+      "marco": "curriculum",
+      "subjectCode": "ENG",
+      "source": "curriculumnacional.cl",
+      "order": 2
+    },
+    {
+      "code": "ENG-SK-EXPRESION-ORAL",
+      "type": "skill",
+      "name": "Expresión oral",
+      "parentCode": "CUR-HAB-ENG",
+      "marco": "curriculum",
+      "subjectCode": "ENG",
+      "source": "curriculumnacional.cl",
+      "order": 3
+    },
+    {
+      "code": "ENG-SK-EXPRESION-ESCRITA",
+      "type": "skill",
+      "name": "Expresión escrita",
+      "parentCode": "CUR-HAB-ENG",
+      "marco": "curriculum",
+      "subjectCode": "ENG",
+      "source": "curriculumnacional.cl",
+      "order": 4
+    },
+    {
+      "code": "DIA-ENG",
+      "type": "domain",
+      "name": "Idioma Extranjero: Inglés",
+      "parentCode": null,
+      "marco": "dia",
+      "subjectCode": "ENG",
+      "source": "dia",
+      "order": 3
+    },
+    {
+      "code": "DIA-ENG-6B",
+      "type": "subdomain",
+      "name": "6° básico",
+      "parentCode": "DIA-ENG",
+      "marco": "dia",
+      "subjectCode": "ENG",
+      "level": "6_basico",
+      "source": "dia",
+      "order": 6
+    },
+    {
+      "code": "ENG-6B-OA01-I1",
+      "type": "descriptor",
+      "name": "Identificar información explícita en el texto escuchado que responda a las preguntas ¿quién?, ¿cómo?, ¿dónde?, ¿qué?, cuando no hay información que compite.",
+      "parentCode": "DIA-ENG-6B",
+      "marco": "dia",
+      "subjectCode": "ENG",
+      "level": "6_basico",
+      "source": "dia-ficha-2026",
+      "order": 1,
+      "_positions": [
+        2,
+        3,
+        4,
+        7,
+        9
+      ]
+    },
+    {
+      "code": "ENG-6B-OA01-I2",
+      "type": "descriptor",
+      "name": "Identificar información explícita en el texto escuchado referida a características de personas (por ejemplo, edad, color de pelo, etc.), lugares (por ejemplo, clima, temperatura, ubicación, etc.) u objetos (por ejemplo, tamaño, color, etc.), cuando no hay información que compite.",
+      "parentCode": "DIA-ENG-6B",
+      "marco": "dia",
+      "subjectCode": "ENG",
+      "level": "6_basico",
+      "source": "dia-ficha-2026",
+      "order": 2,
+      "_positions": [
+        8
+      ]
+    },
+    {
+      "code": "ENG-6B-OA02-I1",
+      "type": "descriptor",
+      "name": "Establecer el tema o propósito general del texto escuchado, cuando este no se encuentra explícito, a partir de claves evidentes (como palabras o expresiones familiares asociadas al tema o ideas que se repiten) que permiten inferirlo.",
+      "parentCode": "DIA-ENG-6B",
+      "marco": "dia",
+      "subjectCode": "ENG",
+      "level": "6_basico",
+      "source": "dia-ficha-2026",
+      "order": 1,
+      "_positions": [
+        1,
+        12
+      ]
+    },
+    {
+      "code": "ENG-6B-OA02-I2",
+      "type": "descriptor",
+      "name": "Extraer información específica asociada a personas, lugares y tiempo, cuando esta no se encuentra explícita y requiere realizar inferencias o establecer relaciones evidentes.",
+      "parentCode": "DIA-ENG-6B",
+      "marco": "dia",
+      "subjectCode": "ENG",
+      "level": "6_basico",
+      "source": "dia-ficha-2026",
+      "order": 2,
+      "_positions": [
+        5,
+        11
+      ]
+    },
+    {
+      "code": "ENG-6B-OA02-I3",
+      "type": "descriptor",
+      "name": "Extraer expresiones de uso frecuente relacionadas con los temas y las funciones del año (por ejemplo, seguir y dar instrucciones; decir y preguntar la hora; expresar habilidad e inhabilidad; expresar necesidad, etc.) que se encuentran explícitas en el texto escuchado, cuando no hay información que compite.",
+      "parentCode": "DIA-ENG-6B",
+      "marco": "dia",
+      "subjectCode": "ENG",
+      "level": "6_basico",
+      "source": "dia-ficha-2026",
+      "order": 3,
+      "_positions": [
+        6,
+        10
+      ]
+    },
+    {
+      "code": "ENG-6B-OA06-I1",
+      "type": "descriptor",
+      "name": "Identificar el tema o idea general de un texto no literario de tema familiar o una sección de este, reconociendo de qué trata a partir de su sentido global, cuando el texto contiene apoyo visual o contextual (por ejemplo, títulos y/o subtítulos).",
+      "parentCode": "DIA-ENG-6B",
+      "marco": "dia",
+      "subjectCode": "ENG",
+      "level": "6_basico",
+      "source": "dia-ficha-2026",
+      "order": 1,
+      "_positions": [
+        13,
+        15
+      ]
+    },
+    {
+      "code": "ENG-6B-OA06-I2",
+      "type": "descriptor",
+      "name": "Identificar información entregada por palabras clave, expresiones de uso común y vocabulario temático presentes en textos no literarios simples en los que la información se presenta de manera clara y evidente.",
+      "parentCode": "DIA-ENG-6B",
+      "marco": "dia",
+      "subjectCode": "ENG",
+      "level": "6_basico",
+      "source": "dia-ficha-2026",
+      "order": 2,
+      "_positions": [
+        14,
+        16
+      ]
+    },
+    {
+      "code": "ENG-6B-OA06-I3",
+      "type": "descriptor",
+      "name": "Identificar información explícita y relevante asociada a datos concretos como personas, acciones, lugares, cantidades o momentos, cuando esta es fácil de localizar en el texto (por ejemplo, por encontrarse al inicio, destacada, repetida dentro del texto, etc.).",
+      "parentCode": "DIA-ENG-6B",
+      "marco": "dia",
+      "subjectCode": "ENG",
+      "level": "6_basico",
+      "source": "dia-ficha-2026",
+      "order": 3,
+      "_positions": [
+        17,
+        18,
+        19
+      ]
+    },
+    {
+      "code": "ENG-6B-OA06-I4",
+      "type": "descriptor",
+      "name": "Reconocer el propósito de un texto no literario, infiriendo para qué sirve o qué busca comunicar (invitar, informar, saludar, instruir), a partir de su sentido global y/o de claves contextuales como imágenes o títulos.",
+      "parentCode": "DIA-ENG-6B",
+      "marco": "dia",
+      "subjectCode": "ENG",
+      "level": "6_basico",
+      "source": "dia-ficha-2026",
+      "order": 4,
+      "_positions": [
+        20
+      ]
+    },
+    {
+      "code": "ENG-6B-OA07-I1",
+      "type": "descriptor",
+      "name": "Identificar acciones, según el momento en que ocurren en el relato, cuando existen claves evidentes para identificar la secuencia de las mismas (first, then, finally, beginning, middle, end y/o mediante la separación de párrafos o imágenes).",
+      "parentCode": "DIA-ENG-6B",
+      "marco": "dia",
+      "subjectCode": "ENG",
+      "level": "6_basico",
+      "source": "dia-ficha-2026",
+      "order": 1,
+      "_positions": [
+        21
+      ]
+    },
+    {
+      "code": "ENG-6B-OA07-I2",
+      "type": "descriptor",
+      "name": "Identificar información entregada por expresiones de uso común (por ejemplo, excuse me, I'm sorry, how old...? entre otras) y vocabulario temático presentes en textos literarios simples en los que la información se presenta de manera clara y evidente.",
+      "parentCode": "DIA-ENG-6B",
+      "marco": "dia",
+      "subjectCode": "ENG",
+      "level": "6_basico",
+      "source": "dia-ficha-2026",
+      "order": 2,
+      "_positions": [
+        22
+      ]
+    },
+    {
+      "code": "ENG-6B-OA07-I3",
+      "type": "descriptor",
+      "name": "Identificar ideas generales presentes en un texto literario (por ejemplo, de qué trata, cuál es el conflicto, cómo se solucionó el conflicto, etc.) cuando el texto contiene claves que facilitan la tarea.",
+      "parentCode": "DIA-ENG-6B",
+      "marco": "dia",
+      "subjectCode": "ENG",
+      "level": "6_basico",
+      "source": "dia-ficha-2026",
+      "order": 3,
+      "_positions": [
+        23
+      ]
+    },
+    {
+      "code": "ENG-6B-OA07-I4",
+      "type": "descriptor",
+      "name": "Extraer información específica asociada a personajes, lugares y tiempo, cuando esta no se encuentra explícita y requiere realizar inferencias evidentes o establecer relaciones entre información que se encuentra próxima en el texto.",
+      "parentCode": "DIA-ENG-6B",
+      "marco": "dia",
+      "subjectCode": "ENG",
+      "level": "6_basico",
+      "source": "dia-ficha-2026",
+      "order": 4,
+      "_positions": [
+        24
+      ]
+    },
+    {
+      "code": "ENG-6B-OA14-I1",
+      "type": "descriptor",
+      "name": "Completar oraciones (siguiendo un modelo y/o formato dado) sobre temas de la vida cotidiana, del contexto inmediato del estudiante y de actualidad y/o interés global, usando vocabulario temático o funciones del año.",
+      "parentCode": "DIA-ENG-6B",
+      "marco": "dia",
+      "subjectCode": "ENG",
+      "level": "6_basico",
+      "source": "dia-ficha-2026",
+      "order": 1,
+      "_positions": [
+        25,
+        26,
+        27
+      ],
+      "_positionsCuadernillo": [
+        28,
+        29,
+        30
+      ],
+      "_positionsNote": "La guía asigna este indicador a las posiciones 25-27, pero en el cuadernillo esos ítems piden describir fotos («Write a complete sentence describing what the children are doing»); el bloque de «completar siguiendo un modelo/caja de palabras» son los ítems 28-30. Ver warning ENG-WRITING-SWAP."
+    },
+    {
+      "code": "ENG-6B-OA15-I1",
+      "type": "descriptor",
+      "name": "Escribir oraciones breves sobre imágenes dadas, que permiten describir acciones que ocurren al momento de hablar.",
+      "parentCode": "DIA-ENG-6B",
+      "marco": "dia",
+      "subjectCode": "ENG",
+      "level": "6_basico",
+      "source": "dia-ficha-2026",
+      "order": 1,
+      "_positions": [
+        28,
+        29,
+        30
+      ],
+      "_positionsCuadernillo": [
+        25,
+        26,
+        27
+      ],
+      "_positionsNote": "La guía asigna este indicador a las posiciones 28-30, pero en el cuadernillo los ítems que describen acciones en imágenes (present continuous) son 25-27. Ver warning ENG-WRITING-SWAP."
+    }
+  ],
+  "mappings": [
+    {
+      "sourceCode": "ENG-6B-OA01-I1",
+      "targetCode": "ENG-6B-OA01",
+      "mappingType": "subset"
+    },
+    {
+      "sourceCode": "ENG-6B-OA01-I1",
+      "targetCode": "ENG-SK-COMPRENSION-AUDITIVA",
+      "mappingType": "related"
+    },
+    {
+      "sourceCode": "ENG-6B-OA01-I2",
+      "targetCode": "ENG-6B-OA01",
+      "mappingType": "subset"
+    },
+    {
+      "sourceCode": "ENG-6B-OA01-I2",
+      "targetCode": "ENG-SK-COMPRENSION-AUDITIVA",
+      "mappingType": "related"
+    },
+    {
+      "sourceCode": "ENG-6B-OA02-I1",
+      "targetCode": "ENG-6B-OA02",
+      "mappingType": "subset"
+    },
+    {
+      "sourceCode": "ENG-6B-OA02-I1",
+      "targetCode": "ENG-SK-COMPRENSION-AUDITIVA",
+      "mappingType": "related"
+    },
+    {
+      "sourceCode": "ENG-6B-OA02-I2",
+      "targetCode": "ENG-6B-OA02",
+      "mappingType": "subset"
+    },
+    {
+      "sourceCode": "ENG-6B-OA02-I2",
+      "targetCode": "ENG-SK-COMPRENSION-AUDITIVA",
+      "mappingType": "related"
+    },
+    {
+      "sourceCode": "ENG-6B-OA02-I3",
+      "targetCode": "ENG-6B-OA02",
+      "mappingType": "subset"
+    },
+    {
+      "sourceCode": "ENG-6B-OA02-I3",
+      "targetCode": "ENG-SK-COMPRENSION-AUDITIVA",
+      "mappingType": "related"
+    },
+    {
+      "sourceCode": "ENG-6B-OA06-I1",
+      "targetCode": "ENG-6B-OA06",
+      "mappingType": "subset"
+    },
+    {
+      "sourceCode": "ENG-6B-OA06-I1",
+      "targetCode": "ENG-SK-COMPRENSION-DE-LECTURA",
+      "mappingType": "related"
+    },
+    {
+      "sourceCode": "ENG-6B-OA06-I2",
+      "targetCode": "ENG-6B-OA06",
+      "mappingType": "subset"
+    },
+    {
+      "sourceCode": "ENG-6B-OA06-I2",
+      "targetCode": "ENG-SK-COMPRENSION-DE-LECTURA",
+      "mappingType": "related"
+    },
+    {
+      "sourceCode": "ENG-6B-OA06-I3",
+      "targetCode": "ENG-6B-OA06",
+      "mappingType": "subset"
+    },
+    {
+      "sourceCode": "ENG-6B-OA06-I3",
+      "targetCode": "ENG-SK-COMPRENSION-DE-LECTURA",
+      "mappingType": "related"
+    },
+    {
+      "sourceCode": "ENG-6B-OA06-I4",
+      "targetCode": "ENG-6B-OA06",
+      "mappingType": "subset"
+    },
+    {
+      "sourceCode": "ENG-6B-OA06-I4",
+      "targetCode": "ENG-SK-COMPRENSION-DE-LECTURA",
+      "mappingType": "related"
+    },
+    {
+      "sourceCode": "ENG-6B-OA07-I1",
+      "targetCode": "ENG-6B-OA07",
+      "mappingType": "subset"
+    },
+    {
+      "sourceCode": "ENG-6B-OA07-I1",
+      "targetCode": "ENG-SK-COMPRENSION-DE-LECTURA",
+      "mappingType": "related"
+    },
+    {
+      "sourceCode": "ENG-6B-OA07-I2",
+      "targetCode": "ENG-6B-OA07",
+      "mappingType": "subset"
+    },
+    {
+      "sourceCode": "ENG-6B-OA07-I2",
+      "targetCode": "ENG-SK-COMPRENSION-DE-LECTURA",
+      "mappingType": "related"
+    },
+    {
+      "sourceCode": "ENG-6B-OA07-I3",
+      "targetCode": "ENG-6B-OA07",
+      "mappingType": "subset"
+    },
+    {
+      "sourceCode": "ENG-6B-OA07-I3",
+      "targetCode": "ENG-SK-COMPRENSION-DE-LECTURA",
+      "mappingType": "related"
+    },
+    {
+      "sourceCode": "ENG-6B-OA07-I4",
+      "targetCode": "ENG-6B-OA07",
+      "mappingType": "subset"
+    },
+    {
+      "sourceCode": "ENG-6B-OA07-I4",
+      "targetCode": "ENG-SK-COMPRENSION-DE-LECTURA",
+      "mappingType": "related"
+    },
+    {
+      "sourceCode": "ENG-6B-OA14-I1",
+      "targetCode": "ENG-6B-OA14",
+      "mappingType": "subset"
+    },
+    {
+      "sourceCode": "ENG-6B-OA14-I1",
+      "targetCode": "ENG-SK-EXPRESION-ESCRITA",
+      "mappingType": "related"
+    },
+    {
+      "sourceCode": "ENG-6B-OA15-I1",
+      "targetCode": "ENG-6B-OA15",
+      "mappingType": "subset"
+    },
+    {
+      "sourceCode": "ENG-6B-OA15-I1",
+      "targetCode": "ENG-SK-EXPRESION-ESCRITA",
+      "mappingType": "related"
+    }
+  ]
+}

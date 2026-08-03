@@ -1,0 +1,184 @@
+import Link from 'next/link';
+import type { Route } from 'next';
+import { Lock } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import type { InstrumentModel, ItemModel } from '@soe/types';
+import { ItemsTable } from './ItemsTable';
+import { SectionsList } from './SectionsList';
+import { EnunciadoPdfCard } from './EnunciadoPdfCard';
+import { EnunciadoViewButton } from '@/components/instruments/EnunciadoViewButton';
+import { SetPageTitle } from '@/components/layout/page-title-context';
+
+const TYPE_LABELS: Record<string, string> = {
+  dia: 'DIA',
+  simce: 'SIMCE',
+  paes: 'PAES',
+  cambridge_mock: 'Cambridge',
+  aptus: 'Aptus',
+  desafio: 'Desafio',
+  pal: 'PAL',
+  custom: 'Personalizado',
+};
+
+/**
+ * Vista de detalle de un instrumento (encabezado + metadata + PDF de enunciado +
+ * secciones + ítems). Es compartida por dos rutas:
+ *  · `/banco-contenido/[id]`            (dashboard del colegio)
+ *  · `/admin/instrumentos/[id]`     (backoffice de plataforma)
+ *
+ * `canEdit` decide si se muestran las acciones de modificación (subir/eliminar PDF,
+ * editar ítems). Los instrumentos OFICIALES son de solo lectura para todos menos
+ * `platform_admin` — quien resuelve `canEdit` es la página, no este componente. El
+ * backend (`InstrumentsService.assertEditable`) es la barrera real.
+ *
+ * `basePath` prefija los enlaces de autoría (tabla de especificaciones, etiquetado
+ * IA); `showAuthoringLinks` los oculta donde no aplican (backoffice: los flujos de
+ * autoría avanzada viven en el dashboard del colegio).
+ */
+export function InstrumentDetailView({
+  instrument,
+  items,
+  totalItems,
+  canEdit,
+  basePath,
+  breadcrumb,
+  showAuthoringLinks = true,
+}: {
+  instrument: InstrumentModel;
+  items: ItemModel[];
+  /** Total de ítems del instrumento según la API. Si es mayor que `items.length`, la lista viene truncada por paginación y hay que decirlo. */
+  totalItems?: number;
+  canEdit: boolean;
+  basePath: string;
+  breadcrumb: { href: string; label: string };
+  showAuthoringLinks?: boolean;
+}) {
+  const readOnlyOfficial = instrument.isOfficial && !canEdit;
+
+  return (
+    <div className="space-y-6">
+      {/* El nombre del instrumento es el título de la vista: lo pinta la barra
+          superior. Acá quedan sus atributos y las acciones. */}
+      <SetPageTitle
+        title={instrument.name}
+        parentHref={breadcrumb.href}
+        parentLabel={breadcrumb.label}
+      />
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+          <div className="flex flex-wrap items-center gap-2">
+            <Badge variant="outline" className="text-xs">
+              {TYPE_LABELS[instrument.type] ?? instrument.type}
+            </Badge>
+            {instrument.isOfficial && (
+              <Badge variant="outline" className="border-0 bg-info/10 text-xs text-info">
+                Oficial
+              </Badge>
+            )}
+            {instrument.year && (
+              <span className="text-xs text-muted-foreground">Ano {instrument.year}</span>
+            )}
+            {instrument.version && (
+              <span className="text-xs text-muted-foreground">v{instrument.version}</span>
+            )}
+          </div>
+        </div>
+
+        <div className="flex flex-wrap gap-2">
+          {instrument.enunciadoPdf && <EnunciadoViewButton instrumentId={instrument.id} />}
+          {/* La tabla de especificaciones es de lectura: el botón se muestra
+              siempre, también en el backoffice. La acción de cargar/editar vive
+              dentro de la vista y se gatea por rol / basePath. */}
+          <Link href={`${basePath}/${instrument.id}/spec-table` as Route}>
+            <Button variant="outline" size="sm">
+              Tabla de especificaciones
+            </Button>
+          </Link>
+          {/* Etiquetar con IA modifica el instrumento → sólo para editores y donde
+              aplica la autoría (se oculta en el backoffice). */}
+          {canEdit && showAuthoringLinks && (
+            <Link href={`${basePath}/${instrument.id}/etiquetar` as Route}>
+              <Button variant="outline" size="sm">
+                Etiquetar con IA
+              </Button>
+            </Link>
+          )}
+        </div>
+      </div>
+
+      {/* Aviso de solo lectura para instrumentos oficiales (no platform_admin) */}
+      {readOnlyOfficial && (
+        <p className="flex items-center gap-2 rounded-md bg-muted px-3 py-2 text-xs text-muted-foreground">
+          <Lock className="size-3.5 shrink-0" aria-hidden />
+          Este instrumento es oficial de la plataforma y es de solo lectura. Su configuración
+          (enunciado, secciones e ítems) la mantiene el equipo de la plataforma.
+        </p>
+      )}
+
+      {/* Metadata */}
+      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-xs font-medium text-muted-foreground">Items</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-sm font-medium">{items.length}</p>
+          </CardContent>
+        </Card>
+        {instrument.isOfficial && (
+          <Card>
+            <CardHeader className="pb-2">
+              <CardTitle className="text-xs font-medium text-muted-foreground">Origen</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-sm font-medium">Oficial</p>
+            </CardContent>
+          </Card>
+        )}
+      </div>
+
+      {/* PDF del enunciado (TKT-15) — panel de gestión (subir / reemplazar / eliminar)
+          sólo para editores. La previsualización y descarga viven en el botón
+          "Ver enunciado" del encabezado, disponible para todos. */}
+      {canEdit && (
+        <EnunciadoPdfCard
+          instrumentId={instrument.id}
+          enunciadoPdf={instrument.enunciadoPdf ?? null}
+          canEdit={canEdit}
+        />
+      )}
+
+      {/* Sections */}
+      {instrument.sections && instrument.sections.length > 0 && (
+        <section className="space-y-3">
+          <h2 className="text-sm font-medium uppercase text-muted-foreground">Secciones</h2>
+          <SectionsList sections={instrument.sections} />
+        </section>
+      )}
+
+      {/* Items table */}
+      <section className="space-y-3">
+        <h2 className="text-sm font-medium uppercase text-muted-foreground">
+          Items ({items.length}
+          {typeof totalItems === 'number' && totalItems > items.length ? ` de ${totalItems}` : ''})
+        </h2>
+        {typeof totalItems === 'number' && totalItems > items.length ? (
+          // Antes esto se truncaba en silencio: la API cortaba en 20 y la vista
+          // decía "Items (20)" como si fueran todos.
+          <p className="rounded-md border border-warning/40 bg-warning/10 px-3 py-2 text-xs text-warning">
+            Se están mostrando {items.length} de {totalItems} ítems: la lista viene paginada desde
+            el servidor.
+          </p>
+        ) : null}
+        <ItemsTable
+          items={items}
+          sections={instrument.sections ?? []}
+          canEdit={canEdit}
+          instrumentId={instrument.id}
+        />
+      </section>
+    </div>
+  );
+}

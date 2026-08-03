@@ -17,6 +17,7 @@ import {
 import { cn } from '@/lib/utils';
 import { QuestionDetailSheet } from '@/components/question-detail/question-detail-sheet';
 import { QuestionNodes, type QuestionNodeTag } from '@/components/question-detail/question-nodes';
+import { AddToCollectionMenu } from '@/components/collections/add-to-collection-menu';
 
 function questionSectionToPassage(section: QuestionSection): PassageData {
   return {
@@ -59,8 +60,9 @@ export function QuestionDetailPanel(props: {
   data: QuestionAnalysisResponse | null;
   open: boolean;
   onClose: () => void;
+  canAddToCollection?: boolean;
 }): JSX.Element {
-  const { data, open, onClose } = props;
+  const { data, open, onClose, canAddToCollection = false } = props;
   const section = data?.section ?? null;
   const passage = section && hasPassageContent(section) ? questionSectionToPassage(section) : null;
 
@@ -71,6 +73,9 @@ export function QuestionDetailPanel(props: {
       position={data?.position ?? null}
       headerBadges={
         data?.correctKey ? <Badge variant="success">Clave correcta: {data.correctKey}</Badge> : null
+      }
+      headerActions={
+        data && canAddToCollection ? <AddToCollectionMenu itemId={data.itemId} /> : undefined
       }
       description="Enunciado, distribución de respuestas, análisis de distractores y nodos asociados a la pregunta."
       passage={passage}
@@ -102,6 +107,7 @@ function toNodeTags(tags: QuestionTaxonomyTag[]): QuestionNodeTag[] {
 
 function QuestionDetailContent({ data }: { data: QuestionAnalysisResponse }): JSX.Element {
   const distractor = topDistractorKey(data.alternatives);
+  const levelReference = data.references.grade.rate;
 
   return (
     <div className="mt-6 space-y-6">
@@ -139,6 +145,20 @@ function QuestionDetailContent({ data }: { data: QuestionAnalysisResponse }): JS
           tone={data.blankCount > 0 ? 'warning' : 'neutral'}
         />
       </div>
+
+      {/* T2-17 — Comparativa: % de logro de la MISMA pregunta en el nivel/grado,
+          junto al % del scope en contexto (arriba). El nivel trasciende el scope del
+          usuario: un profesor ve su curso arriba y esta referencia más amplia aquí. */}
+      {levelReference !== null ? (
+        <div className="grid grid-cols-2 gap-3">
+          <MetricCard
+            label="% de logro · nivel"
+            value={formatPct(levelReference)}
+            tone={achievementTone(levelReference)}
+            hint={`${data.references.grade.responseCount} respuestas`}
+          />
+        </div>
+      ) : null}
 
       {/* Todos los nodos de taxonomía asociados a la pregunta. TKT-05: en
           resultados los descriptores no se muestran (solo en el banco de ítems). */}
@@ -197,9 +217,7 @@ function AlternativeRow({
           <span
             className={cn(
               'inline-flex size-6 shrink-0 items-center justify-center rounded-full border text-xs font-semibold',
-              alt.isCorrect
-                ? 'border-success text-success'
-                : 'border-border text-muted-foreground',
+              alt.isCorrect ? 'border-success text-success' : 'border-border text-muted-foreground',
             )}
           >
             {alt.key}
@@ -214,15 +232,10 @@ function AlternativeRow({
               className="max-h-12 min-w-0 rounded border bg-white object-contain"
             />
           ) : (
-            <span className="truncate text-foreground">
-              {alt.text ?? `Alternativa ${alt.key}`}
-            </span>
+            <span className="truncate text-foreground">{alt.text ?? `Alternativa ${alt.key}`}</span>
           )}
           {alt.isCorrect ? (
-            <CheckCircle2
-              className="size-4 shrink-0 text-success"
-              aria-label="Correcta"
-            />
+            <CheckCircle2 className="size-4 shrink-0 text-success" aria-label="Correcta" />
           ) : isTopDistractor ? (
             <Badge variant="warning" className="shrink-0">
               Distractor
@@ -235,7 +248,10 @@ function AlternativeRow({
       </div>
       <div className="h-2 w-full overflow-hidden rounded-full bg-muted" role="presentation">
         <div
-          className={cn('h-full rounded-full transition-[width] motion-reduce:transition-none', barClass)}
+          className={cn(
+            'h-full rounded-full transition-[width] motion-reduce:transition-none',
+            barClass,
+          )}
           style={{ width: `${Math.min(100, Math.max(0, alt.percentage))}%` }}
         />
       </div>
@@ -276,10 +292,13 @@ function MetricCard({
   label,
   value,
   tone,
+  hint,
 }: {
   label: string;
   value: string;
   tone: Tone;
+  /** Detalle al pie (ej. el N de la población de una referencia). */
+  hint?: string;
 }): JSX.Element {
   const toneClass: Record<Tone, string> = {
     good: 'text-success',
@@ -291,6 +310,7 @@ function MetricCard({
     <div className="rounded-lg border bg-card p-3 text-center">
       <p className="text-xs text-muted-foreground">{label}</p>
       <p className={cn('mt-1 text-lg font-semibold tabular-nums', toneClass[tone])}>{value}</p>
+      {hint ? <p className="mt-0.5 text-[11px] text-muted-foreground">{hint}</p> : null}
     </div>
   );
 }

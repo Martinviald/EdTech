@@ -1,0 +1,1152 @@
+{
+  "schemaVersion": "1.0",
+  "source": {
+    "file": "8_prueba_lectura_diagnostico_2026_08_basico.pdf",
+    "subjectFolder": "Lenguaje"
+  },
+  "instrument": {
+    "name": "DIA Lectura 8° Básico 2026 — Diagnóstico",
+    "subject": "Lenguaje y Comunicación",
+    "subjectCode": "LANG",
+    "grade": "8° Básico",
+    "gradeCode": "8TH_BASIC",
+    "year": 2026,
+    "applicationPeriod": "diagnostico",
+    "type": "dia",
+    "isOfficial": true,
+    "source": "imported"
+  },
+  "sections": [
+    {
+      "order": 1,
+      "name": "Texto 1: «Eleanor»",
+      "type": "multiple_choice",
+      "instructions": "Lee el siguiente texto y responde las preguntas 1 a 4.",
+      "passage": {
+        "title": "Eleanor",
+        "text": "A la mañana siguiente Eleanor se puso ropa limpia y se llevó los libros consigo. Había tenido que lavar los jeans a mano la víspera, así que estaban aún un poco húmedos… Pero en conjunto se sentía mil veces mejor que el día anterior. Incluso se arregló un poco el pelo. Se hizo un moño y lo sujetó con un elástico. Vería las estrellas cuando lo retirase del pelo, pero el peinado se mantendría en su sitio. Y lo que era aún mejor: tenía las canciones de Park en la cabeza; también en el pecho, por decirlo de algún modo.\n\nLa música que Park le había grabado poseía una cualidad especial. Sonaba distinta. O sea, te dejaba como sin aliento. Había algo emocionante en ella y también enérgico. Cuando la escuchaba, Eleanor tenía la sensación de que todo, el mundo entero, no era como ella había creído hasta entonces. Y eso era bueno. Eso era genial.\n\nCuando tomó el autobús por la mañana enseguida alzó la vista buscando a Park. Él también miraba hacia arriba, como si la estuviera esperando. Eleanor no pudo evitarlo; sonrió. Solo un instante.\n\nNada más sentarse, se hundió cuanto pudo en el asiento por si los malditos bellacos del fondo advertían lo contenta que estaba por la posición de su coronilla o algo así.\n\nNotaba la presencia de Park en su propia piel, aunque la separaba un mínimo de quince centímetros.\n\nEleanor le tendió los cómics y toqueteó nerviosa la cinta verde que llevaba enrollada en la muñeca. No se le ocurría nada que decir. ¿Y si no era capaz de decir nada? ¿Y si no se atrevía a darle las gracias siquiera?\n\nPark tenía las manos inmóviles sobre el regazo. Inmóviles y perfectas. De color miel, las uñas rosadas y limpias. Todo en él era grácil y fuerte. No movía ni un dedo sin motivo.\n\nEstaban a punto de llegar al instituto cuando él rompió el silencio.\n\n—¿La has oído?\n\nAlzando la vista solo hasta la altura de los hombros del chico, Eleanor asintió.\n\n—¿Te ha gustado? —preguntó Park.\n\nElla puso los ojos en blanco.\n\n—Oh, por favor. Es… no sé… —abrió las manos— alucinante.\n\n—¿Lo dices con sarcasmo? No lo tengo claro.\n\nEleanor lo miró a los ojos, aunque sabía perfectamente cómo se iba a sentir: como si le abrieran el pecho para arrancarle las entrañas.\n\n—No. Es alucinante. La estuve oyendo durante horas. Esa canción ¿“Love Will Tear Us Apart”?\n\n—Sí, Joy Division.\n\n—Qué fuerte, es el mejor principio de canción del mundo.\n\nÉl imitó el sonido de la guitarra y la batería.\n\n—Sí, sí, sí —se emocionó Eleanor—. Me pasaría la vida escuchando esos tres segundos.\n\n—Podrías hacerlo.\n\nLos ojos de Park sonreían, la boca solo a medias.\n\n—No quería gastar las pilas —dijo ella.\n\nÉl negó con la cabeza, como si Eleanor fuera boba.\n\n—Además —añadió Eleanor—, también me encanta todo lo demás, la parte aguda, la melodía, el naa, naa-ni-naa, ni-naa, naa, ni-naa.\n\nPark asintió.\n\n—Y la voz de la última parte —continuó ella— cuando canta un pelo demasiado agudo. Y luego muy al final, cuando la batería suena como enojada, como si no quisiera que la canción terminase…\n\nPark imitó el sonido de la batería:\n\n—Ta-ta-ta, ta-ta-ta.\n\n—Me entran ganas de romper esa canción en pedacitos —dijo Eleanor— y disfrutar de ellos hasta reventar.\n\nEl comentario hizo reír a Park.\n\n—¿Y qué me dices de los Smiths? —preguntó.\n\n—No sabía qué canciones eran suyas —se disculpó Eleanor.\n\n—Te escribiré los títulos.\n\n—Me gusta todo.\n\n—Bien —repuso él.\n\n—Me encanta.\n\nÉl sonrió, pero desvió la vista hacia la ventanilla. Eleanor bajó la mirada.\n\nLa micro entraba ya en el estacionamiento. Eleanor no quería que aquella relación recién instaurada —una charla de verdad, con preguntas, respuestas y sonrisas— llegase a su fin.\n\nRainbow Rowell. Eleonor & Park. Cap.13. Madrid: Alfaguara, 2012. (Fragmento).",
+        "format": "plain",
+        "attachments": []
+      },
+      "items": [
+        {
+          "position": 1,
+          "type": "multiple_choice",
+          "stem": "¿Qué hizo Eleanor apenas se subió al autobús?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Buscó a Park.",
+              "isCorrect": true
+            },
+            {
+              "key": "B",
+              "text": "Escuchó una canción.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Se arregló un poco el pelo.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "Se tocó la cinta en su muñeca.",
+              "isCorrect": false
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "A",
+          "skill": "Localizar",
+          "oa": "OA 3",
+          "contentAxis": "Narración",
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Localizan información explícita relevante en un texto literario. Infieren información relevante sobre personajes en un"
+        },
+        {
+          "position": 2,
+          "type": "multiple_choice",
+          "stem": "¿Qué provocaron en Eleanor las canciones de Park?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Un desencanto del mundo.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Una rebeldía contra el mundo.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "La inseguridad frente al mundo.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "El redescubrimiento del mundo.",
+              "isCorrect": true
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "D",
+          "skill": "Interpretar y relacionar",
+          "oa": "OA 3",
+          "contentAxis": "Narración",
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Infieren información relevante sobre personajes en un texto literario. Infieren información relevante sobre personajes en un"
+        },
+        {
+          "position": 3,
+          "type": "multiple_choice",
+          "stem": "De acuerdo con lo leído, ¿cómo es Eleanor?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Tímida.",
+              "isCorrect": true
+            },
+            {
+              "key": "B",
+              "text": "Tolerante.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Superficial.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "Aduladora.",
+              "isCorrect": false
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "A",
+          "skill": "Interpretar y relacionar",
+          "oa": "OA 3",
+          "contentAxis": "Narración",
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Infieren información relevante sobre personajes en un texto literario."
+        },
+        {
+          "position": 4,
+          "type": "multiple_choice",
+          "stem": "¿De qué trata el texto?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Del malestar de una joven por causa de unos compañeros.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "De la diferencia en gustos musicales de dos jóvenes.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "De la obsesión de una joven por su apariencia física.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "Del comienzo de una relación entre dos jóvenes.",
+              "isCorrect": true
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "D",
+          "skill": "Interpretar y relacionar",
+          "oa": "OA 3",
+          "contentAxis": "Narración",
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Infieren el sentido global de un texto literario. Localizan información explícita relevante en un texto"
+        }
+      ]
+    },
+    {
+      "order": 2,
+      "name": "Texto 2: «Thor pierde su martillo»",
+      "type": "mixed",
+      "instructions": "Lee el siguiente texto y responde las preguntas 5 a 11.",
+      "passage": {
+        "title": "THOR PIERDE SU MARTILLO",
+        "text": "(Mito nórdico)\n\nUna mañana Thor descubre que su martillo ha desaparecido. Llama a Loki y le dice que el martillo le ha sido robado. Loki decide que vayan a ver a Freyja.\n\n—¿Me dejas tu forma de halcón para que busque mi martillo? —le preguntó Thor.\n\n—Gustosamente te la dejaré —contestó Freyja—, aunque fuera de oro o plata, si puede ayudarte a encontrar a Mjollnir.\n\nLoki voló bajo la forma del halcón de Freyja hasta encontrar a Thrym, señor de los gigantes.\n\n—¿Has escondido tú el martillo de Thor? —preguntó Loki.\n\n—Lo he escondido a ocho leguas bajo tierra —replicó Thrym— y afirmo que nadie lo sacará hasta que Freyja me sea dada como novia.\n\nLoki y Thor dijeron a Freyja que se preparase para ser la novia de Thrym, mas esta, furiosa, se negó. Los dioses, alarmados, se reunieron para decidir qué hacer. Si los gigantes tenían el martillo de Thor, los dioses se verían indefensos ante cualquier ataque y Asgard pronto sería destruida. Pero Freyja no quería casarse con Thrym, ¿cómo recuperarían el martillo? A Heimdall se le ocurrió una idea:\n\n—Disfracemos a Thor de novia y enviémosle a Thrym en lugar de Freyja.\n\nA Thor no le gustó la sugerencia y protestó diciendo que sería imposible disfrazarle con ropas de mujer; pero Loki le recordó el destino que esperaba a Asgard si no recuperaba a Mjollnir. De modo que Thor fue disfrazado de novia con joyas sobre el pecho y un velo en la cabeza. En el cuello le pusieron el collar de los Brisings. Loki, vestido de dama de compañía, acompañaba al disfrazado Thor.\n\nThrym se puso muy contento con la llegada de Freyja y sus sirvientes les ofrecieron un gran festín. Thor se sentó a la mesa y se comió un buey entero, ocho salmones y todas las golosinas reservadas para las mujeres, todo con tres cuernos de hidromiel. Thrym observó esto con cierta alarma y dijo que nunca había visto que una doncella comiera y bebiera tanto. Loki tuvo que espabilarse para evitar que les descubrieran:\n\n—Freyja lleva ocho noches sin comer ni beber, tan deseosa estaba de llegar al País de los Gigantes —dijo.\n\nA Thrym esto le agradó y levantó el velo de Freyja para besarla, mas se echó atrás horrorizado:\n\n—¿Por qué tiene Freyja unos ojos tan rojos y feroces? —dijo muy asustado.\n\n—Freyja lleva ocho noches sin dormir, tan deseosa estaba de llegar al País de los Gigantes —le respondió Loki.\n\nThrym quedó satisfecho y quiso proseguir las bodas. Ordenó que se trajera a Mjollnir para que bendijera a la pareja. El martillo fue depositado en el regazo de la novia. En cuanto Thor tuvo el martillo las cosas cambiaron. Saltó arrancándose el velo y machacó en la estancia a todos los gigantes, empezando por Thrym.\n\nArthur Cotterell (Comp.). Enciclopedia de mitología universal. Barcelona: Parragon Books Ltd. S.L., 2008.",
+        "format": "plain",
+        "attachments": []
+      },
+      "items": [
+        {
+          "position": 5,
+          "type": "multiple_choice",
+          "stem": "¿Qué es el Mjollnir?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Un reino.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Un halcón.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Un martillo.",
+              "isCorrect": true
+            },
+            {
+              "key": "D",
+              "text": "Un gigante.",
+              "isCorrect": false
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "C",
+          "skill": "Localizar",
+          "oa": "OA 3",
+          "contentAxis": "Narración",
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Localizan información explícita relevante en un texto literario. Localizan información explícita relevante en un texto"
+        },
+        {
+          "position": 6,
+          "type": "multiple_choice",
+          "stem": "¿Quién tuvo la idea de disfrazar a Thor de novia?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Loki.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Freyja.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Thrym.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "Heimdall.",
+              "isCorrect": true
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "D",
+          "skill": "Localizar",
+          "oa": "OA 3",
+          "contentAxis": "Narración",
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Localizan información explícita relevante en un texto literario. Infieren información relevante sobre personajes en un"
+        },
+        {
+          "position": 7,
+          "type": "multiple_choice",
+          "stem": "¿Cuál era la intención del gigante al ocultar el martillo?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Enfurecer a Freyja con los dioses.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Intimidar a Thor para destruir Asgard.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Presionar para lograr casarse con Freyja.",
+              "isCorrect": true
+            },
+            {
+              "key": "D",
+              "text": "Atraer a Thor hacia el país de los gigantes.",
+              "isCorrect": false
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "C",
+          "skill": "Interpretar y relacionar",
+          "oa": "OA 3",
+          "contentAxis": "Narración",
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Infieren información relevante sobre personajes en un texto literario. Infieren información relevante sobre personajes en un"
+        },
+        {
+          "position": 8,
+          "type": "multiple_choice",
+          "stem": "¿Qué característica demuestra Loki durante el festín organizado por Thrym?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Astucia.",
+              "isCorrect": true
+            },
+            {
+              "key": "B",
+              "text": "Valentía.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Desconfianza.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "Perseverancia.",
+              "isCorrect": false
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "A",
+          "skill": "Interpretar y relacionar",
+          "oa": "OA 3",
+          "contentAxis": "Narración",
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Infieren información relevante sobre personajes en un texto literario."
+        },
+        {
+          "position": 9,
+          "type": "multiple_choice",
+          "stem": "¿Qué caracteriza la relación entre Loki y Thor en el relato?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "La competitividad.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "La complicidad.",
+              "isCorrect": true
+            },
+            {
+              "key": "C",
+              "text": "La obediencia.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "La falsedad.",
+              "isCorrect": false
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "B",
+          "skill": "Interpretar y relacionar",
+          "oa": "OA 3",
+          "contentAxis": "Narración",
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Caracterizan las relaciones entre los personajes en un texto literario."
+        },
+        {
+          "position": 10,
+          "type": "multiple_choice",
+          "stem": "¿De qué trata el texto leído?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Del matrimonio de Freyja y Thrym para recobrar el martillo.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "De la manera en que Thor logra recuperar el martillo.",
+              "isCorrect": true
+            },
+            {
+              "key": "C",
+              "text": "Del plan de Thrym para robar el martillo de Thor.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "De la lucha entre Thor y Thrym por el martillo.",
+              "isCorrect": false
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "B",
+          "skill": "Interpretar y relacionar",
+          "oa": "OA 3",
+          "contentAxis": "Narración",
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Infieren el sentido global de un texto literario. Opinan sobre algún aspecto controversial de un texto"
+        },
+        {
+          "position": 11,
+          "type": "open_ended",
+          "stem": "¿Qué te pareció la reacción de Freyja cuando Loki y Thor le dijeron que se preparara para ser la novia de Thrym?\nMarca tu opción:\nBien\nMal\nFundamenta tu respuesta incluyendo información del texto.",
+          "alternatives": [],
+          "responseFormat": "develop",
+          "correctKey": null,
+          "skill": "Reflexionar",
+          "oa": "OA 7",
+          "contentAxis": "Narración",
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "literario con fundamentos que integran información del texto. Infieren la postura o tesis del autor en un texto de los",
+          "rubric": "Tipos de respuestas Respuestas correctas Respuestas parcialmente Respuestas incorrectas (Código 2) correctas (Código 1) (Código 0) El/la estudiante identifica la reacción de El/la estudiante identifica la El/la estudiante no identifica la reacción reacción de Freyja y marca Bien o Freyja y marca Bien o Mal para de Freyja y, aunque puede o no Mal para manifestar su postura. Sin manifestar su postura. Luego, manifestar una postura, las respuestas embargo, en su fundamentación fundamenta su opinión con información evidencian un error de comprensión evidencia una comprensión parcial del texto que tiene directa relación con la lectora, o bien, no pueden ser del texto, pues justifica con hechos secuencia de acciones entre el deseo de evaluadas debido a la escasa que, si bien son mencionados, no recobrar el martillo y su posterior información que presentan. se relacionan directamente con la recuperación. Por ejemplo, puede hacer secuencia de acciones entre el referencia a la intención de fondo de deseo de recobrar el martillo y su Otras respuestas incorrectas son las Freyja, el riesgo que corría el pueblo posterior recuperación. tautológicas, vagas, contradictorias, donde vivían los personajes principales, En este nivel también pueden estar incoherentes y en blanco. el propósito final de conseguir el martillo, aquellas respuestas en las que solo la injusticia frente a un problema que no se identifica la reacción de Freyja, era de Freyja, etc. pero no se entrega una fundamentación. Ejemplos: Ejemplos: Ejemplos: Bien, porque ella no quería casarse - Bien, porque Thrym era un Me parece bien su reacción. - - con Thrym y, aunque serviría para gigante. Bien porque Loki era muy astuto. - rescatar el martillo, uno no puede Yo creo que estuvo bien que Bien porque se preparó para ser la - - casarse con alguien que no quiere. Freyja se enojara y dijera que no. novia de Thrym. Bien, porque el problema era de - Yo creo que estuvo mal porque Mal porque Asgard fue destruida. - - Thor y ella no tenía por qué ser la perdió la oportunidad de ir al gran que asumiera los problemas de los festín que organizó Thrym para otros. ella. Mal, porque estaba en peligro el - Yo creo que está mal lo que hizo - pueblo de Asgard. Pudo haber Freyja porque debería haberse pensado en un plan para conseguir casado con Thrym. el martillo que era el objetivo final. Mal, porque ella podría haber - participado del engaño que al final hizo Thor y que resultó como querían. 10 Ficha Técnica Prueba de Lectura 8° básico"
+        }
+      ]
+    },
+    {
+      "order": 3,
+      "name": "Texto 3: «Por qué no es posible una vida sin Internet»",
+      "type": "mixed",
+      "instructions": "Lee el siguiente texto y responde las preguntas 12 a 16.",
+      "passage": {
+        "title": "Por qué no es posible una vida sin Internet: Cinco claves que revelan cómo la web se metió en nuestras vidas",
+        "text": "José Miguel Piquer, Académico de la Facultad de Ciencias Físicas y Matemáticas de la U. de Chile\nJUE 25 JUL 2019 | 12:39 AM\n\nCuando se cumplen 50 años de la primera conexión entre computadores en Estados Unidos, es conveniente reflexionar acerca del nivel de penetración de Internet en la vida de las personas hoy. La vida sin la red sería un caos total, tanto así, que la humanidad entera tendría que aprender de nuevo a vivir.\n\n1. EL MUNDO SERÍA COMO HACE 20 AÑOS\nMuchas de las cosas en las que el país ha avanzado, incluso los fenómenos sociales, la coordinación y los movimientos políticos, se generan gracias a la conectividad de Internet. Sin ella, se desarma la vida social, familiar y laboral. Perder la conectividad implica volver a aprender a vivir, volveríamos a las cavernas. Por ejemplo, hace unos días me quedé sin batería a la hora de almuerzo, y es impresionante lo perdido que uno se siente. Tenía un almuerzo, pero no me acordaba con quién era, ni el lugar. Me acordaba solamente de una persona que iba, pero no me sabía su número. Ni siquiera me servía que me prestaran un teléfono, no sabía qué hacer, estaba totalmente perdido en la mitad de Santiago. Suena absurdo, pero solo por no tener acceso a la tecnología, no sabía cómo vivir. Siento que sería realmente un retroceso cultural y de civilización de por lo menos unos 20 años.\n\n2. PEOR ORGANIZACIÓN DE LAS PERSONAS\nMuchas cosas dependen de Internet, pero uno no se da cuenta, no lo tenemos asumido aún. Por ejemplo, Internet cumple un rol clave en la comunicación para emergencias. Para el terremoto de 2010, cuando Internet aún no era lo que es hoy en cuanto a masividad, las personas se comunicaban por teléfono o mensaje de texto y nada funcionaba, entonces hubo mucha desesperación. El Internet chileno también falló masivamente esa noche, pero nadie lo notó. Mientras que en 2014, para otro terremoto, esta vez en Iquique, todo fue diferente. Hubo una evacuación ordenada de la ciudad, a pesar de que la telefonía tampoco funcionó. Creo que se debe a que las personas para ese momento utilizaban mayormente WhatsApp (basado en Internet), lo que ayudó a una mejor organización. Cuando ocurre un terremoto, necesitas comunicarte con tus seres queridos, y mientras eso no ocurre, eres completamente irracional, no haces caso a instrucciones. Cuando logras comunicarte y sabes que los que te importan y preocupan están bien, eres una persona mucho más razonable para la comunidad.\n\n3. NUESTROS SISTEMAS QUEDARÍAN DESCONECTADOS\nLos sistemas y dispositivos móviles de pago utilizan Internet. Sin Internet, tendríamos que volver al efectivo, pero esto requiere de cajeros automáticos, los que también utilizan Internet. Sin sistema no hay respaldo. Incluso en el banco, sin Internet hay problemas para operar. Está todo conectado. Si no hay Internet, si no funciona el sistema, la gente ya no sabe operar, no sabe vender, no sabe comprar, no sabe cobrar. Por lo tanto, ningún servicio funciona. El supermercado no te puede vender productos sin Internet. Eso empieza a ocurrir más frecuentemente, no tenemos formas manuales de operar. En la universidad, una vez había una toma, y hubo un corte de luz donde estaba el centro de conexión de red. Cuando ocurrió, los estudiantes salieron a pedir ayuda. Nada funcionaba, incluso la misma toma no era posible sin red. Carabineros y la Armada, por ejemplo, tienen su propio sistema de radio, pero también ocupan Internet.\n\n4. HABRÍA QUE REAPRENDER A VIVIR\nEs notable la dependencia que empezamos a tener de estos sistemas. Es imposible, no sabríamos cómo funcionar ni vivir sin Internet. Ya no hay alternativa. Si hubiera un caos en el planeta y nos quedáramos sin Internet de golpe, de alguna forma tendríamos que aprender a vivir de nuevo. No sabemos dónde encontrar información, no sabemos cómo movernos si no hay Waze o Google, hay que reaprender a cómo existir. Pienso que es buena la llegada de Internet, pese a que tiene cosas negativas y peligrosas, y nos hace más difícil volver a la naturaleza. Cada día, cada año que pasa es más difícil esa vuelta atrás, pero por otro lado, eso ya estaba ocurriendo hace muchos años, por muchos lados. Dependemos de la energía, de combustible, de tecnología, hace muchos años que no somos capaces de vivir de manera autónoma e independiente.\n\n5. REUTILIZACIÓN DE LA MEMORIA\nAntes de Internet, debías destinar la memoria y los conocimientos a cosas que hoy no son necesarias. En 1900, tú arreglabas tu propia carreta, hoy Internet y la tecnología nos han alejado de eso y creo que es bueno. Sin Internet tendríamos un retroceso. No es nuestro objetivo en la vida estar preocupados de arreglar todo en forma individual, y esto va generando la posibilidad de que utilices tu inteligencia y capacidad en otras cosas. En vez de estar memorizando números de teléfono, puedes utilizar tu memoria en cosas más interesantes. Por ejemplo, las tablas de multiplicar, que nos costaban tanto de niños, ¿para qué? No sé si es el conocimiento más importante, me parece mejor aprender a ser creativos, soñadores e inventar soluciones. En ese sentido, Internet fue muy positivo, un aporte a una vida mejor.\n\nGlosario\nWhatsApp: aplicación de mensajería para teléfonos inteligentes con la cual se pueden enviar y recibir mensajes, fotos, archivos, etc. en tiempo real.\nWaze: aplicación de tránsito en tiempo real para teléfonos inteligentes que permite buscar una dirección y obtener asistencia y orientación sobre las rutas para llegar de un lugar a otro.\nGoogle: buscador de Internet.\n\nJosé Miguel Piquer. “Por qué no es posible una vida sin Internet: Cinco claves que revelan cómo la internet se metió en nuestras vidas”. La Tercera [Santiago, Chile]. 29 julio 2019. Web.",
+        "format": "plain",
+        "attachments": []
+      },
+      "items": [
+        {
+          "position": 12,
+          "type": "multiple_choice",
+          "stem": "¿Cuál es la postura del autor respecto de Internet?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Internet genera desorganización en las personas.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Internet ayuda a mejorar la memoria de las personas.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Internet facilita la vida de las personas en la actualidad.",
+              "isCorrect": true
+            },
+            {
+              "key": "D",
+              "text": "Internet hace que las personas tengan una vida aislada.",
+              "isCorrect": false
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "C",
+          "skill": "Interpretar y relacionar",
+          "oa": "OA 8",
+          "contentAxis": null,
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Infieren la postura o tesis del autor en un texto de los medios de comunicación. Infieren información relevante en un texto de los medios"
+        },
+        {
+          "position": 13,
+          "type": "multiple_choice",
+          "stem": "Según el autor, ¿qué acción, realizada gracias a Internet, favoreció la coordinación en una situación de emergencia nacional?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "El uso de WhatsApp.",
+              "isCorrect": true
+            },
+            {
+              "key": "B",
+              "text": "La ubicación por Waze.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "La asistencia de Google.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "El empleo de un sistema de radio.",
+              "isCorrect": false
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "A",
+          "skill": "Interpretar y relacionar",
+          "oa": "OA 8",
+          "contentAxis": null,
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Infieren información relevante en un texto de los medios de comunicación. Infieren información relevante en un texto de los medios"
+        },
+        {
+          "position": 14,
+          "type": "multiple_choice",
+          "stem": "¿Cómo cree el autor que era la vida hace 20 años?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Más cómoda.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Más limitada.",
+              "isCorrect": true
+            },
+            {
+              "key": "C",
+              "text": "Más sociable.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "Más ordenada.",
+              "isCorrect": false
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "B",
+          "skill": "Interpretar y relacionar",
+          "oa": "OA 8",
+          "contentAxis": null,
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Infieren información relevante en un texto de los medios de comunicación. Determinan propósitos explícitos e implícitos en un texto"
+        },
+        {
+          "position": 15,
+          "type": "multiple_choice",
+          "stem": "¿Cuál es el propósito del texto?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Criticar la dependencia de las personas a Internet.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Relatar experiencias personales en el uso de Internet.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Convencer sobre la relevancia del uso de Internet hoy en día.",
+              "isCorrect": true
+            },
+            {
+              "key": "D",
+              "text": "Analizar la función de aplicaciones de Internet disponibles hoy en día.",
+              "isCorrect": false
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "C",
+          "skill": "Reflexionar",
+          "oa": "OA 8",
+          "contentAxis": null,
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Determinan propósitos explícitos e implícitos en un texto de los medios de comunicación. Formulan una postura personal sobre algún aspecto"
+        },
+        {
+          "position": 16,
+          "type": "open_ended",
+          "stem": "Según el autor del texto, sin Internet se desarma la vida social, familiar y laboral. ¿Estás de acuerdo con esta perspectiva?\nMarca tu opción:\nSí\nNo\nFundamenta tu respuesta con información del texto.",
+          "alternatives": [],
+          "responseFormat": "develop",
+          "correctKey": null,
+          "skill": "Reflexionar",
+          "oa": "OA 8",
+          "contentAxis": null,
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "controversial de un texto de los medios de comunicación. Establecen conclusiones sobre distintos aspectos en un",
+          "rubric": "Tipos de respuestas Respuestas correctas Respuestas parcialmente Respuestas incorrectas (Código 2) correctas (Código 1) (Código 0) El/la estudiante marca Sí o No para El/la estudiante puede o no manifestar El/la estudiante marca Sí o No para manifestar su postura en torno a la su postura en torno a la perspectiva manifestar su postura en torno a la perspectiva planteada, pero su planteada, pero al fundamentar perspectiva planteada y fundamenta su fundamentación evidencia una demuestra que no comprendió el texto respuesta con información del texto que comprensión parcial del texto, pues o la pregunta formulada. se relaciona con el impacto de internet en recoge ideas locales que no O bien, la respuesta no puede ser la vida social, familiar y/o laboral. Por necesariamente se relacionan con el evaluada debido a la escasa ejemplo, puede aludir a la idea de que sin desarme de la vida familiar, social y/o información que presenta. internet es complejo comunicarse laboral. Otras respuestas incorrectas son las fácilmente con los más cercanos, o que, Adicionalmente, pueden encontrarse en tautológicas, vagas, contradictorias, si internet sufre de alguna caída, el esta categoría respuestas que utilicen incoherentes y en blanco. trabajo sería problemático pues las como fundamentación el conocimiento aplicaciones o sistemas no funcionarían, de mundo y no la información del texto. entre otras. Ejemplos: Ejemplos: Ejemplos: Yo creo que sí, porque hoy en día - Sí, porque sin internet caeríamos Yo pienso que es verdad. - - nos organizamos y coordinamos por en la desesperación, como en el Estoy de acuerdo con el autor del - internet, por ejemplo, cuando ocurrió terremoto del 2010. texto. lo del terremoto el WhatsApp fue Yo creo que sí, pero lo bueno es No creo, porque no seríamos - - una solución. Si no existiese, que con internet hemos aprendido cavernícolas. estaríamos 100% desconectados. a reutilizar la memoria en cosas A mí me gustaría aprender de - Yo creo que sí, laboralmente sería - realmente relevantes. nuevo a vivir. muy difícil porque si los sistemas no No. De hecho, creo que es mejor Creo que internet es muy malo en - - funcionan mucha gente no tendría porque el internet nos aísla. verdad. cómo trabajar. Internet se ha No, internet no es indispensable y, Pienso que a Chile le falta - - convertido en algo indispensable. además, volveríamos a la organización social e internet No, necesariamente. Si bien el autor - naturaleza. podría ayudar. dice que sería un retroceso enorme, la verdad es que hace 20 años nos manejábamos sin internet e igual teníamos vida laboral, social y familiar. 11 &gt; Diagnóstico Integral de Aprendizajes Instrumentos de Evaluación 2026 agenciaeducacion.cl"
+        }
+      ]
+    },
+    {
+      "order": 4,
+      "name": "Texto 4: «Date a volar»",
+      "type": "multiple_choice",
+      "instructions": "Lee el siguiente texto y responde las preguntas 17 a 20.",
+      "passage": {
+        "title": "Date a volar",
+        "text": "Anda, date a volar, hazte una abeja,\nen el jardín florecen amapolas,\ny el néctar fino colma las corolas;\nmañana el alma tuya estará vieja.\n\nAnda, suelta a volar, hazte paloma,\nrecorre el bosque y picotea granos,\ncome migajas en distintas manos,\nla pulpa muerde de fragante poma.\n\nAnda, date a volar, sé golondrina,\nbusca la playa de los soles de oro,\ngusta la primavera y su tesoro,\nla primavera es única y divina.\n\nMueres de sed: no he de oprimirte tanto…\nAnda, camina por el mundo, sabe;\ndispuesta sobre el mar está tu nave:\ndate a bogar hacia el mejor encanto.\n\nCorre, camina más, es poco aquello…\nAún quedan cosas que tu mano anhela,\ncorre, camina, gira, sube y vuela:\ngústalo todo porque todo es bello.\n\nEcha a volar… mi amor no te detiene,\n¡cómo te entiendo, bien, cómo te entiendo!\nLlore mi vida… el corazón se apene…\nDate a volar, Amor, yo te comprendo.\n\nCallada el alma… el corazón partido,\nsuelto tus alas… ve… pero te espero.\n¿Cómo traerás el corazón, viajero?\nTendré piedad de un corazón vencido.\n\nPara que tanta sed bebiendo cures\nhay numerosas sendas para ti.\nPero se hace la noche; no te apures.\nTodas traen a mí.\n\nGlosario\nPoma: fruto de un árbol.\nOprimirte: causar agobio o presión.\nBogar: acción de remar.\n\nAlfonsina Storni. “Date a volar”. Irremediablemente. Madrid: Ediciones Torremozas, 2005.",
+        "format": "plain",
+        "attachments": []
+      },
+      "items": [
+        {
+          "position": 17,
+          "type": "multiple_choice",
+          "stem": "¿Cómo se muestra el hablante en el poema?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Angustiado.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Maravillado.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Comprensivo.",
+              "isCorrect": true
+            },
+            {
+              "key": "D",
+              "text": "Desilusionado.",
+              "isCorrect": false
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "C",
+          "skill": "Interpretar y relacionar",
+          "oa": "OA 4",
+          "contentAxis": "Poema",
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Establecen conclusiones sobre distintos aspectos en un poema. Establecen conclusiones sobre distintos aspectos en un"
+        },
+        {
+          "position": 18,
+          "type": "multiple_choice",
+          "stem": "¿Qué le aconseja el hablante al ser amado?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Que aprecie la belleza de la primavera.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Que disfrute la vida porque es una sola.",
+              "isCorrect": true
+            },
+            {
+              "key": "C",
+              "text": "Que fortalezca el lazo con la naturaleza.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "Que busque el verdadero amor en su vida.",
+              "isCorrect": false
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "B",
+          "skill": "Interpretar y relacionar",
+          "oa": "OA 4",
+          "contentAxis": "Poema",
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Establecen conclusiones sobre distintos aspectos en un poema. Interpretan el sentido de expresiones en lenguaje"
+        },
+        {
+          "position": 19,
+          "type": "multiple_choice",
+          "stem": "¿A qué se refiere la expresión “corazón vencido” en el poema?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "A la ingratitud del ser amado.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Al desinterés del ser amado.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "A la molestia del ser amado.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "Al cansancio del ser amado.",
+              "isCorrect": true
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "D",
+          "skill": "Interpretar y relacionar",
+          "oa": "OA 4",
+          "contentAxis": "Poema",
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Interpretan el sentido de expresiones en lenguaje figurado presentes en un texto literario. Establecen conclusiones sobre distintos aspectos en un"
+        },
+        {
+          "position": 20,
+          "type": "multiple_choice",
+          "stem": "¿Qué imagen usa el hablante para representar al ser amado?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Un camino.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Una golondrina.",
+              "isCorrect": true
+            },
+            {
+              "key": "C",
+              "text": "Un jardín florecido.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "Una playa soleada.",
+              "isCorrect": false
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "B",
+          "skill": "Interpretar y relacionar",
+          "oa": "OA 4",
+          "contentAxis": "Poema",
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Establecen conclusiones sobre distintos aspectos en un poema. Infieren información relevante en un texto de los medios"
+        }
+      ]
+    },
+    {
+      "order": 5,
+      "name": "Texto 5: «Pasillos vigilados»",
+      "type": "multiple_choice",
+      "instructions": "Lee el siguiente texto y responde las preguntas 21 a 26.",
+      "passage": {
+        "title": "PASILLOS VIGILADOS",
+        "text": "Desde 2004, muchos padres japoneses reciben un e-mail cada vez que sus hijos llegan o se marchan del colegio. ¿Cómo? Los chicos llevan en la mochila una etiqueta de identificación por radiofrecuencia (RFID, por sus siglas en inglés). Estas etiquetas minúsculas se comunican con unos dispositivos que las leen desde un máximo de 10 metros de distancia. A continuación, el propio sistema pasa lista y envía la información a los padres y a los profesores. En algunas zonas del país los colegios están experimentando, incluso, con sistemas RFID que siguen el rastro de los alumnos en su recorrido por los barrios cercanos. En Japón es habitual que la mayoría de los niños vayan solos andando al colegio. La Organización Mundial de la Salud dice: ¡Fantástico! Japón tiene los chicos más sanos del mundo. Pero los padres dijeron: Dóshiyó! ¿Y si atracan a nuestros hijos o los secuestran cuando van solos por la calle? Aunque Japón tenía un índice muy bajo de delincuencia, los padres seguían preocupados. Al instalar los sistemas RFID, los colegios consiguieron que muchas familias se sintiesen más seguras. Y, además, iniciaron una tendencia que seguiría el resto del mundo.\n\nLa identificación por radiofrecuencia no se diseñó para rastrear a los niños. La empezaron a usar los ejércitos en la Segunda Guerra Mundial para distinguir sus propios aviones de los bombarderos enemigos. Décadas más tarde, los científicos descubrieron cómo añadir otro tipo de información a las etiquetas RFID. Unos emisores y receptores de radio denominados «lectores» podían hacer rebotar energía en estas etiquetas y decodificar los resultados. En la década de los noventa del siglo XX, los investigadores fabricaron versiones en miniatura. De pronto, las etiquetas RFID se podían colocar en cualquier parte. Aquellos dispositivos rastreaban los envíos que se embarcaban en los puertos, hacían más seguros los pasaportes y permitían que se abriese una puerta de seguridad. Se adherían a objetos tan pequeños como el tubo de un labial. Permitían a las empresas seguir el envío de sus productos desde las mismas puertas de la fábrica hasta las tiendas, lo cual facilitaba mucho la elaboración de los inventarios. Hoy en día, tiendas como Walmart exigen a sus proveedores que peguen chips RFID en todos sus productos. Las bibliotecas los usan para controlar sus libros. Los veterinarios se los ponen a las mascotas para que no se pierdan, y los biólogos marcan con ellos a los animales salvajes para realizar sus investigaciones. Sin embargo, un niño no es lo mismo que un labial, un libro o una mascota.\n\nTanya Lloyd Kyi. Ojos y espías. Cómo nos vigilan y por qué deberíamos saberlo. Biblioteca Pública Digital. España: Siruela, 2017. (Fragmento).",
+        "format": "plain",
+        "attachments": [
+          {
+            "kind": "image",
+            "note": "Ilustración de una escena escolar japonesa: una madre frente a un computador recibe un aviso («Aviso procedente del instituto Haru: Su hija Sakura ha llegado a clases sin contratiempo»), estudiantes con uniforme llegando al colegio y un profesor. La pregunta 21 a 26 incluye el ítem 23 que pregunta explícitamente por esta imagen."
+          }
+        ]
+      },
+      "items": [
+        {
+          "position": 21,
+          "type": "multiple_choice",
+          "stem": "¿Qué preocupaba a los padres de los niños japoneses?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Que sus hijos faltaran a clases.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Que dejaran de pasar lista en las escuelas.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Que sus hijos corrieran peligro camino al colegio.",
+              "isCorrect": true
+            },
+            {
+              "key": "D",
+              "text": "Que subieran los índices de delincuencia en Japón.",
+              "isCorrect": false
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "C",
+          "skill": "Interpretar y relacionar",
+          "oa": "OA 9",
+          "contentAxis": null,
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Infieren información relevante en un texto de los medios de comunicación. Infieren información relevante en un texto de los medios"
+        },
+        {
+          "position": 22,
+          "type": "multiple_choice",
+          "stem": "¿Para qué fue creada la identificación por radiofrecuencia?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Para proteger a los escolares.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Para enviar productos a los puertos.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Para distinguir entre tipos de aviones.",
+              "isCorrect": true
+            },
+            {
+              "key": "D",
+              "text": "Para realizar inventarios en las tiendas.",
+              "isCorrect": false
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "C",
+          "skill": "Interpretar y relacionar",
+          "oa": "OA 9",
+          "contentAxis": null,
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Infieren información relevante en un texto de los medios de comunicación. Interpretan información relevante que aportan los"
+        },
+        {
+          "position": 23,
+          "type": "multiple_choice",
+          "stem": "¿Con qué información del texto se relaciona la imagen?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Con el uso innovador del identificador por radiofrecuencia que está realizando Japón.",
+              "isCorrect": true
+            },
+            {
+              "key": "B",
+              "text": "Con la manera en que se combate la delincuencia en Japón a través de la radiofrecuencia.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Con el estudio sobre el identificador por radiofrecuencia que se hizo en las escuelas de Japón.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "Con la forma en que se comunican los estudiantes con sus padres en Japón mediante radiofrecuencia.",
+              "isCorrect": false
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "A",
+          "skill": "Interpretar y relacionar",
+          "oa": "OA 9",
+          "contentAxis": null,
+          "hasFigure": true,
+          "figureNote": "El ítem pregunta explícitamente por la ilustración de la escena escolar japonesa (madre recibiendo el aviso del instituto, estudiantes llegando al colegio). Se necesita ver la imagen para responder.",
+          "indicador": "elementos discontinuos en un texto de los medios de comunicación. Infieren información relevante en un texto de los medios"
+        },
+        {
+          "position": 24,
+          "type": "multiple_choice",
+          "stem": "¿Para qué sirve la identificación por radiofrecuencia?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Para generar energía.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Para rastrear algo o alguien.",
+              "isCorrect": true
+            },
+            {
+              "key": "C",
+              "text": "Para comunicarse a larga distancia.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "Para clasificar información de algo o alguien.",
+              "isCorrect": false
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "B",
+          "skill": "Interpretar y relacionar",
+          "oa": "OA 9",
+          "contentAxis": null,
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Infieren información relevante en un texto de los medios de comunicación. Distinguen un hecho de una opinión en un texto de los"
+        },
+        {
+          "position": 25,
+          "type": "multiple_choice",
+          "stem": "¿Cuál de las siguientes citas corresponde a una opinión de la autora?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "“Los científicos descubrieron cómo añadir otro tipo de información a las etiquetas RFID”.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "“Aunque Japón tenía un índice muy bajo de delincuencia, los padres seguían preocupados”.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "“En Japón es habitual que la mayoría de los niños vayan solos andando al colegio”.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "“Sin embargo, un niño no es lo mismo que un labial, un libro o una mascota”.",
+              "isCorrect": true
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "D",
+          "skill": "Reflexionar",
+          "oa": "OA 9",
+          "contentAxis": null,
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Distinguen un hecho de una opinión en un texto de los medios de comunicación."
+        },
+        {
+          "position": 26,
+          "type": "multiple_choice",
+          "stem": "¿Cuál es el propósito del texto?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Criticar el uso de la radiofrecuencia en personas.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Reflexionar sobre el uso de la radiofrecuencia en el futuro.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Fomentar el uso de la radiofrecuencia para la seguridad en las escuelas.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "Informar sobre los diversos usos que ha tenido la radiofrecuencia.",
+              "isCorrect": true
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "D",
+          "skill": "Reflexionar",
+          "oa": "OA 9",
+          "contentAxis": null,
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Determinan propósitos explícitos e implícitos en un texto de los medios de comunicación. Localizan información explícita relevante en un texto de"
+        }
+      ]
+    },
+    {
+      "order": 6,
+      "name": "Texto 6: «Planeta S.O.S. ¡Alarma en Groenlandia!»",
+      "type": "multiple_choice",
+      "instructions": "Lee el siguiente texto y responde las preguntas 27 a 30.",
+      "passage": {
+        "title": "PLANETA S.O.S. ¡ALARMA EN GROENLANDIA!",
+        "text": "Groenlandia es una isla gigantesca que se ubica entre el Océano Atlántico y el Océano Glacial Ártico. Lo de “gigantesca” no es broma: mide 2 166 086 km2.\n\nEs la segunda isla más grande del mundo (después de Australia). Es una región autónoma que pertenece al Reino de Dinamarca. Su capital se llama Nuuk.\n\nEl 80% del territorio groenlandés es hielo. Se trata de la segunda reserva de hielo más grande de la Tierra, después de la Antártida. El área de hielo que cubre la parte continental (o sea, que está sobre tierra) se llama casquete polar o indlandsis, que en danés significa “hielo interior”.\n\nLa parte del hielo que flota sobre el mar se llama banquisa. Si sumamos el volumen del hielo del indlandsis más el de su banquisa, da la increíble cifra de 2 860 000 km3. ¿Te puedes imaginar cuánto es eso en litros? Nosotros tampoco, pero aquí hay un dato que puede darnos una idea: si se derrite todo el hielo de Groenlandia, el nivel del mar subiría… ¡siete metros!\n\nDATOS PARA QUEDARNOS… HELADOS\n\n1. Entre 2002 y 2016, Groenlandia perdió más de 200 000 millones de toneladas de hielo al año. Los científicos pensaban que provenía de los glaciares.\n\n2. Sin embargo, un equipo de investigadores dirigido por el geólogo Michael Bevis (de la Universidad de Ohio) descubrió que gran parte del hielo que se derritió entre 2003 y 2013 salió del sudoeste de la isla, donde casi no hay glaciares. Esto significa que se está desvaneciendo la capa de hielo de la superficie de Groenlandia.\n\n3. Bevis también descubrió que este derretimiento está sucediendo a un ritmo nunca antes visto: 50% más que en la era anterior a la Revolución Industrial y 33% por encima de los niveles del siglo XX.\n\n4. Lo más triste del estudio de Bevis, publicado en enero de 2019, es que la capa de hielo ya llegó a “su punto de inflexión”, o sea: está en su momento más crítico de la historia, y ya no podemos hacer mucho para evitar que se desvanezca.\n\n5. Bevis y su equipo advirtieron que el deshielo en Groenlandia causará un aumento adicional en el nivel del mar, lo cual traerá graves consecuencias. Y tendremos que asumirlas y adaptarnos a ellas.\n\n¡ALERTA ROJA! CON EL AGUA AL CUELLO\nDurante el siglo pasado, el calentamiento global hizo que el nivel del mar aumentara entre 10 y 20 centímetros. Sin embargo, durante los últimos 20 años se ha elevado alrededor de 3.2 milímetros al año, o sea: ¡al doble de velocidad que durante los 80 años anteriores! A este ritmo el mapa del mundo se alterará para siempre: ciudades, islas y países enteros podrían desaparecer bajo las aguas. Los ecosistemas costeros serán destruidos. El aumento del nivel del mar también hace que los huracanes y otros eventos climáticos sean más extremos y destructivos.\n\nSABÍAS QUE…\n• Una de las causas del deshielo es la Oscilación del Atlántico Norte, fenómeno climático que lleva aire cálido al oeste de Groenlandia. Aunque es un ciclo natural, cuando se combina con los factores humanos que están provocando el calentamiento global, sus efectos se vuelven más poderosos.\n• El calentamiento global altera la estructura de la capa de hielo: la vuelve más oscura y por lo tanto, hace que absorba más calor, lo que a la vez derrite más hielo. Es un círculo vicioso.\n• Groenlandia fue descubierta por el vikingo Erik el Rojo alrededor del año 982.\n• Su nombre significa “tierra verde”, lo cual es curioso porque está casi toda cubierta de glaciares. Solo una parte de la isla es verde, en verano.\n\nECOTIPS\nTú puedes hacer la diferencia, todas tus acciones cuentan.\nA pesar de las malas noticias, si todos nos aplicamos ya, podemos frenar un poco el calentamiento global y lograr que sus efectos sean menos graves. Ya sabes cómo:\n• Ahorra energía. Apaga las luces y desconecta los aparatos eléctricos que no se están usando.\n• Cuando puedas, elige un medio de transporte no contaminante (bici, caminar) o comparte el auto con otras personas.\n• Aplica las tres “erres”: reduce, recicla y reutiliza.\n\n“Planeta SOS. ¡Alarma en Groenlandia!”. Muy Interesante. [México] 8 agosto 2019. Web.",
+        "format": "plain",
+        "attachments": [
+          {
+            "kind": "image",
+            "note": "Fotografías de témpanos de hielo / paisaje glaciar de Groenlandia y una foto de un iceberg (decorativas, no requeridas para responder los ítems)."
+          }
+        ]
+      },
+      "items": [
+        {
+          "position": 27,
+          "type": "multiple_choice",
+          "stem": "¿Qué es la banquisa?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "El área de hielo que está sobre la tierra.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "La parte del hielo que flota sobre el mar.",
+              "isCorrect": true
+            },
+            {
+              "key": "C",
+              "text": "El fragmento de un glaciar que está sobre la isla.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "La segunda isla más grande después de la Antártida.",
+              "isCorrect": false
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "B",
+          "skill": "Localizar",
+          "oa": "OA 9",
+          "contentAxis": null,
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Localizan información explícita relevante en un texto de los medios de comunicación. Infieren información relevante en un texto de los medios"
+        },
+        {
+          "position": 28,
+          "type": "multiple_choice",
+          "stem": "¿Desde qué parte salió el hielo que se derritió entre 2003 y 2013?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Desde la Antártida.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Desde el área llamada banquisa.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Desde la superficie de Groenlandia.",
+              "isCorrect": true
+            },
+            {
+              "key": "D",
+              "text": "Desde el mar que rodea Groenlandia.",
+              "isCorrect": false
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "C",
+          "skill": "Interpretar y relacionar",
+          "oa": "OA 9",
+          "contentAxis": null,
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Infieren información relevante en un texto de los medios de comunicación. Infieren información relevante en un texto de los medios"
+        },
+        {
+          "position": 29,
+          "type": "multiple_choice",
+          "stem": "¿Qué conclusión obtuvo el estudio de Bevis respecto del derretimiento de la capa de hielo?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Que es casi irreversible.",
+              "isCorrect": true
+            },
+            {
+              "key": "B",
+              "text": "Que se ha desacelerado.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Que es parte de un ciclo natural.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "Que se produjo por la Revolución Industrial.",
+              "isCorrect": false
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "A",
+          "skill": "Interpretar y relacionar",
+          "oa": "OA 9",
+          "contentAxis": null,
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Infieren información relevante en un texto de los medios de comunicación. Determinan propósitos explícitos e implícitos en un texto"
+        },
+        {
+          "position": 30,
+          "type": "multiple_choice",
+          "stem": "¿Cuál es el propósito del texto?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Detallar las características climáticas de Groenlandia.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Informar sobre la importancia de los glaciares de Groenlandia.",
+              "isCorrect": true
+            },
+            {
+              "key": "C",
+              "text": "Explicar la variedad de ecosistemas presentes en Groenlandia.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "Aconsejar cómo solucionar el daño medioambiental en Groenlandia.",
+              "isCorrect": false
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "B",
+          "skill": "Reflexionar",
+          "oa": "OA 9",
+          "contentAxis": null,
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Determinan propósitos explícitos e implícitos en un texto de los medios de comunicación."
+        }
+      ]
+    }
+  ],
+  "extraction": {
+    "itemCount": 30,
+    "warnings": [
+      "Ítem 23 depende de la ilustración de la sección «Pasillos vigilados» para responderse (pregunta explícitamente por la imagen): hasFigure=true y needsHumanReview=true.",
+      "Ítems 11 y 16 son de desarrollo (open_ended, responseFormat=develop): incluyen una marca de opción (Bien/Mal, Sí/No) más fundamentación; la marca se transcribe en el stem.",
+      "Textos 5 (Pasillos vigilados) y 6 (Planeta SOS) traen ilustraciones/fotografías; salvo el ítem 23, son de apoyo y todo el texto necesario está transcrito en el passage.",
+      "Textos transcritos verbatim desde la capa de texto del PDF (pdftotext -layout)."
+    ],
+    "needsHumanReview": true,
+    "crossCheck": {
+      "hardIssues": [],
+      "softWarnings": [],
+      "counts": {
+        "cuadernillo": 30,
+        "ficha": 30,
+        "hoja": 30
+      }
+    }
+  },
+  "pauta": {
+    "source": {
+      "ficha": "8_TE DIA Diagnóstico lectura 8° básico 2026.pdf",
+      "hoja": "8_Hoja de respuestas DIA Diagnóstico lectura 8° básico 2026.pdf"
+    },
+    "appliedKeys": 28,
+    "rubrics": 2
+  }
+}

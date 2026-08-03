@@ -1,0 +1,1183 @@
+{
+  "schemaVersion": "1.0",
+  "source": {
+    "file": "8_prueba_lectura_monitoreo_2026_8_basico.pdf",
+    "subjectFolder": "Lenguaje"
+  },
+  "instrument": {
+    "name": "DIA Lectura 8° Básico 2026 — Intermedio",
+    "subject": "Lenguaje y Comunicación",
+    "subjectCode": "LANG",
+    "grade": "8° Básico",
+    "gradeCode": "8TH_BASIC",
+    "year": 2026,
+    "applicationPeriod": "intermedio",
+    "type": "dia",
+    "isOfficial": true,
+    "source": "imported"
+  },
+  "sections": [
+    {
+      "order": 1,
+      "name": "Texto 1: «Historia de los dos que soñaron»",
+      "type": "multiple_choice",
+      "instructions": "Lee el siguiente texto y responde las preguntas 1 a 6.",
+      "passage": {
+        "title": "Historia de los dos que soñaron",
+        "text": "Cuentan los hombres dignos de fe (pero solo Alá es omnisciente y poderoso y misericordioso y no duerme) que hubo en El Cairo un hombre poseedor de riquezas, pero tan magnánimo y liberal que todas las perdió, menos la casa de su padre, y que se vio forzado a trabajar para ganarse el pan. Trabajó tanto que el sueño lo rindió debajo de una higuera de su jardín y vio en el sueño a un desconocido que le dijo:\n—Tu fortuna está en Persia, en Isfaján; vete a buscarla.\nA la madrugada siguiente se despertó y emprendió el largo viaje y afrontó los peligros de los desiertos, de los idólatras, de los ríos, de las fieras y de los hombres. Llegó al fin a Isfaján, pero en el recinto de esa ciudad lo sorprendió la noche y se tendió a dormir en el patio de una mezquita. Había, junto a la mezquita, una casa y por el decreto de Dios Todopoderoso una pandilla de ladrones atravesó la mezquita y se metió en la casa, y las personas que dormían se despertaron y pidieron socorro. Los vecinos también gritaron, hasta que el capitán de los serenos de aquel distrito acudió con sus hombres y los bandoleros huyeron por la azotea.\nEl capitán hizo registrar la mezquita y en ella dieron con el hombre de El Cairo y lo llevaron a la cárcel.\nEl juez lo hizo comparecer y le dijo:\n—¿Quién eres y cuál es tu patria?\nEl hombre declaró:\n—Soy de la ciudad famosa de El Cairo y mi nombre es Yacub El Magrebí.\nEl juez le preguntó:\n—¿Qué te trajo a Persia?\nEl hombre optó por la verdad y le dijo:\n—Un hombre me ordenó en un sueño que viniera a Isfaján, porque ahí estaba mi fortuna. Ya estoy en Isfaján y veo que la fortuna que me prometió ha de ser esta cárcel.\nEl juez echó a reír.\n—Hombre desatinado —le dijo—, tres veces he soñado con una casa en la ciudad de El Cairo, en cuyo fondo hay un jardín y en el jardín, un reloj de sol y después del reloj de sol, una higuera, y bajo la higuera un tesoro. No he dado el menor crédito a esa mentira. Tú, sin embargo, has errado de ciudad en ciudad, bajo la sola fe de tu sueño. Que no vuelva a verte en Isfaján. Toma estas monedas y vete.\nEl hombre las tomó y regresó a la patria. Debajo de la higuera de su casa (que era la del sueño del juez) desenterró el tesoro. Así Dios le dio bendición y lo recompensó y exaltó. Dios es el Generoso, el Oculto.\n\nGustavo Weil. Historia de los dos que soñaron. J. L. Borges, B. Casares y S. Ocampo eds. Antología de la literatura fantástica. Barcelona: Edhasa, 1998.\n\nGlosario\nmagnánimo: que tiene noble temperamento y grandeza de espíritu y se comporta con generosidad.\nmezquita: construcción destinada al culto islámico.\nMagrebí: que es de Magreb, que es la región del norte de África que se extiende por Argelia, Marruecos y Túnez.",
+        "format": "plain",
+        "attachments": []
+      },
+      "items": [
+        {
+          "position": 1,
+          "type": "multiple_choice",
+          "stem": "¿Por qué Yacub abandonó su casa al inicio del cuento?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Porque perdió todas sus riquezas.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Porque debía ir a trabajar a otra ciudad.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Porque tenía ganas de vivir una aventura.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "Porque siguió las indicaciones recibidas en sueños.",
+              "isCorrect": true
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "D",
+          "skill": "Interpretar y relacionar",
+          "oa": "OA 3",
+          "contentAxis": "Narración",
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Infieren información relevante sobre personajes en un texto narrativo. Infieren cómo influyen acciones y acontecimientos"
+        },
+        {
+          "position": 2,
+          "type": "multiple_choice",
+          "stem": "¿Por qué detuvieron al hombre de El Cairo?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Porque se durmió en una mezquita.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Porque lo confundieron con un ladrón.",
+              "isCorrect": true
+            },
+            {
+              "key": "C",
+              "text": "Porque ayudó a huir a unos bandoleros.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "Porque entró a una casa sin autorización.",
+              "isCorrect": false
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "B",
+          "skill": "Interpretar y relacionar",
+          "oa": "OA 3",
+          "contentAxis": "Narración",
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Infieren cómo influyen acciones y acontecimientos relevantes en el desarrollo de un texto narrativo."
+        },
+        {
+          "position": 3,
+          "type": "multiple_choice",
+          "stem": "En este cuento, ¿qué tienen en común el juez y Yacub?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Que ambos habían soñado con una higuera.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Que ambos hicieron su vida en base a un sueño.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Que ambos habían recibido un mensaje en sueños.",
+              "isCorrect": true
+            },
+            {
+              "key": "D",
+              "text": "Que ambos tuvieron sueños que jamás se hicieron realidad.",
+              "isCorrect": false
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "C",
+          "skill": "Interpretar y relacionar",
+          "oa": "OA 3",
+          "contentAxis": "Narración",
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Comparan personajes en un texto narrativo. Infieren información relevante sobre personajes en un"
+        },
+        {
+          "position": 4,
+          "type": "multiple_choice",
+          "stem": "Después de oír la explicación del hombre, ¿qué piensa el juez acerca de él?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Que es ladrón.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Que es ingenuo.",
+              "isCorrect": true
+            },
+            {
+              "key": "C",
+              "text": "Que es mentiroso.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "Que es irrespetuoso.",
+              "isCorrect": false
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "B",
+          "skill": "Interpretar y relacionar",
+          "oa": "OA 3",
+          "contentAxis": "Narración",
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Infieren información relevante sobre personajes en un texto narrativo."
+        },
+        {
+          "position": 5,
+          "type": "multiple_choice",
+          "stem": "¿Qué mensaje nos entrega esta historia?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Hay que confiar en las personas.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Hay que luchar contra el destino.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Hay que perseverar en lo que se cree.",
+              "isCorrect": true
+            },
+            {
+              "key": "D",
+              "text": "Hay que trabajar para conseguir el dinero.",
+              "isCorrect": false
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "C",
+          "skill": "Interpretar y relacionar",
+          "oa": "OA 3",
+          "contentAxis": "Narración",
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Infieren el sentido global de un texto narrativo."
+        },
+        {
+          "position": 6,
+          "type": "multiple_choice",
+          "stem": "¿Qué visión de Alá se presenta en este cuento?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "La de un dios castigador.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "La de un dios prepotente.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "La de un dios desconocido.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "La de un dios todopoderoso.",
+              "isCorrect": true
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "D",
+          "skill": "Reflexionar",
+          "oa": "OA 8",
+          "contentAxis": "Narración",
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Establecen la visión de mundo de un texto narrativo."
+        }
+      ]
+    },
+    {
+      "order": 2,
+      "name": "Texto 2: «Día del Perro Adoptado» (Texto 1) y «Día Mundial del Perro Adoptado» (Texto 2)",
+      "type": "multiple_choice",
+      "instructions": "Lee los siguientes textos y responde las preguntas 7 a 13.",
+      "passage": {
+        "title": "Día del Perro Adoptado (dos textos)",
+        "text": "Texto 1\n\nDía del Perro Adoptado: el 57% de los chilenos tiene un mestizo\n23 de Septiembre de 2025\n\nEste 23 de septiembre se conmemora el Día del Perro Adoptado y, según el Registro Nacional de Mascotas (2022), el 57% de los chilenos que tienen uno de estos animales como compañía optó por uno mestizo por sobre los de raza.\nA eso se suman los resultados del informe “El Chile que viene” efectuado por Cadem el 2022, que señala que el 86% de los chilenos declara tener al menos una mascota, ocupando los perros el 79% de las preferencias. Por otro lado, solo el 13% de los chilenos compró su mascota y el 40% de los perros que tienen “familia” fue adoptado o recogido de la calle.\nCon motivo de esta fecha, expertos han hecho una serie de recomendaciones para llevar adelante una adopción de manera responsable y positiva tanto para el animal como para su dueño.\nEntre los consejos está preferir la adopción en refugios y fundaciones que se preocupan de cuidarlos y exigir requisitos a los adoptantes: una lista de más de 100 de estas organizaciones se puede encontrar en www.petmatch.cl.\nTambién se propone adaptar el hogar para la llegada de una nueva mascota e informarse bien de los cuidados que requiere el animal, como alimentación adecuada, paseos, lugar para hacer sus necesidades y visitas al veterinario.\nY es fundamental elegir una mascota según el estilo de vida que uno lleva. La veterinaria Masiel Gálvez detalla que “es importante saber los niveles de energía, edad, temperamento, necesidades de aseo y más, así te aseguras de que el perrito que llegue a tu hogar se adapta a tu estilo de vida”.\n\nCooperativa. [Chile]. Web. 23 de septiembre de 2025. (Adaptación).\n\nGlosario\nmestizo: que no pertenece a una raza pura.\ntemperamento: carácter, personalidad.\n\n\nTexto 2\n\nONG El Paraíso de los Animales\nDía Mundial del Perro Adoptado\n\nPor: Josefina Real de Azua\nVoluntaria de El Paraíso de los Animales\n\nEl 23 de septiembre es un día muy especial para aquellos que han adoptado un perro. En este Día del Perro Adoptado, queremos aprovechar la oportunidad para reflexionar sobre el amor incondicional que estos animales nos brindan y destacar la importancia de la adopción responsable. Por ello, exploraremos cómo los perros adoptados pueden cambiar nuestras vidas y cómo podemos hacer la diferencia en la vida de un perro abandonado.\n\nEl amor de un perro adoptado\nUno de los aspectos más notables de tener un perro adoptado es el amor incondicional que nos ofrecen. Estos perros, que a menudo han pasado por situaciones difíciles en su vida, tienen la habilidad única de perdonar y amar sin restricciones. A pesar de las experiencias traumáticas que han tenido, estos animales nos brindan una lealtad y cariño infinitos. Su alegría al vernos llegar a casa es contagiosa, y su compañía nos reconforta durante los momentos más difíciles.\n\nLa adopción responsable: una oportunidad para marcar la diferencia\nLa adopción responsable es fundamental para garantizar el bienestar de los perros abandonados. Al adoptar a un perro, nos convertimos en sus cuidadores y responsables de su felicidad y salud. Debemos proporcionarles un hogar seguro, una nutrición adecuada, atención veterinaria y, sobre todo, mucho amor y cariño. La adopción responsable también implica educar a nuestros perros y brindarles la oportunidad de socializar adecuadamente con otros animales y personas.\n\nCómo marcar la diferencia en la vida de un perro abandonado\nSi aún no has tenido la oportunidad de adoptar, hay muchas formas en las que puedes marcar la diferencia en la vida de un perro abandonado. Puedes considerar participar como voluntario en un refugio de animales local, donar alimentos y suministros, o ayudar a difundir la importancia de la adopción responsable y sensibilizar sobre los perros en situación de abandono.\nAdemás, muchos refugios y organizaciones tienen programas de apadrinamiento que te permiten contribuir económicamente al cuidado de un perro sin necesidad de adoptarlo permanentemente.\nEn este Día del Perro Adoptado, recordemos el amor incondicional que nuestros perros adoptados nos brindan y reflexionemos sobre la importancia de la adopción responsable. Debemos ser conscientes de que los perros abandonados merecen una segunda oportunidad y, como amantes de los animales, tenemos la capacidad de marcar la diferencia en sus vidas. ¡Aprovechemos esta oportunidad para darles el amor y la vida que se merecen!\n\nJosefina Real de Azua. El Paraíso de los Animales. [Argentina]. Web. 23 de septiembre de 2025. (Adaptación).",
+        "format": "plain",
+        "attachments": []
+      },
+      "items": [
+        {
+          "position": 7,
+          "type": "multiple_choice",
+          "stem": "En el Texto 1, ¿qué declara el Registro Nacional de Mascotas sobre los chilenos que son dueños de un animal?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "El 13% compró su mascota.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "El 57% optó por un perro mestizo.",
+              "isCorrect": true
+            },
+            {
+              "key": "C",
+              "text": "El 79% prefirió un perro como mascota.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "El 86% declara tener al menos una mascota.",
+              "isCorrect": false
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "B",
+          "skill": "Localizar",
+          "oa": "OA 10",
+          "contentAxis": null,
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Localizan información explícita relevante en un texto de los medios de comunicación. Infieren información relevante en un texto de los"
+        },
+        {
+          "position": 8,
+          "type": "multiple_choice",
+          "stem": "En el Texto 1, ¿qué información aporta la veterinaria Masiel Gálvez?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Los porcentajes de adopción de perros mestizos en Chile.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Las características de los lugares donde es preferible adoptar.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Los cambios necesarios en el hogar ante la llegada de una nueva mascota.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "Las cualidades relevantes a considerar de un perro para su adaptación al hogar.",
+              "isCorrect": true
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "D",
+          "skill": "Interpretar y relacionar",
+          "oa": "OA 10",
+          "contentAxis": null,
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Infieren información relevante en un texto de los medios de comunicación. Infieren el tema central de un texto de los medios de"
+        },
+        {
+          "position": 9,
+          "type": "multiple_choice",
+          "stem": "¿Cuál es el tema central del Texto 1?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "El estado de la adopción de perros en Chile.",
+              "isCorrect": true
+            },
+            {
+              "key": "B",
+              "text": "Los requisitos necesarios en Chile para adoptar un perro.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "El origen de la celebración del Día del Perro Adoptado en Chile.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "Los lugares donde es preferible la adopción de perros en Chile.",
+              "isCorrect": false
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "A",
+          "skill": "Interpretar y relacionar",
+          "oa": "OA 10",
+          "contentAxis": null,
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Infieren el tema central de un texto de los medios de comunicación o un fragmento relevante de este. Comparan información relevante entre dos textos de"
+        },
+        {
+          "position": 10,
+          "type": "multiple_choice",
+          "stem": "¿Qué información comparten ambos textos?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "La conducta más común de un perro abandonado.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Los beneficios para las personas de adoptar un perro.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Los consejos veterinarios para el cuidado de un perro.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "La fecha de conmemoración del día del perro adoptado.",
+              "isCorrect": true
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "D",
+          "skill": "Interpretar y relacionar",
+          "oa": "OA 10",
+          "contentAxis": null,
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Comparan información relevante entre dos textos de los medios de comunicación. Comparan información relevante entre dos textos de"
+        },
+        {
+          "position": 11,
+          "type": "multiple_choice",
+          "stem": "¿Qué acción promueven ambos textos?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "La adquisición de perros de raza.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "La adopción responsable de perros.",
+              "isCorrect": true
+            },
+            {
+              "key": "C",
+              "text": "El apadrinamiento de refugios de perros.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "El estudio del comportamiento de los perros.",
+              "isCorrect": false
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "B",
+          "skill": "Interpretar y relacionar",
+          "oa": "OA 10",
+          "contentAxis": null,
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Comparan información relevante entre dos textos de los medios de comunicación. Evalúan la forma en que dos fuentes abordan un"
+        },
+        {
+          "position": 12,
+          "type": "multiple_choice",
+          "stem": "Con respecto a la manera en que ambos textos abordan el tema, ¿qué diferencia al Texto 1 del Texto 2?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "El Texto 1 es crítico con quienes prefieren comprar mascotas, el Texto 2 es exigente con quienes desean adoptar animales.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "El Texto 1 es práctico al entregar consejos de especialistas para adoptar animales, el Texto 2 es sensible al destacar los traumas del abandono animal.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "El Texto 1 es objetivo al mostrar las cifras de la adopción de animales, el Texto 2 es cercano al apelar a las experiencias comunes de quienes adoptan.",
+              "isCorrect": true
+            },
+            {
+              "key": "D",
+              "text": "El Texto 1 es superficial al presentar solo datos sobre la adopción de animales mestizos, el Texto 2 es descriptivo al detallar la experiencia personal de un adoptante.",
+              "isCorrect": false
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "C",
+          "skill": "Reflexionar",
+          "oa": "OA 10",
+          "contentAxis": null,
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Evalúan la forma en que dos fuentes abordan un mismo tema en textos de los medios de comunicación. Determinan la función que tiene el uso de cierta información (datos, ejemplos, hechos, etc.)"
+        },
+        {
+          "position": 13,
+          "type": "multiple_choice",
+          "stem": "En el Texto 2, ¿para qué se menciona la actividad que desarrolla la autora al comienzo del texto?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Para exponer el caso puntual de la organización para la cual trabaja.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Para demostrar que aquello que propone es factible de ser conseguido.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Para darle credibilidad a lo que dice debido a su experiencia.",
+              "isCorrect": true
+            },
+            {
+              "key": "D",
+              "text": "Para destacar la rigurosidad de la información que entrega.",
+              "isCorrect": false
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "C",
+          "skill": "Reflexionar",
+          "oa": "OA 10",
+          "contentAxis": null,
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "información (datos, ejemplos, hechos, etc.) considerando el propósito de un texto de los medios de comunicación. Infieren información relevante sobre personajes en un"
+        }
+      ]
+    },
+    {
+      "order": 3,
+      "name": "Texto 3: «Historia de una escalera»",
+      "type": "mixed",
+      "instructions": "Lee el siguiente texto y responde las preguntas 14 a 20.",
+      "passage": {
+        "title": "Historia de una escalera",
+        "text": "Final del acto I\n\nFERNANDO.- No. Te lo suplico. No te marches. Es preciso que me oigas… y que me creas. Ven. (La lleva al primer peldaño). Como entonces. (Con un ligero forcejeo la sienta contra la pared y se sienta a su lado. Le quita la lechera y la deja junto a él. Le coge una mano).\n\nCARMINA.- ¡Si nos ven!\n\nFERNANDO.- ¡Qué nos importa! Carmina, por favor, créeme. No puedo vivir sin ti. Estoy desesperado. Me ahoga la ordinariez que nos rodea. Necesito que me quieras y que me consueles. Si no me ayudas no podré salir adelante.\n\nCARMINA.- ¿Por qué no se lo pides a Elvira? (Pausa. Él la mira, excitado, alegre).\n\nFERNANDO.- ¡Me quieres! ¡Lo sabía! ¡Tenías que quererme! (Le levanta la cabeza. Ella sonríe involuntariamente). ¡Carmina, mi Carmina! (Va a besarla, pero ella le detiene).\n\nCARMINA.- ¿Y Elvira?\n\nFERNANDO.- ¡La detesto! Quiere cazarme con su dinero. ¡No la puedo ver!\n\nCARMINA.- (Con una risita). ¡Yo tampoco! (Ríen felices).\n\nFERNANDO.- Ahora tendría que preguntarte yo: ¿Y Urbano?\n\nCARMINA.- ¡Es un buen chico! ¡Estoy loca por él! (Fernando se enfurruña). ¡Tonto!\n\nFERNANDO.- (Abrazándola por el talle). Carmina, desde mañana voy a trabajar de firme por ti. Quiero salir de esta pobreza, de este sucio ambiente. Salir y sacarte a ti. Dejar para siempre los chismorreos, las broncas entre vecinos… Acabar con la angustia del dinero escaso, de los favores que abochornan como una bofetada, de los padres que nos abruman con su torpeza y su cariño servil, irracional…\n\nCARMINA.- (Reprensiva). ¡Fernando!\n\nFERNANDO.- Sí. Acabar con todo esto. ¡Ayúdame tú! Escucha: voy a estudiar mucho, ¿sabes? Mucho. Primero me haré delineante. ¡Eso es fácil! En un año… Como para entonces ya ganaré bastante, estudiaré para aparejador. Tres años. Dentro de cuatro años seré un aparejador solicitado por todos los arquitectos. Ganaré mucho dinero. Por entonces tú serás ya mi mujercita, y viviremos en otro barrio, en un pisito limpio y tranquilo. Yo seguiré estudiando. ¿Quién sabe? Puede que entonces me haga ingeniero. Y como una cosa no es incompatible con la otra, publicaré un libro de poesías, un libro que tendrá mucho éxito…\n\nCARMINA.- (Que le ha escuchado extasiada). ¡Qué felices seremos!\n\nFERNANDO.- ¡Carmina!\n\n(Se inclina para besarla y da un golpe con el pie a la lechera, que se derrama estrepitosamente. Temblorosos, se levantan los dos y miran, asombrados, la gran mancha en el suelo).\n\nAntonio Buero Vallejo. Historia de una escalera. Barcelona: Espasa, 2010.\n\nGlosario\ndelineante: dibujante.\naparejador: constructor.",
+        "format": "plain",
+        "attachments": []
+      },
+      "items": [
+        {
+          "position": 14,
+          "type": "multiple_choice",
+          "stem": "¿Por qué al inicio del fragmento Carmina se resiste a conversar con Fernando?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Porque no siente amor por Fernando.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Porque no quiere que los vean juntos.",
+              "isCorrect": true
+            },
+            {
+              "key": "C",
+              "text": "Porque no tiene tiempo para conversar.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "Porque no quiere herir los sentimientos de Elvira.",
+              "isCorrect": false
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "B",
+          "skill": "Interpretar y relacionar",
+          "oa": "OA 5",
+          "contentAxis": null,
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Infieren información relevante sobre personajes en un texto dramático. Infieren información relevante sobre personajes en un"
+        },
+        {
+          "position": 15,
+          "type": "multiple_choice",
+          "stem": "¿Cómo se siente Fernando respecto del ambiente que lo rodea?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Agobiado.",
+              "isCorrect": true
+            },
+            {
+              "key": "B",
+              "text": "Inservible.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Abandonado.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "Atemorizado.",
+              "isCorrect": false
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "A",
+          "skill": "Interpretar y relacionar",
+          "oa": "OA 5",
+          "contentAxis": null,
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Infieren información relevante sobre personajes en un texto dramático. Localizan información explícita relevante en un texto"
+        },
+        {
+          "position": 16,
+          "type": "multiple_choice",
+          "stem": "Según los planes de Fernando, ¿cómo piensa ganarse la vida al comienzo?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Como ingeniero.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Como dibujante.",
+              "isCorrect": true
+            },
+            {
+              "key": "C",
+              "text": "Como arquitecto.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "Como constructor.",
+              "isCorrect": false
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "B",
+          "skill": "Localizar",
+          "oa": "OA 5",
+          "contentAxis": null,
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Localizan información explícita relevante en un texto dramático. Infieren información relevante sobre personajes en un"
+        },
+        {
+          "position": 17,
+          "type": "multiple_choice",
+          "stem": "¿Cómo se expresa Carmina al responderle a Fernando sobre sus sentimientos por Urbano?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Con honestidad.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Con entusiasmo.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Con frialdad.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "Con ironía.",
+              "isCorrect": true
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "D",
+          "skill": "Interpretar y relacionar",
+          "oa": "OA 5",
+          "contentAxis": null,
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Infieren información relevante sobre personajes en un texto dramático. Realizan inferencias sobre dichos o acciones"
+        },
+        {
+          "position": 18,
+          "type": "multiple_choice",
+          "stem": "¿Cómo es la visión de un futuro juntos para Fernando y Carmina?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Sencillo.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Idealista.",
+              "isCorrect": true
+            },
+            {
+              "key": "C",
+              "text": "Imposible.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "Superficial.",
+              "isCorrect": false
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "B",
+          "skill": "Interpretar y relacionar",
+          "oa": "OA 5",
+          "contentAxis": null,
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "relevantes que inciden en la obra o en los personajes de un texto dramático. Infieren información relevante sobre personajes en un"
+        },
+        {
+          "position": 19,
+          "type": "multiple_choice",
+          "stem": "Según el fragmento leído, ¿cómo cree Fernando que saldrá adelante?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Esforzándose para ser exitoso.",
+              "isCorrect": true
+            },
+            {
+              "key": "B",
+              "text": "Cumpliendo con distintos favores.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Casándose con una persona rica.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "Siguiendo el ejemplo de sus padres.",
+              "isCorrect": false
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "A",
+          "skill": "Interpretar y relacionar",
+          "oa": "OA 5",
+          "contentAxis": null,
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Infieren información relevante sobre personajes en un texto dramático. Formulan una interpretación o postura personal sobre"
+        },
+        {
+          "position": 20,
+          "type": "open_ended",
+          "stem": "Lee la siguiente historia:\n“Una lechera iba al mercado muy contenta. Con el dinero que conseguiría vendiendo la leche se compraría una gallina y, con los huevos de la gallina, una cabra. Tanto soñó que no vio una piedra en el camino, tropezó, el cántaro cayó y toda la leche se derramó; sin nada se quedó”.\nConsiderando la lectura del texto y de la historia, ¿qué podría simbolizar la leche derramada por Fernando y Carmina en el suelo de la escalera? ¿Por qué? Justifica tu respuesta considerando la información del texto.",
+          "alternatives": [],
+          "responseFormat": "develop",
+          "correctKey": null,
+          "skill": "Reflexionar",
+          "oa": "OA 8",
+          "contentAxis": null,
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Formulan una interpretación o postura personal sobre el sentido de un texto dramático o un aspecto de este. Localizan información explícita relevante en un texto",
+          "rubric": "Tipos de respuestas Respuestas correctas Respuestas parcialmente correctas Respuestas incorrectas (Código 2) (Código 1) (Código 0) La o el estudiante evidencia en su La o el estudiante evidencia en su La o el estudiante evidencia en su respuesta una interpretación coherente respuesta una interpretación sobre el respuesta una comprensión sobre el final de la obra, considerando final de la obra, pero esta demuestra errónea del texto y de lo solicitado, los elementos de la fábula y la una comprensión parcial del texto, la pues no realiza una interpretación comprensión global del texto. pregunta o la fábula adecuada de la situación y En este nivel, una interpretación parcial evidencia errores en la En este nivel, una interpretación sobre el derramamiento de la leche comprensión lectora (respuestas adecuada sobre el derramamiento de la consideraría aspectos más locales del incoherentes, vagas, tautológicas, leche consideraría que los planes de los texto (no evidenciando una comprensión etc.). enamorados se verán frustrados por el global ni la alusión al idealismo de los idealismo de la pareja, concentrándose También son incorrectas las enamorados). Por ejemplo, que la en sus sueños sin ver la realidad. respuestas en blanco. relación de pareja es prohibida porque La respuesta del/la estudiante, debe tienen otros pretendientes o que los van incluir tres elementos: lo que simboliza el a descubrir por el ruido de la leche derramamiento de la leche, la derramada, etc. explicación de dicha interpretación y los elementos del texto y/o fábula que permiten hacerla coherente. Ejemplos: Ejemplos: Ejemplos: - Creo que la leche simboliza que todos - Creo que la leche derramada - Creo que se les acabó la leche. los planes de los jóvenes se van a ver simboliza que la pareja no puede estar - Creo que la señora debería frustrados, porque ambos se junta porque tiene otros pretendientes, fijarse más en el suelo y ver las muestran demasiado soñadores e como Elvira y Urbano. piedras. idealistas sobre el futuro sin tener - Yo creo la leche derramada significa - Creo que Fernando será un gran nada a la mano, que es lo que le pasa que los van a descubrir en la escalera arquitecto. un poco a la lechera, que de tanto y van a saber de su amor prohibido - La leche es muy valiosa y le iba soñar con lo que tendrá, no se da porque dejaron huellas. a servir a la pareja para poder cuenta que una mínima piedra en el armar sus sueños. camino puede hacer que todos sus sueños se terminen. Es mejor concretar antes de hablar. 10 &gt; Diagnóstico Integral de Aprendizajes Instrumentos de Evaluación 2026 agenciaeducacion.cl"
+        }
+      ]
+    },
+    {
+      "order": 4,
+      "name": "Texto 4: «Mi amiga la IA»",
+      "type": "multiple_choice",
+      "instructions": "Lee el siguiente texto y responde las preguntas 21 a 26.",
+      "passage": {
+        "title": "Mi amiga la IA",
+        "text": "11 Septiembre, 2025\nPor: Francisco Kroff\nDocente de Ciencias de la Ingeniería, Universidad de Los Lagos\n\nHace no mucho tiempo, la idea de conversar con una máquina parecía sacada de la ciencia ficción. Hoy, sin embargo, la inteligencia artificial (IA) se ha vuelto parte de nuestra vida diaria. Está en el celular que nos sugiere la ruta más rápida, en la música que escuchamos gracias a recomendaciones automáticas, en el correo que filtra mensajes y en los filtros que embellecen nuestras fotos. La tratamos con cierta desconfianza, pero también con fascinación. Es una amiga silenciosa, siempre disponible, que no pide nada a cambio y que nos acompaña en tareas pequeñas y grandes.\n\nPensar en ella como amiga no es exagerado. Nos ayuda a estudiar, a trabajar, a organizarnos. En educación, permite personalizar aprendizajes: un estudiante que se queda atrás recibe ejercicios a su medida, mientras otro accede a desafíos más avanzados. Los profesores pueden generar guías, planificar clases o traducir materiales en cuestión de minutos. En salud, la IA detecta patrones en radiografías, sugiere diagnósticos y ayuda a predecir brotes de enfermedades. No sustituye al médico, pero lo complementa con rapidez y precisión. En el trabajo, organiza correos, redacta borradores y analiza datos, liberando tiempo para que las personas se concentren en lo creativo. Y en la vida diaria, basta con abrir Netflix o Spotify para darnos cuenta de cómo la IA anticipa nuestros gustos. Incluso en el arte sorprende: escribe relatos, compone música y genera imágenes que inspiran a creadores en todo el mundo.\n\nPero ninguna amistad es perfecta. Confiar demasiado en la inteligencia artificial puede generar dependencia y debilitar nuestro pensamiento crítico. También existe el riesgo del desplazamiento laboral en tareas rutinarias. Más grave aún son los sesgos: si la IA aprende de datos discriminatorios, repetirá esas injusticias. Ya se han visto sistemas de reclutamiento que dejaban en desventaja a mujeres o tecnologías de reconocimiento facial menos precisas con ciertos tonos de piel. Y no podemos ignorar la amenaza de los deepfakes, capaces de difundir desinformación con un realismo inquietante.\n\nLa clave, entonces, está en el uso ético y responsable. Una amiga verdadera no debe manipular ni invadir la privacidad. Con la IA necesitamos transparencia para saber cuándo hablamos con una máquina, protección de nuestros datos, reglas que impidan discriminación y responsabilidad compartida entre gobiernos, empresas y ciudadanos. La UNESCO y la Unión Europea ya trabajan en marcos normativos, pero la tecnología avanza más rápido que las leyes. Por eso también necesitamos educación digital: aprender desde la escuela a convivir con esta nueva compañera con criterio y respeto.\n\nLa inteligencia artificial no es un ente ajeno, es un espejo de la humanidad que la creó. Sus luces y sombras reflejan nuestras decisiones. Podemos verla con miedo, como amenaza, o con optimismo, como aliada. Yo prefiero lo segundo. En mis conversaciones con esta amiga digital, siento que no sustituye mis ideas, sino que las acompaña y enriquece. Como toda amistad, requiere límites, confianza y responsabilidad. Y si logramos mantener ese equilibrio, la IA será una compañera leal en el presente y en el futuro.\n\nFrancisco Kroff. El Calbucano. [Chile]. Web. 11 de septiembre de 2025.\n\nGlosario\ndeepfakes: archivos de video, imagen o voz manipulados mediante un software de inteligencia artificial de modo que parezcan reales.\nUNESCO: es la agencia de las Naciones Unidas encargada de promover la educación, la ciencia, la cultura y la comunicación al servicio de la paz y el desarrollo sostenible.\nUnión Europea: es una asociación formada por 27 países de Europa para tomar decisiones conjuntas sobre asuntos como la paz, la democracia, la estabilidad y la prosperidad.",
+        "format": "plain",
+        "attachments": []
+      },
+      "items": [
+        {
+          "position": 21,
+          "type": "multiple_choice",
+          "stem": "Según el texto, ¿cuál de las siguientes acciones de la IA se menciona como ejemplo de la vida diaria?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "La generación de imágenes.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "La anticipación a nuestros gustos.",
+              "isCorrect": true
+            },
+            {
+              "key": "C",
+              "text": "La personalización de aprendizajes.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "La organización de nuestros correos.",
+              "isCorrect": false
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "B",
+          "skill": "Localizar",
+          "oa": "OA 9",
+          "contentAxis": null,
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Localizan información explícita relevante en un texto argumentativo. Localizan información explícita relevante en un texto"
+        },
+        {
+          "position": 22,
+          "type": "multiple_choice",
+          "stem": "Según el texto, ¿cuál es el rol de la UNESCO y la Unión Europea con respecto a la inteligencia artificial?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Avanzar en el uso de tecnología.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Educar digitalmente a los escolares.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Desarrollar el marco normativo de uso.",
+              "isCorrect": true
+            },
+            {
+              "key": "D",
+              "text": "Transparentar el uso específico de máquinas.",
+              "isCorrect": false
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "C",
+          "skill": "Localizar",
+          "oa": "OA 9",
+          "contentAxis": null,
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Localizan información explícita relevante en un texto argumentativo. Infieren información relevante (datos, hechos,"
+        },
+        {
+          "position": 23,
+          "type": "multiple_choice",
+          "stem": "De acuerdo al texto, ¿cuál es el principal riesgo de confiar excesivamente en la inteligencia artificial?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "La pérdida de puestos de trabajo en diversas áreas.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "La limitación de la capacidad de análisis de las personas.",
+              "isCorrect": true
+            },
+            {
+              "key": "C",
+              "text": "El reemplazo de las tareas rutinarias por otras más complejas.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "El debilitamiento del control de los gobiernos sobre la tecnología.",
+              "isCorrect": false
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "B",
+          "skill": "Interpretar y relacionar",
+          "oa": "OA 9",
+          "contentAxis": null,
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Infieren información relevante (datos, hechos, opiniones, etc.) en un texto argumentativo."
+        },
+        {
+          "position": 24,
+          "type": "multiple_choice",
+          "stem": "¿Cuál de las siguientes afirmaciones refleja la postura del autor frente a la inteligencia artificial?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "La IA es objetiva al momento de reclutar trabajadores.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "La IA es una herramienta peligrosa y debería restringirse su uso.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "La IA es capaz de discriminar la información falsa de la verdadera.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "La IA es una aliada valiosa si se usa de forma ética y responsable.",
+              "isCorrect": true
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "D",
+          "skill": "Interpretar y relacionar",
+          "oa": "OA 9",
+          "contentAxis": null,
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Infieren la postura del autor en un texto argumentativo. Determinan propósitos explícitos o implícitos de un"
+        },
+        {
+          "position": 25,
+          "type": "multiple_choice",
+          "stem": "¿Con qué propósito el autor escribe este texto?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Justificar el uso de la tecnología en situaciones cotidianas de la vida.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Convencer sobre el beneficio de tener amistades reales en vez de virtuales.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Demostrar las limitaciones de la IA para satisfacer las necesidades humanas.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "Aconsejar sobre una manera adecuada de incorporar la IA en la vida de las personas.",
+              "isCorrect": true
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "D",
+          "skill": "Reflexionar",
+          "oa": "OA 10",
+          "contentAxis": null,
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Determinan propósitos explícitos o implícitos de un texto argumentativo. Evalúan la función o propósito con que el autor utiliza"
+        },
+        {
+          "position": 26,
+          "type": "multiple_choice",
+          "stem": "¿De qué manera el autor aborda la relación humana con la inteligencia artificial en el texto?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "De forma crítica, al exponer los peligros asociados al uso de IA.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "De forma neutral, al limitar su exposición a datos concretos sobre la IA.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "De forma afectuosa, al dirigirse a la IA como si fuera una persona cercana.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "De forma didáctica, al comparar la IA con las cualidades de una buena amistad.",
+              "isCorrect": true
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "D",
+          "skill": "Reflexionar",
+          "oa": "OA 9",
+          "contentAxis": null,
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Evalúan la función o propósito con que el autor utiliza diversos modos verbales en un texto argumentativo."
+        }
+      ]
+    },
+    {
+      "order": 5,
+      "name": "Texto 5: «Se juntan dos palomitos»",
+      "type": "multiple_choice",
+      "instructions": "Lee el siguiente texto y responde las preguntas 27 a 31.",
+      "passage": {
+        "title": "Se juntan dos palomitos",
+        "text": "Se juntan dos palomitos,\nen el árbol del amor,\nfin de la separación\nque los tenía contritos.\nBrillaba con sus rayitos\nel sol en ese entretanto.\nLos dos en un solo manto\nse arrebozaron dichosos.\nDice un clarín misterioso:\nPalomito, yo te canto.\n\nComo el clavel y la rosa\nflorecen en el jardín\nla dalia con el jazmín\ny la azucena olorosa .\nSe encuentran las mariposas\nde aquellos dos sentimientos\ny anudan sus pensamientos\nal son de una melodía.\nSe dicen los buenos días\nen el más bello instrumento.\n\nLo que en la ausencia fue pena\nse convirtió en alegría,\nasí pasaron seguidas\nhoras de dicha serena.\nBendicen la luna llena,\nseñora del firmamento.\nDice una voz en el viento,\nalguna lengua amorosa:\n“Quién conservará la rosa\nque se abre en este momento”.\n\nDespués de tanta dulzura\nsonó la antigua campana\nque anuncia alguna mañana\ndel adiós su cruel premura.\nComo la fruta madura\nal desprenderse del alto,\nse desgarraron en llanto\nlos novios sin más demora\nporque ha llegado la hora\nde dividir el encanto.\n\nCondimento de la vida\nque alimenta el corazón\nmás que alegría, dolor\nque nunca cierra su herida,\ntisana para bebida\nque calma por un instante\nes ley de cada habitante\ndesde que el mundo fue mundo\nsolo de dicha un segundo\npara los pobres amantes.\n\nVioleta Parra. Poesía Violeta Parra. Paula Miranda comp. y Ernesto Pfeiffer y Cristián Warnken eds. Valparaíso: UV de la Universidad de Valparaíso, 2016.\n\nGlosario\ncontritos: arrepentidos de una culpa cometida.\nclarín: instrumento musical de viento, de metal, semejante a la trompeta, pero más pequeño y de sonidos más agudos.\ntisana: infusión, brebaje, poción.",
+        "format": "plain",
+        "attachments": []
+      },
+      "items": [
+        {
+          "position": 27,
+          "type": "multiple_choice",
+          "stem": "¿De qué trata el poema?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Del amor a lo largo de toda la vida.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Del origen del amor en la adolescencia.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Del tiempo fugaz que tienen los amantes.",
+              "isCorrect": true
+            },
+            {
+              "key": "D",
+              "text": "Del desencanto en las relaciones amorosas.",
+              "isCorrect": false
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "C",
+          "skill": "Interpretar y relacionar",
+          "oa": "OA 4",
+          "contentAxis": "Poema",
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Infieren el sentido global de un poema. Interpretan el sentido de expresiones en lenguaje"
+        },
+        {
+          "position": 28,
+          "type": "multiple_choice",
+          "stem": "¿Qué representan los palomitos?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Los novios enamorados.",
+              "isCorrect": true
+            },
+            {
+              "key": "B",
+              "text": "Los habitantes del mundo.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Los sentimientos amorosos.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "Los pájaros de la naturaleza.",
+              "isCorrect": false
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "A",
+          "skill": "Interpretar y relacionar",
+          "oa": "OA 4",
+          "contentAxis": "Poema",
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Interpretan el sentido de expresiones en lenguaje figurado presentes en un poema."
+        },
+        {
+          "position": 29,
+          "type": "multiple_choice",
+          "stem": "¿Qué simboliza el “sonido de la antigua campana” en el poema?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "El inicio del rencor.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "El recuerdo del dolor.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "El comienzo de la madurez.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "El momento de la separación.",
+              "isCorrect": true
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "D",
+          "skill": "Interpretar y relacionar",
+          "oa": "OA 4",
+          "contentAxis": "Poema",
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Interpretan elementos simbólicos en un poema. Establecen conclusiones sobre distintos aspectos en un"
+        },
+        {
+          "position": 30,
+          "type": "multiple_choice",
+          "stem": "¿Cuándo se “divide el encanto” entre los palomitos?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Al mediodía.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Al atardecer.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Al amanecer.",
+              "isCorrect": true
+            },
+            {
+              "key": "D",
+              "text": "Al anochecer.",
+              "isCorrect": false
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "C",
+          "skill": "Interpretar y relacionar",
+          "oa": "OA 4",
+          "contentAxis": "Poema",
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Establecen conclusiones sobre distintos aspectos en un poema. Establecen conclusiones sobre distintos aspectos en un"
+        },
+        {
+          "position": 31,
+          "type": "multiple_choice",
+          "stem": "En la última estrofa, ¿qué expresa el hablante respecto de la situación de los amantes?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Calma.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Alegría.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Indiferencia.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "Resignación.",
+              "isCorrect": true
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "D",
+          "skill": "Interpretar y relacionar",
+          "oa": "OA 4",
+          "contentAxis": "Poema",
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Establecen conclusiones sobre distintos aspectos en un poema."
+        }
+      ]
+    }
+  ],
+  "extraction": {
+    "itemCount": 31,
+    "warnings": [
+      "Q20 es un ítem de desarrollo (open_ended, responseFormat develop); las 30 preguntas restantes son de alternativas (A/B/C/D).",
+      "La sección 2 agrupa DOS textos de lectura (Texto 1 «Día del Perro Adoptado» de Cooperativa y Texto 2 «Día Mundial del Perro Adoptado» de El Paraíso de los Animales) porque las preguntas 7 a 13 son comparativas y requieren ambos; se transcribieron ambos textos en un solo passage.",
+      "Los textos incluyen logotipos e íconos de redes sociales (Texto 1 y Texto 4) que son decorativos; ningún ítem depende de una figura para responderse.",
+      "Textos transcritos desde la capa de texto del PDF (pdftotext -layout), verbatim, con glosarios incluidos en el passage."
+    ],
+    "needsHumanReview": false,
+    "crossCheck": {
+      "hardIssues": [],
+      "softWarnings": [],
+      "counts": {
+        "cuadernillo": 31,
+        "ficha": 31,
+        "hoja": 31
+      }
+    }
+  },
+  "pauta": {
+    "source": {
+      "ficha": "8_ficha_tecnica_lectura_monitoreo_2026_8_basico.pdf",
+      "hoja": "8_hoja_de_respuestas_lectura_monitoreo_2026_8_basico.pdf"
+    },
+    "appliedKeys": 30,
+    "rubrics": 1
+  }
+}

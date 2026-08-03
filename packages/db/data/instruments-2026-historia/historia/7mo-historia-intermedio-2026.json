@@ -1,0 +1,1409 @@
+{
+  "schemaVersion": "1.0",
+  "source": {
+    "file": "7_prueba_historia_monitoreo_2026_7_basico.pdf",
+    "subjectFolder": "Historia"
+  },
+  "instrument": {
+    "name": "DIA Historia, Geografía y Ciencias Sociales 7° Básico 2026 — Monitoreo Intermedio",
+    "subject": "Historia, Geografía y Ciencias Sociales",
+    "subjectCode": "HIST",
+    "grade": "7° Básico",
+    "gradeCode": "7TH_BASIC",
+    "year": 2026,
+    "applicationPeriod": "intermedio",
+    "type": "dia",
+    "isOfficial": true,
+    "source": "imported"
+  },
+  "sections": [
+    {
+      "order": 1,
+      "name": "Pregunta 1 — Mapa: la dispersión de la especie humana por el planeta",
+      "type": "multiple_choice",
+      "instructions": "Observa el siguiente mapa:",
+      "passage": null,
+      "items": [
+        {
+          "position": 1,
+          "printedNumber": "1",
+          "type": "multiple_choice",
+          "responseFormat": "choice",
+          "stem": "Observa el siguiente mapa:\n\nLa dispersión de la especie humana por el planeta\n(https://www.curriculumnacional.cl/ Adaptación.)\n\nA partir de la información del mapa, ¿cuál de estas conclusiones es válida?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "El desplazamiento de la especie humana fue principalmente de este a oeste.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "El proceso de dispersión de la especie humana duró alrededor de 50 000 años.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "La especie humana se asentó en América antes que en Asia.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "La especie humana se originó en el continente africano.",
+              "isCorrect": true
+            }
+          ],
+          "correctKey": "D",
+          "skill": "Pensamiento temporal y espacial",
+          "oa": "OA 1",
+          "contentAxis": "Historia",
+          "hasFigure": true,
+          "figureNote": "Mapamundi con flechas de las rutas de dispersión de la especie humana desde África y rangos de años",
+          "oaLevel": null,
+          "indicador": "Localizan los diversos espacios geográficos estudiados en el nivel, utilizando herramientas geográficas y/o tecnológicas.",
+          "imageRef": "item/global/7mo-historia-intermedio-2026/item_figure/01.png"
+        }
+      ]
+    },
+    {
+      "order": 2,
+      "name": "Pregunta 2 — Fuente: la Revolución Neolítica",
+      "type": "multiple_choice",
+      "instructions": "Lee la siguiente fuente sobre la Revolución Neolítica:",
+      "passage": {
+        "title": "Fuente sobre la Revolución Neolítica",
+        "text": "Al final de la última glaciación, alrededor de 15 000 años atrás, el clima se tornó más templado por un incremento en la temperatura. La región de la medialuna fértil, ubicada en el suroeste de Asia, contaba con inviernos húmedos y veranos secos. Estas condiciones climáticas favorecían el crecimiento de pastos invernoprimaverales entre los que se encontraban el trigo, la cebada y el centeno, que florecían y maduraban hacia fines de la primavera. Los humanos comenzamos a aprovechar esta abundante producción, recolectando y almacenando los granos y, posteriormente, cultivando dichas especies vegetales. Alguien, observando los residuos de los asentamientos, descubrió que las semillas que recolectaban podían generar las plantas que las originaban. Sobre la base de este descubrimiento, se comenzaron a sembrar, a cuidar e irrigar los primeros cultivos. (…) Estos cambios, conjuntamente con la domesticación de los animales, se repitieron en otros lugares del mundo y se conocen como la Revolución Neolítica. Fue un paso gigante de la humanidad ya que posibilitó hábitos más sedentarios y, por lo tanto, la aparición de las primeras civilizaciones.\n\nAndrade, F. La tecnología y la producción agrícola. El pasado y los actuales desafíos, 2011. Adaptación.",
+        "format": "plain",
+        "attachments": []
+      },
+      "items": [
+        {
+          "position": 2,
+          "printedNumber": "2",
+          "type": "multiple_choice",
+          "responseFormat": "choice",
+          "stem": "En la fuente anterior el autor afirma que la Revolución Neolítica posibilitó la sedentarización de los seres humanos.\n\n¿Qué información contenida en la fuente permite fundamentar esa afirmación?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "“Sobre la base de este descubrimiento, se comenzaron a sembrar, a cuidar e irrigar los primeros cultivos”.",
+              "isCorrect": true
+            },
+            {
+              "key": "B",
+              "text": "“Estas condiciones climáticas favorecían el crecimiento de pastos invernoprimaverales”.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "“15 000 años atrás, el clima se tornó más templado por un incremento en la temperatura”.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "“La región de la medialuna fértil, ubicada en el suroeste de Asia, contaba con inviernos húmedos y veranos secos”.",
+              "isCorrect": false
+            }
+          ],
+          "correctKey": "A",
+          "skill": "Pensamiento crítico",
+          "oa": "OA 2",
+          "contentAxis": "Historia",
+          "hasFigure": false,
+          "figureNote": null,
+          "oaLevel": null,
+          "indicador": "Identifican evidencia que permite fundamentar una inferencia, respecto de algún tema estudiado en el nivel."
+        }
+      ]
+    },
+    {
+      "order": 3,
+      "name": "Pregunta 3 — Fuentes: la organización del poder en el Antiguo Egipto",
+      "type": "multiple_choice",
+      "instructions": "Lee las siguientes fuentes sobre la organización del poder en el Antiguo Egipto:",
+      "passage": {
+        "title": "La organización del poder en el Antiguo Egipto",
+        "text": "Fuente 1\nEl fundamento real de la monarquía proviene del papel del faraón como hijo y representante del dios creador -el dios solar- en el mundo de los humanos. Como cada rey, era el hijo real y directo del creador; en otras palabras, la realeza humana procedía de una realeza divina. Desde esta perspectiva, el Estado no es algo que se forma, en un sentido histórico, sino que ya existe con anterioridad a cualquier forma de historia.\n\nSeildmayer, J. El origen del Estado en el Antiguo Egipto, 2007. Adaptación.\n\nFuente 2\nPara los antiguos egipcios, el orden, la paz, la estabilidad, la fuerza benefactora, debía ser sustentada y mantenida por el faraón. Él debía actuar como un rey sabio y piadoso; y era venerado como un dios en la tierra. Las élites crearon intencionalmente esta estructura para aplicar sus modos de dominación y lograr la obediencia por parte de la población.\n\nArias, J. El origen del Estado en Mesopotamia y Egipto, 2013.",
+        "format": "plain",
+        "attachments": []
+      },
+      "items": [
+        {
+          "position": 3,
+          "printedNumber": "3",
+          "type": "multiple_choice",
+          "responseFormat": "choice",
+          "stem": "¿En qué característica sobre el origen del poder del faraón coinciden ambas fuentes?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "En su condición divina.",
+              "isCorrect": true
+            },
+            {
+              "key": "B",
+              "text": "En su nivel de inteligencia.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "En el temor que provocaba.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "En el poder militar que tenía.",
+              "isCorrect": false
+            }
+          ],
+          "correctKey": "A",
+          "skill": "Análisis y trabajo con fuentes de información",
+          "oa": "OA 3",
+          "contentAxis": "Historia",
+          "hasFigure": false,
+          "figureNote": null,
+          "oaLevel": null,
+          "indicador": "Identifican similitudes y/o diferencias en la información que entregan distintas fuentes primarias o secundarias, a partir de un criterio dado."
+        }
+      ]
+    },
+    {
+      "order": 4,
+      "name": "Pregunta 4 — El surgimiento de las primeras civilizaciones",
+      "type": "multiple_choice",
+      "instructions": null,
+      "passage": null,
+      "items": [
+        {
+          "position": 4,
+          "printedNumber": "4",
+          "type": "multiple_choice",
+          "responseFormat": "choice",
+          "stem": "Las primeras civilizaciones del mundo surgen en diferentes espacios geográficos. La egipcia en África, sumeria y china en Asia, olmeca en América. Sin embargo, en ellas se desarrollan procesos similares que caracterizan su surgimiento y desarrollo.\n\nDe acuerdo a lo anterior, ¿qué transformación común se produjo con el surgimiento de las primeras civilizaciones?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "El desarrollo de la vida urbana.",
+              "isCorrect": true
+            },
+            {
+              "key": "B",
+              "text": "El inicio de las prácticas agrícolas.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "La fragmentación del poder político.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "La aparición de las ideas religiosas.",
+              "isCorrect": false
+            }
+          ],
+          "correctKey": "A",
+          "skill": "Pensamiento temporal y espacial",
+          "oa": "OA 4",
+          "contentAxis": "Historia",
+          "hasFigure": false,
+          "figureNote": null,
+          "oaLevel": null,
+          "indicador": "Reconocen elementos de continuidad y cambio entre periodos o procesos históricos estudiados en el nivel."
+        }
+      ]
+    },
+    {
+      "order": 5,
+      "name": "Pregunta 5 — Mapa: griegos y romanos en el mundo antiguo",
+      "type": "multiple_choice",
+      "instructions": "Observa el siguiente mapa:",
+      "passage": null,
+      "items": [
+        {
+          "position": 5,
+          "printedNumber": "5",
+          "type": "multiple_choice",
+          "responseFormat": "choice",
+          "stem": "Observa el siguiente mapa:\n\nGriegos y romanos en el mundo antiguo\nSimbología: 1 Romanos · 2 Griegos\n(Elaboración propia.)\n\nDe acuerdo con lo observado en el mapa sobre la ubicación de griegos y romanos, ¿qué característica geográfica fue compartida por ambas civilizaciones?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "La presencia de extensos lagos.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "La conexión marítima entre tres continentes.",
+              "isCorrect": true
+            },
+            {
+              "key": "C",
+              "text": "La localización al sur del continente africano.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "La entrada inmediata a distintos océanos.",
+              "isCorrect": false
+            }
+          ],
+          "correctKey": "B",
+          "skill": "Pensamiento temporal y espacial",
+          "oa": "OA 5",
+          "contentAxis": "Historia",
+          "hasFigure": true,
+          "figureNote": "Mapa del Mediterráneo con Europa, Asia y África; zonas 1 (romanos) y 2 (griegos), océano Atlántico y mar Negro rotulados",
+          "oaLevel": null,
+          "indicador": "Caracterizan los diversos espacios geográficos estudiados en el nivel, utilizando mapas a diferentes escalas, herramientas geográficas y/o tecnológicas",
+          "imageRef": "item/global/7mo-historia-intermedio-2026/item_figure/05.png"
+        }
+      ]
+    },
+    {
+      "order": 6,
+      "name": "Pregunta 6 — Bajorrelieve: Juegos Panhelénicos de Olimpia",
+      "type": "multiple_choice",
+      "instructions": "Observa la siguiente imagen correspondiente a un bajorrelieve creado en la Antigua Grecia:",
+      "passage": null,
+      "items": [
+        {
+          "position": 6,
+          "printedNumber": "6",
+          "type": "multiple_choice",
+          "responseFormat": "choice",
+          "stem": "Observa la siguiente imagen correspondiente a un bajorrelieve creado en la Antigua Grecia:\n\nJuegos Panhelénicos de Olimpia, hacia el 510 a. C.\n(En Portal web National Geographic Español. Imagen de bajorrelieve exhibido en Museo Arqueológico de Atenas. Consultado el 10 de febrero 2026.)\n\n¿Qué característica, propia de la cultura de las polis en la Antigua Grecia, se representa principalmente en la obra?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Los conflictos sociales.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "La centralidad religiosa.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "El predominio de la guerra.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "La importancia del deporte.",
+              "isCorrect": true
+            }
+          ],
+          "correctKey": "D",
+          "skill": "Análisis y trabajo con fuentes de información",
+          "oa": "OA 8",
+          "contentAxis": "Historia",
+          "hasFigure": true,
+          "figureNote": "Fotografía de un bajorrelieve griego con figuras humanas practicando deportes",
+          "oaLevel": null,
+          "indicador": "Infieren información que se encuentra implícita en fuentes primarias o secundarias",
+          "imageRef": "item/global/7mo-historia-intermedio-2026/item_figure/06.png"
+        }
+      ]
+    },
+    {
+      "order": 7,
+      "name": "Preguntas 7 y 8 — Fuentes: los sistemas políticos espartano y ateniense",
+      "type": "multiple_choice",
+      "instructions": "Lee las siguientes fuentes sobre los sistemas políticos espartano y ateniense y responde las preguntas 7 y 8.",
+      "passage": {
+        "title": "Los sistemas políticos espartano y ateniense",
+        "text": "Sistema político espartano a partir del siglo VI a. C.\nEn Esparta, Licurgo estableció un equilibrio entre los reyes, la aristocracia y el pueblo, aunque quienes realmente ejercían el poder eran los ancianos y los monarcas, pues la Asamblea del pueblo, llamada Apella, que se reunía una vez al mes bajo la luna llena, tan solo aprobaba o rechazaba con sus gritos las propuestas del Consejo. Las reformas de Licurgo pretendían conseguir la total lealtad de los espartanos hacia la comunidad. El instrumento con el que logró convertir a Esparta en un Estado excepcional dentro de Grecia fue un sistema de educación en que a los 7 años los niños abandonaban el núcleo familiar y quedaban bajo el amparo de la ciudad hasta los 30 años, tomando conciencia de su pertenencia a una comunidad igualitaria y solidaria.\n\nMartínez, O. Licurgo y el viaje que inspiró las nuevas leyes que transformaron Esparta, 2023. Adaptación.\n\nSistema político ateniense, durante el siglo V a. C.\nEs habitual referirse al siglo V a. C. como «el siglo de Pericles», en claro homenaje al que fue, indiscutiblemente, el político decisivo de la democracia ateniense. En aquella democracia el poder residía en la asamblea popular y donde, a diferencia de los regímenes políticos modernos, no existían ni partidos ni organizaciones o grupos de ideología rígida, ni escalafones ni funcionarios, ni un senado o una corte que ejerciera el control del gobierno o el poder militar. Lo decisivo era solo el voto directo e igualitario de la mayoría de los ciudadanos reunidos en la asamblea, en la que cualquier ciudadano tenía igual derecho a hablar y expresar su opinión con entera libertad de palabra.\n\nGarcía, C. Pericles, el triunfo de la democracia, 2023.",
+        "format": "plain",
+        "attachments": [],
+        "imageRef": "section/global/7mo-historia-intermedio-2026/passage/07.png"
+      },
+      "items": [
+        {
+          "position": 7,
+          "printedNumber": "7",
+          "type": "multiple_choice",
+          "responseFormat": "choice",
+          "stem": "Considerando la información que entregan las fuentes anteriores, ¿en qué se diferenciaban ambos sistemas políticos respecto de la ciudadanía?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "En el grado de compromiso que presentaban los ciudadanos con su polis.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "En la presencia de partidos políticos que representaban a los ciudadanos.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "En el nivel de participación política de los ciudadanos.",
+              "isCorrect": true
+            },
+            {
+              "key": "D",
+              "text": "En la existencia de personas con derechos ciudadanos.",
+              "isCorrect": false
+            }
+          ],
+          "correctKey": "C",
+          "skill": "Análisis y trabajo con fuentes de información",
+          "oa": "OA 6",
+          "contentAxis": "Historia",
+          "hasFigure": false,
+          "figureNote": null,
+          "oaLevel": null,
+          "indicador": "Identifican similitudes y/o diferencias en la información que entregan distintas fuentes primarias o secundarias, a partir de un criterio dado."
+        },
+        {
+          "position": 8,
+          "printedNumber": "8",
+          "type": "multiple_choice",
+          "responseFormat": "choice",
+          "stem": "Según la información que entregan las fuentes, ¿qué similitud se puede apreciar entre ambos sistemas?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "La forma en cómo se definía quiénes eran los ciudadanos.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "La forma en que los ciudadanos intervenían en las asambleas.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "La existencia de un parlamento que presidía el régimen político.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "La existencia de una reunión en la que participaban los ciudadanos.",
+              "isCorrect": true
+            }
+          ],
+          "correctKey": "D",
+          "skill": "Análisis y trabajo con fuentes de información",
+          "oa": "OA 6",
+          "contentAxis": "Historia",
+          "hasFigure": false,
+          "figureNote": null,
+          "oaLevel": null,
+          "indicador": "Extraen conclusiones a partir del contraste de la información que se obtiene de dos fuentes primarias o secundarias."
+        }
+      ]
+    },
+    {
+      "order": 8,
+      "name": "Pregunta 9 — La romanización (respuesta múltiple)",
+      "type": "multiple_choice",
+      "instructions": "Marca todas las causas correctas.",
+      "passage": null,
+      "items": [
+        {
+          "position": 9,
+          "printedNumber": "9",
+          "type": "multiple_choice",
+          "responseFormat": "choice",
+          "stem": "Roma inició su expansión territorial durante la República y continuó durante la etapa del Imperio, abarcando vastos territorios, situados alrededor de la cuenca del Mediterráneo, el Norte de África y Asia Menor. Junto a la conquista de nuevos territorios se inició un proceso de romanización, es decir, la expansión de la civilización romana, transmitida principalmente a través del latín.\n\n¿Cuáles son algunas de las causas que favorecieron este proceso de romanización?\n\nMarca todas las causas correctas.",
+          "alternatives": [
+            {
+              "key": "1",
+              "text": "El anhelo de terminar con la esclavitud.",
+              "isCorrect": false
+            },
+            {
+              "key": "2",
+              "text": "La escasez de mano de obra.",
+              "isCorrect": false
+            },
+            {
+              "key": "3",
+              "text": "La búsqueda de tierras fértiles.",
+              "isCorrect": true
+            },
+            {
+              "key": "4",
+              "text": "La expansión de la cultura.",
+              "isCorrect": true
+            },
+            {
+              "key": "5",
+              "text": "El poderío militar alcanzado.",
+              "isCorrect": true
+            }
+          ],
+          "correctKey": "345",
+          "skill": "Pensamiento crítico",
+          "oa": "OA 7",
+          "contentAxis": "Historia",
+          "hasFigure": false,
+          "figureNote": null,
+          "isMultiAnswer": true,
+          "oaLevel": null,
+          "indicador": "Distinguen las causas de procesos históricos y/o geográficos estudiados en el nivel."
+        }
+      ]
+    },
+    {
+      "order": 9,
+      "name": "Pregunta 10 — La coronación de Carlomagno",
+      "type": "multiple_choice",
+      "instructions": "Observa y lee la siguiente fuente:",
+      "passage": {
+        "title": "El papa León III coronó a Carlomagno como emperador del Imperio Carolingio en el año 800 d. C.",
+        "text": "“Entonces el venerable y benévolo papa León III le coronó con sus propias manos con una magnífica corona. Entonces todos los fieles viendo la protección tan grande y el amor que tenía a la santa madre Iglesia católica y a su representante unánimemente gritaron en alta voz, con el favor de Dios y del bienaventurado San Pedro, portero del reino celestial: ¡A Carlomagno, piadoso augusto, por Dios coronado, grande y pacífico emperador, vida y victoria! (Liber Pontificalis, XCVIII)”.\n\nRue des Archives / Cordon Press. En portal web Historia National Geographic Español. Consultado el 28 de abril de 2026. Adaptación.",
+        "format": "plain",
+        "attachments": [
+          {
+            "kind": "image",
+            "note": "Ilustración de la coronación de Carlomagno por el papa León III"
+          }
+        ]
+      },
+      "items": [
+        {
+          "position": 10,
+          "printedNumber": "10",
+          "type": "multiple_choice",
+          "responseFormat": "choice",
+          "stem": "¿Qué característica del periodo Medieval se infiere a partir de la fuente?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "La creencia judeocristiana sobre el origen divino del poder del emperador.",
+              "isCorrect": true
+            },
+            {
+              "key": "B",
+              "text": "La tradición germana defensora de la validación religiosa del poder imperial.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "La autoridad que tenía la Iglesia Católica por sobre el poder del emperador.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "El poder imperial que ostentaba el papa como representante de la cristiandad.",
+              "isCorrect": false
+            }
+          ],
+          "correctKey": "A",
+          "skill": "Análisis y trabajo con fuentes de información",
+          "oa": "OA 9",
+          "contentAxis": "Historia",
+          "hasFigure": false,
+          "figureNote": null,
+          "oaLevel": null,
+          "indicador": "Relacionan información sobre el contexto histórico presentada en fuentes históricas o geográficas, con periodos o procesos históricos estudiados en el nivel."
+        }
+      ]
+    },
+    {
+      "order": 10,
+      "name": "Pregunta 11 — Fuente: el origen del feudalismo",
+      "type": "multiple_choice",
+      "instructions": "Lee la siguiente fuente:",
+      "passage": {
+        "title": "El origen del feudalismo",
+        "text": "A partir del siglo VIII, Europa occidental volvió al estado de región exclusivamente rural. La tierra fue la única fuente de subsistencia y la única condición de la riqueza. Todas las clases de la población, desde el emperador, que no tenía más rentas que las de sus tierras, hasta el más humilde de sus siervos, vivían directa o indirectamente de los productos del suelo. La existencia social se funda en la propiedad o en la posesión de la tierra. De ahí la imposibilidad para el Estado de mantener un sistema militar y una administración que no se basen en ella. En tales circunstancias, resulta imposible amparar la soberanía del jefe del Estado. El sistema feudal es tan sólo la desintegración del poder público entre las manos de varios, que por el mismo hecho de que poseen cada uno parte del suelo se han vuelto independientes y consideran las atribuciones de que están investidos como parte de su patrimonio.\n\nPirenne, H. (1989). Historia económica y social de la Edad Media. Adaptación.",
+        "format": "plain",
+        "attachments": []
+      },
+      "items": [
+        {
+          "position": 11,
+          "printedNumber": "11",
+          "type": "multiple_choice",
+          "responseFormat": "choice",
+          "stem": "Considerando lo expuesto por el autor en la fuente, ¿a qué atribuye el inicio del sistema feudal?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "A la aparición de nuevos estamentos sociales.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "A las nuevas relaciones de obediencia surgidas.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "A la desaparición de la figura del rey como autoridad.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "A la dependencia de la sociedad de las actividades agrícolas.",
+              "isCorrect": true
+            }
+          ],
+          "correctKey": "D",
+          "skill": "Análisis y trabajo con fuentes de información",
+          "oa": "OA 10",
+          "contentAxis": "Historia",
+          "hasFigure": false,
+          "figureNote": null,
+          "oaLevel": null,
+          "indicador": "Infieren información que se encuentra implícita en fuentes primarias o secundarias"
+        }
+      ]
+    },
+    {
+      "order": 11,
+      "name": "Pregunta 12 — Esquema: transformaciones de Europa en el siglo XII",
+      "type": "multiple_choice",
+      "instructions": "Observa el siguiente esquema:",
+      "passage": null,
+      "items": [
+        {
+          "position": 12,
+          "printedNumber": "12",
+          "type": "multiple_choice",
+          "responseFormat": "choice",
+          "stem": "Observa el siguiente esquema:\n\nTransformaciones de Europa en el siglo XII\nExcedentes productivos → Aumento del comercio (materias primas, alimentos) → Funciones urbanas (artesanía, comercio)\nExcedentes demográficos → Éxodo rural → Crecimiento de la población urbana\n(Elaboración propia.)\n\nConsiderando la información incluida en el esquema, ¿qué relación de causalidad es correcta sobre las transformaciones de Europa en el siglo XII?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Las funciones urbanas fueron una causa de la obtención de excedentes productivos.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Los excedentes demográficos fueron causados por el aumento de los intercambios urbanos.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "El aumento del comercio y la artesanía fueron causados por el excedente productivo.",
+              "isCorrect": true
+            },
+            {
+              "key": "D",
+              "text": "El crecimiento de la población urbana fue una causa de los excedentes demográficos.",
+              "isCorrect": false
+            }
+          ],
+          "correctKey": "C",
+          "skill": "Pensamiento crítico",
+          "oa": "OA 12",
+          "contentAxis": "Historia",
+          "hasFigure": true,
+          "figureNote": "Esquema de flujo con dos filas de cajas encadenadas por flechas: excedentes productivos → aumento del comercio → funciones urbanas; excedentes demográficos → éxodo rural → crecimiento de la población urbana",
+          "oaLevel": null,
+          "indicador": "Distinguen las causas de procesos históricos y/o geográficos estudiados en el nivel.",
+          "imageRef": "item/global/7mo-historia-intermedio-2026/item_figure/12.png"
+        }
+      ]
+    },
+    {
+      "order": 12,
+      "name": "Pregunta 13 — Alianzas entre cristianos y musulmanes en la Edad Media ibérica",
+      "type": "multiple_choice",
+      "instructions": "Lee la siguiente fuente referida a las interacciones entre musulmanes y cristianos en la Península Ibérica durante la Edad Media:",
+      "passage": {
+        "title": "Alianzas entre cristianos y musulmanes en la Edad Media Ibérica",
+        "text": "La historia de las relaciones políticas y militares entre poderes cristianos y musulmanes durante la Edad Media ibérica pone de manifiesto la existencia de alianzas entre fuerzas que se identifican a sí mismas y a los demás con etiquetas de carácter religioso (cristianos y musulmanes). El antagonismo esencial que pudiera derivarse de la diferencia de adherir a religiones diferentes, y que las ideologías de uno y otro lado de las fronteras se esforzaron en subrayar, referidas todas a ideas relacionadas con las nociones de guerra santa, guerra justa, cruzada o yihad, se debilita hasta desaparecer a favor de lo que es más práctico en política y por el interés militar de cada situación concreta.\n\nGarcía, F. (2019). Alianzas entre cristianos y musulmanes en la Edad Media Ibérica. Adaptación.",
+        "format": "plain",
+        "attachments": []
+      },
+      "items": [
+        {
+          "position": 13,
+          "printedNumber": "13",
+          "type": "multiple_choice",
+          "responseFormat": "choice",
+          "stem": "A partir de la fuente, debes organizar la información que contiene. En este caso, ¿cuál de los siguientes esquemas sintetiza y ordena de forma correcta el contenido de la fuente?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Organizador gráfico titulado «Relaciones entre la cristiandad y el establecimento del islam en la Península Ibérica durante la Edad Media»: existencia de relaciones de tipo político y militar, marcadas por diferencias ideológicas y confesionales, que llevan a alianzas y prácticas concretas.",
+              "isImage": true,
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Organizador gráfico titulado «Relaciones entre la cristiandad y el establecimento del islam en la Península Ibérica durante la Edad Media»: a pesar de un antagonismo abierto por diferencias de tipo religioso e ideológico, se establecen alianzas debido a la necesidad de actuar en forma práctica en lo político y de responder a situaciones concretas.",
+              "isImage": true,
+              "isCorrect": true
+            },
+            {
+              "key": "C",
+              "text": "Organizador gráfico titulado «Relaciones entre la cristiandad y el establecimento del islam en la Península Ibérica durante la Edad Media»: hubo antagonismo entre cristianos y musulmanes que llevó a diferencias religiosas e ideológicas, las que generaron alianzas de tipo prácticas concretas.",
+              "isImage": true,
+              "isCorrect": false
+            }
+          ],
+          "correctKey": "B",
+          "skill": "Análisis y trabajo con fuentes de información",
+          "oa": "OA 11",
+          "contentAxis": "Historia",
+          "hasFigure": true,
+          "figureNote": "Las tres alternativas son organizadores gráficos (diagramas de cajas y conectores); su lectura completa requiere ver la imagen",
+          "oaLevel": null,
+          "indicador": "Organizan la información obtenida en fuentes sobre un tema pertinente al nivel, utilizando organizadores gráficos, tablas, listas de ideas principales y esquemas, entre otros.",
+          "imageRef": "item/global/7mo-historia-intermedio-2026/item_figure/13.png"
+        }
+      ]
+    },
+    {
+      "order": 13,
+      "name": "Pregunta 14 — Fuente: el comercio en el Imperio Azteca",
+      "type": "multiple_choice",
+      "instructions": "Lee la siguiente fuente sobre el comercio en el Imperio Azteca:",
+      "passage": {
+        "title": "El comercio en el Imperio Azteca",
+        "text": "El comercio de los mexicanos en la tierra de Anáhuac comenzó desde su primer establecimiento en el lago en que fundaron después su ciudad. El pescado que cogían y las esteras que tejían, los cambiaban por maíz para su sustento, por algodón para su vestido y por piedras, cal y madera para sus edificios. Junto con el poder que adquirían con sus armas, aumentaba y extendían su comercio; y limitándose al principio a los contornos del lago, se propagó después hasta las más remotas provincias. Eran infinitos los mercaderes mexicanos que giraban de mercado en mercado por todas las provincias del Imperio, sacando productos de cada lugar para intercambiarlos en otro con ventajas.\n\nClavijero, F. El comercio en el México antiguo, 2018. Adaptación.",
+        "format": "plain",
+        "attachments": []
+      },
+      "items": [
+        {
+          "position": 14,
+          "printedNumber": "14",
+          "type": "multiple_choice",
+          "responseFormat": "choice",
+          "stem": "Un estudiante de 7º básico está escribiendo un trabajo de investigación sobre las características del Imperio Azteca y quiere incluir dentro de su trabajo un fragmento textual de la fuente anterior.\n\n¿Cuál sería la forma correcta de incluir ese texto en su trabajo de investigación?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Escribir la cita usando una letra más grande.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Apuntar la referencia subrayando el escrito.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Apuntar la referencia ocupando otro color.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "Escribir la cita utilizando comillas.",
+              "isCorrect": true
+            }
+          ],
+          "correctKey": "D",
+          "skill": "Análisis y trabajo con fuentes de información",
+          "oa": "OA 13",
+          "contentAxis": "Historia",
+          "hasFigure": false,
+          "figureNote": null,
+          "oaLevel": null,
+          "indicador": "Distinguen estrategias para citar la información contenida en fuentes primarias o secundarias (cita textual, parafraseo o mención en el contexto de una"
+        }
+      ]
+    },
+    {
+      "order": 14,
+      "name": "Pregunta 15 — Fuente: expansión del Imperio Inca",
+      "type": "multiple_choice",
+      "instructions": "Lee la siguiente fuente:",
+      "passage": {
+        "title": "Expansión del Imperio Inca",
+        "text": "Los incas empleaban primero la persuasión, invitando a los pueblos a unirse al imperio, reconocer la sumisión al monarca y aceptar el tributo que este solicitaba. En caso de no obtener respuesta afirmativa entraba en juego su poderío militar.\n\nLos incas se apoderaban de las tierras de sus vencidos, la dividían en tres sectores asignándolos al Estado, la Iglesia y la comunidad. El emperador solía reservarse para sí los terrenos fértiles, los yacimientos minerales y gente para su servicio. La población derrotada recibía el derecho a usar y disfrutar de parte de sus antiguos territorios; en compensación se comprometía a laborar las tierras del Estado y de la Iglesia, almacenando las cosechas en enormes bodegas, de las que se extraía lo necesario para mantener a quienes laboraban para el Estado, a la corte y a los funcionarios civiles o religiosos; también proporcionaban alimento a los soldados.\n\nSilva, O. (2006). Civilizaciones prehispánicas de América. Adaptación.",
+        "format": "plain",
+        "attachments": []
+      },
+      "items": [
+        {
+          "position": 15,
+          "printedNumber": "15",
+          "type": "multiple_choice",
+          "responseFormat": "choice",
+          "stem": "Considerando la información proporcionada, ¿qué causas explican la expansión del Imperio Inca?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "La necesidad de tierras para distribuirlas entre la creciente población del imperio.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "El poder militar para acordar el tipo de participación de los pueblos sometidos al imperio.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "El poder militar para organizar las cosechas de la población derrotada por el imperio.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "La necesidad de tierras para financiar los gastos de la administración imperial.",
+              "isCorrect": true
+            }
+          ],
+          "correctKey": "D",
+          "skill": "Pensamiento crítico",
+          "oa": "OA 14",
+          "contentAxis": "Historia",
+          "hasFigure": false,
+          "figureNote": null,
+          "oaLevel": null,
+          "indicador": "Distinguen las causas de procesos históricos y/o geográficos estudiados en el nivel."
+        }
+      ]
+    },
+    {
+      "order": 15,
+      "name": "Pregunta 16 — Noticia: el carnaval de Oruro",
+      "type": "multiple_choice",
+      "instructions": "Lee la siguiente noticia sobre el carnaval de Oruro:",
+      "passage": {
+        "title": "Así es el espectacular carnaval de Oruro, Patrimonio de la Humanidad",
+        "text": "Hasta el martes 21, rinde homenaje a la Virgen del Socavón y reúne a unos 40 000 participantes, entre músicos y bailarines.\n\nColoridos vestuarios y originales máscaras avanzan al ritmo de trompetas, bombos y platillos; niños se enredan en batallas de espuma; miles se reúnen en cada rincón de las calles de Oruro: el carnaval más célebre de Bolivia está de regreso.\n\nTras la suspensión que tuvo el 2021 y las restricciones de 2022 por la pandemia de COVID-19, el principal desfile del carnaval de Oruro se realizó el sábado sin mascarillas ni controles de vacunación y con mucho ánimo de fiesta.\n\n\"Nuestras culturas y tradiciones vuelven a brillar en el majestuoso carnaval de Oruro. Bailarines y bandas lucen sus mejores galas y exponen inigualables coreografías para deslumbrar al mundo\", expresó el presidente boliviano, Luis Arce.\n\nAunque el carnaval de Oruro tiene orígenes prehispánicos, se orientó hacia el cristianismo tras la conquista española. A pesar de que estos eventos fueron prohibidos en el siglo XVII, estos rituales continuaron bajo la fachada religiosa: los dioses andinos se ocultaban tras los íconos cristianos. De esta manera, la fiesta de Ito fue transformada en un ritual cristiano y la tradicional ‘lama lama’ o ‘diablada’ se convirtió en el baile principal de Oruro.\n\nDiario El Clarín, Argentina. 20 de febrero de 2023. Adaptación.",
+        "format": "plain",
+        "attachments": [
+          {
+            "kind": "image",
+            "note": "Fotografía: La danza del Waca Waca es una de las varias del principal desfile del carnaval de Oruro."
+          }
+        ]
+      },
+      "items": [
+        {
+          "position": 16,
+          "printedNumber": "16",
+          "type": "multiple_choice",
+          "responseFormat": "choice",
+          "stem": "¿Cuál de las siguientes oraciones contenidas en la noticia anterior da cuenta de que el carnaval de Oruro es un ejemplo de sincretismo cultural?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Carnaval de Oruro se realizó el sábado sin mascarillas ni controles de vacunación y con mucho ánimo de fiesta.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Bailarines y bandas lucen sus mejores galas y exponen inigualables coreografías.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Los dioses andinos se ocultaban tras los íconos cristianos.",
+              "isCorrect": true
+            },
+            {
+              "key": "D",
+              "text": "Originales máscaras avanzan al ritmo de trompetas, bombos y platillos.",
+              "isCorrect": false
+            }
+          ],
+          "correctKey": "C",
+          "skill": "Pensamiento crítico",
+          "oa": "OA 16",
+          "contentAxis": "Historia",
+          "hasFigure": false,
+          "figureNote": null,
+          "oaLevel": null,
+          "indicador": "Identifican evidencia que permite fundamentar una inferencia, respecto de algún tema estudiado en el nivel."
+        }
+      ]
+    },
+    {
+      "order": 16,
+      "name": "Pregunta 17 — Noticia: las palabras que el maya le regaló al español",
+      "type": "multiple_choice",
+      "instructions": "Lee la siguiente noticia:",
+      "passage": {
+        "title": "Las palabras más hermosas que el maya le regaló al español (y cuáles se usan cotidianamente en México y América Latina)",
+        "text": "Ana Gabriela Rojas\n\n\"Mi palabra favorita del maya que se usa en español y que me parece la más linda es chamaco\", dice Fidencio Briceño, investigador del Instituto Nacional de Antropología e Historia.\n\nChan en maya peninsular significa pequeño. Maák significa persona, continúa con la explicación Briceño. Y así \"chamaco\" es una forma muy linda de llamar a los muchachitos, a las personas pequeñas en México, El Salvador, Honduras y Nicaragua.\n\nLo que la mayoría conoce como \"lengua maya\" es en realidad una familia lingüística de alrededor de 30 lenguas diferentes.\n\nPara Briceño, otro de sus mayismos favoritos es \"cachito\". Es un pedacito, una parte pequeña de algo. \"Es una onomatopeya. Cuando se rompe algo, por ejemplo un pedazo de madera, suena cach, que es un clasificador de lengua maya para cosas partidas y de ahí se formó la palabra cachito\", dice Briceño.\n\n\"Y una vez me sorprendí cuando en Argentina oía que alguien dijo que le iba a dar un patatús\", cuenta. Explica que es una oración que dicen mucho los mayas. Patatús es un conjunto de palabras mayas que significa una muerte fingida, un desmayo.\n\nEn portal web BBC. Consultado en febrero 2026. www.bbc.com/mundo/noticias. Adaptación.",
+        "format": "plain",
+        "attachments": []
+      },
+      "items": [
+        {
+          "position": 17,
+          "printedNumber": "17",
+          "type": "multiple_choice",
+          "responseFormat": "choice",
+          "stem": "¿A cuál de las siguientes preguntas responde la información presentada en la noticia?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "¿Qué aporte hizo la lengua maya a la cultura centroamericana?",
+              "isCorrect": true
+            },
+            {
+              "key": "B",
+              "text": "¿Cuál es el origen de la lengua maya en el territorio de Centroamérica?",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "¿Cómo se expandió la lengua maya dentro de la población centroamericana?",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "¿Cuáles son las diferencias de la lengua maya en distintos lugares de Centroamérica?",
+              "isCorrect": false
+            }
+          ],
+          "correctKey": "A",
+          "skill": "Análisis y trabajo con fuentes de información",
+          "oa": "OA 15",
+          "contentAxis": "Historia",
+          "hasFigure": false,
+          "figureNote": null,
+          "oaLevel": null,
+          "indicador": "Distinguen una pregunta de investigación que puede responderse a partir de información obtenida de una fuente primaria o secundaria"
+        }
+      ]
+    },
+    {
+      "order": 17,
+      "name": "Pregunta 18 — Fuente: el cambio climático",
+      "type": "multiple_choice",
+      "instructions": "Lee la siguiente fuente sobre el cambio climático que afecta a nuestro planeta:",
+      "passage": {
+        "title": "El cambio climático",
+        "text": "Nos encontramos en un momento decisivo para afrontar con éxito el mayor desafío de nuestro tiempo: el cambio climático. Cada día, en diferentes puntos de la geografía mundial, el planeta nos manda mensajes sobre las enormes transformaciones que está sufriendo: desde cambiantes pautas meteorológicas que amenazan la producción de alimentos; hasta el aumento del nivel del mar que incrementa el riesgo de inundaciones catastróficas. Los efectos del cambio climático nos afectan a todos. Si no se toman medidas drásticas desde ya, será mucho más difícil y costoso adaptarse a sus efectos en el futuro.\n\nEl cambio climático se refiere a los cambios a largo plazo de las temperaturas y los patrones meteorológicos. Estos cambios pueden ser naturales, debido a variaciones de la actividad solar o a grandes erupciones volcánicas. Desde el siglo XIX, las actividades humanas han sido el principal causante del cambio climático, principalmente debido a la quema de combustibles como el carbón, el petróleo y el gas.\n\nPortal web Naciones Unidas Español. Desafíos Globales. Cambio climático. Consultado el 10 de junio de 2024.",
+        "format": "plain",
+        "attachments": []
+      },
+      "items": [
+        {
+          "position": 18,
+          "printedNumber": "18",
+          "type": "multiple_choice",
+          "responseFormat": "choice",
+          "stem": "¿Cuál sería una solución sustentable en el tiempo ante el problema del cambio climático descrito en la fuente?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Disminuir las áreas habitadas en zonas costeras.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Incentivar el cultivo de alimentos orgánicos.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Reducir el impacto de las causas naturales.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "Fomentar el uso de energías limpias.",
+              "isCorrect": true
+            }
+          ],
+          "correctKey": "D",
+          "skill": "Pensamiento crítico",
+          "oa": "OA 22",
+          "contentAxis": "Geografía",
+          "hasFigure": false,
+          "figureNote": null,
+          "oaLevel": null,
+          "indicador": "Distinguen posibles soluciones frente a un problema, a partir de un criterio dado."
+        }
+      ]
+    },
+    {
+      "order": 18,
+      "name": "Preguntas 19 y 20 — Mapa del Antiguo Egipto",
+      "type": "mixed",
+      "instructions": "Observa el siguiente mapa del Antiguo Egipto y contesta las preguntas 19 y 20.",
+      "passage": {
+        "title": "Mapa del Antiguo Egipto",
+        "text": "Mapa físico-político del Antiguo Egipto. Rotula el mar Mediterráneo, el Bajo Egipto (con el Delta y las ciudades de Tanis, Sais, Gizeh, Heliópolis, Menfis y Sakkara), el Alto Egipto (Hermópolis, Amarna, Tinis, Karnak, Luxor, Tebas y el Valle de los Reyes), Nubia y Abu Simbel, la península del Sinaí, el desierto de Libia al oeste y el desierto de Arabia al este, el mar Rojo, el río Nilo y el río Nilo Azul, la primera y la segunda catarata, y los oasis de Fayum, Bahariya, Farafra y Kharga.\n\nSimbología: zonas elevadas, zonas fértiles, ciudades, capitales y oasis.\n\nElaboración propia.",
+        "format": "plain",
+        "attachments": [
+          {
+            "kind": "image",
+            "note": "Mapa del Antiguo Egipto con simbología de zonas elevadas, zonas fértiles, ciudades, capitales y oasis"
+          }
+        ],
+        "imageRef": "section/global/7mo-historia-intermedio-2026/passage/18.png"
+      },
+      "items": [
+        {
+          "position": 19,
+          "printedNumber": "19.1",
+          "type": "multiple_choice",
+          "responseFormat": "choice",
+          "isTrueFalse": true,
+          "stem": "Considerando la información que presenta el mapa, lee atentamente cada enunciado y marca con una X si es verdadero o falso.\n\nLos oasis se concentran al este del río Nilo.",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Verdadero",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Falso",
+              "isCorrect": true
+            }
+          ],
+          "correctKey": "B",
+          "skill": "Pensamiento temporal y espacial",
+          "oa": "OA 21",
+          "contentAxis": "Geografía",
+          "hasFigure": true,
+          "figureNote": "Depende del mapa del Antiguo Egipto de la sección",
+          "oaLevel": null,
+          "indicador": "Caracterizan los diversos espacios geográficos estudiados en el nivel, utilizando mapas a diferentes escalas, herramientas geográficas y/o tecnológicas.",
+          "imageRef": "item/global/7mo-historia-intermedio-2026/item_figure/19.png"
+        },
+        {
+          "position": 20,
+          "printedNumber": "19.2",
+          "type": "multiple_choice",
+          "responseFormat": "choice",
+          "isTrueFalse": true,
+          "stem": "Considerando la información que presenta el mapa, lee atentamente cada enunciado y marca con una X si es verdadero o falso.\n\nLas zonas elevadas se presentan solo en el Bajo Egipto.",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Verdadero",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Falso",
+              "isCorrect": true
+            }
+          ],
+          "correctKey": "B",
+          "skill": "Pensamiento temporal y espacial",
+          "oa": "OA 21",
+          "contentAxis": "Geografía",
+          "hasFigure": true,
+          "figureNote": "Depende del mapa del Antiguo Egipto de la sección",
+          "oaLevel": null,
+          "indicador": "Caracterizan los diversos espacios geográficos estudiados en el nivel, utilizando mapas a diferentes escalas, herramientas geográficas y/o tecnológicas.",
+          "imageRef": "item/global/7mo-historia-intermedio-2026/item_figure/19.png"
+        },
+        {
+          "position": 21,
+          "printedNumber": "19.3",
+          "type": "multiple_choice",
+          "responseFormat": "choice",
+          "isTrueFalse": true,
+          "stem": "Considerando la información que presenta el mapa, lee atentamente cada enunciado y marca con una X si es verdadero o falso.\n\nSe presentan amplias zonas áridas.",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Verdadero",
+              "isCorrect": true
+            },
+            {
+              "key": "B",
+              "text": "Falso",
+              "isCorrect": false
+            }
+          ],
+          "correctKey": "A",
+          "skill": "Pensamiento temporal y espacial",
+          "oa": "OA 21",
+          "contentAxis": "Geografía",
+          "hasFigure": true,
+          "figureNote": "Depende del mapa del Antiguo Egipto de la sección",
+          "oaLevel": null,
+          "indicador": "Caracterizan los diversos espacios geográficos estudiados en el nivel, utilizando mapas a diferentes escalas, herramientas geográficas y/o tecnológicas.",
+          "imageRef": "item/global/7mo-historia-intermedio-2026/item_figure/19.png"
+        },
+        {
+          "position": 22,
+          "printedNumber": "19.4",
+          "type": "multiple_choice",
+          "responseFormat": "choice",
+          "isTrueFalse": true,
+          "stem": "Considerando la información que presenta el mapa, lee atentamente cada enunciado y marca con una X si es verdadero o falso.\n\nExisten cursos de agua dulce en el sur.",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Verdadero",
+              "isCorrect": true
+            },
+            {
+              "key": "B",
+              "text": "Falso",
+              "isCorrect": false
+            }
+          ],
+          "correctKey": "A",
+          "skill": "Pensamiento temporal y espacial",
+          "oa": "OA 21",
+          "contentAxis": "Geografía",
+          "hasFigure": true,
+          "figureNote": "Depende del mapa del Antiguo Egipto de la sección",
+          "oaLevel": null,
+          "indicador": "Caracterizan los diversos espacios geográficos estudiados en el nivel, utilizando mapas a diferentes escalas, herramientas geográficas y/o tecnológicas.",
+          "imageRef": "item/global/7mo-historia-intermedio-2026/item_figure/19.png"
+        },
+        {
+          "position": 23,
+          "printedNumber": "19.5",
+          "type": "multiple_choice",
+          "responseFormat": "choice",
+          "isTrueFalse": true,
+          "stem": "Considerando la información que presenta el mapa, lee atentamente cada enunciado y marca con una X si es verdadero o falso.\n\nLas áreas fértiles se encuentran alrededor del río Nilo.",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Verdadero",
+              "isCorrect": true
+            },
+            {
+              "key": "B",
+              "text": "Falso",
+              "isCorrect": false
+            }
+          ],
+          "correctKey": "A",
+          "skill": "Pensamiento temporal y espacial",
+          "oa": "OA 21",
+          "contentAxis": "Geografía",
+          "hasFigure": true,
+          "figureNote": "Depende del mapa del Antiguo Egipto de la sección",
+          "oaLevel": null,
+          "indicador": "Caracterizan los diversos espacios geográficos estudiados en el nivel, utilizando mapas a diferentes escalas, herramientas geográficas y/o tecnológicas.",
+          "imageRef": "item/global/7mo-historia-intermedio-2026/item_figure/19.png"
+        },
+        {
+          "position": 24,
+          "printedNumber": "20",
+          "type": "multiple_choice",
+          "responseFormat": "choice",
+          "stem": "A partir de la observación del mapa, ¿cómo influyó el río Nilo en la distribución espacial de la civilización egipcia?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "En la ubicación de sus ciudades.",
+              "isCorrect": true
+            },
+            {
+              "key": "B",
+              "text": "En la ocupación costera del mar Rojo.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "En la concentración de población en las tierras altas.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "En los obstáculos para la circulación de productos y personas.",
+              "isCorrect": false
+            }
+          ],
+          "correctKey": "A",
+          "skill": "Pensamiento temporal y espacial",
+          "oa": "OA 21",
+          "contentAxis": "Geografía",
+          "hasFigure": true,
+          "figureNote": "Depende del mapa del Antiguo Egipto de la sección",
+          "oaLevel": null,
+          "indicador": "Establecen relaciones entre distribuciones espaciales y patrones (por ejemplo, población, cultivo, ciudades, regiones, entre otros) en los diversos espacios geográficos estudiados en el nivel, utilizando herramientas geográficas y/o tecnológicas.",
+          "imageRef": "item/global/7mo-historia-intermedio-2026/item_figure/20.png"
+        }
+      ]
+    },
+    {
+      "order": 19,
+      "name": "Pregunta 21 — Gráfico: uso de combustibles fósiles y energías limpias",
+      "type": "multiple_choice",
+      "instructions": "Observa el siguiente gráfico:",
+      "passage": null,
+      "items": [
+        {
+          "position": 25,
+          "printedNumber": "21",
+          "type": "multiple_choice",
+          "responseFormat": "choice",
+          "stem": "Observa el siguiente gráfico:\n\nUso de combustibles fósiles y energías limpias en el planeta\n(Tasa de crecimiento promedio en 2014-2023 · Porcentaje en la generación mundial de electricidad en 2023)\nCarbón 1,1% · 35,4%\nGas 2,7% · 22,5%\nHidroeléctrica 1,1% · 14,3%\nNuclear 1,0% · 9,1%\nEólica 13,8% · 7,8%\nSolar 28,8% · 5,5%\nOtros combustibles fósiles -3,9% · 2,7%\nBioenergía 5,6% · 2,4%\nOtras fuentes renovables 3,4% · 0,3%\n(En cnnespanol.cnn.com. Mayo 2024. Consultado en febrero 2026.)\n\nConsiderando la información del gráfico, ¿cuál es la tendencia actual con respecto a los recursos energéticos presentados?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Las energías limpias han tenido un importante desarrollo.",
+              "isCorrect": true
+            },
+            {
+              "key": "B",
+              "text": "La energía solar se ha convertido en la energía predominante.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Los combustibles fósiles han tenido la mayor tasa de crecimiento.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "Las energías contaminantes presentan un menor porcentaje de generación.",
+              "isCorrect": false
+            }
+          ],
+          "correctKey": "A",
+          "skill": "Pensamiento crítico",
+          "oa": "OA 23",
+          "contentAxis": "Geografía",
+          "hasFigure": true,
+          "figureNote": "Gráfico de barras horizontales dobles por fuente energética, con leyenda de energía limpia y combustibles fósiles",
+          "oaLevel": null,
+          "indicador": "Interpretan información cuantitativa pertinente para responder preguntas históricas o geográficas.",
+          "imageRef": "item/global/7mo-historia-intermedio-2026/item_figure/21.png"
+        }
+      ]
+    },
+    {
+      "order": 20,
+      "name": "Pregunta 22 — Instituciones democráticas: continuidad y cambio",
+      "type": "multiple_choice",
+      "instructions": null,
+      "passage": null,
+      "items": [
+        {
+          "position": 26,
+          "printedNumber": "22",
+          "type": "multiple_choice",
+          "responseFormat": "choice",
+          "stem": "El desarrollo de las instituciones democráticas a través de la historia, desde la antigua Atenas hasta la actualidad, ha contribuido, entre otras cosas, a limitar el ejercicio autoritario del poder.\n\nAl respecto, ¿qué elemento de continuidad y cambio político es posible reconocer entre la antigua Atenas y Chile en la actualidad?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Se mantienen las mismas instituciones, aunque con diferentes funciones.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Se mantiene el sorteo para ocupar los cargos públicos, aunque ejercen menos tiempo en dichos cargos.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Se mantiene la igualdad de todas las personas ante la ley, aunque falta un conjunto de leyes fundamentales.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "Se mantiene la separación de poderes entre las instituciones, aunque la participación ciudadana es representativa y no directa.",
+              "isCorrect": true
+            }
+          ],
+          "correctKey": "D",
+          "skill": "Pensamiento temporal y espacial",
+          "oa": "OA 17",
+          "contentAxis": "Formación ciudadana",
+          "hasFigure": false,
+          "figureNote": null,
+          "oaLevel": null,
+          "indicador": "Reconocen elementos de continuidad y cambio entre periodos o procesos históricos estudiados en el nivel."
+        }
+      ]
+    },
+    {
+      "order": 21,
+      "name": "Pregunta 23 — Fuente: la conformación del Imperio Azteca (desarrollo)",
+      "type": "open_ended",
+      "instructions": "Lee la siguiente fuente sobre el Imperio Azteca:",
+      "passage": {
+        "title": "La conformación del Imperio Azteca",
+        "text": "De acuerdo con las propias tradiciones históricas nahuas en 1168, procedentes del Norte u Oeste de México, “los Aztecas o Mexicas comenzaron su gran migración, que les iba a llevar al Valle de México”. Fue así que en el año 1267, “muy posiblemente con el permiso del pueblo Tepaneca de Azcapotzalco” que residían allí, se asentaron en Chapultepec, sobre la orilla occidental del lago de Tetzcoco, suceso que podemos considerar como el “encuentro” –de hecho pacífico– con sus nuevos vecinos. Sin embargo, “sobrevinieron conflictos con los vecinos”, nada más ni nada menos “porque los jóvenes aztecas tenían la costumbre de ir a robar mujeres en las comunidades vecinas, y esto produjo el enojo de los perjudicados”. Lo cierto es que los tepanecas se unieron, “y hacia 1298, vencieron a los Mexicas”.\n\nDeclarada la guerra entre los habitantes del lugar y los recién llegados, comenzó un proceso que llevó a los aztecas a establecer en 1325 su propia “comunidad urbana”, que fue llamada México–Tenochtitlán. Trece años después se genera una división al interior de esta comunidad y surge la ciudad rival llamada México–Tlaltelolco, que conservó su independencia hasta muy cerca de la conquista española.\n\nLas guerras, acuerdos y acomodamientos posteriores condujeron a que en 1427 se estableciera una unión entre Texcoco, Tlacopan y Tenochtitlán –llamada la Triple Alianza–, cuya doble finalidad era “abatir a la ciudad de Azcapotzalco (tepanecas)”, que por entonces seguía detentando la superioridad e “independizarse de esa ciudad”. De la guerra resultó que los Mexicas no solo lograron su definitiva independencia política, sino que hasta ganaron territorios en tierra firme y un enorme botín, lo cual dio la primera base a su imperio.\n\nSalcedo, E. Encuentro, choque y fusión en las civilizaciones prehispánicas, 2017.",
+        "format": "plain",
+        "attachments": []
+      },
+      "items": [
+        {
+          "position": 27,
+          "printedNumber": "23",
+          "type": "open_ended",
+          "responseFormat": "develop",
+          "stem": "Luego de leer la fuente y considerando tu opinión y conocimientos, ¿crees que los aztecas fueron una cultura que llegaba a acuerdos con otros pueblos?\n\nSí / No\n\n¿Por qué? Fundamenta tu respuesta utilizando información contenida en la fuente.",
+          "correctKey": null,
+          "skill": "Pensamiento crítico",
+          "oa": "OA 20",
+          "contentAxis": "Formación ciudadana",
+          "hasFigure": false,
+          "figureNote": null,
+          "oaLevel": null,
+          "indicador": "Fundamentan una opinión respaldada con evidencia sobre temas estudiados en el nivel.",
+          "rubric": "Tipos de respuestas Respuestas parcialmente Respuestas correctas Respuestas incorrectas correctas (Código 2) (Código 0) (Código 1) La o el estudiante expresa una La o el estudiante expresa una El/la estudiante solo marca “Sí” postura (ya sea marcando una de postura (ya sea marcando una o “No” sin desarrollar una las opciones Sí/No o la evidencia en de las opciones Sí/No o la argumentación que respalde su la redacción de su respuesta), evidencia en la redacción de su elección, respuesta), y o bien, y fundamenta su opinión de manera el/la estudiante no contesta la coherente con la opción marcada, o fundamenta su opinión de pregunta, haciendo alusión a una de ellas, manera coherente sin utilizar o bien, utilizando información que aparece información que aparezca de el/la estudiante responde de en la fuente y que permite respaldar manera explícita en la fuente. manera tautológica, la postura marcada. incoherente o presenta cualquier otra respuesta no descrita en esta pauta. Ejemplos: Ejemplos: Ejemplos: - Sí, porque cuando llegaron al - Sí, porque en 1267 se - Sí, considero que ellos Valle de México se instalaron ahí encontraron de manera llegaban a acuerdos. con el permiso de los pacífica con sus nuevos - Sí, porque establecieron su Tepanecas, lo que denota la vecinos. propia comunidad urbana existencia de un acuerdo con - No, porque tuvieron en 1325. otro pueblo. conflictos con sus vecinos lo - No, porque sus acuerdos - No, porque le hicieron la guerra que da cuenta de que no no eran parte de sus a los Tepanecas queriendo cumplían sus acuerdos. tradiciones históricas. derrotarlos y conseguir su - No llegaban a acuerdos - No, porque cuando llegaron independencia a partir de porque tuvieron conflictos los españoles no hicieron quitarles su superioridad. con los Tepanecas por acuerdos con ellos. - Yo creo que sí porque para robarse sus mujeres. derrotar a los Tepanecas y ganar su independencia se unieron a otros pueblos como Tlacopan y Tetzcoco y esa unión es un acuerdo. 9 &gt; Diagnóstico Integral de Aprendizajes Instrumentos de Evaluación 2026 agenciaeducacion.cl"
+        }
+      ]
+    },
+    {
+      "order": 22,
+      "name": "Preguntas 24 y 25 — Fuentes: la Europa de la Edad Media",
+      "type": "multiple_choice",
+      "instructions": "Lee las siguientes fuentes referidas a la Europa de la Edad Media y contesta las preguntas 24 y 25.",
+      "passage": {
+        "title": "La Europa de la Edad Media",
+        "text": "Fuente 1\nEl cristianismo forjó la unidad de la Europa medieval, que nació de la desintegración del Imperio Romano. El vínculo de unión entre pueblos diversos fue la religión cristiana y los valores que esta tenía. Así, por encima del mosaico de lenguas, tradiciones y costumbres que componen Europa, hay un elemento unificador en todo el continente, que es precisamente el cristianismo.\n\nNavarro, M. Las raíces cristianas de Europa y su cultura, 2023. UCV noticias. Adaptación.\n\nFuente 2\nCruzaron el estrecho de Gibraltar en el año 711 y durante casi ocho siglos los musulmanes no sólo nos dejaron unas cuantas bellas mezquitas y un libro. Perfeccionaron y difundieron la brújula, el astrolabio, la carta náutica y la vela latina, elementos que hicieron posible la etapa de grandes navegaciones y descubrimientos europeos de la segunda mitad del siglo XV. Además, fueron pioneros en la utilización de presas para la producción de energía hidráulica.\n\nRego, P. Musulmanes la huella positiva en España, 2001. El Mundo. Adaptación.",
+        "format": "plain",
+        "attachments": [],
+        "imageRef": "section/global/7mo-historia-intermedio-2026/passage/22.png"
+      },
+      "items": [
+        {
+          "position": 28,
+          "printedNumber": "24",
+          "type": "multiple_choice",
+          "responseFormat": "choice",
+          "stem": "¿Qué criterio serviría para comparar la información de ambas fuentes?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Los territorios conquistados.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Las formas de evangelizar.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Las formas de gobierno.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "Los aportes culturales.",
+              "isCorrect": true
+            }
+          ],
+          "correctKey": "D",
+          "skill": "Análisis y trabajo con fuentes de información",
+          "oa": "OA 19",
+          "contentAxis": "Formación ciudadana",
+          "hasFigure": false,
+          "figureNote": null,
+          "oaLevel": null,
+          "indicador": "Establecen criterios o preguntas dirigidas que permiten comparar la información presente en fuentes primarias o secundarias, respecto de un mismo tema."
+        },
+        {
+          "position": 29,
+          "printedNumber": "25",
+          "type": "multiple_choice",
+          "responseFormat": "choice",
+          "stem": "A partir de la información que presentan ambas fuentes, ¿qué conclusión es posible extraer respecto de la Europa medieval?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Que se caracterizó por realizar importantes viajes de exploración.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Que se caracterizó por desarrollar diversos conocimientos técnicos y científicos.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Que se caracterizó por presentar la convivencia de diversas civilizaciones.",
+              "isCorrect": true
+            },
+            {
+              "key": "D",
+              "text": "Que se caracterizó por surgir a partir de la pérdida de la unidad imperial de Roma.",
+              "isCorrect": false
+            }
+          ],
+          "correctKey": "C",
+          "skill": "Análisis y trabajo con fuentes de información",
+          "oa": "OA 19",
+          "contentAxis": "Formación ciudadana",
+          "hasFigure": false,
+          "figureNote": null,
+          "oaLevel": null,
+          "indicador": "Extraen conclusiones a partir del contraste de la información que se obtiene de dos fuentes primarias o secundarias."
+        }
+      ]
+    },
+    {
+      "order": 23,
+      "name": "Pregunta 26 — Fuentes: los gremios en la Edad Media y en el Chile actual",
+      "type": "multiple_choice",
+      "instructions": "Lee atentamente las siguientes fuentes:",
+      "passage": {
+        "title": "Los gremios en la Edad Media y en el Chile actual",
+        "text": "Gremios en la Edad Media\nEl término gremio fue ampliamente usado en la Edad Media para designar agrupaciones, conjuntos o asociaciones de oficios como, por ejemplo, gremios de artesanos, de obreros, de artistas o comerciantes. Los componentes de los diferentes gremios generalmente controlaban el conocimiento y los secretos de sus oficios, y ese arte era entonces transmitido tradicionalmente de los maestros a los aprendices.\n\nKoch, E. et al. El concepto de gremio: Del feudalismo a la ecología de comunidades, 2018.\n\nGremios en el Chile actual\nLos gremios son organizaciones que reúnen a personas naturales, jurídicas, o ambas, con el objeto de promover la racionalización, desarrollo y protección de las actividades que les son comunes, en razón de su profesión, oficio o rama de la producción o de los servicios, y de las conexas a dichas actividades comunes. Estas asociaciones no podrán desarrollar actividades políticas ni religiosas.\n\nBiblioteca del Congreso Nacional, Decreto Ley 2757, 1979, Chile.",
+        "format": "plain",
+        "attachments": []
+      },
+      "items": [
+        {
+          "position": 30,
+          "printedNumber": "26",
+          "type": "multiple_choice",
+          "responseFormat": "choice",
+          "stem": "Considerando la información que entregan ambas fuentes, ¿cuál de las siguientes conclusiones es correcta sobre el funcionamiento de los gremios?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Dejaron de ser asociaciones que buscan reunir a quienes desempeñan el mismo trabajo.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Continúan siendo organizaciones que impulsan el cuidado de ciertas actividades económicas.",
+              "isCorrect": true
+            },
+            {
+              "key": "C",
+              "text": "Continúan estando integrados exclusivamente por personas que ejercen el oficio de artesano.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "Dejaron de representar los ideales y deseos políticos de sus asociados.",
+              "isCorrect": false
+            }
+          ],
+          "correctKey": "B",
+          "skill": "Análisis y trabajo con fuentes de información",
+          "oa": "OA 18",
+          "contentAxis": "Formación ciudadana",
+          "hasFigure": false,
+          "figureNote": null,
+          "oaLevel": null,
+          "indicador": "Extraen conclusiones a partir del contraste de la información que se obtiene de dos fuentes primarias o secundarias."
+        }
+      ]
+    }
+  ],
+  "extraction": {
+    "itemCount": 30,
+    "warnings": [
+      "La prueba imprime 26 preguntas; la 19 son 5 subítems de verdadero/falso (19.1–19.5), por lo que hay 30 posiciones puntuables. Cada ítem conserva su número impreso en `printedNumber`.",
+      "#9 (impresa 9) es de respuesta múltiple ('marca todas las causas correctas') con 5 alternativas NUMERADAS 1–5, no A–D.",
+      "#13 (impresa 13) tiene 3 alternativas y las tres son organizadores gráficos: su `text` es una descripción del diagrama, no una transcripción literal.",
+      "#19–23 (impresas 19.1–19.5) son verdadero/falso; el cuadernillo imprime las columnas (A) Verdadero y (B) Falso, así que se modelan como alternativas A/B.",
+      "#27 (impresa 23) es de desarrollo con opción Sí/No previa; su pauta de corrección (códigos 2/1/0) viene en la ficha técnica."
+    ],
+    "needsHumanReview": true,
+    "crossCheck": {
+      "hardIssues": [],
+      "softWarnings": [],
+      "counts": {
+        "cuadernillo": 30,
+        "ficha": 30,
+        "hoja": null
+      }
+    }
+  },
+  "pauta": {
+    "source": {
+      "ficha": "7_ficha_tecnica_historia_monitoreo_2026_7_basico.pdf",
+      "hoja": null
+    },
+    "appliedKeys": 29,
+    "rubrics": 1
+  }
+}

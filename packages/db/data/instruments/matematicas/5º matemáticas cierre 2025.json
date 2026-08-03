@@ -220,25 +220,29 @@
               "key": "A",
               "text": "Cuadrado dividido en 4 partes verticales iguales, con 2 partes pintadas grises (2/4).",
               "isImage": true,
-              "isCorrect": false
+              "isCorrect": false,
+              "imageRef": "item/global/5to-matematicas-cierre-2025/alt_figure/04_A.png"
             },
             {
               "key": "B",
               "text": "Cuadrado dividido en 4 partes verticales iguales, con 1 parte pintada gris (1/4).",
               "isImage": true,
-              "isCorrect": false
+              "isCorrect": false,
+              "imageRef": "item/global/5to-matematicas-cierre-2025/alt_figure/04_B.png"
             },
             {
               "key": "C",
               "text": "Cuadrado dividido en 3 partes verticales iguales, con 2 partes pintadas grises (2/3).",
               "isImage": true,
-              "isCorrect": false
+              "isCorrect": false,
+              "imageRef": "item/global/5to-matematicas-cierre-2025/alt_figure/04_C.png"
             },
             {
               "key": "D",
               "text": "Cuadrado dividido en 3 partes verticales iguales, con 1 parte pintada gris (1/3).",
               "isImage": true,
-              "isCorrect": true
+              "isCorrect": true,
+              "imageRef": "item/global/5to-matematicas-cierre-2025/alt_figure/04_D.png"
             }
           ],
           "correctKey": "D",
@@ -274,7 +278,8 @@
               "name": "Números y operaciones",
               "tagType": "secondary"
             }
-          ]
+          ],
+          "imageRef": "item/global/5to-matematicas-cierre-2025/item_figure/04.png"
         },
         {
           "position": 5,
@@ -439,7 +444,8 @@
               "name": "Números y operaciones",
               "tagType": "secondary"
             }
-          ]
+          ],
+          "imageRef": "item/global/5to-matematicas-cierre-2025/item_figure/07.png"
         },
         {
           "position": 8,
@@ -480,7 +486,8 @@
               "name": "Medición",
               "tagType": "secondary"
             }
-          ]
+          ],
+          "imageRef": "item/global/5to-matematicas-cierre-2025/item_figure/08.png"
         },
         {
           "position": 9,
@@ -599,7 +606,8 @@
               "name": "Medición",
               "tagType": "secondary"
             }
-          ]
+          ],
+          "imageRef": "item/global/5to-matematicas-cierre-2025/item_figure/10.png"
         },
         {
           "position": 11,
@@ -661,7 +669,8 @@
               "name": "Medición",
               "tagType": "secondary"
             }
-          ]
+          ],
+          "imageRef": "item/global/5to-matematicas-cierre-2025/item_figure/11.png"
         },
         {
           "position": 12,
@@ -723,7 +732,8 @@
               "name": "Patrones y álgebra",
               "tagType": "secondary"
             }
-          ]
+          ],
+          "imageRef": "item/global/5to-matematicas-cierre-2025/item_figure/12.png"
         },
         {
           "position": 13,
@@ -854,25 +864,29 @@
               "key": "A",
               "text": "Paralelepípedo con la cara izquierda y la cara inferior pintadas gris (caras perpendiculares).",
               "isImage": true,
-              "isCorrect": false
+              "isCorrect": false,
+              "imageRef": "item/global/5to-matematicas-cierre-2025/alt_figure/15_A.png"
             },
             {
               "key": "B",
               "text": "Paralelepípedo con solo la cara izquierda pintada gris.",
               "isImage": true,
-              "isCorrect": true
+              "isCorrect": true,
+              "imageRef": "item/global/5to-matematicas-cierre-2025/alt_figure/15_B.png"
             },
             {
               "key": "C",
               "text": "Paralelepípedo con la cara izquierda y la cara superior trasera pintadas gris.",
               "isImage": true,
-              "isCorrect": false
+              "isCorrect": false,
+              "imageRef": "item/global/5to-matematicas-cierre-2025/alt_figure/15_C.png"
             },
             {
               "key": "D",
               "text": "Paralelepípedo con dos caras laterales pintadas gris.",
               "isImage": true,
-              "isCorrect": false
+              "isCorrect": false,
+              "imageRef": "item/global/5to-matematicas-cierre-2025/alt_figure/15_D.png"
             }
           ],
           "correctKey": "B",
@@ -908,7 +922,8 @@
               "name": "Geometría",
               "tagType": "secondary"
             }
-          ]
+          ],
+          "imageRef": "item/global/5to-matematicas-cierre-2025/item_figure/15.png"
         },
         {
           "position": 16,
@@ -920,25 +935,29 @@
               "key": "A",
               "text": "Par de figuras en T (rotadas/reflejadas) a ambos lados de un eje vertical; Figura 1 y Figura 2 de igual tamaño.",
               "isImage": true,
-              "isCorrect": false
+              "isCorrect": false,
+              "imageRef": "item/global/5to-matematicas-cierre-2025/alt_figure/16_A.png"
             },
             {
               "key": "B",
               "text": "Par de figuras en T enfrentadas respecto al eje vertical, de igual tamaño.",
               "isImage": true,
-              "isCorrect": true
+              "isCorrect": true,
+              "imageRef": "item/global/5to-matematicas-cierre-2025/alt_figure/16_B.png"
             },
             {
               "key": "C",
               "text": "Figura 1 pequeña a la izquierda y Figura 2 más grande a la derecha (distinto tamaño).",
               "isImage": true,
-              "isCorrect": false
+              "isCorrect": false,
+              "imageRef": "item/global/5to-matematicas-cierre-2025/alt_figure/16_C.png"
             },
             {
               "key": "D",
               "text": "Figura 1 a la izquierda del eje y Figura 2 a la derecha, de distinto tamaño.",
               "isImage": true,
-              "isCorrect": false
+              "isCorrect": false,
+              "imageRef": "item/global/5to-matematicas-cierre-2025/alt_figure/16_D.png"
             }
           ],
           "correctKey": "B",
@@ -974,7 +993,8 @@
               "name": "Geometría",
               "tagType": "secondary"
             }
-          ]
+          ],
+          "imageRef": "item/global/5to-matematicas-cierre-2025/item_figure/16.png"
         },
         {
           "position": 17,
@@ -986,25 +1006,29 @@
               "key": "A",
               "text": "Figura en escalón orientada hacia abajo a la derecha, mismo tamaño que la original.",
               "isImage": true,
-              "isCorrect": true
+              "isCorrect": true,
+              "imageRef": "item/global/5to-matematicas-cierre-2025/alt_figure/17_A.png"
             },
             {
               "key": "B",
               "text": "Figura en escalón vertical/girada respecto a la original.",
               "isImage": true,
-              "isCorrect": false
+              "isCorrect": false,
+              "imageRef": "item/global/5to-matematicas-cierre-2025/alt_figure/17_B.png"
             },
             {
               "key": "C",
               "text": "Figura en escalón con la misma forma y tamaño que la original.",
               "isImage": true,
-              "isCorrect": false
+              "isCorrect": false,
+              "imageRef": "item/global/5to-matematicas-cierre-2025/alt_figure/17_C.png"
             },
             {
               "key": "D",
               "text": "Figura en escalón de mayor tamaño que la original.",
               "isImage": true,
-              "isCorrect": false
+              "isCorrect": false,
+              "imageRef": "item/global/5to-matematicas-cierre-2025/alt_figure/17_D.png"
             }
           ],
           "correctKey": "A",
@@ -1040,7 +1064,8 @@
               "name": "Geometría",
               "tagType": "secondary"
             }
-          ]
+          ],
+          "imageRef": "item/global/5to-matematicas-cierre-2025/item_figure/17.png"
         },
         {
           "position": 18,
@@ -1267,7 +1292,8 @@
               "name": "Números y operaciones",
               "tagType": "secondary"
             }
-          ]
+          ],
+          "imageRef": "item/global/5to-matematicas-cierre-2025/item_figure/21.png"
         },
         {
           "position": 22,
@@ -1577,7 +1603,8 @@
               "name": "Datos y probabilidades",
               "tagType": "secondary"
             }
-          ]
+          ],
+          "imageRef": "item/global/5to-matematicas-cierre-2025/item_figure/26.png"
         },
         {
           "position": 27,
@@ -1639,7 +1666,8 @@
               "name": "Datos y probabilidades",
               "tagType": "secondary"
             }
-          ]
+          ],
+          "imageRef": "item/global/5to-matematicas-cierre-2025/item_figure/27.png"
         }
       ]
     }

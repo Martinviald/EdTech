@@ -27,6 +27,26 @@ export function toApplicationPeriod(
   return INSTRUMENT_APPLICATION_PERIODS.find((p) => p === normalized) ?? null;
 }
 
+/**
+ * Deduce el momento desde el NOMBRE del instrumento, para los casos en que la
+ * columna `application_period` no viene (instrumentos anteriores a que existiera,
+ * o cargados a mano). Devuelve null cuando el nombre no lo dice: es preferible
+ * dejarlo sin momento que adivinarlo mal.
+ *
+ * Cubre las dos nomenclaturas en circulación: la del enum ("Intermedio") y la
+ * que usa la Agencia de cara al usuario ("Monitoreo"); "Final" es como el seed
+ * histórico llamaba al Cierre.
+ */
+export function inferApplicationPeriodFromName(
+  name: string | null | undefined,
+): InstrumentApplicationPeriod | null {
+  if (!name) return null;
+  if (/diagn[oó]stic/i.test(name)) return 'diagnostico';
+  if (/intermedi|monitore/i.test(name)) return 'intermedio';
+  if (/cierre|final/i.test(name)) return 'cierre';
+  return null;
+}
+
 export const SECTION_TYPES = [
   'multiple_choice',
   'open_ended',
@@ -112,7 +132,12 @@ export type PassageDto = z.infer<typeof passageSchema>;
 export const instrumentUploadUrlRequestSchema = z.object({
   fileName: z.string().min(1).max(300),
   mimeType: z.string().min(1).max(150).default('application/pdf'),
-  sizeBytes: z.number().int().min(1).max(50 * 1024 * 1024).optional(),
+  sizeBytes: z
+    .number()
+    .int()
+    .min(1)
+    .max(50 * 1024 * 1024)
+    .optional(),
 });
 
 /** Paso 3: confirmar la subida (persistir el adjunto) tras el PUT a S3. */
@@ -203,9 +228,7 @@ export const createInstrumentSchema = z.object({
   sections: z.array(createInstrumentSectionSchema).optional(),
 });
 
-export const updateInstrumentSchema = createInstrumentSchema
-  .omit({ sections: true })
-  .partial();
+export const updateInstrumentSchema = createInstrumentSchema.omit({ sections: true }).partial();
 
 export const listInstrumentsQuerySchema = z.object({
   type: instrumentTypeSchema.optional(),
@@ -213,7 +236,6 @@ export const listInstrumentsQuerySchema = z.object({
   gradeId: z.string().uuid().optional(),
   year: z.coerce.number().int().optional(),
   applicationPeriod: instrumentApplicationPeriodSchema.optional(),
-  status: instrumentStatusSchema.optional(),
   isOfficial: z.coerce.boolean().optional(),
   page: z.coerce.number().int().min(1).default(1),
   limit: z.coerce.number().int().min(1).max(100).default(20),

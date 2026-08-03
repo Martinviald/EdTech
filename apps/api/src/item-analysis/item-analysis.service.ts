@@ -24,7 +24,12 @@ import {
 import {
   RESULTS_VIEWER_ROLES,
   RESULT_HIDDEN_NODE_TYPES,
+  TRUE_FALSE_KEYS,
+  TRUE_FALSE_LABELS,
+  isTrueFalseContent,
+  parseSelectedKeys,
   mergeAnswerCounts,
+  trueFalseKeyOf,
   userHasAnyRole,
   type AlternativeDistribution,
   type AssessmentListQueryDto,
@@ -35,8 +40,11 @@ import {
   type ItemTaxonomyRef,
   type MatrixCell,
   type MatrixQuestionColumn,
+  type MatrixReferenceScopes,
   type MatrixStudentRow,
   type QuestionAnalysisQueryDto,
+  type QuestionReferences,
+  type ReferenceRate,
   type QuestionAnalysisResponse,
   type QuestionSection,
   type QuestionTaxonomyTag,
@@ -118,13 +126,18 @@ export class ItemAnalysisService {
         sql`(exists (select 1 from ${assessmentResults} where ${assessmentResults.assessmentId} = ${assessments.id})
           or exists (select 1 from ${assessmentItemStats} where ${assessmentItemStats.assessmentId} = ${assessments.id}))`,
       ];
-      if (query.subjectId) conditions.push(eq(instruments.subjectId, query.subjectId));
-      if (query.instrumentType) {
-        conditions.push(sql`${instruments.type}::text = ${query.instrumentType}`);
+      // Filtros multi-valor (T2-12): el DTO ya normalizó CSV/param repetido a
+      // array, así que todos van con inArray. Un array vacío no llega (el schema
+      // lo colapsa a undefined) → "sin filtro", nunca un `in ()` que no matchea.
+      if (query.subjectId?.length) {
+        conditions.push(inArray(instruments.subjectId, query.subjectId));
       }
-      if (query.gradeId) conditions.push(eq(classGroups.gradeId, query.gradeId));
-      if (query.classGroupId) {
-        conditions.push(eq(assessmentCourseAssignments.classGroupId, query.classGroupId));
+      if (query.instrumentType?.length) {
+        conditions.push(inArray(sql`${instruments.type}::text`, query.instrumentType));
+      }
+      if (query.gradeId?.length) conditions.push(inArray(classGroups.gradeId, query.gradeId));
+      if (query.classGroupId?.length) {
+        conditions.push(inArray(assessmentCourseAssignments.classGroupId, query.classGroupId));
       }
       if (query.academicYearId) {
         conditions.push(eq(classGroups.academicYearId, query.academicYearId));
@@ -302,12 +315,13 @@ export class ItemAnalysisService {
       // promedio de TODA la org, con independencia del scope del usuario. La línea
       // de "muestra de colegios" (benchmark inter-colegio) queda DIFERIDA hasta
       // existir un pool multi-colegio (references.sample; ver QuestionReferences).
-      const questionsWithRefs = await this.attachOrgReferences(
+      const references = await this.attachLevelReferences(
         tx,
+        orgId,
         query.assessmentId,
+        assessment.instrumentId,
         questionsWithRate,
         itemIds,
-        classGroupFilter,
       );
 
       // ── Alumnos visibles con respuestas en la evaluación ──────────────────────
@@ -335,7 +349,7 @@ export class ItemAnalysisService {
         const cells: MatrixCell[] = itemIds.map((itemId) => {
           const cell = byItem.get(itemId);
           if (!cell) {
-            return { itemId, selectedKey: null, isCorrect: null, score: null };
+            return { itemId, selectedKey: null, isCorrect: null, score: null, maxScore: null };
           }
           if (cell.selectedKey !== null) answeredCount++;
           if (cell.isCorrect === true) correctCount++;
@@ -365,7 +379,8 @@ export class ItemAnalysisService {
         assessmentId: query.assessmentId,
         assessmentName: assessment.name,
         instrumentName: assessment.instrumentName,
-        questions: questionsWithRefs,
+        questions: references.questions,
+        references: references.scopes,
         students: {
           data: students,
           total: pagination.total,
@@ -430,8 +445,13 @@ export class ItemAnalysisService {
       const classGroupFilter = this.resolveAccessibleClassGroupIds(scope, query.classGroupId);
 
       const content = (item.content ?? {}) as ItemContent;
-      const correctKey = this.deriveCorrectKey(content);
+      // En multi-selección no existe UNA clave correcta: la respuesta es un
+      // conjunto. `correctKey` queda null y son las alternativas las que llevan
+      // el `isCorrect` — exponer la primera correcta como "la" clave mentiría.
+      const isMultiSelect = item.type === 'multi_select';
       const altDefs = this.parseAlternatives(content);
+      const altKeys = altDefs.map((alt) => alt.key);
+      const correctKey = isMultiSelect ? null : this.deriveCorrectKey(content);
 
       const { skill, contentRef } = await this.loadItemTags(tx, itemId);
       const tags = await this.loadAllItemTags(tx, itemId);
@@ -453,13 +473,42 @@ export class ItemAnalysisService {
         totalResponses += row.count;
         if (row.answer === null) {
           blankCount += row.count;
+        } else if (isMultiSelect) {
+          // En multi-selección la respuesta es un CONJUNTO (`"145"`): se cuenta
+          // una vez por cada opción marcada, así la barra de cada alternativa
+          // dice "% de alumnos que la marcó". Los porcentajes suman más de 100
+          // a propósito — un alumno aporta a varias barras.
+          const selected = parseSelectedKeys(row.answer, altKeys);
+          if (selected === null || selected.size === 0) {
+            countByKey.set(row.answer, (countByKey.get(row.answer) ?? 0) + row.count);
+          } else {
+            for (const key of selected) countByKey.set(key, (countByKey.get(key) ?? 0) + row.count);
+          }
         } else {
-          countByKey.set(row.answer, (countByKey.get(row.answer) ?? 0) + row.count);
+          // En un V/F la hoja puede traer `V`, `VERDADERO`, `TRUE` o `A` para lo
+          // mismo: se colapsan a la clave canónica con el MISMO criterio que usa
+          // la corrección, o la distribución contradiría al % de logro.
+          const key = isTrueFalseContent(content)
+            ? (trueFalseKeyOf(row.answer) ?? row.answer)
+            : row.answer;
+          countByKey.set(key, (countByKey.get(key) ?? 0) + row.count);
         }
         if (row.isCorrect) correctCount += row.count;
       }
 
       const correctRate = totalResponses > 0 ? (correctCount / totalResponses) * 100 : null;
+
+      // T2-17 — referencias comparativas: % de logro de la MISMA pregunta en el
+      // colegio (toda la org) y en el nivel/grado. Independientes del scope del
+      // usuario (líneas de referencia), acotadas a la org por `assessmentId`.
+      const references = await this.loadQuestionReferences(
+        tx,
+        orgId,
+        item.instrumentId,
+        query.assessmentId,
+        itemId,
+        query.classGroupId,
+      );
 
       // Recortes por alternativa (ítems con opciones-imagen). Se expone solo el flag; la
       // imagen se sirve firmada por `/items/{id}/alternativa/{key}/figura`.
@@ -498,6 +547,7 @@ export class ItemAnalysisService {
         blankCount,
         correctCount,
         correctRate,
+        references,
         alternatives,
       };
     });
@@ -551,7 +601,7 @@ export class ItemAnalysisService {
         content: refs.contentRef,
         correctRate: null,
         // sample queda en undefined → línea de "muestra de colegios" DIFERIDA (TKT-20).
-        references: { org: null },
+        references: { grade: { rate: null, responseCount: 0, correctCount: 0 } },
       };
     });
 
@@ -637,72 +687,253 @@ export class ItemAnalysisService {
   }
 
   /**
-   * TKT-22 — "% de logro del colegio" por pregunta: promedio de aciertos de TODA
-   * la org, con independencia del scope del usuario, como línea de referencia.
+   * T2-17 — "% de logro del nivel" por pregunta: la línea de referencia del
+   * tablero maestro.
    *
-   * La query corre dentro de `withOrgContext` (RLS ya acota a la org del token) y
-   * la evaluación fue validada como propia de la org → agregar SIN filtro de
-   * alumno es el promedio del colegio, nunca de otra org.
+   * ⚠️ El predicado NO incluye `assessmentId`. El modelo crea una `assessment`
+   * POR CURSO (`assessment_course_assignments`), así que acotar por ella dejaría
+   * fuera al curso hermano y la referencia saldría IDÉNTICA a la del curso mirado
+   * — que es exactamente el bug que esto corrige. La población es
+   * (org, instrumento, grade_id, año académico).
    *
-   * Optimización: cuando `classGroupFilter === null` (admin sin filtro de curso) la
-   * población visible YA es toda la org, así que `references.org = correctRate`
-   * sin una query extra. Sólo cuando el scope está acotado (profesor, o filtro por
-   * curso) se lanza la agregación org-wide adicional.
+   * Ponderada por alumno: `sum(correctCount)/sum(responseCount)` sobre las cohortes
+   * del nivel. NUNCA el promedio de los % de cada curso — cursos de distinto N
+   * pesarían igual y el número sería falso.
    *
-   * Sobre el read-model, "toda la org" = TODAS las filas del assessment sin filtrar
-   * por curso (la suma de las cohortes), que es exactamente la recombinación que
-   * habilita el grano por `class_group`.
+   * La query corre dentro de `withOrgContext` y filtra `assessments.orgId`
+   * explícitamente: nunca cruza datos de otra org (RLS + filtro manual, §5.2). Es
+   * independiente del scope del usuario, que es el punto de una referencia: un
+   * profesor ve su curso en `correctRate` y el nivel completo acá.
    *
    * `references.sample` (muestra de colegios / benchmark inter-colegio) queda
    * DIFERIDO: requiere pool multi-colegio (TKT-20). Se deja el hueco en el
    * contrato (`QuestionReferences.sample`) sin poblarlo.
    */
-  private async attachOrgReferences(
+  private async attachLevelReferences(
     tx: Database,
+    orgId: string,
     assessmentId: string,
+    instrumentId: string,
     questions: MatrixQuestionColumn[],
     itemIds: string[],
-    classGroupFilter: string[] | null,
-  ): Promise<MatrixQuestionColumn[]> {
-    if (itemIds.length === 0) return questions;
+  ): Promise<{ questions: MatrixQuestionColumn[]; scopes: MatrixReferenceScopes }> {
+    const noData: ReferenceRate = { rate: null, responseCount: 0, correctCount: 0 };
+    const emptyScopes: MatrixReferenceScopes = {
+      grade: { rate: null, gradeName: null, classGroupCount: 0, studentCount: 0 },
+    };
+    if (itemIds.length === 0) return { questions, scopes: emptyScopes };
 
-    // Sin acotar el scope, la tasa visible es la del colegio completo.
-    if (classGroupFilter === null) {
-      return questions.map((q) => ({
+    const cohort = await this.resolveReferenceCohort(tx, assessmentId);
+    if (cohort === null) return { questions, scopes: emptyScopes };
+
+    const rows = await this.loadReferenceRows(
+      tx,
+      orgId,
+      instrumentId,
+      cohort.gradeIds,
+      cohort.yearIds,
+      itemIds,
+    );
+    const agg = this.aggregateReference(rows);
+
+    return {
+      questions: questions.map((q) => ({
         ...q,
-        references: { ...q.references, org: q.correctRate },
-      }));
-    }
+        references: { ...q.references, grade: agg.byItem.get(q.itemId) ?? noData },
+      })),
+      scopes: { grade: { ...agg.summary, gradeName: cohort.gradeName } },
+    };
+  }
 
-    const rows = await tx
+  /**
+   * Grados y años académicos que cubre una evaluación — el "contexto" del que
+   * cuelga la línea de referencia. `null` si no tiene cursos asignados (sin
+   * cohorte no hay referencia bien definida).
+   */
+  private async resolveReferenceCohort(
+    tx: Database,
+    assessmentId: string,
+  ): Promise<{ gradeIds: string[]; yearIds: string[]; gradeName: string | null } | null> {
+    const cohort = await tx
+      .selectDistinct({
+        gradeId: classGroups.gradeId,
+        gradeName: grades.name,
+        academicYearId: classGroups.academicYearId,
+      })
+      .from(assessmentCourseAssignments)
+      .innerJoin(classGroups, eq(classGroups.id, assessmentCourseAssignments.classGroupId))
+      .innerJoin(grades, eq(grades.id, classGroups.gradeId))
+      .where(eq(assessmentCourseAssignments.assessmentId, assessmentId));
+
+    const gradeIds = [...new Set(cohort.map((c) => c.gradeId))];
+    const yearIds = [...new Set(cohort.map((c) => c.academicYearId))];
+    if (gradeIds.length === 0 || yearIds.length === 0) return null;
+
+    return { gradeIds, yearIds, gradeName: cohort.length === 1 ? cohort[0].gradeName : null };
+  }
+
+  /**
+   * Filas del read-model de cohorte que componen la población del nivel: TODOS los
+   * cursos de la org, de esos grados, que rindieron ese instrumento en esos años —
+   * sin importar bajo qué `assessment`. Volumen acotado: filas = ítems × cursos
+   * del nivel.
+   */
+  private async loadReferenceRows(
+    tx: Database,
+    orgId: string,
+    instrumentId: string,
+    gradeIds: string[],
+    yearIds: string[],
+    itemIds: string[],
+  ): Promise<
+    Array<{
+      itemId: string;
+      classGroupId: string;
+      studentCount: number;
+      responseCount: number;
+      correctCount: number;
+    }>
+  > {
+    return tx
       .select({
         itemId: assessmentItemStats.itemId,
-        total: sql<number>`sum(${assessmentItemStats.responseCount})::int`,
-        correct: sql<number>`sum(${assessmentItemStats.correctCount})::int`,
+        classGroupId: assessmentItemStats.classGroupId,
+        studentCount: assessmentItemStats.studentCount,
+        responseCount: assessmentItemStats.responseCount,
+        correctCount: assessmentItemStats.correctCount,
       })
       .from(assessmentItemStats)
+      .innerJoin(assessments, eq(assessments.id, assessmentItemStats.assessmentId))
+      .innerJoin(classGroups, eq(classGroups.id, assessmentItemStats.classGroupId))
       .where(
         and(
-          eq(assessmentItemStats.assessmentId, assessmentId),
+          eq(assessments.orgId, orgId),
+          eq(assessments.instrumentId, instrumentId),
+          inArray(classGroups.gradeId, gradeIds),
+          inArray(classGroups.academicYearId, yearIds),
           inArray(assessmentItemStats.itemId, itemIds),
         ),
-      )
-      .groupBy(assessmentItemStats.itemId);
+      );
+  }
 
-    const orgRateByItem = new Map<string, number>();
+  /**
+   * Agrega las filas del read-model en (a) conteos por ítem — las celdas de la
+   * fila de referencia — y (b) el resumen de toda la población, que es
+   * `sum(correctCount) / sum(responseCount)` sobre TODAS las respuestas de TODOS
+   * sus alumnos. Nunca un promedio de los % por curso: los cursos tienen N distinto
+   * y promediar sus % los ponderaría igual (mismo criterio que `attachCorrectRates`).
+   *
+   * `studentCount` viene por (assessment, curso, ítem) y se repite en cada ítem del
+   * mismo curso → se toma el `max` por curso y recién ahí se suma; si no, se
+   * contaría cada alumno tantas veces como preguntas tiene la prueba.
+   */
+  private aggregateReference(
+    rows: Array<{
+      itemId: string;
+      classGroupId: string;
+      studentCount: number;
+      responseCount: number;
+      correctCount: number;
+    }>,
+  ): {
+    byItem: Map<string, ReferenceRate>;
+    summary: { rate: number | null; classGroupCount: number; studentCount: number };
+  } {
+    const byItem = new Map<string, ReferenceRate>();
+    const studentsByGroup = new Map<string, number>();
+    let totalResponses = 0;
+    let totalCorrect = 0;
+
     for (const r of rows) {
-      const total = Number(r.total);
-      const correct = Number(r.correct);
-      orgRateByItem.set(r.itemId, total > 0 ? (correct / total) * 100 : 0);
+      const responseCount = Number(r.responseCount);
+      const correctCount = Number(r.correctCount);
+      const acc = byItem.get(r.itemId) ?? { rate: null, responseCount: 0, correctCount: 0 };
+      acc.responseCount += responseCount;
+      acc.correctCount += correctCount;
+      byItem.set(r.itemId, acc);
+
+      totalResponses += responseCount;
+      totalCorrect += correctCount;
+
+      const prev = studentsByGroup.get(r.classGroupId) ?? 0;
+      studentsByGroup.set(r.classGroupId, Math.max(prev, Number(r.studentCount)));
     }
 
-    return questions.map((q) => ({
-      ...q,
-      references: {
-        ...q.references,
-        org: orgRateByItem.has(q.itemId) ? orgRateByItem.get(q.itemId)! : null,
+    for (const acc of byItem.values()) {
+      acc.rate = acc.responseCount > 0 ? (acc.correctCount / acc.responseCount) * 100 : 0;
+    }
+
+    let studentCount = 0;
+    for (const n of studentsByGroup.values()) studentCount += n;
+
+    return {
+      byItem,
+      summary: {
+        rate: totalResponses > 0 ? (totalCorrect / totalResponses) * 100 : null,
+        classGroupCount: studentsByGroup.size,
+        studentCount,
       },
-    }));
+    };
+  }
+
+  /**
+   * T2-17 — Referencia comparativa de UNA pregunta para el panel de detalle: el
+   * % de logro de la MISMA pregunta en el NIVEL/grado. Es el análogo por-pregunta
+   * de `attachLevelReferences` y comparte su población EXACTA, para que el panel
+   * no contradiga al tablero que lo abrió.
+   *
+   * Semántica (idéntica a `attachLevelReferences`):
+   *  · IGNORA el scope del usuario — es una línea de comparación: un profesor ve
+   *    su curso en `correctRate` y el nivel completo aquí.
+   *  · Se acota a la org por construcción: corre dentro de `withOrgContext` y
+   *    filtra `assessments.orgId` explícitamente.
+   *  · Recombinar cursos es SUMA de conteos, nunca promedio de % (los cursos
+   *    tienen N distinto): se suman `response_count`/`correct_count` y el % se
+   *    recalcula sobre el total.
+   *
+   * `grade` = Σ de los cursos del grado en contexto (el del `classGroupId` si
+   *           viene; si no, los de la evaluación) que rindieron el mismo
+   *           instrumento ese año — incluidos los cursos hermanos que viven en
+   *           OTRA evaluación. ⚠️ Antes se acotaba por `assessmentId`, con lo que
+   *           el "nivel" era el propio curso.
+   *
+   * Sin `assessmentId` (o sin instrumento: ítem suelto del banco) no hay cohorte
+   * de la cual derivar grado/año → `rate: null`.
+   */
+  private async loadQuestionReferences(
+    tx: Database,
+    orgId: string,
+    instrumentId: string | null,
+    assessmentId: string | undefined,
+    itemId: string,
+    classGroupId: string | undefined,
+  ): Promise<QuestionReferences> {
+    const empty: ReferenceRate = { rate: null, responseCount: 0, correctCount: 0 };
+    if (!assessmentId || !instrumentId) return { grade: empty };
+
+    const cohort = await this.resolveReferenceCohort(tx, assessmentId);
+    if (cohort === null) return { grade: empty };
+
+    // Grado en contexto: el del curso filtrado (si viene); si no, los de la
+    // evaluación. Un curso ajeno a la cohorte no acota nada (set vacío → sin datos).
+    let gradeIds: string[];
+    if (classGroupId) {
+      const [cg] = await tx
+        .select({ gradeId: classGroups.gradeId })
+        .from(classGroups)
+        .where(eq(classGroups.id, classGroupId))
+        .limit(1);
+      gradeIds = cg?.gradeId ? [cg.gradeId] : [];
+    } else {
+      gradeIds = cohort.gradeIds;
+    }
+    if (gradeIds.length === 0) return { grade: empty };
+
+    const rows = await this.loadReferenceRows(tx, orgId, instrumentId, gradeIds, cohort.yearIds, [
+      itemId,
+    ]);
+
+    return { grade: this.aggregateReference(rows).byItem.get(itemId) ?? empty };
   }
 
   /** Alumnos con respuestas en la evaluación dentro del scope, paginados. */
@@ -869,6 +1100,7 @@ export class ItemAnalysisService {
         isCorrect: responses.isCorrect,
         finalScore: responses.finalScore,
         rawScore: responses.rawScore,
+        maxScore: responses.maxScore,
       })
       .from(responses)
       .where(
@@ -891,6 +1123,7 @@ export class ItemAnalysisService {
         selectedKey: this.extractRawAnswer(r.value),
         isCorrect: r.isCorrect,
         score,
+        maxScore: r.maxScore != null ? Number(r.maxScore) : null,
       };
       let byItem = result.get(r.studentId);
       if (!byItem) {
@@ -1269,9 +1502,9 @@ export class ItemAnalysisService {
    * expansión, acá no hace falta ninguna query.
    *
    * `null` se preserva con cuidado: es lo que habilita el atajo de
-   * `attachOrgReferences` (sin filtro → `references.org = correctRate`, sin query
-   * extra). Si esto devolviera `[]` en vez de `null` para un admin sin filtro, la
-   * referencia del colegio se caería a null en silencio.
+   * `null` distingue "admin sin filtro" (toda la población visible) de "scope
+   * vacío" (`[]` → sin datos). La línea de referencia (`attachLevelReferences`) NO
+   * depende de este valor a propósito: es independiente del scope del usuario.
    */
   private resolveAccessibleClassGroupIds(
     scope: ScopeResult,
@@ -1349,6 +1582,23 @@ export class ItemAnalysisService {
   private parseAlternatives(
     content: ItemContent,
   ): { key: string; text: string | null; isCorrect: boolean }[] {
+    // Un Verdadero/Falso canónico no lleva `alternatives`: su respuesta es un
+    // booleano. Se sintetizan las dos opciones para que el análisis por pregunta
+    // muestre distribución y clave correcta igual que cualquier otro ítem cerrado.
+    if (isTrueFalseContent(content)) {
+      return [
+        {
+          key: TRUE_FALSE_KEYS.true,
+          text: TRUE_FALSE_LABELS.V,
+          isCorrect: content.correctAnswer,
+        },
+        {
+          key: TRUE_FALSE_KEYS.false,
+          text: TRUE_FALSE_LABELS.F,
+          isCorrect: !content.correctAnswer,
+        },
+      ];
+    }
     if (!Array.isArray(content.alternatives)) return [];
     const out: { key: string; text: string | null; isCorrect: boolean }[] = [];
     for (const raw of content.alternatives) {

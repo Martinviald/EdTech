@@ -29,6 +29,10 @@ const STATIC_TITLES: Record<string, PageTitle> = {
 
   [ROUTES.evaluaciones]: { title: 'Evaluaciones' },
 
+  // Vista 360 del estudiante: el picker usa este título estático; la ficha de un
+  // alumno (`/estudiantes/[studentId]`) lo sobre-escribe con `<SetPageTitle>`.
+  [ROUTES.estudiantes]: { title: 'Vista 360 del estudiante' },
+
   // Hub de Panorama pedagógico: todas las tabs comparten título (la tab activa
   // ya se identifica en la barra de pestañas del cuerpo).
   [ROUTES.resultados]: { title: 'Panorama pedagógico' },
@@ -129,28 +133,28 @@ const DYNAMIC_TITLES: readonly { pattern: RegExp; resolve: (m: RegExpMatchArray)
       }),
     },
     {
-      pattern: /^\/banco-items\/([^/]+)\/spec-table\/cargar$/,
+      pattern: /^\/banco-contenido\/([^/]+)\/spec-table\/cargar$/,
       resolve: (m) => ({
         title: 'Cargar tabla de especificaciones',
         parent: { href: ROUTES.bancoItemSpecTable(m[1]!), label: 'Tabla de especificaciones' },
       }),
     },
     {
-      pattern: /^\/banco-items\/([^/]+)\/spec-table$/,
+      pattern: /^\/banco-contenido\/([^/]+)\/spec-table$/,
       resolve: (m) => ({
         title: 'Tabla de especificaciones',
         parent: { href: ROUTES.bancoItem(m[1]!), label: 'Instrumento' },
       }),
     },
     {
-      pattern: /^\/banco-items\/([^/]+)\/etiquetar$/,
+      pattern: /^\/banco-contenido\/([^/]+)\/etiquetar$/,
       resolve: (m) => ({
         title: 'Etiquetado con IA',
         parent: { href: ROUTES.bancoItem(m[1]!), label: 'Instrumento' },
       }),
     },
     {
-      pattern: /^\/banco-items\/[^/]+$/,
+      pattern: /^\/banco-contenido\/[^/]+$/,
       resolve: () => ({
         title: 'Instrumento',
         parent: { href: ROUTES.bancoItems, label: 'Banco de contenido' },

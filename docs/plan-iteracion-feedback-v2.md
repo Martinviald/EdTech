@@ -83,7 +83,7 @@ El mapeo del código encontró que **varios puntos ya están resueltos parcial o
 | | T2-16 | #9 | Árboles de taxonomía agrupados por asignatura | UI (o seed) | M | 🟡 |
 | | T2-17 | #12 | Informes: tabla de ítems clickeable + comparativa % del nivel | UI+Backend | M | 🟡 |
 | | T2-18 | #15 | Unificar el cuerpo del panel de pregunta (resultados↔instrumento) | UI | M | 🟡 |
-| **4 — Features nuevas de peso** | T2-19 | #30 | Estudio de material IA: canvas + lenguaje natural + rename | UI+Backend+Prompts+BDD | L | ⬜ |
+| **4 — Features nuevas de peso** | T2-19 | #30 | ~~Crear material IA: canvas + lenguaje natural~~ · **⏸️ DIFERIDO a fase futura (F2)** | UI+Backend+Prompts+BDD | L | ⏸️ |
 | | T2-20 | #21 | Vista 360 del estudiante | Backend+UI | L | ⬜ |
 | | T2-21 | #18 | Etiqueta de dificultad por ítem (+ IA a futuro) | BDD+Backend+UI | M/L | ⬜ |
 | | T2-22 | #19 | Listas/colecciones de ítems para armar evaluaciones | BDD+Backend+UI | L | ⬜ |
@@ -489,7 +489,10 @@ El único gating existente es por **capacidad** (evaluaciones `aggregate_only` n
 
 ---
 
-### T2-19 — Estudio de material IA: canvas + lenguaje natural + rename
+### T2-19 — Crear material IA: canvas + lenguaje natural + rename
+
+> ⏸️ **DIFERIDO a fase futura (2026-07-26).** Por decisión del usuario, la generación de contenido con IA para crear material se retoma más adelante (capacidad F2). **No se construye en esta iteración**; "Material Remedial" queda tal cual (sigue en el sidebar, sin rename ni canvas). El detalle de abajo se conserva para cuando se retome; el nombre elegido al retomar es **"Crear material"**.
+
 **Feedback original:** *"Poder generar material con IA seleccionando preguntas, ejes, asignaturas, etc. Tener una especie de canvas para crear material con IA. Agregar lenguaje natural para definir el objetivo, y que ese prompt se arme dinámicamente en base a opciones seleccionables por el usuario. Cambiar el nombre a algo más amplio que 'material remedial' (crear cualquier material)."*
 
 **Problema / crítica:** La generación de material hoy es **estrecha**: siempre parte de **una brecha** diagnosticada (un `nodeId`), sin composición libre ni objetivo en lenguaje natural, y bajo el nombre "Material Remedial" (que limita conceptualmente a lo remedial). El usuario quiere un **canvas** para crear **cualquier** material, combinando insumos y expresando el objetivo en sus palabras.
@@ -579,7 +582,7 @@ El único gating existente es por **capacidad** (evaluaciones `aggregate_only` n
 
 - **Benchmark integrado al tablero maestro y como comparativa transversal** (parte de #29): **bloqueado** hasta tener un pool real multi-colegio (hereda TKT-20 de v1). Solo la comparativa **contra el colegio/nivel** es viable ahora.
 - **Etiquetado IA de dificultad + ingesta curriculumnacional.cl** (#18): **F2+**. Ahora solo se sienta la columna de datos.
-- **Generación de contenido IA** (#30, "Estudio de material"): es una capacidad **F2**; se adelanta por prioridad del usuario, documentando que pertenece al tier de monetización.
+- **Generación de contenido IA / "Crear material" (T2-19, #30): DIFERIDO a una fase futura** por decisión del usuario (2026-07-26). Capacidad **F2** (tier de monetización). Se retoma más adelante; por ahora "Material Remedial" queda como está (sigue en el sidebar, sin rename ni canvas). El resto del plan avanza sin depender de esto.
 
 ---
 
@@ -588,7 +591,7 @@ El único gating existente es por **capacidad** (evaluaciones `aggregate_only` n
 1. **Ola 1** (quick wins) — desbloquea terminología y quita datos no confiables (T2-04) antes de construir encima.
 2. **Ola 2** (navegación) — reubica accesos y cierra el "callejón sin salida" de la spec-table.
 3. **Ola 3** — primero **T2-12** (multi-select) porque habilita T2-13/T2-14; luego **T2-14** (jerarquía) que habilita **T2-15** (Panorama).
-4. **Ola 4** — features nuevas; **T2-19** coordina con la salida de "Material" del sidebar (T2-09).
+4. **Ola 4** — features nuevas: **T2-21** (dificultad, migración `0015`) → **T2-22** (colecciones, migración `0016`) → **T2-20** (vista 360, sin migración). *(T2-19 "Crear material" DIFERIDO a fase futura — ver §5.)*
 5. **Ola 5** — limpieza del `status` (tras confirmar la duda de §7).
 
 Cada ticket: `pnpm typecheck` + `pnpm lint` verdes y, donde aplique, tests (§10.2 CLAUDE.md).

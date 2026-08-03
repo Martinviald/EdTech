@@ -1,9 +1,5 @@
 import type { Database } from '@soe/db';
-import type {
-  QuestionAnalysisResponse,
-  AssessmentReportResponse,
-  UserRole,
-} from '@soe/types';
+import type { QuestionAnalysisResponse, AssessmentReportResponse, UserRole } from '@soe/types';
 import type { JwtPayload } from '../auth/jwt-payload.types';
 import { AssessmentReportService } from '../assessment-report/assessment-report.service';
 import { ItemAnalysisService } from '../item-analysis/item-analysis.service';
@@ -57,9 +53,7 @@ function makeDb(sequence: unknown[][]): Database {
   return db as unknown as Database;
 }
 
-function makeQuestion(
-  overrides: Partial<QuestionAnalysisResponse> = {},
-): QuestionAnalysisResponse {
+function makeQuestion(overrides: Partial<QuestionAnalysisResponse> = {}): QuestionAnalysisResponse {
   return {
     itemId: 'item-1',
     position: 7,
@@ -86,6 +80,7 @@ function makeQuestion(
     blankCount: 1,
     correctCount: 7,
     correctRate: 28,
+    references: { grade: { rate: null, responseCount: 0, correctCount: 0 } },
     alternatives: [
       { key: 'A', text: 'a', isCorrect: false, count: 3, percentage: 12, hasImage: false },
       { key: 'B', text: 'b', isCorrect: true, count: 7, percentage: 28, hasImage: false },
@@ -179,11 +174,10 @@ describe('ItemInsightSnapshotService.build', () => {
       assessmentId: 'as-1',
     });
 
-    expect(getQuestionAnalysis).toHaveBeenCalledWith(
-      expect.any(Object),
-      'item-1',
-      { assessmentId: 'as-1', classGroupId: undefined },
-    );
+    expect(getQuestionAnalysis).toHaveBeenCalledWith(expect.any(Object), 'item-1', {
+      assessmentId: 'as-1',
+      classGroupId: undefined,
+    });
     expect(getReport).toHaveBeenCalledWith(expect.any(Object), {
       assessmentId: 'as-1',
       classGroupId: undefined,
@@ -273,13 +267,11 @@ describe('ItemInsightSnapshotService.build', () => {
 
   it('fetchea imagen del ítem (url http) a base64 best-effort', async () => {
     const fakeBytes = new Uint8Array([1, 2, 3, 4]);
-    const fetchSpy = jest
-      .spyOn(globalThis, 'fetch')
-      .mockResolvedValue({
-        ok: true,
-        headers: { get: (h: string) => (h === 'content-type' ? 'image/png' : null) },
-        arrayBuffer: async () => fakeBytes.buffer,
-      } as unknown as Response);
+    const fetchSpy = jest.spyOn(globalThis, 'fetch').mockResolvedValue({
+      ok: true,
+      headers: { get: (h: string) => (h === 'content-type' ? 'image/png' : null) },
+      arrayBuffer: async () => fakeBytes.buffer,
+    } as unknown as Response);
 
     const db = dbNoSection();
     const { service } = makeService(
@@ -307,9 +299,7 @@ describe('ItemInsightSnapshotService.build', () => {
   });
 
   it('fetch fallido → omite la imagen (degrada a texto), sin lanzar', async () => {
-    const fetchSpy = jest
-      .spyOn(globalThis, 'fetch')
-      .mockRejectedValue(new Error('network down'));
+    const fetchSpy = jest.spyOn(globalThis, 'fetch').mockRejectedValue(new Error('network down'));
     const db = dbNoSection();
     const { service } = makeService(
       db,

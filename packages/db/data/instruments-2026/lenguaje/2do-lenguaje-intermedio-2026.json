@@ -1,0 +1,641 @@
+{
+  "schemaVersion": "1.0",
+  "source": {
+    "file": "2_prueba_lectura_monitoreo_2026_2_basico.pdf",
+    "subjectFolder": "Lenguaje"
+  },
+  "instrument": {
+    "name": "DIA Lectura 2° Básico 2026 — Intermedio",
+    "subject": "Lenguaje y Comunicación",
+    "subjectCode": "LANG",
+    "grade": "2° Básico",
+    "gradeCode": "2ND_BASIC",
+    "year": 2026,
+    "applicationPeriod": "intermedio",
+    "type": "dia",
+    "isOfficial": true,
+    "source": "imported"
+  },
+  "sections": [
+    {
+      "order": 1,
+      "name": "Texto 1: «Nubes»",
+      "type": "multiple_choice",
+      "instructions": "Lee el siguiente texto y responde las preguntas 1 a 5.",
+      "passage": {
+        "title": "Nubes",
+        "text": "Un ratoncito salió a pasear con su madre. Subieron a una colina y miraron al cielo.\n—¡Mira! —dijo la madre—. Se ven figuras en las nubes.\nEl ratón y su madre vieron muchas figuras en las nubes. Vieron un castillo… un conejo… un ratón.\n—Voy a recoger flores —dijo la madre.\n—Yo me quedaré aquí y miraré las nubes —dijo el ratón.\nEl ratoncito vio una nube muy grande en el cielo que creció más y más. La nube se convirtió en un gato. El gato se acercaba más y más al ratoncito.\n—¡Socorro! —gritó el ratón.\nY corrió hacia su madre.\n—¡Hay un gato enorme en el cielo! ¡Tengo miedo! —dijo el ratón llorando.\nLa madre miró al cielo y le dijo:\n—No tengas miedo. ¡Mira! El gato se ha convertido otra vez en una nube.\nEl ratoncito vio que era cierto y se tranquilizó. Ayudó a su madre a recoger flores, pero durante el resto de la tarde no volvió a mirar al cielo.\n\nArnold Lobel. Historias de ratones. Chile: Ediciones Alfaguara, 1978.",
+        "format": "plain",
+        "attachments": [
+          {
+            "kind": "image",
+            "note": "Ilustraciones decorativas del ratoncito y su madre mirando las nubes en una colina; acompañan el relato."
+          }
+        ]
+      },
+      "items": [
+        {
+          "position": 1,
+          "type": "multiple_choice",
+          "stem": "Según la madre del ratoncito, ¿qué se ve en las nubes?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Flores.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Figuras.",
+              "isCorrect": true
+            },
+            {
+              "key": "C",
+              "text": "Colinas.",
+              "isCorrect": false
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "B",
+          "skill": "Localizar",
+          "oa": "OA 5",
+          "contentAxis": "Narración",
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Localizan información explícita relevante en un texto narrativo. Infieren características y sentimientos de personajes en un"
+        },
+        {
+          "position": 2,
+          "type": "multiple_choice",
+          "stem": "¿Cómo se sintió el ratoncito al ver una nube muy grande en el cielo?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Entusiasmado.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Sorprendido.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Asustado.",
+              "isCorrect": true
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "C",
+          "skill": null,
+          "oa": "OA 5",
+          "contentAxis": "Narración",
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "texto narrativo. Infieren causa o consecuencia de hechos o acciones"
+        },
+        {
+          "position": 3,
+          "type": "multiple_choice",
+          "stem": "¿Por qué gritó el ratoncito?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Porque vio que el cielo se cubrió de nubes.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Porque creyó ver un enorme gato en el cielo.",
+              "isCorrect": true
+            },
+            {
+              "key": "C",
+              "text": "Porque pensó que se había perdido de su madre.",
+              "isCorrect": false
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "B",
+          "skill": null,
+          "oa": "OA 5",
+          "contentAxis": "Narración",
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "relevantes en un texto narrativo. Identifican un hecho o acción relevante en un texto"
+        },
+        {
+          "position": 4,
+          "type": "multiple_choice",
+          "stem": "¿Cómo logró la madre tranquilizar al ratoncito?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Pidiéndole que fuera con ella a recoger flores.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Diciéndole que podía entretenerse mirando el cielo.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Mostrándole que lo que había en el cielo era una nube.",
+              "isCorrect": true
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "C",
+          "skill": null,
+          "oa": "OA 5",
+          "contentAxis": "Narración",
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "narrativo."
+        },
+        {
+          "position": 5,
+          "type": "multiple_choice",
+          "stem": "¿De qué trata este texto?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "De un ratoncito que se asusta con una nube.",
+              "isCorrect": true
+            },
+            {
+              "key": "B",
+              "text": "De un ratoncito que ayuda a su madre.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "De un ratoncito al que le gusta pasear.",
+              "isCorrect": false
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "A",
+          "skill": null,
+          "oa": "OA 5",
+          "contentAxis": "Narración",
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Infieren de qué trata un texto narrativo. Localizan información explícita relevante en un texto no"
+        }
+      ]
+    },
+    {
+      "order": 2,
+      "name": "Texto 2: «Mantis religiosa»",
+      "type": "mixed",
+      "instructions": "Lee el siguiente texto y responde las preguntas 6 a 10.",
+      "passage": {
+        "title": "Mantis religiosa",
+        "text": "La mantis religiosa es un insecto grande. Su cuerpo se compone de tres partes: la cabeza, el tórax y el abdomen. Cuando su cuerpo se ha desarrollado completamente, la mantis religiosa puede volar.\n\n¿Por qué tiene ese nombre?\nLa mantis religiosa se parece a una ramita o a una hoja. Recibe su nombre por la postura de sus patas delanteras, que hacen parecer que estuviera rezando.\n\n¡Se camufla!\nLa mantis religiosa usa el camuflaje para esconderse de los depredadores, es decir, de los animales que se la quieren comer. Gracias a esta habilidad, puede cambiar su color de café a verde para parecerse al tronco de un árbol o a sus hojas.\n\nSon observadoras\n¡La mantis religiosa tiene cinco ojos! Tiene dos grandes ojos que se pueden ver fácilmente. Pero también tiene tres ojos más pequeños situados en el centro de su cabeza. Esto le permite ver mejor. También tiene dos antenas en la cabeza que utiliza para ubicarse.\n\nMammoth. Mi gran libro de insectos. India: Lexus,2023. (Adaptación).",
+        "format": "plain",
+        "attachments": [
+          {
+            "kind": "image",
+            "note": "Ilustración de una mantis religiosa junto al texto informativo; de apoyo. Todo el contenido necesario para responder está en el texto."
+          }
+        ]
+      },
+      "items": [
+        {
+          "position": 6,
+          "type": "open_ended",
+          "stem": "Escribe las tres partes que componen el cuerpo de la mantis religiosa.\n1.\n2.\n3.",
+          "alternatives": [],
+          "responseFormat": "fill_in",
+          "correctKey": null,
+          "skill": "Localizar",
+          "oa": "OA 7",
+          "contentAxis": null,
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Localizan información explícita relevante en un texto no literario.",
+          "multiAnswer": "Cabeza, tórax, abdomen",
+          "needsHumanReview": true
+        },
+        {
+          "position": 7,
+          "type": "multiple_choice",
+          "stem": "¿Por qué la mantis religiosa se llama así?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Por la forma en que pone sus patas delanteras.",
+              "isCorrect": true
+            },
+            {
+              "key": "B",
+              "text": "Por la cantidad de antenas que tiene en la cabeza.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Por la manera de esconderse de los depredadores.",
+              "isCorrect": false
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "A",
+          "skill": null,
+          "oa": "OA 7",
+          "contentAxis": null,
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Infieren información relevante en un texto no literario."
+        },
+        {
+          "position": 8,
+          "type": "multiple_choice",
+          "stem": "¿Cómo se protege la mantis religiosa de los animales que se la quieren comer?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Usa sus ojos para observar a los depredadores.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Cambia su color para esconderse de los depredadores.",
+              "isCorrect": true
+            },
+            {
+              "key": "C",
+              "text": "Mueve sus antenas para saber dónde están los depredadores.",
+              "isCorrect": false
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "B",
+          "skill": null,
+          "oa": "OA 7",
+          "contentAxis": null,
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Infieren información relevante en un texto no literario. Localizan información explícita relevante en un texto no"
+        },
+        {
+          "position": 9,
+          "type": "multiple_choice",
+          "stem": "Según el texto, ¿cuántos ojos tiene la mantis religiosa?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Dos.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Tres.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Cinco.",
+              "isCorrect": true
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "C",
+          "skill": "Localizar",
+          "oa": "OA 7",
+          "contentAxis": null,
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Localizan información explícita relevante en un texto no literario."
+        },
+        {
+          "position": 10,
+          "type": "multiple_choice",
+          "stem": "¿De qué trata principalmente este texto?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "De cómo se esconde la mantis religiosa.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "De cómo vuela la mantis religiosa.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "De cómo es la mantis religiosa.",
+              "isCorrect": true
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "C",
+          "skill": null,
+          "oa": "OA 7",
+          "contentAxis": "Texto no literario",
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Infieren de qué trata un texto no literario."
+        }
+      ]
+    },
+    {
+      "order": 3,
+      "name": "Texto 3: «El zorro y la ardilla»",
+      "type": "mixed",
+      "instructions": "Lee el siguiente texto y responde las preguntas 11 a 15.",
+      "passage": {
+        "title": "El zorro y la ardilla",
+        "text": "Había una vez un zorro que salió a buscar comida al bosque. Allí se encontró con una ardilla.\n—¡Qué delicioso manjar! —pensó—. ¿Cómo podré pillarla?\nY como era un zorro muy astuto, se le ocurrió una idea.\n—¡Ardillita, ardillita! —la llamó— ¡ven para acá! Yo conocí a tu padre, pero él saltaba mucho mejor que tú. No iba de rama en rama, sino que saltaba de un árbol a otro. Me parece que tú no eres capaz de hacerlo, ¿verdad?\nEntonces la ardilla le contestó:\n—Si mi padre podía, yo lo haré también.\nY se fue saltando de un árbol a otro, con tan mala suerte, que cayó justo a los pies del zorro.\n—¡Te voy a comer! —le dijo el zorro, poniéndole la pata encima.\nLa ardillita muy asustada le dijo:\n—Está bien, zorro. Me pillaste. Pero te diré algo antes de que me comas. Yo también conocí a tu padre y él era muy educado. Jamás comía sin limpiarse las patas primero.\n—Oh, claro —repuso el zorro— si él lo hacía, yo también lo haré.\nEntonces levantó las patas y la ardilla se pudo escapar. Subió muy rápido hasta la rama de un gran árbol. Desde ahí miró al zorro y le gritó:\n—¿Qué esperas para comerme?\nY el zorro se tuvo que ir de allí con la cola entre las piernas.\n\nCaracol, caracol, saca tu librito al sol. Cecilia Beuchat y Mabel Condemarín, Comp. Chile: Editorial Universitaria, 1996. (Adaptación).",
+        "format": "plain",
+        "attachments": [
+          {
+            "kind": "image",
+            "note": "Ilustraciones decorativas del zorro y la ardilla en el bosque; acompañan el relato."
+          }
+        ]
+      },
+      "items": [
+        {
+          "position": 11,
+          "type": "multiple_choice",
+          "stem": "¿Qué le propuso el zorro a la ardilla?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Que saltara de un árbol a otro.",
+              "isCorrect": true
+            },
+            {
+              "key": "B",
+              "text": "Que compartiera su comida con él.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Que se limpiara las patas antes de comer.",
+              "isCorrect": false
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "A",
+          "skill": "Interpretar y relacionar",
+          "oa": "OA 5",
+          "contentAxis": "Narración",
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Identifican un hecho o acción relevante en un texto narrativo. Localizan información explícita relevante en un"
+        },
+        {
+          "position": 12,
+          "type": "multiple_choice",
+          "stem": "¿Por qué la ardilla aceptó la propuesta del zorro?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Porque quería hacer lo mismo que su padre.",
+              "isCorrect": true
+            },
+            {
+              "key": "B",
+              "text": "Porque pensaba que el zorro se la podía comer.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Porque creía que podía subir hasta la rama del árbol.",
+              "isCorrect": false
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "A",
+          "skill": "Localizar",
+          "oa": "OA 5",
+          "contentAxis": "Narración",
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Localizan información explícita relevante en un texto narrativo."
+        },
+        {
+          "position": 13,
+          "type": "open_ended",
+          "stem": "¡Ordena la historia! Escribe en el recuadro los números del 1 al 4 según lo que pasó primero y lo que pasó después en el cuento.\n___ La ardilla cae a los pies del zorro.\n___ El zorro levanta sus patas para limpiarse.\n___ El zorro le pone la pata encima a la ardilla.\n___ La ardilla salta de un árbol a otro.",
+          "alternatives": [],
+          "responseFormat": "fill_in",
+          "correctKey": null,
+          "skill": "Interpretar y relacionar",
+          "oa": "OA 5",
+          "contentAxis": "Narración",
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Reconstruyen la secuencia de acciones en un texto narrativo. Identifican un hecho o acción relevante en un texto",
+          "fillAnswer": "2 – 4 – 3 – 1"
+        },
+        {
+          "position": 14,
+          "type": "multiple_choice",
+          "stem": "¿Qué imagen muestra el final de la historia?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Ilustración: la ardilla salta por el aire entre dos árboles (de un árbol a otro), sobre pasto con hongos y piedras.",
+              "isImage": true,
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Ilustración: el zorro, cabizbajo y frustrado en el suelo, mientras la ardilla está a salvo sobre una rama del árbol.",
+              "isImage": true,
+              "isCorrect": true
+            },
+            {
+              "key": "C",
+              "text": "Ilustración: el zorro persigue y alcanza a la ardilla asustada en el suelo, sujetándole la cola.",
+              "isImage": true,
+              "isCorrect": false
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "B",
+          "skill": "Interpretar y relacionar",
+          "oa": "OA 5",
+          "contentAxis": "Narración",
+          "hasFigure": true,
+          "figureNote": "Las tres alternativas (A, B, C) son ilustraciones que representan posibles finales de la historia; se requiere ver las imágenes para responder.",
+          "indicador": "Identifican un hecho o acción relevante en un texto narrativo. Opinan sobre algún aspecto controversial en un texto"
+        },
+        {
+          "position": 15,
+          "type": "open_ended",
+          "stem": "¿Crees que estuvo bien que la ardilla le mintiera al zorro para salvar su vida? ¿Por qué? Justifica tu respuesta con información del texto.",
+          "alternatives": [],
+          "responseFormat": "develop",
+          "correctKey": null,
+          "skill": "Reflexionar",
+          "oa": "OA 5",
+          "contentAxis": "Narración",
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Opinan sobre algún aspecto controversial en un texto narrativo. Infieren información relevante en un texto no literario."
+        }
+      ]
+    },
+    {
+      "order": 4,
+      "name": "Texto 4: «La minga de Chiloé»",
+      "type": "mixed",
+      "instructions": "Lee el siguiente texto y responde las preguntas 16 a 19.",
+      "passage": {
+        "title": "La minga de Chiloé",
+        "text": "Existen tradiciones que son propias de cada lugar. Un ejemplo es la minga de Chiloé.\nEsta es una tradición campesina que consiste en trasladar una casa de un lugar a otro con la ayuda de vecinos y amigos.\nLa minga puede durar varios días, ya que no es una tarea fácil. Para mover la casa, lo primero que se debe hacer es sacarla de la base, luego, se pone sobre unos palos de madera que funcionan como un trineo. Después, se amarra la casa a unos bueyes o toros que, usando toda su fuerza, la llevan hacia otro lugar.\nAl terminar el trabajo, el vecino que pidió la minga prepara una rica comida para agradecer a todos los que lo ayudaron. Esta comida casi siempre viene acompañada de música folclórica.\nLa minga de Chiloé muestra cómo se puede hacer un trabajo muy difícil ayudándose entre todos.\n\nChile Para Niños. Biblioteca Nacional. Chile. Web. 3 junio de 2021. (Adaptación).",
+        "format": "plain",
+        "attachments": [
+          {
+            "kind": "image",
+            "note": "Fotografía (Fotografía: Luis Fuentes) de una minga de Chiloé: una casa siendo trasladada con ayuda de bueyes/personas. De apoyo; el texto contiene toda la información necesaria."
+          }
+        ]
+      },
+      "items": [
+        {
+          "position": 16,
+          "type": "multiple_choice",
+          "stem": "Según el texto, ¿en qué consiste la minga de Chiloé?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "En preparar una rica comida.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "En regalar animales a los vecinos.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "En trasladar una casa de un lugar a otro.",
+              "isCorrect": true
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "C",
+          "skill": "Interpretar y relacionar",
+          "oa": "OA 7",
+          "contentAxis": "Texto no literario",
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Infieren información relevante en un texto no literario. Localizan información explícita relevante en un texto"
+        },
+        {
+          "position": 17,
+          "type": "multiple_choice",
+          "stem": "¿Qué es lo primero que se debe hacer para mover la casa?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Sacarla de la base.",
+              "isCorrect": true
+            },
+            {
+              "key": "B",
+              "text": "Amarrarla a unos bueyes.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Ponerla sobre unos palos.",
+              "isCorrect": false
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "A",
+          "skill": "Localizar",
+          "oa": "OA 7",
+          "contentAxis": "Texto no literario",
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Localizan información explícita relevante en un texto no literario."
+        },
+        {
+          "position": 18,
+          "type": "multiple_choice",
+          "stem": "¿Qué muestra esta tradición de nuestro país?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Cómo hacer una tarea ayudándose entre todos.",
+              "isCorrect": true
+            },
+            {
+              "key": "B",
+              "text": "Cómo acompañar una tarea con música folclórica.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Cómo realizar una tarea que puede durar varios días.",
+              "isCorrect": false
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "A",
+          "skill": "Interpretar y relacionar",
+          "oa": "OA 7",
+          "contentAxis": "Texto no literario",
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Infieren información relevante en un texto no literario. Opinan sobre algún aspecto controversial en un texto"
+        },
+        {
+          "position": 19,
+          "type": "open_ended",
+          "stem": "¿Te gustaría participar en una minga de Chiloé?\nSí\nNo\n¿Por qué? Justifica tu respuesta con información del texto.",
+          "alternatives": [],
+          "responseFormat": "develop",
+          "correctKey": null,
+          "skill": "Reflexionar",
+          "oa": "OA 7",
+          "contentAxis": "Texto no literario",
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Opinan sobre algún aspecto controversial en un texto narrativo."
+        }
+      ]
+    }
+  ],
+  "extraction": {
+    "itemCount": 19,
+    "warnings": [
+      "Ítems de alternativas con solo 3 opciones (A, B, C), típico de 2° básico DIA; cumplen el mínimo de 2 alternativas.",
+      "Q6 (fill_in): completación — escribir las tres partes del cuerpo de la mantis. Q13 (fill_in): ordenación — escribir números 1 a 4 en los recuadros.",
+      "Q15 y Q19 son ítems de desarrollo (open_ended). Q19 incluye selección Sí/No más justificación.",
+      "Q14: las tres alternativas (A, B, C) son ilustraciones y se requiere verlas para responder; needsHumanReview=true.",
+      "Textos transcritos desde la capa de texto del PDF (pdftotext), verbatim."
+    ],
+    "needsHumanReview": true,
+    "crossCheck": {
+      "hardIssues": [],
+      "softWarnings": [
+        "#6: respuesta múltiple por texto ('Cabeza, tórax, abdomen') — isCorrect a resolver",
+        "#6: responseFormat cuadernillo=fill_in vs ficha=choice",
+        "partición no-choice difiere: cuadernillo=[6, 13, 15, 19] vs ficha=[13, 15, 19]"
+      ],
+      "counts": {
+        "cuadernillo": 19,
+        "ficha": 19,
+        "hoja": 19
+      }
+    }
+  },
+  "pauta": {
+    "source": {
+      "ficha": "2_ficha_tecnica_lectura_monitoreo_2026_2_basico.pdf",
+      "hoja": "2_hoja_de_respuestas_lectura_monitoreo_2026_2_basico.pdf"
+    },
+    "appliedKeys": 15,
+    "rubrics": 0
+  }
+}

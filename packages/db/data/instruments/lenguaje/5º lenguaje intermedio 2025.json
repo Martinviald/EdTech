@@ -31,7 +31,8 @@
             "kind": "image",
             "note": "Ilustración de un personaje (Pedro Urdemales) junto a un atleta en un estadio (decorativa)."
           }
-        ]
+        ],
+        "imageRef": "item/global/5to-lenguaje-intermedio-2025/section_figure/01.png"
       },
       "items": [
         {
@@ -334,7 +335,8 @@
             "kind": "image",
             "note": "Cuatro fotografías de hongos rotuladas: Agaricus campestris (champiñón silvestre), Flammulina velutipes (enoki), Marasmius oreades (senderuela) y Amanita muscaria (matamoscas)."
           }
-        ]
+        ],
+        "imageRef": "item/global/5to-lenguaje-intermedio-2025/section_figure/02.png"
       },
       "items": [
         {
@@ -579,7 +581,8 @@
               "name": "Texto no literario",
               "tagType": "secondary"
             }
-          ]
+          ],
+          "imageRef": "item/global/5to-lenguaje-intermedio-2025/item_figure/09.png"
         }
       ]
     },
@@ -597,7 +600,8 @@
             "kind": "image",
             "note": "Fotografías de fauna del Valle del Elqui (zorro, reptil, loros tricahue) y una fotografía de un loro barranquero (tricahue) sobre una rama."
           }
-        ]
+        ],
+        "imageRef": "item/global/5to-lenguaje-intermedio-2025/section_figure/03.png"
       },
       "items": [
         {
@@ -900,7 +904,8 @@
             "kind": "image",
             "note": "Ilustración de Alejandro montando a Bucéfalo, un caballo (decorativa)."
           }
-        ]
+        ],
+        "imageRef": "item/global/5to-lenguaje-intermedio-2025/section_figure/04.png"
       },
       "items": [
         {
@@ -1224,7 +1229,8 @@
             "kind": "image",
             "note": "Ilustración de delfines nadando en el mar (decorativa)."
           }
-        ]
+        ],
+        "imageRef": "item/global/5to-lenguaje-intermedio-2025/section_figure/05.png"
       },
       "items": [
         {
@@ -1548,7 +1554,8 @@
             "kind": "image",
             "note": "Ilustración de un zorzal (ave) junto a un río al atardecer (decorativa)."
           }
-        ]
+        ],
+        "imageRef": "item/global/5to-lenguaje-intermedio-2025/section_figure/06.png"
       },
       "items": [
         {

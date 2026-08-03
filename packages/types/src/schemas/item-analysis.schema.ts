@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { stringCsvSchema, uuidCsvSchema } from './common.schema';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Sprint 5 — Análisis a nivel de ítem (H6.11 + H6.12)
@@ -22,13 +23,21 @@ import { z } from 'zod';
 // GET /api/item-analysis/assessments
 // ═══════════════════════════════════════════════════════════════════════════
 
-/** Filtros del listado: acotan las evaluaciones ofrecidas (mismos que el dashboard). */
+/**
+ * Filtros del listado: acotan las evaluaciones ofrecidas (mismos que el dashboard).
+ *
+ * ⚠️ Multi-valor (T2-12), igual que `dashboardFiltersQuerySchema`: la barra de
+ * filtros serializa la selección como CSV (`?gradeId=a,b`) y este endpoint recibe
+ * exactamente la MISMA querystring que `/dashboards/filters` (ver la página
+ * `/evaluaciones`). Con un DTO escalar, elegir dos niveles reventaba en un 400
+ * ("Invalid uuid") y `instrumentType` en CSV no matcheaba nada en silencio.
+ */
 export const assessmentListQuerySchema = z.object({
-  subjectId: z.string().uuid().optional(),
-  gradeId: z.string().uuid().optional(),
-  classGroupId: z.string().uuid().optional(),
+  subjectId: uuidCsvSchema,
+  gradeId: uuidCsvSchema,
+  classGroupId: uuidCsvSchema,
   academicYearId: z.string().uuid().optional(),
-  instrumentType: z.string().min(1).optional(),
+  instrumentType: stringCsvSchema,
 });
 export type AssessmentListQueryDto = z.infer<typeof assessmentListQuerySchema>;
 
@@ -83,17 +92,48 @@ export type ItemTaxonomyRef = {
  * (Detalle por pregunta). Objeto extensible: cada nueva referencia es un campo
  * más, sin romper el contrato existente.
  *
- * - `org` (viable ahora): % de logro del COLEGIO para la pregunta = promedio de
- *   TODA la org, independiente del scope del usuario (un profesor ve su curso en
- *   `correctRate` y el colegio completo aquí). Sale del token; nunca expone datos
- *   de otra org (RLS + withOrgContext).
+ * - `grade`: % de logro del NIVEL/grado para la pregunta = TODOS los alumnos de la
+ *   org que rindieron el MISMO instrumento en el MISMO grado y año académico,
+ *   aunque lo hayan hecho bajo otra `assessment` (el modelo crea una evaluación
+ *   POR CURSO, así que los cursos hermanos viven en evaluaciones distintas y deben
+ *   entrar igual). Como los instrumentos son siempre por nivel, es la referencia
+ *   del colegio para esa evaluación. Trasciende el scope del usuario (un profesor
+ *   ve su curso en `correctRate` y el nivel aquí). Sale del token; nunca expone
+ *   datos de otra org (RLS + withOrgContext).
  * - `sample` (DIFERIDO): % de logro de la MUESTRA de colegios (benchmark
  *   inter-colegio). Bloqueado hasta existir un pool multi-colegio (TKT-20). El
  *   campo se deja opcional para poblarlo después sin cambiar el contrato.
+ *
+ * ⚠️ La tasa es SIEMPRE ponderada por alumno: `sum(correctCount)/sum(responseCount)`
+ * sobre las cohortes involucradas, NUNCA el promedio de los % de cada curso (cursos
+ * de distinto N pesarían igual). Los conteos crudos viajan en el contrato para que
+ * el frontend pueda agregar con el mismo criterio.
  */
+export type ReferenceRate = {
+  rate: number | null; // 0..100 — ponderado: correctCount / responseCount
+  responseCount: number; // respuestas de TODOS los alumnos de la población
+  correctCount: number; // aciertos de TODOS los alumnos de la población
+};
+
 export type QuestionReferences = {
-  org: number | null; // 0..100 — % logro del colegio (toda la org)
+  grade: ReferenceRate; // % logro del nivel (mismo grado + instrumento + año)
   sample?: number | null; // 0..100 — muestra de colegios (DIFERIDO, TKT-20)
+};
+
+/**
+ * Resumen de la población de la línea de referencia, para rotularla y para la
+ * columna "% Logro" de su fila. `rate` es el % ponderado sobre TODAS las respuestas
+ * de TODOS los alumnos del nivel (no el promedio de los % por pregunta ni por
+ * curso). `classGroupCount`/`studentCount` dicen sobre cuántos cursos y alumnos
+ * agrega: sin eso, un nivel de un solo curso se lee como dato duplicado del curso.
+ */
+export type MatrixReferenceScopes = {
+  grade: {
+    rate: number | null; // 0..100 — % logro ponderado de todo el nivel
+    gradeName: string | null;
+    classGroupCount: number;
+    studentCount: number;
+  };
 };
 
 /** Una columna de la matriz = una pregunta (ítem) de la evaluación. */
@@ -108,7 +148,7 @@ export type MatrixQuestionColumn = {
   // % de alumnos (de la población VISIBLE, según scope) que respondió
   // correctamente esta pregunta — para resaltar preguntas críticas en la cabecera.
   correctRate: number | null; // 0..100
-  // TKT-22 — líneas de referencia por pregunta (% colegio ahora; muestra diferida).
+  // T2-17 — línea de referencia por pregunta (% del nivel; muestra diferida).
   references: QuestionReferences;
 };
 
@@ -118,6 +158,12 @@ export type MatrixCell = {
   selectedKey: string | null; // alternativa elegida (null = sin respuesta)
   isCorrect: boolean | null;
   score: number | null; // final_score si existe, si no raw_score
+  /**
+   * Puntaje máximo del ítem. Con ítems de crédito parcial (`matching`), un
+   * `isCorrect: false` puede traer puntaje > 0: mostrar "2/4" dice mucho más que
+   * "incorrecto". En los ítems binarios vale 1 y no cambia nada de lo que se ve.
+   */
+  maxScore: number | null;
 };
 
 /** Una fila de la matriz = un alumno con sus respuestas. */
@@ -138,6 +184,8 @@ export type ItemMatrixResponse = {
   assessmentName: string | null;
   instrumentName: string;
   questions: MatrixQuestionColumn[];
+  /** Resumen de la línea de referencia (nivel) del tablero maestro. */
+  references: MatrixReferenceScopes;
   students: {
     data: MatrixStudentRow[];
     total: number;
@@ -227,5 +275,11 @@ export type QuestionAnalysisResponse = {
   blankCount: number; // alumnos sin alternativa elegida
   correctCount: number;
   correctRate: number | null; // 0..100 sobre totalResponses
+  // T2-17 — referencias comparativas de la MISMA pregunta, independientes del scope
+  // del usuario (un profesor ve su curso en `correctRate` y estas referencias más
+  // amplias aquí): `org` = % de logro en todo el colegio; `grade` = % de logro en el
+  // nivel/grado (todos los cursos del mismo grado que rindieron la evaluación). Ambas
+  // `null` sin evaluación en contexto o sin datos agregados. `sample` queda DIFERIDO.
+  references: QuestionReferences;
   alternatives: AlternativeDistribution[]; // incluye la correcta y los distractores
 };

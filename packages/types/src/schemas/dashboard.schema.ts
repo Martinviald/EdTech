@@ -1,6 +1,11 @@
 import { z } from 'zod';
 import { PERFORMANCE_LEVELS, type AssessmentStatus, type PerformanceLevel } from '../enums';
 import type { PerformanceBandView } from './performance-band.schema';
+import { csvArraySchema, stringCsvSchema, uuidCsvSchema } from './common.schema';
+import {
+  INSTRUMENT_APPLICATION_PERIODS,
+  type InstrumentApplicationPeriod,
+} from './instrument.schema';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Sprint 4 — Dashboards core (H6.1, H6.2, H6.4, H6.5, H6.7, H6.8)
@@ -21,10 +26,15 @@ import type { PerformanceBandView } from './performance-band.schema';
 export const dashboardFiltersQuerySchema = z.object({
   assessmentId: z.string().uuid().optional(),
   instrumentId: z.string().uuid().optional(),
-  instrumentType: z.string().min(1).optional(),
-  subjectId: z.string().uuid().optional(),
-  gradeId: z.string().uuid().optional(),
-  classGroupId: z.string().uuid().optional(),
+  // Multi-select (T2-12): aceptan CSV (`?x=a,b`) o param repetido → array.
+  instrumentType: stringCsvSchema,
+  subjectId: uuidCsvSchema,
+  gradeId: uuidCsvSchema,
+  classGroupId: uuidCsvSchema,
+  // Habilidad/eje del árbol de taxonomía para la jerarquía (T2-14).
+  nodeId: z.string().uuid().optional(),
+  // Momento DIA (T2-27): sólo aplica a instrumentos con ciclo (ej. DIA).
+  applicationPeriod: csvArraySchema(z.enum(INSTRUMENT_APPLICATION_PERIODS)),
   studentId: z.string().uuid().optional(),
   academicYearId: z.string().uuid().optional(),
 });
@@ -107,6 +117,11 @@ export type DashboardOverviewResponse = {
   assessmentsCount: number;
   performanceDistribution: PerformanceDistributionBucket[];
   recentAssessments: DashboardAssessmentSummary[];
+  // Cuántas evaluaciones hay en el alcance filtrado. `recentAssessments` viene
+  // recortado a las más recientes, así que sin este total la UI no puede decir que
+  // está mostrando una parte — y una tabla truncada en silencio se lee como "esto
+  // es todo lo que hay".
+  recentAssessmentsTotal: number;
   alerts: DashboardAlert[];
 };
 
@@ -137,6 +152,7 @@ export type InstrumentFilterOption = {
   type: string;
   subjectId: string | null;
   gradeId: string | null;
+  applicationPeriod: InstrumentApplicationPeriod | null;
 };
 
 export type DashboardFilterOptionsResponse = {
@@ -150,6 +166,14 @@ export type DashboardFilterOptionsResponse = {
   classGroups: ClassGroupFilterOption[];
   periods: PeriodFilterOption[];
   instruments: InstrumentFilterOption[];
+  /**
+   * Momentos que tienen al menos una evaluación en el alcance visible. El catálogo
+   * de `instruments` no alcanza para saberlo: un momento puede tener instrumentos
+   * oficiales y ninguna evaluación del colegio, y filtrar por él devolvería vacío
+   * igual. La UI lo usa para anotar los momentos sin datos antes de que el usuario
+   * los elija.
+   */
+  applicationPeriodsWithData: InstrumentApplicationPeriod[];
   /**
    * Año académico al que está acotado el catálogo de cursos: el pedido en la
    * query, o el vigente, o el más reciente con cursos. `null` si el usuario no

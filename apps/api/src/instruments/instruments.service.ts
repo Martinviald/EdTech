@@ -84,9 +84,8 @@ export class InstrumentsService {
     if (filters.applicationPeriod) {
       conditions.push(eq(instruments.applicationPeriod, filters.applicationPeriod));
     }
-    if (filters.status) {
-      conditions.push(eq(instruments.status, filters.status));
-    }
+    // T2-23: el estado (borrador/publicado/archivado) se ocultó de la UI y el
+    // listado siempre trae TODOS los estados (no se filtra por status).
     if (typeof filters.isOfficial === 'boolean') {
       conditions.push(eq(instruments.isOfficial, filters.isOfficial));
     }
@@ -222,7 +221,9 @@ export class InstrumentsService {
     if (dto.version !== undefined) updateData.version = dto.version;
     if (dto.isOfficial !== undefined) {
       if (dto.isOfficial && !userHasRole(user.roles, 'platform_admin')) {
-        throw new ForbiddenException('Solo platform_admin puede marcar instrumentos como oficiales');
+        throw new ForbiddenException(
+          'Solo platform_admin puede marcar instrumentos como oficiales',
+        );
       }
       updateData.isOfficial = dto.isOfficial;
     }
@@ -317,10 +318,7 @@ export class InstrumentsService {
   }
 
   /** Lee el PDF del enunciado del instrumento (con URL de descarga si aplica). */
-  async getEnunciadoPdf(
-    id: string,
-    user: JwtPayload,
-  ): Promise<InstrumentAttachmentModel | null> {
+  async getEnunciadoPdf(id: string, user: JwtPayload): Promise<InstrumentAttachmentModel | null> {
     const instrument = await this.getByIdRaw(id, user);
     return this.loadEnunciadoPdf(instrument);
   }
@@ -345,10 +343,7 @@ export class InstrumentsService {
    * la sección no tiene ilustración. El scope (`orgId`) sale del instrumento dueño, no del
    * usuario: los oficiales son globales (`org_id NULL`).
    */
-  async getSectionFigure(
-    sectionId: string,
-    user: JwtPayload,
-  ): Promise<SectionFigureModel | null> {
+  async getSectionFigure(sectionId: string, user: JwtPayload): Promise<SectionFigureModel | null> {
     const [section] = await this.db
       .select()
       .from(instrumentSections)
@@ -407,10 +402,7 @@ export class InstrumentsService {
   }
 
   /** Mapea un archivo del módulo `files` al modelo de API del adjunto (+ downloadUrl). */
-  private toAttachmentModel(
-    file: FileRecord,
-    instrumentId: string,
-  ): InstrumentAttachmentModel {
+  private toAttachmentModel(file: FileRecord, instrumentId: string): InstrumentAttachmentModel {
     const model: InstrumentAttachmentModel = {
       id: file.id,
       instrumentId,
@@ -652,9 +644,7 @@ export class InstrumentsService {
   }
 
   /** Pobla los adjuntos (ordenados) en un conjunto de secciones. */
-  private async withAttachments(
-    sections: InstrumentSection[],
-  ): Promise<SectionWithAttachments[]> {
+  private async withAttachments(sections: InstrumentSection[]): Promise<SectionWithAttachments[]> {
     if (!sections.length) return [];
 
     const ids = sections.map((s) => s.id);

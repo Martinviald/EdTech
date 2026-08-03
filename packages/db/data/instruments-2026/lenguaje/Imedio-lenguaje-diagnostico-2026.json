@@ -1,0 +1,1182 @@
+{
+  "schemaVersion": "1.0",
+  "source": {
+    "file": "I_prueba_lectura_diagnostico_2026_I_medio.pdf",
+    "subjectFolder": "Lenguaje"
+  },
+  "instrument": {
+    "name": "DIA Lectura I° Medio 2026 — Diagnóstico",
+    "subject": "Lenguaje y Comunicación",
+    "subjectCode": "LANG",
+    "grade": "I° Medio",
+    "gradeCode": "1ST_MEDIO",
+    "year": 2026,
+    "applicationPeriod": "diagnostico",
+    "type": "dia",
+    "isOfficial": true,
+    "source": "imported"
+  },
+  "sections": [
+    {
+      "order": 1,
+      "name": "Texto 1: «El sabio que tomó el poder»",
+      "type": "mixed",
+      "instructions": "Lee el siguiente texto y responde las preguntas 1 a 6.",
+      "passage": {
+        "title": "El sabio que tomó el poder",
+        "text": "Un día, hace muchos años, el Mono advirtió que entre todos los animales era él quien contaba con la descendencia más inteligente, o sea el hombre.\nAnimado por esta revelación empezó a estudiar un gran lote de libros arrumbados desde hace mucho en su casa y, a medida que leía, aprendía a conducirse como ser importante frente a las situaciones más comunes.\nFue tal su empeño que en poco tiempo hizo enormes progresos, aconsejado por la Zorra en política y en saber por el Búho y la Serpiente.\nDe esta manera, ante el asombro de los inocentes, pronto inició su ascenso a la cumbre, hasta que llegó el día en que amigos y enemigos lo saludaron secretario del León.\nSin embargo, durante un insomnio (en los que había caído desde que sabía que sabía tanto), el Mono hizo aún otro descubrimiento sensacional: la injusticia de que el León, que contaba únicamente con su fuerza y el miedo de los demás, fuera su jefe; y él, que si quisiera, según leyó no recordaba dónde, con un poco de tesón podía escribir otra vez los sonetos de Shakespeare, un mero subalterno.\nA la mañana siguiente, armado de valor y aclarando una y otra vez la garganta, durante más de una hora expuso al León con largas y elaboradas razones la teoría de que de acuerdo con la lógica más elemental los papeles debían cambiarse, pues para cualquiera con dos dedos de frente era fácil ver cómo lo aventajaba en descendencia y, por supuesto, en sabiduría.\nEl León, que intrigado por el vuelo de una Mosca en ningún momento había bajado la vista del techo, estuvo conforme con todo, en ese mismo instante le cambió la corona por la pluma y, asomándose al balcón, anunció el cambio a la ciudad y al mundo.\nDe ahí en adelante, cuando el Mono le ordenaba algo, el León, siempre de acuerdo, asentía invariablemente con un zarpazo; y cuando el Mono lo regañaba por alguna orden mal entendida o por un discurso mal redactado, con dos o tres; hasta que, pasado poco tiempo, en el cuerpo del nuevo rey, o sea el Mono sabio, no iba quedando sitio del que no manara sangre, o cosas peores.\nPor último el Mono, casi de rodillas, rogó al León volver al anterior estado de cosas, a lo que el León, aburrido como desde hacía mil años, le respondió con un bostezo que sí, y con otro que estaba bien, que volvieran al anterior estado de cosas, y le recibió la corona y le devolvió la pluma, y desde entonces el Mono conserva la pluma y el León la corona.\n\nAugusto Monterroso. La Oveja negra y otras fábulas. México: Joaquín Mortiz, 1969. (Adaptación).",
+        "format": "plain",
+        "attachments": []
+      },
+      "items": [
+        {
+          "position": 1,
+          "type": "multiple_choice",
+          "stem": "¿Quién aconsejaba al Mono en política?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "El León.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "El Búho.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "La Zorra.",
+              "isCorrect": true
+            },
+            {
+              "key": "D",
+              "text": "La Serpiente.",
+              "isCorrect": false
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "C",
+          "skill": "Localizar",
+          "oa": "OA 3",
+          "contentAxis": "Narración",
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Localizan información explícita relevante en un texto literario. Infieren información relevante sobre personajes en un"
+        },
+        {
+          "position": 2,
+          "type": "multiple_choice",
+          "stem": "¿Qué actitud del León se destaca en el relato?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Su valor.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Su astucia.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Su ambición.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "Su indiferencia.",
+              "isCorrect": true
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "D",
+          "skill": "Interpretar y relacionar",
+          "oa": "OA 3",
+          "contentAxis": "Narración",
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Infieren información relevante sobre personajes en un texto literario. Infieren información relevante sobre personajes en un"
+        },
+        {
+          "position": 3,
+          "type": "multiple_choice",
+          "stem": "Según el relato, ¿por qué el Mono tenía insomnio?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Porque tenía más responsabilidades que los demás.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Porque había tomado consciencia de su sabiduría.",
+              "isCorrect": true
+            },
+            {
+              "key": "C",
+              "text": "Porque le inquietaban las injusticias del reino.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "Porque leía en exceso en las noches.",
+              "isCorrect": false
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "B",
+          "skill": "Interpretar y relacionar",
+          "oa": "OA 3",
+          "contentAxis": "Narración",
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Infieren información relevante sobre personajes en un texto literario. Infieren información relevante sobre personajes en un"
+        },
+        {
+          "position": 4,
+          "type": "multiple_choice",
+          "stem": "¿Por qué el Mono le propuso al León cambiar de roles?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Porque creía que así combatiría su insomnio.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Porque deseaba seguir los consejos de los animales.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Porque creía que estaba más capacitado para gobernar.",
+              "isCorrect": true
+            },
+            {
+              "key": "D",
+              "text": "Porque deseaba conseguir el reconocimiento del pueblo.",
+              "isCorrect": false
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "C",
+          "skill": "Interpretar y relacionar",
+          "oa": "OA 3",
+          "contentAxis": "Narración",
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Infieren información relevante sobre personajes en un texto literario. Infieren información relevante sobre personajes en un"
+        },
+        {
+          "position": 5,
+          "type": "multiple_choice",
+          "stem": "¿Qué rol ocupa quien posee la pluma en el reino de los animales?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Rey.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Sabio.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Consejero.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "Secretario.",
+              "isCorrect": true
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "D",
+          "skill": "Interpretar y relacionar",
+          "oa": "OA 3",
+          "contentAxis": "Narración",
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Infieren información relevante sobre personajes en un texto literario. Formulan una interpretación o postura personal sobre"
+        },
+        {
+          "position": 6,
+          "type": "open_ended",
+          "stem": "De acuerdo con lo que leíste, ¿quién posee mejores cualidades para ser rey?\nMarca tu elección:\nLeón\nMono\nFundamenta con información del texto.",
+          "alternatives": [],
+          "responseFormat": "develop",
+          "correctKey": null,
+          "skill": "Reflexionar",
+          "oa": "OA 8",
+          "contentAxis": "Narración",
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Formulan una interpretación o postura personal sobre el sentido de un texto literario o un aspecto de este.",
+          "rubric": "Tipos de respuestas Respuestas correctas Respuestas parcialmente Respuestas incorrectas (Código 2) correctas (Código 1) (Código 0) El/la estudiante escoge a uno de los El/la estudiante escoge a uno de los El/la estudiante puede o no escoger a personajes y fundamenta su respuesta personajes que considera posee uno de los personajes, pero al aludiendo a alguna de las características mejores cualidades para ser rey, pero fundamentar utiliza información del del León o del Mono mencionadas en el fundamenta su respuesta aludiendo a texto que no tiene relación con el texto (de manera explícita o implícita), características que, si bien se personaje escogido, realiza una que podrían relacionarse con cualidades mencionan en el texto, no tienen una interpretación errónea, o bien, no para ser rey. Por ejemplo, inteligencia, clara relación con las cualidades fundamenta su respuesta. sabiduría, fuerza, inspirar miedo, tesón, requeridas para ostentar este cargo. Otras respuestas incorrectas son las templanza, esfuerzo, preparación, Puede o no incluir información de sus tautológicas, vagas, contradictorias, conocimiento, entre otras. conocimientos propios o experiencia incoherentes y en blanco. Puede o no incluir información de sus previa. conocimientos propios o experiencias previas para complementar su respuesta. Ejemplos: Ejemplos : Ejemplos : Elige Mono y fundamenta con Elige Mono y fundamenta con - Mono, porque el León ya había • • información como: información como: sido rey. - Tuvo un ascenso, un desarrollo, se - Porque había recibido consejos de - León, porque era el más justo. preparó, leyó, progresó. la zorra, el búho y la serpiente. - Mono, porque el León disfrutaba - Estaba intelectualmente más - Porque era secretario del León. las moscas y otras cosas. preparado que el león. - Porque le gustaba leer. - Tenía ventaja sobre el león en descendencia y sabiduría. Elige León y fundamenta con • - El león solo tenía fuerza y generaba información como: miedo a los demás. - Porque era el jefe del mono. - El león se distraía fácilmente. Era - Porque el león siempre ha sido el obediente y no cuestionaba. rey de la selva. - El león reaccionaba con zarpazos. Elige León y fundamenta con • argumentos como: - No se angustiaba por los problemas del reino y mantenía la calma. - Tenía fuerza y los demás lo respetaban. - Mantenía su tranquilidad porque no se cuestionaba todo en exceso. Ficha Técnica Prueba de Lectura I medio"
+        }
+      ]
+    },
+    {
+      "order": 2,
+      "name": "Texto 2: «El Kulxun»",
+      "type": "multiple_choice",
+      "instructions": "Lee el siguiente texto y responde las preguntas 7 a 10.",
+      "passage": {
+        "title": "El Kulxun",
+        "text": "El Kulxun es muy sagrado,\nno lo toca cualquiera\nes solicitado en sueño,\nporque simboliza la tierra.\n\nCuando ya tiene un dueño\npasa a ser divino,\nporque guarda los secretos\nde un arte único.\n\nCuando su dueño fallece,\nes mejor destruirlo,\npero no en cualquier parte:\neste se bota al río.\n\nEl horario preciso,\nes siempre en atardecer,\nporque se queda dormido,\nlo que se llama poder.\n\nAllí la corriente del agua\njunto a la puesta de sol\nse llevan las energías,\nde regreso al Creador.\n\nLas fuerzas encerradas,\nson liberadas en el mar,\nentonces se quedan perdidas,\ndormidas por la eternidad.\n\nGlosario\nKulxun: tambor mapuche, también llamado “Kultrún” que contiene en su interior objetos sagrados y es usado por los chamanes en rituales.\n\nMora, M., Moraga, F., Caniguán, J. (Eds.). Kümedungon/ Kümewirin. Antología poética de mujeres mapuche (siglos XX y XXI). Santiago: LOM Ediciones, 2010.",
+        "format": "plain",
+        "attachments": [
+          {
+            "kind": "image",
+            "note": "Ilustración decorativa de un Kulxun (tambor mapuche / kultrún) junto al poema. No aporta información necesaria para responder."
+          }
+        ]
+      },
+      "items": [
+        {
+          "position": 7,
+          "type": "multiple_choice",
+          "stem": "¿De qué trata el poema?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Del dueño del Kulxun.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "De los secretos del Kulxun.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Del arte asociado al Kulxun.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "De la función sagrada del Kulxun.",
+              "isCorrect": true
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "D",
+          "skill": "Interpretar y relacionar",
+          "oa": "OA 4",
+          "contentAxis": "Poema",
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Infieren el sentido global de un texto literario. Establecen conclusiones sobre distintos aspectos en"
+        },
+        {
+          "position": 8,
+          "type": "multiple_choice",
+          "stem": "¿Qué característica del Kulxun se destaca en el poema?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Su fuerza creadora.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Su conexión con el mar.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Su carácter sobrenatural.",
+              "isCorrect": true
+            },
+            {
+              "key": "D",
+              "text": "Su relación con el tiempo.",
+              "isCorrect": false
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "C",
+          "skill": "Interpretar y relacionar",
+          "oa": "OA 4",
+          "contentAxis": "Poema",
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Establecen conclusiones sobre distintos aspectos en un poema. Establecen conclusiones sobre distintos aspectos en"
+        },
+        {
+          "position": 9,
+          "type": "multiple_choice",
+          "stem": "¿A qué se refieren los versos: “se llevan las energías, /de regreso al Creador”?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "A que el Kulxun regresa al mar.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "A que el poder del Kulxun vuelve a su origen.",
+              "isCorrect": true
+            },
+            {
+              "key": "C",
+              "text": "A que el Kulxun devuelve la fuerza a su dueño.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "A que el alma del dueño del Kulxun vuelve a la eternidad.",
+              "isCorrect": false
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "B",
+          "skill": "Interpretar y relacionar",
+          "oa": "OA 4",
+          "contentAxis": "Poema",
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Establecen conclusiones sobre distintos aspectos en un poema. Establecen conclusiones sobre distintos aspectos en"
+        },
+        {
+          "position": 10,
+          "type": "multiple_choice",
+          "stem": "¿Cómo es la atmósfera en el poema?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Triste.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Mística.",
+              "isCorrect": true
+            },
+            {
+              "key": "C",
+              "text": "Sombría.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "Compasiva.",
+              "isCorrect": false
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "B",
+          "skill": "Interpretar y relacionar",
+          "oa": "OA 4",
+          "contentAxis": "Poema",
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Establecen conclusiones sobre distintos aspectos en un poema. Localizan información explícita relevante en un texto"
+        }
+      ]
+    },
+    {
+      "order": 3,
+      "name": "Texto 3: «Día internacional de la limpieza de playas: una solución aguas abajo»",
+      "type": "multiple_choice",
+      "instructions": "Lee el siguiente texto y responde las preguntas 11 a 16.",
+      "passage": {
+        "title": "Día internacional de la limpieza de playas: una solución aguas abajo",
+        "text": "Columna de Opinión\n\nDía internacional de la limpieza de playas: una solución aguas abajo\nUna columna de opinión de Mark Minneboo, Director Regional para Latinoamérica de Plastic Oceans International.\n1 de octubre de 2022 | 15:00\n\nEste 30 de septiembre celebramos un nuevo Día Internacional de Limpieza de Playas en nuestro país. Como tradición de los últimos años, más de 100 playas serán limpiadas por voluntarios, distintas ONG, comunidades o colegios, bajo el liderazgo de la Armada de Chile. Seguramente se extraerán toneladas de basura desde las playas, ríos, lagos y, en algunos casos, desde el fondo marino.\nSi bien se trata de un problema mundial, en Chile no estamos ajenos a esta situación crítica provocada por el mal uso y manejo de productos plásticos. Una situación preocupante que se ve aún más complicada después de la pandemia, por todas las mascarillas de un solo uso que ahora también se encuentran en el medioambiente, provocando el mismo daño que otros plásticos.\nDesde los inicios de Plastic Oceans Chile lo dijimos y lo seguimos diciendo: limpiar playas es una solución inmediata, pero no es suficiente para revertir el problema de fondo. Limpiar es el recurso al cual podemos recurrir en este momento, pero la contaminación del océano es un problema que debemos afrontar de manera seria y en conjunto para evitar un desastre ambiental a largo plazo.\nCada vez hay más conciencia sobre esta crisis en nuestro país, y se está haciendo una gran labor de limpiar nuestras costas desde Arica a Punta Arenas y Rapa Nui. En algunos casos específicos, también se está reciclando material contaminante que antes se desechaba (como los cabos, las redes y boyas que se encuentran en la Patagonia, por ejemplo). Son materiales que en su momento fueron mal manejados por la industria local y hoy están siendo recogidos y convertidos en productos nuevos de alto valor. Si bien se están tomando medidas para evitar la basura en los océanos, el problema va más allá: más de la mitad de los desechos recogidos en las limpiezas de playas termina en vertederos locales.\nSeamos realistas: por más playas que limpiemos, si seguimos produciendo y consumiendo la cantidad actual de plástico, no veremos nunca el fin de esta crisis. Tenemos que reducir nuestro consumo. ¡Y no me refiero a la reducción de un producto específico, sino de todo! La contaminación se genera en todo el ciclo de vida de la producción de productos plásticos: desde la extracción, transporte (desde otro lado del mundo), uso y gestión final.\nY no son solo los envases y embalajes los que generan problemas. Son muchos más productos: los textiles, los productos de belleza, la industria pesquera, los neumáticos y un larguísimo etcétera. Son parte de un puzle de la contaminación bien complejo, un puzle que no se va a resolver con una jornada de limpieza.\nTenemos que terminar con esta “visión de rendija”, en la que perdemos de vista el panorama global que atañe a la contaminación por plástico, mientras continuamos pensando y reduciendo el tema a un problema de gestión de basura y de envases. Podemos sacar la basura de las playas, pero la basura seguirá estando en vertederos.\nEl problema final es un problema sistémico del cual todos somos parte. Necesitamos soluciones que no sean superficiales, sino tanto “aguas arriba” como “aguas abajo”, o de lo contrario la contaminación se va a duplicar en los próximos 20 años. Revertir este problema depende de un cambio cultural y regulatorio que nos involucre a todos: estado, empresas, investigadores y sociedad civil. Necesitamos un pack completo de soluciones que provea un incentivo potente para que la sociedad civil sea parte de la transición y del cambio cultural: que el foco no esté en arreglar, sino en prevenir.\nEspero que nuevamente miles de chilenos y chilenas se sumen a las limpiezas este año, pero que, mientras caminan por las playas recogiendo basura, también reflexionen acerca de cómo evitar que ese plástico llegue a una playa, para que ojalá el próximo año no debamos regresar a ese mismo lugar para recoger basura, sino para disfrutar el paisaje natural.\n\nGlosario\nOrganización no gubernamental (ONG): institución sin ánimo de lucro que no depende del gobierno y realiza actividades de interés social.\n\nMark Minneboo. “Día internacional de la limpieza de playas: una solución aguas abajo”. Diario Sostenible. [Santiago, Chile]. 1 oct 2022. Web. 30 jun 2023. (Adaptación).",
+        "format": "plain",
+        "attachments": []
+      },
+      "items": [
+        {
+          "position": 11,
+          "type": "multiple_choice",
+          "stem": "¿Quiénes lideran la limpieza de playas?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "La ONG Plastic Ocean.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "La Armada de Chile.",
+              "isCorrect": true
+            },
+            {
+              "key": "C",
+              "text": "Las comunidades.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "Los voluntarios.",
+              "isCorrect": false
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "B",
+          "skill": "Localizar",
+          "oa": "OA 9",
+          "contentAxis": null,
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Localizan información explícita relevante en un texto de los medios de comunicación. Localizan información explícita relevante en un texto"
+        },
+        {
+          "position": 12,
+          "type": "multiple_choice",
+          "stem": "Según el autor, ¿dónde se está reciclando material contaminante que antes era desechado?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "En Arica.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "En Rapa Nui.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "En Patagonia.",
+              "isCorrect": true
+            },
+            {
+              "key": "D",
+              "text": "En Punta Arenas.",
+              "isCorrect": false
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "C",
+          "skill": "Localizar",
+          "oa": "OA 9",
+          "contentAxis": null,
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Localizan información explícita relevante en un texto de los medios de comunicación. Infieren la postura o tesis del autor en un texto de los"
+        },
+        {
+          "position": 13,
+          "type": "multiple_choice",
+          "stem": "¿Qué postura tiene el autor respecto de la iniciativa de limpieza de playas?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Que es una medida inútil si no se realiza también en el fondo marino.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Que es una medida insostenible si no se suman más voluntarios a la causa.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Que es una medida ineficiente si no se establece el trabajo en distintas zonas del país.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "Que es una medida insuficiente si no se aborda el origen del problema medioambiental.",
+              "isCorrect": true
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "D",
+          "skill": "Interpretar y relacionar",
+          "oa": "OA 9",
+          "contentAxis": null,
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Infieren la postura o tesis del autor en un texto de los medios de comunicación. Infieren información relevante en un texto de los"
+        },
+        {
+          "position": 14,
+          "type": "multiple_choice",
+          "stem": "Según el autor, ¿cuál es la acción más efectiva para combatir la contaminación por plásticos?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Recoger anualmente los plásticos de las playas.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Disminuir la producción y consumo de productos plásticos.",
+              "isCorrect": true
+            },
+            {
+              "key": "C",
+              "text": "Desechar los productos plásticos en los vertederos locales.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "Capacitar a las industrias locales en el uso y gestión del plástico.",
+              "isCorrect": false
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "B",
+          "skill": "Interpretar y relacionar",
+          "oa": "OA 9",
+          "contentAxis": null,
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Infieren información relevante en un texto de los medios de comunicación. Distinguen un hecho de una opinión en un texto de los"
+        },
+        {
+          "position": 15,
+          "type": "multiple_choice",
+          "stem": "¿Cuál de las siguientes citas corresponde a una opinión del autor del texto?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "“Como tradición de los últimos años, más de 100 playas serán limpiadas por voluntarios”.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "“La contaminación se genera en todo el ciclo de vida de la producción de productos plásticos”.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "“Revertir este problema depende de un cambio cultural y regulatorio que nos involucre a todos”.",
+              "isCorrect": true
+            },
+            {
+              "key": "D",
+              "text": "“Este 30 de septiembre celebramos un nuevo Día Internacional de Limpieza de Playas en nuestro país”.",
+              "isCorrect": false
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "C",
+          "skill": "Reflexionar",
+          "oa": "OA 9",
+          "contentAxis": null,
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Distinguen un hecho de una opinión en un texto de los medios de comunicación. Determinan propósitos explícitos e implícitos en un"
+        },
+        {
+          "position": 16,
+          "type": "multiple_choice",
+          "stem": "¿Con qué propósito se escribe esta columna?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Explicar el ciclo de producción de los productos contaminantes.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Denunciar a las empresas que fabrican productos contaminantes.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Motivar a participar de campañas para recoger productos contaminantes.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "Convencer sobre la necesidad de reducir el uso de productos contaminantes.",
+              "isCorrect": true
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "D",
+          "skill": "Reflexionar",
+          "oa": "OA 9",
+          "contentAxis": null,
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Determinan propósitos explícitos e implícitos en un texto de los medios de comunicación. Infieren información relevante sobre personajes en un"
+        }
+      ]
+    },
+    {
+      "order": 4,
+      "name": "Texto 4: «El tony chico»",
+      "type": "mixed",
+      "instructions": "Lee el siguiente texto y responde las preguntas 17 a 22.",
+      "passage": {
+        "title": "El tony chico",
+        "text": "Por Luis Alberto Heiremans\n\nESCENA 12\n(Hay en la lejanía un ir y venir de personas, algunos ruidos, el afinar súbito de instrumentos).\nLANDA: ¿Y tú no tienes que trabajar?\nJUANUCHO: No, señor.\nLANDA: ¿No haces ningún número?\nJUANUCHO: El Capitán trató de enseñarme, pero no pude aprender.\nLANDA: ¿Qué cosas?\nJUANUCHO: Unas cuestiones de equilibrio, pero me caía siempre.\nLANDA: Quizás habrías podido aprender otra cosa.\nJUANUCHO: No quiso.\nLANDA: ¿Y qué haces entonces?\nJUANUCHO: Me tienen para los mandados.\nLANDA: Mejor que te vayas para allá entonces.\nJUANUCHO: Al Capitán no le gusta verme durante la función. Dice que lo pongo nervioso.\n(Landa comienza a buscar entre las ropas, encontrando una chaqueta larga).\nLANDA: ¿Cómo me queda esta chaqueta?\nJUANUCHO: Se ve bien.\nLANDA: No nos tenemos que demorar... ¡Ayudante!\nJUANUCHO: Mande.\nLANDA: ¿Dónde dejaste la caja con pinturas?\nJUANUCHO: Aquí está.\nLANDA: Voy a hacerme una boca grande, colorada. ¿Habrá pintura colorada?\nJUANUCHO: Aquí.\nLANDA: Con las puntas levantadas como si me estuviera riendo.\nJUANUCHO: El otro tony tenía una boca chica.\nLANDA: Pero Landa la tendrá grande. Para hablar poco. Pásame el negro.\nJUANUCHO: Aquí está.\nLANDA: Me voy a pintar dos líneas negras bajo los ojos, como si hubiera llorado carbón... Y lo demás todo blanco... blanco...\nJUANUCHO: ¡Blanco!\nLANDA: (De pronto). ¡Como ellos!\nJUANUCHO: ¿Quiénes, señor Landa?\nLANDA: Mis ángeles. Algún día te contaré.\nJUANUCHO: Si ya me lo contó hace un rato.\nLANDA: ¿Te lo conté?\nJUANUCHO: Claro. Dijo que se habían perdido y que los andaba buscando.\nVOZ DEL CAPITÁN: ¡Landa! ¡Landa! Ya vamos a empezar...\nLANDA: (Gritando). ¡Voy!\n(Poco a poco, a medida que transcurre la escena anterior, Landa se ha ido metamorfoseando en tony. Y ahora cuando se yergue bajo el haz de luz, habla con el tono alto y monocorde de un tony).\nLANDA: ¡Señor Juanucho!\nJUANUCHO: Mande.\nLANDA: ¡Le apuesto cien pesos que no sabe en qué se parecen un bombero a una naranja y a mi tía!\nJUANUCHO: ¿Una naranja... a un bombero y a mi tía?\nLANDA: No, no, no... a mi tía.\nJUANUCHO: ¿A su tía? Este...\nLANDA: A la una.\nJUANUCHO: ¿Un bombero?\nLANDA: A las dos.\nJUANUCHO: ¿A una naranja?\nLANDA: ¡Y a las tres! Perdió, señor, perdió, perdió... En que un bombero usa casco y una naranja tiene cascos. ¿Ve? Perdió, perdió, perdió...\nJUANUCHO: ¿Y su tía?\nLANDA: Está bien, gracias. (Ríe y de pronto con un gesto instintivo traza una línea de negro sobre la mejilla del niño...). Oye, cabro; ¿y si te transformara en tony?\nJUANUCHO: ¿A mí?\nLANDA: ¡Sí! Un tony más chico... que me contestara. Podríamos trabajar juntos.\nJUANUCHO: El Capitán dice que yo no puedo aprender nada.\nLANDA: Es que él no ha sabido enseñarte. ¿Te gustaría aprender?\nJUANUCHO: Sí, señor.\nLANDA: Vas a tener que llamarme señor Landa. Los tonies tienen nombre.\nJUANUCHO: (Con algo de entonación de tony en su voz). Sí, señor Landa.\nLANDA: Acérquese entonces, señor Juanucho. Lo primero es sentir lo que uno va a hacer... Piensa en un tony. En el tony que te gustaría ser. (El niño cierra los ojos). ¿Lo ves?\nJUANUCHO: Sí, señor Landa.\nLANDA: Ahora abre los ojos. ¡Y no vayas a olvidar el tony que acabas de ver! Escoge ahí la chaqueta que tenía... (El niño obedece y se pone una chaqueta). Y tenía una peluca, ¿no es cierto?\n(El niño asiente. Landa le coloca una). Y tenía una nariz... ¿cómo era?\nJUANUCHO: Gorda. Como un botón de abrigo.\nLANDA: (Colocándole una nariz con un elástico). Como un botón de abrigo, señor Juanucho. ¿Y qué más? ¿Qué más?\nJUANUCHO: Un paraguas.\nLANDA: Un paraguas, señor Juanucho. ¡Dos paraguas! Uno para usted y otro para yo.\nJUANUCHO: (Encontrando los paraguas). Uno para usted y otro para yo.\nLANDA: (Los dos ya están convertidos en tonies). ¡Señor Juanucho!\nJUANUCHO: ¡Dígame, señor Landa!\nLANDA: ¿Qué le parece si fuéramos a dar una vuelta en bote?\nJUANUCHO: Mire, mal no me parece, señor Landa.\nLANDA: Tenga cuidado cuando suba al bote, señor Juanucho.\nJUANUCHO: ¡Vamos!\nLANDA: ¿Y a dónde le gustaría ir, señor Juanucho?\nJUANUCHO: (Olvidándose de su papel de tony). Al mar.\nLANDA: Hacia allá vamos entonces. Siga remando, señor Juanucho. Mire que el camino es largo y el Paraíso queda lejos.\nJUANUCHO: ¿Allá vamos?\nLANDA: Allá parece. (Pero pronto pierde su voz de tony. Parece recordar). Parece que allá están los ángeles que tanto busco.\nVOZ DEL CAPITÁN: ¡Landa! A dónde se ha metido, carajo. La función ya va a empezar.\nLANDA: ¡Voy! (Volviéndose a Juanucho). ¿Vamos?\nJUANUCHO: ¿Conmigo?\nLANDA: (Con voz de tony). Claro que sí, señor Juanucho: ¡Con usted!\n\nNorma Alcamán Riffo (Ed.). Teatro completo de Luis Alberto Heiremans. Santiago de Chile: RIL editores. Corporación del Patrimonio Cultural, 2002. (Fragmento).",
+        "format": "plain",
+        "attachments": []
+      },
+      "items": [
+        {
+          "position": 17,
+          "type": "multiple_choice",
+          "stem": "¿Qué rol cumple Landa en el circo?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Es el dueño.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Es un payaso.",
+              "isCorrect": true
+            },
+            {
+              "key": "C",
+              "text": "Es el ayudante.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "Es un equilibrista.",
+              "isCorrect": false
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "B",
+          "skill": "Interpretar y relacionar",
+          "oa": "OA 8",
+          "contentAxis": null,
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Infieren información relevante sobre personajes en un texto literario. Realizan inferencias sobre acontecimientos o acciones"
+        },
+        {
+          "position": 18,
+          "type": "multiple_choice",
+          "stem": "¿Qué hace que Landa recuerde a sus ángeles la primera vez?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Las líneas negras bajo sus ojos.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Las preguntas de Juanucho.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "La voz del capitán.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "La pintura blanca.",
+              "isCorrect": true
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "D",
+          "skill": "Interpretar y relacionar",
+          "oa": "OA 8",
+          "contentAxis": null,
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Realizan inferencias sobre acontecimientos o acciones relevantes en un texto literario. Realizan inferencias sobre acontecimientos o acciones"
+        },
+        {
+          "position": 19,
+          "type": "multiple_choice",
+          "stem": "¿Por qué Juanucho se dedicaba a los mandados?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Porque había rechazado las otras labores que le habían ofrecido.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Porque al Capitán le parecía que desempeñaba bien esa labor.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Porque fue incapaz de aprender un número de equilibrio.",
+              "isCorrect": true
+            },
+            {
+              "key": "D",
+              "text": "Porque así podía ayudar a Landa a realizar su trabajo.",
+              "isCorrect": false
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "C",
+          "skill": "Interpretar y relacionar",
+          "oa": "OA 8",
+          "contentAxis": null,
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Realizan inferencias sobre acontecimientos o acciones relevantes en un texto literario. Caracterizan las relaciones entre los personajes en un"
+        },
+        {
+          "position": 20,
+          "type": "multiple_choice",
+          "stem": "¿Cómo trata Landa a Juanucho?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Firmemente.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Burlonamente.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Educadamente.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "Afectuosamente.",
+              "isCorrect": true
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "D",
+          "skill": "Interpretar y relacionar",
+          "oa": "OA 8",
+          "contentAxis": null,
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Caracterizan las relaciones entre los personajes en un texto literario. Determinan prejuicios, estereotipos y creencias en un"
+        },
+        {
+          "position": 21,
+          "type": "multiple_choice",
+          "stem": "¿Qué visión del trabajo en el circo se desprende del texto?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Que solo los adultos pueden realizar actos circenses.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Que solo los niños pueden escoger qué tipo de oficio realizar.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Que todas las personas deben tener un oficio independiente de su edad.",
+              "isCorrect": true
+            },
+            {
+              "key": "D",
+              "text": "Que todas las personas deben realizar un acto circense adecuado a su edad.",
+              "isCorrect": false
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "C",
+          "skill": "Reflexionar",
+          "oa": "OA 8",
+          "contentAxis": null,
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Determinan prejuicios, estereotipos y creencias en un texto literario."
+        },
+        {
+          "position": 22,
+          "type": "open_ended",
+          "stem": "Considerando el fragmento leído, ¿estás de acuerdo con que Juanucho deba trabajar dentro del circo?\nMarca tu respuesta:\nSí\nNo\nFundamenta con información del texto.",
+          "alternatives": [],
+          "responseFormat": "develop",
+          "correctKey": null,
+          "skill": "Reflexionar",
+          "oa": "OA 8",
+          "contentAxis": null,
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Formulan una interpretación o postura personal sobre el sentido de un texto literario o un aspecto de este. Localizan información explícita relevante en un texto",
+          "rubric": "Tipos de respuestas Respuestas correctas Respuestas parcialmente Respuestas incorrectas (Código 2) correctas (Código 1) (Código 0) El/la estudiante escoge Sí o No para El/la estudiante escoge Sí o No para El/la estudiante puede o no manifestar su postura en torno al trabajo manifestar su postura en torno al manifestar su postura en torno al ejercido por el personaje y fundamenta su trabajo ejercido por el personaje. Sin trabajo ejercido por el personaje. Sin respuesta haciendo referencia a algún embargo, en su fundamentación embargo, en su respuesta no aspecto de la lectura que demuestra evidencia una comprensión parcial del evidencia una lectura comprensiva comprensión global de lo leído. Por texto, pues justifica su respuesta del texto, pues fundamenta con ejemplo, puede mencionar la relación que basándose en elementos locales que elementos que no se extraen tuvo Juanucho con Landa y/o la que tuvo no dan cuenta de una comprensión directamente de él. Por ejemplo, con el capitán, los beneficios o perjuicios global. Por ejemplo, que el niño puede apelar a conocimientos que esta actividad podría traerle al niño, contaba con una vestimenta adecuada generales de lo que es el circo, del entre otros. de payaso o que Landa era muy trabajo infantil, entre otros. agradable con él, entre otros. El/la estudiante puede incorporar algún Otras respuestas incorrectas son las aspecto de su experiencia personal, pero tautológicas, vagas, contradictorias, este debe estar al servicio de la incoherentes y en blanco. fundamentación con información del texto. Ejemplos: Ejemplos: Ejemplos: - Sí, porque de esa manera se sentiría - Yo creo que sí, porque tenía toda - No, porque el circo es un lugar útil dentro del circo y no estaría triste la ropa necesaria para hacerlo y para pasarlo bien. porque el capitán no lo dejó hacer un Landa se la prestó. - Sí, porque en los circos todos los número. - Yo creo que no, porque no que viven ahí trabajan. - Sí, porque así sería considerado como aprendía a hacer ningún truco, - Sí, pero depende de él. un artista y no solo como alguien para entonces este tampoco lo iba a - No, porque en el circo no pagan los mandados. aprender. bien. - Sí, porque él quiso aprender cuando - No, porque él estaba destinado a - No, porque en muchos circos Landa le ofreció que lo ayudara y eso los mandados. hay maltrato animal. lo hizo sentir mejor. - No, porque los niños deben - Sí, porque, aunque el capitán no tenía estudiar. paciencia y parece que no lo trataba muy bien, le dio un trabajo y nunca lo echó. Quizás porque eran familia como pasa en la mayoría de los circos y así él podía cooperar en los trabajos del circo. - No, porque pareciera que el capitán no lo consideraba para buenos trabajos. Lo menospreciaba. - No, porque el capitán no lo quería ver durante la función. Al tratarlo así, es mejor que se hubiera ido a otro lado. &gt; Diagnóstico Integral de Aprendizajes Instrumentos de Evaluación 2026 agenciaeducacion.cl"
+        }
+      ]
+    },
+    {
+      "order": 5,
+      "name": "Texto 5: «La edad del pavo»",
+      "type": "multiple_choice",
+      "instructions": "Lee el siguiente texto y responde las preguntas 23 a 26.",
+      "passage": {
+        "title": "LA EDAD DEL PAVO",
+        "text": "Hace calor y el agua, en este lugar, llega plácidamente a la orilla. Es una lata venir solo a la playa; pero mi prima, la Tomate, no ha querido acompañarme. (Ha dicho que tiene otro compromiso. ¿Qué compromiso puede tener ella, la ridícula?).\n—Métete por ahí, detrás de las rocas y te pones el traje de baño —me dice Laurencio—. Las casetas para desvestirse se las llevó el mar. La ropa puedes dejarla encargada al viejo cuidador de autos.\nUna vez superados los problemas de la ropa, camino hasta la orilla en traje de baño.\nDe pronto advierto que hay una muchacha espléndida, pero más alta que yo. Me parece que es Jacqueline, ¿estaré equivocado?\n¿Cómo podía calcular yo, en esa foto de la Revista Mariana Número 4, la verdadera estatura de mi querida niña, a la que nunca he visto sino en fotos?\nSuperando la nerviosidad que me embarga, le pregunto:\n—Dígame, señorita: ¿es usted Jacqueline?\nLa muchacha me observa. Con sus ojos fruncidos, pareciera llevar a cabo un verdadero inventario de mis espinillas.\n—No, no soy Jacqueline.\nEs muy cortante.\n—Perdón, no es… Pero, de todas maneras, ¿podríamos conversar?\n—Yo voy a nadar —dice ahora, algo más amable—. Me gusta hacerlo temprano, cuando aún no ha llegado toda la gente. ¿Vamos al agua?\nMe recorre un escalofrío que ella nota perfectamente.\n—Usted tiene piel de gallina —me dice, con mirada despectiva.\nSospecho, angustiado, que para ella, no soy más que una gallina.\nMe seduce su belleza olímpica, sus ojos pequeños, dos lucecitas de perversa inteligencia.\n—¿Cómo que no? ¿Quiere decirme que su piel es siempre así? Debiera consultar a un dermatólogo. ¿Cómo se llama usted?\n—Moncho.\n—Yo —dice ella mirando al mar— nado crawl.\nY sin saber cómo nos lanzamos al agua heladísima. Apenas dejo de topar fondo advierto, conforme al libro de “Cómo aprender a nadar en diez lecciones”, muy recomendado por don Narciso, que me estoy ahogando.\n—¡Señorita! —le grito.\nPero ella se ha internado en el mar sin que yo me alcance a dar bien cuenta cómo.\n—¿Qué le pasa? —me pregunta un niño pelirrojo al cual le bastan muy pocas brazadas para llegar hasta mi lado.\n—No sé. Yo aprendí a nadar por libro —y trago un poco más de agua.\nQuisiera decirle otra cosa, pero no puedo continuar: el mar me llena la boca.\n—¡Voy a avisarle a mi hermana! —grita el niño pelirrojo.\nUn caballero de edad, al parecer alemán, me instruye ahora.\n—Señog, oiga una conseja. Ahí está topando abajo togdavía. Haga la contraria de lo que está haciendo. Con la ola alta suba, no baje. Sálvese, no sea pogfiado.\nTrato de seguir dichas instrucciones de buena voluntad. Sobre todas las cosas quiero gritar: ¡Me estoy ahogando! Pero trago más agua y pierdo el conocimiento…\nCuando vuelvo en mí, disfruto de un beso dilatado, algo fantástico. Es la muchacha olímpica estilo crawl que, acompasadamente, me está haciendo respiración boca a boca.\n—¡Más, más! —alcanzo a musitar, antes de que ella, rodeada por una multitud de curiosos, me dé dos bofetadas para que reaccione de una vez por todas.\nAhora no soy más que un pingajo abandonado en una playa que, por desgracia, no se halla desierta.\nEl hermano chico de la nadadora, el pelirrojo, permanece a mi lado, con toda la insidia en su cara burlona.\nY lo peor es que no dice nada. Me mira no más…\n\nCarlos Ruiz Tagle. La Edad del Pavo. Santiago de Chile: Universitaria, 2006. (Fragmento).",
+        "format": "plain",
+        "attachments": []
+      },
+      "items": [
+        {
+          "position": 23,
+          "type": "multiple_choice",
+          "stem": "Al inicio del texto, ¿por qué Moncho siente “lata” de ir a la playa?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Porque está solo.",
+              "isCorrect": true
+            },
+            {
+              "key": "B",
+              "text": "Porque hace calor.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Porque el agua es heladísima.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "Porque tiene otro compromiso.",
+              "isCorrect": false
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "A",
+          "skill": "Localizar",
+          "oa": "OA 3",
+          "contentAxis": "Narración",
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Localizan información explícita relevante en un texto literario. Infieren información relevante sobre personajes en un"
+        },
+        {
+          "position": 24,
+          "type": "multiple_choice",
+          "stem": "¿Qué cualidad de la muchacha encanta a Moncho?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Su gran belleza.",
+              "isCorrect": true
+            },
+            {
+              "key": "B",
+              "text": "Su cabello rojizo.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Su acento extranjero.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "Su destreza deportiva.",
+              "isCorrect": false
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "A",
+          "skill": "Interpretar y relacionar",
+          "oa": "OA 3",
+          "contentAxis": "Narración",
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Infieren información relevante sobre personajes en un texto literario. Infieren información relevante sobre personajes en un"
+        },
+        {
+          "position": 25,
+          "type": "multiple_choice",
+          "stem": "Según Moncho, ¿por qué la muchacha lo abofeteó?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Porque se enojó al recibir un beso inesperado.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Porque quería que él recobrara la consciencia.",
+              "isCorrect": true
+            },
+            {
+              "key": "C",
+              "text": "Porque pensó que él se estaba burlando de ella.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "Porque se sintió avergonzada frente a la multitud.",
+              "isCorrect": false
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "B",
+          "skill": "Interpretar y relacionar",
+          "oa": "OA 3",
+          "contentAxis": "Narración",
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Infieren información relevante sobre personajes en un texto literario. Realizan inferencias sobre acontecimientos o acciones"
+        },
+        {
+          "position": 26,
+          "type": "multiple_choice",
+          "stem": "¿Quién logra finalmente salvar a Moncho de ahogarse?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "El niño pelirrojo.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Un señor alemán.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "La muchacha olímpica.",
+              "isCorrect": true
+            },
+            {
+              "key": "D",
+              "text": "Una multitud de curiosos.",
+              "isCorrect": false
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "C",
+          "skill": "Interpretar y relacionar",
+          "oa": "OA 3",
+          "contentAxis": "Narración",
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Realizan inferencias sobre acontecimientos o acciones relevantes en un texto literario. Infieren información relevante en un texto de los"
+        }
+      ]
+    },
+    {
+      "order": 6,
+      "name": "Texto 6: «El anti-influencer que se cansó de las estrellas de redes sociales y les cobra el doble por sus productos»",
+      "type": "multiple_choice",
+      "instructions": "Lee el siguiente texto y responde las preguntas 27 a 31.",
+      "passage": {
+        "title": "El anti-influencer que se cansó de las estrellas de redes sociales y les cobra el doble por sus productos",
+        "text": "Joe Nicchi tiene un camión de helados en Estados Unidos. Debido a los constantes pedidos para intercambios gratis por publicidad, decidió imponer una medida que lo ha beneficiado con el doble de clientes.\n\n04 de Julio de 2019 | 15:14 | Redactado por María José Hermosilla.\n\nEl comerciante de un popular camión de helados de la ciudad de Los Angeles, Estados Unidos, Joe Nicchi, no soportó más que llegaran día a día decenas de influencers de las redes sociales a pedirle productos gratis a cambio de fotografías en sus perfiles. CVT Soft Serve es el nombre del camión que durante los últimos meses ha estado recibiendo constantemente peticiones de los influencers de Instagram, quienes prometen fotos de los helados de Nicchi a cambio de estos gratis.\nEl dueño siempre se ha negado a las propuestas. Sin embargo, esta semana, cansado de los jóvenes y sus celulares, decidió que aplicaría una nueva medida para alejarlos: decirles públicamente que se alejen de su negocio.\n“Los influencers pagan el doble”, escribió en un letrero fuera de su camión. Además, compartió la imagen en su cuenta de Instagram, agregando “nunca te daría un helado gratis a cambio de un posteo”, bajo el hashtag #LosInfluencersSonUnAsco.\nA los pocos minutos las imágenes de Nicchi se volvieron virales en las redes sociales, y con estas además atrajo a cientos de turistas que comparten el mismo sentimiento de desprecio hacia los influencers a visitar su negocio, doblando el número de clientes en poco tiempo y aumentando también sus seguidores en Instagram.\n“Somos influencers de los anti-influencers”, aseguró ayer miércoles Nicchi durante una entrevista a The Guardian. “Es raro, pero creo que es muy divertido. Espero que pueda inspirar a pequeños negocios a mantenerse y decirle a esta gente que se aleje de nosotros”, añadió.\nA pesar de todo, el comerciante entiende la importancia de la publicidad. Ha estado trabajando como actor durante un tiempo, y en 2014 empezó el negocio de los helados como un complemento a su profesión para aumentar sus ingresos.\n“Esto es algo para ganar dinero. No puedo entregar helados gratis”, aseguró, añadiendo que había adquirido el camión después de un pago que recibió por grabar un comercial.\nUna de las cosas que hace que el camión sea muy atractivo para los fanáticos de las redes sociales, es su estilo vintage y las formas de sus helados de chocolate, vainilla o mezcla de ambos. Y, fue durante el primer año que se instaló en la ciudad, que empezó a recibir varios correos electrónicos de personas con seguidores en redes sociales que le ofrecían acuerdos de promociones a cambio de productos gratis.\n“Les encantaba usar la palabra exposición. Es tan ridículo”, aseguró el actor. Con el paso del tiempo las peticiones se volvieron más insistentes llegando a realizar las solicitudes en persona, lo que ponía en situaciones muy incómodas al vendedor, pero entendía que si las personas lo hacían es porque otros aceptaban sus tratos. “Aunque me encantaría, no creo que el colegio de mi hijo permita fotografías de celebridades a cambio del pago de la matrícula”, afirmó. “Quiero que las personas vayan a los restaurantes porque la comida y el servicio es fantástico”, añadió.\n\nMaría José Hermosilla. “El anti-influencer que se cansó de las estrellas de redes sociales y les cobra el doble por sus productos”. EMOL [Santiago, Chile] 4 de julio de 2019. Web.",
+        "format": "plain",
+        "attachments": []
+      },
+      "items": [
+        {
+          "position": 27,
+          "type": "multiple_choice",
+          "stem": "Según Nicchi, ¿de qué debería depender el éxito de un negocio?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "De la publicidad pagada.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "De la calidad del servicio.",
+              "isCorrect": true
+            },
+            {
+              "key": "C",
+              "text": "De la viralización de imágenes.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "De la exposición de los influencers.",
+              "isCorrect": false
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "B",
+          "skill": "Interpretar y relacionar",
+          "oa": "OA 10",
+          "contentAxis": null,
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Infieren información relevante en un texto de los medios de comunicación. Infieren información relevante en un texto de los"
+        },
+        {
+          "position": 28,
+          "type": "multiple_choice",
+          "stem": "¿Qué opinión tiene Nicchi de los influencers?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Que son personas consumidas por el internet.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Que son personas que solo desean exposición.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Que son personas que se aprovechan de su fama.",
+              "isCorrect": true
+            },
+            {
+              "key": "D",
+              "text": "Que son personas que menosprecian a sus seguidores.",
+              "isCorrect": false
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "C",
+          "skill": "Interpretar y relacionar",
+          "oa": "OA 10",
+          "contentAxis": null,
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Infieren información relevante en un texto de los medios de comunicación. Determinan propósitos explícitos e implícitos en un"
+        },
+        {
+          "position": 29,
+          "type": "multiple_choice",
+          "stem": "¿Cuál es el propósito del texto?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Criticar la reacción de un comerciante en relación al trabajo de los influencers.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Demostrar la importancia de los influencers al momento de publicitar un negocio.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Denunciar la manera en que los influencers usan las redes sociales para su beneficio.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "Dar a conocer una medida impuesta por un comerciante con respecto a los influencers.",
+              "isCorrect": true
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "D",
+          "skill": "Reflexionar",
+          "oa": "OA 10",
+          "contentAxis": null,
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Determinan propósitos explícitos e implícitos en un texto de los medios de comunicación. Distinguen un hecho de una opinión en un texto de los"
+        },
+        {
+          "position": 30,
+          "type": "multiple_choice",
+          "stem": "¿Cuál de las siguientes citas corresponde a una opinión de la autora del texto?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "“El dueño siempre se ha negado a las propuestas”.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "“Joe Nicchi tiene un camión de helados en Estados Unidos”.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "“A pesar de todo, el comerciante entiende la importancia de la publicidad”.",
+              "isCorrect": true
+            },
+            {
+              "key": "D",
+              "text": "“A los pocos minutos las imágenes de Nicchi se volvieron virales en las redes sociales”.",
+              "isCorrect": false
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "C",
+          "skill": "Reflexionar",
+          "oa": "OA 10",
+          "contentAxis": null,
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Distinguen un hecho de una opinión en un texto de los medios de comunicación. Infieren información relevante en un texto de los"
+        },
+        {
+          "position": 31,
+          "type": "multiple_choice",
+          "stem": "¿Qué característica de los influencers se destaca en el texto?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Su descontento con las imposiciones.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Su importancia en el campo publicitario.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Su afán por llamar la atención de la prensa.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "Su interés por intercambiar su imagen por mercancía.",
+              "isCorrect": true
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "D",
+          "skill": "Interpretar y relacionar",
+          "oa": "OA 10",
+          "contentAxis": null,
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Infieren información relevante en un texto de los medios de comunicación."
+        }
+      ]
+    }
+  ],
+  "extraction": {
+    "itemCount": 31,
+    "warnings": [
+      "Q6 y Q22 son ítems de desarrollo (open_ended / develop): el alumno marca una elección binaria (León/Mono; Sí/No) y fundamenta con información del texto. La elección binaria no se modela como alternatives (no es multiple_choice); queda descrita en el stem.",
+      "Texto 2 («El Kulxun») incluye una ilustración decorativa del tambor mapuche; no aporta información para responder. Se anota como attachment del passage.",
+      "Glosarios de los Textos 2 (Kulxun) y 3 (ONG) transcritos al final del passage respectivo.",
+      "Textos transcritos desde la capa de texto del PDF (pdftotext -layout), verbatim."
+    ],
+    "needsHumanReview": false,
+    "crossCheck": {
+      "hardIssues": [],
+      "softWarnings": [],
+      "counts": {
+        "cuadernillo": 31,
+        "ficha": 31,
+        "hoja": 31
+      }
+    }
+  },
+  "pauta": {
+    "source": {
+      "ficha": "I_TE DIA Diagnóstico lectura I° medio 2026.pdf",
+      "hoja": "I_Hoja de respuestas lectura I° medio 2026.pdf"
+    },
+    "appliedKeys": 29,
+    "rubrics": 2
+  }
+}

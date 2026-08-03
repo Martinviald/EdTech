@@ -31,7 +31,8 @@
             "kind": "image",
             "note": "Ilustración de una mosca posada sobre miel derramada (decorativa)."
           }
-        ]
+        ],
+        "imageRef": "item/global/4to-lenguaje-diagnostico-2025/section_figure/01.png"
       },
       "items": [
         {
@@ -335,7 +336,8 @@
             "kind": "image",
             "note": "Instructivo ilustrado con materiales y seis pasos, cada uno con una imagen del muñeco en construcción."
           }
-        ]
+        ],
+        "imageRef": "item/global/4to-lenguaje-diagnostico-2025/section_figure/02.png"
       },
       "items": [
         {
@@ -508,7 +510,8 @@
               "name": "Texto no literario",
               "tagType": "secondary"
             }
-          ]
+          ],
+          "imageRef": "item/global/4to-lenguaje-diagnostico-2025/item_figure/08.png"
         },
         {
           "position": 9,
@@ -624,7 +627,8 @@
             "kind": "image",
             "note": "Ilustración de animales apilados intentando alcanzar la luna (decorativa)."
           }
-        ]
+        ],
+        "imageRef": "item/global/4to-lenguaje-diagnostico-2025/section_figure/03.png"
       },
       "items": [
         {
@@ -907,7 +911,8 @@
         "title": "NASA descubre 7 planetas similares a la Tierra",
         "text": "22 de febrero de 2017\n\nNASA descubre 7 planetas similares a la Tierra\n\nSegún el hallazgo, tres de ellos serían habitables, ya que cuentan con océanos en su superficie.\n\nLa Administración Nacional de la Aeronáutica y del Espacio de Estados Unidos (NASA) reveló una importante información este miércoles. Se trata del hallazgo de un sistema que se encuentra a tan solo 39 años luz de distancia y que posee siete cuerpos del tamaño de la Tierra.\n\nEl autor principal del estudio, Michael Gillon, del Instituto STAR en la Universidad de Lieja (Bélgica), señaló que el descubrimiento representa un gran avance para el estudio de la vida más allá del Sistema Solar.\n\n“Se trata de un sistema planetario sorprendente, no solo porque hayamos encontrado tantos planetas, ¡sino porque son todos asombrosamente similares en tamaño a la Tierra!”, declaró el científico que logró identificarlos gracias a un telescopio ubicado en Chile.\n\nDe acuerdo a los datos, tres de los planetas descubiertos podrían calificarse como habitables, puesto que albergan océanos de agua en su superficie. En este sentido, el organismo comunicó que el resto de los cuerpos pueden poseer una temperatura en la superficie de entre 0 y 100 grados, rango en el que puede haber agua líquida.\n\nLos planetas recién descubiertos no tienen satélites naturales y giran en órbitas planas y ordenadas alrededor de TRAPPIST-1, una estrella enana ultra fría con un brillo cerca de mil veces menor al del Sol.\n\nTras una primera fase de reconocimiento, los científicos planean ahora iniciar observaciones detalladas para estudiar el clima y la composición química del hallazgo, con el objetivo de determinar si hay vida en ellos.\n\n“NASA descubre 7 planetas similares a la Tierra”. Diario Uchile [Santiago, Chile]. 22 feb. 2017. Web. 27 sep. 2019. (Adaptación).",
         "format": "plain",
-        "attachments": []
+        "attachments": [],
+        "imageRef": "item/global/4to-lenguaje-diagnostico-2025/section_figure/04.png"
       },
       "items": [
         {
@@ -1154,7 +1159,8 @@
             "kind": "image",
             "note": "Ilustración invernal acompañando el poema (decorativa)."
           }
-        ]
+        ],
+        "imageRef": "item/global/4to-lenguaje-diagnostico-2025/section_figure/05.png"
       },
       "items": [
         {

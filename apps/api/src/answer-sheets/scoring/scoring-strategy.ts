@@ -12,10 +12,11 @@
 // devuelven `requiresManualGrading: true` con scores null — NUNCA 0/incorrecto.
 // ─────────────────────────────────────────────────────────────────────────────
 
-import { isAutoScorable, type ItemContent, type ItemType } from '@soe/types';
+import { isAutoScorable, type ItemContent, type ItemType, type ScoringConfig } from '@soe/types';
 import {
   gapFillStrategy,
   matchingStrategy,
+  multiSelectStrategy,
   multipleChoiceStrategy,
   orderingStrategy,
   trueFalseStrategy,
@@ -23,7 +24,18 @@ import {
 
 /** Entrada de scoring: el ítem tipado + la respuesta cruda del alumno. */
 export interface ScoringInput {
-  item: { id: string; type: ItemType; content: ItemContent; maxScore: number };
+  item: {
+    id: string;
+    type: ItemType;
+    content: ItemContent;
+    maxScore: number;
+    /**
+     * Política de puntaje del ítem. `maxScore` ya sale de `scoringConfig.points`;
+     * esto lo acompaña para las estrategias cuyo puntaje NO es binario y depende
+     * de más configuración (`partialCredit`, `matching.pointsPerPair`, …).
+     */
+    scoringConfig?: ScoringConfig;
+  };
   /** Valor crudo del alumno (letra, texto, pares, orden, etc.). `null` = sin responder. */
   rawAnswer: unknown;
 }
@@ -53,6 +65,7 @@ const manualGradingStrategy: ScoringStrategy = {
 // ── Registro tipo → estrategia (punto de extensión único) ────────────────────
 export const SCORING_STRATEGIES: Record<ItemType, ScoringStrategy> = {
   multiple_choice: multipleChoiceStrategy,
+  multi_select: multiSelectStrategy,
   true_false: trueFalseStrategy,
   matching: matchingStrategy,
   ordering: orderingStrategy,

@@ -39,6 +39,9 @@ export const ROUTES = {
   evaluacionInformeAlumnoBase: (assessmentId: string) =>
     route(`/evaluaciones/${assessmentId}/informe-alumno`),
 
+  estudiantes: route('/estudiantes'),
+  estudiante: (studentId: string) => route(`/estudiantes/${studentId}`),
+
   resultados: route('/resultados'),
   resultadosClasificacion: route('/resultados/clasificacion'),
   resultadosComparacion: route('/resultados/comparacion'),
@@ -58,14 +61,17 @@ export const ROUTES = {
   importarDia: route('/importar-dia'),
   importarResultadosLegacy: route('/importar-resultados'),
 
-  bancoItems: route('/banco-items'),
-  bancoItemsExplorar: route('/banco-items/explorar'),
-  bancoItemsNuevo: route('/banco-items/nuevo'),
-  bancoItem: (instrumentId: string) => route(`/banco-items/${instrumentId}`),
-  bancoItemEtiquetar: (instrumentId: string) => route(`/banco-items/${instrumentId}/etiquetar`),
-  bancoItemSpecTable: (instrumentId: string) => route(`/banco-items/${instrumentId}/spec-table`),
+  bancoItems: route('/banco-contenido'),
+  bancoItemsExplorar: route('/banco-contenido/explorar'),
+  bancoItemsNuevo: route('/banco-contenido/nuevo'),
+  bancoColecciones: route('/banco-contenido/colecciones'),
+  bancoColeccion: (collectionId: string) => route(`/banco-contenido/colecciones/${collectionId}`),
+  bancoItem: (instrumentId: string) => route(`/banco-contenido/${instrumentId}`),
+  bancoItemEtiquetar: (instrumentId: string) => route(`/banco-contenido/${instrumentId}/etiquetar`),
+  bancoItemSpecTable: (instrumentId: string) =>
+    route(`/banco-contenido/${instrumentId}/spec-table`),
   bancoItemSpecTableCargar: (instrumentId: string) =>
-    route(`/banco-items/${instrumentId}/spec-table/cargar`),
+    route(`/banco-contenido/${instrumentId}/spec-table/cargar`),
 
   organizacion: route('/organizacion'),
   organizacionAsignaciones: route('/organizacion/asignaciones'),

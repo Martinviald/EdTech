@@ -9,9 +9,9 @@ import type { DashboardFilterValues } from './dashboard-filters';
  */
 export function dashboardFiltersToAssistantRefs(f: DashboardFilterValues): AssistantContextRef[] {
   const refs: AssistantContextRef[] = [];
-  if (f.subjectId) refs.push({ kind: 'subject', id: f.subjectId });
-  if (f.gradeId) refs.push({ kind: 'grade', id: f.gradeId });
-  if (f.classGroupId) refs.push({ kind: 'classGroup', id: f.classGroupId });
+  for (const id of f.subjectId ?? []) refs.push({ kind: 'subject', id });
+  for (const id of f.gradeId ?? []) refs.push({ kind: 'grade', id });
+  for (const id of f.classGroupId ?? []) refs.push({ kind: 'classGroup', id });
   if (f.studentId) refs.push({ kind: 'student', id: f.studentId });
   if (f.academicYearId) refs.push({ kind: 'academicYear', id: f.academicYearId });
   return refs;

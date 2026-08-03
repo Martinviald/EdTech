@@ -1,0 +1,604 @@
+{
+  "schemaVersion": "1.0",
+  "source": {
+    "file": "2_prueba_lectura_diagnostico_2026_02_basico.pdf",
+    "subjectFolder": "Lenguaje"
+  },
+  "instrument": {
+    "name": "DIA Lectura 2° Básico 2026 — Diagnóstico",
+    "subject": "Lenguaje y Comunicación",
+    "subjectCode": "LANG",
+    "grade": "2° Básico",
+    "gradeCode": "2ND_BASIC",
+    "year": 2026,
+    "applicationPeriod": "diagnostico",
+    "type": "dia",
+    "isOfficial": true,
+    "source": "imported"
+  },
+  "sections": [
+    {
+      "order": 1,
+      "name": "Texto 1: «El cumpleaños del señor león»",
+      "type": "multiple_choice",
+      "instructions": "Lee el siguiente texto y responde las preguntas 1 a 4.",
+      "passage": {
+        "title": "El cumpleaños del señor león",
+        "text": "La jirafa y la elefanta estaban conversando muy animadas. Y, ¿sabes de qué hablaban? Querían celebrarle el cumpleaños al señor león e invitar a todos los animales de la selva. La paloma y don búho fueron los encargados de avisar por toda la selva.\n\nAl otro día, con un sol radiante, los animales se pusieron a trabajar. Hicieron una gran torta que alcanzaría para todos. Formaron una orquesta y tenían todo preparado.\n\nEl monito tití fue el encargado de ir a buscar al león y su familia, que no sabían nada.\n\nCuando llegó, el león se emocionó mucho y se puso muy feliz. Sus amigos le cantaron el cumpleaños feliz y comenzó la celebración que duró toda una semana.\n\nMarta Muñoz. “El cumpleaños del señor león”. Te cuento mi cuento. Chile: Sistema de Protección a la Infancia. Chile Crece Contigo. Web. 5 sep. 2016. (Adaptación).",
+        "format": "plain",
+        "attachments": [
+          {
+            "kind": "image",
+            "note": "Ilustraciones decorativas del cuento (animales de la selva, monito tití, león y su familia). No aportan información necesaria para responder."
+          }
+        ]
+      },
+      "items": [
+        {
+          "position": 1,
+          "type": "multiple_choice",
+          "stem": "¿Por qué la jirafa y la elefanta estaban muy animadas?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Porque estaban planeando una celebración.",
+              "isCorrect": true
+            },
+            {
+              "key": "B",
+              "text": "Porque estaban haciendo una gran torta.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Porque estaban formando una orquesta.",
+              "isCorrect": false
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "A",
+          "skill": "Interpretar y relacionar",
+          "oa": "OA 8",
+          "contentAxis": "Narración",
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Infieren causa o consecuencia de hechos o acciones relevantes en un texto narrativo. Localizan información explícita relevante en un texto"
+        },
+        {
+          "position": 2,
+          "type": "multiple_choice",
+          "stem": "¿Quiénes fueron los encargados de avisar por toda la selva?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "La jirafa y el león.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "La elefanta y el mono.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "La paloma y don búho.",
+              "isCorrect": true
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "C",
+          "skill": "Localizar",
+          "oa": "OA 8",
+          "contentAxis": "Narración",
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Localizan información explícita relevante en un texto narrativo. Localizan información explícita relevante en un texto"
+        },
+        {
+          "position": 3,
+          "type": "multiple_choice",
+          "stem": "¿Quién fue el encargado de ir a buscar al león y su familia?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Don búho.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "La elefanta.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "El monito tití.",
+              "isCorrect": true
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "C",
+          "skill": "Localizar",
+          "oa": "OA 8",
+          "contentAxis": "Narración",
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Localizan información explícita relevante en un texto narrativo."
+        },
+        {
+          "position": 4,
+          "type": "multiple_choice",
+          "stem": "¿De qué trata la historia?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "De una fiesta sorpresa para el león.",
+              "isCorrect": true
+            },
+            {
+              "key": "B",
+              "text": "De una orquesta que dirige el león.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "De un cumpleaños que organiza el león.",
+              "isCorrect": false
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "A",
+          "skill": "Interpretar y relacionar",
+          "oa": "OA 8",
+          "contentAxis": "Narración",
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Infieren el sentido global de un texto narrativo."
+        }
+      ]
+    },
+    {
+      "order": 2,
+      "name": "Texto 2: «Descubramos las manzanas»",
+      "type": "multiple_choice",
+      "instructions": "Lee el siguiente texto y responde las preguntas 5 a 9.",
+      "passage": {
+        "title": "Descubramos las manzanas",
+        "text": "La manzana es una fruta que crece en un árbol. Puede ser de color verde, rojo o amarillo. Si cortas una manzana por la mitad, podrás ver las pequeñas semillas.\n\nCuando muerdes una manzana, el crujido que se produce es muy particular. No importa de qué color sean, todas las manzanas son jugosas, deliciosas y crujientes.\n\nLas manzanas tienen vitamina C y la encuentras justo debajo de la cáscara, ¡así que no debes pelarlas! Solo lávalas bien.\n\nGracias a sus cualidades, un trozo de manzana después del almuerzo puede ayudar a prevenir caries.\n\n¿Quién come manzanas? ¡Muchas personas comen manzanas! A los caballos, a los conejos, a las tortugas y a los pájaros también les gustan las manzanas.\n\nAna Rejala. Mi primera Enciclopedia de Winnie the Pooh. La Naturaleza. Bogotá, Colombia: Norma S.A., 2004.",
+        "format": "plain",
+        "attachments": [
+          {
+            "kind": "image",
+            "note": "Ilustraciones decorativas de manzanas y animales que las comen. No aportan información necesaria para responder."
+          }
+        ]
+      },
+      "items": [
+        {
+          "position": 5,
+          "type": "multiple_choice",
+          "stem": "Según el texto, ¿qué puede ser verde, rojo o amarillo?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Los árboles.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Las semillas.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Las manzanas.",
+              "isCorrect": true
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "C",
+          "skill": "Interpretar y relacionar",
+          "oa": "OA 10",
+          "contentAxis": "Texto no literario",
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Infieren información relevante en un texto no literario. Localizan información explícita relevante en un texto no"
+        },
+        {
+          "position": 6,
+          "type": "multiple_choice",
+          "stem": "¿Cómo son las semillas de la manzana?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Jugosas.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Pequeñas.",
+              "isCorrect": true
+            },
+            {
+              "key": "C",
+              "text": "Coloridas.",
+              "isCorrect": false
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "B",
+          "skill": "Localizar",
+          "oa": "OA 10",
+          "contentAxis": "Texto no literario",
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Localizan información explícita relevante en un texto no literario. Localizan información explícita relevante en un texto no"
+        },
+        {
+          "position": 7,
+          "type": "multiple_choice",
+          "stem": "Según el texto, ¿cuándo se produce un crujido muy particular?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Cuando pelas una manzana.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Cuando cortas una manzana.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Cuando muerdes una manzana.",
+              "isCorrect": true
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "C",
+          "skill": "Localizar",
+          "oa": "OA 10",
+          "contentAxis": "Texto no literario",
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Localizan información explícita relevante en un texto no literario. Infieren relaciones entre las ideas (causa-consecuencia,"
+        },
+        {
+          "position": 8,
+          "type": "multiple_choice",
+          "stem": "Según lo leído, ¿por qué no se debe pelar la manzana?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Porque la cáscara protege de las caries.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Porque sin la cáscara deja de ser deliciosa.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Porque debajo de la cáscara hay vitamina C.",
+              "isCorrect": true
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "C",
+          "skill": "Interpretar y relacionar",
+          "oa": "OA 10",
+          "contentAxis": "Texto no literario",
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Infieren relaciones entre las ideas (causa-consecuencia, problema-solución, etc.) en un texto no literario."
+        },
+        {
+          "position": 9,
+          "type": "multiple_choice",
+          "stem": "¿De qué trata el texto?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "De los diferentes tipos de manzanas.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "De las características de las manzanas.",
+              "isCorrect": true
+            },
+            {
+              "key": "C",
+              "text": "De la importancia de comer manzanas.",
+              "isCorrect": false
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "B",
+          "skill": "Interpretar y relacionar",
+          "oa": "OA 10",
+          "contentAxis": "Texto no literario",
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Infieren el sentido global de un texto no literario."
+        }
+      ]
+    },
+    {
+      "order": 3,
+      "name": "Texto 3: «Coatí sudamericano»",
+      "type": "mixed",
+      "instructions": "Lee el siguiente texto y responde las preguntas 10 a 13.",
+      "passage": {
+        "title": "Coatí sudamericano",
+        "text": "Los coatís sudamericanos viven en grupos de 5 a 20 coatís, siempre juegan y se cuidan entre ellos. Ante una amenaza, un coatí alerta a sus compañeros con una especie de ladrido agudo. Asustados, todos suben rápidamente a los árboles para protegerse y mirar qué ocurre desde la altura. No son tímidos: si ven a un humano cargando bolsas se acercan a él para sacarle comida. Normalmente comen huevos e insectos, pero las frutas son su comida favorita.\n\nLoreto Salinas. Animales americanos. Santiago de Chile: Hueders, 2015.",
+        "format": "plain",
+        "attachments": [
+          {
+            "kind": "image",
+            "note": "Ilustración decorativa de coatís sudamericanos. No aporta información necesaria para responder."
+          }
+        ]
+      },
+      "items": [
+        {
+          "position": 10,
+          "type": "multiple_choice",
+          "stem": "¿Para qué da un ladrido agudo el coatí?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Para jugar.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Para comer.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Para alertar.",
+              "isCorrect": true
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "C",
+          "skill": "Interpretar y relacionar",
+          "oa": "OA 10",
+          "contentAxis": "Texto no literario",
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Infieren información relevante en un texto no literario."
+        },
+        {
+          "position": 11,
+          "type": "multiple_choice",
+          "stem": "Según el texto, ¿para qué sube a los árboles el coatí?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Para jugar.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Para protegerse.",
+              "isCorrect": true
+            },
+            {
+              "key": "C",
+              "text": "Para sacar comida.",
+              "isCorrect": false
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "B",
+          "skill": "Interpretar y relacionar",
+          "oa": "OA 10",
+          "contentAxis": "Texto no literario",
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Infieren información relevante en un texto no literario."
+        },
+        {
+          "position": 12,
+          "type": "multiple_choice",
+          "stem": "Según el texto, ¿cuál es la comida favorita de los coatís?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Frutas.",
+              "isCorrect": true
+            },
+            {
+              "key": "B",
+              "text": "Huevos.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Insectos.",
+              "isCorrect": false
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "A",
+          "skill": "Localizar",
+          "oa": "OA 10",
+          "contentAxis": "Texto no literario",
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Localizan información explícita relevante en un texto no literario. Infieren relaciones entre las ideas (causa-consecuencia,"
+        },
+        {
+          "position": 13,
+          "type": "open_ended",
+          "stem": "¿Por qué es bueno para los coatís vivir en grupos?",
+          "alternatives": [],
+          "responseFormat": "develop",
+          "correctKey": null,
+          "skill": "Interpretar y relacionar",
+          "oa": "OA 10",
+          "contentAxis": "Texto no literario",
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Infieren relaciones entre las ideas (causa-consecuencia, problema-solución, etc.) en un texto no literario. Localizan información explícita relevante en un texto",
+          "rubric": "Tipos de respuestas Respuestas correctas Respuestas incorrectas (Código 2) (Código 0) El/la estudiante infiere la causa de un hecho en un texto no El/la estudiante responde, sin inferir cuál es la causa del hecho literario a partir de la relación que puede establecer, por el que se pregunta. Su respuesta no da cuenta de una utilizando la información presente en el texto para elaborar comprensión del texto o fundamenta con información que no una respuesta y utilizando marcas textuales que dan cuenta responde a lo solicitado. de la comprensión del texto. Otras respuestas incorrectas son las tautológicas, vagas, A partir de la utilización de la información del texto, puede contradictorias, incoherentes o en blanco. establecer que la vida en grupo es beneficiosa para los coatís, principalmente, porque se protegen entre ellos o se alertan ante peligros. Ejemplos: Ejemplos: Es bueno porque así se cuidan entre ellos. Porque les encanta subirse a los árboles a comer fruta. - - - Es bueno porque así protegen sus vidas. - Porque viven juntos entre 5 y 20 coatís. - Porque así se defienden y protegen para que no les pase - Porque son asustadizos. nada. - Porque consiguen la comida con los humanos. - Siempre juegan y se cuidan entre ellos. - Es bueno porque sí. Ante una amenaza, un coatí alerta a sus compañeros. - - No, porque no están acompañados."
+        }
+      ]
+    },
+    {
+      "order": 4,
+      "name": "Texto 4: «Calce-titerín»",
+      "type": "mixed",
+      "instructions": "Lee el siguiente texto y responde las preguntas 14 a 17.",
+      "passage": {
+        "title": "Calce-titerín",
+        "text": "Me llamo Aurelio y el otro día, cuando aseaba mi habitación junto a mi mamá, oí que desde el basurero alguien lloraba.\n\nCurioso y silenciosamente me acerqué y ¡zas!: ahí estaba mi viejo calcetín que me regaló el abuelo cuando era bebé, pero ya no servía para nada.\n\nLo recogí y le pregunté:\n—¿Por qué lloras?\nÉl me respondió:\n—¡Estoy triste, porque como estoy roto, me desechas!\nYo le dije:\n—¡Es verdad, estás lleno de orificios y como he crecido ya no entras en mis pies!\n\nMi madre, al escuchar la conversación, se acercó y recogió delicadamente el calcetín entre sus manos. Luego, tomó hilo, aguja y botones, transformando al viejo calcetín en un bello títere.\n\nDesde ese día lo llamé Calce-titerín. Él y yo nunca más nos hemos separado.\n\nKatherine Flood. “Calcetiterín”. Te cuento mi cuento. Chile: Sistema de Protección a la Infancia. Chile Crece Contigo. Web. 29 ago. 2016. (Adaptación).",
+        "format": "plain",
+        "attachments": [
+          {
+            "kind": "image",
+            "note": "Ilustración decorativa de la madre transformando el calcetín en un títere. No aporta información necesaria para responder."
+          }
+        ]
+      },
+      "items": [
+        {
+          "position": 14,
+          "type": "multiple_choice",
+          "stem": "¿Qué estaba haciendo Aurelio cuando escuchó un llanto desde el basurero?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Aseaba su habitación.",
+              "isCorrect": true
+            },
+            {
+              "key": "B",
+              "text": "Jugaba con un títere.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Cosía sus calcetines.",
+              "isCorrect": false
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "A",
+          "skill": "Localizar",
+          "oa": "OA 8",
+          "contentAxis": "Narración",
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Localizan información explícita relevante en un texto narrativo. Infieren causa o consecuencia de hechos o acciones"
+        },
+        {
+          "position": 15,
+          "type": "multiple_choice",
+          "stem": "¿Por qué estaba triste el calcetín?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Porque lo regaló el abuelo.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Porque lo habían desechado.",
+              "isCorrect": true
+            },
+            {
+              "key": "C",
+              "text": "Porque lo convirtieron en un títere.",
+              "isCorrect": false
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "B",
+          "skill": "Interpretar y relacionar",
+          "oa": "OA 8",
+          "contentAxis": "Narración",
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Infieren causa o consecuencia de hechos o acciones relevantes en un texto narrativo. Infieren causa o consecuencia de hechos o acciones"
+        },
+        {
+          "position": 16,
+          "type": "multiple_choice",
+          "stem": "¿Por qué Aurelio pensaba que el calcetín ya no servía para nada?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Porque se sentía triste y lloraba.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Porque lo cosieron con hilo y aguja.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Porque estaba roto y le quedaba pequeño.",
+              "isCorrect": true
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "C",
+          "skill": "Interpretar y relacionar",
+          "oa": "OA 8",
+          "contentAxis": "Narración",
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Infieren causa o consecuencia de hechos o acciones relevantes en un texto narrativo. Opinan sobre algún aspecto controversial en un texto"
+        },
+        {
+          "position": 17,
+          "type": "open_ended",
+          "stem": "¿Estás de acuerdo con que recogieran el calcetín del basurero? Marca con una X tu respuesta.\nSí\nNo\n¿Por qué?",
+          "alternatives": [],
+          "responseFormat": "develop",
+          "correctKey": null,
+          "skill": "Reflexionar",
+          "oa": "OA 8",
+          "contentAxis": "Narración",
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Opinan sobre algún aspecto controversial en un texto narrativo.",
+          "rubric": "Tipos de respuestas Respuestas correctas Respuestas parcialmente Respuestas incorrectas (Código 2) correctas (Código 1) (Código 0) El/la estudiante puede responder Sí o El/la estudiante puede responder Sí o El/la estudiante responde Sí o No, sin No, fundamentando su respuesta con No, fundamentando su respuesta en su fundamentar o entregando una base en información extraída del texto. conocimiento de mundo, dando fundamentación que no corresponde al argumentos relacionados con el tema, tema tratado en el texto, por lo que la Puede responder Sí y basar su pero que no aparecen en el texto. Otras respuesta no entrega evidencia sobre fundamentación en el sentimiento del respuestas pueden estar si lo comprendió o no. calcetín, que fuera un regalo de su fundamentadas, pero sin tomar una abuelo o que después fue reutilizado. Otras respuestas incorrectas son las postura (de acuerdo o desacuerdo). tautológicas, vagas, contradictorias, También puede responder No y incoherentes o en blanco. fundamentar basándose en las características del calcetín como: viejo, roto y muy pequeño para el pie del niño. Ejemplos: Ejemplos: Ejemplos: - Sí, porque estaba llorando. - No, porque en la basura hay - Sí, porque es lindo. - Sí, porque se lo regaló su abuelo. gérmenes. - No, porque es feo. - Sí, porque lo transformaron en un - Sí, porque cuida el medio ambiente. - Sí, porque es bueno. títere. No, porque es malo. - No, porque está sucio, hediondo. - - No, porque estaba viejo, agujereado y - Sí, porque fue linda la historia. ya no le servía al niño. - Sí, porque era un títere. - No, porque no es cierto. &gt; Diagnóstico Integral de Aprendizajes Instrumentos de Evaluación 2026 agenciaeducacion.cl"
+        }
+      ]
+    }
+  ],
+  "extraction": {
+    "itemCount": 17,
+    "warnings": [
+      "Ítems de alternativas con solo 3 opciones (A, B, C), típico de 2° básico DIA; cumple el mínimo de 2 alternativas.",
+      "Q13 y Q17 son ítems de desarrollo (open_ended, responseFormat develop). Q17 pide marcar Sí/No y fundamentar.",
+      "Todos los textos incluyen ilustraciones decorativas; todo el texto necesario para responder está transcrito en el passage.",
+      "Textos transcritos desde la capa de texto del PDF (pdftotext -layout), verbatim."
+    ],
+    "needsHumanReview": false,
+    "crossCheck": {
+      "hardIssues": [],
+      "softWarnings": [],
+      "counts": {
+        "cuadernillo": 17,
+        "ficha": 17,
+        "hoja": 17
+      }
+    }
+  },
+  "pauta": {
+    "source": {
+      "ficha": "2_TE DIA Diagnóstico Lectura 2° básico 2026.pdf",
+      "hoja": "2_Hoja de respuestas DIA Diagnóstico lectura 2° básico 2026.pdf"
+    },
+    "appliedKeys": 15,
+    "rubrics": 2
+  }
+}

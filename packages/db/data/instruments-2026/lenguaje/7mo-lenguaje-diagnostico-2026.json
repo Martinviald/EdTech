@@ -1,0 +1,1077 @@
+{
+  "schemaVersion": "1.0",
+  "source": {
+    "file": "7_prueba_lectura_diagnostico_2026_07_basico.pdf",
+    "subjectFolder": "Lenguaje"
+  },
+  "instrument": {
+    "name": "DIA Lectura 7° Básico 2026 — Diagnóstico",
+    "subject": "Lenguaje y Comunicación",
+    "subjectCode": "LANG",
+    "grade": "7° Básico",
+    "gradeCode": "7TH_BASIC",
+    "year": 2026,
+    "applicationPeriod": "diagnostico",
+    "type": "dia",
+    "isOfficial": true,
+    "source": "imported"
+  },
+  "sections": [
+    {
+      "order": 1,
+      "name": "Texto 1: «La casa del trueno»",
+      "type": "mixed",
+      "instructions": "Lee el siguiente texto y responde las preguntas 1 a 5.",
+      "passage": {
+        "title": "LA CASA DEL TRUENO",
+        "text": "Leyenda totonaca (México)\n\nEn tiempos antiguos, cuando aún no llegaban los conquistadores españoles a las tierras de lo que hoy se conoce como Veracruz (México), los antepasados levantaron un templo dedicado al dios del Trueno, señor de la lluvia y de las aguas bravas de los ríos. Se dice que el altar estaba dentro de una cueva, entre las regiones de Totomoxtle y Coatzintlali.\n\nEra costumbre que siete sacerdotes se juntaran en la cueva en cada temporada de cultivo de la tierra. Cuando los sembradores estaban listos para echar las semillas o cosechar los frutos, siete veces se invocaba a los dioses y se cantaban himnos a los cuatro vientos. En esas ceremonias los siete sacerdotes se orientaban hacia los cuatro puntos cardinales. Así multiplicaban su mensaje, pues se entendía que cuatro por siete daba como resultado los veintiocho días que componen el ciclo de la luna.\n\nEstos rituales se hacían para que la tierra diera abundantes frutos y los pueblos no pasaran hambre. Así, los sacerdotes hacían sonar el gran tambor del trueno, arrastraban pieles secas de animales en la caverna y lanzaban flechas con fuego hacia las nubes. Al poco tiempo el cielo se iluminaba con los relámpagos y truenos que deslumbraban a toda criatura viviente, sobre la tierra y en las aguas.\n\nLa lluvia caía abundante y, a veces, no cesaba durante muchos días y noches como si el dios del Trueno estuviese enojado. Los ríos Hitzilac y Papaloapan rompían sus orillas, llegaban tierra adentro a llevarse siembras, casas, árboles.\n\nSi los sacerdotes arrastraban demasiado los cueros, las corrientes de los ríos arrastraban más cosas; cuantas más flechas incendiadas se hubieran lanzado, más relámpagos habría en el cielo. Y si el tambor se había tocado con mucha fuerza, así también resonarían los truenos.\n\nLos siglos pasaron y un día llegaron a esas tierras grupos de personas de otras regiones; contaban que venían del gran mar de las turquesas, como le decían al Golfo de México, y se hacían llamar totonacas. Tenían costumbres distintas, otras Leyes y otros dioses. Ellos creían en Cicini —“Aquel que calienta”—, dios del Sol y dueño del maíz.\n\nLos siete sacerdotes de la cueva del trueno no estuvieron conformes con aquella invasión de los extranjeros, y muy molestos se fueron a la cueva a hacer truenos, relámpagos, rayos y tormentas terribles con el fin de asustarlos. Los libros antiguos cuentan que llovió y llovió durante varios días con sus noches, hasta que alguien se dio cuenta de que esas tempestades las provocaban los siete hechiceros de la casa del trueno.\n\nComo los totonacas eran gente de paz, no sabían cómo tratar a los dioses del Trueno y de la Lluvia para evitar el desastre de su pueblo. Se reunieron los sabios y decidieron que lo único que podían hacer era rogarles a esos dioses que fueran buenos con ellos.\n\nY en el mismo lugar en donde estaba el altar del dios del Trueno, los totonacas construyeron el maravilloso templo de El Tajín. Piedra a piedra levantaron una pirámide cuyo nombre significa “lugar de las tempestades”. Allí se rindió culto al dios del Trueno y también se le pidió buen clima durante 365 días, número igual al de nichos que tiene la pirámide de El Tajín.\n\nFrancisco Hinojosa, adp. “La casa del trueno”. Léeme 5, Libro de lecturas para primaria. México: Castillo, S.A., 2013.",
+        "format": "plain",
+        "attachments": []
+      },
+      "items": [
+        {
+          "position": 1,
+          "type": "multiple_choice",
+          "stem": "¿Qué ocurría si los sacerdotes lanzaban más flechas incendiadas?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Más relámpagos había en el cielo.",
+              "isCorrect": true
+            },
+            {
+              "key": "B",
+              "text": "Más abundantemente caía la lluvia.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Los truenos resonaban con más fuerza.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "Las corrientes de los ríos arrastraban más cosas.",
+              "isCorrect": false
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "A",
+          "skill": "Localizar",
+          "oa": "OA 4",
+          "contentAxis": "Narración",
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Localizan información explícita relevante en un texto narrativo. Localizan información explícita relevante en un texto"
+        },
+        {
+          "position": 2,
+          "type": "multiple_choice",
+          "stem": "¿Qué decidieron hacer los sacerdotes ante la llegada de los extranjeros?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Acoger sus costumbres, leyes y dioses.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Asustarlos mediante tormentas terribles.",
+              "isCorrect": true
+            },
+            {
+              "key": "C",
+              "text": "Rogar a los dioses para que fueran buenos con ellos.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "Reunir a los sabios para evitar el desastre de su pueblo.",
+              "isCorrect": false
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "B",
+          "skill": "Localizar",
+          "oa": "OA 4",
+          "contentAxis": "Narración",
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Localizan información explícita relevante en un texto narrativo. Infieren información relevante sobre personajes en un"
+        },
+        {
+          "position": 3,
+          "type": "multiple_choice",
+          "stem": "¿Qué actitud demostraron los totonacas al construir el templo de El Tajín?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Compasión.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Obediencia.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Tolerancia.",
+              "isCorrect": true
+            },
+            {
+              "key": "D",
+              "text": "Valentía.",
+              "isCorrect": false
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "C",
+          "skill": "Interpretar y relacionar",
+          "oa": "OA 4",
+          "contentAxis": "Narración",
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Infieren información relevante sobre personajes en un texto narrativo."
+        },
+        {
+          "position": 4,
+          "type": "multiple_choice",
+          "stem": "¿Qué busca explicar esta historia?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "El nacimiento de los cuatro puntos cardinales.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "El inicio del ritual totonaca en honor al dios Sol.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "El comienzo del conflicto entre los pueblos de México.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "El origen del templo construido en honor al dios del Trueno.",
+              "isCorrect": true
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "D",
+          "skill": "Interpretar y relacionar",
+          "oa": "OA 4",
+          "contentAxis": "Narración",
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Infieren el sentido global de un texto literario. Opinan sobre algún aspecto controversial de un texto"
+        },
+        {
+          "position": 5,
+          "type": "open_ended",
+          "stem": "¿Estás de acuerdo con la reacción de los sacerdotes ante la llegada de los totonacas?\nSí\nNo\n¿Por qué? Fundamenta tu respuesta con información del texto.",
+          "alternatives": [],
+          "responseFormat": "develop",
+          "correctKey": null,
+          "skill": "Reflexionar",
+          "oa": "OA 4",
+          "contentAxis": "Narración",
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "narrativo con fundamentos que integran información del texto. Infieren causa o consecuencia de acontecimientos o",
+          "rubric": "Tipos de respuestas Respuestas correctas Respuestas parcialmente Respuestas incorrectas (Código 2) correctas (Código 1) (Código 0) El/la estudiante identifica la reacción de El/la estudiante identifica la reacción de El/la estudiante no identifica la reacción los sacerdotes respecto de la llegada de los sacerdotes respecto de la llegada de los sacerdotes respecto de la los totonacas, formula una opinión de los totonacas y formula una opinión llegada de los totonacas, y aunque valorando positiva o negativamente esta valorando positiva o negativamente puede o no hacer una valoración, en su reacción y fundamenta su respuesta con esta reacción. Sin embargo, su respuesta da cuenta de un error de información del texto. Por ejemplo, puede fundamentación se basa únicamente comprensión lectora. En este nivel mostrarse a favor de la reacción de los en información proveniente de su también están aquellas respuestas que sacerdotes aludiendo al hecho de que conocimiento de mundo o de sus no pueden ser evaluadas debido a la estos vieron su cultura y costumbres experiencias previas. En este nivel escasa información que presentan. amenazadas, o bien, mostrarse en también se encuentran aquellas Otras respuestas incorrectas son las desacuerdo con su reacción aludiendo al respuestas en las que solo se identifica tautológicas, vagas, contradictorias, hecho de que los totonacas eran un la reacción de los sacerdotes, pero no incoherentes y en blanco. pueblo pacífico. se entrega una fundamentación. El/la estudiante podría complementar su fundamentación con su experiencia de mundo o conocimientos previos. Ejemplos: Ejemplos : Ejemplos : Sí, creo que los sacerdotes hicieron Sí, estoy de acuerdo porque los Sí, estoy de acuerdo con su - - - bien en intentar expulsar a los extranjeros deben mostrarse reacción. extranjeros ya que los totonacas tenían respetuosos cuando llegan a vivir a Sí porque tuvieron una guerra y - otros dioses y costumbres y llegaron a otro lugar. ganaron. invadir el lugar. No, porque al ser sacerdotes No, porque se orientaban a los - - Sí, los sacerdotes hicieron bien porque debieron dar el ejemplo y actuar de cuatro puntos cardinales. - vieron amenazada su cultura con la forma pacífica. No, porque el dios Sol salvó a todos. - llegada de los totonacas e intentaron No, yo creo que no está bien porque - preservar las costumbres de su pueblo. es importante ser generosos. No, porque no tenían por qué estar Sí, estoy de acuerdo con que hayan - - molestos, ya que se dice que los intentado asustar a los totonacas. totonacas eran gente de paz y no venían a hacer la guerra, entonces no hay motivos para intentar expulsarlos y asustarlos si pueden perfectamente convivir en paz. No, porque la llegada de los totonacas - no implicaba ninguna amenaza para los sacerdotes ni para su pueblo, entonces creo que intentar echarlos es un acto egoísta. 9 Ficha Técnica Prueba de Lectura 7° básico"
+        }
+      ]
+    },
+    {
+      "order": 2,
+      "name": "Texto 2: «La Hora que nunca llegó»",
+      "type": "multiple_choice",
+      "instructions": "Lee el siguiente texto y responde las preguntas 6 a 9.",
+      "passage": {
+        "title": "La Hora que nunca llegó",
+        "text": "Viajamos con papá a la capital y llegamos al atardecer a la vieja estación de trenes para tomar el Nocturno al sur. Subimos con las maletas y nos instalamos en el salón-cama que tenía literas para dormir. Era un vagón cercano a la locomotora, enchapado en madera de nogal y con lámparas de bronce.\n\nEl tren salió puntualmente a las siete de la tarde y antes de que anocheciera fui viendo el paisaje por la ventanilla, las charcas de los caminos y las estaciones por donde pasó el olvido.\n\nCenamos en el coche comedor y luego regresamos a acostarnos en nuestras literas, para tener aquella extraña sensación de estar durmiendo en un vagón que recorre la inmensidad.\n\n—Vamos a llegar a las nueve de la mañana —dijo papá.\n\nNos estábamos quedando dormidos en una penumbra interrumpida por repentinas rachas de luz, cuando el tren frenó súbitamente en medio del campo.\n\nNos incorporamos de la cama y miramos a través de los cristales. No se veía nada. Aquello no era ninguna estación abandonada, ni siquiera un pueblo. A lo lejos solo se divisaban luces dispersas en un páramo desolado.\n\nLadraban los perros en la lejanía y se escuchaba el croar de las cigarras en las charcas. Papá subió la ventanilla y vio a algunas personas que se bajaban del tren y encendían linternas.\n\nEra exactamente medianoche. Preocupados por las conversaciones que se escuchaban en el pasillo, salimos a preguntar qué ocurría. Entonces, nos encontramos con el maquinista que tranquilamente se preparaba un café.\n\n—Es el cambio de hora —explicó con toda naturalidad—. Los relojes se atrasan en sesenta minutos, por lo tanto, debemos permanecer aquí una hora para llegar a nuestro destino a la hora de siempre…\n\nMuy sorprendidos, bajamos del tren y nos unimos a esos grupos fantasmagóricos que deambulaban por la pradera desierta a la luz de la luna. Parecían almas en pena o antiguos sonámbulos sin patria.\n\nCon papá fuimos a refugiarnos a la sombra espectral de un espino. Desde allí se veía el tren detenido en aquel mar de tinieblas.\n\nAl cabo de una hora, papá miró su reloj que marcaba la una de la mañana y retrasándolo, dijo:\n\n—O sea que después de una hora siguen siendo las doce de la noche.\n\nPronto la bocina sonó y todos los pasajeros volvieron a subir al tren, después de vivir aquella hora que nunca existió.\n\nEl tren se puso en marcha. Nosotros nos quedamos dormidos y a la mañana siguiente, llegamos a nuestro destino con la extraña sensación de haber vivido un sueño…\n\nEran las nueve de la mañana. Tal como predijo papá.\n\nManuel Peña. “La hora que nunca llegó”. Atrapalecturas 4. Leyendo para siempre. Chile: Mare Nostrum, 2005.",
+        "format": "plain",
+        "attachments": []
+      },
+      "items": [
+        {
+          "position": 6,
+          "type": "multiple_choice",
+          "stem": "¿Por qué el maquinista detuvo el tren?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Porque el viaje consideraba una detención para conocer el lugar.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Porque debían recoger a unos pasajeros en una antigua estación.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Porque había una confusión con el horario de salida y llegada del tren.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "Porque era el cambio de hora y eso alteraría la hora de llegada del tren.",
+              "isCorrect": true
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "D",
+          "skill": "Interpretar y relacionar",
+          "oa": "OA 4",
+          "contentAxis": "Narración",
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Infieren causa o consecuencia de acontecimientos o acciones relevantes en un texto narrativo. Realizan inferencias sobre el ambiente y las costumbres"
+        },
+        {
+          "position": 7,
+          "type": "multiple_choice",
+          "stem": "¿Cómo se describe el ambiente cuando el tren se detuvo?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Salvaje.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Inseguro.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Misterioso.",
+              "isCorrect": true
+            },
+            {
+              "key": "D",
+              "text": "Sorprendente.",
+              "isCorrect": false
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "C",
+          "skill": "Interpretar y relacionar",
+          "oa": "OA 4",
+          "contentAxis": "Narración",
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Realizan inferencias sobre el ambiente y las costumbres en un texto literario. Infieren información relevante sobre personajes en un"
+        },
+        {
+          "position": 8,
+          "type": "multiple_choice",
+          "stem": "¿Cómo se sintieron el padre y su hijo luego de la experiencia vivida?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Confundidos.",
+              "isCorrect": true
+            },
+            {
+              "key": "B",
+              "text": "Indiferentes.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Asustados.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "Irritados.",
+              "isCorrect": false
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "A",
+          "skill": "Interpretar y relacionar",
+          "oa": "OA 4",
+          "contentAxis": "Narración",
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Infieren información relevante sobre personajes en un texto narrativo. Identifican un acontecimiento o acción relevante en un"
+        },
+        {
+          "position": 9,
+          "type": "multiple_choice",
+          "stem": "¿Qué predijo el padre?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Que el tren se detendría a la medianoche.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Que los relojes se atrasarían sesenta minutos.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Que comenzarían su viaje a las siete de la tarde.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "Que llegarían a las nueve de la mañana a su destino.",
+              "isCorrect": true
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "D",
+          "skill": "Interpretar y relacionar",
+          "oa": "OA 4",
+          "contentAxis": "Narración",
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Identifican un acontecimiento o acción relevante en un texto narrativo."
+        }
+      ]
+    },
+    {
+      "order": 3,
+      "name": "Texto 3: «Un lenguaje solo para mujeres»",
+      "type": "mixed",
+      "instructions": "Lee el siguiente texto y responde las preguntas 10 a 15.",
+      "passage": {
+        "title": "Un lenguaje solo para mujeres",
+        "text": "Hace 1700 años las mujeres de la provincia de Hunan, en China, desarrollaron un lenguaje propio que le llamaron nushu. Las madres se lo enseñaban a sus hijas y así lo transmitían de generación en generación. Lo hablaban a escondidas de los hombres y lo escribían en bordados, en cerámicas y en cartas que intercambiaban entre ellas y guardaban celosamente toda la vida. Esta especie de código secreto sobrevivió hasta nuestros días y fue conocido por el mundo recién en 1983, gracias a una profesora china.\n\n¿Por qué estas mujeres necesitaban un lenguaje secreto? Porque en esa época a las niñas no les enseñaban a leer ni a escribir. Solo los hombres tenían ese privilegio. Entonces el nushu les daba a las mujeres la posibilidad de aprender escritura y, además, les permitía expresar libremente sus penas y sueños.\n\nEn el siglo III, cuando nació el nushu, los matrimonios eran arreglados. Las jóvenes se casaban con hombres que muchas veces ni siquiera conocían. Tenían que dejar a sus amigas —a quienes consideraban almas gemelas— y a su familia para mudarse al pueblo de su nuevo marido. Una vez casadas permanecían encerradas en la casa, trabajaban sin parar y no les quedaba más que obedecer a su familia política. Se sentían solas y desdichadas. Su único consuelo eran los mensajes en nushu que sus amigas les enviaban en secreto.\n\nEn 2004, a los 98 años, murió Yang Huanyi, la última mujer que hablaba y escribía esta lengua. Antes de hacerlo compartió sus cartas, poemas, diarios de vida y letras de canciones con personas expertas, para que pudieran estudiar el nushu. Los documentos que les entregó son un tesoro, porque durante siglos fue costumbre quemar o enterrar los manuscritos nushu con las muertas y hay muy pocos ejemplos escritos de esta lengua. Ahora, después de 17 siglos, dejó de ser un secreto.\n\nErnesto Ayala, Claudia Larraguibel y Claudia Traverso, ed. Curiosidades del mundo II. Chile: Fundación Astoreca, 2009.",
+        "format": "plain",
+        "attachments": [
+          {
+            "kind": "image",
+            "note": "Ilustración de apoyo bajo el título (caracteres/escritura nushu), decorativa; todo el texto necesario para responder está transcrito en el passage."
+          }
+        ]
+      },
+      "items": [
+        {
+          "position": 10,
+          "type": "multiple_choice",
+          "stem": "¿Para qué utilizaban el nushu las mujeres?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Para crear y publicar poemas manuscritos.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Para conocer al futuro marido y escribirle cartas.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Para educarse y expresar sus emociones sin restricciones.",
+              "isCorrect": true
+            },
+            {
+              "key": "D",
+              "text": "Para defenderse de las injusticias y proteger a sus amigas.",
+              "isCorrect": false
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "C",
+          "skill": "Interpretar y relacionar",
+          "oa": "OA 6",
+          "contentAxis": "Texto no literario",
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Infieren información relevante en un texto no literario."
+        },
+        {
+          "position": 11,
+          "type": "multiple_choice",
+          "stem": "A partir del texto, ¿qué es el nushu?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Una forma de arte.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Un estilo literario.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Un manuscrito.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "Un lenguaje.",
+              "isCorrect": true
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "D",
+          "skill": "Interpretar y relacionar",
+          "oa": "OA 6",
+          "contentAxis": "Texto no literario",
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Infieren información relevante en un texto no literario. Infieren relaciones entre las ideas (causa-consecuencia,"
+        },
+        {
+          "position": 12,
+          "type": "multiple_choice",
+          "stem": "Según el texto, ¿por qué existen muy pocos escritos en nushu?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Porque se hacían desaparecer al fallecer su dueña.",
+              "isCorrect": true
+            },
+            {
+              "key": "B",
+              "text": "Porque solo se confiaban a expertos para estudiarlos.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Porque se guardaban en lugares secretos de su dueña.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "Porque solo se entregaban a los miembros de la familia.",
+              "isCorrect": false
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "A",
+          "skill": "Interpretar y relacionar",
+          "oa": "OA 6",
+          "contentAxis": "Texto no literario",
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Infieren relaciones entre las ideas (causa-consecuencia, problema-solución, etc.) en un texto no literario. Infieren relaciones entre las ideas (causa-consecuencia,"
+        },
+        {
+          "position": 13,
+          "type": "multiple_choice",
+          "stem": "A partir de lo señalado en el texto, ¿por qué las mujeres chinas dejaron de usar el nushu?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Porque ya no desean difundir el nushu.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Porque ya no necesitan utilizar el nushu.",
+              "isCorrect": true
+            },
+            {
+              "key": "C",
+              "text": "Porque ya no existen manuscritos en nushu.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "Porque ya no es seguro expresarse en nushu.",
+              "isCorrect": false
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "B",
+          "skill": "Interpretar y relacionar",
+          "oa": "OA 6",
+          "contentAxis": "Texto no literario",
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Infieren relaciones entre las ideas (causa-consecuencia, problema-solución, etc.) en un texto no literario. Determinan propósitos explícitos e implícitos en un texto"
+        },
+        {
+          "position": 14,
+          "type": "multiple_choice",
+          "stem": "¿Qué propósito tiene este texto?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Dar a conocer el origen del nushu.",
+              "isCorrect": true
+            },
+            {
+              "key": "B",
+              "text": "Presentar estudios sobre el nushu.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Discutir acerca del valor del nushu.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "Persuadir sobre el aporte del nushu.",
+              "isCorrect": false
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "A",
+          "skill": "Reflexionar",
+          "oa": "OA 7",
+          "contentAxis": "Texto no literario",
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Determinan propósitos explícitos e implícitos en un texto no literario. Opinan sobre algún aspecto relevante en un texto no"
+        },
+        {
+          "position": 15,
+          "type": "open_ended",
+          "stem": "¿Estás de acuerdo con que Yang Huanyi compartiera sus escritos en nushu antes de morir?\nSí\nNo\n¿Por qué? Fundamenta tu respuesta con información del texto.",
+          "alternatives": [],
+          "responseFormat": "develop",
+          "correctKey": null,
+          "skill": "Reflexionar",
+          "oa": "OA 6",
+          "contentAxis": "Texto no literario",
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "literario con fundamentos que integran información del texto. Localizan información explícita relevante en un texto no",
+          "rubric": "Tipos de respuestas Respuestas correctas Respuestas parcialmente Respuestas incorrectas (Código 2) correctas (Código 1) (Código 0) El/la estudiante formula una opinión valorando El/la estudiante formula una opinión El/la estudiante puede o no positiva o negativamente la entrega de valorando positiva o negativamente formular una opinión respecto de la documentos escritos en nushu con fines la entrega de documentos escritos entrega de documentos escritos en investigativos y fundamenta su respuesta en nushu con fines investigativos, nushu con fines investigativos. Sin basándose en información del texto. Por ejemplo, pero la fundamentación de su embargo, en su fundamentación las puede mostrarse a favor de la acción de Yang respuesta demuestra una respuestas dan cuenta de un error Huanyi, aludiendo al hecho de que ella era la comprensión parcial del texto, ya de comprensión lectora, o bien, última mujer que dominaba esta lengua y a la sea porque se centra en pasajes entregan información que no está importancia cultural de preservar este lenguaje. que no se relacionan directamente relacionada con la pregunta O bien, puede mostrarse en desacuerdo con la con esta acción, o bien, porque se formulada. acción aludiendo al tipo de documentos que se basa únicamente en su Otras respuestas incorrectas son escribían en esa lengua (documentos de índole conocimiento de mundo o las tautológicas, vagas, personal, principalmente) y al hecho de que se experiencias previas en relación a contradictorias, incoherentes y en trataba de un código secreto entre mujeres. la temática abordada. blanco. Ejemplos: Ejemplos: Ejemplos: Sí, porque entregó los escritos a personas Sí, porque los textos les Sí, estoy de acuerdo porque - - - expertas que podrían estudiar esta lengua pertenecían a sus dueñas y Yang iba a morir. para que no se pierda. Aunque los textos eran podían hacer lo que estimaran. Sí, estuvo bien porque el nushu - privados, creo que era importante conocer ese Sí, porque el nushu dejó de ser es muy importante. - lenguaje para saber cómo era la vida de las un secreto. No. Creo que no debió hacerlo - mujeres en ese tiempo. No, porque no se deben romper porque quizás era algo sagrado. - Sí, porque así fue posible conocer la lengua y las promesas entre amigas. - las cosas que hablaban las mujeres chinas No, porque no me gustaría que - hace mucho tiempo. Si ella no hubiera alguien leyera algo secreto mío. entregado este material, no se habría conocido la existencia de un lenguaje secreto entre mujeres y la importancia de esta lengua en momentos difíciles para las mujeres. No, porque reveló secretos de mujeres que - escribían para que sus amigas y cercanas supieran lo que les pasaba y no todo el mundo. Creo que ella no cumplió con mantener el secreto entre mujeres. No, porque las mujeres ya no necesitan un - lenguaje secreto, entonces no es importante conocer el nushu. Además, al entregar este material traicionó a las mujeres porque reveló información privada. 10 &gt; Diagnóstico Integral de Aprendizajes Instrumentos de Evaluación 2026 agenciaeducacion.cl"
+        }
+      ]
+    },
+    {
+      "order": 4,
+      "name": "Texto 4: «¿Cuánta gente sufre alergia en Chile?»",
+      "type": "multiple_choice",
+      "instructions": "Lee el siguiente texto y responde las preguntas 16 a 20.",
+      "passage": {
+        "title": "¿Cuánta gente sufre alergia en Chile?",
+        "text": "Existe un alto porcentaje de la población que está sufriendo de alergias, cifra que ha ido en aumento debido al cambio climático, entre otras razones.\n\nLa alergia es una respuesta exagerada de nuestro sistema inmune frente a un agente externo (alérgeno) al cual normalmente no deberíamos reaccionar, ya que para la mayoría de las personas es algo inofensivo.\n\nAproximadamente, entre el 20% y el 30% de los chilenos sufre de alergias de tipo respiratoria (rinitis/rinoconjuntivitis alérgica o asma). Es una cifra que ha ido aumentando paulatinamente debido al cambio climático, la contaminación ambiental, al incremento de las medidas de higiene (menos eventos infecciosos) y al aumento de alérgenos en circulación dependiendo de la región en que nos encontremos.\n\nEn Chile, a fines de agosto, comienza la polinización de los árboles, la cual dura hasta inicios de octubre. En este proceso, en la zona central, toma protagonismo el plátano oriental dada su alta densidad en la zona. Luego viene la polinización de los pastos, desde octubre a diciembre, y finalmente la polinización de las malezas hasta febrero. Por lo tanto, si un paciente está sensibilizado a los tres pólenes, podría estar con síntomas prácticamente todo un semestre. Es por este motivo que es muy importante saber a qué es alérgica una persona (a partir de los test cutáneos que se realizan en la piel). De esta forma, se puede identificar al “enemigo”, consultar en forma precoz, previo al inicio de los síntomas, para reducirlos entre un 70% y 80%, evitando así reacciones inflamatorias severas y eventuales sobreinfecciones respiratorias.\n\nEs importante identificar los síntomas principales, sobre todo cuando es la primera temporada que se padece de alergia. Estos síntomas son: prurito (picazón) nasal, ocular, de los oídos y del paladar, estornudos repetidos, secreción nasal transparente y sensación de nariz tapada. También pueden sumarse síntomas de obstrucción bronquial, cefalea, pérdida del olfato que pueden provocar trastornos del sueño debido a mala oxigenación en las noches, lo que deriva en un sueño no reparador y, por lo tanto, una alteración en la calidad de vida.\n\nPara poder tratar estos síntomas tenemos medidas ambientales y farmacológicas. Dentro de las medidas ambientales podemos usar mascarillas, anteojos de sol cuando estamos al aire libre (para evitar que los alérgenos ingresen por la mucosa ocular), usar el auto con ventilación en circuito cerrado y ventanas cerradas, ventilar la casa o muy temprano en la mañana o ya tarde en la noche para evitar el ingreso de corrientes de aires que acarrean pólenes, secar la ropa al interior de la casa para que no queden impregnadas de pólenes y evitar el deporte al aire libre durante el periodo de síntomas.\n\nDentro del tratamiento farmacológico, el cual debe ser guiado por un especialista, tenemos los medicamentos orales y oculares, antialérgicos intranasales de acción local, los inhaladores bronquiales según los síntomas del paciente y soluciones salinas para aseo nasal que evitan las sobreinfecciones como la sinusitis.\n\nEn casos más severos de rinitis y asma, que no responden bien a estas medidas, existe la inmunoterapia alérgeno específica, que es un tratamiento más largo, pero curativo, de estos síntomas.\n\nEn suma, frente a la presencia de síntomas de alergia respiratoria, la consulta y el tratamiento precoz son fundamentales para aliviar los síntomas y prevenir las complicaciones.\n\nGlosario\n• Alérgeno: Es una sustancia que puede provocar una reacción alérgica. En algunas personas, el sistema inmunitario considera a los alérgenos como “extraños” o “peligrosos”.\n\n“¿Cuánta gente sufre alergia?”. La Tercera [Santiago, Chile]. 4 sep. 2019. Web. 10 sep. 2019.",
+        "format": "plain",
+        "attachments": []
+      },
+      "items": [
+        {
+          "position": 16,
+          "type": "multiple_choice",
+          "stem": "Según el texto, ¿qué consecuencia puede provocar una inadecuada oxigenación durante la noche?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Prurito nasal.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Estornudos repetidos.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Trastornos del sueño.",
+              "isCorrect": true
+            },
+            {
+              "key": "D",
+              "text": "Sensación de nariz tapada.",
+              "isCorrect": false
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "C",
+          "skill": "Localizar",
+          "oa": "OA 6",
+          "contentAxis": "Texto no literario",
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Localizan información explícita relevante en un texto no literario. Localizan información explícita relevante en un texto no"
+        },
+        {
+          "position": 17,
+          "type": "multiple_choice",
+          "stem": "¿Qué tratamiento se recomienda en el texto para los casos severos de rinitis?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Aplicación de inhalador.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Aseo nasal con soluciones salinas.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Uso de antialérgico intranasal de acción local.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "Realización de inmunoterapia alérgeno específica.",
+              "isCorrect": true
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "D",
+          "skill": "Localizar",
+          "oa": "OA 6",
+          "contentAxis": "Texto no literario",
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Localizan información explícita relevante en un texto no literario."
+        },
+        {
+          "position": 18,
+          "type": "multiple_choice",
+          "stem": "De acuerdo con el texto, ¿qué acción es fundamental para evitar reacciones alérgicas severas antes de que aparezcan los síntomas en personas que sufren alergia?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Detectar el alérgeno.",
+              "isCorrect": true
+            },
+            {
+              "key": "B",
+              "text": "Tomar tratamiento farmacológico.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Aplicar la inmunoterapia alérgeno específica.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "Usar el auto con circuito cerrado de ventilación.",
+              "isCorrect": false
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "A",
+          "skill": "Interpretar y relacionar",
+          "oa": "OA 6",
+          "contentAxis": "Texto no literario",
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Infieren información relevante en un texto no literario. Interpretan el sentido de expresiones en lenguaje"
+        },
+        {
+          "position": 19,
+          "type": "multiple_choice",
+          "stem": "En el texto, ¿a qué se le llama “enemigo”?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "A la alergia.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Al alérgeno.",
+              "isCorrect": true
+            },
+            {
+              "key": "C",
+              "text": "Al cambio climático.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "A la contaminación ambiental.",
+              "isCorrect": false
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "B",
+          "skill": "Interpretar y relacionar",
+          "oa": "OA 6",
+          "contentAxis": "Texto no literario",
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Interpretan el sentido de expresiones en lenguaje figurado en un texto no literario. Determinan propósitos explícitos e implícitos en un texto"
+        },
+        {
+          "position": 20,
+          "type": "multiple_choice",
+          "stem": "¿Cuál es el propósito de este texto en relación con las alergias?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Enseñar sobre el origen de las alergias y su evolución en el tiempo.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Entregar información sobre las alergias y sus principales tratamientos.",
+              "isCorrect": true
+            },
+            {
+              "key": "C",
+              "text": "Alertar acerca del aumento de las alergias y el impacto del cambio climático.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "Opinar sobre la eficacia de los medicamentos contra las alergias y sus limitaciones.",
+              "isCorrect": false
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "B",
+          "skill": "Reflexionar",
+          "oa": "OA 7",
+          "contentAxis": "Texto no literario",
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Determinan propósitos explícitos e implícitos en un texto no literario. Establecen conclusiones sobre distintos aspectos en un"
+        }
+      ]
+    },
+    {
+      "order": 5,
+      "name": "Texto 5: «La jardinera»",
+      "type": "multiple_choice",
+      "instructions": "Lee el siguiente texto y responde las preguntas 21 a 23.",
+      "passage": {
+        "title": "La jardinera",
+        "text": "Para olvidarme de ti\nvoy a cultivar la tierra,\nen ella espero encontrar\nremedio para mis penas.\nAquí plantaré el rosal\nde las espinas más gruesas,\ntendré lista la corona\npara cuando en mí te mueras.\n\nPara mi tristeza, violeta azul,\nclavelina roja pa’ mi pasión\ny para saber si me corresponde\ndeshojo un blanco manzanillón.\nSi me quiere mucho, poquito o nada,\ntranquilo queda mi corazón.\n\nCreciendo irán poco a poco\nlos alegres pensamientos,\ncuando ya estén florecidos\nirá lejos tu recuerdo.\nDe la flor de la amapola\nseré su mejor amiga,\nla pondré bajo la almohada\npara dormirme tranquila.\n\nCogollo de toronjil\ncuando me aumenten las penas,\nlas flores de mi jardín\nhan de ser mis enfermeras.\nY si acaso yo me ausento\nantes que tú te arrepientas,\nheredarás estas flores:\nven a curarte con ellas.\n\nGlosario\n• violeta: planta herbácea que se cultiva en los jardines. La infusión de su flor se usa en medicina como pectoral y sudorífico.\n• pensamientos: planta herbácea cultivada en jardín con flores de pétalos redondeados y tres colores.\n• toronjil: planta herbácea con flores de color blanco, cuyas hojas se utilizan como remedio antiespasmódico.\n\nVioleta Parra. “La jardinera”. Chile: Violeta Parra 100 años. Web. 05 sept 2023.",
+        "format": "plain",
+        "attachments": []
+      },
+      "items": [
+        {
+          "position": 21,
+          "type": "multiple_choice",
+          "stem": "En el poema, ¿qué flor se asocia al olvido?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "El rosal.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "La violeta.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "La amapola.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "El pensamiento.",
+              "isCorrect": true
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "D",
+          "skill": "Interpretar y relacionar",
+          "oa": "OA 5",
+          "contentAxis": "Poema",
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Establecen conclusiones sobre distintos aspectos en un poema. Interpretan el sentido de expresiones en lenguaje"
+        },
+        {
+          "position": 22,
+          "type": "multiple_choice",
+          "stem": "¿Cuál es el estado de ánimo que manifiesta la hablante en el poema?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Tristeza.",
+              "isCorrect": true
+            },
+            {
+              "key": "B",
+              "text": "Irritación.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Pesimismo.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "Incertidumbre.",
+              "isCorrect": false
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "A",
+          "skill": "Interpretar y relacionar",
+          "oa": "OA 5",
+          "contentAxis": "Poema",
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Interpretan el sentido de expresiones en lenguaje figurado presentes en un poema. Establecen conclusiones sobre distintos aspectos en un"
+        },
+        {
+          "position": 23,
+          "type": "multiple_choice",
+          "stem": "¿Qué aflige a la hablante en el poema?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "La desesperanza hacia la vida.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "El sufrimiento a causa del olvido.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "El dolor provocado por el desamor.",
+              "isCorrect": true
+            },
+            {
+              "key": "D",
+              "text": "La angustia por la muerte del ser amado.",
+              "isCorrect": false
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "C",
+          "skill": "Interpretar y relacionar",
+          "oa": "OA 5",
+          "contentAxis": "Poema",
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Establecen conclusiones sobre distintos aspectos en un poema. Infieren relaciones entre las ideas (causa-consecuencia,"
+        }
+      ]
+    },
+    {
+      "order": 6,
+      "name": "Texto 6: «El marinero que murió dos veces»",
+      "type": "multiple_choice",
+      "instructions": "Lee el siguiente texto y responde las preguntas 24 a 28.",
+      "passage": {
+        "title": "EL MARINERO QUE MURIÓ DOS VECES",
+        "text": "Combate Naval de Iquique\n\nAunque parece un cuento de ficción, esta es una historia real, un increíble episodio de la Guerra del Pacífico, protagonizado por un marinero que perteneció a la tripulación de la Esmeralda. Se llamaba Luis Segundo Ugarte.\n\nEl 21 de mayo de 1879, durante el Combate Naval de Iquique, la Esmeralda fue bombardeada durante horas por el buque peruano Huáscar. Cuando el acorazado decidió finalmente atacar con su espolón al barco chileno, el comandante Arturo Prat, espada en mano, estaba de pie sobre la cubierta de la Esmeralda. Junto a él se encontraba el sargento Juan de Dios Aldea y, cerca, el marino Ugarte.\n\n—¡Al abordaje, muchachos! —gritó Prat cuando el Huáscar impactó a la Esmeralda. Pero la orden de abordar el barco enemigo fue silenciada por el estruendo del espolonazo y las ráfagas de los fusileros de ambas naves. Prat saltó a la proa del buque peruano solo seguido por el sargento Aldea. Cuando el Huáscar comenzó a separarse del barco chileno, viendo que su capitán quedaba prácticamente solo en la cubierta del barco enemigo, Luis Segundo Ugarte también saltó al abordaje. Pero en su acción desesperada apenas alcanzó el borde de la proa del Huáscar. No pudo agarrarse bien y cayó al mar, entre las dos naves. Ugarte no pudo ver la muerte heroica de su capitán ni tampoco la de sus compañeros. Aferrado a un pedazo de madera, sangrando y semi ahogado, divisó el hundimiento de La Esmeralda desde el agua.\n\nAl terminar el combate, los chilenos pensaron que Ugarte había muerto en la cubierta del barco peruano. Por eso, en la lista de la marina chilena se colocó una cruz junto al nombre de Luis Segundo Ugarte. Es decir, se le dio oficialmente por muerto.\n\nSin embargo, más tarde, cuando la ciudad de Iquique fue finalmente tomada por los chilenos y se rescató a los sobrevivientes de la Esmeralda, apareció entre ellos Luis Segundo Ugarte, sano y vivo. Poco después, en Valparaíso, al ser todos condecorados, también se prendió una medalla de plata en el pecho del supuesto difunto.\n\nComo el conflicto entre Chile y Perú continuaba y todos los hombres eran útiles, estos marineros volvieron a la guerra, ahora como tripulantes de otra nave. El “resucitado” Ugarte formó parte de la tripulación bajo las órdenes del capitán Manuel Thompson. Murió, esta vez de verdad, en el Combate de Arica, el 27 de febrero de 1880, de pie sobre la cubierta del Huáscar, justamente donde se le había dado por muerto la primera vez.\n\nGlosario\n• Espolón: pieza de hierro aguda, afilada y saliente en la proa de las antiguas galeras y de algunos modernos acorazados, para embestir y echar a pique el buque enemigo.\n\nErnesto Ayala y Claudia Larraguibel, ed. Curiosidades del mundo y de la naturaleza. Tomo III. Chile: Fundación Astoreca, 2010.",
+        "format": "plain",
+        "attachments": []
+      },
+      "items": [
+        {
+          "position": 24,
+          "type": "multiple_choice",
+          "stem": "¿Por qué el marinero Ugarte decidió saltar al abordaje del Huáscar?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Porque quería destruir la nave.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Porque quería apoyar a su capitán.",
+              "isCorrect": true
+            },
+            {
+              "key": "C",
+              "text": "Porque quería escapar de las ráfagas de los fusiles.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "Porque quería huir de su barco antes de que se hundiera.",
+              "isCorrect": false
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "B",
+          "skill": "Interpretar y relacionar",
+          "oa": "OA 6",
+          "contentAxis": "Texto no literario",
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Infieren relaciones entre las ideas (causa-consecuencia, problema-solución, etc.) en un texto no literario."
+        },
+        {
+          "position": 25,
+          "type": "multiple_choice",
+          "stem": "¿Por qué Ugarte es conocido como “El marinero que murió dos veces”?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Porque logró evitar la muerte en dos combates navales.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Porque se informó de su muerte por error en dos oportunidades.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Porque se accidentó gravemente en un combate y fingió su muerte en otro.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "Porque fue dado por muerto erróneamente en un combate y falleció en otro.",
+              "isCorrect": true
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "D",
+          "skill": "Interpretar y relacionar",
+          "oa": "OA 6",
+          "contentAxis": "Texto no literario",
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Infieren el sentido global de un texto no literario. Interpretan el sentido de expresiones en lenguaje"
+        },
+        {
+          "position": 26,
+          "type": "multiple_choice",
+          "stem": "Lee este fragmento:\n“Pero la orden de abordar el barco enemigo fue silenciada por el estruendo del espolonazo y las ráfagas de los fusileros de ambas naves”.\n¿Qué quiere decir la expresión subrayada en el fragmento?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Que el capitán pidió silencio a los fusileros.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Que la orden no se escuchó debido al ruido.",
+              "isCorrect": true
+            },
+            {
+              "key": "C",
+              "text": "Que los fusileros no tomaron en cuenta la orden.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "Que las naves se mantuvieron en silencio después de la orden.",
+              "isCorrect": false
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "B",
+          "skill": "Interpretar y relacionar",
+          "oa": "OA 6",
+          "contentAxis": "Texto no literario",
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Interpretan el sentido de expresiones en lenguaje figurado en un texto no literario."
+        },
+        {
+          "position": 27,
+          "type": "multiple_choice",
+          "stem": "Según el texto, ¿quién murió en el Combate de Arica?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Arturo Prat.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Manuel Thompson.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Juan de Dios Aldea.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "Luis Segundo Ugarte.",
+              "isCorrect": true
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "D",
+          "skill": "Interpretar y relacionar",
+          "oa": "OA 6",
+          "contentAxis": "Texto no literario",
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Infieren información relevante en un texto no literario. Determinan propósitos explícitos e implícitos en un texto"
+        },
+        {
+          "position": 28,
+          "type": "multiple_choice",
+          "stem": "¿Cuál es el propósito comunicativo de este texto?",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Informar sobre la muerte del marinero Luis Segundo Ugarte.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Narrar un episodio curioso ocurrido durante la Guerra del Pacífico.",
+              "isCorrect": true
+            },
+            {
+              "key": "C",
+              "text": "Describir los combates que se produjeron durante la Guerra del Pacífico.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "Opinar sobre los errores que propiciaron la muerte de Luis Segundo Ugarte.",
+              "isCorrect": false
+            }
+          ],
+          "responseFormat": "choice",
+          "correctKey": "B",
+          "skill": "Reflexionar",
+          "oa": "OA 7",
+          "contentAxis": "Texto no literario",
+          "hasFigure": false,
+          "figureNote": null,
+          "indicador": "Determinan propósitos explícitos e implícitos en un texto no literario."
+        }
+      ]
+    }
+  ],
+  "extraction": {
+    "itemCount": 28,
+    "warnings": [
+      "Q5 y Q15 son ítems de desarrollo (open_ended, responseFormat=develop) con estructura Sí/No + fundamentación.",
+      "Texto 3 («Un lenguaje solo para mujeres») incluye una ilustración de apoyo bajo el título (escritura nushu), decorativa; todo el texto necesario para responder está transcrito en el passage.",
+      "Los glosarios de los Textos 4, 5 y 6 se transcribieron dentro del passage respectivo.",
+      "Textos transcritos desde la capa de texto del PDF (pdftotext -layout), verbatim."
+    ],
+    "needsHumanReview": false,
+    "crossCheck": {
+      "hardIssues": [],
+      "softWarnings": [],
+      "counts": {
+        "cuadernillo": 28,
+        "ficha": 28,
+        "hoja": 28
+      }
+    }
+  },
+  "pauta": {
+    "source": {
+      "ficha": "7_TE DIA Diagnóstico lectura 7° básico 2026.pdf",
+      "hoja": "7_Hoja de respuestas DIA Diagnóstico lectura 7° básico 2026.pdf"
+    },
+    "appliedKeys": 26,
+    "rubrics": 2
+  }
+}
