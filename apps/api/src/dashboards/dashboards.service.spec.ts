@@ -336,6 +336,12 @@ describe('DashboardsService.getFilterOptions', () => {
       ],
       // 5. periods (academic_years)
       [{ id: 'ay1', year: 2025, isCurrent: true }],
+      // 6. scopedCgRows (cursos accesibles sin filtro de año)
+      [{ id: 'cg1' }],
+      // 7. periodRows (momentos con evaluaciones en el alcance)
+      [],
+      // 8. dataInstrumentRows (instrumentos con datos — P3)
+      [{ instrumentId: 'i1' }],
     ]);
     const svc = makeService(db);
     const res = await svc.getFilterOptions(makeUser({ activeRole: 'academic_director' }), {});
@@ -347,6 +353,27 @@ describe('DashboardsService.getFilterOptions', () => {
     expect(res.instruments[0]!.type).toBe('dia');
     expect(res.periods).toEqual([{ id: 'ay1', year: 2025, label: '2025', isCurrent: true }]);
     expect(res.defaultAcademicYearId).toBe('ay1');
+  });
+
+  // P3 — el selector de instrumento sólo lista los que tienen datos en el alcance.
+  it('filtra del selector los instrumentos sin datos', async () => {
+    const db = makeDb([
+      [{ academicYearId: 'ay1', year: 2025, isCurrent: true }],
+      [{ id: 'cg1', name: '2°A', gradeId: 'g1', academicYearId: 'ay1', gradeName: '2° Básico' }],
+      [{ id: 'sub1', name: 'Lenguaje' }],
+      [
+        { id: 'i1', name: 'DIA con datos', type: 'dia', subjectId: 'sub1', gradeId: 'g1' },
+        { id: 'i2', name: 'DIA sin datos', type: 'dia', subjectId: 'sub1', gradeId: 'g1' },
+      ],
+      [{ id: 'ay1', year: 2025, isCurrent: true }],
+      [{ id: 'cg1' }],
+      [],
+      // dataInstrumentRows: sólo i1 tiene read-model de cohorte en el alcance
+      [{ instrumentId: 'i1' }],
+    ]);
+    const svc = makeService(db);
+    const res = await svc.getFilterOptions(makeUser({ activeRole: 'school_admin' }), {});
+    expect(res.instruments.map((i) => i.id)).toEqual(['i1']);
   });
 
   // El catálogo de cursos se acota SIEMPRE a un año: `class_groups` es por año y
