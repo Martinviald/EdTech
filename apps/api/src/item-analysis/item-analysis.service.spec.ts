@@ -1,6 +1,6 @@
 import { ForbiddenException, NotFoundException } from '@nestjs/common';
 import type { Database } from '@soe/db';
-import type { UserRole } from '@soe/types';
+import { assessmentListQuerySchema, type UserRole } from '@soe/types';
 import type { JwtPayload } from '../auth/jwt-payload.types';
 import { ItemAnalysisService } from './item-analysis.service';
 
@@ -1113,6 +1113,62 @@ describe('ItemAnalysisService.listAssessments', () => {
       gradeName: '3° básico',
       studentsCount: 24,
     });
+  });
+
+  // Regresión: la barra de filtros de /evaluaciones es multi-select (T2-12) y
+  // serializa la selección como CSV en la MISMA querystring que consume
+  // /dashboards/filters. Con el DTO escalar anterior, elegir dos niveles daba
+  // 400 "Invalid uuid" y `instrumentType` en CSV no matcheaba nada en silencio.
+  it('T2-12 — acepta filtros multi-valor en CSV (dos niveles) sin lanzar', () => {
+    const GRADE_A = '0f6a8d6d-a206-4ec8-92f0-243161652a7f';
+    const GRADE_B = '9aac0fab-d546-4069-aa45-b8775a1e22ed';
+
+    const dto = assessmentListQuerySchema.parse({
+      gradeId: `${GRADE_A},${GRADE_B}`,
+      instrumentType: 'dia,ensayo',
+    });
+
+    expect(dto.gradeId).toEqual([GRADE_A, GRADE_B]);
+    expect(dto.instrumentType).toEqual(['dia', 'ensayo']);
+  });
+
+  // Un solo valor sigue siendo válido: la tool `list_assessments` del asistente
+  // manda un uuid suelto, no un CSV.
+  it('un valor suelto se normaliza a array de uno; vacío queda sin filtro', () => {
+    const one = assessmentListQuerySchema.parse({ gradeId: CLASS_GROUP_ID });
+    expect(one.gradeId).toEqual([CLASS_GROUP_ID]);
+
+    const none = assessmentListQuerySchema.parse({ gradeId: '' });
+    expect(none.gradeId).toBeUndefined();
+  });
+
+  it('un uuid malformado sigue siendo rechazado', () => {
+    expect(() => assessmentListQuerySchema.parse({ gradeId: 'no-uuid' })).toThrow();
+  });
+
+  it('filtros multi-valor: el service los aplica sin romper la consulta', async () => {
+    const db = makeDb([
+      [
+        {
+          assessmentId: ASSESSMENT_ID,
+          name: 'DIA Lectura',
+          administeredAt: new Date('2026-03-10T00:00:00Z'),
+          instrumentName: 'Instrumento Lectura',
+          instrumentType: 'dia',
+          subjectName: 'Lenguaje',
+          gradeName: '3° básico',
+        },
+      ],
+      [{ assessmentId: ASSESSMENT_ID, count: 24 }],
+    ]);
+    const service = makeService(db);
+
+    const dto = assessmentListQuerySchema.parse({
+      gradeId: `${GRADE_ID},${'0f6a8d6d-a206-4ec8-92f0-243161652a7f'}`,
+      instrumentType: 'dia',
+    });
+    const res = await service.listAssessments(makeUser(), dto);
+    expect(res.data).toHaveLength(1);
   });
 
   it('admin: sin evaluaciones con resultados → data vacía (sin segunda query)', async () => {
