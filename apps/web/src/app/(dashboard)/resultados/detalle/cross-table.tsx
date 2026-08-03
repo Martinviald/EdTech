@@ -78,22 +78,41 @@ function correctRateHeaderClass(rate: number | null): string {
   return 'text-success';
 }
 
+/**
+ * ¿La celda es un acierto parcial? Sólo puede serlo un ítem de crédito parcial
+ * (`matching`): puntúa > 0 sin llegar al total. En los binarios nunca se cumple.
+ */
+function partialScore(cell: MatrixCell): { score: number; maxScore: number } | null {
+  if (cell.isCorrect !== false) return null;
+  if (cell.score === null || cell.maxScore === null) return null;
+  if (cell.score <= 0 || cell.score >= cell.maxScore) return null;
+  return { score: cell.score, maxScore: cell.maxScore };
+}
+
 /** Estilo de celda por estado de la respuesta del alumno. */
 function cellClass(cell: MatrixCell): string {
   if (cell.isCorrect === true) {
     return 'bg-success/10 text-success';
   }
   if (cell.isCorrect === false) {
-    return 'bg-destructive/10 text-destructive';
+    // Un acierto parcial no es lo mismo que fallar el ítem entero.
+    return partialScore(cell) ? 'bg-warning/10 text-warning' : 'bg-destructive/10 text-destructive';
   }
   // Sin respuesta / sin corrección.
   return 'bg-muted/40 text-muted-foreground';
 }
 
 function cellLabel(cell: MatrixCell): string {
+  const partial = partialScore(cell);
+  if (partial) return `${formatScore(partial.score)}/${formatScore(partial.maxScore)}`;
   if (cell.selectedKey) return cell.selectedKey;
   if (cell.isCorrect === null) return '·';
   return '—';
+}
+
+/** 2 → "2", 2.5 → "2,5". Evita el "2.00" de los decimales de la BDD. */
+function formatScore(value: number): string {
+  return Number.isInteger(value) ? String(value) : value.toFixed(1).replace('.', ',');
 }
 
 /** Valor ordenable de una celda: correcta > incorrecta > en blanco, desempate por score. */
@@ -298,8 +317,8 @@ export function CrossTable({
       <p className="text-xs text-muted-foreground">
         Clic en el <span className="font-medium">número</span> de una pregunta para ver su detalle;
         el botón <ArrowDownUp className="inline size-3" aria-hidden /> bajo cada pregunta ordena a
-        los alumnos por esa pregunta. Clic en <span className="font-medium">Logro</span>{' '}
-        (cabecera) ordena a los alumnos por su logro global; o usa{' '}
+        los alumnos por esa pregunta. Clic en <span className="font-medium">Logro</span> (cabecera)
+        ordena a los alumnos por su logro global; o usa{' '}
         <span className="font-medium">Ordenar preguntas</span>. Verde = correcta, rojo = incorrecta,
         gris = sin respuesta.
       </p>
@@ -579,7 +598,10 @@ function StudentRow({
         return (
           <TableCell
             key={q.itemId}
-            className={cn('px-0.5 py-1.5 text-center text-xs font-semibold tabular-nums', cellClass(cell))}
+            className={cn(
+              'px-0.5 py-1.5 text-center text-xs font-semibold tabular-nums',
+              cellClass(cell),
+            )}
             title={
               cell.selectedKey
                 ? `Respondió ${cell.selectedKey}${

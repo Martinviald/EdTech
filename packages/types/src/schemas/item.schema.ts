@@ -55,10 +55,25 @@ export type IrtParams = z.infer<typeof irtParamsSchema>;
 
 // ── Scoring Config ───────────────────────────────────────────────────────────
 
+/**
+ * Política de puntaje de un ítem de términos pareados. Todo es configuración:
+ * el caso DIA (un punto por par, sin penalización) es sólo el default.
+ *
+ * `pointsPerPair` omitido ⇒ se deriva de `points / nº de pares correctos`, así
+ * un ítem que sólo declara `points` se comporta bien sin saber cuántos pares tiene.
+ */
+export const matchingScoringSchema = z.object({
+  pointsPerPair: z.number().min(0).optional(),
+  penaltyPerIncorrectPair: z.number().min(0).optional(),
+});
+
+export type MatchingScoring = z.infer<typeof matchingScoringSchema>;
+
 export const scoringConfigSchema = z
   .object({
     points: z.number().min(0).optional(),
     partialCredit: z.boolean().optional(),
+    matching: matchingScoringSchema.optional(),
   })
   .passthrough()
   .optional();

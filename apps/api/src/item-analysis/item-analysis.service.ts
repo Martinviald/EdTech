@@ -335,7 +335,7 @@ export class ItemAnalysisService {
         const cells: MatrixCell[] = itemIds.map((itemId) => {
           const cell = byItem.get(itemId);
           if (!cell) {
-            return { itemId, selectedKey: null, isCorrect: null, score: null };
+            return { itemId, selectedKey: null, isCorrect: null, score: null, maxScore: null };
           }
           if (cell.selectedKey !== null) answeredCount++;
           if (cell.isCorrect === true) correctCount++;
@@ -968,6 +968,7 @@ export class ItemAnalysisService {
         isCorrect: responses.isCorrect,
         finalScore: responses.finalScore,
         rawScore: responses.rawScore,
+        maxScore: responses.maxScore,
       })
       .from(responses)
       .where(
@@ -990,6 +991,7 @@ export class ItemAnalysisService {
         selectedKey: this.extractRawAnswer(r.value),
         isCorrect: r.isCorrect,
         score,
+        maxScore: r.maxScore != null ? Number(r.maxScore) : null,
       };
       let byItem = result.get(r.studentId);
       if (!byItem) {

@@ -35,6 +35,13 @@ type Alt = {
   /** Storage key en S3 del recorte de esa alternativa (contrato v1.1). No es una URL. */
   imageRef?: string | null;
 };
+/** Elemento de una columna de un ítem de términos pareados. */
+type MatchElement = {
+  key: string;
+  text: string;
+  isImage?: boolean;
+  imageRef?: string | null;
+};
 type Item = {
   position: number;
   /**
@@ -54,17 +61,12 @@ type Item = {
   figureNote?: string | null;
   /** Storage key en S3 del recorte de la figura (contrato v1.1). No es una URL. */
   imageRef?: string | null;
-  /**
-   * Términos pareados (`responseFormat: "match_pairs"`): las dos columnas y los pares correctos.
-   * Se preservan en `scoringConfig` porque hoy el ítem entra como `open_ended` — el tipo
-   * `matching` existe en el enum y tiene schema y estrategia, pero le falta el camino de carga
-   * y su corrección es todo-o-nada, que no es como puntúa la Agencia. Guardarlos acá evita
-   * tener que volver a los PDF cuando se implemente.
-   * Ver `docs/plan-items-terminos-pareados.md`.
-   */
+  /** Puntaje del ítem. Ausente ⇒ se deriva del tipo (ver `resolvePoints`). */
+  points?: number;
+  /** Términos pareados — las dos columnas tal como las rotula el documento. */
+  matchColumns?: Record<string, MatchElement[]>;
+  /** Términos pareados — los pares correctos, en las etiquetas del documento. */
   matchPairs?: { left: string; right: string }[];
-  /** `{ "A": [{ key: "A.1", text: "Osmosis" }, …], "B": [ … ] }` — la etiqueta impresa es la key. */
-  matchColumns?: Record<string, { key: string; text: string }[]>;
 };
 type Passage = {
   title?: string;
@@ -117,19 +119,233 @@ function altImageRefs(it: Item): Record<string, unknown> | null {
   return Object.keys(refs).length ? { altImageRefs: refs } : null;
 }
 
-function buildContent(it: Item): Record<string, unknown> {
-  if (it.type === 'multiple_choice' || it.type === 'true_false') {
-    return {
-      stem: it.stem,
-      alternatives: (it.alternatives ?? []).map((a) => ({
-        key: a.key,
-        text: a.text,
-        isCorrect: a.isCorrect === true,
-      })),
-    };
+// ── Términos pareados ────────────────────────────────────────────────────────
+//
+// El `content` de `matching` es genérico: `leftItems` es el lado RESPONDIBLE
+// (una entrada de `correctPairs` por elemento) y `rightItems` el banco de
+// opciones, donde viven los distractores. Qué columna del documento cae en cada
+// lado NO es fijo: en Ciencias 8° los distractores están en la columna A y en
+// Historia 6° en la B. Por eso el lado respondible se DEDUCE de los pares en vez
+// de hardcodearse, con esta regla:
+//
+//   el lado respondible es aquel cuyas etiquetas aparecen una sola vez entre los
+//   pares Y cubren todos los elementos de su columna
+//
+// (todo elemento respondible tiene exactamente una respuesta; un elemento del
+// banco puede no usarse —distractor— o repetirse —clasificación N → k).
+
+type MatchingSides = {
+  answerable: MatchElement[];
+  options: MatchElement[];
+  pairs: { answerableKey: string; optionKey: string }[];
+};
+
+function isAnswerableSide(keys: string[], column: MatchElement[]): boolean {
+  const unique = new Set(keys);
+  return unique.size === keys.length && unique.size === column.length;
+}
+
+/**
+ * Adaptador del shape que entrega el pipeline de extracción DIA
+ * (`matchColumns: {A, B}` + `matchPairs: [{left, right}]`) al shape genérico.
+ * Todo lo específico de DIA vive acá; `buildMatchingContent` no lo conoce.
+ */
+/**
+ * Fallback cuando la capa A no emitió `matchColumns`: los rotulados de las dos
+ * columnas están igual en el enunciado, una etiqueta por línea
+ * (`A.1 Osmosis`). Se derivan los prefijos de las etiquetas de `matchPairs` y se
+ * barre el stem por cada uno — así se recuperan también los distractores, que
+ * por definición NO aparecen en los pares.
+ *
+ * Vive en el adaptador DIA a propósito: es parsing del formato de un proveedor,
+ * no parte del contrato de `matching`.
+ */
+function columnsFromStem(it: Item): Record<string, MatchElement[]> {
+  const prefixes = [
+    ...new Set((it.matchPairs ?? []).flatMap((p) => [p.left, p.right]).map(labelPrefix)),
+  ];
+  const columns: Record<string, MatchElement[]> = {};
+  for (const prefix of prefixes) {
+    const pattern = new RegExp(`^\\s*(${prefix}[.\\s]?\\d+)[.)\\s]+(.+)$`, 'gm');
+    const elements: MatchElement[] = [];
+    for (const m of it.stem.matchAll(pattern)) {
+      const key = m[1]!.replace(/\s+/g, '');
+      const text = m[2]!.trim();
+      if (text.length > 0) elements.push({ key, text });
+    }
+    if (elements.length > 0) columns[prefix] = elements;
   }
-  // open_ended (incluye responseFormat fill_in / develop), writing, etc.
-  return { prompt: it.stem };
+  return columns;
+}
+
+function labelPrefix(label: string): string {
+  return label.replace(/[.\s]?\d+$/, '');
+}
+
+function diaMatchingSides(it: Item): MatchingSides {
+  const columns =
+    it.matchColumns && Object.keys(it.matchColumns).length > 0
+      ? it.matchColumns
+      : columnsFromStem(it);
+  const names = Object.keys(columns);
+  if (names.length !== 2) {
+    throw new Error(
+      `Ítem ${it.position}: matchColumns debe traer exactamente 2 columnas, trae ${names.length}`,
+    );
+  }
+  const pairs = it.matchPairs ?? [];
+  if (pairs.length === 0) {
+    throw new Error(`Ítem ${it.position}: matchPairs vacío en un ítem de términos pareados`);
+  }
+
+  const [firstName, secondName] = names as [string, string];
+  const first = columns[firstName] ?? [];
+  const second = columns[secondName] ?? [];
+  const leftKeys = pairs.map((p) => p.left);
+  const rightKeys = pairs.map((p) => p.right);
+
+  const leftIsAnswerable = isAnswerableSide(leftKeys, first);
+  const rightIsAnswerable = isAnswerableSide(rightKeys, second);
+
+  if (leftIsAnswerable === rightIsAnswerable) {
+    // Biyección perfecta (ambos lados califican) o dato inconsistente (ninguno).
+    // En el primer caso da igual cuál se elija; en el segundo hay que fallar
+    // ruidoso, porque adivinar el lado corrige mal sin fallar nunca.
+    if (!leftIsAnswerable) {
+      throw new Error(
+        `Ítem ${it.position}: no se puede deducir el lado respondible de los pares ` +
+          `(${leftKeys.length} pares, columnas de ${first.length} y ${second.length})`,
+      );
+    }
+  }
+
+  return leftIsAnswerable
+    ? {
+        answerable: first,
+        options: second,
+        pairs: pairs.map((p) => ({ answerableKey: p.left, optionKey: p.right })),
+      }
+    : {
+        answerable: second,
+        options: first,
+        pairs: pairs.map((p) => ({ answerableKey: p.right, optionKey: p.left })),
+      };
+}
+
+function toMatchingElement(el: MatchElement): Record<string, unknown> {
+  return {
+    id: el.key,
+    text: el.text,
+    label: el.key,
+    ...(el.isImage ? { isImage: true } : {}),
+  };
+}
+
+function buildMatchingContent(it: Item): Record<string, unknown> {
+  const { answerable, options, pairs } = diaMatchingSides(it);
+  return {
+    prompt: it.stem,
+    leftItems: answerable.map(toMatchingElement),
+    rightItems: options.map(toMatchingElement),
+    correctPairs: pairs.map((p) => ({ leftId: p.answerableKey, rightId: p.optionKey })),
+  };
+}
+
+/** `{ matchImageRefs: {"B.1": key, …} }` con los recortes de ambas columnas, o `null`. */
+function matchImageRefs(it: Item): Record<string, unknown> | null {
+  const refs = Object.fromEntries(
+    Object.values(it.matchColumns ?? {})
+      .flat()
+      .filter((el) => el.imageRef)
+      .map((el) => [el.key, el.imageRef]),
+  );
+  return Object.keys(refs).length ? { matchImageRefs: refs } : null;
+}
+
+/** Nº de pares correctos declarados, para derivar el puntaje por defecto. */
+function matchingPairCount(it: Item): number {
+  return (it.matchPairs ?? []).length;
+}
+
+function buildTrueFalseContent(it: Item): Record<string, unknown> {
+  const correct = (it.alternatives ?? []).find((a) => a.isCorrect === true);
+  if (!correct) {
+    throw new Error(`Ítem ${it.position}: true_false sin alternativa correcta declarada`);
+  }
+  const normalized = `${correct.key} ${correct.text}`.trim().toUpperCase();
+  const isTrue = /\b(V|VERDADERO|TRUE|T|SÍ|SI)\b/.test(normalized);
+  const isFalse = /\b(F|FALSO|FALSE)\b/.test(normalized);
+  if (isTrue === isFalse) {
+    throw new Error(
+      `Ítem ${it.position}: no se puede resolver V/F desde la alternativa correcta "${correct.key}. ${correct.text}"`,
+    );
+  }
+  return { stem: it.stem, correctAnswer: isTrue };
+}
+
+/**
+ * Tipo REAL del ítem. El pipeline de extracción tipa los términos pareados como
+ * `open_ended` + `responseFormat: "match_pairs"` — deuda tomada cuando `matching`
+ * no tenía camino de carga. Un ítem que declara sus pares ES un pareado, así que
+ * se normaliza acá en vez de exigir re-extraer los PDF.
+ *
+ * Es el mismo criterio que el resto del adaptador: el dato manda sobre la
+ * etiqueta que le puso la capa de extracción.
+ */
+function resolveItemType(it: Item): string {
+  if (it.type === 'matching') return 'matching';
+  if ((it.matchPairs ?? []).length > 0 || it.responseFormat === 'match_pairs') return 'matching';
+  if (it.type === 'true_false' || isTrueFalseAlternatives(it)) return 'true_false';
+  return it.type;
+}
+
+/**
+ * ¿Las alternativas son exactamente Verdadero/Falso? La extracción tipa estos
+ * ítems como `multiple_choice` con `A. Verdadero` / `B. Falso`, pero la hoja de
+ * respuestas los escanea como `V`/`F`: corregirlos contra la LETRA da siempre
+ * incorrecto (verificado contra los scans reales de Ciencias 8°, donde los 9
+ * ítems V/F puntuaban 0). Como `true_false`, la estrategia normaliza ambas
+ * formas a una clave canónica y el escaneo calza.
+ */
+function isTrueFalseAlternatives(it: Item): boolean {
+  const alternatives = it.alternatives ?? [];
+  if (alternatives.length !== 2) return false;
+  const texts = alternatives.map((a) => a.text.trim().toLowerCase());
+  return texts.includes('verdadero') && texts.includes('falso');
+}
+
+export function buildContent(it: Item): Record<string, unknown> {
+  // Siempre por el tipo RESUELTO, nunca por `it.type`: los V/F llegan tipados
+  // como multiple_choice y la rama MCQ se los tragaría antes de llegar a la suya.
+  switch (resolveItemType(it)) {
+    case 'matching':
+      return buildMatchingContent(it);
+    case 'true_false':
+      return buildTrueFalseContent(it);
+    case 'multiple_choice':
+      return {
+        stem: it.stem,
+        alternatives: (it.alternatives ?? []).map((a) => ({
+          key: a.key,
+          text: a.text,
+          isCorrect: a.isCorrect === true,
+        })),
+      };
+    default:
+      // open_ended (incluye responseFormat fill_in / develop), writing, etc.
+      return { prompt: it.stem };
+  }
+}
+
+/**
+ * Puntaje del ítem. El JSON manda; si no lo declara, un pareado vale un punto por
+ * par (la convención de la Agencia, y el default razonable en general) y todo lo
+ * demás vale 1.
+ */
+export function resolvePoints(it: Item): number {
+  if (typeof it.points === 'number' && it.points >= 0) return it.points;
+  if (resolveItemType(it) === 'matching') return matchingPairCount(it) || 1;
+  return 1;
 }
 
 export async function importInstruments(db: Database): Promise<void> {
@@ -259,8 +475,9 @@ export async function importInstruments(db: Database): Promise<void> {
           await tx.insert(sectionAttachments).values(attachments);
         }
         for (const it of s.items) {
+          const itemType = resolveItemType(it);
           const content = validateItemContent(
-            it.type as Parameters<typeof validateItemContent>[0],
+            itemType as Parameters<typeof validateItemContent>[0],
             buildContent(it),
           );
           await tx.insert(items).values({
@@ -268,11 +485,11 @@ export async function importInstruments(db: Database): Promise<void> {
             instrumentId,
             sectionId,
             position: it.position,
-            type: it.type as typeof items.$inferInsert.type,
+            type: itemType as typeof items.$inferInsert.type,
             content,
             scoringConfig: {
-              points: 1,
-              partialCredit: it.type !== 'multiple_choice' && it.type !== 'true_false',
+              points: resolvePoints(it),
+              partialCredit: itemType !== 'multiple_choice' && itemType !== 'true_false',
               ...(it.responseFormat ? { responseFormat: it.responseFormat } : {}),
               // Número impreso (ver el tipo `Item`). Va en scoringConfig por el mismo motivo que
               // `imageRef`: el schema Zod de `content` descarta las claves que no declara.
@@ -288,13 +505,11 @@ export async function importInstruments(db: Database): Promise<void> {
               // Recortes por alternativa: {A: key, B: key, …}. Mismo motivo para NO ponerlos en
               // `content`: el schema de alternativa es {key,text,isCorrect} y Zod descarta el resto.
               ...(altImageRefs(it) ?? {}),
-              // Términos pareados: columnas y pares correctos (ver el tipo `Item`).
-              ...(it.matchPairs?.length
-                ? {
-                    matchPairs: it.matchPairs,
-                    ...(it.matchColumns ? { matchColumns: it.matchColumns } : {}),
-                  }
-                : {}),
+              // Recortes de los elementos de un pareado: {"B.1": key, …}. Mismo motivo.
+              // Los pares y las columnas NO se copian acá: desde que `matching` tiene camino
+              // de carga, viven en `content` (leftItems/rightItems/correctPairs) y duplicarlos
+              // en scoringConfig sería una segunda fuente de verdad de lo mismo.
+              ...(matchImageRefs(it) ?? {}),
             },
             status: 'published',
             source: 'imported',

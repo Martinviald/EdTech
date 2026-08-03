@@ -2,8 +2,7 @@ import Papa from 'papaparse';
 import type { AnswerSheetRowError } from '@soe/types';
 import {
   decodeCsvBuffer,
-  normalizeAnswerValue,
-  questionColumnToPosition,
+  assignAnswer,
   type ParsedAnswerSheetRow,
   type ParserResult,
 } from './parser.types';
@@ -30,9 +29,7 @@ export function parseGradecamCsv(buffer: Buffer): ParserResult {
 
   const questionColumns = detectedColumns.filter((c) => /^Q\d+$/i.test(c));
   if (questionColumns.length === 0) {
-    warnings.push(
-      'No se detectaron columnas de preguntas con formato "Q1", "Q2", etc. en el CSV.',
-    );
+    warnings.push('No se detectaron columnas de preguntas con formato "Q1", "Q2", etc. en el CSV.');
   }
 
   const rows: ParsedAnswerSheetRow[] = [];
@@ -43,8 +40,7 @@ export function parseGradecamCsv(buffer: Buffer): ParserResult {
     const studentRut = (raw['Student ID'] ?? '').trim() || null;
     const firstName = (raw['First Name'] ?? '').trim();
     const lastName = (raw['Last Name'] ?? '').trim();
-    const studentFullName =
-      firstName || lastName ? `${firstName} ${lastName}`.trim() : null;
+    const studentFullName = firstName || lastName ? `${firstName} ${lastName}`.trim() : null;
 
     if (!studentRut) {
       errors.push({ rowNumber, field: 'Student ID', message: 'Falta el RUT del alumno' });
@@ -52,9 +48,7 @@ export function parseGradecamCsv(buffer: Buffer): ParserResult {
 
     const answers: Record<string, string | null> = {};
     for (const col of questionColumns) {
-      const position = questionColumnToPosition(col);
-      if (!position) continue;
-      answers[position] = normalizeAnswerValue(raw[col]);
+      assignAnswer(answers, col, raw[col]);
     }
 
     // Saltar filas completamente vacías (sin RUT y sin respuestas).

@@ -5,8 +5,15 @@ import type { AnswerSheetRowError } from '@soe/types';
  *
  * - `studentRut`: tal cual viene en el archivo. La normalización canónica
  *   (chequear DV, formatear) ocurre en el matcher, no acá.
- * - `answers`: mapa de `position` (string, ej. "1", "12") → alternativa
- *   seleccionada (ej. "A", "B"), o null si en blanco.
+ * - `answers`: mapa de ETIQUETA IMPRESA (tal como la numera la hoja: "1", "12",
+ *   "14.2", "7B1") → alternativa marcada, o null si en blanco.
+ *
+ *   ⚠️ La key NO es la `position` del ítem. El parser no conoce el instrumento,
+ *   así que no puede resolverla: en un cuadernillo con sub-numeración el número
+ *   impreso y la posición NO coinciden (Ciencias 8° 2026 imprime `14.1..14.5`
+ *   sobre posiciones correlativas). Traducir etiqueta → `position` es trabajo del
+ *   service, que sí tiene los ítems — ver `lib/composite-answers.ts`.
+ *
  * - `errors`: errores específicos de la fila — el parser igual la incluye
  *   para que el matcher/preview reporte todo de una vez.
  */
@@ -46,16 +53,38 @@ export function decodeCsvBuffer(buffer: Buffer): string {
 }
 
 /**
- * Normaliza una clave de pregunta como "Q1", "Q01", "p1", "1" → posición
- * numérica como string ("1", "12"). Si no contiene dígitos, retorna null.
+ * Etiqueta impresa de una columna de pregunta, sin el prefijo del proveedor:
+ *
+ *   "Q12"  → "12"        "Q14.2" → "14.2"
+ *   "7B1"  → "7B1"       "p9.1"  → "9.1"
+ *
+ * Preserva la sub-numeración TAL CUAL: es lo que permite después distinguir un
+ * ítem propio (`14.2`) de una sub-respuesta de un ítem compuesto (`7B1`), cosa
+ * que sólo se puede decidir contra el instrumento. Si no contiene dígitos o el
+ * número base es 0, retorna null.
  */
-export function questionColumnToPosition(column: string): string | null {
-  const m = column.match(/(\d+)/);
+export function questionColumnToLabel(column: string): string | null {
+  const m = column.trim().match(/^[^\d]*(\d+)(.*)$/);
   if (!m || !m[1]) return null;
-  // Parse para quitar leading zeros y volver a string (canonical "1", "12").
   const n = parseInt(m[1], 10);
   if (!Number.isFinite(n) || n <= 0) return null;
-  return String(n);
+
+  const rest = (m[2] ?? '').trim();
+  return `${n}${rest}`;
+}
+
+/**
+ * Escribe la respuesta de una columna en el mapa de la fila. Es el único punto
+ * donde los 4 parsers escriben `answers`, para que la regla sea una sola.
+ */
+export function assignAnswer(
+  answers: Record<string, string | null>,
+  column: string,
+  rawValue: string | undefined | null,
+): void {
+  const label = questionColumnToLabel(column);
+  if (!label) return;
+  answers[label] = normalizeAnswerValue(rawValue);
 }
 
 /**

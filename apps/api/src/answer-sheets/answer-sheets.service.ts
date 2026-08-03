@@ -33,6 +33,7 @@ import {
   type ImportJobModel,
   type ItemContent,
   type ItemType,
+  type ScoringConfig,
 } from '@soe/types';
 import type { JwtPayload } from '../auth/jwt-payload.types';
 import { InjectDb, type Database } from '../database/database.types';
@@ -51,13 +52,21 @@ import { parseGenericCsv } from './lib/parsers/generic-csv-parser';
 import { getTemplate, listTemplates } from './lib/templates';
 import type { ParserResult } from './lib/parsers/parser.types';
 import { matchStudents } from './lib/student-matcher';
+import {
+  buildPrintedLabelIndex,
+  resolveRowAnswers,
+  toScoringAnswer,
+} from './lib/composite-answers';
 
 interface ItemForAssessment {
   id: string;
   position: number;
+  /** Número impreso en el cuadernillo, si difiere de `position`. */
+  printedNumber: string | null;
   type: ItemType;
   content: ItemContent;
   maxScore: number;
+  scoringConfig: ScoringConfig;
 }
 
 interface UploadMetadataInput {
@@ -140,22 +149,35 @@ export class AnswerSheetsService {
       matchStudents(tx, orgId, entry.rows),
     );
 
-    // Posiciones detectadas (todas las preguntas que aparecieron en alguna fila).
-    const positionSet = new Set<string>();
-    for (const row of entry.rows) {
-      for (const pos of Object.keys(row.answers)) positionSet.add(pos);
-    }
-    const itemPositions = Array.from(positionSet)
-      .map((p) => parseInt(p, 10))
-      .filter((n) => Number.isFinite(n))
-      .sort((a, b) => a - b);
-
-    // Comparar con los items del instrumento.
+    // Resolver las etiquetas del escaneo contra los ítems del instrumento: la
+    // hoja numera por el NÚMERO IMPRESO y la BDD por `position`, que no
+    // coinciden cuando el cuadernillo sub-numera (ver lib/composite-answers.ts).
     const instrumentItems = await this.loadInstrumentItems(entry.instrumentId);
+    const labelIndex = buildPrintedLabelIndex(instrumentItems);
+
+    const coveredPositions = new Set<number>();
+    const unmatchedLabels = new Set<string>();
+    const unexpectedComposites = new Set<number>();
+    for (const row of entry.rows) {
+      const resolved = resolveRowAnswers(labelIndex, row.answers);
+      for (const position of resolved.byPosition.keys()) coveredPositions.add(position);
+      for (const label of resolved.unmatchedLabels) unmatchedLabels.add(label);
+      for (const position of resolved.unexpectedCompositePositions) {
+        unexpectedComposites.add(position);
+      }
+    }
+
+    const itemPositions = Array.from(coveredPositions).sort((a, b) => a - b);
     const instrumentPositions = new Set(instrumentItems.map((i) => i.position));
     const missingItemPositions = Array.from(instrumentPositions)
-      .filter((p) => !positionSet.has(String(p)))
+      .filter((p) => !coveredPositions.has(p))
       .sort((a, b) => a - b);
+
+    // Sub-numeración inesperada: el escaneo trae varias sub-columnas para un
+    // ítem que la app NO modela como compuesto. Antes se perdían todas las
+    // sub-respuestas menos la última, en silencio; ahora se avisa.
+    const unexpectedCompositePositions = Array.from(unexpectedComposites).sort((a, b) => a - b);
+    const unresolvedScanLabels = Array.from(unmatchedLabels).sort();
 
     let matchedRows = 0;
     let unmatchedRows = 0;
@@ -167,7 +189,11 @@ export class AnswerSheetsService {
       if (matched) matchedRows++;
       else unmatchedRows++;
 
-      const answeredCount = Object.values(row.answers).filter((v) => v !== null).length;
+      // Cuenta POSICIONES respondidas, no columnas del archivo: un ítem
+      // compuesto que el escaneo sub-numera es una sola pregunta del instrumento.
+      const answeredCount = Object.values(row.answers).filter((v) =>
+        v !== null && typeof v === 'object' ? Object.keys(v).length > 0 : v !== null,
+      ).length;
 
       const errors = [...row.errors];
       if (!matched && m && !m.rutNormalized) {
@@ -220,6 +246,18 @@ export class AnswerSheetsService {
         ...(missingItemPositions.length > 0
           ? [`Faltan respuestas para ${missingItemPositions.length} pregunta(s) del instrumento`]
           : []),
+        ...(unexpectedCompositePositions.length > 0
+          ? [
+              `El escaneo sub-numera la(s) pregunta(s) ${unexpectedCompositePositions.join(', ')}, ` +
+                'que en el instrumento son un único ítem no compuesto: se usará la primera sub-respuesta.',
+            ]
+          : []),
+        ...(unresolvedScanLabels.length > 0
+          ? [
+              `${unresolvedScanLabels.length} columna(s) del archivo no corresponden a ninguna ` +
+                `pregunta del instrumento y se ignorarán: ${unresolvedScanLabels.slice(0, 10).join(', ')}`,
+            ]
+          : []),
       ],
     };
   }
@@ -252,8 +290,7 @@ export class AnswerSheetsService {
         'El instrumento no tiene ítems configurados — no se pueden ingestar respuestas',
       );
     }
-    const itemByPosition = new Map<number, ItemForAssessment>();
-    for (const it of instrumentItems) itemByPosition.set(it.position, it);
+    const labelIndex = buildPrintedLabelIndex(instrumentItems);
 
     // 3. Re-matchear alumnos (no confiamos en datos del preview).
     //    matchStudents consulta `students` (RLS): correr con contexto de org.
@@ -305,14 +342,20 @@ export class AnswerSheetsService {
       // (#1): MCQ/true_false → binaria; matching/ordering/gap_fill →
       // determinística por content; el resto → pendiente (corrección humana/IA),
       // NUNCA 0/incorrecto en silencio.
+      // El escaneo numera por el número impreso, no por `position`, y puede traer
+      // varias sub-columnas para una sola pregunta (`7B1`…`7B4`). Se resuelve
+      // contra los ítems del instrumento antes de corregir.
+      const resolvedRow = resolveRowAnswers(labelIndex, row.answers);
+
       for (const item of instrumentItems) {
-        const rawAnswer = row.answers[String(item.position)] ?? null;
+        const rawAnswer = toScoringAnswer(item, resolvedRow.byPosition.get(item.position));
         const result = getScoringStrategy(item.type).score({
           item: {
             id: item.id,
             type: item.type,
             content: item.content,
             maxScore: item.maxScore,
+            scoringConfig: item.scoringConfig,
           },
           rawAnswer,
         });
@@ -632,11 +675,17 @@ export class AnswerSheetsService {
 
     const out: ItemForAssessment[] = [];
     for (const row of rows) {
-      const scoringConfig = (row.scoringConfig ?? {}) as { points?: number };
-      const maxScore = scoringConfig.points ?? 1;
+      const scoringConfig = (row.scoringConfig ?? {}) as ScoringConfig;
+      const maxScore = scoringConfig?.points ?? 1;
+      // El número impreso sólo se persiste cuando difiere de la posición; es la
+      // clave con la que numera la hoja de respuestas escaneada.
+      const printedNumber =
+        typeof scoringConfig?.printedNumber === 'string' ? scoringConfig.printedNumber : null;
       out.push({
         id: row.id,
         position: row.position,
+        printedNumber,
+        scoringConfig,
         // `items.type` es un enum de DB tipado como ItemType. El `content`
         // JSONB ya está tipado como ItemContent en el schema Drizzle; lo pasamos
         // a la estrategia de scoring correspondiente a su `type`.
