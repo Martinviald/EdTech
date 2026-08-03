@@ -13,15 +13,15 @@
   }
  },
  "counts": {
-  "curriculum/axis": 92,
+  "curriculum/axis": 102,
   "curriculum/domain": 3,
-  "curriculum/learning_objective": 560,
+  "curriculum/learning_objective": 617,
   "curriculum/skill": 19,
-  "curriculum/subdomain": 35,
+  "curriculum/subdomain": 38,
   "curriculum/text_type": 6,
-  "dia/descriptor": 805,
+  "dia/descriptor": 880,
   "dia/domain": 5,
-  "dia/subdomain": 23
+  "dia/subdomain": 26
  },
  "nodes": [
   {
@@ -17891,6 +17891,1691 @@
    "level": "7_basico",
    "source": "dia-ficha-2026",
    "order": 2
+  },
+  {
+   "code": "CUR-CONTENIDO-HIST-6B",
+   "type": "subdomain",
+   "name": "6° básico",
+   "parentCode": "CUR-CONTENIDO-HIST",
+   "marco": "curriculum",
+   "subjectCode": "HIST",
+   "level": "6_basico",
+   "source": "curriculumnacional.cl",
+   "order": 6
+  },
+  {
+   "code": "CUR-CONTENIDO-HIST-6B-AX-HISTORIA",
+   "type": "axis",
+   "name": "Historia",
+   "parentCode": "CUR-CONTENIDO-HIST-6B",
+   "marco": "curriculum",
+   "subjectCode": "HIST",
+   "level": "6_basico",
+   "source": "curriculumnacional.cl",
+   "order": 0
+  },
+  {
+   "code": "CUR-CONTENIDO-HIST-6B-AX-GEOGRAFIA",
+   "type": "axis",
+   "name": "Geografía",
+   "parentCode": "CUR-CONTENIDO-HIST-6B",
+   "marco": "curriculum",
+   "subjectCode": "HIST",
+   "level": "6_basico",
+   "source": "curriculumnacional.cl",
+   "order": 0
+  },
+  {
+   "code": "CUR-CONTENIDO-HIST-6B-AX-FORMACION-CIUDADANA",
+   "type": "axis",
+   "name": "Formación ciudadana",
+   "parentCode": "CUR-CONTENIDO-HIST-6B",
+   "marco": "curriculum",
+   "subjectCode": "HIST",
+   "level": "6_basico",
+   "source": "curriculumnacional.cl",
+   "order": 0
+  },
+  {
+   "code": "DIA-HIST-6B",
+   "type": "subdomain",
+   "name": "6° básico",
+   "parentCode": "DIA-HIST",
+   "marco": "dia",
+   "subjectCode": "HIST",
+   "level": "6_basico",
+   "source": "dia",
+   "order": 6
+  },
+  {
+   "code": "HIST-6B-OA01",
+   "type": "learning_objective",
+   "name": "Explicar los múltiples antecedentes de la independencia de las colonias americanas y reconocer que la independencia de Chile se enmarca en un proceso continental.",
+   "parentCode": "CUR-CONTENIDO-HIST-6B-AX-HISTORIA",
+   "marco": "curriculum",
+   "subjectCode": "HIST",
+   "level": "6_basico",
+   "oaNumber": 1,
+   "source": "curriculumnacional.cl",
+   "order": 1
+  },
+  {
+   "code": "HIST-6B-OA02",
+   "type": "learning_objective",
+   "name": "Explicar el desarrollo del proceso de independencia de Chile, considerando actores y bandos que se enfrentaron, hombres y mujeres destacados, avances y retrocesos de la causa patriota y algunos acontecimientos significativos, como la celebración del cabildo abierto de 1810 y la formación de la Primera Junta Nacional de Gobierno, la elección del primer Congreso Nacional, las batallas de Rancagua, Chacabuco y Maipú, y la Declaración de la Independencia, entre otros.",
+   "parentCode": "CUR-CONTENIDO-HIST-6B-AX-HISTORIA",
+   "marco": "curriculum",
+   "subjectCode": "HIST",
+   "level": "6_basico",
+   "oaNumber": 2,
+   "source": "curriculumnacional.cl",
+   "order": 2
+  },
+  {
+   "code": "HIST-6B-OA03",
+   "type": "learning_objective",
+   "name": "Describir algunos hitos y procesos de la organización de la república, incluyendo las dificultades y los desafíos que implicó organizar en Chile una nueva forma de gobierno, el surgimiento de grupos con diferentes ideas políticas (conservadores y liberales), las características de la Constitución de 1833 y el impacto de las reformas realizadas por los liberales en la segunda mitad del siglo XIX.",
+   "parentCode": "CUR-CONTENIDO-HIST-6B-AX-HISTORIA",
+   "marco": "curriculum",
+   "subjectCode": "HIST",
+   "level": "6_basico",
+   "oaNumber": 3,
+   "source": "curriculumnacional.cl",
+   "order": 3
+  },
+  {
+   "code": "HIST-6B-OA04",
+   "type": "learning_objective",
+   "name": "Investigar sobre algunos aspectos culturales del siglo XIX, como los avances en educación y la fundación de instituciones, el aporte de intelectuales y científicos nacionales (por ejemplo, Diego Barros Arana, Benjamín Vicuña Mackenna, José Victorino Lastarria) y extranjeros (por ejemplo, Andrés Bello, Claudio Gay, Charles Darwin y María Graham), las primeras mujeres en obtener títulos universitarios y el impacto en la sociedad de la llegada del ferrocarril y de otros avances tecnológicos, entre otros.",
+   "parentCode": "CUR-CONTENIDO-HIST-6B-AX-HISTORIA",
+   "marco": "curriculum",
+   "subjectCode": "HIST",
+   "level": "6_basico",
+   "oaNumber": 4,
+   "source": "curriculumnacional.cl",
+   "order": 4
+  },
+  {
+   "code": "HIST-6B-OA05",
+   "type": "learning_objective",
+   "name": "Describir cómo se conformó el territorio de Chile durante el siglo XIX, considerando colonizaciones europeas, la incorporación de Isla de Pascua, la ocupación de la Araucanía, la Guerra del Pacífico y diversos conflictos bélicos, entre otros factores.",
+   "parentCode": "CUR-CONTENIDO-HIST-6B-AX-HISTORIA",
+   "marco": "curriculum",
+   "subjectCode": "HIST",
+   "level": "6_basico",
+   "oaNumber": 5,
+   "source": "curriculumnacional.cl",
+   "order": 5
+  },
+  {
+   "code": "HIST-6B-OA06",
+   "type": "learning_objective",
+   "name": "Caracterizar los principales aspectos que definieron el período de riqueza aportada por la explotación del salitre, considerando la expansión económica y el inicio de la \"cuestión social\".",
+   "parentCode": "CUR-CONTENIDO-HIST-6B-AX-HISTORIA",
+   "marco": "curriculum",
+   "subjectCode": "HIST",
+   "level": "6_basico",
+   "oaNumber": 6,
+   "source": "curriculumnacional.cl",
+   "order": 6
+  },
+  {
+   "code": "HIST-6B-OA07",
+   "type": "learning_objective",
+   "name": "Explicar y dar ejemplos de la progresiva democratización de la sociedad durante el siglo XX, considerando el acceso creciente al voto, la participación de la mujer en la vida pública y el acceso a la educación ya la cultura, entre otros.",
+   "parentCode": "CUR-CONTENIDO-HIST-6B-AX-HISTORIA",
+   "marco": "curriculum",
+   "subjectCode": "HIST",
+   "level": "6_basico",
+   "oaNumber": 7,
+   "source": "curriculumnacional.cl",
+   "order": 7
+  },
+  {
+   "code": "HIST-6B-OA08",
+   "type": "learning_objective",
+   "name": "Comparar diferentes visiones sobre el quiebre de la democracia en Chile, el régimen o dictadura militar y el proceso de recuperación de la democracia a fines del siglo XX, considerando los distintos actores, experiencias y puntos de vista, y el consenso actual con respecto al valor de la democracia.",
+   "parentCode": "CUR-CONTENIDO-HIST-6B-AX-HISTORIA",
+   "marco": "curriculum",
+   "subjectCode": "HIST",
+   "level": "6_basico",
+   "oaNumber": 8,
+   "source": "curriculumnacional.cl",
+   "order": 8
+  },
+  {
+   "code": "HIST-6B-OA09",
+   "type": "learning_objective",
+   "name": "Explicar y dar ejemplos de aspectos que se mantienen y aspectos que han cambiado o se han desarrollado en la sociedad chilena a lo largo de su historia.",
+   "parentCode": "CUR-CONTENIDO-HIST-6B-AX-HISTORIA",
+   "marco": "curriculum",
+   "subjectCode": "HIST",
+   "level": "6_basico",
+   "oaNumber": 9,
+   "source": "curriculumnacional.cl",
+   "order": 9
+  },
+  {
+   "code": "HIST-6B-OA10",
+   "type": "learning_objective",
+   "name": "Identificar elementos constitutivos del territorio nacional, considerando la localización de Chile en el mundo y su carácter tricontinental.",
+   "parentCode": "CUR-CONTENIDO-HIST-6B-AX-GEOGRAFIA",
+   "marco": "curriculum",
+   "subjectCode": "HIST",
+   "level": "6_basico",
+   "oaNumber": 10,
+   "source": "curriculumnacional.cl",
+   "order": 10
+  },
+  {
+   "code": "HIST-6B-OA11",
+   "type": "learning_objective",
+   "name": "Caracterizar geográficamente las regiones político-administrativas del país, destacando los rasgos físicos (como clima, relieve, hidrografía y vegetación) y humanos (como volumen y distribución de la población y actividades económicas) que les dan unidad.",
+   "parentCode": "CUR-CONTENIDO-HIST-6B-AX-GEOGRAFIA",
+   "marco": "curriculum",
+   "subjectCode": "HIST",
+   "level": "6_basico",
+   "oaNumber": 11,
+   "source": "curriculumnacional.cl",
+   "order": 11
+  },
+  {
+   "code": "HIST-6B-OA12",
+   "type": "learning_objective",
+   "name": "Comparar diversos ambientes naturales en Chile (desértico, altiplánico, costero, mediterráneo, andino, frío y lluvioso, patagónico y polar), considerando como criterios las oportunidades y las dificultades que presentan y cómo las personas las han aprovechado y superado para vivir y desarrollarse.",
+   "parentCode": "CUR-CONTENIDO-HIST-6B-AX-GEOGRAFIA",
+   "marco": "curriculum",
+   "subjectCode": "HIST",
+   "level": "6_basico",
+   "oaNumber": 12,
+   "source": "curriculumnacional.cl",
+   "order": 12
+  },
+  {
+   "code": "HIST-6B-OA13",
+   "type": "learning_objective",
+   "name": "Explicar las principales características físicas, humanas y económicas de su región y de su localidad.",
+   "parentCode": "CUR-CONTENIDO-HIST-6B-AX-GEOGRAFIA",
+   "marco": "curriculum",
+   "subjectCode": "HIST",
+   "level": "6_basico",
+   "oaNumber": 13,
+   "source": "curriculumnacional.cl",
+   "order": 13
+  },
+  {
+   "code": "HIST-6B-OA14",
+   "type": "learning_objective",
+   "name": "Explicar cómo han influido los desastres naturales en el desarrollo de Chile durante su historia reciente, dando ejemplos de nivel nacional y regional (sismos, volcanismo, sequía, inundaciones y derrumbes, entre otros).",
+   "parentCode": "CUR-CONTENIDO-HIST-6B-AX-GEOGRAFIA",
+   "marco": "curriculum",
+   "subjectCode": "HIST",
+   "level": "6_basico",
+   "oaNumber": 14,
+   "source": "curriculumnacional.cl",
+   "order": 14
+  },
+  {
+   "code": "HIST-6B-OA15",
+   "type": "learning_objective",
+   "name": "Explicar algunos elementos fundamentales de la organización democrática de Chile, incluyendo: la división de poderes del Estado la representación mediante cargos de elección popular (concejales, alcaldes, diputados, senadores y Presidente) la importancia de la participación ciudadana.",
+   "parentCode": "CUR-CONTENIDO-HIST-6B-AX-FORMACION-CIUDADANA",
+   "marco": "curriculum",
+   "subjectCode": "HIST",
+   "level": "6_basico",
+   "oaNumber": 15,
+   "source": "curriculumnacional.cl",
+   "order": 15
+  },
+  {
+   "code": "HIST-6B-OA16",
+   "type": "learning_objective",
+   "name": "Reconocer que la Constitución Política de Chile establece la organización política del país y garantiza los derechos y las libertades de las personas, instaurando un sistema democrático.",
+   "parentCode": "CUR-CONTENIDO-HIST-6B-AX-FORMACION-CIUDADANA",
+   "marco": "curriculum",
+   "subjectCode": "HIST",
+   "level": "6_basico",
+   "oaNumber": 16,
+   "source": "curriculumnacional.cl",
+   "order": 16
+  },
+  {
+   "code": "HIST-6B-OA17",
+   "type": "learning_objective",
+   "name": "Comprender que todas las personas tienen derechos que deben ser respetados por los pares, la comunidad y el Estado, lo que constituye la base para vivir en una sociedad justa, y dar como ejemplo algunos artículos de la Constitución y de la Declaración Universal de los Derechos Humanos.",
+   "parentCode": "CUR-CONTENIDO-HIST-6B-AX-FORMACION-CIUDADANA",
+   "marco": "curriculum",
+   "subjectCode": "HIST",
+   "level": "6_basico",
+   "oaNumber": 17,
+   "source": "curriculumnacional.cl",
+   "order": 17
+  },
+  {
+   "code": "HIST-6B-OA18",
+   "type": "learning_objective",
+   "name": "Explicar que los derechos generan deberes y responsabilidades en las personas e instituciones, y lo importante que es cumplirlos para la convivencia social y el bien común.",
+   "parentCode": "CUR-CONTENIDO-HIST-6B-AX-FORMACION-CIUDADANA",
+   "marco": "curriculum",
+   "subjectCode": "HIST",
+   "level": "6_basico",
+   "oaNumber": 18,
+   "source": "curriculumnacional.cl",
+   "order": 18
+  },
+  {
+   "code": "HIST-6B-OA19",
+   "type": "learning_objective",
+   "name": "Proponer y fundamentar distintas formas en que la sociedad puede proteger a las personas de situaciones en las que no se respetan sus derechos.",
+   "parentCode": "CUR-CONTENIDO-HIST-6B-AX-FORMACION-CIUDADANA",
+   "marco": "curriculum",
+   "subjectCode": "HIST",
+   "level": "6_basico",
+   "oaNumber": 19,
+   "source": "curriculumnacional.cl",
+   "order": 19
+  },
+  {
+   "code": "HIST-6B-OA20",
+   "type": "learning_objective",
+   "name": "Demostrar actitudes cívicas con acciones en su vida diaria, como: respetar a todas las personas (ejemplos: actuar considerando la igualdad de derechos, escuchar respetuosamente opiniones distintas, etc.) contribuir a la buena convivencia (ejemplos: proponer posibles soluciones frente a un problema, usar el diálogo para plantear ideas a sus pares, alcanzar acuerdos, cooperar activamente en el logro de metas comunes, etc.) actuar con honestidad y responsabilidad (ejemplos: hablar con la verdad, actuar de acuerdo a sus convicciones y de las responsabilidades que se deriven, cumplir las responsabilidades asumidas, evitar la copia textual y el plagio, etc.) cuidar y valorar el patrimonio y el medioambiente (ejemplos: impulsar y participar en campañas de reciclaje, realizar acciones en la casa y en la escuela para ahorrar luz, agua y gas, etc.).",
+   "parentCode": "CUR-CONTENIDO-HIST-6B-AX-FORMACION-CIUDADANA",
+   "marco": "curriculum",
+   "subjectCode": "HIST",
+   "level": "6_basico",
+   "oaNumber": 20,
+   "source": "curriculumnacional.cl",
+   "order": 20
+  },
+  {
+   "code": "HIST-6B-OA21",
+   "type": "learning_objective",
+   "name": "Trabajar en equipo de manera efectiva para llevar a cabo una investigación u otro proyecto, asignando y asumiendo roles, cumpliendo las responsabilidades asignadas y los tiempos acordados, escuchando los argumentos de los demás, manifestando opiniones fundamentadas y llegando a un punto de vista común.",
+   "parentCode": "CUR-CONTENIDO-HIST-6B-AX-FORMACION-CIUDADANA",
+   "marco": "curriculum",
+   "subjectCode": "HIST",
+   "level": "6_basico",
+   "oaNumber": 21,
+   "source": "curriculumnacional.cl",
+   "order": 21
+  },
+  {
+   "code": "HIST-6B-OA22",
+   "type": "learning_objective",
+   "name": "Participar en su comunidad, tomando parte en elecciones para una directiva de curso, evaluando las propuestas realizadas por los diferentes aspirantes y considerando la importancia de elegir personas responsables.",
+   "parentCode": "CUR-CONTENIDO-HIST-6B-AX-FORMACION-CIUDADANA",
+   "marco": "curriculum",
+   "subjectCode": "HIST",
+   "level": "6_basico",
+   "oaNumber": 22,
+   "source": "curriculumnacional.cl",
+   "order": 22
+  },
+  {
+   "code": "HIST-6B-OA23",
+   "type": "learning_objective",
+   "name": "Participar, mediante acciones concretas, en proyectos que impliquen aportes dentro de la escuela, la comunidad y la sociedad, como voluntariado y ayuda social, entre otros, ateniéndose a un plan y un presupuesto.",
+   "parentCode": "CUR-CONTENIDO-HIST-6B-AX-FORMACION-CIUDADANA",
+   "marco": "curriculum",
+   "subjectCode": "HIST",
+   "level": "6_basico",
+   "oaNumber": 23,
+   "source": "curriculumnacional.cl",
+   "order": 23
+  },
+  {
+   "code": "HIST-6B-OA24",
+   "type": "learning_objective",
+   "name": "Opinar y argumentar con fundamentos sobre temas de la asignatura u otros.",
+   "parentCode": "CUR-CONTENIDO-HIST-6B-AX-FORMACION-CIUDADANA",
+   "marco": "curriculum",
+   "subjectCode": "HIST",
+   "level": "6_basico",
+   "oaNumber": 24,
+   "source": "curriculumnacional.cl",
+   "order": 24
+  },
+  {
+   "code": "HIST-6B-OA25",
+   "type": "learning_objective",
+   "name": "Evaluar posibles soluciones frente a un problema o proyecto y justificar su elección.",
+   "parentCode": "CUR-CONTENIDO-HIST-6B-AX-FORMACION-CIUDADANA",
+   "marco": "curriculum",
+   "subjectCode": "HIST",
+   "level": "6_basico",
+   "oaNumber": 25,
+   "source": "curriculumnacional.cl",
+   "order": 25
+  },
+  {
+   "code": "HIST-6B-OA26",
+   "type": "learning_objective",
+   "name": "Informarse y opinar sobre temas relevantes y de su interés en el país y el mundo (política, medioambiente, deporte, arte y música, entre otros) por medio de periódicos y TlCs.",
+   "parentCode": "CUR-CONTENIDO-HIST-6B-AX-FORMACION-CIUDADANA",
+   "marco": "curriculum",
+   "subjectCode": "HIST",
+   "level": "6_basico",
+   "oaNumber": 26,
+   "source": "curriculumnacional.cl",
+   "order": 26
+  },
+  {
+   "code": "HIST-6B-OA01-I1",
+   "type": "descriptor",
+   "name": "Distinguen las causas de procesos históricos estudiados en el nivel.",
+   "parentCode": "DIA-HIST-6B",
+   "marco": "dia",
+   "subjectCode": "HIST",
+   "level": "6_basico",
+   "source": "dia-ficha-2026",
+   "order": 1
+  },
+  {
+   "code": "HIST-6B-OA01-I2",
+   "type": "descriptor",
+   "name": "Distinguen una pregunta de investigación que puede responderse a partir de información obtenida de una fuente primaria o secundaria.",
+   "parentCode": "DIA-HIST-6B",
+   "marco": "dia",
+   "subjectCode": "HIST",
+   "level": "6_basico",
+   "source": "dia-ficha-2026",
+   "order": 2
+  },
+  {
+   "code": "HIST-6B-OA02-I1",
+   "type": "descriptor",
+   "name": "Interpretan información sobre secuencias de hechos, procesos y/o periodos históricos estudiados en el nivel, a partir de líneas de tiempo simples o paralelas.",
+   "parentCode": "DIA-HIST-6B",
+   "marco": "dia",
+   "subjectCode": "HIST",
+   "level": "6_basico",
+   "source": "dia-ficha-2026",
+   "order": 1
+  },
+  {
+   "code": "HIST-6B-OA02-I2",
+   "type": "descriptor",
+   "name": "Reconocen la simultaneidad de hechos, procesos y/o periodos históricos estudiados en el nivel, en líneas de tiempo simples o paralelas.",
+   "parentCode": "DIA-HIST-6B",
+   "marco": "dia",
+   "subjectCode": "HIST",
+   "level": "6_basico",
+   "source": "dia-ficha-2026",
+   "order": 2
+  },
+  {
+   "code": "HIST-6B-OA03-I1",
+   "type": "descriptor",
+   "name": "Infieren información que se encuentra implícita en fuentes primarias o secundarias.",
+   "parentCode": "DIA-HIST-6B",
+   "marco": "dia",
+   "subjectCode": "HIST",
+   "level": "6_basico",
+   "source": "dia-ficha-2026",
+   "order": 1
+  },
+  {
+   "code": "HIST-6B-OA04-I1",
+   "type": "descriptor",
+   "name": "Identifican información que se encuentra explícita en fuentes primarias o secundarias.",
+   "parentCode": "DIA-HIST-6B",
+   "marco": "dia",
+   "subjectCode": "HIST",
+   "level": "6_basico",
+   "source": "dia-ficha-2026",
+   "order": 1
+  },
+  {
+   "code": "HIST-6B-OA05-I1",
+   "type": "descriptor",
+   "name": "Reconocen elementos de continuidad y cambio entre períodos o procesos históricos estudiados en el nivel.",
+   "parentCode": "DIA-HIST-6B",
+   "marco": "dia",
+   "subjectCode": "HIST",
+   "level": "6_basico",
+   "source": "dia-ficha-2026",
+   "order": 1
+  },
+  {
+   "code": "HIST-6B-OA06-I1",
+   "type": "descriptor",
+   "name": "Infieren información que se encuentra implícita en fuentes primarias o secundarias.",
+   "parentCode": "DIA-HIST-6B",
+   "marco": "dia",
+   "subjectCode": "HIST",
+   "level": "6_basico",
+   "source": "dia-ficha-2026",
+   "order": 1
+  },
+  {
+   "code": "HIST-6B-OA07-I1",
+   "type": "descriptor",
+   "name": "Relacionan información sobre el contexto histórico presentada en fuentes primarias o secundarias, con periodos o procesos históricos estudiados en el nivel.",
+   "parentCode": "DIA-HIST-6B",
+   "marco": "dia",
+   "subjectCode": "HIST",
+   "level": "6_basico",
+   "source": "dia-ficha-2026",
+   "order": 1
+  },
+  {
+   "code": "HIST-6B-OA07-I2",
+   "type": "descriptor",
+   "name": "Distinguen una pregunta de investigación que puede responderse a partir de información obtenida de una fuente primaria o secundaria.",
+   "parentCode": "DIA-HIST-6B",
+   "marco": "dia",
+   "subjectCode": "HIST",
+   "level": "6_basico",
+   "source": "dia-ficha-2026",
+   "order": 2
+  },
+  {
+   "code": "HIST-6B-OA07-I3",
+   "type": "descriptor",
+   "name": "Infieren la intención del autor o autora de fuentes primarias o secundarias.",
+   "parentCode": "DIA-HIST-6B",
+   "marco": "dia",
+   "subjectCode": "HIST",
+   "level": "6_basico",
+   "source": "dia-ficha-2026",
+   "order": 3
+  },
+  {
+   "code": "HIST-6B-OA08-I1",
+   "type": "descriptor",
+   "name": "Identifican similitudes y/o diferencias entre distintos puntos de vista respecto de un mismo tema.",
+   "parentCode": "DIA-HIST-6B",
+   "marco": "dia",
+   "subjectCode": "HIST",
+   "level": "6_basico",
+   "source": "dia-ficha-2026",
+   "order": 1
+  },
+  {
+   "code": "HIST-6B-OA09-I1",
+   "type": "descriptor",
+   "name": "Reconocen elementos de continuidad y cambio entre períodos o procesos históricos estudiados en el nivel.",
+   "parentCode": "DIA-HIST-6B",
+   "marco": "dia",
+   "subjectCode": "HIST",
+   "level": "6_basico",
+   "source": "dia-ficha-2026",
+   "order": 1
+  },
+  {
+   "code": "HIST-6B-OA10-I1",
+   "type": "descriptor",
+   "name": "Establecen relaciones entre regiones, climas, paisajes, población, recursos y riesgos naturales estudiados en el nivel, utilizando herramientas geográficas.",
+   "parentCode": "DIA-HIST-6B",
+   "marco": "dia",
+   "subjectCode": "HIST",
+   "level": "6_basico",
+   "source": "dia-ficha-2026",
+   "order": 1
+  },
+  {
+   "code": "HIST-6B-OA11-I1",
+   "type": "descriptor",
+   "name": "Establecen relaciones entre regiones, climas, paisajes, población, recursos y riesgos naturales estudiados en el nivel, utilizando herramientas geográficas.",
+   "parentCode": "DIA-HIST-6B",
+   "marco": "dia",
+   "subjectCode": "HIST",
+   "level": "6_basico",
+   "source": "dia-ficha-2026",
+   "order": 1
+  },
+  {
+   "code": "HIST-6B-OA11-I2",
+   "type": "descriptor",
+   "name": "Localizan regiones, climas, paisajes, población, recursos y riesgos naturales, estudiados en el nivel, utilizando herramientas geográficas.",
+   "parentCode": "DIA-HIST-6B",
+   "marco": "dia",
+   "subjectCode": "HIST",
+   "level": "6_basico",
+   "source": "dia-ficha-2026",
+   "order": 2
+  },
+  {
+   "code": "HIST-6B-OA14-I1",
+   "type": "descriptor",
+   "name": "Distinguen una pregunta de investigación que puede responderse a partir de información obtenida de una fuente primaria o secundaria.",
+   "parentCode": "DIA-HIST-6B",
+   "marco": "dia",
+   "subjectCode": "HIST",
+   "level": "6_basico",
+   "source": "dia-ficha-2026",
+   "order": 1
+  },
+  {
+   "code": "HIST-6B-OA12-I1",
+   "type": "descriptor",
+   "name": "Establecen relaciones entre regiones, climas, paisajes, población, recursos y riesgos naturales estudiados en el nivel, utilizando herramientas geográficas.",
+   "parentCode": "DIA-HIST-6B",
+   "marco": "dia",
+   "subjectCode": "HIST",
+   "level": "6_basico",
+   "source": "dia-ficha-2026",
+   "order": 1
+  },
+  {
+   "code": "HIST-6B-OA15-I1",
+   "type": "descriptor",
+   "name": "Infieren información que se encuentra implícita en fuentes primarias o secundarias.",
+   "parentCode": "DIA-HIST-6B",
+   "marco": "dia",
+   "subjectCode": "HIST",
+   "level": "6_basico",
+   "source": "dia-ficha-2026",
+   "order": 1
+  },
+  {
+   "code": "HIST-6B-OA26-I1",
+   "type": "descriptor",
+   "name": "Fundamentan una opinión respaldada con evidencia sobre temas estudiados en el nivel.",
+   "parentCode": "DIA-HIST-6B",
+   "marco": "dia",
+   "subjectCode": "HIST",
+   "level": "6_basico",
+   "source": "dia-ficha-2026",
+   "order": 1
+  },
+  {
+   "code": "HIST-6B-OA17-I1",
+   "type": "descriptor",
+   "name": "Identifican argumentos que fundamentan la elección de una solución frente a un determinado problema.",
+   "parentCode": "DIA-HIST-6B",
+   "marco": "dia",
+   "subjectCode": "HIST",
+   "level": "6_basico",
+   "source": "dia-ficha-2026",
+   "order": 1
+  },
+  {
+   "code": "HIST-6B-OA16-I1",
+   "type": "descriptor",
+   "name": "Distinguen una pregunta de investigación que puede responderse a partir de información obtenida de una fuente primaria o secundaria.",
+   "parentCode": "DIA-HIST-6B",
+   "marco": "dia",
+   "subjectCode": "HIST",
+   "level": "6_basico",
+   "source": "dia-ficha-2026",
+   "order": 1
+  },
+  {
+   "code": "HIST-6B-OA18-I1",
+   "type": "descriptor",
+   "name": "Extraen conclusiones a partir del contraste de la información que se obtiene de dos fuentes primarias o secundarias.",
+   "parentCode": "DIA-HIST-6B",
+   "marco": "dia",
+   "subjectCode": "HIST",
+   "level": "6_basico",
+   "source": "dia-ficha-2026",
+   "order": 1
+  },
+  {
+   "code": "HIST-6B-OA24-I1",
+   "type": "descriptor",
+   "name": "Distinguen opiniones fundamentadas con evidencia de opiniones no fundamentadas, sobre temas estudiados en el nivel.",
+   "parentCode": "DIA-HIST-6B",
+   "marco": "dia",
+   "subjectCode": "HIST",
+   "level": "6_basico",
+   "source": "dia-ficha-2026",
+   "order": 1
+  },
+  {
+   "code": "HIST-6B-OA19-I1",
+   "type": "descriptor",
+   "name": "Identifican similitudes y/o diferencias entre distintos puntos de vista respecto de un mismo tema.",
+   "parentCode": "DIA-HIST-6B",
+   "marco": "dia",
+   "subjectCode": "HIST",
+   "level": "6_basico",
+   "source": "dia-ficha-2026",
+   "order": 1
+  },
+  {
+   "code": "HIST-6B-OA25-I1",
+   "type": "descriptor",
+   "name": "Distinguen posibles soluciones frente a un problema, a partir de un criterio dado.",
+   "parentCode": "DIA-HIST-6B",
+   "marco": "dia",
+   "subjectCode": "HIST",
+   "level": "6_basico",
+   "source": "dia-ficha-2026",
+   "order": 1
+  },
+  {
+   "code": "CUR-CONTENIDO-SCI-8B",
+   "type": "subdomain",
+   "name": "8° básico",
+   "parentCode": "CUR-CONTENIDO-SCI",
+   "marco": "curriculum",
+   "subjectCode": "SCI",
+   "level": "8_basico",
+   "source": "curriculumnacional.cl",
+   "order": 8
+  },
+  {
+   "code": "CUR-CONTENIDO-SCI-8B-AX-BIOLOGIA",
+   "type": "axis",
+   "name": "Biología",
+   "parentCode": "CUR-CONTENIDO-SCI-8B",
+   "marco": "curriculum",
+   "subjectCode": "SCI",
+   "level": "8_basico",
+   "source": "curriculumnacional.cl",
+   "order": 1
+  },
+  {
+   "code": "CUR-CONTENIDO-SCI-8B-AX-FISICA",
+   "type": "axis",
+   "name": "Física",
+   "parentCode": "CUR-CONTENIDO-SCI-8B",
+   "marco": "curriculum",
+   "subjectCode": "SCI",
+   "level": "8_basico",
+   "source": "curriculumnacional.cl",
+   "order": 2
+  },
+  {
+   "code": "CUR-CONTENIDO-SCI-8B-AX-QUIMICA",
+   "type": "axis",
+   "name": "Química",
+   "parentCode": "CUR-CONTENIDO-SCI-8B",
+   "marco": "curriculum",
+   "subjectCode": "SCI",
+   "level": "8_basico",
+   "source": "curriculumnacional.cl",
+   "order": 3
+  },
+  {
+   "code": "DIA-SCI-8B",
+   "type": "subdomain",
+   "name": "8° básico",
+   "parentCode": "DIA-SCI",
+   "marco": "dia",
+   "subjectCode": "SCI",
+   "level": "8_basico",
+   "source": "dia",
+   "order": 8
+  },
+  {
+   "code": "SCI-8B-OA01",
+   "type": "learning_objective",
+   "name": "Explicar que los modelos de la célula han evolucionado sobre la base de evidencias, como las aportadas por científicos como Hooke, Leeuwenhoek, Virchow, Schleiden y Schwann.",
+   "parentCode": "CUR-CONTENIDO-SCI-8B-AX-BIOLOGIA",
+   "marco": "curriculum",
+   "subjectCode": "SCI",
+   "level": "8_basico",
+   "oaNumber": 1,
+   "source": "curriculumnacional.cl",
+   "order": 1
+  },
+  {
+   "code": "SCI-8B-OA02",
+   "type": "learning_objective",
+   "name": "Desarrollar modelos que expliquen la relación entre la función de una célula y sus partes, considerando: Sus estructuras (núcleo, citoplasma, membrana celular, pared celular, vacuolas, mitocondria, cloroplastos, entre otros). Células eucariontes (animal y vegetal) y procariontes. Tipos celulares (como intestinal, muscular, nervioso, pancreático).",
+   "parentCode": "CUR-CONTENIDO-SCI-8B-AX-BIOLOGIA",
+   "marco": "curriculum",
+   "subjectCode": "SCI",
+   "level": "8_basico",
+   "oaNumber": 2,
+   "source": "curriculumnacional.cl",
+   "order": 2
+  },
+  {
+   "code": "SCI-8B-OA03",
+   "type": "learning_objective",
+   "name": "Explicar, por medio de la experimentación, los mecanismos de intercambio de partículas entre la célula (en animales y plantas) y su ambiente por difusión y osmosis.",
+   "parentCode": "CUR-CONTENIDO-SCI-8B-AX-BIOLOGIA",
+   "marco": "curriculum",
+   "subjectCode": "SCI",
+   "level": "8_basico",
+   "oaNumber": 3,
+   "source": "curriculumnacional.cl",
+   "order": 3
+  },
+  {
+   "code": "SCI-8B-OA04",
+   "type": "learning_objective",
+   "name": "Crear modelos que expliquen que las plantas tienen estructuras especializadas para responder a estímulos del medioambiente, similares a las del cuerpo humano, considerando los procesos de transporte de sustancia e intercambio de gases.",
+   "parentCode": "CUR-CONTENIDO-SCI-8B-AX-BIOLOGIA",
+   "marco": "curriculum",
+   "subjectCode": "SCI",
+   "level": "8_basico",
+   "oaNumber": 4,
+   "source": "curriculumnacional.cl",
+   "order": 4
+  },
+  {
+   "code": "SCI-8B-OA05",
+   "type": "learning_objective",
+   "name": "Explicar, basados en evidencias, la interacción de sistemas del cuerpo humano, organizados por estructuras especializadas que contribuyen a su equilibrio, considerando: La digestión de los alimentos por medio de la acción de enzimas digestivas y su absorción o paso a la sangre. El rol del sistema circulatorio en el transporte de sustancias como nutrientes, gases, desechos metabólicos y anticuerpos. El proceso de ventilación pulmonar e intercambio gaseoso a nivel alveolar. El rol del sistema excretor en relación con la filtración de la sangre, la regulación de la cantidad de agua en el cuerpo y la eliminación de desechos. La prevención de enfermedades debido al consumo excesivo de sustancias como tabaco, alcohol, grasas y sodio, que se relacionan con estos sistemas.",
+   "parentCode": "CUR-CONTENIDO-SCI-8B-AX-BIOLOGIA",
+   "marco": "curriculum",
+   "subjectCode": "SCI",
+   "level": "8_basico",
+   "oaNumber": 5,
+   "source": "curriculumnacional.cl",
+   "order": 5
+  },
+  {
+   "code": "SCI-8B-OA06",
+   "type": "learning_objective",
+   "name": "Investigar experimentalmente y explicar las características de los nutrientes (carbohidratos, proteínas, grasas, vitaminas, minerales y agua) en los alimentos y sus efectos para la salud humana.",
+   "parentCode": "CUR-CONTENIDO-SCI-8B-AX-BIOLOGIA",
+   "marco": "curriculum",
+   "subjectCode": "SCI",
+   "level": "8_basico",
+   "oaNumber": 6,
+   "source": "curriculumnacional.cl",
+   "order": 6
+  },
+  {
+   "code": "SCI-8B-OA07",
+   "type": "learning_objective",
+   "name": "Analizar y evaluar, basados en evidencias los factores que contribuyen a mantener un cuerpo saludable, proponiendo un plan que considere: Una alimentación balanceada. Un ejercicio físico regular. Evitar consumo de alcohol, tabaco y drogas.",
+   "parentCode": "CUR-CONTENIDO-SCI-8B-AX-BIOLOGIA",
+   "marco": "curriculum",
+   "subjectCode": "SCI",
+   "level": "8_basico",
+   "oaNumber": 7,
+   "source": "curriculumnacional.cl",
+   "order": 7
+  },
+  {
+   "code": "SCI-8B-OA08",
+   "type": "learning_objective",
+   "name": "Analizar las fuerzas eléctricas, considerando: Los tipos de electricidad. Los métodos de electrización (fricción, contacto e inducción). La planificación, conducción y evaluación de experimentos para evidenciar las interacciones eléctricas. La evaluación de los riesgos en la vida cotidiana y las posibles soluciones.",
+   "parentCode": "CUR-CONTENIDO-SCI-8B-AX-FISICA",
+   "marco": "curriculum",
+   "subjectCode": "SCI",
+   "level": "8_basico",
+   "oaNumber": 8,
+   "source": "curriculumnacional.cl",
+   "order": 8
+  },
+  {
+   "code": "SCI-8B-OA09",
+   "type": "learning_objective",
+   "name": "Investigar, explicar y evaluar las tecnologías que permiten la generación de energía eléctrica, como ocurre en pilas o baterías, en paneles fotovoltaicos y en generadores (eólicos, hidroeléctricos o nucleares, entre otros).",
+   "parentCode": "CUR-CONTENIDO-SCI-8B-AX-FISICA",
+   "marco": "curriculum",
+   "subjectCode": "SCI",
+   "level": "8_basico",
+   "oaNumber": 9,
+   "source": "curriculumnacional.cl",
+   "order": 9
+  },
+  {
+   "code": "SCI-8B-OA10",
+   "type": "learning_objective",
+   "name": "Analizar un circuito eléctrico domiciliario y comparar experimentalmente los circuitos eléctricos en serie y en paralelo, en relación con la: Energía eléctrica. Diferencia de potencial. Intensidad de corriente. Potencia eléctrica. Resistencia eléctrica. Eficiencia energética.",
+   "parentCode": "CUR-CONTENIDO-SCI-8B-AX-FISICA",
+   "marco": "curriculum",
+   "subjectCode": "SCI",
+   "level": "8_basico",
+   "oaNumber": 10,
+   "source": "curriculumnacional.cl",
+   "order": 10
+  },
+  {
+   "code": "SCI-8B-OA11",
+   "type": "learning_objective",
+   "name": "Desarrollar modelos e investigaciones experimentales que expliquen el calor como un proceso de transferencia de energía térmica entre dos o más cuerpos que están a diferentes temperaturas, o entre una fuente térmica y un objeto, considerando: Las formas en que se propaga (conducción, convección y radiación). Los efectos que produce (cambio de temperatura, deformación y cambio de estado, entre otros). La cantidad de calor cedida y absorbida en un proceso térmico. Objetos tecnológicos que protegen de altas o bajas temperaturas a seres vivos y objetos. Su diferencia con la temperatura (a nivel de sus partículas). Mediciones de temperatura, usando termómetro y variadas escalas, como Celsius, Kelvin y Fahrenheit, entre otras.",
+   "parentCode": "CUR-CONTENIDO-SCI-8B-AX-FISICA",
+   "marco": "curriculum",
+   "subjectCode": "SCI",
+   "level": "8_basico",
+   "oaNumber": 11,
+   "source": "curriculumnacional.cl",
+   "order": 11
+  },
+  {
+   "code": "SCI-8B-OA12",
+   "type": "learning_objective",
+   "name": "Investigar y analizar cómo ha evolucionado el conocimiento de la constitución de la materia, considerando los aportes y las evidencias de: La teoría atómica de Dalton. Los modelos atómicos desarrollados por Thomson, Rutherford y Bohr, entre otros.",
+   "parentCode": "CUR-CONTENIDO-SCI-8B-AX-QUIMICA",
+   "marco": "curriculum",
+   "subjectCode": "SCI",
+   "level": "8_basico",
+   "oaNumber": 12,
+   "source": "curriculumnacional.cl",
+   "order": 12
+  },
+  {
+   "code": "SCI-8B-OA13",
+   "type": "learning_objective",
+   "name": "Desarrollar modelos que expliquen que la materia está constituida por átomos que interactúan, generando diversas partículas y sustancias.",
+   "parentCode": "CUR-CONTENIDO-SCI-8B-AX-QUIMICA",
+   "marco": "curriculum",
+   "subjectCode": "SCI",
+   "level": "8_basico",
+   "oaNumber": 13,
+   "source": "curriculumnacional.cl",
+   "order": 13
+  },
+  {
+   "code": "SCI-8B-OA14",
+   "type": "learning_objective",
+   "name": "Usar la tabla periódica como un modelo para predecir las propiedades relativas de los elementos químicos basados en los patrones de sus átomos, considerando: El número atómico. La masa atómica. La conductividad eléctrica. La conductividad térmica. El brillo. Los enlaces que se pueden formar.",
+   "parentCode": "CUR-CONTENIDO-SCI-8B-AX-QUIMICA",
+   "marco": "curriculum",
+   "subjectCode": "SCI",
+   "level": "8_basico",
+   "oaNumber": 14,
+   "source": "curriculumnacional.cl",
+   "order": 14
+  },
+  {
+   "code": "SCI-8B-OA15",
+   "type": "learning_objective",
+   "name": "Investigar y argumentar, en base a evidencias, que existen algunos elementos químicos más frecuentes en la Tierra que son comunes en los seres vivos y son soporte para la vida, como el carbono, el hidrógeno, el oxígeno y el nitrógeno.",
+   "parentCode": "CUR-CONTENIDO-SCI-8B-AX-QUIMICA",
+   "marco": "curriculum",
+   "subjectCode": "SCI",
+   "level": "8_basico",
+   "oaNumber": 15,
+   "source": "curriculumnacional.cl",
+   "order": 15
+  },
+  {
+   "code": "SCI-8B-OA01-I1",
+   "type": "descriptor",
+   "name": "Interpretan información relacionada con que los modelos de la célula han evolucionado sobre la base de evidencias.",
+   "parentCode": "DIA-SCI-8B",
+   "marco": "dia",
+   "subjectCode": "SCI",
+   "level": "8_basico",
+   "source": "dia-ficha-2026",
+   "order": 1
+  },
+  {
+   "code": "SCI-8B-OA02-I1",
+   "type": "descriptor",
+   "name": "Describen en base a la observación de imágenes alguna característica relacionada con las células animales, vegetales o procariontes.",
+   "parentCode": "DIA-SCI-8B",
+   "marco": "dia",
+   "subjectCode": "SCI",
+   "level": "8_basico",
+   "source": "dia-ficha-2026",
+   "order": 1
+  },
+  {
+   "code": "SCI-8B-OA02-I2",
+   "type": "descriptor",
+   "name": "Fundamentan predicciones basadas en evidencia relacionada con la relación entre la función de una célula y sus partes.",
+   "parentCode": "DIA-SCI-8B",
+   "marco": "dia",
+   "subjectCode": "SCI",
+   "level": "8_basico",
+   "source": "dia-ficha-2026",
+   "order": 2
+  },
+  {
+   "code": "SCI-8B-OA03-I1",
+   "type": "descriptor",
+   "name": "Establecen la pregunta que se busca responder en una investigación relacionada con los mecanismos de intercambio de partículas entre la célula (en animales y plantas) y su ambiente por difusión y osmosis.",
+   "parentCode": "DIA-SCI-8B",
+   "marco": "dia",
+   "subjectCode": "SCI",
+   "level": "8_basico",
+   "source": "dia-ficha-2026",
+   "order": 1
+  },
+  {
+   "code": "SCI-8B-OA04-I1",
+   "type": "descriptor",
+   "name": "Establecen la pregunta que se busca responder en una investigación relacionada con la existencia de estructuras especializadas en las plantas que les permiten responder a estímulos del medio ambiente, el transporte de sustancias y el intercambio de gases.",
+   "parentCode": "DIA-SCI-8B",
+   "marco": "dia",
+   "subjectCode": "SCI",
+   "level": "8_basico",
+   "source": "dia-ficha-2026",
+   "order": 1
+  },
+  {
+   "code": "SCI-8B-OA04-I2",
+   "type": "descriptor",
+   "name": "Seleccionan un modelo o representación coherente con una investigación relacionada con los procesos de transporte de sustancias en las plantas.",
+   "parentCode": "DIA-SCI-8B",
+   "marco": "dia",
+   "subjectCode": "SCI",
+   "level": "8_basico",
+   "source": "dia-ficha-2026",
+   "order": 2
+  },
+  {
+   "code": "SCI-8B-OA03-I2",
+   "type": "descriptor",
+   "name": "Interpretan información relacionada con los mecanismos de intercambio de partículas entre la célula (en animales y plantas) y su ambiente por difusión y osmosis.",
+   "parentCode": "DIA-SCI-8B",
+   "marco": "dia",
+   "subjectCode": "SCI",
+   "level": "8_basico",
+   "source": "dia-ficha-2026",
+   "order": 2
+  },
+  {
+   "code": "SCI-8B-OA05-I1",
+   "type": "descriptor",
+   "name": "Formulan conclusiones a partir de contextos experimentales relacionados con el rol del sistema excretor.",
+   "parentCode": "DIA-SCI-8B",
+   "marco": "dia",
+   "subjectCode": "SCI",
+   "level": "8_basico",
+   "source": "dia-ficha-2026",
+   "order": 1
+  },
+  {
+   "code": "SCI-8B-OA06-I1",
+   "type": "descriptor",
+   "name": "Formulan conclusiones a partir de contextos experimentales relacionados con las características de los nutrientes en los alimentos.",
+   "parentCode": "DIA-SCI-8B",
+   "marco": "dia",
+   "subjectCode": "SCI",
+   "level": "8_basico",
+   "source": "dia-ficha-2026",
+   "order": 1
+  },
+  {
+   "code": "SCI-8B-OA05-I2",
+   "type": "descriptor",
+   "name": "Formulan predicciones basadas en evidencia relacionada con la interacción de los sistemas del cuerpo humano y el proceso de ventilación pulmonar e intercambio gaseoso a nivel alveolar.",
+   "parentCode": "DIA-SCI-8B",
+   "marco": "dia",
+   "subjectCode": "SCI",
+   "level": "8_basico",
+   "source": "dia-ficha-2026",
+   "order": 2
+  },
+  {
+   "code": "SCI-8B-OA05-I3",
+   "type": "descriptor",
+   "name": "comunicar información relacionada con la prevención de enfermedades debido al consumo excesivo de sustancias como tabaco, alcohol, grasas y sodio.",
+   "parentCode": "DIA-SCI-8B",
+   "marco": "dia",
+   "subjectCode": "SCI",
+   "level": "8_basico",
+   "source": "dia-ficha-2026",
+   "order": 3
+  },
+  {
+   "code": "SCI-8B-OA06-I2",
+   "type": "descriptor",
+   "name": "Interpretan información relacionada con las características de los nutrientes en los alimentos.",
+   "parentCode": "DIA-SCI-8B",
+   "marco": "dia",
+   "subjectCode": "SCI",
+   "level": "8_basico",
+   "source": "dia-ficha-2026",
+   "order": 2
+  },
+  {
+   "code": "SCI-8B-OA07-I1",
+   "type": "descriptor",
+   "name": "Interpretan información relacionada con los factores que contribuyen a mantener un cuerpo saludable.",
+   "parentCode": "DIA-SCI-8B",
+   "marco": "dia",
+   "subjectCode": "SCI",
+   "level": "8_basico",
+   "source": "dia-ficha-2026",
+   "order": 1
+  },
+  {
+   "code": "SCI-8B-OA07-I2",
+   "type": "descriptor",
+   "name": "Evalúan la confiabilidad de los elementos de una investigación relacionada con los factores que impiden mantener un cuerpo saludable, como el consumo de alcohol, tabaco y drogas.",
+   "parentCode": "DIA-SCI-8B",
+   "marco": "dia",
+   "subjectCode": "SCI",
+   "level": "8_basico",
+   "source": "dia-ficha-2026",
+   "order": 2
+  },
+  {
+   "code": "SCI-8B-OA08-I1",
+   "type": "descriptor",
+   "name": "Identifican tipos de electricidad y los métodos de electrización.",
+   "parentCode": "DIA-SCI-8B",
+   "marco": "dia",
+   "subjectCode": "SCI",
+   "level": "8_basico",
+   "source": "dia-ficha-2026",
+   "order": 1
+  },
+  {
+   "code": "SCI-8B-OA08-I2",
+   "type": "descriptor",
+   "name": "Identifican un procedimiento que permita responder una pregunta de investigación relacionada con las fuerzas eléctricas.",
+   "parentCode": "DIA-SCI-8B",
+   "marco": "dia",
+   "subjectCode": "SCI",
+   "level": "8_basico",
+   "source": "dia-ficha-2026",
+   "order": 2
+  },
+  {
+   "code": "SCI-8B-OA08-I3",
+   "type": "descriptor",
+   "name": "Identifican riesgos potenciales al manipular materiales e instrumentos durante una investigación relacionada con las fuerzas eléctricas.",
+   "parentCode": "DIA-SCI-8B",
+   "marco": "dia",
+   "subjectCode": "SCI",
+   "level": "8_basico",
+   "source": "dia-ficha-2026",
+   "order": 3
+  },
+  {
+   "code": "SCI-8B-OA09-I1",
+   "type": "descriptor",
+   "name": "Interpretan información relacionada con las tecnologías que permiten la generación de energía eléctrica.",
+   "parentCode": "DIA-SCI-8B",
+   "marco": "dia",
+   "subjectCode": "SCI",
+   "level": "8_basico",
+   "source": "dia-ficha-2026",
+   "order": 1
+  },
+  {
+   "code": "SCI-8B-OA09-I2",
+   "type": "descriptor",
+   "name": "Formulan predicciones basadas en evidencia relacionada con las tecnologías que permiten la generación de energía eléctrica.",
+   "parentCode": "DIA-SCI-8B",
+   "marco": "dia",
+   "subjectCode": "SCI",
+   "level": "8_basico",
+   "source": "dia-ficha-2026",
+   "order": 2
+  },
+  {
+   "code": "SCI-8B-OA10-I1",
+   "type": "descriptor",
+   "name": "Identifican fortalezas o debilidades de una investigación experimental relacionada con circuitos en serie o en paralelo.",
+   "parentCode": "DIA-SCI-8B",
+   "marco": "dia",
+   "subjectCode": "SCI",
+   "level": "8_basico",
+   "source": "dia-ficha-2026",
+   "order": 1
+  },
+  {
+   "code": "SCI-8B-OA10-I2",
+   "type": "descriptor",
+   "name": "Identifican las variables de una investigación relacionada con circuitos en serie o en paralelo.",
+   "parentCode": "DIA-SCI-8B",
+   "marco": "dia",
+   "subjectCode": "SCI",
+   "level": "8_basico",
+   "source": "dia-ficha-2026",
+   "order": 2
+  },
+  {
+   "code": "SCI-8B-OA10-I3",
+   "type": "descriptor",
+   "name": "Formulan conclusiones a partir de contextos experimentales relacionados con circuitos en serie o en paralelo.",
+   "parentCode": "DIA-SCI-8B",
+   "marco": "dia",
+   "subjectCode": "SCI",
+   "level": "8_basico",
+   "source": "dia-ficha-2026",
+   "order": 3
+  },
+  {
+   "code": "SCI-8B-OA11-I1",
+   "type": "descriptor",
+   "name": "Identifican formas en que se propaga el calor.",
+   "parentCode": "DIA-SCI-8B",
+   "marco": "dia",
+   "subjectCode": "SCI",
+   "level": "8_basico",
+   "source": "dia-ficha-2026",
+   "order": 1
+  },
+  {
+   "code": "SCI-8B-OA11-I2",
+   "type": "descriptor",
+   "name": "Explican situaciones cotidianas en la que exista transferencia de calor.",
+   "parentCode": "DIA-SCI-8B",
+   "marco": "dia",
+   "subjectCode": "SCI",
+   "level": "8_basico",
+   "source": "dia-ficha-2026",
+   "order": 2
+  },
+  {
+   "code": "SCI-8B-OA11-I3",
+   "type": "descriptor",
+   "name": "Identifican fortalezas o debilidades de una investigación experimental relacionada con el proceso de transferencia de energía térmica entre dos o más cuerpos.",
+   "parentCode": "DIA-SCI-8B",
+   "marco": "dia",
+   "subjectCode": "SCI",
+   "level": "8_basico",
+   "source": "dia-ficha-2026",
+   "order": 3
+  },
+  {
+   "code": "SCI-8B-OA12-I1",
+   "type": "descriptor",
+   "name": "Comparan a partir de imágenes los modelos atómicos desarrollados por Dalton, Thomson, Rutherford y Bohr.",
+   "parentCode": "DIA-SCI-8B",
+   "marco": "dia",
+   "subjectCode": "SCI",
+   "level": "8_basico",
+   "source": "dia-ficha-2026",
+   "order": 1
+  },
+  {
+   "code": "SCI-8B-OA12-I2",
+   "type": "descriptor",
+   "name": "Explican fenómenos mediante el uso de los modelos atómicos.",
+   "parentCode": "DIA-SCI-8B",
+   "marco": "dia",
+   "subjectCode": "SCI",
+   "level": "8_basico",
+   "source": "dia-ficha-2026",
+   "order": 2
+  },
+  {
+   "code": "SCI-8B-OA13-I1",
+   "type": "descriptor",
+   "name": "Interpretan información relacionada con que la materia está constituida por átomos que interactúan, generando diversas partículas y sustancias.",
+   "parentCode": "DIA-SCI-8B",
+   "marco": "dia",
+   "subjectCode": "SCI",
+   "level": "8_basico",
+   "source": "dia-ficha-2026",
+   "order": 1
+  },
+  {
+   "code": "SCI-8B-OA13-I2",
+   "type": "descriptor",
+   "name": "Identifican formas de representar las interacciones entre átomos.",
+   "parentCode": "DIA-SCI-8B",
+   "marco": "dia",
+   "subjectCode": "SCI",
+   "level": "8_basico",
+   "source": "dia-ficha-2026",
+   "order": 2
+  },
+  {
+   "code": "SCI-8B-OA14-I1",
+   "type": "descriptor",
+   "name": "Interpretan información haciendo uso de la tabla periódica de los elementos.",
+   "parentCode": "DIA-SCI-8B",
+   "marco": "dia",
+   "subjectCode": "SCI",
+   "level": "8_basico",
+   "source": "dia-ficha-2026",
+   "order": 1
+  },
+  {
+   "code": "SCI-8B-OA14-I2",
+   "type": "descriptor",
+   "name": "Fundamentan predicciones en base a las propiedades relativas de los elementos químicos, reflejadas en la tabla periódica.",
+   "parentCode": "DIA-SCI-8B",
+   "marco": "dia",
+   "subjectCode": "SCI",
+   "level": "8_basico",
+   "source": "dia-ficha-2026",
+   "order": 2
+  },
+  {
+   "code": "SCI-8B-OA15-I1",
+   "type": "descriptor",
+   "name": "Interpretan información relacionada con los elementos químicos más frecuentes en la Tierra que son comunes en los seres vivos y son soporte para la vida.",
+   "parentCode": "DIA-SCI-8B",
+   "marco": "dia",
+   "subjectCode": "SCI",
+   "level": "8_basico",
+   "source": "dia-ficha-2026",
+   "order": 1
+  },
+  {
+   "code": "CUR-CONTENIDO-ENG-5B",
+   "type": "subdomain",
+   "name": "5° básico",
+   "parentCode": "CUR-CONTENIDO-ENG",
+   "marco": "curriculum",
+   "subjectCode": "ENG",
+   "level": "5_basico",
+   "source": "curriculumnacional.cl",
+   "order": 5
+  },
+  {
+   "code": "CUR-CONTENIDO-ENG-5B-AX-LISTENING",
+   "type": "axis",
+   "name": "Comprensión auditiva",
+   "parentCode": "CUR-CONTENIDO-ENG-5B",
+   "marco": "curriculum",
+   "subjectCode": "ENG",
+   "level": "5_basico",
+   "source": "curriculumnacional.cl",
+   "order": 1
+  },
+  {
+   "code": "CUR-CONTENIDO-ENG-5B-AX-READING",
+   "type": "axis",
+   "name": "Comprensión de lectura",
+   "parentCode": "CUR-CONTENIDO-ENG-5B",
+   "marco": "curriculum",
+   "subjectCode": "ENG",
+   "level": "5_basico",
+   "source": "curriculumnacional.cl",
+   "order": 2
+  },
+  {
+   "code": "CUR-CONTENIDO-ENG-5B-AX-SPEAKING",
+   "type": "axis",
+   "name": "Expresión oral",
+   "parentCode": "CUR-CONTENIDO-ENG-5B",
+   "marco": "curriculum",
+   "subjectCode": "ENG",
+   "level": "5_basico",
+   "source": "curriculumnacional.cl",
+   "order": 3
+  },
+  {
+   "code": "CUR-CONTENIDO-ENG-5B-AX-WRITING",
+   "type": "axis",
+   "name": "Expresión escrita",
+   "parentCode": "CUR-CONTENIDO-ENG-5B",
+   "marco": "curriculum",
+   "subjectCode": "ENG",
+   "level": "5_basico",
+   "source": "curriculumnacional.cl",
+   "order": 4
+  },
+  {
+   "code": "DIA-ENG-5B",
+   "type": "subdomain",
+   "name": "5° básico",
+   "parentCode": "DIA-ENG",
+   "marco": "dia",
+   "subjectCode": "ENG",
+   "level": "5_basico",
+   "source": "dia",
+   "order": 5
+  },
+  {
+   "code": "ENG-5B-OA01",
+   "type": "learning_objective",
+   "name": "Escuchar y demostrar comprensión de información explícita en textos adaptados y auténticos simples, tanto no literarios (textos expositivos, diálogos) como literarios (rimas, canciones, cuentos), que estén enunciados en forma clara, tengan repetición de palabras y apoyo visual y gestual, y estén relacionados con las funciones del año y con los siguientes temas: temas de la vida cotidiana: la escuela, la casa, la familia, la ropa, la comida, el clima temas del contexto inmediato de los estudiantes como experiencias personales e información de interés relativa a eventos y aspectos de su entorno y de nuestro país temas de otras asignaturas, como alimentación equilibrada y variada (Ciencias Naturales), descripción de lugares y clima (Geografía) temas de actualidad e interés global como cultura de otros países, cuidado del medio ambiente y avances tecnológicos (redes sociales, medios de comunicación).",
+   "parentCode": "CUR-CONTENIDO-ENG-5B-AX-LISTENING",
+   "marco": "curriculum",
+   "subjectCode": "ENG",
+   "level": "5_basico",
+   "oaNumber": 1,
+   "source": "curriculumnacional.cl",
+   "order": 1
+  },
+  {
+   "code": "ENG-5B-OA02",
+   "type": "learning_objective",
+   "name": "Identificar en los textos escuchados: tema e ideas generales información específica asociada a personas, lugares y tiempo palabras, familias de palabras, expresiones de uso frecuente y vocabulario temático sonidos y repetición de sonidos para comenzar a familiarizarse con los sonidos del inglés.",
+   "parentCode": "CUR-CONTENIDO-ENG-5B-AX-LISTENING",
+   "marco": "curriculum",
+   "subjectCode": "ENG",
+   "level": "5_basico",
+   "oaNumber": 2,
+   "source": "curriculumnacional.cl",
+   "order": 2
+  },
+  {
+   "code": "ENG-5B-OA03",
+   "type": "learning_objective",
+   "name": "Escuchar textos orales en diversos formatos audiovisuales, usando las siguientes estrategias para apoyar la comprensión: hacer predicciones basándose en conocimientos previos usar claves contextuales (tema, hablantes, lugar, tiempo, imágenes) visualizar diferentes aspectos del texto usar apoyo visual.",
+   "parentCode": "CUR-CONTENIDO-ENG-5B-AX-LISTENING",
+   "marco": "curriculum",
+   "subjectCode": "ENG",
+   "level": "5_basico",
+   "oaNumber": 3,
+   "source": "curriculumnacional.cl",
+   "order": 3
+  },
+  {
+   "code": "ENG-5B-OA04",
+   "type": "learning_objective",
+   "name": "Reaccionar a los textos escuchados, expresando preferencias o haciendo conexiones con experiencias personales, en forma oral, escrita o a través de ilustraciones.",
+   "parentCode": "CUR-CONTENIDO-ENG-5B-AX-LISTENING",
+   "marco": "curriculum",
+   "subjectCode": "ENG",
+   "level": "5_basico",
+   "oaNumber": 4,
+   "source": "curriculumnacional.cl",
+   "order": 4
+  },
+  {
+   "code": "ENG-5B-OA05",
+   "type": "learning_objective",
+   "name": "Leer y demostrar comprensión de textos adaptados y auténticos simples no literarios, que contengan palabras de uso frecuente, familias de palabras, repetición de palabras y frases, estén acompañados de abundante apoyo visual y estén relacionados con los temas y las siguientes funciones del año: saludar y despedirse solicitar y entregar información personal y de temas familiares agradecer, disculparse y pedir permiso seguir y dar instrucciones describir personas, objetos y su posición, lugares, acciones cotidianas y clima expresar gustos, preferencias, cantidades y posesiones.",
+   "parentCode": "CUR-CONTENIDO-ENG-5B-AX-READING",
+   "marco": "curriculum",
+   "subjectCode": "ENG",
+   "level": "5_basico",
+   "oaNumber": 5,
+   "source": "curriculumnacional.cl",
+   "order": 5
+  },
+  {
+   "code": "ENG-5B-OA06",
+   "type": "learning_objective",
+   "name": "Leer comprensivamente textos no literarios, como notas, postales, invitaciones, tarjetas de saludo, menús, recetas, diálogos, instrucciones o emails, identificando: propósito del texto ideas generales información explícita palabras clave, expresiones de uso común asociadas a las funciones del nivel (por ejemplo: I'm sorry, excuse me ) y vocabulario temático.",
+   "parentCode": "CUR-CONTENIDO-ENG-5B-AX-READING",
+   "marco": "curriculum",
+   "subjectCode": "ENG",
+   "level": "5_basico",
+   "oaNumber": 6,
+   "source": "curriculumnacional.cl",
+   "order": 6
+  },
+  {
+   "code": "ENG-5B-OA07",
+   "type": "learning_objective",
+   "name": "Leer comprensivamente textos literarios adaptados y auténticos simples como rimas, canciones y cuentos, que contengan palabras de uso frecuente, familias de palabras, repetición de palabras y frases y estén acompañados de abundante apoyo visual, identificando: tema general del texto personajes, lugares y tiempo secuencia de eventos ( beginning - middle - end ) vocabulario temático y expresiones de uso común.",
+   "parentCode": "CUR-CONTENIDO-ENG-5B-AX-READING",
+   "marco": "curriculum",
+   "subjectCode": "ENG",
+   "level": "5_basico",
+   "oaNumber": 7,
+   "source": "curriculumnacional.cl",
+   "order": 7
+  },
+  {
+   "code": "ENG-5B-OA08",
+   "type": "learning_objective",
+   "name": "Reaccionar a los textos leídos, expresando preferencias o haciendo conexiones con experiencias personales, en forma oral, escrita o por medio de ilustraciones.",
+   "parentCode": "CUR-CONTENIDO-ENG-5B-AX-READING",
+   "marco": "curriculum",
+   "subjectCode": "ENG",
+   "level": "5_basico",
+   "oaNumber": 8,
+   "source": "curriculumnacional.cl",
+   "order": 8
+  },
+  {
+   "code": "ENG-5B-OA09",
+   "type": "learning_objective",
+   "name": "Usar las siguientes estrategias para apoyar la comprensión de los textos leídos, tanto en formato digital como impreso: prelectura: hacer predicciones, basándose en conocimientos previos y elementos visuales lectura: usar organizadores, como títulos, subtítulos, ilustraciones e imágenes poslectura: organizar información en diagramas, releer.",
+   "parentCode": "CUR-CONTENIDO-ENG-5B-AX-READING",
+   "marco": "curriculum",
+   "subjectCode": "ENG",
+   "level": "5_basico",
+   "oaNumber": 9,
+   "source": "curriculumnacional.cl",
+   "order": 9
+  },
+  {
+   "code": "ENG-5B-OA10",
+   "type": "learning_objective",
+   "name": "Reproducir y producir monólogos, canciones, rimas y diálogos para comenzar a identificar y familiarizarse con los sonidos propios del idioma.",
+   "parentCode": "CUR-CONTENIDO-ENG-5B-AX-SPEAKING",
+   "marco": "curriculum",
+   "subjectCode": "ENG",
+   "level": "5_basico",
+   "oaNumber": 10,
+   "source": "curriculumnacional.cl",
+   "order": 10
+  },
+  {
+   "code": "ENG-5B-OA11",
+   "type": "learning_objective",
+   "name": "Expresarse oralmente, ya sea en diálogos, presentaciones o actividades grupales, con apoyo de lenguaje visual y/o digital, en torno a los temas del año.",
+   "parentCode": "CUR-CONTENIDO-ENG-5B-AX-SPEAKING",
+   "marco": "curriculum",
+   "subjectCode": "ENG",
+   "level": "5_basico",
+   "oaNumber": 11,
+   "source": "curriculumnacional.cl",
+   "order": 11
+  },
+  {
+   "code": "ENG-5B-OA12",
+   "type": "learning_objective",
+   "name": "Participar en diálogos con pares y profesores al realizar las siguientes funciones: saludar y despedirse, por ejemplo: hello/good morning, goodbye dar instrucciones, por ejemplo: sit down, close the door agradecer, disculparse y pedir permiso, por ejemplo: thank you, sorry, may I...? describir acciones cotidianas, por ejemplo: I run, I sleep identificar y describir objetos, personas y lugares en su apariencia, por ejemplo: the... is big, it is black agregar información, por ejemplo: it is big and black; this is my bag and that is your bag describir el clima, por ejemplo: today is sunny/cloudy expresar gustos y preferencias, por ejemplo: I like/don't like... describir posesiones, por ejemplo: this/that is my/your...; I/They have expresar cantidad numérica hasta el 20 identificar y expresar cantidades, por ejemplo: there is a/an/one...; there are two/twenty... It is a/an... solicitar y dar información, por ejemplo: How old/What/Where is/are...?; there is/are...; it /this/the... is/are...; Is/Are he/they...? yes/no; Is he your father? Yes he is/No, he isn't identificar y describir posición de objetos, por ejemplo: the... is on/in/under the... dar información general sobre un tema conocido, por ejemplo: the/he/they... is/are/have/eat/read re-contar cuentos con apoyo de ilustraciones, por ejemplo: the... run/play/have...; there is/are...",
+   "parentCode": "CUR-CONTENIDO-ENG-5B-AX-SPEAKING",
+   "marco": "curriculum",
+   "subjectCode": "ENG",
+   "level": "5_basico",
+   "oaNumber": 12,
+   "source": "curriculumnacional.cl",
+   "order": 12
+  },
+  {
+   "code": "ENG-5B-OA13",
+   "type": "learning_objective",
+   "name": "Demostrar conocimiento y uso del vocabulario aprendido: vocabulario temático de uso cotidiano palabras de uso frecuente expresiones de uso común asociadas a las funciones del nivel (por ejemplo: Excuse me, How old...? )",
+   "parentCode": "CUR-CONTENIDO-ENG-5B-AX-SPEAKING",
+   "marco": "curriculum",
+   "subjectCode": "ENG",
+   "level": "5_basico",
+   "oaNumber": 13,
+   "source": "curriculumnacional.cl",
+   "order": 13
+  },
+  {
+   "code": "ENG-5B-OA14",
+   "type": "learning_objective",
+   "name": "Completar y escribir, de acuerdo a un modelo y con apoyo de lenguaje visual, textos no literarios (como postales, mini libros, listas de compras) y textos literarios (como rimas, tiras cómicas) con el propósito de compartir información en torno a los temas del año.",
+   "parentCode": "CUR-CONTENIDO-ENG-5B-AX-WRITING",
+   "marco": "curriculum",
+   "subjectCode": "ENG",
+   "level": "5_basico",
+   "oaNumber": 14,
+   "source": "curriculumnacional.cl",
+   "order": 14
+  },
+  {
+   "code": "ENG-5B-OA15",
+   "type": "learning_objective",
+   "name": "Escribir para realizar las siguientes funciones: describir acciones cotidianas, por ejemplo: I run, I sleep expresar gustos y preferencias, por ejemplo: I like/don't like identificar y expresar cantidades, por ejemplo: there is a/an/one...; there are two/twenty...; It is a/an... agregar información, por ejemplo: it is big and black describir posesiones, por ejemplo: this is my/your... ...; I/They have... expresar cantidad numérica hasta el 12 identificar y describir objetos, personas y lugares por su apariencia, por ejemplo: the... is big; it is black describir posición de objetos, por ejemplo: the... is on/in/under the... dar información general sobre un tema conocido, por ejemplo: the... is/are/have/eat/read...; he/they is/are/have/eat/read... describir el clima, por ejemplo: today is sunny/cloudy solicitar y dar información, por ejemplo: What/ Where is/are...?; there is/are...; it/this/the... is/are; Is this...? Yes, it is/No, it isn't; Is he your father? Yes, he is/No, he isn't",
+   "parentCode": "CUR-CONTENIDO-ENG-5B-AX-WRITING",
+   "marco": "curriculum",
+   "subjectCode": "ENG",
+   "level": "5_basico",
+   "oaNumber": 15,
+   "source": "curriculumnacional.cl",
+   "order": 15
+  },
+  {
+   "code": "ENG-5B-OA16",
+   "type": "learning_objective",
+   "name": "Utilizar los pasos del proceso de escritura (organización de ideas, escritura, corrección y publicación), recurriendo a herramientas como diccionario en línea y procesador de texto, para: escribir oraciones simples y párrafos breves de acuerdo a un modelo y con la ayuda del docente demostrar conocimiento y uso de vocabulario temático de uso cotidiano, palabras de uso frecuente y expresiones de uso común asociadas a las funciones del nivel (por ejemplo: Excuse me, I'm sorry, How old... )",
+   "parentCode": "CUR-CONTENIDO-ENG-5B-AX-WRITING",
+   "marco": "curriculum",
+   "subjectCode": "ENG",
+   "level": "5_basico",
+   "oaNumber": 16,
+   "source": "curriculumnacional.cl",
+   "order": 16
+  },
+  {
+   "code": "ENG-5B-OA01-I1",
+   "type": "descriptor",
+   "name": "Identificar información explícita en el texto escuchado que responda a las preguntas ¿quién?, ¿cómo?, ¿dónde?, ¿qué? ¿cuál?, cuando no hay información que compite.",
+   "parentCode": "DIA-ENG-5B",
+   "marco": "dia",
+   "subjectCode": "ENG",
+   "level": "5_basico",
+   "source": "dia-ficha-2026",
+   "order": 1
+  },
+  {
+   "code": "ENG-5B-OA02-I1",
+   "type": "descriptor",
+   "name": "Identificar información explícita en el texto escuchado referida a características de personas (por ejemplo, edad, color de pelo, preferencias, gustos etc.), lugares (por ejemplo, clima, temperatura, ubicación, etc.) u objetos (por ejemplo, tamaño, color, etc.), cuando no hay información que compite.",
+   "parentCode": "DIA-ENG-5B",
+   "marco": "dia",
+   "subjectCode": "ENG",
+   "level": "5_basico",
+   "source": "dia-ficha-2026",
+   "order": 1
+  },
+  {
+   "code": "ENG-5B-OA01-I2",
+   "type": "descriptor",
+   "name": "Extraer información específica asociada a personas, lugares y tiempo, cuando esta no se encuentra explícita y requiere realizar inferencias o establecer relaciones evidentes.",
+   "parentCode": "DIA-ENG-5B",
+   "marco": "dia",
+   "subjectCode": "ENG",
+   "level": "5_basico",
+   "source": "dia-ficha-2026",
+   "order": 2
+  },
+  {
+   "code": "ENG-5B-OA02-I2",
+   "type": "descriptor",
+   "name": "Establecer el tema o propósito general del texto escuchado, cuando este no se encuentra explícito, a partir de claves evidentes (como palabras o expresiones familiares asociadas al tema o ideas que se repiten) que permiten inferirlo.",
+   "parentCode": "DIA-ENG-5B",
+   "marco": "dia",
+   "subjectCode": "ENG",
+   "level": "5_basico",
+   "source": "dia-ficha-2026",
+   "order": 2
+  },
+  {
+   "code": "ENG-5B-OA02-I3",
+   "type": "descriptor",
+   "name": "Extraer expresiones de uso frecuente relacionadas con los temas y las funciones del año (por ejemplo, usadas para saludar, despedirse, agradecer, disculparse, pedir permiso) que se encuentran explícitas en el texto escuchado, cuando no hay información que compite.",
+   "parentCode": "DIA-ENG-5B",
+   "marco": "dia",
+   "subjectCode": "ENG",
+   "level": "5_basico",
+   "source": "dia-ficha-2026",
+   "order": 3
+  },
+  {
+   "code": "ENG-5B-OA02-I4",
+   "type": "descriptor",
+   "name": "Extraer información específica asociada a personas, lugares y tiempo, cuando esta no se encuentra explícita y requiere realizar inferencias o establecer relaciones evidentes.",
+   "parentCode": "DIA-ENG-5B",
+   "marco": "dia",
+   "subjectCode": "ENG",
+   "level": "5_basico",
+   "source": "dia-ficha-2026",
+   "order": 4
+  },
+  {
+   "code": "ENG-5B-OA01-I3",
+   "type": "descriptor",
+   "name": "Identificar información explícita en el texto escuchado referida a características de personas (por ejemplo, edad, color de pelo, preferencias, gustos etc.), lugares (por ejemplo, clima, temperatura, ubicación, etc.) u objetos (por ejemplo, tamaño, color, etc.), cuando no hay información que compite.",
+   "parentCode": "DIA-ENG-5B",
+   "marco": "dia",
+   "subjectCode": "ENG",
+   "level": "5_basico",
+   "source": "dia-ficha-2026",
+   "order": 3
+  },
+  {
+   "code": "ENG-5B-OA06-I1",
+   "type": "descriptor",
+   "name": "Identificar información explícita relevante asociada a datos concretos como personas, acciones, lugares, cantidades o momentos, cuando esta es fácil de localizar en el texto (por ejemplo, por encontrarse al inicio, destacada, repetida dentro del texto, o se entregan claves para encontrarlo fácilmente, etc.).",
+   "parentCode": "DIA-ENG-5B",
+   "marco": "dia",
+   "subjectCode": "ENG",
+   "level": "5_basico",
+   "source": "dia-ficha-2026",
+   "order": 1
+  },
+  {
+   "code": "ENG-5B-OA06-I2",
+   "type": "descriptor",
+   "name": "Identificar el tema o idea general de un texto no literario de tema familiar o una sección de este, reconociendo de qué trata a partir de su sentido global, cuando el texto contiene apoyo visual o contextual (por ejemplo, títulos y/o subtítulos).",
+   "parentCode": "DIA-ENG-5B",
+   "marco": "dia",
+   "subjectCode": "ENG",
+   "level": "5_basico",
+   "source": "dia-ficha-2026",
+   "order": 2
+  },
+  {
+   "code": "ENG-5B-OA06-I3",
+   "type": "descriptor",
+   "name": "Reconocer el propósito de un texto no literario, infiriendo para qué sirve o qué busca comunicar (invitar, informar, saludar, instruir), a partir de su sentido global y/o de claves contextuales como imágenes o títulos.",
+   "parentCode": "DIA-ENG-5B",
+   "marco": "dia",
+   "subjectCode": "ENG",
+   "level": "5_basico",
+   "source": "dia-ficha-2026",
+   "order": 3
+  },
+  {
+   "code": "ENG-5B-OA06-I4",
+   "type": "descriptor",
+   "name": "Identificar información entregada por palabras clave, expresiones de uso común y vocabulario temático presentes en textos no literarios simples en los que la información se presenta de manera clara y evidente.",
+   "parentCode": "DIA-ENG-5B",
+   "marco": "dia",
+   "subjectCode": "ENG",
+   "level": "5_basico",
+   "source": "dia-ficha-2026",
+   "order": 4
+  },
+  {
+   "code": "ENG-5B-OA07-I1",
+   "type": "descriptor",
+   "name": "Identificar acciones, según el momento en que ocurren en el relato, cuando existen claves evidentes para identificar la secuencia de las mismas (first, then, finally, beginning, middle, end y/o mediante la separación de párrafos o imágenes).",
+   "parentCode": "DIA-ENG-5B",
+   "marco": "dia",
+   "subjectCode": "ENG",
+   "level": "5_basico",
+   "source": "dia-ficha-2026",
+   "order": 1
+  },
+  {
+   "code": "ENG-5B-OA07-I2",
+   "type": "descriptor",
+   "name": "Identificar información entregada por expresiones de uso común y vocabulario temático presentes en textos literarios simples en los que la información se presenta de manera clara y evidente.",
+   "parentCode": "DIA-ENG-5B",
+   "marco": "dia",
+   "subjectCode": "ENG",
+   "level": "5_basico",
+   "source": "dia-ficha-2026",
+   "order": 2
+  },
+  {
+   "code": "ENG-5B-OA07-I3",
+   "type": "descriptor",
+   "name": "Extraer información específica asociada a personajes, lugares y tiempo, cuando esta no se encuentra explícita y requiere realizar inferencias evidentes o establecer relaciones entre información que se encuentra próxima en el texto.",
+   "parentCode": "DIA-ENG-5B",
+   "marco": "dia",
+   "subjectCode": "ENG",
+   "level": "5_basico",
+   "source": "dia-ficha-2026",
+   "order": 3
+  },
+  {
+   "code": "ENG-5B-OA07-I4",
+   "type": "descriptor",
+   "name": "Identificar ideas generales presentes en un texto literario (por ejemplo, de qué trata, cuál es el conflicto, cómo se solucionó el conflicto, etc.) cuando el texto contiene claves que facilitan la tarea.",
+   "parentCode": "DIA-ENG-5B",
+   "marco": "dia",
+   "subjectCode": "ENG",
+   "level": "5_basico",
+   "source": "dia-ficha-2026",
+   "order": 4
+  },
+  {
+   "code": "ENG-5B-OA14-I1",
+   "type": "descriptor",
+   "name": "Completar oraciones (siguiendo un modelo y/o formato dado) sobre temas de la vida cotidiana, del contexto inmediato del estudiante y de actualidad y/o interés global, usando vocabulario temático o funciones del año.",
+   "parentCode": "DIA-ENG-5B",
+   "marco": "dia",
+   "subjectCode": "ENG",
+   "level": "5_basico",
+   "source": "dia-ficha-2026",
+   "order": 1
+  },
+  {
+   "code": "ENG-5B-OA15-I1",
+   "type": "descriptor",
+   "name": "Escribir oraciones breves sobre imágenes dadas, que permiten describir apariencia, posición, gustos, preferencias y/o cantidad usando vocabulario temático o funciones del año.",
+   "parentCode": "DIA-ENG-5B",
+   "marco": "dia",
+   "subjectCode": "ENG",
+   "level": "5_basico",
+   "source": "dia-ficha-2026",
+   "order": 1
   }
  ],
  "mappings": [
@@ -22247,6 +23932,741 @@
   {
    "sourceCode": "SCI-7B-OA15-I2",
    "targetCode": "SCI-SK-PROCESAR-Y-ANALIZAR-LA-EVIDENCIA",
+   "mappingType": "related"
+  },
+  {
+   "sourceCode": "HIST-6B-OA01-I1",
+   "targetCode": "HIST-6B-OA01",
+   "mappingType": "subset"
+  },
+  {
+   "sourceCode": "HIST-6B-OA01-I1",
+   "targetCode": "HIST-SK-PENSAMIENTO-CRITICO",
+   "mappingType": "related"
+  },
+  {
+   "sourceCode": "HIST-6B-OA01-I2",
+   "targetCode": "HIST-6B-OA01",
+   "mappingType": "subset"
+  },
+  {
+   "sourceCode": "HIST-6B-OA01-I2",
+   "targetCode": "HIST-SK-ANALISIS-Y-TRABAJO-CON-FUENTES-DE-INFORMACION",
+   "mappingType": "related"
+  },
+  {
+   "sourceCode": "HIST-6B-OA02-I1",
+   "targetCode": "HIST-6B-OA02",
+   "mappingType": "subset"
+  },
+  {
+   "sourceCode": "HIST-6B-OA02-I1",
+   "targetCode": "HIST-SK-PENSAMIENTO-TEMPORAL-Y-ESPACIAL",
+   "mappingType": "related"
+  },
+  {
+   "sourceCode": "HIST-6B-OA02-I2",
+   "targetCode": "HIST-6B-OA02",
+   "mappingType": "subset"
+  },
+  {
+   "sourceCode": "HIST-6B-OA02-I2",
+   "targetCode": "HIST-SK-PENSAMIENTO-TEMPORAL-Y-ESPACIAL",
+   "mappingType": "related"
+  },
+  {
+   "sourceCode": "HIST-6B-OA03-I1",
+   "targetCode": "HIST-6B-OA03",
+   "mappingType": "subset"
+  },
+  {
+   "sourceCode": "HIST-6B-OA03-I1",
+   "targetCode": "HIST-SK-ANALISIS-Y-TRABAJO-CON-FUENTES-DE-INFORMACION",
+   "mappingType": "related"
+  },
+  {
+   "sourceCode": "HIST-6B-OA04-I1",
+   "targetCode": "HIST-6B-OA04",
+   "mappingType": "subset"
+  },
+  {
+   "sourceCode": "HIST-6B-OA04-I1",
+   "targetCode": "HIST-SK-ANALISIS-Y-TRABAJO-CON-FUENTES-DE-INFORMACION",
+   "mappingType": "related"
+  },
+  {
+   "sourceCode": "HIST-6B-OA05-I1",
+   "targetCode": "HIST-6B-OA05",
+   "mappingType": "subset"
+  },
+  {
+   "sourceCode": "HIST-6B-OA05-I1",
+   "targetCode": "HIST-SK-PENSAMIENTO-TEMPORAL-Y-ESPACIAL",
+   "mappingType": "related"
+  },
+  {
+   "sourceCode": "HIST-6B-OA06-I1",
+   "targetCode": "HIST-6B-OA06",
+   "mappingType": "subset"
+  },
+  {
+   "sourceCode": "HIST-6B-OA06-I1",
+   "targetCode": "HIST-SK-ANALISIS-Y-TRABAJO-CON-FUENTES-DE-INFORMACION",
+   "mappingType": "related"
+  },
+  {
+   "sourceCode": "HIST-6B-OA07-I1",
+   "targetCode": "HIST-6B-OA07",
+   "mappingType": "subset"
+  },
+  {
+   "sourceCode": "HIST-6B-OA07-I1",
+   "targetCode": "HIST-SK-ANALISIS-Y-TRABAJO-CON-FUENTES-DE-INFORMACION",
+   "mappingType": "related"
+  },
+  {
+   "sourceCode": "HIST-6B-OA07-I2",
+   "targetCode": "HIST-6B-OA07",
+   "mappingType": "subset"
+  },
+  {
+   "sourceCode": "HIST-6B-OA07-I2",
+   "targetCode": "HIST-SK-ANALISIS-Y-TRABAJO-CON-FUENTES-DE-INFORMACION",
+   "mappingType": "related"
+  },
+  {
+   "sourceCode": "HIST-6B-OA07-I3",
+   "targetCode": "HIST-6B-OA07",
+   "mappingType": "subset"
+  },
+  {
+   "sourceCode": "HIST-6B-OA07-I3",
+   "targetCode": "HIST-SK-ANALISIS-Y-TRABAJO-CON-FUENTES-DE-INFORMACION",
+   "mappingType": "related"
+  },
+  {
+   "sourceCode": "HIST-6B-OA08-I1",
+   "targetCode": "HIST-6B-OA08",
+   "mappingType": "subset"
+  },
+  {
+   "sourceCode": "HIST-6B-OA08-I1",
+   "targetCode": "HIST-SK-PENSAMIENTO-CRITICO",
+   "mappingType": "related"
+  },
+  {
+   "sourceCode": "HIST-6B-OA09-I1",
+   "targetCode": "HIST-6B-OA09",
+   "mappingType": "subset"
+  },
+  {
+   "sourceCode": "HIST-6B-OA09-I1",
+   "targetCode": "HIST-SK-PENSAMIENTO-TEMPORAL-Y-ESPACIAL",
+   "mappingType": "related"
+  },
+  {
+   "sourceCode": "HIST-6B-OA10-I1",
+   "targetCode": "HIST-6B-OA10",
+   "mappingType": "subset"
+  },
+  {
+   "sourceCode": "HIST-6B-OA10-I1",
+   "targetCode": "HIST-SK-PENSAMIENTO-TEMPORAL-Y-ESPACIAL",
+   "mappingType": "related"
+  },
+  {
+   "sourceCode": "HIST-6B-OA11-I1",
+   "targetCode": "HIST-6B-OA11",
+   "mappingType": "subset"
+  },
+  {
+   "sourceCode": "HIST-6B-OA11-I1",
+   "targetCode": "HIST-SK-PENSAMIENTO-TEMPORAL-Y-ESPACIAL",
+   "mappingType": "related"
+  },
+  {
+   "sourceCode": "HIST-6B-OA11-I2",
+   "targetCode": "HIST-6B-OA11",
+   "mappingType": "subset"
+  },
+  {
+   "sourceCode": "HIST-6B-OA11-I2",
+   "targetCode": "HIST-SK-PENSAMIENTO-TEMPORAL-Y-ESPACIAL",
+   "mappingType": "related"
+  },
+  {
+   "sourceCode": "HIST-6B-OA14-I1",
+   "targetCode": "HIST-6B-OA14",
+   "mappingType": "subset"
+  },
+  {
+   "sourceCode": "HIST-6B-OA14-I1",
+   "targetCode": "HIST-SK-ANALISIS-Y-TRABAJO-CON-FUENTES-DE-INFORMACION",
+   "mappingType": "related"
+  },
+  {
+   "sourceCode": "HIST-6B-OA12-I1",
+   "targetCode": "HIST-6B-OA12",
+   "mappingType": "subset"
+  },
+  {
+   "sourceCode": "HIST-6B-OA12-I1",
+   "targetCode": "HIST-SK-PENSAMIENTO-TEMPORAL-Y-ESPACIAL",
+   "mappingType": "related"
+  },
+  {
+   "sourceCode": "HIST-6B-OA15-I1",
+   "targetCode": "HIST-6B-OA15",
+   "mappingType": "subset"
+  },
+  {
+   "sourceCode": "HIST-6B-OA15-I1",
+   "targetCode": "HIST-SK-ANALISIS-Y-TRABAJO-CON-FUENTES-DE-INFORMACION",
+   "mappingType": "related"
+  },
+  {
+   "sourceCode": "HIST-6B-OA26-I1",
+   "targetCode": "HIST-6B-OA26",
+   "mappingType": "subset"
+  },
+  {
+   "sourceCode": "HIST-6B-OA26-I1",
+   "targetCode": "HIST-SK-PENSAMIENTO-CRITICO",
+   "mappingType": "related"
+  },
+  {
+   "sourceCode": "HIST-6B-OA17-I1",
+   "targetCode": "HIST-6B-OA17",
+   "mappingType": "subset"
+  },
+  {
+   "sourceCode": "HIST-6B-OA17-I1",
+   "targetCode": "HIST-SK-PENSAMIENTO-CRITICO",
+   "mappingType": "related"
+  },
+  {
+   "sourceCode": "HIST-6B-OA16-I1",
+   "targetCode": "HIST-6B-OA16",
+   "mappingType": "subset"
+  },
+  {
+   "sourceCode": "HIST-6B-OA16-I1",
+   "targetCode": "HIST-SK-ANALISIS-Y-TRABAJO-CON-FUENTES-DE-INFORMACION",
+   "mappingType": "related"
+  },
+  {
+   "sourceCode": "HIST-6B-OA18-I1",
+   "targetCode": "HIST-6B-OA18",
+   "mappingType": "subset"
+  },
+  {
+   "sourceCode": "HIST-6B-OA18-I1",
+   "targetCode": "HIST-SK-ANALISIS-Y-TRABAJO-CON-FUENTES-DE-INFORMACION",
+   "mappingType": "related"
+  },
+  {
+   "sourceCode": "HIST-6B-OA24-I1",
+   "targetCode": "HIST-6B-OA24",
+   "mappingType": "subset"
+  },
+  {
+   "sourceCode": "HIST-6B-OA24-I1",
+   "targetCode": "HIST-SK-PENSAMIENTO-CRITICO",
+   "mappingType": "related"
+  },
+  {
+   "sourceCode": "HIST-6B-OA19-I1",
+   "targetCode": "HIST-6B-OA19",
+   "mappingType": "subset"
+  },
+  {
+   "sourceCode": "HIST-6B-OA19-I1",
+   "targetCode": "HIST-SK-PENSAMIENTO-CRITICO",
+   "mappingType": "related"
+  },
+  {
+   "sourceCode": "HIST-6B-OA25-I1",
+   "targetCode": "HIST-6B-OA25",
+   "mappingType": "subset"
+  },
+  {
+   "sourceCode": "HIST-6B-OA25-I1",
+   "targetCode": "HIST-SK-PENSAMIENTO-CRITICO",
+   "mappingType": "related"
+  },
+  {
+   "sourceCode": "SCI-8B-OA01-I1",
+   "targetCode": "SCI-8B-OA01",
+   "mappingType": "subset"
+  },
+  {
+   "sourceCode": "SCI-8B-OA01-I1",
+   "targetCode": "SCI-SK-PROCESAR-Y-ANALIZAR-LA-EVIDENCIA",
+   "mappingType": "related"
+  },
+  {
+   "sourceCode": "SCI-8B-OA02-I1",
+   "targetCode": "SCI-8B-OA02",
+   "mappingType": "subset"
+  },
+  {
+   "sourceCode": "SCI-8B-OA02-I1",
+   "targetCode": "SCI-SK-OBSERVAR-Y-PLANTEAR-PREGUNTAS",
+   "mappingType": "related"
+  },
+  {
+   "sourceCode": "SCI-8B-OA02-I2",
+   "targetCode": "SCI-8B-OA02",
+   "mappingType": "subset"
+  },
+  {
+   "sourceCode": "SCI-8B-OA02-I2",
+   "targetCode": "SCI-SK-OBSERVAR-Y-PLANTEAR-PREGUNTAS",
+   "mappingType": "related"
+  },
+  {
+   "sourceCode": "SCI-8B-OA03-I1",
+   "targetCode": "SCI-8B-OA03",
+   "mappingType": "subset"
+  },
+  {
+   "sourceCode": "SCI-8B-OA03-I1",
+   "targetCode": "SCI-SK-OBSERVAR-Y-PLANTEAR-PREGUNTAS",
+   "mappingType": "related"
+  },
+  {
+   "sourceCode": "SCI-8B-OA04-I1",
+   "targetCode": "SCI-8B-OA04",
+   "mappingType": "subset"
+  },
+  {
+   "sourceCode": "SCI-8B-OA04-I1",
+   "targetCode": "SCI-SK-OBSERVAR-Y-PLANTEAR-PREGUNTAS",
+   "mappingType": "related"
+  },
+  {
+   "sourceCode": "SCI-8B-OA04-I2",
+   "targetCode": "SCI-8B-OA04",
+   "mappingType": "subset"
+  },
+  {
+   "sourceCode": "SCI-8B-OA04-I2",
+   "targetCode": "SCI-SK-PROCESAR-Y-ANALIZAR-LA-EVIDENCIA",
+   "mappingType": "related"
+  },
+  {
+   "sourceCode": "SCI-8B-OA03-I2",
+   "targetCode": "SCI-8B-OA03",
+   "mappingType": "subset"
+  },
+  {
+   "sourceCode": "SCI-8B-OA03-I2",
+   "targetCode": "SCI-SK-PROCESAR-Y-ANALIZAR-LA-EVIDENCIA",
+   "mappingType": "related"
+  },
+  {
+   "sourceCode": "SCI-8B-OA05-I1",
+   "targetCode": "SCI-8B-OA05",
+   "mappingType": "subset"
+  },
+  {
+   "sourceCode": "SCI-8B-OA05-I1",
+   "targetCode": "SCI-SK-PROCESAR-Y-ANALIZAR-LA-EVIDENCIA",
+   "mappingType": "related"
+  },
+  {
+   "sourceCode": "SCI-8B-OA06-I1",
+   "targetCode": "SCI-8B-OA06",
+   "mappingType": "subset"
+  },
+  {
+   "sourceCode": "SCI-8B-OA06-I1",
+   "targetCode": "SCI-SK-PROCESAR-Y-ANALIZAR-LA-EVIDENCIA",
+   "mappingType": "related"
+  },
+  {
+   "sourceCode": "SCI-8B-OA05-I2",
+   "targetCode": "SCI-8B-OA05",
+   "mappingType": "subset"
+  },
+  {
+   "sourceCode": "SCI-8B-OA05-I2",
+   "targetCode": "SCI-SK-OBSERVAR-Y-PLANTEAR-PREGUNTAS",
+   "mappingType": "related"
+  },
+  {
+   "sourceCode": "SCI-8B-OA05-I3",
+   "targetCode": "SCI-8B-OA05",
+   "mappingType": "subset"
+  },
+  {
+   "sourceCode": "SCI-8B-OA05-I3",
+   "targetCode": "SCI-SK-COMUNICAR",
+   "mappingType": "related"
+  },
+  {
+   "sourceCode": "SCI-8B-OA06-I2",
+   "targetCode": "SCI-8B-OA06",
+   "mappingType": "subset"
+  },
+  {
+   "sourceCode": "SCI-8B-OA06-I2",
+   "targetCode": "SCI-SK-PROCESAR-Y-ANALIZAR-LA-EVIDENCIA",
+   "mappingType": "related"
+  },
+  {
+   "sourceCode": "SCI-8B-OA07-I1",
+   "targetCode": "SCI-8B-OA07",
+   "mappingType": "subset"
+  },
+  {
+   "sourceCode": "SCI-8B-OA07-I1",
+   "targetCode": "SCI-SK-PROCESAR-Y-ANALIZAR-LA-EVIDENCIA",
+   "mappingType": "related"
+  },
+  {
+   "sourceCode": "SCI-8B-OA07-I2",
+   "targetCode": "SCI-8B-OA07",
+   "mappingType": "subset"
+  },
+  {
+   "sourceCode": "SCI-8B-OA07-I2",
+   "targetCode": "SCI-SK-EVALUAR",
+   "mappingType": "related"
+  },
+  {
+   "sourceCode": "SCI-8B-OA08-I1",
+   "targetCode": "SCI-8B-OA08",
+   "mappingType": "subset"
+  },
+  {
+   "sourceCode": "SCI-8B-OA08-I2",
+   "targetCode": "SCI-8B-OA08",
+   "mappingType": "subset"
+  },
+  {
+   "sourceCode": "SCI-8B-OA08-I2",
+   "targetCode": "SCI-SK-PLANIFICAR-Y-CONDUCIR-UNA-INVESTIGACION",
+   "mappingType": "related"
+  },
+  {
+   "sourceCode": "SCI-8B-OA08-I3",
+   "targetCode": "SCI-8B-OA08",
+   "mappingType": "subset"
+  },
+  {
+   "sourceCode": "SCI-8B-OA08-I3",
+   "targetCode": "SCI-SK-PLANIFICAR-Y-CONDUCIR-UNA-INVESTIGACION",
+   "mappingType": "related"
+  },
+  {
+   "sourceCode": "SCI-8B-OA09-I1",
+   "targetCode": "SCI-8B-OA09",
+   "mappingType": "subset"
+  },
+  {
+   "sourceCode": "SCI-8B-OA09-I1",
+   "targetCode": "SCI-SK-PROCESAR-Y-ANALIZAR-LA-EVIDENCIA",
+   "mappingType": "related"
+  },
+  {
+   "sourceCode": "SCI-8B-OA09-I2",
+   "targetCode": "SCI-8B-OA09",
+   "mappingType": "subset"
+  },
+  {
+   "sourceCode": "SCI-8B-OA09-I2",
+   "targetCode": "SCI-SK-PROCESAR-Y-ANALIZAR-LA-EVIDENCIA",
+   "mappingType": "related"
+  },
+  {
+   "sourceCode": "SCI-8B-OA10-I1",
+   "targetCode": "SCI-8B-OA10",
+   "mappingType": "subset"
+  },
+  {
+   "sourceCode": "SCI-8B-OA10-I1",
+   "targetCode": "SCI-SK-EVALUAR",
+   "mappingType": "related"
+  },
+  {
+   "sourceCode": "SCI-8B-OA10-I2",
+   "targetCode": "SCI-8B-OA10",
+   "mappingType": "subset"
+  },
+  {
+   "sourceCode": "SCI-8B-OA10-I2",
+   "targetCode": "SCI-SK-PLANIFICAR-Y-CONDUCIR-UNA-INVESTIGACION",
+   "mappingType": "related"
+  },
+  {
+   "sourceCode": "SCI-8B-OA10-I3",
+   "targetCode": "SCI-8B-OA10",
+   "mappingType": "subset"
+  },
+  {
+   "sourceCode": "SCI-8B-OA10-I3",
+   "targetCode": "SCI-SK-PROCESAR-Y-ANALIZAR-LA-EVIDENCIA",
+   "mappingType": "related"
+  },
+  {
+   "sourceCode": "SCI-8B-OA11-I1",
+   "targetCode": "SCI-8B-OA11",
+   "mappingType": "subset"
+  },
+  {
+   "sourceCode": "SCI-8B-OA11-I2",
+   "targetCode": "SCI-8B-OA11",
+   "mappingType": "subset"
+  },
+  {
+   "sourceCode": "SCI-8B-OA11-I2",
+   "targetCode": "SCI-SK-PLANIFICAR-Y-CONDUCIR-UNA-INVESTIGACION",
+   "mappingType": "related"
+  },
+  {
+   "sourceCode": "SCI-8B-OA11-I3",
+   "targetCode": "SCI-8B-OA11",
+   "mappingType": "subset"
+  },
+  {
+   "sourceCode": "SCI-8B-OA11-I3",
+   "targetCode": "SCI-SK-EVALUAR",
+   "mappingType": "related"
+  },
+  {
+   "sourceCode": "SCI-8B-OA12-I1",
+   "targetCode": "SCI-8B-OA12",
+   "mappingType": "subset"
+  },
+  {
+   "sourceCode": "SCI-8B-OA12-I1",
+   "targetCode": "SCI-SK-OBSERVAR-Y-PLANTEAR-PREGUNTAS",
+   "mappingType": "related"
+  },
+  {
+   "sourceCode": "SCI-8B-OA12-I2",
+   "targetCode": "SCI-8B-OA12",
+   "mappingType": "subset"
+  },
+  {
+   "sourceCode": "SCI-8B-OA12-I2",
+   "targetCode": "SCI-SK-PROCESAR-Y-ANALIZAR-LA-EVIDENCIA",
+   "mappingType": "related"
+  },
+  {
+   "sourceCode": "SCI-8B-OA13-I1",
+   "targetCode": "SCI-8B-OA13",
+   "mappingType": "subset"
+  },
+  {
+   "sourceCode": "SCI-8B-OA13-I1",
+   "targetCode": "SCI-SK-PROCESAR-Y-ANALIZAR-LA-EVIDENCIA",
+   "mappingType": "related"
+  },
+  {
+   "sourceCode": "SCI-8B-OA13-I2",
+   "targetCode": "SCI-8B-OA13",
+   "mappingType": "subset"
+  },
+  {
+   "sourceCode": "SCI-8B-OA14-I1",
+   "targetCode": "SCI-8B-OA14",
+   "mappingType": "subset"
+  },
+  {
+   "sourceCode": "SCI-8B-OA14-I1",
+   "targetCode": "SCI-SK-PROCESAR-Y-ANALIZAR-LA-EVIDENCIA",
+   "mappingType": "related"
+  },
+  {
+   "sourceCode": "SCI-8B-OA14-I2",
+   "targetCode": "SCI-8B-OA14",
+   "mappingType": "subset"
+  },
+  {
+   "sourceCode": "SCI-8B-OA14-I2",
+   "targetCode": "SCI-SK-OBSERVAR-Y-PLANTEAR-PREGUNTAS",
+   "mappingType": "related"
+  },
+  {
+   "sourceCode": "SCI-8B-OA15-I1",
+   "targetCode": "SCI-8B-OA15",
+   "mappingType": "subset"
+  },
+  {
+   "sourceCode": "SCI-8B-OA15-I1",
+   "targetCode": "SCI-SK-PROCESAR-Y-ANALIZAR-LA-EVIDENCIA",
+   "mappingType": "related"
+  },
+  {
+   "sourceCode": "ENG-5B-OA01-I1",
+   "targetCode": "ENG-5B-OA01",
+   "mappingType": "subset"
+  },
+  {
+   "sourceCode": "ENG-5B-OA01-I1",
+   "targetCode": "ENG-SK-COMPRENSION-AUDITIVA",
+   "mappingType": "related"
+  },
+  {
+   "sourceCode": "ENG-5B-OA02-I1",
+   "targetCode": "ENG-5B-OA02",
+   "mappingType": "subset"
+  },
+  {
+   "sourceCode": "ENG-5B-OA02-I1",
+   "targetCode": "ENG-SK-COMPRENSION-AUDITIVA",
+   "mappingType": "related"
+  },
+  {
+   "sourceCode": "ENG-5B-OA01-I2",
+   "targetCode": "ENG-5B-OA01",
+   "mappingType": "subset"
+  },
+  {
+   "sourceCode": "ENG-5B-OA01-I2",
+   "targetCode": "ENG-SK-COMPRENSION-AUDITIVA",
+   "mappingType": "related"
+  },
+  {
+   "sourceCode": "ENG-5B-OA02-I2",
+   "targetCode": "ENG-5B-OA02",
+   "mappingType": "subset"
+  },
+  {
+   "sourceCode": "ENG-5B-OA02-I2",
+   "targetCode": "ENG-SK-COMPRENSION-AUDITIVA",
+   "mappingType": "related"
+  },
+  {
+   "sourceCode": "ENG-5B-OA02-I3",
+   "targetCode": "ENG-5B-OA02",
+   "mappingType": "subset"
+  },
+  {
+   "sourceCode": "ENG-5B-OA02-I3",
+   "targetCode": "ENG-SK-COMPRENSION-AUDITIVA",
+   "mappingType": "related"
+  },
+  {
+   "sourceCode": "ENG-5B-OA02-I4",
+   "targetCode": "ENG-5B-OA02",
+   "mappingType": "subset"
+  },
+  {
+   "sourceCode": "ENG-5B-OA02-I4",
+   "targetCode": "ENG-SK-COMPRENSION-AUDITIVA",
+   "mappingType": "related"
+  },
+  {
+   "sourceCode": "ENG-5B-OA01-I3",
+   "targetCode": "ENG-5B-OA01",
+   "mappingType": "subset"
+  },
+  {
+   "sourceCode": "ENG-5B-OA01-I3",
+   "targetCode": "ENG-SK-COMPRENSION-AUDITIVA",
+   "mappingType": "related"
+  },
+  {
+   "sourceCode": "ENG-5B-OA06-I1",
+   "targetCode": "ENG-5B-OA06",
+   "mappingType": "subset"
+  },
+  {
+   "sourceCode": "ENG-5B-OA06-I1",
+   "targetCode": "ENG-SK-COMPRENSION-DE-LECTURA",
+   "mappingType": "related"
+  },
+  {
+   "sourceCode": "ENG-5B-OA06-I2",
+   "targetCode": "ENG-5B-OA06",
+   "mappingType": "subset"
+  },
+  {
+   "sourceCode": "ENG-5B-OA06-I2",
+   "targetCode": "ENG-SK-COMPRENSION-DE-LECTURA",
+   "mappingType": "related"
+  },
+  {
+   "sourceCode": "ENG-5B-OA06-I3",
+   "targetCode": "ENG-5B-OA06",
+   "mappingType": "subset"
+  },
+  {
+   "sourceCode": "ENG-5B-OA06-I3",
+   "targetCode": "ENG-SK-COMPRENSION-DE-LECTURA",
+   "mappingType": "related"
+  },
+  {
+   "sourceCode": "ENG-5B-OA06-I4",
+   "targetCode": "ENG-5B-OA06",
+   "mappingType": "subset"
+  },
+  {
+   "sourceCode": "ENG-5B-OA06-I4",
+   "targetCode": "ENG-SK-COMPRENSION-DE-LECTURA",
+   "mappingType": "related"
+  },
+  {
+   "sourceCode": "ENG-5B-OA07-I1",
+   "targetCode": "ENG-5B-OA07",
+   "mappingType": "subset"
+  },
+  {
+   "sourceCode": "ENG-5B-OA07-I1",
+   "targetCode": "ENG-SK-COMPRENSION-DE-LECTURA",
+   "mappingType": "related"
+  },
+  {
+   "sourceCode": "ENG-5B-OA07-I2",
+   "targetCode": "ENG-5B-OA07",
+   "mappingType": "subset"
+  },
+  {
+   "sourceCode": "ENG-5B-OA07-I2",
+   "targetCode": "ENG-SK-COMPRENSION-DE-LECTURA",
+   "mappingType": "related"
+  },
+  {
+   "sourceCode": "ENG-5B-OA07-I3",
+   "targetCode": "ENG-5B-OA07",
+   "mappingType": "subset"
+  },
+  {
+   "sourceCode": "ENG-5B-OA07-I3",
+   "targetCode": "ENG-SK-COMPRENSION-DE-LECTURA",
+   "mappingType": "related"
+  },
+  {
+   "sourceCode": "ENG-5B-OA07-I4",
+   "targetCode": "ENG-5B-OA07",
+   "mappingType": "subset"
+  },
+  {
+   "sourceCode": "ENG-5B-OA07-I4",
+   "targetCode": "ENG-SK-COMPRENSION-DE-LECTURA",
+   "mappingType": "related"
+  },
+  {
+   "sourceCode": "ENG-5B-OA14-I1",
+   "targetCode": "ENG-5B-OA14",
+   "mappingType": "subset"
+  },
+  {
+   "sourceCode": "ENG-5B-OA14-I1",
+   "targetCode": "ENG-SK-EXPRESION-ESCRITA",
+   "mappingType": "related"
+  },
+  {
+   "sourceCode": "ENG-5B-OA15-I1",
+   "targetCode": "ENG-5B-OA15",
+   "mappingType": "subset"
+  },
+  {
+   "sourceCode": "ENG-5B-OA15-I1",
+   "targetCode": "ENG-SK-EXPRESION-ESCRITA",
    "mappingType": "related"
   }
  ]

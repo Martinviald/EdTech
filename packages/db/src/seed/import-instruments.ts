@@ -37,6 +37,14 @@ type Alt = {
 };
 type Item = {
   position: number;
+  /**
+   * Número tal como lo imprime el cuadernillo ("15.1", "23.4"). Difiere de `position` en los
+   * instrumentos con sub-numeración: Ciencias 8° 2026 tiene 43 posiciones correlativas pero
+   * imprime `1..13, 14.1..14.5, 15.1..15.4, …`. Sin esto la BDD no tiene forma de saber a qué
+   * pregunta impresa corresponde un ítem, que es justo lo que se necesita para cruzar con la
+   * hoja de respuestas escaneada (GradeCam numera por el impreso, no por la posición).
+   */
+  printedNumber?: string | null;
   type: string;
   stem: string;
   alternatives?: Alt[];
@@ -46,6 +54,16 @@ type Item = {
   figureNote?: string | null;
   /** Storage key en S3 del recorte de la figura (contrato v1.1). No es una URL. */
   imageRef?: string | null;
+  /**
+   * Términos pareados (`responseFormat: "match_pairs"`): las dos columnas y los pares correctos.
+   * Se preservan en `scoringConfig` porque hoy el ítem entra como `open_ended` — el tipo
+   * `matching` existe en el enum y tiene schema y estrategia, pero le falta el camino de carga
+   * y su corrección es todo-o-nada, que no es como puntúa la Agencia. Guardarlos acá evita
+   * tener que volver a los PDF cuando se implemente.
+   * Ver `docs/plan-items-terminos-pareados.md`.
+   */
+  matchPairs?: { left: string; right: string }[];
+  matchColumns?: Record<string, { id: string; text: string }[]>;
 };
 type Passage = {
   title?: string;
@@ -255,6 +273,11 @@ export async function importInstruments(db: Database): Promise<void> {
               points: 1,
               partialCredit: it.type !== 'multiple_choice' && it.type !== 'true_false',
               ...(it.responseFormat ? { responseFormat: it.responseFormat } : {}),
+              // Número impreso (ver el tipo `Item`). Va en scoringConfig por el mismo motivo que
+              // `imageRef`: el schema Zod de `content` descarta las claves que no declara.
+              ...(it.printedNumber && it.printedNumber !== String(it.position)
+                ? { printedNumber: it.printedNumber }
+                : {}),
               ...(it.hasFigure ? { hasFigure: true, figureNote: it.figureNote ?? null } : {}),
               // Storage key de la figura recortada (contrato v1.1). Va en scoringConfig y no
               // en `content` porque el schema Zod de content strippea claves desconocidas y
@@ -264,6 +287,13 @@ export async function importInstruments(db: Database): Promise<void> {
               // Recortes por alternativa: {A: key, B: key, …}. Mismo motivo para NO ponerlos en
               // `content`: el schema de alternativa es {key,text,isCorrect} y Zod descarta el resto.
               ...(altImageRefs(it) ?? {}),
+              // Términos pareados: columnas y pares correctos (ver el tipo `Item`).
+              ...(it.matchPairs?.length
+                ? {
+                    matchPairs: it.matchPairs,
+                    ...(it.matchColumns ? { matchColumns: it.matchColumns } : {}),
+                  }
+                : {}),
             },
             status: 'published',
             source: 'imported',
