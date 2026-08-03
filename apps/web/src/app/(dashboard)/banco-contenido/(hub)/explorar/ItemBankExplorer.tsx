@@ -16,7 +16,7 @@ import { Button } from '@/components/ui/button';
 import { EmptyState } from '@/components/shared';
 import { TagBadge } from '../../[instrumentId]/TagBadge';
 import { ItemDetailPanel } from '../../[instrumentId]/ItemDetailPanel';
-import { SaveToCollectionDialog } from './SaveToCollectionDialog';
+import { SaveToCollectionDialog } from '@/components/collections/save-to-collection-dialog';
 
 function getContentPreview(content: Record<string, unknown>): string {
   for (const field of ['stem', 'text', 'prompt', 'question'] as const) {
@@ -160,6 +160,7 @@ export function ItemBankExplorer({
 
       <ItemDetailPanel
         item={detail}
+        canAddToCollection={canManageCollections}
         instrumentName={
           detail
             ? detail.instrumentId

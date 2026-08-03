@@ -17,6 +17,7 @@ import {
 import { cn } from '@/lib/utils';
 import { QuestionDetailSheet } from '@/components/question-detail/question-detail-sheet';
 import { QuestionNodes, type QuestionNodeTag } from '@/components/question-detail/question-nodes';
+import { AddToCollectionMenu } from '@/components/collections/add-to-collection-menu';
 
 function questionSectionToPassage(section: QuestionSection): PassageData {
   return {
@@ -59,8 +60,9 @@ export function QuestionDetailPanel(props: {
   data: QuestionAnalysisResponse | null;
   open: boolean;
   onClose: () => void;
+  canAddToCollection?: boolean;
 }): JSX.Element {
-  const { data, open, onClose } = props;
+  const { data, open, onClose, canAddToCollection = false } = props;
   const section = data?.section ?? null;
   const passage = section && hasPassageContent(section) ? questionSectionToPassage(section) : null;
 
@@ -71,6 +73,9 @@ export function QuestionDetailPanel(props: {
       position={data?.position ?? null}
       headerBadges={
         data?.correctKey ? <Badge variant="success">Clave correcta: {data.correctKey}</Badge> : null
+      }
+      headerActions={
+        data && canAddToCollection ? <AddToCollectionMenu itemId={data.itemId} /> : undefined
       }
       description="Enunciado, distribución de respuestas, análisis de distractores y nodos asociados a la pregunta."
       passage={passage}
@@ -102,10 +107,7 @@ function toNodeTags(tags: QuestionTaxonomyTag[]): QuestionNodeTag[] {
 
 function QuestionDetailContent({ data }: { data: QuestionAnalysisResponse }): JSX.Element {
   const distractor = topDistractorKey(data.alternatives);
-  // T2-17 — referencias comparativas (colegio / nivel). `grade` es opcional en el
-  // contrato (sólo el detalle por pregunta lo puebla); se normaliza a `null`.
-  const orgReference = data.references.org;
-  const gradeReference = data.references.grade ?? null;
+  const levelReference = data.references.grade;
 
   return (
     <div className="mt-6 space-y-6">
@@ -144,21 +146,15 @@ function QuestionDetailContent({ data }: { data: QuestionAnalysisResponse }): JS
         />
       </div>
 
-      {/* T2-17 — Comparativa: % de logro de la MISMA pregunta en el colegio (toda la
-          org) y en el nivel/grado, junto al % del scope en contexto (arriba). El
-          colegio/nivel trascienden el scope del usuario: un profesor ve su curso
-          arriba y estas referencias más amplias aquí. */}
-      {orgReference !== null || gradeReference !== null ? (
+      {/* T2-17 — Comparativa: % de logro de la MISMA pregunta en el nivel/grado,
+          junto al % del scope en contexto (arriba). El nivel trasciende el scope del
+          usuario: un profesor ve su curso arriba y esta referencia más amplia aquí. */}
+      {levelReference !== null ? (
         <div className="grid grid-cols-2 gap-3">
           <MetricCard
-            label="% de logro · colegio"
-            value={formatPct(orgReference)}
-            tone={achievementTone(orgReference)}
-          />
-          <MetricCard
             label="% de logro · nivel"
-            value={formatPct(gradeReference)}
-            tone={achievementTone(gradeReference)}
+            value={formatPct(levelReference)}
+            tone={achievementTone(levelReference)}
           />
         </div>
       ) : null}

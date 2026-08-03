@@ -18,6 +18,7 @@ import {
   TrueFalseContentView,
   asTrueFalseContent,
 } from '@/components/items/true-false-content-view';
+import { AddToCollectionMenu } from '@/components/collections/add-to-collection-menu';
 import { ItemEditProposals } from './ItemEditProposals';
 
 function sectionToPassage(section: InstrumentSectionModel): PassageData {
@@ -76,6 +77,7 @@ export function ItemDetailPanel(props: {
   item: ItemModel | null;
   sections?: InstrumentSectionModel[];
   canEdit?: boolean;
+  canAddToCollection?: boolean;
   instrumentId?: string;
   instrumentName?: string;
   open: boolean;
@@ -85,6 +87,7 @@ export function ItemDetailPanel(props: {
     item,
     sections = [],
     canEdit = false,
+    canAddToCollection = false,
     instrumentId,
     instrumentName,
     open,
@@ -112,6 +115,9 @@ export function ItemDetailPanel(props: {
             ) : null}
           </>
         ) : null
+      }
+      headerActions={
+        item && canAddToCollection ? <AddToCollectionMenu itemId={item.id} /> : undefined
       }
       description="Enunciado completo, alternativas y nodos de taxonomía asociados a la pregunta."
       passage={passage}

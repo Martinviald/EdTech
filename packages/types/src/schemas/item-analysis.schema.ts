@@ -83,22 +83,17 @@ export type ItemTaxonomyRef = {
  * (Detalle por pregunta). Objeto extensible: cada nueva referencia es un campo
  * más, sin romper el contrato existente.
  *
- * - `org` (viable ahora): % de logro del COLEGIO para la pregunta = promedio de
- *   TODA la org, independiente del scope del usuario (un profesor ve su curso en
- *   `correctRate` y el colegio completo aquí). Sale del token; nunca expone datos
- *   de otra org (RLS + withOrgContext).
- * - `grade` (T2-17): % de logro del NIVEL/grado para la pregunta = promedio de
- *   todos los cursos del MISMO grado de la org que rindieron la evaluación
- *   (subconjunto de `org`). Sólo se puebla en el detalle por pregunta
- *   (`QuestionAnalysisResponse`); la cabecera de la matriz no lo usa y queda
- *   `undefined`.
+ * - `grade`: % de logro del NIVEL/grado para la pregunta = promedio de todos los
+ *   cursos del mismo grado que rindieron la evaluación. Como los instrumentos son
+ *   siempre por nivel, es la referencia del colegio para esa evaluación. Trasciende
+ *   el scope del usuario (un profesor ve su curso en `correctRate` y el nivel aquí).
+ *   Sale del token; nunca expone datos de otra org (RLS + withOrgContext).
  * - `sample` (DIFERIDO): % de logro de la MUESTRA de colegios (benchmark
  *   inter-colegio). Bloqueado hasta existir un pool multi-colegio (TKT-20). El
  *   campo se deja opcional para poblarlo después sin cambiar el contrato.
  */
 export type QuestionReferences = {
-  org: number | null; // 0..100 — % logro del colegio (toda la org)
-  grade?: number | null; // 0..100 — % logro del nivel/grado (T2-17)
+  grade: number | null; // 0..100 — % logro del nivel/grado
   sample?: number | null; // 0..100 — muestra de colegios (DIFERIDO, TKT-20)
 };
 
@@ -114,7 +109,7 @@ export type MatrixQuestionColumn = {
   // % de alumnos (de la población VISIBLE, según scope) que respondió
   // correctamente esta pregunta — para resaltar preguntas críticas en la cabecera.
   correctRate: number | null; // 0..100
-  // TKT-22 — líneas de referencia por pregunta (% colegio ahora; muestra diferida).
+  // T2-17 — línea de referencia por pregunta (% del nivel; muestra diferida).
   references: QuestionReferences;
 };
 

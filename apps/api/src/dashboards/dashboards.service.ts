@@ -3,6 +3,7 @@ import { and, asc, desc, eq, inArray, isNull, notInArray, sql, type SQL } from '
 import {
   academicYears,
   assessmentCourseAssignments,
+  assessmentItemStats,
   assessmentResults,
   assessmentSkillStats,
   assessments,
@@ -393,6 +394,27 @@ export class DashboardsService {
                 ),
               );
 
+      // T2-14/P3 — Instrumentos que REALMENTE tienen datos en el alcance visible: se
+      // filtra el catálogo a los que tienen read-model de cohorte (`assessment_item_stats`,
+      // el poblado por ambos escritores: cálculo desde `responses` e informes oficiales)
+      // en alguno de los cursos accesibles. Así el selector de instrumento no ofrece
+      // instrumentos oficiales sin evaluaciones o evaluaciones sin resultados, que
+      // dejarían el dashboard en blanco al elegirlos.
+      const dataInstrumentRows =
+        scopedCgIds.length === 0
+          ? []
+          : await tx
+              .selectDistinct({ instrumentId: assessments.instrumentId })
+              .from(assessments)
+              .innerJoin(assessmentItemStats, eq(assessmentItemStats.assessmentId, assessments.id))
+              .where(
+                and(
+                  eq(assessments.orgId, orgId),
+                  inArray(assessmentItemStats.classGroupId, scopedCgIds),
+                ),
+              );
+      const instrumentIdsWithData = new Set(dataInstrumentRows.map((r) => r.instrumentId));
+
       return {
         applicationPeriodsWithData: periodRows
           .map((r) => r.applicationPeriod)
@@ -407,14 +429,16 @@ export class DashboardsService {
         })),
         periods,
         defaultAcademicYearId: academicYearId,
-        instruments: instrumentRows.map((r) => ({
-          id: r.id,
-          label: r.name,
-          type: r.type,
-          subjectId: r.subjectId,
-          gradeId: r.gradeId,
-          applicationPeriod: r.applicationPeriod,
-        })),
+        instruments: instrumentRows
+          .filter((r) => instrumentIdsWithData.has(r.id))
+          .map((r) => ({
+            id: r.id,
+            label: r.name,
+            type: r.type,
+            subjectId: r.subjectId,
+            gradeId: r.gradeId,
+            applicationPeriod: r.applicationPeriod,
+          })),
       };
     });
   }

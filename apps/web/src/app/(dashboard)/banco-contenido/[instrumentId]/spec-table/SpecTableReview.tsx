@@ -2,7 +2,14 @@
 
 import { useMemo, useState } from 'react';
 import { LayoutGrid, ListChecks } from 'lucide-react';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
 import {
   TAXONOMY_NODE_TYPES,
@@ -181,6 +188,7 @@ export function SpecTableReview({
       )}
 
       <ItemDetailPanel
+        canAddToCollection={canEdit}
         item={selected}
         sections={sections}
         canEdit={canEdit}

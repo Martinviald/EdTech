@@ -1,9 +1,10 @@
 'use client';
 
-import { useState, useTransition } from 'react';
+import { useEffect, useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
-import type { ItemCollectionModel } from '@soe/types';
+import type { ItemCollectionListResponse, ItemCollectionModel } from '@soe/types';
 import {
   Dialog,
   DialogContent,
@@ -22,9 +23,17 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Field } from '@/components/shared';
-import { addItemsToCollection, createCollectionWithItems } from '../../colecciones/actions';
+import { apiClientGet } from '@/lib/api-client';
+import {
+  addItemsToCollection,
+  createCollectionWithItems,
+} from '@/app/(dashboard)/banco-contenido/colecciones/actions';
 
 type Mode = 'existing' | 'new';
+
+export const itemCollectionKeys = {
+  list: ['item-collections', 'list'] as const,
+};
 
 const textareaClass =
   'flex min-h-[72px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50';
@@ -33,7 +42,8 @@ interface SaveToCollectionDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   itemIds: string[];
-  collections: ItemCollectionModel[];
+  /** Colecciones iniciales (fallback mientras el diálogo trae las frescas). */
+  collections?: ItemCollectionModel[];
   onSaved: () => void;
 }
 
@@ -41,26 +51,38 @@ export function SaveToCollectionDialog({
   open,
   onOpenChange,
   itemIds,
-  collections,
+  collections: initialCollections = [],
   onSaved,
 }: SaveToCollectionDialogProps) {
   const router = useRouter();
+  const queryClient = useQueryClient();
   const [pending, startTransition] = useTransition();
+
+  const { data } = useQuery({
+    queryKey: itemCollectionKeys.list,
+    queryFn: () => apiClientGet<ItemCollectionListResponse>('/item-collections?limit=100'),
+    enabled: open,
+  });
+  const collections = data?.data ?? initialCollections;
   const hasCollections = collections.length > 0;
 
-  const [mode, setMode] = useState<Mode>(hasCollections ? 'existing' : 'new');
+  const [mode, setMode] = useState<Mode>('existing');
   const [collectionId, setCollectionId] = useState('');
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
+
+  useEffect(() => {
+    if (open) setMode(hasCollections ? 'existing' : 'new');
+  }, [open, hasCollections]);
 
   function reset() {
     setName('');
     setDescription('');
     setCollectionId('');
-    setMode(hasCollections ? 'existing' : 'new');
   }
 
   function finish() {
+    void queryClient.invalidateQueries({ queryKey: itemCollectionKeys.list });
     onOpenChange(false);
     onSaved();
     reset();
