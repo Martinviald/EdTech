@@ -24,7 +24,11 @@ import {
 import {
   RESULTS_VIEWER_ROLES,
   RESULT_HIDDEN_NODE_TYPES,
+  TRUE_FALSE_KEYS,
+  TRUE_FALSE_LABELS,
+  isTrueFalseContent,
   mergeAnswerCounts,
+  trueFalseKeyOf,
   userHasAnyRole,
   type AlternativeDistribution,
   type AssessmentListQueryDto,
@@ -454,7 +458,13 @@ export class ItemAnalysisService {
         if (row.answer === null) {
           blankCount += row.count;
         } else {
-          countByKey.set(row.answer, (countByKey.get(row.answer) ?? 0) + row.count);
+          // En un V/F la hoja puede traer `V`, `VERDADERO`, `TRUE` o `A` para lo
+          // mismo: se colapsan a la clave canónica con el MISMO criterio que usa
+          // la corrección, o la distribución contradiría al % de logro.
+          const key = isTrueFalseContent(content)
+            ? (trueFalseKeyOf(row.answer) ?? row.answer)
+            : row.answer;
+          countByKey.set(key, (countByKey.get(key) ?? 0) + row.count);
         }
         if (row.isCorrect) correctCount += row.count;
       }
@@ -1450,6 +1460,23 @@ export class ItemAnalysisService {
   private parseAlternatives(
     content: ItemContent,
   ): { key: string; text: string | null; isCorrect: boolean }[] {
+    // Un Verdadero/Falso canónico no lleva `alternatives`: su respuesta es un
+    // booleano. Se sintetizan las dos opciones para que el análisis por pregunta
+    // muestre distribución y clave correcta igual que cualquier otro ítem cerrado.
+    if (isTrueFalseContent(content)) {
+      return [
+        {
+          key: TRUE_FALSE_KEYS.true,
+          text: TRUE_FALSE_LABELS.V,
+          isCorrect: content.correctAnswer,
+        },
+        {
+          key: TRUE_FALSE_KEYS.false,
+          text: TRUE_FALSE_LABELS.F,
+          isCorrect: !content.correctAnswer,
+        },
+      ];
+    }
     if (!Array.isArray(content.alternatives)) return [];
     const out: { key: string; text: string | null; isCorrect: boolean }[] = [];
     for (const raw of content.alternatives) {

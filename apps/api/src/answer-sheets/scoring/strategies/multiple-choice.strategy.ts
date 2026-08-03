@@ -7,9 +7,10 @@
 // La única diferencia es que ahora la clave correcta se deriva del `content`
 // tipado (no se descarta) en vez de venir precalculada.
 
-import type {
-  MultipleChoiceContent,
-  TrueFalseContent,
+import {
+  parseTrueFalseAnswer,
+  type MultipleChoiceContent,
+  type TrueFalseContent,
 } from '@soe/types';
 import type { ScoringInput, ScoringOutput, ScoringStrategy } from '../scoring-strategy';
 import { asTrimmedString } from './scoring.helpers';
@@ -29,7 +30,7 @@ function extractMcqCorrectKey(content: MultipleChoiceContent): string {
         (alt as { isCorrect?: unknown }).isCorrect === true &&
         typeof (alt as { key?: unknown }).key === 'string'
       ) {
-        return ((alt as { key: string }).key).trim().toUpperCase();
+        return (alt as { key: string }).key.trim().toUpperCase();
       }
     }
   }
@@ -63,9 +64,8 @@ export const trueFalseStrategy: ScoringStrategy = {
     // de respuestas puede traer la respuesta como booleano o como letra
     // (V/F, T/F, A/B). Normalizamos ambos a una clave canónica "TRUE"/"FALSE".
     if (typeof content.correctAnswer === 'boolean') {
-      const correctKey = content.correctAnswer ? 'TRUE' : 'FALSE';
-      const answer = asTrimmedString(input.rawAnswer);
-      const isCorrect = answer === null ? false : booleanKeyOf(answer) === correctKey;
+      const answered = parseTrueFalseAnswer(asTrimmedString(input.rawAnswer));
+      const isCorrect = answered !== null && answered === content.correctAnswer;
       return {
         isCorrect,
         rawScore: isCorrect ? input.item.maxScore : 0,
@@ -76,11 +76,3 @@ export const trueFalseStrategy: ScoringStrategy = {
     return scoreBinary(input, extractMcqCorrectKey(content as MultipleChoiceContent));
   },
 };
-
-/** Mapea variantes textuales de verdadero/falso a una clave canónica. */
-function booleanKeyOf(answer: string): string {
-  const a = answer.trim().toUpperCase();
-  if (['TRUE', 'T', 'V', 'VERDADERO', 'SI', 'YES', '1', 'A'].includes(a)) return 'TRUE';
-  if (['FALSE', 'F', 'FALSO', 'NO', '0', 'B'].includes(a)) return 'FALSE';
-  return a; // desconocido → no matcheará ninguna clave canónica
-}

@@ -5,3 +5,4 @@ export * from './grade-calculator';
 export * from './item-stats-calculator';
 export * from './level-stats';
 export * from './taxonomy-kind';
+export * from './true-false';

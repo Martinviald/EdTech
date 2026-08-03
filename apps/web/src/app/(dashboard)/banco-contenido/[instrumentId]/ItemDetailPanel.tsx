@@ -14,6 +14,10 @@ import { cn } from '@/lib/utils';
 import { QuestionDetailSheet } from '@/components/question-detail/question-detail-sheet';
 import { QuestionNodes, type QuestionNodeTag } from '@/components/question-detail/question-nodes';
 import { MatchingContentView, asMatchingContent } from '@/components/items/matching-content-view';
+import {
+  TrueFalseContentView,
+  asTrueFalseContent,
+} from '@/components/items/true-false-content-view';
 import { ItemEditProposals } from './ItemEditProposals';
 
 function sectionToPassage(section: InstrumentSectionModel): PassageData {
@@ -168,6 +172,7 @@ function ItemDetailContent({
   const explanation = getStringField(content, 'explanation');
   const imageKeys = altImageKeys(item);
   const matching = asMatchingContent(content);
+  const trueFalse = asTrueFalseContent(content);
 
   return (
     <div className="mt-6 space-y-6">
@@ -196,11 +201,16 @@ function ItemDetailContent({
         />
       ) : null}
 
-      {/* Respuesta correcta: por alternativas, o por pares si es un pareado */}
+      {/* Respuesta correcta: según la forma del content del ítem */}
       {matching ? (
         <section className="space-y-3">
           <h3 className="text-sm font-semibold text-foreground">Pares correctos</h3>
           <MatchingContentView content={matching} />
+        </section>
+      ) : trueFalse ? (
+        <section className="space-y-3">
+          <h3 className="text-sm font-semibold text-foreground">Respuesta correcta</h3>
+          <TrueFalseContentView correctAnswer={trueFalse.correctAnswer} />
         </section>
       ) : (
         <section className="space-y-3">
