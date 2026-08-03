@@ -22,7 +22,6 @@ COPY package.json pnpm-lock.yaml pnpm-workspace.yaml .npmrc turbo.json tsconfig.
 COPY apps/api/package.json apps/api/
 COPY packages/db/package.json packages/db/
 COPY packages/types/package.json packages/types/
-COPY packages/ui/package.json packages/ui/
 RUN --mount=type=cache,id=pnpm,target=/pnpm/store \
     pnpm install --frozen-lockfile
 
