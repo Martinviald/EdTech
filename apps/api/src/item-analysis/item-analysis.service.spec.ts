@@ -238,9 +238,9 @@ describe('ItemAnalysisService.getMatrix', () => {
     expect(res.questions[0].correctRate).toBe(50);
     expect(res.questions[1].correctRate).toBe(100);
     // TKT-22 — admin sin filtro: la población visible ya es toda la org, así que
-    // references.org = correctRate sin query adicional. `sample` DIFERIDO (ausente).
-    expect(res.questions[0].references.org).toBe(50);
-    expect(res.questions[1].references.org).toBe(100);
+    // references.grade = correctRate sin query adicional. `sample` DIFERIDO (ausente).
+    expect(res.questions[0].references.grade).toBe(50);
+    expect(res.questions[1].references.grade).toBe(100);
     expect(res.questions[0].references.sample).toBeUndefined();
 
     // Paginación.
@@ -362,9 +362,9 @@ describe('ItemAnalysisService.getMatrix', () => {
     expect(res.students.data[0].studentId).toBe(STUDENT_1);
     expect(res.students.data[0].achievement).toBe(80);
     // TKT-22 — el profesor ve su curso en correctRate (100%) y el COLEGIO completo
-    // en references.org (50%): la referencia trasciende el scope del usuario.
+    // en references.grade (50%): la referencia trasciende el scope del usuario.
     expect(res.questions[0].correctRate).toBe(100);
-    expect(res.questions[0].references.org).toBe(50);
+    expect(res.questions[0].references.grade).toBe(50);
   });
 
   it('filtro nodeId: limita las columnas a ítems taggeados con ese nodo', async () => {

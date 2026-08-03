@@ -471,7 +471,7 @@ export function CrossTable({
                   colegio completo aquí). La línea de "muestra de colegios"
                   (benchmark inter-colegio) queda DIFERIDA hasta existir un pool
                   multi-colegio; llegará como `q.references.sample` sin romper esto. */}
-              <SchoolReferenceRow questions={displayQuestions} />
+              <LevelReferenceRow questions={displayQuestions} />
               {displayStudents.map((row) => (
                 <StudentRow key={row.studentId} row={row} questions={displayQuestions} />
               ))}
@@ -499,16 +499,19 @@ function referenceCellClass(rate: number | null): string {
 }
 
 /**
- * TKT-22 — Fila de referencia del tablero maestro: "% de logro del colegio" por
- * pregunta (`q.references.org`), independiente del scope del usuario. La columna
- * "% Logro" muestra el promedio de esas tasas como referencia agregada. Cuando
- * exista el pool multi-colegio (TKT-20), la "muestra de colegios"
- * (`q.references.sample`) se agrega como una segunda fila análoga.
+ * T2-17 — Fila de referencia del tablero maestro: "% de logro del nivel" por
+ * pregunta (`q.references.grade`), independiente del scope del usuario. Como los
+ * instrumentos son siempre por nivel, es la referencia del colegio para esa
+ * evaluación. La columna "% Logro" muestra el promedio de esas tasas. Cuando exista
+ * el pool multi-colegio (TKT-20), la "muestra de colegios" (`q.references.sample`)
+ * se agrega como una segunda fila análoga.
  */
-function SchoolReferenceRow({ questions }: { questions: MatrixQuestionColumn[] }): JSX.Element {
-  const orgRates = questions.map((q) => q.references.org).filter((v): v is number => v !== null);
-  const orgMean =
-    orgRates.length > 0 ? orgRates.reduce((a, b) => a + b, 0) / orgRates.length : null;
+function LevelReferenceRow({ questions }: { questions: MatrixQuestionColumn[] }): JSX.Element {
+  const levelRates = questions
+    .map((q) => q.references.grade)
+    .filter((v): v is number => v !== null);
+  const levelMean =
+    levelRates.length > 0 ? levelRates.reduce((a, b) => a + b, 0) / levelRates.length : null;
 
   return (
     <TableRow className="border-b-2 bg-muted/30">
@@ -516,25 +519,25 @@ function SchoolReferenceRow({ questions }: { questions: MatrixQuestionColumn[] }
         {/* Mismo ancho fijo que las filas de alumno para que la columna congelada
             no crezca con este texto más largo (que envuelve dentro de los 134px). */}
         <div className="w-[134px]">
-          <span className="block text-sm font-semibold">% Logro colegio</span>
+          <span className="block text-sm font-semibold">% Logro nivel</span>
           <span className="block text-xs font-normal text-muted-foreground">
-            Promedio de toda la organización
+            Promedio del nivel
           </span>
         </div>
       </TableCell>
       <TableCell className="w-[68px] px-2 text-right font-semibold tabular-nums">
-        {formatPct(orgMean)}
+        {formatPct(levelMean)}
       </TableCell>
       {questions.map((q) => (
         <TableCell
           key={q.itemId}
           className={cn(
             'px-0.5 py-1.5 text-center text-xs font-semibold tabular-nums',
-            referenceCellClass(q.references.org),
+            referenceCellClass(q.references.grade),
           )}
-          title={`Colegio · Pregunta ${q.position}: ${formatPct(q.references.org)} de logro`}
+          title={`Nivel · Pregunta ${q.position}: ${formatPct(q.references.grade)} de logro`}
         >
-          {formatPct(q.references.org)}
+          {formatPct(q.references.grade)}
         </TableCell>
       ))}
     </TableRow>

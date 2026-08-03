@@ -307,7 +307,7 @@ export class ItemAnalysisService {
       // promedio de TODA la org, con independencia del scope del usuario. La línea
       // de "muestra de colegios" (benchmark inter-colegio) queda DIFERIDA hasta
       // existir un pool multi-colegio (references.sample; ver QuestionReferences).
-      const questionsWithRefs = await this.attachOrgReferences(
+      const questionsWithRefs = await this.attachLevelReferences(
         tx,
         query.assessmentId,
         questionsWithRate,
@@ -589,7 +589,7 @@ export class ItemAnalysisService {
         content: refs.contentRef,
         correctRate: null,
         // sample queda en undefined → línea de "muestra de colegios" DIFERIDA (TKT-20).
-        references: { org: null },
+        references: { grade: null },
       };
     });
 
@@ -695,7 +695,7 @@ export class ItemAnalysisService {
    * DIFERIDO: requiere pool multi-colegio (TKT-20). Se deja el hueco en el
    * contrato (`QuestionReferences.sample`) sin poblarlo.
    */
-  private async attachOrgReferences(
+  private async attachLevelReferences(
     tx: Database,
     assessmentId: string,
     questions: MatrixQuestionColumn[],
@@ -708,7 +708,7 @@ export class ItemAnalysisService {
     if (classGroupFilter === null) {
       return questions.map((q) => ({
         ...q,
-        references: { ...q.references, org: q.correctRate },
+        references: { ...q.references, grade: q.correctRate },
       }));
     }
 
@@ -727,18 +727,18 @@ export class ItemAnalysisService {
       )
       .groupBy(assessmentItemStats.itemId);
 
-    const orgRateByItem = new Map<string, number>();
+    const levelRateByItem = new Map<string, number>();
     for (const r of rows) {
       const total = Number(r.total);
       const correct = Number(r.correct);
-      orgRateByItem.set(r.itemId, total > 0 ? (correct / total) * 100 : 0);
+      levelRateByItem.set(r.itemId, total > 0 ? (correct / total) * 100 : 0);
     }
 
     return questions.map((q) => ({
       ...q,
       references: {
         ...q.references,
-        org: orgRateByItem.has(q.itemId) ? orgRateByItem.get(q.itemId)! : null,
+        grade: levelRateByItem.has(q.itemId) ? levelRateByItem.get(q.itemId)! : null,
       },
     }));
   }
@@ -747,10 +747,10 @@ export class ItemAnalysisService {
    * T2-17 — Referencias comparativas de UNA pregunta para el panel de detalle: el
    * % de logro de la MISMA pregunta en el COLEGIO (toda la org) y en el NIVEL/grado
    * (todos los cursos del mismo grado que rindieron la evaluación). Es el análogo
-   * por-pregunta de `attachOrgReferences` (que puebla la cabecera de la matriz),
+   * por-pregunta de `attachLevelReferences` (que puebla la cabecera de la matriz),
    * extendido con el corte por grado.
    *
-   * Semántica (idéntica a `attachOrgReferences`):
+   * Semántica (idéntica a `attachLevelReferences`):
    *  · Ambas referencias IGNORAN el scope del usuario — son líneas de comparación:
    *    un profesor ve su curso en `correctRate` y el colegio/nivel completos aquí.
    *  · Se acotan a la org por construcción: la query corre dentro de `withOrgContext`
@@ -773,8 +773,8 @@ export class ItemAnalysisService {
     assessmentId: string | undefined,
     itemId: string,
     classGroupId: string | undefined,
-  ): Promise<{ org: number | null; grade: number | null }> {
-    if (!assessmentId) return { org: null, grade: null };
+  ): Promise<{ grade: number | null }> {
+    if (!assessmentId) return { grade: null };
 
     // Conteos de la pregunta en la evaluación, agrupados por grado del curso.
     const rows = await tx
@@ -793,7 +793,7 @@ export class ItemAnalysisService {
       )
       .groupBy(classGroups.gradeId);
 
-    if (rows.length === 0) return { org: null, grade: null };
+    if (rows.length === 0) return { grade: null };
 
     // Grado(s) en contexto: el del curso filtrado (si viene); si no, todos los
     // grados que rindieron la evaluación (⇒ `grade` == `org` en evaluación de un
@@ -810,23 +810,15 @@ export class ItemAnalysisService {
       targetGradeIds = new Set(rows.map((r) => r.gradeId));
     }
 
-    let orgTotal = 0;
-    let orgCorrect = 0;
     let gradeTotal = 0;
     let gradeCorrect = 0;
     for (const r of rows) {
-      const total = Number(r.total);
-      const correct = Number(r.correct);
-      orgTotal += total;
-      orgCorrect += correct;
-      if (targetGradeIds.has(r.gradeId)) {
-        gradeTotal += total;
-        gradeCorrect += correct;
-      }
+      if (!targetGradeIds.has(r.gradeId)) continue;
+      gradeTotal += Number(r.total);
+      gradeCorrect += Number(r.correct);
     }
 
     return {
-      org: orgTotal > 0 ? (orgCorrect / orgTotal) * 100 : null,
       grade: gradeTotal > 0 ? (gradeCorrect / gradeTotal) * 100 : null,
     };
   }
@@ -1397,7 +1389,7 @@ export class ItemAnalysisService {
    * expansión, acá no hace falta ninguna query.
    *
    * `null` se preserva con cuidado: es lo que habilita el atajo de
-   * `attachOrgReferences` (sin filtro → `references.org = correctRate`, sin query
+   * `attachLevelReferences` (sin filtro → `references.org = correctRate`, sin query
    * extra). Si esto devolviera `[]` en vez de `null` para un admin sin filtro, la
    * referencia del colegio se caería a null en silencio.
    */
