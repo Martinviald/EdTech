@@ -14,6 +14,7 @@ import { FilterBar, MultiSelectFilter, type FilterField } from '@/components/sha
 import {
   FILTER_KEYS,
   classGroupSelectOptionsMulti,
+  hasActiveFilters,
   type DashboardFilterValues,
 } from './dashboard-filters';
 
@@ -118,10 +119,7 @@ export function DashboardFilterBar({
     });
   }, [router, searchParams, basePath]);
 
-  const hasActive = FILTER_KEYS.some((k) => {
-    const v = value[k];
-    return Array.isArray(v) ? v.length > 0 : Boolean(v);
-  });
+  const hasActive = hasActiveFilters(value);
 
   // Tipos de instrumento únicos derivados de las opciones de instrumentos.
   const instrumentTypes = Array.from(new Set(options.instruments.map((i) => i.type)));
@@ -141,7 +139,7 @@ export function DashboardFilterBar({
   const selectedSubjects = new Set(value.subjectId ?? []);
   const selectedTypes = new Set(value.instrumentType ?? []);
   const selectedGrades = new Set(value.gradeId ?? []);
-  const instrumentOptions = options.instruments
+  const scopedInstruments = options.instruments
     .filter(
       (i) =>
         selectedSubjects.size === 0 || (i.subjectId != null && selectedSubjects.has(i.subjectId)),
@@ -149,8 +147,14 @@ export function DashboardFilterBar({
     .filter((i) => selectedTypes.size === 0 || selectedTypes.has(i.type))
     .filter(
       (i) => selectedGrades.size === 0 || (i.gradeId != null && selectedGrades.has(i.gradeId)),
-    )
-    .map((i) => ({ id: i.id, label: i.label }));
+    );
+  const instrumentOptions = scopedInstruments.map((i) => ({ id: i.id, label: i.label }));
+
+  // Momentos con evaluaciones reales en el alcance visible (lo calcula el backend:
+  // el catálogo de instrumentos no basta, un momento puede tener instrumentos
+  // oficiales y ninguna evaluación del colegio). Se anota en el dropdown para no
+  // dejar al usuario filtrando a ciegas.
+  const periodsWithData = new Set(options.applicationPeriodsWithData);
 
   const fields: FilterField[] = [
     {
@@ -234,6 +238,7 @@ export function DashboardFilterBar({
           options={INSTRUMENT_APPLICATION_PERIODS.map((p) => ({
             id: p,
             label: INSTRUMENT_APPLICATION_PERIOD_LABELS[p],
+            hint: periodsWithData.has(p) ? undefined : 'sin evaluaciones',
           }))}
           selected={value.applicationPeriod ?? []}
           onChange={(ids) => updateMulti('applicationPeriod', ids)}

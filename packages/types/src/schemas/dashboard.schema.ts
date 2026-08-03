@@ -117,6 +117,11 @@ export type DashboardOverviewResponse = {
   assessmentsCount: number;
   performanceDistribution: PerformanceDistributionBucket[];
   recentAssessments: DashboardAssessmentSummary[];
+  // Cuántas evaluaciones hay en el alcance filtrado. `recentAssessments` viene
+  // recortado a las más recientes, así que sin este total la UI no puede decir que
+  // está mostrando una parte — y una tabla truncada en silencio se lee como "esto
+  // es todo lo que hay".
+  recentAssessmentsTotal: number;
   alerts: DashboardAlert[];
 };
 
@@ -161,6 +166,14 @@ export type DashboardFilterOptionsResponse = {
   classGroups: ClassGroupFilterOption[];
   periods: PeriodFilterOption[];
   instruments: InstrumentFilterOption[];
+  /**
+   * Momentos que tienen al menos una evaluación en el alcance visible. El catálogo
+   * de `instruments` no alcanza para saberlo: un momento puede tener instrumentos
+   * oficiales y ninguna evaluación del colegio, y filtrar por él devolvería vacío
+   * igual. La UI lo usa para anotar los momentos sin datos antes de que el usuario
+   * los elija.
+   */
+  applicationPeriodsWithData: InstrumentApplicationPeriod[];
   /**
    * Año académico al que está acotado el catálogo de cursos: el pedido en la
    * query, o el vigente, o el más reciente con cursos. `null` si el usuario no

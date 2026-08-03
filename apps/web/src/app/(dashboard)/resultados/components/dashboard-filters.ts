@@ -34,6 +34,14 @@ export const FILTER_KEYS: readonly (keyof DashboardFilterValues)[] = [
   'academicYearId',
 ];
 
+/** ¿Hay algún filtro aplicado? Decide si un resultado vacío se explica por los filtros. */
+export function hasActiveFilters(value: DashboardFilterValues): boolean {
+  return FILTER_KEYS.some((key) => {
+    const v = value[key];
+    return Array.isArray(v) ? v.length > 0 : Boolean(v);
+  });
+}
+
 /**
  * Parsea los filtros del dashboard desde el objeto `searchParams` resuelto de
  * Next 15. Reutilizado por todas las páginas de `/resultados`.

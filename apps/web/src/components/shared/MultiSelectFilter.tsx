@@ -16,7 +16,11 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { cn } from '@/lib/utils';
 
-export type MultiSelectOption = { id: string; label: string };
+// `hint` marca una opción que existe pero no tiene datos en el alcance actual
+// (ej. un momento que ningún instrumento del colegio declara). Se anota en vez de
+// deshabilitarse: el usuario puede seleccionarla igual, y el vacío de la vista le
+// explica por qué no hay nada.
+export type MultiSelectOption = { id: string; label: string; hint?: string };
 
 interface MultiSelectFilterProps {
   /** Nombre del filtro en plural, usado en el texto "Limpiar …". */
@@ -76,7 +80,12 @@ export function MultiSelectFilter({
                 onCheckedChange={() => toggle(option.id)}
                 onSelect={(e) => e.preventDefault()}
               >
-                <span className="truncate">{option.label}</span>
+                <span className="flex min-w-0 flex-1 items-baseline justify-between gap-2">
+                  <span className="truncate">{option.label}</span>
+                  {option.hint && (
+                    <span className="shrink-0 text-2xs text-muted-foreground">{option.hint}</span>
+                  )}
+                </span>
               </DropdownMenuCheckboxItem>
             ))}
             {selected.length > 0 && (

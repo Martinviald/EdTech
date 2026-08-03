@@ -149,6 +149,10 @@ describe('DashboardsService.getOverview', () => {
     expect(res.recentAssessments).toHaveLength(1);
     expect(res.recentAssessments[0]!.instrumentName).toBe('DIA 2025 Lectura');
     expect(res.recentAssessments[0]!.studentsCount).toBe(30);
+    // La tabla viene recortada a las más recientes: el total cuenta TODAS las del
+    // alcance (2), no las devueltas (1). Sin él la UI no puede decir que muestra
+    // una parte.
+    expect(res.recentAssessmentsTotal).toBe(2);
     // Alertas: curso < 60 (low_achievement) + skill < 50 (critical_skill).
     expect(res.alerts).toHaveLength(2);
     expect(res.alerts.map((a) => a.type).sort()).toEqual(['critical_skill', 'low_achievement']);
@@ -188,6 +192,15 @@ describe('DashboardsService.getOverview', () => {
     expect(res.recentAssessments).toHaveLength(1);
     expect(res.recentAssessments[0]!.studentsCount).toBe(41);
     expect(res.recentAssessments[0]!.averageAchievement).toBeCloseTo(41, 6); // 820/2000
+  });
+
+  it('sin evaluaciones que matcheen → total en 0 (no queda un total viejo colgando)', async () => {
+    const db = makeDb([[]]);
+    const svc = makeService(db);
+    const res = await svc.getOverview(makeUser(), { applicationPeriod: ['intermedio'] });
+
+    expect(res.recentAssessments).toEqual([]);
+    expect(res.recentAssessmentsTotal).toBe(0);
   });
 
   it('sin evaluaciones que matcheen → overview vacío con distribución de ceros', async () => {
