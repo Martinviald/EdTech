@@ -258,7 +258,7 @@ async function planSplit(
         .where(eq(instruments.id, instrumentId));
     });
   }
-  await planStaleBands(
+  const { restoresBands } = await planStaleBands(
     db,
     plan,
     instrumentId,
@@ -266,6 +266,23 @@ async function planSplit(
     inst.orgId,
     inst.applicationPeriod ?? keepPeriod,
   );
+
+  for (let i = 0; i < ORDERED_PERIODS.length; i++) {
+    const createdId = uuidAt(target.newInstrumentPrefix, 0x20 + i);
+    const [created] = await db
+      .select({ id: instruments.id, name: instruments.name })
+      .from(instruments)
+      .where(eq(instruments.id, createdId));
+    if (!created) continue;
+    await planCopyBands(db, plan, {
+      sourceInstrumentId: instrumentId,
+      targetInstrumentId: created.id,
+      targetInstrumentName: created.name,
+      bandIdPrefix: target.newBandPrefix,
+      bandIdOffset: (i + 1) * 0x10,
+      includePendingRestore: restoresBands,
+    });
+  }
 
   const movable = ORDERED_PERIODS.filter((p) => p !== keepPeriod && byPeriod.has(p));
   for (const [idx, period] of movable.entries()) {
@@ -281,7 +298,7 @@ async function planSplit(
       plan.lines.push(`· "${newName}" — ya existe (${newInstrumentId}), no se recrea`);
     } else {
       plan.lines.push(
-        `+ "${newName}" (${newInstrumentId}) — instrumento nuevo + ${sourceItems.length} ítems copiados + sus tags + copia de las bandas activas del original`,
+        `+ "${newName}" (${newInstrumentId}) — instrumento nuevo + ${sourceItems.length} ítems copiados + sus tags`,
       );
       plan.writes.push(async (tx) => {
         await tx.insert(instruments).values({
@@ -314,26 +331,17 @@ async function planSplit(
             });
           }
         }
-        const sourceBands = await tx
-          .select()
-          .from(performanceBands)
-          .where(
-            and(
-              eq(performanceBands.instrumentId, instrumentId),
-              isNull(performanceBands.deletedAt),
-            ),
-          );
-        for (const [b, band] of sourceBands.entries()) {
-          await tx.insert(performanceBands).values({
-            ...band,
-            id: uuidAt(target.newBandPrefix, (idx + 1) * 0x10 + b),
-            instrumentId: newInstrumentId,
-            createdAt: new Date(),
-            updatedAt: new Date(),
-          });
-        }
       });
     }
+
+    await planCopyBands(db, plan, {
+      sourceInstrumentId: instrumentId,
+      targetInstrumentId: newInstrumentId,
+      targetInstrumentName: newName,
+      bandIdPrefix: target.newBandPrefix,
+      bandIdOffset: (idx + 1) * 0x10,
+      includePendingRestore: restoresBands,
+    });
 
     const itemIdByPosition = new Map(
       sourceItems.map((item, i) => [item.id, uuidAt(target.newItemPrefix, (idx + 1) * 0x20 + i)]),
@@ -409,7 +417,7 @@ async function planStaleBands(
   instrumentName: string,
   instrumentOrgId: string | null,
   period: InstrumentApplicationPeriod,
-): Promise<void> {
+): Promise<{ restoresBands: boolean }> {
   const bands = await db
     .select({ id: performanceBands.id, label: performanceBands.label })
     .from(performanceBands)
@@ -443,18 +451,19 @@ async function planStaleBands(
           .set({ deletedAt: null })
           .where(inArray(performanceBands.id, ids));
       });
+      return { restoresBands: true };
     }
-    return;
+    return { restoresBands: false };
   }
 
   const expected = period === 'diagnostico' ? 2 : 3;
-  if (bands.length === 0 || bands.length === expected) return;
+  if (bands.length === 0 || bands.length === expected) return { restoresBands: false };
 
   if (instrumentOrgId !== null) {
     plan.lines.push(
       `· "${instrumentName}" tiene ${bands.length} banda(s) y ${period} usa ${expected}, pero es de org y \`db:seed:performance-bands\` no lo cubre: NO se tocan (corregir por PUT /instruments/:id/performance-bands)`,
     );
-    return;
+    return { restoresBands: false };
   }
 
   const bandIds = bands.map((b) => b.id);
@@ -472,7 +481,7 @@ async function planStaleBands(
     plan.lines.push(
       `⚠️ ${bands.length} banda(s) no corresponden a ${period} (se esperan ${expected}) pero están usadas en ${used} resultado(s): NO se tocan, revisar a mano`,
     );
-    return;
+    return { restoresBands: false };
   }
 
   plan.lines.push(
@@ -483,6 +492,73 @@ async function planStaleBands(
       .update(performanceBands)
       .set({ deletedAt: new Date() })
       .where(inArray(performanceBands.id, bandIds));
+  });
+  return { restoresBands: false };
+}
+
+/**
+ * Copia las bandas activas del instrumento original al nuevo. Paso aparte de la
+ * creación (y no dentro de ella) para que también repare un instrumento creado por
+ * una corrida anterior que quedó sin bandas: sin ellas, sus evaluaciones pierden el
+ * corte que tenían y el scoring cae al enum legacy 40/70/85.
+ */
+async function planCopyBands(
+  db: Database,
+  plan: Plan,
+  args: {
+    sourceInstrumentId: string;
+    targetInstrumentId: string;
+    targetInstrumentName: string;
+    bandIdPrefix: string;
+    bandIdOffset: number;
+    includePendingRestore: boolean;
+  },
+): Promise<void> {
+  const existing = await db
+    .select({ id: performanceBands.id })
+    .from(performanceBands)
+    .where(
+      and(
+        eq(performanceBands.instrumentId, args.targetInstrumentId),
+        isNull(performanceBands.deletedAt),
+      ),
+    );
+  if (existing.length > 0) return;
+
+  // Si el plan incluye restaurar las bandas del original (soft-deleteadas por una
+  // corrida anterior), hay que copiarlas igual: ese write corre ANTES que este.
+  const sourceBands = await db
+    .select()
+    .from(performanceBands)
+    .where(
+      args.includePendingRestore
+        ? eq(performanceBands.instrumentId, args.sourceInstrumentId)
+        : and(
+            eq(performanceBands.instrumentId, args.sourceInstrumentId),
+            isNull(performanceBands.deletedAt),
+          ),
+    );
+  if (sourceBands.length === 0) {
+    plan.lines.push(
+      `⚠️ "${args.targetInstrumentName}" queda SIN bandas: el instrumento original tampoco tiene activas`,
+    );
+    return;
+  }
+
+  plan.lines.push(
+    `+ "${args.targetInstrumentName}" — copia ${sourceBands.length} banda(s) del original [${sourceBands.map((b) => b.label).join(', ')}]`,
+  );
+  plan.writes.push(async (tx) => {
+    for (const [b, band] of sourceBands.entries()) {
+      await tx.insert(performanceBands).values({
+        ...band,
+        id: uuidAt(args.bandIdPrefix, args.bandIdOffset + b),
+        instrumentId: args.targetInstrumentId,
+        deletedAt: null,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      });
+    }
   });
 }
 
