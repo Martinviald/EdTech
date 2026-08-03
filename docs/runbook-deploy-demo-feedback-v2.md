@@ -40,6 +40,26 @@ vale para **cualquier ambiente nuevo o re-seedeado**.
 
 Tocan **datos** del demo. Se corren contra el **RDS del demo** vía túnel SST — skill **`demo-db-access`**; perfil AWS **`edtech`** (cuenta `604179600768`, verificar con `sts get-caller-identity --profile edtech` antes).
 
+### 4.0 ⚠️ ANTES de correr cualquier script de datos: snapshot del RDS
+
+Los scripts de §4 son no destructivos e idempotentes **por diseño**, pero el demo tiene datos que no
+se pueden regenerar: el **roster real de CSCJ (~1.300 alumnos, PII)**, las responses ingestadas y
+~5.000 `item_taxonomy_tags` de la tanda 2026. Un error humano (correr un `db:seed:*` por reflejo, un
+`--force`, un UPDATE sin `WHERE`) no tiene deshacer sin respaldo.
+
+- [ ] Tomar un snapshot manual y **esperar a que esté `available`** antes de seguir:
+  ```bash
+  aws rds create-db-snapshot --profile edtech --region us-east-1 \
+    --db-instance-identifier edtech-demo-dbinstance-cauoeshr \
+    --db-snapshot-identifier edtech-demo-pre-promocion-$(date +%Y%m%d-%H%M)
+  aws rds wait db-snapshot-available --profile edtech --region us-east-1 \
+    --db-snapshot-identifier <el-id-de-arriba>
+  ```
+- [ ] Anotar acá el id del snapshot usado: `________________`
+
+Restaurar es crear una instancia nueva desde el snapshot y re-apuntar la app — no es instantáneo,
+pero es la diferencia entre un susto y perder el roster.
+
 ### 4.1 B3 — `application_period` de los instrumentos DIA (filtro "Momento")
 
 El backfill de cohorte **no** setea el momento: vive en `instruments.application_period`, y es
@@ -300,7 +320,8 @@ Recorrer con `docs/testing-manual-feedback-v2.md`. Mínimo imprescindible:
 - **Re-importar un instrumento ya cargado borra sus tags EN SILENCIO** (`ON DELETE CASCADE`): la tanda 2026 tiene ~5.000. Desde #94 hay un **guard** que aborta y exige `--force`. Para cambiar ítems ya cargados el camino es `db:retype:items` (UPDATE in-place), nunca `db:import:instruments`.
 - **`item_collections` sin RLS** por decisión (aislamiento por `org_id` + `withOrgContext`). Si a futuro guardan algo sensible, agregar su política a `rls-policies.sql` (§5.2 CLAUDE.md).
 - **Backfill idempotente** (delete + reinsert por assessment) → re-correrlo no mueve números publicados; no recalcula `assessment_results`/`skill_results`.
-- **No re-seedear** el demo con datos existentes (destructivo). Para el demo vivo, usar **UPDATEs dirigidos**, no el seed. Única excepción a evaluar: §4.1 opción (b), que es una decisión consciente con su costo declarado.
+- **No re-seedear** el demo con datos existentes. Para el demo vivo, usar **UPDATEs dirigidos** o los scripts de §4, nunca el seed. *(La "opción (b) = re-correr el seed E2E" que figuraba en versiones anteriores de este runbook **ya no aplica**: el caso que la motivaba —el instrumento de Lectura reusado entre 3 momentos— se resolvió con `db:fix:application-period`, que no borra nada.)*
+- **⚠️ Los `db:seed:*` NO tienen guard.** El guard de #94 protege sólo a `db:import:instruments`. Cualquiera puede correr `db:seed:e2e` / `db:seed:benchmark` contra el demo y **borrar su namespace completo**, incluidos los assessments que alguien haya cargado encima. La única red es el snapshot de §4.0.
 - **Los UUID y nombres de los instrumentos del seed E2E cambiaron.** Un demo re-seedeado ya no tiene `e2e…500`/`e2e…501` sino 9 instrumentos `e2e…500`–`e2e…508` (uno por asignatura × año × momento), y los ítems se movieron al rango `e2e…1001+`. Cualquier script, query guardada o doc que apunte a esos IDs (este runbook incluido, §4.1) vale **sólo** para el demo actual, no para uno fresco.
 - **El seed E2E estaba roto de antes y no se sabía:** `performance_bands.instrument_id` no tiene `ON DELETE CASCADE`, así que una vez sembradas las bandas DIA, la siguiente corrida del seed fallaba por FK al borrar sus instrumentos. Ya corregido (el seed borra las bandas de su namespace antes). Relevante si se elige §4.1 (b).
 
@@ -314,7 +335,7 @@ Recorrer con `docs/testing-manual-feedback-v2.md`. Mínimo imprescindible:
 | B1 — filtro Momento en dashboards | ✅ en `dev` (commit `ea462b8`) | viaja con `dev → main` |
 | B2 — read-model de cohorte | backfill **automático** en deploy | ninguna (lo corre el workflow) |
 | B3 — `application_period` DIA (código) | ✅ seeds corregidos (1 instrumento por asignatura × año × momento) + script `db:backfill:application-period` | viaja con `dev → main` |
-| B3 — `application_period` DIA (datos del demo) | ⚠️ pendiente | **backfill + UPDATE dirigido** (4.1); Lectura `…500` requiere **decisión** (a)/(b) |
+| B3 — `application_period` DIA (datos del demo) | ✅ **APLICADO** (2026-08-02) | backfill + `db:fix:application-period` (4.1). El split de Lectura `a3e…500` ya no requiere ninguna decisión: se hizo sin borrar nada |
 | Términos pareados + V/F (PR #89, #90, #92) | ✅ en `dev` | ✅ **APLICADO**: 31 ítems re-tipados en demo (4.2). Sin re-ingesta: 0 responses sobre 2026. Script versionado en #91 |
 | Multi-selección (**11 ítems, 7 instrumentos**) | ✅ tipo `multi_select` en `dev` (#94) | ✅ **APLICADO** en demo: migración `0017` + `db:retype:items`. Ciencias 8° 8A pasó de 31/44 a **44/44** contra GradeCam |
 | Historia 5° pos 9 (6º pareado) | ✅ resuelto (#92) | ✅ **APLICADO** en demo |
