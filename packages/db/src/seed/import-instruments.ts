@@ -44,6 +44,14 @@ type MatchElement = {
 };
 type Item = {
   position: number;
+  /**
+   * Número tal como lo imprime el cuadernillo ("15.1", "23.4"). Difiere de `position` en los
+   * instrumentos con sub-numeración: Ciencias 8° 2026 tiene 43 posiciones correlativas pero
+   * imprime `1..13, 14.1..14.5, 15.1..15.4, …`. Sin esto la BDD no tiene forma de saber a qué
+   * pregunta impresa corresponde un ítem, que es justo lo que se necesita para cruzar con la
+   * hoja de respuestas escaneada (GradeCam numera por el impreso, no por la posición).
+   */
+  printedNumber?: string | null;
   type: string;
   stem: string;
   alternatives?: Alt[];
@@ -275,7 +283,23 @@ function buildTrueFalseContent(it: Item): Record<string, unknown> {
   return { stem: it.stem, correctAnswer: isTrue };
 }
 
+/**
+ * Tipo REAL del ítem. El pipeline de extracción tipa los términos pareados como
+ * `open_ended` + `responseFormat: "match_pairs"` — deuda tomada cuando `matching`
+ * no tenía camino de carga. Un ítem que declara sus pares ES un pareado, así que
+ * se normaliza acá en vez de exigir re-extraer los PDF.
+ *
+ * Es el mismo criterio que el resto del adaptador: el dato manda sobre la
+ * etiqueta que le puso la capa de extracción.
+ */
+function resolveItemType(it: Item): string {
+  if (it.type === 'matching') return 'matching';
+  if ((it.matchPairs ?? []).length > 0 || it.responseFormat === 'match_pairs') return 'matching';
+  return it.type;
+}
+
 export function buildContent(it: Item): Record<string, unknown> {
+  if (resolveItemType(it) === 'matching') return buildMatchingContent(it);
   if (it.type === 'multiple_choice') {
     return {
       stem: it.stem,
@@ -287,7 +311,6 @@ export function buildContent(it: Item): Record<string, unknown> {
     };
   }
   if (it.type === 'true_false') return buildTrueFalseContent(it);
-  if (it.type === 'matching') return buildMatchingContent(it);
   // open_ended (incluye responseFormat fill_in / develop), writing, etc.
   return { prompt: it.stem };
 }
@@ -299,7 +322,7 @@ export function buildContent(it: Item): Record<string, unknown> {
  */
 export function resolvePoints(it: Item): number {
   if (typeof it.points === 'number' && it.points >= 0) return it.points;
-  if (it.type === 'matching') return matchingPairCount(it) || 1;
+  if (resolveItemType(it) === 'matching') return matchingPairCount(it) || 1;
   return 1;
 }
 
@@ -430,8 +453,9 @@ export async function importInstruments(db: Database): Promise<void> {
           await tx.insert(sectionAttachments).values(attachments);
         }
         for (const it of s.items) {
+          const itemType = resolveItemType(it);
           const content = validateItemContent(
-            it.type as Parameters<typeof validateItemContent>[0],
+            itemType as Parameters<typeof validateItemContent>[0],
             buildContent(it),
           );
           await tx.insert(items).values({
@@ -439,12 +463,17 @@ export async function importInstruments(db: Database): Promise<void> {
             instrumentId,
             sectionId,
             position: it.position,
-            type: it.type as typeof items.$inferInsert.type,
+            type: itemType as typeof items.$inferInsert.type,
             content,
             scoringConfig: {
               points: resolvePoints(it),
-              partialCredit: it.type !== 'multiple_choice' && it.type !== 'true_false',
+              partialCredit: itemType !== 'multiple_choice' && itemType !== 'true_false',
               ...(it.responseFormat ? { responseFormat: it.responseFormat } : {}),
+              // Número impreso (ver el tipo `Item`). Va en scoringConfig por el mismo motivo que
+              // `imageRef`: el schema Zod de `content` descarta las claves que no declara.
+              ...(it.printedNumber && it.printedNumber !== String(it.position)
+                ? { printedNumber: it.printedNumber }
+                : {}),
               ...(it.hasFigure ? { hasFigure: true, figureNote: it.figureNote ?? null } : {}),
               // Storage key de la figura recortada (contrato v1.1). Va en scoringConfig y no
               // en `content` porque el schema Zod de content strippea claves desconocidas y
@@ -455,6 +484,9 @@ export async function importInstruments(db: Database): Promise<void> {
               // `content`: el schema de alternativa es {key,text,isCorrect} y Zod descarta el resto.
               ...(altImageRefs(it) ?? {}),
               // Recortes de los elementos de un pareado: {"B.1": key, …}. Mismo motivo.
+              // Los pares y las columnas NO se copian acá: desde que `matching` tiene camino
+              // de carga, viven en `content` (leftItems/rightItems/correctPairs) y duplicarlos
+              // en scoringConfig sería una segunda fuente de verdad de lo mismo.
               ...(matchImageRefs(it) ?? {}),
             },
             status: 'published',
