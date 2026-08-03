@@ -57,29 +57,42 @@ ya desplegado**, que el deploy no re-seedea.
   ```
   Cubre los instrumentos DIA reales importados (`… 2025 — Diagnóstico/Intermedio/Cierre`), que ya
   traen el momento en el nombre.
-- [ ] **Matemática del seed demo (`…501`, "DIA Matemática 2° Básico") — UPDATE dirigido.** Su nombre
-      no dice el momento, así que el backfill lo deja en NULL a propósito. Sus 3 evaluaciones son
-      todas Diagnóstico → es inequívoco:
-  ```sql
-  UPDATE instruments SET application_period='diagnostico'
-  WHERE id='e2e00000-0000-0000-0000-000000000501' AND type='dia';
-  ```
-- [ ] **Lectura del seed demo (`…500`) — sigue sin tener un UPDATE correcto.** Es **un** instrumento
-      reusado entre Diagnóstico + Intermedia + Final: no existe un momento único que setearle. Hay
-      que **decidir** entre dos caminos (ninguno es automático):
+- [x] **Los 4 instrumentos que el backfill no puede clasificar** — resueltos con
+      `db:fix:application-period` (**ya aplicado al demo el 2026-08-02**, ver el estado abajo).
 
-  | Opción | Qué implica | Riesgo |
+  ⚠️ **Corrección importante:** una versión anterior de este runbook mandaba un `UPDATE` sobre
+  `e2e00000-…-501`. **En el demo NO existe ni un instrumento del namespace `e2e00000`**: se sembró
+  con `e2e-andes.ts` (namespace **`a3e00000`**), no con `e2e-testing.ts`. Ese `UPDATE` habría
+  tocado 0 filas y parecido exitoso.
+
+  | Instrumento | Evals | Caso |
   |---|---|---|
-  | **(a) Dejarlo como está** | Lectura + cualquier momento sigue vacío en el demo | Ninguno. Limitación conocida, no bug de código |
-  | **(b) Re-correr el seed E2E contra el demo** | Recrea los 9 instrumentos por momento y sus evaluaciones, ya correctos | ⚠️ **Destructivo**: el seed borra su namespace `e2e00000-…` **y** los assessments que alguien haya creado subiendo CSVs contra esos instrumentos. Contradice §6 ("no re-seedear el demo") |
+  | `a3e…500` DIA Lectura 2° Básico | 7, en 3 momentos | El único que requería split |
+  | `a3e…501` DIA Matemática 2° Básico | 3, todas Diagnóstico | Momento inequívoco |
+  | `b3c…101` / `b3c…102` (benchmarking) | 0 | Sin ítems ni evaluaciones |
 
-  Si el demo no tiene cargas manuales sobre los instrumentos E2E, (b) deja el demo consistente con
-  el seed nuevo. Si las tiene o hay dudas, (a). **Decidir explícitamente antes del deploy.**
+  ```bash
+  DATABASE_ADMIN_URL=<url-del-túnel> pnpm --filter @soe/db db:fix:application-period --dry-run
+  DATABASE_ADMIN_URL=<url-del-túnel> pnpm --filter @soe/db db:fix:application-period
+  ```
+
+  **No es destructivo: cero `DELETE`.** `a3e…500` conserva sus 10 ítems y se queda con el momento
+  mayoritario (Diagnóstico, 4 de 7 evaluaciones); se crean 2 instrumentos nuevos (Intermedio,
+  Cierre) con copia de los ítems, sus tags y las bandas del original; y se re-apuntan las 3
+  evaluaciones restantes con sus **440 responses** y **30 `assessment_item_stats`**. Idempotente
+  (UUID determinísticos y cada paso comprueba si ya está hecho).
 
 ⚠️ **Orden importa:** correr el backfill **antes** de `db:seed:performance-bands`. El seed de bandas
 ahora deriva el momento de la columna (y sólo cae al nombre si está en NULL), y el Diagnóstico
 siembra **2** bandas mientras Monitoreo/Cierre siembran **3** — un Diagnóstico sin momento y con
 nombre ambiguo recibiría 3 bandas.
+
+⚠️ **`db:seed:performance-bands` SÓLO cubre instrumentos globales (`org_id IS NULL`).** Los 4 de
+arriba son **de la org**, así que el seed no los toca: sus bandas se administran por
+`PUT /instruments/:id/performance-bands`. Una primera versión de `db:fix:application-period`
+soft-deleteó 3 bandas de `a3e…500` esperando que el seed las resembrara — no ocurrió y quedó sin
+bandas (scoring al enum legacy 40/70/85). Ya corregido en el script, que además **restaura** las
+bandas soft-deleteadas si detecta ese estado.
 
 ✅ **El seed ya no repite el problema** (`e2e-testing.ts`, `e2e-andes.ts`, `benchmark-demo.ts`): un
 demo **fresco** nace con los momentos correctos. El seed **no** se re-corre en cada deploy → por eso
@@ -112,14 +125,22 @@ Correr §4.1 **antes** de confiar en los informes oficiales del demo.
 Los importadores siguen **escribiendo** `config.period`, pero como procedencia del archivo origen
 (junto a `sourceFile`/`rbd`), no como dato autoritativo.
 
-### 4.2 Términos pareados y V/F — re-tipar los ítems ya cargados
+### 4.2 Tipos de ítem mal cargados — re-tipar in-place
 
-> ✅ **YA APLICADO AL DEMO (2026-08-02).** 30 ítems re-tipados, tags intactos, 0 pendientes.
-> El script quedó versionado (PR #91): `pnpm --filter @soe/db db:retype:items [--apply]`.
-> **Hay que volver a correrlo en cualquier ambiente que se cargue con datos previos a #89**
-> (por ejemplo prod tras la promoción) — es idempotente y corre en dry-run por defecto.
+> ✅ **Pareados + V/F: YA APLICADO AL DEMO.** 31 ítems re-tipados (30 el 2026-08-02 + Historia 5°
+> pos 9 el 2026-08-03), tags intactos, 0 pendientes.
+>
+> ⏳ **Multi-selección: PENDIENTE en el demo.** 11 ítems. Requiere **primero** la migración `0017`
+> (`ALTER TYPE item_type ADD VALUE 'multi_select'`), porque hasta que el valor exista en el enum el
+> UPDATE no puede escribirlo. En el demo eso lo aplica el deploy al promover a `main`; si se quiere
+> antes, correr `db:migrate` contra el demo y después el re-tipado.
+>
+> Script único para los tres grupos: `pnpm --filter @soe/db db:retype:items [--apply]`
+> (idempotente, dry-run por defecto). **Hay que correrlo en cualquier ambiente cargado con datos
+> previos a #94** — prod incluido, tras la promoción y DESPUÉS de que corra la migración.
 
-Código: **PR #89** (`matching` + numeración impresa) y **PR #90** (UI de V/F), ambos en `dev`.
+Código: **PR #89** (`matching` + numeración impresa), **#90** (UI de V/F), **#92** (Historia 5°) y
+**#94** (`multi_select` + guard de import), todos en `dev`.
 No hay migración de schema: `matching` y `true_false` ya existían en el enum. Lo que hay que
 arreglar son **datos ya cargados con el tipo equivocado**, porque el importador no tenía cómo
 producirlos bien cuando corrió la carga de la tanda 2026 (`a9974ce`).
@@ -167,14 +188,23 @@ contra esta tanda, así que el re-tipado toca sólo `items` y no arrastra result
       from items where type='true_false' and deleted_at is null;
       ```
 
-⚠️ **Queda fuera y hay que decidirlo aparte — MULTI-SELECCIÓN.** No son 3 ítems de Ciencias 8° como
-decía la versión anterior: son **11 ítems en 7 instrumentos**, incluidos **Lectura 3°** y
-**Matemática 6°** (este último con **4** alternativas correctas). Son `multiple_choice` con varias
-`isCorrect`; la estrategia MCQ toma sólo la primera, así que puntúan **al revés**: quien marca la
-respuesta completa saca 0 y quien marca una sola saca 1. El PR #89 **no** los toca — necesitan su
-propia decisión de tipo (¿`multi_select` nuevo? ¿`correctKeys`? ¿crédito parcial o todo-o-nada?).
-Ver §7bis de `docs/plan-desarrollo-items-terminos-pareados.md`.
-Contraste contra los puntajes de GradeCam en Ciencias 8° 8A: **31/44** alumnos hoy; 44/44 al cerrarlo.
+**MULTI-SELECCIÓN — resuelta en código (#94), pendiente en los datos del demo.** Son **11 ítems en
+7 instrumentos**, incluidos **Lectura 3°** y **Matemática 6°** (este último con **4** alternativas
+correctas). Están cargados como `multiple_choice` con varias `isCorrect`, y la estrategia MCQ toma
+sólo la primera, así que puntúan **al revés**: quien marca la respuesta completa saca 0 y quien
+marca una sola saca 1.
+
+Se modelaron como **tipo propio `multi_select`** (no `correctKeys` sobre `multiple_choice`): el
+`type` tiene que seguir determinando la semántica, que es justo lo que falló en los tres bugs de
+#89. Puntaje **todo-o-nada por defecto**, verificado contra el escaneo real, con crédito parcial
+disponible por configuración.
+
+- [ ] Aplicar la migración **`0017`** al demo (el enum tiene que tener el valor antes del UPDATE).
+- [ ] Correr `db:retype:items --apply` — el script ya cubre los 11.
+- [ ] Verificar: `select count(*) from items where type='multi_select' and deleted_at is null;` → **11**.
+
+Contraste contra GradeCam en Ciencias 8° 8A: **31/44** hoy en el demo; con esto aplicado, **44/44**
+(ya verificado en local contra el escaneo real).
 
 | Instrumento | Posiciones (impreso) |
 |---|---|
@@ -187,8 +217,9 @@ Contraste contra los puntajes de GradeCam en Ciencias 8° 8A: **31/44** alumnos 
 | Lectura 3° Intermedio | 7 |
 | Matemática 6° Intermedio | 29 *(4 correctas)* |
 
-⚠️ **Historia 5° pos 9** es un 6º ítem pareado, cargado como `open_ended`/`fill_in` y hoy sin
-corregir. **No** se migra en esta tanda: le falta el dato estructurado en las dos capas de
+✅ **Historia 5° pos 9** (6º pareado) — **resuelto y aplicado** (PR #92). Se corrigió el JSON del
+instrumento derivando columnas y pares del propio enunciado y de la tupla `fillAnswer`; un
+re-import futuro ya lo carga bien solo. Nota histórica: le faltaba el dato en las dos capas de
 extracción (ni `matchColumns` en el cuadernillo ni `matchPairs` en la ficha), y a diferencia de los
 otros 5 tampoco tiene `matchPairs` en `scoring_config`.
 
@@ -242,7 +273,8 @@ Recorrer con `docs/testing-manual-feedback-v2.md`. Mínimo imprescindible:
 | B2 — read-model de cohorte | backfill **automático** en deploy | ninguna (lo corre el workflow) |
 | B3 — `application_period` DIA (código) | ✅ seeds corregidos (1 instrumento por asignatura × año × momento) + script `db:backfill:application-period` | viaja con `dev → main` |
 | B3 — `application_period` DIA (datos del demo) | ⚠️ pendiente | **backfill + UPDATE dirigido** (4.1); Lectura `…500` requiere **decisión** (a)/(b) |
-| Términos pareados + V/F (PR #89, #90) | ✅ en `dev` | ✅ **APLICADO**: 30 ítems re-tipados en demo (4.2). Sin re-ingesta: 0 responses sobre 2026. Script versionado en #91 |
-| Multi-selección (**11 ítems, 7 instrumentos**) | ❌ sin decidir el tipo | fuera de #89 — decidir antes de confiar en los puntajes de Ciencias, Historia, Lectura 3° y Mate 6° |
-| Historia 5° pos 9 (6º pareado) | ❌ falta el dato en la extracción | no migrar en esta tanda (4.2) |
+| Términos pareados + V/F (PR #89, #90, #92) | ✅ en `dev` | ✅ **APLICADO**: 31 ítems re-tipados en demo (4.2). Sin re-ingesta: 0 responses sobre 2026. Script versionado en #91 |
+| Multi-selección (**11 ítems, 7 instrumentos**) | ✅ tipo `multi_select` en `dev` (#94) | ⏳ **pendiente en demo**: migración `0017` **y luego** `db:retype:items` (4.2). Hasta entonces esos puntajes están mal |
+| Historia 5° pos 9 (6º pareado) | ✅ resuelto (#92) | ✅ **APLICADO** en demo |
+| Guard de `import-instruments` | ✅ en `dev` (#94) | ninguna — evita que un re-import borre los ~5.000 tags de la tanda 2026 |
 | T2-21 dificultad (datos demo) | columna NULL | opcional (4.3) |
