@@ -130,10 +130,11 @@ Los importadores siguen **escribiendo** `config.period`, pero como procedencia d
 > ✅ **Pareados + V/F: YA APLICADO AL DEMO.** 31 ítems re-tipados (30 el 2026-08-02 + Historia 5°
 > pos 9 el 2026-08-03), tags intactos, 0 pendientes.
 >
-> ⏳ **Multi-selección: PENDIENTE en el demo.** 11 ítems. Requiere **primero** la migración `0017`
-> (`ALTER TYPE item_type ADD VALUE 'multi_select'`), porque hasta que el valor exista en el enum el
-> UPDATE no puede escribirlo. En el demo eso lo aplica el deploy al promover a `main`; si se quiere
-> antes, correr `db:migrate` contra el demo y después el re-tipado.
+> ✅ **Multi-selección: YA APLICADO AL DEMO (2026-08-03).** 11 ítems re-tipados. Se aplicó primero
+> la migración `0017` (`ALTER TYPE item_type ADD VALUE 'multi_select'`) — **ese orden es
+> obligatorio**: hasta que el valor exista en el enum, el UPDATE no puede escribirlo. Era la única
+> migración pendiente en el demo, así que `db:migrate` aplicó exactamente ese `ALTER TYPE` y
+> re-aplicó las políticas RLS (19 tablas).
 >
 > Script único para los tres grupos: `pnpm --filter @soe/db db:retype:items [--apply]`
 > (idempotente, dry-run por defecto). **Hay que correrlo en cualquier ambiente cargado con datos
@@ -199,12 +200,15 @@ Se modelaron como **tipo propio `multi_select`** (no `correctKeys` sobre `multip
 #89. Puntaje **todo-o-nada por defecto**, verificado contra el escaneo real, con crédito parcial
 disponible por configuración.
 
-- [ ] Aplicar la migración **`0017`** al demo (el enum tiene que tener el valor antes del UPDATE).
-- [ ] Correr `db:retype:items --apply` — el script ya cubre los 11.
-- [ ] Verificar: `select count(*) from items where type='multi_select' and deleted_at is null;` → **11**.
+- [x] Aplicar la migración **`0017`** al demo (el enum tiene que tener el valor antes del UPDATE).
+- [x] Correr `db:retype:items --apply` — el script cubre los 11.
+- [x] Verificar: `select count(*) from items where type='multi_select' and deleted_at is null;` → **11**.
 
-Contraste contra GradeCam en Ciencias 8° 8A: **31/44** hoy en el demo; con esto aplicado, **44/44**
-(ya verificado en local contra el escaneo real).
+✅ **Contraste contra GradeCam en Ciencias 8° 8A, corriendo las estrategias sobre el contenido ya
+migrado en la BDD del demo: 44/44 alumnos, cero ítems con diferencia.** Venía de 31/44.
+
+Estado final de tipos en la tanda 2026 del demo: 1156 `multiple_choice`, 138 `open_ended`,
+25 `true_false`, 11 `multi_select`, 6 `matching`. Los ~5.000 tags intactos.
 
 | Instrumento | Posiciones (impreso) |
 |---|---|
@@ -274,7 +278,7 @@ Recorrer con `docs/testing-manual-feedback-v2.md`. Mínimo imprescindible:
 | B3 — `application_period` DIA (código) | ✅ seeds corregidos (1 instrumento por asignatura × año × momento) + script `db:backfill:application-period` | viaja con `dev → main` |
 | B3 — `application_period` DIA (datos del demo) | ⚠️ pendiente | **backfill + UPDATE dirigido** (4.1); Lectura `…500` requiere **decisión** (a)/(b) |
 | Términos pareados + V/F (PR #89, #90, #92) | ✅ en `dev` | ✅ **APLICADO**: 31 ítems re-tipados en demo (4.2). Sin re-ingesta: 0 responses sobre 2026. Script versionado en #91 |
-| Multi-selección (**11 ítems, 7 instrumentos**) | ✅ tipo `multi_select` en `dev` (#94) | ⏳ **pendiente en demo**: migración `0017` **y luego** `db:retype:items` (4.2). Hasta entonces esos puntajes están mal |
+| Multi-selección (**11 ítems, 7 instrumentos**) | ✅ tipo `multi_select` en `dev` (#94) | ✅ **APLICADO** en demo: migración `0017` + `db:retype:items`. Ciencias 8° 8A pasó de 31/44 a **44/44** contra GradeCam |
 | Historia 5° pos 9 (6º pareado) | ✅ resuelto (#92) | ✅ **APLICADO** en demo |
 | Guard de `import-instruments` | ✅ en `dev` (#94) | ninguna — evita que un re-import borre los ~5.000 tags de la tanda 2026 |
 | T2-21 dificultad (datos demo) | columna NULL | opcional (4.3) |
