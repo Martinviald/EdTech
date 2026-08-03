@@ -611,6 +611,52 @@ describe('ItemAnalysisService.getQuestionAnalysis', () => {
     });
   });
 
+  // Un Verdadero/Falso NO lleva `alternatives` en su content: su respuesta es un
+  // booleano. Sin sintetizarlas, el panel de la pregunta saldría sin distribución
+  // y sin clave correcta. Además la hoja escribe la misma opción de varias formas
+  // (`V`, `VERDADERO`, `A`) y todas tienen que colapsar a la clave canónica, con el
+  // mismo criterio que usa la corrección.
+  it('sintetiza las opciones de un true_false y colapsa las variantes de la hoja', async () => {
+    const trueFalseRow = {
+      ...itemVisibleRow,
+      type: 'true_false',
+      content: { stem: 'El agua hierve a 100 °C', correctAnswer: true },
+    };
+    const db = makeDb([
+      [trueFalseRow], // requireItemVisible
+      [], // loadItemTags
+      [], // loadAllItemTags
+      [
+        {
+          answerCounts: [
+            { key: 'V', isCorrect: true, count: 3 },
+            { key: 'VERDADERO', isCorrect: true, count: 2 },
+            { key: 'A', isCorrect: true, count: 1 },
+            { key: 'F', isCorrect: false, count: 3 },
+            { key: 'B', isCorrect: false, count: 1 },
+          ],
+        },
+      ],
+    ]);
+    const service = makeService(db);
+
+    const res = await service.getQuestionAnalysis(makeUser(), ITEM_A, {});
+
+    expect(res.correctKey).toBe('V');
+    expect(res.alternatives).toHaveLength(2);
+
+    const verdadero = res.alternatives.find((a) => a.key === 'V')!;
+    expect(verdadero.text).toBe('Verdadero');
+    expect(verdadero.isCorrect).toBe(true);
+    expect(verdadero.count).toBe(6);
+
+    const falso = res.alternatives.find((a) => a.key === 'F')!;
+    expect(falso.isCorrect).toBe(false);
+    expect(falso.count).toBe(4);
+
+    expect(verdadero.count + falso.count).toBe(res.totalResponses);
+  });
+
   // ⚠️ La regla central del read-model. Los cursos tienen N distinto, así que
   // recombinarlos es SUMA de conteos y el % se recalcula al final sobre el total.
   // Promediar los % de cada curso los ponderaría igual y daría otro número.
