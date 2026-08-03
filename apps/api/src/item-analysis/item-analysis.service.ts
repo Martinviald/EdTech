@@ -126,13 +126,18 @@ export class ItemAnalysisService {
         sql`(exists (select 1 from ${assessmentResults} where ${assessmentResults.assessmentId} = ${assessments.id})
           or exists (select 1 from ${assessmentItemStats} where ${assessmentItemStats.assessmentId} = ${assessments.id}))`,
       ];
-      if (query.subjectId) conditions.push(eq(instruments.subjectId, query.subjectId));
-      if (query.instrumentType) {
-        conditions.push(sql`${instruments.type}::text = ${query.instrumentType}`);
+      // Filtros multi-valor (T2-12): el DTO ya normalizó CSV/param repetido a
+      // array, así que todos van con inArray. Un array vacío no llega (el schema
+      // lo colapsa a undefined) → "sin filtro", nunca un `in ()` que no matchea.
+      if (query.subjectId?.length) {
+        conditions.push(inArray(instruments.subjectId, query.subjectId));
       }
-      if (query.gradeId) conditions.push(eq(classGroups.gradeId, query.gradeId));
-      if (query.classGroupId) {
-        conditions.push(eq(assessmentCourseAssignments.classGroupId, query.classGroupId));
+      if (query.instrumentType?.length) {
+        conditions.push(inArray(sql`${instruments.type}::text`, query.instrumentType));
+      }
+      if (query.gradeId?.length) conditions.push(inArray(classGroups.gradeId, query.gradeId));
+      if (query.classGroupId?.length) {
+        conditions.push(inArray(assessmentCourseAssignments.classGroupId, query.classGroupId));
       }
       if (query.academicYearId) {
         conditions.push(eq(classGroups.academicYearId, query.academicYearId));

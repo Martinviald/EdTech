@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { stringCsvSchema, uuidCsvSchema } from './common.schema';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Sprint 5 — Análisis a nivel de ítem (H6.11 + H6.12)
@@ -22,13 +23,21 @@ import { z } from 'zod';
 // GET /api/item-analysis/assessments
 // ═══════════════════════════════════════════════════════════════════════════
 
-/** Filtros del listado: acotan las evaluaciones ofrecidas (mismos que el dashboard). */
+/**
+ * Filtros del listado: acotan las evaluaciones ofrecidas (mismos que el dashboard).
+ *
+ * ⚠️ Multi-valor (T2-12), igual que `dashboardFiltersQuerySchema`: la barra de
+ * filtros serializa la selección como CSV (`?gradeId=a,b`) y este endpoint recibe
+ * exactamente la MISMA querystring que `/dashboards/filters` (ver la página
+ * `/evaluaciones`). Con un DTO escalar, elegir dos niveles reventaba en un 400
+ * ("Invalid uuid") y `instrumentType` en CSV no matcheaba nada en silencio.
+ */
 export const assessmentListQuerySchema = z.object({
-  subjectId: z.string().uuid().optional(),
-  gradeId: z.string().uuid().optional(),
-  classGroupId: z.string().uuid().optional(),
+  subjectId: uuidCsvSchema,
+  gradeId: uuidCsvSchema,
+  classGroupId: uuidCsvSchema,
   academicYearId: z.string().uuid().optional(),
-  instrumentType: z.string().min(1).optional(),
+  instrumentType: stringCsvSchema,
 });
 export type AssessmentListQueryDto = z.infer<typeof assessmentListQuerySchema>;
 

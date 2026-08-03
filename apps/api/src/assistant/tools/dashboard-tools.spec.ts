@@ -261,9 +261,10 @@ describe('list_assessments tool', () => {
 
     const result = await tool.execute({ instrumentType: 'dia' }, CTX);
 
+    // El DTO es multi-valor (T2-12): un escalar se normaliza a array de uno.
     expect(listAssessments).toHaveBeenCalledWith(
       USER,
-      expect.objectContaining({ instrumentType: 'dia' }),
+      expect.objectContaining({ instrumentType: ['dia'] }),
     );
     expect(result.isError).toBeUndefined();
     expect(JSON.parse(result.content)).toEqual(response);
