@@ -1,5 +1,6 @@
 import { z } from 'zod';
 import type { PerformanceLevel } from '../enums';
+import { INSTRUMENT_APPLICATION_PERIODS } from './instrument.schema';
 import type { OfficialReportVariant } from './official-report-common.schema';
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -20,9 +21,11 @@ export const officialEstablishmentReportQuerySchema = z.object({
   // Año académico a reportar. Si se omite, el service usa el año marcado
   // `is_current` de la organización.
   academicYearId: z.string().uuid().optional(),
-  // Momento (Diagnóstico/Monitoreo/Cierre) a reportar: filtra las evaluaciones
-  // por `assessments.config.period`. Si se omite, incluye todas las del año.
-  period: z.string().min(1).max(60).optional(),
+  // Momento (Diagnóstico/Monitoreo/Cierre) a reportar: filtra por
+  // `instruments.application_period` — el momento es del INSTRUMENTO, no de la
+  // evaluación (cada aplicación DIA es un cuadernillo distinto). Si se omite,
+  // incluye todas las del año.
+  period: z.enum(INSTRUMENT_APPLICATION_PERIODS).optional(),
 });
 export type OfficialEstablishmentReportQueryDto = z.infer<
   typeof officialEstablishmentReportQuerySchema

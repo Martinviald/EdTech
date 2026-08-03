@@ -6,7 +6,7 @@ import { PERFORMANCE_LEVELS, type PerformanceLevel } from '../enums';
 // Estos informes replican el FORMATO de los informes oficiales que los colegios
 // reconocen (hoy: DIA), pero como PLANTILLA sobre datos genéricos. Nada aquí
 // hardcodea "DIA"/"Lenguaje"/un grado: el momento (Diagnóstico/Monitoreo/Cierre)
-// se lee de `assessments.config.period` (string genérico), los niveles de logro
+// se lee de `instruments.application_period`, los niveles de logro
 // del enum `performance_level` (insufficient/elementary/adequate/advanced) que la
 // plataforma ya calcula, y las asignaturas/grados/ejes de
 // `subjects`/`grades`/`taxonomy_nodes` por ID. Extender a SIMCE/PAES/Cambridge no
@@ -64,9 +64,15 @@ export type OfficialReportMeta = {
   instrumentType: string; // instrument_type (dia | simce | paes | …) — nunca se ramifica lógica por su valor
   subjectId: string | null;
   subjectName: string | null;
-  // Momento de la evaluación leído de `assessments.config.period` (genérico).
+  // Momento del INSTRUMENTO (`instruments.application_period`), no de la evaluación:
+  // cada aplicación DIA es un cuadernillo distinto, con su clave y sus cortes.
+  // ⚠️ `assessments.config.period` quedó DEPRECADO como fuente de verdad — se lee
+  // sólo como fallback de filas viejas cuyo instrumento aún tenga la columna en
+  // NULL (corregible con `db:backfill:application-period`). Los importadores lo
+  // siguen escribiendo, pero como PROCEDENCIA del archivo origen, no como dato
+  // autoritativo.
   period: string | null;
-  periodLabel: string | null; // `config.periodLabel` si existe, si no humanizado de `period`
+  periodLabel: string | null;
   year: number | null; // año del instrumento o de la evaluación
   generatedAt: string; // ISO — fecha/hora de generación del informe
   disclaimers: string[]; // recuadro de advertencias de uso (data-driven, ver arriba)
