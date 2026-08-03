@@ -46,6 +46,7 @@ export default async function InstrumentDetailPage({ params }: PageProps) {
     <InstrumentDetailView
       instrument={instrument}
       items={itemsResponse.data}
+      totalItems={itemsResponse.total}
       canEdit={canEdit}
       basePath={ROUTES.bancoItems}
       breadcrumb={{ href: ROUTES.bancoItems, label: 'Banco de Instrumentos' }}

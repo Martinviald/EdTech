@@ -213,31 +213,8 @@ const taxonomyNodeGroupsSchema = z
   })
   .pipe(z.array(z.array(z.string().uuid())).optional());
 
-export const listItemsQuerySchema = z.object({
-  instrumentId: z.string().uuid().optional(),
-  sectionId: z.string().uuid().optional(),
-  type: itemTypeSchema.optional(),
-  status: itemStatusSchema.optional(),
-  source: itemSourceSchema.optional(),
-  // Filtro por un nodo (retrocompatible).
-  taxonomyNodeId: z.string().uuid().optional(),
-  // Filtro multi-tag con lógica OR (TKT-12/TKT-14): el ítem se incluye si tiene
-  // CUALQUIERA de estos nodos etiquetado. Se combina con `taxonomyNodeId` (OR).
-  taxonomyNodeIds: taxonomyNodeIdsSchema,
-  // Filtro facetado del banco: asignatura Y nivel (transitivo vía tags → nodos).
-  subjectId: z.string().uuid().optional(),
-  gradeId: z.string().uuid().optional(),
-  // Grupos AND (OR dentro de cada grupo): un grupo por tipo de nodo elegido.
-  taxonomyNodeGroups: taxonomyNodeGroupsSchema,
-  // Alcance del banco de ítems (TKT-14): 'own' | 'global' | 'all' (default).
-  scope: itemBankScopeSchema.default('all'),
-  page: z.coerce.number().int().min(1).default(1),
-  limit: z.coerce.number().int().min(1).max(200).default(50),
-});
-
 export type CreateItemDto = z.infer<typeof createItemSchema>;
 export type UpdateItemDto = z.infer<typeof updateItemSchema>;
-export type ListItemsQueryDto = z.infer<typeof listItemsQuerySchema>;
 
 // ── Taxonomy Tags ────────────────────────────────────────────────────────────
 

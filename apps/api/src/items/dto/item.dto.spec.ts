@@ -50,3 +50,28 @@ describe('listItemsQuerySchema — filtro facetado del banco', () => {
     expect(q.taxonomyNodeIds).toEqual([UUID_A, UUID_B]);
   });
 });
+
+// El detalle de instrumento pide `?limit=200`. Antes ese parámetro no existía en
+// el schema: se descartaba EN SILENCIO y la lista se cortaba en el default de 20
+// (se veían 20 de 33 ítems sin ningún aviso). `limit` es alias de `pageSize`.
+describe('listItemsQuerySchema — paginación', () => {
+  it('acepta `limit` como alias de `pageSize`', () => {
+    expect(listItemsQuerySchema.parse({ limit: '200' }).pageSize).toBe(200);
+  });
+
+  it('sigue aceptando `pageSize`', () => {
+    expect(listItemsQuerySchema.parse({ pageSize: '50' }).pageSize).toBe(50);
+  });
+
+  it('`limit` gana sobre `pageSize` cuando vienen los dos', () => {
+    expect(listItemsQuerySchema.parse({ limit: '100', pageSize: '20' }).pageSize).toBe(100);
+  });
+
+  it('sin nada, cae al default de 20', () => {
+    expect(listItemsQuerySchema.parse({}).pageSize).toBe(20);
+  });
+
+  it('rechaza por encima del tope en vez de recortar en silencio', () => {
+    expect(() => listItemsQuerySchema.parse({ limit: '999' })).toThrow();
+  });
+});

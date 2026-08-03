@@ -1,5 +1,6 @@
 'use client';
 
+import { ITEM_TYPE_LABELS } from '@soe/types';
 import { useMemo, useState } from 'react';
 import {
   Table,
@@ -15,19 +16,6 @@ import { TagBadge } from './TagBadge';
 import { ItemDetailPanel } from './ItemDetailPanel';
 import { TagMultiFilter } from '../TagMultiFilter';
 import { deriveTagFacets, filterItemsByTags } from '../tag-facets';
-
-const ITEM_TYPE_LABELS: Record<string, string> = {
-  multiple_choice: 'Seleccion multiple',
-  true_false: 'Verdadero/Falso',
-  open_ended: 'Desarrollo',
-  oral_reading: 'Lectura oral',
-  oral_expression: 'Expresion oral',
-  writing: 'Escritura',
-  listening: 'Comprension auditiva',
-  matching: 'Terminos pareados',
-  ordering: 'Ordenamiento',
-  gap_fill: 'Completar',
-};
 
 const ITEM_STATUS_COLORS: Record<string, string> = {
   draft: 'bg-warning/15 text-warning',

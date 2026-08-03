@@ -1,5 +1,6 @@
 'use client';
 
+import { ITEM_TYPE_LABELS } from '@soe/types';
 // TKT-14 — Explorador del banco de ítems global (cross-instrumento).
 //
 // Recibe los ítems YA filtrados por el Server Component (asignatura, nivel y tags
@@ -16,20 +17,6 @@ import { EmptyState } from '@/components/shared';
 import { TagBadge } from '../../[instrumentId]/TagBadge';
 import { ItemDetailPanel } from '../../[instrumentId]/ItemDetailPanel';
 import { SaveToCollectionDialog } from './SaveToCollectionDialog';
-
-const ITEM_TYPE_LABELS: Record<string, string> = {
-  multiple_choice: 'Selección múltiple',
-  multi_select: 'Multi-selección',
-  true_false: 'Verdadero/Falso',
-  open_ended: 'Desarrollo',
-  oral_reading: 'Lectura oral',
-  oral_expression: 'Expresión oral',
-  writing: 'Escritura',
-  listening: 'Comprensión auditiva',
-  matching: 'Términos pareados',
-  ordering: 'Ordenamiento',
-  gap_fill: 'Completar',
-};
 
 function getContentPreview(content: Record<string, unknown>): string {
   for (const field of ['stem', 'text', 'prompt', 'question'] as const) {

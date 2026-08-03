@@ -1,5 +1,6 @@
 'use client';
 
+import { ITEM_TYPE_LABELS } from '@soe/types';
 import { useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
@@ -30,20 +31,6 @@ import {
 } from '@/components/ui/alert-dialog';
 import { ROUTES } from '@/lib/routes';
 import { deleteCollection, materializeCollection, removeItemFromCollection } from '../actions';
-
-const ITEM_TYPE_LABELS: Record<string, string> = {
-  multiple_choice: 'Selección múltiple',
-  multi_select: 'Multi-selección',
-  true_false: 'Verdadero/Falso',
-  open_ended: 'Desarrollo',
-  oral_reading: 'Lectura oral',
-  oral_expression: 'Expresión oral',
-  writing: 'Escritura',
-  listening: 'Comprensión auditiva',
-  matching: 'Términos pareados',
-  ordering: 'Ordenamiento',
-  gap_fill: 'Completar',
-};
 
 function getContentPreview(content: Record<string, unknown>): string {
   for (const field of ['stem', 'text', 'prompt', 'question'] as const) {

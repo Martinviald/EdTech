@@ -110,28 +110,47 @@ const taxonomyNodeGroupsSchema = z
   })
   .pipe(z.array(z.array(z.string().uuid())).optional());
 
-export const listItemsQuerySchema = paginationSchema.extend({
-  instrumentId: z.string().uuid().optional(),
-  sectionId: z.string().uuid().optional(),
-  type: z.enum(ITEM_TYPES).optional(),
-  status: z.enum(ITEM_STATUSES).optional(),
-  source: z.enum(ITEM_SOURCES).optional(),
-  // Dificultad (T2-21): multi-select CSV.
-  difficulty: csvArraySchema(z.enum(ITEM_DIFFICULTIES)),
-  // Filtro por un nodo (retrocompatible).
-  taxonomyNodeId: z.string().uuid().optional(),
-  // Filtro multi-tag con lógica OR (TKT-12/TKT-14).
-  taxonomyNodeIds: taxonomyNodeIdsSchema,
-  // Filtro facetado del banco: el ítem debe estar etiquetado con un nodo de la
-  // asignatura (transitivo vía item_taxonomy_tags → taxonomy_nodes.subject_id).
-  subjectId: uuidCsvSchema,
-  // Ídem por nivel (taxonomy_nodes.grade_id). Multi-valor (CSV) — T2-13.
-  gradeId: uuidCsvSchema,
-  // Grupos AND (OR dentro de cada grupo): un grupo por tipo de nodo elegido.
-  taxonomyNodeGroups: taxonomyNodeGroupsSchema,
-  // Alcance del banco de ítems (TKT-14): 'own' | 'global' | 'all' (default).
-  scope: itemBankScopeSchema.default('all'),
-});
+/**
+ * Tope de página del banco de ítems. Un instrumento DIA completo ronda los 45
+ * ítems, así que 200 deja margen — pero el consumidor NO debe asumir que con
+ * pedir el máximo se lleva todo: la respuesta trae `total` y hay que compararlo
+ * con `data.length` (la UI del instrumento avisa si se truncó).
+ */
+const MAX_PAGE_SIZE = 200;
+
+export const listItemsQuerySchema = paginationSchema
+  .extend({
+    /**
+     * Tamaño de página. `limit` es un ALIAS aceptado por compatibilidad: el
+     * frontend del detalle de instrumento pide `?limit=200` y, antes de esto,
+     * ese parámetro se descartaba en silencio y la lista se cortaba en 20 —
+     * mostrando 20 de 33 ítems sin ningún aviso.
+     */
+    pageSize: z.coerce.number().int().min(1).max(MAX_PAGE_SIZE).default(20),
+    limit: z.coerce.number().int().min(1).max(MAX_PAGE_SIZE).optional(),
+    instrumentId: z.string().uuid().optional(),
+    sectionId: z.string().uuid().optional(),
+    type: z.enum(ITEM_TYPES).optional(),
+    status: z.enum(ITEM_STATUSES).optional(),
+    source: z.enum(ITEM_SOURCES).optional(),
+    // Dificultad (T2-21): multi-select CSV.
+    difficulty: csvArraySchema(z.enum(ITEM_DIFFICULTIES)),
+    // Filtro por un nodo (retrocompatible).
+    taxonomyNodeId: z.string().uuid().optional(),
+    // Filtro multi-tag con lógica OR (TKT-12/TKT-14).
+    taxonomyNodeIds: taxonomyNodeIdsSchema,
+    // Filtro facetado del banco: el ítem debe estar etiquetado con un nodo de la
+    // asignatura (transitivo vía item_taxonomy_tags → taxonomy_nodes.subject_id).
+    subjectId: uuidCsvSchema,
+    // Ídem por nivel (taxonomy_nodes.grade_id). Multi-valor (CSV) — T2-13.
+    gradeId: uuidCsvSchema,
+    // Grupos AND (OR dentro de cada grupo): un grupo por tipo de nodo elegido.
+    taxonomyNodeGroups: taxonomyNodeGroupsSchema,
+    // Alcance del banco de ítems (TKT-14): 'own' | 'global' | 'all' (default).
+    scope: itemBankScopeSchema.default('all'),
+  })
+  // Canonicaliza a `pageSize`: el resto del service lee sólo ese campo.
+  .transform(({ limit, ...query }) => ({ ...query, pageSize: limit ?? query.pageSize }));
 
 // ── Version DTOs ────────────────────────────────────────────────────────────
 export const createVersionSchema = z.object({

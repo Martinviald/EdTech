@@ -3,7 +3,7 @@
 import type { JSX } from 'react';
 import { CheckCircle2, FileQuestion } from 'lucide-react';
 import type { ItemModel, ItemTaxonomyTagModel, InstrumentSectionModel } from '@soe/types';
-import { ITEM_DIFFICULTY_LABELS } from '@soe/types';
+import { ITEM_DIFFICULTY_LABELS, ITEM_TYPE_LABELS } from '@soe/types';
 import { Badge } from '@/components/ui/badge';
 import {
   hasPassageContent,
@@ -39,20 +39,6 @@ function sectionToPassage(section: InstrumentSectionModel): PassageData {
 // cargado por `data` — no hace fetch propio, porque `GET /items?instrumentId=…`
 // ya retorna el `content` y los `tags` con su nodo poblado.
 // ─────────────────────────────────────────────────────────────────────────────
-
-const ITEM_TYPE_LABELS: Record<string, string> = {
-  multiple_choice: 'Selección múltiple',
-  multi_select: 'Multi-selección',
-  true_false: 'Verdadero/Falso',
-  open_ended: 'Desarrollo',
-  oral_reading: 'Lectura oral',
-  oral_expression: 'Expresión oral',
-  writing: 'Escritura',
-  listening: 'Comprensión auditiva',
-  matching: 'Términos pareados',
-  ordering: 'Ordenamiento',
-  gap_fill: 'Completar',
-};
 
 type Alternative = { key: string; text?: string; isCorrect?: boolean };
 

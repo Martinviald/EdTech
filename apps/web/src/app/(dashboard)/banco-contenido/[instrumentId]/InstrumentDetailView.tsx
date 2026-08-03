@@ -40,6 +40,7 @@ const TYPE_LABELS: Record<string, string> = {
 export function InstrumentDetailView({
   instrument,
   items,
+  totalItems,
   canEdit,
   basePath,
   breadcrumb,
@@ -47,6 +48,8 @@ export function InstrumentDetailView({
 }: {
   instrument: InstrumentModel;
   items: ItemModel[];
+  /** Total de ítems del instrumento según la API. Si es mayor que `items.length`, la lista viene truncada por paginación y hay que decirlo. */
+  totalItems?: number;
   canEdit: boolean;
   basePath: string;
   breadcrumb: { href: string; label: string };
@@ -158,8 +161,17 @@ export function InstrumentDetailView({
       {/* Items table */}
       <section className="space-y-3">
         <h2 className="text-sm font-medium uppercase text-muted-foreground">
-          Items ({items.length})
+          Items ({items.length}
+          {typeof totalItems === 'number' && totalItems > items.length ? ` de ${totalItems}` : ''})
         </h2>
+        {typeof totalItems === 'number' && totalItems > items.length ? (
+          // Antes esto se truncaba en silencio: la API cortaba en 20 y la vista
+          // decía "Items (20)" como si fueran todos.
+          <p className="rounded-md border border-warning/40 bg-warning/10 px-3 py-2 text-xs text-warning">
+            Se están mostrando {items.length} de {totalItems} ítems: la lista viene paginada desde
+            el servidor.
+          </p>
+        ) : null}
         <ItemsTable
           items={items}
           sections={instrument.sections ?? []}
