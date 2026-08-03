@@ -80,7 +80,7 @@ function makeQuestion(overrides: Partial<QuestionAnalysisResponse> = {}): Questi
     blankCount: 1,
     correctCount: 7,
     correctRate: 28,
-    references: { grade: null },
+    references: { grade: { rate: null, responseCount: 0, correctCount: 0 } },
     alternatives: [
       { key: 'A', text: 'a', isCorrect: false, count: 3, percentage: 12, hasImage: false },
       { key: 'B', text: 'b', isCorrect: true, count: 7, percentage: 28, hasImage: false },

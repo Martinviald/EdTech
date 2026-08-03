@@ -195,7 +195,16 @@ export function CrossTable({
     setLoadingItemId(null);
   }, []);
 
-  const { questions, students } = matrix;
+  const { questions, students, references } = matrix;
+
+  // Rótulo de la fila de referencia: sobre cuántos cursos y alumnos del nivel
+  // agrega. En un nivel de un solo curso la cifra coincide con la del curso, y sin
+  // este detalle eso se lee como un bug en vez de como un hecho de los datos.
+  const levelSublabel = describeScope(
+    references.grade.gradeName ?? 'Promedio del nivel',
+    references.grade.classGroupCount,
+    references.grade.studentCount,
+  );
 
   // ── TKT-12: opciones de filtro derivadas de los nodos presentes en la matriz ──
   // La matriz sólo expone el nodo representativo de habilidad y de contenido por
@@ -471,7 +480,7 @@ export function CrossTable({
                   colegio completo aquí). La línea de "muestra de colegios"
                   (benchmark inter-colegio) queda DIFERIDA hasta existir un pool
                   multi-colegio; llegará como `q.references.sample` sin romper esto. */}
-              <LevelReferenceRow questions={displayQuestions} />
+              <LevelReferenceRow questions={displayQuestions} sublabel={levelSublabel} />
               {displayStudents.map((row) => (
                 <StudentRow key={row.studentId} row={row} questions={displayQuestions} />
               ))}
@@ -498,20 +507,42 @@ function referenceCellClass(rate: number | null): string {
   return 'text-success';
 }
 
+/** Rótulo de la fila de referencia: "4° Básico · 2 cursos · 87 alumnos". */
+function describeScope(name: string, classGroupCount: number, studentCount: number): string {
+  if (classGroupCount === 0) return name;
+  const cursos = `${classGroupCount} ${classGroupCount === 1 ? 'curso' : 'cursos'}`;
+  const alumnos = `${studentCount} ${studentCount === 1 ? 'alumno' : 'alumnos'}`;
+  return `${name} · ${cursos} · ${alumnos}`;
+}
+
 /**
  * T2-17 — Fila de referencia del tablero maestro: "% de logro del nivel" por
  * pregunta (`q.references.grade`), independiente del scope del usuario. Como los
  * instrumentos son siempre por nivel, es la referencia del colegio para esa
- * evaluación. La columna "% Logro" muestra el promedio de esas tasas. Cuando exista
- * el pool multi-colegio (TKT-20), la "muestra de colegios" (`q.references.sample`)
- * se agrega como una segunda fila análoga.
+ * evaluación. Cuando exista el pool multi-colegio (TKT-20), la "muestra de
+ * colegios" (`q.references.sample`) se agrega como una segunda fila análoga.
+ *
+ * ⚠️ La columna "% Logro" es el % ponderado sobre TODAS las respuestas de TODOS
+ * los alumnos del nivel (`sum(correctCount)/sum(responseCount)` de las columnas
+ * visibles), NUNCA el promedio de los % por pregunta ni por curso. El subtítulo
+ * dice sobre cuántos cursos y alumnos agrega: sin eso, un nivel de un solo curso
+ * se lee como un duplicado de la fila del alumno.
  */
-function LevelReferenceRow({ questions }: { questions: MatrixQuestionColumn[] }): JSX.Element {
-  const levelRates = questions
-    .map((q) => q.references.grade)
-    .filter((v): v is number => v !== null);
-  const levelMean =
-    levelRates.length > 0 ? levelRates.reduce((a, b) => a + b, 0) / levelRates.length : null;
+function LevelReferenceRow({
+  questions,
+  sublabel,
+}: {
+  questions: MatrixQuestionColumn[];
+  sublabel: string;
+}): JSX.Element {
+  // Agregado ponderado sobre las columnas VISIBLES (respeta el filtro por tags).
+  let totalResponses = 0;
+  let totalCorrect = 0;
+  for (const q of questions) {
+    totalResponses += q.references.grade.responseCount;
+    totalCorrect += q.references.grade.correctCount;
+  }
+  const levelOverall = totalResponses > 0 ? (totalCorrect / totalResponses) * 100 : null;
 
   return (
     <TableRow className="border-b-2 bg-muted/30">
@@ -520,24 +551,22 @@ function LevelReferenceRow({ questions }: { questions: MatrixQuestionColumn[] })
             no crezca con este texto más largo (que envuelve dentro de los 134px). */}
         <div className="w-[134px]">
           <span className="block text-sm font-semibold">% Logro nivel</span>
-          <span className="block text-xs font-normal text-muted-foreground">
-            Promedio del nivel
-          </span>
+          <span className="block text-xs font-normal text-muted-foreground">{sublabel}</span>
         </div>
       </TableCell>
       <TableCell className="w-[68px] px-2 text-right font-semibold tabular-nums">
-        {formatPct(levelMean)}
+        {formatPct(levelOverall)}
       </TableCell>
       {questions.map((q) => (
         <TableCell
           key={q.itemId}
           className={cn(
             'px-0.5 py-1.5 text-center text-xs font-semibold tabular-nums',
-            referenceCellClass(q.references.grade),
+            referenceCellClass(q.references.grade.rate),
           )}
-          title={`Nivel · Pregunta ${q.position}: ${formatPct(q.references.grade)} de logro`}
+          title={`Nivel · Pregunta ${q.position}: ${formatPct(q.references.grade.rate)} de logro (${q.references.grade.responseCount} respuestas)`}
         >
-          {formatPct(q.references.grade)}
+          {formatPct(q.references.grade.rate)}
         </TableCell>
       ))}
     </TableRow>
