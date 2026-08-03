@@ -95,9 +95,12 @@ describe('DashboardsService.getOverview', () => {
       // 1. resolveScopedAssessmentIds (assessments+instruments)
       [{ id: 'a1' }, { id: 'a2' }],
       // 2. métricas globales (per-alumno)
-      [{ avgPct: '72.50', studentsEvaluated: 30 }],
-      // 3. resultAssessmentIds (distinct assessment con datos per-alumno)
-      [{ assessmentId: 'a1' }, { assessmentId: 'a2' }],
+      [{ avgPct: '72.50', studentsEvaluated: 30, studentsWithPct: 30 }],
+      // 3. resultAssessmentIds (assessment con datos per-alumno + cuántos con %)
+      [
+        { assessmentId: 'a1', withPct: 15 },
+        { assessmentId: 'a2', withPct: 15 },
+      ],
       // 4. loadCohortAchievementByAssessment — a1/a2 también en read-model (computed),
       //    ya contados per-alumno → no aportan N ni logro extra.
       [
@@ -149,9 +152,8 @@ describe('DashboardsService.getOverview', () => {
     expect(res.recentAssessments).toHaveLength(1);
     expect(res.recentAssessments[0]!.instrumentName).toBe('DIA 2025 Lectura');
     expect(res.recentAssessments[0]!.studentsCount).toBe(30);
-    // La tabla viene recortada a las más recientes: el total cuenta TODAS las del
-    // alcance (2), no las devueltas (1). Sin él la UI no puede decir que muestra
-    // una parte.
+    // `total` cuenta las evaluaciones del alcance. Ya no hay recorte: la lista
+    // devuelve todas las filas que trae la query (acá el mock provee una).
     expect(res.recentAssessmentsTotal).toBe(2);
     // Alertas: curso < 60 (low_achievement) + skill < 50 (critical_skill).
     expect(res.alerts).toHaveLength(2);
@@ -230,6 +232,79 @@ describe('DashboardsService.getOverview', () => {
     expect(res.assessmentsCount).toBe(0);
   });
 
+  // Regresión: la lista estaba recortada a `.limit(5)`. Con más evaluaciones en el
+  // alcance, las filas visibles no podían explicar el KPI global (que agrega sobre
+  // TODAS) y la diferencia se leía como un error de cálculo.
+  it('la lista de evaluaciones NO se trunca: devuelve todas las del alcance', async () => {
+    const ids = ['a1', 'a2', 'a3', 'a4', 'a5', 'a6', 'a7', 'a8'];
+    const assessmentRow = (id: string) => ({
+      assessmentId: id,
+      name: `Eval ${id}`,
+      administeredAt: new Date('2025-03-01'),
+      createdAt: new Date('2025-03-01'),
+      status: 'completed',
+      instrumentName: 'DIA',
+      instrumentType: 'dia',
+      subjectName: 'Matemática',
+      gradeName: '5° Básico',
+    });
+    const db = makeDb([
+      ids.map((id) => ({ id })), // 1. resolveScopedAssessmentIds
+      [{ avgPct: '60.00', studentsEvaluated: 80, studentsWithPct: 80 }], // 2. métricas
+      ids.map((id) => ({ assessmentId: id, withPct: 10 })), // 3. resultAssessmentIds
+      [], // 4. cohorte
+      [], // 5. distribución
+      ids.map((id) => ({ id })), // 6. recientes → scoped ids
+      ids.map(assessmentRow), // 7. recientes → assessments
+      [], // 8. stats
+      [], // 9. cohorte
+    ]);
+    const svc = makeService(db);
+    const res = await svc.getOverview(makeUser({ activeRole: 'academic_director' }), {});
+
+    expect(res.recentAssessments).toHaveLength(8); // antes: 5
+    expect(res.recentAssessmentsTotal).toBe(8);
+  });
+
+  // Regresión: el fallback al read-model era todo-o-nada. Un informe agregado con
+  // filas por alumno de sólo-nivel (percentage NULL) tenía `stats`, así que nunca
+  // caía al cohorte y mostraba logro "—" teniendo el dato.
+  it('lista: una agregada con filas sin porcentaje toma el logro del read-model', async () => {
+    const db = makeDb([
+      [{ id: 'a1' }], // 1. resolveScopedAssessmentIds
+      [{ avgPct: null, studentsEvaluated: 30, studentsWithPct: 0 }], // 2. métricas
+      [{ assessmentId: 'a1', withPct: 0 }], // 3. tiene filas, ningún porcentaje
+      [{ assessmentId: 'a1', scoreSum: '90', maxSum: '200', studentsAssessed: 30 }], // 4. cohorte
+      [], // 5. distribución
+      [{ id: 'a1' }], // 6. recientes → scoped ids
+      [
+        {
+          assessmentId: 'a1',
+          name: 'MATH cierre 2025',
+          administeredAt: new Date('2025-11-01'),
+          createdAt: new Date('2025-11-01'),
+          status: 'completed',
+          instrumentName: 'DIA Matemática',
+          instrumentType: 'dia',
+          subjectName: 'Matemática',
+          gradeName: '5° Básico',
+        },
+      ], // 7. recientes → assessments
+      // 8. stats per-alumno: hay alumnos con fila, pero el avg es NULL.
+      [{ assessmentId: 'a1', studentsCount: 30, avgPct: null }],
+      // 9. cohorte de la lista: 90/200 = 45%
+      [{ assessmentId: 'a1', scoreSum: '90', maxSum: '200', studentsAssessed: 30 }],
+    ]);
+    const svc = makeService(db);
+    const res = await svc.getOverview(makeUser({ activeRole: 'academic_director' }), {});
+
+    const row = res.recentAssessments[0]!;
+    expect(row.studentsCount).toBe(30);
+    expect(row.averageAchievement).toBeCloseTo(45, 6); // antes: null → "—"
+    // Y el KPI global toma ese mismo 45 (la rama per-alumno no aporta nada).
+    expect(res.globalAchievement).toBeCloseTo(45, 6);
+  });
+
   it('platform_admin sin org activa → vacío sin consultar la DB', async () => {
     const db = makeDb([]);
     const svc = makeService(db);
@@ -266,8 +341,8 @@ describe('DashboardsService.getOverview', () => {
       [{ id: 'a1' }, { id: 'a2' }],
       // 2. métricas per-alumno de a1: 80% sobre 20 alumnos
       [{ avgPct: '80.00', studentsEvaluated: 20 }],
-      // 3. resultAssessmentIds → sólo a1 tiene datos per-alumno
-      [{ assessmentId: 'a1' }],
+      // 3. resultAssessmentIds → sólo a1 tiene datos per-alumno (con porcentaje)
+      [{ assessmentId: 'a1', withPct: 20 }],
       // 4. read-model: a1 (computed, ya contado) + a2 (agregado, 90/200 = 45%, N 30)
       [
         { assessmentId: 'a1', scoreSum: '160', maxSum: '200', studentsAssessed: 20 },
@@ -281,6 +356,42 @@ describe('DashboardsService.getOverview', () => {
     // 20 (per-alumno de a1) + 30 (cohorte de a2); a1 del read-model no re-suma.
     expect(res.studentsEvaluated).toBe(50);
     // Ponderado: (80×20 + 45×30) / (20+30) = (1600 + 1350) / 50 = 59.
+    expect(res.globalAchievement).toBeCloseTo(59, 6);
+  });
+
+  // Regresión: un informe oficial cargado en modo agregado puede crear filas por
+  // alumno que sólo traen el nivel de desempeño (`performance_band_id`) con
+  // `percentage` NULL. Antes esas filas marcaban la evaluación como "ya contada por
+  // alumno", así que se saltaba la rama de cohorte, y el `avg` la ignoraba por NULL:
+  // su logro desaparecía del KPI sin ningún error. En la org demo eran 24 de 40.
+  it('agregado con filas de SÓLO nivel (percentage NULL): su logro entra por cohorte', async () => {
+    const db = makeDb([
+      // 1. resolveScopedAssessmentIds → a1 (item_level) + a2 (agregado con filas de nivel)
+      [{ id: 'a1' }, { id: 'a2' }],
+      // 2. métricas per-alumno: sólo a1 aporta porcentaje (80% sobre 20 alumnos).
+      //    Los 30 alumnos de a2 tienen fila (cuentan como evaluados) pero su
+      //    `percentage` es NULL, así que no pesan en el promedio.
+      [{ avgPct: '80.00', studentsEvaluated: 50, studentsWithPct: 20 }],
+      // 3. a1 con 20 porcentajes; a2 con filas pero NINGÚN porcentaje.
+      [
+        { assessmentId: 'a1', withPct: 20 },
+        { assessmentId: 'a2', withPct: 0 },
+      ],
+      // 4. read-model: a1 (ya cubierto per-alumno) + a2 (90/200 = 45%, N 30)
+      [
+        { assessmentId: 'a1', scoreSum: '160', maxSum: '200', studentsAssessed: 20 },
+        { assessmentId: 'a2', scoreSum: '90', maxSum: '200', studentsAssessed: 30 },
+      ],
+    ]);
+    const svc = makeService(db);
+    const res = await svc.getOverview(makeUser({ activeRole: 'academic_director' }), {});
+
+    expect(res.assessmentsCount).toBe(2);
+    // Los alumnos de a2 YA están en el count(distinct) per-alumno (tienen fila): no
+    // se vuelven a sumar desde el read-model.
+    expect(res.studentsEvaluated).toBe(50);
+    // El logro de a2 sí entra, por cohorte: (80×20 + 45×30) / (20+30) = 59.
+    // Antes daba 80 — a2 desaparecía del promedio.
     expect(res.globalAchievement).toBeCloseTo(59, 6);
   });
 

@@ -159,24 +159,49 @@ export class DashboardsService {
 
       // ── Parte per-alumno (`assessment_results`) — informes item_level ──────────
       // Promedio de % logro y alumnos distintos evaluados.
+      // `studentsWithPct` es el peso del promedio: los alumnos que REALMENTE aportan
+      // un porcentaje. No coincide con `studentsEvaluated` — un informe agregado deja
+      // filas con sólo el nivel de desempeño y `percentage` NULL, que el `avg` ignora.
+      // Pesar el promedio por alumnos que no entraron en él inflaba esta rama frente a
+      // la de cohorte.
       const [metrics] = await tx
         .select({
           avgPct: sql<string | null>`avg(${assessmentResults.percentage}::numeric)`,
           studentsEvaluated: sql<number>`count(distinct ${assessmentResults.studentId})::int`,
+          studentsWithPct: sql<number>`count(distinct ${assessmentResults.studentId}) filter (where ${assessmentResults.percentage} is not null)::int`,
         })
         .from(assessmentResults)
         .innerJoin(students, eq(students.id, assessmentResults.studentId))
         .where(and(...resultConditions, isNull(students.deletedAt)));
 
-      // AssessmentIds que SÍ tienen datos per-alumno en el scope. Se usa para no
-      // doble-contar contra el read-model de cohorte (un assessment computed escribe
-      // en ambos): sus alumnos ya salen del `count(distinct)` de arriba.
+      // AssessmentIds con datos per-alumno en el scope. Se usa para no doble-contar
+      // contra el read-model de cohorte (un assessment computed escribe en ambos):
+      // sus alumnos ya salen del `count(distinct)` de arriba.
+      //
+      // ⚠️ Se distinguen DOS cosas, porque no coinciden:
+      //  · `resultAssessmentIds` — tiene filas por alumno (sirve para el conteo de
+      //    alumnos: esos alumnos ya están en `nResults`).
+      //  · `achievementAssessmentIds` — tiene filas por alumno CON `percentage` no
+      //    nulo (sirve para el logro: es lo único que entra en el `avg`).
+      //
+      // Un informe oficial cargado en modo agregado puede crear filas por alumno que
+      // sólo traen el nivel de desempeño (`performance_band_id`) y `percentage` NULL.
+      // Con un solo set, esas evaluaciones quedaban marcadas como "ya contadas por
+      // alumno" y se saltaban la rama de cohorte, mientras el `avg` las ignoraba por
+      // ser NULL: su logro desaparecía del KPI sin error ninguno.
       const resultAssessmentRows = await tx
-        .selectDistinct({ assessmentId: assessmentResults.assessmentId })
+        .select({
+          assessmentId: assessmentResults.assessmentId,
+          withPct: sql<number>`count(${assessmentResults.percentage})::int`,
+        })
         .from(assessmentResults)
         .innerJoin(students, eq(students.id, assessmentResults.studentId))
-        .where(and(...resultConditions, isNull(students.deletedAt)));
+        .where(and(...resultConditions, isNull(students.deletedAt)))
+        .groupBy(assessmentResults.assessmentId);
       const resultAssessmentIds = new Set(resultAssessmentRows.map((r) => r.assessmentId));
+      const achievementAssessmentIds = new Set(
+        resultAssessmentRows.filter((r) => Number(r.withPct) > 0).map((r) => r.assessmentId),
+      );
 
       // ── Parte de cohorte (`assessment_item_stats`) — informes agregados ────────
       // Un informe oficial DIA cargado en modo aggregate_only no tiene filas per-alumno
@@ -190,6 +215,9 @@ export class DashboardsService {
 
       const pctResults = metrics?.avgPct == null ? null : Number(metrics.avgPct);
       const nResults = Number(metrics?.studentsEvaluated ?? 0);
+      // Peso del promedio per-alumno (≤ nResults). Si la columna no viene (mocks
+      // viejos), se cae a nResults: mismo comportamiento que antes.
+      const nAchievement = Number(metrics?.studentsWithPct ?? nResults);
 
       // Acumula SÓLO los assessment agregados (los que no aparecen en
       // `assessment_results`) para no doble-contar los computed.
@@ -199,8 +227,15 @@ export class DashboardsService {
       let cohortAchWeight = 0; // Σ N_a de esos mismos agregados
       for (const c of cohortByAssessment) {
         cohortAssessmentIds.add(c.assessmentId);
-        if (resultAssessmentIds.has(c.assessmentId)) continue; // ya contado per-alumno
-        cohortStudents += c.studentsAssessed;
+        // Alumnos: sólo los de evaluaciones sin NINGUNA fila por alumno (si las hay,
+        // esos alumnos ya están en `nResults` y sumarlos los duplicaría).
+        if (!resultAssessmentIds.has(c.assessmentId)) {
+          cohortStudents += c.studentsAssessed;
+        }
+        // Logro: entra si el `avg` per-alumno no lo cubre — o sea, si la evaluación no
+        // aportó ningún `percentage`. Es lo que rescata a los informes agregados con
+        // filas de sólo-nivel.
+        if (achievementAssessmentIds.has(c.assessmentId)) continue;
         if (c.averageAchievement != null) {
           cohortAchNum += c.averageAchievement * c.studentsAssessed;
           cohortAchWeight += c.studentsAssessed;
@@ -224,9 +259,9 @@ export class DashboardsService {
       // el resultado es null (mismo contrato nullable de antes).
       let achNum = 0;
       let achWeight = 0;
-      if (pctResults != null && nResults > 0) {
-        achNum += pctResults * nResults;
-        achWeight += nResults;
+      if (pctResults != null && nAchievement > 0) {
+        achNum += pctResults * nAchievement;
+        achWeight += nAchievement;
       }
       achNum += cohortAchNum;
       achWeight += cohortAchWeight;
@@ -1558,8 +1593,13 @@ export class DashboardsService {
   }
 
   /**
-   * Últimas evaluaciones (máx 5) del scope, con su nombre de instrumento,
-   * asignatura, grado, conteo de alumnos y % logro promedio.
+   * Evaluaciones del scope (TODAS, ordenadas de la más reciente a la más antigua),
+   * con su nombre de instrumento, asignatura, grado, conteo de alumnos y % logro.
+   *
+   * No se truncan: una lista recortada no puede explicar el KPI global, que agrega
+   * sobre el scope completo — y comparar "% Logro" contra las filas visibles daba
+   * una discrepancia que parecía un error de cálculo. El recorte a 5 se quitó por
+   * eso; si el volumen molesta, la salida correcta es paginar, no esconder filas.
    */
   private async loadRecentAssessments(
     tx: Database,
@@ -1622,8 +1662,7 @@ export class DashboardsService {
       .leftJoin(subjects, eq(subjects.id, instruments.subjectId))
       .leftJoin(grades, eq(grades.id, instruments.gradeId))
       .where(inArray(assessments.id, scopedAssessmentIds))
-      .orderBy(desc(assessments.administeredAt), desc(assessments.createdAt))
-      .limit(5);
+      .orderBy(desc(assessments.administeredAt), desc(assessments.createdAt));
 
     if (rows.length === 0) return EMPTY_RECENT_ASSESSMENTS;
 
@@ -1663,11 +1702,16 @@ export class DashboardsService {
 
     const data = rows.map((r) => {
       const cohort = cohortByAssessment.get(r.assessmentId);
-      const stats =
-        statsByAssessment.get(r.assessmentId) ??
-        (cohort
-          ? { studentsCount: cohort.studentsAssessed, avgPct: cohort.averageAchievement }
-          : undefined);
+      const perStudent = statsByAssessment.get(r.assessmentId);
+      // ⚠️ El fallback es CAMPO A CAMPO, no todo-o-nada. Un informe oficial cargado
+      // en modo agregado puede tener filas por alumno que sólo traen el nivel de
+      // desempeño (`performance_band_id`) con `percentage` NULL: existían filas, así
+      // que el fallback todo-o-nada se daba por satisfecho y la evaluación mostraba
+      // logro "—" teniendo el dato en el read-model de cohorte.
+      const stats = {
+        studentsCount: perStudent?.studentsCount || (cohort?.studentsAssessed ?? 0),
+        avgPct: perStudent?.avgPct ?? cohort?.averageAchievement ?? null,
+      };
       return {
         assessmentId: r.assessmentId,
         name: r.name,
