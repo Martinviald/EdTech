@@ -63,7 +63,8 @@ type Item = {
    * Ver `docs/plan-items-terminos-pareados.md`.
    */
   matchPairs?: { left: string; right: string }[];
-  matchColumns?: Record<string, { id: string; text: string }[]>;
+  /** `{ "A": [{ key: "A.1", text: "Osmosis" }, …], "B": [ … ] }` — la etiqueta impresa es la key. */
+  matchColumns?: Record<string, { key: string; text: string }[]>;
 };
 type Passage = {
   title?: string;
