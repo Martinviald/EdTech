@@ -1132,6 +1132,50 @@ describe('ItemAnalysisService.listAssessments', () => {
     expect(dto.instrumentType).toEqual(['dia', 'ensayo']);
   });
 
+  // Regresión: el DTO no declaraba `applicationPeriod`, y como z.object descarta
+  // las claves desconocidas, el "Momento" del DIA se perdía en el parse y la
+  // lista devolvía los tres momentos. /dashboards sí lo filtraba, así que el
+  // dropdown reaccionaba y la lista no.
+  it('acepta applicationPeriod y lo normaliza a array', () => {
+    const dto = assessmentListQuerySchema.parse({ applicationPeriod: 'intermedio' });
+    expect(dto.applicationPeriod).toEqual(['intermedio']);
+
+    const csv = assessmentListQuerySchema.parse({ applicationPeriod: 'diagnostico,cierre' });
+    expect(csv.applicationPeriod).toEqual(['diagnostico', 'cierre']);
+
+    const none = assessmentListQuerySchema.parse({ applicationPeriod: '' });
+    expect(none.applicationPeriod).toBeUndefined();
+  });
+
+  it('rechaza un momento que no es del enum', () => {
+    expect(() => assessmentListQuerySchema.parse({ applicationPeriod: 'trimestral' })).toThrow();
+  });
+
+  it('applicationPeriod: el service lo aplica sin romper la consulta', async () => {
+    const db = makeDb([
+      [
+        {
+          assessmentId: ASSESSMENT_ID,
+          name: 'DIA Matemática — Intermedio',
+          administeredAt: new Date('2026-08-03T00:00:00Z'),
+          instrumentName: 'DIA Matemática 5° Básico 2026 — Intermedio',
+          instrumentType: 'dia',
+          subjectName: 'Matemáticas',
+          gradeName: '5° básico',
+        },
+      ],
+      [{ assessmentId: ASSESSMENT_ID, count: 37 }],
+    ]);
+    const service = makeService(db);
+
+    const dto = assessmentListQuerySchema.parse({
+      instrumentType: 'dia',
+      applicationPeriod: 'intermedio',
+    });
+    const res = await service.listAssessments(makeUser(), dto);
+    expect(res.data).toHaveLength(1);
+  });
+
   // Un solo valor sigue siendo válido: la tool `list_assessments` del asistente
   // manda un uuid suelto, no un CSV.
   it('un valor suelto se normaliza a array de uno; vacío queda sin filtro', () => {

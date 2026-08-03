@@ -135,6 +135,11 @@ export class ItemAnalysisService {
       if (query.instrumentType?.length) {
         conditions.push(inArray(sql`${instruments.type}::text`, query.instrumentType));
       }
+      if (query.applicationPeriod?.length) {
+        conditions.push(
+          inArray(sql`${instruments.applicationPeriod}::text`, query.applicationPeriod),
+        );
+      }
       if (query.gradeId?.length) conditions.push(inArray(classGroups.gradeId, query.gradeId));
       if (query.classGroupId?.length) {
         conditions.push(inArray(assessmentCourseAssignments.classGroupId, query.classGroupId));
