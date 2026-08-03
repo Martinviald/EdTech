@@ -99,6 +99,7 @@ export const sectionTypeEnum = pgEnum('section_type', [
 
 export const itemTypeEnum = pgEnum('item_type', [
   'multiple_choice',
+  'multi_select',
   'true_false',
   'open_ended',
   'oral_reading',

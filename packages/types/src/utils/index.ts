@@ -6,3 +6,4 @@ export * from './item-stats-calculator';
 export * from './level-stats';
 export * from './taxonomy-kind';
 export * from './true-false';
+export * from './multi-select';

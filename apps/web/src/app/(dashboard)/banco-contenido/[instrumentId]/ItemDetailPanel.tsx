@@ -42,6 +42,7 @@ function sectionToPassage(section: InstrumentSectionModel): PassageData {
 
 const ITEM_TYPE_LABELS: Record<string, string> = {
   multiple_choice: 'Selección múltiple',
+  multi_select: 'Multi-selección',
   true_false: 'Verdadero/Falso',
   open_ended: 'Desarrollo',
   oral_reading: 'Lectura oral',

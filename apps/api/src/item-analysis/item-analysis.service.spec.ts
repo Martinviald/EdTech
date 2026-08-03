@@ -657,6 +657,53 @@ describe('ItemAnalysisService.getQuestionAnalysis', () => {
     expect(verdadero.count + falso.count).toBe(res.totalResponses);
   });
 
+  // En multi-selección la respuesta es un CONJUNTO ("125"): cada opción marcada
+  // suma a su propia barra, así que un alumno aporta a varias y los porcentajes
+  // pasan de 100 a propósito. `correctKey` queda null: no hay UNA clave correcta.
+  it('multi_select: cuenta por opción marcada y no expone una única correctKey', async () => {
+    const multiRow = {
+      ...itemVisibleRow,
+      type: 'multi_select',
+      content: {
+        stem: '¿Cuáles corresponden?',
+        alternatives: [
+          { key: '1', text: 'a', isCorrect: true },
+          { key: '2', text: 'b', isCorrect: true },
+          { key: '3', text: 'c', isCorrect: false },
+          { key: '5', text: 'e', isCorrect: true },
+        ],
+      },
+    };
+    const db = makeDb([
+      [multiRow], // requireItemVisible
+      [], // loadItemTags
+      [], // loadAllItemTags
+      [
+        {
+          answerCounts: [
+            { key: '125', isCorrect: true, count: 4 },
+            { key: '1', isCorrect: false, count: 2 },
+            { key: '13', isCorrect: false, count: 1 },
+          ],
+        },
+      ],
+    ]);
+    const service = makeService(db);
+
+    const res = await service.getQuestionAnalysis(makeUser(), ITEM_A, {});
+
+    expect(res.correctKey).toBeNull();
+    expect(res.totalResponses).toBe(7);
+
+    const byKey = new Map(res.alternatives.map((a) => [a.key, a]));
+    expect(byKey.get('1')!.count).toBe(7); // 4 (de "125") + 2 (de "1") + 1 (de "13")
+    expect(byKey.get('2')!.count).toBe(4);
+    expect(byKey.get('3')!.count).toBe(1);
+    expect(byKey.get('5')!.count).toBe(4);
+    expect(byKey.get('1')!.isCorrect).toBe(true);
+    expect(byKey.get('3')!.isCorrect).toBe(false);
+  });
+
   // ⚠️ La regla central del read-model. Los cursos tienen N distinto, así que
   // recombinarlos es SUMA de conteos y el % se recalcula al final sobre el total.
   // Promediar los % de cada curso los ponderaría igual y daría otro número.

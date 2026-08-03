@@ -16,6 +16,7 @@ describe('SCORING_STRATEGIES (registro de estrategias por tipo)', () => {
   it('tiene una estrategia para cada ItemType', () => {
     const types: ItemType[] = [
       'multiple_choice',
+      'multi_select',
       'true_false',
       'open_ended',
       'oral_reading',
@@ -99,6 +100,123 @@ describe('SCORING_STRATEGIES (registro de estrategias por tipo)', () => {
       const c = { stem: 'x', correctAnswer: false } as unknown as ItemContent;
       const out = getScoringStrategy('true_false').score(input('true_false', c, 'F'));
       expect(out.isCorrect).toBe(true);
+    });
+  });
+
+  // ── multi_select ───────────────────────────────────────────────────────────
+  // Forma real del ítem 29 de Ciencias 8° (impreso): 5 opciones, 3 correctas.
+  // La hoja escanea el conjunto concatenado ("125").
+  describe('multi_select', () => {
+    const content = {
+      stem: '¿Cuáles corresponden?',
+      alternatives: [
+        { key: '1', text: 'a', isCorrect: true },
+        { key: '2', text: 'b', isCorrect: true },
+        { key: '3', text: 'c', isCorrect: false },
+        { key: '4', text: 'd', isCorrect: false },
+        { key: '5', text: 'e', isCorrect: true },
+      ],
+    } as unknown as ItemContent;
+
+    // Verificado contra el escaneo real: GradeCam dio 1 al conjunto exacto y 0 a
+    // la respuesta parcial, con max_points 1. El default reproduce eso.
+    it('conjunto exacto → correcto', () => {
+      const out = getScoringStrategy('multi_select').score(input('multi_select', content, '125'));
+      expect(out).toEqual({ isCorrect: true, rawScore: 1, requiresManualGrading: false });
+    });
+
+    it('el orden no importa', () => {
+      expect(
+        getScoringStrategy('multi_select').score(input('multi_select', content, '521')).isCorrect,
+      ).toBe(true);
+    });
+
+    it('respuesta PARCIAL → 0 por defecto (todo o nada)', () => {
+      const out = getScoringStrategy('multi_select').score(input('multi_select', content, '1'));
+      expect(out).toEqual({ isCorrect: false, rawScore: 0, requiresManualGrading: false });
+    });
+
+    it('marcar de más → incorrecto', () => {
+      expect(
+        getScoringStrategy('multi_select').score(input('multi_select', content, '1253')).isCorrect,
+      ).toBe(false);
+    });
+
+    it('sin responder → incorrecto, nunca pendiente', () => {
+      const out = getScoringStrategy('multi_select').score(input('multi_select', content, null));
+      expect(out).toEqual({ isCorrect: false, rawScore: 0, requiresManualGrading: false });
+    });
+
+    it('acepta separadores y arrays', () => {
+      for (const raw of ['1,2,5', '1 2 5', ['1', '2', '5']]) {
+        expect(
+          getScoringStrategy('multi_select').score(input('multi_select', content, raw)).isCorrect,
+        ).toBe(true);
+      }
+    });
+
+    describe('crédito parcial (requireExact: false)', () => {
+      const parcial: ScoringConfig = {
+        points: 3,
+        partialCredit: true,
+        multiSelect: { requireExact: false },
+      };
+
+      it('2 de 3 correctas → 2 puntos', () => {
+        const out = getScoringStrategy('multi_select').score(
+          input('multi_select', content, '12', 3, parcial),
+        );
+        expect(out).toEqual({ isCorrect: false, rawScore: 2, requiresManualGrading: false });
+      });
+
+      it('todas correctas → maxScore e isCorrect true', () => {
+        const out = getScoringStrategy('multi_select').score(
+          input('multi_select', content, '125', 3, parcial),
+        );
+        expect(out).toEqual({ isCorrect: true, rawScore: 3, requiresManualGrading: false });
+      });
+
+      it('penaliza las marcadas de más, con piso en 0', () => {
+        const config: ScoringConfig = {
+          ...parcial,
+          multiSelect: { requireExact: false, penaltyPerIncorrect: 1 },
+        };
+        const una = getScoringStrategy('multi_select').score(
+          input('multi_select', content, '123', 3, config),
+        );
+        expect(una.rawScore).toBe(1);
+
+        const todas = getScoringStrategy('multi_select').score(
+          input('multi_select', content, '34', 3, config),
+        );
+        expect(todas.rawScore).toBe(0);
+      });
+
+      it('pointsPerCorrect explícito pondera cada acierto', () => {
+        const out = getScoringStrategy('multi_select').score(
+          input('multi_select', content, '12', 6, {
+            ...parcial,
+            points: 6,
+            multiSelect: { requireExact: false, pointsPerCorrect: 2 },
+          }),
+        );
+        expect(out.rawScore).toBe(4);
+      });
+    });
+
+    it('respuesta ambigua (keys multi-carácter concatenadas) → 0, no adivina', () => {
+      const multiChar = {
+        stem: 'x',
+        alternatives: [
+          { key: 'A1', text: 'a', isCorrect: true },
+          { key: 'B2', text: 'b', isCorrect: true },
+          { key: 'C3', text: 'c', isCorrect: false },
+        ],
+      } as unknown as ItemContent;
+      const out = getScoringStrategy('multi_select').score(
+        input('multi_select', multiChar, 'A1B2'),
+      );
+      expect(out.rawScore).toBe(0);
     });
   });
 

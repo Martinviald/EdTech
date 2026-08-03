@@ -38,6 +38,49 @@ const baseContent = {
 // ── Schemas de content por tipo ──────────────────────────────────────────────
 // (multiple_choice se importa de item.schema.ts — ver arriba)
 
+// ── Multi-selección (`multi_select`) ─────────────────────────────────────────
+//
+// Selección múltiple donde el alumno debe marcar VARIAS opciones. Reutiliza el
+// shape de alternativas de `multiple_choice` a propósito: el render del banco y
+// el análisis por ítem funcionan sin inventar una forma nueva. Lo que lo hace un
+// tipo distinto es la SEMÁNTICA de corrección, no la del contenido — y por eso
+// tiene su propio `type`, en vez de un flag dentro de multiple_choice: el tipo
+// es lo que elige la estrategia de scoring.
+//
+// La invariante que lo separa de `multiple_choice` es tener **≥2 correctas**.
+
+export const multiSelectContentSchema = z
+  .object({
+    stem: z.string().min(1),
+    alternatives: z.array(alternativeSchema).min(3),
+    ...baseContent,
+  })
+  .superRefine((content, ctx) => {
+    const correct = content.alternatives.filter((alt) => alt.isCorrect).length;
+    if (correct < 2) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ['alternatives'],
+        message: `multi_select exige al menos 2 alternativas correctas (tiene ${correct}); con una sola es multiple_choice`,
+      });
+    }
+    if (correct === content.alternatives.length) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ['alternatives'],
+        message: 'todas las alternativas son correctas: el ítem no discrimina',
+      });
+    }
+    const keys = content.alternatives.map((alt) => alt.key);
+    if (new Set(keys).size !== keys.length) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ['alternatives'],
+        message: 'las keys de las alternativas deben ser únicas',
+      });
+    }
+  });
+
 export const trueFalseContentSchema = z.object({
   stem: z.string().min(1),
   correctAnswer: z.boolean(),
@@ -180,6 +223,7 @@ export const gapFillContentSchema = z.object({
 
 export const ITEM_CONTENT_SCHEMAS = {
   multiple_choice: multipleChoiceContentSchema,
+  multi_select: multiSelectContentSchema,
   true_false: trueFalseContentSchema,
   open_ended: openEndedContentSchema,
   writing: writingContentSchema,
@@ -193,6 +237,7 @@ export const ITEM_CONTENT_SCHEMAS = {
 
 // ── Tipos derivados ──────────────────────────────────────────────────────────
 
+export type MultiSelectContent = z.infer<typeof multiSelectContentSchema>;
 export type TrueFalseContent = z.infer<typeof trueFalseContentSchema>;
 export type OpenEndedContent = z.infer<typeof openEndedContentSchema>;
 export type WritingContent = z.infer<typeof writingContentSchema>;
@@ -206,6 +251,7 @@ export type GapFillContent = z.infer<typeof gapFillContentSchema>;
 /** Unión de todos los contenidos posibles. Tipo a usar en `items.content.$type<ItemContent>()`. */
 export type ItemContent =
   | MultipleChoiceContent
+  | MultiSelectContent
   | TrueFalseContent
   | OpenEndedContent
   | WritingContent
@@ -223,6 +269,7 @@ export type ItemContent =
 
 export const AUTO_SCORABLE_ITEM_TYPES = [
   'multiple_choice',
+  'multi_select',
   'true_false',
   'matching',
   'ordering',

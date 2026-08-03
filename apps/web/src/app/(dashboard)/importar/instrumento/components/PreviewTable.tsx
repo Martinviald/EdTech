@@ -82,6 +82,7 @@ function CorrectAnswerCell({ item }: { item: DiaItemPreview }) {
 function formatType(type: string): string {
   const map: Record<string, string> = {
     multiple_choice: 'Sel. multiple',
+    multi_select: 'Multi-selección',
     true_false: 'V/F',
     open_ended: 'Abierta',
     oral_reading: 'Lectura oral',

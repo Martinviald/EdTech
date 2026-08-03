@@ -1,0 +1,1 @@
+ALTER TYPE "public"."item_type" ADD VALUE 'multi_select' BEFORE 'true_false';
