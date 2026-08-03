@@ -35,6 +35,7 @@
     "db:import:item-tags": "tsx src/seed/import-item-tags.ts",
     "db:seed:performance-bands": "tsx src/seed/seed-performance-bands.ts",
     "db:backfill:cohort-stats": "tsx src/scripts/backfill-cohort-stats.ts",
+    "db:retype:items": "tsx src/scripts/retype-matching-truefalse-items.ts",
     "db:seed:dev": "tsx src/seed/index.ts && tsx src/seed/e2e-testing.ts && tsx src/seed/benchmark-demo.ts",
     "db:migrate:dev": "tsx src/migrate.ts && pnpm db:seed:dev",
     "db:reset": "tsx src/reset-schema.ts && pnpm db:migrate:dev",
