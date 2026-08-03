@@ -13,15 +13,15 @@
   }
  },
  "counts": {
-  "curriculum/axis": 102,
+  "curriculum/axis": 108,
   "curriculum/domain": 3,
-  "curriculum/learning_objective": 617,
-  "curriculum/skill": 19,
-  "curriculum/subdomain": 38,
+  "curriculum/learning_objective": 649,
+  "curriculum/skill": 21,
+  "curriculum/subdomain": 40,
   "curriculum/text_type": 6,
-  "dia/descriptor": 880,
+  "dia/descriptor": 938,
   "dia/domain": 5,
-  "dia/subdomain": 26
+  "dia/subdomain": 28
  },
  "nodes": [
   {
@@ -19576,6 +19576,1158 @@
    "level": "5_basico",
    "source": "dia-ficha-2026",
    "order": 1
+  },
+  {
+   "code": "SCI-SK-OBSERVAR-Y-PREGUNTAR",
+   "type": "skill",
+   "name": "Observar y preguntar",
+   "parentCode": "CUR-HAB-SCI",
+   "marco": "curriculum",
+   "subjectCode": "SCI",
+   "source": "curriculumnacional.cl",
+   "order": 5
+  },
+  {
+   "code": "SCI-SK-ANALIZAR-LA-EVIDENCIA-Y-COMUNICAR",
+   "type": "skill",
+   "name": "Analizar la evidencia y comunicar",
+   "parentCode": "CUR-HAB-SCI",
+   "marco": "curriculum",
+   "subjectCode": "SCI",
+   "source": "curriculumnacional.cl",
+   "order": 6
+  },
+  {
+   "code": "CUR-CONTENIDO-SCI-5B",
+   "type": "subdomain",
+   "name": "5° básico",
+   "parentCode": "CUR-CONTENIDO-SCI",
+   "marco": "curriculum",
+   "subjectCode": "SCI",
+   "level": "5_basico",
+   "source": "curriculumnacional.cl",
+   "order": 5
+  },
+  {
+   "code": "CUR-CONTENIDO-SCI-5B-AX-CIENCIAS-DE-LA-VIDA",
+   "type": "axis",
+   "name": "Ciencias de la Vida",
+   "parentCode": "CUR-CONTENIDO-SCI-5B",
+   "marco": "curriculum",
+   "subjectCode": "SCI",
+   "level": "5_basico",
+   "source": "curriculumnacional.cl",
+   "order": 1
+  },
+  {
+   "code": "CUR-CONTENIDO-SCI-5B-AX-CIENCIAS-FISICAS-Y-QUIMICAS",
+   "type": "axis",
+   "name": "Ciencias Físicas y Químicas",
+   "parentCode": "CUR-CONTENIDO-SCI-5B",
+   "marco": "curriculum",
+   "subjectCode": "SCI",
+   "level": "5_basico",
+   "source": "curriculumnacional.cl",
+   "order": 2
+  },
+  {
+   "code": "CUR-CONTENIDO-SCI-5B-AX-CIENCIAS-DE-LA-TIERRA-Y-EL-UNIVERSO",
+   "type": "axis",
+   "name": "Ciencias de la Tierra y el Universo",
+   "parentCode": "CUR-CONTENIDO-SCI-5B",
+   "marco": "curriculum",
+   "subjectCode": "SCI",
+   "level": "5_basico",
+   "source": "curriculumnacional.cl",
+   "order": 3
+  },
+  {
+   "code": "DIA-SCI-5B",
+   "type": "subdomain",
+   "name": "5° básico",
+   "parentCode": "DIA-SCI",
+   "marco": "dia",
+   "subjectCode": "SCI",
+   "level": "5_basico",
+   "source": "dia",
+   "order": 5
+  },
+  {
+   "code": "SCI-5B-OA01",
+   "type": "learning_objective",
+   "name": "Reconocer y explicar que los seres vivos están formados por una o más células y que estas se organizan en tejidos, órganos y sistemas.",
+   "parentCode": "CUR-CONTENIDO-SCI-5B-AX-CIENCIAS-DE-LA-VIDA",
+   "marco": "curriculum",
+   "subjectCode": "SCI",
+   "level": "5_basico",
+   "oaNumber": 1,
+   "source": "curriculumnacional.cl",
+   "order": 1
+  },
+  {
+   "code": "SCI-5B-OA02",
+   "type": "learning_objective",
+   "name": "Identificar y describir por medio de modelos las estructuras básicas del sistema digestivo (boca, esófago, estómago, hígado, intestino delgado, intestino grueso, recto y ano) y sus funciones en la digestión, la absorción de alimentos y la eliminación de desechos.",
+   "parentCode": "CUR-CONTENIDO-SCI-5B-AX-CIENCIAS-DE-LA-VIDA",
+   "marco": "curriculum",
+   "subjectCode": "SCI",
+   "level": "5_basico",
+   "oaNumber": 2,
+   "source": "curriculumnacional.cl",
+   "order": 2
+  },
+  {
+   "code": "SCI-5B-OA03",
+   "type": "learning_objective",
+   "name": "Explicar por medio de modelos la respiración (inspiración-espiración-intercambio de oxígeno y dióxido de carbono), identificando las estructuras básicas del sistema respiratorio (nariz, tráquea, bronquios, alvéolos, pulmones).",
+   "parentCode": "CUR-CONTENIDO-SCI-5B-AX-CIENCIAS-DE-LA-VIDA",
+   "marco": "curriculum",
+   "subjectCode": "SCI",
+   "level": "5_basico",
+   "oaNumber": 3,
+   "source": "curriculumnacional.cl",
+   "order": 3
+  },
+  {
+   "code": "SCI-5B-OA04",
+   "type": "learning_objective",
+   "name": "Explicar la función de transporte del sistema circulatorio (sustancias alimenticias, oxígeno y dióxido de carbono), identificando sus estructuras básicas (corazón, vasos sanguíneos y sangre).",
+   "parentCode": "CUR-CONTENIDO-SCI-5B-AX-CIENCIAS-DE-LA-VIDA",
+   "marco": "curriculum",
+   "subjectCode": "SCI",
+   "level": "5_basico",
+   "oaNumber": 4,
+   "source": "curriculumnacional.cl",
+   "order": 4
+  },
+  {
+   "code": "SCI-5B-OA05",
+   "type": "learning_objective",
+   "name": "Analizar el consumo de alimento diario (variedad, tamaño y frecuencia de porciones) reconociendo los alimentos para el crecimiento, la reparación, el desarrollo y el movimiento del cuerpo.",
+   "parentCode": "CUR-CONTENIDO-SCI-5B-AX-CIENCIAS-DE-LA-VIDA",
+   "marco": "curriculum",
+   "subjectCode": "SCI",
+   "level": "5_basico",
+   "oaNumber": 5,
+   "source": "curriculumnacional.cl",
+   "order": 5
+  },
+  {
+   "code": "SCI-5B-OA06",
+   "type": "learning_objective",
+   "name": "Investigar en diversas fuentes y comunicar los efectos nocivos que produce el cigarrillo (humo del tabaco) en los sistemas respiratorio y circulatorio.",
+   "parentCode": "CUR-CONTENIDO-SCI-5B-AX-CIENCIAS-DE-LA-VIDA",
+   "marco": "curriculum",
+   "subjectCode": "SCI",
+   "level": "5_basico",
+   "oaNumber": 6,
+   "source": "curriculumnacional.cl",
+   "order": 6
+  },
+  {
+   "code": "SCI-5B-OA07",
+   "type": "learning_objective",
+   "name": "Investigar e identificar algunos microorganismos beneficiosos y dañinos para la salud (bacterias, virus y hongos), y proponer medidas de cuidado e higiene del cuerpo.",
+   "parentCode": "CUR-CONTENIDO-SCI-5B-AX-CIENCIAS-DE-LA-VIDA",
+   "marco": "curriculum",
+   "subjectCode": "SCI",
+   "level": "5_basico",
+   "oaNumber": 7,
+   "source": "curriculumnacional.cl",
+   "order": 7
+  },
+  {
+   "code": "SCI-5B-OA08",
+   "type": "learning_objective",
+   "name": "Reconocer los cambios que experimenta la energía eléctrica al pasar de una forma a otra (eléctrica a calórica, sonora, lumínica, etc.) e investigar los principales aportes de científicos en su estudio a lo largo del tiempo.",
+   "parentCode": "CUR-CONTENIDO-SCI-5B-AX-CIENCIAS-FISICAS-Y-QUIMICAS",
+   "marco": "curriculum",
+   "subjectCode": "SCI",
+   "level": "5_basico",
+   "oaNumber": 8,
+   "source": "curriculumnacional.cl",
+   "order": 8
+  },
+  {
+   "code": "SCI-5B-OA09",
+   "type": "learning_objective",
+   "name": "Construir un circuito eléctrico simple (cable, ampolleta, interruptor y pila), usarlo para resolver problemas cotidianos y explicar su funcionamiento.",
+   "parentCode": "CUR-CONTENIDO-SCI-5B-AX-CIENCIAS-FISICAS-Y-QUIMICAS",
+   "marco": "curriculum",
+   "subjectCode": "SCI",
+   "level": "5_basico",
+   "oaNumber": 9,
+   "source": "curriculumnacional.cl",
+   "order": 9
+  },
+  {
+   "code": "SCI-5B-OA10",
+   "type": "learning_objective",
+   "name": "Observar y distinguir, por medio de la investigación experimental, los materiales conductores (cobre y aluminio) y aisladores (plásticos y goma) de electricidad, relacionándolos con la manipulación segura de artefactos tecnológicos y circuitos eléctricos domiciliarios.",
+   "parentCode": "CUR-CONTENIDO-SCI-5B-AX-CIENCIAS-FISICAS-Y-QUIMICAS",
+   "marco": "curriculum",
+   "subjectCode": "SCI",
+   "level": "5_basico",
+   "oaNumber": 10,
+   "source": "curriculumnacional.cl",
+   "order": 10
+  },
+  {
+   "code": "SCI-5B-OA11",
+   "type": "learning_objective",
+   "name": "Explicar la importancia de la energía eléctrica en la vida cotidiana y proponer medidas para promover su ahorro y uso responsable.",
+   "parentCode": "CUR-CONTENIDO-SCI-5B-AX-CIENCIAS-FISICAS-Y-QUIMICAS",
+   "marco": "curriculum",
+   "subjectCode": "SCI",
+   "level": "5_basico",
+   "oaNumber": 11,
+   "source": "curriculumnacional.cl",
+   "order": 11
+  },
+  {
+   "code": "SCI-5B-OA12",
+   "type": "learning_objective",
+   "name": "Describir la distribución del agua dulce y salada en la Tierra, considerando océanos, glaciares, ríos y lagos, aguas subterráneas, nubes, vapor de agua, etc., y comparar sus volúmenes, reconociendo la escasez relativa de agua dulce.",
+   "parentCode": "CUR-CONTENIDO-SCI-5B-AX-CIENCIAS-DE-LA-TIERRA-Y-EL-UNIVERSO",
+   "marco": "curriculum",
+   "subjectCode": "SCI",
+   "level": "5_basico",
+   "oaNumber": 12,
+   "source": "curriculumnacional.cl",
+   "order": 12
+  },
+  {
+   "code": "SCI-5B-OA13",
+   "type": "learning_objective",
+   "name": "Analizar y describir las características de los océanos y lagos: variación de temperatura, luminosidad y presión en relación con la profundidad; diversidad de flora y fauna; movimiento de las aguas, como olas, mareas, corrientes (El Niño y Humboldt).",
+   "parentCode": "CUR-CONTENIDO-SCI-5B-AX-CIENCIAS-DE-LA-TIERRA-Y-EL-UNIVERSO",
+   "marco": "curriculum",
+   "subjectCode": "SCI",
+   "level": "5_basico",
+   "oaNumber": 13,
+   "source": "curriculumnacional.cl",
+   "order": 13
+  },
+  {
+   "code": "SCI-5B-OA14",
+   "type": "learning_objective",
+   "name": "Investigar y explicar efectos positivos y negativos de la actividad humana en los océanos, lagos, ríos, glaciares, entre otros, proponiendo acciones de protección de las reservas hídricas en Chile y comunicando sus resultados.",
+   "parentCode": "CUR-CONTENIDO-SCI-5B-AX-CIENCIAS-DE-LA-TIERRA-Y-EL-UNIVERSO",
+   "marco": "curriculum",
+   "subjectCode": "SCI",
+   "level": "5_basico",
+   "oaNumber": 14,
+   "source": "curriculumnacional.cl",
+   "order": 14
+  },
+  {
+   "code": "SCI-5B-OA01-I1",
+   "type": "descriptor",
+   "name": "Explican contextos relacionados con que los seres vivos están formados por una o más células.",
+   "parentCode": "DIA-SCI-5B",
+   "marco": "dia",
+   "subjectCode": "SCI",
+   "level": "5_basico",
+   "source": "dia-ficha-2026",
+   "order": 1
+  },
+  {
+   "code": "SCI-5B-OA01-I2",
+   "type": "descriptor",
+   "name": "Seleccionan instrumentos que permiten la observación de alguno de los niveles de organización de los seres vivos.",
+   "parentCode": "DIA-SCI-5B",
+   "marco": "dia",
+   "subjectCode": "SCI",
+   "level": "5_basico",
+   "source": "dia-ficha-2026",
+   "order": 2
+  },
+  {
+   "code": "SCI-5B-OA02-I1",
+   "type": "descriptor",
+   "name": "Identifican estructuras básicas del sistema digestivo mediante el uso de modelos.",
+   "parentCode": "DIA-SCI-5B",
+   "marco": "dia",
+   "subjectCode": "SCI",
+   "level": "5_basico",
+   "source": "dia-ficha-2026",
+   "order": 1
+  },
+  {
+   "code": "SCI-5B-OA02-I2",
+   "type": "descriptor",
+   "name": "Identifican funciones de las estructuras básicas del sistema digestivo.",
+   "parentCode": "DIA-SCI-5B",
+   "marco": "dia",
+   "subjectCode": "SCI",
+   "level": "5_basico",
+   "source": "dia-ficha-2026",
+   "order": 2
+  },
+  {
+   "code": "SCI-5B-OA03-I1",
+   "type": "descriptor",
+   "name": "Identifican estructuras del sistema respiratorio mediante el uso de modelos.",
+   "parentCode": "DIA-SCI-5B",
+   "marco": "dia",
+   "subjectCode": "SCI",
+   "level": "5_basico",
+   "source": "dia-ficha-2026",
+   "order": 1
+  },
+  {
+   "code": "SCI-5B-OA03-I2",
+   "type": "descriptor",
+   "name": "Distinguen los procesos de inspiración y espiración mediante el uso de modelos del sistema respiratorio.",
+   "parentCode": "DIA-SCI-5B",
+   "marco": "dia",
+   "subjectCode": "SCI",
+   "level": "5_basico",
+   "source": "dia-ficha-2026",
+   "order": 2
+  },
+  {
+   "code": "SCI-5B-OA04-I1",
+   "type": "descriptor",
+   "name": "Identifican la función de las estructuras del sistema circulatorio.",
+   "parentCode": "DIA-SCI-5B",
+   "marco": "dia",
+   "subjectCode": "SCI",
+   "level": "5_basico",
+   "source": "dia-ficha-2026",
+   "order": 1
+  },
+  {
+   "code": "SCI-5B-OA04-I2",
+   "type": "descriptor",
+   "name": "Identifican estructuras del sistema circulatorio mediante el uso de modelos.",
+   "parentCode": "DIA-SCI-5B",
+   "marco": "dia",
+   "subjectCode": "SCI",
+   "level": "5_basico",
+   "source": "dia-ficha-2026",
+   "order": 2
+  },
+  {
+   "code": "SCI-5B-OA05-I1",
+   "type": "descriptor",
+   "name": "Explican contextos relacionados con los alimentos para el crecimiento, la reparación, el desarrollo y el movimiento del cuerpo.",
+   "parentCode": "DIA-SCI-5B",
+   "marco": "dia",
+   "subjectCode": "SCI",
+   "level": "5_basico",
+   "source": "dia-ficha-2026",
+   "order": 1
+  },
+  {
+   "code": "SCI-5B-OA05-I2",
+   "type": "descriptor",
+   "name": "Interpretan información relacionada con el consumo de alimento diario y los alimentos para el crecimiento, la reparación, el desarrollo y el movimiento del cuerpo.",
+   "parentCode": "DIA-SCI-5B",
+   "marco": "dia",
+   "subjectCode": "SCI",
+   "level": "5_basico",
+   "source": "dia-ficha-2026",
+   "order": 2
+  },
+  {
+   "code": "SCI-5B-OA07-I1",
+   "type": "descriptor",
+   "name": "Identifican un procedimiento que permita responder una pregunta de investigación relacionada con los microorganismos beneficiosos y dañinos para la salud.",
+   "parentCode": "DIA-SCI-5B",
+   "marco": "dia",
+   "subjectCode": "SCI",
+   "level": "5_basico",
+   "source": "dia-ficha-2026",
+   "order": 1
+  },
+  {
+   "code": "SCI-5B-OA07-I2",
+   "type": "descriptor",
+   "name": "Identifican debilidades de una investigación relacionada con microorganismos beneficiosos y dañinos para la salud.",
+   "parentCode": "DIA-SCI-5B",
+   "marco": "dia",
+   "subjectCode": "SCI",
+   "level": "5_basico",
+   "source": "dia-ficha-2026",
+   "order": 2
+  },
+  {
+   "code": "SCI-5B-OA06-I1",
+   "type": "descriptor",
+   "name": "Identifican las variables de una investigación relacionada con los efectos nocivos del consumo de cigarrillo sobre el sistema respiratorio.",
+   "parentCode": "DIA-SCI-5B",
+   "marco": "dia",
+   "subjectCode": "SCI",
+   "level": "5_basico",
+   "source": "dia-ficha-2026",
+   "order": 1
+  },
+  {
+   "code": "SCI-5B-OA06-I2",
+   "type": "descriptor",
+   "name": "Formulan conclusiones a partir de evidencia relacionada con los efectos nocivos que produce el cigarrillo en el sistema respiratorio.",
+   "parentCode": "DIA-SCI-5B",
+   "marco": "dia",
+   "subjectCode": "SCI",
+   "level": "5_basico",
+   "source": "dia-ficha-2026",
+   "order": 2
+  },
+  {
+   "code": "SCI-5B-OA06-I3",
+   "type": "descriptor",
+   "name": "Establecen la pregunta que se busca responder en una investigación relacionada con los efectos nocivos que produce el cigarrillo en el sistema respiratorio.",
+   "parentCode": "DIA-SCI-5B",
+   "marco": "dia",
+   "subjectCode": "SCI",
+   "level": "5_basico",
+   "source": "dia-ficha-2026",
+   "order": 3
+  },
+  {
+   "code": "SCI-5B-OA08-I1",
+   "type": "descriptor",
+   "name": "Identifican los cambios que experimenta la energía eléctrica al pasar de una forma a otra.",
+   "parentCode": "DIA-SCI-5B",
+   "marco": "dia",
+   "subjectCode": "SCI",
+   "level": "5_basico",
+   "source": "dia-ficha-2026",
+   "order": 1
+  },
+  {
+   "code": "SCI-5B-OA10-I1",
+   "type": "descriptor",
+   "name": "Interpretan información relacionada con los materiales conductores y aisladores de electricidad.",
+   "parentCode": "DIA-SCI-5B",
+   "marco": "dia",
+   "subjectCode": "SCI",
+   "level": "5_basico",
+   "source": "dia-ficha-2026",
+   "order": 1
+  },
+  {
+   "code": "SCI-5B-OA10-I2",
+   "type": "descriptor",
+   "name": "Formulan predicciones basadas en observaciones previamente realizadas, relacionadas con la distinción entre los materiales conductores y aisladores de electricidad.",
+   "parentCode": "DIA-SCI-5B",
+   "marco": "dia",
+   "subjectCode": "SCI",
+   "level": "5_basico",
+   "source": "dia-ficha-2026",
+   "order": 2
+  },
+  {
+   "code": "SCI-5B-OA09-I1",
+   "type": "descriptor",
+   "name": "Identifican la función de los componentes de un circuito simple.",
+   "parentCode": "DIA-SCI-5B",
+   "marco": "dia",
+   "subjectCode": "SCI",
+   "level": "5_basico",
+   "source": "dia-ficha-2026",
+   "order": 1
+  },
+  {
+   "code": "SCI-5B-OA11-I1",
+   "type": "descriptor",
+   "name": "Interpretan información relacionada con la importancia de la energía eléctrica en la vida cotidiana.",
+   "parentCode": "DIA-SCI-5B",
+   "marco": "dia",
+   "subjectCode": "SCI",
+   "level": "5_basico",
+   "source": "dia-ficha-2026",
+   "order": 1
+  },
+  {
+   "code": "SCI-5B-OA11-I2",
+   "type": "descriptor",
+   "name": "Explican contextos relacionados con la necesidad del ahorro de energía eléctrica y su uso responsable.",
+   "parentCode": "DIA-SCI-5B",
+   "marco": "dia",
+   "subjectCode": "SCI",
+   "level": "5_basico",
+   "source": "dia-ficha-2026",
+   "order": 2
+  },
+  {
+   "code": "SCI-5B-OA12-I1",
+   "type": "descriptor",
+   "name": "Seleccionan estrategias adecuadas para comunicar aspectos relacionados con la escasez relativa de agua dulce.",
+   "parentCode": "DIA-SCI-5B",
+   "marco": "dia",
+   "subjectCode": "SCI",
+   "level": "5_basico",
+   "source": "dia-ficha-2026",
+   "order": 1
+  },
+  {
+   "code": "SCI-5B-OA12-I2",
+   "type": "descriptor",
+   "name": "Interpretan información relacionada con la distribución del agua dulce y salada en la Tierra, sus volúmenes y la escasez relativa de agua dulce.",
+   "parentCode": "DIA-SCI-5B",
+   "marco": "dia",
+   "subjectCode": "SCI",
+   "level": "5_basico",
+   "source": "dia-ficha-2026",
+   "order": 2
+  },
+  {
+   "code": "SCI-5B-OA13-I1",
+   "type": "descriptor",
+   "name": "Seleccionan estrategias adecuadas para comunicar las características de los océanos y lagos.",
+   "parentCode": "DIA-SCI-5B",
+   "marco": "dia",
+   "subjectCode": "SCI",
+   "level": "5_basico",
+   "source": "dia-ficha-2026",
+   "order": 1
+  },
+  {
+   "code": "SCI-5B-OA13-I2",
+   "type": "descriptor",
+   "name": "Interpretan información relacionada con el movimiento de las aguas.",
+   "parentCode": "DIA-SCI-5B",
+   "marco": "dia",
+   "subjectCode": "SCI",
+   "level": "5_basico",
+   "source": "dia-ficha-2026",
+   "order": 2
+  },
+  {
+   "code": "SCI-5B-OA14-I1",
+   "type": "descriptor",
+   "name": "Identifican los efectos positivos y negativos de la actividad humana en los océanos, lagos, ríos, glaciares, entre otros.",
+   "parentCode": "DIA-SCI-5B",
+   "marco": "dia",
+   "subjectCode": "SCI",
+   "level": "5_basico",
+   "source": "dia-ficha-2026",
+   "order": 1
+  },
+  {
+   "code": "SCI-5B-OA14-I2",
+   "type": "descriptor",
+   "name": "Identifican las formas de contaminación hídrica más comunes.",
+   "parentCode": "DIA-SCI-5B",
+   "marco": "dia",
+   "subjectCode": "SCI",
+   "level": "5_basico",
+   "source": "dia-ficha-2026",
+   "order": 2
+  },
+  {
+   "code": "SCI-5B-OA14-I3",
+   "type": "descriptor",
+   "name": "Explican contextos relacionados con las acciones de protección de las reservas hídricas.",
+   "parentCode": "DIA-SCI-5B",
+   "marco": "dia",
+   "subjectCode": "SCI",
+   "level": "5_basico",
+   "source": "dia-ficha-2026",
+   "order": 3
+  },
+  {
+   "code": "CUR-CONTENIDO-SCI-6B",
+   "type": "subdomain",
+   "name": "6° básico",
+   "parentCode": "CUR-CONTENIDO-SCI",
+   "marco": "curriculum",
+   "subjectCode": "SCI",
+   "level": "6_basico",
+   "source": "curriculumnacional.cl",
+   "order": 6
+  },
+  {
+   "code": "CUR-CONTENIDO-SCI-6B-AX-CIENCIAS-DE-LA-VIDA",
+   "type": "axis",
+   "name": "Ciencias de la Vida",
+   "parentCode": "CUR-CONTENIDO-SCI-6B",
+   "marco": "curriculum",
+   "subjectCode": "SCI",
+   "level": "6_basico",
+   "source": "curriculumnacional.cl",
+   "order": 1
+  },
+  {
+   "code": "CUR-CONTENIDO-SCI-6B-AX-CIENCIAS-FISICAS-Y-QUIMICAS",
+   "type": "axis",
+   "name": "Ciencias Físicas y Químicas",
+   "parentCode": "CUR-CONTENIDO-SCI-6B",
+   "marco": "curriculum",
+   "subjectCode": "SCI",
+   "level": "6_basico",
+   "source": "curriculumnacional.cl",
+   "order": 2
+  },
+  {
+   "code": "CUR-CONTENIDO-SCI-6B-AX-CIENCIAS-DE-LA-TIERRA-Y-EL-UNIVERSO",
+   "type": "axis",
+   "name": "Ciencias de la Tierra y el Universo",
+   "parentCode": "CUR-CONTENIDO-SCI-6B",
+   "marco": "curriculum",
+   "subjectCode": "SCI",
+   "level": "6_basico",
+   "source": "curriculumnacional.cl",
+   "order": 3
+  },
+  {
+   "code": "DIA-SCI-6B",
+   "type": "subdomain",
+   "name": "6° básico",
+   "parentCode": "DIA-SCI",
+   "marco": "dia",
+   "subjectCode": "SCI",
+   "level": "6_basico",
+   "source": "dia",
+   "order": 6
+  },
+  {
+   "code": "SCI-6B-OA01",
+   "type": "learning_objective",
+   "name": "Explicar, a partir de una investigación experimental, los requerimientos de agua, dióxido de carbono y energía lumínica para la producción de azúcar y liberación de oxígeno en la fotosíntesis, comunicando sus resultados y los aportes de científicos en este campo a través del tiempo.",
+   "parentCode": "CUR-CONTENIDO-SCI-6B-AX-CIENCIAS-DE-LA-VIDA",
+   "marco": "curriculum",
+   "subjectCode": "SCI",
+   "level": "6_basico",
+   "oaNumber": 1,
+   "source": "curriculumnacional.cl",
+   "order": 1
+  },
+  {
+   "code": "SCI-6B-OA02",
+   "type": "learning_objective",
+   "name": "Representar, por medio de modelos, la transferencia de energía y materia desde los organismos fotosintéticos a otros seres vivos por medio de cadenas y redes alimentarias en diferentes ecosistemas.",
+   "parentCode": "CUR-CONTENIDO-SCI-6B-AX-CIENCIAS-DE-LA-VIDA",
+   "marco": "curriculum",
+   "subjectCode": "SCI",
+   "level": "6_basico",
+   "oaNumber": 2,
+   "source": "curriculumnacional.cl",
+   "order": 2
+  },
+  {
+   "code": "SCI-6B-OA03",
+   "type": "learning_objective",
+   "name": "Analizar los efectos de la actividad humana sobre las redes alimentarias.",
+   "parentCode": "CUR-CONTENIDO-SCI-6B-AX-CIENCIAS-DE-LA-VIDA",
+   "marco": "curriculum",
+   "subjectCode": "SCI",
+   "level": "6_basico",
+   "oaNumber": 3,
+   "source": "curriculumnacional.cl",
+   "order": 3
+  },
+  {
+   "code": "SCI-6B-OA04",
+   "type": "learning_objective",
+   "name": "Identificar y describir las funciones de las principales estructuras del sistema reproductor humano femenino y masculino.",
+   "parentCode": "CUR-CONTENIDO-SCI-6B-AX-CIENCIAS-DE-LA-VIDA",
+   "marco": "curriculum",
+   "subjectCode": "SCI",
+   "level": "6_basico",
+   "oaNumber": 4,
+   "source": "curriculumnacional.cl",
+   "order": 4
+  },
+  {
+   "code": "SCI-6B-OA05",
+   "type": "learning_objective",
+   "name": "Describir y comparar los cambios que se producen en la pubertad en mujeres y hombres, reconociéndola como una etapa del desarrollo humano.",
+   "parentCode": "CUR-CONTENIDO-SCI-6B-AX-CIENCIAS-DE-LA-VIDA",
+   "marco": "curriculum",
+   "subjectCode": "SCI",
+   "level": "6_basico",
+   "oaNumber": 5,
+   "source": "curriculumnacional.cl",
+   "order": 5
+  },
+  {
+   "code": "SCI-6B-OA06",
+   "type": "learning_objective",
+   "name": "Reconocer los beneficios de realizar actividad física en forma regular y de cuidar la higiene corporal en el período de la pubertad.",
+   "parentCode": "CUR-CONTENIDO-SCI-6B-AX-CIENCIAS-DE-LA-VIDA",
+   "marco": "curriculum",
+   "subjectCode": "SCI",
+   "level": "6_basico",
+   "oaNumber": 6,
+   "source": "curriculumnacional.cl",
+   "order": 6
+  },
+  {
+   "code": "SCI-6B-OA07",
+   "type": "learning_objective",
+   "name": "Investigar y comunicar los efectos nocivos de algunas drogas para la salud, proponiendo conductas de protección.",
+   "parentCode": "CUR-CONTENIDO-SCI-6B-AX-CIENCIAS-DE-LA-VIDA",
+   "marco": "curriculum",
+   "subjectCode": "SCI",
+   "level": "6_basico",
+   "oaNumber": 7,
+   "source": "curriculumnacional.cl",
+   "order": 7
+  },
+  {
+   "code": "SCI-6B-OA08",
+   "type": "learning_objective",
+   "name": "Explicar que la energía es necesaria para que los objetos cambien y los seres vivos realicen sus procesos vitales, y que la mayoría de los recursos energéticos proviene directa o indirectamente del Sol, dando ejemplos de ello.",
+   "parentCode": "CUR-CONTENIDO-SCI-6B-AX-CIENCIAS-FISICAS-Y-QUIMICAS",
+   "marco": "curriculum",
+   "subjectCode": "SCI",
+   "level": "6_basico",
+   "oaNumber": 8,
+   "source": "curriculumnacional.cl",
+   "order": 8
+  },
+  {
+   "code": "SCI-6B-OA09",
+   "type": "learning_objective",
+   "name": "Investigar en forma experimental la transformación de la energía de una forma a otra, dando ejemplos y comunicando sus conclusiones.",
+   "parentCode": "CUR-CONTENIDO-SCI-6B-AX-CIENCIAS-FISICAS-Y-QUIMICAS",
+   "marco": "curriculum",
+   "subjectCode": "SCI",
+   "level": "6_basico",
+   "oaNumber": 9,
+   "source": "curriculumnacional.cl",
+   "order": 9
+  },
+  {
+   "code": "SCI-6B-OA10",
+   "type": "learning_objective",
+   "name": "Demostrar, por medio de la investigación experimental, que el calor fluye de un objeto caliente a uno frío hasta que ambos alcanzan la misma temperatura.",
+   "parentCode": "CUR-CONTENIDO-SCI-6B-AX-CIENCIAS-FISICAS-Y-QUIMICAS",
+   "marco": "curriculum",
+   "subjectCode": "SCI",
+   "level": "6_basico",
+   "oaNumber": 10,
+   "source": "curriculumnacional.cl",
+   "order": 10
+  },
+  {
+   "code": "SCI-6B-OA11",
+   "type": "learning_objective",
+   "name": "Clasificar los recursos naturales energéticos en no renovables y renovables y proponer medidas para el uso responsable de la energía.",
+   "parentCode": "CUR-CONTENIDO-SCI-6B-AX-CIENCIAS-FISICAS-Y-QUIMICAS",
+   "marco": "curriculum",
+   "subjectCode": "SCI",
+   "level": "6_basico",
+   "oaNumber": 11,
+   "source": "curriculumnacional.cl",
+   "order": 11
+  },
+  {
+   "code": "SCI-6B-OA12",
+   "type": "learning_objective",
+   "name": "Explicar, a partir de modelos, que la materia está formada por partículas en movimiento en sus estados sólido, líquido y gaseoso.",
+   "parentCode": "CUR-CONTENIDO-SCI-6B-AX-CIENCIAS-FISICAS-Y-QUIMICAS",
+   "marco": "curriculum",
+   "subjectCode": "SCI",
+   "level": "6_basico",
+   "oaNumber": 12,
+   "source": "curriculumnacional.cl",
+   "order": 12
+  },
+  {
+   "code": "SCI-6B-OA13",
+   "type": "learning_objective",
+   "name": "Demostrar, mediante la investigación experimental, los cambios de estado de la materia, como fusión, evaporación, ebullición, condensación, solidificación y sublimación.",
+   "parentCode": "CUR-CONTENIDO-SCI-6B-AX-CIENCIAS-FISICAS-Y-QUIMICAS",
+   "marco": "curriculum",
+   "subjectCode": "SCI",
+   "level": "6_basico",
+   "oaNumber": 13,
+   "source": "curriculumnacional.cl",
+   "order": 13
+  },
+  {
+   "code": "SCI-6B-OA14",
+   "type": "learning_objective",
+   "name": "Diferenciar entre calor y temperatura, considerando que el calor es una forma de energía y la temperatura es una medida de lo caliente de un objeto.",
+   "parentCode": "CUR-CONTENIDO-SCI-6B-AX-CIENCIAS-FISICAS-Y-QUIMICAS",
+   "marco": "curriculum",
+   "subjectCode": "SCI",
+   "level": "6_basico",
+   "oaNumber": 14,
+   "source": "curriculumnacional.cl",
+   "order": 14
+  },
+  {
+   "code": "SCI-6B-OA15",
+   "type": "learning_objective",
+   "name": "Medir e interpretar la información obtenida al calentar y enfriar el agua, considerando las transformaciones de un estado a otro.",
+   "parentCode": "CUR-CONTENIDO-SCI-6B-AX-CIENCIAS-FISICAS-Y-QUIMICAS",
+   "marco": "curriculum",
+   "subjectCode": "SCI",
+   "level": "6_basico",
+   "oaNumber": 15,
+   "source": "curriculumnacional.cl",
+   "order": 15
+  },
+  {
+   "code": "SCI-6B-OA16",
+   "type": "learning_objective",
+   "name": "Describir las características de las capas de la Tierra (atmósfera, litósfera e hidrósfera) que posibilitan el desarrollo de la vida y proveen recursos para el ser humano, y proponer medidas de protección de dichas capas.",
+   "parentCode": "CUR-CONTENIDO-SCI-6B-AX-CIENCIAS-DE-LA-TIERRA-Y-EL-UNIVERSO",
+   "marco": "curriculum",
+   "subjectCode": "SCI",
+   "level": "6_basico",
+   "oaNumber": 16,
+   "source": "curriculumnacional.cl",
+   "order": 16
+  },
+  {
+   "code": "SCI-6B-OA17",
+   "type": "learning_objective",
+   "name": "Investigar experimentalmente la formación del suelo, sus propiedades (como color, textura y capacidad de retención de agua) y la importancia de protegerlo de la contaminación, comunicando sus resultados.",
+   "parentCode": "CUR-CONTENIDO-SCI-6B-AX-CIENCIAS-DE-LA-TIERRA-Y-EL-UNIVERSO",
+   "marco": "curriculum",
+   "subjectCode": "SCI",
+   "level": "6_basico",
+   "oaNumber": 17,
+   "source": "curriculumnacional.cl",
+   "order": 17
+  },
+  {
+   "code": "SCI-6B-OA18",
+   "type": "learning_objective",
+   "name": "Explicar las consecuencias de la erosión sobre la superficie de la Tierra, identificando los agentes que la provocan, como el viento, el agua y las actividades humanas.",
+   "parentCode": "CUR-CONTENIDO-SCI-6B-AX-CIENCIAS-DE-LA-TIERRA-Y-EL-UNIVERSO",
+   "marco": "curriculum",
+   "subjectCode": "SCI",
+   "level": "6_basico",
+   "oaNumber": 18,
+   "source": "curriculumnacional.cl",
+   "order": 18
+  },
+  {
+   "code": "SCI-6B-OA01-I1",
+   "type": "descriptor",
+   "name": "Establecen la pregunta que se busca responder en una investigación relacionada con los requerimientos de agua, dióxido de carbono y energía lumínica para la producción de azúcar y la liberación de oxígeno en la fotosíntesis.",
+   "parentCode": "DIA-SCI-6B",
+   "marco": "dia",
+   "subjectCode": "SCI",
+   "level": "6_basico",
+   "source": "dia-ficha-2026",
+   "order": 1
+  },
+  {
+   "code": "SCI-6B-OA01-I2",
+   "type": "descriptor",
+   "name": "Identifican las variables de una investigación relacionada con los requerimientos de agua, dióxido de carbono y energía lumínica para la producción de azúcar y la liberación de oxígeno en la fotosíntesis.",
+   "parentCode": "DIA-SCI-6B",
+   "marco": "dia",
+   "subjectCode": "SCI",
+   "level": "6_basico",
+   "source": "dia-ficha-2026",
+   "order": 2
+  },
+  {
+   "code": "SCI-6B-OA02-I1",
+   "type": "descriptor",
+   "name": "Interpretan información relacionada con el modelo de transferencia de energía y materia de las cadenas y redes alimentarias.",
+   "parentCode": "DIA-SCI-6B",
+   "marco": "dia",
+   "subjectCode": "SCI",
+   "level": "6_basico",
+   "source": "dia-ficha-2026",
+   "order": 1
+  },
+  {
+   "code": "SCI-6B-OA02-I2",
+   "type": "descriptor",
+   "name": "Formulan predicciones basadas en el modelo de transferencia de energía y materia de las cadenas y redes alimentarias.",
+   "parentCode": "DIA-SCI-6B",
+   "marco": "dia",
+   "subjectCode": "SCI",
+   "level": "6_basico",
+   "source": "dia-ficha-2026",
+   "order": 2
+  },
+  {
+   "code": "SCI-6B-OA08-I1",
+   "type": "descriptor",
+   "name": "Identifican al Sol como fuente de energía principal de las cadenas y redes alimentarias.",
+   "parentCode": "DIA-SCI-6B",
+   "marco": "dia",
+   "subjectCode": "SCI",
+   "level": "6_basico",
+   "source": "dia-ficha-2026",
+   "order": 1
+  },
+  {
+   "code": "SCI-6B-OA03-I1",
+   "type": "descriptor",
+   "name": "Formulan predicciones relacionadas con los efectos de la actividad humana sobre las redes alimentarias.",
+   "parentCode": "DIA-SCI-6B",
+   "marco": "dia",
+   "subjectCode": "SCI",
+   "level": "6_basico",
+   "source": "dia-ficha-2026",
+   "order": 1
+  },
+  {
+   "code": "SCI-6B-OA04-I1",
+   "type": "descriptor",
+   "name": "Identifican las funciones de las distintas estructuras del sistema reproductor humano femenino y masculino.",
+   "parentCode": "DIA-SCI-6B",
+   "marco": "dia",
+   "subjectCode": "SCI",
+   "level": "6_basico",
+   "source": "dia-ficha-2026",
+   "order": 1
+  },
+  {
+   "code": "SCI-6B-OA04-I2",
+   "type": "descriptor",
+   "name": "Identifican las principales estructuras del sistema reproductor humano femenino y masculino, a partir de representaciones como fotografías, dibujos o diagramas.",
+   "parentCode": "DIA-SCI-6B",
+   "marco": "dia",
+   "subjectCode": "SCI",
+   "level": "6_basico",
+   "source": "dia-ficha-2026",
+   "order": 2
+  },
+  {
+   "code": "SCI-6B-OA05-I1",
+   "type": "descriptor",
+   "name": "Identifican los cambios que se producen en la pubertad en mujeres y hombres.",
+   "parentCode": "DIA-SCI-6B",
+   "marco": "dia",
+   "subjectCode": "SCI",
+   "level": "6_basico",
+   "source": "dia-ficha-2026",
+   "order": 1
+  },
+  {
+   "code": "SCI-6B-OA06-I1",
+   "type": "descriptor",
+   "name": "Identifican algunos beneficios de realizar actividad física en forma regular.",
+   "parentCode": "DIA-SCI-6B",
+   "marco": "dia",
+   "subjectCode": "SCI",
+   "level": "6_basico",
+   "source": "dia-ficha-2026",
+   "order": 1
+  },
+  {
+   "code": "SCI-6B-OA07-I1",
+   "type": "descriptor",
+   "name": "Interpretan información relacionada con los efectos nocivos de algunas drogas para la salud.",
+   "parentCode": "DIA-SCI-6B",
+   "marco": "dia",
+   "subjectCode": "SCI",
+   "level": "6_basico",
+   "source": "dia-ficha-2026",
+   "order": 1
+  },
+  {
+   "code": "SCI-6B-OA07-I2",
+   "type": "descriptor",
+   "name": "Seleccionan estrategias adecuadas para comunicar información sobre los efectos nocivos de algunas drogas para la salud y las conductas de protección.",
+   "parentCode": "DIA-SCI-6B",
+   "marco": "dia",
+   "subjectCode": "SCI",
+   "level": "6_basico",
+   "source": "dia-ficha-2026",
+   "order": 2
+  },
+  {
+   "code": "SCI-6B-OA10-I1",
+   "type": "descriptor",
+   "name": "Establecen la pregunta que se busca responder en una investigación relacionada con que el calor fluye de un objeto caliente a uno frío hasta que ambos alcanzan la misma temperatura.",
+   "parentCode": "DIA-SCI-6B",
+   "marco": "dia",
+   "subjectCode": "SCI",
+   "level": "6_basico",
+   "source": "dia-ficha-2026",
+   "order": 1
+  },
+  {
+   "code": "SCI-6B-OA10-I2",
+   "type": "descriptor",
+   "name": "Formulan predicciones basadas en observaciones previamente realizadas relacionadas con que el calor fluye de un objeto caliente a uno frío hasta que ambos alcanzan la misma temperatura.",
+   "parentCode": "DIA-SCI-6B",
+   "marco": "dia",
+   "subjectCode": "SCI",
+   "level": "6_basico",
+   "source": "dia-ficha-2026",
+   "order": 2
+  },
+  {
+   "code": "SCI-6B-OA09-I1",
+   "type": "descriptor",
+   "name": "Interpretan información relacionada con la transformación de la energía de una forma a otra.",
+   "parentCode": "DIA-SCI-6B",
+   "marco": "dia",
+   "subjectCode": "SCI",
+   "level": "6_basico",
+   "source": "dia-ficha-2026",
+   "order": 1
+  },
+  {
+   "code": "SCI-6B-OA10-I3",
+   "type": "descriptor",
+   "name": "Identifican un procedimiento que permita responder una pregunta de investigación relacionada con que el calor fluye de un objeto caliente a uno frío hasta que ambos alcanzan la misma temperatura.",
+   "parentCode": "DIA-SCI-6B",
+   "marco": "dia",
+   "subjectCode": "SCI",
+   "level": "6_basico",
+   "source": "dia-ficha-2026",
+   "order": 3
+  },
+  {
+   "code": "SCI-6B-OA11-I1",
+   "type": "descriptor",
+   "name": "Seleccionan estrategias adecuadas para comunicar información sobre medidas para el uso responsable de la energía.",
+   "parentCode": "DIA-SCI-6B",
+   "marco": "dia",
+   "subjectCode": "SCI",
+   "level": "6_basico",
+   "source": "dia-ficha-2026",
+   "order": 1
+  },
+  {
+   "code": "SCI-6B-OA12-I1",
+   "type": "descriptor",
+   "name": "Interpretan información relacionada con que la materia está formada por partículas en movimiento en sus estados sólido, líquido y gaseoso.",
+   "parentCode": "DIA-SCI-6B",
+   "marco": "dia",
+   "subjectCode": "SCI",
+   "level": "6_basico",
+   "source": "dia-ficha-2026",
+   "order": 1
+  },
+  {
+   "code": "SCI-6B-OA13-I1",
+   "type": "descriptor",
+   "name": "Identifican cambios de estado en situaciones cotidianas.",
+   "parentCode": "DIA-SCI-6B",
+   "marco": "dia",
+   "subjectCode": "SCI",
+   "level": "6_basico",
+   "source": "dia-ficha-2026",
+   "order": 1
+  },
+  {
+   "code": "SCI-6B-OA13-I2",
+   "type": "descriptor",
+   "name": "Establecen la pregunta que se busca responder en una investigación relacionada con los cambios de estado de la materia.",
+   "parentCode": "DIA-SCI-6B",
+   "marco": "dia",
+   "subjectCode": "SCI",
+   "level": "6_basico",
+   "source": "dia-ficha-2026",
+   "order": 2
+  },
+  {
+   "code": "SCI-6B-OA13-I3",
+   "type": "descriptor",
+   "name": "Identifican riesgos potenciales al manipular materiales e instrumentos durante una investigación relacionada con los cambios de estado de la materia.",
+   "parentCode": "DIA-SCI-6B",
+   "marco": "dia",
+   "subjectCode": "SCI",
+   "level": "6_basico",
+   "source": "dia-ficha-2026",
+   "order": 3
+  },
+  {
+   "code": "SCI-6B-OA13-I4",
+   "type": "descriptor",
+   "name": "Diseñan un procedimiento que permita responder una pregunta de investigación relacionada con los cambios de estado de la materia.",
+   "parentCode": "DIA-SCI-6B",
+   "marco": "dia",
+   "subjectCode": "SCI",
+   "level": "6_basico",
+   "source": "dia-ficha-2026",
+   "order": 4
+  },
+  {
+   "code": "SCI-6B-OA14-I1",
+   "type": "descriptor",
+   "name": "Formulan conclusiones a partir de contextos relacionados con la distinción entre calor y temperatura.",
+   "parentCode": "DIA-SCI-6B",
+   "marco": "dia",
+   "subjectCode": "SCI",
+   "level": "6_basico",
+   "source": "dia-ficha-2026",
+   "order": 1
+  },
+  {
+   "code": "SCI-6B-OA15-I1",
+   "type": "descriptor",
+   "name": "Interpretan información obtenida al calentar y enfriar el agua, considerando las transformaciones de un estado a otro.",
+   "parentCode": "DIA-SCI-6B",
+   "marco": "dia",
+   "subjectCode": "SCI",
+   "level": "6_basico",
+   "source": "dia-ficha-2026",
+   "order": 1
+  },
+  {
+   "code": "SCI-6B-OA16-I1",
+   "type": "descriptor",
+   "name": "Seleccionan estrategias adecuadas para comunicar medidas de protección de las capas de la Tierra (atmósfera, litósfera e hidrósfera).",
+   "parentCode": "DIA-SCI-6B",
+   "marco": "dia",
+   "subjectCode": "SCI",
+   "level": "6_basico",
+   "source": "dia-ficha-2026",
+   "order": 1
+  },
+  {
+   "code": "SCI-6B-OA16-I2",
+   "type": "descriptor",
+   "name": "Interpretan información relacionada con la identificación de las propiedades de las capas de la Tierra.",
+   "parentCode": "DIA-SCI-6B",
+   "marco": "dia",
+   "subjectCode": "SCI",
+   "level": "6_basico",
+   "source": "dia-ficha-2026",
+   "order": 2
+  },
+  {
+   "code": "SCI-6B-OA17-I1",
+   "type": "descriptor",
+   "name": "Establecen la pregunta que se busca responder en una investigación relacionada con la formación del suelo y sus propiedades.",
+   "parentCode": "DIA-SCI-6B",
+   "marco": "dia",
+   "subjectCode": "SCI",
+   "level": "6_basico",
+   "source": "dia-ficha-2026",
+   "order": 1
+  },
+  {
+   "code": "SCI-6B-OA17-I2",
+   "type": "descriptor",
+   "name": "Interpretan información relacionada con la formación del suelo y sus propiedades.",
+   "parentCode": "DIA-SCI-6B",
+   "marco": "dia",
+   "subjectCode": "SCI",
+   "level": "6_basico",
+   "source": "dia-ficha-2026",
+   "order": 2
+  },
+  {
+   "code": "SCI-6B-OA18-I1",
+   "type": "descriptor",
+   "name": "Formulan inferencias a partir de contextos relacionados con la erosión sobre la superficie de la Tierra y los agentes que la provocan.",
+   "parentCode": "DIA-SCI-6B",
+   "marco": "dia",
+   "subjectCode": "SCI",
+   "level": "6_basico",
+   "source": "dia-ficha-2026",
+   "order": 1
+  },
+  {
+   "code": "SCI-6B-OA18-I2",
+   "type": "descriptor",
+   "name": "Establecen la pregunta que se busca responder en una investigación relacionada con las consecuencias de la erosión sobre la superficie de la Tierra y los agentes que la provocan.",
+   "parentCode": "DIA-SCI-6B",
+   "marco": "dia",
+   "subjectCode": "SCI",
+   "level": "6_basico",
+   "source": "dia-ficha-2026",
+   "order": 2
   }
  ],
  "mappings": [
@@ -24667,6 +25819,506 @@
   {
    "sourceCode": "ENG-5B-OA15-I1",
    "targetCode": "ENG-SK-EXPRESION-ESCRITA",
+   "mappingType": "related"
+  },
+  {
+   "sourceCode": "SCI-5B-OA01-I1",
+   "targetCode": "SCI-5B-OA01",
+   "mappingType": "subset"
+  },
+  {
+   "sourceCode": "SCI-5B-OA01-I1",
+   "targetCode": "SCI-SK-ANALIZAR-LA-EVIDENCIA-Y-COMUNICAR",
+   "mappingType": "related"
+  },
+  {
+   "sourceCode": "SCI-5B-OA01-I2",
+   "targetCode": "SCI-5B-OA01",
+   "mappingType": "subset"
+  },
+  {
+   "sourceCode": "SCI-5B-OA01-I2",
+   "targetCode": "SCI-SK-PLANIFICAR-Y-CONDUCIR-UNA-INVESTIGACION",
+   "mappingType": "related"
+  },
+  {
+   "sourceCode": "SCI-5B-OA02-I1",
+   "targetCode": "SCI-5B-OA02",
+   "mappingType": "subset"
+  },
+  {
+   "sourceCode": "SCI-5B-OA02-I2",
+   "targetCode": "SCI-5B-OA02",
+   "mappingType": "subset"
+  },
+  {
+   "sourceCode": "SCI-5B-OA03-I1",
+   "targetCode": "SCI-5B-OA03",
+   "mappingType": "subset"
+  },
+  {
+   "sourceCode": "SCI-5B-OA03-I2",
+   "targetCode": "SCI-5B-OA03",
+   "mappingType": "subset"
+  },
+  {
+   "sourceCode": "SCI-5B-OA03-I2",
+   "targetCode": "SCI-SK-ANALIZAR-LA-EVIDENCIA-Y-COMUNICAR",
+   "mappingType": "related"
+  },
+  {
+   "sourceCode": "SCI-5B-OA04-I1",
+   "targetCode": "SCI-5B-OA04",
+   "mappingType": "subset"
+  },
+  {
+   "sourceCode": "SCI-5B-OA04-I2",
+   "targetCode": "SCI-5B-OA04",
+   "mappingType": "subset"
+  },
+  {
+   "sourceCode": "SCI-5B-OA05-I1",
+   "targetCode": "SCI-5B-OA05",
+   "mappingType": "subset"
+  },
+  {
+   "sourceCode": "SCI-5B-OA05-I1",
+   "targetCode": "SCI-SK-ANALIZAR-LA-EVIDENCIA-Y-COMUNICAR",
+   "mappingType": "related"
+  },
+  {
+   "sourceCode": "SCI-5B-OA05-I2",
+   "targetCode": "SCI-5B-OA05",
+   "mappingType": "subset"
+  },
+  {
+   "sourceCode": "SCI-5B-OA05-I2",
+   "targetCode": "SCI-SK-ANALIZAR-LA-EVIDENCIA-Y-COMUNICAR",
+   "mappingType": "related"
+  },
+  {
+   "sourceCode": "SCI-5B-OA07-I1",
+   "targetCode": "SCI-5B-OA07",
+   "mappingType": "subset"
+  },
+  {
+   "sourceCode": "SCI-5B-OA07-I1",
+   "targetCode": "SCI-SK-PLANIFICAR-Y-CONDUCIR-UNA-INVESTIGACION",
+   "mappingType": "related"
+  },
+  {
+   "sourceCode": "SCI-5B-OA07-I2",
+   "targetCode": "SCI-5B-OA07",
+   "mappingType": "subset"
+  },
+  {
+   "sourceCode": "SCI-5B-OA07-I2",
+   "targetCode": "SCI-SK-ANALIZAR-LA-EVIDENCIA-Y-COMUNICAR",
+   "mappingType": "related"
+  },
+  {
+   "sourceCode": "SCI-5B-OA06-I1",
+   "targetCode": "SCI-5B-OA06",
+   "mappingType": "subset"
+  },
+  {
+   "sourceCode": "SCI-5B-OA06-I1",
+   "targetCode": "SCI-SK-PLANIFICAR-Y-CONDUCIR-UNA-INVESTIGACION",
+   "mappingType": "related"
+  },
+  {
+   "sourceCode": "SCI-5B-OA06-I2",
+   "targetCode": "SCI-5B-OA06",
+   "mappingType": "subset"
+  },
+  {
+   "sourceCode": "SCI-5B-OA06-I2",
+   "targetCode": "SCI-SK-ANALIZAR-LA-EVIDENCIA-Y-COMUNICAR",
+   "mappingType": "related"
+  },
+  {
+   "sourceCode": "SCI-5B-OA06-I3",
+   "targetCode": "SCI-5B-OA06",
+   "mappingType": "subset"
+  },
+  {
+   "sourceCode": "SCI-5B-OA08-I1",
+   "targetCode": "SCI-5B-OA08",
+   "mappingType": "subset"
+  },
+  {
+   "sourceCode": "SCI-5B-OA10-I1",
+   "targetCode": "SCI-5B-OA10",
+   "mappingType": "subset"
+  },
+  {
+   "sourceCode": "SCI-5B-OA10-I1",
+   "targetCode": "SCI-SK-ANALIZAR-LA-EVIDENCIA-Y-COMUNICAR",
+   "mappingType": "related"
+  },
+  {
+   "sourceCode": "SCI-5B-OA10-I2",
+   "targetCode": "SCI-5B-OA10",
+   "mappingType": "subset"
+  },
+  {
+   "sourceCode": "SCI-5B-OA10-I2",
+   "targetCode": "SCI-SK-OBSERVAR-Y-PREGUNTAR",
+   "mappingType": "related"
+  },
+  {
+   "sourceCode": "SCI-5B-OA09-I1",
+   "targetCode": "SCI-5B-OA09",
+   "mappingType": "subset"
+  },
+  {
+   "sourceCode": "SCI-5B-OA11-I1",
+   "targetCode": "SCI-5B-OA11",
+   "mappingType": "subset"
+  },
+  {
+   "sourceCode": "SCI-5B-OA11-I1",
+   "targetCode": "SCI-SK-ANALIZAR-LA-EVIDENCIA-Y-COMUNICAR",
+   "mappingType": "related"
+  },
+  {
+   "sourceCode": "SCI-5B-OA11-I2",
+   "targetCode": "SCI-5B-OA11",
+   "mappingType": "subset"
+  },
+  {
+   "sourceCode": "SCI-5B-OA11-I2",
+   "targetCode": "SCI-SK-ANALIZAR-LA-EVIDENCIA-Y-COMUNICAR",
+   "mappingType": "related"
+  },
+  {
+   "sourceCode": "SCI-5B-OA12-I1",
+   "targetCode": "SCI-5B-OA12",
+   "mappingType": "subset"
+  },
+  {
+   "sourceCode": "SCI-5B-OA12-I1",
+   "targetCode": "SCI-SK-ANALIZAR-LA-EVIDENCIA-Y-COMUNICAR",
+   "mappingType": "related"
+  },
+  {
+   "sourceCode": "SCI-5B-OA12-I2",
+   "targetCode": "SCI-5B-OA12",
+   "mappingType": "subset"
+  },
+  {
+   "sourceCode": "SCI-5B-OA12-I2",
+   "targetCode": "SCI-SK-ANALIZAR-LA-EVIDENCIA-Y-COMUNICAR",
+   "mappingType": "related"
+  },
+  {
+   "sourceCode": "SCI-5B-OA13-I1",
+   "targetCode": "SCI-5B-OA13",
+   "mappingType": "subset"
+  },
+  {
+   "sourceCode": "SCI-5B-OA13-I1",
+   "targetCode": "SCI-SK-ANALIZAR-LA-EVIDENCIA-Y-COMUNICAR",
+   "mappingType": "related"
+  },
+  {
+   "sourceCode": "SCI-5B-OA13-I2",
+   "targetCode": "SCI-5B-OA13",
+   "mappingType": "subset"
+  },
+  {
+   "sourceCode": "SCI-5B-OA13-I2",
+   "targetCode": "SCI-SK-ANALIZAR-LA-EVIDENCIA-Y-COMUNICAR",
+   "mappingType": "related"
+  },
+  {
+   "sourceCode": "SCI-5B-OA14-I1",
+   "targetCode": "SCI-5B-OA14",
+   "mappingType": "subset"
+  },
+  {
+   "sourceCode": "SCI-5B-OA14-I2",
+   "targetCode": "SCI-5B-OA14",
+   "mappingType": "subset"
+  },
+  {
+   "sourceCode": "SCI-5B-OA14-I3",
+   "targetCode": "SCI-5B-OA14",
+   "mappingType": "subset"
+  },
+  {
+   "sourceCode": "SCI-5B-OA14-I3",
+   "targetCode": "SCI-SK-ANALIZAR-LA-EVIDENCIA-Y-COMUNICAR",
+   "mappingType": "related"
+  },
+  {
+   "sourceCode": "SCI-6B-OA01-I1",
+   "targetCode": "SCI-6B-OA01",
+   "mappingType": "subset"
+  },
+  {
+   "sourceCode": "SCI-6B-OA01-I1",
+   "targetCode": "SCI-SK-OBSERVAR-Y-PREGUNTAR",
+   "mappingType": "related"
+  },
+  {
+   "sourceCode": "SCI-6B-OA01-I2",
+   "targetCode": "SCI-6B-OA01",
+   "mappingType": "subset"
+  },
+  {
+   "sourceCode": "SCI-6B-OA01-I2",
+   "targetCode": "SCI-SK-PLANIFICAR-Y-CONDUCIR-UNA-INVESTIGACION",
+   "mappingType": "related"
+  },
+  {
+   "sourceCode": "SCI-6B-OA02-I1",
+   "targetCode": "SCI-6B-OA02",
+   "mappingType": "subset"
+  },
+  {
+   "sourceCode": "SCI-6B-OA02-I1",
+   "targetCode": "SCI-SK-ANALIZAR-LA-EVIDENCIA-Y-COMUNICAR",
+   "mappingType": "related"
+  },
+  {
+   "sourceCode": "SCI-6B-OA02-I2",
+   "targetCode": "SCI-6B-OA02",
+   "mappingType": "subset"
+  },
+  {
+   "sourceCode": "SCI-6B-OA02-I2",
+   "targetCode": "SCI-SK-OBSERVAR-Y-PREGUNTAR",
+   "mappingType": "related"
+  },
+  {
+   "sourceCode": "SCI-6B-OA08-I1",
+   "targetCode": "SCI-6B-OA08",
+   "mappingType": "subset"
+  },
+  {
+   "sourceCode": "SCI-6B-OA03-I1",
+   "targetCode": "SCI-6B-OA03",
+   "mappingType": "subset"
+  },
+  {
+   "sourceCode": "SCI-6B-OA03-I1",
+   "targetCode": "SCI-SK-OBSERVAR-Y-PREGUNTAR",
+   "mappingType": "related"
+  },
+  {
+   "sourceCode": "SCI-6B-OA04-I1",
+   "targetCode": "SCI-6B-OA04",
+   "mappingType": "subset"
+  },
+  {
+   "sourceCode": "SCI-6B-OA04-I2",
+   "targetCode": "SCI-6B-OA04",
+   "mappingType": "subset"
+  },
+  {
+   "sourceCode": "SCI-6B-OA05-I1",
+   "targetCode": "SCI-6B-OA05",
+   "mappingType": "subset"
+  },
+  {
+   "sourceCode": "SCI-6B-OA06-I1",
+   "targetCode": "SCI-6B-OA06",
+   "mappingType": "subset"
+  },
+  {
+   "sourceCode": "SCI-6B-OA07-I1",
+   "targetCode": "SCI-6B-OA07",
+   "mappingType": "subset"
+  },
+  {
+   "sourceCode": "SCI-6B-OA07-I1",
+   "targetCode": "SCI-SK-ANALIZAR-LA-EVIDENCIA-Y-COMUNICAR",
+   "mappingType": "related"
+  },
+  {
+   "sourceCode": "SCI-6B-OA07-I2",
+   "targetCode": "SCI-6B-OA07",
+   "mappingType": "subset"
+  },
+  {
+   "sourceCode": "SCI-6B-OA07-I2",
+   "targetCode": "SCI-SK-ANALIZAR-LA-EVIDENCIA-Y-COMUNICAR",
+   "mappingType": "related"
+  },
+  {
+   "sourceCode": "SCI-6B-OA10-I1",
+   "targetCode": "SCI-6B-OA10",
+   "mappingType": "subset"
+  },
+  {
+   "sourceCode": "SCI-6B-OA10-I1",
+   "targetCode": "SCI-SK-OBSERVAR-Y-PREGUNTAR",
+   "mappingType": "related"
+  },
+  {
+   "sourceCode": "SCI-6B-OA10-I2",
+   "targetCode": "SCI-6B-OA10",
+   "mappingType": "subset"
+  },
+  {
+   "sourceCode": "SCI-6B-OA10-I2",
+   "targetCode": "SCI-SK-OBSERVAR-Y-PREGUNTAR",
+   "mappingType": "related"
+  },
+  {
+   "sourceCode": "SCI-6B-OA09-I1",
+   "targetCode": "SCI-6B-OA09",
+   "mappingType": "subset"
+  },
+  {
+   "sourceCode": "SCI-6B-OA09-I1",
+   "targetCode": "SCI-SK-ANALIZAR-LA-EVIDENCIA-Y-COMUNICAR",
+   "mappingType": "related"
+  },
+  {
+   "sourceCode": "SCI-6B-OA10-I3",
+   "targetCode": "SCI-6B-OA10",
+   "mappingType": "subset"
+  },
+  {
+   "sourceCode": "SCI-6B-OA10-I3",
+   "targetCode": "SCI-SK-PLANIFICAR-Y-CONDUCIR-UNA-INVESTIGACION",
+   "mappingType": "related"
+  },
+  {
+   "sourceCode": "SCI-6B-OA11-I1",
+   "targetCode": "SCI-6B-OA11",
+   "mappingType": "subset"
+  },
+  {
+   "sourceCode": "SCI-6B-OA11-I1",
+   "targetCode": "SCI-SK-ANALIZAR-LA-EVIDENCIA-Y-COMUNICAR",
+   "mappingType": "related"
+  },
+  {
+   "sourceCode": "SCI-6B-OA12-I1",
+   "targetCode": "SCI-6B-OA12",
+   "mappingType": "subset"
+  },
+  {
+   "sourceCode": "SCI-6B-OA12-I1",
+   "targetCode": "SCI-SK-ANALIZAR-LA-EVIDENCIA-Y-COMUNICAR",
+   "mappingType": "related"
+  },
+  {
+   "sourceCode": "SCI-6B-OA13-I1",
+   "targetCode": "SCI-6B-OA13",
+   "mappingType": "subset"
+  },
+  {
+   "sourceCode": "SCI-6B-OA13-I2",
+   "targetCode": "SCI-6B-OA13",
+   "mappingType": "subset"
+  },
+  {
+   "sourceCode": "SCI-6B-OA13-I2",
+   "targetCode": "SCI-SK-OBSERVAR-Y-PREGUNTAR",
+   "mappingType": "related"
+  },
+  {
+   "sourceCode": "SCI-6B-OA13-I3",
+   "targetCode": "SCI-6B-OA13",
+   "mappingType": "subset"
+  },
+  {
+   "sourceCode": "SCI-6B-OA13-I3",
+   "targetCode": "SCI-SK-PLANIFICAR-Y-CONDUCIR-UNA-INVESTIGACION",
+   "mappingType": "related"
+  },
+  {
+   "sourceCode": "SCI-6B-OA13-I4",
+   "targetCode": "SCI-6B-OA13",
+   "mappingType": "subset"
+  },
+  {
+   "sourceCode": "SCI-6B-OA13-I4",
+   "targetCode": "SCI-SK-PLANIFICAR-Y-CONDUCIR-UNA-INVESTIGACION",
+   "mappingType": "related"
+  },
+  {
+   "sourceCode": "SCI-6B-OA14-I1",
+   "targetCode": "SCI-6B-OA14",
+   "mappingType": "subset"
+  },
+  {
+   "sourceCode": "SCI-6B-OA14-I1",
+   "targetCode": "SCI-SK-ANALIZAR-LA-EVIDENCIA-Y-COMUNICAR",
+   "mappingType": "related"
+  },
+  {
+   "sourceCode": "SCI-6B-OA15-I1",
+   "targetCode": "SCI-6B-OA15",
+   "mappingType": "subset"
+  },
+  {
+   "sourceCode": "SCI-6B-OA15-I1",
+   "targetCode": "SCI-SK-ANALIZAR-LA-EVIDENCIA-Y-COMUNICAR",
+   "mappingType": "related"
+  },
+  {
+   "sourceCode": "SCI-6B-OA16-I1",
+   "targetCode": "SCI-6B-OA16",
+   "mappingType": "subset"
+  },
+  {
+   "sourceCode": "SCI-6B-OA16-I1",
+   "targetCode": "SCI-SK-ANALIZAR-LA-EVIDENCIA-Y-COMUNICAR",
+   "mappingType": "related"
+  },
+  {
+   "sourceCode": "SCI-6B-OA16-I2",
+   "targetCode": "SCI-6B-OA16",
+   "mappingType": "subset"
+  },
+  {
+   "sourceCode": "SCI-6B-OA16-I2",
+   "targetCode": "SCI-SK-ANALIZAR-LA-EVIDENCIA-Y-COMUNICAR",
+   "mappingType": "related"
+  },
+  {
+   "sourceCode": "SCI-6B-OA17-I1",
+   "targetCode": "SCI-6B-OA17",
+   "mappingType": "subset"
+  },
+  {
+   "sourceCode": "SCI-6B-OA17-I1",
+   "targetCode": "SCI-SK-OBSERVAR-Y-PREGUNTAR",
+   "mappingType": "related"
+  },
+  {
+   "sourceCode": "SCI-6B-OA17-I2",
+   "targetCode": "SCI-6B-OA17",
+   "mappingType": "subset"
+  },
+  {
+   "sourceCode": "SCI-6B-OA17-I2",
+   "targetCode": "SCI-SK-ANALIZAR-LA-EVIDENCIA-Y-COMUNICAR",
+   "mappingType": "related"
+  },
+  {
+   "sourceCode": "SCI-6B-OA18-I1",
+   "targetCode": "SCI-6B-OA18",
+   "mappingType": "subset"
+  },
+  {
+   "sourceCode": "SCI-6B-OA18-I1",
+   "targetCode": "SCI-SK-ANALIZAR-LA-EVIDENCIA-Y-COMUNICAR",
+   "mappingType": "related"
+  },
+  {
+   "sourceCode": "SCI-6B-OA18-I2",
+   "targetCode": "SCI-6B-OA18",
+   "mappingType": "subset"
+  },
+  {
+   "sourceCode": "SCI-6B-OA18-I2",
+   "targetCode": "SCI-SK-OBSERVAR-Y-PREGUNTAR",
    "mappingType": "related"
   }
  ]
