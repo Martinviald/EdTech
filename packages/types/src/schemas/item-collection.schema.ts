@@ -47,6 +47,8 @@ export type ItemCollectionItemModel = {
   itemId: string;
   position: number;
   createdAt: string | Date;
+  /** Nombre del instrumento del que proviene el ítem. Null si el ítem es suelto. */
+  instrumentName: string | null;
   item: ItemModel | null;
 };
 

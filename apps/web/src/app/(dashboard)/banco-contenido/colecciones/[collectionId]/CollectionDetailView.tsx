@@ -6,8 +6,10 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { toast } from 'sonner';
 import { ArrowLeft, FileStack, Trash2, X } from 'lucide-react';
-import type { ItemCollectionDetailModel } from '@soe/types';
+import type { ItemCollectionDetailModel, ItemModel } from '@soe/types';
 import { EmptyState, Field, PageHeader } from '@/components/shared';
+import { ItemDetailPanel } from '../../[instrumentId]/ItemDetailPanel';
+import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import {
@@ -50,6 +52,9 @@ export function CollectionDetailView({ collection, canManage }: CollectionDetail
   const [pending, startTransition] = useTransition();
   const [materializeOpen, setMaterializeOpen] = useState(false);
   const [instrumentName, setInstrumentName] = useState(collection.name);
+  const [detail, setDetail] = useState<{ item: ItemModel; instrumentName: string | null } | null>(
+    null,
+  );
 
   const items = collection.items;
 
@@ -157,36 +162,72 @@ export function CollectionDetailView({ collection, canManage }: CollectionDetail
         />
       ) : (
         <ul className="divide-y overflow-hidden rounded-lg border">
-          {items.map((entry, index) => (
-            <li key={entry.id} className="flex items-start gap-3 p-3">
-              <span className="mt-0.5 w-6 shrink-0 font-mono text-xs text-muted-foreground">
-                {index + 1}
-              </span>
-              <div className="min-w-0 flex-1 space-y-1">
-                <p className="truncate text-sm">
-                  {entry.item ? getContentPreview(entry.item.content) : 'Ítem no disponible'}
-                </p>
-                {entry.item && (
-                  <span className="text-xs text-muted-foreground">
-                    {ITEM_TYPE_LABELS[entry.item.type] ?? entry.item.type}
-                  </span>
+          {items.map((entry, index) => {
+            const item = entry.item;
+            const preview = item ? getContentPreview(item.content) : 'Ítem no disponible';
+            const typeLabel = item ? (ITEM_TYPE_LABELS[item.type] ?? item.type) : null;
+
+            return (
+              <li key={entry.id} className="flex items-stretch">
+                {item ? (
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setDetail({ item, instrumentName: entry.instrumentName ?? null })
+                    }
+                    className="flex flex-1 items-start gap-3 p-3 text-left transition-colors hover:bg-muted/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                  >
+                    <span className="mt-0.5 w-6 shrink-0 font-mono text-xs text-muted-foreground">
+                      {index + 1}
+                    </span>
+                    <div className="min-w-0 flex-1 space-y-1">
+                      <p className="truncate text-sm">{preview}</p>
+                      <div className="flex flex-wrap items-center gap-2">
+                        <span className="text-xs text-muted-foreground">{typeLabel}</span>
+                        {entry.instrumentName && (
+                          <Badge variant="outline" className="max-w-[240px] truncate text-2xs">
+                            {entry.instrumentName}
+                          </Badge>
+                        )}
+                      </div>
+                    </div>
+                  </button>
+                ) : (
+                  <div className="flex flex-1 items-start gap-3 p-3">
+                    <span className="mt-0.5 w-6 shrink-0 font-mono text-xs text-muted-foreground">
+                      {index + 1}
+                    </span>
+                    <p className="min-w-0 flex-1 truncate text-sm text-muted-foreground">
+                      {preview}
+                    </p>
+                  </div>
                 )}
-              </div>
-              {canManage && (
-                <Button
-                  size="icon"
-                  variant="ghost"
-                  onClick={() => handleRemove(entry.itemId)}
-                  disabled={pending}
-                  aria-label="Quitar ítem de la lista"
-                >
-                  <X className="h-4 w-4" />
-                </Button>
-              )}
-            </li>
-          ))}
+                {canManage && (
+                  <div className="flex items-center pr-1">
+                    <Button
+                      size="icon"
+                      variant="ghost"
+                      onClick={() => handleRemove(entry.itemId)}
+                      disabled={pending}
+                      aria-label="Quitar ítem de la lista"
+                    >
+                      <X className="h-4 w-4" />
+                    </Button>
+                  </div>
+                )}
+              </li>
+            );
+          })}
         </ul>
       )}
+
+      <ItemDetailPanel
+        item={detail?.item ?? null}
+        canAddToCollection={canManage}
+        instrumentName={detail?.instrumentName ?? undefined}
+        open={detail !== null}
+        onClose={() => setDetail(null)}
+      />
 
       <Dialog open={materializeOpen} onOpenChange={setMaterializeOpen}>
         <DialogContent>
