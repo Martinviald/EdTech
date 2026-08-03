@@ -1,23 +1,19 @@
 import type { AnswerSheetRowError } from '@soe/types';
 
 /**
- * Respuesta de un alumno a UNA posición del instrumento.
- *
- * - `string | null`: el caso normal — una alternativa marcada, o en blanco.
- * - `Record<string, string>`: un ítem COMPUESTO, cuyo escaneo trae varias
- *   sub-columnas para una sola pregunta impresa (`7B1`, `7B2`, … o `9.1`,
- *   `9.2`, …). Se indexa por la sub-etiqueta y se resuelve más arriba, donde se
- *   conoce el `item.type` — el parser no sabe de tipos de ítem.
- */
-export type ParsedAnswerValue = string | null | Record<string, string>;
-
-/**
  * Fila parseada desde un archivo CSV/Excel de hojas de respuesta.
  *
  * - `studentRut`: tal cual viene en el archivo. La normalización canónica
  *   (chequear DV, formatear) ocurre en el matcher, no acá.
- * - `answers`: mapa de `position` (string, ej. "1", "12") → respuesta del alumno
- *   (ver `ParsedAnswerValue`).
+ * - `answers`: mapa de ETIQUETA IMPRESA (tal como la numera la hoja: "1", "12",
+ *   "14.2", "7B1") → alternativa marcada, o null si en blanco.
+ *
+ *   ⚠️ La key NO es la `position` del ítem. El parser no conoce el instrumento,
+ *   así que no puede resolverla: en un cuadernillo con sub-numeración el número
+ *   impreso y la posición NO coinciden (Ciencias 8° 2026 imprime `14.1..14.5`
+ *   sobre posiciones correlativas). Traducir etiqueta → `position` es trabajo del
+ *   service, que sí tiene los ítems — ver `lib/composite-answers.ts`.
+ *
  * - `errors`: errores específicos de la fila — el parser igual la incluye
  *   para que el matcher/preview reporte todo de una vez.
  */
@@ -25,7 +21,7 @@ export interface ParsedAnswerSheetRow {
   rowNumber: number;
   studentRut: string | null;
   studentFullName: string | null;
-  answers: Record<string, ParsedAnswerValue>;
+  answers: Record<string, string | null>;
   errors: AnswerSheetRowError[];
 }
 
@@ -57,66 +53,38 @@ export function decodeCsvBuffer(buffer: Buffer): string {
 }
 
 /**
- * Normaliza una clave de pregunta como "Q1", "Q01", "p1", "1" → posición
- * numérica como string ("1", "12"). Si no contiene dígitos, retorna null.
- */
-export function questionColumnToPosition(column: string): string | null {
-  return parseQuestionColumn(column)?.position ?? null;
-}
-
-/**
- * Separa una columna de pregunta en la posición del ítem y, si la trae, la
- * sub-etiqueta de una sub-pregunta:
+ * Etiqueta impresa de una columna de pregunta, sin el prefijo del proveedor:
  *
- *   "Q12"  → { position: "12", subKey: null }
- *   "7B1"  → { position: "7",  subKey: "B1" }
- *   "9.1"  → { position: "9",  subKey: "1"  }
- *   "19.5" → { position: "19", subKey: "5"  }
+ *   "Q12"  → "12"        "Q14.2" → "14.2"
+ *   "7B1"  → "7B1"       "p9.1"  → "9.1"
  *
- * ⚠️ Antes de esto, la posición se sacaba con un único `match(/(\d+)/)`, así que
- * `7B1`…`7B4` colapsaban todas en la posición `7` y ganaba la última EN SILENCIO
- * (mismo bug con `9.1..9.4` y `19.1..19.5`). Distinguir la sub-etiqueta es lo que
- * permite reconstruir la respuesta compuesta en vez de perderla.
+ * Preserva la sub-numeración TAL CUAL: es lo que permite después distinguir un
+ * ítem propio (`14.2`) de una sub-respuesta de un ítem compuesto (`7B1`), cosa
+ * que sólo se puede decidir contra el instrumento. Si no contiene dígitos o el
+ * número base es 0, retorna null.
  */
-export function parseQuestionColumn(
-  column: string,
-): { position: string; subKey: string | null } | null {
+export function questionColumnToLabel(column: string): string | null {
   const m = column.trim().match(/^[^\d]*(\d+)(.*)$/);
   if (!m || !m[1]) return null;
   const n = parseInt(m[1], 10);
   if (!Number.isFinite(n) || n <= 0) return null;
 
-  const rest = (m[2] ?? '')
-    .trim()
-    .replace(/^[.\-_:]+/, '')
-    .trim();
-  return { position: String(n), subKey: rest.length > 0 ? rest : null };
+  const rest = (m[2] ?? '').trim();
+  return `${n}${rest}`;
 }
 
 /**
- * Escribe la respuesta de una columna en el mapa de la fila, agrupando las
- * sub-columnas de un mismo ítem en un único valor compuesto. Es el único punto
+ * Escribe la respuesta de una columna en el mapa de la fila. Es el único punto
  * donde los 4 parsers escriben `answers`, para que la regla sea una sola.
  */
 export function assignAnswer(
-  answers: Record<string, ParsedAnswerValue>,
+  answers: Record<string, string | null>,
   column: string,
   rawValue: string | undefined | null,
 ): void {
-  const parsed = parseQuestionColumn(column);
-  if (!parsed) return;
-  const value = normalizeAnswerValue(rawValue);
-
-  if (parsed.subKey === null) {
-    answers[parsed.position] = value;
-    return;
-  }
-
-  const existing = answers[parsed.position];
-  const composite =
-    existing !== null && typeof existing === 'object' ? existing : ({} as Record<string, string>);
-  if (value !== null) composite[parsed.subKey] = value;
-  answers[parsed.position] = composite;
+  const label = questionColumnToLabel(column);
+  if (!label) return;
+  answers[label] = normalizeAnswerValue(rawValue);
 }
 
 /**

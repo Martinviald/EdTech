@@ -527,9 +527,13 @@ describe('AnswerSheetsService', () => {
       expect(preview.summary.totalRows).toBe(2);
       expect(preview.summary.matchedStudents).toBe(1);
       expect(preview.summary.unmatchedStudents).toBe(1);
-      // El CSV trae respuestas para 3 posiciones (1, 2, 3) y el instrumento tiene 2 ítems
-      expect(preview.summary.itemsCovered).toBe(3);
+      // El CSV trae 3 columnas (Q1, Q2, Q3) y el instrumento tiene 2 ítems.
+      // `itemsCovered` cuenta ÍTEMS DEL INSTRUMENTO cubiertos por el escaneo, no
+      // columnas del archivo: cubrir "3 de 2" no significaba nada. La columna
+      // sobrante se reporta como no resuelta en vez de inflar la cobertura.
+      expect(preview.summary.itemsCovered).toBe(2);
       expect(preview.summary.itemsInInstrument).toBe(2);
+      expect(preview.warnings.some((w) => w.includes('no corresponden'))).toBe(true);
     });
 
     it('rechaza con 404 si el previewToken no existe', async () => {

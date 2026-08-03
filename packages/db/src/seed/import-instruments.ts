@@ -295,24 +295,46 @@ function buildTrueFalseContent(it: Item): Record<string, unknown> {
 function resolveItemType(it: Item): string {
   if (it.type === 'matching') return 'matching';
   if ((it.matchPairs ?? []).length > 0 || it.responseFormat === 'match_pairs') return 'matching';
+  if (it.type === 'true_false' || isTrueFalseAlternatives(it)) return 'true_false';
   return it.type;
 }
 
+/**
+ * ¿Las alternativas son exactamente Verdadero/Falso? La extracción tipa estos
+ * ítems como `multiple_choice` con `A. Verdadero` / `B. Falso`, pero la hoja de
+ * respuestas los escanea como `V`/`F`: corregirlos contra la LETRA da siempre
+ * incorrecto (verificado contra los scans reales de Ciencias 8°, donde los 9
+ * ítems V/F puntuaban 0). Como `true_false`, la estrategia normaliza ambas
+ * formas a una clave canónica y el escaneo calza.
+ */
+function isTrueFalseAlternatives(it: Item): boolean {
+  const alternatives = it.alternatives ?? [];
+  if (alternatives.length !== 2) return false;
+  const texts = alternatives.map((a) => a.text.trim().toLowerCase());
+  return texts.includes('verdadero') && texts.includes('falso');
+}
+
 export function buildContent(it: Item): Record<string, unknown> {
-  if (resolveItemType(it) === 'matching') return buildMatchingContent(it);
-  if (it.type === 'multiple_choice') {
-    return {
-      stem: it.stem,
-      alternatives: (it.alternatives ?? []).map((a) => ({
-        key: a.key,
-        text: a.text,
-        isCorrect: a.isCorrect === true,
-      })),
-    };
+  // Siempre por el tipo RESUELTO, nunca por `it.type`: los V/F llegan tipados
+  // como multiple_choice y la rama MCQ se los tragaría antes de llegar a la suya.
+  switch (resolveItemType(it)) {
+    case 'matching':
+      return buildMatchingContent(it);
+    case 'true_false':
+      return buildTrueFalseContent(it);
+    case 'multiple_choice':
+      return {
+        stem: it.stem,
+        alternatives: (it.alternatives ?? []).map((a) => ({
+          key: a.key,
+          text: a.text,
+          isCorrect: a.isCorrect === true,
+        })),
+      };
+    default:
+      // open_ended (incluye responseFormat fill_in / develop), writing, etc.
+      return { prompt: it.stem };
   }
-  if (it.type === 'true_false') return buildTrueFalseContent(it);
-  // open_ended (incluye responseFormat fill_in / develop), writing, etc.
-  return { prompt: it.stem };
 }
 
 /**

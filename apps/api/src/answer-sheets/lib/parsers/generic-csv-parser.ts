@@ -3,7 +3,6 @@ import type { AnswerSheetColumnMapping, AnswerSheetRowError } from '@soe/types';
 import {
   decodeCsvBuffer,
   assignAnswer,
-  type ParsedAnswerValue,
   type ParsedAnswerSheetRow,
   type ParserResult,
 } from './parser.types';
@@ -72,7 +71,7 @@ export function parseGenericCsv(buffer: Buffer, mapping: AnswerSheetColumnMappin
       errors.push({ rowNumber, field: rutCol, message: 'Falta el RUT del alumno' });
     }
 
-    const answers: Record<string, ParsedAnswerValue> = {};
+    const answers: Record<string, string | null> = {};
     for (const col of questionColumns) {
       assignAnswer(answers, col, raw[col]);
     }

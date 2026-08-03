@@ -291,6 +291,27 @@ contrato.
 
 ---
 
+## 7bis. Hallazgo abierto — ítems de multi-selección (fuera de este alcance)
+
+La verificación contra el escaneo real de 8A (§6, paso 7) dejó **13 alumnos de 44** con 1 punto de
+diferencia, todos por los mismos **3 ítems de Ciencias 8°** (posiciones 8, 27 y 40; impresos 8, 20 y
+29). No son pareados: son de **selección múltiple con varias respuestas correctas**.
+
+La extracción los tipa `multiple_choice` con `correctKey: "145"` y **tres** alternativas marcadas
+`isCorrect`. La estrategia MCQ deriva la clave de la PRIMERA alternativa correcta, así que:
+
+- el alumno que marca `"145"` (la respuesta completa) obtiene **0** — debería ser 1;
+- el alumno que marca sólo `"1"` obtiene **1** — debería ser 0.
+
+Es la misma clase de hueco que `matching` y `true_false` —el tipo real del ítem no es el que dice la
+extracción— pero es un **tipo de ítem distinto**, con su propia decisión de diseño pendiente
+(¿`multi_select` nuevo en el enum, o `multiple_choice` con `correctKeys`? ¿crédito parcial por opción
+o todo-o-nada?). No se resuelve acá para no decidirlo de facto.
+
+Una vez cerrado, el contraste alumno por alumno contra los `points` de GradeCam debería dar 44/44.
+
+---
+
 ## 8. Fuera de alcance
 
 - Componente interactivo de rendición en línea (F3+).
