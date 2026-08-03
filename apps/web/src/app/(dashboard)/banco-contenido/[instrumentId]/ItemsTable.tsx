@@ -151,6 +151,7 @@ export function ItemsTable({
       </div>
 
       <ItemDetailPanel
+        canAddToCollection={canEdit}
         item={selected}
         sections={sections}
         canEdit={canEdit}

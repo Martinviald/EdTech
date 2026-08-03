@@ -485,7 +485,7 @@ export function CrossTable({
         {displayQuestions.length === 1 ? 'pregunta' : 'preguntas'}
       </p>
 
-      <QuestionDetailPanel data={detail} open={open} onClose={closePanel} />
+      <QuestionDetailPanel data={detail} open={open} onClose={closePanel} canAddToCollection />
     </div>
   );
 }

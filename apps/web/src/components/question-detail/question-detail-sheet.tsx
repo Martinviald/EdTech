@@ -28,6 +28,8 @@ export function QuestionDetailSheet(props: {
   position?: number | null;
   /** Badges extra junto al de "Pregunta N" (tipo de ítem, clave correcta, …). */
   headerBadges?: ReactNode;
+  /** Acciones del header (kebab "Agregar a colección", …), alineadas a la derecha. */
+  headerActions?: ReactNode;
   /** Texto de la descripción accesible del panel. */
   description: string;
   /** Pasaje de lectura ya mapeado; si viene, se muestra el botón + diálogo. */
@@ -48,6 +50,7 @@ export function QuestionDetailSheet(props: {
     onClose,
     position,
     headerBadges,
+    headerActions,
     description,
     passage = null,
     figureItemId = null,
@@ -81,6 +84,7 @@ export function QuestionDetailSheet(props: {
           <div className="flex flex-wrap items-center gap-2">
             <Badge variant="secondary">{hasPosition ? `Pregunta ${position}` : 'Pregunta'}</Badge>
             {headerBadges}
+            {headerActions ? <div className="ml-auto">{headerActions}</div> : null}
           </div>
           <SheetTitle className="text-base leading-snug">
             {hasPosition ? `Detalle de la pregunta ${position}` : 'Detalle de la pregunta'}

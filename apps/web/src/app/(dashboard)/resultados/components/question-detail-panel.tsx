@@ -17,6 +17,7 @@ import {
 import { cn } from '@/lib/utils';
 import { QuestionDetailSheet } from '@/components/question-detail/question-detail-sheet';
 import { QuestionNodes, type QuestionNodeTag } from '@/components/question-detail/question-nodes';
+import { AddToCollectionMenu } from '@/components/collections/add-to-collection-menu';
 
 function questionSectionToPassage(section: QuestionSection): PassageData {
   return {
@@ -59,8 +60,9 @@ export function QuestionDetailPanel(props: {
   data: QuestionAnalysisResponse | null;
   open: boolean;
   onClose: () => void;
+  canAddToCollection?: boolean;
 }): JSX.Element {
-  const { data, open, onClose } = props;
+  const { data, open, onClose, canAddToCollection = false } = props;
   const section = data?.section ?? null;
   const passage = section && hasPassageContent(section) ? questionSectionToPassage(section) : null;
 
@@ -71,6 +73,9 @@ export function QuestionDetailPanel(props: {
       position={data?.position ?? null}
       headerBadges={
         data?.correctKey ? <Badge variant="success">Clave correcta: {data.correctKey}</Badge> : null
+      }
+      headerActions={
+        data && canAddToCollection ? <AddToCollectionMenu itemId={data.itemId} /> : undefined
       }
       description="Enunciado, distribución de respuestas, análisis de distractores y nodos asociados a la pregunta."
       passage={passage}

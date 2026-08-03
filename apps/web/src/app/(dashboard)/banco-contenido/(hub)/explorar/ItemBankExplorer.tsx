@@ -15,7 +15,7 @@ import { Button } from '@/components/ui/button';
 import { EmptyState } from '@/components/shared';
 import { TagBadge } from '../../[instrumentId]/TagBadge';
 import { ItemDetailPanel } from '../../[instrumentId]/ItemDetailPanel';
-import { SaveToCollectionDialog } from './SaveToCollectionDialog';
+import { SaveToCollectionDialog } from '@/components/collections/save-to-collection-dialog';
 
 const ITEM_TYPE_LABELS: Record<string, string> = {
   multiple_choice: 'Selección múltiple',
@@ -173,6 +173,7 @@ export function ItemBankExplorer({
 
       <ItemDetailPanel
         item={detail}
+        canAddToCollection={canManageCollections}
         instrumentName={
           detail
             ? detail.instrumentId

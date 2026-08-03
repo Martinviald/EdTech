@@ -24,7 +24,10 @@ import {
 } from '@/components/ui/select';
 import { Field } from '@/components/shared';
 import { apiClientGet } from '@/lib/api-client';
-import { addItemsToCollection, createCollectionWithItems } from '../../colecciones/actions';
+import {
+  addItemsToCollection,
+  createCollectionWithItems,
+} from '@/app/(dashboard)/banco-contenido/colecciones/actions';
 
 type Mode = 'existing' | 'new';
 
