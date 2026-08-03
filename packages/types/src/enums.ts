@@ -54,6 +54,7 @@ export type InstrumentType = (typeof INSTRUMENT_TYPES)[number];
 
 export const ITEM_TYPES = [
   'multiple_choice',
+  'multi_select',
   'true_false',
   'open_ended',
   'oral_reading',

@@ -13,15 +13,23 @@ config({ path: resolve(__dirname, '../../../../.env') });
 
 import { readFileSync, readdirSync } from 'node:fs';
 import { and, eq, sql } from 'drizzle-orm';
-import { toApplicationPeriod, validateItemContent } from '@soe/types';
+import {
+  hasMultipleCorrectAlternatives,
+  toApplicationPeriod,
+  validateItemContent,
+} from '@soe/types';
 import { createDbClient, type Database } from '../client';
 import { instruments, instrumentSections, sectionAttachments } from '../schema/instruments';
-import { items } from '../schema/items';
+import { itemTaxonomyTags, items } from '../schema/items';
 import { subjects, grades } from '../schema/academic';
 import { taxonomies } from '../schema/taxonomy';
+import { responses } from '../schema/responses';
 
 // Override opcional (INSTRUMENTS_DATA_DIR) para cargar un set aislado sin re-importar el resto
 // (ej. la tanda DIA 2026 en su propio dir, sin tocar los instrumentos 2025 ya cargados).
+/** `--force` recrea el instrumento aunque tenga tags/respuestas colgando (ver assertSafeToRecreate). */
+const FORCE = process.argv.includes('--force');
+
 const DATA_DIR = process.env.INSTRUMENTS_DATA_DIR
   ? resolve(process.env.INSTRUMENTS_DATA_DIR)
   : resolve(__dirname, '../../data/instruments');
@@ -296,6 +304,11 @@ function resolveItemType(it: Item): string {
   if (it.type === 'matching') return 'matching';
   if ((it.matchPairs ?? []).length > 0 || it.responseFormat === 'match_pairs') return 'matching';
   if (it.type === 'true_false' || isTrueFalseAlternatives(it)) return 'true_false';
+  if (
+    it.type === 'multi_select' ||
+    hasMultipleCorrectAlternatives({ alternatives: it.alternatives })
+  )
+    return 'multi_select';
   return it.type;
 }
 
@@ -322,6 +335,7 @@ export function buildContent(it: Item): Record<string, unknown> {
       return buildMatchingContent(it);
     case 'true_false':
       return buildTrueFalseContent(it);
+    case 'multi_select':
     case 'multiple_choice':
       return {
         stem: it.stem,
@@ -346,6 +360,53 @@ export function resolvePoints(it: Item): number {
   if (typeof it.points === 'number' && it.points >= 0) return it.points;
   if (resolveItemType(it) === 'matching') return matchingPairCount(it) || 1;
   return 1;
+}
+
+/**
+ * Guard: este import es idempotente **borrando y recreando** el árbol del
+ * instrumento, y eso regenera los UUID de los ítems. El daño no es uniforme:
+ *
+ *   · `item_taxonomy_tags`, `item_versions`, `item_edit_proposals` cuelgan con
+ *     ON DELETE CASCADE ⇒ se destruyen EN SILENCIO;
+ *   · `responses`, `assessment_item_stats`, `item_collection_items` NO declaran
+ *     onDelete ⇒ el DELETE falla y la transacción revierte (molesto, pero seguro).
+ *
+ * Así que lo peligroso es re-importar un instrumento ya TAGUEADO: se pierde el
+ * trabajo de etiquetado sin ningún aviso. Antes de borrar se cuenta lo que
+ * colgaría y se aborta con el detalle, salvo `--force`.
+ *
+ * Para cambiar ítems ya cargados el camino correcto es UPDATE in-place
+ * (`db:retype:items`), no re-import.
+ */
+async function assertSafeToRecreate(
+  tx: Parameters<Parameters<Database['transaction']>[0]>[0],
+  instrumentId: string,
+  instrumentName: string,
+): Promise<void> {
+  if (FORCE) return;
+
+  const [counts] = await tx
+    .select({
+      tags: sql<number>`(select count(*)::int from ${itemTaxonomyTags} t
+        join ${items} i on i.id = t.item_id where i.instrument_id = ${instrumentId})`,
+      responses: sql<number>`(select count(*)::int from ${responses} r
+        join ${items} i on i.id = r.item_id where i.instrument_id = ${instrumentId})`,
+    })
+    .from(instruments)
+    .where(eq(instruments.id, instrumentId));
+
+  const tags = Number(counts?.tags ?? 0);
+  const responseCount = Number(counts?.responses ?? 0);
+  if (tags === 0 && responseCount === 0) return;
+
+  throw new Error(
+    `"${instrumentName}" ya está cargado y tiene datos dependientes:\n` +
+      `  · ${tags} item_taxonomy_tags   → se PERDERÍAN (ON DELETE CASCADE)\n` +
+      `  · ${responseCount} responses            → bloquearían el DELETE\n` +
+      'Re-importar borra y recrea los ítems (regenera sus UUID). Para cambiar ítems ya\n' +
+      'cargados usá UPDATE in-place (pnpm --filter @soe/db db:retype:items), no re-import.\n' +
+      'Si de verdad querés recrear el instrumento desde cero, re-corré con --force.',
+  );
 }
 
 export async function importInstruments(db: Database): Promise<void> {
@@ -390,6 +451,7 @@ export async function importInstruments(db: Database): Promise<void> {
         .from(instruments)
         .where(sql`${instruments.config} ->> 'sourceJson' = ${sourceJson}`);
       for (const p of prev) {
+        await assertSafeToRecreate(tx, p.id, ins.name);
         await tx.delete(items).where(eq(items.instrumentId, p.id)); // cascade: item_taxonomy_tags
         await tx.delete(instruments).where(eq(instruments.id, p.id)); // cascade: sections → section_attachments
       }

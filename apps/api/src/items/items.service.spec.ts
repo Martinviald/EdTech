@@ -14,7 +14,7 @@ function makeService() {
 
 function user(overrides: Partial<JwtPayload> = {}): JwtPayload {
   const role = overrides.activeRole ?? overrides.role ?? 'school_admin';
-  const isPlatformAdmin = overrides.isPlatformAdmin ?? (role === 'platform_admin');
+  const isPlatformAdmin = overrides.isPlatformAdmin ?? role === 'platform_admin';
   return {
     userId: 'u1',
     orgId: 'org-1',
@@ -54,9 +54,7 @@ describe('ItemsService.assertVisible', () => {
   const svc = makeService();
 
   it('allows viewing official items (null orgId) for any user', () => {
-    expect(() =>
-      svc.assertVisible(item({ orgId: null }), user()),
-    ).not.toThrow();
+    expect(() => svc.assertVisible(item({ orgId: null }), user())).not.toThrow();
   });
 
   it('allows viewing items from own org', () => {
@@ -66,17 +64,14 @@ describe('ItemsService.assertVisible', () => {
   });
 
   it('blocks items from another org', () => {
-    expect(() =>
-      svc.assertVisible(item({ orgId: 'other' }), user({ orgId: 'org-1' })),
-    ).toThrow(ForbiddenException);
+    expect(() => svc.assertVisible(item({ orgId: 'other' }), user({ orgId: 'org-1' }))).toThrow(
+      ForbiddenException,
+    );
   });
 
   it('platform_admin can see anything', () => {
     expect(() =>
-      svc.assertVisible(
-        item({ orgId: 'other' }),
-        user({ role: 'platform_admin' }),
-      ),
+      svc.assertVisible(item({ orgId: 'other' }), user({ role: 'platform_admin' })),
     ).not.toThrow();
   });
 });
@@ -85,9 +80,9 @@ describe('ItemsService.assertEditable', () => {
   const svc = makeService();
 
   it('blocks official items (null orgId) for non-admin', () => {
-    expect(() =>
-      svc.assertEditable(item({ orgId: null }), user({ role: 'school_admin' })),
-    ).toThrow(ForbiddenException);
+    expect(() => svc.assertEditable(item({ orgId: null }), user({ role: 'school_admin' }))).toThrow(
+      ForbiddenException,
+    );
   });
 
   it('allows platform_admin to edit official items', () => {
@@ -98,28 +93,19 @@ describe('ItemsService.assertEditable', () => {
 
   it('allows editing items from own org', () => {
     expect(() =>
-      svc.assertEditable(
-        item({ orgId: 'org-1' }),
-        user({ orgId: 'org-1', role: 'school_admin' }),
-      ),
+      svc.assertEditable(item({ orgId: 'org-1' }), user({ orgId: 'org-1', role: 'school_admin' })),
     ).not.toThrow();
   });
 
   it('blocks editing items from another org', () => {
     expect(() =>
-      svc.assertEditable(
-        item({ orgId: 'other' }),
-        user({ orgId: 'org-1', role: 'school_admin' }),
-      ),
+      svc.assertEditable(item({ orgId: 'other' }), user({ orgId: 'org-1', role: 'school_admin' })),
     ).toThrow(ForbiddenException);
   });
 
   it('platform_admin can edit items from any org', () => {
     expect(() =>
-      svc.assertEditable(
-        item({ orgId: 'other' }),
-        user({ role: 'platform_admin' }),
-      ),
+      svc.assertEditable(item({ orgId: 'other' }), user({ role: 'platform_admin' })),
     ).not.toThrow();
   });
 });
@@ -142,6 +128,14 @@ const VALID_CONTENT = {
     alternatives: [
       { key: 'A', text: '3', isCorrect: false },
       { key: 'B', text: '4', isCorrect: true },
+    ],
+  },
+  multi_select: {
+    stem: '¿Cuáles son números pares?',
+    alternatives: [
+      { key: '1', text: '2', isCorrect: true },
+      { key: '2', text: '3', isCorrect: false },
+      { key: '3', text: '4', isCorrect: true },
     ],
   },
   true_false: { stem: 'El cielo es azul', correctAnswer: true },
@@ -182,10 +176,7 @@ const VALID_CONTENT = {
     textWithGaps: 'El sol ___ por el este.',
     gaps: [{ position: 0, acceptedAnswers: ['sale', 'aparece'] }],
   },
-} satisfies Record<ItemType, Record<string, unknown>> as Record<
-  ItemType,
-  Item['content']
->;
+} satisfies Record<ItemType, Record<string, unknown>> as Record<ItemType, Item['content']>;
 
 const ALL_ITEM_TYPES = Object.keys(VALID_CONTENT) as ItemType[];
 
@@ -222,16 +213,11 @@ function createDto(type: ItemType, content: Record<string, unknown>): CreateItem
 }
 
 describe('ItemsService.create — validación de content polimórfico', () => {
-  it.each(ALL_ITEM_TYPES)(
-    'acepta content válido para el tipo %s',
-    async (type) => {
-      const created = item({ type, content: VALID_CONTENT[type] });
-      const svc = new ItemsService(dbMockForCreate(created), {} as never);
-      await expect(
-        svc.create(createDto(type, VALID_CONTENT[type]), user()),
-      ).resolves.toBeDefined();
-    },
-  );
+  it.each(ALL_ITEM_TYPES)('acepta content válido para el tipo %s', async (type) => {
+    const created = item({ type, content: VALID_CONTENT[type] });
+    const svc = new ItemsService(dbMockForCreate(created), {} as never);
+    await expect(svc.create(createDto(type, VALID_CONTENT[type]), user())).resolves.toBeDefined();
+  });
 
   it('rechaza multiple_choice sin alternativas', async () => {
     const svc = makeService();
@@ -263,10 +249,7 @@ describe('ItemsService.create — validación de content polimórfico', () => {
   it('rechaza gap_fill sin gaps', async () => {
     const svc = makeService();
     await expect(
-      svc.create(
-        createDto('gap_fill', { textWithGaps: 'El sol ___ por el este.' }),
-        user(),
-      ),
+      svc.create(createDto('gap_fill', { textWithGaps: 'El sol ___ por el este.' }), user()),
     ).rejects.toBeInstanceOf(BadRequestException);
   });
 
@@ -275,8 +258,14 @@ describe('ItemsService.create — validación de content polimórfico', () => {
     await expect(
       svc.create(
         createDto('matching', {
-          leftItems: [{ id: 'l1', text: 'A' }, { id: 'l2', text: 'B' }],
-          rightItems: [{ id: 'r1', text: '1' }, { id: 'r2', text: '2' }],
+          leftItems: [
+            { id: 'l1', text: 'A' },
+            { id: 'l2', text: 'B' },
+          ],
+          rightItems: [
+            { id: 'r1', text: '1' },
+            { id: 'r2', text: '2' },
+          ],
         }),
         user(),
       ),
@@ -292,9 +281,7 @@ describe('ItemsService.create — validación de content polimórfico', () => {
 
   it('el mensaje de error nombra el tipo de ítem', async () => {
     const svc = makeService();
-    await expect(
-      svc.create(createDto('true_false', {}), user()),
-    ).rejects.toThrow(/true_false/);
+    await expect(svc.create(createDto('true_false', {}), user())).rejects.toThrow(/true_false/);
   });
 
   it('CERO REGRESIÓN: un multiple_choice con shape del seed (incl. correctKey extra) sigue validando', async () => {
@@ -340,9 +327,7 @@ describe('ItemsService.update — validación de content polimórfico', () => {
       update: jest.fn().mockReturnValue({
         set: jest.fn().mockReturnValue({
           where: jest.fn().mockReturnValue({
-            returning: jest
-              .fn()
-              .mockResolvedValue([{ ...existing, content: existing.content }]),
+            returning: jest.fn().mockResolvedValue([{ ...existing, content: existing.content }]),
           }),
         }),
       }),
@@ -368,9 +353,9 @@ describe('ItemsService.update — validación de content polimórfico', () => {
     });
     const svc = new ItemsService(dbMockForUpdate(existing), {} as never);
     const dto = { content: { stem: 'sin correctAnswer' } } as UpdateItemDto;
-    await expect(
-      svc.update('item-1', dto, user({ orgId: 'org-1' })),
-    ).rejects.toBeInstanceOf(BadRequestException);
+    await expect(svc.update('item-1', dto, user({ orgId: 'org-1' }))).rejects.toBeInstanceOf(
+      BadRequestException,
+    );
   });
 
   it('al cambiar solo el type, re-valida el content existente contra el nuevo type', async () => {
@@ -383,9 +368,9 @@ describe('ItemsService.update — validación de content polimórfico', () => {
     });
     const svc = new ItemsService(dbMockForUpdate(existing), {} as never);
     const dto = { type: 'gap_fill' } as UpdateItemDto;
-    await expect(
-      svc.update('item-1', dto, user({ orgId: 'org-1' })),
-    ).rejects.toBeInstanceOf(BadRequestException);
+    await expect(svc.update('item-1', dto, user({ orgId: 'org-1' }))).rejects.toBeInstanceOf(
+      BadRequestException,
+    );
   });
 
   it('no valida content cuando ni type ni content cambian (cero regresión)', async () => {
@@ -396,9 +381,7 @@ describe('ItemsService.update — validación de content polimórfico', () => {
     });
     const svc = new ItemsService(dbMockForUpdate(existing), {} as never);
     const dto = { position: 5 } as UpdateItemDto;
-    await expect(
-      svc.update('item-1', dto, user({ orgId: 'org-1' })),
-    ).resolves.toBeDefined();
+    await expect(svc.update('item-1', dto, user({ orgId: 'org-1' }))).resolves.toBeDefined();
   });
 });
 
@@ -423,14 +406,9 @@ describe('ItemsService.getContentForAssistant — normalización', () => {
       innerJoin: jest.fn().mockReturnThis(),
       where: jest.fn().mockReturnThis(),
       orderBy: jest.fn().mockReturnThis(),
-      limit: jest
-        .fn()
-        .mockResolvedValue(skillName === null ? [] : [{ name: skillName }]),
+      limit: jest.fn().mockResolvedValue(skillName === null ? [] : [{ name: skillName }]),
     };
-    const select = jest
-      .fn()
-      .mockReturnValueOnce(itemSelect)
-      .mockReturnValueOnce(skillSelect);
+    const select = jest.fn().mockReturnValueOnce(itemSelect).mockReturnValueOnce(skillSelect);
     return { select } as never;
   }
 
@@ -528,9 +506,9 @@ describe('ItemsService.getContentForAssistant — normalización', () => {
 
   it('exige itemId o (assessmentId + position)', async () => {
     const svc = makeService();
-    await expect(
-      svc.getContentForAssistant(user({ orgId: 'org-1' }), {}),
-    ).rejects.toBeInstanceOf(BadRequestException);
+    await expect(svc.getContentForAssistant(user({ orgId: 'org-1' }), {})).rejects.toBeInstanceOf(
+      BadRequestException,
+    );
   });
 
   /**
@@ -577,10 +555,7 @@ describe('ItemsService.getContentForAssistant — normalización', () => {
       orderBy: jest.fn().mockReturnThis(),
       limit: jest.fn().mockResolvedValue([]),
     };
-    const select = jest
-      .fn()
-      .mockReturnValueOnce(itemSelect)
-      .mockReturnValueOnce(skillSelect);
+    const select = jest.fn().mockReturnValueOnce(itemSelect).mockReturnValueOnce(skillSelect);
 
     const svc = new ItemsService({ select, transaction } as never, {} as never);
 

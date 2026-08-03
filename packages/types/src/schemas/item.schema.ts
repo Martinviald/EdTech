@@ -69,11 +69,24 @@ export const matchingScoringSchema = z.object({
 
 export type MatchingScoring = z.infer<typeof matchingScoringSchema>;
 
+/**
+ * Política de puntaje de un ítem de multi-selección. Default: todo-o-nada
+ * (`requireExact`), que es como puntúa la Agencia — verificado contra los scans.
+ */
+export const multiSelectScoringSchema = z.object({
+  pointsPerCorrect: z.number().min(0).optional(),
+  penaltyPerIncorrect: z.number().min(0).optional(),
+  requireExact: z.boolean().optional(),
+});
+
+export type MultiSelectScoring = z.infer<typeof multiSelectScoringSchema>;
+
 export const scoringConfigSchema = z
   .object({
     points: z.number().min(0).optional(),
     partialCredit: z.boolean().optional(),
     matching: matchingScoringSchema.optional(),
+    multiSelect: multiSelectScoringSchema.optional(),
   })
   .passthrough()
   .optional();

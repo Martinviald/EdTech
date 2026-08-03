@@ -16,6 +16,7 @@ import { isAutoScorable, type ItemContent, type ItemType, type ScoringConfig } f
 import {
   gapFillStrategy,
   matchingStrategy,
+  multiSelectStrategy,
   multipleChoiceStrategy,
   orderingStrategy,
   trueFalseStrategy,
@@ -64,6 +65,7 @@ const manualGradingStrategy: ScoringStrategy = {
 // ── Registro tipo → estrategia (punto de extensión único) ────────────────────
 export const SCORING_STRATEGIES: Record<ItemType, ScoringStrategy> = {
   multiple_choice: multipleChoiceStrategy,
+  multi_select: multiSelectStrategy,
   true_false: trueFalseStrategy,
   matching: matchingStrategy,
   ordering: orderingStrategy,

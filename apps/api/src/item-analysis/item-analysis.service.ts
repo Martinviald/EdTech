@@ -27,6 +27,7 @@ import {
   TRUE_FALSE_KEYS,
   TRUE_FALSE_LABELS,
   isTrueFalseContent,
+  parseSelectedKeys,
   mergeAnswerCounts,
   trueFalseKeyOf,
   userHasAnyRole,
@@ -434,8 +435,13 @@ export class ItemAnalysisService {
       const classGroupFilter = this.resolveAccessibleClassGroupIds(scope, query.classGroupId);
 
       const content = (item.content ?? {}) as ItemContent;
-      const correctKey = this.deriveCorrectKey(content);
+      // En multi-selección no existe UNA clave correcta: la respuesta es un
+      // conjunto. `correctKey` queda null y son las alternativas las que llevan
+      // el `isCorrect` — exponer la primera correcta como "la" clave mentiría.
+      const isMultiSelect = item.type === 'multi_select';
       const altDefs = this.parseAlternatives(content);
+      const altKeys = altDefs.map((alt) => alt.key);
+      const correctKey = isMultiSelect ? null : this.deriveCorrectKey(content);
 
       const { skill, contentRef } = await this.loadItemTags(tx, itemId);
       const tags = await this.loadAllItemTags(tx, itemId);
@@ -457,6 +463,17 @@ export class ItemAnalysisService {
         totalResponses += row.count;
         if (row.answer === null) {
           blankCount += row.count;
+        } else if (isMultiSelect) {
+          // En multi-selección la respuesta es un CONJUNTO (`"145"`): se cuenta
+          // una vez por cada opción marcada, así la barra de cada alternativa
+          // dice "% de alumnos que la marcó". Los porcentajes suman más de 100
+          // a propósito — un alumno aporta a varias barras.
+          const selected = parseSelectedKeys(row.answer, altKeys);
+          if (selected === null || selected.size === 0) {
+            countByKey.set(row.answer, (countByKey.get(row.answer) ?? 0) + row.count);
+          } else {
+            for (const key of selected) countByKey.set(key, (countByKey.get(key) ?? 0) + row.count);
+          }
         } else {
           // En un V/F la hoja puede traer `V`, `VERDADERO`, `TRUE` o `A` para lo
           // mismo: se colapsan a la clave canónica con el MISMO criterio que usa

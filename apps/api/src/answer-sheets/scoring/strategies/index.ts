@@ -2,3 +2,4 @@ export { multipleChoiceStrategy, trueFalseStrategy } from './multiple-choice.str
 export { matchingStrategy } from './matching.strategy';
 export { orderingStrategy } from './ordering.strategy';
 export { gapFillStrategy } from './gap-fill.strategy';
+export { multiSelectStrategy } from './multi-select.strategy';

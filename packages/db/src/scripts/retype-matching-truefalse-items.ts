@@ -4,6 +4,7 @@
  *
  *   · términos pareados → `open_ended` + `responseFormat: match_pairs`  ⇒ `matching`
  *   · Verdadero/Falso   → `multiple_choice` con alternativas V/F        ⇒ `true_false`
+ *   · multi-selección   → `multiple_choice` con ≥2 alternativas correctas ⇒ `multi_select`
  *
  * ⚠️ NO re-importa: `import-instruments` borra y recrea, regenera los UUID y se
  * lleva los `item_taxonomy_tags` por ON DELETE CASCADE (~4.900 tags en la tanda
@@ -25,7 +26,7 @@ import { resolve } from 'node:path';
 config({ path: resolve(__dirname, '../../../../.env') });
 
 import postgres from 'postgres';
-import { validateItemContent } from '@soe/types';
+import { hasMultipleCorrectAlternatives, validateItemContent } from '@soe/types';
 
 const APPLY = process.argv.includes('--apply');
 
@@ -166,8 +167,19 @@ const sql = postgres(process.env.DATABASE_ADMIN_URL as string, { max: 1 });
       and it.content->'alternatives' @> '[{"text":"Falso"}]'
     order by ins.name, it.position`) as unknown as ItemRow[];
 
+  const multi = (await sql`
+    select it.id, it.position, it.type, ins.name as "instrumentName",
+           ins.config->>'sourceJson' as "sourceJson",
+           it.content, it.scoring_config as "scoringConfig"
+    from items it join instruments ins on ins.id = it.instrument_id
+    where it.deleted_at is null and it.type = 'multiple_choice'
+      and (select count(*) from jsonb_array_elements(it.content->'alternatives') e
+           where (e->>'isCorrect')::boolean) > 1
+    order by ins.name, it.position`) as unknown as ItemRow[];
+
   console.log(
-    `${APPLY ? 'APLICANDO' : 'DRY-RUN'} · pareados=${pareados.length} · V/F=${vf.length}\n`,
+    `${APPLY ? 'APLICANDO' : 'DRY-RUN'} · candidatos a pareado=${pareados.length}` +
+      ` · V/F=${vf.length} · multi-selección=${multi.length}\n`,
   );
 
   const planned: { id: string; type: string; content: unknown; points: number; label: string }[] =
@@ -194,6 +206,22 @@ const sql = postgres(process.env.DATABASE_ADMIN_URL as string, { max: 1 });
       content,
       points: Number(row.scoringConfig.points ?? 1),
       label: `${row.instrumentName} pos ${row.position}: multiple_choice → true_false (correctAnswer=${content.correctAnswer})`,
+    });
+  }
+
+  // Multi-selección: el `content` NO cambia (ya tiene las alternativas con varias
+  // `isCorrect`); lo que estaba mal era el `type`, y con él la estrategia que lo
+  // corregía. Se revalida contra su schema para que el refinamiento confirme que
+  // de verdad tiene ≥2 correctas y no todas.
+  for (const row of multi) {
+    if (!hasMultipleCorrectAlternatives(row.content)) continue;
+    validateItemContent('multi_select', row.content);
+    planned.push({
+      id: row.id,
+      type: 'multi_select',
+      content: row.content,
+      points: Number(row.scoringConfig.points ?? 1),
+      label: `${row.instrumentName} pos ${row.position}: multiple_choice → multi_select`,
     });
   }
 
