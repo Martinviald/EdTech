@@ -107,7 +107,7 @@ function toNodeTags(tags: QuestionTaxonomyTag[]): QuestionNodeTag[] {
 
 function QuestionDetailContent({ data }: { data: QuestionAnalysisResponse }): JSX.Element {
   const distractor = topDistractorKey(data.alternatives);
-  const levelReference = data.references.grade;
+  const levelReference = data.references.grade.rate;
 
   return (
     <div className="mt-6 space-y-6">
@@ -155,6 +155,7 @@ function QuestionDetailContent({ data }: { data: QuestionAnalysisResponse }): JS
             label="% de logro · nivel"
             value={formatPct(levelReference)}
             tone={achievementTone(levelReference)}
+            hint={`${data.references.grade.responseCount} respuestas`}
           />
         </div>
       ) : null}
@@ -291,10 +292,13 @@ function MetricCard({
   label,
   value,
   tone,
+  hint,
 }: {
   label: string;
   value: string;
   tone: Tone;
+  /** Detalle al pie (ej. el N de la población de una referencia). */
+  hint?: string;
 }): JSX.Element {
   const toneClass: Record<Tone, string> = {
     good: 'text-success',
@@ -306,6 +310,7 @@ function MetricCard({
     <div className="rounded-lg border bg-card p-3 text-center">
       <p className="text-xs text-muted-foreground">{label}</p>
       <p className={cn('mt-1 text-lg font-semibold tabular-nums', toneClass[tone])}>{value}</p>
+      {hint ? <p className="mt-0.5 text-[11px] text-muted-foreground">{hint}</p> : null}
     </div>
   );
 }

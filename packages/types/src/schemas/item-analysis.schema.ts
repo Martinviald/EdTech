@@ -83,18 +83,48 @@ export type ItemTaxonomyRef = {
  * (Detalle por pregunta). Objeto extensible: cada nueva referencia es un campo
  * más, sin romper el contrato existente.
  *
- * - `grade`: % de logro del NIVEL/grado para la pregunta = promedio de todos los
- *   cursos del mismo grado que rindieron la evaluación. Como los instrumentos son
- *   siempre por nivel, es la referencia del colegio para esa evaluación. Trasciende
- *   el scope del usuario (un profesor ve su curso en `correctRate` y el nivel aquí).
- *   Sale del token; nunca expone datos de otra org (RLS + withOrgContext).
+ * - `grade`: % de logro del NIVEL/grado para la pregunta = TODOS los alumnos de la
+ *   org que rindieron el MISMO instrumento en el MISMO grado y año académico,
+ *   aunque lo hayan hecho bajo otra `assessment` (el modelo crea una evaluación
+ *   POR CURSO, así que los cursos hermanos viven en evaluaciones distintas y deben
+ *   entrar igual). Como los instrumentos son siempre por nivel, es la referencia
+ *   del colegio para esa evaluación. Trasciende el scope del usuario (un profesor
+ *   ve su curso en `correctRate` y el nivel aquí). Sale del token; nunca expone
+ *   datos de otra org (RLS + withOrgContext).
  * - `sample` (DIFERIDO): % de logro de la MUESTRA de colegios (benchmark
  *   inter-colegio). Bloqueado hasta existir un pool multi-colegio (TKT-20). El
  *   campo se deja opcional para poblarlo después sin cambiar el contrato.
+ *
+ * ⚠️ La tasa es SIEMPRE ponderada por alumno: `sum(correctCount)/sum(responseCount)`
+ * sobre las cohortes involucradas, NUNCA el promedio de los % de cada curso (cursos
+ * de distinto N pesarían igual). Los conteos crudos viajan en el contrato para que
+ * el frontend pueda agregar con el mismo criterio.
  */
+export type ReferenceRate = {
+  rate: number | null; // 0..100 — ponderado: correctCount / responseCount
+  responseCount: number; // respuestas de TODOS los alumnos de la población
+  correctCount: number; // aciertos de TODOS los alumnos de la población
+};
+
 export type QuestionReferences = {
-  grade: number | null; // 0..100 — % logro del nivel/grado
+  grade: ReferenceRate; // % logro del nivel (mismo grado + instrumento + año)
   sample?: number | null; // 0..100 — muestra de colegios (DIFERIDO, TKT-20)
+};
+
+/**
+ * Resumen de la población de la línea de referencia, para rotularla y para la
+ * columna "% Logro" de su fila. `rate` es el % ponderado sobre TODAS las respuestas
+ * de TODOS los alumnos del nivel (no el promedio de los % por pregunta ni por
+ * curso). `classGroupCount`/`studentCount` dicen sobre cuántos cursos y alumnos
+ * agrega: sin eso, un nivel de un solo curso se lee como dato duplicado del curso.
+ */
+export type MatrixReferenceScopes = {
+  grade: {
+    rate: number | null; // 0..100 — % logro ponderado de todo el nivel
+    gradeName: string | null;
+    classGroupCount: number;
+    studentCount: number;
+  };
 };
 
 /** Una columna de la matriz = una pregunta (ítem) de la evaluación. */
@@ -145,6 +175,8 @@ export type ItemMatrixResponse = {
   assessmentName: string | null;
   instrumentName: string;
   questions: MatrixQuestionColumn[];
+  /** Resumen de la línea de referencia (nivel) del tablero maestro. */
+  references: MatrixReferenceScopes;
   students: {
     data: MatrixStudentRow[];
     total: number;

@@ -57,12 +57,16 @@ function makeDb(selectResults: unknown[][]): DbMock {
     return chain;
   }
 
+  const nextChain = (): QueryBuilder => {
+    const rows = selectResults[selectIdx] ?? [];
+    selectIdx++;
+    return buildSelectChain(rows);
+  };
+
   const db = {
-    select: () => {
-      const rows = selectResults[selectIdx] ?? [];
-      selectIdx++;
-      return buildSelectChain(rows);
-    },
+    select: nextChain,
+    // attachLevelReferences resuelve el grado/año de la evaluación con selectDistinct.
+    selectDistinct: nextChain,
     // withOrgContext() abre una transacción y fija app.current_org_id vía
     // tx.execute antes de correr el callback. El tx es el propio mock.
     execute: async () => [],
@@ -83,6 +87,8 @@ const ITEM_A = '11111111-1111-1111-1111-111111111111';
 const ITEM_B = '22222222-2222-2222-2222-222222222222';
 const STUDENT_1 = 'cccccccc-cccc-cccc-cccc-cccccccccccc';
 const STUDENT_2 = 'dddddddd-dddd-dddd-dddd-dddddddddddd';
+const GRADE_ID = 'b1b1b1b1-b1b1-b1b1-b1b1-b1b1b1b1b1b1';
+const YEAR_ID = 'c1c1c1c1-c1c1-c1c1-c1c1-c1c1c1c1c1c1';
 const CLASS_GROUP_ID = 'eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee';
 const NODE_SKILL = 'ffffffff-ffff-ffff-ffff-ffffffffffff';
 const NODE_CONTENT = 'a0a0a0a0-a0a0-a0a0-a0a0-a0a0a0a0a0a0';
@@ -159,6 +165,41 @@ describe('ItemAnalysisService.getMatrix', () => {
         // attachCorrectRates → group by item_id
         { itemId: ITEM_A, total: 2, correct: 1 },
         { itemId: ITEM_B, total: 2, correct: 2 },
+      ],
+      // attachLevelReferences → grado/año de la evaluación (selectDistinct)
+      [{ gradeId: GRADE_ID, gradeName: '3° Básico', academicYearId: YEAR_ID }],
+      // attachLevelReferences → read-model del NIVEL (org + instrumento + año)
+      [
+        // 3°A — el curso mirado
+        {
+          itemId: ITEM_A,
+          classGroupId: CLASS_GROUP_ID,
+          studentCount: 2,
+          responseCount: 2,
+          correctCount: 1,
+        },
+        {
+          itemId: ITEM_B,
+          classGroupId: CLASS_GROUP_ID,
+          studentCount: 2,
+          responseCount: 2,
+          correctCount: 2,
+        },
+        // 3°B — MISMO nivel, OTRA evaluación: la referencia debe incluirlo
+        {
+          itemId: ITEM_A,
+          classGroupId: 'cg-3b',
+          studentCount: 2,
+          responseCount: 2,
+          correctCount: 2,
+        },
+        {
+          itemId: ITEM_B,
+          classGroupId: 'cg-3b',
+          studentCount: 2,
+          responseCount: 2,
+          correctCount: 0,
+        },
       ],
       [{ total: 2 }], // loadStudentsPage → count
       [
@@ -237,10 +278,21 @@ describe('ItemAnalysisService.getMatrix', () => {
     // correctRate agregado.
     expect(res.questions[0].correctRate).toBe(50);
     expect(res.questions[1].correctRate).toBe(100);
-    // TKT-22 — admin sin filtro: la población visible ya es toda la org, así que
-    // references.grade = correctRate sin query adicional. `sample` DIFERIDO (ausente).
-    expect(res.questions[0].references.grade).toBe(50);
-    expect(res.questions[1].references.grade).toBe(100);
+    // El NIVEL suma 3°A + 3°B: el curso hermano vive en OTRA evaluación y debe
+    // entrar igual (antes se acotaba por assessmentId y el "nivel" era el curso).
+    // P1 = (1+2)/(2+2) = 75%, P2 = (2+0)/(2+2) = 50%.
+    expect(res.questions[0].references.grade.rate).toBe(75);
+    expect(res.questions[1].references.grade.rate).toBe(50);
+    // Ponderado por respuestas, nunca promedio de los % por curso: los conteos
+    // crudos quedan expuestos para que el frontend agregue con el mismo criterio.
+    expect(res.questions[0].references.grade.responseCount).toBe(4);
+    expect(res.questions[0].references.grade.correctCount).toBe(3);
+    // Resumen del nivel: % ponderado (1+2+2+0)/(2+2+2+2), y su población. El
+    // studentCount es por curso, no por (curso × ítem): 2 + 2 = 4, no 8.
+    expect(res.references.grade.rate).toBe(62.5);
+    expect(res.references.grade.gradeName).toBe('3° Básico');
+    expect(res.references.grade.classGroupCount).toBe(2);
+    expect(res.references.grade.studentCount).toBe(4);
     expect(res.questions[0].references.sample).toBeUndefined();
 
     // Paginación.
@@ -324,7 +376,26 @@ describe('ItemAnalysisService.getMatrix', () => {
       tagRows, // loadTagsByItems
       [{ studentId: STUDENT_1 }], // resolveAccessibleStudentIds (teacher, sin classGroupId param)
       [{ itemId: ITEM_A, total: 1, correct: 1 }], // attachCorrectRates (scope profesor → 100%)
-      [{ itemId: ITEM_A, total: 4, correct: 2 }], // attachOrgReferences (colegio → 50%)
+      // attachLevelReferences → grado/año de la evaluación (selectDistinct)
+      [{ gradeId: GRADE_ID, gradeName: '3° Básico', academicYearId: YEAR_ID }],
+      // attachLevelReferences → read-model del NIVEL (org + instrumento + año)
+      [
+        {
+          itemId: ITEM_A,
+          classGroupId: CLASS_GROUP_ID,
+          studentCount: 1,
+          responseCount: 1,
+          correctCount: 1,
+        },
+        // curso hermano del nivel
+        {
+          itemId: ITEM_A,
+          classGroupId: 'cg-3b',
+          studentCount: 3,
+          responseCount: 3,
+          correctCount: 1,
+        },
+      ],
       [{ total: 1 }], // loadStudentsPage count
       [
         {
@@ -362,9 +433,10 @@ describe('ItemAnalysisService.getMatrix', () => {
     expect(res.students.data[0].studentId).toBe(STUDENT_1);
     expect(res.students.data[0].achievement).toBe(80);
     // TKT-22 — el profesor ve su curso en correctRate (100%) y el COLEGIO completo
-    // en references.grade (50%): la referencia trasciende el scope del usuario.
+    // en references.grade (50% = (1+1)/(1+3)): la referencia trasciende el scope.
     expect(res.questions[0].correctRate).toBe(100);
-    expect(res.questions[0].references.grade).toBe(50);
+    expect(res.questions[0].references.grade.rate).toBe(50);
+    expect(res.references.grade.studentCount).toBe(4);
   });
 
   it('filtro nodeId: limita las columnas a ítems taggeados con ese nodo', async () => {
@@ -374,6 +446,18 @@ describe('ItemAnalysisService.getMatrix', () => {
       tagRows, // loadTagsByItems
       [{ itemId: ITEM_A }], // filtro nodeId → solo ITEM_A taggeado
       [{ itemId: ITEM_A, total: 2, correct: 1 }], // attachCorrectRates
+      // attachLevelReferences → grado/año de la evaluación (selectDistinct)
+      [{ gradeId: GRADE_ID, gradeName: '3° Básico', academicYearId: YEAR_ID }],
+      // attachLevelReferences → read-model del NIVEL (org + instrumento + año)
+      [
+        {
+          itemId: ITEM_A,
+          classGroupId: CLASS_GROUP_ID,
+          studentCount: 2,
+          responseCount: 2,
+          correctCount: 1,
+        },
+      ],
       [{ total: 1 }], // count
       [
         {
@@ -425,6 +509,18 @@ describe('ItemAnalysisService.getMatrix', () => {
         { itemId: ITEM_A, total: 2, correct: 1 },
         { itemId: ITEM_B, total: 2, correct: 2 },
       ], // attachCorrectRates
+      // attachLevelReferences → grado/año de la evaluación (selectDistinct)
+      [{ gradeId: GRADE_ID, gradeName: '3° Básico', academicYearId: YEAR_ID }],
+      // attachLevelReferences → read-model del NIVEL (org + instrumento + año)
+      [
+        {
+          itemId: ITEM_A,
+          classGroupId: CLASS_GROUP_ID,
+          studentCount: 2,
+          responseCount: 2,
+          correctCount: 1,
+        },
+      ],
       [{ total: 1 }], // count
       [
         {
@@ -469,6 +565,18 @@ describe('ItemAnalysisService.getMatrix', () => {
         { itemId: ITEM_A, total: 2, correct: 1 },
         { itemId: ITEM_B, total: 2, correct: 2 },
       ], // attachCorrectRates
+      // attachLevelReferences → grado/año de la evaluación (selectDistinct)
+      [{ gradeId: GRADE_ID, gradeName: '3° Básico', academicYearId: YEAR_ID }],
+      // attachLevelReferences → read-model del NIVEL (org + instrumento + año)
+      [
+        {
+          itemId: ITEM_A,
+          classGroupId: CLASS_GROUP_ID,
+          studentCount: 2,
+          responseCount: 2,
+          correctCount: 1,
+        },
+      ],
       [{ total: 2 }], // count
       [
         {
@@ -801,6 +909,49 @@ describe('ItemAnalysisService.getQuestionAnalysis', () => {
     await expect(service.getQuestionAnalysis(makeUser(), ITEM_A, {})).rejects.toBeInstanceOf(
       NotFoundException,
     );
+  });
+
+  // Regresión del fix: el panel de detalle debe usar la MISMA población que la
+  // fila del tablero maestro. Antes acotaba por assessmentId y, como el modelo crea
+  // una evaluación POR CURSO, el "nivel" era el propio curso mirado.
+  it('T2-17 — el nivel del detalle incluye el curso hermano de otra evaluación', async () => {
+    const db = makeDb([
+      [itemVisibleRow], // requireItemVisible
+      [assessmentRow], // requireAssessmentOwnedByUser (viene assessmentId)
+      [], // loadItemTags
+      [], // loadAllItemTags
+      [{ answerCounts: [{ key: 'B', isCorrect: true, count: 1 }] }], // loadAnswerDistribution
+      // resolveReferenceCohort → grado/año de la evaluación
+      [{ gradeId: GRADE_ID, gradeName: '3° Básico', academicYearId: YEAR_ID }],
+      // loadReferenceRows → el curso mirado + el hermano (otra evaluación, mismo nivel)
+      [
+        {
+          itemId: ITEM_A,
+          classGroupId: CLASS_GROUP_ID,
+          studentCount: 2,
+          responseCount: 2,
+          correctCount: 1,
+        },
+        {
+          itemId: ITEM_A,
+          classGroupId: 'cg-3b',
+          studentCount: 2,
+          responseCount: 2,
+          correctCount: 2,
+        },
+      ],
+    ]);
+    const service = makeService(db);
+
+    const res = await service.getQuestionAnalysis(makeUser(), ITEM_A, {
+      assessmentId: ASSESSMENT_ID,
+    });
+
+    // (1+2)/(2+2) = 75% — ponderado sobre los 4 alumnos del nivel, no el promedio
+    // de 50% y 100% (que sólo coincidiría porque los cursos tienen igual N).
+    expect(res.references.grade.rate).toBe(75);
+    expect(res.references.grade.responseCount).toBe(4);
+    expect(res.references.grade.correctCount).toBe(3);
   });
 
   // Regresión: los instrumentos oficiales (ej. DIA) tienen org_id NULL. El detalle
