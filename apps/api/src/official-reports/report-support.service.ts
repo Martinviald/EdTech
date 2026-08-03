@@ -16,6 +16,7 @@ import {
   users,
 } from '@soe/db';
 import {
+  INSTRUMENT_APPLICATION_PERIOD_LABELS,
   RESULTS_VIEWER_ROLES,
   userHasAnyRole,
   type DataGranularity,
@@ -227,6 +228,7 @@ export class ReportSupportService {
         instrumentName: instruments.name,
         instrumentType: sql<string>`${instruments.type}::text`,
         instrumentYear: instruments.year,
+        instrumentApplicationPeriod: instruments.applicationPeriod,
         instrumentConfig: instruments.config,
         subjectId: instruments.subjectId,
         subjectName: subjects.name,
@@ -246,9 +248,13 @@ export class ReportSupportService {
     }
 
     const config = (row.config ?? {}) as Record<string, unknown>;
-    const period = typeof config.period === 'string' ? config.period : null;
-    const periodLabel =
-      typeof config.periodLabel === 'string' ? config.periodLabel : humanizePeriod(period);
+    const legacyPeriod = typeof config.period === 'string' ? config.period : null;
+    const period = row.instrumentApplicationPeriod ?? legacyPeriod;
+    const periodLabel = row.instrumentApplicationPeriod
+      ? INSTRUMENT_APPLICATION_PERIOD_LABELS[row.instrumentApplicationPeriod]
+      : typeof config.periodLabel === 'string'
+        ? config.periodLabel
+        : humanizePeriod(legacyPeriod);
 
     return {
       id: row.id,

@@ -8,7 +8,8 @@
  *  - 5 cursos: "2° Básico A" en los 3 años (cohortes distintas) + "2° Básico B"
  *    y "3° Básico A" en 2026.
  *  - ~74 alumnos con RUT válido (Módulo 11) y matrículas por año.
- *  - 2 instrumentos DIA (Lectura y Matemática 2° Básico) con 10 ítems c/u,
+ *  - 9 instrumentos DIA de 2° Básico — UNO por (asignatura × año × momento),
+ *    con `application_period` seteado — de 10 ítems c/u,
  *    clave correcta en content y tags de habilidad de la taxonomía DIA.
  *  - 10 evaluaciones históricas con assessment_course_assignments + respuestas +
  *    resultados calculados con el MISMO aggregate* que usa el backend, con
@@ -38,6 +39,7 @@ import {
   aggregateSkillResults,
   aggregateStudentResults,
   type GradingScaleParams,
+  type InstrumentApplicationPeriod,
   type ResponseForCalculation,
   type ResponseForItemStats,
 } from '@soe/types';
@@ -53,7 +55,7 @@ import { gradingScales, instruments } from '../schema/instruments';
 import { items, itemTaxonomyTags } from '../schema/items';
 import { assessments, assessmentCourseAssignments } from '../schema/assessments';
 import { responses } from '../schema/responses';
-import { assessmentResults, skillResults } from '../schema/results';
+import { assessmentResults, performanceBands, skillResults } from '../schema/results';
 
 config({ path: resolve(__dirname, '../../../../.env') });
 
@@ -211,11 +213,30 @@ const BASE_SKILL: Record<string, number> = {
   'MATH-SK-ARGUMENTAR-Y-COMUNICAR': 0.28,
 };
 const YEAR_FACTOR: Record<number, number> = { 2024: 0, 2025: 0.06, 2026: 0.11 };
-const PERIOD_FACTOR: Record<string, number> = {
+// Momento de aplicación dentro del año. El seed usa etiquetas propias para modular
+// la dificultad; `PERIOD_TO_APPLICATION` las traduce al enum de BDD
+// (`instruments.application_period`), que es por donde filtra el "Momento" de
+// /resultados. La etiqueta que ve el usuario es la del DIA ("Monitoreo" = intermedio).
+const SEED_PERIODS = ['diagnostico', 'intermedia', 'final'] as const;
+type SeedPeriod = (typeof SEED_PERIODS)[number];
+
+const PERIOD_FACTOR: Record<SeedPeriod, number> = {
   diagnostico: 0,
   intermedia: 0.05,
   final: 0.1,
 };
+const PERIOD_TO_APPLICATION: Record<SeedPeriod, InstrumentApplicationPeriod> = {
+  diagnostico: 'diagnostico',
+  intermedia: 'intermedio',
+  final: 'cierre',
+};
+const PERIOD_LABEL: Record<SeedPeriod, string> = {
+  diagnostico: 'Diagnóstico',
+  intermedia: 'Intermedio',
+  final: 'Cierre',
+};
+const instrumentKey = (subject: string, year: number, period: SeedPeriod) =>
+  `${subject}:${year}:${period}`;
 
 /**
  * Una respuesta del seed, lista para los DOS agregadores: el de resultados por alumno
@@ -232,7 +253,7 @@ function correctProbability(
   studentId: string,
   nodeCode: string,
   year: number,
-  period: string,
+  period: SeedPeriod,
 ): number {
   const ability = rng(`ability:${studentId}`)() * 0.4 - 0.2; // [-0.2, 0.2] estable
   const base = BASE_SKILL[nodeCode] ?? 0.6;
@@ -246,7 +267,7 @@ function answerFor(
   item: SeedItem,
   nodeCode: string,
   year: number,
-  period: string,
+  period: SeedPeriod,
 ): { isCorrect: boolean; chosen: string } {
   const p = correctProbability(studentId, nodeCode, year, period);
   const r = rng(`${assessmentSeed}:${studentId}:${item.id}`)();
@@ -308,6 +329,9 @@ async function main() {
   await db.delete(responses).where(like(responses.itemId));
   await db.delete(itemTaxonomyTags).where(like(itemTaxonomyTags.id));
   await db.delete(items).where(like(items.id));
+  // `performance_bands.instrument_id` no tiene ON DELETE CASCADE: si `seedPerformanceBands`
+  // ya sembró las bandas DIA de estos instrumentos, el DELETE de abajo falla por FK.
+  await db.delete(performanceBands).where(like(performanceBands.instrumentId));
   await db.delete(instruments).where(like(instruments.id));
   await db.delete(teacherAssignments).where(like(teacherAssignments.id));
   // Los students cascada a enrollments, responses y results.
@@ -423,109 +447,131 @@ async function main() {
   await db.insert(studentEnrollments).values(enrollmentValues);
 
   // ── 8. Instrumentos + ítems + tags ─────────────────────────────────────────
-  const INST_LECT = uid(0x500);
-  const INST_MAT = uid(0x501);
+  // UN instrumento por (asignatura × año × momento), igual que el DIA real: cada
+  // aplicación es un cuadernillo distinto, con su propia clave y sus propias
+  // bandas de logro. Compartir un instrumento entre momentos deja
+  // `application_period` en NULL y el filtro de "Momento" de /resultados no
+  // encuentra nada (filtra por esa columna, no por el nombre de la evaluación).
+  //
   // Instrumentos DIA "del sistema": globales (`orgId = null`) y oficiales
   // (`isOfficial = true`). En F1 solo se usan instrumentos del sistema — los
   // colegios cuelgan sus evaluaciones de estos, y sus niveles/umbrales de logro
   // (performance_bands globales) los administra `platform_admin`. Los ítems
   // siguen `orgId = DEMO_ORG_ID` a propósito: son tablas de catálogo sin RLS y
   // el scoring los resuelve por `instrument_id`, no por org.
-  await db.insert(instruments).values([
-    {
-      id: INST_LECT,
-      orgId: null,
-      taxonomyId: diaMarco.id,
-      name: 'DIA Lectura 2° Básico',
-      shortName: 'DIA Lectura 2°B',
-      type: 'dia',
-      subjectId: langSubject.id,
-      gradeId: grade2.id,
-      year: 2026,
-      isOfficial: true,
-      status: 'published',
-      gradingScaleId: scaleId,
-    },
-    {
-      id: INST_MAT,
-      orgId: null,
-      taxonomyId: diaMarco.id,
-      name: 'DIA Matemática 2° Básico',
-      shortName: 'DIA Mat 2°B',
-      type: 'dia',
-      subjectId: mathSubject.id,
-      gradeId: grade2.id,
-      year: 2026,
-      isOfficial: true,
-      status: 'published',
-      gradingScaleId: scaleId,
-    },
-  ]);
+  type SubjectKey = 'lect' | 'mat';
+  const SUBJECT_META: Record<
+    SubjectKey,
+    { label: string; shortLabel: string; subjectId: string; skillCycle: readonly string[]; questions: SeedQuestion[] }
+  > = {
+    lect: { label: 'Lectura', shortLabel: 'Lectura', subjectId: langSubject.id, skillCycle: LECT_SKILL_CYCLE, questions: LECT_QUESTIONS },
+    mat: { label: 'Matemática', shortLabel: 'Mat', subjectId: mathSubject.id, skillCycle: MAT_SKILL_CYCLE, questions: MAT_QUESTIONS },
+  };
 
-  const lectPack = (() => {
-    const itemRows: Array<typeof items.$inferInsert> = [];
-    const tagRows: Array<typeof itemTaxonomyTags.$inferInsert> = [];
-    const out: SeedItem[] = [];
-    LECT_SKILL_CYCLE.forEach((nodeCode, idx) => {
-      const position = idx + 1;
-      const correctKey = KEYS[idx % 4]!;
-      const id = uid(0x600 + position);
-      const nodeId = nodeByCode.get(nodeCode)!;
-      out.push({ id, position, nodeId, correctKey });
-      itemRows.push({
-        id, orgId: DEMO_ORG_ID, instrumentId: INST_LECT, position, type: 'multiple_choice',
-        content: buildItemContent(LECT_QUESTIONS, idx, position, correctKey, 'Lectura'),
-        scoringConfig: { points: 1, partialCredit: false }, status: 'published', source: 'official',
-      });
-      tagRows.push({ id: uid(0x630 + position), itemId: id, nodeId, tagType: 'primary', confidence: '1.00', taggedBy: 'human' });
-    });
-    return { itemRows, tagRows, out };
-  })();
-  const matPack = (() => {
-    const itemRows: Array<typeof items.$inferInsert> = [];
-    const tagRows: Array<typeof itemTaxonomyTags.$inferInsert> = [];
-    const out: SeedItem[] = [];
-    MAT_SKILL_CYCLE.forEach((nodeCode, idx) => {
-      const position = idx + 1;
-      const correctKey = KEYS[idx % 4]!;
-      const id = uid(0x680 + position);
-      const nodeId = nodeByCode.get(nodeCode)!;
-      out.push({ id, position, nodeId, correctKey });
-      itemRows.push({
-        id, orgId: DEMO_ORG_ID, instrumentId: INST_MAT, position, type: 'multiple_choice',
-        content: buildItemContent(MAT_QUESTIONS, idx, position, correctKey, 'Matemática'),
-        scoringConfig: { points: 1, partialCredit: false }, status: 'published', source: 'official',
-      });
-      tagRows.push({ id: uid(0x6b0 + position), itemId: id, nodeId, tagType: 'primary', confidence: '1.00', taggedBy: 'human' });
-    });
-    return { itemRows, tagRows, out };
-  })();
-  await db.insert(items).values([...lectPack.itemRows, ...matPack.itemRows]);
-  await db.insert(itemTaxonomyTags).values([...lectPack.tagRows, ...matPack.tagRows]);
+  // Un instrumento por combinación efectivamente evaluada (ver el plan de
+  // evaluaciones más abajo). `lect/2026/final` no tiene evaluación sembrada a
+  // propósito: es el instrumento contra el que se sube el CSV de
+  // `e2e-answer-sheets/lectura-2A-final-2026.csv`.
+  const INSTRUMENT_PLAN: Array<{ subject: SubjectKey; year: number; period: SeedPeriod }> = [
+    { subject: 'lect', year: 2024, period: 'diagnostico' },
+    { subject: 'lect', year: 2024, period: 'final' },
+    { subject: 'lect', year: 2025, period: 'diagnostico' },
+    { subject: 'lect', year: 2025, period: 'final' },
+    { subject: 'lect', year: 2026, period: 'diagnostico' },
+    { subject: 'lect', year: 2026, period: 'intermedia' },
+    { subject: 'lect', year: 2026, period: 'final' },
+    { subject: 'mat', year: 2025, period: 'diagnostico' },
+    { subject: 'mat', year: 2026, period: 'diagnostico' },
+  ];
+
+  type SeedInstrument = { id: string; items: SeedItem[] };
+  const instrumentRows: Array<typeof instruments.$inferInsert> = [];
+  const itemRows: Array<typeof items.$inferInsert> = [];
+  const tagRows: Array<typeof itemTaxonomyTags.$inferInsert> = [];
   const itemNodeCode = new Map<string, string>(); // itemId -> nodeCode (para prob.)
-  LECT_SKILL_CYCLE.forEach((c, i) => itemNodeCode.set(uid(0x600 + i + 1), c));
-  MAT_SKILL_CYCLE.forEach((c, i) => itemNodeCode.set(uid(0x680 + i + 1), c));
+  const instrumentByKey = new Map<string, SeedInstrument>();
+
+  INSTRUMENT_PLAN.forEach((plan, instrumentIdx) => {
+    const meta = SUBJECT_META[plan.subject];
+    const instrumentId = uid(0x500 + instrumentIdx);
+    const seedItems: SeedItem[] = [];
+    meta.skillCycle.forEach((nodeCode, idx) => {
+      const position = idx + 1;
+      const correctKey = KEYS[idx % 4]!;
+      const itemId = uid(0x1000 + instrumentIdx * 0x20 + position);
+      const nodeId = nodeByCode.get(nodeCode)!;
+      seedItems.push({ id: itemId, position, nodeId, correctKey });
+      itemNodeCode.set(itemId, nodeCode);
+      itemRows.push({
+        id: itemId, orgId: DEMO_ORG_ID, instrumentId, position, type: 'multiple_choice',
+        content: buildItemContent(meta.questions, idx, position, correctKey, meta.label),
+        scoringConfig: { points: 1, partialCredit: false }, status: 'published', source: 'official',
+      });
+      tagRows.push({ id: uid(0x1800 + instrumentIdx * 0x20 + position), itemId, nodeId, tagType: 'primary', confidence: '1.00', taggedBy: 'human' });
+    });
+    instrumentRows.push({
+      id: instrumentId,
+      orgId: null,
+      taxonomyId: diaMarco.id,
+      // El nombre lleva el momento en el mismo formato que los instrumentos DIA
+      // reales importados ("DIA Lectura 3° Básico 2025 — Intermedio"), del que
+      // `seedPerformanceBands` deriva el corte cuando la columna viene en NULL.
+      name: `DIA ${meta.label} 2° Básico ${plan.year} — ${PERIOD_LABEL[plan.period]}`,
+      shortName: `DIA ${meta.shortLabel} 2°B ${plan.year} ${PERIOD_LABEL[plan.period]}`,
+      type: 'dia',
+      subjectId: meta.subjectId,
+      gradeId: grade2.id,
+      year: plan.year,
+      applicationPeriod: PERIOD_TO_APPLICATION[plan.period],
+      isOfficial: true,
+      status: 'published',
+      gradingScaleId: scaleId,
+    });
+    instrumentByKey.set(instrumentKey(plan.subject, plan.year, plan.period), { id: instrumentId, items: seedItems });
+  });
+
+  await db.insert(instruments).values(instrumentRows);
+  await db.insert(items).values(itemRows);
+  await db.insert(itemTaxonomyTags).values(tagRows);
+
+  const useInstrument = (subject: SubjectKey, year: number, period: SeedPeriod): SeedInstrument => {
+    const found = instrumentByKey.get(instrumentKey(subject, year, period));
+    if (!found) {
+      throw new Error(
+        `Falta el instrumento ${subject}/${year}/${period} en INSTRUMENT_PLAN. ` +
+          'Cada evaluación necesita el instrumento de SU momento (ver §8).',
+      );
+    }
+    return found;
+  };
 
   // ── 9. Evaluaciones históricas con respuestas + resultados ─────────────────
-  type AssessmentDef = {
-    id: string; name: string; instrumentItems: SeedItem[]; cgId: string;
-    year: number; period: string; date: string; instrumentId: string;
+  // El instrumento NO se elige a mano: sale de (asignatura, año, momento) de la
+  // propia evaluación, así no puede volver a quedar una evaluación colgando de un
+  // instrumento de otro momento.
+  type AssessmentPlan = {
+    id: string; name: string; subject: SubjectKey; cgId: string;
+    year: number; period: SeedPeriod; date: string;
   };
-  const A: AssessmentDef[] = [
+  const PLAN: AssessmentPlan[] = [
     // Lenguaje — 2° A a través de 3 años (comparación generacional) + progresión
-    { id: uid(0x700), name: 'DIA Lectura · Diagnóstico 2024', instrumentItems: lectPack.out, cgId: CG.a2024, year: 2024, period: 'diagnostico', date: '2024-03-20', instrumentId: INST_LECT },
-    { id: uid(0x701), name: 'DIA Lectura · Final 2024', instrumentItems: lectPack.out, cgId: CG.a2024, year: 2024, period: 'final', date: '2024-11-12', instrumentId: INST_LECT },
-    { id: uid(0x702), name: 'DIA Lectura · Diagnóstico 2025', instrumentItems: lectPack.out, cgId: CG.a2025, year: 2025, period: 'diagnostico', date: '2025-03-19', instrumentId: INST_LECT },
-    { id: uid(0x703), name: 'DIA Lectura · Final 2025', instrumentItems: lectPack.out, cgId: CG.a2025, year: 2025, period: 'final', date: '2025-11-11', instrumentId: INST_LECT },
-    { id: uid(0x704), name: 'DIA Lectura · Diagnóstico 2026', instrumentItems: lectPack.out, cgId: CG.a2026, year: 2026, period: 'diagnostico', date: '2026-03-18', instrumentId: INST_LECT },
-    { id: uid(0x705), name: 'DIA Lectura · Intermedia 2026', instrumentItems: lectPack.out, cgId: CG.a2026, year: 2026, period: 'intermedia', date: '2026-07-15', instrumentId: INST_LECT },
+    { id: uid(0x700), name: 'DIA Lectura · Diagnóstico 2024', subject: 'lect', cgId: CG.a2024, year: 2024, period: 'diagnostico', date: '2024-03-20' },
+    { id: uid(0x701), name: 'DIA Lectura · Cierre 2024', subject: 'lect', cgId: CG.a2024, year: 2024, period: 'final', date: '2024-11-12' },
+    { id: uid(0x702), name: 'DIA Lectura · Diagnóstico 2025', subject: 'lect', cgId: CG.a2025, year: 2025, period: 'diagnostico', date: '2025-03-19' },
+    { id: uid(0x703), name: 'DIA Lectura · Cierre 2025', subject: 'lect', cgId: CG.a2025, year: 2025, period: 'final', date: '2025-11-11' },
+    { id: uid(0x704), name: 'DIA Lectura · Diagnóstico 2026', subject: 'lect', cgId: CG.a2026, year: 2026, period: 'diagnostico', date: '2026-03-18' },
+    { id: uid(0x705), name: 'DIA Lectura · Monitoreo 2026', subject: 'lect', cgId: CG.a2026, year: 2026, period: 'intermedia', date: '2026-07-15' },
     // 2° B 2026 — segundo curso con datos
-    { id: uid(0x706), name: 'DIA Lectura · Diagnóstico 2026', instrumentItems: lectPack.out, cgId: CG.b2026, year: 2026, period: 'diagnostico', date: '2026-03-18', instrumentId: INST_LECT },
+    { id: uid(0x706), name: 'DIA Lectura · Diagnóstico 2026', subject: 'lect', cgId: CG.b2026, year: 2026, period: 'diagnostico', date: '2026-03-18' },
     // Matemática — segunda asignatura
-    { id: uid(0x707), name: 'DIA Matemática · Diagnóstico 2025', instrumentItems: matPack.out, cgId: CG.a2025, year: 2025, period: 'diagnostico', date: '2025-03-26', instrumentId: INST_MAT },
-    { id: uid(0x708), name: 'DIA Matemática · Diagnóstico 2026', instrumentItems: matPack.out, cgId: CG.a2026, year: 2026, period: 'diagnostico', date: '2026-03-25', instrumentId: INST_MAT },
-    { id: uid(0x709), name: 'DIA Matemática · Diagnóstico 2026 (3°A)', instrumentItems: matPack.out, cgId: CG.c2026, year: 2026, period: 'diagnostico', date: '2026-03-25', instrumentId: INST_MAT },
+    { id: uid(0x707), name: 'DIA Matemática · Diagnóstico 2025', subject: 'mat', cgId: CG.a2025, year: 2025, period: 'diagnostico', date: '2025-03-26' },
+    { id: uid(0x708), name: 'DIA Matemática · Diagnóstico 2026', subject: 'mat', cgId: CG.a2026, year: 2026, period: 'diagnostico', date: '2026-03-25' },
+    { id: uid(0x709), name: 'DIA Matemática · Diagnóstico 2026 (3°A)', subject: 'mat', cgId: CG.c2026, year: 2026, period: 'diagnostico', date: '2026-03-25' },
   ];
+  const A = PLAN.map((p) => {
+    const instrument = useInstrument(p.subject, p.year, p.period);
+    return { ...p, instrumentId: instrument.id, instrumentItems: instrument.items };
+  });
 
   let totalResponses = 0;
   for (const a of A) {
@@ -533,7 +579,7 @@ async function main() {
     await db.insert(assessments).values({
       id: a.id, orgId: DEMO_ORG_ID, instrumentId: a.instrumentId, name: a.name,
       administeredById: DEMO_USER_IDS.teacher, mode: 'paper', status: 'completed',
-      administeredAt: new Date(`${a.date}T12:00:00Z`), config: { period: a.period },
+      administeredAt: new Date(`${a.date}T12:00:00Z`), config: { period: PERIOD_TO_APPLICATION[a.period] },
     });
     await db.insert(assessmentCourseAssignments).values({ assessmentId: a.id, classGroupId: a.cgId });
 
@@ -615,7 +661,7 @@ async function main() {
   mkdirSync(outDir, { recursive: true });
 
   function buildCsv(
-    cohort: SeedStudent[], itemsArr: SeedItem[], seed: string, year: number, period: string,
+    cohort: SeedStudent[], itemsArr: SeedItem[], seed: string, year: number, period: SeedPeriod,
   ): string {
     const header = ['RUT', 'Apellidos', 'Nombres', ...itemsArr.map((i) => `p${i.position}`)].join(',');
     const lines = cohort.map((st) => {
@@ -628,16 +674,21 @@ async function main() {
     return `${header}\n${lines.join('\n')}\n`;
   }
 
-  const lectFinal2026 = buildCsv(studentsByCg.get(CG.a2026)!, lectPack.out, 'UPLOAD-LECT-FINAL-2026', 2026, 'final');
+  // Cada CSV se sube contra el instrumento de SU momento (el de Lectura · Cierre
+  // 2026 existe sólo para esto: no tiene evaluación sembrada).
+  const lectFinal2026 = buildCsv(studentsByCg.get(CG.a2026)!, useInstrument('lect', 2026, 'final').items, 'UPLOAD-LECT-FINAL-2026', 2026, 'final');
   writeFileSync(resolve(outDir, 'lectura-2A-final-2026.csv'), lectFinal2026);
-  const matDiag2026B = buildCsv(studentsByCg.get(CG.b2026)!, matPack.out, 'UPLOAD-MAT-DIAG-2026B', 2026, 'diagnostico');
+  const matDiag2026B = buildCsv(studentsByCg.get(CG.b2026)!, useInstrument('mat', 2026, 'diagnostico').items, 'UPLOAD-MAT-DIAG-2026B', 2026, 'diagnostico');
   writeFileSync(resolve(outDir, 'matematica-2B-diagnostico-2026.csv'), matDiag2026B);
 
   // ── Resumen ────────────────────────────────────────────────────────────────
   console.log('\n✅ Seed E2E completado:');
   console.log(`   • 3 años académicos (2024, 2025, 2026)`);
   console.log(`   • 5 cursos, ${studentValues.length} alumnos, ${enrollmentValues.length} matrículas`);
-  console.log(`   • 2 instrumentos (Lectura + Matemática 2°B), 20 ítems, 20 tags de habilidad`);
+  console.log(
+    `   • ${instrumentRows.length} instrumentos (uno por asignatura × año × momento), ` +
+      `${itemRows.length} ítems, ${tagRows.length} tags de habilidad`,
+  );
   console.log(`   • ${A.length} evaluaciones, ${totalResponses} respuestas, resultados + skill_results`);
   console.log(`   • CSVs para upload en: packages/db/data/e2e-answer-sheets/`);
   process.exit(0);

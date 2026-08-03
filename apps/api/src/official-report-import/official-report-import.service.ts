@@ -25,6 +25,8 @@ import {
 } from '@soe/db';
 import {
   buildLevelStatCounts,
+  inferApplicationPeriodFromName,
+  INSTRUMENT_APPLICATION_PERIOD_LABELS,
   officialReportImportFileSchema,
   type ImportJobStatus,
   type ItemCohortStats,
@@ -78,6 +80,7 @@ export class OfficialReportImportService {
 
     // Hardstop temprano: no guardar un informe contra un instrumento o curso ajenos.
     await this.ensureInstrumentVisible(metadata.instrumentId, orgId);
+    await this.ensureInstrumentMatchesReportPeriod(metadata.instrumentId, parsed.report.period);
     await this.ensureClassGroup(metadata.classGroupId, orgId);
 
     const entry = this.previewStore.set({
@@ -394,6 +397,7 @@ export class OfficialReportImportService {
     file: OfficialReportImportFile,
   ): Promise<GateContext> {
     await this.ensureInstrumentVisible(instrumentId, orgId);
+    await this.ensureInstrumentMatchesReportPeriod(instrumentId, file.report.period);
     await this.ensureClassGroup(classGroupId, orgId);
 
     const instrumentItems = await this.loadInstrumentItems(instrumentId);
@@ -616,6 +620,26 @@ export class OfficialReportImportService {
     if (!row) {
       throw new NotFoundException('Instrumento no encontrado o no visible para tu organización');
     }
+  }
+
+  private async ensureInstrumentMatchesReportPeriod(
+    instrumentId: string,
+    reportPeriod: string,
+  ): Promise<void> {
+    const reported = inferApplicationPeriodFromName(reportPeriod);
+    if (!reported) return;
+
+    const [row] = await this.db
+      .select({ name: instruments.name, applicationPeriod: instruments.applicationPeriod })
+      .from(instruments)
+      .where(eq(instruments.id, instrumentId));
+    if (!row?.applicationPeriod || row.applicationPeriod === reported) return;
+
+    throw new ConflictException(
+      `El informe es de ${INSTRUMENT_APPLICATION_PERIOD_LABELS[reported]} pero "${row.name}" es el instrumento de ` +
+        `${INSTRUMENT_APPLICATION_PERIOD_LABELS[row.applicationPeriod]}. Cada momento del DIA es un instrumento distinto: ` +
+        'elige el que corresponde al informe.',
+    );
   }
 
   private async ensureClassGroup(classGroupId: string, orgId: string): Promise<void> {

@@ -38,6 +38,7 @@ import { resolve } from 'node:path';
 config({ path: resolve(__dirname, '../../../../.env') });
 
 import { and, eq, isNull } from 'drizzle-orm';
+import { inferApplicationPeriodFromName, type InstrumentApplicationPeriod } from '@soe/types';
 import { createDbClient, type Database } from '../client';
 import { instruments } from '../schema/instruments';
 import { performanceBands as performanceBandsTable } from '../schema/results';
@@ -96,11 +97,18 @@ const DIA_DIAG_BANDS_META = [
   { key: 'dia_diag_logrado', label: 'No requiere mayor apoyo', order: 1, color: '#10b981' },
 ] as const;
 
-/** Período DIA del instrumento, por su nombre (robusto: `version` no siempre viene). */
-function diaPeriod(name: string): 'diagnostico' | 'cierre' | 'intermedio' {
-  if (/diagn/i.test(name)) return 'diagnostico';
-  if (/cierre/i.test(name)) return 'cierre';
-  return 'intermedio';
+/**
+ * Período DIA del instrumento. Manda la columna `application_period` (la misma por
+ * la que filtra el resto de la app); el nombre sólo se usa cuando viene en NULL —
+ * instrumentos anteriores a la columna, corregibles con
+ * `db:backfill:application-period`. Sin ninguno de los dos cae a `intermedio`,
+ * que comparte corte con `cierre`.
+ */
+function diaPeriod(
+  applicationPeriod: InstrumentApplicationPeriod | null,
+  name: string,
+): InstrumentApplicationPeriod {
+  return applicationPeriod ?? inferApplicationPeriodFromName(name) ?? 'intermedio';
 }
 
 export async function seedPerformanceBands(db: Database): Promise<void> {
@@ -110,6 +118,7 @@ export async function seedPerformanceBands(db: Database): Promise<void> {
       id: instruments.id,
       name: instruments.name,
       version: instruments.version,
+      applicationPeriod: instruments.applicationPeriod,
       subjectCode: subjects.code,
       gradeCode: grades.code,
     })
@@ -126,7 +135,7 @@ export async function seedPerformanceBands(db: Database): Promise<void> {
 
   for (const inst of diaInstruments) {
     const sg = `${inst.subjectCode}|${inst.gradeCode}`;
-    const period = diaPeriod(inst.name);
+    const period = diaPeriod(inst.applicationPeriod, inst.name);
 
     // Idempotencia: si ya hay bandas globales activas, no recrear.
     const existing = await db

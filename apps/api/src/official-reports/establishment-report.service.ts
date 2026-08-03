@@ -14,6 +14,7 @@ import {
   withOrgContext,
 } from '@soe/db';
 import {
+  INSTRUMENT_APPLICATION_PERIOD_LABELS,
   OFFICIAL_REPORT_LEVEL_ORDER,
   type EstablishmentCountRow,
   type EstablishmentGradeColumn,
@@ -22,11 +23,12 @@ import {
   type EstablishmentSubjectSection,
   type OfficialEstablishmentReportQueryDto,
   type OfficialEstablishmentReportResponse,
+  type InstrumentApplicationPeriod,
   type PerformanceLevel,
 } from '@soe/types';
 import type { JwtPayload } from '../auth/jwt-payload.types';
 import { InjectDb, type Database } from '../database/database.types';
-import { ReportSupportService, humanizePeriod } from './report-support.service';
+import { ReportSupportService } from './report-support.service';
 import { compareSexes } from './lib/sex-comparison';
 
 const SCOPE_NOTE_SOCIOEMOTIONAL =
@@ -105,7 +107,7 @@ export class EstablishmentReportService {
           academicYearId: academicYear.id,
           academicYear: academicYear.year,
           period: query.period ?? null,
-          periodLabel: humanizePeriod(query.period ?? null),
+          periodLabel: query.period ? INSTRUMENT_APPLICATION_PERIOD_LABELS[query.period] : null,
           generatedAt: new Date().toISOString(),
           disclaimers,
           variant: this.support.resolveVariant(query.period ?? null),
@@ -149,7 +151,7 @@ export class EstablishmentReportService {
     tx: Database,
     orgId: string,
     academicYearId: string,
-    period: string | null,
+    period: InstrumentApplicationPeriod | null,
   ): Promise<RawRow[]> {
     const conditions = [
       eq(assessments.orgId, orgId),
@@ -159,7 +161,7 @@ export class EstablishmentReportService {
       isNull(instruments.deletedAt),
     ];
     if (period) {
-      conditions.push(sql`${assessments.config}->>'period' = ${period}`);
+      conditions.push(eq(instruments.applicationPeriod, period));
     }
 
     const rows = await tx

@@ -27,6 +27,26 @@ export function toApplicationPeriod(
   return INSTRUMENT_APPLICATION_PERIODS.find((p) => p === normalized) ?? null;
 }
 
+/**
+ * Deduce el momento desde el NOMBRE del instrumento, para los casos en que la
+ * columna `application_period` no viene (instrumentos anteriores a que existiera,
+ * o cargados a mano). Devuelve null cuando el nombre no lo dice: es preferible
+ * dejarlo sin momento que adivinarlo mal.
+ *
+ * Cubre las dos nomenclaturas en circulación: la del enum ("Intermedio") y la
+ * que usa la Agencia de cara al usuario ("Monitoreo"); "Final" es como el seed
+ * histórico llamaba al Cierre.
+ */
+export function inferApplicationPeriodFromName(
+  name: string | null | undefined,
+): InstrumentApplicationPeriod | null {
+  if (!name) return null;
+  if (/diagn[oó]stic/i.test(name)) return 'diagnostico';
+  if (/intermedi|monitore/i.test(name)) return 'intermedio';
+  if (/cierre|final/i.test(name)) return 'cierre';
+  return null;
+}
+
 export const SECTION_TYPES = [
   'multiple_choice',
   'open_ended',
