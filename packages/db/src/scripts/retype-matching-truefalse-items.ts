@@ -10,8 +10,10 @@
  * 2026). Acá se hace UPDATE sobre la fila existente, así que los tags, las
  * figuras y cualquier referencia a `items.id` sobreviven.
  *
- * Los pares se leen de `scoring_config->'matchPairs'`/`'matchColumns'`, que el
- * import previo preservó — no hace falta volver a los PDF ni a los JSON.
+ * Los pares se leen de `scoring_config->'matchPairs'`/`'matchColumns'` (lo que el
+ * import preservó) y, si el ítem no los tiene, del JSON del instrumento en
+ * `packages/db/data/` — el mismo que consume `import-instruments`, así que el
+ * script y los datos no pueden divergir. No hace falta volver a los PDF.
  *
  * Idempotente: sólo toca ítems que siguen mal tipados.
  *
@@ -23,6 +25,10 @@
 import { config } from 'dotenv';
 import { resolve } from 'node:path';
 config({ path: resolve(__dirname, '../../../../.env') });
+
+import { readFileSync, readdirSync } from 'node:fs';
+
+const DATA_ROOT = resolve(__dirname, '../../data');
 
 import postgres from 'postgres';
 import { validateItemContent } from '@soe/types';
@@ -37,6 +43,7 @@ type ItemRow = {
   position: number;
   type: string;
   instrumentName: string;
+  sourceJson: string | null;
   content: Record<string, unknown>;
   scoringConfig: Record<string, unknown>;
 };
@@ -73,12 +80,34 @@ function columnsFromText(text: string, pairs: MatchPair[]): Record<string, Match
   return columns;
 }
 
+type MatchSource = { pairs: MatchPair[]; columns: Record<string, MatchElement[]> };
+
+/**
+ * De dónde salen los pares de un ítem: primero de `scoring_config` (lo que el
+ * import preservó) y, si no está, del JSON del instrumento en el repo. Devuelve
+ * `null` si el ítem no es un pareado — así el barrido puede incluir los `fill_in`
+ * sin re-tipar por error los que sí son de completar.
+ */
+function resolveMatchSource(row: ItemRow, fromJson: Map<string, MatchSource>): MatchSource | null {
+  const stored = (row.scoringConfig.matchPairs ?? []) as MatchPair[];
+  if (stored.length > 0) {
+    return {
+      pairs: stored,
+      columns: (row.scoringConfig.matchColumns ?? {}) as Record<string, MatchElement[]>,
+    };
+  }
+  return fromJson.get(`${row.sourceJson}#${row.position}`) ?? null;
+}
+
 /** Misma regla que el importador: el lado respondible se DEDUCE de los pares. */
-function buildMatchingContent(row: ItemRow): { content: Record<string, unknown>; points: number } {
-  const pairs = (row.scoringConfig.matchPairs ?? []) as MatchPair[];
-  const stored = (row.scoringConfig.matchColumns ?? {}) as Record<string, MatchElement[]>;
+function buildMatchingContent(
+  row: ItemRow,
+  source: MatchSource,
+): { content: Record<string, unknown>; points: number } {
+  const pairs = source.pairs;
   const text = String(row.content.prompt ?? row.content.stem ?? '');
-  const columns = Object.keys(stored).length > 0 ? stored : columnsFromText(text, pairs);
+  const columns =
+    Object.keys(source.columns).length > 0 ? source.columns : columnsFromText(text, pairs);
   const names = Object.keys(columns);
   if (pairs.length === 0) throw new Error(`pos ${row.position}: matchPairs vacío`);
   if (names.length !== 2) {
@@ -144,16 +173,74 @@ function buildTrueFalseContent(row: ItemRow): Record<string, unknown> {
   return { stem: row.content.stem ?? row.content.prompt ?? '', correctAnswer: isTrue };
 }
 
+/**
+ * Índice (sourceJson, position) → pares del JSON del instrumento.
+ *
+ * Hay ítems pareados cuyo `scoring_config` NO tiene `matchPairs`: se cargaron
+ * antes de que el import los preservara, o su extracción escribía la clave en
+ * otra notación. Para ésos, el JSON del repo es la fuente — y como el mismo JSON
+ * es el que consume `import-instruments`, script y datos no pueden divergir.
+ */
+function indexPairsFromDataDir(): Map<
+  string,
+  { pairs: MatchPair[]; columns: Record<string, MatchElement[]> }
+> {
+  const index = new Map<string, { pairs: MatchPair[]; columns: Record<string, MatchElement[]> }>();
+  const roots = readdirSync(DATA_ROOT, { withFileTypes: true })
+    .filter((e) => e.isDirectory() && e.name.startsWith('instruments'))
+    .map((e) => resolve(DATA_ROOT, e.name));
+
+  for (const root of roots) {
+    for (const file of collectJsonFiles(root)) {
+      let parsed: {
+        sections?: { items?: Record<string, unknown>[] }[];
+        pauta?: { source?: { instrumentJson?: string } };
+      };
+      try {
+        parsed = JSON.parse(readFileSync(file, 'utf-8'));
+      } catch {
+        continue;
+      }
+      const sourceJson = parsed.pauta?.source?.instrumentJson;
+      if (!sourceJson || !Array.isArray(parsed.sections)) continue;
+      for (const section of parsed.sections) {
+        for (const item of section.items ?? []) {
+          const pairs = item.matchPairs as MatchPair[] | undefined;
+          if (!pairs?.length) continue;
+          index.set(`${sourceJson}#${item.position as number}`, {
+            pairs,
+            columns: (item.matchColumns ?? {}) as Record<string, MatchElement[]>,
+          });
+        }
+      }
+    }
+  }
+  return index;
+}
+
+function collectJsonFiles(dir: string): string[] {
+  const out: string[] = [];
+  for (const entry of readdirSync(dir, { withFileTypes: true })) {
+    const full = resolve(dir, entry.name);
+    if (entry.isDirectory()) out.push(...collectJsonFiles(full));
+    else if (entry.name.endsWith('.json')) out.push(full);
+  }
+  return out;
+}
+
 const sql = postgres(process.env.DATABASE_ADMIN_URL as string, { max: 1 });
 
 (async () => {
+  const fromJson = indexPairsFromDataDir();
+
   const pareados = (await sql`
     select it.id, it.position, it.type, ins.name as "instrumentName",
+           ins.config->>'sourceJson' as "sourceJson",
            it.content, it.scoring_config as "scoringConfig"
     from items it join instruments ins on ins.id = it.instrument_id
     where it.deleted_at is null and it.type <> 'matching'
-      and it.scoring_config->>'responseFormat' = 'match_pairs'
-      and it.scoring_config ? 'matchPairs'
+      and (it.scoring_config ? 'matchPairs'
+           or it.scoring_config->>'responseFormat' in ('match_pairs', 'fill_in'))
     order by ins.name, it.position`) as unknown as ItemRow[];
 
   const vf = (await sql`
@@ -173,8 +260,14 @@ const sql = postgres(process.env.DATABASE_ADMIN_URL as string, { max: 1 });
   const planned: { id: string; type: string; content: unknown; points: number; label: string }[] =
     [];
 
+  let noPareados = 0;
   for (const row of pareados) {
-    const { content, points } = buildMatchingContent(row);
+    const source = resolveMatchSource(row, fromJson);
+    if (!source) {
+      noPareados++;
+      continue;
+    }
+    const { content, points } = buildMatchingContent(row, source);
     validateItemContent('matching', content);
     planned.push({
       id: row.id,
@@ -198,6 +291,11 @@ const sql = postgres(process.env.DATABASE_ADMIN_URL as string, { max: 1 });
   }
 
   planned.forEach((p) => console.log('  ' + p.label));
+  if (noPareados > 0) {
+    console.log(
+      `\n  (${noPareados} ítem(s) con responseFormat fill_in/match_pairs SIN pares declarados: no son pareados, se omiten)`,
+    );
+  }
 
   if (!APPLY) {
     console.log('\nDry-run: nada escrito. Re-correr con --apply.');
