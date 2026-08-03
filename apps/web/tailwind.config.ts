@@ -123,6 +123,16 @@ const config: Config = {
         'progress-indeterminate': 'progress-indeterminate 1.1s ease-in-out infinite',
       },
       // Escala de apilamiento para superficies flotantes (Fase 1 overlays).
+      //
+      // ⚠️ `dropdown` (40) queda por DEBAJO de `modal` (50). Toda superficie que
+      // se porta a `document.body` (Radix Portal) y pueda abrirse DENTRO de un
+      // Dialog/Sheet/AlertDialog debe usar `popover`, no `dropdown`: al ser
+      // hermana del modal en el mismo contexto de apilamiento, con 40 se dibuja
+      // detrás y queda invisible e inseleccionable. Le pasó al Select del modal
+      // "Guardar en lista" y al kebab del panel de detalle.
+      //
+      // `dropdown` queda para menús en flujo (no portados) que nunca conviven
+      // con un modal.
       zIndex: {
         sticky: '30',
         dropdown: '40',
