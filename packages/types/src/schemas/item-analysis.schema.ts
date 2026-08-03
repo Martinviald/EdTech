@@ -124,6 +124,12 @@ export type MatrixCell = {
   selectedKey: string | null; // alternativa elegida (null = sin respuesta)
   isCorrect: boolean | null;
   score: number | null; // final_score si existe, si no raw_score
+  /**
+   * Puntaje máximo del ítem. Con ítems de crédito parcial (`matching`), un
+   * `isCorrect: false` puede traer puntaje > 0: mostrar "2/4" dice mucho más que
+   * "incorrecto". En los ítems binarios vale 1 y no cambia nada de lo que se ve.
+   */
+  maxScore: number | null;
 };
 
 /** Una fila de la matriz = un alumno con sus respuestas. */

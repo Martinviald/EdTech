@@ -2,8 +2,8 @@ import Papa from 'papaparse';
 import type { AnswerSheetColumnMapping, AnswerSheetRowError } from '@soe/types';
 import {
   decodeCsvBuffer,
-  normalizeAnswerValue,
-  questionColumnToPosition,
+  assignAnswer,
+  type ParsedAnswerValue,
   type ParsedAnswerSheetRow,
   type ParserResult,
 } from './parser.types';
@@ -20,10 +20,7 @@ import {
  * El nombre canónico de la pregunta (la "position") siempre se deriva de los
  * dígitos en la columna, no del orden — para que el CSV pueda omitir columnas.
  */
-export function parseGenericCsv(
-  buffer: Buffer,
-  mapping: AnswerSheetColumnMapping,
-): ParserResult {
+export function parseGenericCsv(buffer: Buffer, mapping: AnswerSheetColumnMapping): ParserResult {
   const text = decodeCsvBuffer(buffer);
   const parsed = Papa.parse<Record<string, string>>(text, {
     header: true,
@@ -47,14 +44,9 @@ export function parseGenericCsv(
   // Resolver columnas de preguntas.
   let questionColumns: string[] = [];
   if (mapping.questionColumns && mapping.questionColumns.length > 0) {
-    questionColumns = mapping.questionColumns.filter((c: string) =>
-      detectedColumns.includes(c),
-    );
+    questionColumns = mapping.questionColumns.filter((c: string) => detectedColumns.includes(c));
   } else if (mapping.questionsPrefix) {
-    const pattern = new RegExp(
-      `^${escapeRegex(mapping.questionsPrefix)}0*\\d+$`,
-      'i',
-    );
+    const pattern = new RegExp(`^${escapeRegex(mapping.questionsPrefix)}0*\\d+$`, 'i');
     questionColumns = detectedColumns.filter((c) => pattern.test(c));
   } else {
     warnings.push(
@@ -74,18 +66,15 @@ export function parseGenericCsv(
     const studentRut = rutCol ? (raw[rutCol] ?? '').trim() || null : null;
     const firstName = firstNameCol ? (raw[firstNameCol] ?? '').trim() : '';
     const lastName = lastNameCol ? (raw[lastNameCol] ?? '').trim() : '';
-    const studentFullName =
-      firstName || lastName ? `${firstName} ${lastName}`.trim() : null;
+    const studentFullName = firstName || lastName ? `${firstName} ${lastName}`.trim() : null;
 
     if (!studentRut && rutCol) {
       errors.push({ rowNumber, field: rutCol, message: 'Falta el RUT del alumno' });
     }
 
-    const answers: Record<string, string | null> = {};
+    const answers: Record<string, ParsedAnswerValue> = {};
     for (const col of questionColumns) {
-      const position = questionColumnToPosition(col);
-      if (!position) continue;
-      answers[position] = normalizeAnswerValue(raw[col]);
+      assignAnswer(answers, col, raw[col]);
     }
 
     if (!studentRut && Object.values(answers).every((v) => v === null) && !studentFullName) {

@@ -80,13 +80,80 @@ export const listeningContentSchema = z.object({
   imageUrl: baseContent.imageUrl,
 });
 
-export const matchingContentSchema = z.object({
-  prompt: z.string().min(1).optional(),
-  leftItems: z.array(z.object({ id: z.string(), text: z.string().min(1) })).min(2),
-  rightItems: z.array(z.object({ id: z.string(), text: z.string().min(1) })).min(2),
-  correctPairs: z.array(z.object({ leftId: z.string(), rightId: z.string() })).min(1),
-  ...baseContent,
+// ── Términos pareados (`matching`) ───────────────────────────────────────────
+//
+// Abstracción genérica, NO una transcripción del formato DIA. Invariantes:
+//
+//   · `leftItems` es el lado RESPONDIBLE: cada elemento recibe exactamente una
+//     respuesta del alumno, y por eso `correctPairs` tiene una entrada por
+//     elemento y `leftId` es único. La corrección indexa por `leftId`.
+//   · `rightItems` es el BANCO DE OPCIONES. Un elemento del banco que no aparece
+//     en ningún `correctPairs` es, por definición, un distractor.
+//   · `rightId` PUEDE repetirse: varios elementos respondibles pueden apuntar a
+//     la misma opción (pareados de clasificación N → k categorías).
+//   · Las dos columnas pueden tener tamaños distintos y arbitrarios.
+//
+// Qué lado del documento impreso queda en `leftItems` lo decide el adaptador de
+// carga, no este schema: en unos instrumentos los distractores están en la
+// columna A y en otros en la B. `label` preserva el rótulo impreso ("A.3") para
+// no perder la traza al documento original.
+
+const matchingElementSchema = z.object({
+  id: z.string().min(1),
+  /** Texto del elemento; si `isImage`, es la descripción textual de la figura. */
+  text: z.string().min(1),
+  /** Rótulo impreso en el documento de origen ("A.3", "1", "a"). Trazabilidad. */
+  label: z.string().min(1).optional(),
+  /** El contenido real es una figura — `text` la describe, no la reemplaza. */
+  isImage: z.boolean().optional(),
 });
+
+export const matchingContentSchema = z
+  .object({
+    prompt: z.string().min(1).optional(),
+    leftItems: z.array(matchingElementSchema).min(1),
+    rightItems: z.array(matchingElementSchema).min(2),
+    correctPairs: z.array(z.object({ leftId: z.string(), rightId: z.string() })).min(1),
+    ...baseContent,
+  })
+  .superRefine((content, ctx) => {
+    const leftIds = new Set(content.leftItems.map((el) => el.id));
+    const rightIds = new Set(content.rightItems.map((el) => el.id));
+    const seenLeftIds = new Set<string>();
+
+    content.correctPairs.forEach((pair, index) => {
+      if (!leftIds.has(pair.leftId)) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          path: ['correctPairs', index, 'leftId'],
+          message: `leftId "${pair.leftId}" no existe en leftItems`,
+        });
+      }
+      if (!rightIds.has(pair.rightId)) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          path: ['correctPairs', index, 'rightId'],
+          message: `rightId "${pair.rightId}" no existe en rightItems`,
+        });
+      }
+      if (seenLeftIds.has(pair.leftId)) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          path: ['correctPairs', index, 'leftId'],
+          message: `leftId "${pair.leftId}" está repetido: cada elemento respondible admite un único par`,
+        });
+      }
+      seenLeftIds.add(pair.leftId);
+    });
+
+    if (seenLeftIds.size !== leftIds.size) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ['correctPairs'],
+        message: `correctPairs debe cubrir los ${leftIds.size} elementos de leftItems (cubre ${seenLeftIds.size})`,
+      });
+    }
+  });
 
 export const orderingContentSchema = z.object({
   prompt: z.string().min(1).optional(),

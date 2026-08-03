@@ -13,6 +13,7 @@ import {
 import { cn } from '@/lib/utils';
 import { QuestionDetailSheet } from '@/components/question-detail/question-detail-sheet';
 import { QuestionNodes, type QuestionNodeTag } from '@/components/question-detail/question-nodes';
+import { MatchingContentView, asMatchingContent } from '@/components/items/matching-content-view';
 import { ItemEditProposals } from './ItemEditProposals';
 
 function sectionToPassage(section: InstrumentSectionModel): PassageData {
@@ -166,6 +167,7 @@ function ItemDetailContent({
   const imageUrl = getStringField(content, 'imageUrl');
   const explanation = getStringField(content, 'explanation');
   const imageKeys = altImageKeys(item);
+  const matching = asMatchingContent(content);
 
   return (
     <div className="mt-6 space-y-6">
@@ -194,27 +196,34 @@ function ItemDetailContent({
         />
       ) : null}
 
-      {/* Alternativas */}
-      <section className="space-y-3">
-        <h3 className="text-sm font-semibold text-foreground">Alternativas</h3>
-        {alternatives.length === 0 ? (
-          <div className="flex items-center gap-2 rounded-md border border-dashed bg-muted/30 px-4 py-6 text-sm text-muted-foreground">
-            <FileQuestion className="size-5" aria-hidden />
-            <span>Esta pregunta no tiene alternativas (no es de selección múltiple).</span>
-          </div>
-        ) : (
-          <ul className="space-y-2">
-            {alternatives.map((alt) => (
-              <AlternativeRow
-                key={alt.key}
-                alt={alt}
-                itemId={item.id}
-                hasImage={imageKeys.has(alt.key)}
-              />
-            ))}
-          </ul>
-        )}
-      </section>
+      {/* Respuesta correcta: por alternativas, o por pares si es un pareado */}
+      {matching ? (
+        <section className="space-y-3">
+          <h3 className="text-sm font-semibold text-foreground">Pares correctos</h3>
+          <MatchingContentView content={matching} />
+        </section>
+      ) : (
+        <section className="space-y-3">
+          <h3 className="text-sm font-semibold text-foreground">Alternativas</h3>
+          {alternatives.length === 0 ? (
+            <div className="flex items-center gap-2 rounded-md border border-dashed bg-muted/30 px-4 py-6 text-sm text-muted-foreground">
+              <FileQuestion className="size-5" aria-hidden />
+              <span>Esta pregunta no tiene alternativas (no es de selección múltiple).</span>
+            </div>
+          ) : (
+            <ul className="space-y-2">
+              {alternatives.map((alt) => (
+                <AlternativeRow
+                  key={alt.key}
+                  alt={alt}
+                  itemId={item.id}
+                  hasImage={imageKeys.has(alt.key)}
+                />
+              ))}
+            </ul>
+          )}
+        </section>
+      )}
 
       {/* Nodos asociados */}
       <QuestionNodes tags={toNodeTags(item.tags ?? [])} />

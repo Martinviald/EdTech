@@ -89,14 +89,24 @@ export type AnswerSheetRowError = z.infer<typeof answerSheetRowErrorSchema>;
 
 // ── Response Models (API shape) ──────────────────────────────────────────────
 
+/**
+ * Respuesta del alumno a UNA posición del instrumento.
+ *
+ * `string | null` es el caso normal (una alternativa marcada, o en blanco). El
+ * `Record<string, string>` cubre los ítems COMPUESTOS, cuyo escaneo trae varias
+ * sub-columnas para una sola pregunta impresa (`7B1`…`7B4`, `9.1`…`9.4`):
+ * llegan agrupadas por sub-etiqueta y se resuelven según el tipo del ítem.
+ */
+export type AnswerSheetAnswerValue = string | null | Record<string, string>;
+
 export type AnswerSheetRowPreview = {
   rowNumber: number;
   studentRut: string | null;
   studentId: string | null; // null si no se encontró el alumno en la org
   studentFullName: string | null;
   matched: boolean; // true si studentId está presente
-  // Mapa de itemPosition → rawAnswer (key seleccionada por el alumno).
-  answers: Record<string, string | null>;
+  // Mapa de itemPosition → respuesta del alumno (ver AnswerSheetAnswerValue).
+  answers: Record<string, AnswerSheetAnswerValue>;
   errors: AnswerSheetRowError[];
 };
 

@@ -2,8 +2,8 @@ import Papa from 'papaparse';
 import type { AnswerSheetRowError } from '@soe/types';
 import {
   decodeCsvBuffer,
-  normalizeAnswerValue,
-  questionColumnToPosition,
+  assignAnswer,
+  type ParsedAnswerValue,
   type ParsedAnswerSheetRow,
   type ParserResult,
 } from './parser.types';
@@ -45,18 +45,15 @@ export function parseZipgradeCsv(buffer: Buffer): ParserResult {
     const studentRut = (raw['Student ID'] ?? '').trim() || null;
     const firstName = (raw['Student First Name'] ?? '').trim();
     const lastName = (raw['Student Last Name'] ?? '').trim();
-    const studentFullName =
-      firstName || lastName ? `${firstName} ${lastName}`.trim() : null;
+    const studentFullName = firstName || lastName ? `${firstName} ${lastName}`.trim() : null;
 
     if (!studentRut) {
       errors.push({ rowNumber, field: 'Student ID', message: 'Falta el RUT del alumno' });
     }
 
-    const answers: Record<string, string | null> = {};
+    const answers: Record<string, ParsedAnswerValue> = {};
     for (const col of questionColumns) {
-      const position = questionColumnToPosition(col);
-      if (!position) continue;
-      answers[position] = normalizeAnswerValue(raw[col]);
+      assignAnswer(answers, col, raw[col]);
     }
 
     if (!studentRut && Object.values(answers).every((v) => v === null) && !studentFullName) {

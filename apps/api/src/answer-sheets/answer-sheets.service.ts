@@ -33,6 +33,7 @@ import {
   type ImportJobModel,
   type ItemContent,
   type ItemType,
+  type ScoringConfig,
 } from '@soe/types';
 import type { JwtPayload } from '../auth/jwt-payload.types';
 import { InjectDb, type Database } from '../database/database.types';
@@ -51,6 +52,7 @@ import { parseGenericCsv } from './lib/parsers/generic-csv-parser';
 import { getTemplate, listTemplates } from './lib/templates';
 import type { ParserResult } from './lib/parsers/parser.types';
 import { matchStudents } from './lib/student-matcher';
+import { isUnexpectedCompositeAnswer, resolveCompositeAnswer } from './lib/composite-answers';
 
 interface ItemForAssessment {
   id: string;
@@ -58,6 +60,7 @@ interface ItemForAssessment {
   type: ItemType;
   content: ItemContent;
   maxScore: number;
+  scoringConfig: ScoringConfig;
 }
 
 interface UploadMetadataInput {
@@ -157,6 +160,20 @@ export class AnswerSheetsService {
       .filter((p) => !positionSet.has(String(p)))
       .sort((a, b) => a - b);
 
+    // Sub-numeración inesperada: el escaneo trae varias sub-columnas para un
+    // ítem que la app NO modela como compuesto. Antes se perdían todas las
+    // sub-respuestas menos la última, en silencio; ahora se avisa.
+    const itemByPosition = new Map(instrumentItems.map((i) => [String(i.position), i]));
+    const unexpectedCompositePositions = Array.from(
+      new Set(
+        entry.rows.flatMap((row) =>
+          Object.entries(row.answers)
+            .filter(([pos, value]) => isUnexpectedCompositeAnswer(itemByPosition.get(pos), value))
+            .map(([pos]) => pos),
+        ),
+      ),
+    ).sort((a, b) => Number(a) - Number(b));
+
     let matchedRows = 0;
     let unmatchedRows = 0;
     let errorRows = 0;
@@ -167,7 +184,11 @@ export class AnswerSheetsService {
       if (matched) matchedRows++;
       else unmatchedRows++;
 
-      const answeredCount = Object.values(row.answers).filter((v) => v !== null).length;
+      // Cuenta POSICIONES respondidas, no columnas del archivo: un ítem
+      // compuesto que el escaneo sub-numera es una sola pregunta del instrumento.
+      const answeredCount = Object.values(row.answers).filter((v) =>
+        v !== null && typeof v === 'object' ? Object.keys(v).length > 0 : v !== null,
+      ).length;
 
       const errors = [...row.errors];
       if (!matched && m && !m.rutNormalized) {
@@ -219,6 +240,12 @@ export class AnswerSheetsService {
         ...entry.warnings,
         ...(missingItemPositions.length > 0
           ? [`Faltan respuestas para ${missingItemPositions.length} pregunta(s) del instrumento`]
+          : []),
+        ...(unexpectedCompositePositions.length > 0
+          ? [
+              `El escaneo sub-numera la(s) pregunta(s) ${unexpectedCompositePositions.join(', ')}, ` +
+                'que en el instrumento son un único ítem no compuesto: se usará la primera sub-respuesta.',
+            ]
           : []),
       ],
     };
@@ -306,13 +333,18 @@ export class AnswerSheetsService {
       // determinística por content; el resto → pendiente (corrección humana/IA),
       // NUNCA 0/incorrecto en silencio.
       for (const item of instrumentItems) {
-        const rawAnswer = row.answers[String(item.position)] ?? null;
+        // Un escaneo puede traer varias sub-columnas para una sola pregunta
+        // impresa (`7B1`…`7B4`). El parser las agrupa sin interpretarlas; acá,
+        // que ya se conoce el `item.type`, se resuelven a la forma que espera su
+        // estrategia de corrección.
+        const rawAnswer = resolveCompositeAnswer(item, row.answers[String(item.position)] ?? null);
         const result = getScoringStrategy(item.type).score({
           item: {
             id: item.id,
             type: item.type,
             content: item.content,
             maxScore: item.maxScore,
+            scoringConfig: item.scoringConfig,
           },
           rawAnswer,
         });
@@ -632,11 +664,12 @@ export class AnswerSheetsService {
 
     const out: ItemForAssessment[] = [];
     for (const row of rows) {
-      const scoringConfig = (row.scoringConfig ?? {}) as { points?: number };
-      const maxScore = scoringConfig.points ?? 1;
+      const scoringConfig = (row.scoringConfig ?? {}) as ScoringConfig;
+      const maxScore = scoringConfig?.points ?? 1;
       out.push({
         id: row.id,
         position: row.position,
+        scoringConfig,
         // `items.type` es un enum de DB tipado como ItemType. El `content`
         // JSONB ya está tipado como ItemContent en el schema Drizzle; lo pasamos
         // a la estrategia de scoring correspondiente a su `type`.

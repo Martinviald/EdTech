@@ -35,6 +35,13 @@ type Alt = {
   /** Storage key en S3 del recorte de esa alternativa (contrato v1.1). No es una URL. */
   imageRef?: string | null;
 };
+/** Elemento de una columna de un ítem de términos pareados. */
+type MatchElement = {
+  key: string;
+  text: string;
+  isImage?: boolean;
+  imageRef?: string | null;
+};
 type Item = {
   position: number;
   type: string;
@@ -46,6 +53,12 @@ type Item = {
   figureNote?: string | null;
   /** Storage key en S3 del recorte de la figura (contrato v1.1). No es una URL. */
   imageRef?: string | null;
+  /** Puntaje del ítem. Ausente ⇒ se deriva del tipo (ver `resolvePoints`). */
+  points?: number;
+  /** Términos pareados — las dos columnas tal como las rotula el documento. */
+  matchColumns?: Record<string, MatchElement[]>;
+  /** Términos pareados — los pares correctos, en las etiquetas del documento. */
+  matchPairs?: { left: string; right: string }[];
 };
 type Passage = {
   title?: string;
@@ -98,8 +111,172 @@ function altImageRefs(it: Item): Record<string, unknown> | null {
   return Object.keys(refs).length ? { altImageRefs: refs } : null;
 }
 
-function buildContent(it: Item): Record<string, unknown> {
-  if (it.type === 'multiple_choice' || it.type === 'true_false') {
+// ── Términos pareados ────────────────────────────────────────────────────────
+//
+// El `content` de `matching` es genérico: `leftItems` es el lado RESPONDIBLE
+// (una entrada de `correctPairs` por elemento) y `rightItems` el banco de
+// opciones, donde viven los distractores. Qué columna del documento cae en cada
+// lado NO es fijo: en Ciencias 8° los distractores están en la columna A y en
+// Historia 6° en la B. Por eso el lado respondible se DEDUCE de los pares en vez
+// de hardcodearse, con esta regla:
+//
+//   el lado respondible es aquel cuyas etiquetas aparecen una sola vez entre los
+//   pares Y cubren todos los elementos de su columna
+//
+// (todo elemento respondible tiene exactamente una respuesta; un elemento del
+// banco puede no usarse —distractor— o repetirse —clasificación N → k).
+
+type MatchingSides = {
+  answerable: MatchElement[];
+  options: MatchElement[];
+  pairs: { answerableKey: string; optionKey: string }[];
+};
+
+function isAnswerableSide(keys: string[], column: MatchElement[]): boolean {
+  const unique = new Set(keys);
+  return unique.size === keys.length && unique.size === column.length;
+}
+
+/**
+ * Adaptador del shape que entrega el pipeline de extracción DIA
+ * (`matchColumns: {A, B}` + `matchPairs: [{left, right}]`) al shape genérico.
+ * Todo lo específico de DIA vive acá; `buildMatchingContent` no lo conoce.
+ */
+/**
+ * Fallback cuando la capa A no emitió `matchColumns`: los rotulados de las dos
+ * columnas están igual en el enunciado, una etiqueta por línea
+ * (`A.1 Osmosis`). Se derivan los prefijos de las etiquetas de `matchPairs` y se
+ * barre el stem por cada uno — así se recuperan también los distractores, que
+ * por definición NO aparecen en los pares.
+ *
+ * Vive en el adaptador DIA a propósito: es parsing del formato de un proveedor,
+ * no parte del contrato de `matching`.
+ */
+function columnsFromStem(it: Item): Record<string, MatchElement[]> {
+  const prefixes = [
+    ...new Set((it.matchPairs ?? []).flatMap((p) => [p.left, p.right]).map(labelPrefix)),
+  ];
+  const columns: Record<string, MatchElement[]> = {};
+  for (const prefix of prefixes) {
+    const pattern = new RegExp(`^\\s*(${prefix}[.\\s]?\\d+)[.)\\s]+(.+)$`, 'gm');
+    const elements: MatchElement[] = [];
+    for (const m of it.stem.matchAll(pattern)) {
+      const key = m[1]!.replace(/\s+/g, '');
+      const text = m[2]!.trim();
+      if (text.length > 0) elements.push({ key, text });
+    }
+    if (elements.length > 0) columns[prefix] = elements;
+  }
+  return columns;
+}
+
+function labelPrefix(label: string): string {
+  return label.replace(/[.\s]?\d+$/, '');
+}
+
+function diaMatchingSides(it: Item): MatchingSides {
+  const columns =
+    it.matchColumns && Object.keys(it.matchColumns).length > 0
+      ? it.matchColumns
+      : columnsFromStem(it);
+  const names = Object.keys(columns);
+  if (names.length !== 2) {
+    throw new Error(
+      `Ítem ${it.position}: matchColumns debe traer exactamente 2 columnas, trae ${names.length}`,
+    );
+  }
+  const pairs = it.matchPairs ?? [];
+  if (pairs.length === 0) {
+    throw new Error(`Ítem ${it.position}: matchPairs vacío en un ítem de términos pareados`);
+  }
+
+  const [firstName, secondName] = names as [string, string];
+  const first = columns[firstName] ?? [];
+  const second = columns[secondName] ?? [];
+  const leftKeys = pairs.map((p) => p.left);
+  const rightKeys = pairs.map((p) => p.right);
+
+  const leftIsAnswerable = isAnswerableSide(leftKeys, first);
+  const rightIsAnswerable = isAnswerableSide(rightKeys, second);
+
+  if (leftIsAnswerable === rightIsAnswerable) {
+    // Biyección perfecta (ambos lados califican) o dato inconsistente (ninguno).
+    // En el primer caso da igual cuál se elija; en el segundo hay que fallar
+    // ruidoso, porque adivinar el lado corrige mal sin fallar nunca.
+    if (!leftIsAnswerable) {
+      throw new Error(
+        `Ítem ${it.position}: no se puede deducir el lado respondible de los pares ` +
+          `(${leftKeys.length} pares, columnas de ${first.length} y ${second.length})`,
+      );
+    }
+  }
+
+  return leftIsAnswerable
+    ? {
+        answerable: first,
+        options: second,
+        pairs: pairs.map((p) => ({ answerableKey: p.left, optionKey: p.right })),
+      }
+    : {
+        answerable: second,
+        options: first,
+        pairs: pairs.map((p) => ({ answerableKey: p.right, optionKey: p.left })),
+      };
+}
+
+function toMatchingElement(el: MatchElement): Record<string, unknown> {
+  return {
+    id: el.key,
+    text: el.text,
+    label: el.key,
+    ...(el.isImage ? { isImage: true } : {}),
+  };
+}
+
+function buildMatchingContent(it: Item): Record<string, unknown> {
+  const { answerable, options, pairs } = diaMatchingSides(it);
+  return {
+    prompt: it.stem,
+    leftItems: answerable.map(toMatchingElement),
+    rightItems: options.map(toMatchingElement),
+    correctPairs: pairs.map((p) => ({ leftId: p.answerableKey, rightId: p.optionKey })),
+  };
+}
+
+/** `{ matchImageRefs: {"B.1": key, …} }` con los recortes de ambas columnas, o `null`. */
+function matchImageRefs(it: Item): Record<string, unknown> | null {
+  const refs = Object.fromEntries(
+    Object.values(it.matchColumns ?? {})
+      .flat()
+      .filter((el) => el.imageRef)
+      .map((el) => [el.key, el.imageRef]),
+  );
+  return Object.keys(refs).length ? { matchImageRefs: refs } : null;
+}
+
+/** Nº de pares correctos declarados, para derivar el puntaje por defecto. */
+function matchingPairCount(it: Item): number {
+  return (it.matchPairs ?? []).length;
+}
+
+function buildTrueFalseContent(it: Item): Record<string, unknown> {
+  const correct = (it.alternatives ?? []).find((a) => a.isCorrect === true);
+  if (!correct) {
+    throw new Error(`Ítem ${it.position}: true_false sin alternativa correcta declarada`);
+  }
+  const normalized = `${correct.key} ${correct.text}`.trim().toUpperCase();
+  const isTrue = /\b(V|VERDADERO|TRUE|T|SÍ|SI)\b/.test(normalized);
+  const isFalse = /\b(F|FALSO|FALSE)\b/.test(normalized);
+  if (isTrue === isFalse) {
+    throw new Error(
+      `Ítem ${it.position}: no se puede resolver V/F desde la alternativa correcta "${correct.key}. ${correct.text}"`,
+    );
+  }
+  return { stem: it.stem, correctAnswer: isTrue };
+}
+
+export function buildContent(it: Item): Record<string, unknown> {
+  if (it.type === 'multiple_choice') {
     return {
       stem: it.stem,
       alternatives: (it.alternatives ?? []).map((a) => ({
@@ -109,8 +286,21 @@ function buildContent(it: Item): Record<string, unknown> {
       })),
     };
   }
+  if (it.type === 'true_false') return buildTrueFalseContent(it);
+  if (it.type === 'matching') return buildMatchingContent(it);
   // open_ended (incluye responseFormat fill_in / develop), writing, etc.
   return { prompt: it.stem };
+}
+
+/**
+ * Puntaje del ítem. El JSON manda; si no lo declara, un pareado vale un punto por
+ * par (la convención de la Agencia, y el default razonable en general) y todo lo
+ * demás vale 1.
+ */
+export function resolvePoints(it: Item): number {
+  if (typeof it.points === 'number' && it.points >= 0) return it.points;
+  if (it.type === 'matching') return matchingPairCount(it) || 1;
+  return 1;
 }
 
 export async function importInstruments(db: Database): Promise<void> {
@@ -252,7 +442,7 @@ export async function importInstruments(db: Database): Promise<void> {
             type: it.type as typeof items.$inferInsert.type,
             content,
             scoringConfig: {
-              points: 1,
+              points: resolvePoints(it),
               partialCredit: it.type !== 'multiple_choice' && it.type !== 'true_false',
               ...(it.responseFormat ? { responseFormat: it.responseFormat } : {}),
               ...(it.hasFigure ? { hasFigure: true, figureNote: it.figureNote ?? null } : {}),
@@ -264,6 +454,8 @@ export async function importInstruments(db: Database): Promise<void> {
               // Recortes por alternativa: {A: key, B: key, …}. Mismo motivo para NO ponerlos en
               // `content`: el schema de alternativa es {key,text,isCorrect} y Zod descarta el resto.
               ...(altImageRefs(it) ?? {}),
+              // Recortes de los elementos de un pareado: {"B.1": key, …}. Mismo motivo.
+              ...(matchImageRefs(it) ?? {}),
             },
             status: 'published',
             source: 'imported',
