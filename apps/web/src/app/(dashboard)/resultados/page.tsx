@@ -207,10 +207,6 @@ function RecentAssessments({
   filters: DashboardFilterValues;
 }) {
   const filtered = hasActiveFilters(filters);
-  // La tabla muestra sólo las más recientes. Sin decirlo, una lista recortada se lee
-  // como "esto es todo lo que hay" — y al filtrar aparecían evaluaciones que antes
-  // no estaban, lo que parecía un filtro roto.
-  const isTruncated = total > assessments.length;
   const periodFilterOnly =
     (filters.applicationPeriod?.length ?? 0) > 0 &&
     assessments.length === 0 &&
@@ -221,8 +217,11 @@ function RecentAssessments({
       <CardHeader>
         <CardTitle className="text-base">Evaluaciones</CardTitle>
         <CardDescription>
-          {isTruncated
-            ? `Mostrando las ${assessments.length} más recientes de ${total}. Selecciona una para ver su análisis en profundidad.`
+          {/* La lista ya no se trunca: muestra TODAS las del alcance filtrado, de la
+              más reciente a la más antigua. El KPI de arriba agrega sobre ese mismo
+              conjunto, así que las filas visibles siempre lo explican. */}
+          {total > 0
+            ? `${total} ${total === 1 ? 'evaluación' : 'evaluaciones'} en el alcance seleccionado. Selecciona una para ver su análisis en profundidad.`
             : 'Selecciona una evaluación para ver su análisis en profundidad.'}
         </CardDescription>
       </CardHeader>
