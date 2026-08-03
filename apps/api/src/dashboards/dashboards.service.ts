@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { and, asc, desc, eq, inArray, isNull, notInArray, sql, type SQL } from 'drizzle-orm';
 import {
   academicYears,
+  assessmentCourseAssignments,
   assessmentResults,
   assessmentSkillStats,
   assessments,
@@ -38,6 +39,7 @@ import {
   type DashboardSkillBreakdownQueryDto,
   type DashboardSkillBreakdownResponse,
   type DashboardSkillsResponse,
+  type InstrumentApplicationPeriod,
   type SkillBreakdownRow,
   type DashboardTeacherKpisResponse,
   type PerformanceBandDistributionBucket,
@@ -112,6 +114,8 @@ type BreakdownAggregate = {
   studentsAssessed: number;
 };
 
+const EMPTY_RECENT_ASSESSMENTS = { data: [] as DashboardAssessmentSummary[], total: 0 };
+
 @Injectable()
 export class DashboardsService {
   constructor(@InjectDb() private readonly db: Database) {}
@@ -133,6 +137,7 @@ export class DashboardsService {
       assessmentsCount: 0,
       performanceDistribution: this.emptyDistribution(),
       recentAssessments: [],
+      recentAssessmentsTotal: 0,
       alerts: [],
     };
     if (!orgId) return empty;
@@ -244,7 +249,8 @@ export class DashboardsService {
         studentsEvaluated,
         assessmentsCount,
         performanceDistribution: distribution,
-        recentAssessments,
+        recentAssessments: recentAssessments.data,
+        recentAssessmentsTotal: recentAssessments.total,
         alerts,
       };
     });
@@ -265,6 +271,7 @@ export class DashboardsService {
       classGroups: [],
       periods: [],
       instruments: [],
+      applicationPeriodsWithData: [],
       defaultAcademicYearId: null,
     };
     if (!orgId) return empty;
@@ -348,7 +355,48 @@ export class DashboardsService {
 
       const periods = await this.loadPeriods(orgId);
 
+      // Momentos que REALMENTE tienen evaluaciones en el alcance visible. Dos cosas
+      // que NO sirven acá:
+      //  · el catálogo de `instruments` — un momento puede tener instrumentos
+      //    oficiales y ninguna evaluación del colegio;
+      //  · `visibleClassGroupIds` — está acotado a UN año académico (el del
+      //    catálogo de cursos), y las evaluaciones de otros años quedarían fuera,
+      //    marcando como "sin evaluaciones" un momento que sí devuelve filas.
+      // Por eso se resuelven los cursos accesibles SIN filtro de año.
+      const scopedCgRows = await tx
+        .select({ id: classGroups.id })
+        .from(classGroups)
+        .where(
+          and(
+            eq(classGroups.orgId, orgId),
+            ...(scope.scopeAll ? [] : [inArray(classGroups.id, scope.classGroupIds)]),
+          ),
+        );
+      const scopedCgIds = scopedCgRows.map((r) => r.id);
+
+      const periodRows =
+        scopedCgIds.length === 0
+          ? []
+          : await tx
+              .selectDistinct({ applicationPeriod: instruments.applicationPeriod })
+              .from(assessments)
+              .innerJoin(instruments, eq(instruments.id, assessments.instrumentId))
+              .innerJoin(
+                assessmentCourseAssignments,
+                eq(assessmentCourseAssignments.assessmentId, assessments.id),
+              )
+              .where(
+                and(
+                  eq(assessments.orgId, orgId),
+                  isNull(instruments.deletedAt),
+                  inArray(assessmentCourseAssignments.classGroupId, scopedCgIds),
+                ),
+              );
+
       return {
+        applicationPeriodsWithData: periodRows
+          .map((r) => r.applicationPeriod)
+          .filter((p): p is InstrumentApplicationPeriod => p !== null),
         subjects: subjectRows.map((r) => ({ id: r.id, label: r.name })),
         grades: Array.from(gradeMap.entries()).map(([id, label]) => ({ id, label })),
         classGroups: classGroupRows.map((r) => ({
@@ -1495,9 +1543,9 @@ export class DashboardsService {
     scope: Scope,
     query: DashboardFiltersQueryDto,
     studentIds: string[] | null,
-  ): Promise<DashboardAssessmentSummary[]> {
+  ): Promise<{ data: DashboardAssessmentSummary[]; total: number }> {
     const assessmentIds = await this.resolveScopedAssessmentIds(tx, orgId, query);
-    if (assessmentIds.length === 0) return [];
+    if (assessmentIds.length === 0) return EMPTY_RECENT_ASSESSMENTS;
 
     // Teacher scoping: si el caller está acotado a un set de alumnos
     // (studentIds !== null), las evaluaciones recientes deben intersectarse con
@@ -1505,7 +1553,7 @@ export class DashboardsService {
     // lista nombres de evaluaciones de toda la org que no tocan a sus cursos.
     let scopedAssessmentIds = assessmentIds;
     if (studentIds !== null) {
-      if (studentIds.length === 0) return [];
+      if (studentIds.length === 0) return EMPTY_RECENT_ASSESSMENTS;
       const withResults = await tx
         .selectDistinct({ assessmentId: assessmentResults.assessmentId })
         .from(assessmentResults)
@@ -1530,7 +1578,7 @@ export class DashboardsService {
           ...withCohort.map((r) => r.assessmentId),
         ]),
       ];
-      if (scopedAssessmentIds.length === 0) return [];
+      if (scopedAssessmentIds.length === 0) return EMPTY_RECENT_ASSESSMENTS;
     }
 
     const rows = await tx
@@ -1553,7 +1601,7 @@ export class DashboardsService {
       .orderBy(desc(assessments.administeredAt), desc(assessments.createdAt))
       .limit(5);
 
-    if (rows.length === 0) return [];
+    if (rows.length === 0) return EMPTY_RECENT_ASSESSMENTS;
 
     const summaryAssessmentIds = rows.map((r) => r.assessmentId);
     const statsConditions = [inArray(assessmentResults.assessmentId, summaryAssessmentIds)];
@@ -1589,7 +1637,7 @@ export class DashboardsService {
     );
     const cohortByAssessment = new Map(cohortStats.map((c) => [c.assessmentId, c]));
 
-    return rows.map((r) => {
+    const data = rows.map((r) => {
       const cohort = cohortByAssessment.get(r.assessmentId);
       const stats =
         statsByAssessment.get(r.assessmentId) ??
@@ -1609,6 +1657,8 @@ export class DashboardsService {
         status: r.status as AssessmentStatus,
       };
     });
+
+    return { data, total: scopedAssessmentIds.length };
   }
 
   /**
