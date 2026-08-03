@@ -17,6 +17,26 @@ export const paginationSchema = z.object({
 
 export type Pagination = z.infer<typeof paginationSchema>;
 
+/**
+ * Envoltura canónica de toda respuesta de lista de la API (CLAUDE.md §6.2:
+ * `{ data, total, page, limit }`).
+ *
+ * Vive acá porque estaba redeclarada a mano en 9 archivos del front, sin nada
+ * que verificara que coincidiera con lo que el backend devuelve de verdad. Esa
+ * falta de contrato compartido fue lo que dejó pasar un bug real: el front pedía
+ * `?limit=200`, el DTO del backend sólo entendía `pageSize`, y la lista se
+ * cortaba en 20 de 33 ítems sin que nada fallara.
+ *
+ * `total` es el total del FILTRO, no el de la página: si `data.length < total`,
+ * la respuesta viene truncada y la UI tiene que decirlo.
+ */
+export type PaginatedResponse<T> = {
+  data: T[];
+  total: number;
+  page: number;
+  limit: number;
+};
+
 export const paginatedResponseSchema = <T extends z.ZodTypeAny>(itemSchema: T) =>
   z.object({
     items: z.array(itemSchema),

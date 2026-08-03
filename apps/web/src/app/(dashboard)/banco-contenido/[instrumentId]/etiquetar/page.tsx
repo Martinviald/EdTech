@@ -8,16 +8,12 @@ import {
   type InstrumentModel,
   type ItemModel,
   type TaxonomyModel,
+  type PaginatedResponse,
 } from '@soe/types';
 import { AiTaggingWizard } from './AiTaggingWizard';
 import { SetPageTitle } from '@/components/layout/page-title-context';
 
-type ItemsListResponse = {
-  data: ItemModel[];
-  total: number;
-  page: number;
-  limit: number;
-};
+type ItemsListResponse = PaginatedResponse<ItemModel>;
 
 type PageProps = {
   params: Promise<{ instrumentId: string }>;

@@ -12,16 +12,12 @@ import {
   type CatalogEntryModel,
   type InstrumentFacetsModel,
   type InstrumentModel,
+  type PaginatedResponse,
 } from '@soe/types';
 import { InstrumentRow } from '../InstrumentRow';
 import { InstrumentFilters } from '../InstrumentFilters';
 
-type InstrumentListResponse = {
-  data: InstrumentModel[];
-  total: number;
-  page: number;
-  limit: number;
-};
+type InstrumentListResponse = PaginatedResponse<InstrumentModel>;
 
 type SearchParams = Record<string, string | string[] | undefined>;
 
@@ -32,7 +28,14 @@ type PageProps = {
 const PAGE_SIZE = 20;
 
 /** Filtros que el API acepta tal cual desde la querystring. */
-const FILTER_KEYS = ['type', 'status', 'year', 'subjectId', 'gradeId', 'applicationPeriod'] as const;
+const FILTER_KEYS = [
+  'type',
+  'status',
+  'year',
+  'subjectId',
+  'gradeId',
+  'applicationPeriod',
+] as const;
 
 function buildInstrumentsQuery(params: SearchParams, page: string): string {
   // `pageSize` (no `limit`) es el nombre que valida el DTO del API.

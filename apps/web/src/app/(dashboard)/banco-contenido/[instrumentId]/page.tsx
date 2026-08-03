@@ -8,16 +8,12 @@ import {
   ITEM_BANK_ROLES,
   type InstrumentModel,
   type ItemModel,
+  type PaginatedResponse,
 } from '@soe/types';
 import { ROUTES } from '@/lib/routes';
 import { InstrumentDetailView } from './InstrumentDetailView';
 
-type ItemsListResponse = {
-  data: ItemModel[];
-  total: number;
-  page: number;
-  limit: number;
-};
+type ItemsListResponse = PaginatedResponse<ItemModel>;
 
 type PageProps = {
   params: Promise<{ instrumentId: string }>;

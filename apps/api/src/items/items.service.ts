@@ -21,6 +21,7 @@ import type {
   ItemContent,
   ItemFigureModel,
   ItemType,
+  PaginatedResponse,
 } from '@soe/types';
 import { ZodError } from 'zod';
 import type { JwtPayload } from '../auth/jwt-payload.types';
@@ -69,7 +70,10 @@ export class ItemsService {
 
   // ── Items ───────────────────────────────────────────────────────────────
 
-  async list(user: JwtPayload, query: ListItemsQueryDto) {
+  async list(
+    user: JwtPayload,
+    query: ListItemsQueryDto,
+  ): Promise<PaginatedResponse<Item & { tags: unknown[] }>> {
     const { page, pageSize, ...filters } = query;
     // Banco de ítems (TKT-14): el `scope` decide qué origen se lista (propio de
     // la org, global/oficial, o ambos). Nunca expone otras orgs (ver §5.2).

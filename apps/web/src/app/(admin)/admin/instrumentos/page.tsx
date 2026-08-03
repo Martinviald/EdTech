@@ -3,7 +3,7 @@ import Link from 'next/link';
 import { Library } from 'lucide-react';
 import { apiGet } from '@/lib/api';
 import { ROUTES } from '@/lib/routes';
-import type { InstrumentModel } from '@soe/types';
+import type { InstrumentModel, PaginatedResponse } from '@soe/types';
 import {
   Table,
   TableBody,
@@ -18,12 +18,7 @@ import { EmptyState, TableSkeleton } from '@/components/shared';
 
 export const dynamic = 'force-dynamic';
 
-type InstrumentListResponse = {
-  data: InstrumentModel[];
-  total: number;
-  page: number;
-  limit: number;
-};
+type InstrumentListResponse = PaginatedResponse<InstrumentModel>;
 
 const TYPE_LABELS: Record<string, string> = {
   dia: 'DIA',

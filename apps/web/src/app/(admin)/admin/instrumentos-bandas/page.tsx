@@ -1,6 +1,6 @@
 import { Suspense } from 'react';
 import Link from 'next/link';
-import type { InstrumentModel } from '@soe/types';
+import type { InstrumentModel, PaginatedResponse } from '@soe/types';
 import { apiGet } from '@/lib/api';
 import { Card, CardContent } from '@/components/ui/card';
 import {
@@ -17,12 +17,7 @@ import { ROUTES } from '@/lib/routes';
 
 export const dynamic = 'force-dynamic';
 
-type InstrumentsListResponse = {
-  data: InstrumentModel[];
-  total: number;
-  page: number;
-  limit: number;
-};
+type InstrumentsListResponse = PaginatedResponse<InstrumentModel>;
 
 /**
  * Configuración de niveles/umbrales de logro por instrumento (área plataforma).

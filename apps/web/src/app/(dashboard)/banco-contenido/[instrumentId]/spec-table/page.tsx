@@ -8,16 +8,12 @@ import {
   ITEM_VIEWER_ROLES,
   type InstrumentModel,
   type ItemModel,
+  type PaginatedResponse,
 } from '@soe/types';
 import { ROUTES } from '@/lib/routes';
 import { SpecTableView } from './SpecTableView';
 
-type ItemsListResponse = {
-  data: ItemModel[];
-  total: number;
-  page: number;
-  limit: number;
-};
+type ItemsListResponse = PaginatedResponse<ItemModel>;
 
 interface PageProps {
   params: Promise<{ instrumentId: string }>;

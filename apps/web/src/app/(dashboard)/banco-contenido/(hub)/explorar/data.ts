@@ -6,15 +6,11 @@ import type {
   ItemCollectionListResponse,
   ItemModel,
   TaxonomyNodeModel,
+  PaginatedResponse,
 } from '@soe/types';
 import type { CatalogEntry } from './ItemBankFilters';
 
-export type ItemsListResponse = {
-  data: ItemModel[];
-  total: number;
-  page: number;
-  limit: number;
-};
+export type ItemsListResponse = PaginatedResponse<ItemModel>;
 
 export type InstrumentsListResponse = {
   data: InstrumentModel[];
