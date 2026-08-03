@@ -188,7 +188,39 @@ export class ItemsService {
 
     if (data.length === 0) return { data: [], total, page, limit: pageSize };
 
-    const rawTags = await this.db
+    const tagsByItem = await this.findTagsByItemIds(data.map((i) => i.id));
+
+    const dataWithTags = data.map((item) => ({
+      ...item,
+      tags: tagsByItem.get(item.id) ?? [],
+    }));
+
+    return { data: dataWithTags, total, page, limit: pageSize };
+  }
+
+  /**
+   * Tags de taxonomía (con su nodo y el nombre del padre poblados) de un conjunto
+   * de ítems, agrupados por `itemId`. Es la lectura que necesitan tanto los
+   * listados de ítems como los paneles de detalle que muestran los nodos asociados.
+   */
+  async findTagsByItemIds(itemIds: string[]) {
+    const rawTags = await this.selectTagsWithNode(itemIds);
+    const allTags = await this.attachParentNames(rawTags);
+
+    const tagsByItem = new Map<string, typeof allTags>();
+    for (const tag of allTags) {
+      const list = tagsByItem.get(tag.itemId) ?? [];
+      list.push(tag);
+      tagsByItem.set(tag.itemId, list);
+    }
+
+    return tagsByItem;
+  }
+
+  private async selectTagsWithNode(itemIds: string[]) {
+    if (itemIds.length === 0) return [];
+
+    return this.db
       .select({
         id: itemTaxonomyTags.id,
         itemId: itemTaxonomyTags.itemId,
@@ -210,28 +242,7 @@ export class ItemsService {
       })
       .from(itemTaxonomyTags)
       .innerJoin(taxonomyNodes, eq(itemTaxonomyTags.nodeId, taxonomyNodes.id))
-      .where(
-        inArray(
-          itemTaxonomyTags.itemId,
-          data.map((i) => i.id),
-        ),
-      );
-
-    const allTags = await this.attachParentNames(rawTags);
-
-    const tagsByItem = new Map<string, typeof allTags>();
-    for (const tag of allTags) {
-      const list = tagsByItem.get(tag.itemId) ?? [];
-      list.push(tag);
-      tagsByItem.set(tag.itemId, list);
-    }
-
-    const dataWithTags = data.map((item) => ({
-      ...item,
-      tags: tagsByItem.get(item.id) ?? [],
-    }));
-
-    return { data: dataWithTags, total, page, limit: pageSize };
+      .where(inArray(itemTaxonomyTags.itemId, itemIds));
   }
 
   async getById(id: string, user: JwtPayload) {
@@ -243,34 +254,9 @@ export class ItemsService {
     if (!row) throw new NotFoundException('Ítem no encontrado');
     this.assertVisible(row, user);
 
-    // Populate tags with taxonomy node info
-    const rawTags = await this.db
-      .select({
-        id: itemTaxonomyTags.id,
-        itemId: itemTaxonomyTags.itemId,
-        nodeId: itemTaxonomyTags.nodeId,
-        tagType: itemTaxonomyTags.tagType,
-        confidence: itemTaxonomyTags.confidence,
-        taggedBy: itemTaxonomyTags.taggedBy,
-        taggedAt: itemTaxonomyTags.taggedAt,
-        node: {
-          id: taxonomyNodes.id,
-          name: taxonomyNodes.name,
-          code: taxonomyNodes.code,
-          type: taxonomyNodes.type,
-          description: taxonomyNodes.description,
-          taxonomyId: taxonomyNodes.taxonomyId,
-          // Eje curricular estricto: el nodo PADRE del OA (T2-11).
-          parentId: taxonomyNodes.parentId,
-        },
-      })
-      .from(itemTaxonomyTags)
-      .innerJoin(taxonomyNodes, eq(itemTaxonomyTags.nodeId, taxonomyNodes.id))
-      .where(eq(itemTaxonomyTags.itemId, id));
+    const tagsByItem = await this.findTagsByItemIds([id]);
 
-    const tags = await this.attachParentNames(rawTags);
-
-    return { ...row, tags };
+    return { ...row, tags: tagsByItem.get(id) ?? [] };
   }
 
   /**
