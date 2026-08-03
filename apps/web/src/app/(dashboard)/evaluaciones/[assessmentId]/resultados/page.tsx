@@ -7,16 +7,12 @@ import {
   canAccess,
   ANALYTICS_VIEWER_ROLES,
   type AssessmentReportResponse,
-  type DashboardFilterOptionsResponse,
   type DashboardSkillsResponse,
 } from '@soe/types';
 import { EmptyState } from '@/components/shared';
-import { DashboardFilterBar } from '../../../resultados/components/dashboard-filter-bar';
-import {
-  parseDashboardFilters,
-  buildDashboardQuery,
-} from '../../../resultados/components/dashboard-filters';
 import { ReportBody } from '../../../resultados/informe/report-body';
+import { AssessmentCourseFilter } from '../components/course-filter';
+import { getAssessmentCourses, pickParam } from '../data';
 
 export const dynamic = 'force-dynamic';
 
@@ -33,10 +29,8 @@ export default async function EvaluacionResultadosPage({
 
   const { assessmentId } = await params;
   const sp = await searchParams;
-  const filters = parseDashboardFilters(sp);
-  const filterQuery = buildDashboardQuery(filters);
-  // El informe por-evaluación se acota a UN curso: el primero seleccionado.
-  const classGroupId = filters.classGroupId?.[0];
+  // El informe por-evaluación se acota a UN curso de los que la rindieron.
+  const classGroupId = pickParam(sp.classGroupId);
   const basePath = ROUTES.evaluacionResultados(assessmentId);
 
   const reportQuery = new URLSearchParams({ assessmentId });
@@ -47,8 +41,8 @@ export default async function EvaluacionResultadosPage({
   const skillsQuery = new URLSearchParams({ assessmentId });
   if (classGroupId) skillsQuery.set('classGroupId', classGroupId);
 
-  const [options, reportResult, skillsResult] = await Promise.all([
-    apiGet<DashboardFilterOptionsResponse>(`/dashboards/filters${filterQuery}`),
+  const [courses, reportResult, skillsResult] = await Promise.all([
+    getAssessmentCourses(assessmentId),
     apiGet<AssessmentReportResponse>(
       `/analytics/assessment-report?${reportQuery.toString()}`,
     ).catch((): AssessmentReportResponse | null => null),
@@ -59,7 +53,7 @@ export default async function EvaluacionResultadosPage({
 
   return (
     <div className="space-y-6">
-      <DashboardFilterBar options={options} value={filters} basePath={basePath} />
+      <AssessmentCourseFilter courses={courses} value={classGroupId} basePath={basePath} />
 
       {reportResult ? (
         <ReportBody

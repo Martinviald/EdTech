@@ -23,6 +23,7 @@ import { AskAiButton } from '@/components/assistant';
 import { EnunciadoViewButton } from '@/components/instruments/EnunciadoViewButton';
 import { AssessmentTabsNav, type HubTab } from './components/assessment-tabs-nav';
 import { HubAssistantContext } from './components/hub-assistant-context';
+import { getAssessmentReportMeta } from './data';
 
 export const dynamic = 'force-dynamic';
 
@@ -58,9 +59,7 @@ export default async function EvaluacionLayout({
   // (RESULTS_VIEWER_ROLES), así que un 403/404 ⇒ sin acceso ⇒ notFound().
   let report: AssessmentReportResponse | null = null;
   try {
-    report = await apiGet<AssessmentReportResponse>(
-      `/analytics/assessment-report?assessmentId=${assessmentId}`,
-    );
+    report = await getAssessmentReportMeta(assessmentId);
   } catch {
     notFound();
   }

@@ -9,17 +9,13 @@ import {
   canAccess,
   capabilityUnavailableMessage,
   ITEM_ANALYSIS_VIEWER_ROLES,
-  type DashboardFilterOptionsResponse,
   type ItemMatrixResponse,
 } from '@soe/types';
 import { EmptyState } from '@/components/shared';
 import { Card, CardContent } from '@/components/ui/card';
-import { DashboardFilterBar } from '../../../resultados/components/dashboard-filter-bar';
-import {
-  parseDashboardFilters,
-  buildDashboardQuery,
-} from '../../../resultados/components/dashboard-filters';
 import { CrossTable } from '../../../resultados/detalle/cross-table';
+import { AssessmentCourseFilter } from '../components/course-filter';
+import { getAssessmentCourses, pickParam } from '../data';
 
 export const dynamic = 'force-dynamic';
 
@@ -36,10 +32,8 @@ export default async function EvaluacionDetallePage({
 
   const { assessmentId } = await params;
   const sp = await searchParams;
-  const filters = parseDashboardFilters(sp);
-  const filterQuery = buildDashboardQuery(filters);
-  // El detalle por-evaluación se acota a UN curso: el primero seleccionado.
-  const classGroupId = filters.classGroupId?.[0];
+  // El detalle por-evaluación se acota a UN curso de los que la rindieron.
+  const classGroupId = pickParam(sp.classGroupId);
   const basePath = ROUTES.evaluacionDetalle(assessmentId);
 
   // TKT-09 — el ordenamiento (alumnos/preguntas por % de logro) se resuelve en el
@@ -47,8 +41,8 @@ export default async function EvaluacionDetallePage({
   const matrixQuery = new URLSearchParams({ assessmentId, all: 'true' });
   if (classGroupId) matrixQuery.set('classGroupId', classGroupId);
 
-  const [options, matrixResult, hasStudentMatrix] = await Promise.all([
-    apiGet<DashboardFilterOptionsResponse>(`/dashboards/filters${filterQuery}`),
+  const [courses, matrixResult, hasStudentMatrix] = await Promise.all([
+    getAssessmentCourses(assessmentId),
     apiGet<ItemMatrixResponse>(`/item-analysis/matrix?${matrixQuery.toString()}`)
       .then((matrix) => ({ matrix, unavailableReason: null as string | null }))
       .catch((error: unknown) => ({
@@ -66,7 +60,7 @@ export default async function EvaluacionDetallePage({
 
   return (
     <div className="space-y-6">
-      <DashboardFilterBar options={options} value={filters} basePath={basePath} />
+      <AssessmentCourseFilter courses={courses} value={classGroupId} basePath={basePath} />
 
       {!matrix ? (
         <EmptyState

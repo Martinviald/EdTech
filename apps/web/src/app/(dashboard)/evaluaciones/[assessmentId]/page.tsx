@@ -33,13 +33,9 @@ import {
   formatAchievement,
   performanceLevelLabel,
 } from '../../resultados/components/performance-level';
+import { pickParam } from './data';
 
 export const dynamic = 'force-dynamic';
-
-function pickParam(raw: string | string[] | undefined): string | undefined {
-  const value = Array.isArray(raw) ? raw[0] : raw;
-  return value && value.length > 0 ? value : undefined;
-}
 
 type SectionLink = {
   href: string;

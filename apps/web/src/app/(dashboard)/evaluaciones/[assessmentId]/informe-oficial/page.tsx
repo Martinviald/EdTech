@@ -7,23 +7,19 @@ import {
   canAccess,
   OFFICIAL_REPORT_VIEWER_ROLES,
   type OfficialCourseReportResponse,
-  type DashboardFilterOptionsResponse,
 } from '@soe/types';
 import { EmptyState } from '@/components/shared';
 import { CourseReport } from '@/components/official-reports/course-report';
 import { PrintToolbar } from '@/components/official-reports/print-toolbar';
-import { DashboardFilterBar } from '../../../resultados/components/dashboard-filter-bar';
-import {
-  parseDashboardFilters,
-  buildDashboardQuery,
-} from '../../../resultados/components/dashboard-filters';
+import { AssessmentCourseFilter } from '../components/course-filter';
+import { getAssessmentCourses, pickParam } from '../data';
 
 export const dynamic = 'force-dynamic';
 
 /**
  * TKT-24 — Informe oficial por curso. Vive como pestaña del hub de evaluación.
- * El filtro de curso (DashboardFilterBar) acota el informe a un `classGroupId`.
- * El scoping (profesor sólo sus cursos) lo aplica el backend.
+ * El selector de curso acota el informe a un `classGroupId` entre los cursos que
+ * rindieron la evaluación. El scoping (profesor sólo sus cursos) lo aplica el backend.
  */
 export default async function InformeOficialPage({
   params,
@@ -38,17 +34,15 @@ export default async function InformeOficialPage({
 
   const { assessmentId } = await params;
   const sp = await searchParams;
-  const filters = parseDashboardFilters(sp);
-  const filterQuery = buildDashboardQuery(filters);
-  // El informe oficial por-evaluación se acota a UN curso: el primero seleccionado.
-  const classGroupId = filters.classGroupId?.[0];
+  // El informe oficial por-evaluación se acota a UN curso de los que la rindieron.
+  const classGroupId = pickParam(sp.classGroupId);
   const basePath = ROUTES.evaluacionInformeOficial(assessmentId);
 
   const reportQuery = new URLSearchParams({ assessmentId });
   if (classGroupId) reportQuery.set('classGroupId', classGroupId);
 
-  const [options, report] = await Promise.all([
-    apiGet<DashboardFilterOptionsResponse>(`/dashboards/filters${filterQuery}`),
+  const [courses, report] = await Promise.all([
+    getAssessmentCourses(assessmentId),
     apiGet<OfficialCourseReportResponse>(`/reports/course?${reportQuery.toString()}`).catch(
       (): OfficialCourseReportResponse | null => null,
     ),
@@ -57,7 +51,9 @@ export default async function InformeOficialPage({
   return (
     <div className="space-y-6">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <DashboardFilterBar options={options} value={filters} basePath={basePath} />
+        <div className="min-w-0 flex-1">
+          <AssessmentCourseFilter courses={courses} value={classGroupId} basePath={basePath} />
+        </div>
         {report ? <PrintToolbar /> : null}
       </div>
 
