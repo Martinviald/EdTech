@@ -94,6 +94,9 @@ export function hasHardFailure(verdicts: JudgeVerdict[]): boolean {
  */
 export function objectionsFrom(verdicts: JudgeVerdict[]): string[] {
   const failing = verdicts.filter((v) => !v.answerable || !v.uniqueCorrect || !v.factual);
-  const all = failing.flatMap((v) => v.objections).map((o) => o.trim()).filter((o) => o.length > 0);
+  const all = failing
+    .flatMap((v) => v.objections)
+    .map((o) => o.trim())
+    .filter((o) => o.length > 0);
   return [...new Set(all)];
 }

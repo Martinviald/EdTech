@@ -14,10 +14,7 @@ import {
   teacherAssignments,
   users,
 } from '@soe/db';
-import type {
-  CreateTeacherAssignmentDto,
-  ListTeacherAssignmentsQuery,
-} from '@soe/types';
+import type { CreateTeacherAssignmentDto, ListTeacherAssignmentsQuery } from '@soe/types';
 import { InjectDb, type Database } from '../database/database.types';
 
 @Injectable()

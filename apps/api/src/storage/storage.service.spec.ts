@@ -49,12 +49,10 @@ describe('StorageService (presigned S3)', () => {
   it('no está configurado y lanza 503 sin bucket/credenciales', () => {
     const svc = new StorageService();
     expect(svc.isConfigured()).toBe(false);
-    expect(() =>
-      svc.createUploadUrl({ key: 'k/x.pdf', contentType: 'application/pdf' }),
-    ).toThrow(ServiceUnavailableException);
-    expect(() => svc.createDownloadUrl({ key: 'k/x.pdf' })).toThrow(
+    expect(() => svc.createUploadUrl({ key: 'k/x.pdf', contentType: 'application/pdf' })).toThrow(
       ServiceUnavailableException,
     );
+    expect(() => svc.createDownloadUrl({ key: 'k/x.pdf' })).toThrow(ServiceUnavailableException);
   });
 
   it('genera una URL de subida PUT prefirmada con los parámetros SigV4', () => {
@@ -240,9 +238,7 @@ describe('StorageService (presigned S3)', () => {
   // ── Credenciales por rol de instancia (container credentials: ECS / App Runner) ──
 
   /** Mock de fetch que responde el JSON de credenciales del endpoint del contenedor. */
-  function mockCredentialsFetch(
-    ...bodies: Array<Record<string, unknown>>
-  ): jest.Mock {
+  function mockCredentialsFetch(...bodies: Array<Record<string, unknown>>): jest.Mock {
     const fn = jest.fn();
     for (const body of bodies) {
       fn.mockResolvedValueOnce({ ok: true, status: 200, json: () => Promise.resolve(body) });
@@ -307,9 +303,7 @@ describe('StorageService (presigned S3)', () => {
     const svc = new StorageService();
     await svc.onModuleInit();
     expect(svc.isConfigured()).toBe(false);
-    expect(() => svc.createDownloadUrl({ key: 'a/b.pdf' })).toThrow(
-      ServiceUnavailableException,
-    );
+    expect(() => svc.createDownloadUrl({ key: 'a/b.pdf' })).toThrow(ServiceUnavailableException);
     svc.onModuleDestroy();
   });
 

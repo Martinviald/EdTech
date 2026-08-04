@@ -65,10 +65,7 @@ export class GetHeatmapTool implements AssistantTool {
     },
   };
 
-  async execute(
-    input: unknown,
-    ctx: AssistantToolContext,
-  ): Promise<AssistantToolResult> {
+  async execute(input: unknown, ctx: AssistantToolContext): Promise<AssistantToolResult> {
     const parsed = heatmapQuerySchema.safeParse(input ?? {});
     if (!parsed.success) {
       return {

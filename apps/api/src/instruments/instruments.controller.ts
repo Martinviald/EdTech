@@ -38,11 +38,7 @@ const INSTRUMENT_VIEWER_ROLES = [
   'teacher',
 ] as const;
 
-const INSTRUMENT_EDITOR_ROLES = [
-  'school_admin',
-  'academic_director',
-  'eval_coordinator',
-] as const;
+const INSTRUMENT_EDITOR_ROLES = ['school_admin', 'academic_director', 'eval_coordinator'] as const;
 
 @Controller('instruments')
 @UseGuards(RolesGuard)

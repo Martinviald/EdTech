@@ -35,10 +35,7 @@ import { JOB_DISPATCHER, type JobDispatcher } from '../jobs/job-dispatcher';
 import { RemedialRunner } from './remedial.runner';
 import { RemedialService } from './remedial.service';
 import { BankPassageService } from './stimulus/bank-passage.service';
-import {
-  FailedStimulusService,
-  type FailedStimulus,
-} from './stimulus/failed-stimulus.service';
+import { FailedStimulusService, type FailedStimulus } from './stimulus/failed-stimulus.service';
 
 /**
  * Query del picker de estímulos (Ola 2.1a). Validación Zod local al módulo: es BE-only
@@ -124,10 +121,7 @@ export class RemedialController {
   /** GET /api/remedial/:id — poll del estado/salida del material (versión profesor). */
   @Get(':id')
   @Roles(...REMEDIAL_VIEWER_ROLES)
-  get(
-    @Param('id') id: string,
-    @CurrentUser() user: JwtPayload,
-  ): Promise<RemedialMaterialModel> {
+  get(@Param('id') id: string, @CurrentUser() user: JwtPayload): Promise<RemedialMaterialModel> {
     return this.service.get(user, id);
   }
 
@@ -147,10 +141,7 @@ export class RemedialController {
   /** GET /api/remedial — banco de material remedial paginado/filtrado. */
   @Get()
   @Roles(...REMEDIAL_VIEWER_ROLES)
-  list(
-    @Query() query: unknown,
-    @CurrentUser() user: JwtPayload,
-  ): Promise<RemedialListResponse> {
+  list(@Query() query: unknown, @CurrentUser() user: JwtPayload): Promise<RemedialListResponse> {
     const dto = remedialListQuerySchema.parse(query);
     return this.service.list(user, dto);
   }

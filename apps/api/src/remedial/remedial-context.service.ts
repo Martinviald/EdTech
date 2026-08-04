@@ -88,8 +88,8 @@ export class RemedialContextService {
 
     // Un solo filtro por `stem`: los ítems sin enunciado no sirven ni como
     // few-shot ni como referencia completa.
-    const withStem = ctx.taggedItems.filter(
-      (item): item is ReferenceItemRef & { stem: string } => Boolean(item.stem),
+    const withStem = ctx.taggedItems.filter((item): item is ReferenceItemRef & { stem: string } =>
+      Boolean(item.stem),
     );
 
     return {

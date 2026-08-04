@@ -194,7 +194,9 @@ describe('FilesService.confirm', () => {
   it('lanza si el objeto no existe en S3', async () => {
     const pending = fileRow({ status: 'pending' });
     const storage = makeStorage({
-      headObject: jest.fn(() => Promise.resolve({ exists: false, sizeBytes: null, contentType: null })),
+      headObject: jest.fn(() =>
+        Promise.resolve({ exists: false, sizeBytes: null, contentType: null }),
+      ),
     });
     const fake = new FakeDb([[pending]], [], []);
     const { svc } = makeService(fake, storage);

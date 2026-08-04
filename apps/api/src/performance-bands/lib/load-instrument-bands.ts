@@ -28,9 +28,7 @@ export async function loadInstrumentBands(
       color: performanceBands.color,
     })
     .from(performanceBands)
-    .where(
-      and(eq(performanceBands.instrumentId, instrumentId), isNull(performanceBands.deletedAt)),
-    )
+    .where(and(eq(performanceBands.instrumentId, instrumentId), isNull(performanceBands.deletedAt)))
     .orderBy(asc(performanceBands.order));
 
   if (rows.length === 0) return [];

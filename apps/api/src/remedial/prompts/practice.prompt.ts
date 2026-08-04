@@ -1,9 +1,6 @@
 import type { RemedialStimulus } from '@soe/types';
 import type { RemedialBrief } from '../remedial-brief.service';
-import type {
-  RemedialCurriculumContext,
-  RemedialReferenceItem,
-} from '../remedial-context.service';
+import type { RemedialCurriculumContext, RemedialReferenceItem } from '../remedial-context.service';
 import { renderCurriculumContext } from './curriculum-context.prompt';
 
 /**
@@ -235,24 +232,29 @@ function renderReferenceItems(referenceItems?: RemedialReferenceItem[]): string 
 function renderBrief(brief?: RemedialBrief | null): string {
   if (!brief) return '';
 
-  const lines: string[] = ['EVIDENCIA DEL ERROR REAL A ATACAR (ancla aquí las alternativas incorrectas):'];
+  const lines: string[] = [
+    'EVIDENCIA DEL ERROR REAL A ATACAR (ancla aquí las alternativas incorrectas):',
+  ];
   if (brief.rootCauseHypothesis) lines.push(`- Causa raíz: ${brief.rootCauseHypothesis}`);
-  if (brief.misconceptionSignal) lines.push(`- Señal de misconception: ${brief.misconceptionSignal}`);
+  if (brief.misconceptionSignal)
+    lines.push(`- Señal de misconception: ${brief.misconceptionSignal}`);
   if (brief.reteachStrategy) lines.push(`- Estrategia de reenseñanza: ${brief.reteachStrategy}`);
   if (brief.achievement !== null) {
     lines.push(`- Logro del grupo en la habilidad: ${brief.achievement}%`);
   }
 
-  const errorsWithSignal = brief.realErrors.filter(
-    (err) => err.dominantDistractor || err.stem,
-  );
+  const errorsWithSignal = brief.realErrors.filter((err) => err.dominantDistractor || err.stem);
   if (errorsWithSignal.length > 0) {
-    lines.push('Errores reales observados (usa el distractor dominante como base de una alternativa incorrecta):');
+    lines.push(
+      'Errores reales observados (usa el distractor dominante como base de una alternativa incorrecta):',
+    );
     errorsWithSignal.forEach((err, idx) => {
       lines.push(`${idx + 1}. Enunciado: ${err.stem ?? '(sin enunciado)'}`);
       if (err.correctLabel) lines.push(`   Clave correcta: ${err.correctLabel}`);
       if (err.dominantDistractor) {
-        lines.push(`   Distractor dominante (el más elegido, incorrecto): ${err.dominantDistractor}`);
+        lines.push(
+          `   Distractor dominante (el más elegido, incorrecto): ${err.dominantDistractor}`,
+        );
       }
       const dist = Object.entries(err.distribution);
       if (dist.length > 0) {

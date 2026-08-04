@@ -291,10 +291,7 @@ export class AssistantService {
             .select({ id: academicYears.id, year: academicYears.year })
             .from(academicYears)
             .where(
-              and(
-                eq(academicYears.orgId, orgId),
-                ilike(sql`${academicYears.year}::text`, pattern),
-              ),
+              and(eq(academicYears.orgId, orgId), ilike(sql`${academicYears.year}::text`, pattern)),
             )
             .orderBy(desc(academicYears.year))
             .limit(limit);

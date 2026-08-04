@@ -21,7 +21,7 @@ function makeService() {
 
 function user(overrides: Partial<JwtPayload> = {}): JwtPayload {
   const role = overrides.activeRole ?? overrides.role ?? 'school_admin';
-  const isPlatformAdmin = overrides.isPlatformAdmin ?? (role === 'platform_admin');
+  const isPlatformAdmin = overrides.isPlatformAdmin ?? role === 'platform_admin';
   return {
     userId: 'u1',
     orgId: 'org-1',
@@ -299,10 +299,7 @@ describe('InstrumentsService.assertVisible', () => {
 
   it('platform_admin can see anything', () => {
     expect(() =>
-      svc.assertVisible(
-        instrument({ orgId: 'other' }),
-        user({ role: 'platform_admin' }),
-      ),
+      svc.assertVisible(instrument({ orgId: 'other' }), user({ role: 'platform_admin' })),
     ).not.toThrow();
   });
 });
@@ -348,10 +345,7 @@ describe('InstrumentsService.assertEditable', () => {
 
   it('platform_admin can edit instruments from any org', () => {
     expect(() =>
-      svc.assertEditable(
-        instrument({ orgId: 'other' }),
-        user({ role: 'platform_admin' }),
-      ),
+      svc.assertEditable(instrument({ orgId: 'other' }), user({ role: 'platform_admin' })),
     ).not.toThrow();
   });
 });

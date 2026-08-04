@@ -64,6 +64,10 @@ export const instrumentReliabilityModelSchema = z.object({
   interpretation: z.string(), // determinista: excelente/buena/aceptable/cuestionable/pobre/no calculable
   itemsAnalyzed: z.number().int(),
   studentsAnalyzed: z.number().int(),
+  // KR-20 está definido para ítems DICOTÓMICOS. Los de crédito parcial se
+  // excluyen del cálculo en vez de colapsarlos a 0/1, que sesgaría la varianza
+  // en silencio. Se expone el nº excluido para poder declararlo en la UI.
+  itemsExcludedForPartialCredit: z.number().int(),
 });
 export type InstrumentReliabilityModel = z.infer<typeof instrumentReliabilityModelSchema>;
 

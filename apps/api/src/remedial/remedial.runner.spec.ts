@@ -79,9 +79,7 @@ function makeBrief(brief: unknown = null) {
   } as unknown as RemedialBriefService & { build: jest.Mock };
 }
 
-function makeResolver(
-  resolved: ResolvedStimulus = { method: 'self_contained', stimulus: null },
-) {
+function makeResolver(resolved: ResolvedStimulus = { method: 'self_contained', stimulus: null }) {
   return {
     resolve: jest.fn().mockResolvedValue(resolved),
   } as unknown as StimulusResolver & { resolve: jest.Mock };
@@ -275,7 +273,7 @@ describe('RemedialRunner', () => {
     await runner.run('mat-1', 'org-1');
 
     // 3 rondas de generación (ronda 0 + 2 regeneraciones).
-    expect((gen.generate as jest.Mock)).toHaveBeenCalledTimes(3);
+    expect(gen.generate as jest.Mock).toHaveBeenCalledTimes(3);
     // La 2ª y 3ª generación reciben las objeciones del juez como feedback.
     expect(gen.generate).toHaveBeenNthCalledWith(
       2,
@@ -299,7 +297,9 @@ describe('RemedialRunner', () => {
     const service = makeService() as ReturnType<typeof makeService>;
     const resolver = makeResolver();
     (resolver.resolve as jest.Mock).mockRejectedValue(
-      new NotFoundException('Estímulo no encontrado o no es un pasaje visible para la organización'),
+      new NotFoundException(
+        'Estímulo no encontrado o no es un pasaje visible para la organización',
+      ),
     );
     const judge = makeJudge([passVerdict]);
     const gen = makeGenerator('practice_set', makePracticeResult());

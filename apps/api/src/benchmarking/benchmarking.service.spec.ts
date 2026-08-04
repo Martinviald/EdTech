@@ -46,8 +46,7 @@ function makeDb(selectResults: unknown[][]): DbMock {
     for (const m of ['from', 'innerJoin', 'leftJoin', 'where', 'orderBy', 'limit', 'offset']) {
       chain[m] = passthrough;
     }
-    chain.then = (resolve: (rows: unknown[]) => unknown) =>
-      Promise.resolve(rows).then(resolve);
+    chain.then = (resolve: (rows: unknown[]) => unknown) => Promise.resolve(rows).then(resolve);
     return chain;
   }
 
@@ -221,7 +220,12 @@ describe('BenchmarkingService.compare (network)', () => {
     // 5 fetchCohortRows (network)
     // 6 resolveOrgNames
     const networkRows = [
-      aggRow({ orgId: 'org-you', networkOrgId: 'found-1', avgAchievement: '70.00', studentCount: 4 }),
+      aggRow({
+        orgId: 'org-you',
+        networkOrgId: 'found-1',
+        avgAchievement: '70.00',
+        studentCount: 4,
+      }),
       aggRow({ orgId: 'sib-1', networkOrgId: 'found-1', avgAchievement: '40.00', studentCount: 3 }),
     ];
     const db = makeDb([

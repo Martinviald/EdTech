@@ -9,14 +9,8 @@ import {
 // ── Enunciado PDF a nivel de instrumento (TKT-15) ────────────────────────────
 // Los schemas viven en `@soe/types` (contrato compartido con web). Se re-exportan
 // aquí para que el controller los consuma desde el barrel de DTOs del módulo.
-export {
-  instrumentUploadUrlRequestSchema,
-  confirmInstrumentAttachmentSchema,
-} from '@soe/types';
-export type {
-  InstrumentUploadUrlRequestDto,
-  ConfirmInstrumentAttachmentDto,
-} from '@soe/types';
+export { instrumentUploadUrlRequestSchema, confirmInstrumentAttachmentSchema } from '@soe/types';
+export type { InstrumentUploadUrlRequestDto, ConfirmInstrumentAttachmentDto } from '@soe/types';
 
 // ── Instrument Type / Status enums ──────────────────────────────────────────
 const INSTRUMENT_TYPES = [
@@ -76,9 +70,7 @@ export const createInstrumentSchema = z.object({
   sections: z.array(createSectionSchema).optional(),
 });
 
-export const updateInstrumentSchema = createInstrumentSchema
-  .omit({ sections: true })
-  .partial();
+export const updateInstrumentSchema = createInstrumentSchema.omit({ sections: true }).partial();
 
 export const listInstrumentsQuerySchema = paginationSchema.extend({
   type: z.enum(INSTRUMENT_TYPES).optional(),
@@ -87,9 +79,7 @@ export const listInstrumentsQuerySchema = paginationSchema.extend({
   year: z.coerce.number().int().optional(),
   applicationPeriod: z.enum(INSTRUMENT_APPLICATION_PERIODS).optional(),
   status: z.enum(INSTRUMENT_STATUSES).optional(),
-  isOfficial: z
-    .union([z.boolean(), z.string().transform((v) => v === 'true')])
-    .optional(),
+  isOfficial: z.union([z.boolean(), z.string().transform((v) => v === 'true')]).optional(),
 });
 
 // ── Inferred types ──────────────────────────────────────────────────────────

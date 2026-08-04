@@ -1,9 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { z } from 'zod';
-import type {
-  AssessmentResultModel,
-  StudentResultDetail,
-} from '@soe/types';
+import type { AssessmentResultModel, StudentResultDetail } from '@soe/types';
 import type {
   AssistantTool,
   AssistantToolContext,
@@ -19,10 +16,7 @@ const inputSchema = z.object({
 });
 
 /** Resultado del alumno SIN PII: igual al modelo pero sin nombre ni RUT. */
-type ResultPiiFree = Omit<
-  AssessmentResultModel,
-  'studentRut' | 'studentFullName'
->;
+type ResultPiiFree = Omit<AssessmentResultModel, 'studentRut' | 'studentFullName'>;
 
 /** Detalle del alumno con `result` proyectado a su forma PII-free. */
 type StudentResultDetailPiiFree = Omit<StudentResultDetail, 'result'> & {
@@ -71,10 +65,7 @@ export class GetStudentDetailTool implements AssistantTool {
     },
   };
 
-  async execute(
-    input: unknown,
-    ctx: AssistantToolContext,
-  ): Promise<AssistantToolResult> {
+  async execute(input: unknown, ctx: AssistantToolContext): Promise<AssistantToolResult> {
     const parsed = inputSchema.safeParse(input);
     if (!parsed.success) {
       return {

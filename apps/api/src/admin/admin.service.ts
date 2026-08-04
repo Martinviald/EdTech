@@ -55,10 +55,7 @@ export class AdminService {
         .orderBy(desc(organizations.createdAt))
         .limit(query.limit)
         .offset(query.offset),
-      this.db
-        .select({ total: count() })
-        .from(organizations)
-        .where(where),
+      this.db.select({ total: count() }).from(organizations).where(where),
     ]);
 
     return {

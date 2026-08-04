@@ -84,7 +84,9 @@ export class RemedialJudgeService {
     const derivedAnswer = parsed.data.derivedAnswer?.trim() || null;
     const realKey = this.realKey(item.alternatives);
     const answerable =
-      derivedAnswer !== null && realKey !== null && normalizeKey(derivedAnswer) === normalizeKey(realKey);
+      derivedAnswer !== null &&
+      realKey !== null &&
+      normalizeKey(derivedAnswer) === normalizeKey(realKey);
 
     const objections = [...(parsed.data.objections ?? [])];
     // Si el ítem no es respondible, deja SIEMPRE una objeción accionable (aunque el

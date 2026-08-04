@@ -2,18 +2,12 @@ import { parseExcelBuffer, type ParsedSheet } from './excel-parser';
 
 describe('parseExcelBuffer', () => {
   it('parses a simple CSV string correctly', () => {
-    const csv =
-      'Pregunta,Habilidad,OA,Respuesta\n1,Localizar,OA1,B\n2,Interpretar,OA3,C';
+    const csv = 'Pregunta,Habilidad,OA,Respuesta\n1,Localizar,OA1,B\n2,Interpretar,OA3,C';
     const buffer = Buffer.from(csv, 'utf-8');
 
     const result: ParsedSheet = parseExcelBuffer(buffer);
 
-    expect(result.columns).toEqual([
-      'Pregunta',
-      'Habilidad',
-      'OA',
-      'Respuesta',
-    ]);
+    expect(result.columns).toEqual(['Pregunta', 'Habilidad', 'OA', 'Respuesta']);
     expect(result.totalRows).toBe(2);
     expect(result.rows).toHaveLength(2);
     expect(result.rows[0]).toEqual({
@@ -46,12 +40,7 @@ describe('parseExcelBuffer', () => {
 
     const result = parseExcelBuffer(buffer);
 
-    expect(result.columns).toEqual([
-      'Número',
-      'Eje',
-      'Objetivo de Aprendizaje',
-      'Dificultad',
-    ]);
+    expect(result.columns).toEqual(['Número', 'Eje', 'Objetivo de Aprendizaje', 'Dificultad']);
     expect(result.totalRows).toBe(1);
   });
 

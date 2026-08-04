@@ -13,16 +13,10 @@ import type { LlmToolDefinition } from '../../llm/llm.types';
 import { AssessmentReportService } from '../../assessment-report/assessment-report.service';
 
 /** Alumno en foco SIN PII: estructuralmente igual pero sin nombre ni RUT. */
-type RiskStudentPiiFree = Omit<
-  AssessmentReportRiskStudent,
-  'studentRut' | 'studentFullName'
->;
+type RiskStudentPiiFree = Omit<AssessmentReportRiskStudent, 'studentRut' | 'studentFullName'>;
 
 /** Informe con `studentsAtRisk` proyectado a su forma PII-free. */
-type AssessmentReportPiiFree = Omit<
-  AssessmentReportResponse,
-  'studentsAtRisk'
-> & {
+type AssessmentReportPiiFree = Omit<AssessmentReportResponse, 'studentsAtRisk'> & {
   studentsAtRisk: RiskStudentPiiFree[];
 };
 
@@ -73,10 +67,7 @@ export class GetAssessmentReportTool implements AssistantTool {
     },
   };
 
-  async execute(
-    input: unknown,
-    ctx: AssistantToolContext,
-  ): Promise<AssistantToolResult> {
+  async execute(input: unknown, ctx: AssistantToolContext): Promise<AssistantToolResult> {
     const parsed = assessmentReportQuerySchema.safeParse(input);
     if (!parsed.success) {
       return {
@@ -98,15 +89,13 @@ export class GetAssessmentReportTool implements AssistantTool {
    * weakestSkill, classGroupName). El resto del informe es agregado.
    */
   private sanitize(data: AssessmentReportResponse): AssessmentReportPiiFree {
-    const studentsAtRisk: RiskStudentPiiFree[] = data.studentsAtRisk.map(
-      (s) => ({
-        studentId: s.studentId,
-        classGroupName: s.classGroupName,
-        achievement: s.achievement,
-        performanceLevel: s.performanceLevel,
-        weakestSkill: s.weakestSkill,
-      }),
-    );
+    const studentsAtRisk: RiskStudentPiiFree[] = data.studentsAtRisk.map((s) => ({
+      studentId: s.studentId,
+      classGroupName: s.classGroupName,
+      achievement: s.achievement,
+      performanceLevel: s.performanceLevel,
+      weakestSkill: s.weakestSkill,
+    }));
     return { ...data, studentsAtRisk };
   }
 }

@@ -10,11 +10,7 @@ import {
   Query,
   UseGuards,
 } from '@nestjs/common';
-import {
-  createTaxonomySchema,
-  listTaxonomiesQuerySchema,
-  updateTaxonomySchema,
-} from '@soe/types';
+import { createTaxonomySchema, listTaxonomiesQuerySchema, updateTaxonomySchema } from '@soe/types';
 import { CurrentUser } from '../auth/current-user.decorator';
 import type { JwtPayload } from '../auth/jwt-payload.types';
 import { Roles } from '../common/decorators/roles.decorator';

@@ -45,11 +45,7 @@ export class ItemInsightController {
     @CurrentUser() user: JwtPayload,
   ): Promise<{ analysisId: string; status: AiAnalysisModel['status'] }> {
     const dto = generateItemInsightSchema.parse(body);
-    const { analysis, fromCache } = await this.service.createForItem(
-      user,
-      itemId,
-      dto,
-    );
+    const { analysis, fromCache } = await this.service.createForItem(user, itemId, dto);
 
     if (!fromCache) {
       const orgId = user.orgId as string; // createForItem ya validó que existe

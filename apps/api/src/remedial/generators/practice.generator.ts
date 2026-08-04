@@ -198,9 +198,7 @@ export class PracticeGenerator implements RemedialGenerator {
         requestedItemCount: itemCount,
         stimulusSectionId: sectionId,
         // Ola 2.1b: si es una regeneración, deja traza de las objeciones inyectadas.
-        ...(input.feedback && input.feedback.length > 0
-          ? { regeneratedFrom: input.feedback }
-          : {}),
+        ...(input.feedback && input.feedback.length > 0 ? { regeneratedFrom: input.feedback } : {}),
       },
       // Ola 2.1b: ítems para el juez (el loop los pasa a `RemedialJudgeService.judge`).
       judgeItems,

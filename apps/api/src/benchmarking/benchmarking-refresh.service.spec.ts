@@ -31,8 +31,7 @@ function makeDb(selectResults: unknown[][]): DbMock {
     for (const m of ['from', 'innerJoin', 'where', 'groupBy', 'limit']) {
       chain[m] = passthrough;
     }
-    chain.then = (resolve: (rows: unknown[]) => unknown) =>
-      Promise.resolve(rows).then(resolve);
+    chain.then = (resolve: (rows: unknown[]) => unknown) => Promise.resolve(rows).then(resolve);
     return chain;
   }
 
@@ -63,9 +62,7 @@ function makeDb(selectResults: unknown[][]): DbMock {
 }
 
 function makeService(db: Database): BenchmarkingRefreshService {
-  return new (BenchmarkingRefreshService as new (
-    db: Database,
-  ) => BenchmarkingRefreshService)(db);
+  return new (BenchmarkingRefreshService as new (db: Database) => BenchmarkingRefreshService)(db);
 }
 
 describe('BenchmarkingRefreshService.refresh', () => {

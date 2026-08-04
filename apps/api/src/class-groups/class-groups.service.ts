@@ -71,12 +71,7 @@ export class ClassGroupsService {
         .innerJoin(grades, eq(grades.id, classGroups.gradeId))
         .innerJoin(subjects, eq(subjects.id, subjectClasses.subjectId))
         .innerJoin(academicYears, eq(academicYears.id, classGroups.academicYearId))
-        .where(
-          and(
-            eq(classGroups.orgId, orgId),
-            eq(teacherAssignments.userId, user.userId),
-          ),
-        )
+        .where(and(eq(classGroups.orgId, orgId), eq(teacherAssignments.userId, user.userId)))
         .orderBy(grades.order, classGroups.name, subjects.name);
     }
 
@@ -193,10 +188,7 @@ export class ClassGroupsService {
       .from(subjectClasses)
       .innerJoin(subjects, eq(subjects.id, subjectClasses.subjectId))
       .leftJoin(teacherAssignments, eq(teacherAssignments.subjectClassId, subjectClasses.id))
-      .leftJoin(
-        users,
-        and(eq(users.id, teacherAssignments.userId), isNull(users.deletedAt)),
-      )
+      .leftJoin(users, and(eq(users.id, teacherAssignments.userId), isNull(users.deletedAt)))
       .where(eq(subjectClasses.classGroupId, classGroupId))
       .orderBy(subjects.name);
 

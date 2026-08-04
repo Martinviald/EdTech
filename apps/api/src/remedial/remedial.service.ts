@@ -103,15 +103,10 @@ export class RemedialService {
    *   → la devuelve (`fromCache: true`).
    * - En cualquier otro caso inserta una fila `pending` y la devuelve.
    */
-  async create(
-    user: JwtPayload,
-    dto: GenerateRemedialDto,
-  ): Promise<CreateRemedialResult> {
+  async create(user: JwtPayload, dto: GenerateRemedialDto): Promise<CreateRemedialResult> {
     const orgId = this.requireOrgId(user);
     const itemCount =
-      dto.type === 'practice_set'
-        ? dto.itemCount ?? DEFAULT_PRACTICE_ITEM_COUNT
-        : null;
+      dto.type === 'practice_set' ? (dto.itemCount ?? DEFAULT_PRACTICE_ITEM_COUNT) : null;
     // Ola 2.1a: método remedial (default self_contained) + override de pasaje del
     // docente. Ambos entran en la caché (mismo nodo con/sin pasaje NO deben colisionar)
     // y se persisten (`method` en columna, `stimulusId` en `input`) para que el runner
@@ -198,10 +193,7 @@ export class RemedialService {
       // `content` (refs ligeras) queda intacto. Junto a él (Ola 2.1a), el TEXTO
       // completo del pasaje se re-hidrata desde `instrument_sections` para los sets
       // con estímulo (`content.stimuli` no vacío); self_contained → `[]`.
-      if (
-        row.type === 'practice_set' &&
-        (row.status === 'ready' || row.status === 'approved')
-      ) {
+      if (row.type === 'practice_set' && (row.status === 'ready' || row.status === 'approved')) {
         model.practiceItems = await this.hydratePracticeItems(tx, row.content, orgId);
         model.stimuli = await this.hydrateStimuli(tx, row.content, orgId);
       }
@@ -211,18 +203,12 @@ export class RemedialService {
   }
 
   /** Banco de material remedial paginado (filtra `deletedAt IS NULL`). */
-  async list(
-    user: JwtPayload,
-    query: RemedialListQueryDto,
-  ): Promise<RemedialListResponse> {
+  async list(user: JwtPayload, query: RemedialListQueryDto): Promise<RemedialListResponse> {
     const orgId = this.requireOrgId(user);
     const { page, limit } = query;
 
     return withOrgContext(this.db, orgId, async (tx) => {
-      const conditions = [
-        eq(remedialMaterials.orgId, orgId),
-        isNull(remedialMaterials.deletedAt),
-      ];
+      const conditions = [eq(remedialMaterials.orgId, orgId), isNull(remedialMaterials.deletedAt)];
       if (query.type) conditions.push(eq(remedialMaterials.type, query.type));
       if (query.status) conditions.push(eq(remedialMaterials.status, query.status));
       if (query.nodeId) conditions.push(eq(remedialMaterials.nodeId, query.nodeId));
@@ -256,9 +242,7 @@ export class RemedialService {
       await tx
         .update(remedialMaterials)
         .set({ status: 'processing', startedAt: new Date(), updatedAt: new Date() })
-        .where(
-          and(eq(remedialMaterials.id, id), eq(remedialMaterials.orgId, orgId)),
-        );
+        .where(and(eq(remedialMaterials.id, id), eq(remedialMaterials.orgId, orgId)));
     });
   }
 
@@ -287,9 +271,7 @@ export class RemedialService {
           completedAt: new Date(),
           updatedAt: new Date(),
         })
-        .where(
-          and(eq(remedialMaterials.id, id), eq(remedialMaterials.orgId, orgId)),
-        );
+        .where(and(eq(remedialMaterials.id, id), eq(remedialMaterials.orgId, orgId)));
     });
   }
 
@@ -304,9 +286,7 @@ export class RemedialService {
           completedAt: new Date(),
           updatedAt: new Date(),
         })
-        .where(
-          and(eq(remedialMaterials.id, id), eq(remedialMaterials.orgId, orgId)),
-        );
+        .where(and(eq(remedialMaterials.id, id), eq(remedialMaterials.orgId, orgId)));
     });
   }
 
@@ -344,9 +324,7 @@ export class RemedialService {
             reviewedAt: new Date(),
             updatedAt: new Date(),
           })
-          .where(
-            and(eq(remedialMaterials.id, id), eq(remedialMaterials.orgId, orgId)),
-          );
+          .where(and(eq(remedialMaterials.id, id), eq(remedialMaterials.orgId, orgId)));
         const updated = await this.findOne(tx, id, orgId);
         return this.toModel(tx, updated!);
       }
@@ -372,9 +350,7 @@ export class RemedialService {
           reviewedAt: new Date(),
           updatedAt: new Date(),
         })
-        .where(
-          and(eq(remedialMaterials.id, id), eq(remedialMaterials.orgId, orgId)),
-        );
+        .where(and(eq(remedialMaterials.id, id), eq(remedialMaterials.orgId, orgId)));
 
       // Aprobar un practice_set publica sus ítems generados (draft → published).
       if (row.type === 'practice_set' && 'items' in finalContent) {
@@ -384,11 +360,7 @@ export class RemedialService {
             .update(items)
             .set({ status: 'published', updatedAt: new Date() })
             .where(
-              and(
-                inArray(items.id, itemIds),
-                eq(items.orgId, orgId),
-                isNull(items.deletedAt),
-              ),
+              and(inArray(items.id, itemIds), eq(items.orgId, orgId), isNull(items.deletedAt)),
             );
         }
       }
@@ -435,9 +407,7 @@ export class RemedialService {
       await tx
         .update(remedialMaterials)
         .set(patch)
-        .where(
-          and(eq(remedialMaterials.id, id), eq(remedialMaterials.orgId, orgId)),
-        );
+        .where(and(eq(remedialMaterials.id, id), eq(remedialMaterials.orgId, orgId)));
 
       const updated = await this.findOne(tx, id, orgId);
       return this.toModel(tx, updated!);
@@ -450,10 +420,7 @@ export class RemedialService {
    * (`editedContent ?? content`) con `toRemedialStudentContent`. `content` queda
    * null si el material aún no tiene salida (status distinto de ready/approved).
    */
-  async getStudentVersion(
-    user: JwtPayload,
-    id: string,
-  ): Promise<RemedialStudentMaterialModel> {
+  async getStudentVersion(user: JwtPayload, id: string): Promise<RemedialStudentMaterialModel> {
     const orgId = this.requireOrgId(user);
 
     return withOrgContext(this.db, orgId, async (tx) => {
@@ -554,10 +521,7 @@ export class RemedialService {
    * Versión de prompt EFECTIVA para la caché. `practice_set` en modo `reuse_stimulus`
    * usa el prompt anclado al pasaje (versión propia); el resto usa la versión por tipo.
    */
-  private resolvePromptVersion(
-    type: RemedialMaterialType,
-    method: RemedialMethod,
-  ): string {
+  private resolvePromptVersion(type: RemedialMaterialType, method: RemedialMethod): string {
     if (type === 'practice_set' && method === 'reuse_stimulus') {
       return PRACTICE_STIMULUS_PROMPT_VERSION;
     }
@@ -588,10 +552,7 @@ export class RemedialService {
   }
 
   /** Arma el `RemedialMaterialModel` joineando `nodeName` de `taxonomy_nodes`. */
-  private async toModel(
-    tx: Database,
-    row: RemedialMaterial,
-  ): Promise<RemedialMaterialModel> {
+  private async toModel(tx: Database, row: RemedialMaterial): Promise<RemedialMaterialModel> {
     let nodeName: string | null = null;
     if (row.nodeId) {
       const [node] = await tx

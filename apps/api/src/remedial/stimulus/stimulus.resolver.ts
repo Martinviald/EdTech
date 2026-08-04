@@ -5,14 +5,8 @@ import type { RemedialMethod, RemedialStimulus } from '@soe/types';
 import { InjectDb, type Database } from '../../database/database.types';
 import { FailedStimulusService } from './failed-stimulus.service';
 import { failedStimulusToStimulus } from './stimulus.mappers';
-import {
-  PASSAGE_SELECTION_POLICY,
-  type PassageSelectionPolicy,
-} from './passage-selection.policy';
-import {
-  TERMINAL_FALLBACK_POLICY,
-  type TerminalFallbackPolicy,
-} from './terminal-fallback.policy';
+import { PASSAGE_SELECTION_POLICY, type PassageSelectionPolicy } from './passage-selection.policy';
+import { TERMINAL_FALLBACK_POLICY, type TerminalFallbackPolicy } from './terminal-fallback.policy';
 
 /** Entrada de la resolución de estímulo. `method`/`stimulusId` vienen del DTO de generación. */
 export interface ResolveStimulusInput {
@@ -104,10 +98,7 @@ export class StimulusResolver {
    * para la org. `instrument_sections` NO está bajo RLS → filtro `orgId` explícito del
    * pool `org ∪ oficial`; no requiere `withOrgContext`.
    */
-  private async loadPassage(
-    orgId: string,
-    sectionId: string,
-  ): Promise<RemedialStimulus | null> {
+  private async loadPassage(orgId: string, sectionId: string): Promise<RemedialStimulus | null> {
     const [section] = await this.db
       .select({
         id: instrumentSections.id,
@@ -121,10 +112,7 @@ export class StimulusResolver {
         and(
           eq(instrumentSections.id, sectionId),
           eq(instrumentSections.kind, 'passage'),
-          or(
-            eq(instrumentSections.orgId, orgId),
-            isNull(instrumentSections.orgId),
-          ),
+          or(eq(instrumentSections.orgId, orgId), isNull(instrumentSections.orgId)),
         ),
       )
       .limit(1);

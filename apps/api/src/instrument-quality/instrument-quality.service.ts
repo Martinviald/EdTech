@@ -4,6 +4,7 @@ import {
   assessments,
   classGroups,
   instruments,
+  items,
   responses,
   studentEnrollments,
   students,
@@ -13,6 +14,7 @@ import {
 } from '@soe/db';
 import {
   RESULTS_VIEWER_ROLES,
+  isDichotomousItem,
   userHasAnyRole,
   type AssessmentReportItemRow,
   type InstrumentQualityQueryDto,
@@ -105,31 +107,42 @@ export class InstrumentQualityService {
     });
 
     // Matriz correcto/incorrecto (por la misma cohorte del informe) e instrumentId.
-    const { matrix, instrumentId } = await withOrgContext(this.db, orgId, async (tx) => {
-      const instrumentId = await this.resolveInstrumentId(tx, dto.assessmentId);
-      const scope = await this.getAccessibleClassGroupIds(tx, user, orgId);
-      const studentFilter = await this.resolveAccessibleStudentIds(
-        tx,
-        orgId,
-        scope,
-        dto.classGroupId,
-      );
-      const matrix = await this.buildScoreMatrix(
-        tx,
-        dto.assessmentId,
-        report.items,
-        studentFilter,
-      );
-      return { matrix, instrumentId };
-    });
+    const { matrix, reducedColumnByItem, instrumentId } = await withOrgContext(
+      this.db,
+      orgId,
+      async (tx) => {
+        const instrumentId = await this.resolveInstrumentId(tx, dto.assessmentId);
+        const scope = await this.getAccessibleClassGroupIds(tx, user, orgId);
+        const studentFilter = await this.resolveAccessibleStudentIds(
+          tx,
+          orgId,
+          scope,
+          dto.classGroupId,
+        );
+        const scoreMatrix = await this.buildScoreMatrix(
+          tx,
+          dto.assessmentId,
+          report.items,
+          studentFilter,
+        );
+        return { ...scoreMatrix, instrumentId };
+      },
+    );
 
-    // El orden de columnas de la matriz sigue el orden de report.items.
-    const items: ItemQualityModel[] = report.items.map((row, columnIndex) => {
-      const pBiserial = pointBiserial(matrix, columnIndex);
+    // La psicometría clásica (KR-20, punto-biserial) sólo admite ítems
+    // dicotómicos: los de crédito parcial se excluyen de la matriz y su
+    // correlación queda en null, en vez de colapsarlos a 0 y sesgar la varianza.
+    const items: ItemQualityModel[] = report.items.map((row) => {
+      const reducedIndex = reducedColumnByItem.get(row.itemId);
+      const pBiserial = reducedIndex === undefined ? null : pointBiserial(matrix, reducedIndex);
       return this.buildItemQuality(row, pBiserial);
     });
 
-    const reliability = this.buildReliability(matrix, items.length);
+    const reliability = this.buildReliability(
+      matrix,
+      reducedColumnByItem.size,
+      report.items.length - reducedColumnByItem.size,
+    );
     const flaggedCount = items.filter((i) => i.flags.length > 0).length;
 
     return {
@@ -191,8 +204,7 @@ export class InstrumentQualityService {
 
     // strong_distractor: un distractor ≥ la clave (tasa distractor ≥ p) o > 35%.
     if (row.topDistractorRate !== null) {
-      const distractorBeatsKey =
-        row.difficulty !== null && row.topDistractorRate >= row.difficulty;
+      const distractorBeatsKey = row.difficulty !== null && row.topDistractorRate >= row.difficulty;
       if (distractorBeatsKey || row.topDistractorRate > STRONG_DISTRACTOR_RATE) {
         flags.push('strong_distractor');
       }
@@ -218,6 +230,7 @@ export class InstrumentQualityService {
   private buildReliability(
     matrix: ScoreMatrix,
     itemsAnalyzed: number,
+    itemsExcludedForPartialCredit: number,
   ): InstrumentReliabilityModel {
     const value = kr20(matrix);
     return {
@@ -225,6 +238,7 @@ export class InstrumentQualityService {
       interpretation: this.interpretKr20(value),
       itemsAnalyzed,
       studentsAnalyzed: matrix.length,
+      itemsExcludedForPartialCredit,
     };
   }
 
@@ -253,10 +267,14 @@ export class InstrumentQualityService {
     assessmentId: string,
     itemRows: AssessmentReportItemRow[],
     studentFilter: string[] | null,
-  ): Promise<ScoreMatrix> {
-    const itemIds = itemRows.map((i) => i.itemId);
-    if (itemIds.length === 0) return [];
-    if (studentFilter !== null && studentFilter.length === 0) return [];
+  ): Promise<{ matrix: ScoreMatrix; reducedColumnByItem: Map<string, number> }> {
+    const empty = { matrix: [] as ScoreMatrix, reducedColumnByItem: new Map<string, number>() };
+    const allItemIds = itemRows.map((i) => i.itemId);
+    if (allItemIds.length === 0) return empty;
+    if (studentFilter !== null && studentFilter.length === 0) return empty;
+
+    const itemIds = await this.filterDichotomousItems(tx, allItemIds);
+    if (itemIds.length === 0) return empty;
 
     const columnIndexByItem = new Map<string, number>();
     itemIds.forEach((itemId, index) => columnIndexByItem.set(itemId, index));
@@ -291,7 +309,26 @@ export class InstrumentQualityService {
       studentRow[columnIndex] = r.isCorrect === true;
     }
 
-    return Array.from(rowByStudent.values());
+    return { matrix: Array.from(rowByStudent.values()), reducedColumnByItem: columnIndexByItem };
+  }
+
+  /**
+   * Conserva sólo los ítems dicotómicos, en el mismo orden recibido.
+   *
+   * El criterio no se hardcodea acá: `isDichotomousItem` lo deriva del tipo y de
+   * la configuración de scoring, así un tipo politómico futuro queda excluido sin
+   * tocar este servicio.
+   */
+  private async filterDichotomousItems(tx: Database, itemIds: string[]): Promise<string[]> {
+    const rows = await tx
+      .select({ id: items.id, type: items.type, scoringConfig: items.scoringConfig })
+      .from(items)
+      .where(inArray(items.id, itemIds));
+
+    const dichotomousIds = new Set(
+      rows.filter((r) => isDichotomousItem(r.type, r.scoringConfig ?? undefined)).map((r) => r.id),
+    );
+    return itemIds.filter((id) => dichotomousIds.has(id));
   }
 
   // ───────────────────────────────────────────────────────────────────────────
@@ -300,10 +337,7 @@ export class InstrumentQualityService {
   // ───────────────────────────────────────────────────────────────────────────
 
   /** instrumentId de la evaluación (ya validada por el informe). */
-  private async resolveInstrumentId(
-    tx: Database,
-    assessmentId: string,
-  ): Promise<string> {
+  private async resolveInstrumentId(tx: Database, assessmentId: string): Promise<string> {
     const [row] = await tx
       .select({ instrumentId: assessments.instrumentId })
       .from(assessments)
@@ -338,12 +372,7 @@ export class InstrumentQualityService {
       .from(teacherAssignments)
       .innerJoin(subjectClasses, eq(subjectClasses.id, teacherAssignments.subjectClassId))
       .innerJoin(classGroups, eq(classGroups.id, subjectClasses.classGroupId))
-      .where(
-        and(
-          eq(teacherAssignments.userId, user.userId),
-          eq(classGroups.orgId, orgId),
-        ),
-      );
+      .where(and(eq(teacherAssignments.userId, user.userId), eq(classGroups.orgId, orgId)));
 
     const ids = Array.from(new Set(rows.map((r) => r.classGroupId)));
     return { scopeAll: false, classGroupIds: ids };

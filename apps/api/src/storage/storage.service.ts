@@ -193,9 +193,7 @@ export class StorageService implements OnModuleInit, OnModuleDestroy {
     const res = await fetch(url, { method: 'DELETE' });
     // 2xx (204 típico) o 404 → objeto ausente = éxito idempotente.
     if (res.ok || res.status === 404) return;
-    throw new Error(
-      `Error al eliminar el objeto S3 "${key}": ${res.status} ${res.statusText}`,
-    );
+    throw new Error(`Error al eliminar el objeto S3 "${key}": ${res.status} ${res.statusText}`);
   }
 
   /**
@@ -225,9 +223,7 @@ export class StorageService implements OnModuleInit, OnModuleDestroy {
         contentType: res.headers.get('content-type'),
       };
     }
-    throw new Error(
-      `Error al consultar el objeto S3 "${key}": ${res.status} ${res.statusText}`,
-    );
+    throw new Error(`Error al consultar el objeto S3 "${key}": ${res.status} ${res.statusText}`);
   }
 
   /**
@@ -236,9 +232,7 @@ export class StorageService implements OnModuleInit, OnModuleDestroy {
    * query. La respuesta es XML: se parsea con regex simple para extraer
    * `<Contents><Key>…</Key><Size>…</Size></Contents>`. Bucket/prefijo vacío → `[]`.
    */
-  async listObjects(
-    prefix: string,
-  ): Promise<Array<{ key: string; sizeBytes: number | null }>> {
+  async listObjects(prefix: string): Promise<Array<{ key: string; sizeBytes: number | null }>> {
     const { base, credentials } = this.requireResolved();
     const url = this.presign({
       base,
@@ -258,9 +252,7 @@ export class StorageService implements OnModuleInit, OnModuleDestroy {
   }
 
   /** Parseo minimalista del XML de ListObjectsV2 (sin dependencia de un parser XML). */
-  private parseListObjectsXml(
-    xml: string,
-  ): Array<{ key: string; sizeBytes: number | null }> {
+  private parseListObjectsXml(xml: string): Array<{ key: string; sizeBytes: number | null }> {
     const results: Array<{ key: string; sizeBytes: number | null }> = [];
     const contentsRe = /<Contents>([\s\S]*?)<\/Contents>/g;
     let match: RegExpExecArray | null;
@@ -320,9 +312,7 @@ export class StorageService implements OnModuleInit, OnModuleDestroy {
       if (!creds) return; // no hay endpoint del rol → sólo quedan las de env (o ninguna)
       this.credentials = creds;
       this.scheduleRefresh(creds);
-      this.logger.log(
-        'Credenciales S3 obtenidas del rol de instancia (container credentials).',
-      );
+      this.logger.log('Credenciales S3 obtenidas del rol de instancia (container credentials).');
     } catch (err) {
       const msg = err instanceof Error ? err.message : String(err);
       this.logger.error(`No se pudieron obtener credenciales del rol de instancia: ${msg}`);
@@ -398,9 +388,12 @@ export class StorageService implements OnModuleInit, OnModuleDestroy {
   }
 
   private armTimer(delay: number): void {
-    this.refreshTimer = setTimeout(() => {
-      void this.refreshCredentials();
-    }, Math.min(delay, MAX_TIMER_MS));
+    this.refreshTimer = setTimeout(
+      () => {
+        void this.refreshCredentials();
+      },
+      Math.min(delay, MAX_TIMER_MS),
+    );
     // No mantener vivo el event loop sólo por este timer.
     this.refreshTimer.unref?.();
   }
@@ -445,9 +438,7 @@ export class StorageService implements OnModuleInit, OnModuleDestroy {
       'X-Amz-Date': amzDate,
       'X-Amz-Expires': String(expiresIn),
       'X-Amz-SignedHeaders': 'host',
-      ...(credentials.sessionToken
-        ? { 'X-Amz-Security-Token': credentials.sessionToken }
-        : {}),
+      ...(credentials.sessionToken ? { 'X-Amz-Security-Token': credentials.sessionToken } : {}),
       ...(args.extraQuery ?? {}),
     };
 
@@ -519,9 +510,7 @@ export class StorageService implements OnModuleInit, OnModuleDestroy {
     // `AWS_S3_BUCKET` es la variable que inyecta la infra AWS/SST al aprovisionar
     // el bucket; se deja como último fallback tras las overrides locales explícitas.
     const bucket =
-      process.env.STORAGE_S3_BUCKET ??
-      process.env.S3_BUCKET ??
-      process.env.AWS_S3_BUCKET;
+      process.env.STORAGE_S3_BUCKET ?? process.env.S3_BUCKET ?? process.env.AWS_S3_BUCKET;
     const region = process.env.STORAGE_S3_REGION ?? process.env.AWS_REGION ?? 'us-east-1';
 
     if (!bucket) return null;

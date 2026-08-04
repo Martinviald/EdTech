@@ -43,8 +43,5 @@ export interface AssistantTool {
   /** Definición provider-agnóstica que se entrega al modelo. */
   readonly definition: LlmToolDefinition;
   /** Ejecuta la tool. `input` es lo que propuso el modelo (validar siempre). */
-  execute(
-    input: unknown,
-    ctx: AssistantToolContext,
-  ): Promise<AssistantToolResult>;
+  execute(input: unknown, ctx: AssistantToolContext): Promise<AssistantToolResult>;
 }

@@ -123,9 +123,7 @@ export class BenchmarkingRefreshService {
       refreshedRows += values.length;
     }
 
-    this.logger.log(
-      `Benchmark read-model refreshed: ${refreshedOrgs} orgs, ${refreshedRows} rows`,
-    );
+    this.logger.log(`Benchmark read-model refreshed: ${refreshedOrgs} orgs, ${refreshedRows} rows`);
 
     return {
       refreshedOrgs,
@@ -153,9 +151,7 @@ export class BenchmarkingRefreshService {
           gradeId: instruments.gradeId,
           subjectId: instruments.subjectId,
           studentCount: sql<number>`count(distinct ${assessmentResults.studentId})::int`,
-          avgAchievement: sql<
-            string | null
-          >`round(avg(${assessmentResults.percentage}), 2)`,
+          avgAchievement: sql<string | null>`round(avg(${assessmentResults.percentage}), 2)`,
           insufficient: sql<number>`sum(case when ${assessmentResults.performanceLevel} = 'insufficient' then 1 else 0 end)::int`,
           elementary: sql<number>`sum(case when ${assessmentResults.performanceLevel} = 'elementary' then 1 else 0 end)::int`,
           adequate: sql<number>`sum(case when ${assessmentResults.performanceLevel} = 'adequate' then 1 else 0 end)::int`,

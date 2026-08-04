@@ -76,12 +76,7 @@ export class EstablishmentReportService {
     return withOrgContext(this.db, orgId, async (tx) => {
       const academicYear = await this.resolveAcademicYear(tx, orgId, query.academicYearId);
 
-      const rawRows = await this.loadRawRows(
-        tx,
-        orgId,
-        academicYear.id,
-        query.period ?? null,
-      );
+      const rawRows = await this.loadRawRows(tx, orgId, academicYear.id, query.period ?? null);
 
       const [orgMeta, directorName] = await Promise.all([
         this.support.loadOrgMeta(tx, orgId),
@@ -186,10 +181,7 @@ export class EstablishmentReportService {
         assessmentCourseAssignments,
         eq(assessmentCourseAssignments.assessmentId, assessments.id),
       )
-      .innerJoin(
-        classGroups,
-        eq(classGroups.id, assessmentCourseAssignments.classGroupId),
-      )
+      .innerJoin(classGroups, eq(classGroups.id, assessmentCourseAssignments.classGroupId))
       .innerJoin(
         studentEnrollments,
         and(
@@ -281,9 +273,7 @@ export class EstablishmentReportService {
 
     const sections: EstablishmentSubjectSection[] = [];
     for (const acc of bySubject.values()) {
-      const gradeCols = Array.from(acc.grades.values()).sort(
-        (a, b) => a.gradeOrder - b.gradeOrder,
-      );
+      const gradeCols = Array.from(acc.grades.values()).sort((a, b) => a.gradeOrder - b.gradeOrder);
 
       // Niveles presentes (con al menos una fila), en orden canónico.
       const levelsPresent = new Set<PerformanceLevel>();

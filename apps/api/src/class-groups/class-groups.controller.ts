@@ -29,10 +29,7 @@ export class ClassGroupsController {
     'school_admin',
     'platform_admin',
   )
-  list(
-    @Param('orgId', ParseUUIDPipe) orgId: string,
-    @CurrentUser() user: JwtPayload,
-  ) {
+  list(@Param('orgId', ParseUUIDPipe) orgId: string, @CurrentUser() user: JwtPayload) {
     const effectiveOrgId = getEffectiveOrgId(user, orgId);
     return this.service.listForUser(effectiveOrgId, user);
   }

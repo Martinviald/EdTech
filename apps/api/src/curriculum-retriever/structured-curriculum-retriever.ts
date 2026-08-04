@@ -1,11 +1,7 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { and, eq, inArray, isNull, ne, or, type SQL } from 'drizzle-orm';
 import { instruments, items, itemTaxonomyTags, taxonomyNodes } from '@soe/db';
-import type {
-  TaggedItemAlternative,
-  TaggedItemRef,
-  TaxonomyNodeRef,
-} from '@soe/types';
+import type { TaggedItemAlternative, TaggedItemRef, TaxonomyNodeRef } from '@soe/types';
 import { InjectDb, type Database } from '../database/database.types';
 import {
   CurriculumRetriever,
@@ -42,10 +38,7 @@ const MAX_ANCESTOR_DEPTH = 64;
 export class StructuredCurriculumRetriever implements CurriculumRetriever {
   constructor(@InjectDb() private readonly db: Database) {}
 
-  async getContext(
-    nodeId: string,
-    orgId?: string,
-  ): Promise<CurriculumContextWithProvenance> {
+  async getContext(nodeId: string, orgId?: string): Promise<CurriculumContextWithProvenance> {
     const node = await this.findNode(nodeId);
     if (!node) {
       throw new NotFoundException(`Taxonomy node ${nodeId} not found`);
@@ -128,10 +121,7 @@ export class StructuredCurriculumRetriever implements CurriculumRetriever {
    * Hermanos: mismo `parentId` que el nodo, excluyendo el propio nodo. Si el
    * nodo es raíz (`parentId` null) → `[]`.
    */
-  private async loadSiblings(
-    nodeId: string,
-    parentId: string | null,
-  ): Promise<TaxonomyNodeRef[]> {
+  private async loadSiblings(nodeId: string, parentId: string | null): Promise<TaxonomyNodeRef[]> {
     if (!parentId) return [];
     const rows = await this.db
       .select(NODE_COLUMNS)
@@ -231,9 +221,7 @@ export class StructuredCurriculumRetriever implements CurriculumRetriever {
       );
     }
     if (targetNode.gradeId) {
-      conditions.push(
-        or(eq(instruments.gradeId, targetNode.gradeId), isNull(instruments.gradeId)),
-      );
+      conditions.push(or(eq(instruments.gradeId, targetNode.gradeId), isNull(instruments.gradeId)));
     }
 
     const rows = await this.db

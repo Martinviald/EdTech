@@ -74,10 +74,7 @@ export class StaffController {
   @Delete(':membershipId')
   @Roles('school_admin', 'platform_admin')
   @HttpCode(204)
-  async revoke(
-    @Param('membershipId') membershipId: string,
-    @CurrentUser() user: JwtPayload,
-  ) {
+  async revoke(@Param('membershipId') membershipId: string, @CurrentUser() user: JwtPayload) {
     requireOrgId(user);
     const id = parseUuid(membershipId, 'membershipId');
     await this.staff.revoke(user, id);

@@ -16,12 +16,14 @@ const diaRawItemSchema = z.object({
   // `multipleChoiceContentSchema.alternatives[].key`). Soporta A–E (PAES) y V/F sin
   // capar a un único carácter. La validación del set válido la hace el parser (#4).
   correctKey: z.string().min(1).max(5),
-  alternatives: z.array(
-    z.object({
-      key: z.string().min(1).max(5),
-      text: z.string().optional(),
-    }),
-  ).min(2),
+  alternatives: z
+    .array(
+      z.object({
+        key: z.string().min(1).max(5),
+        text: z.string().optional(),
+      }),
+    )
+    .min(2),
   skill: z.string().min(1),
   oa: z.string().optional(),
   contentAxis: z.string().optional(),

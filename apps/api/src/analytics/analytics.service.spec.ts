@@ -170,9 +170,7 @@ describe('AnalyticsService.generational', () => {
     expect(res.series[0].averageAchievement).toBe(55);
     // Sin filas de distribución → buckets en cero pero presentes (4 niveles).
     expect(res.series[0].performanceDistribution).toHaveLength(4);
-    expect(
-      res.series[0].performanceDistribution.every((d) => d.count === 0),
-    ).toBe(true);
+    expect(res.series[0].performanceDistribution.every((d) => d.count === 0)).toBe(true);
   });
 
   it('devuelve serie vacía cuando no hay datos para el grade', async () => {

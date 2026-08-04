@@ -83,10 +83,7 @@ type DbMock = Database & {
  * `selectResults` se consume en orden FIFO por cada `db.select()`. Un chain es
  * thenable y resoluble vía `.limit()`/`.offset()` para cubrir las variantes.
  */
-function makeDb(
-  selectResults: unknown[][],
-  insertReturning: unknown[][] = [],
-): DbMock {
+function makeDb(selectResults: unknown[][], insertReturning: unknown[][] = []): DbMock {
   let selectIdx = 0;
   let insertIdx = 0;
   const inserted: Array<Record<string, unknown>> = [];
@@ -143,17 +140,12 @@ describe('RemedialService', () => {
   it('lanza ForbiddenException si el usuario no tiene orgId', async () => {
     const service = new RemedialService(makeDb([]));
     const user = makeUser({ orgId: null });
-    await expect(service.create(user, baseDto)).rejects.toBeInstanceOf(
-      ForbiddenException,
-    );
+    await expect(service.create(user, baseDto)).rejects.toBeInstanceOf(ForbiddenException);
   });
 
   it('create inserta un registro pending cuando no hay caché (fromCache=false)', async () => {
     // 1) lookup de caché (vacío), 2) toModel nodeName lookup
-    const db = makeDb(
-      [[], [{ name: 'OA 3' }]],
-      [[makeRow({ id: 'mat-new' })]],
-    );
+    const db = makeDb([[], [{ name: 'OA 3' }]], [[makeRow({ id: 'mat-new' })]]);
     const service = new RemedialService(db);
     const result = await service.create(makeUser(), baseDto);
 
@@ -207,9 +199,7 @@ describe('RemedialService', () => {
   it('get lanza NotFound si no existe', async () => {
     const db = makeDb([[]]);
     const service = new RemedialService(db);
-    await expect(service.get(makeUser(), 'missing')).rejects.toBeInstanceOf(
-      NotFoundException,
-    );
+    await expect(service.get(makeUser(), 'missing')).rejects.toBeInstanceOf(NotFoundException);
   });
 
   it('toModel arma el Model con nodeName joineado y shape exacto', async () => {
@@ -318,7 +308,11 @@ describe('RemedialService', () => {
       type: 'practice_set',
       content: practiceContent,
     });
-    const approved = makeRow({ status: 'approved', type: 'practice_set', content: practiceContent });
+    const approved = makeRow({
+      status: 'approved',
+      type: 'practice_set',
+      content: practiceContent,
+    });
     // 1) findOne inicial, 2) findOne final, 3) nodeName lookup
     const db = makeDb([[ready], [approved], [{ name: 'OA' }]]);
     const service = new RemedialService(db);
@@ -378,9 +372,9 @@ describe('RemedialService', () => {
     const approved = makeRow({ status: 'approved' });
     const db = makeDb([[approved]]);
     const service = new RemedialService(db);
-    await expect(
-      service.update(makeUser(), 'mat-1', { title: 'x' }),
-    ).rejects.toBeInstanceOf(BadRequestException);
+    await expect(service.update(makeUser(), 'mat-1', { title: 'x' })).rejects.toBeInstanceOf(
+      BadRequestException,
+    );
   });
 
   it('getStudentVersion deriva el render sin info solo-profesor (guide)', async () => {

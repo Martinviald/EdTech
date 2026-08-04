@@ -29,10 +29,7 @@ function makeDeps(): {
   };
 }
 
-function makeResolver(
-  deps: ReturnType<typeof makeDeps>,
-  db: Database,
-): StimulusResolver {
+function makeResolver(deps: ReturnType<typeof makeDeps>, db: Database): StimulusResolver {
   return new StimulusResolver(
     db,
     deps.failed as unknown as FailedStimulusService,

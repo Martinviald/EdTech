@@ -51,18 +51,14 @@ export class GetGenerationalTool implements AssistantTool {
         },
         nodeId: {
           type: 'string',
-          description:
-            'UUID del nodo de taxonomía para enfocar una habilidad (opcional).',
+          description: 'UUID del nodo de taxonomía para enfocar una habilidad (opcional).',
         },
       },
       required: ['gradeId'],
     },
   };
 
-  async execute(
-    input: unknown,
-    ctx: AssistantToolContext,
-  ): Promise<AssistantToolResult> {
+  async execute(input: unknown, ctx: AssistantToolContext): Promise<AssistantToolResult> {
     const parsed = generationalComparisonQuerySchema.safeParse(input);
     if (!parsed.success) {
       return {

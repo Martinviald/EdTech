@@ -64,11 +64,7 @@ export class FilesController {
   /** POST /api/files/:id/confirm — Paso 3: valida en S3 y marca `ready`. */
   @Post(':id/confirm')
   @Roles(...FILE_MANAGER_ROLES)
-  async confirm(
-    @Param('id') id: string,
-    @Body() body: unknown,
-    @CurrentUser() user: JwtPayload,
-  ) {
+  async confirm(@Param('id') id: string, @Body() body: unknown, @CurrentUser() user: JwtPayload) {
     const dto = confirmFileSchema.parse(body);
     const row = await this.filesService.confirm({
       orgId: user.orgId,
@@ -104,11 +100,7 @@ export class FilesController {
   /** PATCH /api/files/:id — actualiza metadata (no toca el objeto en S3). */
   @Patch(':id')
   @Roles(...FILE_MANAGER_ROLES)
-  async update(
-    @Param('id') id: string,
-    @Body() body: unknown,
-    @CurrentUser() user: JwtPayload,
-  ) {
+  async update(@Param('id') id: string, @Body() body: unknown, @CurrentUser() user: JwtPayload) {
     const dto = updateFileSchema.parse(body);
     const row = await this.filesService.updateMetadata(user.orgId, id, dto);
     return this.filesService.toModel(row, true);

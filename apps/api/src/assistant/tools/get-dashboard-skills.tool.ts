@@ -68,10 +68,7 @@ export class GetDashboardSkillsTool implements AssistantTool {
     },
   };
 
-  async execute(
-    input: unknown,
-    ctx: AssistantToolContext,
-  ): Promise<AssistantToolResult> {
+  async execute(input: unknown, ctx: AssistantToolContext): Promise<AssistantToolResult> {
     const parsed = dashboardFiltersQuerySchema.safeParse(input ?? {});
     if (!parsed.success) {
       return {

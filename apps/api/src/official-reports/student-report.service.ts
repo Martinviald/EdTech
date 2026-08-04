@@ -39,12 +39,7 @@ export class StudentReportService {
     const orgId = this.support.requireOrgId(user);
 
     return withOrgContext(this.db, orgId, async (tx) => {
-      const assessment = await this.support.requireAssessment(
-        tx,
-        user,
-        orgId,
-        query.assessmentId,
-      );
+      const assessment = await this.support.requireAssessment(tx, user, orgId, query.assessmentId);
       const scope = await this.support.getAccessibleClassGroupIds(tx, user, orgId);
 
       if (!scope.scopeAll) {
@@ -135,13 +130,7 @@ export class StudentReportService {
         lastName: students.lastName,
       })
       .from(students)
-      .where(
-        and(
-          eq(students.id, studentId),
-          eq(students.orgId, orgId),
-          isNull(students.deletedAt),
-        ),
-      )
+      .where(and(eq(students.id, studentId), eq(students.orgId, orgId), isNull(students.deletedAt)))
       .limit(1);
     if (!row) throw new NotFoundException('Estudiante no encontrado');
     return row;
@@ -210,12 +199,7 @@ export class StudentReportService {
         correct: sql<number>`sum(case when ${responses.isCorrect} = true then 1 else 0 end)::int`,
       })
       .from(responses)
-      .where(
-        and(
-          eq(responses.assessmentId, assessmentId),
-          eq(responses.studentId, studentId),
-        ),
-      );
+      .where(and(eq(responses.assessmentId, assessmentId), eq(responses.studentId, studentId)));
 
     const classAverageAchievement = await this.loadClassAverage(
       tx,
@@ -294,10 +278,7 @@ export class StudentReportService {
       .from(skillResults)
       .innerJoin(taxonomyNodes, eq(taxonomyNodes.id, skillResults.nodeId))
       .where(
-        and(
-          eq(skillResults.assessmentId, assessmentId),
-          eq(skillResults.studentId, studentId),
-        ),
+        and(eq(skillResults.assessmentId, assessmentId), eq(skillResults.studentId, studentId)),
       );
 
     return rows
@@ -332,12 +313,7 @@ export class StudentReportService {
         maxScore: responses.maxScore,
       })
       .from(responses)
-      .where(
-        and(
-          eq(responses.assessmentId, assessmentId),
-          eq(responses.studentId, studentId),
-        ),
-      );
+      .where(and(eq(responses.assessmentId, assessmentId), eq(responses.studentId, studentId)));
 
     const byItem = new Map(rows.map((r) => [r.itemId, r]));
 
