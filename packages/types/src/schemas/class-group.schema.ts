@@ -1,7 +1,12 @@
 import { z } from 'zod';
 import { teacherAssignmentRoleEnum } from './teacher-assignment.schema';
 
-export const enrollmentStatusEnum = z.enum(['active', 'transferred', 'graduated', 'withdrawn']);
+export const enrollmentStatusEnum = z.enum([
+  'active',
+  'transferred',
+  'graduated',
+  'withdrawn',
+]);
 export type EnrollmentStatus = z.infer<typeof enrollmentStatusEnum>;
 
 export const classGroupStudentSchema = z.object({

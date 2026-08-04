@@ -1,6 +1,12 @@
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { and, eq, isNull, or } from 'drizzle-orm';
-import { instruments, items, itemTaxonomyTags, taxonomyNodes, taxonomies } from '@soe/db';
+import {
+  instruments,
+  items,
+  itemTaxonomyTags,
+  taxonomyNodes,
+  taxonomies,
+} from '@soe/db';
 import { toApplicationPeriod, validateItemContent, type InstrumentType } from '@soe/types';
 import type { JwtPayload } from '../auth/jwt-payload.types';
 import { InjectDb, type Database } from '../database/database.types';
@@ -68,7 +74,9 @@ export class DiaIngestionService {
 
     const matchedSkills = taxonomyMatches.filter((m) => m.matched).length;
     const unmatchedSkills = [
-      ...new Set(taxonomyMatches.filter((m) => !m.matched).map((m) => m.skillName)),
+      ...new Set(
+        taxonomyMatches.filter((m) => !m.matched).map((m) => m.skillName),
+      ),
     ];
 
     return {
@@ -182,7 +190,9 @@ export class DiaIngestionService {
       }> = [];
 
       for (const createdItem of createdItems) {
-        const parsedItem = parseResult.items.find((pi) => pi.position === createdItem.position);
+        const parsedItem = parseResult.items.find(
+          (pi) => pi.position === createdItem.position,
+        );
         if (!parsedItem) continue;
 
         const match = taxonomyMatches.find(
@@ -218,7 +228,10 @@ export class DiaIngestionService {
    * List DIA instruments visible to the user (own org + official).
    */
   async listInstruments(user: JwtPayload) {
-    const conditions = [eq(instruments.type, DIA_INSTRUMENT_TYPE), isNull(instruments.deletedAt)];
+    const conditions = [
+      eq(instruments.type, DIA_INSTRUMENT_TYPE),
+      isNull(instruments.deletedAt),
+    ];
 
     // Multi-tenancy: show official (org_id IS NULL) + user's org instruments
     const visibilityCondition = user.orgId

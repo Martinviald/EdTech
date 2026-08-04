@@ -57,7 +57,11 @@ export class GradingScalesController {
 
   @Patch(':id')
   @Roles(...GRADING_SCALE_ROLES)
-  update(@Param('id') id: string, @Body() body: unknown, @CurrentUser() user: JwtPayload) {
+  update(
+    @Param('id') id: string,
+    @Body() body: unknown,
+    @CurrentUser() user: JwtPayload,
+  ) {
     const dto = gradingScaleUpdateSchema.parse(body);
     return this.gradingScalesService.update(user, id, dto);
   }
@@ -72,7 +76,11 @@ export class GradingScalesController {
   @Post(':id/preview')
   @Roles(...ANSWER_SHEET_IMPORT_ROLES)
   @HttpCode(200)
-  preview(@Param('id') id: string, @Body() body: unknown, @CurrentUser() user: JwtPayload) {
+  preview(
+    @Param('id') id: string,
+    @Body() body: unknown,
+    @CurrentUser() user: JwtPayload,
+  ) {
     const { percentages } = gradingScalePreviewRequestSchema.parse(body);
     return this.gradingScalesService.previewConversion(user, id, percentages);
   }

@@ -21,7 +21,13 @@ const hkdfAsync = promisify(hkdf);
 
 async function signToken(payload: Record<string, unknown>): Promise<string> {
   const secret = process.env.AUTH_SECRET ?? 'local-development-secret-replace-in-production';
-  const derived = await hkdfAsync('sha256', secret, '', 'Auth.js Generated Encryption Key ()', 64);
+  const derived = await hkdfAsync(
+    'sha256',
+    secret,
+    '',
+    'Auth.js Generated Encryption Key ()',
+    64,
+  );
   const key = new Uint8Array(derived);
   return new EncryptJWT(payload)
     .setProtectedHeader({ alg: 'dir', enc: 'A256CBC-HS512' })
@@ -50,7 +56,10 @@ describe('PrivacyController (e2e)', () => {
         AuthModule,
         PrivacyModule,
       ],
-      providers: [RolesGuard, { provide: APP_GUARD, useClass: AuthGuard }],
+      providers: [
+        RolesGuard,
+        { provide: APP_GUARD, useClass: AuthGuard },
+      ],
     }).compile();
 
     app = moduleRef.createNestApplication();

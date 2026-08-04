@@ -11,7 +11,10 @@ import { failedStimulusToRef } from './stimulus.mappers';
  */
 @Injectable()
 export class HighestGapPolicy implements PassageSelectionPolicy {
-  select(candidates: FailedStimulus[], overrideSectionId?: string): RemedialStimulusRef[] {
+  select(
+    candidates: FailedStimulus[],
+    overrideSectionId?: string,
+  ): RemedialStimulusRef[] {
     if (candidates.length === 0) return [];
 
     if (overrideSectionId) {

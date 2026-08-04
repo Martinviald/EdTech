@@ -16,14 +16,17 @@ export interface ParsedSheet {
  * @param buffer  Raw file contents
  * @param sheetIndex  Which sheet to read (0-based, default first)
  */
-export function parseExcelBuffer(buffer: Buffer, sheetIndex = 0): ParsedSheet {
+export function parseExcelBuffer(
+  buffer: Buffer,
+  sheetIndex = 0,
+): ParsedSheet {
   if (!buffer || buffer.length === 0) {
     return { columns: [], rows: [], totalRows: 0 };
   }
 
   // Detect whether the buffer looks like a plain-text CSV (as opposed to a
   // binary XLSX).  XLSX files start with the PK zip signature (0x50 0x4B).
-  const isLikelyCsv = buffer.length < 2 || buffer[0] !== 0x50 || buffer[1] !== 0x4b;
+  const isLikelyCsv = buffer.length < 2 || (buffer[0] !== 0x50 || buffer[1] !== 0x4b);
 
   const workbook = isLikelyCsv
     ? XLSX.read(buffer.toString('utf-8'), { type: 'string' })

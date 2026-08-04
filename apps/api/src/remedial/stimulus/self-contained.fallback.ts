@@ -1,6 +1,9 @@
 import { Injectable } from '@nestjs/common';
 import type { ResolvedStimulus } from './stimulus.resolver';
-import type { TerminalFallbackContext, TerminalFallbackPolicy } from './terminal-fallback.policy';
+import type {
+  TerminalFallbackContext,
+  TerminalFallbackPolicy,
+} from './terminal-fallback.policy';
 
 /**
  * Fallback terminal de 2.1a: sin pasaje fallado ni elección del docente → `self_contained`

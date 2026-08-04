@@ -81,7 +81,10 @@ export class LlmSettingsService {
    * Upsert de la fila GLOBAL de una funcionalidad. `dto` ya viene validado por Zod
    * (modelo ∈ catálogo del proveedor); aquí se valida la regla extra de multimodal.
    */
-  async upsertGlobal(feature: LlmFeature, dto: UpdateLlmSettingDto): Promise<LlmSettingsResponse> {
+  async upsertGlobal(
+    feature: LlmFeature,
+    dto: UpdateLlmSettingDto,
+  ): Promise<LlmSettingsResponse> {
     const option = findModelOption(dto.provider, dto.model);
     if (!option) {
       throw new BadRequestException('Modelo no disponible para el proveedor seleccionado');

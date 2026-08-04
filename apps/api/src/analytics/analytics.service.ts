@@ -82,7 +82,10 @@ export class AnalyticsService {
 
       // Filtro base sobre class_groups: grade + org. El scope de profesor
       // restringe a sus class_groups asignados.
-      const cgConditions = [eq(classGroups.gradeId, query.gradeId), eq(classGroups.orgId, orgId)];
+      const cgConditions = [
+        eq(classGroups.gradeId, query.gradeId),
+        eq(classGroups.orgId, orgId),
+      ];
       if (!scope.scopeAll) {
         cgConditions.push(inArray(classGroups.id, scope.classGroupIds));
       }
@@ -116,7 +119,10 @@ export class AnalyticsService {
   // Serie temporal de % logro a través de las evaluaciones de un período.
   // ───────────────────────────────────────────────────────────────────────────
 
-  async progression(user: JwtPayload, query: ProgressionQueryDto): Promise<ProgressionResponse> {
+  async progression(
+    user: JwtPayload,
+    query: ProgressionQueryDto,
+  ): Promise<ProgressionResponse> {
     const orgId = this.requireOrgId(user);
 
     return withOrgContext(this.db, orgId, async (tx) => {
@@ -240,14 +246,17 @@ export class AnalyticsService {
       const avg = r.avgPct === null ? null : Number(r.avgPct);
       // Sin escala configurada en el scope, la tasa de aprobación no aplica.
       const passingRate =
-        passingGrade !== null && r.totalGraded > 0 ? (r.passingCount / r.totalGraded) * 100 : null;
+        passingGrade !== null && r.totalGraded > 0
+          ? (r.passingCount / r.totalGraded) * 100
+          : null;
       return {
         academicYearId: r.academicYearId,
         year: r.year,
         studentsCount: r.studentsCount,
         averageAchievement: avg,
         passingRate,
-        performanceDistribution: distByYear.get(r.academicYearId) ?? this.emptyDistribution(),
+        performanceDistribution:
+          distByYear.get(r.academicYearId) ?? this.emptyDistribution(),
       };
     });
   }
@@ -371,7 +380,8 @@ export class AnalyticsService {
         averageAchievement: avg,
         // passingRate no aplica a una habilidad puntual (no hay nota por skill).
         passingRate: null,
-        performanceDistribution: distByYear.get(r.academicYearId) ?? this.emptyDistribution(),
+        performanceDistribution:
+          distByYear.get(r.academicYearId) ?? this.emptyDistribution(),
       };
     });
   }
@@ -468,7 +478,9 @@ export class AnalyticsService {
       scope: 'student',
       subjectId: query.subjectId ?? null,
       entityId: studentId,
-      entityLabel: student ? `${student.firstName} ${student.lastName}`.trim() : null,
+      entityLabel: student
+        ? `${student.firstName} ${student.lastName}`.trim()
+        : null,
       points: rows.map((r) => this.toProgressionPoint(r)),
     };
   }
@@ -513,7 +525,10 @@ export class AnalyticsService {
       .innerJoin(assessments, eq(assessments.id, assessmentResults.assessmentId))
       .innerJoin(instruments, eq(instruments.id, assessments.instrumentId))
       .innerJoin(students, eq(students.id, assessmentResults.studentId))
-      .innerJoin(studentEnrollments, eq(studentEnrollments.studentId, assessmentResults.studentId))
+      .innerJoin(
+        studentEnrollments,
+        eq(studentEnrollments.studentId, assessmentResults.studentId),
+      )
       .where(
         and(
           eq(studentEnrollments.classGroupId, classGroupId),
@@ -523,7 +538,12 @@ export class AnalyticsService {
           ...this.instrumentFilters(query),
         ),
       )
-      .groupBy(assessments.id, assessments.name, instruments.name, assessments.administeredAt)
+      .groupBy(
+        assessments.id,
+        assessments.name,
+        instruments.name,
+        assessments.administeredAt,
+      )
       .orderBy(asc(assessments.administeredAt));
 
     return {
@@ -531,7 +551,9 @@ export class AnalyticsService {
       subjectId: query.subjectId ?? null,
       entityId: classGroupId,
       entityLabel: cg.name,
-      points: rows.map((r) => this.toProgressionPointFromAvg(r, r.avgPct)),
+      points: rows.map((r) =>
+        this.toProgressionPointFromAvg(r, r.avgPct),
+      ),
     };
   }
 
@@ -585,7 +607,12 @@ export class AnalyticsService {
       .innerJoin(instruments, eq(instruments.id, assessments.instrumentId))
       .innerJoin(students, eq(students.id, skillResults.studentId))
       .where(and(...conditions))
-      .groupBy(assessments.id, assessments.name, instruments.name, assessments.administeredAt)
+      .groupBy(
+        assessments.id,
+        assessments.name,
+        instruments.name,
+        assessments.administeredAt,
+      )
       .orderBy(asc(assessments.administeredAt));
 
     return {
@@ -634,7 +661,12 @@ export class AnalyticsService {
       .from(teacherAssignments)
       .innerJoin(subjectClasses, eq(subjectClasses.id, teacherAssignments.subjectClassId))
       .innerJoin(classGroups, eq(classGroups.id, subjectClasses.classGroupId))
-      .where(and(eq(teacherAssignments.userId, user.userId), eq(classGroups.orgId, orgId)));
+      .where(
+        and(
+          eq(teacherAssignments.userId, user.userId),
+          eq(classGroups.orgId, orgId),
+        ),
+      );
 
     const ids = Array.from(new Set(rows.map((r) => r.classGroupId)));
     return { scopeAll: false, classGroupIds: ids };
@@ -673,7 +705,13 @@ export class AnalyticsService {
     const [student] = await tx
       .select({ id: students.id })
       .from(students)
-      .where(and(eq(students.id, studentId), eq(students.orgId, orgId), isNull(students.deletedAt)))
+      .where(
+        and(
+          eq(students.id, studentId),
+          eq(students.orgId, orgId),
+          isNull(students.deletedAt),
+        ),
+      )
       .limit(1);
     if (!student) return false;
     if (scope.scopeAll) return true;
@@ -693,7 +731,10 @@ export class AnalyticsService {
   }
 
   /** Filtros opcionales por subject/instrumentType del instrumento. */
-  private instrumentFilters(query: { subjectId?: string; instrumentType?: string }): SQL[] {
+  private instrumentFilters(query: {
+    subjectId?: string;
+    instrumentType?: string;
+  }): SQL[] {
     const conds: SQL[] = [];
     if (query.subjectId) {
       conds.push(eq(instruments.subjectId, query.subjectId));
@@ -720,14 +761,16 @@ export class AnalyticsService {
     const result = new Map<string, PerformanceDistributionBucket[]>();
     for (const [yearId, counts] of byYear) {
       const total = Array.from(counts.values()).reduce((a, b) => a + b, 0);
-      const buckets: PerformanceDistributionBucket[] = PERFORMANCE_LEVELS_ORDER.map((level) => {
-        const count = counts.get(level) ?? 0;
-        return {
-          level,
-          count,
-          percentage: total > 0 ? (count / total) * 100 : 0,
-        };
-      });
+      const buckets: PerformanceDistributionBucket[] = PERFORMANCE_LEVELS_ORDER.map(
+        (level) => {
+          const count = counts.get(level) ?? 0;
+          return {
+            level,
+            count,
+            percentage: total > 0 ? (count / total) * 100 : 0,
+          };
+        },
+      );
       result.set(yearId, buckets);
     }
     return result;
@@ -778,7 +821,9 @@ export class AnalyticsService {
       achievement,
       // Nivel derivado del promedio (percentageToPerformanceLevel espera 0..1).
       performanceLevel:
-        achievement === null ? null : percentageToPerformanceLevel(achievement / 100),
+        achievement === null
+          ? null
+          : percentageToPerformanceLevel(achievement / 100),
     };
   }
 }

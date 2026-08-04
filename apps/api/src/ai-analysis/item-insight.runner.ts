@@ -12,8 +12,14 @@ import type { JwtPayload } from '../auth/jwt-payload.types';
 import { InjectDb, type Database } from '../database/database.types';
 import { LlmService } from '../llm/llm.service';
 import { AiAnalysisService } from './ai-analysis.service';
-import { buildItemInsightPrompt, ITEM_INSIGHT_PROMPT_VERSION } from './prompts/item-insight.prompt';
-import { ITEM_INSIGHT_BUILDER, type ItemInsightBuilder } from './item-insight.port';
+import {
+  buildItemInsightPrompt,
+  ITEM_INSIGHT_PROMPT_VERSION,
+} from './prompts/item-insight.prompt';
+import {
+  ITEM_INSIGHT_BUILDER,
+  type ItemInsightBuilder,
+} from './item-insight.port';
 
 // 120s: la tarea `analysis` usa el modelo Pro (thinking obligatorio), más lento
 // que Flash. Override por env `AI_ANALYSIS_TIMEOUT_MS`.
@@ -49,10 +55,14 @@ export class ItemInsightRunner {
 
       await this.service.markProcessing(analysisId, orgId);
 
-      const { snapshot, images } = await this.snapshot.build(this.orgScopedUser(orgId), itemId, {
-        assessmentId,
-        classGroupId: record.classGroupId ?? undefined,
-      });
+      const { snapshot, images } = await this.snapshot.build(
+        this.orgScopedUser(orgId),
+        itemId,
+        {
+          assessmentId,
+          classGroupId: record.classGroupId ?? undefined,
+        },
+      );
 
       const audience = this.resolveAudience(record.audience);
       const { system, prompt } = buildItemInsightPrompt(snapshot, audience);
@@ -105,7 +115,9 @@ export class ItemInsightRunner {
     };
     const itemId = typeof input.itemId === 'string' ? input.itemId : null;
     const assessmentId =
-      typeof input.assessmentId === 'string' ? input.assessmentId : record.assessmentId;
+      typeof input.assessmentId === 'string'
+        ? input.assessmentId
+        : record.assessmentId;
     if (!itemId) {
       throw new Error('El análisis por-pregunta no tiene itemId en input');
     }
@@ -153,7 +165,10 @@ export class ItemInsightRunner {
   private withTimeout<T>(promise: Promise<T>, ms: number): Promise<T> {
     let timer: ReturnType<typeof setTimeout>;
     const timeout = new Promise<never>((_resolve, reject) => {
-      timer = setTimeout(() => reject(new Error(`Timeout de análisis IA tras ${ms}ms`)), ms);
+      timer = setTimeout(
+        () => reject(new Error(`Timeout de análisis IA tras ${ms}ms`)),
+        ms,
+      );
     });
     return Promise.race([promise, timeout]).finally(() => clearTimeout(timer));
   }

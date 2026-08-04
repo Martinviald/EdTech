@@ -47,10 +47,7 @@ describe('AuthGuard', () => {
     );
   });
 
-  function makeContext(token?: string): {
-    ctx: ExecutionContext;
-    request: Record<string, unknown>;
-  } {
+  function makeContext(token?: string): { ctx: ExecutionContext; request: Record<string, unknown> } {
     const request: Record<string, unknown> = {
       headers: token ? { authorization: `Bearer ${token}` } : {},
     };
@@ -86,10 +83,7 @@ describe('AuthGuard', () => {
     });
 
     it('rechaza con 401 si el token fue firmado con un secret diferente', async () => {
-      const token = await signToken(
-        { userId: 'u1', orgId: 'o1' },
-        'otro-secret-completamente-diferente',
-      );
+      const token = await signToken({ userId: 'u1', orgId: 'o1' }, 'otro-secret-completamente-diferente');
       const { ctx } = makeContext(token);
       await expect(guard.canActivate(ctx)).rejects.toThrow(UnauthorizedException);
     });

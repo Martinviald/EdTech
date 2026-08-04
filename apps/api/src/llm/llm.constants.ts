@@ -70,7 +70,9 @@ function isValidProvider(value: string | undefined): value is LlmProviderName {
  * Cambiar esta constante (o definir la env `LLM_PROVIDER`) conmuta el proveedor
  * en todo el sistema. Si `LLM_PROVIDER` trae un valor inválido, se ignora.
  */
-export const ACTIVE_LLM_PROVIDER: LlmProviderName = isValidProvider(process.env.LLM_PROVIDER)
+export const ACTIVE_LLM_PROVIDER: LlmProviderName = isValidProvider(
+  process.env.LLM_PROVIDER,
+)
   ? process.env.LLM_PROVIDER
   : 'gemini';
 

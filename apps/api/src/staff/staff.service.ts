@@ -55,24 +55,22 @@ export class StaffService {
       .where(eq(orgMemberships.orgId, orgId))
       .orderBy(orgMemberships.role, orgMemberships.createdAt);
 
-    return (
-      rows
-        // Excluir users soft-deleted (membership "huérfano" después de borrar user)
-        .filter((r) => r.userId === null || r.userDeletedAt === null)
-        .map((r) => ({
-          id: r.id,
-          orgId: r.orgId,
-          userId: r.userId,
-          email: r.userEmail ?? r.pendingEmail ?? '',
-          name: r.userName,
-          role: r.role,
-          status: r.userId ? ('active' as const) : ('pending' as const),
-          isActive: r.isActive,
-          lastLoginAt: r.lastLoginAt?.toISOString() ?? null,
-          invitedAt: r.invitedAt?.toISOString() ?? null,
-          createdAt: r.createdAt.toISOString(),
-        }))
-    );
+    return rows
+      // Excluir users soft-deleted (membership "huérfano" después de borrar user)
+      .filter((r) => r.userId === null || r.userDeletedAt === null)
+      .map((r) => ({
+        id: r.id,
+        orgId: r.orgId,
+        userId: r.userId,
+        email: r.userEmail ?? r.pendingEmail ?? '',
+        name: r.userName,
+        role: r.role,
+        status: r.userId ? ('active' as const) : ('pending' as const),
+        isActive: r.isActive,
+        lastLoginAt: r.lastLoginAt?.toISOString() ?? null,
+        invitedAt: r.invitedAt?.toISOString() ?? null,
+        createdAt: r.createdAt.toISOString(),
+      }));
   }
 
   /**
@@ -90,7 +88,10 @@ export class StaffService {
   }
 
   /** Misma lógica pero no lanza; útil para bulk para acumular errores. */
-  private async inviteInternal(user: JwtPayload, dto: InviteMemberDto): Promise<InviteResult> {
+  private async inviteInternal(
+    user: JwtPayload,
+    dto: InviteMemberDto,
+  ): Promise<InviteResult> {
     // El controller garantiza user.orgId != null antes de llamar al service.
     const orgId = user.orgId!;
     const email = dto.email; // ya viene normalizado por Zod
@@ -261,7 +262,9 @@ export class StaffService {
           ),
         );
       if (activeAdmins <= 1) {
-        throw new ForbiddenException('No puedes eliminar al último administrador del colegio');
+        throw new ForbiddenException(
+          'No puedes eliminar al último administrador del colegio',
+        );
       }
     }
 

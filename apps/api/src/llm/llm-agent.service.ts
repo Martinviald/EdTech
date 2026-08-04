@@ -227,7 +227,9 @@ export class LlmAgentService {
     }
 
     // Se alcanzó el tope de pasos sin que el modelo cerrara en prosa.
-    this.logger.warn(`Loop agéntico alcanzó maxSteps=${maxSteps} sin respuesta final.`);
+    this.logger.warn(
+      `Loop agéntico alcanzó maxSteps=${maxSteps} sin respuesta final.`,
+    );
     yield {
       type: 'final',
       text: lastText,
@@ -247,7 +249,9 @@ export class LlmAgentService {
     const provider = this.registry.get(cfg.provider);
 
     if (!provider) {
-      throw new ServiceUnavailableException(`LLM provider "${cfg.provider}" no está registrado`);
+      throw new ServiceUnavailableException(
+        `LLM provider "${cfg.provider}" no está registrado`,
+      );
     }
     if (!provider.isAvailable()) {
       throw new ServiceUnavailableException(

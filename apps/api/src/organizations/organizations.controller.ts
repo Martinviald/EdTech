@@ -101,7 +101,10 @@ export class OrganizationsController {
   /** GET /api/organizations/:orgId/teachers — usuarios elegibles como profesores. */
   @Get(':orgId/teachers')
   @Roles(...ORG_ACADEMIC_ADMIN_ROLES)
-  listTeachers(@Param('orgId', ParseUUIDPipe) orgId: string, @CurrentUser() user: JwtPayload) {
+  listTeachers(
+    @Param('orgId', ParseUUIDPipe) orgId: string,
+    @CurrentUser() user: JwtPayload,
+  ) {
     const effectiveOrgId = getEffectiveOrgId(user, orgId);
     return this.organizationsService.listTeachers(effectiveOrgId);
   }
@@ -158,7 +161,10 @@ export class OrganizationsController {
   /** GET /api/organizations/:orgId/subject-matrix — cursos × asignaturas del año vigente. */
   @Get(':orgId/subject-matrix')
   @Roles(...ORG_ACADEMIC_ADMIN_ROLES)
-  getSubjectMatrix(@Param('orgId', ParseUUIDPipe) orgId: string, @CurrentUser() user: JwtPayload) {
+  getSubjectMatrix(
+    @Param('orgId', ParseUUIDPipe) orgId: string,
+    @CurrentUser() user: JwtPayload,
+  ) {
     const effectiveOrgId = getEffectiveOrgId(user, orgId);
     return this.organizationsService.getSubjectMatrix(effectiveOrgId);
   }

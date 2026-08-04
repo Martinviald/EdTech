@@ -125,12 +125,7 @@ function buildUserPrompt(
     sections.push('Evalúa la siguiente pregunta de selección múltiple:', '');
   }
 
-  sections.push(
-    'PREGUNTA:',
-    item.stem,
-    '',
-    'ALTERNATIVAS (no sabes cuál marcó el autor como correcta):',
-  );
+  sections.push('PREGUNTA:', item.stem, '', 'ALTERNATIVAS (no sabes cuál marcó el autor como correcta):');
   for (const alt of item.alternatives) {
     sections.push(`${alt.key}) ${alt.text}`);
   }

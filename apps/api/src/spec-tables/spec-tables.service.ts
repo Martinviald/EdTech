@@ -5,7 +5,12 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { and, eq, inArray, isNull } from 'drizzle-orm';
-import { instruments, items, itemTaxonomyTags, taxonomyNodes } from '@soe/db';
+import {
+  instruments,
+  items,
+  itemTaxonomyTags,
+  taxonomyNodes,
+} from '@soe/db';
 import type { JwtPayload } from '../auth/jwt-payload.types';
 import { InjectDb, type Database } from '../database/database.types';
 import { parseExcelBuffer, type ParsedSheet } from './lib/excel-parser';
@@ -68,11 +73,18 @@ export class SpecTablesService {
         position: items.position,
       })
       .from(items)
-      .where(and(eq(items.instrumentId, instrument.id), isNull(items.deletedAt)))
+      .where(
+        and(
+          eq(items.instrumentId, instrument.id),
+          isNull(items.deletedAt),
+        ),
+      )
       .orderBy(items.position);
 
     if (instrumentItems.length === 0) {
-      throw new BadRequestException('El instrumento no tiene ítems. Cree los ítems primero.');
+      throw new BadRequestException(
+        'El instrumento no tiene ítems. Cree los ítems primero.',
+      );
     }
 
     // Build a map: position -> item id
@@ -158,7 +170,8 @@ export class SpecTablesService {
         const expectedType = COLUMN_TO_NODE_TYPE[colKey];
         // Primero intentamos con el tipo esperado; si no, fallback sin filtro.
         const node =
-          findMatchingNode(cellValue, nodes, expectedType) ?? findMatchingNode(cellValue, nodes);
+          findMatchingNode(cellValue, nodes, expectedType) ??
+          findMatchingNode(cellValue, nodes);
 
         if (node) {
           tagsToInsert.push({
@@ -203,12 +216,17 @@ export class SpecTablesService {
 
     // Ordenar para una lectura predecible (posiciones nulas al final).
     result.linkedItems.sort((a, b) => a.position - b.position);
-    result.unlinkedItems.sort((a, b) => (a.position ?? Infinity) - (b.position ?? Infinity));
+    result.unlinkedItems.sort(
+      (a, b) => (a.position ?? Infinity) - (b.position ?? Infinity),
+    );
 
     // 5. Bulk insert tags (with conflict handling — skip duplicates)
     if (tagsToInsert.length > 0) {
       try {
-        await this.db.insert(itemTaxonomyTags).values(tagsToInsert).onConflictDoNothing();
+        await this.db
+          .insert(itemTaxonomyTags)
+          .values(tagsToInsert)
+          .onConflictDoNothing();
       } catch (err) {
         const message = err instanceof Error ? err.message : String(err);
         result.errors.push(`Error al guardar tags: ${message}`);
@@ -236,7 +254,12 @@ export class SpecTablesService {
         scoringConfig: items.scoringConfig,
       })
       .from(items)
-      .where(and(eq(items.instrumentId, instrumentId), isNull(items.deletedAt)))
+      .where(
+        and(
+          eq(items.instrumentId, instrumentId),
+          isNull(items.deletedAt),
+        ),
+      )
       .orderBy(items.position);
 
     if (instrumentItems.length === 0) {
@@ -305,11 +328,19 @@ export class SpecTablesService {
    * Verifies that the instrument exists and the user has access to it
    * (official instruments are visible to all, org instruments only to org members).
    */
-  private async assertInstrumentAccess(instrumentId: string, user: JwtPayload) {
+  private async assertInstrumentAccess(
+    instrumentId: string,
+    user: JwtPayload,
+  ) {
     const [instrument] = await this.db
       .select()
       .from(instruments)
-      .where(and(eq(instruments.id, instrumentId), isNull(instruments.deletedAt)));
+      .where(
+        and(
+          eq(instruments.id, instrumentId),
+          isNull(instruments.deletedAt),
+        ),
+      );
 
     if (!instrument) {
       throw new NotFoundException('Instrumento no encontrado');
@@ -323,7 +354,9 @@ export class SpecTablesService {
 
     // Org-specific instruments require matching org
     if (!user.orgId || instrument.orgId !== user.orgId) {
-      throw new ForbiddenException('No tienes acceso a este instrumento');
+      throw new ForbiddenException(
+        'No tienes acceso a este instrumento',
+      );
     }
 
     return instrument;

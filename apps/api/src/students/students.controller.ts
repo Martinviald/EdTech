@@ -28,10 +28,7 @@ const MAX_CSV_BYTES = 5 * 1024 * 1024; // 5 MB
 // CSV es texto plano sin firma, así que la validación falla. La estructura
 // (headers, columnas) la valida `parseStudentRosterCsv` con un mensaje claro.
 const csvFilePipe = new ParseFilePipeBuilder()
-  .addMaxSizeValidator({
-    maxSize: MAX_CSV_BYTES,
-    message: 'El archivo excede el tamaño máximo (5 MB)',
-  })
+  .addMaxSizeValidator({ maxSize: MAX_CSV_BYTES, message: 'El archivo excede el tamaño máximo (5 MB)' })
   .build({ fileIsRequired: true });
 
 @Controller('students')
@@ -43,7 +40,10 @@ export class StudentsController {
   @Post('import/preview')
   @Roles('school_admin', 'academic_director', 'platform_admin')
   @UseInterceptors(FileInterceptor('file'))
-  preview(@CurrentUser() user: JwtPayload, @UploadedFile(csvFilePipe) file: UploadedCsv) {
+  preview(
+    @CurrentUser() user: JwtPayload,
+    @UploadedFile(csvFilePipe) file: UploadedCsv,
+  ) {
     const orgId = getEffectiveOrgId(user);
     return this.importService.preview(orgId, file.buffer);
   }

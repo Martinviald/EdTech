@@ -155,7 +155,9 @@ function makeDb(store: Store): Database {
 
     const run = (): unknown[] => {
       if (baseTable === taxonomyNodes) {
-        const matched = store.nodes.filter((n) => evalPred(wherePred, (c) => resolveForNode(c, n)));
+        const matched = store.nodes.filter((n) =>
+          evalPred(wherePred, (c) => resolveForNode(c, n)),
+        );
         const limited = limitN !== undefined ? matched.slice(0, limitN) : matched;
         return limited.map((n) => project(projection, (c) => resolveForNode(c, n)));
       }
@@ -245,13 +247,7 @@ function makeRetriever(store: Store): StructuredCurriculumRetriever {
   return new StructuredCurriculumRetriever(makeDb(store));
 }
 
-const leaf = node({
-  id: 'leaf',
-  code: 'OA-01',
-  name: 'Comprender textos',
-  description: 'Desc',
-  parentId: 'axis',
-});
+const leaf = node({ id: 'leaf', code: 'OA-01', name: 'Comprender textos', description: 'Desc', parentId: 'axis' });
 
 describe('StructuredCurriculumRetriever', () => {
   // ── Estructura del árbol ─────────────────────────────────────────────────
@@ -413,18 +409,8 @@ describe('StructuredCurriculumRetriever', () => {
           item({ id: 'match1', position: 1, instrumentId: 'insMatch', content: { stem: 'a' } }),
           item({ id: 'match2', position: 2, instrumentId: 'insMatch', content: { stem: 'b' } }),
           item({ id: 'noInstrument', position: 3, instrumentId: null, content: { stem: 'c' } }),
-          item({
-            id: 'otherSubj',
-            position: 4,
-            instrumentId: 'insOtherSubj',
-            content: { stem: 'd' },
-          }),
-          item({
-            id: 'otherGrade',
-            position: 5,
-            instrumentId: 'insOtherGrade',
-            content: { stem: 'e' },
-          }),
+          item({ id: 'otherSubj', position: 4, instrumentId: 'insOtherSubj', content: { stem: 'd' } }),
+          item({ id: 'otherGrade', position: 5, instrumentId: 'insOtherGrade', content: { stem: 'e' } }),
         ],
         tags: [
           tag('match1', 'leaf'),

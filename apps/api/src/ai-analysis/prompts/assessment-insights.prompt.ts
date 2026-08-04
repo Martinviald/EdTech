@@ -130,7 +130,10 @@ const OUTPUT_CONTRACT = `{
 // User: el snapshot serializado + instrucciones de priorización por audiencia.
 // ──────────────────────────────────────────────────────────────────────────────
 
-function buildUserPrompt(snapshot: AiAnalysisSnapshot, audience: AiAnalysisAudience): string {
+function buildUserPrompt(
+  snapshot: AiAnalysisSnapshot,
+  audience: AiAnalysisAudience,
+): string {
   return [
     audienceFocus(audience),
     '',

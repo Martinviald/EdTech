@@ -87,7 +87,10 @@ export class GradingScalesService {
     return this.toResponseModel(row);
   }
 
-  async create(user: JwtPayload, dto: GradingScaleCreateDto): Promise<GradingScaleResponseModel> {
+  async create(
+    user: JwtPayload,
+    dto: GradingScaleCreateDto,
+  ): Promise<GradingScaleResponseModel> {
     this.assertScaleInvariants(dto.minGrade, dto.passingGrade, dto.maxGrade, dto.passingThreshold);
 
     if (!user.orgId) {
@@ -159,7 +162,9 @@ export class GradingScalesService {
       .where(eq(instruments.gradingScaleId, id));
 
     if (Number(count ?? 0) > 0) {
-      throw new ConflictException('No se puede eliminar: hay instrumentos usando esta escala');
+      throw new ConflictException(
+        'No se puede eliminar: hay instrumentos usando esta escala',
+      );
     }
 
     await this.db.delete(gradingScales).where(eq(gradingScales.id, id));
@@ -238,7 +243,9 @@ export class GradingScalesService {
     passingThreshold: number,
   ) {
     if (!(minGrade < passingGrade && passingGrade < maxGrade)) {
-      throw new BadRequestException('Las notas deben cumplir minGrade < passingGrade < maxGrade');
+      throw new BadRequestException(
+        'Las notas deben cumplir minGrade < passingGrade < maxGrade',
+      );
     }
     if (!(passingThreshold > 0 && passingThreshold < 1)) {
       throw new BadRequestException('passingThreshold debe estar entre 0 y 1 (exclusivo)');

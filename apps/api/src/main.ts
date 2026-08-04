@@ -15,20 +15,14 @@ async function bootstrap() {
   // HTTP request logger (dev only)
   if (process.env.NODE_ENV !== 'production') {
     const httpLogger = new Logger('HTTP');
-    app.use(
-      (
-        req: { method: string; url: string },
-        res: { statusCode: number; on: (e: string, cb: () => void) => void },
-        next: () => void,
-      ) => {
-        const { method, url } = req;
-        const start = Date.now();
-        res.on('finish', () => {
-          httpLogger.log(`${method} ${url} → ${res.statusCode} (${Date.now() - start}ms)`);
-        });
-        next();
-      },
-    );
+    app.use((req: { method: string; url: string }, res: { statusCode: number; on: (e: string, cb: () => void) => void }, next: () => void) => {
+      const { method, url } = req;
+      const start = Date.now();
+      res.on('finish', () => {
+        httpLogger.log(`${method} ${url} → ${res.statusCode} (${Date.now() - start}ms)`);
+      });
+      next();
+    });
   }
   const configService = app.get(ConfigService);
 

@@ -72,11 +72,7 @@ describe('InProcessJobDispatcher', () => {
   it('ejecuta el job de forma asíncrona (no bloquea enqueue)', async () => {
     const dispatcher = withConcurrency('4');
     let ran = false;
-    dispatcher.enqueue(
-      job('j1', async () => {
-        ran = true;
-      }),
-    );
+    dispatcher.enqueue(job('j1', async () => { ran = true; }));
 
     // enqueue retorna síncronamente; el job aún no necesariamente corrió.
     await flush();
@@ -153,11 +149,7 @@ describe('InProcessJobDispatcher', () => {
     const finished: string[] = [];
 
     for (const id of ['a', 'b', 'c', 'd']) {
-      dispatcher.enqueue(
-        job(id, async () => {
-          finished.push(id);
-        }),
-      );
+      dispatcher.enqueue(job(id, async () => { finished.push(id); }));
     }
 
     await flush(10);
@@ -170,31 +162,21 @@ describe('InProcessJobDispatcher', () => {
 
     // No debe lanzar de forma síncrona ni dejar un unhandled rejection.
     expect(() => {
-      dispatcher.enqueue(
-        job('bad', async () => {
-          throw new Error('boom');
-        }),
-      );
+      dispatcher.enqueue(job('bad', async () => { throw new Error('boom'); }));
     }).not.toThrow();
-    dispatcher.enqueue(
-      job('good', async () => {
-        okRan = true;
-      }),
-    );
+    dispatcher.enqueue(job('good', async () => { okRan = true; }));
 
     await flush();
     expect(okRan).toBe(true);
   });
 
   it('loguea el error de un job que rechaza con el Logger de NestJS', async () => {
-    const errorSpy = jest.spyOn(Logger.prototype, 'error').mockImplementation(() => undefined);
+    const errorSpy = jest
+      .spyOn(Logger.prototype, 'error')
+      .mockImplementation(() => undefined);
     const dispatcher = withConcurrency('2');
 
-    dispatcher.enqueue(
-      job('bad', async () => {
-        throw new Error('boom');
-      }),
-    );
+    dispatcher.enqueue(job('bad', async () => { throw new Error('boom'); }));
     await flush();
 
     expect(errorSpy).toHaveBeenCalledTimes(1);
@@ -207,16 +189,8 @@ describe('InProcessJobDispatcher', () => {
     const dispatcher = withConcurrency('1');
     let secondRan = false;
 
-    dispatcher.enqueue(
-      job('bad', async () => {
-        throw new Error('boom');
-      }),
-    );
-    dispatcher.enqueue(
-      job('next', async () => {
-        secondRan = true;
-      }),
-    );
+    dispatcher.enqueue(job('bad', async () => { throw new Error('boom'); }));
+    dispatcher.enqueue(job('next', async () => { secondRan = true; }));
 
     await flush();
     expect(secondRan).toBe(true);
@@ -226,16 +200,8 @@ describe('InProcessJobDispatcher', () => {
     const dispatcher = withConcurrency('1');
     let after = false;
 
-    dispatcher.enqueue(
-      job('bad', async () => {
-        throw 'string-error';
-      }),
-    );
-    dispatcher.enqueue(
-      job('after', async () => {
-        after = true;
-      }),
-    );
+    dispatcher.enqueue(job('bad', async () => { throw 'string-error'; }));
+    dispatcher.enqueue(job('after', async () => { after = true; }));
 
     await flush();
     expect(after).toBe(true);
@@ -271,11 +237,7 @@ describe('InProcessJobDispatcher', () => {
     let done = 0;
 
     for (let i = 0; i < total; i += 1) {
-      dispatcher.enqueue(
-        job(`j${i}`, async () => {
-          done += 1;
-        }),
-      );
+      dispatcher.enqueue(job(`j${i}`, async () => { done += 1; }));
     }
 
     await flush(50);

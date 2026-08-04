@@ -55,7 +55,10 @@ export class BenchmarkSettingsService {
    * `consentGrantedById`) la primera vez que se registra, sin sobrescribirlo en
    * llamados posteriores.
    */
-  async update(user: JwtPayload, dto: UpdateBenchmarkSettingsDto): Promise<BenchmarkSettingsModel> {
+  async update(
+    user: JwtPayload,
+    dto: UpdateBenchmarkSettingsDto,
+  ): Promise<BenchmarkSettingsModel> {
     const orgId = this.requireOrgId(user);
 
     const row = await withOrgContext(this.db, orgId, async (tx) => {

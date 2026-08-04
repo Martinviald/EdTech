@@ -31,7 +31,10 @@ const DEFAULT_TEMPERATURE = 0;
 export class LlmConfigService {
   constructor(@InjectDb() private readonly db: Database) {}
 
-  async resolve(orgId: string | null | undefined, feature: LlmFeature): Promise<LlmRuntimeConfig> {
+  async resolve(
+    orgId: string | null | undefined,
+    feature: LlmFeature,
+  ): Promise<LlmRuntimeConfig> {
     const choice = await this.resolveChoice(orgId, feature);
     return {
       provider: choice.provider,

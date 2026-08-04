@@ -29,7 +29,11 @@ import type { AssistantContextRef } from '@soe/types';
 import type { JwtPayload } from '../auth/jwt-payload.types';
 import type { LlmConfigService } from '../llm/llm.config';
 import type { LlmAgentService } from '../llm/llm-agent.service';
-import { AssistantService, buildUserTurnText, mergeContextRefs } from './assistant.service';
+import {
+  AssistantService,
+  buildUserTurnText,
+  mergeContextRefs,
+} from './assistant.service';
 
 const USER: JwtPayload = {
   userId: 'user-1',
@@ -103,7 +107,9 @@ describe('AssistantService.searchContext', () => {
   });
 
   it('instrument → ilike por nombre, devuelve {kind, id, label}', async () => {
-    const svc = makeService(state([[instruments, [{ id: 'in-1', label: 'DIA Matemática' }]]]));
+    const svc = makeService(
+      state([[instruments, [{ id: 'in-1', label: 'DIA Matemática' }]]]),
+    );
     const res = await svc.searchContext(USER, { kind: 'instrument', q: 'dia', limit: 10 });
     expect(res).toEqual([{ kind: 'instrument', id: 'in-1', label: 'DIA Matemática' }]);
   });
@@ -182,9 +188,9 @@ describe('AssistantService.updateContext', () => {
     const st = state([[assistantConversations, [conversationRow({ userId: 'otro' })]]]);
     const svc = makeService(st);
 
-    await expect(svc.updateContext(USER, 'conv-1', { pinnedContext: refs })).rejects.toBeInstanceOf(
-      NotFoundException,
-    );
+    await expect(
+      svc.updateContext(USER, 'conv-1', { pinnedContext: refs }),
+    ).rejects.toBeInstanceOf(NotFoundException);
     expect(st.updated).toHaveLength(0);
   });
 });

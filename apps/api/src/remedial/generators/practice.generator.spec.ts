@@ -226,10 +226,7 @@ describe('PracticeGenerator', () => {
     const db = makeDb();
     const llm = makeLlm(JSON.stringify(twoItems));
     const gen = new PracticeGenerator(llm, db);
-    await gen.generate({
-      ...makeInput(),
-      feedback: ['La pregunta 1 no es respondible desde el texto'],
-    });
+    await gen.generate({ ...makeInput(), feedback: ['La pregunta 1 no es respondible desde el texto'] });
 
     const prompt = (llm.completeWithUsage as jest.Mock).mock.calls[0][1];
     expect(prompt).toContain('EVITA ESTOS PROBLEMAS DETECTADOS');

@@ -43,7 +43,8 @@ export class GetProgressionTool implements AssistantTool {
         scope: {
           type: 'string',
           enum: ['student', 'class', 'skill'],
-          description: 'Entidad a medir. student=un alumno, class=un curso, skill=una habilidad.',
+          description:
+            'Entidad a medir. student=un alumno, class=un curso, skill=una habilidad.',
         },
         studentId: {
           type: 'string',
@@ -55,7 +56,8 @@ export class GetProgressionTool implements AssistantTool {
         },
         nodeId: {
           type: 'string',
-          description: 'UUID del nodo de taxonomía (habilidad). Requerido si scope=skill.',
+          description:
+            'UUID del nodo de taxonomía (habilidad). Requerido si scope=skill.',
         },
         subjectId: {
           type: 'string',
@@ -74,7 +76,10 @@ export class GetProgressionTool implements AssistantTool {
     },
   };
 
-  async execute(input: unknown, ctx: AssistantToolContext): Promise<AssistantToolResult> {
+  async execute(
+    input: unknown,
+    ctx: AssistantToolContext,
+  ): Promise<AssistantToolResult> {
     const parsed = progressionQuerySchema.safeParse(input);
     if (!parsed.success) {
       return {

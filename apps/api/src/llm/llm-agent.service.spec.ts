@@ -46,7 +46,9 @@ function makeConfig(provider = 'anthropic'): LlmConfigService {
   } as unknown as LlmConfigService;
 }
 
-async function collect(gen: AsyncGenerator<AgentStreamEvent>): Promise<AgentStreamEvent[]> {
+async function collect(
+  gen: AsyncGenerator<AgentStreamEvent>,
+): Promise<AgentStreamEvent[]> {
   const out: AgentStreamEvent[] = [];
   for await (const e of gen) out.push(e);
   return out;
@@ -79,9 +81,7 @@ describe('LlmAgentService', () => {
       service.runAgent({
         system: 'eres un asistente',
         messages: [{ role: 'user', content: [{ type: 'text', text: '¿qué pasó con el 8°B?' }] }],
-        tools: [
-          { name: 'get_heatmap', description: 'mapa de calor', inputSchema: { type: 'object' } },
-        ],
+        tools: [{ name: 'get_heatmap', description: 'mapa de calor', inputSchema: { type: 'object' } }],
         executeTool,
         maxSteps: 6,
       }),
@@ -96,9 +96,7 @@ describe('LlmAgentService', () => {
     });
 
     // Se emitieron los deltas de texto de ambas vueltas, el tool_call y el tool_result.
-    const textDeltas = events
-      .filter((e) => e.type === 'text_delta')
-      .map((e) => (e as { text: string }).text);
+    const textDeltas = events.filter((e) => e.type === 'text_delta').map((e) => (e as { text: string }).text);
     expect(textDeltas).toEqual(['Déjame revisar. ', 'El 8°B bajó en fracciones.']);
     expect(events.some((e) => e.type === 'tool_call')).toBe(true);
     expect(events.some((e) => e.type === 'tool_result' && !e.isError)).toBe(true);

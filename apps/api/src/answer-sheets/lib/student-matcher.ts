@@ -58,7 +58,11 @@ export async function matchStudents(
     })
     .from(students)
     .where(
-      and(eq(students.orgId, orgId), isNull(students.deletedAt), inArray(students.rut, allRuts)),
+      and(
+        eq(students.orgId, orgId),
+        isNull(students.deletedAt),
+        inArray(students.rut, allRuts),
+      ),
     );
 
   const studentByRut = new Map<string, { id: string; fullName: string }>();

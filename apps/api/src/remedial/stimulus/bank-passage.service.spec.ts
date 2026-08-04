@@ -28,45 +28,17 @@ describe('BankPassageService', () => {
   it('distinct por sección + preview, filtrando por el grado del instrumento evaluado', async () => {
     // El join multiplica S1 por sus dos ítems publicados; debe colapsar a una ref.
     const bankRows = [
-      {
-        sectionId: 'S1',
-        kind: 'passage',
-        source: 'official',
-        passageTitle: 'Lectura 1',
-        passageText: 'contenido del pasaje uno',
-      },
-      {
-        sectionId: 'S1',
-        kind: 'passage',
-        source: 'official',
-        passageTitle: 'Lectura 1',
-        passageText: 'contenido del pasaje uno',
-      },
-      {
-        sectionId: 'S2',
-        kind: 'passage',
-        source: 'official',
-        passageTitle: null,
-        passageText: null,
-      },
+      { sectionId: 'S1', kind: 'passage', source: 'official', passageTitle: 'Lectura 1', passageText: 'contenido del pasaje uno' },
+      { sectionId: 'S1', kind: 'passage', source: 'official', passageTitle: 'Lectura 1', passageText: 'contenido del pasaje uno' },
+      { sectionId: 'S2', kind: 'passage', source: 'official', passageTitle: null, passageText: null },
     ];
     // Queue: assessment (instrumentId) → instrument (gradeId) → pasajes del banco.
-    const { db, transaction } = makeDb([
-      [{ instrumentId: 'inst-1' }],
-      [{ gradeId: 'grade-2b' }],
-      bankRows,
-    ]);
+    const { db, transaction } = makeDb([[{ instrumentId: 'inst-1' }], [{ gradeId: 'grade-2b' }], bankRows]);
 
     const result = await new BankPassageService(db).listCandidates('org-1', 'node-1', 'assess-1');
 
     expect(result).toEqual([
-      {
-        sectionId: 'S1',
-        kind: 'passage',
-        source: 'official',
-        title: 'Lectura 1',
-        textPreview: 'contenido del pasaje uno',
-      },
+      { sectionId: 'S1', kind: 'passage', source: 'official', title: 'Lectura 1', textPreview: 'contenido del pasaje uno' },
       { sectionId: 'S2', kind: 'passage', source: 'official', title: null, textPreview: null },
     ]);
     // La lectura del grado (assessments, RLS) corre bajo withOrgContext (una transacción).
@@ -81,25 +53,13 @@ describe('BankPassageService', () => {
 
   it('sin grado derivable (assessment no visible) → no filtra por nivel y devuelve los del banco', async () => {
     const bankRows = [
-      {
-        sectionId: 'S1',
-        kind: 'passage',
-        source: 'official',
-        passageTitle: 'Lectura 1',
-        passageText: 'texto uno',
-      },
+      { sectionId: 'S1', kind: 'passage', source: 'official', passageTitle: 'Lectura 1', passageText: 'texto uno' },
     ];
     // assessment vacío → se omite la lectura del instrumento → el siguiente await es el banco.
     const { db } = makeDb([[], bankRows]);
     const result = await new BankPassageService(db).listCandidates('org-1', 'node-1', 'assess-1');
     expect(result).toEqual([
-      {
-        sectionId: 'S1',
-        kind: 'passage',
-        source: 'official',
-        title: 'Lectura 1',
-        textPreview: 'texto uno',
-      },
+      { sectionId: 'S1', kind: 'passage', source: 'official', title: 'Lectura 1', textPreview: 'texto uno' },
     ]);
   });
 });

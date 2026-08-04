@@ -34,7 +34,7 @@ interface AnthropicStreamEvent {
  * tumbar el arranque de la app.
  */
 // Tipo dinámico para no romper la compilación si el SDK aún no está instalado.
-
+ 
 type Anthropic = import('@anthropic-ai/sdk').default;
 
 @Injectable()
@@ -50,7 +50,9 @@ export class AnthropicProvider implements LlmProvider {
   private initClient(): void {
     const apiKey = process.env[LLM_PROVIDER_DEFAULTS.anthropic.apiKeyEnv];
     if (!apiKey) {
-      this.logger.warn('ANTHROPIC_API_KEY no definida — provider anthropic deshabilitado');
+      this.logger.warn(
+        'ANTHROPIC_API_KEY no definida — provider anthropic deshabilitado',
+      );
       return;
     }
 
@@ -60,7 +62,9 @@ export class AnthropicProvider implements LlmProvider {
         default: new (opts: { apiKey: string }) => Anthropic;
       };
       const Constructor = AnthropicSdk.default ?? AnthropicSdk;
-      this.client = new (Constructor as new (opts: { apiKey: string }) => Anthropic)({ apiKey });
+      this.client = new (Constructor as new (opts: {
+        apiKey: string;
+      }) => Anthropic)({ apiKey });
     } catch (err) {
       this.logger.error(
         'No se pudo inicializar el SDK de Anthropic. Verifica @anthropic-ai/sdk.',
@@ -86,7 +90,9 @@ export class AnthropicProvider implements LlmProvider {
       messages: [{ role: 'user', content: request.prompt }],
     });
 
-    const textBlock = response.content.find((b: { type: string }) => b.type === 'text');
+    const textBlock = response.content.find(
+      (b: { type: string }) => b.type === 'text',
+    );
     return (textBlock as { type: 'text'; text: string } | undefined)?.text ?? '';
   }
 
@@ -147,7 +153,9 @@ export class AnthropicProvider implements LlmProvider {
    * El input de cada tool llega fragmentado (`input_json_delta`); se acumula y
    * se parsea al cerrar el bloque (`content_block_stop`).
    */
-  async *streamWithTools(request: LlmAgentRequest): AsyncIterable<LlmAgentEvent> {
+  async *streamWithTools(
+    request: LlmAgentRequest,
+  ): AsyncIterable<LlmAgentEvent> {
     if (!this.client) {
       throw new Error('Anthropic provider no está disponible');
     }

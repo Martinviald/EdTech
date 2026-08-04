@@ -23,7 +23,12 @@ export const ASSIGNABLE_SCHOOL_ROLES = [
 export const assignableSchoolRoleSchema = z.enum(ASSIGNABLE_SCHOOL_ROLES);
 export type AssignableSchoolRole = z.infer<typeof assignableSchoolRoleSchema>;
 
-const emailField = z.string().trim().toLowerCase().email('Correo inválido').max(320);
+const emailField = z
+  .string()
+  .trim()
+  .toLowerCase()
+  .email('Correo inválido')
+  .max(320);
 
 export const inviteMemberSchema = z.object({
   email: emailField,

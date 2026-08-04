@@ -69,7 +69,9 @@ export class SpecTablesController {
     }
 
     if (!VALID_MIME_TYPES.includes(file.mimetype)) {
-      throw new BadRequestException('El archivo debe ser .xlsx o .csv');
+      throw new BadRequestException(
+        'El archivo debe ser .xlsx o .csv',
+      );
     }
 
     const parsed = this.specTablesService.parseFile(file.buffer);
@@ -90,7 +92,10 @@ export class SpecTablesController {
    */
   @Post('link')
   @Roles(...ITEM_BANK_ROLES)
-  async link(@Body() body: unknown, @CurrentUser() user: JwtPayload) {
+  async link(
+    @Body() body: unknown,
+    @CurrentUser() user: JwtPayload,
+  ) {
     const dto = specTableLinkSchema.parse(body);
 
     return this.specTablesService.linkToInstrument(
@@ -110,7 +115,10 @@ export class SpecTablesController {
    */
   @Get(':instrumentId')
   @Roles(...ITEM_BANK_ROLES)
-  getSpecTable(@Param('instrumentId') instrumentId: string, @CurrentUser() user: JwtPayload) {
+  getSpecTable(
+    @Param('instrumentId') instrumentId: string,
+    @CurrentUser() user: JwtPayload,
+  ) {
     return this.specTablesService.getSpecTable(instrumentId, user);
   }
 }

@@ -17,10 +17,7 @@ export type EditableOrgType = z.infer<typeof editableOrgTypeSchema>;
 
 export const updateOrganizationProfileSchema = z.object({
   name: z.string().min(2).max(200),
-  rbd: z
-    .string()
-    .regex(/^\d{5}-\d$/, 'Formato RBD inválido (ej: 12345-6)')
-    .optional(),
+  rbd: z.string().regex(/^\d{5}-\d$/, 'Formato RBD inválido (ej: 12345-6)').optional(),
   commune: z.string().min(2).max(100).optional(),
   region: z.string().min(2).max(100).optional(),
   dependence: schoolDependenceSchema.optional(),
@@ -29,7 +26,9 @@ export const updateOrganizationProfileSchema = z.object({
 
 export const classGroupInputSchema = z.object({
   gradeId: z.string().uuid(),
-  sections: z.array(z.string().min(1).max(20)).min(1, 'Debe haber al menos una sección por nivel'),
+  sections: z
+    .array(z.string().min(1).max(20))
+    .min(1, 'Debe haber al menos una sección por nivel'),
 });
 
 export const academicSetupSchema = z.object({

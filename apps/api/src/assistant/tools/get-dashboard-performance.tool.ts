@@ -1,5 +1,8 @@
 import { Injectable } from '@nestjs/common';
-import { dashboardPerformanceQuerySchema, type StudentClassificationModel } from '@soe/types';
+import {
+  dashboardPerformanceQuerySchema,
+  type StudentClassificationModel,
+} from '@soe/types';
 import type {
   AssistantTool,
   AssistantToolContext,
@@ -16,7 +19,10 @@ const DEFAULT_LIMIT = 50;
  * `studentId` (UUID, opaco) para que el FRONTEND re-hidrate el nombre; jamás
  * incluye `studentFullName` ni `studentRut`.
  */
-type ProjectedStudentRow = Omit<StudentClassificationModel, 'studentFullName' | 'studentRut'>;
+type ProjectedStudentRow = Omit<
+  StudentClassificationModel,
+  'studentFullName' | 'studentRut'
+>;
 
 /**
  * `get_dashboard_performance` — clasificación de alumnos por desempeño (H21.5).
@@ -99,7 +105,10 @@ export class GetDashboardPerformanceTool implements AssistantTool {
     },
   };
 
-  async execute(input: unknown, ctx: AssistantToolContext): Promise<AssistantToolResult> {
+  async execute(
+    input: unknown,
+    ctx: AssistantToolContext,
+  ): Promise<AssistantToolResult> {
     // Por defecto acotamos a una página razonable (page 1, limit 50) para no
     // inundar al modelo. El usuario/modelo puede sobreescribir page/limit.
     const raw = (input ?? {}) as Record<string, unknown>;

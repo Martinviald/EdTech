@@ -77,13 +77,7 @@ describe('parseDiaPayload', () => {
 
   it('should accept a 5-alternative (A–E) item, e.g. PAES-style', () => {
     const payload: DiaRawPayload = {
-      instrument: {
-        name: 'PAES',
-        subject: 'Matemática',
-        grade: 'IV Medio',
-        year: 2025,
-        applicationPeriod: 'regular',
-      },
+      instrument: { name: 'PAES', subject: 'Matemática', grade: 'IV Medio', year: 2025, applicationPeriod: 'regular' },
       items: [
         {
           position: 1,
@@ -105,21 +99,12 @@ describe('parseDiaPayload', () => {
 
   it('should accept custom valid keys via options (e.g. true/false V/F)', () => {
     const payload: DiaRawPayload = {
-      instrument: {
-        name: 'VF',
-        subject: 'Ciencias',
-        grade: '6° Básico',
-        year: 2025,
-        applicationPeriod: 'diagnostico',
-      },
+      instrument: { name: 'VF', subject: 'Ciencias', grade: '6° Básico', year: 2025, applicationPeriod: 'diagnostico' },
       items: [
         {
           position: 1,
           correctKey: 'V',
-          alternatives: [
-            { key: 'V', text: 'Verdadero' },
-            { key: 'F', text: 'Falso' },
-          ],
+          alternatives: [{ key: 'V', text: 'Verdadero' }, { key: 'F', text: 'Falso' }],
           skill: 'Comprender',
         },
       ],
@@ -133,20 +118,9 @@ describe('parseDiaPayload', () => {
 
   it('should reject a correctKey outside the explicit valid keys set', () => {
     const payload: DiaRawPayload = {
-      instrument: {
-        name: 'VF',
-        subject: 'Ciencias',
-        grade: '6° Básico',
-        year: 2025,
-        applicationPeriod: 'diagnostico',
-      },
+      instrument: { name: 'VF', subject: 'Ciencias', grade: '6° Básico', year: 2025, applicationPeriod: 'diagnostico' },
       items: [
-        {
-          position: 1,
-          correctKey: 'A',
-          alternatives: [{ key: 'V' }, { key: 'F' }],
-          skill: 'Comprender',
-        },
+        { position: 1, correctKey: 'A', alternatives: [{ key: 'V' }, { key: 'F' }], skill: 'Comprender' },
       ],
     };
 
@@ -159,20 +133,9 @@ describe('parseDiaPayload', () => {
 
   it('should report error for missing instrument name', () => {
     const payload: DiaRawPayload = {
-      instrument: {
-        name: '',
-        subject: 'Lenguaje',
-        grade: '2° Básico',
-        year: 2025,
-        applicationPeriod: 'diagnostico',
-      },
+      instrument: { name: '', subject: 'Lenguaje', grade: '2° Básico', year: 2025, applicationPeriod: 'diagnostico' },
       items: [
-        {
-          position: 1,
-          correctKey: 'A',
-          alternatives: [{ key: 'A' }, { key: 'B' }, { key: 'C' }, { key: 'D' }],
-          skill: 'Localizar',
-        },
+        { position: 1, correctKey: 'A', alternatives: [{ key: 'A' }, { key: 'B' }, { key: 'C' }, { key: 'D' }], skill: 'Localizar' },
       ],
     };
 
@@ -182,20 +145,9 @@ describe('parseDiaPayload', () => {
 
   it('should report error for invalid year', () => {
     const payload: DiaRawPayload = {
-      instrument: {
-        name: 'Test',
-        subject: 'Lenguaje',
-        grade: '2° Básico',
-        year: 1999,
-        applicationPeriod: 'diagnostico',
-      },
+      instrument: { name: 'Test', subject: 'Lenguaje', grade: '2° Básico', year: 1999, applicationPeriod: 'diagnostico' },
       items: [
-        {
-          position: 1,
-          correctKey: 'A',
-          alternatives: [{ key: 'A' }, { key: 'B' }, { key: 'C' }, { key: 'D' }],
-          skill: 'Localizar',
-        },
+        { position: 1, correctKey: 'A', alternatives: [{ key: 'A' }, { key: 'B' }, { key: 'C' }, { key: 'D' }], skill: 'Localizar' },
       ],
     };
 
@@ -205,13 +157,7 @@ describe('parseDiaPayload', () => {
 
   it('should report error for empty items array', () => {
     const payload: DiaRawPayload = {
-      instrument: {
-        name: 'Test',
-        subject: 'Lenguaje',
-        grade: '2° Básico',
-        year: 2025,
-        applicationPeriod: 'diagnostico',
-      },
+      instrument: { name: 'Test', subject: 'Lenguaje', grade: '2° Básico', year: 2025, applicationPeriod: 'diagnostico' },
       items: [],
     };
 
@@ -222,20 +168,9 @@ describe('parseDiaPayload', () => {
 
   it('should report error for invalid correctKey (default A–D derived from alternatives)', () => {
     const payload: DiaRawPayload = {
-      instrument: {
-        name: 'Test',
-        subject: 'Lenguaje',
-        grade: '2° Básico',
-        year: 2025,
-        applicationPeriod: 'diagnostico',
-      },
+      instrument: { name: 'Test', subject: 'Lenguaje', grade: '2° Básico', year: 2025, applicationPeriod: 'diagnostico' },
       items: [
-        {
-          position: 1,
-          correctKey: 'X',
-          alternatives: [{ key: 'A' }, { key: 'B' }, { key: 'C' }, { key: 'D' }],
-          skill: 'Localizar',
-        },
+        { position: 1, correctKey: 'X', alternatives: [{ key: 'A' }, { key: 'B' }, { key: 'C' }, { key: 'D' }], skill: 'Localizar' },
       ],
     };
 
@@ -246,45 +181,21 @@ describe('parseDiaPayload', () => {
 
   it('should report error when correctKey is not among alternatives', () => {
     const payload: DiaRawPayload = {
-      instrument: {
-        name: 'Test',
-        subject: 'Lenguaje',
-        grade: '2° Básico',
-        year: 2025,
-        applicationPeriod: 'diagnostico',
-      },
+      instrument: { name: 'Test', subject: 'Lenguaje', grade: '2° Básico', year: 2025, applicationPeriod: 'diagnostico' },
       items: [
-        {
-          position: 1,
-          correctKey: 'D',
-          alternatives: [{ key: 'A' }, { key: 'B' }, { key: 'C' }],
-          skill: 'Localizar',
-        },
+        { position: 1, correctKey: 'D', alternatives: [{ key: 'A' }, { key: 'B' }, { key: 'C' }], skill: 'Localizar' },
       ],
     };
 
     const result = parseDiaPayload(payload);
-    expect(result.errors.some((e) => e.message.includes('no está entre las alternativas'))).toBe(
-      true,
-    );
+    expect(result.errors.some((e) => e.message.includes('no está entre las alternativas'))).toBe(true);
   });
 
   it('should report error for missing skill', () => {
     const payload: DiaRawPayload = {
-      instrument: {
-        name: 'Test',
-        subject: 'Lenguaje',
-        grade: '2° Básico',
-        year: 2025,
-        applicationPeriod: 'diagnostico',
-      },
+      instrument: { name: 'Test', subject: 'Lenguaje', grade: '2° Básico', year: 2025, applicationPeriod: 'diagnostico' },
       items: [
-        {
-          position: 1,
-          correctKey: 'A',
-          alternatives: [{ key: 'A' }, { key: 'B' }, { key: 'C' }, { key: 'D' }],
-          skill: '',
-        },
+        { position: 1, correctKey: 'A', alternatives: [{ key: 'A' }, { key: 'B' }, { key: 'C' }, { key: 'D' }], skill: '' },
       ],
     };
 
@@ -294,26 +205,10 @@ describe('parseDiaPayload', () => {
 
   it('should skip invalid items but parse valid ones', () => {
     const payload: DiaRawPayload = {
-      instrument: {
-        name: 'Test',
-        subject: 'Lenguaje',
-        grade: '2° Básico',
-        year: 2025,
-        applicationPeriod: 'diagnostico',
-      },
+      instrument: { name: 'Test', subject: 'Lenguaje', grade: '2° Básico', year: 2025, applicationPeriod: 'diagnostico' },
       items: [
-        {
-          position: 1,
-          correctKey: 'X',
-          alternatives: [{ key: 'A' }, { key: 'B' }],
-          skill: 'Localizar',
-        }, // invalid
-        {
-          position: 2,
-          correctKey: 'A',
-          alternatives: [{ key: 'A' }, { key: 'B' }, { key: 'C' }, { key: 'D' }],
-          skill: 'Interpretar',
-        }, // valid
+        { position: 1, correctKey: 'X', alternatives: [{ key: 'A' }, { key: 'B' }], skill: 'Localizar' }, // invalid
+        { position: 2, correctKey: 'A', alternatives: [{ key: 'A' }, { key: 'B' }, { key: 'C' }, { key: 'D' }], skill: 'Interpretar' }, // valid
       ],
     };
 
@@ -325,20 +220,9 @@ describe('parseDiaPayload', () => {
 
   it('should handle lowercase correctKey by uppercasing', () => {
     const payload: DiaRawPayload = {
-      instrument: {
-        name: 'Test',
-        subject: 'Lenguaje',
-        grade: '2° Básico',
-        year: 2025,
-        applicationPeriod: 'diagnostico',
-      },
+      instrument: { name: 'Test', subject: 'Lenguaje', grade: '2° Básico', year: 2025, applicationPeriod: 'diagnostico' },
       items: [
-        {
-          position: 1,
-          correctKey: 'b',
-          alternatives: [{ key: 'A' }, { key: 'B' }, { key: 'C' }, { key: 'D' }],
-          skill: 'Localizar',
-        },
+        { position: 1, correctKey: 'b', alternatives: [{ key: 'A' }, { key: 'B' }, { key: 'C' }, { key: 'D' }], skill: 'Localizar' },
       ],
     };
 
@@ -350,20 +234,9 @@ describe('parseDiaPayload', () => {
 
   it('should use default stem when not provided', () => {
     const payload: DiaRawPayload = {
-      instrument: {
-        name: 'Test',
-        subject: 'Lenguaje',
-        grade: '2° Básico',
-        year: 2025,
-        applicationPeriod: 'diagnostico',
-      },
+      instrument: { name: 'Test', subject: 'Lenguaje', grade: '2° Básico', year: 2025, applicationPeriod: 'diagnostico' },
       items: [
-        {
-          position: 3,
-          correctKey: 'A',
-          alternatives: [{ key: 'A' }, { key: 'B' }, { key: 'C' }, { key: 'D' }],
-          skill: 'Localizar',
-        },
+        { position: 3, correctKey: 'A', alternatives: [{ key: 'A' }, { key: 'B' }, { key: 'C' }, { key: 'D' }], skill: 'Localizar' },
       ],
     };
 

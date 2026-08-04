@@ -65,14 +65,20 @@ export function findMatchingNode(
   const needle = cellValue.trim().toLowerCase();
   if (!needle) return undefined;
 
-  const candidates = expectedType ? nodes.filter((n) => n.type === expectedType) : nodes;
+  const candidates = expectedType
+    ? nodes.filter((n) => n.type === expectedType)
+    : nodes;
 
   // 1. Exact code match
-  const byCode = candidates.find((n) => n.code !== null && n.code.toLowerCase() === needle);
+  const byCode = candidates.find(
+    (n) => n.code !== null && n.code.toLowerCase() === needle,
+  );
   if (byCode) return byCode;
 
   // 2. Exact name match
-  const byName = candidates.find((n) => n.name.trim().toLowerCase() === needle);
+  const byName = candidates.find(
+    (n) => n.name.trim().toLowerCase() === needle,
+  );
   if (byName) return byName;
 
   // 3. Starts-with on code (handles "OA1" matching code "OA1")
@@ -82,11 +88,15 @@ export function findMatchingNode(
   if (byCodePrefix) return byCodePrefix;
 
   // 4. Starts-with on name (handles partial matches)
-  const byNamePrefix = candidates.find((n) => n.name.trim().toLowerCase().startsWith(needle));
+  const byNamePrefix = candidates.find(
+    (n) => n.name.trim().toLowerCase().startsWith(needle),
+  );
   if (byNamePrefix) return byNamePrefix;
 
   // 5. Reverse starts-with: the node name starts with the needle
-  const byNameContains = candidates.find((n) => needle.startsWith(n.name.trim().toLowerCase()));
+  const byNameContains = candidates.find(
+    (n) => needle.startsWith(n.name.trim().toLowerCase()),
+  );
   if (byNameContains) return byNameContains;
 
   return undefined;

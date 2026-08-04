@@ -37,7 +37,14 @@ export const ANSWER_SHEET_TEMPLATES: readonly AnswerSheetTemplate[] = [
     fileExtension: 'csv',
     sampleCsvUrl: null,
     requiredColumns: ['Student ID'],
-    optionalColumns: ['Student First Name', 'Student Last Name', 'Q01', 'Q02', 'Q03', '...'],
+    optionalColumns: [
+      'Student First Name',
+      'Student Last Name',
+      'Q01',
+      'Q02',
+      'Q03',
+      '...',
+    ],
     exampleCsv:
       'Student First Name,Student Last Name,Student ID,Q01,Q02,Q03,Q04,Q05\nJuan,Pérez Soto,12345678-5,A,B,C,D,A\nMaría,González,9876543-3,B,B,A,D,C\n',
   },
@@ -49,7 +56,9 @@ export const ANSWER_SHEET_TEMPLATES: readonly AnswerSheetTemplate[] = [
     fileExtension: 'csv',
     sampleCsvUrl: null,
     requiredColumns: [],
-    optionalColumns: ['Cualquier nombre — configurable vía columnMapping en /upload'],
+    optionalColumns: [
+      'Cualquier nombre — configurable vía columnMapping en /upload',
+    ],
     exampleCsv:
       'rut,nombre,apellido,preg_1,preg_2,preg_3\n12345678-5,Juan,Pérez,A,B,C\n9876543-3,María,González,B,B,A\n',
   },

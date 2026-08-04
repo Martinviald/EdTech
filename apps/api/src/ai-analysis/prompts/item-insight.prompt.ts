@@ -102,7 +102,10 @@ const OUTPUT_CONTRACT = `{
 // User: el snapshot serializado + foco por audiencia.
 // ──────────────────────────────────────────────────────────────────────────────
 
-function buildUserPrompt(snapshot: ItemInsightSnapshot, audience: AiAnalysisAudience): string {
+function buildUserPrompt(
+  snapshot: ItemInsightSnapshot,
+  audience: AiAnalysisAudience,
+): string {
   const hasImages = snapshot.images.length > 0;
   return [
     audienceFocus(audience),

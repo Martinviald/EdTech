@@ -16,18 +16,14 @@ function makeCtx(
       description: 'Inferir información',
       type: 'learning_objective',
     },
-    ancestors: [{ id: 'a1', code: 'EJE', name: 'Lectura', description: null, type: 'axis' }],
+    ancestors: [
+      { id: 'a1', code: 'EJE', name: 'Lectura', description: null, type: 'axis' },
+    ],
     descriptors: [
       { id: 'd1', code: null, name: 'Inferir causa', description: null, type: 'descriptor' },
     ],
     siblings: [
-      {
-        id: 's1',
-        code: 'OA4',
-        name: 'Comprensión literal',
-        description: null,
-        type: 'learning_objective',
-      },
+      { id: 's1', code: 'OA4', name: 'Comprensión literal', description: null, type: 'learning_objective' },
     ],
     taggedItems: [
       {
@@ -102,7 +98,9 @@ describe('RemedialContextService', () => {
       gradeId: null,
       fromNode: 'target',
     }));
-    const service = new RemedialContextService(makeRetriever(makeCtx({ taggedItems: many })));
+    const service = new RemedialContextService(
+      makeRetriever(makeCtx({ taggedItems: many })),
+    );
     const result = await service.assemble('node-1');
     expect(result.fewShotItems.length).toBeLessThanOrEqual(5);
   });
@@ -173,7 +171,9 @@ describe('RemedialContextService', () => {
       gradeId: null,
       fromNode: 'target',
     }));
-    const service = new RemedialContextService(makeRetriever(makeCtx({ taggedItems: many })));
+    const service = new RemedialContextService(
+      makeRetriever(makeCtx({ taggedItems: many })),
+    );
     const result = await service.assemble('node-1');
     expect(result.referenceItems!.length).toBeLessThanOrEqual(6);
   });

@@ -1,4 +1,13 @@
-import { Body, Controller, Delete, Get, Param, Post, Query, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Param,
+  Post,
+  Query,
+  UseGuards,
+} from '@nestjs/common';
 import {
   adminCreateOrganizationSchema,
   adminCreateUserSchema,
@@ -93,7 +102,10 @@ export class AdminController {
   }
 
   @Delete('platform-admins/:userId')
-  revokePlatformAdmin(@Param('userId') userId: string, @CurrentUser() user: JwtPayload) {
+  revokePlatformAdmin(
+    @Param('userId') userId: string,
+    @CurrentUser() user: JwtPayload,
+  ) {
     return this.admin.revokePlatformAdmin(userId, user.userId);
   }
 }

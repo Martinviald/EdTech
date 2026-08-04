@@ -106,7 +106,11 @@ export class PrivacyService {
    * Si orgId es null (platform_admin sin filtro), retorna todos los logs paginados.
    */
   async listAuditLogs(orgId: string | null, limit = 100) {
-    const query = this.db.select().from(auditLogs).orderBy(desc(auditLogs.createdAt)).limit(limit);
+    const query = this.db
+      .select()
+      .from(auditLogs)
+      .orderBy(desc(auditLogs.createdAt))
+      .limit(limit);
 
     return orgId ? query.where(eq(auditLogs.orgId, orgId)) : query;
   }

@@ -20,7 +20,9 @@ const inputSchema = z
     position: z.number().int().positive().optional(),
   })
   .refine(
-    (v) => v.itemId !== undefined || (v.assessmentId !== undefined && v.position !== undefined),
+    (v) =>
+      v.itemId !== undefined ||
+      (v.assessmentId !== undefined && v.position !== undefined),
     {
       message: 'Debe entregar itemId, o bien assessmentId y position.',
     },
@@ -52,7 +54,8 @@ export class GetItemContentTool implements AssistantTool {
       properties: {
         itemId: {
           type: 'string',
-          description: 'UUID del ítem. Úsalo cuando lo conozcas directamente.',
+          description:
+            'UUID del ítem. Úsalo cuando lo conozcas directamente.',
         },
         assessmentId: {
           type: 'string',
@@ -71,12 +74,16 @@ export class GetItemContentTool implements AssistantTool {
     },
   };
 
-  async execute(input: unknown, ctx: AssistantToolContext): Promise<AssistantToolResult> {
+  async execute(
+    input: unknown,
+    ctx: AssistantToolContext,
+  ): Promise<AssistantToolResult> {
     const parsed = inputSchema.safeParse(input);
     if (!parsed.success) {
       return {
         content: JSON.stringify({
-          error: 'Parámetros inválidos: entrega itemId, o assessmentId y position.',
+          error:
+            'Parámetros inválidos: entrega itemId, o assessmentId y position.',
         }),
         isError: true,
       };

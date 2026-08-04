@@ -1,4 +1,9 @@
-import { BadRequestException, Injectable, Logger, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  Logger,
+  NotFoundException,
+} from '@nestjs/common';
 import { randomUUID } from 'node:crypto';
 import { and, desc, eq, inArray, isNull, ne } from 'drizzle-orm';
 import { files, withOrgContext, type FileRecord } from '@soe/db';
@@ -409,7 +414,8 @@ export class FilesService {
     const scope = params.orgId ?? 'global';
     const ownerSeg = params.ownerId ? `/${params.ownerId}` : '';
     const purposeSeg = params.purpose ? `/${this.sanitizeSegment(params.purpose)}` : '';
-    const safeName = params.fileName.replace(/[^A-Za-z0-9._-]/g, '_').slice(0, 120) || 'archivo';
+    const safeName =
+      params.fileName.replace(/[^A-Za-z0-9._-]/g, '_').slice(0, 120) || 'archivo';
     return `${owner}/${scope}${ownerSeg}${purposeSeg}/${randomUUID()}-${safeName}`;
   }
 

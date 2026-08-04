@@ -58,7 +58,10 @@ function buildSystem(): string {
   ].join('\n');
 }
 
-function buildUserPrompt(ctx: RemedialCurriculumContext, aggregates: GroupPlanAggregates): string {
+function buildUserPrompt(
+  ctx: RemedialCurriculumContext,
+  aggregates: GroupPlanAggregates,
+): string {
   return [
     'Genera el plan remedial por grupo para la siguiente brecha.',
     '',

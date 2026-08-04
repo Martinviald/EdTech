@@ -46,7 +46,10 @@ type DbMock = Database & {
   __transactionRan: boolean;
 };
 
-function makeDb(selectResults: unknown[][], mutationResults: unknown[][] = []): DbMock {
+function makeDb(
+  selectResults: unknown[][],
+  mutationResults: unknown[][] = [],
+): DbMock {
   let selectIdx = 0;
   let mutationIdx = 0;
   const inserts: Array<{ table: unknown; values: unknown }> = [];
@@ -124,7 +127,9 @@ describe('BenchmarkSettingsService.getForOrg', () => {
   it('lanza ForbiddenException si el usuario no tiene org activa', async () => {
     const db = makeDb([]);
     const svc = makeService(db);
-    await expect(svc.getForOrg(makeUser({ orgId: null }))).rejects.toThrow(ForbiddenException);
+    await expect(svc.getForOrg(makeUser({ orgId: null }))).rejects.toThrow(
+      ForbiddenException,
+    );
   });
 
   it('devuelve la fila existente sin crear una nueva', async () => {
@@ -157,7 +162,9 @@ describe('BenchmarkSettingsService.getForOrg', () => {
     const result = await svc.getForOrg(makeUser());
 
     expect(db.__inserts).toHaveLength(1);
-    expect((db.__inserts[0].values as { optOutGlobalPool: boolean }).optOutGlobalPool).toBe(false);
+    expect((db.__inserts[0].values as { optOutGlobalPool: boolean }).optOutGlobalPool).toBe(
+      false,
+    );
     expect(result.optOutGlobalPool).toBe(false);
     expect(result.consentGrantedAt).toBeNull();
   });
@@ -221,9 +228,9 @@ describe('BenchmarkSettingsService.update', () => {
   it('lanza ForbiddenException si el usuario no tiene org activa', async () => {
     const db = makeDb([]);
     const svc = makeService(db);
-    await expect(svc.update(makeUser({ orgId: null }), { optOutGlobalPool: true })).rejects.toThrow(
-      ForbiddenException,
-    );
+    await expect(
+      svc.update(makeUser({ orgId: null }), { optOutGlobalPool: true }),
+    ).rejects.toThrow(ForbiddenException);
   });
 
   it('setea optOut y sella el consentimiento si aún no existe', async () => {

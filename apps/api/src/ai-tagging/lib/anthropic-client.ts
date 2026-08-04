@@ -9,7 +9,7 @@ import { Injectable, Logger } from '@nestjs/common';
  */
 
 // Dynamic import type to avoid hard crash if the SDK package isn't installed yet.
-
+ 
 type Anthropic = import('@anthropic-ai/sdk').default;
 
 @Injectable()
@@ -24,7 +24,9 @@ export class AnthropicClient {
   private initClient(): void {
     const apiKey = process.env.ANTHROPIC_API_KEY;
     if (!apiKey) {
-      this.logger.warn('ANTHROPIC_API_KEY not set — AI tagging will return 503 on suggest calls');
+      this.logger.warn(
+        'ANTHROPIC_API_KEY not set — AI tagging will return 503 on suggest calls',
+      );
       return;
     }
 
@@ -61,7 +63,9 @@ export class AnthropicClient {
       messages: [{ role: 'user', content: userPrompt }],
     });
 
-    const textBlock = response.content.find((b: { type: string }) => b.type === 'text');
+    const textBlock = response.content.find(
+      (b: { type: string }) => b.type === 'text',
+    );
     return (textBlock as { type: 'text'; text: string } | undefined)?.text ?? '';
   }
 }

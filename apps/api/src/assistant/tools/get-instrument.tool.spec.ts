@@ -87,10 +87,7 @@ describe('GetInstrumentTool', () => {
     expect(result.isError).toBeUndefined();
 
     const payload = JSON.parse(result.content);
-    expect(payload.instrument).toMatchObject({
-      id: INSTRUMENT_ID,
-      name: 'DIA Matemática 3° Básico',
-    });
+    expect(payload.instrument).toMatchObject({ id: INSTRUMENT_ID, name: 'DIA Matemática 3° Básico' });
     expect(payload.sections).toEqual([
       { id: 'sec-1', name: 'Números', type: 'closed', order: 1, maxPoints: 10 },
     ]);

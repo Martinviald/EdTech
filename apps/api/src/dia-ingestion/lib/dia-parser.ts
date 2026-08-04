@@ -90,42 +90,19 @@ export function parseDiaPayload(
 
   // Validate instrument metadata
   if (!payload.instrument.name || payload.instrument.name.trim().length === 0) {
-    errors.push({
-      position: null,
-      field: 'instrument.name',
-      message: 'El nombre del instrumento es obligatorio',
-    });
+    errors.push({ position: null, field: 'instrument.name', message: 'El nombre del instrumento es obligatorio' });
   }
   if (!payload.instrument.subject || payload.instrument.subject.trim().length === 0) {
-    errors.push({
-      position: null,
-      field: 'instrument.subject',
-      message: 'La asignatura es obligatoria',
-    });
+    errors.push({ position: null, field: 'instrument.subject', message: 'La asignatura es obligatoria' });
   }
   if (!payload.instrument.grade || payload.instrument.grade.trim().length === 0) {
     errors.push({ position: null, field: 'instrument.grade', message: 'El nivel es obligatorio' });
   }
-  if (
-    !payload.instrument.year ||
-    payload.instrument.year < 2000 ||
-    payload.instrument.year > 2100
-  ) {
-    errors.push({
-      position: null,
-      field: 'instrument.year',
-      message: 'El año debe estar entre 2000 y 2100',
-    });
+  if (!payload.instrument.year || payload.instrument.year < 2000 || payload.instrument.year > 2100) {
+    errors.push({ position: null, field: 'instrument.year', message: 'El año debe estar entre 2000 y 2100' });
   }
-  if (
-    !payload.instrument.applicationPeriod ||
-    payload.instrument.applicationPeriod.trim().length === 0
-  ) {
-    errors.push({
-      position: null,
-      field: 'instrument.applicationPeriod',
-      message: 'El período de aplicación es obligatorio',
-    });
+  if (!payload.instrument.applicationPeriod || payload.instrument.applicationPeriod.trim().length === 0) {
+    errors.push({ position: null, field: 'instrument.applicationPeriod', message: 'El período de aplicación es obligatorio' });
   }
 
   if (!payload.items || payload.items.length === 0) {
@@ -194,7 +171,10 @@ export function parseDiaPayload(
  * 2. Si no, se derivan de las propias alternativas del ítem (soporta A–D, A–E, V/F…).
  * 3. Como último recurso (ítem sin alternativas), se usan las claves por defecto A–E.
  */
-function resolveValidKeys(item: DiaRawItem, explicit: readonly string[] | undefined): Set<string> {
+function resolveValidKeys(
+  item: DiaRawItem,
+  explicit: readonly string[] | undefined,
+): Set<string> {
   if (explicit && explicit.length > 0) {
     return new Set(explicit.map((k) => k.toUpperCase()));
   }

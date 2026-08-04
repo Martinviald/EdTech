@@ -13,7 +13,8 @@ function user(overrides: Partial<JwtPayload> = {}): JwtPayload {
   const role = overrides.activeRole ?? overrides.role ?? 'school_admin';
   // Si el fixture pide platform_admin sin setear isPlatformAdmin explícito,
   // derivamos el flag — coherente con el invariante del AuthGuard.
-  const isPlatformAdmin = overrides.isPlatformAdmin ?? role === 'platform_admin';
+  const isPlatformAdmin =
+    overrides.isPlatformAdmin ?? (role === 'platform_admin');
   return {
     userId: 'u1',
     orgId: 'org-1',
@@ -58,9 +59,9 @@ describe('TaxonomiesService.assertVisible', () => {
   });
 
   it('bloquea currícula custom de otra org', () => {
-    expect(() => svc.assertVisible(taxonomy({ orgId: 'other' }), user({ orgId: 'org-1' }))).toThrow(
-      ForbiddenException,
-    );
+    expect(() =>
+      svc.assertVisible(taxonomy({ orgId: 'other' }), user({ orgId: 'org-1' })),
+    ).toThrow(ForbiddenException);
   });
 });
 
