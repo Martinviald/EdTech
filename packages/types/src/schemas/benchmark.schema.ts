@@ -57,9 +57,7 @@ export type BenchmarkInstrumentOption = z.infer<typeof benchmarkInstrumentOption
 export const benchmarkInstrumentListResponseSchema = z.object({
   data: z.array(benchmarkInstrumentOptionSchema),
 });
-export type BenchmarkInstrumentListResponse = z.infer<
-  typeof benchmarkInstrumentListResponseSchema
->;
+export type BenchmarkInstrumentListResponse = z.infer<typeof benchmarkInstrumentListResponseSchema>;
 
 // ── Consulta de comparación ──
 

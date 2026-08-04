@@ -258,5 +258,10 @@ export type ItemInsightSnapshot = {
   contentName: string | null;
   tags: Array<{ nodeName: string; nodeType: string; nodeCode: string | null }>;
   passage: { title: string | null; text: string | null; format: string | null } | null;
-  images: Array<{ url: string; mimeType: string | null; note: string | null; source: 'item' | 'section' }>;
+  images: Array<{
+    url: string;
+    mimeType: string | null;
+    note: string | null;
+    source: 'item' | 'section';
+  }>;
 };

@@ -109,6 +109,8 @@ export const itemTypeEnum = pgEnum('item_type', [
   'matching',
   'ordering',
   'gap_fill',
+  'short_answer',
+  'rubric_scored',
 ]);
 
 export const itemStatusEnum = pgEnum('item_status', ['draft', 'review', 'published', 'deprecated']);

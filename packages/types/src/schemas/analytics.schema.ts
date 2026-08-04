@@ -20,9 +20,7 @@ export const generationalComparisonQuerySchema = z.object({
   instrumentType: z.string().min(1).optional(),
   nodeId: z.string().uuid().optional(), // opcional: enfocar una habilidad
 });
-export type GenerationalComparisonQueryDto = z.infer<
-  typeof generationalComparisonQuerySchema
->;
+export type GenerationalComparisonQueryDto = z.infer<typeof generationalComparisonQuerySchema>;
 
 export type GenerationalPoint = {
   academicYearId: string;

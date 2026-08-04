@@ -21,6 +21,8 @@ import {
   multiSelectStrategy,
   multipleChoiceStrategy,
   orderingStrategy,
+  rubricScoredStrategy,
+  shortAnswerStrategy,
   trueFalseStrategy,
 } from './strategies';
 
@@ -72,6 +74,8 @@ export const SCORING_STRATEGIES: Record<ItemType, ScoringStrategy> = {
   matching: matchingStrategy,
   ordering: orderingStrategy,
   gap_fill: gapFillStrategy,
+  short_answer: shortAnswerStrategy,
+  rubric_scored: rubricScoredStrategy,
   // No auto-scorables → corrección humana/IA (F4).
   open_ended: manualGradingStrategy,
   writing: manualGradingStrategy,

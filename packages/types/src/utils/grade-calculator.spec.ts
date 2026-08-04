@@ -85,9 +85,34 @@ describe('aggregateStudentResults — ítems pendientes no contaminan el % (fuen
   // isComplete = false. Cubre el hallazgo de auditoría: ambos consumidores
   // (ingesta y recálculo) deben coincidir sin replicar el filtro.
   const mixed: ResponseForCalculation[] = [
-    { studentId: 'stu-1', itemId: 'mc-1', isCorrect: true, rawScore: 1, maxScore: 1, itemPosition: 1, taxonomyNodeIds: [] },
-    { studentId: 'stu-1', itemId: 'mc-2', isCorrect: false, rawScore: 0, maxScore: 1, itemPosition: 2, taxonomyNodeIds: [] },
-    { studentId: 'stu-1', itemId: 'open-1', isCorrect: null, rawScore: null, finalScore: null, maxScore: 5, itemPosition: 3, taxonomyNodeIds: [] },
+    {
+      studentId: 'stu-1',
+      itemId: 'mc-1',
+      isCorrect: true,
+      rawScore: 1,
+      maxScore: 1,
+      itemPosition: 1,
+      taxonomyNodeIds: [],
+    },
+    {
+      studentId: 'stu-1',
+      itemId: 'mc-2',
+      isCorrect: false,
+      rawScore: 0,
+      maxScore: 1,
+      itemPosition: 2,
+      taxonomyNodeIds: [],
+    },
+    {
+      studentId: 'stu-1',
+      itemId: 'open-1',
+      isCorrect: null,
+      rawScore: null,
+      finalScore: null,
+      maxScore: 5,
+      itemPosition: 3,
+      taxonomyNodeIds: [],
+    },
   ];
 
   it('excluye el pendiente del % (su maxScore 5 no diluye el denominador)', () => {
@@ -248,10 +273,7 @@ describe('aggregateStudentResults — métrica raíz extendida (#3)', () => {
         ],
       },
     };
-    const responses = [
-      diaResponse('stu-1', 'i1', 1, true),
-      diaResponse('stu-1', 'i2', 2, false),
-    ];
+    const responses = [diaResponse('stu-1', 'i1', 1, true), diaResponse('stu-1', 'i2', 2, false)];
     const [r] = aggregateStudentResults(responses, scale);
     expect(r!.percentage).toBeCloseTo(0.5, 10);
     expect(r!.scaledScore).toBe(575); // punto medio de [150,1000]
@@ -387,8 +409,22 @@ describe('isPassingGrade', () => {
 // Bandas DIA Lectura 6° Intermedio (cortes reverse-engineered): I<0.35, II<0.75, III.
 const DIA_6TO_BANDS: PerformanceBandInput[] = [
   { id: 'b1', key: 'dia_nivel_1', label: 'Nivel I', order: 0, minThreshold: 0, maxThreshold: 0.35 },
-  { id: 'b2', key: 'dia_nivel_2', label: 'Nivel II', order: 1, minThreshold: 0.35, maxThreshold: 0.75 },
-  { id: 'b3', key: 'dia_nivel_3', label: 'Nivel III', order: 2, minThreshold: 0.75, maxThreshold: 1 },
+  {
+    id: 'b2',
+    key: 'dia_nivel_2',
+    label: 'Nivel II',
+    order: 1,
+    minThreshold: 0.35,
+    maxThreshold: 0.75,
+  },
+  {
+    id: 'b3',
+    key: 'dia_nivel_3',
+    label: 'Nivel III',
+    order: 2,
+    minThreshold: 0.75,
+    maxThreshold: 1,
+  },
 ];
 
 describe('classifyByBands', () => {
@@ -439,7 +475,16 @@ describe('aggregateStudentResults con bandas del instrumento', () => {
 
   it('sin bandas cae al corte legacy 40/70/85 (performanceBandId null)', () => {
     const responses: ResponseForCalculation[] = [
-      { studentId: 's1', itemId: 'i1', isCorrect: true, rawScore: 8, finalScore: null, maxScore: 10, itemPosition: 1, taxonomyNodeIds: [] },
+      {
+        studentId: 's1',
+        itemId: 'i1',
+        isCorrect: true,
+        rawScore: 8,
+        finalScore: null,
+        maxScore: 10,
+        itemPosition: 1,
+        taxonomyNodeIds: [],
+      },
     ];
     const [r] = aggregateStudentResults(responses, DIA_SCALE);
     expect(r!.performanceBandId ?? null).toBeNull();

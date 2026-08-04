@@ -1,9 +1,6 @@
 import type { UserRole } from '../enums';
 
-export const STAFF_MANAGEMENT_ROLES: readonly UserRole[] = [
-  'platform_admin',
-  'school_admin',
-];
+export const STAFF_MANAGEMENT_ROLES: readonly UserRole[] = ['platform_admin', 'school_admin'];
 
 // GET /organizations/me — perfil básico del colegio. Audiencia más amplia:
 // cualquier directivo/profesor que necesite saber en qué colegio está.
