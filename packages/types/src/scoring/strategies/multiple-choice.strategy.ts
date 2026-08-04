@@ -7,11 +7,9 @@
 // La única diferencia es que ahora la clave correcta se deriva del `content`
 // tipado (no se descarta) en vez de venir precalculada.
 
-import {
-  parseTrueFalseAnswer,
-  type MultipleChoiceContent,
-  type TrueFalseContent,
-} from '@soe/types';
+import { parseTrueFalseAnswer } from '../../utils/true-false';
+import type { TrueFalseContent } from '../../schemas/item-content.schema';
+import type { MultipleChoiceContent } from '../../schemas/item.schema';
 import type { ScoringInput, ScoringOutput, ScoringStrategy } from '../scoring-strategy';
 import { asTrimmedString } from './scoring.helpers';
 

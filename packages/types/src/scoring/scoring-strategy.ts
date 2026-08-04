@@ -12,7 +12,9 @@
 // devuelven `requiresManualGrading: true` con scores null — NUNCA 0/incorrecto.
 // ─────────────────────────────────────────────────────────────────────────────
 
-import { isAutoScorable, type ItemContent, type ItemType, type ScoringConfig } from '@soe/types';
+import { isAutoScorable, type ItemContent } from '../schemas/item-content.schema';
+import type { ScoringConfig } from '../schemas/item.schema';
+import type { ItemType } from '../enums';
 import {
   gapFillStrategy,
   matchingStrategy,

@@ -1,26 +1,14 @@
 import { z } from 'zod';
 import {
   ITEM_DIFFICULTIES,
+  ITEM_TYPES,
   csvArraySchema,
   itemBankScopeSchema,
   paginationSchema,
   uuidCsvSchema,
 } from '@soe/types';
 
-// ── Item Type / Status / Source enums ───────────────────────────────────────
-const ITEM_TYPES = [
-  'multiple_choice',
-  'true_false',
-  'open_ended',
-  'oral_reading',
-  'oral_expression',
-  'writing',
-  'listening',
-  'matching',
-  'ordering',
-  'gap_fill',
-] as const;
-
+// ── Item Status / Source enums ──────────────────────────────────────────────
 const ITEM_STATUSES = ['draft', 'review', 'published', 'deprecated'] as const;
 
 const ITEM_SOURCES = ['official', 'ai_generated', 'custom', 'imported'] as const;

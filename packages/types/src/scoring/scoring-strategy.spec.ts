@@ -1,4 +1,6 @@
-import type { ItemContent, ItemType, ScoringConfig } from '@soe/types';
+import type { ItemContent } from '../schemas/item-content.schema';
+import type { ScoringConfig } from '../schemas/item.schema';
+import type { ItemType } from '../enums';
 import { SCORING_STRATEGIES, getScoringStrategy, type ScoringInput } from './scoring-strategy';
 
 // Helper para construir un ScoringInput con un maxScore por defecto de 1.
