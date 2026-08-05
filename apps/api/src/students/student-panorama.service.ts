@@ -1,5 +1,6 @@
 import { ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
 import { and, asc, desc, eq, isNull, notInArray, sql } from 'drizzle-orm';
+import { alias } from 'drizzle-orm/pg-core';
 import {
   academicYears,
   assessmentResults,
@@ -19,10 +20,13 @@ import {
   PERFORMANCE_LEVELS,
   RESULT_HIDDEN_NODE_TYPES,
   percentageToPerformanceLevel,
+  type DataGranularity,
+  type PerformanceBandInput,
   type PerformanceBandView,
   type PerformanceDistributionBucket,
   type PerformanceLevel,
   type StudentPanoramaAssessment,
+  type StudentPanoramaDistribution,
   type StudentPanoramaHeader,
   type StudentPanoramaResponse,
   type StudentPanoramaSkill,
@@ -34,12 +38,8 @@ import {
   isStudentVisibleInScope,
   resolveClassGroupScope,
 } from '../common/helpers/class-group-scope.helper';
+import { loadBandsForInstruments } from '../performance-bands/lib/load-instrument-bands';
 
-/**
- * Construye la vista de banda a partir de las columnas del LEFT JOIN a
- * `performance_bands`. `null` si el resultado no tiene banda asignada (cae al enum
- * legacy en la UI). Lee la banda YA persistida — no reclasifica.
- */
 function toBandView(r: {
   bandKey: string | null;
   bandLabel: string | null;
@@ -50,13 +50,20 @@ function toBandView(r: {
   return { key: r.bandKey, label: r.bandLabel, order: r.bandOrder, color: r.bandColor };
 }
 
+function bandsToViews(bands: readonly PerformanceBandInput[]): PerformanceBandView[] {
+  return bands.map((b) => ({ key: b.key, label: b.label, order: b.order, color: b.color ?? null }));
+}
+
+function scaleSignature(bands: readonly PerformanceBandInput[]): string {
+  return bands
+    .map((b) => `${b.order}:${b.key}`)
+    .sort()
+    .join('|');
+}
+
 @Injectable()
 export class StudentPanoramaService {
   constructor(@InjectDb() private readonly db: Database) {}
-
-  // ───────────────────────────────────────────────────────────────────────────
-  // GET /students/:id/panorama — Vista 360 del estudiante (T2-20)
-  // ───────────────────────────────────────────────────────────────────────────
 
   async getPanorama(user: JwtPayload, studentId: string): Promise<StudentPanoramaResponse> {
     const orgId = user.orgId;
@@ -65,12 +72,9 @@ export class StudentPanoramaService {
     }
 
     return withOrgContext(this.db, orgId, async (tx) => {
-      // Alcance por curso (teacher scoping) — reusa el helper compartido. Un
-      // profesor sólo ve alumnos de sus cursos; un directivo ve toda la org.
       const scope = await resolveClassGroupScope(tx, user, orgId);
       const visible = await isStudentVisibleInScope(tx, orgId, scope, studentId);
       if (!visible) {
-        // No diferenciamos 404 vs 403 para no filtrar existencia entre cursos/orgs.
         throw new NotFoundException('Estudiante no encontrado');
       }
 
@@ -81,18 +85,17 @@ export class StudentPanoramaService {
 
       const byAssessment = await this.loadByAssessment(tx, orgId, studentId);
       const bySkill = await this.loadBySkill(tx, orgId, studentId);
-      const byLevel = this.buildLevelDistribution(byAssessment);
+      const bandsByInstrument = await loadBandsForInstruments(tx, [
+        ...new Set(byAssessment.map((a) => a.instrumentId)),
+      ]);
+
+      const distribution = this.buildDistribution(byAssessment, bandsByInstrument);
       const summary = this.buildSummary(byAssessment, bySkill);
 
-      return { student, summary, byAssessment, bySkill, byLevel };
+      return { student, summary, byAssessment, bySkill, distribution };
     });
   }
 
-  // ───────────────────────────────────────────────────────────────────────────
-  // Queries
-  // ───────────────────────────────────────────────────────────────────────────
-
-  /** Identidad del alumno + curso vigente (matrícula del año más reciente). */
   private async loadStudentHeader(
     tx: Database,
     orgId: string,
@@ -110,8 +113,6 @@ export class StudentPanoramaService {
       .limit(1);
     if (!row) return null;
 
-    // Curso vigente: la matrícula del año académico más reciente (best-effort —
-    // un alumno con matrícula en varios años se muestra con la última).
     const [enrollment] = await tx
       .select({
         classGroupId: classGroups.id,
@@ -142,22 +143,22 @@ export class StudentPanoramaService {
     };
   }
 
-  /**
-   * Resultados del alumno por evaluación (grano alumno × evaluación), ordenados
-   * por fecha de aplicación. Reagrega `assessment_results` — no recalcula nada.
-   */
   private async loadByAssessment(
     tx: Database,
     orgId: string,
     studentId: string,
   ): Promise<StudentPanoramaAssessment[]> {
+    const priorBands = alias(performanceBands, 'prior_performance_bands');
+
     const rows = await tx
       .select({
         assessmentId: assessments.id,
         assessmentName: assessments.name,
+        instrumentId: instruments.id,
         instrumentName: instruments.name,
         subjectName: subjects.name,
         administeredAt: assessments.administeredAt,
+        dataGranularity: assessments.dataGranularity,
         achievement: assessmentResults.percentage,
         grade: assessmentResults.grade,
         performanceLevel: assessmentResults.performanceLevel,
@@ -165,12 +166,17 @@ export class StudentPanoramaService {
         bandLabel: performanceBands.label,
         bandOrder: performanceBands.order,
         bandColor: performanceBands.color,
+        priorBandKey: priorBands.key,
+        priorBandLabel: priorBands.label,
+        priorBandOrder: priorBands.order,
+        priorBandColor: priorBands.color,
       })
       .from(assessmentResults)
       .innerJoin(assessments, eq(assessments.id, assessmentResults.assessmentId))
       .innerJoin(instruments, eq(instruments.id, assessments.instrumentId))
       .leftJoin(subjects, eq(subjects.id, instruments.subjectId))
       .leftJoin(performanceBands, eq(performanceBands.id, assessmentResults.performanceBandId))
+      .leftJoin(priorBands, eq(priorBands.id, assessmentResults.priorPerformanceBandId))
       .where(
         and(
           eq(assessmentResults.studentId, studentId),
@@ -183,23 +189,24 @@ export class StudentPanoramaService {
     return rows.map((r) => ({
       assessmentId: r.assessmentId,
       assessmentName: r.assessmentName,
+      instrumentId: r.instrumentId,
       instrumentName: r.instrumentName,
       subjectName: r.subjectName,
       administeredAt: r.administeredAt,
+      dataGranularity: r.dataGranularity as DataGranularity,
       achievement: r.achievement === null ? null : Number(r.achievement),
       grade: r.grade,
       performanceLevel: r.performanceLevel,
       performanceBand: toBandView(r),
+      priorPerformanceBand: toBandView({
+        bandKey: r.priorBandKey,
+        bandLabel: r.priorBandLabel,
+        bandOrder: r.priorBandOrder,
+        bandColor: r.priorBandColor,
+      }),
     }));
   }
 
-  /**
-   * Logro del alumno por nodo de taxonomía (habilidad/eje), promediando sus
-   * `skill_results` a través de todas sus evaluaciones. Excluye los tipos de nodo
-   * ocultos en resultados (descriptor) igual que dashboards/heatmap. El nivel se
-   * deriva del promedio con umbrales por defecto (helper compartido, no duplica
-   * lógica de bandas).
-   */
   private async loadBySkill(
     tx: Database,
     orgId: string,
@@ -211,13 +218,12 @@ export class StudentPanoramaService {
         nodeName: taxonomyNodes.name,
         nodeType: taxonomyNodes.type,
         nodeCode: taxonomyNodes.code,
-        avgPct: sql<string | null>`avg(${skillResults.percentage}::numeric)`,
+        correctCount: sql<number>`sum(${skillResults.correctCount})::int`,
+        totalCount: sql<number>`sum(${skillResults.totalCount})::int`,
         assessmentsCount: sql<number>`count(distinct ${skillResults.assessmentId})::int`,
       })
       .from(skillResults)
       .innerJoin(taxonomyNodes, eq(taxonomyNodes.id, skillResults.nodeId))
-      // Join a assessments para acotar por org (defensa en profundidad — RLS ya
-      // aísla, pero mantenemos el filtro explícito como el resto del módulo).
       .innerJoin(assessments, eq(assessments.id, skillResults.assessmentId))
       .where(
         and(
@@ -227,43 +233,105 @@ export class StudentPanoramaService {
         ),
       )
       .groupBy(skillResults.nodeId, taxonomyNodes.name, taxonomyNodes.type, taxonomyNodes.code)
-      .orderBy(asc(sql`avg(${skillResults.percentage}::numeric)`), asc(taxonomyNodes.name));
+      .orderBy(asc(taxonomyNodes.name));
 
-    return rows.map((r) => {
-      const averageAchievement = r.avgPct === null ? null : Number(r.avgPct);
-      return {
-        nodeId: r.nodeId,
-        nodeName: r.nodeName,
-        nodeType: r.nodeType,
-        nodeCode: r.nodeCode,
-        averageAchievement,
-        assessmentsCount: Number(r.assessmentsCount ?? 0),
-        performanceLevel:
-          averageAchievement === null
-            ? null
-            : percentageToPerformanceLevel(averageAchievement / 100),
-      };
-    });
+    return rows
+      .map((r) => {
+        const correctCount = Number(r.correctCount ?? 0);
+        const totalCount = Number(r.totalCount ?? 0);
+        const achievement = totalCount > 0 ? (correctCount / totalCount) * 100 : null;
+        return {
+          nodeId: r.nodeId,
+          nodeName: r.nodeName,
+          nodeType: r.nodeType,
+          nodeCode: r.nodeCode,
+          achievement,
+          correctCount,
+          totalCount,
+          assessmentsCount: Number(r.assessmentsCount ?? 0),
+          performanceLevel:
+            achievement === null ? null : percentageToPerformanceLevel(achievement / 100),
+        };
+      })
+      .sort((a, b) => {
+        if (a.achievement === null) return b.achievement === null ? 0 : 1;
+        if (b.achievement === null) return -1;
+        return a.achievement - b.achievement || a.nodeName.localeCompare(b.nodeName, 'es');
+      });
   }
 
-  // ───────────────────────────────────────────────────────────────────────────
-  // Agregación en memoria (sobre lo ya traído)
-  // ───────────────────────────────────────────────────────────────────────────
-
-  /** Distribución del alumno por nivel de desempeño, a partir de sus evaluaciones. */
-  private buildLevelDistribution(
+  private buildDistribution(
     byAssessment: StudentPanoramaAssessment[],
-  ): PerformanceDistributionBucket[] {
-    const counts = new Map<PerformanceLevel, number>();
+    bandsByInstrument: Map<string, PerformanceBandInput[]>,
+  ): StudentPanoramaDistribution {
+    const signatureBands = new Map<string, PerformanceBandInput[]>();
+    const bandCounts = new Map<string, Map<string, number>>();
+    const levelCounts = new Map<PerformanceLevel, number>();
+    let classified = 0;
+
     for (const a of byAssessment) {
-      if (!a.performanceLevel) continue;
-      counts.set(a.performanceLevel, (counts.get(a.performanceLevel) ?? 0) + 1);
+      if (a.performanceBand) {
+        const bands = bandsByInstrument.get(a.instrumentId) ?? [];
+        const signature = bands.length > 0 ? scaleSignature(bands) : a.performanceBand.key;
+        if (!signatureBands.has(signature)) signatureBands.set(signature, bands);
+        const counts = bandCounts.get(signature) ?? new Map<string, number>();
+        counts.set(a.performanceBand.key, (counts.get(a.performanceBand.key) ?? 0) + 1);
+        bandCounts.set(signature, counts);
+        classified += 1;
+        continue;
+      }
+      if (a.performanceLevel) {
+        levelCounts.set(a.performanceLevel, (levelCounts.get(a.performanceLevel) ?? 0) + 1);
+        classified += 1;
+      }
     }
-    const total = Array.from(counts.values()).reduce((acc, n) => acc + n, 0);
-    return PERFORMANCE_LEVELS.map((level) => {
-      const count = counts.get(level) ?? 0;
-      return { level, count, percentage: total > 0 ? (count / total) * 100 : 0 };
+
+    if (classified === 0) return { kind: 'empty' };
+
+    const scaleCount = signatureBands.size + (levelCounts.size > 0 ? 1 : 0);
+    if (scaleCount > 1) return { kind: 'mixed', scaleCount };
+
+    if (signatureBands.size === 1) {
+      const entry = [...signatureBands.entries()][0]!;
+      const counts = bandCounts.get(entry[0])!;
+      const vocabulary =
+        entry[1].length > 0
+          ? bandsToViews(entry[1])
+          : this.vocabularyFromResults(byAssessment, counts);
+      const buckets = vocabulary
+        .map((b) => {
+          const count = counts.get(b.key) ?? 0;
+          return {
+            key: b.key,
+            label: b.label,
+            order: b.order,
+            color: b.color ?? null,
+            count,
+            percentage: (count / classified) * 100,
+          };
+        })
+        .sort((a, b) => a.order - b.order);
+      return { kind: 'band', bands: vocabulary, buckets };
+    }
+
+    const buckets: PerformanceDistributionBucket[] = PERFORMANCE_LEVELS.map((level) => {
+      const count = levelCounts.get(level) ?? 0;
+      return { level, count, percentage: (count / classified) * 100 };
     });
+    return { kind: 'level', buckets };
+  }
+
+  private vocabularyFromResults(
+    byAssessment: StudentPanoramaAssessment[],
+    counts: Map<string, number>,
+  ): PerformanceBandView[] {
+    const views = new Map<string, PerformanceBandView>();
+    for (const a of byAssessment) {
+      if (a.performanceBand && counts.has(a.performanceBand.key)) {
+        views.set(a.performanceBand.key, a.performanceBand);
+      }
+    }
+    return [...views.values()].sort((a, b) => a.order - b.order);
   }
 
   private buildSummary(
@@ -280,6 +348,7 @@ export class StudentPanoramaService {
     return {
       assessmentsCount: byAssessment.length,
       averageAchievement,
+      assessmentsWithAchievement: withPct.length,
       skillsAssessed: bySkill.length,
     };
   }

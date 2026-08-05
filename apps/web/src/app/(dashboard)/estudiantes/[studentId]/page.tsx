@@ -1,17 +1,22 @@
 import { Suspense } from 'react';
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
-import { ArrowLeft, ClipboardList, Inbox, Layers } from 'lucide-react';
+import { ArrowLeft, ArrowRight, ClipboardList, Inbox, Layers } from 'lucide-react';
 import { auth } from '@/auth';
 import { ROUTES } from '@/lib/routes';
-import { canAccess, RESULTS_VIEWER_ROLES, type StudentPanoramaResponse } from '@soe/types';
+import {
+  canAccess,
+  RESULTS_VIEWER_ROLES,
+  type StudentPanoramaAssessment,
+  type StudentPanoramaResponse,
+} from '@soe/types';
 import { PageContainer, EmptyState, CardSkeleton, MetricsGroup } from '@/components/shared';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { SetPageTitle } from '@/components/layout/page-title-context';
 import { PerformanceBadge } from '../../resultados/components/performance-badge';
-import { DistributionBar } from '../../resultados/components/distribution-bar';
 import { formatAchievement } from '../../resultados/components/performance-level';
 import { PanoramaTrajectory } from '../components/panorama-trajectory';
+import { PanoramaDistribution } from '../components/panorama-distribution';
 import { getStudentPanorama } from '../data';
 
 function fmtDate(value: string | Date | null): string {
@@ -26,6 +31,14 @@ function fmtGrade(grade: string | null): string {
   if (grade === null) return '—';
   const n = Number(grade);
   return Number.isNaN(n) ? '—' : n.toFixed(1);
+}
+
+function achievementHint(withAchievement: number, total: number): string | undefined {
+  if (total === 0 || withAchievement === total) return undefined;
+  if (withAchievement === 0) {
+    return `Ninguna de sus ${total} evaluaciones entrega % de logro: sólo nivel de desempeño.`;
+  }
+  return `Sobre ${withAchievement} de ${total} evaluaciones — el resto sólo entrega nivel.`;
 }
 
 export default async function EstudiantePanoramaPage({
@@ -61,6 +74,19 @@ function BackLink() {
   );
 }
 
+function BandMovement({ item }: { item: StudentPanoramaAssessment }) {
+  if (!item.priorPerformanceBand || !item.performanceBand) {
+    return <PerformanceBadge level={item.performanceLevel} band={item.performanceBand} />;
+  }
+  return (
+    <span className="inline-flex items-center gap-1.5">
+      <span className="text-xs text-muted-foreground">{item.priorPerformanceBand.label}</span>
+      <ArrowRight className="size-3 text-muted-foreground" aria-hidden />
+      <PerformanceBadge level={item.performanceLevel} band={item.performanceBand} />
+    </span>
+  );
+}
+
 async function PanoramaContent({ studentId }: { studentId: string }) {
   const data = await getStudentPanorama(studentId).catch(
     (): StudentPanoramaResponse | null => null,
@@ -76,7 +102,7 @@ async function PanoramaContent({ studentId }: { studentId: string }) {
     );
   }
 
-  const { student, summary, byAssessment, bySkill, byLevel } = data;
+  const { student, summary, byAssessment, bySkill, distribution } = data;
   const meta = [
     student.rut,
     student.classGroup ? `${student.classGroup.gradeName} · ${student.classGroup.name}` : null,
@@ -97,7 +123,11 @@ async function PanoramaContent({ studentId }: { studentId: string }) {
             value: String(summary.assessmentsCount),
             icon: ClipboardList,
           },
-          { label: 'Logro promedio', value: formatAchievement(summary.averageAchievement) },
+          {
+            label: 'Logro promedio',
+            value: formatAchievement(summary.averageAchievement),
+            hint: achievementHint(summary.assessmentsWithAchievement, summary.assessmentsCount),
+          },
           {
             label: 'Habilidades evaluadas',
             value: String(summary.skillsAssessed),
@@ -123,7 +153,7 @@ async function PanoramaContent({ studentId }: { studentId: string }) {
             </CardContent>
           </Card>
 
-          <DistributionBar distribution={byLevel} title="Distribución por nivel de desempeño" />
+          <PanoramaDistribution distribution={distribution} />
 
           <Card>
             <CardHeader>
@@ -150,9 +180,20 @@ async function PanoramaContent({ studentId }: { studentId: string }) {
                       <td className="py-2 pr-4">{a.subjectName ?? '—'}</td>
                       <td className="py-2 pr-4">{fmtDate(a.administeredAt)}</td>
                       <td className="py-2 pr-4 tabular-nums">{fmtGrade(a.grade)}</td>
-                      <td className="py-2 pr-4 tabular-nums">{formatAchievement(a.achievement)}</td>
+                      <td className="py-2 pr-4 tabular-nums">
+                        {a.achievement === null ? (
+                          <span
+                            className="text-muted-foreground"
+                            title="Informe agregado: entrega el nivel del alumno, no su porcentaje"
+                          >
+                            —
+                          </span>
+                        ) : (
+                          formatAchievement(a.achievement)
+                        )}
+                      </td>
                       <td className="py-2 pr-4">
-                        <PerformanceBadge level={a.performanceLevel} band={a.performanceBand} />
+                        <BandMovement item={a} />
                       </td>
                     </tr>
                   ))}
@@ -172,6 +213,7 @@ async function PanoramaContent({ studentId }: { studentId: string }) {
                     <tr className="border-b text-left text-muted-foreground">
                       <th className="py-2 pr-4 font-medium">Habilidad / Eje</th>
                       <th className="py-2 pr-4 font-medium">Evaluaciones</th>
+                      <th className="py-2 pr-4 font-medium">Ítems</th>
                       <th className="py-2 pr-4 font-medium">% logro</th>
                       <th className="py-2 pr-4 font-medium">Nivel</th>
                     </tr>
@@ -188,8 +230,11 @@ async function PanoramaContent({ studentId }: { studentId: string }) {
                           ) : null}
                         </td>
                         <td className="py-2 pr-4 tabular-nums">{s.assessmentsCount}</td>
+                        <td className="py-2 pr-4 tabular-nums text-muted-foreground">
+                          {s.correctCount}/{s.totalCount}
+                        </td>
                         <td className="py-2 pr-4 tabular-nums">
-                          {formatAchievement(s.averageAchievement)}
+                          {formatAchievement(s.achievement)}
                         </td>
                         <td className="py-2 pr-4">
                           <PerformanceBadge level={s.performanceLevel} />
