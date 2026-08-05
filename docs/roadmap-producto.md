@@ -78,7 +78,7 @@ buscar. Si un feature solo se ve entrando a una vista, está a medio construir.
 | 1 | Quitar evaluación de **calidad de instrumento / discriminación de ítems** | **P0** | 🔲 Pendiente | — |
 | 1C | Quitar **agregación de analítica sobre instrumentos no comparables** (% logro global, clasificación global de niveles) | **P0** | 🔲 Pendiente | — |
 | 2 | Dashboard **Panorama Pedagógico** inteligente (banners/CTAs, % logro ×nivel ×asignatura ×evaluación) | **P1** | 🔲 Pendiente | #1, #1C |
-| 2B | **Vista 360 del estudiante** más rica (por asignatura, movimiento por periodos comparables) + alertas proactivas | **P1** | 🔲 Pendiente | #1C, #3 |
+| 2B | **Vista 360 del estudiante** más rica (por asignatura, movimiento por periodos comparables) + alertas proactivas — [diseño](./diseno-vista-360-estudiante.md) | **P1** | 🚧 Diseño | #1C, #3 |
 | 3 | **Análisis IA de resultados** multi-paso + **proactivo** (alertas/acciones, sin calidad de instrumento) | **P1** | 🔲 Pendiente | #1 |
 | 3B | **Motor proactivo (espina):** disparo por eventos + bandeja de insights/alertas/acciones + entrega push + seguimiento | **P1** | 🔲 Pendiente | #3 |
 | 4 | **Comparación entre años/instrumentos** fácil + explicada por IA potente | **P1** | 🔲 Pendiente | #1, #3 |
@@ -234,7 +234,9 @@ por sección) y `frontend/05-performance.md` (agregación O(N) con Map, no re-sc
 
 ### 2B. Vista 360 del estudiante más rica y proactiva
 
-**Estado:** 🔲 Pendiente · **Prioridad:** P1 · **Depende de:** #1C, #3
+**Estado:** 🚧 En curso (diseño) · **Prioridad:** P1 · **Depende de:** #1C, #3 · **Diseño detallado:**
+[`docs/diseno-vista-360-estudiante.md`](./diseno-vista-360-estudiante.md) (modelo de zoom progresivo
+Z0→Z4, filtros y pre-filtros de alerta, 8 defectos verificables de la vista actual)
 
 **Objetivo:** hacer la **visión 360 del estudiante** mucho más rica y útil. Hoy los filtros son malos,
 se muestra poca información poco útil, y el gráfico de progresión grafica sobre pruebas **no
