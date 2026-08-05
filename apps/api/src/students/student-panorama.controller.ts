@@ -1,5 +1,5 @@
-import { Controller, Get, Param, ParseUUIDPipe, UseGuards } from '@nestjs/common';
-import { RESULTS_VIEWER_ROLES } from '@soe/types';
+import { Controller, Get, Param, ParseUUIDPipe, Query, UseGuards } from '@nestjs/common';
+import { RESULTS_VIEWER_ROLES, studentPanoramaQuerySchema } from '@soe/types';
 import { CurrentUser } from '../auth/current-user.decorator';
 import type { JwtPayload } from '../auth/jwt-payload.types';
 import { Roles } from '../common/decorators/roles.decorator';
@@ -18,10 +18,14 @@ import { StudentPanoramaService } from './student-panorama.service';
 export class StudentPanoramaController {
   constructor(private readonly service: StudentPanoramaService) {}
 
-  /** GET /api/students/:id/panorama — consolidado por evaluación, habilidad/eje y nivel. */
+  /** GET /api/students/:id/panorama — consolidado por asignatura, habilidad/eje y nivel. */
   @Get(':id/panorama')
   @Roles(...RESULTS_VIEWER_ROLES)
-  getPanorama(@CurrentUser() user: JwtPayload, @Param('id', ParseUUIDPipe) id: string) {
-    return this.service.getPanorama(user, id);
+  getPanorama(
+    @CurrentUser() user: JwtPayload,
+    @Param('id', ParseUUIDPipe) id: string,
+    @Query() query: unknown,
+  ) {
+    return this.service.getPanorama(user, id, studentPanoramaQuerySchema.parse(query ?? {}));
   }
 }
