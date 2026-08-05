@@ -1,5 +1,6 @@
 import { z } from 'zod';
 import { PERFORMANCE_LEVELS, type AssessmentStatus, type PerformanceLevel } from '../enums';
+import type { ComparabilityMeta } from '../comparability';
 import type { PerformanceBandView } from './performance-band.schema';
 import { csvArraySchema, stringCsvSchema, uuidCsvSchema } from './common.schema';
 import {
@@ -123,6 +124,14 @@ export type DashboardOverviewResponse = {
   // es todo lo que hay".
   recentAssessmentsTotal: number;
   alerts: DashboardAlert[];
+  /**
+   * Comparabilidad del alcance filtrado. Mecanismo de PAYLOAD (no guard), igual que
+   * `meta.capabilities` de `analytics-capabilities.ts`: esta ruta es mixta —sirve
+   * conteos y lista de evaluaciones, que siempre son legítimos, junto a métricas que
+   * sólo se pueden emitir sobre una unidad comparable—, así que el punto de corte es
+   * el payload y no la ruta.
+   */
+  comparability: ComparabilityMeta;
 };
 
 // ── H6.2 — GET /api/dashboards/filters ───────────────────────────────────────
@@ -216,6 +225,7 @@ export type DashboardPerformanceResponse = {
     page: number;
     limit: number;
   };
+  comparability: ComparabilityMeta;
 };
 
 // ── H6.5 — GET /api/dashboards/skills ────────────────────────────────────────
@@ -236,6 +246,7 @@ export type DashboardSkillsResponse = {
   skills: SkillAchievementModel[];
   // Bandas del instrumento cuando el scope es un único instrumento con bandas.
   bands?: PerformanceBandView[];
+  comparability: ComparabilityMeta;
 };
 
 /**

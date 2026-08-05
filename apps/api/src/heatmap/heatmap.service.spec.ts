@@ -1,4 +1,5 @@
 import type { Database } from '@soe/db';
+import { buildComparabilityMeta } from '@soe/types';
 import type { UserRole } from '@soe/types';
 import type { JwtPayload } from '../auth/jwt-payload.types';
 import { HeatmapService } from './heatmap.service';
@@ -9,13 +10,15 @@ import { HeatmapService } from './heatmap.service';
 // orden. Las funciones encadenables retornan el chain y al resolver entregan las
 // filas configuradas.
 //
-// Orden de queries en getHeatmap() (tras cells no-vacías corre resolveThresholds):
+// Orden de queries en getHeatmap() (tras cells no-vacías corre resolveScaleAndComparability,
+// que resuelve thresholds Y comparabilidad en la MISMA query):
 //   admin/scopeAll, sin filtro de curso → [cells, thresholds]
 //   admin con classGroupId/academicYearId → [classGroups, cells, thresholds]
 //   teacher → [scope, classGroups, cells, thresholds]
 //   (early returns: profesor sin cursos = [scope]; sin datos = [..., cells=[]])
-//   La query de thresholds devuelve la config de la grading_scale del scope; si
-//   no se provee (selectResults faltante → []), se usan los defaults DIA.
+//   Esa query devuelve la config de la grading_scale del scope junto a los
+//   instrumentos que participan; si no se provee (selectResults faltante → []), se
+//   usan los defaults DIA y la comparabilidad queda 'empty'.
 //
 // Fase 5: las celdas salen de `assessment_skill_stats` (grano curso) y ya NO hay
 // query de overall — se deriva sumando los numeradores/denominadores de las celdas
@@ -71,6 +74,11 @@ function makeDb(selectResults: unknown[][]): DbMock {
 
   const db = {
     select: () => {
+      const rows = selectResults[selectIdx] ?? [];
+      selectIdx++;
+      return buildSelectChain(rows);
+    },
+    selectDistinct: () => {
       const rows = selectResults[selectIdx] ?? [];
       selectIdx++;
       return buildSelectChain(rows);
@@ -301,7 +309,7 @@ describe('HeatmapService.getHeatmap', () => {
 
     const res = await service.getHeatmap(makeUser(), {});
 
-    expect(res).toEqual({ subjects: [], rows: [] });
+    expect(res).toEqual({ subjects: [], rows: [], comparability: buildComparabilityMeta([]) });
     // thresholds NO se consultó.
     expect(db.__selectIdx()).toBe(1);
   });
@@ -316,7 +324,7 @@ describe('HeatmapService.getHeatmap', () => {
 
     const res = await service.getHeatmap(makeUser({ role: 'teacher' }), {});
 
-    expect(res).toEqual({ subjects: [], rows: [] });
+    expect(res).toEqual({ subjects: [], rows: [], comparability: buildComparabilityMeta([]) });
     // Sólo se consultó el scope; ni cursos ni celdas.
     expect(db.__selectIdx()).toBe(1);
   });
@@ -356,7 +364,7 @@ describe('HeatmapService.getHeatmap', () => {
 
     const res = await service.getHeatmap(makeUser({ role: 'teacher' }), {});
 
-    expect(res).toEqual({ subjects: [], rows: [] });
+    expect(res).toEqual({ subjects: [], rows: [], comparability: buildComparabilityMeta([]) });
     expect(db.__selectIdx()).toBe(2);
   });
 

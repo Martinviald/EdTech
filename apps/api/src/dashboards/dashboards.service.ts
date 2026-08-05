@@ -26,10 +26,12 @@ import {
   RESULTS_VIEWER_ROLES,
   RESULT_HIDDEN_NODE_TYPES,
   bandToLegacyLevel,
+  buildComparabilityMeta,
   classifyByBands,
   percentageToPerformanceLevel,
   userHasAnyRole,
   type AssessmentStatus,
+  type ComparabilityInstrumentRef,
   type DashboardAlert,
   type DashboardAssessmentSummary,
   type DashboardFilterOptionsResponse,
@@ -115,7 +117,14 @@ type BreakdownAggregate = {
   studentsAssessed: number;
 };
 
+type ScopedAssessments = {
+  ids: string[];
+  refs: ComparabilityInstrumentRef[];
+};
+
 const EMPTY_RECENT_ASSESSMENTS = { data: [] as DashboardAssessmentSummary[], total: 0 };
+
+const EMPTY_COMPARABILITY = buildComparabilityMeta([]);
 
 @Injectable()
 export class DashboardsService {
@@ -140,6 +149,7 @@ export class DashboardsService {
       recentAssessments: [],
       recentAssessmentsTotal: 0,
       alerts: [],
+      comparability: EMPTY_COMPARABILITY,
     };
     if (!orgId) return empty;
 
@@ -150,10 +160,13 @@ export class DashboardsService {
       const studentIds = await this.resolveScopedStudentIds(tx, orgId, scope, query);
       if (studentIds !== null && studentIds.length === 0) return empty;
 
-      const assessmentIds = await this.resolveScopedAssessmentIds(tx, orgId, query);
+      const scoped = await this.resolveScopedAssessments(tx, orgId, query);
+      const assessmentIds = scoped.ids;
       if (assessmentIds.length === 0) {
         return { ...empty, scope: isTeacherScope ? 'teacher' : 'org' };
       }
+
+      const comparability = buildComparabilityMeta(scoped.refs, assessmentIds.length);
 
       const resultConditions = this.buildResultConditions(assessmentIds, studentIds, undefined);
 
@@ -288,6 +301,7 @@ export class DashboardsService {
         recentAssessments: recentAssessments.data,
         recentAssessmentsTotal: recentAssessments.total,
         alerts,
+        comparability,
       };
     });
   }
@@ -496,6 +510,7 @@ export class DashboardsService {
       distribution: this.emptyDistribution(),
       thresholds,
       students: { data: [], total: 0, page: query.page, limit: query.limit },
+      comparability: EMPTY_COMPARABILITY,
     };
     if (!orgId) return empty;
 
@@ -506,7 +521,8 @@ export class DashboardsService {
       const studentIds = await this.resolveScopedStudentIds(tx, orgId, scope, query);
       if (studentIds !== null && studentIds.length === 0) return empty;
 
-      const assessmentIds = await this.resolveScopedAssessmentIds(tx, orgId, query);
+      const scoped = await this.resolveScopedAssessments(tx, orgId, query);
+      const assessmentIds = scoped.ids;
       if (assessmentIds.length === 0) {
         return {
           ...empty,
@@ -515,6 +531,7 @@ export class DashboardsService {
       }
 
       const resolvedThresholds = await this.resolveThresholds(tx, orgId, query, assessmentIds);
+      const comparability = buildComparabilityMeta(scoped.refs, assessmentIds.length);
 
       // Clasificación por alumno: promediamos el % logro por alumno sobre el set de
       // evaluaciones que matchean los filtros. Una fila por alumno.
@@ -627,6 +644,7 @@ export class DashboardsService {
         thresholds: resolvedThresholds,
         ...(bands ? { bands: bands.map(toBandView), bandDistribution } : {}),
         students: { data: pageData, total, page: query.page, limit: query.limit },
+        comparability,
       };
     });
   }
@@ -650,25 +668,29 @@ export class DashboardsService {
     query: DashboardFiltersQueryDto,
   ): Promise<DashboardSkillsResponse> {
     const orgId = this.resolveOrgId(user);
-    if (!orgId) return { skills: [] };
+    const empty: DashboardSkillsResponse = { skills: [], comparability: EMPTY_COMPARABILITY };
+    if (!orgId) return empty;
 
     return withOrgContext(this.db, orgId, async (tx) => {
       const scope = await this.getAccessibleClassGroupIds(tx, user, orgId);
-      if (!scope.scopeAll && scope.classGroupIds.length === 0) return { skills: [] };
+      if (!scope.scopeAll && scope.classGroupIds.length === 0) return empty;
 
       const perStudent = this.requiresPerStudentData(query);
       const studentIds = perStudent
         ? await this.resolveScopedStudentIds(tx, orgId, scope, query)
         : null;
-      if (studentIds !== null && studentIds.length === 0) return { skills: [] };
+      if (studentIds !== null && studentIds.length === 0) return empty;
 
       const classGroupIds = perStudent
         ? null
         : await this.resolveScopedClassGroupIds(tx, orgId, scope, query);
-      if (classGroupIds !== null && classGroupIds.length === 0) return { skills: [] };
+      if (classGroupIds !== null && classGroupIds.length === 0) return empty;
 
-      const assessmentIds = await this.resolveScopedAssessmentIds(tx, orgId, query);
-      if (assessmentIds.length === 0) return { skills: [] };
+      const scoped = await this.resolveScopedAssessments(tx, orgId, query);
+      const assessmentIds = scoped.ids;
+      if (assessmentIds.length === 0) return empty;
+
+      const comparability = buildComparabilityMeta(scoped.refs, assessmentIds.length);
 
       // Thresholds de la escala aplicable (consistente con getPerformance/
       // getDistribution; antes getSkills usaba siempre defaults). Misma limitación
@@ -709,7 +731,9 @@ export class DashboardsService {
         };
       });
 
-      return bands ? { skills, bands: bands.map(toBandView) } : { skills };
+      return bands
+        ? { skills, bands: bands.map(toBandView), comparability }
+        : { skills, comparability };
     });
   }
 
@@ -1487,6 +1511,20 @@ export class DashboardsService {
     orgId: string,
     query: DashboardFiltersQueryDto,
   ): Promise<string[]> {
+    return (await this.resolveScopedAssessments(tx, orgId, query)).ids;
+  }
+
+  /**
+   * Evaluaciones del alcance filtrado JUNTO CON los instrumentos distintos que
+   * participan de él. Van juntos a propósito: la comparabilidad se deriva de los
+   * mismos instrumentos que esta query ya joinea, así que resolverla no cuesta un
+   * viaje extra a la base.
+   */
+  private async resolveScopedAssessments(
+    tx: Database,
+    orgId: string,
+    query: DashboardFiltersQueryDto,
+  ): Promise<ScopedAssessments> {
     const conditions = [eq(assessments.orgId, orgId), isNull(instruments.deletedAt)];
     if (query.assessmentId) conditions.push(eq(assessments.id, query.assessmentId));
     if (query.instrumentId) conditions.push(eq(assessments.instrumentId, query.instrumentId));
@@ -1502,12 +1540,34 @@ export class DashboardsService {
     }
 
     const rows = await tx
-      .select({ id: assessments.id })
+      .select({
+        id: assessments.id,
+        instrumentId: instruments.id,
+        instrumentType: instruments.type,
+        instrumentSubjectId: instruments.subjectId,
+        instrumentGradeId: instruments.gradeId,
+        instrumentApplicationPeriod: instruments.applicationPeriod,
+        instrumentYear: instruments.year,
+      })
       .from(assessments)
       .innerJoin(instruments, eq(instruments.id, assessments.instrumentId))
       .where(and(...conditions));
 
-    return Array.from(new Set(rows.map((r) => r.id)));
+    const ids = new Set<string>();
+    const byInstrument = new Map<string, ComparabilityInstrumentRef>();
+    for (const row of rows) {
+      ids.add(row.id);
+      if (row.instrumentId == null || byInstrument.has(row.instrumentId)) continue;
+      byInstrument.set(row.instrumentId, {
+        instrumentId: row.instrumentId,
+        type: row.instrumentType,
+        subjectId: row.instrumentSubjectId,
+        gradeId: row.instrumentGradeId,
+        applicationPeriod: row.instrumentApplicationPeriod,
+        year: row.instrumentYear,
+      });
+    }
+    return { ids: Array.from(ids), refs: Array.from(byInstrument.values()) };
   }
 
   /**
