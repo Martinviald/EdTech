@@ -26,6 +26,7 @@ import {
 } from '@soe/types';
 import type { JwtPayload } from '../auth/jwt-payload.types';
 import { InjectDb, type Database } from '../database/database.types';
+import { promptVersionFor } from './prompt-versions';
 
 /**
  * Minutos tras los cuales un análisis en `processing` se considera obsoleto
@@ -577,11 +578,18 @@ export class AiAnalysisService {
     // Orden de claves fijo → hash determinista e independiente del insertion order.
     // `itemId` solo entra al canonical para análisis por-pregunta (H20.8); para los
     // demás tipos el canonical NO cambia (hash de S1 estable).
+    //
+    // `promptVersion` entra al canonical porque el prompt es parte del input real del
+    // análisis: si cambia, el resultado cacheado ya no corresponde a lo que el sistema
+    // produciría hoy. Sin esto, reescribir un prompt no invalida nada y toda evaluación
+    // ya analizada sigue devolviendo la salida vieja
+    // (docs/diseno-limpieza-calidad-instrumento.md §3.1).
     const canonical = JSON.stringify({
       assessmentId: input.assessmentId,
       analysisType: input.analysisType,
       audience: input.audience,
       classGroupId: input.classGroupId,
+      promptVersion: promptVersionFor(input.analysisType),
       ...(input.itemId !== undefined ? { itemId: input.itemId } : {}),
     });
     return createHash('sha256').update(canonical).digest('hex');
