@@ -30,6 +30,7 @@
  *   Commit:   ... --commit
  *
  * Args: --org=<uuid> --year=<año> --levels=<code:credit,...> --min-coverage=<0..1>
+ *       --only=<instrumento,...>  (substring del nombre; acota la corrida)
  */
 import postgres from 'postgres';
 import { drizzle } from 'drizzle-orm/postgres-js';
@@ -68,6 +69,21 @@ const LEVEL_LABELS: Record<string, string> = {
   '1': 'Parcialmente correcta',
   '2': 'Correcta',
 };
+
+/**
+ * Restringe la corrida a ciertos instrumentos (substring del nombre). La BDD demo
+ * la comparten varias sesiones: una corrida "de todo el año" re-tipifica ítems de
+ * una carga ajena en curso y le deja las respuestas pendientes hasta que esa
+ * sesión vuelva a corregir. Vacío = todos.
+ */
+const ONLY = opt('only', '')
+  .split(',')
+  .map((s) => s.trim())
+  .filter(Boolean);
+
+function isInScope(instrumentName: string): boolean {
+  return ONLY.length === 0 || ONLY.some((pattern) => instrumentName.includes(pattern));
+}
 
 /** El `responseFormat` con el que el pipeline marca "desarrollo evaluado por pauta". */
 const RUBRIC_RESPONSE_FORMAT = 'develop';
@@ -184,6 +200,7 @@ async function main() {
     const toRetype: Array<{ item: Candidate; outside: Array<{ value: string; n: number }> }> = [];
     const skipped: Array<{ item: Candidate; reason: string }> = [];
     for (const item of candidates) {
+      if (!isInScope(item.instrumentName)) continue;
       const declared = (item.scoringConfig as { responseFormat?: unknown } | null)?.responseFormat;
       if (declared !== RUBRIC_RESPONSE_FORMAT) {
         skipped.push({ item, reason: `responseFormat="${String(declared ?? '-')}" (no es pauta)` });
@@ -215,7 +232,11 @@ async function main() {
     console.log(
       `  señales: responseFormat="${RUBRIC_RESPONSE_FORMAT}" + cobertura ≥ ${(MIN_COVERAGE * 100).toFixed(0)}%`,
     );
-    console.log(`  candidatos open_ended: ${candidates.length}`);
+    const inScope = candidates.filter((c) => isInScope(c.instrumentName));
+    console.log(
+      `  candidatos open_ended: ${inScope.length}` +
+        (ONLY.length ? ` (de ${candidates.length}; --only=${ONLY.join(', ')})` : ''),
+    );
     console.log(`  a re-tipificar: ${toRetype.length}\n`);
     let pendingCells = 0;
     for (const { item, outside } of toRetype) {

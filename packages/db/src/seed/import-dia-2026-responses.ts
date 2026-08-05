@@ -55,10 +55,9 @@ import {
   aggregateSkillResults,
   DEFAULT_GRADING_SCALE,
   normalizeRut,
-  getScoringStrategy,
-  parsePositionalMatchingAnswer,
+  maxScoreOf,
+  scoreAnswerSheetCell,
   type ItemContent,
-  type MatchingSide,
   type ResponseForCalculation,
   type ResponseForItemStats,
   type ScoringConfig,
@@ -141,48 +140,16 @@ function itemHasAlternatives(content: unknown): boolean {
   return Array.isArray(alternatives) && alternatives.length > 0;
 }
 
-function matchingSidesOf(content: unknown, side: 'leftItems' | 'rightItems'): MatchingSide[] {
-  const raw = (content as Record<string, unknown> | null)?.[side];
-  if (!Array.isArray(raw)) return [];
-  return raw.flatMap((entry) => {
-    if (!entry || typeof entry !== 'object') return [];
-    const { id } = entry as { id?: unknown };
-    return typeof id === 'string' ? [{ id }] : [];
-  });
-}
-
-/**
- * Traduce la celda de la planilla al `rawAnswer` que espera la estrategia del
- * tipo. Sólo `matching` necesita traducción: la hoja trae una secuencia
- * posicional de dígitos ("2,5,3,4") y la estrategia corrige contra
- * `content.correctPairs`. Los demás tipos consumen el string tal cual.
- *
- * Este es el único conocimiento del formato de la planilla que queda en el
- * importador. La corrección en sí no vive acá: la hace `getScoringStrategy`, la
- * misma que usa la app, para que la ingesta y el análisis por ítem no puedan
- * volver a discrepar.
- */
-function toStrategyAnswer(item: ScorableItem, answer: string | null): unknown {
-  if (answer === null) return null;
-  if (item.type !== 'matching') return answer;
-  return parsePositionalMatchingAnswer(
-    answer,
-    matchingSidesOf(item.content, 'leftItems'),
-    matchingSidesOf(item.content, 'rightItems'),
-  );
-}
-
-function scoreWithRegistry(item: ScorableItem, maxScore: number, answer: string | null) {
-  return getScoringStrategy(item.type).score({
-    item: {
+function scoreWithRegistry(item: ScorableItem, answer: string | null) {
+  return scoreAnswerSheetCell(
+    {
       id: item.id,
       type: item.type,
       content: item.content as ItemContent,
-      maxScore,
-      scoringConfig: (item.scoringConfig ?? undefined) as ScoringConfig | undefined,
+      scoringConfig: item.scoringConfig as ScoringConfig | null,
     },
-    rawAnswer: toStrategyAnswer(item, answer),
-  });
+    answer,
+  );
 }
 
 function splitFullName(nombre: string): { firstName: string; lastName: string } {
@@ -521,13 +488,12 @@ async function main() {
         studentIds.push(studentId);
 
         for (const item of instrumentItems) {
-          const maxScore = (item.scoringConfig as { points?: number } | null)?.points ?? 1;
+          const maxScore = maxScoreOf(item);
           const rawAnswer = row.answers[String(item.position)] ?? null;
           const nodeIds = tagsByItem.get(item.id) ?? [];
 
-          const answer =
-            typeof rawAnswer === 'string' && rawAnswer.trim() ? rawAnswer.trim() : null;
-          const outcome = scoreWithRegistry(item, maxScore, answer);
+          const answer = typeof rawAnswer === 'string' ? rawAnswer : null;
+          const outcome = scoreWithRegistry(item, answer);
           const isCorrect = outcome.isCorrect;
           const scoreOrNull = outcome.rawScore;
 
