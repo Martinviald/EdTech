@@ -649,8 +649,17 @@ describe('SCORING_STRATEGIES (registro de estrategias por tipo)', () => {
       ).toBe(7.2);
     });
 
-    it('un código no declarado queda pendiente, nunca en cero', () => {
-      for (const raw of ['01', '12', 'x', null, '']) {
+    it('tolera el cero a la izquierda: "01" es el nivel 1', () => {
+      const padded = getScoringStrategy('rubric_scored').score(input('rubric_scored', dia, '01'));
+      const plain = getScoringStrategy('rubric_scored').score(input('rubric_scored', dia, '1'));
+      expect(padded).toEqual(plain);
+      expect(
+        getScoringStrategy('rubric_scored').score(input('rubric_scored', dia, '02')).rawScore,
+      ).toBe(1);
+    });
+
+    it('la tolerancia no se estira a un código que no existe', () => {
+      for (const raw of ['12', 'x', '1.0', null, '']) {
         const out = getScoringStrategy('rubric_scored').score(input('rubric_scored', dia, raw));
         expect(out).toEqual({ isCorrect: null, rawScore: null, requiresManualGrading: true });
       }

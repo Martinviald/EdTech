@@ -8,5 +8,7 @@ export * from './taxonomy-kind';
 export * from './true-false';
 export * from './multi-select';
 export * from './short-answer';
+export * from './matching-answer';
+export * from './rubric-code';
 export * from './item-scoring';
 export * from './response-display';
