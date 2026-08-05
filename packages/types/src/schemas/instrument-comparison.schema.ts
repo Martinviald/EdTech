@@ -85,7 +85,7 @@ export type ComparableAssessmentsResponse = z.infer<typeof comparableAssessments
 
 // ============================================================================
 // Snapshot DETERMINISTA por lado (input que ensambla el backend, sin PII).
-// Reusa el snapshot de evaluación (contenido + psicometría) y lo enriquece con
+// Reusa el snapshot de evaluación (contenido + resultados) y lo enriquece con
 // alternativas y pasajes para el análisis de contenido.
 // ============================================================================
 

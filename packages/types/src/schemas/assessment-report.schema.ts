@@ -11,8 +11,8 @@ import type { PerformanceBandView } from './performance-band.schema';
 // Informe de Evaluación (H6.13) — vista consolidada y conclusiva por evaluación
 // para el equipo directivo / UTP. A diferencia de los dashboards exploratorios,
 // reúne en una sola respuesta: ficha técnica, síntesis ejecutiva, distribución,
-// comparativa por curso, fortalezas/brechas por habilidad, análisis psicométrico
-// de ítems (dificultad + discriminación) y recomendaciones accionables.
+// comparativa por curso, fortalezas/brechas por habilidad, análisis de ítems
+// (% de logro + distractores) y recomendaciones accionables.
 //
 // Módulo backend: apps/api/src/assessment-report/ (ruta /api/analytics/assessment-report)
 // El scoping por rol lo aplica el service (directivo = toda la org; profesor =
@@ -136,7 +136,7 @@ export type AssessmentReportSkillRow = {
   performanceBand?: PerformanceBandView | null;
 };
 
-/** Análisis psicométrico de un ítem. */
+/** Comportamiento de un ítem en la evaluación. */
 export type AssessmentReportItemRow = {
   itemId: string;
   position: number;
@@ -167,11 +167,7 @@ export type AssessmentReportRiskStudent = {
   weakestSkill: string | null; // habilidad con menor logro del alumno
 };
 
-export const RECOMMENDATION_TYPES = [
-  'reteach_skill',
-  'support_students',
-  'celebrate',
-] as const;
+export const RECOMMENDATION_TYPES = ['reteach_skill', 'support_students', 'celebrate'] as const;
 export type RecommendationType = (typeof RECOMMENDATION_TYPES)[number];
 
 /** Recomendación accionable derivada por reglas (no IA en F1). */

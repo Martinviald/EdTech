@@ -106,9 +106,9 @@ export function ItemsAnalysisTable({
       <CardHeader>
         <CardTitle className="text-base">Análisis de preguntas</CardTitle>
         <p className="text-sm text-muted-foreground">
-          % de logro de cada pregunta y alternativa incorrecta más elegida. «Error dominante»
-          marca las preguntas donde el curso se fue en masa por la misma alternativa
-          equivocada. Haz clic en una pregunta para ver su detalle.
+          % de logro de cada pregunta y alternativa incorrecta más elegida. «Error dominante» marca
+          las preguntas donde el curso se fue en masa por la misma alternativa equivocada. Haz clic
+          en una pregunta para ver su detalle.
         </p>
       </CardHeader>
       <CardContent className="space-y-4">
@@ -224,15 +224,11 @@ function FlagsLegend(): JSX.Element {
         logrado.
       </span>
       <span>
-        <strong className="text-foreground">Baja discriminación</strong>: D&nbsp;&lt;&nbsp;0,2 —
-        posible problema de redacción/clave.
+        <strong className="text-foreground">Error dominante</strong>: una alternativa incorrecta
+        atrae más que la clave — misconcepción compartida por el curso.
       </span>
       <span>
-        <strong className="text-foreground">Distractor potente</strong>: una alternativa incorrecta
-        atrae más que la clave.
-      </span>
-      <span>
-        <strong className="text-foreground">Muy fácil</strong>: ≥85% de logro.
+        <strong className="text-foreground">Logro alto</strong>: ≥85% de logro.
       </span>
     </div>
   );

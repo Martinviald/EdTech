@@ -14,7 +14,7 @@ import type { OfficialReportMeta } from './official-report-common.schema';
 //
 // Replica las 6 secciones del informe oficial (hoy DIA) como PLANTILLA sobre los
 // datos que la plataforma ya calcula (assessment_results, skill_results,
-// responses). Reutiliza el análisis psicométrico y de habilidades del
+// responses). Reutiliza el análisis de ítems y de habilidades del
 // assessment-report interno; agrega la tabla de especificaciones con distribución
 // por alternativa y el listado COMPLETO de estudiantes.
 // ─────────────────────────────────────────────────────────────────────────────

@@ -9,7 +9,7 @@
 //     recomendaciones).
 //   • PDF (.pdf): un documento que reproduce la vista — ficha técnica, KPIs,
 //     fortalezas/brechas y cada sección como tabla, con la MISMA codificación de
-//     color que la pantalla (niveles de desempeño, dificultad/discriminación,
+//     color que la pantalla (niveles de desempeño, % de logro,
 //     brecha por curso y prioridad de recomendaciones).
 // No hace fetch: opera sobre el AssessmentReportResponse ya cargado.
 // ─────────────────────────────────────────────────────────────────────────────
@@ -233,7 +233,7 @@ async function buildWorkbook(report: AssessmentReportResponse, base: string) {
     ]),
   );
 
-  // Hoja 5 — Análisis de preguntas (psicometría).
+  // Hoja 5 — Análisis de preguntas.
   appendSheet(
     wb,
     'Análisis de preguntas',
@@ -294,7 +294,6 @@ async function buildWorkbook(report: AssessmentReportResponse, base: string) {
 
   XLSX.writeFile(wb, `${base}.xlsx`);
 }
-
 
 // ── PDF: documento completo con estilo ────────────────────────────────────────
 
@@ -496,9 +495,7 @@ async function buildPdf(report: AssessmentReportResponse, base: string) {
     const items = report.items;
     autoTable(doc, {
       startY: y + 4,
-      head: [
-        ['N°', 'Habilidad / contenido', 'Clave', '% de logro', 'Distractor', 'Alertas'],
-      ],
+      head: [['N°', 'Habilidad / contenido', 'Clave', '% de logro', 'Distractor', 'Alertas']],
       body: items.map((i) => [
         String(i.position),
         i.skillName ?? i.contentName ?? '—',

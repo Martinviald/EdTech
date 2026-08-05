@@ -81,7 +81,7 @@ describe('CapabilityGuard', () => {
   });
 
   it('NO exime al platform_admin: es disponibilidad de dato, no permiso', async () => {
-    const guard = guardFor('psychometrics', { dataGranularity: 'aggregate_only' });
+    const guard = guardFor('student_detail', { dataGranularity: 'aggregate_only' });
     const ctx = mockContext({ orgId: 'org-1', isPlatformAdmin: true }, { assessmentId: UUID });
     await expect(guard.canActivate(ctx)).rejects.toThrow(ConflictException);
   });

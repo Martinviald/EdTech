@@ -8,7 +8,7 @@ import { ItemInsightSnapshotService } from './item-insight.snapshot';
 // ──────────────────────────────────────────────────────────────────────────────
 // Mocks: ItemAnalysisService.getQuestionAnalysis y AssessmentReportService.getReport,
 // más un DB mock que secuencia los select() de loadItemMeta / loadPassage /
-// loadSectionImages / computePointBiserial. fetch global se stubbea por prueba.
+// loadSectionImages. fetch global se stubbea por prueba.
 // ──────────────────────────────────────────────────────────────────────────────
 
 function makeUser(overrides: Partial<JwtPayload> = {}): JwtPayload {
@@ -105,7 +105,6 @@ function makeReport(): AssessmentReportResponse {
         blankCount: 1,
         totalResponses: 25,
         difficulty: 28, // %
-        discrimination: 0.12,
         topDistractorKey: 'D',
         topDistractorRate: 44,
         flags: [],
@@ -137,13 +136,7 @@ function makeService(
 
 // Secuencia DB para el caso sin sección (sin pasaje ni adjuntos):
 //  1) loadItemMeta → items (instrumentId, sectionId=null, content)
-//  2) computePointBiserial → items del instrumento
-//  3) computePointBiserial → responses
-function dbNoSection(opts?: {
-  itemMeta?: Record<string, unknown>;
-  instrumentItems?: Array<{ itemId: string }>;
-  responses?: unknown[];
-}): Database {
+function dbNoSection(opts?: { itemMeta?: Record<string, unknown> }): Database {
   return makeDb([
     [
       opts?.itemMeta ?? {
@@ -152,18 +145,11 @@ function dbNoSection(opts?: {
         content: {},
       },
     ],
-    opts?.instrumentItems ?? [{ itemId: 'item-1' }, { itemId: 'item-2' }],
-    opts?.responses ?? [
-      { studentId: 's1', itemId: 'item-1', isCorrect: true },
-      { studentId: 's1', itemId: 'item-2', isCorrect: true },
-      { studentId: 's2', itemId: 'item-1', isCorrect: false },
-      { studentId: 's2', itemId: 'item-2', isCorrect: false },
-    ],
   ]);
 }
 
 describe('ItemInsightSnapshotService.build', () => {
-  it('arma el snapshot reusando getQuestionAnalysis + getReport (psicometría)', async () => {
+  it('arma el snapshot reusando getQuestionAnalysis + getReport', async () => {
     const db = dbNoSection();
     const { service, getQuestionAnalysis, getReport } = makeService(
       db,
@@ -186,7 +172,6 @@ describe('ItemInsightSnapshotService.build', () => {
     expect(snapshot.position).toBe(7);
     expect(snapshot.instrumentName).toBe('DIA Lenguaje');
     expect(snapshot.difficulty).toBeCloseTo(0.28); // 28% → 0..1
-    expect(snapshot.discrimination).toBe(0.12);
     expect(snapshot.correctKey).toBe('B');
     expect(snapshot.skillName).toBe('Inferir');
     expect(snapshot.passage).toBeNull();
@@ -202,14 +187,16 @@ describe('ItemInsightSnapshotService.build', () => {
     expect(snapshot.dominantDistractor).toBe('D'); // 11 > 4 > 3, clave B excluida
   });
 
-  it('calcula punto-biserial desde la matriz de respuestas', async () => {
+  it('el snapshot no expone métricas de calidad del instrumento', async () => {
     const db = dbNoSection();
     const { service } = makeService(db, makeQuestion(), makeReport());
     const { snapshot } = await service.build(makeUser(), 'item-1', {
       assessmentId: 'as-1',
     });
-    expect(snapshot.pointBiserial).not.toBeNull();
-    expect(typeof snapshot.pointBiserial).toBe('number');
+    const serialized = JSON.stringify(snapshot);
+    for (const forbidden of ['discrimination', 'pointBiserial', 'kr20']) {
+      expect(serialized).not.toContain(forbidden);
+    }
   });
 
   it('incluye el pasaje cuando la sección tiene passageText', async () => {

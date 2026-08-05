@@ -36,11 +36,11 @@ export class AiAnalysisController {
    * `{ analysisId, status }` para que el frontend haga polling con `GET /:id`.
    *
    * `@RequireCapability('ai_item_insight')`: el snapshot lee `responses` para armar
-   * la ScoreMatrix y la psicometría por ítem. Sin ellas `assembleItems` NO lanza —
-   * arma ítems con `distribution: {}` y `pointBiserial: null`, y el LLM recibe un
-   * snapshot con alumnos y habilidades pero sin evidencia, sin ninguna señal de "no
-   * aplica". Generar el informe igual sería invitar a la alucinación, así que se
-   * cierra antes de encolar. Ver docs/plan-analitica-agregada-informes-oficiales.md §2.8.
+   * la distribución de alternativas por ítem. Sin ellas `assembleItems` NO lanza —
+   * arma ítems con `distribution: {}`, y el LLM recibe un snapshot con alumnos y
+   * habilidades pero sin evidencia, sin ninguna señal de "no aplica". Generar el
+   * informe igual sería invitar a la alucinación, así que se cierra antes de
+   * encolar. Ver docs/plan-analitica-agregada-informes-oficiales.md §2.8.
    */
   @Post('assessments/:assessmentId/generate')
   @Roles(...AI_ANALYSIS_GENERATOR_ROLES)

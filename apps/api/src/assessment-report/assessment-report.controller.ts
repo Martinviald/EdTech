@@ -15,7 +15,7 @@ export class AssessmentReportController {
    * GET /api/analytics/assessment-report  (H6.13)
    * Informe consolidado de una evaluación para directivos / UTP: ficha técnica,
    * síntesis ejecutiva, distribución, comparativa por curso, fortalezas/brechas
-   * por habilidad, análisis psicométrico de ítems y recomendaciones accionables.
+   * por habilidad, análisis de ítems y recomendaciones accionables.
    */
   @Get('assessment-report')
   @Roles(...ANALYTICS_VIEWER_ROLES)

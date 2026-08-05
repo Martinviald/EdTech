@@ -1,9 +1,8 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { and, asc, eq, inArray, isNull, sql } from 'drizzle-orm';
+import { and, asc, eq, isNull, sql } from 'drizzle-orm';
 import {
   instrumentSections,
   items,
-  responses,
   sectionAttachments,
   studentEnrollments,
   students,
@@ -31,9 +30,9 @@ const IMAGE_FETCH_TIMEOUT_MS = 8_000;
  *
  * Reúsa `ItemAnalysisService.getQuestionAnalysis` (scoping + tenancy + enunciado,
  * alternativas/distribución, distractor dominante, correctKey, tags, imageUrl) y
- * `AssessmentReportService.getReport` (psicometría p / D por ítem), añade
- * punto-biserial (matriz de aciertos), el pasaje de la sección y las imágenes
- * fetcheadas a base64 (best-effort, solo URLs http(s)).
+ * `AssessmentReportService.getReport` (% de logro y contentName por ítem), añade
+ * el pasaje de la sección y las imágenes fetcheadas a base64 (best-effort, solo
+ * URLs http(s)).
  *
  * Multi-tenancy: el `orgId` proviene del token (`user.orgId`); toda query a tablas
  * con RLS corre dentro de `withOrgContext`. El snapshot NUNCA contiene PII de
@@ -62,7 +61,7 @@ export class ItemInsightSnapshotService implements ItemInsightBuilder {
       classGroupId: opts.classGroupId,
     });
 
-    // 2) Psicometría del informe (p, D, contentName) — busca el ítem por position.
+    // 2) Datos del informe (% de logro, contentName) — busca el ítem por position.
     const report = await this.reportService.getReport(user, {
       assessmentId: opts.assessmentId,
       classGroupId: opts.classGroupId,
@@ -76,9 +75,7 @@ export class ItemInsightSnapshotService implements ItemInsightBuilder {
       orgId,
       async (tx) => {
         const meta = await this.loadItemMeta(tx, itemId);
-        const passage = meta?.sectionId
-          ? await this.loadPassage(tx, meta.sectionId)
-          : null;
+        const passage = meta?.sectionId ? await this.loadPassage(tx, meta.sectionId) : null;
         const sectionImages = meta?.sectionId
           ? await this.loadSectionImages(tx, meta.sectionId)
           : [];
@@ -91,10 +88,7 @@ export class ItemInsightSnapshotService implements ItemInsightBuilder {
     );
 
     // 4) Imágenes a base64 (best-effort): item + sección. Solo URLs http(s).
-    const { snapshotImages, llmImages } = await this.fetchImages(
-      itemImageUrl,
-      sectionImages,
-    );
+    const { snapshotImages, llmImages } = await this.fetchImages(itemImageUrl, sectionImages);
 
     const difficulty =
       reportItem?.difficulty === null || reportItem?.difficulty === undefined
@@ -231,7 +225,6 @@ export class ItemInsightSnapshotService implements ItemInsightBuilder {
       .map((r) => ({ url: r.url, mimeType: r.mimeType, note: r.note }));
   }
 
-
   /**
    * IDs de alumnos matriculados en un curso, acotados a la org y no eliminados.
    * Sin PII en la salida: solo se usan para filtrar la matriz de aciertos y se
@@ -308,9 +301,7 @@ export class ItemInsightSnapshotService implements ItemInsightBuilder {
    * null si falla, excede el tamaño máximo o el content-type no es imagen — el
    * análisis sigue en modo texto. No lanza: nunca debe tumbar el ensamblado.
    */
-  private async fetchAsBase64(
-    url: string,
-  ): Promise<{ data: string; mimeType: string } | null> {
+  private async fetchAsBase64(url: string): Promise<{ data: string; mimeType: string } | null> {
     const controller = new AbortController();
     const timer = setTimeout(() => controller.abort(), IMAGE_FETCH_TIMEOUT_MS);
     try {
@@ -342,9 +333,7 @@ export class ItemInsightSnapshotService implements ItemInsightBuilder {
 
   private requireOrgId(user: JwtPayload): string {
     if (!user.orgId) {
-      throw new Error(
-        'Sin organización activa. Selecciona una organización antes de continuar.',
-      );
+      throw new Error('Sin organización activa. Selecciona una organización antes de continuar.');
     }
     return user.orgId;
   }

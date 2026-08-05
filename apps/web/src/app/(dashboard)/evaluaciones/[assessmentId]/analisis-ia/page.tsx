@@ -89,7 +89,7 @@ async function AnalisisIaContent({
   const audience = activeRole === 'teacher' ? 'teacher' : 'director';
 
   // El snapshot que alimenta al LLM lee `responses`. Sin ellas el informe se
-  // generaría sobre una matriz vacía y sin psicometría, pero sin ninguna señal de
+  // generaría sobre una matriz vacía, pero sin ninguna señal de
   // "no aplica" → alucinación probable. Se cierra sólo el GENERAR: un análisis ya
   // existente se sigue viendo (se generó cuando el dato sí estaba).
   const canGenerate = await assessmentSupports(assessmentId, 'ai_item_insight');

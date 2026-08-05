@@ -12,7 +12,6 @@ import {
   instruments,
   itemTaxonomyTags,
   items,
-  responses,
   skillResults,
   studentEnrollments,
   students,
@@ -161,8 +160,8 @@ export class AssessmentReportService {
       // Dos resoluciones del MISMO scope, para las dos capas del informe (mismo
       // patrón y misma semántica que `ItemAnalysisService.getMatrix`):
       //  · classGroupFilter → la capa agregable (read-model de cohorte, grano curso).
-      //  · studentFilter    → lo irreducible sobre `responses` (la discriminación
-      //    necesita el puntaje de cada alumno para partir la cohorte en 27%/27%).
+      //  · studentFilter    → lo irreducible por alumno (niveles, alumnos en foco),
+      //    que necesita el registro individual y no se deriva de conteos por curso.
       // `null` significa lo mismo en ambas: scopeAll sin filtro.
       const classGroupFilter = this.resolveAccessibleClassGroupIds(scope, query.classGroupId);
       const studentFilter = await this.resolveAccessibleStudentIds(
@@ -591,7 +590,7 @@ export class AssessmentReportService {
   }
 
   // ───────────────────────────────────────────────────────────────────────────
-  // Análisis psicométrico de ítems
+  // Análisis de ítems (% de logro, distractores y flags de aprendizaje)
   // ───────────────────────────────────────────────────────────────────────────
 
   private async buildItemAnalysis(
@@ -1184,7 +1183,6 @@ export class AssessmentReportService {
     return result;
   }
 
-
   /** Habilidad de menor logro por alumno (1 query, dedupe en JS). */
   private async loadWeakestSkillPerStudent(
     db: Database,
@@ -1387,8 +1385,8 @@ export class AssessmentReportService {
 
   /**
    * studentIds visibles combinando scope + filtro por curso. `null` = scopeAll sin
-   * filtro. Sólo para lo irreducible sobre `responses` (la discriminación); la capa
-   * agregable usa `resolveAccessibleClassGroupIds`.
+   * filtro. Sólo para lo irreducible por alumno; la capa agregable usa
+   * `resolveAccessibleClassGroupIds`.
    */
   private async resolveAccessibleStudentIds(
     db: Database,
