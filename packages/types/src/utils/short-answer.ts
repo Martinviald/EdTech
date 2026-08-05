@@ -15,7 +15,7 @@
 export type ShortAnswerMatch = 'match' | 'mismatch' | 'undecidable';
 
 export type ShortAnswerOptions = {
-  comparison?: 'numeric' | 'text';
+  comparison?: 'numeric' | 'text' | 'sequence';
   unit?: string;
   caseSensitive?: boolean;
 };
@@ -78,10 +78,100 @@ function looksNumeric(value: string): boolean {
   return parseRational(value) !== null;
 }
 
+// ── Secuencias: coordenadas y órdenes ────────────────────────────────────────
+//
+// Un par de coordenadas ("(5,6)") y un orden ("3-1-4-2") son el mismo objeto:
+// una lista ORDENADA de números. Lo que cambia es cómo se escribe, y ahí la hoja
+// de respuestas es brutal — el escáner lee casillas contiguas y las concatena, así
+// que la respuesta más común a "(5,6)" es "56" y a "3-1-4-2" es "3142".
+//
+// La aridad la fija la CLAVE, no la respuesta: sabiendo que se esperan 2 números
+// se puede leer "56" como (5,6) sin adivinar. Por eso los intentos van del
+// separador más explícito al más implícito, y sólo se acepta el que produzca
+// exactamente la cantidad esperada.
+
+const OPEN_CLOSE = /^\((.*)\)$/;
+const EXPLICIT_SEPARATORS = /[,;/|\s]+/;
+
+function stripOuterParens(value: string): string {
+  const match = OPEN_CLOSE.exec(value.trim());
+  return match ? (match[1] as string).trim() : value.trim();
+}
+
+function allIntegers(parts: readonly Rational[]): boolean {
+  return parts.every((p) => p.denominator === 1);
+}
+
+function toRationals(tokens: readonly string[]): Rational[] | null {
+  const out: Rational[] = [];
+  for (const token of tokens) {
+    const parsed = parseRational(token.trim());
+    if (parsed === null) return null;
+    out.push(parsed);
+  }
+  return out;
+}
+
+/**
+ * Lee la clave como secuencia. Sólo lo es cuando lo declara explícitamente:
+ * paréntesis, punto y coma, o guiones entre dígitos. Un `11,5` suelto NO es
+ * secuencia — es un decimal con coma, y tratarlo como (11,5) rompería los ítems
+ * numéricos que ya funcionan.
+ */
+function parseKeySequence(raw: string): Rational[] | null {
+  const trimmed = collapseWhitespace(raw);
+  const hasParens = OPEN_CLOSE.test(trimmed);
+  const inner = stripOuterParens(trimmed);
+  const hasSemicolon = inner.includes(';');
+  const hasInnerDash = /\d\s*-\s*\d/.test(inner);
+  if (!hasParens && !hasSemicolon && !hasInnerDash) return null;
+
+  const tokens = inner.split(hasInnerDash ? /[,;/|\s-]+/ : EXPLICIT_SEPARATORS).filter(Boolean);
+  if (tokens.length < 2) return null;
+  return toRationals(tokens);
+}
+
+/**
+ * Lee la respuesta del alumno como secuencia de `arity` números. `keyIsIntegers`
+ * habilita el punto como separador ("3.3" = (3,3)): sólo tiene sentido cuando la
+ * clave no tiene decimales, o se estaría partiendo un número en dos.
+ */
+function parseAnswerSequence(
+  raw: string,
+  arity: number,
+  keyIsIntegers: boolean,
+): Rational[] | null {
+  const inner = stripOuterParens(collapseWhitespace(raw));
+
+  const attempts: string[][] = [inner.split(EXPLICIT_SEPARATORS).filter(Boolean)];
+  if (/\d\s*-\s*\d/.test(inner)) {
+    attempts.push(inner.split(/(?<=\d)\s*-\s*(?=\d)/).filter(Boolean));
+  }
+  if (keyIsIntegers && inner.includes('.')) {
+    attempts.push(inner.split(/[.,;/|\s]+/).filter(Boolean));
+  }
+  if (keyIsIntegers && /^\d+$/.test(inner) && inner.length === arity) {
+    attempts.push(inner.split(''));
+  }
+
+  for (const tokens of attempts) {
+    if (tokens.length !== arity) continue;
+    const parsed = toRationals(tokens);
+    if (parsed !== null) return parsed;
+  }
+  return null;
+}
+
+function sameSequence(a: readonly Rational[], b: readonly Rational[]): boolean {
+  return a.length === b.length && a.every((value, i) => sameRational(value, b[i] as Rational));
+}
+
 /** Deriva el modo de comparación cuando el ítem no lo declara. */
-export function inferComparisonMode(accepted: readonly string[]): 'numeric' | 'text' {
+export function inferComparisonMode(accepted: readonly string[]): 'numeric' | 'text' | 'sequence' {
   const cleaned = accepted.map((a) => collapseWhitespace(a)).filter(Boolean);
-  return cleaned.length > 0 && cleaned.every(looksNumeric) ? 'numeric' : 'text';
+  if (cleaned.length === 0) return 'text';
+  if (cleaned.every((a) => parseKeySequence(a) !== null)) return 'sequence';
+  return cleaned.every(looksNumeric) ? 'numeric' : 'text';
 }
 
 /**
@@ -102,6 +192,16 @@ export function matchesAcceptedAnswer(
 
   const mode = options.comparison ?? inferComparisonMode(accepted);
   const withoutUnit = collapseWhitespace(stripUnit(cleaned, options.unit));
+
+  if (mode === 'sequence') {
+    for (const candidate of accepted) {
+      const key = parseKeySequence(candidate);
+      if (key === null) continue;
+      const given = parseAnswerSequence(withoutUnit, key.length, allIntegers(key));
+      if (given !== null && sameSequence(given, key)) return 'match';
+    }
+    return 'mismatch';
+  }
 
   if (mode === 'numeric') {
     const normalized = tightenFractionSlash(withoutUnit);

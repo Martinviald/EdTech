@@ -92,3 +92,54 @@ describe('matchesAcceptedAnswer — indecidibles', () => {
     expect(matchesAcceptedAnswer('24', [])).toBe('undecidable');
   });
 });
+
+describe('comparación por secuencia (coordenadas y órdenes)', () => {
+  it('infiere secuencia sólo cuando la clave lo declara', () => {
+    expect(inferComparisonMode(['(5,6)'])).toBe('sequence');
+    expect(inferComparisonMode(['(0;4)'])).toBe('sequence');
+    expect(inferComparisonMode(['3-1-4-2'])).toBe('sequence');
+    expect(inferComparisonMode(['(2, -4)'])).toBe('sequence');
+  });
+
+  it('un decimal con coma NO es una secuencia', () => {
+    expect(inferComparisonMode(['11,5'])).toBe('numeric');
+    expect(inferComparisonMode(['2,5'])).toBe('numeric');
+    expect(matchesAcceptedAnswer('11.5', ['11,5'])).toBe('match');
+  });
+
+  it('acepta la coordenada escrita de todas las formas de la hoja', () => {
+    for (const raw of ['(5,6)', '5,6', '5;6', '5 6', '56']) {
+      expect(matchesAcceptedAnswer(raw, ['(5,6)'])).toBe('match');
+    }
+  });
+
+  it('el punto separa coordenadas cuando la clave son enteros', () => {
+    expect(matchesAcceptedAnswer('1.5', ['(1;5)'])).toBe('match');
+    expect(matchesAcceptedAnswer('3.3', ['(1;5)'])).toBe('mismatch');
+  });
+
+  it('respeta los negativos en vez de partirlos por el guion', () => {
+    expect(matchesAcceptedAnswer('-3,-2', ['(-3;-2)'])).toBe('match');
+    expect(matchesAcceptedAnswer('4,-3', ['(4;-3)'])).toBe('match');
+  });
+
+  it('lee el orden con y sin separadores', () => {
+    for (const raw of ['3142', '3-1-4-2', '3,1,4,2', '3 1 4 2']) {
+      expect(matchesAcceptedAnswer(raw, ['3-1-4-2'])).toBe('match');
+    }
+    expect(matchesAcceptedAnswer('4132', ['3-1-4-2'])).toBe('mismatch');
+    expect(matchesAcceptedAnswer('4-2-3-1', ['3-1-4-2'])).toBe('mismatch');
+  });
+
+  it('no inventa una lectura cuando la cantidad de números no calza', () => {
+    expect(matchesAcceptedAnswer('5645', ['(5,6)'])).toBe('mismatch');
+    expect(matchesAcceptedAnswer('(3,1)(2,3)', ['(1;5)'])).toBe('mismatch');
+    expect(matchesAcceptedAnswer('no visto en clases', ['(1;5)'])).toBe('mismatch');
+    expect(matchesAcceptedAnswer('14', ['3-1-4-2'])).toBe('mismatch');
+  });
+
+  it('el orden importa', () => {
+    expect(matchesAcceptedAnswer('65', ['(5,6)'])).toBe('mismatch');
+    expect(matchesAcceptedAnswer('6,5', ['(5,6)'])).toBe('mismatch');
+  });
+});

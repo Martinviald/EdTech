@@ -226,6 +226,7 @@ async function main() {
     const toConvert: Array<{
       item: Candidate;
       accepted: string[];
+      comparison: 'numeric' | 'sequence';
       agreement: number;
       total: number;
     }> = [];
@@ -245,10 +246,11 @@ async function main() {
         held.push({ item, reason: `clave vacía tras normalizar ("${fillAnswer}")` });
         continue;
       }
-      if (inferComparisonMode(accepted) !== 'numeric') {
+      const comparison = inferComparisonMode(accepted);
+      if (comparison === 'text') {
         held.push({
           item,
-          reason: `la clave "${fillAnswer}" no es una cantidad (par de coordenadas u orden) — el comparador aún no la entiende`,
+          reason: `la clave "${fillAnswer}" no es ni una cantidad ni una secuencia — se corrige a mano`,
         });
         continue;
       }
@@ -275,7 +277,7 @@ async function main() {
         continue;
       }
 
-      toConvert.push({ item, accepted, agreement, total });
+      toConvert.push({ item, accepted, comparison, agreement, total });
     }
 
     const inScope = candidates.filter((c) => isInScope(c.instrumentName));
@@ -307,12 +309,12 @@ async function main() {
     }
     if (toConvert.length === 0) return;
 
-    for (const { item, accepted } of toConvert) {
+    for (const { item, accepted, comparison } of toConvert) {
       const extracted = extraction.get(item.instrumentName)?.get(item.position);
       const content = shortAnswerContentSchema.parse({
         prompt: promptOf(item.content, extracted?.stem ?? 'Pregunta de respuesta corta'),
         acceptedAnswers: accepted,
-        comparison: 'numeric',
+        comparison,
       });
       await tx
         .update(items)

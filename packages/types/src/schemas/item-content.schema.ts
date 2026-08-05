@@ -230,7 +230,7 @@ export const gapFillContentSchema = z.object({
 export const shortAnswerContentSchema = z.object({
   prompt: z.string().min(1),
   acceptedAnswers: z.array(z.string().min(1)).min(1),
-  comparison: z.enum(['numeric', 'text']).optional(),
+  comparison: z.enum(['numeric', 'text', 'sequence']).optional(),
   unit: z.string().min(1).optional(),
   caseSensitive: z.boolean().optional(),
   ...baseContent,
