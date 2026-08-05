@@ -53,7 +53,6 @@ export default async function EvaluacionAnalisisIaPage({
         analysisId={analysisId}
         classGroupId={classGroupId}
         activeRole={session.user.activeRole}
-        roles={session.user.roles}
       />
     </Suspense>
   );
@@ -73,13 +72,11 @@ async function AnalisisIaContent({
   analysisId,
   classGroupId,
   activeRole,
-  roles,
 }: {
   assessmentId: string;
   analysisId: string | undefined;
   classGroupId: string | undefined;
   activeRole: UserRole;
-  roles: readonly UserRole[];
 }) {
   if (!(await isFeatureEnabled('ai_analysis'))) {
     return <FeatureUpgradeNotice feature="ai_analysis" />;
