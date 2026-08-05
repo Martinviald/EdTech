@@ -96,6 +96,12 @@ reutilizará el motor proactivo (#3B capa 2):
 | **D5** | `dashboards.service.ts:1200+` → `getTeacherKpis` | `averageAchievement`, `passingRate`, `criticalStudents` por curso agregando todas sus evaluaciones | Mismo defecto que D1, a grano curso. "Mi 7°A tiene 68%" no dice nada si son 5 instrumentos distintos. |
 | **D6** | `analytics.service.ts` → `progression` (`scope=class\|student`) | Una línea única de % logro ordenada por fecha, saltando entre instrumentos | Ya denunciado en el roadmap #2B. Se anota aquí porque comparte el resolver de comparabilidad; **el fix de la vista vive en #2B**, no en esta tanda. |
 | **D7** | `analytics.schema.ts:18-25` → `generationalComparisonQuerySchema` | Compara mismo `gradeId` entre años, filtrando por `subjectId` + `instrumentType` | Es *casi* comparable, pero no exige mismo instrumento ni mismo momento: puede comparar el DIA de Cierre 2025 contra el de Diagnóstico 2024. Hay que endurecerlo a la clave N2. |
+| **D8** | `dashboards.service.ts:648+` → `getSkills` (tab **Dimensiones**) | % de logro promedio por nodo de taxonomía sobre todo el scope, y `resolveScopedBands` en `:683` con el mismo fallback silencioso de D4 | Un mismo nodo de taxonomía se evalúa con ítems de dificultad muy distinta según el instrumento: promediar "Reflexionar sobre el texto" entre un DIA de 3° y uno de 8° no mide una habilidad, mide una mezcla. El propio código lo sabe (`dimensiones/page.tsx:47-51`: "Sin él, la vista es agregada (varias evaluaciones) y el drill-down lo indica") — pero *indicarlo* en el drill-down no arregla el número de arriba. |
+| **D9** | `heatmap.service.ts:122,134,148,321,348` → tab **Mapa de calor** | Matriz habilidad × asignatura. `instrumentId` es **opcional** (`:201`), así que agrega entre instrumentos; y clasifica cada celda con `percentageToPerformanceLevel` usando los thresholds "del **primer instrumento** (con grading_scale) que matchee" (`:134`) | **El peor de los nueve.** No sólo mezcla dificultades: toma el corte de *un* instrumento elegido arbitrariamente y lo aplica a una matriz que agrega *todos*. No usa `performance_bands` en ningún punto. |
+
+**D8 y D9 amplían el alcance de #1C más allá del Resumen.** Son tabs del mismo módulo, comparten la
+misma barra de filtros y alimentan las mismas tools del asistente. Arreglar el Panorama y dejar
+Dimensiones y Mapa de calor mezclando al lado sería incoherente para el usuario y para el LLM.
 
 ### 3.2 Backend: alertas que no significan nada
 
@@ -149,8 +155,9 @@ reutilizará el motor proactivo (#3B capa 2):
 |---|---|---|
 | `resultados/page.tsx` | `overview.globalAchievement` | El único consumidor de UI (`grep` confirmado) |
 | `dashboards.service.spec.ts` | `globalAchievement` en 7 aserciones | Los tests hay que reescribirlos con la métrica nueva, no borrarlos |
-| **Asistente IA** — `get-dashboard-overview.tool.ts`, `get-dashboard-performance.tool.ts`, `get-dashboard-skills.tool.ts` | Llaman directo a `DashboardsService` | **Cambio de contrato llega al LLM.** Es una mejora, no un daño: hoy le entregamos un promedio sin significado del que razona. Hay que actualizar las descripciones de las tools en la misma tanda. |
-| `heatmap.service.ts` | Reusa helpers de scope de `DashboardsService` | Sin impacto si el resolver se agrega sin tocar los helpers existentes |
+| **Asistente IA** — `get-dashboard-overview.tool.ts`, `get-dashboard-performance.tool.ts`, `get-dashboard-skills.tool.ts`, `get-heatmap.tool.ts` | Llaman directo a `DashboardsService` / `HeatmapService` | **Cambio de contrato llega al LLM.** Es una mejora, no un daño: hoy le entregamos un promedio sin significado del que razona. Hay que actualizar las descripciones de las tools en la misma tanda. |
+| **Botón "Ask AI" de Dimensiones** (`dimensiones/page.tsx:25-26`) | Prompt fijo: "¿Qué habilidades están más descendidas y qué acciones remediales priorizarías?" | Hoy le pide al LLM que priorice sobre un agregado mezclado (D8). Con #1C el prompt debe acotarse a la unidad comparable |
+| `heatmap.service.ts` | Reusa helpers de scope de `DashboardsService` | Además de D9, hay que revisar que el resolver nuevo no duplique la lógica de scope existente |
 
 El radio es **chico y contenido**. Es el mejor momento para hacerlo.
 
@@ -201,6 +208,8 @@ métricas que sí se pueden emitir (conteos, lista de evaluaciones) junto a otra
 | `getPerformance` / Clasificación (D3, D4) | Si el scope no resuelve a N0/N1, **no clasifica**: devuelve `students` sin `performanceLevel`/`performanceBand` + `comparability.reason`, y la UI pide elegir una unidad. Se elimina el fallback silencioso a 40/70/85 |
 | `teacher-kpis` (D5) | Una fila por **(curso × unidad comparable)**, no por curso |
 | `generational` (D7) | El query pasa a exigir la clave N2 completa (se agrega `applicationPeriod`, y `instrumentId` opcional para fijar N1) |
+| `getSkills` / Dimensiones (D8) | Emite `bands` sólo si `aggregatable`; con scope mixto, el % por nodo se desglosa **por unidad comparable** en vez de promediarse. El prompt de "Ask AI" se acota a la unidad |
+| Mapa de calor (D9) | Se elimina `resolveThresholds` "del primer instrumento que matchee". Con scope mixto, la matriz **no clasifica** (muestra % sin banda + `reason`); con N0/N1 clasifica con las bandas del instrumento |
 | `progression` (D6) | Sólo se anota la deuda y se deja el resolver listo. **El fix vive en #2B** |
 
 ### 4.3 Ola 2 — #2: el Panorama nuevo
@@ -238,6 +247,22 @@ type ComparableOverviewResponse = {
 
 Agregación en **una sola pasada con `Map`** (`04-collection-complexity.md`); nada de `.find()` por
 celda como advierte la regla sobre `HeatmapService.assembleResponse()`.
+
+**Cómo se calcula `severity` en la Ola 2** (antes de que exista la Ola 3). La decisión A convirtió el
+orden por severidad en la vista por defecto, así que la Ola 2 no puede depender de la Ola 3 para
+ordenar. Se define un cálculo determinístico que **sólo usa la familia A de alertas** (nivel actual,
+sin baseline):
+
+| `severity` | Regla |
+|---|---|
+| `high` | La banda inferior del instrumento concentra **≥ 40%** de los alumnos de la unidad |
+| `medium` | La banda inferior concentra **≥ 25%** |
+| `low` | Resto de las unidades con bandas configuradas |
+| `null` | La unidad **no tiene bandas** configuradas → ordena al final, por fecha descendente |
+
+Cuando llegue la Ola 3, `severity` pasa a ser el **máximo** entre la severidad de familia A y la de
+familia B (el delta contra baseline puede *subir* la severidad, nunca bajarla). El contrato del
+endpoint no cambia: el campo ya existe y la UI ya ordena por él.
 
 **UI del panorama** (`resultados/page.tsx` reescrito):
 
@@ -350,15 +375,39 @@ esta tanda.
 
 | Ola | Alcance | Depende de |
 |---|---|---|
-| **0** | `packages/types/src/comparability.ts` + `comparability.service.ts` + `meta.comparability` en las 3 rutas de dashboards. Sin cambios de UI | — |
-| **1** | #1C: retirar `globalAchievement`, condicionar distribución/clasificación, `teacher-kpis` por unidad, endurecer `generational`. Actualizar specs y tools del asistente | 0 |
-| **2** | #2: `GET /dashboards/comparable-overview` + reescritura de `resultados/page.tsx` (select-first, matriz, tarjetas CTA, cartel de mezcla) | 0, 1 |
-| **3** | Alertas comparables (bandas + delta + prioridad + dedup + CTA) | 0, 2 |
+| **0** | `packages/types/src/comparability.ts` + `comparability.service.ts` + `meta.comparability` en las rutas de dashboards y heatmap. Sin cambios de UI | — |
+| **1** | #1C: retirar `globalAchievement`, condicionar distribución/clasificación/Dimensiones/Mapa de calor, `teacher-kpis` por unidad, endurecer `generational`. Actualizar specs y tools del asistente | 0 |
+| **2** | #2: `GET /dashboards/comparable-overview` + reescritura de `resultados/page.tsx` (matriz por severidad, tarjetas CTA, cartel de mezcla) | 0, 1 |
+| **3** | Alertas comparables: catálogo de §4.4 (familias A, B y C) con prioridad, dedup y CTA | 0, 2 |
 | **4** | Refresco en vivo + responsive + pulido | 2, 3 |
 
-Olas 0 y 1 son backend puro y se pueden validar con los specs existentes de
-`dashboards.service.spec.ts` (1027 líneas ya cubren el camino cohorte/per-alumno — hay que
-reescribir las 7 aserciones de `globalAchievement`, no borrarlas).
+Olas 0 y 1 son backend puro y se validan con los specs existentes de `dashboards.service.spec.ts`
+(1027 líneas que ya cubren el camino cohorte/per-alumno — hay que **reescribir** las 7 aserciones de
+`globalAchievement`, no borrarlas).
+
+### 5.1 Criterios de aceptación
+
+**Ola 0** — `resolveComparability` devuelve el `kind` correcto para los 5 casos (una evaluación; un
+instrumento en varios cursos; misma familia en 2 años; 3 momentos del mismo año; mezcla). Ninguna
+respuesta de API cambia todavía.
+
+**Ola 1** — Ninguna ruta emite un número agregado con `aggregatable === false`. `grep` de
+`globalAchievement` no devuelve nada fuera del historial. Ningún camino llama a
+`percentageToPerformanceLevel` con thresholds de un instrumento que no sea el de la unidad. Un
+informe **agregado** (`aggregate_only`) sigue alimentando Resumen, Dimensiones y Mapa de calor por el
+read-model de cohorte.
+
+**Ola 2** — Con la org demo del CSCJ: entrar a `/resultados` sin filtros muestra la matriz ordenada
+por severidad, sin ningún promedio entre instrumentos. Cada fila navega a su drill. Con scope mixto
+aparece el cartel con el `reason`. El shell sigue pintando antes que los datos (contrato de
+`07-navigation-reactivity.md` intacto).
+
+**Ola 3** — Cada alerta emitida trae `unitKey`, `severity`, `contextId` y `href`. Ninguna usa un
+umbral absoluto de logro. La misma alerta no se emite dos veces (dedup). Un instrumento sin bandas
+configuradas no genera alertas de familia A.
+
+**Ola 4** — La banda de alertas se refresca sin recargar la página y sin convertir `page.tsx` en
+Client Component. La matriz hace scroll horizontal dentro de su contenedor; el body nunca.
 
 ---
 
@@ -370,8 +419,8 @@ reescribir las 7 aserciones de `globalAchievement`, no borrarlas).
 | **B** | Clasificación de alumnos en scope mixto | **No se clasifica.** Se muestra el motivo (`comparability.reason`) + selector de unidad. Se elimina el fallback silencioso a 40/70/85 | ✅ 2026-08-04 |
 | **C** | ¿Se conserva algún KPI de cabecera? | **Sólo conteos + alertas críticas** (alumnos evaluados, evaluaciones, alertas). Son legítimos porque no promedian nada. Se elimina el "% Logro global" | ✅ 2026-08-04 |
 | **D** | Umbrales de alerta | (a) pp de caída que disparan B1/B2/B4; (b) % de alumnos en banda inferior que dispara A1; (c) cuántos ejes bajos emite A2. ¿Configurable por org o constante del producto? | 🔲 |
-| **E** | ¿`instrument.version` entra en la clave de familia N2? | Si una versión nueva cambia los ítems, ¿siguen siendo comparables año a año? | 🔲 |
-| **F** | Retrocompatibilidad del contrato | ¿`globalAchievement` se borra del tipo o se deja deprecated un ciclo? (el único consumidor de UI es la propia página) | 🔲 |
+| **E** | ¿`instrument.version` entra en la clave de familia N2? | **Recomendación: no.** Incluirla partiría la serie histórica cada vez que la Agencia publica una versión nueva — que es justo cuando la comparación año a año importa. En cambio el baseline expone `versionMismatch: boolean` y la UI lo advierte junto al delta ("versiones distintas del instrumento"). Se conserva la comparación y no se esconde la salvedad. **Bloquea la Ola 0** (define `familyKey`) | 🔲 |
+| **F** | Retrocompatibilidad del contrato | **Recomendación: borrarlo del tipo, no deprecarlo.** El radio es de 2 consumidores (la propia página + los specs) y dejar un campo deprecated es exactamente cómo vuelve a aparecer un promedio mezclado en la próxima vista. **Bloquea la Ola 1** | 🔲 |
 
 **Consecuencias de A + B + C sobre el diseño:**
 
@@ -412,3 +461,4 @@ reescribir las 7 aserciones de `globalAchievement`, no borrarlas).
 | 2026-08-04 | Documento creado. Diagnóstico cerrado (D1–D7, F1–F9), definición de comparabilidad N0–N3 y diseño de las 5 olas propuesto. Pendientes las decisiones A–F. |
 | 2026-08-04 | Decisiones **A** (matriz por severidad como vista por defecto), **B** (no clasificar en scope mixto) y **C** (cabecera sólo con conteos, se elimina el "% Logro global") resueltas. §4.3 actualizado con sus consecuencias. Pendientes D, E, F. |
 | 2026-08-04 | §4.4 detallado con el **catálogo de alertas**: 9 tipos en 3 familias (Nivel / Movimiento / Cobertura). Hallazgos que lo condicionan: `assessment_level_stats` permite alertas de banda **también con informes agregados**, y `assessment_results.priorPerformanceBandId` da el retroceso de banda entre momentos **sin resolver baseline**. La decisión D se amplía a los tres umbrales del catálogo. |
+| 2026-08-04 | Auditadas las dos tabs que faltaban: **D8** (Dimensiones) y **D9** (Mapa de calor, que clasifica con los thresholds "del primer instrumento que matchee"). #1C se extiende a ellas. Definido el cálculo determinístico de `severity` para la Ola 2 (hueco que abrió la decisión A). Agregados criterios de aceptación por ola (§5.1) y recomendación para las decisiones **E** y **F**, que son las únicas que bloquean código. |
