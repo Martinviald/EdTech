@@ -241,16 +241,17 @@ celda como advierte la regla sobre `HeatmapService.assembleResponse()`.
 
 **UI del panorama** (`resultados/page.tsx` reescrito):
 
-1. **Banda de alertas arriba** — banners priorizados por severidad, cada uno con su unidad
-   comparable, su delta contra baseline y un **CTA que navega al drill** usando `contextId` (arregla
-   F2). Máximo N visibles + "ver todas".
-2. **Selector de unidad comparable (select-first)** — coherente con la decisión ya tomada en el plan
-   de feedback v2 sobre el Panorama. Sin unidad elegida se muestra la **matriz de unidades**, no un
-   promedio.
-3. **Matriz % logro × nivel × asignatura × evaluación** — la vista central (arregla F3). Cada celda:
-   % logro + banda + N + delta vs baseline. Cada celda es **navegable** (arregla F5).
-4. **Tarjetas de la unidad seleccionada** con `MetricComparison` (ya soporta chips de delta), no
-   `StatCard` pelado (arregla F1/F4).
+1. **Cabecera de 3 conteos** — alumnos evaluados, evaluaciones, alertas críticas. Nada que promedie
+   (decisión C, arregla F1).
+2. **Banda de alertas** — banners priorizados por severidad, cada uno con su unidad comparable, su
+   delta contra baseline y un **CTA que navega al drill** usando `contextId` (arregla F2). Máximo N
+   visibles + "ver todas".
+3. **Matriz de unidades comparables — la vista por defecto** (decisión A, arregla F3). Filas
+   ordenadas por severidad, con el corte % logro × nivel × asignatura × evaluación. Cada celda:
+   % logro + banda + N + delta vs baseline, y es **navegable** (arregla F5).
+4. **Selector de unidad** que *acota* la matriz (no es peaje de entrada). Al elegir una, la vista
+   baja al desglose por curso de esa unidad, con `MetricComparison` y sus chips de delta (arregla
+   F4).
 5. **Cartel explícito cuando el scope es mixto** con el `reason` del backend (arregla F7). Se acabó
    el número mudo.
 6. **Desglose por curso siempre visible**, para director y profesor (arregla F8).
@@ -300,14 +301,28 @@ reescribir las 7 aserciones de `globalAchievement`, no borrarlas).
 
 ## 6. Decisiones abiertas
 
-| # | Decisión | Opciones | Estado |
+| # | Decisión | Resolución | Estado |
 |---|---|---|---|
-| **A** | Qué muestra el panorama **sin** unidad comparable elegida | (a) matriz de todas las unidades ordenada por severidad; (b) forzar la elección con un selector vacío; (c) recordar la última elegida | 🔲 |
-| **B** | Clasificación de alumnos en scope mixto | (a) no clasificar y pedir elegir unidad; (b) mostrar la tabla sin columna Nivel; (c) una fila por alumno × unidad | 🔲 |
-| **C** | ¿Se conserva algún KPI de cabecera? | (a) sólo conteos (alumnos, evaluaciones, alertas); (b) ninguno, la matriz manda; (c) KPI de la unidad seleccionada | 🔲 |
+| **A** | Qué muestra el panorama **sin** unidad comparable elegida | **Matriz de todas las unidades ordenada por severidad.** El usuario ve dónde está el problema sin elegir nada y entra con un clic; nunca se le muestra un número mezclado. La elección de unidad acota, no es un peaje de entrada | ✅ 2026-08-04 |
+| **B** | Clasificación de alumnos en scope mixto | **No se clasifica.** Se muestra el motivo (`comparability.reason`) + selector de unidad. Se elimina el fallback silencioso a 40/70/85 | ✅ 2026-08-04 |
+| **C** | ¿Se conserva algún KPI de cabecera? | **Sólo conteos + alertas críticas** (alumnos evaluados, evaluaciones, alertas). Son legítimos porque no promedian nada. Se elimina el "% Logro global" | ✅ 2026-08-04 |
 | **D** | Umbral de alerta por delta | ¿Cuántos pp de caída contra el baseline disparan alerta? ¿Configurable por org? | 🔲 |
 | **E** | ¿`instrument.version` entra en la clave de familia N2? | Si una versión nueva cambia los ítems, ¿siguen siendo comparables año a año? | 🔲 |
 | **F** | Retrocompatibilidad del contrato | ¿`globalAchievement` se borra del tipo o se deja deprecated un ciclo? (el único consumidor de UI es la propia página) | 🔲 |
+
+**Consecuencias de A + B + C sobre el diseño:**
+
+- La **matriz de unidades es la vista por defecto** de `/resultados`, no un modo alternativo. El
+  endpoint `comparable-overview` debe devolver `units[]` **siempre** poblado y ordenado por
+  severidad, no sólo cuando el scope es mixto.
+- `severity` en `ComparableUnitSummary` deja de ser opcional para la UI: es la clave de orden de la
+  vista principal. Se deriva de la banda del instrumento + el delta contra baseline (Ola 3), con un
+  fallback determinístico mientras la Ola 3 no exista.
+- `getPerformance` emite `students[]` **sin** `performanceLevel` ni `performanceBand` cuando
+  `aggregatable === false`, más `comparability.reason`. El frontend de Clasificación renderiza el
+  cartel + selector en vez de la tabla.
+- La cabecera del panorama pasa de 4 `StatCard` a 3 conteos. `MetricComparison` (con chips de
+  delta) se usa **dentro** de la unidad seleccionada, no en la cabecera global.
 
 ---
 
@@ -332,3 +347,4 @@ reescribir las 7 aserciones de `globalAchievement`, no borrarlas).
 | Fecha | Cambio |
 |---|---|
 | 2026-08-04 | Documento creado. Diagnóstico cerrado (D1–D7, F1–F9), definición de comparabilidad N0–N3 y diseño de las 5 olas propuesto. Pendientes las decisiones A–F. |
+| 2026-08-04 | Decisiones **A** (matriz por severidad como vista por defecto), **B** (no clasificar en scope mixto) y **C** (cabecera sólo con conteos, se elimina el "% Logro global") resueltas. §4.3 actualizado con sus consecuencias. Pendientes D, E, F. |
