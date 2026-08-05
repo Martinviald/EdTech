@@ -9,7 +9,9 @@
 >
 > **Rama / worktree:** `feat/panorama-comparable` (worktree aislado desde `origin/dev` en
 > `.claude/worktrees/panorama-comparable`).
-> **Fecha de creación:** 2026-08-04 · **Estado:** 🚧 diagnóstico cerrado, diseño en revisión.
+> **Fecha de creación:** 2026-08-04 · **Estado:** ✅ **diseño cerrado** — listo para implementar
+> desde la Ola 0. Única decisión pendiente: **D** (umbrales del catálogo de alertas), que no bloquea
+> hasta la Ola 3 y se calibra con datos reales.
 
 ---
 
@@ -419,8 +421,13 @@ Client Component. La matriz hace scroll horizontal dentro de su contenedor; el b
 | **B** | Clasificación de alumnos en scope mixto | **No se clasifica.** Se muestra el motivo (`comparability.reason`) + selector de unidad. Se elimina el fallback silencioso a 40/70/85 | ✅ 2026-08-04 |
 | **C** | ¿Se conserva algún KPI de cabecera? | **Sólo conteos + alertas críticas** (alumnos evaluados, evaluaciones, alertas). Son legítimos porque no promedian nada. Se elimina el "% Logro global" | ✅ 2026-08-04 |
 | **D** | Umbrales de alerta | (a) pp de caída que disparan B1/B2/B4; (b) % de alumnos en banda inferior que dispara A1; (c) cuántos ejes bajos emite A2. ¿Configurable por org o constante del producto? | 🔲 |
-| **E** | ¿`instrument.version` entra en la clave de familia N2? | **Recomendación: no.** Incluirla partiría la serie histórica cada vez que la Agencia publica una versión nueva — que es justo cuando la comparación año a año importa. En cambio el baseline expone `versionMismatch: boolean` y la UI lo advierte junto al delta ("versiones distintas del instrumento"). Se conserva la comparación y no se esconde la salvedad. **Bloquea la Ola 0** (define `familyKey`) | 🔲 |
-| **F** | Retrocompatibilidad del contrato | **Recomendación: borrarlo del tipo, no deprecarlo.** El radio es de 2 consumidores (la propia página + los specs) y dejar un campo deprecated es exactamente cómo vuelve a aparecer un promedio mezclado en la próxima vista. **Bloquea la Ola 1** | 🔲 |
+| **E** | ¿`instrument.version` entra en la clave de familia N2? | **No entra.** `instrument.version` es una capacidad que hoy no se usa en el producto. La clave N2 queda en `(type, subjectId, gradeId, applicationPeriod)` | ✅ 2026-08-04 |
+| **F** | Retrocompatibilidad del contrato | **Se borra** `globalAchievement` del tipo, sin período deprecated. El radio es de 2 consumidores (la propia página + los specs); dejar un campo deprecated es exactamente cómo vuelve a aparecer un promedio mezclado en la próxima vista | ✅ 2026-08-04 |
+
+**Consecuencia de E:** como `version` no está en uso, **no se construye** el flag `versionMismatch`
+que se había propuesto para el baseline: sería siempre falso y sólo agregaría ruido al contrato. Si
+algún día el producto empieza a versionar instrumentos, el punto de extensión es
+`resolveBaseline()` — ahí se agrega el flag y la advertencia en la UI, sin tocar `familyKey`.
 
 **Consecuencias de A + B + C sobre el diseño:**
 
@@ -462,3 +469,4 @@ Client Component. La matriz hace scroll horizontal dentro de su contenedor; el b
 | 2026-08-04 | Decisiones **A** (matriz por severidad como vista por defecto), **B** (no clasificar en scope mixto) y **C** (cabecera sólo con conteos, se elimina el "% Logro global") resueltas. §4.3 actualizado con sus consecuencias. Pendientes D, E, F. |
 | 2026-08-04 | §4.4 detallado con el **catálogo de alertas**: 9 tipos en 3 familias (Nivel / Movimiento / Cobertura). Hallazgos que lo condicionan: `assessment_level_stats` permite alertas de banda **también con informes agregados**, y `assessment_results.priorPerformanceBandId` da el retroceso de banda entre momentos **sin resolver baseline**. La decisión D se amplía a los tres umbrales del catálogo. |
 | 2026-08-04 | Auditadas las dos tabs que faltaban: **D8** (Dimensiones) y **D9** (Mapa de calor, que clasifica con los thresholds "del primer instrumento que matchee"). #1C se extiende a ellas. Definido el cálculo determinístico de `severity` para la Ola 2 (hueco que abrió la decisión A). Agregados criterios de aceptación por ola (§5.1) y recomendación para las decisiones **E** y **F**, que son las únicas que bloquean código. |
+| 2026-08-04 | **Diseño cerrado.** Decisiones **E** (`version` no entra en `familyKey`; es una capacidad que el producto no usa hoy → tampoco se construye `versionMismatch`) y **F** (`globalAchievement` se borra sin período deprecated) resueltas. Queda abierta sólo **D**, que no bloquea hasta la Ola 3. Siguiente paso: implementar la Ola 0. |
