@@ -18,6 +18,7 @@ import {
   buildPeriodSeriesKey,
   compareSeverity,
   deltaInPoints,
+  deriveGenerationalHighlights,
   previousApplicationPeriod,
   severityFromLowestBandShare,
   type BaselineRef,
@@ -51,6 +52,24 @@ type UnitAccumulator = {
 
 type AchievementByAssessment = Map<string, { achievement: number | null; students: number }>;
 
+/**
+ * ⚠️ DEUDA TÉCNICA CONOCIDA — el ensamblado NO es de una sola pasada.
+ *
+ * `T3-01` (docs/pendientes-prioritarios-v3.md) pide que la matriz salga en UNA pasada.
+ * Hoy no: `buildSummary` corre por unidad (bandas, distribución, desglose por curso) y
+ * `loadUnitLevelCounts` corre además una query POR EVALUACIÓN, más dos por unidad para
+ * el baseline. Con 8 unidades son ~40 queries donde debería haber un puñado.
+ *
+ * Se acepta a sabiendas en esta fase: el volumen de un colegio es chico (unidades =
+ * instrumentos con resultados en el año) y la corrección del número importaba más que
+ * su costo. **No agregar más trabajo por unidad sin resolver esto primero.**
+ *
+ * Cómo se salda cuando toque: una query por PREOCUPACIÓN en vez de por unidad — un
+ * `group by (instrument_id, performance_band_id)` para las bandas, otro
+ * `group by (instrument_id, class_group_id)` para el desglose, y resolver todos los
+ * baselines en un solo barrido sobre las familias del alcance. Los `Map` de ensamblado
+ * en memoria ya están, sólo cambia de dónde se llenan.
+ */
 @Injectable()
 export class ComparableOverviewService {
   constructor(
@@ -69,6 +88,7 @@ export class ComparableOverviewService {
         scope: 'org',
         alerts: [],
         units: [],
+        generational: [],
         totals: { assessments: 0, studentsEvaluated: 0 },
         comparability: buildComparabilityMeta([]),
       };
@@ -79,6 +99,7 @@ export class ComparableOverviewService {
       scope: isTeacherScope ? 'teacher' : 'org',
       alerts: [],
       units: [],
+      generational: [],
       totals: { assessments: 0, studentsEvaluated: 0 },
       comparability: buildComparabilityMeta(refs, assessmentIds.length),
     };
@@ -116,6 +137,7 @@ export class ComparableOverviewService {
         scope: isTeacherScope ? 'teacher' : 'org',
         alerts,
         units: summaries,
+        generational: deriveGenerationalHighlights(summaries),
         totals: { assessments: assessmentIds.length, studentsEvaluated },
         comparability: buildComparabilityMeta(refs, assessmentIds.length),
       };

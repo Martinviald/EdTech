@@ -23,6 +23,7 @@ import {
 } from '@/components/ui/table';
 import { LiveAlertsBanner } from './components/live-alerts-banner';
 import { ComparableUnitsTable } from './components/comparable-units-table';
+import { GenerationalBanner } from './components/generational-banner';
 import { DashboardFilterBar } from './components/dashboard-filter-bar';
 import {
   parseDashboardFilters,
@@ -114,6 +115,8 @@ async function PanoramaSections({ query }: { query: string }) {
       </div>
 
       <LiveAlertsBanner query={query} initialAlerts={comparable.alerts} />
+
+      <GenerationalBanner cells={comparable.generational} />
 
       <ComparabilityNotice comparability={comparable.comparability} />
 
