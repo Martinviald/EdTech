@@ -285,7 +285,7 @@ dice todo.** Hoy el alumno se muestra en el vacío.
 
 ## 6. Plan de implementación
 
-> **Estado (2026-08-04):** O1 ✅ · O3 ✅ · O2 ✅ · O4 🔲 pendiente (espera la bandeja de #3B).
+> **Estado (2026-08-04):** O1 ✅ · O3 ✅ · O2 ✅ · O4 ✅ (señales derivadas; migran a la bandeja de #3B cuando exista).
 > Implementado en la rama `feat/vista-360-estudiante`, que integra `feat/panorama-comparable`
 > para consumir su resolver.
 
