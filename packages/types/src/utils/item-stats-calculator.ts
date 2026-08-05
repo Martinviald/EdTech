@@ -237,12 +237,19 @@ export function aggregateItemStats(
 
     const answer = bucketKeyFor(r);
     const isCorrect = r.isCorrect === true;
+    const isGraded = r.isCorrect !== null;
 
     cell.students.add(r.studentId);
     cell.responseCount += 1;
     if (isCorrect) cell.correctCount += 1;
-    cell.scoreSum += effectiveScore(r);
-    cell.maxSum += r.maxScore;
+    // Los ítems pendientes de corrección (`isCorrect === null`) no entran al
+    // numerador NI al denominador ponderado, igual que en `aggregateStudentResults`
+    // y `aggregateSkillResults`. Sumarlos a `maxSum` los mostraba como 0% de logro
+    // en vez de "sin corregir".
+    if (isGraded) {
+      cell.scoreSum += effectiveScore(r);
+      cell.maxSum += r.maxScore;
+    }
 
     // JSON.stringify y no una plantilla: distingue sin ambigüedad el blanco (null)
     // de un alumno que respondió literalmente el texto "null", y evita inventar un

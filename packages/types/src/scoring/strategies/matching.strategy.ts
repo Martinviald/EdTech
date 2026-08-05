@@ -14,7 +14,8 @@
 // `matchingContentSchema` — así que la corrección indexa por `leftId`. Una
 // inversión acá corrige mal sin fallar nunca; no cambiar sin leer ese contrato.
 
-import type { MatchingContent, MatchingScoring } from '@soe/types';
+import type { MatchingContent } from '../../schemas/item-content.schema';
+import type { MatchingScoring } from '../../schemas/item.schema';
 import type { ScoringInput, ScoringOutput, ScoringStrategy } from '../scoring-strategy';
 import { asRecord } from './scoring.helpers';
 

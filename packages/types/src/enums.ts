@@ -64,6 +64,8 @@ export const ITEM_TYPES = [
   'matching',
   'ordering',
   'gap_fill',
+  'short_answer',
+  'rubric_scored',
 ] as const;
 export type ItemType = (typeof ITEM_TYPES)[number];
 
@@ -85,6 +87,8 @@ export const ITEM_TYPE_LABELS: Record<ItemType, string> = {
   matching: 'Términos pareados',
   ordering: 'Ordenamiento',
   gap_fill: 'Completar',
+  short_answer: 'Respuesta corta',
+  rubric_scored: 'Evaluado por pauta',
 };
 
 export const TAXONOMY_NODE_TYPES = [

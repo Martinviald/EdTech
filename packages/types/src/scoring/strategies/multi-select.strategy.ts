@@ -16,13 +16,9 @@
 // El default reproduce a la Agencia: verificado contra el escaneo real, dio 0 a
 // una respuesta parcial y 1 a la exacta, con max_points 1.
 
-import {
-  correctKeysOf,
-  parseSelectedKeys,
-  sameKeySet,
-  type MultiSelectContent,
-  type MultiSelectScoring,
-} from '@soe/types';
+import { correctKeysOf, parseSelectedKeys, sameKeySet } from '../../utils/multi-select';
+import type { MultiSelectContent } from '../../schemas/item-content.schema';
+import type { MultiSelectScoring } from '../../schemas/item.schema';
 import type { ScoringInput, ScoringOutput, ScoringStrategy } from '../scoring-strategy';
 
 function resolveScoringPolicy(input: ScoringInput): {

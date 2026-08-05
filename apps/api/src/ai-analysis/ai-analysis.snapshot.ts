@@ -9,6 +9,7 @@ import {
   taxonomyNodes,
   withOrgContext,
 } from '@soe/db';
+import { isDichotomousItem } from '@soe/types';
 import type {
   AiAnalysisSnapshot,
   SnapshotItem,
@@ -74,11 +75,7 @@ export class SnapshotService implements SnapshotBuilder {
         const itemMeta = await this.loadItemMeta(tx, report.meta.instrumentName, assessmentId);
         const itemIds = itemMeta.map((m) => m.itemId);
         const { matrix, itemOrder } = await this.loadScoreMatrix(tx, assessmentId, itemIds);
-        const belowThresholdByNode = await this.loadStudentsBelowThreshold(
-          tx,
-          assessmentId,
-          orgId,
-        );
+        const belowThresholdByNode = await this.loadStudentsBelowThreshold(tx, assessmentId, orgId);
         return { itemMeta, matrix, itemOrder, belowThresholdByNode };
       },
     );
@@ -115,8 +112,7 @@ export class SnapshotService implements SnapshotBuilder {
     return reportItems.map((row) => {
       const meta = metaById.get(row.itemId);
       const matrixIndex = matrixIndexById.get(row.itemId);
-      const pb =
-        matrixIndex === undefined ? null : pointBiserial(matrix, matrixIndex);
+      const pb = matrixIndex === undefined ? null : pointBiserial(matrix, matrixIndex);
 
       return {
         position: row.position,
@@ -186,10 +182,7 @@ export class SnapshotService implements SnapshotBuilder {
       .from(items)
       .innerJoin(
         responses,
-        and(
-          eq(responses.itemId, items.id),
-          eq(responses.assessmentId, assessmentId),
-        ),
+        and(eq(responses.itemId, items.id), eq(responses.assessmentId, assessmentId)),
       )
       .where(isNull(items.deletedAt))
       .groupBy(items.id, items.position, items.content)
@@ -211,10 +204,7 @@ export class SnapshotService implements SnapshotBuilder {
   }
 
   /** Nodo de habilidad representativo por ítem (primer tag de tipo habilidad). */
-  private async loadSkillNodeByItem(
-    tx: Database,
-    itemIds: string[],
-  ): Promise<Map<string, string>> {
+  private async loadSkillNodeByItem(tx: Database, itemIds: string[]): Promise<Map<string, string>> {
     const map = new Map<string, string>();
     if (itemIds.length === 0) return map;
 
@@ -262,12 +252,7 @@ export class SnapshotService implements SnapshotBuilder {
         count: sql<number>`count(*)::int`,
       })
       .from(responses)
-      .where(
-        and(
-          eq(responses.assessmentId, assessmentId),
-          inArray(responses.itemId, itemIds),
-        ),
-      )
+      .where(and(eq(responses.assessmentId, assessmentId), inArray(responses.itemId, itemIds)))
       .groupBy(responses.itemId, answerExpr);
 
     for (const r of rows) {
@@ -292,6 +277,20 @@ export class SnapshotService implements SnapshotBuilder {
   ): Promise<{ matrix: ScoreMatrix; itemOrder: string[] }> {
     if (itemIds.length === 0) return { matrix: [], itemOrder: [] };
 
+    // KR-20 y punto-biserial son psicometría DICOTÓMICA: un ítem de crédito
+    // parcial colapsado a 0/1 sesga la varianza sin avisar, así que se excluye.
+    const itemTypeRows = await tx
+      .select({ id: items.id, type: items.type, scoringConfig: items.scoringConfig })
+      .from(items)
+      .where(inArray(items.id, itemIds));
+    const dichotomousIds = new Set(
+      itemTypeRows
+        .filter((r) => isDichotomousItem(r.type, r.scoringConfig ?? undefined))
+        .map((r) => r.id),
+    );
+    const dichotomousItemIds = itemIds.filter((id) => dichotomousIds.has(id));
+    if (dichotomousItemIds.length === 0) return { matrix: [], itemOrder: [] };
+
     const rows = await tx
       .select({
         studentId: responses.studentId,
@@ -302,11 +301,11 @@ export class SnapshotService implements SnapshotBuilder {
       .where(
         and(
           eq(responses.assessmentId, assessmentId),
-          inArray(responses.itemId, itemIds),
+          inArray(responses.itemId, dichotomousItemIds),
         ),
       );
 
-    const itemOrder = [...itemIds];
+    const itemOrder = [...dichotomousItemIds];
     const itemIndex = new Map(itemOrder.map((id, idx) => [id, idx]));
 
     // Agrupar por alumno → fila booleana de largo k (default false = blanco).

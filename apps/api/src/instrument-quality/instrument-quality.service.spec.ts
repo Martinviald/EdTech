@@ -167,9 +167,15 @@ function responseRows(
   return rows;
 }
 
-// Selects para admin (scopeAll, sin classGroupId): [instrumentId], [responses].
-function adminSelects(responses: unknown[]): unknown[][] {
-  return [[{ instrumentId: INSTRUMENT_ID }], responses];
+/** Tipos de ítem para `filterDichotomousItems`: por defecto, todos dicotómicos. */
+function itemTypeRows(itemIds: string[]): unknown[] {
+  return itemIds.map((id) => ({ id, type: 'multiple_choice', scoringConfig: null }));
+}
+
+// Selects para admin (scopeAll, sin classGroupId):
+// [instrumentId], [tipos de ítem], [responses].
+function adminSelects(responses: unknown[], itemIds: string[] = [ITEM(1)]): unknown[][] {
+  return [[{ instrumentId: INSTRUMENT_ID }], itemTypeRows(itemIds), responses];
 }
 
 describe('InstrumentQualityService', () => {
@@ -275,7 +281,7 @@ describe('InstrumentQualityService', () => {
       [true, false],
       [true, false],
     ];
-    const db = makeDb(adminSelects(responseRows(matrix, [ITEM(1), ITEM(2)])));
+    const db = makeDb(adminSelects(responseRows(matrix, [ITEM(1), ITEM(2)]), [ITEM(1), ITEM(2)]));
     const svc = makeService(db, reportService);
 
     const res = await svc.getQuality(makeUser(), { assessmentId: ASSESSMENT_ID });
@@ -321,7 +327,7 @@ describe('InstrumentQualityService', () => {
     const items = [itemRow({ discrimination: 0.4 })];
     const { service: reportService, getReport } = makeReportService(makeReport(items));
     // Profesor (no admin-like): selects = [instrumentId], [scope classGroups],
-    // [studentFilter], [responses].
+    // [studentFilter], [tipos de ítem], [responses].
     const teacherClassGroups = [{ classGroupId: CLASS_GROUP_ID }];
     const scopedStudents = [{ studentId: STUDENT(0) }, { studentId: STUDENT(1) }];
     const matrix = [[true], [false]];
@@ -329,6 +335,7 @@ describe('InstrumentQualityService', () => {
       [{ instrumentId: INSTRUMENT_ID }],
       teacherClassGroups,
       scopedStudents,
+      itemTypeRows([ITEM(1)]),
       responseRows(matrix, [ITEM(1)]),
     ]);
     const svc = makeService(db, reportService);

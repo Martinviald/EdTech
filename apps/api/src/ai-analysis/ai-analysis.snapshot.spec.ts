@@ -10,8 +10,9 @@ import type { AssessmentReportService } from '../assessment-report/assessment-re
 //   1) items ⋈ responses        (loadItemMeta)
 //   2) item_taxonomy_tags        (loadSkillNodeByItem)
 //   3) responses (distribución)  (loadDistributionByItem)
-//   4) responses (matriz)        (loadScoreMatrix)
-//   5) skill_results bajo umbral (loadStudentsBelowThreshold)
+//   4) items (tipo/scoring)      (loadScoreMatrix → filtro dicotómico)
+//   5) responses (matriz)        (loadScoreMatrix)
+//   6) skill_results bajo umbral (loadStudentsBelowThreshold)
 // transaction() ejecuta el callback con el mismo db (withOrgContext lo envuelve).
 // ──────────────────────────────────────────────────────────────────────────────
 
@@ -158,7 +159,12 @@ function defaultDbQueues(): unknown[][] {
       { itemId: 'it2', answer: 'C', count: 2 },
       { itemId: 'it2', answer: 'D', count: 2 },
     ],
-    // 4) matriz de aciertos (alumno × ítem)
+    // 4) tipos de ítem para el filtro dicotómico de la matriz
+    [
+      { id: 'it1', type: 'multiple_choice', scoringConfig: null },
+      { id: 'it2', type: 'multiple_choice', scoringConfig: null },
+    ],
+    // 5) matriz de aciertos (alumno × ítem)
     [
       { studentId: 's1', itemId: 'it1', isCorrect: true },
       { studentId: 's1', itemId: 'it2', isCorrect: true },
@@ -169,7 +175,7 @@ function defaultDbQueues(): unknown[][] {
       { studentId: 's4', itemId: 'it1', isCorrect: false },
       { studentId: 's4', itemId: 'it2', isCorrect: false },
     ],
-    // 5) skill_results bajo umbral
+    // 6) skill_results bajo umbral
     [{ nodeId: 'node-skill-1', count: 2 }],
   ];
 }
@@ -368,7 +374,7 @@ describe('SnapshotService.build', () => {
     });
     const rs = makeReportService(emptyReport);
     // Todas las queries devuelven [].
-    const svc = makeService(makeDb([[], [], [], [], []]), rs);
+    const svc = makeService(makeDb([[], [], [], [], [], []]), rs);
 
     const snap = await svc.build('a1', 'org-1');
     expect(snap.items).toEqual([]);

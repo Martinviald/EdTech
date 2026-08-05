@@ -1,12 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { and, eq, inArray, isNull, or, sql } from 'drizzle-orm';
-import {
-  instrumentSections,
-  items,
-  itemTaxonomyTags,
-  responses,
-  withOrgContext,
-} from '@soe/db';
+import { instrumentSections, items, itemTaxonomyTags, responses, withOrgContext } from '@soe/db';
 import type { StimulusKind, StimulusSource } from '@soe/types';
 import { InjectDb, type Database } from '../../database/database.types';
 
@@ -45,11 +39,7 @@ export interface FailedStimulus {
 export class FailedStimulusService {
   constructor(@InjectDb() private readonly db: Database) {}
 
-  async list(
-    orgId: string,
-    assessmentId: string,
-    nodeId: string,
-  ): Promise<FailedStimulus[]> {
+  async list(orgId: string, assessmentId: string, nodeId: string): Promise<FailedStimulus[]> {
     return withOrgContext(this.db, orgId, async (tx) => {
       // 1. Ítems etiquetados al nodo, del pool visible (org ∪ oficial), no borrados.
       const taggedItems = await tx
@@ -78,39 +68,33 @@ export class FailedStimulusService {
       const itemIds = withSection.map((row) => row.itemId);
 
       // 2. Brecha por ítem desde `responses` de ESTA evaluación (RLS → tx).
-      //    gap = 100 - %acierto. Solo cuentan los ítems con respuestas en la evaluación.
+      //    gap = 100 - %logro, ponderado por PUNTAJE y no por aciertos: con el
+      //    conteo binario un ítem de crédito parcial siempre daba gap 100 y
+      //    acaparaba el material remedial. Los pendientes de corrección no entran
+      //    al denominador (no se sabe si hay brecha).
       const rateRows = await tx
         .select({
           itemId: responses.itemId,
-          total: sql<number>`count(*)::int`,
-          correct: sql<number>`sum(case when ${responses.isCorrect} = true then 1 else 0 end)::int`,
+          scoreSum: sql<string>`coalesce(sum(coalesce(${responses.finalScore}, ${responses.rawScore})) filter (where ${responses.isCorrect} is not null), 0)`,
+          maxSum: sql<string>`coalesce(sum(${responses.maxScore}) filter (where ${responses.isCorrect} is not null), 0)`,
         })
         .from(responses)
-        .where(
-          and(
-            eq(responses.assessmentId, assessmentId),
-            inArray(responses.itemId, itemIds),
-          ),
-        )
+        .where(and(eq(responses.assessmentId, assessmentId), inArray(responses.itemId, itemIds)))
         .groupBy(responses.itemId);
 
       const gapByItem = new Map<string, number>();
       for (const row of rateRows) {
-        const total = Number(row.total);
-        if (total === 0) continue;
-        const correctRate = (Number(row.correct) / total) * 100;
-        gapByItem.set(row.itemId, 100 - correctRate);
+        const maxSum = Number(row.maxSum);
+        if (maxSum === 0) continue;
+        const achievementRate = (Number(row.scoreSum) / maxSum) * 100;
+        gapByItem.set(row.itemId, 100 - achievementRate);
       }
       if (gapByItem.size === 0) return [];
 
       // 3. Secciones de esos ítems que son PASAJES visibles (org ∪ oficial). Sin RLS →
       //    filtro `orgId` explícito.
       const sectionIds = Array.from(
-        new Set(
-          withSection
-            .filter((row) => gapByItem.has(row.itemId))
-            .map((row) => row.sectionId),
-        ),
+        new Set(withSection.filter((row) => gapByItem.has(row.itemId)).map((row) => row.sectionId)),
       );
       if (sectionIds.length === 0) return [];
 
@@ -128,10 +112,7 @@ export class FailedStimulusService {
           and(
             inArray(instrumentSections.id, sectionIds),
             eq(instrumentSections.kind, 'passage'),
-            or(
-              eq(instrumentSections.orgId, orgId),
-              isNull(instrumentSections.orgId),
-            ),
+            or(eq(instrumentSections.orgId, orgId), isNull(instrumentSections.orgId)),
           ),
         );
       const sectionById = new Map(sections.map((section) => [section.id, section]));

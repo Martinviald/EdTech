@@ -18,18 +18,9 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import {
-  FLAG_LABELS,
-  flagTone,
-  fmtMetric,
-  fmtPctInt,
-} from './quality-format';
+import { FLAG_LABELS, flagTone, fmtMetric, fmtPctInt } from './quality-format';
 
-export function QualityPanel({
-  quality,
-}: {
-  quality: InstrumentQualityResponse;
-}) {
+export function QualityPanel({ quality }: { quality: InstrumentQualityResponse }) {
   const { reliability, items, flaggedCount } = quality;
   const kr20Ok = reliability.kr20 !== null && reliability.kr20 >= 0.7;
 
@@ -53,8 +44,7 @@ export function QualityPanel({
               KR-20 {fmtMetric(reliability.kr20)}
             </Badge>
             <Badge variant="outline">
-              {reliability.itemsAnalyzed} ítems · {reliability.studentsAnalyzed}{' '}
-              alumnos
+              {reliability.itemsAnalyzed} ítems · {reliability.studentsAnalyzed} alumnos
             </Badge>
             {flaggedCount > 0 ? (
               <Badge variant="warning">{flaggedCount} ítems con alertas</Badge>
@@ -62,9 +52,14 @@ export function QualityPanel({
               <Badge variant="success">Sin alertas de ítem</Badge>
             )}
           </div>
-          <p className="mt-2 text-sm text-muted-foreground">
-            {reliability.interpretation}
-          </p>
+          <p className="mt-2 text-sm text-muted-foreground">{reliability.interpretation}</p>
+          {reliability.itemsExcludedForPartialCredit > 0 && (
+            <p className="mt-1 text-caption text-muted-foreground">
+              Se excluyeron {reliability.itemsExcludedForPartialCredit}{' '}
+              {reliability.itemsExcludedForPartialCredit === 1 ? 'ítem' : 'ítems'} de puntaje
+              parcial: el KR-20 está definido para preguntas de respuesta correcta o incorrecta.
+            </p>
+          )}
         </div>
 
         {/* Tabla de ítems con banderas y sugerencias. */}
@@ -94,18 +89,10 @@ export function QualityPanel({
                     <TableCell className="text-muted-foreground">
                       {item.skillName ?? item.contentName ?? '—'}
                     </TableCell>
-                    <TableCell className="text-center">
-                      {item.correctKey ?? '—'}
-                    </TableCell>
-                    <TableCell className="text-right">
-                      {fmtPctInt(item.difficulty)}
-                    </TableCell>
-                    <TableCell className="text-right">
-                      {fmtMetric(item.discrimination)}
-                    </TableCell>
-                    <TableCell className="text-right">
-                      {fmtMetric(item.pointBiserial)}
-                    </TableCell>
+                    <TableCell className="text-center">{item.correctKey ?? '—'}</TableCell>
+                    <TableCell className="text-right">{fmtPctInt(item.difficulty)}</TableCell>
+                    <TableCell className="text-right">{fmtMetric(item.discrimination)}</TableCell>
+                    <TableCell className="text-right">{fmtMetric(item.pointBiserial)}</TableCell>
                     <TableCell>
                       {item.flags.length === 0 ? (
                         <span className="text-sm text-success">Sin alertas</span>

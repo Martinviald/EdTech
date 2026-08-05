@@ -646,7 +646,11 @@ export class AssessmentReportService {
       );
       const blankCount = totalResponses - answeredCount;
       const correctCount = s?.correctCount ?? 0;
-      const difficulty = totalResponses > 0 ? (correctCount / totalResponses) * 100 : null;
+      // Dificultad ponderada por PUNTAJE: con `correctCount` un ítem de crédito
+      // parcial bien respondido daba 0% y se marcaba `critical` sin serlo. En un
+      // ítem dicotómico sin pendientes ambas fórmulas dan el mismo número.
+      const gradedMax = s?.maxSum ?? 0;
+      const difficulty = gradedMax > 0 ? ((s?.scoreSum ?? 0) / gradedMax) * 100 : null;
 
       const top = topCorrect.get(col.itemId);
       const bottom = bottomCorrect.get(col.itemId);
@@ -1208,6 +1212,8 @@ export class AssessmentReportService {
         itemId: assessmentItemStats.itemId,
         responseCount: assessmentItemStats.responseCount,
         correctCount: assessmentItemStats.correctCount,
+        scoreSum: assessmentItemStats.scoreSum,
+        maxSum: assessmentItemStats.maxSum,
         answerCounts: assessmentItemStats.answerCounts,
       })
       .from(assessmentItemStats)
@@ -1218,12 +1224,14 @@ export class AssessmentReportService {
     for (const r of rows) {
       let entry = result.get(r.itemId);
       if (!entry) {
-        entry = { responseCount: 0, correctCount: 0, answerCounts: [] };
+        entry = { responseCount: 0, correctCount: 0, scoreSum: 0, maxSum: 0, answerCounts: [] };
         result.set(r.itemId, entry);
         bucketsByItem.set(r.itemId, []);
       }
       entry.responseCount += Number(r.responseCount);
       entry.correctCount += Number(r.correctCount);
+      entry.scoreSum += Number(r.scoreSum ?? 0);
+      entry.maxSum += Number(r.maxSum ?? 0);
       bucketsByItem.get(r.itemId)!.push(r.answerCounts ?? []);
     }
     for (const [itemId, buckets] of bucketsByItem) {
@@ -1565,6 +1573,8 @@ type ItemColumn = {
 type ItemCohortRow = {
   responseCount: number;
   correctCount: number;
+  scoreSum: number;
+  maxSum: number;
   answerCounts: AnswerCount[];
 };
 

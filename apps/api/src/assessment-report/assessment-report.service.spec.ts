@@ -211,6 +211,8 @@ function baseSelectResults(): unknown[][] {
         itemId: 'i1',
         responseCount: 4,
         correctCount: 3,
+        scoreSum: '3',
+        maxSum: '4',
         answerCounts: [
           { key: 'A', count: 3, isCorrect: true },
           { key: 'B', count: 1, isCorrect: false },
@@ -220,6 +222,8 @@ function baseSelectResults(): unknown[][] {
         itemId: 'i2',
         responseCount: 4,
         correctCount: 1,
+        scoreSum: '1',
+        maxSum: '4',
         answerCounts: [
           { key: 'B', count: 1, isCorrect: true },
           { key: 'C', count: 3, isCorrect: false },

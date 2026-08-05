@@ -10,6 +10,7 @@ import {
   withOrgContext,
 } from '@soe/db';
 import type { ItemInsightSnapshot } from '@soe/types';
+import { isDichotomousItem } from '@soe/types';
 import type { JwtPayload } from '../auth/jwt-payload.types';
 import { InjectDb, type Database } from '../database/database.types';
 import { AssessmentReportService } from '../assessment-report/assessment-report.service';
@@ -77,9 +78,7 @@ export class ItemInsightSnapshotService implements ItemInsightBuilder {
       orgId,
       async (tx) => {
         const meta = await this.loadItemMeta(tx, itemId);
-        const passage = meta?.sectionId
-          ? await this.loadPassage(tx, meta.sectionId)
-          : null;
+        const passage = meta?.sectionId ? await this.loadPassage(tx, meta.sectionId) : null;
         const sectionImages = meta?.sectionId
           ? await this.loadSectionImages(tx, meta.sectionId)
           : [];
@@ -101,10 +100,7 @@ export class ItemInsightSnapshotService implements ItemInsightBuilder {
     );
 
     // 4) Imágenes a base64 (best-effort): item + sección. Solo URLs http(s).
-    const { snapshotImages, llmImages } = await this.fetchImages(
-      itemImageUrl,
-      sectionImages,
-    );
+    const { snapshotImages, llmImages } = await this.fetchImages(itemImageUrl, sectionImages);
 
     const difficulty =
       reportItem?.difficulty === null || reportItem?.difficulty === undefined
@@ -263,13 +259,15 @@ export class ItemInsightSnapshotService implements ItemInsightBuilder {
     if (!instrumentId) return null;
 
     const itemRows = await tx
-      .select({ itemId: items.id })
+      .select({ itemId: items.id, type: items.type, scoringConfig: items.scoringConfig })
       .from(items)
-      .where(
-        and(eq(items.instrumentId, instrumentId), isNull(items.deletedAt)),
-      )
+      .where(and(eq(items.instrumentId, instrumentId), isNull(items.deletedAt)))
       .orderBy(asc(items.position));
-    const itemOrder = itemRows.map((r) => r.itemId);
+    // Psicometría dicotómica: los ítems de crédito parcial quedan fuera de la
+    // matriz (ver `isDichotomousItem`), incluido el propio ítem en foco.
+    const itemOrder = itemRows
+      .filter((r) => isDichotomousItem(r.type, r.scoringConfig ?? undefined))
+      .map((r) => r.itemId);
     const targetIndex = itemOrder.indexOf(itemId);
     if (targetIndex < 0 || itemOrder.length < 2) return null;
 
@@ -393,9 +391,7 @@ export class ItemInsightSnapshotService implements ItemInsightBuilder {
    * null si falla, excede el tamaño máximo o el content-type no es imagen — el
    * análisis sigue en modo texto. No lanza: nunca debe tumbar el ensamblado.
    */
-  private async fetchAsBase64(
-    url: string,
-  ): Promise<{ data: string; mimeType: string } | null> {
+  private async fetchAsBase64(url: string): Promise<{ data: string; mimeType: string } | null> {
     const controller = new AbortController();
     const timer = setTimeout(() => controller.abort(), IMAGE_FETCH_TIMEOUT_MS);
     try {
@@ -427,9 +423,7 @@ export class ItemInsightSnapshotService implements ItemInsightBuilder {
 
   private requireOrgId(user: JwtPayload): string {
     if (!user.orgId) {
-      throw new Error(
-        'Sin organización activa. Selecciona una organización antes de continuar.',
-      );
+      throw new Error('Sin organización activa. Selecciona una organización antes de continuar.');
     }
     return user.orgId;
   }

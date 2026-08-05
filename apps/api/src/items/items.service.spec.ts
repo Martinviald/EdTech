@@ -176,6 +176,18 @@ const VALID_CONTENT = {
     textWithGaps: 'El sol ___ por el este.',
     gaps: [{ position: 0, acceptedAnswers: ['sale', 'aparece'] }],
   },
+  short_answer: {
+    prompt: '¿Cuál es el resultado?',
+    acceptedAnswers: ['21/10', '2,1'],
+  },
+  rubric_scored: {
+    prompt: 'Fundamenta tu respuesta',
+    levels: [
+      { code: '0', label: 'Incorrecta', creditFraction: 0 },
+      { code: '1', label: 'Parcialmente correcta', creditFraction: 0.5 },
+      { code: '2', label: 'Correcta', creditFraction: 1 },
+    ],
+  },
 } satisfies Record<ItemType, Record<string, unknown>> as Record<ItemType, Item['content']>;
 
 const ALL_ITEM_TYPES = Object.keys(VALID_CONTENT) as ItemType[];

@@ -1,3 +1,4 @@
+import { responseOutcome } from '@soe/types';
 import type { OfficialStudentReportResponse, OfficialStudentItemRow } from '@soe/types';
 import { cn } from '@/lib/utils';
 import {
@@ -98,9 +99,7 @@ export function StudentReport({ report }: { report: OfficialStudentReportRespons
               label: s.nodeName,
               sublabel: `${s.correctCount}/${s.totalCount}`,
               value: s.percentage,
-              color: s.performanceLevel
-                ? PERFORMANCE_LEVEL_CHART_COLOR[s.performanceLevel]
-                : null,
+              color: s.performanceLevel ? PERFORMANCE_LEVEL_CHART_COLOR[s.performanceLevel] : null,
               tooltip: [
                 ...(s.performanceLevel
                   ? [
@@ -200,29 +199,28 @@ function ItemsTable({ items }: { items: OfficialStudentItemRow[] }) {
 }
 
 function ResultMark({ item }: { item: OfficialStudentItemRow }) {
-  // Sin respuesta.
-  if (item.selectedKey === null && item.isCorrect === null) {
+  const outcome = responseOutcome({
+    isCorrect: item.isCorrect,
+    score: item.score,
+    maxScore: item.maxScore,
+    hasAnswer: item.selectedKey !== null,
+  });
+
+  if (outcome === 'unanswered') {
     return <span className="text-xs text-muted-foreground">Sin responder</span>;
   }
-  // Puntaje parcial (desarrollo): 0 < score < maxScore.
-  if (item.isCorrect === null && item.score !== null) {
-    const partial = item.score > 0 && item.score < item.maxScore;
+  if (outcome === 'ungraded') {
+    return <span className="text-xs text-muted-foreground">Sin corregir</span>;
+  }
+  // El puntaje parcial se muestra como fracción: un "✗" escondería que sumó.
+  if (outcome === 'partial') {
     return (
-      <span
-        className={cn(
-          'text-xs font-medium',
-          item.score >= item.maxScore
-            ? 'text-success'
-            : partial
-              ? 'text-warning'
-              : 'text-destructive',
-        )}
-      >
+      <span className="text-xs font-medium text-warning" title="Parcialmente correcta">
         {item.score}/{item.maxScore}
       </span>
     );
   }
-  return item.isCorrect ? (
+  return outcome === 'correct' ? (
     <span className="text-success" title="Correcta">
       ✓
     </span>
