@@ -304,6 +304,43 @@ async function main() {
     }
 
     const instrumentIds = [...new Set(resolved.map((r) => r.instrumentId))];
+
+    // La BDD demo la comparten varias sesiones, y el artefacto de entrada también:
+    // si alguien le agrega un curso y otro re-corre la ingesta con SU loadKey, se
+    // crea un segundo assessment para el mismo (instrumento × curso). La
+    // idempotencia por loadKey no lo detecta — sólo limpia lo propio. Falla acá
+    // antes de escribir, en vez de dejar el duplicado para que aparezca en la app.
+    const foreign = await tx
+      .select({
+        name: assessments.name,
+        loadKey: dsql<string | null>`${assessments.config}->>'loadKey'`,
+        instrumentId: assessments.instrumentId,
+        classGroupId: assessmentCourseAssignments.classGroupId,
+      })
+      .from(assessments)
+      .innerJoin(
+        assessmentCourseAssignments,
+        eq(assessmentCourseAssignments.assessmentId, assessments.id),
+      )
+      .where(
+        and(
+          eq(assessments.orgId, ORG_ID),
+          inArray(assessments.instrumentId, instrumentIds),
+          dsql`coalesce(${assessments.config}->>'loadKey', '') <> ${LOAD_KEY}`,
+        ),
+      );
+    const clashes = foreign.filter((f) =>
+      resolved.some((r) => r.instrumentId === f.instrumentId && r.classGroupId === f.classGroupId),
+    );
+    if (clashes.length > 0) {
+      throw new Error(
+        `Ya existen assessments de otra carga para ${clashes.length} de los cursos a procesar; ` +
+          `crearlos de nuevo los duplicaría:\n` +
+          clashes.map((c) => `  · ${c.name} (loadKey=${c.loadKey ?? 'sin loadKey'})`).join('\n') +
+          `\nSaca esos cursos del artefacto (o del --only) antes de continuar.`,
+      );
+    }
+
     const allItems = await tx
       .select({
         id: items.id,

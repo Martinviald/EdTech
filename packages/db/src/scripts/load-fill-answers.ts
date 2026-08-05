@@ -64,6 +64,48 @@ if (!Number.isFinite(MIN_AGREEMENT) || MIN_AGREEMENT < 0 || MIN_AGREEMENT > 1) {
   throw new Error(`--min-agreement debe estar en [0, 1]; llegó "${MIN_AGREEMENT}"`);
 }
 
+/**
+ * Ítems cuya clave alguien ya contrastó contra el cuadernillo y la ficha, y que
+ * por eso saltan el piso de acierto. Se declaran uno a uno —`--confirmed=5°:7,…`—
+ * y no con un `--min-agreement=0` global: bajar el piso apagaría el guardarraíl
+ * también para la próxima clave mala que aparezca, y no dejaría registro de qué
+ * se revisó. Un ítem acá dice "esto lo miró una persona", no "esto da lo mismo".
+ *
+ * El patrón matchea por substring del nombre del instrumento + posición exacta.
+ */
+const CONFIRMED = opt('confirmed', '')
+  .split(',')
+  .map((entry) => entry.trim())
+  .filter(Boolean)
+  .map((entry) => {
+    const at = entry.lastIndexOf(':');
+    const pattern = entry.slice(0, at).trim();
+    const position = Number(entry.slice(at + 1));
+    if (at < 0 || !pattern || !Number.isInteger(position)) {
+      throw new Error(`--confirmed mal formado en "${entry}"; se espera <instrumento>:<posición>`);
+    }
+    return { pattern, position };
+  });
+
+function isConfirmed(instrumentName: string, position: number): boolean {
+  return CONFIRMED.some((c) => c.position === position && instrumentName.includes(c.pattern));
+}
+
+/**
+ * Restringe la corrida a ciertos instrumentos (substring del nombre). La BDD demo
+ * la comparten varias sesiones: sin esto, una corrida "de todo 2026" re-tipifica
+ * ítems de una carga ajena en curso y le deja las respuestas pendientes hasta que
+ * esa sesión re-corra su ingesta. Vacío = todos.
+ */
+const ONLY = opt('only', '')
+  .split(',')
+  .map((s) => s.trim())
+  .filter(Boolean);
+
+function isInScope(instrumentName: string): boolean {
+  return ONLY.length === 0 || ONLY.some((pattern) => instrumentName.includes(pattern));
+}
+
 const url = process.env.DATABASE_ADMIN_URL ?? process.env.DATABASE_URL;
 if (!url) throw new Error('Falta DATABASE_ADMIN_URL');
 const isLocal = /@(localhost|127\.0\.0\.1)[:/]/.test(url);
@@ -190,6 +232,7 @@ async function main() {
     const held: Array<{ item: Candidate; reason: string }> = [];
 
     for (const item of candidates) {
+      if (!isInScope(item.instrumentName)) continue;
       const extracted = extraction.get(item.instrumentName)?.get(item.position);
       const fillAnswer = extracted?.fillAnswer?.trim();
       if (!fillAnswer) {
@@ -221,7 +264,7 @@ async function main() {
         if (matchesAcceptedAnswer(answer, accepted) === 'match') hits += n;
       }
       const agreement = hits / total;
-      if (agreement < MIN_AGREEMENT) {
+      if (agreement < MIN_AGREEMENT && !isConfirmed(item.instrumentName, item.position)) {
         const modal = observed.reduce((a, b) => (b.n > a.n ? b : a));
         held.push({
           item,
@@ -235,11 +278,18 @@ async function main() {
       toConvert.push({ item, accepted, agreement, total });
     }
 
-    console.log(`  candidatos open_ended: ${candidates.length}`);
+    const inScope = candidates.filter((c) => isInScope(c.instrumentName));
+    console.log(
+      `  candidatos open_ended: ${inScope.length}` +
+        (ONLY.length ? ` (de ${candidates.length}; --only=${ONLY.join(', ')})` : ''),
+    );
     console.log(`  a convertir en short_answer: ${toConvert.length}\n`);
     for (const { item, accepted, agreement } of toConvert) {
+      const mark = isConfirmed(item.instrumentName, item.position)
+        ? ' · clave verificada a mano'
+        : '';
       console.log(
-        `    ✓ ${item.instrumentName.replace('DIA ', '')} · pos ${item.position} · clave=${accepted.join(' | ')} · acierto=${(agreement * 100).toFixed(0)}%`,
+        `    ✓ ${item.instrumentName.replace('DIA ', '')} · pos ${item.position} · clave=${accepted.join(' | ')} · acierto=${(agreement * 100).toFixed(0)}%${mark}`,
       );
     }
     if (held.length) {
