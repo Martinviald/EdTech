@@ -1,5 +1,6 @@
 import { Suspense } from 'react';
 import Link from 'next/link';
+import type { Route } from 'next';
 import { redirect } from 'next/navigation';
 import { ArrowLeft, ArrowRight, ClipboardList, Inbox, Layers } from 'lucide-react';
 import { auth } from '@/auth';
@@ -17,6 +18,7 @@ import { PerformanceBadge } from '../../resultados/components/performance-badge'
 import { formatAchievement } from '../../resultados/components/performance-level';
 import { PanoramaTrajectory } from '../components/panorama-trajectory';
 import { PanoramaDistribution } from '../components/panorama-distribution';
+import { SkillTree } from '../components/skill-tree';
 import { getStudentPanorama } from '../data';
 
 function fmtDate(value: string | Date | null): string {
@@ -87,6 +89,31 @@ function BandMovement({ item }: { item: StudentPanoramaAssessment }) {
   );
 }
 
+function ResponsesLink({
+  item,
+  studentId,
+}: {
+  item: StudentPanoramaAssessment;
+  studentId: string;
+}) {
+  if (item.dataGranularity !== 'item_level') {
+    return (
+      <span className="text-xs text-muted-foreground">Sólo nivel — sin detalle por pregunta</span>
+    );
+  }
+  return (
+    <Link
+      href={
+        `${ROUTES.evaluacionInformeAlumno(item.assessmentId, studentId)}?volver=estudiante` as Route
+      }
+      className="inline-flex items-center gap-1 text-sm font-medium text-primary hover:underline"
+    >
+      Ver respuestas
+      <ArrowRight className="size-3.5" aria-hidden />
+    </Link>
+  );
+}
+
 async function PanoramaContent({ studentId }: { studentId: string }) {
   const data = await getStudentPanorama(studentId).catch(
     (): StudentPanoramaResponse | null => null,
@@ -102,7 +129,7 @@ async function PanoramaContent({ studentId }: { studentId: string }) {
     );
   }
 
-  const { student, summary, byAssessment, bySkill, distribution } = data;
+  const { student, summary, byAssessment, bySkillTree, distribution } = data;
   const meta = [
     student.rut,
     student.classGroup ? `${student.classGroup.gradeName} · ${student.classGroup.name}` : null,
@@ -170,6 +197,7 @@ async function PanoramaContent({ studentId }: { studentId: string }) {
                     <th className="py-2 pr-4 font-medium">Nota</th>
                     <th className="py-2 pr-4 font-medium">% logro</th>
                     <th className="py-2 pr-4 font-medium">Nivel</th>
+                    <th className="py-2 pr-4 font-medium">Respuestas</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -195,6 +223,9 @@ async function PanoramaContent({ studentId }: { studentId: string }) {
                       <td className="py-2 pr-4">
                         <BandMovement item={a} />
                       </td>
+                      <td className="py-2 pr-4">
+                        <ResponsesLink item={a} studentId={studentId} />
+                      </td>
                     </tr>
                   ))}
                 </tbody>
@@ -202,47 +233,13 @@ async function PanoramaContent({ studentId }: { studentId: string }) {
             </CardContent>
           </Card>
 
-          {bySkill.length > 0 ? (
+          {bySkillTree.length > 0 ? (
             <Card>
               <CardHeader>
-                <CardTitle className="text-base">Por habilidad / eje</CardTitle>
+                <CardTitle className="text-base">Por eje, habilidad y OA</CardTitle>
               </CardHeader>
-              <CardContent className="overflow-x-auto">
-                <table className="w-full text-sm">
-                  <thead>
-                    <tr className="border-b text-left text-muted-foreground">
-                      <th className="py-2 pr-4 font-medium">Habilidad / Eje</th>
-                      <th className="py-2 pr-4 font-medium">Evaluaciones</th>
-                      <th className="py-2 pr-4 font-medium">Ítems</th>
-                      <th className="py-2 pr-4 font-medium">% logro</th>
-                      <th className="py-2 pr-4 font-medium">Nivel</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {bySkill.map((s) => (
-                      <tr key={s.nodeId} className="border-b last:border-0">
-                        <td className="py-2 pr-4 font-medium">
-                          {s.nodeName}
-                          {s.nodeCode ? (
-                            <span className="ml-1.5 text-xs text-muted-foreground">
-                              {s.nodeCode}
-                            </span>
-                          ) : null}
-                        </td>
-                        <td className="py-2 pr-4 tabular-nums">{s.assessmentsCount}</td>
-                        <td className="py-2 pr-4 tabular-nums text-muted-foreground">
-                          {s.correctCount}/{s.totalCount}
-                        </td>
-                        <td className="py-2 pr-4 tabular-nums">
-                          {formatAchievement(s.achievement)}
-                        </td>
-                        <td className="py-2 pr-4">
-                          <PerformanceBadge level={s.performanceLevel} />
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
+              <CardContent>
+                <SkillTree nodes={bySkillTree} />
               </CardContent>
             </Card>
           ) : null}

@@ -104,6 +104,21 @@ function bandRow(instrumentId: string, key: string, label: string, order: number
   };
 }
 
+function skillRow(overrides: Record<string, unknown> = {}) {
+  return {
+    nodeId: 'node-1',
+    nodeName: 'Localizar información',
+    nodeType: 'skill',
+    nodeCode: null,
+    parentNodeId: null,
+    nodeOrder: 0,
+    correctCount: 5,
+    totalCount: 10,
+    assessmentsCount: 1,
+    ...overrides,
+  };
+}
+
 const DIA_BANDS = (instrumentId: string) => [
   bandRow(instrumentId, 'I', 'Nivel I', 0),
   bandRow(instrumentId, 'II', 'Nivel II', 1),
@@ -279,17 +294,7 @@ describe('StudentPanoramaService — logro por habilidad', () => {
       [STUDENT],
       [ENROLLMENT],
       [],
-      [
-        {
-          nodeId: 'node-1',
-          nodeName: 'Localizar información',
-          nodeType: 'skill',
-          nodeCode: 'LOC',
-          correctCount: 6,
-          totalCount: 12,
-          assessmentsCount: 2,
-        },
-      ],
+      [skillRow({ nodeCode: 'LOC', correctCount: 6, totalCount: 12, assessmentsCount: 2 })],
       [],
     ]);
 
@@ -304,6 +309,72 @@ describe('StudentPanoramaService — logro por habilidad', () => {
     });
   });
 
+  it('anida los OA bajo su habilidad y ésta bajo su eje, en orden curricular', async () => {
+    const db = makeDb([
+      [STUDENT],
+      [STUDENT],
+      [ENROLLMENT],
+      [],
+      [
+        skillRow({
+          nodeId: 'oa-2',
+          nodeName: 'OA 2',
+          nodeType: 'learning_objective',
+          parentNodeId: 'hab',
+          nodeOrder: 1,
+        }),
+        skillRow({
+          nodeId: 'eje',
+          nodeName: 'Lectura',
+          nodeType: 'axis',
+          parentNodeId: null,
+          nodeOrder: 0,
+        }),
+        skillRow({
+          nodeId: 'oa-1',
+          nodeName: 'OA 1',
+          nodeType: 'learning_objective',
+          parentNodeId: 'hab',
+          nodeOrder: 0,
+        }),
+        skillRow({
+          nodeId: 'hab',
+          nodeName: 'Localizar',
+          nodeType: 'skill',
+          parentNodeId: 'eje',
+          nodeOrder: 0,
+        }),
+      ],
+      [],
+    ]);
+
+    const result = await makeService(db).getPanorama(makeUser(), 'stu-1');
+
+    expect(result.bySkillTree.map((n) => n.nodeId)).toEqual(['eje']);
+    const eje = result.bySkillTree[0]!;
+    expect(eje.children.map((n) => n.nodeId)).toEqual(['hab']);
+    expect(eje.children[0]!.children.map((n) => n.nodeId)).toEqual(['oa-1', 'oa-2']);
+    expect(result.bySkill).toHaveLength(4);
+  });
+
+  it('sube a raíz un nodo cuyo padre no está entre los evaluados', async () => {
+    const db = makeDb([
+      [STUDENT],
+      [STUDENT],
+      [ENROLLMENT],
+      [],
+      [
+        skillRow({ nodeId: 'huerfano', nodeName: 'OA suelto', parentNodeId: 'eje-no-evaluado' }),
+        skillRow({ nodeId: 'raiz', nodeName: 'Eje', parentNodeId: null }),
+      ],
+      [],
+    ]);
+
+    const result = await makeService(db).getPanorama(makeUser(), 'stu-1');
+
+    expect(result.bySkillTree.map((n) => n.nodeId).sort()).toEqual(['huerfano', 'raiz']);
+  });
+
   it('ordena las habilidades por logro ascendente y deja al final las sin medir', async () => {
     const db = makeDb([
       [STUDENT],
@@ -311,33 +382,9 @@ describe('StudentPanoramaService — logro por habilidad', () => {
       [ENROLLMENT],
       [],
       [
-        {
-          nodeId: 'n-alto',
-          nodeName: 'Alto',
-          nodeType: 'skill',
-          nodeCode: null,
-          correctCount: 9,
-          totalCount: 10,
-          assessmentsCount: 1,
-        },
-        {
-          nodeId: 'n-sin',
-          nodeName: 'Sin medir',
-          nodeType: 'skill',
-          nodeCode: null,
-          correctCount: 0,
-          totalCount: 0,
-          assessmentsCount: 1,
-        },
-        {
-          nodeId: 'n-bajo',
-          nodeName: 'Bajo',
-          nodeType: 'skill',
-          nodeCode: null,
-          correctCount: 2,
-          totalCount: 10,
-          assessmentsCount: 1,
-        },
+        skillRow({ nodeId: 'n-alto', nodeName: 'Alto', correctCount: 9, totalCount: 10 }),
+        skillRow({ nodeId: 'n-sin', nodeName: 'Sin medir', correctCount: 0, totalCount: 0 }),
+        skillRow({ nodeId: 'n-bajo', nodeName: 'Bajo', correctCount: 2, totalCount: 10 }),
       ],
       [],
     ]);

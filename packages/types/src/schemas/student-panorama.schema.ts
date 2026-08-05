@@ -63,6 +63,8 @@ export type StudentPanoramaSkill = {
   nodeName: string;
   nodeType: string;
   nodeCode: string | null;
+  /** Padre en la taxonomía. Arma el zoom eje → habilidad → OA (`bySkillTree`). */
+  parentNodeId: string | null;
   /** % 0..100 del alumno para el nodo = correctCount / totalCount. */
   achievement: number | null;
   correctCount: number;
@@ -70,6 +72,16 @@ export type StudentPanoramaSkill = {
   /** Cuántas evaluaciones aportan a este nodo para el alumno. */
   assessmentsCount: number;
   performanceLevel: PerformanceLevel | null;
+};
+
+/**
+ * El mismo logro por nodo, anidado por `parentNodeId`. Cada nivel conserva su
+ * propio dato persistido (no se recalcula desde los hijos): un eje tiene su fila
+ * en `skill_results` porque los ítems se etiquetan con el eje además del OA. Un
+ * nodo cuyo padre no está evaluado sube a raíz, así el árbol nunca esconde datos.
+ */
+export type StudentPanoramaSkillNode = StudentPanoramaSkill & {
+  children: StudentPanoramaSkillNode[];
 };
 
 /**
@@ -106,8 +118,10 @@ export type StudentPanoramaResponse = {
   summary: StudentPanoramaSummary;
   /** Trayectoria por evaluación, ordenada por fecha de aplicación ascendente. */
   byAssessment: StudentPanoramaAssessment[];
-  /** Habilidades/ejes/OAs, ordenados por logro ascendente (más críticos primero). */
+  /** Habilidades/ejes/OAs planos, ordenados por logro ascendente (más críticos primero). */
   bySkill: StudentPanoramaSkill[];
+  /** Los mismos nodos anidados por jerarquía, para el zoom eje → habilidad → OA. */
+  bySkillTree: StudentPanoramaSkillNode[];
   /** Distribución de desempeño, o el motivo por el que no se puede clasificar. */
   distribution: StudentPanoramaDistribution;
 };

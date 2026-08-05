@@ -30,6 +30,7 @@ import {
   type StudentPanoramaHeader,
   type StudentPanoramaResponse,
   type StudentPanoramaSkill,
+  type StudentPanoramaSkillNode,
   type StudentPanoramaSummary,
 } from '@soe/types';
 import type { JwtPayload } from '../auth/jwt-payload.types';
@@ -39,6 +40,15 @@ import {
   resolveClassGroupScope,
 } from '../common/helpers/class-group-scope.helper';
 import { loadBandsForInstruments } from '../performance-bands/lib/load-instrument-bands';
+import { buildTree } from '../taxonomies/lib/tree-builder';
+
+type SkillWithOrder = StudentPanoramaSkill & { nodeOrder: number };
+
+function compareSkillsByAchievement(a: StudentPanoramaSkill, b: StudentPanoramaSkill): number {
+  if (a.achievement === null) return b.achievement === null ? 0 : 1;
+  if (b.achievement === null) return -1;
+  return a.achievement - b.achievement || a.nodeName.localeCompare(b.nodeName, 'es');
+}
 
 function toBandView(r: {
   bandKey: string | null;
@@ -84,15 +94,17 @@ export class StudentPanoramaService {
       }
 
       const byAssessment = await this.loadByAssessment(tx, orgId, studentId);
-      const bySkill = await this.loadBySkill(tx, orgId, studentId);
+      const skillRows = await this.loadBySkill(tx, orgId, studentId);
       const bandsByInstrument = await loadBandsForInstruments(tx, [
         ...new Set(byAssessment.map((a) => a.instrumentId)),
       ]);
 
+      const bySkillTree = this.buildSkillTree(skillRows);
+      const bySkill = skillRows.map(({ nodeOrder: _nodeOrder, ...skill }) => skill);
       const distribution = this.buildDistribution(byAssessment, bandsByInstrument);
       const summary = this.buildSummary(byAssessment, bySkill);
 
-      return { student, summary, byAssessment, bySkill, distribution };
+      return { student, summary, byAssessment, bySkill, bySkillTree, distribution };
     });
   }
 
@@ -211,13 +223,15 @@ export class StudentPanoramaService {
     tx: Database,
     orgId: string,
     studentId: string,
-  ): Promise<StudentPanoramaSkill[]> {
+  ): Promise<SkillWithOrder[]> {
     const rows = await tx
       .select({
         nodeId: skillResults.nodeId,
         nodeName: taxonomyNodes.name,
         nodeType: taxonomyNodes.type,
         nodeCode: taxonomyNodes.code,
+        parentNodeId: taxonomyNodes.parentId,
+        nodeOrder: taxonomyNodes.order,
         correctCount: sql<number>`sum(${skillResults.correctCount})::int`,
         totalCount: sql<number>`sum(${skillResults.totalCount})::int`,
         assessmentsCount: sql<number>`count(distinct ${skillResults.assessmentId})::int`,
@@ -232,7 +246,14 @@ export class StudentPanoramaService {
           notInArray(taxonomyNodes.type, [...RESULT_HIDDEN_NODE_TYPES]),
         ),
       )
-      .groupBy(skillResults.nodeId, taxonomyNodes.name, taxonomyNodes.type, taxonomyNodes.code)
+      .groupBy(
+        skillResults.nodeId,
+        taxonomyNodes.name,
+        taxonomyNodes.type,
+        taxonomyNodes.code,
+        taxonomyNodes.parentId,
+        taxonomyNodes.order,
+      )
       .orderBy(asc(taxonomyNodes.name));
 
     return rows
@@ -245,6 +266,8 @@ export class StudentPanoramaService {
           nodeName: r.nodeName,
           nodeType: r.nodeType,
           nodeCode: r.nodeCode,
+          parentNodeId: r.parentNodeId,
+          nodeOrder: r.nodeOrder,
           achievement,
           correctCount,
           totalCount,
@@ -253,11 +276,27 @@ export class StudentPanoramaService {
             achievement === null ? null : percentageToPerformanceLevel(achievement / 100),
         };
       })
-      .sort((a, b) => {
-        if (a.achievement === null) return b.achievement === null ? 0 : 1;
-        if (b.achievement === null) return -1;
-        return a.achievement - b.achievement || a.nodeName.localeCompare(b.nodeName, 'es');
-      });
+      .sort(compareSkillsByAchievement);
+  }
+
+  private buildSkillTree(bySkill: SkillWithOrder[]): StudentPanoramaSkillNode[] {
+    const tree = buildTree(
+      bySkill.map((s) => ({ ...s, id: s.nodeId, parentId: s.parentNodeId, order: s.nodeOrder })),
+    );
+    const strip = (node: (typeof tree)[number]): StudentPanoramaSkillNode => ({
+      nodeId: node.nodeId,
+      nodeName: node.nodeName,
+      nodeType: node.nodeType,
+      nodeCode: node.nodeCode,
+      parentNodeId: node.parentNodeId,
+      achievement: node.achievement,
+      correctCount: node.correctCount,
+      totalCount: node.totalCount,
+      assessmentsCount: node.assessmentsCount,
+      performanceLevel: node.performanceLevel,
+      children: node.children.map(strip),
+    });
+    return tree.map(strip);
   }
 
   private buildDistribution(
