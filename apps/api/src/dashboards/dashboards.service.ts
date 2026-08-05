@@ -122,6 +122,14 @@ type ScopedAssessments = {
   refs: ComparabilityInstrumentRef[];
 };
 
+export type ComparableOverviewScope = {
+  orgId: string;
+  isTeacherScope: boolean;
+  classGroupIds: string[] | null;
+  assessmentIds: string[];
+  refs: ComparabilityInstrumentRef[];
+};
+
 const EMPTY_RECENT_ASSESSMENTS = { data: [] as DashboardAssessmentSummary[], total: 0 };
 
 const EMPTY_COMPARABILITY = buildComparabilityMeta([]);
@@ -1321,6 +1329,38 @@ export class DashboardsService {
       }
 
       return { courses };
+    });
+  }
+
+  /**
+   * Resuelve el alcance (org, cursos visibles, evaluaciones e instrumentos) para
+   * `ComparableOverviewService`, que necesita exactamente el mismo scoping por rol que
+   * el resto de los dashboards. Vive acá y no allá para no duplicar la resolución de
+   * permisos: es la misma regla, y duplicarla es cómo se abren los agujeros de scope.
+   */
+  async resolveScopeForComparableOverview(
+    user: JwtPayload,
+    query: DashboardFiltersQueryDto,
+  ): Promise<ComparableOverviewScope | null> {
+    const orgId = this.resolveOrgId(user);
+    if (!orgId) return null;
+
+    return withOrgContext(this.db, orgId, async (tx) => {
+      const scope = await this.getAccessibleClassGroupIds(tx, user, orgId);
+      const isTeacherScope = this.isTeacherScope(user);
+      if (!scope.scopeAll && scope.classGroupIds.length === 0) {
+        return { orgId, isTeacherScope, classGroupIds: [], assessmentIds: [], refs: [] };
+      }
+
+      const classGroupIds = await this.resolveScopedClassGroupIds(tx, orgId, scope, query);
+      const scoped = await this.resolveScopedAssessments(tx, orgId, query);
+      return {
+        orgId,
+        isTeacherScope,
+        classGroupIds,
+        assessmentIds: scoped.ids,
+        refs: scoped.refs,
+      };
     });
   }
 

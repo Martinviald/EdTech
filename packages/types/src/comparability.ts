@@ -209,3 +209,46 @@ export function deltaInPoints(current: number | null, baseline: number | null): 
   if (current == null || baseline == null) return null;
   return Number((current - baseline).toFixed(1));
 }
+
+// ── Severidad de una unidad comparable ───────────────────────────────────────
+
+/**
+ * Umbrales de concentración en la banda inferior del instrumento que determinan la
+ * severidad de una unidad.
+ *
+ * Se expresan como % de alumnos, NO como % de logro: un corte absoluto de logro
+ * (el viejo "curso bajo 60%") no significa lo mismo en instrumentos con cortes
+ * distintos, que es justo lo que #1C corrige. "Cuántos alumnos quedaron en el nivel
+ * más bajo de SU instrumento" sí es comparable entre instrumentos.
+ */
+export const SEVERITY_LOWEST_BAND_THRESHOLDS = { high: 40, medium: 25 } as const;
+
+/**
+ * Severidad de una unidad a partir de la concentración en su banda inferior.
+ *
+ * `null` cuando el instrumento no define bandas ni niveles: sin corte propio no hay
+ * forma honesta de decir si está bien o mal, y ordenar por un número inventado es
+ * exactamente el problema que este módulo existe para evitar. Esas unidades van al
+ * final de la vista, ordenadas por recencia.
+ *
+ * Cuando exista el motor de alertas (roadmap #3B), la severidad pasa a ser el MÁXIMO
+ * entre ésta y la del delta contra el baseline: el movimiento puede subir la
+ * severidad, nunca bajarla.
+ */
+export function severityFromLowestBandShare(share: number | null): UnitSeverityValue | null {
+  if (share == null) return null;
+  if (share >= SEVERITY_LOWEST_BAND_THRESHOLDS.high) return 'high';
+  if (share >= SEVERITY_LOWEST_BAND_THRESHOLDS.medium) return 'medium';
+  return 'low';
+}
+
+type UnitSeverityValue = 'high' | 'medium' | 'low';
+
+const SEVERITY_ORDER: Record<UnitSeverityValue, number> = { high: 0, medium: 1, low: 2 };
+
+/** Orden de la vista: primero lo urgente; las unidades sin severidad, al final. */
+export function compareSeverity(a: UnitSeverityValue | null, b: UnitSeverityValue | null): number {
+  const rankA = a == null ? 3 : SEVERITY_ORDER[a];
+  const rankB = b == null ? 3 : SEVERITY_ORDER[b];
+  return rankA - rankB;
+}

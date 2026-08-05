@@ -2,6 +2,7 @@ import { cache } from 'react';
 
 import { apiGet } from '@/lib/api';
 import type {
+  ComparableOverviewResponse,
   DashboardOverviewResponse,
   DashboardFilterOptionsResponse,
   DashboardTeacherKpisResponse,
@@ -13,6 +14,10 @@ import type {
 
 export const getDashboardOverview = cache((query: string) =>
   apiGet<DashboardOverviewResponse>(`/dashboards/overview${query}`),
+);
+
+export const getComparableOverview = cache((query: string) =>
+  apiGet<ComparableOverviewResponse>(`/dashboards/comparable-overview${query}`),
 );
 
 export const getDashboardFilters = cache((query: string) =>

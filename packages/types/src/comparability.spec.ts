@@ -1,4 +1,6 @@
 import {
+  compareSeverity,
+  severityFromLowestBandShare,
   buildComparabilityMeta,
   buildInstrumentFamilyKey,
   buildPeriodSeriesKey,
@@ -165,5 +167,26 @@ describe('deltaInPoints', () => {
   it('sin alguno de los dos extremos no hay delta', () => {
     expect(deltaInPoints(null, 60)).toBeNull();
     expect(deltaInPoints(48, null)).toBeNull();
+  });
+});
+
+describe('severidad de una unidad comparable', () => {
+  it('la determina la concentración en la banda inferior, no un corte de logro', () => {
+    expect(severityFromLowestBandShare(62)).toBe('high');
+    expect(severityFromLowestBandShare(40)).toBe('high');
+    expect(severityFromLowestBandShare(30)).toBe('medium');
+    expect(severityFromLowestBandShare(25)).toBe('medium');
+    expect(severityFromLowestBandShare(10)).toBe('low');
+    expect(severityFromLowestBandShare(0)).toBe('low');
+  });
+
+  it('sin bandas configuradas no se inventa una severidad', () => {
+    expect(severityFromLowestBandShare(null)).toBeNull();
+  });
+
+  it('ordena lo urgente primero y deja al final lo que no se puede evaluar', () => {
+    const orden = ['low', 'high', null, 'medium'] as const;
+    const ordenado = [...orden].sort(compareSeverity);
+    expect(ordenado).toEqual(['high', 'medium', 'low', null]);
   });
 });
