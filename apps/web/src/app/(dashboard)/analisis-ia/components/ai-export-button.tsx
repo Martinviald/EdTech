@@ -49,10 +49,6 @@ function fmtPct(value: number | null, digits = 0): string {
   const pct = value <= 1 && value >= -1 ? value * 100 : value;
   return `${pct.toFixed(digits)}%`;
 }
-function fmtNum(value: number | null, digits = 2): string {
-  if (value === null || Number.isNaN(value)) return '—';
-  return value.toFixed(digits);
-}
 function sanitize(name: string): string {
   return name.replace(/[\\/?*[\]:]/g, ' ').trim();
 }
