@@ -3,6 +3,7 @@ import type { BaselineRef } from '../comparability';
 import type { ComparabilityMeta } from '../comparability';
 import { dashboardFiltersQuerySchema } from './dashboard.schema';
 import type {
+  DashboardAlert,
   PerformanceBandDistributionBucket,
   PerformanceDistributionBucket,
 } from './dashboard.schema';
@@ -71,6 +72,12 @@ export type ComparableUnitSummary = {
 
 export type ComparableOverviewResponse = {
   scope: 'org' | 'teacher';
+  /**
+   * Las alertas viven acá y no en `/dashboards/overview` porque toda alerta nace de una
+   * unidad comparable: sin saber de qué instrumento sale, no hay corte con el cual
+   * decidir si algo está mal (era el defecto de los umbrales 60/50 hardcodeados).
+   */
+  alerts: DashboardAlert[];
   /** Ordenadas por severidad y, dentro de ella, por recencia. */
   units: ComparableUnitSummary[];
   totals: {

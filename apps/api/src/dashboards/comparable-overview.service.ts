@@ -37,6 +37,7 @@ import {
 } from '../common/helpers/cohort-level-stats.helper';
 import { InjectDb, type Database } from '../database/database.types';
 import { loadInstrumentBands } from '../performance-bands/lib/load-instrument-bands';
+import { ComparableAlertsService } from './comparable-alerts.service';
 import { DashboardsService } from './dashboards.service';
 
 type UnitAccumulator = {
@@ -55,6 +56,7 @@ export class ComparableOverviewService {
   constructor(
     @InjectDb() private readonly db: Database,
     private readonly dashboards: DashboardsService,
+    private readonly alerts: ComparableAlertsService,
   ) {}
 
   async getComparableOverview(
@@ -65,6 +67,7 @@ export class ComparableOverviewService {
     if (!scopeInfo) {
       return {
         scope: 'org',
+        alerts: [],
         units: [],
         totals: { assessments: 0, studentsEvaluated: 0 },
         comparability: buildComparabilityMeta([]),
@@ -74,6 +77,7 @@ export class ComparableOverviewService {
     const { orgId, isTeacherScope, classGroupIds, assessmentIds, refs } = scopeInfo;
     const emptyResponse: ComparableOverviewResponse = {
       scope: isTeacherScope ? 'teacher' : 'org',
+      alerts: [],
       units: [],
       totals: { assessments: 0, studentsEvaluated: 0 },
       comparability: buildComparabilityMeta(refs, assessmentIds.length),
@@ -106,9 +110,11 @@ export class ComparableOverviewService {
       });
 
       const studentsEvaluated = summaries.reduce((acc, u) => acc + u.studentsAssessed, 0);
+      const alerts = await this.alerts.deriveAlerts(tx, orgId, summaries, classGroupIds);
 
       return {
         scope: isTeacherScope ? 'teacher' : 'org',
+        alerts,
         units: summaries,
         totals: { assessments: assessmentIds.length, studentsEvaluated },
         comparability: buildComparabilityMeta(refs, assessmentIds.length),
@@ -228,7 +234,13 @@ export class ComparableOverviewService {
         : null;
     const lowestBandShare = this.lowestBandShare(bandDistribution);
 
-    const byClassGroup = await this.loadByClassGroup(tx, orgId, unit.assessmentIds, classGroupIds);
+    const byClassGroup = await this.loadByClassGroup(
+      tx,
+      orgId,
+      unit.assessmentIds,
+      classGroupIds,
+      bands,
+    );
 
     return {
       key: unit.ref.instrumentId,
@@ -363,6 +375,7 @@ export class ComparableOverviewService {
     orgId: string,
     assessmentIds: string[],
     classGroupIds: string[] | null,
+    bands: PerformanceBandInput[],
   ): Promise<ComparableUnitClassGroup[]> {
     const conditions = [
       inArray(assessmentResults.assessmentId, assessmentIds),
@@ -379,25 +392,67 @@ export class ComparableOverviewService {
         classGroupId: classGroups.id,
         classGroupName: classGroups.name,
         gradeName: grades.name,
-        avgPct: sql<string | null>`avg(${assessmentResults.percentage}::numeric)`,
-        students: sql<number>`count(distinct ${assessmentResults.studentId})::int`,
+        percentage: assessmentResults.percentage,
+        performanceBandId: assessmentResults.performanceBandId,
+        studentId: assessmentResults.studentId,
       })
       .from(assessmentResults)
       .innerJoin(students, eq(students.id, assessmentResults.studentId))
       .innerJoin(studentEnrollments, eq(studentEnrollments.studentId, assessmentResults.studentId))
       .innerJoin(classGroups, eq(classGroups.id, studentEnrollments.classGroupId))
       .leftJoin(grades, eq(grades.id, classGroups.gradeId))
-      .where(and(...conditions))
-      .groupBy(classGroups.id, classGroups.name, grades.name);
+      .where(and(...conditions));
 
-    return rows
-      .map((row) => ({
-        classGroupId: row.classGroupId,
-        classGroupName: row.classGroupName,
-        gradeName: row.gradeName,
-        studentsAssessed: Number(row.students ?? 0),
-        averageAchievement: row.avgPct == null ? null : Number(row.avgPct),
-        lowestBandShare: null,
+    const lowestBandId = bands.length > 0 ? lowestBand(bands)?.id : undefined;
+
+    type Acc = {
+      classGroupId: string;
+      classGroupName: string;
+      gradeName: string | null;
+      pctSum: number;
+      pctCount: number;
+      studentIds: Set<string>;
+      inLowestBand: number;
+      classified: number;
+    };
+    const byCourse = new Map<string, Acc>();
+    for (const row of rows) {
+      let acc = byCourse.get(row.classGroupId);
+      if (!acc) {
+        acc = {
+          classGroupId: row.classGroupId,
+          classGroupName: row.classGroupName,
+          gradeName: row.gradeName,
+          pctSum: 0,
+          pctCount: 0,
+          studentIds: new Set(),
+          inLowestBand: 0,
+          classified: 0,
+        };
+        byCourse.set(row.classGroupId, acc);
+      }
+      acc.studentIds.add(row.studentId);
+      if (row.percentage != null) {
+        acc.pctSum += Number(row.percentage);
+        acc.pctCount += 1;
+      }
+      if (lowestBandId) {
+        const bandId = row.performanceBandId ?? this.classifyPercentage(row.percentage, bands);
+        if (bandId) {
+          acc.classified += 1;
+          if (bandId === lowestBandId) acc.inLowestBand += 1;
+        }
+      }
+    }
+
+    return Array.from(byCourse.values())
+      .map((acc) => ({
+        classGroupId: acc.classGroupId,
+        classGroupName: acc.classGroupName,
+        gradeName: acc.gradeName,
+        studentsAssessed: acc.studentIds.size,
+        averageAchievement: acc.pctCount > 0 ? acc.pctSum / acc.pctCount : null,
+        lowestBandShare: acc.classified > 0 ? (acc.inLowestBand / acc.classified) * 100 : null,
       }))
       .sort((a, b) => (a.averageAchievement ?? 101) - (b.averageAchievement ?? 101));
   }
@@ -520,4 +575,11 @@ export class ComparableOverviewService {
 
 function toBandView(band: PerformanceBandInput) {
   return { key: band.key, label: band.label, order: band.order, color: band.color ?? null };
+}
+
+function lowestBand(bands: PerformanceBandInput[]): PerformanceBandInput | undefined {
+  return bands.reduce<PerformanceBandInput | undefined>(
+    (min, b) => (min === undefined || b.order < min.order ? b : min),
+    undefined,
+  );
 }
