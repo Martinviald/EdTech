@@ -70,6 +70,34 @@ export type ComparableUnitSummary = {
   severity: UnitSeverity | null;
 };
 
+/**
+ * Cómo le fue a una generación contra la anterior, en una asignatura y nivel.
+ *
+ * "Generación" = el mismo nivel (`gradeId`) en años distintos: los alumnos son otros,
+ * el instrumento es el mismo. Es una comparación N2 y por eso es legítima; se deriva de
+ * las unidades que ya resolvieron su baseline `previous_year`, sin consultar de nuevo.
+ *
+ * Varias unidades pueden caer en la misma celda (asignatura × nivel) cuando el año trae
+ * más de un momento del ciclo — se agregan ponderando por alumnos, que es válido porque
+ * todas comparten familia.
+ */
+export type GenerationalHighlight = {
+  gradeId: string | null;
+  gradeName: string | null;
+  subjectId: string | null;
+  subjectName: string | null;
+  /** Momento del ciclo, cuando todas las unidades de la celda comparten uno. */
+  applicationPeriod: InstrumentApplicationPeriod | null;
+  year: number | null;
+  baselineYear: number | null;
+  achievement: number | null; // 0..100
+  baselineAchievement: number | null;
+  deltaPp: number | null;
+  studentsAssessed: number;
+  /** Unidades que sustentan la celda, para el drill. */
+  instrumentIds: string[];
+};
+
 export type ComparableOverviewResponse = {
   scope: 'org' | 'teacher';
   /**
@@ -80,6 +108,12 @@ export type ComparableOverviewResponse = {
   alerts: DashboardAlert[];
   /** Ordenadas por severidad y, dentro de ella, por recencia. */
   units: ComparableUnitSummary[];
+  /**
+   * Movimiento por generación (asignatura × nivel, año contra año). Ordenado por
+   * magnitud de la caída: lo que más retrocedió primero. Vacío cuando no hay dos años
+   * comparables en el alcance.
+   */
+  generational: GenerationalHighlight[];
   totals: {
     assessments: number;
     studentsEvaluated: number;

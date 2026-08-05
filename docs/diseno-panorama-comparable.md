@@ -471,7 +471,45 @@ algún día el producto empieza a versionar instrumentos, el punto de extensión
 
 ---
 
-## 8. Bitácora
+## 8. Deuda y pendientes conocidos
+
+Registrado explícitamente para que no se lea como "terminado" lo que está aceptado a sabiendas.
+
+| # | Qué | Dónde | Por qué se acepta hoy |
+|---|---|---|---|
+| **1** | **El ensamblado no es de una sola pasada.** `T3-01` lo pide; hoy son ~1 query por unidad + 1 por evaluación para los conteos de banda + 2 por unidad para el baseline (~40 con 8 unidades) | `comparable-overview.service.ts` (documentado en el propio archivo) | El volumen de un colegio es chico y la corrección del número importaba más que su costo. **No agregar más trabajo por unidad sin saldarlo antes.** |
+| **2** | **Lo proactivo sigue siendo efímero.** Las alertas se recalculan en cada request; no se persisten, no tienen ciclo de vida (nueva → vista → en acción → resuelta) ni las produce el análisis IA | `comparable-alerts.service.ts` | Es exactamente el alcance de **T3-05** / roadmap **#3B capa 3**, que el propio `pendientes-prioritarios-v3.md` pone ANTES de T3-01. El catálogo ya emite `dedupKey`, `unitKey` y `contextKind` con la forma de fila que esa bandeja va a necesitar, así que persistirlo es mudanza, no rediseño. |
+| **3** | **Sin verificación visual.** Validado por servicio contra la base real, tests y typecheck; nadie abrió la página en el navegador | — | Pendiente de la próxima sesión con la app levantada. |
+| **4** | **Umbrales sin calibrar.** `ALERT_THRESHOLDS` son valores de partida | `packages/types/src/comparability.ts` | Decisión **D**: se afinan mirando datos reales, y recién ahí se decide si además son configurables por colegio. |
+| **5** | **`progression` (D6) sigue mezclando instrumentos** | `analytics.service.ts` | El resolver queda disponible; el fix de la vista vive en **#2B**. |
+| **6** | **La matriz no enlaza a la comparación de instrumentos.** `T3-03` pide "comparar con el año anterior en un clic desde la matriz" | `comparable-units-table.tsx` | El banner generacional ya lleva a `/resultados/comparacion` con el corte puesto; falta el enlace por fila. |
+
+### 8.1 Por qué la matriz es una lista ordenada y no un cruce
+
+`T3-01` describe "% de logro × nivel × asignatura × evaluación" y es tentador leerlo como una
+tabla pivote (filas = nivel, columnas = asignatura, celdas coloreadas por % de logro). **Se decidió
+no construir eso**, y la razón es el propio principio rector:
+
+Un cruce sólo se lee de un vistazo si sus celdas son comparables **entre sí** — para eso existe el
+color compartido. Pero la celda (3° Básico, Lenguaje) y la celda (8° Básico, Matemática) vienen de
+instrumentos distintos, con dificultad distinta y **corte distinto**: pintarlas en la misma escala
+invita exactamente a la comparación que #1C elimina. No es una hipótesis: el Mapa de calor (**D9**)
+ya hacía justo eso —tomaba los thresholds del primer instrumento y los aplicaba a toda la matriz— y
+fue el peor defecto del diagnóstico.
+
+La lista ordenada por severidad, en cambio, responde directo la pregunta del ticket ("que llame la
+atención", "CTA al detalle") sin pedirle al ojo que compare cosas incomparables: las cuatro
+dimensiones están presentes como columnas, y el orden lo pone la urgencia, no la posición en una
+grilla.
+
+**Lo único que el cruce hacía mejor** es mostrar los HUECOS de cobertura (qué nivel × asignatura no
+tiene evaluación). Eso lo cubre parcialmente la alerta `coverage_gap`, que detecta cursos asignados
+sin resultados. Si algún día se quiere la grilla completa de cobertura, debe pintar **presencia y
+severidad**, nunca un % en escala compartida.
+
+---
+
+## 9. Bitácora
 
 | Fecha | Cambio |
 |---|---|
@@ -479,6 +517,7 @@ algún día el producto empieza a versionar instrumentos, el punto de extensión
 | 2026-08-04 | Decisiones **A** (matriz por severidad como vista por defecto), **B** (no clasificar en scope mixto) y **C** (cabecera sólo con conteos, se elimina el "% Logro global") resueltas. §4.3 actualizado con sus consecuencias. Pendientes D, E, F. |
 | 2026-08-04 | §4.4 detallado con el **catálogo de alertas**: 9 tipos en 3 familias (Nivel / Movimiento / Cobertura). Hallazgos que lo condicionan: `assessment_level_stats` permite alertas de banda **también con informes agregados**, y `assessment_results.priorPerformanceBandId` da el retroceso de banda entre momentos **sin resolver baseline**. La decisión D se amplía a los tres umbrales del catálogo. |
 | 2026-08-04 | Auditadas las dos tabs que faltaban: **D8** (Dimensiones) y **D9** (Mapa de calor, que clasifica con los thresholds "del primer instrumento que matchee"). #1C se extiende a ellas. Definido el cálculo determinístico de `severity` para la Ola 2 (hueco que abrió la decisión A). Agregados criterios de aceptación por ola (§5.1) y recomendación para las decisiones **E** y **F**, que son las únicas que bloquean código. |
+| 2026-08-05 | Cierre de los pendientes del review de `T3-01`: se agrega el **banner de movimiento por generación** (asignatura × nivel, año contra año) derivado en memoria del baseline `previous_year` de cada unidad — cero queries nuevas; se registra el **N+1 como deuda explícita** en el propio servicio; se documenta **por qué la matriz es lista y no cruce** (§8.1); y lo **proactivo queda marcado como pendiente** de T3-05 / #3B. |
 | 2026-08-04 | **Olas 0–4 implementadas.** Desviaciones respecto del plan, todas hacia menos código o más precisión: (1) el resolver de comparabilidad NO es un servicio Nest ni un helper aparte — sale del `select` que `resolveScopedAssessments` ya hacía, así que no cuesta una query extra; en heatmap se fusionó con el de thresholds porque sus tests vigilan el número de queries. (2) `resolveBaseline` se construyó en la Ola 2, donde tiene consumidor, en vez de la Ola 0. (3) `versionMismatch` no se construyó (ver decisión E). (4) La familia A de alertas necesitó un tercer camino para la distribución por banda —clasificar el `%` de cada alumno con las bandas de su instrumento— porque el read-model de cohorte sólo se puebla con informes importados. (5) Se agregó `get_comparable_overview` como tool del asistente para no dejarlo sin la señal de alertas. |
 | 2026-08-04 | **Lo que sólo apareció corriendo contra datos reales** (los tests con DB falsa no podían verlo): el baseline excluía como candidatos a los instrumentos del propio alcance, así que con 2025 y 2026 en pantalla ninguno podía ser baseline del otro; `item_gap` afirmaba "0% de acierto" en preguntas de desarrollo, que no se autocorrigen; y la misma brecha salía repetida por habilidad y por OA, porque los ítems se etiquetan con varios nodos a la vez. Las alertas de CSCJ pasaron de 27 a 13. |
 | 2026-08-04 | **Diseño cerrado.** Decisiones **E** (`version` no entra en `familyKey`; es una capacidad que el producto no usa hoy → tampoco se construye `versionMismatch`) y **F** (`globalAchievement` se borra sin período deprecated) resueltas. Queda abierta sólo **D**, que no bloquea hasta la Ola 3. Siguiente paso: implementar la Ola 0. |
