@@ -21,7 +21,7 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import { AlertsBanner } from './components/alerts-banner';
+import { LiveAlertsBanner } from './components/live-alerts-banner';
 import { ComparableUnitsTable } from './components/comparable-units-table';
 import { DashboardFilterBar } from './components/dashboard-filter-bar';
 import {
@@ -113,7 +113,7 @@ async function PanoramaSections({ query }: { query: string }) {
         />
       </div>
 
-      <AlertsBanner alerts={comparable.alerts} />
+      <LiveAlertsBanner query={query} initialAlerts={comparable.alerts} />
 
       <ComparabilityNotice comparability={comparable.comparability} />
 

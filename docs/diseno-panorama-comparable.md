@@ -9,9 +9,9 @@
 >
 > **Rama / worktree:** `feat/panorama-comparable` (worktree aislado desde `origin/dev` en
 > `.claude/worktrees/panorama-comparable`).
-> **Fecha de creación:** 2026-08-04 · **Estado:** ✅ **diseño cerrado** — listo para implementar
-> desde la Ola 0. Única decisión pendiente: **D** (umbrales del catálogo de alertas), que no bloquea
-> hasta la Ola 3 y se calibra con datos reales.
+> **Fecha de creación:** 2026-08-04 · **Estado:** ✅ **diseño cerrado** · 🚧 **implementado hasta la
+> Ola 4** en `feat/panorama-comparable`. Decisión **D** (umbrales) resuelta con valores de partida en
+> `ALERT_THRESHOLDS`, pendiente de calibración con datos reales.
 
 ---
 
@@ -383,6 +383,16 @@ esta tanda.
 | **3** | Alertas comparables: catálogo de §4.4 (familias A, B y C) con prioridad, dedup y CTA | 0, 2 |
 | **4** | Refresco en vivo + responsive + pulido | 2, 3 |
 
+**Estado de ejecución** (commits en `feat/panorama-comparable`):
+
+| Ola | Commit | Estado |
+|---|---|---|
+| 0 | `5649f13` | ✅ |
+| 1 | `7080075` | ✅ |
+| 2 | `d27c7ec` | ✅ |
+| 3 | `de64c1a` | ✅ |
+| 4 | — | ✅ |
+
 Olas 0 y 1 son backend puro y se validan con los specs existentes de `dashboards.service.spec.ts`
 (1027 líneas que ya cubren el camino cohorte/per-alumno — hay que **reescribir** las 7 aserciones de
 `globalAchievement`, no borrarlas).
@@ -469,4 +479,6 @@ algún día el producto empieza a versionar instrumentos, el punto de extensión
 | 2026-08-04 | Decisiones **A** (matriz por severidad como vista por defecto), **B** (no clasificar en scope mixto) y **C** (cabecera sólo con conteos, se elimina el "% Logro global") resueltas. §4.3 actualizado con sus consecuencias. Pendientes D, E, F. |
 | 2026-08-04 | §4.4 detallado con el **catálogo de alertas**: 9 tipos en 3 familias (Nivel / Movimiento / Cobertura). Hallazgos que lo condicionan: `assessment_level_stats` permite alertas de banda **también con informes agregados**, y `assessment_results.priorPerformanceBandId` da el retroceso de banda entre momentos **sin resolver baseline**. La decisión D se amplía a los tres umbrales del catálogo. |
 | 2026-08-04 | Auditadas las dos tabs que faltaban: **D8** (Dimensiones) y **D9** (Mapa de calor, que clasifica con los thresholds "del primer instrumento que matchee"). #1C se extiende a ellas. Definido el cálculo determinístico de `severity` para la Ola 2 (hueco que abrió la decisión A). Agregados criterios de aceptación por ola (§5.1) y recomendación para las decisiones **E** y **F**, que son las únicas que bloquean código. |
+| 2026-08-04 | **Olas 0–4 implementadas.** Desviaciones respecto del plan, todas hacia menos código o más precisión: (1) el resolver de comparabilidad NO es un servicio Nest ni un helper aparte — sale del `select` que `resolveScopedAssessments` ya hacía, así que no cuesta una query extra; en heatmap se fusionó con el de thresholds porque sus tests vigilan el número de queries. (2) `resolveBaseline` se construyó en la Ola 2, donde tiene consumidor, en vez de la Ola 0. (3) `versionMismatch` no se construyó (ver decisión E). (4) La familia A de alertas necesitó un tercer camino para la distribución por banda —clasificar el `%` de cada alumno con las bandas de su instrumento— porque el read-model de cohorte sólo se puebla con informes importados. (5) Se agregó `get_comparable_overview` como tool del asistente para no dejarlo sin la señal de alertas. |
+| 2026-08-04 | **Lo que sólo apareció corriendo contra datos reales** (los tests con DB falsa no podían verlo): el baseline excluía como candidatos a los instrumentos del propio alcance, así que con 2025 y 2026 en pantalla ninguno podía ser baseline del otro; `item_gap` afirmaba "0% de acierto" en preguntas de desarrollo, que no se autocorrigen; y la misma brecha salía repetida por habilidad y por OA, porque los ítems se etiquetan con varios nodos a la vez. Las alertas de CSCJ pasaron de 27 a 13. |
 | 2026-08-04 | **Diseño cerrado.** Decisiones **E** (`version` no entra en `familyKey`; es una capacidad que el producto no usa hoy → tampoco se construye `versionMismatch`) y **F** (`globalAchievement` se borra sin período deprecated) resueltas. Queda abierta sólo **D**, que no bloquea hasta la Ola 3. Siguiente paso: implementar la Ola 0. |
