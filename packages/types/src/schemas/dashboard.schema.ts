@@ -1,5 +1,6 @@
 import { z } from 'zod';
 import { PERFORMANCE_LEVELS, type AssessmentStatus, type PerformanceLevel } from '../enums';
+import type { ComparabilityMeta } from '../comparability';
 import type { PerformanceBandView } from './performance-band.schema';
 import { csvArraySchema, stringCsvSchema, uuidCsvSchema } from './common.schema';
 import {
@@ -112,10 +113,18 @@ export type DashboardAlert = {
 /** H6.1 / H6.7 — GET /api/dashboards/overview */
 export type DashboardOverviewResponse = {
   scope: 'org' | 'teacher';
-  globalAchievement: number | null; // % logro global 0..100
+  // NO hay "% de logro global": promediar instrumentos de distinta dificultad y
+  // distinta escala no produce un número interpretable (#1C). El reemplazo es el
+  // desglose por unidad comparable de `GET /dashboards/comparable-overview`.
+  //
+  // Estos dos SÍ se emiten siempre: son conteos, no promedios, así que no mezclan
+  // nada al sumar sobre instrumentos distintos.
   studentsEvaluated: number;
   assessmentsCount: number;
-  performanceDistribution: PerformanceDistributionBucket[];
+  // `null` cuando el alcance no es agregable (`comparability.aggregatable === false`):
+  // la distribución por nivel mezclaría los cortes de cada instrumento. La UI pinta
+  // `comparability.reason` en su lugar.
+  performanceDistribution: PerformanceDistributionBucket[] | null;
   recentAssessments: DashboardAssessmentSummary[];
   // Cuántas evaluaciones hay en el alcance filtrado. `recentAssessments` viene
   // recortado a las más recientes, así que sin este total la UI no puede decir que
@@ -123,6 +132,14 @@ export type DashboardOverviewResponse = {
   // es todo lo que hay".
   recentAssessmentsTotal: number;
   alerts: DashboardAlert[];
+  /**
+   * Comparabilidad del alcance filtrado. Mecanismo de PAYLOAD (no guard), igual que
+   * `meta.capabilities` de `analytics-capabilities.ts`: esta ruta es mixta —sirve
+   * conteos y lista de evaluaciones, que siempre son legítimos, junto a métricas que
+   * sólo se pueden emitir sobre una unidad comparable—, así que el punto de corte es
+   * el payload y no la ruta.
+   */
+  comparability: ComparabilityMeta;
 };
 
 // ── H6.2 — GET /api/dashboards/filters ───────────────────────────────────────
@@ -190,7 +207,9 @@ export type StudentClassificationModel = {
   studentFullName: string;
   classGroupId: string | null;
   classGroupName: string | null;
-  achievement: number | null; // % logro 0..100 (promedio si abarca varias evaluaciones)
+  // `null` cuando el alcance no es agregable: el promedio del % de un alumno a través
+  // de instrumentos de distinta dificultad no tiene lectura pedagógica (#1C).
+  achievement: number | null; // % logro 0..100 dentro de la unidad comparable
   grade: string | null; // nota
   performanceLevel: PerformanceLevel | null;
   // Banda del instrumento (cuando el scope es un único instrumento con bandas).
@@ -198,7 +217,8 @@ export type StudentClassificationModel = {
 };
 
 export type DashboardPerformanceResponse = {
-  distribution: PerformanceDistributionBucket[];
+  // `null` cuando el alcance no es agregable: ver `performanceDistribution` del overview.
+  distribution: PerformanceDistributionBucket[] | null;
   // Umbrales configurables (0..1) tomados de la grading scale aplicable.
   thresholds: {
     elementary: number;
@@ -216,6 +236,7 @@ export type DashboardPerformanceResponse = {
     page: number;
     limit: number;
   };
+  comparability: ComparabilityMeta;
 };
 
 // ── H6.5 — GET /api/dashboards/skills ────────────────────────────────────────
@@ -236,6 +257,7 @@ export type DashboardSkillsResponse = {
   skills: SkillAchievementModel[];
   // Bandas del instrumento cuando el scope es un único instrumento con bandas.
   bands?: PerformanceBandView[];
+  comparability: ComparabilityMeta;
 };
 
 /**
@@ -271,6 +293,11 @@ export type TeacherCourseKpiModel = {
   classGroupName: string;
   gradeName: string | null;
   subjectName: string | null;
+  // El grano es (curso × INSTRUMENTO), no curso: promediar el logro de un curso a
+  // través de instrumentos de distinta dificultad no es interpretable (#1C). `null`
+  // cuando el curso todavía no tiene resultados.
+  instrumentId: string | null;
+  instrumentName: string | null;
   studentsCount: number;
   averageAchievement: number | null; // % logro promedio 0..100
   passingRate: number | null; // % alumnos sobre passing_grade, 0..100

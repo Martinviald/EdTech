@@ -1,6 +1,7 @@
 import { Controller, Get, Query, UseGuards } from '@nestjs/common';
 import {
   DASHBOARD_VIEWER_ROLES,
+  comparableOverviewQuerySchema,
   dashboardFiltersQuerySchema,
   dashboardPerformanceQuerySchema,
   dashboardSkillBreakdownQuerySchema,
@@ -9,6 +10,7 @@ import { CurrentUser } from '../auth/current-user.decorator';
 import type { JwtPayload } from '../auth/jwt-payload.types';
 import { Roles } from '../common/decorators/roles.decorator';
 import { RolesGuard } from '../common/guards/roles.guard';
+import { ComparableOverviewService } from './comparable-overview.service';
 import { DashboardsService } from './dashboards.service';
 
 /**
@@ -20,7 +22,23 @@ import { DashboardsService } from './dashboards.service';
 @Controller('dashboards')
 @UseGuards(RolesGuard)
 export class DashboardsController {
-  constructor(private readonly service: DashboardsService) {}
+  constructor(
+    private readonly service: DashboardsService,
+    private readonly comparableOverview: ComparableOverviewService,
+  ) {}
+
+  /**
+   * GET /api/dashboards/comparable-overview
+   * Una fila por unidad comparable (instrumento), ordenadas por severidad. Es el
+   * reemplazo del "% de logro global" que #1C retiró: en vez de un promedio sobre
+   * instrumentos de distinta dificultad, el desglose donde cada número sí se lee.
+   */
+  @Get('comparable-overview')
+  @Roles(...DASHBOARD_VIEWER_ROLES)
+  getComparableOverview(@Query() query: unknown, @CurrentUser() user: JwtPayload) {
+    const dto = comparableOverviewQuerySchema.parse(query ?? {});
+    return this.comparableOverview.getComparableOverview(user, dto);
+  }
 
   /**
    * GET /api/dashboards/overview

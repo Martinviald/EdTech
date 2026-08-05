@@ -20,6 +20,7 @@ export * from './grading-scale.schema';
 export * from './performance-band.schema';
 export * from './assessment-result.schema';
 export * from './student-panorama.schema';
+export * from './comparable-overview.schema';
 export * from './dashboard.schema';
 export * from './analytics.schema';
 export * from './assessment-report.schema';

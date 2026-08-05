@@ -1,3 +1,4 @@
+import { buildComparabilityMeta } from '@soe/types';
 import type {
   DashboardFilterOptionsResponse,
   DashboardOverviewResponse,
@@ -99,9 +100,11 @@ describe('get_dashboard_overview tool', () => {
   });
 });
 
+const EMPTY_COMPARABILITY = buildComparabilityMeta([]);
+
 describe('get_dashboard_skills tool', () => {
   it('valida e invoca getSkills con ctx.user', async () => {
-    const response: DashboardSkillsResponse = { skills: [] };
+    const response: DashboardSkillsResponse = { skills: [], comparability: EMPTY_COMPARABILITY };
     const getSkills = jest.fn().mockResolvedValue(response);
     const tool = new GetDashboardSkillsTool({
       getSkills,
@@ -130,6 +133,7 @@ describe('get_dashboard_performance tool (guardrail PII)', () => {
   function makeResponse(): DashboardPerformanceResponse {
     return {
       distribution: [],
+      comparability: EMPTY_COMPARABILITY,
       thresholds: { elementary: 0.4, adequate: 0.7, advanced: 0.85 },
       students: {
         data: [
@@ -213,7 +217,11 @@ describe('get_dashboard_performance tool (guardrail PII)', () => {
 
 describe('get_heatmap tool', () => {
   it('valida e invoca getHeatmap con ctx.user', async () => {
-    const response: HeatmapResponse = { subjects: [], rows: [] };
+    const response: HeatmapResponse = {
+      subjects: [],
+      rows: [],
+      comparability: EMPTY_COMPARABILITY,
+    };
     const getHeatmap = jest.fn().mockResolvedValue(response);
     const tool = new GetHeatmapTool({
       getHeatmap,

@@ -13,6 +13,7 @@ import {
 } from '@soe/types';
 import { PageActions, EmptyState, FilterBarSkeleton, TableSkeleton } from '@/components/shared';
 import { AskAiButton, RegisterAssistantContext } from '@/components/assistant';
+import { ComparabilityNotice } from '../components/comparability-notice';
 import { DashboardFilterBar } from '../components/dashboard-filter-bar';
 import {
   parseDashboardFilters,
@@ -124,6 +125,7 @@ async function HeatmapSection({
 
   return (
     <div className="space-y-4">
+      <ComparabilityNotice comparability={heatmap.comparability} />
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <HeatmapLegend />
         <ExportButton

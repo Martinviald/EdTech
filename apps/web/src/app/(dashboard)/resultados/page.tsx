@@ -1,25 +1,9 @@
 import { Suspense } from 'react';
 import { redirect } from 'next/navigation';
-import {
-  BarChart3,
-  GraduationCap,
-  ClipboardList,
-  TriangleAlert,
-  Inbox,
-  CircleCheck,
-  ArrowRight,
-  FilterX,
-} from 'lucide-react';
-import Link from 'next/link';
+import { GraduationCap, ClipboardList, TriangleAlert } from 'lucide-react';
 import { auth } from '@/auth';
 import { ROUTES } from '@/lib/routes';
-import {
-  canAccess,
-  DASHBOARD_VIEWER_ROLES,
-  type DashboardAlert,
-  type DashboardAssessmentSummary,
-  type DashboardTeacherKpisResponse,
-} from '@soe/types';
+import { canAccess, DASHBOARD_VIEWER_ROLES, type DashboardTeacherKpisResponse } from '@soe/types';
 import {
   EmptyState,
   StatCard,
@@ -28,7 +12,6 @@ import {
   CardSkeleton,
   TableSkeleton,
 } from '@/components/shared';
-import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import {
   Table,
@@ -38,24 +21,24 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
+import { AlertsBanner } from './components/alerts-banner';
+import { ComparableUnitsTable } from './components/comparable-units-table';
 import { DashboardFilterBar } from './components/dashboard-filter-bar';
 import {
   parseDashboardFilters,
   buildDashboardQuery,
-  hasActiveFilters,
   type DashboardFilterValues,
 } from './components/dashboard-filters';
-import { DistributionBar } from './components/distribution-bar';
+import { ComparabilityNotice } from './components/comparability-notice';
 import { formatAchievement } from './components/performance-level';
-import { getDashboardOverview, getDashboardFilters, getDashboardTeacherKpis } from './data';
+import {
+  getComparableOverview,
+  getDashboardOverview,
+  getDashboardFilters,
+  getDashboardTeacherKpis,
+} from './data';
 
 export const dynamic = 'force-dynamic';
-
-const ALERT_TONE: Record<DashboardAlert['severity'], string> = {
-  high: 'border-l-destructive bg-destructive/10',
-  medium: 'border-l-warning bg-warning/10',
-  low: 'border-l-info bg-info/10',
-};
 
 export default async function ResultadosOverviewPage({
   searchParams,
@@ -86,7 +69,7 @@ export default async function ResultadosOverviewPage({
           </>
         }
       >
-        <OverviewSections query={query} filters={filters} />
+        <PanoramaSections query={query} />
       </Suspense>
     </>
   );
@@ -103,53 +86,48 @@ async function FiltersSection({
   return <DashboardFilterBar options={options} value={filters} basePath={ROUTES.resultados} />;
 }
 
-async function OverviewSections({
-  query,
-  filters,
-}: {
-  query: string;
-  filters: DashboardFilterValues;
-}) {
-  const overview = await getDashboardOverview(query);
+/**
+ * El panorama, en el orden en que se lee: primero lo que requiere atención, después
+ * el desglose por unidad comparable.
+ *
+ * No hay ningún número que resuma el alcance completo — ver #1C. Los tres de arriba
+ * son CONTEOS (no promedian nada) y la matriz entrega un % por instrumento, que es el
+ * nivel más grande donde un porcentaje todavía significa algo.
+ */
+async function PanoramaSections({ query }: { query: string }) {
+  const [comparable, overview] = await Promise.all([
+    getComparableOverview(query),
+    getDashboardOverview(query),
+  ]);
 
   return (
     <>
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <StatCard
-          label="% Logro global"
-          value={formatAchievement(overview.globalAchievement)}
-          hint="Promedio sobre el alcance filtrado"
-          icon={BarChart3}
-        />
+      <div className="grid gap-4 sm:grid-cols-3">
         <StatCard
           label="Alumnos evaluados"
-          value={overview.studentsEvaluated.toLocaleString('es-CL')}
+          value={comparable.totals.studentsEvaluated.toLocaleString('es-CL')}
           icon={GraduationCap}
         />
         <StatCard
           label="Evaluaciones"
-          value={overview.assessmentsCount.toLocaleString('es-CL')}
+          value={comparable.totals.assessments.toLocaleString('es-CL')}
           icon={ClipboardList}
         />
         <StatCard
-          label="Alertas"
+          label="Requieren atención"
           value={overview.alerts.length.toLocaleString('es-CL')}
-          hint="Cursos/habilidades que requieren atención"
+          hint="Cursos y habilidades bajo umbral"
           icon={TriangleAlert}
         />
       </div>
 
-      <DistributionBar distribution={overview.performanceDistribution} />
+      <AlertsBanner alerts={overview.alerts} />
 
-      <AlertsSection alerts={overview.alerts} />
+      <ComparabilityNotice comparability={comparable.comparability} />
 
-      <RecentAssessments
-        assessments={overview.recentAssessments}
-        total={overview.recentAssessmentsTotal}
-        filters={filters}
-      />
+      <ComparableUnitsTable units={comparable.units} />
 
-      {overview.scope === 'teacher' ? (
+      {comparable.scope === 'teacher' ? (
         <Suspense fallback={<TableSkeleton />}>
           <TeacherKpisSection query={query} />
         </Suspense>
@@ -163,147 +141,15 @@ async function TeacherKpisSection({ query }: { query: string }) {
   return <TeacherKpisTable kpis={kpis} />;
 }
 
-function AlertsSection({ alerts }: { alerts: DashboardAlert[] }) {
-  return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="text-base">Alertas</CardTitle>
-      </CardHeader>
-      <CardContent>
-        {alerts.length === 0 ? (
-          <EmptyState
-            tone="success"
-            icon={CircleCheck}
-            title="Sin alertas"
-            description="Todos los cursos y habilidades del alcance están sobre los umbrales."
-          />
-        ) : (
-          <ul className="space-y-2">
-            {alerts.map((alert, idx) => (
-              <li
-                key={`${alert.type}-${alert.contextId ?? idx}`}
-                className={`rounded-md border-l-4 px-4 py-3 ${ALERT_TONE[alert.severity]}`}
-              >
-                <p className="text-sm font-medium text-foreground">{alert.message}</p>
-                {alert.contextLabel ? (
-                  <p className="text-xs text-muted-foreground">{alert.contextLabel}</p>
-                ) : null}
-              </li>
-            ))}
-          </ul>
-        )}
-      </CardContent>
-    </Card>
-  );
-}
-
-function RecentAssessments({
-  assessments,
-  total,
-  filters,
-}: {
-  assessments: DashboardAssessmentSummary[];
-  total: number;
-  filters: DashboardFilterValues;
-}) {
-  const filtered = hasActiveFilters(filters);
-  const periodFilterOnly =
-    (filters.applicationPeriod?.length ?? 0) > 0 &&
-    assessments.length === 0 &&
-    filters.instrumentType?.includes('dia') === true;
-
-  return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="text-base">Evaluaciones</CardTitle>
-        <CardDescription>
-          {/* La lista ya no se trunca: muestra TODAS las del alcance filtrado, de la
-              más reciente a la más antigua. El KPI de arriba agrega sobre ese mismo
-              conjunto, así que las filas visibles siempre lo explican. */}
-          {total > 0
-            ? `${total} ${total === 1 ? 'evaluación' : 'evaluaciones'} en el alcance seleccionado. Selecciona una para ver su análisis en profundidad.`
-            : 'Selecciona una evaluación para ver su análisis en profundidad.'}
-        </CardDescription>
-      </CardHeader>
-      <CardContent>
-        {assessments.length === 0 ? (
-          filtered ? (
-            <EmptyState
-              icon={FilterX}
-              title="Ninguna evaluación coincide con los filtros"
-              description={
-                periodFilterOnly
-                  ? 'El momento es una propiedad del instrumento: ningún instrumento del alcance seleccionado declara el momento que elegiste.'
-                  : 'Prueba quitando alguno de los filtros aplicados.'
-              }
-              action={
-                <Button variant="outline" size="sm" asChild>
-                  <Link href={ROUTES.resultados}>Quitar filtros</Link>
-                </Button>
-              }
-            />
-          ) : (
-            <EmptyState
-              icon={Inbox}
-              title="Aún no hay evaluaciones"
-              description="Cuando importes resultados de evaluaciones aparecerán aquí las más recientes."
-            />
-          )
-        ) : (
-          <div className="overflow-x-auto">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Evaluación</TableHead>
-                  <TableHead className="hidden md:table-cell">Asignatura</TableHead>
-                  <TableHead className="hidden md:table-cell">Nivel</TableHead>
-                  <TableHead className="hidden sm:table-cell">Fecha</TableHead>
-                  <TableHead className="text-right">Alumnos</TableHead>
-                  <TableHead className="text-right">% Logro</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {assessments.map((a) => (
-                  <TableRow key={a.assessmentId}>
-                    <TableCell className="font-medium">
-                      <Link
-                        href={ROUTES.evaluacionResultados(a.assessmentId)}
-                        className="group inline-flex items-center gap-1.5 hover:text-primary"
-                      >
-                        <span>
-                          {a.name ?? a.instrumentName}
-                          <span className="block text-xs font-normal text-muted-foreground md:hidden">
-                            {[a.subjectName, a.gradeName].filter(Boolean).join(' · ')}
-                          </span>
-                        </span>
-                        <ArrowRight className="size-3.5 shrink-0 opacity-0 transition-opacity group-hover:opacity-100" />
-                      </Link>
-                    </TableCell>
-                    <TableCell className="hidden md:table-cell">{a.subjectName ?? '—'}</TableCell>
-                    <TableCell className="hidden md:table-cell">{a.gradeName ?? '—'}</TableCell>
-                    <TableCell className="hidden sm:table-cell">
-                      {formatDate(a.administeredAt)}
-                    </TableCell>
-                    <TableCell className="text-right">{a.studentsCount}</TableCell>
-                    <TableCell className="text-right font-medium">
-                      {formatAchievement(a.averageAchievement)}
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </div>
-        )}
-      </CardContent>
-    </Card>
-  );
-}
-
 function TeacherKpisTable({ kpis }: { kpis: DashboardTeacherKpisResponse }) {
   return (
     <Card>
       <CardHeader>
         <CardTitle className="text-base">Mis cursos</CardTitle>
+        <CardDescription>
+          Una fila por curso y evaluación: el % de logro sólo se puede leer dentro de un mismo
+          instrumento.
+        </CardDescription>
       </CardHeader>
       <CardContent>
         {kpis.courses.length === 0 ? (
@@ -319,6 +165,7 @@ function TeacherKpisTable({ kpis }: { kpis: DashboardTeacherKpisResponse }) {
                 <TableRow>
                   <TableHead>Curso</TableHead>
                   <TableHead className="hidden md:table-cell">Asignatura</TableHead>
+                  <TableHead className="hidden lg:table-cell">Evaluación</TableHead>
                   <TableHead className="text-right">Alumnos</TableHead>
                   <TableHead className="text-right">% Logro</TableHead>
                   <TableHead className="text-right hidden sm:table-cell">% Aprob.</TableHead>
@@ -328,7 +175,7 @@ function TeacherKpisTable({ kpis }: { kpis: DashboardTeacherKpisResponse }) {
               </TableHeader>
               <TableBody>
                 {kpis.courses.map((c) => (
-                  <TableRow key={`${c.classGroupId}-${c.subjectName ?? 'all'}`}>
+                  <TableRow key={`${c.classGroupId}-${c.instrumentId ?? 'sin-instrumento'}`}>
                     <TableCell className="font-medium">
                       {c.classGroupName}
                       {c.gradeName ? (
@@ -336,6 +183,9 @@ function TeacherKpisTable({ kpis }: { kpis: DashboardTeacherKpisResponse }) {
                       ) : null}
                     </TableCell>
                     <TableCell className="hidden md:table-cell">{c.subjectName ?? '—'}</TableCell>
+                    <TableCell className="hidden lg:table-cell">
+                      {c.instrumentName ?? '—'}
+                    </TableCell>
                     <TableCell className="text-right">{c.studentsCount}</TableCell>
                     <TableCell className="text-right font-medium">
                       {formatAchievement(c.averageAchievement)}
@@ -362,11 +212,4 @@ function TeacherKpisTable({ kpis }: { kpis: DashboardTeacherKpisResponse }) {
       </CardContent>
     </Card>
   );
-}
-
-function formatDate(value: string | Date | null): string {
-  if (!value) return '—';
-  const date = typeof value === 'string' ? new Date(value) : value;
-  if (Number.isNaN(date.getTime())) return '—';
-  return date.toLocaleDateString('es-CL', { day: '2-digit', month: 'short', year: 'numeric' });
 }
