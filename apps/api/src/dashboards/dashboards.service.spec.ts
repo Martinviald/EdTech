@@ -151,10 +151,6 @@ describe('DashboardsService.getOverview', () => {
       [{ assessmentId: 'a1', studentsCount: 30, avgPct: '72.50' }],
       // 9. loadRecentAssessments → cohorte (fallback para agregadas; acá no aplica)
       [],
-      // 10. deriveAlerts → courseAchievement
-      [{ classGroupId: 'cg1', classGroupName: '2°A', avgPct: '55.00' }],
-      // 11. deriveAlerts → skills
-      [{ nodeId: 'n1', nodeName: 'Inferir', avgPct: '40.00' }],
     ]);
     const svc = makeService(db);
     const res = await svc.getOverview(makeUser({ activeRole: 'academic_director' }), {});
@@ -177,9 +173,9 @@ describe('DashboardsService.getOverview', () => {
     // `total` cuenta las evaluaciones del alcance. Ya no hay recorte: la lista
     // devuelve todas las filas que trae la query (acá el mock provee una).
     expect(res.recentAssessmentsTotal).toBe(2);
-    // Alertas: curso < 60 (low_achievement) + skill < 50 (critical_skill).
-    expect(res.alerts).toHaveLength(2);
-    expect(res.alerts.map((a) => a.type).sort()).toEqual(['critical_skill', 'low_achievement']);
+    // Las alertas ya no salen de acá: nacen de una unidad comparable y viven en
+    // `/dashboards/comparable-overview` (#1C — un umbral 60/50 sobre instrumentos
+    // mezclados no significaba nada).
   });
 
   // Espeja el fallback de `listAssessments`: una evaluación cargada desde un informe
@@ -239,7 +235,6 @@ describe('DashboardsService.getOverview', () => {
     expect(res.comparability.kind).toBe('empty');
     expect(res.studentsEvaluated).toBe(0);
     expect(res.recentAssessments).toEqual([]);
-    expect(res.alerts).toEqual([]);
   });
 
   it('teacher sin asignaciones → scope=teacher y datos vacíos (no filtra PII)', async () => {

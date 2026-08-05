@@ -25,16 +25,25 @@ const TONE: Record<DashboardAlert['severity'], string> = {
 const VISIBLE_LIMIT = 4;
 
 /**
- * A dónde lleva cada alerta. `contextId` significa cosas distintas según el tipo:
- * un curso en `low_achievement`, un nodo de taxonomía en `critical_skill`.
+ * A dónde lleva cada alerta. `contextId` significa cosas distintas según la familia
+ * —un curso, un nodo de taxonomía, un ítem o una evaluación—, y por eso el backend
+ * manda `contextKind`: sin él, la UI tendría que re-derivar el significado del id a
+ * partir del tipo de alerta, y ese mapeo se desincroniza en cuanto se agrega un tipo.
  */
 function alertHref(alert: DashboardAlert): Route | null {
   if (!alert.contextId) return null;
-  switch (alert.type) {
-    case 'low_achievement':
-      return `${ROUTES.resultadosClasificacion}?classGroupId=${alert.contextId}` as Route;
-    case 'critical_skill':
-      return `${ROUTES.resultadosDimensiones}?nodeId=${alert.contextId}` as Route;
+  const unit = alert.unitKey ? `&instrumentId=${alert.unitKey}` : '';
+  switch (alert.contextKind) {
+    case 'class_group':
+      return `${ROUTES.resultadosClasificacion}?classGroupId=${alert.contextId}${unit}` as Route;
+    case 'taxonomy_node':
+      return `${ROUTES.resultadosDimensiones}?nodeId=${alert.contextId}${unit}` as Route;
+    case 'assessment':
+      return ROUTES.evaluacionResultados(alert.contextId);
+    case 'item':
+      return alert.unitKey
+        ? (`${ROUTES.resultadosDimensiones}?instrumentId=${alert.unitKey}` as Route)
+        : null;
     default:
       return null;
   }
@@ -77,8 +86,8 @@ export function AlertsBanner({ alerts }: { alerts: DashboardAlert[] }) {
                 >
                   <div className="min-w-0">
                     <p className="text-sm font-medium text-foreground">{alert.message}</p>
-                    {alert.contextLabel ? (
-                      <p className="text-xs text-muted-foreground">{alert.contextLabel}</p>
+                    {alert.unitLabel ? (
+                      <p className="text-xs text-muted-foreground">{alert.unitLabel}</p>
                     ) : null}
                   </div>
                   {href ? (

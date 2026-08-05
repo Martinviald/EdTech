@@ -32,7 +32,6 @@ import {
   userHasAnyRole,
   type AssessmentStatus,
   type ComparabilityInstrumentRef,
-  type DashboardAlert,
   type DashboardAssessmentSummary,
   type DashboardFilterOptionsResponse,
   type DashboardFiltersQueryDto,
@@ -155,7 +154,6 @@ export class DashboardsService {
       performanceDistribution: null,
       recentAssessments: [],
       recentAssessmentsTotal: 0,
-      alerts: [],
       comparability: EMPTY_COMPARABILITY,
     };
     if (!orgId) return empty;
@@ -248,8 +246,6 @@ export class DashboardsService {
         studentIds,
       );
 
-      const alerts = await this.deriveAlerts(tx, orgId, scope, query, studentIds, assessmentIds);
-
       return {
         scope: isTeacherScope ? 'teacher' : 'org',
         studentsEvaluated,
@@ -257,7 +253,6 @@ export class DashboardsService {
         performanceDistribution: distribution,
         recentAssessments: recentAssessments.data,
         recentAssessmentsTotal: recentAssessments.total,
-        alerts,
         comparability,
       };
     });
@@ -1823,92 +1818,6 @@ export class DashboardsService {
    * Deriva alertas: cursos con % logro < 60 (low_achievement) y habilidades con
    * promedio < 50 (critical_skill). Sobre el scope filtrado.
    */
-  private async deriveAlerts(
-    tx: Database,
-    orgId: string,
-    scope: Scope,
-    query: DashboardFiltersQueryDto,
-    studentIds: string[] | null,
-    assessmentIds: string[],
-  ): Promise<DashboardAlert[]> {
-    const alerts: DashboardAlert[] = [];
-    if (assessmentIds.length === 0) return alerts;
-
-    // 1) Cursos con bajo logro (< 60% promedio).
-    const cgConditions = [eq(classGroups.orgId, orgId)];
-    if (!scope.scopeAll) cgConditions.push(inArray(classGroups.id, scope.classGroupIds));
-    if (query.classGroupId?.length) cgConditions.push(inArray(classGroups.id, query.classGroupId));
-    if (query.gradeId?.length) cgConditions.push(inArray(classGroups.gradeId, query.gradeId));
-    if (query.academicYearId)
-      cgConditions.push(eq(classGroups.academicYearId, query.academicYearId));
-
-    const resultConditions = [inArray(assessmentResults.assessmentId, assessmentIds)];
-    if (studentIds !== null) {
-      resultConditions.push(inArray(assessmentResults.studentId, studentIds));
-    }
-
-    const courseAchievementRows = await tx
-      .select({
-        classGroupId: classGroups.id,
-        classGroupName: classGroups.name,
-        avgPct: sql<string | null>`avg(${assessmentResults.percentage}::numeric)`,
-      })
-      .from(assessmentResults)
-      .innerJoin(students, eq(students.id, assessmentResults.studentId))
-      .innerJoin(studentEnrollments, eq(studentEnrollments.studentId, assessmentResults.studentId))
-      .innerJoin(classGroups, eq(classGroups.id, studentEnrollments.classGroupId))
-      .where(and(...resultConditions, ...cgConditions, isNull(students.deletedAt)))
-      .groupBy(classGroups.id, classGroups.name);
-
-    for (const r of courseAchievementRows) {
-      const pct = r.avgPct == null ? null : Number(r.avgPct);
-      if (pct != null && pct < 60) {
-        alerts.push({
-          type: 'low_achievement',
-          severity: pct < 40 ? 'high' : 'medium',
-          message: `El curso ${r.classGroupName} tiene un logro promedio de ${pct.toFixed(1)}%`,
-          contextId: r.classGroupId,
-          contextLabel: r.classGroupName,
-          value: Number(pct.toFixed(2)),
-        });
-      }
-    }
-
-    // 2) Habilidades críticas (< 50% promedio). TKT-05 — sin descriptores.
-    const skillConditions = [
-      inArray(skillResults.assessmentId, assessmentIds),
-      notInArray(taxonomyNodes.type, [...RESULT_HIDDEN_NODE_TYPES]),
-    ];
-    if (studentIds !== null) skillConditions.push(inArray(skillResults.studentId, studentIds));
-
-    const skillRows = await tx
-      .select({
-        nodeId: skillResults.nodeId,
-        nodeName: taxonomyNodes.name,
-        avgPct: sql<string | null>`avg(${skillResults.percentage}::numeric)`,
-      })
-      .from(skillResults)
-      .innerJoin(taxonomyNodes, eq(taxonomyNodes.id, skillResults.nodeId))
-      .where(and(...skillConditions))
-      .groupBy(skillResults.nodeId, taxonomyNodes.name);
-
-    for (const r of skillRows) {
-      const pct = r.avgPct == null ? null : Number(r.avgPct);
-      if (pct != null && pct < 50) {
-        alerts.push({
-          type: 'critical_skill',
-          severity: pct < 30 ? 'high' : 'medium',
-          message: `La habilidad ${r.nodeName} tiene un logro promedio de ${pct.toFixed(1)}%`,
-          contextId: r.nodeId,
-          contextLabel: r.nodeName,
-          value: Number(pct.toFixed(2)),
-        });
-      }
-    }
-
-    return alerts;
-  }
-
   /** Períodos = academic_years de la org, año desc. */
   /**
    * Año académico al que se acota el CATÁLOGO de cursos de `/dashboards/filters`.

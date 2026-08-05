@@ -101,13 +101,60 @@ export type DashboardAssessmentSummary = {
   status: AssessmentStatus;
 };
 
+/**
+ * Catálogo de alertas del panorama, en tres familias.
+ *
+ *  A — NIVEL: dónde estoy parado, dentro de una unidad comparable.
+ *  B — MOVIMIENTO: qué cambió contra el comparable propio. Antes no existía ninguna.
+ *  C — COBERTURA: qué falta. Integridad del dato, no de logro.
+ *
+ * Lo que reemplazan: `low_achievement` disparaba bajo un 60 hardcodeado y
+ * `critical_skill` bajo un 50, ambos promediando instrumentos de distinta dificultad.
+ * Un corte absoluto de logro no significa lo mismo en instrumentos con cortes
+ * distintos — en un DIA cuyo Nivel I corta en ~33%, un curso en 55% está bien y salía
+ * alertado igual.
+ *
+ * Ver docs/diseno-panorama-comparable.md §4.4.
+ */
+export const DASHBOARD_ALERT_TYPES = [
+  'band_concentration',
+  'skill_gap',
+  'item_gap',
+  'drop_vs_previous_year',
+  'drop_vs_previous_period',
+  'band_regression',
+  'class_below_org',
+  'coverage_gap',
+  'stale_assessment',
+] as const;
+export type DashboardAlertType = (typeof DASHBOARD_ALERT_TYPES)[number];
+
+export const ALERT_SEVERITIES = ['high', 'medium', 'low'] as const;
+export type AlertSeverity = (typeof ALERT_SEVERITIES)[number];
+
+/** Qué representa `contextId`, para que la UI sepa a dónde llevar el CTA. */
+export const ALERT_CONTEXT_KINDS = ['class_group', 'taxonomy_node', 'item', 'assessment'] as const;
+export type AlertContextKind = (typeof ALERT_CONTEXT_KINDS)[number];
+
 export type DashboardAlert = {
-  type: 'low_achievement' | 'critical_skill' | 'incomplete';
-  severity: 'high' | 'medium' | 'low';
+  type: DashboardAlertType;
+  severity: AlertSeverity;
   message: string;
-  contextId: string | null; // classGroupId o nodeId asociado
+  contextKind: AlertContextKind | null;
+  contextId: string | null;
   contextLabel: string | null;
-  value: number | null; // métrica asociada (% logro, conteo, etc.)
+  value: number | null; // métrica asociada (% logro, pp de caída, conteo)
+  /** Unidad comparable de la que sale la alerta. Ninguna alerta vive fuera de una. */
+  unitKey: string | null; // instrumentId
+  unitLabel: string | null;
+  /** Cuántos alumnos afecta. Prioriza entre alertas de la misma severidad. */
+  studentsAffected: number | null;
+  /**
+   * Identidad estable de la alerta. Hoy sirve para no emitir dos veces lo mismo en una
+   * corrida; cuando exista la bandeja persistente (#3B) es la clave con la que se
+   * reconoce que una alerta ya vista es la misma.
+   */
+  dedupKey: string;
 };
 
 /** H6.1 / H6.7 — GET /api/dashboards/overview */
@@ -131,7 +178,6 @@ export type DashboardOverviewResponse = {
   // está mostrando una parte — y una tabla truncada en silencio se lee como "esto
   // es todo lo que hay".
   recentAssessmentsTotal: number;
-  alerts: DashboardAlert[];
   /**
    * Comparabilidad del alcance filtrado. Mecanismo de PAYLOAD (no guard), igual que
    * `meta.capabilities` de `analytics-capabilities.ts`: esta ruta es mixta —sirve

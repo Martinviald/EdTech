@@ -68,6 +68,28 @@ export const ITEM_TYPES = [
 export type ItemType = (typeof ITEM_TYPES)[number];
 
 /**
+ * Tipos de ítem que se corrigen SOLOS contra la clave.
+ *
+ * El resto (desarrollo, oral, escritura) necesita corrección humana o IA, así que
+ * mientras nadie los puntúe su `correct_count` es 0 — y 0 aciertos por falta de
+ * corrección no es lo mismo que 0 aciertos por error de los alumnos. Toda lectura que
+ * interprete una tasa de acierto BAJA como señal pedagógica tiene que excluirlos, o
+ * termina afirmando que una pregunta de desarrollo "tuvo 0% de acierto".
+ */
+export const AUTO_SCORED_ITEM_TYPES: readonly ItemType[] = [
+  'multiple_choice',
+  'multi_select',
+  'true_false',
+  'matching',
+  'ordering',
+  'gap_fill',
+];
+
+export function isAutoScoredItemType(type: string): boolean {
+  return (AUTO_SCORED_ITEM_TYPES as readonly string[]).includes(type);
+}
+
+/**
  * Etiqueta de cada tipo de ítem para la UI. Vive acá y no en `apps/web` porque
  * estaba duplicada en 5 componentes con textos distintos (unos con acento, otros
  * sin) — y al agregar `multi_select` uno quedó sin actualizar, mostrando el
@@ -108,6 +130,16 @@ export type TaxonomyNodeType = (typeof TAXONOMY_NODE_TYPES)[number];
 // NO una dimensión de reporte pedagógico (TKT-05). Excluirlos aquí no afecta el
 // banco de ítems ni el pipeline de IA — sólo la lectura de resultados.
 export const RESULT_HIDDEN_NODE_TYPES = ['descriptor'] as const;
+
+/**
+ * Tipos de nodo que NO generan alerta propia, aunque sí se muestran en el drill-down.
+ *
+ * Los ítems se etiquetan con varios nodos a la vez (una habilidad, un tipo de texto y
+ * el OA), así que una misma brecha aparece repetida en cada eje: emitir una alerta por
+ * cada uno multiplica el ruido sin agregar información — el OA además tiene por nombre
+ * un párrafo entero, ilegible en un banner. Se conserva el eje corto y accionable.
+ */
+export const ALERT_HIDDEN_NODE_TYPES = [...RESULT_HIDDEN_NODE_TYPES, 'learning_objective'] as const;
 export type ResultHiddenNodeType = (typeof RESULT_HIDDEN_NODE_TYPES)[number];
 
 export const PERFORMANCE_LEVELS = ['insufficient', 'elementary', 'adequate', 'advanced'] as const;

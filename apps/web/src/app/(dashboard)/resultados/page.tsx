@@ -21,7 +21,7 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import { AlertsBanner } from './components/alerts-banner';
+import { LiveAlertsBanner } from './components/live-alerts-banner';
 import { ComparableUnitsTable } from './components/comparable-units-table';
 import { DashboardFilterBar } from './components/dashboard-filter-bar';
 import {
@@ -31,12 +31,7 @@ import {
 } from './components/dashboard-filters';
 import { ComparabilityNotice } from './components/comparability-notice';
 import { formatAchievement } from './components/performance-level';
-import {
-  getComparableOverview,
-  getDashboardOverview,
-  getDashboardFilters,
-  getDashboardTeacherKpis,
-} from './data';
+import { getComparableOverview, getDashboardFilters, getDashboardTeacherKpis } from './data';
 
 export const dynamic = 'force-dynamic';
 
@@ -95,10 +90,7 @@ async function FiltersSection({
  * nivel más grande donde un porcentaje todavía significa algo.
  */
 async function PanoramaSections({ query }: { query: string }) {
-  const [comparable, overview] = await Promise.all([
-    getComparableOverview(query),
-    getDashboardOverview(query),
-  ]);
+  const comparable = await getComparableOverview(query);
 
   return (
     <>
@@ -115,13 +107,13 @@ async function PanoramaSections({ query }: { query: string }) {
         />
         <StatCard
           label="Requieren atención"
-          value={overview.alerts.length.toLocaleString('es-CL')}
+          value={comparable.alerts.length.toLocaleString('es-CL')}
           hint="Cursos y habilidades bajo umbral"
           icon={TriangleAlert}
         />
       </div>
 
-      <AlertsBanner alerts={overview.alerts} />
+      <LiveAlertsBanner query={query} initialAlerts={comparable.alerts} />
 
       <ComparabilityNotice comparability={comparable.comparability} />
 

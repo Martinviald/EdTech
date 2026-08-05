@@ -252,3 +252,32 @@ export function compareSeverity(a: UnitSeverityValue | null, b: UnitSeverityValu
   const rankB = b == null ? 3 : SEVERITY_ORDER[b];
   return rankA - rankB;
 }
+
+// ── Umbrales del catálogo de alertas ─────────────────────────────────────────
+
+/**
+ * Los cortes que disparan cada familia de alertas.
+ *
+ * ⚠️ DECISIÓN ABIERTA (D del diseño): estos valores son un punto de partida razonable,
+ * no una calibración. Se afinan mirando datos reales antes de decidir si además deben
+ * ser configurables por colegio. Viven acá —y no dispersos en el service— justamente
+ * para que calibrarlos sea cambiar un número en un solo lugar.
+ *
+ * Ninguno es un corte absoluto de LOGRO: son concentración en la banda inferior del
+ * propio instrumento, o caída en puntos porcentuales contra el comparable propio. Un
+ * "curso bajo 60%" no significa lo mismo en dos instrumentos con cortes distintos.
+ */
+export const ALERT_THRESHOLDS = {
+  /** % de alumnos del curso en la banda inferior del instrumento. */
+  bandConcentration: { high: 40, medium: 25 },
+  /** Caída en puntos porcentuales contra el baseline comparable. */
+  dropPp: { high: 10, medium: 5 },
+  /** Cuánto puede quedar un curso bajo el promedio de su propia unidad, en pp. */
+  classBelowOrgPp: { high: 15, medium: 8 },
+  /** Un eje se marca si queda estos pp bajo el promedio de su unidad. */
+  skillGapPp: { high: 20, medium: 12 },
+  /** % de acierto de un ítem bajo el cual se considera brecha de contenido. */
+  itemCorrectRate: { high: 20, medium: 35 },
+  /** Días desde la aplicación sin resultados para considerarla estancada. */
+  staleAssessmentDays: 14,
+} as const;
