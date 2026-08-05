@@ -8,18 +8,30 @@ import { ROUTES } from '@/lib/routes';
 import {
   canAccess,
   RESULTS_VIEWER_ROLES,
+  studentPanoramaQuerySchema,
   type StudentPanoramaAssessment,
+  type StudentPanoramaQueryDto,
   type StudentPanoramaResponse,
 } from '@soe/types';
-import { PageContainer, EmptyState, CardSkeleton, MetricsGroup } from '@/components/shared';
+import {
+  PageContainer,
+  EmptyState,
+  CardSkeleton,
+  FilterBarSkeleton,
+  MetricsGroup,
+  AlertCallout,
+} from '@/components/shared';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { SetPageTitle } from '@/components/layout/page-title-context';
 import { PerformanceBadge } from '../../resultados/components/performance-badge';
 import { formatAchievement } from '../../resultados/components/performance-level';
-import { PanoramaTrajectory } from '../components/panorama-trajectory';
 import { PanoramaDistribution } from '../components/panorama-distribution';
+import { PanoramaFilters } from '../components/panorama-filters';
 import { SkillTree } from '../components/skill-tree';
+import { SubjectPanorama } from '../components/subject-panorama';
 import { getStudentPanorama } from '../data';
+
+type SearchParams = Record<string, string | string[] | undefined>;
 
 function fmtDate(value: string | Date | null): string {
   if (!value) return '—';
@@ -45,20 +57,32 @@ function achievementHint(withAchievement: number, total: number): string | undef
 
 export default async function EstudiantePanoramaPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ studentId: string }>;
+  searchParams: Promise<SearchParams>;
 }) {
   const session = await auth();
   if (!session?.user) redirect(ROUTES.login);
   if (!canAccess(session.user.roles, RESULTS_VIEWER_ROLES)) redirect(ROUTES.dashboard);
 
   const { studentId } = await params;
+  const parsed = studentPanoramaQuerySchema.safeParse(await searchParams);
+  const query: StudentPanoramaQueryDto = parsed.success ? parsed.data : {};
 
   return (
     <PageContainer>
       <BackLink />
-      <Suspense fallback={<CardSkeleton rows={8} />}>
-        <PanoramaContent studentId={studentId} />
+      <Suspense
+        key={JSON.stringify(query)}
+        fallback={
+          <>
+            <FilterBarSkeleton />
+            <CardSkeleton rows={8} />
+          </>
+        }
+      >
+        <PanoramaContent studentId={studentId} query={query} />
       </Suspense>
     </PageContainer>
   );
@@ -114,8 +138,14 @@ function ResponsesLink({
   );
 }
 
-async function PanoramaContent({ studentId }: { studentId: string }) {
-  const data = await getStudentPanorama(studentId).catch(
+async function PanoramaContent({
+  studentId,
+  query,
+}: {
+  studentId: string;
+  query: StudentPanoramaQueryDto;
+}) {
+  const data = await getStudentPanorama(studentId, query).catch(
     (): StudentPanoramaResponse | null => null,
   );
 
@@ -129,7 +159,18 @@ async function PanoramaContent({ studentId }: { studentId: string }) {
     );
   }
 
-  const { student, summary, byAssessment, bySkillTree, distribution } = data;
+  const {
+    student,
+    filters,
+    filterOptions,
+    comparability,
+    bySubject,
+    summary,
+    byAssessment,
+    bySkillTree,
+    distribution,
+  } = data;
+
   const meta = [
     student.rut,
     student.classGroup ? `${student.classGroup.gradeName} · ${student.classGroup.name}` : null,
@@ -143,48 +184,56 @@ async function PanoramaContent({ studentId }: { studentId: string }) {
 
       {meta ? <p className="text-sm text-muted-foreground">{meta}</p> : null}
 
-      <MetricsGroup
-        metrics={[
-          {
-            label: 'Evaluaciones',
-            value: String(summary.assessmentsCount),
-            icon: ClipboardList,
-          },
-          {
-            label: 'Logro promedio',
-            value: formatAchievement(summary.averageAchievement),
-            hint: achievementHint(summary.assessmentsWithAchievement, summary.assessmentsCount),
-          },
-          {
-            label: 'Habilidades evaluadas',
-            value: String(summary.skillsAssessed),
-            icon: Layers,
-          },
-        ]}
-      />
+      <PanoramaFilters studentId={studentId} options={filterOptions} value={filters} />
 
       {byAssessment.length === 0 ? (
         <EmptyState
           icon={Inbox}
-          title="Sin evaluaciones con resultados"
-          description="Este estudiante aún no tiene resultados individuales calculados."
+          title="Sin evaluaciones en este alcance"
+          description="Ajusta los filtros o revisa otro año: este estudiante no tiene resultados calculados para lo seleccionado."
         />
       ) : (
         <>
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-base">Evolución del % de logro</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <PanoramaTrajectory items={byAssessment} />
-            </CardContent>
-          </Card>
+          <MetricsGroup
+            metrics={[
+              {
+                label: 'Evaluaciones',
+                value: String(summary.assessmentsCount),
+                icon: ClipboardList,
+              },
+              {
+                label: 'Logro promedio',
+                value: formatAchievement(summary.averageAchievement),
+                hint:
+                  summary.averageAchievement === null && comparability.reason
+                    ? 'No se promedia: el alcance mezcla instrumentos.'
+                    : achievementHint(summary.assessmentsWithAchievement, summary.assessmentsCount),
+              },
+              {
+                label: 'Habilidades evaluadas',
+                value: String(summary.skillsAssessed),
+                icon: Layers,
+              },
+            ]}
+          />
+
+          {comparability.reason ? (
+            <AlertCallout tone="info" title="Alcance no agregable">
+              {comparability.reason}
+            </AlertCallout>
+          ) : null}
+
+          <SubjectPanorama
+            studentId={studentId}
+            subjects={bySubject}
+            activeSubjectId={filters.subjectId}
+          />
 
           <PanoramaDistribution distribution={distribution} />
 
           <Card>
             <CardHeader>
-              <CardTitle className="text-base">Por evaluación</CardTitle>
+              <CardTitle className="text-base">Historial de evaluaciones</CardTitle>
             </CardHeader>
             <CardContent className="overflow-x-auto">
               <table className="w-full text-sm">

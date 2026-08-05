@@ -5,13 +5,34 @@
 //
 // Ver docs/diseno-vista-360-estudiante.md. El endpoint no recibe body: su única
 // entrada es el `:id` del alumno, validado con `ParseUUIDPipe`.
+import { z } from 'zod';
 import type { PerformanceLevel } from '../enums';
 import type { DataGranularity } from '../analytics-capabilities';
+import type { ComparabilityMeta } from '../comparability';
 import type { PerformanceBandView } from './performance-band.schema';
+import {
+  INSTRUMENT_APPLICATION_PERIODS,
+  type InstrumentApplicationPeriod,
+} from './instrument.schema';
 import type {
   PerformanceBandDistributionBucket,
   PerformanceDistributionBucket,
 } from './dashboard.schema';
+
+/**
+ * Filtros de la vista 360. El zoom ES el filtro: cada nivel lo estrecha y el
+ * breadcrumb lo refleja. `year` tiene default implícito en el backend (el año más
+ * reciente con resultados del alumno), porque "todo el historial" mezcla grados y
+ * es justo lo que el principio rector prohíbe; `allYears` lo desactiva a propósito.
+ */
+export const studentPanoramaQuerySchema = z.object({
+  subjectId: z.string().uuid().optional(),
+  instrumentType: z.string().min(1).optional(),
+  applicationPeriod: z.enum(INSTRUMENT_APPLICATION_PERIODS).optional(),
+  year: z.coerce.number().int().optional(),
+  allYears: z.coerce.boolean().optional(),
+});
+export type StudentPanoramaQueryDto = z.infer<typeof studentPanoramaQuerySchema>;
 
 /** Cabecera del alumno: identidad + curso vigente (best-effort, matrícula más reciente). */
 export type StudentPanoramaHeader = {
@@ -29,7 +50,16 @@ export type StudentPanoramaAssessment = {
   assessmentName: string | null;
   instrumentId: string;
   instrumentName: string;
+  instrumentType: string;
+  subjectId: string | null;
   subjectName: string | null;
+  gradeId: string | null;
+  year: number | null;
+  applicationPeriod: InstrumentApplicationPeriod | null;
+  /** Clave N2 del instrumento (mismo estándar a través de los años). */
+  familyKey: string;
+  /** Clave N3 del instrumento (momentos del ciclo dentro de un año). */
+  periodSeriesKey: string;
   administeredAt: string | Date | null;
   /**
    * % de logro 0..100, o null. Un informe oficial cargado en modo agregado
@@ -104,17 +134,83 @@ export type StudentPanoramaDistribution =
 export type StudentPanoramaSummary = {
   assessmentsCount: number;
   /**
-   * % de logro promedio del alumno, o null. Se calcula SÓLO sobre las
-   * evaluaciones que aportan porcentaje: `assessmentsWithAchievement` es su
-   * denominador real y no tiene por qué coincidir con `assessmentsCount`.
+   * % de logro promedio del alumno, o null. Dos razones para que venga null:
+   * ninguna evaluación aporta porcentaje, o el alcance filtrado NO es agregable
+   * (mezcla instrumentos) — en ese caso el motivo está en `comparability.reason`.
+   * Cuando sí viene, `assessmentsWithAchievement` es su denominador real y no
+   * tiene por qué coincidir con `assessmentsCount`.
    */
   averageAchievement: number | null;
   assessmentsWithAchievement: number;
   skillsAssessed: number;
 };
 
+/**
+ * Un punto de una serie comparable del alumno. `label` es el eje X real de la
+ * trayectoria: el momento del ciclo (N3) o el año (N2), NUNCA la fecha cruda —
+ * ordenar por fecha es lo que hacía saltar la línea entre instrumentos distintos.
+ */
+export type StudentPanoramaSeriesPoint = {
+  assessmentId: string;
+  label: string;
+  instrumentName: string;
+  administeredAt: string | Date | null;
+  achievement: number | null;
+  performanceBand: PerformanceBandView | null;
+  performanceLevel: PerformanceLevel | null;
+};
+
+/**
+ * Una serie comparable: los mismos resultados leídos punto a punto. NO se promedian
+ * entre sí (`comparability.aggregatable` es false para N2/N3) — se comparan.
+ */
+export type StudentPanoramaSeries = {
+  kind: 'period_series' | 'instrument_family';
+  key: string;
+  label: string;
+  points: StudentPanoramaSeriesPoint[];
+};
+
+/**
+ * El alumno en UNA asignatura: el eje principal de la vista. El % de logro sólo se
+ * emite cuando el alcance de la asignatura es agregable (N0/N1); si mezcla
+ * instrumentos, viaja `null` con el motivo en `comparability.reason`.
+ */
+export type StudentPanoramaSubject = {
+  subjectId: string | null;
+  subjectName: string | null;
+  assessmentsCount: number;
+  achievement: number | null;
+  comparability: ComparabilityMeta;
+  latest: StudentPanoramaSeriesPoint | null;
+  series: StudentPanoramaSeries[];
+};
+
+/** Opciones disponibles para los filtros, derivadas del historial del alumno. */
+export type StudentPanoramaFilterOptions = {
+  subjects: { id: string | null; name: string | null }[];
+  instrumentTypes: string[];
+  years: number[];
+  applicationPeriods: InstrumentApplicationPeriod[];
+};
+
+/** Qué filtro quedó realmente aplicado (incluye el default de año que puso el backend). */
+export type StudentPanoramaAppliedFilters = {
+  subjectId: string | null;
+  instrumentType: string | null;
+  applicationPeriod: InstrumentApplicationPeriod | null;
+  year: number | null;
+  allYears: boolean;
+};
+
 export type StudentPanoramaResponse = {
   student: StudentPanoramaHeader;
+  filters: StudentPanoramaAppliedFilters;
+  filterOptions: StudentPanoramaFilterOptions;
+  /** Comparabilidad del alcance filtrado completo. */
+  comparability: ComparabilityMeta;
+  /** El alumno por asignatura — el eje principal del panorama. */
+  bySubject: StudentPanoramaSubject[];
   summary: StudentPanoramaSummary;
   /** Trayectoria por evaluación, ordenada por fecha de aplicación ascendente. */
   byAssessment: StudentPanoramaAssessment[];

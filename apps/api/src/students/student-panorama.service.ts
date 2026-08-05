@@ -1,5 +1,5 @@
 import { ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
-import { and, asc, desc, eq, isNull, notInArray, sql } from 'drizzle-orm';
+import { and, asc, desc, eq, inArray, isNull, notInArray, sql } from 'drizzle-orm';
 import { alias } from 'drizzle-orm/pg-core';
 import {
   academicYears,
@@ -17,20 +17,32 @@ import {
   withOrgContext,
 } from '@soe/db';
 import {
+  INSTRUMENT_APPLICATION_PERIOD_LABELS,
   PERFORMANCE_LEVELS,
   RESULT_HIDDEN_NODE_TYPES,
+  buildComparabilityMeta,
+  buildInstrumentFamilyKey,
+  buildPeriodSeriesKey,
   percentageToPerformanceLevel,
+  type ComparabilityInstrumentRef,
   type DataGranularity,
+  type InstrumentApplicationPeriod,
   type PerformanceBandInput,
   type PerformanceBandView,
   type PerformanceDistributionBucket,
   type PerformanceLevel,
+  type StudentPanoramaAppliedFilters,
   type StudentPanoramaAssessment,
   type StudentPanoramaDistribution,
+  type StudentPanoramaFilterOptions,
   type StudentPanoramaHeader,
+  type StudentPanoramaQueryDto,
   type StudentPanoramaResponse,
+  type StudentPanoramaSeries,
+  type StudentPanoramaSeriesPoint,
   type StudentPanoramaSkill,
   type StudentPanoramaSkillNode,
+  type StudentPanoramaSubject,
   type StudentPanoramaSummary,
 } from '@soe/types';
 import type { JwtPayload } from '../auth/jwt-payload.types';
@@ -43,6 +55,8 @@ import { loadBandsForInstruments } from '../performance-bands/lib/load-instrumen
 import { buildTree } from '../taxonomies/lib/tree-builder';
 
 type SkillWithOrder = StudentPanoramaSkill & { nodeOrder: number };
+
+const MIN_SERIES_POINTS = 2;
 
 function compareSkillsByAchievement(a: StudentPanoramaSkill, b: StudentPanoramaSkill): number {
   if (a.achievement === null) return b.achievement === null ? 0 : 1;
@@ -71,11 +85,56 @@ function scaleSignature(bands: readonly PerformanceBandInput[]): string {
     .join('|');
 }
 
+function toInstrumentRef(a: StudentPanoramaAssessment): ComparabilityInstrumentRef {
+  return {
+    instrumentId: a.instrumentId,
+    type: a.instrumentType,
+    subjectId: a.subjectId,
+    gradeId: a.gradeId,
+    applicationPeriod: a.applicationPeriod,
+    year: a.year,
+  };
+}
+
+function uniqueInstrumentRefs(rows: StudentPanoramaAssessment[]): ComparabilityInstrumentRef[] {
+  const byId = new Map<string, ComparabilityInstrumentRef>();
+  for (const row of rows) {
+    if (!byId.has(row.instrumentId)) byId.set(row.instrumentId, toInstrumentRef(row));
+  }
+  return [...byId.values()];
+}
+
+function toSeriesPoint(a: StudentPanoramaAssessment, label: string): StudentPanoramaSeriesPoint {
+  return {
+    assessmentId: a.assessmentId,
+    label,
+    instrumentName: a.instrumentName,
+    administeredAt: a.administeredAt,
+    achievement: a.achievement,
+    performanceBand: a.performanceBand,
+    performanceLevel: a.performanceLevel,
+  };
+}
+
+function periodLabel(period: InstrumentApplicationPeriod | null): string {
+  return period ? INSTRUMENT_APPLICATION_PERIOD_LABELS[period] : 'Sin momento';
+}
+
+function meanAchievement(rows: StudentPanoramaAssessment[]): number | null {
+  const withPct = rows.filter((a) => a.achievement !== null);
+  if (withPct.length === 0) return null;
+  return withPct.reduce((acc, a) => acc + (a.achievement ?? 0), 0) / withPct.length;
+}
+
 @Injectable()
 export class StudentPanoramaService {
   constructor(@InjectDb() private readonly db: Database) {}
 
-  async getPanorama(user: JwtPayload, studentId: string): Promise<StudentPanoramaResponse> {
+  async getPanorama(
+    user: JwtPayload,
+    studentId: string,
+    query: StudentPanoramaQueryDto = {},
+  ): Promise<StudentPanoramaResponse> {
     const orgId = user.orgId;
     if (orgId === null) {
       throw new ForbiddenException('Usuario sin organización activa');
@@ -93,18 +152,42 @@ export class StudentPanoramaService {
         throw new NotFoundException('Estudiante no encontrado');
       }
 
-      const byAssessment = await this.loadByAssessment(tx, orgId, studentId);
-      const skillRows = await this.loadBySkill(tx, orgId, studentId);
+      const allAssessments = await this.loadByAssessment(tx, orgId, studentId);
+      const filterOptions = this.buildFilterOptions(allAssessments);
+      const filters = this.resolveFilters(query, allAssessments);
+      const byAssessment = this.applyFilters(allAssessments, filters);
+
+      const skillRows = await this.loadBySkill(
+        tx,
+        studentId,
+        byAssessment.map((a) => a.assessmentId),
+      );
       const bandsByInstrument = await loadBandsForInstruments(tx, [
         ...new Set(byAssessment.map((a) => a.instrumentId)),
       ]);
 
+      const comparability = buildComparabilityMeta(
+        uniqueInstrumentRefs(byAssessment),
+        byAssessment.length,
+      );
       const bySkillTree = this.buildSkillTree(skillRows);
       const bySkill = skillRows.map(({ nodeOrder: _nodeOrder, ...skill }) => skill);
+      const bySubject = this.buildBySubject(byAssessment);
       const distribution = this.buildDistribution(byAssessment, bandsByInstrument);
-      const summary = this.buildSummary(byAssessment, bySkill);
+      const summary = this.buildSummary(byAssessment, bySkill, comparability.aggregatable);
 
-      return { student, summary, byAssessment, bySkill, bySkillTree, distribution };
+      return {
+        student,
+        filters,
+        filterOptions,
+        comparability,
+        bySubject,
+        summary,
+        byAssessment,
+        bySkill,
+        bySkillTree,
+        distribution,
+      };
     });
   }
 
@@ -168,7 +251,12 @@ export class StudentPanoramaService {
         assessmentName: assessments.name,
         instrumentId: instruments.id,
         instrumentName: instruments.name,
+        instrumentType: instruments.type,
+        subjectId: instruments.subjectId,
         subjectName: subjects.name,
+        gradeId: instruments.gradeId,
+        year: instruments.year,
+        applicationPeriod: instruments.applicationPeriod,
         administeredAt: assessments.administeredAt,
         dataGranularity: assessments.dataGranularity,
         achievement: assessmentResults.percentage,
@@ -198,32 +286,112 @@ export class StudentPanoramaService {
       )
       .orderBy(asc(assessments.administeredAt), asc(assessments.createdAt));
 
-    return rows.map((r) => ({
-      assessmentId: r.assessmentId,
-      assessmentName: r.assessmentName,
-      instrumentId: r.instrumentId,
-      instrumentName: r.instrumentName,
-      subjectName: r.subjectName,
-      administeredAt: r.administeredAt,
-      dataGranularity: r.dataGranularity as DataGranularity,
-      achievement: r.achievement === null ? null : Number(r.achievement),
-      grade: r.grade,
-      performanceLevel: r.performanceLevel,
-      performanceBand: toBandView(r),
-      priorPerformanceBand: toBandView({
-        bandKey: r.priorBandKey,
-        bandLabel: r.priorBandLabel,
-        bandOrder: r.priorBandOrder,
-        bandColor: r.priorBandColor,
-      }),
-    }));
+    return rows.map((r) => {
+      const ref: ComparabilityInstrumentRef = {
+        instrumentId: r.instrumentId,
+        type: r.instrumentType,
+        subjectId: r.subjectId,
+        gradeId: r.gradeId,
+        applicationPeriod: r.applicationPeriod,
+        year: r.year,
+      };
+      return {
+        assessmentId: r.assessmentId,
+        assessmentName: r.assessmentName,
+        instrumentId: r.instrumentId,
+        instrumentName: r.instrumentName,
+        instrumentType: r.instrumentType,
+        subjectId: r.subjectId,
+        subjectName: r.subjectName,
+        gradeId: r.gradeId,
+        year: r.year,
+        applicationPeriod: r.applicationPeriod,
+        familyKey: buildInstrumentFamilyKey(ref),
+        periodSeriesKey: buildPeriodSeriesKey(ref),
+        administeredAt: r.administeredAt,
+        dataGranularity: r.dataGranularity as DataGranularity,
+        achievement: r.achievement === null ? null : Number(r.achievement),
+        grade: r.grade,
+        performanceLevel: r.performanceLevel,
+        performanceBand: toBandView(r),
+        priorPerformanceBand: toBandView({
+          bandKey: r.priorBandKey,
+          bandLabel: r.priorBandLabel,
+          bandOrder: r.priorBandOrder,
+          bandColor: r.priorBandColor,
+        }),
+      };
+    });
+  }
+
+  private buildFilterOptions(rows: StudentPanoramaAssessment[]): StudentPanoramaFilterOptions {
+    const subjects = new Map<string, { id: string | null; name: string | null }>();
+    const instrumentTypes = new Set<string>();
+    const years = new Set<number>();
+    const periods = new Set<InstrumentApplicationPeriod>();
+
+    for (const row of rows) {
+      subjects.set(row.subjectId ?? '', { id: row.subjectId, name: row.subjectName });
+      instrumentTypes.add(row.instrumentType);
+      if (row.year !== null) years.add(row.year);
+      if (row.applicationPeriod !== null) periods.add(row.applicationPeriod);
+    }
+
+    return {
+      subjects: [...subjects.values()].sort((a, b) =>
+        (a.name ?? '').localeCompare(b.name ?? '', 'es'),
+      ),
+      instrumentTypes: [...instrumentTypes].sort(),
+      years: [...years].sort((a, b) => b - a),
+      applicationPeriods: [...periods],
+    };
+  }
+
+  private resolveFilters(
+    query: StudentPanoramaQueryDto,
+    rows: StudentPanoramaAssessment[],
+  ): StudentPanoramaAppliedFilters {
+    const allYears = query.allYears === true;
+    const declaredYears = rows.map((r) => r.year).filter((y): y is number => y !== null);
+    const latestYear = declaredYears.length > 0 ? Math.max(...declaredYears) : null;
+    const year = allYears ? null : (query.year ?? latestYear);
+
+    return {
+      subjectId: query.subjectId ?? null,
+      instrumentType: query.instrumentType ?? null,
+      applicationPeriod: query.applicationPeriod ?? null,
+      year,
+      allYears,
+    };
+  }
+
+  private applyFilters(
+    rows: StudentPanoramaAssessment[],
+    filters: StudentPanoramaAppliedFilters,
+  ): StudentPanoramaAssessment[] {
+    return rows.filter((row) => {
+      if (filters.subjectId !== null && row.subjectId !== filters.subjectId) return false;
+      if (filters.instrumentType !== null && row.instrumentType !== filters.instrumentType) {
+        return false;
+      }
+      if (
+        filters.applicationPeriod !== null &&
+        row.applicationPeriod !== filters.applicationPeriod
+      ) {
+        return false;
+      }
+      if (filters.year !== null && row.year !== null && row.year !== filters.year) return false;
+      return true;
+    });
   }
 
   private async loadBySkill(
     tx: Database,
-    orgId: string,
     studentId: string,
+    assessmentIds: string[],
   ): Promise<SkillWithOrder[]> {
+    if (assessmentIds.length === 0) return [];
+
     const rows = await tx
       .select({
         nodeId: skillResults.nodeId,
@@ -238,11 +406,10 @@ export class StudentPanoramaService {
       })
       .from(skillResults)
       .innerJoin(taxonomyNodes, eq(taxonomyNodes.id, skillResults.nodeId))
-      .innerJoin(assessments, eq(assessments.id, skillResults.assessmentId))
       .where(
         and(
           eq(skillResults.studentId, studentId),
-          eq(assessments.orgId, orgId),
+          inArray(skillResults.assessmentId, assessmentIds),
           notInArray(taxonomyNodes.type, [...RESULT_HIDDEN_NODE_TYPES]),
         ),
       )
@@ -297,6 +464,76 @@ export class StudentPanoramaService {
       children: node.children.map(strip),
     });
     return tree.map(strip);
+  }
+
+  private buildBySubject(rows: StudentPanoramaAssessment[]): StudentPanoramaSubject[] {
+    const grouped = new Map<string, StudentPanoramaAssessment[]>();
+    for (const row of rows) {
+      const key = row.subjectId ?? '';
+      const bucket = grouped.get(key);
+      if (bucket) bucket.push(row);
+      else grouped.set(key, [row]);
+    }
+
+    const subjects: StudentPanoramaSubject[] = [];
+    for (const group of grouped.values()) {
+      const comparability = buildComparabilityMeta(uniqueInstrumentRefs(group), group.length);
+      const latest = group[group.length - 1];
+      subjects.push({
+        subjectId: latest?.subjectId ?? null,
+        subjectName: latest?.subjectName ?? null,
+        assessmentsCount: group.length,
+        achievement: comparability.aggregatable ? meanAchievement(group) : null,
+        comparability,
+        latest: latest ? toSeriesPoint(latest, periodLabel(latest.applicationPeriod)) : null,
+        series: this.buildSeries(group),
+      });
+    }
+
+    return subjects.sort((a, b) =>
+      (a.subjectName ?? 'zzz').localeCompare(b.subjectName ?? 'zzz', 'es'),
+    );
+  }
+
+  private buildSeries(rows: StudentPanoramaAssessment[]): StudentPanoramaSeries[] {
+    const byPeriodSeries = new Map<string, StudentPanoramaAssessment[]>();
+    const byFamily = new Map<string, StudentPanoramaAssessment[]>();
+
+    for (const row of rows) {
+      const periodBucket = byPeriodSeries.get(row.periodSeriesKey);
+      if (periodBucket) periodBucket.push(row);
+      else byPeriodSeries.set(row.periodSeriesKey, [row]);
+
+      const familyBucket = byFamily.get(row.familyKey);
+      if (familyBucket) familyBucket.push(row);
+      else byFamily.set(row.familyKey, [row]);
+    }
+
+    const series: StudentPanoramaSeries[] = [];
+
+    for (const [key, group] of byPeriodSeries) {
+      if (group.length < MIN_SERIES_POINTS) continue;
+      const year = group[0]?.year;
+      series.push({
+        kind: 'period_series',
+        key,
+        label: year === null || year === undefined ? 'Momentos del ciclo' : `Momentos ${year}`,
+        points: group.map((a) => toSeriesPoint(a, periodLabel(a.applicationPeriod))),
+      });
+    }
+
+    for (const [key, group] of byFamily) {
+      if (group.length < MIN_SERIES_POINTS) continue;
+      const sorted = [...group].sort((a, b) => (a.year ?? 0) - (b.year ?? 0));
+      series.push({
+        kind: 'instrument_family',
+        key,
+        label: `${periodLabel(sorted[0]?.applicationPeriod ?? null)} año a año`,
+        points: sorted.map((a) => toSeriesPoint(a, a.year === null ? 'Sin año' : String(a.year))),
+      });
+    }
+
+    return series;
   }
 
   private buildDistribution(
@@ -376,18 +613,13 @@ export class StudentPanoramaService {
   private buildSummary(
     byAssessment: StudentPanoramaAssessment[],
     bySkill: StudentPanoramaSkill[],
+    aggregatable: boolean,
   ): StudentPanoramaSummary {
-    const withPct = byAssessment.filter(
-      (a): a is StudentPanoramaAssessment & { achievement: number } => a.achievement !== null,
-    );
-    const averageAchievement =
-      withPct.length > 0
-        ? withPct.reduce((acc, a) => acc + a.achievement, 0) / withPct.length
-        : null;
+    const withAchievement = byAssessment.filter((a) => a.achievement !== null).length;
     return {
       assessmentsCount: byAssessment.length,
-      averageAchievement,
-      assessmentsWithAchievement: withPct.length,
+      averageAchievement: aggregatable ? meanAchievement(byAssessment) : null,
+      assessmentsWithAchievement: withAchievement,
       skillsAssessed: bySkill.length,
     };
   }

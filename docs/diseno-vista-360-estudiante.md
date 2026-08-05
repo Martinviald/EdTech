@@ -285,6 +285,10 @@ dice todo.** Hoy el alumno se muestra en el vacío.
 
 ## 6. Plan de implementación
 
+> **Estado (2026-08-04):** O1 ✅ · O3 ✅ · O2 ✅ · O4 🔲 pendiente (espera la bandeja de #3B).
+> Implementado en la rama `feat/vista-360-estudiante`, que integra `feat/panorama-comparable`
+> para consumir su resolver.
+
 | Ola                             | Contenido                                                                                                                                              | Por qué en ese orden                                                                                                                             |
 | ------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------ |
 | **O1 — Reparar la base**        | D1, D2, D3, D4: unificar el vocabulario de banda, contar los resultados agregados, ponderar por conteos. Sin UI nueva.                                 | Es acotado, está en un solo servicio, y `f97cb0e` ya dejó el patrón de corrección. Construir zoom sobre números incorrectos multiplica el error. |
@@ -292,32 +296,37 @@ dice todo.** Hoy el alumno se muestra en el vacío.
 | **O2 — Comparabilidad + Z1/Z2** | Consumir `comparability.ts` (§2), filtros en el endpoint (D8), panorama por asignatura, trayectoria por serie N2/N3. Sustituye los agregados globales. | ⚠️ **Requiere la Ola 0 de `feat/panorama-comparable` mergeada.** Adelantarla obliga a inventar una segunda definición de comparable.             |
 | **O4 — Z0 + alertas**           | Lista con señal y pre-filtros, alimentada por la bandeja de #3B.                                                                                       | Depende de que exista la bandeja; si se adelanta, nace la cuarta fuente de verdad de "alumno en riesgo".                                         |
 
-**Nota de arquitectura:** `getPanorama` (`student-panorama.service.ts:82-85`) encadena tres `await`
-independientes en secuencia. Con filtros y cohorte encima conviene paralelizarlos y agregar con `Map`
-en una sola pasada (`frontend/05-performance.md`), además de mantener el shell inmediato + Suspense
-por sección (`frontend/07-navigation-reactivity.md`).
+**Nota de arquitectura:** las agregaciones en memoria van con `Map` en una sola pasada
+(`frontend/05-performance.md`) y la página mantiene el shell inmediato + Suspense por sección
+(`frontend/07-navigation-reactivity.md`).
+
+> ⚠️ **Corrección a una versión anterior de este documento:** decía que convenía _paralelizar_ los
+> `await` de `getPanorama`. Es falso — corren dentro de un `withOrgContext`, es decir sobre **una
+> sola conexión en transacción**, y `node-postgres` serializa las queries de un cliente. Un
+> `Promise.all` ahí no ahorra nada y sólo agrega riesgo. Quedan secuenciales a propósito.
 
 ---
 
 ## 7. Decisiones abiertas
 
-> **Ya NO está abierta la definición de "comparable"** — quedó cerrada en `diseno-panorama-comparable.md`
-> (modelo N0–N3, §2). Lo que esta vista debe hacer es **consumir** ese resolver y **esperar a su Ola 0**;
-> si se implementa la O2 de acá antes de que exista `comparability.ts`, nace la segunda definición.
+> **Resueltas:** la definición de "comparable" quedó cerrada en `diseno-panorama-comparable.md`
+> (modelo N0–N3) y esta vista la **consume** vía `packages/types/src/comparability.ts` — no
+> re-deriva nada. La secuencia O1 → O3 → O2 se ejecutó en ese orden y la rama integra
+> `feat/panorama-comparable`, así que ambas deben entrar a `dev` juntas o esa primero.
 
-1. **Dependencia de secuencia con #1C/#2.** La O2 de este plan necesita la Ola 0 de
-   `feat/panorama-comparable` mergeada. Decidir si se espera, o si esta vista arranca por O1 + O3
-   (que no dependen del resolver) mientras aquella avanza. **Recomendado: O1 → O3 → O2 → O4.**
-2. **`class_same_instrument` como baseline nuevo** (§2): hay que agregarlo al catálogo de baselines
-   de aquel diseño, no crear un cálculo paralelo acá.
-3. **Dónde viven las alertas de alumno.** O se define la bandeja de #3B capa 3 antes de la O4, o esta
+1. **`class_same_instrument` como baseline nuevo:** la comparación del alumno contra **su curso** en
+   el mismo `instrumentId` todavía no existe. Va al catálogo de baselines de aquel diseño (que hoy
+   tiene `previous_year`, `previous_period`, `org_same_instrument`), no como cálculo paralelo acá.
+   Sin él, la ficha sigue mostrando al alumno en el vacío.
+2. **Dónde viven las alertas de alumno.** O se define la bandeja de #3B capa 3 antes de la O4, o esta
    vista genera una cuarta definición de "está mal" (§4.3).
-4. **El enum `performanceLevel` legacy.** Mientras conviva con `performance_bands`, cualquier
-   distribución seguirá partiendo los datos en dos. Hay que elegir bandas y migrar.
-5. **¿Persistir `scoreSum`/`maxSum` en `skill_results`?** Es la única forma de agregar el logro por
-   nodo entre evaluaciones con exactitud (§ Z3). Alternativa: no ofrecer consolidado cross-evaluación
-   y quedarse siempre en valores por aplicación.
-6. **Alcance del "no rindió".** Requiere que `assessment_course_assignments` esté poblado de forma
+3. **El enum `performanceLevel` legacy.** Mientras conviva con `performance_bands`, cualquier
+   distribución seguirá partiendo los datos en dos — hoy la vista lo declara `mixed` y no clasifica,
+   que es honesto pero no es la solución. Hay que elegir bandas y migrar.
+4. **¿Persistir `scoreSum`/`maxSum` en `skill_results`?** Es la única forma de agregar el logro por
+   nodo entre evaluaciones con exactitud (§ Z3). Hoy se suman conteos de ítems, que difieren del
+   `percentage` persistido (ponderado por `maxScore`) cuando hay ítems de puntaje múltiple.
+5. **Alcance del "no rindió".** Requiere que `assessment_course_assignments` esté poblado de forma
    confiable; verificar en la demo antes de prometer el chip.
 
 ---
