@@ -9,11 +9,9 @@ import {
   canAccess,
   capabilityUnavailableMessage,
   AI_ANALYSIS_VIEWER_ROLES,
-  INSTRUMENT_QUALITY_VIEWER_ROLES,
   assessmentInsightsOutputSchema,
   type AiAnalysisModel,
   type AssessmentInsightsOutput,
-  type InstrumentQualityResponse,
   type ItemMatrixResponse,
   type MatrixQuestionColumn,
   type UserRole,
@@ -55,7 +53,6 @@ export default async function EvaluacionAnalisisIaPage({
         analysisId={analysisId}
         classGroupId={classGroupId}
         activeRole={session.user.activeRole}
-        roles={session.user.roles}
       />
     </Suspense>
   );
@@ -75,13 +72,11 @@ async function AnalisisIaContent({
   analysisId,
   classGroupId,
   activeRole,
-  roles,
 }: {
   assessmentId: string;
   analysisId: string | undefined;
   classGroupId: string | undefined;
   activeRole: UserRole;
-  roles: readonly UserRole[];
 }) {
   if (!(await isFeatureEnabled('ai_analysis'))) {
     return <FeatureUpgradeNotice feature="ai_analysis" />;
@@ -91,7 +86,7 @@ async function AnalisisIaContent({
   const audience = activeRole === 'teacher' ? 'teacher' : 'director';
 
   // El snapshot que alimenta al LLM lee `responses`. Sin ellas el informe se
-  // generaría sobre una matriz vacía y sin psicometría, pero sin ninguna señal de
+  // generaría sobre una matriz vacía, pero sin ninguna señal de
   // "no aplica" → alucinación probable. Se cierra sólo el GENERAR: un análisis ya
   // existente se sigue viendo (se generó cuando el dato sí estaba).
   const canGenerate = await assessmentSupports(assessmentId, 'ai_item_insight');
@@ -218,25 +213,13 @@ async function AnalisisIaContent({
 
   const output: AssessmentInsightsOutput = parsed.data;
 
-  // Datos deterministas complementarios (calidad + columnas de ítems). Best-effort.
-  const qualityQuery = new URLSearchParams({ assessmentId });
-  if (classGroupId) qualityQuery.set('classGroupId', classGroupId);
-
+  // Columnas de ítems para el export. Best-effort.
   const matrixQuery = new URLSearchParams({ assessmentId, limit: '1' });
   if (classGroupId) matrixQuery.set('classGroupId', classGroupId);
 
-  const canViewQuality = canAccess(roles, INSTRUMENT_QUALITY_VIEWER_ROLES);
-
-  const [quality, matrix] = await Promise.all([
-    canViewQuality
-      ? apiGet<InstrumentQualityResponse>(`/instrument-quality?${qualityQuery.toString()}`).catch(
-          () => null,
-        )
-      : Promise.resolve(null),
-    apiGet<ItemMatrixResponse>(`/item-analysis/matrix?${matrixQuery.toString()}`).catch(
-      (): ItemMatrixResponse | null => null,
-    ),
-  ]);
+  const matrix = await apiGet<ItemMatrixResponse>(
+    `/item-analysis/matrix?${matrixQuery.toString()}`,
+  ).catch((): ItemMatrixResponse | null => null);
 
   const questions: MatrixQuestionColumn[] = matrix?.questions ?? [];
   const exportTitle = matrix?.assessmentName ?? matrix?.instrumentName ?? 'evaluacion';
@@ -249,7 +232,6 @@ async function AnalisisIaContent({
         activeRole={activeRole}
         assessmentId={assessmentId}
         classGroupId={classGroupId}
-        quality={quality}
         questions={questions}
         exportTitle={exportTitle}
         basePath={basePath}

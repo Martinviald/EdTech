@@ -7,7 +7,6 @@ import {
   CheckCircle2,
   GraduationCap,
   Lightbulb,
-  ShieldCheck,
   Sparkles,
   Table2,
   Target,
@@ -23,7 +22,6 @@ import {
   ITEM_ANALYSIS_VIEWER_ROLES,
   AI_ANALYSIS_VIEWER_ROLES,
   REMEDIAL_VIEWER_ROLES,
-  INSTRUMENT_QUALITY_VIEWER_ROLES,
   type AssessmentReportResponse,
   type UserRole,
 } from '@soe/types';
@@ -167,13 +165,6 @@ async function ResumenContent({
       description: 'Material remedial generado para las brechas de esta evaluación.',
       icon: Lightbulb,
       policy: REMEDIAL_VIEWER_ROLES,
-    },
-    {
-      href: ROUTES.evaluacionCalidad(assessmentId),
-      label: 'Calidad del instrumento',
-      description: 'Confiabilidad (KR-20) y banderas psicométricas de los ítems.',
-      icon: ShieldCheck,
-      policy: INSTRUMENT_QUALITY_VIEWER_ROLES,
     },
   ];
 

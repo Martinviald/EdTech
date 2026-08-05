@@ -13,24 +13,18 @@ import type { LlmToolDefinition } from '../../llm/llm.types';
 import { AssessmentReportService } from '../../assessment-report/assessment-report.service';
 
 /** Alumno en foco SIN PII: estructuralmente igual pero sin nombre ni RUT. */
-type RiskStudentPiiFree = Omit<
-  AssessmentReportRiskStudent,
-  'studentRut' | 'studentFullName'
->;
+type RiskStudentPiiFree = Omit<AssessmentReportRiskStudent, 'studentRut' | 'studentFullName'>;
 
 /** Informe con `studentsAtRisk` proyectado a su forma PII-free. */
-type AssessmentReportPiiFree = Omit<
-  AssessmentReportResponse,
-  'studentsAtRisk'
-> & {
+type AssessmentReportPiiFree = Omit<AssessmentReportResponse, 'studentsAtRisk'> & {
   studentsAtRisk: RiskStudentPiiFree[];
 };
 
 /**
- * `get_assessment_report` — informe psicométrico consolidado de una evaluación
+ * `get_assessment_report` — informe consolidado de resultados de una evaluación
  * (H6.13): ficha técnica, síntesis ejecutiva, distribución por nivel, comparativa
  * por curso, fortalezas/brechas por habilidad, análisis de ítems (dificultad,
- * discriminación, distractor dominante, flags) y recomendaciones accionables.
+ * distractor dominante, flags) y recomendaciones accionables.
  *
  * Wrapper delgado sobre `AssessmentReportService.getReport` → hereda
  * `withOrgContext` + RLS + scoping por rol. La identidad sale de `ctx.user`
@@ -48,14 +42,16 @@ export class GetAssessmentReportTool implements AssistantTool {
   readonly definition: LlmToolDefinition = {
     name: 'get_assessment_report',
     description:
-      'Devuelve el informe psicométrico consolidado de una evaluación: síntesis ' +
+      'Devuelve el informe consolidado de resultados de una evaluación: síntesis ' +
       'ejecutiva (logro, aprobación, cobertura), distribución por nivel de ' +
       'desempeño, comparativa por curso, fortalezas y brechas por habilidad, ' +
-      'análisis de ítems (dificultad, discriminación, distractor dominante, ' +
-      'flags como critical/low_discrimination/strong_distractor/easy) y ' +
-      'recomendaciones accionables. Requiere assessmentId; opcionalmente acota a ' +
-      'un curso con classGroupId. Los IDs se obtienen de list_filter_options o ' +
-      'get_dashboard_*. No expone nombres ni RUT de alumnos.',
+      'análisis de ítems (% de logro, distractor dominante, flags como ' +
+      'critical/dominant_error/high_achievement) y recomendaciones accionables. ' +
+      'Los flags describen el APRENDIZAJE del curso, no la calidad del ' +
+      'instrumento: son pruebas estandarizadas y validadas y no se juzgan. ' +
+      'Requiere assessmentId; opcionalmente acota a un curso con classGroupId. ' +
+      'Los IDs se obtienen de list_filter_options o get_dashboard_*. No expone ' +
+      'nombres ni RUT de alumnos.',
     inputSchema: {
       type: 'object',
       properties: {
@@ -73,10 +69,7 @@ export class GetAssessmentReportTool implements AssistantTool {
     },
   };
 
-  async execute(
-    input: unknown,
-    ctx: AssistantToolContext,
-  ): Promise<AssistantToolResult> {
+  async execute(input: unknown, ctx: AssistantToolContext): Promise<AssistantToolResult> {
     const parsed = assessmentReportQuerySchema.safeParse(input);
     if (!parsed.success) {
       return {
@@ -98,15 +91,13 @@ export class GetAssessmentReportTool implements AssistantTool {
    * weakestSkill, classGroupName). El resto del informe es agregado.
    */
   private sanitize(data: AssessmentReportResponse): AssessmentReportPiiFree {
-    const studentsAtRisk: RiskStudentPiiFree[] = data.studentsAtRisk.map(
-      (s) => ({
-        studentId: s.studentId,
-        classGroupName: s.classGroupName,
-        achievement: s.achievement,
-        performanceLevel: s.performanceLevel,
-        weakestSkill: s.weakestSkill,
-      }),
-    );
+    const studentsAtRisk: RiskStudentPiiFree[] = data.studentsAtRisk.map((s) => ({
+      studentId: s.studentId,
+      classGroupName: s.classGroupName,
+      achievement: s.achievement,
+      performanceLevel: s.performanceLevel,
+      weakestSkill: s.weakestSkill,
+    }));
     return { ...data, studentsAtRisk };
   }
 }

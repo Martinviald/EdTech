@@ -25,7 +25,7 @@ export type PageTab = {
   exact?: boolean;
   /**
    * La pestaña existe para el rol pero su contenido no aplica al dato actual
-   * (p. ej. una evaluación sin `psychometrics` en sus `capabilities`). Se
+   * (p. ej. una evaluación sin `student_matrix` en sus `capabilities`). Se
    * renderiza apagada y sin enlace en vez de ocultarse: la forma del hub no
    * cambia de un registro a otro y el usuario no queda buscando una pestaña
    * que "desapareció".

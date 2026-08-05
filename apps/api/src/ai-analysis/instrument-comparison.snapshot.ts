@@ -29,7 +29,7 @@ const PASSAGE_MAX_CHARS = 600;
 /**
  * Ensamblador del snapshot DETERMINISTA de la comparación de DOS instrumentos
  * (TKT-23). Para cada lado reusa el snapshot de evaluación ya existente
- * (`SnapshotBuilder`: contenido + psicometría anonimizada) y lo enriquece con:
+ * (`SnapshotBuilder`: contenido + resultados anonimizados) y lo enriquece con:
  *  - metadatos del instrumento (año, tipo) resueltos desde el assessment,
  *  - % de logro global (avg de `assessment_results.percentage`),
  *  - alternativas y pasaje/sección por ítem (para el análisis de CONTENIDO).
@@ -83,7 +83,6 @@ export class InstrumentComparisonSnapshotService {
         stem: truncate(it.stem, STEM_MAX_CHARS),
         alternatives: extra?.alternatives ?? [],
         difficulty: it.difficulty,
-        discrimination: it.discrimination,
         correctLabel: it.correctLabel,
         dominantDistractor: it.dominantDistractor,
         distribution: it.distribution,
@@ -102,7 +101,6 @@ export class InstrumentComparisonSnapshotService {
       studentsEvaluated: snap.evaluated,
       studentsEnrolled: snap.enrolled,
       averageAchievement: enrichment.averageAchievement,
-      reliabilityKr20: snap.reliability.kr20,
       items,
       skills: snap.skills.map((s) => ({
         nodeId: s.nodeId,

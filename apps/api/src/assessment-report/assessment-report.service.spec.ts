@@ -226,17 +226,7 @@ function baseSelectResults(): unknown[][] {
         ],
       },
     ],
-    // 8. loadGroupCorrectness(top = s1)
-    [
-      { itemId: 'i1', total: 1, correct: 1 },
-      { itemId: 'i2', total: 1, correct: 1 },
-    ],
-    // 9. loadGroupCorrectness(bottom = s4)
-    [
-      { itemId: 'i1', total: 1, correct: 0 },
-      { itemId: 'i2', total: 1, correct: 0 },
-    ],
-    // 10. buildSkills → assessment_skill_stats, ya agregado en SQL al grano
+    // 8. buildSkills → assessment_skill_stats, ya agregado en SQL al grano
     // (nodo × curso). `pctSum`/`pctWeight` son el promedio ponderado por
     // studentCount: 120/4 = 30% y 320/4 = 80%, los mismos números que daba el
     // `avg(skill_results.percentage)` que reemplaza.
@@ -260,7 +250,7 @@ function baseSelectResults(): unknown[][] {
         studentsAssessed: 4,
       },
     ],
-    // 11. loadWeakestSkillPerStudent (atRisk = s3, s4)
+    // 9. loadWeakestSkillPerStudent (atRisk = s3, s4)
     [
       { studentId: 's4', nodeName: 'Interpretar', percentage: '10.00' },
       { studentId: 's3', nodeName: 'Interpretar', percentage: '20.00' },
@@ -327,23 +317,23 @@ describe('AssessmentReportService.getReport', () => {
     expect(b.criticalStudents).toBe(2); // elemental + insuficiente
   });
 
-  it('calcula dificultad, discriminación y flags psicométricos por ítem', async () => {
+  it('calcula el % de logro y los flags de aprendizaje por ítem', async () => {
     const svc = makeService(makeDb(baseSelectResults()));
     const res = await svc.getReport(makeUser(), { assessmentId: ASSESSMENT_ID });
 
     const i1 = res.items.find((i) => i.position === 1)!;
     const i2 = res.items.find((i) => i.position === 2)!;
 
-    // i1: 3/4 aciertos → p=75%, discrimina perfecto (D=1), sin alertas.
+    // i1: 3/4 aciertos → 75% de logro, sin alertas.
     expect(i1.difficulty).toBeCloseTo(75);
-    expect(i1.discrimination).toBeCloseTo(1);
     expect(i1.flags).toEqual([]);
 
-    // i2: 1/4 aciertos → p=25% (crítico) y el distractor C (3) supera a la clave (1).
+    // i2: 1/4 aciertos → 25% de logro (crítico) y el distractor C (3) supera a la
+    // clave (1) → error dominante del curso.
     expect(i2.difficulty).toBeCloseTo(25);
     expect(i2.topDistractorKey).toBe('C');
     expect(i2.flags).toContain('critical');
-    expect(i2.flags).toContain('strong_distractor');
+    expect(i2.flags).toContain('dominant_error');
   });
 
   it('ordena habilidades por brecha y deriva fortalezas/brechas y alumnos en foco', async () => {
@@ -374,7 +364,6 @@ describe('AssessmentReportService.getReport', () => {
     const results = baseSelectResults();
     results[4] = []; // loadEvaluatedStudents sin filas
     results.splice(5, 1); // loadStudentClassGroups no consulta con 0 alumnos
-    results.splice(8, 2); // sin percentages no hay grupos 27/27 → no consulta
 
     const svc = makeService(makeDb(results));
     const res = await svc.getReport(makeUser(), { assessmentId: ASSESSMENT_ID });
@@ -387,9 +376,6 @@ describe('AssessmentReportService.getReport', () => {
     // Lo agregable viene completo desde el read-model, no en cero.
     expect(res.items).toHaveLength(2);
     expect(res.items[0].difficulty).toBeCloseTo(75);
-    // …salvo la discriminación, que necesita el puntaje de cada alumno.
-    expect(res.items[0].discrimination).toBeNull();
-    expect(res.items[0].flags).not.toContain('low_discrimination');
     expect(res.skills.map((s) => s.nodeName)).toEqual(['Interpretar', 'Localizar información']);
   });
 
@@ -470,7 +456,6 @@ describe('AssessmentReportService.getReport', () => {
       { studentId: 's2', classGroupId: 'cg1', classGroupName: '3°A' },
     ];
     results[7] = DIA_BANDS; // loadInstrumentBands
-    results.splice(9, 2); // sin percentages no hay grupos 27/27 → no consulta
     return results;
   }
 
@@ -485,7 +470,6 @@ describe('AssessmentReportService.getReport', () => {
     (results[0][0] as Record<string, unknown>).dataGranularity = 'aggregate_only';
     results[4] = []; // loadEvaluatedStudents sin filas
     results.splice(5, 1); // loadStudentClassGroups no consulta con 0 alumnos
-    results.splice(8, 2); // sin percentages no hay grupos 27/27 → no consulta
     // loadCohortOverallAchievement (agrupado por curso): Σscore/Σmax = 90/120 = 75%,
     // N = 4. Reemplaza al slot de loadWeakestSkillPerStudent, que el corte no consulta.
     results[9] = [{ scoreSum: '90.00', maxSum: '120.00', studentsAssessed: 4 }];
@@ -548,7 +532,7 @@ describe('AssessmentReportService.getReport', () => {
     expect(res.meta.dataGranularity).toBe('aggregate_only');
     expect(res.meta.hasItemLevelData).toBe(false);
     expect(res.meta.capabilities).toContain('cohort_item_stats');
-    expect(res.meta.capabilities).not.toContain('psychometrics');
+    expect(res.meta.capabilities).not.toContain('student_matrix');
 
     // Lo que el endpoint PROMETE en `capabilities`, ahora lo cumple.
     const i2 = res.items.find((i) => i.position === 2)!;
@@ -557,10 +541,6 @@ describe('AssessmentReportService.getReport', () => {
     expect(i2.topDistractorKey).toBe('C');
     expect(res.skills.map((s) => s.averageAchievement)).toEqual([30, 80]);
 
-    // Lo irreducible queda en null, no en cero: sin el puntaje de cada alumno no hay
-    // 27% superior/inferior. Y sin discriminación no se infla `low_discrimination`.
-    expect(res.items.every((i) => i.discrimination === null)).toBe(true);
-    expect(res.items.every((i) => !i.flags.includes('low_discrimination'))).toBe(true);
     // §8.5 — el informe oficial no trae el % de cada alumno, así que no hay promedio.
     expect(res.summary.averageAchievement).toBeNull();
   });

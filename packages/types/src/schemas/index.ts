@@ -32,7 +32,6 @@ export * from './heatmap.schema';
 export * from './item-analysis.schema';
 export * from './ai-analysis.schema';
 export * from './instrument-comparison.schema';
-export * from './instrument-quality.schema';
 export * from './benchmark-settings.schema';
 export * from './benchmark.schema';
 export * from './curriculum-context.schema';

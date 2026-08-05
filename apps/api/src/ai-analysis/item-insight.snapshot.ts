@@ -1,21 +1,12 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { and, asc, eq, inArray, isNull, sql } from 'drizzle-orm';
-import {
-  instrumentSections,
-  items,
-  responses,
-  sectionAttachments,
-  studentEnrollments,
-  students,
-  withOrgContext,
-} from '@soe/db';
+import { and, asc, eq, isNull, sql } from 'drizzle-orm';
+import { instrumentSections, items, sectionAttachments, withOrgContext } from '@soe/db';
 import type { ItemInsightSnapshot } from '@soe/types';
 import type { JwtPayload } from '../auth/jwt-payload.types';
 import { InjectDb, type Database } from '../database/database.types';
 import { AssessmentReportService } from '../assessment-report/assessment-report.service';
 import { ItemAnalysisService } from '../item-analysis/item-analysis.service';
 import type { LlmImagePart } from '../llm/llm.types';
-import { pointBiserial, type ScoreMatrix } from './ai-analysis.metrics';
 import type {
   ItemInsightBuilder,
   ItemInsightBuildOptions,
@@ -32,9 +23,9 @@ const IMAGE_FETCH_TIMEOUT_MS = 8_000;
  *
  * Reúsa `ItemAnalysisService.getQuestionAnalysis` (scoping + tenancy + enunciado,
  * alternativas/distribución, distractor dominante, correctKey, tags, imageUrl) y
- * `AssessmentReportService.getReport` (psicometría p / D por ítem), añade
- * punto-biserial (matriz de aciertos), el pasaje de la sección y las imágenes
- * fetcheadas a base64 (best-effort, solo URLs http(s)).
+ * `AssessmentReportService.getReport` (% de logro y contentName por ítem), añade
+ * el pasaje de la sección y las imágenes fetcheadas a base64 (best-effort, solo
+ * URLs http(s)).
  *
  * Multi-tenancy: el `orgId` proviene del token (`user.orgId`); toda query a tablas
  * con RLS corre dentro de `withOrgContext`. El snapshot NUNCA contiene PII de
@@ -63,48 +54,34 @@ export class ItemInsightSnapshotService implements ItemInsightBuilder {
       classGroupId: opts.classGroupId,
     });
 
-    // 2) Psicometría del informe (p, D, contentName) — busca el ítem por position.
+    // 2) Datos del informe (% de logro, contentName) — busca el ítem por position.
     const report = await this.reportService.getReport(user, {
       assessmentId: opts.assessmentId,
       classGroupId: opts.classGroupId,
     });
     const reportItem = report.items.find((it) => it.itemId === itemId) ?? null;
 
-    // 3) Datos no expuestos por los servicios anteriores: sección/pasaje, imagen
-    //    del ítem y matriz de aciertos (para punto-biserial). Todo bajo RLS.
-    const { passage, itemImageUrl, sectionImages, pb } = await withOrgContext(
+    // 3) Datos no expuestos por los servicios anteriores: sección/pasaje e imagen
+    //    del ítem. Todo bajo RLS.
+    const { passage, itemImageUrl, sectionImages } = await withOrgContext(
       this.db,
       orgId,
       async (tx) => {
         const meta = await this.loadItemMeta(tx, itemId);
-        const passage = meta?.sectionId
-          ? await this.loadPassage(tx, meta.sectionId)
-          : null;
+        const passage = meta?.sectionId ? await this.loadPassage(tx, meta.sectionId) : null;
         const sectionImages = meta?.sectionId
           ? await this.loadSectionImages(tx, meta.sectionId)
           : [];
-        const pb = await this.computePointBiserial(
-          tx,
-          orgId,
-          opts.assessmentId,
-          meta?.instrumentId ?? null,
-          itemId,
-          opts.classGroupId ?? null,
-        );
         return {
           passage,
           itemImageUrl: question.imageUrl ?? meta?.imageUrl ?? null,
           sectionImages,
-          pb,
         };
       },
     );
 
     // 4) Imágenes a base64 (best-effort): item + sección. Solo URLs http(s).
-    const { snapshotImages, llmImages } = await this.fetchImages(
-      itemImageUrl,
-      sectionImages,
-    );
+    const { snapshotImages, llmImages } = await this.fetchImages(itemImageUrl, sectionImages);
 
     const difficulty =
       reportItem?.difficulty === null || reportItem?.difficulty === undefined
@@ -130,8 +107,6 @@ export class ItemInsightSnapshotService implements ItemInsightBuilder {
       blankCount: question.blankCount,
       correctRate: question.correctRate,
       difficulty,
-      discrimination: reportItem?.discrimination ?? null,
-      pointBiserial: pb,
       dominantDistractor: this.deriveDominantDistractor(question),
       skillName: question.skill?.nodeName ?? null,
       contentName: question.content?.nodeName ?? reportItem?.contentName ?? null,
@@ -243,105 +218,6 @@ export class ItemInsightSnapshotService implements ItemInsightBuilder {
       .map((r) => ({ url: r.url, mimeType: r.mimeType, note: r.note }));
   }
 
-  /**
-   * Punto-biserial del ítem en la cohorte de la evaluación. Construye la matriz
-   * de aciertos (alumno × ítem) sobre TODOS los ítems del instrumento y aplica la
-   * función pura. Sin PII: los ids de alumno solo agrupan y se descartan.
-   *
-   * Si se pasa `classGroupId`, la matriz se acota a los alumnos matriculados en
-   * ese curso — así el punto-biserial usa la MISMA cohorte que el p/D del informe
-   * (que también se scopea por `classGroupId`), evitando una métrica inconsistente.
-   */
-  private async computePointBiserial(
-    tx: Database,
-    orgId: string,
-    assessmentId: string,
-    instrumentId: string | null,
-    itemId: string,
-    classGroupId: string | null,
-  ): Promise<number | null> {
-    if (!instrumentId) return null;
-
-    const itemRows = await tx
-      .select({ itemId: items.id })
-      .from(items)
-      .where(
-        and(eq(items.instrumentId, instrumentId), isNull(items.deletedAt)),
-      )
-      .orderBy(asc(items.position));
-    const itemOrder = itemRows.map((r) => r.itemId);
-    const targetIndex = itemOrder.indexOf(itemId);
-    if (targetIndex < 0 || itemOrder.length < 2) return null;
-
-    // Cohorte: alumnos del curso (si se filtró). null = toda la evaluación.
-    const cohortStudentIds = classGroupId
-      ? await this.resolveCohortStudentIds(tx, orgId, classGroupId)
-      : null;
-    // Curso sin alumnos visibles → no hay matriz que calcular.
-    if (cohortStudentIds !== null && cohortStudentIds.length === 0) return null;
-
-    const respConditions = [
-      eq(responses.assessmentId, assessmentId),
-      inArray(responses.itemId, itemOrder),
-    ];
-    if (cohortStudentIds !== null) {
-      respConditions.push(inArray(responses.studentId, cohortStudentIds));
-    }
-
-    const respRows = await tx
-      .select({
-        studentId: responses.studentId,
-        itemId: responses.itemId,
-        isCorrect: sql<boolean>`coalesce(${responses.isCorrect}, false)`,
-      })
-      .from(responses)
-      .where(and(...respConditions));
-
-    const itemIndex = new Map(itemOrder.map((id, idx) => [id, idx]));
-    const byStudent = new Map<string, boolean[]>();
-    for (const r of respRows) {
-      const idx = itemIndex.get(r.itemId);
-      if (idx === undefined) continue;
-      let row = byStudent.get(r.studentId);
-      if (!row) {
-        row = new Array<boolean>(itemOrder.length).fill(false);
-        byStudent.set(r.studentId, row);
-      }
-      row[idx] = r.isCorrect === true;
-    }
-
-    const matrix: ScoreMatrix = Array.from(byStudent.entries())
-      .sort(([a], [b]) => a.localeCompare(b))
-      .map(([, row]) => row);
-
-    return pointBiserial(matrix, targetIndex);
-  }
-
-  /**
-   * IDs de alumnos matriculados en un curso, acotados a la org y no eliminados.
-   * Sin PII en la salida: solo se usan para filtrar la matriz de aciertos y se
-   * descartan. El acceso del caller al curso ya fue validado por
-   * getQuestionAnalysis/getReport (que comparten el mismo `classGroupId`).
-   */
-  private async resolveCohortStudentIds(
-    tx: Database,
-    orgId: string,
-    classGroupId: string,
-  ): Promise<string[]> {
-    const rows = await tx
-      .select({ studentId: studentEnrollments.studentId })
-      .from(studentEnrollments)
-      .innerJoin(students, eq(students.id, studentEnrollments.studentId))
-      .where(
-        and(
-          eq(studentEnrollments.classGroupId, classGroupId),
-          eq(students.orgId, orgId),
-          isNull(students.deletedAt),
-        ),
-      );
-    return Array.from(new Set(rows.map((r) => r.studentId)));
-  }
-
   // ───────────────────────────────────────────────────────────────────────────
   // Imágenes (fetch → base64, best-effort)
   // ───────────────────────────────────────────────────────────────────────────
@@ -393,9 +269,7 @@ export class ItemInsightSnapshotService implements ItemInsightBuilder {
    * null si falla, excede el tamaño máximo o el content-type no es imagen — el
    * análisis sigue en modo texto. No lanza: nunca debe tumbar el ensamblado.
    */
-  private async fetchAsBase64(
-    url: string,
-  ): Promise<{ data: string; mimeType: string } | null> {
+  private async fetchAsBase64(url: string): Promise<{ data: string; mimeType: string } | null> {
     const controller = new AbortController();
     const timer = setTimeout(() => controller.abort(), IMAGE_FETCH_TIMEOUT_MS);
     try {
@@ -427,9 +301,7 @@ export class ItemInsightSnapshotService implements ItemInsightBuilder {
 
   private requireOrgId(user: JwtPayload): string {
     if (!user.orgId) {
-      throw new Error(
-        'Sin organización activa. Selecciona una organización antes de continuar.',
-      );
+      throw new Error('Sin organización activa. Selecciona una organización antes de continuar.');
     }
     return user.orgId;
   }

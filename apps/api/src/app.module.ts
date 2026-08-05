@@ -40,7 +40,6 @@ import { AiAnalysisModule } from './ai-analysis/ai-analysis.module';
 import { BenchmarkSettingsModule } from './benchmark-settings/benchmark-settings.module';
 import { RemedialModule } from './remedial/remedial.module';
 import { BenchmarkingModule } from './benchmarking/benchmarking.module';
-import { InstrumentQualityModule } from './instrument-quality/instrument-quality.module';
 import { AiObservabilityModule } from './ai-observability/ai-observability.module';
 import { AssistantModule } from './assistant/assistant.module';
 import { OfficialReportsModule } from './official-reports/official-reports.module';
@@ -92,8 +91,7 @@ import { OfficialReportImportModule } from './official-report-import/official-re
     CurriculumRetrieverModule,
     AiAnalysisModule,
     BenchmarkSettingsModule,
-    // ── F2 S2: análisis IA por-pregunta (en AiAnalysisModule) + calidad de instrumento ──
-    InstrumentQualityModule,
+    // ── F2 S2: análisis IA por-pregunta (en AiAnalysisModule) ──
     // ── F2 S3: IA Remedial (RAG) — generación de material con aprobación humana ──
     RemedialModule,
     // ── F2 S4: Benchmarking Institucional (read-model cross-tenant + k-anonimato) ──

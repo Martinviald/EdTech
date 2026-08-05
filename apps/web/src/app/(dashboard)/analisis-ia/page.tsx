@@ -16,7 +16,7 @@ function pickParam(raw: string | string[] | undefined): string | undefined {
  * evaluaciones (el nuevo selector).
  *
  * Los componentes de presentación (`analysis-report`, `analysis-poller`,
- * `generate-button`, `quality-panel`, `actions.ts`, …) siguen viviendo en esta
+ * `generate-button`, `actions.ts`, …) siguen viviendo en esta
  * carpeta: el hub los reutiliza.
  */
 export default async function AnalisisIaRedirect({
