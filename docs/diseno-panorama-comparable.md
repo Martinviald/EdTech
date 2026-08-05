@@ -258,18 +258,81 @@ celda como advierte la regla sobre `HeatmapService.assembleResponse()`.
 
 ### 4.4 Ola 3 — Alertas comparables
 
-Reescribir `deriveAlerts` sobre tres cambios:
+#### Principios
 
 - **Umbral por banda del instrumento**, no 60/50 hardcodeados. Una alerta se dispara cuando el
   curso/habilidad cae en la banda inferior **de su propio instrumento**.
 - **Alerta por delta**: caída ≥ X pp contra el baseline comparable (`previous_year` /
-  `previous_period`). Esta es la alerta que hoy no existe y es la más valiosa.
+  `previous_period`). Es la alerta que hoy no existe y la más valiosa.
 - **Prioridad + dedup**: clave de dedup `(type, contextId, unitKey)`, orden por severidad × N de
   alumnos afectados, tope de emisión con "ver todas".
+- **Precisión sobre recall.** Mejor 3 alertas ciertas que 40 ruidosas. Es la razón de que la familia
+  A use umbrales relativos a la banda y la familia B use deltas, en vez de cortes absolutos.
 
 Cada alerta emite `unitKey`, `baselineRef` y `href` de drill — que es **exactamente la forma de fila
 que la bandeja persistente de #3B va a necesitar**. Se diseña compatible aunque aquí siga siendo
 efímera.
+
+#### Catálogo de alertas
+
+Toda alerta vive **dentro de una unidad comparable** (N0/N1) o **entre dos unidades comparables**
+(N2/N3). Ninguna promedia entre instrumentos.
+
+**Familia A — Nivel: dónde estoy parado hoy** *(dentro de una unidad comparable)*
+
+| Tipo | Se dispara cuando | Fuente | Ejemplo |
+|---|---|---|---|
+| `band_concentration` | El % de alumnos del curso en la **banda inferior del instrumento** supera el umbral | `assessment_level_stats` (grano curso × banda) o `assessment_results.performanceBandId` | "8°B: 62% de los alumnos en Nivel I de DIA Matemática Cierre" |
+| `skill_gap` | Un eje/habilidad queda entre los más bajos **de esa evaluación** (regla relativa, no corte fijo) | `assessment_skill_stats` | "En DIA Lectura 5° Diagnóstico, *Reflexionar sobre el texto* es el eje más bajo: 41%" |
+| `item_gap` | Una pregunta tiene acierto muy bajo en varios cursos de la misma evaluación | `assessment_item_stats` | "Pregunta 14: 18% de acierto en los 4 quintos" |
+
+`band_concentration` **reemplaza** a `low_achievement` (60 hardcodeado) y `skill_gap` reemplaza a
+`critical_skill` (50 hardcodeado). `item_gap` es nueva y es la más accionable para el profesor.
+
+**Familia B — Movimiento: qué cambió** *(comparación entre unidades comparables — hoy no existe ninguna)*
+
+| Tipo | Se dispara cuando | Baseline | Ejemplo |
+|---|---|---|---|
+| `drop_vs_previous_year` | Caída ≥ X pp contra la misma familia N2 del año anterior | `previous_year` | "DIA Matemática 8° Cierre: −12 pp vs 2025" |
+| `drop_vs_previous_period` | Caída ≥ X pp entre momentos del mismo año | `previous_period` (N3) | "Lectura 5°: −7 pp entre Diagnóstico y Monitoreo 2026" |
+| `band_regression` | Alumnos que **bajaron de banda** entre el momento anterior y este | `assessment_results.priorPerformanceBandId` — la ingesta de Cierre ya escribe la banda previa **en la propia fila** | "8°B: 9 alumnos bajaron de nivel entre Monitoreo y Cierre" |
+| `class_below_org` | Un curso queda N pp bajo el resto del colegio **en el mismo instrumento** | `org_same_instrument` | "8°B está 15 pp bajo el promedio del colegio en esta evaluación" |
+
+`band_regression` no necesita resolver baseline ni hacer join: `priorPerformanceBandId`
+(`packages/db/src/schema/results.ts:89-93`) ya trae la banda del momento anterior en la fila del
+alumno. **Sólo aplica a Cierre** (es NULL en Diagnóstico/Monitoreo e `item_level`).
+
+**Familia C — Cobertura: qué falta** *(integridad del dato, no de logro)*
+
+| Tipo | Se dispara cuando | Fuente | Ejemplo |
+|---|---|---|---|
+| `coverage_gap` | Hay cursos asignados a la evaluación sin resultados, o alumnos matriculados sin fila | `assessment_course_assignments` × `student_enrollments` vs `assessment_results` / `assessment_level_stats` | "DIA Historia 7° Diagnóstico: 2 de 5 cursos sin resultados cargados" |
+| `stale_assessment` | `status` sigue en `scheduled`/`in_progress` con `administeredAt` ya pasada | `assessments.status` | "Evaluación aplicada hace 3 semanas sin resultados" |
+
+Estas dos materializan el `incomplete` que hoy está **declarado en el tipo
+(`dashboard.schema.ts:104`) y nunca se emite**. Importan porque hoy un colegio no tiene forma de
+enterarse de que le falta cargar un curso — el mismo agujero que destapó la herramienta de
+reconciliación de roster DIA, pero visible en el panorama en vez de en un script aparte.
+
+#### Qué desaparece
+
+- `low_achievement` con el 60 fijo (`dashboards.service.ts:1775`).
+- `critical_skill` con el 50 fijo (`dashboards.service.ts:1807`).
+
+#### Disponibilidad
+
+| Alertas | Requiere |
+|---|---|
+| A1, A2, A3, C1, C2 | Nada nuevo. Datos ya en BDD, y **funcionan también con informes agregados** (`assessment_level_stats` / `skill_stats` / `item_stats` son de grano curso) |
+| B1, B2, B4 | El resolver de baseline de la **Ola 0**. Los datos ya están |
+| B3 | `priorPerformanceBandId` poblado → sólo evaluaciones de **Cierre** ingestadas desde informe oficial |
+
+#### Scope por rol
+
+Mismo catálogo para director y profesor; cambia el **alcance**, no el tipo: el profesor sólo recibe
+alertas de sus cursos asignados (el scoping ya existe en `getAccessibleClassGroupIds`). La
+diferenciación de *prioridad* por rol (director ve gestión, profesor ve aula) es de **#3B**, no de
+esta tanda.
 
 ### 4.5 Ola 4 — Reactividad ("tiempo real")
 
@@ -306,7 +369,7 @@ reescribir las 7 aserciones de `globalAchievement`, no borrarlas).
 | **A** | Qué muestra el panorama **sin** unidad comparable elegida | **Matriz de todas las unidades ordenada por severidad.** El usuario ve dónde está el problema sin elegir nada y entra con un clic; nunca se le muestra un número mezclado. La elección de unidad acota, no es un peaje de entrada | ✅ 2026-08-04 |
 | **B** | Clasificación de alumnos en scope mixto | **No se clasifica.** Se muestra el motivo (`comparability.reason`) + selector de unidad. Se elimina el fallback silencioso a 40/70/85 | ✅ 2026-08-04 |
 | **C** | ¿Se conserva algún KPI de cabecera? | **Sólo conteos + alertas críticas** (alumnos evaluados, evaluaciones, alertas). Son legítimos porque no promedian nada. Se elimina el "% Logro global" | ✅ 2026-08-04 |
-| **D** | Umbral de alerta por delta | ¿Cuántos pp de caída contra el baseline disparan alerta? ¿Configurable por org? | 🔲 |
+| **D** | Umbrales de alerta | (a) pp de caída que disparan B1/B2/B4; (b) % de alumnos en banda inferior que dispara A1; (c) cuántos ejes bajos emite A2. ¿Configurable por org o constante del producto? | 🔲 |
 | **E** | ¿`instrument.version` entra en la clave de familia N2? | Si una versión nueva cambia los ítems, ¿siguen siendo comparables año a año? | 🔲 |
 | **F** | Retrocompatibilidad del contrato | ¿`globalAchievement` se borra del tipo o se deja deprecated un ciclo? (el único consumidor de UI es la propia página) | 🔲 |
 
@@ -348,3 +411,4 @@ reescribir las 7 aserciones de `globalAchievement`, no borrarlas).
 |---|---|
 | 2026-08-04 | Documento creado. Diagnóstico cerrado (D1–D7, F1–F9), definición de comparabilidad N0–N3 y diseño de las 5 olas propuesto. Pendientes las decisiones A–F. |
 | 2026-08-04 | Decisiones **A** (matriz por severidad como vista por defecto), **B** (no clasificar en scope mixto) y **C** (cabecera sólo con conteos, se elimina el "% Logro global") resueltas. §4.3 actualizado con sus consecuencias. Pendientes D, E, F. |
+| 2026-08-04 | §4.4 detallado con el **catálogo de alertas**: 9 tipos en 3 familias (Nivel / Movimiento / Cobertura). Hallazgos que lo condicionan: `assessment_level_stats` permite alertas de banda **también con informes agregados**, y `assessment_results.priorPerformanceBandId` da el retroceso de banda entre momentos **sin resolver baseline**. La decisión D se amplía a los tres umbrales del catálogo. |
