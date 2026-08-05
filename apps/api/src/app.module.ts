@@ -91,7 +91,7 @@ import { OfficialReportImportModule } from './official-report-import/official-re
     CurriculumRetrieverModule,
     AiAnalysisModule,
     BenchmarkSettingsModule,
-    // ── F2 S2: análisis IA por-pregunta (en AiAnalysisModule) + calidad de instrumento ──
+    // ── F2 S2: análisis IA por-pregunta (en AiAnalysisModule) ──
     // ── F2 S3: IA Remedial (RAG) — generación de material con aprobación humana ──
     RemedialModule,
     // ── F2 S4: Benchmarking Institucional (read-model cross-tenant + k-anonimato) ──

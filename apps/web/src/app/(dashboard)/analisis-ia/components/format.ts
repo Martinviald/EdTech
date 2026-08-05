@@ -1,11 +1,5 @@
 /** Helpers de formateo locales para las tarjetas del análisis IA. */
 
-/** p / D / punto-biserial → 2 decimales; null → guion. */
-export function formatMetric(value: number | null): string {
-  if (value === null || Number.isNaN(value)) return '—';
-  return value.toFixed(2);
-}
-
 /** % de logro (0..1 o 0..100). Acepta proporción o porcentaje ya escalado. */
 export function formatAchievement(value: number | null): string {
   if (value === null || Number.isNaN(value)) return '—';

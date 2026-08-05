@@ -255,7 +255,7 @@ async function buildWorkbook(report: AssessmentReportResponse, base: string) {
         i.skillName ?? '—',
         i.contentName ?? '—',
         i.correctKey ?? '—',
-        fmtNum(i.difficulty),
+        fmtPct(i.difficulty, 0),
         i.topDistractorKey ?? '—',
         fmtPct(i.topDistractorRate),
         i.answeredCount,

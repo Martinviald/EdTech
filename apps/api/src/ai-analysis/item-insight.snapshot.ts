@@ -1,13 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { and, asc, eq, isNull, sql } from 'drizzle-orm';
-import {
-  instrumentSections,
-  items,
-  sectionAttachments,
-  studentEnrollments,
-  students,
-  withOrgContext,
-} from '@soe/db';
+import { instrumentSections, items, sectionAttachments, withOrgContext } from '@soe/db';
 import type { ItemInsightSnapshot } from '@soe/types';
 import type { JwtPayload } from '../auth/jwt-payload.types';
 import { InjectDb, type Database } from '../database/database.types';
@@ -223,31 +216,6 @@ export class ItemInsightSnapshotService implements ItemInsightBuilder {
     return rows
       .filter((r): r is typeof r & { url: string } => isHttpUrl(r.url))
       .map((r) => ({ url: r.url, mimeType: r.mimeType, note: r.note }));
-  }
-
-  /**
-   * IDs de alumnos matriculados en un curso, acotados a la org y no eliminados.
-   * Sin PII en la salida: solo se usan para filtrar la matriz de aciertos y se
-   * descartan. El acceso del caller al curso ya fue validado por
-   * getQuestionAnalysis/getReport (que comparten el mismo `classGroupId`).
-   */
-  private async resolveCohortStudentIds(
-    tx: Database,
-    orgId: string,
-    classGroupId: string,
-  ): Promise<string[]> {
-    const rows = await tx
-      .select({ studentId: studentEnrollments.studentId })
-      .from(studentEnrollments)
-      .innerJoin(students, eq(students.id, studentEnrollments.studentId))
-      .where(
-        and(
-          eq(studentEnrollments.classGroupId, classGroupId),
-          eq(students.orgId, orgId),
-          isNull(students.deletedAt),
-        ),
-      );
-    return Array.from(new Set(rows.map((r) => r.studentId)));
   }
 
   // ───────────────────────────────────────────────────────────────────────────

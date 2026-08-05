@@ -249,7 +249,6 @@ export class AssessmentReportService {
         query.assessmentId,
         itemColumns,
         itemIds,
-        evaluated,
         classGroupFilter,
       );
       const skills = await this.buildSkills(
@@ -598,7 +597,6 @@ export class AssessmentReportService {
     assessmentId: string,
     itemColumns: ItemColumn[],
     itemIds: string[],
-    evaluated: EvaluatedStudent[],
     classGroupFilter: string[] | null,
   ): Promise<AssessmentReportItemRow[]> {
     if (itemIds.length === 0) return [];

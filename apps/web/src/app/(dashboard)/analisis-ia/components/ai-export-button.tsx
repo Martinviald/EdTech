@@ -95,17 +95,12 @@ export function AiExportButton({ output, title }: AiExportButtonProps): JSX.Elem
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
-        <DropdownMenuItem onSelect={exportExcel}>
-          Análisis IA en Excel (.xlsx)
-        </DropdownMenuItem>
-        <DropdownMenuItem onSelect={exportPdf}>
-          Análisis IA en PDF (.pdf)
-        </DropdownMenuItem>
+        <DropdownMenuItem onSelect={exportExcel}>Análisis IA en Excel (.xlsx)</DropdownMenuItem>
+        <DropdownMenuItem onSelect={exportPdf}>Análisis IA en PDF (.pdf)</DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
   );
 }
-
 
 // ── Excel ─────────────────────────────────────────────────────────────────────
 
@@ -147,7 +142,7 @@ async function buildWorkbook(output: AssessmentInsightsOutput, title: string, ba
       ...output.topItems.map((i) => [
         i.position,
         i.skillName ?? '—',
-        fmtNum(i.difficulty),
+        fmtPct(i.difficulty),
         i.whatWorked.join(' · '),
         i.replicableAction,
       ]),
@@ -163,7 +158,7 @@ async function buildWorkbook(output: AssessmentInsightsOutput, title: string, ba
       ...output.bottomItems.map((i) => [
         i.position,
         i.skillName ?? '—',
-        fmtNum(i.difficulty),
+        fmtPct(i.difficulty),
         causeLabel(i.likelyCause),
         i.misconception ?? '—',
         i.actionPlan.join(' · '),
@@ -176,7 +171,15 @@ async function buildWorkbook(output: AssessmentInsightsOutput, title: string, ba
     wb,
     'Brechas por habilidad',
     XLSX.utils.aoa_to_sheet([
-      ['Habilidad', '% Logro', 'Hipótesis de causa raíz', 'Señal de misconcepción', 'Estrategia de reenseñanza', 'Actividad ejemplo', 'Grupo remedial'],
+      [
+        'Habilidad',
+        '% Logro',
+        'Hipótesis de causa raíz',
+        'Señal de misconcepción',
+        'Estrategia de reenseñanza',
+        'Actividad ejemplo',
+        'Grupo remedial',
+      ],
       ...output.skillGaps.map((s) => [
         s.nodeName,
         fmtPct(s.achievement),
@@ -264,7 +267,7 @@ async function buildPdf(output: AssessmentInsightsOutput, title: string, base: s
       body: output.topItems.map((i) => [
         String(i.position),
         i.skillName ?? '—',
-        fmtNum(i.difficulty),
+        fmtPct(i.difficulty),
         i.replicableAction,
       ]),
       styles: { fontSize: 8, cellPadding: 1.5, valign: 'top' },
@@ -353,12 +356,9 @@ async function buildPdf(output: AssessmentInsightsOutput, title: string, base: s
     y = sectionTitle(doc, 'Límites del análisis', lastY(doc) + 8, marginX);
     doc.setFontSize(8);
     doc.setTextColor(...MUTED);
-    doc.text(
-      output.caveats.map((c) => `• ${c}`).join('\n'),
-      marginX,
-      y,
-      { maxWidth: pageW - marginX * 2 },
-    );
+    doc.text(output.caveats.map((c) => `• ${c}`).join('\n'), marginX, y, {
+      maxWidth: pageW - marginX * 2,
+    });
     doc.setTextColor(0, 0, 0);
   }
 
@@ -368,12 +368,9 @@ async function buildPdf(output: AssessmentInsightsOutput, title: string, base: s
     doc.setPage(p);
     doc.setFontSize(8);
     doc.setTextColor(...MUTED);
-    doc.text(
-      `Página ${p} de ${pages}`,
-      pageW - marginX,
-      doc.internal.pageSize.getHeight() - 8,
-      { align: 'right' },
-    );
+    doc.text(`Página ${p} de ${pages}`, pageW - marginX, doc.internal.pageSize.getHeight() - 8, {
+      align: 'right',
+    });
   }
 
   doc.save(`${base}.pdf`);

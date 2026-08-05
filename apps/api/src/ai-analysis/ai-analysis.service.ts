@@ -67,7 +67,7 @@ export class AiAnalysisService {
    * Crea (o reutiliza desde caché) un registro de análisis.
    *
    * - Calcula un `inputHash` determinista de {assessmentId, analysisType,
-   *   audience, classGroupId}.
+   *   audience, classGroupId, promptVersion}.
    * - Si existe una fila `completed` con ese hash y NO `force` → la devuelve
    *   (caché, `fromCache: true`).
    * - Lazy stale recovery: una fila `processing` con `startedAt` más viejo que
@@ -523,6 +523,11 @@ export class AiAnalysisService {
   /**
    * Hash determinista del scope de una comparación. El orden base→comparación
    * importa (determina la dirección del diagnóstico), así que NO se ordena el par.
+   *
+   * Incluye `promptVersion` por la misma razón que `computeInputHash`: el prompt es
+   * parte del input real del análisis. La comparación tiene su propio hash porque su
+   * scope son DOS evaluaciones, no una — y por eso mismo es fácil que un arreglo
+   * hecho en `computeInputHash` no llegue hasta acá.
    */
   private computeComparisonHash(input: {
     baseAssessmentId: string;
@@ -534,6 +539,7 @@ export class AiAnalysisService {
       audience: input.audience,
       baseAssessmentId: input.baseAssessmentId,
       comparisonAssessmentId: input.comparisonAssessmentId,
+      promptVersion: promptVersionFor(INSTRUMENT_COMPARISON_ANALYSIS_TYPE),
     });
     return createHash('sha256').update(canonical).digest('hex');
   }
