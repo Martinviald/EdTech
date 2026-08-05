@@ -40,7 +40,7 @@ import { items } from '../schema/items';
 import { instruments } from '../schema/instruments';
 import { responses } from '../schema/responses';
 import { assessments } from '../schema/assessments';
-import { rubricScoredContentSchema } from '@soe/types';
+import { normalizeRubricCode, rubricScoredContentSchema } from '@soe/types';
 
 const argv = process.argv.slice(2);
 const COMMIT = argv.includes('--commit');
@@ -84,13 +84,12 @@ if (!Number.isFinite(MIN_COVERAGE) || MIN_COVERAGE <= 0 || MIN_COVERAGE > 1) {
 }
 
 /**
- * Tolera el cero a la izquierda: quien corrigió escribió "02" donde la escala dice
- * "2". Es un artefacto de tipeo/escaneo, no una respuesta distinta. La tolerancia
- * llega hasta acá a propósito: "12" NO es un código y debe quedar pendiente.
+ * La misma tolerancia al cero a la izquierda que aplica la estrategia al corregir
+ * (`normalizeRubricCode`). Comparten la función a propósito: si acá "02" contara
+ * como código y allá no, el ítem se re-tipificaría y después esas respuestas
+ * quedarían pendientes sin que nadie entendiera por qué.
  */
-function normalizeCode(value: string): string {
-  return /^0+\d$/.test(value) ? value.replace(/^0+/, '') : value;
-}
+const normalizeCode = normalizeRubricCode;
 
 const url = process.env.DATABASE_ADMIN_URL ?? process.env.DATABASE_URL;
 if (!url) throw new Error('Falta DATABASE_ADMIN_URL');

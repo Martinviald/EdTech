@@ -10,14 +10,14 @@
 // Un código NO declarado (una marca doble del escáner, texto libre) queda
 // pendiente, nunca en 0: una lectura fallida no es un cero.
 import type { RubricLevel, RubricScoredContent } from '../../schemas/item-content.schema';
+import { sameRubricCode } from '../../utils/rubric-code';
 import type { ScoringInput, ScoringOutput, ScoringStrategy } from '../scoring-strategy';
 import { asTrimmedString } from './scoring.helpers';
 
 const PENDING: ScoringOutput = { isCorrect: null, rawScore: null, requiresManualGrading: true };
 
 function findLevel(levels: readonly RubricLevel[], code: string): RubricLevel | undefined {
-  const normalized = code.trim().toLocaleLowerCase('es');
-  return levels.find((level) => level.code.trim().toLocaleLowerCase('es') === normalized);
+  return levels.find((level) => sameRubricCode(level.code, code));
 }
 
 export const rubricScoredStrategy: ScoringStrategy = {
