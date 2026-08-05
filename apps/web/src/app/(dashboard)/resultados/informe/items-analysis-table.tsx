@@ -26,48 +26,30 @@ import { fetchQuestionAnalysis } from '../detalle/actions';
 // (open/detail/loadingItemId), llama la action y le pasa los datos al panel.
 // ─────────────────────────────────────────────────────────────────────────────
 
-// Umbrales de color para dificultad (p) y discriminación (D). Mismos cortes que
-// usa el backend para los flags, replicados aquí sólo para la codificación visual.
-const DIFFICULTY_LOW = 40;
-const DIFFICULTY_MID = 60;
-const DISCRIMINATION_LOW = 0.2;
-const DISCRIMINATION_MID = 0.3;
+// Umbrales de color para el % de logro. Mismos cortes que usa el backend para los
+// flags, replicados aquí sólo para la codificación visual.
+const ACHIEVEMENT_LOW = 40;
+const ACHIEVEMENT_MID = 60;
 
 const FLAG_META: Record<ItemReportFlag, { label: string; className: string }> = {
   critical: {
     label: 'Crítico',
     className: 'border-transparent bg-destructive/10 text-destructive',
   },
-  low_discrimination: {
-    label: 'Baja discriminación',
-    className: 'border-transparent bg-accent text-accent-foreground',
-  },
-  strong_distractor: {
-    label: 'Distractor potente',
+  dominant_error: {
+    label: 'Error dominante',
     className: 'border-transparent bg-warning/15 text-warning',
   },
-  easy: {
-    label: 'Muy fácil',
-    className: 'border-transparent bg-muted text-muted-foreground',
+  high_achievement: {
+    label: 'Logro alto',
+    className: 'border-transparent bg-success/10 text-success',
   },
 };
 
-function fmtDiscrimination(value: number | null): string {
-  if (value === null || Number.isNaN(value)) return '—';
-  return value.toFixed(2);
-}
-
-function difficultyClass(value: number | null): string {
+function achievementClass(value: number | null): string {
   if (value === null) return 'text-muted-foreground';
-  if (value < DIFFICULTY_LOW) return 'text-destructive font-semibold';
-  if (value < DIFFICULTY_MID) return 'text-warning font-medium';
-  return 'text-success font-medium';
-}
-
-function discriminationClass(value: number | null): string {
-  if (value === null) return 'text-muted-foreground';
-  if (value < DISCRIMINATION_LOW) return 'text-destructive font-semibold';
-  if (value < DISCRIMINATION_MID) return 'text-warning font-medium';
+  if (value < ACHIEVEMENT_LOW) return 'text-destructive font-semibold';
+  if (value < ACHIEVEMENT_MID) return 'text-warning font-medium';
   return 'text-success font-medium';
 }
 
@@ -124,9 +106,9 @@ export function ItemsAnalysisTable({
       <CardHeader>
         <CardTitle className="text-base">Análisis de preguntas</CardTitle>
         <p className="text-sm text-muted-foreground">
-          Dificultad (p): % de logro — bajo = difícil. Discriminación (D): distingue a quienes
-          dominan el contenido — D&nbsp;&lt;&nbsp;0,2 sugiere revisar la pregunta, no el
-          aprendizaje. Haz clic en una pregunta para ver su detalle.
+          % de logro de cada pregunta y alternativa incorrecta más elegida. «Error dominante» marca
+          las preguntas donde el curso se fue en masa por la misma alternativa equivocada. Haz clic
+          en una pregunta para ver su detalle.
         </p>
       </CardHeader>
       <CardContent className="space-y-4">
@@ -137,8 +119,7 @@ export function ItemsAnalysisTable({
                 <TableHead className="w-12">N°</TableHead>
                 <TableHead>Habilidad / contenido</TableHead>
                 <TableHead className="text-center">Clave</TableHead>
-                <TableHead className="text-right">Dificultad</TableHead>
-                <TableHead className="text-right">Discrim.</TableHead>
+                <TableHead className="text-right">% de logro</TableHead>
                 <TableHead className="hidden md:table-cell">Distractor top</TableHead>
                 <TableHead>Alertas</TableHead>
               </TableRow>
@@ -201,13 +182,8 @@ function ItemRow({
         ) : null}
       </TableCell>
       <TableCell className="text-center font-mono text-xs">{item.correctKey ?? '—'}</TableCell>
-      <TableCell className={cn('text-right tabular-nums', difficultyClass(item.difficulty))}>
+      <TableCell className={cn('text-right tabular-nums', achievementClass(item.difficulty))}>
         {item.difficulty === null ? '—' : `${item.difficulty.toFixed(0)}%`}
-      </TableCell>
-      <TableCell
-        className={cn('text-right tabular-nums', discriminationClass(item.discrimination))}
-      >
-        {fmtDiscrimination(item.discrimination)}
       </TableCell>
       <TableCell className="hidden md:table-cell text-sm">
         {item.topDistractorKey ? (
@@ -248,15 +224,11 @@ function FlagsLegend(): JSX.Element {
         logrado.
       </span>
       <span>
-        <strong className="text-foreground">Baja discriminación</strong>: D&nbsp;&lt;&nbsp;0,2 —
-        posible problema de redacción/clave.
+        <strong className="text-foreground">Error dominante</strong>: una alternativa incorrecta
+        atrae más que la clave — misconcepción compartida por el curso.
       </span>
       <span>
-        <strong className="text-foreground">Distractor potente</strong>: una alternativa incorrecta
-        atrae más que la clave.
-      </span>
-      <span>
-        <strong className="text-foreground">Muy fácil</strong>: ≥85% de logro.
+        <strong className="text-foreground">Logro alto</strong>: ≥85% de logro.
       </span>
     </div>
   );

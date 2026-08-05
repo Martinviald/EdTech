@@ -19,7 +19,6 @@ export * from './grading-scales';
 export * from './performance-bands';
 export * from './results-dashboards';
 export * from './item-analysis';
-export * from './instrument-quality';
 export * from './ai-analysis';
 export * from './remedial';
 export * from './benchmarking';

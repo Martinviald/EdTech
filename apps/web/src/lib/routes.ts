@@ -27,7 +27,6 @@ export const ROUTES = {
   evaluacion: (assessmentId: string) => route(`/evaluaciones/${assessmentId}`),
   evaluacionResultados: (assessmentId: string) => route(`/evaluaciones/${assessmentId}/resultados`),
   evaluacionDetalle: (assessmentId: string) => route(`/evaluaciones/${assessmentId}/detalle`),
-  evaluacionCalidad: (assessmentId: string) => route(`/evaluaciones/${assessmentId}/calidad`),
   evaluacionAnalisisIa: (assessmentId: string) =>
     route(`/evaluaciones/${assessmentId}/analisis-ia`),
   evaluacionMaterialRemedial: (assessmentId: string) =>

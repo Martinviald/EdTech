@@ -49,9 +49,7 @@ function baseRecord(overrides: Record<string, unknown> = {}): Record<string, unk
   };
 }
 
-function makeSnapshot(
-  overrides: Partial<ItemInsightSnapshot> = {},
-): ItemInsightSnapshot {
+function makeSnapshot(overrides: Partial<ItemInsightSnapshot> = {}): ItemInsightSnapshot {
   return {
     itemId: 'item-1',
     position: 7,
@@ -70,8 +68,6 @@ function makeSnapshot(
     blankCount: 0,
     correctRate: 28,
     difficulty: 0.28,
-    discrimination: 0.12,
-    pointBiserial: 0.09,
     dominantDistractor: 'D',
     skillName: 'Inferir',
     contentName: 'Comprensión lectora',
@@ -88,12 +84,9 @@ function validOutput(overrides: Partial<ItemInsightOutput> = {}): ItemInsightOut
     performanceSummary: 'Solo el 28% acertó; D concentra el 44%.',
     likelyCause: 'misconception',
     misconception: 'Confunden inferencia con dato literal.',
-    distractorAnalysis: [
-      { key: 'D', interpretation: 'Eligen lo literal, no la inferencia.' },
-    ],
+    distractorAnalysis: [{ key: 'D', interpretation: 'Eligen lo literal, no la inferencia.' }],
     passageInsight: null,
     visualInsight: null,
-    itemQuality: { verdict: 'review', notes: 'Punto-biserial bajo, vigilar.' },
     recommendedActions: ['Modelar inferencias con pistas del texto.'],
     confidence: 0.7,
     caveats: ['Muestra acotada.'],
@@ -103,11 +96,7 @@ function validOutput(overrides: Partial<ItemInsightOutput> = {}): ItemInsightOut
 
 function makeRunner(opts: {
   record?: Record<string, unknown> | null;
-  llmComplete: (
-    system: string,
-    prompt: string,
-    images?: LlmImagePart[],
-  ) => Promise<string>;
+  llmComplete: (system: string, prompt: string, images?: LlmImagePart[]) => Promise<string>;
   buildResult?: () => Promise<ItemInsightBuildResult>;
 }): {
   runner: ItemInsightRunner;
@@ -121,8 +110,7 @@ function makeRunner(opts: {
   const completeMultimodal = jest.fn(opts.llmComplete);
   const llm = { completeMultimodal } as unknown as LlmService;
   const build = jest.fn(
-    opts.buildResult ??
-      (async () => ({ snapshot: makeSnapshot(), images: [] })),
+    opts.buildResult ?? (async () => ({ snapshot: makeSnapshot(), images: [] })),
   );
   const snapshot = { build } as unknown as ItemInsightBuilder;
   const markProcessing = jest.fn().mockResolvedValue(undefined);
@@ -185,9 +173,7 @@ describe('ItemInsightRunner.run', () => {
     const { runner, completeMultimodal } = makeRunner({
       buildResult: async () => ({
         snapshot: makeSnapshot({
-          images: [
-            { url: 'https://x/y.png', mimeType: 'image/png', note: null, source: 'item' },
-          ],
+          images: [{ url: 'https://x/y.png', mimeType: 'image/png', note: null, source: 'item' }],
         }),
         images,
       }),
@@ -281,8 +267,7 @@ describe('ItemInsightRunner.run', () => {
   it('timeout → failed', async () => {
     process.env.AI_ANALYSIS_TIMEOUT_MS = '20';
     const { runner, markCompleted, markFailed } = makeRunner({
-      llmComplete: () =>
-        new Promise((resolve) => setTimeout(() => resolve('tarde'), 200)),
+      llmComplete: () => new Promise((resolve) => setTimeout(() => resolve('tarde'), 200)),
     });
     await runner.run('a-1', 'org-1');
     delete process.env.AI_ANALYSIS_TIMEOUT_MS;

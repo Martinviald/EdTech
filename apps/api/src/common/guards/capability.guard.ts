@@ -22,10 +22,9 @@ import type { JwtPayload } from '../../auth/jwt-payload.types';
  * por alumno, no existen para nadie. Eximir al platform_admin solo le mostraría una
  * matriz vacía haciéndola pasar por real.
  *
- * Por qué un guard y no dejar que degrade solo: sin `responses`, `instrument-quality`
- * no muestra un vacío — **afirma mala calidad** (KR-20 en warning + flags `misaligned`
- * inflados sobre ítems sin tags), y `ai-analysis` le pasa al LLM un snapshot sin
- * psicometría y sin ninguna señal de "no aplica". Degradar en silencio miente.
+ * Por qué un guard y no dejar que degrade solo: sin `responses`, `ai-analysis` le pasa
+ * al LLM un snapshot mudo, sin ninguna señal de "no aplica", y el modelo razona igual
+ * —interpreta la ausencia de dato como si fuera un dato—. Degradar en silencio miente.
  *
  * Responde 409 con un código legible por máquina para que la web pinte un estado
  * vacío específico en vez de un error genérico. Mismo espíritu que el

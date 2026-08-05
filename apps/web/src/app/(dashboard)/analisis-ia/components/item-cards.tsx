@@ -3,21 +3,12 @@ import type { ItemPracticeCard, ItemDiagnosisCard } from '@soe/types';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { EmptyState } from '@/components/shared';
-import { formatMetric, causeLabel } from './format';
+import { formatAchievement, causeLabel } from './format';
 
-function MetricChips({
-  difficulty,
-  discrimination,
-}: {
-  difficulty: number | null;
-  discrimination?: number | null;
-}) {
+function MetricChips({ difficulty }: { difficulty: number | null }) {
   return (
     <div className="flex flex-wrap gap-1.5">
-      <Badge variant="outline">p {formatMetric(difficulty)}</Badge>
-      {discrimination !== undefined ? (
-        <Badge variant="outline">D {formatMetric(discrimination)}</Badge>
-      ) : null}
+      <Badge variant="outline">{formatAchievement(difficulty)} de logro</Badge>
     </div>
   );
 }
@@ -42,15 +33,10 @@ export function TopItemsCard({ items }: { items: ItemPracticeCard[] }) {
                 <div className="flex items-center gap-2">
                   <Badge variant="success">Pregunta {item.position}</Badge>
                   {item.skillName ? (
-                    <span className="text-sm font-medium text-foreground">
-                      {item.skillName}
-                    </span>
+                    <span className="text-sm font-medium text-foreground">{item.skillName}</span>
                   ) : null}
                 </div>
-                <MetricChips
-                  difficulty={item.difficulty}
-                  discrimination={item.discrimination}
-                />
+                <MetricChips difficulty={item.difficulty} />
               </div>
               {item.whatWorked.length > 0 ? (
                 <div className="mt-3">
@@ -98,9 +84,7 @@ export function BottomItemsCard({ items }: { items: ItemDiagnosisCard[] }) {
                 <div className="flex items-center gap-2">
                   <Badge variant="destructive">Pregunta {item.position}</Badge>
                   {item.skillName ? (
-                    <span className="text-sm font-medium text-foreground">
-                      {item.skillName}
-                    </span>
+                    <span className="text-sm font-medium text-foreground">{item.skillName}</span>
                   ) : null}
                 </div>
                 <div className="flex flex-wrap items-center gap-1.5">

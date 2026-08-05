@@ -12,7 +12,6 @@ import {
   instruments,
   itemTaxonomyTags,
   items,
-  responses,
   skillResults,
   studentEnrollments,
   students,
@@ -100,12 +99,11 @@ const PERFORMANCE_LEVELS_ORDER: readonly PerformanceLevel[] = [
 // Niveles que cuentan como "en riesgo" para el foco de intervención.
 const AT_RISK_LEVELS: readonly PerformanceLevel[] = ['insufficient', 'elementary'];
 
-// Umbrales de los flags psicométricos. No hardcodean instrumento: son convención
-// psicométrica estándar aplicable a cualquier prueba de selección múltiple.
-const DIFFICULTY_CRITICAL = 40; // p < 40% → contenido no logrado
-const DIFFICULTY_EASY = 85; // p >= 85% → ítem muy fácil
-const DISCRIMINATION_LOW = 0.2; // D < 0.2 → pregunta poco discriminativa
-const DISCRIMINATION_GROUP_FRACTION = 0.27; // grupos alto/bajo (Kelley)
+// Umbrales de los flags de un ítem. Describen el LOGRO del curso, no la calidad
+// del instrumento (docs/diseno-limpieza-calidad-instrumento.md). No hardcodean
+// instrumento: aplican a cualquier prueba expresada en % de logro.
+const ACHIEVEMENT_CRITICAL = 40; // < 40% de logro → contenido no logrado
+const ACHIEVEMENT_HIGH = 85; // >= 85% de logro → contenido logrado por casi todos
 
 type ScopeResult = { scopeAll: boolean; classGroupIds: string[] };
 
@@ -162,8 +160,8 @@ export class AssessmentReportService {
       // Dos resoluciones del MISMO scope, para las dos capas del informe (mismo
       // patrón y misma semántica que `ItemAnalysisService.getMatrix`):
       //  · classGroupFilter → la capa agregable (read-model de cohorte, grano curso).
-      //  · studentFilter    → lo irreducible sobre `responses` (la discriminación
-      //    necesita el puntaje de cada alumno para partir la cohorte en 27%/27%).
+      //  · studentFilter    → lo irreducible por alumno (niveles, alumnos en foco),
+      //    que necesita el registro individual y no se deriva de conteos por curso.
       // `null` significa lo mismo en ambas: scopeAll sin filtro.
       const classGroupFilter = this.resolveAccessibleClassGroupIds(scope, query.classGroupId);
       const studentFilter = await this.resolveAccessibleStudentIds(
@@ -251,7 +249,6 @@ export class AssessmentReportService {
         query.assessmentId,
         itemColumns,
         itemIds,
-        evaluated,
         classGroupFilter,
       );
       const skills = await this.buildSkills(
@@ -592,7 +589,7 @@ export class AssessmentReportService {
   }
 
   // ───────────────────────────────────────────────────────────────────────────
-  // Análisis psicométrico de ítems
+  // Análisis de ítems (% de logro, distractores y flags de aprendizaje)
   // ───────────────────────────────────────────────────────────────────────────
 
   private async buildItemAnalysis(
@@ -600,7 +597,6 @@ export class AssessmentReportService {
     assessmentId: string,
     itemColumns: ItemColumn[],
     itemIds: string[],
-    evaluated: EvaluatedStudent[],
     classGroupFilter: string[] | null,
   ): Promise<AssessmentReportItemRow[]> {
     if (itemIds.length === 0) return [];
@@ -611,27 +607,6 @@ export class AssessmentReportService {
     // que este informe deja de ser el tercer lugar que hace su propio `GROUP BY`
     // sobre `responses` — y funciona con las dos granularidades sin ramificar.
     const stats = await this.loadItemCohortStats(db, assessmentId, itemIds, classGroupFilter);
-
-    // Discriminación: grupos alto/bajo (27%) por puntaje total. Es lo ÚNICO de esta
-    // sección que sigue en `responses`: partir la cohorte en 27% superior/inferior
-    // exige el puntaje de cada alumno, y eso no se deriva de conteos por curso. Con
-    // datos agregados `evaluated` no trae `percentage` → `sorted` vacío → groupSize 0
-    // → `discrimination: null` sin disparar ninguna query (y sin flag de baja
-    // discriminación, que sería un falso positivo). Ver `meta.hasItemLevelData`.
-    const sorted = [...evaluated]
-      .filter((e) => e.percentage !== null)
-      .sort((a, b) => (b.percentage ?? 0) - (a.percentage ?? 0));
-    const groupSize = Math.floor(sorted.length * DISCRIMINATION_GROUP_FRACTION);
-    let topCorrect = new Map<string, { correct: number; total: number }>();
-    let bottomCorrect = new Map<string, { correct: number; total: number }>();
-    if (groupSize >= 1) {
-      const topIds = sorted.slice(0, groupSize).map((e) => e.studentId);
-      const bottomIds = sorted.slice(-groupSize).map((e) => e.studentId);
-      [topCorrect, bottomCorrect] = await Promise.all([
-        this.loadGroupCorrectness(db, assessmentId, itemIds, topIds),
-        this.loadGroupCorrectness(db, assessmentId, itemIds, bottomIds),
-      ]);
-    }
 
     return itemColumns.map((col) => {
       const s = stats.get(col.itemId);
@@ -648,13 +623,6 @@ export class AssessmentReportService {
       const correctCount = s?.correctCount ?? 0;
       const difficulty = totalResponses > 0 ? (correctCount / totalResponses) * 100 : null;
 
-      const top = topCorrect.get(col.itemId);
-      const bottom = bottomCorrect.get(col.itemId);
-      let discrimination: number | null = null;
-      if (top && bottom && top.total > 0 && bottom.total > 0) {
-        discrimination = top.correct / top.total - bottom.correct / bottom.total;
-      }
-
       const { key: topDistractorKey, count: topDistractorCount } = this.pickTopDistractor(
         col,
         answerCounts,
@@ -664,7 +632,6 @@ export class AssessmentReportService {
 
       const flags = this.deriveItemFlags({
         difficulty,
-        discrimination,
         correctCount,
         topDistractorCount,
       });
@@ -679,7 +646,6 @@ export class AssessmentReportService {
         blankCount,
         totalResponses,
         difficulty,
-        discrimination,
         topDistractorKey,
         topDistractorRate,
         flags,
@@ -694,7 +660,7 @@ export class AssessmentReportService {
    * escritor del read-model (`result-aggregator.ts`): `content.alternatives` no vacío.
    * En un ítem de desarrollo la clave del bucket no es una alternativa marcada sino la
    * categoría por puntaje ('RC'|'RPC'|'RI'), así que sin este corte 'RI' pasaría por
-   * "distractor dominante" y dispararía `strong_distractor` en preguntas que no tienen
+   * "distractor dominante" y dispararía `dominant_error` en preguntas que no tienen
    * distractores. Preserva exacto el comportamiento anterior: sobre `responses`, un
    * ítem de desarrollo daba `answer = null` y nunca entraba al conteo de distractores.
    *
@@ -723,24 +689,21 @@ export class AssessmentReportService {
 
   private deriveItemFlags(input: {
     difficulty: number | null;
-    discrimination: number | null;
     correctCount: number;
     topDistractorCount: number;
   }): ItemReportFlag[] {
     const flags: ItemReportFlag[] = [];
-    if (input.difficulty !== null && input.difficulty < DIFFICULTY_CRITICAL) {
+    if (input.difficulty !== null && input.difficulty < ACHIEVEMENT_CRITICAL) {
       flags.push('critical');
     }
-    if (input.difficulty !== null && input.difficulty >= DIFFICULTY_EASY) {
-      flags.push('easy');
+    if (input.difficulty !== null && input.difficulty >= ACHIEVEMENT_HIGH) {
+      flags.push('high_achievement');
     }
-    if (input.discrimination !== null && input.discrimination < DISCRIMINATION_LOW) {
-      flags.push('low_discrimination');
-    }
-    // Distractor potente: una alternativa incorrecta atrae a más alumnos que la
-    // clave correcta. Señal fuerte de error conceptual extendido o ítem confuso.
+    // Error dominante: una alternativa incorrecta atrae a más alumnos que la clave.
+    // Es una misconcepción COMPARTIDA por el curso —el hallazgo más accionable del
+    // informe—, no un defecto del distractor.
     if (input.topDistractorCount > input.correctCount && input.correctCount >= 0) {
-      flags.push('strong_distractor');
+      flags.push('dominant_error');
     }
     return flags;
   }
@@ -921,20 +884,6 @@ export class AssessmentReportService {
         type: 'reteach_skill',
         priority: skill.performanceLevel === 'insufficient' ? 'high' : 'medium',
         message: `Reforzar "${skill.nodeName}" (${(skill.averageAchievement ?? 0).toFixed(0)}% de logro): es una de las brechas prioritarias de esta evaluación.`,
-      });
-    }
-
-    // 2. Revisar ítems con baja discriminación (posible problema de la pregunta).
-    const flagged = items.filter((i) => i.flags.includes('low_discrimination'));
-    if (flagged.length > 0) {
-      const positions = flagged
-        .slice(0, 5)
-        .map((i) => `N°${i.position}`)
-        .join(', ');
-      recs.push({
-        type: 'review_item',
-        priority: 'medium',
-        message: `Revisar la redacción/clave de ${flagged.length} pregunta(s) con baja discriminación (${positions}${flagged.length > 5 ? '…' : ''}): no distinguen bien a quienes dominan el contenido.`,
       });
     }
 
@@ -1232,38 +1181,6 @@ export class AssessmentReportService {
     return result;
   }
 
-  /** Aciertos por ítem dentro de un grupo de alumnos (para discriminación). */
-  private async loadGroupCorrectness(
-    db: Database,
-    assessmentId: string,
-    itemIds: string[],
-    studentIds: string[],
-  ): Promise<Map<string, { correct: number; total: number }>> {
-    const result = new Map<string, { correct: number; total: number }>();
-    if (itemIds.length === 0 || studentIds.length === 0) return result;
-
-    const rows = await db
-      .select({
-        itemId: responses.itemId,
-        total: sql<number>`count(*)::int`,
-        correct: sql<number>`sum(case when ${responses.isCorrect} = true then 1 else 0 end)::int`,
-      })
-      .from(responses)
-      .where(
-        and(
-          eq(responses.assessmentId, assessmentId),
-          inArray(responses.itemId, itemIds),
-          inArray(responses.studentId, studentIds),
-        ),
-      )
-      .groupBy(responses.itemId);
-
-    for (const r of rows) {
-      result.set(r.itemId, { correct: Number(r.correct), total: Number(r.total) });
-    }
-    return result;
-  }
-
   /** Habilidad de menor logro por alumno (1 query, dedupe en JS). */
   private async loadWeakestSkillPerStudent(
     db: Database,
@@ -1466,8 +1383,8 @@ export class AssessmentReportService {
 
   /**
    * studentIds visibles combinando scope + filtro por curso. `null` = scopeAll sin
-   * filtro. Sólo para lo irreducible sobre `responses` (la discriminación); la capa
-   * agregable usa `resolveAccessibleClassGroupIds`.
+   * filtro. Sólo para lo irreducible por alumno; la capa agregable usa
+   * `resolveAccessibleClassGroupIds`.
    */
   private async resolveAccessibleStudentIds(
     db: Database,

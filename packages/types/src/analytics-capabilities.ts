@@ -7,9 +7,8 @@
  * El problema que resuelve: una evaluación cargada desde un informe oficial DIA no
  * tiene respuestas alumno×pregunta. Los flujos que las exigen no deben "degradar a
  * vacío" — deben cerrarse explícitamente. Degradar en silencio no es neutro: sin
- * `responses`, `instrument-quality` no muestra un vacío, **afirma mala calidad**
- * (KR-20 en warning + flags `misaligned` inflados), y `ai-analysis` le entrega al
- * LLM un snapshot sin psicometría y sin ninguna señal de "no aplica".
+ * `responses`, `ai-analysis` le entrega al LLM un snapshot mudo y sin ninguna señal
+ * de "no aplica", y el modelo interpreta la ausencia como si fuera un dato.
  *
  * ⚠️ REGLA DE ESTA LISTA: una capacidad se declara sólo si algo la APLICA hoy. Una
  * capacidad declarada y no aplicada es peor que no declararla, porque promete una
@@ -20,9 +19,8 @@
  *
  *  1. `@RequireCapability` + `CapabilityGuard` → 409. Es para rutas cuya respuesta
  *     COMPLETA depende de la capacidad. Sirve donde degradar mentiría: sin
- *     `responses`, `instrument-quality` no muestra un vacío sino que AFIRMA mala
- *     calidad, y `ai-analysis` le da al LLM un snapshot sin psicometría ni señal de
- *     "no aplica" (§2.8 del plan).
+ *     `responses`, `ai-analysis` le da al LLM un snapshot mudo, sin señal de "no
+ *     aplica", y el modelo razona igual sobre el vacío (§2.8 del plan).
  *  2. `meta.capabilities` en el payload del informe → la UI colapsa la sección con el
  *     motivo. Es para rutas MIXTAS, que sirven varias capacidades a la vez. Ahí el
  *     guard no sirve: cierra la ruta entera y de paso niega las capacidades que SÍ
@@ -75,11 +73,6 @@ export const ANALYTICS_CAPABILITIES = [
    */
   'student_detail',
   /**
-   * KR-20, punto-biserial, discriminación. Requieren la ScoreMatrix alumno×ítem.
-   * Aplicada por GUARD: `@RequireCapability('psychometrics')` en `instrument-quality`.
-   */
-  'psychometrics',
-  /**
    * Cargar hojas de respuesta contra la evaluación.
    * Aplicada: `answer-sheets.service.confirm()` responde 409 con este código.
    */
@@ -109,6 +102,14 @@ export type AnalyticsCapability = (typeof ANALYTICS_CAPABILITIES)[number];
  *   `generate-panel.tsx` cambia el método por defecto y explica por qué. Si se
  *   quiere el motivo exacto ("es un informe oficial") en vez del genérico, el
  *   camino es exponerlo por payload, como hace `detalle`.
+ *
+ * · `psychometrics` (KR-20, punto-biserial, discriminación). Retirada 2026-08-04 con
+ *   el módulo `instrument-quality` completo, por decisión de PRODUCTO, no de datos:
+ *   los instrumentos que procesa la plataforma son estándar y validados por un
+ *   tercero (DIA, SIMCE, PAES, Cambridge) y no se juzgan. La capacidad protegía el
+ *   caso "informe oficial sin `responses`", pero el problema de fondo era el otro:
+ *   emitir un veredicto de calidad sobre un instrumento nacional a partir de ~30
+ *   respuestas. Ver docs/diseno-limpieza-calidad-instrumento.md.
  */
 
 /**
@@ -167,8 +168,6 @@ export function capabilityUnavailableMessage(capability: AnalyticsCapability): s
       'Esta evaluación se cargó desde un informe oficial, que entrega resultados agregados por curso y no las respuestas de cada estudiante.',
     student_detail:
       'Esta evaluación se cargó desde un informe oficial y no tiene el detalle de respuestas de cada estudiante.',
-    psychometrics:
-      'El análisis de calidad del instrumento necesita las respuestas de cada estudiante, que un informe oficial no entrega.',
     answer_sheet_import:
       'Esta evaluación se cargó desde un informe oficial. Para cargar hojas de respuesta, cree una evaluación nueva.',
     ai_item_insight:

@@ -13,7 +13,7 @@ import {
 
 describe('ASSISTANT_SYSTEM_PROMPT — guardrails (§4)', () => {
   it('está versionado y la versión es estable', () => {
-    expect(ASSISTANT_PROMPT_VERSION).toBe('e21-assistant-v2');
+    expect(ASSISTANT_PROMPT_VERSION).toBe('e21-assistant-v3');
   });
 
   it('prohíbe inventar o recalcular cifras (anti-alucinación)', () => {

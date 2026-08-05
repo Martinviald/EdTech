@@ -5,8 +5,8 @@ import type { LlmImagePart } from '../llm/llm.types';
 /**
  * Puerto del ensamblador de snapshot determinista POR-PREGUNTA (F2 S2 — H20.8).
  *
- * Reúsa `ItemAnalysisService.getQuestionAnalysis` + psicometría (KR-20 /
- * punto-biserial) + pasaje + imágenes (base64, best-effort). El runner lo inyecta
+ * Reúsa `ItemAnalysisService.getQuestionAnalysis` + el % de logro del informe +
+ * pasaje + imágenes (base64, best-effort). El runner lo inyecta
  * por token. El snapshot NUNCA contiene PII (sin nombres ni RUT): solo el
  * contenido del ítem + agregados.
  */

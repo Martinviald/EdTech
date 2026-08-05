@@ -2,7 +2,6 @@ import { Sparkles } from 'lucide-react';
 import type {
   AiAnalysisModel,
   AssessmentInsightsOutput,
-  InstrumentQualityResponse,
   MatrixQuestionColumn,
   UserRole,
 } from '@soe/types';
@@ -13,9 +12,8 @@ import { ExecutiveSummary } from './executive-summary';
 import { TopItemsCard, BottomItemsCard } from './item-cards';
 import { SkillGapsCard } from './skill-gaps';
 import { RecommendationsCard } from './recommendations';
-import { ReliabilityPanel } from './reliability-panel';
+import { ConfidencePanel } from './confidence-panel';
 import { ReportActions } from './report-actions';
-import { QualityPanel } from './quality-panel';
 import { ItemInsightSection } from './item-insight-section';
 import { AiExportButton } from './ai-export-button';
 
@@ -25,8 +23,6 @@ interface AnalysisReportProps {
   activeRole: UserRole;
   assessmentId: string;
   classGroupId?: string;
-  /** Calidad determinista del instrumento (H20.9). null si no se pudo cargar. */
-  quality: InstrumentQualityResponse | null;
   /** Columnas de la matriz (item-analysis): mapa posición → itemId del drill-down. */
   questions: MatrixQuestionColumn[];
   /** Nombre de la evaluación/instrumento, para el nombre del archivo exportado. */
@@ -55,7 +51,6 @@ export function AnalysisReport({
   activeRole,
   assessmentId,
   classGroupId,
-  quality,
   questions,
   exportTitle,
   basePath = ROUTES.analisisIa,
@@ -78,7 +73,7 @@ export function AnalysisReport({
           ) : null}
         </div>
         <div className="flex flex-col items-stretch gap-2 sm:items-end">
-          <AiExportButton output={output} quality={quality} title={exportTitle} />
+          <AiExportButton output={output} title={exportTitle} />
           <ReportActions
             assessmentId={assessmentId}
             classGroupId={classGroupId}
@@ -121,14 +116,7 @@ export function AnalysisReport({
 
       <RecommendationsCard recommendations={output.recommendations} activeRole={activeRole} />
 
-      {/* Calidad determinista del instrumento (H20.9) */}
-      {quality ? <QualityPanel quality={quality} /> : null}
-
-      <ReliabilityPanel
-        reliability={output.reliability}
-        confidence={output.confidence}
-        caveats={output.caveats}
-      />
+      <ConfidencePanel confidence={output.confidence} caveats={output.caveats} />
     </div>
   );
 }

@@ -166,7 +166,7 @@ export function ReportBody({
         classGroupId={classGroupId}
       />
 
-      {/* 5. Análisis psicométrico de ítems (T2-17: clickeable → panel de detalle) */}
+      {/* 5. Análisis de preguntas (T2-17: clickeable → panel de detalle) */}
       <ItemsAnalysisTable
         items={report.items}
         assessmentId={assessmentId}

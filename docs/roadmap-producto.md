@@ -75,10 +75,10 @@ buscar. Si un feature solo se ve entrando a una vista, está a medio construir.
 
 | # | Ítem | Prioridad | Estado | Depende de |
 |---|------|-----------|--------|-----------|
-| 1 | Quitar evaluación de **calidad de instrumento / discriminación de ítems** | **P0** | 🔲 Pendiente | — |
-| 1C | Quitar **agregación de analítica sobre instrumentos no comparables** (% logro global, clasificación global de niveles) | **P0** | 🔲 Pendiente | — |
-| 2 | Dashboard **Panorama Pedagógico** inteligente (banners/CTAs, % logro ×nivel ×asignatura ×evaluación) | **P1** | 🔲 Pendiente | #1, #1C |
-| 2B | **Vista 360 del estudiante** más rica (por asignatura, movimiento por periodos comparables) + alertas proactivas — [diseño](./diseno-vista-360-estudiante.md) | **P1** | 🚧 Diseño | #1C, #3 |
+| 1 | Quitar evaluación de **calidad de instrumento / discriminación de ítems** — [diseño](./diseno-limpieza-calidad-instrumento.md) | **P0** | ✅ Hecho | — |
+| 1C | Quitar **agregación de analítica sobre instrumentos no comparables** (% logro global, clasificación global de niveles) — [diseño](./diseno-panorama-comparable.md) | **P0** | ✅ Hecho | — |
+| 2 | Dashboard **Panorama Pedagógico** inteligente (banners/CTAs, % logro ×nivel ×asignatura ×evaluación) — [diseño](./diseno-panorama-comparable.md) | **P1** | ✅ Hecho | #1, #1C |
+| 2B | **Vista 360 del estudiante** más rica (por asignatura, movimiento por periodos comparables) + alertas proactivas — [diseño](./diseno-vista-360-estudiante.md) | **P1** | ✅ Hecho | #1C, #3 |
 | 3 | **Análisis IA de resultados** multi-paso + **proactivo** (alertas/acciones, sin calidad de instrumento) | **P1** | 🔲 Pendiente | #1 |
 | 3B | **Motor proactivo (espina):** disparo por eventos + bandeja de insights/alertas/acciones + entrega push + seguimiento | **P1** | 🔲 Pendiente | #3 |
 | 4 | **Comparación entre años/instrumentos** fácil + explicada por IA potente | **P1** | 🔲 Pendiente | #1, #3 |

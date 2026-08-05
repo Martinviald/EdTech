@@ -26,6 +26,7 @@ import {
 } from '@soe/types';
 import type { JwtPayload } from '../auth/jwt-payload.types';
 import { InjectDb, type Database } from '../database/database.types';
+import { promptVersionFor } from './prompt-versions';
 
 /**
  * Minutos tras los cuales un análisis en `processing` se considera obsoleto
@@ -66,7 +67,7 @@ export class AiAnalysisService {
    * Crea (o reutiliza desde caché) un registro de análisis.
    *
    * - Calcula un `inputHash` determinista de {assessmentId, analysisType,
-   *   audience, classGroupId}.
+   *   audience, classGroupId, promptVersion}.
    * - Si existe una fila `completed` con ese hash y NO `force` → la devuelve
    *   (caché, `fromCache: true`).
    * - Lazy stale recovery: una fila `processing` con `startedAt` más viejo que
@@ -522,6 +523,11 @@ export class AiAnalysisService {
   /**
    * Hash determinista del scope de una comparación. El orden base→comparación
    * importa (determina la dirección del diagnóstico), así que NO se ordena el par.
+   *
+   * Incluye `promptVersion` por la misma razón que `computeInputHash`: el prompt es
+   * parte del input real del análisis. La comparación tiene su propio hash porque su
+   * scope son DOS evaluaciones, no una — y por eso mismo es fácil que un arreglo
+   * hecho en `computeInputHash` no llegue hasta acá.
    */
   private computeComparisonHash(input: {
     baseAssessmentId: string;
@@ -533,6 +539,7 @@ export class AiAnalysisService {
       audience: input.audience,
       baseAssessmentId: input.baseAssessmentId,
       comparisonAssessmentId: input.comparisonAssessmentId,
+      promptVersion: promptVersionFor(INSTRUMENT_COMPARISON_ANALYSIS_TYPE),
     });
     return createHash('sha256').update(canonical).digest('hex');
   }
@@ -577,11 +584,18 @@ export class AiAnalysisService {
     // Orden de claves fijo → hash determinista e independiente del insertion order.
     // `itemId` solo entra al canonical para análisis por-pregunta (H20.8); para los
     // demás tipos el canonical NO cambia (hash de S1 estable).
+    //
+    // `promptVersion` entra al canonical porque el prompt es parte del input real del
+    // análisis: si cambia, el resultado cacheado ya no corresponde a lo que el sistema
+    // produciría hoy. Sin esto, reescribir un prompt no invalida nada y toda evaluación
+    // ya analizada sigue devolviendo la salida vieja
+    // (docs/diseno-limpieza-calidad-instrumento.md §3.1).
     const canonical = JSON.stringify({
       assessmentId: input.assessmentId,
       analysisType: input.analysisType,
       audience: input.audience,
       classGroupId: input.classGroupId,
+      promptVersion: promptVersionFor(input.analysisType),
       ...(input.itemId !== undefined ? { itemId: input.itemId } : {}),
     });
     return createHash('sha256').update(canonical).digest('hex');
