@@ -48,14 +48,16 @@ export class GetAssessmentReportTool implements AssistantTool {
   readonly definition: LlmToolDefinition = {
     name: 'get_assessment_report',
     description:
-      'Devuelve el informe psicométrico consolidado de una evaluación: síntesis ' +
+      'Devuelve el informe consolidado de resultados de una evaluación: síntesis ' +
       'ejecutiva (logro, aprobación, cobertura), distribución por nivel de ' +
       'desempeño, comparativa por curso, fortalezas y brechas por habilidad, ' +
-      'análisis de ítems (dificultad, discriminación, distractor dominante, ' +
-      'flags como critical/low_discrimination/strong_distractor/easy) y ' +
-      'recomendaciones accionables. Requiere assessmentId; opcionalmente acota a ' +
-      'un curso con classGroupId. Los IDs se obtienen de list_filter_options o ' +
-      'get_dashboard_*. No expone nombres ni RUT de alumnos.',
+      'análisis de ítems (% de logro, distractor dominante, flags como ' +
+      'critical/dominant_error/high_achievement) y recomendaciones accionables. ' +
+      'Los flags describen el APRENDIZAJE del curso, no la calidad del ' +
+      'instrumento: son pruebas estandarizadas y validadas y no se juzgan. ' +
+      'Requiere assessmentId; opcionalmente acota a un curso con classGroupId. ' +
+      'Los IDs se obtienen de list_filter_options o get_dashboard_*. No expone ' +
+      'nombres ni RUT de alumnos.',
     inputSchema: {
       type: 'object',
       properties: {
