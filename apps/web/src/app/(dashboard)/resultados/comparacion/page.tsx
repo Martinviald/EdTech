@@ -16,6 +16,7 @@ import {
 } from '@/components/shared';
 import { DashboardFilterBar } from '../components/dashboard-filter-bar';
 import { parseDashboardFilters, type DashboardFilterValues } from '../components/dashboard-filters';
+import { ComparabilityNotice } from '../components/comparability-notice';
 import { GenerationalChart } from '../components/charts/generational-chart';
 import { GenerationalDistributionChart } from '../components/charts/generational-distribution-chart';
 import { ExportViewButton } from '../components/charts/export-view-button';
@@ -61,6 +62,11 @@ function buildGenerationalQuery(filters: DashboardFilterValues): string | null {
   if (subjectId) qs.set('subjectId', subjectId);
   const instrumentType = filters.instrumentType?.[0];
   if (instrumentType) qs.set('instrumentType', instrumentType);
+  // El momento es parte de la clave de familia: sin él la serie puede terminar
+  // comparando el Cierre de un año contra el Diagnóstico del anterior (#1C / D7).
+  const applicationPeriod = filters.applicationPeriod?.[0];
+  if (applicationPeriod) qs.set('applicationPeriod', applicationPeriod);
+  if (filters.instrumentId) qs.set('instrumentId', filters.instrumentId);
   return `?${qs.toString()}`;
 }
 
@@ -202,6 +208,8 @@ async function ComparacionSection({
 
   return (
     <div className="space-y-6">
+      <ComparabilityNotice comparability={data.comparability} />
+
       {latest && previous ? (
         <section className="grid grid-cols-1 gap-4 sm:grid-cols-3">
           <MetricComparison

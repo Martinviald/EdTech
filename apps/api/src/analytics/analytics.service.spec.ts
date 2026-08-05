@@ -92,6 +92,28 @@ const CLASS_GROUP_ID = 'dddddddd-dddd-dddd-dddd-dddddddddddd';
 // generational()  (H6.3)
 // ──────────────────────────────────────────────────────────────────────────────
 
+/**
+ * Fila de `resolveGenerationalComparability`: los instrumentos que participan de la
+ * serie. Una comparación generacional es legítima cuando todos pertenecen a la misma
+ * familia (mismo tipo/asignatura/nivel/momento, distinto año).
+ */
+function seriesInstrument(
+  instrumentId: string,
+  year: number,
+  overrides: Record<string, unknown> = {},
+) {
+  return {
+    assessmentId: `a-${instrumentId}`,
+    instrumentId,
+    instrumentType: 'dia',
+    subjectId: 's1',
+    gradeId: 'g1',
+    applicationPeriod: 'diagnostico',
+    year,
+    ...overrides,
+  };
+}
+
 describe('AnalyticsService.generational', () => {
   it('arma la serie ordenada por año con múltiples períodos', async () => {
     const db = makeDb([
@@ -99,6 +121,8 @@ describe('AnalyticsService.generational', () => {
       [{ name: '3° Básico' }],
       // resolveScopePassingGrade → grading scale aplicable
       [{ passingGrade: '4.00' }],
+      // resolveGenerationalComparability → instrumentos de la serie
+      [seriesInstrument('i-2024', 2024), seriesInstrument('i-2025', 2025)],
       // generationalSeriesFromResults → filas por año
       [
         {
@@ -146,9 +170,73 @@ describe('AnalyticsService.generational', () => {
     expect(insuf.percentage).toBe(40);
   });
 
+  // ── #1C / D7: la serie puede estar comparando cosas distintas ─────────────
+  // El bug que esto detecta: sin acotar el momento, la comparación generacional
+  // enfrenta el Cierre de un año contra el Diagnóstico del anterior.
+  it('marca como no comparable una serie que mezcla momentos distintos', async () => {
+    const db = makeDb([
+      [{ name: '3° Básico' }], // meta
+      // instrumentos de la serie: mismo tipo/asignatura/nivel pero DISTINTO momento
+      // y distinto año → ni familia ni serie de momentos: mixed.
+      [
+        seriesInstrument('i-2025', 2025, { applicationPeriod: 'cierre' }),
+        seriesInstrument('i-2024', 2024, { applicationPeriod: 'diagnostico' }),
+      ],
+      [{ passingGrade: '4.00' }],
+      [
+        {
+          academicYearId: 'ay-2024',
+          year: 2024,
+          avgPct: '50.00',
+          studentsCount: 10,
+          totalGraded: 10,
+          passingCount: 5,
+        },
+      ],
+      [],
+    ]);
+    const svc = makeService(db);
+
+    const res = await svc.generational(makeUser(), { gradeId: GRADE_ID });
+
+    expect(res.comparability.kind).toBe('mixed');
+    expect(res.comparability.aggregatable).toBe(false);
+    expect(res.comparability.reason).not.toBeNull();
+  });
+
+  it('acotar el momento vuelve la serie una familia comparable', async () => {
+    const db = makeDb([
+      [{ name: '3° Básico' }],
+      [seriesInstrument('i-2025', 2025), seriesInstrument('i-2024', 2024)],
+      [{ passingGrade: '4.00' }],
+      [
+        {
+          academicYearId: 'ay-2024',
+          year: 2024,
+          avgPct: '50.00',
+          studentsCount: 10,
+          totalGraded: 10,
+          passingCount: 5,
+        },
+      ],
+      [],
+    ]);
+    const svc = makeService(db);
+
+    const res = await svc.generational(makeUser(), {
+      gradeId: GRADE_ID,
+      applicationPeriod: 'diagnostico',
+    });
+
+    expect(res.comparability.kind).toBe('instrument_family');
+    expect(res.comparability.familyKey).not.toBeNull();
+  });
+
   it('devuelve un único punto cuando sólo existe un período (válido)', async () => {
     const db = makeDb([
       [{ name: '4° Básico' }], // meta
+      // resolveGenerationalComparability → un solo instrumento
+      [seriesInstrument('i-2025', 2025)],
       [{ passingGrade: '4.00' }], // resolveScopePassingGrade
       [
         {
@@ -170,9 +258,7 @@ describe('AnalyticsService.generational', () => {
     expect(res.series[0].averageAchievement).toBe(55);
     // Sin filas de distribución → buckets en cero pero presentes (4 niveles).
     expect(res.series[0].performanceDistribution).toHaveLength(4);
-    expect(
-      res.series[0].performanceDistribution.every((d) => d.count === 0),
-    ).toBe(true);
+    expect(res.series[0].performanceDistribution.every((d) => d.count === 0)).toBe(true);
   });
 
   it('devuelve serie vacía cuando no hay datos para el grade', async () => {
@@ -192,6 +278,8 @@ describe('AnalyticsService.generational', () => {
     const db = makeDb([
       [{ name: '3° Básico' }], // grade
       [{ name: 'Lectura literal' }], // node (resolveGenerationalMeta consulta nodo)
+      // resolveGenerationalComparability → instrumentos de la serie
+      [seriesInstrument('i-2025', 2025)],
       // generationalSeriesFromSkills → filas
       [
         {

@@ -14,6 +14,7 @@ import {
   type DashboardFilterValues,
 } from '../components/dashboard-filters';
 import { dashboardFiltersToAssistantRefs } from '../components/assistant-context';
+import { ComparabilityNotice } from '../components/comparability-notice';
 import { SkillsBreakdown } from '../components/skills-breakdown';
 import { getDashboardFilters } from '../data';
 import { getDashboardSkills } from './data';
@@ -114,10 +115,13 @@ async function SkillsSection({
   }
 
   return (
-    <SkillsBreakdown
-      skills={skills}
-      filters={toScalarFilters(filters)}
-      assessmentId={assessmentId}
-    />
+    <>
+      <ComparabilityNotice comparability={skillsResponse.comparability} className="mb-4" />
+      <SkillsBreakdown
+        skills={skills}
+        filters={toScalarFilters(filters)}
+        assessmentId={assessmentId}
+      />
+    </>
   );
 }

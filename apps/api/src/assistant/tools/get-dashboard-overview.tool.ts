@@ -9,13 +9,13 @@ import type { LlmToolDefinition } from '../../llm/llm.types';
 import { DashboardsService } from '../../dashboards/dashboards.service';
 
 /**
- * `get_dashboard_overview` — KPIs macro del dashboard (H21.5).
+ * `get_dashboard_overview` — conteos y evaluaciones recientes del dashboard (H21.5).
  *
- * Wrapper delgado sobre `DashboardsService.getOverview`: devuelve logro global,
- * alumnos evaluados, conteo de evaluaciones, distribución por nivel de
- * desempeño, evaluaciones recientes y alertas. Todo agregado (sin PII), acotado
- * al scope del usuario autenticado (`ctx.user`). Los filtros opcionales son
- * UUIDs que salen de `list_filter_options`.
+ * Ya NO devuelve un "% de logro global" ni alertas: ese promedio mezclaba instrumentos
+ * de distinta dificultad y el modelo razonaba sobre él como si significara algo. El
+ * desglose por unidad comparable y las alertas viven en `get_comparable_overview`.
+ *
+ * Todo agregado (sin PII), acotado al scope del usuario autenticado (`ctx.user`).
  */
 @Injectable()
 export class GetDashboardOverviewTool implements AssistantTool {
@@ -24,9 +24,10 @@ export class GetDashboardOverviewTool implements AssistantTool {
   readonly definition: LlmToolDefinition = {
     name: 'get_dashboard_overview',
     description:
-      'Resumen macro del dashboard: logro global (%), alumnos evaluados, ' +
-      'cantidad de evaluaciones, distribución por nivel de desempeño, ' +
-      'evaluaciones recientes y alertas. Datos agregados (sin información de ' +
+      'Conteos del dashboard (alumnos evaluados, cantidad de evaluaciones) y lista de ' +
+      'evaluaciones recientes. NO entrega un % de logro global: no existe, porque ' +
+      'promediar instrumentos de distinta dificultad no es interpretable — para logro ' +
+      'y alertas usa get_comparable_overview. Datos agregados (sin información de ' +
       'alumnos individuales). Filtros opcionales por curso, grado, asignatura, ' +
       'instrumento o período; sus IDs (UUID) se obtienen de list_filter_options.',
     inputSchema: {
@@ -69,10 +70,7 @@ export class GetDashboardOverviewTool implements AssistantTool {
     },
   };
 
-  async execute(
-    input: unknown,
-    ctx: AssistantToolContext,
-  ): Promise<AssistantToolResult> {
+  async execute(input: unknown, ctx: AssistantToolContext): Promise<AssistantToolResult> {
     const parsed = dashboardFiltersQuerySchema.safeParse(input ?? {});
     if (!parsed.success) {
       return {

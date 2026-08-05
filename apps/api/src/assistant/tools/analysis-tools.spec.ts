@@ -1,3 +1,4 @@
+import { buildComparabilityMeta } from '@soe/types';
 import type {
   AssessmentReportResponse,
   GenerationalComparisonResponse,
@@ -115,6 +116,7 @@ describe('GetGenerationalTool', () => {
       nodeId: null,
       nodeName: null,
       series: [],
+      comparability: buildComparabilityMeta([]),
     };
     const generational = jest.fn().mockResolvedValue(response);
     const tool = new GetGenerationalTool({
