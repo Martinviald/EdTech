@@ -15,7 +15,6 @@ import { InjectDb, type Database } from '../database/database.types';
 import { AssessmentReportService } from '../assessment-report/assessment-report.service';
 import { ItemAnalysisService } from '../item-analysis/item-analysis.service';
 import type { LlmImagePart } from '../llm/llm.types';
-import { pointBiserial, type ScoreMatrix } from './ai-analysis.metrics';
 import type {
   ItemInsightBuilder,
   ItemInsightBuildOptions,
@@ -70,9 +69,9 @@ export class ItemInsightSnapshotService implements ItemInsightBuilder {
     });
     const reportItem = report.items.find((it) => it.itemId === itemId) ?? null;
 
-    // 3) Datos no expuestos por los servicios anteriores: sección/pasaje, imagen
-    //    del ítem y matriz de aciertos (para punto-biserial). Todo bajo RLS.
-    const { passage, itemImageUrl, sectionImages, pb } = await withOrgContext(
+    // 3) Datos no expuestos por los servicios anteriores: sección/pasaje e imagen
+    //    del ítem. Todo bajo RLS.
+    const { passage, itemImageUrl, sectionImages } = await withOrgContext(
       this.db,
       orgId,
       async (tx) => {
@@ -83,19 +82,10 @@ export class ItemInsightSnapshotService implements ItemInsightBuilder {
         const sectionImages = meta?.sectionId
           ? await this.loadSectionImages(tx, meta.sectionId)
           : [];
-        const pb = await this.computePointBiserial(
-          tx,
-          orgId,
-          opts.assessmentId,
-          meta?.instrumentId ?? null,
-          itemId,
-          opts.classGroupId ?? null,
-        );
         return {
           passage,
           itemImageUrl: question.imageUrl ?? meta?.imageUrl ?? null,
           sectionImages,
-          pb,
         };
       },
     );
@@ -130,8 +120,6 @@ export class ItemInsightSnapshotService implements ItemInsightBuilder {
       blankCount: question.blankCount,
       correctRate: question.correctRate,
       difficulty,
-      discrimination: reportItem?.discrimination ?? null,
-      pointBiserial: pb,
       dominantDistractor: this.deriveDominantDistractor(question),
       skillName: question.skill?.nodeName ?? null,
       contentName: question.content?.nodeName ?? reportItem?.contentName ?? null,
@@ -243,79 +231,6 @@ export class ItemInsightSnapshotService implements ItemInsightBuilder {
       .map((r) => ({ url: r.url, mimeType: r.mimeType, note: r.note }));
   }
 
-  /**
-   * Punto-biserial del ítem en la cohorte de la evaluación. Construye la matriz
-   * de aciertos (alumno × ítem) sobre TODOS los ítems del instrumento y aplica la
-   * función pura. Sin PII: los ids de alumno solo agrupan y se descartan.
-   *
-   * Si se pasa `classGroupId`, la matriz se acota a los alumnos matriculados en
-   * ese curso — así el punto-biserial usa la MISMA cohorte que el p/D del informe
-   * (que también se scopea por `classGroupId`), evitando una métrica inconsistente.
-   */
-  private async computePointBiserial(
-    tx: Database,
-    orgId: string,
-    assessmentId: string,
-    instrumentId: string | null,
-    itemId: string,
-    classGroupId: string | null,
-  ): Promise<number | null> {
-    if (!instrumentId) return null;
-
-    const itemRows = await tx
-      .select({ itemId: items.id })
-      .from(items)
-      .where(
-        and(eq(items.instrumentId, instrumentId), isNull(items.deletedAt)),
-      )
-      .orderBy(asc(items.position));
-    const itemOrder = itemRows.map((r) => r.itemId);
-    const targetIndex = itemOrder.indexOf(itemId);
-    if (targetIndex < 0 || itemOrder.length < 2) return null;
-
-    // Cohorte: alumnos del curso (si se filtró). null = toda la evaluación.
-    const cohortStudentIds = classGroupId
-      ? await this.resolveCohortStudentIds(tx, orgId, classGroupId)
-      : null;
-    // Curso sin alumnos visibles → no hay matriz que calcular.
-    if (cohortStudentIds !== null && cohortStudentIds.length === 0) return null;
-
-    const respConditions = [
-      eq(responses.assessmentId, assessmentId),
-      inArray(responses.itemId, itemOrder),
-    ];
-    if (cohortStudentIds !== null) {
-      respConditions.push(inArray(responses.studentId, cohortStudentIds));
-    }
-
-    const respRows = await tx
-      .select({
-        studentId: responses.studentId,
-        itemId: responses.itemId,
-        isCorrect: sql<boolean>`coalesce(${responses.isCorrect}, false)`,
-      })
-      .from(responses)
-      .where(and(...respConditions));
-
-    const itemIndex = new Map(itemOrder.map((id, idx) => [id, idx]));
-    const byStudent = new Map<string, boolean[]>();
-    for (const r of respRows) {
-      const idx = itemIndex.get(r.itemId);
-      if (idx === undefined) continue;
-      let row = byStudent.get(r.studentId);
-      if (!row) {
-        row = new Array<boolean>(itemOrder.length).fill(false);
-        byStudent.set(r.studentId, row);
-      }
-      row[idx] = r.isCorrect === true;
-    }
-
-    const matrix: ScoreMatrix = Array.from(byStudent.entries())
-      .sort(([a], [b]) => a.localeCompare(b))
-      .map(([, row]) => row);
-
-    return pointBiserial(matrix, targetIndex);
-  }
 
   /**
    * IDs de alumnos matriculados en un curso, acotados a la org y no eliminados.
