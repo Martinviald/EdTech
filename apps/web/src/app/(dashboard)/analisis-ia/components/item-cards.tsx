@@ -5,19 +5,10 @@ import { Badge } from '@/components/ui/badge';
 import { EmptyState } from '@/components/shared';
 import { formatMetric, causeLabel } from './format';
 
-function MetricChips({
-  difficulty,
-  discrimination,
-}: {
-  difficulty: number | null;
-  discrimination?: number | null;
-}) {
+function MetricChips({ difficulty }: { difficulty: number | null }) {
   return (
     <div className="flex flex-wrap gap-1.5">
-      <Badge variant="outline">p {formatMetric(difficulty)}</Badge>
-      {discrimination !== undefined ? (
-        <Badge variant="outline">D {formatMetric(discrimination)}</Badge>
-      ) : null}
+      <Badge variant="outline">{formatMetric(difficulty)} de logro</Badge>
     </div>
   );
 }
@@ -47,10 +38,7 @@ export function TopItemsCard({ items }: { items: ItemPracticeCard[] }) {
                     </span>
                   ) : null}
                 </div>
-                <MetricChips
-                  difficulty={item.difficulty}
-                  discrimination={item.discrimination}
-                />
+                <MetricChips difficulty={item.difficulty} />
               </div>
               {item.whatWorked.length > 0 ? (
                 <div className="mt-3">

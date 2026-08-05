@@ -44,7 +44,6 @@ export function priorityRank(priority: 'high' | 'medium' | 'low'): number {
 const CAUSE_LABEL: Record<string, string> = {
   not_taught: 'No enseñado',
   misconception: 'Error conceptual',
-  item_quality: 'Calidad del ítem',
   insufficient_practice: 'Práctica insuficiente',
 };
 

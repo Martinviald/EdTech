@@ -9,11 +9,9 @@ import {
   canAccess,
   capabilityUnavailableMessage,
   AI_ANALYSIS_VIEWER_ROLES,
-  INSTRUMENT_QUALITY_VIEWER_ROLES,
   assessmentInsightsOutputSchema,
   type AiAnalysisModel,
   type AssessmentInsightsOutput,
-  type InstrumentQualityResponse,
   type ItemMatrixResponse,
   type MatrixQuestionColumn,
   type UserRole,
@@ -218,25 +216,13 @@ async function AnalisisIaContent({
 
   const output: AssessmentInsightsOutput = parsed.data;
 
-  // Datos deterministas complementarios (calidad + columnas de ítems). Best-effort.
-  const qualityQuery = new URLSearchParams({ assessmentId });
-  if (classGroupId) qualityQuery.set('classGroupId', classGroupId);
-
+  // Columnas de ítems para el export. Best-effort.
   const matrixQuery = new URLSearchParams({ assessmentId, limit: '1' });
   if (classGroupId) matrixQuery.set('classGroupId', classGroupId);
 
-  const canViewQuality = canAccess(roles, INSTRUMENT_QUALITY_VIEWER_ROLES);
-
-  const [quality, matrix] = await Promise.all([
-    canViewQuality
-      ? apiGet<InstrumentQualityResponse>(`/instrument-quality?${qualityQuery.toString()}`).catch(
-          () => null,
-        )
-      : Promise.resolve(null),
-    apiGet<ItemMatrixResponse>(`/item-analysis/matrix?${matrixQuery.toString()}`).catch(
-      (): ItemMatrixResponse | null => null,
-    ),
-  ]);
+  const matrix = await apiGet<ItemMatrixResponse>(
+    `/item-analysis/matrix?${matrixQuery.toString()}`,
+  ).catch((): ItemMatrixResponse | null => null);
 
   const questions: MatrixQuestionColumn[] = matrix?.questions ?? [];
   const exportTitle = matrix?.assessmentName ?? matrix?.instrumentName ?? 'evaluacion';
@@ -249,7 +235,6 @@ async function AnalisisIaContent({
         activeRole={activeRole}
         assessmentId={assessmentId}
         classGroupId={classGroupId}
-        quality={quality}
         questions={questions}
         exportTitle={exportTitle}
         basePath={basePath}

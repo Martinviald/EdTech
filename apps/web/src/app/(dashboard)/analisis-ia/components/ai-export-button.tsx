@@ -5,9 +5,8 @@
 // Reusa el patrón de resultados/informe/report-export-button.tsx (paleta, dropdown,
 // formateadores). NO hace fetch: opera sobre los datos ya cargados:
 //   • AssessmentInsightsOutput (informe IA de la evaluación, S1)
-//   • InstrumentQualityResponse (calidad determinista del instrumento, H20.9)
 // Excel: un libro multi-hoja. PDF: un documento con secciones y la misma
-// codificación de color de la pantalla (prioridad, banderas de calidad).
+// codificación de color de la pantalla (prioridad).
 // ─────────────────────────────────────────────────────────────────────────────
 
 import type { JSX } from 'react';
@@ -16,11 +15,7 @@ import type { WorkBook, WorkSheet } from 'xlsx';
 import type { jsPDF } from 'jspdf';
 import type { CellHookData } from 'jspdf-autotable';
 import { FileDown } from 'lucide-react';
-import type {
-  AssessmentInsightsOutput,
-  InstrumentQualityResponse,
-  ItemQualityFlag,
-} from '@soe/types';
+import type { AssessmentInsightsOutput } from '@soe/types';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -29,7 +24,6 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Button } from '@/components/ui/button';
 import { causeLabel, priorityLabel } from './format';
-import { FLAG_LABELS } from './quality-format';
 
 type RGB = [number, number, number];
 
@@ -47,20 +41,6 @@ const PRIORITY_TEXT: Record<'high' | 'medium' | 'low', RGB> = {
   medium: [146, 64, 14],
   low: [30, 64, 175],
 };
-const FLAG_FILL: Record<ItemQualityFlag, RGB> = {
-  low_discrimination: [254, 226, 226],
-  ambiguous_key: [254, 226, 226],
-  strong_distractor: [254, 243, 199],
-  too_easy: [243, 244, 246],
-  misaligned: [254, 243, 199],
-};
-const FLAG_TEXT: Record<ItemQualityFlag, RGB> = {
-  low_discrimination: [153, 27, 27],
-  ambiguous_key: [153, 27, 27],
-  strong_distractor: [146, 64, 14],
-  too_easy: [55, 65, 81],
-  misaligned: [146, 64, 14],
-};
 
 // ── Formateadores ─────────────────────────────────────────────────────────────
 
@@ -68,10 +48,6 @@ function fmtPct(value: number | null, digits = 0): string {
   if (value === null || Number.isNaN(value)) return '—';
   const pct = value <= 1 && value >= -1 ? value * 100 : value;
   return `${pct.toFixed(digits)}%`;
-}
-function fmtPctRaw(value: number | null, digits = 0): string {
-  if (value === null || Number.isNaN(value)) return '—';
-  return `${value.toFixed(digits)}%`;
 }
 function fmtNum(value: number | null, digits = 2): string {
   if (value === null || Number.isNaN(value)) return '—';
@@ -86,22 +62,17 @@ function audienceLabel(audience: 'director' | 'teacher'): string {
 
 interface AiExportButtonProps {
   output: AssessmentInsightsOutput;
-  quality: InstrumentQualityResponse | null;
   title: string;
 }
 
-export function AiExportButton({
-  output,
-  quality,
-  title,
-}: AiExportButtonProps): JSX.Element {
+export function AiExportButton({ output, title }: AiExportButtonProps): JSX.Element {
   const [busy, setBusy] = useState(false);
   const base = `analisis-ia-${sanitize(title)}`.slice(0, 80);
 
   async function exportExcel() {
     setBusy(true);
     try {
-      await buildWorkbook(output, quality, title, base);
+      await buildWorkbook(output, title, base);
     } finally {
       setBusy(false);
     }
@@ -109,7 +80,7 @@ export function AiExportButton({
   async function exportPdf() {
     setBusy(true);
     try {
-      await buildPdf(output, quality, title, base);
+      await buildPdf(output, title, base);
     } finally {
       setBusy(false);
     }
@@ -138,12 +109,7 @@ export function AiExportButton({
 
 // ── Excel ─────────────────────────────────────────────────────────────────────
 
-async function buildWorkbook(
-  output: AssessmentInsightsOutput,
-  quality: InstrumentQualityResponse | null,
-  title: string,
-  base: string,
-) {
+async function buildWorkbook(output: AssessmentInsightsOutput, title: string, base: string) {
   const XLSX = await import('xlsx');
   const appendSheet = (wb: WorkBook, name: string, ws: WorkSheet) =>
     XLSX.utils.book_append_sheet(wb, ws, name.slice(0, 31));
@@ -166,8 +132,6 @@ async function buildWorkbook(
       ['Síntesis para el aula'],
       [output.executiveSummary.teacher],
       [],
-      ['Confiabilidad (KR-20)', fmtNum(output.reliability.kr20)],
-      ['Interpretación', output.reliability.interpretation],
       ['Confianza del análisis', fmtPct(output.confidence)],
       [],
       ['Límites del análisis', ...output.caveats],
@@ -179,12 +143,11 @@ async function buildWorkbook(
     wb,
     'Ítems destacados',
     XLSX.utils.aoa_to_sheet([
-      ['N°', 'Habilidad', 'Dificultad (p)', 'Discrim. (D)', 'Qué funcionó', 'Práctica replicable'],
+      ['N°', 'Habilidad', '% de logro', 'Qué funcionó', 'Práctica replicable'],
       ...output.topItems.map((i) => [
         i.position,
         i.skillName ?? '—',
         fmtNum(i.difficulty),
-        fmtNum(i.discrimination),
         i.whatWorked.join(' · '),
         i.replicableAction,
       ]),
@@ -196,7 +159,7 @@ async function buildWorkbook(
     wb,
     'Ítems críticos',
     XLSX.utils.aoa_to_sheet([
-      ['N°', 'Habilidad', 'Dificultad (p)', 'Causa probable', 'Misconcepción', 'Plan de acción'],
+      ['N°', 'Habilidad', '% de logro', 'Causa probable', 'Misconcepción', 'Plan de acción'],
       ...output.bottomItems.map((i) => [
         i.position,
         i.skillName ?? '—',
@@ -242,44 +205,12 @@ async function buildWorkbook(
     ]),
   );
 
-  // Hoja 6 — Calidad del instrumento (si está disponible).
-  if (quality) {
-    appendSheet(
-      wb,
-      'Calidad instrumento',
-      XLSX.utils.aoa_to_sheet([
-        ['Confiabilidad (KR-20)', fmtNum(quality.reliability.kr20)],
-        ['Interpretación', quality.reliability.interpretation],
-        ['Ítems analizados', quality.reliability.itemsAnalyzed],
-        ['Alumnos analizados', quality.reliability.studentsAnalyzed],
-        ['Ítems con alertas', quality.flaggedCount],
-        [],
-        ['N°', 'Habilidad/contenido', 'Clave', 'Dificultad (p%)', 'Discrim. (D)', 'P. biserial', 'Alertas', 'Sugerencias'],
-        ...quality.items.map((i) => [
-          i.position,
-          i.skillName ?? i.contentName ?? '—',
-          i.correctKey ?? '—',
-          fmtPctRaw(i.difficulty),
-          fmtNum(i.discrimination),
-          fmtNum(i.pointBiserial),
-          i.flags.map((f) => FLAG_LABELS[f]).join(', ') || '—',
-          i.suggestions.join(' · ') || '—',
-        ]),
-      ]),
-    );
-  }
-
   XLSX.writeFile(wb, `${base}.xlsx`);
 }
 
 // ── PDF ───────────────────────────────────────────────────────────────────────
 
-async function buildPdf(
-  output: AssessmentInsightsOutput,
-  quality: InstrumentQualityResponse | null,
-  title: string,
-  base: string,
-) {
+async function buildPdf(output: AssessmentInsightsOutput, title: string, base: string) {
   const { jsPDF } = await import('jspdf');
   const autoTable = (await import('jspdf-autotable')).default;
   const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
@@ -329,12 +260,11 @@ async function buildPdf(
     y = sectionTitle(doc, 'Ítems destacados (Top 5)', lastY(doc) + 8, marginX);
     autoTable(doc, {
       startY: y,
-      head: [['N°', 'Habilidad', 'p', 'D', 'Práctica replicable']],
+      head: [['N°', 'Habilidad', '% logro', 'Práctica replicable']],
       body: output.topItems.map((i) => [
         String(i.position),
         i.skillName ?? '—',
         fmtNum(i.difficulty),
-        fmtNum(i.discrimination),
         i.replicableAction,
       ]),
       styles: { fontSize: 8, cellPadding: 1.5, valign: 'top' },
@@ -413,51 +343,6 @@ async function buildPdf(
           data.cell.styles.fillColor = PRIORITY_FILL[p];
           data.cell.styles.textColor = PRIORITY_TEXT[p];
           data.cell.styles.fontStyle = 'bold';
-        }
-      },
-    });
-  }
-
-  // Calidad del instrumento.
-  if (quality) {
-    y = sectionTitle(doc, 'Calidad del instrumento', lastY(doc) + 8, marginX);
-    doc.setFontSize(9);
-    doc.setTextColor(...MUTED);
-    doc.text(
-      `KR-20: ${fmtNum(quality.reliability.kr20)} — ${quality.reliability.interpretation}`,
-      marginX,
-      y,
-      { maxWidth: pageW - marginX * 2 },
-    );
-    doc.setTextColor(0, 0, 0);
-    const qItems = quality.items;
-    autoTable(doc, {
-      startY: y + 5,
-      head: [['N°', 'Habilidad/contenido', 'p%', 'D', 'P.bis', 'Alertas']],
-      body: qItems.map((i) => [
-        String(i.position),
-        i.skillName ?? i.contentName ?? '—',
-        i.difficulty === null ? '—' : `${i.difficulty.toFixed(0)}%`,
-        fmtNum(i.discrimination),
-        fmtNum(i.pointBiserial),
-        i.flags.map((f) => FLAG_LABELS[f]).join(', ') || '—',
-      ]),
-      styles: { fontSize: 8, cellPadding: 1.5 },
-      headStyles: { fillColor: HEAD },
-      columnStyles: {
-        0: { halign: 'center', cellWidth: 9 },
-        2: { halign: 'right', cellWidth: 14 },
-        3: { halign: 'right', cellWidth: 14 },
-        4: { halign: 'right', cellWidth: 16 },
-      },
-      didParseCell: (data: CellHookData) => {
-        if (data.section === 'body' && data.column.index === 5) {
-          const flags = qItems[data.row.index]?.flags;
-          const first = flags?.[0];
-          if (first) {
-            data.cell.styles.fillColor = FLAG_FILL[first];
-            data.cell.styles.textColor = FLAG_TEXT[first];
-          }
         }
       },
     });

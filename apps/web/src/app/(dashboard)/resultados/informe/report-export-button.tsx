@@ -57,9 +57,8 @@ const HEAD: RGB = [37, 99, 235];
 
 const FLAG_LABELS: Record<ItemReportFlag, string> = {
   critical: 'Crítico',
-  low_discrimination: 'Baja discriminación',
-  strong_distractor: 'Distractor potente',
-  easy: 'Muy fácil',
+  dominant_error: 'Error dominante',
+  high_achievement: 'Logro alto',
 };
 const PRIORITY_LABELS: Record<'high' | 'medium' | 'low', string> = {
   high: 'Alta',
@@ -105,12 +104,6 @@ function difficultyColor(value: number | null): RGB {
   if (value === null) return MUTED;
   if (value < 40) return RED;
   if (value < 60) return AMBER;
-  return GREEN;
-}
-function discriminationColor(value: number | null): RGB {
-  if (value === null) return MUTED;
-  if (value < 0.2) return RED;
-  if (value < 0.3) return AMBER;
   return GREEN;
 }
 function sanitize(name: string): string {
@@ -250,8 +243,7 @@ async function buildWorkbook(report: AssessmentReportResponse, base: string) {
         'Habilidad',
         'Contenido',
         'Clave',
-        'Dificultad (p%)',
-        'Discriminación (D)',
+        '% de logro',
         'Distractor top',
         '% Distractor',
         'Respondidas',
@@ -264,7 +256,6 @@ async function buildWorkbook(report: AssessmentReportResponse, base: string) {
         i.contentName ?? '—',
         i.correctKey ?? '—',
         fmtNum(i.difficulty),
-        fmtNum(i.discrimination, 2),
         i.topDistractorKey ?? '—',
         fmtPct(i.topDistractorRate),
         i.answeredCount,
@@ -490,13 +481,13 @@ async function buildPdf(report: AssessmentReportResponse, base: string) {
     });
   }
 
-  // Análisis de preguntas (psicometría).
+  // Análisis de preguntas.
   if (report.items.length) {
     y = sectionTitle(doc, 'Análisis de preguntas', lastY(doc) + 8, marginX);
     doc.setFontSize(8);
     doc.setTextColor(...MUTED);
     doc.text(
-      'Dificultad (p): % de logro — bajo = difícil. Discriminación (D): D < 0,2 sugiere revisar la pregunta.',
+      '% de logro de cada pregunta y alternativa incorrecta más elegida. «Error dominante»: el curso se fue en masa por la misma alternativa equivocada.',
       marginX,
       y,
       { maxWidth: pageW - marginX * 2 },
@@ -506,14 +497,13 @@ async function buildPdf(report: AssessmentReportResponse, base: string) {
     autoTable(doc, {
       startY: y + 4,
       head: [
-        ['N°', 'Habilidad / contenido', 'Clave', 'Dificultad', 'Discrim.', 'Distractor', 'Alertas'],
+        ['N°', 'Habilidad / contenido', 'Clave', '% de logro', 'Distractor', 'Alertas'],
       ],
       body: items.map((i) => [
         String(i.position),
         i.skillName ?? i.contentName ?? '—',
         i.correctKey ?? '—',
         i.difficulty === null ? '—' : `${i.difficulty.toFixed(0)}%`,
-        fmtNum(i.discrimination, 2),
         i.topDistractorKey
           ? `${i.topDistractorKey}${i.topDistractorRate !== null ? ` (${i.topDistractorRate.toFixed(0)}%)` : ''}`
           : '—',
@@ -534,10 +524,7 @@ async function buildPdf(report: AssessmentReportResponse, base: string) {
         if (data.column.index === 3) {
           data.cell.styles.textColor = difficultyColor(item.difficulty);
           data.cell.styles.fontStyle = 'bold';
-        } else if (data.column.index === 4) {
-          data.cell.styles.textColor = discriminationColor(item.discrimination);
-          data.cell.styles.fontStyle = 'bold';
-        } else if (data.column.index === 6 && item.flags.includes('critical')) {
+        } else if (data.column.index === 5 && item.flags.includes('critical')) {
           data.cell.styles.textColor = RED;
         }
       },
