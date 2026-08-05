@@ -25,6 +25,7 @@ import {
   buildDashboardQuery,
   type DashboardFilterValues,
 } from '../components/dashboard-filters';
+import { ComparabilityNotice } from '../components/comparability-notice';
 import { DistributionBar } from '../components/distribution-bar';
 import { PerformanceBadge } from '../components/performance-badge';
 import { PaginationControls } from '@/components/shared';
@@ -116,11 +117,15 @@ async function PerformanceSection({
 
   return (
     <>
-      <DistributionBar
-        distribution={performance.distribution}
-        bands={performance.bands}
-        bandDistribution={performance.bandDistribution}
-      />
+      <ComparabilityNotice comparability={performance.comparability} />
+
+      {performance.distribution ? (
+        <DistributionBar
+          distribution={performance.distribution}
+          bands={performance.bands}
+          bandDistribution={performance.bandDistribution}
+        />
+      ) : null}
 
       <Card>
         <CardContent className="space-y-4 p-5">

@@ -1,6 +1,8 @@
 import { z } from 'zod';
 import type { PerformanceLevel } from '../enums';
+import type { ComparabilityMeta } from '../comparability';
 import type { PerformanceDistributionBucket } from './dashboard.schema';
+import { INSTRUMENT_APPLICATION_PERIODS } from './instrument.schema';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Sprint 4 — Analítica de series temporales (H6.3, H6.6)
@@ -18,11 +20,16 @@ export const generationalComparisonQuerySchema = z.object({
   gradeId: z.string().uuid(),
   subjectId: z.string().uuid().optional(),
   instrumentType: z.string().min(1).optional(),
+  // Momento del ciclo (#1C / D7). Sin él, la serie puede terminar comparando el
+  // Cierre de un año contra el Diagnóstico del anterior — instrumentos que NO son
+  // comparables entre sí. La clave de familia N2 lo incluye, así que acotar el
+  // momento es lo que vuelve legítima la comparación año a año.
+  applicationPeriod: z.enum(INSTRUMENT_APPLICATION_PERIODS).optional(),
+  // Fija la comparación a un instrumento concreto (N1) cuando se conoce.
+  instrumentId: z.string().uuid().optional(),
   nodeId: z.string().uuid().optional(), // opcional: enfocar una habilidad
 });
-export type GenerationalComparisonQueryDto = z.infer<
-  typeof generationalComparisonQuerySchema
->;
+export type GenerationalComparisonQueryDto = z.infer<typeof generationalComparisonQuerySchema>;
 
 export type GenerationalPoint = {
   academicYearId: string;
@@ -41,6 +48,13 @@ export type GenerationalComparisonResponse = {
   nodeId: string | null;
   nodeName: string | null;
   series: GenerationalPoint[]; // ordenada por año ascendente
+  /**
+   * Comparabilidad de la SERIE. Una comparación generacional es legítima cuando todos
+   * sus puntos pertenecen a la misma familia de instrumento (`instrument_family`) o al
+   * mismo instrumento; si sale `mixed`, la serie está comparando cosas distintas y la
+   * UI debe advertirlo (#1C / D7).
+   */
+  comparability: ComparabilityMeta;
 };
 
 // ── H6.6 — Progresión a lo largo del año ─────────────────────────────────────

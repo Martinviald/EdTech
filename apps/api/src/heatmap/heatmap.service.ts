@@ -137,7 +137,13 @@ export class HeatmapService {
       // pertenece a exactamente un (node, subject, class_group), así que sumar los
       // numeradores y denominadores de sus celdas da el mismo promedio
       // student-weighted que antes calculaba `loadOverallRows`.
-      return { ...this.assembleResponse(cellRows, thresholds), comparability };
+      // Con instrumentos no comparables la matriz mezclaría dificultades y cortes
+      // distintos en cada celda (#1C, D9): se devuelven las filas y columnas —para que
+      // la vista conserve su estructura— pero sin números ni niveles.
+      return {
+        ...this.assembleResponse(cellRows, thresholds, comparability.aggregatable),
+        comparability,
+      };
     });
   }
 
@@ -303,6 +309,7 @@ export class HeatmapService {
   private assembleResponse(
     cellRows: CellRow[],
     thresholds: PerformanceThresholds,
+    aggregatable: boolean,
   ): Omit<HeatmapResponse, 'comparability'> {
     // Asignaturas (columnas), únicas y ordenadas por nombre.
     const subjectMap = new Map<string, HeatmapSubject>();
@@ -349,7 +356,7 @@ export class HeatmapService {
     }
 
     const toCell = (subjectId: string, acc: CohortAccumulator): HeatmapCell => {
-      const pct = cohortAverage(acc);
+      const pct = aggregatable ? cohortAverage(acc) : null;
       return {
         subjectId,
         averageAchievement: pct,
@@ -373,7 +380,7 @@ export class HeatmapService {
               studentsAssessed: 0,
             };
       });
-      const overall = cohortAverage(node.overall);
+      const overall = aggregatable ? cohortAverage(node.overall) : null;
       return {
         nodeId: node.nodeId,
         nodeName: node.nodeName,

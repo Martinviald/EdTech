@@ -1,7 +1,6 @@
 import { Suspense } from 'react';
 import { redirect } from 'next/navigation';
 import {
-  BarChart3,
   GraduationCap,
   ClipboardList,
   TriangleAlert,
@@ -45,6 +44,7 @@ import {
   hasActiveFilters,
   type DashboardFilterValues,
 } from './components/dashboard-filters';
+import { ComparabilityNotice } from './components/comparability-notice';
 import { DistributionBar } from './components/distribution-bar';
 import { formatAchievement } from './components/performance-level';
 import { getDashboardOverview, getDashboardFilters, getDashboardTeacherKpis } from './data';
@@ -114,13 +114,9 @@ async function OverviewSections({
 
   return (
     <>
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <StatCard
-          label="% Logro global"
-          value={formatAchievement(overview.globalAchievement)}
-          hint="Promedio sobre el alcance filtrado"
-          icon={BarChart3}
-        />
+      {/* Sólo conteos: no promedian nada, así que son legítimos sobre cualquier
+          alcance. El "% de logro global" se retiró en #1C. */}
+      <div className="grid gap-4 sm:grid-cols-3">
         <StatCard
           label="Alumnos evaluados"
           value={overview.studentsEvaluated.toLocaleString('es-CL')}
@@ -139,7 +135,11 @@ async function OverviewSections({
         />
       </div>
 
-      <DistributionBar distribution={overview.performanceDistribution} />
+      <ComparabilityNotice comparability={overview.comparability} />
+
+      {overview.performanceDistribution ? (
+        <DistributionBar distribution={overview.performanceDistribution} />
+      ) : null}
 
       <AlertsSection alerts={overview.alerts} />
 
@@ -304,6 +304,10 @@ function TeacherKpisTable({ kpis }: { kpis: DashboardTeacherKpisResponse }) {
     <Card>
       <CardHeader>
         <CardTitle className="text-base">Mis cursos</CardTitle>
+        <CardDescription>
+          Una fila por curso y evaluación: el % de logro sólo se puede leer dentro de un mismo
+          instrumento.
+        </CardDescription>
       </CardHeader>
       <CardContent>
         {kpis.courses.length === 0 ? (
@@ -319,6 +323,7 @@ function TeacherKpisTable({ kpis }: { kpis: DashboardTeacherKpisResponse }) {
                 <TableRow>
                   <TableHead>Curso</TableHead>
                   <TableHead className="hidden md:table-cell">Asignatura</TableHead>
+                  <TableHead className="hidden lg:table-cell">Evaluación</TableHead>
                   <TableHead className="text-right">Alumnos</TableHead>
                   <TableHead className="text-right">% Logro</TableHead>
                   <TableHead className="text-right hidden sm:table-cell">% Aprob.</TableHead>
@@ -328,7 +333,7 @@ function TeacherKpisTable({ kpis }: { kpis: DashboardTeacherKpisResponse }) {
               </TableHeader>
               <TableBody>
                 {kpis.courses.map((c) => (
-                  <TableRow key={`${c.classGroupId}-${c.subjectName ?? 'all'}`}>
+                  <TableRow key={`${c.classGroupId}-${c.instrumentId ?? 'sin-instrumento'}`}>
                     <TableCell className="font-medium">
                       {c.classGroupName}
                       {c.gradeName ? (
@@ -336,6 +341,9 @@ function TeacherKpisTable({ kpis }: { kpis: DashboardTeacherKpisResponse }) {
                       ) : null}
                     </TableCell>
                     <TableCell className="hidden md:table-cell">{c.subjectName ?? '—'}</TableCell>
+                    <TableCell className="hidden lg:table-cell">
+                      {c.instrumentName ?? '—'}
+                    </TableCell>
                     <TableCell className="text-right">{c.studentsCount}</TableCell>
                     <TableCell className="text-right font-medium">
                       {formatAchievement(c.averageAchievement)}

@@ -93,6 +93,32 @@ function makeDb(selectResults: unknown[][]): DbMock {
   return db;
 }
 
+/**
+ * Fila de `resolveScaleAndComparability`: un instrumento del alcance con la config de
+ * su grading_scale. `config: null` = sin escala propia → thresholds default DIA.
+ *
+ * Que el alcance traiga UN instrumento es lo que lo vuelve agregable; con cero (o con
+ * instrumentos no comparables entre sí) la matriz no clasifica ni promedia (#1C, D9).
+ */
+function scaleRow(
+  config: unknown = null,
+  instrumentId = 'i1',
+  overrides: Record<string, unknown> = {},
+) {
+  return {
+    assessmentId: 'a1',
+    instrumentId,
+    instrumentType: 'dia',
+    subjectId: 's-leng',
+    gradeId: 'g1',
+    applicationPeriod: null,
+    year: 2026,
+    createdAt: new Date('2026-01-01'),
+    config,
+    ...overrides,
+  };
+}
+
 function makeService(db: Database): HeatmapService {
   return new (HeatmapService as new (db: Database) => HeatmapService)(db);
 }
@@ -135,6 +161,7 @@ describe('HeatmapService.getHeatmap', () => {
         cell('n1', 'Comprensión', 's-mat', 'Matemática', 60, 8),
         cell('n2', 'Localizar', 's-leng', 'Lenguaje', 45, 10),
       ],
+      [scaleRow()],
     ]);
     const service = makeService(db);
 
@@ -164,8 +191,8 @@ describe('HeatmapService.getHeatmap', () => {
         cell('n1', 'Comprensión', 's-leng', 'Lenguaje', 90, 10),
         cell('n1', 'Comprensión', 's-leng', 'Lenguaje', 40, 30),
       ],
-      // thresholds → defaults DIA
-      [],
+      // escala+comparabilidad: 1 instrumento, sin grading_scale → defaults DIA
+      [scaleRow()],
     ]);
     const service = makeService(db);
 
@@ -190,7 +217,7 @@ describe('HeatmapService.getHeatmap', () => {
         cell('n1', 'Comprensión', 's-leng', 'Lenguaje', 30, 40),
         cell('n1', 'Comprensión', 's-mat', 'Matemática', 90, 10),
       ],
-      [],
+      [scaleRow()],
     ]);
     const service = makeService(db);
 
@@ -210,6 +237,7 @@ describe('HeatmapService.getHeatmap', () => {
         cell('n1', 'Comprensión', 's-mat', 'Matemática', 60, 8),
         cell('n2', 'Localizar', 's-leng', 'Lenguaje', 45, 10),
       ],
+      [scaleRow()],
     ]);
     const service = makeService(db);
 
@@ -226,6 +254,38 @@ describe('HeatmapService.getHeatmap', () => {
     });
   });
 
+  // ── #1C / D9: alcance NO comparable → sin números ni niveles ───────────────
+  // Antes, la matriz tomaba los thresholds del primer instrumento que matcheara y los
+  // aplicaba a TODAS las celdas, aunque agregara instrumentos de dificultad distinta.
+  it('con instrumentos no comparables conserva la estructura pero no clasifica', async () => {
+    const db = makeDb([
+      [
+        cell('n1', 'Comprensión', 's-leng', 'Lenguaje', 80, 10),
+        cell('n1', 'Comprensión', 's-mat', 'Matemática', 30, 10),
+      ],
+      // dos instrumentos de asignaturas distintas → mixed
+      [
+        scaleRow(null, 'i1', { subjectId: 's-leng' }),
+        scaleRow(null, 'i2', { subjectId: 's-mat', assessmentId: 'a2' }),
+      ],
+    ]);
+    const service = makeService(db);
+
+    const res = await service.getHeatmap(makeUser(), {});
+
+    expect(res.comparability.kind).toBe('mixed');
+    expect(res.comparability.aggregatable).toBe(false);
+    // Las filas y columnas siguen ahí: la vista conserva su estructura.
+    expect(res.subjects).toHaveLength(2);
+    expect(res.rows).toHaveLength(1);
+    // Pero ninguna celda trae número ni nivel.
+    const n1 = res.rows[0];
+    expect(n1.cells.every((c) => c.averageAchievement === null)).toBe(true);
+    expect(n1.cells.every((c) => c.performanceLevel === null)).toBe(true);
+    expect(n1.overallAchievement).toBeNull();
+    expect(n1.overallPerformanceLevel).toBeNull();
+  });
+
   // ── Orden por criticidad (overallAchievement asc) ──────────────────────────
   it('ordena las filas por overallAchievement ascendente (críticas primero)', async () => {
     const db = makeDb([
@@ -234,6 +294,7 @@ describe('HeatmapService.getHeatmap', () => {
         cell('n2', 'Localizar', 's-leng', 'Lenguaje', 45, 10),
         cell('n3', 'Inferir', 's-leng', 'Lenguaje', 30, 10),
       ],
+      [scaleRow()],
     ]);
     const service = makeService(db);
 
@@ -249,6 +310,7 @@ describe('HeatmapService.getHeatmap', () => {
         cell('n1', 'Comprensión', 's-leng', 'Lenguaje', 50, 10),
         cell('n2', 'Localizar', 's-leng', 'Lenguaje', null, 0),
       ],
+      [scaleRow()],
     ]);
     const service = makeService(db);
 
@@ -268,6 +330,7 @@ describe('HeatmapService.getHeatmap', () => {
         cell('n3', 'Ele', 's-leng', 'Lenguaje', 50, 10), // 40-69 elementary
         cell('n4', 'Ins', 's-leng', 'Lenguaje', 30, 10), // <40 insufficient
       ],
+      [scaleRow()],
     ]);
     const service = makeService(db);
 
@@ -289,6 +352,7 @@ describe('HeatmapService.getHeatmap', () => {
         cell('n1', 'Comprensión', 's-leng', 'Lenguaje', 80, 10),
         cell('n2', 'Localizar', 's-leng', 'Lenguaje', 45, 10),
       ],
+      [scaleRow()],
     ]);
     const service = makeService(db);
 
@@ -338,8 +402,8 @@ describe('HeatmapService.getHeatmap', () => {
       [{ id: 'cg-1' }],
       // 3. cells
       [cell('n1', 'Comprensión', 's-leng', 'Lenguaje', 65, 2)],
-      // 4. thresholds (sin grading_scale → defaults DIA)
-      [],
+      // 4. escala+comparabilidad: 1 instrumento sin grading_scale → defaults DIA
+      [scaleRow()],
     ]);
     const service = makeService(db);
 
@@ -385,8 +449,8 @@ describe('HeatmapService.getHeatmap', () => {
       [{ id: 'cg-1' }],
       // 2. cells
       [cell('n1', 'Comprensión', 's-leng', 'Lenguaje', 88, 1)],
-      // 3. thresholds (sin grading_scale → defaults DIA)
-      [],
+      // 3. escala+comparabilidad: 1 instrumento sin grading_scale → defaults DIA
+      [scaleRow()],
     ]);
     const service = makeService(db);
 

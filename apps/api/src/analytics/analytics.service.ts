@@ -20,8 +20,11 @@ import {
 } from '@soe/db';
 import {
   RESULTS_VIEWER_ROLES,
+  buildComparabilityMeta,
   percentageToPerformanceLevel,
   userHasAnyRole,
+  type ComparabilityInstrumentRef,
+  type ComparabilityMeta,
   type GenerationalComparisonQueryDto,
   type GenerationalComparisonResponse,
   type GenerationalPoint,
@@ -77,21 +80,25 @@ export class AnalyticsService {
 
       // Profesor sin cursos → no hay datos visibles. Devolvemos serie vacía.
       if (!scope.scopeAll && scope.classGroupIds.length === 0) {
-        return { ...meta, series: [] };
+        return { ...meta, series: [], comparability: buildComparabilityMeta([]) };
       }
 
       // Filtro base sobre class_groups: grade + org. El scope de profesor
       // restringe a sus class_groups asignados.
-      const cgConditions = [
-        eq(classGroups.gradeId, query.gradeId),
-        eq(classGroups.orgId, orgId),
-      ];
+      const cgConditions = [eq(classGroups.gradeId, query.gradeId), eq(classGroups.orgId, orgId)];
       if (!scope.scopeAll) {
         cgConditions.push(inArray(classGroups.id, scope.classGroupIds));
       }
 
       // Filtros opcionales sobre el instrumento de la evaluación.
       const instrumentConditions = this.instrumentFilters(query);
+
+      const comparability = await this.resolveGenerationalComparability(
+        tx,
+        orgId,
+        cgConditions,
+        instrumentConditions,
+      );
 
       if (query.nodeId) {
         const series = await this.generationalSeriesFromSkills(
@@ -101,7 +108,7 @@ export class AnalyticsService {
           instrumentConditions,
           query.nodeId,
         );
-        return { ...meta, series };
+        return { ...meta, series, comparability };
       }
 
       const series = await this.generationalSeriesFromResults(
@@ -110,7 +117,7 @@ export class AnalyticsService {
         cgConditions,
         instrumentConditions,
       );
-      return { ...meta, series };
+      return { ...meta, series, comparability };
     });
   }
 
@@ -119,10 +126,7 @@ export class AnalyticsService {
   // Serie temporal de % logro a través de las evaluaciones de un período.
   // ───────────────────────────────────────────────────────────────────────────
 
-  async progression(
-    user: JwtPayload,
-    query: ProgressionQueryDto,
-  ): Promise<ProgressionResponse> {
+  async progression(user: JwtPayload, query: ProgressionQueryDto): Promise<ProgressionResponse> {
     const orgId = this.requireOrgId(user);
 
     return withOrgContext(this.db, orgId, async (tx) => {
@@ -183,6 +187,55 @@ export class AnalyticsService {
    * un academic_year con: nº de alumnos distintos, % logro promedio, % de
    * aprobación y distribución por nivel de desempeño.
    */
+  private async resolveGenerationalComparability(
+    tx: Database,
+    orgId: string,
+    cgConditions: SQL[],
+    instrumentConditions: SQL[],
+  ): Promise<ComparabilityMeta> {
+    const rows = await tx
+      .selectDistinct({
+        assessmentId: assessments.id,
+        instrumentId: instruments.id,
+        instrumentType: instruments.type,
+        subjectId: instruments.subjectId,
+        gradeId: instruments.gradeId,
+        applicationPeriod: instruments.applicationPeriod,
+        year: instruments.year,
+      })
+      .from(assessments)
+      .innerJoin(
+        assessmentCourseAssignments,
+        eq(assessmentCourseAssignments.assessmentId, assessments.id),
+      )
+      .innerJoin(classGroups, eq(classGroups.id, assessmentCourseAssignments.classGroupId))
+      .innerJoin(instruments, eq(instruments.id, assessments.instrumentId))
+      .where(
+        and(
+          eq(assessments.orgId, orgId),
+          isNull(instruments.deletedAt),
+          ...cgConditions,
+          ...instrumentConditions,
+        ),
+      );
+
+    const byInstrument = new Map<string, ComparabilityInstrumentRef>();
+    const assessmentIds = new Set<string>();
+    for (const row of rows) {
+      assessmentIds.add(row.assessmentId);
+      if (row.instrumentId == null || byInstrument.has(row.instrumentId)) continue;
+      byInstrument.set(row.instrumentId, {
+        instrumentId: row.instrumentId,
+        type: row.instrumentType,
+        subjectId: row.subjectId,
+        gradeId: row.gradeId,
+        applicationPeriod: row.applicationPeriod,
+        year: row.year,
+      });
+    }
+    return buildComparabilityMeta(Array.from(byInstrument.values()), assessmentIds.size);
+  }
+
   private async generationalSeriesFromResults(
     tx: Database,
     orgId: string,
@@ -246,17 +299,14 @@ export class AnalyticsService {
       const avg = r.avgPct === null ? null : Number(r.avgPct);
       // Sin escala configurada en el scope, la tasa de aprobación no aplica.
       const passingRate =
-        passingGrade !== null && r.totalGraded > 0
-          ? (r.passingCount / r.totalGraded) * 100
-          : null;
+        passingGrade !== null && r.totalGraded > 0 ? (r.passingCount / r.totalGraded) * 100 : null;
       return {
         academicYearId: r.academicYearId,
         year: r.year,
         studentsCount: r.studentsCount,
         averageAchievement: avg,
         passingRate,
-        performanceDistribution:
-          distByYear.get(r.academicYearId) ?? this.emptyDistribution(),
+        performanceDistribution: distByYear.get(r.academicYearId) ?? this.emptyDistribution(),
       };
     });
   }
@@ -380,8 +430,7 @@ export class AnalyticsService {
         averageAchievement: avg,
         // passingRate no aplica a una habilidad puntual (no hay nota por skill).
         passingRate: null,
-        performanceDistribution:
-          distByYear.get(r.academicYearId) ?? this.emptyDistribution(),
+        performanceDistribution: distByYear.get(r.academicYearId) ?? this.emptyDistribution(),
       };
     });
   }
@@ -391,7 +440,7 @@ export class AnalyticsService {
     tx: Database,
     orgId: string,
     query: GenerationalComparisonQueryDto,
-  ): Promise<Omit<GenerationalComparisonResponse, 'series'>> {
+  ): Promise<Omit<GenerationalComparisonResponse, 'series' | 'comparability'>> {
     const [grade] = await tx
       .select({ name: grades.name })
       .from(grades)
@@ -478,9 +527,7 @@ export class AnalyticsService {
       scope: 'student',
       subjectId: query.subjectId ?? null,
       entityId: studentId,
-      entityLabel: student
-        ? `${student.firstName} ${student.lastName}`.trim()
-        : null,
+      entityLabel: student ? `${student.firstName} ${student.lastName}`.trim() : null,
       points: rows.map((r) => this.toProgressionPoint(r)),
     };
   }
@@ -525,10 +572,7 @@ export class AnalyticsService {
       .innerJoin(assessments, eq(assessments.id, assessmentResults.assessmentId))
       .innerJoin(instruments, eq(instruments.id, assessments.instrumentId))
       .innerJoin(students, eq(students.id, assessmentResults.studentId))
-      .innerJoin(
-        studentEnrollments,
-        eq(studentEnrollments.studentId, assessmentResults.studentId),
-      )
+      .innerJoin(studentEnrollments, eq(studentEnrollments.studentId, assessmentResults.studentId))
       .where(
         and(
           eq(studentEnrollments.classGroupId, classGroupId),
@@ -538,12 +582,7 @@ export class AnalyticsService {
           ...this.instrumentFilters(query),
         ),
       )
-      .groupBy(
-        assessments.id,
-        assessments.name,
-        instruments.name,
-        assessments.administeredAt,
-      )
+      .groupBy(assessments.id, assessments.name, instruments.name, assessments.administeredAt)
       .orderBy(asc(assessments.administeredAt));
 
     return {
@@ -551,9 +590,7 @@ export class AnalyticsService {
       subjectId: query.subjectId ?? null,
       entityId: classGroupId,
       entityLabel: cg.name,
-      points: rows.map((r) =>
-        this.toProgressionPointFromAvg(r, r.avgPct),
-      ),
+      points: rows.map((r) => this.toProgressionPointFromAvg(r, r.avgPct)),
     };
   }
 
@@ -607,12 +644,7 @@ export class AnalyticsService {
       .innerJoin(instruments, eq(instruments.id, assessments.instrumentId))
       .innerJoin(students, eq(students.id, skillResults.studentId))
       .where(and(...conditions))
-      .groupBy(
-        assessments.id,
-        assessments.name,
-        instruments.name,
-        assessments.administeredAt,
-      )
+      .groupBy(assessments.id, assessments.name, instruments.name, assessments.administeredAt)
       .orderBy(asc(assessments.administeredAt));
 
     return {
@@ -661,12 +693,7 @@ export class AnalyticsService {
       .from(teacherAssignments)
       .innerJoin(subjectClasses, eq(subjectClasses.id, teacherAssignments.subjectClassId))
       .innerJoin(classGroups, eq(classGroups.id, subjectClasses.classGroupId))
-      .where(
-        and(
-          eq(teacherAssignments.userId, user.userId),
-          eq(classGroups.orgId, orgId),
-        ),
-      );
+      .where(and(eq(teacherAssignments.userId, user.userId), eq(classGroups.orgId, orgId)));
 
     const ids = Array.from(new Set(rows.map((r) => r.classGroupId)));
     return { scopeAll: false, classGroupIds: ids };
@@ -705,13 +732,7 @@ export class AnalyticsService {
     const [student] = await tx
       .select({ id: students.id })
       .from(students)
-      .where(
-        and(
-          eq(students.id, studentId),
-          eq(students.orgId, orgId),
-          isNull(students.deletedAt),
-        ),
-      )
+      .where(and(eq(students.id, studentId), eq(students.orgId, orgId), isNull(students.deletedAt)))
       .limit(1);
     if (!student) return false;
     if (scope.scopeAll) return true;
@@ -734,6 +755,8 @@ export class AnalyticsService {
   private instrumentFilters(query: {
     subjectId?: string;
     instrumentType?: string;
+    applicationPeriod?: string;
+    instrumentId?: string;
   }): SQL[] {
     const conds: SQL[] = [];
     if (query.subjectId) {
@@ -743,6 +766,12 @@ export class AnalyticsService {
       // `instruments.type` es un pgEnum; el DTO entrega string. Comparamos por
       // texto para no acoplar el contrato al enum de Drizzle.
       conds.push(sql`${instruments.type}::text = ${query.instrumentType}`);
+    }
+    if (query.applicationPeriod) {
+      conds.push(sql`${instruments.applicationPeriod}::text = ${query.applicationPeriod}`);
+    }
+    if (query.instrumentId) {
+      conds.push(eq(instruments.id, query.instrumentId));
     }
     return conds;
   }
@@ -761,16 +790,14 @@ export class AnalyticsService {
     const result = new Map<string, PerformanceDistributionBucket[]>();
     for (const [yearId, counts] of byYear) {
       const total = Array.from(counts.values()).reduce((a, b) => a + b, 0);
-      const buckets: PerformanceDistributionBucket[] = PERFORMANCE_LEVELS_ORDER.map(
-        (level) => {
-          const count = counts.get(level) ?? 0;
-          return {
-            level,
-            count,
-            percentage: total > 0 ? (count / total) * 100 : 0,
-          };
-        },
-      );
+      const buckets: PerformanceDistributionBucket[] = PERFORMANCE_LEVELS_ORDER.map((level) => {
+        const count = counts.get(level) ?? 0;
+        return {
+          level,
+          count,
+          percentage: total > 0 ? (count / total) * 100 : 0,
+        };
+      });
       result.set(yearId, buckets);
     }
     return result;
@@ -821,9 +848,7 @@ export class AnalyticsService {
       achievement,
       // Nivel derivado del promedio (percentageToPerformanceLevel espera 0..1).
       performanceLevel:
-        achievement === null
-          ? null
-          : percentageToPerformanceLevel(achievement / 100),
+        achievement === null ? null : percentageToPerformanceLevel(achievement / 100),
     };
   }
 }
