@@ -54,14 +54,20 @@ export type AiAnalysisModel = {
 // La IA razona sobre métricas deterministas (snapshot) y devuelve ESTE objeto,
 // validado con Zod tras la respuesta del modelo. Metodología en 3 capas (§3 de
 // la planificación F2): Top/Bottom 5 (entrada concreta) + brechas priorizadas +
-// causa raíz. `itemQuality` llega en S2.
+// causa raíz. Toda causa es de APRENDIZAJE: la plataforma no juzga la calidad del
+// instrumento (docs/diseno-limpieza-calidad-instrumento.md).
 // ============================================================================
 
-/** Causa probable del bajo desempeño de un ítem (deriva acción distinta). */
+/**
+ * Causa probable del bajo desempeño de un ítem (deriva acción distinta).
+ *
+ * Las tres son causas de APRENDIZAJE: los instrumentos que procesa la plataforma
+ * son estándar y validados, así que un bajo logro nunca se explica por un defecto
+ * del ítem. Ver docs/diseno-limpieza-calidad-instrumento.md.
+ */
 export const itemLikelyCauseSchema = z.enum([
   'not_taught', // no enseñado / no alcanzado a ver
   'misconception', // error conceptual (señalado por el distractor dominante)
-  'item_quality', // el ítem es defectuoso (baja D, clave ambigua)
   'insufficient_practice', // visto pero poco practicado
 ]);
 export type ItemLikelyCause = z.infer<typeof itemLikelyCauseSchema>;
@@ -70,8 +76,7 @@ export type ItemLikelyCause = z.infer<typeof itemLikelyCauseSchema>;
 export const itemPracticeCardSchema = z.object({
   position: z.number().int(),
   skillName: z.string().nullable(),
-  difficulty: z.number().nullable(), // p
-  discrimination: z.number().nullable(), // D
+  difficulty: z.number().nullable(), // % de logro del ítem, 0..1 (ver D1 del diseño)
   whatWorked: z.array(z.string()), // por qué funcionó (claridad, alineación al OA…)
   replicableAction: z.string(), // práctica reutilizable para clases
 });
@@ -124,10 +129,6 @@ export const assessmentInsightsOutputSchema = z.object({
   bottomItems: z.array(itemDiagnosisCardSchema), // 5 peores — H20.3
   skillGaps: z.array(skillDiagnosisSchema), // brechas con causa raíz — H20.4
   recommendations: z.array(aiRecommendationSchema), // priorizadas — H20.5
-  reliability: z.object({
-    kr20: z.number().nullable(),
-    interpretation: z.string(),
-  }),
   confidence: z.number().min(0).max(1), // autoevaluación del análisis — H20.7
   caveats: z.array(z.string()), // límites / datos insuficientes — H20.7
 });
@@ -135,17 +136,16 @@ export type AssessmentInsightsOutput = z.infer<typeof assessmentInsightsOutputSc
 
 // ============================================================================
 // AiAnalysisSnapshot — input DETERMINISTA que el backend ensambla (BE-1, H20.1)
-// y que el prompt consume (BE-2). Reusa AssessmentReportService (H6.13) + KR-20 /
-// punto-biserial / cobertura. NUNCA contiene PII de alumnos (sin nombres ni RUT).
+// y que el prompt consume (BE-2). Reusa AssessmentReportService (H6.13): % de logro
+// por ítem, distribución de alternativas y cobertura por habilidad. NUNCA contiene
+// PII de alumnos (sin nombres ni RUT).
 // ============================================================================
 
 export type SnapshotItem = {
   position: number;
   skillName: string | null;
   nodeId: string | null;
-  difficulty: number | null; // p (0..1)
-  discrimination: number | null; // D (Kelley 27%)
-  pointBiserial: number | null; // discriminación fina
+  difficulty: number | null; // % de logro del ítem (0..1)
   correctLabel: string | null; // alternativa correcta
   dominantDistractor: string | null; // alternativa incorrecta más elegida
   distribution: Record<string, number>; // label -> nº de respuestas
@@ -168,7 +168,6 @@ export type AiAnalysisSnapshot = {
   subjectName: string | null;
   evaluated: number; // alumnos evaluados
   enrolled: number; // matriculados (cobertura)
-  reliability: { kr20: number | null };
   items: SnapshotItem[];
   skills: SnapshotSkill[];
 };
@@ -192,14 +191,6 @@ export const generateItemInsightSchema = z.object({
 });
 export type GenerateItemInsightDto = z.infer<typeof generateItemInsightSchema>;
 
-/** Veredicto de calidad del ítem que entrega la IA (cualitativo, complementa la psicometría determinista de H20.9). */
-export const itemInsightQualityVerdictSchema = z.enum([
-  'solid', // el ítem mide bien; el resultado refleja aprendizaje real
-  'review', // hay señales (distractor potente, ambigüedad) que ameritan revisión
-  'flawed', // el ítem probablemente está defectuoso (clave/redacción)
-]);
-export type ItemInsightQualityVerdict = z.infer<typeof itemInsightQualityVerdictSchema>;
-
 /** Lectura de un distractor: qué revela elegir esa alternativa. */
 export const distractorReadingSchema = z.object({
   key: z.string(), // "A" | "B" | ...
@@ -211,16 +202,12 @@ export type DistractorReading = z.infer<typeof distractorReadingSchema>;
 export const itemInsightOutputSchema = z.object({
   headline: z.string(), // titular del análisis de la pregunta
   performanceSummary: z.string(), // por qué se obtuvo ese resultado (acierto/fallo en su contexto)
-  likelyCause: itemLikelyCauseSchema, // reusa el enum de H20.3 (not_taught | misconception | item_quality | insufficient_practice)
+  likelyCause: itemLikelyCauseSchema, // reusa el enum de H20.3 (not_taught | misconception | insufficient_practice)
   misconception: z.string().nullable(), // inferida del distractor dominante (null si no aplica)
   distractorAnalysis: z.array(distractorReadingSchema), // lectura de los distractores relevantes
   passageInsight: z.string().nullable(), // cómo el pasaje/material asociado influye (null si la pregunta no tiene pasaje)
   visualInsight: z.string().nullable(), // lectura de la imagen del ítem (null si no se adjuntó imagen)
-  itemQuality: z.object({
-    verdict: itemInsightQualityVerdictSchema,
-    notes: z.string(),
-  }),
-  recommendedActions: z.array(z.string()).min(1), // acción concreta (remediar / replicar / revisar el ítem)
+  recommendedActions: z.array(z.string()).min(1), // acción concreta de remediación o de réplica
   confidence: z.number().min(0).max(1), // autoevaluación del análisis
   caveats: z.array(z.string()), // límites (muestra chica, sin imagen, etc.)
 });
@@ -250,9 +237,7 @@ export type ItemInsightSnapshot = {
   totalResponses: number;
   blankCount: number;
   correctRate: number | null; // 0..100
-  difficulty: number | null; // p (0..1)
-  discrimination: number | null; // D (Kelley 27%)
-  pointBiserial: number | null;
+  difficulty: number | null; // % de logro del ítem (0..1)
   dominantDistractor: string | null; // alternativa incorrecta más elegida
   skillName: string | null;
   contentName: string | null;

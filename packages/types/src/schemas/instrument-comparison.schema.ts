@@ -103,8 +103,7 @@ export type ComparisonItem = {
   nodeId: string | null;
   stem: string | null; // enunciado (truncado)
   alternatives: ComparisonAlternative[]; // texto truncado
-  difficulty: number | null; // p (0..1) — mayor = más fácil
-  discrimination: number | null; // D
+  difficulty: number | null; // % de logro del ítem (0..1) — mayor = más logrado
   correctLabel: string | null;
   dominantDistractor: string | null; // alternativa incorrecta más elegida
   distribution: Record<string, number>; // label -> nº de respuestas
@@ -137,7 +136,6 @@ export type ComparisonSide = {
   studentsEvaluated: number;
   studentsEnrolled: number;
   averageAchievement: number | null; // % de logro global (0..100)
-  reliabilityKr20: number | null;
   items: ComparisonItem[];
   skills: ComparisonSkill[];
   passages: ComparisonPassage[];
