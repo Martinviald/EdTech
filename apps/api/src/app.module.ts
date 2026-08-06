@@ -32,6 +32,7 @@ import { PerformanceBandsModule } from './performance-bands/performance-bands.mo
 import { DashboardsModule } from './dashboards/dashboards.module';
 import { AnalyticsModule } from './analytics/analytics.module';
 import { HeatmapModule } from './heatmap/heatmap.module';
+import { MasterBoardModule } from './master-board/master-board.module';
 import { ItemAnalysisModule } from './item-analysis/item-analysis.module';
 import { AssessmentReportModule } from './assessment-report/assessment-report.module';
 import { JobsModule } from './jobs/jobs.module';
@@ -83,6 +84,7 @@ import { OfficialReportImportModule } from './official-report-import/official-re
     AnalyticsModule,
     // ── Sprint 5: dashboards avanzados (heatmap, tabla cruzada, distractores) ──
     HeatmapModule,
+    MasterBoardModule,
     ItemAnalysisModule,
     // ── Informe consolidado por evaluación (directivos / UTP) ──
     AssessmentReportModule,

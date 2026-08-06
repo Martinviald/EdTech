@@ -30,6 +30,7 @@ export * from './official-report-establishment.schema';
 export * from './official-report-student.schema';
 export * from './official-report-import.schema';
 export * from './heatmap.schema';
+export * from './master-board.schema';
 export * from './item-analysis.schema';
 export * from './ai-analysis.schema';
 export * from './instrument-comparison.schema';

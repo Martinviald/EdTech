@@ -32,3 +32,21 @@ export const RESULTS_RECALCULATE_ROLES: readonly UserRole[] = [
 export const DASHBOARD_VIEWER_ROLES: readonly UserRole[] = RESULTS_VIEWER_ROLES;
 export const ANALYTICS_VIEWER_ROLES: readonly UserRole[] = RESULTS_VIEWER_ROLES;
 export const HEATMAP_VIEWER_ROLES: readonly UserRole[] = RESULTS_VIEWER_ROLES;
+
+// El tablero maestro es otra VISTA sobre el mismo resultado: mismos permisos que el
+// resto de dashboards (el scoping por curso para profesores lo aplica el service).
+export const MASTER_BOARD_VIEWER_ROLES: readonly UserRole[] = RESULTS_VIEWER_ROLES;
+
+// La página de desempeño de un profesor expone datos agregados de la org enfocados en
+// un docente: sólo la ven directivos/admin (decisión P4b del diseño). Es un
+// subconjunto ESTRICTO de RESULTS_VIEWER_ROLES (excluye teacher/homeroom_teacher), así
+// que se declara aparte en vez de aliasarlo.
+export const TEACHER_PERFORMANCE_VIEWER_ROLES: readonly UserRole[] = [
+  'platform_admin',
+  'school_admin',
+  'academic_director',
+  'cycle_director',
+  'dept_head',
+  'coordinator',
+  'eval_coordinator',
+];
