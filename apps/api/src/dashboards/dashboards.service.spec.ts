@@ -1,3 +1,4 @@
+import { PgDialect } from 'drizzle-orm/pg-core';
 import type { Database } from '@soe/db';
 import type { UserRole } from '@soe/types';
 import type { JwtPayload } from '../auth/jwt-payload.types';
@@ -40,15 +41,23 @@ type QueryBuilder = {
 
 type DbMock = Database & {
   __selectIdx: () => number;
+  /** SQL compilado del `where` de la n-ésima query, para assertar predicados. */
+  __whereSql: (selectNumber: number) => string;
 };
+
+const dialect = new PgDialect();
 
 function makeDb(selectResults: unknown[][]): DbMock {
   let selectIdx = 0;
+  const whereBySelect = new Map<number, unknown>();
 
-  function buildSelectChain(rows: unknown[]): QueryBuilder {
+  function buildSelectChain(rows: unknown[], selectNumber: number): QueryBuilder {
     const chain: QueryBuilder = {
       from: () => chain,
-      where: () => chain,
+      where: (...args: unknown[]) => {
+        whereBySelect.set(selectNumber, args[0]);
+        return chain;
+      },
       innerJoin: () => chain,
       leftJoin: () => chain,
       groupBy: () => chain,
@@ -64,18 +73,23 @@ function makeDb(selectResults: unknown[][]): DbMock {
     select: () => {
       const rows = selectResults[selectIdx] ?? [];
       selectIdx++;
-      return buildSelectChain(rows);
+      return buildSelectChain(rows, selectIdx);
     },
     selectDistinct: () => {
       const rows = selectResults[selectIdx] ?? [];
       selectIdx++;
-      return buildSelectChain(rows);
+      return buildSelectChain(rows, selectIdx);
     },
     // withOrgContext() abre una transacción y fija app.current_org_id vía
     // tx.execute antes de correr el callback. El tx es el propio mock.
     execute: async () => [],
     transaction: async (fn: (tx: unknown) => unknown) => fn(db),
     __selectIdx: () => selectIdx,
+    __whereSql: (selectNumber: number) => {
+      const condition = whereBySelect.get(selectNumber);
+      if (!condition) return '';
+      return dialect.sqlToQuery(condition as Parameters<PgDialect['sqlToQuery']>[0]).sql;
+    },
   } as unknown as DbMock;
 
   return db;
@@ -468,6 +482,102 @@ describe('DashboardsService.getOverview', () => {
     const res = await svc.getOverview(makeUser({ activeRole: 'school_admin' }), {});
     expect(res.assessmentsCount).toBe(1);
     expect(res.studentsEvaluated).toBe(15);
+  });
+});
+
+// ──────────────────────────────────────────────────────────────────────────────
+// Alcance por año académico / curso
+//
+// El año y el curso viven en `class_groups`, no en el instrumento: sin cruzar los
+// assessments contra los cursos del alcance, filtrar por 2026 seguía trayendo las
+// evaluaciones de 2025 del mismo instrumento-hermano (misma asignatura y nivel).
+// ──────────────────────────────────────────────────────────────────────────────
+
+describe('DashboardsService — alcance por año académico', () => {
+  const YEAR_QUERY = { academicYearId: 'ay-2026' };
+
+  it('filtrar por año acota las evaluaciones a los cursos de ese año', async () => {
+    const db = makeDb([
+      // 1. resolveScopedStudentIds (hay filtro de año → consulta)
+      [{ studentId: 's1' }],
+      // 2. resolveScopedClassGroupIds → cursos del 2026
+      [{ id: 'cg-2026-a' }, { id: 'cg-2026-b' }],
+      // 3. resolveScopedAssessments
+      [scopedAssessment('a-2026')],
+      // 4. métricas per-alumno
+      [{ studentsEvaluated: 40 }],
+      // 5. resultAssessmentIds
+      [{ assessmentId: 'a-2026' }],
+      // 6. read-model de cohorte
+      [],
+    ]);
+    const svc = makeService(db);
+    const res = await svc.getOverview(makeUser({ activeRole: 'school_admin' }), YEAR_QUERY);
+
+    const assessmentsWhere = db.__whereSql(3);
+    expect(assessmentsWhere).toContain('"assessment_course_assignments"');
+    expect(assessmentsWhere).toContain('"class_group_id" in');
+    expect(res.assessmentsCount).toBe(1);
+  });
+
+  it('una evaluación sin cursos asignados sigue visible (no se puede ubicar en un año)', async () => {
+    const db = makeDb([
+      [{ studentId: 's1' }],
+      [{ id: 'cg-2026-a' }],
+      [scopedAssessment('a-sin-curso')],
+      [{ studentsEvaluated: 10 }],
+      [{ assessmentId: 'a-sin-curso' }],
+      [],
+    ]);
+    const svc = makeService(db);
+    await svc.getOverview(makeUser({ activeRole: 'school_admin' }), YEAR_QUERY);
+
+    expect(db.__whereSql(3)).toContain('not exists');
+  });
+
+  it('un año sin cursos no consulta evaluaciones: alcance vacío', async () => {
+    const db = makeDb([
+      // 1. resolveScopedStudentIds → hay alumnos (matriculados en otros años)
+      [{ studentId: 's1' }],
+      // 2. resolveScopedClassGroupIds → el año pedido no tiene cursos
+      [],
+    ]);
+    const svc = makeService(db);
+    const res = await svc.getOverview(makeUser({ activeRole: 'school_admin' }), YEAR_QUERY);
+
+    expect(res.assessmentsCount).toBe(0);
+    expect(db.__selectIdx()).toBe(2);
+  });
+
+  it('el panorama comparable hereda el mismo alcance por curso', async () => {
+    const db = makeDb([
+      // 1. resolveScopedClassGroupIds
+      [{ id: 'cg-2026-a' }],
+      // 2. resolveScopedAssessments
+      [scopedAssessment('a-2026')],
+    ]);
+    const svc = makeService(db);
+    const scope = await svc.resolveScopeForComparableOverview(
+      makeUser({ activeRole: 'school_admin' }),
+      YEAR_QUERY,
+    );
+
+    expect(scope?.assessmentIds).toEqual(['a-2026']);
+    expect(db.__whereSql(2)).toContain('"assessment_course_assignments"');
+  });
+
+  it('sin filtro de año ni de curso el alcance no se restringe por curso', async () => {
+    const db = makeDb([
+      // 1. resolveScopedAssessments (resolveScopedClassGroupIds retorna null sin consultar)
+      [scopedAssessment('a1')],
+      [{ studentsEvaluated: 30 }],
+      [{ assessmentId: 'a1' }],
+      [],
+    ]);
+    const svc = makeService(db);
+    await svc.getOverview(makeUser({ activeRole: 'school_admin' }), {});
+
+    expect(db.__whereSql(1)).not.toContain('"assessment_course_assignments"');
   });
 });
 
