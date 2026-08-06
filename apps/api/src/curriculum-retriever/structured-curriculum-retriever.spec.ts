@@ -369,8 +369,9 @@ describe('StructuredCurriculumRetriever', () => {
       { key: 'A', text: 'Uno', isCorrect: false },
       { key: 'B', text: 'Dos', isCorrect: true },
     ]);
-    // Tipo sin alternativas → null (degradación elegante), stem del prompt no aplica.
-    expect(byId.oe).toMatchObject({ stem: null, alternatives: null, correctKey: null });
+    // Tipo sin alternativas: éstas degradan a null, pero el enunciado SÍ se extrae
+    // (vive en `prompt`, no en `stem`) — si no, el ítem llega sin texto al contexto.
+    expect(byId.oe).toMatchObject({ stem: 'Explica', alternatives: null, correctKey: null });
     // stem no-string → null.
     expect(byId.bad!.stem).toBeNull();
   });

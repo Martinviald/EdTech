@@ -49,6 +49,7 @@ import {
   type QuestionSection,
   type QuestionTaxonomyTag,
   type UserRole,
+  extractItemStem,
 } from '@soe/types';
 import type { JwtPayload } from '../auth/jwt-payload.types';
 import { loadCohortAchievementByAssessment } from '../common/helpers/cohort-item-stats.helper';
@@ -545,7 +546,7 @@ export class ItemAnalysisService {
         itemId,
         position: item.position,
         type: item.type,
-        stem: typeof content.stem === 'string' ? content.stem : null,
+        stem: extractItemStem(content),
         imageUrl: typeof content.imageUrl === 'string' ? content.imageUrl : null,
         // La figura vive en `files` (owner_type='item'); acá solo se expone el flag
         // para que la UI decida si ofrecer el botón, sin firmar una URL por ítem.

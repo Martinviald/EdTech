@@ -1,10 +1,11 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { and, eq, inArray, isNull, ne, or, type SQL } from 'drizzle-orm';
 import { instruments, items, itemTaxonomyTags, taxonomyNodes } from '@soe/db';
-import type {
-  TaggedItemAlternative,
-  TaggedItemRef,
-  TaxonomyNodeRef,
+import {
+  extractItemStem,
+  type TaggedItemAlternative,
+  type TaggedItemRef,
+  type TaxonomyNodeRef,
 } from '@soe/types';
 import { InjectDb, type Database } from '../database/database.types';
 import {
@@ -309,7 +310,7 @@ function toTaggedItemRef(row: TaggedItemRow, targetNode: TaxonomyNodeRow): Tagge
     itemId: row.itemId,
     position: row.position,
     type: row.type,
-    stem: extractStem(row.content),
+    stem: extractItemStem(row.content),
     alternatives,
     correctKey: extractCorrectKey(alternatives),
     explanation: extractExplanation(row.content),
@@ -320,21 +321,8 @@ function toTaggedItemRef(row: TaggedItemRow, targetNode: TaxonomyNodeRow): Tagge
 }
 
 /**
- * Extrae `content.stem` de forma defensiva: el contenido es polimórfico por
- * `item_type` y no todos los shapes tienen `stem`. Devuelve `null` si no existe
- * o no es string.
- */
-function extractStem(content: unknown): string | null {
-  if (content && typeof content === 'object' && 'stem' in content) {
-    const stem = (content as { stem?: unknown }).stem;
-    if (typeof stem === 'string') return stem;
-  }
-  return null;
-}
-
-/**
  * Extrae `content.alternatives` como lista `{key,text,isCorrect}` de forma
- * defensiva (mismo criterio que `extractStem`). Solo los tipos con alternativas
+ * defensiva (mismo criterio que `extractItemStem`). Solo los tipos con alternativas
  * (`multiple_choice`, `listening`) las traen; el resto degrada a `null`. El banco
  * puede tener contenido heterogéneo, por eso se parsea campo a campo en lugar de
  * validar contra el schema estricto (que rechazaría un ítem entero por un detalle).

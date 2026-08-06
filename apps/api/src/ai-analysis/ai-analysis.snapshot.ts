@@ -9,13 +9,14 @@ import {
   taxonomyNodes,
   withOrgContext,
 } from '@soe/db';
-import type {
-  AiAnalysisSnapshot,
-  SnapshotItem,
-  SnapshotSkill,
-  UserRole,
-  AssessmentReportItemRow,
-  AssessmentReportResponse,
+import {
+  extractItemStem,
+  type AiAnalysisSnapshot,
+  type SnapshotItem,
+  type SnapshotSkill,
+  type UserRole,
+  type AssessmentReportItemRow,
+  type AssessmentReportResponse,
 } from '@soe/types';
 import type { JwtPayload } from '../auth/jwt-payload.types';
 import { InjectDb, type Database } from '../database/database.types';
@@ -192,7 +193,7 @@ export class SnapshotService implements SnapshotBuilder {
     return rows.map((r) => ({
       itemId: r.itemId,
       position: r.position,
-      stem: extractStem(r.content),
+      stem: extractItemStem(r.content),
       skillNodeId: skillByItem.get(r.itemId) ?? null,
       distribution: distributionByItem.get(r.itemId) ?? {},
     }));
@@ -333,10 +334,3 @@ type ItemMeta = {
   skillNodeId: string | null;
   distribution: Record<string, number>;
 };
-
-/** Extrae `content.stem` de forma defensiva (contenido polimórfico por type). */
-function extractStem(content: unknown): string | null {
-  if (!content || typeof content !== 'object') return null;
-  const stem = (content as { stem?: unknown }).stem;
-  return typeof stem === 'string' && stem.length > 0 ? stem : null;
-}
