@@ -79,9 +79,7 @@ export function MasterBoardTable({
   canViewTeacher: boolean;
 }) {
   const { subjects, grades, primaryMetricKey } = data;
-  const [expanded, setExpanded] = useState<Set<string>>(
-    () => new Set(grades.map((g) => g.gradeId)),
-  );
+  const [expanded, setExpanded] = useState<Set<string>>(() => new Set());
 
   const toggle = (gradeId: string) => {
     setExpanded((prev) => {
