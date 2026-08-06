@@ -7,7 +7,7 @@
 // Cada panel pasa su cuerpo específico como `children`.
 
 import { useState, type JSX, type ReactNode } from 'react';
-import { BookOpen, ImageIcon } from 'lucide-react';
+import { BookOpen, ImageIcon, Maximize2, Minimize2 } from 'lucide-react';
 import {
   Sheet,
   SheetContent,
@@ -20,6 +20,7 @@ import { Button } from '@/components/ui/button';
 import { PassageDialog, type PassageData } from '@/components/passage-dialog';
 import { ItemFigureDialog } from '@/components/item-figure-dialog';
 import { useResizablePanelWidth, PanelResizeHandle } from '@/hooks/use-resizable-panel-width';
+import { cn } from '@/lib/utils';
 
 export function QuestionDetailSheet(props: {
   open: boolean;
@@ -62,6 +63,9 @@ export function QuestionDetailSheet(props: {
 
   const [passageOpen, setPassageOpen] = useState(false);
   const [figureOpen, setFigureOpen] = useState(false);
+  // Modo pantalla completa: expande el MISMO panel (no remonta el cuerpo), así el
+  // análisis IA ya generado se conserva al maximizar/minimizar.
+  const [maximized, setMaximized] = useState(false);
   const { width, onPointerDown, onKeyDown } = useResizablePanelWidth({
     storageKey,
     defaultWidth,
@@ -74,17 +78,35 @@ export function QuestionDetailSheet(props: {
     <Sheet open={open} onOpenChange={(next) => (next ? undefined : onClose())}>
       <SheetContent
         side="right"
-        style={{ width, maxWidth: '95vw' }}
-        className="w-full max-w-none overflow-y-auto"
+        style={maximized ? { width: '100vw', maxWidth: '100vw' } : { width, maxWidth: '95vw' }}
+        className={cn('w-full max-w-none overflow-y-auto', maximized && 'sm:max-w-none')}
       >
-        {/* Tirador de redimensionado en el borde izquierdo (panel ancla derecha). */}
-        <PanelResizeHandle onPointerDown={onPointerDown} onKeyDown={onKeyDown} />
+        {/* Tirador de redimensionado en el borde izquierdo (oculto en pantalla completa). */}
+        {maximized ? null : (
+          <PanelResizeHandle onPointerDown={onPointerDown} onKeyDown={onKeyDown} />
+        )}
         {/* Header SIEMPRE presente (Radix Dialog exige Title + Description). */}
         <SheetHeader className="space-y-2 pr-8">
           <div className="flex flex-wrap items-center gap-2">
             <Badge variant="secondary">{hasPosition ? `Pregunta ${position}` : 'Pregunta'}</Badge>
             {headerBadges}
-            {headerActions ? <div className="ml-auto">{headerActions}</div> : null}
+            <div className="ml-auto flex items-center gap-1">
+              {headerActions}
+              <Button
+                type="button"
+                variant="ghost"
+                size="icon"
+                onClick={() => setMaximized((v) => !v)}
+                aria-label={maximized ? 'Salir de pantalla completa' : 'Ver en pantalla completa'}
+                title={maximized ? 'Salir de pantalla completa' : 'Ver en pantalla completa'}
+              >
+                {maximized ? (
+                  <Minimize2 className="size-4" aria-hidden />
+                ) : (
+                  <Maximize2 className="size-4" aria-hidden />
+                )}
+              </Button>
+            </div>
           </div>
           <SheetTitle className="text-base leading-snug">
             {hasPosition ? `Detalle de la pregunta ${position}` : 'Detalle de la pregunta'}
@@ -120,7 +142,7 @@ export function QuestionDetailSheet(props: {
           </div>
         ) : null}
 
-        {children}
+        {maximized ? <div className="mx-auto w-full max-w-4xl">{children}</div> : children}
       </SheetContent>
 
       {/* Los diálogos van FUERA del SheetContent: son portales de Radix que deben

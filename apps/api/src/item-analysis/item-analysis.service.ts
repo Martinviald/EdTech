@@ -26,12 +26,16 @@ import {
   RESULT_HIDDEN_NODE_TYPES,
   TRUE_FALSE_KEYS,
   TRUE_FALSE_LABELS,
+  DEVELOPMENT_BUCKETS,
+  SCORE_CATEGORY_META,
+  deriveAnswerKey,
   isTrueFalseContent,
   parseSelectedKeys,
   mergeAnswerCounts,
   trueFalseKeyOf,
   userHasAnyRole,
   type AlternativeDistribution,
+  type ScoreCategoryDistribution,
   type AssessmentListQueryDto,
   type AssessmentListResponse,
   type AssessmentOption,
@@ -49,6 +53,7 @@ import {
   type QuestionSection,
   type QuestionTaxonomyTag,
   type UserRole,
+  type ItemType,
   extractItemStem,
 } from '@soe/types';
 import type { JwtPayload } from '../auth/jwt-payload.types';
@@ -563,6 +568,26 @@ export class ItemAnalysisService {
         correctRate,
         references,
         alternatives,
+        answerKey: deriveAnswerKey(item.type as ItemType, content as Record<string, unknown>),
+        scoreDistribution:
+          altDefs.length === 0 ? this.buildScoreDistribution(countByKey, totalResponses) : null,
+      };
+    });
+  }
+
+  private buildScoreDistribution(
+    countByKey: Map<string, number>,
+    totalResponses: number,
+  ): ScoreCategoryDistribution[] {
+    return DEVELOPMENT_BUCKETS.map((key) => {
+      const count = countByKey.get(key) ?? 0;
+      const meta = SCORE_CATEGORY_META[key];
+      return {
+        key,
+        label: meta.label,
+        count,
+        percentage: totalResponses > 0 ? (count / totalResponses) * 100 : 0,
+        credit: meta.credit,
       };
     });
   }
