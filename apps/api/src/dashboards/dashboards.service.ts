@@ -165,7 +165,9 @@ export class DashboardsService {
       const studentIds = await this.resolveScopedStudentIds(tx, orgId, scope, query);
       if (studentIds !== null && studentIds.length === 0) return empty;
 
-      const scoped = await this.resolveScopedAssessments(tx, orgId, query);
+      const cohortClassGroupIds = await this.resolveScopedClassGroupIds(tx, orgId, scope, query);
+
+      const scoped = await this.resolveScopedAssessments(tx, orgId, query, cohortClassGroupIds);
       const assessmentIds = scoped.ids;
       if (assessmentIds.length === 0) {
         return { ...empty, scope: isTeacherScope ? 'teacher' : 'org' };
@@ -199,7 +201,6 @@ export class DashboardsService {
       // ── Parte de cohorte (`assessment_item_stats`) — informes agregados ────────
       // Un informe oficial DIA cargado en modo aggregate_only no tiene filas per-alumno
       // pero sí read-model de cohorte. Su scope es por curso (no por alumno).
-      const cohortClassGroupIds = await this.resolveScopedClassGroupIds(tx, orgId, scope, query);
       const cohortByAssessment = await loadCohortAchievementByAssessment(
         tx,
         assessmentIds,
@@ -244,6 +245,7 @@ export class DashboardsService {
         scope,
         query,
         studentIds,
+        cohortClassGroupIds,
       );
 
       return {
@@ -473,7 +475,9 @@ export class DashboardsService {
       const studentIds = await this.resolveScopedStudentIds(tx, orgId, scope, query);
       if (studentIds !== null && studentIds.length === 0) return empty;
 
-      const scoped = await this.resolveScopedAssessments(tx, orgId, query);
+      const classGroupIds = await this.resolveScopedClassGroupIds(tx, orgId, scope, query);
+
+      const scoped = await this.resolveScopedAssessments(tx, orgId, query, classGroupIds);
       const assessmentIds = scoped.ids;
       if (assessmentIds.length === 0) {
         return {
@@ -653,12 +657,14 @@ export class DashboardsService {
         : null;
       if (studentIds !== null && studentIds.length === 0) return empty;
 
-      const classGroupIds = perStudent
-        ? null
-        : await this.resolveScopedClassGroupIds(tx, orgId, scope, query);
+      // El alcance de cursos acota SIEMPRE qué evaluaciones entran (ahí viven el año
+      // académico y el curso); como filtro del read-model de cohorte, en cambio, sólo
+      // aplica cuando la lectura no es per-alumno.
+      const scopedClassGroupIds = await this.resolveScopedClassGroupIds(tx, orgId, scope, query);
+      const classGroupIds = perStudent ? null : scopedClassGroupIds;
       if (classGroupIds !== null && classGroupIds.length === 0) return empty;
 
-      const scoped = await this.resolveScopedAssessments(tx, orgId, query);
+      const scoped = await this.resolveScopedAssessments(tx, orgId, query, scopedClassGroupIds);
       const assessmentIds = scoped.ids;
       if (assessmentIds.length === 0) return empty;
 
@@ -890,12 +896,16 @@ export class DashboardsService {
         : null;
       if (studentIds !== null && studentIds.length === 0) return empty;
 
-      const classGroupIds = perStudent
-        ? null
-        : await this.resolveScopedClassGroupIds(tx, orgId, scope, query);
+      const scopedClassGroupIds = await this.resolveScopedClassGroupIds(tx, orgId, scope, query);
+      const classGroupIds = perStudent ? null : scopedClassGroupIds;
       if (classGroupIds !== null && classGroupIds.length === 0) return empty;
 
-      const assessmentIds = await this.resolveScopedAssessmentIds(tx, orgId, query);
+      const assessmentIds = await this.resolveScopedAssessmentIds(
+        tx,
+        orgId,
+        query,
+        scopedClassGroupIds,
+      );
       if (assessmentIds.length === 0) return empty;
 
       const resolvedThresholds = await this.resolveThresholds(tx, orgId, query, assessmentIds);
@@ -1239,9 +1249,9 @@ export class DashboardsService {
       const subjectByCourse = await this.loadSubjectNamesByClassGroup(tx, courseIds);
 
       // passing_grade de la escala aplicable (default 4.0).
-      const passingGrade = await this.resolvePassingGrade(tx, orgId, query);
+      const passingGrade = await this.resolvePassingGrade(tx, orgId, query, courseIds);
 
-      const assessmentIds = await this.resolveScopedAssessmentIds(tx, orgId, query);
+      const assessmentIds = await this.resolveScopedAssessmentIds(tx, orgId, query, courseIds);
 
       const courses: TeacherCourseKpiModel[] = [];
       for (const c of courseRows) {
@@ -1348,7 +1358,7 @@ export class DashboardsService {
       }
 
       const classGroupIds = await this.resolveScopedClassGroupIds(tx, orgId, scope, query);
-      const scoped = await this.resolveScopedAssessments(tx, orgId, query);
+      const scoped = await this.resolveScopedAssessments(tx, orgId, query, classGroupIds);
       return {
         orgId,
         isTeacherScope,
@@ -1529,14 +1539,16 @@ export class DashboardsService {
 
   /**
    * Conjunto de assessmentIds de la org que matchean los filtros de
-   * instrumento/asignatura/grado/evaluación. Siempre acotado a la org.
+   * instrumento/asignatura/grado/evaluación, acotado a los cursos del alcance.
+   * Siempre acotado a la org.
    */
   private async resolveScopedAssessmentIds(
     tx: Database,
     orgId: string,
     query: DashboardFiltersQueryDto,
+    classGroupIds: string[] | null,
   ): Promise<string[]> {
-    return (await this.resolveScopedAssessments(tx, orgId, query)).ids;
+    return (await this.resolveScopedAssessments(tx, orgId, query, classGroupIds)).ids;
   }
 
   /**
@@ -1544,13 +1556,24 @@ export class DashboardsService {
    * participan de él. Van juntos a propósito: la comparabilidad se deriva de los
    * mismos instrumentos que esta query ya joinea, así que resolverla no cuesta un
    * viaje extra a la base.
+   *
+   * `classGroupIds` son los cursos del alcance (`resolveScopedClassGroupIds`):
+   * `null` = sin restricción por curso, `[]` = ningún curso visible. Es el ÚNICO
+   * lugar donde entran los filtros de año académico y de curso: viven en
+   * `class_groups`, no en el instrumento, así que sin este cruce un filtro por año
+   * no acota nada y el alcance arrastra las evaluaciones de todos los años (y de
+   * todos los cursos) que compartan asignatura y nivel.
    */
   private async resolveScopedAssessments(
     tx: Database,
     orgId: string,
     query: DashboardFiltersQueryDto,
+    classGroupIds: string[] | null,
   ): Promise<ScopedAssessments> {
+    if (classGroupIds !== null && classGroupIds.length === 0) return { ids: [], refs: [] };
+
     const conditions = [eq(assessments.orgId, orgId), isNull(instruments.deletedAt)];
+    if (classGroupIds !== null) conditions.push(this.inClassGroups(classGroupIds));
     if (query.assessmentId) conditions.push(eq(assessments.id, query.assessmentId));
     if (query.instrumentId) conditions.push(eq(assessments.instrumentId, query.instrumentId));
     if (query.instrumentType?.length) {
@@ -1593,6 +1616,25 @@ export class DashboardsService {
       });
     }
     return { ids: Array.from(ids), refs: Array.from(byInstrument.values()) };
+  }
+
+  /**
+   * Predicado "esta evaluación pertenece a alguno de estos cursos".
+   *
+   * El `OR notExists` no es una concesión: una evaluación SIN ninguna fila en
+   * `assessment_course_assignments` no puede ubicarse en un año ni en un curso, y hoy
+   * el flujo de ingesta de hojas de respuesta (`AnswerSheetsService.confirm`) crea
+   * evaluaciones así. Con un `EXISTS` a secas desaparecerían del panorama apenas hay
+   * filtro de año — que viene puesto por defecto. Se mantienen visibles, como hoy,
+   * hasta que ese flujo escriba sus cursos.
+   */
+  private inClassGroups(classGroupIds: string[]): SQL {
+    const belongsToScope = and(
+      eq(assessmentCourseAssignments.assessmentId, assessments.id),
+      inArray(assessmentCourseAssignments.classGroupId, classGroupIds),
+    );
+    const hasAnyCourse = eq(assessmentCourseAssignments.assessmentId, assessments.id);
+    return sql`(exists (select 1 from ${assessmentCourseAssignments} where ${belongsToScope}) or not exists (select 1 from ${assessmentCourseAssignments} where ${hasAnyCourse}))`;
   }
 
   /**
@@ -1692,8 +1734,9 @@ export class DashboardsService {
     scope: Scope,
     query: DashboardFiltersQueryDto,
     studentIds: string[] | null,
+    classGroupIds: string[] | null,
   ): Promise<{ data: DashboardAssessmentSummary[]; total: number }> {
-    const assessmentIds = await this.resolveScopedAssessmentIds(tx, orgId, query);
+    const assessmentIds = await this.resolveScopedAssessmentIds(tx, orgId, query, classGroupIds);
     if (assessmentIds.length === 0) return EMPTY_RECENT_ASSESSMENTS;
 
     // Teacher scoping: si el caller está acotado a un set de alumnos
@@ -1976,8 +2019,9 @@ export class DashboardsService {
     tx: Database,
     orgId: string,
     query: DashboardFiltersQueryDto,
+    classGroupIds: string[] | null,
   ): Promise<number> {
-    const assessmentIds = await this.resolveScopedAssessmentIds(tx, orgId, query);
+    const assessmentIds = await this.resolveScopedAssessmentIds(tx, orgId, query, classGroupIds);
     const scale = await this.resolveApplicableScale(tx, orgId, query, assessmentIds);
     return scale ? Number(scale.passingGrade) : 4;
   }
