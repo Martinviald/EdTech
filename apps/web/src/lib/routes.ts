@@ -42,6 +42,7 @@ export const ROUTES = {
   estudiante: (studentId: string) => route(`/estudiantes/${studentId}`),
 
   resultados: route('/resultados'),
+  resultadosTableroMaestro: route('/resultados/tablero-maestro'),
   resultadosClasificacion: route('/resultados/clasificacion'),
   resultadosComparacion: route('/resultados/comparacion'),
   resultadosDetalle: route('/resultados/detalle'),
@@ -88,6 +89,7 @@ export const ROUTES = {
   benchmarking: route('/benchmarking'),
   compararInstrumentos: route('/comparar-instrumentos'),
   equipo: route('/equipo'),
+  equipoMiembro: (userId: string) => route(`/equipo/${userId}`),
   alumnos: route('/alumnos'),
   instrumentoEnunciado: (instrumentId: string) => route(`/instrumentos/${instrumentId}/enunciado`),
   marcosAcademicos: route('/marcos-academicos'),

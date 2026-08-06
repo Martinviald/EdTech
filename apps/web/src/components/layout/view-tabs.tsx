@@ -8,6 +8,7 @@ import {
   Library,
   ListChecks,
   Lightbulb,
+  Table2,
   TrendingUp,
   UsersRound,
   type LucideIcon,
@@ -25,6 +26,7 @@ export type ViewTab = { href: string; label: string; icon: LucideIcon; exact?: b
 
 export const RESULTADOS_TABS: readonly ViewTab[] = [
   { href: ROUTES.resultados, label: 'Resumen', icon: LayoutDashboard, exact: true },
+  { href: ROUTES.resultadosTableroMaestro, label: 'Tablero maestro', icon: Table2, exact: true },
   { href: ROUTES.resultadosClasificacion, label: 'Clasificación', icon: Layers, exact: true },
   { href: ROUTES.resultadosDimensiones, label: 'Dimensiones', icon: Lightbulb, exact: true },
   { href: ROUTES.resultadosMapaCalor, label: 'Mapa de calor', icon: Grid3x3, exact: true },
