@@ -22,13 +22,9 @@ import { isFeatureEnabled } from '@/lib/features';
 import { GenerateButton } from '../../../analisis-ia/components/generate-button';
 import { AnalysisPoller } from '../../../analisis-ia/components/analysis-poller';
 import { AnalysisReport } from '../../../analisis-ia/components/analysis-report';
+import { pickParam } from '../data';
 
 export const dynamic = 'force-dynamic';
-
-function pickParam(raw: string | string[] | undefined): string | undefined {
-  const value = Array.isArray(raw) ? raw[0] : raw;
-  return value && value.length > 0 ? value : undefined;
-}
 
 export default async function EvaluacionAnalisisIaPage({
   params,

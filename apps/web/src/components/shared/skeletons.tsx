@@ -1,14 +1,27 @@
 import { Skeleton } from '@/components/ui/skeleton';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
+import { cn } from '@/lib/utils';
 
 /**
  * Skeletons por arquetipo, para los fallbacks de `<Suspense>` y los `loading.tsx`.
  * Que el placeholder CALCE con la vista destino (no un spinner genérico).
  */
 
-export function FilterBarSkeleton({ fields = 5 }: { fields?: number }) {
+export function FilterBarSkeleton({
+  fields = 5,
+  className,
+}: {
+  fields?: number;
+  /** Debe calzar con el `className` de la `FilterBar` real (p. ej. su ancho máximo). */
+  className?: string;
+}) {
   return (
-    <div className="flex flex-wrap items-end gap-3 rounded-xl border border-primary/20 bg-primary/5 p-4">
+    <div
+      className={cn(
+        'flex flex-wrap items-end gap-3 rounded-xl border border-primary/20 bg-primary/5 p-4',
+        className,
+      )}
+    >
       {Array.from({ length: fields }).map((_, i) => (
         <div key={i} className="flex min-w-[180px] flex-1 flex-col gap-1.5">
           <Skeleton className="h-3 w-20" />

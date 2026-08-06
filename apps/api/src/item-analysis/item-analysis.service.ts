@@ -135,6 +135,11 @@ export class ItemAnalysisService {
       if (query.instrumentType?.length) {
         conditions.push(inArray(sql`${instruments.type}::text`, query.instrumentType));
       }
+      if (query.applicationPeriod?.length) {
+        conditions.push(
+          inArray(sql`${instruments.applicationPeriod}::text`, query.applicationPeriod),
+        );
+      }
       if (query.gradeId?.length) conditions.push(inArray(classGroups.gradeId, query.gradeId));
       if (query.classGroupId?.length) {
         conditions.push(inArray(assessmentCourseAssignments.classGroupId, query.classGroupId));
@@ -346,6 +351,8 @@ export class ItemAnalysisService {
         const byItem = cellsByStudent.get(s.studentId) ?? new Map<string, MatrixCell>();
         let correctCount = 0;
         let answeredCount = 0;
+        let scoreSum = 0;
+        let maxSum = 0;
         const cells: MatrixCell[] = itemIds.map((itemId) => {
           const cell = byItem.get(itemId);
           if (!cell) {
@@ -353,13 +360,19 @@ export class ItemAnalysisService {
           }
           if (cell.selectedKey !== null) answeredCount++;
           if (cell.isCorrect === true) correctCount++;
+          if (cell.isCorrect !== null && cell.maxScore !== null) {
+            scoreSum += cell.score ?? 0;
+            maxSum += cell.maxScore;
+          }
           return cell;
         });
 
-        // % logro: de assessment_results.percentage si existe, si no derivado.
+        // % logro: de assessment_results.percentage si existe, si no derivado del
+        // PUNTAJE de los ítems corregidos (no del conteo de aciertos, que daría 0
+        // en los de crédito parcial y excluiría el aporte de los pendientes).
         let achievement: number | null = s.percentage != null ? Number(s.percentage) : null;
-        if (achievement === null && answeredCount > 0) {
-          achievement = (correctCount / answeredCount) * 100;
+        if (achievement === null && maxSum > 0) {
+          achievement = (scoreSum / maxSum) * 100;
         }
 
         return {
@@ -458,7 +471,7 @@ export class ItemAnalysisService {
       const section = item.sectionId ? await this.loadQuestionSection(tx, item.sectionId) : null;
 
       // ── Distribución agregada por valor de respuesta (read-model de cohorte) ──
-      const dist = await this.loadAnswerDistribution(
+      const { buckets: dist, achievementRate } = await this.loadAnswerDistribution(
         tx,
         itemId,
         query.assessmentId,
@@ -496,7 +509,7 @@ export class ItemAnalysisService {
         if (row.isCorrect) correctCount += row.count;
       }
 
-      const correctRate = totalResponses > 0 ? (correctCount / totalResponses) * 100 : null;
+      const correctRate = achievementRate;
 
       // T2-17 — referencias comparativas: % de logro de la MISMA pregunta en el
       // colegio (toda la org) y en el nivel/grado. Independientes del scope del
@@ -637,11 +650,13 @@ export class ItemAnalysisService {
    * cursos tienen N distinto y promediar sus % los ponderaría igual. Por eso el
    * read-model guarda enteros y el % se recalcula acá sobre el total recombinado.
    *
-   * Paridad con el `GROUP BY` sobre `responses` que reemplaza:
-   *  · `responseCount` es el `count(*)` de filas de respuesta del ítem → incluye los
-   *    blancos en el denominador, igual que antes.
-   *  · `correctCount` es el `sum(case when is_correct = true ...)` → `null` sigue
-   *    contando como incorrecto (no se excluye del denominador).
+   * El % se pondera por PUNTAJE (`scoreSum/maxSum`), no por conteo de aciertos:
+   * un ítem de crédito parcial bien respondido daba 0% con `correctCount`, porque
+   * ese contador sólo suma los que obtuvieron el máximo. En un ítem dicotómico sin
+   * pendientes ambas fórmulas coinciden, así que el número no cambia.
+   *
+   * Los pendientes de corrección no entran a `maxSum` (ver `aggregateItemStats`),
+   * así que un ítem sin corregir queda sin tasa en vez de aparecer en 0%.
    */
   private async attachCorrectRates(
     tx: Database,
@@ -655,30 +670,7 @@ export class ItemAnalysisService {
       return questions.map((q) => ({ ...q, correctRate: null }));
     }
 
-    const conditions = [
-      eq(assessmentItemStats.assessmentId, assessmentId),
-      inArray(assessmentItemStats.itemId, itemIds),
-    ];
-    if (classGroupFilter !== null) {
-      conditions.push(inArray(assessmentItemStats.classGroupId, classGroupFilter));
-    }
-
-    const rows = await tx
-      .select({
-        itemId: assessmentItemStats.itemId,
-        total: sql<number>`sum(${assessmentItemStats.responseCount})::int`,
-        correct: sql<number>`sum(${assessmentItemStats.correctCount})::int`,
-      })
-      .from(assessmentItemStats)
-      .where(and(...conditions))
-      .groupBy(assessmentItemStats.itemId);
-
-    const rateByItem = new Map<string, number>();
-    for (const r of rows) {
-      const total = Number(r.total);
-      const correct = Number(r.correct);
-      rateByItem.set(r.itemId, total > 0 ? (correct / total) * 100 : 0);
-    }
+    const rateByItem = await this.loadAchievementRates(tx, assessmentId, itemIds, classGroupFilter);
 
     return questions.map((q) => ({
       ...q,
@@ -792,6 +784,8 @@ export class ItemAnalysisService {
       studentCount: number;
       responseCount: number;
       correctCount: number;
+      scoreSum: string | null;
+      maxSum: string | null;
     }>
   > {
     return tx
@@ -801,6 +795,8 @@ export class ItemAnalysisService {
         studentCount: assessmentItemStats.studentCount,
         responseCount: assessmentItemStats.responseCount,
         correctCount: assessmentItemStats.correctCount,
+        scoreSum: assessmentItemStats.scoreSum,
+        maxSum: assessmentItemStats.maxSum,
       })
       .from(assessmentItemStats)
       .innerJoin(assessments, eq(assessments.id, assessmentItemStats.assessmentId))
@@ -819,9 +815,13 @@ export class ItemAnalysisService {
   /**
    * Agrega las filas del read-model en (a) conteos por ítem — las celdas de la
    * fila de referencia — y (b) el resumen de toda la población, que es
-   * `sum(correctCount) / sum(responseCount)` sobre TODAS las respuestas de TODOS
-   * sus alumnos. Nunca un promedio de los % por curso: los cursos tienen N distinto
-   * y promediar sus % los ponderaría igual (mismo criterio que `attachCorrectRates`).
+   * `sum(scoreSum) / sum(maxSum)` sobre TODAS las respuestas de TODOS sus alumnos.
+   * Nunca un promedio de los % por curso: los cursos tienen N distinto y promediar
+   * sus % los ponderaría igual (mismo criterio que `attachCorrectRates`).
+   *
+   * Los conteos `responseCount`/`correctCount` se siguen reportando tal cual —son
+   * "cuántos respondieron" y "cuántos lo lograron entero"—, pero la TASA se pondera
+   * por puntaje para no dar 0% en los ítems de crédito parcial.
    *
    * `studentCount` viene por (assessment, curso, ítem) y se repite en cada ítem del
    * mismo curso → se toma el `max` por curso y recién ahí se suma; si no, se
@@ -834,6 +834,8 @@ export class ItemAnalysisService {
       studentCount: number;
       responseCount: number;
       correctCount: number;
+      scoreSum: string | null;
+      maxSum: string | null;
     }>,
   ): {
     byItem: Map<string, ReferenceRate>;
@@ -841,26 +843,35 @@ export class ItemAnalysisService {
   } {
     const byItem = new Map<string, ReferenceRate>();
     const studentsByGroup = new Map<string, number>();
-    let totalResponses = 0;
-    let totalCorrect = 0;
+    let totalScore = 0;
+    let totalMax = 0;
+    const weightByItem = new Map<string, { scoreSum: number; maxSum: number }>();
 
     for (const r of rows) {
       const responseCount = Number(r.responseCount);
       const correctCount = Number(r.correctCount);
+      const scoreSum = Number(r.scoreSum ?? 0);
+      const maxSum = Number(r.maxSum ?? 0);
       const acc = byItem.get(r.itemId) ?? { rate: null, responseCount: 0, correctCount: 0 };
       acc.responseCount += responseCount;
       acc.correctCount += correctCount;
       byItem.set(r.itemId, acc);
 
-      totalResponses += responseCount;
-      totalCorrect += correctCount;
+      const weight = weightByItem.get(r.itemId) ?? { scoreSum: 0, maxSum: 0 };
+      weight.scoreSum += scoreSum;
+      weight.maxSum += maxSum;
+      weightByItem.set(r.itemId, weight);
+
+      totalScore += scoreSum;
+      totalMax += maxSum;
 
       const prev = studentsByGroup.get(r.classGroupId) ?? 0;
       studentsByGroup.set(r.classGroupId, Math.max(prev, Number(r.studentCount)));
     }
 
-    for (const acc of byItem.values()) {
-      acc.rate = acc.responseCount > 0 ? (acc.correctCount / acc.responseCount) * 100 : 0;
+    for (const [itemId, acc] of byItem) {
+      const weight = weightByItem.get(itemId);
+      acc.rate = weight && weight.maxSum > 0 ? (weight.scoreSum / weight.maxSum) * 100 : 0;
     }
 
     let studentCount = 0;
@@ -869,7 +880,7 @@ export class ItemAnalysisService {
     return {
       byItem,
       summary: {
-        rate: totalResponses > 0 ? (totalCorrect / totalResponses) * 100 : null,
+        rate: totalMax > 0 ? (totalScore / totalMax) * 100 : null,
         classGroupCount: studentsByGroup.size,
         studentCount,
       },
@@ -1154,13 +1165,60 @@ export class ItemAnalysisService {
    * altDefs de `items.content`, que en desarrollo están vacías, así que esos buckets
    * sólo alimentan totalResponses/correctCount.
    */
+  /**
+   * % de logro por ítem ponderado por PUNTAJE sobre el read-model de cohorte.
+   *
+   * Única fuente del número para la matriz y para el panel de detalle: calcularlo
+   * dos veces con fórmulas distintas era justamente lo que hacía que la misma
+   * pregunta mostrara valores diferentes según la pantalla.
+   */
+  private async loadAchievementRates(
+    tx: Database,
+    assessmentId: string,
+    itemIds: string[],
+    classGroupFilter: string[] | null,
+  ): Promise<Map<string, number>> {
+    const rateByItem = new Map<string, number>();
+    if (itemIds.length === 0) return rateByItem;
+    if (classGroupFilter !== null && classGroupFilter.length === 0) return rateByItem;
+
+    const conditions = [
+      eq(assessmentItemStats.assessmentId, assessmentId),
+      inArray(assessmentItemStats.itemId, itemIds),
+    ];
+    if (classGroupFilter !== null) {
+      conditions.push(inArray(assessmentItemStats.classGroupId, classGroupFilter));
+    }
+
+    const rows = await tx
+      .select({
+        itemId: assessmentItemStats.itemId,
+        maxSum: sql<string>`coalesce(sum(${assessmentItemStats.maxSum}), 0)`,
+        scoreSum: sql<string>`coalesce(sum(${assessmentItemStats.scoreSum}), 0)`,
+      })
+      .from(assessmentItemStats)
+      .where(and(...conditions))
+      .groupBy(assessmentItemStats.itemId);
+
+    for (const r of rows) {
+      const maxSum = Number(r.maxSum);
+      if (maxSum > 0) rateByItem.set(r.itemId, (Number(r.scoreSum) / maxSum) * 100);
+    }
+    return rateByItem;
+  }
+
   private async loadAnswerDistribution(
     tx: Database,
     itemId: string,
     assessmentId: string | undefined,
     classGroupFilter: string[] | null,
-  ): Promise<{ answer: string | null; isCorrect: boolean; count: number }[]> {
-    if (classGroupFilter !== null && classGroupFilter.length === 0) return [];
+  ): Promise<{
+    buckets: { answer: string | null; isCorrect: boolean; count: number }[];
+    achievementRate: number | null;
+  }> {
+    if (classGroupFilter !== null && classGroupFilter.length === 0) {
+      return { buckets: [], achievementRate: null };
+    }
 
     const conditions = [eq(assessmentItemStats.itemId, itemId)];
     if (assessmentId) {
@@ -1171,13 +1229,29 @@ export class ItemAnalysisService {
     }
 
     const rows = await tx
-      .select({ answerCounts: assessmentItemStats.answerCounts })
+      .select({
+        answerCounts: assessmentItemStats.answerCounts,
+        scoreSum: assessmentItemStats.scoreSum,
+        maxSum: assessmentItemStats.maxSum,
+      })
       .from(assessmentItemStats)
       .where(and(...conditions));
 
-    // Recombinación entre cohortes: SUMA de conteos por (key, isCorrect).
+    // Recombinación entre cohortes: SUMA de conteos por (key, isCorrect) y de
+    // puntaje por separado. El % sale del PUNTAJE y no del conteo de aciertos,
+    // que daría 0 en un ítem de crédito parcial (mismo criterio que la matriz).
     const merged = mergeAnswerCounts(rows.map((r) => r.answerCounts ?? []));
-    return merged.map((b) => ({ answer: b.key, isCorrect: b.isCorrect, count: b.count }));
+    let scoreSum = 0;
+    let maxSum = 0;
+    for (const r of rows) {
+      scoreSum += Number(r.scoreSum ?? 0);
+      maxSum += Number(r.maxSum ?? 0);
+    }
+
+    return {
+      buckets: merged.map((b) => ({ answer: b.key, isCorrect: b.isCorrect, count: b.count })),
+      achievementRate: maxSum > 0 ? (scoreSum / maxSum) * 100 : null,
+    };
   }
 
   /**

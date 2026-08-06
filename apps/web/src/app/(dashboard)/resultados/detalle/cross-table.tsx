@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import type { JSX } from 'react';
+import { responseOutcome, type ResponseOutcome } from '@soe/types';
 import type {
   ItemMatrixResponse,
   ItemTaxonomyRef,
@@ -79,35 +80,54 @@ function correctRateHeaderClass(rate: number | null): string {
 }
 
 /**
- * ¿La celda es un acierto parcial? Sólo puede serlo un ítem de crédito parcial
- * (`matching`): puntúa > 0 sin llegar al total. En los binarios nunca se cumple.
+ * Estado presentable de la celda. El predicado vive en `@soe/types` porque el
+ * informe del alumno pintaba el MISMO parcial con otro criterio: una respuesta
+ * 3/4 se veía ámbar acá y roja allá.
  */
-function partialScore(cell: MatrixCell): { score: number; maxScore: number } | null {
-  if (cell.isCorrect !== false) return null;
-  if (cell.score === null || cell.maxScore === null) return null;
-  if (cell.score <= 0 || cell.score >= cell.maxScore) return null;
-  return { score: cell.score, maxScore: cell.maxScore };
+function outcomeOf(cell: MatrixCell): ResponseOutcome {
+  return responseOutcome({
+    isCorrect: cell.isCorrect,
+    score: cell.score,
+    maxScore: cell.maxScore,
+    hasAnswer: cell.selectedKey !== null,
+  });
 }
+
+const CELL_CLASS: Record<ResponseOutcome, string> = {
+  correct: 'bg-success/10 text-success',
+  partial: 'bg-warning/10 text-warning',
+  incorrect: 'bg-destructive/10 text-destructive',
+  ungraded: 'bg-muted/40 text-muted-foreground',
+  unanswered: 'bg-muted/40 text-muted-foreground',
+};
 
 /** Estilo de celda por estado de la respuesta del alumno. */
 function cellClass(cell: MatrixCell): string {
-  if (cell.isCorrect === true) {
-    return 'bg-success/10 text-success';
-  }
-  if (cell.isCorrect === false) {
-    // Un acierto parcial no es lo mismo que fallar el ítem entero.
-    return partialScore(cell) ? 'bg-warning/10 text-warning' : 'bg-destructive/10 text-destructive';
-  }
-  // Sin respuesta / sin corrección.
-  return 'bg-muted/40 text-muted-foreground';
+  return CELL_CLASS[outcomeOf(cell)];
 }
 
 function cellLabel(cell: MatrixCell): string {
-  const partial = partialScore(cell);
-  if (partial) return `${formatScore(partial.score)}/${formatScore(partial.maxScore)}`;
+  const outcome = outcomeOf(cell);
+  if (outcome === 'partial' && cell.score !== null && cell.maxScore !== null) {
+    return `${formatScore(cell.score)}/${formatScore(cell.maxScore)}`;
+  }
   if (cell.selectedKey) return cell.selectedKey;
-  if (cell.isCorrect === null) return '·';
+  if (outcome === 'ungraded') return '·';
   return '—';
+}
+
+const OUTCOME_LABEL: Record<ResponseOutcome, string> = {
+  correct: 'correcta',
+  partial: 'parcialmente correcta',
+  incorrect: 'incorrecta',
+  ungraded: 'sin corregir',
+  unanswered: 'sin respuesta',
+};
+
+function cellTitle(cell: MatrixCell): string {
+  const outcome = outcomeOf(cell);
+  if (!cell.selectedKey) return outcome === 'ungraded' ? 'Sin corregir' : 'Sin respuesta';
+  return `Respondió ${cell.selectedKey} (${OUTCOME_LABEL[outcome]})`;
 }
 
 /** 2 → "2", 2.5 → "2,5". Evita el "2.00" de los decimales de la BDD. */
@@ -115,12 +135,22 @@ function formatScore(value: number): string {
   return Number.isInteger(value) ? String(value) : value.toFixed(1).replace('.', ',');
 }
 
-/** Valor ordenable de una celda: correcta > incorrecta > en blanco, desempate por score. */
+/**
+ * Valor ordenable de una celda: correcta > parcial > incorrecta > en blanco.
+ * El parcial se ordena por su crédito, así un 0,9/1 no queda junto a un 0/1.
+ */
 function cellRank(cell: MatrixCell | undefined): number {
   if (!cell) return -2;
-  if (cell.isCorrect === true) return 2 + (cell.score ?? 0);
-  if (cell.isCorrect === false) return 0;
-  return -1; // sin respuesta / sin corrección
+  switch (outcomeOf(cell)) {
+    case 'correct':
+      return 2 + (cell.score ?? 0);
+    case 'partial':
+      return 1 + (cell.maxScore ? (cell.score ?? 0) / cell.maxScore : 0);
+    case 'incorrect':
+      return 0;
+    default:
+      return -1;
+  }
 }
 
 /** Comparador respetando `null` al final, según dirección. */
@@ -328,8 +358,8 @@ export function CrossTable({
         el botón <ArrowDownUp className="inline size-3" aria-hidden /> bajo cada pregunta ordena a
         los alumnos por esa pregunta. Clic en <span className="font-medium">Logro</span> (cabecera)
         ordena a los alumnos por su logro global; o usa{' '}
-        <span className="font-medium">Ordenar preguntas</span>. Verde = correcta, rojo = incorrecta,
-        gris = sin respuesta.
+        <span className="font-medium">Ordenar preguntas</span>. Verde = correcta, ámbar = parcial,
+        rojo = incorrecta, gris = sin respuesta o sin corregir.
       </p>
 
       {/* Barra de herramientas: filtro por tags (TKT-12) + orden de preguntas (TKT-09) */}
@@ -634,17 +664,7 @@ function StudentRow({
               'px-0.5 py-1.5 text-center text-xs font-semibold tabular-nums',
               cellClass(cell),
             )}
-            title={
-              cell.selectedKey
-                ? `Respondió ${cell.selectedKey}${
-                    cell.isCorrect === true
-                      ? ' (correcta)'
-                      : cell.isCorrect === false
-                        ? ' (incorrecta)'
-                        : ''
-                  }`
-                : 'Sin respuesta'
-            }
+            title={cellTitle(cell)}
           >
             {cellLabel(cell)}
           </TableCell>

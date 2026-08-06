@@ -100,6 +100,54 @@ describe('aggregateItemStats', () => {
     ]);
   });
 
+  it('un ítem pendiente de corrección no entra al denominador ponderado', () => {
+    const out = aggregateItemStats(
+      [
+        resp({ studentId: 's1', value: { raw: 'A' }, isCorrect: true }),
+        resp({ studentId: 's2', value: { raw: 'B' }, isCorrect: null, rawScore: null }),
+        resp({ studentId: 's3', value: { raw: 'B' }, isCorrect: false, rawScore: 0 }),
+      ],
+      enrollment,
+    );
+
+    const st = out[0]!;
+    expect(st.responseCount).toBe(3);
+    expect(st.correctCount).toBe(1);
+    expect(st.scoreSum).toBe(1);
+    expect(st.maxSum).toBe(2);
+  });
+
+  it('el puntaje parcial suma al numerador aunque isCorrect sea false', () => {
+    const out = aggregateItemStats(
+      [devResp('s1', 2), devResp('s2', 1), devResp('s3', 0)],
+      enrollment,
+    );
+
+    const st = out[0]!;
+    expect(st.correctCount).toBe(1);
+    expect(st.scoreSum).toBe(3);
+    expect(st.maxSum).toBe(6);
+    expect(st.answerCounts).toEqual([
+      { key: 'RC', count: 1, isCorrect: true },
+      { key: 'RI', count: 1, isCorrect: false },
+      { key: 'RPC', count: 1, isCorrect: false },
+    ]);
+  });
+
+  it('REGRESIÓN: en ítems dicotómicos sin pendientes, scoreSum/maxSum == correctCount/responseCount', () => {
+    const out = aggregateItemStats(
+      [
+        resp({ studentId: 's1', value: { raw: 'A' }, isCorrect: true }),
+        resp({ studentId: 's2', value: { raw: 'B' }, isCorrect: false, rawScore: 0 }),
+        resp({ studentId: 's3', value: { raw: 'A' }, isCorrect: true }),
+      ],
+      enrollment,
+    );
+
+    const st = out[0]!;
+    expect(st.scoreSum / st.maxSum).toBe(st.correctCount / st.responseCount);
+  });
+
   it('agrupa los blancos en un bucket key=null y los ordena al final', () => {
     const out = aggregateItemStats(
       [

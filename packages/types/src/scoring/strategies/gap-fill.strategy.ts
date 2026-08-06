@@ -6,7 +6,7 @@
 //   - array ordenado por posición de gap: ["casa", "perro"]
 //   - record por posición: { "0": "casa", "1": "perro" }
 
-import type { GapFillContent } from '@soe/types';
+import type { GapFillContent } from '../../schemas/item-content.schema';
 import type { ScoringInput, ScoringOutput, ScoringStrategy } from '../scoring-strategy';
 import { asRecord, asStringArray, normalizeAnswer } from './scoring.helpers';
 

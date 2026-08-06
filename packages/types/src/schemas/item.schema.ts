@@ -372,7 +372,7 @@ export type ItemTaxonomyTagModel = {
   itemId: string;
   nodeId: string;
   tagType: ItemTagType;
-  confidence: string;
+  confidence: string | null;
   taggedBy: TaggedBy;
   taggedAt: string | Date;
   node?: {

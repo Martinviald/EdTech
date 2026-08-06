@@ -1,5 +1,6 @@
 import { z } from 'zod';
-import { stringCsvSchema, uuidCsvSchema } from './common.schema';
+import { csvArraySchema, stringCsvSchema, uuidCsvSchema } from './common.schema';
+import { INSTRUMENT_APPLICATION_PERIODS } from './instrument.schema';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Sprint 5 — Análisis a nivel de ítem (H6.11 + H6.12)
@@ -38,6 +39,7 @@ export const assessmentListQuerySchema = z.object({
   classGroupId: uuidCsvSchema,
   academicYearId: z.string().uuid().optional(),
   instrumentType: stringCsvSchema,
+  applicationPeriod: csvArraySchema(z.enum(INSTRUMENT_APPLICATION_PERIODS)),
 });
 export type AssessmentListQueryDto = z.infer<typeof assessmentListQuerySchema>;
 

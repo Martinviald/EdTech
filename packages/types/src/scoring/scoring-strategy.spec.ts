@@ -1,4 +1,6 @@
-import type { ItemContent, ItemType, ScoringConfig } from '@soe/types';
+import type { ItemContent } from '../schemas/item-content.schema';
+import type { ScoringConfig } from '../schemas/item.schema';
+import type { ItemType } from '../enums';
 import { SCORING_STRATEGIES, getScoringStrategy, type ScoringInput } from './scoring-strategy';
 
 // Helper para construir un ScoringInput con un maxScore por defecto de 1.
@@ -26,6 +28,8 @@ describe('SCORING_STRATEGIES (registro de estrategias por tipo)', () => {
       'matching',
       'ordering',
       'gap_fill',
+      'short_answer',
+      'rubric_scored',
     ];
     for (const t of types) {
       expect(SCORING_STRATEGIES[t]).toBeDefined();
@@ -548,6 +552,116 @@ describe('SCORING_STRATEGIES (registro de estrategias por tipo)', () => {
         expect(out.isCorrect).toBe(legacy.isCorrect);
         expect(out.rawScore).toBe(legacy.rawScore);
         expect(out.requiresManualGrading).toBe(false);
+      }
+    });
+  });
+  // ── short_answer ───────────────────────────────────────────────────────────
+  describe('short_answer', () => {
+    const content = {
+      prompt: '¿Cuánto es?',
+      acceptedAnswers: ['21/10'],
+    } as unknown as ItemContent;
+
+    it('acepta la clave y sus formas equivalentes', () => {
+      for (const raw of ['21/10', '2,1', '2.1', ' 21 / 10 ']) {
+        const out = getScoringStrategy('short_answer').score(input('short_answer', content, raw));
+        expect(out).toEqual({ isCorrect: true, rawScore: 1, requiresManualGrading: false });
+      }
+    });
+
+    it('otra cantidad es incorrecta', () => {
+      const out = getScoringStrategy('short_answer').score(input('short_answer', content, '1/10'));
+      expect(out).toEqual({ isCorrect: false, rawScore: 0, requiresManualGrading: false });
+    });
+
+    it('sin responder es incorrecta, no pendiente', () => {
+      for (const raw of [null, '', '   ']) {
+        const out = getScoringStrategy('short_answer').score(input('short_answer', content, raw));
+        expect(out).toEqual({ isCorrect: false, rawScore: 0, requiresManualGrading: false });
+      }
+    });
+
+    it('una respuesta indecidible queda pendiente, nunca en cero', () => {
+      const out = getScoringStrategy('short_answer').score(
+        input('short_answer', content, '0=16.5'),
+      );
+      expect(out).toEqual({ isCorrect: null, rawScore: null, requiresManualGrading: true });
+    });
+
+    it('respeta el maxScore del ítem', () => {
+      const out = getScoringStrategy('short_answer').score(
+        input('short_answer', content, '2,1', 4),
+      );
+      expect(out.rawScore).toBe(4);
+    });
+  });
+
+  // ── rubric_scored ──────────────────────────────────────────────────────────
+  describe('rubric_scored', () => {
+    const dia = {
+      prompt: 'Fundamenta tu respuesta',
+      levels: [
+        { code: '0', label: 'Incorrecta', creditFraction: 0 },
+        { code: '1', label: 'Parcialmente correcta', creditFraction: 0.5 },
+        { code: '2', label: 'Correcta', creditFraction: 1 },
+      ],
+    } as unknown as ItemContent;
+
+    it('convierte el código en puntaje según la escala declarada', () => {
+      const cases: Array<[string, number, boolean]> = [
+        ['0', 0, false],
+        ['1', 0.5, false],
+        ['2', 1, true],
+      ];
+      for (const [code, rawScore, isCorrect] of cases) {
+        const out = getScoringStrategy('rubric_scored').score(input('rubric_scored', dia, code));
+        expect(out).toEqual({ isCorrect, rawScore, requiresManualGrading: false });
+      }
+    });
+
+    it('isCorrect es "obtuvo el máximo", no "tiene puntaje"', () => {
+      const out = getScoringStrategy('rubric_scored').score(input('rubric_scored', dia, '1'));
+      expect(out.isCorrect).toBe(false);
+      expect(out.rawScore).toBeGreaterThan(0);
+    });
+
+    it('el crédito compone con el maxScore del ítem', () => {
+      const out = getScoringStrategy('rubric_scored').score(input('rubric_scored', dia, '1', 4));
+      expect(out.rawScore).toBe(2);
+    });
+
+    it('la escala es dato: soporta más niveles y pesos no lineales', () => {
+      const custom = {
+        prompt: 'x',
+        levels: [
+          { code: 'RI', creditFraction: 0 },
+          { code: 'RPC', creditFraction: 0.25 },
+          { code: 'RC', creditFraction: 0.9 },
+          { code: 'RD', creditFraction: 1 },
+        ],
+      } as unknown as ItemContent;
+      expect(
+        getScoringStrategy('rubric_scored').score(input('rubric_scored', custom, 'RPC', 8))
+          .rawScore,
+      ).toBe(2);
+      expect(
+        getScoringStrategy('rubric_scored').score(input('rubric_scored', custom, 'rc', 8)).rawScore,
+      ).toBe(7.2);
+    });
+
+    it('tolera el cero a la izquierda: "01" es el nivel 1', () => {
+      const padded = getScoringStrategy('rubric_scored').score(input('rubric_scored', dia, '01'));
+      const plain = getScoringStrategy('rubric_scored').score(input('rubric_scored', dia, '1'));
+      expect(padded).toEqual(plain);
+      expect(
+        getScoringStrategy('rubric_scored').score(input('rubric_scored', dia, '02')).rawScore,
+      ).toBe(1);
+    });
+
+    it('la tolerancia no se estira a un código que no existe', () => {
+      for (const raw of ['12', 'x', '1.0', null, '']) {
+        const out = getScoringStrategy('rubric_scored').score(input('rubric_scored', dia, raw));
+        expect(out).toEqual({ isCorrect: null, rawScore: null, requiresManualGrading: true });
       }
     });
   });

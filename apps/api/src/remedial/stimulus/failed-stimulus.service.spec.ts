@@ -44,9 +44,9 @@ describe('FailedStimulusService', () => {
       { itemId: 'iC', position: 3, sectionId: 'S2' },
     ];
     const rateRows = [
-      { itemId: 'iA', total: 10, correct: 2 }, // gap 80
-      { itemId: 'iB', total: 10, correct: 5 }, // gap 50
-      { itemId: 'iC', total: 10, correct: 9 }, // gap 10
+      { itemId: 'iA', scoreSum: '2', maxSum: '10' }, // gap 80
+      { itemId: 'iB', scoreSum: '5', maxSum: '10' }, // gap 50
+      { itemId: 'iC', scoreSum: '9', maxSum: '10' }, // gap 10
     ];
     const sections = [
       {
@@ -104,8 +104,8 @@ describe('FailedStimulusService', () => {
       { itemId: 'iF', position: 4, sectionId: null }, // autocontenido → excluido
     ];
     const rateRows = [
-      { itemId: 'iA', total: 10, correct: 3 }, // gap 70
-      { itemId: 'iE', total: 10, correct: 4 }, // gap 60 (pero S4 no vuelve como pasaje)
+      { itemId: 'iA', scoreSum: '3', maxSum: '10' }, // gap 70
+      { itemId: 'iE', scoreSum: '4', maxSum: '10' }, // gap 60 (pero S4 no vuelve como pasaje)
     ];
     // La query de secciones (kind='passage') no devuelve S4 ni S3.
     const sections = [

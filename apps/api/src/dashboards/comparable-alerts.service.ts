@@ -16,7 +16,7 @@ import {
 } from '@soe/db';
 import {
   ALERT_THRESHOLDS,
-  AUTO_SCORED_ITEM_TYPES,
+  AUTO_SCORABLE_ITEM_TYPES,
   ALERT_HIDDEN_NODE_TYPES,
   type AlertSeverity,
   type ComparableUnitSummary,
@@ -241,7 +241,7 @@ export class ComparableAlertsService {
       .where(
         and(
           inArray(assessmentItemStats.assessmentId, assessmentIds),
-          inArray(sql`${items.type}::text`, [...AUTO_SCORED_ITEM_TYPES]),
+          inArray(sql`${items.type}::text`, [...AUTO_SCORABLE_ITEM_TYPES]),
         ),
       )
       .groupBy(assessmentItemStats.assessmentId, assessmentItemStats.itemId, items.position);

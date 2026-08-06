@@ -12,13 +12,17 @@
 // devuelven `requiresManualGrading: true` con scores null — NUNCA 0/incorrecto.
 // ─────────────────────────────────────────────────────────────────────────────
 
-import { isAutoScorable, type ItemContent, type ItemType, type ScoringConfig } from '@soe/types';
+import { isAutoScorable, type ItemContent } from '../schemas/item-content.schema';
+import type { ScoringConfig } from '../schemas/item.schema';
+import type { ItemType } from '../enums';
 import {
   gapFillStrategy,
   matchingStrategy,
   multiSelectStrategy,
   multipleChoiceStrategy,
   orderingStrategy,
+  rubricScoredStrategy,
+  shortAnswerStrategy,
   trueFalseStrategy,
 } from './strategies';
 
@@ -70,6 +74,8 @@ export const SCORING_STRATEGIES: Record<ItemType, ScoringStrategy> = {
   matching: matchingStrategy,
   ordering: orderingStrategy,
   gap_fill: gapFillStrategy,
+  short_answer: shortAnswerStrategy,
+  rubric_scored: rubricScoredStrategy,
   // No auto-scorables → corrección humana/IA (F4).
   open_ended: manualGradingStrategy,
   writing: manualGradingStrategy,

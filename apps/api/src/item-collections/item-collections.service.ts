@@ -6,6 +6,7 @@ import {
 } from '@nestjs/common';
 import { and, asc, count, desc, eq, ilike, isNull } from 'drizzle-orm';
 import {
+  instruments,
   itemCollectionItems,
   itemCollections,
   items,
@@ -80,11 +81,16 @@ export class ItemCollectionsService {
     const collection = await this.getOwnedCollection(id, user);
 
     const rows = await this.db
-      .select({ link: itemCollectionItems, item: items })
+      .select({ link: itemCollectionItems, item: items, instrumentName: instruments.name })
       .from(itemCollectionItems)
       .leftJoin(items, and(eq(items.id, itemCollectionItems.itemId), isNull(items.deletedAt)))
+      .leftJoin(instruments, eq(instruments.id, items.instrumentId))
       .where(eq(itemCollectionItems.collectionId, id))
       .orderBy(asc(itemCollectionItems.position), asc(itemCollectionItems.createdAt));
+
+    const tagsByItem = await this.items.findTagsByItemIds(
+      rows.map((row) => row.item?.id).filter((itemId): itemId is string => Boolean(itemId)),
+    );
 
     const collectionItems: ItemCollectionItemModel[] = rows.map((row) => ({
       id: row.link.id,
@@ -92,7 +98,10 @@ export class ItemCollectionsService {
       itemId: row.link.itemId,
       position: row.link.position,
       createdAt: row.link.createdAt,
-      item: row.item ? this.toItemModel(row.item) : null,
+      instrumentName: row.instrumentName,
+      item: row.item
+        ? { ...this.toItemModel(row.item), tags: tagsByItem.get(row.item.id) ?? [] }
+        : null,
     }));
 
     return { ...this.toModel(collection, collectionItems.length), items: collectionItems };

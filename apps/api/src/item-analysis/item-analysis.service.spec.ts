@@ -163,8 +163,8 @@ describe('ItemAnalysisService.getMatrix', () => {
       // resolveAccessibleStudentIds → scopeAll, sin classGroupId → null (sin query)
       [
         // attachCorrectRates → group by item_id
-        { itemId: ITEM_A, total: 2, correct: 1 },
-        { itemId: ITEM_B, total: 2, correct: 2 },
+        { itemId: ITEM_A, maxSum: '2', scoreSum: '1' },
+        { itemId: ITEM_B, maxSum: '2', scoreSum: '2' },
       ],
       // attachLevelReferences → grado/año de la evaluación (selectDistinct)
       [{ gradeId: GRADE_ID, gradeName: '3° Básico', academicYearId: YEAR_ID }],
@@ -177,6 +177,8 @@ describe('ItemAnalysisService.getMatrix', () => {
           studentCount: 2,
           responseCount: 2,
           correctCount: 1,
+          scoreSum: '1',
+          maxSum: '2',
         },
         {
           itemId: ITEM_B,
@@ -184,6 +186,8 @@ describe('ItemAnalysisService.getMatrix', () => {
           studentCount: 2,
           responseCount: 2,
           correctCount: 2,
+          scoreSum: '2',
+          maxSum: '2',
         },
         // 3°B — MISMO nivel, OTRA evaluación: la referencia debe incluirlo
         {
@@ -192,6 +196,8 @@ describe('ItemAnalysisService.getMatrix', () => {
           studentCount: 2,
           responseCount: 2,
           correctCount: 2,
+          scoreSum: '2',
+          maxSum: '2',
         },
         {
           itemId: ITEM_B,
@@ -199,6 +205,8 @@ describe('ItemAnalysisService.getMatrix', () => {
           studentCount: 2,
           responseCount: 2,
           correctCount: 0,
+          scoreSum: '0',
+          maxSum: '2',
         },
       ],
       [{ total: 2 }], // loadStudentsPage → count
@@ -235,6 +243,7 @@ describe('ItemAnalysisService.getMatrix', () => {
           isCorrect: true,
           finalScore: '1.00',
           rawScore: '1.00',
+          maxScore: '1.00',
         },
         {
           studentId: STUDENT_1,
@@ -243,6 +252,7 @@ describe('ItemAnalysisService.getMatrix', () => {
           isCorrect: false,
           finalScore: null,
           rawScore: '0.00',
+          maxScore: '1.00',
         },
         {
           studentId: STUDENT_2,
@@ -251,6 +261,7 @@ describe('ItemAnalysisService.getMatrix', () => {
           isCorrect: false,
           finalScore: null,
           rawScore: null,
+          maxScore: '1.00',
         },
       ],
     ]);
@@ -375,7 +386,7 @@ describe('ItemAnalysisService.getMatrix', () => {
       itemRows, // loadQuestionColumns → items
       tagRows, // loadTagsByItems
       [{ studentId: STUDENT_1 }], // resolveAccessibleStudentIds (teacher, sin classGroupId param)
-      [{ itemId: ITEM_A, total: 1, correct: 1 }], // attachCorrectRates (scope profesor → 100%)
+      [{ itemId: ITEM_A, maxSum: '1', scoreSum: '1' }], // attachCorrectRates (scope profesor → 100%)
       // attachLevelReferences → grado/año de la evaluación (selectDistinct)
       [{ gradeId: GRADE_ID, gradeName: '3° Básico', academicYearId: YEAR_ID }],
       // attachLevelReferences → read-model del NIVEL (org + instrumento + año)
@@ -386,6 +397,8 @@ describe('ItemAnalysisService.getMatrix', () => {
           studentCount: 1,
           responseCount: 1,
           correctCount: 1,
+          scoreSum: '1',
+          maxSum: '1',
         },
         // curso hermano del nivel
         {
@@ -394,6 +407,8 @@ describe('ItemAnalysisService.getMatrix', () => {
           studentCount: 3,
           responseCount: 3,
           correctCount: 1,
+          scoreSum: '1',
+          maxSum: '3',
         },
       ],
       [{ total: 1 }], // loadStudentsPage count
@@ -418,6 +433,7 @@ describe('ItemAnalysisService.getMatrix', () => {
           isCorrect: true,
           finalScore: '1.00',
           rawScore: '1.00',
+          maxScore: '1.00',
         },
       ],
     ]);
@@ -445,7 +461,7 @@ describe('ItemAnalysisService.getMatrix', () => {
       itemRows, // loadQuestionColumns → items (admin, sin scope query)
       tagRows, // loadTagsByItems
       [{ itemId: ITEM_A }], // filtro nodeId → solo ITEM_A taggeado
-      [{ itemId: ITEM_A, total: 2, correct: 1 }], // attachCorrectRates
+      [{ itemId: ITEM_A, maxSum: '2', scoreSum: '1' }], // attachCorrectRates
       // attachLevelReferences → grado/año de la evaluación (selectDistinct)
       [{ gradeId: GRADE_ID, gradeName: '3° Básico', academicYearId: YEAR_ID }],
       // attachLevelReferences → read-model del NIVEL (org + instrumento + año)
@@ -456,6 +472,8 @@ describe('ItemAnalysisService.getMatrix', () => {
           studentCount: 2,
           responseCount: 2,
           correctCount: 1,
+          scoreSum: '1',
+          maxSum: '2',
         },
       ],
       [{ total: 1 }], // count
@@ -480,6 +498,7 @@ describe('ItemAnalysisService.getMatrix', () => {
           isCorrect: true,
           finalScore: '1.00',
           rawScore: '1.00',
+          maxScore: '1.00',
         },
       ],
     ]);
@@ -506,8 +525,8 @@ describe('ItemAnalysisService.getMatrix', () => {
       // filtro por nodos (nodeId ∪ tagIds): ambos ítems calzan con algún tag.
       [{ itemId: ITEM_A }, { itemId: ITEM_B }],
       [
-        { itemId: ITEM_A, total: 2, correct: 1 },
-        { itemId: ITEM_B, total: 2, correct: 2 },
+        { itemId: ITEM_A, maxSum: '2', scoreSum: '1' },
+        { itemId: ITEM_B, maxSum: '2', scoreSum: '2' },
       ], // attachCorrectRates
       // attachLevelReferences → grado/año de la evaluación (selectDistinct)
       [{ gradeId: GRADE_ID, gradeName: '3° Básico', academicYearId: YEAR_ID }],
@@ -519,6 +538,8 @@ describe('ItemAnalysisService.getMatrix', () => {
           studentCount: 2,
           responseCount: 2,
           correctCount: 1,
+          scoreSum: '1',
+          maxSum: '2',
         },
       ],
       [{ total: 1 }], // count
@@ -540,6 +561,7 @@ describe('ItemAnalysisService.getMatrix', () => {
           isCorrect: true,
           finalScore: '1.00',
           rawScore: '1.00',
+          maxScore: '1.00',
         },
       ],
     ]);
@@ -562,8 +584,8 @@ describe('ItemAnalysisService.getMatrix', () => {
       itemRows, // loadQuestionColumns → items
       tagRows, // loadTagsByItems
       [
-        { itemId: ITEM_A, total: 2, correct: 1 },
-        { itemId: ITEM_B, total: 2, correct: 2 },
+        { itemId: ITEM_A, maxSum: '2', scoreSum: '1' },
+        { itemId: ITEM_B, maxSum: '2', scoreSum: '2' },
       ], // attachCorrectRates
       // attachLevelReferences → grado/año de la evaluación (selectDistinct)
       [{ gradeId: GRADE_ID, gradeName: '3° Básico', academicYearId: YEAR_ID }],
@@ -575,6 +597,8 @@ describe('ItemAnalysisService.getMatrix', () => {
           studentCount: 2,
           responseCount: 2,
           correctCount: 1,
+          scoreSum: '1',
+          maxSum: '2',
         },
       ],
       [{ total: 2 }], // count
@@ -672,6 +696,8 @@ describe('ItemAnalysisService.getQuestionAnalysis', () => {
             { key: 'B', isCorrect: true, count: 4 },
             { key: 'A', isCorrect: false, count: 1 },
           ],
+          scoreSum: '4',
+          maxSum: '5',
         },
         {
           answerCounts: [
@@ -679,6 +705,8 @@ describe('ItemAnalysisService.getQuestionAnalysis', () => {
             { key: 'A', isCorrect: false, count: 2 },
             { key: null, isCorrect: false, count: 1 },
           ],
+          scoreSum: '2',
+          maxSum: '5',
         },
       ],
     ]);
@@ -743,6 +771,8 @@ describe('ItemAnalysisService.getQuestionAnalysis', () => {
             { key: 'F', isCorrect: false, count: 3 },
             { key: 'B', isCorrect: false, count: 1 },
           ],
+          scoreSum: '6',
+          maxSum: '10',
         },
       ],
     ]);
@@ -793,6 +823,8 @@ describe('ItemAnalysisService.getQuestionAnalysis', () => {
             { key: '1', isCorrect: false, count: 2 },
             { key: '13', isCorrect: false, count: 1 },
           ],
+          scoreSum: '4',
+          maxSum: '7',
         },
       ],
     ]);
@@ -827,9 +859,11 @@ describe('ItemAnalysisService.getQuestionAnalysis', () => {
             { key: 'B', isCorrect: true, count: 9 },
             { key: 'A', isCorrect: false, count: 1 },
           ],
+          scoreSum: '9',
+          maxSum: '10',
         },
         // Curso chico: 0 de 2 correctas → 0%.
-        { answerCounts: [{ key: 'A', isCorrect: false, count: 2 }] },
+        { answerCounts: [{ key: 'A', isCorrect: false, count: 2 }], scoreSum: '0', maxSum: '2' },
       ],
     ]);
     const service = makeService(db);
@@ -861,6 +895,8 @@ describe('ItemAnalysisService.getQuestionAnalysis', () => {
             { key: 'A', isCorrect: true, count: 2 },
             { key: 'B', isCorrect: true, count: 8 },
           ],
+          scoreSum: '10',
+          maxSum: '10',
         },
       ],
     ]);
@@ -883,12 +919,14 @@ describe('ItemAnalysisService.getQuestionAnalysis', () => {
       [], // loadAllItemTags
       [
         // Misma pregunta, dos evaluaciones distintas.
-        { answerCounts: [{ key: 'B', isCorrect: true, count: 3 }] },
+        { answerCounts: [{ key: 'B', isCorrect: true, count: 3 }], scoreSum: '3', maxSum: '3' },
         {
           answerCounts: [
             { key: 'B', isCorrect: true, count: 1 },
             { key: 'A', isCorrect: false, count: 4 },
           ],
+          scoreSum: '1',
+          maxSum: '5',
         },
       ],
     ]);
@@ -931,6 +969,8 @@ describe('ItemAnalysisService.getQuestionAnalysis', () => {
           studentCount: 2,
           responseCount: 2,
           correctCount: 1,
+          scoreSum: '1',
+          maxSum: '2',
         },
         {
           itemId: ITEM_A,
@@ -938,6 +978,8 @@ describe('ItemAnalysisService.getQuestionAnalysis', () => {
           studentCount: 2,
           responseCount: 2,
           correctCount: 2,
+          scoreSum: '2',
+          maxSum: '2',
         },
       ],
     ]);
@@ -1025,6 +1067,8 @@ describe('ItemAnalysisService.getQuestionAnalysis', () => {
             { key: null, isCorrect: false, count: 4 },
             { key: null, isCorrect: true, count: 1 },
           ],
+          scoreSum: '1',
+          maxSum: '5',
         },
       ], // loadAnswerDistribution
     ]);
@@ -1066,6 +1110,8 @@ describe('ItemAnalysisService.getQuestionAnalysis', () => {
             { key: 'A', isCorrect: true, count: 5 },
             { key: 'B', isCorrect: false, count: 5 },
           ],
+          scoreSum: '5',
+          maxSum: '10',
         },
       ], // loadAnswerDistribution
     ]);
@@ -1130,6 +1176,50 @@ describe('ItemAnalysisService.listAssessments', () => {
 
     expect(dto.gradeId).toEqual([GRADE_A, GRADE_B]);
     expect(dto.instrumentType).toEqual(['dia', 'ensayo']);
+  });
+
+  // Regresión: el DTO no declaraba `applicationPeriod`, y como z.object descarta
+  // las claves desconocidas, el "Momento" del DIA se perdía en el parse y la
+  // lista devolvía los tres momentos. /dashboards sí lo filtraba, así que el
+  // dropdown reaccionaba y la lista no.
+  it('acepta applicationPeriod y lo normaliza a array', () => {
+    const dto = assessmentListQuerySchema.parse({ applicationPeriod: 'intermedio' });
+    expect(dto.applicationPeriod).toEqual(['intermedio']);
+
+    const csv = assessmentListQuerySchema.parse({ applicationPeriod: 'diagnostico,cierre' });
+    expect(csv.applicationPeriod).toEqual(['diagnostico', 'cierre']);
+
+    const none = assessmentListQuerySchema.parse({ applicationPeriod: '' });
+    expect(none.applicationPeriod).toBeUndefined();
+  });
+
+  it('rechaza un momento que no es del enum', () => {
+    expect(() => assessmentListQuerySchema.parse({ applicationPeriod: 'trimestral' })).toThrow();
+  });
+
+  it('applicationPeriod: el service lo aplica sin romper la consulta', async () => {
+    const db = makeDb([
+      [
+        {
+          assessmentId: ASSESSMENT_ID,
+          name: 'DIA Matemática — Intermedio',
+          administeredAt: new Date('2026-08-03T00:00:00Z'),
+          instrumentName: 'DIA Matemática 5° Básico 2026 — Intermedio',
+          instrumentType: 'dia',
+          subjectName: 'Matemáticas',
+          gradeName: '5° básico',
+        },
+      ],
+      [{ assessmentId: ASSESSMENT_ID, count: 37 }],
+    ]);
+    const service = makeService(db);
+
+    const dto = assessmentListQuerySchema.parse({
+      instrumentType: 'dia',
+      applicationPeriod: 'intermedio',
+    });
+    const res = await service.listAssessments(makeUser(), dto);
+    expect(res.data).toHaveLength(1);
   });
 
   // Un solo valor sigue siendo válido: la tool `list_assessments` del asistente

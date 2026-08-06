@@ -19,6 +19,7 @@ import {
   CAPABILITY_UNAVAILABLE_CODE,
   DEFAULT_GRADING_SCALE,
   capabilityUnavailableMessage,
+  getScoringStrategy,
   type AnswerSheetColumnMapping,
   type AnswerSheetConfirmRequestDto,
   type AnswerSheetConfirmResponse,
@@ -43,7 +44,7 @@ import {
   persistAssessmentResults,
 } from '../assessment-results/lib/persist-results';
 import { loadInstrumentBands } from '../performance-bands/lib/load-instrument-bands';
-import { getScoringStrategy } from './scoring/scoring-strategy';
+
 import { AnswerSheetPreviewStore } from './lib/preview-store';
 import { parseGradecamCsv } from './lib/parsers/gradecam-parser';
 import { parseZipgradeCsv } from './lib/parsers/zipgrade-parser';

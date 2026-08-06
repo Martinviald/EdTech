@@ -1,7 +1,7 @@
 // Estrategia determinística para `ordering`. Corrección "todo o nada": la
 // secuencia de ids del alumno debe igualar EXACTAMENTE `content.correctOrder`.
 
-import type { OrderingContent } from '@soe/types';
+import type { OrderingContent } from '../../schemas/item-content.schema';
 import type { ScoringInput, ScoringOutput, ScoringStrategy } from '../scoring-strategy';
 import { asStringArray } from './scoring.helpers';
 

@@ -219,6 +219,48 @@ export const gapFillContentSchema = z.object({
   ...baseContent,
 });
 
+/**
+ * Respuesta corta: el alumno escribe un valor que se compara contra una clave.
+ *
+ * `acceptedAnswers` recoge las variantes oficialmente equivalentes (la ficha
+ * técnica DIA publica claves del estilo "21/10 o equivalente"). `comparison`
+ * omitido se deriva del dato: si TODAS las claves parsean como número o fracción
+ * la comparación es numérica, si no es textual.
+ */
+export const shortAnswerContentSchema = z.object({
+  prompt: z.string().min(1),
+  acceptedAnswers: z.array(z.string().min(1)).min(1),
+  comparison: z.enum(['numeric', 'text']).optional(),
+  unit: z.string().min(1).optional(),
+  caseSensitive: z.boolean().optional(),
+  ...baseContent,
+});
+
+/**
+ * Ítem evaluado por pauta: NO tiene respuesta correcta. La corrección es un nivel
+ * de una escala y lo que se ingresa es ese nivel, ya asignado por quien corrigió.
+ *
+ * `creditFraction` (0..1) y no un puntaje absoluto: compone con el `maxScore` del
+ * ítem, así cambiar su peso no obliga a reescribir la pauta. Los niveles son DATO,
+ * no constantes: DIA usa códigos 0/1/2 → 0 / 0,5 / 1, pero cualquier escala con
+ * otros códigos o pesos no lineales se declara igual sin tocar código.
+ */
+export const rubricScoredContentSchema = z.object({
+  prompt: z.string().min(1),
+  levels: z
+    .array(
+      z.object({
+        code: z.string().min(1),
+        label: z.string().optional(),
+        descriptor: z.string().optional(),
+        creditFraction: z.number().min(0).max(1),
+      }),
+    )
+    .min(2),
+  rubricId: z.string().uuid().optional(),
+  ...baseContent,
+});
+
 // ── Registro tipo → schema (punto de extensión único) ────────────────────────
 
 export const ITEM_CONTENT_SCHEMAS = {
@@ -233,6 +275,8 @@ export const ITEM_CONTENT_SCHEMAS = {
   matching: matchingContentSchema,
   ordering: orderingContentSchema,
   gap_fill: gapFillContentSchema,
+  short_answer: shortAnswerContentSchema,
+  rubric_scored: rubricScoredContentSchema,
 } satisfies Record<ItemType, z.ZodTypeAny>;
 
 // ── Tipos derivados ──────────────────────────────────────────────────────────
@@ -247,6 +291,9 @@ export type ListeningContent = z.infer<typeof listeningContentSchema>;
 export type MatchingContent = z.infer<typeof matchingContentSchema>;
 export type OrderingContent = z.infer<typeof orderingContentSchema>;
 export type GapFillContent = z.infer<typeof gapFillContentSchema>;
+export type ShortAnswerContent = z.infer<typeof shortAnswerContentSchema>;
+export type RubricScoredContent = z.infer<typeof rubricScoredContentSchema>;
+export type RubricLevel = RubricScoredContent['levels'][number];
 
 /** Unión de todos los contenidos posibles. Tipo a usar en `items.content.$type<ItemContent>()`. */
 export type ItemContent =
@@ -260,7 +307,9 @@ export type ItemContent =
   | ListeningContent
   | MatchingContent
   | OrderingContent
-  | GapFillContent;
+  | GapFillContent
+  | ShortAnswerContent
+  | RubricScoredContent;
 
 // ── Auto-scorabilidad (contrato para el registro de scoring, #1) ─────────────
 // Tipos que una máquina puede corregir determinísticamente. El resto requiere
@@ -274,6 +323,8 @@ export const AUTO_SCORABLE_ITEM_TYPES = [
   'matching',
   'ordering',
   'gap_fill',
+  'short_answer',
+  'rubric_scored',
 ] as const satisfies readonly ItemType[];
 
 export function isAutoScorable(type: ItemType): boolean {
