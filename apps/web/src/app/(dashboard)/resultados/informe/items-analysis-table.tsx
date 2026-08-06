@@ -139,7 +139,14 @@ export function ItemsAnalysisTable({
         <FlagsLegend />
       </CardContent>
 
-      <QuestionDetailPanel data={detail} open={open} onClose={closePanel} canAddToCollection />
+      <QuestionDetailPanel
+        data={detail}
+        open={open}
+        onClose={closePanel}
+        canAddToCollection
+        assessmentId={assessmentId}
+        classGroupId={classGroupId}
+      />
     </Card>
   );
 }

@@ -13,6 +13,7 @@ export * from './instrument.schema';
 export * from './file.schema';
 export * from './item.schema';
 export * from './item-content.schema';
+export * from './rubric.schema';
 export * from './item-collection.schema';
 export * from './item-edit-proposal.schema';
 export * from './answer-sheet.schema';

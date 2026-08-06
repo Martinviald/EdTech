@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import type { AnswerKey, ScoreCategoryDistribution } from '../utils/answer-key';
 
 // Contratos del motor de análisis IA (F2 S0 — H19.23). El output rico por tipo de
 // análisis (AssessmentInsightsOutput, etc.) se define en S1; aquí van los DTOs del
@@ -243,5 +244,17 @@ export type ItemInsightSnapshot = {
   contentName: string | null;
   tags: Array<{ nodeName: string; nodeType: string; nodeCode: string | null }>;
   passage: { title: string | null; text: string | null; format: string | null } | null;
-  images: Array<{ url: string; mimeType: string | null; note: string | null; source: 'item' | 'section' }>;
+  images: Array<{
+    url: string;
+    mimeType: string | null;
+    note: string | null;
+    source: 'item' | 'section';
+  }>;
+  // Clave/pauta normalizada del ítem (respuesta modelo, respuestas aceptadas,
+  // orden correcto, niveles de pauta…). Deja que la IA razone sobre la respuesta
+  // esperada en tipos sin alternativas. `undefined` en snapshots antiguos (compat).
+  answerKey?: AnswerKey;
+  // Distribución por categoría de puntaje (RC/RPC/RI) en ítems de desarrollo;
+  // `null` en selección múltiple (ahí la distribución vive en `alternatives`).
+  scoreDistribution?: ScoreCategoryDistribution[] | null;
 };

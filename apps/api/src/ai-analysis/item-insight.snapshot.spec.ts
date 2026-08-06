@@ -87,6 +87,17 @@ function makeQuestion(overrides: Partial<QuestionAnalysisResponse> = {}): Questi
       { key: 'C', text: 'c', isCorrect: false, count: 4, percentage: 16, hasImage: false },
       { key: 'D', text: 'd', isCorrect: false, count: 11, percentage: 44, hasImage: false },
     ],
+    answerKey: {
+      kind: 'choice',
+      correctKey: 'B',
+      alternatives: [
+        { key: 'A', text: 'a', isCorrect: false },
+        { key: 'B', text: 'b', isCorrect: true },
+        { key: 'C', text: 'c', isCorrect: false },
+        { key: 'D', text: 'd', isCorrect: false },
+      ],
+    },
+    scoreDistribution: null,
     ...overrides,
   };
 }

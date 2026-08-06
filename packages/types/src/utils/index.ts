@@ -14,3 +14,4 @@ export * from './rubric-code';
 export * from './item-scoring';
 export * from './item-stem';
 export * from './response-display';
+export * from './answer-key';
