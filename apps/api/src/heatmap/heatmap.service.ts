@@ -6,19 +6,15 @@ import {
   classGroups,
   gradingScales,
   instruments,
-  subjectClasses,
   subjects,
   taxonomyNodes,
-  teacherAssignments,
   withOrgContext,
 } from '@soe/db';
 import {
   DEFAULT_PERFORMANCE_THRESHOLDS,
-  RESULTS_VIEWER_ROLES,
   RESULT_HIDDEN_NODE_TYPES,
   buildComparabilityMeta,
   percentageToPerformanceLevel,
-  userHasAnyRole,
   type ComparabilityInstrumentRef,
   type ComparabilityMeta,
   type HeatmapCell,
@@ -27,7 +23,6 @@ import {
   type HeatmapRow,
   type HeatmapSubject,
   type PerformanceThresholds,
-  type UserRole,
 } from '@soe/types';
 import type { JwtPayload } from '../auth/jwt-payload.types';
 import {
@@ -38,6 +33,7 @@ import {
   cohortAverage,
   type CohortAccumulator,
 } from '../common/helpers/cohort-skill-stats.helper';
+import { resolveClassGroupScope } from '../common/helpers/class-group-scope.helper';
 import { InjectDb, type Database } from '../database/database.types';
 
 const EMPTY_HEATMAP: HeatmapResponse = {
@@ -45,19 +41,6 @@ const EMPTY_HEATMAP: HeatmapResponse = {
   rows: [],
   comparability: buildComparabilityMeta([]),
 };
-
-// Roles "administrativos" — ven todos los cursos de la org. Cualquier otro rol
-// con acceso (teacher, homeroom_teacher) ve sólo los cursos donde tiene
-// teacher_assignments activos. Idéntico a AnalyticsService / DashboardsService.
-const ADMIN_LIKE_ROLES: readonly UserRole[] = [
-  'platform_admin',
-  'school_admin',
-  'academic_director',
-  'cycle_director',
-  'dept_head',
-  'coordinator',
-  'eval_coordinator',
-];
 
 type Scope = { scopeAll: boolean; classGroupIds: string[] };
 
@@ -103,7 +86,7 @@ export class HeatmapService {
     const orgId = this.requireOrgId(user);
 
     return withOrgContext(this.db, orgId, async (tx) => {
-      const scope = await this.getAccessibleClassGroupIds(tx, user, orgId);
+      const scope = await resolveClassGroupScope(tx, user, orgId);
 
       // Profesor sin cursos → no hay datos visibles.
       if (!scope.scopeAll && scope.classGroupIds.length === 0) {
@@ -422,36 +405,6 @@ export class HeatmapService {
   private requireOrgId(user: JwtPayload): string {
     if (user.orgId) return user.orgId;
     throw new ForbiddenException('Usuario sin organización asociada');
-  }
-
-  /**
-   * Decide el alcance del usuario:
-   *  - `scopeAll = true`  → admin-like / platform_admin, ve toda la org.
-   *  - `scopeAll = false` → teacher puro, ve sólo sus class_groups asignados.
-   */
-  private async getAccessibleClassGroupIds(
-    tx: Database,
-    user: JwtPayload,
-    orgId: string,
-  ): Promise<Scope> {
-    if (user.isPlatformAdmin) return { scopeAll: true, classGroupIds: [] };
-
-    const adminLike = userHasAnyRole(user.roles, ADMIN_LIKE_ROLES);
-    if (adminLike) return { scopeAll: true, classGroupIds: [] };
-
-    if (!userHasAnyRole(user.roles, RESULTS_VIEWER_ROLES)) {
-      return { scopeAll: false, classGroupIds: [] };
-    }
-
-    const rows = await tx
-      .select({ classGroupId: subjectClasses.classGroupId })
-      .from(teacherAssignments)
-      .innerJoin(subjectClasses, eq(subjectClasses.id, teacherAssignments.subjectClassId))
-      .innerJoin(classGroups, eq(classGroups.id, subjectClasses.classGroupId))
-      .where(and(eq(teacherAssignments.userId, user.userId), eq(classGroups.orgId, orgId)));
-
-    const ids = Array.from(new Set(rows.map((r) => r.classGroupId)));
-    return { scopeAll: false, classGroupIds: ids };
   }
 
   /**

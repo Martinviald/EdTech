@@ -11,18 +11,14 @@ import {
   skillResults,
   studentEnrollments,
   students,
-  subjectClasses,
   subjects,
   taxonomyNodes,
-  teacherAssignments,
   assessmentResults,
   withOrgContext,
 } from '@soe/db';
 import {
-  RESULTS_VIEWER_ROLES,
   buildComparabilityMeta,
   percentageToPerformanceLevel,
-  userHasAnyRole,
   type ComparabilityInstrumentRef,
   type ComparabilityMeta,
   type GenerationalComparisonQueryDto,
@@ -33,23 +29,10 @@ import {
   type ProgressionPoint,
   type ProgressionQueryDto,
   type ProgressionResponse,
-  type UserRole,
 } from '@soe/types';
 import type { JwtPayload } from '../auth/jwt-payload.types';
+import { resolveClassGroupScope } from '../common/helpers/class-group-scope.helper';
 import { InjectDb, type Database } from '../database/database.types';
-
-// Roles "administrativos" — ven todos los cursos de la org. Cualquier otro rol
-// con acceso (teacher, homeroom_teacher) ve sólo los cursos donde tiene
-// teacher_assignments activos. Idéntico a AssessmentResultsService.
-const ADMIN_LIKE_ROLES: readonly UserRole[] = [
-  'platform_admin',
-  'school_admin',
-  'academic_director',
-  'cycle_director',
-  'dept_head',
-  'coordinator',
-  'eval_coordinator',
-];
 
 const PERFORMANCE_LEVELS_ORDER: readonly PerformanceLevel[] = [
   'insufficient',
@@ -74,7 +57,7 @@ export class AnalyticsService {
     const orgId = this.requireOrgId(user);
 
     return withOrgContext(this.db, orgId, async (tx) => {
-      const scope = await this.getAccessibleClassGroupIds(tx, user, orgId);
+      const scope = await resolveClassGroupScope(tx, user, orgId);
 
       const meta = await this.resolveGenerationalMeta(tx, orgId, query);
 
@@ -130,7 +113,7 @@ export class AnalyticsService {
     const orgId = this.requireOrgId(user);
 
     return withOrgContext(this.db, orgId, async (tx) => {
-      const scope = await this.getAccessibleClassGroupIds(tx, user, orgId);
+      const scope = await resolveClassGroupScope(tx, user, orgId);
 
       if (query.scope === 'student') {
         return this.progressionForStudent(tx, orgId, scope, query);
@@ -667,36 +650,6 @@ export class AnalyticsService {
   private requireOrgId(user: JwtPayload): string {
     if (user.orgId) return user.orgId;
     throw new ForbiddenException('Usuario sin organización asociada');
-  }
-
-  /**
-   * Decide el alcance del usuario:
-   *  - `scopeAll = true`  → admin-like / platform_admin, ve toda la org.
-   *  - `scopeAll = false` → teacher puro, ve sólo sus class_groups asignados.
-   */
-  private async getAccessibleClassGroupIds(
-    tx: Database,
-    user: JwtPayload,
-    orgId: string,
-  ): Promise<{ scopeAll: boolean; classGroupIds: string[] }> {
-    if (user.isPlatformAdmin) return { scopeAll: true, classGroupIds: [] };
-
-    const adminLike = userHasAnyRole(user.roles, ADMIN_LIKE_ROLES);
-    if (adminLike) return { scopeAll: true, classGroupIds: [] };
-
-    if (!userHasAnyRole(user.roles, RESULTS_VIEWER_ROLES)) {
-      return { scopeAll: false, classGroupIds: [] };
-    }
-
-    const rows = await tx
-      .select({ classGroupId: subjectClasses.classGroupId })
-      .from(teacherAssignments)
-      .innerJoin(subjectClasses, eq(subjectClasses.id, teacherAssignments.subjectClassId))
-      .innerJoin(classGroups, eq(classGroups.id, subjectClasses.classGroupId))
-      .where(and(eq(teacherAssignments.userId, user.userId), eq(classGroups.orgId, orgId)));
-
-    const ids = Array.from(new Set(rows.map((r) => r.classGroupId)));
-    return { scopeAll: false, classGroupIds: ids };
   }
 
   /** Set de studentIds visibles para un profesor, o `null` si ve toda la org. */

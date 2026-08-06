@@ -17,13 +17,11 @@ import {
   subjectClasses,
   subjects,
   taxonomyNodes,
-  teacherAssignments,
   withOrgContext,
 } from '@soe/db';
 import {
   DEFAULT_PERFORMANCE_THRESHOLDS,
   PERFORMANCE_LEVELS,
-  RESULTS_VIEWER_ROLES,
   RESULT_HIDDEN_NODE_TYPES,
   bandToLegacyLevel,
   buildComparabilityMeta,
@@ -52,7 +50,6 @@ import {
   type SkillAchievementModel,
   type StudentClassificationModel,
   type TeacherCourseKpiModel,
-  type UserRole,
 } from '@soe/types';
 import type { JwtPayload } from '../auth/jwt-payload.types';
 import {
@@ -64,6 +61,10 @@ import {
   type CohortAccumulator,
 } from '../common/helpers/cohort-skill-stats.helper';
 import { loadCohortAchievementByAssessment } from '../common/helpers/cohort-item-stats.helper';
+import {
+  ADMIN_LIKE_ROLES,
+  resolveClassGroupScope,
+} from '../common/helpers/class-group-scope.helper';
 import { InjectDb, type Database } from '../database/database.types';
 import { loadInstrumentBands } from '../performance-bands/lib/load-instrument-bands';
 
@@ -71,19 +72,6 @@ import { loadInstrumentBands } from '../performance-bands/lib/load-instrument-ba
 function toBandView(b: PerformanceBandInput): PerformanceBandView {
   return { key: b.key, label: b.label, order: b.order, color: b.color ?? null };
 }
-
-// Roles "administrativos" — ven todos los cursos de la org. Cualquier otro rol
-// con acceso (teacher, homeroom_teacher) ve sólo los cursos donde tiene
-// teacher_assignments activos. Mismo conjunto que assessment-results.service.
-const ADMIN_LIKE_ROLES: readonly UserRole[] = [
-  'platform_admin',
-  'school_admin',
-  'academic_director',
-  'cycle_director',
-  'dept_head',
-  'coordinator',
-  'eval_coordinator',
-];
 
 // Umbrales por defecto (0..1) — alineados al estándar DIA. Se usan cuando la
 // grading scale aplicable no define `config.performanceThresholds`. Single source
@@ -159,7 +147,7 @@ export class DashboardsService {
     if (!orgId) return empty;
 
     return withOrgContext(this.db, orgId, async (tx) => {
-      const scope = await this.getAccessibleClassGroupIds(tx, user, orgId);
+      const scope = await resolveClassGroupScope(tx, user, orgId);
       if (!scope.scopeAll && scope.classGroupIds.length === 0) return empty;
 
       const studentIds = await this.resolveScopedStudentIds(tx, orgId, scope, query);
@@ -279,7 +267,7 @@ export class DashboardsService {
     if (!orgId) return empty;
 
     return withOrgContext(this.db, orgId, async (tx) => {
-      const scope = await this.getAccessibleClassGroupIds(tx, user, orgId);
+      const scope = await resolveClassGroupScope(tx, user, orgId);
       if (!scope.scopeAll && scope.classGroupIds.length === 0) {
         // Profesor sin cursos: igual exponemos los períodos de la org para que la
         // UI no quede sin contexto, pero sin cursos/asignaturas visibles.
@@ -467,7 +455,7 @@ export class DashboardsService {
     if (!orgId) return empty;
 
     return withOrgContext(this.db, orgId, async (tx) => {
-      const scope = await this.getAccessibleClassGroupIds(tx, user, orgId);
+      const scope = await resolveClassGroupScope(tx, user, orgId);
       if (!scope.scopeAll && scope.classGroupIds.length === 0) return empty;
 
       const studentIds = await this.resolveScopedStudentIds(tx, orgId, scope, query);
@@ -644,7 +632,7 @@ export class DashboardsService {
     if (!orgId) return empty;
 
     return withOrgContext(this.db, orgId, async (tx) => {
-      const scope = await this.getAccessibleClassGroupIds(tx, user, orgId);
+      const scope = await resolveClassGroupScope(tx, user, orgId);
       if (!scope.scopeAll && scope.classGroupIds.length === 0) return empty;
 
       const perStudent = this.requiresPerStudentData(query);
@@ -881,7 +869,7 @@ export class DashboardsService {
         : emptyNode;
       const empty: DashboardSkillBreakdownResponse = { node, groupBy: query.groupBy, rows: [] };
 
-      const scope = await this.getAccessibleClassGroupIds(tx, user, orgId);
+      const scope = await resolveClassGroupScope(tx, user, orgId);
       if (!scope.scopeAll && scope.classGroupIds.length === 0) return empty;
 
       const perStudent = this.requiresPerStudentData(query);
@@ -1207,7 +1195,7 @@ export class DashboardsService {
     if (!orgId) return { courses: [] };
 
     return withOrgContext(this.db, orgId, async (tx) => {
-      const scope = await this.getAccessibleClassGroupIds(tx, user, orgId);
+      const scope = await resolveClassGroupScope(tx, user, orgId);
       if (!scope.scopeAll && scope.classGroupIds.length === 0) return { courses: [] };
 
       // Cursos del scope (filtrados por gradeId/classGroupId/academicYearId si vienen).
@@ -1341,7 +1329,7 @@ export class DashboardsService {
     if (!orgId) return null;
 
     return withOrgContext(this.db, orgId, async (tx) => {
-      const scope = await this.getAccessibleClassGroupIds(tx, user, orgId);
+      const scope = await resolveClassGroupScope(tx, user, orgId);
       const isTeacherScope = this.isTeacherScope(user);
       if (!scope.scopeAll && scope.classGroupIds.length === 0) {
         return { orgId, isTeacherScope, classGroupIds: [], assessmentIds: [], refs: [] };
@@ -1376,35 +1364,6 @@ export class DashboardsService {
   private isTeacherScope(user: JwtPayload): boolean {
     if (user.isPlatformAdmin) return false;
     return !userHasAnyRole(user.roles, ADMIN_LIKE_ROLES);
-  }
-
-  /**
-   * Replica assessment-results.getAccessibleClassGroupIds: admin-like ve toda
-   * la org (`scopeAll`), teacher ve sólo sus class_groups vía teacher_assignments.
-   */
-  private async getAccessibleClassGroupIds(
-    tx: Database,
-    user: JwtPayload,
-    orgId: string,
-  ): Promise<Scope> {
-    if (user.isPlatformAdmin) return { scopeAll: true, classGroupIds: [] };
-
-    const adminLike = userHasAnyRole(user.roles, ADMIN_LIKE_ROLES);
-    if (adminLike) return { scopeAll: true, classGroupIds: [] };
-
-    if (!userHasAnyRole(user.roles, RESULTS_VIEWER_ROLES)) {
-      return { scopeAll: false, classGroupIds: [] };
-    }
-
-    const rows = await tx
-      .select({ classGroupId: subjectClasses.classGroupId })
-      .from(teacherAssignments)
-      .innerJoin(subjectClasses, eq(subjectClasses.id, teacherAssignments.subjectClassId))
-      .innerJoin(classGroups, eq(classGroups.id, subjectClasses.classGroupId))
-      .where(and(eq(teacherAssignments.userId, user.userId), eq(classGroups.orgId, orgId)));
-
-    const ids = Array.from(new Set(rows.map((r) => r.classGroupId)));
-    return { scopeAll: false, classGroupIds: ids };
   }
 
   /**
