@@ -1,3 +1,4 @@
+import { Suspense } from 'react';
 import { redirect } from 'next/navigation';
 import { auth } from '@/auth';
 import { ROUTES } from '@/lib/routes';
@@ -5,6 +6,7 @@ import { PageTitleProvider } from '@/components/layout/page-title-context';
 import { Sidebar } from '@/components/layout/Sidebar';
 import { Topbar } from '@/components/layout/Topbar';
 import { SkipLink } from '@/components/layout/SkipLink';
+import { ListSearchMemory } from '@/components/shared';
 import { Toaster } from '@/components/ui/sonner';
 
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {
@@ -20,6 +22,10 @@ export default async function AdminLayout({ children }: { children: React.ReactN
 
   return (
     <PageTitleProvider>
+      {/* Recuerda los filtros de cada listado para el enlace de vuelta. */}
+      <Suspense fallback={null}>
+        <ListSearchMemory />
+      </Suspense>
       <div className="flex h-screen bg-background">
         <SkipLink />
         <Sidebar roles={['platform_admin']} variant="admin" />

@@ -2,7 +2,7 @@ import { Suspense } from 'react';
 import Link from 'next/link';
 import type { Route } from 'next';
 import { redirect } from 'next/navigation';
-import { ArrowLeft, ArrowRight, ClipboardList, Inbox, Layers } from 'lucide-react';
+import { ArrowRight, ClipboardList, Inbox, Layers } from 'lucide-react';
 import { auth } from '@/auth';
 import { ROUTES } from '@/lib/routes';
 import {
@@ -20,6 +20,7 @@ import {
   FilterBarSkeleton,
   MetricsGroup,
   AlertCallout,
+  BackLink,
 } from '@/components/shared';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { SetPageTitle } from '@/components/layout/page-title-context';
@@ -72,7 +73,7 @@ export default async function EstudiantePanoramaPage({
 
   return (
     <PageContainer>
-      <BackLink />
+      <BackLink href={ROUTES.estudiantes} label="Volver a estudiantes" className="font-medium" />
       <Suspense
         key={JSON.stringify(query)}
         fallback={
@@ -88,17 +89,6 @@ export default async function EstudiantePanoramaPage({
   );
 }
 
-function BackLink() {
-  return (
-    <Link
-      href={ROUTES.estudiantes}
-      className="inline-flex items-center gap-1.5 text-sm font-medium text-muted-foreground hover:text-foreground"
-    >
-      <ArrowLeft className="size-4" aria-hidden />
-      Volver a estudiantes
-    </Link>
-  );
-}
 
 function BandMovement({ item }: { item: StudentPanoramaAssessment }) {
   if (!item.priorPerformanceBand || !item.performanceBand) {
