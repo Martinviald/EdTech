@@ -1,5 +1,6 @@
 import { z } from 'zod';
 import type { PerformanceLevel } from '../enums';
+import type { ComparabilityMeta } from '../comparability';
 import { csvArraySchema, stringCsvSchema, uuidCsvSchema } from './common.schema';
 import { INSTRUMENT_APPLICATION_PERIODS } from './instrument.schema';
 
@@ -63,4 +64,5 @@ export type HeatmapRow = {
 export type HeatmapResponse = {
   subjects: HeatmapSubject[]; // columnas, en orden
   rows: HeatmapRow[]; // filas (habilidades), ordenadas por criticidad asc
+  comparability: ComparabilityMeta;
 };

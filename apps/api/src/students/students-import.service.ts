@@ -111,8 +111,7 @@ export class StudentsImportService {
 
     if (willCreateCount > 0 && !confirmCreateMissingCourses) {
       throw new ConflictException({
-        message:
-          'Se detectaron cursos que aún no existen. Confirma su creación para continuar.',
+        message: 'Se detectaron cursos que aún no existen. Confirma su creación para continuar.',
         newClassGroups: Array.from(preResolution.resolved.values())
           .filter((r) => !r.existed)
           .map((r) => r.ref),
@@ -132,12 +131,7 @@ export class StudentsImportService {
         .selectDistinct({ subjectId: subjectClasses.subjectId })
         .from(subjectClasses)
         .innerJoin(classGroups, eq(classGroups.id, subjectClasses.classGroupId))
-        .where(
-          and(
-            eq(classGroups.orgId, orgId),
-            eq(subjectClasses.academicYearId, academicYearId),
-          ),
-        )
+        .where(and(eq(classGroups.orgId, orgId), eq(subjectClasses.academicYearId, academicYearId)))
         .then((rows) => rows.map((r) => r.subjectId));
 
       const classGroupIdByLabel = new Map<string, string>();
@@ -352,9 +346,7 @@ export class StudentsImportService {
       .limit(1);
 
     if (!row) {
-      throw new BadRequestException(
-        'Debes configurar el año académico antes de importar alumnos.',
-      );
+      throw new BadRequestException('Debes configurar el año académico antes de importar alumnos.');
     }
     return row.id;
   }
@@ -374,7 +366,9 @@ export class StudentsImportService {
       return { resolved, unknownGradeLabels };
     }
 
-    const wantedGradeCodes = Array.from(new Set(Array.from(labels.values()).map((c) => c.gradeCode)));
+    const wantedGradeCodes = Array.from(
+      new Set(Array.from(labels.values()).map((c) => c.gradeCode)),
+    );
     const gradeRows: Grade[] = await this.db
       .select()
       .from(grades)
@@ -388,9 +382,7 @@ export class StudentsImportService {
         name: classGroups.name,
       })
       .from(classGroups)
-      .where(
-        and(eq(classGroups.orgId, orgId), eq(classGroups.academicYearId, academicYearId)),
-      );
+      .where(and(eq(classGroups.orgId, orgId), eq(classGroups.academicYearId, academicYearId)));
 
     const existingKey = (gradeId: string, section: string) => `${gradeId}|${section}`;
     const existingByKey = new Map<string, string>();

@@ -7,14 +7,19 @@ import type { AiAnalysisAudience, AiAnalysisSnapshot } from '@soe/types';
  * el prompt evolucione. Cambiar el texto del prompt o la forma del output exige
  * bumpear esta versión.
  */
-export const PROMPT_VERSION = 's1-insights-v1';
+export const PROMPT_VERSION = 's1-insights-v2';
 
 /**
  * Construye el par {system, prompt} del informe IA de evaluación.
  *
- * Principio rector: el snapshot ya trae TODA la psicometría calculada de forma
- * determinista en backend (p, D, punto-biserial, KR-20, distractores, % de logro,
- * cobertura). La IA SOLO interpreta y prioriza; nunca recalcula ni inventa números.
+ * Principio rector: el snapshot ya trae TODOS los números calculados de forma
+ * determinista en backend (% de logro por ítem y por habilidad, distribución de
+ * alternativas, distractor dominante, cobertura). La IA SOLO interpreta y prioriza;
+ * nunca recalcula ni inventa números.
+ *
+ * El análisis es de APRENDIZAJE, no del instrumento: las pruebas que procesa la
+ * plataforma son estándar y validadas por un tercero y no se juzgan
+ * (docs/diseno-limpieza-calidad-instrumento.md).
  *
  * El prompt instruye a Gemini para devolver EXACTAMENTE un JSON que cumpla
  * `assessmentInsightsOutputSchema` de `@soe/types` (el runner lo valida con Zod
@@ -41,7 +46,7 @@ export function buildAssessmentInsightsPrompt(
 function buildSystem(): string {
   return [
     'Eres un asesor pedagógico experto en evaluación educativa para colegios chilenos.',
-    'Interpretas métricas psicométricas YA CALCULADAS y produces un informe accionable.',
+    'Interpretas resultados YA CALCULADOS y produces un informe accionable de aprendizaje.',
     '',
     'REGLAS INQUEBRANTABLES:',
     '1. Responde EXCLUSIVAMENTE con un único objeto JSON válido. Sin texto, sin markdown,',
@@ -51,14 +56,17 @@ function buildSystem(): string {
     '3. NUNCA menciones alumnos por nombre ni inventes identidades: el snapshot está',
     '   anonimizado. Habla siempre en agregados ("el grupo", "N alumnos bajo el umbral").',
     '4. Escribe en español de Chile, claro y profesional, sin jerga estadística innecesaria.',
-    '5. Distingue SIEMPRE la causa raíz de un ítem de bajo desempeño:',
-    '   - "not_taught": p muy bajo y D positiva razonable, distribución dispersa → contenido',
-    '     probablemente no alcanzado a ver/enseñar.',
+    '5. NO evalúes la calidad del instrumento ni de sus preguntas. Son pruebas estandarizadas',
+    '   y validadas (DIA, SIMCE, PAES, Cambridge). NUNCA atribuyas un resultado a que la',
+    '   pregunta esté mal redactada, sea ambigua, tenga la clave errónea o "no discrimine".',
+    '   Un bajo logro SIEMPRE se explica por aprendizaje.',
+    '6. Distingue SIEMPRE la causa raíz de un ítem de bajo desempeño, entre estas tres:',
+    '   - "not_taught": logro muy bajo con las respuestas repartidas entre varias alternativas',
+    '     (nadie sabe hacia dónde ir) → contenido probablemente no alcanzado a ver/enseñar.',
     '   - "misconception": un distractor concentra muchas respuestas (distractor dominante) →',
-    '     error conceptual sistemático; explica la misconcepción que sugiere ese distractor.',
-    '   - "item_quality": D baja o negativa, o la clave compite con un distractor → el ÍTEM es',
-    '     defectuoso (ambiguo/mal redactado), NO un problema de aprendizaje.',
-    '   - "insufficient_practice": p intermedio-bajo con D alta → visto pero poco consolidado.',
+    '     error conceptual sistemático; explica qué misconcepción revela elegir esa alternativa.',
+    '   - "insufficient_practice": logro intermedio-bajo sin un distractor dominante claro →',
+    '     el contenido se vio pero no está consolidado.',
     '',
     'CONTRATO DE SALIDA (JSON, claves y tipos EXACTOS):',
     OUTPUT_CONTRACT,
@@ -79,8 +87,7 @@ const OUTPUT_CONTRACT = `{
     {
       "position": number,                   // nº de pregunta (del snapshot)
       "skillName": string | null,
-      "difficulty": number | null,          // p
-      "discrimination": number | null,      // D
+      "difficulty": number | null,          // % de logro del ítem, 0..1
       "whatWorked": string[],               // por qué funcionó (claridad, alineación al OA…)
       "replicableAction": string            // práctica reutilizable para clases
     }
@@ -89,8 +96,8 @@ const OUTPUT_CONTRACT = `{
     {
       "position": number,
       "skillName": string | null,
-      "difficulty": number | null,          // p
-      "likelyCause": "not_taught" | "misconception" | "item_quality" | "insufficient_practice",
+      "difficulty": number | null,          // % de logro del ítem, 0..1
+      "likelyCause": "not_taught" | "misconception" | "insufficient_practice",
       "misconception": string | null,       // inferida del distractor dominante (null si no aplica)
       "actionPlan": string[]                // >=1 paso concreto de remediación
     }
@@ -118,12 +125,8 @@ const OUTPUT_CONTRACT = `{
       "linkedItemPositions": number[]       // posiciones de ítems relacionados
     }
   ],
-  "reliability": {
-    "kr20": number | null,                  // copia el del snapshot (reliability.kr20)
-    "interpretation": string                // qué significa esa confiabilidad para leer estos datos
-  },
   "confidence": number,                     // 0..1, tu autoevaluación de la solidez del análisis (H20.7)
-  "caveats": string[]                       // límites: pocos evaluados, baja cobertura, KR-20 nulo… (H20.7)
+  "caveats": string[]                       // límites: pocos evaluados, baja cobertura… (H20.7)
 }`;
 
 // ──────────────────────────────────────────────────────────────────────────────
@@ -143,14 +146,13 @@ function buildUserPrompt(
     '- Capa 3 — Recomendaciones priorizadas por impacto × factibilidad × persistencia, enlazadas a',
     '  habilidades (linkedSkillIds) e ítems (linkedItemPositions).',
     '',
-    'PRIORIZACIÓN de Top/Bottom: ordena por desempeño (p) y discriminación (D). Si hay menos de 5',
+    'PRIORIZACIÓN de Top/Bottom: ordena por % de logro (difficulty). Si hay menos de 5',
     'ítems disponibles, incluye solo los que existan (no rellenes con inventados).',
     '',
-    'Para CADA ítem de bottomItems, decide likelyCause con la regla del system usando p, D,',
-    'punto-biserial y el distractor dominante (dominantDistractor vs correctLabel y distribution).',
+    'Para CADA ítem de bottomItems, decide likelyCause con la regla del system usando el % de',
+    'logro y el reparto de las respuestas (dominantDistractor vs correctLabel y distribution).',
     '',
     'remedialGroupSize de cada brecha DEBE ser exactamente studentsBelowThreshold de esa habilidad.',
-    'reliability.kr20 DEBE ser exactamente reliability.kr20 del snapshot.',
     '',
     'Datos deterministas del instrumento (anonimizados, sin PII):',
     '```json',
@@ -200,14 +202,11 @@ function serializeSnapshot(snapshot: AiAnalysisSnapshot) {
     subjectName: snapshot.subjectName,
     evaluated: snapshot.evaluated,
     enrolled: snapshot.enrolled,
-    reliability: { kr20: snapshot.reliability.kr20 },
     items: snapshot.items.map((it) => ({
       position: it.position,
       skillName: it.skillName,
       nodeId: it.nodeId,
       difficulty: it.difficulty,
-      discrimination: it.discrimination,
-      pointBiserial: it.pointBiserial,
       correctLabel: it.correctLabel,
       dominantDistractor: it.dominantDistractor,
       distribution: it.distribution,

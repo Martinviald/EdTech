@@ -5,7 +5,7 @@ import type { AiAnalysisAudience, ComparisonSide, InstrumentComparisonSnapshot }
  * (TKT-23). Se persiste con cada análisis para invalidar caché y auditar
  * regresiones. Cambiar el texto del prompt o la forma del output exige bumpear.
  */
-export const PROMPT_VERSION = 'tkt23-instrument-comparison-v1';
+export const PROMPT_VERSION = 'tkt23-instrument-comparison-v2';
 
 /**
  * Construye el par {system, prompt} del diagnóstico de variación entre dos
@@ -36,7 +36,7 @@ function buildSystem(): string {
     'Tu tarea: DIAGNOSTICAR por qué el resultado (% de logro) varió entre DOS instrumentos',
     'comparables (p. ej. el mismo diagnóstico aplicado en dos años). Analizas tanto el',
     'CONTENIDO (enunciados, alternativas, pasajes, cobertura de habilidades) como los',
-    'RESULTADOS (dificultad p, discriminación D, distribución de respuestas, % de logro).',
+    'RESULTADOS (% de logro por ítem y por habilidad, distribución de respuestas).',
     '',
     'REGLAS INQUEBRANTABLES:',
     '1. Responde EXCLUSIVAMENTE con un único objeto JSON válido. Sin texto, sin markdown,',
@@ -47,10 +47,13 @@ function buildSystem(): string {
     '   Sé explícito sobre la incertidumbre en `confidence` y `caveats`.',
     '4. NUNCA menciones alumnos por nombre: el snapshot está anonimizado. Habla en agregados.',
     '5. Distingue causas de contenido de causas de aprendizaje: un cambio de resultados puede',
-    '   deberse a que el instrumento cambió (ítems más difíciles, textos más largos, otra',
-    '   cobertura, distractores más potentes) O a un cambio real en el aprendizaje del grupo.',
-    '   Cuando el contenido difiera de forma relevante, dilo; cuando el contenido sea',
-    '   equivalente y aun así el resultado cambie, atribúyelo al aprendizaje/enseñanza.',
+    '   deberse a que el instrumento cambió (contenidos distintos, textos más largos, otra',
+    '   cobertura de habilidades, mayor exigencia del enunciado) O a un cambio real en el',
+    '   aprendizaje del grupo. Cuando el contenido difiera de forma relevante, dilo; cuando',
+    '   sea equivalente y aun así el resultado cambie, atribúyelo al aprendizaje/enseñanza.',
+    '   OJO: describir en qué se diferencian dos instrumentos NO es juzgar su calidad. Ambos',
+    '   son pruebas estandarizadas y validadas: nunca digas que un ítem está mal construido,',
+    '   mal redactado, es ambiguo o "no discrimina".',
     '6. Compara habilidad por habilidad usando los nodeName; solo cruza habilidades que',
     '   existan en ambos lados. Escribe en español de Chile, claro y profesional.',
     '',
@@ -70,7 +73,7 @@ const OUTPUT_CONTRACT = `{
   },
   "contentDifferences": [                       // qué cambió en el CONTENIDO/dificultad entre instrumentos
     {
-      "aspect": string,                         // p. ej. "dificultad de los textos", "cobertura de habilidad X"
+      "aspect": string,                         // p. ej. "extensión de los textos", "cobertura de habilidad X"
       "description": string,
       "evidence": string                        // referencia a ítems (posición), habilidades o pasajes del snapshot
     }
@@ -117,8 +120,8 @@ function buildUserPrompt(
     'METODOLOGÍA:',
     '1. Cuantifica la variación global (overallVariation) usando averageAchievement de cada lado.',
     '   deltaPct = comparison.averageAchievement - base.averageAchievement.',
-    '2. Contrasta el CONTENIDO: dificultad (p), discriminación (D), distribución/distractores,',
-    '   enunciados, alternativas y pasajes. Identifica diferencias relevantes (contentDifferences).',
+    '2. Contrasta el CONTENIDO: % de logro por ítem, distribución/distractores, enunciados,',
+    '   alternativas y pasajes. Identifica diferencias relevantes (contentDifferences).',
     '3. Cruza las habilidades por nodeName presentes en ambos lados (skillMovements).',
     '4. Formula hipótesis priorizadas de por qué cambió el resultado, separando causas de',
     '   contenido/instrumento de causas de aprendizaje/enseñanza.',
@@ -177,14 +180,12 @@ function serializeSide(side: ComparisonSide) {
     studentsEvaluated: side.studentsEvaluated,
     studentsEnrolled: side.studentsEnrolled,
     averageAchievement: side.averageAchievement,
-    reliabilityKr20: side.reliabilityKr20,
     items: side.items.map((it) => ({
       position: it.position,
       skillName: it.skillName,
       stem: it.stem,
       alternatives: it.alternatives,
       difficulty: it.difficulty,
-      discrimination: it.discrimination,
       correctLabel: it.correctLabel,
       dominantDistractor: it.dominantDistractor,
       distribution: it.distribution,

@@ -15,6 +15,8 @@ export type Metric = {
   trend?: MetricTrend;
   /** `danger` colorea el valor en rojo (p. ej. un conteo de errores > 0). */
   tone?: 'default' | 'danger';
+  /** Aclaración bajo el valor, p. ej. el denominador real de un promedio. */
+  hint?: string;
 };
 
 /**
@@ -52,10 +54,11 @@ export function MetricsGroup({
                   </span>
                   {metric.trend ? <MetricTrendChip trend={metric.trend} /> : null}
                 </div>
+                {metric.hint ? (
+                  <p className="mt-1 text-xs text-muted-foreground">{metric.hint}</p>
+                ) : null}
               </div>
-              {Icon ? (
-                <Icon className="size-5 shrink-0 text-muted-foreground" aria-hidden />
-              ) : null}
+              {Icon ? <Icon className="size-5 shrink-0 text-muted-foreground" aria-hidden /> : null}
             </div>
           );
         })}

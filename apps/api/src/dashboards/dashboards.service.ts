@@ -26,11 +26,12 @@ import {
   RESULTS_VIEWER_ROLES,
   RESULT_HIDDEN_NODE_TYPES,
   bandToLegacyLevel,
+  buildComparabilityMeta,
   classifyByBands,
   percentageToPerformanceLevel,
   userHasAnyRole,
   type AssessmentStatus,
-  type DashboardAlert,
+  type ComparabilityInstrumentRef,
   type DashboardAssessmentSummary,
   type DashboardFilterOptionsResponse,
   type DashboardFiltersQueryDto,
@@ -115,7 +116,22 @@ type BreakdownAggregate = {
   studentsAssessed: number;
 };
 
+type ScopedAssessments = {
+  ids: string[];
+  refs: ComparabilityInstrumentRef[];
+};
+
+export type ComparableOverviewScope = {
+  orgId: string;
+  isTeacherScope: boolean;
+  classGroupIds: string[] | null;
+  assessmentIds: string[];
+  refs: ComparabilityInstrumentRef[];
+};
+
 const EMPTY_RECENT_ASSESSMENTS = { data: [] as DashboardAssessmentSummary[], total: 0 };
+
+const EMPTY_COMPARABILITY = buildComparabilityMeta([]);
 
 @Injectable()
 export class DashboardsService {
@@ -133,13 +149,12 @@ export class DashboardsService {
     const isTeacherScope = this.isTeacherScope(user);
     const empty: DashboardOverviewResponse = {
       scope: isTeacherScope ? 'teacher' : 'org',
-      globalAchievement: null,
       studentsEvaluated: 0,
       assessmentsCount: 0,
-      performanceDistribution: this.emptyDistribution(),
+      performanceDistribution: null,
       recentAssessments: [],
       recentAssessmentsTotal: 0,
-      alerts: [],
+      comparability: EMPTY_COMPARABILITY,
     };
     if (!orgId) return empty;
 
@@ -150,25 +165,22 @@ export class DashboardsService {
       const studentIds = await this.resolveScopedStudentIds(tx, orgId, scope, query);
       if (studentIds !== null && studentIds.length === 0) return empty;
 
-      const assessmentIds = await this.resolveScopedAssessmentIds(tx, orgId, query);
+      const scoped = await this.resolveScopedAssessments(tx, orgId, query);
+      const assessmentIds = scoped.ids;
       if (assessmentIds.length === 0) {
         return { ...empty, scope: isTeacherScope ? 'teacher' : 'org' };
       }
 
+      const comparability = buildComparabilityMeta(scoped.refs, assessmentIds.length);
+
       const resultConditions = this.buildResultConditions(assessmentIds, studentIds, undefined);
 
       // ── Parte per-alumno (`assessment_results`) — informes item_level ──────────
-      // Promedio de % logro y alumnos distintos evaluados.
-      // `studentsWithPct` es el peso del promedio: los alumnos que REALMENTE aportan
-      // un porcentaje. No coincide con `studentsEvaluated` — un informe agregado deja
-      // filas con sólo el nivel de desempeño y `percentage` NULL, que el `avg` ignora.
-      // Pesar el promedio por alumnos que no entraron en él inflaba esta rama frente a
-      // la de cohorte.
+      // Sólo alumnos distintos evaluados: el "% de logro global" que este bloque
+      // alimentaba ya no existe (#1C), porque promediaba instrumentos no comparables.
       const [metrics] = await tx
         .select({
-          avgPct: sql<string | null>`avg(${assessmentResults.percentage}::numeric)`,
           studentsEvaluated: sql<number>`count(distinct ${assessmentResults.studentId})::int`,
-          studentsWithPct: sql<number>`count(distinct ${assessmentResults.studentId}) filter (where ${assessmentResults.percentage} is not null)::int`,
         })
         .from(assessmentResults)
         .innerJoin(students, eq(students.id, assessmentResults.studentId))
@@ -177,31 +189,12 @@ export class DashboardsService {
       // AssessmentIds con datos per-alumno en el scope. Se usa para no doble-contar
       // contra el read-model de cohorte (un assessment computed escribe en ambos):
       // sus alumnos ya salen del `count(distinct)` de arriba.
-      //
-      // ⚠️ Se distinguen DOS cosas, porque no coinciden:
-      //  · `resultAssessmentIds` — tiene filas por alumno (sirve para el conteo de
-      //    alumnos: esos alumnos ya están en `nResults`).
-      //  · `achievementAssessmentIds` — tiene filas por alumno CON `percentage` no
-      //    nulo (sirve para el logro: es lo único que entra en el `avg`).
-      //
-      // Un informe oficial cargado en modo agregado puede crear filas por alumno que
-      // sólo traen el nivel de desempeño (`performance_band_id`) y `percentage` NULL.
-      // Con un solo set, esas evaluaciones quedaban marcadas como "ya contadas por
-      // alumno" y se saltaban la rama de cohorte, mientras el `avg` las ignoraba por
-      // ser NULL: su logro desaparecía del KPI sin error ninguno.
       const resultAssessmentRows = await tx
-        .select({
-          assessmentId: assessmentResults.assessmentId,
-          withPct: sql<number>`count(${assessmentResults.percentage})::int`,
-        })
+        .selectDistinct({ assessmentId: assessmentResults.assessmentId })
         .from(assessmentResults)
         .innerJoin(students, eq(students.id, assessmentResults.studentId))
-        .where(and(...resultConditions, isNull(students.deletedAt)))
-        .groupBy(assessmentResults.assessmentId);
+        .where(and(...resultConditions, isNull(students.deletedAt)));
       const resultAssessmentIds = new Set(resultAssessmentRows.map((r) => r.assessmentId));
-      const achievementAssessmentIds = new Set(
-        resultAssessmentRows.filter((r) => Number(r.withPct) > 0).map((r) => r.assessmentId),
-      );
 
       // ── Parte de cohorte (`assessment_item_stats`) — informes agregados ────────
       // Un informe oficial DIA cargado en modo aggregate_only no tiene filas per-alumno
@@ -213,32 +206,18 @@ export class DashboardsService {
         cohortClassGroupIds,
       );
 
-      const pctResults = metrics?.avgPct == null ? null : Number(metrics.avgPct);
       const nResults = Number(metrics?.studentsEvaluated ?? 0);
-      // Peso del promedio per-alumno (≤ nResults). Si la columna no viene (mocks
-      // viejos), se cae a nResults: mismo comportamiento que antes.
-      const nAchievement = Number(metrics?.studentsWithPct ?? nResults);
 
       // Acumula SÓLO los assessment agregados (los que no aparecen en
       // `assessment_results`) para no doble-contar los computed.
       const cohortAssessmentIds = new Set<string>();
       let cohortStudents = 0; // Σ N_curso de los agregados (para studentsEvaluated)
-      let cohortAchNum = 0; //   Σ (logro_a × N_a) de los agregados con logro no nulo
-      let cohortAchWeight = 0; // Σ N_a de esos mismos agregados
       for (const c of cohortByAssessment) {
         cohortAssessmentIds.add(c.assessmentId);
         // Alumnos: sólo los de evaluaciones sin NINGUNA fila por alumno (si las hay,
         // esos alumnos ya están en `nResults` y sumarlos los duplicaría).
         if (!resultAssessmentIds.has(c.assessmentId)) {
           cohortStudents += c.studentsAssessed;
-        }
-        // Logro: entra si el `avg` per-alumno no lo cubre — o sea, si la evaluación no
-        // aportó ningún `percentage`. Es lo que rescata a los informes agregados con
-        // filas de sólo-nivel.
-        if (achievementAssessmentIds.has(c.assessmentId)) continue;
-        if (c.averageAchievement != null) {
-          cohortAchNum += c.averageAchievement * c.studentsAssessed;
-          cohortAchWeight += c.studentsAssessed;
         }
       }
 
@@ -253,21 +232,11 @@ export class DashboardsService {
       // sobreconteo aceptable en un KPI de landing.
       const studentsEvaluated = nResults + cohortStudents;
 
-      // globalAchievement = mezcla ponderada por N de ambas fuentes:
-      //   (pct_results × N_results + Σ logro_a × N_a) / (N_results + Σ N_a)
-      // Si una parte no tiene datos (null / peso 0) se pondera sólo la otra; si ninguna,
-      // el resultado es null (mismo contrato nullable de antes).
-      let achNum = 0;
-      let achWeight = 0;
-      if (pctResults != null && nAchievement > 0) {
-        achNum += pctResults * nAchievement;
-        achWeight += nAchievement;
-      }
-      achNum += cohortAchNum;
-      achWeight += cohortAchWeight;
-      const globalAchievement = achWeight > 0 ? achNum / achWeight : null;
-
-      const distribution = await this.computePerformanceDistribution(tx, assessmentIds, studentIds);
+      // La distribución por nivel mezcla los cortes de cada instrumento cuando el
+      // alcance no es comparable, así que sólo se emite sobre una unidad agregable (#1C).
+      const distribution = comparability.aggregatable
+        ? await this.computePerformanceDistribution(tx, assessmentIds, studentIds)
+        : null;
 
       const recentAssessments = await this.loadRecentAssessments(
         tx,
@@ -277,17 +246,14 @@ export class DashboardsService {
         studentIds,
       );
 
-      const alerts = await this.deriveAlerts(tx, orgId, scope, query, studentIds, assessmentIds);
-
       return {
         scope: isTeacherScope ? 'teacher' : 'org',
-        globalAchievement,
         studentsEvaluated,
         assessmentsCount,
         performanceDistribution: distribution,
         recentAssessments: recentAssessments.data,
         recentAssessmentsTotal: recentAssessments.total,
-        alerts,
+        comparability,
       };
     });
   }
@@ -493,9 +459,10 @@ export class DashboardsService {
       advanced: DEFAULT_THRESHOLDS.advanced,
     };
     const empty: DashboardPerformanceResponse = {
-      distribution: this.emptyDistribution(),
+      distribution: null,
       thresholds,
       students: { data: [], total: 0, page: query.page, limit: query.limit },
+      comparability: EMPTY_COMPARABILITY,
     };
     if (!orgId) return empty;
 
@@ -506,7 +473,8 @@ export class DashboardsService {
       const studentIds = await this.resolveScopedStudentIds(tx, orgId, scope, query);
       if (studentIds !== null && studentIds.length === 0) return empty;
 
-      const assessmentIds = await this.resolveScopedAssessmentIds(tx, orgId, query);
+      const scoped = await this.resolveScopedAssessments(tx, orgId, query);
+      const assessmentIds = scoped.ids;
       if (assessmentIds.length === 0) {
         return {
           ...empty,
@@ -515,6 +483,7 @@ export class DashboardsService {
       }
 
       const resolvedThresholds = await this.resolveThresholds(tx, orgId, query, assessmentIds);
+      const comparability = buildComparabilityMeta(scoped.refs, assessmentIds.length);
 
       // Clasificación por alumno: promediamos el % logro por alumno sobre el set de
       // evaluaciones que matchean los filtros. Una fila por alumno.
@@ -557,10 +526,18 @@ export class DashboardsService {
 
       // Bandas del instrumento cuando el scope es un único instrumento (ej. una
       // evaluación DIA): la clasificación usa el corte configurado, no 40/70/85.
-      const bands = await this.resolveScopedBands(tx, query, assessmentIds);
+      //
+      // Si el alcance NO es agregable no se clasifica en absoluto (#1C): el promedio del
+      // % de un alumno a través de instrumentos de distinta dificultad no tiene lectura
+      // pedagógica, y clasificarlo con un corte que no es el de ninguno de ellos —el
+      // viejo fallback silencioso a 40/70/85— era peor que no mostrarlo. La UI pide
+      // elegir una unidad comparable con `comparability.reason`.
+      const bands = comparability.aggregatable
+        ? await this.resolveScopedBands(tx, query, assessmentIds)
+        : null;
 
       let classified: StudentClassificationModel[] = aggregateRows.map((r) => {
-        const pct = r.avgPct == null ? null : Number(r.avgPct);
+        const pct = r.avgPct == null || !comparability.aggregatable ? null : Number(r.avgPct);
         const band = pct == null ? null : classifyByBands(pct / 100, bands);
         const level =
           pct == null
@@ -588,21 +565,33 @@ export class DashboardsService {
       // (alumno × evaluación), lo que producía discrepancias cuando el promedio del
       // alumno caía en un nivel distinto al de alguna de sus evaluaciones.
       const classifiedTotal = classified.filter((c) => c.performanceLevel != null).length;
-      const distribution: PerformanceDistributionBucket[] = PERFORMANCE_LEVELS.map((level) => {
-        const count = classified.filter((c) => c.performanceLevel === level).length;
-        return {
-          level,
-          count,
-          percentage: classifiedTotal > 0 ? (count / classifiedTotal) * 100 : 0,
-        };
-      });
+      const countByLevel = new Map<PerformanceLevel, number>();
+      for (const c of classified) {
+        if (c.performanceLevel == null) continue;
+        countByLevel.set(c.performanceLevel, (countByLevel.get(c.performanceLevel) ?? 0) + 1);
+      }
+      const distribution: PerformanceDistributionBucket[] | null = comparability.aggregatable
+        ? PERFORMANCE_LEVELS.map((level) => {
+            const count = countByLevel.get(level) ?? 0;
+            return {
+              level,
+              count,
+              percentage: classifiedTotal > 0 ? (count / classifiedTotal) * 100 : 0,
+            };
+          })
+        : null;
 
       // Distribución por banda del instrumento (N niveles reales) cuando aplica.
       let bandDistribution: PerformanceBandDistributionBucket[] | undefined;
       if (bands) {
         const withBand = classified.filter((c) => c.performanceBand != null).length;
+        const countByBand = new Map<string, number>();
+        for (const c of classified) {
+          if (c.performanceBand == null) continue;
+          countByBand.set(c.performanceBand.key, (countByBand.get(c.performanceBand.key) ?? 0) + 1);
+        }
         bandDistribution = bands.map((b) => {
-          const count = classified.filter((c) => c.performanceBand?.key === b.key).length;
+          const count = countByBand.get(b.key) ?? 0;
           return {
             key: b.key,
             label: b.label,
@@ -627,6 +616,7 @@ export class DashboardsService {
         thresholds: resolvedThresholds,
         ...(bands ? { bands: bands.map(toBandView), bandDistribution } : {}),
         students: { data: pageData, total, page: query.page, limit: query.limit },
+        comparability,
       };
     });
   }
@@ -650,25 +640,29 @@ export class DashboardsService {
     query: DashboardFiltersQueryDto,
   ): Promise<DashboardSkillsResponse> {
     const orgId = this.resolveOrgId(user);
-    if (!orgId) return { skills: [] };
+    const empty: DashboardSkillsResponse = { skills: [], comparability: EMPTY_COMPARABILITY };
+    if (!orgId) return empty;
 
     return withOrgContext(this.db, orgId, async (tx) => {
       const scope = await this.getAccessibleClassGroupIds(tx, user, orgId);
-      if (!scope.scopeAll && scope.classGroupIds.length === 0) return { skills: [] };
+      if (!scope.scopeAll && scope.classGroupIds.length === 0) return empty;
 
       const perStudent = this.requiresPerStudentData(query);
       const studentIds = perStudent
         ? await this.resolveScopedStudentIds(tx, orgId, scope, query)
         : null;
-      if (studentIds !== null && studentIds.length === 0) return { skills: [] };
+      if (studentIds !== null && studentIds.length === 0) return empty;
 
       const classGroupIds = perStudent
         ? null
         : await this.resolveScopedClassGroupIds(tx, orgId, scope, query);
-      if (classGroupIds !== null && classGroupIds.length === 0) return { skills: [] };
+      if (classGroupIds !== null && classGroupIds.length === 0) return empty;
 
-      const assessmentIds = await this.resolveScopedAssessmentIds(tx, orgId, query);
-      if (assessmentIds.length === 0) return { skills: [] };
+      const scoped = await this.resolveScopedAssessments(tx, orgId, query);
+      const assessmentIds = scoped.ids;
+      if (assessmentIds.length === 0) return empty;
+
+      const comparability = buildComparabilityMeta(scoped.refs, assessmentIds.length);
 
       // Thresholds de la escala aplicable (consistente con getPerformance/
       // getDistribution; antes getSkills usaba siempre defaults). Misma limitación
@@ -680,14 +674,20 @@ export class DashboardsService {
         advanced: resolvedThresholds.advanced,
       };
 
-      const bands = await this.resolveScopedBands(tx, query, assessmentIds);
+      const bands = comparability.aggregatable
+        ? await this.resolveScopedBands(tx, query, assessmentIds)
+        : null;
 
       const aggregates = perStudent
         ? await this.loadSkillsFromSkillResults(tx, assessmentIds, studentIds)
         : await this.loadSkillsFromCohortStats(tx, assessmentIds, classGroupIds);
 
+      // Un mismo nodo de taxonomía se evalúa con ítems de dificultad muy distinta según
+      // el instrumento, así que su % promedio a través de instrumentos no comparables no
+      // mide una habilidad: mide una mezcla (#1C, D8). Se conservan los nodos y su N
+      // —que son conteos— pero no el número que no se puede leer.
       const skills: SkillAchievementModel[] = aggregates.map((a) => {
-        const pct = a.averageAchievement;
+        const pct = comparability.aggregatable ? a.averageAchievement : null;
         const band = pct == null ? null : classifyByBands(pct / 100, bands);
         return {
           nodeId: a.nodeId,
@@ -709,7 +709,9 @@ export class DashboardsService {
         };
       });
 
-      return bands ? { skills, bands: bands.map(toBandView) } : { skills };
+      return bands
+        ? { skills, bands: bands.map(toBandView), comparability }
+        : { skills, comparability };
     });
   }
 
@@ -1257,23 +1259,32 @@ export class DashboardsService {
           );
         const courseStudentIds = Array.from(new Set(studentRows.map((r) => r.studentId)));
 
+        const emptyRow: TeacherCourseKpiModel = {
+          classGroupId: c.classGroupId,
+          classGroupName: c.classGroupName,
+          gradeName: c.gradeName,
+          subjectName: subjectByCourse.get(c.classGroupId) ?? null,
+          instrumentId: null,
+          instrumentName: null,
+          studentsCount: courseStudentIds.length,
+          averageAchievement: null,
+          passingRate: null,
+          criticalStudents: 0,
+          assessmentsCount: 0,
+        };
+
         if (courseStudentIds.length === 0 || assessmentIds.length === 0) {
-          courses.push({
-            classGroupId: c.classGroupId,
-            classGroupName: c.classGroupName,
-            gradeName: c.gradeName,
-            subjectName: subjectByCourse.get(c.classGroupId) ?? null,
-            studentsCount: courseStudentIds.length,
-            averageAchievement: null,
-            passingRate: null,
-            criticalStudents: 0,
-            assessmentsCount: 0,
-          });
+          courses.push(emptyRow);
           continue;
         }
 
-        const [agg] = await tx
+        // Una fila por INSTRUMENTO del curso: el promedio sólo tiene lectura dentro de
+        // una unidad comparable (#1C). Antes se promediaba el curso entero a través de
+        // todas sus evaluaciones, mezclando instrumentos de dificultad distinta.
+        const aggRows = await tx
           .select({
+            instrumentId: instruments.id,
+            instrumentName: instruments.name,
             avgPct: sql<string | null>`avg(${assessmentResults.percentage}::numeric)`,
             assessmentsCount: sql<number>`count(distinct ${assessmentResults.assessmentId})::int`,
             totalResults: sql<number>`count(*)::int`,
@@ -1281,32 +1292,70 @@ export class DashboardsService {
             criticalStudents: sql<number>`count(distinct ${assessmentResults.studentId}) filter (where ${assessmentResults.performanceLevel} = 'insufficient')::int`,
           })
           .from(assessmentResults)
+          .innerJoin(assessments, eq(assessments.id, assessmentResults.assessmentId))
+          .innerJoin(instruments, eq(instruments.id, assessments.instrumentId))
           .where(
             and(
               inArray(assessmentResults.assessmentId, assessmentIds),
               inArray(assessmentResults.studentId, courseStudentIds),
             ),
-          );
+          )
+          .groupBy(instruments.id, instruments.name)
+          .orderBy(instruments.name);
 
-        const avgPct = agg?.avgPct == null ? null : Number(agg.avgPct);
-        const totalResults = Number(agg?.totalResults ?? 0);
-        const passingResults = Number(agg?.passingResults ?? 0);
-        const passingRate = totalResults > 0 ? (passingResults / totalResults) * 100 : null;
+        if (aggRows.length === 0) {
+          courses.push(emptyRow);
+          continue;
+        }
 
-        courses.push({
-          classGroupId: c.classGroupId,
-          classGroupName: c.classGroupName,
-          gradeName: c.gradeName,
-          subjectName: subjectByCourse.get(c.classGroupId) ?? null,
-          studentsCount: courseStudentIds.length,
-          averageAchievement: avgPct,
-          passingRate,
-          criticalStudents: Number(agg?.criticalStudents ?? 0),
-          assessmentsCount: Number(agg?.assessmentsCount ?? 0),
-        });
+        for (const agg of aggRows) {
+          const totalResults = Number(agg.totalResults ?? 0);
+          const passingResults = Number(agg.passingResults ?? 0);
+          courses.push({
+            ...emptyRow,
+            instrumentId: agg.instrumentId,
+            instrumentName: agg.instrumentName,
+            averageAchievement: agg.avgPct == null ? null : Number(agg.avgPct),
+            passingRate: totalResults > 0 ? (passingResults / totalResults) * 100 : null,
+            criticalStudents: Number(agg.criticalStudents ?? 0),
+            assessmentsCount: Number(agg.assessmentsCount ?? 0),
+          });
+        }
       }
 
       return { courses };
+    });
+  }
+
+  /**
+   * Resuelve el alcance (org, cursos visibles, evaluaciones e instrumentos) para
+   * `ComparableOverviewService`, que necesita exactamente el mismo scoping por rol que
+   * el resto de los dashboards. Vive acá y no allá para no duplicar la resolución de
+   * permisos: es la misma regla, y duplicarla es cómo se abren los agujeros de scope.
+   */
+  async resolveScopeForComparableOverview(
+    user: JwtPayload,
+    query: DashboardFiltersQueryDto,
+  ): Promise<ComparableOverviewScope | null> {
+    const orgId = this.resolveOrgId(user);
+    if (!orgId) return null;
+
+    return withOrgContext(this.db, orgId, async (tx) => {
+      const scope = await this.getAccessibleClassGroupIds(tx, user, orgId);
+      const isTeacherScope = this.isTeacherScope(user);
+      if (!scope.scopeAll && scope.classGroupIds.length === 0) {
+        return { orgId, isTeacherScope, classGroupIds: [], assessmentIds: [], refs: [] };
+      }
+
+      const classGroupIds = await this.resolveScopedClassGroupIds(tx, orgId, scope, query);
+      const scoped = await this.resolveScopedAssessments(tx, orgId, query);
+      return {
+        orgId,
+        isTeacherScope,
+        classGroupIds,
+        assessmentIds: scoped.ids,
+        refs: scoped.refs,
+      };
     });
   }
 
@@ -1487,6 +1536,20 @@ export class DashboardsService {
     orgId: string,
     query: DashboardFiltersQueryDto,
   ): Promise<string[]> {
+    return (await this.resolveScopedAssessments(tx, orgId, query)).ids;
+  }
+
+  /**
+   * Evaluaciones del alcance filtrado JUNTO CON los instrumentos distintos que
+   * participan de él. Van juntos a propósito: la comparabilidad se deriva de los
+   * mismos instrumentos que esta query ya joinea, así que resolverla no cuesta un
+   * viaje extra a la base.
+   */
+  private async resolveScopedAssessments(
+    tx: Database,
+    orgId: string,
+    query: DashboardFiltersQueryDto,
+  ): Promise<ScopedAssessments> {
     const conditions = [eq(assessments.orgId, orgId), isNull(instruments.deletedAt)];
     if (query.assessmentId) conditions.push(eq(assessments.id, query.assessmentId));
     if (query.instrumentId) conditions.push(eq(assessments.instrumentId, query.instrumentId));
@@ -1502,12 +1565,34 @@ export class DashboardsService {
     }
 
     const rows = await tx
-      .select({ id: assessments.id })
+      .select({
+        id: assessments.id,
+        instrumentId: instruments.id,
+        instrumentType: instruments.type,
+        instrumentSubjectId: instruments.subjectId,
+        instrumentGradeId: instruments.gradeId,
+        instrumentApplicationPeriod: instruments.applicationPeriod,
+        instrumentYear: instruments.year,
+      })
       .from(assessments)
       .innerJoin(instruments, eq(instruments.id, assessments.instrumentId))
       .where(and(...conditions));
 
-    return Array.from(new Set(rows.map((r) => r.id)));
+    const ids = new Set<string>();
+    const byInstrument = new Map<string, ComparabilityInstrumentRef>();
+    for (const row of rows) {
+      ids.add(row.id);
+      if (row.instrumentId == null || byInstrument.has(row.instrumentId)) continue;
+      byInstrument.set(row.instrumentId, {
+        instrumentId: row.instrumentId,
+        type: row.instrumentType,
+        subjectId: row.instrumentSubjectId,
+        gradeId: row.instrumentGradeId,
+        applicationPeriod: row.instrumentApplicationPeriod,
+        year: row.instrumentYear,
+      });
+    }
+    return { ids: Array.from(ids), refs: Array.from(byInstrument.values()) };
   }
 
   /**
@@ -1733,92 +1818,6 @@ export class DashboardsService {
    * Deriva alertas: cursos con % logro < 60 (low_achievement) y habilidades con
    * promedio < 50 (critical_skill). Sobre el scope filtrado.
    */
-  private async deriveAlerts(
-    tx: Database,
-    orgId: string,
-    scope: Scope,
-    query: DashboardFiltersQueryDto,
-    studentIds: string[] | null,
-    assessmentIds: string[],
-  ): Promise<DashboardAlert[]> {
-    const alerts: DashboardAlert[] = [];
-    if (assessmentIds.length === 0) return alerts;
-
-    // 1) Cursos con bajo logro (< 60% promedio).
-    const cgConditions = [eq(classGroups.orgId, orgId)];
-    if (!scope.scopeAll) cgConditions.push(inArray(classGroups.id, scope.classGroupIds));
-    if (query.classGroupId?.length) cgConditions.push(inArray(classGroups.id, query.classGroupId));
-    if (query.gradeId?.length) cgConditions.push(inArray(classGroups.gradeId, query.gradeId));
-    if (query.academicYearId)
-      cgConditions.push(eq(classGroups.academicYearId, query.academicYearId));
-
-    const resultConditions = [inArray(assessmentResults.assessmentId, assessmentIds)];
-    if (studentIds !== null) {
-      resultConditions.push(inArray(assessmentResults.studentId, studentIds));
-    }
-
-    const courseAchievementRows = await tx
-      .select({
-        classGroupId: classGroups.id,
-        classGroupName: classGroups.name,
-        avgPct: sql<string | null>`avg(${assessmentResults.percentage}::numeric)`,
-      })
-      .from(assessmentResults)
-      .innerJoin(students, eq(students.id, assessmentResults.studentId))
-      .innerJoin(studentEnrollments, eq(studentEnrollments.studentId, assessmentResults.studentId))
-      .innerJoin(classGroups, eq(classGroups.id, studentEnrollments.classGroupId))
-      .where(and(...resultConditions, ...cgConditions, isNull(students.deletedAt)))
-      .groupBy(classGroups.id, classGroups.name);
-
-    for (const r of courseAchievementRows) {
-      const pct = r.avgPct == null ? null : Number(r.avgPct);
-      if (pct != null && pct < 60) {
-        alerts.push({
-          type: 'low_achievement',
-          severity: pct < 40 ? 'high' : 'medium',
-          message: `El curso ${r.classGroupName} tiene un logro promedio de ${pct.toFixed(1)}%`,
-          contextId: r.classGroupId,
-          contextLabel: r.classGroupName,
-          value: Number(pct.toFixed(2)),
-        });
-      }
-    }
-
-    // 2) Habilidades críticas (< 50% promedio). TKT-05 — sin descriptores.
-    const skillConditions = [
-      inArray(skillResults.assessmentId, assessmentIds),
-      notInArray(taxonomyNodes.type, [...RESULT_HIDDEN_NODE_TYPES]),
-    ];
-    if (studentIds !== null) skillConditions.push(inArray(skillResults.studentId, studentIds));
-
-    const skillRows = await tx
-      .select({
-        nodeId: skillResults.nodeId,
-        nodeName: taxonomyNodes.name,
-        avgPct: sql<string | null>`avg(${skillResults.percentage}::numeric)`,
-      })
-      .from(skillResults)
-      .innerJoin(taxonomyNodes, eq(taxonomyNodes.id, skillResults.nodeId))
-      .where(and(...skillConditions))
-      .groupBy(skillResults.nodeId, taxonomyNodes.name);
-
-    for (const r of skillRows) {
-      const pct = r.avgPct == null ? null : Number(r.avgPct);
-      if (pct != null && pct < 50) {
-        alerts.push({
-          type: 'critical_skill',
-          severity: pct < 30 ? 'high' : 'medium',
-          message: `La habilidad ${r.nodeName} tiene un logro promedio de ${pct.toFixed(1)}%`,
-          contextId: r.nodeId,
-          contextLabel: r.nodeName,
-          value: Number(pct.toFixed(2)),
-        });
-      }
-    }
-
-    return alerts;
-  }
-
   /** Períodos = academic_years de la org, año desc. */
   /**
    * Año académico al que se acota el CATÁLOGO de cursos de `/dashboards/filters`.

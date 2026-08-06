@@ -7,16 +7,19 @@ import type { AiAnalysisAudience, ItemInsightSnapshot } from '@soe/types';
  * el prompt evolucione. Cambiar el texto del prompt o la forma del output exige
  * bumpear esta versión.
  */
-export const ITEM_INSIGHT_PROMPT_VERSION = 's2-item-insight-v1';
+export const ITEM_INSIGHT_PROMPT_VERSION = 's2-item-insight-v2';
 
 /**
  * Construye el par {system, prompt} del análisis IA por-pregunta (drill-down).
  *
- * Principio rector (CLAUDE.md §8.3): el snapshot ya trae TODA la psicometría
- * calculada de forma determinista en backend (p, D, punto-biserial, distribución
- * de alternativas, distractor dominante). La IA SOLO interpreta el porqué del
+ * Principio rector (CLAUDE.md §8.3): el snapshot ya trae TODOS los números
+ * calculados de forma determinista en backend (% de logro, distribución de
+ * alternativas, distractor dominante). La IA SOLO interpreta el porqué del
  * resultado, lee distractores/pasaje/imagen y propone acciones; nunca recalcula
  * ni inventa números.
+ *
+ * El análisis es de APRENDIZAJE: la pregunta no se juzga
+ * (docs/diseno-limpieza-calidad-instrumento.md).
  *
  * Devuelve EXACTAMENTE un JSON que cumpla `itemInsightOutputSchema` de `@soe/types`
  * (el runner lo valida con Zod estricto). NUNCA contiene PII: el snapshot llega
@@ -43,7 +46,7 @@ export function buildItemInsightPrompt(
 function buildSystem(): string {
   return [
     'Eres un asesor pedagógico experto en evaluación educativa para colegios chilenos.',
-    'Analizas UNA pregunta de selección múltiple e interpretas métricas YA CALCULADAS.',
+    'Analizas UNA pregunta de selección múltiple e interpretas resultados YA CALCULADOS.',
     '',
     'REGLAS INQUEBRANTABLES:',
     '1. Responde EXCLUSIVAMENTE con un único objeto JSON válido. Sin texto, sin markdown,',
@@ -53,16 +56,17 @@ function buildSystem(): string {
     '3. NUNCA menciones alumnos por nombre ni inventes identidades: el snapshot está',
     '   anonimizado. Habla siempre en agregados ("el grupo", "N alumnos eligieron…").',
     '4. Escribe en español de Chile, claro y profesional, sin jerga estadística innecesaria.',
-    '5. Decide likelyCause (causa del desempeño) con esta regla:',
-    '   - "not_taught": p (difficulty) muy bajo y distribución dispersa → contenido',
-    '     probablemente no alcanzado a ver/enseñar.',
+    '5. NO evalúes la calidad de la pregunta. Es parte de una prueba estandarizada y',
+    '   validada (DIA, SIMCE, PAES, Cambridge). NUNCA atribuyas el resultado a que la',
+    '   pregunta esté mal redactada, sea ambigua o tenga la clave errónea, ni sugieras',
+    '   revisarla o reemplazarla. El resultado SIEMPRE se explica por aprendizaje.',
+    '6. Decide likelyCause (causa del desempeño) entre estas tres:',
+    '   - "not_taught": % de logro muy bajo con las respuestas repartidas entre varias',
+    '     alternativas → contenido probablemente no alcanzado a ver/enseñar.',
     '   - "misconception": un distractor concentra muchas respuestas (dominantDistractor) →',
     '     error conceptual sistemático; explica la misconcepción que sugiere ese distractor.',
-    '   - "item_quality": discrimination (D) baja o negativa, punto-biserial <0.10, o la',
-    '     clave compite con un distractor → el ÍTEM es defectuoso (ambiguo/mal redactado).',
-    '   - "insufficient_practice": p intermedio-bajo con D razonable → visto pero poco consolidado.',
-    '6. itemQuality.verdict: "solid" (mide bien), "review" (señales que ameritan revisión),',
-    '   "flawed" (probablemente defectuoso).',
+    '   - "insufficient_practice": % de logro intermedio-bajo sin un distractor dominante',
+    '     claro → el contenido se vio pero no está consolidado.',
     '7. distractorAnalysis: una lectura por cada distractor relevante (los más elegidos):',
     '   qué error/misconcepción revela elegir esa alternativa.',
     '8. passageInsight: si el snapshot trae "passage", explica cómo influye en la pregunta;',
@@ -82,18 +86,14 @@ function buildSystem(): string {
 const OUTPUT_CONTRACT = `{
   "headline": string,                       // titular de una línea del análisis de la pregunta
   "performanceSummary": string,             // por qué se obtuvo ese resultado en su contexto
-  "likelyCause": "not_taught" | "misconception" | "item_quality" | "insufficient_practice",
+  "likelyCause": "not_taught" | "misconception" | "insufficient_practice",
   "misconception": string | null,           // inferida del distractor dominante (null si no aplica)
   "distractorAnalysis": [                    // lectura de los distractores relevantes
     { "key": string, "interpretation": string }
   ],
   "passageInsight": string | null,          // cómo el pasaje asociado influye (null si no hay pasaje)
   "visualInsight": string | null,           // lectura de la imagen adjunta (null si no se adjuntó imagen)
-  "itemQuality": {
-    "verdict": "solid" | "review" | "flawed",
-    "notes": string
-  },
-  "recommendedActions": string[],           // >=1 acción concreta (remediar / replicar / revisar el ítem)
+  "recommendedActions": string[],           // >=1 acción concreta de remediación o de réplica
   "confidence": number,                     // 0..1, tu autoevaluación de la solidez del análisis
   "caveats": string[]                       // límites (muestra chica, sin imagen, etc.)
 }`;
@@ -174,8 +174,6 @@ function serializeSnapshot(snapshot: ItemInsightSnapshot) {
     blankCount: snapshot.blankCount,
     correctRate: snapshot.correctRate,
     difficulty: snapshot.difficulty,
-    discrimination: snapshot.discrimination,
-    pointBiserial: snapshot.pointBiserial,
     dominantDistractor: snapshot.dominantDistractor,
     skillName: snapshot.skillName,
     contentName: snapshot.contentName,

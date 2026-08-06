@@ -14,6 +14,7 @@ import { AssistantController } from './assistant.controller';
 import { AssistantService } from './assistant.service';
 import type { AssistantTool } from './tools/assistant-tool.types';
 import { GetAssessmentReportTool } from './tools/get-assessment-report.tool';
+import { GetComparableOverviewTool } from './tools/get-comparable-overview.tool';
 import { GetDashboardOverviewTool } from './tools/get-dashboard-overview.tool';
 import { GetDashboardPerformanceTool } from './tools/get-dashboard-performance.tool';
 import { GetDashboardSkillsTool } from './tools/get-dashboard-skills.tool';
@@ -40,6 +41,7 @@ import { ProposeItemEditTool } from './tools/propose-item-edit.tool';
 const ASSISTANT_TOOL_CLASSES = [
   ListFilterOptionsTool,
   ListAssessmentsTool,
+  GetComparableOverviewTool,
   GetDashboardOverviewTool,
   GetDashboardSkillsTool,
   GetDashboardPerformanceTool,

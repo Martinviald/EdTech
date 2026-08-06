@@ -11,8 +11,8 @@ import type { PerformanceBandView } from './performance-band.schema';
 // Informe de Evaluación (H6.13) — vista consolidada y conclusiva por evaluación
 // para el equipo directivo / UTP. A diferencia de los dashboards exploratorios,
 // reúne en una sola respuesta: ficha técnica, síntesis ejecutiva, distribución,
-// comparativa por curso, fortalezas/brechas por habilidad, análisis psicométrico
-// de ítems (dificultad + discriminación) y recomendaciones accionables.
+// comparativa por curso, fortalezas/brechas por habilidad, análisis de ítems
+// (% de logro + distractores) y recomendaciones accionables.
 //
 // Módulo backend: apps/api/src/assessment-report/ (ruta /api/analytics/assessment-report)
 // El scoping por rol lo aplica el service (directivo = toda la org; profesor =
@@ -30,12 +30,17 @@ export type AssessmentReportQueryDto = z.infer<typeof assessmentReportQuerySchem
 
 // ── Sub-modelos ──────────────────────────────────────────────────────────────
 
-/** Flags automáticos de calidad/criticidad de un ítem (psicometría). */
+/**
+ * Flags automáticos de un ítem, derivados por reglas del comportamiento del curso.
+ *
+ * Describen APRENDIZAJE, no calidad del instrumento: los instrumentos que procesa
+ * la plataforma son estándar y validados, y no se juzgan
+ * (docs/diseno-limpieza-calidad-instrumento.md).
+ */
 export const ITEM_REPORT_FLAGS = [
-  'critical', // p < 0.4 → contenido no logrado por la mayoría
-  'low_discrimination', // D < 0.2 → la pregunta no separa buenos de malos: revisar
-  'strong_distractor', // un distractor atrae más respuestas que la clave correcta
-  'easy', // p >= 0.85 → ítem muy fácil (poco aporte diagnóstico)
+  'critical', // logro < 40% → contenido no logrado por la mayoría
+  'dominant_error', // una alternativa incorrecta atrae más que la clave: misconcepción compartida
+  'high_achievement', // logro >= 85% → contenido logrado por casi todo el curso
 ] as const;
 export type ItemReportFlag = (typeof ITEM_REPORT_FLAGS)[number];
 
@@ -75,15 +80,12 @@ export type AssessmentReportMeta = {
    *
    * Qué queda sin sustituto agregado cuando es `false` — y por lo tanto la UI debe
    * ocultar, no mostrar en cero ni con guión:
-   *  · `items[].discrimination` y el flag `low_discrimination` que deriva de ella:
-   *    D = p(27% superior) − p(27% inferior) necesita el puntaje de CADA alumno para
-   *    partir la cohorte en grupos. Es irreducible; no se deriva de conteos por curso.
    *  · `studentsAtRisk[].weakestSkill`: es un ranking POR ALUMNO sobre `skill_results`.
    *  · `courseComparison[].*` de logro y la distribución por nivel cuando el informe se
    *    cargó SIN niveles por alumno: dependen del dato por alumno / de la Figura 1.
    *
    * Lo que sí sigue completo con `false` (viene del read-model de cohorte, no de
-   * `responses`): `items[]` dificultad + distractor + blancos, `skills[]`, la
+   * `responses`): `items[]` % de logro + distractor + blancos, `skills[]`, la
    * distribución por banda y la nómina de alumnos con su nivel. Y `summary.averageAchievement`
    * / `performanceLevel`: el % de LOGRO DEL CURSO (Σ score / Σ max de `assessment_item_stats`)
    * sí es agregable —es el número que el propio informe DIA publica— y se deriva del
@@ -134,7 +136,7 @@ export type AssessmentReportSkillRow = {
   performanceBand?: PerformanceBandView | null;
 };
 
-/** Análisis psicométrico de un ítem. */
+/** Comportamiento de un ítem en la evaluación. */
 export type AssessmentReportItemRow = {
   itemId: string;
   position: number;
@@ -144,17 +146,10 @@ export type AssessmentReportItemRow = {
   answeredCount: number;
   blankCount: number;
   totalResponses: number;
-  // Índice de dificultad p: % de aciertos sobre el total de quienes respondieron
-  // (incluye blancos como incorrectos). Bajo = difícil.
+  // % de logro del ítem: aciertos sobre el total de quienes respondieron (incluye
+  // blancos como incorrectos). El nombre `difficulty` es histórico; el número es el
+  // % de logro y se lee como tal (ver D1 de docs/diseno-limpieza-calidad-instrumento.md).
   difficulty: number | null; // 0..100
-  // Índice de discriminación D = p(27% superior) − p(27% inferior), −1..1. Bajo o
-  // negativo = la pregunta no distingue a quienes dominan de quienes no.
-  //
-  // SIEMPRE null cuando `meta.hasItemLevelData === false`: partir la cohorte en 27%
-  // superior/inferior exige el puntaje de cada alumno, que un informe oficial no
-  // entrega. Es lo único de esta fila que no tiene sustituto agregado — dificultad,
-  // distractor y blancos salen del read-model de cohorte y vienen completos igual.
-  discrimination: number | null; // -1..1
   topDistractorKey: string | null; // alternativa incorrecta más elegida
   topDistractorRate: number | null; // % que la eligió, 0..100
   flags: ItemReportFlag[];
@@ -172,12 +167,7 @@ export type AssessmentReportRiskStudent = {
   weakestSkill: string | null; // habilidad con menor logro del alumno
 };
 
-export const RECOMMENDATION_TYPES = [
-  'reteach_skill',
-  'review_item',
-  'support_students',
-  'celebrate',
-] as const;
+export const RECOMMENDATION_TYPES = ['reteach_skill', 'support_students', 'celebrate'] as const;
 export type RecommendationType = (typeof RECOMMENDATION_TYPES)[number];
 
 /** Recomendación accionable derivada por reglas (no IA en F1). */

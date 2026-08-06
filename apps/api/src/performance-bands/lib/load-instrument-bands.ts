@@ -7,36 +7,34 @@
 // (filas con org_id = org activa), esas ganan sobre el catálogo global. Si no,
 // se usan las globales (org_id NULL, ej. cortes oficiales DIA).
 
-import { and, asc, eq, isNull } from 'drizzle-orm';
+import { and, asc, eq, inArray, isNull } from 'drizzle-orm';
 import { performanceBands } from '@soe/db';
 import type { PerformanceBandInput } from '@soe/types';
 import type { Database } from '../../database/database.types';
 
-export async function loadInstrumentBands(
-  tx: Database,
-  instrumentId: string,
-): Promise<PerformanceBandInput[]> {
-  const rows = await tx
-    .select({
-      id: performanceBands.id,
-      orgId: performanceBands.orgId,
-      key: performanceBands.key,
-      label: performanceBands.label,
-      order: performanceBands.order,
-      minThreshold: performanceBands.minThreshold,
-      maxThreshold: performanceBands.maxThreshold,
-      color: performanceBands.color,
-    })
-    .from(performanceBands)
-    .where(
-      and(eq(performanceBands.instrumentId, instrumentId), isNull(performanceBands.deletedAt)),
-    )
-    .orderBy(asc(performanceBands.order));
+type BandRow = {
+  id: string;
+  orgId: string | null;
+  key: string;
+  label: string;
+  order: number;
+  minThreshold: string;
+  maxThreshold: string;
+  color: string | null;
+};
 
-  if (rows.length === 0) return [];
+const BAND_COLUMNS = {
+  id: performanceBands.id,
+  orgId: performanceBands.orgId,
+  key: performanceBands.key,
+  label: performanceBands.label,
+  order: performanceBands.order,
+  minThreshold: performanceBands.minThreshold,
+  maxThreshold: performanceBands.maxThreshold,
+  color: performanceBands.color,
+};
 
-  // Override por org sobre global: si hay filas de la org (org_id no NULL, que
-  // bajo RLS sólo puede ser la org activa), usar sólo esas; si no, las globales.
+function toEffectiveBands(rows: BandRow[]): PerformanceBandInput[] {
   const orgRows = rows.filter((r) => r.orgId !== null);
   const effective = orgRows.length > 0 ? orgRows : rows.filter((r) => r.orgId === null);
 
@@ -49,4 +47,50 @@ export async function loadInstrumentBands(
     maxThreshold: Number(r.maxThreshold),
     color: r.color,
   }));
+}
+
+export async function loadInstrumentBands(
+  tx: Database,
+  instrumentId: string,
+): Promise<PerformanceBandInput[]> {
+  const rows = await tx
+    .select(BAND_COLUMNS)
+    .from(performanceBands)
+    .where(and(eq(performanceBands.instrumentId, instrumentId), isNull(performanceBands.deletedAt)))
+    .orderBy(asc(performanceBands.order));
+
+  if (rows.length === 0) return [];
+  return toEffectiveBands(rows);
+}
+
+export async function loadBandsForInstruments(
+  tx: Database,
+  instrumentIds: readonly string[],
+): Promise<Map<string, PerformanceBandInput[]>> {
+  const byInstrument = new Map<string, PerformanceBandInput[]>();
+  if (instrumentIds.length === 0) return byInstrument;
+
+  const rows = await tx
+    .select({ ...BAND_COLUMNS, instrumentId: performanceBands.instrumentId })
+    .from(performanceBands)
+    .where(
+      and(
+        inArray(performanceBands.instrumentId, [...instrumentIds]),
+        isNull(performanceBands.deletedAt),
+      ),
+    )
+    .orderBy(asc(performanceBands.order));
+
+  const grouped = new Map<string, BandRow[]>();
+  for (const row of rows) {
+    if (row.instrumentId === null) continue;
+    const bucket = grouped.get(row.instrumentId);
+    if (bucket) bucket.push(row);
+    else grouped.set(row.instrumentId, [row]);
+  }
+
+  for (const [instrumentId, group] of grouped) {
+    byInstrument.set(instrumentId, toEffectiveBands(group));
+  }
+  return byInstrument;
 }

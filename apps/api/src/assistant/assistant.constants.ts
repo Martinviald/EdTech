@@ -22,7 +22,7 @@ export const ASSISTANT_TOOLS = Symbol('ASSISTANT_TOOLS');
  * poder reproducir el comportamiento cuando el prompt evolucione. Bumpear esta
  * versión ante cualquier cambio del texto de abajo.
  */
-export const ASSISTANT_PROMPT_VERSION = 'e21-assistant-v2';
+export const ASSISTANT_PROMPT_VERSION = 'e21-assistant-v3';
 
 /**
  * System prompt del asistente. Codifica los guardrails NO NEGOCIABLES (§4 de la

@@ -16,8 +16,11 @@ import {
   DEFAULT_PERFORMANCE_THRESHOLDS,
   RESULTS_VIEWER_ROLES,
   RESULT_HIDDEN_NODE_TYPES,
+  buildComparabilityMeta,
   percentageToPerformanceLevel,
   userHasAnyRole,
+  type ComparabilityInstrumentRef,
+  type ComparabilityMeta,
   type HeatmapCell,
   type HeatmapQueryDto,
   type HeatmapResponse,
@@ -36,6 +39,12 @@ import {
   type CohortAccumulator,
 } from '../common/helpers/cohort-skill-stats.helper';
 import { InjectDb, type Database } from '../database/database.types';
+
+const EMPTY_HEATMAP: HeatmapResponse = {
+  subjects: [],
+  rows: [],
+  comparability: buildComparabilityMeta([]),
+};
 
 // Roles "administrativos" — ven todos los cursos de la org. Cualquier otro rol
 // con acceso (teacher, homeroom_teacher) ve sólo los cursos donde tiene
@@ -98,14 +107,14 @@ export class HeatmapService {
 
       // Profesor sin cursos → no hay datos visibles.
       if (!scope.scopeAll && scope.classGroupIds.length === 0) {
-        return { subjects: [], rows: [] };
+        return EMPTY_HEATMAP;
       }
 
       // Set de cursos visibles según scope + filtros de curso/período
       // (null = toda la org sin restricción).
       const classGroupIds = await this.resolveScopedClassGroupIds(tx, orgId, scope, query);
       if (classGroupIds !== null && classGroupIds.length === 0) {
-        return { subjects: [], rows: [] };
+        return EMPTY_HEATMAP;
       }
 
       const baseConditions = this.buildConditions(orgId, query, classGroupIds);
@@ -113,61 +122,96 @@ export class HeatmapService {
       // 1 query: celdas agregadas por (node, subject, class_group).
       const cellRows = await this.loadCellRows(tx, baseConditions);
       if (cellRows.length === 0) {
-        return { subjects: [], rows: [] };
+        return EMPTY_HEATMAP;
       }
 
       // BUG #8: los niveles de desempeño deben usar los thresholds de la escala
       // del instrumento, no los defaults fijos. Se resuelven una vez sobre el
       // scope y se pasan a percentageToPerformanceLevel en el ensamblado.
-      const thresholds = await this.resolveThresholds(tx, baseConditions);
+      const { thresholds, comparability } = await this.resolveScaleAndComparability(
+        tx,
+        baseConditions,
+      );
 
       // El overall por nodo ya NO necesita query propia: cada fila del read-model
       // pertenece a exactamente un (node, subject, class_group), así que sumar los
       // numeradores y denominadores de sus celdas da el mismo promedio
       // student-weighted que antes calculaba `loadOverallRows`.
-      return this.assembleResponse(cellRows, thresholds);
+      // Con instrumentos no comparables la matriz mezclaría dificultades y cortes
+      // distintos en cada celda (#1C, D9): se devuelven las filas y columnas —para que
+      // la vista conserve su estructura— pero sin números ni niveles.
+      return {
+        ...this.assembleResponse(cellRows, thresholds, comparability.aggregatable),
+        comparability,
+      };
     });
   }
 
   /**
-   * Thresholds (0..1) de la escala aplicable al scope. Toma el `config.
-   * performanceThresholds` del primer instrumento (con grading_scale) que matchee
-   * las condiciones; si ninguno define escala/thresholds, usa los defaults DIA.
+   * En UNA query: los thresholds (0..1) de la escala aplicable al scope Y la
+   * comparabilidad del alcance. Van juntos porque ambos se derivan de los mismos
+   * instrumentos, y el heatmap ya paga este join — resolverlos por separado costaba un
+   * viaje extra que los tests de este servicio vigilan (`__selectIdx`).
+   *
    * Corre dentro de `withOrgContext` (recibe `tx`): toca tablas con RLS
    * (assessment_skill_stats, assessments), y las condiciones ya incluyen
    * `eq(assessments.orgId, orgId)`.
    *
-   * ⚠️ LIMITACIÓN (F1 OK / revisar en F2): asume escala HOMOGÉNEA en el scope.
-   * Si la vista mezcla instrumentos con escalas de thresholds distintas (p. ej.
-   * PAES + DIA), toma una sola escala (`limit(1)`) y la aplica a TODAS las celdas
-   * → las de otra escala quedarían clasificadas con thresholds ajenos. En F1 (solo
-   * DIA, thresholds = defaults) no afecta. El fix real (thresholds por instrumento)
-   * se difiere a F2 multi-escala. El `orderBy(createdAt)` solo garantiza que la
-   * escala elegida sea determinista, no que sea correcta para celdas de otra escala.
+   * ⚠️ LIMITACIÓN (multi-escala): los thresholds asumen escala HOMOGÉNEA en el scope —
+   * se toma la del instrumento más antiguo (`orderBy(createdAt)`) y se aplica a todas
+   * las celdas. `comparability` es justamente lo que permite detectar y declarar ese
+   * caso: cuando `aggregatable` es falso, la matriz no debe clasificar con estos
+   * thresholds (ver docs/diseno-panorama-comparable.md D9).
    */
-  private async resolveThresholds(tx: Database, conditions: SQL[]): Promise<PerformanceThresholds> {
-    const [row] = await tx
-      .select({ config: gradingScales.config })
+  private async resolveScaleAndComparability(
+    tx: Database,
+    conditions: SQL[],
+  ): Promise<{ thresholds: PerformanceThresholds; comparability: ComparabilityMeta }> {
+    const rows = await tx
+      .selectDistinct({
+        assessmentId: assessments.id,
+        instrumentId: instruments.id,
+        instrumentType: instruments.type,
+        subjectId: instruments.subjectId,
+        gradeId: instruments.gradeId,
+        applicationPeriod: instruments.applicationPeriod,
+        year: instruments.year,
+        createdAt: instruments.createdAt,
+        config: gradingScales.config,
+      })
       .from(assessmentSkillStats)
       .innerJoin(assessments, eq(assessments.id, assessmentSkillStats.assessmentId))
       .innerJoin(instruments, eq(instruments.id, assessments.instrumentId))
-      .innerJoin(subjects, eq(subjects.id, instruments.subjectId))
-      .innerJoin(gradingScales, eq(gradingScales.id, instruments.gradingScaleId))
+      .leftJoin(gradingScales, eq(gradingScales.id, instruments.gradingScaleId))
       .where(and(...conditions))
-      // Determinista: el "primer instrumento" es el más antiguo del scope, no una
-      // fila arbitraria (limit(1) sin orden no es determinista entre requests).
-      .orderBy(asc(instruments.createdAt))
-      .limit(1);
+      .orderBy(asc(instruments.createdAt));
 
-    const cfg = row?.config as
-      | { performanceThresholds?: Partial<PerformanceThresholds> }
-      | null
-      | undefined;
+    const byInstrument = new Map<string, ComparabilityInstrumentRef>();
+    const assessmentIds = new Set<string>();
+    let scaleConfig: unknown = null;
+    for (const row of rows) {
+      assessmentIds.add(row.assessmentId);
+      if (scaleConfig === null && row.config != null) scaleConfig = row.config;
+      if (row.instrumentId == null || byInstrument.has(row.instrumentId)) continue;
+      byInstrument.set(row.instrumentId, {
+        instrumentId: row.instrumentId,
+        type: row.instrumentType,
+        subjectId: row.subjectId,
+        gradeId: row.gradeId,
+        applicationPeriod: row.applicationPeriod,
+        year: row.year,
+      });
+    }
+
+    const cfg = scaleConfig as { performanceThresholds?: Partial<PerformanceThresholds> } | null;
     const t = cfg?.performanceThresholds;
     return {
-      elementary: t?.elementary ?? DEFAULT_PERFORMANCE_THRESHOLDS.elementary,
-      adequate: t?.adequate ?? DEFAULT_PERFORMANCE_THRESHOLDS.adequate,
-      advanced: t?.advanced ?? DEFAULT_PERFORMANCE_THRESHOLDS.advanced,
+      thresholds: {
+        elementary: t?.elementary ?? DEFAULT_PERFORMANCE_THRESHOLDS.elementary,
+        adequate: t?.adequate ?? DEFAULT_PERFORMANCE_THRESHOLDS.adequate,
+        advanced: t?.advanced ?? DEFAULT_PERFORMANCE_THRESHOLDS.advanced,
+      },
+      comparability: buildComparabilityMeta(Array.from(byInstrument.values()), assessmentIds.size),
     };
   }
 
@@ -265,7 +309,8 @@ export class HeatmapService {
   private assembleResponse(
     cellRows: CellRow[],
     thresholds: PerformanceThresholds,
-  ): HeatmapResponse {
+    aggregatable: boolean,
+  ): Omit<HeatmapResponse, 'comparability'> {
     // Asignaturas (columnas), únicas y ordenadas por nombre.
     const subjectMap = new Map<string, HeatmapSubject>();
     for (const r of cellRows) {
@@ -311,7 +356,7 @@ export class HeatmapService {
     }
 
     const toCell = (subjectId: string, acc: CohortAccumulator): HeatmapCell => {
-      const pct = cohortAverage(acc);
+      const pct = aggregatable ? cohortAverage(acc) : null;
       return {
         subjectId,
         averageAchievement: pct,
@@ -335,7 +380,7 @@ export class HeatmapService {
               studentsAssessed: 0,
             };
       });
-      const overall = cohortAverage(node.overall);
+      const overall = aggregatable ? cohortAverage(node.overall) : null;
       return {
         nodeId: node.nodeId,
         nodeName: node.nodeName,

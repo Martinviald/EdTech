@@ -192,7 +192,7 @@ export const metricTypeEnum = pgEnum('metric_type', ['percentage', 'scaled', 'ba
 //  · `item_level`     = hay respuestas alumno×pregunta en `responses`. Todo derivable.
 //  · `aggregate_only` = el origen es un informe oficial: solo agregados por curso en
 //                       `assessment_item_stats` + nivel por alumno en `assessment_results`.
-//                       La analítica granular (matriz, psicometría) NO aplica y se cierra
+//                       La analítica granular (matriz alumno×ítem) NO aplica y se cierra
 //                       por capacidad (packages/types/src/analytics-capabilities.ts).
 export const dataGranularityEnum = pgEnum('data_granularity', ['item_level', 'aggregate_only']);
 

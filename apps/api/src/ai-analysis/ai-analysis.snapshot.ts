@@ -9,7 +9,6 @@ import {
   taxonomyNodes,
   withOrgContext,
 } from '@soe/db';
-import { isDichotomousItem } from '@soe/types';
 import type {
   AiAnalysisSnapshot,
   SnapshotItem,
@@ -22,7 +21,6 @@ import type { JwtPayload } from '../auth/jwt-payload.types';
 import { InjectDb, type Database } from '../database/database.types';
 import { AssessmentReportService } from '../assessment-report/assessment-report.service';
 import type { SnapshotBuilder, SnapshotBuildOptions } from './snapshot.port';
-import { kr20, pointBiserial, type ScoreMatrix } from './ai-analysis.metrics';
 
 /**
  * Umbral de logro (%) por debajo del cual un alumno se cuenta en
@@ -37,9 +35,9 @@ const SKILL_NODE_TYPES: readonly string[] = ['skill', 'competency', 'dimension']
 
 /**
  * Ensamblador del snapshot DETERMINISTA que consume el prompt del informe IA
- * (H20.1). Reúsa `AssessmentReportService.getReport()` para p, D, distractores,
- * % de logro por habilidad y cobertura, y añade métricas nuevas (KR-20,
- * punto-biserial, cobertura blueprint) sobre la matriz de aciertos.
+ * (H20.1). Reúsa `AssessmentReportService.getReport()` para el % de logro por
+ * ítem y por habilidad, los distractores y la cobertura, y añade el nodo de
+ * habilidad, el enunciado y la cobertura blueprint de cada ítem.
  *
  * Multi-tenancy: el `orgId` proviene del token (lo pasa el runner). Toda query a
  * tablas con RLS corre dentro de `withOrgContext`. El snapshot NUNCA contiene PII
@@ -58,29 +56,31 @@ export class SnapshotService implements SnapshotBuilder {
     orgId: string,
     opts?: SnapshotBuildOptions,
   ): Promise<AiAnalysisSnapshot> {
-    // El informe ya encapsula p / D / distractores / % logro / cobertura, con
-    // scoping por rol. El snapshot es una vista org-wide determinista, así que se
-    // ejecuta con un contexto sintético admin-like ligado al `orgId` del token.
+    // El informe ya encapsula % de logro / distractores / cobertura, con scoping por
+    // rol. El snapshot es una vista org-wide determinista, así que se ejecuta con un
+    // contexto sintético admin-like ligado al `orgId` del token.
     const report = await this.reportService.getReport(this.orgScopedUser(orgId), {
       assessmentId,
       classGroupId: opts?.classGroupId,
     });
 
-    // Datos que el informe no expone: nodeId + stem por ítem, matriz de aciertos
-    // (para KR-20 / punto-biserial) y conteo de alumnos bajo umbral por habilidad.
-    const { itemMeta, matrix, itemOrder, belowThresholdByNode } = await withOrgContext(
+    // Datos que el informe no expone: nodeId + stem por ítem y conteo de alumnos
+    // bajo umbral por habilidad.
+    const { itemMeta, belowThresholdByNode } = await withOrgContext(
       this.db,
       orgId,
       async (tx) => {
         const itemMeta = await this.loadItemMeta(tx, report.meta.instrumentName, assessmentId);
-        const itemIds = itemMeta.map((m) => m.itemId);
-        const { matrix, itemOrder } = await this.loadScoreMatrix(tx, assessmentId, itemIds);
-        const belowThresholdByNode = await this.loadStudentsBelowThreshold(tx, assessmentId, orgId);
-        return { itemMeta, matrix, itemOrder, belowThresholdByNode };
+        const belowThresholdByNode = await this.loadStudentsBelowThreshold(
+          tx,
+          assessmentId,
+          orgId,
+        );
+        return { itemMeta, belowThresholdByNode };
       },
     );
 
-    const items = this.assembleItems(report.items, itemMeta, matrix, itemOrder);
+    const items = this.assembleItems(report.items, itemMeta);
     const skills = this.assembleSkills(report, itemMeta, belowThresholdByNode);
 
     return {
@@ -90,7 +90,6 @@ export class SnapshotService implements SnapshotBuilder {
       subjectName: report.meta.subjectName ?? null,
       evaluated: report.summary.studentsEvaluated,
       enrolled: report.summary.studentsEnrolled,
-      reliability: { kr20: kr20(matrix) },
       items,
       skills,
     };
@@ -103,24 +102,17 @@ export class SnapshotService implements SnapshotBuilder {
   private assembleItems(
     reportItems: AssessmentReportItemRow[],
     itemMeta: ItemMeta[],
-    matrix: ScoreMatrix,
-    itemOrder: string[],
   ): SnapshotItem[] {
     const metaById = new Map(itemMeta.map((m) => [m.itemId, m]));
-    const matrixIndexById = new Map(itemOrder.map((id, idx) => [id, idx]));
 
     return reportItems.map((row) => {
       const meta = metaById.get(row.itemId);
-      const matrixIndex = matrixIndexById.get(row.itemId);
-      const pb = matrixIndex === undefined ? null : pointBiserial(matrix, matrixIndex);
 
       return {
         position: row.position,
         skillName: row.skillName,
         nodeId: meta?.skillNodeId ?? null,
         difficulty: row.difficulty === null ? null : row.difficulty / 100, // % → 0..1
-        discrimination: row.discrimination,
-        pointBiserial: pb,
         correctLabel: row.correctKey,
         dominantDistractor: row.topDistractorKey,
         distribution: meta?.distribution ?? {},
@@ -182,7 +174,10 @@ export class SnapshotService implements SnapshotBuilder {
       .from(items)
       .innerJoin(
         responses,
-        and(eq(responses.itemId, items.id), eq(responses.assessmentId, assessmentId)),
+        and(
+          eq(responses.itemId, items.id),
+          eq(responses.assessmentId, assessmentId),
+        ),
       )
       .where(isNull(items.deletedAt))
       .groupBy(items.id, items.position, items.content)
@@ -204,7 +199,10 @@ export class SnapshotService implements SnapshotBuilder {
   }
 
   /** Nodo de habilidad representativo por ítem (primer tag de tipo habilidad). */
-  private async loadSkillNodeByItem(tx: Database, itemIds: string[]): Promise<Map<string, string>> {
+  private async loadSkillNodeByItem(
+    tx: Database,
+    itemIds: string[],
+  ): Promise<Map<string, string>> {
     const map = new Map<string, string>();
     if (itemIds.length === 0) return map;
 
@@ -252,7 +250,12 @@ export class SnapshotService implements SnapshotBuilder {
         count: sql<number>`count(*)::int`,
       })
       .from(responses)
-      .where(and(eq(responses.assessmentId, assessmentId), inArray(responses.itemId, itemIds)))
+      .where(
+        and(
+          eq(responses.assessmentId, assessmentId),
+          inArray(responses.itemId, itemIds),
+        ),
+      )
       .groupBy(responses.itemId, answerExpr);
 
     for (const r of rows) {
@@ -264,71 +267,6 @@ export class SnapshotService implements SnapshotBuilder {
     return map;
   }
 
-  /**
-   * Matriz de aciertos (alumno × ítem) para KR-20 / punto-biserial. Filas =
-   * alumnos con al menos una respuesta; columnas = `itemOrder` (orden estable).
-   * Un blanco / ausencia de respuesta cuenta como incorrecto (false). Sin PII:
-   * los ids de alumno solo se usan para agrupar y se descartan.
-   */
-  private async loadScoreMatrix(
-    tx: Database,
-    assessmentId: string,
-    itemIds: string[],
-  ): Promise<{ matrix: ScoreMatrix; itemOrder: string[] }> {
-    if (itemIds.length === 0) return { matrix: [], itemOrder: [] };
-
-    // KR-20 y punto-biserial son psicometría DICOTÓMICA: un ítem de crédito
-    // parcial colapsado a 0/1 sesga la varianza sin avisar, así que se excluye.
-    const itemTypeRows = await tx
-      .select({ id: items.id, type: items.type, scoringConfig: items.scoringConfig })
-      .from(items)
-      .where(inArray(items.id, itemIds));
-    const dichotomousIds = new Set(
-      itemTypeRows
-        .filter((r) => isDichotomousItem(r.type, r.scoringConfig ?? undefined))
-        .map((r) => r.id),
-    );
-    const dichotomousItemIds = itemIds.filter((id) => dichotomousIds.has(id));
-    if (dichotomousItemIds.length === 0) return { matrix: [], itemOrder: [] };
-
-    const rows = await tx
-      .select({
-        studentId: responses.studentId,
-        itemId: responses.itemId,
-        isCorrect: sql<boolean>`coalesce(${responses.isCorrect}, false)`,
-      })
-      .from(responses)
-      .where(
-        and(
-          eq(responses.assessmentId, assessmentId),
-          inArray(responses.itemId, dichotomousItemIds),
-        ),
-      );
-
-    const itemOrder = [...dichotomousItemIds];
-    const itemIndex = new Map(itemOrder.map((id, idx) => [id, idx]));
-
-    // Agrupar por alumno → fila booleana de largo k (default false = blanco).
-    const byStudent = new Map<string, boolean[]>();
-    for (const r of rows) {
-      const idx = itemIndex.get(r.itemId);
-      if (idx === undefined) continue;
-      let row = byStudent.get(r.studentId);
-      if (!row) {
-        row = new Array<boolean>(itemOrder.length).fill(false);
-        byStudent.set(r.studentId, row);
-      }
-      row[idx] = r.isCorrect === true;
-    }
-
-    // Orden determinista de filas (por studentId) para reproducibilidad. El id no
-    // se incluye en el snapshot; solo ordena.
-    const matrix = Array.from(byStudent.entries())
-      .sort(([a], [b]) => a.localeCompare(b))
-      .map(([, row]) => row);
-
-    return { matrix, itemOrder };
-  }
 
   /** Nº de alumnos bajo el umbral remedial por nodo (determinista, sin PII). */
   private async loadStudentsBelowThreshold(

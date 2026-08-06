@@ -26,42 +26,53 @@ export const dynamic = 'force-dynamic';
  * Contiene PII (RUT, nombre): el scoping (un profesor sólo ve alumnos de sus
  * cursos) lo aplica el backend; aquí sólo se verifica el rol de acceso.
  */
+type Back = { href: Route; label: string };
+
 export default async function InformeAlumnoPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ assessmentId: string; studentId: string }>;
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
   const session = await auth();
   if (!session?.user) redirect(ROUTES.login);
   if (!canAccess(session.user.roles, OFFICIAL_REPORT_VIEWER_ROLES)) redirect(ROUTES.dashboard);
 
   const { assessmentId, studentId } = await params;
-  const backHref = ROUTES.evaluacionInformeOficial(assessmentId);
+  const { volver } = await searchParams;
+  const back: Back =
+    volver === 'estudiante'
+      ? { href: ROUTES.estudiante(studentId), label: 'Volver al panorama del alumno' }
+      : {
+          href: ROUTES.evaluacionInformeOficial(assessmentId),
+          label: 'Volver al informe del curso',
+        };
 
   return (
-    <Suspense fallback={<InformeAlumnoSkeleton backHref={backHref} />}>
-      <InformeAlumnoContent assessmentId={assessmentId} studentId={studentId} backHref={backHref} />
+    <Suspense fallback={<InformeAlumnoSkeleton back={back} />}>
+      <InformeAlumnoContent assessmentId={assessmentId} studentId={studentId} back={back} />
     </Suspense>
   );
 }
 
-function BackLink({ backHref }: { backHref: Route }) {
+function BackLink({ back }: { back: Back }) {
   return (
     <Link
-      href={backHref}
+      href={back.href}
       className="inline-flex items-center gap-1.5 text-sm font-medium text-muted-foreground hover:text-foreground"
     >
       <ArrowLeft className="size-4" aria-hidden />
-      Volver al informe del curso
+      {back.label}
     </Link>
   );
 }
 
-function InformeAlumnoSkeleton({ backHref }: { backHref: Route }) {
+function InformeAlumnoSkeleton({ back }: { back: Back }) {
   return (
     <div className="space-y-6">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between print:hidden">
-        <BackLink backHref={backHref} />
+        <BackLink back={back} />
       </div>
       <CardSkeleton rows={6} />
     </div>
@@ -71,11 +82,11 @@ function InformeAlumnoSkeleton({ backHref }: { backHref: Route }) {
 async function InformeAlumnoContent({
   assessmentId,
   studentId,
-  backHref,
+  back,
 }: {
   assessmentId: string;
   studentId: string;
-  backHref: Route;
+  back: Back;
 }) {
   const query = new URLSearchParams({ assessmentId, studentId });
   const report = await apiGet<OfficialStudentReportResponse>(
@@ -85,7 +96,7 @@ async function InformeAlumnoContent({
   return (
     <div className="space-y-6">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between print:hidden">
-        <BackLink backHref={backHref} />
+        <BackLink back={back} />
         {report ? <PrintToolbar /> : null}
       </div>
 

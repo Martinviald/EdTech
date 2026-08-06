@@ -43,7 +43,6 @@ function makeOutput(nodeId = 'node-1'): Record<string, unknown> {
       },
     ],
     recommendations: [],
-    reliability: { kr20: 0.81, interpretation: 'buena' },
     confidence: 0.7,
     caveats: [],
   };
@@ -58,15 +57,12 @@ function makeSnapshot(nodeId = 'node-1'): Record<string, unknown> {
     subjectName: null,
     evaluated: 20,
     enrolled: 25,
-    reliability: { kr20: 0.81 },
     items: [
       {
         position: 3,
         skillName: 'Fracciones',
         nodeId,
         difficulty: 0.4,
-        discrimination: 0.3,
-        pointBiserial: 0.25,
         correctLabel: 'B',
         dominantDistractor: 'C',
         distribution: { A: 2, B: 8, C: 9, D: 1 },
@@ -77,8 +73,6 @@ function makeSnapshot(nodeId = 'node-1'): Record<string, unknown> {
         skillName: 'Otra habilidad',
         nodeId: 'node-other',
         difficulty: 0.6,
-        discrimination: 0.2,
-        pointBiserial: 0.1,
         correctLabel: 'A',
         dominantDistractor: 'D',
         distribution: { A: 12, D: 8 },
