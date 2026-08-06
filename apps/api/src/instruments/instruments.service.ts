@@ -4,7 +4,7 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { and, count, desc, eq, inArray, isNull, or } from 'drizzle-orm';
+import { and, asc, count, desc, eq, inArray, isNotNull, isNull, or } from 'drizzle-orm';
 import {
   instruments,
   instrumentSections,
@@ -42,11 +42,6 @@ const ENUNCIADO_OWNER_TYPE = 'instrument' as const;
 const ENUNCIADO_PURPOSE = 'enunciado_pdf' as const;
 /** Kind del adjunto en el modelo de API (el enunciado siempre es un PDF). */
 const ENUNCIADO_PDF_KIND = 'pdf' as const;
-
-// La ilustración/recorte del pasaje se almacena en `files` con esta asociación
-// (owner = la sección). 1 por sección, así que `getLatestByOwner` la resuelve.
-const SECTION_FIGURE_OWNER_TYPE = 'section' as const;
-const SECTION_FIGURE_PURPOSE = 'section_figure' as const;
 
 /** Cliente transaccional de Drizzle (mismo shape que `Database` dentro de un `.transaction`). */
 type Tx = Parameters<Parameters<Database['transaction']>[0]>[0];
@@ -342,6 +337,10 @@ export class InstrumentsService {
    * `/instrumentos/secciones/{id}/imagen`, que la firma en cada request. Devuelve null si
    * la sección no tiene ilustración. El scope (`orgId`) sale del instrumento dueño, no del
    * usuario: los oficiales son globales (`org_id NULL`).
+   *
+   * La key sale del propio adjunto (`section_attachments.storage_key`) — el MISMO dato con
+   * que la vista decide mostrar la imagen (`toPassageAttachments`) —, así que el adjunto no
+   * puede anunciar una ilustración que no se sirva. La fila de `files` sólo aporta metadata.
    */
   async getSectionFigure(sectionId: string, user: JwtPayload): Promise<SectionFigureModel | null> {
     const [section] = await this.db
@@ -356,31 +355,23 @@ export class InstrumentsService {
     // Carga el instrumento dueño y valida visibilidad (oficial → visible para todos).
     const instrument = await this.getByIdRaw(section.instrumentId, user);
 
-    const file = await this.files.getLatestByOwner(
-      instrument.orgId,
-      SECTION_FIGURE_OWNER_TYPE,
-      section.id,
-      SECTION_FIGURE_PURPOSE,
-    );
-    if (!file) return null;
+    const [attachment] = await this.db
+      .select({ storageKey: sectionAttachments.storageKey })
+      .from(sectionAttachments)
+      .where(
+        and(
+          eq(sectionAttachments.sectionId, section.id),
+          eq(sectionAttachments.kind, 'image'),
+          isNotNull(sectionAttachments.storageKey),
+        ),
+      )
+      .orderBy(asc(sectionAttachments.order))
+      .limit(1);
 
-    const model: SectionFigureModel = {
-      id: file.id,
-      sectionId: section.id,
-      storageKey: file.storageKey,
-      fileName: file.fileName,
-      mimeType: file.mimeType,
-      sizeBytes: file.sizeBytes,
-    };
+    if (!attachment?.storageKey) return null;
 
-    // Las URLs prefirmadas solo existen si el almacenamiento está configurado; su
-    // ausencia nunca debe hacer fallar la lectura.
-    const downloadUrl = this.files.buildDownloadUrl(file);
-    if (downloadUrl) model.downloadUrl = downloadUrl;
-    const previewUrl = this.files.buildDownloadUrl(file, 'inline');
-    if (previewUrl) model.previewUrl = previewUrl;
-
-    return model;
+    const resolved = await this.files.resolveByStorageKey(instrument.orgId, attachment.storageKey);
+    return { ...resolved, sectionId: section.id };
   }
 
   /**

@@ -12,4 +12,5 @@ export * from './short-answer';
 export * from './matching-answer';
 export * from './rubric-code';
 export * from './item-scoring';
+export * from './item-stem';
 export * from './response-display';

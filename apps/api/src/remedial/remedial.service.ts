@@ -15,6 +15,7 @@ import {
   type RemedialMaterial,
 } from '@soe/db';
 import {
+  extractItemStem,
   qualityReportSchema,
   toRemedialStudentContent,
   validateRemedialContent,
@@ -681,7 +682,7 @@ export class RemedialService {
         itemId: item.id,
         position: ref.position,
         type: item.type,
-        stem: extractStem(item.content),
+        stem: extractItemStem(item.content),
         alternatives,
         correctKey: extractCorrectKey(alternatives),
         explanation: extractExplanation(item.content),
@@ -749,15 +750,6 @@ export class RemedialService {
 // ──────────────────────────────────────────────────────────────────────────────
 
 type PreviewAlternative = { key: string; text: string; isCorrect: boolean };
-
-/** `content.stem` si existe y es string; `null` en otro caso. */
-function extractStem(content: unknown): string | null {
-  if (content && typeof content === 'object' && 'stem' in content) {
-    const stem = (content as { stem?: unknown }).stem;
-    if (typeof stem === 'string') return stem;
-  }
-  return null;
-}
 
 /**
  * `content.alternatives` como lista `{key,text,isCorrect}`. Solo los tipos con

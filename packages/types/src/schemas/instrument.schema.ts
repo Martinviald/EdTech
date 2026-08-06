@@ -268,10 +268,12 @@ export type SectionAttachmentModel = {
  *
  * Espejo de `ItemFigureModel`: la BDD guarda la storage key y las URLs se firman en cada
  * request (una presigned persistida caducaría). Se sirve por la ruta estable
- * `/instrumentos/secciones/{id}/imagen`.
+ * `/instrumentos/secciones/{id}/imagen`, resolviendo la key desde
+ * `section_attachments.storage_key` — el mismo dato con que la vista decide mostrar el
+ * adjunto. `id` es nullable porque el objeto puede no estar registrado en `files`.
  */
 export type SectionFigureModel = {
-  id: string;
+  id: string | null;
   sectionId: string;
   storageKey: string | null;
   fileName: string | null;

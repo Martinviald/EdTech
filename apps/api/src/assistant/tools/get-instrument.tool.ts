@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { z } from 'zod';
+import { extractItemStemPreview } from '@soe/types';
 import type {
   AssistantTool,
   AssistantToolContext,
@@ -114,24 +115,6 @@ export class GetInstrumentTool implements AssistantTool {
   }
 }
 
-/**
- * Extrae un enunciado CORTO del `content` polimórfico del ítem (sin hardcodear un
- * único tipo): toma la primera clave textual presente (stem/prompt/passage/
- * textWithGaps) y la trunca. Mantiene el payload liviano — el contenido completo
- * lo entrega `get_item_content`.
- */
 function shortStem(content: unknown): string | null {
-  if (content === null || typeof content !== 'object') return null;
-  const c = content as Record<string, unknown>;
-  const raw =
-    pickString(c.stem) ??
-    pickString(c.prompt) ??
-    pickString(c.passage) ??
-    pickString(c.textWithGaps);
-  if (raw === null) return null;
-  return raw.length > STEM_PREVIEW_MAX ? `${raw.slice(0, STEM_PREVIEW_MAX)}…` : raw;
-}
-
-function pickString(value: unknown): string | null {
-  return typeof value === 'string' && value.length > 0 ? value : null;
+  return extractItemStemPreview(content, STEM_PREVIEW_MAX);
 }
