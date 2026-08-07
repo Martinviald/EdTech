@@ -2,16 +2,16 @@
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Entrada por UNIDAD COMPARABLE de la vista de trayectoria. Reemplaza el
-// multi-select del panorama: un cascade guiado (eje → nivel → asignatura →
-// medición → curso) que garantiza que el alcance sea siempre una familia
-// comparable (N1/N2/N3), nunca una mezcla. Ver docs/diseno-comparacion-progresion.md.
+// multi-select del panorama: un cascade guiado (nivel → asignatura → medición →
+// curso) que garantiza que el alcance sea siempre una familia comparable
+// (N1/N2/N3), nunca una mezcla. El EJE (años/momentos) no vive aquí: es un toggle
+// aparte (`AxisToggle`). Ver docs/diseno-comparacion-progresion.md.
 // ─────────────────────────────────────────────────────────────────────────────
 
 import { useCallback, useTransition } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import type { Route } from 'next';
 import {
-  COMPARABLE_TRAJECTORY_AXES,
   INSTRUMENT_APPLICATION_PERIOD_LABELS,
   type ComparableTrajectoryAxis,
   type DashboardFilterOptionsResponse,
@@ -28,11 +28,6 @@ import { TopProgressBar } from '@/components/shared';
 import { classGroupSelectOptions } from '../components/dashboard-filters';
 
 const NONE = '__none__';
-
-const AXIS_LABELS: Record<ComparableTrajectoryAxis, string> = {
-  years: 'Años (generacional)',
-  moments: 'Momentos del ciclo',
-};
 
 export type TrajectorySelection = {
   axis: ComparableTrajectoryAxis;
@@ -92,11 +87,6 @@ export function TrajectoryScopeBar({
       });
     },
     [router, searchParams, basePath],
-  );
-
-  const onAxis = useCallback(
-    (next: string) => pushParams((sp) => sp.set('axis', next)),
-    [pushParams],
   );
 
   const onGrade = useCallback(
@@ -188,21 +178,6 @@ export function TrajectoryScopeBar({
   return (
     <div className="relative flex flex-col gap-3 overflow-hidden rounded-lg border bg-card p-4 sm:flex-row sm:flex-wrap sm:items-end">
       <TopProgressBar active={isPending} position="bottom" />
-
-      <Field label="Eje">
-        <Select value={selection.axis} onValueChange={onAxis}>
-          <SelectTrigger>
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            {COMPARABLE_TRAJECTORY_AXES.map((a) => (
-              <SelectItem key={a} value={a}>
-                {AXIS_LABELS[a]}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      </Field>
 
       <Field label="Nivel">
         <Select value={selection.gradeId ?? ''} onValueChange={onGrade}>
