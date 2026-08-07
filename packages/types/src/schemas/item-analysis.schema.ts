@@ -2,6 +2,7 @@ import { z } from 'zod';
 import { csvArraySchema, stringCsvSchema, uuidCsvSchema } from './common.schema';
 import { INSTRUMENT_APPLICATION_PERIODS } from './instrument.schema';
 import type { AnswerKey, ScoreCategoryDistribution } from '../utils/answer-key';
+import type { RawAnswerCount } from '../utils/raw-answer-distribution';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Sprint 5 — Análisis a nivel de ítem (H6.11 + H6.12)
@@ -293,4 +294,9 @@ export type QuestionAnalysisResponse = {
   // Distribución por categoría de puntaje (RC/RPC/RI) para ítems de desarrollo.
   // `null` en selección múltiple (ahí la distribución vive en `alternatives`).
   scoreDistribution: ScoreCategoryDistribution[] | null;
+  // Distribución de respuestas EXACTAS ingresadas por los alumnos, para tipos no-MC
+  // estructurados (respuesta corta/número, ordenar, unir, completar). Agregada y
+  // anónima (valor → conteo). `null` si el tipo no aplica o no hay `assessmentId`
+  // en contexto (solo se calcula acotado a la cohorte de una evaluación).
+  rawAnswerDistribution: RawAnswerCount[] | null;
 };

@@ -67,7 +67,7 @@ Cerrar las decisiones abiertas §10 del diseño para no bloquear a mitad de fase
       `kind`), tipos `AnswerKey`, `AlternativeKey`, `RubricLevelInline`. Exportar desde el index de
       `@soe/types`.
 - [ ] `packages/types/src/utils/answer-key.ts` — `deriveAnswerKey(type: ItemType, content:
-  ItemContent): AnswerKey`. Puro, sin `db`, sin imports de services. Mapea cada `item_type` a su
+ItemContent): AnswerKey`. Puro, sin `db`, sin imports de services. Mapea cada `item_type` a su
       `kind` (ver tabla §2.2 del diseño); default → `{ kind: 'none' }`.
 - [ ] `packages/types/src/utils/answer-key.spec.ts` — un caso por `item_type` (incluye
       `multi_select`, `rubric_scored`, y un tipo sin clave → `none`).
@@ -100,7 +100,7 @@ botón "Ver pauta" aparece (inactivo) cuando hay `rubricId`.
 
 - [ ] `packages/types/src/schemas/rubric.schema.ts` — `rubricModelSchema` / `RubricModel`:
       `{ id, name, type, criteria: { id, name, description, maxPoints, order, levels: { id, score,
-  descriptor, examples }[] }[] }`. Export desde `@soe/types`.
+descriptor, examples }[] }[] }`. Export desde `@soe/types`.
 - [ ] Roles: constante en `access-policies/` (según Fase 0).
 - [ ] `apps/api/src/rubrics/rubrics.service.ts` — `getById(user, rubricId): Promise<RubricModel>`.
       Query anidada (rubric + criteria ordenados + levels ordenados) **dentro de

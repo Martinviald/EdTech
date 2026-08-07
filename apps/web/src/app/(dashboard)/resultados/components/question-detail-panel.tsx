@@ -7,6 +7,7 @@ import type {
   QuestionAnalysisResponse,
   QuestionSection,
   QuestionTaxonomyTag,
+  RawAnswerCount,
   ScoreCategoryDistribution,
   UserRole,
 } from '@soe/types';
@@ -246,6 +247,22 @@ function QuestionDetailContent({
         )}
       </section>
 
+      {/* Respuestas exactas de los alumnos (tipos estructurados no-MC) */}
+      {data.rawAnswerDistribution && data.rawAnswerDistribution.length > 0 ? (
+        <section className="space-y-3">
+          <h3 className="text-sm font-semibold text-foreground">Respuestas más frecuentes</h3>
+          <p className="text-xs text-muted-foreground">
+            Lo que escribieron exactamente los alumnos, agrupado por frecuencia. Las respuestas
+            correctas van en verde.
+          </p>
+          <ul className="space-y-2.5">
+            {data.rawAnswerDistribution.map((answer, i) => (
+              <RawAnswerRow key={`${answer.answer}-${i}`} answer={answer} />
+            ))}
+          </ul>
+        </section>
+      ) : null}
+
       {/* Análisis pedagógico con IA (drill-down por-pregunta) */}
       {assessmentId ? (
         <section className="space-y-3 border-t pt-6">
@@ -348,6 +365,41 @@ function ScoreCategoryRow({ category }: { category: ScoreCategoryDistribution })
             barClass,
           )}
           style={{ width: `${Math.min(100, Math.max(0, category.percentage))}%` }}
+        />
+      </div>
+    </li>
+  );
+}
+
+function RawAnswerRow({ answer }: { answer: RawAnswerCount }): JSX.Element {
+  return (
+    <li className="space-y-1">
+      <div className="flex items-center justify-between gap-2 text-sm">
+        <div className="flex min-w-0 items-center gap-2">
+          {answer.isCorrect ? (
+            <CheckCircle2 className="size-4 shrink-0 text-success" aria-label="Correcta" />
+          ) : null}
+          <span
+            className={cn(
+              'min-w-0 truncate',
+              answer.isCorrect ? 'font-medium text-foreground' : 'text-foreground',
+            )}
+            title={answer.answer}
+          >
+            {answer.answer}
+          </span>
+        </div>
+        <span className="shrink-0 tabular-nums text-muted-foreground">
+          {answer.count} · {formatPct(answer.percentage)}
+        </span>
+      </div>
+      <div className="h-2 w-full overflow-hidden rounded-full bg-muted" role="presentation">
+        <div
+          className={cn(
+            'h-full rounded-full transition-[width] motion-reduce:transition-none',
+            answer.isCorrect ? 'bg-success' : 'bg-muted-foreground/40',
+          )}
+          style={{ width: `${Math.min(100, Math.max(0, answer.percentage))}%` }}
         />
       </div>
     </li>
