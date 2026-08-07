@@ -16,7 +16,6 @@ import {
 } from '@soe/types';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import {
-  PageActions,
   EmptyState,
   MetricComparison,
   FilterBarSkeleton,
@@ -25,11 +24,13 @@ import {
 } from '@/components/shared';
 import { ComparabilityNotice } from '../components/comparability-notice';
 import { DistributionBar } from '../components/distribution-bar';
+import { ResultadosNavActions } from '../components/nav-actions';
 import { TrajectoryChart } from '../components/charts/trajectory-chart';
 import { ExportViewButton } from '../components/charts/export-view-button';
 import { formatAchievement } from '../components/performance-level';
 import { getDashboardFilters } from '../data';
 import { getComparableTrajectory } from './data';
+import { AxisToggle } from './axis-toggle';
 import { TrajectoryScopeBar, type TrajectorySelection } from './trajectory-scope-bar';
 
 type SearchParams = Record<string, string | string[] | undefined>;
@@ -147,11 +148,12 @@ export default async function TrayectoriaPage({
 
   return (
     <>
-      <PageActions>
+      <ResultadosNavActions>
+        <AxisToggle axis={selection.axis} basePath={BASE_PATH} />
         <Suspense fallback={null}>
           <TrayectoriaAction query={query} />
         </Suspense>
-      </PageActions>
+      </ResultadosNavActions>
 
       <Suspense fallback={<FilterBarSkeleton fields={5} />}>
         <SelectorSection selection={selection} />

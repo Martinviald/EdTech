@@ -42,6 +42,12 @@ interface PageTabsProps {
    * Queda por debajo del Topbar (`z-30`).
    */
   sticky?: boolean;
+  /**
+   * Acciones de la vista alineadas a la derecha, EN LA MISMA FILA que las
+   * pestañas (no en una fila propia que reste alto). Pensado para que una página
+   * teletransporte aquí sus botones (exportar, toggles) vía portal.
+   */
+  actions?: ReactNode;
   className?: string;
 }
 
@@ -50,7 +56,7 @@ interface PageTabsProps {
  * curso) al cambiar de pestaña. Unifica el patrón que antes se reescribía en
  * `ResultadosNav` y `AssessmentTabsNav`.
  */
-export function PageTabs({ tabs, sticky = false, className }: PageTabsProps) {
+export function PageTabs({ tabs, sticky = false, actions, className }: PageTabsProps) {
   // Tab activa optimista: se marca al click, no al commit (ver rule 07).
   const { activePath, isPending, navigate } = useOptimisticRoute();
   const searchParams = useSearchParams();
@@ -108,9 +114,7 @@ export function PageTabs({ tabs, sticky = false, className }: PageTabsProps) {
               <span
                 className={cn(
                   'rounded-full px-1.5 py-0.5 text-2xs font-semibold tabular-nums',
-                  active
-                    ? 'bg-primary/10 text-primary'
-                    : 'bg-muted text-muted-foreground',
+                  active ? 'bg-primary/10 text-primary' : 'bg-muted text-muted-foreground',
                 )}
               >
                 {tab.count}
@@ -119,6 +123,9 @@ export function PageTabs({ tabs, sticky = false, className }: PageTabsProps) {
           </Link>
         );
       })}
+      {actions ? (
+        <div className="ml-auto flex items-center gap-2 self-center pl-4">{actions}</div>
+      ) : null}
     </nav>
   );
 }
