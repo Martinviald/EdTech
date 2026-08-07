@@ -98,6 +98,7 @@ function makeQuestion(overrides: Partial<QuestionAnalysisResponse> = {}): Questi
       ],
     },
     scoreDistribution: null,
+    rawAnswerDistribution: null,
     ...overrides,
   };
 }

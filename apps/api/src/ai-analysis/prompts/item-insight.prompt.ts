@@ -7,7 +7,7 @@ import type { AiAnalysisAudience, ItemInsightSnapshot } from '@soe/types';
  * el prompt evolucione. Cambiar el texto del prompt o la forma del output exige
  * bumpear esta versión.
  */
-export const ITEM_INSIGHT_PROMPT_VERSION = 's2-item-insight-v3';
+export const ITEM_INSIGHT_PROMPT_VERSION = 's2-item-insight-v4';
 
 /**
  * Construye el par {system, prompt} del análisis IA por-pregunta (drill-down).
@@ -119,6 +119,12 @@ function buildUserPrompt(snapshot: ItemInsightSnapshot, audience: AiAnalysisAudi
     '(scoreDistribution: RC/RPC/RI) y la respuesta modelo o pauta (answerKey) para inferir la',
     'causa del desempeño y las misconcepciones del grupo.',
     '',
+    'Si viene "rawAnswerDistribution" (respuestas EXACTAS que ingresaron los alumnos en ítems',
+    'de respuesta corta/número, ordenar, unir o completar, agregadas por frecuencia), es tu',
+    'evidencia más valiosa: nombra los valores incorrectos más frecuentes y explica el error',
+    'específico que revelan (p. ej. "muchos escribieron 24 en vez de 21/10 → no simplifican").',
+    'Fundamenta misconception y recommendedActions en esos valores concretos, no en generalidades.',
+    '',
     hasImages
       ? `NOTA: se adjuntaron ${snapshot.images.length} imagen(es) en el contenido multimodal. Interprétalas en visualInsight.`
       : 'NOTA: no se adjuntó ninguna imagen. visualInsight DEBE ser null.',
@@ -178,6 +184,7 @@ function serializeSnapshot(snapshot: ItemInsightSnapshot) {
       percentage: alt.percentage,
     })),
     scoreDistribution: snapshot.scoreDistribution ?? null,
+    rawAnswerDistribution: snapshot.rawAnswerDistribution ?? null,
     totalResponses: snapshot.totalResponses,
     blankCount: snapshot.blankCount,
     correctRate: snapshot.correctRate,

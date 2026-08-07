@@ -29,6 +29,8 @@ import {
   DEVELOPMENT_BUCKETS,
   SCORE_CATEGORY_META,
   deriveAnswerKey,
+  buildRawAnswerDistribution,
+  supportsRawAnswerDistribution,
   isTrueFalseContent,
   parseSelectedKeys,
   mergeAnswerCounts,
@@ -36,6 +38,7 @@ import {
   userHasAnyRole,
   type AlternativeDistribution,
   type ScoreCategoryDistribution,
+  type RawAnswerCount,
   type AssessmentListQueryDto,
   type AssessmentListResponse,
   type AssessmentOption,
@@ -571,8 +574,33 @@ export class ItemAnalysisService {
         answerKey: deriveAnswerKey(item.type as ItemType, content as Record<string, unknown>),
         scoreDistribution:
           altDefs.length === 0 ? this.buildScoreDistribution(countByKey, totalResponses) : null,
+        rawAnswerDistribution:
+          query.assessmentId && supportsRawAnswerDistribution(item.type as ItemType)
+            ? await this.loadRawAnswerDistribution(
+                tx,
+                itemId,
+                query.assessmentId,
+                item.type as ItemType,
+                content as Record<string, unknown>,
+              )
+            : null,
       };
     });
+  }
+
+  private async loadRawAnswerDistribution(
+    tx: Database,
+    itemId: string,
+    assessmentId: string,
+    type: ItemType,
+    content: Record<string, unknown>,
+  ): Promise<RawAnswerCount[]> {
+    const rows = await tx
+      .select({ value: responses.value, isCorrect: responses.isCorrect })
+      .from(responses)
+      .where(and(eq(responses.itemId, itemId), eq(responses.assessmentId, assessmentId)));
+
+    return buildRawAnswerDistribution(type, content, rows);
   }
 
   private buildScoreDistribution(
