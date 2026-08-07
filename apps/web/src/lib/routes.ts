@@ -44,12 +44,11 @@ export const ROUTES = {
   resultados: route('/resultados'),
   resultadosTableroMaestro: route('/resultados/tablero-maestro'),
   resultadosClasificacion: route('/resultados/clasificacion'),
-  resultadosComparacion: route('/resultados/comparacion'),
+  resultadosTrayectoria: route('/resultados/trayectoria'),
   resultadosDetalle: route('/resultados/detalle'),
   resultadosDimensiones: route('/resultados/dimensiones'),
   resultadosInforme: route('/resultados/informe'),
   resultadosMapaCalor: route('/resultados/mapa-calor'),
-  resultadosProgresion: route('/resultados/progresion'),
 
   importar: route('/importar'),
   importarAlumnos: route('/importar/alumnos'),

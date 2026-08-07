@@ -1,5 +1,4 @@
 import {
-  ArrowLeftRight,
   Building2,
   FileQuestion,
   Grid3x3,
@@ -30,8 +29,7 @@ export const RESULTADOS_TABS: readonly ViewTab[] = [
   { href: ROUTES.resultadosClasificacion, label: 'Clasificación', icon: Layers, exact: true },
   { href: ROUTES.resultadosDimensiones, label: 'Dimensiones', icon: Lightbulb, exact: true },
   { href: ROUTES.resultadosMapaCalor, label: 'Mapa de calor', icon: Grid3x3, exact: true },
-  { href: ROUTES.resultadosComparacion, label: 'Comparación', icon: ArrowLeftRight, exact: true },
-  { href: ROUTES.resultadosProgresion, label: 'Progresión', icon: TrendingUp, exact: true },
+  { href: ROUTES.resultadosTrayectoria, label: 'Trayectoria', icon: TrendingUp, exact: true },
 ];
 
 export const ORGANIZACION_TABS: readonly ViewTab[] = [

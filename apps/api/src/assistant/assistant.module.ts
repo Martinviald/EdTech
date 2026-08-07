@@ -15,14 +15,13 @@ import { AssistantService } from './assistant.service';
 import type { AssistantTool } from './tools/assistant-tool.types';
 import { GetAssessmentReportTool } from './tools/get-assessment-report.tool';
 import { GetComparableOverviewTool } from './tools/get-comparable-overview.tool';
+import { GetComparableTrajectoryTool } from './tools/get-comparable-trajectory.tool';
 import { GetDashboardOverviewTool } from './tools/get-dashboard-overview.tool';
 import { GetDashboardPerformanceTool } from './tools/get-dashboard-performance.tool';
 import { GetDashboardSkillsTool } from './tools/get-dashboard-skills.tool';
-import { GetGenerationalTool } from './tools/get-generational.tool';
 import { GetHeatmapTool } from './tools/get-heatmap.tool';
 import { GetInstrumentTool } from './tools/get-instrument.tool';
 import { GetItemContentTool } from './tools/get-item-content.tool';
-import { GetProgressionTool } from './tools/get-progression.tool';
 import { GetStudentDetailTool } from './tools/get-student-detail.tool';
 import { ListAssessmentsTool } from './tools/list-assessments.tool';
 import { ListFilterOptionsTool } from './tools/list-filter-options.tool';
@@ -46,8 +45,7 @@ const ASSISTANT_TOOL_CLASSES = [
   GetDashboardSkillsTool,
   GetDashboardPerformanceTool,
   GetHeatmapTool,
-  GetProgressionTool,
-  GetGenerationalTool,
+  GetComparableTrajectoryTool,
   GetAssessmentReportTool,
   GetStudentDetailTool,
   GetItemContentTool,

@@ -26,12 +26,11 @@ const VISIBLE_LIMIT = 3;
 const MIN_RELEVANT_PP = 2;
 
 function comparisonHref(cell: GenerationalHighlight): Route {
-  const params = new URLSearchParams();
+  const params = new URLSearchParams({ axis: 'years' });
   if (cell.gradeId) params.set('gradeId', cell.gradeId);
   if (cell.subjectId) params.set('subjectId', cell.subjectId);
   if (cell.applicationPeriod) params.set('applicationPeriod', cell.applicationPeriod);
-  const qs = params.toString();
-  return (qs ? `${ROUTES.resultadosComparacion}?${qs}` : ROUTES.resultadosComparacion) as Route;
+  return `${ROUTES.resultadosTrayectoria}?${params.toString()}` as Route;
 }
 
 export function GenerationalBanner({ cells }: { cells: GenerationalHighlight[] }) {
