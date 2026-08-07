@@ -1,17 +1,15 @@
 import { buildComparabilityMeta } from '@soe/types';
 import type {
   AssessmentReportResponse,
-  GenerationalComparisonResponse,
-  ProgressionResponse,
+  ComparableTrajectoryResponse,
   StudentResultDetail,
 } from '@soe/types';
 import { capabilitiesFor } from '@soe/types';
 import type { JwtPayload } from '../../auth/jwt-payload.types';
-import type { AnalyticsService } from '../../analytics/analytics.service';
+import type { ComparableTrajectoryService } from '../../analytics/comparable-trajectory.service';
 import type { AssessmentReportService } from '../../assessment-report/assessment-report.service';
 import type { AssessmentResultsService } from '../../assessment-results/assessment-results.service';
-import { GetProgressionTool } from './get-progression.tool';
-import { GetGenerationalTool } from './get-generational.tool';
+import { GetComparableTrajectoryTool } from './get-comparable-trajectory.tool';
 import { GetAssessmentReportTool } from './get-assessment-report.tool';
 import { GetStudentDetailTool } from './get-student-detail.tool';
 
@@ -40,106 +38,62 @@ const STUDENT_ID = '11111111-1111-1111-1111-111111111111';
 const ASSESSMENT_ID = '22222222-2222-2222-2222-222222222222';
 
 // ──────────────────────────────────────────────────────────────────────────────
-// get_progression
+// get_comparable_trajectory
 // ──────────────────────────────────────────────────────────────────────────────
 
-describe('GetProgressionTool', () => {
-  function makeAnalytics(response: ProgressionResponse) {
-    const progression = jest.fn().mockResolvedValue(response);
-    return { service: { progression } as unknown as AnalyticsService, progression };
+describe('GetComparableTrajectoryTool', () => {
+  function makeService(response: ComparableTrajectoryResponse) {
+    const trajectory = jest.fn().mockResolvedValue(response);
+    return { service: { trajectory } as unknown as ComparableTrajectoryService, trajectory };
   }
 
-  it('llama al service con ctx.user y serializa la respuesta', async () => {
-    const response: ProgressionResponse = {
-      scope: 'class',
-      subjectId: null,
-      entityId: 'cg-1',
-      entityLabel: '4°A',
-      points: [],
+  const VALID_INPUT = {
+    axis: 'years',
+    gradeId: '44444444-4444-4444-4444-444444444444',
+    subjectId: '55555555-5555-5555-5555-555555555555',
+    instrumentType: 'dia',
+    applicationPeriod: 'intermedio',
+  };
+
+  it('llama al service con ctx.user y serializa la respuesta agregada', async () => {
+    const response: ComparableTrajectoryResponse = {
+      scope: 'org',
+      axis: 'years',
+      gradeId: VALID_INPUT.gradeId,
+      gradeName: '3° básico',
+      subjectId: VALID_INPUT.subjectId,
+      subjectName: 'Lenguaje',
+      instrumentType: 'dia',
+      applicationPeriod: 'intermedio',
+      classGroupId: null,
+      classGroupName: null,
+      bands: null,
+      series: [],
+      current: null,
+      byClassGroup: [],
+      baselines: { previousPeriod: null, previousYear: null },
+      comparability: buildComparabilityMeta([]),
     };
-    const { service, progression } = makeAnalytics(response);
-    const tool = new GetProgressionTool(service);
+    const { service, trajectory } = makeService(response);
+    const tool = new GetComparableTrajectoryTool(service);
 
-    const result = await tool.execute(
-      { scope: 'class', classGroupId: '33333333-3333-3333-3333-333333333333' },
-      CTX,
-    );
+    const result = await tool.execute(VALID_INPUT, CTX);
 
-    expect(progression).toHaveBeenCalledTimes(1);
-    expect(progression.mock.calls[0][0]).toBe(USER);
+    expect(trajectory).toHaveBeenCalledTimes(1);
+    expect(trajectory.mock.calls[0][0]).toBe(USER);
     expect(result.isError).toBeUndefined();
     expect(JSON.parse(result.content)).toEqual(response);
   });
 
-  it('reemplaza el entityLabel por el studentId cuando scope=student (PII-free)', async () => {
-    const response: ProgressionResponse = {
-      scope: 'student',
-      subjectId: null,
-      entityId: STUDENT_ID,
-      entityLabel: SECRET_NAME, // el service devuelve el nombre del alumno
-      points: [],
-    };
-    const { service } = makeAnalytics(response);
-    const tool = new GetProgressionTool(service);
-
-    const result = await tool.execute({ scope: 'student', studentId: STUDENT_ID }, CTX);
-
-    expect(result.content).not.toContain(SECRET_NAME);
-    const parsed = JSON.parse(result.content) as ProgressionResponse;
-    expect(parsed.entityLabel).toBe(STUDENT_ID);
-    expect(parsed.entityId).toBe(STUDENT_ID);
-  });
-
   it('input inválido → isError sin llamar al service', async () => {
-    const { service, progression } = makeAnalytics({} as ProgressionResponse);
-    const tool = new GetProgressionTool(service);
+    const { service, trajectory } = makeService({} as ComparableTrajectoryResponse);
+    const tool = new GetComparableTrajectoryTool(service);
 
-    const result = await tool.execute({ scope: 'student' }, CTX); // falta studentId
+    const result = await tool.execute({ axis: 'years', gradeId: 'not-a-uuid' }, CTX);
 
-    expect(progression).not.toHaveBeenCalled();
+    expect(trajectory).not.toHaveBeenCalled();
     expect(result.isError).toBe(true);
     expect(JSON.parse(result.content).error).toBe('Parámetros inválidos');
-  });
-});
-
-// ──────────────────────────────────────────────────────────────────────────────
-// get_generational
-// ──────────────────────────────────────────────────────────────────────────────
-
-describe('GetGenerationalTool', () => {
-  it('llama al service con ctx.user y serializa la respuesta agregada', async () => {
-    const response: GenerationalComparisonResponse = {
-      gradeId: 'g-1',
-      gradeName: '3° básico',
-      subjectId: null,
-      subjectName: null,
-      nodeId: null,
-      nodeName: null,
-      series: [],
-      comparability: buildComparabilityMeta([]),
-    };
-    const generational = jest.fn().mockResolvedValue(response);
-    const tool = new GetGenerationalTool({
-      generational,
-    } as unknown as AnalyticsService);
-
-    const result = await tool.execute({ gradeId: '44444444-4444-4444-4444-444444444444' }, CTX);
-
-    expect(generational).toHaveBeenCalledTimes(1);
-    expect(generational.mock.calls[0][0]).toBe(USER);
-    expect(JSON.parse(result.content)).toEqual(response);
-  });
-
-  it('input inválido → isError sin llamar al service', async () => {
-    const generational = jest.fn();
-    const tool = new GetGenerationalTool({
-      generational,
-    } as unknown as AnalyticsService);
-
-    const result = await tool.execute({ gradeId: 'not-a-uuid' }, CTX);
-
-    expect(generational).not.toHaveBeenCalled();
-    expect(result.isError).toBe(true);
   });
 });
 

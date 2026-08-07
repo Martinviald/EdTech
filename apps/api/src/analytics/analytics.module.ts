@@ -1,10 +1,12 @@
 import { Module } from '@nestjs/common';
+import { DashboardsModule } from '../dashboards/dashboards.module';
 import { AnalyticsController } from './analytics.controller';
-import { AnalyticsService } from './analytics.service';
+import { ComparableTrajectoryService } from './comparable-trajectory.service';
 
 @Module({
+  imports: [DashboardsModule],
   controllers: [AnalyticsController],
-  providers: [AnalyticsService],
-  exports: [AnalyticsService],
+  providers: [ComparableTrajectoryService],
+  exports: [ComparableTrajectoryService],
 })
 export class AnalyticsModule {}

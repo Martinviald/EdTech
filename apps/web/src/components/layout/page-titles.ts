@@ -39,8 +39,7 @@ const STATIC_TITLES: Record<string, PageTitle> = {
   [ROUTES.resultadosClasificacion]: { title: 'Panorama pedagógico' },
   [ROUTES.resultadosDimensiones]: { title: 'Panorama pedagógico' },
   [ROUTES.resultadosMapaCalor]: { title: 'Panorama pedagógico' },
-  [ROUTES.resultadosComparacion]: { title: 'Panorama pedagógico' },
-  [ROUTES.resultadosProgresion]: { title: 'Panorama pedagógico' },
+  [ROUTES.resultadosTrayectoria]: { title: 'Panorama pedagógico' },
 
   // Hub del Banco de contenido (tabs Instrumentos / Ítems).
   [ROUTES.bancoItems]: { title: 'Banco de contenido' },

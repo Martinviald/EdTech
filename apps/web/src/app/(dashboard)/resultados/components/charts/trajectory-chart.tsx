@@ -1,72 +1,67 @@
 'use client';
 
 // ─────────────────────────────────────────────────────────────────────────────
-// H6.6 — Gráfico de progresión temporal (FE-B). Línea de % logro a través de las
-// evaluaciones del período. Recharts es client-only; recibe los puntos cargados.
+// Gráfico de la trayectoria comparable: una línea de % de logro a través de los
+// puntos de la serie. A diferencia de la progresión antigua, todos los puntos
+// pertenecen a la MISMA familia comparable (mismo tipo + asignatura + nivel), así
+// que unirlos con una línea es legítimo: mide movimiento, no mezcla instrumentos.
 // ─────────────────────────────────────────────────────────────────────────────
 
 import {
   CartesianGrid,
   Line,
   LineChart,
+  ReferenceLine,
   ResponsiveContainer,
   Tooltip,
   XAxis,
   YAxis,
 } from 'recharts';
-import type { PerformanceLevel, ProgressionPoint } from '@soe/types';
+import type { ComparableTrajectoryPoint } from '@soe/types';
 import { ChartTooltipCard, type RechartsContentProps } from '@/components/ui/chart-tooltip';
-import {
-  PERFORMANCE_LEVEL_COLOR,
-  PERFORMANCE_LEVEL_LABELS,
-} from './performance-distribution';
 
-function formatDate(value: string | Date | null): string {
-  if (!value) return '—';
-  const d = typeof value === 'string' ? new Date(value) : value;
-  if (Number.isNaN(d.getTime())) return '—';
-  return d.toLocaleDateString('es-CL', { day: '2-digit', month: 'short', year: 'numeric' });
-}
-
-type ProgressionDatum = {
+type TrajectoryDatum = {
   label: string;
   instrument: string;
-  date: string;
   achievement: number | null;
-  level: PerformanceLevel | null;
+  students: number;
 };
 
-function ProgressionTooltip({ active, payload }: RechartsContentProps) {
+function TrajectoryTooltip({ active, payload }: RechartsContentProps) {
   if (!active || !payload?.length) return null;
-  const d = payload[0]?.payload as ProgressionDatum | undefined;
+  const d = payload[0]?.payload as TrajectoryDatum | undefined;
   if (!d) return null;
-  const levelColor = d.level ? PERFORMANCE_LEVEL_COLOR[d.level] : 'hsl(var(--primary))';
   return (
     <ChartTooltipCard
       title={d.label}
-      subtitle={`${d.instrument} · ${d.date}`}
-      accentColor={levelColor}
+      subtitle={d.instrument}
+      accentColor="hsl(var(--primary))"
       rows={[
         {
           label: '% de logro',
           value: d.achievement == null ? '—' : `${d.achievement}%`,
           color: 'hsl(var(--primary))',
         },
-        ...(d.level
-          ? [{ label: 'Nivel', value: PERFORMANCE_LEVEL_LABELS[d.level], color: levelColor }]
-          : []),
+        { label: 'Alumnos', value: d.students },
       ]}
     />
   );
 }
 
-export function ProgressionChart({ points }: { points: ProgressionPoint[] }) {
-  const data: ProgressionDatum[] = points.map((p) => ({
-    label: p.assessmentName ?? p.instrumentName,
+export function TrajectoryChart({
+  series,
+  baselineAchievement,
+  baselineLabel,
+}: {
+  series: ComparableTrajectoryPoint[];
+  baselineAchievement?: number | null;
+  baselineLabel?: string;
+}) {
+  const data: TrajectoryDatum[] = series.map((p) => ({
+    label: p.label,
     instrument: p.instrumentName,
-    date: formatDate(p.administeredAt),
-    achievement: p.achievement === null ? null : Math.round(p.achievement * 10) / 10,
-    level: p.performanceLevel,
+    achievement: p.averageAchievement === null ? null : Math.round(p.averageAchievement * 10) / 10,
+    students: p.studentsAssessed,
   }));
 
   return (
@@ -74,7 +69,7 @@ export function ProgressionChart({ points }: { points: ProgressionPoint[] }) {
       <ResponsiveContainer width="100%" height="100%">
         <LineChart data={data} margin={{ top: 8, right: 8, left: 0, bottom: 0 }}>
           <CartesianGrid strokeDasharray="3 3" className="stroke-border" />
-          <XAxis dataKey="date" tick={{ fontSize: 11 }} className="fill-muted-foreground" />
+          <XAxis dataKey="label" tick={{ fontSize: 12 }} className="fill-muted-foreground" />
           <YAxis
             domain={[0, 100]}
             tick={{ fontSize: 12 }}
@@ -82,9 +77,22 @@ export function ProgressionChart({ points }: { points: ProgressionPoint[] }) {
             tickFormatter={(v: number) => `${v}%`}
           />
           <Tooltip
-            content={<ProgressionTooltip />}
+            content={<TrajectoryTooltip />}
             cursor={{ stroke: 'hsl(var(--border))', strokeWidth: 1 }}
           />
+          {baselineAchievement != null ? (
+            <ReferenceLine
+              y={baselineAchievement}
+              stroke="hsl(var(--muted-foreground))"
+              strokeDasharray="4 4"
+              label={{
+                value: baselineLabel ?? 'referencia',
+                position: 'insideTopRight',
+                fontSize: 11,
+                fill: 'hsl(var(--muted-foreground))',
+              }}
+            />
+          ) : null}
           <Line
             type="monotone"
             dataKey="achievement"
