@@ -33,6 +33,12 @@
  *
  * Args: --org=<uuid> --year=<año> --loadKey=<clave> --input=<ruta.json>
  *       --only=<GRADE_CODE:SECCION:Asignatura,...>  (subconjunto, para pruebas)
+ *       --administeredAt=<YYYY-MM-DD>  (fecha de aplicación; por defecto, hoy)
+ *
+ * `--administeredAt` importa en las cargas históricas: `resolveAssessmentYear`
+ * deriva el año lectivo de esa fecha para bucketizar el read-model cuando el
+ * alumno no está matriculado en el curso asignado. Fechar una evaluación de 2025
+ * con la fecha de hoy la ancla al año equivocado.
  */
 import postgres from 'postgres';
 import { drizzle } from 'drizzle-orm/postgres-js';
@@ -104,6 +110,10 @@ const ONLY = opt('only', '')
   .filter(Boolean);
 const IMPORT_FORMAT = 'generic_csv';
 const CHUNK = 3000;
+const ADMINISTERED_AT = opt('administeredAt', '');
+if (ADMINISTERED_AT && !/^\d{4}-\d{2}-\d{2}$/.test(ADMINISTERED_AT)) {
+  throw new Error(`--administeredAt debe ser YYYY-MM-DD, llegó "${ADMINISTERED_AT}"`);
+}
 
 const url = process.env.DATABASE_ADMIN_URL ?? process.env.DATABASE_URL;
 if (!url) throw new Error('Falta DATABASE_ADMIN_URL');
@@ -203,6 +213,7 @@ async function main() {
     : artifact.courses;
   if (!courses.length) throw new Error('El artefacto no tiene cursos que procesar');
   const now = new Date();
+  const administeredAt = ADMINISTERED_AT ? new Date(`${ADMINISTERED_AT}T12:00:00Z`) : now;
 
   await withOrgContext(db, ORG_ID, async (tx) => {
     const [year] = await tx
@@ -243,9 +254,43 @@ async function main() {
           dsql`${instruments.deletedAt} is null`,
         ),
       );
-    const instrumentByKey = new Map(
-      instrumentRows.map((i) => [`${i.gradeId}|${i.subjectId}|${i.applicationPeriod}`, i]),
+    /**
+     * Varios instrumentos pueden compartir (grado, asignatura, momento, año): en
+     * 2026 el catálogo tiene el instrumento real de 2° Básico y además fixtures
+     * `[DEMO]` sin ítems que sostienen el benchmarking. Quedarse con el último
+     * del Map elegía uno en silencio y podía tocar el equivocado, así que se
+     * resuelve por el que TIENE ítems y se falla si hay más de uno.
+     */
+    const itemCountRows = await tx
+      .select({ instrumentId: items.instrumentId, n: dsql<number>`count(*)::int` })
+      .from(items)
+      .groupBy(items.instrumentId);
+    const itemCountByInstrument = new Map(
+      itemCountRows.flatMap((r) => (r.instrumentId ? [[r.instrumentId, Number(r.n)]] : [])),
     );
+    const instrumentsByKey = new Map<string, typeof instrumentRows>();
+    for (const i of instrumentRows) {
+      const key = `${i.gradeId}|${i.subjectId}|${i.applicationPeriod}`;
+      const list = instrumentsByKey.get(key) ?? [];
+      list.push(i);
+      instrumentsByKey.set(key, list);
+    }
+    const itemCountOf = (id: string): number => itemCountByInstrument.get(id) ?? 0;
+    const resolveInstrument = (key: string, etiqueta: string) => {
+      const candidatos = instrumentsByKey.get(key) ?? [];
+      const conItems = candidatos.filter((c) => itemCountOf(c.id) > 0);
+      if (conItems.length === 1) return conItems[0];
+      if (conItems.length === 0) {
+        const vacios = candidatos.map((c) => `"${c.name}"`).join(', ');
+        throw new Error(
+          `Instrumento no encontrado para ${etiqueta}` +
+            (vacios ? ` — hay ${candidatos.length} sin ítems: ${vacios}` : ''),
+        );
+      }
+      throw new Error(
+        `Instrumento ambiguo para ${etiqueta}: ${conItems.map((c) => `"${c.name}" (${itemCountOf(c.id)} ítems)`).join(' · ')}`,
+      );
+    };
 
     const roster = await tx
       .select({
@@ -283,13 +328,11 @@ async function main() {
       const subject = subjectByName.get(course.subjectName);
       if (!subject)
         throw new Error(`Subject no encontrado: "${course.subjectName}" (${course.sourceFile})`);
-      const instrument = instrumentByKey.get(
+      const instrument = resolveInstrument(
         `${grade.id}|${subject.id}|${course.applicationPeriod}`,
+        `${grade.name} · ${subject.name} · ${course.applicationPeriod} ${YEAR}`,
       );
-      if (!instrument)
-        throw new Error(
-          `Instrumento no encontrado para ${grade.name} · ${subject.name} · ${course.applicationPeriod} ${YEAR}`,
-        );
+      if (!instrument) throw new Error(`Instrumento no resuelto para ${course.sourceFile}`);
       const classGroupId = groupByKey.get(`${grade.id}|${course.section.toUpperCase()}`);
       if (!classGroupId)
         throw new Error(
@@ -597,7 +640,7 @@ async function main() {
           name: `${p.instrumentName} · ${p.course.section}`,
           mode: 'paper' as const,
           status: 'completed' as const,
-          administeredAt: now,
+          administeredAt,
           administeredById: null,
           config: {
             source: IMPORT_FORMAT,
@@ -658,7 +701,7 @@ async function main() {
           grade: a.grade.toFixed(2),
           performanceLevel: a.performanceLevel,
           isComplete: a.isComplete && !withPending.has(a.studentId),
-          completedAt: now,
+          completedAt: administeredAt,
         });
       }
       for (const a of skillAgg) {
