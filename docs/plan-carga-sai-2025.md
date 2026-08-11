@@ -317,3 +317,75 @@ clave — son ítems con un distractor muy fuerte (`9/24` por `9/12`).
 4. **Corregir el RUT tipo `IPE:…`**: `normalizeRut` lo rechaza, así que esa alumna quedaría fuera
    de cualquier carga de II° medio.
 5. Fechas de aplicación reales, si se quieren en vez de las aproximadas de §7.2.
+
+---
+
+## 9. Cierre: los 23 instrumentos que faltaban, extraídos y cargados (2026-08-11)
+
+El §3 de este documento listaba 23 combinaciones «sin instrumento en el catálogo». Ese diagnóstico
+tenía un error: **los 23 sí tenían cuadernillo publicado**. Los de Cierre e Intermedio de básica
+viven en `s3-oficial/<año>/<medición>/_general/<asignatura>/` con el nivel en **dos** dígitos
+(`_07_basico`), no en `<medición>/<nivel>/<asignatura>/` con uno. El inventario original sólo
+miraba la segunda ruta. Lo detectó un agente de extracción al rechazar el PDF que se le asignó y
+probar con tres fuentes independientes que no era el cuadernillo correcto.
+
+### 9.1 Resultado
+
+**23 instrumentos · 145 secciones · 638 ítems · 2.199 tags.** Delta en la BDD: `+23` instrumentos,
+`+638` ítems, `+2.199` tags y **`+0` nodos de taxonomía** — el catálogo ya cubría todos los niveles
+y asignaturas necesarios.
+
+Con eso, **los 124 cursos de `sai-identificado/` (2025 y 2026) quedaron cargados**: 92 de 2025 y 32
+de 2026, sin un solo curso con evaluación duplicada.
+
+### 9.2 El gate que había que resolver: el nivel del OA en Cierre
+
+El DIA no etiqueta sus ítems con el OA del grado que rinde. Las reglas conocidas eran: Diagnóstico
+mide el nivel **anterior** (en Matemática, por ítem, en la columna «Nivel del OA» de la ficha) y
+Monitoreo mide el **propio**. De Cierre no había precedente, y son 13 de los 23.
+
+Se resolvió como **nivel propio**, con cuatro líneas de evidencia convergentes:
+
+- **Documental**: la ficha de Diagnóstico dice «Objetivos de Aprendizaje […] del nivel anterior» y
+  titula su columna «N.º de OA (1° básico)»; la de Cierre dice «de los distintos ejes temáticos
+  DEL NIVEL» y titula «Nº OA» a secas, sin el paréntesis de grado.
+- **Numeración** (la prueba dura): el mismo contenido cambia de número entre niveles y el Cierre usa
+  el del grado en curso. En 8° básico los ítems de textos de los medios son OA 9 en el Diagnóstico
+  (numeración de 7°) y OA 10 en el Cierre (numeración de 8°); el corrimiento +1 es exactamente el
+  del currículum 7°→8°.
+- **Coherencia OA↔ítem**: 19/19 en Lectura 2° Cierre al grado en curso contra 0/19 a grado−1;
+  Matemática Cierre 100% al grado en curso y falla a grado−1 (con OA que ni existen).
+- **Controles**: la misma batería reproduce las dos reglas ya conocidas (Lectura 2° Diagnóstico
+  marca 1B 17/17; Lectura 2° Intermedio marca 2B 19/19). El test discrimina.
+
+### 9.3 Verificación de las claves de 1° y 2° básico
+
+Esos 4 instrumentos no tienen ficha técnica: su pauta es una guía didáctica que trae
+especificaciones pero **no la tabla de claves** (están dentro de imágenes). La clave se dedujo del
+informe oficial, exigiendo que el % de cada eje se reproduzca y que la misma clave sirva en los DOS
+cursos del nivel.
+
+Verificado después contra una fuente que la deducción no usó — las respuestas crudas del SAI:
+
+| Verificación                                                                 | Resultado               |
+| ---------------------------------------------------------------------------- | ----------------------- |
+| Conteos por alternativa, SAI vs informe                                      | **296 / 296 idénticos** |
+| Ejes verificables que reproducen el % del informe                            | **26**, 0 diferencias   |
+| Ejes no verificables (contienen un ítem de desarrollo que el SAI no exporta) | 14                      |
+
+### 9.4 Lo que quedó fuera
+
+- **197 ítems (30%) dependen de una figura** que todavía no se recorta. Los instrumentos están
+  cargados y sus resultados se calculan igual; lo que falta es poder **ver** la pregunta. Se agregan
+  después con UPDATE in-place por `sourceJson` + `position` — nunca re-importando, que regenera los
+  UUID de los ítems y orfana sus tags.
+- **344 de 638 ítems sin descriptor** (tag `primary`). Sus indicadores 2025 no existen como
+  descriptor en el catálogo; crearlos son 297 nodos nuevos y requiere `add-taxonomy-nodes.ts`.
+  El OA, la habilidad y el eje sí están en los 638.
+- **69 filas (3,6%) excluidas por cruce ambiguo**, concentradas en Ciencias 5° (~30%) e Historia 6°
+  (~13%): son las asignaturas con menos ejes, así que su vector de porcentajes discrimina peor y no
+  se puede saber a qué alumno pertenece la fila. Atribuirla al equivocado es peor que no cargarla.
+- El **matcher de descriptores** se endureció (Jaccard ≥ 0.85 y margen ≥ 0.15 además del recall):
+  con sólo recall se colaban descriptores que son subconjunto de un indicador más rico y volteos de
+  una palabra que cambian el sentido (directamente/inversamente, gráfica/algebraica). Cuesta ~41
+  descriptores; la alternativa correcta es crear los que faltan, no aflojar el umbral.

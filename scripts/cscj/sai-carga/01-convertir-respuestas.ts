@@ -64,33 +64,30 @@ const PERIODO_POR_CARPETA: Record<string, string> = {
 /**
  * Combinaciones que NO se cargan, con el motivo. Es una tabla por año y no una
  * regla porque cada exclusión tiene una causa distinta que hay que poder
- * auditar. 2026 no tiene ninguna: sus 32 cursos tienen instrumento y ninguno
- * estaba cargado.
+ * auditar. 2026 no tiene ninguna.
+ *
+ * Todas las exclusiones de 2025 son ahora «ya cargada»: los 23 instrumentos que
+ * faltaban en el catálogo se extrajeron de sus cuadernillos y se cargaron, así
+ * que ya no hay combinación sin instrumento.
  */
 const EXCLUIDAS_2025: Record<string, string> = {
-  'diagnostico|2ND_BASIC|Lenguaje y Comunicación': 'sin instrumento en el catálogo',
-  'diagnostico|8TH_BASIC|Lenguaje y Comunicación': 'sin instrumento en el catálogo',
-  'diagnostico|8TH_BASIC|Matemáticas': 'sin instrumento en el catálogo',
-  'diagnostico|2ND_MEDIO|Lenguaje y Comunicación': 'sin instrumento en el catálogo',
-  'diagnostico|2ND_MEDIO|Matemáticas': 'sin instrumento en el catálogo',
-  'intermedio|1RD_BASIC|Matemáticas': 'sin instrumento en el catálogo',
-  'intermedio|2ND_BASIC|Lenguaje y Comunicación': 'sin instrumento en el catálogo',
-  'intermedio|2ND_BASIC|Matemáticas': 'sin instrumento en el catálogo',
-  'intermedio|5TH_BASIC|Ciencias Naturales': 'sin instrumento en el catálogo',
-  'intermedio|6TH_BASIC|Historia, Geografía y Cs. Sociales': 'sin instrumento en el catálogo',
-  'cierre|1RD_BASIC|Matemáticas': 'sin instrumento en el catálogo',
-  'cierre|2ND_BASIC|Lenguaje y Comunicación': 'sin instrumento en el catálogo',
-  'cierre|2ND_BASIC|Matemáticas': 'sin instrumento en el catálogo',
-  'cierre|5TH_BASIC|Ciencias Naturales': 'sin instrumento en el catálogo',
-  'cierre|6TH_BASIC|Historia, Geografía y Cs. Sociales': 'sin instrumento en el catálogo',
-  'cierre|7TH_BASIC|Lenguaje y Comunicación': 'sin instrumento en el catálogo',
-  'cierre|7TH_BASIC|Matemáticas': 'sin instrumento en el catálogo',
-  'cierre|8TH_BASIC|Lenguaje y Comunicación': 'sin instrumento en el catálogo',
-  'cierre|8TH_BASIC|Matemáticas': 'sin instrumento en el catálogo',
-  'cierre|1ST_MEDIO|Lenguaje y Comunicación': 'sin instrumento en el catálogo',
-  'cierre|1ST_MEDIO|Matemáticas': 'sin instrumento en el catálogo',
-  'cierre|2ND_MEDIO|Lenguaje y Comunicación': 'sin instrumento en el catálogo',
-  'cierre|2ND_MEDIO|Matemáticas': 'sin instrumento en el catálogo',
+  'diagnostico|3RD_BASIC|Lenguaje y Comunicación': 'ya cargada (loadKey sai-2025-diagnostico)',
+  'diagnostico|3RD_BASIC|Matemáticas': 'ya cargada (loadKey sai-2025-diagnostico)',
+  'diagnostico|4TH_BASIC|Lenguaje y Comunicación': 'ya cargada (loadKey sai-2025-diagnostico)',
+  'diagnostico|4TH_BASIC|Matemáticas': 'ya cargada (loadKey sai-2025-diagnostico)',
+  'diagnostico|5TH_BASIC|Lenguaje y Comunicación': 'ya cargada (loadKey sai-2025-diagnostico)',
+  'diagnostico|6TH_BASIC|Lenguaje y Comunicación': 'ya cargada (loadKey sai-2025-diagnostico)',
+  'intermedio|3RD_BASIC|Matemáticas': 'ya cargada (loadKey sai-2025-intermedio)',
+  'intermedio|4TH_BASIC|Matemáticas': 'ya cargada (loadKey sai-2025-intermedio)',
+  'intermedio|5TH_BASIC|Matemáticas': 'ya cargada (loadKey sai-2025-intermedio)',
+  'cierre|3RD_BASIC|Lenguaje y Comunicación': 'ya cargada (loadKey sai-2025-cierre)',
+  'cierre|3RD_BASIC|Matemáticas': 'ya cargada (loadKey sai-2025-cierre)',
+  'cierre|4TH_BASIC|Lenguaje y Comunicación': 'ya cargada (loadKey sai-2025-cierre)',
+  'cierre|4TH_BASIC|Matemáticas': 'ya cargada (loadKey sai-2025-cierre)',
+  'cierre|5TH_BASIC|Lenguaje y Comunicación': 'ya cargada (loadKey sai-2025-cierre)',
+  'cierre|5TH_BASIC|Matemáticas': 'ya cargada (loadKey sai-2025-cierre)',
+  'cierre|6TH_BASIC|Lenguaje y Comunicación': 'ya cargada (loadKey sai-2025-cierre)',
+  'cierre|6TH_BASIC|Matemáticas': 'ya cargada (loadKey sai-2025-cierre)',
   'intermedio|3RD_BASIC|Lenguaje y Comunicación':
     'ya cargada (loadKey dia-lenguaje-intermedio-2025)',
   'intermedio|4TH_BASIC|Lenguaje y Comunicación':
@@ -243,7 +240,8 @@ function main(): void {
       continue;
     }
     const dudosas = leido.rows.filter((r) => r.metodo && r.metodo !== 'vector').length;
-    if (dudosas) metodosDudosos.push(`${leido.sourceFile}: ${dudosas} fila(s) con metodo=vector-aprox`);
+    if (dudosas)
+      metodosDudosos.push(`${leido.sourceFile}: ${dudosas} fila(s) con metodo=vector-aprox`);
     for (const a of leido.ambiguas) {
       metodosDudosos.push(`${leido.sourceFile}: EXCLUIDA por cruce ambiguo — ${a}`);
     }
