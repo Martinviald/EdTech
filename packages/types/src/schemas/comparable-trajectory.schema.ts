@@ -2,10 +2,7 @@ import { z } from 'zod';
 import type { BaselineRef, ComparabilityMeta } from '../comparability';
 import type { PerformanceBandDistributionBucket } from './dashboard.schema';
 import type { PerformanceBandView } from './performance-band.schema';
-import {
-  INSTRUMENT_APPLICATION_PERIODS,
-  type InstrumentApplicationPeriod,
-} from './instrument.schema';
+import type { InstrumentApplicationPeriod } from './instrument.schema';
 import type { ComparableUnitClassGroup } from './comparable-overview.schema';
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -15,33 +12,25 @@ import type { ComparableUnitClassGroup } from './comparable-overview.schema';
 // Reemplaza la comparación generacional (H6.3) y la progresión (H6.6), que graficaban
 // promedios que mezclaban instrumentos de distinta dificultad y escala.
 //
-// El principio: UNA unidad comparable (una familia N2 = mismo tipo+asignatura+nivel) que
-// se mueve a lo largo de UN eje. Cada punto es una aplicación comparable con su % de logro
-// y su distribución por las bandas DEL INSTRUMENTO — nunca un promedio entre instrumentos.
+// El principio: UNA familia comparable (mismo tipo + asignatura + nivel) desplegada como
+// una MATRIZ año × momento del ciclo. El eje es el ciclo (Diagnóstico → Monitoreo →
+// Cierre) y hay una serie por año: así el año en curso se lee evaluación a evaluación
+// contra los años anteriores del mismo nivel — mismo instrumento, mismo corte de niveles,
+// eje comparable.
 //
-//  - `axis='years'`   → fija el momento (`applicationPeriod`), varía el año. Es N2
-//                       (`instrument_family`): la comparación generacional legítima.
-//  - `axis='moments'` → recorre TODAS las aplicaciones de la familia en orden cronológico
-//                       (año, y dentro del año diagnóstico → monitoreo → cierre): los
-//                       momentos de los años anteriores y los de este año hasta hoy. Es N4
-//                       (`instrument_history`). Acotado a un `year` degenera en la serie
-//                       N3 (`period_series`) de ese ciclo.
+// Cada punto es una aplicación comparable con su % de logro y su distribución por las
+// bandas DEL INSTRUMENTO — nunca un promedio entre instrumentos. Es N4
+// (`instrument_history`); acotado a un `year` degenera en la serie N3 (`period_series`)
+// de ese ciclo.
 // ─────────────────────────────────────────────────────────────────────────────
 
-export const COMPARABLE_TRAJECTORY_AXES = ['years', 'moments'] as const;
-export type ComparableTrajectoryAxis = (typeof COMPARABLE_TRAJECTORY_AXES)[number];
-
 export const comparableTrajectoryQuerySchema = z.object({
-  axis: z.enum(COMPARABLE_TRAJECTORY_AXES),
   // La familia comparable base: tipo de instrumento + asignatura + nivel.
   gradeId: z.string().uuid(),
   subjectId: z.string().uuid(),
   instrumentType: z.string().min(1),
-  // Eje años: el momento del ciclo que se mantiene fijo (ej. "intermedio"). Ausente si
-  // el instrumento no tiene ciclo (custom).
-  applicationPeriod: z.enum(INSTRUMENT_APPLICATION_PERIODS).optional(),
-  // Eje momentos: acota la trayectoria a un año (instruments.year). Ausente → toda la
-  // historia de la familia, año a año y momento a momento.
+  // Acota la trayectoria a un año (instruments.year). Ausente → toda la historia de la
+  // familia, una serie por año.
   year: z.coerce.number().int().optional(),
   // Acota el alcance a un curso (drill nivel → curso, decisión C). Ausente → todo el nivel.
   classGroupId: z.string().uuid().optional(),
@@ -49,14 +38,14 @@ export const comparableTrajectoryQuerySchema = z.object({
 export type ComparableTrajectoryQueryDto = z.infer<typeof comparableTrajectoryQuerySchema>;
 
 /**
- * Un punto de la trayectoria: una aplicación comparable de la familia (un año en el eje
- * de años, o un momento del ciclo en el eje de momentos). Su `averageAchievement` es
- * legítimo porque todos los resultados salen del mismo instrumento y del mismo corte.
+ * Un punto de la trayectoria: la aplicación de la familia en UN momento del ciclo de UN
+ * año. Su `averageAchievement` es legítimo porque todos los resultados salen del mismo
+ * instrumento y del mismo corte.
  */
 export type ComparableTrajectoryPoint = {
-  /** Clave estable del punto: el año (`"2025"`) o la aplicación (`"2025-intermedio"`). */
+  /** Clave del momento del ciclo (`"intermedio"`, o `"none"` si el instrumento no lo declara). */
   key: string;
-  /** Etiqueta lista para pintar en el eje. */
+  /** Etiqueta del momento, lista para el eje X (`"Monitoreo"`). */
   label: string;
   year: number | null;
   applicationPeriod: InstrumentApplicationPeriod | null;
@@ -71,23 +60,37 @@ export type ComparableTrajectoryPoint = {
   bandDistribution: PerformanceBandDistributionBucket[] | null;
 };
 
+/**
+ * Una línea del gráfico: el ciclo completo de un año. Los alumnos de un año anterior son
+ * otra generación (hoy están un nivel más arriba); eso se dice en `label` y
+ * `currentGradeName`, nunca cambiando el instrumento ni la escala.
+ */
+export type ComparableTrajectoryYearSeries = {
+  year: number | null;
+  /** Etiqueta de la serie: "2026" el año más reciente; "2025 · hoy 6º básico" los anteriores. */
+  label: string;
+  /** Nivel donde está hoy esa generación. `null` si no se puede proyectar. */
+  currentGradeName: string | null;
+  /** Un punto por momento con datos ese año, en el orden del ciclo. */
+  points: ComparableTrajectoryPoint[];
+};
+
 export type ComparableTrajectoryResponse = {
   scope: 'org' | 'teacher';
-  axis: ComparableTrajectoryAxis;
   gradeId: string;
   gradeName: string | null;
   subjectId: string;
   subjectName: string | null;
   instrumentType: string;
-  /** Momento fijo (eje años) o `null`. */
-  applicationPeriod: InstrumentApplicationPeriod | null;
   classGroupId: string | null;
   classGroupName: string | null;
   /** Bandas del instrumento de la familia, para la leyenda de la distribución. */
   bands: PerformanceBandView[] | null;
-  /** Puntos ordenados ascendente a lo largo del eje. */
-  series: ComparableTrajectoryPoint[];
-  /** El punto más reciente de la serie (conveniencia; `= series[series.length - 1]`). */
+  /** El eje X: los momentos presentes en toda la data, en el orden del ciclo. */
+  periods: { key: string; label: string }[];
+  /** Una serie por año, de la más reciente a la más antigua. */
+  series: ComparableTrajectoryYearSeries[];
+  /** El último momento con datos del año más reciente: lo que describen los KPIs. */
   current: ComparableTrajectoryPoint | null;
   /** Desglose por curso del punto actual — el drill nivel → curso (decisión C). */
   byClassGroup: ComparableUnitClassGroup[];
@@ -102,8 +105,8 @@ export type ComparableTrajectoryResponse = {
     previousYear: BaselineRef | null;
   };
   /**
-   * Comparabilidad del alcance. La entrada guiada garantiza N1/N2/N3, pero se emite igual
-   * para que la UI tenga la red de seguridad si un alcance resultara `mixed`.
+   * Comparabilidad del alcance. La entrada guiada garantiza N1/N2/N3/N4, pero se emite
+   * igual para que la UI tenga la red de seguridad si un alcance resultara `mixed`.
    */
   comparability: ComparabilityMeta;
 };

@@ -8,11 +8,8 @@ import { ROUTES } from '@/lib/routes';
 import {
   ANALYTICS_VIEWER_ROLES,
   canAccess,
-  INSTRUMENT_APPLICATION_PERIOD_LABELS,
-  INSTRUMENT_APPLICATION_PERIODS,
-  type ComparableTrajectoryAxis,
+  type ComparableTrajectoryPoint,
   type ComparableTrajectoryResponse,
-  type InstrumentApplicationPeriod,
 } from '@soe/types';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import {
@@ -30,14 +27,11 @@ import { ExportViewButton } from '../components/charts/export-view-button';
 import { formatAchievement } from '../components/performance-level';
 import { getDashboardFilters } from '../data';
 import { getComparableTrajectory } from './data';
-import { AxisToggle } from './axis-toggle';
 import { TrajectoryScopeBar, type TrajectorySelection } from './trajectory-scope-bar';
 
 type SearchParams = Record<string, string | string[] | undefined>;
 
 const BASE_PATH = ROUTES.resultadosTrayectoria;
-
-const AXES: readonly ComparableTrajectoryAxis[] = ['years', 'moments'];
 
 function fmtPp(value: number): string {
   return `${Math.abs(value).toFixed(1)} pp`;
@@ -50,34 +44,19 @@ function pick(params: SearchParams, key: string): string | undefined {
 }
 
 function parseSelection(params: SearchParams): TrajectorySelection {
-  const rawAxis = pick(params, 'axis');
-  const axis: ComparableTrajectoryAxis = AXES.includes(rawAxis as ComparableTrajectoryAxis)
-    ? (rawAxis as ComparableTrajectoryAxis)
-    : 'moments';
-  const rawPeriod = pick(params, 'applicationPeriod');
-  const applicationPeriod = INSTRUMENT_APPLICATION_PERIODS.includes(
-    rawPeriod as InstrumentApplicationPeriod,
-  )
-    ? (rawPeriod as InstrumentApplicationPeriod)
-    : undefined;
   return {
-    axis,
     gradeId: pick(params, 'gradeId'),
     subjectId: pick(params, 'subjectId'),
     instrumentType: pick(params, 'instrumentType'),
-    applicationPeriod,
     classGroupId: pick(params, 'classGroupId'),
   };
 }
 
 function selectionParams(sel: TrajectorySelection): URLSearchParams {
-  const qs = new URLSearchParams({ axis: sel.axis });
+  const qs = new URLSearchParams();
   if (sel.gradeId) qs.set('gradeId', sel.gradeId);
   if (sel.subjectId) qs.set('subjectId', sel.subjectId);
   if (sel.instrumentType) qs.set('instrumentType', sel.instrumentType);
-  if (sel.axis === 'years' && sel.applicationPeriod) {
-    qs.set('applicationPeriod', sel.applicationPeriod);
-  }
   return qs;
 }
 
@@ -95,26 +74,34 @@ function courseHref(sel: TrajectorySelection, classGroupId: string | null): Rout
 }
 
 function summaryOf(data: ComparableTrajectoryResponse): string {
-  const period =
-    data.applicationPeriod != null
-      ? INSTRUMENT_APPLICATION_PERIOD_LABELS[data.applicationPeriod]
-      : null;
-  return [data.subjectName, data.gradeName, data.instrumentType.toUpperCase(), period]
+  return [data.subjectName, data.gradeName, data.instrumentType.toUpperCase()]
     .filter(Boolean)
     .join(' · ');
 }
 
+/** El momento del punto actual lleva su año: en el eje sólo se lee "Monitoreo". */
+function pointLabel(point: ComparableTrajectoryPoint): string {
+  return point.year == null ? point.label : `${point.label} ${point.year}`;
+}
+
 function exportTablesOf(data: ComparableTrajectoryResponse) {
+  const chronological = [...data.series].reverse();
   return [
     {
       name: 'Trayectoria',
       table: {
-        columns: ['Punto', 'Instrumento', 'Alumnos', '% logro'],
-        rows: data.series.map((p) => [
-          p.label,
-          p.instrumentName,
-          p.studentsAssessed,
-          p.averageAchievement == null ? '—' : `${p.averageAchievement.toFixed(1)}%`,
+        columns: [
+          'Momento',
+          ...chronological.map((s) => (s.year == null ? 'Sin año' : String(s.year))),
+        ],
+        rows: data.periods.map((period) => [
+          period.label,
+          ...chronological.map((s) => {
+            const point = s.points.find((p) => p.key === period.key);
+            return point?.averageAchievement == null
+              ? '—'
+              : `${point.averageAchievement.toFixed(1)}%`;
+          }),
         ]),
       },
     },
@@ -202,20 +189,22 @@ async function TrajectorySection({
   }
 
   const data = await getComparableTrajectory(query);
-  const { series, current } = data;
+  const { series, periods, current } = data;
   const summary = summaryOf(data);
 
   if (series.length === 0 || !current) {
     return (
-      <TrajectoryCard axis={selection.axis} summary={summary}>
+      <TrajectoryCard summary={summary}>
         <EmptyState
           icon={TrendingUp}
           title="Sin datos para esta medición"
-          description="No hay evaluaciones con resultados para la familia seleccionada. Prueba con otro eje, o con otra asignatura, medición o nivel."
+          description="No hay evaluaciones con resultados para la familia seleccionada. Prueba con otra asignatura, medición o nivel."
         />
       </TrajectoryCard>
     );
   }
+
+  const currentLabel = pointLabel(current);
 
   const comparisons: MetricDelta[] = [];
   if (data.baselines.previousPeriod) {
@@ -233,23 +222,20 @@ async function TrajectorySection({
     });
   }
 
-  const refBaseline =
-    data.axis === 'years' ? data.baselines.previousYear : data.baselines.previousPeriod;
-
   return (
     <div className="space-y-6">
       <ComparabilityNotice comparability={data.comparability} />
 
       <section className="grid grid-cols-1 gap-4 sm:grid-cols-3">
         <MetricComparison
-          label={`% Logro · ${current.label}`}
+          label={`% Logro · ${currentLabel}`}
           value={formatAchievement(current.averageAchievement)}
           icon={Target}
           comparisons={comparisons}
           hint={data.classGroupName ? `Curso ${data.classGroupName}` : 'Todo el nivel'}
         />
         <MetricComparison
-          label={`Alumnos evaluados · ${current.label}`}
+          label={`Alumnos evaluados · ${currentLabel}`}
           value={String(current.studentsAssessed)}
           icon={Users}
         />
@@ -265,13 +251,8 @@ async function TrajectorySection({
         />
       </section>
 
-      <TrajectoryCard axis={data.axis} summary={summary}>
-        <TrajectoryChart
-          series={series}
-          axis={data.axis}
-          baselineAchievement={refBaseline?.achievement ?? null}
-          baselineLabel={data.axis === 'years' ? 'Año anterior' : 'Aplicación anterior'}
-        />
+      <TrajectoryCard summary={summary}>
+        <TrajectoryChart series={series} periods={periods} />
       </TrajectoryCard>
 
       {current.bandDistribution && data.bands ? (
@@ -279,13 +260,13 @@ async function TrajectorySection({
           distribution={[]}
           bands={data.bands}
           bandDistribution={current.bandDistribution}
-          title={`Distribución por nivel · ${current.label}`}
+          title={`Distribución por nivel · ${currentLabel}`}
         />
       ) : null}
 
       <Card>
         <CardHeader>
-          <CardTitle className="text-base">Desglose por curso · {current.label}</CardTitle>
+          <CardTitle className="text-base">Desglose por curso · {currentLabel}</CardTitle>
         </CardHeader>
         <CardContent className="overflow-x-auto">
           {data.byClassGroup.length === 0 ? (
@@ -335,30 +316,16 @@ async function TrajectorySection({
   );
 }
 
-/**
- * El gráfico y su encabezado. El toggle del eje vive acá —en la misma fila del título—
- * porque es lo que cambia QUÉ grafica esta tarjeta, no un filtro del alcance. Se renderiza
- * también cuando la serie viene vacía, para poder cambiar de eje sin volver atrás.
- */
-function TrajectoryCard({
-  axis,
-  summary,
-  children,
-}: {
-  axis: ComparableTrajectoryAxis;
-  summary: string;
-  children: ReactNode;
-}) {
+function TrajectoryCard({ summary, children }: { summary: string; children: ReactNode }) {
   return (
     <Card>
-      <CardHeader className="flex flex-col items-start gap-3 space-y-0 sm:flex-row sm:items-center sm:justify-between">
+      <CardHeader>
         <CardTitle className="text-base">
           Trayectoria del % de logro
           {summary ? (
             <span className="ml-2 text-sm font-normal text-muted-foreground">{summary}</span>
           ) : null}
         </CardTitle>
-        <AxisToggle axis={axis} basePath={BASE_PATH} />
       </CardHeader>
       <CardContent>{children}</CardContent>
     </Card>

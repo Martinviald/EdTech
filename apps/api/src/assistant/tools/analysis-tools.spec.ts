@@ -48,26 +48,23 @@ describe('GetComparableTrajectoryTool', () => {
   }
 
   const VALID_INPUT = {
-    axis: 'years',
     gradeId: '44444444-4444-4444-4444-444444444444',
     subjectId: '55555555-5555-5555-5555-555555555555',
     instrumentType: 'dia',
-    applicationPeriod: 'intermedio',
   };
 
   it('llama al service con ctx.user y serializa la respuesta agregada', async () => {
     const response: ComparableTrajectoryResponse = {
       scope: 'org',
-      axis: 'years',
       gradeId: VALID_INPUT.gradeId,
       gradeName: '3° básico',
       subjectId: VALID_INPUT.subjectId,
       subjectName: 'Lenguaje',
       instrumentType: 'dia',
-      applicationPeriod: 'intermedio',
       classGroupId: null,
       classGroupName: null,
       bands: null,
+      periods: [],
       series: [],
       current: null,
       byClassGroup: [],
@@ -89,7 +86,7 @@ describe('GetComparableTrajectoryTool', () => {
     const { service, trajectory } = makeService({} as ComparableTrajectoryResponse);
     const tool = new GetComparableTrajectoryTool(service);
 
-    const result = await tool.execute({ axis: 'years', gradeId: 'not-a-uuid' }, CTX);
+    const result = await tool.execute({ gradeId: 'not-a-uuid' }, CTX);
 
     expect(trajectory).not.toHaveBeenCalled();
     expect(result.isError).toBe(true);

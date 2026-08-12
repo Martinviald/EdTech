@@ -154,31 +154,46 @@ maquinaria de `comparable-overview`.
 
 ### 6.1 Concepto: "Trayectoria comparable"
 
-Una sola vista, centrada en **una unidad comparable** (una familia N2 o una serie de momentos N3),
-que se mueve a lo largo de **un eje** elegible:
+Una sola vista y **un solo gráfico**, centrado en **una unidad comparable** (una familia
+`(type, subject, grade)`) desplegada como **matriz momento × año**:
 
-| Eje          | Qué fija / qué varía                                                                              | Nivel                      | Reemplaza a                 |
-| ------------ | ------------------------------------------------------------------------------------------------- | -------------------------- | --------------------------- |
-| **Generaciones** | Fija `(type, subject, grade, applicationPeriod)`; varía `year`                                | **N2 `instrument_family`**  | la comparación generacional |
-| **Trayectoria**  | Fija `(type, subject, grade)`; varía `year` **y** `applicationPeriod`, en orden cronológico    | **N4 `instrument_history`** | la progresión               |
+| Dimensión           | Qué contiene                                                                            | Rol en el gráfico       |
+| ------------------- | --------------------------------------------------------------------------------------- | ----------------------- |
+| **Momento (eje X)** | El ciclo de aplicación: Diagnóstico → Monitoreo → Cierre                                 | El eje, común a todos   |
+| **Año (una línea)** | Cada año en que se aplicó la familia; el más reciente arriba de la leyenda y más saturado | Una serie por año       |
 
-> **Actualización (2026-08-12).** El eje "Momentos" original fijaba también el año, así que la
-> trayectoria sólo mostraba el ciclo del año en curso. Hoy recorre **todas** las aplicaciones de la
-> familia —los momentos de los años anteriores y los de este año— en orden cronológico (año, y dentro
-> del año diagnóstico → monitoreo → cierre). Acotado a un `year` degenera en la serie N3 de ese ciclo,
-> que es lo que hacía antes. Eso obligó a nombrar el nivel N4 `instrument_history` en
-> `comparability.ts`: varía año Y momento, pero **no** mezcla asignaturas ni tipos de instrumento, así
-> que no es `mixed` — se compara punto a punto y sigue sin ser agregable.
->
-> El drill a curso (decisión C) tuvo que seguir el mismo camino: `class_groups` es POR año
-> académico, así que filtrar por el id elegido a secas volvía a colapsar la trayectoria al año de
-> esa fila. El curso elegido se resuelve a su **mismo curso (nivel + letra) en todos los años** de
-> la org; para un profesor la expansión se intersecta con su alcance (`teacher_assignments`), no lo
-> amplía (CLAUDE.md §6.3).
+La lectura que resuelve: **evaluación a evaluación, el año en curso contra los años anteriores del
+mismo nivel**. No hay que elegir entre "comparar generaciones" y "ver la progresión del ciclo": el
+mismo gráfico responde a las dos preguntas, porque el ciclo es el eje y los años son las líneas. Es
+N4 `instrument_history` (varían año Y momento, pero **no** la asignatura ni el tipo de instrumento,
+así que no es `mixed` — se compara punto a punto y sigue sin ser agregable). Acotada a un `year`, la
+matriz queda en una sola línea: la serie N3 (`period_series`) de ese ciclo.
 
-Cada punto del eje es una **aplicación comparable** (misma familia), con su `% de logro` y su banda —
-nunca una línea `connectNulls` que salta entre instrumentos incomparables. El corte de niveles siempre
-es el del instrumento (`classifyByBands` + `loadInstrumentBands`), nunca el legacy 40/70/85 (mata P3).
+> **El concepto `axis` murió (2026-08-12).** El diseño original ofrecía dos ejes alternativos
+> —"Generaciones" (fija el momento, varía el año) y "Trayectoria" (recorre año × momento en orden
+> cronológico)— con un toggle y un filtro de "Momento". Eran dos vistas parciales del mismo cubo:
+> una línea cronológica única mezclaba en el eje dos dimensiones distintas (¿la caída de Cierre 2025
+> a Diagnóstico 2026 es una caída real o el salto normal entre el fin de un ciclo y el inicio del
+> siguiente?), y el eje de generaciones sólo mostraba una columna de esa matriz. Poner el ciclo en
+> el eje X y un año por línea muestra el cubo entero y hace la pregunta comparable por construcción.
+> Con eso desaparecen el toggle `AxisToggle`, el filtro "Momento" del selector, y los parámetros
+> `axis` y `applicationPeriod` del querystring, del DTO y de la respuesta.
+
+Las líneas de años anteriores son el **mismo nivel** en años anteriores (5º 2026 vs 5º 2025 vs 5º
+2024): mismo instrumento, mismo corte de niveles, eje Y comparable. Que los alumnos de la línea 2025
+sean otra generación —hoy están en 6º— se dice **sólo en la etiqueta de la serie** ("2025 · hoy 6º
+básico", proyectada con `grades.order`), nunca cambiando el instrumento ni la escala.
+
+El drill a curso (decisión C) tuvo que seguir el mismo camino: `class_groups` es POR año académico,
+así que filtrar por el id elegido a secas colapsaba la trayectoria al año de esa fila. El curso
+elegido se resuelve a su **mismo curso (nivel + letra) en todos los años** de la org; para un
+profesor la expansión se intersecta con su alcance (`teacher_assignments`), no lo amplía
+(CLAUDE.md §6.3).
+
+Cada punto es una **aplicación comparable** (misma familia), con su `% de logro` y su banda — nunca
+una línea `connectNulls` que salta entre instrumentos incomparables: un año al que le falta el Cierre
+deja el hueco visible en vez de inventar el tramo. El corte de niveles siempre es el del instrumento
+(`classifyByBands` + `loadInstrumentBands`), nunca el legacy 40/70/85 (mata P3).
 
 ### 6.2 Los dos baselines, en un mismo lugar
 
@@ -239,23 +254,23 @@ peores de lo mismo (avg crudo, nivel legacy).
    "una query por preocupación" sin empeorar overview. **No** introducir trabajo por-unidad nuevo sin
    saldar eso (regla del propio archivo + `04-collection-complexity.md`).
 
-### 6.4 Frontend: una vista, un selector guiado, dos ejes
+### 6.4 Frontend: una vista, un selector guiado, un gráfico
 
 - **Una tab** ("Comparación" o "Trayectoria") reemplaza las dos actuales en `RESULTADOS_TABS`
   (`view-tabs.tsx`). Se retira la tab "Progresión".
 - **Selector guiado** (reemplaza el multi-select en esta vista): `Nivel → Asignatura → Medición
-(tipo + momento) → Curso (opcional)`, con `useTransition` + `TopProgressBar` (contrato de
-  `07-navigation-reactivity.md`). Por defecto: nivel elegido, eje = años, sin curso.
-- **Toggle de eje** años ↔ momentos (o mostrar ambos si hay datos): la misma unidad, distinto eje.
-- **Panel**: (a) `MetricComparison` del resultado actual con **dos chips de delta** (vs período
-  anterior, vs año anterior); (b) **gráfico de trayectoria** punto-a-punto comparable (reemplaza
-  `generational-chart` + `progression-chart` por un único chart parametrizado por eje); (c)
-  distribución por **bandas del instrumento** (reemplaza `generational-distribution-chart`, sin enum
-  legacy); (d) **tabla `byClassGroup`** con drill a curso.
+(tipo) → Curso (opcional)`, con `useTransition` + `TopProgressBar` (contrato de
+  `07-navigation-reactivity.md`). No hay filtro de "Momento": los momentos son el eje del gráfico.
+- **Panel**: (a) `MetricComparison` del punto actual —el último momento con datos del año más
+  reciente— con **dos chips de delta** (vs momento anterior, vs año anterior); (b) el **gráfico de
+  trayectoria**: momentos en X, una línea por año, leyenda clickeable para apagar años y tooltip
+  compartido por momento (reemplaza `generational-chart` + `progression-chart`); (c) distribución por
+  **bandas del instrumento** (reemplaza `generational-distribution-chart`, sin enum legacy); (d)
+  **tabla `byClassGroup`** con drill a curso.
 - **Guardas de comparabilidad**: si el alcance resolviera a `mixed` (no debería, dada la entrada
   guiada), se reutiliza `ComparabilityNotice` + supresión del número (mata C1).
-- **`GenerationalBanner`** del Resumen re-apunta a la vista unificada con el eje = años pre-seleccionado
-  (hoy enlaza a `/resultados/comparacion`).
+- **`GenerationalBanner`** del Resumen re-apunta a la vista unificada con el nivel y la asignatura
+  pre-seleccionados (hoy enlaza a `/resultados/comparacion`).
 
 ### 6.5 Migración (radio acotado, verificado)
 
@@ -316,7 +331,7 @@ prettier (types/api/web) y los specs afectados (`analysis-tools.spec.ts`, `compa
 | #   | Qué                                                                                                                             | Por qué se acepta                                                                                                           |
 | --- | ------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------- |
 | 1   | **Lente por habilidad (`nodeId`) no implementada.** El eje recorre la familia a grano assessment, no por nodo de taxonomía.     | El core (comparación+progresión a grano nivel/curso) es el entregable; la lente de habilidad es follow-up (P6, decisión D). |
-| 2   | **Eje "momentos" usa el año más reciente** (no hay selector de año en la UI). El backend acepta `year`; falta exponerlo.        | Cubre el caso normal; agregar el picker de año es incremental.                                                              |
+| 2   | **No hay selector de año en la UI** (el gráfico muestra todos los años de la familia). El backend acepta `year`; falta exponerlo. | Con un año por línea el picker deja de ser necesario para leer la vista; sigue disponible para el asistente.               |
 | 3   | **Ensamblado no es de una sola pasada.** `ComparableTrajectoryService` corre queries por punto/baseline (acotado a una unidad). | Igual deuda documentada en `comparable-overview.service.ts`; volumen chico. No agregar trabajo por-unidad sin saldarla.     |
 | 4   | **`student` scope migró conceptualmente a #2B** pero #2B aún no consume `ComparableTrajectoryService`.                          | #2B no consumía `progression` hoy (usa `getStudentPanorama`): no hay regresión; el enganche queda para esa tanda.           |
 | 5   | **Sin verificación visual** (nadie abrió la página en el navegador).                                                            | Pendiente de una sesión con la app levantada / datos demo.                                                                  |
@@ -330,3 +345,4 @@ prettier (types/api/web) y los specs afectados (`analysis-tools.spec.ts`, `compa
 | 2026-08-06 | Documento creado. Diagnóstico de las dos vistas de comparación temporal (C1–C7 en comparación, P1–P7 en progresión), mapeo de los requerimientos del usuario a los niveles N0–N3 ya existentes, y direcciones de mejora. Decisiones A–E abiertas. Continúa `diseno-panorama-comparable.md` (Deuda #5) y engancha con roadmap #2B y #4.                                                                                                                                                                                                                                                                                                                                                                                          |
 | 2026-08-06 | **Decisiones A–E resueltas** (§5): fusión en una vista "Trayectoria comparable" (N2 años / N3 momentos como ejes), selector guiado que reemplaza el multi-select, grano nivel por defecto con drill a curso, `student`→#2B y `skill`→lente por nodeId, endpoint unificado nuevo reutilizando los resolvers de `comparable-overview`. Diseño de la solución escrito (§6): concepto, dos baselines (`previous_period` + `previous_year`) en un lugar, extracción DRY/SOLID de `ComparableUnitAssembler`, frontend de una vista, migración acotada. Interpretación de "el nivel de arriba" = `previous_year` anotada para confirmar. Falta: cerrar el nombre del endpoint y la calibración fina; luego plan de ejecución por olas. |
 | 2026-08-06 | **Implementado** (§8). Endpoint `GET /api/analytics/comparable-trajectory`, `ComparableTrajectoryService` + `ComparableUnitAssembler` (extraído del overview sin cambiar su comportamiento), tool `get_comparable_trajectory`, y la vista única `resultados/trayectoria/`. Retirados `generational`/`progression` (endpoints, DTOs, tools, charts, páginas, `analytics.schema.ts`). typecheck + lint + prettier verdes; specs afectados pasan. Deuda registrada en §8.1 (lente por habilidad, picker de año, ensamblado 1-pasada, enganche #2B, verificación visual).                                                                                                                                                           |
+| 2026-08-12 | **Muere el concepto `axis`** (§6.1 reescrito). El gráfico único pasa a ser matriz **momento × año**: eje X = el ciclo (Diagnóstico → Monitoreo → Cierre), una línea por año, la más reciente primero y más saturada. Se retiran `AxisToggle`, el filtro "Momento" del selector, y `axis`/`applicationPeriod` del querystring, del DTO, de la respuesta y del tool del asistente (`COMPARABLE_TRAJECTORY_AXES`/`ComparableTrajectoryAxis` borrados). La respuesta agrega `periods` (el eje) y `series: ComparableTrajectoryYearSeries[]`; `ComparableTrajectoryPoint` vuelve a ser el momento y `current` es el último momento con datos del año más reciente. Cada serie trae su etiqueta generacional ("2025 · hoy 6º básico", proyectada con `grades.order` en UNA query). Se retira la línea de referencia del gráfico: con los años dibujados explícitamente era una duplicación de un punto ya visible. |
