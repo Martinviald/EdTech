@@ -26,13 +26,29 @@
  * instrumento: una planilla con columnas sub-numeradas (`P19.1`) desplaza todo
  * lo que viene después y corrige contra el ítem equivocado sin fallar nunca.
  *
- * Idempotente: borra y reinserta los assessments con el mismo `config.loadKey`.
+ * Idempotente por CELDA: antes de insertar borra los assessments que compartan
+ * `config.loadKey` **y** además sean del mismo (instrumento × curso) que esta
+ * corrida va a escribir. Acotarlo a la celda es lo que hace seguro a `--only`:
+ * borrar todo el `loadKey` se llevaba puesta la carga completa cuando alguien
+ * re-corría un subconjunto, y convertía cualquier colisión de clave en pérdida
+ * de datos. `--prune` recupera el borrado amplio cuando de verdad se quiere
+ * vaciar el lote entero.
  *
- *   Dry-run:  DATABASE_ADMIN_URL=... pnpm --filter @soe/db exec tsx "src/seed/import-dia-2026-responses.ts"
+ * `--loadKey` es OBLIGATORIO y no tiene default: el default anterior apuntaba a
+ * la clave del lote más grande ya cargado, así que olvidar el flag lo borraba.
+ *
+ *   Dry-run:  DATABASE_ADMIN_URL=... pnpm --filter @soe/db exec tsx "src/seed/import-dia-2026-responses.ts" --loadKey=...
  *   Commit:   ... --commit
  *
- * Args: --org=<uuid> --year=<año> --loadKey=<clave> --input=<ruta.json>
+ * Args: --loadKey=<clave>  (OBLIGATORIO)  --org=<uuid> --year=<año> --input=<ruta.json>
  *       --only=<GRADE_CODE:SECCION:Asignatura,...>  (subconjunto, para pruebas)
+ *       --prune  (borra TODO el loadKey, no sólo las celdas de esta corrida)
+ *       --administeredAt=<YYYY-MM-DD>  (fecha de aplicación; por defecto, hoy)
+ *
+ * `--administeredAt` importa en las cargas históricas: `resolveAssessmentYear`
+ * deriva el año lectivo de esa fecha para bucketizar el read-model cuando el
+ * alumno no está matriculado en el curso asignado. Fechar una evaluación de 2025
+ * con la fecha de hoy la ancla al año equivocado.
  */
 import postgres from 'postgres';
 import { drizzle } from 'drizzle-orm/postgres-js';
@@ -92,7 +108,14 @@ const opt = (name: string, def: string): string => {
 };
 const ORG_ID = opt('org', 'c5c10000-0000-0000-0000-000000000001');
 const YEAR = parseInt(opt('year', '2026'), 10);
-const LOAD_KEY = opt('loadKey', 'dia-2026-monitoreo-intermedio');
+const LOAD_KEY = opt('loadKey', '');
+if (!LOAD_KEY) {
+  throw new Error(
+    'Falta --loadKey=<clave>. Usá una clave por lote (ej. dia-2026-intermedio-lenguaje-2A): ' +
+      'la idempotencia borra los assessments que la compartan.',
+  );
+}
+const PRUNE = argv.includes('--prune');
 const DEFAULT_INPUT = resolve(
   __dirname,
   '../../../../scripts/cscj/dia-2026/out/dia-2026-respuestas.json',
@@ -104,6 +127,10 @@ const ONLY = opt('only', '')
   .filter(Boolean);
 const IMPORT_FORMAT = 'generic_csv';
 const CHUNK = 3000;
+const ADMINISTERED_AT = opt('administeredAt', '');
+if (ADMINISTERED_AT && !/^\d{4}-\d{2}-\d{2}$/.test(ADMINISTERED_AT)) {
+  throw new Error(`--administeredAt debe ser YYYY-MM-DD, llegó "${ADMINISTERED_AT}"`);
+}
 
 const url = process.env.DATABASE_ADMIN_URL ?? process.env.DATABASE_URL;
 if (!url) throw new Error('Falta DATABASE_ADMIN_URL');
@@ -203,6 +230,7 @@ async function main() {
     : artifact.courses;
   if (!courses.length) throw new Error('El artefacto no tiene cursos que procesar');
   const now = new Date();
+  const administeredAt = ADMINISTERED_AT ? new Date(`${ADMINISTERED_AT}T12:00:00Z`) : now;
 
   await withOrgContext(db, ORG_ID, async (tx) => {
     const [year] = await tx
@@ -243,9 +271,43 @@ async function main() {
           dsql`${instruments.deletedAt} is null`,
         ),
       );
-    const instrumentByKey = new Map(
-      instrumentRows.map((i) => [`${i.gradeId}|${i.subjectId}|${i.applicationPeriod}`, i]),
+    /**
+     * Varios instrumentos pueden compartir (grado, asignatura, momento, año): en
+     * 2026 el catálogo tiene el instrumento real de 2° Básico y además fixtures
+     * `[DEMO]` sin ítems que sostienen el benchmarking. Quedarse con el último
+     * del Map elegía uno en silencio y podía tocar el equivocado, así que se
+     * resuelve por el que TIENE ítems y se falla si hay más de uno.
+     */
+    const itemCountRows = await tx
+      .select({ instrumentId: items.instrumentId, n: dsql<number>`count(*)::int` })
+      .from(items)
+      .groupBy(items.instrumentId);
+    const itemCountByInstrument = new Map(
+      itemCountRows.flatMap((r) => (r.instrumentId ? [[r.instrumentId, Number(r.n)]] : [])),
     );
+    const instrumentsByKey = new Map<string, typeof instrumentRows>();
+    for (const i of instrumentRows) {
+      const key = `${i.gradeId}|${i.subjectId}|${i.applicationPeriod}`;
+      const list = instrumentsByKey.get(key) ?? [];
+      list.push(i);
+      instrumentsByKey.set(key, list);
+    }
+    const itemCountOf = (id: string): number => itemCountByInstrument.get(id) ?? 0;
+    const resolveInstrument = (key: string, etiqueta: string) => {
+      const candidatos = instrumentsByKey.get(key) ?? [];
+      const conItems = candidatos.filter((c) => itemCountOf(c.id) > 0);
+      if (conItems.length === 1) return conItems[0];
+      if (conItems.length === 0) {
+        const vacios = candidatos.map((c) => `"${c.name}"`).join(', ');
+        throw new Error(
+          `Instrumento no encontrado para ${etiqueta}` +
+            (vacios ? ` — hay ${candidatos.length} sin ítems: ${vacios}` : ''),
+        );
+      }
+      throw new Error(
+        `Instrumento ambiguo para ${etiqueta}: ${conItems.map((c) => `"${c.name}" (${itemCountOf(c.id)} ítems)`).join(' · ')}`,
+      );
+    };
 
     const roster = await tx
       .select({
@@ -283,13 +345,11 @@ async function main() {
       const subject = subjectByName.get(course.subjectName);
       if (!subject)
         throw new Error(`Subject no encontrado: "${course.subjectName}" (${course.sourceFile})`);
-      const instrument = instrumentByKey.get(
+      const instrument = resolveInstrument(
         `${grade.id}|${subject.id}|${course.applicationPeriod}`,
+        `${grade.name} · ${subject.name} · ${course.applicationPeriod} ${YEAR}`,
       );
-      if (!instrument)
-        throw new Error(
-          `Instrumento no encontrado para ${grade.name} · ${subject.name} · ${course.applicationPeriod} ${YEAR}`,
-        );
+      if (!instrument) throw new Error(`Instrumento no resuelto para ${course.sourceFile}`);
       const classGroupId = groupByKey.get(`${grade.id}|${course.section.toUpperCase()}`);
       if (!classGroupId)
         throw new Error(
@@ -418,13 +478,44 @@ async function main() {
       return candidates.length === 1 ? (candidates[0] as string) : null;
     };
 
+    const cellKey = (instrumentId: string, classGroupId: string | null): string =>
+      `${instrumentId}|${classGroupId ?? ''}`;
+    const targetCells = new Set(resolved.map((r) => cellKey(r.instrumentId, r.classGroupId)));
+
     const prior = await tx
-      .select({ id: assessments.id })
+      .select({
+        id: assessments.id,
+        instrumentId: assessments.instrumentId,
+        classGroupId: assessmentCourseAssignments.classGroupId,
+      })
       .from(assessments)
+      .leftJoin(
+        assessmentCourseAssignments,
+        eq(assessmentCourseAssignments.assessmentId, assessments.id),
+      )
       .where(
         and(eq(assessments.orgId, ORG_ID), dsql`${assessments.config}->>'loadKey' = ${LOAD_KEY}`),
       );
-    const priorIds = prior.map((p) => p.id);
+    const priorIdSet = new Set<string>();
+    const keptIdSet = new Set<string>();
+    for (const p of prior) {
+      const target = PRUNE || targetCells.has(cellKey(p.instrumentId, p.classGroupId));
+      (target ? priorIdSet : keptIdSet).add(p.id);
+    }
+    for (const id of priorIdSet) keptIdSet.delete(id);
+    const priorIds = [...priorIdSet];
+    if (keptIdSet.size) {
+      console.log(
+        `  idempotencia: ${keptIdSet.size} assessment(s) con loadKey=${LOAD_KEY} quedan intactos ` +
+          `(otras celdas; usá --prune para borrarlos)`,
+      );
+    }
+    if (priorIds.length && !COMMIT) {
+      console.log(
+        `  idempotencia: se borrarían ${priorIds.length} assessment(s) previos ` +
+          `${PRUNE ? 'de todo el lote' : 'de estas celdas'} (loadKey=${LOAD_KEY})`,
+      );
+    }
     if (COMMIT && priorIds.length) {
       await tx.delete(responses).where(inArray(responses.assessmentId, priorIds));
       await tx.delete(assessmentResults).where(inArray(assessmentResults.assessmentId, priorIds));
@@ -435,7 +526,8 @@ async function main() {
         .where(inArray(assessmentCourseAssignments.assessmentId, priorIds));
       await tx.delete(assessments).where(inArray(assessments.id, priorIds));
       console.log(
-        `  idempotencia: borrados ${priorIds.length} assessments previos (loadKey=${LOAD_KEY})`,
+        `  idempotencia: borrados ${priorIds.length} assessments previos ` +
+          `${PRUNE ? 'de todo el lote' : 'de estas celdas'} (loadKey=${LOAD_KEY})`,
       );
     }
 
@@ -597,7 +689,7 @@ async function main() {
           name: `${p.instrumentName} · ${p.course.section}`,
           mode: 'paper' as const,
           status: 'completed' as const,
-          administeredAt: now,
+          administeredAt,
           administeredById: null,
           config: {
             source: IMPORT_FORMAT,
@@ -658,7 +750,7 @@ async function main() {
           grade: a.grade.toFixed(2),
           performanceLevel: a.performanceLevel,
           isComplete: a.isComplete && !withPending.has(a.studentId),
-          completedAt: now,
+          completedAt: administeredAt,
         });
       }
       for (const a of skillAgg) {
