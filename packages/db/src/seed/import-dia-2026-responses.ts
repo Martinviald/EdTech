@@ -26,13 +26,23 @@
  * instrumento: una planilla con columnas sub-numeradas (`P19.1`) desplaza todo
  * lo que viene después y corrige contra el ítem equivocado sin fallar nunca.
  *
- * Idempotente: borra y reinserta los assessments con el mismo `config.loadKey`.
+ * Idempotente por CELDA: antes de insertar borra los assessments que compartan
+ * `config.loadKey` **y** además sean del mismo (instrumento × curso) que esta
+ * corrida va a escribir. Acotarlo a la celda es lo que hace seguro a `--only`:
+ * borrar todo el `loadKey` se llevaba puesta la carga completa cuando alguien
+ * re-corría un subconjunto, y convertía cualquier colisión de clave en pérdida
+ * de datos. `--prune` recupera el borrado amplio cuando de verdad se quiere
+ * vaciar el lote entero.
  *
- *   Dry-run:  DATABASE_ADMIN_URL=... pnpm --filter @soe/db exec tsx "src/seed/import-dia-2026-responses.ts"
+ * `--loadKey` es OBLIGATORIO y no tiene default: el default anterior apuntaba a
+ * la clave del lote más grande ya cargado, así que olvidar el flag lo borraba.
+ *
+ *   Dry-run:  DATABASE_ADMIN_URL=... pnpm --filter @soe/db exec tsx "src/seed/import-dia-2026-responses.ts" --loadKey=...
  *   Commit:   ... --commit
  *
- * Args: --org=<uuid> --year=<año> --loadKey=<clave> --input=<ruta.json>
+ * Args: --loadKey=<clave>  (OBLIGATORIO)  --org=<uuid> --year=<año> --input=<ruta.json>
  *       --only=<GRADE_CODE:SECCION:Asignatura,...>  (subconjunto, para pruebas)
+ *       --prune  (borra TODO el loadKey, no sólo las celdas de esta corrida)
  *       --administeredAt=<YYYY-MM-DD>  (fecha de aplicación; por defecto, hoy)
  *
  * `--administeredAt` importa en las cargas históricas: `resolveAssessmentYear`
@@ -98,7 +108,14 @@ const opt = (name: string, def: string): string => {
 };
 const ORG_ID = opt('org', 'c5c10000-0000-0000-0000-000000000001');
 const YEAR = parseInt(opt('year', '2026'), 10);
-const LOAD_KEY = opt('loadKey', 'dia-2026-monitoreo-intermedio');
+const LOAD_KEY = opt('loadKey', '');
+if (!LOAD_KEY) {
+  throw new Error(
+    'Falta --loadKey=<clave>. Usá una clave por lote (ej. dia-2026-intermedio-lenguaje-2A): ' +
+      'la idempotencia borra los assessments que la compartan.',
+  );
+}
+const PRUNE = argv.includes('--prune');
 const DEFAULT_INPUT = resolve(
   __dirname,
   '../../../../scripts/cscj/dia-2026/out/dia-2026-respuestas.json',
@@ -461,13 +478,44 @@ async function main() {
       return candidates.length === 1 ? (candidates[0] as string) : null;
     };
 
+    const cellKey = (instrumentId: string, classGroupId: string | null): string =>
+      `${instrumentId}|${classGroupId ?? ''}`;
+    const targetCells = new Set(resolved.map((r) => cellKey(r.instrumentId, r.classGroupId)));
+
     const prior = await tx
-      .select({ id: assessments.id })
+      .select({
+        id: assessments.id,
+        instrumentId: assessments.instrumentId,
+        classGroupId: assessmentCourseAssignments.classGroupId,
+      })
       .from(assessments)
+      .leftJoin(
+        assessmentCourseAssignments,
+        eq(assessmentCourseAssignments.assessmentId, assessments.id),
+      )
       .where(
         and(eq(assessments.orgId, ORG_ID), dsql`${assessments.config}->>'loadKey' = ${LOAD_KEY}`),
       );
-    const priorIds = prior.map((p) => p.id);
+    const priorIdSet = new Set<string>();
+    const keptIdSet = new Set<string>();
+    for (const p of prior) {
+      const target = PRUNE || targetCells.has(cellKey(p.instrumentId, p.classGroupId));
+      (target ? priorIdSet : keptIdSet).add(p.id);
+    }
+    for (const id of priorIdSet) keptIdSet.delete(id);
+    const priorIds = [...priorIdSet];
+    if (keptIdSet.size) {
+      console.log(
+        `  idempotencia: ${keptIdSet.size} assessment(s) con loadKey=${LOAD_KEY} quedan intactos ` +
+          `(otras celdas; usá --prune para borrarlos)`,
+      );
+    }
+    if (priorIds.length && !COMMIT) {
+      console.log(
+        `  idempotencia: se borrarían ${priorIds.length} assessment(s) previos ` +
+          `${PRUNE ? 'de todo el lote' : 'de estas celdas'} (loadKey=${LOAD_KEY})`,
+      );
+    }
     if (COMMIT && priorIds.length) {
       await tx.delete(responses).where(inArray(responses.assessmentId, priorIds));
       await tx.delete(assessmentResults).where(inArray(assessmentResults.assessmentId, priorIds));
@@ -478,7 +526,8 @@ async function main() {
         .where(inArray(assessmentCourseAssignments.assessmentId, priorIds));
       await tx.delete(assessments).where(inArray(assessments.id, priorIds));
       console.log(
-        `  idempotencia: borrados ${priorIds.length} assessments previos (loadKey=${LOAD_KEY})`,
+        `  idempotencia: borrados ${priorIds.length} assessments previos ` +
+          `${PRUNE ? 'de todo el lote' : 'de estas celdas'} (loadKey=${LOAD_KEY})`,
       );
     }
 
