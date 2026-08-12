@@ -88,7 +88,7 @@ export class ComparableTrajectoryService {
       const meta = await this.resolveMeta(tx, query);
       const emptyScope = scope.scopeAll ? 'org' : 'teacher';
 
-      const classGroupIds = this.resolveClassGroupIds(scope, query.classGroupId);
+      const classGroupIds = await this.resolveClassGroupIds(tx, orgId, scope, query.classGroupId);
       if (classGroupIds !== null && classGroupIds.length === 0) {
         return this.emptyResponse(query, meta, emptyScope, []);
       }
@@ -392,14 +392,57 @@ export class ComparableTrajectoryService {
     };
   }
 
-  private resolveClassGroupIds(
+  /**
+   * Los ids de `class_groups` que acotan la trayectoria.
+   *
+   * `class_groups` es POR año académico: "3º A" de 2025 y "3º A" de 2026 son filas
+   * distintas. Filtrar por el id elegido a secas colapsaría la trayectoria al año de esa
+   * fila — justo lo contrario de lo que la vista promete. Así que el curso elegido se
+   * resuelve a su MISMO curso (mismo nivel + misma letra) en todos los años de la org.
+   *
+   * Un profesor sigue viendo sólo los cursos donde tiene asignación (CLAUDE.md §6.3): la
+   * expansión se intersecta con su alcance, no lo amplía.
+   */
+  private async resolveClassGroupIds(
+    tx: Database,
+    orgId: string,
     scope: { scopeAll: boolean; classGroupIds: string[] },
     classGroupId: string | undefined,
-  ): string[] | null {
-    if (scope.scopeAll) return classGroupId ? [classGroupId] : null;
-    if (scope.classGroupIds.length === 0) return [];
-    if (!classGroupId) return scope.classGroupIds;
-    return scope.classGroupIds.includes(classGroupId) ? [classGroupId] : [];
+  ): Promise<string[] | null> {
+    if (!classGroupId) {
+      if (scope.scopeAll) return null;
+      return scope.classGroupIds;
+    }
+
+    const acrossYears = await this.sameCourseAcrossYears(tx, orgId, classGroupId);
+    if (scope.scopeAll) return acrossYears;
+    const allowed = new Set(scope.classGroupIds);
+    return acrossYears.filter((id) => allowed.has(id));
+  }
+
+  private async sameCourseAcrossYears(
+    tx: Database,
+    orgId: string,
+    classGroupId: string,
+  ): Promise<string[]> {
+    const [selected] = await tx
+      .select({ gradeId: classGroups.gradeId, name: classGroups.name })
+      .from(classGroups)
+      .where(and(eq(classGroups.id, classGroupId), eq(classGroups.orgId, orgId)))
+      .limit(1);
+    if (!selected) return [];
+
+    const rows = await tx
+      .select({ id: classGroups.id })
+      .from(classGroups)
+      .where(
+        and(
+          eq(classGroups.orgId, orgId),
+          eq(classGroups.gradeId, selected.gradeId),
+          eq(classGroups.name, selected.name),
+        ),
+      );
+    return rows.map((r) => r.id);
   }
 
   private async resolveMeta(
