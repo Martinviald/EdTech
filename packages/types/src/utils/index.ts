@@ -16,3 +16,4 @@ export * from './item-stem';
 export * from './response-display';
 export * from './answer-key';
 export * from './raw-answer-distribution';
+export * from './trajectory-selection';

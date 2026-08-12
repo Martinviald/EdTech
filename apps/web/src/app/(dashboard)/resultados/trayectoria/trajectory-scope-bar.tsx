@@ -2,20 +2,25 @@
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Entrada por UNIDAD COMPARABLE de la vista de trayectoria. Reemplaza el
-// multi-select del panorama: un cascade guiado (nivel → asignatura → medición →
-// curso) que garantiza que el alcance sea siempre una familia comparable
-// (N1/N2/N3), nunca una mezcla. El EJE (años/momentos) no vive aquí: es un toggle
-// aparte (`AxisToggle`). Ver docs/diseno-comparacion-progresion.md.
+// multi-select del panorama: nivel → asignatura → medición → curso, de modo que
+// el alcance sea siempre una familia comparable (N1/N2/N3), nunca una mezcla.
+//
+// Cambiar un filtro NO borra los demás: se conserva todo lo que siga teniendo
+// respaldo en el catálogo (`pruneTrajectoryScope`) y sólo cae lo que se quedó sin
+// instrumentos. El curso es la excepción: pertenece a un nivel, así que cambiar
+// de nivel lo suelta siempre.
+//
+// El momento del ciclo tampoco se filtra aquí: es el eje X del gráfico, que
+// dibuja una línea por año sobre él. Ver docs/diseno-comparacion-progresion.md.
 // ─────────────────────────────────────────────────────────────────────────────
 
 import { useCallback, useTransition } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import type { Route } from 'next';
 import {
-  INSTRUMENT_APPLICATION_PERIOD_LABELS,
-  type ComparableTrajectoryAxis,
+  instrumentsInScope,
+  pruneTrajectoryScope,
   type DashboardFilterOptionsResponse,
-  type InstrumentApplicationPeriod,
 } from '@soe/types';
 import {
   Select,
@@ -30,38 +35,15 @@ import { classGroupSelectOptions } from '../components/dashboard-filters';
 const NONE = '__none__';
 
 export type TrajectorySelection = {
-  axis: ComparableTrajectoryAxis;
   gradeId?: string;
   subjectId?: string;
   instrumentType?: string;
-  applicationPeriod?: InstrumentApplicationPeriod;
   classGroupId?: string;
 };
 
-type Instruments = DashboardFilterOptionsResponse['instruments'];
-
-function instrumentsMatching(
-  instruments: Instruments,
-  sel: { gradeId?: string; subjectId?: string; type?: string },
-): Instruments {
-  return instruments.filter(
-    (i) =>
-      (!sel.gradeId || i.gradeId === sel.gradeId) &&
-      (!sel.subjectId || i.subjectId === sel.subjectId) &&
-      (!sel.type || i.type === sel.type),
-  );
-}
-
-function uniqueBy<T, K>(items: T[], keyOf: (t: T) => K): T[] {
-  const seen = new Set<K>();
-  const out: T[] = [];
-  for (const item of items) {
-    const key = keyOf(item);
-    if (seen.has(key)) continue;
-    seen.add(key);
-    out.push(item);
-  }
-  return out;
+function setOrDelete(sp: URLSearchParams, key: string, value: string | undefined): void {
+  if (value) sp.set(key, value);
+  else sp.delete(key);
 }
 
 export function TrajectoryScopeBar({
@@ -89,43 +71,44 @@ export function TrajectoryScopeBar({
     [router, searchParams, basePath],
   );
 
+  const instruments = options.instruments;
+
   const onGrade = useCallback(
-    (next: string) =>
+    (next: string) => {
+      const kept = pruneTrajectoryScope(instruments, {
+        gradeId: next,
+        subjectId: selection.subjectId,
+        instrumentType: selection.instrumentType,
+      });
       pushParams((sp) => {
         sp.set('gradeId', next);
-        // El nivel es la raíz del cascade: cambiarlo invalida todo lo de abajo.
-        sp.delete('subjectId');
-        sp.delete('instrumentType');
-        sp.delete('applicationPeriod');
+        setOrDelete(sp, 'subjectId', kept.subjectId);
+        setOrDelete(sp, 'instrumentType', kept.instrumentType);
         sp.delete('classGroupId');
-      }),
-    [pushParams],
+      });
+    },
+    [instruments, pushParams, selection.subjectId, selection.instrumentType],
   );
 
   const onSubject = useCallback(
-    (next: string) =>
+    (next: string) => {
+      const kept = pruneTrajectoryScope(instruments, {
+        gradeId: selection.gradeId,
+        subjectId: next,
+        instrumentType: selection.instrumentType,
+      });
       pushParams((sp) => {
         sp.set('subjectId', next);
-        sp.delete('instrumentType');
-        sp.delete('applicationPeriod');
-      }),
-    [pushParams],
+        setOrDelete(sp, 'instrumentType', kept.instrumentType);
+      });
+    },
+    [instruments, pushParams, selection.gradeId, selection.instrumentType],
   );
 
   const onType = useCallback(
     (next: string) =>
       pushParams((sp) => {
         sp.set('instrumentType', next);
-        sp.delete('applicationPeriod');
-      }),
-    [pushParams],
-  );
-
-  const onPeriod = useCallback(
-    (next: string) =>
-      pushParams((sp) => {
-        if (next === NONE) sp.delete('applicationPeriod');
-        else sp.set('applicationPeriod', next);
       }),
     [pushParams],
   );
@@ -139,41 +122,24 @@ export function TrajectoryScopeBar({
     [pushParams],
   );
 
-  const gradeIds = new Set(options.instruments.map((i) => i.gradeId).filter(Boolean));
+  const gradeIds = new Set(instruments.map((i) => i.gradeId).filter(Boolean));
   const gradeOptions = options.grades.filter((g) => gradeIds.size === 0 || gradeIds.has(g.id));
 
-  const subjectMatches = instrumentsMatching(options.instruments, { gradeId: selection.gradeId });
+  const subjectMatches = instrumentsInScope(instruments, { gradeId: selection.gradeId });
   const subjectIds = new Set(subjectMatches.map((i) => i.subjectId).filter(Boolean));
   const subjectOptions = options.subjects.filter((s) => subjectIds.has(s.id));
 
-  const typeMatches = instrumentsMatching(options.instruments, {
+  const typeMatches = instrumentsInScope(instruments, {
     gradeId: selection.gradeId,
     subjectId: selection.subjectId,
   });
-  const typeOptions = uniqueBy(
-    typeMatches.map((i) => i.type),
-    (t) => t,
-  );
-
-  const periodMatches = instrumentsMatching(options.instruments, {
-    gradeId: selection.gradeId,
-    subjectId: selection.subjectId,
-    type: selection.instrumentType,
-  });
-  const periodOptions = uniqueBy(
-    periodMatches
-      .map((i) => i.applicationPeriod)
-      .filter((p): p is InstrumentApplicationPeriod => !!p),
-    (p) => p,
-  );
+  const typeOptions = Array.from(new Set(typeMatches.map((i) => i.type)));
 
   const courseOptions = classGroupSelectOptions(
     options.classGroups,
     options.grades,
     selection.gradeId,
   );
-
-  const showPeriod = selection.axis === 'years' && periodOptions.length > 0;
 
   return (
     <div className="relative flex flex-col gap-3 overflow-hidden rounded-lg border bg-card p-4 sm:flex-row sm:flex-wrap sm:items-end">
@@ -231,24 +197,6 @@ export function TrajectoryScopeBar({
           </SelectContent>
         </Select>
       </Field>
-
-      {showPeriod ? (
-        <Field label="Momento">
-          <Select value={selection.applicationPeriod ?? NONE} onValueChange={onPeriod}>
-            <SelectTrigger>
-              <SelectValue placeholder="Todos los momentos" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value={NONE}>Sin momento</SelectItem>
-              {periodOptions.map((p) => (
-                <SelectItem key={p} value={p}>
-                  {INSTRUMENT_APPLICATION_PERIOD_LABELS[p]}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </Field>
-      ) : null}
 
       <Field label="Curso (opcional)">
         <Select
