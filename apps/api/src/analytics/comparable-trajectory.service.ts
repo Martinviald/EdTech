@@ -19,6 +19,7 @@ import {
   type ComparableTrajectoryPoint,
   type ComparableTrajectoryQueryDto,
   type ComparableTrajectoryResponse,
+  type ComparableTrajectoryYearSeries,
   type ComparableUnitClassGroup,
   type InstrumentApplicationPeriod,
   type PerformanceBandInput,
@@ -32,6 +33,9 @@ import {
 } from '../dashboards/comparable/comparable-unit.assembler';
 import { InjectDb, type Database } from '../database/database.types';
 import { loadInstrumentBands } from '../performance-bands/lib/load-instrument-bands';
+
+const NO_PERIOD_KEY = 'none';
+const NO_PERIOD_LABEL = 'Sin momento';
 
 type FamilyRow = {
   assessmentId: string;
@@ -53,17 +57,31 @@ type RawPoint = {
   administeredAt: Date | null;
 };
 
+type YearGroup = {
+  year: number | null;
+  points: RawPoint[];
+};
+
+type SeriesLabel = {
+  label: string;
+  currentGradeName: string | null;
+};
+
+type TrajectoryMeta = {
+  gradeName: string | null;
+  gradeOrder: number | null;
+  subjectName: string | null;
+  classGroupName: string | null;
+};
+
 /**
  * GET /api/analytics/comparable-trajectory — la vista unificada de "Trayectoria comparable".
  *
- * Una familia comparable (tipo + asignatura + nivel) a lo largo de UN eje:
- *
- *  - `years`   → fija el momento del ciclo y recorre los años (N2, la comparación
- *                generacional: la misma medición contra la generación anterior).
- *  - `moments` → recorre TODAS las aplicaciones de la familia en orden cronológico
- *                (año, luego momento del ciclo): los momentos de los años anteriores y
- *                los de este año hasta hoy (N4 `instrument_history`). Acotable a un año
- *                concreto con `year`, y ahí degenera en la serie N3 de ese ciclo.
+ * Una familia comparable (tipo + asignatura + nivel) desplegada como matriz año × momento
+ * del ciclo: el eje es el ciclo (diagnóstico → monitoreo → cierre) y hay una serie por
+ * año, de la más reciente a la más antigua. Así el año en curso se compara evaluación a
+ * evaluación contra los años anteriores del mismo nivel. Acotada a un `year`, la matriz
+ * queda en una sola serie: el ciclo de ese año.
  *
  * Cada punto es una aplicación comparable; su % de logro es legítimo porque sale del mismo
  * instrumento y del mismo corte — nunca se promedia entre puntos. Reutiliza
@@ -96,12 +114,20 @@ export class ComparableTrajectoryService {
       const rows = await this.loadFamilyRows(tx, orgId, query, classGroupIds);
       if (rows.length === 0) return this.emptyResponse(query, meta, emptyScope, []);
 
-      const rawPoints = this.buildPoints(rows, query);
-      if (rawPoints.length === 0) return this.emptyResponse(query, meta, emptyScope, []);
+      const groups = this.buildYearGroups(rows, query);
+      if (groups.length === 0) return this.emptyResponse(query, meta, emptyScope, []);
 
+      const rawPoints = groups.flatMap((g) => g.points);
       const refs = rawPoints.map((p) => this.refOf(query, p));
       const assessmentCount = rawPoints.reduce((acc, p) => acc + p.assessmentIds.length, 0);
       const comparability = buildComparabilityMeta(refs, assessmentCount);
+      const periods = this.buildPeriods(rawPoints);
+
+      const labels = await this.buildSeriesLabels(
+        tx,
+        meta.gradeOrder,
+        groups.map((g) => g.year),
+      );
 
       const allAssessmentIds = rawPoints.flatMap((p) => p.assessmentIds);
       const achievementByAssessment = await this.assembler.loadAchievementByAssessment(
@@ -111,39 +137,50 @@ export class ComparableTrajectoryService {
       );
 
       const bandsByInstrument = new Map<string, PerformanceBandInput[]>();
-      const series: ComparableTrajectoryPoint[] = [];
-      for (const raw of rawPoints) {
-        const bands = await this.bandsFor(tx, raw.instrumentId, bandsByInstrument);
-        const { achievement, students } = this.assembler.foldAchievement(
-          raw.assessmentIds,
-          achievementByAssessment,
-        );
-        const bandDistribution =
-          bands.length > 0
-            ? await this.assembler.resolveBandDistribution(
-                tx,
-                raw.assessmentIds,
-                classGroupIds,
-                bands,
-              )
-            : null;
+      const series: ComparableTrajectoryYearSeries[] = [];
+      for (const group of groups) {
+        const points: ComparableTrajectoryPoint[] = [];
+        for (const raw of group.points) {
+          const bands = await this.bandsFor(tx, raw.instrumentId, bandsByInstrument);
+          const { achievement, students } = this.assembler.foldAchievement(
+            raw.assessmentIds,
+            achievementByAssessment,
+          );
+          const bandDistribution =
+            bands.length > 0
+              ? await this.assembler.resolveBandDistribution(
+                  tx,
+                  raw.assessmentIds,
+                  classGroupIds,
+                  bands,
+                )
+              : null;
+          points.push({
+            key: raw.key,
+            label: raw.label,
+            year: raw.year,
+            applicationPeriod: raw.applicationPeriod,
+            instrumentId: raw.instrumentId,
+            instrumentName: raw.instrumentName,
+            assessmentIds: raw.assessmentIds,
+            administeredAt: raw.administeredAt,
+            studentsAssessed: students,
+            averageAchievement: achievement,
+            bandDistribution,
+          });
+        }
+        const label = labels.get(group.year);
         series.push({
-          key: raw.key,
-          label: raw.label,
-          year: raw.year,
-          applicationPeriod: raw.applicationPeriod,
-          instrumentId: raw.instrumentId,
-          instrumentName: raw.instrumentName,
-          assessmentIds: raw.assessmentIds,
-          administeredAt: raw.administeredAt,
-          studentsAssessed: students,
-          averageAchievement: achievement,
-          bandDistribution,
+          year: group.year,
+          label: label?.label ?? (group.year == null ? 'Sin año' : String(group.year)),
+          currentGradeName: label?.currentGradeName ?? null,
+          points,
         });
       }
 
-      const current = series[series.length - 1] ?? null;
-      const currentRaw = rawPoints[rawPoints.length - 1] ?? null;
+      const currentGroup = groups[0];
+      const currentRaw = currentGroup ? (currentGroup.points.at(-1) ?? null) : null;
+      const current = series[0]?.points.at(-1) ?? null;
       const currentBands = current ? (bandsByInstrument.get(current.instrumentId) ?? []) : [];
 
       const byClassGroup: ComparableUnitClassGroup[] = current
@@ -156,28 +193,28 @@ export class ComparableTrajectoryService {
           )
         : [];
 
-      const baselines = currentRaw
-        ? await this.resolveBaselines(
-            tx,
-            orgId,
-            this.refOf(query, currentRaw),
-            current,
-            classGroupIds,
-          )
-        : { previousPeriod: null, previousYear: null };
+      const baselines =
+        currentRaw && current
+          ? await this.resolveBaselines(
+              tx,
+              orgId,
+              this.refOf(query, currentRaw),
+              current,
+              classGroupIds,
+            )
+          : { previousPeriod: null, previousYear: null };
 
       return {
         scope: emptyScope,
-        axis: query.axis,
         gradeId: query.gradeId,
         gradeName: meta.gradeName,
         subjectId: query.subjectId,
         subjectName: meta.subjectName,
         instrumentType: query.instrumentType,
-        applicationPeriod: query.axis === 'years' ? (query.applicationPeriod ?? null) : null,
         classGroupId: query.classGroupId ?? null,
         classGroupName: meta.classGroupName,
         bands: currentBands.length > 0 ? currentBands.map(toBandView) : null,
+        periods,
         series,
         current,
         byClassGroup,
@@ -186,8 +223,6 @@ export class ComparableTrajectoryService {
       };
     });
   }
-
-  // ── Carga de la familia ──────────────────────────────────────────────────────
 
   private async loadFamilyRows(
     tx: Database,
@@ -230,41 +265,101 @@ export class ComparableTrajectoryService {
     return rows;
   }
 
-  // ── Agrupación por eje ───────────────────────────────────────────────────────
+  private buildYearGroups(rows: FamilyRow[], query: ComparableTrajectoryQueryDto): YearGroup[] {
+    const matching = query.year == null ? rows : rows.filter((r) => r.year === query.year);
+    const byApplication = this.groupRows(
+      matching,
+      (r) => `${r.year ?? NO_PERIOD_KEY}|${r.applicationPeriod ?? NO_PERIOD_KEY}`,
+    );
 
-  private buildPoints(rows: FamilyRow[], query: ComparableTrajectoryQueryDto): RawPoint[] {
-    if (query.axis === 'years') {
-      const fixedPeriod = query.applicationPeriod ?? null;
-      const matching = rows.filter((r) => r.applicationPeriod === fixedPeriod);
-      const byYear = this.groupPoints(matching, (r) => (r.year == null ? 'none' : String(r.year)));
-      return Array.from(byYear.values())
-        .map((rs) => this.toRawPoint(rs, 'year'))
-        .sort(
-          (a, b) => (a.year ?? Number.POSITIVE_INFINITY) - (b.year ?? Number.POSITIVE_INFINITY),
-        );
+    const byYear = new Map<number | null, RawPoint[]>();
+    for (const group of byApplication.values()) {
+      const point = this.toRawPoint(group);
+      const list = byYear.get(point.year);
+      if (list) list.push(point);
+      else byYear.set(point.year, [point]);
     }
 
-    const matching = query.year == null ? rows : rows.filter((r) => r.year === query.year);
-    const byApplication = this.groupPoints(
-      matching,
-      (r) => `${r.year ?? 'none'}|${r.applicationPeriod ?? 'none'}`,
+    const groups: YearGroup[] = [];
+    for (const [year, points] of byYear) {
+      points.sort(
+        (a, b) => this.periodRank(a.applicationPeriod) - this.periodRank(b.applicationPeriod),
+      );
+      groups.push({ year, points });
+    }
+    groups.sort((a, b) => this.compareYearsDesc(a.year, b.year));
+    return groups;
+  }
+
+  private compareYearsDesc(a: number | null, b: number | null): number {
+    if (a === b) return 0;
+    if (a == null) return 1;
+    if (b == null) return -1;
+    return b - a;
+  }
+
+  private buildPeriods(points: RawPoint[]): { key: string; label: string }[] {
+    const present = new Set(points.map((p) => this.periodKeyOf(p.applicationPeriod)));
+    const ordered: { key: string; label: string }[] = INSTRUMENT_APPLICATION_PERIODS.filter((p) =>
+      present.has(p),
+    ).map((p) => ({ key: p, label: INSTRUMENT_APPLICATION_PERIOD_LABELS[p] }));
+    if (present.has(NO_PERIOD_KEY)) ordered.push({ key: NO_PERIOD_KEY, label: NO_PERIOD_LABEL });
+    return ordered;
+  }
+
+  private async buildSeriesLabels(
+    tx: Database,
+    gradeOrder: number | null,
+    years: (number | null)[],
+  ): Promise<Map<number | null, SeriesLabel>> {
+    const refYear = years.reduce<number | null>(
+      (max, y) => (y != null && (max === null || y > max) ? y : max),
+      null,
     );
-    return Array.from(byApplication.values())
-      .map((rs) => this.toRawPoint(rs, 'period'))
-      .sort((a, b) => this.compareChronologically(a, b));
+
+    const projectedOrders = new Set<number>();
+    for (const year of years) {
+      const delta = this.deltaToRefYear(year, refYear);
+      if (delta !== null && delta > 0 && gradeOrder !== null) {
+        projectedOrders.add(gradeOrder + delta);
+      }
+    }
+    const gradeNameByOrder = await this.loadGradeNamesByOrder(tx, Array.from(projectedOrders));
+
+    const labels = new Map<number | null, SeriesLabel>();
+    for (const year of years) {
+      const base = year == null ? 'Sin año' : String(year);
+      const delta = this.deltaToRefYear(year, refYear);
+      const currentGradeName =
+        delta !== null && delta > 0 && gradeOrder !== null
+          ? (gradeNameByOrder.get(gradeOrder + delta) ?? null)
+          : null;
+      labels.set(year, {
+        label: currentGradeName ? `${base} · hoy ${currentGradeName}` : base,
+        currentGradeName,
+      });
+    }
+    return labels;
   }
 
-  private compareChronologically(a: RawPoint, b: RawPoint): number {
-    const yearA = a.year ?? Number.POSITIVE_INFINITY;
-    const yearB = b.year ?? Number.POSITIVE_INFINITY;
-    if (yearA !== yearB) return yearA - yearB;
-    return this.periodRank(a.applicationPeriod) - this.periodRank(b.applicationPeriod);
+  private deltaToRefYear(year: number | null, refYear: number | null): number | null {
+    if (year == null || refYear == null) return null;
+    return refYear - year;
   }
 
-  private groupPoints(
-    rows: FamilyRow[],
-    keyOf: (r: FamilyRow) => string,
-  ): Map<string, FamilyRow[]> {
+  private async loadGradeNamesByOrder(
+    tx: Database,
+    orders: number[],
+  ): Promise<Map<number, string>> {
+    if (orders.length === 0) return new Map();
+    const rows = await tx
+      .select({ order: grades.order, name: grades.name })
+      .from(grades)
+      .where(inArray(grades.order, orders));
+    return new Map(rows.map((r) => [r.order, r.name]));
+  }
+
+  private groupRows(rows: FamilyRow[], keyOf: (r: FamilyRow) => string): Map<string, FamilyRow[]> {
     const byKey = new Map<string, FamilyRow[]>();
     for (const row of rows) {
       const key = keyOf(row);
@@ -275,28 +370,16 @@ export class ComparableTrajectoryService {
     return byKey;
   }
 
-  private toRawPoint(rows: FamilyRow[], axis: 'year' | 'period'): RawPoint {
+  private toRawPoint(rows: FamilyRow[]): RawPoint {
     const first = rows[0]!;
     const assessmentIds = Array.from(new Set(rows.map((r) => r.assessmentId)));
     const administeredAt = rows.reduce<Date | null>((max, r) => {
       if (!r.administeredAt) return max;
       return max === null || r.administeredAt > max ? r.administeredAt : max;
     }, null);
-    const key =
-      axis === 'year'
-        ? first.year == null
-          ? 'none'
-          : String(first.year)
-        : `${first.year ?? 'none'}-${first.applicationPeriod ?? 'none'}`;
-    const label =
-      axis === 'year'
-        ? first.year == null
-          ? 'Sin año'
-          : String(first.year)
-        : this.applicationLabel(first);
     return {
-      key,
-      label,
+      key: this.periodKeyOf(first.applicationPeriod),
+      label: this.periodLabelOf(first.applicationPeriod),
       year: first.year,
       applicationPeriod: first.applicationPeriod,
       instrumentId: first.instrumentId,
@@ -306,11 +389,12 @@ export class ComparableTrajectoryService {
     };
   }
 
-  private applicationLabel(row: FamilyRow): string {
-    const period = row.applicationPeriod
-      ? INSTRUMENT_APPLICATION_PERIOD_LABELS[row.applicationPeriod]
-      : 'Sin momento';
-    return row.year == null ? period : `${period} ${row.year}`;
+  private periodKeyOf(period: InstrumentApplicationPeriod | null): string {
+    return period ?? NO_PERIOD_KEY;
+  }
+
+  private periodLabelOf(period: InstrumentApplicationPeriod | null): string {
+    return period ? INSTRUMENT_APPLICATION_PERIOD_LABELS[period] : NO_PERIOD_LABEL;
   }
 
   private periodRank(period: InstrumentApplicationPeriod | null): number {
@@ -448,13 +532,9 @@ export class ComparableTrajectoryService {
   private async resolveMeta(
     tx: Database,
     query: ComparableTrajectoryQueryDto,
-  ): Promise<{
-    gradeName: string | null;
-    subjectName: string | null;
-    classGroupName: string | null;
-  }> {
+  ): Promise<TrajectoryMeta> {
     const [grade] = await tx
-      .select({ name: grades.name })
+      .select({ name: grades.name, order: grades.order })
       .from(grades)
       .where(eq(grades.id, query.gradeId))
       .limit(1);
@@ -476,6 +556,7 @@ export class ComparableTrajectoryService {
 
     return {
       gradeName: grade?.name ?? null,
+      gradeOrder: grade?.order ?? null,
       subjectName: subject?.name ?? null,
       classGroupName,
     };
@@ -483,22 +564,21 @@ export class ComparableTrajectoryService {
 
   private emptyResponse(
     query: ComparableTrajectoryQueryDto,
-    meta: { gradeName: string | null; subjectName: string | null; classGroupName: string | null },
+    meta: TrajectoryMeta,
     scope: 'org' | 'teacher',
     refs: ComparabilityInstrumentRef[],
   ): ComparableTrajectoryResponse {
     return {
       scope,
-      axis: query.axis,
       gradeId: query.gradeId,
       gradeName: meta.gradeName,
       subjectId: query.subjectId,
       subjectName: meta.subjectName,
       instrumentType: query.instrumentType,
-      applicationPeriod: query.axis === 'years' ? (query.applicationPeriod ?? null) : null,
       classGroupId: query.classGroupId ?? null,
       classGroupName: meta.classGroupName,
       bands: null,
+      periods: [],
       series: [],
       current: null,
       byClassGroup: [],

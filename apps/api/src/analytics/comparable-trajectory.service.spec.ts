@@ -84,8 +84,13 @@ function makeAssembler(spy: AssemblerSpy = { scopedClassGroupIds: [] }): Compara
   } as unknown as ComparableUnitAssembler;
 }
 
-const GRADE = [{ name: '5º básico' }];
+const GRADE = [{ name: '5º básico', order: 5 }];
 const SUBJECT = [{ name: 'Lenguaje' }];
+
+const GRADE_CATALOG = [
+  { order: 6, name: '6º básico' },
+  { order: 7, name: '7º básico' },
+];
 
 function familyRow(
   assessmentId: string,
@@ -102,8 +107,11 @@ function familyRow(
   };
 }
 
-function makeService(rows: unknown[]): ComparableTrajectoryService {
-  return new ComparableTrajectoryService(makeDb([GRADE, SUBJECT, rows]), makeAssembler());
+function makeService(rows: unknown[], gradeCatalog: unknown[] = GRADE_CATALOG) {
+  return new ComparableTrajectoryService(
+    makeDb([GRADE, SUBJECT, rows, gradeCatalog]),
+    makeAssembler(),
+  );
 }
 
 const BASE_QUERY = {
@@ -112,8 +120,8 @@ const BASE_QUERY = {
   instrumentType: 'dia',
 } as const;
 
-describe('ComparableTrajectoryService — eje "trayectoria" (moments)', () => {
-  it('recorre TODAS las aplicaciones de la familia en orden cronológico: año, y dentro del año el ciclo', async () => {
+describe('ComparableTrajectoryService — matriz año × momento', () => {
+  it('devuelve una serie por año, de la más reciente a la más antigua, con el ciclo en orden', async () => {
     const service = makeService([
       familyRow('a-4', 2026, 'intermedio'),
       familyRow('a-1', 2025, 'diagnostico'),
@@ -121,27 +129,103 @@ describe('ComparableTrajectoryService — eje "trayectoria" (moments)', () => {
       familyRow('a-2', 2025, 'cierre'),
     ]);
 
-    const res = await service.trajectory(makeUser(), { ...BASE_QUERY, axis: 'moments' });
+    const res = await service.trajectory(makeUser(), BASE_QUERY);
 
-    expect(res.series.map((p) => p.label)).toEqual([
-      'Diagnóstico 2025',
-      'Cierre 2025',
-      'Diagnóstico 2026',
-      'Monitoreo 2026',
-    ]);
-    expect(res.current?.label).toBe('Monitoreo 2026');
+    expect(res.series.map((s) => s.year)).toEqual([2026, 2025]);
+    expect(res.series[0]!.points.map((p) => p.label)).toEqual(['Diagnóstico', 'Monitoreo']);
+    expect(res.series[1]!.points.map((p) => p.label)).toEqual(['Diagnóstico', 'Cierre']);
   });
 
-  it('la clave de cada punto distingue año y momento, para que 2025 y 2026 no colisionen', async () => {
+  it('la clave del punto es el momento del ciclo; el año vive en la serie', async () => {
     const service = makeService([
       familyRow('a-1', 2025, 'diagnostico'),
       familyRow('a-2', 2026, 'diagnostico'),
     ]);
 
-    const res = await service.trajectory(makeUser(), { ...BASE_QUERY, axis: 'moments' });
+    const res = await service.trajectory(makeUser(), BASE_QUERY);
 
-    expect(res.series.map((p) => p.key)).toEqual(['2025-diagnostico', '2026-diagnostico']);
-    expect(res.series.map((p) => p.assessmentIds)).toEqual([['a-1'], ['a-2']]);
+    expect(res.series.map((s) => s.points.map((p) => p.key))).toEqual([
+      ['diagnostico'],
+      ['diagnostico'],
+    ]);
+    expect(res.series.map((s) => s.points.map((p) => p.year))).toEqual([[2026], [2025]]);
+    expect(res.series.map((s) => s.points.map((p) => p.assessmentIds))).toEqual([
+      [['a-2']],
+      [['a-1']],
+    ]);
+  });
+
+  it('un año al que le falta un momento deja el hueco: no corre los puntos ni rompe el eje', async () => {
+    const service = makeService([
+      familyRow('a-1', 2025, 'diagnostico'),
+      familyRow('a-2', 2025, 'intermedio'),
+      familyRow('a-3', 2025, 'cierre'),
+      familyRow('a-4', 2026, 'diagnostico'),
+      familyRow('a-5', 2026, 'cierre'),
+    ]);
+
+    const res = await service.trajectory(makeUser(), BASE_QUERY);
+
+    expect(res.periods.map((p) => p.key)).toEqual(['diagnostico', 'intermedio', 'cierre']);
+    expect(res.series[0]!.points.map((p) => p.key)).toEqual(['diagnostico', 'cierre']);
+    expect(res.series[1]!.points.map((p) => p.key)).toEqual([
+      'diagnostico',
+      'intermedio',
+      'cierre',
+    ]);
+  });
+
+  it('`periods` es la unión de los momentos de TODA la data, en el orden del ciclo', async () => {
+    const service = makeService([
+      familyRow('a-1', 2024, 'cierre'),
+      familyRow('a-2', 2026, 'diagnostico'),
+    ]);
+
+    const res = await service.trajectory(makeUser(), BASE_QUERY);
+
+    expect(res.periods).toEqual([
+      { key: 'diagnostico', label: 'Diagnóstico' },
+      { key: 'cierre', label: 'Cierre' },
+    ]);
+  });
+
+  it('un instrumento sin momento declarado aterriza en "Sin momento", al final del eje', async () => {
+    const service = makeService([
+      { ...familyRow('a-1', 2026, 'diagnostico'), applicationPeriod: null },
+      familyRow('a-2', 2026, 'diagnostico'),
+    ]);
+
+    const res = await service.trajectory(makeUser(), BASE_QUERY);
+
+    expect(res.periods.map((p) => p.key)).toEqual(['diagnostico', 'none']);
+    expect(res.series[0]!.points.map((p) => p.label)).toEqual(['Diagnóstico', 'Sin momento']);
+  });
+
+  it('`current` es el último momento con datos del año más reciente', async () => {
+    const service = makeService([
+      familyRow('a-1', 2025, 'cierre'),
+      familyRow('a-2', 2026, 'diagnostico'),
+      familyRow('a-3', 2026, 'intermedio'),
+    ]);
+
+    const res = await service.trajectory(makeUser(), BASE_QUERY);
+
+    expect(res.current?.year).toBe(2026);
+    expect(res.current?.label).toBe('Monitoreo');
+  });
+
+  it('con `year` la matriz queda en una sola serie: el ciclo de ese año', async () => {
+    const service = makeService([
+      familyRow('a-1', 2025, 'diagnostico'),
+      familyRow('a-2', 2026, 'diagnostico'),
+      familyRow('a-3', 2026, 'cierre'),
+    ]);
+
+    const res = await service.trajectory(makeUser(), { ...BASE_QUERY, year: 2026 });
+
+    expect(res.series.map((s) => s.year)).toEqual([2026]);
+    expect(res.series[0]!.points.map((p) => p.label)).toEqual(['Diagnóstico', 'Cierre']);
+    expect(res.comparability.kind).toBe('period_series');
   });
 
   it('una historia que cruza años y momentos es comparable punto a punto, no "mixed"', async () => {
@@ -151,27 +235,41 @@ describe('ComparableTrajectoryService — eje "trayectoria" (moments)', () => {
       familyRow('a-3', 2026, 'diagnostico'),
     ]);
 
-    const res = await service.trajectory(makeUser(), { ...BASE_QUERY, axis: 'moments' });
+    const res = await service.trajectory(makeUser(), BASE_QUERY);
 
     expect(res.comparability.kind).toBe('instrument_history');
     expect(res.comparability.aggregatable).toBe(false);
   });
+});
 
-  it('con `year` la trayectoria se acota al ciclo de ese año', async () => {
+describe('ComparableTrajectoryService — etiqueta de la generación', () => {
+  it('el año de referencia va sin proyección; los anteriores dicen dónde están hoy', async () => {
     const service = makeService([
-      familyRow('a-1', 2025, 'diagnostico'),
-      familyRow('a-2', 2026, 'diagnostico'),
-      familyRow('a-3', 2026, 'cierre'),
+      familyRow('a-1', 2024, 'diagnostico'),
+      familyRow('a-2', 2025, 'diagnostico'),
+      familyRow('a-3', 2026, 'diagnostico'),
     ]);
 
-    const res = await service.trajectory(makeUser(), {
-      ...BASE_QUERY,
-      axis: 'moments',
-      year: 2026,
-    });
+    const res = await service.trajectory(makeUser(), BASE_QUERY);
 
-    expect(res.series.map((p) => p.label)).toEqual(['Diagnóstico 2026', 'Cierre 2026']);
-    expect(res.comparability.kind).toBe('period_series');
+    expect(res.series.map((s) => s.label)).toEqual([
+      '2026',
+      '2025 · hoy 6º básico',
+      '2024 · hoy 7º básico',
+    ]);
+    expect(res.series.map((s) => s.currentGradeName)).toEqual([null, '6º básico', '7º básico']);
+  });
+
+  it('si la generación se pasó del último nivel, la etiqueta queda en el año a secas', async () => {
+    const service = makeService(
+      [familyRow('a-1', 2024, 'diagnostico'), familyRow('a-2', 2026, 'diagnostico')],
+      [],
+    );
+
+    const res = await service.trajectory(makeUser(), BASE_QUERY);
+
+    expect(res.series.map((s) => s.label)).toEqual(['2026', '2024']);
+    expect(res.series.map((s) => s.currentGradeName)).toEqual([null, null]);
   });
 });
 
@@ -190,17 +288,17 @@ describe('ComparableTrajectoryService — acotar a un curso', () => {
       COURSE_ACROSS_YEARS,
       [],
       FAMILY,
+      GRADE_CATALOG,
     ]);
     const service = new ComparableTrajectoryService(db, makeAssembler(spy));
 
     const res = await service.trajectory(makeUser(), {
       ...BASE_QUERY,
-      axis: 'moments',
       classGroupId: 'cg-2026-A',
     });
 
     expect(spy.scopedClassGroupIds[0]).toEqual(['cg-2025-A', 'cg-2026-A']);
-    expect(res.series.map((p) => p.label)).toEqual(['Diagnóstico 2025', 'Diagnóstico 2026']);
+    expect(res.series.map((s) => s.year)).toEqual([2026, 2025]);
   });
 
   it('a un profesor la expansión no le abre cursos fuera de su asignación', async () => {
@@ -214,12 +312,12 @@ describe('ComparableTrajectoryService — acotar a un curso', () => {
       COURSE_ACROSS_YEARS,
       [],
       FAMILY,
+      GRADE_CATALOG,
     ]);
     const service = new ComparableTrajectoryService(db, makeAssembler(spy));
 
     await service.trajectory(makeUser({ activeRole: 'teacher' }), {
       ...BASE_QUERY,
-      axis: 'moments',
       classGroupId: 'cg-2026-A',
     });
 
@@ -227,21 +325,15 @@ describe('ComparableTrajectoryService — acotar a un curso', () => {
   });
 });
 
-describe('ComparableTrajectoryService — eje "generaciones" (years)', () => {
-  it('fija el momento del ciclo y varía el año', async () => {
-    const service = makeService([
-      familyRow('a-1', 2026, 'diagnostico'),
-      familyRow('a-2', 2025, 'diagnostico'),
-      familyRow('a-3', 2025, 'cierre'),
-    ]);
+describe('ComparableTrajectoryService — sin datos', () => {
+  it('la respuesta vacía trae la forma nueva: sin series y sin eje', async () => {
+    const service = makeService([]);
 
-    const res = await service.trajectory(makeUser(), {
-      ...BASE_QUERY,
-      axis: 'years',
-      applicationPeriod: 'diagnostico',
-    });
+    const res = await service.trajectory(makeUser(), BASE_QUERY);
 
-    expect(res.series.map((p) => p.label)).toEqual(['2025', '2026']);
-    expect(res.comparability.kind).toBe('instrument_family');
+    expect(res.series).toEqual([]);
+    expect(res.periods).toEqual([]);
+    expect(res.current).toBeNull();
+    expect(res.gradeName).toBe('5º básico');
   });
 });

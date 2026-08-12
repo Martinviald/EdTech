@@ -1,98 +1,181 @@
 'use client';
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Gráfico de la trayectoria comparable: una línea de % de logro a través de los
-// puntos de la serie. A diferencia de la progresión antigua, todos los puntos
-// pertenecen a la MISMA familia comparable (mismo tipo + asignatura + nivel), así
-// que unirlos con una línea es legítimo: mide movimiento, no mezcla instrumentos.
+// Trayectoria del % de logro: el eje X es el ciclo (Diagnóstico → Monitoreo →
+// Cierre) y hay UNA línea por año. Todas las líneas son la misma familia
+// comparable (mismo tipo + asignatura + nivel), así que el año en curso se lee
+// evaluación a evaluación contra los años anteriores del mismo nivel: mismo
+// instrumento, mismo corte de niveles, eje comparable.
+//
+// Los alumnos de una línea anterior son OTRA generación (hoy están un nivel más
+// arriba). Eso se dice en la etiqueta de la serie, nunca cambiando la escala.
 // ─────────────────────────────────────────────────────────────────────────────
 
+import { useMemo, useState } from 'react';
 import {
   CartesianGrid,
+  Legend,
   Line,
   LineChart,
-  ReferenceLine,
   ResponsiveContainer,
   Tooltip,
   XAxis,
   YAxis,
 } from 'recharts';
-import {
-  INSTRUMENT_APPLICATION_PERIOD_SHORT_LABELS,
-  type ComparableTrajectoryAxis,
-  type ComparableTrajectoryPoint,
-} from '@soe/types';
+import type { ComparableTrajectoryYearSeries } from '@soe/types';
 import { ChartTooltipCard, type RechartsContentProps } from '@/components/ui/chart-tooltip';
+import { cn } from '@/lib/utils';
+import { trajectoryYearChartColor } from '../performance-level';
 
-type TrajectoryDatum = {
-  /** Etiqueta del eje X: corta, porque la serie puede traer años × momentos. */
-  tick: string;
+type PeriodAxis = { key: string; label: string };
+
+type YearLine = {
+  /** `dataKey` de la línea. Estable por año, para que el color no dependa del filtro. */
+  dataKey: string;
   label: string;
-  instrument: string;
-  achievement: number | null;
-  students: number;
+  color: string;
 };
 
-/**
- * En el eje de generaciones el punto ES el año, así que la etiqueta completa ya es corta.
- * En la trayectoria cada punto es una aplicación (año + momento) y "Diagnóstico 2024" no
- * cabe repetido: se abrevia a "2024 Diag." y el nombre completo queda en el tooltip.
- */
-function tickOf(point: ComparableTrajectoryPoint, axis: ComparableTrajectoryAxis): string {
-  if (axis === 'years' || point.year == null || point.applicationPeriod == null) return point.label;
-  return `${point.year} ${INSTRUMENT_APPLICATION_PERIOD_SHORT_LABELS[point.applicationPeriod]}`;
+/** Una fila del gráfico: un momento del ciclo con el valor de cada año en ese momento. */
+type PeriodDatum = {
+  period: string;
+  label: string;
+} & Record<string, string | number | null>;
+
+const ACHIEVEMENT_PREFIX = 'y:';
+const STUDENTS_PREFIX = 'n:';
+
+function achievementKey(series: ComparableTrajectoryYearSeries, index: number): string {
+  return `${ACHIEVEMENT_PREFIX}${series.year ?? `s${index}`}`;
 }
 
-function TrajectoryTooltip({ active, payload }: RechartsContentProps) {
+function roundAchievement(value: number | null): number | null {
+  return value === null ? null : Math.round(value * 10) / 10;
+}
+
+function buildLines(series: ComparableTrajectoryYearSeries[]): YearLine[] {
+  return series.map((s, index) => ({
+    dataKey: achievementKey(s, index),
+    label: s.label,
+    color: trajectoryYearChartColor(index),
+  }));
+}
+
+function buildData(series: ComparableTrajectoryYearSeries[], periods: PeriodAxis[]): PeriodDatum[] {
+  const rows = new Map<string, PeriodDatum>();
+  for (const period of periods) {
+    rows.set(period.key, { period: period.key, label: period.label });
+  }
+  series.forEach((s, index) => {
+    const key = achievementKey(s, index);
+    for (const point of s.points) {
+      const row = rows.get(point.key);
+      if (!row) continue;
+      row[key] = roundAchievement(point.averageAchievement);
+      row[`${STUDENTS_PREFIX}${key}`] = point.studentsAssessed;
+    }
+  });
+  return Array.from(rows.values());
+}
+
+function PeriodTooltip({
+  active,
+  payload,
+  lines,
+  hidden,
+}: RechartsContentProps & { lines: YearLine[]; hidden: ReadonlySet<string> }) {
   if (!active || !payload?.length) return null;
-  const d = payload[0]?.payload as TrajectoryDatum | undefined;
-  if (!d) return null;
+  const datum = payload[0]?.payload as PeriodDatum | undefined;
+  if (!datum) return null;
+
+  const rows = lines
+    .filter((line) => !hidden.has(line.dataKey))
+    .map((line) => {
+      const achievement = datum[line.dataKey];
+      const students = datum[`${STUDENTS_PREFIX}${line.dataKey}`];
+      return {
+        label: line.label,
+        value:
+          typeof achievement === 'number'
+            ? `${achievement}% · ${typeof students === 'number' ? students : 0} alumnos`
+            : 'Sin datos',
+        color: line.color,
+        muted: typeof achievement !== 'number',
+      };
+    });
+
+  return <ChartTooltipCard title={datum.label} rows={rows} />;
+}
+
+function YearLegend({
+  lines,
+  hidden,
+  onToggle,
+}: {
+  lines: YearLine[];
+  hidden: ReadonlySet<string>;
+  onToggle: (dataKey: string) => void;
+}) {
   return (
-    <ChartTooltipCard
-      title={d.label}
-      subtitle={d.instrument}
-      accentColor="hsl(var(--primary))"
-      rows={[
-        {
-          label: '% de logro',
-          value: d.achievement == null ? '—' : `${d.achievement}%`,
-          color: 'hsl(var(--primary))',
-        },
-        { label: 'Alumnos', value: d.students },
-      ]}
-    />
+    <ul className="flex flex-wrap items-center justify-center gap-x-4 gap-y-1.5 pt-3">
+      {lines.map((line) => {
+        const off = hidden.has(line.dataKey);
+        return (
+          <li key={line.dataKey}>
+            <button
+              type="button"
+              aria-pressed={!off}
+              onClick={() => onToggle(line.dataKey)}
+              className={cn(
+                'flex items-center gap-1.5 rounded px-1 py-0.5 text-xs transition-colors',
+                off ? 'text-muted-foreground/60' : 'text-muted-foreground hover:text-foreground',
+              )}
+            >
+              <span
+                className="h-0.5 w-4 shrink-0 rounded-full"
+                style={{ backgroundColor: off ? 'currentColor' : line.color }}
+                aria-hidden
+              />
+              <span className={cn(off && 'line-through')}>{line.label}</span>
+            </button>
+          </li>
+        );
+      })}
+    </ul>
   );
 }
 
 export function TrajectoryChart({
   series,
-  axis,
-  baselineAchievement,
-  baselineLabel,
+  periods,
 }: {
-  series: ComparableTrajectoryPoint[];
-  axis: ComparableTrajectoryAxis;
-  baselineAchievement?: number | null;
-  baselineLabel?: string;
+  series: ComparableTrajectoryYearSeries[];
+  periods: { key: string; label: string }[];
 }) {
-  const data: TrajectoryDatum[] = series.map((p) => ({
-    tick: tickOf(p, axis),
-    label: p.label,
-    instrument: p.instrumentName,
-    achievement: p.averageAchievement === null ? null : Math.round(p.averageAchievement * 10) / 10,
-    students: p.studentsAssessed,
-  }));
+  const [hidden, setHidden] = useState<ReadonlySet<string>>(() => new Set<string>());
+
+  const lines = useMemo(() => buildLines(series), [series]);
+  const data = useMemo(() => buildData(series, periods), [series, periods]);
+
+  const toggle = (dataKey: string) => {
+    setHidden((prev) => {
+      const next = new Set(prev);
+      if (next.has(dataKey)) next.delete(dataKey);
+      else next.add(dataKey);
+      return next;
+    });
+  };
 
   return (
-    <div className="h-72 w-full sm:h-80">
+    <div className="h-80 w-full sm:h-96">
       <ResponsiveContainer width="100%" height="100%">
         <LineChart data={data} margin={{ top: 8, right: 8, left: 0, bottom: 0 }}>
           <CartesianGrid strokeDasharray="3 3" className="stroke-border" />
           <XAxis
-            dataKey="tick"
+            dataKey="label"
             tick={{ fontSize: 12 }}
             className="fill-muted-foreground"
-            interval="preserveStartEnd"
+            interval={0}
             minTickGap={8}
           />
           <YAxis
@@ -102,31 +185,28 @@ export function TrajectoryChart({
             tickFormatter={(v: number) => `${v}%`}
           />
           <Tooltip
-            content={<TrajectoryTooltip />}
+            content={<PeriodTooltip lines={lines} hidden={hidden} />}
             cursor={{ stroke: 'hsl(var(--border))', strokeWidth: 1 }}
           />
-          {baselineAchievement != null ? (
-            <ReferenceLine
-              y={baselineAchievement}
-              stroke="hsl(var(--muted-foreground))"
-              strokeDasharray="4 4"
-              label={{
-                value: baselineLabel ?? 'referencia',
-                position: 'insideTopRight',
-                fontSize: 11,
-                fill: 'hsl(var(--muted-foreground))',
-              }}
-            />
-          ) : null}
-          <Line
-            type="monotone"
-            dataKey="achievement"
-            stroke="hsl(var(--primary))"
-            strokeWidth={2}
-            dot={{ r: 4 }}
-            activeDot={{ r: 6 }}
-            connectNulls
+          <Legend
+            verticalAlign="bottom"
+            content={() => <YearLegend lines={lines} hidden={hidden} onToggle={toggle} />}
           />
+          {lines.map((line, index) => (
+            <Line
+              key={line.dataKey}
+              type="monotone"
+              dataKey={line.dataKey}
+              name={line.label}
+              stroke={line.color}
+              strokeWidth={index === 0 ? 2.5 : 2}
+              dot={{ r: 4, strokeWidth: 0, fill: line.color }}
+              activeDot={{ r: 6 }}
+              connectNulls={false}
+              hide={hidden.has(line.dataKey)}
+              isAnimationActive={false}
+            />
+          ))}
         </LineChart>
       </ResponsiveContainer>
     </div>

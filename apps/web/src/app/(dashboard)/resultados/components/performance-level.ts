@@ -53,6 +53,37 @@ export const PERFORMANCE_LEVEL_CHART_COLOR: Record<PerformanceLevel, string> = {
   advanced: '#3b82f6', // blue-500
 };
 
+/**
+ * Rampa ordinal (un solo tono azul de marca) para las series por AÑO de la trayectoria:
+ * el índice 0 es el año más reciente —el más saturado— y los anteriores se atenúan paso
+ * a paso. Es un orden, no identidades sueltas: el año en curso manda y los previos son
+ * contexto.
+ *
+ * Vive acá por la misma razón que `PERFORMANCE_LEVEL_CHART_COLOR`: recharts pide un
+ * `stroke`/`fill` concreto y no acepta clases Tailwind, así que el hex se centraliza en
+ * este único archivo. Los 5 pasos pasan las validaciones de rampa ordinal (tono único,
+ * luminosidad monótona, ΔL ≥ 0.06) contra AMBAS superficies de la app —card claro
+ * `#ffffff` y card oscuro `#0f172a`— con contraste ≥ 2.3:1 en cada una, así que se leen
+ * en claro y en oscuro sin cambiar de paleta.
+ */
+export const TRAJECTORY_YEAR_CHART_COLORS: readonly string[] = [
+  '#024dd6',
+  '#356ad1',
+  '#5781d1',
+  '#7597d5',
+  '#91abdb',
+];
+
+/**
+ * Color de la serie del año en la posición `index` (0 = el más reciente). Más años que
+ * pasos de la rampa comparten el paso más atenuado: la identidad la carga la leyenda, no
+ * el color, y los años lejanos son contexto de fondo.
+ */
+export function trajectoryYearChartColor(index: number): string {
+  const last = TRAJECTORY_YEAR_CHART_COLORS.length - 1;
+  return TRAJECTORY_YEAR_CHART_COLORS[Math.min(Math.max(index, 0), last)]!;
+}
+
 export function performanceLevelLabel(level: PerformanceLevel | null): string {
   return level ? PERFORMANCE_LEVEL_LABELS[level] : 'Sin datos';
 }
