@@ -169,6 +169,12 @@ que se mueve a lo largo de **un eje** elegible:
 > que es lo que hacía antes. Eso obligó a nombrar el nivel N4 `instrument_history` en
 > `comparability.ts`: varía año Y momento, pero **no** mezcla asignaturas ni tipos de instrumento, así
 > que no es `mixed` — se compara punto a punto y sigue sin ser agregable.
+>
+> El drill a curso (decisión C) tuvo que seguir el mismo camino: `class_groups` es POR año
+> académico, así que filtrar por el id elegido a secas volvía a colapsar la trayectoria al año de
+> esa fila. El curso elegido se resuelve a su **mismo curso (nivel + letra) en todos los años** de
+> la org; para un profesor la expansión se intersecta con su alcance (`teacher_assignments`), no lo
+> amplía (CLAUDE.md §6.3).
 
 Cada punto del eje es una **aplicación comparable** (misma familia), con su `% de logro` y su banda —
 nunca una línea `connectNulls` que salta entre instrumentos incomparables. El corte de niveles siempre
