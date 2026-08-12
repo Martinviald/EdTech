@@ -21,8 +21,11 @@ import type { ComparableUnitClassGroup } from './comparable-overview.schema';
 //
 //  - `axis='years'`   → fija el momento (`applicationPeriod`), varía el año. Es N2
 //                       (`instrument_family`): la comparación generacional legítima.
-//  - `axis='moments'` → fija el año, varía el momento del ciclo (diagnóstico → monitoreo →
-//                       cierre). Es N3 (`period_series`): la progresión intra-año legítima.
+//  - `axis='moments'` → recorre TODAS las aplicaciones de la familia en orden cronológico
+//                       (año, y dentro del año diagnóstico → monitoreo → cierre): los
+//                       momentos de los años anteriores y los de este año hasta hoy. Es N4
+//                       (`instrument_history`). Acotado a un `year` degenera en la serie
+//                       N3 (`period_series`) de ese ciclo.
 // ─────────────────────────────────────────────────────────────────────────────
 
 export const COMPARABLE_TRAJECTORY_AXES = ['years', 'moments'] as const;
@@ -37,8 +40,8 @@ export const comparableTrajectoryQuerySchema = z.object({
   // Eje años: el momento del ciclo que se mantiene fijo (ej. "intermedio"). Ausente si
   // el instrumento no tiene ciclo (custom).
   applicationPeriod: z.enum(INSTRUMENT_APPLICATION_PERIODS).optional(),
-  // Eje momentos: el año (instruments.year) cuyo ciclo se recorre. Ausente → el más
-  // reciente con datos.
+  // Eje momentos: acota la trayectoria a un año (instruments.year). Ausente → toda la
+  // historia de la familia, año a año y momento a momento.
   year: z.coerce.number().int().optional(),
   // Acota el alcance a un curso (drill nivel → curso, decisión C). Ausente → todo el nivel.
   classGroupId: z.string().uuid().optional(),
@@ -51,7 +54,7 @@ export type ComparableTrajectoryQueryDto = z.infer<typeof comparableTrajectoryQu
  * legítimo porque todos los resultados salen del mismo instrumento y del mismo corte.
  */
 export type ComparableTrajectoryPoint = {
-  /** Clave estable del punto: el año (`"2025"`) o el momento (`"intermedio"`). */
+  /** Clave estable del punto: el año (`"2025"`) o la aplicación (`"2025-intermedio"`). */
   key: string;
   /** Etiqueta lista para pintar en el eje. */
   label: string;

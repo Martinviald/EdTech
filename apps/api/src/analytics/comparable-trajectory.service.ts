@@ -56,9 +56,17 @@ type RawPoint = {
 /**
  * GET /api/analytics/comparable-trajectory — la vista unificada de "Trayectoria comparable".
  *
- * Una familia comparable (tipo + asignatura + nivel) a lo largo de UN eje: años (N2) o
- * momentos del ciclo (N3). Cada punto es una aplicación comparable; su % de logro es
- * legítimo porque sale del mismo instrumento y del mismo corte. Reutiliza
+ * Una familia comparable (tipo + asignatura + nivel) a lo largo de UN eje:
+ *
+ *  - `years`   → fija el momento del ciclo y recorre los años (N2, la comparación
+ *                generacional: la misma medición contra la generación anterior).
+ *  - `moments` → recorre TODAS las aplicaciones de la familia en orden cronológico
+ *                (año, luego momento del ciclo): los momentos de los años anteriores y
+ *                los de este año hasta hoy (N4 `instrument_history`). Acotable a un año
+ *                concreto con `year`, y ahí degenera en la serie N3 de ese ciclo.
+ *
+ * Cada punto es una aplicación comparable; su % de logro es legítimo porque sale del mismo
+ * instrumento y del mismo corte — nunca se promedia entre puntos. Reutiliza
  * `ComparableUnitAssembler` para el cómputo de logro, distribución por banda, desglose por
  * curso y baselines — la misma maquinaria que la matriz del Panorama, sin re-derivar.
  */
@@ -236,12 +244,21 @@ export class ComparableTrajectoryService {
         );
     }
 
-    const targetYear = query.year ?? this.latestYear(rows);
-    const matching = rows.filter((r) => (r.year ?? null) === (targetYear ?? null));
-    const byPeriod = this.groupPoints(matching, (r) => r.applicationPeriod ?? 'none');
-    return Array.from(byPeriod.values())
+    const matching = query.year == null ? rows : rows.filter((r) => r.year === query.year);
+    const byApplication = this.groupPoints(
+      matching,
+      (r) => `${r.year ?? 'none'}|${r.applicationPeriod ?? 'none'}`,
+    );
+    return Array.from(byApplication.values())
       .map((rs) => this.toRawPoint(rs, 'period'))
-      .sort((a, b) => this.periodRank(a.applicationPeriod) - this.periodRank(b.applicationPeriod));
+      .sort((a, b) => this.compareChronologically(a, b));
+  }
+
+  private compareChronologically(a: RawPoint, b: RawPoint): number {
+    const yearA = a.year ?? Number.POSITIVE_INFINITY;
+    const yearB = b.year ?? Number.POSITIVE_INFINITY;
+    if (yearA !== yearB) return yearA - yearB;
+    return this.periodRank(a.applicationPeriod) - this.periodRank(b.applicationPeriod);
   }
 
   private groupPoints(
@@ -270,15 +287,13 @@ export class ComparableTrajectoryService {
         ? first.year == null
           ? 'none'
           : String(first.year)
-        : (first.applicationPeriod ?? 'none');
+        : `${first.year ?? 'none'}-${first.applicationPeriod ?? 'none'}`;
     const label =
       axis === 'year'
         ? first.year == null
           ? 'Sin año'
           : String(first.year)
-        : first.applicationPeriod
-          ? INSTRUMENT_APPLICATION_PERIOD_LABELS[first.applicationPeriod]
-          : 'Sin momento';
+        : this.applicationLabel(first);
     return {
       key,
       label,
@@ -291,12 +306,11 @@ export class ComparableTrajectoryService {
     };
   }
 
-  private latestYear(rows: FamilyRow[]): number | null {
-    let max: number | null = null;
-    for (const r of rows) {
-      if (r.year != null && (max === null || r.year > max)) max = r.year;
-    }
-    return max;
+  private applicationLabel(row: FamilyRow): string {
+    const period = row.applicationPeriod
+      ? INSTRUMENT_APPLICATION_PERIOD_LABELS[row.applicationPeriod]
+      : 'Sin momento';
+    return row.year == null ? period : `${period} ${row.year}`;
   }
 
   private periodRank(period: InstrumentApplicationPeriod | null): number {

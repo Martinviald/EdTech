@@ -19,6 +19,20 @@ export const INSTRUMENT_APPLICATION_PERIOD_LABELS: Record<InstrumentApplicationP
   cierre: 'Cierre',
 };
 
+/**
+ * Etiqueta corta del momento, para ejes de gráficos donde el punto además lleva el año
+ * ("2025 Diag."). Sólo para espacios apretados: en texto corrido va
+ * `INSTRUMENT_APPLICATION_PERIOD_LABELS`.
+ */
+export const INSTRUMENT_APPLICATION_PERIOD_SHORT_LABELS: Record<
+  InstrumentApplicationPeriod,
+  string
+> = {
+  diagnostico: 'Diag.',
+  intermedio: 'Mon.',
+  cierre: 'Cierre',
+};
+
 /** Narrowing de un texto libre (JSON de ingesta) al enum. Devuelve null si no calza. */
 export function toApplicationPeriod(
   value: string | null | undefined,

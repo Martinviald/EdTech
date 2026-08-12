@@ -1,4 +1,4 @@
-import { Suspense } from 'react';
+import { Suspense, type ReactNode } from 'react';
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
 import type { Route } from 'next';
@@ -53,7 +53,7 @@ function parseSelection(params: SearchParams): TrajectorySelection {
   const rawAxis = pick(params, 'axis');
   const axis: ComparableTrajectoryAxis = AXES.includes(rawAxis as ComparableTrajectoryAxis)
     ? (rawAxis as ComparableTrajectoryAxis)
-    : 'years';
+    : 'moments';
   const rawPeriod = pick(params, 'applicationPeriod');
   const applicationPeriod = INSTRUMENT_APPLICATION_PERIODS.includes(
     rawPeriod as InstrumentApplicationPeriod,
@@ -149,7 +149,6 @@ export default async function TrayectoriaPage({
   return (
     <>
       <ResultadosNavActions>
-        <AxisToggle axis={selection.axis} basePath={BASE_PATH} />
         <Suspense fallback={null}>
           <TrayectoriaAction query={query} />
         </Suspense>
@@ -204,14 +203,17 @@ async function TrajectorySection({
 
   const data = await getComparableTrajectory(query);
   const { series, current } = data;
+  const summary = summaryOf(data);
 
   if (series.length === 0 || !current) {
     return (
-      <EmptyState
-        icon={TrendingUp}
-        title="Sin datos para esta medición"
-        description="No hay evaluaciones con resultados para la familia seleccionada. Prueba con otra asignatura, medición o nivel."
-      />
+      <TrajectoryCard axis={selection.axis} summary={summary}>
+        <EmptyState
+          icon={TrendingUp}
+          title="Sin datos para esta medición"
+          description="No hay evaluaciones con resultados para la familia seleccionada. Prueba con otro eje, o con otra asignatura, medición o nivel."
+        />
+      </TrajectoryCard>
     );
   }
 
@@ -233,7 +235,6 @@ async function TrajectorySection({
 
   const refBaseline =
     data.axis === 'years' ? data.baselines.previousYear : data.baselines.previousPeriod;
-  const summary = summaryOf(data);
 
   return (
     <div className="space-y-6">
@@ -264,23 +265,14 @@ async function TrajectorySection({
         />
       </section>
 
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-base">
-            Trayectoria del % de logro
-            {summary ? (
-              <span className="ml-2 text-sm font-normal text-muted-foreground">{summary}</span>
-            ) : null}
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <TrajectoryChart
-            series={series}
-            baselineAchievement={refBaseline?.achievement ?? null}
-            baselineLabel={data.axis === 'years' ? 'Año anterior' : 'Momento anterior'}
-          />
-        </CardContent>
-      </Card>
+      <TrajectoryCard axis={data.axis} summary={summary}>
+        <TrajectoryChart
+          series={series}
+          axis={data.axis}
+          baselineAchievement={refBaseline?.achievement ?? null}
+          baselineLabel={data.axis === 'years' ? 'Año anterior' : 'Aplicación anterior'}
+        />
+      </TrajectoryCard>
 
       {current.bandDistribution && data.bands ? (
         <DistributionBar
@@ -340,6 +332,36 @@ async function TrajectorySection({
         </CardContent>
       </Card>
     </div>
+  );
+}
+
+/**
+ * El gráfico y su encabezado. El toggle del eje vive acá —en la misma fila del título—
+ * porque es lo que cambia QUÉ grafica esta tarjeta, no un filtro del alcance. Se renderiza
+ * también cuando la serie viene vacía, para poder cambiar de eje sin volver atrás.
+ */
+function TrajectoryCard({
+  axis,
+  summary,
+  children,
+}: {
+  axis: ComparableTrajectoryAxis;
+  summary: string;
+  children: ReactNode;
+}) {
+  return (
+    <Card>
+      <CardHeader className="flex flex-col items-start gap-3 space-y-0 sm:flex-row sm:items-center sm:justify-between">
+        <CardTitle className="text-base">
+          Trayectoria del % de logro
+          {summary ? (
+            <span className="ml-2 text-sm font-normal text-muted-foreground">{summary}</span>
+          ) : null}
+        </CardTitle>
+        <AxisToggle axis={axis} basePath={BASE_PATH} />
+      </CardHeader>
+      <CardContent>{children}</CardContent>
+    </Card>
   );
 }
 

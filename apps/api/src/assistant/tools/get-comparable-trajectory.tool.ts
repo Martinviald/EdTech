@@ -10,8 +10,9 @@ import { ComparableTrajectoryService } from '../../analytics/comparable-trajecto
 
 /**
  * `get_comparable_trajectory` — la trayectoria de UNA familia comparable (tipo +
- * asignatura + nivel) a lo largo de un eje: años (comparación generacional, N2) o
- * momentos del ciclo diagnóstico → monitoreo → cierre (N3). Reemplaza a
+ * asignatura + nivel) a lo largo de un eje: años (comparación generacional, N2) o la
+ * historia completa de sus aplicaciones en orden cronológico (N4; acotada a un año, la
+ * serie de momentos diagnóstico → monitoreo → cierre, N3). Reemplaza a
  * `get_generational` y `get_progression`, que promediaban instrumentos no comparables.
  *
  * Wrapper delgado sobre `ComparableTrajectoryService.trajectory` → hereda
@@ -32,8 +33,10 @@ export class GetComparableTrajectoryTool implements AssistantTool {
       'Devuelve la trayectoria comparable de una familia de instrumento (mismo tipo, ' +
       'asignatura y nivel) a lo largo de un eje. axis=years compara la misma medición ' +
       'entre años (evolución generacional, requiere applicationPeriod para fijar el ' +
-      'momento del ciclo); axis=moments recorre el ciclo diagnóstico → monitoreo → ' +
-      'cierre de un año (requiere/asume el año más reciente). Requiere gradeId, ' +
+      'momento del ciclo); axis=moments recorre todas las aplicaciones en orden ' +
+      'cronológico (año, y dentro del año diagnóstico → monitoreo → cierre), es decir ' +
+      'los momentos de los años anteriores y los de este año, y acepta year para ' +
+      'acotarlo al ciclo de un solo año. Requiere gradeId, ' +
       'subjectId e instrumentType; opcionalmente acota a un curso con classGroupId. ' +
       'Los IDs se obtienen de list_filter_options. Cada punto es una aplicación ' +
       'comparable con su % de logro y distribución por las bandas del instrumento (nunca ' +
@@ -47,7 +50,7 @@ export class GetComparableTrajectoryTool implements AssistantTool {
           type: 'string',
           enum: ['years', 'moments'],
           description:
-            'years=misma medición año a año (generacional); moments=ciclo diagnóstico→monitoreo→cierre de un año.',
+            'years=misma medición año a año (generacional); moments=todas las aplicaciones en orden cronológico (años y momentos del ciclo).',
         },
         gradeId: { type: 'string', description: 'UUID del nivel (grade). Requerido.' },
         subjectId: { type: 'string', description: 'UUID de asignatura. Requerido.' },
@@ -63,7 +66,7 @@ export class GetComparableTrajectoryTool implements AssistantTool {
         year: {
           type: 'number',
           description:
-            'Año a recorrer cuando axis=moments (opcional; por defecto el más reciente).',
+            'Acota la trayectoria a un solo año cuando axis=moments (opcional; por defecto toda la historia).',
         },
         classGroupId: {
           type: 'string',
