@@ -35,6 +35,7 @@ promediar mezcla **dificultades Y escalas**.
 | **N1 — Instrumento**       | `instrumentId`                                                 | El mismo instrumento en varios cursos          | ✅ Sí                               |
 | **N2 — Familia estándar**  | `(type, subjectId, gradeId, applicationPeriod)` — varía `year` | El "mismo DIA" de años distintos               | ❌ No. Se compara **punto a punto** |
 | **N3 — Serie de momentos** | `(type, subjectId, gradeId, year)` — varía `applicationPeriod` | Diagnóstico → Monitoreo → Cierre del mismo año | ❌ No. Trayectoria, no promedio     |
+| **N4 — Historia del instrumento** | `(type, subjectId, gradeId)` — varían `year` y `applicationPeriod` | Todas las aplicaciones de la misma medición, en orden cronológico | ❌ No. Trayectoria, no promedio |
 
 Todo lo que no cae en N0–N3 es **mixto**: no se agrega ni se compara, se desglosa o se pide elegir
 una unidad. La regla de emisión: **agregar** un número sólo en N0/N1; **comparar** (dos números +
@@ -158,8 +159,16 @@ que se mueve a lo largo de **un eje** elegible:
 
 | Eje          | Qué fija / qué varía                                                                              | Nivel                      | Reemplaza a                 |
 | ------------ | ------------------------------------------------------------------------------------------------- | -------------------------- | --------------------------- |
-| **Años**     | Fija `(type, subject, grade, applicationPeriod)`; varía `year`                                    | **N2 `instrument_family`** | la comparación generacional |
-| **Momentos** | Fija `(type, subject, grade, year)`; varía `applicationPeriod` (diagnóstico → monitoreo → cierre) | **N3 `period_series`**     | la progresión               |
+| **Generaciones** | Fija `(type, subject, grade, applicationPeriod)`; varía `year`                                | **N2 `instrument_family`**  | la comparación generacional |
+| **Trayectoria**  | Fija `(type, subject, grade)`; varía `year` **y** `applicationPeriod`, en orden cronológico    | **N4 `instrument_history`** | la progresión               |
+
+> **Actualización (2026-08-12).** El eje "Momentos" original fijaba también el año, así que la
+> trayectoria sólo mostraba el ciclo del año en curso. Hoy recorre **todas** las aplicaciones de la
+> familia —los momentos de los años anteriores y los de este año— en orden cronológico (año, y dentro
+> del año diagnóstico → monitoreo → cierre). Acotado a un `year` degenera en la serie N3 de ese ciclo,
+> que es lo que hacía antes. Eso obligó a nombrar el nivel N4 `instrument_history` en
+> `comparability.ts`: varía año Y momento, pero **no** mezcla asignaturas ni tipos de instrumento, así
+> que no es `mixed` — se compara punto a punto y sigue sin ser agregable.
 
 Cada punto del eje es una **aplicación comparable** (misma familia), con su `% de logro` y su banda —
 nunca una línea `connectNulls` que salta entre instrumentos incomparables. El corte de niveles siempre
