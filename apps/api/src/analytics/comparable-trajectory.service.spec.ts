@@ -60,9 +60,18 @@ function makeDb(selectResults: unknown[][]): Database {
   return db;
 }
 
-function makeAssembler(): ComparableUnitAssembler {
+type AssemblerSpy = { scopedClassGroupIds: (string[] | null)[] };
+
+function makeAssembler(spy: AssemblerSpy = { scopedClassGroupIds: [] }): ComparableUnitAssembler {
   return {
-    loadAchievementByAssessment: async () => new Map(),
+    loadAchievementByAssessment: async (
+      _tx: unknown,
+      _ids: string[],
+      classGroupIds: string[] | null,
+    ) => {
+      spy.scopedClassGroupIds.push(classGroupIds);
+      return new Map();
+    },
     foldAchievement: (assessmentIds: string[]) => ({
       achievement: assessmentIds.length > 0 ? 50 : null,
       students: assessmentIds.length * 10,
@@ -163,6 +172,58 @@ describe('ComparableTrajectoryService — eje "trayectoria" (moments)', () => {
 
     expect(res.series.map((p) => p.label)).toEqual(['Diagnóstico 2026', 'Cierre 2026']);
     expect(res.comparability.kind).toBe('period_series');
+  });
+});
+
+describe('ComparableTrajectoryService — acotar a un curso', () => {
+  const SELECTED_COURSE = [{ gradeId: 'grade-5', name: 'A' }];
+  const COURSE_ACROSS_YEARS = [{ id: 'cg-2025-A' }, { id: 'cg-2026-A' }];
+  const FAMILY = [familyRow('a-1', 2025, 'diagnostico'), familyRow('a-2', 2026, 'diagnostico')];
+
+  it('sigue al mismo curso (nivel + letra) en todos los años, no sólo en el del `class_group` elegido', async () => {
+    const spy: AssemblerSpy = { scopedClassGroupIds: [] };
+    const db = makeDb([
+      GRADE,
+      SUBJECT,
+      [{ name: 'A' }],
+      SELECTED_COURSE,
+      COURSE_ACROSS_YEARS,
+      [],
+      FAMILY,
+    ]);
+    const service = new ComparableTrajectoryService(db, makeAssembler(spy));
+
+    const res = await service.trajectory(makeUser(), {
+      ...BASE_QUERY,
+      axis: 'moments',
+      classGroupId: 'cg-2026-A',
+    });
+
+    expect(spy.scopedClassGroupIds[0]).toEqual(['cg-2025-A', 'cg-2026-A']);
+    expect(res.series.map((p) => p.label)).toEqual(['Diagnóstico 2025', 'Diagnóstico 2026']);
+  });
+
+  it('a un profesor la expansión no le abre cursos fuera de su asignación', async () => {
+    const spy: AssemblerSpy = { scopedClassGroupIds: [] };
+    const db = makeDb([
+      [{ classGroupId: 'cg-2026-A' }],
+      GRADE,
+      SUBJECT,
+      [{ name: 'A' }],
+      SELECTED_COURSE,
+      COURSE_ACROSS_YEARS,
+      [],
+      FAMILY,
+    ]);
+    const service = new ComparableTrajectoryService(db, makeAssembler(spy));
+
+    await service.trajectory(makeUser({ activeRole: 'teacher' }), {
+      ...BASE_QUERY,
+      axis: 'moments',
+      classGroupId: 'cg-2026-A',
+    });
+
+    expect(spy.scopedClassGroupIds[0]).toEqual(['cg-2026-A']);
   });
 });
 
