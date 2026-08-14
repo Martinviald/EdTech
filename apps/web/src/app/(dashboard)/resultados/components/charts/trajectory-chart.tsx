@@ -25,7 +25,7 @@ import {
 import type { ComparableTrajectoryYearSeries } from '@soe/types';
 import { ChartTooltipCard, type RechartsContentProps } from '@/components/ui/chart-tooltip';
 import { cn } from '@/lib/utils';
-import { trajectoryYearChartColor } from '../performance-level';
+import { TRAJECTORY_YEAR_SLOTS, trajectoryYearChartColor } from '../performance-level';
 
 type PeriodAxis = { key: string; label: string };
 
@@ -53,11 +53,19 @@ function roundAchievement(value: number | null): number | null {
   return value === null ? null : Math.round(value * 10) / 10;
 }
 
+/**
+ * El color lo fija la DISTANCIA al año más reciente, no la posición en la lista: así el
+ * año en curso es siempre el primer slot y un año sin datos deja su color libre en vez de
+ * correr los siguientes. Sin año (instrumento sin `year`) cae al final de la rampa.
+ */
 function buildLines(series: ComparableTrajectoryYearSeries[]): YearLine[] {
+  const refYear = series.find((s) => s.year != null)?.year ?? null;
   return series.map((s, index) => ({
     dataKey: achievementKey(s, index),
     label: s.label,
-    color: trajectoryYearChartColor(index),
+    color: trajectoryYearChartColor(
+      s.year == null || refYear == null ? TRAJECTORY_YEAR_SLOTS - 1 : refYear - s.year,
+    ),
   }));
 }
 

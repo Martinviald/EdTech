@@ -131,6 +131,21 @@
     --cat-5: 346 77% 50%; /* rosa */
     --cat-6: 192 85% 32%; /* cyan */
 
+    /* Series de un chart de líneas (hoy: un año por línea en la trayectoria).
+       Es la paleta --cat-* REORDENADA: en un chart sólo importan los pares
+       CONTIGUOS, y el orden natural 1-2-3… deja azul junto a violeta (ΔE 3.0
+       bajo protanopía: indistinguibles) y naranjo junto a rosa (ΔE 12.5 incluso
+       con visión normal). Este orden —azul, naranjo, verde, violeta, rosa— pasa
+       las seis validaciones de paleta categórica contra la superficie de la card
+       en AMBOS modos: banda de luminosidad, piso de croma, separación bajo
+       protanopía/deuteranopía (peor par ΔE 8.0), piso de visión normal (25.7) y
+       contraste ≥ 3:1. No reordenar sin volver a validar. */
+    --chart-series-1: var(--cat-1); /* azul    · el año en curso */
+    --chart-series-2: var(--cat-4); /* naranjo */
+    --chart-series-3: var(--cat-3); /* verde   */
+    --chart-series-4: var(--cat-2); /* violeta */
+    --chart-series-5: var(--cat-5); /* rosa    */
+
     /* Radio base algo mayor (lectura moderna); lg/md/sm/xl derivan de aquí. */
     --radius: 0.75rem;
   }
@@ -172,7 +187,16 @@
     --input: var(--neutral-800);
     --ring: var(--brand-400);
     /* Los --level-* de :root se heredan tal cual (colores gráficos idénticos
-       en ambos modos); no se re-mapean aquí. */
+       en ambos modos); no se re-mapean aquí.
+
+       De las series de chart sólo se re-mapea el azul: --cat-1 queda en 2.98:1
+       sobre la card oscura, justo bajo el piso de 3:1 que necesita una línea de
+       2px. Un peldaño más claro del mismo hue lo cruza sin romper ningún otro
+       chequeo (el par contiguo azul-naranjo sigue holgado). Los otros cuatro
+       slots pasan las seis validaciones sobre la card oscura tal como están, así
+       que se heredan. --cat-1 en sí NO se toca: lo consumen los badges de
+       taxonomía, que son texto sobre tinte y otro problema de contraste. */
+    --chart-series-1: 217 91% 52%;
   }
 }
 
