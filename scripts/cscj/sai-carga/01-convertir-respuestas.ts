@@ -15,6 +15,13 @@
  *
  * Ver `docs/plan-carga-sai-2025.md` para por qué se excluye cada combinación.
  *
+ * `--incluir-lote=<loadKey,...>` levanta las exclusiones cuyo motivo nombra a ese
+ * lote, para poder RE-generar el artefacto de algo ya cargado y volver a
+ * importarlo. El artefacto queda con los cursos de varios lotes juntos, así que
+ * cada corrida del importador debe acotarse con su propio `--only`: sin eso, un
+ * lote borra por `loadKey` sus assessments y recrea los de TODOS los cursos del
+ * artefacto, duplicando los que pertenecen a otro lote.
+ *
  *   pnpm --filter @soe/db exec tsx scripts/cscj/sai-carga/01-convertir-respuestas.ts --anio=2025
  */
 import { createRequire } from 'module';
@@ -31,6 +38,11 @@ const argv = process.argv.slice(2);
 const anioArg = argv.find((a) => a.startsWith('--anio='));
 const YEAR = parseInt(anioArg ? anioArg.slice('--anio='.length) : '2025', 10);
 if (!Number.isInteger(YEAR)) throw new Error(`--anio inválido: "${anioArg}"`);
+const incluirArg = argv.find((a) => a.startsWith('--incluir-lote='));
+const LOTES_A_REINCLUIR = (incluirArg ? incluirArg.slice('--incluir-lote='.length) : '')
+  .split(',')
+  .map((s) => s.trim())
+  .filter(Boolean);
 
 const ENTRADA = resolve(REPO, `../Histórico Pruebas DIA/respuestas/sai-identificado/${YEAR}`);
 const SALIDA = join(__dirname, 'out');
@@ -99,7 +111,17 @@ const EXCLUIDAS_2025: Record<string, string> = {
 };
 
 const EXCLUIDAS_POR_ANIO: Record<number, Record<string, string>> = { 2025: EXCLUIDAS_2025 };
-const EXCLUIDAS = EXCLUIDAS_POR_ANIO[YEAR] ?? {};
+const EXCLUIDAS = Object.fromEntries(
+  Object.entries(EXCLUIDAS_POR_ANIO[YEAR] ?? {}).filter(
+    ([, motivo]) => !LOTES_A_REINCLUIR.some((lote) => motivo.includes(lote)),
+  ),
+);
+if (LOTES_A_REINCLUIR.length) {
+  const antes = Object.keys(EXCLUIDAS_POR_ANIO[YEAR] ?? {}).length;
+  console.log(
+    `  --incluir-lote=${LOTES_A_REINCLUIR.join(',')} → exclusiones ${antes} → ${Object.keys(EXCLUIDAS).length}`,
+  );
+}
 
 type Curso = {
   /**
