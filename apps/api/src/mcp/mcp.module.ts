@@ -83,6 +83,6 @@ const MCP_RESOURCES = [
     ...MCP_PROMPTS,
     ...MCP_RESOURCES,
   ],
-  exports: [AnalyticsToolsFacade, ToolRegistry],
+  exports: [AnalyticsToolsFacade, ToolRegistry, McpPrincipalResolver],
 })
 export class McpModule {}

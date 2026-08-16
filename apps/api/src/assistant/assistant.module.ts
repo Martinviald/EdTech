@@ -9,9 +9,11 @@ import { ItemAnalysisModule } from '../item-analysis/item-analysis.module';
 import { ItemsModule } from '../items/items.module';
 import { ItemEditProposalsModule } from '../item-edit-proposals/item-edit-proposals.module';
 import { LlmModule } from '../llm/llm.module';
+import { McpModule } from '../mcp/mcp.module';
 import { ASSISTANT_TOOLS } from './assistant.constants';
 import { AssistantController } from './assistant.controller';
 import { AssistantService } from './assistant.service';
+import { AnalyticsAssistantBridge } from './tools/analytics-tools.bridge';
 import type { AssistantTool } from './tools/assistant-tool.types';
 import { GetAssessmentReportTool } from './tools/get-assessment-report.tool';
 import { GetComparableOverviewTool } from './tools/get-comparable-overview.tool';
@@ -65,10 +67,12 @@ const ASSISTANT_TOOL_CLASSES = [
     ItemsModule,
     ItemEditProposalsModule,
     ItemAnalysisModule,
+    McpModule,
   ],
   controllers: [AssistantController],
   providers: [
     AssistantService,
+    AnalyticsAssistantBridge,
     ...ASSISTANT_TOOL_CLASSES,
     {
       provide: ASSISTANT_TOOLS,

@@ -3,8 +3,9 @@ import { eq } from 'drizzle-orm';
 import { organizations } from '@soe/db';
 import { FEATURE_KEYS, resolveAllowedFeatures, type FeatureKey } from '@soe/types';
 import { AuthService } from '../../auth/auth.service';
+import type { JwtPayload } from '../../auth/jwt-payload.types';
 import { InjectDb, type Database } from '../../database/database.types';
-import type { AnalyticsPrincipal } from '../core/analytics-principal';
+import type { AnalyticsChannel, AnalyticsPrincipal } from '../core/analytics-principal';
 
 @Injectable()
 export class McpPrincipalResolver {
@@ -45,6 +46,17 @@ export class McpPrincipalResolver {
       role: result.activeRole,
       features: await this.resolveFeatures(orgId, result.isPlatformAdmin),
       channel: 'mcp-external',
+    };
+  }
+
+  async principalFromJwt(
+    user: JwtPayload,
+    channel: AnalyticsChannel,
+  ): Promise<AnalyticsPrincipal> {
+    return {
+      ...user,
+      features: await this.resolveFeatures(user.orgId, user.isPlatformAdmin),
+      channel,
     };
   }
 
