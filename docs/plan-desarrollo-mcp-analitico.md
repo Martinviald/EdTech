@@ -3,6 +3,11 @@
 > Companion de [`propuesta-mcp-analitico.md`](./propuesta-mcp-analitico.md) (el _qué_ y el _por qué_).
 > Este documento es el _cómo_: fases ordenadas, archivos, tareas, tests y estructura de PRs que
 > ejecutan el diseño completo. **Branch base sugerido: `mcp-analitico`** (desde `main`).
+>
+> **Estado (2026-08-16): F0–F7 implementadas** en la branch `mcp-analytics-design` (código en
+> `apps/api/src/mcp/`). Suite MCP+asistente en verde y build de producción OK; `MCP_ENABLED=false`
+> hasta configurar WorkOS. Pendiente: provisioning WorkOS + prueba E2E OAuth con Claude/ChatGPT (F0,
+> tarea del usuario). F8 (extensiones) queda post-MVP.
 
 ## Cómo leer este plan
 
