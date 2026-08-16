@@ -20,7 +20,6 @@ import {
   CardSkeleton,
   FilterBarSkeleton,
   MetricsGroup,
-  AlertCallout,
   BackLink,
 } from '@/components/shared';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -165,16 +164,7 @@ async function PanoramaContent({
     );
   }
 
-  const {
-    student,
-    filters,
-    filterOptions,
-    comparability,
-    bySubject,
-    summary,
-    byAssessment,
-    bySkillTree,
-  } = data;
+  const { student, filters, filterOptions, bySubject, summary, byAssessment, bySkillTree } = data;
 
   const meta = [
     student.rut,
@@ -209,10 +199,7 @@ async function PanoramaContent({
               {
                 label: 'Logro promedio',
                 value: formatAchievement(summary.averageAchievement),
-                hint:
-                  summary.averageAchievement === null && comparability.reason
-                    ? 'No se promedia: el alcance mezcla instrumentos.'
-                    : achievementHint(summary.assessmentsWithAchievement, summary.assessmentsCount),
+                hint: achievementHint(summary.assessmentsWithAchievement, summary.assessmentsCount),
               },
               {
                 label: 'Habilidades evaluadas',
@@ -221,12 +208,6 @@ async function PanoramaContent({
               },
             ]}
           />
-
-          {comparability.reason ? (
-            <AlertCallout tone="info" title="Alcance no agregable">
-              {comparability.reason}
-            </AlertCallout>
-          ) : null}
 
           <SubjectPanorama
             studentId={studentId}

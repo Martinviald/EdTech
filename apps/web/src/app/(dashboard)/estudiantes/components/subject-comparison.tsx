@@ -7,7 +7,6 @@ import {
 } from '@soe/types';
 import { cn } from '@/lib/utils';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { AlertCallout } from '@/components/shared';
 import { PerformanceBadge } from '../../resultados/components/performance-badge';
 import { formatAchievement } from '../../resultados/components/performance-level';
 
@@ -124,7 +123,6 @@ function CohortRow({
 }
 
 function SubjectComparisonCard({ comparison }: { comparison: StudentSubjectComparison }) {
-  const incomparable = comparison.comparability.reason;
   return (
     <Card>
       <CardHeader className="flex flex-row items-start justify-between gap-3 space-y-0">
@@ -146,43 +144,39 @@ function SubjectComparisonCard({ comparison }: { comparison: StudentSubjectCompa
           <p className="text-2xs uppercase tracking-wide text-muted-foreground">Logro del alumno</p>
         </div>
 
-        {incomparable ? (
-          <AlertCallout tone="info">{incomparable}</AlertCallout>
-        ) : (
-          <div className="space-y-3">
-            <CohortRow
-              icon={Users}
-              title="Curso"
-              cohort={comparison.course}
-              studentAchievement={comparison.student.achievement}
-            />
-            <CohortRow
-              icon={GraduationCap}
-              title="Nivel"
-              cohort={comparison.grade}
-              studentAchievement={comparison.student.achievement}
-            />
-            {comparison.generations.length > 0 ? (
-              <div className="space-y-2">
-                <span className="inline-flex items-center gap-1.5 text-sm font-medium">
-                  <History className="size-3.5 text-muted-foreground" aria-hidden />
-                  Generaciones anteriores
-                </span>
-                <div className="space-y-3 border-l border-border pl-3">
-                  {comparison.generations.map((generation) => (
-                    <CohortRow
-                      key={generation.label}
-                      icon={History}
-                      title={generation.label}
-                      cohort={generation}
-                      studentAchievement={comparison.student.achievement}
-                    />
-                  ))}
-                </div>
+        <div className="space-y-3">
+          <CohortRow
+            icon={Users}
+            title="Curso"
+            cohort={comparison.course}
+            studentAchievement={comparison.student.achievement}
+          />
+          <CohortRow
+            icon={GraduationCap}
+            title="Nivel"
+            cohort={comparison.grade}
+            studentAchievement={comparison.student.achievement}
+          />
+          {comparison.generations.length > 0 ? (
+            <div className="space-y-2">
+              <span className="inline-flex items-center gap-1.5 text-sm font-medium">
+                <History className="size-3.5 text-muted-foreground" aria-hidden />
+                Generaciones anteriores
+              </span>
+              <div className="space-y-3 border-l border-border pl-3">
+                {comparison.generations.map((generation) => (
+                  <CohortRow
+                    key={generation.label}
+                    icon={History}
+                    title={generation.label}
+                    cohort={generation}
+                    studentAchievement={comparison.student.achievement}
+                  />
+                ))}
               </div>
-            ) : null}
-          </div>
-        )}
+            </div>
+          ) : null}
+        </div>
       </CardContent>
     </Card>
   );
