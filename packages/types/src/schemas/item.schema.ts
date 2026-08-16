@@ -426,15 +426,21 @@ export type ItemVersionModel = {
 
 /**
  * Figura (imagen) asociada a un ítem: la banda recortada del PDF original que
- * contiene el enunciado gráfico y/o las alternativas-imagen. Vive en el módulo
- * genérico `files` (`owner_type='item'`, `purpose='item_figure'`); la storage key
- * queda además en `items.scoring_config.imageRef`.
+ * contiene el enunciado gráfico y/o las alternativas-imagen.
+ *
+ * La FUENTE DE VERDAD es `items.scoring_config.imageRef`, que es también lo que
+ * enciende `hasFigure` en el análisis por pregunta: se sirve desde ahí para que la
+ * UI no pueda ofrecer una figura que después no se muestra. El registro en `files`
+ * (`owner_type='item'`, `purpose='item_figure'`) es el inventario del objeto y sólo
+ * aporta metadata — por eso `id` es nullable: puede no estar registrado todavía.
+ * (Los instrumentos 2026 se cargaron sin esa fila y la figura salía "no disponible"
+ * aunque el PNG estuviera en S3.)
  *
  * Calcado de `InstrumentAttachmentModel`: las URLs prefirmadas son opcionales
  * porque solo se emiten cuando el almacenamiento S3 está configurado.
  */
 export type ItemFigureModel = {
-  id: string;
+  id: string | null;
   itemId: string;
   storageKey: string | null;
   fileName: string | null;
@@ -451,7 +457,7 @@ export type ItemFigureModel = {
  * `ItemFigureModel` + la `key` (A/B/C/D). Se sirve por `/items/{id}/alternativa/{key}/figura`.
  */
 export type AltFigureModel = {
-  id: string;
+  id: string | null;
   itemId: string;
   key: string;
   storageKey: string | null;

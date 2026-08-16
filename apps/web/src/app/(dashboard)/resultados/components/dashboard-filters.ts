@@ -79,7 +79,7 @@ export function parseDashboardFilters(
 // El nombre de un curso ("A", "B", "C") no dice a qué nivel pertenece, así que
 // todo dropdown de cursos se filtra por el nivel elegido y, mientras no haya
 // nivel, muestra el nombre calificado ("3° Básico A"). Helpers compartidos por
-// `DashboardFilterBar` y `ProgressionScopeBar` para no duplicar la regla.
+// `DashboardFilterBar` y `TrajectoryScopeBar` para no duplicar la regla.
 
 /** Cursos del nivel indicado; sin nivel elegido, todos los cursos. */
 export function classGroupsForGrade(

@@ -14,7 +14,7 @@ import {
   withOrgContext,
   type Item,
 } from '@soe/db';
-import { validateItemContent } from '@soe/types';
+import { extractItemStem, validateItemContent } from '@soe/types';
 import type {
   AltFigureModel,
   ItemBankScope,
@@ -56,10 +56,6 @@ export interface ItemContentForAssistant {
   /** Habilidad principal etiquetada al ítem (taxonomy tag), si existe. */
   skillName: string | null;
 }
-
-/** Scope del archivo de figura dentro del módulo genérico `files`. */
-const FIGURE_OWNER_TYPE = 'item' as const;
-const FIGURE_PURPOSE = 'item_figure' as const;
 
 @Injectable()
 export class ItemsService {
@@ -290,7 +286,11 @@ export class ItemsService {
 
   /**
    * Lee la figura de un ítem (con URLs prefirmadas si aplica). Devuelve `null` si
-   * el ítem no tiene figura registrada.
+   * el ítem no declara figura.
+   *
+   * La key sale de `scoringConfig.imageRef` — el MISMO dato con que el análisis por
+   * pregunta enciende `hasFigure` —, así que el botón no puede prometer una imagen
+   * que no se sirva. La fila de `files` sólo aporta metadata y puede no existir.
    *
    * El scope del archivo se deriva del RECURSO DUEÑO, no del usuario: `row.orgId`
    * es `null` en los ítems oficiales, y `FilesService.run(null)` corre sin contexto
@@ -298,80 +298,41 @@ export class ItemsService {
    * deja ver las filas globales. Mismo criterio que `createEnunciadoUploadUrl`.
    */
   async getFigure(id: string, user: JwtPayload): Promise<ItemFigureModel | null> {
-    const [row] = await this.db
-      .select()
-      .from(items)
-      .where(and(eq(items.id, id), isNull(items.deletedAt)));
+    const row = await this.loadVisibleItem(id, user);
 
-    if (!row) throw new NotFoundException('Ítem no encontrado');
-    this.assertVisible(row, user);
+    const imageRef = row.scoringConfig?.imageRef;
+    if (typeof imageRef !== 'string' || imageRef.length === 0) return null;
 
-    const file = await this.files.getLatestByOwner(
-      row.orgId,
-      FIGURE_OWNER_TYPE,
-      row.id,
-      FIGURE_PURPOSE,
-    );
-    if (!file) return null;
-
-    const model: ItemFigureModel = {
-      id: file.id,
-      itemId: row.id,
-      storageKey: file.storageKey,
-      fileName: file.fileName,
-      mimeType: file.mimeType,
-      sizeBytes: file.sizeBytes,
-    };
-
-    // Las URLs prefirmadas solo existen si el almacenamiento está configurado; su
-    // ausencia nunca debe hacer fallar la lectura del ítem.
-    const downloadUrl = this.files.buildDownloadUrl(file);
-    if (downloadUrl) model.downloadUrl = downloadUrl;
-    const previewUrl = this.files.buildDownloadUrl(file, 'inline');
-    if (previewUrl) model.previewUrl = previewUrl;
-
-    return model;
+    const resolved = await this.files.resolveByStorageKey(row.orgId, imageRef);
+    return { ...resolved, itemId: row.id };
   }
 
   /**
    * Figura de UNA alternativa (ítems con opciones-imagen), con URLs prefirmadas frescas.
-   * Se resuelve por la storage key guardada en `scoringConfig.altImageRefs[key]`: las 4
-   * filas `files` de un ítem comparten owner/purpose, así que `getLatestByOwner` no las
-   * distingue — hay que ir por la key. La vista la pide por la ruta estable
+   * Se resuelve por la storage key guardada en `scoringConfig.altImageRefs[key]`, que es
+   * también la que decide si la vista muestra la miniatura. La pide por la ruta estable
    * `/items/{id}/alternativa/{key}/figura`. Null si la alternativa no tiene imagen.
    */
   async getAltFigure(id: string, key: string, user: JwtPayload): Promise<AltFigureModel | null> {
-    const [row] = await this.db
-      .select()
-      .from(items)
-      .where(and(eq(items.id, id), isNull(items.deletedAt)));
-
-    if (!row) throw new NotFoundException('Ítem no encontrado');
-    this.assertVisible(row, user);
+    const row = await this.loadVisibleItem(id, user);
 
     const refs = (row.scoringConfig?.altImageRefs ?? null) as Record<string, unknown> | null;
     const storageKey = refs && typeof refs[key] === 'string' ? (refs[key] as string) : null;
     if (!storageKey) return null;
 
-    const file = await this.files.findByStorageKey(row.orgId, storageKey);
-    if (!file) return null;
+    const resolved = await this.files.resolveByStorageKey(row.orgId, storageKey);
+    return { ...resolved, itemId: row.id, key };
+  }
 
-    const model: AltFigureModel = {
-      id: file.id,
-      itemId: row.id,
-      key,
-      storageKey: file.storageKey,
-      fileName: file.fileName,
-      mimeType: file.mimeType,
-      sizeBytes: file.sizeBytes,
-    };
+  private async loadVisibleItem(id: string, user: JwtPayload): Promise<Item> {
+    const [row] = await this.db
+      .select()
+      .from(items)
+      .where(and(eq(items.id, id), isNull(items.deletedAt)));
 
-    const downloadUrl = this.files.buildDownloadUrl(file);
-    if (downloadUrl) model.downloadUrl = downloadUrl;
-    const previewUrl = this.files.buildDownloadUrl(file, 'inline');
-    if (previewUrl) model.previewUrl = previewUrl;
-
-    return model;
+    if (!row) throw new NotFoundException('Ítem no encontrado');
+    this.assertVisible(row, user);
+    return row;
   }
 
   /**
@@ -750,13 +711,7 @@ export class ItemsService {
     const asString = (v: unknown): string | null =>
       typeof v === 'string' && v.length > 0 ? v : null;
 
-    // El enunciado vive bajo distintas claves según el tipo (stem/prompt/passage/
-    // textWithGaps). Tomamos la primera presente — sin hardcodear un único tipo.
-    const stem =
-      asString(content.stem) ??
-      asString(content.prompt) ??
-      asString(content.passage) ??
-      asString(content.textWithGaps);
+    const stem = extractItemStem(content);
 
     if (type === 'true_false') {
       const correct =

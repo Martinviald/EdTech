@@ -3,11 +3,10 @@
 import { ITEM_TYPE_LABELS } from '@soe/types';
 import { useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
-import Link from 'next/link';
 import { toast } from 'sonner';
-import { ArrowLeft, FileStack, Trash2, X } from 'lucide-react';
+import { FileStack, Trash2, X } from 'lucide-react';
 import type { ItemCollectionDetailModel, ItemModel } from '@soe/types';
-import { EmptyState, Field, PageHeader } from '@/components/shared';
+import { BackLink, EmptyState, Field, PageHeader } from '@/components/shared';
 import { ItemDetailPanel } from '../../[instrumentId]/ItemDetailPanel';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -102,13 +101,7 @@ export function CollectionDetailView({ collection, canManage }: CollectionDetail
 
   return (
     <>
-      <Link
-        href={ROUTES.bancoColecciones}
-        className="inline-flex items-center gap-1 text-sm text-muted-foreground transition-colors hover:text-foreground"
-      >
-        <ArrowLeft className="h-4 w-4" />
-        Colecciones
-      </Link>
+      <BackLink href={ROUTES.bancoColecciones} label="Colecciones" />
 
       <PageHeader
         title={collection.name}

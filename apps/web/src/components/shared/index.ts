@@ -27,3 +27,5 @@ export { FilterBarSkeleton, KpiGridSkeleton, CardSkeleton, TableSkeleton } from 
 export { StatCard } from './StatCard';
 export { MetricTrendChip, type MetricTrend } from './metric-trend';
 export { PaginationControls } from './PaginationControls';
+export { ListSearchMemory, useRememberedHref } from './list-search-memory';
+export { BackLink } from './BackLink';

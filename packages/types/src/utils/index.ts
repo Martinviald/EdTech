@@ -12,4 +12,8 @@ export * from './short-answer';
 export * from './matching-answer';
 export * from './rubric-code';
 export * from './item-scoring';
+export * from './item-stem';
 export * from './response-display';
+export * from './answer-key';
+export * from './raw-answer-distribution';
+export * from './trajectory-selection';

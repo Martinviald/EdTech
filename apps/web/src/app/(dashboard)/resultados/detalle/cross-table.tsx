@@ -524,7 +524,14 @@ export function CrossTable({
         {displayQuestions.length === 1 ? 'pregunta' : 'preguntas'}
       </p>
 
-      <QuestionDetailPanel data={detail} open={open} onClose={closePanel} canAddToCollection />
+      <QuestionDetailPanel
+        data={detail}
+        open={open}
+        onClose={closePanel}
+        canAddToCollection
+        assessmentId={assessmentId}
+        classGroupId={classGroupId}
+      />
     </div>
   );
 }

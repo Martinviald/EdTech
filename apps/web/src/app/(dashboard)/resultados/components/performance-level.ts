@@ -53,6 +53,26 @@ export const PERFORMANCE_LEVEL_CHART_COLOR: Record<PerformanceLevel, string> = {
   advanced: '#3b82f6', // blue-500
 };
 
+/** Cuántos años distintos puede pintar la trayectoria antes de repetir color. */
+export const TRAJECTORY_YEAR_SLOTS = 5;
+
+/**
+ * Color de la serie del año que está a `yearsBack` años del más reciente (0 = el año en
+ * curso). Son identidades, no una magnitud: hues distintos, no pasos de una rampa, porque
+ * las líneas se cruzan y hay que poder seguir cada año a través del cruce.
+ *
+ * Sale de `--chart-series-*` (`globals.css`), que fija el orden validado de la paleta
+ * categórica del proyecto. Se pide como `hsl(var(...))` —igual que el resto de los colores
+ * de estos charts— para que el modo oscuro use su propio peldaño sin duplicar la tabla acá.
+ *
+ * Más años que slots comparten el último color: la identidad la carga la leyenda. Si eso
+ * llega a pasar de verdad, la salida correcta es plegar los años lejanos, no inventar hues.
+ */
+export function trajectoryYearChartColor(yearsBack: number): string {
+  const slot = Math.min(Math.max(yearsBack, 0), TRAJECTORY_YEAR_SLOTS - 1);
+  return `hsl(var(--chart-series-${slot + 1}))`;
+}
+
 export function performanceLevelLabel(level: PerformanceLevel | null): string {
   return level ? PERFORMANCE_LEVEL_LABELS[level] : 'Sin datos';
 }

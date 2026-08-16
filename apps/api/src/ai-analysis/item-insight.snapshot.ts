@@ -117,6 +117,9 @@ export class ItemInsightSnapshotService implements ItemInsightBuilder {
       })),
       passage,
       images: snapshotImages,
+      answerKey: question.answerKey,
+      scoreDistribution: question.scoreDistribution,
+      rawAnswerDistribution: question.rawAnswerDistribution,
     };
 
     return { snapshot, images: llmImages };

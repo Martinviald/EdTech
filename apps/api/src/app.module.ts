@@ -19,6 +19,7 @@ import { StudentsModule } from './students/students.module';
 import { InstrumentsModule } from './instruments/instruments.module';
 import { FilesModule } from './files/files.module';
 import { ItemsModule } from './items/items.module';
+import { RubricsModule } from './rubrics/rubrics.module';
 import { ItemCollectionsModule } from './item-collections/item-collections.module';
 import { ItemEditProposalsModule } from './item-edit-proposals/item-edit-proposals.module';
 import { DiaIngestionModule } from './dia-ingestion/dia-ingestion.module';
@@ -32,6 +33,7 @@ import { PerformanceBandsModule } from './performance-bands/performance-bands.mo
 import { DashboardsModule } from './dashboards/dashboards.module';
 import { AnalyticsModule } from './analytics/analytics.module';
 import { HeatmapModule } from './heatmap/heatmap.module';
+import { MasterBoardModule } from './master-board/master-board.module';
 import { ItemAnalysisModule } from './item-analysis/item-analysis.module';
 import { AssessmentReportModule } from './assessment-report/assessment-report.module';
 import { JobsModule } from './jobs/jobs.module';
@@ -66,6 +68,7 @@ import { OfficialReportImportModule } from './official-report-import/official-re
     // ── Módulo genérico de almacenamiento de archivos (S3 CRUD reutilizable) ──
     FilesModule,
     ItemsModule,
+    RubricsModule,
     ItemCollectionsModule,
     // ── TKT-19: escritura asistida de ítems (IA propone, humano aprueba) ──
     ItemEditProposalsModule,
@@ -83,6 +86,7 @@ import { OfficialReportImportModule } from './official-report-import/official-re
     AnalyticsModule,
     // ── Sprint 5: dashboards avanzados (heatmap, tabla cruzada, distractores) ──
     HeatmapModule,
+    MasterBoardModule,
     ItemAnalysisModule,
     // ── Informe consolidado por evaluación (directivos / UTP) ──
     AssessmentReportModule,

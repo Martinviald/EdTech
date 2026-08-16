@@ -52,6 +52,23 @@ export const INSTRUMENT_TYPES = [
 ] as const;
 export type InstrumentType = (typeof INSTRUMENT_TYPES)[number];
 
+/**
+ * Etiqueta de cada tipo de instrumento para la UI (selector de "toma" del tablero
+ * maestro, chips de evaluación). Vive acá —single source of truth— para no repetir
+ * el mapeo "dia → DIA / cambridge_mock → Mock Cambridge" en cada vista. Un tipo nuevo
+ * en `INSTRUMENT_TYPES` obliga a completar este Record.
+ */
+export const INSTRUMENT_TYPE_LABELS: Record<InstrumentType, string> = {
+  dia: 'DIA',
+  simce: 'Ensayo SIMCE',
+  paes: 'Ensayo PAES',
+  cambridge_mock: 'Mock Cambridge',
+  aptus: 'Aptus',
+  desafio: 'Desafío',
+  pal: 'PAL',
+  custom: 'Personalizado',
+};
+
 export const ITEM_TYPES = [
   'multiple_choice',
   'multi_select',
@@ -68,7 +85,6 @@ export const ITEM_TYPES = [
   'rubric_scored',
 ] as const;
 export type ItemType = (typeof ITEM_TYPES)[number];
-
 
 /**
  * Etiqueta de cada tipo de ítem para la UI. Vive acá y no en `apps/web` porque

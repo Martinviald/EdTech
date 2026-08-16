@@ -29,6 +29,16 @@ export interface CreateUploadIntentParams {
   expiresIn?: number;
 }
 
+export interface ResolvedStorageObject {
+  id: string | null;
+  storageKey: string;
+  fileName: string | null;
+  mimeType: string | null;
+  sizeBytes: number | null;
+  downloadUrl?: string;
+  previewUrl?: string;
+}
+
 export interface ConfirmFileParams {
   orgId: string | null;
   fileId: string;
@@ -371,6 +381,34 @@ export class FilesService {
       downloadFileName: row.fileName ?? undefined,
       disposition,
     });
+  }
+
+  async resolveByStorageKey(
+    orgId: string | null,
+    storageKey: string,
+  ): Promise<ResolvedStorageObject> {
+    const row = await this.findByStorageKey(orgId, storageKey);
+    const resolved: ResolvedStorageObject = {
+      id: row?.id ?? null,
+      storageKey,
+      fileName: row?.fileName ?? null,
+      mimeType: row?.mimeType ?? null,
+      sizeBytes: row?.sizeBytes ?? null,
+    };
+    if (!this.storage.isConfigured()) return resolved;
+
+    const downloadFileName = row?.fileName ?? undefined;
+    resolved.downloadUrl = this.storage.createDownloadUrl({
+      key: storageKey,
+      downloadFileName,
+      disposition: 'attachment',
+    });
+    resolved.previewUrl = this.storage.createDownloadUrl({
+      key: storageKey,
+      downloadFileName,
+      disposition: 'inline',
+    });
+    return resolved;
   }
 
   /** Mapea una fila de `files` al modelo de API compartido (`@soe/types`). */

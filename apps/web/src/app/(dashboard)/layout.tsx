@@ -1,3 +1,4 @@
+import { Suspense } from 'react';
 import { redirect } from 'next/navigation';
 import { canAccess, ASSISTANT_USER_ROLES } from '@soe/types';
 import { auth } from '@/auth';
@@ -8,6 +9,7 @@ import { PageTitleProvider } from '@/components/layout/page-title-context';
 import { Sidebar } from '@/components/layout/Sidebar';
 import { SkipLink } from '@/components/layout/SkipLink';
 import { Topbar } from '@/components/layout/Topbar';
+import { ListSearchMemory } from '@/components/shared';
 import { Toaster } from '@/components/ui/sonner';
 import { AssistantProvider, AssistantWidget } from '@/components/assistant';
 
@@ -29,6 +31,10 @@ export default async function DashboardLayout({ children }: { children: React.Re
   return (
     <AssistantProvider enabled={assistantEnabled}>
       <PageTitleProvider>
+        {/* Recuerda los filtros de cada listado para el enlace de vuelta. */}
+        <Suspense fallback={null}>
+          <ListSearchMemory />
+        </Suspense>
         <div className="flex h-screen bg-background">
           <SkipLink />
           <Sidebar roles={session.user.roles} />

@@ -7,7 +7,7 @@ import type { AiAnalysisAudience, ItemInsightSnapshot } from '@soe/types';
  * el prompt evolucione. Cambiar el texto del prompt o la forma del output exige
  * bumpear esta versión.
  */
-export const ITEM_INSIGHT_PROMPT_VERSION = 's2-item-insight-v2';
+export const ITEM_INSIGHT_PROMPT_VERSION = 's2-item-insight-v4';
 
 /**
  * Construye el par {system, prompt} del análisis IA por-pregunta (drill-down).
@@ -46,7 +46,10 @@ export function buildItemInsightPrompt(
 function buildSystem(): string {
   return [
     'Eres un asesor pedagógico experto en evaluación educativa para colegios chilenos.',
-    'Analizas UNA pregunta de selección múltiple e interpretas resultados YA CALCULADOS.',
+    'Analizas UNA pregunta de una evaluación e interpretas resultados YA CALCULADOS. La',
+    'pregunta puede ser de selección múltiple (con alternativas y distractores) o de',
+    'desarrollo / respuesta construida (con respuesta modelo o pauta y una distribución por',
+    'categoría de puntaje: RC = correcta, RPC = parcialmente correcta, RI = incorrecta).',
     '',
     'REGLAS INQUEBRANTABLES:',
     '1. Responde EXCLUSIVAMENTE con un único objeto JSON válido. Sin texto, sin markdown,',
@@ -62,13 +65,17 @@ function buildSystem(): string {
     '   revisarla o reemplazarla. El resultado SIEMPRE se explica por aprendizaje.',
     '6. Decide likelyCause (causa del desempeño) entre estas tres:',
     '   - "not_taught": % de logro muy bajo con las respuestas repartidas entre varias',
-    '     alternativas → contenido probablemente no alcanzado a ver/enseñar.',
+    '     alternativas (o alta proporción de RI en desarrollo) → contenido probablemente no',
+    '     alcanzado a ver/enseñar.',
     '   - "misconception": un distractor concentra muchas respuestas (dominantDistractor) →',
     '     error conceptual sistemático; explica la misconcepción que sugiere ese distractor.',
+    '     En desarrollo, una alta proporción de RPC/RI concentrada en un mismo tipo de error.',
     '   - "insufficient_practice": % de logro intermedio-bajo sin un distractor dominante',
-    '     claro → el contenido se vio pero no está consolidado.',
-    '7. distractorAnalysis: una lectura por cada distractor relevante (los más elegidos):',
-    '   qué error/misconcepción revela elegir esa alternativa.',
+    '     claro (o muchos RPC en desarrollo) → el contenido se vio pero no está consolidado.',
+    '7. distractorAnalysis: en selección múltiple, una lectura por cada distractor relevante',
+    '   (los más elegidos): qué error/misconcepción revela elegir esa alternativa. En ítems de',
+    '   desarrollo SIN alternativas devuelve un arreglo vacío y explica la brecha frente a la',
+    '   respuesta modelo o pauta (answerKey) en performanceSummary, misconception y las acciones.',
     '8. passageInsight: si el snapshot trae "passage", explica cómo influye en la pregunta;',
     '   si no hay pasaje, devuelve null. visualInsight: si se adjuntó una imagen (el snapshot',
     '   lista "images" y la imagen va en el contenido multimodal), descríbela e interprétala;',
@@ -102,16 +109,21 @@ const OUTPUT_CONTRACT = `{
 // User: el snapshot serializado + foco por audiencia.
 // ──────────────────────────────────────────────────────────────────────────────
 
-function buildUserPrompt(
-  snapshot: ItemInsightSnapshot,
-  audience: AiAnalysisAudience,
-): string {
+function buildUserPrompt(snapshot: ItemInsightSnapshot, audience: AiAnalysisAudience): string {
   const hasImages = snapshot.images.length > 0;
   return [
     audienceFocus(audience),
     '',
-    'Analiza la siguiente pregunta. Usa la distribución de alternativas y el distractor',
-    'dominante para inferir la causa del desempeño y las misconcepciones del grupo.',
+    'Analiza la siguiente pregunta. En selección múltiple usa la distribución de alternativas',
+    'y el distractor dominante; en desarrollo usa la distribución por categoría de puntaje',
+    '(scoreDistribution: RC/RPC/RI) y la respuesta modelo o pauta (answerKey) para inferir la',
+    'causa del desempeño y las misconcepciones del grupo.',
+    '',
+    'Si viene "rawAnswerDistribution" (respuestas EXACTAS que ingresaron los alumnos en ítems',
+    'de respuesta corta/número, ordenar, unir o completar, agregadas por frecuencia), es tu',
+    'evidencia más valiosa: nombra los valores incorrectos más frecuentes y explica el error',
+    'específico que revelan (p. ej. "muchos escribieron 24 en vez de 21/10 → no simplifican").',
+    'Fundamenta misconception y recommendedActions en esos valores concretos, no en generalidades.',
     '',
     hasImages
       ? `NOTA: se adjuntaron ${snapshot.images.length} imagen(es) en el contenido multimodal. Interprétalas en visualInsight.`
@@ -163,6 +175,7 @@ function serializeSnapshot(snapshot: ItemInsightSnapshot) {
     type: snapshot.type,
     stem: snapshot.stem,
     correctKey: snapshot.correctKey,
+    answerKey: snapshot.answerKey ?? null,
     alternatives: snapshot.alternatives.map((alt) => ({
       key: alt.key,
       text: alt.text,
@@ -170,6 +183,8 @@ function serializeSnapshot(snapshot: ItemInsightSnapshot) {
       count: alt.count,
       percentage: alt.percentage,
     })),
+    scoreDistribution: snapshot.scoreDistribution ?? null,
+    rawAnswerDistribution: snapshot.rawAnswerDistribution ?? null,
     totalResponses: snapshot.totalResponses,
     blankCount: snapshot.blankCount,
     correctRate: snapshot.correctRate,

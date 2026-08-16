@@ -64,7 +64,7 @@ describe('resolveComparabilityKind', () => {
     expect(resolveComparabilityKind(refs, 8)).toBe('mixed');
   });
 
-  it('variar año Y momento a la vez rompe las dos claves: mixed', () => {
+  it('N4 — variar año Y momento sobre la misma medición es instrument_history', () => {
     const refs = [
       MATE_8_CIERRE_2026,
       variant(MATE_8_CIERRE_2026, {
@@ -73,7 +73,8 @@ describe('resolveComparabilityKind', () => {
         applicationPeriod: 'diagnostico',
       }),
     ];
-    expect(resolveComparabilityKind(refs, 8)).toBe('mixed');
+    expect(resolveComparabilityKind(refs, 8)).toBe('instrument_history');
+    expect(isAggregatable('instrument_history')).toBe(false);
   });
 
   it('mismo nivel y asignatura pero distinto tipo de instrumento es mixed', () => {
@@ -91,6 +92,7 @@ describe('isAggregatable', () => {
     expect(isAggregatable('single_instrument')).toBe(true);
     expect(isAggregatable('instrument_family')).toBe(false);
     expect(isAggregatable('period_series')).toBe(false);
+    expect(isAggregatable('instrument_history')).toBe(false);
     expect(isAggregatable('mixed')).toBe(false);
     expect(isAggregatable('empty')).toBe(false);
   });

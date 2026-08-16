@@ -19,6 +19,20 @@ export const INSTRUMENT_APPLICATION_PERIOD_LABELS: Record<InstrumentApplicationP
   cierre: 'Cierre',
 };
 
+/**
+ * Etiqueta corta del momento, para ejes de gráficos donde el punto además lleva el año
+ * ("2025 Diag."). Sólo para espacios apretados: en texto corrido va
+ * `INSTRUMENT_APPLICATION_PERIOD_LABELS`.
+ */
+export const INSTRUMENT_APPLICATION_PERIOD_SHORT_LABELS: Record<
+  InstrumentApplicationPeriod,
+  string
+> = {
+  diagnostico: 'Diag.',
+  intermedio: 'Mon.',
+  cierre: 'Cierre',
+};
+
 /** Narrowing de un texto libre (JSON de ingesta) al enum. Devuelve null si no calza. */
 export function toApplicationPeriod(
   value: string | null | undefined,
@@ -268,10 +282,12 @@ export type SectionAttachmentModel = {
  *
  * Espejo de `ItemFigureModel`: la BDD guarda la storage key y las URLs se firman en cada
  * request (una presigned persistida caducaría). Se sirve por la ruta estable
- * `/instrumentos/secciones/{id}/imagen`.
+ * `/instrumentos/secciones/{id}/imagen`, resolviendo la key desde
+ * `section_attachments.storage_key` — el mismo dato con que la vista decide mostrar el
+ * adjunto. `id` es nullable porque el objeto puede no estar registrado en `files`.
  */
 export type SectionFigureModel = {
-  id: string;
+  id: string | null;
   sectionId: string;
   storageKey: string | null;
   fileName: string | null;

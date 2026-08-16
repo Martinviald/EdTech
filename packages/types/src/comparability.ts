@@ -33,8 +33,8 @@ import {
  * único (% de logro, distribución, clasificación de alumnos) porque todos los resultados
  * salen de las mismas preguntas y del mismo corte.
  *
- * `instrument_family` y `period_series` son COMPARABLES pero NO agregables: se muestran
- * punto a punto, con su delta, nunca promediados entre sí.
+ * `instrument_family`, `period_series` e `instrument_history` son COMPARABLES pero NO
+ * agregables: se muestran punto a punto, con su delta, nunca promediados entre sí.
  */
 export const COMPARABILITY_KINDS = [
   'empty',
@@ -42,6 +42,7 @@ export const COMPARABILITY_KINDS = [
   'single_instrument',
   'instrument_family',
   'period_series',
+  'instrument_history',
   'mixed',
 ] as const;
 export type ComparabilityKind = (typeof COMPARABILITY_KINDS)[number];
@@ -99,6 +100,19 @@ export function buildPeriodSeriesKey(ref: ComparabilityInstrumentRef): string {
   return [ref.type, ref.subjectId ?? NONE, ref.gradeId ?? NONE, ref.year ?? NONE].join('|');
 }
 
+/**
+ * Clave de **historia del instrumento** (nivel N4): la misma medición (tipo + asignatura
+ * + nivel) a lo largo de TODAS sus aplicaciones — varían el año Y el momento del ciclo.
+ * Es la unión de N2 y N3 sobre la misma familia base.
+ *
+ * No es agregable (nunca se promedia entre puntos), pero tampoco es `mixed`: no mezcla
+ * asignaturas ni tipos de instrumento, así que la trayectoria punto a punto sí se lee.
+ * Es lo que grafica la vista de Trayectoria en su eje "Trayectoria".
+ */
+export function buildInstrumentHistoryKey(ref: ComparabilityInstrumentRef): string {
+  return [ref.type, ref.subjectId ?? NONE, ref.gradeId ?? NONE].join('|');
+}
+
 /** El momento anterior del ciclo, o `null` si es el primero (o no declara momento). */
 export function previousApplicationPeriod(
   period: InstrumentApplicationPeriod | null,
@@ -134,6 +148,7 @@ export function resolveComparabilityKind(
   }
   if (allShare(refs, buildInstrumentFamilyKey) !== null) return 'instrument_family';
   if (allShare(refs, buildPeriodSeriesKey) !== null) return 'period_series';
+  if (allShare(refs, buildInstrumentHistoryKey) !== null) return 'instrument_history';
   return 'mixed';
 }
 
@@ -153,6 +168,8 @@ export function comparabilityReason(
       return 'Estás viendo el mismo instrumento en varios años. Se pueden comparar entre sí, pero no promediar en un solo número.';
     case 'period_series':
       return 'Estás viendo varios momentos del mismo instrumento. Se pueden comparar entre sí, pero no promediar en un solo número.';
+    case 'instrument_history':
+      return 'Estás viendo la misma medición a lo largo de varios años y momentos del ciclo. Se pueden comparar punto a punto, pero no promediar en un solo número.';
     default:
       return null;
   }
@@ -166,6 +183,7 @@ export function comparabilityLabel(kind: ComparabilityKind): string {
     single_instrument: 'Un instrumento',
     instrument_family: 'Mismo instrumento, varios años',
     period_series: 'Varios momentos del año',
+    instrument_history: 'Misma medición, historia completa',
     mixed: 'Varios instrumentos',
   };
   return labels[kind];

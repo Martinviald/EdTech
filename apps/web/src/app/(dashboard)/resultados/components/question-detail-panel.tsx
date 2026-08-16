@@ -1,12 +1,15 @@
 'use client';
 
 import type { JSX } from 'react';
-import { CheckCircle2, FileQuestion, Loader2 } from 'lucide-react';
+import { CheckCircle2, FileQuestion, Loader2, Sparkles } from 'lucide-react';
 import type {
   AlternativeDistribution,
   QuestionAnalysisResponse,
   QuestionSection,
   QuestionTaxonomyTag,
+  RawAnswerCount,
+  ScoreCategoryDistribution,
+  UserRole,
 } from '@soe/types';
 import { Badge } from '@/components/ui/badge';
 import {
@@ -17,6 +20,8 @@ import {
 import { cn } from '@/lib/utils';
 import { QuestionDetailSheet } from '@/components/question-detail/question-detail-sheet';
 import { QuestionNodes, type QuestionNodeTag } from '@/components/question-detail/question-nodes';
+import { AnswerKeyView } from '@/components/items/answer-key-view';
+import { ItemInsightInline } from '@/app/(dashboard)/analisis-ia/components/item-insight-inline';
 import { AddToCollectionMenu } from '@/components/collections/add-to-collection-menu';
 
 function questionSectionToPassage(section: QuestionSection): PassageData {
@@ -61,8 +66,20 @@ export function QuestionDetailPanel(props: {
   open: boolean;
   onClose: () => void;
   canAddToCollection?: boolean;
+  /** Contexto para el análisis IA por-pregunta. Sin `assessmentId` no se ofrece. */
+  assessmentId?: string;
+  classGroupId?: string;
+  activeRole?: UserRole;
 }): JSX.Element {
-  const { data, open, onClose, canAddToCollection = false } = props;
+  const {
+    data,
+    open,
+    onClose,
+    canAddToCollection = false,
+    assessmentId,
+    classGroupId,
+    activeRole,
+  } = props;
   const section = data?.section ?? null;
   const passage = section && hasPassageContent(section) ? questionSectionToPassage(section) : null;
 
@@ -88,7 +105,12 @@ export function QuestionDetailPanel(props: {
           <p className="text-sm">Cargando análisis de la pregunta…</p>
         </div>
       ) : (
-        <QuestionDetailContent data={data} />
+        <QuestionDetailContent
+          data={data}
+          assessmentId={assessmentId}
+          classGroupId={classGroupId}
+          activeRole={activeRole}
+        />
       )}
     </QuestionDetailSheet>
   );
@@ -105,9 +127,25 @@ function toNodeTags(tags: QuestionTaxonomyTag[]): QuestionNodeTag[] {
   }));
 }
 
-function QuestionDetailContent({ data }: { data: QuestionAnalysisResponse }): JSX.Element {
+function QuestionDetailContent({
+  data,
+  assessmentId,
+  classGroupId,
+  activeRole,
+}: {
+  data: QuestionAnalysisResponse;
+  assessmentId?: string;
+  classGroupId?: string;
+  activeRole?: UserRole;
+}): JSX.Element {
   const distractor = topDistractorKey(data.alternatives);
   const levelReference = data.references.grade.rate;
+  // En selección múltiple la clave ya va resaltada en la distribución; para el
+  // resto de tipos (V/F, desarrollo, pauta…) la mostramos aparte.
+  const showAnswerKey =
+    data.answerKey.kind !== 'choice' &&
+    data.answerKey.kind !== 'multi_choice' &&
+    data.answerKey.kind !== 'none';
 
   return (
     <div className="mt-6 space-y-6">
@@ -129,6 +167,14 @@ function QuestionDetailContent({ data }: { data: QuestionAnalysisResponse }): JS
           alt={`Imagen de la pregunta ${data.position}`}
           className="max-h-64 w-full rounded-md border object-contain"
         />
+      ) : null}
+
+      {/* Respuesta correcta / pauta (para tipos sin alternativas visibles) */}
+      {showAnswerKey ? (
+        <section className="space-y-3">
+          <h3 className="text-sm font-semibold text-foreground">Respuesta correcta</h3>
+          <AnswerKeyView answerKey={data.answerKey} itemId={data.itemId} />
+        </section>
       ) : null}
 
       {/* Métricas globales de la pregunta */}
@@ -164,18 +210,10 @@ function QuestionDetailContent({ data }: { data: QuestionAnalysisResponse }): JS
           resultados los descriptores no se muestran (solo en el banco de ítems). */}
       <QuestionNodes tags={toNodeTags(data.tags)} hiddenTypes={['descriptor']} />
 
-      {/* Distribución por alternativa */}
+      {/* Distribución: por alternativa (MC) o por categoría de puntaje (desarrollo) */}
       <section className="space-y-3">
         <h3 className="text-sm font-semibold text-foreground">Distribución de respuestas</h3>
-        {data.alternatives.length === 0 ? (
-          <div className="flex items-center gap-2 rounded-md border border-dashed bg-muted/30 px-4 py-6 text-sm text-muted-foreground">
-            <FileQuestion className="size-5" aria-hidden />
-            <span>
-              Esta pregunta no es de selección múltiple. Se registraron {data.totalResponses}{' '}
-              respuestas con {formatPct(data.correctRate)} de logro.
-            </span>
-          </div>
-        ) : (
+        {data.alternatives.length > 0 ? (
           <ul className="space-y-2.5">
             {data.alternatives.map((alt) => (
               <AlternativeRow
@@ -189,8 +227,58 @@ function QuestionDetailContent({ data }: { data: QuestionAnalysisResponse }): JS
               <BlankRow count={data.blankCount} total={data.totalResponses} />
             ) : null}
           </ul>
+        ) : data.scoreDistribution ? (
+          <ul className="space-y-2.5">
+            {data.scoreDistribution.map((category) => (
+              <ScoreCategoryRow key={category.key} category={category} />
+            ))}
+            {data.blankCount > 0 ? (
+              <BlankRow count={data.blankCount} total={data.totalResponses} />
+            ) : null}
+          </ul>
+        ) : (
+          <div className="flex items-center gap-2 rounded-md border border-dashed bg-muted/30 px-4 py-6 text-sm text-muted-foreground">
+            <FileQuestion className="size-5" aria-hidden />
+            <span>
+              Sin distribución disponible. Se registraron {data.totalResponses} respuestas con{' '}
+              {formatPct(data.correctRate)} de logro.
+            </span>
+          </div>
         )}
       </section>
+
+      {/* Respuestas exactas de los alumnos (tipos estructurados no-MC) */}
+      {data.rawAnswerDistribution && data.rawAnswerDistribution.length > 0 ? (
+        <section className="space-y-3">
+          <h3 className="text-sm font-semibold text-foreground">Respuestas más frecuentes</h3>
+          <p className="text-xs text-muted-foreground">
+            Lo que escribieron exactamente los alumnos, agrupado por frecuencia. Las respuestas
+            correctas van en verde.
+          </p>
+          <ul className="space-y-2.5">
+            {data.rawAnswerDistribution.map((answer, i) => (
+              <RawAnswerRow key={`${answer.answer}-${i}`} answer={answer} />
+            ))}
+          </ul>
+        </section>
+      ) : null}
+
+      {/* Análisis pedagógico con IA (drill-down por-pregunta) */}
+      {assessmentId ? (
+        <section className="space-y-3 border-t pt-6">
+          <h3 className="flex items-center gap-2 text-sm font-semibold text-foreground">
+            <Sparkles className="size-4 text-primary" aria-hidden />
+            Análisis pedagógico con IA
+          </h3>
+          <ItemInsightInline
+            key={data.itemId}
+            itemId={data.itemId}
+            assessmentId={assessmentId}
+            classGroupId={classGroupId}
+            activeRole={activeRole}
+          />
+        </section>
+      ) : null}
     </div>
   );
 }
@@ -253,6 +341,65 @@ function AlternativeRow({
             barClass,
           )}
           style={{ width: `${Math.min(100, Math.max(0, alt.percentage))}%` }}
+        />
+      </div>
+    </li>
+  );
+}
+
+function ScoreCategoryRow({ category }: { category: ScoreCategoryDistribution }): JSX.Element {
+  const barClass =
+    category.credit >= 1 ? 'bg-success' : category.credit > 0 ? 'bg-warning' : 'bg-destructive/70';
+  return (
+    <li className="space-y-1">
+      <div className="flex items-center justify-between gap-2 text-sm">
+        <span className="font-medium text-foreground">{category.label}</span>
+        <span className="shrink-0 tabular-nums text-muted-foreground">
+          {category.count} · {formatPct(category.percentage)}
+        </span>
+      </div>
+      <div className="h-2 w-full overflow-hidden rounded-full bg-muted" role="presentation">
+        <div
+          className={cn(
+            'h-full rounded-full transition-[width] motion-reduce:transition-none',
+            barClass,
+          )}
+          style={{ width: `${Math.min(100, Math.max(0, category.percentage))}%` }}
+        />
+      </div>
+    </li>
+  );
+}
+
+function RawAnswerRow({ answer }: { answer: RawAnswerCount }): JSX.Element {
+  return (
+    <li className="space-y-1">
+      <div className="flex items-center justify-between gap-2 text-sm">
+        <div className="flex min-w-0 items-center gap-2">
+          {answer.isCorrect ? (
+            <CheckCircle2 className="size-4 shrink-0 text-success" aria-label="Correcta" />
+          ) : null}
+          <span
+            className={cn(
+              'min-w-0 truncate',
+              answer.isCorrect ? 'font-medium text-foreground' : 'text-foreground',
+            )}
+            title={answer.answer}
+          >
+            {answer.answer}
+          </span>
+        </div>
+        <span className="shrink-0 tabular-nums text-muted-foreground">
+          {answer.count} · {formatPct(answer.percentage)}
+        </span>
+      </div>
+      <div className="h-2 w-full overflow-hidden rounded-full bg-muted" role="presentation">
+        <div
+          className={cn(
+            'h-full rounded-full transition-[width] motion-reduce:transition-none',
+            answer.isCorrect ? 'bg-success' : 'bg-muted-foreground/40',
+          )}
+          style={{ width: `${Math.min(100, Math.max(0, answer.percentage))}%` }}
         />
       </div>
     </li>

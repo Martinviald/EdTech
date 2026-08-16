@@ -12,6 +12,16 @@ function makeService() {
   return new ItemsService(db, files);
 }
 
+/** Doble de Drizzle que devuelve `row` a un `select().from().where()`. */
+function dbMockForRow(row: Item | null) {
+  return {
+    select: jest.fn().mockReturnValue({
+      from: jest.fn().mockReturnThis(),
+      where: jest.fn().mockResolvedValue(row === null ? [] : [row]),
+    }),
+  } as never;
+}
+
 function user(overrides: Partial<JwtPayload> = {}): JwtPayload {
   const role = overrides.activeRole ?? overrides.role ?? 'school_admin';
   const isPlatformAdmin = overrides.isPlatformAdmin ?? role === 'platform_admin';
@@ -394,6 +404,102 @@ describe('ItemsService.update — validación de content polimórfico', () => {
     const svc = new ItemsService(dbMockForUpdate(existing), {} as never);
     const dto = { position: 5 } as UpdateItemDto;
     await expect(svc.update('item-1', dto, user({ orgId: 'org-1' }))).resolves.toBeDefined();
+  });
+});
+
+// ── getFigure / getAltFigure — la figura se resuelve por su storage key ──────
+//
+// La key vive en `scoring_config` (imageRef / altImageRefs), que es el MISMO dato
+// con que la UI decide ofrecer la imagen. La fila de `files` es sólo inventario y
+// puede faltar (pasó con los instrumentos 2026): sin ella la figura igual se sirve.
+
+describe('ItemsService.getFigure', () => {
+  function filesMock(row: { id: string; fileName: string } | null) {
+    return {
+      resolveByStorageKey: jest.fn(async (_orgId: string | null, storageKey: string) => ({
+        id: row?.id ?? null,
+        storageKey,
+        fileName: row?.fileName ?? null,
+        mimeType: null,
+        sizeBytes: null,
+        downloadUrl: `https://s3.test/${storageKey}?download`,
+        previewUrl: `https://s3.test/${storageKey}?inline`,
+      })),
+    };
+  }
+
+  const IMAGE_REF = 'item/global/Imedio-matematicas-intermedio-2026/item_figure/12.png';
+
+  it('sirve la figura desde `scoringConfig.imageRef` aunque no exista fila en `files`', async () => {
+    const row = item({ orgId: null, scoringConfig: { points: 1, imageRef: IMAGE_REF } });
+    const files = filesMock(null);
+    const svc = new ItemsService(dbMockForRow(row), files as never);
+
+    const figure = await svc.getFigure('item-1', user());
+
+    expect(figure).toEqual({
+      id: null,
+      itemId: 'item-1',
+      storageKey: IMAGE_REF,
+      fileName: null,
+      mimeType: null,
+      sizeBytes: null,
+      downloadUrl: `https://s3.test/${IMAGE_REF}?download`,
+      previewUrl: `https://s3.test/${IMAGE_REF}?inline`,
+    });
+    expect(files.resolveByStorageKey).toHaveBeenCalledWith(null, IMAGE_REF);
+  });
+
+  it('enriquece con la metadata de `files` cuando la fila existe', async () => {
+    const row = item({ orgId: null, scoringConfig: { points: 1, imageRef: IMAGE_REF } });
+    const files = filesMock({ id: 'f1', fileName: '12.png' });
+    const svc = new ItemsService(dbMockForRow(row), files as never);
+
+    const figure = await svc.getFigure('item-1', user());
+
+    expect(figure?.id).toBe('f1');
+    expect(figure?.fileName).toBe('12.png');
+  });
+
+  it('devuelve null cuando el ítem no declara figura', async () => {
+    const row = item({ scoringConfig: { points: 1 } });
+    const svc = new ItemsService(dbMockForRow(row), filesMock(null) as never);
+    await expect(svc.getFigure('item-1', user())).resolves.toBeNull();
+  });
+
+  it('lanza NotFound si el ítem no existe', async () => {
+    const svc = new ItemsService(dbMockForRow(null), filesMock(null) as never);
+    await expect(svc.getFigure('item-1', user())).rejects.toBeInstanceOf(NotFoundException);
+  });
+
+  it('bloquea el ítem de otra org antes de firmar nada', async () => {
+    const row = item({ orgId: 'other', scoringConfig: { points: 1, imageRef: IMAGE_REF } });
+    const files = filesMock(null);
+    const svc = new ItemsService(dbMockForRow(row), files as never);
+
+    await expect(svc.getFigure('item-1', user({ orgId: 'org-1' }))).rejects.toBeInstanceOf(
+      ForbiddenException,
+    );
+    expect(files.resolveByStorageKey).not.toHaveBeenCalled();
+  });
+
+  it('getAltFigure resuelve por la key de la alternativa, sin fila en `files`', async () => {
+    const altRef = 'item/global/slug/alt_figure/12-B.png';
+    const row = item({
+      orgId: null,
+      scoringConfig: { points: 1, altImageRefs: { A: 'a.png', B: altRef } },
+    });
+    const svc = new ItemsService(dbMockForRow(row), filesMock(null) as never);
+
+    const figure = await svc.getAltFigure('item-1', 'B', user());
+
+    expect(figure).toMatchObject({ id: null, itemId: 'item-1', key: 'B', storageKey: altRef });
+  });
+
+  it('getAltFigure devuelve null para una alternativa sin imagen', async () => {
+    const row = item({ orgId: null, scoringConfig: { points: 1, altImageRefs: { A: 'a.png' } } });
+    const svc = new ItemsService(dbMockForRow(row), filesMock(null) as never);
+    await expect(svc.getAltFigure('item-1', 'B', user())).resolves.toBeNull();
   });
 });
 

@@ -54,6 +54,7 @@ Ese "cae en silencio" es la raíz de casi todo lo que sigue.
 | **N1 — Instrumento** | `instrumentId` | El mismo instrumento aplicado a varios cursos del colegio | ✅ Sí (mismas preguntas, mismo corte) |
 | **N2 — Familia estándar** | `(type, subjectId, gradeId, applicationPeriod)` — varía `year` | El "mismo DIA" de años distintos | ❌ No. Se compara **punto a punto** |
 | **N3 — Serie de momentos** | `(type, subjectId, gradeId, year)` — varía `applicationPeriod` | Diagnóstico → Monitoreo → Cierre del mismo año | ❌ No. Trayectoria, no promedio |
+| **N4 — Historia del instrumento** | `(type, subjectId, gradeId)` — varían `year` y `applicationPeriod` | Todas las aplicaciones de la misma medición, en orden cronológico | ❌ No. Trayectoria, no promedio |
 
 Todo lo que **no** cae en N0–N3 es **mixto**: no se agrega ni se compara, se **desglosa**.
 
@@ -177,6 +178,7 @@ export const COMPARABILITY_KINDS = [
   'single_instrument',   // N1
   'instrument_family',   // N2 — comparable punto a punto, NO agregable
   'period_series',       // N3 — comparable punto a punto, NO agregable
+  'instrument_history',  // N4 — varían año Y momento sobre la misma medición; punto a punto
   'mixed',               // no comparable
 ] as const;
 

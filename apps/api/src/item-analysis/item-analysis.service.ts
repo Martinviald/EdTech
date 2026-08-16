@@ -26,12 +26,19 @@ import {
   RESULT_HIDDEN_NODE_TYPES,
   TRUE_FALSE_KEYS,
   TRUE_FALSE_LABELS,
+  DEVELOPMENT_BUCKETS,
+  SCORE_CATEGORY_META,
+  deriveAnswerKey,
+  buildRawAnswerDistribution,
+  supportsRawAnswerDistribution,
   isTrueFalseContent,
   parseSelectedKeys,
   mergeAnswerCounts,
   trueFalseKeyOf,
   userHasAnyRole,
   type AlternativeDistribution,
+  type ScoreCategoryDistribution,
+  type RawAnswerCount,
   type AssessmentListQueryDto,
   type AssessmentListResponse,
   type AssessmentOption,
@@ -49,6 +56,8 @@ import {
   type QuestionSection,
   type QuestionTaxonomyTag,
   type UserRole,
+  type ItemType,
+  extractItemStem,
 } from '@soe/types';
 import type { JwtPayload } from '../auth/jwt-payload.types';
 import { loadCohortAchievementByAssessment } from '../common/helpers/cohort-item-stats.helper';
@@ -545,7 +554,7 @@ export class ItemAnalysisService {
         itemId,
         position: item.position,
         type: item.type,
-        stem: typeof content.stem === 'string' ? content.stem : null,
+        stem: extractItemStem(content),
         imageUrl: typeof content.imageUrl === 'string' ? content.imageUrl : null,
         // La figura vive en `files` (owner_type='item'); acá solo se expone el flag
         // para que la UI decida si ofrecer el botón, sin firmar una URL por ítem.
@@ -562,6 +571,51 @@ export class ItemAnalysisService {
         correctRate,
         references,
         alternatives,
+        answerKey: deriveAnswerKey(item.type as ItemType, content as Record<string, unknown>),
+        scoreDistribution:
+          altDefs.length === 0 ? this.buildScoreDistribution(countByKey, totalResponses) : null,
+        rawAnswerDistribution:
+          query.assessmentId && supportsRawAnswerDistribution(item.type as ItemType)
+            ? await this.loadRawAnswerDistribution(
+                tx,
+                itemId,
+                query.assessmentId,
+                item.type as ItemType,
+                content as Record<string, unknown>,
+              )
+            : null,
+      };
+    });
+  }
+
+  private async loadRawAnswerDistribution(
+    tx: Database,
+    itemId: string,
+    assessmentId: string,
+    type: ItemType,
+    content: Record<string, unknown>,
+  ): Promise<RawAnswerCount[]> {
+    const rows = await tx
+      .select({ value: responses.value, isCorrect: responses.isCorrect })
+      .from(responses)
+      .where(and(eq(responses.itemId, itemId), eq(responses.assessmentId, assessmentId)));
+
+    return buildRawAnswerDistribution(type, content, rows);
+  }
+
+  private buildScoreDistribution(
+    countByKey: Map<string, number>,
+    totalResponses: number,
+  ): ScoreCategoryDistribution[] {
+    return DEVELOPMENT_BUCKETS.map((key) => {
+      const count = countByKey.get(key) ?? 0;
+      const meta = SCORE_CATEGORY_META[key];
+      return {
+        key,
+        label: meta.label,
+        count,
+        percentage: totalResponses > 0 ? (count / totalResponses) * 100 : 0,
+        credit: meta.credit,
       };
     });
   }

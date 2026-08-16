@@ -1,6 +1,8 @@
 import { z } from 'zod';
 import { csvArraySchema, stringCsvSchema, uuidCsvSchema } from './common.schema';
 import { INSTRUMENT_APPLICATION_PERIODS } from './instrument.schema';
+import type { AnswerKey, ScoreCategoryDistribution } from '../utils/answer-key';
+import type { RawAnswerCount } from '../utils/raw-answer-distribution';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Sprint 5 — Análisis a nivel de ítem (H6.11 + H6.12)
@@ -284,4 +286,17 @@ export type QuestionAnalysisResponse = {
   // `null` sin evaluación en contexto o sin datos agregados. `sample` queda DIFERIDO.
   references: QuestionReferences;
   alternatives: AlternativeDistribution[]; // incluye la correcta y los distractores
+  // Clave/respuesta correcta normalizada por tipo de ítem (deriveAnswerKey). Para
+  // los tipos sin alternativas (desarrollo, respuesta corta, pauta…) es lo que la
+  // vista muestra como "respuesta correcta"; en selección múltiple la clave ya va
+  // resaltada en `alternatives`.
+  answerKey: AnswerKey;
+  // Distribución por categoría de puntaje (RC/RPC/RI) para ítems de desarrollo.
+  // `null` en selección múltiple (ahí la distribución vive en `alternatives`).
+  scoreDistribution: ScoreCategoryDistribution[] | null;
+  // Distribución de respuestas EXACTAS ingresadas por los alumnos, para tipos no-MC
+  // estructurados (respuesta corta/número, ordenar, unir, completar). Agregada y
+  // anónima (valor → conteo). `null` si el tipo no aplica o no hay `assessmentId`
+  // en contexto (solo se calcula acotado a la cohorte de una evaluación).
+  rawAnswerDistribution: RawAnswerCount[] | null;
 };
