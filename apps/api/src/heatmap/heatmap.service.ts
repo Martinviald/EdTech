@@ -13,7 +13,9 @@ import {
 import {
   DEFAULT_PERFORMANCE_THRESHOLDS,
   RESULT_HIDDEN_NODE_TYPES,
+  bandToLegacyLevel,
   buildComparabilityMeta,
+  classifyByBands,
   percentageToPerformanceLevel,
   type ComparabilityInstrumentRef,
   type ComparabilityMeta,
@@ -22,6 +24,7 @@ import {
   type HeatmapResponse,
   type HeatmapRow,
   type HeatmapSubject,
+  type PerformanceBandInput,
   type PerformanceThresholds,
 } from '@soe/types';
 import type { JwtPayload } from '../auth/jwt-payload.types';
@@ -35,6 +38,7 @@ import {
 } from '../common/helpers/cohort-skill-stats.helper';
 import { resolveClassGroupScope } from '../common/helpers/class-group-scope.helper';
 import { InjectDb, type Database } from '../database/database.types';
+import { resolveEffectiveBands } from '../performance-bands/lib/resolve-effective-bands';
 
 const EMPTY_HEATMAP: HeatmapResponse = {
   subjects: [],
@@ -108,10 +112,12 @@ export class HeatmapService {
         return EMPTY_HEATMAP;
       }
 
-      // BUG #8: los niveles de desempeño deben usar los thresholds de la escala
-      // del instrumento, no los defaults fijos. Se resuelven una vez sobre el
-      // scope y se pasan a percentageToPerformanceLevel en el ensamblado.
-      const { thresholds, comparability } = await this.resolveScaleAndComparability(
+      // BUG #8: los niveles de desempeño deben usar los cortes del instrumento, no
+      // los defaults fijos. Las bandas del instrumento (con fallback a la versión
+      // anterior de su familia) son la fuente primaria; los thresholds de la escala
+      // sólo sirven de último recurso cuando el instrumento no tiene ni bandas
+      // propias ni heredadas (`source:'none'`). Se resuelven una vez sobre el scope.
+      const { thresholds, bands, comparability } = await this.resolveScaleAndComparability(
         tx,
         baseConditions,
       );
@@ -124,7 +130,7 @@ export class HeatmapService {
       // distintos en cada celda (#1C, D9): se devuelven las filas y columnas —para que
       // la vista conserve su estructura— pero sin números ni niveles.
       return {
-        ...this.assembleResponse(cellRows, thresholds, comparability.aggregatable),
+        ...this.assembleResponse(cellRows, thresholds, bands, comparability.aggregatable),
         comparability,
       };
     });
@@ -145,11 +151,22 @@ export class HeatmapService {
    * las celdas. `comparability` es justamente lo que permite detectar y declarar ese
    * caso: cuando `aggregatable` es falso, la matriz no debe clasificar con estos
    * thresholds (ver docs/diseno-panorama-comparable.md D9).
+   *
+   * Las bandas efectivas del instrumento (propias o heredadas de la versión anterior
+   * de su familia) son la fuente primaria de niveles; sólo se resuelven cuando el
+   * scope es un ÚNICO instrumento (mismo criterio que `DashboardsService.resolveScopedBands`):
+   * con varios instrumentos un corte por-instrumento no está definido. Cuando el
+   * resolver devuelve `source:'none'` (ni propias ni heredadas), `bands` queda `null`
+   * y el ensamblado cae a los thresholds legacy.
    */
   private async resolveScaleAndComparability(
     tx: Database,
     conditions: SQL[],
-  ): Promise<{ thresholds: PerformanceThresholds; comparability: ComparabilityMeta }> {
+  ): Promise<{
+    thresholds: PerformanceThresholds;
+    bands: PerformanceBandInput[] | null;
+    comparability: ComparabilityMeta;
+  }> {
     const rows = await tx
       .selectDistinct({
         assessmentId: assessments.id,
@@ -188,14 +205,36 @@ export class HeatmapService {
 
     const cfg = scaleConfig as { performanceThresholds?: Partial<PerformanceThresholds> } | null;
     const t = cfg?.performanceThresholds;
+
+    const instrumentIds = Array.from(byInstrument.keys());
+    const bands =
+      instrumentIds.length === 1
+        ? await this.resolveInstrumentBands(tx, instrumentIds[0]!)
+        : null;
+
     return {
       thresholds: {
         elementary: t?.elementary ?? DEFAULT_PERFORMANCE_THRESHOLDS.elementary,
         adequate: t?.adequate ?? DEFAULT_PERFORMANCE_THRESHOLDS.adequate,
         advanced: t?.advanced ?? DEFAULT_PERFORMANCE_THRESHOLDS.advanced,
       },
+      bands,
       comparability: buildComparabilityMeta(Array.from(byInstrument.values()), assessmentIds.size),
     };
+  }
+
+  /**
+   * Bandas efectivas del instrumento (propias o heredadas de la versión anterior de
+   * su familia). `source:'none'` → `null` para caer al corte legacy en el ensamblado.
+   * Corre dentro de `withOrgContext` (recibe `tx`): RLS necesita el contexto para ver
+   * las bandas globales (org_id NULL) más los overrides de la org.
+   */
+  private async resolveInstrumentBands(
+    tx: Database,
+    instrumentId: string,
+  ): Promise<PerformanceBandInput[] | null> {
+    const effective = await resolveEffectiveBands(tx, instrumentId);
+    return effective.source === 'none' ? null : effective.bands;
   }
 
   // ───────────────────────────────────────────────────────────────────────────
@@ -292,6 +331,7 @@ export class HeatmapService {
   private assembleResponse(
     cellRows: CellRow[],
     thresholds: PerformanceThresholds,
+    bands: PerformanceBandInput[] | null,
     aggregatable: boolean,
   ): Omit<HeatmapResponse, 'comparability'> {
     // Asignaturas (columnas), únicas y ordenadas por nombre.
@@ -338,15 +378,18 @@ export class HeatmapService {
       node.overall.pctWeight += Number(r.pctWeight ?? 0);
     }
 
+    const levelFor = (pct: number): HeatmapCell['performanceLevel'] => {
+      const band = classifyByBands(pct / 100, bands);
+      if (band) return bandToLegacyLevel(band, bands!);
+      return percentageToPerformanceLevel(pct / 100, { performanceThresholds: thresholds });
+    };
+
     const toCell = (subjectId: string, acc: CohortAccumulator): HeatmapCell => {
       const pct = aggregatable ? cohortAverage(acc) : null;
       return {
         subjectId,
         averageAchievement: pct,
-        performanceLevel:
-          pct == null
-            ? null
-            : percentageToPerformanceLevel(pct / 100, { performanceThresholds: thresholds }),
+        performanceLevel: pct == null ? null : levelFor(pct),
         studentsAssessed: acc.studentsAssessed,
       };
     };
@@ -370,12 +413,7 @@ export class HeatmapService {
         nodeType: node.nodeType,
         nodeCode: node.nodeCode,
         overallAchievement: overall,
-        overallPerformanceLevel:
-          overall == null
-            ? null
-            : percentageToPerformanceLevel(overall / 100, {
-                performanceThresholds: thresholds,
-              }),
+        overallPerformanceLevel: overall == null ? null : levelFor(overall),
         cells,
       };
     });
