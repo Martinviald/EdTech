@@ -4,9 +4,11 @@ import { DiscoveryModule } from '@nestjs/core';
 import { Test } from '@nestjs/testing';
 import request from 'supertest';
 import { McpController } from './mcp.controller';
+import { McpThrottlerGuard } from './mcp-throttler.guard';
 import { McpAuthGuard } from '../auth/mcp-auth.guard';
 import { ProtectedResourceController } from '../auth/protected-resource.controller';
 import { AnalyticsToolsFacade } from '../core/analytics-tools.facade';
+import { McpAuditLogger } from '../core/mcp-audit-logger';
 import { ToolRegistry } from '../core/tool-registry';
 import { WhoamiTool } from '../tools/whoami.tool';
 import { makePrincipal } from '../testing/make-principal';
@@ -38,6 +40,7 @@ describe('McpController (e2e)', () => {
         ToolRegistry,
         AnalyticsToolsFacade,
         WhoamiTool,
+        { provide: McpAuditLogger, useValue: { record: jest.fn() } },
         {
           provide: ConfigService,
           useValue: {
@@ -62,6 +65,8 @@ describe('McpController (e2e)', () => {
           return true;
         },
       })
+      .overrideGuard(McpThrottlerGuard)
+      .useValue({ canActivate: () => true })
       .compile();
 
     app = moduleRef.createNestApplication();

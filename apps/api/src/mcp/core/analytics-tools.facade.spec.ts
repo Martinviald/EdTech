@@ -3,10 +3,14 @@ import { z } from 'zod';
 import type { AnalyticsPrincipal } from './analytics-principal';
 import type { AnalyticsTool, ToolDescriptor } from './analytics-tool';
 import { AnalyticsToolsFacade } from './analytics-tools.facade';
+import type { McpAuditEntry, McpAuditLogger } from './mcp-audit-logger';
 import { ToolRegistry, isToolAllowed } from './tool-registry';
 import { makePrincipal } from '../testing/make-principal';
 
-function makeFacade(tools: AnalyticsTool[]): AnalyticsToolsFacade {
+function makeFacade(
+  tools: AnalyticsTool[],
+  auditRecord: (entry: McpAuditEntry) => Promise<void> = async () => {},
+): AnalyticsToolsFacade {
   const byName = new Map(tools.map((tool) => [tool.descriptor.name, tool]));
   const registry = {
     get: (name: string) => byName.get(name),
@@ -16,7 +20,8 @@ function makeFacade(tools: AnalyticsTool[]): AnalyticsToolsFacade {
         .map((tool) => tool.descriptor)
         .filter((descriptor) => isToolAllowed(descriptor, principal)),
   } as unknown as ToolRegistry;
-  return new AnalyticsToolsFacade(registry);
+  const audit = { record: auditRecord } as unknown as McpAuditLogger;
+  return new AnalyticsToolsFacade(registry, audit);
 }
 
 function makeTool(
@@ -76,6 +81,37 @@ describe('AnalyticsToolsFacade', () => {
 
     expect(result).toEqual({ resultado: 42 });
     expect(execute).toHaveBeenCalledWith(principal, { assessmentId: VALID_UUID });
+  });
+
+  it('audita una invocación exitosa con ok=true, canal y hash de argumentos', async () => {
+    const record = jest.fn().mockResolvedValue(undefined);
+    const facade = makeFacade([makeTool()], record);
+
+    await facade.execute('demo_tool', makePrincipal({ channel: 'mcp-external' }), {
+      assessmentId: VALID_UUID,
+    });
+
+    expect(record).toHaveBeenCalledWith(
+      expect.objectContaining({
+        tool: 'demo_tool',
+        channel: 'mcp-external',
+        ok: true,
+        userId: 'user-1',
+        orgId: 'org-1',
+        argsHash: expect.stringMatching(/^[a-f0-9]{64}$/),
+      }),
+    );
+  });
+
+  it('audita con ok=false cuando la tool lanza, y propaga el error', async () => {
+    const record = jest.fn().mockResolvedValue(undefined);
+    const execute = jest.fn().mockRejectedValue(new Error('boom'));
+    const facade = makeFacade([makeTool({}, execute)], record);
+
+    await expect(
+      facade.execute('demo_tool', makePrincipal(), { assessmentId: VALID_UUID }),
+    ).rejects.toThrow('boom');
+    expect(record).toHaveBeenCalledWith(expect.objectContaining({ ok: false }));
   });
 
   it('listVisible delega el filtrado por rol/feature', () => {

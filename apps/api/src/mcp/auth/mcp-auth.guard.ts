@@ -1,4 +1,5 @@
 import {
+  ForbiddenException,
   Injectable,
   NotFoundException,
   UnauthorizedException,
@@ -58,7 +59,11 @@ export class McpAuthGuard implements CanActivate {
       throw this.unauthorized(response, 'Token inválido, expirado o emitido para otra audiencia');
     }
 
-    request.user = await this.resolver.resolve(email);
+    const principal = await this.resolver.resolve(email);
+    if (!principal.isPlatformAdmin && !principal.features.includes('mcp')) {
+      throw new ForbiddenException('El servidor MCP no está habilitado para tu organización');
+    }
+    request.user = principal;
     return true;
   }
 

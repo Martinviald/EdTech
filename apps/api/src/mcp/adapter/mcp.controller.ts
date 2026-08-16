@@ -23,6 +23,7 @@ import { reportServerError } from '../../common/observability/report-error';
 import { McpAuthGuard } from '../auth/mcp-auth.guard';
 import type { AnalyticsPrincipal } from '../core/analytics-principal';
 import { AnalyticsToolsFacade } from '../core/analytics-tools.facade';
+import { McpThrottlerGuard } from './mcp-throttler.guard';
 
 const SERVER_INFO = { name: 'academos-analitico', version: '0.1.0' };
 
@@ -49,7 +50,7 @@ interface AuthenticatedRequest extends Request {
 }
 
 @Public()
-@UseGuards(McpAuthGuard)
+@UseGuards(McpAuthGuard, McpThrottlerGuard)
 @Controller('mcp')
 export class McpController {
   constructor(private readonly facade: AnalyticsToolsFacade) {}

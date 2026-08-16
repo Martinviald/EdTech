@@ -44,9 +44,11 @@ function makeContext(headers: Record<string, string | undefined>) {
   return { context, request, response };
 }
 
-function makeResolver(): McpPrincipalResolver {
+function makeResolver(
+  principal = makePrincipal({ channel: 'mcp-external', features: ['mcp'] }),
+): McpPrincipalResolver {
   return {
-    resolve: jest.fn().mockResolvedValue(makePrincipal({ channel: 'mcp-external' })),
+    resolve: jest.fn().mockResolvedValue(principal),
   } as unknown as McpPrincipalResolver;
 }
 
@@ -104,6 +106,35 @@ describe('McpAuthGuard', () => {
     await expect(guard.canActivate(context)).resolves.toBe(true);
     expect(resolver.resolve).toHaveBeenCalledWith('docente@colegio.cl');
     expect(request.user).toMatchObject({ channel: 'mcp-external' });
+  });
+
+  it('responde 403 cuando la org no tiene la feature mcp habilitada', async () => {
+    jwtVerifyMock.mockResolvedValue({
+      payload: { email: 'docente@colegio.cl' },
+    });
+    const resolver = makeResolver(
+      makePrincipal({ channel: 'mcp-external', roles: ['teacher'], features: [] }),
+    );
+    const guard = new McpAuthGuard(makeConfig(), resolver);
+    const { context } = makeContext({ authorization: 'Bearer valido' });
+
+    await expect(guard.canActivate(context)).rejects.toBeInstanceOf(ForbiddenException);
+  });
+
+  it('permite a un platform_admin aunque la org no liste la feature mcp', async () => {
+    jwtVerifyMock.mockResolvedValue({ payload: { email: 'admin@academos.cl' } });
+    const resolver = makeResolver(
+      makePrincipal({
+        channel: 'mcp-external',
+        isPlatformAdmin: true,
+        roles: ['platform_admin'],
+        features: [],
+      }),
+    );
+    const guard = new McpAuthGuard(makeConfig(), resolver);
+    const { context } = makeContext({ authorization: 'Bearer valido' });
+
+    await expect(guard.canActivate(context)).resolves.toBe(true);
   });
 
   it('propaga el Forbidden del resolver (email autenticado pero sin acceso)', async () => {
