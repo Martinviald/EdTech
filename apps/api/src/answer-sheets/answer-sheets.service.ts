@@ -43,7 +43,7 @@ import {
   loadResponsesForPersist,
   persistAssessmentResults,
 } from '../assessment-results/lib/persist-results';
-import { loadInstrumentBands } from '../performance-bands/lib/load-instrument-bands';
+import { resolveEffectiveBands } from '../performance-bands/lib/resolve-effective-bands';
 
 import { AnswerSheetPreviewStore } from './lib/preview-store';
 import { parseGradecamCsv } from './lib/parsers/gradecam-parser';
@@ -498,9 +498,7 @@ export class AnswerSheetsService {
       // de los cursos cargados antes contra el mismo assessment (permitido más
       // arriba, vía `body.assessmentId`). `responses` es la única fuente completa.
       const allResponses = await loadResponsesForPersist(tx, assessmentId);
-      // Bandas de logro del instrumento (fuente de verdad del nivel). Dentro de
-      // withOrgContext → RLS trae globales (org_id NULL) + override de la org.
-      const bands = await loadInstrumentBands(tx, entry.instrumentId);
+      const { bands } = await resolveEffectiveBands(tx, entry.instrumentId);
       await persistAssessmentResults(tx, {
         assessmentId,
         responses: allResponses,

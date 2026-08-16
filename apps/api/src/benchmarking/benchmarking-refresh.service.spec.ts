@@ -9,8 +9,13 @@ import { BenchmarkingRefreshService } from './benchmarking-refresh.service';
 //   por cada org con datos:
 //     a. deriveNetworkOrgId: parentId  (+ parent type si hay parent)
 //     b. readOptOut (dentro de withOrgContext)
-//     c. buildOrgRows.base (dentro de withOrgContext)
-//     d. buildOrgRows.perSkill (solo si base.length > 0)
+//     c. buildOrgRows.resultRows (por alumno × instrumento, dentro de withOrgContext)
+//     d. resolveEffectiveBandsForInstruments (solo si resultRows.length > 0):
+//        · loadFamilyRows          → filas de familia de los instrumentos objetivo
+//        · loadBandsForInstruments → bandas propias de los objetivos
+//        · loadFamilyCandidates    → todos los instrumentos vivos (solo si falta alguna banda propia)
+//        · loadBandsForInstruments → bandas de los candidatos con year no nulo
+//     e. buildOrgRows.perSkill
 //
 // `db.insert().values().onConflictDoUpdate()` registra el upsert.
 // withOrgContext usa db.transaction → marca __transactionRan.
@@ -28,7 +33,7 @@ function makeDb(selectResults: unknown[][]): DbMock {
   function buildSelect(rows: unknown[]): unknown {
     const chain: Record<string, unknown> = {};
     const passthrough = () => chain;
-    for (const m of ['from', 'innerJoin', 'where', 'groupBy', 'limit']) {
+    for (const m of ['from', 'innerJoin', 'leftJoin', 'where', 'groupBy', 'orderBy', 'limit']) {
       chain[m] = passthrough;
     }
     chain.then = (resolve: (rows: unknown[]) => unknown) =>
@@ -68,6 +73,60 @@ function makeService(db: Database): BenchmarkingRefreshService {
   ) => BenchmarkingRefreshService)(db);
 }
 
+function resultRow(
+  overrides: Partial<{
+    instrumentId: string;
+    gradeId: string | null;
+    subjectId: string | null;
+    gradingScaleConfig: unknown;
+    studentId: string;
+    percentage: string | null;
+    performanceLevel: string | null;
+  }> = {},
+) {
+  return {
+    instrumentId: 'inst-1',
+    gradeId: 'g1',
+    subjectId: 's1',
+    gradingScaleConfig: null,
+    studentId: 'stu-1',
+    percentage: '62.50',
+    performanceLevel: null,
+    ...overrides,
+  };
+}
+
+function familyRow(id: string, year: number | null) {
+  return {
+    id,
+    type: 'dia',
+    subjectId: 's1',
+    gradeId: 'g1',
+    applicationPeriod: null,
+    year,
+  };
+}
+
+function bandRow(instrumentId: string, key: string, order: number, min: string, max: string) {
+  return {
+    id: `band-${instrumentId}-${key}`,
+    orgId: null,
+    key,
+    label: key,
+    order,
+    minThreshold: min,
+    maxThreshold: max,
+    color: null,
+    instrumentId,
+  };
+}
+
+const THREE_BANDS = [
+  bandRow('inst-1', 'nivel-1', 0, '0.00', '0.40'),
+  bandRow('inst-1', 'nivel-2', 1, '0.40', '0.70'),
+  bandRow('inst-1', 'nivel-3', 2, '0.70', '1.00'),
+];
+
 describe('BenchmarkingRefreshService.refresh', () => {
   it('agrega la fuente por org y hace upsert sin PII en el read-model', async () => {
     const db = makeDb([
@@ -82,21 +141,15 @@ describe('BenchmarkingRefreshService.refresh', () => {
         },
       ],
       [{ optOut: false }], // readOptOut(org-1)
-      // buildOrgRows.base(org-1)
+      // buildOrgRows.resultRows(org-1): 2 alumnos con % distintos.
       [
-        {
-          instrumentId: 'inst-1',
-          gradeId: 'g1',
-          subjectId: 's1',
-          studentCount: 30,
-          avgAchievement: '62.50',
-          insufficient: 5,
-          elementary: 10,
-          adequate: 10,
-          advanced: 5,
-        },
+        resultRow({ studentId: 'stu-1', percentage: '30.00' }),
+        resultRow({ studentId: 'stu-2', percentage: '80.00' }),
       ],
-      // buildOrgRows.perSkill(org-1)
+      // resolveEffectiveBands: familia + bandas propias del instrumento.
+      [familyRow('inst-1', 2026)],
+      THREE_BANDS,
+      // perSkill(org-1)
       [
         {
           instrumentId: 'inst-1',
@@ -118,43 +171,127 @@ describe('BenchmarkingRefreshService.refresh', () => {
     expect(db.__upserts).toHaveLength(1);
 
     const values = db.__upserts[0].values as Record<string, unknown>;
-    // Snapshot de dimensiones + opt-out, sin PII (sin studentId/nombres/RUT).
     expect(values.orgId).toBe('org-1');
     expect(values.instrumentId).toBe('inst-1');
     expect(values.optOutGlobalPool).toBe(false);
     expect(values.dependence).toBe('private');
-    expect(values.studentCount).toBe(30);
+    // Conteo de alumnos distintos y % promedio en memoria.
+    expect(values.studentCount).toBe(2);
+    expect(values.avgAchievement).toBe('55.00');
+    // % 30 → nivel-1 (order 0) → insufficient; % 80 → nivel-3 (order 2) → advanced.
     expect(values.bandDistribution).toEqual({
-      insufficient: 5,
-      elementary: 10,
-      adequate: 10,
-      advanced: 5,
+      insufficient: 1,
+      elementary: 0,
+      adequate: 0,
+      advanced: 1,
     });
     expect(values.perSkill).toEqual([
       { nodeId: 'node-1', nodeName: 'Comprensión', achievement: 55, studentCount: 30 },
     ]);
-    // No debe filtrarse ninguna clave de PII.
     expect(Object.keys(values)).not.toContain('studentId');
     expect(Object.keys(values)).not.toContain('studentName');
+  });
+
+  it('sin bandas efectivas (source none) clasifica por el corte legacy 40/70/85', async () => {
+    const db = makeDb([
+      [{ id: 'org-1', parentId: null, dependence: null, region: null, commune: null }],
+      [{ optOut: false }],
+      // Un alumno por cada bucket legacy: 30 insufficient, 55 elementary, 78 adequate, 90 advanced.
+      [
+        resultRow({ studentId: 'a', percentage: '30.00' }),
+        resultRow({ studentId: 'b', percentage: '55.00' }),
+        resultRow({ studentId: 'c', percentage: '78.00' }),
+        resultRow({ studentId: 'd', percentage: '90.00' }),
+      ],
+      // resolveEffectiveBands: sin bandas propias ni versión anterior → source none.
+      [familyRow('inst-1', 2026)], // loadFamilyRows
+      [], // loadBandsForInstruments(targets): sin bandas propias
+      [familyRow('inst-1', 2026)], // loadFamilyCandidates: solo el propio, sin previa
+      [], // loadBandsForInstruments(candidatos): sin bandas
+      [], // perSkill
+    ]);
+    const svc = makeService(db);
+
+    await svc.refresh();
+
+    const values = db.__upserts[0].values as { bandDistribution: unknown };
+    expect(values.bandDistribution).toEqual({
+      insufficient: 1,
+      elementary: 1,
+      adequate: 1,
+      advanced: 1,
+    });
+  });
+
+  it('sin bandas propias usa las de la versión anterior de su familia', async () => {
+    const db = makeDb([
+      [{ id: 'org-1', parentId: null, dependence: null, region: null, commune: null }],
+      [{ optOut: false }],
+      // % 30 y % 90 sobre bandas de 3 niveles heredadas.
+      [
+        resultRow({ instrumentId: 'inst-1', studentId: 'a', percentage: '30.00' }),
+        resultRow({ instrumentId: 'inst-1', studentId: 'b', percentage: '90.00' }),
+      ],
+      // resolveEffectiveBands: sin bandas propias, con versión anterior con bandas.
+      [familyRow('inst-1', 2026)],
+      [], // sin bandas propias
+      [familyRow('inst-1', 2026), familyRow('inst-0', 2025)], // candidatos
+      [
+        bandRow('inst-0', 'nivel-1', 0, '0.00', '0.40'),
+        bandRow('inst-0', 'nivel-2', 1, '0.40', '0.70'),
+        bandRow('inst-0', 'nivel-3', 2, '0.70', '1.00'),
+      ],
+    ]);
+    const svc = makeService(db);
+
+    await svc.refresh();
+
+    const values = db.__upserts[0].values as { bandDistribution: unknown };
+    // % 30 → nivel-1 → insufficient; % 90 → nivel-3 → advanced.
+    expect(values.bandDistribution).toEqual({
+      insufficient: 1,
+      elementary: 0,
+      adequate: 0,
+      advanced: 1,
+    });
+  });
+
+  it('cuenta las filas band-only (percentage NULL) por su nivel persistido', async () => {
+    const db = makeDb([
+      [{ id: 'org-1', parentId: null, dependence: null, region: null, commune: null }],
+      [{ optOut: false }],
+      [
+        resultRow({ studentId: 'a', percentage: null, performanceLevel: 'insufficient' }),
+        resultRow({ studentId: 'b', percentage: null, performanceLevel: 'advanced' }),
+      ],
+      [familyRow('inst-1', 2026)],
+      THREE_BANDS,
+    ]);
+    const svc = makeService(db);
+
+    await svc.refresh();
+
+    const values = db.__upserts[0].values as {
+      bandDistribution: unknown;
+      avgAchievement: string | null;
+    };
+    expect(values.bandDistribution).toEqual({
+      insufficient: 1,
+      elementary: 0,
+      adequate: 0,
+      advanced: 1,
+    });
+    // Sin ningún percentage → avgAchievement null.
+    expect(values.avgAchievement).toBeNull();
   });
 
   it('snapshotea optOutGlobalPool=true de org_benchmark_settings', async () => {
     const db = makeDb([
       [{ id: 'org-1', parentId: null, dependence: null, region: null, commune: null }],
-      [{ optOut: true }], // readOptOut
-      [
-        {
-          instrumentId: 'inst-1',
-          gradeId: null,
-          subjectId: null,
-          studentCount: 10,
-          avgAchievement: '50.00',
-          insufficient: 0,
-          elementary: 0,
-          adequate: 0,
-          advanced: 0,
-        },
-      ],
+      [{ optOut: true }],
+      [resultRow({ percentage: '50.00' })],
+      [familyRow('inst-1', 2026)],
+      THREE_BANDS,
       [], // perSkill vacío
     ]);
     const svc = makeService(db);
@@ -170,19 +307,9 @@ describe('BenchmarkingRefreshService.refresh', () => {
       [{ id: 'org-1', parentId: 'p1', dependence: null, region: null, commune: null }],
       [{ id: 'p1', type: 'foundation' }], // deriveNetworkOrgId: parent foundation
       [{ optOut: false }],
-      [
-        {
-          instrumentId: 'inst-1',
-          gradeId: null,
-          subjectId: null,
-          studentCount: 10,
-          avgAchievement: '50.00',
-          insufficient: 0,
-          elementary: 0,
-          adequate: 0,
-          advanced: 0,
-        },
-      ],
+      [resultRow({ percentage: '50.00' })],
+      [familyRow('inst-1', 2026)],
+      THREE_BANDS,
       [],
     ]);
     const svc = makeService(db);
@@ -202,21 +329,11 @@ describe('BenchmarkingRefreshService.refresh', () => {
       ],
       // org-1
       [{ optOut: false }],
-      [
-        {
-          instrumentId: 'inst-1',
-          gradeId: null,
-          subjectId: null,
-          studentCount: 10,
-          avgAchievement: '50.00',
-          insufficient: 0,
-          elementary: 0,
-          adequate: 0,
-          advanced: 0,
-        },
-      ],
+      [resultRow({ percentage: '50.00' })],
+      [familyRow('inst-1', 2026)],
+      THREE_BANDS,
       [],
-      // org-2 — sin datos en base (no se consulta perSkill)
+      // org-2 — sin datos en resultRows (no se resuelven bandas ni perSkill)
       [{ optOut: false }],
       [],
     ]);

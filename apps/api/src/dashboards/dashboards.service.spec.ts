@@ -121,6 +121,53 @@ function makeService(db: Database): DashboardsService {
   return new (DashboardsService as new (db: Database) => DashboardsService)(db);
 }
 
+/**
+ * Fila de `loadFamilyRows` (dentro de `resolveEffectiveBands`): el instrumento con su
+ * familia. Con bandas propias, la resolución termina en `source:'own'` sin buscar la
+ * versión anterior.
+ */
+function familyRow(instrumentId = 'i1', overrides: Record<string, unknown> = {}) {
+  return {
+    id: instrumentId,
+    type: 'dia',
+    subjectId: 's1',
+    gradeId: 'g1',
+    applicationPeriod: null,
+    year: 2026,
+    ...overrides,
+  };
+}
+
+/** Fila de `performance_bands` como la trae `loadBandsForInstruments`. */
+function bandRow(
+  key: string,
+  order: number,
+  minThreshold: string,
+  maxThreshold: string,
+  instrumentId = 'i1',
+) {
+  return {
+    id: `b-${key}`,
+    orgId: null,
+    key,
+    label: key,
+    order,
+    minThreshold,
+    maxThreshold,
+    color: null,
+    instrumentId,
+  };
+}
+
+/** Set de bandas DIA de 3 niveles (I/II/III), cortes 0 / 0.5 / 0.8. */
+function diaThreeBands(instrumentId = 'i1') {
+  return [
+    bandRow('I', 0, '0', '0.5', instrumentId),
+    bandRow('II', 1, '0.5', '0.8', instrumentId),
+    bandRow('III', 2, '0.8', '1', instrumentId),
+  ];
+}
+
 // ──────────────────────────────────────────────────────────────────────────────
 // getOverview()
 // ──────────────────────────────────────────────────────────────────────────────
@@ -140,14 +187,18 @@ describe('DashboardsService.getOverview', () => {
         { assessmentId: 'a1', scoreSum: '0', maxSum: '0', studentsAssessed: 0 },
         { assessmentId: 'a2', scoreSum: '0', maxSum: '0', studentsAssessed: 0 },
       ],
-      // 5. computePerformanceDistribution (group by level)
+      // 5. computePerformanceDistribution: filas por resultado { instrumentId, percentage }.
+      //    instrumentId null → sin bandas efectivas → corte legacy. 18 en adequate
+      //    (75%) + 12 en elementary (50%) = 30 → 60% adequate.
       [
-        { level: 'adequate', count: 18 },
-        { level: 'elementary', count: 12 },
+        ...Array.from({ length: 18 }, () => ({ instrumentId: null, percentage: '75.00' })),
+        ...Array.from({ length: 12 }, () => ({ instrumentId: null, percentage: '50.00' })),
       ],
-      // 6. loadRecentAssessments → resolveScopedAssessments
+      // 6. computePerformanceDistribution → resolveThresholds → resolveApplicableScale
+      [],
+      // 7. loadRecentAssessments → resolveScopedAssessments
       [scopedAssessment('a1'), scopedAssessment('a2')],
-      // 7. loadRecentAssessments → assessments
+      // 8. loadRecentAssessments → assessments
       [
         {
           assessmentId: 'a1',
@@ -161,9 +212,9 @@ describe('DashboardsService.getOverview', () => {
           gradeName: '2° Básico',
         },
       ],
-      // 8. loadRecentAssessments → stats
+      // 9. loadRecentAssessments → stats
       [{ assessmentId: 'a1', studentsCount: 30, avgPct: '72.50' }],
-      // 9. loadRecentAssessments → cohorte (fallback para agregadas; acá no aplica)
+      // 10. loadRecentAssessments → cohorte (fallback para agregadas; acá no aplica)
       [],
     ]);
     const svc = makeService(db);
@@ -190,6 +241,52 @@ describe('DashboardsService.getOverview', () => {
     // Las alertas ya no salen de acá: nacen de una unidad comparable y viven en
     // `/dashboards/comparable-overview` (#1C — un umbral 60/50 sobre instrumentos
     // mezclados no significaba nada).
+  });
+
+  // La distribución por nivel se arma clasificando el `percentage` de cada resultado
+  // con las bandas EFECTIVAS de su instrumento, NO con la columna legacy
+  // `performance_level`. Con bandas I/II/III (cortes 0/0.5/0.8), un 60% cae en la
+  // banda media → 'adequate' (el corte legacy lo habría marcado 'elementary').
+  it('distribución: clasifica el % de cada resultado con las bandas de su instrumento', async () => {
+    const db = makeDb([
+      // 1. resolveScopedAssessments (un solo instrumento → agregable)
+      [scopedAssessment('a1')],
+      // 2. métricas
+      [{ studentsEvaluated: 4 }],
+      // 3. resultAssessmentIds
+      [{ assessmentId: 'a1' }],
+      // 4. cohorte
+      [],
+      // 5. computePerformanceDistribution: filas por resultado { instrumentId, percentage }
+      [
+        { instrumentId: 'i1', percentage: '60.00' }, // banda II → adequate
+        { instrumentId: 'i1', percentage: '65.00' }, // banda II → adequate
+        { instrumentId: 'i1', percentage: '90.00' }, // banda III → advanced
+        { instrumentId: 'i1', percentage: '30.00' }, // banda I → insufficient
+      ],
+      // 6. resolveEffectiveBandsForInstruments → loadFamilyRows
+      [familyRow('i1')],
+      // 7. resolveEffectiveBandsForInstruments → loadBandsForInstruments (I/II/III propias)
+      diaThreeBands('i1'),
+      // 8. computePerformanceDistribution → resolveThresholds → resolveApplicableScale
+      [],
+      // 9. loadRecentAssessments → resolveScopedAssessments
+      [scopedAssessment('a1')],
+      // 10. loadRecentAssessments → assessments (vacío → lista vacía)
+      [],
+    ]);
+    const svc = makeService(db);
+    const res = await svc.getOverview(makeUser({ activeRole: 'academic_director' }), {});
+
+    expect(res.performanceDistribution).toHaveLength(4);
+    const byLevel = new Map(res.performanceDistribution!.map((b) => [b.level, b.count]));
+    // 2 en adequate (60% y 65% por la banda media), 1 advanced, 1 insufficient.
+    expect(byLevel.get('adequate')).toBe(2);
+    expect(byLevel.get('advanced')).toBe(1);
+    expect(byLevel.get('insufficient')).toBe(1);
+    expect(byLevel.get('elementary')).toBe(0); // ninguno cayó en el bucket legacy
+    const adequate = res.performanceDistribution!.find((b) => b.level === 'adequate')!;
+    expect(adequate.percentage).toBeCloseTo(50); // 2 de 4
   });
 
   // Espeja el fallback de `listAssessments`: una evaluación cargada desde un informe
@@ -1016,7 +1113,9 @@ describe('DashboardsService.getSkillBreakdown', () => {
       [scopedAssessment('a1')],
       // 3. resolveThresholds → resolveApplicableScale (sin escala → defaults)
       [],
-      // 4. breakdown por classGroup sobre assessment_skill_stats
+      // 4. resolveScopedBands: >1 instrumento en scope → sin bandas (corte legacy)
+      [{ instrumentId: 'i1' }, { instrumentId: 'i2' }],
+      // 5. breakdown por classGroup sobre assessment_skill_stats
       [
         {
           id: 'cg1',
@@ -1060,6 +1159,8 @@ describe('DashboardsService.getSkillBreakdown', () => {
       [{ name: 'Comprensión', type: 'skill', code: null }],
       [scopedAssessment('a1')],
       [],
+      // resolveScopedBands: >1 instrumento → sin bandas (corte legacy)
+      [{ instrumentId: 'i1' }, { instrumentId: 'i2' }],
       // breakdown por assessment con name null — dos cursos de la MISMA evaluación,
       // que el fold recombina en una sola fila ponderando por pctWeight.
       [
@@ -1094,6 +1195,56 @@ describe('DashboardsService.getSkillBreakdown', () => {
     // (1400 + 400) / 30 = 60 — no 55, que sería el promedio simple de 70 y 40.
     expect(res.rows[0]!.averageAchievement).toBeCloseTo(60, 6);
     expect(res.rows[0]!.studentsAssessed).toBe(30);
+  });
+
+  // Con un único instrumento con bandas propias, el nivel de cada fila sale de las
+  // bandas del instrumento (I/II/III proyectadas a los 4 niveles), NO del corte legacy.
+  it('clasifica cada fila por las bandas del instrumento cuando el scope es uno solo', async () => {
+    const db = makeDb([
+      // 1. metadata del nodo
+      [{ name: 'Localizar información', type: 'skill', code: 'OA1' }],
+      // 2. resolveScopedAssessments
+      [scopedAssessment('a1')],
+      // 3. resolveThresholds → resolveApplicableScale
+      [],
+      // 4. resolveScopedBands → selectDistinct instrumento (uno solo)
+      [{ instrumentId: 'i1' }],
+      // 5. resolveEffectiveBands → loadFamilyRows
+      [familyRow('i1')],
+      // 6. resolveEffectiveBands → loadBandsForInstruments (bandas propias I/II/III)
+      diaThreeBands('i1'),
+      // 7. breakdown por classGroup
+      [
+        {
+          id: 'cg1',
+          name: '2°A',
+          gradeName: '2° Básico',
+          pctSum: '1200.00', // 60% × 20 → banda media (order 1) → adequate
+          pctWeight: 20,
+          studentsAssessed: 20,
+        },
+        {
+          id: 'cg2',
+          name: '2°B',
+          gradeName: '2° Básico',
+          pctSum: '600.00', // 30% × 20 → banda inferior (order 0) → insufficient
+          pctWeight: 20,
+          studentsAssessed: 20,
+        },
+      ],
+    ]);
+    const svc = makeService(db);
+    const res = await svc.getSkillBreakdown(makeUser({ activeRole: 'academic_director' }), {
+      nodeId: 'n1',
+      groupBy: 'classGroup',
+    });
+    // 60% con el corte legacy sería 'elementary'; por las bandas del instrumento
+    // (order 1 de 3) es 'adequate'.
+    expect(res.rows[0]!.averageAchievement).toBe(60);
+    expect(res.rows[0]!.performanceLevel).toBe('adequate');
+    // 30% cae en la banda inferior → 'insufficient' (igual que el legacy acá, pero
+    // decidido por las bandas).
+    expect(res.rows[1]!.performanceLevel).toBe('insufficient');
   });
 
   it('teacher sin asignaciones → rows vacío (pero node se resuelve)', async () => {

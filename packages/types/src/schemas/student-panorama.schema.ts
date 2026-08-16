@@ -14,10 +14,6 @@ import {
   INSTRUMENT_APPLICATION_PERIODS,
   type InstrumentApplicationPeriod,
 } from './instrument.schema';
-import type {
-  PerformanceBandDistributionBucket,
-  PerformanceDistributionBucket,
-} from './dashboard.schema';
 
 /**
  * Filtros de la vista 360. El zoom ES el filtro: cada nivel lo estrecha y el
@@ -114,22 +110,6 @@ export type StudentPanoramaSkillNode = StudentPanoramaSkill & {
   children: StudentPanoramaSkillNode[];
 };
 
-/**
- * Distribución de desempeño del alumno. Discriminada porque no siempre se puede
- * clasificar: si sus resultados vienen de instrumentos con escalas de logro
- * distintas, un único gráfico mezclaría vocabularios que no son el mismo. En ese
- * caso NO se clasifica (regla de #1C), se declara `mixed` y la UI explica por qué.
- */
-export type StudentPanoramaDistribution =
-  | {
-      kind: 'band';
-      bands: PerformanceBandView[];
-      buckets: PerformanceBandDistributionBucket[];
-    }
-  | { kind: 'level'; buckets: PerformanceDistributionBucket[] }
-  | { kind: 'mixed'; scaleCount: number }
-  | { kind: 'empty' };
-
 /** KPIs de cabecera del panorama. */
 export type StudentPanoramaSummary = {
   assessmentsCount: number;
@@ -218,6 +198,4 @@ export type StudentPanoramaResponse = {
   bySkill: StudentPanoramaSkill[];
   /** Los mismos nodos anidados por jerarquía, para el zoom eje → habilidad → OA. */
   bySkillTree: StudentPanoramaSkillNode[];
-  /** Distribución de desempeño, o el motivo por el que no se puede clasificar. */
-  distribution: StudentPanoramaDistribution;
 };

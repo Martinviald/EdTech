@@ -50,7 +50,7 @@ import {
   loadResponsesForPersist,
   persistAssessmentResults,
 } from './lib/persist-results';
-import { loadInstrumentBands } from '../performance-bands/lib/load-instrument-bands';
+import { resolveEffectiveBands } from '../performance-bands/lib/resolve-effective-bands';
 
 // Roles "administrativos" — ven todos los cursos de la org. Cualquier otro rol
 // con acceso (teacher, homeroom_teacher) ve sólo los cursos donde tiene
@@ -164,9 +164,7 @@ export class AssessmentResultsService {
       };
     }
 
-    // Bandas de logro del instrumento (fuente de verdad del nivel por
-    // instrumento). Corre dentro de withOrgContext → RLS trae globales + org.
-    const bands = await loadInstrumentBands(tx, instrumentId);
+    const { bands } = await resolveEffectiveBands(tx, instrumentId);
 
     // Cuántos resultados previos había — define created vs updated. Va ANTES del
     // delete + reinsert que hace persistAssessmentResults.

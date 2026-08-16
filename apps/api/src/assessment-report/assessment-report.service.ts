@@ -67,7 +67,7 @@ import {
   levelCountsToLegacyDistribution,
 } from '../common/helpers/cohort-level-stats.helper';
 import { InjectDb, type Database } from '../database/database.types';
-import { loadInstrumentBands } from '../performance-bands/lib/load-instrument-bands';
+import { resolveEffectiveBands } from '../performance-bands/lib/resolve-effective-bands';
 import { hydrateBandForStudent } from '../performance-bands/lib/hydrate-band-level';
 
 /** PerformanceBandInput (con thresholds) → vista mínima para la respuesta. */
@@ -209,9 +209,11 @@ export class AssessmentReportService {
       );
 
       // Bandas del instrumento (el informe es siempre de un único instrumento):
-      // fuente de verdad del nivel. Corre dentro de withOrgContext → RLS trae
-      // globales + override de la org. Sin bandas → modo legacy (4 niveles).
-      const bands = await loadInstrumentBands(tx, assessment.instrumentId);
+      // fuente de verdad del nivel. Con fallback a la versión anterior de su
+      // familia; sólo si tampoco hay versión anterior (source 'none') se cae al
+      // legacy (4 niveles). Corre dentro de withOrgContext → RLS trae globales +
+      // override de la org.
+      const { bands } = await resolveEffectiveBands(tx, assessment.instrumentId);
       const bandView = bands.length > 0 ? bands.map(toBandView) : undefined;
 
       // Resuelve la banda de cada alumno UNA vez, para que las 3 vistas que la usan

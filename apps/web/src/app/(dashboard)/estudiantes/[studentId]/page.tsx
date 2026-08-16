@@ -9,6 +9,7 @@ import {
   canAccess,
   RESULTS_VIEWER_ROLES,
   studentPanoramaQuerySchema,
+  type StudentComparisonsResponse,
   type StudentPanoramaAssessment,
   type StudentPanoramaQueryDto,
   type StudentPanoramaResponse,
@@ -26,11 +27,11 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { SetPageTitle } from '@/components/layout/page-title-context';
 import { PerformanceBadge } from '../../resultados/components/performance-badge';
 import { formatAchievement } from '../../resultados/components/performance-level';
-import { PanoramaDistribution } from '../components/panorama-distribution';
 import { PanoramaFilters } from '../components/panorama-filters';
 import { SkillTree } from '../components/skill-tree';
 import { SubjectPanorama } from '../components/subject-panorama';
-import { getStudentPanorama } from '../data';
+import { SubjectComparison } from '../components/subject-comparison';
+import { getStudentComparisons, getStudentPanorama } from '../data';
 
 type SearchParams = Record<string, string | string[] | undefined>;
 
@@ -89,7 +90,6 @@ export default async function EstudiantePanoramaPage({
   );
 }
 
-
 function BandMovement({ item }: { item: StudentPanoramaAssessment }) {
   if (!item.priorPerformanceBand || !item.performanceBand) {
     return <PerformanceBadge level={item.performanceLevel} band={item.performanceBand} />;
@@ -128,6 +128,22 @@ function ResponsesLink({
   );
 }
 
+async function ComparisonsSection({
+  studentId,
+  query,
+}: {
+  studentId: string;
+  query: StudentPanoramaQueryDto;
+}) {
+  const data = await getStudentComparisons(studentId, query).catch(
+    (): StudentComparisonsResponse | null => null,
+  );
+
+  if (!data || data.subjects.length === 0) return null;
+
+  return <SubjectComparison subjects={data.subjects} scope={data.scope} />;
+}
+
 async function PanoramaContent({
   studentId,
   query,
@@ -158,7 +174,6 @@ async function PanoramaContent({
     summary,
     byAssessment,
     bySkillTree,
-    distribution,
   } = data;
 
   const meta = [
@@ -219,7 +234,9 @@ async function PanoramaContent({
             activeSubjectId={filters.subjectId}
           />
 
-          <PanoramaDistribution distribution={distribution} />
+          <Suspense fallback={<CardSkeleton rows={6} />}>
+            <ComparisonsSection studentId={studentId} query={query} />
+          </Suspense>
 
           <Card>
             <CardHeader>

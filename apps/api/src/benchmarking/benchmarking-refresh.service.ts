@@ -4,6 +4,7 @@ import {
   assessmentResults,
   assessments,
   benchmarkAggregates,
+  gradingScales,
   instruments,
   organizations,
   orgBenchmarkSettings,
@@ -13,11 +14,20 @@ import {
   type NewBenchmarkAggregate,
 } from '@soe/db';
 import {
+  bandToLegacyLevel,
+  classifyByBands,
+  percentageToPerformanceLevel,
   type BenchmarkBandDistribution,
   type BenchmarkRefreshResponse,
   type BenchmarkSkillAggregate,
+  type PerformanceBandInput,
+  type PerformanceLevel,
 } from '@soe/types';
 import { InjectDb, type Database } from '../database/database.types';
+import {
+  resolveEffectiveBandsForInstruments,
+  type EffectiveBands,
+} from '../performance-bands/lib/resolve-effective-bands';
 
 /**
  * H7.1 — Refresh del read-model `benchmark_aggregates`.
@@ -142,34 +152,73 @@ export class BenchmarkingRefreshService {
    * Agrega `assessment_results` + `skill_results` de la org bajo `withOrgContext`.
    * Agrupa por (instrumentId, gradeId, subjectId) — gradeId/subjectId vienen del
    * instrumento. Devuelve filas sin PII listas para el read-model.
+   *
+   * La distribución por banda NO sale de la columna legacy `performanceLevel`: se
+   * clasifica el `percentage` de cada resultado con las bandas EFECTIVAS del
+   * instrumento (propias → versión anterior de su familia → legacy 40/70/85 sólo
+   * como último recurso, ver `resolveEffectiveBands`) y se proyecta al enum de 4
+   * niveles con `bandToLegacyLevel`. Cuando el instrumento no tiene bandas
+   * efectivas (`source: 'none'`) se cae al corte legacy vía
+   * `percentageToPerformanceLevel`. Las filas band-only (informe oficial:
+   * `percentage` NULL, `performanceLevel` ya persistido) se cuentan por su nivel
+   * persistido, como antes.
    */
   private async buildOrgRows(orgId: string): Promise<OrgAggregateRow[]> {
     return withOrgContext(this.db, orgId, async (tx) => {
-      // Agregado global por instrumento: conteo de alumnos, % logro promedio y
-      // distribución por banda (de performanceLevel).
-      const base = await tx
+      const resultRows = await tx
         .select({
           instrumentId: instruments.id,
           gradeId: instruments.gradeId,
           subjectId: instruments.subjectId,
-          studentCount: sql<number>`count(distinct ${assessmentResults.studentId})::int`,
-          avgAchievement: sql<
-            string | null
-          >`round(avg(${assessmentResults.percentage}), 2)`,
-          insufficient: sql<number>`sum(case when ${assessmentResults.performanceLevel} = 'insufficient' then 1 else 0 end)::int`,
-          elementary: sql<number>`sum(case when ${assessmentResults.performanceLevel} = 'elementary' then 1 else 0 end)::int`,
-          adequate: sql<number>`sum(case when ${assessmentResults.performanceLevel} = 'adequate' then 1 else 0 end)::int`,
-          advanced: sql<number>`sum(case when ${assessmentResults.performanceLevel} = 'advanced' then 1 else 0 end)::int`,
+          gradingScaleConfig: gradingScales.config,
+          studentId: assessmentResults.studentId,
+          percentage: assessmentResults.percentage,
+          performanceLevel: assessmentResults.performanceLevel,
         })
         .from(assessmentResults)
         .innerJoin(assessments, eq(assessmentResults.assessmentId, assessments.id))
         .innerJoin(instruments, eq(assessments.instrumentId, instruments.id))
-        .where(eq(assessments.orgId, orgId))
-        .groupBy(instruments.id, instruments.gradeId, instruments.subjectId);
+        .leftJoin(gradingScales, eq(gradingScales.id, instruments.gradingScaleId))
+        .where(eq(assessments.orgId, orgId));
 
-      if (base.length === 0) return [];
+      if (resultRows.length === 0) return [];
 
-      // Agregado por habilidad (taxonomy node) por instrumento.
+      const instrumentIds = Array.from(new Set(resultRows.map((r) => r.instrumentId)));
+      const effectiveBands = await resolveEffectiveBandsForInstruments(tx, instrumentIds);
+      const bandClassifiers = new Map<string, BandClassifier>();
+      for (const [instrumentId, effective] of effectiveBands) {
+        bandClassifiers.set(instrumentId, buildBandClassifier(effective));
+      }
+
+      const accByInstrument = new Map<string, InstrumentAccumulator>();
+      for (const row of resultRows) {
+        let acc = accByInstrument.get(row.instrumentId);
+        if (!acc) {
+          acc = {
+            gradeId: row.gradeId,
+            subjectId: row.subjectId,
+            students: new Set<string>(),
+            pctSum: 0,
+            pctCount: 0,
+            bandDistribution: { insufficient: 0, elementary: 0, adequate: 0, advanced: 0 },
+          };
+          accByInstrument.set(row.instrumentId, acc);
+        }
+        acc.students.add(row.studentId);
+        const pct = row.percentage === null ? null : Number(row.percentage);
+        if (pct !== null) {
+          acc.pctSum += pct;
+          acc.pctCount += 1;
+        }
+        const level = classifyResultLevel(
+          pct,
+          row.performanceLevel,
+          bandClassifiers.get(row.instrumentId),
+          row.gradingScaleConfig,
+        );
+        if (level !== null) acc.bandDistribution[level] += 1;
+      }
+
       const perSkillRows = await tx
         .select({
           instrumentId: instruments.id,
@@ -197,23 +246,21 @@ export class BenchmarkingRefreshService {
         perSkillByInstrument.set(row.instrumentId, list);
       }
 
-      return base.map((row) => {
-        const bandDistribution: BenchmarkBandDistribution = {
-          insufficient: row.insufficient,
-          elementary: row.elementary,
-          adequate: row.adequate,
-          advanced: row.advanced,
-        };
-        return {
-          instrumentId: row.instrumentId,
-          gradeId: row.gradeId,
-          subjectId: row.subjectId,
-          studentCount: row.studentCount,
-          avgAchievement: row.avgAchievement,
-          bandDistribution,
-          perSkill: perSkillByInstrument.get(row.instrumentId) ?? [],
-        };
-      });
+      const rows: OrgAggregateRow[] = [];
+      for (const [instrumentId, acc] of accByInstrument) {
+        const avgAchievement =
+          acc.pctCount === 0 ? null : (acc.pctSum / acc.pctCount).toFixed(2);
+        rows.push({
+          instrumentId,
+          gradeId: acc.gradeId,
+          subjectId: acc.subjectId,
+          studentCount: acc.students.size,
+          avgAchievement,
+          bandDistribution: acc.bandDistribution,
+          perSkill: perSkillByInstrument.get(instrumentId) ?? [],
+        });
+      }
+      return rows;
     });
   }
 
@@ -261,4 +308,52 @@ interface OrgAggregateRow {
   avgAchievement: string | null;
   bandDistribution: BenchmarkBandDistribution;
   perSkill: BenchmarkSkillAggregate[];
+}
+
+/** Acumulador en memoria por instrumento durante el agregado de una org. */
+interface InstrumentAccumulator {
+  gradeId: string | null;
+  subjectId: string | null;
+  students: Set<string>;
+  pctSum: number;
+  pctCount: number;
+  bandDistribution: BenchmarkBandDistribution;
+}
+
+/**
+ * Clasificador de bandas de un instrumento pre-indexado UNA vez: guarda las bandas
+ * ordenadas por `order` y el nivel legacy ya resuelto por banda, para clasificar
+ * cada `percentage` en O(bandas) sin recalcular la proyección por fila. Cuando el
+ * instrumento no tiene bandas efectivas (`source: 'none'`) queda `bands` vacío y el
+ * caller cae a `percentageToPerformanceLevel`.
+ */
+interface BandClassifier {
+  bands: PerformanceBandInput[];
+  legacyByBandId: Map<string, PerformanceLevel>;
+}
+
+function buildBandClassifier(effective: EffectiveBands): BandClassifier {
+  const bands = effective.bands;
+  const legacyByBandId = new Map<string, PerformanceLevel>();
+  for (const band of bands) {
+    legacyByBandId.set(band.id, bandToLegacyLevel(band, bands));
+  }
+  return { bands, legacyByBandId };
+}
+
+function classifyResultLevel(
+  percentage: number | null,
+  persistedLevel: PerformanceLevel | null,
+  classifier: BandClassifier | undefined,
+  gradingScaleConfig: unknown,
+): PerformanceLevel | null {
+  if (percentage === null) return persistedLevel;
+  if (classifier && classifier.bands.length > 0) {
+    const band = classifyByBands(percentage / 100, classifier.bands);
+    if (band) return classifier.legacyByBandId.get(band.id) ?? null;
+    return null;
+  }
+  return percentageToPerformanceLevel(percentage / 100, {
+    config: gradingScaleConfig as never,
+  });
 }

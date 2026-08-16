@@ -64,12 +64,26 @@ export function SubjectPanorama({
 
             <CardContent className="space-y-3">
               {subject.achievement !== null ? (
-                <p className="text-2xl font-semibold tabular-nums">
-                  {formatAchievement(subject.achievement)}
-                </p>
+                <div>
+                  <p className="text-2xl font-semibold tabular-nums">
+                    {formatAchievement(subject.achievement)}
+                  </p>
+                  <p className="text-2xs uppercase tracking-wide text-muted-foreground">
+                    Logro promedio de la asignatura
+                  </p>
+                </div>
               ) : (
                 <p className="text-xs text-muted-foreground">{subject.comparability.reason}</p>
               )}
+
+              {subject.latest ? (
+                <p className="text-xs text-muted-foreground">
+                  Última evaluación:{' '}
+                  <span className="font-medium text-foreground">{subject.latest.label}</span>
+                  {' · '}
+                  {formatAchievement(subject.latest.achievement)}
+                </p>
+              ) : null}
 
               {subject.series.length > 0 ? (
                 <div className="space-y-3">
