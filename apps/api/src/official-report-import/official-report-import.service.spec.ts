@@ -127,6 +127,7 @@ function buildMockDb(
       case 'performance_bands':
         return DIA_BANDS.map((b) => ({
           id: b.id,
+          instrumentId: INSTRUMENT_ID,
           orgId: null,
           key: b.key,
           label: b.label,
