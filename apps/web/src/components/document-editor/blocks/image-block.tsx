@@ -1,5 +1,8 @@
-import { Image as ImageIcon } from 'lucide-react';
-import type { ImageBlock } from '@soe/types';
+import { useRef, useState } from 'react';
+import { Image as ImageIcon, Upload } from 'lucide-react';
+import { toast } from 'sonner';
+import { MAX_DOCUMENT_IMAGE_BYTES, type ImageBlock } from '@soe/types';
+import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import {
   Select,
@@ -10,6 +13,8 @@ import {
 } from '@/components/ui/select';
 import { cn } from '@/lib/utils';
 import type { BlockDefinition, BlockEditProps, BlockViewProps } from '../block-registry';
+
+const ACCEPTED_IMAGE_TYPES = ['image/png', 'image/jpeg', 'image/webp', 'image/svg+xml'];
 
 type ImageAlign = NonNullable<ImageBlock['align']>;
 
@@ -65,10 +70,60 @@ function ImageFigure({
   );
 }
 
-function ImageEditView({ block, onChange, assets }: BlockEditProps<ImageBlock>) {
+function ImageEditView({ block, onChange, assets, onUploadImage }: BlockEditProps<ImageBlock>) {
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [isUploading, setIsUploading] = useState(false);
+  const hasImage = Boolean(assets?.[block.fileId]);
+
+  async function handleFileSelected(file: File) {
+    if (!onUploadImage) return;
+    if (!ACCEPTED_IMAGE_TYPES.includes(file.type)) {
+      toast.error('Formato no soportado. Usa PNG, JPG, WebP o SVG.');
+      return;
+    }
+    if (file.size > MAX_DOCUMENT_IMAGE_BYTES) {
+      toast.error('La imagen no puede superar los 5 MB.');
+      return;
+    }
+
+    setIsUploading(true);
+    try {
+      const result = await onUploadImage(file);
+      if (!result) return;
+      onChange({ ...block, fileId: result.fileId });
+    } finally {
+      setIsUploading(false);
+    }
+  }
+
   return (
     <div className="space-y-2">
       <ImageFigure block={block} assets={assets} />
+      {onUploadImage ? (
+        <div>
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept={ACCEPTED_IMAGE_TYPES.join(',')}
+            hidden
+            onChange={(event) => {
+              const file = event.target.files?.[0];
+              if (file) void handleFileSelected(file);
+              event.target.value = '';
+            }}
+          />
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            icon={Upload}
+            disabled={isUploading}
+            onClick={() => fileInputRef.current?.click()}
+          >
+            {isUploading ? 'Subiendo…' : hasImage ? 'Cambiar imagen' : 'Subir imagen'}
+          </Button>
+        </div>
+      ) : null}
       <div className="flex flex-wrap items-center gap-2">
         <Input
           value={block.caption ?? ''}

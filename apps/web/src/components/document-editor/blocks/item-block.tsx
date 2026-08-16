@@ -1,4 +1,5 @@
-import { Eye, EyeOff, FileQuestion, Pencil } from 'lucide-react';
+import { useState } from 'react';
+import { ChevronDown, ChevronUp, FileQuestion, Pencil } from 'lucide-react';
 import {
   ITEM_TYPE_LABELS,
   multipleChoiceContentSchema,
@@ -221,7 +222,9 @@ function ItemSnapshotBody({
 }
 
 function ItemPrintView({ block, audience, itemNumber }: BlockViewProps<ItemBlock>) {
-  const showKey = audience === 'teacher' && block.showAnswer;
+  // La versión profesor SIEMPRE lleva la pauta (respuestas correctas + explicación);
+  // la del alumno nunca. No depende de un toggle por ítem.
+  const showKey = audience === 'teacher';
   return (
     <div className="space-y-3 rounded-lg border border-border p-4">
       <div className="flex items-center justify-between gap-2">
@@ -237,13 +240,24 @@ function ItemPrintView({ block, audience, itemNumber }: BlockViewProps<ItemBlock
   );
 }
 
-function ItemEditView({ block, onChange, onEditItem }: BlockEditProps<ItemBlock>) {
+function ItemEditView({ block, onEditItem }: BlockEditProps<ItemBlock>) {
+  const [expanded, setExpanded] = useState(false);
   const stem = snapshotStem(block.snapshot);
   return (
     <div className="space-y-2 rounded-md border border-border bg-muted/20 p-3">
       <div className="flex flex-wrap items-center justify-between gap-2">
         <Badge variant="outline">{ITEM_TYPE_LABELS[block.snapshot.type]}</Badge>
         <div className="flex items-center gap-1.5">
+          <Button
+            type="button"
+            size="sm"
+            variant="ghost"
+            icon={expanded ? ChevronUp : ChevronDown}
+            aria-expanded={expanded}
+            onClick={() => setExpanded((value) => !value)}
+          >
+            {expanded ? 'Ocultar' : 'Ver alternativas'}
+          </Button>
           {onEditItem ? (
             <Button
               type="button"
@@ -255,27 +269,17 @@ function ItemEditView({ block, onChange, onEditItem }: BlockEditProps<ItemBlock>
               Editar contenido
             </Button>
           ) : null}
-          <Button
-            type="button"
-            size="sm"
-            variant={block.showAnswer ? 'secondary' : 'outline'}
-            icon={block.showAnswer ? Eye : EyeOff}
-            onClick={() => onChange({ ...block, showAnswer: !block.showAnswer })}
-          >
-            Mostrar pauta
-          </Button>
         </div>
       </div>
-      {stem ? (
+      {expanded ? (
+        <div className="rounded-md border border-border bg-background p-3">
+          <ItemSnapshotBody snapshot={block.snapshot} showKey />
+        </div>
+      ) : stem ? (
         <p className="line-clamp-3 text-sm">{stem}</p>
       ) : (
         <p className="text-sm italic text-muted-foreground">Ítem sin enunciado.</p>
       )}
-      {!onEditItem ? (
-        <p className="text-xs text-muted-foreground">
-          El contenido del ítem se edita en el banco de contenido.
-        </p>
-      ) : null}
     </div>
   );
 }
@@ -289,7 +293,6 @@ export const itemBlockDefinition: BlockDefinition<ItemBlock> = {
     id: crypto.randomUUID(),
     type: 'item',
     itemId: crypto.randomUUID(),
-    showAnswer: false,
     snapshot: { type: 'multiple_choice', version: 0, content: {} },
   }),
   EditView: ItemEditView,

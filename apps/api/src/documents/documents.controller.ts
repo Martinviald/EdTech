@@ -13,19 +13,25 @@ import {
 import {
   createDocumentSchema,
   customizeDocumentItemSchema,
+  documentImageConfirmRequestSchema,
+  documentImageUploadRequestSchema,
   documentListQuerySchema,
   updateDocumentSchema,
   DOCUMENT_EDITOR_ROLES,
   DOCUMENT_VIEWER_ROLES,
+  type DocumentAssetsResponse,
+  type DocumentImageConfirmResponse,
   type DocumentListResponse,
   type DocumentModel,
   type DocumentSpecificationResponse,
+  type FileUploadUrlResponse,
 } from '@soe/types';
 import { CurrentUser } from '../auth/current-user.decorator';
 import type { JwtPayload } from '../auth/jwt-payload.types';
 import { Roles } from '../common/decorators/roles.decorator';
 import { RolesGuard } from '../common/guards/roles.guard';
 import { DocumentsService } from './documents.service';
+import { DocumentImagesService } from './document-images.service';
 import { DocumentImportService } from './document-import.service';
 import { DocumentItemsService } from './document-items.service';
 import { DocumentPromotionService } from './document-promotion.service';
@@ -36,6 +42,7 @@ import { DocumentSpecificationService } from './document-specification.service';
 export class DocumentsController {
   constructor(
     private readonly documentsService: DocumentsService,
+    private readonly imagesService: DocumentImagesService,
     private readonly importService: DocumentImportService,
     private readonly itemsService: DocumentItemsService,
     private readonly promotionService: DocumentPromotionService,
@@ -138,5 +145,37 @@ export class DocumentsController {
     @CurrentUser() user: JwtPayload,
   ): Promise<DocumentModel> {
     return this.promotionService.promoteToInstrument(user, id);
+  }
+
+  @Post(':id/images/upload-url')
+  @Roles(...DOCUMENT_EDITOR_ROLES)
+  requestImageUpload(
+    @Param('id') id: string,
+    @Body() body: unknown,
+    @CurrentUser() user: JwtPayload,
+  ): Promise<FileUploadUrlResponse> {
+    const dto = documentImageUploadRequestSchema.parse(body);
+    return this.imagesService.requestUpload(user, id, dto);
+  }
+
+  @Post(':id/images/:fileId/confirm')
+  @Roles(...DOCUMENT_EDITOR_ROLES)
+  confirmImageUpload(
+    @Param('id') id: string,
+    @Param('fileId') fileId: string,
+    @Body() body: unknown,
+    @CurrentUser() user: JwtPayload,
+  ): Promise<DocumentImageConfirmResponse> {
+    const dto = documentImageConfirmRequestSchema.parse(body);
+    return this.imagesService.confirmUpload(user, id, fileId, dto.sizeBytes);
+  }
+
+  @Get(':id/assets')
+  @Roles(...DOCUMENT_VIEWER_ROLES)
+  assets(
+    @Param('id') id: string,
+    @CurrentUser() user: JwtPayload,
+  ): Promise<DocumentAssetsResponse> {
+    return this.imagesService.getAssets(user, id);
   }
 }

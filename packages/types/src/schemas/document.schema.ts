@@ -96,13 +96,13 @@ export type DocumentItemSnapshot = z.infer<typeof documentItemSnapshotSchema>;
 
 /**
  * El puente medible: referencia una fila viva de `items` (cadena
- * instrument → assessment → results). `showAnswer` gobierna la versión
- * profesor (con pauta) vs alumno del render/impresión.
+ * instrument → assessment → results). La pauta (respuestas correctas +
+ * explicación) se muestra según la AUDIENCIA del render/impresión: profesor
+ * siempre la ve, alumno nunca.
  */
 export const itemBlockSchema = blockBaseSchema.extend({
   type: z.literal('item'),
   itemId: z.string().uuid(),
-  showAnswer: z.boolean(),
   snapshot: documentItemSnapshotSchema,
 });
 export type ItemBlock = z.infer<typeof itemBlockSchema>;
@@ -307,3 +307,41 @@ export const documentSpecificationResponseSchema = z.object({
   rows: z.array(documentSpecRowSchema),
 });
 export type DocumentSpecificationResponse = z.infer<typeof documentSpecificationResponseSchema>;
+
+// ── Imágenes de bloques (subida presigned S3, purpose `document_image`) ───────
+
+/** Límite de tamaño para imágenes de documento (5 MB). */
+export const MAX_DOCUMENT_IMAGE_BYTES = 5 * 1024 * 1024;
+
+/**
+ * POST /documents/:id/images/upload-url. Solicita una URL prefirmada para subir
+ * una imagen del bloque `image`. La respuesta reutiliza `FileUploadUrlResponse`
+ * del módulo `files`. El endpoint vive en `documents` (no en `/files`) para que
+ * cualquier editor de documentos (incluye `teacher`) pueda subir.
+ */
+export const documentImageUploadRequestSchema = z.object({
+  fileName: z.string().min(1).max(300),
+  mimeType: z.string().min(1).max(150),
+  sizeBytes: z.number().int().min(1).max(MAX_DOCUMENT_IMAGE_BYTES),
+});
+export type DocumentImageUploadRequestDto = z.infer<typeof documentImageUploadRequestSchema>;
+
+/** POST /documents/:id/images/:fileId/confirm. */
+export const documentImageConfirmRequestSchema = z.object({
+  sizeBytes: z.number().int().min(0).optional(),
+});
+export type DocumentImageConfirmRequestDto = z.infer<
+  typeof documentImageConfirmRequestSchema
+>;
+
+export const documentImageConfirmResponseSchema = z.object({
+  fileId: z.string().uuid(),
+  url: z.string().nullable(),
+});
+export type DocumentImageConfirmResponse = z.infer<
+  typeof documentImageConfirmResponseSchema
+>;
+
+/** GET /documents/:id/assets → mapa fileId → URL prefirmada inline. */
+export const documentAssetsResponseSchema = z.record(z.string());
+export type DocumentAssetsResponse = Record<string, string>;

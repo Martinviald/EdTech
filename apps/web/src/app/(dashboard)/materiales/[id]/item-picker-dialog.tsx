@@ -51,7 +51,6 @@ function toItemBlock(item: ItemModel): Block {
     id: crypto.randomUUID(),
     type: 'item',
     itemId: item.id,
-    showAnswer: false,
     snapshot: { type: item.type, version: item.version, content: item.content },
   };
 }
