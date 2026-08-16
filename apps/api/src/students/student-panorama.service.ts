@@ -1,18 +1,12 @@
 import { ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
 import { and, asc, desc, eq, inArray, isNull, notInArray, sql } from 'drizzle-orm';
-import { alias } from 'drizzle-orm/pg-core';
 import {
   academicYears,
-  assessmentResults,
-  assessments,
   classGroups,
   grades,
-  instruments,
-  performanceBands,
   skillResults,
   studentEnrollments,
   students,
-  subjects,
   taxonomyNodes,
   withOrgContext,
 } from '@soe/db';
@@ -21,12 +15,9 @@ import {
   RESULT_HIDDEN_NODE_TYPES,
   bandToLegacyLevel,
   buildComparabilityMeta,
-  buildInstrumentFamilyKey,
-  buildPeriodSeriesKey,
   classifyByBands,
   percentageToPerformanceLevel,
   type ComparabilityInstrumentRef,
-  type DataGranularity,
   type InstrumentApplicationPeriod,
   type PerformanceBandInput,
   type PerformanceBandView,
@@ -50,6 +41,7 @@ import {
   resolveClassGroupScope,
 } from '../common/helpers/class-group-scope.helper';
 import { resolveEffectiveBandsForInstruments } from '../performance-bands/lib/resolve-effective-bands';
+import { loadStudentAssessments } from './lib/load-student-assessments';
 import { buildTree } from '../taxonomies/lib/tree-builder';
 
 type SkillWithOrder = StudentPanoramaSkill & { nodeOrder: number };
@@ -60,16 +52,6 @@ function compareSkillsByAchievement(a: StudentPanoramaSkill, b: StudentPanoramaS
   if (a.achievement === null) return b.achievement === null ? 0 : 1;
   if (b.achievement === null) return -1;
   return a.achievement - b.achievement || a.nodeName.localeCompare(b.nodeName, 'es');
-}
-
-function toBandView(r: {
-  bandKey: string | null;
-  bandLabel: string | null;
-  bandOrder: number | null;
-  bandColor: string | null;
-}): PerformanceBandView | null {
-  if (r.bandKey === null || r.bandLabel === null || r.bandOrder === null) return null;
-  return { key: r.bandKey, label: r.bandLabel, order: r.bandOrder, color: r.bandColor };
 }
 
 function bandInputToView(band: PerformanceBandInput): PerformanceBandView {
@@ -143,7 +125,7 @@ export class StudentPanoramaService {
         throw new NotFoundException('Estudiante no encontrado');
       }
 
-      const rawAssessments = await this.loadByAssessment(tx, orgId, studentId);
+      const rawAssessments = await loadStudentAssessments(tx, orgId, studentId);
       const effectiveBands = await resolveEffectiveBandsForInstruments(tx, [
         ...new Set(rawAssessments.map((a) => a.instrumentId)),
       ]);
@@ -227,92 +209,6 @@ export class StudentPanoramaService {
           }
         : null,
     };
-  }
-
-  private async loadByAssessment(
-    tx: Database,
-    orgId: string,
-    studentId: string,
-  ): Promise<StudentPanoramaAssessment[]> {
-    const priorBands = alias(performanceBands, 'prior_performance_bands');
-
-    const rows = await tx
-      .select({
-        assessmentId: assessments.id,
-        assessmentName: assessments.name,
-        instrumentId: instruments.id,
-        instrumentName: instruments.name,
-        instrumentType: instruments.type,
-        subjectId: instruments.subjectId,
-        subjectName: subjects.name,
-        gradeId: instruments.gradeId,
-        year: instruments.year,
-        applicationPeriod: instruments.applicationPeriod,
-        administeredAt: assessments.administeredAt,
-        dataGranularity: assessments.dataGranularity,
-        achievement: assessmentResults.percentage,
-        grade: assessmentResults.grade,
-        performanceLevel: assessmentResults.performanceLevel,
-        bandKey: performanceBands.key,
-        bandLabel: performanceBands.label,
-        bandOrder: performanceBands.order,
-        bandColor: performanceBands.color,
-        priorBandKey: priorBands.key,
-        priorBandLabel: priorBands.label,
-        priorBandOrder: priorBands.order,
-        priorBandColor: priorBands.color,
-      })
-      .from(assessmentResults)
-      .innerJoin(assessments, eq(assessments.id, assessmentResults.assessmentId))
-      .innerJoin(instruments, eq(instruments.id, assessments.instrumentId))
-      .leftJoin(subjects, eq(subjects.id, instruments.subjectId))
-      .leftJoin(performanceBands, eq(performanceBands.id, assessmentResults.performanceBandId))
-      .leftJoin(priorBands, eq(priorBands.id, assessmentResults.priorPerformanceBandId))
-      .where(
-        and(
-          eq(assessmentResults.studentId, studentId),
-          eq(assessments.orgId, orgId),
-          isNull(instruments.deletedAt),
-        ),
-      )
-      .orderBy(asc(assessments.administeredAt), asc(assessments.createdAt));
-
-    return rows.map((r) => {
-      const ref: ComparabilityInstrumentRef = {
-        instrumentId: r.instrumentId,
-        type: r.instrumentType,
-        subjectId: r.subjectId,
-        gradeId: r.gradeId,
-        applicationPeriod: r.applicationPeriod,
-        year: r.year,
-      };
-      return {
-        assessmentId: r.assessmentId,
-        assessmentName: r.assessmentName,
-        instrumentId: r.instrumentId,
-        instrumentName: r.instrumentName,
-        instrumentType: r.instrumentType,
-        subjectId: r.subjectId,
-        subjectName: r.subjectName,
-        gradeId: r.gradeId,
-        year: r.year,
-        applicationPeriod: r.applicationPeriod,
-        familyKey: buildInstrumentFamilyKey(ref),
-        periodSeriesKey: buildPeriodSeriesKey(ref),
-        administeredAt: r.administeredAt,
-        dataGranularity: r.dataGranularity as DataGranularity,
-        achievement: r.achievement === null ? null : Number(r.achievement),
-        grade: r.grade,
-        performanceLevel: r.performanceLevel,
-        performanceBand: toBandView(r),
-        priorPerformanceBand: toBandView({
-          bandKey: r.priorBandKey,
-          bandLabel: r.priorBandLabel,
-          bandOrder: r.priorBandOrder,
-          bandColor: r.priorBandColor,
-        }),
-      };
-    });
   }
 
   private applyEffectiveBands(
