@@ -47,6 +47,7 @@ import { AssistantModule } from './assistant/assistant.module';
 import { OfficialReportsModule } from './official-reports/official-reports.module';
 import { OfficialReportImportModule } from './official-report-import/official-report-import.module';
 import { DocumentsModule } from './documents/documents.module';
+import { McpModule } from './mcp/mcp.module';
 
 @Module({
   imports: [
@@ -111,6 +112,7 @@ import { DocumentsModule } from './documents/documents.module';
     // OfficialReportsModule, que GENERA el informe desde nuestros datos.
     OfficialReportImportModule,
     DocumentsModule,
+    McpModule,
   ],
   controllers: [AppController],
   providers: [
