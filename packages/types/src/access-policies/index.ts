@@ -27,3 +27,4 @@ export * from './ai-observability';
 export * from './llm-settings';
 export * from './official-reports';
 export * from './assistant';
+export * from './documents';

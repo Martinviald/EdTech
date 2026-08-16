@@ -45,3 +45,4 @@ export * from './ai-observability.schema';
 export * from './assistant.schema';
 export * from './llm-settings.schema';
 export * from './student-signals.schema';
+export * from './document.schema';

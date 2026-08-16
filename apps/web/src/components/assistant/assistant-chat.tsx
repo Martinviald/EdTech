@@ -9,7 +9,7 @@ import { cn } from '@/lib/utils';
 import { createConversation, searchStudents } from '@/lib/assistant/actions';
 import { useAssistant } from './assistant-context';
 import { ContextTray, contextChipLabel } from './context-tray';
-import { Markdown } from './markdown';
+import { Markdown } from '@/components/shared/markdown';
 import { readAssistantStream } from './stream';
 
 /**

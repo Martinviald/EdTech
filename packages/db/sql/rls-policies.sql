@@ -214,6 +214,36 @@ CREATE POLICY "files_tenant_isolation" ON "files"
     OR org_id::text = current_setting('app.current_org_id', true)
   );
 
+-- ── Editor de Materiales — documents + document_item_refs ────────────────────
+-- Documentos por bloques (docs/propuesta-editor-materiales.md). org_id NULLABLE:
+-- las filas con org_id IS NULL son material de PLATAFORMA (plantillas cross-
+-- colegio), visibles para todos los tenants — mismo criterio que files /
+-- performance_bands / llm_settings. Las filas de tenant se aíslan por org_id.
+-- La visibilidad fina DENTRO del colegio (private/department/org) la aplica el
+-- service (created_by_id + visibility); RLS es solo la barrera de tenant.
+-- document_item_refs espeja el org_id de su documento para heredar el mismo
+-- aislamiento sin EXISTS.
+ALTER TABLE "documents"          ENABLE ROW LEVEL SECURITY;
+ALTER TABLE "documents"          FORCE  ROW LEVEL SECURITY;
+ALTER TABLE "document_item_refs" ENABLE ROW LEVEL SECURITY;
+ALTER TABLE "document_item_refs" FORCE  ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "documents_tenant_isolation" ON "documents";
+CREATE POLICY "documents_tenant_isolation" ON "documents"
+  AS PERMISSIVE FOR ALL
+  USING (
+    org_id IS NULL
+    OR org_id::text = current_setting('app.current_org_id', true)
+  );
+
+DROP POLICY IF EXISTS "document_item_refs_tenant_isolation" ON "document_item_refs";
+CREATE POLICY "document_item_refs_tenant_isolation" ON "document_item_refs"
+  AS PERMISSIVE FOR ALL
+  USING (
+    org_id IS NULL
+    OR org_id::text = current_setting('app.current_org_id', true)
+  );
+
 -- ── Read-model de cohorte (analítica agregada) ──────────────────────────────
 -- `assessment_item_stats` / `assessment_skill_stats` no tienen org_id propio: heredan
 -- la pertenencia de tenant vía EXISTS sobre assessments, exactamente igual que

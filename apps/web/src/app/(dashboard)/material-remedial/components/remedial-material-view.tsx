@@ -1,7 +1,9 @@
 'use client';
 
-import { useState } from 'react';
-import { GraduationCap, Printer, User } from 'lucide-react';
+import { useState, useTransition } from 'react';
+import { useRouter } from 'next/navigation';
+import { toast } from 'sonner';
+import { GraduationCap, PenSquare, Printer, User } from 'lucide-react';
 import {
   type RemedialAudience,
   type RemedialContent,
@@ -9,12 +11,14 @@ import {
   type RemedialStudentContent,
 } from '@soe/types';
 import { cn } from '@/lib/utils';
+import { ROUTES } from '@/lib/routes';
 import { Button } from '@/components/ui/button';
 import { AlertCallout } from '@/components/shared';
 import { ContentDisplay } from './content-display';
 import { StudentContentDisplay } from './student-content-display';
 import { ReviewPanel } from './review-panel';
 import { REMEDIAL_TYPE_LABELS } from './labels';
+import { openInMaterialEditor } from '../actions';
 
 interface RemedialMaterialViewProps {
   material: RemedialMaterialModel;
@@ -23,6 +27,8 @@ interface RemedialMaterialViewProps {
   /** Versión estudiante derivada en backend (GET /:id/student). */
   studentContent: RemedialStudentContent | null;
   canApprove: boolean;
+  /** El usuario puede usar el Editor de Materiales (DOCUMENT_EDITOR_ROLES). */
+  canOpenInEditor: boolean;
   title: string;
 }
 
@@ -40,13 +46,30 @@ export function RemedialMaterialView({
   teacherContent,
   studentContent,
   canApprove,
+  canOpenInEditor,
   title,
 }: RemedialMaterialViewProps) {
+  const router = useRouter();
   const [audience, setAudience] = useState<RemedialAudience>('teacher');
+  const [isOpening, startOpening] = useTransition();
 
   const typeLabel = REMEDIAL_TYPE_LABELS[material.type];
   const subtitle = [typeLabel, material.nodeName].filter(Boolean).join(' · ');
   const audienceLabel = audience === 'teacher' ? 'Versión profesor' : 'Versión estudiante';
+  const showOpenInEditor =
+    canOpenInEditor && (material.status === 'ready' || material.status === 'approved');
+
+  function handleOpenInEditor() {
+    startOpening(async () => {
+      const result = await openInMaterialEditor(material.id);
+      if (!result.ok) {
+        toast.error(result.message);
+        return;
+      }
+      toast.success('Material abierto en el editor');
+      router.push(ROUTES.material(result.data.id));
+    });
+  }
 
   return (
     <div className="space-y-4">
@@ -70,10 +93,23 @@ export function RemedialMaterialView({
           />
         </div>
 
-        <Button variant="outline" size="sm" onClick={() => window.print()}>
-          <Printer className="size-4" aria-hidden />
-          Imprimir
-        </Button>
+        <div className="flex flex-wrap items-center gap-2">
+          {showOpenInEditor && (
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleOpenInEditor}
+              disabled={isOpening}
+            >
+              <PenSquare className="size-4" aria-hidden />
+              {isOpening ? 'Abriendo…' : 'Abrir en editor'}
+            </Button>
+          )}
+          <Button variant="outline" size="sm" onClick={() => window.print()}>
+            <Printer className="size-4" aria-hidden />
+            Imprimir
+          </Button>
+        </div>
       </div>
 
       <div className="print-region">
