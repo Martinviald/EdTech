@@ -100,7 +100,7 @@ export class DocumentsService {
       if (!inserted) {
         throw new Error('No se pudo crear el material');
       }
-      await this.replaceItemRefs(tx, inserted.id, inserted.orgId, itemIds);
+      await this.syncItemRefs(tx, inserted.id, inserted.orgId, itemIds);
       return this.toModel(inserted, user.name);
     });
   }
@@ -144,7 +144,7 @@ export class DocumentsService {
       }
 
       if (itemIds !== null) {
-        await this.replaceItemRefs(tx, updated.id, updated.orgId, itemIds);
+        await this.syncItemRefs(tx, updated.id, updated.orgId, itemIds);
       }
       return this.toModel(updated, found.createdByName);
     });
@@ -191,12 +191,12 @@ export class DocumentsService {
       if (!copy) {
         throw new Error('No se pudo duplicar el material');
       }
-      await this.replaceItemRefs(tx, copy.id, copy.orgId, collectItemBlockIds(copy.content));
+      await this.syncItemRefs(tx, copy.id, copy.orgId, collectItemBlockIds(copy.content));
       return this.toModel(copy, user.name);
     });
   }
 
-  private requireOrgId(user: JwtPayload): string {
+  requireOrgId(user: JwtPayload): string {
     if (!user.orgId) {
       throw new ForbiddenException(
         'Sin organización activa. Selecciona una organización antes de continuar.',
@@ -219,7 +219,7 @@ export class DocumentsService {
     return row.orgId === null && row.visibility === 'platform';
   }
 
-  private async findVisibleOrThrow(
+  async findVisibleOrThrow(
     tx: Database,
     orgId: string,
     user: JwtPayload,
@@ -238,7 +238,7 @@ export class DocumentsService {
     return found;
   }
 
-  private assertOwner(row: Document, user: JwtPayload): void {
+  assertOwner(row: Document, user: JwtPayload): void {
     if (row.createdById === user.userId || user.isPlatformAdmin) return;
     throw new ForbiddenException(
       'Solo el creador puede editar este material. Duplícalo para hacer tu propia versión.',
@@ -271,7 +271,7 @@ export class DocumentsService {
     }
   }
 
-  private async replaceItemRefs(
+  async syncItemRefs(
     tx: Database,
     documentId: string,
     docOrgId: string | null,

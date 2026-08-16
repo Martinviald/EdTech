@@ -262,3 +262,48 @@ export const documentListQuerySchema = z.object({
   q: z.string().max(200).optional(),
 });
 export type DocumentListQueryDto = z.infer<typeof documentListQuerySchema>;
+
+// ── Copy-on-write de ítems (Decisión H) ──────────────────────────────────────
+
+/**
+ * POST /documents/:id/items/:itemId/customize. Edita el contenido de un ítem
+ * DESDE el canvas. El backend decide: si el ítem es propio del documento (org
+ * propia, borrador, referenciado solo por este documento) edita in-place con
+ * bump de versión; si es del banco/compartido, lo CLONA a un draft propio y
+ * re-apunta el bloque — el original y su historial de medición quedan intactos.
+ * `content` se valida contra el schema del tipo del ítem en el service.
+ */
+export const customizeDocumentItemSchema = z.object({
+  blockId: z.string().uuid(),
+  content: z.record(z.unknown()),
+});
+export type CustomizeDocumentItemDto = z.infer<typeof customizeDocumentItemSchema>;
+
+// ── Especificación derivada (Decisión G2: orientar ≠ medir) ─────────────────
+
+/**
+ * GET /documents/:id/specification. Cobertura taxonómica DERIVADA de los
+ * `item_taxonomy_tags` de los ítems referenciados (vía document_item_refs).
+ * Disponible siempre, sin promover a instrumento: orienta el trabajo. La
+ * medición (resultados/progresión) sí requiere promote-to-instrument.
+ */
+export const documentSpecRowSchema = z.object({
+  nodeId: z.string().uuid(),
+  nodeName: z.string(),
+  nodeType: z.string(),
+  code: z.string().nullable(),
+  tagType: z.enum(['primary', 'secondary']),
+  itemCount: z.number().int(),
+  /** Posiciones (1-based, orden de aparición) de los bloques ítem que cubren el nodo. */
+  itemPositions: z.array(z.number().int()),
+});
+export type DocumentSpecRow = z.infer<typeof documentSpecRowSchema>;
+
+export const documentSpecificationResponseSchema = z.object({
+  documentId: z.string().uuid(),
+  totalItems: z.number().int(),
+  taggedItems: z.number().int(),
+  untaggedItems: z.number().int(),
+  rows: z.array(documentSpecRowSchema),
+});
+export type DocumentSpecificationResponse = z.infer<typeof documentSpecificationResponseSchema>;
