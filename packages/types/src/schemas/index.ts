@@ -21,6 +21,7 @@ export * from './grading-scale.schema';
 export * from './performance-band.schema';
 export * from './assessment-result.schema';
 export * from './student-panorama.schema';
+export * from './student-comparisons.schema';
 export * from './comparable-overview.schema';
 export * from './comparable-trajectory.schema';
 export * from './dashboard.schema';
