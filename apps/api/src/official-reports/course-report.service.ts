@@ -34,7 +34,7 @@ import {
 } from '@soe/types';
 import type { JwtPayload } from '../auth/jwt-payload.types';
 import { InjectDb, type Database } from '../database/database.types';
-import { loadInstrumentBands } from '../performance-bands/lib/load-instrument-bands';
+import { resolveEffectiveBands } from '../performance-bands/lib/resolve-effective-bands';
 import { hydrateBandForStudent } from '../performance-bands/lib/hydrate-band-level';
 import {
   loadCohortLevelCounts,
@@ -192,9 +192,10 @@ export class CourseReportService {
       // no sólo en la rama agregada— porque un informe agregado con filas
       // por-alumno band-only (percentage/performanceLevel NULL, performance_band_id
       // seteado, lo que escribe el importador oficial) necesita derivar el nivel
-      // desde la banda para poblar §5. Corre dentro de withOrgContext → RLS trae
-      // globales + override de la org.
-      const instrumentBands = await loadInstrumentBands(tx, assessment.instrumentId);
+      // desde la banda para poblar §5. Con fallback a la versión anterior de su
+      // familia; sólo si tampoco hay (source 'none') se cae al legacy. Corre
+      // dentro de withOrgContext → RLS trae globales + override de la org.
+      const { bands: instrumentBands } = await resolveEffectiveBands(tx, assessment.instrumentId);
       this.hydratePerformanceLevels(evaluated, instrumentBands);
 
       // Informe oficial cargado en modo agregado: sin filas por alumno. El logro del

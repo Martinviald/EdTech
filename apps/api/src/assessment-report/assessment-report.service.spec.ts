@@ -98,6 +98,30 @@ function makeService(db: Database): AssessmentReportService {
 
 const ASSESSMENT_ID = 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa';
 
+// Familia del instrumento del informe. La usa resolveEffectiveBands para el
+// fallback a la versión anterior; acá el instrumento es único en su familia.
+const INSTRUMENT_FAMILY_ROW = {
+  id: 'inst-1',
+  type: 'dia',
+  subjectId: 's1',
+  gradeId: 'g1',
+  applicationPeriod: null,
+  year: 2026,
+};
+
+// resolveEffectiveBands(tx, 'inst-1') SIN bandas propias ni versión anterior:
+// loadFamilyRows → loadBandsForInstruments(target) → loadFamilyCandidates →
+// loadBandsForInstruments(candidatos). Resuelve a source 'none' → modo legacy.
+function effectiveBandsNoneSelects(): unknown[][] {
+  return [[INSTRUMENT_FAMILY_ROW], [], [INSTRUMENT_FAMILY_ROW], []];
+}
+
+// resolveEffectiveBands(tx, 'inst-1') CON bandas propias: loadFamilyRows →
+// loadBandsForInstruments(target) devuelve las bandas y corta (source 'own').
+function effectiveBandsOwnSelects(ownBands: unknown[]): unknown[][] {
+  return [[INSTRUMENT_FAMILY_ROW], ownBands];
+}
+
 // Escenario base: 4 alumnos evaluados, 2 ítems, 2 cursos. gradingScaleId null →
 // SIN escala configurada (TKT-04): los campos de nota vienen null, sin query extra.
 function baseSelectResults(): unknown[][] {
@@ -202,8 +226,9 @@ function baseSelectResults(): unknown[][] {
     ],
     // 6. countEnrolled
     [{ total: 5 }],
-    // 6b. loadInstrumentBands (sin bandas configuradas → modo legacy 4 niveles)
-    [],
+    // 6b. resolveEffectiveBands (sin bandas propias ni versión anterior →
+    // source 'none' → modo legacy 4 niveles). Consume 4 selects.
+    ...effectiveBandsNoneSelects(),
     // 7. loadItemCohortStats → assessment_item_stats (read-model de cohorte).
     // Una fila por (curso × ítem); acá un solo curso por ítem.
     [
@@ -396,6 +421,7 @@ describe('AssessmentReportService.getReport', () => {
     {
       id: 'b1',
       orgId: null,
+      instrumentId: 'inst-1',
       key: 'I',
       label: 'Nivel I',
       order: 1,
@@ -406,6 +432,7 @@ describe('AssessmentReportService.getReport', () => {
     {
       id: 'b2',
       orgId: null,
+      instrumentId: 'inst-1',
       key: 'II',
       label: 'Nivel II',
       order: 2,
@@ -416,6 +443,7 @@ describe('AssessmentReportService.getReport', () => {
     {
       id: 'b3',
       orgId: null,
+      instrumentId: 'inst-1',
       key: 'III',
       label: 'Nivel III',
       order: 3,
@@ -459,7 +487,10 @@ describe('AssessmentReportService.getReport', () => {
       { studentId: 's1', classGroupId: 'cg1', classGroupName: '3°A' },
       { studentId: 's2', classGroupId: 'cg1', classGroupName: '3°A' },
     ];
-    results[7] = DIA_BANDS; // loadInstrumentBands
+    // El instrumento SÍ trae bandas propias: resolveEffectiveBands corta tras
+    // loadFamilyRows + loadBandsForInstruments (2 selects), no los 4 del caso
+    // 'none' de la base. Reemplaza el bloque de bandas por el de 'own'.
+    results.splice(7, 4, ...effectiveBandsOwnSelects(DIA_BANDS));
     return results;
   }
 
@@ -474,9 +505,10 @@ describe('AssessmentReportService.getReport', () => {
     (results[0][0] as Record<string, unknown>).dataGranularity = 'aggregate_only';
     results[4] = []; // loadEvaluatedStudents sin filas
     results.splice(5, 1); // loadStudentClassGroups no consulta con 0 alumnos
-    // loadCohortOverallAchievement (agrupado por curso): Σscore/Σmax = 90/120 = 75%,
-    // N = 4. Reemplaza al slot de loadWeakestSkillPerStudent, que el corte no consulta.
-    results[9] = [{ scoreSum: '90.00', maxSum: '120.00', studentsAssessed: 4 }];
+    // Tras el splice: pre-band 0..5, bloque de bandas 'none' 6..9, loadItemCohortStats
+    // 10, buildSkills 11, loadCohortOverallAchievement 12, loadCohortLevelCounts 13.
+    // loadCohortOverallAchievement (agrupado por curso): Σscore/Σmax = 90/120 = 75%, N=4.
+    results[12] = [{ scoreSum: '90.00', maxSum: '120.00', studentsAssessed: 4 }];
     return results;
   }
 
@@ -505,9 +537,13 @@ describe('AssessmentReportService.getReport', () => {
   // sólo dispara en la rama agregada del guard, justo tras loadCohortOverallAchievement).
   function aggregateWithLevelStatsSelectResults(): unknown[][] {
     const results = aggregateEmptySelectResults();
-    results[6] = DIA_BANDS; // loadInstrumentBands (índice tras los splices)
+    // El instrumento trae bandas propias → resolveEffectiveBands corta en 2 selects.
+    // Reemplaza el bloque 'none' (índices 6..9) por el 'own'. Tras esto: itemStats 8,
+    // buildSkills 9, loadCohortOverallAchievement 10, loadCohortLevelCounts 11.
+    results.splice(6, 4, ...effectiveBandsOwnSelects(DIA_BANDS));
+    results[10] = [{ scoreSum: '90.00', maxSum: '120.00', studentsAssessed: 4 }];
     // loadCohortLevelCounts → conteos por banda sumados sobre el scope.
-    results[10] = [
+    results[11] = [
       { performanceBandId: 'b1', count: 2 },
       { performanceBandId: 'b3', count: 2 },
     ];
