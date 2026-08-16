@@ -33,6 +33,7 @@ import {
   type StudentPanoramaSkillNode,
   type StudentPanoramaSubject,
   type StudentPanoramaSummary,
+  type StudentSkillTrendPoint,
 } from '@soe/types';
 import type { JwtPayload } from '../auth/jwt-payload.types';
 import { InjectDb, type Database } from '../database/database.types';
@@ -135,17 +136,15 @@ export class StudentPanoramaService {
       const filters = this.resolveFilters(query, allAssessments);
       const byAssessment = this.applyFilters(allAssessments, filters);
 
-      const skillRows = await this.loadBySkill(
-        tx,
-        studentId,
-        byAssessment.map((a) => a.assessmentId),
-      );
+      const assessmentIds = byAssessment.map((a) => a.assessmentId);
+      const skillRows = await this.loadBySkill(tx, studentId, assessmentIds);
+      const skillSeries = await this.loadSkillSeries(tx, studentId, assessmentIds);
 
       const comparability = buildComparabilityMeta(
         uniqueInstrumentRefs(byAssessment),
         byAssessment.length,
       );
-      const bySkillTree = this.buildSkillTree(skillRows);
+      const bySkillTree = this.buildSkillTree(skillRows, byAssessment, skillSeries);
       const bySkill = skillRows.map(({ nodeOrder: _nodeOrder, ...skill }) => skill);
       const bySubject = this.buildBySubject(byAssessment);
       const summary = this.buildSummary(byAssessment, bySkill, comparability.aggregatable);
@@ -351,7 +350,68 @@ export class StudentPanoramaService {
       .sort(compareSkillsByAchievement);
   }
 
-  private buildSkillTree(bySkill: SkillWithOrder[]): StudentPanoramaSkillNode[] {
+  private async loadSkillSeries(
+    tx: Database,
+    studentId: string,
+    assessmentIds: string[],
+  ): Promise<Map<string, Map<string, number | null>>> {
+    const byNode = new Map<string, Map<string, number | null>>();
+    if (assessmentIds.length === 0) return byNode;
+
+    const rows = await tx
+      .select({
+        assessmentId: skillResults.assessmentId,
+        nodeId: skillResults.nodeId,
+        percentage: skillResults.percentage,
+      })
+      .from(skillResults)
+      .where(
+        and(
+          eq(skillResults.studentId, studentId),
+          inArray(skillResults.assessmentId, assessmentIds),
+        ),
+      );
+
+    for (const row of rows) {
+      let byAssessment = byNode.get(row.nodeId);
+      if (!byAssessment) {
+        byAssessment = new Map<string, number | null>();
+        byNode.set(row.nodeId, byAssessment);
+      }
+      byAssessment.set(row.assessmentId, row.percentage === null ? null : Number(row.percentage));
+    }
+
+    return byNode;
+  }
+
+  private buildSkillTree(
+    bySkill: SkillWithOrder[],
+    byAssessment: StudentPanoramaAssessment[],
+    skillSeries: Map<string, Map<string, number | null>>,
+  ): StudentPanoramaSkillNode[] {
+    const assessmentLabels = new Map<string, string>();
+    for (const a of byAssessment) {
+      assessmentLabels.set(
+        a.assessmentId,
+        `${periodLabel(a.applicationPeriod)}${a.year === null ? '' : ` ${a.year}`}`,
+      );
+    }
+
+    const seriesForNode = (nodeId: string): StudentSkillTrendPoint[] => {
+      const byAssessmentPct = skillSeries.get(nodeId);
+      if (!byAssessmentPct) return [];
+      const points: StudentSkillTrendPoint[] = [];
+      for (const a of byAssessment) {
+        if (!byAssessmentPct.has(a.assessmentId)) continue;
+        points.push({
+          assessmentId: a.assessmentId,
+          label: assessmentLabels.get(a.assessmentId) ?? 'Sin momento',
+          achievement: byAssessmentPct.get(a.assessmentId) ?? null,
+        });
+      }
+      return points;
+    };
+
     const tree = buildTree(
       bySkill.map((s) => ({ ...s, id: s.nodeId, parentId: s.parentNodeId, order: s.nodeOrder })),
     );
@@ -366,6 +426,7 @@ export class StudentPanoramaService {
       totalCount: node.totalCount,
       assessmentsCount: node.assessmentsCount,
       performanceLevel: node.performanceLevel,
+      series: seriesForNode(node.nodeId),
       children: node.children.map(strip),
     });
     return tree.map(strip);
