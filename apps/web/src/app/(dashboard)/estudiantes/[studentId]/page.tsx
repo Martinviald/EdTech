@@ -9,6 +9,7 @@ import {
   canAccess,
   RESULTS_VIEWER_ROLES,
   studentPanoramaQuerySchema,
+  type StudentComparisonsResponse,
   type StudentPanoramaAssessment,
   type StudentPanoramaQueryDto,
   type StudentPanoramaResponse,
@@ -29,7 +30,8 @@ import { formatAchievement } from '../../resultados/components/performance-level
 import { PanoramaFilters } from '../components/panorama-filters';
 import { SkillTree } from '../components/skill-tree';
 import { SubjectPanorama } from '../components/subject-panorama';
-import { getStudentPanorama } from '../data';
+import { SubjectComparison } from '../components/subject-comparison';
+import { getStudentComparisons, getStudentPanorama } from '../data';
 
 type SearchParams = Record<string, string | string[] | undefined>;
 
@@ -88,7 +90,6 @@ export default async function EstudiantePanoramaPage({
   );
 }
 
-
 function BandMovement({ item }: { item: StudentPanoramaAssessment }) {
   if (!item.priorPerformanceBand || !item.performanceBand) {
     return <PerformanceBadge level={item.performanceLevel} band={item.performanceBand} />;
@@ -125,6 +126,22 @@ function ResponsesLink({
       <ArrowRight className="size-3.5" aria-hidden />
     </Link>
   );
+}
+
+async function ComparisonsSection({
+  studentId,
+  query,
+}: {
+  studentId: string;
+  query: StudentPanoramaQueryDto;
+}) {
+  const data = await getStudentComparisons(studentId, query).catch(
+    (): StudentComparisonsResponse | null => null,
+  );
+
+  if (!data || data.subjects.length === 0) return null;
+
+  return <SubjectComparison subjects={data.subjects} scope={data.scope} />;
 }
 
 async function PanoramaContent({
@@ -216,6 +233,10 @@ async function PanoramaContent({
             subjects={bySubject}
             activeSubjectId={filters.subjectId}
           />
+
+          <Suspense fallback={<CardSkeleton rows={6} />}>
+            <ComparisonsSection studentId={studentId} query={query} />
+          </Suspense>
 
           <Card>
             <CardHeader>
