@@ -603,3 +603,72 @@ describe('StudentPanoramaService — logro por habilidad', () => {
     expect(result.bySkill[2]?.achievement).toBeNull();
   });
 });
+
+describe('StudentPanoramaService — serie temporal por nodo de habilidad', () => {
+  function seriesRow(overrides: Record<string, unknown> = {}) {
+    return { assessmentId: 'a-dg', nodeId: 'node-1', percentage: '50.00', ...overrides };
+  }
+
+  it('adjunta la serie cronológica de un nodo evaluado en dos evaluaciones', async () => {
+    const db = makeDb([
+      [STUDENT],
+      [STUDENT],
+      [ENROLLMENT],
+      [
+        assessmentRow({
+          assessmentId: 'a-dg',
+          instrumentId: 'inst-dg',
+          applicationPeriod: 'diagnostico',
+          administeredAt: new Date('2025-03-01'),
+          year: 2025,
+        }),
+        assessmentRow({
+          assessmentId: 'a-cierre',
+          instrumentId: 'inst-cierre',
+          applicationPeriod: 'cierre',
+          administeredAt: new Date('2025-11-01'),
+          year: 2025,
+        }),
+      ],
+      [
+        familyRow('inst-dg', { applicationPeriod: 'diagnostico', year: 2025 }),
+        familyRow('inst-cierre', { applicationPeriod: 'cierre', year: 2025 }),
+      ],
+      [...DIA_BANDS('inst-dg'), ...DIA_BANDS('inst-cierre')],
+      [skillRow({ nodeId: 'node-1', correctCount: 11, totalCount: 20, assessmentsCount: 2 })],
+      [
+        seriesRow({ assessmentId: 'a-cierre', nodeId: 'node-1', percentage: '80.00' }),
+        seriesRow({ assessmentId: 'a-dg', nodeId: 'node-1', percentage: '40.00' }),
+      ],
+    ]);
+
+    const result = await makeService(db).getPanorama(makeUser(), 'stu-1', { allYears: true });
+
+    const node = result.bySkillTree[0]!;
+    expect(node.nodeId).toBe('node-1');
+    expect(node.series).toEqual([
+      { assessmentId: 'a-dg', label: 'Diagnóstico 2025', achievement: 40 },
+      { assessmentId: 'a-cierre', label: 'Cierre 2025', achievement: 80 },
+    ]);
+  });
+
+  it('adjunta una serie de un punto para un nodo evaluado en una sola evaluación', async () => {
+    const db = makeDb([
+      [STUDENT],
+      [STUDENT],
+      [ENROLLMENT],
+      [assessmentRow({ assessmentId: 'a-1', applicationPeriod: 'diagnostico', year: 2026 })],
+      [familyRow('inst-1')],
+      DIA_BANDS('inst-1'),
+      [skillRow({ nodeId: 'node-1' })],
+      [seriesRow({ assessmentId: 'a-1', nodeId: 'node-1', percentage: '65.50' })],
+    ]);
+
+    const result = await makeService(db).getPanorama(makeUser(), 'stu-1');
+
+    const node = result.bySkillTree[0]!;
+    expect(node.series).toEqual([
+      { assessmentId: 'a-1', label: 'Diagnóstico 2026', achievement: 65.5 },
+    ]);
+  });
+});
