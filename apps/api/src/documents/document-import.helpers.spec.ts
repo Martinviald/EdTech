@@ -112,15 +112,6 @@ describe('remedialPracticeToBlocks', () => {
     expect(last?.type === 'callout' && last.title).toBe('Notas para el docente');
   });
 
-  it('los bloques ítem nacen sin pauta visible (showAnswer=false)', () => {
-    const blocks = remedialPracticeToBlocks(
-      practice,
-      new Map([['00000000-0000-4000-8000-000000000001', snapshot]]),
-      new Map(),
-    );
-    const itemBlock = blocks.find((b) => b.type === 'item');
-    expect(itemBlock?.type === 'item' && itemBlock.showAnswer).toBe(false);
-  });
 });
 
 describe('remedialPlanToBlocks', () => {

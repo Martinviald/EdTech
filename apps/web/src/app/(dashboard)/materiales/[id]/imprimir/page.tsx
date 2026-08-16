@@ -6,6 +6,7 @@ import { ArrowLeft } from 'lucide-react';
 import {
   canAccess,
   DOCUMENT_VIEWER_ROLES,
+  type DocumentAssetsResponse,
   type DocumentModel,
   type OrgBrandingResponse,
 } from '@soe/types';
@@ -41,10 +42,13 @@ export default async function MaterialImprimirPage({
   const { version } = await searchParams;
   const audience: DocumentAudience = version === 'student' ? 'student' : 'teacher';
 
-  const [doc, brandingResponse, org] = await Promise.all([
+  const [doc, brandingResponse, org, assets] = await Promise.all([
     apiGet<DocumentModel>(`/documents/${id}`).catch(() => null),
     apiGet<OrgBrandingResponse>('/organizations/me/branding').catch(() => EMPTY_BRANDING),
     apiGet<{ name: string }>('/organizations/me').catch(() => null),
+    apiGet<DocumentAssetsResponse>(`/documents/${id}/assets`).catch(
+      () => ({}) as DocumentAssetsResponse,
+    ),
   ]);
   if (!doc) notFound();
 
@@ -107,7 +111,7 @@ export default async function MaterialImprimirPage({
         ) : null}
 
         <div className="mt-6">
-          <DocumentRenderer content={doc.content} audience={audience} />
+          <DocumentRenderer content={doc.content} audience={audience} assets={assets} />
         </div>
 
         {branding.footerText ? (

@@ -23,6 +23,10 @@ import { DocumentCanvas } from '@/components/document-editor/document-canvas';
 import { DocumentRenderer } from '@/components/document-editor/document-renderer';
 import { BLOCK_TYPE_ORDER } from '@/components/document-editor/block-registry';
 import { duplicateDocument } from '../actions';
+import {
+  confirmDocumentImageUpload,
+  requestDocumentImageUploadUrl,
+} from './image-actions';
 import { ItemPickerDialog } from './item-picker-dialog';
 import { CustomizeItemDialog } from './customize-item-dialog';
 import { SpecificationDialog } from './specification-dialog';
@@ -45,6 +49,7 @@ type DocumentEditorShellProps = {
   canEdit: boolean;
   subjects: CatalogEntryModel[];
   grades: CatalogEntryModel[];
+  initialAssets?: Record<string, string>;
 };
 
 export function DocumentEditorShell({
@@ -52,11 +57,13 @@ export function DocumentEditorShell({
   canEdit,
   subjects,
   grades,
+  initialAssets = {},
 }: DocumentEditorShellProps) {
   const router = useRouter();
   const [title, setTitle] = useState(document.title);
   const [blocks, setBlocks] = useState<Block[]>(document.content.blocks);
   const [instrumentId, setInstrumentId] = useState(document.instrumentId);
+  const [assets, setAssets] = useState<Record<string, string>>(initialAssets);
   const [mode, setMode] = useState<Mode>(canEdit ? 'edit' : 'preview');
   const [saveState, setSaveState] = useState<SaveState>('idle');
   const [editingItemBlock, setEditingItemBlock] = useState<ItemBlockType | null>(null);
@@ -134,6 +141,47 @@ export function DocumentEditorShell({
     handleBlocksChange([...blocks, ...newBlocks]);
   }
 
+  async function handleUploadImage(
+    file: File,
+  ): Promise<{ fileId: string; url: string } | null> {
+    const urlResult = await requestDocumentImageUploadUrl(document.id, {
+      fileName: file.name,
+      mimeType: file.type,
+      sizeBytes: file.size,
+    });
+    if (!urlResult.ok) {
+      toast.error(urlResult.message);
+      return null;
+    }
+
+    const { uploadUrl, headers, fileId } = urlResult.data;
+    let putResponse: Response;
+    try {
+      putResponse = await fetch(uploadUrl, { method: 'PUT', headers, body: file });
+    } catch (error) {
+      toast.error(getDisplayMessage(error, 'No se pudo subir la imagen al almacenamiento.'));
+      return null;
+    }
+    if (!putResponse.ok) {
+      toast.error('No se pudo subir la imagen al almacenamiento.');
+      return null;
+    }
+
+    const confirmResult = await confirmDocumentImageUpload(document.id, fileId, file.size);
+    if (!confirmResult.ok) {
+      toast.error(confirmResult.message);
+      return null;
+    }
+    if (!confirmResult.data.url) {
+      toast.error('La imagen se subió pero no se pudo resolver su URL.');
+      return null;
+    }
+
+    const url = confirmResult.data.url;
+    setAssets((prev) => ({ ...prev, [fileId]: url }));
+    return { fileId, url };
+  }
+
   function handleDuplicate() {
     setIsDuplicating(true);
     void duplicateDocument(document.id).then((result) => {
@@ -175,6 +223,7 @@ export function DocumentEditorShell({
           <DocumentRenderer
             content={{ version: DOCUMENT_CONTENT_VERSION, blocks }}
             audience="teacher"
+            assets={assets}
           />
         </div>
       </div>
@@ -230,8 +279,10 @@ export function DocumentEditorShell({
         <DocumentCanvas
           value={blocks}
           onChange={handleBlocksChange}
+          assets={assets}
           insertableTypes={INSERTABLE_TYPES}
           onEditItem={setEditingItemBlock}
+          onUploadImage={handleUploadImage}
           insertActions={
             <ItemPickerDialog subjects={subjects} grades={grades} onInsert={handleInsertItems} />
           }
@@ -241,6 +292,7 @@ export function DocumentEditorShell({
           <DocumentRenderer
             content={{ version: DOCUMENT_CONTENT_VERSION, blocks }}
             audience="teacher"
+            assets={assets}
           />
         </div>
       )}
