@@ -175,6 +175,13 @@ const DYNAMIC_TITLES: readonly { pattern: RegExp; resolve: (m: RegExpMatchArray)
       }),
     },
     {
+      pattern: /^\/materiales\/([^/]+)\/imprimir$/,
+      resolve: (m) => ({
+        title: 'Imprimir material',
+        parent: { href: ROUTES.material(m[1]!), label: 'Editor de materiales' },
+      }),
+    },
+    {
       pattern: /^\/materiales\/[^/]+$/,
       resolve: () => ({
         title: 'Editor de materiales',

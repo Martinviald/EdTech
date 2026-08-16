@@ -8,6 +8,7 @@ import type { InstrumentModel, ItemModel } from '@soe/types';
 import { ItemsTable } from './ItemsTable';
 import { SectionsList } from './SectionsList';
 import { EnunciadoPdfCard } from './EnunciadoPdfCard';
+import { CreateMaterialButton } from './CreateMaterialButton';
 import { EnunciadoViewButton } from '@/components/instruments/EnunciadoViewButton';
 import { SetPageTitle } from '@/components/layout/page-title-context';
 
@@ -42,6 +43,7 @@ export function InstrumentDetailView({
   items,
   totalItems,
   canEdit,
+  canCreateDocument = false,
   basePath,
   breadcrumb,
   showAuthoringLinks = true,
@@ -51,6 +53,8 @@ export function InstrumentDetailView({
   /** Total de ítems del instrumento según la API. Si es mayor que `items.length`, la lista viene truncada por paginación y hay que decirlo. */
   totalItems?: number;
   canEdit: boolean;
+  /** Puede crear un material imprimible en el Editor de Materiales (DOCUMENT_EDITOR_ROLES, no ITEM_BANK_ROLES). */
+  canCreateDocument?: boolean;
   basePath: string;
   breadcrumb: { href: string; label: string };
   showAuthoringLinks?: boolean;
@@ -105,6 +109,7 @@ export function InstrumentDetailView({
               </Button>
             </Link>
           )}
+          {canCreateDocument && <CreateMaterialButton instrumentId={instrument.id} />}
         </div>
       </div>
 

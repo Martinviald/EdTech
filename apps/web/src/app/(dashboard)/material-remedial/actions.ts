@@ -4,6 +4,7 @@ import {
   generateRemedialSchema,
   reviewRemedialSchema,
   updateRemedialSchema,
+  type DocumentModel,
   type RemedialMaterialModel,
   type RemedialMaterialType,
   type RemedialMethod,
@@ -14,6 +15,8 @@ import {
   type StimulusSource,
 } from '@soe/types';
 import { apiGet, apiPost, apiPatch } from '@/lib/api';
+
+type ApiError = Error & { status?: number };
 
 /**
  * Pasaje fallado candidato (modo A · Ola 2.1a). Espejo del shape backend-interno
@@ -103,6 +106,27 @@ export async function reviewRemedial(input: {
   });
 
   return apiPatch<RemedialMaterialModel>(`/remedial/${input.materialId}/review`, dto);
+}
+
+export type OpenInMaterialEditorResult =
+  | { ok: true; data: DocumentModel }
+  | { ok: false; message: string };
+
+/**
+ * Forkea un material remedial `ready`/`approved` a un documento editable del
+ * Editor de Materiales (`POST /documents/from-remedial/:id`, propuesta §8). El
+ * backend valida el estado (400 si no está listo) y la autorización la aplica
+ * el guard del endpoint (`DOCUMENT_EDITOR_ROLES`).
+ */
+export async function openInMaterialEditor(
+  materialId: string,
+): Promise<OpenInMaterialEditorResult> {
+  try {
+    const data = await apiPost<DocumentModel>(`/documents/from-remedial/${materialId}`, {});
+    return { ok: true, data };
+  } catch (e) {
+    return { ok: false, message: (e as ApiError).message };
+  }
 }
 
 /**

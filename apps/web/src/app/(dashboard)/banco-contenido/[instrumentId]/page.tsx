@@ -4,6 +4,7 @@ import { apiGet } from '@/lib/api';
 import {
   canAccess,
   userHasAnyRole,
+  DOCUMENT_EDITOR_ROLES,
   ITEM_VIEWER_ROLES,
   ITEM_BANK_ROLES,
   type InstrumentModel,
@@ -38,12 +39,15 @@ export default async function InstrumentDetailPage({ params }: PageProps) {
     userHasAnyRole(session.user.roles, ITEM_BANK_ROLES) &&
     (!instrument.isOfficial || session.user.isPlatformAdmin);
 
+  const canCreateDocument = canAccess(session.user.roles, DOCUMENT_EDITOR_ROLES);
+
   return (
     <InstrumentDetailView
       instrument={instrument}
       items={itemsResponse.data}
       totalItems={itemsResponse.total}
       canEdit={canEdit}
+      canCreateDocument={canCreateDocument}
       basePath={ROUTES.bancoItems}
       breadcrumb={{ href: ROUTES.bancoItems, label: 'Banco de Instrumentos' }}
     />
