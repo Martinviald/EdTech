@@ -3,15 +3,37 @@ import { ConfigService } from '@nestjs/config';
 import { DiscoveryModule } from '@nestjs/core';
 import { Test } from '@nestjs/testing';
 import request from 'supertest';
+import { Injectable } from '@nestjs/common';
 import { McpController } from './mcp.controller';
 import { McpThrottlerGuard } from './mcp-throttler.guard';
 import { McpAuthGuard } from '../auth/mcp-auth.guard';
 import { ProtectedResourceController } from '../auth/protected-resource.controller';
 import { AnalyticsToolsFacade } from '../core/analytics-tools.facade';
 import { McpAuditLogger } from '../core/mcp-audit-logger';
+import { McpResourceProvider, type McpResource, type ResourceDescriptor } from '../core/mcp-resource';
+import { PromptRegistry } from '../core/prompt-registry';
+import { ResourceRegistry } from '../core/resource-registry';
 import { ToolRegistry } from '../core/tool-registry';
+import { ContrastarDificultadPrompt } from '../prompts/contrastar-dificultad.prompt';
 import { WhoamiTool } from '../tools/whoami.tool';
 import { makePrincipal } from '../testing/make-principal';
+
+@McpResourceProvider()
+@Injectable()
+class FakeTaxonomyResource implements McpResource {
+  readonly descriptor: ResourceDescriptor = {
+    scheme: 'taxonomy',
+    uriTemplate: 'taxonomy://{taxonomyId}',
+    name: 'Árbol de taxonomía',
+    description: 'Recurso de prueba',
+    mimeType: 'application/json',
+    requiredRoles: ['teacher'],
+  };
+
+  async read(_principal: unknown, id: string): Promise<unknown> {
+    return { taxonomyId: id, nodes: [] };
+  }
+}
 
 const CONFIG_VALUES: Record<string, string> = {
   MCP_ENABLED: 'true',
@@ -38,8 +60,12 @@ describe('McpController (e2e)', () => {
       controllers: [McpController, ProtectedResourceController],
       providers: [
         ToolRegistry,
+        PromptRegistry,
+        ResourceRegistry,
         AnalyticsToolsFacade,
         WhoamiTool,
+        ContrastarDificultadPrompt,
+        FakeTaxonomyResource,
         { provide: McpAuditLogger, useValue: { record: jest.fn() } },
         {
           provide: ConfigService,
@@ -142,6 +168,57 @@ describe('McpController (e2e)', () => {
       .expect(200);
 
     expect(res.body.result.isError).toBe(true);
+  });
+
+  it('POST /mcp prompts/list anuncia el prompt del caso estrella', async () => {
+    const res = await request(app.getHttpServer())
+      .post('/mcp')
+      .set(MCP_HEADERS)
+      .send(rpc('prompts/list'))
+      .expect(200);
+
+    const names = (res.body.result.prompts as Array<{ name: string }>).map((p) => p.name);
+    expect(names).toContain('contrastar_dificultad_declarada_vs_empirica');
+  });
+
+  it('POST /mcp prompts/get renderiza los mensajes con los argumentos', async () => {
+    const res = await request(app.getHttpServer())
+      .post('/mcp')
+      .set(MCP_HEADERS)
+      .send(
+        rpc('prompts/get', {
+          name: 'contrastar_dificultad_declarada_vs_empirica',
+          arguments: { instrumentId: 'inst-9', assessmentId: 'assess-9' },
+        }),
+      )
+      .expect(200);
+
+    const text = res.body.result.messages[0].content.text as string;
+    expect(text).toContain('inst-9');
+    expect(text).toContain('assess-9');
+  });
+
+  it('POST /mcp resources/templates/list anuncia las plantillas visibles', async () => {
+    const res = await request(app.getHttpServer())
+      .post('/mcp')
+      .set(MCP_HEADERS)
+      .send(rpc('resources/templates/list'))
+      .expect(200);
+
+    const templates = res.body.result.resourceTemplates as Array<{ uriTemplate: string }>;
+    expect(templates.map((t) => t.uriTemplate)).toContain('taxonomy://{taxonomyId}');
+  });
+
+  it('POST /mcp resources/read resuelve el esquema y devuelve el contenido', async () => {
+    const res = await request(app.getHttpServer())
+      .post('/mcp')
+      .set(MCP_HEADERS)
+      .send(rpc('resources/read', { uri: 'taxonomy://tax-1' }))
+      .expect(200);
+
+    const content = res.body.result.contents[0];
+    expect(content.uri).toBe('taxonomy://tax-1');
+    expect(JSON.parse(content.text)).toMatchObject({ taxonomyId: 'tax-1' });
   });
 
   it('GET /mcp responde 405 (stateless)', async () => {

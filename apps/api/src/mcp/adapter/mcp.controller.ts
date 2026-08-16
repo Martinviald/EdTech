@@ -14,7 +14,12 @@ import { Server } from '@modelcontextprotocol/sdk/server/index.js';
 import { StreamableHTTPServerTransport } from '@modelcontextprotocol/sdk/server/streamableHttp.js';
 import {
   CallToolRequestSchema,
+  GetPromptRequestSchema,
+  ListPromptsRequestSchema,
+  ListResourceTemplatesRequestSchema,
+  ListResourcesRequestSchema,
   ListToolsRequestSchema,
+  ReadResourceRequestSchema,
 } from '@modelcontextprotocol/sdk/types.js';
 import type { AnyZodObject } from 'zod';
 import { zodToJsonSchema } from 'zod-to-json-schema';
@@ -23,6 +28,8 @@ import { reportServerError } from '../../common/observability/report-error';
 import { McpAuthGuard } from '../auth/mcp-auth.guard';
 import type { AnalyticsPrincipal } from '../core/analytics-principal';
 import { AnalyticsToolsFacade } from '../core/analytics-tools.facade';
+import { PromptRegistry } from '../core/prompt-registry';
+import { ResourceRegistry } from '../core/resource-registry';
 import { McpThrottlerGuard } from './mcp-throttler.guard';
 
 const SERVER_INFO = { name: 'academos-analitico', version: '0.1.0' };
@@ -53,7 +60,11 @@ interface AuthenticatedRequest extends Request {
 @UseGuards(McpAuthGuard, McpThrottlerGuard)
 @Controller('mcp')
 export class McpController {
-  constructor(private readonly facade: AnalyticsToolsFacade) {}
+  constructor(
+    private readonly facade: AnalyticsToolsFacade,
+    private readonly prompts: PromptRegistry,
+    private readonly resources: ResourceRegistry,
+  ) {}
 
   @Post()
   async handle(@Req() req: AuthenticatedRequest, @Res() res: Response): Promise<void> {
@@ -82,7 +93,7 @@ export class McpController {
 
   private buildServer(principal: AnalyticsPrincipal): Server {
     const server = new Server(SERVER_INFO, {
-      capabilities: { tools: {} },
+      capabilities: { tools: {}, prompts: {}, resources: {} },
       instructions: SERVER_INSTRUCTIONS,
     });
 
@@ -131,6 +142,43 @@ export class McpController {
         };
       }
     });
+
+    server.setRequestHandler(ListPromptsRequestSchema, async () => ({
+      prompts: this.prompts.listVisible(principal).map((descriptor) => ({
+        name: descriptor.name,
+        description: descriptor.description,
+        arguments: descriptor.arguments,
+      })),
+    }));
+
+    server.setRequestHandler(GetPromptRequestSchema, async (request) => {
+      const prompt = this.prompts.get(request.params.name);
+      if (!prompt) {
+        throw new Error(`Prompt desconocido: ${request.params.name}`);
+      }
+      return {
+        description: prompt.descriptor.description,
+        messages: prompt.render(request.params.arguments ?? {}).map((message) => ({
+          role: message.role,
+          content: { type: 'text' as const, text: message.text },
+        })),
+      };
+    });
+
+    server.setRequestHandler(ListResourcesRequestSchema, async () => ({ resources: [] }));
+
+    server.setRequestHandler(ListResourceTemplatesRequestSchema, async () => ({
+      resourceTemplates: this.resources.listVisible(principal).map((descriptor) => ({
+        uriTemplate: descriptor.uriTemplate,
+        name: descriptor.name,
+        description: descriptor.description,
+        mimeType: descriptor.mimeType,
+      })),
+    }));
+
+    server.setRequestHandler(ReadResourceRequestSchema, async (request) => ({
+      contents: [await this.resources.read(principal, request.params.uri)],
+    }));
 
     return server;
   }
