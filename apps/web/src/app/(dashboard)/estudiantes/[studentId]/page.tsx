@@ -26,7 +26,6 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { SetPageTitle } from '@/components/layout/page-title-context';
 import { PerformanceBadge } from '../../resultados/components/performance-badge';
 import { formatAchievement } from '../../resultados/components/performance-level';
-import { PanoramaDistribution } from '../components/panorama-distribution';
 import { PanoramaFilters } from '../components/panorama-filters';
 import { SkillTree } from '../components/skill-tree';
 import { SubjectPanorama } from '../components/subject-panorama';
@@ -158,7 +157,6 @@ async function PanoramaContent({
     summary,
     byAssessment,
     bySkillTree,
-    distribution,
   } = data;
 
   const meta = [
@@ -218,8 +216,6 @@ async function PanoramaContent({
             subjects={bySubject}
             activeSubjectId={filters.subjectId}
           />
-
-          <PanoramaDistribution distribution={distribution} />
 
           <Card>
             <CardHeader>

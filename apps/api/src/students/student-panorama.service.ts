@@ -18,22 +18,20 @@ import {
 } from '@soe/db';
 import {
   INSTRUMENT_APPLICATION_PERIOD_LABELS,
-  PERFORMANCE_LEVELS,
   RESULT_HIDDEN_NODE_TYPES,
+  bandToLegacyLevel,
   buildComparabilityMeta,
   buildInstrumentFamilyKey,
   buildPeriodSeriesKey,
+  classifyByBands,
   percentageToPerformanceLevel,
   type ComparabilityInstrumentRef,
   type DataGranularity,
   type InstrumentApplicationPeriod,
   type PerformanceBandInput,
   type PerformanceBandView,
-  type PerformanceDistributionBucket,
-  type PerformanceLevel,
   type StudentPanoramaAppliedFilters,
   type StudentPanoramaAssessment,
-  type StudentPanoramaDistribution,
   type StudentPanoramaFilterOptions,
   type StudentPanoramaHeader,
   type StudentPanoramaQueryDto,
@@ -51,7 +49,7 @@ import {
   isStudentVisibleInScope,
   resolveClassGroupScope,
 } from '../common/helpers/class-group-scope.helper';
-import { loadBandsForInstruments } from '../performance-bands/lib/load-instrument-bands';
+import { resolveEffectiveBandsForInstruments } from '../performance-bands/lib/resolve-effective-bands';
 import { buildTree } from '../taxonomies/lib/tree-builder';
 
 type SkillWithOrder = StudentPanoramaSkill & { nodeOrder: number };
@@ -74,15 +72,8 @@ function toBandView(r: {
   return { key: r.bandKey, label: r.bandLabel, order: r.bandOrder, color: r.bandColor };
 }
 
-function bandsToViews(bands: readonly PerformanceBandInput[]): PerformanceBandView[] {
-  return bands.map((b) => ({ key: b.key, label: b.label, order: b.order, color: b.color ?? null }));
-}
-
-function scaleSignature(bands: readonly PerformanceBandInput[]): string {
-  return bands
-    .map((b) => `${b.order}:${b.key}`)
-    .sort()
-    .join('|');
+function bandInputToView(band: PerformanceBandInput): PerformanceBandView {
+  return { key: band.key, label: band.label, order: band.order, color: band.color ?? null };
 }
 
 function toInstrumentRef(a: StudentPanoramaAssessment): ComparabilityInstrumentRef {
@@ -152,7 +143,12 @@ export class StudentPanoramaService {
         throw new NotFoundException('Estudiante no encontrado');
       }
 
-      const allAssessments = await this.loadByAssessment(tx, orgId, studentId);
+      const rawAssessments = await this.loadByAssessment(tx, orgId, studentId);
+      const effectiveBands = await resolveEffectiveBandsForInstruments(tx, [
+        ...new Set(rawAssessments.map((a) => a.instrumentId)),
+      ]);
+      const allAssessments = this.applyEffectiveBands(rawAssessments, effectiveBands);
+
       const filterOptions = this.buildFilterOptions(allAssessments);
       const filters = this.resolveFilters(query, allAssessments);
       const byAssessment = this.applyFilters(allAssessments, filters);
@@ -162,9 +158,6 @@ export class StudentPanoramaService {
         studentId,
         byAssessment.map((a) => a.assessmentId),
       );
-      const bandsByInstrument = await loadBandsForInstruments(tx, [
-        ...new Set(byAssessment.map((a) => a.instrumentId)),
-      ]);
 
       const comparability = buildComparabilityMeta(
         uniqueInstrumentRefs(byAssessment),
@@ -173,7 +166,6 @@ export class StudentPanoramaService {
       const bySkillTree = this.buildSkillTree(skillRows);
       const bySkill = skillRows.map(({ nodeOrder: _nodeOrder, ...skill }) => skill);
       const bySubject = this.buildBySubject(byAssessment);
-      const distribution = this.buildDistribution(byAssessment, bandsByInstrument);
       const summary = this.buildSummary(byAssessment, bySkill, comparability.aggregatable);
 
       return {
@@ -186,7 +178,6 @@ export class StudentPanoramaService {
         byAssessment,
         bySkill,
         bySkillTree,
-        distribution,
       };
     });
   }
@@ -320,6 +311,24 @@ export class StudentPanoramaService {
           bandOrder: r.priorBandOrder,
           bandColor: r.priorBandColor,
         }),
+      };
+    });
+  }
+
+  private applyEffectiveBands(
+    rows: StudentPanoramaAssessment[],
+    effectiveBands: ReadonlyMap<string, { bands: PerformanceBandInput[] }>,
+  ): StudentPanoramaAssessment[] {
+    return rows.map((row) => {
+      if (row.performanceBand !== null || row.achievement === null) return row;
+      const bands = effectiveBands.get(row.instrumentId)?.bands;
+      if (!bands || bands.length === 0) return row;
+      const band = classifyByBands(row.achievement / 100, bands);
+      if (!band) return row;
+      return {
+        ...row,
+        performanceBand: bandInputToView(band),
+        performanceLevel: bandToLegacyLevel(band, bands),
       };
     });
   }
@@ -534,80 +543,6 @@ export class StudentPanoramaService {
     }
 
     return series;
-  }
-
-  private buildDistribution(
-    byAssessment: StudentPanoramaAssessment[],
-    bandsByInstrument: Map<string, PerformanceBandInput[]>,
-  ): StudentPanoramaDistribution {
-    const signatureBands = new Map<string, PerformanceBandInput[]>();
-    const bandCounts = new Map<string, Map<string, number>>();
-    const levelCounts = new Map<PerformanceLevel, number>();
-    let classified = 0;
-
-    for (const a of byAssessment) {
-      if (a.performanceBand) {
-        const bands = bandsByInstrument.get(a.instrumentId) ?? [];
-        const signature = bands.length > 0 ? scaleSignature(bands) : a.performanceBand.key;
-        if (!signatureBands.has(signature)) signatureBands.set(signature, bands);
-        const counts = bandCounts.get(signature) ?? new Map<string, number>();
-        counts.set(a.performanceBand.key, (counts.get(a.performanceBand.key) ?? 0) + 1);
-        bandCounts.set(signature, counts);
-        classified += 1;
-        continue;
-      }
-      if (a.performanceLevel) {
-        levelCounts.set(a.performanceLevel, (levelCounts.get(a.performanceLevel) ?? 0) + 1);
-        classified += 1;
-      }
-    }
-
-    if (classified === 0) return { kind: 'empty' };
-
-    const scaleCount = signatureBands.size + (levelCounts.size > 0 ? 1 : 0);
-    if (scaleCount > 1) return { kind: 'mixed', scaleCount };
-
-    if (signatureBands.size === 1) {
-      const entry = [...signatureBands.entries()][0]!;
-      const counts = bandCounts.get(entry[0])!;
-      const vocabulary =
-        entry[1].length > 0
-          ? bandsToViews(entry[1])
-          : this.vocabularyFromResults(byAssessment, counts);
-      const buckets = vocabulary
-        .map((b) => {
-          const count = counts.get(b.key) ?? 0;
-          return {
-            key: b.key,
-            label: b.label,
-            order: b.order,
-            color: b.color ?? null,
-            count,
-            percentage: (count / classified) * 100,
-          };
-        })
-        .sort((a, b) => a.order - b.order);
-      return { kind: 'band', bands: vocabulary, buckets };
-    }
-
-    const buckets: PerformanceDistributionBucket[] = PERFORMANCE_LEVELS.map((level) => {
-      const count = levelCounts.get(level) ?? 0;
-      return { level, count, percentage: (count / classified) * 100 };
-    });
-    return { kind: 'level', buckets };
-  }
-
-  private vocabularyFromResults(
-    byAssessment: StudentPanoramaAssessment[],
-    counts: Map<string, number>,
-  ): PerformanceBandView[] {
-    const views = new Map<string, PerformanceBandView>();
-    for (const a of byAssessment) {
-      if (a.performanceBand && counts.has(a.performanceBand.key)) {
-        views.set(a.performanceBand.key, a.performanceBand);
-      }
-    }
-    return [...views.values()].sort((a, b) => a.order - b.order);
   }
 
   private buildSummary(
