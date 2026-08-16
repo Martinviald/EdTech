@@ -5,6 +5,7 @@ import {
   DOCUMENT_EDITOR_ROLES,
   DOCUMENT_VIEWER_ROLES,
   type CatalogEntryModel,
+  type DocumentAssetsResponse,
   type DocumentModel,
 } from '@soe/types';
 import { auth } from '@/auth';
@@ -62,9 +63,12 @@ async function DocumentSection({
   }
   if (!document) notFound();
 
-  const [subjects, grades] = await Promise.all([
+  const [subjects, grades, assets] = await Promise.all([
     apiGet<CatalogEntryModel[]>('/catalog/subjects').catch(() => []),
     apiGet<CatalogEntryModel[]>('/catalog/grades').catch(() => []),
+    apiGet<DocumentAssetsResponse>(`/documents/${id}/assets`).catch(
+      () => ({}) as DocumentAssetsResponse,
+    ),
   ]);
 
   const canEdit =
@@ -81,6 +85,7 @@ async function DocumentSection({
         canEdit={canEdit}
         subjects={subjects}
         grades={grades}
+        initialAssets={assets}
       />
     </>
   );

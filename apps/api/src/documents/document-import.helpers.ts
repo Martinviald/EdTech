@@ -35,7 +35,7 @@ function activity(title: string, description: string, durationMin: number | null
 }
 
 function itemBlock(itemId: string, snapshot: DocumentItemSnapshot): Block {
-  return { id: randomUUID(), type: 'item', itemId, showAnswer: false, snapshot };
+  return { id: randomUUID(), type: 'item', itemId, snapshot };
 }
 
 export function remedialGuideToBlocks(content: RemedialGuideContent): Block[] {

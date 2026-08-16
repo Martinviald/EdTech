@@ -24,6 +24,12 @@ export interface BlockEditProps<B extends Block = Block> {
    * diálogo de copy-on-write). Sin callback, el EditView no ofrece la acción.
    */
   onEditItem?: (block: Extract<Block, { type: 'item' }>) => void;
+  /**
+   * Slot del host para subir una imagen (bloques `image`): sube el archivo a S3
+   * (presigned) y devuelve el `fileId` + URL resuelta. Sin callback, el EditView
+   * no ofrece la subida.
+   */
+  onUploadImage?: (file: File) => Promise<{ fileId: string; url: string } | null>;
 }
 
 export interface BlockViewProps<B extends Block = Block> {

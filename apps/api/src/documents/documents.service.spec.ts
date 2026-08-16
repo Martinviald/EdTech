@@ -36,7 +36,6 @@ function itemBlock(id: string, itemId: string): Block {
     id,
     type: 'item',
     itemId,
-    showAnswer: false,
     snapshot: { type: 'multiple_choice', version: 1, content: {} },
   };
 }

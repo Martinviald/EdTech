@@ -14,6 +14,8 @@ interface DocumentCanvasProps {
   insertableTypes?: readonly BlockType[];
   /** Ver BlockEditProps.onEditItem. */
   onEditItem?: (block: Extract<Block, { type: 'item' }>) => void;
+  /** Ver BlockEditProps.onUploadImage. */
+  onUploadImage?: (file: File) => Promise<{ fileId: string; url: string } | null>;
   /** Acciones extra del host junto al insertador (p. ej. "Agregar preguntas"). */
   insertActions?: React.ReactNode;
 }
@@ -24,6 +26,7 @@ export function DocumentCanvas({
   assets,
   insertableTypes = BLOCK_TYPE_ORDER,
   onEditItem,
+  onUploadImage,
   insertActions,
 }: DocumentCanvasProps) {
   function replaceAt(index: number, block: Block) {
@@ -128,6 +131,7 @@ export function DocumentCanvas({
               onChange={(next) => replaceAt(index, next)}
               assets={assets}
               onEditItem={onEditItem}
+              onUploadImage={onUploadImage}
             />
           </div>
         );
