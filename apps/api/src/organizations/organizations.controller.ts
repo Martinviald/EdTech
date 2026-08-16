@@ -22,11 +22,14 @@ import {
   createClassGroupSchema,
   updateOrganizationProfileSchema,
   academicSetupSchema,
+  updateOrgBrandingSchema,
   updateOrgFeaturesSchema,
   FEATURE_MANAGEMENT_ROLES,
+  ORG_BRANDING_ROLES,
   ORG_PROFILE_VIEWER_ROLES,
   ORG_ACADEMIC_ADMIN_ROLES,
   ORG_OWNER_ROLES,
+  type OrgBrandingResponse,
   type OrgFeaturesResponse,
 } from '@soe/types';
 
@@ -60,6 +63,31 @@ export class OrganizationsController {
     @Query('orgId') orgId?: string,
   ): Promise<OrgFeaturesResponse> {
     return this.organizationsService.getFeatures(getEffectiveOrgId(user, orgId));
+  }
+
+  /**
+   * GET /api/organizations/me/branding — branding del colegio (Editor de
+   * Materiales). Accesible a cualquier usuario autenticado de la org: cualquier
+   * documento imprimible lo necesita para render de cabecera/pie.
+   */
+  @Get('me/branding')
+  getMyBranding(
+    @CurrentUser() user: JwtPayload,
+    @Query('orgId') orgId?: string,
+  ): Promise<OrgBrandingResponse> {
+    return this.organizationsService.getBranding(getEffectiveOrgId(user, orgId));
+  }
+
+  /** PATCH /api/organizations/me/branding — actualiza logo/colores/textos del colegio. */
+  @Patch('me/branding')
+  @Roles(...ORG_BRANDING_ROLES)
+  updateMyBranding(
+    @CurrentUser() user: JwtPayload,
+    @Body() body: unknown,
+    @Query('orgId') orgId?: string,
+  ): Promise<OrgBrandingResponse> {
+    const dto = updateOrgBrandingSchema.parse(body);
+    return this.organizationsService.updateBranding(getEffectiveOrgId(user, orgId), dto);
   }
 
   /** GET /api/organizations/:orgId/features — plan de features de una org (gestión). */

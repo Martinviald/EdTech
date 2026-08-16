@@ -3,6 +3,7 @@ import {
   Cpu,
   FolderTree,
   Gauge,
+  Palette,
   SlidersHorizontal,
   UserCog,
   Users,
@@ -15,6 +16,7 @@ import {
   GRADING_SCALE_ROLES,
   LLM_SETTINGS_ROLES,
   ORG_ACADEMIC_ADMIN_ROLES,
+  ORG_BRANDING_ROLES,
   STAFF_MANAGEMENT_ROLES,
   STUDENT_ROSTER_ROLES,
   TAXONOMY_ROLES,
@@ -60,6 +62,13 @@ export const CONFIG_HUB_OPTIONS: readonly AdminHubOption[] = [
     description: 'Consumo, costo y latencia de las funciones de IA.',
     icon: Gauge,
     roles: AI_OBSERVABILITY_VIEWER_ROLES,
+  },
+  {
+    href: ROUTES.configIdentidad,
+    label: 'Identidad del colegio',
+    description: 'Logo, colores y textos que llevan tus materiales impresos.',
+    icon: Palette,
+    roles: ORG_BRANDING_ROLES,
   },
 ];
 

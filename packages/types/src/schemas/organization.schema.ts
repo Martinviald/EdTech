@@ -79,6 +79,17 @@ export type OrgBranding = z.infer<typeof orgBrandingSchema>;
 export const updateOrgBrandingSchema = orgBrandingSchema;
 export type UpdateOrgBrandingDto = z.infer<typeof updateOrgBrandingSchema>;
 
+/**
+ * GET /organizations/me/branding. `logoUrl` es la URL prefirmada (inline) del
+ * logo resuelta on-read desde `files` — nunca se persiste (expira).
+ */
+export const orgBrandingResponseSchema = z.object({
+  orgId: z.string().uuid(),
+  branding: orgBrandingSchema,
+  logoUrl: z.string().nullable(),
+});
+export type OrgBrandingResponse = z.infer<typeof orgBrandingResponseSchema>;
+
 export type CreateOrganizationDto = z.infer<typeof createOrganizationSchema>;
 export type UpdateOrganizationDto = z.infer<typeof updateOrganizationSchema>;
 export type UpdateOrganizationProfileDto = z.infer<typeof updateOrganizationProfileSchema>;
