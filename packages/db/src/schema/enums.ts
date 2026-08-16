@@ -270,3 +270,29 @@ export const benchmarkModeEnum = pgEnum('benchmark_mode', ['global', 'network'])
 // Rol de un mensaje persistido en la conversación. Las invocaciones de tools no
 // son mensajes: su traza va en assistant_messages.tool_calls (JSONB) del turno.
 export const assistantMessageRoleEnum = pgEnum('assistant_message_role', ['user', 'assistant']);
+
+// ── Editor de Materiales — motor de documentos por bloques ───────────────────
+// (docs/propuesta-editor-materiales.md). `documents` es la capa de autoría /
+// presentación sobre el backbone de medición (instruments/items/assessments).
+
+// Tipo de documento: guía de trabajo, guía de ejercitación con ítems, versión
+// imprimible de una evaluación, o documento libre.
+export const documentTypeEnum = pgEnum('document_type', [
+  'guide',
+  'worksheet',
+  'assessment',
+  'generic',
+]);
+
+export const documentStatusEnum = pgEnum('document_status', ['draft', 'published', 'archived']);
+
+// Escalera de compartición completa desde el día 1 (Decisión B): v1 usa
+// `private`/`org` (default `org`); `department`, `network` y `platform` quedan
+// definidos para restringir/expandir sin migración de enum.
+export const documentVisibilityEnum = pgEnum('document_visibility', [
+  'private',
+  'department',
+  'org',
+  'network',
+  'platform',
+]);

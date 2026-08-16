@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { orgBrandingSchema } from './organization.schema';
 
 // ── F2 S5 — H18.1 Gating de tier pago ────────────────────────────────────────
 // Las features pagas de F2 se gobiernan por `organizations.config.allowedFeatures`.
@@ -34,6 +35,8 @@ export const orgConfigSchema = z
     allowedFeatures: z.array(featureKeySchema).optional(),
     /** Presupuesto mensual de costo IA (USD) para alertas (H19.25). null/undefined = sin tope. */
     aiBudgetUsd: z.number().nonnegative().nullable().optional(),
+    /** Branding del colegio (Editor de Materiales). Ver orgBrandingSchema. */
+    branding: orgBrandingSchema.optional(),
   })
   .passthrough();
 export type OrgConfig = z.infer<typeof orgConfigSchema>;
