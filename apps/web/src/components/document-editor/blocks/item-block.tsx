@@ -1,4 +1,4 @@
-import { Eye, EyeOff, FileQuestion } from 'lucide-react';
+import { Eye, EyeOff, FileQuestion, Pencil } from 'lucide-react';
 import {
   ITEM_TYPE_LABELS,
   multipleChoiceContentSchema,
@@ -237,30 +237,45 @@ function ItemPrintView({ block, audience, itemNumber }: BlockViewProps<ItemBlock
   );
 }
 
-function ItemEditView({ block, onChange }: BlockEditProps<ItemBlock>) {
+function ItemEditView({ block, onChange, onEditItem }: BlockEditProps<ItemBlock>) {
   const stem = snapshotStem(block.snapshot);
   return (
     <div className="space-y-2 rounded-md border border-border bg-muted/20 p-3">
       <div className="flex flex-wrap items-center justify-between gap-2">
         <Badge variant="outline">{ITEM_TYPE_LABELS[block.snapshot.type]}</Badge>
-        <Button
-          type="button"
-          size="sm"
-          variant={block.showAnswer ? 'secondary' : 'outline'}
-          icon={block.showAnswer ? Eye : EyeOff}
-          onClick={() => onChange({ ...block, showAnswer: !block.showAnswer })}
-        >
-          Mostrar pauta
-        </Button>
+        <div className="flex items-center gap-1.5">
+          {onEditItem ? (
+            <Button
+              type="button"
+              size="sm"
+              variant="outline"
+              icon={Pencil}
+              onClick={() => onEditItem(block)}
+            >
+              Editar contenido
+            </Button>
+          ) : null}
+          <Button
+            type="button"
+            size="sm"
+            variant={block.showAnswer ? 'secondary' : 'outline'}
+            icon={block.showAnswer ? Eye : EyeOff}
+            onClick={() => onChange({ ...block, showAnswer: !block.showAnswer })}
+          >
+            Mostrar pauta
+          </Button>
+        </div>
       </div>
       {stem ? (
         <p className="line-clamp-3 text-sm">{stem}</p>
       ) : (
         <p className="text-sm italic text-muted-foreground">Ítem sin enunciado.</p>
       )}
-      <p className="text-xs text-muted-foreground">
-        El contenido del ítem se edita en el banco de contenido.
-      </p>
+      {!onEditItem ? (
+        <p className="text-xs text-muted-foreground">
+          El contenido del ítem se edita en el banco de contenido.
+        </p>
+      ) : null}
     </div>
   );
 }

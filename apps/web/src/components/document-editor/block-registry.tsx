@@ -18,6 +18,12 @@ export interface BlockEditProps<B extends Block = Block> {
   onChange: (block: B) => void;
   /** URLs resueltas por fileId (bloques `image`). */
   assets?: Record<string, string>;
+  /**
+   * Slot del host para editar el CONTENIDO de un ítem referenciado (bloques
+   * `item`). El motor no sabe de dominio: el host decide qué hacer (abrir el
+   * diálogo de copy-on-write). Sin callback, el EditView no ofrece la acción.
+   */
+  onEditItem?: (block: Extract<Block, { type: 'item' }>) => void;
 }
 
 export interface BlockViewProps<B extends Block = Block> {

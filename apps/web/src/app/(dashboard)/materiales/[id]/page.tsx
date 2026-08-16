@@ -1,6 +1,12 @@
 import { Suspense } from 'react';
 import { notFound, redirect } from 'next/navigation';
-import { canAccess, DOCUMENT_VIEWER_ROLES, type DocumentModel } from '@soe/types';
+import {
+  canAccess,
+  DOCUMENT_EDITOR_ROLES,
+  DOCUMENT_VIEWER_ROLES,
+  type CatalogEntryModel,
+  type DocumentModel,
+} from '@soe/types';
 import { auth } from '@/auth';
 import { apiGet } from '@/lib/api';
 import { ROUTES } from '@/lib/routes';
@@ -19,17 +25,35 @@ export default async function MaterialEditorPage({
   if (!canAccess(session.user.roles, DOCUMENT_VIEWER_ROLES)) redirect(ROUTES.dashboard);
 
   const { id } = await params;
+  const canUseEditor =
+    Boolean(session.user.isPlatformAdmin) ||
+    canAccess(session.user.roles, DOCUMENT_EDITOR_ROLES);
 
   return (
     <PageContainer>
       <Suspense fallback={<EditorBodySkeleton />}>
-        <DocumentSection id={id} />
+        <DocumentSection
+          id={id}
+          currentUserId={session.user.id}
+          isPlatformAdmin={Boolean(session.user.isPlatformAdmin)}
+          canUseEditor={canUseEditor}
+        />
       </Suspense>
     </PageContainer>
   );
 }
 
-async function DocumentSection({ id }: { id: string }) {
+async function DocumentSection({
+  id,
+  currentUserId,
+  isPlatformAdmin,
+  canUseEditor,
+}: {
+  id: string;
+  currentUserId: string;
+  isPlatformAdmin: boolean;
+  canUseEditor: boolean;
+}) {
   let document: DocumentModel | null = null;
   try {
     document = await apiGet<DocumentModel>(`/documents/${id}`);
@@ -38,13 +62,26 @@ async function DocumentSection({ id }: { id: string }) {
   }
   if (!document) notFound();
 
+  const [subjects, grades] = await Promise.all([
+    apiGet<CatalogEntryModel[]>('/catalog/subjects').catch(() => []),
+    apiGet<CatalogEntryModel[]>('/catalog/grades').catch(() => []),
+  ]);
+
+  const canEdit =
+    canUseEditor && (document.createdById === currentUserId || isPlatformAdmin);
+
   return (
     <>
       <PageHeader
         title={document.title}
         description={`${DOCUMENT_TYPE_LABELS[document.type]} · ${DOCUMENT_STATUS_LABELS[document.status]}`}
       />
-      <DocumentEditorShell document={document} />
+      <DocumentEditorShell
+        document={document}
+        canEdit={canEdit}
+        subjects={subjects}
+        grades={grades}
+      />
     </>
   );
 }

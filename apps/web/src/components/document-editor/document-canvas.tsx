@@ -12,6 +12,10 @@ interface DocumentCanvasProps {
   assets?: Record<string, string>;
   /** Tipos ofrecidos por el insertador; por defecto todos los del registro. */
   insertableTypes?: readonly BlockType[];
+  /** Ver BlockEditProps.onEditItem. */
+  onEditItem?: (block: Extract<Block, { type: 'item' }>) => void;
+  /** Acciones extra del host junto al insertador (p. ej. "Agregar preguntas"). */
+  insertActions?: React.ReactNode;
 }
 
 export function DocumentCanvas({
@@ -19,6 +23,8 @@ export function DocumentCanvas({
   onChange,
   assets,
   insertableTypes = BLOCK_TYPE_ORDER,
+  onEditItem,
+  insertActions,
 }: DocumentCanvasProps) {
   function replaceAt(index: number, block: Block) {
     onChange(value.map((current, i) => (i === index ? block : current)));
@@ -121,6 +127,7 @@ export function DocumentCanvas({
               block={block}
               onChange={(next) => replaceAt(index, next)}
               assets={assets}
+              onEditItem={onEditItem}
             />
           </div>
         );
@@ -147,6 +154,7 @@ export function DocumentCanvas({
               </Button>
             );
           })}
+          {insertActions}
         </div>
       </div>
     </div>
