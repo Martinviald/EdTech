@@ -4,6 +4,8 @@ import { DiscoveryModule } from '@nestjs/core';
 import { Test } from '@nestjs/testing';
 import request from 'supertest';
 import { Injectable } from '@nestjs/common';
+import { z } from 'zod';
+import { AnalyticsTool, type ToolDescriptor } from '../core/analytics-tool';
 import { McpController } from './mcp.controller';
 import { McpThrottlerGuard } from './mcp-throttler.guard';
 import { McpAuthGuard } from '../auth/mcp-auth.guard';
@@ -32,6 +34,22 @@ class FakeTaxonomyResource implements McpResource {
 
   async read(_principal: unknown, id: string): Promise<unknown> {
     return { taxonomyId: id, nodes: [] };
+  }
+}
+
+@AnalyticsTool()
+@Injectable()
+class FakeGapsTool {
+  readonly descriptor: ToolDescriptor = {
+    name: 'get_fake_gaps',
+    description: 'Tool de datos de prueba (org-scoped)',
+    inputSchema: z.object({}),
+    requiredRoles: ['teacher'],
+    piiLevel: 'aggregate',
+  };
+
+  async execute(): Promise<unknown> {
+    return { gaps: [1, 2] };
   }
 }
 
@@ -64,6 +82,7 @@ describe('McpController (e2e)', () => {
         ResourceRegistry,
         AnalyticsToolsFacade,
         WhoamiTool,
+        FakeGapsTool,
         ContrastarDificultadPrompt,
         FakeTaxonomyResource,
         { provide: McpAuditLogger, useValue: { record: jest.fn() } },
@@ -158,6 +177,29 @@ describe('McpController (e2e)', () => {
       orgId: 'org-1',
       channel: 'mcp-external',
     });
+  });
+
+  it('POST /mcp tools/call de una tool de datos prefija la organización activa', async () => {
+    const res = await request(app.getHttpServer())
+      .post('/mcp')
+      .set(MCP_HEADERS)
+      .send(rpc('tools/call', { name: 'get_fake_gaps', arguments: {} }))
+      .expect(200);
+
+    const text = res.body.result.content[0].text as string;
+    expect(text.startsWith('Organización: Colegio Test (org-1)\n')).toBe(true);
+    expect(JSON.parse(text.slice(text.indexOf('\n') + 1))).toEqual({ gaps: [1, 2] });
+  });
+
+  it('POST /mcp tools/call whoami NO prefija organización (tool exenta)', async () => {
+    const res = await request(app.getHttpServer())
+      .post('/mcp')
+      .set(MCP_HEADERS)
+      .send(rpc('tools/call', { name: 'whoami', arguments: {} }))
+      .expect(200);
+
+    const text = res.body.result.content[0].text as string;
+    expect(text.startsWith('Organización:')).toBe(false);
   });
 
   it('POST /mcp tools/call de una tool desconocida devuelve error in-band', async () => {

@@ -12,6 +12,10 @@ const whoamiOutputSchema = z.object({
   name: z.string(),
   orgId: z.string().nullable(),
   orgName: z.string().nullable(),
+  activeOrg: z
+    .object({ orgId: z.string(), orgName: z.string() })
+    .nullable(),
+  orgCount: z.number(),
   roles: z.array(z.string()),
   isPlatformAdmin: z.boolean(),
   features: z.array(z.string()),
@@ -35,12 +39,18 @@ export class WhoamiTool implements AnalyticsTool<Record<string, never>, WhoamiOu
   };
 
   async execute(principal: AnalyticsPrincipal): Promise<WhoamiOutput> {
+    const activeOrg =
+      principal.orgId && principal.orgName
+        ? { orgId: principal.orgId, orgName: principal.orgName }
+        : null;
     return {
       userId: principal.userId,
       email: principal.email,
       name: principal.name,
       orgId: principal.orgId,
       orgName: principal.orgName ?? null,
+      activeOrg,
+      orgCount: principal.orgs?.length ?? 0,
       roles: [...principal.roles],
       isPlatformAdmin: principal.isPlatformAdmin,
       features: [...principal.features],

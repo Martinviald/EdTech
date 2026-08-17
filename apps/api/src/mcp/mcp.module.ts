@@ -32,10 +32,14 @@ import { GetItemStatisticsTool } from './tools/get-item-statistics.tool';
 import { GetSkillGapsTool } from './tools/get-skill-gaps.tool';
 import { GetSkillHeatmapTool } from './tools/get-skill-heatmap.tool';
 import { ListAssessmentsTool } from './tools/list-assessments.tool';
+import { ListMyOrgsTool } from './tools/list-my-orgs.tool';
+import { SetActiveOrgTool } from './tools/set-active-org.tool';
 import { WhoamiTool } from './tools/whoami.tool';
 
 const ANALYTICS_TOOLS = [
   WhoamiTool,
+  ListMyOrgsTool,
+  SetActiveOrgTool,
   ListAssessmentsTool,
   GetInstrumentBlueprintTool,
   GetItemStatisticsTool,
