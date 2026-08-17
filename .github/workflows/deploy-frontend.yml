@@ -16,13 +16,14 @@ on:
 permissions:
   contents: read
 
-# `sst deploy` toma un lock sobre el estado de la app. Dos deploys del front en
-# paralelo (p. ej. dos merges a main seguidos) chocan con
-# "A concurrent update was detected on the app" y el segundo muere. Este grupo
-# los SERIALIZA (el segundo queda encolado hasta que termina el primero) en vez
-# de cancelarlos, para no perder ningún deploy. Espeja el guard del backend.
+# `sst deploy` toma un lock sobre el estado de la app y reconcilia App Runner.
+# Dos deploys en paralelo (front-vs-front por dos merges seguidos, o front-vs-back
+# porque el push de imagen del backend deja App Runner en OPERATION_IN_PROGRESS)
+# chocan y el segundo muere. Grupo COMPARTIDO con el deploy del backend: los
+# SERIALIZA (el segundo se encola hasta que termina el primero) en vez de
+# cancelarlos, para no perder ningún deploy.
 concurrency:
-  group: deploy-frontend-${{ github.ref }}
+  group: sst-deploy-${{ github.ref }}
   cancel-in-progress: false
 
 env:

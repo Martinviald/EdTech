@@ -24,8 +24,12 @@ on:
 permissions:
   contents: read
 
+# Grupo COMPARTIDO con el deploy del front: ambos tocan el mismo estado de SST /
+# App Runner, así que se serializan entre sí (nunca corren a la vez). Evita tanto
+# el lock de estado de SST como el "OPERATION_IN_PROGRESS" de App Runner cuando el
+# push de imagen del backend y el `sst deploy` del front se pisan.
 concurrency:
-  group: deploy-backend-${{ github.ref }}
+  group: sst-deploy-${{ github.ref }}
   cancel-in-progress: false
 
 env:
