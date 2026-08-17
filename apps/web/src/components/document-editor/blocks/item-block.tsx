@@ -1,3 +1,5 @@
+'use client';
+
 import { useState } from 'react';
 import { ChevronDown, ChevronUp, FileQuestion, Pencil } from 'lucide-react';
 import {
