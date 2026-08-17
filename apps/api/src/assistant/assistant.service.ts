@@ -1,4 +1,10 @@
-import { ForbiddenException, Inject, Injectable, NotFoundException } from '@nestjs/common';
+import {
+  ForbiddenException,
+  Inject,
+  Injectable,
+  NotFoundException,
+  Optional,
+} from '@nestjs/common';
 import { and, asc, desc, eq, ilike, isNull, or, sql } from 'drizzle-orm';
 import {
   academicYears,
@@ -50,6 +56,7 @@ import {
   deriveConversationTitle,
   estimateAssistantCostUsd,
 } from './assistant.constants';
+import { AnalyticsAssistantBridge } from './tools/analytics-tools.bridge';
 import type { AssistantTool } from './tools/assistant-tool.types';
 
 /**
@@ -76,6 +83,7 @@ export class AssistantService {
     private readonly agent: LlmAgentService,
     private readonly llmConfig: LlmConfigService,
     @Inject(ASSISTANT_TOOLS) private readonly tools: AssistantTool[],
+    @Optional() private readonly analytics?: AnalyticsAssistantBridge,
   ) {
     this.toolsByName = new Map(this.tools.map((t) => [t.definition.name, t]));
   }
@@ -412,8 +420,11 @@ export class AssistantService {
 
     // ── Fase 2: correr el loop, reemitiendo eventos al consumidor ──
     const cfg = await this.llmConfig.resolve(orgId, 'assistant');
-    const executeTool = this.buildExecuteTool(user);
-    const toolDefs = this.tools.map((t) => t.definition);
+    const analyticsTools = this.analytics
+      ? await this.analytics.assistantTools(user, new Set(this.toolsByName.keys()))
+      : [];
+    const executeTool = this.buildExecuteTool(user, analyticsTools);
+    const toolDefs = [...this.tools, ...analyticsTools].map((t) => t.definition);
 
     const traces = new Map<string, AssistantToolCall>();
     let finalEvent: Extract<AgentStreamEvent, { type: 'final' }> | null = null;
@@ -487,9 +498,16 @@ export class AssistantService {
    * del modelo (guardrail §4.2/§4.4). Una tool desconocida o que falla no tumba
    * el turno: se devuelve un error serializado para que el modelo reaccione.
    */
-  private buildExecuteTool(user: JwtPayload): AgentToolExecutor {
+  private buildExecuteTool(
+    user: JwtPayload,
+    extraTools: AssistantTool[] = [],
+  ): AgentToolExecutor {
+    const toolsByName = new Map(this.toolsByName);
+    for (const tool of extraTools) {
+      toolsByName.set(tool.definition.name, tool);
+    }
     return async ({ name, input }) => {
-      const tool = this.toolsByName.get(name);
+      const tool = toolsByName.get(name);
       if (!tool) {
         return {
           content: JSON.stringify({ error: `Tool desconocida: ${name}` }),

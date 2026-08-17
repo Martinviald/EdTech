@@ -11,6 +11,7 @@ export const FEATURE_KEYS = [
   'remedial',
   'benchmarking',
   'ai_assistant',
+  'mcp',
 ] as const;
 export type FeatureKey = (typeof FEATURE_KEYS)[number];
 
@@ -22,6 +23,7 @@ export const FEATURE_LABELS: Record<FeatureKey, string> = {
   remedial: 'IA Remedial',
   benchmarking: 'Benchmarking',
   ai_assistant: 'Asistente IA',
+  mcp: 'Servidor MCP analítico',
 };
 
 /**

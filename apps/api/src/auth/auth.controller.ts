@@ -1,5 +1,6 @@
 import { Body, Controller, ForbiddenException, Get, Headers, Post } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+import { createHash, timingSafeEqual } from 'crypto';
 import { switchOrgSchema, switchRoleSchema } from '@soe/types';
 import { AuthService } from './auth.service';
 import { CurrentUser } from './current-user.decorator';
@@ -15,9 +16,15 @@ export class AuthController {
 
   private verifyInternalToken(token: string | undefined): void {
     const expected = this.config.getOrThrow<string>('INTERNAL_API_SECRET');
-    if (!token || token !== expected) {
+    if (!token || !this.constantTimeEquals(token, expected)) {
       throw new ForbiddenException('Token interno inválido');
     }
+  }
+
+  private constantTimeEquals(a: string, b: string): boolean {
+    const hashedA = createHash('sha256').update(a).digest();
+    const hashedB = createHash('sha256').update(b).digest();
+    return timingSafeEqual(hashedA, hashedB);
   }
 
   /** POST /api/auth/validate-user — valida email en signIn callback de NextAuth. */
@@ -74,6 +81,9 @@ export class AuthController {
   @Get('mock-users')
   async listMockUsers(@Headers('x-internal-token') token: string | undefined) {
     this.verifyInternalToken(token);
+    if (process.env.NODE_ENV === 'production') {
+      throw new ForbiddenException('Login mock deshabilitado en producción');
+    }
     const authMode = this.config.get<string>('AUTH_MODE');
     return this.authService.listMockUsers(authMode);
   }

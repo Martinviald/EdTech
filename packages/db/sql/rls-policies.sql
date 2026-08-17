@@ -294,3 +294,15 @@ CREATE POLICY "assessment_level_stats_tenant_isolation" ON "assessment_level_sta
         AND "assessments"."org_id"::text = current_setting('app.current_org_id', true)
     )
   );
+
+-- ── Servidor MCP analítico — mcp_access_logs (org_id directo) ─────────────────
+-- Auditoría de invocaciones de tools del MCP (docs/propuesta-mcp-analitico.md §3.7).
+-- Cada org ve solo sus propios accesos. El DbMcpAuditLogger escribe dentro de
+-- withOrgContext(orgId); las invocaciones de platform_admin sin org no se auditan.
+ALTER TABLE "mcp_access_logs" ENABLE ROW LEVEL SECURITY;
+ALTER TABLE "mcp_access_logs" FORCE  ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "mcp_access_logs_tenant_isolation" ON "mcp_access_logs";
+CREATE POLICY "mcp_access_logs_tenant_isolation" ON "mcp_access_logs"
+  AS PERMISSIVE FOR ALL
+  USING (org_id::text = current_setting('app.current_org_id', true));

@@ -21,3 +21,4 @@ export * from './remedial';
 export * from './assistant';
 export * from './llm-settings';
 export * from './documents';
+export * from './mcp';

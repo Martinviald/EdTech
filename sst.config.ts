@@ -50,6 +50,14 @@ export default $config({
     const googleClientId = new sst.Secret("GoogleClientId", "");
     const googleClientSecret = new sst.Secret("GoogleClientSecret", "");
 
+    // ── Servidor MCP analítico (docs/propuesta-mcp-analitico.md) ──
+    // Defaults seguros: con McpEnabled="false" el endpoint /mcp responde 404 (apagado).
+    // Encender = setear los 4 secrets (WorkOS + URI canónica) y McpEnabled="true", luego redeploy.
+    const mcpEnabled = new sst.Secret("McpEnabled", "false");
+    const mcpCanonicalUri = new sst.Secret("McpCanonicalUri", ""); // https://<api>/mcp (== resource indicator en WorkOS)
+    const workosIssuer = new sst.Secret("WorkosIssuer", ""); // AuthKit issuer
+    const workosJwksUrl = new sst.Secret("WorkosJwksUrl", ""); // jwks_uri del issuer
+
     // ── Red: VPC con bastion (para `sst tunnel`) + NAT ec2 (fck-nat, ~$3-4/mes). ──
     // El NAT da salida a internet a las subredes privadas. App Runner enruta TODO su
     // egress por la VPC (lo necesita para el RDS privado); el asistente E21 llama a la
@@ -170,6 +178,11 @@ export default $config({
               AWS_S3_BUCKET: uploads.name,
               // web->api es server-side (Lambda OpenNext -> App Runner), CORS no aplica.
               CORS_ORIGIN: "*",
+              // MCP analítico: apagado por default; se enciende seteando los secrets.
+              MCP_ENABLED: mcpEnabled.value,
+              MCP_CANONICAL_URI: mcpCanonicalUri.value,
+              WORKOS_ISSUER: workosIssuer.value,
+              WORKOS_JWKS_URL: workosJwksUrl.value,
             },
           },
         },
