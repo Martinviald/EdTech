@@ -101,12 +101,29 @@ export type StudentPanoramaSkill = {
 };
 
 /**
+ * Un punto de la serie temporal de UN nodo de habilidad: el % de logro del alumno
+ * en ese nodo en una evaluación puntual. `label` es el eje X (momento del ciclo +
+ * año, ej. "Cierre 2025"), nunca la fecha cruda. Sólo se emiten evaluaciones donde
+ * el nodo fue efectivamente evaluado.
+ */
+export type StudentSkillTrendPoint = {
+  assessmentId: string;
+  label: string;
+  achievement: number | null;
+};
+
+/**
  * El mismo logro por nodo, anidado por `parentNodeId`. Cada nivel conserva su
  * propio dato persistido (no se recalcula desde los hijos): un eje tiene su fila
  * en `skill_results` porque los ítems se etiquetan con el eje además del OA. Un
  * nodo cuyo padre no está evaluado sube a raíz, así el árbol nunca esconde datos.
+ *
+ * `series` es la trayectoria CRONOLÓGICA del propio nodeId a través de las
+ * evaluaciones del alcance filtrado (ordenada por `administeredAt` asc), sin
+ * reagregar los hijos — mantiene la semántica por-nodeId de `skill_results`.
  */
 export type StudentPanoramaSkillNode = StudentPanoramaSkill & {
+  series: StudentSkillTrendPoint[];
   children: StudentPanoramaSkillNode[];
 };
 
