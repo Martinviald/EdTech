@@ -4,12 +4,26 @@ import { useTransition } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import type { Route } from 'next';
 import { ArrowRight } from 'lucide-react';
-import type { StudentPanoramaSubject } from '@soe/types';
+import type { StudentPanoramaSeries, StudentPanoramaSubject } from '@soe/types';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { PerformanceBadge } from '../../resultados/components/performance-badge';
-import { formatAchievement } from '../../resultados/components/performance-level';
-import { SeriesTrack } from './series-track';
+import {
+  formatAchievement,
+  trajectoryYearChartColor,
+} from '../../resultados/components/performance-level';
+import { ProgressionChart, type ProgressionLine } from './progression-chart';
+
+function toLines(series: StudentPanoramaSeries[]): ProgressionLine[] {
+  return series
+    .filter((serie) => serie.points.length >= 2)
+    .map((serie, index) => ({
+      key: `${serie.kind}-${serie.key}`,
+      label: serie.label,
+      color: trajectoryYearChartColor(index),
+      points: serie.points.map((point) => ({ label: point.label, achievement: point.achievement })),
+    }));
+}
 
 export function SubjectPanorama({
   studentId,
@@ -39,6 +53,7 @@ export function SubjectPanorama({
     <div className="grid gap-4 lg:grid-cols-2">
       {subjects.map((subject) => {
         const isActive = subject.subjectId !== null && subject.subjectId === activeSubjectId;
+        const lines = toLines(subject.series);
         return (
           <Card
             key={subject.subjectId ?? 'sin-asignatura'}
@@ -64,38 +79,48 @@ export function SubjectPanorama({
 
             <CardContent className="space-y-3">
               {subject.achievement !== null ? (
-                <p className="text-2xl font-semibold tabular-nums">
-                  {formatAchievement(subject.achievement)}
-                </p>
-              ) : (
-                <p className="text-xs text-muted-foreground">{subject.comparability.reason}</p>
-              )}
-
-              {subject.series.length > 0 ? (
-                <div className="space-y-3">
-                  {subject.series.map((series) => (
-                    <SeriesTrack key={`${series.kind}-${series.key}`} series={series} />
-                  ))}
+                <div>
+                  <p className="text-2xl font-semibold tabular-nums">
+                    {formatAchievement(subject.achievement)}
+                  </p>
+                  <p className="text-2xs uppercase tracking-wide text-muted-foreground">
+                    Logro promedio de la asignatura
+                  </p>
                 </div>
               ) : null}
 
-              {subject.subjectId !== null ? (
-                <button
-                  type="button"
-                  onClick={() => focus(subject.subjectId)}
-                  disabled={isPending}
-                  className="inline-flex items-center gap-1 text-sm font-medium text-primary hover:underline disabled:opacity-60"
-                >
-                  {isActive ? 'Quitar el foco' : 'Ver sólo esta asignatura'}
-                  <ArrowRight className="size-3.5" aria-hidden />
-                </button>
+              {subject.latest ? (
+                <p className="text-xs text-muted-foreground">
+                  Última evaluación:{' '}
+                  <span className="font-medium text-foreground">{subject.latest.label}</span>
+                  {' · '}
+                  {formatAchievement(subject.latest.achievement)}
+                </p>
               ) : null}
 
-              {subject.comparability.instrumentIds.length > 1 ? (
-                <Badge variant="outline" className="text-2xs">
-                  {subject.comparability.instrumentIds.length} instrumentos
-                </Badge>
-              ) : null}
+              {lines.length > 0 ? <ProgressionChart lines={lines} height={192} /> : null}
+
+              <div className="flex flex-wrap items-center justify-between gap-2">
+                {subject.subjectId !== null ? (
+                  <button
+                    type="button"
+                    onClick={() => focus(subject.subjectId)}
+                    disabled={isPending}
+                    className="inline-flex items-center gap-1 text-sm font-medium text-primary hover:underline disabled:opacity-60"
+                  >
+                    {isActive ? 'Quitar el foco' : 'Ver sólo esta asignatura'}
+                    <ArrowRight className="size-3.5" aria-hidden />
+                  </button>
+                ) : (
+                  <span />
+                )}
+
+                {subject.comparability.instrumentIds.length > 1 ? (
+                  <Badge variant="outline" className="text-2xs">
+                    {subject.comparability.instrumentIds.length} instrumentos
+                  </Badge>
+                ) : null}
+              </div>
             </CardContent>
           </Card>
         );

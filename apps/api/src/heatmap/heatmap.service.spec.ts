@@ -11,14 +11,18 @@ import { HeatmapService } from './heatmap.service';
 // filas configuradas.
 //
 // Orden de queries en getHeatmap() (tras cells no-vacías corre resolveScaleAndComparability,
-// que resuelve thresholds Y comparabilidad en la MISMA query):
-//   admin/scopeAll, sin filtro de curso → [cells, thresholds]
-//   admin con classGroupId/academicYearId → [classGroups, cells, thresholds]
-//   teacher → [scope, classGroups, cells, thresholds]
+// que resuelve thresholds Y comparabilidad en la MISMA query, y luego —si el scope es
+// un ÚNICO instrumento— resuelve sus bandas efectivas con 2 selects más:
+// loadFamilyRows + loadBandsForInstruments):
+//   admin/scopeAll, sin filtro de curso → [cells, scale, familyRows, bands]
+//   admin con classGroupId/academicYearId → [classGroups, cells, scale, familyRows, bands]
+//   teacher → [scope, classGroups, cells, scale, familyRows, bands]
 //   (early returns: profesor sin cursos = [scope]; sin datos = [..., cells=[]])
-//   Esa query devuelve la config de la grading_scale del scope junto a los
+//   La query `scale` devuelve la config de la grading_scale del scope junto a los
 //   instrumentos que participan; si no se provee (selectResults faltante → []), se
 //   usan los defaults DIA y la comparabilidad queda 'empty'.
+//   Las 2 queries de bandas (`familyRows`, `bands`) faltantes → [] → el resolver
+//   devuelve source:'none' → se cae al corte legacy (thresholds DIA), como antes.
 //
 // Fase 5: las celdas salen de `assessment_skill_stats` (grano curso) y ya NO hay
 // query de overall — se deriva sumando los numeradores/denominadores de las celdas
@@ -345,6 +349,71 @@ describe('HeatmapService.getHeatmap', () => {
     expect(res.rows.find((r) => r.nodeId === 'n4')!.overallPerformanceLevel).toBe('insufficient');
   });
 
+  // ── Bandas del instrumento como fuente de niveles (no el corte legacy) ─────
+  // Con bandas propias del instrumento, la clasificación sale de ellas y NO de los
+  // umbrales DIA 40/70/85. Acá las bandas son 3 (I/II/III) con cortes 0/0.5/0.8:
+  // 60% cae en la banda media (order 1 de 3) → bandToLegacyLevel la proyecta a
+  // 'adequate', mientras que el corte legacy la habría marcado 'elementary'.
+  it('clasifica por las bandas del instrumento cuando existen, no por el corte legacy', async () => {
+    const familyRow = {
+      id: 'i1',
+      type: 'dia',
+      subjectId: 's-leng',
+      gradeId: 'g1',
+      applicationPeriod: null,
+      year: 2026,
+    };
+    const band = (
+      key: string,
+      order: number,
+      minThreshold: string,
+      maxThreshold: string,
+    ) => ({
+      id: `b-${key}`,
+      orgId: null,
+      key,
+      label: key,
+      order,
+      minThreshold,
+      maxThreshold,
+      color: null,
+      instrumentId: 'i1',
+    });
+    const db = makeDb([
+      // 1. cells
+      [cell('n1', 'Comprensión', 's-leng', 'Lenguaje', 60, 10)],
+      // 2. scale+comparabilidad: 1 instrumento
+      [scaleRow()],
+      // 3. resolveEffectiveBands → loadFamilyRows
+      [familyRow],
+      // 4. resolveEffectiveBands → loadBandsForInstruments (bandas propias de i1)
+      [band('I', 0, '0', '0.5'), band('II', 1, '0.5', '0.8'), band('III', 2, '0.8', '1')],
+    ]);
+    const service = makeService(db);
+
+    const res = await service.getHeatmap(makeUser(), {});
+
+    // Banda media (order 1 de 3) → 'adequate'; el corte legacy daría 'elementary'.
+    expect(res.rows[0].cells[0].performanceLevel).toBe('adequate');
+    expect(res.rows[0].overallPerformanceLevel).toBe('adequate');
+  });
+
+  // Sin bandas propias ni heredadas (resolver → source:'none'), el nivel sigue
+  // saliendo del corte legacy: es el último recurso, no la fuente primaria.
+  it('sin bandas del instrumento cae al corte legacy DIA', async () => {
+    const db = makeDb([
+      [cell('n1', 'Comprensión', 's-leng', 'Lenguaje', 60, 10)],
+      [scaleRow()],
+      // familyRows y bands faltantes → [] → source:'none' → legacy
+    ]);
+    const service = makeService(db);
+
+    const res = await service.getHeatmap(makeUser(), {});
+
+    // 0.60 ∈ [0.40, 0.70) → elementary por el corte legacy.
+    expect(res.rows[0].cells[0].performanceLevel).toBe('elementary');
+  });
+
   // ── filtro subjectId → una sola columna ────────────────────────────────────
   it('con subjectId devuelve una sola columna (la asignatura filtrada)', async () => {
     const db = makeDb([
@@ -409,7 +478,7 @@ describe('HeatmapService.getHeatmap', () => {
 
     const res = await service.getHeatmap(makeUser({ role: 'teacher' }), {});
 
-    expect(db.__selectIdx()).toBe(4);
+    expect(db.__selectIdx()).toBe(6);
     expect(res.subjects.map((s) => s.subjectId)).toEqual(['s-leng']);
     expect(res.rows).toHaveLength(1);
     expect(res.rows[0].cells[0].averageAchievement).toBe(65);
@@ -456,7 +525,7 @@ describe('HeatmapService.getHeatmap', () => {
 
     const res = await service.getHeatmap(makeUser(), { classGroupId: ['cg-1'] });
 
-    expect(db.__selectIdx()).toBe(3);
+    expect(db.__selectIdx()).toBe(5);
     expect(res.rows[0].cells[0].performanceLevel).toBe('advanced');
   });
 });

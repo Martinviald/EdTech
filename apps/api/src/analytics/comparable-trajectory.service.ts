@@ -32,7 +32,7 @@ import {
   type BaselineCandidate,
 } from '../dashboards/comparable/comparable-unit.assembler';
 import { InjectDb, type Database } from '../database/database.types';
-import { loadInstrumentBands } from '../performance-bands/lib/load-instrument-bands';
+import { resolveEffectiveBands } from '../performance-bands/lib/resolve-effective-bands';
 
 const NO_PERIOD_KEY = 'none';
 const NO_PERIOD_LABEL = 'Sin momento';
@@ -460,7 +460,7 @@ export class ComparableTrajectoryService {
   ): Promise<PerformanceBandInput[]> {
     const cached = cache.get(instrumentId);
     if (cached) return cached;
-    const bands = await loadInstrumentBands(tx, instrumentId);
+    const { bands } = await resolveEffectiveBands(tx, instrumentId);
     cache.set(instrumentId, bands);
     return bands;
   }

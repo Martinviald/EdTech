@@ -28,15 +28,22 @@ import {
   type AcademicSetupDto,
   type BulkAddSubjectsDto,
   type CreateClassGroupDto,
+  type OrgBranding,
+  type OrgBrandingResponse,
   type OrgFeaturesResponse,
   type UpdateOrganizationProfileDto,
+  type UpdateOrgBrandingDto,
   type UpdateOrgFeaturesDto,
 } from '@soe/types';
 import { InjectDb, type Database } from '../database/database.types';
+import { FilesService } from '../files/files.service';
 
 @Injectable()
 export class OrganizationsService {
-  constructor(@InjectDb() private readonly db: Database) {}
+  constructor(
+    @InjectDb() private readonly db: Database,
+    private readonly files: FilesService,
+  ) {}
 
   async getProfile(orgId: string) {
     const [org] = await this.db
@@ -92,6 +99,53 @@ export class OrganizationsService {
       .where(eq(organizations.id, orgId));
 
     return this.getFeatures(orgId);
+  }
+
+  /** Branding del colegio (Editor de Materiales): config.branding + URL del logo. */
+  async getBranding(orgId: string): Promise<OrgBrandingResponse> {
+    const [org] = await this.db
+      .select({ id: organizations.id, config: organizations.config })
+      .from(organizations)
+      .where(eq(organizations.id, orgId));
+    if (!org) throw new NotFoundException('Organización no encontrada');
+
+    const parsed = orgConfigSchema.safeParse(org.config ?? {});
+    const branding: OrgBranding = parsed.success ? (parsed.data.branding ?? {}) : {};
+    return {
+      orgId: org.id,
+      branding,
+      logoUrl: await this.resolveLogoUrl(orgId, branding.logoFileId ?? null),
+    };
+  }
+
+  /** Reemplaza config.branding (merge no destructivo con el resto de config). */
+  async updateBranding(orgId: string, dto: UpdateOrgBrandingDto): Promise<OrgBrandingResponse> {
+    const [org] = await this.db
+      .select({ config: organizations.config })
+      .from(organizations)
+      .where(eq(organizations.id, orgId));
+    if (!org) throw new NotFoundException('Organización no encontrada');
+
+    if (dto.logoFileId) {
+      await this.files.getById(orgId, dto.logoFileId).catch(() => {
+        throw new BadRequestException('El archivo del logo no existe o no pertenece al colegio');
+      });
+    }
+
+    const currentConfig = (org.config ?? {}) as Record<string, unknown>;
+    await this.db
+      .update(organizations)
+      .set({ config: { ...currentConfig, branding: dto }, updatedAt: new Date() })
+      .where(eq(organizations.id, orgId));
+
+    return this.getBranding(orgId);
+  }
+
+  private async resolveLogoUrl(orgId: string, logoFileId: string | null): Promise<string | null> {
+    if (!logoFileId) return null;
+    const row = await this.files.getById(orgId, logoFileId).catch(() => null);
+    if (!row || row.status !== 'ready') return null;
+    return this.files.buildDownloadUrl(row, 'inline') ?? null;
   }
 
   async updateProfile(orgId: string, requestingOrgId: string, dto: UpdateOrganizationProfileDto) {

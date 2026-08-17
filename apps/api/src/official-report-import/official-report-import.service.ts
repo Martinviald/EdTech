@@ -41,7 +41,7 @@ import {
 } from '@soe/types';
 import type { JwtPayload } from '../auth/jwt-payload.types';
 import { InjectDb, type Database } from '../database/database.types';
-import { loadInstrumentBands } from '../performance-bands/lib/load-instrument-bands';
+import { resolveEffectiveBands } from '../performance-bands/lib/resolve-effective-bands';
 import { evaluateGates, resolveLevelBand, type GateContext } from './lib/evaluate-gates';
 import { OfficialReportPreviewStore } from './lib/preview-store';
 import type { InstrumentItemForImport } from './lib/report-to-item-stats';
@@ -434,7 +434,7 @@ export class OfficialReportImportService {
     // `students` y `performance_bands` tienen RLS → contexto de org obligatorio.
     const { roster, bands } = await withOrgContext(this.db, orgId, async (tx) => ({
       roster: await this.loadRoster(tx, orgId, classGroupId),
-      bands: await loadInstrumentBands(tx, instrumentId),
+      bands: (await resolveEffectiveBands(tx, instrumentId)).bands,
     }));
 
     return { file, classGroupId, itemsByPosition, tagsByItem, nodeNameById, bands, roster };

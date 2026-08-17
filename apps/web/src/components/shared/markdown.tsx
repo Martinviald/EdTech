@@ -4,7 +4,8 @@ import ReactMarkdown, { type Components } from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 
 /**
- * Render seguro del markdown que produce el asistente (E21 — Ola 4).
+ * Render seguro de markdown, compartido por el asistente (E21 — Ola 4) y los
+ * bloques `text`/`callout`/`activity` del editor de materiales.
  *
  * SEGURIDAD: usa `react-markdown` SIN `rehype-raw` → NO renderiza HTML crudo
  * (defensa contra inyección §4.3, ya que el texto es salida de un LLM que mezcla

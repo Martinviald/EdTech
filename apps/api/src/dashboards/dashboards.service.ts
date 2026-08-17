@@ -66,7 +66,11 @@ import {
   resolveClassGroupScope,
 } from '../common/helpers/class-group-scope.helper';
 import { InjectDb, type Database } from '../database/database.types';
-import { loadInstrumentBands } from '../performance-bands/lib/load-instrument-bands';
+import {
+  resolveEffectiveBands,
+  resolveEffectiveBandsForInstruments,
+  type EffectiveBands,
+} from '../performance-bands/lib/resolve-effective-bands';
 
 /** PerformanceBandInput (con thresholds) → vista mínima para la respuesta. */
 function toBandView(b: PerformanceBandInput): PerformanceBandView {
@@ -224,7 +228,7 @@ export class DashboardsService {
       // La distribución por nivel mezcla los cortes de cada instrumento cuando el
       // alcance no es comparable, así que sólo se emite sobre una unidad agregable (#1C).
       const distribution = comparability.aggregatable
-        ? await this.computePerformanceDistribution(tx, assessmentIds, studentIds)
+        ? await this.computePerformanceDistribution(tx, orgId, query, assessmentIds, studentIds)
         : null;
 
       const recentAssessments = await this.loadRecentAssessments(
@@ -902,10 +906,16 @@ export class DashboardsService {
         adequate: resolvedThresholds.adequate,
         advanced: resolvedThresholds.advanced,
       };
-      const toLevel = (pct: number | null): PerformanceLevel | null =>
-        pct == null
-          ? null
-          : percentageToPerformanceLevel(pct / 100, { performanceThresholds: scaleThresholds });
+      // Las bandas del instrumento (propias o heredadas de la versión anterior) son la
+      // fuente primaria del nivel; el corte legacy sólo aplica cuando el scope no
+      // resuelve a un único instrumento con bandas (source:'none').
+      const bands = await this.resolveScopedBands(tx, query, assessmentIds);
+      const toLevel = (pct: number | null): PerformanceLevel | null => {
+        if (pct == null) return null;
+        const band = classifyByBands(pct / 100, bands);
+        if (band) return bandToLegacyLevel(band, bands!);
+        return percentageToPerformanceLevel(pct / 100, { performanceThresholds: scaleThresholds });
+      };
 
       const aggregates = perStudent
         ? await this.loadBreakdownFromSkillResults(
@@ -1597,11 +1607,16 @@ export class DashboardsService {
   }
 
   /**
-   * Bandas de logro aplicables SÓLO cuando el scope resuelve a un ÚNICO
-   * instrumento con bandas configuradas (ej. mirar una evaluación DIA). Con
-   * varios instrumentos en scope, un corte por-instrumento no está bien definido
-   * (limitación multi-escala, F2) → devuelve null y se usa el corte legacy.
-   * Corre dentro de withOrgContext → RLS trae globales (org_id NULL) + override org.
+   * Bandas de logro EFECTIVAS aplicables SÓLO cuando el scope resuelve a un ÚNICO
+   * instrumento (ej. mirar una evaluación DIA). Con varios instrumentos en scope, un
+   * corte por-instrumento no está bien definido (limitación multi-escala, F2) →
+   * devuelve null y se usa el corte legacy.
+   *
+   * Las bandas ahora salen de `resolveEffectiveBands`: propias del instrumento, o —si
+   * no tiene— las de la versión anterior de su familia. Sólo cuando el resolver
+   * devuelve `source:'none'` (ni propias ni heredadas) se devuelve null para caer al
+   * corte legacy 40/70/85. Corre dentro de withOrgContext → RLS trae globales
+   * (org_id NULL) + override org.
    */
   private async resolveScopedBands(
     tx: Database,
@@ -1618,8 +1633,8 @@ export class DashboardsService {
       if (rows.length !== 1) return null; // 0 o múltiples instrumentos → sin bandas
       instrumentId = rows[0]!.instrumentId;
     }
-    const bands = await loadInstrumentBands(tx, instrumentId);
-    return bands.length > 0 ? bands : null;
+    const effective = await resolveEffectiveBands(tx, instrumentId);
+    return effective.source === 'none' ? null : effective.bands;
   }
 
   private buildResultConditions(
@@ -1634,11 +1649,23 @@ export class DashboardsService {
   }
 
   /**
-   * Distribución por nivel de desempeño contando cada (alumno, assessment) como
-   * un punto. Agregado en SQL con group by.
+   * Distribución por nivel de desempeño contando cada (alumno, assessment) como un
+   * punto, proyectada a los 4 niveles del enum.
+   *
+   * La fuente del nivel ya NO es la columna legacy `performance_level`: se clasifica
+   * el `percentage` de cada resultado con las bandas EFECTIVAS de SU instrumento
+   * (propias o heredadas de la versión anterior de su familia), proyectando la banda a
+   * uno de los 4 niveles con `bandToLegacyLevel`. Sólo cuando el instrumento no tiene
+   * bandas ni heredadas (`source:'none'`) se cae al corte legacy 40/70/85. El shape de
+   * salida (4 buckets) no cambia; cambia quién decide el corte.
+   *
+   * O(1) amortizado por resultado: las bandas se resuelven UNA vez para el set de
+   * instrumentos y se indexan por instrumento en un Map; nada de resolver por fila.
    */
   private async computePerformanceDistribution(
     tx: Database,
+    orgId: string,
+    query: DashboardFiltersQueryDto,
     assessmentIds: string[],
     studentIds: string[] | null,
   ): Promise<PerformanceDistributionBucket[]> {
@@ -1647,21 +1674,31 @@ export class DashboardsService {
     const conditions = this.buildResultConditions(assessmentIds, studentIds, undefined);
     const rows = await tx
       .select({
-        level: assessmentResults.performanceLevel,
-        count: sql<number>`count(*)::int`,
+        instrumentId: assessments.instrumentId,
+        percentage: assessmentResults.percentage,
       })
       .from(assessmentResults)
+      .innerJoin(assessments, eq(assessments.id, assessmentResults.assessmentId))
       .innerJoin(students, eq(students.id, assessmentResults.studentId))
-      .where(and(...conditions, isNull(students.deletedAt)))
-      .groupBy(assessmentResults.performanceLevel);
+      .where(and(...conditions, isNull(students.deletedAt)));
 
-    const countByLevel = new Map<string, number>();
+    if (rows.length === 0) return this.emptyDistribution();
+
+    const instrumentIds = Array.from(
+      new Set(rows.map((r) => r.instrumentId).filter((id): id is string => id != null)),
+    );
+    const bandsByInstrument = await resolveEffectiveBandsForInstruments(tx, instrumentIds);
+
+    const scaleThresholds = await this.resolveThresholds(tx, orgId, query, assessmentIds);
+
+    const countByLevel = new Map<PerformanceLevel, number>();
     let total = 0;
     for (const r of rows) {
-      if (!r.level) continue; // ignoramos resultados sin nivel asignado
-      const c = Number(r.count ?? 0);
-      countByLevel.set(r.level, c);
-      total += c;
+      if (r.percentage == null) continue; // sin porcentaje → sin nivel derivable
+      const pct = Number(r.percentage) / 100;
+      const level = this.levelForResult(pct, bandsByInstrument.get(r.instrumentId), scaleThresholds);
+      countByLevel.set(level, (countByLevel.get(level) ?? 0) + 1);
+      total += 1;
     }
 
     return PERFORMANCE_LEVELS.map((level) => {
@@ -1672,6 +1709,23 @@ export class DashboardsService {
         percentage: total > 0 ? (count / total) * 100 : 0,
       };
     });
+  }
+
+  /**
+   * Nivel (enum de 4) de un `percentage` (0..1): por las bandas efectivas del
+   * instrumento cuando existen (`source !== 'none'`), o por el corte legacy en caso
+   * contrario. `bandToLegacyLevel` proyecta bandas de 3 (DIA) o N niveles a los 4.
+   */
+  private levelForResult(
+    pct: number,
+    effective: EffectiveBands | undefined,
+    scaleThresholds: { elementary: number; adequate: number; advanced: number },
+  ): PerformanceLevel {
+    if (effective && effective.source !== 'none') {
+      const band = classifyByBands(pct, effective.bands);
+      if (band) return bandToLegacyLevel(band, effective.bands);
+    }
+    return percentageToPerformanceLevel(pct, { performanceThresholds: scaleThresholds });
   }
 
   private emptyDistribution(): PerformanceDistributionBucket[] {

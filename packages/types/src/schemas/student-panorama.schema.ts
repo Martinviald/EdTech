@@ -14,10 +14,6 @@ import {
   INSTRUMENT_APPLICATION_PERIODS,
   type InstrumentApplicationPeriod,
 } from './instrument.schema';
-import type {
-  PerformanceBandDistributionBucket,
-  PerformanceDistributionBucket,
-} from './dashboard.schema';
 
 /**
  * Filtros de la vista 360. El zoom ES el filtro: cada nivel lo estrecha y el
@@ -105,30 +101,31 @@ export type StudentPanoramaSkill = {
 };
 
 /**
+ * Un punto de la serie temporal de UN nodo de habilidad: el % de logro del alumno
+ * en ese nodo en una evaluación puntual. `label` es el eje X (momento del ciclo +
+ * año, ej. "Cierre 2025"), nunca la fecha cruda. Sólo se emiten evaluaciones donde
+ * el nodo fue efectivamente evaluado.
+ */
+export type StudentSkillTrendPoint = {
+  assessmentId: string;
+  label: string;
+  achievement: number | null;
+};
+
+/**
  * El mismo logro por nodo, anidado por `parentNodeId`. Cada nivel conserva su
  * propio dato persistido (no se recalcula desde los hijos): un eje tiene su fila
  * en `skill_results` porque los ítems se etiquetan con el eje además del OA. Un
  * nodo cuyo padre no está evaluado sube a raíz, así el árbol nunca esconde datos.
+ *
+ * `series` es la trayectoria CRONOLÓGICA del propio nodeId a través de las
+ * evaluaciones del alcance filtrado (ordenada por `administeredAt` asc), sin
+ * reagregar los hijos — mantiene la semántica por-nodeId de `skill_results`.
  */
 export type StudentPanoramaSkillNode = StudentPanoramaSkill & {
+  series: StudentSkillTrendPoint[];
   children: StudentPanoramaSkillNode[];
 };
-
-/**
- * Distribución de desempeño del alumno. Discriminada porque no siempre se puede
- * clasificar: si sus resultados vienen de instrumentos con escalas de logro
- * distintas, un único gráfico mezclaría vocabularios que no son el mismo. En ese
- * caso NO se clasifica (regla de #1C), se declara `mixed` y la UI explica por qué.
- */
-export type StudentPanoramaDistribution =
-  | {
-      kind: 'band';
-      bands: PerformanceBandView[];
-      buckets: PerformanceBandDistributionBucket[];
-    }
-  | { kind: 'level'; buckets: PerformanceDistributionBucket[] }
-  | { kind: 'mixed'; scaleCount: number }
-  | { kind: 'empty' };
 
 /** KPIs de cabecera del panorama. */
 export type StudentPanoramaSummary = {
@@ -218,6 +215,4 @@ export type StudentPanoramaResponse = {
   bySkill: StudentPanoramaSkill[];
   /** Los mismos nodos anidados por jerarquía, para el zoom eje → habilidad → OA. */
   bySkillTree: StudentPanoramaSkillNode[];
-  /** Distribución de desempeño, o el motivo por el que no se puede clasificar. */
-  distribution: StudentPanoramaDistribution;
 };

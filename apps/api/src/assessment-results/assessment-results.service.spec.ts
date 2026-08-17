@@ -127,6 +127,23 @@ function makeService(db: Database): AssessmentResultsService {
   return new (AssessmentResultsService as new (db: Database) => AssessmentResultsService)(db);
 }
 
+function noEffectiveBandsSelects(instrumentId: string): unknown[][] {
+  return [
+    [
+      {
+        id: instrumentId,
+        type: 'dia',
+        subjectId: null,
+        gradeId: null,
+        applicationPeriod: null,
+        year: null,
+      },
+    ],
+    [],
+    [],
+  ];
+}
+
 // ──────────────────────────────────────────────────────────────────────────────
 // calculate()
 // ──────────────────────────────────────────────────────────────────────────────
@@ -201,11 +218,11 @@ describe('AssessmentResultsService.calculate', () => {
         { itemId: 'it2', nodeId: 'n1' },
         { itemId: 'it2', nodeId: 'n2' },
       ],
-      // 5 (loadInstrumentBands — sin bandas configuradas → cae al enum legacy)
-      [],
-      // 6 (prior counts)
+      // 5-7 (resolveEffectiveBands — sin bandas propias ni de versión anterior → enum legacy)
+      ...noEffectiveBandsSelects('i1'),
+      // 8 (prior counts)
       [{ priorResults: 0, priorSkillResults: 0 }],
-      // 7 (loadEnrollmentByStudent — read-model de cohorte: ambos alumnos en cg-A)
+      // 9 (loadEnrollmentByStudent — read-model de cohorte: ambos alumnos en cg-A)
       [
         { studentId: 's1', classGroupId: 'cg-A' },
         { studentId: 's2', classGroupId: 'cg-A' },
@@ -295,8 +312,8 @@ describe('AssessmentResultsService.calculate', () => {
         { studentId: 's1', itemId: 'it1', isCorrect: true, rawScore: '1.00', finalScore: '1.00', maxScore: '1.00', itemPosition: 1 },
       ],
       [],                                                  // 4: tags vacío
-      [],                                                  // 5: loadInstrumentBands (sin bandas)
-      [{ priorResults: 0, priorSkillResults: 0 }],         // 6: prior counts
+      ...noEffectiveBandsSelects('i1'),                    // 5-7: resolveEffectiveBands (sin bandas)
+      [{ priorResults: 0, priorSkillResults: 0 }],         // 8: prior counts
     ]);
     const svc = makeService(db);
     const result = await svc.calculate(makeUser(), 'a1', { force: false });

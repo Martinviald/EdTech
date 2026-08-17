@@ -52,6 +52,44 @@ export const createClassGroupSchema = z.object({
 
 export const updateOrganizationSchema = createOrganizationSchema.partial();
 
+/**
+ * Branding del colegio para el Editor de Materiales (documentos imprimibles con
+ * identidad propia — docs/propuesta-editor-materiales.md §4.5/§10). Vive dentro
+ * de `organizations.config.branding` (ver orgConfigSchema en feature.schema.ts).
+ * El logo usa el módulo `files` (presigned S3): `logoFileId` referencia una fila
+ * con purpose='org_logo'.
+ */
+export const orgBrandingSchema = z.object({
+  logoFileId: z.string().uuid().nullable().optional(),
+  displayName: z.string().max(120).optional(),
+  primaryColor: z
+    .string()
+    .regex(/^#[0-9a-fA-F]{6}$/, 'Color inválido (formato #RRGGBB)')
+    .optional(),
+  secondaryColor: z
+    .string()
+    .regex(/^#[0-9a-fA-F]{6}$/, 'Color inválido (formato #RRGGBB)')
+    .optional(),
+  headerText: z.string().max(200).optional(),
+  footerText: z.string().max(300).optional(),
+});
+export type OrgBranding = z.infer<typeof orgBrandingSchema>;
+
+/** PATCH /organizations/me/branding */
+export const updateOrgBrandingSchema = orgBrandingSchema;
+export type UpdateOrgBrandingDto = z.infer<typeof updateOrgBrandingSchema>;
+
+/**
+ * GET /organizations/me/branding. `logoUrl` es la URL prefirmada (inline) del
+ * logo resuelta on-read desde `files` — nunca se persiste (expira).
+ */
+export const orgBrandingResponseSchema = z.object({
+  orgId: z.string().uuid(),
+  branding: orgBrandingSchema,
+  logoUrl: z.string().nullable(),
+});
+export type OrgBrandingResponse = z.infer<typeof orgBrandingResponseSchema>;
+
 export type CreateOrganizationDto = z.infer<typeof createOrganizationSchema>;
 export type UpdateOrganizationDto = z.infer<typeof updateOrganizationSchema>;
 export type UpdateOrganizationProfileDto = z.infer<typeof updateOrganizationProfileSchema>;

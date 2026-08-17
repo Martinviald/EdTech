@@ -16,6 +16,16 @@ on:
 permissions:
   contents: read
 
+# `sst deploy` toma un lock sobre el estado de la app y reconcilia App Runner.
+# Dos deploys en paralelo (front-vs-front por dos merges seguidos, o front-vs-back
+# porque el push de imagen del backend deja App Runner en OPERATION_IN_PROGRESS)
+# chocan y el segundo muere. Grupo COMPARTIDO con el deploy del backend: los
+# SERIALIZA (el segundo se encola hasta que termina el primero) en vez de
+# cancelarlos, para no perder ningún deploy.
+concurrency:
+  group: sst-deploy-${{ github.ref }}
+  cancel-in-progress: false
+
 env:
   AWS_REGION: us-east-1
 

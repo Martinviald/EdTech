@@ -66,6 +66,7 @@ const STATIC_TITLES: Record<string, PageTitle> = {
   [ROUTES.benchmarking]: { title: 'Benchmarking' },
   [ROUTES.compararInstrumentos]: { title: 'Comparar instrumentos con IA' },
   [ROUTES.materialRemedial]: { title: 'Material Remedial' },
+  [ROUTES.materiales]: { title: 'Materiales' },
   [ROUTES.establecimientoInformeOficial]: { title: 'Informe oficial de establecimiento' },
 
   [ROUTES.equipo]: { title: 'Equipo', parent: adminHubParent() },
@@ -171,6 +172,20 @@ const DYNAMIC_TITLES: readonly { pattern: RegExp; resolve: (m: RegExpMatchArray)
       resolve: () => ({
         title: 'Marco académico',
         parent: { href: ROUTES.marcosAcademicos, label: 'Marcos Académicos' },
+      }),
+    },
+    {
+      pattern: /^\/materiales\/([^/]+)\/imprimir$/,
+      resolve: (m) => ({
+        title: 'Imprimir material',
+        parent: { href: ROUTES.material(m[1]!), label: 'Editor de materiales' },
+      }),
+    },
+    {
+      pattern: /^\/materiales\/[^/]+$/,
+      resolve: () => ({
+        title: 'Editor de materiales',
+        parent: { href: ROUTES.materiales, label: 'Materiales' },
       }),
     },
     {

@@ -72,6 +72,10 @@ export const ROUTES = {
   bancoItemSpecTableCargar: (instrumentId: string) =>
     route(`/banco-contenido/${instrumentId}/spec-table/cargar`),
 
+  materiales: route('/materiales'),
+  material: (id: string) => route(`/materiales/${id}`),
+  materialImprimir: (id: string) => route(`/materiales/${id}/imprimir`),
+
   organizacion: route('/organizacion'),
   organizacionAsignaciones: route('/organizacion/asignaciones'),
   organizacionConfigurar: route('/organizacion/configurar'),
@@ -80,6 +84,7 @@ export const ROUTES = {
   configEscalas: route('/configuracion/escalas'),
   configEscalasNueva: route('/configuracion/escalas/nueva'),
   configEscala: (id: string) => route(`/configuracion/escalas/${id}`),
+  configIdentidad: route('/configuracion/identidad'),
   configModelosIa: route('/configuracion/modelos-ia'),
   configObservabilidadIa: route('/configuracion/observabilidad-ia'),
 

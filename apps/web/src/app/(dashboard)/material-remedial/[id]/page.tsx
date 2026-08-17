@@ -7,6 +7,7 @@ import { ROUTES } from '@/lib/routes';
 import {
   canAccess,
   validateRemedialContent,
+  DOCUMENT_EDITOR_ROLES,
   REMEDIAL_VIEWER_ROLES,
   REMEDIAL_APPROVER_ROLES,
   type RemedialContent,
@@ -44,17 +45,26 @@ export default async function MaterialRemedialDetailPage({
 
   const { id } = await params;
   const canApprove = canAccess(session.user.roles, REMEDIAL_APPROVER_ROLES);
+  const canOpenInEditor = canAccess(session.user.roles, DOCUMENT_EDITOR_ROLES);
 
   return (
     <PageContainer>
       <Suspense fallback={<MaterialDetailFallback />}>
-        <MaterialDetailSection id={id} canApprove={canApprove} />
+        <MaterialDetailSection id={id} canApprove={canApprove} canOpenInEditor={canOpenInEditor} />
       </Suspense>
     </PageContainer>
   );
 }
 
-async function MaterialDetailSection({ id, canApprove }: { id: string; canApprove: boolean }) {
+async function MaterialDetailSection({
+  id,
+  canApprove,
+  canOpenInEditor,
+}: {
+  id: string;
+  canApprove: boolean;
+  canOpenInEditor: boolean;
+}) {
   let material: RemedialMaterialModel | null = null;
   let loadError = false;
   try {
@@ -165,6 +175,7 @@ async function MaterialDetailSection({ id, canApprove }: { id: string; canApprov
         teacherContent={content}
         studentContent={studentMaterial?.content ?? null}
         canApprove={canApprove}
+        canOpenInEditor={canOpenInEditor}
         title={title}
       />
     </>

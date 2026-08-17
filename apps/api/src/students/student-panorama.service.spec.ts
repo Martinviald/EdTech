@@ -95,15 +95,33 @@ function assessmentRow(overrides: Record<string, unknown> = {}) {
   };
 }
 
-function bandRow(instrumentId: string, key: string, label: string, order: number) {
+function familyRow(instrumentId: string, overrides: Record<string, unknown> = {}) {
+  return {
+    id: instrumentId,
+    type: 'dia',
+    subjectId: 'subj-len',
+    gradeId: 'grade-5',
+    applicationPeriod: 'diagnostico',
+    year: 2026,
+    ...overrides,
+  };
+}
+
+function bandRow(
+  instrumentId: string,
+  key: string,
+  label: string,
+  order: number,
+  thresholds: { min: string; max: string } = { min: '0.0000', max: '1.0000' },
+) {
   return {
     id: `${instrumentId}-${key}`,
     orgId: null,
     key,
     label,
     order,
-    minThreshold: '0.0000',
-    maxThreshold: '1.0000',
+    minThreshold: thresholds.min,
+    maxThreshold: thresholds.max,
     color: null,
     instrumentId,
   };
@@ -125,141 +143,145 @@ function skillRow(overrides: Record<string, unknown> = {}) {
 }
 
 const DIA_BANDS = (instrumentId: string) => [
-  bandRow(instrumentId, 'I', 'Nivel I', 0),
-  bandRow(instrumentId, 'II', 'Nivel II', 1),
-  bandRow(instrumentId, 'III', 'Nivel III', 2),
+  bandRow(instrumentId, 'I', 'Nivel I', 0, { min: '0.0000', max: '0.4000' }),
+  bandRow(instrumentId, 'II', 'Nivel II', 1, { min: '0.4000', max: '0.7000' }),
+  bandRow(instrumentId, 'III', 'Nivel III', 2, { min: '0.7000', max: '1.0000' }),
 ];
 
-describe('StudentPanoramaService — resultados de informes agregados', () => {
-  it('cuenta las filas sin porcentaje en la distribución y expone el denominador real del promedio', async () => {
+describe('StudentPanoramaService — bandas efectivas del instrumento', () => {
+  it('clasifica una fila legacy (sin performanceBandId) con las bandas resueltas del instrumento', async () => {
     const db = makeDb([
       [STUDENT],
       [STUDENT],
       [ENROLLMENT],
       [
-        assessmentRow({ assessmentId: 'a-1', achievement: '70.00', bandKey: 'II', bandOrder: 1 }),
         assessmentRow({
-          assessmentId: 'a-2',
-          achievement: null,
-          grade: null,
-          performanceLevel: null,
-          dataGranularity: 'aggregate_only',
-          bandKey: 'I',
-          bandLabel: 'Nivel I',
-          bandOrder: 0,
+          achievement: '75.00',
+          performanceLevel: 'adequate',
+          bandKey: null,
+          bandLabel: null,
+          bandOrder: null,
+          bandColor: null,
         }),
       ],
-      [],
+      [familyRow('inst-1')],
       DIA_BANDS('inst-1'),
+      [],
     ]);
 
     const result = await makeService(db).getPanorama(makeUser(), 'stu-1');
 
-    expect(result.summary.assessmentsCount).toBe(2);
-    expect(result.summary.assessmentsWithAchievement).toBe(1);
-    expect(result.summary.averageAchievement).toBe(70);
-
-    expect(result.distribution.kind).toBe('band');
-    if (result.distribution.kind !== 'band') throw new Error('esperaba distribución por banda');
-    const counted = result.distribution.buckets.reduce((acc, b) => acc + b.count, 0);
-    expect(counted).toBe(2);
-    expect(result.distribution.buckets.find((b) => b.key === 'I')?.count).toBe(1);
-    expect(result.distribution.buckets.find((b) => b.key === 'II')?.count).toBe(1);
+    const only = result.byAssessment[0]!;
+    expect(only.performanceBand).toEqual({ key: 'III', label: 'Nivel III', order: 2, color: null });
+    expect(only.performanceLevel).toBe('advanced');
   });
 
-  it('emite la banda vacía del vocabulario aunque el alumno no la alcance', async () => {
+  it('conserva el nivel legacy almacenado cuando no hay bandas resueltas (source none)', async () => {
+    const db = makeDb([
+      [STUDENT],
+      [STUDENT],
+      [ENROLLMENT],
+      [
+        assessmentRow({
+          achievement: '75.00',
+          performanceLevel: 'elementary',
+          bandKey: null,
+          bandLabel: null,
+          bandOrder: null,
+          bandColor: null,
+        }),
+      ],
+      [familyRow('inst-1')],
+      [],
+      [],
+      [],
+    ]);
+
+    const result = await makeService(db).getPanorama(makeUser(), 'stu-1');
+
+    const only = result.byAssessment[0]!;
+    expect(only.performanceBand).toBeNull();
+    expect(only.performanceLevel).toBe('elementary');
+  });
+
+  it('respeta la banda ya persistida (performanceBandId no nulo) sin reclasificar', async () => {
     const db = makeDb([
       [STUDENT],
       [STUDENT],
       [ENROLLMENT],
       [assessmentRow()],
-      [],
+      [familyRow('inst-1')],
       DIA_BANDS('inst-1'),
-    ]);
-
-    const result = await makeService(db).getPanorama(makeUser(), 'stu-1');
-
-    if (result.distribution.kind !== 'band') throw new Error('esperaba distribución por banda');
-    expect(result.distribution.buckets.map((b) => b.key)).toEqual(['I', 'II', 'III']);
-    expect(result.distribution.buckets.find((b) => b.key === 'III')?.count).toBe(0);
-  });
-
-  it('no clasifica cuando los resultados vienen de escalas de logro distintas', async () => {
-    const db = makeDb([
-      [STUDENT],
-      [STUDENT],
-      [ENROLLMENT],
-      [
-        assessmentRow(),
-        assessmentRow({
-          assessmentId: 'a-2',
-          instrumentId: 'inst-2',
-          bandKey: 'A2',
-          bandLabel: 'A2 — Elementary',
-          bandOrder: 1,
-        }),
-      ],
       [],
-      [
-        ...DIA_BANDS('inst-1'),
-        bandRow('inst-2', 'A1', 'A1 — Beginner', 0),
-        bandRow('inst-2', 'A2', 'A2 — Elementary', 1),
-      ],
     ]);
 
     const result = await makeService(db).getPanorama(makeUser(), 'stu-1');
 
-    expect(result.distribution).toEqual({ kind: 'mixed', scaleCount: 2 });
+    const only = result.byAssessment[0]!;
+    expect(only.performanceBand).toEqual({
+      key: 'II',
+      label: 'Nivel II',
+      order: 1,
+      color: '#f59e0b',
+    });
+    expect(only.performanceLevel).toBe('adequate');
   });
 
-  it('trata como escalas distintas una fila con banda y otra clasificada sólo con el enum legacy', async () => {
-    const db = makeDb([
-      [STUDENT],
-      [STUDENT],
-      [ENROLLMENT],
-      [
-        assessmentRow(),
-        assessmentRow({
-          assessmentId: 'a-2',
-          instrumentId: 'inst-2',
-          bandKey: null,
-          bandLabel: null,
-          bandOrder: null,
-          bandColor: null,
-          performanceLevel: 'elementary',
-        }),
-      ],
-      [],
-      DIA_BANDS('inst-1'),
-    ]);
-
-    const result = await makeService(db).getPanorama(makeUser(), 'stu-1');
-
-    expect(result.distribution).toEqual({ kind: 'mixed', scaleCount: 2 });
-  });
-
-  it('declara vacío cuando ningún resultado trae nivel ni banda', async () => {
+  it('deja intacta una fila legacy sin porcentaje (achievement null)', async () => {
     const db = makeDb([
       [STUDENT],
       [STUDENT],
       [ENROLLMENT],
       [
         assessmentRow({
-          performanceLevel: null,
+          achievement: null,
+          grade: null,
+          performanceLevel: 'insufficient',
+          dataGranularity: 'aggregate_only',
           bandKey: null,
           bandLabel: null,
           bandOrder: null,
           bandColor: null,
         }),
       ],
-      [],
+      [familyRow('inst-1')],
       DIA_BANDS('inst-1'),
+      [],
     ]);
 
     const result = await makeService(db).getPanorama(makeUser(), 'stu-1');
 
-    expect(result.distribution).toEqual({ kind: 'empty' });
-    expect(result.summary.assessmentsWithAchievement).toBe(1);
+    const only = result.byAssessment[0]!;
+    expect(only.performanceBand).toBeNull();
+    expect(only.performanceLevel).toBe('insufficient');
+  });
+
+  it('el estado (latest) por asignatura refleja la banda resuelta', async () => {
+    const db = makeDb([
+      [STUDENT],
+      [STUDENT],
+      [ENROLLMENT],
+      [
+        assessmentRow({
+          achievement: '30.00',
+          performanceLevel: 'adequate',
+          bandKey: null,
+          bandLabel: null,
+          bandOrder: null,
+          bandColor: null,
+        }),
+      ],
+      [familyRow('inst-1')],
+      DIA_BANDS('inst-1'),
+      [],
+    ]);
+
+    const result = await makeService(db).getPanorama(makeUser(), 'stu-1');
+
+    expect(result.bySubject).toHaveLength(1);
+    const lenguaje = result.bySubject[0]!;
+    expect(lenguaje.latest?.performanceBand?.key).toBe('I');
+    expect(lenguaje.latest?.performanceLevel).toBe('insufficient');
   });
 
   it('expone el nivel previo del informe de cierre como movimiento del alumno', async () => {
@@ -275,8 +297,9 @@ describe('StudentPanoramaService — resultados de informes agregados', () => {
           priorBandColor: '#ef4444',
         }),
       ],
-      [],
+      [familyRow('inst-1')],
       DIA_BANDS('inst-1'),
+      [],
     ]);
 
     const result = await makeService(db).getPanorama(makeUser(), 'stu-1');
@@ -289,6 +312,54 @@ describe('StudentPanoramaService — resultados de informes agregados', () => {
     });
     expect(result.byAssessment[0]?.dataGranularity).toBe('item_level');
   });
+
+  it('no expone un campo de distribución agregada en la respuesta', async () => {
+    const db = makeDb([
+      [STUDENT],
+      [STUDENT],
+      [ENROLLMENT],
+      [assessmentRow()],
+      [familyRow('inst-1')],
+      DIA_BANDS('inst-1'),
+      [],
+    ]);
+
+    const result = await makeService(db).getPanorama(makeUser(), 'stu-1');
+
+    expect('distribution' in result).toBe(false);
+  });
+});
+
+describe('StudentPanoramaService — resumen y denominador del promedio', () => {
+  it('cuenta las evaluaciones sin porcentaje y expone el denominador real del promedio', async () => {
+    const db = makeDb([
+      [STUDENT],
+      [STUDENT],
+      [ENROLLMENT],
+      [
+        assessmentRow({ assessmentId: 'a-1', achievement: '70.00' }),
+        assessmentRow({
+          assessmentId: 'a-2',
+          achievement: null,
+          grade: null,
+          performanceLevel: 'insufficient',
+          dataGranularity: 'aggregate_only',
+          bandKey: 'I',
+          bandLabel: 'Nivel I',
+          bandOrder: 0,
+        }),
+      ],
+      [familyRow('inst-1')],
+      DIA_BANDS('inst-1'),
+      [],
+    ]);
+
+    const result = await makeService(db).getPanorama(makeUser(), 'stu-1');
+
+    expect(result.summary.assessmentsCount).toBe(2);
+    expect(result.summary.assessmentsWithAchievement).toBe(1);
+    expect(result.summary.averageAchievement).toBe(70);
+  });
 });
 
 describe('StudentPanoramaService — alcance comparable', () => {
@@ -298,7 +369,15 @@ describe('StudentPanoramaService — alcance comparable', () => {
   ];
 
   it('acota al año más reciente con resultados en vez de mezclar todo el historial', async () => {
-    const db = makeDb([[STUDENT], [STUDENT], [ENROLLMENT], DOS_ANOS, [], DIA_BANDS('inst-2026')]);
+    const db = makeDb([
+      [STUDENT],
+      [STUDENT],
+      [ENROLLMENT],
+      DOS_ANOS,
+      [familyRow('inst-2025', { year: 2025 }), familyRow('inst-2026', { year: 2026 })],
+      [...DIA_BANDS('inst-2025'), ...DIA_BANDS('inst-2026')],
+      [],
+    ]);
 
     const result = await makeService(db).getPanorama(makeUser(), 'stu-1');
 
@@ -314,8 +393,9 @@ describe('StudentPanoramaService — alcance comparable', () => {
       [STUDENT],
       [ENROLLMENT],
       DOS_ANOS,
-      [],
+      [familyRow('inst-2025', { year: 2025 }), familyRow('inst-2026', { year: 2026 })],
       [...DIA_BANDS('inst-2025'), ...DIA_BANDS('inst-2026')],
+      [],
     ]);
 
     const result = await makeService(db).getPanorama(makeUser(), 'stu-1', { allYears: true });
@@ -346,8 +426,12 @@ describe('StudentPanoramaService — alcance comparable', () => {
           achievement: '80.00',
         }),
       ],
-      [],
+      [
+        familyRow('inst-dg', { applicationPeriod: 'diagnostico' }),
+        familyRow('inst-cierre', { applicationPeriod: 'cierre' }),
+      ],
       [...DIA_BANDS('inst-dg'), ...DIA_BANDS('inst-cierre')],
+      [],
     ]);
 
     const result = await makeService(db).getPanorama(makeUser(), 'stu-1');
@@ -380,8 +464,9 @@ describe('StudentPanoramaService — alcance comparable', () => {
       [STUDENT],
       [ENROLLMENT],
       rows,
-      [],
+      [familyRow('inst-1'), familyRow('inst-mate', { subjectId: 'subj-mate' })],
       [...DIA_BANDS('inst-1'), ...DIA_BANDS('inst-mate')],
+      [],
     ]);
     const todas = await makeService(sinFiltro).getPanorama(makeUser(), 'stu-1');
     expect(todas.bySubject.map((s) => s.subjectName)).toEqual(['Lenguaje', 'Matemática']);
@@ -392,8 +477,9 @@ describe('StudentPanoramaService — alcance comparable', () => {
       [STUDENT],
       [ENROLLMENT],
       rows,
-      [],
+      [familyRow('inst-mate', { subjectId: 'subj-mate' })],
       DIA_BANDS('inst-mate'),
+      [],
     ]);
     const soloMate = await makeService(conFiltro).getPanorama(makeUser(), 'stu-1', {
       subjectId: 'subj-mate',
@@ -412,8 +498,9 @@ describe('StudentPanoramaService — logro por habilidad', () => {
       [STUDENT],
       [ENROLLMENT],
       [assessmentRow()],
+      [familyRow('inst-1')],
+      DIA_BANDS('inst-1'),
       [skillRow({ nodeCode: 'LOC', correctCount: 6, totalCount: 12, assessmentsCount: 2 })],
-      [],
     ]);
 
     const result = await makeService(db).getPanorama(makeUser(), 'stu-1');
@@ -433,6 +520,8 @@ describe('StudentPanoramaService — logro por habilidad', () => {
       [STUDENT],
       [ENROLLMENT],
       [assessmentRow()],
+      [familyRow('inst-1')],
+      DIA_BANDS('inst-1'),
       [
         skillRow({
           nodeId: 'oa-2',
@@ -463,7 +552,6 @@ describe('StudentPanoramaService — logro por habilidad', () => {
           nodeOrder: 0,
         }),
       ],
-      [],
     ]);
 
     const result = await makeService(db).getPanorama(makeUser(), 'stu-1');
@@ -481,11 +569,12 @@ describe('StudentPanoramaService — logro por habilidad', () => {
       [STUDENT],
       [ENROLLMENT],
       [assessmentRow()],
+      [familyRow('inst-1')],
+      DIA_BANDS('inst-1'),
       [
         skillRow({ nodeId: 'huerfano', nodeName: 'OA suelto', parentNodeId: 'eje-no-evaluado' }),
         skillRow({ nodeId: 'raiz', nodeName: 'Eje', parentNodeId: null }),
       ],
-      [],
     ]);
 
     const result = await makeService(db).getPanorama(makeUser(), 'stu-1');
@@ -499,17 +588,87 @@ describe('StudentPanoramaService — logro por habilidad', () => {
       [STUDENT],
       [ENROLLMENT],
       [assessmentRow()],
+      [familyRow('inst-1')],
+      DIA_BANDS('inst-1'),
       [
         skillRow({ nodeId: 'n-alto', nodeName: 'Alto', correctCount: 9, totalCount: 10 }),
         skillRow({ nodeId: 'n-sin', nodeName: 'Sin medir', correctCount: 0, totalCount: 0 }),
         skillRow({ nodeId: 'n-bajo', nodeName: 'Bajo', correctCount: 2, totalCount: 10 }),
       ],
-      [],
     ]);
 
     const result = await makeService(db).getPanorama(makeUser(), 'stu-1');
 
     expect(result.bySkill.map((s) => s.nodeId)).toEqual(['n-bajo', 'n-alto', 'n-sin']);
     expect(result.bySkill[2]?.achievement).toBeNull();
+  });
+});
+
+describe('StudentPanoramaService — serie temporal por nodo de habilidad', () => {
+  function seriesRow(overrides: Record<string, unknown> = {}) {
+    return { assessmentId: 'a-dg', nodeId: 'node-1', percentage: '50.00', ...overrides };
+  }
+
+  it('adjunta la serie cronológica de un nodo evaluado en dos evaluaciones', async () => {
+    const db = makeDb([
+      [STUDENT],
+      [STUDENT],
+      [ENROLLMENT],
+      [
+        assessmentRow({
+          assessmentId: 'a-dg',
+          instrumentId: 'inst-dg',
+          applicationPeriod: 'diagnostico',
+          administeredAt: new Date('2025-03-01'),
+          year: 2025,
+        }),
+        assessmentRow({
+          assessmentId: 'a-cierre',
+          instrumentId: 'inst-cierre',
+          applicationPeriod: 'cierre',
+          administeredAt: new Date('2025-11-01'),
+          year: 2025,
+        }),
+      ],
+      [
+        familyRow('inst-dg', { applicationPeriod: 'diagnostico', year: 2025 }),
+        familyRow('inst-cierre', { applicationPeriod: 'cierre', year: 2025 }),
+      ],
+      [...DIA_BANDS('inst-dg'), ...DIA_BANDS('inst-cierre')],
+      [skillRow({ nodeId: 'node-1', correctCount: 11, totalCount: 20, assessmentsCount: 2 })],
+      [
+        seriesRow({ assessmentId: 'a-cierre', nodeId: 'node-1', percentage: '80.00' }),
+        seriesRow({ assessmentId: 'a-dg', nodeId: 'node-1', percentage: '40.00' }),
+      ],
+    ]);
+
+    const result = await makeService(db).getPanorama(makeUser(), 'stu-1', { allYears: true });
+
+    const node = result.bySkillTree[0]!;
+    expect(node.nodeId).toBe('node-1');
+    expect(node.series).toEqual([
+      { assessmentId: 'a-dg', label: 'Diagnóstico 2025', achievement: 40 },
+      { assessmentId: 'a-cierre', label: 'Cierre 2025', achievement: 80 },
+    ]);
+  });
+
+  it('adjunta una serie de un punto para un nodo evaluado en una sola evaluación', async () => {
+    const db = makeDb([
+      [STUDENT],
+      [STUDENT],
+      [ENROLLMENT],
+      [assessmentRow({ assessmentId: 'a-1', applicationPeriod: 'diagnostico', year: 2026 })],
+      [familyRow('inst-1')],
+      DIA_BANDS('inst-1'),
+      [skillRow({ nodeId: 'node-1' })],
+      [seriesRow({ assessmentId: 'a-1', nodeId: 'node-1', percentage: '65.50' })],
+    ]);
+
+    const result = await makeService(db).getPanorama(makeUser(), 'stu-1');
+
+    const node = result.bySkillTree[0]!;
+    expect(node.series).toEqual([
+      { assessmentId: 'a-1', label: 'Diagnóstico 2026', achievement: 65.5 },
+    ]);
   });
 });
