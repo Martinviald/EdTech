@@ -156,7 +156,7 @@ export default $config({
 
     // ── Backend: App Runner desde la imagen :latest en ECR ──
     const api = new aws.apprunner.Service("Api", {
-      serviceName: `edtech-api-${$app.stage}`,
+      serviceName: `edtech-api-${$app.stage}-v2`,
       sourceConfiguration: {
         autoDeploymentsEnabled: true, // el CI pushea :latest -> redeploy automático
         authenticationConfiguration: { accessRoleArn: accessRole.arn },
