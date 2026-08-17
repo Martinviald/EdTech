@@ -24,8 +24,13 @@ interface DbOpts {
   orgConfig?: Record<string, unknown> | null;
 }
 
-function makeDb(opts: DbOpts = {}): { db: Database; deleted: string[] } {
+function makeDb(opts: DbOpts = {}): {
+  db: Database;
+  deleted: string[];
+  upserts: Array<Record<string, unknown>>;
+} {
   const deleted: string[] = [];
+  const upserts: Array<Record<string, unknown>> = [];
   const db = {
     select: () => ({
       from: (table: unknown) => ({
@@ -44,8 +49,15 @@ function makeDb(opts: DbOpts = {}): { db: Database; deleted: string[] } {
         deleted.push('cleared');
       },
     }),
+    insert: () => ({
+      values: (values: Record<string, unknown>) => ({
+        onConflictDoUpdate: async () => {
+          upserts.push(values);
+        },
+      }),
+    }),
   } as unknown as Database;
-  return { db, deleted };
+  return { db, deleted, upserts };
 }
 
 function makeAuthService(result: unknown): AuthService {
@@ -208,6 +220,36 @@ describe('McpPrincipalResolver', () => {
     await expect(resolver.resolve('desconocido@otro.cl')).rejects.toBeInstanceOf(
       ForbiddenException,
     );
+  });
+
+  it('setActiveOrg valida la membresía, hace upsert y devuelve roles de la org nueva', async () => {
+    mockGetActiveMemberships.mockResolvedValue({
+      organization: { id: 'org-2', name: 'Colegio Dos', type: 'school' },
+      memberships: [{ role: 'school_admin' }, { role: 'teacher' }],
+    });
+    const { db, upserts } = makeDb();
+    const resolver = new McpPrincipalResolver(makeAuthService(realUserResult), db);
+
+    const result = await resolver.setActiveOrg('user-1', 'docente@colegio.cl', 'org-2');
+
+    expect(result).toEqual({
+      orgId: 'org-2',
+      orgName: 'Colegio Dos',
+      roles: ['school_admin', 'teacher'],
+      activeRole: 'school_admin',
+    });
+    expect(upserts).toEqual([{ userId: 'user-1', orgId: 'org-2' }]);
+  });
+
+  it('setActiveOrg rechaza con Forbidden si el usuario no es miembro', async () => {
+    mockGetActiveMemberships.mockResolvedValue(null);
+    const { db, upserts } = makeDb();
+    const resolver = new McpPrincipalResolver(makeAuthService(realUserResult), db);
+
+    await expect(
+      resolver.setActiveOrg('user-1', 'docente@colegio.cl', 'org-9'),
+    ).rejects.toBeInstanceOf(ForbiddenException);
+    expect(upserts).toEqual([]);
   });
 
   it('listMyOrgs marca la org activa y mapea roles', async () => {

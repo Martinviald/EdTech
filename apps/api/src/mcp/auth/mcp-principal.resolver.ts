@@ -12,6 +12,7 @@ import {
   resolveAllowedFeatures,
   type FeatureKey,
   type McpOrgSummary,
+  type McpSetActiveOrgOutput,
   type UserRole,
 } from '@soe/types';
 import { AuthService } from '../../auth/auth.service';
@@ -73,6 +74,33 @@ export class McpPrincipalResolver {
       roles: org.memberships.map((m) => m.role),
       isActive: org.organization.id === activeOrgId,
     }));
+  }
+
+  async setActiveOrg(
+    userId: string,
+    email: string,
+    orgId: string,
+  ): Promise<McpSetActiveOrgOutput> {
+    const membership = await getActiveMembershipsForEmailAndOrg(this.db, email, orgId);
+    if (!membership || membership.memberships.length === 0) {
+      throw new ForbiddenException('Sin acceso activo a esta organización');
+    }
+
+    await this.db
+      .insert(mcpUserActiveOrg)
+      .values({ userId, orgId })
+      .onConflictDoUpdate({
+        target: mcpUserActiveOrg.userId,
+        set: { orgId, updatedAt: new Date() },
+      });
+
+    const roles = membership.memberships.map((m) => m.role);
+    return {
+      orgId,
+      orgName: membership.organization.name,
+      roles,
+      activeRole: pickDefaultActiveRole(roles),
+    };
   }
 
   async principalFromJwt(
