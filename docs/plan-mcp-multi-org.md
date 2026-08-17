@@ -150,17 +150,23 @@ CSCJ con los roles del usuario EN CSCJ; un `set_active_org` a una org donde no e
 elimina el riesgo de "quedó activa otra org" al mandar datos a un LLM.
 
 ### API
-- [ ] `apps/api/src/mcp/adapter/mcp.controller.ts` — en el handler de `tools/call`, envolver el
-      resultado con `orgContext: { orgId, orgName }` del `principal` (una sola vez, sin tocar cada
-      tool): agregarlo a `structuredContent` **y** prefijar una línea legible en el `content` de texto
-      (ej. `Organización: <orgName> (<orgId>)`). Excluir tools no-org (`whoami`, `list_my_orgs`,
-      `set_active_org`) o incluirlo igual (inocuo).
-- [ ] Actualizar `mcp.controller.spec.ts` — `tools/call` incluye `orgContext`.
+- [x] `apps/api/src/mcp/adapter/mcp.controller.ts` — en el handler de `tools/call`, prefijar una línea
+      legible `Organización: <orgName> (<orgId>)` en el `content` de texto del resultado (una sola vez,
+      sin tocar cada tool). Las tools no-org (`whoami`, `list_my_orgs`, `set_active_org`) quedan
+      exentas vía `ORG_CONTEXT_EXEMPT_TOOLS`.
+- [x] Actualizar `mcp.controller.spec.ts` — la tool de datos prefija la org; `whoami` no.
+
+**Realización (cierre):** el `orgContext` va **en el `content` de texto**, no en `structuredContent`.
+Motivo verificado: `zodToJsonSchema` emite `additionalProperties: false`, y las **únicas** tools con
+`outputSchema` son las 3 exentas (`whoami`/`list_my_orgs`/`set_active_org`) — todas las tools de datos
+devuelven `unknown` sin `outputSchema`, así que no tienen `structuredContent` que envolver. La línea de
+texto es justo lo que lee el LLM, así que es el canal correcto del resguardo y no rompe la conformidad
+de ningún schema declarado.
 
 **Puerta de calidad + PR:** típica. PR: `feat(mcp): cada respuesta de tool declara su organización`.
 
-**Aceptación:** toda respuesta de tool de datos incluye `orgContext`; el modelo (y el humano) siempre
-ve el tenant sobre el que se ejecutó.
+**Aceptación:** toda respuesta de tool de datos declara su organización en el texto; el modelo (y el
+humano) siempre ve el tenant sobre el que se ejecutó.
 
 ---
 
