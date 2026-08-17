@@ -1,7 +1,11 @@
 name: CI
 
-# Gate de calidad en PRs: typecheck + lint + guard del Design System.
+# Gate de calidad en PRs: typecheck + lint + guard del Design System + `next build`.
 # (El repo antes solo tenía workflows de deploy; nada bloqueaba un PR roto.)
+#
+# `next build` es el ÚNICO paso que detecta violaciones de frontera cliente/servidor
+# (RSC): un módulo que usa hooks (useState/useRef) sin `'use client'` pasa typecheck y
+# lint pero rompe la build de producción. Sin este paso esos errores llegaban al deploy.
 on:
   pull_request:
     branches: [dev, main]
@@ -26,9 +30,11 @@ jobs:
 
       - run: pnpm install --frozen-lockfile
 
-      # apps/web resuelve @soe/types; se construye para que typecheck lo encuentre.
+      # apps/web resuelve @soe/types y @soe/db (transpilePackages en next.config);
+      # se construyen para que typecheck y `next build` los encuentren. Mismo par
+      # que arma el deploy del front antes de `next build` (deploy-frontend.yml).
       - name: Build workspace deps
-        run: pnpm --filter @soe/types build
+        run: pnpm --filter @soe/types build && pnpm --filter @soe/db build
 
       - name: Typecheck
         run: pnpm --filter @soe/web typecheck
@@ -38,3 +44,9 @@ jobs:
 
       - name: Design System guard
         run: pnpm --filter @soe/web lint:ds
+
+      # Build de producción: detecta errores que typecheck/lint NO ven —sobre todo
+      # violaciones de frontera cliente/servidor (RSC). Corre en checkout limpio sin
+      # `.env`, igual que el `next build` del deploy (que compila sin esas variables).
+      - name: Production build (next build)
+        run: pnpm --filter @soe/web build

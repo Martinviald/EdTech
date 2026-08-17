@@ -16,6 +16,15 @@ on:
 permissions:
   contents: read
 
+# `sst deploy` toma un lock sobre el estado de la app. Dos deploys del front en
+# paralelo (p. ej. dos merges a main seguidos) chocan con
+# "A concurrent update was detected on the app" y el segundo muere. Este grupo
+# los SERIALIZA (el segundo queda encolado hasta que termina el primero) en vez
+# de cancelarlos, para no perder ningún deploy. Espeja el guard del backend.
+concurrency:
+  group: deploy-frontend-${{ github.ref }}
+  cancel-in-progress: false
+
 env:
   AWS_REGION: us-east-1
 
