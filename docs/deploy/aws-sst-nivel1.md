@@ -13,9 +13,11 @@ se define con el provider crudo `aws.*`). Stage: `production`. Región: `us-east
 
 **Costo idle ~$22-26/mes** (sin ALB, sin NAT, sin Fargate). Ver §7.
 
-> ⚠️ **Deploy en 2 fases:** App Runner exige que la imagen exista en ECR antes de crearse.
-> Fase 1 deja la infra base (incl. ECR); se pushea la imagen y se provisiona la BDD;
-> Fase 2 (`SST_BACKEND_READY=1`) crea App Runner + front. Después el CI/CD mantiene todo.
+> ⚠️ **Bootstrap en 2 pasos (solo la 1ª vez de un stage):** App Runner exige que la imagen
+> exista en ECR antes de crearse. El bootstrap (`SST_BOOTSTRAP=1`) deja solo la infra base
+> (incl. ECR); se pushea la imagen y se provisiona la BDD; después `npx sst deploy` (sin flag)
+> crea App Runner + front. De ahí en más `sst deploy` a secas es el deploy completo y el CI/CD
+> lo mantiene. **Sin el flag NUNCA se borra nada:** `sst deploy` siempre deploya TODO.
 
 ---
 
@@ -48,14 +50,14 @@ npx sst secret set AuthMode mock --stage production
 
 ---
 
-## 2. Fase 1 — Infra base + ECR
+## 2. Bootstrap — Infra base + ECR (solo la 1ª vez del stage)
 
 ```bash
-npx sst deploy --stage production
+SST_BOOTSTRAP=1 npx sst deploy --stage production
 ```
 
 Crea VPC, RDS, S3, **ECR**, roles IAM y VPC connector. Imprime `ecrRepo`, `dbHost`, `bucket`.
-(App Runner y el front todavía NO se crean.)
+(App Runner y el front todavía NO se crean — para eso está el paso 5, ya sin flag.)
 
 ---
 
@@ -107,10 +109,10 @@ DATABASE_URL="$DATABASE_ADMIN_URL" pnpm --filter @soe/db db:seed
 
 ---
 
-## 5. Fase 2 — App Runner + Frontend
+## 5. Deploy completo — App Runner + Frontend
 
 ```bash
-SST_BACKEND_READY=1 npx sst deploy --stage production
+npx sst deploy --stage production
 ```
 
 Crea App Runner (apunta a `edtech-api-production:latest`, `autoDeployments` ON) y el front
@@ -127,7 +129,7 @@ Dos workflows en `.github/workflows/`:
 | Workflow | Dispara con | Hace |
 |---|---|---|
 | `deploy-backend.yml` | cambios en `apps/api`, `packages/db`, `packages/types`, lockfile | **(1) migra el RDS** (port-forward SSM por el bastión — gatea el deploy) → **(2)** build de la imagen → push a ECR `:latest` → App Runner **auto-deploya** |
-| `deploy-frontend.yml` | cambios en `apps/web`, `packages`, `sst.config.ts` | `SST_BACKEND_READY=1 sst deploy` (reconciliación idempotente) |
+| `deploy-frontend.yml` | cambios en `apps/web`, `packages`, `sst.config.ts` | `sst deploy` (deploy completo idempotente) |
 
 **Secrets de GitHub** (Settings → Secrets and variables → Actions):
 
@@ -181,7 +183,9 @@ DB_MASTER_PASSWORD      # = SST secret DbMasterPassword (stage demo). Lo usa el 
 
 ```bash
 # Preview aislada por rama (URL propia para un stakeholder):
-SST_BACKEND_READY=1 npx sst deploy --stage pr-123   # requiere imagen :latest del repo ECR de ese stage
+SST_BOOTSTRAP=1 npx sst deploy --stage pr-123   # 1) infra base (crea el ECR de ese stage)
+# push de la imagen :latest a ese ECR, luego:
+npx sst deploy --stage pr-123                    # 2) deploy completo (App Runner + front)
 npx sst remove --stage pr-123
 
 # Bajar producción completa:

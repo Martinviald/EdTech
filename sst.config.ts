@@ -12,12 +12,20 @@
  * privado por un VPC connector; en runtime la demo F1 (dashboards) no necesita salir
  * a internet, así que la VPC NO lleva NAT. Costo idle ~$22-26/mes.
  *
- * ── Deploy en DOS fases (App Runner exige la imagen en ECR antes de crearse) ──
- *   Fase 1:  npx sst deploy --stage production
- *            -> VPC, RDS, S3, ECR, roles IAM, VPC connector. (sin App Runner ni front)
+ * ── Deploy: `sst deploy` a secas es COMPLETO y seguro (App Runner + front + todo). ──
+ * Solo el BOOTSTRAP inicial de un stage nuevo usa un flag, porque App Runner exige la
+ * imagen ya en ECR para poder crearse:
+ *   Bootstrap (stage nuevo, 1 sola vez):
+ *     SST_BOOTSTRAP=1 npx sst deploy --stage production
+ *            -> solo infra base: VPC, RDS, S3, ECR, roles IAM, VPC connector (sin App Runner ni front)
  *   (build + push de la imagen del backend a ECR; provisionar BDD con tunnel)
- *   Fase 2:  SST_BACKEND_READY=1 npx sst deploy --stage production
- *            -> App Runner + frontend (con API_URL real).
+ *   Deploy normal (default, siempre después):
+ *     npx sst deploy --stage production
+ *            -> App Runner + frontend (con API_URL real) + reconcilia el resto.
+ *
+ * ⚠️ NO hay un `sst deploy` "destructivo": sin flag deploya TODO. El flag es el que hace el
+ * deploy PARCIAL (solo base) y es solo para arrancar un stage nuevo. (Antes era al revés:
+ * `sst deploy` sin flag borraba App Runner + front — footgun que tiró abajo demo una vez.)
  *
  * Luego el CI/CD mantiene todo: push a main -> el backend rebuildea la imagen a ECR
  * (App Runner auto-deploya) y el frontend corre `sst deploy`.
@@ -35,8 +43,10 @@ export default $config({
   },
 
   async run() {
-    // Gate de la fase 2: App Runner + front solo se crean con la imagen ya en ECR.
-    const backendReady = process.env.SST_BACKEND_READY === "1";
+    // Gate de bootstrap: por default `sst deploy` crea TODO (App Runner + front). Solo el
+    // arranque de un stage nuevo usa SST_BOOTSTRAP=1 para crear la infra base primero,
+    // porque App Runner exige la imagen ya en ECR para poder crearse.
+    const bootstrapOnly = process.env.SST_BOOTSTRAP === "1";
 
     // ── Secretos (set con: npx sst secret set <Nombre> <valor> --stage <stage>) ──
     const authSecret = new sst.Secret("AuthSecret"); // == NEXTAUTH_SECRET, idéntico en web y api
@@ -143,14 +153,14 @@ export default $config({
       securityGroups: vpc.securityGroups,
     });
 
-    // ── Fase 1: solo infra base. App Runner + front se crean en la fase 2. ──
-    if (!backendReady) {
+    // ── Bootstrap (SST_BOOTSTRAP=1): solo infra base. Sin el flag se crea TODO. ──
+    if (bootstrapOnly) {
       return {
-        phase: "1 — infra base lista",
+        phase: "bootstrap — infra base lista",
         ecrRepo: apiRepo.repositoryUrl,
         dbHost: db.host,
         bucket: uploads.name,
-        next: "Push imagen a ECR + provisionar BDD, luego: SST_BACKEND_READY=1 sst deploy",
+        next: "Push imagen a ECR + provisionar BDD, luego (sin flag): npx sst deploy",
       };
     }
 
@@ -226,7 +236,7 @@ export default $config({
     });
 
     return {
-      phase: "2 — completa",
+      phase: "completa",
       web: web.url,
       api: apiUrl,
       ecrRepo: apiRepo.repositoryUrl,

@@ -7,8 +7,10 @@ Arquitectura: Frontend Next.js en CloudFront/Lambda (OpenNext), Backend NestJS e
 desde imagen en ECR, BDD en RDS `t4g.micro`. Todo en un `sst.config.ts`. Ver
 `docs/deploy/aws-sst-nivel1.md` para el detalle de arquitectura, CI/CD y costos.
 
-> El despliegue va en **2 fases** porque App Runner exige que la imagen exista en ECR antes
-> de crearse: Fase 1 (infra base + ECR) → push imagen + provisionar BDD → Fase 2 (App Runner + front).
+> El **primer** despliegue de un stage va en **2 pasos** porque App Runner exige que la imagen
+> exista en ECR antes de crearse: bootstrap (`SST_BOOTSTRAP=1`, solo infra base + ECR) → push
+> imagen + provisionar BDD → `sst deploy` sin flag (App Runner + front). Después, `sst deploy`
+> a secas siempre deploya todo; **sin el flag nunca borra nada.**
 
 > **Nota sobre `.env`:** puedes reusar tu `AUTH_SECRET` local para el secreto `AuthSecret`
 > (mantiene paridad con tu entorno local). No es obligatorio: cualquier valor sirve mientras
@@ -70,10 +72,10 @@ npx sst secret set AuthMode mock --stage production
 
 ---
 
-## Paso 3 — Fase 1: infra base + ECR
+## Paso 3 — Bootstrap: infra base + ECR (solo la 1ª vez)
 
 ```bash
-npx sst deploy --stage production
+SST_BOOTSTRAP=1 npx sst deploy --stage production
 ```
 
 Crea VPC, RDS, S3, ECR, roles IAM y VPC connector (App Runner y front todavía **no**).
@@ -135,10 +137,10 @@ DATABASE_URL="$DATABASE_ADMIN_URL" pnpm --filter @soe/db db:seed
 
 ---
 
-## Paso 6 — Fase 2: App Runner + Frontend
+## Paso 6 — Deploy completo: App Runner + Frontend
 
 ```bash
-SST_BACKEND_READY=1 npx sst deploy --stage production
+npx sst deploy --stage production
 ```
 
 Crea App Runner (apunta a `edtech-api-production:latest`, auto-deploy ON) y el front
