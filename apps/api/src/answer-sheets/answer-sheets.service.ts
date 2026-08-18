@@ -183,12 +183,14 @@ export class AnswerSheetsService {
     let matchedRows = 0;
     let unmatchedRows = 0;
     let errorRows = 0;
+    let bodyMatchedRows = 0;
 
     const rows: AnswerSheetRowPreview[] = entry.rows.map((row) => {
       const m = matches.get(row.rowNumber);
       const matched = !!m?.matched;
       if (matched) matchedRows++;
       else unmatchedRows++;
+      if (matched && m?.matchMethod === 'body') bodyMatchedRows++;
 
       // Cuenta POSICIONES respondidas, no columnas del archivo: un ítem
       // compuesto que el escaneo sub-numera es una sola pregunta del instrumento.
@@ -244,6 +246,12 @@ export class AnswerSheetsService {
       },
       warnings: [
         ...entry.warnings,
+        ...(bodyMatchedRows > 0
+          ? [
+              `${bodyMatchedRows} alumno(s) se identificaron por el cuerpo del RUT porque el ` +
+                'dígito verificador no coincidía (típico de un DV = K capturado como 0 por el escáner). Revísalos antes de confirmar.',
+            ]
+          : []),
         ...(missingItemPositions.length > 0
           ? [`Faltan respuestas para ${missingItemPositions.length} pregunta(s) del instrumento`]
           : []),
