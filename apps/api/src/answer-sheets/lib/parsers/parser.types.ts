@@ -88,7 +88,7 @@ export function assignAnswer(
 }
 
 /**
- * Normaliza el valor de una respuesta. Soporta blank = "", "-", "_", "0" → null.
+ * Normaliza el valor de una respuesta. Soporta blank = "", "-", "_" → null.
  * Devuelve la alternativa en MAYÚSCULA (la convención del banco de ítems).
  */
 export function normalizeAnswerValue(value: string | undefined | null): string | null {
@@ -96,4 +96,19 @@ export function normalizeAnswerValue(value: string | undefined | null): string |
   const trimmed = value.trim();
   if (trimmed === '' || trimmed === '-' || trimmed === '_') return null;
   return trimmed.toUpperCase();
+}
+
+/**
+ * Forma canónica de un encabezado para cruzarlo con alias: sin acentos,
+ * minúscula, espacios colapsados. `"Student First Name"` → `"student first name"`,
+ * `"Apellidos "` → `"apellidos"`.
+ */
+export function normalizeHeaderText(value: string | undefined | null): string {
+  if (value === null || value === undefined) return '';
+  return value
+    .normalize('NFD')
+    .replace(/\p{Diacritic}/gu, '')
+    .trim()
+    .toLowerCase()
+    .replace(/\s+/g, ' ');
 }
