@@ -28,3 +28,4 @@ export * from './llm-settings';
 export * from './official-reports';
 export * from './assistant';
 export * from './documents';
+export * from './telemetry';

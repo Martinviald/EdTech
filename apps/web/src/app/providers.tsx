@@ -6,6 +6,7 @@ import { ThemeProvider } from 'next-themes';
 import { QueryCache, QueryClient, QueryClientProvider, MutationCache } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import { getDisplayMessage } from '@/lib/errors';
+import { TelemetryProvider } from '@/lib/telemetry';
 
 const DEFAULT_ERROR_MESSAGE = 'No se pudo completar la operación.';
 
@@ -24,16 +25,18 @@ export function Providers({ children }: { children: React.ReactNode }) {
 
   return (
     <SessionProvider>
-      <QueryClientProvider client={queryClient}>
-        <ThemeProvider
-          attribute="class"
-          defaultTheme="system"
-          enableSystem
-          disableTransitionOnChange
-        >
-          {children}
-        </ThemeProvider>
-      </QueryClientProvider>
+      <TelemetryProvider>
+        <QueryClientProvider client={queryClient}>
+          <ThemeProvider
+            attribute="class"
+            defaultTheme="system"
+            enableSystem
+            disableTransitionOnChange
+          >
+            {children}
+          </ThemeProvider>
+        </QueryClientProvider>
+      </TelemetryProvider>
     </SessionProvider>
   );
 }
