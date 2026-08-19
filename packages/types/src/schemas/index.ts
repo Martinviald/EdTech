@@ -48,3 +48,4 @@ export * from './llm-settings.schema';
 export * from './student-signals.schema';
 export * from './document.schema';
 export * from './mcp.schema';
+export * from './telemetry.schema';
