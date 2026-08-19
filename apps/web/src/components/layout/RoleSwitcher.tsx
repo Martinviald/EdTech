@@ -14,6 +14,7 @@ import {
   DropdownMenuSubTrigger,
 } from '@/components/ui/dropdown-menu';
 import { switchRoleAction } from '@/lib/sessionActions';
+import { useTelemetry } from '@/lib/telemetry';
 import { ROLE_LABELS } from './nav-items';
 
 interface RoleSwitcherProps {
@@ -36,6 +37,7 @@ interface RoleSwitcherProps {
 export function RoleSwitcher({ roles, activeRole }: RoleSwitcherProps) {
   const router = useRouter();
   const { update } = useSession();
+  const { track } = useTelemetry();
   const [isPending, startTransition] = useTransition();
 
   if (roles.length <= 1) return null;
@@ -45,6 +47,7 @@ export function RoleSwitcher({ roles, activeRole }: RoleSwitcherProps) {
     startTransition(async () => {
       try {
         const result = await switchRoleAction(role);
+        track('session.role_switched', { from: activeRole, to: result.activeRole });
         await update({ activeRole: result.activeRole });
         router.refresh();
         toast.success(`Rol activo: ${ROLE_LABELS[result.activeRole] ?? result.activeRole}`);

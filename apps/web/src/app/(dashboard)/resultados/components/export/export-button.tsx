@@ -20,6 +20,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Button } from '@/components/ui/button';
+import { useTelemetry } from '@/lib/telemetry';
 
 /** Definición de una columna a exportar: clave del objeto fila + encabezado. */
 export type ExportColumn<T> = { key: keyof T | string; header: string };
@@ -58,11 +59,13 @@ export function ExportButton<T extends Record<string, unknown>>({
   formats?: ExportFormat[];
 }): JSX.Element {
   const [busy, setBusy] = useState(false);
+  const { track } = useTelemetry();
   const hasData = rows.length > 0;
   const offered = formats.length > 0 ? formats : DEFAULT_FORMATS;
 
   async function exportExcel() {
     setBusy(true);
+    track('export.generated', { format: 'xlsx', surface: title, rowCount: rows.length });
     try {
       const XLSX = await import('xlsx');
       // Construye objetos planos con los encabezados como claves para json_to_sheet.
@@ -87,6 +90,7 @@ export function ExportButton<T extends Record<string, unknown>>({
 
   async function exportPdf() {
     setBusy(true);
+    track('export.generated', { format: 'pdf', surface: title, rowCount: rows.length });
     try {
       const { jsPDF } = await import('jspdf');
       const autoTable = (await import('jspdf-autotable')).default;

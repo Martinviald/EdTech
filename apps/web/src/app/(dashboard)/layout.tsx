@@ -12,6 +12,7 @@ import { Topbar } from '@/components/layout/Topbar';
 import { ListSearchMemory } from '@/components/shared';
 import { Toaster } from '@/components/ui/sonner';
 import { AssistantProvider, AssistantWidget } from '@/components/assistant';
+import { PageViewTracker } from '@/lib/telemetry';
 
 export default async function DashboardLayout({ children }: { children: React.ReactNode }) {
   const session = await auth();
@@ -31,6 +32,8 @@ export default async function DashboardLayout({ children }: { children: React.Re
   return (
     <AssistantProvider enabled={assistantEnabled}>
       <PageTitleProvider>
+        {/* Telemetría de uso: registra el page view de cada navegación autenticada. */}
+        <PageViewTracker />
         {/* Recuerda los filtros de cada listado para el enlace de vuelta. */}
         <Suspense fallback={null}>
           <ListSearchMemory />
