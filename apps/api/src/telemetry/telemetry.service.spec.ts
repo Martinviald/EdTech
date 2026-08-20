@@ -115,4 +115,17 @@ describe('TelemetryService.trackServer', () => {
 
     expect(records).toHaveLength(0);
   });
+
+  it('persists the server-provided context (userAgent/ip) on the record', () => {
+    const { service, records } = makeService();
+
+    service.trackServer(
+      { orgId: 'org-1', userId: 'user-1', role: 'teacher' },
+      'api.request',
+      { method: 'GET', route: '/api/dashboards/comparable-overview', status: 200, durationMs: 5 },
+      { userAgent: 'curl/8.4.0', ip: '203.0.113.7' },
+    );
+
+    expect(records[0]?.context).toEqual({ userAgent: 'curl/8.4.0', ip: '203.0.113.7' });
+  });
 });
