@@ -3,6 +3,7 @@ import {
   parseTelemetryEvent,
   type IngestTelemetryDto,
   type IngestTelemetryResponse,
+  type TelemetryContext,
   type TelemetryEventName,
   type TelemetryEventPropertiesMap,
 } from '@soe/types';
@@ -43,6 +44,7 @@ export class TelemetryService {
     actor: TelemetryActor,
     name: K,
     properties: TelemetryEventPropertiesMap[K],
+    context: TelemetryContext = {},
   ): void {
     if (!actor.orgId) return;
     const validated = parseTelemetryEvent(name, properties);
@@ -55,7 +57,7 @@ export class TelemetryService {
       source: 'api',
       role: actor.role,
       properties: validated.properties,
-      context: {},
+      context,
       occurredAt: new Date(),
     });
   }

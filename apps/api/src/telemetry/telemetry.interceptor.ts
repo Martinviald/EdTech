@@ -1,5 +1,6 @@
 import { CallHandler, ExecutionContext, Injectable, NestInterceptor } from '@nestjs/common';
 import { Observable, tap } from 'rxjs';
+import type { TelemetryContext } from '@soe/types';
 import type { Request, Response } from 'express';
 import type { JwtPayload } from '../auth/jwt-payload.types';
 import { TelemetryService } from './telemetry.service';
@@ -31,14 +32,20 @@ export class TelemetryInterceptor implements NestInterceptor {
     }
 
     const actor = { orgId: user.orgId, userId: user.userId, role: user.activeRole ?? null };
+    const eventContext = this.clientContext(request);
     const start = Date.now();
     const emit = (status: number): void => {
-      this.telemetry.trackServer(actor, 'api.request', {
-        method: request.method,
-        route: this.routeOf(request),
-        status,
-        durationMs: Date.now() - start,
-      });
+      this.telemetry.trackServer(
+        actor,
+        'api.request',
+        {
+          method: request.method,
+          route: this.routeOf(request),
+          status,
+          durationMs: Date.now() - start,
+        },
+        eventContext,
+      );
     };
 
     return next.handle().pipe(
@@ -66,10 +73,42 @@ export class TelemetryInterceptor implements NestInterceptor {
     return path.split('?')[0] ?? path;
   }
 
+  private clientContext(request: Request): TelemetryContext {
+    const context: TelemetryContext = {};
+    const userAgent = this.userAgentOf(request);
+    if (userAgent) context.userAgent = userAgent;
+    const ip = clientIpOf(request);
+    if (ip) context.ip = ip;
+    return context;
+  }
+
+  private userAgentOf(request: Request): string | undefined {
+    const ua = request.headers['user-agent'];
+    return typeof ua === 'string' && ua.length > 0 ? ua.slice(0, 512) : undefined;
+  }
+
   private static resolveSampleRate(raw: string | undefined): number {
     if (raw === undefined || raw.trim() === '') return 1;
     const parsed = Number(raw);
     if (!Number.isFinite(parsed)) return 1;
     return Math.min(Math.max(parsed, 0), 1);
   }
+}
+
+export function firstForwardedIp(
+  forwardedFor: string | string[] | undefined,
+): string | undefined {
+  const raw = Array.isArray(forwardedFor) ? forwardedFor[0] : forwardedFor;
+  if (typeof raw !== 'string') return undefined;
+  const first = raw.split(',')[0]?.trim();
+  return first && first.length > 0 ? first : undefined;
+}
+
+function clientIpOf(request: Request): string | undefined {
+  return (
+    firstForwardedIp(request.headers['x-forwarded-for']) ??
+    (typeof request.ip === 'string' && request.ip.length > 0 ? request.ip : undefined) ??
+    request.socket?.remoteAddress ??
+    undefined
+  );
 }

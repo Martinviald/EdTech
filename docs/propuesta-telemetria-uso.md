@@ -46,6 +46,16 @@ El writer agrupa el lote por `org_id` y hace un insert por grupo dentro de
 `onModuleDestroy`. La telemetría es **best-effort**: un fallo se loguea y se
 descarta, nunca rompe el flujo de usuario ni bloquea el response.
 
+**Contexto de `api.request` (dispositivo/origen).** El interceptor enriquece cada
+`api.request` con `context.userAgent` + `context.ip` (de `x-forwarded-for` / `request.ip`),
+tomados **server-side de la request real** — nunca del cliente. Sirven para distinguir el
+origen de una llamada (navegador vs script vs bot) y detectar **acceso directo a la API**
+que no pasa por la web (que además genera `page.viewed` y llamadas de bootstrap como
+`/organizations/me`). No se enriquecen los eventos de cliente (`page.viewed`, etc.): esos
+llegan por el proxy de Next, así que la UA/IP que vería el backend sería la del proxy, no la
+del navegador. UA/IP son metadatos operativos de origen (como `audit_logs`), no contenido de
+usuario.
+
 ## 4. Cómo agregar un evento nuevo (sin migración)
 
 1. Agregá una entrada a `telemetryEventDefinitions` en `telemetry.schema.ts`:

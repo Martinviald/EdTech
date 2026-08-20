@@ -53,6 +53,11 @@ export const telemetryContextSchema = z.object({
       h: z.number().int().nonnegative(),
     })
     .optional(),
+  // Dispositivo/origen del cliente. Los fija el SERVIDOR (interceptor) a partir de
+  // la request real — nunca se confía en lo que mande el cliente. Sirven para
+  // distinguir el origen de un `api.request` (navegador vs script vs bot vs IP).
+  userAgent: z.string().max(512).optional(),
+  ip: z.string().max(64).optional(),
 });
 export type TelemetryContext = z.infer<typeof telemetryContextSchema>;
 
