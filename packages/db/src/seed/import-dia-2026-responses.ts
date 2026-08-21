@@ -7,9 +7,21 @@
  * El instrumento se resuelve por (gradeId, subjectId, year, applicationPeriod)
  * sobre los instrumentos de catálogo (`org_id is null`), nunca por nombre.
  *
- * Matching de alumnos, en orden: RUT exacto → cuerpo del RUT (absorbe dígitos
- * verificadores mal escaneados) → alumno nuevo (se crea y se matricula en el
- * curso del año destino).
+ * Matching de alumnos, en orden, quedándose sólo con el candidato ÚNICO:
+ *   1. RUT exacto (normalizeRut, con dígito verificador válido)
+ *   2. cuerpo del RUT (absorbe dígitos verificadores mal escaneados)
+ *   3. identificador crudo, comparado como string — un IPE (Identificador
+ *      Provisorio Escolar, para alumnos extranjeros sin RUN) no pasa Módulo 11
+ *      y no es un RUT, pero el roster lo guarda literal y así se encuentra
+ *   4. nombre: TODOS los apellidos del roster más su primer nombre presentes en
+ *      el nombre del informe, como multiconjunto (un apellido repetido exige dos
+ *      apariciones) y sin importar el orden — el informe alterna entre
+ *      "APELLIDOS NOMBRES" y "NOMBRES APELLIDOS"
+ *   5. nombre tolerando UN typo por token de 5+ letras (Campo/Campos,
+ *      Cisterna/Cisternas, Guilermo/Guillermo)
+ * Si ninguna vía deja un candidato único y la fila trae identificador, el alumno
+ * se crea y se matricula en el curso del año destino. Una fila sin identificador
+ * y sin match por nombre se reporta como `sin match` y no se carga.
  *
  * Se autocorrige cada tipo con la clave que le corresponde, porque cada uno la
  * guarda en un lugar distinto: `multiple_choice` en `content.correctKey` o la
@@ -26,13 +38,29 @@
  * instrumento: una planilla con columnas sub-numeradas (`P19.1`) desplaza todo
  * lo que viene después y corrige contra el ítem equivocado sin fallar nunca.
  *
- * Idempotente: borra y reinserta los assessments con el mismo `config.loadKey`.
+ * Idempotente por CELDA: antes de insertar borra los assessments que compartan
+ * `config.loadKey` **y** además sean del mismo (instrumento × curso) que esta
+ * corrida va a escribir. Acotarlo a la celda es lo que hace seguro a `--only`:
+ * borrar todo el `loadKey` se llevaba puesta la carga completa cuando alguien
+ * re-corría un subconjunto, y convertía cualquier colisión de clave en pérdida
+ * de datos. `--prune` recupera el borrado amplio cuando de verdad se quiere
+ * vaciar el lote entero.
  *
- *   Dry-run:  DATABASE_ADMIN_URL=... pnpm --filter @soe/db exec tsx "src/seed/import-dia-2026-responses.ts"
+ * `--loadKey` es OBLIGATORIO y no tiene default: el default anterior apuntaba a
+ * la clave del lote más grande ya cargado, así que olvidar el flag lo borraba.
+ *
+ *   Dry-run:  DATABASE_ADMIN_URL=... pnpm --filter @soe/db exec tsx "src/seed/import-dia-2026-responses.ts" --loadKey=...
  *   Commit:   ... --commit
  *
- * Args: --org=<uuid> --year=<año> --loadKey=<clave> --input=<ruta.json>
+ * Args: --loadKey=<clave>  (OBLIGATORIO)  --org=<uuid> --year=<año> --input=<ruta.json>
  *       --only=<GRADE_CODE:SECCION:Asignatura,...>  (subconjunto, para pruebas)
+ *       --prune  (borra TODO el loadKey, no sólo las celdas de esta corrida)
+ *       --administeredAt=<YYYY-MM-DD>  (fecha de aplicación; por defecto, hoy)
+ *
+ * `--administeredAt` importa en las cargas históricas: `resolveAssessmentYear`
+ * deriva el año lectivo de esa fecha para bucketizar el read-model cuando el
+ * alumno no está matriculado en el curso asignado. Fechar una evaluación de 2025
+ * con la fecha de hoy la ancla al año equivocado.
  */
 import postgres from 'postgres';
 import { drizzle } from 'drizzle-orm/postgres-js';
@@ -92,18 +120,32 @@ const opt = (name: string, def: string): string => {
 };
 const ORG_ID = opt('org', 'c5c10000-0000-0000-0000-000000000001');
 const YEAR = parseInt(opt('year', '2026'), 10);
-const LOAD_KEY = opt('loadKey', 'dia-2026-monitoreo-intermedio');
+const LOAD_KEY = opt('loadKey', '');
+if (!LOAD_KEY) {
+  throw new Error(
+    'Falta --loadKey=<clave>. Usá una clave por lote (ej. dia-2026-intermedio-lenguaje-2A): ' +
+      'la idempotencia borra los assessments que la compartan.',
+  );
+}
+const PRUNE = argv.includes('--prune');
 const DEFAULT_INPUT = resolve(
   __dirname,
   '../../../../scripts/cscj/dia-2026/out/dia-2026-respuestas.json',
 );
 const INPUT = resolve(opt('input', DEFAULT_INPUT));
-const ONLY = opt('only', '')
-  .split(',')
+const ONLY_FILE = opt('onlyFile', '');
+const ONLY = (
+  ONLY_FILE ? readFileSync(resolve(ONLY_FILE), 'utf8').split('\n') : opt('only', '').split(',')
+)
   .map((s) => s.trim())
   .filter(Boolean);
+if (ONLY_FILE && opt('only', '')) throw new Error('Usá --only o --onlyFile, no los dos');
 const IMPORT_FORMAT = 'generic_csv';
 const CHUNK = 3000;
+const ADMINISTERED_AT = opt('administeredAt', '');
+if (ADMINISTERED_AT && !/^\d{4}-\d{2}-\d{2}$/.test(ADMINISTERED_AT)) {
+  throw new Error(`--administeredAt debe ser YYYY-MM-DD, llegó "${ADMINISTERED_AT}"`);
+}
 
 const url = process.env.DATABASE_ADMIN_URL ?? process.env.DATABASE_URL;
 if (!url) throw new Error('Falta DATABASE_ADMIN_URL');
@@ -131,9 +173,65 @@ function safeRut(value: string): string | null {
 }
 
 function rutBody(value: string): string | null {
-  const cleaned = value.replace(/[.\s]/g, '').toUpperCase();
-  const body = cleaned.split('-')[0];
+  const body = rawIdentifier(value).split('-')[0];
   return body && /^\d+$/.test(body) ? body : null;
+}
+
+function rawIdentifier(value: string): string {
+  return value.replace(/[.\s]/g, '').toUpperCase();
+}
+
+const MIN_TOKEN_LENGTH_FOR_TYPO_TOLERANCE = 5;
+
+function nameTokens(value: string): string[] {
+  const normalized = value
+    .normalize('NFD')
+    .replace(/[̀-ͯ]/g, '')
+    .toUpperCase()
+    .replace(/[^A-Z\s]/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+  return normalized ? normalized.split(' ') : [];
+}
+
+function differsByAtMostOneEdit(a: string, b: string): boolean {
+  if (a === b) return true;
+  if (
+    a.length < MIN_TOKEN_LENGTH_FOR_TYPO_TOLERANCE ||
+    b.length < MIN_TOKEN_LENGTH_FOR_TYPO_TOLERANCE ||
+    Math.abs(a.length - b.length) > 1
+  ) {
+    return false;
+  }
+  let previous = Array.from({ length: b.length + 1 }, (_, j) => j);
+  for (let i = 1; i <= a.length; i += 1) {
+    const current = [i];
+    for (let j = 1; j <= b.length; j += 1) {
+      current[j] = Math.min(
+        (previous[j] as number) + 1,
+        (current[j - 1] as number) + 1,
+        (previous[j - 1] as number) + (a[i - 1] === b[j - 1] ? 0 : 1),
+      );
+    }
+    previous = current;
+  }
+  return (previous[b.length] as number) <= 1;
+}
+
+function consumesEveryToken(
+  required: string[],
+  available: string[],
+  tolerateTypo: boolean,
+): boolean {
+  const pool = [...available];
+  for (const token of required) {
+    const at = pool.findIndex((candidate) =>
+      tolerateTypo ? differsByAtMostOneEdit(candidate, token) : candidate === token,
+    );
+    if (at < 0) return false;
+    pool.splice(at, 1);
+  }
+  return true;
 }
 
 function itemHasAlternatives(content: unknown): boolean {
@@ -198,11 +296,24 @@ async function main() {
     year: number;
     courses: CourseArtifact[];
   };
+  const courseKey = (c: CourseArtifact) => `${c.gradeCode}:${c.section}:${c.subjectName}`;
   const courses = ONLY.length
-    ? artifact.courses.filter((c) => ONLY.includes(`${c.gradeCode}:${c.section}:${c.subjectName}`))
+    ? artifact.courses.filter((c) => ONLY.includes(courseKey(c)))
     : artifact.courses;
   if (!courses.length) throw new Error('El artefacto no tiene cursos que procesar');
+  if (ONLY.length) {
+    const enArtefacto = new Set(artifact.courses.map(courseKey));
+    const sinCalce = ONLY.filter((k) => !enArtefacto.has(k));
+    if (sinCalce.length) {
+      throw new Error(
+        `--only pide ${ONLY.length} cursos y ${sinCalce.length} no existen en el artefacto: ` +
+          `${sinCalce.join(' · ')}. El borrado por loadKey NO se acota con --only, así que seguir ` +
+          `dejaría esos cursos borrados y sin recrear.`,
+      );
+    }
+  }
   const now = new Date();
+  const administeredAt = ADMINISTERED_AT ? new Date(`${ADMINISTERED_AT}T12:00:00Z`) : now;
 
   await withOrgContext(db, ORG_ID, async (tx) => {
     const [year] = await tx
@@ -243,9 +354,43 @@ async function main() {
           dsql`${instruments.deletedAt} is null`,
         ),
       );
-    const instrumentByKey = new Map(
-      instrumentRows.map((i) => [`${i.gradeId}|${i.subjectId}|${i.applicationPeriod}`, i]),
+    /**
+     * Varios instrumentos pueden compartir (grado, asignatura, momento, año): en
+     * 2026 el catálogo tiene el instrumento real de 2° Básico y además fixtures
+     * `[DEMO]` sin ítems que sostienen el benchmarking. Quedarse con el último
+     * del Map elegía uno en silencio y podía tocar el equivocado, así que se
+     * resuelve por el que TIENE ítems y se falla si hay más de uno.
+     */
+    const itemCountRows = await tx
+      .select({ instrumentId: items.instrumentId, n: dsql<number>`count(*)::int` })
+      .from(items)
+      .groupBy(items.instrumentId);
+    const itemCountByInstrument = new Map(
+      itemCountRows.flatMap((r) => (r.instrumentId ? [[r.instrumentId, Number(r.n)]] : [])),
     );
+    const instrumentsByKey = new Map<string, typeof instrumentRows>();
+    for (const i of instrumentRows) {
+      const key = `${i.gradeId}|${i.subjectId}|${i.applicationPeriod}`;
+      const list = instrumentsByKey.get(key) ?? [];
+      list.push(i);
+      instrumentsByKey.set(key, list);
+    }
+    const itemCountOf = (id: string): number => itemCountByInstrument.get(id) ?? 0;
+    const resolveInstrument = (key: string, etiqueta: string) => {
+      const candidatos = instrumentsByKey.get(key) ?? [];
+      const conItems = candidatos.filter((c) => itemCountOf(c.id) > 0);
+      if (conItems.length === 1) return conItems[0];
+      if (conItems.length === 0) {
+        const vacios = candidatos.map((c) => `"${c.name}"`).join(', ');
+        throw new Error(
+          `Instrumento no encontrado para ${etiqueta}` +
+            (vacios ? ` — hay ${candidatos.length} sin ítems: ${vacios}` : ''),
+        );
+      }
+      throw new Error(
+        `Instrumento ambiguo para ${etiqueta}: ${conItems.map((c) => `"${c.name}" (${itemCountOf(c.id)} ítems)`).join(' · ')}`,
+      );
+    };
 
     const roster = await tx
       .select({
@@ -258,16 +403,65 @@ async function main() {
       .where(and(eq(students.orgId, ORG_ID), dsql`${students.deletedAt} is null`));
     const byExactRut = new Map<string, string>();
     const byRutBody = new Map<string, string[]>();
-    for (const s of roster) {
-      const exact = safeRut(s.rut);
-      if (exact) byExactRut.set(exact, s.id);
-      const body = rutBody(s.rut);
-      if (body) {
-        const list = byRutBody.get(body) ?? [];
-        list.push(s.id);
-        byRutBody.set(body, list);
+    const byRawIdentifier = new Map<string, string[]>();
+    const byRequiredNameTokens: Array<{ id: string; required: string[] }> = [];
+
+    const indexStudent = (student: {
+      id: string;
+      rut: string;
+      firstName: string;
+      lastName: string;
+    }) => {
+      const exact = safeRut(student.rut);
+      if (exact) byExactRut.set(exact, student.id);
+      const body = rutBody(student.rut);
+      if (body) byRutBody.set(body, [...(byRutBody.get(body) ?? []), student.id]);
+      const raw = rawIdentifier(student.rut);
+      if (raw) byRawIdentifier.set(raw, [...(byRawIdentifier.get(raw) ?? []), student.id]);
+      const surnames = nameTokens(student.lastName);
+      const givenNames = nameTokens(student.firstName);
+      if (surnames.length && givenNames.length) {
+        byRequiredNameTokens.push({
+          id: student.id,
+          required: [...surnames, givenNames[0] as string],
+        });
       }
-    }
+    };
+    for (const s of roster) indexStudent(s);
+
+    const matchByName = (nombre: string, tolerateTypo: boolean): string | null => {
+      const available = nameTokens(nombre);
+      if (!available.length) return null;
+      const hits = byRequiredNameTokens.filter((entry) =>
+        consumesEveryToken(entry.required, available, tolerateTypo),
+      );
+      return hits.length === 1 ? (hits[0] as { id: string }).id : null;
+    };
+
+    type Resolution = {
+      id: string;
+      via: 'rut' | 'cuerpo-rut' | 'identificador' | 'nombre' | 'nombre~';
+    };
+    const resolveStudent = (rut: string, nombre: string): Resolution | null => {
+      const exact = safeRut(rut);
+      const exactHit = exact ? byExactRut.get(exact) : undefined;
+      if (exactHit) return { id: exactHit, via: 'rut' };
+
+      const body = rutBody(rut);
+      const byBody = body ? (byRutBody.get(body) ?? []) : [];
+      if (byBody.length === 1) return { id: byBody[0] as string, via: 'cuerpo-rut' };
+
+      const raw = rawIdentifier(rut);
+      const byRaw = raw ? (byRawIdentifier.get(raw) ?? []) : [];
+      if (byRaw.length === 1) return { id: byRaw[0] as string, via: 'identificador' };
+
+      const exactName = matchByName(nombre, false);
+      if (exactName) return { id: exactName, via: 'nombre' };
+
+      const typoTolerantName = matchByName(nombre, true);
+      return typoTolerantName ? { id: typoTolerantName, via: 'nombre~' } : null;
+    };
+    const resolutionsByRoute = new Map<Resolution['via'], number>();
 
     type Resolved = {
       course: CourseArtifact;
@@ -283,13 +477,11 @@ async function main() {
       const subject = subjectByName.get(course.subjectName);
       if (!subject)
         throw new Error(`Subject no encontrado: "${course.subjectName}" (${course.sourceFile})`);
-      const instrument = instrumentByKey.get(
+      const instrument = resolveInstrument(
         `${grade.id}|${subject.id}|${course.applicationPeriod}`,
+        `${grade.name} · ${subject.name} · ${course.applicationPeriod} ${YEAR}`,
       );
-      if (!instrument)
-        throw new Error(
-          `Instrumento no encontrado para ${grade.name} · ${subject.name} · ${course.applicationPeriod} ${YEAR}`,
-        );
+      if (!instrument) throw new Error(`Instrumento no resuelto para ${course.sourceFile}`);
       const classGroupId = groupByKey.get(`${grade.id}|${course.section.toUpperCase()}`);
       if (!classGroupId)
         throw new Error(
@@ -341,11 +533,7 @@ async function main() {
     const newStudents = new Map<string, { rut: string; nombre: string; classGroupId: string }>();
     for (const r of resolved) {
       for (const row of r.course.rows) {
-        const exact = safeRut(row.rut);
-        if (exact && byExactRut.has(exact)) continue;
-        const body = rutBody(row.rut);
-        const candidates = body ? (byRutBody.get(body) ?? []) : [];
-        if (candidates.length === 1) continue;
+        if (resolveStudent(row.rut, row.nombre)) continue;
         if (!row.rut) continue;
         if (!newStudents.has(row.rut))
           newStudents.set(row.rut, {
@@ -379,10 +567,9 @@ async function main() {
         })
         .returning({ id: students.id, rut: students.rut });
       for (const s of inserted) {
-        const exact = safeRut(s.rut);
-        if (exact) byExactRut.set(exact, s.id);
-        const body = rutBody(s.rut);
-        if (body) byRutBody.set(body, [s.id]);
+        const source = newStudents.get(s.rut);
+        const { firstName, lastName } = splitFullName(source?.nombre ?? s.rut);
+        indexStudent({ id: s.id, rut: s.rut, firstName, lastName });
       }
       const enrollmentValues = inserted.flatMap((s) => {
         const source = newStudents.get(s.rut);
@@ -410,21 +597,44 @@ async function main() {
       );
     }
 
-    const resolveStudentId = (rut: string): string | null => {
-      const exact = safeRut(rut);
-      if (exact && byExactRut.has(exact)) return byExactRut.get(exact) ?? null;
-      const body = rutBody(rut);
-      const candidates = body ? (byRutBody.get(body) ?? []) : [];
-      return candidates.length === 1 ? (candidates[0] as string) : null;
-    };
+    const cellKey = (instrumentId: string, classGroupId: string | null): string =>
+      `${instrumentId}|${classGroupId ?? ''}`;
+    const targetCells = new Set(resolved.map((r) => cellKey(r.instrumentId, r.classGroupId)));
 
     const prior = await tx
-      .select({ id: assessments.id })
+      .select({
+        id: assessments.id,
+        instrumentId: assessments.instrumentId,
+        classGroupId: assessmentCourseAssignments.classGroupId,
+      })
       .from(assessments)
+      .leftJoin(
+        assessmentCourseAssignments,
+        eq(assessmentCourseAssignments.assessmentId, assessments.id),
+      )
       .where(
         and(eq(assessments.orgId, ORG_ID), dsql`${assessments.config}->>'loadKey' = ${LOAD_KEY}`),
       );
-    const priorIds = prior.map((p) => p.id);
+    const priorIdSet = new Set<string>();
+    const keptIdSet = new Set<string>();
+    for (const p of prior) {
+      const target = PRUNE || targetCells.has(cellKey(p.instrumentId, p.classGroupId));
+      (target ? priorIdSet : keptIdSet).add(p.id);
+    }
+    for (const id of priorIdSet) keptIdSet.delete(id);
+    const priorIds = [...priorIdSet];
+    if (keptIdSet.size) {
+      console.log(
+        `  idempotencia: ${keptIdSet.size} assessment(s) con loadKey=${LOAD_KEY} quedan intactos ` +
+          `(otras celdas; usá --prune para borrarlos)`,
+      );
+    }
+    if (priorIds.length && !COMMIT) {
+      console.log(
+        `  idempotencia: se borrarían ${priorIds.length} assessment(s) previos ` +
+          `${PRUNE ? 'de todo el lote' : 'de estas celdas'} (loadKey=${LOAD_KEY})`,
+      );
+    }
     if (COMMIT && priorIds.length) {
       await tx.delete(responses).where(inArray(responses.assessmentId, priorIds));
       await tx.delete(assessmentResults).where(inArray(assessmentResults.assessmentId, priorIds));
@@ -435,7 +645,8 @@ async function main() {
         .where(inArray(assessmentCourseAssignments.assessmentId, priorIds));
       await tx.delete(assessments).where(inArray(assessments.id, priorIds));
       console.log(
-        `  idempotencia: borrados ${priorIds.length} assessments previos (loadKey=${LOAD_KEY})`,
+        `  idempotencia: borrados ${priorIds.length} assessments previos ` +
+          `${PRUNE ? 'de todo el lote' : 'de estas celdas'} (loadKey=${LOAD_KEY})`,
       );
     }
 
@@ -476,11 +687,13 @@ async function main() {
       let pendingItems = 0;
 
       for (const row of r.course.rows) {
-        const studentId = resolveStudentId(row.rut);
-        if (!studentId) {
+        const resolution = resolveStudent(row.rut, row.nombre);
+        if (!resolution) {
           unmatched.push(`${row.rut} (${row.nombre})`);
           continue;
         }
+        resolutionsByRoute.set(resolution.via, (resolutionsByRoute.get(resolution.via) ?? 0) + 1);
+        const studentId = resolution.id;
         studentIds.push(studentId);
 
         for (const item of instrumentItems) {
@@ -582,6 +795,11 @@ async function main() {
     console.log(
       `\n  TOTAL: assessments=${pending.length} responses=${totalResponses} sin_match=${totalUnmatched}`,
     );
+    console.log(
+      `  filas resueltas por: ${[...resolutionsByRoute.entries()]
+        .map(([via, n]) => `${via}=${n}`)
+        .join(' ')}`,
+    );
 
     if (!COMMIT) {
       console.log('\n(dry-run: no se escribió nada. Re-corre con --commit)');
@@ -597,7 +815,7 @@ async function main() {
           name: `${p.instrumentName} · ${p.course.section}`,
           mode: 'paper' as const,
           status: 'completed' as const,
-          administeredAt: now,
+          administeredAt,
           administeredById: null,
           config: {
             source: IMPORT_FORMAT,
@@ -658,7 +876,7 @@ async function main() {
           grade: a.grade.toFixed(2),
           performanceLevel: a.performanceLevel,
           isComplete: a.isComplete && !withPending.has(a.studentId),
-          completedAt: now,
+          completedAt: administeredAt,
         });
       }
       for (const a of skillAgg) {
