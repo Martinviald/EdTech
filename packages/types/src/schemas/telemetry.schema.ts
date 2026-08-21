@@ -26,6 +26,7 @@ export const TELEMETRY_EVENT_CATEGORIES = [
   'item_bank',
   'ai',
   'benchmarking',
+  'mcp',
   'admin',
   'session',
   'system',
@@ -129,6 +130,15 @@ export const telemetryEventDefinitions = {
       route: z.string().min(1).max(200),
       status: z.number().int(),
       durationMs: z.number().int().nonnegative(),
+    }),
+  },
+  'mcp.tool_invoked': {
+    category: 'mcp',
+    properties: z.object({
+      tool: z.string().min(1).max(120),
+      channel: z.string().min(1).max(32),
+      ok: z.boolean(),
+      durationMs: z.number().int().nonnegative().optional(),
     }),
   },
 } as const satisfies Record<string, TelemetryEventDefinition>;

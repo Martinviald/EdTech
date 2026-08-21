@@ -5,11 +5,13 @@ import type { AnalyticsTool, ToolDescriptor } from './analytics-tool';
 import { AnalyticsToolsFacade } from './analytics-tools.facade';
 import type { McpAuditEntry, McpAuditLogger } from './mcp-audit-logger';
 import { ToolRegistry, isToolAllowed } from './tool-registry';
+import { TelemetryService } from '../../telemetry/telemetry.service';
 import { makePrincipal } from '../testing/make-principal';
 
 function makeFacade(
   tools: AnalyticsTool[],
   auditRecord: (entry: McpAuditEntry) => Promise<void> = async () => {},
+  trackServer: (...args: unknown[]) => void = () => {},
 ): AnalyticsToolsFacade {
   const byName = new Map(tools.map((tool) => [tool.descriptor.name, tool]));
   const registry = {
@@ -21,7 +23,8 @@ function makeFacade(
         .filter((descriptor) => isToolAllowed(descriptor, principal)),
   } as unknown as ToolRegistry;
   const audit = { record: auditRecord } as unknown as McpAuditLogger;
-  return new AnalyticsToolsFacade(registry, audit);
+  const telemetry = { trackServer } as unknown as TelemetryService;
+  return new AnalyticsToolsFacade(registry, audit, telemetry);
 }
 
 function makeTool(
@@ -112,6 +115,21 @@ describe('AnalyticsToolsFacade', () => {
       facade.execute('demo_tool', makePrincipal(), { assessmentId: VALID_UUID }),
     ).rejects.toThrow('boom');
     expect(record).toHaveBeenCalledWith(expect.objectContaining({ ok: false }));
+  });
+
+  it('emite telemetría mcp.tool_invoked con tool, canal y ok', async () => {
+    const track = jest.fn();
+    const facade = makeFacade([makeTool()], undefined, track);
+
+    await facade.execute('demo_tool', makePrincipal({ channel: 'mcp-external' }), {
+      assessmentId: VALID_UUID,
+    });
+
+    expect(track).toHaveBeenCalledWith(
+      expect.objectContaining({ orgId: 'org-1', userId: 'user-1' }),
+      'mcp.tool_invoked',
+      expect.objectContaining({ tool: 'demo_tool', channel: 'mcp-external', ok: true }),
+    );
   });
 
   it('listVisible delega el filtrado por rol/feature', () => {

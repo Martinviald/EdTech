@@ -5,6 +5,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { createHash } from 'crypto';
+import { TelemetryService } from '../../telemetry/telemetry.service';
 import type { AnalyticsPrincipal } from './analytics-principal';
 import type { ToolDescriptor } from './analytics-tool';
 import { McpAuditLogger } from './mcp-audit-logger';
@@ -15,6 +16,7 @@ export class AnalyticsToolsFacade {
   constructor(
     private readonly registry: ToolRegistry,
     private readonly audit: McpAuditLogger,
+    private readonly telemetry: TelemetryService,
   ) {}
 
   listVisible(principal: AnalyticsPrincipal): ToolDescriptor[] {
@@ -43,11 +45,13 @@ export class AnalyticsToolsFacade {
     }
 
     let ok = false;
+    const start = Date.now();
     try {
       const result = await tool.execute(principal, parsed.data);
       ok = true;
       return result;
     } finally {
+      const durationMs = Date.now() - start;
       await this.audit.record({
         orgId: principal.orgId,
         userId: principal.userId,
@@ -56,6 +60,11 @@ export class AnalyticsToolsFacade {
         channel: principal.channel,
         ok,
       });
+      this.telemetry.trackServer(
+        { orgId: principal.orgId, userId: principal.userId, role: principal.activeRole },
+        'mcp.tool_invoked',
+        { tool: name, channel: principal.channel, ok, durationMs },
+      );
     }
   }
 

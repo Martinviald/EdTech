@@ -9,6 +9,7 @@ import { ItemAnalysisModule } from '../item-analysis/item-analysis.module';
 import { ItemsModule } from '../items/items.module';
 import { PerformanceBandsModule } from '../performance-bands/performance-bands.module';
 import { TaxonomiesModule } from '../taxonomies/taxonomies.module';
+import { TelemetryModule } from '../telemetry/telemetry.module';
 import { McpController } from './adapter/mcp.controller';
 import { McpThrottlerGuard } from './adapter/mcp-throttler.guard';
 import { McpAuthGuard } from './auth/mcp-auth.guard';
@@ -72,6 +73,7 @@ const MCP_RESOURCES = [
     HeatmapModule,
     TaxonomiesModule,
     PerformanceBandsModule,
+    TelemetryModule,
   ],
   controllers: [McpController, ProtectedResourceController],
   providers: [
