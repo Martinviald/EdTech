@@ -12,6 +12,7 @@ import { McpAuthGuard } from '../auth/mcp-auth.guard';
 import { ProtectedResourceController } from '../auth/protected-resource.controller';
 import { AnalyticsToolsFacade } from '../core/analytics-tools.facade';
 import { McpAuditLogger } from '../core/mcp-audit-logger';
+import { TelemetryService } from '../../telemetry/telemetry.service';
 import { McpResourceProvider, type McpResource, type ResourceDescriptor } from '../core/mcp-resource';
 import { PromptRegistry } from '../core/prompt-registry';
 import { ResourceRegistry } from '../core/resource-registry';
@@ -86,6 +87,7 @@ describe('McpController (e2e)', () => {
         ContrastarDificultadPrompt,
         FakeTaxonomyResource,
         { provide: McpAuditLogger, useValue: { record: jest.fn() } },
+        { provide: TelemetryService, useValue: { trackServer: jest.fn() } },
         {
           provide: ConfigService,
           useValue: {

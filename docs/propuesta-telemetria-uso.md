@@ -22,6 +22,7 @@ contenido de alumnos): sólo qué se usó, por qué org/rol, y cuándo.
 | **Tabla** | `packages/db/src/schema/telemetry-events.ts` + RLS en `sql/rls-policies.sql` | Polimórfica: `event_name` (text, no enum) + `properties`/`context` JSONB. Aislada por `org_id` (RLS). |
 | **Ingesta** | `apps/api/src/telemetry/` | `POST /telemetry/events` (lote), valida contra el registro, escribe async con buffer. |
 | **Captura pasiva** | `TelemetryInterceptor` (APP_INTERCEPTOR) | Cada request autenticada → evento `api.request` (endpoint, latencia, status). Gateable + muestreo. |
+| **Captura MCP** | `AnalyticsToolsFacade.execute()` | Cada invocación de tool del servidor MCP analítico → evento `mcp.tool_invoked` (`tool`, `channel`, `ok`, `durationMs`). El `/mcp` HTTP se excluye del interceptor (es un único POST JSON-RPC que lleva muchas tools); el evento se emite a nivel de tool, donde se conoce el nombre. Cubre ambos canales: `mcp-external` (cliente MCP) e `in-app` (asistente IA). |
 | **Consumo** | `GET /telemetry/usage` | Agregación: eventos por evento/categoría/rol/día, con usuarios únicos. |
 | **Cliente web** | `apps/web/src/lib/telemetry/` | `TelemetryProvider` + `useTelemetry().track()` tipado + `PageViewTracker` automático. |
 
