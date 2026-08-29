@@ -4,15 +4,16 @@ Todas las coordenadas del LayoutSpec (centros de burbuja, regiones, QR) son
 fracciones 0-1 del RECTANGULO FIDUCIAL, definido asi:
 
 1. El rectangulo fiducial es el rectangulo alineado a la pagina cuyas esquinas
-   son las ESQUINAS EXTERIORES de los 4 cuadrados fiduciales (la esquina de
-   cada cuadrado mas cercana a su esquina de pagina). (0,0) = esquina exterior
-   del cuadrado superior-izquierdo; (1,1) = esquina exterior del inferior-derecho.
-   `x` es fraccion del ANCHO del rectangulo; `y` es fraccion de su ALTO.
-2. `fiducials.marginRatio` = distancia de cada borde de pagina al rectangulo
-   fiducial, expresada como fraccion del ANCHO DE PAGINA (el mismo margen
-   fisico en los 4 lados; los cuadrados se dibujan hacia adentro del rectangulo).
-3. `fiducials.sizeRatio` y todo `radius` de burbuja son fracciones del ANCHO
-   del rectangulo fiducial.
+   son los CENTROS de los 4 cuadrados fiduciales (CD-5; identico a
+   computeDrawPlan del impresor, apps/api/src/sheet-scanning/sheet-print.helpers.ts).
+   (0,0) = centro del cuadrado superior-izquierdo; (1,1) = centro del
+   inferior-derecho. `x` es fraccion del ANCHO del rectangulo; `y` de su ALTO.
+2. `fiducials.sizeRatio` (lado del cuadrado) y `fiducials.marginRatio`
+   (distancia del borde de pagina al BORDE EXTERIOR del cuadrado) son
+   fracciones del ANCHO DE PAGINA, iguales en ambos ejes.
+3. Todo `radius` de burbuja es fraccion del ANCHO del rectangulo fiducial.
+4. El rectificador mapea los CENTROIDES detectados de los cuadrados a las
+   esquinas del espacio de trabajo.
 
 El espacio de trabajo rectificado tiene WORK_WIDTH px de ancho y una altura
 que preserva la proporcion fisica del rectangulo segun `paper`.
@@ -33,8 +34,15 @@ PAPER_SIZES_MM: dict[str, tuple[float, float]] = {
 
 def fiducial_rect_mm(spec: dict[str, Any]) -> tuple[float, float]:
     paper_w, paper_h = PAPER_SIZES_MM[spec["paper"]]
+    inset = fiducial_inset_mm(spec)
+    return paper_w - 2 * inset, paper_h - 2 * inset
+
+
+def fiducial_inset_mm(spec: dict[str, Any]) -> float:
+    paper_w, _ = PAPER_SIZES_MM[spec["paper"]]
     margin = spec["fiducials"]["marginRatio"] * paper_w
-    return paper_w - 2 * margin, paper_h - 2 * margin
+    side = spec["fiducials"]["sizeRatio"] * paper_w
+    return margin + side / 2
 
 
 def workspace_size(spec: dict[str, Any], width: int = WORK_WIDTH) -> tuple[int, int]:

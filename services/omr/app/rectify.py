@@ -7,7 +7,9 @@ casi-identidad (D2): un solo camino de codigo. Menos de 4 fiduciales =>
 La busqueda es por cuadrante de esquina: en cada uno se buscan contornos
 cuadrados, solidos y sin agujeros (los finder patterns del QR tienen agujero,
 esto los descarta) y se elige el candidato cuya esquina exterior queda mas
-cerca de la esquina de la imagen.
+cerca de la esquina de la imagen. La homografia mapea los CENTROIDES de los
+cuadrados (CD-5: el marco fiducial son los centros); la esquina exterior solo
+se usa para elegir candidato y detectar recorte.
 """
 
 from __future__ import annotations
@@ -44,15 +46,15 @@ class FiducialFailure:
 
 def rectify(page_bgr: np.ndarray, spec: dict[str, Any]) -> RectifiedPage | FiducialFailure:
     gray = cv2.cvtColor(page_bgr, cv2.COLOR_BGR2GRAY)
-    corners = _find_fiducial_outer_corners(gray)
-    found = sum(1 for corner in corners if corner is not None)
-    touches = _any_touches_border(corners, gray.shape)
+    detections = _find_fiducials(gray)
+    found = sum(1 for d in detections if d is not None)
+    touches = _any_touches_border([d[1] for d in detections if d is not None], gray.shape)
     if found < 4:
         return FiducialFailure(fiducials_found=found, touches_border=touches)
 
     size = workspace_size(spec)
     width, height = size
-    src = np.array(corners, dtype=np.float32)
+    src = np.array([d[0] for d in detections], dtype=np.float32)
     dst = np.array(
         [[0, 0], [width - 1, 0], [width - 1, height - 1], [0, height - 1]], dtype=np.float32
     )
@@ -61,7 +63,9 @@ def rectify(page_bgr: np.ndarray, spec: dict[str, Any]) -> RectifiedPage | Fiduc
     return RectifiedPage(gray=warped, size=size, fiducials_found=4, touches_border=touches)
 
 
-def _find_fiducial_outer_corners(gray: np.ndarray) -> list[tuple[float, float] | None]:
+def _find_fiducials(
+    gray: np.ndarray,
+) -> list[tuple[tuple[float, float], tuple[float, float]] | None]:
     height, width = gray.shape
     binary = cv2.adaptiveThreshold(
         cv2.GaussianBlur(gray, (5, 5), 0),
@@ -81,22 +85,26 @@ def _find_fiducial_outer_corners(gray: np.ndarray) -> list[tuple[float, float] |
     ]
     image_corners = [(0, 0), (width - 1, 0), (width - 1, height - 1), (0, height - 1)]
 
-    corners: list[tuple[float, float] | None] = []
+    detections: list[tuple[tuple[float, float], tuple[float, float]] | None] = []
     for (offset_x, offset_y), image_corner in zip(regions, image_corners, strict=True):
         crop = binary[offset_y : offset_y + region_h, offset_x : offset_x + region_w]
         local_target = (image_corner[0] - offset_x, image_corner[1] - offset_y)
-        local = _best_square_outer_corner(crop, local_target, width * height)
-        corners.append(None if local is None else (local[0] + offset_x, local[1] + offset_y))
-    return corners
+        local = _best_square(crop, local_target, width * height)
+        if local is None:
+            detections.append(None)
+        else:
+            (cx, cy), (ox, oy) = local
+            detections.append(((cx + offset_x, cy + offset_y), (ox + offset_x, oy + offset_y)))
+    return detections
 
 
-def _best_square_outer_corner(
+def _best_square(
     binary_crop: np.ndarray, target: tuple[int, int], page_area: float
-) -> tuple[float, float] | None:
+) -> tuple[tuple[float, float], tuple[float, float]] | None:
     contours, hierarchy = cv2.findContours(binary_crop, cv2.RETR_CCOMP, cv2.CHAIN_APPROX_SIMPLE)
     if hierarchy is None:
         return None
-    best: tuple[float, tuple[float, float]] | None = None
+    best: tuple[float, tuple[tuple[float, float], tuple[float, float]]] | None = None
     for contour, node in zip(contours, hierarchy[0], strict=True):
         is_top_level = node[3] == -1
         has_child = node[2] != -1
@@ -108,9 +116,13 @@ def _best_square_outer_corner(
         outer = min(
             candidate, key=lambda p: (p[0] - target[0]) ** 2 + (p[1] - target[1]) ** 2
         )
+        moments = cv2.moments(contour)
+        if moments["m00"] == 0:
+            continue
+        centroid = (moments["m10"] / moments["m00"], moments["m01"] / moments["m00"])
         distance = (outer[0] - target[0]) ** 2 + (outer[1] - target[1]) ** 2
         if best is None or distance < best[0]:
-            best = (distance, outer)
+            best = (distance, (centroid, outer))
     return None if best is None else best[1]
 
 

@@ -5,9 +5,10 @@ Sigue EXACTAMENTE la convencion del rectangulo fiducial de app/geometry.py
 
 - Rectangulo fiducial = esquinas EXTERIORES de los 4 cuadrados; las
   coordenadas del spec son fracciones 0-1 de ese rectangulo.
-- marginRatio = margen de pagina al rectangulo, en fracciones del ANCHO de
+- marginRatio = margen de pagina al borde EXTERIOR del cuadrado, y sizeRatio
+= lado del cuadrado, ambos en fracciones del ANCHO de
   pagina (igual en los 4 lados); los cuadrados se dibujan hacia adentro.
-- sizeRatio y radius son fracciones del ANCHO del rectangulo fiducial.
+- radius de burbuja es fraccion del ANCHO del rectangulo fiducial.
 
 Todo es deterministico: lo aleatorio recibe un `numpy.random.Generator` con
 semilla fija. Ningun fixture se comitea como binario: se construye en el test.
@@ -107,11 +108,13 @@ def render_page(
     page = np.full((page_height, page_width), paper_gray, dtype=np.uint8)
 
     margin = spec["fiducials"]["marginRatio"] * page_width
-    rect_x0, rect_y0 = margin, margin
-    rect_w = page_width - 2 * margin
-    rect_h = page_height - 2 * margin
+    side = spec["fiducials"]["sizeRatio"] * page_width
+    inset = margin + side / 2
+    rect_x0, rect_y0 = inset, inset
+    rect_w = page_width - 2 * inset
+    rect_h = page_height - 2 * inset
 
-    _draw_fiducials(page, spec, rect_x0, rect_y0, rect_w, rect_h)
+    _draw_fiducials(page, side, rect_x0, rect_y0, rect_w, rect_h)
     if qr_text is not None and spec["identity"]["mode"] == "qr":
         payload = qr_payload(page_index, spec["pageCount"]) if qr_text == "auto" else qr_text
         _draw_qr(page, spec, payload, rect_x0, rect_y0, rect_w, rect_h)
@@ -135,17 +138,14 @@ def render_page(
 
 
 def _draw_fiducials(
-    page: np.ndarray, spec: dict[str, Any], x0: float, y0: float, rect_w: float, rect_h: float
+    page: np.ndarray, side: float, x0: float, y0: float, rect_w: float, rect_h: float
 ) -> None:
-    side = spec["fiducials"]["sizeRatio"] * rect_w
     x1 = x0 + rect_w
     y1 = y0 + rect_h
-    corners = [(x0, y0, 1, 1), (x1, y0, -1, 1), (x1, y1, -1, -1), (x0, y1, 1, -1)]
-    for corner_x, corner_y, dir_x, dir_y in corners:
-        inner_x = corner_x + dir_x * side
-        inner_y = corner_y + dir_y * side
-        top_left = (round(min(corner_x, inner_x)), round(min(corner_y, inner_y)))
-        bottom_right = (round(max(corner_x, inner_x)), round(max(corner_y, inner_y)))
+    half = side / 2
+    for center_x, center_y in [(x0, y0), (x1, y0), (x1, y1), (x0, y1)]:
+        top_left = (round(center_x - half), round(center_y - half))
+        bottom_right = (round(center_x + half), round(center_y + half))
         cv2.rectangle(page, top_left, bottom_right, INK_GRAY, thickness=-1)
 
 
