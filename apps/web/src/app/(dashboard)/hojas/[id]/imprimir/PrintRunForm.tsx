@@ -1,0 +1,139 @@
+'use client';
+
+import { useState, useTransition } from 'react';
+import { useRouter } from 'next/navigation';
+import { toast } from 'sonner';
+import { Loader2, Printer } from 'lucide-react';
+import { createPrintRunSchema, type PrintRunModel } from '@soe/types';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import { AlertCallout, Field } from '@/components/shared';
+import { DownloadPdfButton } from '../../components/DownloadPdfButton';
+import { createPrintRun } from '../../actions';
+
+export type CourseOption = { id: string; label: string };
+
+export function PrintRunForm({
+  layoutId,
+  courses,
+}: {
+  layoutId: string;
+  courses: CourseOption[];
+}) {
+  const [classGroupId, setClassGroupId] = useState('');
+  const [spareCount, setSpareCount] = useState('2');
+  const [createdRun, setCreatedRun] = useState<PrintRunModel | null>(null);
+  const [pending, startTransition] = useTransition();
+  const router = useRouter();
+
+  function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    const parsed = createPrintRunSchema.safeParse({
+      layoutId,
+      classGroupId,
+      assessmentId: null,
+      spareCount: Number(spareCount),
+    });
+    if (!parsed.success) {
+      toast.error(parsed.error.issues[0]?.message ?? 'Datos inválidos');
+      return;
+    }
+
+    startTransition(async () => {
+      const result = await createPrintRun(parsed.data);
+      if (!result.ok) {
+        toast.error(result.message);
+        return;
+      }
+      setCreatedRun(result.data);
+      toast.success(`Tirada creada: ${result.data.sheetCount} hojas listas para imprimir.`);
+      router.refresh();
+    });
+  }
+
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle>Nueva tirada</CardTitle>
+        <CardDescription>
+          Se genera una hoja por alumno activo del curso, con su nombre y QR propios, más las
+          reservas sin nombre que indiques.
+        </CardDescription>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div className="grid gap-4 sm:grid-cols-2">
+            <Field label="Curso" htmlFor="print-run-course" required>
+              <Select value={classGroupId} onValueChange={setClassGroupId} disabled={pending}>
+                <SelectTrigger id="print-run-course">
+                  <SelectValue placeholder="Selecciona un curso" />
+                </SelectTrigger>
+                <SelectContent>
+                  {courses.map((course) => (
+                    <SelectItem key={course.id} value={course.id}>
+                      {course.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </Field>
+
+            <Field
+              label="Hojas de reserva"
+              htmlFor="print-run-spare"
+              hint="Hojas extra sin alumno asignado, para incorporaciones o reemplazos (0–20)."
+            >
+              <Input
+                id="print-run-spare"
+                type="number"
+                min={0}
+                max={20}
+                value={spareCount}
+                onChange={(e) => setSpareCount(e.target.value)}
+                disabled={pending}
+              />
+            </Field>
+          </div>
+
+          <div className="flex justify-end">
+            <Button type="submit" disabled={pending || !classGroupId}>
+              {pending ? (
+                <>
+                  <Loader2 className="mr-2 size-4 animate-spin" />
+                  Generando…
+                </>
+              ) : (
+                <>
+                  <Printer className="mr-2 size-4" />
+                  Generar tirada
+                </>
+              )}
+            </Button>
+          </div>
+        </form>
+
+        {createdRun ? (
+          <AlertCallout tone="success" title="Tirada creada">
+            <div className="space-y-3">
+              <p>
+                {createdRun.sheetCount} hojas para{' '}
+                <span className="font-medium">{createdRun.classGroupName ?? 'el curso'}</span>{' '}
+                ({createdRun.spareCount} de reserva). Descarga el PDF e imprímelo sin ajustar a
+                página.
+              </p>
+              <DownloadPdfButton runId={createdRun.id} variant="default" size="default" />
+            </div>
+          </AlertCallout>
+        ) : null}
+      </CardContent>
+    </Card>
+  );
+}
