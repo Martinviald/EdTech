@@ -1,18 +1,23 @@
-"""Tests de contrato del esqueleto F0.
+"""Tests de contrato del esqueleto F0 (siguen verdes sobre el pipeline real).
 
 Verifican que los ejemplos compartidos validan contra los JSON Schema generados
 desde Zod, y que el endpoint /v1/read respeta el contrato de entrada/salida.
 Los mismos ejemplos se validan con Zod en packages/types
 (omr-contract-examples.spec.ts): un origen de verdad, dos validadores.
+
+Las URLs del ejemplo no existen: el descargador se stubbea con paginas
+sinteticas renderizadas desde el MISMO layoutSpec del ejemplo (sin red).
 """
 
 import json
 from pathlib import Path
 
+import numpy as np
 from fastapi.testclient import TestClient
 
 from app.contracts import validate
 from app.main import app
+from tests import synthetic as syn
 
 EXAMPLES = Path(__file__).resolve().parent.parent / "contracts" / "examples"
 
@@ -21,6 +26,23 @@ client = TestClient(app)
 
 def load_example(name: str) -> dict:
     return json.loads((EXAMPLES / f"{name}.example.json").read_text())
+
+
+def stub_example_pages(monkeypatch) -> None:
+    request = load_example("read-request")
+    spec = request["layoutSpec"]
+    rendered = {
+        url: syn.png_bytes(
+            syn.render_page(
+                spec,
+                page_index,
+                marks={"f_001": "C"} if page_index == 0 else {"f_019_1": "V"},
+                rng=np.random.default_rng(30 + page_index),
+            )
+        )
+        for page_index, url in enumerate(request["source"]["imageUrls"])
+    }
+    monkeypatch.setattr("app.pipeline.fetch_url", lambda url: rendered[url])
 
 
 def test_read_request_example_validates() -> None:
@@ -41,7 +63,8 @@ def test_health() -> None:
     assert response.json()["status"] == "ok"
 
 
-def test_read_returns_valid_scan_result() -> None:
+def test_read_returns_valid_scan_result(monkeypatch) -> None:
+    stub_example_pages(monkeypatch)
     response = client.post("/v1/read", json=load_example("read-request"))
     assert response.status_code == 200
     body = response.json()

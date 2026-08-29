@@ -6,3 +6,4 @@ numpy>=2.1
 opencv-python-headless>=4.10
 pypdfium2>=4.30
 zxing-cpp>=2.2
+pillow>=10.4
