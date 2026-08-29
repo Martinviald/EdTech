@@ -1,0 +1,154 @@
+import type { OmrReadRequest, ScanResult } from '@soe/types';
+import { OmrPageTimeoutError, OmrServiceUnavailableError } from './omr-client.types';
+import {
+  HttpOmrClient,
+  OmrInvalidResponseError,
+  OmrRequestRejectedError,
+  type OmrFetchFn,
+  type OmrFetchResponse,
+} from './omr-http.client';
+
+const REQUEST = {
+  layoutSpec: { specVersion: 1 },
+  captureProfile: { source: 'scanner' },
+  source: { kind: 'pdf', pdfUrl: 'https://signed.example/lote.pdf', imageUrls: null },
+} as unknown as OmrReadRequest;
+
+const VALID_RESULT: ScanResult = {
+  pages: [
+    {
+      pageIndex: 0,
+      imageSha256: 'a'.repeat(64),
+      quality: { ok: true, sharpness: 0.9, glare: 0.05, fiducialsFound: 4, rejectReason: null },
+      identity: { mode: 'qr', raw: null, confidence: 0 },
+      marks: [],
+      pageThumbJpegBase64: null,
+    },
+  ],
+};
+
+function jsonResponse(status: number, body: unknown): OmrFetchResponse {
+  return {
+    ok: status >= 200 && status < 300,
+    status,
+    json: () => Promise.resolve(body),
+    text: () => Promise.resolve(JSON.stringify(body)),
+  };
+}
+
+function makeFetch(responses: (OmrFetchResponse | Error)[]): {
+  fetchFn: OmrFetchFn;
+  calls: { url: string; body: string }[];
+} {
+  const calls: { url: string; body: string }[] = [];
+  const fetchFn: OmrFetchFn = (url, init) => {
+    calls.push({ url, body: init.body });
+    const next = responses.shift();
+    if (!next) return Promise.reject(new Error('sin respuestas encoladas'));
+    if (next instanceof Error) return Promise.reject(next);
+    return Promise.resolve(next);
+  };
+  return { fetchFn, calls };
+}
+
+function makeClient(fetchFn: OmrFetchFn, timeoutMs = 5000): HttpOmrClient {
+  return new HttpOmrClient({ serviceUrl: 'http://omr.test:8090', timeoutMs, fetchFn });
+}
+
+describe('HttpOmrClient.read', () => {
+  it('postea el OmrReadRequest a /v1/read y devuelve el ScanResult validado', async () => {
+    const { fetchFn, calls } = makeFetch([jsonResponse(200, VALID_RESULT)]);
+    const client = makeClient(fetchFn);
+
+    const result = await client.read(REQUEST);
+
+    expect(result.pages).toHaveLength(1);
+    expect(result.pages[0].imageSha256).toBe('a'.repeat(64));
+    expect(calls).toHaveLength(1);
+    expect(calls[0].url).toBe('http://omr.test:8090/v1/read');
+    expect(JSON.parse(calls[0].body)).toEqual(REQUEST);
+  });
+
+  it('una respuesta 200 bien formada pero inválida lanza OmrInvalidResponseError', async () => {
+    const { fetchFn } = makeFetch([
+      jsonResponse(200, { pages: [{ pageIndex: 'no-un-numero' }] }),
+    ]);
+    const client = makeClient(fetchFn);
+
+    await expect(client.read(REQUEST)).rejects.toBeInstanceOf(OmrInvalidResponseError);
+  });
+
+  it('un 200 con cuerpo no-JSON lanza OmrInvalidResponseError', async () => {
+    const { fetchFn } = makeFetch([
+      {
+        ok: true,
+        status: 200,
+        json: () => Promise.reject(new Error('unexpected token')),
+        text: () => Promise.resolve('<html>'),
+      },
+    ]);
+    const client = makeClient(fetchFn);
+
+    await expect(client.read(REQUEST)).rejects.toBeInstanceOf(OmrInvalidResponseError);
+  });
+
+  it('reintenta UNA vez tras un 502 y devuelve el resultado del segundo intento', async () => {
+    const { fetchFn, calls } = makeFetch([
+      jsonResponse(502, {}),
+      jsonResponse(200, VALID_RESULT),
+    ]);
+    const client = makeClient(fetchFn);
+
+    const result = await client.read(REQUEST);
+
+    expect(result.pages).toHaveLength(1);
+    expect(calls).toHaveLength(2);
+  });
+
+  it('dos 502 seguidos lanzan OmrServiceUnavailableError', async () => {
+    const { fetchFn, calls } = makeFetch([jsonResponse(502, {}), jsonResponse(502, {})]);
+    const client = makeClient(fetchFn);
+
+    await expect(client.read(REQUEST)).rejects.toBeInstanceOf(OmrServiceUnavailableError);
+    expect(calls).toHaveLength(2);
+  });
+
+  it('un error de red reintenta una vez y luego lanza OmrServiceUnavailableError', async () => {
+    const { fetchFn, calls } = makeFetch([
+      new Error('ECONNREFUSED'),
+      new Error('ECONNREFUSED'),
+    ]);
+    const client = makeClient(fetchFn);
+
+    await expect(client.read(REQUEST)).rejects.toBeInstanceOf(OmrServiceUnavailableError);
+    expect(calls).toHaveLength(2);
+  });
+
+  it('un 504 lanza OmrPageTimeoutError sin reintentar', async () => {
+    const { fetchFn, calls } = makeFetch([jsonResponse(504, {})]);
+    const client = makeClient(fetchFn);
+
+    await expect(client.read(REQUEST)).rejects.toBeInstanceOf(OmrPageTimeoutError);
+    expect(calls).toHaveLength(1);
+  });
+
+  it('un 422 lanza OmrRequestRejectedError con el detalle, sin reintentar', async () => {
+    const { fetchFn, calls } = makeFetch([jsonResponse(422, { detail: 'layoutSpec inválido' })]);
+    const client = makeClient(fetchFn);
+
+    const promise = client.read(REQUEST);
+    await expect(promise).rejects.toBeInstanceOf(OmrRequestRejectedError);
+    await expect(promise).rejects.toThrow('layoutSpec inválido');
+    expect(calls).toHaveLength(1);
+  });
+
+  it('el timeout total aborta la llamada y lanza OmrPageTimeoutError', async () => {
+    const fetchFn: OmrFetchFn = (_url, init) =>
+      new Promise((_resolve, reject) => {
+        init.signal.addEventListener('abort', () => reject(new Error('aborted')));
+      });
+    const client = makeClient(fetchFn, 20);
+
+    await expect(client.read(REQUEST)).rejects.toBeInstanceOf(OmrPageTimeoutError);
+  });
+});
