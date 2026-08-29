@@ -16,6 +16,46 @@ pnpm --filter @soe/types gen:omr-contracts
 Nunca editarlos a mano. Los ejemplos de `contracts/examples/` se validan en
 ambos lados (pytest acá, jest en `packages/types`).
 
+## Pipeline (F1)
+
+```
+PageSource (sources.py) → Rectifier (rectify.py) → QualityGate (quality.py)
+                        → FieldReader/MarkClassifier (readers.py / classify.py)
+                        → QR (identity.py) → ScanResult (pipeline.py)
+```
+
+| Módulo | Componente |
+|---|---|
+| `app/geometry.py` | Convención del rectángulo fiducial y espacio de trabajo |
+| `app/sources.py` | C18 · `PdfPageSource` (pypdfium2, ~200 DPI) / `ImagePageSource` (EXIF) |
+| `app/rectify.py` | C19 · detección de fiduciales + homografía (corre SIEMPRE, D2) |
+| `app/quality.py` | C20 · sharpness/glare/cropped/fiducials, umbrales del `CaptureProfile` |
+| `app/classify.py` | C21 · fill, umbral Otsu relativo por hoja, separabilidad, `AMBIGUITY_MARGIN` |
+| `app/readers.py` | D10 · registro `READERS` por tipo de campo (MVP: `bubble_group`) |
+| `app/identity.py` | T6 · lectura de QR (el payload NO se interpreta acá) |
+| `app/pipeline.py` | T7 · ensamblado, sha256 canónico, thumbs, timeout por página |
+
+## Convención del rectángulo fiducial (compartida con el impresor, A1)
+
+1. El rectángulo fiducial es el rectángulo cuyas esquinas son las **esquinas
+   EXTERIORES** de los 4 cuadrados (la esquina de cada cuadrado más cercana a
+   su esquina de página). Todas las coordenadas del `LayoutSpec` son fracciones
+   0–1 de ese rectángulo: `x` sobre su ancho, `y` sobre su alto.
+2. `marginRatio` = distancia de cada borde de página al rectángulo, como
+   fracción del **ancho de página** (igual en los 4 lados); los cuadrados se
+   dibujan hacia adentro del rectángulo.
+3. `sizeRatio` y todo `radius` son fracciones del **ancho del rectángulo
+   fiducial**.
+
+Ver `app/geometry.py` y el generador espejo `tests/synthetic.py`.
+
+## Variables de entorno
+
+| Var | Default | Qué controla |
+|---|---|---|
+| `OMR_PAGE_TIMEOUT_S` | `20` | Tiempo límite por página; una página que lo excede se omite del resultado (si TODAS lo exceden → 504) |
+| `OMR_DOWNLOAD_TIMEOUT_S` | `10` | Timeout de descarga de cada URL firmada |
+
 ## Desarrollo local
 
 ```bash
