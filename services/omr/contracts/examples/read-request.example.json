@@ -1,0 +1,56 @@
+{
+  "layoutSpec": {
+    "specVersion": 1,
+    "instrumentId": "9f2c1a44-3b7e-4c11-9a0d-5e8f7b2c1d33",
+    "pageCount": 2,
+    "paper": "letter",
+    "fiducials": { "kind": "corner_squares", "sizeRatio": 0.02, "marginRatio": 0.03 },
+    "identity": {
+      "mode": "qr",
+      "region": { "topLeft": { "x": 0.75, "y": 0.01 }, "bottomRight": { "x": 0.99, "y": 0.14 } }
+    },
+    "fields": [
+      {
+        "fieldId": "f_001",
+        "kind": "bubble_group",
+        "printedNumber": "1",
+        "pageIndex": 0,
+        "selectMode": "single",
+        "bubbles": [
+          { "value": "A", "center": { "x": 0.12, "y": 0.22 }, "radius": 0.012 },
+          { "value": "B", "center": { "x": 0.17, "y": 0.22 }, "radius": 0.012 },
+          { "value": "C", "center": { "x": 0.22, "y": 0.22 }, "radius": 0.012 },
+          { "value": "D", "center": { "x": 0.27, "y": 0.22 }, "radius": 0.012 }
+        ],
+        "region": null
+      },
+      {
+        "fieldId": "f_019_1",
+        "kind": "bubble_group",
+        "printedNumber": "19.1",
+        "pageIndex": 1,
+        "selectMode": "single",
+        "bubbles": [
+          { "value": "V", "center": { "x": 0.12, "y": 0.3 }, "radius": 0.012 },
+          { "value": "F", "center": { "x": 0.17, "y": 0.3 }, "radius": 0.012 }
+        ],
+        "region": null
+      }
+    ]
+  },
+  "captureProfile": {
+    "source": "phone",
+    "normalizeIllumination": true,
+    "minSharpness": 0.35,
+    "maxGlare": 0.25,
+    "expectedDpi": null
+  },
+  "source": {
+    "kind": "images",
+    "pdfUrl": null,
+    "imageUrls": [
+      "https://example.com/presigned/pagina-0.jpg",
+      "https://example.com/presigned/pagina-1.jpg"
+    ]
+  }
+}

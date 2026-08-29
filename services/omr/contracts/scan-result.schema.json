@@ -1,0 +1,184 @@
+{
+  "$ref": "#/definitions/scan-result",
+  "definitions": {
+    "scan-result": {
+      "type": "object",
+      "properties": {
+        "pages": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "pageIndex": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "imageSha256": {
+                "type": "string",
+                "minLength": 64,
+                "maxLength": 64
+              },
+              "quality": {
+                "type": "object",
+                "properties": {
+                  "ok": {
+                    "type": "boolean"
+                  },
+                  "sharpness": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 1
+                  },
+                  "glare": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 1
+                  },
+                  "fiducialsFound": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 4
+                  },
+                  "rejectReason": {
+                    "anyOf": [
+                      {
+                        "type": "string",
+                        "enum": [
+                          "blurry",
+                          "glare",
+                          "fiducials_missing",
+                          "cropped",
+                          "no_separable_marks"
+                        ]
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  }
+                },
+                "required": [
+                  "ok",
+                  "sharpness",
+                  "glare",
+                  "fiducialsFound",
+                  "rejectReason"
+                ],
+                "additionalProperties": false
+              },
+              "identity": {
+                "type": "object",
+                "properties": {
+                  "mode": {
+                    "type": "string",
+                    "enum": [
+                      "qr",
+                      "rut_bubbles",
+                      "none"
+                    ]
+                  },
+                  "raw": {
+                    "type": [
+                      "string",
+                      "null"
+                    ]
+                  },
+                  "confidence": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 1
+                  }
+                },
+                "required": [
+                  "mode",
+                  "raw",
+                  "confidence"
+                ],
+                "additionalProperties": false
+              },
+              "marks": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "fieldId": {
+                      "type": "string"
+                    },
+                    "printedNumber": {
+                      "type": "string"
+                    },
+                    "state": {
+                      "type": "string",
+                      "enum": [
+                        "marked",
+                        "blank",
+                        "multiple",
+                        "ambiguous"
+                      ]
+                    },
+                    "value": {
+                      "type": [
+                        "string",
+                        "null"
+                      ]
+                    },
+                    "fill": {
+                      "type": "number",
+                      "minimum": 0,
+                      "maximum": 1
+                    },
+                    "threshold": {
+                      "type": "number",
+                      "minimum": 0,
+                      "maximum": 1
+                    },
+                    "margin": {
+                      "type": "number"
+                    },
+                    "cropJpegBase64": {
+                      "type": [
+                        "string",
+                        "null"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "fieldId",
+                    "printedNumber",
+                    "state",
+                    "value",
+                    "fill",
+                    "threshold",
+                    "margin",
+                    "cropJpegBase64"
+                  ],
+                  "additionalProperties": false
+                }
+              },
+              "pageThumbJpegBase64": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              }
+            },
+            "required": [
+              "pageIndex",
+              "imageSha256",
+              "quality",
+              "identity",
+              "marks",
+              "pageThumbJpegBase64"
+            ],
+            "additionalProperties": false
+          }
+        }
+      },
+      "required": [
+        "pages"
+      ],
+      "additionalProperties": false
+    }
+  },
+  "$schema": "http://json-schema.org/draft-07/schema#"
+}
