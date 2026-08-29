@@ -244,3 +244,71 @@ export type TelemetryUsageResponse = {
   uniqueUsers: number;
   rows: TelemetryUsageRow[];
 };
+
+// ── Dashboards de consumo (uso por org / usuario / módulo backend / vista frontend) ──
+// Alimentan la vista de platform_admin (cross-org) y la de school_admin (su org).
+
+export const telemetryUsageFiltersSchema = z.object({
+  from: z.string().datetime().optional(),
+  to: z.string().datetime().optional(),
+});
+export type TelemetryUsageFilters = z.infer<typeof telemetryUsageFiltersSchema>;
+
+/** Fila genérica de un desglose por dimensión (módulo backend, vista frontend, tool MCP, categoría). */
+export type TelemetryDimensionRow = {
+  key: string;
+  label: string;
+  events: number;
+  users: number;
+};
+
+export type TelemetryUserUsageRow = {
+  userId: string | null;
+  name: string | null;
+  email: string | null;
+  role: string | null;
+  events: number;
+  pageViews: number;
+  apiCalls: number;
+  mcpCalls: number;
+  lastSeen: string | null;
+};
+
+/** Uso detallado de UNA org: por usuario, por módulo backend, por vista frontend, por tool MCP. */
+export type TelemetryOrgUsageResponse = {
+  orgId: string;
+  orgName: string | null;
+  from: string | null;
+  to: string | null;
+  totalEvents: number;
+  uniqueUsers: number;
+  byUser: TelemetryUserUsageRow[];
+  byBackendModule: TelemetryDimensionRow[];
+  byFrontendView: TelemetryDimensionRow[];
+  byMcpTool: TelemetryDimensionRow[];
+  byCategory: TelemetryDimensionRow[];
+};
+
+export type TelemetryOrgSummaryRow = {
+  orgId: string;
+  orgName: string;
+  events: number;
+  users: number;
+  lastSeen: string | null;
+};
+
+/**
+ * Panorama cross-org para platform_admin: total por org + rollups de plataforma
+ * por módulo backend y vista frontend. `users` de los rollups es aproximado (suma
+ * de distintos por org: un usuario multi-org cuenta más de una vez).
+ */
+export type TelemetryPlatformOverviewResponse = {
+  from: string | null;
+  to: string | null;
+  totalEvents: number;
+  uniqueUsers: number;
+  orgCount: number;
+  byOrg: TelemetryOrgSummaryRow[];
+  byBackendModule: TelemetryDimensionRow[];
+  byFrontendView: TelemetryDimensionRow[];
+};

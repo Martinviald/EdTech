@@ -1,4 +1,5 @@
 import {
+  Activity,
   BarChart3,
   BookOpen,
   ClipboardList,
@@ -25,6 +26,7 @@ import {
   REMEDIAL_VIEWER_ROLES,
   BENCHMARKING_VIEWER_ROLES,
   ESTABLISHMENT_REPORT_ROLES,
+  TELEMETRY_VIEWER_ROLES,
 } from '@soe/types';
 import { ROUTES } from '@/lib/routes';
 import { ADMIN_HUB_PATHS, ADMIN_HUB_ROLES } from './admin-hub';
@@ -159,6 +161,15 @@ export const NAV_GROUPS: readonly NavGroup[] = [
         roles: ESTABLISHMENT_REPORT_ROLES,
       },
       {
+        // Telemetría de uso del colegio (uso por usuario, módulo backend y vista
+        // frontend). Audiencia: admins/directivos (TELEMETRY_VIEWER_ROLES).
+        href: ROUTES.telemetria,
+        label: 'Telemetría de uso',
+        icon: Activity,
+        status: 'live',
+        roles: TELEMETRY_VIEWER_ROLES,
+      },
+      {
         // Vista del profesor (sus cursos): acceso menos frecuente para directivos,
         // por eso va al final del grupo (T2-08).
         href: ROUTES.myClasses,
@@ -237,6 +248,14 @@ export const ADMIN_NAV_ITEMS: readonly NavItem[] = [
     href: ROUTES.adminColegios,
     label: 'Colegios',
     icon: School,
+    status: 'live',
+    roles: ['platform_admin'],
+    requiresPlatformAdmin: true,
+  },
+  {
+    href: ROUTES.adminTelemetria,
+    label: 'Telemetría',
+    icon: Activity,
     status: 'live',
     roles: ['platform_admin'],
     requiresPlatformAdmin: true,
