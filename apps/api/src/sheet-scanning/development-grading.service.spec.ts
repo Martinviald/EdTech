@@ -1,4 +1,5 @@
 import { Logger } from '@nestjs/common';
+import { PgDialect } from 'drizzle-orm/pg-core';
 import { aiGradingJobs, responses, type Database } from '@soe/db';
 import type { LayoutSpec } from '@soe/types';
 import type { FilesService } from '../files/files.service';
@@ -40,15 +41,20 @@ function makeDb(selectResults: unknown[][]): {
   db: Database;
   updates: Array<{ table: unknown; values: Record<string, unknown> }>;
   inserts: Array<{ table: unknown; rows: Array<Record<string, unknown>> }>;
+  selectWheres: unknown[];
 } {
   let selectIdx = 0;
   const updates: Array<{ table: unknown; values: Record<string, unknown> }> = [];
   const inserts: Array<{ table: unknown; rows: Array<Record<string, unknown>> }> = [];
+  const selectWheres: unknown[] = [];
 
   function chain(rows: unknown[]): QueryChain {
     const c: QueryChain = {
       from: () => c,
-      where: () => c,
+      where: (condition?: unknown) => {
+        selectWheres.push(condition);
+        return c;
+      },
       innerJoin: () => c,
       leftJoin: () => c,
       orderBy: () => c,
@@ -79,7 +85,7 @@ function makeDb(selectResults: unknown[][]): {
     transaction: async (fn: (tx: unknown) => unknown) => fn(db),
   } as unknown as Database;
 
-  return { db, updates, inserts };
+  return { db, updates, inserts, selectWheres };
 }
 
 function makeDispatcher(): { dispatcher: JobDispatcher; jobs: EnqueuedJob[] } {
@@ -126,11 +132,11 @@ const filesServiceFake = {
 } as unknown as FilesService;
 
 function makeService(selects: unknown[][], llmText = DEFAULT_LLM_JSON) {
-  const { db, updates, inserts } = makeDb(selects);
+  const { db, updates, inserts, selectWheres } = makeDb(selects);
   const { dispatcher, jobs } = makeDispatcher();
   const { llm, calls: llmCalls } = makeLlm(llmText);
   const service = new DevelopmentGradingService(db, dispatcher, llm, filesServiceFake);
-  return { service, updates, inserts, jobs, llmCalls };
+  return { service, updates, inserts, jobs, llmCalls, selectWheres };
 }
 
 function cropField(printedNumber: string, fieldId = `f_dev_${printedNumber}`) {
@@ -261,6 +267,21 @@ describe('DevelopmentGradingService.scheduleConfirmedBatch', () => {
 });
 
 describe('DevelopmentGradingService.processConfirmedBatch', () => {
+  it('M3: sólo toma crops de scans read con hoja anclada — identity_unresolved y quality_rejected quedan fuera del query', async () => {
+    const ctx = makeService([[]]);
+    ctx.service.scheduleConfirmedBatch(PARAMS);
+    await ctx.jobs[0].run();
+
+    expect(ctx.inserts).toHaveLength(0);
+    expect(ctx.llmCalls).toHaveLength(0);
+    const cropsWhere = new PgDialect().sqlToQuery(
+      ctx.selectWheres[0] as Parameters<PgDialect['sqlToQuery']>[0],
+    );
+    expect(cropsWhere.sql).toContain('"sheet_scans"."state" =');
+    expect(cropsWhere.params).toContain('read');
+    expect(cropsWhere.sql).toContain('"sheet_scans"."printed_sheet_id" is not null');
+  });
+
   it('crea el ai_grading_job pending con el responseId y el input del recorte', async () => {
     const { inserts } = await runScheduledJob(HAPPY_SELECTS);
 

@@ -1,5 +1,5 @@
 import { Inject, Injectable, Logger } from '@nestjs/common';
-import { and, eq, inArray, isNull, notInArray } from 'drizzle-orm';
+import { and, eq, inArray, isNotNull, isNull } from 'drizzle-orm';
 import { z } from 'zod';
 import {
   aiGradingJobs,
@@ -117,7 +117,8 @@ export class DevelopmentGradingService {
           and(
             eq(sheetScanMarks.orgId, params.orgId),
             eq(sheetScans.batchId, params.batchId),
-            notInArray(sheetScans.state, ['superseded', 'quality_rejected']),
+            eq(sheetScans.state, 'read'),
+            isNotNull(sheetScans.printedSheetId),
             inArray(sheetScanMarks.fieldId, cropFieldIds),
           ),
         );
