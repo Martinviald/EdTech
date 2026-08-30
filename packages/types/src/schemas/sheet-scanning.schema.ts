@@ -37,6 +37,7 @@ export type SheetScanState = (typeof SHEET_SCAN_STATES)[number];
 
 export const deriveLayoutSchema = z.object({
   instrumentId: z.string().uuid(),
+  identityMode: z.enum(['qr', 'rut_bubbles']).optional(),
 });
 
 export const freezeLayoutSchema = z.object({

@@ -325,6 +325,9 @@ helper del otro workstream, NO lo escribas: decláralo en tu reporte final y F3 
 
 Servicio de visión: `POST /v1/assess` (ver CD-11); `/v1/read` intacto.
 
+Enmienda de integración V1: `DeriveLayoutDto` gana `identityMode: 'qr' | 'rut_bubbles'`
+(optional, default `'qr'`) — el diseñador elige el modo de identidad de la hoja al derivar.
+
 JSON Schemas generados nuevos: `assess-request.schema.json`, `assess-result.schema.json`.
 Ejemplos compartidos nuevos (jest + pytest): `layout-digit-grid-rut.example.json`,
 `layout-crop-region.example.json`.

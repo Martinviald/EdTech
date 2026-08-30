@@ -30,7 +30,11 @@ export class SheetLayoutsController {
     @Query('orgId') orgId?: string,
   ): Promise<LayoutDraftModel> {
     const dto = deriveLayoutSchema.parse(body);
-    return this.sheetLayoutService.deriveDraft(getEffectiveOrgId(user, orgId), dto.instrumentId);
+    return this.sheetLayoutService.deriveDraft(
+      getEffectiveOrgId(user, orgId),
+      dto.instrumentId,
+      dto.identityMode ?? 'qr',
+    );
   }
 
   @Post()

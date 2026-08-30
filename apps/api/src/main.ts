@@ -1,5 +1,6 @@
 import 'reflect-metadata';
 import { NestFactory } from '@nestjs/core';
+import type { NestExpressApplication } from '@nestjs/platform-express';
 import { ValidationPipe, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { AppModule } from './app.module';
@@ -8,9 +9,10 @@ import type { Database } from './database/database.types';
 import { checkRlsEnforcement } from './database/rls-startup-check';
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule, {
+  const app = await NestFactory.create<NestExpressApplication>(AppModule, {
     logger: ['log', 'warn', 'error', 'debug'],
   });
+  app.useBodyParser('json', { limit: '8mb' });
 
   // HTTP request logger (dev only)
   if (process.env.NODE_ENV !== 'production') {
