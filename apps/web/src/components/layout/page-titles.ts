@@ -49,6 +49,12 @@ const STATIC_TITLES: Record<string, PageTitle> = {
     parent: { href: ROUTES.bancoItems, label: 'Banco de contenido' },
   },
 
+  [ROUTES.hojas]: { title: 'Hojas de respuesta' },
+  [ROUTES.hojasEscanear]: {
+    title: 'Escanear pruebas',
+    parent: { href: ROUTES.hojas, label: 'Hojas de respuesta' },
+  },
+
   [ROUTES.importar]: { title: 'Importar' },
   [ROUTES.importarAlumnos]: { title: 'Importar alumnos', parent: importarParent() },
   [ROUTES.importarInstrumento]: { title: 'Importar pauta DIA', parent: importarParent() },

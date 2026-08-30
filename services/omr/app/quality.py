@@ -4,9 +4,11 @@ sharpness = min(1, varianza del laplaciano / SHARPNESS_FULL_SCALE), medida
 sobre el gris llevado al ancho de trabajo (misma escala siempre). Calibrado
 con los fixtures sinteticos: nitida > 0.5, borrosa < 0.2.
 
-glare = fraccion de pixeles saturados (> GLARE_SATURATION_LEVEL) sobre la
-pagina; un papel normal fotografiado/escaneado queda por debajo de 250, un
-reflejo especular satura el sensor.
+glare = fraccion de pixeles saturados RELATIVA AL PAPEL: cuenta pixeles mas
+brillantes que mediana + GLARE_DELTA (piso GLARE_SATURATION_LEVEL). Un reflejo
+especular satura el sensor muy por encima del blanco del papel; un papel
+blanco puro (PDF rasterizado, escaner bien calibrado) NO es glare aunque toda
+la pagina supere 250.
 
 Los umbrales minSharpness/maxGlare vienen del CaptureProfile: son datos, no
 codigo (D2). `no_separable_marks` lo aporta el clasificador (C21) y se aplica
@@ -25,6 +27,7 @@ from .rectify import FiducialFailure, RectifiedPage
 
 SHARPNESS_FULL_SCALE = 60.0
 GLARE_SATURATION_LEVEL = 250
+GLARE_DELTA = 15
 
 
 def sharpness_score(gray: np.ndarray) -> float:
@@ -34,7 +37,11 @@ def sharpness_score(gray: np.ndarray) -> float:
 
 
 def glare_score(gray: np.ndarray) -> float:
-    saturated = int(np.count_nonzero(gray > GLARE_SATURATION_LEVEL))
+    paper = float(np.median(gray))
+    threshold = max(GLARE_SATURATION_LEVEL, paper + GLARE_DELTA)
+    if threshold >= 255:
+        return 0.0
+    saturated = int(np.count_nonzero(gray > threshold))
     return saturated / gray.size
 
 

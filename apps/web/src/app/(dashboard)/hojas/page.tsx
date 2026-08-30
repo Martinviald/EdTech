@@ -1,7 +1,7 @@
 import { Suspense } from 'react';
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
-import { FileText, Printer } from 'lucide-react';
+import { FileText, Printer, ScanLine } from 'lucide-react';
 import {
   canAccess,
   SHEET_MANAGEMENT_ROLES,
@@ -40,9 +40,17 @@ export default async function HojasPage() {
         title="Hojas de respuesta"
         description="Diseña la hoja desde un instrumento, imprímela por curso, escanea las pruebas rendidas y revisa las lecturas antes de confirmar los resultados."
         actions={
-          <Suspense fallback={<Skeleton className="h-10 w-36" />}>
-            <DesignSheetAction />
-          </Suspense>
+          <>
+            <Button asChild variant="outline">
+              <Link href={ROUTES.hojasEscanear}>
+                <ScanLine className="mr-2 size-4" />
+                Escanear pruebas
+              </Link>
+            </Button>
+            <Suspense fallback={<Skeleton className="h-10 w-36" />}>
+              <DesignSheetAction />
+            </Suspense>
+          </>
         }
       />
 

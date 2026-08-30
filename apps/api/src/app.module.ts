@@ -48,6 +48,7 @@ import { OfficialReportsModule } from './official-reports/official-reports.modul
 import { OfficialReportImportModule } from './official-report-import/official-report-import.module';
 import { DocumentsModule } from './documents/documents.module';
 import { McpModule } from './mcp/mcp.module';
+import { SheetScanningModule } from './sheet-scanning/sheet-scanning.module';
 
 @Module({
   imports: [
@@ -113,6 +114,8 @@ import { McpModule } from './mcp/mcp.module';
     OfficialReportImportModule,
     DocumentsModule,
     McpModule,
+    // ── E22: lector de marcas (hojas de respuesta propias: layout, impresión, OMR, revisión) ──
+    SheetScanningModule,
   ],
   controllers: [AppController],
   providers: [
