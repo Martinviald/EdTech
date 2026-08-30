@@ -31,6 +31,8 @@ import { SheetLayoutsController } from './sheet-layouts.controller';
 import { SheetPrintRunsController } from './sheet-print-runs.controller';
 import { SheetPrintService } from './sheet-print.service';
 import { SheetScanBatchesController } from './sheet-scan-batches.controller';
+import { SheetScanMetricsController } from './sheet-scan-metrics.controller';
+import { SheetScanMetricsService } from './sheet-scan-metrics.service';
 import { SheetScanService } from './sheet-scan.service';
 
 @Module({
@@ -39,6 +41,7 @@ import { SheetScanService } from './sheet-scan.service';
     SheetLayoutsController,
     SheetPrintRunsController,
     SheetScanBatchesController,
+    SheetScanMetricsController,
     OmrCalibrationController,
     ScanReviewBatchesController,
     ScanReviewMarksController,
@@ -48,6 +51,7 @@ import { SheetScanService } from './sheet-scan.service';
     SheetLayoutService,
     SheetPrintService,
     SheetScanService,
+    SheetScanMetricsService,
     ScanReviewService,
     DevelopmentGradingService,
     OmrCalibrationService,
