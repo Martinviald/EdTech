@@ -9,6 +9,7 @@ import type { JwtPayload } from '../auth/jwt-payload.types';
 import { Roles } from '../common/decorators/roles.decorator';
 import { RolesGuard } from '../common/guards/roles.guard';
 import { getEffectiveOrgId } from '../common/helpers/org-context.helper';
+import { parseDtoOrBadRequest } from './parse-dto.helper';
 import { OmrCalibrationService } from './omr-calibration.service';
 
 @Controller('organizations/me/omr-calibration')
@@ -32,7 +33,7 @@ export class OmrCalibrationController {
     @CurrentUser() user: JwtPayload,
     @Query('orgId') orgId?: string,
   ): Promise<OmrCalibrationResponse> {
-    const dto = updateOmrCalibrationSchema.parse(body);
+    const dto = parseDtoOrBadRequest(updateOmrCalibrationSchema, body);
     return this.omrCalibrationService.updateCalibration(getEffectiveOrgId(user, orgId), dto);
   }
 }

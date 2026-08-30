@@ -34,9 +34,13 @@ export class OmrCalibrationService {
     if (!org) throw new NotFoundException('Organización no encontrada');
 
     const currentConfig = (org.config ?? {}) as Record<string, unknown>;
+    const mergedCalibration = { ...this.parseCalibration(org.config), ...dto };
     await this.db
       .update(organizations)
-      .set({ config: { ...currentConfig, omrCalibration: dto }, updatedAt: new Date() })
+      .set({
+        config: { ...currentConfig, omrCalibration: mergedCalibration },
+        updatedAt: new Date(),
+      })
       .where(eq(organizations.id, orgId));
 
     return this.getCalibration(orgId);

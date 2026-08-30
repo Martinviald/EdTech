@@ -91,6 +91,34 @@ describe('OmrCalibrationService.updateCalibration', () => {
     expect(result.calibration).toEqual({ ambiguityMargin: 0.1 });
   });
 
+  it('PATCH parcial: mandar sólo ambiguityMargin no borra minSeparability', async () => {
+    const currentConfig = {
+      allowedFeatures: ['remedial'],
+      omrCalibration: { ambiguityMargin: 0.25, minSeparability: 0.4 },
+    };
+    const { db, updates } = makeDb([
+      [{ config: currentConfig }],
+      [
+        {
+          id: ORG_ID,
+          config: {
+            ...currentConfig,
+            omrCalibration: { ambiguityMargin: 0.1, minSeparability: 0.4 },
+          },
+        },
+      ],
+    ]);
+    const service = new OmrCalibrationService(db);
+
+    const result = await service.updateCalibration(ORG_ID, { ambiguityMargin: 0.1 });
+
+    expect(updates[0].set.config).toEqual({
+      allowedFeatures: ['remedial'],
+      omrCalibration: { ambiguityMargin: 0.1, minSeparability: 0.4 },
+    });
+    expect(result.calibration).toEqual({ ambiguityMargin: 0.1, minSeparability: 0.4 });
+  });
+
   it('org inexistente lanza NotFound sin escribir', async () => {
     const { db, updates } = makeDb([[]]);
     const service = new OmrCalibrationService(db);

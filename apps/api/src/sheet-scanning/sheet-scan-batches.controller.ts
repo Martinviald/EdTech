@@ -14,6 +14,7 @@ import type { JwtPayload } from '../auth/jwt-payload.types';
 import { Roles } from '../common/decorators/roles.decorator';
 import { RolesGuard } from '../common/guards/roles.guard';
 import { getEffectiveOrgId } from '../common/helpers/org-context.helper';
+import { parseDtoOrBadRequest } from './parse-dto.helper';
 import { SheetScanService } from './sheet-scan.service';
 
 @Controller('sheet-scan-batches')
@@ -28,7 +29,7 @@ export class SheetScanBatchesController {
     @CurrentUser() user: JwtPayload,
     @Query('orgId') orgId?: string,
   ): Promise<CreateScanBatchResponse> {
-    const dto = createScanBatchSchema.parse(body);
+    const dto = parseDtoOrBadRequest(createScanBatchSchema, body);
     return this.sheetScanService.createBatch(getEffectiveOrgId(user, orgId), user.userId, dto);
   }
 
@@ -39,7 +40,7 @@ export class SheetScanBatchesController {
     @CurrentUser() user: JwtPayload,
     @Query('orgId') orgId?: string,
   ): Promise<AssessCaptureResponse> {
-    const dto = assessCaptureSchema.parse(body);
+    const dto = parseDtoOrBadRequest(assessCaptureSchema, body);
     return this.sheetScanService.assessCapture(getEffectiveOrgId(user, orgId), dto);
   }
 
@@ -70,7 +71,7 @@ export class SheetScanBatchesController {
     @CurrentUser() user: JwtPayload,
     @Query('orgId') orgId?: string,
   ): Promise<PaginatedResponse<BatchStatusModel>> {
-    const dto = scanBatchQuerySchema.parse(query);
+    const dto = parseDtoOrBadRequest(scanBatchQuerySchema, query);
     return this.sheetScanService.list(getEffectiveOrgId(user, orgId), dto);
   }
 

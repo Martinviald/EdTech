@@ -26,6 +26,7 @@ import type { JwtPayload } from '../auth/jwt-payload.types';
 import { Roles } from '../common/decorators/roles.decorator';
 import { RolesGuard } from '../common/guards/roles.guard';
 import { getEffectiveOrgId } from '../common/helpers/org-context.helper';
+import { parseDtoOrBadRequest } from './parse-dto.helper';
 import { SheetPrintService } from './sheet-print.service';
 
 @Controller('sheet-print-runs')
@@ -40,7 +41,7 @@ export class SheetPrintRunsController {
     @CurrentUser() user: JwtPayload,
     @Query('orgId') orgId?: string,
   ): Promise<PrintRunModel> {
-    const dto = createPrintRunSchema.parse(body);
+    const dto = parseDtoOrBadRequest(createPrintRunSchema, body);
     return this.sheetPrintService.createRun(getEffectiveOrgId(user, orgId), user.userId, dto);
   }
 
@@ -51,7 +52,7 @@ export class SheetPrintRunsController {
     @CurrentUser() user: JwtPayload,
     @Query('orgId') orgId?: string,
   ): Promise<PaginatedResponse<PrintRunModel>> {
-    const dto = printRunQuerySchema.parse(query);
+    const dto = parseDtoOrBadRequest(printRunQuerySchema, query);
     return this.sheetPrintService.list(getEffectiveOrgId(user, orgId), dto);
   }
 

@@ -252,6 +252,10 @@ helper del otro workstream, NO lo escribas: decláralo en tu reporte final y F3 
   `threshold: 0.5`, `margin: 1` fijos (no aplican).
 - El adaptador NO lo mapea a `answers`: el confirm crea la respuesta de desarrollo por el
   camino `ai_grading_jobs` (V2·B2). `ai_score` jamás pisa `final_score` (§8.3).
+- Métricas del módulo (V3): las marcas `marked` fijas de `crop_region` se detectan por
+  sus valores fijos CD-9 (`fill = 0 AND threshold = 0.5 AND margin = 1`) y se excluyen
+  del denominador de `reviewRatePercent` — los crops no son revisables por diseño y
+  cargar los specs de cada lote sólo para clasificarlas no se justifica.
 
 ### CD-10 — Identidad `rut_bubbles` (hoja genérica)
 
