@@ -58,6 +58,10 @@ export function PrintRunForm({
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
+    if (hasForms && !assessmentFormId) {
+      toast.error('Selecciona la forma de la evaluación antes de generar la tirada.');
+      return;
+    }
     const parsed = createPrintRunSchema.safeParse({
       layoutId,
       classGroupId,

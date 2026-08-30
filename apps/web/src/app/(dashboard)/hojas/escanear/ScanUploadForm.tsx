@@ -283,17 +283,44 @@ export function ScanUploadForm({
     else toast.error('Sigue habiendo archivos con error. Puedes reintentar de nuevo.');
   }
 
-  function handleCameraAccepted(file: File, identity: AssessCaptureIdentityModel | null) {
-    setFiles((prev) => {
-      if (prev.length >= MAX_FILES) {
-        toast.error(`Máximo ${MAX_FILES} archivos por lote.`);
-        return prev;
-      }
-      return [
-        ...prev,
-        { file, status: 'queued', progress: 0, error: null, origin: 'camera', identity },
-      ];
-    });
+  function handleCameraAccepted(
+    file: File,
+    identity: AssessCaptureIdentityModel | null,
+  ): boolean {
+    if (files.length >= MAX_FILES) {
+      toast.error(`Máximo ${MAX_FILES} archivos por lote: la foto no se agregó.`);
+      return false;
+    }
+    setFiles((prev) => [
+      ...prev,
+      { file, status: 'queued', progress: 0, error: null, origin: 'camera', identity },
+    ]);
+    return true;
+  }
+
+  function discardCameraCaptures(reason: string) {
+    if (!files.some((entry) => entry.origin === 'camera')) return;
+    setFiles((prev) => prev.filter((entry) => entry.origin !== 'camera'));
+    toast.warning(reason);
+  }
+
+  function handlePrintRunChange(value: string) {
+    if (value !== printRunId) {
+      discardCameraCaptures(
+        'Se quitaron las fotos de cámara: su control de calidad se hizo contra otra tirada. Vuelve a capturarlas.',
+      );
+    }
+    setPrintRunId(value);
+  }
+
+  function handleSourceChange(value: CaptureSource) {
+    if (value !== source) {
+      discardCameraCaptures(
+        'Se quitaron las fotos de cámara: su control de calidad usó el perfil de celular y cambiaste la fuente. Vuelve a capturarlas.',
+      );
+    }
+    setSource(value);
+    if (value !== 'phone') setUploadMode('files');
   }
 
   const selectedRun = printRuns.find((run) => run.id === printRunId) ?? null;
@@ -326,7 +353,7 @@ export function ScanUploadForm({
             required
             hint="No es la evaluación: la evaluación es el destino de los resultados y va asociada a la tirada."
           >
-            <Select value={printRunId} onValueChange={setPrintRunId} disabled={!editable}>
+            <Select value={printRunId} onValueChange={handlePrintRunChange} disabled={!editable}>
               <SelectTrigger id="print-run" className="h-auto w-full py-2">
                 <SelectValue placeholder="Selecciona la tirada que se rindió" />
               </SelectTrigger>
@@ -384,10 +411,7 @@ export function ScanUploadForm({
                       name="capture-source"
                       value={option.value}
                       checked={selected}
-                      onChange={() => {
-                        setSource(option.value);
-                        if (option.value !== 'phone') setUploadMode('files');
-                      }}
+                      onChange={() => handleSourceChange(option.value)}
                       className="sr-only"
                     />
                     <Icon

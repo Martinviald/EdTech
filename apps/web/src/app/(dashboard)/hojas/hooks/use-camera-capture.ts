@@ -77,6 +77,7 @@ export function useCameraCapture() {
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const streamRef = useRef<MediaStream | null>(null);
   const disposedRef = useRef(false);
+  const startingRef = useRef(false);
   const [status, setStatus] = useState<CameraStatus>('idle');
 
   const stop = useCallback(() => {
@@ -86,10 +87,12 @@ export function useCameraCapture() {
   }, []);
 
   const start = useCallback(async () => {
+    if (startingRef.current) return;
     if (!isCameraSupported()) {
       setStatus('unsupported');
       return;
     }
+    startingRef.current = true;
     setStatus('starting');
     try {
       const stream = await navigator.mediaDevices.getUserMedia({
@@ -104,6 +107,7 @@ export function useCameraCapture() {
         stream.getTracks().forEach((track) => track.stop());
         return;
       }
+      streamRef.current?.getTracks().forEach((track) => track.stop());
       streamRef.current = stream;
       const video = videoRef.current;
       if (video) {
@@ -113,6 +117,8 @@ export function useCameraCapture() {
       setStatus('active');
     } catch (err) {
       setStatus(isPermissionError(err) ? 'denied' : 'error');
+    } finally {
+      startingRef.current = false;
     }
   }, []);
 

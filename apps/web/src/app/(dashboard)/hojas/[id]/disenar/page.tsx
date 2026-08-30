@@ -51,10 +51,10 @@ async function DeriveSection({
   instrumentId: string;
   identityMode: DesignIdentityMode;
 }) {
-  const draft = await deriveDraftOrNotFound(instrumentId, identityMode);
-  const instrument = await apiGet<InstrumentModel>(`/instruments/${instrumentId}`).catch(
-    () => null,
-  );
+  const [draft, instrument] = await Promise.all([
+    deriveDraftOrNotFound(instrumentId, identityMode),
+    apiGet<InstrumentModel>(`/instruments/${instrumentId}`).catch(() => null),
+  ]);
 
   return <LayoutDesigner draft={draft} instrumentName={instrument?.name ?? null} />;
 }

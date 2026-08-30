@@ -27,7 +27,7 @@ type CameraCaptureSectionProps = {
   expectedSheets: number | null;
   capturedIdentities: AssessCaptureIdentityModel[];
   capturedCount: number;
-  onAccepted: (file: File, identity: AssessCaptureIdentityModel | null) => void;
+  onAccepted: (file: File, identity: AssessCaptureIdentityModel | null) => boolean;
 };
 
 function rejectionLabel(quality: PageQuality): string {
@@ -48,12 +48,25 @@ export function CameraCaptureSection({
   const [gate, setGate] = useState<GateState>({ phase: 'live' });
   const [encoding, setEncoding] = useState(false);
   const fallbackInputRef = useRef<HTMLInputElement | null>(null);
+  const capturingRef = useRef(false);
+  const previewUrlRef = useRef<string | null>(null);
   const supported = isCameraSupported();
 
   const { start } = camera;
   useEffect(() => {
     if (supported) void start();
   }, [supported, start]);
+
+  useEffect(() => {
+    previewUrlRef.current = gate.phase === 'live' ? null : gate.previewUrl;
+  }, [gate]);
+
+  useEffect(
+    () => () => {
+      if (previewUrlRef.current) URL.revokeObjectURL(previewUrlRef.current);
+    },
+    [],
+  );
 
   function isDuplicate(identity: AssessCaptureIdentityModel): boolean {
     return capturedIdentities.some(
@@ -101,8 +114,8 @@ export function CameraCaptureSection({
           const file = new File([capture.blob], `captura-${capturedCount + 1}-${Date.now()}.jpg`, {
             type: 'image/jpeg',
           });
-          notifyAccepted(result.identity);
-          onAccepted(file, result.identity);
+          const added = onAccepted(file, result.identity);
+          if (added) notifyAccepted(result.identity);
           backToLive(previewUrl);
         },
         onError: () => backToLive(previewUrl),
@@ -111,12 +124,18 @@ export function CameraCaptureSection({
   }
 
   async function handleCapture() {
-    const capture = await camera.captureJpeg();
-    if (!capture) {
-      toast.error('No se pudo capturar la imagen. Intenta de nuevo.');
-      return;
+    if (capturingRef.current) return;
+    capturingRef.current = true;
+    try {
+      const capture = await camera.captureJpeg();
+      if (!capture) {
+        toast.error('No se pudo capturar la imagen. Intenta de nuevo.');
+        return;
+      }
+      runGate(capture);
+    } finally {
+      capturingRef.current = false;
     }
-    runGate(capture);
   }
 
   async function handleFallbackFile(e: React.ChangeEvent<HTMLInputElement>) {
@@ -155,7 +174,7 @@ export function CameraCaptureSection({
         <div className="flex flex-wrap gap-1.5">
           {knownIdentities.map(({ identity, label }, index) => (
             <Badge
-              key={`${identity.printedSheetId ?? identity.studentId ?? index}-${identity.pageIndex ?? 0}`}
+              key={`${identity.printedSheetId ?? identity.studentId ?? 'sin-id'}-${identity.pageIndex ?? 0}-${index}`}
               variant="secondary"
             >
               {label}
@@ -213,6 +232,7 @@ export function CameraCaptureSection({
               autoPlay
               playsInline
               muted
+              aria-label="Vista previa en vivo de la cámara para capturar la hoja"
               className="h-full w-full object-cover"
             />
             {gate.phase === 'live' && camera.status === 'active' && (
