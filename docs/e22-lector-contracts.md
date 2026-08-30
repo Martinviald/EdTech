@@ -294,6 +294,31 @@ helper del otro workstream, NO lo escribas: decláralo en tu reporte final y F3 
   (`access-policies/sheet-scanning.ts`) — alias EXPLÍCITO de `SHEET_MANAGEMENT_ROLES`:
   quien gestiona hojas calibra su lectura; es el mismo conjunto a propósito, no una
   copia — si divergen algún día, se separa la constante, no se edita la lista en línea.
+- El PATCH hace merge no destructivo sobre `config.omrCalibration` (mandar sólo
+  `ambiguityMargin` no borra `minSeparability`). `minSeparability` se persiste como
+  knob reservado: NO viaja al servicio en v1.
+
+### CD-15 — QR de esquina en modo `rut_bubbles` (enmienda V3, post-auditoría)
+
+- `scannedPageIdentitySchema` gana `qrRaw: z.string().nullable().optional()` (sin
+  default: los payloads del MVP validan sin cambios; el schema JSON regenerado lo
+  deja fuera de `required`). En modo `qr`, `qrRaw` duplica `raw`. En modo
+  `rut_bubbles`, `identity.raw` = dígitos RUT leídos e `identity.qrRaw` = payload
+  del QR de esquina (o null si es ilegible) — la hoja genérica SIEMPRE imprime ese
+  QR (`SHEET_QR_IDENTITY_REGION`, esquina superior derecha) con
+  `printedSheetId + layoutHash + pageIndex + pageCount`.
+- El servicio lo localiza escaneando el cuadrante superior derecho de la página
+  rectificada (no conoce la constante del impresor). El QR identifica la COPIA
+  física: con él, el hash-check G1 corre siempre, la idempotencia D13
+  `(printedSheetId, pageIndex, imageHash)` y el supersede funcionan sin cambios, y
+  el `pageIndex` lógico sale del QR — el RUT sólo resuelve el alumno
+  (`resolvedStudentId`, vía `RutBubbleResolver`).
+- **Orientación (política cerrada):** en specs `rut_bubbles` la pasada de
+  rectificación sólo se confirma si el QR de esquina decodifica desde ese
+  cuadrante; si ninguna de las 4 orientaciones lo logra, la página se rechaza por
+  calidad (`no_separable_marks`, sin clasificar marcas). Un QR tapado o dañado ⇒
+  retake/re-escaneo: sin QR no hay copia física a la que anclar la idempotencia ni
+  orientación probada, aunque la grilla RUT sea legible.
 
 ### CD-13 — Formas A/B
 

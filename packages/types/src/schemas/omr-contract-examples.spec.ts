@@ -39,4 +39,16 @@ describe('ejemplos compartidos del contrato OMR', () => {
     const parsed = layoutSpecSchema.safeParse(loadExample('layout-crop-region'));
     expect(parsed.success).toBe(true);
   });
+
+  it('CD-15: una página con identity.qrRaw parsea y una del MVP sin qrRaw también', () => {
+    const example = loadExample('scan-result') as { pages: Array<{ identity: object }> };
+    const withQrRaw = {
+      pages: example.pages.map((page) => ({
+        ...page,
+        identity: { ...page.identity, qrRaw: 'academos:v1:hoja:hash:0:1' },
+      })),
+    };
+    expect(scanResultSchema.safeParse(withQrRaw).success).toBe(true);
+    expect(scanResultSchema.safeParse(example).success).toBe(true);
+  });
 });

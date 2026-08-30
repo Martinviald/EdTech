@@ -87,6 +87,12 @@
                     "type": "number",
                     "minimum": 0,
                     "maximum": 1
+                  },
+                  "qrRaw": {
+                    "type": [
+                      "string",
+                      "null"
+                    ]
                   }
                 },
                 "required": [

@@ -52,6 +52,13 @@ export const scannedPageIdentitySchema = z.object({
   /** Payload crudo del QR (`academos:v1:...`) o null si no se pudo decodificar. Lo interpreta el backend, nunca el servicio. */
   raw: z.string().nullable(),
   confidence: z.number().min(0).max(1),
+  /**
+   * CD-15: payload del QR de esquina (`academos:v1:...`) o null si es ilegible.
+   * En modo `qr` duplica `raw`; en modo `rut_bubbles` `raw` lleva los dígitos
+   * RUT leídos y este campo lleva el QR que identifica la copia física.
+   * Optional sin default: los payloads del MVP siguen validando sin cambios.
+   */
+  qrRaw: z.string().nullable().optional(),
 });
 
 /**
