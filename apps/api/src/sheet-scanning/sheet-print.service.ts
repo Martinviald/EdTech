@@ -19,6 +19,7 @@ import {
   withOrgContext,
 } from '@soe/db';
 import type {
+  AssessmentFormListResponse,
   CreatePrintRunDto,
   PaginatedResponse,
   PrintRunAssessmentOption,
@@ -29,18 +30,6 @@ import type {
 import { InjectDb, type Database } from '../database/database.types';
 import { identityModeOf } from './sheet-layout.helpers';
 import { renderSheetsPdf, type PrintableSheetInfo } from './sheet-print.helpers';
-
-export type AssessmentFormModel = {
-  id: string;
-  name: string;
-  assessmentId: string;
-  assessmentName: string | null;
-  createdAt: Date;
-};
-
-export type AssessmentFormListResponse = {
-  data: AssessmentFormModel[];
-};
 
 type RunRow = {
   id: string;

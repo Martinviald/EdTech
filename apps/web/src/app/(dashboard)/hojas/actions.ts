@@ -1,11 +1,6 @@
 'use server';
 
-<<<<<<< HEAD
-import { cookies } from 'next/headers';
-import { apiPatch, apiPost } from '@/lib/api';
-=======
-import { apiGetBinary, apiPost } from '@/lib/api';
->>>>>>> 31fb615 (feat(e22): V2-B4 — apiGetBinary server-only y migración de la descarga del PDF de tiradas)
+import { apiGetBinary, apiPatch, apiPost } from '@/lib/api';
 import { getDisplayMessage } from '@/lib/errors';
 import type {
   CreatePrintRunDto,

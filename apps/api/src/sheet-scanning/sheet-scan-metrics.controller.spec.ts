@@ -1,10 +1,10 @@
 import 'reflect-metadata';
 import { BadRequestException, ForbiddenException } from '@nestjs/common';
-import { SHEET_MANAGEMENT_ROLES } from '@soe/types';
+import { SHEET_MANAGEMENT_ROLES, type SheetScanMetricsResponse } from '@soe/types';
 import { ROLES_KEY } from '../common/decorators/roles.decorator';
 import type { JwtPayload } from '../auth/jwt-payload.types';
 import { SheetScanMetricsController } from './sheet-scan-metrics.controller';
-import type { SheetScanMetricsService, SheetScanMetricsResponse } from './sheet-scan-metrics.service';
+import type { SheetScanMetricsService } from './sheet-scan-metrics.service';
 
 const EMPTY_METRICS: SheetScanMetricsResponse = {
   batchesByStatus: {},

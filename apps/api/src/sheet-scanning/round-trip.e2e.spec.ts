@@ -28,6 +28,9 @@ const RUT_RAW = '123456785';
 const DIGIT_FIELD_ID = 'f_031';
 const DIGIT_PRINTED_NUMBER = '31';
 const DIGIT_VALUE = '407';
+const CROP_FIELD_ID = 'f_032';
+const CROP_PRINTED_NUMBER = '32';
+const JPEG_BASE64_HEADER = '/9j/';
 
 function makeItems(): DerivableItem[] {
   const items: DerivableItem[] = [];
@@ -74,6 +77,18 @@ function digitGridField(): LayoutField {
     selectMode: 'single',
     bubbles,
     region: null,
+  };
+}
+
+function cropRegionField(): LayoutField {
+  return {
+    fieldId: CROP_FIELD_ID,
+    kind: 'crop_region',
+    printedNumber: CROP_PRINTED_NUMBER,
+    pageIndex: 0,
+    selectMode: 'single',
+    bubbles: [],
+    region: { topLeft: { x: 0.6, y: 0.68 }, bottomRight: { x: 0.95, y: 0.9 } },
   };
 }
 
@@ -281,7 +296,10 @@ describeRoundTrip('ida y vuelta impresión ↔ lectura (gates F3 y V1)', () => {
 
     const rutDraft = deriveLayoutDraft(INSTRUMENT_ID, makeItems(), 'rut_bubbles');
     expect(rutDraft.excludedItems).toHaveLength(0);
-    rutSpec = { ...rutDraft.spec, fields: [...rutDraft.spec.fields, digitGridField()] };
+    rutSpec = {
+      ...rutDraft.spec,
+      fields: [...rutDraft.spec.fields, digitGridField(), cropRegionField()],
+    };
     const rutSpecHash = layoutHash(rutSpec);
     rutAnswerKey = makeAnswerKey(rutSpec);
     rutAnswerKey.set(DIGIT_FIELD_ID, DIGIT_VALUE);
@@ -391,6 +409,12 @@ describeRoundTrip('ida y vuelta impresión ↔ lectura (gates F3 y V1)', () => {
       const digitMark = page.marks.find((m) => m.fieldId === DIGIT_FIELD_ID);
       expect(digitMark?.state).toBe('marked');
       expect(digitMark?.value).toBe(DIGIT_VALUE);
+
+      const cropMark = page.marks.find((m) => m.fieldId === CROP_FIELD_ID);
+      expect(cropMark?.state).toBe('marked');
+      expect(cropMark?.value).toBeNull();
+      expect(cropMark?.cropJpegBase64).toBeTruthy();
+      expect(cropMark?.cropJpegBase64?.startsWith(JPEG_BASE64_HEADER)).toBe(true);
 
       const verdict = judge(result, rutSpec, rutAnswerKey);
       expect(verdict.wrongConfident).toEqual([]);

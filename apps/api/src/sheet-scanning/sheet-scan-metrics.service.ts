@@ -8,7 +8,7 @@ import {
   sheetScans,
   withOrgContext,
 } from '@soe/db';
-import { PAGE_REJECT_REASONS } from '@soe/types';
+import { PAGE_REJECT_REASONS, type SheetScanMetricsResponse } from '@soe/types';
 import { InjectDb, type Database } from '../database/database.types';
 
 const REVIEW_MARK_STATES = ['ambiguous', 'multiple'] as const;
@@ -16,14 +16,6 @@ const FIRM_MARK_STATES = ['marked', 'blank'] as const;
 const UNKNOWN_REJECT_REASON = 'unknown';
 
 type CountByKey = { key: string | null; count: number };
-
-export type SheetScanMetricsResponse = {
-  batchesByStatus: Record<string, number>;
-  rejectedPagesByReason: Record<string, number>;
-  marksByState: Record<string, number>;
-  reviewRatePercent: number;
-  firmReadingOverrides: number;
-};
 
 @Injectable()
 export class SheetScanMetricsService {

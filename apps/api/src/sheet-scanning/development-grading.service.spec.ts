@@ -292,7 +292,7 @@ describe('DevelopmentGradingService.processConfirmedBatch', () => {
     expect(llmCalls[0].prompt).toContain('Puntaje máximo: 2');
     expect(llmCalls[0].images).toEqual([{ mimeType: 'image/jpeg', data: CROP_BASE64 }]);
     expect(llmCalls[0].orgId).toBe(ORG_ID);
-    expect(llmCalls[0].feature).toBe('item_insight');
+    expect(llmCalls[0].feature).toBe('ai_grading');
   });
 
   it('escribe ai_score en la response y completa el job con score, modelo y costo', async () => {

@@ -206,6 +206,18 @@ export type PrintRunModel = {
   createdAt: string | Date;
 };
 
+export type AssessmentFormModel = {
+  id: string;
+  name: string;
+  assessmentId: string;
+  assessmentName: string | null;
+  createdAt: string | Date;
+};
+
+export type AssessmentFormListResponse = {
+  data: AssessmentFormModel[];
+};
+
 export type ScanUploadIntent = {
   sourceIndex: number;
   fileId: string;
@@ -296,6 +308,14 @@ export type AssessCaptureResponse = {
 export type OmrCalibrationResponse = {
   orgId: string;
   calibration: OmrCalibration;
+};
+
+export type SheetScanMetricsResponse = {
+  batchesByStatus: Record<string, number>;
+  rejectedPagesByReason: Record<string, number>;
+  marksByState: Record<string, number>;
+  reviewRatePercent: number;
+  firmReadingOverrides: number;
 };
 
 export type ConfirmBatchResponse = {

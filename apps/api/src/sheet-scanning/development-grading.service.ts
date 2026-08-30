@@ -26,7 +26,7 @@ import type { LlmImagePart } from '../llm/llm.types';
 export const DEVELOPMENT_GRADING_JOB_TYPE = 'development_crop';
 export const DEVELOPMENT_GRADING_PROMPT_VERSION = 'dev-grading-v1';
 export const DEVELOPMENT_GRADING_BATCH_LIMIT = 200;
-const DEVELOPMENT_GRADING_LLM_FEATURE = 'item_insight' satisfies LlmFeature;
+const DEVELOPMENT_GRADING_LLM_FEATURE = 'ai_grading' satisfies LlmFeature;
 
 export interface ScheduleConfirmedBatchParams {
   orgId: string;

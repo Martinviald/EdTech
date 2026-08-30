@@ -16,6 +16,7 @@ import {
   printRunAssessmentOptionsQuerySchema,
   printRunQuerySchema,
   updatePrintRunSchema,
+  type AssessmentFormListResponse,
   type PaginatedResponse,
   type PrintRunAssessmentOption,
   type PrintRunModel,
@@ -25,7 +26,7 @@ import type { JwtPayload } from '../auth/jwt-payload.types';
 import { Roles } from '../common/decorators/roles.decorator';
 import { RolesGuard } from '../common/guards/roles.guard';
 import { getEffectiveOrgId } from '../common/helpers/org-context.helper';
-import { SheetPrintService, type AssessmentFormListResponse } from './sheet-print.service';
+import { SheetPrintService } from './sheet-print.service';
 
 @Controller('sheet-print-runs')
 @UseGuards(RolesGuard)

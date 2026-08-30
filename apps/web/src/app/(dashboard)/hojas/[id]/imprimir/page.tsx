@@ -4,6 +4,7 @@ import { Printer } from 'lucide-react';
 import {
   canAccess,
   SHEET_MANAGEMENT_ROLES,
+  type AssessmentFormListResponse,
   type PaginatedResponse,
   type PrintRunModel,
   type SheetLayoutModel,
@@ -72,10 +73,11 @@ export default async function ImprimirPage({ params }: PageProps) {
 
 async function SetupSection({ layoutId, orgId }: { layoutId: string; orgId: string }) {
   const layout = await getLayoutOrNotFound(layoutId);
-  const [classGroups, instruments, assessments] = await Promise.all([
+  const [classGroups, instruments, assessments, forms] = await Promise.all([
     listClassGroupsForUser(orgId),
     listInstrumentsForSheets(),
     listAssessmentOptions(layout.instrumentId),
+    apiGet<AssessmentFormListResponse>(`/sheet-print-runs/forms?layoutId=${layoutId}`),
   ]);
 
   const instrumentName =
@@ -110,6 +112,7 @@ async function SetupSection({ layoutId, orgId }: { layoutId: string; orgId: stri
         layoutId={layout.id}
         courses={buildCourseOptions(classGroups)}
         assessments={assessments}
+        assessmentForms={forms.data.map((form) => ({ id: form.id, name: form.name }))}
       />
     </div>
   );
