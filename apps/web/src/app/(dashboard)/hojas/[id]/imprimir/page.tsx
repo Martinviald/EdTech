@@ -1,10 +1,11 @@
-import { Suspense } from 'react';
+import { Suspense, cache } from 'react';
 import { notFound, redirect } from 'next/navigation';
 import { Printer } from 'lucide-react';
 import {
   canAccess,
   SHEET_MANAGEMENT_ROLES,
   type PaginatedResponse,
+  type PrintRunAssessmentOption,
   type PrintRunModel,
   type SheetLayoutModel,
 } from '@soe/types';
@@ -30,6 +31,7 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { DownloadPdfButton } from '../../components/DownloadPdfButton';
+import { AssignAssessmentControl } from '../../components/AssignAssessmentControl';
 import { HOJAS_ROUTES } from '../../lib/routes';
 import { listInstrumentsForSheets } from '../../lib/instruments';
 import { formatSheetDate } from '../../lib/format';
@@ -70,9 +72,10 @@ export default async function ImprimirPage({ params }: PageProps) {
 
 async function SetupSection({ layoutId, orgId }: { layoutId: string; orgId: string }) {
   const layout = await getLayoutOrNotFound(layoutId);
-  const [classGroups, instruments] = await Promise.all([
+  const [classGroups, instruments, assessments] = await Promise.all([
     listClassGroupsForUser(orgId),
     listInstrumentsForSheets(),
+    listAssessmentOptions(layout.instrumentId),
   ]);
 
   const instrumentName =
@@ -103,19 +106,30 @@ async function SetupSection({ layoutId, orgId }: { layoutId: string; orgId: stri
         </div>
       </dl>
 
-      <PrintRunForm layoutId={layout.id} courses={buildCourseOptions(classGroups)} />
+      <PrintRunForm
+        layoutId={layout.id}
+        courses={buildCourseOptions(classGroups)}
+        assessments={assessments}
+      />
     </div>
   );
 }
 
-async function getLayoutOrNotFound(layoutId: string): Promise<SheetLayoutModel> {
+/** Evaluaciones del mismo instrumento del layout: las únicas que puede recibir una tirada. */
+const listAssessmentOptions = cache((instrumentId: string): Promise<PrintRunAssessmentOption[]> => {
+  return apiGet<PrintRunAssessmentOption[]>(
+    `/sheet-print-runs/assessment-options?instrumentId=${instrumentId}`,
+  );
+});
+
+const getLayoutOrNotFound = cache(async (layoutId: string): Promise<SheetLayoutModel> => {
   try {
     return await apiGet<SheetLayoutModel>(`/sheet-layouts/${layoutId}`);
   } catch (e) {
     if (e instanceof ApiRequestError && (e.status === 404 || e.status === 400)) notFound();
     throw e;
   }
-}
+});
 
 function buildCourseOptions(
   classGroups: Awaited<ReturnType<typeof listClassGroupsForUser>>,
@@ -137,9 +151,13 @@ function buildCourseOptions(
 }
 
 async function HistorySection({ layoutId }: { layoutId: string }) {
-  const runs = await apiGet<PaginatedResponse<PrintRunModel>>(
-    `/sheet-print-runs?layoutId=${layoutId}&page=1&limit=50`,
-  );
+  const layout = await getLayoutOrNotFound(layoutId);
+  const [runs, assessments] = await Promise.all([
+    apiGet<PaginatedResponse<PrintRunModel>>(
+      `/sheet-print-runs?layoutId=${layoutId}&page=1&limit=50`,
+    ),
+    listAssessmentOptions(layout.instrumentId),
+  ]);
 
   if (runs.data.length === 0) {
     return (
@@ -172,8 +190,13 @@ async function HistorySection({ layoutId }: { layoutId: string }) {
               <TableCell className="font-medium">{run.classGroupName ?? '—'}</TableCell>
               <TableCell className="hidden sm:table-cell">{run.sheetCount}</TableCell>
               <TableCell className="hidden sm:table-cell">{run.spareCount}</TableCell>
-              <TableCell className="text-right">
-                <DownloadPdfButton runId={run.id} />
+              <TableCell>
+                <div className="flex items-center justify-end gap-2">
+                  {run.assessmentId ? null : (
+                    <AssignAssessmentControl runId={run.id} assessments={assessments} />
+                  )}
+                  <DownloadPdfButton runId={run.id} />
+                </div>
               </TableCell>
             </TableRow>
           ))}

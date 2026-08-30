@@ -4,7 +4,11 @@ import { useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
 import { Loader2, Printer } from 'lucide-react';
-import { createPrintRunSchema, type PrintRunModel } from '@soe/types';
+import {
+  createPrintRunSchema,
+  type PrintRunAssessmentOption,
+  type PrintRunModel,
+} from '@soe/types';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -17,18 +21,29 @@ import {
 } from '@/components/ui/select';
 import { AlertCallout, Field } from '@/components/shared';
 import { DownloadPdfButton } from '../../components/DownloadPdfButton';
+import { assessmentLabel } from '../../lib/assessments';
 import { createPrintRun } from '../../actions';
 
 export type CourseOption = { id: string; label: string };
 
+/**
+ * Valor centinela del selector de evaluación: "crear una nueva". Se manda como
+ * `assessmentId: null` y el API crea la evaluación de esta aplicación en papel.
+ * Radix Select no admite `value=""` en un item, de ahí el centinela.
+ */
+const NEW_ASSESSMENT = '__new__';
+
 export function PrintRunForm({
   layoutId,
   courses,
+  assessments,
 }: {
   layoutId: string;
   courses: CourseOption[];
+  assessments: PrintRunAssessmentOption[];
 }) {
   const [classGroupId, setClassGroupId] = useState('');
+  const [assessmentId, setAssessmentId] = useState<string>(NEW_ASSESSMENT);
   const [spareCount, setSpareCount] = useState('2');
   const [createdRun, setCreatedRun] = useState<PrintRunModel | null>(null);
   const [pending, startTransition] = useTransition();
@@ -39,7 +54,7 @@ export function PrintRunForm({
     const parsed = createPrintRunSchema.safeParse({
       layoutId,
       classGroupId,
-      assessmentId: null,
+      assessmentId: assessmentId === NEW_ASSESSMENT ? null : assessmentId,
       spareCount: Number(spareCount),
     });
     if (!parsed.success) {
@@ -87,6 +102,27 @@ export function PrintRunForm({
             </Field>
 
             <Field
+              label="Evaluación"
+              htmlFor="print-run-assessment"
+              required
+              hint="Destino de las respuestas leídas. Si creas una nueva, queda agendada para este curso y este instrumento."
+            >
+              <Select value={assessmentId} onValueChange={setAssessmentId} disabled={pending}>
+                <SelectTrigger id="print-run-assessment">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value={NEW_ASSESSMENT}>Crear una evaluación nueva</SelectItem>
+                  {assessments.map((assessment) => (
+                    <SelectItem key={assessment.id} value={assessment.id}>
+                      {assessmentLabel(assessment)}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </Field>
+
+            <Field
               label="Hojas de reserva"
               htmlFor="print-run-spare"
               hint="Hojas extra sin alumno asignado, para incorporaciones o reemplazos (0–20)."
@@ -125,8 +161,8 @@ export function PrintRunForm({
             <div className="space-y-3">
               <p>
                 {createdRun.sheetCount} hojas para{' '}
-                <span className="font-medium">{createdRun.classGroupName ?? 'el curso'}</span>{' '}
-                ({createdRun.spareCount} de reserva). Descarga el PDF e imprímelo sin ajustar a
+                <span className="font-medium">{createdRun.classGroupName ?? 'el curso'}</span> (
+                {createdRun.spareCount} de reserva). Descarga el PDF e imprímelo sin ajustar a
                 página.
               </p>
               <DownloadPdfButton runId={createdRun.id} variant="default" size="default" />
