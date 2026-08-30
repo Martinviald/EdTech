@@ -742,6 +742,83 @@ describe('SheetScanService job', () => {
   });
 });
 
+describe('SheetScanService job — modo rut_bubbles con QR de esquina (CD-15)', () => {
+  const RUT_DIGITS = '123456785';
+
+  function rutIdentity(qr: string | null, raw: string | null = RUT_DIGITS) {
+    return { mode: 'rut_bubbles' as const, raw, confidence: 0.9, qrRaw: qr };
+  }
+
+  it('B1: el hash-check G1 corre con el qrRaw — hoja rut de un layout viejo rechaza el lote entero con ambos hashes', async () => {
+    const { service, inserts, updates, resolve, omr } = makeService([[CTX_ROW], [FILE_ROW]]);
+    const foreignQr = buildOmrQrPayload({
+      printedSheetId: SHEET_1,
+      layoutHash: 'ffff000011112222',
+      pageIndex: 0,
+      pageCount: 2,
+    });
+    omr.enqueueResponse({
+      pages: [makePage({ identity: rutIdentity(foreignQr) })],
+    });
+
+    await runJob(service);
+
+    expect(resolve).not.toHaveBeenCalled();
+    expect(inserts).toHaveLength(0);
+    expect(updates[0].set).toMatchObject({ status: 'rejected' });
+    expect(String(updates[0].set.failureReason)).toContain('ffff000011112222');
+    expect(String(updates[0].set.failureReason)).toContain(LAYOUT_HASH);
+  });
+
+  it('B2/B3: re-escaneo de la misma hoja genérica con foto nueva supersede al anterior y usa el pageIndex del QR', async () => {
+    const { service, inserts, updates, resolve, omr } = makeService([
+      [CTX_ROW],
+      [FILE_ROW],
+      [{ id: 'scan-viejo', imageHash: 'c'.repeat(64), state: 'read' }],
+      [{ state: 'read', count: 1 }],
+      [{ count: 0 }],
+    ]);
+    omr.enqueueResponse({
+      pages: [makePage({ pageIndex: 5, identity: rutIdentity(qrRaw(SHEET_1, 1)) })],
+    });
+    resolve.mockResolvedValueOnce(candidate({ printedSheetId: SHEET_1, studentId: STUDENT_1 }));
+
+    await runJob(service);
+
+    expect(inserts).toHaveLength(1);
+    expect(inserts[0].values).toMatchObject({
+      printedSheetId: SHEET_1,
+      pageIndex: 1,
+      sourcePageIndex: 5,
+      state: 'read',
+      resolvedStudentId: STUDENT_1,
+      supersedesId: 'scan-viejo',
+    });
+    expect(updates[0].table).toBe(sheetScans);
+    expect(updates[0].set).toEqual({ state: 'superseded' });
+    expect(updates[1].set).toMatchObject({ status: 'needs_review' });
+  });
+
+  it('B2: la misma foto de la misma hoja genérica se salta sin duplicar verdades activas', async () => {
+    const { service, inserts, updates, resolve, omr } = makeService([
+      [CTX_ROW],
+      [FILE_ROW],
+      [{ id: 'scan-previo', imageHash: 'a'.repeat(64), state: 'read' }],
+      [{ state: 'read', count: 1 }],
+      [{ count: 0 }],
+    ]);
+    omr.enqueueResponse({
+      pages: [makePage({ identity: rutIdentity(qrRaw(SHEET_1, 0)) })],
+    });
+    resolve.mockResolvedValueOnce(candidate({ printedSheetId: SHEET_1, studentId: STUDENT_1 }));
+
+    await runJob(service);
+
+    expect(inserts).toHaveLength(0);
+    expect(updates[0].set).toMatchObject({ status: 'needs_review' });
+  });
+});
+
 describe('SheetScanService.getBatch', () => {
   it('devuelve el BatchStatusModel con contadores agregados por estado', async () => {
     const { service } = makeService([

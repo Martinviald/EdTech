@@ -35,6 +35,7 @@ import {
   type LayoutSpec,
   type MarkState,
   type OmrAssessResult,
+  type OmrQrPayload,
   type OmrReadRequest,
   type PaginatedResponse,
   type ScanBatchQueryDto,
@@ -379,10 +380,7 @@ export class SheetScanService {
     assessed: OmrAssessResult,
     candidate: IdentityCandidate,
   ): Promise<{ identity: AssessCaptureIdentityModel; belongsToRun: boolean }> {
-    const qrPayload =
-      assessed.identity.mode === 'qr' && assessed.identity.raw !== null
-        ? parseOmrQrPayload(assessed.identity.raw)
-        : null;
+    const qrPayload = this.qrPayloadOf(assessed.identity);
     const evidenceName = candidate.evidence.alumno;
     const fallbackName = typeof evidenceName === 'string' ? evidenceName : null;
 
@@ -556,8 +554,13 @@ export class SheetScanService {
     return { rejectionReason: null, pagesTotal };
   }
 
+  private qrPayloadOf(identity: ScannedPage['identity']): OmrQrPayload | null {
+    const qrRaw = identity.qrRaw ?? (identity.mode === 'qr' ? identity.raw : null);
+    return qrRaw === null ? null : parseOmrQrPayload(qrRaw);
+  }
+
   private detectBatchLayoutMismatch(context: JobContext, page: ScannedPage): string | null {
-    const payload = page.identity.raw === null ? null : parseOmrQrPayload(page.identity.raw);
+    const payload = this.qrPayloadOf(page.identity);
     if (payload === null) return null;
     if (payload.layoutHash === context.specHash.toLowerCase()) return null;
     return `El diseño impreso en las hojas (hash ${payload.layoutHash}) no coincide con el diseño de la tirada de este lote (hash ${context.specHash}). El instrumento fue editado o las hojas pertenecen a otra tirada: reimprime las hojas o crea el lote sobre la tirada correcta. Ninguna hoja de este lote fue corregida.`;
@@ -584,7 +587,7 @@ export class SheetScanService {
     page: ScannedPage,
     candidate: IdentityCandidate,
   ): Promise<void> {
-    const qrPayload = page.identity.raw === null ? null : parseOmrQrPayload(page.identity.raw);
+    const qrPayload = this.qrPayloadOf(page.identity);
     const pageIndex = qrPayload?.pageIndex ?? page.pageIndex;
 
     const decision =

@@ -274,6 +274,7 @@ describeRoundTrip('ida y vuelta impresión ↔ lectura (gates F3 y V1)', () => {
   let answerKey: Map<string, string | null>;
 
   let rutSpec: LayoutSpec;
+  let rutSpecHash: string;
   let rutAnswerKey: Map<string, string | null>;
   let rutFilled: Uint8Array;
 
@@ -300,7 +301,7 @@ describeRoundTrip('ida y vuelta impresión ↔ lectura (gates F3 y V1)', () => {
       ...rutDraft.spec,
       fields: [...rutDraft.spec.fields, digitGridField(), cropRegionField()],
     };
-    const rutSpecHash = layoutHash(rutSpec);
+    rutSpecHash = layoutHash(rutSpec);
     rutAnswerKey = makeAnswerKey(rutSpec);
     rutAnswerKey.set(DIGIT_FIELD_ID, DIGIT_VALUE);
 
@@ -316,6 +317,7 @@ describeRoundTrip('ida y vuelta impresión ↔ lectura (gates F3 y V1)', () => {
     servedPdfs.set('/rut-normal.pdf', rutFilled);
     servedPdfs.set('/rut-fit97.pdf', await scaleToFit(rutFilled, 0.97));
     servedPdfs.set('/rut-fit90.pdf', await scaleToFit(rutFilled, 0.9));
+    servedPdfs.set('/rut-rot90.pdf', await rotate90(rutFilled));
     servedPdfs.set(
       '/rut-doble.pdf',
       await fillPdfAtPrinterCoordinates(rutPrinted, rutSpec, {
@@ -396,6 +398,7 @@ describeRoundTrip('ida y vuelta impresión ↔ lectura (gates F3 y V1)', () => {
       ['impresión normal', '/rut-normal.pdf'],
       ['ajustar a página 97%', '/rut-fit97.pdf'],
       ['ajustar a página 90% (D7)', '/rut-fit90.pdf'],
+      ['escaneada rotada 90°', '/rut-rot90.pdf'],
     ])('%s: número y RUT exactos, cero incorrectas confiadas', async (_name, path) => {
       const result = await readVariant(path, rutSpec);
       expect(result.pages).toHaveLength(1);
@@ -405,6 +408,14 @@ describeRoundTrip('ida y vuelta impresión ↔ lectura (gates F3 y V1)', () => {
       expect(page.identity.mode).toBe('rut_bubbles');
       expect(page.identity.raw).toBe(RUT_RAW);
       expect(page.identity.confidence).toBeGreaterThan(0);
+      expect(page.identity.qrRaw).toBe(
+        buildOmrQrPayload({
+          printedSheetId: SHEET_ID,
+          layoutHash: rutSpecHash,
+          pageIndex: 0,
+          pageCount: rutSpec.pageCount,
+        }),
+      );
 
       const digitMark = page.marks.find((m) => m.fieldId === DIGIT_FIELD_ID);
       expect(digitMark?.state).toBe('marked');
