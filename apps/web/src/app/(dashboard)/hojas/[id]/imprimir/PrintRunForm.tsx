@@ -33,21 +33,28 @@ export type CourseOption = { id: string; label: string };
  */
 const NEW_ASSESSMENT = '__new__';
 
+export type AssessmentFormOption = { id: string; name: string };
+
 export function PrintRunForm({
   layoutId,
   courses,
   assessments,
+  assessmentForms = [],
 }: {
   layoutId: string;
   courses: CourseOption[];
   assessments: PrintRunAssessmentOption[];
+  assessmentForms?: AssessmentFormOption[];
 }) {
   const [classGroupId, setClassGroupId] = useState('');
   const [assessmentId, setAssessmentId] = useState<string>(NEW_ASSESSMENT);
+  const [assessmentFormId, setAssessmentFormId] = useState('');
   const [spareCount, setSpareCount] = useState('2');
   const [createdRun, setCreatedRun] = useState<PrintRunModel | null>(null);
   const [pending, startTransition] = useTransition();
   const router = useRouter();
+
+  const hasForms = assessmentForms.length > 0;
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -55,6 +62,7 @@ export function PrintRunForm({
       layoutId,
       classGroupId,
       assessmentId: assessmentId === NEW_ASSESSMENT ? null : assessmentId,
+      assessmentFormId: hasForms && assessmentFormId ? assessmentFormId : null,
       spareCount: Number(spareCount),
     });
     if (!parsed.success) {
@@ -101,6 +109,32 @@ export function PrintRunForm({
               </Select>
             </Field>
 
+            {hasForms ? (
+              <Field
+                label="Forma de la evaluación"
+                htmlFor="print-run-form"
+                required
+                hint="Cada tirada corresponde a una sola forma; su hash viaja en el QR y las hojas de otra forma se rechazan al leer."
+              >
+                <Select
+                  value={assessmentFormId}
+                  onValueChange={setAssessmentFormId}
+                  disabled={pending}
+                >
+                  <SelectTrigger id="print-run-form">
+                    <SelectValue placeholder="Selecciona una forma" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {assessmentForms.map((form) => (
+                      <SelectItem key={form.id} value={form.id}>
+                        {form.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </Field>
+            ) : null}
+
             <Field
               label="Evaluación"
               htmlFor="print-run-assessment"
@@ -140,7 +174,7 @@ export function PrintRunForm({
           </div>
 
           <div className="flex justify-end">
-            <Button type="submit" disabled={pending || !classGroupId}>
+            <Button type="submit" disabled={pending || !classGroupId || (hasForms && !assessmentFormId)}>
               {pending ? (
                 <>
                   <Loader2 className="mr-2 size-4 animate-spin" />
