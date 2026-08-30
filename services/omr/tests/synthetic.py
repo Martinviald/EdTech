@@ -87,13 +87,18 @@ def make_layout_spec(
     }
 
 
+Chosen = str | list[str] | dict[int, str | list[str]]
+
+
 def render_page(
     spec: dict[str, Any],
     page_index: int,
     *,
-    marks: dict[str, str | list[str]] | None = None,
+    marks: dict[str, Chosen] | None = None,
     coverage: dict[str, float] | None = None,
     styles: dict[str, str] | None = None,
+    identity_marks: dict[int, str | list[str]] | None = None,
+    mark_offsets: dict[str, tuple[int, int]] | None = None,
     qr_text: str | None = "auto",
     page_width: int = DEFAULT_PAGE_WIDTH,
     paper_gray: int = PAPER_GRAY,
@@ -104,6 +109,7 @@ def render_page(
     marks = marks or {}
     coverage = coverage or {}
     styles = styles or {}
+    mark_offsets = mark_offsets or {}
 
     paper_w_mm, paper_h_mm = PAPER_SIZES_MM[spec["paper"]]
     page_height = round(page_width * paper_h_mm / paper_w_mm)
@@ -121,24 +127,183 @@ def render_page(
         payload = qr_payload(page_index, spec["pageCount"]) if qr_text == "auto" else qr_text
         _draw_qr(page, spec, payload, rect_x0, rect_y0, rect_w, rect_h)
 
+    transform = (rect_x0, rect_y0, rect_w, rect_h)
+    if spec["identity"]["mode"] == "rut_bubbles" and spec["identity"].get("bubbles"):
+        _draw_bubble_set(
+            page,
+            spec["identity"]["bubbles"],
+            "identity",
+            identity_marks,
+            coverage,
+            styles,
+            mark_offsets,
+            transform,
+            pencil_gray,
+            rng,
+        )
+
     for field in spec["fields"]:
         if field["pageIndex"] != page_index:
             continue
-        chosen = marks.get(field["fieldId"])
-        chosen_values = [chosen] if isinstance(chosen, str) else (chosen or [])
-        for bubble in field["bubbles"]:
-            center = (
-                round(rect_x0 + bubble["center"]["x"] * rect_w),
-                round(rect_y0 + bubble["center"]["y"] * rect_h),
-            )
-            radius = max(2, round(bubble["radius"] * rect_w))
-            _draw_bubble(page, bubble["value"], center, radius)
-            if bubble["value"] in chosen_values:
-                bubble_key = f"{field['fieldId']}:{bubble['value']}"
-                fill_coverage = coverage.get(bubble_key, coverage.get(field["fieldId"], 1.0))
-                style = styles.get(bubble_key, styles.get(field["fieldId"], "fill"))
-                _mark_bubble(page, style, center, radius, fill_coverage, pencil_gray, rng)
+        _draw_bubble_set(
+            page,
+            field["bubbles"],
+            field["fieldId"],
+            marks.get(field["fieldId"]),
+            coverage,
+            styles,
+            mark_offsets,
+            transform,
+            pencil_gray,
+            rng,
+        )
     return page
+
+
+def _draw_bubble_set(
+    page: np.ndarray,
+    bubbles: list[dict[str, Any]],
+    owner_id: str,
+    chosen: Chosen | None,
+    coverage: dict[str, float],
+    styles: dict[str, str],
+    mark_offsets: dict[str, tuple[int, int]],
+    transform: tuple[float, float, float, float],
+    pencil_gray: int,
+    rng: np.random.Generator,
+) -> None:
+    rect_x0, rect_y0, rect_w, rect_h = transform
+    offset = mark_offsets.get(owner_id, (0, 0))
+    for bubble in bubbles:
+        center = (
+            round(rect_x0 + bubble["center"]["x"] * rect_w),
+            round(rect_y0 + bubble["center"]["y"] * rect_h),
+        )
+        radius = max(2, round(bubble["radius"] * rect_w))
+        _draw_bubble(page, bubble["value"], center, radius)
+        if _bubble_chosen(chosen, bubble):
+            keys = _bubble_keys(owner_id, bubble)
+            fill_coverage = _first_match(coverage, keys, 1.0)
+            style = _first_match(styles, keys, "fill")
+            mark_center = (center[0] + offset[0], center[1] + offset[1])
+            _mark_bubble(page, style, mark_center, radius, fill_coverage, pencil_gray, rng)
+
+
+def _bubble_chosen(chosen: Chosen | None, bubble: dict[str, Any]) -> bool:
+    if chosen is None:
+        return False
+    if isinstance(chosen, dict):
+        group_chosen = chosen.get(bubble.get("group"))
+        values = [group_chosen] if isinstance(group_chosen, str) else (group_chosen or [])
+        return bubble["value"] in values
+    values = [chosen] if isinstance(chosen, str) else chosen
+    return bubble["value"] in values
+
+
+def _bubble_keys(owner_id: str, bubble: dict[str, Any]) -> list[str]:
+    keys = []
+    if bubble.get("group") is not None:
+        keys.append(f"{owner_id}:{bubble['group']}:{bubble['value']}")
+    keys.append(f"{owner_id}:{bubble['value']}")
+    keys.append(owner_id)
+    return keys
+
+
+def _first_match(mapping: dict[str, Any], keys: list[str], default: Any) -> Any:
+    for key in keys:
+        if key in mapping:
+            return mapping[key]
+    return default
+
+
+def digit_grid_bubbles(
+    *,
+    origin: tuple[float, float],
+    digit_count: int,
+    column_step: float = 0.05,
+    row_step: float = 0.016,
+    radius: float = 0.01,
+    last_group_extra: str = "",
+) -> list[dict[str, Any]]:
+    bubbles = []
+    for group in range(digit_count):
+        values = "0123456789" + (last_group_extra if group == digit_count - 1 else "")
+        for row, value in enumerate(values):
+            bubbles.append(
+                {
+                    "value": value,
+                    "center": {
+                        "x": origin[0] + group * column_step,
+                        "y": origin[1] + row * row_step,
+                    },
+                    "radius": radius,
+                    "group": group,
+                }
+            )
+    return bubbles
+
+
+def make_digit_grid_field(
+    field_id: str,
+    printed_number: str,
+    *,
+    page_index: int = 0,
+    digit_count: int = 3,
+    origin: tuple[float, float] = (0.6, 0.3),
+) -> dict[str, Any]:
+    return {
+        "fieldId": field_id,
+        "kind": "digit_grid",
+        "printedNumber": printed_number,
+        "pageIndex": page_index,
+        "selectMode": "single",
+        "bubbles": digit_grid_bubbles(origin=origin, digit_count=digit_count),
+        "region": None,
+    }
+
+
+def make_crop_region_field(
+    field_id: str,
+    printed_number: str,
+    *,
+    page_index: int = 0,
+    top_left: tuple[float, float] = (0.1, 0.75),
+    bottom_right: tuple[float, float] = (0.9, 0.95),
+) -> dict[str, Any]:
+    return {
+        "fieldId": field_id,
+        "kind": "crop_region",
+        "printedNumber": printed_number,
+        "pageIndex": page_index,
+        "selectMode": "single",
+        "bubbles": [],
+        "region": {
+            "topLeft": {"x": top_left[0], "y": top_left[1]},
+            "bottomRight": {"x": bottom_right[0], "y": bottom_right[1]},
+        },
+    }
+
+
+def make_rut_identity(*, body_digits: int = 8) -> dict[str, Any]:
+    return {
+        "mode": "rut_bubbles",
+        "region": {
+            "topLeft": {"x": 0.06, "y": 0.02},
+            "bottomRight": {"x": 0.52, "y": 0.21},
+        },
+        "bubbles": digit_grid_bubbles(
+            origin=(0.08, 0.035),
+            digit_count=body_digits + 1,
+            column_step=0.045,
+            row_step=0.015,
+            radius=0.009,
+            last_group_extra="K",
+        ),
+    }
+
+
+def rut_marks(rut: str) -> dict[int, str]:
+    return {group: value for group, value in enumerate(rut)}
 
 
 def bubble_center_px(

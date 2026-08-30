@@ -24,6 +24,10 @@ Tiempo limite por pagina: OMR_PAGE_TIMEOUT_S (default 20 s). Una pagina que lo
 excede se OMITE del resultado y se loggea (el enum de rejectReason no tiene un
 motivo honesto para timeout); si TODAS las paginas exceden, `AllPagesTimedOut`
 => 504.
+
+assess_page (CD-11): subset de process_page para POST /v1/assess —
+rectificacion + QualityGate + identidad (QR o grilla RUT), SIN clasificar
+marcas. Presupuesto <1s por imagen.
 """
 
 from __future__ import annotations
@@ -42,7 +46,7 @@ from typing import Any
 import cv2
 import numpy as np
 
-from .classify import page_threshold
+from .classify import AMBIGUITY_MARGIN, PageThreshold, page_threshold
 from .identity import decode_region_qr, peek_logical_page_index, read_identity
 from .quality import assess
 from .readers import READERS
@@ -149,14 +153,19 @@ def classify_page_debug(
 
     with _stage(timings_ms, "identity"):
         identity = read_identity(
-            rectified if isinstance(rectified, RectifiedPage) else None, oriented_gray, spec
+            rectified if isinstance(rectified, RectifiedPage) else None,
+            oriented_gray,
+            spec,
+            _ambiguity_margin(profile),
         )
 
     marks: list[dict[str, Any]] = []
     classify_debug = _empty_classify_debug()
     if quality["ok"] and isinstance(rectified, RectifiedPage):
         with _stage(timings_ms, "classify"):
-            marks, classify_debug = _read_marks(rectified, spec, identity, page_index, quality)
+            marks, classify_debug = _read_marks(
+                rectified, spec, identity, page_index, quality, _ambiguity_margin(profile)
+            )
 
     needs_thumb = not quality["ok"] or identity["raw"] is None
     timings_ms["total"] = (time.perf_counter() - started) * 1000
@@ -191,6 +200,22 @@ def _stage(timings_ms: dict[str, float], name: str) -> Iterator[None]:
         yield
     finally:
         timings_ms[name] = (time.perf_counter() - started) * 1000
+
+
+def assess_page(
+    bgr: np.ndarray, spec: dict[str, Any], profile: dict[str, Any]
+) -> dict[str, Any]:
+    image_sha256 = _canonical_png_sha256(bgr)
+    oriented_bgr, rectified, _ = _rectify_oriented(bgr, spec)
+    oriented_gray = cv2.cvtColor(oriented_bgr, cv2.COLOR_BGR2GRAY)
+    quality = assess(oriented_gray, rectified, profile)
+    identity = read_identity(
+        rectified if isinstance(rectified, RectifiedPage) else None,
+        oriented_gray,
+        spec,
+        _ambiguity_margin(profile),
+    )
+    return {"imageSha256": image_sha256, "quality": quality, "identity": identity}
 
 
 def _rectify_oriented(
@@ -249,12 +274,18 @@ def _empty_classify_debug() -> dict[str, Any]:
     }
 
 
+def _ambiguity_margin(profile: dict[str, Any]) -> float:
+    margin = profile.get("ambiguityMargin")
+    return AMBIGUITY_MARGIN if margin is None else float(margin)
+
+
 def _read_marks(
     rectified: RectifiedPage,
     spec: dict[str, Any],
     identity: dict[str, Any],
     file_page_index: int,
     quality: dict[str, Any],
+    ambiguity_margin: float,
 ) -> tuple[list[dict[str, Any]], dict[str, Any]]:
     logical_page = peek_logical_page_index(identity["raw"], file_page_index, spec["pageCount"])
     readable = [
@@ -270,6 +301,16 @@ def _read_marks(
         READERS[field["kind"]].sample_fills(rectified, field) for field in readable
     ]
     all_fills = [fill for fills in fills_by_field for fill in fills]
+    if not all_fills:
+        marks = [
+            READERS[field["kind"]].read(
+                rectified, field, fills, PageThreshold(threshold=0.5, separable=False),
+                ambiguity_margin,
+            )
+            for field, fills in zip(readable, fills_by_field, strict=True)
+        ]
+        return marks, _empty_classify_debug()
+
     threshold = page_threshold(all_fills)
     histogram, _ = np.histogram(all_fills, bins=FILL_HISTOGRAM_BINS, range=(0.0, 1.0))
     classify_debug = {
@@ -287,7 +328,7 @@ def _read_marks(
         return [], classify_debug
 
     marks = [
-        READERS[field["kind"]].read(rectified, field, fills, threshold)
+        READERS[field["kind"]].read(rectified, field, fills, threshold, ambiguity_margin)
         for field, fills in zip(readable, fills_by_field, strict=True)
     ]
     return marks, classify_debug

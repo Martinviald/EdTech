@@ -199,7 +199,23 @@ def crop_field_jpeg(
     y0 = max(0, min(c[1] for c in centers) - radius_px - pad)
     x1 = min(page.size[0], max(c[0] for c in centers) + radius_px + pad)
     y1 = min(page.size[1], max(c[1] for c in centers) + radius_px + pad)
-    crop = page.gray[y0:y1, x0:x1]
+    return _encode_crop_jpeg(page.gray[y0:y1, x0:x1], width_px, jpeg_quality)
+
+
+def crop_region_jpeg(
+    page: RectifiedPage,
+    region: dict[str, dict[str, float]],
+    *,
+    width_px: int = 600,
+    jpeg_quality: int = 70,
+) -> np.ndarray:
+    x0, y0 = point_to_px(region["topLeft"], page.size)
+    x1, y1 = point_to_px(region["bottomRight"], page.size)
+    crop = page.gray[min(y0, y1) : max(y0, y1) + 1, min(x0, x1) : max(x0, x1) + 1]
+    return _encode_crop_jpeg(crop, width_px, jpeg_quality)
+
+
+def _encode_crop_jpeg(crop: np.ndarray, width_px: int, jpeg_quality: int) -> np.ndarray:
     scale = width_px / max(1, crop.shape[1])
     resized = cv2.resize(
         crop, (width_px, max(1, round(crop.shape[0] * scale))), interpolation=cv2.INTER_AREA

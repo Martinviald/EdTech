@@ -17,6 +17,12 @@ responde `{ result: ScanResult, debug: { pages: [...] } }` con histograma de
 fills, threshold/gap/stds, conteo por estado, sharpness/glare crudos y ms por
 etapa. Sin `?debug=1` la respuesta es el ScanResult puro del contrato — el
 schema (additionalProperties:false) no cambia.
+
+POST /v1/assess (CD-11): (imagen base64, LayoutSpec) -> { imageSha256,
+quality, identity }. Subset de read: rectificacion + QualityGate + QR/grilla
+RUT, SIN clasificar marcas; presupuesto <1s por imagen. Una imagen que no
+decodifica es un request invalido (422): aca no hay descarga, el payload ES
+la imagen.
 """
 
 from __future__ import annotations
@@ -27,15 +33,35 @@ from fastapi import FastAPI, Query
 from fastapi.responses import JSONResponse
 
 from .contracts import validate
-from .pipeline import AllPagesTimedOut, read_scan, read_scan_debug
-from .sources import SourceDecodeError, SourceDownloadError
+from .pipeline import AllPagesTimedOut, assess_page, read_scan, read_scan_debug
+from .sources import SourceDecodeError, SourceDownloadError, decode_base64_image
 
-app = FastAPI(title="omr-service", version="0.2.0")
+app = FastAPI(title="omr-service", version="0.3.0")
 
 
 @app.get("/health")
 def health() -> dict[str, str]:
-    return {"status": "ok", "service": "omr", "version": "0.2.0"}
+    return {"status": "ok", "service": "omr", "version": "0.3.0"}
+
+
+@app.post("/v1/assess")
+def assess_capture(payload: dict[str, Any]) -> Any:
+    errors = validate("assess-request", payload)
+    if errors:
+        return JSONResponse(status_code=422, content={"errors": errors})
+
+    try:
+        bgr = decode_base64_image(payload["imageBase64"])
+    except SourceDecodeError as error:
+        return JSONResponse(status_code=422, content={"errors": [str(error)]})
+
+    result = assess_page(bgr, payload["layoutSpec"], payload["captureProfile"])
+
+    output_errors = validate("assess-result", result)
+    if output_errors:
+        bug_errors = [f"assess-result invalido (bug del servicio): {e}" for e in output_errors]
+        return JSONResponse(status_code=500, content={"errors": bug_errors})
+    return result
 
 
 @app.post("/v1/read")

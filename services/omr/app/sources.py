@@ -7,6 +7,8 @@ red. Un fallo de descarga es `SourceDownloadError`, que main.py traduce a 502.
 
 from __future__ import annotations
 
+import base64
+import binascii
 import io
 import os
 from collections.abc import Callable, Iterator
@@ -99,6 +101,17 @@ class ImagePageSource:
                 return buffer.getvalue()
         except OSError:
             return raw
+
+
+def decode_base64_image(image_base64: str) -> np.ndarray:
+    try:
+        raw = base64.b64decode(image_base64, validate=True)
+    except (binascii.Error, ValueError) as error:
+        raise SourceDecodeError(f"imageBase64 no es base64 valido: {error}") from error
+    image = cv2.imdecode(np.frombuffer(raw, dtype=np.uint8), cv2.IMREAD_COLOR)
+    if image is None:
+        raise SourceDecodeError("imageBase64 no decodifica como imagen")
+    return image
 
 
 def build_page_source(source: dict[str, Any], fetch: Fetch = fetch_url) -> PageSource:

@@ -1,0 +1,97 @@
+"""Identidad rut_bubbles (CD-10): misma regla de oro que digit_grid.
+
+Un RUT con un digito inventado matchea al alumno equivocado en silencio, asi
+que cualquier grupo dudoso, doble o vacio => identidad no detectada (raw None,
+confidence 0). El servicio NO valida DV ni interpreta: eso es del backend.
+"""
+
+from __future__ import annotations
+
+import numpy as np
+import pytest
+
+from app.contracts import validate
+from app.pipeline import process_page
+from tests import synthetic as syn
+
+RUT = "12345678K"
+BUBBLE_MARKS = {"f_001": "A", "f_002": "C", "f_003": "B", "f_004": "D"}
+
+
+@pytest.fixture(scope="module")
+def rut_spec() -> dict:
+    spec = syn.make_layout_spec(fields_per_page=4)
+    spec["identity"] = syn.make_rut_identity()
+    return spec
+
+
+def read_rut_page(rut_spec: dict, profile: dict, **render_kwargs) -> dict:
+    gray = syn.render_page(
+        rut_spec, 0, marks=dict(BUBBLE_MARKS), rng=np.random.default_rng(15), **render_kwargs
+    )
+    return process_page(syn.to_bgr(gray), 0, rut_spec, profile)
+
+
+def test_full_rut_with_k_is_read_verbatim(rut_spec: dict, profile: dict) -> None:
+    page = read_rut_page(rut_spec, profile, identity_marks=syn.rut_marks(RUT))
+
+    assert page["identity"]["mode"] == "rut_bubbles"
+    assert page["identity"]["raw"] == RUT
+    assert 0.0 < page["identity"]["confidence"] <= 1.0
+    assert page["quality"]["ok"] is True
+    marked = {m["fieldId"]: m["value"] for m in page["marks"] if m["state"] == "marked"}
+    assert marked == BUBBLE_MARKS
+    assert validate("scan-result", {"pages": [page]}) == []
+
+
+def test_double_marked_rut_group_yields_undetected_identity(
+    rut_spec: dict, profile: dict
+) -> None:
+    doubled = {**syn.rut_marks(RUT), 3: ["4", "9"]}
+    page = read_rut_page(rut_spec, profile, identity_marks=doubled)
+
+    assert page["identity"]["raw"] is None
+    assert page["identity"]["confidence"] == 0.0
+    assert page["quality"]["ok"] is True
+    assert page["pageThumbJpegBase64"] is not None
+
+
+def test_blank_rut_group_yields_undetected_identity(rut_spec: dict, profile: dict) -> None:
+    missing_group = {g: v for g, v in syn.rut_marks(RUT).items() if g != 5}
+    page = read_rut_page(rut_spec, profile, identity_marks=missing_group)
+
+    assert page["identity"]["raw"] is None
+    assert page["identity"]["confidence"] == 0.0
+
+
+def test_partially_filled_rut_digit_yields_undetected_identity(
+    rut_spec: dict, profile: dict
+) -> None:
+    page = read_rut_page(
+        rut_spec,
+        profile,
+        identity_marks=syn.rut_marks(RUT),
+        coverage={"identity:2:3": 0.5},
+    )
+
+    assert page["identity"]["raw"] is None
+    assert page["identity"]["confidence"] == 0.0
+
+
+def test_completely_blank_rut_grid_yields_undetected_identity(
+    rut_spec: dict, profile: dict
+) -> None:
+    page = read_rut_page(rut_spec, profile, identity_marks=None)
+
+    assert page["identity"]["raw"] is None
+    assert page["identity"]["confidence"] == 0.0
+
+
+def test_unrectifiable_page_yields_undetected_identity(rut_spec: dict, profile: dict) -> None:
+    featureless = np.full((1600, 1240), 235, dtype=np.uint8)
+    page = process_page(syn.to_bgr(featureless), 0, rut_spec, profile)
+
+    assert page["quality"]["rejectReason"] == "fiducials_missing"
+    assert page["identity"]["mode"] == "rut_bubbles"
+    assert page["identity"]["raw"] is None
+    assert page["identity"]["confidence"] == 0.0
