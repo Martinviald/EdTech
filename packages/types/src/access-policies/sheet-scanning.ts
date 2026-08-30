@@ -21,3 +21,5 @@ export const SHEET_REVIEW_ROLES: readonly UserRole[] = [
   'academic_director',
   'eval_coordinator',
 ];
+
+export const OMR_CALIBRATION_ROLES: readonly UserRole[] = SHEET_MANAGEMENT_ROLES;

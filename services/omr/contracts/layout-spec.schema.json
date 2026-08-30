@@ -90,6 +90,49 @@
                 "bottomRight"
               ],
               "additionalProperties": false
+            },
+            "bubbles": {
+              "anyOf": [
+                {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "value": {
+                        "type": "string",
+                        "minLength": 1
+                      },
+                      "center": {
+                        "$ref": "#/definitions/layout-spec/properties/identity/properties/region/properties/topLeft"
+                      },
+                      "radius": {
+                        "type": "number",
+                        "exclusiveMinimum": 0
+                      },
+                      "group": {
+                        "anyOf": [
+                          {
+                            "type": "integer",
+                            "minimum": 0
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
+                      }
+                    },
+                    "required": [
+                      "value",
+                      "center",
+                      "radius"
+                    ],
+                    "additionalProperties": false
+                  }
+                },
+                {
+                  "type": "null"
+                }
+              ]
             }
           },
           "required": [
@@ -133,26 +176,7 @@
               "bubbles": {
                 "type": "array",
                 "items": {
-                  "type": "object",
-                  "properties": {
-                    "value": {
-                      "type": "string",
-                      "minLength": 1
-                    },
-                    "center": {
-                      "$ref": "#/definitions/layout-spec/properties/identity/properties/region/properties/topLeft"
-                    },
-                    "radius": {
-                      "type": "number",
-                      "exclusiveMinimum": 0
-                    }
-                  },
-                  "required": [
-                    "value",
-                    "center",
-                    "radius"
-                  ],
-                  "additionalProperties": false
+                  "$ref": "#/definitions/layout-spec/properties/identity/properties/bubbles/anyOf/0/items"
                 }
               },
               "region": {

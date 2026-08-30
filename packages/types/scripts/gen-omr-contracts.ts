@@ -2,7 +2,12 @@ import { mkdirSync, writeFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { zodToJsonSchema } from 'zod-to-json-schema';
 import { layoutSpecSchema } from '../src/schemas/omr-layout.schema';
-import { omrReadRequestSchema, scanResultSchema } from '../src/schemas/omr-scan.schema';
+import {
+  omrAssessRequestSchema,
+  omrAssessResultSchema,
+  omrReadRequestSchema,
+  scanResultSchema,
+} from '../src/schemas/omr-scan.schema';
 
 // Genera los JSON Schema que el servicio de visión (Python) usa para validar
 // entrada/salida. UN SOLO origen de verdad (los Zod de este paquete), dos
@@ -16,6 +21,8 @@ const contracts = [
   { name: 'layout-spec', schema: layoutSpecSchema },
   { name: 'read-request', schema: omrReadRequestSchema },
   { name: 'scan-result', schema: scanResultSchema },
+  { name: 'assess-request', schema: omrAssessRequestSchema },
+  { name: 'assess-result', schema: omrAssessResultSchema },
 ] as const;
 
 for (const { name, schema } of contracts) {

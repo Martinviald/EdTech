@@ -3,10 +3,12 @@ import type { AssessmentStatus } from '../enums';
 import {
   captureProfileSchema,
   layoutSpecSchema,
+  omrCalibrationSchema,
   type CaptureProfile,
   type LayoutSpec,
+  type OmrCalibration,
 } from './omr-layout.schema';
-import type { MarkState, PageRejectReason } from './omr-scan.schema';
+import type { MarkState, PageQuality, PageRejectReason } from './omr-scan.schema';
 
 // ── Lector de marcas (E22) — contrato API ⇄ web del módulo sheet-scanning ────
 // Response Models EXACTOS (lección S2: frontend y backend compilan contra el
@@ -45,6 +47,7 @@ export const createPrintRunSchema = z.object({
   layoutId: z.string().uuid(),
   classGroupId: z.string().uuid(),
   assessmentId: z.string().uuid().nullable().optional(),
+  assessmentFormId: z.string().uuid().nullable().optional(),
   spareCount: z.number().int().min(0).max(20).default(2),
 });
 
@@ -95,6 +98,16 @@ export const discardScanSchema = z.object({
   reason: z.string().min(1).max(500),
 });
 
+export const ASSESS_CAPTURE_MAX_IMAGE_BYTES = 4 * 1024 * 1024;
+const ASSESS_CAPTURE_MAX_BASE64_LENGTH = Math.ceil(ASSESS_CAPTURE_MAX_IMAGE_BYTES / 3) * 4;
+
+export const assessCaptureSchema = z.object({
+  printRunId: z.string().uuid(),
+  imageBase64: z.string().min(1).max(ASSESS_CAPTURE_MAX_BASE64_LENGTH),
+});
+
+export const updateOmrCalibrationSchema = omrCalibrationSchema;
+
 export const sheetLayoutQuerySchema = z.object({
   instrumentId: z.string().uuid().optional(),
   page: z.coerce.number().int().min(1).default(1),
@@ -126,6 +139,8 @@ export type CreateScanBatchDto = z.infer<typeof createScanBatchSchema>;
 export type ReviewMarkDto = z.infer<typeof reviewMarkSchema>;
 export type AssignScanIdentityDto = z.infer<typeof assignScanIdentitySchema>;
 export type DiscardScanDto = z.infer<typeof discardScanSchema>;
+export type AssessCaptureDto = z.infer<typeof assessCaptureSchema>;
+export type UpdateOmrCalibrationDto = z.infer<typeof updateOmrCalibrationSchema>;
 export type SheetLayoutQueryDto = z.infer<typeof sheetLayoutQuerySchema>;
 export type PrintRunQueryDto = z.infer<typeof printRunQuerySchema>;
 export type ScanBatchQueryDto = z.infer<typeof scanBatchQuerySchema>;
@@ -182,6 +197,7 @@ export type PrintRunModel = {
   classGroupId: string | null;
   classGroupName: string | null;
   assessmentId: string | null;
+  assessmentFormId?: string | null;
   spareCount: number;
   sheetCount: number;
   pdfFileId: string | null;
@@ -259,6 +275,26 @@ export type ReviewQueueModel = {
   qualityRejected: ReviewScanModel[];
   identityUnresolved: ReviewScanModel[];
   ambiguousMarks: ReviewMarkModel[];
+};
+
+export type AssessCaptureIdentityModel = {
+  printedSheetId: string | null;
+  pageIndex: number | null;
+  sheetSequence: number | null;
+  studentId: string | null;
+  studentName: string | null;
+  confidence: number;
+};
+
+export type AssessCaptureResponse = {
+  accepted: boolean;
+  quality: PageQuality;
+  identity: AssessCaptureIdentityModel | null;
+};
+
+export type OmrCalibrationResponse = {
+  orgId: string;
+  calibration: OmrCalibration;
 };
 
 export type ConfirmBatchResponse = {

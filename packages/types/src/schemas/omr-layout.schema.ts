@@ -24,6 +24,7 @@ export const omrBubbleSchema = z.object({
   value: z.string().min(1),
   center: omrPointSchema,
   radius: z.number().positive(),
+  group: z.number().int().min(0).nullable().optional(),
 });
 
 export const OMR_FIELD_KINDS = ['bubble_group', 'digit_grid', 'crop_region'] as const;
@@ -51,6 +52,7 @@ export const captureProfileSchema = z.object({
   minSharpness: z.number().min(0).max(1),
   maxGlare: z.number().min(0).max(1),
   expectedDpi: z.number().int().positive().nullable(),
+  ambiguityMargin: z.number().min(0.05).max(0.5).nullable().default(null),
 });
 
 export type CaptureProfile = z.infer<typeof captureProfileSchema>;
@@ -63,6 +65,7 @@ export const DEFAULT_CAPTURE_PROFILES: Record<CaptureSource, CaptureProfile> = {
     minSharpness: 0.45,
     maxGlare: 0.35,
     expectedDpi: 300,
+    ambiguityMargin: null,
   },
   phone: {
     source: 'phone',
@@ -70,6 +73,7 @@ export const DEFAULT_CAPTURE_PROFILES: Record<CaptureSource, CaptureProfile> = {
     minSharpness: 0.35,
     maxGlare: 0.25,
     expectedDpi: null,
+    ambiguityMargin: null,
   },
 };
 
@@ -89,9 +93,17 @@ export const layoutSpecSchema = z.object({
   identity: z.object({
     mode: z.enum(SHEET_IDENTITY_MODES),
     region: omrRegionSchema,
+    bubbles: z.array(omrBubbleSchema).nullable().optional(),
   }),
   fields: z.array(omrFieldSchema).min(1),
 });
+
+export const omrCalibrationSchema = z.object({
+  ambiguityMargin: z.number().min(0.05).max(0.5).optional(),
+  minSeparability: z.number().min(0).max(1).optional(),
+});
+
+export type OmrCalibration = z.infer<typeof omrCalibrationSchema>;
 
 export type OmrPoint = z.infer<typeof omrPointSchema>;
 export type OmrRegion = z.infer<typeof omrRegionSchema>;

@@ -99,3 +99,18 @@ export const omrReadRequestSchema = z.object({
 
 export type OmrReadSource = z.infer<typeof omrReadSourceSchema>;
 export type OmrReadRequest = z.infer<typeof omrReadRequestSchema>;
+
+export const omrAssessRequestSchema = z.object({
+  layoutSpec: layoutSpecSchema,
+  captureProfile: captureProfileSchema,
+  imageBase64: z.string().min(1),
+});
+
+export const omrAssessResultSchema = z.object({
+  imageSha256: z.string().length(64),
+  quality: pageQualitySchema,
+  identity: scannedPageIdentitySchema,
+});
+
+export type OmrAssessRequest = z.infer<typeof omrAssessRequestSchema>;
+export type OmrAssessResult = z.infer<typeof omrAssessResultSchema>;

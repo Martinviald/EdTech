@@ -1,7 +1,7 @@
 {
-  "$ref": "#/definitions/read-request",
+  "$ref": "#/definitions/assess-request",
   "definitions": {
-    "read-request": {
+    "assess-request": {
       "type": "object",
       "properties": {
         "layoutSpec": {
@@ -85,7 +85,7 @@
                       "additionalProperties": false
                     },
                     "bottomRight": {
-                      "$ref": "#/definitions/read-request/properties/layoutSpec/properties/identity/properties/region/properties/topLeft"
+                      "$ref": "#/definitions/assess-request/properties/layoutSpec/properties/identity/properties/region/properties/topLeft"
                     }
                   },
                   "required": [
@@ -106,7 +106,7 @@
                             "minLength": 1
                           },
                           "center": {
-                            "$ref": "#/definitions/read-request/properties/layoutSpec/properties/identity/properties/region/properties/topLeft"
+                            "$ref": "#/definitions/assess-request/properties/layoutSpec/properties/identity/properties/region/properties/topLeft"
                           },
                           "radius": {
                             "type": "number",
@@ -179,13 +179,13 @@
                   "bubbles": {
                     "type": "array",
                     "items": {
-                      "$ref": "#/definitions/read-request/properties/layoutSpec/properties/identity/properties/bubbles/anyOf/0/items"
+                      "$ref": "#/definitions/assess-request/properties/layoutSpec/properties/identity/properties/bubbles/anyOf/0/items"
                     }
                   },
                   "region": {
                     "anyOf": [
                       {
-                        "$ref": "#/definitions/read-request/properties/layoutSpec/properties/identity/properties/region"
+                        "$ref": "#/definitions/assess-request/properties/layoutSpec/properties/identity/properties/region"
                       },
                       {
                         "type": "null"
@@ -275,54 +275,15 @@
           ],
           "additionalProperties": false
         },
-        "source": {
-          "type": "object",
-          "properties": {
-            "kind": {
-              "type": "string",
-              "enum": [
-                "pdf",
-                "images"
-              ]
-            },
-            "pdfUrl": {
-              "anyOf": [
-                {
-                  "type": "string",
-                  "format": "uri"
-                },
-                {
-                  "type": "null"
-                }
-              ]
-            },
-            "imageUrls": {
-              "anyOf": [
-                {
-                  "type": "array",
-                  "items": {
-                    "type": "string",
-                    "format": "uri"
-                  }
-                },
-                {
-                  "type": "null"
-                }
-              ]
-            }
-          },
-          "required": [
-            "kind",
-            "pdfUrl",
-            "imageUrls"
-          ],
-          "additionalProperties": false
+        "imageBase64": {
+          "type": "string",
+          "minLength": 1
         }
       },
       "required": [
         "layoutSpec",
         "captureProfile",
-        "source"
+        "imageBase64"
       ],
       "additionalProperties": false
     }

@@ -29,4 +29,14 @@ describe('ejemplos compartidos del contrato OMR', () => {
     const parsed = scanResultSchema.safeParse(loadExample('scan-result'));
     expect(parsed.success).toBe(true);
   });
+
+  it('layout-digit-grid-rut.example.json parsea con layoutSpecSchema', () => {
+    const parsed = layoutSpecSchema.safeParse(loadExample('layout-digit-grid-rut'));
+    expect(parsed.success).toBe(true);
+  });
+
+  it('layout-crop-region.example.json parsea con layoutSpecSchema', () => {
+    const parsed = layoutSpecSchema.safeParse(loadExample('layout-crop-region'));
+    expect(parsed.success).toBe(true);
+  });
 });

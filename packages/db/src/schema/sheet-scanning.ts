@@ -7,7 +7,7 @@ import { users } from './users';
 import { students } from './students';
 import { instruments } from './instruments';
 import { classGroups } from './academic';
-import { assessments, importJobs } from './assessments';
+import { assessmentForms, assessments, importJobs } from './assessments';
 import { files } from './files';
 
 /**
@@ -49,22 +49,29 @@ export const sheetLayouts = pgTable(
 );
 
 /** Una tirada de impresión: layout congelado × curso, con sus hojas de reserva (G8). */
-export const sheetPrintRuns = pgTable('sheet_print_runs', {
-  id: uuid('id').defaultRandom().primaryKey(),
-  orgId: uuid('org_id')
-    .notNull()
-    .references(() => organizations.id),
-  layoutId: uuid('layout_id')
-    .notNull()
-    .references(() => sheetLayouts.id),
-  classGroupId: uuid('class_group_id').references(() => classGroups.id),
-  assessmentId: uuid('assessment_id').references(() => assessments.id),
-  spareCount: integer('spare_count').default(0).notNull(),
-  sheetCount: integer('sheet_count').notNull(),
-  pdfFileId: uuid('pdf_file_id').references(() => files.id),
-  createdById: uuid('created_by_id').references(() => users.id),
-  createdAt: timestamp('created_at').defaultNow().notNull(),
-});
+export const sheetPrintRuns = pgTable(
+  'sheet_print_runs',
+  {
+    id: uuid('id').defaultRandom().primaryKey(),
+    orgId: uuid('org_id')
+      .notNull()
+      .references(() => organizations.id),
+    layoutId: uuid('layout_id')
+      .notNull()
+      .references(() => sheetLayouts.id),
+    classGroupId: uuid('class_group_id').references(() => classGroups.id),
+    assessmentId: uuid('assessment_id').references(() => assessments.id),
+    assessmentFormId: uuid('assessment_form_id').references(() => assessmentForms.id),
+    spareCount: integer('spare_count').default(0).notNull(),
+    sheetCount: integer('sheet_count').notNull(),
+    pdfFileId: uuid('pdf_file_id').references(() => files.id),
+    createdById: uuid('created_by_id').references(() => users.id),
+    createdAt: timestamp('created_at').defaultNow().notNull(),
+  },
+  (t) => ({
+    formIdx: index('sheet_print_runs_form_idx').on(t.assessmentFormId),
+  }),
+);
 
 /** Una HOJA FÍSICA. Su id viaja en el QR. studentId NULL = hoja de reserva (G8). */
 export const printedSheets = pgTable(
@@ -197,6 +204,10 @@ export const sheetPrintRunsRelations = relations(sheetPrintRuns, ({ one, many })
   layout: one(sheetLayouts, { fields: [sheetPrintRuns.layoutId], references: [sheetLayouts.id] }),
   classGroup: one(classGroups, { fields: [sheetPrintRuns.classGroupId], references: [classGroups.id] }),
   assessment: one(assessments, { fields: [sheetPrintRuns.assessmentId], references: [assessments.id] }),
+  assessmentForm: one(assessmentForms, {
+    fields: [sheetPrintRuns.assessmentFormId],
+    references: [assessmentForms.id],
+  }),
   pdfFile: one(files, { fields: [sheetPrintRuns.pdfFileId], references: [files.id] }),
   sheets: many(printedSheets),
   batches: many(sheetScanBatches),

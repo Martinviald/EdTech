@@ -1,0 +1,70 @@
+{
+  "specVersion": 1,
+  "instrumentId": "9f2c1a44-3b7e-4c11-9a0d-5e8f7b2c1d33",
+  "pageCount": 1,
+  "paper": "letter",
+  "fiducials": {
+    "kind": "corner_squares",
+    "sizeRatio": 0.02,
+    "marginRatio": 0.03
+  },
+  "identity": {
+    "mode": "qr",
+    "region": {
+      "topLeft": {
+        "x": 0.75,
+        "y": 0.01
+      },
+      "bottomRight": {
+        "x": 0.99,
+        "y": 0.14
+      }
+    }
+  },
+  "fields": [
+    {
+      "fieldId": "f_001",
+      "kind": "bubble_group",
+      "printedNumber": "1",
+      "pageIndex": 0,
+      "selectMode": "single",
+      "bubbles": [
+        {
+          "value": "A",
+          "center": {
+            "x": 0.12,
+            "y": 0.22
+          },
+          "radius": 0.012
+        },
+        {
+          "value": "B",
+          "center": {
+            "x": 0.17,
+            "y": 0.22
+          },
+          "radius": 0.012
+        }
+      ],
+      "region": null
+    },
+    {
+      "fieldId": "f_020",
+      "kind": "crop_region",
+      "printedNumber": "20",
+      "pageIndex": 0,
+      "selectMode": "single",
+      "bubbles": [],
+      "region": {
+        "topLeft": {
+          "x": 0.08,
+          "y": 0.55
+        },
+        "bottomRight": {
+          "x": 0.92,
+          "y": 0.9
+        }
+      }
+    }
+  ]
+}
