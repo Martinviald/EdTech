@@ -8,6 +8,7 @@ import {
   type LayoutSpec,
   type OmrBubble,
   type OmrRegion,
+  SHEET_QR_IDENTITY_REGION,
   type SheetIdentityMode,
 } from '@soe/types';
 
@@ -50,10 +51,7 @@ const COLUMN_START_X = [0.05, 0.37, 0.69] as const;
 const FIRST_BUBBLE_OFFSET_X = 0.045;
 const BUBBLE_SPACING_X = 0.05;
 
-export const SHEET_QR_IDENTITY_REGION: OmrRegion = {
-  topLeft: { x: 0.78, y: 0.02 },
-  bottomRight: { x: 0.98, y: 0.16 },
-};
+export { SHEET_QR_IDENTITY_REGION };
 
 export const RUT_BODY_GROUP_COUNT = 8;
 export const RUT_DV_GROUP_INDEX = RUT_BODY_GROUP_COUNT;

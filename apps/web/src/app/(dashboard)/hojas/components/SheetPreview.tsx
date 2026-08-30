@@ -1,4 +1,4 @@
-import type { LayoutField, LayoutSpec } from '@soe/types';
+import { SHEET_QR_IDENTITY_REGION, type LayoutField, type LayoutSpec } from '@soe/types';
 import { cn } from '@/lib/utils';
 
 /**
@@ -22,10 +22,6 @@ const PAPER_DIMENSIONS: Record<LayoutSpec['paper'], { width: number; height: num
   legal: { width: 850, height: 1400 },
 };
 
-const SHEET_QR_CORNER_REGION = {
-  topLeft: { x: 0.78, y: 0.02 },
-  bottomRight: { x: 0.98, y: 0.16 },
-};
 
 type ReferenceFrame = {
   originX: number;
@@ -183,10 +179,10 @@ function IdentityMarks({
     );
   }
 
-  const qrX = scaleX(frame, SHEET_QR_CORNER_REGION.topLeft.x);
-  const qrY = scaleY(frame, SHEET_QR_CORNER_REGION.topLeft.y);
-  const qrWidth = scaleX(frame, SHEET_QR_CORNER_REGION.bottomRight.x) - qrX;
-  const qrHeight = scaleY(frame, SHEET_QR_CORNER_REGION.bottomRight.y) - qrY;
+  const qrX = scaleX(frame, SHEET_QR_IDENTITY_REGION.topLeft.x);
+  const qrY = scaleY(frame, SHEET_QR_IDENTITY_REGION.topLeft.y);
+  const qrWidth = scaleX(frame, SHEET_QR_IDENTITY_REGION.bottomRight.x) - qrX;
+  const qrHeight = scaleY(frame, SHEET_QR_IDENTITY_REGION.bottomRight.y) - qrY;
 
   return (
     <g>
