@@ -3,13 +3,17 @@ import { cookies } from 'next/headers';
 import { ApiConnectionError, ApiRequestError } from './errors';
 import { reportServerError } from './observability';
 
-const API_BASE = process.env.API_URL;
-if (!API_BASE) throw new Error('API_URL is required');
+function apiUrl(): string {
+  const base = process.env.API_URL;
+  if (!base) throw new Error('API_URL is required');
+  return `${base}/api`;
+}
 
-const API_URL = `${API_BASE}/api`;
-
-const INTERNAL_API_SECRET = process.env.INTERNAL_API_SECRET;
-if (!INTERNAL_API_SECRET) throw new Error('INTERNAL_API_SECRET is required');
+function internalApiSecret(): string {
+  const secret = process.env.INTERNAL_API_SECRET;
+  if (!secret) throw new Error('INTERNAL_API_SECRET is required');
+  return secret;
+}
 
 async function getBearerToken(): Promise<string> {
   const jar = await cookies();
@@ -31,12 +35,12 @@ async function request<T>(
   if (options.authenticated) {
     headers['Authorization'] = `Bearer ${await getBearerToken()}`;
   } else {
-    headers['x-internal-token'] = INTERNAL_API_SECRET!;
+    headers['x-internal-token'] = internalApiSecret();
   }
 
   let res: Response;
   try {
-    res = await fetch(`${API_URL}${path}`, {
+    res = await fetch(`${apiUrl()}${path}`, {
       ...options,
       headers: { ...options.headers, ...headers },
     });
@@ -103,7 +107,7 @@ export async function apiPostFormData<T>(path: string, formData: FormData): Prom
   const token = await getBearerToken();
   let res: Response;
   try {
-    res = await fetch(`${API_URL}${path}`, {
+    res = await fetch(`${apiUrl()}${path}`, {
       method: 'POST',
       body: formData,
       headers: { Authorization: `Bearer ${token}` },
