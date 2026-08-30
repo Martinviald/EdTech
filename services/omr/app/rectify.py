@@ -57,8 +57,19 @@ los reales de dos lotes impresos): todos caen entre 0.034 y 0.164 del lado
 menor de la imagen. Los dos falsos positivos observados estaban a 0.239 y
 0.554. El corte en 0.22 los separa.
 
-Ojo al tocarlo: este tope y `CORNER_REGION_FRACTION` acotan lo mismo y se
-mueven juntos. Una captura con MUCHO fondo alrededor de la hoja empuja los
+`MAX_DARKNESS_RATIO` cierra el ultimo criterio: cuan oscuro debe ser el interior
+del cuadrado, medido RESPECTO DE SU PAPEL y no en una escala absoluta. Era un
+absoluto (110) y rechazaba fiduciales sanos que el escaner habia lavado: se
+verifico en el papel que los 4 cuadrados estaban igual de negros, y aun asi los
+de la fila inferior volvieron con interior 125.7 y 182.6 sobre papel 255. El de
+125.7 estaba impecable (compacidad 18.1, de las mejores medidas) y se caia solo
+por claro. Ademas el papel no siempre es blanco — su mediana local fue de 173 a
+255 segun el escaner y el realce aplicado — asi que un absoluto exige cosas
+distintas en cada pagina sin razon. El clasificador de marcas (C21) ya deriva su
+umbral del papel de cada pagina; este era el unico criterio que no lo hacia.
+
+Ojo al tocarlo: el tope de distancia y `CORNER_REGION_FRACTION` acotan lo mismo y
+se mueven juntos. Una captura con MUCHO fondo alrededor de la hoja empuja los
 fiduciales verdaderos lejos de la esquina de la imagen; si algun dia hay que
 admitirla, sube el tope y revalida contra el conjunto de oro, porque aflojarlo
 reabre exactamente este agujero.
@@ -80,7 +91,7 @@ MAX_SQUARE_PAGE_FRACTION = 0.01
 MIN_SOLIDITY = 0.83
 MIN_COMPACTNESS = 15.0
 MAX_ASPECT = 1.7
-DARK_FIDUCIAL_MAX_MEAN = 110.0
+MAX_DARKNESS_RATIO = 0.55
 BORDER_TOUCH_PX = 2
 MIN_CLIPPED_INK_AREA_PX = 200
 MAX_CORNER_DISTANCE_FRACTION = 0.22
@@ -198,10 +209,14 @@ def _find_fiducials_with_clipping(
         gray_crop = gray[offset_y : offset_y + region_h, offset_x : offset_x + region_w]
         local_target = (image_corner[0] - offset_x, image_corner[1] - offset_y)
         max_distance = MAX_CORNER_DISTANCE_FRACTION * min(width, height)
-        local = _best_square(crop, gray_crop, local_target, width * height, max_distance)
+        max_interior = darkness_limit(gray_crop)
+        local = _best_square(
+            crop, gray_crop, local_target, width * height, max_distance, max_interior
+        )
         if local is None:
             detections.append(None)
-            if _corner_looks_clipped(crop, gray_crop, (offset_x, offset_y), gray.shape):
+            offset = (offset_x, offset_y)
+            if _corner_looks_clipped(crop, gray_crop, offset, gray.shape, max_interior):
                 clipped += 1
         else:
             (cx, cy), (ox, oy) = local
@@ -209,11 +224,24 @@ def _find_fiducials_with_clipping(
     return detections, clipped
 
 
+def darkness_limit(gray_crop: np.ndarray) -> float:
+    """Cuan oscuro tiene que ser el interior de un fiducial, RELATIVO a su papel.
+
+    El papel no siempre es blanco: en las capturas medidas su mediana local va de
+    173 a 255 segun el escaner y el realce que le haya aplicado. Un limite
+    absoluto por lo tanto exige cosas distintas en cada pagina sin ninguna razon.
+    El clasificador de marcas (C21) ya resuelve esto asi — su umbral sale del
+    papel de cada pagina — y el detector de fiduciales era el unico que no.
+    """
+    return MAX_DARKNESS_RATIO * float(np.median(gray_crop))
+
+
 def _corner_looks_clipped(
     binary_crop: np.ndarray,
     gray_crop: np.ndarray,
     offset: tuple[int, int],
     shape: tuple[int, ...],
+    max_interior: float,
 ) -> bool:
     """Hay tinta oscura pegada al borde de la captura donde deberia haber un fiducial.
 
@@ -229,7 +257,7 @@ def _corner_looks_clipped(
     for contour in contours:
         if cv2.contourArea(contour) < MIN_CLIPPED_INK_AREA_PX:
             continue
-        if _interior_mean(gray_crop, contour) > DARK_FIDUCIAL_MAX_MEAN:
+        if _interior_mean(gray_crop, contour) > max_interior:
             continue
         x, y, w, h = cv2.boundingRect(contour)
         if (
@@ -248,6 +276,7 @@ def _best_square(
     target: tuple[int, int],
     page_area: float,
     max_distance: float,
+    max_interior: float,
 ) -> tuple[tuple[float, float], tuple[float, float]] | None:
     contours, hierarchy = cv2.findContours(binary_crop, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
     if hierarchy is None:
@@ -262,7 +291,7 @@ def _best_square(
         candidate = _square_candidate(contour, page_area)
         if candidate is None:
             continue
-        if _interior_mean(gray_crop, contour) > DARK_FIDUCIAL_MAX_MEAN:
+        if _interior_mean(gray_crop, contour) > max_interior:
             continue
         outer = min(
             candidate, key=lambda p: (p[0] - target[0]) ** 2 + (p[1] - target[1]) ** 2

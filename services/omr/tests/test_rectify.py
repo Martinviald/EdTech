@@ -115,3 +115,32 @@ def test_a_distant_blob_is_never_crowned_as_the_missing_fiducial(
     result = rectify(syn.to_bgr(tampered), spec)
     assert isinstance(result, FiducialFailure)
     assert result.fiducials_found == 3
+
+
+def test_washed_out_fiducial_is_found_when_it_is_dark_for_its_paper(
+    spec: dict, clean_gray: np.ndarray
+) -> None:
+    """Un escaner que lava una esquina no puede costar la hoja.
+
+    Se verifico en papel: los 4 cuadrados estaban igual de negros, y aun asi el
+    escaner devolvio los de la fila inferior con interior 125.7 y 182.6 sobre un
+    papel de 255. El limite era absoluto (110), asi que se rechazaban por claros
+    pese a estar perfectamente formados — el de 125.7 tenia compacidad 18.1, de
+    las mejores del lote.
+
+    El criterio correcto es el mismo que ya usa el clasificador de marcas: oscuro
+    RESPECTO DE SU PAPEL. Aca se desvanece la esquina superior izquierda hasta un
+    gris que supera el limite absoluto viejo pero sigue siendo oscuro para su
+    propio papel.
+    """
+    washed = clean_gray.copy().astype(np.float32)
+    box = washed[:300, :300]
+    washed[:300, :300] = 255.0 - (255.0 - box) * 0.6
+    faded = washed.astype(np.uint8)
+
+    corner = faded[:300, :300]
+    assert float(corner.min()) > 110.0, "el fiducial tiene que quedar sobre el limite viejo"
+
+    result = rectify(syn.to_bgr(faded), spec)
+    assert isinstance(result, RectifiedPage)
+    assert result.fiducials_found == 4
