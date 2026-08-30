@@ -154,21 +154,29 @@ export class SheetPrintService {
     return this.toModel(row);
   }
 
-  async updateRun(orgId: string, runId: string, dto: UpdatePrintRunDto): Promise<PrintRunModel> {
+  async updateRun(
+    orgId: string,
+    userId: string,
+    runId: string,
+    dto: UpdatePrintRunDto,
+  ): Promise<PrintRunModel> {
     await withOrgContext(this.db, orgId, async (tx) => {
       const [run] = await tx
         .select({
           id: sheetPrintRuns.id,
           assessmentId: sheetPrintRuns.assessmentId,
           instrumentId: sheetLayouts.instrumentId,
+          classGroupId: sheetPrintRuns.classGroupId,
+          classGroupName: classGroups.name,
         })
         .from(sheetPrintRuns)
         .innerJoin(sheetLayouts, eq(sheetLayouts.id, sheetPrintRuns.layoutId))
+        .leftJoin(classGroups, eq(classGroups.id, sheetPrintRuns.classGroupId))
         .where(and(eq(sheetPrintRuns.orgId, orgId), eq(sheetPrintRuns.id, runId)))
         .limit(1);
       if (!run) throw new NotFoundException('Tirada de impresión no encontrada');
 
-      if (run.assessmentId !== dto.assessmentId) {
+      if (!('assessmentId' in dto) || run.assessmentId !== dto.assessmentId) {
         const [confirmed] = await tx
           .select({ id: sheetScanBatches.id })
           .from(sheetScanBatches)
@@ -188,11 +196,20 @@ export class SheetPrintService {
         }
       }
 
-      await this.assertAssessmentUsable(tx, orgId, dto.assessmentId, run.instrumentId);
+      const assessmentId =
+        'assessmentId' in dto
+          ? await this.assertAssessmentUsable(tx, orgId, dto.assessmentId, run.instrumentId)
+          : await this.createAssessmentForRun(
+              tx,
+              orgId,
+              userId,
+              run.instrumentId,
+              this.requireClassGroup(run),
+            );
 
       await tx
         .update(sheetPrintRuns)
-        .set({ assessmentId: dto.assessmentId })
+        .set({ assessmentId })
         .where(and(eq(sheetPrintRuns.orgId, orgId), eq(sheetPrintRuns.id, runId)));
     });
 
@@ -237,6 +254,18 @@ export class SheetPrintService {
       );
     }
     return assessment.id;
+  }
+
+  private requireClassGroup(run: { classGroupId: string | null; classGroupName: string | null }): {
+    id: string;
+    name: string;
+  } {
+    if (!run.classGroupId || !run.classGroupName) {
+      throw new BadRequestException(
+        'La tirada no tiene un curso asociado: no se puede crear su evaluación automáticamente.',
+      );
+    }
+    return { id: run.classGroupId, name: run.classGroupName };
   }
 
   private async createAssessmentForRun(

@@ -4,7 +4,8 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { toast } from 'sonner';
 import { CheckCircle2, Loader2, RotateCcw } from 'lucide-react';
-import type { BatchStatusModel, ConfirmBatchResponse } from '@soe/types';
+import type { Route } from 'next';
+import type { BatchStatusModel, ConfirmBatchResponse, PrintRunAssessmentOption } from '@soe/types';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { AlertCallout, StatusBadge } from '@/components/shared';
@@ -12,15 +13,24 @@ import { ROUTES } from '@/lib/routes';
 import { useBatchStatus } from '../../../hooks/use-batch-status';
 import { useRetryBatch } from '../../../hooks/use-review-queue';
 import { BATCH_STATUS_META, SCAN_ROUTES } from '../../../escanear/batch-meta';
+import { AssignAssessmentControl } from '../../../components/AssignAssessmentControl';
 import { ReviewQueuePanel } from './ReviewQueue';
 
 export type StudentOption = { studentId: string; name: string };
+
+/** Tirada sin evaluación: el lote se puede revisar, pero no confirmar. */
+export type AssessmentGap = {
+  runId: string;
+  imprimirHref: Route;
+  assessments: PrintRunAssessmentOption[];
+};
 
 interface ReviewShellProps {
   batchId: string;
   initialBatch: BatchStatusModel;
   students: StudentOption[];
   rosterAvailable: boolean;
+  assessmentGap: AssessmentGap | null;
 }
 
 export function ReviewShell({
@@ -28,6 +38,7 @@ export function ReviewShell({
   initialBatch,
   students,
   rosterAvailable,
+  assessmentGap,
 }: ReviewShellProps) {
   const { data: batch } = useBatchStatus(batchId, initialBatch);
   const [confirmResult, setConfirmResult] = useState<ConfirmBatchResponse | null>(null);
@@ -40,6 +51,9 @@ export function ReviewShell({
   return (
     <div className="space-y-6">
       <BatchHeaderCard batch={current} />
+      {assessmentGap && current.status !== 'confirmed' && (
+        <AssessmentGapCallout gap={assessmentGap} />
+      )}
       <BatchBody
         batchId={batchId}
         batch={current}
@@ -51,6 +65,23 @@ export function ReviewShell({
         }}
       />
     </div>
+  );
+}
+
+function AssessmentGapCallout({ gap }: { gap: AssessmentGap }) {
+  return (
+    <AlertCallout tone="warning" title="La tirada de este lote no tiene evaluación asociada">
+      <p>
+        Puedes revisar las lecturas, pero <strong>no vas a poder confirmar</strong> hasta asociar
+        una evaluación: es el destino donde se guardan los resultados.
+      </p>
+      <div className="mt-3 flex flex-wrap items-center gap-3">
+        <AssignAssessmentControl runId={gap.runId} assessments={gap.assessments} />
+        <Link href={gap.imprimirHref} className="text-sm underline underline-offset-4">
+          Ver la tirada
+        </Link>
+      </div>
+    </AlertCallout>
   );
 }
 
@@ -142,8 +173,8 @@ function BatchBody({
   if (batch.status === 'pending' || batch.status === 'processing') {
     return (
       <AlertCallout tone="info" title="Procesando el lote">
-        Esta vista se actualiza sola cada pocos segundos. Cuando termine la lectura vas a ver acá
-        la cola de revisión.
+        Esta vista se actualiza sola cada pocos segundos. Cuando termine la lectura vas a ver acá la
+        cola de revisión.
       </AlertCallout>
     );
   }

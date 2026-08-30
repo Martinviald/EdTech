@@ -262,7 +262,15 @@ describe('SheetPrintService.createRun — evaluación asociada', () => {
 });
 
 describe('SheetPrintService.updateRun', () => {
-  const RUN_LOOKUP = [{ id: RUN_ID, assessmentId: null, instrumentId: INSTRUMENT_ID }];
+  const RUN_LOOKUP = [
+    {
+      id: RUN_ID,
+      assessmentId: null,
+      instrumentId: INSTRUMENT_ID,
+      classGroupId: CLASS_GROUP_ID,
+      classGroupName: '3° Básico A',
+    },
+  ];
   const UPDATED_RUN_ROW = {
     id: RUN_ID,
     layoutId: LAYOUT_ID,
@@ -287,7 +295,7 @@ describe('SheetPrintService.updateRun', () => {
     ]);
     const service = new SheetPrintService(db);
 
-    const run = await service.updateRun(ORG_ID, RUN_ID, { assessmentId: ASSESSMENT_ID });
+    const run = await service.updateRun(ORG_ID, USER_ID, RUN_ID, { assessmentId: ASSESSMENT_ID });
 
     expect(updates).toEqual([{ assessmentId: ASSESSMENT_ID }]);
     expect(run.assessmentId).toBe(ASSESSMENT_ID);
@@ -298,7 +306,7 @@ describe('SheetPrintService.updateRun', () => {
     const service = new SheetPrintService(db);
 
     await expect(
-      service.updateRun(ORG_ID, RUN_ID, { assessmentId: ASSESSMENT_ID }),
+      service.updateRun(ORG_ID, USER_ID, RUN_ID, { assessmentId: ASSESSMENT_ID }),
     ).rejects.toBeInstanceOf(NotFoundException);
   });
 
@@ -307,7 +315,7 @@ describe('SheetPrintService.updateRun', () => {
     const service = new SheetPrintService(db);
 
     await expect(
-      service.updateRun(ORG_ID, RUN_ID, { assessmentId: ASSESSMENT_ID }),
+      service.updateRun(ORG_ID, USER_ID, RUN_ID, { assessmentId: ASSESSMENT_ID }),
     ).rejects.toBeInstanceOf(NotFoundException);
     expect(updates).toHaveLength(0);
   });
@@ -321,36 +329,84 @@ describe('SheetPrintService.updateRun', () => {
     const service = new SheetPrintService(db);
 
     await expect(
-      service.updateRun(ORG_ID, RUN_ID, { assessmentId: ASSESSMENT_ID }),
+      service.updateRun(ORG_ID, USER_ID, RUN_ID, { assessmentId: ASSESSMENT_ID }),
     ).rejects.toBeInstanceOf(BadRequestException);
     expect(updates).toHaveLength(0);
   });
 
   it('rechaza el cambio si la tirada ya tiene un lote confirmado', async () => {
     const { db, updates } = makeDb([
-      [{ id: RUN_ID, assessmentId: 'otra-evaluacion', instrumentId: INSTRUMENT_ID }],
+      [{ ...RUN_LOOKUP[0], assessmentId: 'otra-evaluacion' }],
       [{ id: 'batch-confirmado' }],
     ]);
     const service = new SheetPrintService(db);
 
     await expect(
-      service.updateRun(ORG_ID, RUN_ID, { assessmentId: ASSESSMENT_ID }),
+      service.updateRun(ORG_ID, USER_ID, RUN_ID, { assessmentId: ASSESSMENT_ID }),
     ).rejects.toBeInstanceOf(ConflictException);
     expect(updates).toHaveLength(0);
   });
 
   it('es idempotente: reasignar la MISMA evaluación no consulta lotes confirmados', async () => {
     const { db, updates } = makeDb([
-      [{ id: RUN_ID, assessmentId: ASSESSMENT_ID, instrumentId: INSTRUMENT_ID }],
+      [{ ...RUN_LOOKUP[0], assessmentId: ASSESSMENT_ID }],
       [{ id: ASSESSMENT_ID, instrumentId: INSTRUMENT_ID }],
       [UPDATED_RUN_ROW],
     ]);
     const service = new SheetPrintService(db);
 
     await expect(
-      service.updateRun(ORG_ID, RUN_ID, { assessmentId: ASSESSMENT_ID }),
+      service.updateRun(ORG_ID, USER_ID, RUN_ID, { assessmentId: ASSESSMENT_ID }),
     ).resolves.toMatchObject({ assessmentId: ASSESSMENT_ID });
     expect(updates).toEqual([{ assessmentId: ASSESSMENT_ID }]);
+  });
+
+  it('crea la evaluación del instrumento y la asocia cuando se pide createAssessment', async () => {
+    const { db, inserts, updates } = makeDb(
+      [RUN_LOOKUP, [], [UPDATED_RUN_ROW]],
+      [[{ id: ASSESSMENT_ID }], []],
+    );
+    const service = new SheetPrintService(db);
+
+    const run = await service.updateRun(ORG_ID, USER_ID, RUN_ID, { createAssessment: true });
+
+    expect(inserts[0]).toMatchObject({
+      orgId: ORG_ID,
+      instrumentId: INSTRUMENT_ID,
+      mode: 'paper',
+      status: 'scheduled',
+      config: { source: 'sheet_print_run' },
+    });
+    expect(inserts[1]).toEqual({ assessmentId: ASSESSMENT_ID, classGroupId: CLASS_GROUP_ID });
+    expect(updates).toEqual([{ assessmentId: ASSESSMENT_ID }]);
+    expect(run.assessmentId).toBe(ASSESSMENT_ID);
+  });
+
+  it('no crea la evaluación si la tirada ya tiene un lote confirmado', async () => {
+    const { db, inserts, updates } = makeDb([
+      [{ ...RUN_LOOKUP[0], assessmentId: ASSESSMENT_ID }],
+      [{ id: 'batch-confirmado' }],
+    ]);
+    const service = new SheetPrintService(db);
+
+    await expect(
+      service.updateRun(ORG_ID, USER_ID, RUN_ID, { createAssessment: true }),
+    ).rejects.toBeInstanceOf(ConflictException);
+    expect(inserts).toHaveLength(0);
+    expect(updates).toHaveLength(0);
+  });
+
+  it('rechaza createAssessment en una tirada sin curso asociado', async () => {
+    const { db, inserts } = makeDb([
+      [{ ...RUN_LOOKUP[0], classGroupId: null, classGroupName: null }],
+      [],
+    ]);
+    const service = new SheetPrintService(db);
+
+    await expect(
+      service.updateRun(ORG_ID, USER_ID, RUN_ID, { createAssessment: true }),
+    ).rejects.toBeInstanceOf(BadRequestException);
+    expect(inserts).toHaveLength(0);
   });
 });
 

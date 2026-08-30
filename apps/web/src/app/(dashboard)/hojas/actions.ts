@@ -53,6 +53,23 @@ export async function updatePrintRunAssessment(
   }
 }
 
+/**
+ * Crea la evaluación del instrumento de la tirada y la asocia en un solo paso
+ * (`PATCH /sheet-print-runs/:id` con `createAssessment`). Es la salida del caso
+ * sin escapatoria: instrumento sin ninguna evaluación + tirada ya creada, donde
+ * el autocreado de #158 (que sólo corre al crear la tirada) no llega.
+ */
+export async function createPrintRunAssessment(runId: string): Promise<CreatePrintRunResult> {
+  try {
+    const data = await apiPatch<PrintRunModel>(`/sheet-print-runs/${runId}`, {
+      createAssessment: true,
+    });
+    return { ok: true, data };
+  } catch (e) {
+    return { ok: false, message: getDisplayMessage(e, 'No se pudo crear la evaluación') };
+  }
+}
+
 export type DownloadPdfResult =
   | { ok: true; base64: string; fileName: string }
   | { ok: false; message: string };
