@@ -42,7 +42,7 @@ describe('SheetPrintRunsController.update', () => {
       makeUser(),
     );
 
-    expect(service.updateRun).toHaveBeenCalledWith(ORG_ID, RUN_ID, {
+    expect(service.updateRun).toHaveBeenCalledWith(ORG_ID, makeUser().userId, RUN_ID, {
       assessmentId: ASSESSMENT_ID,
     });
   });
@@ -56,14 +56,27 @@ describe('SheetPrintRunsController.update', () => {
     expect(service.updateRun).not.toHaveBeenCalled();
   });
 
-  it('valida el body con Zod: assessmentId es un uuid obligatorio', () => {
+  it('valida el body con Zod: o un assessmentId uuid, o createAssessment', () => {
     const { controller, service } = makeController();
 
     expect(() => controller.update(RUN_ID, {}, makeUser())).toThrow(ZodError);
     expect(() => controller.update(RUN_ID, { assessmentId: 'no-es-uuid' }, makeUser())).toThrow(
       ZodError,
     );
+    expect(() => controller.update(RUN_ID, { createAssessment: false }, makeUser())).toThrow(
+      ZodError,
+    );
     expect(service.updateRun).not.toHaveBeenCalled();
+  });
+
+  it('acepta createAssessment: true y lo delega al service', async () => {
+    const { controller, service } = makeController();
+
+    await controller.update(RUN_ID, { createAssessment: true }, makeUser());
+
+    expect(service.updateRun).toHaveBeenCalledWith(ORG_ID, makeUser().userId, RUN_ID, {
+      createAssessment: true,
+    });
   });
 });
 

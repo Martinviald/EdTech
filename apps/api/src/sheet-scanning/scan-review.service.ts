@@ -440,7 +440,7 @@ export class ScanReviewService {
       }
       if (!batch.assessmentId) {
         throw new BadRequestException(
-          'La tirada de este lote no tiene una evaluación asociada. Asocia una evaluación a la tirada antes de confirmar.',
+          'La tirada de este lote no tiene una evaluación asociada. Asóciala desde el aviso de esta misma pantalla (o en Hojas de respuesta → la tirada) y vuelve a confirmar.',
         );
       }
 
@@ -818,8 +818,7 @@ export class ScanReviewService {
       pageIndex: scan.pageIndex,
       studentId: scan.resolvedStudentId ?? scan.sheetStudentId,
       studentName: this.studentNameOf(scan),
-      identityConfidence:
-        scan.identityConfidence !== null ? Number(scan.identityConfidence) : null,
+      identityConfidence: scan.identityConfidence !== null ? Number(scan.identityConfidence) : null,
       thumbUrl: scan.thumbFileId ? (urlByFileId.get(scan.thumbFileId) ?? null) : null,
     };
   }

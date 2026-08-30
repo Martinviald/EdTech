@@ -5,7 +5,6 @@ import {
   canAccess,
   SHEET_MANAGEMENT_ROLES,
   type PaginatedResponse,
-  type PrintRunAssessmentOption,
   type PrintRunModel,
   type SheetLayoutModel,
 } from '@soe/types';
@@ -34,6 +33,7 @@ import { DownloadPdfButton } from '../../components/DownloadPdfButton';
 import { AssignAssessmentControl } from '../../components/AssignAssessmentControl';
 import { HOJAS_ROUTES } from '../../lib/routes';
 import { listInstrumentsForSheets } from '../../lib/instruments';
+import { listAssessmentOptions } from '../../lib/assessment-options';
 import { formatSheetDate } from '../../lib/format';
 import { PrintRunForm, type CourseOption } from './PrintRunForm';
 
@@ -114,13 +114,6 @@ async function SetupSection({ layoutId, orgId }: { layoutId: string; orgId: stri
     </div>
   );
 }
-
-/** Evaluaciones del mismo instrumento del layout: las únicas que puede recibir una tirada. */
-const listAssessmentOptions = cache((instrumentId: string): Promise<PrintRunAssessmentOption[]> => {
-  return apiGet<PrintRunAssessmentOption[]>(
-    `/sheet-print-runs/assessment-options?instrumentId=${instrumentId}`,
-  );
-});
 
 const getLayoutOrNotFound = cache(async (layoutId: string): Promise<SheetLayoutModel> => {
   try {

@@ -50,13 +50,20 @@ export const createPrintRunSchema = z.object({
 
 /**
  * Asociar (o cambiar) la evaluación de una tirada ya creada.
- * `PATCH /api/sheet-print-runs/:id`. Sólo se expone `assessmentId`: el curso, el
+ * `PATCH /api/sheet-print-runs/:id`. Sólo se expone la evaluación: el curso, el
  * layout y las reservas quedan congelados con las hojas ya impresas y no pueden
  * cambiar sin reimprimir.
+ *
+ * Dos formas: apuntar a una evaluación existente (`assessmentId`), o pedir que
+ * el backend cree una para el instrumento del layout y la asocie
+ * (`createAssessment: true`) — la misma evaluación que se autocrea al crear una
+ * tirada. Sin esa segunda forma, una tirada cuyo instrumento no tiene ninguna
+ * evaluación quedaba sin salida: nada en la app podía desbloquearla.
  */
-export const updatePrintRunSchema = z.object({
-  assessmentId: z.string().uuid(),
-});
+export const updatePrintRunSchema = z.union([
+  z.object({ assessmentId: z.string().uuid() }),
+  z.object({ createAssessment: z.literal(true) }),
+]);
 
 /** `GET /api/sheet-print-runs/assessment-options?instrumentId=…` */
 export const printRunAssessmentOptionsQuerySchema = z.object({

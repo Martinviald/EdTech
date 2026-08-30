@@ -1,7 +1,9 @@
 'use client';
 
 import { useCallback, useRef, useState } from 'react';
+import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import type { Route } from 'next';
 import { useDropzone, type FileRejection } from 'react-dropzone';
 import { toast } from 'sonner';
 import { FileText, Loader2, RotateCcw, ScanLine, Smartphone, Upload, X } from 'lucide-react';
@@ -9,6 +11,7 @@ import {
   createScanBatchSchema,
   DEFAULT_CAPTURE_PROFILES,
   type CaptureSource,
+  type PrintRunAssessmentOption,
   type ScanUploadIntent,
 } from '@soe/types';
 import { Button } from '@/components/ui/button';
@@ -20,7 +23,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { Field } from '@/components/shared';
+import { AlertCallout, Field } from '@/components/shared';
+import { AssignAssessmentControl } from '../components/AssignAssessmentControl';
 import { cn } from '@/lib/utils';
 import { confirmScanFile, createScanBatch, startScanBatch } from './actions';
 import { SCAN_ROUTES } from './batch-meta';
@@ -54,7 +58,22 @@ const SOURCE_OPTIONS: {
   },
 ];
 
-export type PrintRunOption = { id: string; label: string };
+/**
+ * Una tirada NO es una evaluación: es el paquete de hojas físicas que se
+ * imprimió para un curso. El selector muestra las dos cosas por separado
+ * (y avisa cuando falta la evaluación) porque leer sólo el instrumento hacía
+ * creer que se estaba eligiendo la evaluación del análisis.
+ */
+export type PrintRunOption = {
+  id: string;
+  instrumentId: string;
+  courseLabel: string;
+  instrumentName: string;
+  sheetCount: number;
+  createdLabel: string;
+  assessmentName: string | null;
+  imprimirHref: Route;
+};
 
 type UploadStatus = 'queued' | 'uploading' | 'confirming' | 'done' | 'error';
 
@@ -98,7 +117,13 @@ function putWithProgress(
   });
 }
 
-export function ScanUploadForm({ printRuns }: { printRuns: PrintRunOption[] }) {
+export function ScanUploadForm({
+  printRuns,
+  assessmentsByInstrument,
+}: {
+  printRuns: PrintRunOption[];
+  assessmentsByInstrument: Record<string, PrintRunAssessmentOption[]>;
+}) {
   const router = useRouter();
   const [printRunId, setPrintRunId] = useState('');
   const [source, setSource] = useState<CaptureSource>('scanner');
@@ -107,6 +132,7 @@ export function ScanUploadForm({ printRuns }: { printRuns: PrintRunOption[] }) {
   const batchIdRef = useRef<string | null>(null);
   const intentsRef = useRef<Map<number, ScanUploadIntent>>(new Map());
 
+  const selectedRun = printRuns.find((run) => run.id === printRunId) ?? null;
   const busy = phase === 'creating' || phase === 'starting';
   const editable = phase === 'form';
 
@@ -171,16 +197,13 @@ export function ScanUploadForm({ printRuns }: { printRuns: PrintRunOption[] }) {
   async function runUploads(entries: { index: number; file: File }[]): Promise<boolean> {
     const queue = [...entries];
     const results: boolean[] = [];
-    const workers = Array.from(
-      { length: Math.min(UPLOAD_CONCURRENCY, queue.length) },
-      async () => {
-        for (;;) {
-          const next = queue.shift();
-          if (!next) return;
-          results.push(await uploadOne(next.index, next.file));
-        }
-      },
-    );
+    const workers = Array.from({ length: Math.min(UPLOAD_CONCURRENCY, queue.length) }, async () => {
+      for (;;) {
+        const next = queue.shift();
+        if (!next) return;
+        results.push(await uploadOne(next.index, next.file));
+      }
+    });
     await Promise.all(workers);
     return results.every(Boolean);
   }
@@ -258,26 +281,53 @@ export function ScanUploadForm({ printRuns }: { printRuns: PrintRunOption[] }) {
       <CardHeader>
         <CardTitle>Nuevo lote de escaneo</CardTitle>
         <CardDescription>
-          Elige la tirada impresa, cómo se digitalizaron las hojas y sube los archivos. Las hojas
-          se procesan y luego revisas las lecturas dudosas antes de confirmar.
+          Elige la tirada impresa, cómo se digitalizaron las hojas y sube los archivos. Las hojas se
+          procesan y luego revisas las lecturas dudosas antes de confirmar.
         </CardDescription>
       </CardHeader>
       <CardContent>
         <form onSubmit={handleSubmit} className="space-y-6">
-          <Field label="Tirada de impresión" htmlFor="print-run" required>
+          <Field
+            label="Tirada impresa (el paquete de hojas de un curso)"
+            htmlFor="print-run"
+            required
+            hint="No es la evaluación: la evaluación es el destino de los resultados y va asociada a la tirada."
+          >
             <Select value={printRunId} onValueChange={setPrintRunId} disabled={!editable}>
-              <SelectTrigger id="print-run" className="w-full">
+              <SelectTrigger id="print-run" className="h-auto w-full py-2">
                 <SelectValue placeholder="Selecciona la tirada que se rindió" />
               </SelectTrigger>
               <SelectContent>
                 {printRuns.map((run) => (
                   <SelectItem key={run.id} value={run.id}>
-                    {run.label}
+                    <PrintRunOptionLabel run={run} />
                   </SelectItem>
                 ))}
               </SelectContent>
             </Select>
           </Field>
+
+          {selectedRun && !selectedRun.assessmentName && (
+            <AlertCallout tone="warning" title="Esta tirada no tiene una evaluación asociada">
+              <p>
+                La evaluación es el destino de los resultados. Sin ella vas a poder subir y revisar
+                el lote, pero <strong>no vas a poder confirmarlo</strong>: los resultados no
+                tendrían dónde guardarse.
+              </p>
+              <div className="mt-3 flex flex-wrap items-center gap-3">
+                <AssignAssessmentControl
+                  runId={selectedRun.id}
+                  assessments={assessmentsByInstrument[selectedRun.instrumentId] ?? []}
+                />
+                <Link
+                  href={selectedRun.imprimirHref}
+                  className="text-sm underline underline-offset-4"
+                >
+                  Ver la tirada
+                </Link>
+              </div>
+            </AlertCallout>
+          )}
 
           <fieldset className="space-y-2" disabled={!editable}>
             <legend className="text-sm font-medium text-foreground">
@@ -292,9 +342,7 @@ export function ScanUploadForm({ printRuns }: { printRuns: PrintRunOption[] }) {
                     key={option.value}
                     className={cn(
                       'flex cursor-pointer items-start gap-3 rounded-lg border p-4 transition-colors',
-                      selected
-                        ? 'border-primary bg-primary/5'
-                        : 'border-border hover:bg-muted/50',
+                      selected ? 'border-primary bg-primary/5' : 'border-border hover:bg-muted/50',
                       !editable && 'cursor-not-allowed opacity-70',
                     )}
                   >
@@ -382,9 +430,7 @@ export function ScanUploadForm({ printRuns }: { printRuns: PrintRunOption[] }) {
                         variant="ghost"
                         size="icon"
                         aria-label={`Quitar ${entry.file.name}`}
-                        onClick={() =>
-                          setFiles((prev) => prev.filter((_, i) => i !== index))
-                        }
+                        onClick={() => setFiles((prev) => prev.filter((_, i) => i !== index))}
                       >
                         <X className="size-4" />
                       </Button>
@@ -424,6 +470,26 @@ export function ScanUploadForm({ printRuns }: { printRuns: PrintRunOption[] }) {
         </form>
       </CardContent>
     </Card>
+  );
+}
+
+function PrintRunOptionLabel({ run }: { run: PrintRunOption }) {
+  return (
+    <span className="flex flex-col gap-0.5 text-left">
+      <span className="text-sm font-medium text-foreground">
+        {run.courseLabel} · {run.instrumentName}
+      </span>
+      <span className="text-xs text-muted-foreground">
+        {run.assessmentName ? (
+          <>Evaluación: {run.assessmentName}</>
+        ) : (
+          <span className="font-medium text-warning">Sin evaluación asociada</span>
+        )}
+      </span>
+      <span className="text-xs text-muted-foreground">
+        {run.sheetCount} hojas · impresa el {run.createdLabel}
+      </span>
+    </span>
   );
 }
 

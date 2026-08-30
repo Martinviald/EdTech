@@ -12,7 +12,9 @@ import { ROUTES } from '@/lib/routes';
 import { getClassGroupDetail } from '@/lib/teacherAssignmentsApi';
 import { BackLink, CardSkeleton, PageContainer, PageHeader } from '@/components/shared';
 import { SCAN_ROUTES } from '../../../escanear/batch-meta';
-import { ReviewShell, type StudentOption } from './ReviewShell';
+import { HOJAS_ROUTES } from '../../../lib/routes';
+import { listAssessmentOptions } from '../../../lib/assessment-options';
+import { ReviewShell, type AssessmentGap, type StudentOption } from './ReviewShell';
 
 type PageProps = { params: Promise<{ batchId: string }> };
 
@@ -50,8 +52,16 @@ async function BatchSection({ batchId, orgId }: { batchId: string; orgId: string
 
   let students: StudentOption[] = [];
   let rosterAvailable = false;
+  let assessmentGap: AssessmentGap | null = null;
   try {
     const run = await apiGet<PrintRunModel>(`/sheet-print-runs/${batch.printRunId}`);
+    if (!run.assessmentId) {
+      assessmentGap = {
+        runId: run.id,
+        imprimirHref: HOJAS_ROUTES.imprimir(run.layoutId),
+        assessments: await listAssessmentOptions(run.instrumentId).catch(() => []),
+      };
+    }
     if (run.classGroupId) {
       const detail = await getClassGroupDetail(orgId, run.classGroupId);
       students = detail.students
@@ -72,6 +82,7 @@ async function BatchSection({ batchId, orgId }: { batchId: string; orgId: string
       initialBatch={batch}
       students={students}
       rosterAvailable={rosterAvailable}
+      assessmentGap={assessmentGap}
     />
   );
 }

@@ -7,6 +7,7 @@ import {
   SHEET_MANAGEMENT_ROLES,
   type BatchStatusModel,
   type PaginatedResponse,
+  type PrintRunAssessmentOption,
   type PrintRunModel,
 } from '@soe/types';
 import { auth } from '@/auth';
@@ -32,6 +33,8 @@ import {
 } from '@/components/ui/table';
 import { HOJAS_ROUTES } from '../lib/routes';
 import { listInstrumentsForSheets } from '../lib/instruments';
+import { listAssessmentOptionsByInstrument } from '../lib/assessment-options';
+import { assessmentLabel } from '../lib/assessments';
 import { formatSheetDate } from '../lib/format';
 import { ScanUploadForm, type PrintRunOption } from './ScanUploadForm';
 import { BATCH_STATUS_META, SCAN_ROUTES } from './batch-meta';
@@ -63,28 +66,53 @@ export default async function EscanearPage() {
   );
 }
 
-const fetchPrintRunOptions = cache(async (): Promise<{
-  options: PrintRunOption[];
-  labelsById: Map<string, string>;
-}> => {
-  const [runs, instruments] = await Promise.all([
-    apiGet<PaginatedResponse<PrintRunModel>>('/sheet-print-runs?page=1&limit=100'),
-    listInstrumentsForSheets(),
-  ]);
-  const instrumentNames = new Map(instruments.data.map((i) => [i.id, i.name]));
-  const options = runs.data.map((run) => ({
-    id: run.id,
-    label: [
-      instrumentNames.get(run.instrumentId) ?? 'Instrumento sin nombre',
-      run.classGroupName ?? 'Sin curso',
-      `${run.sheetCount} hojas · ${formatSheetDate(run.createdAt)}`,
-    ].join(' — '),
-  }));
-  return { options, labelsById: new Map(options.map((o) => [o.id, o.label])) };
-});
+const fetchPrintRunOptions = cache(
+  async (): Promise<{
+    options: PrintRunOption[];
+    assessmentsByInstrument: Record<string, PrintRunAssessmentOption[]>;
+    labelsById: Map<string, string>;
+  }> => {
+    const [runs, instruments] = await Promise.all([
+      apiGet<PaginatedResponse<PrintRunModel>>('/sheet-print-runs?page=1&limit=100'),
+      listInstrumentsForSheets(),
+    ]);
+    const instrumentNames = new Map(instruments.data.map((i) => [i.id, i.name]));
+    const assessmentsByInstrument = await listAssessmentOptionsByInstrument(
+      runs.data.map((run) => run.instrumentId),
+    );
+
+    const options = runs.data.map((run) => {
+      const assessment = run.assessmentId
+        ? assessmentsByInstrument[run.instrumentId]?.find((a) => a.id === run.assessmentId)
+        : undefined;
+      return {
+        id: run.id,
+        instrumentId: run.instrumentId,
+        courseLabel: run.classGroupName ?? 'Sin curso',
+        instrumentName: instrumentNames.get(run.instrumentId) ?? 'Instrumento sin nombre',
+        sheetCount: run.sheetCount,
+        createdLabel: formatSheetDate(run.createdAt),
+        assessmentName: assessment
+          ? assessmentLabel(assessment)
+          : run.assessmentId
+            ? 'Evaluación asociada'
+            : null,
+        imprimirHref: HOJAS_ROUTES.imprimir(run.layoutId),
+      } satisfies PrintRunOption;
+    });
+
+    const labelsById = new Map(
+      options.map((o) => [
+        o.id,
+        `${o.courseLabel} — ${o.instrumentName} — ${o.sheetCount} hojas · ${o.createdLabel}`,
+      ]),
+    );
+    return { options, assessmentsByInstrument, labelsById };
+  },
+);
 
 async function UploadSection() {
-  const { options } = await fetchPrintRunOptions();
+  const { options, assessmentsByInstrument } = await fetchPrintRunOptions();
 
   if (options.length === 0) {
     return (
@@ -96,7 +124,7 @@ async function UploadSection() {
     );
   }
 
-  return <ScanUploadForm printRuns={options} />;
+  return <ScanUploadForm printRuns={options} assessmentsByInstrument={assessmentsByInstrument} />;
 }
 
 async function RecentBatchesSection() {

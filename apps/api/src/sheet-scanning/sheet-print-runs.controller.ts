@@ -87,7 +87,7 @@ export class SheetPrintRunsController {
     @Query('orgId') orgId?: string,
   ): Promise<PrintRunModel> {
     const dto = updatePrintRunSchema.parse(body);
-    return this.sheetPrintService.updateRun(getEffectiveOrgId(user, orgId), id, dto);
+    return this.sheetPrintService.updateRun(getEffectiveOrgId(user, orgId), user.userId, id, dto);
   }
 
   @Get(':id/pdf')
