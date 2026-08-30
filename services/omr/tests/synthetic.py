@@ -1,13 +1,13 @@
 """Generador sintetico de hojas para tests: renderiza una pagina desde un LayoutSpec.
 
 Sigue EXACTAMENTE la convencion del rectangulo fiducial de app/geometry.py
-(la misma que debe usar el impresor, workstream A1):
+(CD-5, la misma que usa el impresor, workstream A1):
 
-- Rectangulo fiducial = esquinas EXTERIORES de los 4 cuadrados; las
+- Rectangulo fiducial = CENTROS de los 4 cuadrados fiduciales; las
   coordenadas del spec son fracciones 0-1 de ese rectangulo.
 - marginRatio = margen de pagina al borde EXTERIOR del cuadrado, y sizeRatio
-= lado del cuadrado, ambos en fracciones del ANCHO de
-  pagina (igual en los 4 lados); los cuadrados se dibujan hacia adentro.
+  = lado del cuadrado, ambos en fracciones del ANCHO de pagina (igual en los
+  4 lados); los cuadrados se dibujan centrados en las esquinas del rectangulo.
 - radius de burbuja es fraccion del ANCHO del rectangulo fiducial.
 
 Todo es deterministico: lo aleatorio recibe un `numpy.random.Generator` con
@@ -93,6 +93,7 @@ def render_page(
     *,
     marks: dict[str, str | list[str]] | None = None,
     coverage: dict[str, float] | None = None,
+    styles: dict[str, str] | None = None,
     qr_text: str | None = "auto",
     page_width: int = DEFAULT_PAGE_WIDTH,
     paper_gray: int = PAPER_GRAY,
@@ -102,6 +103,7 @@ def render_page(
     rng = rng or np.random.default_rng(7)
     marks = marks or {}
     coverage = coverage or {}
+    styles = styles or {}
 
     paper_w_mm, paper_h_mm = PAPER_SIZES_MM[spec["paper"]]
     page_height = round(page_width * paper_h_mm / paper_w_mm)
@@ -132,9 +134,37 @@ def render_page(
             radius = max(2, round(bubble["radius"] * rect_w))
             _draw_bubble(page, bubble["value"], center, radius)
             if bubble["value"] in chosen_values:
-                fill_coverage = coverage.get(field["fieldId"], 1.0)
-                _fill_bubble(page, center, radius, fill_coverage, pencil_gray, rng)
+                bubble_key = f"{field['fieldId']}:{bubble['value']}"
+                fill_coverage = coverage.get(bubble_key, coverage.get(field["fieldId"], 1.0))
+                style = styles.get(bubble_key, styles.get(field["fieldId"], "fill"))
+                _mark_bubble(page, style, center, radius, fill_coverage, pencil_gray, rng)
     return page
+
+
+def bubble_center_px(
+    spec: dict[str, Any],
+    field_id: str,
+    value: str,
+    page_width: int = DEFAULT_PAGE_WIDTH,
+) -> tuple[int, int]:
+    paper_w_mm, paper_h_mm = PAPER_SIZES_MM[spec["paper"]]
+    page_height = round(page_width * paper_h_mm / paper_w_mm)
+    inset = (spec["fiducials"]["marginRatio"] + spec["fiducials"]["sizeRatio"] / 2) * page_width
+    rect_w = page_width - 2 * inset
+    rect_h = page_height - 2 * inset
+    field = next(f for f in spec["fields"] if f["fieldId"] == field_id)
+    bubble = next(b for b in field["bubbles"] if b["value"] == value)
+    return (
+        round(inset + bubble["center"]["x"] * rect_w),
+        round(inset + bubble["center"]["y"] * rect_h),
+    )
+
+
+def bubble_radius_px(spec: dict[str, Any], page_width: int = DEFAULT_PAGE_WIDTH) -> int:
+    inset = (spec["fiducials"]["marginRatio"] + spec["fiducials"]["sizeRatio"] / 2) * page_width
+    rect_w = page_width - 2 * inset
+    radius = max(bubble["radius"] for field in spec["fields"] for bubble in field["bubbles"])
+    return max(2, round(radius * rect_w))
 
 
 def _draw_fiducials(
@@ -186,6 +216,25 @@ def _draw_bubble(
     cv2.putText(page, letter, origin, cv2.FONT_HERSHEY_SIMPLEX, font_scale, LETTER_GRAY, 1)
 
 
+def _mark_bubble(
+    page: np.ndarray,
+    style: str,
+    center: tuple[int, int],
+    radius: int,
+    fill_coverage: float,
+    pencil_gray: int,
+    rng: np.random.Generator,
+) -> None:
+    if style == "cross":
+        _cross_bubble(page, center, radius, pencil_gray)
+    elif style == "tick":
+        _tick_bubble(page, center, radius, pencil_gray)
+    elif style == "overflow":
+        cv2.circle(page, center, round(radius * 1.5), pencil_gray, thickness=-1)
+    else:
+        _fill_bubble(page, center, radius, fill_coverage, pencil_gray, rng)
+
+
 def _fill_bubble(
     page: np.ndarray,
     center: tuple[int, int],
@@ -201,6 +250,52 @@ def _fill_bubble(
     )
     fill_radius = max(1, round(radius * 0.92 * float(np.sqrt(fill_coverage))))
     cv2.circle(page, offset, fill_radius, pencil_gray, thickness=-1)
+
+
+def _cross_bubble(page: np.ndarray, center: tuple[int, int], radius: int, pencil_gray: int) -> None:
+    reach = round(radius * 0.9)
+    thickness = max(2, round(radius * 0.45))
+    for sign in (1, -1):
+        cv2.line(
+            page,
+            (center[0] - reach, center[1] - sign * reach),
+            (center[0] + reach, center[1] + sign * reach),
+            pencil_gray,
+            thickness,
+        )
+
+
+def _tick_bubble(page: np.ndarray, center: tuple[int, int], radius: int, pencil_gray: int) -> None:
+    thickness = max(2, round(radius * 0.5))
+    low = (center[0] - round(radius * 0.3), center[1] + round(radius * 0.6))
+    cv2.line(
+        page, (center[0] - round(radius * 0.9), center[1]), low, pencil_gray, thickness
+    )
+    cv2.line(
+        page,
+        low,
+        (center[0] + round(radius * 0.9), center[1] - round(radius * 0.8)),
+        pencil_gray,
+        thickness,
+    )
+
+
+def smudge(
+    gray: np.ndarray,
+    center_px: tuple[int, int],
+    radius_px: int,
+    smudge_gray: int,
+    rng: np.random.Generator,
+) -> np.ndarray:
+    out = gray.copy()
+    for _ in range(4):
+        offset = (
+            center_px[0] + int(rng.integers(-radius_px, radius_px + 1)),
+            center_px[1] + int(rng.integers(-radius_px, radius_px + 1)),
+        )
+        blob_radius = max(1, round(radius_px * float(rng.uniform(0.5, 0.9))))
+        cv2.circle(out, offset, blob_radius, smudge_gray, thickness=-1)
+    return out
 
 
 def to_bgr(gray: np.ndarray) -> np.ndarray:
@@ -239,6 +334,30 @@ def perspective(gray: np.ndarray, strength: float, rng: np.random.Generator) -> 
 
 def blur(gray: np.ndarray, sigma: float) -> np.ndarray:
     return cv2.GaussianBlur(gray, (0, 0), sigma)
+
+
+def wrinkle(gray: np.ndarray, amplitude_px: float, waves: float = 2.5) -> np.ndarray:
+    height, width = gray.shape
+    xs, ys = np.meshgrid(
+        np.arange(width, dtype=np.float32), np.arange(height, dtype=np.float32)
+    )
+    map_x = xs + amplitude_px * np.sin(2 * np.pi * waves * ys / height)
+    map_y = ys + amplitude_px * np.sin(2 * np.pi * waves * xs / width)
+    return cv2.remap(
+        gray,
+        map_x,
+        map_y,
+        interpolation=cv2.INTER_LINEAR,
+        borderMode=cv2.BORDER_CONSTANT,
+        borderValue=245,
+    )
+
+
+def side_shadow(gray: np.ndarray, band_frac: float, strength: float) -> np.ndarray:
+    out = gray.astype(np.float32)
+    band = round(gray.shape[1] * band_frac)
+    out[:, :band] *= 1.0 - strength
+    return np.clip(out, 0, 255).astype(np.uint8)
 
 
 def diagonal_shadow(gray: np.ndarray, strength: float) -> np.ndarray:

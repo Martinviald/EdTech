@@ -5,9 +5,10 @@ entran como implementaciones nuevas de este protocolo, sin tocar el pipeline.
 
 Para `selectMode: single`: 0 burbujas sobre el umbral => blank; 1 => marked;
 >= 2 => multiple (value null, la evidencia queda en el recorte). Cualquier
-burbuja del campo con margin < AMBIGUITY_MARGIN => el campo entero es
-ambiguous. El fill/margin reportado es el de la burbuja representativa:
-la marcada si hay una, la de menor margin en los demas casos.
+burbuja del campo con margin < AMBIGUITY_MARGIN, o con fill en tierra de
+nadie entre los dos grupos de la pagina (PageThreshold.is_in_no_mans_land),
+=> el campo entero es ambiguous. El fill/margin reportado es el de la burbuja
+representativa: la marcada si hay una, la mas dudosa en los demas casos.
 """
 
 from __future__ import annotations
@@ -16,7 +17,7 @@ import base64
 from dataclasses import dataclass
 from typing import Any, Protocol
 
-from .classify import AMBIGUITY_MARGIN, bubble_fill, crop_field_jpeg, margin_of
+from .classify import AMBIGUITY_MARGIN, PageThreshold, bubble_fill, crop_field_jpeg, margin_of
 from .rectify import RectifiedPage
 
 
@@ -25,6 +26,7 @@ class BubbleSample:
     value: str
     fill: float
     margin: float
+    uncertain: bool
 
     def is_over(self, threshold: float) -> bool:
         return self.fill > threshold
@@ -36,7 +38,11 @@ class FieldReader(Protocol):
     def sample_fills(self, page: RectifiedPage, field: dict[str, Any]) -> list[float]: ...
 
     def read(
-        self, page: RectifiedPage, field: dict[str, Any], fills: list[float], threshold: float
+        self,
+        page: RectifiedPage,
+        field: dict[str, Any],
+        fills: list[float],
+        page_threshold: PageThreshold,
     ) -> dict[str, Any]: ...
 
 
@@ -49,10 +55,21 @@ class BubbleGroupReader:
         ]
 
     def read(
-        self, page: RectifiedPage, field: dict[str, Any], fills: list[float], threshold: float
+        self,
+        page: RectifiedPage,
+        field: dict[str, Any],
+        fills: list[float],
+        page_threshold: PageThreshold,
     ) -> dict[str, Any]:
+        threshold = page_threshold.threshold
         samples = [
-            BubbleSample(value=bubble["value"], fill=fill, margin=margin_of(fill, threshold))
+            BubbleSample(
+                value=bubble["value"],
+                fill=fill,
+                margin=margin_of(fill, threshold),
+                uncertain=margin_of(fill, threshold) < AMBIGUITY_MARGIN
+                or page_threshold.is_in_no_mans_land(fill),
+            )
             for bubble, fill in zip(field["bubbles"], fills, strict=True)
         ]
         state, value, representative = self._classify(field, samples, threshold)
@@ -73,8 +90,9 @@ class BubbleGroupReader:
     ) -> tuple[str, str | None, BubbleSample]:
         most_doubtful = min(samples, key=lambda sample: sample.margin)
         over = [sample for sample in samples if sample.is_over(threshold)]
-        if most_doubtful.margin < AMBIGUITY_MARGIN:
-            return "ambiguous", None, most_doubtful
+        uncertain = [sample for sample in samples if sample.uncertain]
+        if uncertain:
+            return "ambiguous", None, min(uncertain, key=lambda sample: sample.margin)
         if not over:
             return "blank", None, most_doubtful
         if field["selectMode"] == "multiple":

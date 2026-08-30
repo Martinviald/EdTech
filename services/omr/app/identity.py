@@ -43,6 +43,10 @@ def peek_logical_page_index(raw: str | None, file_page_index: int, page_count: i
     return file_page_index % page_count
 
 
+def decode_region_qr(rectified: RectifiedPage, spec: dict[str, Any]) -> str | None:
+    return _first_qr_text(_identity_region_crop(rectified, spec))
+
+
 def _decode_qr(
     rectified: RectifiedPage | None, original_gray: np.ndarray, spec: dict[str, Any]
 ) -> str | None:
