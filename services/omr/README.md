@@ -101,6 +101,29 @@ histograma de fills (10 bins), `threshold`/`gap`/`stdLow`/`stdHigh`,
 ScanResult puro. El harness del conjunto de oro (F4) puede importar
 `app.pipeline.classify_page_debug` / `read_scan_debug` directamente.
 
+## Conjunto de oro (O4)
+
+El criterio de aceptación del MVP (≥ 99% correctas, ≤ 3% a revisión y **0 incorrectas
+decididas con confianza** — la cifra dominante) se mide contra 300 hojas físicas reales
+transcritas a mano por dos personas. El harness completo vive en `goldset/`
+(formato de datos, veredicto y detalle en `goldset/README.md`):
+
+```bash
+python -m goldset.transcribe goldset/data/<corte>/<hoja>            # transcripción ×2 personas
+python -m goldset.transcribe goldset/data/<corte>/<hoja> --by persona2
+python -m goldset.validate goldset/data                             # doble verificación + estructura
+python -m goldset.run goldset/data                                  # in-process, sin servicio
+python -m goldset.run goldset/data --service-url http://localhost:8090
+```
+
+Flujo: imprimir → rendir → digitalizar (`goldset/data/<corte>/<hoja-id>/`) → transcribir
+(dos personas) → `validate` (lista discrepancias entre transcripciones) → `run` → leer
+`goldset/reports/report-<fecha>.md` (veredicto APRUEBA/NO APRUEBA arriba de todo, más el
+top de incorrectas-confiadas y la distribución de margins para calibrar
+`AMBIGUITY_MARGIN`). `goldset/data/` y `goldset/reports/` están gitignoreados; el único
+dato comiteado es `goldset/example/` (una hoja sintética con la que `pytest goldset/`
+prueba el harness de punta a punta).
+
 ## Variables de entorno
 
 | Var | Default | Qué controla |
