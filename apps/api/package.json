@@ -9,6 +9,7 @@
     "lint": "eslint \"src/**/*.ts\" --fix",
     "test": "jest",
     "typecheck": "tsc --noEmit",
+    "retention:sheet-scans": "tsx scripts/retention-sheet-scans.ts",
     "clean": "rm -rf dist .turbo *.tsbuildinfo"
   },
   "dependencies": {
