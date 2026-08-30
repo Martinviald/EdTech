@@ -22,3 +22,4 @@ export * from './assistant';
 export * from './llm-settings';
 export * from './documents';
 export * from './mcp';
+export * from './sheet-scanning';

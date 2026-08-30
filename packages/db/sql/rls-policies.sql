@@ -306,3 +306,55 @@ DROP POLICY IF EXISTS "mcp_access_logs_tenant_isolation" ON "mcp_access_logs";
 CREATE POLICY "mcp_access_logs_tenant_isolation" ON "mcp_access_logs"
   AS PERMISSIVE FOR ALL
   USING (org_id::text = current_setting('app.current_org_id', true));
+
+-- ── Lector de marcas (E22) — 6 tablas con org_id directo (D16) ────────────────
+-- Las hojas escaneadas contienen el nombre del alumno (Ley 19.628). Toda query
+-- corre dentro de withOrgContext(orgId). Diseño: docs/diseno-lector-de-marcas/.
+ALTER TABLE "sheet_layouts"      ENABLE ROW LEVEL SECURITY;
+ALTER TABLE "sheet_layouts"      FORCE  ROW LEVEL SECURITY;
+ALTER TABLE "sheet_print_runs"   ENABLE ROW LEVEL SECURITY;
+ALTER TABLE "sheet_print_runs"   FORCE  ROW LEVEL SECURITY;
+ALTER TABLE "printed_sheets"     ENABLE ROW LEVEL SECURITY;
+ALTER TABLE "printed_sheets"     FORCE  ROW LEVEL SECURITY;
+ALTER TABLE "sheet_scan_batches" ENABLE ROW LEVEL SECURITY;
+ALTER TABLE "sheet_scan_batches" FORCE  ROW LEVEL SECURITY;
+ALTER TABLE "sheet_scans"        ENABLE ROW LEVEL SECURITY;
+ALTER TABLE "sheet_scans"        FORCE  ROW LEVEL SECURITY;
+ALTER TABLE "sheet_scan_marks"   ENABLE ROW LEVEL SECURITY;
+ALTER TABLE "sheet_scan_marks"   FORCE  ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "sheet_layouts_tenant_isolation" ON "sheet_layouts";
+CREATE POLICY "sheet_layouts_tenant_isolation" ON "sheet_layouts"
+  AS PERMISSIVE FOR ALL
+  USING (org_id::text = current_setting('app.current_org_id', true))
+  WITH CHECK (org_id::text = current_setting('app.current_org_id', true));
+
+DROP POLICY IF EXISTS "sheet_print_runs_tenant_isolation" ON "sheet_print_runs";
+CREATE POLICY "sheet_print_runs_tenant_isolation" ON "sheet_print_runs"
+  AS PERMISSIVE FOR ALL
+  USING (org_id::text = current_setting('app.current_org_id', true))
+  WITH CHECK (org_id::text = current_setting('app.current_org_id', true));
+
+DROP POLICY IF EXISTS "printed_sheets_tenant_isolation" ON "printed_sheets";
+CREATE POLICY "printed_sheets_tenant_isolation" ON "printed_sheets"
+  AS PERMISSIVE FOR ALL
+  USING (org_id::text = current_setting('app.current_org_id', true))
+  WITH CHECK (org_id::text = current_setting('app.current_org_id', true));
+
+DROP POLICY IF EXISTS "sheet_scan_batches_tenant_isolation" ON "sheet_scan_batches";
+CREATE POLICY "sheet_scan_batches_tenant_isolation" ON "sheet_scan_batches"
+  AS PERMISSIVE FOR ALL
+  USING (org_id::text = current_setting('app.current_org_id', true))
+  WITH CHECK (org_id::text = current_setting('app.current_org_id', true));
+
+DROP POLICY IF EXISTS "sheet_scans_tenant_isolation" ON "sheet_scans";
+CREATE POLICY "sheet_scans_tenant_isolation" ON "sheet_scans"
+  AS PERMISSIVE FOR ALL
+  USING (org_id::text = current_setting('app.current_org_id', true))
+  WITH CHECK (org_id::text = current_setting('app.current_org_id', true));
+
+DROP POLICY IF EXISTS "sheet_scan_marks_tenant_isolation" ON "sheet_scan_marks";
+CREATE POLICY "sheet_scan_marks_tenant_isolation" ON "sheet_scan_marks"
+  AS PERMISSIVE FOR ALL
+  USING (org_id::text = current_setting('app.current_org_id', true))
+  WITH CHECK (org_id::text = current_setting('app.current_org_id', true));

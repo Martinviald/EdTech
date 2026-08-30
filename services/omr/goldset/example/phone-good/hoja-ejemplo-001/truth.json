@@ -1,0 +1,33 @@
+{
+  "sheetId": "1c9a7e55-2d40-4b8a-9f31-6a0d8c4e7b21",
+  "layoutSpecFile": "../layout-spec.json",
+  "transcriptions": [
+    {
+      "by": "persona1",
+      "answers": {
+        "1": "A",
+        "2": "B",
+        "3": "C",
+        "4": "D",
+        "5": "A",
+        "6": "B",
+        "7": "C",
+        "8": null
+      }
+    },
+    {
+      "by": "persona2",
+      "answers": {
+        "1": "A",
+        "2": "B",
+        "3": "C",
+        "4": "D",
+        "5": "A",
+        "6": "B",
+        "7": "C",
+        "8": null
+      }
+    }
+  ],
+  "notes": "Hoja sintetica generada con `python -m goldset.make_example`; no es papel real."
+}

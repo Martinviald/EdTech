@@ -47,3 +47,6 @@ export * from './assistant.schema';
 export * from './llm-settings.schema';
 export * from './student-signals.schema';
 export * from './document.schema';
+export * from './omr-layout.schema';
+export * from './omr-scan.schema';
+export * from './sheet-scanning.schema';

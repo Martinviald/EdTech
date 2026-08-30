@@ -83,6 +83,9 @@ export type AnswerSheetConfirmRequestDto = z.infer<typeof answerSheetConfirmRequ
 export const answerSheetRowErrorSchema = z.object({
   rowNumber: z.number().int().positive(),
   field: z.string().optional(),
+  // Código opcional para errores con semántica propia aguas abajo. Hoy sólo
+  // 'ambiguous_mark': marca multiple/ambiguous sin revisar del lector de marcas (E22).
+  code: z.literal('ambiguous_mark').optional(),
   message: z.string(),
 });
 export type AnswerSheetRowError = z.infer<typeof answerSheetRowErrorSchema>;

@@ -1,0 +1,16 @@
+[project]
+name = "omr-service"
+version = "0.1.0"
+description = "Servicio de vision del lector de marcas (E22). Sin estado, sin DB, sin tenants: una funcion pura sobre (imagen, LayoutSpec)."
+requires-python = ">=3.12"
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "UP", "B"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests", "goldset"]
+pythonpath = ["."]

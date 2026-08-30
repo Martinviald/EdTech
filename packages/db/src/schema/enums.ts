@@ -296,3 +296,27 @@ export const documentVisibilityEnum = pgEnum('document_visibility', [
   'network',
   'platform',
 ]);
+
+// ── Lector de marcas (E22) — ver docs/diseno-lector-de-marcas/03-contratos.md §3.5 ──
+export const sheetScanBatchStatusEnum = pgEnum('sheet_scan_batch_status', [
+  'pending',
+  'processing',
+  'needs_review',
+  'confirmed',
+  'failed',
+  'rejected',
+]);
+
+export const sheetScanStateEnum = pgEnum('sheet_scan_state', [
+  'read',
+  'quality_rejected',
+  'identity_unresolved',
+  'superseded',
+]);
+
+export const markStateEnum = pgEnum('mark_state', [
+  'marked',
+  'blank',
+  'multiple',
+  'ambiguous',
+]);

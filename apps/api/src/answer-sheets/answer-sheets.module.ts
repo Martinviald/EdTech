@@ -6,6 +6,6 @@ import { AnswerSheetPreviewStore } from './lib/preview-store';
 @Module({
   controllers: [AnswerSheetsController],
   providers: [AnswerSheetsService, AnswerSheetPreviewStore],
-  exports: [AnswerSheetsService],
+  exports: [AnswerSheetsService, AnswerSheetPreviewStore],
 })
 export class AnswerSheetsModule {}
