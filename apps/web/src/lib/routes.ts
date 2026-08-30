@@ -42,6 +42,7 @@ export const ROUTES = {
   estudiante: (studentId: string) => route(`/estudiantes/${studentId}`),
 
   resultados: route('/resultados'),
+  telemetria: route('/telemetria'),
   resultadosTableroMaestro: route('/resultados/tablero-maestro'),
   resultadosClasificacion: route('/resultados/clasificacion'),
   resultadosTrayectoria: route('/resultados/trayectoria'),
@@ -103,6 +104,7 @@ export const ROUTES = {
   establecimientoInformeOficial: route('/establecimiento/informe-oficial'),
 
   admin: route('/admin'),
+  adminTelemetria: route('/admin/telemetria'),
   adminColegios: route('/admin/colegios'),
   adminColegio: (id: string) => route(`/admin/colegios/${id}`),
   adminColegioConfigurar: (id: string) => route(`/admin/colegios/${id}/configurar`),
