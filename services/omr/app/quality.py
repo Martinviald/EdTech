@@ -13,6 +13,15 @@ la pagina supere 250.
 Los umbrales minSharpness/maxGlare vienen del CaptureProfile: son datos, no
 codigo (D2). `no_separable_marks` lo aporta el clasificador (C21) y se aplica
 en el pipeline.
+
+`cropped` vs `fiducials_missing`: los dos significan "no hay 4 esquinas", pero
+piden acciones distintas — reescanear sin auto-recorte, o revisar que la hoja
+sea de esta tirada. El rectificador distingue el caso mirando si quedo tinta
+oscura pegada al borde de la captura donde deberia estar el fiducial
+(`clipped_corners`). Antes los dos casos salian como `fiducials_missing` y el
+motivo no le decia nada al usuario: `cropped` existia en el enum pero era
+INALCANZABLE cuando el recorte era justo lo que rompia la deteccion, porque
+`touches_border` solo mira los fiduciales ENCONTRADOS.
 """
 
 from __future__ import annotations
@@ -69,8 +78,8 @@ def _reject_reason(
     glare: float,
     capture_profile: dict[str, Any],
 ) -> str | None:
-    if rectified.fiducials_found < 4:
-        return "fiducials_missing"
+    if isinstance(rectified, FiducialFailure):
+        return "cropped" if rectified.clipped_corners > 0 else "fiducials_missing"
     if rectified.touches_border:
         return "cropped"
     if sharpness < capture_profile["minSharpness"]:

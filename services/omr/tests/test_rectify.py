@@ -89,3 +89,29 @@ def test_filled_bubble_is_never_taken_for_a_fiducial(
     result = rectify(syn.to_bgr(erased), spec)
     assert isinstance(result, FiducialFailure)
     assert result.fiducials_found == 3
+
+
+def test_a_distant_blob_is_never_crowned_as_the_missing_fiducial(
+    spec: dict, clean_gray: np.ndarray
+) -> None:
+    """El falso positivo caro: coronar un borron lejano como si fuera la esquina.
+
+    `_best_square` elige el cuadrado oscuro mas cercano a la esquina dentro de
+    una region que abarca el 45% de la pagina. Si el fiducial verdadero falta,
+    sin un tope de distancia el ganador puede estar a media hoja: se reportan 4
+    fiduciales, la homografia sale deformada y la pagina se lee entera mal CON
+    confianza. Se observo de verdad al aflojar el gate de forma — un borron a
+    836 px se llevo la corona y cambio 3 respuestas ya decididas.
+
+    Se borra el fiducial inferior izquierdo y se pinta un cuadrado impecable
+    lejos de esa esquina: la pagina tiene que quedar en 3 fiduciales, no en 4.
+    """
+    tampered = clean_gray.copy()
+    height, width = tampered.shape
+    tampered[height - 80 :, :80] = syn.PAPER_GRAY
+    decoy_y, decoy_x = round(height * 0.62), round(width * 0.12)
+    cv2.rectangle(tampered, (decoy_x, decoy_y), (decoy_x + 30, decoy_y + 30), syn.INK_GRAY, -1)
+
+    result = rectify(syn.to_bgr(tampered), spec)
+    assert isinstance(result, FiducialFailure)
+    assert result.fiducials_found == 3

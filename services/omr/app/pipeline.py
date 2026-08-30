@@ -196,17 +196,34 @@ def _stage(timings_ms: dict[str, float], name: str) -> Iterator[None]:
 def _rectify_oriented(
     bgr: np.ndarray, spec: dict[str, Any]
 ) -> tuple[np.ndarray, RectifiedPage | FiducialFailure, int]:
-    first = rectify(bgr, spec)
+    qr_mode = spec["identity"]["mode"] == "qr"
+    first = rectify(bgr, spec, allow_reconstruction=qr_mode)
     if _orientation_confirmed(first, spec):
         return bgr, first, 0
-    if spec["identity"]["mode"] != "qr":
+    if not qr_mode:
         return bgr, first, 0
     for degrees, rotation_code in ORIENTATION_ROTATIONS:
         rotated = cv2.rotate(bgr, rotation_code)
-        candidate = rectify(rotated, spec)
+        candidate = rectify(rotated, spec, allow_reconstruction=True)
         if isinstance(candidate, RectifiedPage) and decode_region_qr(candidate, spec):
             return rotated, candidate, degrees
-    return bgr, first, 0
+    return bgr, _discard_unconfirmed_reconstruction(bgr, spec, first), 0
+
+
+def _discard_unconfirmed_reconstruction(
+    bgr: np.ndarray, spec: dict[str, Any], rectified: RectifiedPage | FiducialFailure
+) -> RectifiedPage | FiducialFailure:
+    """Una reconstruccion que el QR no confirmo vuelve a ser un fallo de fiduciales.
+
+    Reconstruir la 4a esquina recupera paginas que antes se perdian, pero solo
+    vale si algo independiente confirma que la homografia quedo bien. Esa prueba
+    es el QR decodificando desde la region del spec. Si no decodifico en ninguna
+    orientacion, la pagina se rechaza como antes: cero lecturas incorrectas
+    confiadas manda sobre recuperar una hoja mas.
+    """
+    if not isinstance(rectified, RectifiedPage) or not rectified.reconstructed:
+        return rectified
+    return rectify(bgr, spec)
 
 
 def _orientation_confirmed(
