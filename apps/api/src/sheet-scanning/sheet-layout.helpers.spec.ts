@@ -210,6 +210,83 @@ describe('deriveLayoutDraft — identidad rut_bubbles (CD-10)', () => {
     expect(layoutHash(rut.spec)).not.toBe(layoutHash(qrImplicit.spec));
   });
 
+  it('M4: un campo digit_grid con una burbuja sin group es un spec inválido', () => {
+    const spec = deriveLayoutDraft(INSTRUMENT_ID, items).spec;
+    const digitField = {
+      fieldId: 'f_num',
+      kind: 'digit_grid' as const,
+      printedNumber: '1',
+      pageIndex: 0,
+      selectMode: 'single' as const,
+      bubbles: [
+        { value: '0', center: { x: 0.6, y: 0.3 }, radius: 0.008, group: 0 },
+        { value: '1', center: { x: 0.6, y: 0.35 }, radius: 0.008 },
+      ],
+      region: null,
+    };
+    const broken = { ...spec, fields: [digitField] };
+
+    const messages = collectInvariantViolations(broken, items).map((v) => v.message);
+    expect(messages.some((m) => m.includes('no declara su grupo'))).toBe(true);
+  });
+
+  it('M4: un campo digit_grid con grupos no contiguos (0 y 2) es un spec inválido', () => {
+    const spec = deriveLayoutDraft(INSTRUMENT_ID, items).spec;
+    const digitField = {
+      fieldId: 'f_num',
+      kind: 'digit_grid' as const,
+      printedNumber: '1',
+      pageIndex: 0,
+      selectMode: 'single' as const,
+      bubbles: [
+        { value: '0', center: { x: 0.6, y: 0.3 }, radius: 0.008, group: 0 },
+        { value: '1', center: { x: 0.6, y: 0.35 }, radius: 0.008, group: 2 },
+      ],
+      region: null,
+    };
+    const broken = { ...spec, fields: [digitField] };
+
+    const messages = collectInvariantViolations(broken, items).map((v) => v.message);
+    expect(messages.some((m) => m.includes('contiguos desde 0'))).toBe(true);
+    expect(messages.some((m) => m.includes('0, 2'))).toBe(true);
+  });
+
+  it('M4: un campo digit_grid con grupos contiguos 0..2 no agrega violaciones de grupos', () => {
+    const spec = deriveLayoutDraft(INSTRUMENT_ID, items).spec;
+    const digitField = {
+      fieldId: 'f_num',
+      kind: 'digit_grid' as const,
+      printedNumber: '1',
+      pageIndex: 0,
+      selectMode: 'single' as const,
+      bubbles: [0, 1, 2].map((group) => ({
+        value: String(group),
+        center: { x: 0.6 + group * 0.05, y: 0.3 },
+        radius: 0.008,
+        group,
+      })),
+      region: null,
+    };
+    const valid = { ...spec, fields: [digitField] };
+
+    const messages = collectInvariantViolations(valid, items).map((v) => v.message);
+    expect(messages.some((m) => m.includes('grupo'))).toBe(false);
+  });
+
+  it('M4: la grilla RUT con grupos no contiguos también viola el invariante', () => {
+    const rut = deriveLayoutDraft(INSTRUMENT_ID, items, 'rut_bubbles').spec;
+    const holed = {
+      ...rut,
+      identity: {
+        ...rut.identity,
+        bubbles: (rut.identity.bubbles ?? []).filter((bubble) => bubble.group !== 3),
+      },
+    };
+
+    const messages = collectInvariantViolations(holed, items).map((v) => v.message);
+    expect(messages.some((m) => m.includes('contiguos desde 0'))).toBe(true);
+  });
+
   it('invariante de freeze: rut_bubbles sin grilla y qr con grilla son specs inválidos', () => {
     const rut = deriveLayoutDraft(INSTRUMENT_ID, items, 'rut_bubbles').spec;
     const qr = deriveLayoutDraft(INSTRUMENT_ID, items, 'qr').spec;

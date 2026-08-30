@@ -107,6 +107,8 @@ def read_digit_groups(
         group_bubbles, group_fills = grouped.setdefault(group_index, ([], []))
         group_bubbles.append(bubble)
         group_fills.append(fill)
+    if sorted(grouped) != list(range(len(grouped))):
+        return None
     return [
         _read_group(group_bubbles, group_fills, page_threshold, ambiguity_margin)
         for _, (group_bubbles, group_fills) in sorted(grouped.items())

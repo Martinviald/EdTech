@@ -294,6 +294,39 @@ function collectOverlapViolations(spec: LayoutSpec): InvariantViolation[] {
   return violations;
 }
 
+function collectDigitGroupViolations(
+  bubbles: readonly OmrBubble[],
+  fieldLabel: string,
+): InvariantViolation[] {
+  const violations: InvariantViolation[] = [];
+  const groups = new Set<number>();
+  let allGroupsPresent = true;
+
+  for (const bubble of bubbles) {
+    if (typeof bubble.group !== 'number' || !Number.isInteger(bubble.group)) {
+      allGroupsPresent = false;
+      violations.push({
+        invariant: 6,
+        message: `la burbuja "${bubble.value}" de ${fieldLabel} no declara su grupo (índice de dígito entero)`,
+      });
+      continue;
+    }
+    groups.add(bubble.group);
+  }
+
+  if (allGroupsPresent && groups.size > 0) {
+    const max = Math.max(...groups);
+    if (groups.size !== max + 1 || !groups.has(0)) {
+      violations.push({
+        invariant: 6,
+        message: `los grupos de ${fieldLabel} deben ser contiguos desde 0 (encontrados: ${Array.from(groups).sort((a, b) => a - b).join(', ')})`,
+      });
+    }
+  }
+
+  return violations;
+}
+
 function collectIdentityViolations(spec: LayoutSpec): InvariantViolation[] {
   const violations: InvariantViolation[] = [];
   const bubbles = spec.identity.bubbles ?? null;
@@ -318,13 +351,8 @@ function collectIdentityViolations(spec: LayoutSpec): InvariantViolation[] {
           message: 'una burbuja de la grilla RUT queda fuera del rango 0–1 de la página',
         });
       }
-      if (bubble.group === null || bubble.group === undefined) {
-        violations.push({
-          invariant: 6,
-          message: `la burbuja "${bubble.value}" de la grilla RUT no declara su grupo (índice de dígito)`,
-        });
-      }
     }
+    violations.push(...collectDigitGroupViolations(bubbles, 'la grilla RUT'));
     return violations;
   }
 
@@ -436,6 +464,17 @@ export function collectInvariantViolations(
         invariant: 6,
         message: `la pregunta "${field.printedNumber}" es una región de recorte sin región definida`,
       });
+    }
+    if (field.kind === 'digit_grid') {
+      if (field.bubbles.length === 0) {
+        violations.push({
+          invariant: 6,
+          message: `la pregunta "${field.printedNumber}" es una grilla de dígitos sin burbujas`,
+        });
+      }
+      violations.push(
+        ...collectDigitGroupViolations(field.bubbles, `la pregunta "${field.printedNumber}"`),
+      );
     }
   }
 

@@ -112,3 +112,24 @@ def test_digit_grid_page_validates_against_scan_result_contract(
     )
     page = process_page(syn.to_bgr(gray), 0, grid_spec, profile)
     assert validate("scan-result", {"pages": [page]}) == []
+
+
+def test_non_contiguous_groups_make_whole_field_ambiguous(profile: dict) -> None:
+    spec = syn.make_layout_spec(fields_per_page=4)
+    field = syn.make_digit_grid_field("f_num", "5", digit_count=3, origin=(0.6, 0.25))
+    for bubble in field["bubbles"]:
+        if bubble["group"] == 1:
+            bubble["group"] = 4
+    spec["fields"].append(field)
+
+    gray = syn.render_page(
+        spec,
+        0,
+        marks={**BUBBLE_MARKS, "f_num": {0: "4", 4: "0", 2: "7"}},
+        rng=np.random.default_rng(11),
+    )
+    page = process_page(syn.to_bgr(gray), 0, spec, profile)
+    mark = next(mark for mark in page["marks"] if mark["fieldId"] == "f_num")
+
+    assert mark["state"] == "ambiguous"
+    assert mark["value"] is None
