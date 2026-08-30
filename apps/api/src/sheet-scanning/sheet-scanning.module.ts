@@ -4,6 +4,8 @@ import { AnswerSheetsService } from '../answer-sheets/answer-sheets.service';
 import { AnswerSheetPreviewStore } from '../answer-sheets/lib/preview-store';
 import { FilesModule } from '../files/files.module';
 import { JobsModule } from '../jobs/jobs.module';
+import { LlmModule } from '../llm/llm.module';
+import { DevelopmentGradingService } from './development-grading.service';
 import {
   ManualIdentityResolver,
   QrIdentityResolver,
@@ -32,7 +34,7 @@ import { SheetScanBatchesController } from './sheet-scan-batches.controller';
 import { SheetScanService } from './sheet-scan.service';
 
 @Module({
-  imports: [FilesModule, JobsModule, AnswerSheetsModule],
+  imports: [FilesModule, JobsModule, AnswerSheetsModule, LlmModule],
   controllers: [
     SheetLayoutsController,
     SheetPrintRunsController,
@@ -47,6 +49,7 @@ import { SheetScanService } from './sheet-scan.service';
     SheetPrintService,
     SheetScanService,
     ScanReviewService,
+    DevelopmentGradingService,
     OmrCalibrationService,
     QrIdentityResolver,
     RutBubbleResolver,

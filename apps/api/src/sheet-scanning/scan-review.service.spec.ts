@@ -5,6 +5,10 @@ import type { JwtPayload } from '../auth/jwt-payload.types';
 import type { AnswerSheetsService } from '../answer-sheets/answer-sheets.service';
 import type { AnswerSheetPreviewStore } from '../answer-sheets/lib/preview-store';
 import type { FilesService } from '../files/files.service';
+import type {
+  DevelopmentGradingService,
+  ScheduleConfirmedBatchParams,
+} from './development-grading.service';
 import {
   ScanReviewService,
   createAnswerSheetConfirmer,
@@ -95,8 +99,14 @@ const filesServiceFake = {
 function makeService(selectResults: unknown[][]) {
   const { db, updates } = makeDb(selectResults);
   const { confirmer, calls: confirmCalls } = makeConfirmer();
-  const service = new ScanReviewService(db, confirmer, filesServiceFake);
-  return { service, updates, confirmCalls };
+  const gradingCalls: ScheduleConfirmedBatchParams[] = [];
+  const developmentGradingFake = {
+    scheduleConfirmedBatch: (params: ScheduleConfirmedBatchParams) => {
+      gradingCalls.push(params);
+    },
+  } as unknown as DevelopmentGradingService;
+  const service = new ScanReviewService(db, confirmer, filesServiceFake, developmentGradingFake);
+  return { service, updates, confirmCalls, gradingCalls };
 }
 
 function bubbleField(fieldId: string, printedNumber: string, pageIndex: number, values: string[]) {
@@ -680,6 +690,96 @@ describe('ScanReviewService.confirmBatch', () => {
     await expect(service.confirmBatch(ORG_ID, USER, BATCH_ID)).rejects.toBeInstanceOf(
       ConflictException,
     );
+  });
+
+  it('excluye las marcas crop_region del ParserResult (CD-9: el recorte no es una alternativa)', async () => {
+    const specWithCrop: LayoutSpec = {
+      ...SPEC,
+      fields: [
+        ...SPEC.fields,
+        {
+          fieldId: 'f_dev',
+          kind: 'crop_region',
+          printedNumber: '4',
+          pageIndex: 1,
+          selectMode: 'single',
+          bubbles: [],
+          region: { topLeft: { x: 0.1, y: 0.5 }, bottomRight: { x: 0.9, y: 0.8 } },
+        },
+      ],
+    };
+    const cropMark = {
+      markId: 'm-crop',
+      scanId: 'scan-1b',
+      printedNumber: '4',
+      state: 'marked',
+      value: null,
+      reviewedValue: null,
+      reviewedAt: null,
+    };
+    const { service, confirmCalls } = makeService([
+      [{ ...CONFIRM_BATCH_ROW, spec: specWithCrop }],
+      CONFIRM_SCANS,
+      [...CONFIRM_MARKS, cropMark],
+      CONFIRM_STUDENTS,
+    ]);
+
+    const result = await service.confirmBatch(ORG_ID, USER, BATCH_ID);
+
+    const rows = confirmCalls[0].input.parserResult.rows;
+    expect(rows[0].answers).toEqual({ '1': 'A', '2': null, '3': 'F' });
+    expect(rows[0].answers).not.toHaveProperty('4');
+    expect(result.summary.assumedPending).toBe(1);
+  });
+
+  it('agenda la corrección de desarrollo con los datos del lote tras confirmar', async () => {
+    const { service, gradingCalls } = makeService([
+      [CONFIRM_BATCH_ROW],
+      CONFIRM_SCANS,
+      CONFIRM_MARKS,
+      CONFIRM_STUDENTS,
+    ]);
+
+    await service.confirmBatch(ORG_ID, USER, BATCH_ID);
+
+    expect(gradingCalls).toEqual([
+      {
+        orgId: ORG_ID,
+        batchId: BATCH_ID,
+        assessmentId: ASSESSMENT_ID,
+        instrumentId: INSTRUMENT_ID,
+        spec: SPEC,
+      },
+    ]);
+  });
+
+  it('no agenda corrección de desarrollo si el confirm de answer-sheets falla', async () => {
+    const { db } = makeDb([
+      [CONFIRM_BATCH_ROW],
+      CONFIRM_SCANS,
+      CONFIRM_MARKS,
+      CONFIRM_STUDENTS,
+    ]);
+    const gradingCalls: ScheduleConfirmedBatchParams[] = [];
+    const failingConfirmer: AnswerSheetConfirmer = {
+      confirmParserResult: async () => {
+        throw new Error('falló la ingesta');
+      },
+    };
+    const developmentGradingFake = {
+      scheduleConfirmedBatch: (params: ScheduleConfirmedBatchParams) => {
+        gradingCalls.push(params);
+      },
+    } as unknown as DevelopmentGradingService;
+    const service = new ScanReviewService(
+      db,
+      failingConfirmer,
+      filesServiceFake,
+      developmentGradingFake,
+    );
+
+    await expect(service.confirmBatch(ORG_ID, USER, BATCH_ID)).rejects.toThrow('falló la ingesta');
+    expect(gradingCalls).toHaveLength(0);
   });
 
   it('rechaza con 400 cuando no queda ninguna hoja completa e identificada', async () => {
