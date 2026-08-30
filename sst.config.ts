@@ -5,6 +5,7 @@
  *
  *   Frontend (Next.js)  -> CloudFront + Lambda (OpenNext)        [sst.aws.Nextjs]
  *   Backend  (NestJS)   -> App Runner desde imagen en ECR        [aws.apprunner.* crudo]
+ *   Visión OMR (E22)    -> App Runner desde imagen en ECR        [aws.apprunner.* crudo]
  *   BDD      (Postgres) -> RDS t4g.micro Single-AZ               [sst.aws.Postgres]
  *   Archivos            -> S3                                     [sst.aws.Bucket]
  *
@@ -90,6 +91,15 @@ export default $config({
       imageScanningConfiguration: { scanOnPush: true },
     });
 
+    // ── ECR: repo de la imagen del servicio de visión OMR (services/omr) ──
+    // Dockerfile listo en services/omr/ (uvicorn, puerto 8090). Igual que el
+    // backend: la imagen se buildea/pushea fuera de SST antes de la fase 2.
+    const omrRepo = new aws.ecr.Repository("OmrRepo", {
+      name: `edtech-omr-${$app.stage}`,
+      forceDelete: true,
+      imageScanningConfiguration: { scanOnPush: true },
+    });
+
     // ── IAM: rol de acceso a ECR (pull) ──
     const accessRole = new aws.iam.Role("ApiEcrAccessRole", {
       assumeRolePolicy: JSON.stringify({
@@ -148,11 +158,45 @@ export default $config({
       return {
         phase: "1 — infra base lista",
         ecrRepo: apiRepo.repositoryUrl,
+        ecrOmrRepo: omrRepo.repositoryUrl,
         dbHost: db.host,
         bucket: uploads.name,
-        next: "Push imagen a ECR + provisionar BDD, luego: SST_BACKEND_READY=1 sst deploy",
+        next: "Push imágenes (api + omr) a ECR + provisionar BDD, luego: SST_BACKEND_READY=1 sst deploy",
       };
     }
+
+    // ── Servicio de visión OMR: App Runner desde la imagen :latest en ECR ──
+    // Stateless y sin BDD ni credenciales: recibe LayoutSpec + imagen, devuelve
+    // marcas (E22). No necesita VPC (cero egress útil) ni rol de instancia.
+    // ⚠️ La URL de App Runner es pública y el servicio no autentica: sólo el
+    // backend debe conocerla (OMR_SERVICE_URL); no se expone al frontend. Si el
+    // stage exige aislamiento real, moverlo detrás de un VpcIngressConnection.
+    const omr = new aws.apprunner.Service("Omr", {
+      serviceName: `edtech-omr-${$app.stage}`,
+      sourceConfiguration: {
+        autoDeploymentsEnabled: true,
+        authenticationConfiguration: { accessRoleArn: accessRole.arn },
+        imageRepository: {
+          imageRepositoryType: "ECR",
+          imageIdentifier: $interpolate`${omrRepo.repositoryUrl}:latest`,
+          imageConfiguration: { port: "8090" },
+        },
+      },
+      instanceConfiguration: {
+        // Rectifica y clasifica imágenes página a página: CPU-bound.
+        cpu: "1 vCPU",
+        memory: "2 GB",
+      },
+      healthCheckConfiguration: {
+        protocol: "TCP",
+        interval: 10,
+        timeout: 5,
+        healthyThreshold: 1,
+        unhealthyThreshold: 10,
+      },
+    });
+
+    const omrUrl = $interpolate`https://${omr.serviceUrl}`;
 
     // ── Backend: App Runner desde la imagen :latest en ECR ──
     const api = new aws.apprunner.Service("Api", {
@@ -176,6 +220,8 @@ export default $config({
               GEMINI_API_KEY: geminiApiKey.value,
               ANTHROPIC_API_KEY: anthropicApiKey.value,
               AWS_S3_BUCKET: uploads.name,
+              // E22: el backend habla con el servicio de visión OMR por HTTP.
+              OMR_SERVICE_URL: omrUrl,
               // web->api es server-side (Lambda OpenNext -> App Runner), CORS no aplica.
               CORS_ORIGIN: "*",
               // MCP analítico: apagado por default; se enciende seteando los secrets.
@@ -229,7 +275,9 @@ export default $config({
       phase: "2 — completa",
       web: web.url,
       api: apiUrl,
+      omr: omrUrl,
       ecrRepo: apiRepo.repositoryUrl,
+      ecrOmrRepo: omrRepo.repositoryUrl,
       dbHost: db.host,
       bucket: uploads.name,
     };
