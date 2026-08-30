@@ -1,7 +1,10 @@
 import { BadRequestException } from '@nestjs/common';
-import type { ZodType } from 'zod';
+import type { ZodType, ZodTypeDef } from 'zod';
 
-export function parseDtoOrBadRequest<T>(schema: ZodType<T>, input: unknown): T {
+export function parseDtoOrBadRequest<Output, Input>(
+  schema: ZodType<Output, ZodTypeDef, Input>,
+  input: unknown,
+): Output {
   const parsed = schema.safeParse(input);
   if (parsed.success) return parsed.data;
   const issue = parsed.error.issues[0];
