@@ -90,6 +90,8 @@ invariante violado. Un layout congelado NUNCA se actualiza: editar = fila nueva 
 | `POST /sheet-print-runs` | `SHEET_MANAGEMENT_ROLES` | `CreatePrintRunDto` | `PrintRunModel` |
 | `GET /sheet-print-runs` | `SHEET_MANAGEMENT_ROLES` | `PrintRunQueryDto` | `PaginatedResponse<PrintRunModel>` |
 | `GET /sheet-print-runs/:id` | `SHEET_MANAGEMENT_ROLES` | — | `PrintRunModel` |
+| `PATCH /sheet-print-runs/:id` | `SHEET_MANAGEMENT_ROLES` | `UpdatePrintRunDto` | `PrintRunModel` |
+| `GET /sheet-print-runs/assessment-options` | `SHEET_MANAGEMENT_ROLES` | `PrintRunAssessmentOptionsQueryDto` | `PrintRunAssessmentOption[]` |
 | `GET /sheet-print-runs/:id/pdf` | `SHEET_MANAGEMENT_ROLES` | — | `application/pdf` (stream) |
 
 `createRun` crea la tirada + una `printed_sheets` por alumno activo del curso (orden
@@ -97,6 +99,14 @@ alfabético = `sequence`) + `spareCount` reservas con `studentId: null` (G8), tr
 El QR de cada página: `buildOmrQrPayload({ printedSheetId, layoutHash, pageIndex, pageCount })`,
 corrección de errores nivel M. Reservas usan el MISMO formato (su hoja existe en
 `printed_sheets`, sólo que sin alumno).
+
+La evaluación (`assessmentId`) es el destino de las respuestas leídas: sin ella
+`confirmBatch` rechaza el lote. `createRun` la valida (misma org + mismo instrumento que
+el layout) cuando viene en el DTO y la CREA (`mode: 'paper'`, `status: 'scheduled'`, más
+su `assessment_course_assignments` al curso) cuando no viene, de modo que ninguna tirada
+nazca sin destino. `PATCH /:id` asocia o cambia la evaluación de una tirada existente con
+las mismas validaciones, y responde 409 si la tirada ya tiene un lote `confirmed` (mover
+la evaluación después de confirmar dejaría huérfanas las `responses` ya escritas).
 
 ### Lotes — controller `sheet-scan-batches` (workstream C2, F2)
 

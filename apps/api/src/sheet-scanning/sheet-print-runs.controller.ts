@@ -4,6 +4,7 @@ import {
   Get,
   Param,
   ParseUUIDPipe,
+  Patch,
   Post,
   Query,
   StreamableFile,
@@ -12,8 +13,11 @@ import {
 import {
   SHEET_MANAGEMENT_ROLES,
   createPrintRunSchema,
+  printRunAssessmentOptionsQuerySchema,
   printRunQuerySchema,
+  updatePrintRunSchema,
   type PaginatedResponse,
+  type PrintRunAssessmentOption,
   type PrintRunModel,
 } from '@soe/types';
 import { CurrentUser } from '../auth/current-user.decorator';
@@ -50,6 +54,20 @@ export class SheetPrintRunsController {
     return this.sheetPrintService.list(getEffectiveOrgId(user, orgId), dto);
   }
 
+  @Get('assessment-options')
+  @Roles(...SHEET_MANAGEMENT_ROLES)
+  assessmentOptions(
+    @Query() query: unknown,
+    @CurrentUser() user: JwtPayload,
+    @Query('orgId') orgId?: string,
+  ): Promise<PrintRunAssessmentOption[]> {
+    const dto = printRunAssessmentOptionsQuerySchema.parse(query);
+    return this.sheetPrintService.listAssessmentOptions(
+      getEffectiveOrgId(user, orgId),
+      dto.instrumentId,
+    );
+  }
+
   @Get(':id')
   @Roles(...SHEET_MANAGEMENT_ROLES)
   getOne(
@@ -58,6 +76,18 @@ export class SheetPrintRunsController {
     @Query('orgId') orgId?: string,
   ): Promise<PrintRunModel> {
     return this.sheetPrintService.getRun(getEffectiveOrgId(user, orgId), id);
+  }
+
+  @Patch(':id')
+  @Roles(...SHEET_MANAGEMENT_ROLES)
+  update(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body() body: unknown,
+    @CurrentUser() user: JwtPayload,
+    @Query('orgId') orgId?: string,
+  ): Promise<PrintRunModel> {
+    const dto = updatePrintRunSchema.parse(body);
+    return this.sheetPrintService.updateRun(getEffectiveOrgId(user, orgId), id, dto);
   }
 
   @Get(':id/pdf')

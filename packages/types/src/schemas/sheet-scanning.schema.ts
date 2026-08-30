@@ -1,5 +1,11 @@
 import { z } from 'zod';
-import { captureProfileSchema, layoutSpecSchema, type CaptureProfile, type LayoutSpec } from './omr-layout.schema';
+import type { AssessmentStatus } from '../enums';
+import {
+  captureProfileSchema,
+  layoutSpecSchema,
+  type CaptureProfile,
+  type LayoutSpec,
+} from './omr-layout.schema';
 import type { MarkState, PageRejectReason } from './omr-scan.schema';
 
 // ── Lector de marcas (E22) — contrato API ⇄ web del módulo sheet-scanning ────
@@ -40,6 +46,21 @@ export const createPrintRunSchema = z.object({
   classGroupId: z.string().uuid(),
   assessmentId: z.string().uuid().nullable().optional(),
   spareCount: z.number().int().min(0).max(20).default(2),
+});
+
+/**
+ * Asociar (o cambiar) la evaluación de una tirada ya creada.
+ * `PATCH /api/sheet-print-runs/:id`. Sólo se expone `assessmentId`: el curso, el
+ * layout y las reservas quedan congelados con las hojas ya impresas y no pueden
+ * cambiar sin reimprimir.
+ */
+export const updatePrintRunSchema = z.object({
+  assessmentId: z.string().uuid(),
+});
+
+/** `GET /api/sheet-print-runs/assessment-options?instrumentId=…` */
+export const printRunAssessmentOptionsQuerySchema = z.object({
+  instrumentId: z.string().uuid(),
 });
 
 export const scanBatchSourceSchema = z.object({
@@ -90,6 +111,10 @@ export const scanBatchQuerySchema = z.object({
 export type DeriveLayoutDto = z.infer<typeof deriveLayoutSchema>;
 export type FreezeLayoutDto = z.infer<typeof freezeLayoutSchema>;
 export type CreatePrintRunDto = z.infer<typeof createPrintRunSchema>;
+export type UpdatePrintRunDto = z.infer<typeof updatePrintRunSchema>;
+export type PrintRunAssessmentOptionsQueryDto = z.infer<
+  typeof printRunAssessmentOptionsQuerySchema
+>;
 export type CreateScanBatchDto = z.infer<typeof createScanBatchSchema>;
 export type ReviewMarkDto = z.infer<typeof reviewMarkSchema>;
 export type AssignScanIdentityDto = z.infer<typeof assignScanIdentitySchema>;
@@ -131,6 +156,15 @@ export type SheetLayoutSummaryModel = {
 
 export type SheetLayoutModel = SheetLayoutSummaryModel & {
   spec: LayoutSpec;
+};
+
+/** Evaluación candidata a asociarse a una tirada (misma org, mismo instrumento). */
+export type PrintRunAssessmentOption = {
+  id: string;
+  name: string | null;
+  status: AssessmentStatus;
+  administeredAt: string | Date | null;
+  createdAt: string | Date;
 };
 
 export type PrintRunModel = {

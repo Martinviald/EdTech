@@ -1,10 +1,18 @@
-import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  ConflictException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { and, asc, desc, eq, isNull, sql, type SQL } from 'drizzle-orm';
 import {
+  assessmentCourseAssignments,
+  assessments,
   classGroups,
   printedSheets,
   sheetLayouts,
   sheetPrintRuns,
+  sheetScanBatches,
   studentEnrollments,
   students,
   withOrgContext,
@@ -12,8 +20,10 @@ import {
 import type {
   CreatePrintRunDto,
   PaginatedResponse,
+  PrintRunAssessmentOption,
   PrintRunModel,
   PrintRunQueryDto,
+  UpdatePrintRunDto,
 } from '@soe/types';
 import { InjectDb, type Database } from '../database/database.types';
 import { renderSheetsPdf, type PrintableSheetInfo } from './sheet-print.helpers';
@@ -75,6 +85,10 @@ export class SheetPrintService {
         throw new BadRequestException('El curso no tiene alumnos activos para imprimir hojas.');
       }
 
+      const assessmentId = dto.assessmentId
+        ? await this.assertAssessmentUsable(tx, orgId, dto.assessmentId, layout.instrumentId)
+        : await this.createAssessmentForRun(tx, orgId, userId, layout.instrumentId, classGroup);
+
       const sheetCount = roster.length + dto.spareCount;
 
       const [run] = await tx
@@ -83,7 +97,7 @@ export class SheetPrintService {
           orgId,
           layoutId: layout.id,
           classGroupId: classGroup.id,
-          assessmentId: dto.assessmentId ?? null,
+          assessmentId,
           spareCount: dto.spareCount,
           sheetCount,
           createdById: userId,
@@ -138,6 +152,119 @@ export class SheetPrintService {
     );
     if (!row) throw new NotFoundException('Tirada de impresión no encontrada');
     return this.toModel(row);
+  }
+
+  async updateRun(orgId: string, runId: string, dto: UpdatePrintRunDto): Promise<PrintRunModel> {
+    await withOrgContext(this.db, orgId, async (tx) => {
+      const [run] = await tx
+        .select({
+          id: sheetPrintRuns.id,
+          assessmentId: sheetPrintRuns.assessmentId,
+          instrumentId: sheetLayouts.instrumentId,
+        })
+        .from(sheetPrintRuns)
+        .innerJoin(sheetLayouts, eq(sheetLayouts.id, sheetPrintRuns.layoutId))
+        .where(and(eq(sheetPrintRuns.orgId, orgId), eq(sheetPrintRuns.id, runId)))
+        .limit(1);
+      if (!run) throw new NotFoundException('Tirada de impresión no encontrada');
+
+      if (run.assessmentId !== dto.assessmentId) {
+        const [confirmed] = await tx
+          .select({ id: sheetScanBatches.id })
+          .from(sheetScanBatches)
+          .where(
+            and(
+              eq(sheetScanBatches.orgId, orgId),
+              eq(sheetScanBatches.printRunId, runId),
+              eq(sheetScanBatches.status, 'confirmed'),
+            ),
+          )
+          .limit(1);
+        if (confirmed) {
+          throw new ConflictException(
+            'Esta tirada ya tiene un lote confirmado: no se puede cambiar su evaluación. ' +
+              'Genera una tirada nueva si necesitas apuntar a otra evaluación.',
+          );
+        }
+      }
+
+      await this.assertAssessmentUsable(tx, orgId, dto.assessmentId, run.instrumentId);
+
+      await tx
+        .update(sheetPrintRuns)
+        .set({ assessmentId: dto.assessmentId })
+        .where(and(eq(sheetPrintRuns.orgId, orgId), eq(sheetPrintRuns.id, runId)));
+    });
+
+    return this.getRun(orgId, runId);
+  }
+
+  async listAssessmentOptions(
+    orgId: string,
+    instrumentId: string,
+  ): Promise<PrintRunAssessmentOption[]> {
+    return withOrgContext(this.db, orgId, (tx) =>
+      tx
+        .select({
+          id: assessments.id,
+          name: assessments.name,
+          status: assessments.status,
+          administeredAt: assessments.administeredAt,
+          createdAt: assessments.createdAt,
+        })
+        .from(assessments)
+        .where(and(eq(assessments.orgId, orgId), eq(assessments.instrumentId, instrumentId)))
+        .orderBy(desc(assessments.createdAt))
+        .limit(100),
+    );
+  }
+
+  private async assertAssessmentUsable(
+    tx: Database,
+    orgId: string,
+    assessmentId: string,
+    instrumentId: string,
+  ): Promise<string> {
+    const [assessment] = await tx
+      .select({ id: assessments.id, instrumentId: assessments.instrumentId })
+      .from(assessments)
+      .where(and(eq(assessments.orgId, orgId), eq(assessments.id, assessmentId)))
+      .limit(1);
+    if (!assessment) throw new NotFoundException('Evaluación no encontrada');
+    if (assessment.instrumentId !== instrumentId) {
+      throw new BadRequestException(
+        'La evaluación pertenece a otro instrumento que el del layout de esta tirada.',
+      );
+    }
+    return assessment.id;
+  }
+
+  private async createAssessmentForRun(
+    tx: Database,
+    orgId: string,
+    userId: string,
+    instrumentId: string,
+    classGroup: { id: string; name: string },
+  ): Promise<string> {
+    const [created] = await tx
+      .insert(assessments)
+      .values({
+        orgId,
+        instrumentId,
+        name: `${classGroup.name} · hojas propias ${new Date().toISOString().slice(0, 10)}`,
+        mode: 'paper',
+        status: 'scheduled',
+        administeredById: userId,
+        config: { source: 'sheet_print_run' },
+      })
+      .returning({ id: assessments.id });
+    if (!created) throw new Error('assessments insert returned no row');
+
+    await tx
+      .insert(assessmentCourseAssignments)
+      .values({ assessmentId: created.id, classGroupId: classGroup.id });
+
+    return created.id;
   }
 
   async list(orgId: string, query: PrintRunQueryDto): Promise<PaginatedResponse<PrintRunModel>> {

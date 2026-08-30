@@ -1,7 +1,7 @@
 'use server';
 
 import { cookies } from 'next/headers';
-import { apiPost } from '@/lib/api';
+import { apiPatch, apiPost } from '@/lib/api';
 import { getDisplayMessage } from '@/lib/errors';
 import type {
   CreatePrintRunDto,
@@ -33,6 +33,23 @@ export async function createPrintRun(dto: CreatePrintRunDto): Promise<CreatePrin
     return { ok: true, data };
   } catch (e) {
     return { ok: false, message: getDisplayMessage(e, 'No se pudo crear la tirada') };
+  }
+}
+
+/**
+ * Asocia (o cambia) la evaluación de una tirada ya creada
+ * (`PATCH /sheet-print-runs/:id`). Sin esto, las tiradas creadas antes del
+ * selector de evaluación quedaban sin destino y su lote nunca podía confirmarse.
+ */
+export async function updatePrintRunAssessment(
+  runId: string,
+  assessmentId: string,
+): Promise<CreatePrintRunResult> {
+  try {
+    const data = await apiPatch<PrintRunModel>(`/sheet-print-runs/${runId}`, { assessmentId });
+    return { ok: true, data };
+  } catch (e) {
+    return { ok: false, message: getDisplayMessage(e, 'No se pudo asociar la evaluación') };
   }
 }
 
