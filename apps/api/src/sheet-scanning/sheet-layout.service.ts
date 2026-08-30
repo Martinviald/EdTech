@@ -10,6 +10,7 @@ import {
   type LayoutDraftModel,
   type LayoutSpec,
   type PaginatedResponse,
+  type SheetIdentityMode,
   type SheetLayoutModel,
   type SheetLayoutQueryDto,
   type SheetLayoutSummaryModel,
@@ -25,10 +26,14 @@ import {
 export class SheetLayoutService {
   constructor(@InjectDb() private readonly db: Database) {}
 
-  async deriveDraft(orgId: string, instrumentId: string): Promise<LayoutDraftModel> {
+  async deriveDraft(
+    orgId: string,
+    instrumentId: string,
+    identityMode: SheetIdentityMode = 'qr',
+  ): Promise<LayoutDraftModel> {
     await this.requireVisibleInstrument(orgId, instrumentId);
     const derivableItems = await this.loadDerivableItems(instrumentId);
-    return deriveLayoutDraft(instrumentId, derivableItems);
+    return deriveLayoutDraft(instrumentId, derivableItems, identityMode);
   }
 
   async freeze(orgId: string, userId: string, spec: LayoutSpec): Promise<FreezeLayoutResponse> {

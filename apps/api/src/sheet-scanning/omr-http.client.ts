@@ -1,4 +1,12 @@
-import { scanResultSchema, type OmrReadRequest, type ScanResult } from '@soe/types';
+import {
+  omrAssessResultSchema,
+  scanResultSchema,
+  type OmrAssessRequest,
+  type OmrAssessResult,
+  type OmrReadRequest,
+  type ScanResult,
+} from '@soe/types';
+import type { ZodType } from 'zod';
 import {
   OmrPageTimeoutError,
   OmrServiceUnavailableError,
@@ -45,9 +53,7 @@ export interface HttpOmrClientOptions {
 const DEFAULT_SERVICE_URL = 'http://127.0.0.1:8090';
 const DEFAULT_TIMEOUT_S = 120;
 
-type PostOutcome =
-  | { kind: 'success'; result: ScanResult }
-  | { kind: 'unavailable'; detail: string };
+type PostOutcome<T> = { kind: 'success'; result: T } | { kind: 'unavailable'; detail: string };
 
 export class HttpOmrClient implements OmrClient {
   private readonly serviceUrl: string;
@@ -60,11 +66,24 @@ export class HttpOmrClient implements OmrClient {
     this.fetchFn = options.fetchFn ?? (fetch as unknown as OmrFetchFn);
   }
 
-  async read(request: OmrReadRequest): Promise<ScanResult> {
-    const first = await this.postOnce(request);
+  read(request: OmrReadRequest): Promise<ScanResult> {
+    return this.postWithRetry('/v1/read', request, scanResultSchema, 'ScanResult');
+  }
+
+  assess(request: OmrAssessRequest): Promise<OmrAssessResult> {
+    return this.postWithRetry('/v1/assess', request, omrAssessResultSchema, 'OmrAssessResult');
+  }
+
+  private async postWithRetry<T>(
+    path: string,
+    request: unknown,
+    schema: ZodType<T>,
+    resultName: string,
+  ): Promise<T> {
+    const first = await this.postOnce(path, request, schema, resultName);
     if (first.kind === 'success') return first.result;
 
-    const second = await this.postOnce(request);
+    const second = await this.postOnce(path, request, schema, resultName);
     if (second.kind === 'success') return second.result;
 
     throw new OmrServiceUnavailableError(
@@ -72,13 +91,18 @@ export class HttpOmrClient implements OmrClient {
     );
   }
 
-  private async postOnce(request: OmrReadRequest): Promise<PostOutcome> {
+  private async postOnce<T>(
+    path: string,
+    request: unknown,
+    schema: ZodType<T>,
+    resultName: string,
+  ): Promise<PostOutcome<T>> {
     const controller = new AbortController();
     const timer = setTimeout(() => controller.abort(), this.timeoutMs);
     try {
       let response: OmrFetchResponse;
       try {
-        response = await this.fetchFn(`${this.serviceUrl}/v1/read`, {
+        response = await this.fetchFn(`${this.serviceUrl}${path}`, {
           method: 'POST',
           headers: { 'content-type': 'application/json' },
           body: JSON.stringify(request),
@@ -111,13 +135,21 @@ export class HttpOmrClient implements OmrClient {
         return { kind: 'unavailable', detail: `HTTP ${response.status}` };
       }
 
-      return { kind: 'success', result: await this.parseBody(response, controller.signal) };
+      return {
+        kind: 'success',
+        result: await this.parseBody(response, controller.signal, schema, resultName),
+      };
     } finally {
       clearTimeout(timer);
     }
   }
 
-  private async parseBody(response: OmrFetchResponse, signal: AbortSignal): Promise<ScanResult> {
+  private async parseBody<T>(
+    response: OmrFetchResponse,
+    signal: AbortSignal,
+    schema: ZodType<T>,
+    resultName: string,
+  ): Promise<T> {
     let body: unknown;
     try {
       body = await response.json();
@@ -132,10 +164,10 @@ export class HttpOmrClient implements OmrClient {
       );
     }
 
-    const parsed = scanResultSchema.safeParse(body);
+    const parsed = schema.safeParse(body);
     if (!parsed.success) {
       throw new OmrInvalidResponseError(
-        `El servicio de lectura respondió 200 con un ScanResult inválido: ${parsed.error.issues
+        `El servicio de lectura respondió 200 con un ${resultName} inválido: ${parsed.error.issues
           .slice(0, 3)
           .map((issue) => `${issue.path.join('.')}: ${issue.message}`)
           .join('; ')}`,

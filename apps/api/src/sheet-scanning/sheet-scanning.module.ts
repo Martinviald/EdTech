@@ -4,7 +4,14 @@ import { AnswerSheetsService } from '../answer-sheets/answer-sheets.service';
 import { AnswerSheetPreviewStore } from '../answer-sheets/lib/preview-store';
 import { FilesModule } from '../files/files.module';
 import { JobsModule } from '../jobs/jobs.module';
-import { QrIdentityResolver } from './identity';
+import {
+  ManualIdentityResolver,
+  QrIdentityResolver,
+  RutBubbleResolver,
+  SheetIdentityResolverRegistry,
+} from './identity';
+import { OmrCalibrationController } from './omr-calibration.controller';
+import { OmrCalibrationService } from './omr-calibration.service';
 import { OMR_CLIENT } from './omr-client.types';
 import { HttpOmrClient } from './omr-http.client';
 import {
@@ -30,6 +37,7 @@ import { SheetScanService } from './sheet-scan.service';
     SheetLayoutsController,
     SheetPrintRunsController,
     SheetScanBatchesController,
+    OmrCalibrationController,
     ScanReviewBatchesController,
     ScanReviewMarksController,
     ScanReviewScansController,
@@ -39,7 +47,11 @@ import { SheetScanService } from './sheet-scan.service';
     SheetPrintService,
     SheetScanService,
     ScanReviewService,
+    OmrCalibrationService,
     QrIdentityResolver,
+    RutBubbleResolver,
+    ManualIdentityResolver,
+    SheetIdentityResolverRegistry,
     { provide: OMR_CLIENT, useFactory: (): HttpOmrClient => new HttpOmrClient() },
     {
       provide: ANSWER_SHEET_CONFIRMER,

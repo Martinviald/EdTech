@@ -523,3 +523,60 @@ describe('SheetPrintService.renderPdf', () => {
     await expect(service.renderPdf(ORG_ID, RUN_ID)).rejects.toBeInstanceOf(BadRequestException);
   });
 });
+
+describe('SheetPrintService — hoja genérica y formas (v1)', () => {
+  const FORM_ID = '77777777-7777-4777-8777-777777777777';
+  const rutSpec = deriveLayoutDraft(
+    INSTRUMENT_ID,
+    Array.from({ length: 4 }, (_, i) => mcItem(i + 1)),
+    'rut_bubbles',
+  ).spec;
+
+  it('layout rut_bubbles: la tirada crea N copias genéricas SIN alumno, cada una con su hoja propia (D13)', async () => {
+    const { db, inserts } = makeDb(
+      [[{ ...LAYOUT_ROW, spec: rutSpec }], [CLASS_GROUP_ROW], ROSTER_ROWS],
+      [RUN_RETURNING],
+    );
+    const service = new SheetPrintService(db);
+
+    const run = await service.createRun(ORG_ID, USER_ID, CREATE_DTO);
+
+    expect(run.sheetCount).toBe(5);
+    const sheetValues = inserts[1] as Array<{ studentId: string | null; sequence: number }>;
+    expect(sheetValues).toHaveLength(5);
+    expect(sheetValues.every((s) => s.studentId === null)).toBe(true);
+    expect(sheetValues.map((s) => s.sequence)).toEqual([1, 2, 3, 4, 5]);
+  });
+
+  it('persiste el assessmentFormId de la tirada y lo expone en el modelo (CD-13)', async () => {
+    const { db, inserts } = makeDb(
+      [[LAYOUT_ROW], [CLASS_GROUP_ROW], ROSTER_ROWS],
+      [[{ ...RUN_RETURNING[0], assessmentFormId: FORM_ID }]],
+    );
+    const service = new SheetPrintService(db);
+
+    const run = await service.createRun(ORG_ID, USER_ID, {
+      ...CREATE_DTO,
+      assessmentFormId: FORM_ID,
+    });
+
+    expect(inserts[0]).toMatchObject({ assessmentFormId: FORM_ID });
+    expect(run.assessmentFormId).toBe(FORM_ID);
+  });
+
+  it('renderPdf de una tirada genérica dibuja la grilla RUT sin alumnos y conserva el pageCount', async () => {
+    const { db } = makeDb([
+      [{ id: RUN_ID, spec: rutSpec, specHash: 'a3f9c1e70b4d2856', classGroupName: '3° Básico A' }],
+      [
+        { id: '9f2c1a44-3b7e-4c11-9a0d-5e8f7b2c1d33', sequence: 1, firstName: null, lastName: null },
+        { id: '8e1b0933-2a6d-4b00-8c9c-4d7e6a1b0c22', sequence: 2, firstName: null, lastName: null },
+      ],
+    ]);
+    const service = new SheetPrintService(db);
+
+    const pdf = await service.renderPdf(ORG_ID, RUN_ID);
+    const doc = await PDFDocument.load(pdf);
+
+    expect(doc.getPageCount()).toBe(rutSpec.pageCount * 2);
+  });
+});

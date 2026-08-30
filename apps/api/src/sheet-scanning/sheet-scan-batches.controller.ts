@@ -1,8 +1,10 @@
 import { Body, Controller, Get, Param, ParseUUIDPipe, Post, Query, UseGuards } from '@nestjs/common';
 import {
   SHEET_MANAGEMENT_ROLES,
+  assessCaptureSchema,
   createScanBatchSchema,
   scanBatchQuerySchema,
+  type AssessCaptureResponse,
   type BatchStatusModel,
   type CreateScanBatchResponse,
   type PaginatedResponse,
@@ -28,6 +30,17 @@ export class SheetScanBatchesController {
   ): Promise<CreateScanBatchResponse> {
     const dto = createScanBatchSchema.parse(body);
     return this.sheetScanService.createBatch(getEffectiveOrgId(user, orgId), user.userId, dto);
+  }
+
+  @Post('assess-capture')
+  @Roles(...SHEET_MANAGEMENT_ROLES)
+  assessCapture(
+    @Body() body: unknown,
+    @CurrentUser() user: JwtPayload,
+    @Query('orgId') orgId?: string,
+  ): Promise<AssessCaptureResponse> {
+    const dto = assessCaptureSchema.parse(body);
+    return this.sheetScanService.assessCapture(getEffectiveOrgId(user, orgId), dto);
   }
 
   @Post(':id/start')

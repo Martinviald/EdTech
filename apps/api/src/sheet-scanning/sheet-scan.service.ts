@@ -9,18 +9,24 @@ import { randomUUID } from 'node:crypto';
 import { and, desc, eq, inArray, isNull, ne, sql } from 'drizzle-orm';
 import {
   files,
+  printedSheets,
   sheetLayouts,
   sheetPrintRuns,
   sheetScanBatches,
   sheetScanMarks,
   sheetScans,
+  students,
   withOrgContext,
   type FileRecord,
 } from '@soe/db';
 import {
+  DEFAULT_CAPTURE_PROFILES,
   MARK_STATES,
   SHEET_SCAN_STATES,
   parseOmrQrPayload,
+  type AssessCaptureDto,
+  type AssessCaptureIdentityModel,
+  type AssessCaptureResponse,
   type BatchCountersModel,
   type BatchStatusModel,
   type CaptureProfile,
@@ -28,6 +34,7 @@ import {
   type CreateScanBatchResponse,
   type LayoutSpec,
   type MarkState,
+  type OmrAssessResult,
   type OmrReadRequest,
   type PaginatedResponse,
   type ScanBatchQueryDto,
@@ -46,8 +53,10 @@ import {
   OmrServiceUnavailableError,
   type OmrClient,
 } from './omr-client.types';
-import { QrIdentityResolver } from './identity/qr-identity.resolver';
+import { SheetIdentityResolverRegistry } from './identity/identity-resolver.registry';
 import type { IdentityCandidate } from './identity/identity-resolver.types';
+import { identityModeOf } from './sheet-layout.helpers';
+import { OmrCalibrationService } from './omr-calibration.service';
 
 const ALLOWED_SOURCE_MIME_TYPES = new Set([
   'application/pdf',
@@ -63,10 +72,18 @@ const UNEXPECTED_FAILURE_MESSAGE =
   'Ocurrió un error inesperado al procesar el lote. Reintenta el procesamiento; si el problema persiste, contacta a soporte.';
 
 type JobContext = {
+  printRunId: string;
   spec: LayoutSpec;
   specHash: string;
   captureProfile: CaptureProfile;
   sourceFiles: FileRecord[];
+};
+
+type RunSheetLookup = {
+  sequence: number;
+  studentId: string | null;
+  studentFirstName: string | null;
+  studentLastName: string | null;
 };
 
 type BatchRow = {
@@ -104,7 +121,8 @@ export class SheetScanService {
   constructor(
     @InjectDb() private readonly db: Database,
     private readonly filesService: FilesService,
-    private readonly identityResolver: QrIdentityResolver,
+    private readonly identityResolvers: SheetIdentityResolverRegistry,
+    private readonly omrCalibrationService: OmrCalibrationService,
     @Inject(OMR_CLIENT) private readonly omrClient: OmrClient,
     @Inject(JOB_DISPATCHER) private readonly dispatcher: JobDispatcher,
   ) {}
@@ -305,9 +323,154 @@ export class SheetScanService {
     });
   }
 
+  async assessCapture(orgId: string, dto: AssessCaptureDto): Promise<AssessCaptureResponse> {
+    const run = await this.loadRunForAssess(orgId, dto.printRunId);
+    const captureProfile = await this.calibratedProfile(orgId, DEFAULT_CAPTURE_PROFILES.phone);
+
+    const assessed = await this.omrClient.assess({
+      layoutSpec: run.spec,
+      captureProfile,
+      imageBase64: dto.imageBase64,
+    });
+
+    const page: ScannedPage = {
+      pageIndex: 0,
+      imageSha256: assessed.imageSha256,
+      quality: assessed.quality,
+      identity: assessed.identity,
+      marks: [],
+      pageThumbJpegBase64: null,
+    };
+    const resolver = this.identityResolvers.forMode(identityModeOf(run.spec));
+    const candidate = await resolver.resolve(orgId, page, { printRunId: dto.printRunId });
+    const { identity, belongsToRun } = await this.buildAssessIdentity(
+      orgId,
+      dto.printRunId,
+      assessed,
+      candidate,
+    );
+
+    return {
+      accepted: assessed.quality.ok && candidate.batchRejection === null && belongsToRun,
+      quality: assessed.quality,
+      identity,
+    };
+  }
+
+  private async loadRunForAssess(
+    orgId: string,
+    printRunId: string,
+  ): Promise<{ spec: LayoutSpec; specHash: string }> {
+    const [run] = await withOrgContext(this.db, orgId, (tx) =>
+      tx
+        .select({ spec: sheetLayouts.spec, specHash: sheetLayouts.specHash })
+        .from(sheetPrintRuns)
+        .innerJoin(sheetLayouts, eq(sheetLayouts.id, sheetPrintRuns.layoutId))
+        .where(and(eq(sheetPrintRuns.orgId, orgId), eq(sheetPrintRuns.id, printRunId)))
+        .limit(1),
+    );
+    if (!run) throw new NotFoundException('Tirada de impresión no encontrada');
+    return run;
+  }
+
+  private async buildAssessIdentity(
+    orgId: string,
+    printRunId: string,
+    assessed: OmrAssessResult,
+    candidate: IdentityCandidate,
+  ): Promise<{ identity: AssessCaptureIdentityModel; belongsToRun: boolean }> {
+    const qrPayload =
+      assessed.identity.mode === 'qr' && assessed.identity.raw !== null
+        ? parseOmrQrPayload(assessed.identity.raw)
+        : null;
+    const evidenceName = candidate.evidence.alumno;
+    const fallbackName = typeof evidenceName === 'string' ? evidenceName : null;
+
+    if (candidate.printedSheetId === null) {
+      return {
+        identity: {
+          printedSheetId: null,
+          pageIndex: null,
+          sheetSequence: null,
+          studentId: candidate.studentId,
+          studentName: candidate.studentId === null ? null : fallbackName,
+          confidence: candidate.confidence,
+        },
+        belongsToRun: true,
+      };
+    }
+
+    const sheet = await this.findRunSheet(orgId, printRunId, candidate.printedSheetId);
+    if (!sheet) {
+      return {
+        identity: {
+          printedSheetId: null,
+          pageIndex: null,
+          sheetSequence: null,
+          studentId: null,
+          studentName: null,
+          confidence: 0,
+        },
+        belongsToRun: false,
+      };
+    }
+
+    const sheetName = [sheet.studentFirstName, sheet.studentLastName]
+      .filter((part): part is string => part !== null && part.length > 0)
+      .join(' ');
+    return {
+      identity: {
+        printedSheetId: candidate.printedSheetId,
+        pageIndex: qrPayload?.pageIndex ?? null,
+        sheetSequence: sheet.sequence,
+        studentId: candidate.studentId,
+        studentName: sheetName.length > 0 ? sheetName : fallbackName,
+        confidence: candidate.confidence,
+      },
+      belongsToRun: true,
+    };
+  }
+
+  private async findRunSheet(
+    orgId: string,
+    printRunId: string,
+    printedSheetId: string,
+  ): Promise<RunSheetLookup | null> {
+    const [sheet] = await withOrgContext(this.db, orgId, (tx) =>
+      tx
+        .select({
+          sequence: printedSheets.sequence,
+          studentId: printedSheets.studentId,
+          studentFirstName: students.firstName,
+          studentLastName: students.lastName,
+        })
+        .from(printedSheets)
+        .leftJoin(students, eq(students.id, printedSheets.studentId))
+        .where(
+          and(
+            eq(printedSheets.orgId, orgId),
+            eq(printedSheets.id, printedSheetId),
+            eq(printedSheets.printRunId, printRunId),
+          ),
+        )
+        .limit(1),
+    );
+    return sheet ?? null;
+  }
+
+  private async calibratedProfile(
+    orgId: string,
+    profile: CaptureProfile,
+  ): Promise<CaptureProfile> {
+    if (profile.ambiguityMargin !== null) return profile;
+    const { calibration } = await this.omrCalibrationService.getCalibration(orgId);
+    return { ...profile, ambiguityMargin: calibration.ambiguityMargin ?? null };
+  }
+
   private async runJob(orgId: string, userId: string, batchId: string): Promise<void> {
     try {
       const context = await this.loadJobContext(orgId, batchId);
+      context.captureProfile = await this.calibratedProfile(orgId, context.captureProfile);
       const outcome = await this.processSources(orgId, batchId, context);
       if (outcome.rejectionReason !== null) {
         await this.updateBatch(orgId, batchId, {
@@ -337,6 +500,7 @@ export class SheetScanService {
     return withOrgContext(this.db, orgId, async (tx) => {
       const [row] = await tx
         .select({
+          printRunId: sheetScanBatches.printRunId,
           sourceFileIds: sheetScanBatches.sourceFileIds,
           captureProfile: sheetScanBatches.captureProfile,
           spec: sheetLayouts.spec,
@@ -356,6 +520,7 @@ export class SheetScanService {
         .filter((file): file is FileRecord => file !== undefined);
 
       return {
+        printRunId: row.printRunId,
         spec: row.spec,
         specHash: row.specHash,
         captureProfile: row.captureProfile,
@@ -370,6 +535,7 @@ export class SheetScanService {
     context: JobContext,
   ): Promise<{ rejectionReason: string | null; pagesTotal: number }> {
     let pagesTotal = 0;
+    const resolver = this.identityResolvers.forMode(identityModeOf(context.spec));
     for (const sourceFile of context.sourceFiles) {
       const result = await this.omrClient.read(this.buildReadRequest(context, sourceFile));
       pagesTotal += result.pages.length;
@@ -378,7 +544,9 @@ export class SheetScanService {
         if (batchHashMismatch !== null) {
           return { rejectionReason: batchHashMismatch, pagesTotal };
         }
-        const candidate = await this.identityResolver.resolve(orgId, page);
+        const candidate = await resolver.resolve(orgId, page, {
+          printRunId: context.printRunId,
+        });
         if (candidate.batchRejection !== null) {
           return { rejectionReason: candidate.batchRejection.reason, pagesTotal };
         }

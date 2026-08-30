@@ -11,7 +11,8 @@ import * as observability from '../common/observability/report-error';
 import type { FilesService } from '../files/files.service';
 import type { EnqueuedJob, JobDispatcher } from '../jobs/job-dispatcher';
 import type { IdentityCandidate } from './identity/identity-resolver.types';
-import type { QrIdentityResolver } from './identity/qr-identity.resolver';
+import type { SheetIdentityResolverRegistry } from './identity/identity-resolver.registry';
+import type { OmrCalibrationService } from './omr-calibration.service';
 import { OmrServiceUnavailableError } from './omr-client.types';
 import { FakeOmrClient } from './testing/fake-omr-client';
 import { SheetScanService } from './sheet-scan.service';
@@ -159,11 +160,14 @@ function makeFilesService(): {
 function makeService(
   selectResults: unknown[][],
   insertReturning: unknown[][] = [],
+  calibration: Record<string, unknown> = {},
 ): {
   service: SheetScanService;
   inserts: RecordedInsert[];
   updates: RecordedUpdate[];
   resolve: jest.Mock;
+  forMode: jest.Mock;
+  getCalibration: jest.Mock;
   omr: FakeOmrClient;
   dispatcher: FakeDispatcher;
   createUploadIntent: jest.Mock;
@@ -172,11 +176,32 @@ function makeService(
   const { db, inserts, updates } = makeDb(selectResults, insertReturning);
   const { filesService, createUploadIntent, confirm } = makeFilesService();
   const resolve = jest.fn();
-  const resolver = { mode: 'qr', resolve } as unknown as QrIdentityResolver;
+  const forMode = jest.fn().mockReturnValue({ mode: 'qr', resolve });
+  const registry = { forMode } as unknown as SheetIdentityResolverRegistry;
+  const getCalibration = jest.fn().mockResolvedValue({ orgId: ORG_ID, calibration });
+  const calibrationService = { getCalibration } as unknown as OmrCalibrationService;
   const omr = new FakeOmrClient();
   const dispatcher = new FakeDispatcher();
-  const service = new SheetScanService(db, filesService, resolver, omr, dispatcher);
-  return { service, inserts, updates, resolve, omr, dispatcher, createUploadIntent, confirm };
+  const service = new SheetScanService(
+    db,
+    filesService,
+    registry,
+    calibrationService,
+    omr,
+    dispatcher,
+  );
+  return {
+    service,
+    inserts,
+    updates,
+    resolve,
+    forMode,
+    getCalibration,
+    omr,
+    dispatcher,
+    createUploadIntent,
+    confirm,
+  };
 }
 
 function makePage(overrides: Partial<ScannedPage> = {}): ScannedPage {
@@ -752,6 +777,191 @@ describe('SheetScanService.getBatch', () => {
     const { service } = makeService([[]]);
 
     await expect(service.getBatch(ORG_ID, BATCH_ID)).rejects.toBeInstanceOf(NotFoundException);
+  });
+});
+
+describe('SheetScanService.assessCapture (CD-11)', () => {
+  const QR_SPEC = {
+    specVersion: 1,
+    pageCount: 2,
+    identity: { mode: 'qr' },
+  } as unknown as LayoutSpec;
+  const RUT_SPEC = {
+    specVersion: 1,
+    pageCount: 1,
+    identity: { mode: 'rut_bubbles' },
+  } as unknown as LayoutSpec;
+  const ASSESS_DTO = { printRunId: RUN_ID, imageBase64: 'Zm90by1qcGVn' };
+
+  function assessResult(overrides: Record<string, unknown> = {}) {
+    return {
+      imageSha256: 'a'.repeat(64),
+      quality: { ok: true, sharpness: 0.8, glare: 0.05, fiducialsFound: 4, rejectReason: null },
+      identity: { mode: 'qr' as const, raw: qrRaw(SHEET_1, 0), confidence: 1 },
+      ...overrides,
+    };
+  }
+
+  it('reenvía la imagen al servicio, resuelve la identidad contra la tirada y acepta', async () => {
+    const { service, resolve, forMode, omr } = makeService([
+      [{ spec: QR_SPEC, specHash: LAYOUT_HASH }],
+      [{ sequence: 4, studentId: STUDENT_1, studentFirstName: 'Ana', studentLastName: 'Pérez' }],
+    ]);
+    omr.enqueueAssessResponse(assessResult());
+    resolve.mockResolvedValueOnce(candidate());
+
+    const result = await service.assessCapture(ORG_ID, ASSESS_DTO);
+
+    expect(result.accepted).toBe(true);
+    expect(result.identity).toEqual({
+      printedSheetId: SHEET_1,
+      pageIndex: 0,
+      sheetSequence: 4,
+      studentId: STUDENT_1,
+      studentName: 'Ana Pérez',
+      confidence: 1,
+    });
+    expect(omr.assessRequests).toHaveLength(1);
+    expect(omr.assessRequests[0].captureProfile.source).toBe('phone');
+    expect(omr.assessRequests[0].imageBase64).toBe(ASSESS_DTO.imageBase64);
+    expect(forMode).toHaveBeenCalledWith('qr');
+    expect(resolve).toHaveBeenCalledWith(
+      ORG_ID,
+      expect.objectContaining({ imageSha256: 'a'.repeat(64), marks: [] }),
+      { printRunId: RUN_ID },
+    );
+  });
+
+  it('calidad rechazada: accepted false con el veredicto para el retake inmediato', async () => {
+    const { service, resolve, omr } = makeService([[{ spec: QR_SPEC, specHash: LAYOUT_HASH }]]);
+    omr.enqueueAssessResponse(
+      assessResult({
+        quality: { ok: false, sharpness: 0.1, glare: 0.4, fiducialsFound: 2, rejectReason: 'blurry' },
+        identity: { mode: 'qr', raw: null, confidence: 0 },
+      }),
+    );
+    resolve.mockResolvedValueOnce(
+      candidate({ printedSheetId: null, studentId: null, confidence: 0, needsHumanConfirmation: true }),
+    );
+
+    const result = await service.assessCapture(ORG_ID, ASSESS_DTO);
+
+    expect(result.accepted).toBe(false);
+    expect(result.quality.rejectReason).toBe('blurry');
+    expect(result.identity).toEqual({
+      printedSheetId: null,
+      pageIndex: null,
+      sheetSequence: null,
+      studentId: null,
+      studentName: null,
+      confidence: 0,
+    });
+  });
+
+  it('inyecta la calibración de la org (CD-12) en el captureProfile del assess', async () => {
+    const { service, resolve, getCalibration, omr } = makeService(
+      [[{ spec: QR_SPEC, specHash: LAYOUT_HASH }]],
+      [],
+      { ambiguityMargin: 0.12 },
+    );
+    omr.enqueueAssessResponse(assessResult({ identity: { mode: 'qr', raw: null, confidence: 0 } }));
+    resolve.mockResolvedValueOnce(candidate({ printedSheetId: null, studentId: null, confidence: 0 }));
+
+    await service.assessCapture(ORG_ID, ASSESS_DTO);
+
+    expect(getCalibration).toHaveBeenCalledWith(ORG_ID);
+    expect(omr.assessRequests[0].captureProfile.ambiguityMargin).toBe(0.12);
+  });
+
+  it('tirada inexistente lanza NotFound sin llamar al servicio', async () => {
+    const { service, omr } = makeService([[]]);
+
+    await expect(service.assessCapture(ORG_ID, ASSESS_DTO)).rejects.toBeInstanceOf(
+      NotFoundException,
+    );
+    expect(omr.assessRequests).toHaveLength(0);
+  });
+
+  it('hoja de OTRA tirada: identidad vacía y accepted false aunque la calidad sea buena', async () => {
+    const { service, resolve, omr } = makeService([
+      [{ spec: QR_SPEC, specHash: LAYOUT_HASH }],
+      [],
+    ]);
+    omr.enqueueAssessResponse(assessResult());
+    resolve.mockResolvedValueOnce(candidate());
+
+    const result = await service.assessCapture(ORG_ID, ASSESS_DTO);
+
+    expect(result.accepted).toBe(false);
+    expect(result.quality.ok).toBe(true);
+    expect(result.identity).toEqual({
+      printedSheetId: null,
+      pageIndex: null,
+      sheetSequence: null,
+      studentId: null,
+      studentName: null,
+      confidence: 0,
+    });
+  });
+
+  it('modo rut_bubbles: elige el resolver por el modo del spec y responde el alumno candidato', async () => {
+    const { service, resolve, forMode, omr } = makeService([
+      [{ spec: RUT_SPEC, specHash: LAYOUT_HASH }],
+    ]);
+    omr.enqueueAssessResponse(
+      assessResult({ identity: { mode: 'rut_bubbles', raw: '123456785', confidence: 0.8 } }),
+    );
+    resolve.mockResolvedValueOnce(
+      candidate({
+        printedSheetId: null,
+        studentId: STUDENT_1,
+        confidence: 0.8,
+        evidence: { rut: '12345678-5', alumno: 'Ana Pérez' },
+      }),
+    );
+
+    const result = await service.assessCapture(ORG_ID, ASSESS_DTO);
+
+    expect(forMode).toHaveBeenCalledWith('rut_bubbles');
+    expect(result.accepted).toBe(true);
+    expect(result.identity).toEqual({
+      printedSheetId: null,
+      pageIndex: null,
+      sheetSequence: null,
+      studentId: STUDENT_1,
+      studentName: 'Ana Pérez',
+      confidence: 0.8,
+    });
+  });
+});
+
+describe('SheetScanService job — calibración por org (CD-12)', () => {
+  it('inyecta el ambiguityMargin de la org al captureProfile del read request', async () => {
+    const { service, omr, getCalibration } = makeService(
+      [[CTX_ROW], [FILE_ROW], [], [{ count: 0 }]],
+      [],
+      { ambiguityMargin: 0.1 },
+    );
+
+    await runJob(service);
+
+    expect(getCalibration).toHaveBeenCalledWith(ORG_ID);
+    expect(omr.requests).toHaveLength(1);
+    expect(omr.requests[0].captureProfile.ambiguityMargin).toBe(0.1);
+  });
+
+  it('un ambiguityMargin explícito del lote NO se pisa con la calibración de la org', async () => {
+    const explicitProfile = { ...PROFILE, ambiguityMargin: 0.3 };
+    const { service, omr, getCalibration } = makeService(
+      [[{ ...CTX_ROW, captureProfile: explicitProfile }], [FILE_ROW], [], [{ count: 0 }]],
+      [],
+      { ambiguityMargin: 0.1 },
+    );
+
+    await runJob(service);
+
+    expect(getCalibration).not.toHaveBeenCalled();
+    expect(omr.requests[0].captureProfile.ambiguityMargin).toBe(0.3);
   });
 });
 

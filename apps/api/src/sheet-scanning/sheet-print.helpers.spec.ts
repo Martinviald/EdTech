@@ -176,3 +176,67 @@ describe('renderSheetsPdf', () => {
     expect(page.getHeight()).toBeCloseTo(PAPER_SIZES_PT.letter.height, 2);
   });
 });
+
+describe('computeDrawPlan — hoja genérica con RUT (CD-10)', () => {
+  function makeRutSpec(itemCount = 10): LayoutSpec {
+    const items = Array.from({ length: itemCount }, (_, i) => mcItem(i + 1));
+    return deriveLayoutDraft(INSTRUMENT_ID, items, 'rut_bubbles').spec;
+  }
+
+  it('dibuja la grilla RUT completa dentro de la página, sin chocar con las burbujas de respuesta', () => {
+    const spec = makeRutSpec(30);
+    const plan = computeDrawPlan(spec, 0);
+
+    expect(plan.rutGridBubbles).toHaveLength((spec.identity.bubbles ?? []).length);
+    for (const bubble of plan.rutGridBubbles) {
+      expect(bubble.cx - bubble.radius).toBeGreaterThan(0);
+      expect(bubble.cx + bubble.radius).toBeLessThan(plan.pageWidth);
+      expect(bubble.cy - bubble.radius).toBeGreaterThan(0);
+      expect(bubble.cy + bubble.radius).toBeLessThan(plan.pageHeight);
+    }
+
+    const gridBottom = Math.min(...plan.rutGridBubbles.map((b) => b.cy - b.radius));
+    const answersTop = Math.max(...plan.bubbles.map((b) => b.cy + b.radius));
+    expect(answersTop).toBeLessThan(gridBottom);
+  });
+
+  it('mantiene el QR propio de cada hoja (D13) fuera de la grilla RUT e incluye instrucciones', () => {
+    const plan = computeDrawPlan(makeRutSpec(10), 0);
+
+    expect(plan.qr.size).toBeGreaterThan(0);
+    const gridRight = Math.max(...plan.rutGridBubbles.map((b) => b.cx + b.radius));
+    expect(plan.qr.x).toBeGreaterThan(gridRight);
+    expect(plan.instructions.length).toBeGreaterThan(0);
+    expect(plan.instructions.map((i) => i.text).join(' ')).toContain('RUT');
+  });
+
+  it('el modo qr no gana grilla ni instrucciones (regresión MVP)', () => {
+    const plan = computeDrawPlan(makeSpec(10), 0);
+
+    expect(plan.rutGridBubbles).toEqual([]);
+    expect(plan.instructions).toEqual([]);
+  });
+
+  it('renderSheetsPdf de hojas genéricas produce un PDF válido con QR por copia', async () => {
+    const spec = makeRutSpec(5);
+    const genericSheets: PrintableSheetInfo[] = [
+      {
+        printedSheetId: '9f2c1a44-3b7e-4c11-9a0d-5e8f7b2c1d33',
+        sequence: 1,
+        studentName: null,
+        classGroupName: '3° Básico A',
+      },
+      {
+        printedSheetId: '8e1b0933-2a6d-4b00-8c9c-4d7e6a1b0c22',
+        sequence: 2,
+        studentName: null,
+        classGroupName: '3° Básico A',
+      },
+    ];
+
+    const bytes = await renderSheetsPdf(spec, SPEC_HASH, genericSheets);
+    const doc = await PDFDocument.load(bytes);
+
+    expect(doc.getPageCount()).toBe(spec.pageCount * genericSheets.length);
+  });
+});

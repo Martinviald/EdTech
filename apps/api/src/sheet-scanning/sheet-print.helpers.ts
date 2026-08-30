@@ -1,6 +1,7 @@
 import { PDFDocument, StandardFonts, rgb } from 'pdf-lib';
 import * as QRCode from 'qrcode';
 import { buildOmrQrPayload, type LayoutSpec } from '@soe/types';
+import { identityModeOf, SHEET_QR_IDENTITY_REGION } from './sheet-layout.helpers';
 
 export const PAPER_SIZES_PT: Record<LayoutSpec['paper'], { width: number; height: number }> = {
   letter: { width: 612, height: 792 },
@@ -40,6 +41,8 @@ export interface SheetDrawPlan {
   syncTicks: DrawPlanRect[];
   qr: { x: number; y: number; size: number };
   header: { nameX: number; nameY: number; courseX: number; courseY: number };
+  rutGridBubbles: DrawPlanBubble[];
+  instructions: DrawPlanLabel[];
 }
 
 export interface PrintableSheetInfo {
@@ -54,7 +57,14 @@ const LABEL_FONT_SIZE = 8;
 const LABEL_GAP = 6;
 const NAME_FONT_SIZE = 11;
 const COURSE_FONT_SIZE = 9;
+const INSTRUCTION_FONT_SIZE = 7;
 const BLANK_NAME_LINE = '________________________________';
+const RUT_MODE_NAME_LINE = 'Nombre: ____________________________';
+const RUT_INSTRUCTION_LINES = [
+  'RUT: rellena UN círculo por columna, de izquierda a derecha.',
+  'La última columna es el dígito verificador (marca K si corresponde).',
+  'Si tu RUT tiene 7 dígitos, marca 0 en la primera columna.',
+] as const;
 
 export function computeDrawPlan(spec: LayoutSpec, pageIndex: number): SheetDrawPlan {
   const { width: pageWidth, height: pageHeight } = PAPER_SIZES_PT[spec.paper];
@@ -122,12 +132,39 @@ export function computeDrawPlan(spec: LayoutSpec, pageIndex: number): SheetDrawP
       height: SYNC_TICK_HEIGHT,
     }));
 
-  const region = spec.identity.region;
+  const identityMode = identityModeOf(spec);
+  const region = identityMode === 'rut_bubbles' ? SHEET_QR_IDENTITY_REGION : spec.identity.region;
   const regionWidth = (region.bottomRight.x - region.topLeft.x) * frameWidth;
   const regionHeight = (region.bottomRight.y - region.topLeft.y) * frameHeight;
   const qrSize = Math.max(Math.min(regionWidth, regionHeight), 1);
   const qrX = toX(region.topLeft.x) + (regionWidth - qrSize) / 2;
   const qrY = toY(region.bottomRight.y) + (regionHeight - qrSize) / 2;
+
+  const rutGridBubbles: DrawPlanBubble[] =
+    identityMode === 'rut_bubbles'
+      ? (spec.identity.bubbles ?? []).map((bubble) => ({
+          fieldId: 'identity_rut',
+          printedNumber: 'RUT',
+          value: bubble.value,
+          cx: toX(bubble.center.x),
+          cy: toY(bubble.center.y),
+          radius: bubble.radius * frameWidth,
+        }))
+      : [];
+
+  const instructions: DrawPlanLabel[] =
+    identityMode === 'rut_bubbles'
+      ? RUT_INSTRUCTION_LINES.map((text, index) => ({
+          text,
+          x: toX(0.55),
+          y: toY(0.05 + index * 0.025),
+        }))
+      : [];
+
+  const header =
+    identityMode === 'rut_bubbles'
+      ? { nameX: toX(0.05), nameY: toY(0.015), courseX: toX(0.55), courseY: toY(0.02) }
+      : { nameX: toX(0.02), nameY: toY(0.05), courseX: toX(0.02), courseY: toY(0.09) };
 
   return {
     pageWidth,
@@ -138,12 +175,9 @@ export function computeDrawPlan(spec: LayoutSpec, pageIndex: number): SheetDrawP
     labels,
     syncTicks,
     qr: { x: qrX, y: qrY, size: qrSize },
-    header: {
-      nameX: toX(0.02),
-      nameY: toY(0.05),
-      courseX: toX(0.02),
-      courseY: toY(0.09),
-    },
+    header,
+    rutGridBubbles,
+    instructions,
   };
 }
 
@@ -205,6 +239,35 @@ export async function renderSheetsPdf(
         });
       }
 
+      for (const bubble of plan.rutGridBubbles) {
+        page.drawCircle({
+          x: bubble.cx,
+          y: bubble.cy,
+          size: bubble.radius,
+          borderColor: black,
+          borderWidth: 0.8,
+        });
+        const valueSize = Math.max(bubble.radius * 1.1, 4);
+        const valueWidth = font.widthOfTextAtSize(bubble.value, valueSize);
+        page.drawText(bubble.value, {
+          x: bubble.cx - valueWidth / 2,
+          y: bubble.cy - valueSize * 0.36,
+          size: valueSize,
+          font,
+          color: grey,
+        });
+      }
+
+      for (const instruction of plan.instructions) {
+        page.drawText(instruction.text, {
+          x: instruction.x,
+          y: instruction.y,
+          size: INSTRUCTION_FONT_SIZE,
+          font,
+          color: black,
+        });
+      }
+
       const payload = buildOmrQrPayload({
         printedSheetId: sheet.printedSheetId,
         layoutHash: specHash,
@@ -220,7 +283,8 @@ export async function renderSheetsPdf(
         height: plan.qr.size,
       });
 
-      const name = sheet.studentName ?? BLANK_NAME_LINE;
+      const rutMode = identityModeOf(spec) === 'rut_bubbles';
+      const name = rutMode ? RUT_MODE_NAME_LINE : (sheet.studentName ?? BLANK_NAME_LINE);
       page.drawText(name, {
         x: plan.header.nameX,
         y: plan.header.nameY,
@@ -229,8 +293,9 @@ export async function renderSheetsPdf(
         color: black,
       });
 
-      const courseLine =
-        sheet.studentName === null
+      const courseLine = rutMode
+        ? (sheet.classGroupName ?? '')
+        : sheet.studentName === null
           ? ['Hoja de reserva', sheet.classGroupName].filter(Boolean).join(' — ')
           : (sheet.classGroupName ?? '');
       if (courseLine.length > 0) {

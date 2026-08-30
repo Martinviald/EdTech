@@ -1,5 +1,6 @@
-import { layoutSpecSchema, type ItemContent } from '@soe/types';
+import { layoutHash, layoutSpecSchema, type ItemContent } from '@soe/types';
 import {
+  RUT_DV_GROUP_INDEX,
   SHEET_FIELDS_PER_PAGE,
   collectInvariantViolations,
   deriveLayoutDraft,
@@ -157,5 +158,70 @@ describe('partitionDerivableItems', () => {
   it('ordena por position aunque la lista venga desordenada', () => {
     const { correctable } = partitionDerivableItems([mcItem(3), mcItem(1), mcItem(2)]);
     expect(correctable.map((c) => c.label)).toEqual(['1', '2', '3']);
+  });
+});
+
+describe('deriveLayoutDraft — identidad rut_bubbles (CD-10)', () => {
+  const items = [mcItem(1), mcItem(2), tfItem(3)];
+
+  it('la identidad trae la grilla RUT: 8 grupos de cuerpo + grupo DV con 0–9 y K', () => {
+    const draft = deriveLayoutDraft(INSTRUMENT_ID, items, 'rut_bubbles');
+    const bubbles = draft.spec.identity.bubbles ?? [];
+
+    expect(draft.spec.identity.mode).toBe('rut_bubbles');
+    expect(new Set(bubbles.map((b) => b.group)).size).toBe(RUT_DV_GROUP_INDEX + 1);
+    expect(bubbles.filter((b) => b.group === 0).map((b) => b.value)).toEqual([
+      '0', '1', '2', '3', '4', '5', '6', '7', '8', '9',
+    ]);
+    expect(bubbles.filter((b) => b.group === RUT_DV_GROUP_INDEX).map((b) => b.value)).toEqual([
+      '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'K',
+    ]);
+    expect(() => layoutSpecSchema.parse(draft.spec)).not.toThrow();
+    expect(collectInvariantViolations(draft.spec, items)).toEqual([]);
+  });
+
+  it('la grilla queda dentro de la región identity y las preguntas empiezan debajo de ella', () => {
+    const draft = deriveLayoutDraft(INSTRUMENT_ID, items, 'rut_bubbles');
+    const bubbles = draft.spec.identity.bubbles ?? [];
+    const region = draft.spec.identity.region;
+
+    for (const bubble of bubbles) {
+      expect(bubble.center.x).toBeGreaterThanOrEqual(region.topLeft.x);
+      expect(bubble.center.x).toBeLessThanOrEqual(region.bottomRight.x);
+      expect(bubble.center.y).toBeGreaterThanOrEqual(region.topLeft.y);
+      expect(bubble.center.y).toBeLessThanOrEqual(region.bottomRight.y);
+    }
+
+    const maxGridY = Math.max(...bubbles.map((b) => b.center.y + b.radius));
+    const minFieldY = Math.min(
+      ...draft.spec.fields.flatMap((f) => f.bubbles.map((b) => b.center.y - b.radius)),
+    );
+    expect(minFieldY).toBeGreaterThan(maxGridY);
+  });
+
+  it('el modo qr sigue derivando EXACTAMENTE igual que en el MVP y hashea distinto que rut_bubbles', () => {
+    const qrImplicit = deriveLayoutDraft(INSTRUMENT_ID, items);
+    const qrExplicit = deriveLayoutDraft(INSTRUMENT_ID, items, 'qr');
+    const rut = deriveLayoutDraft(INSTRUMENT_ID, items, 'rut_bubbles');
+
+    expect(qrImplicit.spec).toEqual(qrExplicit.spec);
+    expect(qrImplicit.spec.identity.bubbles).toBeUndefined();
+    expect(layoutHash(qrImplicit.spec)).toBe(layoutHash(qrExplicit.spec));
+    expect(layoutHash(rut.spec)).not.toBe(layoutHash(qrImplicit.spec));
+  });
+
+  it('invariante de freeze: rut_bubbles sin grilla y qr con grilla son specs inválidos', () => {
+    const rut = deriveLayoutDraft(INSTRUMENT_ID, items, 'rut_bubbles').spec;
+    const qr = deriveLayoutDraft(INSTRUMENT_ID, items, 'qr').spec;
+
+    const rutSinGrilla = { ...rut, identity: { ...rut.identity, bubbles: null } };
+    const qrConGrilla = { ...qr, identity: { ...qr.identity, bubbles: rut.identity.bubbles } };
+
+    expect(collectInvariantViolations(rutSinGrilla, items).map((v) => v.message).join(' ')).toContain(
+      'grilla RUT',
+    );
+    expect(collectInvariantViolations(qrConGrilla, items).map((v) => v.message).join(' ')).toContain(
+      'no lleva grilla',
+    );
   });
 });

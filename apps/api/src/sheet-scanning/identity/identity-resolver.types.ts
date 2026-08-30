@@ -9,9 +9,17 @@ export interface IdentityCandidate {
   batchRejection: { reason: string } | null;
 }
 
+export interface IdentityResolutionContext {
+  printRunId: string;
+}
+
 export interface SheetIdentityResolver {
   readonly mode: SheetIdentityMode;
-  resolve(orgId: string, page: ScannedPage): Promise<IdentityCandidate>;
+  resolve(
+    orgId: string,
+    page: ScannedPage,
+    context: IdentityResolutionContext,
+  ): Promise<IdentityCandidate>;
 }
 
 export function unresolvedIdentityCandidate(evidence: Record<string, unknown>): IdentityCandidate {

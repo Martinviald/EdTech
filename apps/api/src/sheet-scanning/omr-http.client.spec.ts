@@ -1,4 +1,4 @@
-import type { OmrReadRequest, ScanResult } from '@soe/types';
+import type { OmrAssessRequest, OmrAssessResult, OmrReadRequest, ScanResult } from '@soe/types';
 import { OmrPageTimeoutError, OmrServiceUnavailableError } from './omr-client.types';
 import {
   HttpOmrClient,
@@ -150,5 +150,54 @@ describe('HttpOmrClient.read', () => {
     const client = makeClient(fetchFn, 20);
 
     await expect(client.read(REQUEST)).rejects.toBeInstanceOf(OmrPageTimeoutError);
+  });
+});
+
+describe('HttpOmrClient.assess (CD-11)', () => {
+  const ASSESS_REQUEST = {
+    layoutSpec: { specVersion: 1 },
+    captureProfile: { source: 'phone' },
+    imageBase64: 'Zm90by1qcGVn',
+  } as unknown as OmrAssessRequest;
+
+  const VALID_ASSESS_RESULT: OmrAssessResult = {
+    imageSha256: 'b'.repeat(64),
+    quality: { ok: true, sharpness: 0.7, glare: 0.1, fiducialsFound: 4, rejectReason: null },
+    identity: { mode: 'rut_bubbles', raw: '123456785', confidence: 0.8 },
+  };
+
+  it('postea el OmrAssessRequest a /v1/assess y devuelve el OmrAssessResult validado', async () => {
+    const { fetchFn, calls } = makeFetch([jsonResponse(200, VALID_ASSESS_RESULT)]);
+    const client = makeClient(fetchFn);
+
+    const result = await client.assess(ASSESS_REQUEST);
+
+    expect(result).toEqual(VALID_ASSESS_RESULT);
+    expect(calls).toHaveLength(1);
+    expect(calls[0].url).toBe('http://omr.test:8090/v1/assess');
+    expect(JSON.parse(calls[0].body)).toEqual(ASSESS_REQUEST);
+  });
+
+  it('un 200 con cuerpo inválido lanza OmrInvalidResponseError', async () => {
+    const { fetchFn } = makeFetch([jsonResponse(200, { quality: {} })]);
+    const client = makeClient(fetchFn);
+
+    await expect(client.assess(ASSESS_REQUEST)).rejects.toBeInstanceOf(OmrInvalidResponseError);
+  });
+
+  it('un 422 lanza OmrRequestRejectedError sin reintentar', async () => {
+    const { fetchFn, calls } = makeFetch([jsonResponse(422, { detail: 'imageBase64 inválido' })]);
+    const client = makeClient(fetchFn);
+
+    await expect(client.assess(ASSESS_REQUEST)).rejects.toBeInstanceOf(OmrRequestRejectedError);
+    expect(calls).toHaveLength(1);
+  });
+
+  it('reintenta UNA vez tras un 502 y luego lanza OmrServiceUnavailableError', async () => {
+    const { fetchFn, calls } = makeFetch([jsonResponse(502, {}), jsonResponse(502, {})]);
+    const client = makeClient(fetchFn);
+
+    await expect(client.assess(ASSESS_REQUEST)).rejects.toBeInstanceOf(OmrServiceUnavailableError);
+    expect(calls).toHaveLength(2);
   });
 });

@@ -26,6 +26,7 @@ import type {
   UpdatePrintRunDto,
 } from '@soe/types';
 import { InjectDb, type Database } from '../database/database.types';
+import { identityModeOf } from './sheet-layout.helpers';
 import { renderSheetsPdf, type PrintableSheetInfo } from './sheet-print.helpers';
 
 type RunRow = {
@@ -36,6 +37,7 @@ type RunRow = {
   classGroupId: string | null;
   classGroupName: string | null;
   assessmentId: string | null;
+  assessmentFormId: string | null;
   spareCount: number;
   sheetCount: number;
   pdfFileId: string | null;
@@ -54,6 +56,7 @@ export class SheetPrintService {
           id: sheetLayouts.id,
           version: sheetLayouts.version,
           instrumentId: sheetLayouts.instrumentId,
+          spec: sheetLayouts.spec,
         })
         .from(sheetLayouts)
         .where(and(eq(sheetLayouts.orgId, orgId), eq(sheetLayouts.id, dto.layoutId)))
@@ -90,6 +93,7 @@ export class SheetPrintService {
         : await this.createAssessmentForRun(tx, orgId, userId, layout.instrumentId, classGroup);
 
       const sheetCount = roster.length + dto.spareCount;
+      const genericSheets = identityModeOf(layout.spec) === 'rut_bubbles';
 
       const [run] = await tx
         .insert(sheetPrintRuns)
@@ -98,6 +102,7 @@ export class SheetPrintService {
           layoutId: layout.id,
           classGroupId: classGroup.id,
           assessmentId,
+          assessmentFormId: dto.assessmentFormId ?? null,
           spareCount: dto.spareCount,
           sheetCount,
           createdById: userId,
@@ -105,6 +110,7 @@ export class SheetPrintService {
         .returning({
           id: sheetPrintRuns.id,
           assessmentId: sheetPrintRuns.assessmentId,
+          assessmentFormId: sheetPrintRuns.assessmentFormId,
           spareCount: sheetPrintRuns.spareCount,
           sheetCount: sheetPrintRuns.sheetCount,
           pdfFileId: sheetPrintRuns.pdfFileId,
@@ -113,20 +119,27 @@ export class SheetPrintService {
         });
       if (!run) throw new Error('sheet_print_runs insert returned no row');
 
-      const sheetValues = [
-        ...roster.map((student, index) => ({
-          orgId,
-          printRunId: run.id,
-          studentId: student.id,
-          sequence: index + 1,
-        })),
-        ...Array.from({ length: dto.spareCount }, (_, index) => ({
-          orgId,
-          printRunId: run.id,
-          studentId: null,
-          sequence: roster.length + index + 1,
-        })),
-      ];
+      const sheetValues = genericSheets
+        ? Array.from({ length: sheetCount }, (_, index) => ({
+            orgId,
+            printRunId: run.id,
+            studentId: null,
+            sequence: index + 1,
+          }))
+        : [
+            ...roster.map((student, index) => ({
+              orgId,
+              printRunId: run.id,
+              studentId: student.id,
+              sequence: index + 1,
+            })),
+            ...Array.from({ length: dto.spareCount }, (_, index) => ({
+              orgId,
+              printRunId: run.id,
+              studentId: null,
+              sequence: roster.length + index + 1,
+            })),
+          ];
       await tx.insert(printedSheets).values(sheetValues);
 
       return {
@@ -137,6 +150,7 @@ export class SheetPrintService {
         classGroupId: classGroup.id,
         classGroupName: classGroup.name,
         assessmentId: run.assessmentId,
+        assessmentFormId: run.assessmentFormId,
         spareCount: run.spareCount,
         sheetCount: run.sheetCount,
         pdfFileId: run.pdfFileId,
@@ -385,6 +399,7 @@ export class SheetPrintService {
         classGroupId: sheetPrintRuns.classGroupId,
         classGroupName: classGroups.name,
         assessmentId: sheetPrintRuns.assessmentId,
+        assessmentFormId: sheetPrintRuns.assessmentFormId,
         spareCount: sheetPrintRuns.spareCount,
         sheetCount: sheetPrintRuns.sheetCount,
         pdfFileId: sheetPrintRuns.pdfFileId,
@@ -410,6 +425,7 @@ export class SheetPrintService {
       classGroupId: row.classGroupId,
       classGroupName: row.classGroupName,
       assessmentId: row.assessmentId,
+      assessmentFormId: row.assessmentFormId,
       spareCount: row.spareCount,
       sheetCount: row.sheetCount,
       pdfFileId: row.pdfFileId,
