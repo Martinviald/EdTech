@@ -7,6 +7,7 @@ import {
 import { and, asc, desc, eq, isNull, sql, type SQL } from 'drizzle-orm';
 import {
   assessmentCourseAssignments,
+  assessmentForms,
   assessments,
   classGroups,
   printedSheets,
@@ -28,6 +29,18 @@ import type {
 import { InjectDb, type Database } from '../database/database.types';
 import { identityModeOf } from './sheet-layout.helpers';
 import { renderSheetsPdf, type PrintableSheetInfo } from './sheet-print.helpers';
+
+export type AssessmentFormModel = {
+  id: string;
+  name: string;
+  assessmentId: string;
+  assessmentName: string | null;
+  createdAt: Date;
+};
+
+export type AssessmentFormListResponse = {
+  data: AssessmentFormModel[];
+};
 
 type RunRow = {
   id: string;
@@ -63,6 +76,16 @@ export class SheetPrintService {
         .limit(1);
       if (!layout) throw new NotFoundException('Layout de hoja no encontrado');
 
+      const form = dto.assessmentFormId
+        ? await this.requireRunForm(
+            tx,
+            orgId,
+            dto.assessmentFormId,
+            layout.instrumentId,
+            dto.assessmentId ?? null,
+          )
+        : null;
+
       const [classGroup] = await tx
         .select({ id: classGroups.id, name: classGroups.name })
         .from(classGroups)
@@ -90,7 +113,8 @@ export class SheetPrintService {
 
       const assessmentId = dto.assessmentId
         ? await this.assertAssessmentUsable(tx, orgId, dto.assessmentId, layout.instrumentId)
-        : await this.createAssessmentForRun(tx, orgId, userId, layout.instrumentId, classGroup);
+        : (form?.assessmentId ??
+          (await this.createAssessmentForRun(tx, orgId, userId, layout.instrumentId, classGroup)));
 
       const sheetCount = roster.length + dto.spareCount;
       const genericSheets = identityModeOf(layout.spec) === 'rut_bubbles';
@@ -102,7 +126,7 @@ export class SheetPrintService {
           layoutId: layout.id,
           classGroupId: classGroup.id,
           assessmentId,
-          assessmentFormId: dto.assessmentFormId ?? null,
+          assessmentFormId: form?.id ?? null,
           spareCount: dto.spareCount,
           sheetCount,
           createdById: userId,
@@ -157,6 +181,34 @@ export class SheetPrintService {
         createdById: run.createdById,
         createdAt: run.createdAt,
       };
+    });
+  }
+
+  async listForms(orgId: string, layoutId: string): Promise<AssessmentFormListResponse> {
+    return withOrgContext(this.db, orgId, async (tx) => {
+      const [layout] = await tx
+        .select({ id: sheetLayouts.id, instrumentId: sheetLayouts.instrumentId })
+        .from(sheetLayouts)
+        .where(and(eq(sheetLayouts.orgId, orgId), eq(sheetLayouts.id, layoutId)))
+        .limit(1);
+      if (!layout) throw new NotFoundException('Layout de hoja no encontrado');
+
+      const rows = await tx
+        .select({
+          id: assessmentForms.id,
+          name: assessmentForms.name,
+          assessmentId: assessmentForms.assessmentId,
+          assessmentName: assessments.name,
+          createdAt: assessmentForms.createdAt,
+        })
+        .from(assessmentForms)
+        .innerJoin(assessments, eq(assessments.id, assessmentForms.assessmentId))
+        .where(
+          and(eq(assessments.orgId, orgId), eq(assessments.instrumentId, layout.instrumentId)),
+        )
+        .orderBy(asc(assessmentForms.name), asc(assessmentForms.createdAt));
+
+      return { data: rows };
     });
   }
 
@@ -382,6 +434,37 @@ export class SheetPrintService {
 
     const bytes = await renderSheetsPdf(spec, specHash, sheets);
     return Buffer.from(bytes);
+  }
+
+  private async requireRunForm(
+    tx: Database,
+    orgId: string,
+    assessmentFormId: string,
+    instrumentId: string,
+    requestedAssessmentId: string | null,
+  ): Promise<{ id: string; assessmentId: string }> {
+    const [form] = await tx
+      .select({
+        id: assessmentForms.id,
+        assessmentId: assessmentForms.assessmentId,
+        instrumentId: assessments.instrumentId,
+      })
+      .from(assessmentForms)
+      .innerJoin(assessments, eq(assessments.id, assessmentForms.assessmentId))
+      .where(and(eq(assessmentForms.id, assessmentFormId), eq(assessments.orgId, orgId)))
+      .limit(1);
+    if (!form) throw new NotFoundException('Forma de evaluación no encontrada');
+    if (form.instrumentId !== instrumentId) {
+      throw new BadRequestException(
+        'La forma seleccionada pertenece a una evaluación de otro instrumento: elige una forma cuya evaluación use el instrumento de este layout.',
+      );
+    }
+    if (requestedAssessmentId !== null && requestedAssessmentId !== form.assessmentId) {
+      throw new BadRequestException(
+        'La forma seleccionada no pertenece a la evaluación indicada para la tirada.',
+      );
+    }
+    return { id: form.id, assessmentId: form.assessmentId };
   }
 
   private selectRuns(

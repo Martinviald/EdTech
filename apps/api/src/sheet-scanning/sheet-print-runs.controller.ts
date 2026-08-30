@@ -25,7 +25,7 @@ import type { JwtPayload } from '../auth/jwt-payload.types';
 import { Roles } from '../common/decorators/roles.decorator';
 import { RolesGuard } from '../common/guards/roles.guard';
 import { getEffectiveOrgId } from '../common/helpers/org-context.helper';
-import { SheetPrintService } from './sheet-print.service';
+import { SheetPrintService, type AssessmentFormListResponse } from './sheet-print.service';
 
 @Controller('sheet-print-runs')
 @UseGuards(RolesGuard)
@@ -66,6 +66,16 @@ export class SheetPrintRunsController {
       getEffectiveOrgId(user, orgId),
       dto.instrumentId,
     );
+  }
+
+  @Get('forms')
+  @Roles(...SHEET_MANAGEMENT_ROLES)
+  listForms(
+    @Query('layoutId', ParseUUIDPipe) layoutId: string,
+    @CurrentUser() user: JwtPayload,
+    @Query('orgId') orgId?: string,
+  ): Promise<AssessmentFormListResponse> {
+    return this.sheetPrintService.listForms(getEffectiveOrgId(user, orgId), layoutId);
   }
 
   @Get(':id')

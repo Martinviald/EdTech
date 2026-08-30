@@ -3,6 +3,8 @@ import { sheetScanBatches, sheetScanMarks, sheetScans, type Database } from '@so
 import {
   DEFAULT_CAPTURE_PROFILES,
   buildOmrQrPayload,
+  layoutHash,
+  type ItemContent,
   type LayoutSpec,
   type MarkReading,
   type ScannedPage,
@@ -12,6 +14,7 @@ import type { FilesService } from '../files/files.service';
 import type { EnqueuedJob, JobDispatcher } from '../jobs/job-dispatcher';
 import type { IdentityCandidate } from './identity/identity-resolver.types';
 import type { SheetIdentityResolverRegistry } from './identity/identity-resolver.registry';
+import { deriveLayoutDraft, type DerivableItem } from './sheet-layout.helpers';
 import type { OmrCalibrationService } from './omr-calibration.service';
 import { OmrServiceUnavailableError } from './omr-client.types';
 import { FakeOmrClient } from './testing/fake-omr-client';
@@ -984,5 +987,99 @@ describe('SheetScanService.list', () => {
     expect(result.data[0].counters.scans.read).toBe(4);
     expect(result.data[0].counters.sheetsExpected).toBe(30);
     expect(result.data[0].counters.sheetsScanned).toBe(4);
+  });
+});
+
+describe('SheetScanService — G1 por formas A/B (CD-13)', () => {
+  function formItem(position: number): DerivableItem {
+    return {
+      id: `item-${position}`,
+      position,
+      printedNumber: null,
+      type: 'multiple_choice',
+      content: {
+        stem: `Pregunta ${position}`,
+        alternatives: ['A', 'B', 'C', 'D'].map((key) => ({
+          key,
+          text: `Alt ${key}`,
+          isCorrect: key === 'A',
+        })),
+      } as ItemContent,
+    };
+  }
+
+  const INSTRUMENT_ID = '11111111-1111-4111-8111-111111111111';
+  const specFormaA = deriveLayoutDraft(
+    INSTRUMENT_ID,
+    Array.from({ length: 4 }, (_, i) => formItem(i + 1)),
+  ).spec;
+  const specFormaB = deriveLayoutDraft(
+    INSTRUMENT_ID,
+    Array.from({ length: 5 }, (_, i) => formItem(i + 1)),
+  ).spec;
+  const hashFormaA = layoutHash(specFormaA);
+  const hashFormaB = layoutHash(specFormaB);
+  const CTX_FORMA_A = {
+    sourceFileIds: [FILE_ID],
+    captureProfile: PROFILE,
+    spec: specFormaA,
+    specHash: hashFormaA,
+  };
+
+  it('dos layouts congelados producen hashes distintos: una forma por layout (CD-13/D6)', () => {
+    expect(hashFormaA).not.toBe(hashFormaB);
+  });
+
+  it('el lote de la tirada de la forma A rechaza ENTERO una hoja impresa con la forma B, con ambos hashes en el motivo', async () => {
+    const { service, inserts, updates, resolve, omr } = makeService([[CTX_FORMA_A], [FILE_ROW]]);
+    const qrDeFormaB = buildOmrQrPayload({
+      printedSheetId: SHEET_1,
+      layoutHash: hashFormaB,
+      pageIndex: 0,
+      pageCount: specFormaB.pageCount,
+    });
+    omr.enqueueResponse({
+      pages: [makePage({ identity: { mode: 'qr', raw: qrDeFormaB, confidence: 1 } })],
+    });
+
+    await runJob(service);
+
+    expect(resolve).not.toHaveBeenCalled();
+    expect(inserts).toHaveLength(0);
+    expect(updates).toHaveLength(1);
+    expect(updates[0].set).toMatchObject({ status: 'rejected' });
+    expect(String(updates[0].set.failureReason)).toContain(hashFormaA);
+    expect(String(updates[0].set.failureReason)).toContain(hashFormaB);
+  });
+
+  it('una hoja de la MISMA forma pasa el chequeo de hash y se lee normal', async () => {
+    const { service, inserts, updates, resolve, omr } = makeService([
+      [CTX_FORMA_A],
+      [FILE_ROW],
+      [],
+      [{ state: 'read', count: 1 }],
+      [{ count: 0 }],
+    ]);
+    const qrDeFormaA = buildOmrQrPayload({
+      printedSheetId: SHEET_1,
+      layoutHash: hashFormaA,
+      pageIndex: 0,
+      pageCount: specFormaA.pageCount,
+    });
+    omr.enqueueResponse({
+      pages: [
+        makePage({ identity: { mode: 'qr', raw: qrDeFormaA, confidence: 1 }, marks: [makeMark()] }),
+      ],
+    });
+    resolve.mockResolvedValue(candidate());
+
+    await runJob(service);
+
+    expect(resolve).toHaveBeenCalledTimes(1);
+    expect(inserts).toHaveLength(2);
+    expect(inserts[0].table).toBe(sheetScans);
+    expect(inserts[0].values).toMatchObject({ printedSheetId: SHEET_1, state: 'read' });
+    expect(inserts[1].table).toBe(sheetScanMarks);
+    expect(updates[updates.length - 1].set).toMatchObject({ status: 'needs_review' });
   });
 });
