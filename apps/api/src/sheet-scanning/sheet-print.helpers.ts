@@ -20,6 +20,7 @@ export interface DrawPlanBubble {
   fieldId: string;
   printedNumber: string;
   value: string;
+  group: number | null;
   cx: number;
   cy: number;
   radius: number;
@@ -29,6 +30,11 @@ export interface DrawPlanLabel {
   text: string;
   x: number;
   y: number;
+}
+
+export interface DrawPlanCropRegion {
+  printedNumber: string;
+  rect: DrawPlanRect;
 }
 
 export interface SheetDrawPlan {
@@ -43,6 +49,7 @@ export interface SheetDrawPlan {
   header: { nameX: number; nameY: number; courseX: number; courseY: number };
   rutGridBubbles: DrawPlanBubble[];
   instructions: DrawPlanLabel[];
+  cropRegions: DrawPlanCropRegion[];
 }
 
 export interface PrintableSheetInfo {
@@ -103,6 +110,7 @@ export function computeDrawPlan(spec: LayoutSpec, pageIndex: number): SheetDrawP
         fieldId: field.fieldId,
         printedNumber: field.printedNumber,
         value: bubble.value,
+        group: bubble.group ?? null,
         cx,
         cy,
         radius,
@@ -121,6 +129,21 @@ export function computeDrawPlan(spec: LayoutSpec, pageIndex: number): SheetDrawP
       });
       rowCenters.add(Math.round(rowCy * 10) / 10);
     }
+  }
+
+  const cropRegions: DrawPlanCropRegion[] = [];
+  for (const field of spec.fields) {
+    if (field.pageIndex !== pageIndex || field.kind !== 'crop_region' || field.region === null) {
+      continue;
+    }
+    const left = toX(field.region.topLeft.x);
+    const topPdf = toY(field.region.topLeft.y);
+    const right = toX(field.region.bottomRight.x);
+    const bottomPdf = toY(field.region.bottomRight.y);
+    cropRegions.push({
+      printedNumber: field.printedNumber,
+      rect: { x: left, y: bottomPdf, width: right - left, height: topPdf - bottomPdf },
+    });
   }
 
   const syncTicks: DrawPlanRect[] = Array.from(rowCenters)
@@ -146,6 +169,7 @@ export function computeDrawPlan(spec: LayoutSpec, pageIndex: number): SheetDrawP
           fieldId: 'identity_rut',
           printedNumber: 'RUT',
           value: bubble.value,
+          group: bubble.group ?? null,
           cx: toX(bubble.center.x),
           cy: toY(bubble.center.y),
           radius: bubble.radius * frameWidth,
@@ -178,6 +202,7 @@ export function computeDrawPlan(spec: LayoutSpec, pageIndex: number): SheetDrawP
     header,
     rutGridBubbles,
     instructions,
+    cropRegions,
   };
 }
 
@@ -255,6 +280,21 @@ export async function renderSheetsPdf(
           size: valueSize,
           font,
           color: grey,
+        });
+      }
+
+      for (const crop of plan.cropRegions) {
+        page.drawRectangle({
+          ...crop.rect,
+          borderColor: black,
+          borderWidth: 0.8,
+        });
+        page.drawText(crop.printedNumber, {
+          x: crop.rect.x + 3,
+          y: crop.rect.y + crop.rect.height - LABEL_FONT_SIZE - 3,
+          size: LABEL_FONT_SIZE,
+          font: boldFont,
+          color: black,
         });
       }
 
