@@ -7,6 +7,7 @@ confidence 0). El servicio NO valida DV ni interpreta: eso es del backend.
 
 from __future__ import annotations
 
+import cv2
 import numpy as np
 import pytest
 
@@ -95,3 +96,47 @@ def test_unrectifiable_page_yields_undetected_identity(rut_spec: dict, profile: 
     assert page["identity"]["mode"] == "rut_bubbles"
     assert page["identity"]["raw"] is None
     assert page["identity"]["confidence"] == 0.0
+
+
+def test_rut_sheet_carries_corner_qr_in_qr_raw(rut_spec: dict, profile: dict) -> None:
+    page = read_rut_page(rut_spec, profile, identity_marks=syn.rut_marks(RUT))
+
+    assert page["identity"]["qrRaw"] == syn.qr_payload(0, 1)
+    assert page["identity"]["raw"] == RUT
+    assert page["quality"]["ok"] is True
+    assert validate("scan-result", {"pages": [page]}) == []
+
+
+def test_upside_down_rut_sheet_is_reoriented_by_corner_qr(
+    rut_spec: dict, profile: dict
+) -> None:
+    gray = syn.render_page(
+        rut_spec,
+        0,
+        marks=dict(BUBBLE_MARKS),
+        identity_marks=syn.rut_marks(RUT),
+        rng=np.random.default_rng(15),
+    )
+    rotated = cv2.rotate(gray, cv2.ROTATE_180)
+    page = process_page(syn.to_bgr(rotated), 0, rut_spec, profile)
+
+    assert page["quality"]["ok"] is True
+    assert page["identity"]["qrRaw"] == syn.qr_payload(0, 1)
+    assert page["identity"]["raw"] == RUT
+    marked = {m["fieldId"]: m["value"] for m in page["marks"] if m["state"] == "marked"}
+    assert marked == BUBBLE_MARKS
+
+
+def test_rut_sheet_without_corner_qr_is_quality_rejected(
+    rut_spec: dict, profile: dict
+) -> None:
+    page = read_rut_page(
+        rut_spec, profile, identity_marks=syn.rut_marks(RUT), qr_text=None
+    )
+
+    assert page["quality"]["ok"] is False
+    assert page["quality"]["rejectReason"] == "no_separable_marks"
+    assert page["identity"]["raw"] is None
+    assert page["identity"]["qrRaw"] is None
+    assert page["marks"] == []
+    assert page["pageThumbJpegBase64"] is not None

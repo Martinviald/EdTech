@@ -12,6 +12,13 @@ alternativa SOLO se acepta si el QR decodifica desde la region del spec: los
 siendo un cuadrado) y aceptar una correspondencia equivocada podria leer mal
 con confianza. Sin prueba, se conserva el resultado de la primera pasada.
 
+M1/CD-15: en specs rut_bubbles la prueba de orientacion es el QR de esquina
+(cuadrante superior derecho de la pagina rectificada). Si ninguna orientacion
+lo decodifica, la pagina se rechaza por calidad (no_separable_marks) SIN leer
+identidad ni clasificar marcas: sin QR no hay copia fisica que anclar ni
+orientacion probada, y una grilla RUT leida con la correspondencia equivocada
+matchearia al alumno incorrecto con confianza.
+
 pageThumbJpegBase64 (~400 px de ancho, sobre la captura ya orientada) SOLO
 cuando quality.ok es false o identity.raw es null (CD-1).
 
@@ -47,7 +54,12 @@ import cv2
 import numpy as np
 
 from .classify import AMBIGUITY_MARGIN, PageThreshold, page_threshold
-from .identity import decode_region_qr, peek_logical_page_index, read_identity
+from .identity import (
+    decode_corner_qr,
+    decode_region_qr,
+    peek_logical_page_index,
+    read_identity,
+)
 from .quality import assess
 from .readers import READERS
 from .rectify import FiducialFailure, RectifiedPage, rectify
@@ -145,15 +157,18 @@ def classify_page_debug(
     image_sha256 = _canonical_png_sha256(bgr)
 
     with _stage(timings_ms, "rectify"):
-        oriented_bgr, rectified, orientation_degrees = _rectify_oriented(bgr, spec)
+        oriented_bgr, rectified, orientation_degrees, orientation_confirmed = _rectify_oriented(
+            bgr, spec
+        )
     oriented_gray = cv2.cvtColor(oriented_bgr, cv2.COLOR_BGR2GRAY)
 
     with _stage(timings_ms, "quality"):
         quality = assess(oriented_gray, rectified, profile)
+    _apply_orientation_verdict(quality, spec, orientation_confirmed)
 
     with _stage(timings_ms, "identity"):
         identity = read_identity(
-            rectified if isinstance(rectified, RectifiedPage) else None,
+            _identity_rectified(rectified, spec, orientation_confirmed),
             oriented_gray,
             spec,
             _ambiguity_margin(profile),
@@ -206,11 +221,12 @@ def assess_page(
     bgr: np.ndarray, spec: dict[str, Any], profile: dict[str, Any]
 ) -> dict[str, Any]:
     image_sha256 = _canonical_png_sha256(bgr)
-    oriented_bgr, rectified, _ = _rectify_oriented(bgr, spec)
+    oriented_bgr, rectified, _, orientation_confirmed = _rectify_oriented(bgr, spec)
     oriented_gray = cv2.cvtColor(oriented_bgr, cv2.COLOR_BGR2GRAY)
     quality = assess(oriented_gray, rectified, profile)
+    _apply_orientation_verdict(quality, spec, orientation_confirmed)
     identity = read_identity(
-        rectified if isinstance(rectified, RectifiedPage) else None,
+        _identity_rectified(rectified, spec, orientation_confirmed),
         oriented_gray,
         spec,
         _ambiguity_margin(profile),
@@ -220,19 +236,19 @@ def assess_page(
 
 def _rectify_oriented(
     bgr: np.ndarray, spec: dict[str, Any]
-) -> tuple[np.ndarray, RectifiedPage | FiducialFailure, int]:
-    qr_mode = spec["identity"]["mode"] == "qr"
-    first = rectify(bgr, spec, allow_reconstruction=qr_mode)
+) -> tuple[np.ndarray, RectifiedPage | FiducialFailure, int, bool]:
+    confirmable = spec["identity"]["mode"] in ("qr", "rut_bubbles")
+    first = rectify(bgr, spec, allow_reconstruction=confirmable)
     if _orientation_confirmed(first, spec):
-        return bgr, first, 0
-    if not qr_mode:
-        return bgr, first, 0
+        return bgr, first, 0, True
+    if not confirmable:
+        return bgr, first, 0, True
     for degrees, rotation_code in ORIENTATION_ROTATIONS:
         rotated = cv2.rotate(bgr, rotation_code)
         candidate = rectify(rotated, spec, allow_reconstruction=True)
-        if isinstance(candidate, RectifiedPage) and decode_region_qr(candidate, spec):
-            return rotated, candidate, degrees
-    return bgr, _discard_unconfirmed_reconstruction(bgr, spec, first), 0
+        if _orientation_confirmed(candidate, spec):
+            return rotated, candidate, degrees, True
+    return bgr, _discard_unconfirmed_reconstruction(bgr, spec, first), 0, False
 
 
 def _discard_unconfirmed_reconstruction(
@@ -242,9 +258,10 @@ def _discard_unconfirmed_reconstruction(
 
     Reconstruir la 4a esquina recupera paginas que antes se perdian, pero solo
     vale si algo independiente confirma que la homografia quedo bien. Esa prueba
-    es el QR decodificando desde la region del spec. Si no decodifico en ninguna
-    orientacion, la pagina se rechaza como antes: cero lecturas incorrectas
-    confiadas manda sobre recuperar una hoja mas.
+    es el QR decodificando desde la region del spec (o el QR de esquina en modo
+    rut_bubbles). Si no decodifico en ninguna orientacion, la pagina se rechaza
+    como antes: cero lecturas incorrectas confiadas manda sobre recuperar una
+    hoja mas.
     """
     if not isinstance(rectified, RectifiedPage) or not rectified.reconstructed:
         return rectified
@@ -256,9 +273,33 @@ def _orientation_confirmed(
 ) -> bool:
     if not isinstance(rectified, RectifiedPage):
         return False
-    if spec["identity"]["mode"] != "qr":
-        return True
-    return decode_region_qr(rectified, spec) is not None
+    mode = spec["identity"]["mode"]
+    if mode == "qr":
+        return decode_region_qr(rectified, spec) is not None
+    if mode == "rut_bubbles":
+        return decode_corner_qr(rectified) is not None
+    return True
+
+
+def _apply_orientation_verdict(
+    quality: dict[str, Any], spec: dict[str, Any], orientation_confirmed: bool
+) -> None:
+    if spec["identity"]["mode"] != "rut_bubbles" or orientation_confirmed:
+        return
+    if quality["ok"]:
+        _reject_page(quality, "no_separable_marks")
+
+
+def _identity_rectified(
+    rectified: RectifiedPage | FiducialFailure,
+    spec: dict[str, Any],
+    orientation_confirmed: bool,
+) -> RectifiedPage | None:
+    if not isinstance(rectified, RectifiedPage):
+        return None
+    if spec["identity"]["mode"] == "rut_bubbles" and not orientation_confirmed:
+        return None
+    return rectified
 
 
 def _empty_classify_debug() -> dict[str, Any]:

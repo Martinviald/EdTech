@@ -13,6 +13,12 @@ misma regla de oro de CD-8 — cualquier grupo dudoso, doble o vacio => raw None
 concatenados ("12345678K"); confidence = minimo margin de los grupos ganadores,
 recortado a [0,1]. El umbral se calcula sobre los fills de la grilla misma:
 autocontenida, funciona igual en /v1/read y /v1/assess.
+
+CD-15: la hoja generica ADEMAS imprime el QR de esquina (superior derecha) con
+printedSheetId + layoutHash + pageIndex. En modo rut_bubbles se decodifica desde
+el cuadrante superior derecho de la pagina rectificada y viaja en
+identity.qrRaw; en modo qr, qrRaw duplica raw. El servicio sigue sin
+interpretarlo: hash-check, idempotencia y pageIndex logico son del backend.
 """
 
 from __future__ import annotations
@@ -41,10 +47,16 @@ def read_identity(
     mode = spec["identity"]["mode"]
     if mode == "qr":
         raw = _decode_qr(rectified, original_gray, spec)
-        return {"mode": mode, "raw": raw, "confidence": 1.0 if raw is not None else 0.0}
+        return {
+            "mode": mode,
+            "raw": raw,
+            "confidence": 1.0 if raw is not None else 0.0,
+            "qrRaw": raw,
+        }
     if mode == "rut_bubbles" and rectified is not None:
-        return _read_rut_bubbles(rectified, spec, ambiguity_margin)
-    return {"mode": mode, "raw": None, "confidence": 0.0}
+        qr_raw = decode_corner_qr(rectified)
+        return {**_read_rut_bubbles(rectified, spec, ambiguity_margin), "qrRaw": qr_raw}
+    return {"mode": mode, "raw": None, "confidence": 0.0, "qrRaw": None}
 
 
 def _read_rut_bubbles(
@@ -64,6 +76,12 @@ def _read_rut_bubbles(
     raw = "".join(group.digit for group in groups if group.digit is not None)
     confidence = min(1.0, min(group.representative.margin for group in groups))
     return {"mode": "rut_bubbles", "raw": raw, "confidence": round(confidence, 4)}
+
+
+def decode_corner_qr(rectified: RectifiedPage) -> str | None:
+    width, height = rectified.size
+    quadrant = rectified.gray[0 : height // 2, width // 2 : width]
+    return _first_qr_text(quadrant)
 
 
 def peek_logical_page_index(raw: str | None, file_page_index: int, page_count: int) -> int:

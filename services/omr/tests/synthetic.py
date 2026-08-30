@@ -34,6 +34,11 @@ INSTRUMENT_ID = "9f2c1a44-3b7e-4c11-9a0d-5e8f7b2c1d33"
 SHEET_ID = "1c9a7e55-2d40-4b8a-9f31-6a0d8c4e7b21"
 LAYOUT_HASH_16 = "a3f9c1e70b4d2856"
 
+CORNER_QR_REGION = {
+    "topLeft": {"x": 0.78, "y": 0.02},
+    "bottomRight": {"x": 0.98, "y": 0.16},
+}
+
 
 def qr_payload(page_index: int, page_count: int, sheet_id: str = SHEET_ID) -> str:
     return f"academos:v1:{sheet_id}:{LAYOUT_HASH_16}:{page_index}:{page_count}"
@@ -123,9 +128,14 @@ def render_page(
     rect_h = page_height - 2 * inset
 
     _draw_fiducials(page, side, rect_x0, rect_y0, rect_w, rect_h)
-    if qr_text is not None and spec["identity"]["mode"] == "qr":
+    if qr_text is not None and spec["identity"]["mode"] in ("qr", "rut_bubbles"):
         payload = qr_payload(page_index, spec["pageCount"]) if qr_text == "auto" else qr_text
-        _draw_qr(page, spec, payload, rect_x0, rect_y0, rect_w, rect_h)
+        region = (
+            spec["identity"]["region"]
+            if spec["identity"]["mode"] == "qr"
+            else CORNER_QR_REGION
+        )
+        _draw_qr(page, region, payload, rect_x0, rect_y0, rect_w, rect_h)
 
     transform = (rect_x0, rect_y0, rect_w, rect_h)
     if spec["identity"]["mode"] == "rut_bubbles" and spec["identity"].get("bubbles"):
@@ -351,14 +361,13 @@ def _draw_fiducials(
 
 def _draw_qr(
     page: np.ndarray,
-    spec: dict[str, Any],
+    region: dict[str, dict[str, float]],
     payload: str,
     x0: float,
     y0: float,
     rect_w: float,
     rect_h: float,
 ) -> None:
-    region = spec["identity"]["region"]
     box_x0 = round(x0 + region["topLeft"]["x"] * rect_w)
     box_y0 = round(y0 + region["topLeft"]["y"] * rect_h)
     box_x1 = round(x0 + region["bottomRight"]["x"] * rect_w)
