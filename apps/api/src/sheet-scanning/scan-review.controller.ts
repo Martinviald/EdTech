@@ -60,6 +60,7 @@ export class ScanReviewMarksController {
   constructor(private readonly scanReviewService: ScanReviewService) {}
 
   @Patch(':id')
+  @UseGuards(SensitiveDataGuard)
   @Roles(...SHEET_REVIEW_ROLES)
   resolveMark(
     @Param('id', ParseUUIDPipe) id: string,
@@ -96,6 +97,7 @@ export class ScanReviewScansController {
   }
 
   @Patch(':id/discard')
+  @UseGuards(SensitiveDataGuard)
   @Roles(...SHEET_REVIEW_ROLES)
   discardScan(
     @Param('id', ParseUUIDPipe) id: string,

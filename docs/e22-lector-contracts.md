@@ -113,9 +113,9 @@ corrección de errores nivel M. Reservas usan el MISMO formato (su hoja existe e
 | Verbo + ruta | Roles | Request | Response |
 |---|---|---|---|
 | `GET /sheet-scan-batches/:id/review` | `SHEET_REVIEW_ROLES` + `SensitiveDataGuard` | — | `ReviewQueueModel` |
-| `PATCH /sheet-scan-marks/:id` | `SHEET_REVIEW_ROLES` | `ReviewMarkDto` | `ReviewMarkModel` |
+| `PATCH /sheet-scan-marks/:id` | `SHEET_REVIEW_ROLES` + `SensitiveDataGuard` | `ReviewMarkDto` | `ReviewMarkModel` |
 | `PATCH /sheet-scans/:id/identity` | `SHEET_REVIEW_ROLES` + `SensitiveDataGuard` | `AssignScanIdentityDto` | `ReviewScanModel` |
-| `PATCH /sheet-scans/:id/discard` | `SHEET_REVIEW_ROLES` | `DiscardScanDto` | `ReviewScanModel` |
+| `PATCH /sheet-scans/:id/discard` | `SHEET_REVIEW_ROLES` + `SensitiveDataGuard` | `DiscardScanDto` | `ReviewScanModel` |
 | `POST /sheet-scan-batches/:id/confirm` | `SHEET_REVIEW_ROLES` | — | `ConfirmBatchResponse` |
 
 Rutas de página frontend: `/hojas/[instrumentId]/disenar`, `/hojas/[layoutId]/imprimir`,

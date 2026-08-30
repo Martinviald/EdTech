@@ -64,6 +64,7 @@ const UNEXPECTED_FAILURE_MESSAGE =
 
 type JobContext = {
   spec: LayoutSpec;
+  specHash: string;
   captureProfile: CaptureProfile;
   sourceFiles: FileRecord[];
 };
@@ -339,6 +340,7 @@ export class SheetScanService {
           sourceFileIds: sheetScanBatches.sourceFileIds,
           captureProfile: sheetScanBatches.captureProfile,
           spec: sheetLayouts.spec,
+          specHash: sheetLayouts.specHash,
         })
         .from(sheetScanBatches)
         .innerJoin(sheetPrintRuns, eq(sheetPrintRuns.id, sheetScanBatches.printRunId))
@@ -353,7 +355,12 @@ export class SheetScanService {
         .map((id) => byId.get(id))
         .filter((file): file is FileRecord => file !== undefined);
 
-      return { spec: row.spec, captureProfile: row.captureProfile, sourceFiles };
+      return {
+        spec: row.spec,
+        specHash: row.specHash,
+        captureProfile: row.captureProfile,
+        sourceFiles,
+      };
     });
   }
 
@@ -367,6 +374,10 @@ export class SheetScanService {
       const result = await this.omrClient.read(this.buildReadRequest(context, sourceFile));
       pagesTotal += result.pages.length;
       for (const page of result.pages) {
+        const batchHashMismatch = this.detectBatchLayoutMismatch(context, page);
+        if (batchHashMismatch !== null) {
+          return { rejectionReason: batchHashMismatch, pagesTotal };
+        }
         const candidate = await this.identityResolver.resolve(orgId, page);
         if (candidate.batchRejection !== null) {
           return { rejectionReason: candidate.batchRejection.reason, pagesTotal };
@@ -375,6 +386,13 @@ export class SheetScanService {
       }
     }
     return { rejectionReason: null, pagesTotal };
+  }
+
+  private detectBatchLayoutMismatch(context: JobContext, page: ScannedPage): string | null {
+    const payload = page.identity.raw === null ? null : parseOmrQrPayload(page.identity.raw);
+    if (payload === null) return null;
+    if (payload.layoutHash === context.specHash.toLowerCase()) return null;
+    return `El diseño impreso en las hojas (hash ${payload.layoutHash}) no coincide con el diseño de la tirada de este lote (hash ${context.specHash}). El instrumento fue editado o las hojas pertenecen a otra tirada: reimprime las hojas o crea el lote sobre la tirada correcta. Ninguna hoja de este lote fue corregida.`;
   }
 
   private buildReadRequest(context: JobContext, sourceFile: FileRecord): OmrReadRequest {
@@ -403,7 +421,7 @@ export class SheetScanService {
 
     const decision =
       candidate.printedSheetId === null
-        ? { skip: false, supersededIds: [], supersedesId: null }
+        ? await this.checkUnidentifiedDuplicate(orgId, batchId, page.imageSha256)
         : await this.checkIdempotency(orgId, candidate.printedSheetId, pageIndex, page.imageSha256);
     if (decision.skip) return;
 
@@ -473,7 +491,7 @@ export class SheetScanService {
             value: mark.value,
             fill: mark.fill.toFixed(3),
             threshold: mark.threshold.toFixed(3),
-            margin: mark.margin.toFixed(3),
+            margin: Math.min(mark.margin, 999.999).toFixed(3),
             cropFileId: cropFileIdByField.get(mark.fieldId) ?? null,
           })),
         );
@@ -500,7 +518,7 @@ export class SheetScanService {
         ),
     );
 
-    if (existing.some((scan) => scan.imageHash === imageHash)) {
+    if (existing.some((scan) => scan.imageHash === imageHash && scan.state !== 'superseded')) {
       return { skip: true, supersededIds: [], supersedesId: null };
     }
     const active = existing.filter((scan) => scan.state !== 'superseded');
@@ -509,6 +527,31 @@ export class SheetScanService {
       supersededIds: active.map((scan) => scan.id),
       supersedesId: active.length > 0 ? active[active.length - 1].id : null,
     };
+  }
+
+  private async checkUnidentifiedDuplicate(
+    orgId: string,
+    batchId: string,
+    imageHash: string,
+  ): Promise<IdempotencyDecision> {
+    const existing = await withOrgContext(this.db, orgId, (tx) =>
+      tx
+        .select({ id: sheetScans.id })
+        .from(sheetScans)
+        .where(
+          and(
+            eq(sheetScans.orgId, orgId),
+            eq(sheetScans.batchId, batchId),
+            eq(sheetScans.imageHash, imageHash),
+            isNull(sheetScans.printedSheetId),
+          ),
+        )
+        .limit(1),
+    );
+    if (existing.length > 0) {
+      return { skip: true, supersededIds: [], supersedesId: null };
+    }
+    return { skip: false, supersededIds: [], supersedesId: null };
   }
 
   private resolveScanState(page: ScannedPage, candidate: IdentityCandidate): SheetScanState {

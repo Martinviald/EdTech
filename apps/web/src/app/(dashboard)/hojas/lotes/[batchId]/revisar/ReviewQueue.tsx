@@ -127,7 +127,7 @@ function ScanThumb({ scan }: { scan: ReviewScanModel }) {
     <img
       src={scan.thumbUrl}
       alt={`Miniatura de la página ${scan.pageIndex + 1}`}
-      className="h-24 w-20 shrink-0 rounded-md border bg-white object-cover"
+      className="h-24 w-20 shrink-0 rounded-md border bg-card object-cover"
     />
   );
 }

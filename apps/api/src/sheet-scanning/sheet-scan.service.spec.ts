@@ -30,7 +30,7 @@ const LAYOUT_HASH = 'a3f9c1e70b4d2856';
 const PROFILE = DEFAULT_CAPTURE_PROFILES.scanner;
 const SPEC = { specVersion: 1, pageCount: 2 } as unknown as LayoutSpec;
 
-const CTX_ROW = { sourceFileIds: [FILE_ID], captureProfile: PROFILE, spec: SPEC };
+const CTX_ROW = { sourceFileIds: [FILE_ID], captureProfile: PROFILE, spec: SPEC, specHash: LAYOUT_HASH };
 const FILE_ROW = {
   id: FILE_ID,
   mimeType: 'application/pdf',
@@ -521,6 +521,7 @@ describe('SheetScanService job', () => {
     const { service, inserts, resolve, omr } = makeService([
       [CTX_ROW],
       [FILE_ROW],
+      [],
       [{ state: 'identity_unresolved', count: 1 }],
       [{ count: 0 }],
     ]);
@@ -600,6 +601,50 @@ describe('SheetScanService job', () => {
     expect(updates[0].table).toBe(sheetScans);
     expect(updates[0].set).toEqual({ state: 'superseded' });
     expect(updates[1].set).toMatchObject({ status: 'needs_review' });
+  });
+
+  it('G1 real: hojas impresas con OTRO layout que el de la tirada del lote rechazan el lote entero', async () => {
+    const { service, inserts, updates, resolve, omr } = makeService([[CTX_ROW], [FILE_ROW]]);
+    const foreignQr = buildOmrQrPayload({
+      printedSheetId: SHEET_1,
+      layoutHash: 'ffff000011112222',
+      pageIndex: 0,
+      pageCount: 2,
+    });
+    omr.enqueueResponse({
+      pages: [makePage({ identity: { mode: 'qr', raw: foreignQr, confidence: 1 } })],
+    });
+
+    await runJob(service);
+
+    expect(resolve).not.toHaveBeenCalled();
+    expect(inserts).toHaveLength(0);
+    expect(updates).toHaveLength(1);
+    expect(updates[0].set).toMatchObject({ status: 'rejected' });
+    expect(String(updates[0].set.failureReason)).toContain('ffff000011112222');
+    expect(String(updates[0].set.failureReason)).toContain(LAYOUT_HASH);
+  });
+
+  it('retry no duplica páginas sin identidad ya persistidas en el lote', async () => {
+    const { service, inserts, updates, resolve, omr } = makeService([
+      [CTX_ROW],
+      [FILE_ROW],
+      [{ id: 'scan-sin-identidad-previo' }],
+      [],
+      [{ count: 0 }],
+    ]);
+    omr.enqueueResponse({
+      pages: [makePage({ identity: { mode: 'qr', raw: null, confidence: 0 } })],
+    });
+    resolve.mockResolvedValueOnce(
+      candidate({ printedSheetId: null, studentId: null, needsHumanConfirmation: true }),
+    );
+
+    await runJob(service);
+
+    expect(inserts).toHaveLength(0);
+    expect(updates).toHaveLength(1);
+    expect(updates[0].set).toMatchObject({ status: 'needs_review' });
   });
 
   it('OmrServiceUnavailableError deja el lote failed con mensaje reintentable, sin reportServerError', async () => {

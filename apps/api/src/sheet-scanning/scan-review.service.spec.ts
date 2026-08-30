@@ -60,7 +60,11 @@ function makeDb(selectResults: unknown[][]): {
     update: () => ({
       set: (values: Record<string, unknown>) => {
         updates.push(values);
-        return { where: () => Promise.resolve([]) };
+        const result = Promise.resolve([]) as unknown as Promise<unknown[]> & {
+          returning: () => Promise<unknown[]>;
+        };
+        result.returning = () => Promise.resolve([{ id: 'batch-1' }]);
+        return { where: () => result };
       },
     }),
     execute: async () => [],
@@ -601,8 +605,9 @@ describe('ScanReviewService.confirmBatch', () => {
     expect(rows[0].studentFullName).toBe('Ana Pérez');
     expect(rows[0].answers).toEqual({ '1': 'A', '2': null, '3': 'F' });
 
-    expect(updates).toHaveLength(1);
-    expect(updates[0]).toMatchObject({ status: 'confirmed', importJobId: 'job-1' });
+    expect(updates).toHaveLength(2);
+    expect(updates[0]).toMatchObject({ status: 'confirmed' });
+    expect(updates[1]).toMatchObject({ importJobId: 'job-1' });
 
     expect(result).toEqual({
       batchId: BATCH_ID,

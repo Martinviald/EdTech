@@ -120,6 +120,27 @@ function adminHubParent() {
 const DYNAMIC_TITLES: readonly { pattern: RegExp; resolve: (m: RegExpMatchArray) => PageTitle }[] =
   [
     {
+      pattern: /^\/hojas\/[^/]+\/disenar$/,
+      resolve: () => ({
+        title: 'Diseñar hoja',
+        parent: { href: ROUTES.hojas, label: 'Hojas de respuesta' },
+      }),
+    },
+    {
+      pattern: /^\/hojas\/[^/]+\/imprimir$/,
+      resolve: () => ({
+        title: 'Tirada de impresión',
+        parent: { href: ROUTES.hojas, label: 'Hojas de respuesta' },
+      }),
+    },
+    {
+      pattern: /^\/hojas\/lotes\/[^/]+\/revisar$/,
+      resolve: () => ({
+        title: 'Revisar lote',
+        parent: { href: ROUTES.hojasEscanear, label: 'Escanear pruebas' },
+      }),
+    },
+    {
       pattern: /^\/dashboard\/my-classes\/[^/]+$/,
       resolve: () => ({ title: 'Curso', parent: { href: ROUTES.myClasses, label: 'Mis cursos' } }),
     },

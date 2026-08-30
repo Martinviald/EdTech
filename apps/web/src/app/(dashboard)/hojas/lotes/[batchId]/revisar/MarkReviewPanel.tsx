@@ -61,9 +61,9 @@ export function MarkReviewPanel({
 
   const goNext = useCallback(() => {
     const next = findNextUnresolved(safeIndex, null);
-    if (next !== null) setIndex(next);
+    setIndex(next !== null ? next : Math.min(safeIndex + 1, marks.length - 1));
     focusPanel();
-  }, [findNextUnresolved, safeIndex, focusPanel]);
+  }, [findNextUnresolved, safeIndex, marks.length, focusPanel]);
 
   const goPrev = useCallback(() => {
     setIndex((prev) => Math.max(0, Math.min(prev, marks.length - 1) - 1));
@@ -95,7 +95,10 @@ export function MarkReviewPanel({
         return;
       }
       const upper = e.key.toUpperCase();
-      if (upper === '0' || (upper === 'B' && !current.options.includes('B'))) {
+      if (
+        (upper === '0' && !current.options.includes('0')) ||
+        (upper === 'B' && !current.options.includes('B'))
+      ) {
         e.preventDefault();
         resolve(BLANK_VALUE);
         return;
@@ -177,7 +180,7 @@ export function MarkReviewPanel({
                 <img
                   src={current.cropUrl}
                   alt={`Recorte de la marca de la pregunta ${current.printedNumber}`}
-                  className="max-h-64 w-auto rounded bg-white"
+                  className="max-h-64 w-auto rounded bg-card"
                 />
               ) : (
                 <div className="flex flex-col items-center gap-2 text-muted-foreground">

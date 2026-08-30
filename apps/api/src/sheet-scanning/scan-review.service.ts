@@ -230,6 +230,7 @@ export class ScanReviewService {
           cropFileId: sheetScanMarks.cropFileId,
           batchId: sheetScans.batchId,
           batchStatus: sheetScanBatches.status,
+          scanState: sheetScans.state,
           spec: sheetLayouts.spec,
           sheetFirstName: students.firstName,
           sheetLastName: students.lastName,
@@ -248,6 +249,11 @@ export class ScanReviewService {
         .limit(1);
       if (!row) throw new NotFoundException('Marca no encontrada');
       this.assertBatchInReview(row.batchStatus);
+      if (row.scanState === 'superseded') {
+        throw new ConflictException(
+          'Esta marca pertenece a un escaneo reemplazado o descartado: revisa la versión vigente de la hoja.',
+        );
+      }
 
       const options = this.buildOptionsIndex(row.spec).get(row.fieldId) ?? [];
       if (dto.reviewedValue !== null && !options.includes(dto.reviewedValue)) {
@@ -577,18 +583,46 @@ export class ScanReviewService {
     confirmedScans.sort((a, b) => a.sequence - b.sequence);
     const parserResult = toParserResult(confirmedScans);
 
-    const outcome = await this.answerSheetConfirmer.confirmParserResult(user, {
-      orgId,
-      instrumentId: prepared.batch.instrumentId,
-      classGroupId: prepared.batch.classGroupId,
-      assessmentId: prepared.batch.assessmentId,
-      parserResult,
-    });
+    const claimed = await withOrgContext(this.db, orgId, (tx) =>
+      tx
+        .update(sheetScanBatches)
+        .set({ status: 'confirmed', updatedAt: new Date() })
+        .where(
+          and(
+            eq(sheetScanBatches.orgId, orgId),
+            eq(sheetScanBatches.id, batchId),
+            eq(sheetScanBatches.status, 'needs_review'),
+          ),
+        )
+        .returning({ id: sheetScanBatches.id }),
+    );
+    if (claimed.length === 0) {
+      throw new ConflictException('El lote ya fue confirmado por otra persona.');
+    }
+
+    let outcome: AnswerSheetConfirmOutcome;
+    try {
+      outcome = await this.answerSheetConfirmer.confirmParserResult(user, {
+        orgId,
+        instrumentId: prepared.batch.instrumentId,
+        classGroupId: prepared.batch.classGroupId,
+        assessmentId: prepared.batch.assessmentId,
+        parserResult,
+      });
+    } catch (error) {
+      await withOrgContext(this.db, orgId, (tx) =>
+        tx
+          .update(sheetScanBatches)
+          .set({ status: 'needs_review', updatedAt: new Date() })
+          .where(and(eq(sheetScanBatches.orgId, orgId), eq(sheetScanBatches.id, batchId))),
+      );
+      throw error;
+    }
 
     await withOrgContext(this.db, orgId, async (tx) => {
       await tx
         .update(sheetScanBatches)
-        .set({ status: 'confirmed', importJobId: outcome.jobId, updatedAt: new Date() })
+        .set({ importJobId: outcome.jobId, updatedAt: new Date() })
         .where(and(eq(sheetScanBatches.orgId, orgId), eq(sheetScanBatches.id, batchId)));
     });
 

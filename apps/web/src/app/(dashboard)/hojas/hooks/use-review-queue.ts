@@ -46,6 +46,7 @@ export function useResolveMark(batchId: string) {
     onMutate: async ({ markId, reviewedValue }) => {
       await queryClient.cancelQueries({ queryKey: queueKey });
       const previous = queryClient.getQueryData<ReviewQueueModel>(queueKey);
+      const previousMark = previous?.ambiguousMarks.find((mark) => mark.markId === markId);
       queryClient.setQueryData<ReviewQueueModel>(queueKey, (old) =>
         old
           ? {
@@ -58,10 +59,21 @@ export function useResolveMark(batchId: string) {
             }
           : old,
       );
-      return { previous };
+      return { previousMark };
     },
-    onError: (_error, _variables, context) => {
-      if (context?.previous) queryClient.setQueryData(queueKey, context.previous);
+    onError: (_error, variables, context) => {
+      if (!context?.previousMark) return;
+      const rollback = context.previousMark;
+      queryClient.setQueryData<ReviewQueueModel>(queueKey, (old) =>
+        old
+          ? {
+              ...old,
+              ambiguousMarks: old.ambiguousMarks.map((mark) =>
+                mark.markId === variables.markId ? rollback : mark,
+              ),
+            }
+          : old,
+      );
     },
     onSuccess: (updated) => {
       queryClient.setQueryData<ReviewQueueModel>(queueKey, (old) =>
