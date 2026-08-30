@@ -306,10 +306,9 @@ def rut_marks(rut: str) -> dict[int, str]:
     return {group: value for group, value in enumerate(rut)}
 
 
-def bubble_center_px(
+def spec_point_px(
     spec: dict[str, Any],
-    field_id: str,
-    value: str,
+    point: dict[str, float],
     page_width: int = DEFAULT_PAGE_WIDTH,
 ) -> tuple[int, int]:
     paper_w_mm, paper_h_mm = PAPER_SIZES_MM[spec["paper"]]
@@ -317,12 +316,18 @@ def bubble_center_px(
     inset = (spec["fiducials"]["marginRatio"] + spec["fiducials"]["sizeRatio"] / 2) * page_width
     rect_w = page_width - 2 * inset
     rect_h = page_height - 2 * inset
+    return round(inset + point["x"] * rect_w), round(inset + point["y"] * rect_h)
+
+
+def bubble_center_px(
+    spec: dict[str, Any],
+    field_id: str,
+    value: str,
+    page_width: int = DEFAULT_PAGE_WIDTH,
+) -> tuple[int, int]:
     field = next(f for f in spec["fields"] if f["fieldId"] == field_id)
     bubble = next(b for b in field["bubbles"] if b["value"] == value)
-    return (
-        round(inset + bubble["center"]["x"] * rect_w),
-        round(inset + bubble["center"]["y"] * rect_h),
-    )
+    return spec_point_px(spec, bubble["center"], page_width)
 
 
 def bubble_radius_px(spec: dict[str, Any], page_width: int = DEFAULT_PAGE_WIDTH) -> int:
