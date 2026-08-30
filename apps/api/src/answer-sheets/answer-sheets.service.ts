@@ -477,6 +477,7 @@ export class AnswerSheetsService {
       }));
 
       // Batch insert con upsert (assessmentId, studentId, itemId).
+      const keepsExistingScore = sql`excluded.final_score IS NULL AND ${responses.finalScore} IS NOT NULL`;
       await tx
         .insert(responses)
         .values(responsesWithAssessment)
@@ -487,9 +488,9 @@ export class AnswerSheetsService {
             isCorrect: sql`excluded.is_correct`,
             rawScore: sql`excluded.raw_score`,
             maxScore: sql`excluded.max_score`,
-            finalScore: sql`excluded.final_score`,
-            scoredBy: sql`excluded.scored_by`,
-            scoredAt: sql`excluded.scored_at`,
+            finalScore: sql`CASE WHEN ${keepsExistingScore} THEN ${responses.finalScore} ELSE excluded.final_score END`,
+            scoredBy: sql`CASE WHEN ${keepsExistingScore} THEN ${responses.scoredBy} ELSE excluded.scored_by END`,
+            scoredAt: sql`CASE WHEN ${keepsExistingScore} THEN ${responses.scoredAt} ELSE excluded.scored_at END`,
             updatedAt: now,
           },
         });
