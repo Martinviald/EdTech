@@ -19,15 +19,15 @@ export const ANSWER_SHEET_TEMPLATES: readonly AnswerSheetTemplate[] = [
   },
   {
     format: 'gradecam_csv',
-    label: 'Gradecam CSV',
+    label: 'Gradecam (Excel/CSV)',
     description:
-      'Exportación estándar de Gradecam. Configura Gradecam para usar el RUT del alumno en el campo Student ID antes de imprimir las hojas.',
-    fileExtension: 'csv',
+      'Exportación "Student By Question" de Gradecam (Excel o CSV), tal cual sale del portal. El header es "Name, ID, GradeCam ID, 1, 2, …": ID debe ser el RUT del alumno, Name es "Apellido, Nombre" y cada columna numerada es una pregunta. La fila final de pauta y las filas de título se ignoran automáticamente.',
+    fileExtension: 'xlsx',
     sampleCsvUrl: null,
-    requiredColumns: ['Student ID'],
-    optionalColumns: ['First Name', 'Last Name', 'Q1', 'Q2', 'Q3', '...'],
+    requiredColumns: ['ID'],
+    optionalColumns: ['Name', 'GradeCam ID', '1', '2', '3', '... (una columna por pregunta)'],
     exampleCsv:
-      'Student ID,First Name,Last Name,Q1,Q2,Q3,Q4,Q5\n12345678-5,Juan,Pérez Soto,A,B,C,D,A\n9876543-3,María,González,B,B,A,D,C\n',
+      'Name,ID,GradeCam ID,1,2,3,4,5\n"Pérez Soto, Juan",12345678-5,,A,B,C,D,A\n"González, María",9876543-3,,B,B,A,D,C\n',
   },
   {
     format: 'zipgrade_csv',

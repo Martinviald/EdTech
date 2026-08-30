@@ -8,7 +8,7 @@ import { useDropzone, type FileRejection } from 'react-dropzone';
 import { toast } from 'sonner';
 import { ANSWER_SHEET_FORMATS, type AnswerSheetFormat } from '@soe/types';
 import type { AnswerSheetColumnMapping, InstrumentModel } from '@soe/types';
-import { parseCsvHeaders } from '@/lib/csv-parser';
+import { parseSpreadsheetHeaders } from '@/lib/spreadsheet-parser';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -27,10 +27,10 @@ import { uploadAnswerSheetAction } from '../actions';
 const MAX_BYTES = 10 * 1024 * 1024;
 
 const FORMAT_LABELS: Record<AnswerSheetFormat, string> = {
-  gradecam_csv: 'Gradecam (CSV)',
-  zipgrade_csv: 'ZipGrade (CSV)',
+  gradecam_csv: 'Gradecam (Excel/CSV)',
+  zipgrade_csv: 'ZipGrade (Excel/CSV)',
   dia_official: 'DIA oficial (Agencia de Calidad)',
-  generic_csv: 'CSV genérico',
+  generic_csv: 'CSV/Excel genérico',
 };
 
 // Valor centinela para la opción "ninguna columna" en los selects opcionales:
@@ -96,7 +96,7 @@ export function UploadForm({ defaultFormat, instruments }: UploadFormProps) {
     }
     let cancelled = false;
     setParsingHeaders(true);
-    parseCsvHeaders(file)
+    parseSpreadsheetHeaders(file)
       .then((columns) => {
         if (cancelled) return;
         setDetectedColumns(columns);
@@ -109,7 +109,7 @@ export function UploadForm({ defaultFormat, instruments }: UploadFormProps) {
       .catch(() => {
         if (cancelled) return;
         setDetectedColumns([]);
-        toast.error('No se pudo leer el encabezado del CSV.');
+        toast.error('No se pudo leer el encabezado del archivo.');
       })
       .finally(() => {
         if (!cancelled) setParsingHeaders(false);
@@ -129,7 +129,8 @@ export function UploadForm({ defaultFormat, instruments }: UploadFormProps) {
     if (rejections.length > 0) {
       const r = rejections[0];
       const msg =
-        r?.errors[0]?.message ?? 'Archivo rechazado. Verifica que sea un CSV válido menor a 10 MB.';
+        r?.errors[0]?.message ??
+        'Archivo rechazado. Verifica que sea un CSV o Excel válido menor a 10 MB.';
       toast.error(msg);
       return;
     }
@@ -146,6 +147,7 @@ export function UploadForm({ defaultFormat, instruments }: UploadFormProps) {
       'text/csv': ['.csv'],
       'text/plain': ['.csv'],
       'application/vnd.ms-excel': ['.csv'],
+      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet': ['.xlsx'],
     },
     maxFiles: 1,
     maxSize: MAX_BYTES,
@@ -250,7 +252,7 @@ export function UploadForm({ defaultFormat, instruments }: UploadFormProps) {
                     ? 'Suelta el archivo aquí'
                     : 'Arrastra tu archivo o haz clic para seleccionar'}
                 </p>
-                <p className="text-muted-foreground text-xs">CSV con encabezado · máximo 10 MB</p>
+                <p className="text-muted-foreground text-xs">CSV o Excel (.xlsx) con encabezado · máximo 10 MB</p>
               </div>
             </div>
           )}
