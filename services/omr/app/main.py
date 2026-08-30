@@ -23,13 +23,19 @@ quality, identity }. Subset de read: rectificacion + QualityGate + QR/grilla
 RUT, SIN clasificar marcas; presupuesto <1s por imagen. Una imagen que no
 decodifica es un request invalido (422): aca no hay descarga, el payload ES
 la imagen.
+
+Auth minima (V3): si la env var OMR_SERVICE_TOKEN esta seteada, /v1/read y
+/v1/assess exigen el header X-OMR-Token con ese valor (401 si falta o no
+coincide). Sin la env var (dev local) el servicio sigue abierto.
 """
 
 from __future__ import annotations
 
+import hmac
+import os
 from typing import Any
 
-from fastapi import FastAPI, Query
+from fastapi import FastAPI, Header, Query
 from fastapi.responses import JSONResponse
 
 from .contracts import validate
@@ -39,13 +45,30 @@ from .sources import SourceDecodeError, SourceDownloadError, decode_base64_image
 app = FastAPI(title="omr-service", version="0.3.0")
 
 
+def _reject_bad_service_token(provided: str | None) -> JSONResponse | None:
+    expected = os.environ.get("OMR_SERVICE_TOKEN", "")
+    if not expected:
+        return None
+    if provided is None or not hmac.compare_digest(provided, expected):
+        return JSONResponse(
+            status_code=401, content={"errors": ["Header X-OMR-Token ausente o invalido"]}
+        )
+    return None
+
+
 @app.get("/health")
 def health() -> dict[str, str]:
     return {"status": "ok", "service": "omr", "version": "0.3.0"}
 
 
 @app.post("/v1/assess")
-def assess_capture(payload: dict[str, Any]) -> Any:
+def assess_capture(
+    payload: dict[str, Any], x_omr_token: str | None = Header(default=None)
+) -> Any:
+    rejected = _reject_bad_service_token(x_omr_token)
+    if rejected is not None:
+        return rejected
+
     errors = validate("assess-request", payload)
     if errors:
         return JSONResponse(status_code=422, content={"errors": errors})
@@ -65,7 +88,15 @@ def assess_capture(payload: dict[str, Any]) -> Any:
 
 
 @app.post("/v1/read")
-def read(payload: dict[str, Any], debug: int = Query(default=0)) -> Any:
+def read(
+    payload: dict[str, Any],
+    debug: int = Query(default=0),
+    x_omr_token: str | None = Header(default=None),
+) -> Any:
+    rejected = _reject_bad_service_token(x_omr_token)
+    if rejected is not None:
+        return rejected
+
     errors = validate("read-request", payload)
     if errors:
         return JSONResponse(status_code=422, content={"errors": errors})

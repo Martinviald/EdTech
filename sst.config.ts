@@ -42,6 +42,7 @@ export default $config({
     // ── Secretos (set con: npx sst secret set <Nombre> <valor> --stage <stage>) ──
     const authSecret = new sst.Secret("AuthSecret"); // == NEXTAUTH_SECRET, idéntico en web y api
     const internalApiSecret = new sst.Secret("InternalApiSecret");
+    const omrServiceToken = new sst.Secret("OmrServiceToken"); // header X-OMR-Token backend→servicio OMR
     const soeAppPassword = new sst.Secret("SoeAppPassword"); // rol RLS soe_app (runtime API)
     const dbMasterPassword = new sst.Secret("DbMasterPassword"); // master RDS (admin: migrate/seed)
     const llmProvider = new sst.Secret("LlmProvider", "gemini");
@@ -168,9 +169,11 @@ export default $config({
     // ── Servicio de visión OMR: App Runner desde la imagen :latest en ECR ──
     // Stateless y sin BDD ni credenciales: recibe LayoutSpec + imagen, devuelve
     // marcas (E22). No necesita VPC (cero egress útil) ni rol de instancia.
-    // ⚠️ La URL de App Runner es pública y el servicio no autentica: sólo el
-    // backend debe conocerla (OMR_SERVICE_URL); no se expone al frontend. Si el
-    // stage exige aislamiento real, moverlo detrás de un VpcIngressConnection.
+    // ⚠️ La URL de App Runner es pública: la protege el token compartido
+    // OMR_SERVICE_TOKEN (header X-OMR-Token, exigido por el servicio cuando la
+    // env var está seteada). Sólo el backend conoce URL y token; no se exponen
+    // al frontend. Si el stage exige aislamiento real, moverlo detrás de un
+    // VpcIngressConnection.
     const omr = new aws.apprunner.Service("Omr", {
       serviceName: `edtech-omr-${$app.stage}`,
       sourceConfiguration: {
@@ -179,7 +182,12 @@ export default $config({
         imageRepository: {
           imageRepositoryType: "ECR",
           imageIdentifier: $interpolate`${omrRepo.repositoryUrl}:latest`,
-          imageConfiguration: { port: "8090" },
+          imageConfiguration: {
+            port: "8090",
+            runtimeEnvironmentVariables: {
+              OMR_SERVICE_TOKEN: omrServiceToken.value,
+            },
+          },
         },
       },
       instanceConfiguration: {
@@ -222,6 +230,7 @@ export default $config({
               AWS_S3_BUCKET: uploads.name,
               // E22: el backend habla con el servicio de visión OMR por HTTP.
               OMR_SERVICE_URL: omrUrl,
+              OMR_SERVICE_TOKEN: omrServiceToken.value,
               // web->api es server-side (Lambda OpenNext -> App Runner), CORS no aplica.
               CORS_ORIGIN: "*",
               // MCP analítico: apagado por default; se enciende seteando los secrets.

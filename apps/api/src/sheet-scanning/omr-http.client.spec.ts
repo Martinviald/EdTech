@@ -38,11 +38,11 @@ function jsonResponse(status: number, body: unknown): OmrFetchResponse {
 
 function makeFetch(responses: (OmrFetchResponse | Error)[]): {
   fetchFn: OmrFetchFn;
-  calls: { url: string; body: string }[];
+  calls: { url: string; body: string; headers: Record<string, string> }[];
 } {
-  const calls: { url: string; body: string }[] = [];
+  const calls: { url: string; body: string; headers: Record<string, string> }[] = [];
   const fetchFn: OmrFetchFn = (url, init) => {
-    calls.push({ url, body: init.body });
+    calls.push({ url, body: init.body, headers: init.headers });
     const next = responses.shift();
     if (!next) return Promise.reject(new Error('sin respuestas encoladas'));
     if (next instanceof Error) return Promise.reject(next);
@@ -199,5 +199,52 @@ describe('HttpOmrClient.assess (CD-11)', () => {
 
     await expect(client.assess(ASSESS_REQUEST)).rejects.toBeInstanceOf(OmrServiceUnavailableError);
     expect(calls).toHaveLength(2);
+  });
+});
+
+describe('HttpOmrClient — token de servicio (M5)', () => {
+  it('manda x-omr-token cuando el cliente tiene serviceToken', async () => {
+    const { fetchFn, calls } = makeFetch([jsonResponse(200, VALID_RESULT)]);
+    const client = new HttpOmrClient({
+      serviceUrl: 'http://omr.test:8090',
+      timeoutMs: 5000,
+      fetchFn,
+      serviceToken: 'secreto-compartido',
+    });
+
+    await client.read(REQUEST);
+
+    expect(calls[0].headers['x-omr-token']).toBe('secreto-compartido');
+  });
+
+  it('no manda el header cuando no hay token configurado', async () => {
+    const previous = process.env.OMR_SERVICE_TOKEN;
+    delete process.env.OMR_SERVICE_TOKEN;
+    try {
+      const { fetchFn, calls } = makeFetch([jsonResponse(200, VALID_RESULT)]);
+      const client = makeClient(fetchFn);
+
+      await client.read(REQUEST);
+
+      expect(calls[0].headers).not.toHaveProperty('x-omr-token');
+    } finally {
+      if (previous !== undefined) process.env.OMR_SERVICE_TOKEN = previous;
+    }
+  });
+
+  it('toma el token de OMR_SERVICE_TOKEN cuando no viene por opciones', async () => {
+    const previous = process.env.OMR_SERVICE_TOKEN;
+    process.env.OMR_SERVICE_TOKEN = 'token-de-env';
+    try {
+      const { fetchFn, calls } = makeFetch([jsonResponse(200, VALID_RESULT)]);
+      const client = makeClient(fetchFn);
+
+      await client.read(REQUEST);
+
+      expect(calls[0].headers['x-omr-token']).toBe('token-de-env');
+    } finally {
+      if (previous === undefined) delete process.env.OMR_SERVICE_TOKEN;
+      else process.env.OMR_SERVICE_TOKEN = previous;
+    }
   });
 });

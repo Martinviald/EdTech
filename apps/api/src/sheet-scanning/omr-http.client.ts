@@ -48,6 +48,7 @@ export interface HttpOmrClientOptions {
   serviceUrl?: string;
   timeoutMs?: number;
   fetchFn?: OmrFetchFn;
+  serviceToken?: string | null;
 }
 
 const DEFAULT_SERVICE_URL = 'http://127.0.0.1:8090';
@@ -59,11 +60,13 @@ export class HttpOmrClient implements OmrClient {
   private readonly serviceUrl: string;
   private readonly timeoutMs: number;
   private readonly fetchFn: OmrFetchFn;
+  private readonly serviceToken: string | null;
 
   constructor(options: HttpOmrClientOptions = {}) {
     this.serviceUrl = options.serviceUrl ?? process.env.OMR_SERVICE_URL ?? DEFAULT_SERVICE_URL;
     this.timeoutMs = options.timeoutMs ?? resolveTimeoutMsFromEnv();
     this.fetchFn = options.fetchFn ?? (fetch as unknown as OmrFetchFn);
+    this.serviceToken = options.serviceToken ?? process.env.OMR_SERVICE_TOKEN ?? null;
   }
 
   read(request: OmrReadRequest): Promise<ScanResult> {
@@ -104,7 +107,10 @@ export class HttpOmrClient implements OmrClient {
       try {
         response = await this.fetchFn(`${this.serviceUrl}${path}`, {
           method: 'POST',
-          headers: { 'content-type': 'application/json' },
+          headers: {
+            'content-type': 'application/json',
+            ...(this.serviceToken === null ? {} : { 'x-omr-token': this.serviceToken }),
+          },
           body: JSON.stringify(request),
           signal: controller.signal,
         });
