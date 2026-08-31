@@ -537,14 +537,14 @@ describe('SheetPrintService — hoja genérica y formas (v1)', () => {
   it('layout rut_bubbles: la tirada crea N copias genéricas SIN alumno, cada una con su hoja propia (D13)', async () => {
     const { db, inserts } = makeDb(
       [[{ ...LAYOUT_ROW, spec: rutSpec }], [CLASS_GROUP_ROW], ROSTER_ROWS],
-      [RUN_RETURNING],
+      [...AUTO_ASSESSMENT_RETURNING, RUN_RETURNING],
     );
     const service = new SheetPrintService(db);
 
     const run = await service.createRun(ORG_ID, USER_ID, CREATE_DTO);
 
     expect(run.sheetCount).toBe(5);
-    const sheetValues = inserts[1] as Array<{ studentId: string | null; sequence: number }>;
+    const sheetValues = inserts[3] as Array<{ studentId: string | null; sequence: number }>;
     expect(sheetValues).toHaveLength(5);
     expect(sheetValues.every((s) => s.studentId === null)).toBe(true);
     expect(sheetValues.map((s) => s.sequence)).toEqual([1, 2, 3, 4, 5]);
