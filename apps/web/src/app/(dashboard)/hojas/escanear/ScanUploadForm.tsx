@@ -323,7 +323,6 @@ export function ScanUploadForm({
     if (value !== 'phone') setUploadMode('files');
   }
 
-  const selectedRun = printRuns.find((run) => run.id === printRunId) ?? null;
   const cameraCaptures = files.filter((entry) => entry.origin === 'camera');
   const capturedIdentities = cameraCaptures
     .map((entry) => entry.identity)

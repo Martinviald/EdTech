@@ -155,7 +155,7 @@ export async function apiGetBinary(path: string): Promise<BinaryResponse> {
   const token = await getBearerToken();
   let res: Response;
   try {
-    res = await fetch(`${API_URL}${path}`, {
+    res = await fetch(`${apiUrl()}${path}`, {
       method: 'GET',
       headers: { Authorization: `Bearer ${token}` },
     });
