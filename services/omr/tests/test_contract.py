@@ -57,6 +57,14 @@ def test_layout_spec_example_validates() -> None:
     assert validate("layout-spec", load_example("read-request")["layoutSpec"]) == []
 
 
+def test_layout_digit_grid_rut_example_validates() -> None:
+    assert validate("layout-spec", load_example("layout-digit-grid-rut")) == []
+
+
+def test_layout_crop_region_example_validates() -> None:
+    assert validate("layout-spec", load_example("layout-crop-region")) == []
+
+
 def test_health() -> None:
     response = client.get("/health")
     assert response.status_code == 200

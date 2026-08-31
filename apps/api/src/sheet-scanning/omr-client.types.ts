@@ -1,9 +1,10 @@
-import type { OmrReadRequest, ScanResult } from '@soe/types';
+import type { OmrAssessRequest, OmrAssessResult, OmrReadRequest, ScanResult } from '@soe/types';
 
 export const OMR_CLIENT = 'OMR_CLIENT';
 
 export interface OmrClient {
   read(request: OmrReadRequest): Promise<ScanResult>;
+  assess(request: OmrAssessRequest): Promise<OmrAssessResult>;
 }
 
 export class OmrServiceUnavailableError extends Error {

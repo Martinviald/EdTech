@@ -5,6 +5,10 @@ import type { JwtPayload } from '../auth/jwt-payload.types';
 import type { AnswerSheetsService } from '../answer-sheets/answer-sheets.service';
 import type { AnswerSheetPreviewStore } from '../answer-sheets/lib/preview-store';
 import type { FilesService } from '../files/files.service';
+import type {
+  DevelopmentGradingService,
+  ScheduleConfirmedBatchParams,
+} from './development-grading.service';
 import {
   ScanReviewService,
   createAnswerSheetConfirmer,
@@ -95,8 +99,14 @@ const filesServiceFake = {
 function makeService(selectResults: unknown[][]) {
   const { db, updates } = makeDb(selectResults);
   const { confirmer, calls: confirmCalls } = makeConfirmer();
-  const service = new ScanReviewService(db, confirmer, filesServiceFake);
-  return { service, updates, confirmCalls };
+  const gradingCalls: ScheduleConfirmedBatchParams[] = [];
+  const developmentGradingFake = {
+    scheduleConfirmedBatch: (params: ScheduleConfirmedBatchParams) => {
+      gradingCalls.push(params);
+    },
+  } as unknown as DevelopmentGradingService;
+  const service = new ScanReviewService(db, confirmer, filesServiceFake, developmentGradingFake);
+  return { service, updates, confirmCalls, gradingCalls };
 }
 
 function bubbleField(fieldId: string, printedNumber: string, pageIndex: number, values: string[]) {
@@ -680,6 +690,209 @@ describe('ScanReviewService.confirmBatch', () => {
     await expect(service.confirmBatch(ORG_ID, USER, BATCH_ID)).rejects.toBeInstanceOf(
       ConflictException,
     );
+  });
+
+  it('B4: confirma un lote rut_bubbles agrupado por printedSheet — 2 alumnos resueltos por RUT entran, la hoja sin resolver queda fuera', async () => {
+    const rutSpec: LayoutSpec = {
+      ...SPEC,
+      pageCount: 1,
+      identity: {
+        mode: 'rut_bubbles',
+        region: { topLeft: { x: 0.05, y: 0.03 }, bottomRight: { x: 0.52, y: 0.3 } },
+        bubbles: [
+          { value: '1', center: { x: 0.1, y: 0.05 }, radius: 0.008, group: 0 },
+          { value: '5', center: { x: 0.15, y: 0.05 }, radius: 0.008, group: 1 },
+        ],
+      },
+      fields: [bubbleField('f1', '1', 0, ['A', 'B', 'C', 'D'])],
+    };
+    const rutScans = [
+      {
+        scanId: 'scan-g1',
+        printedSheetId: 'sheet-g1',
+        pageIndex: 0,
+        state: 'read',
+        resolvedStudentId: STUDENT_1,
+        sheetStudentId: null,
+        sheetSequence: 1,
+      },
+      {
+        scanId: 'scan-g2',
+        printedSheetId: 'sheet-g2',
+        pageIndex: 0,
+        state: 'read',
+        resolvedStudentId: STUDENT_2,
+        sheetStudentId: null,
+        sheetSequence: 2,
+      },
+      {
+        scanId: 'scan-g3',
+        printedSheetId: 'sheet-g3',
+        pageIndex: 0,
+        state: 'identity_unresolved',
+        resolvedStudentId: null,
+        sheetStudentId: null,
+        sheetSequence: 3,
+      },
+    ];
+    const rutMarks = [
+      {
+        markId: 'mg1',
+        scanId: 'scan-g1',
+        printedNumber: '1',
+        state: 'marked',
+        value: 'A',
+        reviewedValue: null,
+        reviewedAt: null,
+      },
+      {
+        markId: 'mg2',
+        scanId: 'scan-g2',
+        printedNumber: '1',
+        state: 'marked',
+        value: 'C',
+        reviewedValue: null,
+        reviewedAt: null,
+      },
+      {
+        markId: 'mg3',
+        scanId: 'scan-g3',
+        printedNumber: '1',
+        state: 'marked',
+        value: 'D',
+        reviewedValue: null,
+        reviewedAt: null,
+      },
+    ];
+    const { service, confirmCalls } = makeService([
+      [{ ...CONFIRM_BATCH_ROW, spec: rutSpec }],
+      rutScans,
+      rutMarks,
+      CONFIRM_STUDENTS,
+    ]);
+
+    const result = await service.confirmBatch(ORG_ID, USER, BATCH_ID);
+
+    const rows = confirmCalls[0].input.parserResult.rows;
+    expect(rows).toHaveLength(2);
+    expect(rows.map((r) => r.studentRut)).toEqual(['12345678-5', '87654321-4']);
+    expect(rows[0].answers).toEqual({ '1': 'A' });
+    expect(rows[1].answers).toEqual({ '1': 'C' });
+    expect(result.summary.sheetsPersisted).toBe(2);
+    expect(result.summary.assumedPending).toBe(0);
+  });
+
+  it('B4: un lote rut_bubbles sin ningún alumno resuelto rechaza con 400 reportando las hojas sin identidad', async () => {
+    const rutScans = [
+      {
+        scanId: 'scan-g1',
+        printedSheetId: 'sheet-g1',
+        pageIndex: 0,
+        state: 'identity_unresolved',
+        resolvedStudentId: null,
+        sheetStudentId: null,
+        sheetSequence: 1,
+      },
+    ];
+    const { service, confirmCalls } = makeService([
+      [{ ...CONFIRM_BATCH_ROW, spec: { ...SPEC, pageCount: 1 } }],
+      rutScans,
+      [],
+      [],
+    ]);
+
+    await expect(service.confirmBatch(ORG_ID, USER, BATCH_ID)).rejects.toThrow(/sin identidad: 1/);
+    expect(confirmCalls).toHaveLength(0);
+  });
+
+  it('excluye las marcas crop_region del ParserResult (CD-9: el recorte no es una alternativa)', async () => {
+    const specWithCrop: LayoutSpec = {
+      ...SPEC,
+      fields: [
+        ...SPEC.fields,
+        {
+          fieldId: 'f_dev',
+          kind: 'crop_region',
+          printedNumber: '4',
+          pageIndex: 1,
+          selectMode: 'single',
+          bubbles: [],
+          region: { topLeft: { x: 0.1, y: 0.5 }, bottomRight: { x: 0.9, y: 0.8 } },
+        },
+      ],
+    };
+    const cropMark = {
+      markId: 'm-crop',
+      scanId: 'scan-1b',
+      printedNumber: '4',
+      state: 'marked',
+      value: null,
+      reviewedValue: null,
+      reviewedAt: null,
+    };
+    const { service, confirmCalls } = makeService([
+      [{ ...CONFIRM_BATCH_ROW, spec: specWithCrop }],
+      CONFIRM_SCANS,
+      [...CONFIRM_MARKS, cropMark],
+      CONFIRM_STUDENTS,
+    ]);
+
+    const result = await service.confirmBatch(ORG_ID, USER, BATCH_ID);
+
+    const rows = confirmCalls[0].input.parserResult.rows;
+    expect(rows[0].answers).toEqual({ '1': 'A', '2': null, '3': 'F' });
+    expect(rows[0].answers).not.toHaveProperty('4');
+    expect(result.summary.assumedPending).toBe(1);
+  });
+
+  it('agenda la corrección de desarrollo con los datos del lote tras confirmar', async () => {
+    const { service, gradingCalls } = makeService([
+      [CONFIRM_BATCH_ROW],
+      CONFIRM_SCANS,
+      CONFIRM_MARKS,
+      CONFIRM_STUDENTS,
+    ]);
+
+    await service.confirmBatch(ORG_ID, USER, BATCH_ID);
+
+    expect(gradingCalls).toEqual([
+      {
+        orgId: ORG_ID,
+        batchId: BATCH_ID,
+        assessmentId: ASSESSMENT_ID,
+        instrumentId: INSTRUMENT_ID,
+        spec: SPEC,
+      },
+    ]);
+  });
+
+  it('no agenda corrección de desarrollo si el confirm de answer-sheets falla', async () => {
+    const { db } = makeDb([
+      [CONFIRM_BATCH_ROW],
+      CONFIRM_SCANS,
+      CONFIRM_MARKS,
+      CONFIRM_STUDENTS,
+    ]);
+    const gradingCalls: ScheduleConfirmedBatchParams[] = [];
+    const failingConfirmer: AnswerSheetConfirmer = {
+      confirmParserResult: async () => {
+        throw new Error('falló la ingesta');
+      },
+    };
+    const developmentGradingFake = {
+      scheduleConfirmedBatch: (params: ScheduleConfirmedBatchParams) => {
+        gradingCalls.push(params);
+      },
+    } as unknown as DevelopmentGradingService;
+    const service = new ScanReviewService(
+      db,
+      failingConfirmer,
+      filesServiceFake,
+      developmentGradingFake,
+    );
+
+    await expect(service.confirmBatch(ORG_ID, USER, BATCH_ID)).rejects.toThrow('falló la ingesta');
+    expect(gradingCalls).toHaveLength(0);
   });
 
   it('rechaza con 400 cuando no queda ninguna hoja completa e identificada', async () => {

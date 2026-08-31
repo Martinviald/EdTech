@@ -7,6 +7,7 @@ import {
 import { and, asc, desc, eq, isNull, sql, type SQL } from 'drizzle-orm';
 import {
   assessmentCourseAssignments,
+  assessmentForms,
   assessments,
   classGroups,
   printedSheets,
@@ -18,6 +19,7 @@ import {
   withOrgContext,
 } from '@soe/db';
 import type {
+  AssessmentFormListResponse,
   CreatePrintRunDto,
   PaginatedResponse,
   PrintRunAssessmentOption,
@@ -26,6 +28,7 @@ import type {
   UpdatePrintRunDto,
 } from '@soe/types';
 import { InjectDb, type Database } from '../database/database.types';
+import { identityModeOf } from './sheet-layout.helpers';
 import { renderSheetsPdf, type PrintableSheetInfo } from './sheet-print.helpers';
 
 type RunRow = {
@@ -36,6 +39,7 @@ type RunRow = {
   classGroupId: string | null;
   classGroupName: string | null;
   assessmentId: string | null;
+  assessmentFormId: string | null;
   spareCount: number;
   sheetCount: number;
   pdfFileId: string | null;
@@ -54,11 +58,22 @@ export class SheetPrintService {
           id: sheetLayouts.id,
           version: sheetLayouts.version,
           instrumentId: sheetLayouts.instrumentId,
+          spec: sheetLayouts.spec,
         })
         .from(sheetLayouts)
         .where(and(eq(sheetLayouts.orgId, orgId), eq(sheetLayouts.id, dto.layoutId)))
         .limit(1);
       if (!layout) throw new NotFoundException('Layout de hoja no encontrado');
+
+      const form = dto.assessmentFormId
+        ? await this.requireRunForm(
+            tx,
+            orgId,
+            dto.assessmentFormId,
+            layout.instrumentId,
+            dto.assessmentId ?? null,
+          )
+        : null;
 
       const [classGroup] = await tx
         .select({ id: classGroups.id, name: classGroups.name })
@@ -87,9 +102,11 @@ export class SheetPrintService {
 
       const assessmentId = dto.assessmentId
         ? await this.assertAssessmentUsable(tx, orgId, dto.assessmentId, layout.instrumentId)
-        : await this.createAssessmentForRun(tx, orgId, userId, layout.instrumentId, classGroup);
+        : (form?.assessmentId ??
+          (await this.createAssessmentForRun(tx, orgId, userId, layout.instrumentId, classGroup)));
 
       const sheetCount = roster.length + dto.spareCount;
+      const genericSheets = identityModeOf(layout.spec) === 'rut_bubbles';
 
       const [run] = await tx
         .insert(sheetPrintRuns)
@@ -98,6 +115,7 @@ export class SheetPrintService {
           layoutId: layout.id,
           classGroupId: classGroup.id,
           assessmentId,
+          assessmentFormId: form?.id ?? null,
           spareCount: dto.spareCount,
           sheetCount,
           createdById: userId,
@@ -105,6 +123,7 @@ export class SheetPrintService {
         .returning({
           id: sheetPrintRuns.id,
           assessmentId: sheetPrintRuns.assessmentId,
+          assessmentFormId: sheetPrintRuns.assessmentFormId,
           spareCount: sheetPrintRuns.spareCount,
           sheetCount: sheetPrintRuns.sheetCount,
           pdfFileId: sheetPrintRuns.pdfFileId,
@@ -113,20 +132,27 @@ export class SheetPrintService {
         });
       if (!run) throw new Error('sheet_print_runs insert returned no row');
 
-      const sheetValues = [
-        ...roster.map((student, index) => ({
-          orgId,
-          printRunId: run.id,
-          studentId: student.id,
-          sequence: index + 1,
-        })),
-        ...Array.from({ length: dto.spareCount }, (_, index) => ({
-          orgId,
-          printRunId: run.id,
-          studentId: null,
-          sequence: roster.length + index + 1,
-        })),
-      ];
+      const sheetValues = genericSheets
+        ? Array.from({ length: sheetCount }, (_, index) => ({
+            orgId,
+            printRunId: run.id,
+            studentId: null,
+            sequence: index + 1,
+          }))
+        : [
+            ...roster.map((student, index) => ({
+              orgId,
+              printRunId: run.id,
+              studentId: student.id,
+              sequence: index + 1,
+            })),
+            ...Array.from({ length: dto.spareCount }, (_, index) => ({
+              orgId,
+              printRunId: run.id,
+              studentId: null,
+              sequence: roster.length + index + 1,
+            })),
+          ];
       await tx.insert(printedSheets).values(sheetValues);
 
       return {
@@ -137,12 +163,41 @@ export class SheetPrintService {
         classGroupId: classGroup.id,
         classGroupName: classGroup.name,
         assessmentId: run.assessmentId,
+        assessmentFormId: run.assessmentFormId,
         spareCount: run.spareCount,
         sheetCount: run.sheetCount,
         pdfFileId: run.pdfFileId,
         createdById: run.createdById,
         createdAt: run.createdAt,
       };
+    });
+  }
+
+  async listForms(orgId: string, layoutId: string): Promise<AssessmentFormListResponse> {
+    return withOrgContext(this.db, orgId, async (tx) => {
+      const [layout] = await tx
+        .select({ id: sheetLayouts.id, instrumentId: sheetLayouts.instrumentId })
+        .from(sheetLayouts)
+        .where(and(eq(sheetLayouts.orgId, orgId), eq(sheetLayouts.id, layoutId)))
+        .limit(1);
+      if (!layout) throw new NotFoundException('Layout de hoja no encontrado');
+
+      const rows = await tx
+        .select({
+          id: assessmentForms.id,
+          name: assessmentForms.name,
+          assessmentId: assessmentForms.assessmentId,
+          assessmentName: assessments.name,
+          createdAt: assessmentForms.createdAt,
+        })
+        .from(assessmentForms)
+        .innerJoin(assessments, eq(assessments.id, assessmentForms.assessmentId))
+        .where(
+          and(eq(assessments.orgId, orgId), eq(assessments.instrumentId, layout.instrumentId)),
+        )
+        .orderBy(asc(assessmentForms.name), asc(assessmentForms.createdAt));
+
+      return { data: rows };
     });
   }
 
@@ -370,6 +425,37 @@ export class SheetPrintService {
     return Buffer.from(bytes);
   }
 
+  private async requireRunForm(
+    tx: Database,
+    orgId: string,
+    assessmentFormId: string,
+    instrumentId: string,
+    requestedAssessmentId: string | null,
+  ): Promise<{ id: string; assessmentId: string }> {
+    const [form] = await tx
+      .select({
+        id: assessmentForms.id,
+        assessmentId: assessmentForms.assessmentId,
+        instrumentId: assessments.instrumentId,
+      })
+      .from(assessmentForms)
+      .innerJoin(assessments, eq(assessments.id, assessmentForms.assessmentId))
+      .where(and(eq(assessmentForms.id, assessmentFormId), eq(assessments.orgId, orgId)))
+      .limit(1);
+    if (!form) throw new NotFoundException('Forma de evaluación no encontrada');
+    if (form.instrumentId !== instrumentId) {
+      throw new BadRequestException(
+        'La forma seleccionada pertenece a una evaluación de otro instrumento: elige una forma cuya evaluación use el instrumento de este layout.',
+      );
+    }
+    if (requestedAssessmentId !== null && requestedAssessmentId !== form.assessmentId) {
+      throw new BadRequestException(
+        'La forma seleccionada no pertenece a la evaluación indicada para la tirada.',
+      );
+    }
+    return { id: form.id, assessmentId: form.assessmentId };
+  }
+
   private selectRuns(
     tx: Database,
     orgId: string,
@@ -385,6 +471,7 @@ export class SheetPrintService {
         classGroupId: sheetPrintRuns.classGroupId,
         classGroupName: classGroups.name,
         assessmentId: sheetPrintRuns.assessmentId,
+        assessmentFormId: sheetPrintRuns.assessmentFormId,
         spareCount: sheetPrintRuns.spareCount,
         sheetCount: sheetPrintRuns.sheetCount,
         pdfFileId: sheetPrintRuns.pdfFileId,
@@ -410,6 +497,7 @@ export class SheetPrintService {
       classGroupId: row.classGroupId,
       classGroupName: row.classGroupName,
       assessmentId: row.assessmentId,
+      assessmentFormId: row.assessmentFormId,
       spareCount: row.spareCount,
       sheetCount: row.sheetCount,
       pdfFileId: row.pdfFileId,

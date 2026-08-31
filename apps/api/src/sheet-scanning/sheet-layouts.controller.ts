@@ -15,6 +15,7 @@ import type { JwtPayload } from '../auth/jwt-payload.types';
 import { Roles } from '../common/decorators/roles.decorator';
 import { RolesGuard } from '../common/guards/roles.guard';
 import { getEffectiveOrgId } from '../common/helpers/org-context.helper';
+import { parseDtoOrBadRequest } from './parse-dto.helper';
 import { SheetLayoutService } from './sheet-layout.service';
 
 @Controller('sheet-layouts')
@@ -29,8 +30,12 @@ export class SheetLayoutsController {
     @CurrentUser() user: JwtPayload,
     @Query('orgId') orgId?: string,
   ): Promise<LayoutDraftModel> {
-    const dto = deriveLayoutSchema.parse(body);
-    return this.sheetLayoutService.deriveDraft(getEffectiveOrgId(user, orgId), dto.instrumentId);
+    const dto = parseDtoOrBadRequest(deriveLayoutSchema, body);
+    return this.sheetLayoutService.deriveDraft(
+      getEffectiveOrgId(user, orgId),
+      dto.instrumentId,
+      dto.identityMode ?? 'qr',
+    );
   }
 
   @Post()
@@ -40,7 +45,7 @@ export class SheetLayoutsController {
     @CurrentUser() user: JwtPayload,
     @Query('orgId') orgId?: string,
   ): Promise<FreezeLayoutResponse> {
-    const dto = freezeLayoutSchema.parse(body);
+    const dto = parseDtoOrBadRequest(freezeLayoutSchema, body);
     return this.sheetLayoutService.freeze(getEffectiveOrgId(user, orgId), user.userId, dto.spec);
   }
 
@@ -51,7 +56,7 @@ export class SheetLayoutsController {
     @CurrentUser() user: JwtPayload,
     @Query('orgId') orgId?: string,
   ): Promise<PaginatedResponse<SheetLayoutSummaryModel>> {
-    const dto = sheetLayoutQuerySchema.parse(query);
+    const dto = parseDtoOrBadRequest(sheetLayoutQuerySchema, query);
     return this.sheetLayoutService.list(getEffectiveOrgId(user, orgId), dto);
   }
 

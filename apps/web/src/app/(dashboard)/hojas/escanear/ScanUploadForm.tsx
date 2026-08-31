@@ -6,10 +6,11 @@ import { useRouter } from 'next/navigation';
 import type { Route } from 'next';
 import { useDropzone, type FileRejection } from 'react-dropzone';
 import { toast } from 'sonner';
-import { FileText, Loader2, RotateCcw, ScanLine, Smartphone, Upload, X } from 'lucide-react';
+import { Camera, FileText, Loader2, RotateCcw, ScanLine, Smartphone, Upload, X } from 'lucide-react';
 import {
   createScanBatchSchema,
   DEFAULT_CAPTURE_PROFILES,
+  type AssessCaptureIdentityModel,
   type CaptureSource,
   type PrintRunAssessmentOption,
   type ScanUploadIntent,
@@ -28,6 +29,8 @@ import { AssignAssessmentControl } from '../components/AssignAssessmentControl';
 import { cn } from '@/lib/utils';
 import { confirmScanFile, createScanBatch, startScanBatch } from './actions';
 import { SCAN_ROUTES } from './batch-meta';
+import { CameraCaptureSection } from './CameraCaptureSection';
+import { assessIdentityLabel } from './capture-identity';
 
 const MAX_FILE_BYTES = 50 * 1024 * 1024;
 const MAX_FILES = 60;
@@ -82,9 +85,18 @@ type UploadFileState = {
   status: UploadStatus;
   progress: number;
   error: string | null;
+  origin?: 'camera';
+  identity?: AssessCaptureIdentityModel | null;
 };
 
 type Phase = 'form' | 'creating' | 'uploading' | 'starting';
+
+type UploadMode = 'files' | 'camera';
+
+function captureEntryLabel(entry: UploadFileState): string | null {
+  if (entry.origin !== 'camera' || !entry.identity) return null;
+  return assessIdentityLabel(entry.identity);
+}
 
 function formatSize(bytes: number): string {
   const mb = bytes / (1024 * 1024);
@@ -127,6 +139,7 @@ export function ScanUploadForm({
   const router = useRouter();
   const [printRunId, setPrintRunId] = useState('');
   const [source, setSource] = useState<CaptureSource>('scanner');
+  const [uploadMode, setUploadMode] = useState<UploadMode>('files');
   const [files, setFiles] = useState<UploadFileState[]>([]);
   const [phase, setPhase] = useState<Phase>('form');
   const batchIdRef = useRef<string | null>(null);
@@ -270,6 +283,52 @@ export function ScanUploadForm({
     else toast.error('Sigue habiendo archivos con error. Puedes reintentar de nuevo.');
   }
 
+  function handleCameraAccepted(
+    file: File,
+    identity: AssessCaptureIdentityModel | null,
+  ): boolean {
+    if (files.length >= MAX_FILES) {
+      toast.error(`Máximo ${MAX_FILES} archivos por lote: la foto no se agregó.`);
+      return false;
+    }
+    setFiles((prev) => [
+      ...prev,
+      { file, status: 'queued', progress: 0, error: null, origin: 'camera', identity },
+    ]);
+    return true;
+  }
+
+  function discardCameraCaptures(reason: string) {
+    if (!files.some((entry) => entry.origin === 'camera')) return;
+    setFiles((prev) => prev.filter((entry) => entry.origin !== 'camera'));
+    toast.warning(reason);
+  }
+
+  function handlePrintRunChange(value: string) {
+    if (value !== printRunId) {
+      discardCameraCaptures(
+        'Se quitaron las fotos de cámara: su control de calidad se hizo contra otra tirada. Vuelve a capturarlas.',
+      );
+    }
+    setPrintRunId(value);
+  }
+
+  function handleSourceChange(value: CaptureSource) {
+    if (value !== source) {
+      discardCameraCaptures(
+        'Se quitaron las fotos de cámara: su control de calidad usó el perfil de celular y cambiaste la fuente. Vuelve a capturarlas.',
+      );
+    }
+    setSource(value);
+    if (value !== 'phone') setUploadMode('files');
+  }
+
+  const cameraCaptures = files.filter((entry) => entry.origin === 'camera');
+  const capturedIdentities = cameraCaptures
+    .map((entry) => entry.identity)
+    .filter((identity): identity is AssessCaptureIdentityModel => identity != null);
+  const showCamera = editable && source === 'phone' && uploadMode === 'camera';
+
   const failedCount = files.filter((entry) => entry.status === 'error').length;
   const doneCount = files.filter((entry) => entry.status === 'done').length;
   const uploadInFlight =
@@ -293,7 +352,7 @@ export function ScanUploadForm({
             required
             hint="No es la evaluación: la evaluación es el destino de los resultados y va asociada a la tirada."
           >
-            <Select value={printRunId} onValueChange={setPrintRunId} disabled={!editable}>
+            <Select value={printRunId} onValueChange={handlePrintRunChange} disabled={!editable}>
               <SelectTrigger id="print-run" className="h-auto w-full py-2">
                 <SelectValue placeholder="Selecciona la tirada que se rindió" />
               </SelectTrigger>
@@ -351,7 +410,7 @@ export function ScanUploadForm({
                       name="capture-source"
                       value={option.value}
                       checked={selected}
-                      onChange={() => setSource(option.value)}
+                      onChange={() => handleSourceChange(option.value)}
                       className="sr-only"
                     />
                     <Icon
@@ -376,32 +435,74 @@ export function ScanUploadForm({
           </fieldset>
 
           <div className="space-y-3">
-            <div
-              {...getRootProps()}
-              className={cn(
-                'flex flex-col items-center justify-center gap-2 rounded-lg border-2 border-dashed p-8 text-center transition-colors',
-                isDragActive ? 'border-primary bg-primary/5' : 'border-border',
-                editable ? 'cursor-pointer hover:bg-muted/40' : 'cursor-not-allowed opacity-70',
-              )}
-            >
-              <input {...getInputProps()} aria-label="Agregar archivos del lote" />
-              <Upload className="size-6 text-muted-foreground" aria-hidden />
-              <p className="text-sm font-medium text-foreground">
-                Arrastra los archivos o haz clic para elegirlos
-              </p>
-              <p className="text-xs text-muted-foreground">
-                PDF, JPG o PNG · hasta {MAX_FILES} archivos · máx. 50 MB cada uno
-              </p>
-            </div>
+            {editable && source === 'phone' && (
+              <div className="grid grid-cols-2 gap-1 rounded-lg border bg-muted/40 p-1">
+                <Button
+                  type="button"
+                  variant={uploadMode === 'files' ? 'secondary' : 'ghost'}
+                  onClick={() => setUploadMode('files')}
+                >
+                  <Upload className="mr-2 size-4" aria-hidden />
+                  Subir fotos
+                </Button>
+                <Button
+                  type="button"
+                  variant={uploadMode === 'camera' ? 'secondary' : 'ghost'}
+                  onClick={() => setUploadMode('camera')}
+                >
+                  <Camera className="mr-2 size-4" aria-hidden />
+                  Cámara
+                </Button>
+              </div>
+            )}
+
+            {showCamera ? (
+              printRunId === '' ? (
+                <AlertCallout tone="info" title="Primero elige la tirada">
+                  El control de calidad revisa cada foto contra la tirada que se rindió: selecciona
+                  la tirada de impresión arriba para activar la cámara.
+                </AlertCallout>
+              ) : (
+                <CameraCaptureSection
+                  printRunId={printRunId}
+                  expectedSheets={selectedRun?.sheetCount ?? null}
+                  capturedIdentities={capturedIdentities}
+                  capturedCount={cameraCaptures.length}
+                  onAccepted={handleCameraAccepted}
+                />
+              )
+            ) : (
+              <div
+                {...getRootProps()}
+                className={cn(
+                  'flex flex-col items-center justify-center gap-2 rounded-lg border-2 border-dashed p-8 text-center transition-colors',
+                  isDragActive ? 'border-primary bg-primary/5' : 'border-border',
+                  editable ? 'cursor-pointer hover:bg-muted/40' : 'cursor-not-allowed opacity-70',
+                )}
+              >
+                <input {...getInputProps()} aria-label="Agregar archivos del lote" />
+                <Upload className="size-6 text-muted-foreground" aria-hidden />
+                <p className="text-sm font-medium text-foreground">
+                  Arrastra los archivos o haz clic para elegirlos
+                </p>
+                <p className="text-xs text-muted-foreground">
+                  PDF, JPG o PNG · hasta {MAX_FILES} archivos · máx. 50 MB cada uno
+                </p>
+              </div>
+            )}
 
             {files.length > 0 && (
               <ul className="divide-y rounded-lg border">
                 {files.map((entry, index) => (
                   <li key={`${entry.file.name}-${index}`} className="flex items-center gap-3 p-3">
-                    <FileText className="size-4 shrink-0 text-muted-foreground" aria-hidden />
+                    {entry.origin === 'camera' ? (
+                      <Camera className="size-4 shrink-0 text-muted-foreground" aria-hidden />
+                    ) : (
+                      <FileText className="size-4 shrink-0 text-muted-foreground" aria-hidden />
+                    )}
                     <div className="min-w-0 flex-1">
                       <p className="truncate text-sm font-medium text-foreground">
-                        {entry.file.name}
+                        {captureEntryLabel(entry) ?? entry.file.name}
                       </p>
                       <p className="text-xs text-muted-foreground">
                         {formatSize(entry.file.size)}

@@ -218,3 +218,168 @@ helper del otro workstream, NO lo escribas: decláralo en tu reporte final y F3 
    `.venv/bin/pytest` + `.venv/bin/ruff check app tests` verdes.
 3. Tests propios verdes (`pnpm test -- <patrón>` en apps/api; jest de types si tocaste types — no deberías).
 4. `git add -A && git commit -m "feat(e22): <workstream> — <resumen>"`.
+
+---
+
+## 9. Contratos v1 (CD-8..CD-14) — enmiendas sobre el MVP
+
+> Congelados en Fase V0 (`docs/plan-desarrollo-lector-v1.md`). Extienden los contratos
+> del MVP SIN romperlos: todo campo nuevo es nullable/optional, los ejemplos congelados
+> del MVP validan sin cambios y el `layoutHash` de un spec del MVP no cambia (test de
+> referencia en `layout-hash.spec.ts` con hash fijado `a9718c3cc1e24e82`).
+
+### CD-8 — Campos numéricos `digit_grid`
+
+- `omrBubbleSchema` gana `group: z.number().int().min(0).nullable().optional()` = índice
+  del dígito dentro del campo (0 = más significativo). Sin default: un spec del MVP no lo
+  materializa al parsear y su hash queda intacto.
+- Un campo `kind: 'digit_grid'` tiene `digitCount` implícito en `max(group) + 1`; sus
+  burbujas llevan `value` `'0'`–`'9'` por grupo. Cada grupo se lee como un mini
+  bubble_group `single`.
+- **Valor del campo = concatenación de los dígitos leídos.** Si CUALQUIER grupo es dudoso
+  (blank/multiple/ambiguous), el campo ENTERO es `ambiguous` — jamás un número con un
+  dígito inventado (45≠46 es invisible). La implementación (`DigitGridReader`) es de V1·P1.
+- Canonicidad del hash: el campo `group` participa del hash cuando está presente. Un spec
+  que lo omite y uno que lo trae explícito en `null` hashean distinto — la convención es
+  **omitir** `group` en burbujas que no pertenecen a una grilla (el diseñador nunca emite
+  `group: null`).
+
+### CD-9 — Campos `crop_region` (respuestas de desarrollo)
+
+- Nuevo `kind: 'crop_region'`: `bubbles: []`, `region` NO nulo (el recorte ES la respuesta).
+- Semántica en `MarkReading` (sin cambio de shape — el schema del MVP ya lo permite):
+  `state: 'marked'`, `value: null`, `cropJpegBase64` SIEMPRE presente; `fill: 0`,
+  `threshold: 0.5`, `margin: 1` fijos (no aplican).
+- El adaptador NO lo mapea a `answers`: el confirm crea la respuesta de desarrollo por el
+  camino `ai_grading_jobs` (V2·B2). `ai_score` jamás pisa `final_score` (§8.3).
+- Métricas del módulo (V3): las marcas `marked` fijas de `crop_region` se detectan por
+  sus valores fijos CD-9 (`fill = 0 AND threshold = 0.5 AND margin = 1`) y se excluyen
+  del denominador de `reviewRatePercent` — los crops no son revisables por diseño y
+  cargar los specs de cada lote sólo para clasificarlas no se justifica.
+
+### CD-10 — Identidad `rut_bubbles` (hoja genérica)
+
+- `layoutSpec.identity` gana `bubbles: z.array(omrBubbleSchema).nullable().optional()`:
+  la grilla RUT vive en la región identity como una digit_grid (mismo `group`/`value`),
+  con el DV como grupo final que además admite `'K'`. Optional sin default → hash de
+  specs MVP intacto. Invariante (se valida en freeze, V1·B1): `mode: 'rut_bubbles'`
+  requiere `bubbles` presente y no vacío; `mode: 'qr'` lo omite.
+- `identity.raw` = dígitos concatenados leídos (`"12345678K"`); `confidence` = mínimo
+  margin normalizado de los grupos. El servicio NO interpreta: el backend
+  (`RutBubbleResolver`, V1·B1) valida DV con `normalizeRut` y hace match EXACTO contra el
+  roster — sin match o DV inválido → cola manual, JAMÁS matching difuso silencioso.
+
+### CD-11 — Gate de calidad para captura con cámara
+
+- Servicio: **`POST /v1/assess`** — request = `OmrAssessRequest`
+  (`assess-request.schema.json`: `{ layoutSpec, captureProfile, imageBase64 }`), respuesta
+  200 = `OmrAssessResult` (`assess-result.schema.json`: `{ imageSha256, quality, identity }`).
+  Subset de read: rectificación + QualityGate + QR, SIN clasificar marcas; presupuesto <1s.
+  Mismos códigos de error que `/v1/read` (422 request inválido).
+- Backend: **`POST /sheet-scan-batches/assess-capture`** — `SHEET_MANAGEMENT_ROLES`;
+  request `AssessCaptureDto` (`printRunId` + `imageBase64`, imagen JPEG ≤4 MB ⇒ base64
+  ≤5.592.408 chars, validado en el DTO); respuesta `AssessCaptureResponse`
+  (`{ accepted, quality, identity }` — la identidad resuelta contra la tirada: hoja,
+  página, alumno candidato + confianza). El navegador NUNCA habla directo con el servicio.
+  El veredicto se muestra ANTES de aceptar la foto (D3): retake inmediato con el motivo.
+
+### CD-12 — Calibración por organización
+
+- Sin migración: `organizations.config.omrCalibration` validado por `omrCalibrationSchema`
+  (`{ ambiguityMargin?: 0.05–0.5, minSeparability?: 0–1 }`) en `orgConfigSchema`
+  (`feature.schema.ts`).
+- `captureProfileSchema` gana `ambiguityMargin: z.number().min(0.05).max(0.5).nullable().default(null)`.
+  El default `null` NO afecta el `layoutHash` (el hash cubre sólo el LayoutSpec, nunca el
+  CaptureProfile). `null` = el clasificador usa su default (0.25, la constante del MVP).
+  Se inyecta al servicio POR REQUEST — datos, no código (D2).
+- Endpoints backend: **`GET /organizations/me/omr-calibration`** y
+  **`PATCH /organizations/me/omr-calibration`** (`UpdateOmrCalibrationDto` →
+  `OmrCalibrationResponse`), guard con **`OMR_CALIBRATION_ROLES`**
+  (`access-policies/sheet-scanning.ts`) — alias EXPLÍCITO de `SHEET_MANAGEMENT_ROLES`:
+  quien gestiona hojas calibra su lectura; es el mismo conjunto a propósito, no una
+  copia — si divergen algún día, se separa la constante, no se edita la lista en línea.
+- El PATCH hace merge no destructivo sobre `config.omrCalibration` (mandar sólo
+  `ambiguityMargin` no borra `minSeparability`). `minSeparability` se persiste como
+  knob reservado: NO viaja al servicio en v1.
+
+### CD-15 — QR de esquina en modo `rut_bubbles` (enmienda V3, post-auditoría)
+
+- `scannedPageIdentitySchema` gana `qrRaw: z.string().nullable().optional()` (sin
+  default: los payloads del MVP validan sin cambios; el schema JSON regenerado lo
+  deja fuera de `required`). En modo `qr`, `qrRaw` duplica `raw`. En modo
+  `rut_bubbles`, `identity.raw` = dígitos RUT leídos e `identity.qrRaw` = payload
+  del QR de esquina (o null si es ilegible) — la hoja genérica SIEMPRE imprime ese
+  QR (`SHEET_QR_IDENTITY_REGION`, esquina superior derecha) con
+  `printedSheetId + layoutHash + pageIndex + pageCount`.
+- El servicio lo localiza escaneando el cuadrante superior derecho de la página
+  rectificada (no conoce la constante del impresor). El QR identifica la COPIA
+  física: con él, el hash-check G1 corre siempre, la idempotencia D13
+  `(printedSheetId, pageIndex, imageHash)` y el supersede funcionan sin cambios, y
+  el `pageIndex` lógico sale del QR — el RUT sólo resuelve el alumno
+  (`resolvedStudentId`, vía `RutBubbleResolver`).
+- **Orientación (política cerrada):** en specs `rut_bubbles` la pasada de
+  rectificación sólo se confirma si el QR de esquina decodifica desde ese
+  cuadrante; si ninguna de las 4 orientaciones lo logra, la página se rechaza por
+  calidad (`no_separable_marks`, sin clasificar marcas). Un QR tapado o dañado ⇒
+  retake/re-escaneo: sin QR no hay copia física a la que anclar la idempotencia ni
+  orientación probada, aunque la grilla RUT sea legible.
+
+### CD-13 — Formas A/B
+
+- Un layout POR FORMA (el versionado D6 ya lo permite; el hash distinto viaja en el QR y
+  el hash-check G1 del MVP ya rechaza hojas de la forma equivocada sin código nuevo).
+- `CreatePrintRunDto` gana `assessmentFormId: z.string().uuid().nullable().optional()`;
+  `PrintRunModel` gana `assessmentFormId?: string | null` (opcional durante la
+  transición; V2·B3 lo puebla siempre). Una tirada = una forma; el lote hereda la forma
+  de su tirada.
+- Migración `0022_cynical_famine`: `sheet_print_runs.assessment_form_id` uuid nullable
+  FK → `assessment_forms.id` + índice `sheet_print_runs_form_idx`. Nada más de schema.
+
+### CD-14 — Retención de imágenes (D18)
+
+- Sólo contrato en V0; script y cron son de V2·B4: `files` con
+  `owner_type IN ('sheet_scan', 'sheet_scan_mark')` y `created_at` más viejo que la
+  retención → borrado S3 + soft-delete, vía `pnpm --filter @soe/api retention:sheet-scans`
+  (tsx, documentado para cron externo). El resultado corregido nunca se toca.
+- `organizations.config.omrRetentionDays?: number` (entero positivo, ya en
+  `orgConfigSchema`); undefined = default **180 días**.
+
+### Superficie REST nueva (v1)
+
+| Verbo + ruta | Roles | Request | Response |
+|---|---|---|---|
+| `POST /sheet-scan-batches/assess-capture` | `SHEET_MANAGEMENT_ROLES` | `AssessCaptureDto` | `AssessCaptureResponse` |
+| `GET /organizations/me/omr-calibration` | `OMR_CALIBRATION_ROLES` | — | `OmrCalibrationResponse` |
+| `PATCH /organizations/me/omr-calibration` | `OMR_CALIBRATION_ROLES` | `UpdateOmrCalibrationDto` | `OmrCalibrationResponse` |
+
+Servicio de visión: `POST /v1/assess` (ver CD-11); `/v1/read` intacto.
+
+Enmienda de integración V1: `DeriveLayoutDto` gana `identityMode: 'qr' | 'rut_bubbles'`
+(optional, default `'qr'`) — el diseñador elige el modo de identidad de la hoja al derivar.
+
+JSON Schemas generados nuevos: `assess-request.schema.json`, `assess-result.schema.json`.
+Ejemplos compartidos nuevos (jest + pytest): `layout-digit-grid-rut.example.json`,
+`layout-crop-region.example.json`.
+
+## 10. Propiedad de archivos por workstream (v1)
+
+Igual que en el MVP: los archivos compartidos sólo se tocan en V0 (hecho) y V3
+(integración). Detalle completo de tickets en `docs/plan-desarrollo-lector-v1.md`.
+
+### Fase V1
+
+| WS | Archivos propios (crear/editar SÓLO estos) |
+|---|---|
+| **P1** | `services/omr/**` (contratos generados intocables): `DigitGridReader`, `CropRegionReader`, grilla RUT en identity, `POST /v1/assess`, `ambiguityMargin` del CaptureProfile, fixtures sintéticos nuevos |
+| **B1** | `apps/api/src/sheet-scanning/identity/rut-bubble.resolver.ts` (+spec), `sheet-layout.helpers.ts`/`sheet-layout.service.ts`, `sheet-print.service.ts`/`sheet-print.helpers.ts` (hoja genérica), `omr-calibration.*` (service+controller, guard `OMR_CALIBRATION_ROLES`), `sheet-scan.service.ts` (inyectar calibración al captureProfile) |
+| **F1** | `apps/web/src/app/(dashboard)/hojas/escanear/**` (extender), `hojas/hooks/**` nuevos (modo cámara + assess-capture) |
+| **F2** | `hojas/[id]/disenar/**`, `hojas/[id]/imprimir/**`, `hojas/components/SheetPreview.tsx` (digit_grid, modo identidad, selector de forma, preview grilla RUT) |
+
+### Fase V2
+
+| WS | Archivos propios |
+|---|---|
+| **P2** | `services/omr/**` (hardening de lectores nuevos, catálogo sucio de grillas) |
+| **B2** | `apps/api/src/sheet-scanning/development-grading.service.ts` (+spec); consume `llm` y `responses`, NO los toca |
+| **B3** | `sheet-print.service.ts` (extensión formas), `sheet-scan.service.ts` (validar forma de la tirada), spec updates |
+| **B4** | `apps/api/scripts/` (retención CD-14), `sst.config.ts` (contenedor OMR), `.env.example`, `apps/web/src/lib/` (`apiGetBinary`), límites de lote, endpoint de métricas del módulo |

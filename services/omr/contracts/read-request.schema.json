@@ -93,6 +93,49 @@
                     "bottomRight"
                   ],
                   "additionalProperties": false
+                },
+                "bubbles": {
+                  "anyOf": [
+                    {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "value": {
+                            "type": "string",
+                            "minLength": 1
+                          },
+                          "center": {
+                            "$ref": "#/definitions/read-request/properties/layoutSpec/properties/identity/properties/region/properties/topLeft"
+                          },
+                          "radius": {
+                            "type": "number",
+                            "exclusiveMinimum": 0
+                          },
+                          "group": {
+                            "anyOf": [
+                              {
+                                "type": "integer",
+                                "minimum": 0
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ]
+                          }
+                        },
+                        "required": [
+                          "value",
+                          "center",
+                          "radius"
+                        ],
+                        "additionalProperties": false
+                      }
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
                 }
               },
               "required": [
@@ -136,26 +179,7 @@
                   "bubbles": {
                     "type": "array",
                     "items": {
-                      "type": "object",
-                      "properties": {
-                        "value": {
-                          "type": "string",
-                          "minLength": 1
-                        },
-                        "center": {
-                          "$ref": "#/definitions/read-request/properties/layoutSpec/properties/identity/properties/region/properties/topLeft"
-                        },
-                        "radius": {
-                          "type": "number",
-                          "exclusiveMinimum": 0
-                        }
-                      },
-                      "required": [
-                        "value",
-                        "center",
-                        "radius"
-                      ],
-                      "additionalProperties": false
+                      "$ref": "#/definitions/read-request/properties/layoutSpec/properties/identity/properties/bubbles/anyOf/0/items"
                     }
                   },
                   "region": {
@@ -227,6 +251,19 @@
                   "type": "null"
                 }
               ]
+            },
+            "ambiguityMargin": {
+              "anyOf": [
+                {
+                  "type": "number",
+                  "minimum": 0.05,
+                  "maximum": 0.5
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null
             }
           },
           "required": [

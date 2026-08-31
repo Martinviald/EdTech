@@ -27,6 +27,7 @@ export const LLM_FEATURES = [
   'remedial_reading',
   'remedial_judge',
   'ai_tagging',
+  'ai_grading',
   'assistant',
 ] as const;
 export type LlmFeature = (typeof LLM_FEATURES)[number];
@@ -66,6 +67,11 @@ export const LLM_FEATURE_LABELS: Record<LlmFeature, { label: string; description
   ai_tagging: {
     label: 'Auto-etiquetado de ítems',
     description: 'Sugerencias de taxonomía (habilidades) para ítems del banco.',
+  },
+  ai_grading: {
+    label: 'Corrección IA de desarrollo',
+    description:
+      'Puntaje sugerido para respuestas de desarrollo escaneadas (recorte de la hoja + rúbrica). Requiere modelo multimodal.',
   },
   assistant: {
     label: 'Asistente IA conversacional',
@@ -158,11 +164,12 @@ export const LLM_FEATURE_DEFAULTS: Record<LlmFeature, LlmModelChoice> = {
   // Juez automático (Ola 2.1b): arranca en Flash; se cambiará a otro proveedor por config.
   remedial_judge: { provider: 'gemini', model: 'gemini-2.5-flash' },
   ai_tagging: { provider: 'gemini', model: 'gemini-2.5-flash' },
+  ai_grading: { provider: 'gemini', model: 'gemini-2.5-pro' },
   assistant: { provider: 'gemini', model: 'gemini-2.5-flash' },
 };
 
 /** Funcionalidades que exigen un modelo multimodal (envían imágenes al LLM). */
-export const MULTIMODAL_FEATURES: readonly LlmFeature[] = ['item_insight'];
+export const MULTIMODAL_FEATURES: readonly LlmFeature[] = ['item_insight', 'ai_grading'];
 
 // ── Request / Response models ────────────────────────────────────────────────
 

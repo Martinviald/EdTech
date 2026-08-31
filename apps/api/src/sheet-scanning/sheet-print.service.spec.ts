@@ -523,3 +523,155 @@ describe('SheetPrintService.renderPdf', () => {
     await expect(service.renderPdf(ORG_ID, RUN_ID)).rejects.toBeInstanceOf(BadRequestException);
   });
 });
+
+describe('SheetPrintService — hoja genérica y formas (v1)', () => {
+  const FORM_ID = '77777777-7777-4777-8777-777777777777';
+  const ASSESSMENT_ID = '88888888-8888-4888-8888-888888888888';
+  const FORM_ROW = { id: FORM_ID, assessmentId: ASSESSMENT_ID, instrumentId: INSTRUMENT_ID };
+  const rutSpec = deriveLayoutDraft(
+    INSTRUMENT_ID,
+    Array.from({ length: 4 }, (_, i) => mcItem(i + 1)),
+    'rut_bubbles',
+  ).spec;
+
+  it('layout rut_bubbles: la tirada crea N copias genéricas SIN alumno, cada una con su hoja propia (D13)', async () => {
+    const { db, inserts } = makeDb(
+      [[{ ...LAYOUT_ROW, spec: rutSpec }], [CLASS_GROUP_ROW], ROSTER_ROWS],
+      [...AUTO_ASSESSMENT_RETURNING, RUN_RETURNING],
+    );
+    const service = new SheetPrintService(db);
+
+    const run = await service.createRun(ORG_ID, USER_ID, CREATE_DTO);
+
+    expect(run.sheetCount).toBe(5);
+    const sheetValues = inserts[3] as Array<{ studentId: string | null; sequence: number }>;
+    expect(sheetValues).toHaveLength(5);
+    expect(sheetValues.every((s) => s.studentId === null)).toBe(true);
+    expect(sheetValues.map((s) => s.sequence)).toEqual([1, 2, 3, 4, 5]);
+  });
+
+  it('persiste el assessmentFormId de la tirada y lo expone en el modelo (CD-13)', async () => {
+    const { db, inserts } = makeDb(
+      [[LAYOUT_ROW], [FORM_ROW], [CLASS_GROUP_ROW], ROSTER_ROWS],
+      [[{ ...RUN_RETURNING[0], assessmentId: ASSESSMENT_ID, assessmentFormId: FORM_ID }]],
+    );
+    const service = new SheetPrintService(db);
+
+    const run = await service.createRun(ORG_ID, USER_ID, {
+      ...CREATE_DTO,
+      assessmentFormId: FORM_ID,
+    });
+
+    expect(inserts[0]).toMatchObject({ assessmentFormId: FORM_ID });
+    expect(run.assessmentFormId).toBe(FORM_ID);
+  });
+
+  it('deriva el assessmentId de la forma cuando el dto no lo trae (el confirm recibe la evaluación correcta)', async () => {
+    const { db, inserts } = makeDb(
+      [[LAYOUT_ROW], [FORM_ROW], [CLASS_GROUP_ROW], ROSTER_ROWS],
+      [[{ ...RUN_RETURNING[0], assessmentId: ASSESSMENT_ID, assessmentFormId: FORM_ID }]],
+    );
+    const service = new SheetPrintService(db);
+
+    const run = await service.createRun(ORG_ID, USER_ID, {
+      ...CREATE_DTO,
+      assessmentId: null,
+      assessmentFormId: FORM_ID,
+    });
+
+    expect(inserts[0]).toMatchObject({ assessmentId: ASSESSMENT_ID, assessmentFormId: FORM_ID });
+    expect(run.assessmentId).toBe(ASSESSMENT_ID);
+  });
+
+  it('rechaza con NotFound una forma inexistente o de otra org', async () => {
+    const { db } = makeDb([[LAYOUT_ROW], []]);
+    const service = new SheetPrintService(db);
+
+    await expect(
+      service.createRun(ORG_ID, USER_ID, { ...CREATE_DTO, assessmentFormId: FORM_ID }),
+    ).rejects.toBeInstanceOf(NotFoundException);
+  });
+
+  it('rechaza con BadRequest una forma cuya evaluación usa otro instrumento que el layout', async () => {
+    const { db } = makeDb([
+      [LAYOUT_ROW],
+      [{ ...FORM_ROW, instrumentId: '99999999-9999-4999-8999-999999999999' }],
+    ]);
+    const service = new SheetPrintService(db);
+
+    await expect(
+      service.createRun(ORG_ID, USER_ID, { ...CREATE_DTO, assessmentFormId: FORM_ID }),
+    ).rejects.toBeInstanceOf(BadRequestException);
+  });
+
+  it('rechaza con BadRequest una forma que no pertenece al assessmentId pedido en el dto', async () => {
+    const { db } = makeDb([[LAYOUT_ROW], [FORM_ROW]]);
+    const service = new SheetPrintService(db);
+
+    await expect(
+      service.createRun(ORG_ID, USER_ID, {
+        ...CREATE_DTO,
+        assessmentId: 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',
+        assessmentFormId: FORM_ID,
+      }),
+    ).rejects.toBeInstanceOf(BadRequestException);
+  });
+
+  it('listForms devuelve las formas de las evaluaciones del instrumento del layout con el shape del contrato', async () => {
+    const createdAt = new Date('2026-08-15T10:00:00Z');
+    const formRows = [
+      {
+        id: FORM_ID,
+        name: 'Forma A',
+        assessmentId: ASSESSMENT_ID,
+        assessmentName: 'Ensayo SIMCE Agosto',
+        createdAt,
+      },
+      {
+        id: '99999999-9999-4999-8999-999999999999',
+        name: 'Forma B',
+        assessmentId: ASSESSMENT_ID,
+        assessmentName: 'Ensayo SIMCE Agosto',
+        createdAt,
+      },
+    ];
+    const { db } = makeDb([[LAYOUT_ROW], formRows]);
+    const service = new SheetPrintService(db);
+
+    const result = await service.listForms(ORG_ID, LAYOUT_ID);
+
+    expect(result).toEqual({ data: formRows });
+  });
+
+  it('listForms lanza NotFound cuando el layout no existe en la org', async () => {
+    const { db } = makeDb([[]]);
+    const service = new SheetPrintService(db);
+
+    await expect(service.listForms(ORG_ID, LAYOUT_ID)).rejects.toBeInstanceOf(NotFoundException);
+  });
+
+  it('listForms devuelve data vacía cuando el instrumento no tiene formas', async () => {
+    const { db } = makeDb([[LAYOUT_ROW], []]);
+    const service = new SheetPrintService(db);
+
+    const result = await service.listForms(ORG_ID, LAYOUT_ID);
+
+    expect(result).toEqual({ data: [] });
+  });
+
+  it('renderPdf de una tirada genérica dibuja la grilla RUT sin alumnos y conserva el pageCount', async () => {
+    const { db } = makeDb([
+      [{ id: RUN_ID, spec: rutSpec, specHash: 'a3f9c1e70b4d2856', classGroupName: '3° Básico A' }],
+      [
+        { id: '9f2c1a44-3b7e-4c11-9a0d-5e8f7b2c1d33', sequence: 1, firstName: null, lastName: null },
+        { id: '8e1b0933-2a6d-4b00-8c9c-4d7e6a1b0c22', sequence: 2, firstName: null, lastName: null },
+      ],
+    ]);
+    const service = new SheetPrintService(db);
+
+    const pdf = await service.renderPdf(ORG_ID, RUN_ID);
+    const doc = await PDFDocument.load(pdf);
+
+    expect(doc.getPageCount()).toBe(rutSpec.pageCount * 2);
+  });
+});

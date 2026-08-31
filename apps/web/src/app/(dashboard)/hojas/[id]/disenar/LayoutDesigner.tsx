@@ -28,6 +28,24 @@ const PAPER_LABELS: Record<LayoutSpec['paper'], string> = {
   legal: 'Oficio',
 };
 
+function buildFieldsHint(fields: LayoutSpec['fields']): string {
+  let bubbleGroups = 0;
+  let digitGrids = 0;
+  let cropRegions = 0;
+  for (const field of fields) {
+    if (field.kind === 'digit_grid') digitGrids += 1;
+    else if (field.kind === 'crop_region') cropRegions += 1;
+    else bubbleGroups += 1;
+  }
+  if (digitGrids === 0 && cropRegions === 0) return 'Una fila de burbujas por pregunta';
+
+  const parts: string[] = [];
+  if (bubbleGroups > 0) parts.push(`${bubbleGroups} de alternativas`);
+  if (digitGrids > 0) parts.push(`${digitGrids} en grilla de dígitos`);
+  if (cropRegions > 0) parts.push(`${cropRegions} de respuesta escrita`);
+  return parts.join(' · ');
+}
+
 export function LayoutDesigner({
   draft,
   instrumentName,
@@ -62,13 +80,21 @@ export function LayoutDesigner({
           hint="Origen de las preguntas de la hoja"
         />
         <StatCard label="Páginas" value={String(spec.pageCount)} hint={`Papel ${PAPER_LABELS[spec.paper]}`} />
-        <StatCard label="Campos en la hoja" value={String(spec.fields.length)} hint="Una fila de burbujas por pregunta" />
+        <StatCard label="Campos en la hoja" value={String(spec.fields.length)} hint={buildFieldsHint(spec.fields)} />
         <StatCard
           label="Ítems excluidos"
           value={String(excludedItems.length)}
           hint={excludedItems.length > 0 ? 'Revisa el detalle más abajo' : 'Todos los ítems entraron'}
         />
       </div>
+
+      {spec.identity.mode === 'rut_bubbles' ? (
+        <AlertCallout tone="info" title="Hoja genérica con RUT">
+          Todas las hojas de la tirada serán idénticas: cada alumno escribe su nombre y marca su
+          RUT en la grilla de burbujas. Al leer, se valida el dígito verificador y se calza el RUT
+          exacto contra la nómina del curso; una hoja sin calce va a revisión manual.
+        </AlertCallout>
+      ) : null}
 
       {excludedItems.length > 0 ? (
         <AlertCallout
@@ -91,8 +117,9 @@ export function LayoutDesigner({
       <section className="space-y-3">
         <h2 className="text-base font-semibold text-foreground">Vista previa de la hoja</h2>
         <p className="text-sm text-muted-foreground">
-          Dibujada desde el mismo spec que usará la impresión y la lectura: fiduciales de esquina,
-          región de identidad con QR y cada pregunta con sus alternativas.
+          {spec.identity.mode === 'rut_bubbles'
+            ? 'Dibujada desde el mismo spec que usará la impresión y la lectura: fiduciales de esquina, grilla RUT con QR de la tirada en la esquina y cada pregunta con sus alternativas.'
+            : 'Dibujada desde el mismo spec que usará la impresión y la lectura: fiduciales de esquina, región de identidad con QR y cada pregunta con sus alternativas.'}
         </p>
         <SheetPreview spec={spec} />
       </section>

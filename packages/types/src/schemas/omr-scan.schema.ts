@@ -52,6 +52,13 @@ export const scannedPageIdentitySchema = z.object({
   /** Payload crudo del QR (`academos:v1:...`) o null si no se pudo decodificar. Lo interpreta el backend, nunca el servicio. */
   raw: z.string().nullable(),
   confidence: z.number().min(0).max(1),
+  /**
+   * CD-15: payload del QR de esquina (`academos:v1:...`) o null si es ilegible.
+   * En modo `qr` duplica `raw`; en modo `rut_bubbles` `raw` lleva los dígitos
+   * RUT leídos y este campo lleva el QR que identifica la copia física.
+   * Optional sin default: los payloads del MVP siguen validando sin cambios.
+   */
+  qrRaw: z.string().nullable().optional(),
 });
 
 /**
@@ -99,3 +106,18 @@ export const omrReadRequestSchema = z.object({
 
 export type OmrReadSource = z.infer<typeof omrReadSourceSchema>;
 export type OmrReadRequest = z.infer<typeof omrReadRequestSchema>;
+
+export const omrAssessRequestSchema = z.object({
+  layoutSpec: layoutSpecSchema,
+  captureProfile: captureProfileSchema,
+  imageBase64: z.string().min(1),
+});
+
+export const omrAssessResultSchema = z.object({
+  imageSha256: z.string().length(64),
+  quality: pageQualitySchema,
+  identity: scannedPageIdentitySchema,
+});
+
+export type OmrAssessRequest = z.infer<typeof omrAssessRequestSchema>;
+export type OmrAssessResult = z.infer<typeof omrAssessResultSchema>;

@@ -5,6 +5,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { getTableName } from 'drizzle-orm';
+import { PgDialect } from 'drizzle-orm/pg-core';
 import type { JwtPayload } from '../auth/jwt-payload.types';
 import type { Database } from '../database/database.types';
 import { AnswerSheetsService } from './answer-sheets.service';
@@ -150,6 +151,7 @@ function buildMockDb(plan: {
   // (no sólo las de la subida). El mock tiene que devolver lo que se acaba de upsertar,
   // ya joineado con `items`, o el recálculo vería una tabla vacía.
   const upserted: InsertedResponse[] = [];
+  const upsertConfigs: Array<{ set: Record<string, unknown> }> = [];
 
   const detectTable = (table: unknown): string => {
     try {
@@ -249,9 +251,10 @@ function buildMockDb(plan: {
             }
             return Promise.resolve([{ id: 'unknown' }]);
           },
-          onConflictDoUpdate: () => {
+          onConflictDoUpdate: (config: { set: Record<string, unknown> }) => {
             if (tableName === 'responses') {
               upserted.push(...(values as InsertedResponse[]));
+              upsertConfigs.push(config);
             }
             return Promise.resolve(undefined);
           },
@@ -270,6 +273,7 @@ function buildMockDb(plan: {
     transaction: async (cb: (tx: Database) => Promise<unknown>) => {
       return cb(txDb as unknown as Database);
     },
+    __upsertConfigs: upsertConfigs,
   };
 
   return db as unknown as Database;
@@ -622,6 +626,39 @@ describe('AnswerSheetsService', () => {
       expect(result.responsesCreated).toBe(2);
       expect(result.studentsProcessed).toBe(1);
       expect(['completed', 'partial']).toContain(result.status);
+    });
+
+    it('M2: el upsert conserva finalScore/scoredBy/scoredAt existentes cuando la fila entrante viene sin corregir', async () => {
+      const db = setupConfirmDb();
+      const service = new AnswerSheetsService(db, store);
+
+      const upload = await service.upload(
+        makeJwt(),
+        { buffer: gradecamCsv, originalname: 'g.csv' },
+        { format: 'gradecam_csv', instrumentId: INSTRUMENT_ID },
+      );
+      await service.confirm(makeJwt(), {
+        previewToken: upload.previewToken,
+        createAssessment: true,
+        skipErrorRows: true,
+      });
+
+      const configs = (db as unknown as { __upsertConfigs: Array<{ set: Record<string, unknown> }> })
+        .__upsertConfigs;
+      expect(configs).toHaveLength(1);
+      const dialect = new PgDialect();
+      const renderSet = (key: string) =>
+        dialect.sqlToQuery(configs[0].set[key] as Parameters<PgDialect['sqlToQuery']>[0]).sql;
+
+      for (const key of ['finalScore', 'scoredBy', 'scoredAt']) {
+        const rendered = renderSet(key);
+        expect(rendered).toContain('CASE WHEN excluded.final_score IS NULL AND');
+        expect(rendered).toContain('"final_score" IS NOT NULL');
+      }
+      expect(renderSet('finalScore')).toContain('ELSE excluded.final_score');
+      expect(renderSet('scoredBy')).toContain('ELSE excluded.scored_by');
+      expect(renderSet('scoredAt')).toContain('ELSE excluded.scored_at');
+      expect(renderSet('value')).toBe('excluded.value');
     });
 
     it('puntúa MCQ por estrategia y NO contamina el % con un ítem open_ended pendiente', async () => {

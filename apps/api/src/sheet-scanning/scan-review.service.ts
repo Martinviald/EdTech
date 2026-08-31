@@ -38,6 +38,7 @@ import type { AnswerSheetsService } from '../answer-sheets/answer-sheets.service
 import type { AnswerSheetPreviewStore } from '../answer-sheets/lib/preview-store';
 import type { ParserResult } from '../answer-sheets/lib/parsers/parser.types';
 import { FilesService } from '../files/files.service';
+import { DevelopmentGradingService } from './development-grading.service';
 import { toParserResult, type ConfirmedScanInput } from './scan-result.adapter';
 
 export const ANSWER_SHEET_CONFIRMER = 'ANSWER_SHEET_CONFIRMER';
@@ -152,6 +153,7 @@ export class ScanReviewService {
     @InjectDb() private readonly db: Database,
     @Inject(ANSWER_SHEET_CONFIRMER) private readonly answerSheetConfirmer: AnswerSheetConfirmer,
     private readonly filesService: FilesService,
+    private readonly developmentGrading: DevelopmentGradingService,
   ) {}
 
   async getQueue(orgId: string, batchId: string): Promise<ReviewQueueModel> {
@@ -539,6 +541,7 @@ export class ScanReviewService {
     });
 
     const pageCount = prepared.batch.spec.pageCount;
+    const cropPrintedNumbers = this.cropPrintedNumbersOf(prepared.batch.spec);
     const confirmedScans: ConfirmedScanInput[] = [];
     let incompleteSheets = 0;
     let unidentifiedSheets = 0;
@@ -554,18 +557,20 @@ export class ScanReviewService {
         incompleteSheets++;
         continue;
       }
-      const marks = sheet.marks.map((mark) => {
+      const marks: ConfirmedScanInput['marks'] = [];
+      for (const mark of sheet.marks) {
+        if (cropPrintedNumbers.has(mark.printedNumber)) continue;
         const reviewed = mark.reviewedAt !== null;
         if (!reviewed && (mark.state === 'multiple' || mark.state === 'ambiguous')) {
           assumedPending++;
         }
-        return {
+        marks.push({
           printedNumber: mark.printedNumber,
           state: mark.state,
           value: mark.value,
           ...(reviewed ? { reviewedValue: mark.reviewedValue } : {}),
-        };
-      });
+        });
+      }
       confirmedScans.push({
         sequence: sheet.sequence,
         studentRut: student.rut,
@@ -624,6 +629,14 @@ export class ScanReviewService {
         .update(sheetScanBatches)
         .set({ importJobId: outcome.jobId, updatedAt: new Date() })
         .where(and(eq(sheetScanBatches.orgId, orgId), eq(sheetScanBatches.id, batchId)));
+    });
+
+    this.developmentGrading.scheduleConfirmedBatch({
+      orgId,
+      batchId,
+      assessmentId: prepared.batch.assessmentId,
+      instrumentId: prepared.batch.instrumentId,
+      spec: prepared.batch.spec,
     });
 
     return {
@@ -793,6 +806,14 @@ export class ScanReviewService {
       index.set(row.id, this.filesService.buildDownloadUrl(row, 'inline') ?? null);
     }
     return index;
+  }
+
+  private cropPrintedNumbersOf(spec: LayoutSpec): Set<string> {
+    const printedNumbers = new Set<string>();
+    for (const field of spec.fields) {
+      if (field.kind === 'crop_region') printedNumbers.add(field.printedNumber);
+    }
+    return printedNumbers;
   }
 
   private buildOptionsIndex(spec: LayoutSpec): Map<string, string[]> {

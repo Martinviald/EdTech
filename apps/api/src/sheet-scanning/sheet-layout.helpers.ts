@@ -7,6 +7,9 @@ import {
   type LayoutField,
   type LayoutSpec,
   type OmrBubble,
+  type OmrRegion,
+  SHEET_QR_IDENTITY_REGION,
+  type SheetIdentityMode,
 } from '@soe/types';
 
 export interface DerivableItem {
@@ -42,16 +45,27 @@ export const SHEET_MAX_BUBBLES_PER_FIELD = 6;
 export const SHEET_FIELDS_PER_PAGE = SHEET_MAX_ROWS_PER_COLUMN * SHEET_COLUMNS_PER_PAGE;
 
 const GRID_TOP = 0.18;
+const GRID_TOP_RUT_BUBBLES = 0.34;
 const GRID_BOTTOM = 0.97;
 const COLUMN_START_X = [0.05, 0.37, 0.69] as const;
 const FIRST_BUBBLE_OFFSET_X = 0.045;
 const BUBBLE_SPACING_X = 0.05;
-const ROW_HEIGHT = (GRID_BOTTOM - GRID_TOP) / SHEET_MAX_ROWS_PER_COLUMN;
 
-const IDENTITY_REGION = {
-  topLeft: { x: 0.78, y: 0.02 },
-  bottomRight: { x: 0.98, y: 0.16 },
+export { SHEET_QR_IDENTITY_REGION };
+
+export const RUT_BODY_GROUP_COUNT = 8;
+export const RUT_DV_GROUP_INDEX = RUT_BODY_GROUP_COUNT;
+export const RUT_GRID_REGION: OmrRegion = {
+  topLeft: { x: 0.05, y: 0.03 },
+  bottomRight: { x: 0.52, y: 0.3 },
 };
+const RUT_GRID_BUBBLE_RADIUS = 0.008;
+const RUT_COLUMN_START_X = 0.075;
+const RUT_COLUMN_SPACING_X = 0.05;
+const RUT_ROW_START_Y = 0.06;
+const RUT_ROW_SPACING_Y = 0.022;
+const RUT_DIGIT_VALUES = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'] as const;
+const RUT_DV_EXTRA_VALUE = 'K';
 
 const TRUE_FALSE_VALUES = ['V', 'F'] as const;
 const SUPPORTED_ITEM_TYPES: ReadonlySet<ItemType> = new Set(['multiple_choice', 'true_false']);
@@ -129,14 +143,62 @@ export function partitionDerivableItems(items: readonly DerivableItem[]): Partit
   return { correctable, excluded };
 }
 
-function buildField(entry: CorrectableItem, slot: number): LayoutField {
+export function identityModeOf(spec: LayoutSpec | null | undefined): SheetIdentityMode {
+  const identity = spec?.identity as LayoutSpec['identity'] | undefined;
+  return identity?.mode ?? 'qr';
+}
+
+export function buildRutIdentityBubbles(): OmrBubble[] {
+  const bubbles: OmrBubble[] = [];
+  for (let group = 0; group <= RUT_DV_GROUP_INDEX; group++) {
+    const values: string[] =
+      group === RUT_DV_GROUP_INDEX ? [...RUT_DIGIT_VALUES, RUT_DV_EXTRA_VALUE] : [...RUT_DIGIT_VALUES];
+    const centerX = RUT_COLUMN_START_X + group * RUT_COLUMN_SPACING_X;
+    for (const [row, value] of values.entries()) {
+      bubbles.push({
+        value,
+        center: { x: centerX, y: RUT_ROW_START_Y + row * RUT_ROW_SPACING_Y },
+        radius: RUT_GRID_BUBBLE_RADIUS,
+        group,
+      });
+    }
+  }
+  return bubbles;
+}
+
+function gridTopOf(identityMode: SheetIdentityMode): number {
+  return identityMode === 'rut_bubbles' ? GRID_TOP_RUT_BUBBLES : GRID_TOP;
+}
+
+function buildIdentity(identityMode: SheetIdentityMode): LayoutSpec['identity'] {
+  if (identityMode === 'rut_bubbles') {
+    return {
+      mode: 'rut_bubbles',
+      region: {
+        topLeft: { ...RUT_GRID_REGION.topLeft },
+        bottomRight: { ...RUT_GRID_REGION.bottomRight },
+      },
+      bubbles: buildRutIdentityBubbles(),
+    };
+  }
+  return {
+    mode: identityMode,
+    region: {
+      topLeft: { ...SHEET_QR_IDENTITY_REGION.topLeft },
+      bottomRight: { ...SHEET_QR_IDENTITY_REGION.bottomRight },
+    },
+  };
+}
+
+function buildField(entry: CorrectableItem, slot: number, gridTop: number): LayoutField {
   const pageIndex = Math.floor(slot / SHEET_FIELDS_PER_PAGE);
   const slotInPage = slot % SHEET_FIELDS_PER_PAGE;
   const column = Math.floor(slotInPage / SHEET_MAX_ROWS_PER_COLUMN);
   const row = slotInPage % SHEET_MAX_ROWS_PER_COLUMN;
 
   const columnX = COLUMN_START_X[column]!;
-  const centerY = GRID_TOP + (row + 0.5) * ROW_HEIGHT;
+  const rowHeight = (GRID_BOTTOM - gridTop) / SHEET_MAX_ROWS_PER_COLUMN;
+  const centerY = gridTop + (row + 0.5) * rowHeight;
 
   const bubbles: OmrBubble[] = entry.values.map((value, index) => ({
     value,
@@ -158,9 +220,11 @@ function buildField(entry: CorrectableItem, slot: number): LayoutField {
 export function deriveLayoutDraft(
   instrumentId: string,
   items: readonly DerivableItem[],
+  identityMode: SheetIdentityMode = 'qr',
 ): LayoutDraftModel {
   const { correctable, excluded } = partitionDerivableItems(items);
-  const fields = correctable.map((entry, slot) => buildField(entry, slot));
+  const gridTop = gridTopOf(identityMode);
+  const fields = correctable.map((entry, slot) => buildField(entry, slot, gridTop));
   const pageCount = Math.max(1, Math.ceil(correctable.length / SHEET_FIELDS_PER_PAGE));
 
   const spec: LayoutSpec = {
@@ -173,13 +237,7 @@ export function deriveLayoutDraft(
       sizeRatio: SHEET_FIDUCIAL_SIZE_RATIO,
       marginRatio: SHEET_FIDUCIAL_MARGIN_RATIO,
     },
-    identity: {
-      mode: 'qr',
-      region: {
-        topLeft: { ...IDENTITY_REGION.topLeft },
-        bottomRight: { ...IDENTITY_REGION.bottomRight },
-      },
-    },
+    identity: buildIdentity(identityMode),
     fields,
   };
 
@@ -231,6 +289,77 @@ function collectOverlapViolations(spec: LayoutSpec): InvariantViolation[] {
     }
   }
 
+  return violations;
+}
+
+function collectDigitGroupViolations(
+  bubbles: readonly OmrBubble[],
+  fieldLabel: string,
+): InvariantViolation[] {
+  const violations: InvariantViolation[] = [];
+  const groups = new Set<number>();
+  let allGroupsPresent = true;
+
+  for (const bubble of bubbles) {
+    if (typeof bubble.group !== 'number' || !Number.isInteger(bubble.group)) {
+      allGroupsPresent = false;
+      violations.push({
+        invariant: 6,
+        message: `la burbuja "${bubble.value}" de ${fieldLabel} no declara su grupo (índice de dígito entero)`,
+      });
+      continue;
+    }
+    groups.add(bubble.group);
+  }
+
+  if (allGroupsPresent && groups.size > 0) {
+    const max = Math.max(...groups);
+    if (groups.size !== max + 1 || !groups.has(0)) {
+      violations.push({
+        invariant: 6,
+        message: `los grupos de ${fieldLabel} deben ser contiguos desde 0 (encontrados: ${Array.from(groups).sort((a, b) => a - b).join(', ')})`,
+      });
+    }
+  }
+
+  return violations;
+}
+
+function collectIdentityViolations(spec: LayoutSpec): InvariantViolation[] {
+  const violations: InvariantViolation[] = [];
+  const bubbles = spec.identity.bubbles ?? null;
+
+  if (spec.identity.mode === 'rut_bubbles') {
+    if (bubbles === null || bubbles.length === 0) {
+      violations.push({
+        invariant: 6,
+        message: 'el modo de identidad rut_bubbles requiere la grilla RUT en identity.bubbles',
+      });
+      return violations;
+    }
+    for (const bubble of bubbles) {
+      const inRange =
+        bubble.center.x - bubble.radius >= 0 &&
+        bubble.center.x + bubble.radius <= 1 &&
+        bubble.center.y - bubble.radius >= 0 &&
+        bubble.center.y + bubble.radius <= 1;
+      if (!inRange) {
+        violations.push({
+          invariant: 3,
+          message: 'una burbuja de la grilla RUT queda fuera del rango 0–1 de la página',
+        });
+      }
+    }
+    violations.push(...collectDigitGroupViolations(bubbles, 'la grilla RUT'));
+    return violations;
+  }
+
+  if (bubbles !== null) {
+    violations.push({
+      invariant: 6,
+      message: `el modo de identidad "${spec.identity.mode}" no lleva grilla en identity.bubbles`,
+    });
+  }
   return violations;
 }
 
@@ -319,6 +448,8 @@ export function collectInvariantViolations(
     }
   }
 
+  violations.push(...collectIdentityViolations(spec));
+
   for (const field of spec.fields) {
     if (field.kind === 'bubble_group' && field.bubbles.length === 0) {
       violations.push({
@@ -331,6 +462,17 @@ export function collectInvariantViolations(
         invariant: 6,
         message: `la pregunta "${field.printedNumber}" es una región de recorte sin región definida`,
       });
+    }
+    if (field.kind === 'digit_grid') {
+      if (field.bubbles.length === 0) {
+        violations.push({
+          invariant: 6,
+          message: `la pregunta "${field.printedNumber}" es una grilla de dígitos sin burbujas`,
+        });
+      }
+      violations.push(
+        ...collectDigitGroupViolations(field.bubbles, `la pregunta "${field.printedNumber}"`),
+      );
     }
   }
 

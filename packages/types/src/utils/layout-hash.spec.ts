@@ -1,5 +1,5 @@
 import { layoutHash, LAYOUT_HASH_LENGTH } from './layout-hash';
-import type { LayoutSpec } from '../schemas/omr-layout.schema';
+import { layoutSpecSchema, type LayoutSpec } from '../schemas/omr-layout.schema';
 
 const baseSpec: LayoutSpec = {
   specVersion: 1,
@@ -94,5 +94,58 @@ describe('layoutHash', () => {
     const broken = structuredClone(baseSpec);
     broken.fields[0]!.bubbles[0]!.radius = Number.POSITIVE_INFINITY;
     expect(() => layoutHash(broken)).toThrow();
+  });
+});
+
+describe('layoutHash — estabilidad de specs MVP tras las enmiendas v1 (CD-8/CD-10/CD-12)', () => {
+  const MVP_REFERENCE_HASH = 'a9718c3cc1e24e82';
+
+  it('un spec del MVP conserva el hash calculado antes de las enmiendas', () => {
+    expect(layoutHash(baseSpec)).toBe(MVP_REFERENCE_HASH);
+  });
+
+  it('parsear un spec del MVP con el schema v1 no materializa campos nuevos ni cambia el hash', () => {
+    expect(layoutHash(layoutSpecSchema.parse(baseSpec))).toBe(MVP_REFERENCE_HASH);
+  });
+
+  const v1Spec: LayoutSpec = {
+    ...structuredClone(baseSpec),
+    identity: {
+      mode: 'rut_bubbles',
+      region: { topLeft: { x: 0.06, y: 0.03 }, bottomRight: { x: 0.5, y: 0.2 } },
+      bubbles: [
+        { value: '1', center: { x: 0.08, y: 0.05 }, radius: 0.009, group: 0 },
+        { value: 'K', center: { x: 0.12, y: 0.05 }, radius: 0.009, group: 1 },
+      ],
+    },
+    fields: [
+      ...structuredClone(baseSpec.fields),
+      {
+        fieldId: 'f_014',
+        kind: 'digit_grid',
+        printedNumber: '14',
+        pageIndex: 0,
+        selectMode: 'single',
+        bubbles: [
+          { value: '0', center: { x: 0.6, y: 0.3 }, radius: 0.009, group: 0 },
+          { value: '1', center: { x: 0.6, y: 0.32 }, radius: 0.009, group: 0 },
+          { value: '0', center: { x: 0.65, y: 0.3 }, radius: 0.009, group: 1 },
+          { value: '1', center: { x: 0.65, y: 0.32 }, radius: 0.009, group: 1 },
+        ],
+        region: null,
+      },
+    ],
+  };
+
+  it('un spec v1 con group hashea determinístico', () => {
+    expect(layoutHash(v1Spec)).toBe(layoutHash(structuredClone(v1Spec)));
+    expect(layoutHash(layoutSpecSchema.parse(v1Spec))).toBe(layoutHash(v1Spec));
+    expect(layoutHash(v1Spec)).toMatch(new RegExp(`^[0-9a-f]{${LAYOUT_HASH_LENGTH}}$`));
+  });
+
+  it('el group participa del hash: cambiar el dígito de una burbuja cambia el hash', () => {
+    const moved = structuredClone(v1Spec);
+    moved.fields[1]!.bubbles[0]!.group = 2;
+    expect(layoutHash(moved)).not.toBe(layoutHash(v1Spec));
   });
 });

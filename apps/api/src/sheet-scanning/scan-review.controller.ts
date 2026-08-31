@@ -25,6 +25,7 @@ import { Roles } from '../common/decorators/roles.decorator';
 import { RolesGuard } from '../common/guards/roles.guard';
 import { SensitiveDataGuard } from '../common/guards/sensitive-data.guard';
 import { getEffectiveOrgId } from '../common/helpers/org-context.helper';
+import { parseDtoOrBadRequest } from './parse-dto.helper';
 import { ScanReviewService } from './scan-review.service';
 
 @Controller('sheet-scan-batches')
@@ -68,7 +69,7 @@ export class ScanReviewMarksController {
     @CurrentUser() user: JwtPayload,
     @Query('orgId') orgId?: string,
   ): Promise<ReviewMarkModel> {
-    const dto = reviewMarkSchema.parse(body);
+    const dto = parseDtoOrBadRequest(reviewMarkSchema, body);
     return this.scanReviewService.resolveMark(getEffectiveOrgId(user, orgId), user.userId, id, dto);
   }
 }
@@ -87,7 +88,7 @@ export class ScanReviewScansController {
     @CurrentUser() user: JwtPayload,
     @Query('orgId') orgId?: string,
   ): Promise<ReviewScanModel> {
-    const dto = assignScanIdentitySchema.parse(body);
+    const dto = parseDtoOrBadRequest(assignScanIdentitySchema, body);
     return this.scanReviewService.assignIdentity(
       getEffectiveOrgId(user, orgId),
       user.userId,
@@ -105,7 +106,7 @@ export class ScanReviewScansController {
     @CurrentUser() user: JwtPayload,
     @Query('orgId') orgId?: string,
   ): Promise<ReviewScanModel> {
-    const dto = discardScanSchema.parse(body);
+    const dto = parseDtoOrBadRequest(discardScanSchema, body);
     return this.scanReviewService.discardScan(getEffectiveOrgId(user, orgId), user.userId, id, dto);
   }
 }
