@@ -1,17 +1,15 @@
 'use client';
 
 import { useMutation } from '@tanstack/react-query';
-import type { AssessCaptureDto, AssessCaptureResponse } from '@soe/types';
-import { apiClientPost } from '@/lib/api-client';
+import type { CaptureTransport } from '@soe/types';
 
 export const assessCaptureKeys = {
   mutation: () => ['sheet-scan-assess-capture'] as const,
 };
 
-export function useAssessCapture() {
+export function useAssessCapture(assess: CaptureTransport['assess']) {
   return useMutation({
     mutationKey: assessCaptureKeys.mutation(),
-    mutationFn: (dto: AssessCaptureDto) =>
-      apiClientPost<AssessCaptureResponse>('/sheet-scan-batches/assess-capture', dto),
+    mutationFn: (imageBase64: string) => assess(imageBase64),
   });
 }
