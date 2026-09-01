@@ -12,8 +12,13 @@ import {
   uuid,
 } from 'drizzle-orm/pg-core';
 import { relations } from 'drizzle-orm';
-import type { CaptureProfile, LayoutSpec, PageQuality } from '@soe/types';
-import { markStateEnum, sheetScanBatchStatusEnum, sheetScanStateEnum } from './enums';
+import type { CaptureProfile, CaptureSessionCapture, LayoutSpec, PageQuality } from '@soe/types';
+import {
+  captureSessionStatusEnum,
+  markStateEnum,
+  sheetScanBatchStatusEnum,
+  sheetScanStateEnum,
+} from './enums';
 import { organizations } from './organizations';
 import { users } from './users';
 import { students } from './students';
@@ -214,6 +219,43 @@ export const sheetScanMarks = pgTable(
   }),
 );
 
+/**
+ * Sesión de captura remota (E22-R, CD-16): empareja un teléfono SIN login con
+ * un lote vía QR. El secreto jamás se persiste en claro (sólo su sha256); el
+ * teléfono lo canjea por un capture token acotado a ESTA sesión (CD-18). El
+ * lote asociado nace junto con la sesión y las fotos aceptadas se agregan de a
+ * una a `sourceFileIds` (CD-19). `captures` es evidencia para el live view del
+ * PC (identidades leídas por el gate), no la resolución autoritativa — esa
+ * ocurre en /v1/read al procesar el lote.
+ */
+export const captureSessions = pgTable(
+  'capture_sessions',
+  {
+    id: uuid('id').defaultRandom().primaryKey(),
+    orgId: uuid('org_id')
+      .notNull()
+      .references(() => organizations.id),
+    printRunId: uuid('print_run_id')
+      .notNull()
+      .references(() => sheetPrintRuns.id),
+    batchId: uuid('batch_id')
+      .notNull()
+      .references(() => sheetScanBatches.id),
+    status: captureSessionStatusEnum('status').default('pending').notNull(),
+    secretHash: text('secret_hash').notNull(),
+    redeemCount: integer('redeem_count').default(0).notNull(),
+    captures: jsonb('captures').$type<CaptureSessionCapture[]>().default([]).notNull(),
+    expiresAt: timestamp('expires_at').notNull(),
+    createdById: uuid('created_by_id').references(() => users.id),
+    createdAt: timestamp('created_at').defaultNow().notNull(),
+    updatedAt: timestamp('updated_at').defaultNow().notNull(),
+  },
+  (t) => ({
+    orgStatusIdx: index('capture_sessions_org_status_idx').on(t.orgId, t.status, t.expiresAt),
+    batchIdx: index('capture_sessions_batch_idx').on(t.batchId),
+  }),
+);
+
 export const sheetLayoutsRelations = relations(sheetLayouts, ({ one, many }) => ({
   org: one(organizations, { fields: [sheetLayouts.orgId], references: [organizations.id] }),
   instrument: one(instruments, { fields: [sheetLayouts.instrumentId], references: [instruments.id] }),
@@ -263,6 +305,19 @@ export const sheetScanMarksRelations = relations(sheetScanMarks, ({ one }) => ({
   reviewedBy: one(users, { fields: [sheetScanMarks.reviewedById], references: [users.id] }),
 }));
 
+export const captureSessionsRelations = relations(captureSessions, ({ one }) => ({
+  org: one(organizations, { fields: [captureSessions.orgId], references: [organizations.id] }),
+  printRun: one(sheetPrintRuns, {
+    fields: [captureSessions.printRunId],
+    references: [sheetPrintRuns.id],
+  }),
+  batch: one(sheetScanBatches, {
+    fields: [captureSessions.batchId],
+    references: [sheetScanBatches.id],
+  }),
+  createdBy: one(users, { fields: [captureSessions.createdById], references: [users.id] }),
+}));
+
 export type SheetLayout = typeof sheetLayouts.$inferSelect;
 export type NewSheetLayout = typeof sheetLayouts.$inferInsert;
 export type SheetPrintRun = typeof sheetPrintRuns.$inferSelect;
@@ -275,3 +330,5 @@ export type SheetScan = typeof sheetScans.$inferSelect;
 export type NewSheetScan = typeof sheetScans.$inferInsert;
 export type SheetScanMark = typeof sheetScanMarks.$inferSelect;
 export type NewSheetScanMark = typeof sheetScanMarks.$inferInsert;
+export type CaptureSession = typeof captureSessions.$inferSelect;
+export type NewCaptureSession = typeof captureSessions.$inferInsert;

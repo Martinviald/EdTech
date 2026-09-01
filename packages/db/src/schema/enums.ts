@@ -334,4 +334,10 @@ export const feedbackStatusEnum = pgEnum('feedback_status', [
   'planned',
   'done',
   'discarded',
+export const captureSessionStatusEnum = pgEnum('capture_session_status', [
+  'pending',
+  'active',
+  'closed',
+  'revoked',
+  'expired',
 ]);

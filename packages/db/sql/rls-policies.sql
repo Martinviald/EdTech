@@ -382,3 +382,22 @@ CREATE POLICY "feedback_tenant_isolation" ON "feedback"
   AS PERMISSIVE FOR ALL
   USING (org_id::text = current_setting('app.current_org_id', true))
   WITH CHECK (org_id::text = current_setting('app.current_org_id', true));
+-- ── Captura remota (E22-R, CD-16) — sesiones de emparejamiento QR ─────────────
+-- El canje del secreto ocurre ANTES de conocer la org (ruta pública, sin
+-- withOrgContext): la segunda política permite leer EXACTAMENTE la fila cuyo id
+-- ya se conoce, fijando `app.capture_session_id` en la transacción (CD-18).
+-- Nunca es un escape genérico: sólo SELECT, sólo por id propio. Todo lo demás
+-- (updates, appends, joins) corre dentro de withOrgContext como siempre.
+ALTER TABLE "capture_sessions" ENABLE ROW LEVEL SECURITY;
+ALTER TABLE "capture_sessions" FORCE  ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "capture_sessions_tenant_isolation" ON "capture_sessions";
+CREATE POLICY "capture_sessions_tenant_isolation" ON "capture_sessions"
+  AS PERMISSIVE FOR ALL
+  USING (org_id::text = current_setting('app.current_org_id', true))
+  WITH CHECK (org_id::text = current_setting('app.current_org_id', true));
+
+DROP POLICY IF EXISTS "capture_sessions_redeem_by_id" ON "capture_sessions";
+CREATE POLICY "capture_sessions_redeem_by_id" ON "capture_sessions"
+  AS PERMISSIVE FOR SELECT
+  USING (id::text = current_setting('app.capture_session_id', true));

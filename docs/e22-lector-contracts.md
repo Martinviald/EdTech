@@ -383,3 +383,115 @@ Igual que en el MVP: los archivos compartidos sólo se tocan en V0 (hecho) y V3
 | **B2** | `apps/api/src/sheet-scanning/development-grading.service.ts` (+spec); consume `llm` y `responses`, NO los toca |
 | **B3** | `sheet-print.service.ts` (extensión formas), `sheet-scan.service.ts` (validar forma de la tirada), spec updates |
 | **B4** | `apps/api/scripts/` (retención CD-14), `sst.config.ts` (contenedor OMR), `.env.example`, `apps/web/src/lib/` (`apiGetBinary`), límites de lote, endpoint de métricas del módulo |
+
+## 11. Contratos E22-R (CD-16..CD-23) — captura remota con teléfono
+
+Diseño completo en `docs/diseno-captura-remota-movil.md`; plan de ejecución en
+`docs/plan-desarrollo-captura-remota.md`. Todas las enmiendas son aditivas: nada
+del MVP ni de la v1 cambia de shape, y `services/omr/**` NO se toca (el gate
+CD-11 se consume tal cual). Shapes congelados en
+`packages/types/src/schemas/sheet-capture.schema.ts`.
+
+### CD-16 — Tabla `capture_sessions`
+
+`packages/db/src/schema/sheet-scanning.ts` (migración `0023_rapid_cerebro`).
+Sesión de emparejamiento QR: `org_id`, `print_run_id`, `batch_id` (el lote nace
+CON la sesión), `status` (`pending|active|closed|revoked|expired`),
+`secret_hash` (sha256; el secreto en claro JAMÁS se persiste), `redeem_count`,
+`captures` (jsonb, evidencia para el live view), `expires_at`. RLS con dos
+políticas en `packages/db/sql/rls-policies.sql`: aislamiento por org (estándar)
++ `capture_sessions_redeem_by_id` (SELECT de la propia fila vía
+`app.capture_session_id`, para el canje público — ver CD-18).
+
+### CD-17 — Ciclo de vida y límites
+
+TTL **15 minutos** fijo (`CAPTURE_SESSION_TTL_MINUTES`), canjes ≤ **3**
+(`CAPTURE_SESSION_MAX_REDEEMS`: segundo teléfono o recarga de página, no fuga
+masiva), capturas ≤ **60** (tope de lote existente). `pending → active` en el
+primer canje; `closed` al terminar; `revoked` desde el PC; `expired` por barrido
+o al tocar una sesión vencida. Regenerar QR = revocar + crear sesión nueva (el
+lote anterior sobrevive `pending` con sus capturas).
+
+### CD-18 — Canje y capture token
+
+`POST /sheet-capture/redeem { sessionId, secret }` (ruta `@Public()`; el secreto
+ES la credencial). Comparación de tiempo constante contra `secret_hash`. La
+lectura pre-org usa `withCaptureSessionContext(db, sessionId, tx => …)` de
+`@soe/db` (política redeem_by_id); todo lo demás vuelve a `withOrgContext`.
+Respuesta: **capture token** = JWT HS256 firmado con `jose`, clave derivada del
+`AUTH_SECRET` vía HKDF-SHA256 con salt `'sheet-capture-token'`, claims
+`{ sessionId, orgId, printRunId, batchId, scope: 'sheet-capture' }`,
+`exp = expires_at` de la sesión. Un JWE de usuario no pasa el guard de captura y
+un capture token no pasa el `AuthGuard`: superficies disjuntas.
+
+### CD-19 — Lote incremental
+
+El lote nace junto con la sesión (`pending`, `sourceFileIds: []`). Cada foto
+aceptada por el gate ⇒ `upload-intent` (crea el intent presigned con
+`ownerType: 'sheet_scan'`, `ownerId: batchId`, `purpose: 'scan_source'`) +
+append transaccional del fileId a `sourceFileIds` y de la evidencia a
+`captures`. `finish` ⇒ sesión `closed` + `startProcessing` existente. La
+identidad que acompaña cada captura es INFORMATIVA (live view); la resolución
+autoritativa sigue siendo la de `/v1/read` al procesar.
+
+### CD-20 — Superficie REST
+
+Token-scoped (controller `sheet-capture.controller.ts`, `@Public()` frente al
+`AuthGuard`, protegido por `CaptureSessionGuard`):
+
+| Ruta | Guard | Body/Respuesta |
+|---|---|---|
+| `POST /sheet-capture/redeem` | — | `redeemCaptureSessionSchema` → `RedeemCaptureSessionResponse` |
+| `GET /sheet-capture/session` | CaptureSessionGuard | → `CaptureSessionStatusModel` |
+| `POST /sheet-capture/assess` | CaptureSessionGuard | `captureAssessSchema` → `AssessCaptureResponse` (printRunId del token) |
+| `POST /sheet-capture/upload-intent` | CaptureSessionGuard | `captureUploadIntentSchema` → `ScanUploadIntent` |
+| `POST /sheet-capture/files/:id/confirm` | CaptureSessionGuard | `captureConfirmFileSchema` (valida que el file pertenece al lote de la sesión) |
+| `POST /sheet-capture/finish` | CaptureSessionGuard | → `FinishCaptureSessionResponse` |
+
+Autenticada (controller `sheet-capture-sessions.controller.ts`, roles
+`SHEET_MANAGEMENT_ROLES`):
+
+| Ruta | Body/Respuesta |
+|---|---|
+| `POST /sheet-capture-sessions` | `createCaptureSessionSchema` → `CreateCaptureSessionResponse` (única vez que viaja el secreto) |
+| `GET /sheet-capture-sessions/:id` | → `CaptureSessionStatusModel` (polling del PC) |
+| `POST /sheet-capture-sessions/:id/revoke` | → `CaptureSessionStatusModel` |
+| `POST /sheet-capture-sessions/:id/finish` | → `FinishCaptureSessionResponse` (cierre desde el PC) |
+
+### CD-21 — `CaptureTransport` y reuso de la cámara
+
+Tipo congelado en `@soe/types`: `{ assess, createUploadIntent, confirmFile }`.
+`CameraCaptureSection` gana una prop opcional `assessOverride` (o recibe el
+transporte): con la sesión del dashboard usa el flujo actual (proxy + cookie)
+SIN cambio de comportamiento; en el móvil usa la implementación por capture
+token. La vista móvil sube cada foto aceptada INMEDIATAMENTE (upload-intent +
+PUT S3 + confirm), a diferencia del PC que encola hasta el submit.
+
+### CD-22 — Proxy dedicado y ruta móvil
+
+El proxy genérico (`/api/proxy`) exige cookie de sesión y pisa `Authorization`
+⇒ NO sirve para el móvil (verificado en R0). Ruta nueva
+`apps/web/src/app/api/capture-proxy/[...path]/route.ts`: reenvía el
+`Authorization: Bearer <capture token>` entrante hacia
+`${API_URL}/api/sheet-capture/<path>` — SOLO hacia `sheet-capture/*`, nada más.
+Vista móvil: `apps/web/src/app/movil/hojas/[sessionId]/page.tsx` (fuera de
+`(dashboard)`), excepción `movil` en el matcher de `middleware.ts`. El secreto
+viaja en el fragment (`#`), se lee client-side y el token vive en memoria
+(jamás localStorage).
+
+### CD-23 — Expiración, limpieza y PC
+
+Polling del PC: TanStack Query `refetchInterval` 2500 ms sobre
+`GET /sheet-capture-sessions/:id` (patrón `useRemedialStatus`). Sesión vencida
+al tocarla (canje, guard, GET) ⇒ transición a `expired` en esa misma operación.
+Sesión `expired`/`revoked` con capturas ⇒ el lote queda `pending` (visible en
+"Lotes recientes", procesable a mano); sin capturas ⇒ el barrido de vencidas
+puede eliminar el lote vacío. SSE/WebSockets: fuera de alcance declarado.
+
+## 12. Propiedad de archivos por workstream (E22-R, fase R1)
+
+| WS | Archivos propios (crear/editar SÓLO estos) |
+|---|---|
+| **B-R1** | `apps/api/src/sheet-scanning/capture-session.service.ts` (+spec), `capture-session.guard.ts` (+spec), `capture-token.helpers.ts` (+spec si aplica), `sheet-capture.controller.ts` (+spec), `sheet-capture-sessions.controller.ts` (+spec), `sheet-scanning.module.ts` (wiring) |
+| **F-R1** | `apps/web/src/app/movil/hojas/[sessionId]/**`, `apps/web/src/app/api/capture-proxy/[...path]/route.ts`, `apps/web/src/middleware.ts`, `apps/web/src/lib/capture-transport.ts`, `hojas/hooks/use-assess-capture.ts` (parametrizar), `hojas/escanear/CameraCaptureSection.tsx` (SOLO inyección del transporte) |
+| **F-R2** | `hojas/escanear/RemoteCaptureSection.tsx`, `hojas/escanear/ScanUploadForm.tsx` (tercera opción del toggle), `hojas/hooks/use-capture-session.ts`, `hojas/escanear/capture-session-actions.ts`, `apps/web/package.json` (dep `qrcode.react` — ya instalada en R0 si aplica) |

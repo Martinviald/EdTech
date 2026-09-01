@@ -49,6 +49,7 @@ export * from './student-signals.schema';
 export * from './document.schema';
 export * from './omr-layout.schema';
 export * from './omr-scan.schema';
+export * from './sheet-capture.schema';
 export * from './sheet-scanning.schema';
 export * from './mcp.schema';
 export * from './telemetry.schema';

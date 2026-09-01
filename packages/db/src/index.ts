@@ -6,3 +6,4 @@ export * from './queries/platform-admins';
 export * from './queries/auth-context';
 export * from './queries/cohort-stats';
 export { withOrgContext } from './with-org-context';
+export { withCaptureSessionContext } from './with-capture-session-context';
