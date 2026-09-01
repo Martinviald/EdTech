@@ -6,7 +6,17 @@ import { useRouter } from 'next/navigation';
 import type { Route } from 'next';
 import { useDropzone, type FileRejection } from 'react-dropzone';
 import { toast } from 'sonner';
-import { Camera, FileText, Loader2, RotateCcw, ScanLine, Smartphone, Upload, X } from 'lucide-react';
+import {
+  Camera,
+  FileText,
+  Loader2,
+  QrCode,
+  RotateCcw,
+  ScanLine,
+  Smartphone,
+  Upload,
+  X,
+} from 'lucide-react';
 import {
   createScanBatchSchema,
   DEFAULT_CAPTURE_PROFILES,
@@ -30,6 +40,7 @@ import { cn } from '@/lib/utils';
 import { confirmScanFile, createScanBatch, startScanBatch } from './actions';
 import { SCAN_ROUTES } from './batch-meta';
 import { CameraCaptureSection } from './CameraCaptureSection';
+import { RemoteCaptureSection } from './RemoteCaptureSection';
 import { assessIdentityLabel } from './capture-identity';
 
 const MAX_FILE_BYTES = 50 * 1024 * 1024;
@@ -91,7 +102,7 @@ type UploadFileState = {
 
 type Phase = 'form' | 'creating' | 'uploading' | 'starting';
 
-type UploadMode = 'files' | 'camera';
+type UploadMode = 'files' | 'camera' | 'remote';
 
 function captureEntryLabel(entry: UploadFileState): string | null {
   if (entry.origin !== 'camera' || !entry.identity) return null;
@@ -328,6 +339,7 @@ export function ScanUploadForm({
     .map((entry) => entry.identity)
     .filter((identity): identity is AssessCaptureIdentityModel => identity != null);
   const showCamera = editable && source === 'phone' && uploadMode === 'camera';
+  const showRemote = editable && source === 'phone' && uploadMode === 'remote';
 
   const failedCount = files.filter((entry) => entry.status === 'error').length;
   const doneCount = files.filter((entry) => entry.status === 'done').length;
@@ -436,7 +448,7 @@ export function ScanUploadForm({
 
           <div className="space-y-3">
             {editable && source === 'phone' && (
-              <div className="grid grid-cols-2 gap-1 rounded-lg border bg-muted/40 p-1">
+              <div className="grid grid-cols-3 gap-1 rounded-lg border bg-muted/40 p-1">
                 <Button
                   type="button"
                   variant={uploadMode === 'files' ? 'secondary' : 'ghost'}
@@ -453,22 +465,37 @@ export function ScanUploadForm({
                   <Camera className="mr-2 size-4" aria-hidden />
                   Cámara
                 </Button>
+                <Button
+                  type="button"
+                  variant={uploadMode === 'remote' ? 'secondary' : 'ghost'}
+                  onClick={() => setUploadMode('remote')}
+                >
+                  <QrCode className="mr-2 size-4" aria-hidden />
+                  Con el teléfono
+                </Button>
               </div>
             )}
 
-            {showCamera ? (
+            {showCamera || showRemote ? (
               printRunId === '' ? (
                 <AlertCallout tone="info" title="Primero elige la tirada">
                   El control de calidad revisa cada foto contra la tirada que se rindió: selecciona
                   la tirada de impresión arriba para activar la cámara.
                 </AlertCallout>
-              ) : (
+              ) : showCamera ? (
                 <CameraCaptureSection
                   printRunId={printRunId}
                   expectedSheets={selectedRun?.sheetCount ?? null}
                   capturedIdentities={capturedIdentities}
                   capturedCount={cameraCaptures.length}
                   onAccepted={handleCameraAccepted}
+                />
+              ) : (
+                <RemoteCaptureSection
+                  key={printRunId}
+                  printRunId={printRunId}
+                  expectedSheets={selectedRun?.sheetCount ?? null}
+                  onCancel={() => setUploadMode('files')}
                 />
               )
             ) : (
@@ -491,7 +518,7 @@ export function ScanUploadForm({
               </div>
             )}
 
-            {files.length > 0 && (
+            {uploadMode !== 'remote' && files.length > 0 && (
               <ul className="divide-y rounded-lg border">
                 {files.map((entry, index) => (
                   <li key={`${entry.file.name}-${index}`} className="flex items-center gap-3 p-3">
@@ -542,32 +569,34 @@ export function ScanUploadForm({
             )}
           </div>
 
-          <div className="flex flex-wrap items-center gap-3">
-            {phase === 'form' || phase === 'creating' ? (
-              <Button type="submit" disabled={busy || files.length === 0 || !printRunId}>
-                {phase === 'creating' ? (
-                  <Loader2 className="mr-2 size-4 animate-spin" aria-hidden />
-                ) : (
-                  <Upload className="mr-2 size-4" aria-hidden />
-                )}
-                Subir y procesar
-              </Button>
-            ) : (
-              <>
-                <p className="text-sm text-muted-foreground" role="status">
-                  {phase === 'starting'
-                    ? 'Iniciando el procesamiento…'
-                    : `${doneCount} de ${files.length} archivos subidos`}
-                </p>
-                {failedCount > 0 && !uploadInFlight && phase === 'uploading' && (
-                  <Button type="button" variant="outline" onClick={handleRetryFailed}>
-                    <RotateCcw className="mr-2 size-4" aria-hidden />
-                    Reintentar {failedCount} {failedCount === 1 ? 'archivo' : 'archivos'}
-                  </Button>
-                )}
-              </>
-            )}
-          </div>
+          {uploadMode !== 'remote' && (
+            <div className="flex flex-wrap items-center gap-3">
+              {phase === 'form' || phase === 'creating' ? (
+                <Button type="submit" disabled={busy || files.length === 0 || !printRunId}>
+                  {phase === 'creating' ? (
+                    <Loader2 className="mr-2 size-4 animate-spin" aria-hidden />
+                  ) : (
+                    <Upload className="mr-2 size-4" aria-hidden />
+                  )}
+                  Subir y procesar
+                </Button>
+              ) : (
+                <>
+                  <p className="text-sm text-muted-foreground" role="status">
+                    {phase === 'starting'
+                      ? 'Iniciando el procesamiento…'
+                      : `${doneCount} de ${files.length} archivos subidos`}
+                  </p>
+                  {failedCount > 0 && !uploadInFlight && phase === 'uploading' && (
+                    <Button type="button" variant="outline" onClick={handleRetryFailed}>
+                      <RotateCcw className="mr-2 size-4" aria-hidden />
+                      Reintentar {failedCount} {failedCount === 1 ? 'archivo' : 'archivos'}
+                    </Button>
+                  )}
+                </>
+              )}
+            </div>
+          )}
         </form>
       </CardContent>
     </Card>
