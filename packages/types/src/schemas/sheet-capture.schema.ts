@@ -63,16 +63,12 @@ export const captureIdentitySchema = z.object({
 export const captureUploadIntentSchema = z.object({
   fileName: z.string().min(1).max(300),
   mimeType: z.literal('image/jpeg'),
-  sizeBytes: z
-    .number()
-    .int()
-    .min(1)
-    .max(ASSESS_CAPTURE_MAX_IMAGE_BYTES * 2),
+  sizeBytes: z.number().int().min(1).max(ASSESS_CAPTURE_MAX_IMAGE_BYTES),
   identity: captureIdentitySchema.nullable(),
 });
 
 export const captureConfirmFileSchema = z.object({
-  sizeBytes: z.number().int().min(1),
+  sizeBytes: z.number().int().min(1).max(ASSESS_CAPTURE_MAX_IMAGE_BYTES),
 });
 
 export type CreateCaptureSessionDto = z.infer<typeof createCaptureSessionSchema>;

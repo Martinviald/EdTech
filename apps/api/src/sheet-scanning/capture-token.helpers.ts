@@ -18,6 +18,9 @@ export type CaptureTokenClaims = {
 export type ActiveCaptureSession = Omit<CaptureTokenClaims, 'scope'>;
 
 export async function deriveCaptureTokenKey(appSecret: string): Promise<Uint8Array> {
+  if (appSecret.length < 16) {
+    throw new Error('AUTH_SECRET ausente o demasiado corto para derivar la clave de captura');
+  }
   const derived = await hkdfAsync(
     'sha256',
     appSecret,

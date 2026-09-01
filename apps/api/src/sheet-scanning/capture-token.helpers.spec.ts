@@ -36,12 +36,17 @@ describe('hashCaptureSecret / captureSecretMatchesHash', () => {
 
 describe('deriveCaptureTokenKey', () => {
   it('es determinista para el mismo secreto y cambia con el secreto', async () => {
-    const a = await deriveCaptureTokenKey('secreto-app');
-    const b = await deriveCaptureTokenKey('secreto-app');
-    const c = await deriveCaptureTokenKey('otro-secreto');
+    const a = await deriveCaptureTokenKey('secreto-app-de-prueba');
+    const b = await deriveCaptureTokenKey('secreto-app-de-prueba');
+    const c = await deriveCaptureTokenKey('otro-secreto-de-prueba');
 
     expect(a).toHaveLength(32);
     expect(Buffer.from(a).equals(Buffer.from(b))).toBe(true);
     expect(Buffer.from(a).equals(Buffer.from(c))).toBe(false);
+  });
+
+  it('rechaza un AUTH_SECRET ausente o demasiado corto (clave degenerada)', async () => {
+    await expect(deriveCaptureTokenKey('')).rejects.toThrow('AUTH_SECRET');
+    await expect(deriveCaptureTokenKey('corto')).rejects.toThrow('AUTH_SECRET');
   });
 });

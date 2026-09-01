@@ -123,7 +123,7 @@ describe('CaptureSessionGuard', () => {
 
   it('rechaza un token firmado con otra clave', async () => {
     const { guard } = makeGuard([[activeRow()]]);
-    const token = await makeToken(CLAIMS, { secret: 'otro-secreto' });
+    const token = await makeToken(CLAIMS, { secret: 'otro-secreto-de-prueba' });
     const { context } = makeContext(`Bearer ${token}`);
 
     await expect(guard.canActivate(context)).rejects.toBeInstanceOf(UnauthorizedException);

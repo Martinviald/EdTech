@@ -7,11 +7,12 @@ import {
   UnauthorizedException,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { and, eq, sql } from 'drizzle-orm';
+import { and, eq, inArray, sql } from 'drizzle-orm';
 import { SignJWT } from 'jose';
 import {
   captureSessions,
   classGroups,
+  files,
   instruments,
   sheetLayouts,
   sheetPrintRuns,
@@ -201,9 +202,10 @@ export class CaptureSessionService {
         .where(
           and(eq(captureSessions.id, session.sessionId), eq(captureSessions.orgId, session.orgId)),
         )
-        .limit(1);
+        .limit(1)
+        .for('update');
       if (!row) throw new NotFoundException(SESSION_NOT_FOUND_MESSAGE);
-      if (row.status !== 'active') throw new ConflictException(SESSION_NOT_ACTIVE_MESSAGE);
+      if (row.status !== 'active') throw new UnauthorizedException(SESSION_NOT_ACTIVE_MESSAGE);
       if (row.captures.length >= CAPTURE_SESSION_MAX_CAPTURES) {
         throw new BadRequestException(
           `Alcanzaste el máximo de ${CAPTURE_SESSION_MAX_CAPTURES} fotos por sesión. Termina la captura para procesar el lote.`,
@@ -222,7 +224,7 @@ export class CaptureSessionService {
         .limit(1);
       if (!batch) throw new NotFoundException('Lote de escaneo no encontrado');
       if (batch.status !== 'pending') {
-        throw new ConflictException('El lote ya entró a procesamiento y no acepta más fotos.');
+        throw new UnauthorizedException(SESSION_NOT_ACTIVE_MESSAGE);
       }
 
       const { file, upload } = await this.filesService.createUploadIntent({
@@ -309,14 +311,26 @@ export class CaptureSessionService {
       throw new ConflictException(SESSION_NOT_ACTIVE_MESSAGE);
     }
 
-    await withOrgContext(this.db, orgId, (tx) =>
-      tx
+    const wonClose = await withOrgContext(this.db, orgId, async (tx) => {
+      const closed = await tx
         .update(captureSessions)
         .set({ status: 'closed', updatedAt: new Date() })
-        .where(and(eq(captureSessions.id, sessionId), eq(captureSessions.orgId, orgId))),
-    );
+        .where(
+          and(
+            eq(captureSessions.id, sessionId),
+            eq(captureSessions.orgId, orgId),
+            inArray(captureSessions.status, ['pending', 'active']),
+          ),
+        )
+        .returning({ id: captureSessions.id });
+      return closed.length > 0;
+    });
+    if (!wonClose) {
+      return this.finishResponseFromBatch(orgId, row.batchId);
+    }
 
-    if (row.captures.length === 0) {
+    const readyFileIds = await this.pruneUnconfirmedFiles(orgId, sessionId, row.batchId);
+    if (readyFileIds.length === 0) {
       return this.finishResponseFromBatch(orgId, row.batchId);
     }
 
@@ -326,6 +340,54 @@ export class CaptureSessionService {
       row.batchId,
     );
     return { batchId: row.batchId, batchStatus: batch.status };
+  }
+
+  private async pruneUnconfirmedFiles(
+    orgId: string,
+    sessionId: string,
+    batchId: string,
+  ): Promise<string[]> {
+    return withOrgContext(this.db, orgId, async (tx) => {
+      const [batch] = await tx
+        .select({ sourceFileIds: sheetScanBatches.sourceFileIds })
+        .from(sheetScanBatches)
+        .where(and(eq(sheetScanBatches.id, batchId), eq(sheetScanBatches.orgId, orgId)))
+        .limit(1);
+      if (!batch) throw new NotFoundException('Lote de escaneo no encontrado');
+      if (batch.sourceFileIds.length === 0) return [];
+
+      const readyRows = await tx
+        .select({ id: files.id })
+        .from(files)
+        .where(
+          and(
+            eq(files.orgId, orgId),
+            inArray(files.id, batch.sourceFileIds),
+            eq(files.status, 'ready'),
+          ),
+        );
+      const readyIds = new Set(readyRows.map((file) => file.id));
+      const keptIds = batch.sourceFileIds.filter((fileId) => readyIds.has(fileId));
+      if (keptIds.length === batch.sourceFileIds.length) return keptIds;
+
+      const [session] = await tx
+        .select({ captures: captureSessions.captures })
+        .from(captureSessions)
+        .where(and(eq(captureSessions.id, sessionId), eq(captureSessions.orgId, orgId)))
+        .limit(1);
+      await tx
+        .update(sheetScanBatches)
+        .set({ sourceFileIds: keptIds, updatedAt: new Date() })
+        .where(and(eq(sheetScanBatches.id, batchId), eq(sheetScanBatches.orgId, orgId)));
+      await tx
+        .update(captureSessions)
+        .set({
+          captures: (session?.captures ?? []).filter((capture) => readyIds.has(capture.fileId)),
+          updatedAt: new Date(),
+        })
+        .where(and(eq(captureSessions.id, sessionId), eq(captureSessions.orgId, orgId)));
+      return keptIds;
+    });
   }
 
   async revoke(orgId: string, sessionId: string): Promise<CaptureSessionStatusModel> {

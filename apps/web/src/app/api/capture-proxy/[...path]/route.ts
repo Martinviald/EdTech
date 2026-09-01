@@ -12,15 +12,18 @@ export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
 const API_BASE = process.env.API_URL;
+const SAFE_PATH_SEGMENT = /^[a-zA-Z0-9-]+$/;
 
 async function proxy(req: Request, path: string[]): Promise<Response> {
   if (!API_BASE) {
     return Response.json({ message: 'API_URL no configurada' }, { status: 500 });
   }
+  if (path.length === 0 || !path.every((segment) => SAFE_PATH_SEGMENT.test(segment))) {
+    return Response.json({ message: 'Ruta de captura inválida' }, { status: 404 });
+  }
 
-  const search = new URL(req.url).search;
-  const upstreamPath = `sheet-capture/${path.map(encodeURIComponent).join('/')}`;
-  const upstreamUrl = `${API_BASE}/api/${upstreamPath}${search}`;
+  const upstreamPath = `sheet-capture/${path.join('/')}`;
+  const upstreamUrl = `${API_BASE}/api/${upstreamPath}`;
 
   const authorization = req.headers.get('authorization');
   const hasBody = req.method === 'POST';

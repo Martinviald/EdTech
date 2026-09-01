@@ -83,15 +83,26 @@ type RecordedUpdate = { table: unknown; set: Record<string, unknown> };
 function makeDb(
   selectResults: unknown[][],
   insertReturning: unknown[][] = [],
+  updateReturning: unknown[][] = [],
 ): { db: Database; inserts: RecordedInsert[]; updates: RecordedUpdate[] } {
   let selectIdx = 0;
   let insertIdx = 0;
+  let updateIdx = 0;
   const inserts: RecordedInsert[] = [];
   const updates: RecordedUpdate[] = [];
 
   function chain(rows: unknown[]): Record<string, unknown> {
     const c: Record<string, unknown> = {};
-    for (const method of ['from', 'where', 'innerJoin', 'leftJoin', 'orderBy', 'limit', 'offset']) {
+    for (const method of [
+      'from',
+      'where',
+      'innerJoin',
+      'leftJoin',
+      'orderBy',
+      'limit',
+      'offset',
+      'for',
+    ]) {
       c[method] = () => c;
     }
     c.then = (resolve: (rows: unknown[]) => unknown, reject?: (err: unknown) => unknown) =>
@@ -115,7 +126,14 @@ function makeDb(
     update: (table: unknown) => ({
       set: (set: Record<string, unknown>) => {
         updates.push({ table, set });
-        return { where: () => Promise.resolve([]) };
+        const rows = updateReturning[updateIdx++] ?? [{ id: 'updated' }];
+        return {
+          where: () => ({
+            returning: () => Promise.resolve(rows),
+            then: (resolve: (r: unknown[]) => unknown, reject?: (e: unknown) => unknown) =>
+              Promise.resolve(rows).then(resolve, reject),
+          }),
+        };
       },
     }),
     execute: async () => [],
@@ -125,8 +143,12 @@ function makeDb(
   return { db, inserts, updates };
 }
 
-function makeService(selectResults: unknown[][], insertReturning: unknown[][] = []) {
-  const { db, inserts, updates } = makeDb(selectResults, insertReturning);
+function makeService(
+  selectResults: unknown[][],
+  insertReturning: unknown[][] = [],
+  updateReturning: unknown[][] = [],
+) {
+  const { db, inserts, updates } = makeDb(selectResults, insertReturning, updateReturning);
   const config = { getOrThrow: jest.fn().mockReturnValue(AUTH_SECRET) } as unknown as ConfigService;
   const createUploadIntent = jest.fn().mockResolvedValue({
     file: { id: FILE_ID },
@@ -328,13 +350,13 @@ describe('CaptureSessionService.createUploadIntent', () => {
     identity: null,
   };
 
-  it('rechaza con conflicto una sesión que ya no está activa', async () => {
+  it('rechaza con 401 una sesión que ya no está activa (el móvil lo trata como terminal)', async () => {
     const { service, createUploadIntent } = makeService([
       [makeSessionRow({ status: 'closed' })],
     ]);
 
     await expect(service.createUploadIntent(SESSION_CTX, DTO)).rejects.toBeInstanceOf(
-      ConflictException,
+      UnauthorizedException,
     );
     expect(createUploadIntent).not.toHaveBeenCalled();
   });
@@ -351,14 +373,14 @@ describe('CaptureSessionService.createUploadIntent', () => {
     expect(createUploadIntent).not.toHaveBeenCalled();
   });
 
-  it('rechaza con conflicto un lote que ya entró a procesamiento', async () => {
+  it('rechaza con 401 un lote que ya entró a procesamiento (el móvil lo trata como terminal)', async () => {
     const { service, createUploadIntent } = makeService([
       [makeSessionRow({ status: 'active' })],
       [{ status: 'processing', sourceFileIds: [] }],
     ]);
 
     await expect(service.createUploadIntent(SESSION_CTX, DTO)).rejects.toBeInstanceOf(
-      ConflictException,
+      UnauthorizedException,
     );
     expect(createUploadIntent).not.toHaveBeenCalled();
   });
@@ -410,14 +432,21 @@ describe('CaptureSessionService.confirmFile', () => {
 });
 
 describe('CaptureSessionService.finish', () => {
-  it('cierra la sesión y dispara el procesamiento del lote', async () => {
-    const { service, updates, startProcessing } = makeService([
-      [makeSessionRow({ status: 'active', captures: [makeCapture()] })],
-    ]);
+  it('cierra la sesión, poda nada si todo está confirmado y dispara el procesamiento', async () => {
+    const { service, updates, startProcessing } = makeService(
+      [
+        [makeSessionRow({ status: 'active', captures: [makeCapture()] })],
+        [{ sourceFileIds: [FILE_ID] }],
+        [{ id: FILE_ID }],
+      ],
+      [],
+      [[{ id: SESSION_ID }]],
+    );
 
     const result = await service.finish(ORG_ID, SESSION_ID, null);
 
     expect(updates[0].set.status).toBe('closed');
+    expect(updates).toHaveLength(1);
     expect(startProcessing).toHaveBeenCalledWith(ORG_ID, USER_ID, BATCH_ID);
     expect(result).toEqual({ batchId: BATCH_ID, batchStatus: 'processing' });
   });
@@ -435,10 +464,74 @@ describe('CaptureSessionService.finish', () => {
     expect(result).toEqual({ batchId: BATCH_ID, batchStatus: 'needs_review' });
   });
 
+  it('pierde la carrera del cierre atómico y NO dispara un segundo procesamiento', async () => {
+    const { service, startProcessing, getBatch } = makeService(
+      [[makeSessionRow({ status: 'active', captures: [makeCapture()] })]],
+      [],
+      [[]],
+    );
+    getBatch.mockResolvedValue({ id: BATCH_ID, status: 'processing' });
+
+    const result = await service.finish(ORG_ID, SESSION_ID, USER_ID);
+
+    expect(startProcessing).not.toHaveBeenCalled();
+    expect(result).toEqual({ batchId: BATCH_ID, batchStatus: 'processing' });
+  });
+
+  it('poda los archivos que nunca se confirmaron antes de procesar', async () => {
+    const orphanId = '88888888-8888-4888-8888-888888888888';
+    const confirmedCapture = makeCapture();
+    const orphanCapture = { ...makeCapture(), fileId: orphanId, fileName: 'foto-2.jpg' };
+    const { service, updates, startProcessing } = makeService(
+      [
+        [makeSessionRow({ status: 'active', captures: [confirmedCapture, orphanCapture] })],
+        [{ sourceFileIds: [FILE_ID, orphanId] }],
+        [{ id: FILE_ID }],
+        [{ captures: [confirmedCapture, orphanCapture] }],
+      ],
+      [],
+      [[{ id: SESSION_ID }]],
+    );
+
+    const result = await service.finish(ORG_ID, SESSION_ID, USER_ID);
+
+    const batchUpdate = updates.find((u) => u.table === sheetScanBatches);
+    expect(batchUpdate?.set.sourceFileIds).toEqual([FILE_ID]);
+    const capturesUpdate = updates.filter((u) => u.table === captureSessions).at(-1);
+    expect(capturesUpdate?.set.captures).toEqual([confirmedCapture]);
+    expect(startProcessing).toHaveBeenCalledWith(ORG_ID, USER_ID, BATCH_ID);
+    expect(result.batchStatus).toBe('processing');
+  });
+
+  it('cierra sin procesar cuando ninguna captura llegó a confirmarse', async () => {
+    const capture = makeCapture();
+    const { service, startProcessing, getBatch } = makeService(
+      [
+        [makeSessionRow({ status: 'active', captures: [capture] })],
+        [{ sourceFileIds: [FILE_ID] }],
+        [],
+        [{ captures: [capture] }],
+      ],
+      [],
+      [[{ id: SESSION_ID }]],
+    );
+
+    const result = await service.finish(ORG_ID, SESSION_ID, USER_ID);
+
+    expect(startProcessing).not.toHaveBeenCalled();
+    expect(getBatch).toHaveBeenCalledWith(ORG_ID, BATCH_ID);
+    expect(result.batchStatus).toBe('pending');
+  });
+
   it('cierra sin disparar procesamiento cuando no hay capturas', async () => {
-    const { service, startProcessing, getBatch } = makeService([
-      [makeSessionRow({ status: 'active', captures: [] })],
-    ]);
+    const { service, startProcessing, getBatch } = makeService(
+      [
+        [makeSessionRow({ status: 'active', captures: [] })],
+        [{ sourceFileIds: [] }],
+      ],
+      [],
+      [[{ id: SESSION_ID }]],
+    );
 
     const result = await service.finish(ORG_ID, SESSION_ID, USER_ID);
 
