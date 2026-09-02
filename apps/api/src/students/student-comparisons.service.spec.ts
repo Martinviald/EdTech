@@ -198,7 +198,9 @@ function makeRoute(fx: Fixtures): Route {
     if (table === studentEnrollments && chain.joins >= 2) {
       return fx.studentCourseId ? [{ classGroupId: fx.studentCourseId }] : [];
     }
-    if (table === studentEnrollments) return fx.visibilityEnrollment ?? [{ id: 'enr-1' }];
+    if (table === studentEnrollments) {
+      return fx.visibilityEnrollment ?? [{ id: 'enr-1', classGroupId: fx.studentCourseId }];
+    }
     return [];
   };
 }
@@ -220,10 +222,10 @@ describe('StudentComparisonsService', () => {
       studentCourseId: 'cg-3a-2026',
     });
 
-    const result = await makeService(makeDb(route), makeAssembler(coursesByAssessment)).getComparisons(
-      makeUser(),
-      'stu-1',
-    );
+    const result = await makeService(
+      makeDb(route),
+      makeAssembler(coursesByAssessment),
+    ).getComparisons(makeUser(), 'stu-1');
 
     expect(result.scope).toBe('org');
     expect(result.subjects).toHaveLength(1);
@@ -268,10 +270,10 @@ describe('StudentComparisonsService', () => {
       studentCourseId: 'cg-3a-2026',
     });
 
-    const result = await makeService(makeDb(route), makeAssembler(coursesByAssessment)).getComparisons(
-      makeUser(),
-      'stu-1',
-    );
+    const result = await makeService(
+      makeDb(route),
+      makeAssembler(coursesByAssessment),
+    ).getComparisons(makeUser(), 'stu-1');
 
     const subject = result.subjects[0]!;
     expect(subject.generations).toEqual([]);
@@ -286,18 +288,18 @@ describe('StudentComparisonsService', () => {
     ]);
 
     const route = makeRoute({
-      scopeRows: [{ classGroupId: 'cg-3a-2026' }],
+      scopeRows: [{ classGroupId: 'cg-3a-2026', subjectId: 'subj-len' }],
       studentAssessments: [studentAssessmentRow()],
       familyInstruments: [familyInstrumentRow('inst-2026', 2026)],
       assessmentIdsByCall: [['a-anchor']],
       studentCourseId: 'cg-3a-2026',
-      visibilityEnrollment: [{ id: 'enr-1' }],
+      visibilityEnrollment: [{ id: 'enr-1', classGroupId: 'cg-3a-2026' }],
     });
 
-    const result = await makeService(makeDb(route), makeAssembler(coursesByAssessment)).getComparisons(
-      makeUser({ activeRole: 'teacher' }),
-      'stu-1',
-    );
+    const result = await makeService(
+      makeDb(route),
+      makeAssembler(coursesByAssessment),
+    ).getComparisons(makeUser({ activeRole: 'teacher' }), 'stu-1');
 
     expect(result.scope).toBe('teacher');
     const subject = result.subjects[0]!;

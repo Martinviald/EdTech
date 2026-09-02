@@ -62,26 +62,21 @@ import {
 import type { JwtPayload } from '../auth/jwt-payload.types';
 import { loadCohortAchievementByAssessment } from '../common/helpers/cohort-item-stats.helper';
 import { InjectDb, type Database } from '../database/database.types';
+import {
+  buildAssessmentScopeCondition,
+  resolveClassGroupScope,
+  type ClassGroupScope,
+} from '../common/helpers/class-group-scope.helper';
 
 // Roles "administrativos" — ven todos los cursos de la org. Cualquier otro rol
 // con acceso (teacher, homeroom_teacher) ve sólo los cursos donde tiene
 // teacher_assignments activos. Idéntico a AssessmentResultsService/AnalyticsService.
-const ADMIN_LIKE_ROLES: readonly UserRole[] = [
-  'platform_admin',
-  'school_admin',
-  'academic_director',
-  'cycle_director',
-  'dept_head',
-  'coordinator',
-  'eval_coordinator',
-];
-
 // Tipos de taxonomy_node que cuentan como "contenido/OA" (vs habilidad). El
 // resto (skill, domain, axis, …) se trata como habilidad. No se hardcodea
 // ningún instrumento — todo se deriva por el `type` del nodo.
 const CONTENT_NODE_TYPES: readonly string[] = ['content', 'learning_objective'];
 
-type ScopeResult = { scopeAll: boolean; classGroupIds: string[] };
+type ScopeResult = ClassGroupScope;
 
 /** Forma mínima del contenido JSONB de un ítem de selección múltiple. */
 interface ItemAlternative {
@@ -157,7 +152,14 @@ export class ItemAnalysisService {
         conditions.push(eq(classGroups.academicYearId, query.academicYearId));
       }
       if (!scope.scopeAll) {
-        conditions.push(inArray(assessmentCourseAssignments.classGroupId, scope.classGroupIds));
+        // Alcance en sus dos dimensiones: el curso ya está en el join, la
+        // asignatura viene del instrumento. Los cursos de jefatura pasan
+        // completos (docs/diseno-alcance-docente.md §3).
+        const inScope = buildAssessmentScopeCondition(scope, {
+          classGroupId: assessmentCourseAssignments.classGroupId,
+          subjectId: instruments.subjectId,
+        });
+        if (inScope) conditions.push(inScope);
       }
 
       // El join a course_assignments multiplica por curso; group by colapsa a una
@@ -1414,25 +1416,8 @@ export class ItemAnalysisService {
     tx: Database,
     user: JwtPayload,
     orgId: string,
-  ): Promise<ScopeResult> {
-    if (user.isPlatformAdmin) return { scopeAll: true, classGroupIds: [] };
-
-    const adminLike = userHasAnyRole(user.roles, ADMIN_LIKE_ROLES);
-    if (adminLike) return { scopeAll: true, classGroupIds: [] };
-
-    if (!userHasAnyRole(user.roles, RESULTS_VIEWER_ROLES)) {
-      return { scopeAll: false, classGroupIds: [] };
-    }
-
-    const rows = await tx
-      .select({ classGroupId: subjectClasses.classGroupId })
-      .from(teacherAssignments)
-      .innerJoin(subjectClasses, eq(subjectClasses.id, teacherAssignments.subjectClassId))
-      .innerJoin(classGroups, eq(classGroups.id, subjectClasses.classGroupId))
-      .where(and(eq(teacherAssignments.userId, user.userId), eq(classGroups.orgId, orgId)));
-
-    const ids = Array.from(new Set(rows.map((r) => r.classGroupId)));
-    return { scopeAll: false, classGroupIds: ids };
+  ): Promise<ClassGroupScope> {
+    return resolveClassGroupScope(tx, user, orgId);
   }
 
   /**

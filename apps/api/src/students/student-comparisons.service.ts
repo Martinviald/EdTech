@@ -32,6 +32,7 @@ import type { JwtPayload } from '../auth/jwt-payload.types';
 import {
   isStudentVisibleInScope,
   resolveClassGroupScope,
+  resolveStudentSubjectFilter,
 } from '../common/helpers/class-group-scope.helper';
 import { ComparableUnitAssembler } from '../dashboards/comparable/comparable-unit.assembler';
 import { InjectDb, type Database } from '../database/database.types';
@@ -105,7 +106,13 @@ export class StudentComparisonsService {
         throw new NotFoundException('Estudiante no encontrado');
       }
 
-      const rawAssessments = await loadStudentAssessments(tx, orgId, studentId);
+      // Alcance por asignatura: de un alumno visible, un profesor de asignatura
+      // sólo ve lo suyo; el profesor jefe ve el perfil completo del alumno
+      // (docs/diseno-alcance-docente.md §3.1).
+      const subjectFilter = await resolveStudentSubjectFilter(tx, scope, studentId);
+      const rawAssessments = (await loadStudentAssessments(tx, orgId, studentId)).filter(
+        (a) => subjectFilter === null || (a.subjectId !== null && subjectFilter.has(a.subjectId)),
+      );
       const filters = this.resolveFilters(query, rawAssessments);
       const byAssessment = this.applyFilters(rawAssessments, filters);
       if (byAssessment.length === 0) {
@@ -505,10 +512,7 @@ function dateValue(value: string | Date | null): number {
   return Number.isNaN(time) ? -Infinity : time;
 }
 
-function anchorLabel(
-  year: number | null,
-  period: InstrumentApplicationPeriod | null,
-): string {
+function anchorLabel(year: number | null, period: InstrumentApplicationPeriod | null): string {
   const periodLabel = period ? INSTRUMENT_APPLICATION_PERIOD_LABELS[period] : null;
   if (year === null) return periodLabel ?? 'Sin período';
   return periodLabel ? `${periodLabel} ${year}` : String(year);

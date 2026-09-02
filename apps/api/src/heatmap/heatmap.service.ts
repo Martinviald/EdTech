@@ -36,7 +36,11 @@ import {
   cohortAverage,
   type CohortAccumulator,
 } from '../common/helpers/cohort-skill-stats.helper';
-import { resolveClassGroupScope } from '../common/helpers/class-group-scope.helper';
+import {
+  buildAssessmentScopeCondition,
+  resolveClassGroupScope,
+  type ClassGroupScope,
+} from '../common/helpers/class-group-scope.helper';
 import { InjectDb, type Database } from '../database/database.types';
 import { resolveEffectiveBands } from '../performance-bands/lib/resolve-effective-bands';
 
@@ -46,7 +50,7 @@ const EMPTY_HEATMAP: HeatmapResponse = {
   comparability: buildComparabilityMeta([]),
 };
 
-type Scope = { scopeAll: boolean; classGroupIds: string[] };
+type Scope = ClassGroupScope;
 
 /**
  * Fila cruda del read-model agregada al grano (node, subject, class_group).
@@ -104,7 +108,7 @@ export class HeatmapService {
         return EMPTY_HEATMAP;
       }
 
-      const baseConditions = this.buildConditions(orgId, query, classGroupIds);
+      const baseConditions = this.buildConditions(orgId, query, classGroupIds, scope);
 
       // 1 query: celdas agregadas por (node, subject, class_group).
       const cellRows = await this.loadCellRows(tx, baseConditions);
@@ -208,9 +212,7 @@ export class HeatmapService {
 
     const instrumentIds = Array.from(byInstrument.keys());
     const bands =
-      instrumentIds.length === 1
-        ? await this.resolveInstrumentBands(tx, instrumentIds[0]!)
-        : null;
+      instrumentIds.length === 1 ? await this.resolveInstrumentBands(tx, instrumentIds[0]!) : null;
 
     return {
       thresholds: {
@@ -255,6 +257,7 @@ export class HeatmapService {
     orgId: string,
     query: HeatmapQueryDto,
     classGroupIds: string[] | null,
+    scope?: Scope,
   ): SQL[] {
     const conditions: SQL[] = [
       eq(assessments.orgId, orgId),
@@ -280,6 +283,14 @@ export class HeatmapService {
       );
     }
 
+    if (scope) {
+      // Segunda dimensión del alcance docente: la asignatura del instrumento.
+      const inScope = buildAssessmentScopeCondition(scope, {
+        classGroupId: assessmentSkillStats.classGroupId,
+        subjectId: instruments.subjectId,
+      });
+      if (inScope) conditions.push(inScope);
+    }
     if (classGroupIds !== null) {
       conditions.push(inArray(assessmentSkillStats.classGroupId, classGroupIds));
     }

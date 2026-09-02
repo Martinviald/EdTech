@@ -28,7 +28,10 @@ import {
 } from '@soe/types';
 import type { JwtPayload } from '../auth/jwt-payload.types';
 import { InjectDb, type Database } from '../database/database.types';
-import { resolveClassGroupScope } from '../common/helpers/class-group-scope.helper';
+import {
+  resolveClassGroupScope,
+  type ClassGroupScope,
+} from '../common/helpers/class-group-scope.helper';
 import { loadBandsForInstruments } from '../performance-bands/lib/load-instrument-bands';
 
 const MAX_ROWS = 500;
@@ -143,7 +146,7 @@ export class StudentSignalsService {
   private async loadRoster(
     tx: Database,
     orgId: string,
-    scope: { scopeAll: boolean; classGroupIds: string[] },
+    scope: ClassGroupScope,
     query: StudentSignalsQueryDto,
   ) {
     const conditions = [eq(students.orgId, orgId), isNull(students.deletedAt)];
