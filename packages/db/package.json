@@ -43,7 +43,8 @@
     "db:reset": "tsx src/reset-schema.ts && pnpm db:migrate:dev",
     "lint": "echo 'lint: db ok'",
     "typecheck": "tsc --noEmit",
-    "clean": "rm -rf dist .turbo *.tsbuildinfo"
+    "clean": "rm -rf dist .turbo *.tsbuildinfo",
+    "db:import:planta-docente": "tsx src/seed/import-planta-docente.ts"
   },
   "dependencies": {
     "@soe/types": "workspace:*",

@@ -62,20 +62,11 @@ import {
 import type { JwtPayload } from '../auth/jwt-payload.types';
 import { loadCohortAchievementByAssessment } from '../common/helpers/cohort-item-stats.helper';
 import { InjectDb, type Database } from '../database/database.types';
+import { resolveClassGroupScope } from '../common/helpers/class-group-scope.helper';
 
 // Roles "administrativos" — ven todos los cursos de la org. Cualquier otro rol
 // con acceso (teacher, homeroom_teacher) ve sólo los cursos donde tiene
 // teacher_assignments activos. Idéntico a AssessmentResultsService/AnalyticsService.
-const ADMIN_LIKE_ROLES: readonly UserRole[] = [
-  'platform_admin',
-  'school_admin',
-  'academic_director',
-  'cycle_director',
-  'dept_head',
-  'coordinator',
-  'eval_coordinator',
-];
-
 // Tipos de taxonomy_node que cuentan como "contenido/OA" (vs habilidad). El
 // resto (skill, domain, axis, …) se trata como habilidad. No se hardcodea
 // ningún instrumento — todo se deriva por el `type` del nodo.
@@ -1414,25 +1405,8 @@ export class ItemAnalysisService {
     tx: Database,
     user: JwtPayload,
     orgId: string,
-  ): Promise<ScopeResult> {
-    if (user.isPlatformAdmin) return { scopeAll: true, classGroupIds: [] };
-
-    const adminLike = userHasAnyRole(user.roles, ADMIN_LIKE_ROLES);
-    if (adminLike) return { scopeAll: true, classGroupIds: [] };
-
-    if (!userHasAnyRole(user.roles, RESULTS_VIEWER_ROLES)) {
-      return { scopeAll: false, classGroupIds: [] };
-    }
-
-    const rows = await tx
-      .select({ classGroupId: subjectClasses.classGroupId })
-      .from(teacherAssignments)
-      .innerJoin(subjectClasses, eq(subjectClasses.id, teacherAssignments.subjectClassId))
-      .innerJoin(classGroups, eq(classGroups.id, subjectClasses.classGroupId))
-      .where(and(eq(teacherAssignments.userId, user.userId), eq(classGroups.orgId, orgId)));
-
-    const ids = Array.from(new Set(rows.map((r) => r.classGroupId)));
-    return { scopeAll: false, classGroupIds: ids };
+  ): Promise<{ scopeAll: boolean; classGroupIds: string[] }> {
+    return resolveClassGroupScope(tx, user, orgId);
   }
 
   /**
