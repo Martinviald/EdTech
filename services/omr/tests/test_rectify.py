@@ -144,3 +144,58 @@ def test_washed_out_fiducial_is_found_when_it_is_dark_for_its_paper(
     result = rectify(syn.to_bgr(faded), spec)
     assert isinstance(result, RectifiedPage)
     assert result.fiducials_found == 4
+
+
+def _add_sensor_noise(page: np.ndarray, sigma: float, seed: int = 5) -> np.ndarray:
+    rng = np.random.default_rng(seed)
+    noisy = page.astype(np.int16) + rng.normal(0, sigma, page.shape)
+    return np.clip(noisy, 0, 255).astype(np.uint8)
+
+
+def test_high_resolution_capture_keeps_its_four_fiducials(spec: dict) -> None:
+    """Una foto grande ahueca el fiducial, y el ruido de adentro no lo puede costar.
+
+    `adaptiveThreshold` usa un `blockSize` fijo en PIXELES (51): cuanto mas
+    grande sale el cuadrado en la captura, mas de su interior queda sobre la
+    media local y mas se ahueca. El ruido del sensor dentro de ese hueco forma
+    contornos, o sea NIETOS en la jerarquia RETR_TREE, y el filtro anti-QR —que
+    descartaba cualquier candidato con nieto— empezaba a rechazar fiduciales
+    verdaderos. Se vio en una foto real de 2339x3308: el detector encontraba 1
+    de 4 esquinas siendo que los cuadrados eran impecables (solidez 0.92-0.95,
+    compacidad 16.7-17.8).
+
+    Aca se reproduce el mecanismo: la misma hoja a 2339 px de ancho con ruido de
+    sensor. Con el criterio viejo salian 2 de 4.
+    """
+    page = _add_sensor_noise(syn.render_page(spec, 0, page_width=2339), 16)
+    result = rectify(syn.to_bgr(page), spec)
+    assert isinstance(result, RectifiedPage)
+    assert result.fiducials_found == 4
+
+
+def test_a_qr_finder_pattern_is_never_crowned_as_the_missing_fiducial(
+    spec: dict, clean_gray: np.ndarray
+) -> None:
+    """La proteccion que no se puede perder al aflojar el criterio del nieto.
+
+    Un finder pattern del QR es un cuadrado oscuro que pasa TODOS los otros
+    gates —forma, tamano, oscuridad— y solo se distingue por su estructura
+    anillo-hueco-centro. Coronarlo como fiducial corre la homografia y produce
+    una lectura mala CON confianza, el unico error que el MVP no admite.
+
+    Se borra el fiducial inferior izquierdo y se pinta un finder pattern
+    (7x7 modulos, centro solido de 3x3) junto a esa esquina. Sin el filtro la
+    pagina reporta 4 fiduciales; tiene que quedarse en 3.
+    """
+    scale = 4
+    tampered = clean_gray.copy()
+    height, _ = tampered.shape
+    tampered[height - 80 :, :80] = syn.PAPER_GRAY
+    x0, y0 = 20, height - 20 - 7 * scale
+    tampered[y0 : y0 + 7 * scale, x0 : x0 + 7 * scale] = syn.INK_GRAY
+    tampered[y0 + scale : y0 + 6 * scale, x0 + scale : x0 + 6 * scale] = syn.PAPER_GRAY
+    tampered[y0 + 2 * scale : y0 + 5 * scale, x0 + 2 * scale : x0 + 5 * scale] = syn.INK_GRAY
+
+    result = rectify(syn.to_bgr(tampered), spec)
+    assert isinstance(result, FiducialFailure)
+    assert result.fiducials_found == 3
