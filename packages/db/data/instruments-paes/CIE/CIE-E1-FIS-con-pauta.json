@@ -677,7 +677,7 @@
      "correctKey": "C",
      "responseFormat": "choice",
      "hasFigure": true,
-     "figureNote": "Alternativas gráficas en grilla; las figuras no están en la capa de texto",
+     "figureNote": "Alternativas gráficas; el recorte de cada una está en S3 (altImageRefs)",
      "alternatives": [
       {
        "key": "A",
@@ -2083,35 +2083,35 @@
      "correctKey": "C",
      "responseFormat": "choice",
      "hasFigure": false,
-     "figureNote": null,
+     "figureNote": "Alternativas gráficas; el recorte de cada una está en S3 (altImageRefs)",
      "alternatives": [
       {
        "key": "A",
-       "text": "(alternativa A: notación no transcrita del cuadernillo)",
+       "text": "(figura A)",
        "isCorrect": false,
        "isImage": true
       },
       {
        "key": "B",
-       "text": "(alternativa B: notación no transcrita del cuadernillo)",
+       "text": "(figura B)",
        "isCorrect": false,
        "isImage": true
       },
       {
        "key": "C",
-       "text": "(alternativa C: notación no transcrita del cuadernillo)",
+       "text": "(figura C)",
        "isCorrect": true,
        "isImage": true
       },
       {
        "key": "D",
-       "text": "(alternativa D: notación no transcrita del cuadernillo)",
+       "text": "(figura D)",
        "isCorrect": false,
        "isImage": true
       },
       {
        "key": "E",
-       "text": "(alternativa E: notación no transcrita del cuadernillo)",
+       "text": "(figura E)",
        "isCorrect": false,
        "isImage": true
       }
@@ -2183,32 +2183,38 @@
      "position": 68,
      "type": "multiple_choice",
      "stem": "Un cuerpo se suelta desde la superficie de un fluido, hundiéndose en él. Si la presión del aire sobre el fluido es P0 y los gráficos representan la presión en función de la profundidad h desde la superficie del fluido, ¿cuál de los siguientes gráficos representa mejor la presión que actúa sobre el cuerpo a medida que desciende por el fluido?",
-     "correctKey": null,
+     "correctKey": "C",
      "responseFormat": "choice",
      "hasFigure": true,
-     "figureNote": "Alternativas no legibles en la capa de texto · alternativas reconstruidas como figuras sin transcribir",
+     "figureNote": "Alternativas gráficas; el recorte de cada una está en S3 (altImageRefs)",
      "alternatives": [
       {
        "key": "A",
-       "text": "(alternativa A: figura no extraída del cuadernillo)",
+       "text": "(figura A)",
        "isCorrect": false,
        "isImage": true
       },
       {
        "key": "B",
-       "text": "(alternativa B: figura no extraída del cuadernillo)",
+       "text": "(figura B)",
        "isCorrect": false,
        "isImage": true
       },
       {
        "key": "C",
-       "text": "(alternativa C: figura no extraída del cuadernillo)",
-       "isCorrect": false,
+       "text": "(figura C)",
+       "isCorrect": true,
        "isImage": true
       },
       {
        "key": "D",
-       "text": "(alternativa D: figura no extraída del cuadernillo)",
+       "text": "(figura D)",
+       "isCorrect": false,
+       "isImage": true
+      },
+      {
+       "key": "E",
+       "text": "(figura E)",
        "isCorrect": false,
        "isImage": true
       }
