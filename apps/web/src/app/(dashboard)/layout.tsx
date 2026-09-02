@@ -13,7 +13,7 @@ import { ListSearchMemory } from '@/components/shared';
 import { Toaster } from '@/components/ui/sonner';
 import { AssistantProvider, AssistantWidget } from '@/components/assistant';
 import { PageViewTracker } from '@/lib/telemetry';
-import { FeedbackWidget } from '@/components/feedback';
+import { FeedbackProvider, FeedbackWidget } from '@/components/feedback';
 
 export default async function DashboardLayout({ children }: { children: React.ReactNode }) {
   const session = await auth();
@@ -32,40 +32,42 @@ export default async function DashboardLayout({ children }: { children: React.Re
 
   return (
     <AssistantProvider enabled={assistantEnabled}>
-      <PageTitleProvider>
-        {/* Telemetría de uso: registra el page view de cada navegación autenticada. */}
-        <PageViewTracker />
-        {/* Recuerda los filtros de cada listado para el enlace de vuelta. */}
-        <Suspense fallback={null}>
-          <ListSearchMemory />
-        </Suspense>
-        {/* `data-app-shell` marca la raíz que captura el widget de comentarios. */}
-        <div data-app-shell className="flex h-screen bg-background">
-          <SkipLink />
-          <Sidebar roles={session.user.roles} />
-          <div className="flex flex-1 flex-col overflow-hidden">
-            <Topbar
-              org={org}
-              user={session.user}
-              roles={session.user.roles}
-              activeRole={session.user.activeRole}
-              orgs={session.user.orgs}
-              platformLink={
-                session.user.isPlatformAdmin
-                  ? { href: ROUTES.admin, label: 'Panel de plataforma' }
-                  : undefined
-              }
-            />
-            <main id="main-content" className="flex-1 overflow-y-auto p-6">
-              {children}
-            </main>
+      <FeedbackProvider>
+        <PageTitleProvider>
+          {/* Telemetría de uso: registra el page view de cada navegación autenticada. */}
+          <PageViewTracker />
+          {/* Recuerda los filtros de cada listado para el enlace de vuelta. */}
+          <Suspense fallback={null}>
+            <ListSearchMemory />
+          </Suspense>
+          {/* `data-app-shell` marca la raíz que captura el widget de comentarios. */}
+          <div data-app-shell className="flex h-screen bg-background">
+            <SkipLink />
+            <Sidebar roles={session.user.roles} />
+            <div className="flex flex-1 flex-col overflow-hidden">
+              <Topbar
+                org={org}
+                user={session.user}
+                roles={session.user.roles}
+                activeRole={session.user.activeRole}
+                orgs={session.user.orgs}
+                platformLink={
+                  session.user.isPlatformAdmin
+                    ? { href: ROUTES.admin, label: 'Panel de plataforma' }
+                    : undefined
+                }
+              />
+              <main id="main-content" className="flex-1 overflow-y-auto p-6">
+                {children}
+              </main>
+            </div>
+            <Toaster position="top-right" richColors closeButton />
+            {assistantEnabled && <AssistantWidget />}
+            {/* Comentarios in-app: disponible para todo rol, en todas las vistas. */}
+            <FeedbackWidget offset={assistantEnabled} />
           </div>
-          <Toaster position="top-right" richColors closeButton />
-          {assistantEnabled && <AssistantWidget />}
-          {/* Comentarios in-app: disponible para todo rol, en todas las vistas. */}
-          <FeedbackWidget offset={assistantEnabled} />
-        </div>
-      </PageTitleProvider>
+        </PageTitleProvider>
+      </FeedbackProvider>
     </AssistantProvider>
   );
 }
