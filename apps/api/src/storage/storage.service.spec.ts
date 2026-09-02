@@ -1,5 +1,5 @@
 import { ServiceUnavailableException } from '@nestjs/common';
-import { StorageService } from './storage.service';
+import { buildContentDisposition, StorageService } from './storage.service';
 
 /**
  * Cubre el presigner SigV4 (implementación propia con node:crypto, TKT-15):
@@ -49,12 +49,10 @@ describe('StorageService (presigned S3)', () => {
   it('no está configurado y lanza 503 sin bucket/credenciales', () => {
     const svc = new StorageService();
     expect(svc.isConfigured()).toBe(false);
-    expect(() =>
-      svc.createUploadUrl({ key: 'k/x.pdf', contentType: 'application/pdf' }),
-    ).toThrow(ServiceUnavailableException);
-    expect(() => svc.createDownloadUrl({ key: 'k/x.pdf' })).toThrow(
+    expect(() => svc.createUploadUrl({ key: 'k/x.pdf', contentType: 'application/pdf' })).toThrow(
       ServiceUnavailableException,
     );
+    expect(() => svc.createDownloadUrl({ key: 'k/x.pdf' })).toThrow(ServiceUnavailableException);
   });
 
   it('genera una URL de subida PUT prefirmada con los parámetros SigV4', () => {
@@ -240,9 +238,7 @@ describe('StorageService (presigned S3)', () => {
   // ── Credenciales por rol de instancia (container credentials: ECS / App Runner) ──
 
   /** Mock de fetch que responde el JSON de credenciales del endpoint del contenedor. */
-  function mockCredentialsFetch(
-    ...bodies: Array<Record<string, unknown>>
-  ): jest.Mock {
+  function mockCredentialsFetch(...bodies: Array<Record<string, unknown>>): jest.Mock {
     const fn = jest.fn();
     for (const body of bodies) {
       fn.mockResolvedValueOnce({ ok: true, status: 200, json: () => Promise.resolve(body) });
@@ -307,9 +303,7 @@ describe('StorageService (presigned S3)', () => {
     const svc = new StorageService();
     await svc.onModuleInit();
     expect(svc.isConfigured()).toBe(false);
-    expect(() => svc.createDownloadUrl({ key: 'a/b.pdf' })).toThrow(
-      ServiceUnavailableException,
-    );
+    expect(() => svc.createDownloadUrl({ key: 'a/b.pdf' })).toThrow(ServiceUnavailableException);
     svc.onModuleDestroy();
   });
 
@@ -357,5 +351,94 @@ describe('StorageService (presigned S3)', () => {
     expect(svc.createDownloadUrl({ key: 'x' })).toContain('X-Amz-Credential=A2%2F');
 
     svc.onModuleDestroy();
+  });
+});
+
+describe('buildContentDisposition (RFC 5987/6266)', () => {
+  const isPureAscii = (value: string) =>
+    Array.from(value).every((ch) => (ch.codePointAt(0) ?? 0) <= 0x7f);
+
+  it('sin nombre de archivo emite sólo la disposición', () => {
+    expect(buildContentDisposition('inline')).toBe('inline');
+    expect(buildContentDisposition('attachment', '   ')).toBe('attachment');
+  });
+
+  it('un nombre con tilde y ñ produce un valor enteramente ASCII', () => {
+    const value = buildContentDisposition('attachment', 'Bravo Núñez, Ana.pdf');
+
+    expect(isPureAscii(value)).toBe(true);
+    expect(value).toContain('filename="Bravo Nunez, Ana.pdf"');
+    expect(value).toContain("filename*=UTF-8''Bravo%20N%C3%BA%C3%B1ez%2C%20Ana.pdf");
+  });
+
+  it('normaliza a NFC: el mismo nombre descompuesto (macOS) da el mismo valor', () => {
+    const nfc = 'Núñez.pdf'.normalize('NFC');
+    const nfd = 'Núñez.pdf'.normalize('NFD');
+
+    expect(nfd).not.toBe(nfc);
+    expect(buildContentDisposition('attachment', nfd)).toBe(
+      buildContentDisposition('attachment', nfc),
+    );
+  });
+
+  it('sanea comillas, barras invertidas y saltos de línea sin romper el valor', () => {
+    const value = buildContentDisposition('attachment', 'ma\r\nlo"; filename="otro.pdf\\evil.pdf');
+
+    expect(isPureAscii(value)).toBe(true);
+    expect(value).not.toContain('\r');
+    expect(value).not.toContain('\n');
+    expect(value.match(/filename="/g)).toHaveLength(1);
+    expect(value.split('"')).toHaveLength(3);
+  });
+
+  it('un nombre sin ningún carácter ASCII conserva un respaldo utilizable', () => {
+    const value = buildContentDisposition('attachment', '试卷');
+
+    expect(isPureAscii(value)).toBe(true);
+    expect(value).toContain('filename="archivo"');
+    expect(value).toContain("filename*=UTF-8''%E8%AF%95%E5%8D%B7");
+  });
+});
+
+describe('StorageService.createDownloadUrl con nombres acentuados', () => {
+  const ENV_KEYS = [
+    'STORAGE_S3_BUCKET',
+    'STORAGE_S3_REGION',
+    'AWS_ACCESS_KEY_ID',
+    'AWS_SECRET_ACCESS_KEY',
+  ] as const;
+  const saved: Record<string, string | undefined> = {};
+
+  beforeEach(() => {
+    for (const k of ENV_KEYS) saved[k] = process.env[k];
+    process.env.STORAGE_S3_BUCKET = 'soe-instruments';
+    process.env.STORAGE_S3_REGION = 'us-east-1';
+    process.env.AWS_ACCESS_KEY_ID = 'AKIAIOSFODNN7EXAMPLE';
+    process.env.AWS_SECRET_ACCESS_KEY = 'wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY';
+  });
+
+  afterEach(() => {
+    for (const k of ENV_KEYS) {
+      if (saved[k] === undefined) delete process.env[k];
+      else process.env[k] = saved[k];
+    }
+  });
+
+  it('la URL firmada es ASCII pura y su disposition decodificada también', () => {
+    const svc = new StorageService();
+
+    const url = svc.createDownloadUrl({
+      key: 'sheets/org-1/lote.pdf',
+      downloadFileName: 'Bravo Núñez, Ana.pdf'.normalize('NFD'),
+    });
+
+    expect(Array.from(url).every((ch) => (ch.codePointAt(0) ?? 0) <= 0x7f)).toBe(true);
+    const disposition = new URL(url).searchParams.get('response-content-disposition');
+    expect(disposition).not.toBeNull();
+    expect(Array.from(disposition ?? '').every((ch) => (ch.codePointAt(0) ?? 0) <= 0x7f)).toBe(
+      true,
+    );
+    expect(disposition).toContain("filename*=UTF-8''Bravo%20N%C3%BA%C3%B1ez%2C%20Ana.pdf");
+    expect(url).toMatch(/X-Amz-Signature=[0-9a-f]{64}$/);
   });
 });

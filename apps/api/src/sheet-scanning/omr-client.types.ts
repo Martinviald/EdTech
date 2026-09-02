@@ -14,6 +14,13 @@ export class OmrServiceUnavailableError extends Error {
   }
 }
 
+export class OmrSourceUnreadableError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = 'OmrSourceUnreadableError';
+  }
+}
+
 export class OmrPageTimeoutError extends Error {
   constructor(message: string) {
     super(message);

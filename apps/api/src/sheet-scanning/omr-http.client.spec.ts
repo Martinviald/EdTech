@@ -1,5 +1,9 @@
 import type { OmrAssessRequest, OmrAssessResult, OmrReadRequest, ScanResult } from '@soe/types';
-import { OmrPageTimeoutError, OmrServiceUnavailableError } from './omr-client.types';
+import {
+  OmrPageTimeoutError,
+  OmrServiceUnavailableError,
+  OmrSourceUnreadableError,
+} from './omr-client.types';
 import {
   HttpOmrClient,
   OmrInvalidResponseError,
@@ -70,9 +74,7 @@ describe('HttpOmrClient.read', () => {
   });
 
   it('una respuesta 200 bien formada pero inválida lanza OmrInvalidResponseError', async () => {
-    const { fetchFn } = makeFetch([
-      jsonResponse(200, { pages: [{ pageIndex: 'no-un-numero' }] }),
-    ]);
+    const { fetchFn } = makeFetch([jsonResponse(200, { pages: [{ pageIndex: 'no-un-numero' }] })]);
     const client = makeClient(fetchFn);
 
     await expect(client.read(REQUEST)).rejects.toBeInstanceOf(OmrInvalidResponseError);
@@ -93,10 +95,7 @@ describe('HttpOmrClient.read', () => {
   });
 
   it('reintenta UNA vez tras un 502 y devuelve el resultado del segundo intento', async () => {
-    const { fetchFn, calls } = makeFetch([
-      jsonResponse(502, {}),
-      jsonResponse(200, VALID_RESULT),
-    ]);
+    const { fetchFn, calls } = makeFetch([jsonResponse(502, {}), jsonResponse(200, VALID_RESULT)]);
     const client = makeClient(fetchFn);
 
     const result = await client.read(REQUEST);
@@ -105,19 +104,26 @@ describe('HttpOmrClient.read', () => {
     expect(calls).toHaveLength(2);
   });
 
-  it('dos 502 seguidos lanzan OmrServiceUnavailableError', async () => {
+  it('dos 502 seguidos lanzan OmrSourceUnreadableError, no un fallo de disponibilidad', async () => {
     const { fetchFn, calls } = makeFetch([jsonResponse(502, {}), jsonResponse(502, {})]);
     const client = makeClient(fetchFn);
 
-    await expect(client.read(REQUEST)).rejects.toBeInstanceOf(OmrServiceUnavailableError);
+    const error = await client.read(REQUEST).catch((err: unknown) => err);
+
+    expect(error).toBeInstanceOf(OmrSourceUnreadableError);
+    expect(error).not.toBeInstanceOf(OmrServiceUnavailableError);
     expect(calls).toHaveLength(2);
   });
 
+  it('un 503 (servicio realmente caído) sigue lanzando OmrServiceUnavailableError', async () => {
+    const { fetchFn } = makeFetch([jsonResponse(503, {}), jsonResponse(503, {})]);
+    const client = makeClient(fetchFn);
+
+    await expect(client.read(REQUEST)).rejects.toBeInstanceOf(OmrServiceUnavailableError);
+  });
+
   it('un error de red reintenta una vez y luego lanza OmrServiceUnavailableError', async () => {
-    const { fetchFn, calls } = makeFetch([
-      new Error('ECONNREFUSED'),
-      new Error('ECONNREFUSED'),
-    ]);
+    const { fetchFn, calls } = makeFetch([new Error('ECONNREFUSED'), new Error('ECONNREFUSED')]);
     const client = makeClient(fetchFn);
 
     await expect(client.read(REQUEST)).rejects.toBeInstanceOf(OmrServiceUnavailableError);
@@ -193,11 +199,11 @@ describe('HttpOmrClient.assess (CD-11)', () => {
     expect(calls).toHaveLength(1);
   });
 
-  it('reintenta UNA vez tras un 502 y luego lanza OmrServiceUnavailableError', async () => {
+  it('reintenta UNA vez tras un 502 y luego lanza OmrSourceUnreadableError', async () => {
     const { fetchFn, calls } = makeFetch([jsonResponse(502, {}), jsonResponse(502, {})]);
     const client = makeClient(fetchFn);
 
-    await expect(client.assess(ASSESS_REQUEST)).rejects.toBeInstanceOf(OmrServiceUnavailableError);
+    await expect(client.assess(ASSESS_REQUEST)).rejects.toBeInstanceOf(OmrSourceUnreadableError);
     expect(calls).toHaveLength(2);
   });
 });

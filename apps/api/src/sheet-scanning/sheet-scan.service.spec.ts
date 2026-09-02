@@ -16,7 +16,7 @@ import type { IdentityCandidate } from './identity/identity-resolver.types';
 import type { SheetIdentityResolverRegistry } from './identity/identity-resolver.registry';
 import { deriveLayoutDraft, type DerivableItem } from './sheet-layout.helpers';
 import type { OmrCalibrationService } from './omr-calibration.service';
-import { OmrServiceUnavailableError } from './omr-client.types';
+import { OmrServiceUnavailableError, OmrSourceUnreadableError } from './omr-client.types';
 import { FakeOmrClient } from './testing/fake-omr-client';
 import { SheetScanService } from './sheet-scan.service';
 
@@ -34,7 +34,12 @@ const LAYOUT_HASH = 'a3f9c1e70b4d2856';
 const PROFILE = DEFAULT_CAPTURE_PROFILES.scanner;
 const SPEC = { specVersion: 1, pageCount: 2 } as unknown as LayoutSpec;
 
-const CTX_ROW = { sourceFileIds: [FILE_ID], captureProfile: PROFILE, spec: SPEC, specHash: LAYOUT_HASH };
+const CTX_ROW = {
+  sourceFileIds: [FILE_ID],
+  captureProfile: PROFILE,
+  spec: SPEC,
+  specHash: LAYOUT_HASH,
+};
 const FILE_ROW = {
   id: FILE_ID,
   mimeType: 'application/pdf',
@@ -520,7 +525,13 @@ describe('SheetScanService job', () => {
     omr.enqueueResponse({
       pages: [
         makePage({
-          quality: { ok: false, sharpness: 0.1, glare: 0.1, fiducialsFound: 4, rejectReason: 'blurry' },
+          quality: {
+            ok: false,
+            sharpness: 0.1,
+            glare: 0.1,
+            fiducialsFound: 4,
+            rejectReason: 'blurry',
+          },
           identity: { mode: 'qr', raw: qrRaw(SHEET_1, 0), confidence: 1 },
         }),
         makePage({
@@ -557,7 +568,12 @@ describe('SheetScanService job', () => {
       pages: [makePage({ pageIndex: 3, identity: { mode: 'qr', raw: null, confidence: 0 } })],
     });
     resolve.mockResolvedValueOnce(
-      candidate({ printedSheetId: null, studentId: null, confidence: 0, needsHumanConfirmation: true }),
+      candidate({
+        printedSheetId: null,
+        studentId: null,
+        confidence: 0,
+        needsHumanConfirmation: true,
+      }),
     );
 
     await runJob(service);
@@ -676,9 +692,11 @@ describe('SheetScanService job', () => {
   });
 
   it('OmrServiceUnavailableError deja el lote failed con mensaje reintentable, sin reportServerError', async () => {
-    const reportSpy = jest.spyOn(observability, 'reportServerError').mockImplementation(() => undefined);
+    const reportSpy = jest
+      .spyOn(observability, 'reportServerError')
+      .mockImplementation(() => undefined);
     const { service, updates, omr } = makeService([[CTX_ROW], [FILE_ROW]]);
-    omr.enqueueResponse(new OmrServiceUnavailableError('HTTP 502'));
+    omr.enqueueResponse(new OmrServiceUnavailableError('ECONNREFUSED'));
 
     await runJob(service);
 
@@ -688,8 +706,32 @@ describe('SheetScanService job', () => {
     expect(reportSpy).not.toHaveBeenCalled();
   });
 
+  it('OmrSourceUnreadableError culpa al archivo de origen, no al servicio de lectura', async () => {
+    const reportSpy = jest
+      .spyOn(observability, 'reportServerError')
+      .mockImplementation(() => undefined);
+    const { service, updates, omr } = makeService([[CTX_ROW], [FILE_ROW]]);
+    const sourceError = new OmrSourceUnreadableError('HTTP 502');
+    omr.enqueueResponse(sourceError);
+
+    await runJob(service);
+
+    expect(updates).toHaveLength(1);
+    expect(updates[0].set).toMatchObject({ status: 'failed' });
+    const failureReason = String(updates[0].set.failureReason);
+    expect(failureReason).toContain('no pudo descargar');
+    expect(failureReason).not.toContain('no está disponible o excedió el tiempo límite');
+    expect(reportSpy).toHaveBeenCalledWith(sourceError, {
+      batchId: BATCH_ID,
+      orgId: ORG_ID,
+      userId: USER_ID,
+    });
+  });
+
   it('un error inesperado deja el lote failed y llama reportServerError con contexto', async () => {
-    const reportSpy = jest.spyOn(observability, 'reportServerError').mockImplementation(() => undefined);
+    const reportSpy = jest
+      .spyOn(observability, 'reportServerError')
+      .mockImplementation(() => undefined);
     const { service, updates, omr } = makeService([[CTX_ROW], [FILE_ROW]]);
     const boom = new Error('boom');
     omr.enqueueResponse(boom);
@@ -719,9 +761,7 @@ describe('SheetScanService job', () => {
       pages: [
         makePage({
           identity: { mode: 'qr', raw: qrRaw(SHEET_1, 0), confidence: 1 },
-          marks: [
-            makeMark({ state: 'ambiguous', value: null, cropJpegBase64: 'aGVsbG8=' }),
-          ],
+          marks: [makeMark({ state: 'ambiguous', value: null, cropJpegBase64: 'aGVsbG8=' })],
         }),
       ],
     });
@@ -736,7 +776,9 @@ describe('SheetScanService job', () => {
       'https://s3.example/upload/file-0',
       expect.objectContaining({ method: 'PUT' }),
     );
-    expect(confirm).toHaveBeenCalledWith(expect.objectContaining({ orgId: ORG_ID, fileId: 'file-0' }));
+    expect(confirm).toHaveBeenCalledWith(
+      expect.objectContaining({ orgId: ORG_ID, fileId: 'file-0' }),
+    );
     const marks = inserts[1].values as Array<Record<string, unknown>>;
     expect(marks[0]).toMatchObject({ cropFileId: 'file-0' });
   });
@@ -916,12 +958,23 @@ describe('SheetScanService.assessCapture (CD-11)', () => {
     const { service, resolve, omr } = makeService([[{ spec: QR_SPEC, specHash: LAYOUT_HASH }]]);
     omr.enqueueAssessResponse(
       assessResult({
-        quality: { ok: false, sharpness: 0.1, glare: 0.4, fiducialsFound: 2, rejectReason: 'blurry' },
+        quality: {
+          ok: false,
+          sharpness: 0.1,
+          glare: 0.4,
+          fiducialsFound: 2,
+          rejectReason: 'blurry',
+        },
         identity: { mode: 'qr', raw: null, confidence: 0 },
       }),
     );
     resolve.mockResolvedValueOnce(
-      candidate({ printedSheetId: null, studentId: null, confidence: 0, needsHumanConfirmation: true }),
+      candidate({
+        printedSheetId: null,
+        studentId: null,
+        confidence: 0,
+        needsHumanConfirmation: true,
+      }),
     );
 
     const result = await service.assessCapture(ORG_ID, ASSESS_DTO);
@@ -945,7 +998,9 @@ describe('SheetScanService.assessCapture (CD-11)', () => {
       { ambiguityMargin: 0.12 },
     );
     omr.enqueueAssessResponse(assessResult({ identity: { mode: 'qr', raw: null, confidence: 0 } }));
-    resolve.mockResolvedValueOnce(candidate({ printedSheetId: null, studentId: null, confidence: 0 }));
+    resolve.mockResolvedValueOnce(
+      candidate({ printedSheetId: null, studentId: null, confidence: 0 }),
+    );
 
     await service.assessCapture(ORG_ID, ASSESS_DTO);
 
@@ -963,10 +1018,7 @@ describe('SheetScanService.assessCapture (CD-11)', () => {
   });
 
   it('hoja de OTRA tirada: identidad vacía y accepted false aunque la calidad sea buena', async () => {
-    const { service, resolve, omr } = makeService([
-      [{ spec: QR_SPEC, specHash: LAYOUT_HASH }],
-      [],
-    ]);
+    const { service, resolve, omr } = makeService([[{ spec: QR_SPEC, specHash: LAYOUT_HASH }], []]);
     omr.enqueueAssessResponse(assessResult());
     resolve.mockResolvedValueOnce(candidate());
 

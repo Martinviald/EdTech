@@ -10,6 +10,7 @@ import type { ZodType } from 'zod';
 import {
   OmrPageTimeoutError,
   OmrServiceUnavailableError,
+  OmrSourceUnreadableError,
   type OmrClient,
 } from './omr-client.types';
 
@@ -54,7 +55,10 @@ export interface HttpOmrClientOptions {
 const DEFAULT_SERVICE_URL = 'http://127.0.0.1:8090';
 const DEFAULT_TIMEOUT_S = 120;
 
-type PostOutcome<T> = { kind: 'success'; result: T } | { kind: 'unavailable'; detail: string };
+type PostOutcome<T> =
+  | { kind: 'success'; result: T }
+  | { kind: 'unavailable'; detail: string }
+  | { kind: 'source-unreadable'; detail: string };
 
 export class HttpOmrClient implements OmrClient {
   private readonly serviceUrl: string;
@@ -88,6 +92,12 @@ export class HttpOmrClient implements OmrClient {
 
     const second = await this.postOnce(path, request, schema, resultName);
     if (second.kind === 'success') return second.result;
+
+    if (second.kind === 'source-unreadable') {
+      throw new OmrSourceUnreadableError(
+        `El servicio de lectura respondió que no pudo descargar ni abrir el archivo de origen (${second.detail})`,
+      );
+    }
 
     throw new OmrServiceUnavailableError(
       `El servicio de lectura no está disponible (${second.detail})`,
@@ -129,7 +139,7 @@ export class HttpOmrClient implements OmrClient {
         );
       }
       if (response.status === 502) {
-        return { kind: 'unavailable', detail: 'HTTP 502' };
+        return { kind: 'source-unreadable', detail: 'HTTP 502' };
       }
       if (response.status === 422) {
         const detail = await response.text().catch(() => '');
