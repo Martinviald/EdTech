@@ -68,6 +68,7 @@ ingeniería resuelta hace décadas. El riesgo real no está en el algoritmo sino
 | [04-componentes.md](04-componentes.md) | Inventario C1–C21 y diseño individual de cada uno |
 | [05-sistema.md](05-sistema.md) | Flujo end-to-end, límites transaccionales, multi-tenancy, modos de falla |
 | [06-plan-mvp-v1.md](06-plan-mvp-v1.md) | Olas del MVP con criterio medible, incrementos de v1, riesgos vivos |
+| [07-identificacion-robusta.md](07-identificacion-robusta.md) | Propuesta: reemplazar el QR como canal crítico de identificación por celdas binarias. Regla del 3:1 |
 
 ## Orden de lectura para implementar
 
