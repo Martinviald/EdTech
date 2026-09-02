@@ -50,3 +50,6 @@ export * from './document.schema';
 export * from './omr-layout.schema';
 export * from './omr-scan.schema';
 export * from './sheet-scanning.schema';
+export * from './mcp.schema';
+export * from './telemetry.schema';
+export * from './feedback.schema';

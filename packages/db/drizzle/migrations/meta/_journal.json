@@ -152,15 +152,29 @@
     {
       "idx": 21,
       "version": "7",
-      "when": 1788039155939,
-      "tag": "0021_fine_onslaught",
+      "when": 1786986098607,
+      "tag": "0021_blushing_freak",
       "breakpoints": true
     },
     {
       "idx": 22,
       "version": "7",
-      "when": 1788057217947,
-      "tag": "0022_cynical_famine",
+      "when": 1787107800035,
+      "tag": "0022_robust_diamondback",
+      "breakpoints": true
+    },
+    {
+      "idx": 23,
+      "version": "7",
+      "when": 1788365824452,
+      "tag": "0023_whole_mindworm",
+      "breakpoints": true
+    },
+    {
+      "idx": 24,
+      "version": "7",
+      "when": 1788374641660,
+      "tag": "0024_vengeful_norrin_radd",
       "breakpoints": true
     }
   ]

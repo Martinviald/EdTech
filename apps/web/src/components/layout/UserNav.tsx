@@ -13,6 +13,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import { FeedbackMenuItem } from '@/components/feedback';
 import { signOutToLogin } from '@/lib/sign-out';
 import { ROLE_LABELS } from './nav-items';
 import { RoleSwitcher } from './RoleSwitcher';
@@ -102,6 +103,7 @@ export function UserNav({
             <DropdownMenuSeparator />
           </>
         ) : null}
+        <FeedbackMenuItem />
         <DropdownMenuItem disabled>
           <Settings className="size-4" aria-hidden />
           Configuración

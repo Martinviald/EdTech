@@ -5,9 +5,10 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { and, desc, eq, isNull, sql } from 'drizzle-orm';
+import { and, desc, eq, inArray, isNull, sql } from 'drizzle-orm';
 import {
   aiAnalyses,
+  assessmentCourseAssignments,
   assessmentResults,
   assessments,
   grades,
@@ -25,6 +26,10 @@ import {
   type GenerateItemInsightDto,
 } from '@soe/types';
 import type { JwtPayload } from '../auth/jwt-payload.types';
+import {
+  assertTargetInScope,
+  resolveClassGroupScope,
+} from '../common/helpers/class-group-scope.helper';
 import { InjectDb, type Database } from '../database/database.types';
 import { promptVersionFor } from './prompt-versions';
 
@@ -64,6 +69,22 @@ export class AiAnalysisService {
   constructor(@InjectDb() private readonly db: Database) {}
 
   /**
+   * Verifica que el caller pueda ver/generar un análisis anclado a esta
+   * evaluación y curso. Un profesor sólo alcanza sus cursos asignados; un
+   * análisis sin `classGroupId` (agregado de toda la evaluación) exige que
+   * todos los cursos de la evaluación estén en su alcance.
+   */
+  private async assertInScope(
+    tx: Database,
+    user: JwtPayload,
+    orgId: string,
+    target: { assessmentId?: string | null; classGroupId?: string | null },
+  ): Promise<void> {
+    const scope = await resolveClassGroupScope(tx, user, orgId);
+    await assertTargetInScope(tx, scope, target);
+  }
+
+  /**
    * Crea (o reutiliza desde caché) un registro de análisis.
    *
    * - Calcula un `inputHash` determinista de {assessmentId, analysisType,
@@ -88,6 +109,11 @@ export class AiAnalysisService {
     });
 
     return withOrgContext(this.db, orgId, async (tx) => {
+      await this.assertInScope(tx, user, orgId, {
+        assessmentId,
+        classGroupId: dto.classGroupId ?? null,
+      });
+
       if (!dto.force) {
         const [existing] = await tx
           .select()
@@ -153,6 +179,11 @@ export class AiAnalysisService {
     });
 
     return withOrgContext(this.db, orgId, async (tx) => {
+      await this.assertInScope(tx, user, orgId, {
+        assessmentId: dto.assessmentId,
+        classGroupId,
+      });
+
       if (!dto.force) {
         const [existing] = await tx
           .select()
@@ -220,6 +251,11 @@ export class AiAnalysisService {
     });
 
     const row = await withOrgContext(this.db, orgId, async (tx) => {
+      await this.assertInScope(tx, user, orgId, {
+        assessmentId: params.assessmentId,
+        classGroupId: params.classGroupId,
+      });
+
       const [found] = await tx
         .select()
         .from(aiAnalyses)
@@ -238,7 +274,7 @@ export class AiAnalysisService {
     return row ? this.toModel(row) : null;
   }
 
-  /** Devuelve un análisis por id dentro del tenant del usuario. */
+  /** Devuelve un análisis por id dentro del tenant del usuario y su alcance. */
   async get(user: JwtPayload, id: string): Promise<AiAnalysisModel> {
     const orgId = this.requireOrgId(user);
     const row = await withOrgContext(this.db, orgId, async (tx) => {
@@ -249,6 +285,12 @@ export class AiAnalysisService {
           and(eq(aiAnalyses.id, id), eq(aiAnalyses.orgId, orgId), isNull(aiAnalyses.deletedAt)),
         )
         .limit(1);
+      if (found) {
+        await this.assertInScope(tx, user, orgId, {
+          assessmentId: found.assessmentId,
+          classGroupId: found.classGroupId,
+        });
+      }
       return found;
     });
 
@@ -316,6 +358,11 @@ export class AiAnalysisService {
     const orgId = this.requireOrgId(user);
 
     return withOrgContext(this.db, orgId, async (tx) => {
+      await this.assertInScope(tx, user, orgId, { assessmentId: dto.baseAssessmentId });
+      await this.assertInScope(tx, user, orgId, {
+        assessmentId: dto.comparisonAssessmentId,
+      });
+
       const [base, comparison] = await Promise.all([
         this.loadComparableInstrument(tx, orgId, dto.baseAssessmentId),
         this.loadComparableInstrument(tx, orgId, dto.comparisonAssessmentId),
@@ -390,6 +437,11 @@ export class AiAnalysisService {
     const inputHash = this.computeComparisonHash(params);
 
     const row = await withOrgContext(this.db, orgId, async (tx) => {
+      await this.assertInScope(tx, user, orgId, { assessmentId: params.baseAssessmentId });
+      await this.assertInScope(tx, user, orgId, {
+        assessmentId: params.comparisonAssessmentId,
+      });
+
       const [found] = await tx
         .select()
         .from(aiAnalyses)
@@ -419,6 +471,15 @@ export class AiAnalysisService {
     const orgId = this.requireOrgId(user);
 
     const rows = await withOrgContext(this.db, orgId, async (tx) => {
+      // Acota el catálogo al alcance del caller: un profesor sólo puede comparar
+      // evaluaciones de sus cursos.
+      const scope = await resolveClassGroupScope(tx, user, orgId);
+      const scopeCondition = scope.scopeAll
+        ? undefined
+        : scope.classGroupIds.length === 0
+          ? sql`false`
+          : inArray(assessmentCourseAssignments.classGroupId, scope.classGroupIds);
+
       return tx
         .select({
           assessmentId: assessments.id,
@@ -437,9 +498,13 @@ export class AiAnalysisService {
         .from(assessments)
         .innerJoin(instruments, eq(instruments.id, assessments.instrumentId))
         .innerJoin(assessmentResults, eq(assessmentResults.assessmentId, assessments.id))
+        .innerJoin(
+          assessmentCourseAssignments,
+          eq(assessmentCourseAssignments.assessmentId, assessments.id),
+        )
         .leftJoin(grades, eq(grades.id, instruments.gradeId))
         .leftJoin(subjects, eq(subjects.id, instruments.subjectId))
-        .where(eq(assessments.orgId, orgId))
+        .where(and(eq(assessments.orgId, orgId), scopeCondition))
         .groupBy(
           assessments.id,
           assessments.name,

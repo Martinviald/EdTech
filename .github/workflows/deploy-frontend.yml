@@ -55,4 +55,6 @@ jobs:
           aws-region: ${{ env.AWS_REGION }}
 
       - name: Deploy with SST
-        run: SST_BACKEND_READY=1 npx sst deploy --stage demo
+        # `sst deploy` a secas = deploy completo (App Runner + front). El bootstrap inicial
+        # de un stage (solo infra base) usa SST_BOOTSTRAP=1; el CD nunca bootstrapea.
+        run: npx sst deploy --stage demo

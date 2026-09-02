@@ -40,6 +40,7 @@ import { InjectDb, type Database } from '../database/database.types';
 import {
   isStudentVisibleInScope,
   resolveClassGroupScope,
+  resolveStudentSubjectFilter,
 } from '../common/helpers/class-group-scope.helper';
 import { resolveEffectiveBandsForInstruments } from '../performance-bands/lib/resolve-effective-bands';
 import { loadStudentAssessments } from './lib/load-student-assessments';
@@ -126,7 +127,13 @@ export class StudentPanoramaService {
         throw new NotFoundException('Estudiante no encontrado');
       }
 
-      const rawAssessments = await loadStudentAssessments(tx, orgId, studentId);
+      // Alcance por asignatura: de un alumno visible, un profesor de asignatura
+      // sólo ve lo suyo; el profesor jefe ve el perfil completo del alumno
+      // (docs/diseno-alcance-docente.md §3.1).
+      const subjectFilter = await resolveStudentSubjectFilter(tx, scope, studentId);
+      const rawAssessments = (await loadStudentAssessments(tx, orgId, studentId)).filter(
+        (a) => subjectFilter === null || (a.subjectId !== null && subjectFilter.has(a.subjectId)),
+      );
       const effectiveBands = await resolveEffectiveBandsForInstruments(tx, [
         ...new Set(rawAssessments.map((a) => a.instrumentId)),
       ]);

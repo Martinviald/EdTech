@@ -15,21 +15,17 @@ import {
   skillResults,
   studentEnrollments,
   students,
-  subjectClasses,
   subjects,
   taxonomyNodes,
-  teacherAssignments,
   withOrgContext,
 } from '@soe/db';
 import {
-  RESULTS_VIEWER_ROLES,
   RESULT_HIDDEN_NODE_TYPES,
   bandToLegacyLevel,
   capabilitiesFor,
   classifyByBands,
   mergeAnswerCounts,
   percentageToPerformanceLevel,
-  userHasAnyRole,
   type AnswerCount,
   type AssessmentReportCourseRow,
   type AssessmentReportItemRow,
@@ -46,7 +42,6 @@ import {
   type PerformanceBandView,
   type PerformanceDistributionBucket,
   type PerformanceLevel,
-  type UserRole,
 } from '@soe/types';
 import type { JwtPayload } from '../auth/jwt-payload.types';
 import {
@@ -69,6 +64,10 @@ import {
 import { InjectDb, type Database } from '../database/database.types';
 import { resolveEffectiveBands } from '../performance-bands/lib/resolve-effective-bands';
 import { hydrateBandForStudent } from '../performance-bands/lib/hydrate-band-level';
+import {
+  resolveClassGroupScope,
+  type ClassGroupScope,
+} from '../common/helpers/class-group-scope.helper';
 
 /** PerformanceBandInput (con thresholds) → vista mínima para la respuesta. */
 function toBandView(b: PerformanceBandInput): PerformanceBandView {
@@ -77,16 +76,6 @@ function toBandView(b: PerformanceBandInput): PerformanceBandView {
 
 // Roles administrativos: ven toda la org. Idéntico a los demás services de
 // resultados (AssessmentResultsService / AnalyticsService / ItemAnalysisService).
-const ADMIN_LIKE_ROLES: readonly UserRole[] = [
-  'platform_admin',
-  'school_admin',
-  'academic_director',
-  'cycle_director',
-  'dept_head',
-  'coordinator',
-  'eval_coordinator',
-];
-
 const CONTENT_NODE_TYPES: readonly string[] = ['content', 'learning_objective'];
 
 const PERFORMANCE_LEVELS_ORDER: readonly PerformanceLevel[] = [
@@ -105,7 +94,7 @@ const AT_RISK_LEVELS: readonly PerformanceLevel[] = ['insufficient', 'elementary
 const ACHIEVEMENT_CRITICAL = 40; // < 40% de logro → contenido no logrado
 const ACHIEVEMENT_HIGH = 85; // >= 85% de logro → contenido logrado por casi todos
 
-type ScopeResult = { scopeAll: boolean; classGroupIds: string[] };
+type ScopeResult = ClassGroupScope;
 
 interface ItemAlternative {
   key?: unknown;
@@ -1311,27 +1300,11 @@ export class AssessmentReportService {
   }
 
   private async getAccessibleClassGroupIds(
-    db: Database,
+    tx: Database,
     user: JwtPayload,
     orgId: string,
-  ): Promise<ScopeResult> {
-    if (user.isPlatformAdmin) return { scopeAll: true, classGroupIds: [] };
-    if (userHasAnyRole(user.roles, ADMIN_LIKE_ROLES)) {
-      return { scopeAll: true, classGroupIds: [] };
-    }
-    if (!userHasAnyRole(user.roles, RESULTS_VIEWER_ROLES)) {
-      return { scopeAll: false, classGroupIds: [] };
-    }
-
-    const rows = await db
-      .select({ classGroupId: subjectClasses.classGroupId })
-      .from(teacherAssignments)
-      .innerJoin(subjectClasses, eq(subjectClasses.id, teacherAssignments.subjectClassId))
-      .innerJoin(classGroups, eq(classGroups.id, subjectClasses.classGroupId))
-      .where(and(eq(teacherAssignments.userId, user.userId), eq(classGroups.orgId, orgId)));
-
-    const ids = Array.from(new Set(rows.map((r) => r.classGroupId)));
-    return { scopeAll: false, classGroupIds: ids };
+  ): Promise<ClassGroupScope> {
+    return resolveClassGroupScope(tx, user, orgId);
   }
 
   private async assessmentTouchesScope(

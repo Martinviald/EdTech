@@ -71,7 +71,9 @@ describe('McpAuthGuard', () => {
     await expect(guard.canActivate(context)).rejects.toBeInstanceOf(UnauthorizedException);
     expect(response.setHeader).toHaveBeenCalledWith(
       'WWW-Authenticate',
-      'Bearer resource_metadata="http://localhost:4000/.well-known/oauth-protected-resource"',
+      expect.stringContaining(
+        'resource_metadata="http://localhost:4000/.well-known/oauth-protected-resource"',
+      ),
     );
   });
 

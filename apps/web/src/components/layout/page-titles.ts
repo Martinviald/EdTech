@@ -74,6 +74,7 @@ const STATIC_TITLES: Record<string, PageTitle> = {
   [ROUTES.materialRemedial]: { title: 'Material Remedial' },
   [ROUTES.materiales]: { title: 'Materiales' },
   [ROUTES.establecimientoInformeOficial]: { title: 'Informe oficial de establecimiento' },
+  [ROUTES.telemetria]: { title: 'Telemetría de uso' },
 
   [ROUTES.equipo]: { title: 'Equipo', parent: adminHubParent() },
   [ROUTES.marcosAcademicos]: { title: 'Marcos Académicos', parent: adminHubParent() },
@@ -96,6 +97,8 @@ const STATIC_TITLES: Record<string, PageTitle> = {
 
   // Panel de plataforma (route group `(admin)`).
   [ROUTES.admin]: { title: 'Panel de plataforma' },
+  [ROUTES.adminTelemetria]: { title: 'Telemetría de plataforma' },
+  [ROUTES.adminFeedback]: { title: 'Comentarios de usuarios' },
   [ROUTES.adminColegios]: { title: 'Colegios' },
   [ROUTES.adminEquipo]: { title: 'Equipo plataforma' },
   [ROUTES.adminInstrumentos]: { title: 'Instrumentos oficiales' },

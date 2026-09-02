@@ -5,6 +5,11 @@ import { ReportSupportService, humanizePeriod } from './report-support.service';
 // stub de Database.
 const service = new ReportSupportService({} as unknown as Database);
 
+/** Alcance de profesor con sólo los cursos que el test declara. */
+function scopeOf(classGroupIds: string[]) {
+  return { scopeAll: false, classGroupIds, pairs: [], homeroomClassGroupIds: [] };
+}
+
 describe('ReportSupportService — helpers de presentación', () => {
   describe('resolveVariant', () => {
     it('marca requires_support para momentos diagnósticos', () => {
@@ -58,44 +63,39 @@ describe('ReportSupportService.resolveAccessibleClassGroupIds', () => {
     // ⚠️ null, NO []: distingue "admin sin filtro" de "scope vacío" en item-analysis
     // (sin filtro → la población visible ya es todo el colegio).
     expect(
-      service.resolveAccessibleClassGroupIds({ scopeAll: true, classGroupIds: [] }, undefined),
+      service.resolveAccessibleClassGroupIds(
+        { scopeAll: true, classGroupIds: [], pairs: [], homeroomClassGroupIds: [] },
+        undefined,
+      ),
     ).toBeNull();
   });
 
   it('admin con filtro por curso → ese único curso', () => {
     expect(
-      service.resolveAccessibleClassGroupIds({ scopeAll: true, classGroupIds: [] }, CG_A),
-    ).toEqual([CG_A]);
-  });
-
-  it('profesor sin filtro → todos sus cursos (se recombinan sumando)', () => {
-    expect(
       service.resolveAccessibleClassGroupIds(
-        { scopeAll: false, classGroupIds: [CG_A, CG_B] },
-        undefined,
-      ),
-    ).toEqual([CG_A, CG_B]);
-  });
-
-  it('profesor con filtro dentro de su scope → ese curso', () => {
-    expect(
-      service.resolveAccessibleClassGroupIds(
-        { scopeAll: false, classGroupIds: [CG_A, CG_B] },
+        { scopeAll: true, classGroupIds: [], pairs: [], homeroomClassGroupIds: [] },
         CG_A,
       ),
     ).toEqual([CG_A]);
   });
 
+  it('profesor sin filtro → todos sus cursos (se recombinan sumando)', () => {
+    expect(service.resolveAccessibleClassGroupIds(scopeOf([CG_A, CG_B]), undefined)).toEqual([
+      CG_A,
+      CG_B,
+    ]);
+  });
+
+  it('profesor con filtro dentro de su scope → ese curso', () => {
+    expect(service.resolveAccessibleClassGroupIds(scopeOf([CG_A, CG_B]), CG_A)).toEqual([CG_A]);
+  });
+
   it('profesor pidiendo un curso fuera de su scope → [] (no null: filtra a nada)', () => {
-    expect(
-      service.resolveAccessibleClassGroupIds({ scopeAll: false, classGroupIds: [CG_A] }, CG_B),
-    ).toEqual([]);
+    expect(service.resolveAccessibleClassGroupIds(scopeOf([CG_A]), CG_B)).toEqual([]);
   });
 
   it('profesor sin cursos → [] (no null)', () => {
-    expect(
-      service.resolveAccessibleClassGroupIds({ scopeAll: false, classGroupIds: [] }, undefined),
-    ).toEqual([]);
+    expect(service.resolveAccessibleClassGroupIds(scopeOf([]), undefined)).toEqual([]);
   });
 });
 

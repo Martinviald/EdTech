@@ -34,6 +34,8 @@ import { McpThrottlerGuard } from './mcp-throttler.guard';
 
 const SERVER_INFO = { name: 'academos-analitico', version: '0.1.0' };
 
+const ORG_CONTEXT_EXEMPT_TOOLS = new Set(['whoami', 'list_my_orgs', 'set_active_org']);
+
 const SERVER_INSTRUCTIONS =
   'Servidor analítico de AcademOS (solo lectura). Expone instrumentos, evaluaciones, ' +
   'resultados y brechas de aprendizaje de la organización del usuario autenticado. ' +
@@ -91,6 +93,16 @@ export class McpController {
     throw new MethodNotAllowedException('Servidor MCP stateless: solo POST');
   }
 
+  private orgContextFor(
+    name: string,
+    principal: AnalyticsPrincipal,
+  ): { orgId: string; orgName: string | null } | null {
+    if (ORG_CONTEXT_EXEMPT_TOOLS.has(name) || !principal.orgId) {
+      return null;
+    }
+    return { orgId: principal.orgId, orgName: principal.orgName ?? null };
+  }
+
   private buildServer(principal: AnalyticsPrincipal): Server {
     const server = new Server(SERVER_INFO, {
       capabilities: { tools: {}, prompts: {}, resources: {} },
@@ -116,8 +128,12 @@ export class McpController {
         const descriptor = this.facade
           .listVisible(principal)
           .find((candidate) => candidate.name === name);
+        const orgContext = this.orgContextFor(name, principal);
+        const text = orgContext
+          ? `Organización: ${orgContext.orgName ?? orgContext.orgId} (${orgContext.orgId})\n${JSON.stringify(result)}`
+          : JSON.stringify(result);
         return {
-          content: [{ type: 'text', text: JSON.stringify(result) }],
+          content: [{ type: 'text', text }],
           ...(descriptor?.outputSchema
             ? { structuredContent: result as Record<string, unknown> }
             : {}),
