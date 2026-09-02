@@ -155,3 +155,21 @@ docker run --rm -p 8090:8090 omr-service
 | `GET /health` | Liveness |
 | `POST /v1/read` | `(LayoutSpec, CaptureProfile, source)` → `ScanResult`. 422 request inválido; 502 imagen no descargable; 504 tiempo límite por página |
 | `POST /v1/read?debug=1` | Igual, pero responde `{ result, debug }` con métricas de diagnóstico por página (ver "Modo debug") |
+
+## Leer una hoja sin pasar por la UI
+
+```bash
+python -m tools.read_sheet hoja.pdf --spec layout.json
+python -m tools.read_sheet foto.jpg --spec-from-db <layoutId|tiradaId> --profile phone
+python -m tools.read_sheet hoja.pdf --spec layout.json --marks   # detalle marca por marca
+python -m tools.read_sheet hoja.pdf --spec layout.json --json    # ScanResult crudo
+```
+
+Corre el pipeline **en proceso**: no necesita el servicio levantado, ni el backend, ni
+S3, ni crear un lote. Existe para cortar el ciclo de iteracion — imprimir, rendir,
+escanear, subir por la UI, crear el lote y esperar — cuando lo unico que se quiere saber
+es por que una hoja se rechazo.
+
+Por pagina informa cuantos fiduciales se detectaron y el motivo del rechazo, si el QR
+decodifico, y con `--marks` el relleno, umbral y margen de cada marca: los tres numeros
+que explican por que una quedo dudosa.
