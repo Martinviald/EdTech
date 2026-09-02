@@ -1,10 +1,11 @@
 """Orientacion (B2/T5): hoja escaneada de lado o invertida.
 
 Si la primera pasada no se confirma (QR ilegible desde su region), se prueban
-las 4 rotaciones y se acepta SOLO la que decodifica el QR: los fiduciales
-solos no distinguen orientaciones. Sin prueba, se conserva la primera pasada
-— que para una hoja rotada sin QR legible termina rechazada, jamas leida con
-una correspondencia equivocada."""
+las 4 rotaciones y se acepta la que el QR decodifica o la que confirma la
+firma de la grilla (test_grid_confirmation.py): los fiduciales solos no
+distinguen orientaciones. Una hoja jamas se lee con una correspondencia
+equivocada — la rotacion sin QR ahora se lee, pero estos tests verifican que
+se lee CORRECTA."""
 
 from __future__ import annotations
 
@@ -53,7 +54,7 @@ def test_image_sha256_is_of_the_capture_as_it_entered_not_the_reoriented(
 
 
 @pytest.mark.parametrize("degrees", [90, 180])
-def test_rotated_sheet_without_readable_qr_is_never_read_with_wrong_mapping(
+def test_rotated_sheet_without_readable_qr_reads_with_the_correct_mapping(
     spec: dict, profile: dict, marks_abcd: dict, degrees: int
 ) -> None:
     no_qr = syn.render_page(
@@ -62,5 +63,10 @@ def test_rotated_sheet_without_readable_qr_is_never_read_with_wrong_mapping(
     rotated = cv2.rotate(no_qr, ROTATION_CODES[degrees])
     page = process_page(syn.to_bgr(rotated), 0, spec, profile)
 
-    assert page["quality"]["ok"] is False
-    assert page["marks"] == []
+    assert page["quality"]["ok"] is True
+    assert page["identity"]["raw"] is None
+    by_number = {mark["printedNumber"]: mark for mark in page["marks"]}
+    for field_id, expected in marks_abcd.items():
+        mark = by_number[str(int(field_id.removeprefix("f_")))]
+        assert mark["state"] == "marked"
+        assert mark["value"] == expected

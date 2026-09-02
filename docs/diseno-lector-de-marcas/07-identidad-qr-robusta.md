@@ -164,5 +164,15 @@ Nada de esto arregla `no_separable_marks` (marcas demasiado claras), ni las esqu
 recorta, ni la calidad general de captura. Ataca el canal de identidad, que es donde estaba el
 problema.
 
+⚠️ Medido durante F1: hacer robusta la identidad **expone más** la limitación de marcas lavadas,
+porque hojas que antes se rechazaban por identidad ahora se leen. En la captura N0 del banco real,
+la banda inferior lavada deja 4 marcas reales (filas 20–23, fills 0,26–0,40) al mismo nivel que los
+anillos vacíos (0,33–0,43): salen como `blank` confiado. No es una regresión — el pipeline de `dev`
+lee exactamente igual una hoja lavada cuyo QR sí decodifica — pero el rechazo accidental por
+identidad ya no la tapa. La señal de fiduciales lavados no discrimina (los interiores detectados de
+N0 miden 0,06–0,15, sanos; el fiducial lavado es justo el que falta). Queda como limitación
+conocida del clasificador; resolverla pide una señal nueva (p. ej. oscuridad del anillo por
+burbuja) con su propia medición, fuera de este plan.
+
 Y el umbral de 12 px/módulo sale de **una impresora y cuatro escaneos**. Confirmarlo contra el
 conjunto de oro (O4) sigue pendiente.

@@ -76,14 +76,15 @@ def test_three_fiducials_recovered_when_the_qr_confirms_the_reconstruction(
     assert page["marks"] != []
 
 
-def test_three_fiducials_rejected_when_the_qr_cannot_confirm_it(
-    spec: dict, clean_gray: np.ndarray, profile: dict
+def test_three_fiducials_without_qr_are_accepted_when_the_grid_confirms(
+    spec: dict, clean_gray: np.ndarray, profile: dict, marks_abcd: dict
 ) -> None:
-    """Sin QR que confirme, la reconstruccion se descarta y la pagina se rechaza.
+    """Sin QR, la firma de la grilla confirma la reconstruccion y la hoja se lee.
 
-    Es la mitad que importa de la recuperacion: recuperar una hoja mas nunca
-    puede costar una lectura incorrecta hecha con confianza. Se borra el
-    fiducial Y el QR.
+    Antes la unica prueba era el QR y esta hoja se rechazaba entera
+    (fiducials_missing) — el caso N0/L0 del banco de capturas reales: el
+    escaner recorto una esquina Y el aliasing mato el QR. La identidad queda
+    sin resolver; las marcas se leen con la correspondencia correcta.
     """
     erased = clean_gray.copy()
     erased[:80, :80] = syn.PAPER_GRAY
@@ -91,6 +92,36 @@ def test_three_fiducials_rejected_when_the_qr_cannot_confirm_it(
     rows = slice(round(height * 0.08), round(height * 0.18))
     cols = slice(round(width * 0.60), round(width * 0.88))
     erased[rows, cols] = syn.PAPER_GRAY
+    page = process_page(syn.to_bgr(erased), 0, spec, profile)
+    assert page["quality"]["ok"] is True
+    assert page["quality"]["fiducialsFound"] == 3
+    assert page["identity"]["raw"] is None
+    by_number = {mark["printedNumber"]: mark for mark in page["marks"]}
+    for field_id, expected in marks_abcd.items():
+        assert by_number[str(int(field_id.removeprefix("f_")))]["value"] == expected
+
+
+def test_three_fiducials_with_nothing_to_confirm_are_rejected(
+    spec: dict, clean_gray: np.ndarray, profile: dict
+) -> None:
+    """Sin QR y sin grilla que calce, la reconstruccion se descarta.
+
+    Es la mitad que importa de la recuperacion: recuperar una hoja mas nunca
+    puede costar una lectura incorrecta hecha con confianza. Se borra el
+    fiducial, el QR y la columna de burbujas: ninguna de las dos pruebas
+    independientes puede confirmar la homografia estimada.
+    """
+    erased = clean_gray.copy()
+    erased[:80, :80] = syn.PAPER_GRAY
+    height, width = erased.shape
+    erased[
+        round(height * 0.08) : round(height * 0.18),
+        round(width * 0.60) : round(width * 0.88),
+    ] = syn.PAPER_GRAY
+    erased[
+        round(height * 0.16) : round(height * 0.78),
+        round(width * 0.06) : round(width * 0.42),
+    ] = syn.PAPER_GRAY
     page = process_page(syn.to_bgr(erased), 0, spec, profile)
     assert page["quality"]["ok"] is False
     assert page["quality"]["rejectReason"] == "fiducials_missing"

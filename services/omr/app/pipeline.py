@@ -4,20 +4,26 @@ imageSha256 = sha256 de los bytes del PNG canonico de la pagina rasterizada,
 tal como entro (ANTES de rectificar y ANTES de corregir orientacion):
 identifica la captura original, para la idempotencia D13/CD-3.
 
-Orientacion (hoja escaneada de lado o invertida): si la rectificacion de la
-primera pasada no se confirma — menos de 4 fiduciales, o el QR no decodifica
-desde su region esperada — se prueban las rotaciones 90/180/270. Una rotacion
-alternativa SOLO se acepta si el QR decodifica desde la region del spec: los
+Orientacion y homografia (F1 de identidad robusta): la rectificacion se
+confirma con una escalera de dos pruebas independientes — el QR decodificando
+desde la region del spec (la via rapida y mas fuerte), o la firma de la
+grilla: en una homografia correcta TODA posicion de burbuja del spec contiene
+al menos su anillo impreso, en una equivocada la mayoria muestrea papel. Los
 4 fiduciales solos no distinguen orientaciones (un cuadrado rotado sigue
-siendo un cuadrado) y aceptar una correspondencia equivocada podria leer mal
-con confianza. Sin prueba, se conserva el resultado de la primera pasada.
+siendo un cuadrado), asi que sin alguna de las dos pruebas jamas se acepta
+una rotacion ni una esquina reconstruida. Si la primera pasada no se
+confirma, se prueban las rotaciones 90/180/270 y despues las rectificaciones
+leave-one-out (falso fiducial: una mancha cuadrada gana una esquina y corre
+la homografia con 4/4 detectados — capturado en papel real, captura N2).
 
-M1/CD-15: en specs rut_bubbles la prueba de orientacion es el QR de esquina
-(cuadrante superior derecho de la pagina rectificada). Si ninguna orientacion
-lo decodifica, la pagina se rechaza por calidad (no_separable_marks) SIN leer
-identidad ni clasificar marcas: sin QR no hay copia fisica que anclar ni
-orientacion probada, y una grilla RUT leida con la correspondencia equivocada
-matchearia al alumno incorrecto con confianza.
+M1/CD-15: en specs rut_bubbles la orientacion se confirma con el QR de esquina
+(cuadrante superior derecho) o con la firma de la grilla — la grilla RUT del
+propio spec es parte de la firma. Si ninguna orientacion se confirma, la
+pagina se rechaza por calidad (no_separable_marks) SIN leer identidad ni
+clasificar marcas: una grilla RUT leida con la correspondencia equivocada
+matchearia al alumno incorrecto con confianza. Con firma confirmada y QR de
+esquina ilegible la pagina SI se lee (qrRaw null): el modo pensado para no
+depender del QR ya no depende del QR.
 
 pageThumbJpegBase64 (~400 px de ancho, sobre la captura ya orientada) SOLO
 cuando quality.ok es false o identity.raw es null (CD-1).
@@ -61,14 +67,22 @@ from .identity import (
     read_identity,
 )
 from .quality import assess
-from .readers import READERS
-from .rectify import FiducialFailure, RectifiedPage, rectify
+from .readers import READERS, sample_bubble_fills
+from .rectify import (
+    FiducialFailure,
+    RectifiedPage,
+    leave_one_out_rectifications,
+    rectify,
+    refine_reconstruction,
+)
 from .sources import Fetch, build_page_source, fetch_url
 
 logger = logging.getLogger("omr.pipeline")
 
 PAGE_THUMB_WIDTH_PX = 400
 FILL_HISTOGRAM_BINS = 10
+GRID_SIGNATURE_FILL_FLOOR = 0.08
+GRID_SIGNATURE_MIN_FRACTION = 0.9
 MARK_STATES = ("marked", "blank", "multiple", "ambiguous")
 ORIENTATION_ROTATIONS: tuple[tuple[int, int], ...] = (
     (90, cv2.ROTATE_90_CLOCKWISE),
@@ -158,7 +172,7 @@ def classify_page_debug(
 
     with _stage(timings_ms, "rectify"):
         oriented_bgr, rectified, orientation_degrees, orientation_confirmed = _rectify_oriented(
-            bgr, spec
+            bgr, spec, page_index
         )
     oriented_gray = cv2.cvtColor(oriented_bgr, cv2.COLOR_BGR2GRAY)
 
@@ -221,7 +235,7 @@ def assess_page(
     bgr: np.ndarray, spec: dict[str, Any], profile: dict[str, Any]
 ) -> dict[str, Any]:
     image_sha256 = _canonical_png_sha256(bgr)
-    oriented_bgr, rectified, _, orientation_confirmed = _rectify_oriented(bgr, spec)
+    oriented_bgr, rectified, _, orientation_confirmed = _rectify_oriented(bgr, spec, 0)
     oriented_gray = cv2.cvtColor(oriented_bgr, cv2.COLOR_BGR2GRAY)
     quality = assess(oriented_gray, rectified, profile)
     _apply_orientation_verdict(quality, spec, orientation_confirmed)
@@ -235,50 +249,137 @@ def assess_page(
 
 
 def _rectify_oriented(
-    bgr: np.ndarray, spec: dict[str, Any]
+    bgr: np.ndarray, spec: dict[str, Any], file_page_index: int
 ) -> tuple[np.ndarray, RectifiedPage | FiducialFailure, int, bool]:
+    logical_page = file_page_index % spec["pageCount"]
     confirmable = spec["identity"]["mode"] in ("qr", "rut_bubbles")
     first = rectify(bgr, spec, allow_reconstruction=confirmable)
-    if _orientation_confirmed(first, spec):
-        return bgr, first, 0, True
+    if _homography_confirmed(first, spec, logical_page):
+        return bgr, _refine_accepted(bgr, spec, first, logical_page), 0, True
     if not confirmable:
         return bgr, first, 0, True
     for degrees, rotation_code in ORIENTATION_ROTATIONS:
         rotated = cv2.rotate(bgr, rotation_code)
         candidate = rectify(rotated, spec, allow_reconstruction=True)
-        if _orientation_confirmed(candidate, spec):
-            return rotated, candidate, degrees, True
+        if _homography_confirmed(candidate, spec, logical_page):
+            return rotated, _refine_accepted(rotated, spec, candidate, logical_page), degrees, True
+    for candidate in leave_one_out_rectifications(bgr, spec):
+        if _homography_confirmed(candidate, spec, logical_page):
+            return bgr, _refine_accepted(bgr, spec, candidate, logical_page), 0, True
     return bgr, _discard_unconfirmed_reconstruction(bgr, spec, first), 0, False
+
+
+def _refine_accepted(
+    bgr: np.ndarray,
+    spec: dict[str, Any],
+    rectified: RectifiedPage | FiducialFailure,
+    logical_page: int,
+) -> RectifiedPage | FiducialFailure:
+    """Una esquina reconstruida ya confirmada se afina antes de leer marcas.
+
+    La confirmacion prueba que la homografia es LA correcta (la firma o el QR
+    calzan); el afinado corrige cuanto se corrio la estimacion del paralelogramo
+    dentro del tope topologico de refine_reconstruction. El puntaje es la brecha
+    de separacion de la propia pagina: mas brecha = burbujas mejor centradas,
+    jamas un mapeo distinto. Si el resultado afinado dejara de confirmar, se
+    conserva el original.
+    """
+    if not isinstance(rectified, RectifiedPage) or rectified.reconstructed_corner is None:
+        return rectified
+    bubbles = _spec_bubbles(spec, logical_page)
+    if not bubbles:
+        return rectified
+
+    def separation_gap(page: RectifiedPage) -> float:
+        return page_threshold(sample_bubble_fills(page, bubbles)).gap
+
+    refined = refine_reconstruction(
+        bgr, spec, rectified.reconstructed_corner, separation_gap
+    )
+    if refined is None or not _homography_confirmed(refined, spec, logical_page):
+        return rectified
+    return refined
 
 
 def _discard_unconfirmed_reconstruction(
     bgr: np.ndarray, spec: dict[str, Any], rectified: RectifiedPage | FiducialFailure
 ) -> RectifiedPage | FiducialFailure:
-    """Una reconstruccion que el QR no confirmo vuelve a ser un fallo de fiduciales.
+    """Una reconstruccion que nada confirmo vuelve a ser un fallo de fiduciales.
 
     Reconstruir la 4a esquina recupera paginas que antes se perdian, pero solo
-    vale si algo independiente confirma que la homografia quedo bien. Esa prueba
-    es el QR decodificando desde la region del spec (o el QR de esquina en modo
-    rut_bubbles). Si no decodifico en ninguna orientacion, la pagina se rechaza
-    como antes: cero lecturas incorrectas confiadas manda sobre recuperar una
-    hoja mas.
+    vale si algo independiente confirma que la homografia quedo bien: el QR
+    decodificando desde la region del spec, o la firma de la grilla. Si ninguna
+    de las dos pruebas paso en ninguna orientacion, la pagina se rechaza como
+    antes: cero lecturas incorrectas confiadas manda sobre recuperar una hoja
+    mas.
     """
     if not isinstance(rectified, RectifiedPage) or not rectified.reconstructed:
         return rectified
     return rectify(bgr, spec)
 
 
-def _orientation_confirmed(
-    rectified: RectifiedPage | FiducialFailure, spec: dict[str, Any]
+def _homography_confirmed(
+    rectified: RectifiedPage | FiducialFailure, spec: dict[str, Any], logical_page: int
 ) -> bool:
     if not isinstance(rectified, RectifiedPage):
         return False
     mode = spec["identity"]["mode"]
-    if mode == "qr":
-        return decode_region_qr(rectified, spec) is not None
-    if mode == "rut_bubbles":
-        return decode_corner_qr(rectified) is not None
-    return True
+    if mode == "qr" and decode_region_qr(rectified, spec) is not None:
+        return True
+    if mode == "rut_bubbles" and decode_corner_qr(rectified) is not None:
+        return True
+    if mode not in ("qr", "rut_bubbles"):
+        return True
+    return _grid_signature_confirmed(rectified, spec, logical_page)
+
+
+def _grid_signature_confirmed(
+    rectified: RectifiedPage, spec: dict[str, Any], logical_page: int
+) -> bool:
+    """El spec "calza": cada posicion de burbuja contiene al menos su anillo.
+
+    Fraccion de burbujas del spec (campos de la pagina logica + grilla de
+    identidad) con fill sobre el piso. Distribucion medida con piso 0.08
+    (instrumental: tools/measure_grid_signature.py) sobre las capturas reales
+    archivadas (una impresora, cuatro cadenas de escaneo) y las hojas
+    sinteticas de la suite, incluida la grilla RUT cuyos anillos finos rinden
+    fills de 0.10-0.15:
+
+        homografia correcta    1.000            (8 capturas legibles reales con
+                                                 2 esquinas reconstruidas, + 3
+                                                 sinteticas: qr, rut, rut blanca)
+        rotada 90/180/270      max 0.491        (33 rectificaciones reales + 9
+                                                 sinteticas)
+        falso fiducial (N2)    0.456
+        leave-one-out malo     0.175 - 0.632    (esquina equivocada de N2)
+
+    El corte en 0.9 deja 0.27 de margen contra la peor homografia equivocada
+    medida y 0.10 contra la peor correcta. Con piso 0.12 la grilla RUT
+    sintetica caia a 0.85 (por eso 0.08); con 0.05 las equivocadas suben sin
+    ganar nada en las correctas.
+
+    La pagina logica para elegir los campos sale del orden del archivo — la
+    misma regla que usa _read_marks cuando el QR no esta. Una captura tipo
+    CamScanner que lava los anillos da firma baja: por eso la firma es el
+    fallback y el QR la via primaria, nunca al reves.
+    """
+    bubbles = _spec_bubbles(spec, logical_page)
+    if not bubbles:
+        return False
+    fills = sample_bubble_fills(rectified, bubbles)
+    over = sum(1 for fill in fills if fill > GRID_SIGNATURE_FILL_FLOOR)
+    return over / len(fills) >= GRID_SIGNATURE_MIN_FRACTION
+
+
+def _spec_bubbles(spec: dict[str, Any], logical_page: int) -> list[dict[str, Any]]:
+    bubbles: list[dict[str, Any]] = []
+    for field in spec["fields"]:
+        if field["pageIndex"] == logical_page:
+            bubbles.extend(field.get("bubbles") or [])
+    identity_bubbles = spec["identity"].get("bubbles")
+    if identity_bubbles:
+        bubbles.extend(identity_bubbles)
+    return bubbles
 
 
 def _apply_orientation_verdict(
