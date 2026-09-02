@@ -21,6 +21,7 @@
 import { config } from 'dotenv';
 import { resolve } from 'path';
 import { readFileSync } from 'fs';
+import { createHash } from 'crypto';
 import { and, eq, inArray, isNull, sql } from 'drizzle-orm';
 import { createDbClient } from '../client';
 import { academicYears } from '../schema/organizations';
@@ -54,12 +55,30 @@ const opt = (name: string, fallback?: string): string | undefined => {
 };
 
 const COMMIT = args.includes('--commit');
+/**
+ * Crea la fila `users` de cada docente en vez de dejarlo como invitación
+ * pendiente. Necesario para poder asignarle cursos: `teacher_assignments.user_id`
+ * es NOT NULL, así que sin usuario no hay asignación posible.
+ */
+const CREATE_USERS = args.includes('--create-users');
 const ORG_ID = opt('org');
 const YEAR = Number(opt('year', '2026'));
 const ARTIFACT = resolve(
   __dirname,
   '../../../../scripts/cscj/planta-docente/out/planta-docente.json',
 );
+
+/**
+ * UUID determinista a partir del correo: la misma planta re-importada produce
+ * los mismos ids, así que la carga es idempotente y las asignaciones no se
+ * duplican ni quedan huérfanas entre corridas.
+ */
+function userIdFromEmail(email: string): string {
+  const h = createHash('sha256').update(`planta-docente:${email.toLowerCase()}`).digest('hex');
+  // Variante/versión fijas para que sea un UUID válido (v4-shaped, no aleatorio).
+  const v = `${h.slice(0, 8)}-${h.slice(8, 12)}-4${h.slice(13, 16)}-a${h.slice(17, 20)}-${h.slice(20, 32)}`;
+  return v;
+}
 
 async function main() {
   if (!ORG_ID) throw new Error('--org <uuid> es requerido');
@@ -107,6 +126,14 @@ async function main() {
       ...art.homerooms.map((h) => h.email).filter((e): e is string => !!e),
     ]),
   ];
+  // Nombre a mostrar de cada docente, tomado de la planta (la primera aparición).
+  const nameByEmail = new Map<string, string>();
+  for (const a of art.assignments)
+    if (!nameByEmail.has(a.email)) nameByEmail.set(a.email, a.teacher);
+  for (const h of art.homerooms) {
+    if (h.email && !nameByEmail.has(h.email)) nameByEmail.set(h.email, h.teacher);
+  }
+
   const userRows = emails.length
     ? await db
         .select({ id: users.id, email: users.email })
@@ -172,6 +199,12 @@ async function main() {
   );
 
   if (!COMMIT) {
+    const faltantes = emails.filter((e) => !userIdByEmail.has(e)).length;
+    console.log(
+      CREATE_USERS
+        ? `usuarios a crear: ${faltantes}`
+        : `docentes sin usuario (quedarían como invitación, SIN cursos asignados): ${faltantes}`,
+    );
     console.log('\nDRY-RUN: no se escribió nada. Re-ejecuta con --commit para persistir.');
     await db.$client.end();
     return;
@@ -195,6 +228,34 @@ async function main() {
     for (const s of refreshed) scIdByKey.set(`${s.classGroupId}|${s.subjectId}`, s.id);
   }
   console.log(`subject_classes creados: ${scToCreate.length}`);
+
+  // ── 1.5) Usuarios de los docentes ──────────────────────────────────────────
+  if (CREATE_USERS) {
+    const missing = emails.filter((e) => !userIdByEmail.has(e));
+    for (const email of missing) {
+      const name = nameByEmail.get(email) ?? email;
+      const id = userIdFromEmail(email);
+      await db
+        .insert(users)
+        .values({
+          id,
+          email,
+          name,
+          provider: 'google',
+          // El proveedor real se sella en el primer login SSO; este marcador
+          // sólo satisface el NOT NULL y deja rastro del origen de la fila.
+          providerId: `planta-docente:${email}`,
+        })
+        .onConflictDoNothing();
+      const [row] = await db
+        .select({ id: users.id })
+        .from(users)
+        .where(eq(users.email, email))
+        .limit(1);
+      if (row) userIdByEmail.set(email, row.id);
+    }
+    console.log(`usuarios creados: ${missing.length}`);
+  }
 
   // ── 2) Memberships (teacher / homeroom_teacher) ────────────────────────────
   const homeroomEmails = new Set(art.homerooms.map((h) => h.email).filter((e): e is string => !!e));
