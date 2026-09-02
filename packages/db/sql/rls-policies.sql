@@ -320,3 +320,13 @@ DROP POLICY IF EXISTS "telemetry_events_tenant_isolation" ON "telemetry_events";
 CREATE POLICY "telemetry_events_tenant_isolation" ON "telemetry_events"
   AS PERMISSIVE FOR ALL
   USING (org_id::text = current_setting('app.current_org_id', true));
+
+-- ── Feedback in-app ──────────────────────────────────────────────────────────
+ALTER TABLE "feedback" ENABLE ROW LEVEL SECURITY;
+ALTER TABLE "feedback" FORCE  ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "feedback_tenant_isolation" ON "feedback";
+CREATE POLICY "feedback_tenant_isolation" ON "feedback"
+  AS PERMISSIVE FOR ALL
+  USING (org_id::text = current_setting('app.current_org_id', true))
+  WITH CHECK (org_id::text = current_setting('app.current_org_id', true));

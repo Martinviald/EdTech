@@ -47,6 +47,7 @@ import { AssistantModule } from './assistant/assistant.module';
 import { OfficialReportsModule } from './official-reports/official-reports.module';
 import { OfficialReportImportModule } from './official-report-import/official-report-import.module';
 import { DocumentsModule } from './documents/documents.module';
+import { FeedbackModule } from './feedback/feedback.module';
 import { McpModule } from './mcp/mcp.module';
 import { TelemetryModule } from './telemetry/telemetry.module';
 import { TelemetryInterceptor } from './telemetry/telemetry.interceptor';
@@ -114,6 +115,7 @@ import { TelemetryInterceptor } from './telemetry/telemetry.interceptor';
     // OfficialReportsModule, que GENERA el informe desde nuestros datos.
     OfficialReportImportModule,
     DocumentsModule,
+    FeedbackModule,
     McpModule,
     // ── Telemetría de uso (analítica de producto): ingesta + agregación ──
     TelemetryModule,

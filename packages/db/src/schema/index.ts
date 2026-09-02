@@ -23,3 +23,4 @@ export * from './llm-settings';
 export * from './documents';
 export * from './mcp';
 export * from './telemetry-events';
+export * from './feedback';
