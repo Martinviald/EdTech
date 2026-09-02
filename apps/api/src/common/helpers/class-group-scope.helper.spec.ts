@@ -8,12 +8,16 @@ import { ForbiddenException } from '@nestjs/common';
 import type { Database } from '@soe/db';
 import {
   ADMIN_LIKE_ROLES,
+  effectiveRolesFor,
+  isTeacherScope,
   assertTargetInScope,
   isAssessmentInScope,
   isClassGroupInScope,
+  buildSubjectCatalogCondition,
   isStudentVisibleInScope,
   resolveClassGroupScope,
 } from './class-group-scope.helper';
+import { subjectClasses } from '@soe/db';
 import { makeQueueDb, makeScope, makeScopedUser } from './scope-test-utils';
 
 describe('resolveClassGroupScope', () => {
@@ -314,5 +318,90 @@ describe('isAssessmentInScope', () => {
     expect(
       isAssessmentInScope(makeScope({ scopeAll: true }), { classGroupIds: [], subjectId: null }),
     ).toBe(true);
+  });
+});
+
+// ──────────────────────────────────────────────────────────────────────────────
+// Criterio único "¿mira como profesor?" — lo comparten el alcance, la vista
+// "Mis cursos" y la etiqueta `scope` de los dashboards.
+// ──────────────────────────────────────────────────────────────────────────────
+
+describe('effectiveRolesFor', () => {
+  it('usa el rol activo, no la unión', () => {
+    expect(
+      effectiveRolesFor(makeScopedUser({ roles: ['teacher', 'dept_head'], activeRole: 'teacher' })),
+    ).toEqual(['teacher']);
+  });
+
+  it('sin activeRole cae a la unión (tokens legacy)', () => {
+    const user = { ...makeScopedUser({ roles: ['teacher', 'dept_head'] }), activeRole: undefined };
+    expect(effectiveRolesFor(user as never).sort()).toEqual(['dept_head', 'teacher']);
+  });
+});
+
+describe('isTeacherScope', () => {
+  it('profesor puro → vista de profesor', () => {
+    expect(isTeacherScope(makeScopedUser())).toBe(true);
+  });
+
+  it('teacher + dept_head con rol activo teacher → vista de PROFESOR', () => {
+    // Antes devolvía false (por la unión) y la respuesta quedaba contradictoria:
+    // scope 'org' junto a datos ya recortados a los cursos del profesor.
+    expect(
+      isTeacherScope(makeScopedUser({ roles: ['teacher', 'dept_head'], activeRole: 'teacher' })),
+    ).toBe(true);
+  });
+
+  it('el mismo usuario con rol activo dept_head → vista de organización', () => {
+    expect(
+      isTeacherScope(makeScopedUser({ roles: ['teacher', 'dept_head'], activeRole: 'dept_head' })),
+    ).toBe(false);
+  });
+
+  it('platform_admin nunca ve la vista de profesor', () => {
+    expect(
+      isTeacherScope(
+        makeScopedUser({
+          isPlatformAdmin: true,
+          roles: ['platform_admin'],
+          activeRole: 'platform_admin',
+        }),
+      ),
+    ).toBe(false);
+  });
+
+  it('coincide con el alcance: quien es teacherScope no tiene scopeAll', async () => {
+    const user = makeScopedUser({ roles: ['teacher', 'dept_head'], activeRole: 'teacher' });
+    const db = makeQueueDb([[{ classGroupId: 'cg-1', subjectId: 'MATH' }]]);
+    const scope = await resolveClassGroupScope(db as Database, user, 'org-1');
+    expect(isTeacherScope(user)).toBe(!scope.scopeAll);
+  });
+});
+
+describe('buildSubjectCatalogCondition', () => {
+  it('sin condición para scopeAll (catálogo completo)', () => {
+    expect(
+      buildSubjectCatalogCondition(makeScope({ scopeAll: true }), {
+        classGroupId: subjectClasses.classGroupId,
+        subjectId: subjectClasses.subjectId,
+      }),
+    ).toBeUndefined();
+  });
+
+  it('acota el catálogo cuando el alcance es de profesor', () => {
+    const cond = buildSubjectCatalogCondition(
+      makeScope({ pairs: [{ classGroupId: 'cg-1', subjectId: 'MATH' }] }),
+      { classGroupId: subjectClasses.classGroupId, subjectId: subjectClasses.subjectId },
+    );
+    expect(cond).toBeDefined();
+  });
+
+  it('un profesor sin cursos no ve ninguna asignatura', () => {
+    const cond = buildSubjectCatalogCondition(makeScope({}), {
+      classGroupId: subjectClasses.classGroupId,
+      subjectId: subjectClasses.subjectId,
+    });
+    // `false`: nunca "sin filtro".
+    expect(cond).toBeDefined();
   });
 });

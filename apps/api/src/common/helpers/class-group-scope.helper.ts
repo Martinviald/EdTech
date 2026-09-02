@@ -78,6 +78,30 @@ const emptyScopeFields = (): Omit<ClassGroupScope, 'scopeAll'> => ({
 });
 
 /**
+ * Roles EFECTIVOS para decidir alcance: el rol activo, no la unión.
+ *
+ * `RolesGuard` autoriza por unión (quién ENTRA al endpoint); el alcance y la
+ * vista se deciden por `activeRole` (qué VE). Un token legacy sin `activeRole`
+ * cae a la unión, que es el comportamiento anterior.
+ */
+export function effectiveRolesFor(user: JwtPayload): UserRole[] {
+  return user.activeRole ? [user.activeRole] : user.roles;
+}
+
+/**
+ * ¿El caller mira la plataforma como PROFESOR (no como directivo)?
+ *
+ * Punto único de esta decisión: la usan el alcance, la vista "Mis cursos" y la
+ * etiqueta `scope` de los dashboards. Tres criterios distintos para la misma
+ * pregunta es cómo se produce una respuesta que se contradice a sí misma —
+ * datos de profesor con cabecera de organización.
+ */
+export function isTeacherScope(user: JwtPayload): boolean {
+  if (user.isPlatformAdmin) return false;
+  return !userHasAnyRole(effectiveRolesFor(user), ADMIN_LIKE_ROLES);
+}
+
+/**
  * Resuelve el alcance por curso del caller dentro de una org. Corre bajo
  * `withOrgContext` (usa `tx`).
  */
@@ -96,7 +120,7 @@ export async function resolveClassGroupScope(
   // pantallas siempre, pero con rol activo `teacher` ve sólo sus cursos y al
   // cambiar a `dept_head` ve la organización. Sin esto el selector de rol no
   // cambia nada y no se puede mostrar a un directivo lo que ve un profesor.
-  const effectiveRoles: UserRole[] = user.activeRole ? [user.activeRole] : user.roles;
+  const effectiveRoles = effectiveRolesFor(user);
 
   if (userHasAnyRole(effectiveRoles, ADMIN_LIKE_ROLES)) {
     return { scopeAll: true, ...emptyScopeFields() };
@@ -378,4 +402,22 @@ export async function resolveStudentSubjectFilter(
   return new Set(
     scope.pairs.filter((p) => studentCourses.has(p.classGroupId)).map((p) => p.subjectId),
   );
+}
+
+/**
+ * Condición para un CATÁLOGO (curso, asignatura) —típicamente `subject_classes`—
+ * acotado al alcance del caller.
+ *
+ * Misma semántica que `buildAssessmentScopeCondition`, sobre otras columnas: los
+ * cursos de jefatura entran completos y del resto sólo los pares que dicta. Se
+ * separa para que quede explícito que acá se filtra un catálogo (lo que la UI
+ * OFRECE), no datos de alumnos: si esto se olvida, el desplegable revela qué
+ * otras asignaturas se dictan en sus cursos y ofrece filtros que no devuelven
+ * nada.
+ */
+export function buildSubjectCatalogCondition(
+  scope: ClassGroupScope,
+  columns: { classGroupId: AnyColumn; subjectId: AnyColumn },
+): SQL | undefined {
+  return buildAssessmentScopeCondition(scope, columns);
 }

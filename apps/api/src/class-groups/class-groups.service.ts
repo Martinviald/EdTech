@@ -14,11 +14,13 @@ import {
 } from '@soe/db';
 import {
   TEACHER_ROLES,
+  userHasAnyRole,
   type ClassGroupDetailResponse,
   type ClassGroupSubject,
   type TeacherAssignmentRole,
 } from '@soe/types';
 import type { JwtPayload } from '../auth/jwt-payload.types';
+import { effectiveRolesFor } from '../common/helpers/class-group-scope.helper';
 import { InjectDb, type Database } from '../database/database.types';
 
 const TEACHER_ROLE_VALUES: readonly TeacherAssignmentRole[] = ['primary', 'assistant'];
@@ -35,7 +37,9 @@ const TEACHER_ROLE_VALUES: readonly TeacherAssignmentRole[] = ['primary', 'assis
  */
 function shouldShowTeacherView(user: JwtPayload): boolean {
   if (user.isPlatformAdmin) return false;
-  return (TEACHER_ROLES as readonly string[]).includes(user.activeRole);
+  // El criterio vive en el helper de alcance (`effectiveRolesFor`): esta vista y
+  // la etiqueta `scope` de los dashboards deben responder lo mismo.
+  return userHasAnyRole(effectiveRolesFor(user), TEACHER_ROLES);
 }
 
 @Injectable()
@@ -71,12 +75,7 @@ export class ClassGroupsService {
         .innerJoin(grades, eq(grades.id, classGroups.gradeId))
         .innerJoin(subjects, eq(subjects.id, subjectClasses.subjectId))
         .innerJoin(academicYears, eq(academicYears.id, classGroups.academicYearId))
-        .where(
-          and(
-            eq(classGroups.orgId, orgId),
-            eq(teacherAssignments.userId, user.userId),
-          ),
-        )
+        .where(and(eq(classGroups.orgId, orgId), eq(teacherAssignments.userId, user.userId)))
         .orderBy(grades.order, classGroups.name, subjects.name);
     }
 
@@ -193,10 +192,7 @@ export class ClassGroupsService {
       .from(subjectClasses)
       .innerJoin(subjects, eq(subjects.id, subjectClasses.subjectId))
       .leftJoin(teacherAssignments, eq(teacherAssignments.subjectClassId, subjectClasses.id))
-      .leftJoin(
-        users,
-        and(eq(users.id, teacherAssignments.userId), isNull(users.deletedAt)),
-      )
+      .leftJoin(users, and(eq(users.id, teacherAssignments.userId), isNull(users.deletedAt)))
       .where(eq(subjectClasses.classGroupId, classGroupId))
       .orderBy(subjects.name);
 
