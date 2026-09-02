@@ -115,6 +115,20 @@ Clasificación por marca: `correct_firm` (marked/blank que coincide) · `review`
 `confident_wrong` (marked/blank firme que NO coincide — la cifra que importa) ·
 `unread` (la página no apareció en el resultado, CD-6).
 
+## Barrido sintético (iteración rápida, NO validación)
+
+Mientras el papel no exista —y también después, como red de regresiones— hay un generador que
+produce N hojas con marcas conocidas bajo 22 combinaciones de degradación calibradas contra
+capturas reales, y las corre por este mismo harness:
+
+```bash
+python -m goldset.make_synthetic --run     # generar + medir + veredicto, ~16s
+```
+
+Ver **[`README-barrido.md`](README-barrido.md)** para las recetas, el solape de distribuciones
+sintético-vs-papel y el veredicto actual. **Un `APRUEBA` ahí significa "sin regresiones conocidas",
+no "MVP validado"**: la validación sigue siendo O4, las 300 hojas físicas.
+
 ## Ejemplo sintético comiteado
 
 `goldset/example/` tiene UNA hoja generada con `tests/synthetic.py`

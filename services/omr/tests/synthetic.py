@@ -108,6 +108,9 @@ def render_page(
     page_width: int = DEFAULT_PAGE_WIDTH,
     paper_gray: int = PAPER_GRAY,
     pencil_gray: int = PENCIL_GRAY,
+    fiducial_roughness: float = 0.0,
+    fiducial_inks: dict[int, int] | None = None,
+    drop_fiducials: tuple[int, ...] = (),
     rng: np.random.Generator | None = None,
 ) -> np.ndarray:
     rng = rng or np.random.default_rng(7)
@@ -127,7 +130,18 @@ def render_page(
     rect_w = page_width - 2 * inset
     rect_h = page_height - 2 * inset
 
-    _draw_fiducials(page, side, rect_x0, rect_y0, rect_w, rect_h)
+    _draw_fiducials(
+        page,
+        side,
+        rect_x0,
+        rect_y0,
+        rect_w,
+        rect_h,
+        roughness=fiducial_roughness,
+        inks=fiducial_inks or {},
+        drop=drop_fiducials,
+        rng=rng,
+    )
     if qr_text is not None and spec["identity"]["mode"] in ("qr", "rut_bubbles"):
         payload = qr_payload(page_index, spec["pageCount"]) if qr_text == "auto" else qr_text
         region = (
@@ -348,15 +362,89 @@ def bubble_radius_px(spec: dict[str, Any], page_width: int = DEFAULT_PAGE_WIDTH)
 
 
 def _draw_fiducials(
-    page: np.ndarray, side: float, x0: float, y0: float, rect_w: float, rect_h: float
+    page: np.ndarray,
+    side: float,
+    x0: float,
+    y0: float,
+    rect_w: float,
+    rect_h: float,
+    *,
+    roughness: float = 0.0,
+    inks: dict[int, int] | None = None,
+    drop: tuple[int, ...] = (),
+    rng: np.random.Generator | None = None,
 ) -> None:
+    """Dibuja los 4 cuadrados fiduciales en las esquinas del rectangulo fiducial.
+
+    `roughness` desborda el borde como lo hace la tinta impresa y escaneada: con
+    0.0 sale el cuadrado perfecto (solidez 1.00, compacidad 16.0) que usan los
+    tests unitarios; con 0.028-0.040 la solidez cae a 0.87-0.93 y la compacidad
+    sube a 16.5-17.8, que es donde vive el papel real (ver
+    `goldset/fiducial_metrics.py` y el README del barrido). Un generador que
+    solo sabe dibujar el cuadrado perfecto no sirve para calibrar el gate de
+    forma: es exactamente como el umbral de solidez termino en 0.88 rechazando
+    capturas limpias.
+
+    `inks` pinta una esquina mas clara que el resto (el escaner que lava un
+    fiducial: interior 125 o 182 sobre papel 255, con el papel verificado a
+    mano). `drop` omite esquinas enteras (fiducial fuera de la captura).
+    """
+    inks = inks or {}
     x1 = x0 + rect_w
     y1 = y0 + rect_h
     half = side / 2
-    for center_x, center_y in [(x0, y0), (x1, y0), (x1, y1), (x0, y1)]:
-        top_left = (round(center_x - half), round(center_y - half))
-        bottom_right = (round(center_x + half), round(center_y + half))
-        cv2.rectangle(page, top_left, bottom_right, INK_GRAY, thickness=-1)
+    corners = [(x0, y0), (x1, y0), (x1, y1), (x0, y1)]
+    for index, (center_x, center_y) in enumerate(corners):
+        if index in drop:
+            continue
+        ink = inks.get(index, INK_GRAY)
+        if roughness <= 0.0:
+            top_left = (round(center_x - half), round(center_y - half))
+            bottom_right = (round(center_x + half), round(center_y + half))
+            cv2.rectangle(page, top_left, bottom_right, ink, thickness=-1)
+            continue
+        polygon = _rough_square_polygon(
+            (center_x, center_y), side, roughness, rng or np.random.default_rng(11)
+        )
+        cv2.fillPoly(page, [polygon], ink)
+
+
+ROUGH_SQUARE_SMOOTHING = 5
+
+
+def _rough_square_polygon(
+    center: tuple[float, float], side: float, roughness: float, rng: np.random.Generator
+) -> np.ndarray:
+    """Cuadrado con el borde dentado: ruido radial suavizado sobre el perimetro.
+
+    El suavizado importa tanto como la amplitud — ruido pixel a pixel dispara la
+    compacidad muy por encima de lo que se mide en papel; promediado sobre 5
+    muestras da la mordida gruesa de la tinta, que es la forma real.
+    """
+    samples = max(8, int(side))
+    half = side / 2
+    points = np.empty((4 * samples, 2), dtype=np.float32)
+    for index in range(4 * samples):
+        edge, along = divmod(index, samples)
+        travel = -half + side * along / samples
+        points[index] = [
+            (travel, -half),
+            (half, travel),
+            (-travel, half),
+            (-half, -travel),
+        ][edge]
+
+    noise = rng.normal(0, roughness * side, size=len(points)).astype(np.float32)
+    window = np.ones(ROUGH_SQUARE_SMOOTHING, dtype=np.float32) / ROUGH_SQUARE_SMOOTHING
+    padded = np.concatenate(
+        [noise[-ROUGH_SQUARE_SMOOTHING:], noise, noise[:ROUGH_SQUARE_SMOOTHING]]
+    )
+    noise = np.convolve(padded, window, mode="same")[
+        ROUGH_SQUARE_SMOOTHING:-ROUGH_SQUARE_SMOOTHING
+    ]
+    outward = points / np.maximum(np.abs(points).max(axis=1, keepdims=True), 1e-6)
+    displaced = points + outward * noise[:, np.newaxis]
+    return np.round(displaced + np.array(center, dtype=np.float32)).astype(np.int32)
 
 
 def _draw_qr(
@@ -571,6 +659,69 @@ def glare_spot(
     center = (round(center_frac[0] * width), round(center_frac[1] * height))
     cv2.circle(out, center, round(radius_frac * width), 255, thickness=-1)
     return out
+
+
+def clip_corner(gray: np.ndarray, corner: int, depth_frac: float = 0.06) -> np.ndarray:
+    """Recorta en diagonal una esquina de la captura, como el auto-crop del escaner.
+
+    Parte el cuadrado fiducial al medio y deja el trozo pegado al borde de la
+    imagen, con el centroide sesgado — el modo de falla que `_corner_looks_clipped`
+    distingue de "aca no hay ningun fiducial". Las esquinas van en el orden
+    TL, TR, BR, BL, igual que en `app/rectify.py`.
+    """
+    height, width = gray.shape
+    out = gray.copy()
+    reach_x = round(width * depth_frac)
+    reach_y = round(height * depth_frac)
+    corner_point = [(0, 0), (width, 0), (width, height), (0, height)][corner]
+    sign_x = 1 if corner_point[0] == 0 else -1
+    sign_y = 1 if corner_point[1] == 0 else -1
+    triangle = np.array(
+        [
+            corner_point,
+            (corner_point[0] + sign_x * reach_x, corner_point[1]),
+            (corner_point[0], corner_point[1] + sign_y * reach_y),
+        ],
+        dtype=np.int32,
+    )
+    cv2.fillPoly(out, [triangle], 255)
+    return out
+
+
+def motion_blur_region(
+    gray: np.ndarray,
+    region: tuple[float, float, float, float],
+    length_px: int = 9,
+) -> np.ndarray:
+    """Empasta horizontalmente una region: el QR movido mientras el resto es nitido.
+
+    `region` es (x0, y0, x1, y1) en fracciones de la imagen. Reproduce la captura
+    donde el QR queda ilegible pero la pagina entera mide `sharpness = 1.0`, asi
+    que ningun gate global de nitidez la ve venir.
+    """
+    height, width = gray.shape
+    x0, y0, x1, y1 = region
+    left, right = round(x0 * width), round(x1 * width)
+    top, bottom = round(y0 * height), round(y1 * height)
+    out = gray.copy()
+    kernel = np.zeros((length_px, length_px), dtype=np.float32)
+    kernel[length_px // 2, :] = 1.0 / length_px
+    patch = out[top:bottom, left:right]
+    if patch.size:
+        out[top:bottom, left:right] = cv2.filter2D(patch, -1, kernel)
+    return out
+
+
+def reflow(gray: np.ndarray, aspect_ratio: float) -> np.ndarray:
+    """Reestira la captura a otra proporcion (carta 1.294 llega como A4 1.414).
+
+    Mantiene el ancho y mueve el alto: la hoja sigue siendo legible pero el
+    rectangulo fiducial deja de tener la forma que el spec declara.
+    """
+    width = gray.shape[1]
+    return cv2.resize(
+        gray, (width, round(width * aspect_ratio)), interpolation=cv2.INTER_AREA
+    )
 
 
 def png_bytes(gray: np.ndarray) -> bytes:
