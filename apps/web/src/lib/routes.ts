@@ -105,6 +105,7 @@ export const ROUTES = {
 
   admin: route('/admin'),
   adminTelemetria: route('/admin/telemetria'),
+  adminFeedback: route('/admin/feedback'),
   adminColegios: route('/admin/colegios'),
   adminColegio: (id: string) => route(`/admin/colegios/${id}`),
   adminColegioConfigurar: (id: string) => route(`/admin/colegios/${id}/configurar`),

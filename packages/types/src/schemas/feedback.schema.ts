@@ -73,16 +73,36 @@ export const createFeedbackSchema = z.object({
 });
 export type CreateFeedbackDto = z.infer<typeof createFeedbackSchema>;
 
-/** PATCH /feedback/:id — triage interno. No toca lo que la persona escribió. */
-export const updateFeedbackSchema = z
-  .object({
-    status: feedbackStatusSchema.optional(),
-    internalNote: z.string().max(5000).nullish(),
-  })
-  .refine((v) => v.status !== undefined || v.internalNote !== undefined, {
-    message: 'Debes enviar al menos un campo para actualizar.',
-  });
+/** Campos editables en el triage. No tocan lo que la persona escribió. */
+const updateFeedbackFields = z.object({
+  status: feedbackStatusSchema.optional(),
+  internalNote: z.string().max(5000).nullish(),
+});
+
+const atLeastOneField = {
+  check: (v: { status?: unknown; internalNote?: unknown }) =>
+    v.status !== undefined || v.internalNote !== undefined,
+  message: 'Debes enviar al menos un campo para actualizar.',
+};
+
+/** PATCH /feedback/:id — triage dentro del colegio. */
+export const updateFeedbackSchema = updateFeedbackFields.refine(atLeastOneField.check, {
+  message: atLeastOneField.message,
+});
 export type UpdateFeedbackDto = z.infer<typeof updateFeedbackSchema>;
+
+/**
+ * PATCH /feedback/admin/:id — triage desde el panel de plataforma.
+ *
+ * Lleva `orgId` explícito porque `platform_admin` no tiene una org activa de la
+ * cual derivarlo, y RLS necesita el contexto para poder escribir. No es un
+ * agujero: el endpoint ya está restringido a `platform_admin`, que por
+ * definición alcanza todas las orgs, y el id viene del propio listado.
+ */
+export const adminUpdateFeedbackSchema = updateFeedbackFields
+  .extend({ orgId: z.string().uuid() })
+  .refine(atLeastOneField.check, { message: atLeastOneField.message });
+export type AdminUpdateFeedbackDto = z.infer<typeof adminUpdateFeedbackSchema>;
 
 export const feedbackQuerySchema = z.object({
   status: feedbackStatusSchema.optional(),
@@ -102,6 +122,31 @@ export interface FeedbackListItem {
   screenshotUrl: string | null;
   createdByName: string | null;
   createdAt: string;
+}
+
+/** GET /feedback/admin — el listado de plataforma agrega el filtro por colegio. */
+export const feedbackAdminQuerySchema = z.object({
+  status: feedbackStatusSchema.optional(),
+  type: feedbackTypeSchema.optional(),
+  orgId: z.string().uuid().optional(),
+  page: z.coerce.number().int().min(1).default(1),
+  limit: z.coerce.number().int().min(1).max(100).default(25),
+});
+export type FeedbackAdminQueryDto = z.infer<typeof feedbackAdminQuerySchema>;
+
+/** Un comentario visto desde plataforma: siempre se sabe de qué colegio viene. */
+export interface FeedbackAdminListItem extends FeedbackListItem {
+  orgId: string;
+  orgName: string;
+}
+
+export interface FeedbackAdminListResponse {
+  data: FeedbackAdminListItem[];
+  total: number;
+  page: number;
+  limit: number;
+  /** Colegios CON comentarios, para poblar el filtro sin una llamada aparte. */
+  orgs: Array<{ id: string; name: string; count: number }>;
 }
 
 export interface FeedbackListResponse {

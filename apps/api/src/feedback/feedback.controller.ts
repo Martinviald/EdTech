@@ -6,7 +6,9 @@ import { Roles } from '../common/decorators/roles.decorator';
 import { RolesGuard } from '../common/guards/roles.guard';
 import { FeedbackService } from './feedback.service';
 import {
+  adminUpdateFeedbackSchema,
   createFeedbackSchema,
+  feedbackAdminQuerySchema,
   feedbackQuerySchema,
   feedbackScreenshotUrlSchema,
   updateFeedbackSchema,
@@ -51,6 +53,26 @@ export class FeedbackController {
   async list(@Query() query: unknown, @CurrentUser() user: JwtPayload) {
     const dto = feedbackQuerySchema.parse(query);
     return this.feedbackService.list(user, dto);
+  }
+
+  /**
+   * GET /api/feedback/admin — bandeja cross-org del panel de plataforma.
+   *
+   * Va ANTES de las rutas con parámetro para que "admin" no se lea como un id.
+   */
+  @Get('admin')
+  @Roles('platform_admin')
+  async listAllOrgs(@Query() query: unknown) {
+    const dto = feedbackAdminQuerySchema.parse(query);
+    return this.feedbackService.listAllOrgs(dto);
+  }
+
+  /** PATCH /api/feedback/admin/:id — triage desde el panel de plataforma. */
+  @Patch('admin/:id')
+  @Roles('platform_admin')
+  async updateAsPlatformAdmin(@Param('id') id: string, @Body() body: unknown) {
+    const dto = adminUpdateFeedbackSchema.parse(body);
+    return this.feedbackService.updateAsPlatformAdmin(id, dto);
   }
 
   /** PATCH /api/feedback/:id — estado y nota interna del triage. */

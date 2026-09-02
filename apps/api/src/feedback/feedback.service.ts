@@ -1,8 +1,12 @@
 import { BadRequestException, Injectable, Logger, NotFoundException } from '@nestjs/common';
-import { and, count, desc, eq } from 'drizzle-orm';
-import { feedback, users, withOrgContext } from '@soe/db';
+import { and, count, desc, eq, isNull } from 'drizzle-orm';
+import { feedback, organizations, users, withOrgContext } from '@soe/db';
 import type {
+  AdminUpdateFeedbackDto,
   CreateFeedbackDto,
+  FeedbackAdminListItem,
+  FeedbackAdminListResponse,
+  FeedbackAdminQueryDto,
   FeedbackListItem,
   FeedbackListResponse,
   FeedbackQueryDto,
@@ -140,6 +144,128 @@ export class FeedbackService {
       const set: Record<string, unknown> = { updatedAt: new Date() };
       if (dto.status !== undefined) set.status = dto.status;
       if (dto.internalNote !== undefined) set.internalNote = dto.internalNote ?? null;
+
+      const [row] = await tx
+        .update(feedback)
+        .set(set)
+        .where(and(eq(feedback.id, id), eq(feedback.orgId, orgId)))
+        .returning({ id: feedback.id });
+      if (!row) throw new NotFoundException('Comentario no encontrado');
+      return { id: row.id };
+    });
+  }
+
+  // ── Plataforma (platform_admin) ────────────────────────────────────────────
+
+  /**
+   * Listado cross-org para el panel de plataforma.
+   *
+   * Recorre las orgs y consulta cada una dentro de su propio `withOrgContext`,
+   * mismo patrón que `TelemetryReportService.getPlatformOverview`. No hay forma
+   * de leer varias orgs en una query mientras RLS esté activo: el contexto es
+   * UNA org por transacción, y desactivarlo para esta vista sería exactamente lo
+   * que §5.2 prohíbe. El costo es aceptable porque las orgs son pocas y la tabla
+   * de comentarios es de bajo volumen.
+   *
+   * El orden y la paginación se resuelven sobre el conjunto ya unido: paginar
+   * por org daría páginas incoherentes al mezclarlas.
+   */
+  async listAllOrgs(query: FeedbackAdminQueryDto): Promise<FeedbackAdminListResponse> {
+    const orgs = await this.db
+      .select({ id: organizations.id, name: organizations.name })
+      .from(organizations)
+      .where(isNull(organizations.deletedAt));
+
+    const targets = query.orgId ? orgs.filter((o) => o.id === query.orgId) : orgs;
+
+    const collected: FeedbackAdminListItem[] = [];
+    const counts = new Map<string, number>();
+    // El id del archivo no viaja en la respuesta (el cliente sólo usa la URL
+    // firmada), pero hace falta para firmarla; se guarda aparte por comentario.
+    const screenshotIds = new Map<string, string | null>();
+
+    for (const org of targets) {
+      const rows = await withOrgContext(this.db, org.id, async (tx) => {
+        const conditions = [eq(feedback.orgId, org.id)];
+        if (query.status) conditions.push(eq(feedback.status, query.status));
+        if (query.type) conditions.push(eq(feedback.type, query.type));
+
+        return tx
+          .select({
+            id: feedback.id,
+            type: feedback.type,
+            status: feedback.status,
+            message: feedback.message,
+            context: feedback.context,
+            internalNote: feedback.internalNote,
+            screenshotFileId: feedback.screenshotFileId,
+            createdAt: feedback.createdAt,
+            createdByName: users.name,
+          })
+          .from(feedback)
+          .leftJoin(users, eq(users.id, feedback.createdById))
+          .where(and(...conditions))
+          .orderBy(desc(feedback.createdAt));
+      });
+
+      if (rows.length === 0) continue;
+      counts.set(org.id, rows.length);
+
+      for (const row of rows) {
+        screenshotIds.set(row.id, row.screenshotFileId);
+        collected.push({
+          id: row.id,
+          type: row.type,
+          status: row.status,
+          message: row.message,
+          context: row.context,
+          internalNote: row.internalNote,
+          createdByName: row.createdByName ?? null,
+          createdAt: row.createdAt.toISOString(),
+          // Se resuelve más abajo, sólo para la página que se devuelve: firmar
+          // una URL por cada comentario de todas las orgs sería trabajo tirado.
+          screenshotUrl: null,
+          orgId: org.id,
+          orgName: org.name,
+        });
+      }
+    }
+
+    collected.sort((a, b) => b.createdAt.localeCompare(a.createdAt));
+
+    const start = (query.page - 1) * query.limit;
+    const pageRows = collected.slice(start, start + query.limit);
+
+    // Sólo se firman las capturas de la página devuelta: hacerlo para todas las
+    // orgs sería trabajo tirado, y las URLs prefirmadas expiran.
+    await Promise.all(
+      pageRows.map(async (item) => {
+        item.screenshotUrl = await this.screenshotUrl(
+          item.orgId,
+          screenshotIds.get(item.id) ?? null,
+        );
+      }),
+    );
+
+    return {
+      data: pageRows,
+      total: collected.length,
+      page: query.page,
+      limit: query.limit,
+      orgs: orgs
+        .filter((o) => counts.has(o.id))
+        .map((o) => ({ id: o.id, name: o.name, count: counts.get(o.id) ?? 0 })),
+    };
+  }
+
+  /** Triage desde plataforma: el `orgId` viaja en el DTO (ver el schema Zod). */
+  async updateAsPlatformAdmin(id: string, dto: AdminUpdateFeedbackDto): Promise<{ id: string }> {
+    const { orgId, ...fields } = dto;
+
+    return withOrgContext(this.db, orgId, async (tx) => {
+      const set: Record<string, unknown> = { updatedAt: new Date() };
+      if (fields.status !== undefined) set.status = fields.status;
+      if (fields.internalNote !== undefined) set.internalNote = fields.internalNote ?? null;
 
       const [row] = await tx
         .update(feedback)
