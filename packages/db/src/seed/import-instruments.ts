@@ -30,6 +30,9 @@ import { responses } from '../schema/responses';
 /** `--force` recrea el instrumento aunque tenga tags/respuestas colgando (ver assertSafeToRecreate). */
 const FORCE = process.argv.includes('--force');
 
+/** Versión vigente del marco de taxonomía del que cuelga cada tipo de instrumento. */
+const MARCO_VERSION: Record<string, string> = { dia: 'vigente', paes: '2026' };
+
 const DATA_DIR = process.env.INSTRUMENTS_DATA_DIR
   ? resolve(process.env.INSTRUMENTS_DATA_DIR)
   : resolve(__dirname, '../../data/instruments');
@@ -414,12 +417,20 @@ export async function importInstruments(db: Database): Promise<void> {
   const gradeRows = await db.select({ id: grades.id, code: grades.code }).from(grades);
   const subjId = new Map(subjRows.map((s) => [s.code, s.id]));
   const gradeId = new Map(gradeRows.map((g) => [g.code, g.id]));
-  const [diaMarco] = await db
-    .select({ id: taxonomies.id })
-    .from(taxonomies)
-    .where(and(eq(taxonomies.type, 'dia'), eq(taxonomies.version, 'vigente')));
-  if (!diaMarco)
-    throw new Error('Falta el marco DIA (type=dia, version=vigente). Corre db:seed:taxonomy.');
+  // El marco y el `type` del instrumento salen del JSON, no están fijos: el mismo importador
+  // carga los DIA y los ensayos PAES, que cuelgan de otro marco. Solo se buscan los marcos
+  // que los archivos de esta corrida realmente usan, para no exigir el de PAES en un repo
+  // que todavía no lo sembró.
+  const marcoRows = await db
+    .select({ id: taxonomies.id, type: taxonomies.type, version: taxonomies.version })
+    .from(taxonomies);
+  // Se indexa por el nombre del marco como string: `taxonomy_type` e `instrument_type` son
+  // enums distintos que comparten los valores 'dia' y 'paes', y no son intercambiables.
+  const marcoPorTipo = new Map<string, string>(
+    marcoRows
+      .filter((m) => MARCO_VERSION[m.type] === m.version)
+      .map((m) => [m.type as string, m.id]),
+  );
 
   const files: string[] = [];
   for (const entry of readdirSync(DATA_DIR, { withFileTypes: true })) {
@@ -443,6 +454,16 @@ export async function importInstruments(db: Database): Promise<void> {
       issues.push(`${ins.name}: subject/grade no resuelto (${ins.subjectCode}/${ins.gradeCode})`);
       continue;
     }
+    const instrumentType = (ins.type ?? 'dia') as typeof instruments.$inferInsert.type;
+    const marcoId = marcoPorTipo.get(instrumentType) ?? null;
+    if (!marcoId) {
+      issues.push(
+        `${ins.name}: falta el marco de taxonomía '${instrumentType}' ` +
+          `(version=${MARCO_VERSION[instrumentType] ?? '?'}). ` +
+          `Corre el seed de ese marco antes de importar.`,
+      );
+      continue;
+    }
 
     await db.transaction(async (tx) => {
       // 1) borrar import previo (idempotencia) por sourceJson — bottom-up
@@ -461,9 +482,9 @@ export async function importInstruments(db: Database): Promise<void> {
         .insert(instruments)
         .values({
           orgId: null,
-          taxonomyId: diaMarco.id,
+          taxonomyId: marcoId,
           name: ins.name,
-          type: 'dia',
+          type: instrumentType,
           subjectId: sId,
           gradeId: gId,
           year: ins.year,

@@ -26,14 +26,29 @@ El acceso es vía **`sst tunnel`** (por el bastión ya desplegado). Levantar el 
 terminal dedicada y dejarlo CORRIENDO:
 
 ```bash
-cd "/Users/macbook/Dropbox/Mi Mac (MacBook Pro de MacBook)/Desktop/EdTech/infra-aws-sst"
+cd "/Users/macbook/Dropbox/Mi Mac (MacBook Pro de MacBook)/Desktop/EdTech/repositorio"
 export AWS_PROFILE=edtech
 sudo npx sst tunnel install     # una sola vez por máquina (pide sudo)
 npx sst tunnel --stage demo     # dejar CORRIENDO (no cerrar la terminal)
 ```
 
-Con el túnel arriba, el endpoint del RDS resuelve a su IP privada (10.0.x.x) y se rutea por
-el túnel. Luego corres scripts con `DATABASE_ADMIN_URL` (§3/§4). No hay que revertir infra.
+⚠️ **El `sst.config.ts` vive en `repositorio/`, no en un worktree `infra-aws-sst`** — ese
+directorio NO existe (verificado 2026-08-30). Correr el túnel desde ahí falla con "no such
+file or directory" y el mensaje no dice que el problema sea el cwd.
+
+⚠️ **Conectate a la IP PRIVADA, no al hostname.** El DNS del RDS resuelve a su IP **pública**
+aunque el túnel esté arriba (el RDS quedó con `PubliclyAccessible: true`), así que el
+hostname NO se rutea por el túnel y el `nc` al puerto 5432 da timeout. La IP privada sale de
+la ENI del RDS:
+
+```bash
+aws ec2 describe-network-interfaces --profile edtech --region us-east-1 \
+  --query "NetworkInterfaces[?contains(Description,'RDS')].PrivateIpAddress" --output text
+# → 10.0.12.143 (a hoy). Verificar SIEMPRE: cambia si se recrea la instancia.
+nc -z -w 8 10.0.12.143 5432    # así se chequea si el túnel está vivo
+```
+
+Luego corres scripts con `DATABASE_ADMIN_URL` (§3/§4). No hay que revertir infra.
 
 ---
 
@@ -81,17 +96,19 @@ convención. Ante duda con `taxonomy_nodes`, avisa antes de escribir.
 | Perfil / región | `AWS_PROFILE=edtech` · `us-east-1` |
 | Stage | `demo` |
 | DB instance id | `edtech-demo-dbinstance-cauoeshr` |
-| Host | `edtech-demo-dbinstance-cauoeshr.cm9sce4qi665.us-east-1.rds.amazonaws.com` |
+| Host | `edtech-demo-dbinstance-cauoeshr.cm9sce4qi665.us-east-1.rds.amazonaws.com` (resuelve a IP **pública**; ver Quick start) |
+| IP privada (para el túnel) | `10.0.12.143` — re-verificar con `describe-network-interfaces` |
 | Database | `soe` |
 | Security group (RDS) | `sg-002c9fafa71da550a` |
 | Internet Gateway | `igw-008f7bef242080563` |
 | Route tables de las subredes del RDS | `rtb-056f639f179afee49`, `rtb-0afd0f626d2e3622b` |
-| Rol admin (DDL/seed) | `soe_admin` (master) — password = SST secret `DbMasterPassword` |
+| Rol admin (DDL/seed) | `soe_admin` (master) — password en Secrets Manager `edtech-demo-DbProxySecret-ksefwadx` |
 | Rol runtime (la API) | `soe_app` (sin BYPASSRLS) — NO usar para admin |
 
-Worktree del repo con las deps (`pnpm`, `tsx`, `@soe/db`):
-`/Users/macbook/Dropbox/Mi Mac (MacBook Pro de MacBook)/Desktop/EdTech/infra-aws-sst`
-(cualquier worktree del monorepo sirve; ese tiene `node_modules` instalado).
+Repo con las deps (`pnpm`, `tsx`, `@soe/db`) y con el `sst.config.ts`:
+`/Users/macbook/Dropbox/Mi Mac (MacBook Pro de MacBook)/Desktop/EdTech/repositorio`
+(cualquier worktree del monorepo sirve para los scripts, pero el túnel se levanta desde
+donde esté `sst.config.ts`).
 
 ## 2. Acceso a la BDD — `sst tunnel` (por el bastión)
 
@@ -105,31 +122,37 @@ Usar **`sst tunnel`** (el bastión `bastion: true` ya está desplegado):
 1. Una sola vez por máquina: `sudo npx sst tunnel install` (necesita sudo — instala el
    routing local).
 2. Abrir el túnel y **dejarlo corriendo** en una terminal:
-   `AWS_PROFILE=edtech npx sst tunnel --stage demo` (desde un worktree del monorepo).
-3. Con el túnel arriba, el endpoint resuelve a la IP privada (10.0.x.x) y se rutea por el
-   túnel. Conectar con `DATABASE_ADMIN_URL` (endpoint, §3). Verificar con un `select 1`.
-4. **Gotcha DNS**: si el endpoint resuelve a una IP pública (52.x, cacheada de cuando el RDS
-   estuvo `publicly-accessible`), flushear: `sudo dscacheutil -flushcache && sudo killall
-   -HUP mDNSResponder` (o esperar ~1 min tras un cambio de estado del RDS). Confirmar con
-   `nslookup <host>` → debe dar `10.0.x.x`.
+   `AWS_PROFILE=edtech npx sst tunnel --stage demo` (desde `repositorio/`, donde vive
+   `sst.config.ts`).
+3. Con el túnel arriba, conectar a la **IP privada** del RDS (ver Quick start), no al
+   hostname. Verificar con `nc -z -w 8 10.0.12.143 5432` y luego un `select 1`.
+4. **Gotcha DNS**: mientras el RDS siga `PubliclyAccessible: true` (ver §7), su hostname
+   resuelve a una IP **pública** y flushear la caché NO lo arregla — no es caché, es el
+   registro real. Por eso se usa la IP privada. Si algún día se cierra el acceso público,
+   el hostname vuelve a resolver a `10.0.x.x` y sirve directo.
 5. **No hay que revertir infra** (el túnel no toca AWS). Cerrar = Ctrl+C en su terminal.
 
 El túnel y las escrituras coexisten sin ventanas ni `modify-db-instance`.
 
 ## 3. Credenciales
 
-El password del master (`soe_admin`) es el **SST secret `DbMasterPassword`**. Para obtenerlo:
+⚠️ **NO existe el SST secret `DbMasterPassword`** (`sst secret list --stage demo` no lo
+lista; verificado 2026-08-30). La credencial de `soe_admin` está en **Secrets Manager**:
 
 ```bash
-cd "/Users/macbook/Dropbox/Mi Mac (MacBook Pro de MacBook)/Desktop/EdTech/infra-aws-sst"
-AWS_PROFILE=edtech npx sst secret list --stage demo   # muestra "DbMasterPassword = ..."
+PW=$(aws secretsmanager get-secret-value --profile edtech --region us-east-1 \
+  --secret-id edtech-demo-DbProxySecret-ksefwadx --query SecretString --output text \
+  | python3 -c "import json,sys; print(json.load(sys.stdin)['password'])")
+
+export DATABASE_ADMIN_URL="postgresql://soe_admin:${PW}@10.0.12.143:5432/soe?sslmode=require"
 ```
 
-Con eso:
-```
-DATABASE_ADMIN_URL="postgresql://soe_admin:<DbMasterPassword>@<HOST>:5432/soe"
-```
-`with-db.sh` lo arma solo (lee el secret si no pasás `DB_MASTER_PW` por env).
+`sslmode=require` y no `verify-full`: al conectarse por IP el certificado no matchea el
+hostname. Con psql: `psql "host=10.0.12.143 port=5432 user=soe_admin dbname=soe sslmode=require"`
+y el password por `PGPASSWORD`.
+
+`with-db.sh` quedó OBSOLETO: arma la URL con el secret inexistente y con el hack de
+`publicly-accessible`.
 
 ## 4. Ejecutar SQL
 
@@ -184,6 +207,12 @@ los que asumen bypass (ej. el seed base `index.ts`) requieren la opción (b) en 
 
 ## 6. Gotchas (aprendidos en producción)
 
+- **Los seeds pesados por el túnel tardan ~20 min y hay que correrlos en background.** El
+  import de los 20 ensayos PAES (1.407 ítems) son ~1.400 INSERT con latencia de túnel: en
+  foreground se come cualquier timeout. `import-instruments.ts` es idempotente por
+  `config->>'sourceJson'` y va por instrumento en su propia transacción, así que una corrida
+  cortada a la mitad se re-lanza sin limpiar nada.
+
 - **zsh no hace word-splitting de `$var`** en `for X in $VAR` (trata todo como un token).
   Usar **listas literales** (`for RTB in rtb-aaa rtb-bbb`) o `${=VAR}`. (En cambio `$(cmd)`
   SÍ splitea en zsh.) `with-db.sh` usa `#!/usr/bin/env bash` para evitar esto.
@@ -219,6 +248,19 @@ los que asumen bypass (ej. el seed base `index.ts`) requieren la opción (b) en 
 
 - **NUNCA dejar el RDS público.** Siempre revertir (el `trap` lo garantiza). Verificá
   `PubliclyAccessible=false` al final.
+
+  ⚠️ **Hoy NO se cumple** (verificado 2026-08-30): el RDS demo está con
+  `PubliclyAccessible: true` y el security group `sg-002c9fafa71da550a` tiene el 5432 abierto
+  a `181.43.242.253/32` — una IP fija, residuo de una sesión vieja del hack obsoleto. Está
+  pendiente cerrarlo. Chequeo:
+
+  ```bash
+  aws rds describe-db-instances --profile edtech --region us-east-1 \
+    --query "DBInstances[].{ep:Endpoint.Address,public:PubliclyAccessible}" --output table
+  ```
+
+  Mientras siga público, el DNS del RDS resuelve a la IP pública y hay que conectarse por la
+  privada (ver Quick start).
 - **PII real**: la org **CSCJ** (`c5c10000-0000-0000-0000-000000000001`) tiene el **roster
   REAL de ~1300 alumnos** (nombres/RUTs, Ley 19.628). No exponerla ni volcarla a logs/archivos
   versionados. Otras orgs (Colegio Demo `dec00000-...`, red Andes `b3c00000-...`) son sintéticas.

@@ -1,0 +1,2070 @@
+{
+ "instrument": {
+  "name": "PAES M1 — Ensayo 3 (Tanda 3) · IV° Medio 2026",
+  "subject": "Competencia Matemática 1",
+  "subjectCode": "MATH",
+  "grade": "IV° Medio",
+  "gradeCode": "4TH_MEDIO",
+  "year": 2026,
+  "applicationPeriod": null,
+  "type": "paes",
+  "isOfficial": false,
+  "paes": {
+   "prueba": "M1",
+   "tanda": "Tanda 3",
+   "mencion": null,
+   "appliedOn": "2026-05-28",
+   "basadoEn": "CMCK 1"
+  }
+ },
+ "sections": [
+  {
+   "order": 1,
+   "name": "Prueba completa",
+   "type": "multiple_choice",
+   "instructions": null,
+   "passage": null,
+   "items": [
+    {
+     "position": 1,
+     "type": "multiple_choice",
+     "stem": "¿Cuál es el valor de 4 − (2 − (−3 + 6) + 1)?",
+     "correctKey": "D",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "figureNote": null,
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "0",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "1",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "2",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "4",
+       "isCorrect": true
+      }
+     ]
+    },
+    {
+     "position": 2,
+     "type": "multiple_choice",
+     "stem": "En la siguiente figura, compuesta de trazos y círculos, se debe ubicar los dígitos del 1 al 6 en los círculos de manera de que ningún trazo conecte a números consecutivos. Por ejemplo, el 3 no puede estar conectado ni con el 2 ni con el 4. ¿Qué valor debe tener p?",
+     "correctKey": "D",
+     "responseFormat": "choice",
+     "hasFigure": true,
+     "figureNote": "Figura no transcrita (hueco en el cuadernillo)",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "2",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "3",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "5",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "6",
+       "isCorrect": true
+      }
+     ]
+    },
+    {
+     "position": 3,
+     "type": "multiple_choice",
+     "stem": "¿En cuál de las siguientes opciones se representa la frase “el recíproco del tercio de un número x, disminuido en 2”? 𝑥",
+     "correctKey": "C",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "figureNote": null,
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "1 − 3 − 2 𝑥 −1",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "(3 − 2) 3",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "𝑥 − 2 𝑥",
+       "isCorrect": true
+      },
+      {
+       "key": "D",
+       "text": "(3 − 1) − 2 10",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 4,
+     "type": "multiple_choice",
+     "stem": "¿Cuál es el resultado de (–2 – 3)  (1 – 4) – ( −5 )?",
+     "correctKey": "A",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "figureNote": null,
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "17",
+       "isCorrect": true
+      },
+      {
+       "key": "B",
+       "text": "20",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "–12",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "–18 Ensayo 1-M1",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 5,
+     "type": "multiple_choice",
+     "stem": "En el colegio “Aprendo” se otorgan puntos positivos por buena conducta y negativos por mala conducta, y un punto positivo borra uno negativo. En mayo Miguel tenía -5 puntos en conducta, por lo que su profesor jefe habló con su apoderado y lograron trabajar juntos para que a final de año Miguel terminara con 18 puntos positivos. ¿Cuántos puntos positivos tuvo Miguel desde mayo en adelante si no volvió a tener puntos negativos?",
+     "correctKey": "C",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "figureNote": null,
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "13",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "15",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "23",
+       "isCorrect": true
+      },
+      {
+       "key": "D",
+       "text": "25",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 6,
+     "type": "multiple_choice",
+     "stem": "Un número natural n es multiplicado por 5, luego disminuido en 7, luego dividido en 2, y finalmente aumentado en 1. Si el resultado es 5, ¿cuál es el valor de n?",
+     "correctKey": "D",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "figureNote": null,
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "8",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "6",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "5",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "3 3",
+       "isCorrect": true
+      }
+     ]
+    },
+    {
+     "position": 7,
+     "type": "multiple_choice",
+     "stem": "El camión de Miguel puede cargar 4 de tonelada de arena. Si un cliente le pide seis cargas y pagará $20.000 por cada tonelada, ¿cuánto gana Miguel con dicho trabajo?",
+     "correctKey": "B",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "figureNote": null,
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "$60.000",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "$90.000",
+       "isCorrect": true
+      },
+      {
+       "key": "C",
+       "text": "$100.000",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "$120.000 Ensayo 1-M1",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 8,
+     "type": "multiple_choice",
+     "stem": "En la ciudad de Villafeliz se corren todos los años la carrera llamada “posta familiar”, en donde los integrantes de una familia deben completar 10 kilómetros entre todos como una posta. Es decir, parte uno de los de la familia con el testigo en la mano y en algún punto del camino se encuentra con otro de su familia, le da el testigo y esta segunda persona sigue corriendo en vez del primero, y así, hasta pasar por todos los integrantes y llegar a la meta. 21 Si en la familia Rodríguez, el hermano mayor partió corriendo y corrió de kilómetro, luego 24 20 15 la mamá corrió de kilómetro, y el hermano del medio corrió de kilómetro, ¿Cuánto han 16 8 corrido entre los tres? 56",
+     "correctKey": "C",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "figureNote": null,
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "km 24 190",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "km3 48",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "4 km",
+       "isCorrect": true
+      },
+      {
+       "key": "D",
+       "text": "6 km",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 9,
+     "type": "multiple_choice",
+     "stem": "Josefina y Bernardita tienen un plan de entrenamiento en donde cada ejercicio que hacen les da puntos en el entrenamiento. Josefina trotó 30 minutos obteniendo 15 puntos. Luego hizo 100 abdominales lo cual le dio 10 puntos, y finalizó con 40 flexiones, las cuales otorgan el doble de puntos por unidad que los abdominales. Bernardita, por su parte, salta 10 minutos la cuerda, lo que le da 20 puntos, y luego hace 60 flexiones y 50 abdominales. Al respecto es correcto afirmar que:",
+     "correctKey": "D",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "figureNote": null,
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "Ambas terminan la jornada con la misma cantidad de puntos",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "Josefina obtiene 5 puntos menos que Bernardita",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "Josefina obtiene 8 puntos más que Bernardita",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "Bernardita obtiene 4 puntos más que Josefina",
+       "isCorrect": true
+      }
+     ]
+    },
+    {
+     "position": 10,
+     "type": "multiple_choice",
+     "stem": "Teodoro está jugando a armar patrones con figuritas, y ha construido la siguiente secuencia: Si Teodoro se detiene al poner la ficha número 27, ¿cuántos círculos habrá puesto?",
+     "correctKey": "B",
+     "responseFormat": "choice",
+     "hasFigure": true,
+     "figureNote": "Figura no transcrita (hueco en el cuadernillo)",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "8",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "9",
+       "isCorrect": true
+      },
+      {
+       "key": "C",
+       "text": "11",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "13 Ensayo 1-M1",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 11,
+     "type": "multiple_choice",
+     "stem": "¿Cuál es el 2% del 5% del 30% de 4.000?",
+     "correctKey": "C",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "figureNote": null,
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "120",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "12",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "1,2",
+       "isCorrect": true
+      },
+      {
+       "key": "D",
+       "text": "0,12",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 12,
+     "type": "multiple_choice",
+     "stem": "Una camisa tenía un precio de $25.000 en una tienda. Si por pagar con la tarjeta de crédito de la tienda se obtiene una rebaja de $1.250 pesos, ¿a qué porcentaje corresponde esa rebaja?",
+     "correctKey": "A",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "figureNote": null,
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "5%",
+       "isCorrect": true
+      },
+      {
+       "key": "B",
+       "text": "3,3%",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "2,5%",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "7%",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 13,
+     "type": "multiple_choice",
+     "stem": "Luego de la inflación causada por la crisis económica, los precios de muchos productos subieron considerablemente. En cierta tienda un producto a costaba antes $200 y ahora cuesta $300, y el producto b que antes costaba $10, ahora cuesta $30. Respecto de esto se puede afirmar que:",
+     "correctKey": "A",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "figureNote": null,
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "El producto a subió su precio en un 50%, mientras que el producto b lo hizo en un 200%",
+       "isCorrect": true
+      },
+      {
+       "key": "B",
+       "text": "El producto a subió su precio en un 100%, mientras que el producto b lo hizo en un 300%",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "El producto a subió su precio en un 30%, mientras que el producto b lo hizo en un 200%",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "El producto a subió su precio en un 60%, mientras que el producto b lo hizo en un 300%",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 14,
+     "type": "multiple_choice",
+     "stem": "¿Cuál de los siguientes es el resultado de la suma del 150% de 2 y el 100% de 2?",
+     "correctKey": "B",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "figureNote": null,
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "3",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "5",
+       "isCorrect": true
+      },
+      {
+       "key": "C",
+       "text": "100",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "150 Ensayo 1-M1",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 15,
+     "type": "multiple_choice",
+     "stem": "Roberto tiene un campo de 15 hectáreas, en donde cría vacas, caballos y gallinas, y además tiene plantaciones de hortalizas. Roberto decide vender una pequeña parte de su campo para poder hacer caja, y dado que Felipe le hizo una buena oferta para comprar 5.000 m2, Roberto decide vender. ¿Qué porcentaje del campo le vende Roberto a Felipe aproximadamente?",
+     "correctKey": "A",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "figureNote": null,
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "3,33%",
+       "isCorrect": true
+      },
+      {
+       "key": "B",
+       "text": "33,3%",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "6,66%",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "66,6%",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 16,
+     "type": "multiple_choice",
+     "stem": "Eloísa al nacer midió 51 cm, y a sus 4 años mide el doble, ¿qué porcentaje ha crecido Eloísa desde que nació?",
+     "correctKey": "D",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "figureNote": null,
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "50%",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "75%",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "95%",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "100%",
+       "isCorrect": true
+      }
+     ]
+    },
+    {
+     "position": 17,
+     "type": "multiple_choice",
+     "stem": "Al estudiar cierto tipo de cáncer se llegó a la conclusión que una célula enferma con este cáncer se triplica cada hora. Si un cultivo de células enfermas parte con 5 células, ¿cuántas habrá al cabo de 4 horas?",
+     "correctKey": "C",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "figureNote": null,
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "52",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "3 ∙ 54",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "5 ∙ 34",
+       "isCorrect": true
+      },
+      {
+       "key": "D",
+       "text": "5 + 3 ∙ 4",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 18,
+     "type": "multiple_choice",
+     "stem": "¿Cuál es el valor numérico de 𝑎3 𝑏1 − 𝑎𝑏 2 si 𝑎 = 2 𝑦 𝑏 = 3?",
+     "correctKey": "C",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "figureNote": null,
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "–9",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "–4",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "6",
+       "isCorrect": true
+      },
+      {
+       "key": "D",
+       "text": "12 Ensayo 1-M1",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 19,
+     "type": "multiple_choice",
+     "stem": "Un número de 6 dígitos tiene todos sus dígitos igual a 3, excepto el de las centenas que es 7 y el de las decenas de mil que es 2, ¿cuál es el número?",
+     "correctKey": "A",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "figureNote": null,
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "323.733",
+       "isCorrect": true
+      },
+      {
+       "key": "B",
+       "text": "233.733",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "332.373",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "733.323",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 20,
+     "type": "multiple_choice",
+     "stem": "Si 𝑦 2 = √𝑥, si el valor de 𝑦 = 3, ¿cuál es el valor de x?",
+     "correctKey": "A",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "figureNote": null,
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "81",
+       "isCorrect": true
+      },
+      {
+       "key": "B",
+       "text": "27",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "9",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "3",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 21,
+     "type": "multiple_choice",
+     "stem": "El resultado de (5 + √2) ∙ (√2 − 5) es:",
+     "correctKey": "D",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "figureNote": null,
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "3",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "–3",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "–21",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "–23",
+       "isCorrect": true
+      }
+     ]
+    },
+    {
+     "position": 22,
+     "type": "multiple_choice",
+     "stem": "La población de conejos de cierta localidad aumenta en un 50% cada año por falta de predadores naturales. Si el año 2000 se tenía 100 conejos, ¿cuántos habrá para el año 2003?",
+     "correctKey": "A",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "figureNote": null,
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "100 ∙ 1,53",
+       "isCorrect": true
+      },
+      {
+       "key": "B",
+       "text": "100 ∙ 0,53",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "100 ∙ 503",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "(100 ∙ 0,5)3 Ensayo 1-M1",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 23,
+     "type": "multiple_choice",
+     "stem": "La siguiente tabla muestra las conversiones de masa en la unidad gramos 1 kilogramo 1.000 gramos (g) 1 gramo 1.000 miligramos (mg) 1 miligramo 1.000 microgramos (µg) 1 microgramo 1.000 Nanogramo (ng) ¿A cuántos kilogramos corresponden 3 nanogramos?",
+     "correctKey": "C",
+     "responseFormat": "choice",
+     "hasFigure": true,
+     "figureNote": "Figura no transcrita (hueco en el cuadernillo)",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "3 ∙ 1012",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "3 ∙ 107",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "3 ∙ 10−12",
+       "isCorrect": true
+      },
+      {
+       "key": "D",
+       "text": "3 ∙ 10−7 2𝑥−1",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 24,
+     "type": "multiple_choice",
+     "stem": "¿Para qué valores de x la expresión 𝑥 2 −2𝑥−63 es indefinida?",
+     "correctKey": "C",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "figureNote": null,
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "–9 o 7",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "9 o 7",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "9 o –7",
+       "isCorrect": true
+      },
+      {
+       "key": "D",
+       "text": "–9 o –7",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 25,
+     "type": "multiple_choice",
+     "stem": "Se tiene que 𝑥 2 − 𝑦 2 = 48 . ¿Cuál es el valor de 2𝑥 + 2𝑦 cuando 𝑥 − 𝑦 = 3?",
+     "correctKey": "C",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "figureNote": null,
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "2√48",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "16",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "32",
+       "isCorrect": true
+      },
+      {
+       "key": "D",
+       "text": "3/2",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 26,
+     "type": "multiple_choice",
+     "stem": "¿Cuál de las siguientes ecuaciones equivale a “el cuadrado de dos veces un número más 4”?",
+     "correctKey": "C",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "figureNote": null,
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "2(𝑥 + 4)2",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "(2𝑥)2 + 4",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "(2𝑥 + 4)2",
+       "isCorrect": true
+      },
+      {
+       "key": "D",
+       "text": "2(𝑥 2 + 4) Ensayo 1-M1",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 27,
+     "type": "multiple_choice",
+     "stem": "2 ¿Cuál es el resultado de 2𝑏(1 − 𝑏) + (𝑏 − (3 + 𝑏)) + 4𝑏 2?",
+     "correctKey": "B",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "figureNote": null,
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "2𝑏 2 + 3 − 2𝑏",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "2𝑏 2 + 2𝑏 + 9",
+       "isCorrect": true
+      },
+      {
+       "key": "C",
+       "text": "6𝑏 2 + 3 + 2𝑏",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "6𝑏 2 + 9 − 2𝑏",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 28,
+     "type": "multiple_choice",
+     "stem": "En una granja de gallinas estas ponen solo huevos blancos o de color. En un día cualquiera las gallinas pusieron 750 huevos para las cuales la razón entre huevos blancos y de color fue de 7 : 3, ¿cuántos huevos de color pusieron las gallinas?",
+     "correctKey": "B",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "figureNote": null,
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "205",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "225",
+       "isCorrect": true
+      },
+      {
+       "key": "C",
+       "text": "350",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "425",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 29,
+     "type": "multiple_choice",
+     "stem": "Una empresa de producción de avellanas tiene gastos relacionados a su producción, como lo son el uso de agua, fertilizantes, mano de obra para la cosecha, etc. Los gastos (eje y) se modelan respecto de los kilos de avellanas producidas (eje x) de acuerdo con el siguiente gráfico. Respecto del gráfico es correcto afirmar que:",
+     "correctKey": "B",
+     "responseFormat": "choice",
+     "hasFigure": true,
+     "figureNote": "Figura no transcrita (hueco en el cuadernillo)",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "La empresa tiene gastos fijos de 8 millones de pesos",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "Los gastos variables son 1 millón de pesos por cada 300 kilos de avellanas",
+       "isCorrect": true
+      },
+      {
+       "key": "C",
+       "text": "Si la empresa produce 1.500 kilos de avellanas, los gastos serán 11 millones de pesos",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "La empresa tiene utilidades positivas Ensayo 1-M1",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 30,
+     "type": "multiple_choice",
+     "stem": "En una expedición, el líder del grupo determinó que entre todos los excursionistas llevaban 342 kg entre el equipo y la comida. Si el grupo debe llevar 126 kg de equipo común y 12 kg de comida por cada uno de ellos, ¿cuál es el número de excursionistas de la expedición?",
+     "correctKey": "B",
+     "responseFormat": "choice",
+     "hasFigure": true,
+     "figureNote": "Figura no transcrita (hueco en el cuadernillo)",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "16",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "18",
+       "isCorrect": true
+      },
+      {
+       "key": "C",
+       "text": "19",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "22",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 31,
+     "type": "multiple_choice",
+     "stem": "Un agente de ventas tiene un ingreso fijo de $1.900.000 al mes, más una comisión del 4% de las ventas que realice. Si el agente de ventas quiere mantener un ingreso de al menos $2.200.000, ¿cuánto debe vender como mínimo cada mes?",
+     "correctKey": "A",
+     "responseFormat": "choice",
+     "hasFigure": true,
+     "figureNote": "Figura no transcrita (hueco en el cuadernillo)",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "$7.500.000",
+       "isCorrect": true
+      },
+      {
+       "key": "B",
+       "text": "$7.000.000",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "$6.500.000",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "$6.000.000",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 32,
+     "type": "multiple_choice",
+     "stem": "¿Cuál de los siguientes gráficos es la solución de −15 < −2𝑥 − 7?",
+     "correctKey": "B",
+     "responseFormat": "choice",
+     "hasFigure": true,
+     "figureNote": "Alternativas gráficas en grilla; las figuras no están en la capa de texto",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "(figura A)",
+       "isCorrect": false,
+       "isImage": true
+      },
+      {
+       "key": "B",
+       "text": "(figura B)",
+       "isCorrect": true,
+       "isImage": true
+      },
+      {
+       "key": "C",
+       "text": "(figura C)",
+       "isCorrect": false,
+       "isImage": true
+      },
+      {
+       "key": "D",
+       "text": "(figura D)",
+       "isCorrect": false,
+       "isImage": true
+      }
+     ]
+    },
+    {
+     "position": 33,
+     "type": "multiple_choice",
+     "stem": "𝑎 3 Si a, b, c y d son enteros distintos de cero y 𝑏 = 2 , 𝑏 𝑐 1 = 2, 𝑐 entonces ¿cuál es el valor de 𝑎? 4",
+     "correctKey": "A",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "figureNote": null,
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "3 2",
+       "isCorrect": true
+      },
+      {
+       "key": "B",
+       "text": "3 1",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "2 1",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "4 Ensayo 1-M1",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 34,
+     "type": "multiple_choice",
+     "stem": "3𝑥 − 2𝑦 = 13. Si se tiene que 𝑥 + 𝑦 = 1, entonces 𝑥𝑦 =",
+     "correctKey": "D",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "figureNote": null,
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "3",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "-1",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "-3",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "-6",
+       "isCorrect": true
+      }
+     ]
+    },
+    {
+     "position": 35,
+     "type": "multiple_choice",
+     "stem": "¿A cuál de los siguientes sistemas de ecuaciones corresponde la solución (5, –1)?",
+     "correctKey": "B",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "figureNote": null,
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "𝑦 = 𝑥 + 1 𝑦 =𝑥−7",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "𝑥 + 𝑦 = 4 𝑥−𝑦 =6",
+       "isCorrect": true
+      },
+      {
+       "key": "C",
+       "text": "𝑦 = −2𝑥 + 3 𝑦 =𝑥−4",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "𝑦 = 𝑥 − 8 𝑦 = −𝑥 + 9",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 36,
+     "type": "multiple_choice",
+     "stem": "Se tiene el siguiente rectángulo como se muestra en la figura ¿Cuánto mide la diagonal del rectángulo?",
+     "correctKey": "D",
+     "responseFormat": "choice",
+     "hasFigure": true,
+     "figureNote": "Figura no transcrita (hueco en el cuadernillo)",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "√(9 − 𝑥)(2𝑥 + 6)",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "√3𝑥 2 + 𝑥 + 130",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "√𝑥 + 15",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "√5𝑥 2 + 6𝑥 + 117 Ensayo 1-M1",
+       "isCorrect": true
+      }
+     ]
+    },
+    {
+     "position": 37,
+     "type": "multiple_choice",
+     "stem": "Si la recta 2𝑦 = 𝑘𝑥 es paralela a la recta cuya ecuación es 3𝑥 + 2𝑦 = 6, entonces ¿cuál es el valor de k?",
+     "correctKey": "A",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "figureNote": null,
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "–3",
+       "isCorrect": true
+      },
+      {
+       "key": "B",
+       "text": "–1/3",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "1/3",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "3",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 38,
+     "type": "multiple_choice",
+     "stem": "Un estudio reveló que las horas de sueño diarias que debe dormir un individuo dependen de la edad de dicho individuo según la siguiente ecuación 𝑦 = −0,09𝑥 + 9,24, en donde y representa las horas dormidas al día, y x representa la edad del individuo en años. Basado en dicho estudio, ¿cuál de las siguientes aseveraciones es cierta?",
+     "correctKey": "B",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "figureNote": null,
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "Las horas diarias que se deben dormir se incrementa en 0,09 por cada año que incrementa la edad",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "Las horas diarias que se deben dormir decrece en 0,09 por cada año que incrementa la edad",
+       "isCorrect": true
+      },
+      {
+       "key": "C",
+       "text": "Las horas diarias que se deben dormir se incrementa en 9,24 por cada año que incrementa la edad",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "Las horas diarias que se deben dormir decrece en 9,24 por cada año que incrementa la edad",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 39,
+     "type": "multiple_choice",
+     "stem": "Alejandra tiene una tienda de ropa de niño, en donde tiene que pagar $500.000 por arriendo, $100.000 por sueldos y cuentas de luz, y un promedio de $5.000 por cada prenda que compra. ¿Cuál sería la función que modela sus costos totales?",
+     "correctKey": "B",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "figureNote": null,
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "𝑓(𝑥) = 500.000 + 105.000𝑥",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "𝑓(𝑥) = 600.000 + 5.000𝑥",
+       "isCorrect": true
+      },
+      {
+       "key": "C",
+       "text": "𝑓(𝑥) = 100.000 + 505.000𝑥",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "𝑓(𝑥) = 5.000 + 600.000𝑥",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 40,
+     "type": "multiple_choice",
+     "stem": "Dada la función 𝑓(𝑥) = (2𝑥 + 3)(𝑥 − 4), ¿dónde corta dicha función al eje y?",
+     "correctKey": "D",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "figureNote": null,
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "6",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "9",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "–1",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "–12 Ensayo 1-M1",
+       "isCorrect": true
+      }
+     ]
+    },
+    {
+     "position": 41,
+     "type": "multiple_choice",
+     "stem": "Dada la función 𝑓(𝑥) = 4𝑥 2 − 5𝑥 + 𝑘, ¿cuál es el valor de k si 𝑓(3) = 19?",
+     "correctKey": "B",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "figureNote": null,
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "0",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "-2",
+       "isCorrect": true
+      },
+      {
+       "key": "C",
+       "text": "4",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "8",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 42,
+     "type": "multiple_choice",
+     "stem": "La función de la altura que alcanza una pelota lanzada hacia arriba se puede modelar mediante la siguiente ecuación: 1 ℎ(𝑡) = − 𝑔 ∙ 𝑡 2 + 𝑣0 ∙ 𝑡 2 En donde h(t) es la altura en metros (m) alcanzada por la pelota en el tiempo t en segundos (s) g es la aceleración de gravedad en m/s2, v0 es la velocidad inicial en m/s. Si la pelota es lanzada como se muestra el gráfico de la figura, en donde: g = 10 m/s2 v0 = 20 m/s ¿Cuánto tiempo pasa desde que es lanzada hasta que cae nuevamente al suelo?",
+     "correctKey": "C",
+     "responseFormat": "choice",
+     "hasFigure": true,
+     "figureNote": "Figura no transcrita (hueco en el cuadernillo)",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "1 segundo",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "2 segundos",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "4 segundos",
+       "isCorrect": true
+      },
+      {
+       "key": "D",
+       "text": "6 segundos Ensayo 1-M1",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 43,
+     "type": "multiple_choice",
+     "stem": "Para la construcción de una casa se debe instalar una viga de soporte en diagonal entre la pared y el techo tal como se muestra en la figura, pero con las siguientes restricciones: Del punto A al B deben haber 1,5 mt, y la distancia del punto B al punto C donde se clava la viga no puede ser menos de 1,7 ni más de 2,3 mt. Se cuenta con tres tipos de vigas, las cuales no pueden ser cortadas, cuyas medidas son: 4 mt, 2,5 mt y 1,5 mt respectivamente. Respecto de esto, es correcto argumentar que:",
+     "correctKey": "B",
+     "responseFormat": "choice",
+     "hasFigure": true,
+     "figureNote": "Figura no transcrita (hueco en el cuadernillo)",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "Cualquiera de las vigas puede ser instalada",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "Solo la viga de 2,5 mt sirve para el propósito",
+       "isCorrect": true
+      },
+      {
+       "key": "C",
+       "text": "Tanto la viga de 4 como la de 2,5 podrían ser instaladas",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "Ninguna de las vigas puede ser utilizada puesto que a todas o bien les sobra o les falta un trozo para cumplir los requerimientos.",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 44,
+     "type": "multiple_choice",
+     "stem": "¿Con cuál de los siguientes tríos de números se puede formar un triángulo rectángulo?",
+     "correctKey": "B",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "figureNote": null,
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "4, 6 y 7 m",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "6, 7 y √85 m",
+       "isCorrect": true
+      },
+      {
+       "key": "C",
+       "text": "8, 10 y 12 m",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "5, 12, √196 m Ensayo 1-M1",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 45,
+     "type": "multiple_choice",
+     "stem": "El profesor plantea el siguiente ejercicio en la pizarra: “Un círculo está inscrito en un cuadrado de lado 8. ¿Cuál es la distancia que hay desde el centro de la circunferencia a la esquina del cuadrado?”. José realiza los siguientes pasos para resolver el problema: Paso 1: Dibuja la situación Paso 2: dibuja el trazo pedido Paso 3: Razona que es la mitad de la Paso 4: Reemplaza y resuelve diagonal y plantea: √2 𝑑𝑖𝑎𝑔𝑜𝑛𝑎𝑙 = 𝑙𝑎𝑑𝑜 ∙ √2 𝑥= ∙ 8 = 4 ∙ √2 2 𝑑𝑖𝑎𝑔𝑜𝑛𝑎𝑙 √2 𝑥= = ∙ 𝑙𝑎𝑑𝑜 2 2 ¿En qué paso cometió un error?",
+     "correctKey": "A",
+     "responseFormat": "choice",
+     "hasFigure": true,
+     "figureNote": "Figura no transcrita (hueco en el cuadernillo)",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "Paso 1",
+       "isCorrect": true
+      },
+      {
+       "key": "B",
+       "text": "Paso 2",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "Paso 3",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "Paso 4",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 46,
+     "type": "multiple_choice",
+     "stem": "En el semicírculo de la figura, la cuerda ̅̅̅̅ ̅̅̅̅, 𝐴𝐵 = 26, y la distancia 𝐶𝐷 es paralela al diámetro 𝐴𝐵 del centro de la circunferencia (O) al segmento ̅̅̅̅ 𝐶𝐷 es 5, ¿cuánto es el largo de la cuerda ̅̅̅̅ 𝐶𝐷?",
+     "correctKey": "D",
+     "responseFormat": "choice",
+     "hasFigure": true,
+     "figureNote": "Figura no transcrita (hueco en el cuadernillo)",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "5",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "12",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "17",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "24 Ensayo 1-M1",
+       "isCorrect": true
+      }
+     ]
+    },
+    {
+     "position": 47,
+     "type": "multiple_choice",
+     "stem": "Un contenedor con forma de paralelepípedo de base cuadrada está hasta la mitad lleno de agua. Si el volumen de agua es de 36 m3 y la altura del contenedor es de 9 metros, ¿cuál es la medida del lado de la base, en metros?",
+     "correctKey": "D",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "figureNote": null,
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "√6m",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "√2m",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "2√3 m",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "2√2 m",
+       "isCorrect": true
+      }
+     ]
+    },
+    {
+     "position": 48,
+     "type": "multiple_choice",
+     "stem": "Una fábrica de sombreros embala sus sombreros individualmente en cajas de 8cm por 10cm por 10cm. Cada sombrero embalado vale $7.500. Si un pedido de sombreros se embarca en un camión de 288.000 cm3 de capacidad, ¿cuál es el valor máximo del pedido en pesos?",
+     "correctKey": "D",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "figureNote": null,
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "$960.000",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "$1.250.000",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "$2.200.000",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "$2.700.000",
+       "isCorrect": true
+      }
+     ]
+    },
+    {
+     "position": 49,
+     "type": "multiple_choice",
+     "stem": "¿Cuál es el módulo del vector AB con A= (-2, 1) y B = (1, 3)?",
+     "correctKey": "A",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "figureNote": null,
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "√13",
+       "isCorrect": true
+      },
+      {
+       "key": "B",
+       "text": "√5",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "5",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "√12",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 50,
+     "type": "multiple_choice",
+     "stem": "¿En qué cuadrante se encuentra el vector resultante de la suma de los vectores 𝑣 = (−4, 6), 𝑤 = (2, −6) y 𝑧 = ( 0, −4)?",
+     "correctKey": "C",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "figureNote": null,
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "I",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "II",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "III",
+       "isCorrect": true
+      },
+      {
+       "key": "D",
+       "text": "IV Ensayo 1-M1",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 51,
+     "type": "multiple_choice",
+     "stem": "El profesor plantea el siguiente desafío en la pizarra: “¿mediante que transformación(es) isométrica(s) se puede obtener el triángulo A’B’C’ a partir del triángulo ABC?” Alicia contesta: Mediante una reflexión con el eje y Ramón contesta: Mediante una rotación en 270° con centro en el origen Claudia contesta: Mediante una rotación en 180° con centro en el origen, seguida de una reflexión respecto del eje x ¿Quién(es) está(n) en lo correcto?",
+     "correctKey": "C",
+     "responseFormat": "choice",
+     "hasFigure": true,
+     "figureNote": "Figura no transcrita (hueco en el cuadernillo)",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "Alicia solamente",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "Alicia y Ramón",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "Alicia y Claudia",
+       "isCorrect": true
+      },
+      {
+       "key": "D",
+       "text": "Alicia, Ramón y Claudia",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 52,
+     "type": "multiple_choice",
+     "stem": "Se forma el vector 𝑣⃗ al trasladar el punto P de coordenadas (-3, 2) 5 unidades a la derecha y 3 unidades hacia abajo hasta el punto Q. ¿Cuáles serían las coordenadas del punto Q?",
+     "correctKey": "B",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "figureNote": null,
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "Q = (3, -2)",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "Q = (2, -1)",
+       "isCorrect": true
+      },
+      {
+       "key": "C",
+       "text": "Q = (-2, 3)",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "Q = (-4, -5) Ensayo 1-M1",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 53,
+     "type": "multiple_choice",
+     "stem": "La gráfica de la función inversa de una función cualquiera se obtiene al hacer una reflexión de la gráfica de la función respecto de la recta y = x. Dada la función graficada a continuación, ¿cuál de las alternativas correspondería a su función inversa?",
+     "correctKey": "A",
+     "responseFormat": "choice",
+     "hasFigure": true,
+     "figureNote": "Alternativas gráficas en grilla; las figuras no están en la capa de texto",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "(figura A)",
+       "isCorrect": true,
+       "isImage": true
+      },
+      {
+       "key": "B",
+       "text": "(figura B)",
+       "isCorrect": false,
+       "isImage": true
+      },
+      {
+       "key": "C",
+       "text": "(figura C)",
+       "isCorrect": false,
+       "isImage": true
+      },
+      {
+       "key": "D",
+       "text": "(figura D)",
+       "isCorrect": false,
+       "isImage": true
+      }
+     ]
+    },
+    {
+     "position": 54,
+     "type": "multiple_choice",
+     "stem": "La siguiente tabla muestra los resultados de un estudio realizado a los padres respecto de su preferencia por el tipo de educación escolar que quieren para sus hijos Tipo de educación Frecuencia relativa porcentual Tradicional 5% Montessori 85% Bosque escuela 10% De la información anterior se desprende que:",
+     "correctKey": "D",
+     "responseFormat": "choice",
+     "hasFigure": true,
+     "figureNote": "Figura no transcrita (hueco en el cuadernillo)",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "Hoy en día la gran mayoría de los padres prefiere una educación no tradicional con una fuerte inclinación al sistema Montessori",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "El estudio abarca el 100% de los padres del país porque la frecuencia relativa porcentual suma 100%",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "La educación basada en la naturaleza, tipo Bosque escuela, está obteniendo cada vez más popularidad",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "La tabla no permite concluir nada de lo anterior ya que no entrega información del tamaño de la muestra por lo que no se sabe si es representativa",
+       "isCorrect": true
+      }
+     ]
+    },
+    {
+     "position": 55,
+     "type": "multiple_choice",
+     "stem": "Cristina está a cargo de una fundación de donación de libros, y lleva un registro de todos los que ha conseguido en el año 2023. El siguiente gráfico de frecuencia muestra los libros obtenidos en ese período de tiempo. ¿Cuántos libros se recibieron entre los meses de noviembre y diciembre juntos?",
+     "correctKey": "D",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "figureNote": null,
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "8",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "12",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "18",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "26 Ensayo 1-M1",
+       "isCorrect": true
+      }
+     ]
+    },
+    {
+     "position": 56,
+     "type": "multiple_choice",
+     "stem": "En un taller de verano hay 3 cursos disponibles: pintura, escalada y canto. En el taller de pintura se inscriben 10 niños con un promedio de edad de 6 años por niño, en el taller de escalada se inscriben15 niños con un promedio de edad de 16 años por niño, y en el de canto se inscribieron 18 niños con un promedio de edad de 17 años por niño. ¿Cuál de las siguientes alternativas permite determinar el promedio de edad de todos los niños que asisten al taller de verano? 10∙12+15∙16+18∙17",
+     "correctKey": "C",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "figureNote": null,
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "𝑥̅ = 6+16+17 10+15+18",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "𝑥̅ = 12+16+17 10∙12 + 15∙16 + 18∙17",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "𝑥̅ = 10+15+18 12+16+17",
+       "isCorrect": true
+      },
+      {
+       "key": "D",
+       "text": "𝑥̅ = 10+15+18",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 57,
+     "type": "multiple_choice",
+     "stem": "La tabla a continuación muestra las preferencias de un grupo de 300 personas en un parque de diversiones respecto de su atracción favorita. Si cada persona eligió solo un juego, hubo 10 personas que no se pudieron decidir por lo que no respondieron, y “x” e “y” son ambos números enteros, ¿cuál es el mayor valor posible que puede tomar y? Atracción Frecuencia (número de personas) Montaña rusa 93 Autitos chocadores 69 Barco pirata 18 Casa embrujada 45 El Splash x Rueda de la fortuna y",
+     "correctKey": "A",
+     "responseFormat": "choice",
+     "hasFigure": true,
+     "figureNote": "Figura no transcrita (hueco en el cuadernillo)",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "65",
+       "isCorrect": true
+      },
+      {
+       "key": "B",
+       "text": "74",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "75",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "80 Ensayo 1-M1",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 58,
+     "type": "multiple_choice",
+     "stem": "En el equipo de selección de gimnasia de un club deportivo se hizo el siguiente desafío: “¿Cuántos segundos puedes durar en posición invertida (parado de manos)?”. Los resultados se muestran en la tabla: Número de Duración gimnastas (segundos) 14 0-2 27 3-5 19 6-10 18 11-20 13 21-30 15 31-60 24 Más de 60 Tres de los integrantes del equipo hicieron las siguientes afirmaciones: Juan: En promedio duramos exactamente 23 segundos Max: La mitad del equipo dura a lo más 20 segundos Andrea: 41 gimnastas de nuestro equipo duraron 5 segundos o menos ¿Quiénes tienen la razón?",
+     "correctKey": "D",
+     "responseFormat": "choice",
+     "hasFigure": true,
+     "figureNote": "Figura no transcrita (hueco en el cuadernillo)",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "Juan, Max y Andrea",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "Juan y Max",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "Solo Andrea",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "Max y Andrea",
+       "isCorrect": true
+      }
+     ]
+    },
+    {
+     "position": 59,
+     "type": "multiple_choice",
+     "stem": "Se hizo una encuesta a alumnos y estudiantes de un colegio preguntándoles si tomaron o no desayuno esa mañana. Los resultados se muestran en la siguiente tabla de doble entrada: Si No Profesores 12 20 Estudiantes 45 23 Al respecto es correcto afirmar:",
+     "correctKey": "D",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "figureNote": null,
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "En promedio los profesores no tomaron desayuno",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "Del total de encuestados, la mayoría no tomaron desayuno",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "Hay más profesores que si tomaron que estudiantes que no tomaron desayuno",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "Ninguna de las anteriores Ensayo 1-M1",
+       "isCorrect": true
+      }
+     ]
+    },
+    {
+     "position": 60,
+     "type": "multiple_choice",
+     "stem": "La tabla a continuación muestra las temperaturas registradas en la ciudad El Pueblo en el mes de marzo, en donde cada letra representa un día diferente A B C D E F G H I J 21° 20° 22° 19° 18° 20° 21° 20° 17° 18° ¿Cuál es el rango intercuartil de la muestra?",
+     "correctKey": "A",
+     "responseFormat": "choice",
+     "hasFigure": true,
+     "figureNote": "Figura no transcrita (hueco en el cuadernillo)",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "3",
+       "isCorrect": true
+      },
+      {
+       "key": "B",
+       "text": "4",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "5",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "6",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 61,
+     "type": "multiple_choice",
+     "stem": "Considere el siguiente diagrama de caja-bigote que muestra los resultados de una prueba realizada a un grupo de alumnos, en donde el puntaje va de 0 a 100 puntos. Al respecto es correcto afirmar que:",
+     "correctKey": "D",
+     "responseFormat": "choice",
+     "hasFigure": true,
+     "figureNote": "Figura no transcrita (hueco en el cuadernillo)",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "El rango intercuartil es 35",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "El segundo cuartil es el que más alumnos concentra",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "El 25% de los alumnos sacaron más de 74 puntos",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "El 75% de los alumnos sacaron a lo más 87 puntos",
+       "isCorrect": true
+      }
+     ]
+    },
+    {
+     "position": 62,
+     "type": "multiple_choice",
+     "stem": "En un consultorio médico tienen la política de que, si un niño se encuentra bajo el percentil 10 de peso, se le debe administrar un suero proteico para hacerle ganar peso, ya que se considera que es demasiado delgado y se encuentra en riesgo de desnutrición. Al respecto es correcto afirmar que:",
+     "correctKey": "C",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "figureNote": null,
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "Un niño que se encuentra en el percentil 4 en talla, recibirá el suero proteico",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "Los niños del percentil 15 tienen un peso saludable para su edad",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "Si un niño es más delgado que el 97% de su generación, se le administrará el suero",
+       "isCorrect": true
+      },
+      {
+       "key": "D",
+       "text": "Es más saludable encontrarse en el percentil 90 que en el percentil 10 Ensayo 1-M1",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 63,
+     "type": "multiple_choice",
+     "stem": "Se tiene un cubo de 6 caras con sus caras enumeradas del 1 al 6, tal que las caras opuestas suman 7, por ejemplo, el 2 opuesto a 5. Si se lanza dicho dado y en una de las caras laterales aparece el número 4, ¿cuál es la probabilidad de que en la cara de abajo esté el número 6? 1",
+     "correctKey": "B",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "figureNote": null,
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "6 1",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "4 1",
+       "isCorrect": true
+      },
+      {
+       "key": "C",
+       "text": "3 1",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "2",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 64,
+     "type": "multiple_choice",
+     "stem": "Si el conjunto A se define como los múltiplos de 2 mayores o iguales a 2 y menores o iguales a 12, y el conjunto B se define como los múltiplos de 3 mayores o iguales a 3 y menores o iguales a 18, entonces, ¿cuál es la probabilidad de sacar un número par de conjunto AUB (A Unión B)? 7",
+     "correctKey": "A",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "figureNote": null,
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "10 3",
+       "isCorrect": true
+      },
+      {
+       "key": "B",
+       "text": "4 7",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "12 7",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "9",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 65,
+     "type": "multiple_choice",
+     "stem": "El siguiente diagrama de Venn muestra los sabores de helado vendidos en una heladería en un día de verano. Los helados vendidos eran de 1, 2 o 3 bolitas todas de distintos sabores. ¿Cuántos de los helados vendidos tenían el sabor vainilla, independiente de la cantidad de bolitas que este tuviera?",
+     "correctKey": "D",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "figureNote": null,
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "24",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "36",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "40",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "42",
+       "isCorrect": true
+      }
+     ]
+    }
+   ]
+  }
+ ],
+ "pauta": {
+  "source": {
+   "instrumentJson": "M1-E3-con-pauta.json"
+  }
+ },
+ "extraction": {
+  "itemCount": 65,
+  "warnings": [
+   "#6: notación matemática partida en líneas",
+   "#33: notación matemática partida en líneas",
+   "#63: notación matemática partida en líneas",
+   "#64: notación matemática partida en líneas"
+  ],
+  "needsHumanReview": true,
+  "itemsConClave": 65
+ }
+}

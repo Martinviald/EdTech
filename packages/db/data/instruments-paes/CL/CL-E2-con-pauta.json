@@ -1,0 +1,2160 @@
+{
+ "instrument": {
+  "name": "PAES CL — Ensayo 2 (Tanda 2) · IV° Medio 2026",
+  "subject": "Competencia Lectora",
+  "subjectCode": "LANG",
+  "grade": "IV° Medio",
+  "gradeCode": "4TH_MEDIO",
+  "year": 2026,
+  "applicationPeriod": null,
+  "type": "paes",
+  "isOfficial": false,
+  "paes": {
+   "prueba": "CL",
+   "tanda": "Tanda 2",
+   "mencion": null,
+   "appliedOn": "2026-04-29",
+   "basadoEn": "Libro RV Ensayo 3"
+  }
+ },
+ "sections": [
+  {
+   "order": 1,
+   "name": "Lectura N°1 (Preguntas 1 a 8)",
+   "type": "multiple_choice",
+   "instructions": null,
+   "passage": {
+    "title": null,
+    "text": "Tu rostro mañana Javier Marías (extracto) No debería uno contar nunca nada, ni dar datos ni aportar historias ni hacer que la gente recuerde a seres que jamás han existido ni pisado la tierra o cruzado el mundo, o que sí pasaron pero estaban ya medio a salvo en el tuerto e inseguro olvido. Contar es casi siempre un regalo, incluso cuando lleva e inyecta veneno el cuento, también es un vínculo y otorgar confianza, y rara es la confianza que antes o después no se traiciona, raro el vínculo que no se enreda o anuda, y así acaba apretando y hay que tirar de navaja o filo para cortarlo: ¿Cuántas de las mías permanecen intactas, de las muchas confianzas brindadas por quien tanto ha creído en su instinto y no siempre le hizo caso y ha sido ingenuo demasiado tiempo? (Ya menos, ya menos, pero la disminución de eso es muy lenta.) Siguen intactas las que deposité en dos amigos que aún las conservan, frente a las puestas en otros diez que las perdieron o desbarataron; la escasa que di a mi padre y la pudorosa que di a mi madre, muy parecidas si no fueron la misma, la de ella además no duró mucho, ya no puede defraudarla o sólo póstumamente, si hiciera yo un día algún mal descubrimiento, y dejara de ocultarse algo oculto; no perdura la de mi hermana, ni la de ninguna novia ni ninguna amante ni ninguna esposa pasada, presente o imaginaria (suele ser la hermana la primera esposa, la esposa niña), parece obligado que en esas relaciones se acabe utilizando lo que se sabe o se ha visto en contra del amado o cónyuge —o de quien resultó ser sólo momentáneo calor y carne—, de quien hizo revelaciones y admitió un testigo para sus flaquezas y pesadumbres y se prestó a confidencias, o simplemente rememoró sobre la almohada abstraído en voz alta sin reparar en los riesgos, ni en el ojo arbitrario que siempre nos mira ni en el oído selectivo y sesgado que nos escucha (muchas veces no es nada grave, una utilización sólo doméstica, defensiva y acorralada, para cargarse de razón en un apuro dialéctico cuando se discute largo, un uso argumentativo). La vulneración de la confianza también es eso: no sólo ser indiscreto y ocasionar daño o perdición con ello, no sólo recurrir a esa arma ilícita cuando los vientos cambian y se le pone la proa al que contó y dejó ver —ese que se arrepiente ahora y niega y confunde y enturbia ahora, y quisiera borrar y callar—, sino sacar ventaja del conocimiento obtenido por debilidad o descuido o generosidad del otro, sin respetar ni tener en cuenta la vía por la que llegó a saberse lo que se esgrime o tergiversa ahora —o basta con haberlo enunciado para que ya lo desfigure al recogerlo el aire—: si fueron las confesiones de una noche enamorada o un desesperado día, de un atardecer de culpa o un despertar desolado, o de la embriagada locuacidad de un insomnio: una noche o un día en que quien hablaba hablaba como si no hubiera futuro más allá de esa noche o día y fuera su lengua suelta a morir con ellos, ignorando que siempre hay más por venir, siempre queda, un poco más, un minuto, la lanza, un segundo, la fiebre, y otro segundo, el sueño —la lanza, la fiebre, mi dolor y la palabra, el sueño—, y también el interminable tiempo que ni siquiera vacila ni aminora el paso tras nuestro acabamiento, y sigue añadiendo y hablando, murmurando e indagando y contando aunque ya no oigamos y hayamos callado. Callar, callar, es la gran aspiración que nadie cumple ni aun después de muerto, y yo el que menos, que he contado a menudo y además por escrito en informes, y aún más miro y escucho, aunque casi nunca pregunte ya nada a cambio. No, yo no debería contar ni oír nada, porque nunca estará en mi mano que no se repita y se afee en mi contra, para perderme, o aún peor, que no se repita y se afee en contra de quienes yo bien quiero, para condenarlos. Tu rostro mañana, Javier Marías",
+    "format": "plain",
+    "attachments": []
+   },
+   "items": [
+    {
+     "position": 1,
+     "type": "multiple_choice",
+     "stem": "Según lo leído, para el narrador uno no debería contar nunca nada porque:",
+     "correctKey": "B",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "figureNote": null,
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "contar es un regalo que lleva implícito el veneno.",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "contar es sinónimo de confianza y esta casi siempre se traiciona.",
+       "isCorrect": true
+      },
+      {
+       "key": "C",
+       "text": "contar es un regalo y un vínculo que siempre se echa a perder.",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "con contar se entregan datos e historias de la gente.",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 2,
+     "type": "multiple_choice",
+     "stem": "En la expresión “siguen intactas las que deposité en dos amigos…”, la palabra “las” reemplaza a:",
+     "correctKey": "A",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "figureNote": null,
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "las confianzas.",
+       "isCorrect": true
+      },
+      {
+       "key": "B",
+       "text": "las historias.",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "las navajas.",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "las gentes.",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 3,
+     "type": "multiple_choice",
+     "stem": "¿Qué se desprende del texto leído?",
+     "correctKey": "D",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "figureNote": null,
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "Que la relación de pareja es la más duradera.",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "Que el narrador calla antes de traicionar las confianzas.",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "Que el narrador confiaba más en su padre.",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "Que la madre del narrador está muerta.",
+       "isCorrect": true
+      }
+     ]
+    },
+    {
+     "position": 4,
+     "type": "multiple_choice",
+     "stem": "¿Cuándo uno pasa a llevar las confianzas del otro?",
+     "correctKey": "A",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "figureNote": null,
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "Cuando saca beneficios de lo contado.",
+       "isCorrect": true
+      },
+      {
+       "key": "B",
+       "text": "Cuando es capaz de restringirse en el conocimiento que entrega.",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "Cuando calla, incluso después de muerto.",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "Cuando cuenta, escucha y pregunta al otro.",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 5,
+     "type": "multiple_choice",
+     "stem": "El narrador al hablar de “las confesiones de una noche enamorada…” se refiere:",
+     "correctKey": "B",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "figureNote": null,
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "a situaciones que uno debería contar.",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "al conocimiento del otro que puede ser vulnerado.",
+       "isCorrect": true
+      },
+      {
+       "key": "C",
+       "text": "a las situaciones en que fue traicionado.",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "al exceso de conocimiento de los otros.",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 6,
+     "type": "multiple_choice",
+     "stem": "¿Qué se puede inferir de la lectura 1?",
+     "correctKey": "A",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "figureNote": null,
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "Que al morir siguen hablando de nosotros.",
+       "isCorrect": true
+      },
+      {
+       "key": "B",
+       "text": "Que nuestro recuerdo se pierde con el tiempo.",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "Que hablar es dañino para el ser humano.",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "Que es aconsejable cortar los vínculos con el otro.",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 7,
+     "type": "multiple_choice",
+     "stem": "Se desprende que el narrador se dedica a:",
+     "correctKey": "D",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "figureNote": null,
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "realizar confesiones y contar historias.",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "contar y oír historias de traiciones.",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "transcribir artículos.",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "mirar, escuchar y emitir informes.",
+       "isCorrect": true
+      }
+     ]
+    },
+    {
+     "position": 8,
+     "type": "multiple_choice",
+     "stem": "¿Cuál es el tema presente en el relato?",
+     "correctKey": "A",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "figureNote": null,
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "La traición de la confianza.",
+       "isCorrect": true
+      },
+      {
+       "key": "B",
+       "text": "El contar historias.",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "El daño.",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "El vínculo con los otros.",
+       "isCorrect": false
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "order": 2,
+   "name": "Lectura N°2 (Preguntas 9 a 15)",
+   "type": "multiple_choice",
+   "instructions": null,
+   "passage": {
+    "title": null,
+    "text": "Artículo extraído de la revista Saber Más, Año 10 / Noviembre-Diciembre / N.º 60, 2021, Universidad Michoacana de San Nicolás de Hidalgo, México. Los insectos y el olor de la muerte Teresa Herrera Aguilar y Josué Iñiguez (adaptado) Los insectos han demostrado tener las cualidades características necesarias para aportar información relevante durante una escena forense. Su gran abundancia, su pequeño tamaño, su fácil acceso a casi cualquier escenario y su capacidad de localizar restos en descomposición los ha situado como agentes potenciales para estimar el tiempo transcurrido desde su llegada a un cadáver y su hallazgo, conocido como intervalo post mortem mínimo. Además, se ha demostrado que los insectos son piezas claves en el establecimiento de posibles situaciones y causas asociadas a la muerte. Por ejemplo, en el traslado de un cuerpo, al encontrarse evidencias entomológicas que no corresponden con el sitio del hallazgo, evidencia de sustancias tóxicas o drogas en el contenido gástrico de las larvas que se alimentan directamente del cadáver o incluso algunas situaciones de maltrato y negligencia en fuentes del forraje y en la crianza de niños. Es así que, la entomología forense, dentro del área médico-legal, se ha situado como una rama de las ciencias forenses encargada de estudiar aquellos insectos asociados directamente con el proceso de descomposición de un cadáver y su utilidad en la resolución de casos judiciales. Pero, ¿cómo los insectos pueden localizar un cadáver a kilómetros de distancia? Los insectos poseen receptores quimiosensoriales ubicados prácticamente en todo su cuerpo, pero estos ocurren más frecuentemente en las antenas, que equivalen a la nariz en los insectos. Las neuronas olfativas están involucradas en los pelos (sensilos) de las antenas, en donde puede haber hasta miles de estos, como es el caso de las antenas de la mosca Calliphora sp., una especie encontrada al inicio de la descomposición del cadáver. Este tipo de neuronas son las responsables de dotar a los insectos de esa capacidad infalible para detectar un cadáver a partir del olor que el cuerpo comienza a liberar una vez que se ha producido el deceso. La mayoría de los componentes del olor a muerte son compuestos químicos volátiles, es decir, que se propagan fácilmente a través del aire, llevando información esencial o útil para los insectos atraídos a este tipo de recursos en donde encontrarán sitios de alimentación, parejas o lugares para la oviposición. Los insectos, en general, interactúan diariamente con un gran número de olores producidos por los diferentes organismos de su medio (plantas, otros insectos y otros organismos). De esta gama de compuestos volátiles, ellos son capaces de identificar y responder únicamente a aquellos que les son ecológicamente relevantes, generando en ellos una respuesta específica en su comportamiento o en su fisiología. En el caso de las moscas necrófagas, se ha demostrado que la actividad de algunas de sus neuronas olfativas responde de manera inmediata ante el estímulo de un determinado olor, generando un espectro de respuestas fisiológicas y por ende un comportamiento en la integración de otros estímulos en el cerebro, desencadenando el comportamiento del insecto, junto con la secreción de otras moléculas de olor, representan una ventaja para estas moscas al momento de evaluar las condiciones del cadáver, identificando a distancia si el cadáver presenta las condiciones necesarias para que sus larvas puedan alimentarse sin competencia o sin correr el riesgo de ser depredadas por otros organismos, es decir, las moscas tienen la capacidad de reconocer si el cadáver se encuentra al inicio o al final de la descomposición. La respuesta específica de las moscas a algunos de los compuestos volátiles emitidos por el cadáver puede ser uno de los principales factores involucrados en la sucesión de insectos que se observa a lo largo de la descomposición de un cadáver, facilitando así a los investigadores asociar el tiempo de llegada de estos insectos con el tiempo de muerte.",
+    "format": "plain",
+    "attachments": []
+   },
+   "items": [
+    {
+     "position": 9,
+     "type": "multiple_choice",
+     "stem": "¿Por qué los insectos son importantes?",
+     "correctKey": "C",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "figureNote": null,
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "Porque pueden localizar un cadáver a kilómetros de distancia.",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "Porque posibilitan esclarecer casos judiciales de asesinato.",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "Porque permiten establecer diversos aspectos asociados al estado de un cadáver.",
+       "isCorrect": true
+      },
+      {
+       "key": "D",
+       "text": "Porque facilitan identificar restos humanos en descomposición.",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 10,
+     "type": "multiple_choice",
+     "stem": "Se infiere del contenido de lo leído, que la entomología forense estudia:",
+     "correctKey": "A",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "figureNote": null,
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "los insectos involucrados en la descomposición de un cadáver.",
+       "isCorrect": true
+      },
+      {
+       "key": "B",
+       "text": "los animales que participan del proceso de descomposición.",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "las evidencias tóxicas de un cuerpo en descomposición.",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "los aspectos médico-legales de los cadáveres.",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 11,
+     "type": "multiple_choice",
+     "stem": "¿Con qué intención se menciona a la mosca Calliphora sp.?",
+     "correctKey": "A",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "figureNote": null,
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "Es el insecto que se encuentra al inicio de la descomposición.",
+       "isCorrect": true
+      },
+      {
+       "key": "B",
+       "text": "Es el insecto que posee receptores quimiosensoriales.",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "Es el insecto que se haya presente en los cadáveres.",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "Es el insecto que ubica un cadáver a kilómetros de distancia.",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 12,
+     "type": "multiple_choice",
+     "stem": "¿Por qué los compuestos volátiles son importantes?",
+     "correctKey": "B",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "figureNote": null,
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "Porque permiten identificar el tiempo de muerte.",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "Porque determinan el comportamiento frente a un cadáver.",
+       "isCorrect": true
+      },
+      {
+       "key": "C",
+       "text": "Porque producen una respuesta específica en el cuerpo.",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "Porque facilitan a los investigadores determinar el tiempo de muerte.",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 13,
+     "type": "multiple_choice",
+     "stem": "¿Qué se puede inferir de la lectura 2?",
+     "correctKey": "A",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "figureNote": null,
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "Que los insectos son relevantes en la investigación forense.",
+       "isCorrect": true
+      },
+      {
+       "key": "B",
+       "text": "Que los investigadores forenses se valen de los cadáveres.",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "Que las moscas son los principales insectos estudiados.",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "Que la entomología forense aporta información médica.",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 14,
+     "type": "multiple_choice",
+     "stem": "¿Qué es el intervalo post mortem mínimo?",
+     "correctKey": "D",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "figureNote": null,
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "El instante en que los insectos reconocen un cadáver.",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "El lapso entre la vida y la muerte.",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "El tiempo entre descomposición de insecto y hallazgo.",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "El período entre muerte y hallazgo del cadáver.",
+       "isCorrect": true
+      }
+     ]
+    },
+    {
+     "position": 15,
+     "type": "multiple_choice",
+     "stem": "¿Qué se señala en la lectura 2?",
+     "correctKey": "D",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "figureNote": null,
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "Que los cadáveres requieren insectos para ser identificados.",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "Que la entomología forense está en desarrollo.",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "Que solo las moscas responden al olor.",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "Que los insectos discriminan olores relevantes.",
+       "isCorrect": true
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "order": 3,
+   "name": "LECTURA N°3 (Preguntas 16 a 23)",
+   "type": "multiple_choice",
+   "instructions": null,
+   "passage": {
+    "title": null,
+    "text": "Texto extraído del Centro de Recursos Digitales Memoria Chilena, de la Biblioteca Nacional de Chile (extracto) ¿Quiénes somos? Memoria Chilena es un centro de recursos digitales que presenta investigaciones basadas en documentos digitalizados pertenecientes a las colecciones de la Biblioteca Nacional de Chile. Memoria Chilena ofrece documentos y contenidos originales relativos a temas clave de nuestra identidad cultural que forman parte de las colecciones de la Biblioteca Nacional de Chile y de otras instituciones del Servicio Nacional del Patrimonio Cultural. El proyecto es un espacio virtual que brinda acceso y visibilidad a las colecciones patrimoniales del principal centro bibliográfico del país desde comienzos de este siglo. Sobre la base de un programa de digitalización sin precedentes en nuestro país, Memoria Chilena fue lanzado oficialmente en el año 2003, convirtiéndose en una experiencia pionera en difusión del patrimonio cultural a través de internet. Para desarrollar el centro de recursos que hoy es Memoria Chilena, un equipo multidisciplinario selecciona, digitaliza y pone en línea materiales documentales que buscan reflejar la diversidad y riqueza de nuestra cultura, facilitar el acceso a las fuentes de información y estimular la producción de nuevo conocimiento. Por otra parte, la aplicación de estándares técnicos en todas las etapas de la conversión digital: captura, procesamiento, control de calidad, descripción, almacenamiento y mantención de los archivos, asegura la estabilidad de los contenidos del sitio y la confiabilidad de sus datos. La estructura de Memoria Chilena se articula a partir de una unidad de contenido denominada “minisitio”. Cada minisitio aborda distintos aspectos nacionales, acontecimientos, obras o procesos relevantes de la cultura nacional y contiene una presentación; una selección de objetos digitales (documentos, imágenes y, en algunos casos, archivos audiovisuales); una bibliografía especializada y una cronología con los principales hitos. Las obras que se digitalizan y ponen en línea a través de Memoria Chilena son seleccionadas por investigadores especializados, de acuerdo con criterios como: su relevancia documental, histórica y/o cultural; su valor literario o estético; y su estado de conservación y la demanda de los usuarios. Teniendo como principal objetivo visibilizar las fuentes patrimoniales de las colecciones de la Biblioteca Nacional, Memoria Chilena prioriza la digitalización de obras que formen parte del Dominio Público o Patrimonio Cultural Común según la Ley de Propiedad Intelectual. Objetos digitales: Todos los documentos, imágenes y archivos audiovisuales digitalizados que forman parte de la colección de Memoria Chilena se rigen por la Ley N° 17.336 sobre Propiedad Intelectual. De acuerdo con esto, se pueden identificar los siguientes casos: 1) Documentos digitales que forman parte del Patrimonio Cultural Común: En Memoria Chilena se pueden encontrar obras de gran valor patrimonial que forman parte del Patrimonio Cultural Común. Tales creaciones pueden ser utilizadas por cualquiera, siempre que se respete la paternidad y la integridad de la obra. En tal sentido, la Ley mencionada señala que este patrimonio se compone por: a) Las obras cuyo plazo de protección se haya extinguido; b) La obra de autor desconocido, incluyéndose las canciones, leyendas, danzas y las expresiones del acervo folclórico; c) Las obras cuyos titulares renunciaron a la protección que otorga esta ley; d) Las obras de autores extranjeros, domiciliados en el exterior, que no estén protegidos en la forma establecida en el artículo 2° de la Ley N° 17.336; e) Las obras que fueron expropiadas por el Estado, salvo que la ley especifique un beneficiario. 2) Objetos digitales protegidos por Ley de Propiedad Intelectual: Corresponden a obras o documentos protegidos cuyos autores y/o titulares de derechos han autorizado su reproducción y divulgación por medio de Memoria Chilena, según las condiciones de uso pactadas en cada caso. Por lo tanto, ningún otro uso podrá solicitarse a la Biblioteca Nacional o a otra unidad cualquiera, que sea parte de la orgánica institucional del Servicio Nacional del Patrimonio Cultural. En tales casos, corresponde efectuar la respectiva solicitud de autorización al titular de los derechos de autor respectivo.",
+    "format": "plain",
+    "attachments": []
+   },
+   "items": [
+    {
+     "position": 16,
+     "type": "multiple_choice",
+     "stem": "En el texto leído se señala que la Ley N° 17.336:",
+     "correctKey": "A",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "figureNote": null,
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "rige todos los objetos digitalizados por Memoria Chilena.",
+       "isCorrect": true
+      },
+      {
+       "key": "B",
+       "text": "protege parte de los documentos digitalizados por Memoria Chilena.",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "ampara la marca registrada Memoria Chilena.",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "ordena la protección a autores chilenos y extranjeros.",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 17,
+     "type": "multiple_choice",
+     "stem": "¿Qué es Memoria Chilena?",
+     "correctKey": "C",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "figureNote": null,
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "Un centro de recursos sobre variadas temáticas chilenas.",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "Un programa de digitalización sin precedentes en nuestro país.",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "Un proyecto virtual con acceso a colecciones patrimoniales de nuestra identidad cultural.",
+       "isCorrect": true
+      },
+      {
+       "key": "D",
+       "text": "Un centro de investigación sobre la identidad cultural de Chile.",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 18,
+     "type": "multiple_choice",
+     "stem": "En el texto leído se afirma que:",
+     "correctKey": "A",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "figureNote": null,
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "investigadores de diversas áreas trabajan para difundir el patrimonio cultural chileno.",
+       "isCorrect": true
+      },
+      {
+       "key": "B",
+       "text": "los estándares técnicos aseguran la estabilidad de los contenidos de Memoria Chilena.",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "la mayoría de los documentos, imágenes y archivos audiovisuales se rigen por la Ley N° 17.336.",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "el respeto a la paternidad de las obras es vital para el gobierno chileno.",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 19,
+     "type": "multiple_choice",
+     "stem": "¿Qué se puede deducir de la lectura 3?",
+     "correctKey": "C",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "figureNote": null,
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "Que existen restricciones para el uso de Memoria Chilena.",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "Que la Biblioteca Nacional de Chile acapara todo el saber del país.",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "Que los titulares de derechos no siempre son los autores de las obras.",
+       "isCorrect": true
+      },
+      {
+       "key": "D",
+       "text": "Que la divulgación y reproducción de obras chilenas está penada por ley.",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 20,
+     "type": "multiple_choice",
+     "stem": "De acuerdo con lo leído, las obras digitalizadas por Memoria Chilena son:",
+     "correctKey": "C",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "figureNote": null,
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "documentadas de acuerdo con el interés de los usuarios.",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "clasificadas a partir de criterios culturales.",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "seleccionadas de acuerdo con una serie de criterios.",
+       "isCorrect": true
+      },
+      {
+       "key": "D",
+       "text": "divulgadas por cualquiera, siempre que se respete la integridad de la obra.",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 21,
+     "type": "multiple_choice",
+     "stem": "¿Cuál es el principal centro bibliográfico del país?",
+     "correctKey": "A",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "figureNote": null,
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "La Biblioteca Nacional de Chile.",
+       "isCorrect": true
+      },
+      {
+       "key": "B",
+       "text": "Memoria Chilena.",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "El Servicio Nacional del Patrimonio Cultural.",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "Dominio Público.",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 22,
+     "type": "multiple_choice",
+     "stem": "¿Qué se puede inferir de la lectura 3?",
+     "correctKey": "B",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "figureNote": null,
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "Que Memoria Chilena digitaliza todas las obras chilenas.",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "Que Memoria Chilena hace más accesible el patrimonio cultural al público.",
+       "isCorrect": true
+      },
+      {
+       "key": "C",
+       "text": "Que Memoria Chilena es un sitio exclusivamente para uso de chilenos.",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "Que no existen requisitos para hacer uso del material descargado desde Memoria Chilena.",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 23,
+     "type": "multiple_choice",
+     "stem": "¿Qué son los “minisitios”?",
+     "correctKey": "C",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "figureNote": null,
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "Son unidades de contenidos de la Biblioteca Nacional.",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "Son las obras digitalizadas por Memoria Chilena.",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "Son la forma de estructura que adopta el centro de recursos Memoria Chilena.",
+       "isCorrect": true
+      },
+      {
+       "key": "D",
+       "text": "Son una manera de abordar las fuentes patrimoniales.",
+       "isCorrect": false
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "order": 4,
+   "name": "Lectura N°4 (Preguntas 24 a 33)",
+   "type": "multiple_choice",
+   "instructions": null,
+   "passage": {
+    "title": null,
+    "text": "Ensayo extraído del libro La nueva desinformación. Veinte ensayos breves contra la manipulación, Ignacio Jiménez Soler. Editorial Uoc, 2020, Barcelona. INTRODUCCIÓN Siempre fue más fácil distribuir la ignorancia que el conocimiento. Siempre la opinión voló más alto que el criterio, que no vuela, que tiene un pie en tierra y al final se impone, aunque a veces muy tarde. Vivimos en un mundo fragmentado en canales y fuentes de información. Hoy cualquiera puede emitir un juicio, una opinión, inventarse una ficción, distribuir conocimiento riguroso… Las opciones son iguales para todos. Los resultados son, sin embargo, desiguales. La tecnología lo ha hecho posible e Internet lo ha hecho crecer exponencialmente. Si Internet se creó con fines buenos y ha traído cosas fantásticas para la humanidad, el mal ha aprendido a aprovecharse de las bondades de la red y de la tecnología y, hoy, el uso maligno crece exponencialmente e impacta en nuestra configuración del mundo, amenaza con condicionar el imaginario global, ese mismo que no hace mucho configuraron el cine, luego la televisión y los propios medios de comunicación de masas. Si gracias al cine las generaciones del siglo XX interiorizaron cómo besar, cómo se articulaban el bien y el mal, entendieron las diferentes tipologías de amor y desamor, dieron forma al éxito y a la caída, moldearon los sueños y los fracasos, gracias a la televisión, el entretenimiento y la información adquirieron escalas masivas y globales. Hoy es lo que se publica en Internet y especialmente en las redes sociales más exitosas lo que da forma a ese imaginario. A finales del año 2019, podemos decir que es la televisión la que aún configura más y mejor el imaginario social, debido sobre todo a que la brecha digital es directamente proporcional al número de humanos conectados. Pero esto está a punto de acabarse. La comunicación basada en nudos neuronales propia de la comunicación en red será hegemónica y ahí es donde emerge el fenómeno principal que aborda este libro: el de la nueva desinformación. La desinformación es ya el principal elemento de desestabilización geopolítica y empresarial. Su morfología imprecisa la hace más interesante para sus promotores y más difícil de identificar para los que la combaten. Es un fantasma que ya está presente en cualquier parte del mundo. Es una criatura que existía en la era analógica y se utilizaba de manera intensiva, pero su crecimiento es exponencial en la era digital. Sus detonantes son de naturaleza política, económica e ideológica. Los de naturaleza política buscan desacreditar al contrario o inocular la duda sobre él o ella. Los de naturaleza económica buscan eliminar, colapsar, desacreditar o destruir a un competidor o a alguno de sus productos o servicios. Los de naturaleza ideológica buscan hegemonizar las emociones y las creencias éticas y morales. La nueva desinformación no se circunscribe solo a la generación de historias falsas. Tiene que ver con el uso de la Inteligencia artificial, el deep learning, la programación de algoritmos con sesgos, la producción masiva de consignas, la suplantación de identidades, la elaboración de trampantojos en vídeos y fotografías. Todas ellas son herramientas puestas al servicio de causas normalmente interesadas para hacer creer que alguien hizo o dijo algo o estuvo en algún lugar con el ánimo de desacreditarle o de difundir una mentira. En cualquier caso, este no es un fenómeno propio de estos tiempos que vivimos. La desinformación ha existido siempre. El condicionamiento de las personas incidiendo en sus percepciones, intentando condicionar cómo estas deben ver el mundo para que alguien o algo perpetúe su poder o simplemente desestabilizar al contrario, es algo que ha sucedido siempre. Las grandes novedades que atañen al fenómeno de la desinformación en estos tiempos que ahora vivimos son esencialmente dos: la escala del problema y la capacidad para producir desinformación a niveles industriales. La escala, porque la diseminación, desde un punto de generación de contenido construido con narrativas de atracción y parámetros de posicionamiento, se produce en cuestión de minutos u horas. La capacidad para producir a escala industrial, porque la desestabilización a través de la desinformación ha pasado de difundirse exclusivamente a través de los líderes de opinión y prescriptores, algo propio del siglo XX, a producir historias masivamente que se alojan en landing pages y medios de comunicación creados a tal efecto (véase Sputnik o Russia Today). Estas son difundidas a gran velocidad por bots y asumidas y amplificadas por personas que, al verse reforzadas en sus posiciones, contribuyen a su difusión masiva. Este libro busca abrir ventanas de reflexión sobre el efecto de la desinformación. Pero además de tratar de abrir esas ventanas, sustancia su tesis en una única vía para minimizar su efecto, que no es otra que el esfuerzo personal a través del conocimiento. Solamente a través del esfuerzo y el conocimiento personal podremos, primero, frenar su escalada y, segundo, generar un movimiento para acuñar un gran pacto social que implique a gobiernos, reguladores, empresas y nodos de educación. Solamente un compromiso global y transversal podrá frenar un fenómeno amorfo, inoloro, incoloro y silencioso que ya ha quebrado los pilares del mundo de la posmodernidad que conocimos y que amenaza con sesgar la sociedad de nodos neuronales en la que ya vivimos. Al igual que el agua potable suele estar en pozos, arroyos y manantiales no contaminados, cuando se producen trombas de agua que anegan terrenos, pozos, cauces secos y otros lugares, el efecto más pernicioso es que el agua no puede beberse. Algo parecido está sucediendo con la información. Estamos anegados en información y en contenidos y cada vez se hace más difícil distinguir la verdadera de la falsa, entre la potable y la no potable. https://www.linkedin.com/pulse/la-nueva-desinformaci",
+    "format": "plain",
+    "attachments": []
+   },
+   "items": [
+    {
+     "position": 24,
+     "type": "multiple_choice",
+     "stem": "Según el autor, ¿de qué trata el libro La nueva desinformación?",
+     "correctKey": "A",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "figureNote": null,
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "La configuración de la realidad y sus consecuencias a partir de la desinformación.",
+       "isCorrect": true
+      },
+      {
+       "key": "B",
+       "text": "El cine, la televisión y la información en el siglo XXI.",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "La morfología de la nueva desinformación.",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "La era digital y la nueva información a través de internet y las redes sociales.",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 25,
+     "type": "multiple_choice",
+     "stem": "¿Cuál es la perspectiva discursiva del emisor?",
+     "correctKey": "D",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "figureNote": null,
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "Polémica.",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "Pesimista-reflexiva.",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "Analítica.",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "Crítica-reflexiva.",
+       "isCorrect": true
+      }
+     ]
+    },
+    {
+     "position": 26,
+     "type": "multiple_choice",
+     "stem": "¿Por qué el emisor adopta el formato de ensayo para escribir?",
+     "correctKey": "C",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "figureNote": null,
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "Porque le ayuda a manifestar su descontento con el tema de la desinformación actual.",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "Porque le procura relatar, desde una mirada personal, una temática contingente.",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "Porque le permite reflexionar y profundizar, desde un punto de vista personal, sobre un tema de interés público.",
+       "isCorrect": true
+      },
+      {
+       "key": "D",
+       "text": "Porque le facilita exponer y analizar una temática propia del siglo XXI.",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 27,
+     "type": "multiple_choice",
+     "stem": "¿Qué se puede inferir del texto leído?",
+     "correctKey": "D",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "figureNote": null,
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "Que la tecnología e internet han resultado ser inventos nocivos para el ser humano.",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "Que los líderes de opinión han posibilitado la masificación de las mentiras.",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "Que la desinformación es un fenómeno propio de las sociedades del siglo XXI.",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "Que hoy resulta más complejo discriminar entre información falsa y verdadera.",
+       "isCorrect": true
+      }
+     ]
+    },
+    {
+     "position": 28,
+     "type": "multiple_choice",
+     "stem": "¿Qué se debe hacer para contrarrestar el efecto de la desinformación?",
+     "correctKey": "A",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "figureNote": null,
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "Priorizar el conocimiento.",
+       "isCorrect": true
+      },
+      {
+       "key": "B",
+       "text": "Abrir ventanas de reflexión.",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "Aprovechar las bondades de la tecnología.",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "Ver cine, televisión y medios de comunicación masiva.",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 29,
+     "type": "multiple_choice",
+     "stem": "¿Cuáles son los elementos desencadenantes de la nueva desinformación?",
+     "correctKey": "D",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "figureNote": null,
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "La tecnología e internet.",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "El cine, la televisión y el mundo del entretenimiento.",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "La inteligencia artificial y la programación de algoritmos.",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "Los de tipo político, económico e ideológico.",
+       "isCorrect": true
+      }
+     ]
+    },
+    {
+     "position": 30,
+     "type": "multiple_choice",
+     "stem": "¿Cuál es el objetivo de la desinformación?",
+     "correctKey": "D",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "figureNote": null,
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "Tomar el control y dirigir el comportamiento de la humanidad.",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "Masificar y ampliar el conocimiento de la posmodernidad.",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "Desestabilizar a los gobiernos intentando desacreditarlos en sus funciones.",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "Manipular el conocimiento para incidir y condicionar las percepciones de la gente.",
+       "isCorrect": true
+      }
+     ]
+    },
+    {
+     "position": 31,
+     "type": "multiple_choice",
+     "stem": "Según el emisor, ¿cuáles serían los aspectos inéditos de la nueva desinformación?",
+     "correctKey": "B",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "figureNote": null,
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "La difusión de información exclusivamente a través de líderes de opinión.",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "La generación de contenido en poco tiempo y la cantidad de desinformación.",
+       "isCorrect": true
+      },
+      {
+       "key": "C",
+       "text": "La escala de información que se propaga por redes sociales.",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "El surgimiento de los bots en internet.",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 32,
+     "type": "multiple_choice",
+     "stem": "La comparación que realiza el emisor al final del texto utiliza",
+     "correctKey": "D",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "figureNote": null,
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "una personificación.",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "una ironía.",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "un eufemismo.",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "una metáfora.",
+       "isCorrect": true
+      }
+     ]
+    },
+    {
+     "position": 33,
+     "type": "multiple_choice",
+     "stem": "Del último párrafo se desprende que",
+     "correctKey": "A",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "figureNote": null,
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "el exceso de contenidos imposibilita discriminar entre información falsa e información verdadera.",
+       "isCorrect": true
+      },
+      {
+       "key": "B",
+       "text": "existe información pura como el agua e información contaminada.",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "el hombre, cada cierto tiempo, vive fenómenos extraños y difíciles de descifrar.",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "la sociedad posmoderna está exenta de amenazas.",
+       "isCorrect": false
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "order": 5,
+   "name": "Lectura N°5 (Preguntas 34 a 42)",
+   "type": "multiple_choice",
+   "instructions": null,
+   "passage": {
+    "title": null,
+    "text": "Artículo extraído de la revista Saber Más, Año 1 /Noviembre-Diciembre/ No. 60, 2021, Universidad Michoacana de San Nicolás de Hidalgo, México. ARTÍCULO: \"La mujer dormida\" que despertó la curiosidad por los artículos científicos y de divulgación Patricia Y. Mayoral Loera Un mundo de información en Google Específicamente para el mal de montaña buscamos información en Google, utilizando como palabras clave «montañismo» y «mal de montaña» y obtuvimos ¡más de 500 000 resultados! Evidentemente tendríamos que descartar los resultados que no se ajustaban a nuestros intereses y los que eran más bien una anécdota o un conjunto de ellas, de los confiables. ¿Cómo saber cuál era cuál? Uno de nosotros dijo en algún momento «les paso este documento, está en un PDF así que es confiable». Se trataba de una tesis que tenía efectivamente mucha información interesante, pero que yo no podría considerar como confiable ¿Por qué? Aunque el estudiante que realizó el trabajo ciertamente se informó y estuvo asesorado por personas académicamente más preparadas que él, la información contenida en ese documento no fue revisada por especialistas en el tema. Entonces, ¿qué información sí es confiable y dónde puedo encontrarla? Revistas científicas Podemos catalogar como información confiable a la contenida en las llamadas «fuentes primarias de información» o revistas científicas. Estas se especializan en distintos temas (zoología, botánica, hongos, bioquímica, etc.) y cumplen con varios requisitos para ser reconocidas como científicas. Están avaladas por una institución editora, son dirigidas por científicos y son evaluadas frecuente y estrictamente por varias instancias que revisan que se cumplan criterios de política y gestión editorial, presentación y contenido, de acuerdo con normas nacionales e internacionales. Cuando una revista está incluida en servicios de evaluación diferentes al país donde se edita, quiere decir que el estándar de calidad que cumple es internacional. El proceso para publicar un artículo científico no es cosa sencilla. La información que ahí se da a conocer debe estar muy bien sustentada y debe soportar fuertes críticas y contraargumentos de los revisores. Artículos científicos Los artículos científicos se distinguen por las siguientes características: 1) dan a conocer los resultados del trabajo de los investigadores, por lo que sus datos son originales y no han sido publicados antes, 2) se trata de hallazgos relevantes dentro de su área de conocimiento, 3) los métodos que dan a conocer permiten que su experimento sea repetible, 4) la información se presenta con la estructura IMRD (Introducción, Métodos, Resultados, Discusión) y utiliza un lenguaje técnico que no se presta a confusión, y 5) el manuscrito, ya en su proceso de publicación, ha sido revisado por especialistas en el tema. Estos especialistas, también llamados árbitros o revisores, junto con los editores, se aseguran de que esas revisiones sean imparciales, críticas y objetivas. Esto es muy importante porque quiere decir que no importa si los árbitros son amigos o no de los autores, si se caen bien o no, si tienen preferencias o creencias respecto a lo que están leyendo; es decir, no se da favoritismo o sesgo. De hecho, muchas revistas usan la revisión «doble ciego» que se refiere a que los árbitros no conocen el nombre de los autores del artículo ni los autores el de los revisores. Bibliotecas digitales Las revistas científicas, además de estar en sus propios sitios o plataformas en línea, también están en bibliotecas digitales. De modo que, si buscas información, pero no tienes idea de la revista en la que la puedes encontrar, debes agregar a tu palabra de búsqueda el nombre de una biblioteca digital. Para nuestro viaje al Iztaccíhuatl se ingresa con en el buscador «montañismo» y «mal de montaña» y se añadieron las palabras SciELO en una primera búsqueda y Redalyc, en otra oportunidad. La primera es una biblioteca digital, mientras que la segunda es un sitio que compila la información de muchas revistas, y las dos pueden ser de gran utilidad. El número de documentos encontrado en Google se redujo a menos de 3 000 —sobre todo, pero no solamente, escritos en español— en el caso de SciELO, y a menos de 6 000 en el de Redalyc. Bastante lejos de los 500 000 que salieron en un inicio, sin agregarle los nombres de las bibliotecas. Para nuestros fines, aunque seguían siendo muchos documentos y todavía era necesario depurar los resultados, el trabajo se volvió sustancialmente menor, pues la localización de la información se restringió al subgrupo de «información confiable». Revistas de divulgación Otra información confiable, pero que no se da a conocer en revistas científicas, es la publicada en revistas de divulgación. Por ejemplo, para conocer la flora y fauna del Iztaccíhuatl y aspectos ecológicos interesantes, quisimos leer documentos en los que la información ya estuviera integrada, interpretada y que pudiéramos entender fácilmente. Encontramos artículos muy interesantes que hablan de la vegetación alpina, de las interacciones biológicas que se dan entre los organismos que viven en esas altitudes y otros de la conservación de su vegetación. Sabemos que podemos fiarnos de esas lecturas porque, al igual que la información que se publica en las revistas científicas, esta también es revisada por científicos conocedores —aunque no expertos en los temas tratados— que pertenecen al cuerpo editorial de una revista que cumple con ciertos estándares de calidad y que también es evaluada continuamente. Los autores de los artículos de divulgación están plenamente identificados y generalmente la revista proporciona sus correos electrónicos y afiliación, por si es necesario contactarlos. Situación que no ocurre con la información que encontramos en internet así nada más, aunque esté en formato PDF. DIFERENCIAS ENTRE ARTÍCULOS CIENTÍFICOS Y DE DIVULGACIÓN Criterio Artículo científico Artículo de divulgación Contenido Presenta resultados Entrega información novedosa, novedosos, originales e generalmente basada en inéditos, derivados de una conocimientos ya existentes, no investigación científica. necesariamente producto de una investigación propia. Autor Científico o investigador Conocedor o experto en el tema; especializado en el área. no necesariamente científico, aunque puede serlo. Organización Sigue la estructura IMRD: Estructura flexible: introducción, de la Introducción, Métodos, desarrollo (o nudo) y conclusión. información Resultados y Discusión. Lenguaje Técnico, formal y preciso Más accesible, cercano y (inequívoco). coloquial. Información de Utiliza citas y referencias Puede incluir referencias, pero en respaldo bibliográficas formales. menor grado y con menor formalidad. Audiencia Dirigido a la comunidad Dirigido al público general no científica y otros especializado. investigadores. Revisión por Siempre sometido a revisión Generalmente no pasa por revisión pares por pares. por pares formal. Respaldo Publicado en revistas Puede estar publicado en medios institucional científicas respaldadas por de comunicación, revistas o instituciones y sometidas a plataformas sin evaluación evaluación constante de científica rigurosa. calidad. Objetivo Diseminar conocimiento Difundir el conocimiento científico científico, aportar al y culturalizar al público general. desarrollo tecnológico y generar avances como patentes.",
+    "format": "plain",
+    "attachments": []
+   },
+   "items": [
+    {
+     "position": 34,
+     "type": "multiple_choice",
+     "stem": "A partir del cuadro comparativo, ¿cuál de las siguientes alternativas corresponde al contenido de un artículo científico?",
+     "correctKey": "B",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "figureNote": null,
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "Los besos virtuales son posibles gracias a un invento chino.",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "El descubrimiento de la proteína tau causa Alzheimer.",
+       "isCorrect": true
+      },
+      {
+       "key": "C",
+       "text": "¿Por qué el exceso de cerveza nos hace engordar?",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "Una de las especies más fieles en la naturaleza: los pingüinos.",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 35,
+     "type": "multiple_choice",
+     "stem": "¿Qué función cumple el apartado “Un mundo de información en Google”?",
+     "correctKey": "A",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "figureNote": null,
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "Introducir la temática de la confiabilidad de las fuentes.",
+       "isCorrect": true
+      },
+      {
+       "key": "B",
+       "text": "Destacar el valor de los documentos en PDF.",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "Resaltar la búsqueda exitosa a través de Google.",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "Evaluar la confiabilidad de los trabajos realizados en el colegio.",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 36,
+     "type": "multiple_choice",
+     "stem": "¿Qué se desprende del cuadro comparativo?",
+     "correctKey": "D",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "figureNote": null,
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "Que el receptor del artículo de divulgación es ignorante.",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "Que artículo de divulgación no posee citas porque su autor no es científico.",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "Que el lenguaje del artículo de opinión resulta incomprensible.",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "Que el receptor de ambos artículos es diferente.",
+       "isCorrect": true
+      }
+     ]
+    },
+    {
+     "position": 37,
+     "type": "multiple_choice",
+     "stem": "¿Qué son las “fuentes primarias de información”?",
+     "correctKey": "B",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "figureNote": null,
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "Las bibliotecas digitales, porque compilan la información de muchas revistas.",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "Las revistas científicas, porque cumplen variados requisitos al momento de publicar.",
+       "isCorrect": true
+      },
+      {
+       "key": "C",
+       "text": "Los artículos científicos, porque dan a conocer un hallazgo.",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "Las revistas de divulgación, porque son revisadas por científicos.",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 38,
+     "type": "multiple_choice",
+     "stem": "Según lo leído, los árbitros o revisores son personas que poseen el rasgo de",
+     "correctKey": "B",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "figureNote": null,
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "iniquidad.",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "ecuanimidad.",
+       "isCorrect": true
+      },
+      {
+       "key": "C",
+       "text": "parcialidad.",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "favoritismo.",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 39,
+     "type": "multiple_choice",
+     "stem": "¿Qué es SciELO?",
+     "correctKey": "D",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "figureNote": null,
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "Una revista de divulgación.",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "Un sitio de Google.",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "Un sitio que compila la información de muchas revistas.",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "Una biblioteca digital.",
+       "isCorrect": true
+      }
+     ]
+    },
+    {
+     "position": 40,
+     "type": "multiple_choice",
+     "stem": "¿Qué elemento en común comparten los artículos científicos y los artículos de divulgación?",
+     "correctKey": "A",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "figureNote": null,
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "La confiabilidad de la información.",
+       "isCorrect": true
+      },
+      {
+       "key": "B",
+       "text": "La publicación en revistas científicas.",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "La redacción realizada por científicos.",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "El tipo de lenguaje.",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 41,
+     "type": "multiple_choice",
+     "stem": "A partir del cuadro comparativo, ¿cuál de las siguientes alternativas corresponde al contenido de un artículo de divulgación?",
+     "correctKey": "D",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "figureNote": null,
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "Ligadura de las arterias hipogástricas de urgencia.",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "¿Es el selenio una nueva arma contra el cáncer de próstata?",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "Pesquisa de lesiones premalignas y malignas en la cavidad bucal.",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "Mitos y realidades sobre las abejas.",
+       "isCorrect": true
+      }
+     ]
+    },
+    {
+     "position": 42,
+     "type": "multiple_choice",
+     "stem": "¿Cuándo un texto pierde confiabilidad?",
+     "correctKey": "D",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "figureNote": null,
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "Cuando se encuentra en las bibliotecas digitales.",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "Cuando los árbitros conocen el nombre de los autores.",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "Cuando se encuentra escrito en formato PDF.",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "Cuando no es revisado por científicos o especialistas en el tema.",
+       "isCorrect": true
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "order": 6,
+   "name": "Lectura N°6 (Preguntas 43 a 49)",
+   "type": "multiple_choice",
+   "instructions": null,
+   "passage": {
+    "title": null,
+    "text": "¿Qué hacer frente a una funa? La convivencia es fundamental para el crecimiento y el aprendizaje de niñas, niños y adolescentes durante la trayectoria educacional. En este sentido, los integrantes de la comunidad educativa deben conocer el Reglamento Interno, sus protocolos, los responsables de implementar medidas y las vías formales para gestionar adecuadamente los conflictos. ¿Cómo actuar frente a una funa? ¿Qué debe hacer el establecimiento? • Activar el protocolo de actuación frente a • Contar con un Consejo Escolar o Comité de situaciones de maltrato, acoso escolar o Buena Convivencia y Encargado(a) de violencia entre miembros de la comunidad Convivencia. educativa. • Elaborar e implementar un Plan de Gestión de • Contener emocionalmente a las víctimas; Convivencia Escolar que considere acciones de orientar sobre los conductos regulares para formación y prevención, determinadas por el realizar denuncias o solicitar apoyo; comunicar Consejo Escolar o Comité de Buena Convivencia. la situación a los apoderados. • Disponer de un Reglamento Interno que incluya • Informar a la comunidad educativa sobre las protocolos de actuación para enfrentar medidas realizadas. situaciones de violencia física o psicológica, • Resguardar la privacidad de las partes causadas a través de cualquier medio. involucradas. • Promover la gestión colaborativa de conflictos. • Orientar al agresor/a considerando que se • Desarrollar estrategias para prevenir y enfrentar encuentra en proceso de formación (niñas, el maltrato, acoso escolar o la violencia entre los niños y adolescentes). miembros de la comunidad educativa, tanto a • Promover conductas reparatorias. nivel presencial como digital. • Evaluar la efectividad de las acciones aplicadas. • El/la sostenedor(a) tiene la responsabilidad de capacitar al personal en convivencia escolar. ¿Cuáles son los contenidos mínimos que debe contener el protocolo? ✓ Procedimientos para recibir y resolver denuncias de acoso escolar o sexual. ✓ Responsables de los procedimientos. ✓ Plazos de resolución. ✓ Medidas formativas y de resguardo. ✓ Procedimiento para dar a conocer o denunciar al Ministerio Público, Carabineros, PDI o cualquier tribunal, en los casos que corresponda.",
+    "format": "plain",
+    "attachments": []
+   },
+   "items": [
+    {
+     "position": 43,
+     "type": "multiple_choice",
+     "stem": "¿Qué elemento del afiche le otorga credibilidad a la información entregada?",
+     "correctKey": "A",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "figureNote": null,
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "Que esté avalado por la Superintendencia de Educación.",
+       "isCorrect": true
+      },
+      {
+       "key": "B",
+       "text": "La presencia de los íconos de las redes sociales.",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "La existencia de un Reglamento Interno.",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "La orientación de un protocolo.",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 44,
+     "type": "multiple_choice",
+     "stem": "Según lo leído, ¿qué significa la palabra “funa”?",
+     "correctKey": "B",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "figureNote": null,
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "Es un término que proviene del mapudungun.",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "Desprestigio público a una persona o grupo.",
+       "isCorrect": true
+      },
+      {
+       "key": "C",
+       "text": "Daño a la convivencia escolar.",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "Molestia individual o pública.",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 45,
+     "type": "multiple_choice",
+     "stem": "¿Cuáles son las consecuencias de la funa escolar?",
+     "correctKey": "D",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "figureNote": null,
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "La creación de un Comité de Buena Convivencia.",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "La implementación del diálogo y medidas reparatorias.",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "La desacreditación de una persona o grupo.",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "El deterioro de la convivencia escolar.",
+       "isCorrect": true
+      }
+     ]
+    },
+    {
+     "position": 46,
+     "type": "multiple_choice",
+     "stem": "¿Qué es un protocolo de actuación?",
+     "correctKey": "A",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "figureNote": null,
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "Un conjunto de reglas preestablecidas que orientan el proceder frente a una funa.",
+       "isCorrect": true
+      },
+      {
+       "key": "B",
+       "text": "Un procedimiento para condenar situaciones o hechos graves.",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "Una medida formativa y reparatoria frente a situaciones complejas.",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "Un Reglamento ministerial interno.",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 47,
+     "type": "multiple_choice",
+     "stem": "De acuerdo con lo leído, ¿quiénes son los responsables de mediar en una funa escolar?",
+     "correctKey": "D",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "figureNote": null,
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "El Ministerio Público, Carabineros y la PDI.",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "El sostenedor del colegio afectado.",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "El Comité de Buena Convivencia.",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "El Consejo Escolar y Encargado(a) de Convivencia.",
+       "isCorrect": true
+      }
+     ]
+    },
+    {
+     "position": 48,
+     "type": "multiple_choice",
+     "stem": "Se afirma en el afiche que en caso de funa escolar, es obligación",
+     "correctKey": "B",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "figureNote": null,
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "contener emocionalmente a las víctimas.",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "denunciar a las autoridades, en los casos en que corresponda.",
+       "isCorrect": true
+      },
+      {
+       "key": "C",
+       "text": "buscar y generar espacios de diálogo.",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "divulgar la situación de acoso al resto de la comunidad.",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 49,
+     "type": "multiple_choice",
+     "stem": "¿Quién podría ser el receptor idóneo de esta campaña?",
+     "correctKey": "A",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "figureNote": null,
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "Un establecimiento educacional.",
+       "isCorrect": true
+      },
+      {
+       "key": "B",
+       "text": "Un acosador.",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "Una víctima de una funa.",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "Carabineros y la PDI.",
+       "isCorrect": false
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "order": 7,
+   "name": "Lectura N°7 (Preguntas 50 a 56)",
+   "type": "multiple_choice",
+   "instructions": null,
+   "passage": {
+    "title": null,
+    "text": "Crítica extraída del diario El País, escrita por Natalia Marcos, 20 de mayo, 2019, España. Juego de tronos, la serie que rompió los límites Cada ciertos años, una serie pone patas arriba la televisión: Twin Peaks, Los Soprano, Perdidos, Breaking Bad. Pero nunca antes el terremoto había sido de tal intensidad ni se había sentido con tanta fuerza en todo el mundo al mismo tiempo. “Juego de tronos ya no es una serie, es un evento emocional. Con la cultura de la inmediatez e Internet, las plataformas digitales y el consumo bajo demanda, parece que el directo ha dejado de tener sentido a no ser que fueran eventos deportivos o musicales. Y cada capítulo final de Juego de tronos se ha vivido al nivel de un mundial de fútbol”, sostiene Irene Raya, profesora de Comunicación Audiovisual y Publicidad de la Universidad de Sevilla. “La mayor aportación de Juego de tronos ha sido la noción de espectáculo total”, opina Alberto N. García, profesor de Comunicación de la Universidad de Navarra. “Antes hubo muchas series que abordaron con éxito de crítica y público la complejidad narrativa o dramática. Incluso hubo series con un altísimo nivel de producción. Sin embargo, Juego de tronos ha empujado todo eso al límite, ha sido un relato televisivo XXL en todos los sentidos: más tramas, más personajes, más efectos especiales, más brutalidad, más medios de producción, más marketing, más localizaciones… En otras palabras: ha redefinido lo que se puede esperar de una serie. La producción de HBO ha trasladado a la televisión la experiencia y niveles de producción reservados hasta ahora para el cine. Es un gran blockbuster por capítulos en el que esa espectacularidad va de la mano de la historia. “El engranaje visual tan colosal, visto desde el sofá de casa, ha roto la dicotomía sagrada que relacionaba la sala de cine con espectáculo y televisión con intimidad. El espectáculo también es un acto disfrutado en la intimidad”, opina Irene Raya. “La ambición novelística de Juego de tronos tiene mucho que ver con su atracción global”, añade García. “Su mayor originalidad narrativa fue la de subvertir una de las reglas sagradas del relato serial: a pesar de ser un relato coral, los creadores mataban personajes esenciales con una facilidad pasmosa”. La Eneida en streaming Para la periodista especializada en series Laia Portaceli, Juego de tronos ha servido para reconocer también el género fantástico. La producción ha llegado a “un público numeroso que hasta ahora no era consumidor de fantasía, mezclándolo con otros géneros que convierten la serie en un producto más adulto y complejo que otras ficciones fantásticas”. Los 47 premios Emmy que lleva acumulados son un claro indicio de la última temporada avala ese reconocimiento. “Es una historia de fantasía épica medieval clásica que sigue de alguna forma a Tolkien”, opina Carolyn Larrington, profesora de Literatura Europea Medieval en la Universidad de Oxford. Para Larrington, en Juego de tronos se pueden encontrar elementos de la fantasía clásica e incluso de historias antiguas como la Odisea o la Eneida, que ha convertido en modernas, contemporáneas y relevantes para gente de los 207 países y territorios donde es emitida”. Ayelet Haimson Lushkov, profesora de Literatura Clásica en la Universidad de Texas, señala relaciones entre personajes de Juego de tronos y héroes de las epopeyas clásicas, como Tyrion y Odiseo o Daenerys y Eneas. Este cóctel ha generado uno de los mayores hitos culturales que se recuerdan. Un programa seguido con furor casi deportivo, con la devoción de culto propia de un universo desarrollado en miles de páginas y minuciosamente imaginado a lo largo de décadas.",
+    "format": "plain",
+    "attachments": []
+   },
+   "items": [
+    {
+     "position": 50,
+     "type": "multiple_choice",
+     "stem": "¿Qué elemento del discurso le da credibilidad a la crítica de la serie?",
+     "correctKey": "A",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "figureNote": null,
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "La opinión de varios expertos.",
+       "isCorrect": true
+      },
+      {
+       "key": "B",
+       "text": "La mención a Tolkien.",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "La comparación con epopeyas clásicas.",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "La opinión de la emisora.",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 51,
+     "type": "multiple_choice",
+     "stem": "¿A qué hace referencia el título “Juego de tronos, la serie que rompió los límites”?",
+     "correctKey": "B",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "figureNote": null,
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "A su originalidad narrativa, brutalidad y presencia de elementos de la fantasía épica medieval.",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "A que posee una complejidad narrativa, dramática, de efectos especiales y marketing.",
+       "isCorrect": true
+      },
+      {
+       "key": "C",
+       "text": "A que es un evento emocional comparable solo con la final de un mundial de fútbol.",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "A que es la serie estrenada, más comentada de la historia por parte de los fanáticos.",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 52,
+     "type": "multiple_choice",
+     "stem": "¿Cuál es la perspectiva discursiva de la emisora?",
+     "correctKey": "C",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "figureNote": null,
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "Reflexiva, porque analiza los argumentos de los entrevistados.",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "Objetiva, porque se limita a presentar el parecer de los especialistas.",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "Encomiosa, porque destaca los aspectos positivos de la serie.",
+       "isCorrect": true
+      },
+      {
+       "key": "D",
+       "text": "Cuestionadora, porque polemiza con las opiniones de los expertos.",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 53,
+     "type": "multiple_choice",
+     "stem": "¿A qué hace referencia en el texto, la expresión “dicotomía sagrada”?",
+     "correctKey": "C",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "figureNote": null,
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "Al espectáculo con intimidad.",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "Al empaque visual visto desde la casa.",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "Al cine con espectáculo y la televisión con intimidad.",
+       "isCorrect": true
+      },
+      {
+       "key": "D",
+       "text": "Al cine y la televisión.",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 54,
+     "type": "multiple_choice",
+     "stem": "¿Con qué intención se mencionan las series Twin Peaks, Los Soprano, Perdidos y Breaking Bad?",
+     "correctKey": "D",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "figureNote": null,
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "Como series al mismo nivel que Juego de tronos.",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "Como series que trastocaron la televisión abierta.",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "Como productos de los medios de masas con un alto rating.",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "Como grandes series superadas por Juego de tronos.",
+       "isCorrect": true
+      }
+     ]
+    },
+    {
+     "position": 55,
+     "type": "multiple_choice",
+     "stem": "¿Qué se desprende de la lectura 7?",
+     "correctKey": "D",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "figureNote": null,
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "Juego de tronos es un fenómeno nacional que sus creadores se toman con cautela.",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "Juego de tronos subvierte la manera de hacer cine.",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "Todos los especialistas coinciden que Juego de tronos es la mejor serie de la historia.",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "Juego de tronos insta un precedente de lo que se espera de una serie.",
+       "isCorrect": true
+      }
+     ]
+    },
+    {
+     "position": 56,
+     "type": "multiple_choice",
+     "stem": "En el texto se afirma que en Juego de tronos",
+     "correctKey": "C",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "figureNote": null,
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "es un producto para público adulto.",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "aparecen Odiseo y Eneas.",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "hay elementos de la fantasía clásica.",
+       "isCorrect": true
+      },
+      {
+       "key": "D",
+       "text": "ha llegado a un público consumidor de género fantástico.",
+       "isCorrect": false
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "order": 8,
+   "name": "Lectura N°8 (Preguntas 57 a 65)",
+   "type": "multiple_choice",
+   "instructions": null,
+   "passage": {
+    "title": null,
+    "text": "El aprendizaje es importante, ya que es el Con el paso del tiempo, la cantidad de mecanismo que nos permite adaptarnos a información que debemos transmitir a la nuestro entorno, sobrevivir y tener éxito en el próxima generación ha crecido. Parte de ese mundo. Todo lo que vive aprende de una u otra conocimiento es rápido y fácil de aprender, forma, pero lo que nos caracteriza como seres pero gran parte no lo es. Como resultado, humanos es la capacidad de aprender hemos creado procesos e instituciones acumulativamente de nuestros predecesores. dedicados a este esfuerzo. El aprendizaje es un cambio perdurable en el conocimiento. Pensar es el proceso que cataliza tal cambio, un proceso gobernado por nuestra memoria de trabajo. Al prestar atención a la información de nuestro entorno, modificamos la estructura misma de nuestra memoria.",
+    "format": "plain",
+    "attachments": []
+   },
+   "items": [
+    {
+     "position": 57,
+     "type": "multiple_choice",
+     "stem": "¿Por qué el aprendizaje es importante?",
+     "correctKey": "D",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "figureNote": null,
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "Porque nos permite aprender acumulativamente de nuestros descendientes.",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "Porque nos proporciona un conocimiento más rápido.",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "Porque nos facilita el éxito en todo lo que emprendamos.",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "Porque nos permite adaptarnos y sobrevivir en el mundo.",
+       "isCorrect": true
+      }
+     ]
+    },
+    {
+     "position": 58,
+     "type": "multiple_choice",
+     "stem": "¿Qué se puede inferir de la infografía?",
+     "correctKey": "A",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "figureNote": null,
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "Que la escuela posee mecanismos que favorecen el aprendizaje.",
+       "isCorrect": true
+      },
+      {
+       "key": "B",
+       "text": "Que existen individuos que no logran aprender.",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "Que el aprender nos garantiza el éxito en la vida.",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "Que la información es tan abundante que ya no alcanzamos a aprender.",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 59,
+     "type": "multiple_choice",
+     "stem": "¿Cuál es el propósito comunicativo de la infografía?",
+     "correctKey": "B",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "figureNote": null,
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "Describir un proceso de adaptabilidad del entorno.",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "Explicar cómo se produce el aprendizaje.",
+       "isCorrect": true
+      },
+      {
+       "key": "C",
+       "text": "Definir en qué consiste el aprendizaje.",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "Comentar la forma en que podemos catalizar el aprendizaje.",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 60,
+     "type": "multiple_choice",
+     "stem": "A partir de la infografía podemos sostener que",
+     "correctKey": "C",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "figureNote": null,
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "nuestra capacidad de aprendizaje es mínima.",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "el aprendizaje siempre será selectivo.",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "pensar estimula el aprendizaje.",
+       "isCorrect": true
+      },
+      {
+       "key": "D",
+       "text": "la información cultural supera nuestro aprendizaje.",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 61,
+     "type": "multiple_choice",
+     "stem": "En el título “El aprendizaje ¿Qué es y cómo podemos catalizarlo?”, la palabra “catalizarlo” se usa en el sentido de",
+     "correctKey": "A",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "figureNote": null,
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "impulsarlo.",
+       "isCorrect": true
+      },
+      {
+       "key": "B",
+       "text": "reproducirlo.",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "multiplicarlo.",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "procesarlo.",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 62,
+     "type": "multiple_choice",
+     "stem": "¿Cuál es misión de las instituciones escolares y de los profesores?",
+     "correctKey": "D",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "figureNote": null,
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "Hacer pensar a los alumnos.",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "Enseñar a tener éxito en el mundo.",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "Enseñar el conocimiento de manera lenta.",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "Propiciar el aprendizaje cultural.",
+       "isCorrect": true
+      }
+     ]
+    },
+    {
+     "position": 63,
+     "type": "multiple_choice",
+     "stem": "Según la infografía, ¿cuál es la causa directa por la que deberíamos desarrollar un proceso para estimular el aprendizaje?",
+     "correctKey": "C",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "figureNote": null,
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "Porque solo podemos prestar atención a algunas cosas a la vez.",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "Porque existe un exceso de información.",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "Porque no todo el conocimiento es fácil de aprender.",
+       "isCorrect": true
+      },
+      {
+       "key": "D",
+       "text": "Porque tenemos una limitada capacidad para pensar.",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 64,
+     "type": "multiple_choice",
+     "stem": "Para el emisor, la información cultural se entiende",
+     "correctKey": "A",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "figureNote": null,
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "como el saber enciclopédico.",
+       "isCorrect": true
+      },
+      {
+       "key": "B",
+       "text": "como el conocimiento.",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "como la capacidad de pensar.",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "como aprender a hablar y construir relaciones.",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 65,
+     "type": "multiple_choice",
+     "stem": "En la idea 2 la palabra natural se encuentra en cursivas porque",
+     "correctKey": "A",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "figureNote": null,
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "está usada coloquialmente como sinónimo de espontáneo.",
+       "isCorrect": true
+      },
+      {
+       "key": "B",
+       "text": "el emisor la usa con una connotación negativa.",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "adquiere un sentido metafórico.",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "el emisor la usa con un sentido literal.",
+       "isCorrect": false
+      }
+     ]
+    }
+   ]
+  }
+ ],
+ "pauta": {
+  "source": {
+   "instrumentJson": "CL-E2-con-pauta.json"
+  }
+ },
+ "extraction": {
+  "itemCount": 65,
+  "warnings": [],
+  "needsHumanReview": false,
+  "itemsConClave": 65
+ }
+}

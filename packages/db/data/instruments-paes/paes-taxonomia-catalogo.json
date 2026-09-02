@@ -1,0 +1,584 @@
+{
+ "marcos": {
+  "paes": {
+   "code": "paes",
+   "name": "PAES — Prueba de Acceso a la Educación Superior",
+   "type": "paes",
+   "version": "2026"
+  }
+ },
+ "nodes": [
+  {
+   "code": "PAES.CL",
+   "type": "domain",
+   "name": "Competencia Lectora",
+   "parentCode": null,
+   "marco": "paes",
+   "subjectCode": null,
+   "source": "DEMRE 2026"
+  },
+  {
+   "code": "PAES.M1",
+   "type": "domain",
+   "name": "Competencia Matemática 1",
+   "parentCode": null,
+   "marco": "paes",
+   "subjectCode": null,
+   "source": "DEMRE 2026"
+  },
+  {
+   "code": "PAES.M2",
+   "type": "domain",
+   "name": "Competencia Matemática 2",
+   "parentCode": null,
+   "marco": "paes",
+   "subjectCode": null,
+   "source": "DEMRE 2026"
+  },
+  {
+   "code": "PAES.HIS",
+   "type": "domain",
+   "name": "Historia y Ciencias Sociales",
+   "parentCode": null,
+   "marco": "paes",
+   "subjectCode": null,
+   "source": "DEMRE 2026"
+  },
+  {
+   "code": "PAES.CIE",
+   "type": "domain",
+   "name": "Ciencias",
+   "parentCode": null,
+   "marco": "paes",
+   "subjectCode": null,
+   "source": "DEMRE 2026"
+  },
+  {
+   "code": "PAES.CIE.BIO",
+   "type": "subdomain",
+   "name": "Ciencias — mención Biología",
+   "parentCode": "PAES.CIE",
+   "marco": "paes",
+   "subjectCode": null,
+   "source": "DEMRE 2026"
+  },
+  {
+   "code": "PAES.CIE.FIS",
+   "type": "subdomain",
+   "name": "Ciencias — mención Física",
+   "parentCode": "PAES.CIE",
+   "marco": "paes",
+   "subjectCode": null,
+   "source": "DEMRE 2026"
+  },
+  {
+   "code": "PAES.CIE.QUI",
+   "type": "subdomain",
+   "name": "Ciencias — mención Química",
+   "parentCode": "PAES.CIE",
+   "marco": "paes",
+   "subjectCode": null,
+   "source": "DEMRE 2026"
+  },
+  {
+   "code": "PAES.CL.HAB.LOCALIZAR",
+   "type": "skill",
+   "name": "Localizar",
+   "parentCode": "PAES.CL",
+   "marco": "paes",
+   "subjectCode": null,
+   "source": "Tabla de especificaciones CSCJ 2026",
+   "metadata": {
+    "variantesObservadas": [
+     "Localizar",
+     "LOCALIZAR"
+    ]
+   }
+  },
+  {
+   "code": "PAES.CL.HAB.INTERPRETAR",
+   "type": "skill",
+   "name": "Interpretar y relacionar",
+   "parentCode": "PAES.CL",
+   "marco": "paes",
+   "subjectCode": null,
+   "source": "Tabla de especificaciones CSCJ 2026",
+   "metadata": {
+    "variantesObservadas": [
+     "Interpretar",
+     "INTERPRETAR",
+     "Interpretar (inferir)",
+     "Relacionar e interpretar"
+    ]
+   }
+  },
+  {
+   "code": "PAES.CL.HAB.EVALUAR",
+   "type": "skill",
+   "name": "Evaluar y reflexionar",
+   "parentCode": "PAES.CL",
+   "marco": "paes",
+   "subjectCode": null,
+   "source": "Tabla de especificaciones CSCJ 2026",
+   "metadata": {
+    "variantesObservadas": [
+     "Evaluar",
+     "EVALUAR"
+    ]
+   }
+  },
+  {
+   "code": "PAES.M1.HAB.RESOLVER",
+   "type": "skill",
+   "name": "Resolver problemas",
+   "parentCode": "PAES.M1",
+   "marco": "paes",
+   "subjectCode": null,
+   "source": "Tabla de especificaciones CSCJ 2026",
+   "metadata": {
+    "variantesObservadas": [
+     "Resolver problemas"
+    ]
+   }
+  },
+  {
+   "code": "PAES.M1.HAB.MODELAR",
+   "type": "skill",
+   "name": "Modelar",
+   "parentCode": "PAES.M1",
+   "marco": "paes",
+   "subjectCode": null,
+   "source": "Tabla de especificaciones CSCJ 2026",
+   "metadata": {
+    "variantesObservadas": [
+     "Modelar"
+    ]
+   }
+  },
+  {
+   "code": "PAES.M1.HAB.REPRESENTAR",
+   "type": "skill",
+   "name": "Representar",
+   "parentCode": "PAES.M1",
+   "marco": "paes",
+   "subjectCode": null,
+   "source": "Tabla de especificaciones CSCJ 2026",
+   "metadata": {
+    "variantesObservadas": [
+     "Representar"
+    ]
+   }
+  },
+  {
+   "code": "PAES.M1.HAB.ARGUMENTAR",
+   "type": "skill",
+   "name": "Argumentar y comunicar",
+   "parentCode": "PAES.M1",
+   "marco": "paes",
+   "subjectCode": null,
+   "source": "Tabla de especificaciones CSCJ 2026",
+   "metadata": {
+    "variantesObservadas": [
+     "Argumentar",
+     "Argumentar y comunicar",
+     "Argumentar Comunicar"
+    ]
+   }
+  },
+  {
+   "code": "PAES.CIE.HAB.OBSERVAR",
+   "type": "skill",
+   "name": "Observar y plantear preguntas",
+   "parentCode": "PAES.CIE",
+   "marco": "paes",
+   "subjectCode": null,
+   "source": "Tabla de especificaciones CSCJ 2026",
+   "metadata": {
+    "variantesObservadas": [
+     "Observar y plantear preguntas"
+    ]
+   }
+  },
+  {
+   "code": "PAES.CIE.HAB.PLANIFICAR",
+   "type": "skill",
+   "name": "Planificar y conducir una investigación",
+   "parentCode": "PAES.CIE",
+   "marco": "paes",
+   "subjectCode": null,
+   "source": "Tabla de especificaciones CSCJ 2026",
+   "metadata": {
+    "variantesObservadas": [
+     "Planificar y conducir una investigación",
+     "planificar y conducir una investigación"
+    ]
+   }
+  },
+  {
+   "code": "PAES.CIE.HAB.PROCESAR",
+   "type": "skill",
+   "name": "Procesar y analizar la evidencia",
+   "parentCode": "PAES.CIE",
+   "marco": "paes",
+   "subjectCode": null,
+   "source": "Tabla de especificaciones CSCJ 2026",
+   "metadata": {
+    "variantesObservadas": [
+     "Procesar y analizar la evidencia",
+     "Procesar y analizar evidencia"
+    ]
+   }
+  },
+  {
+   "code": "PAES.CIE.HAB.EVALUAR",
+   "type": "skill",
+   "name": "Evaluar",
+   "parentCode": "PAES.CIE",
+   "marco": "paes",
+   "subjectCode": null,
+   "source": "Tabla de especificaciones CSCJ 2026",
+   "metadata": {
+    "variantesObservadas": [
+     "Evaluar"
+    ]
+   }
+  },
+  {
+   "code": "PAES.CIE.HAB.COMUNICAR",
+   "type": "skill",
+   "name": "Comunicar",
+   "parentCode": "PAES.CIE",
+   "marco": "paes",
+   "subjectCode": null,
+   "source": "Tabla de especificaciones CSCJ 2026",
+   "metadata": {
+    "variantesObservadas": [
+     "Comunicar"
+    ]
+   }
+  },
+  {
+   "code": "PAES.HIS.HAB.TEMPORAL",
+   "type": "skill",
+   "name": "Pensamiento temporal y espacial",
+   "parentCode": "PAES.HIS",
+   "marco": "paes",
+   "subjectCode": null,
+   "source": "Tabla de especificaciones CSCJ 2026",
+   "metadata": {
+    "variantesObservadas": [
+     "Pensamiento temporal y espacial",
+     "Pensamiento  temporal- espacial"
+    ]
+   }
+  },
+  {
+   "code": "PAES.HIS.HAB.FUENTES",
+   "type": "skill",
+   "name": "Análisis y trabajo con fuentes",
+   "parentCode": "PAES.HIS",
+   "marco": "paes",
+   "subjectCode": null,
+   "source": "Tabla de especificaciones CSCJ 2026",
+   "metadata": {
+    "variantesObservadas": [
+     "Análisis de fuentes de información",
+     "Análisis de fuentes"
+    ]
+   }
+  },
+  {
+   "code": "PAES.HIS.HAB.CRITICO",
+   "type": "skill",
+   "name": "Pensamiento crítico",
+   "parentCode": "PAES.HIS",
+   "marco": "paes",
+   "subjectCode": null,
+   "source": "Tabla de especificaciones CSCJ 2026",
+   "metadata": {
+    "variantesObservadas": [
+     "Pensamiento crítico"
+    ]
+   }
+  },
+  {
+   "code": "PAES.HIS.HAB.CAUSALIDAD",
+   "type": "skill",
+   "name": "Identificar causas y consecuencias",
+   "parentCode": "PAES.HIS",
+   "marco": "paes",
+   "subjectCode": null,
+   "source": "Tabla de especificaciones CSCJ 2026",
+   "metadata": {
+    "variantesObservadas": [
+     "Identificar causas-consecuencias",
+     "Identificar causas - consecuencias"
+    ]
+   }
+  },
+  {
+   "code": "PAES.M1.EJE.NUMEROS",
+   "type": "axis",
+   "name": "Números",
+   "parentCode": "PAES.M1",
+   "marco": "paes",
+   "subjectCode": null,
+   "source": "Tabla de especificaciones CSCJ 2026",
+   "metadata": {
+    "variantesObservadas": [
+     "Números",
+     "Número",
+     "NÚMEROS"
+    ]
+   }
+  },
+  {
+   "code": "PAES.M1.EJE.ALGEBRA",
+   "type": "axis",
+   "name": "Álgebra y funciones",
+   "parentCode": "PAES.M1",
+   "marco": "paes",
+   "subjectCode": null,
+   "source": "Tabla de especificaciones CSCJ 2026",
+   "metadata": {
+    "variantesObservadas": [
+     "Álgebra y funciones",
+     "ÁLGEBRA Y FUNCIONES"
+    ]
+   }
+  },
+  {
+   "code": "PAES.M1.EJE.GEOMETRIA",
+   "type": "axis",
+   "name": "Geometría",
+   "parentCode": "PAES.M1",
+   "marco": "paes",
+   "subjectCode": null,
+   "source": "Tabla de especificaciones CSCJ 2026",
+   "metadata": {
+    "variantesObservadas": [
+     "Geometría",
+     "GEOMETRÍA"
+    ]
+   }
+  },
+  {
+   "code": "PAES.M1.EJE.PROBABILIDAD",
+   "type": "axis",
+   "name": "Probabilidad y estadística",
+   "parentCode": "PAES.M1",
+   "marco": "paes",
+   "subjectCode": null,
+   "source": "Tabla de especificaciones CSCJ 2026",
+   "metadata": {
+    "variantesObservadas": [
+     "Probabilidad y estadística",
+     "DATOS Y AZAR"
+    ]
+   }
+  },
+  {
+   "code": "PAES.HIS.EJE.HISTORIA",
+   "type": "axis",
+   "name": "Historia: Mundo, América y Chile",
+   "parentCode": "PAES.HIS",
+   "marco": "paes",
+   "subjectCode": null,
+   "source": "Tabla de especificaciones CSCJ 2026",
+   "metadata": {
+    "variantesObservadas": [
+     "Historia: Mundo, América y Chile",
+     "Historia: mundo, américa y chile"
+    ]
+   }
+  },
+  {
+   "code": "PAES.HIS.EJE.CIUDADANA",
+   "type": "axis",
+   "name": "Formación ciudadana",
+   "parentCode": "PAES.HIS",
+   "marco": "paes",
+   "subjectCode": null,
+   "source": "Tabla de especificaciones CSCJ 2026",
+   "metadata": {
+    "variantesObservadas": [
+     "Formación ciudadana",
+     "Formación Ciudadana"
+    ]
+   }
+  },
+  {
+   "code": "PAES.HIS.EJE.ECONOMIA",
+   "type": "axis",
+   "name": "Economía y sociedad",
+   "parentCode": "PAES.HIS",
+   "marco": "paes",
+   "subjectCode": null,
+   "source": "Tabla de especificaciones CSCJ 2026",
+   "metadata": {
+    "variantesObservadas": [
+     "Economía y sociedad",
+     "Sistema económico",
+     "Sistema Económico"
+    ]
+   }
+  },
+  {
+   "code": "PAES.CIE.BIO.EJE.CELULAR",
+   "type": "axis",
+   "name": "Organización, estructura y actividad celular",
+   "parentCode": "PAES.CIE.BIO",
+   "marco": "paes",
+   "subjectCode": null,
+   "source": "Tabla de especificaciones CSCJ 2026",
+   "metadata": {
+    "variantesObservadas": [
+     "Organización, estructura y actividad celular"
+    ]
+   }
+  },
+  {
+   "code": "PAES.CIE.BIO.EJE.PROCESOS",
+   "type": "axis",
+   "name": "Procesos y funciones biológicas",
+   "parentCode": "PAES.CIE.BIO",
+   "marco": "paes",
+   "subjectCode": null,
+   "source": "Tabla de especificaciones CSCJ 2026",
+   "metadata": {
+    "variantesObservadas": [
+     "Procesos y funciones biologicas"
+    ]
+   }
+  },
+  {
+   "code": "PAES.CIE.BIO.EJE.HERENCIA",
+   "type": "axis",
+   "name": "Herencia y evolución",
+   "parentCode": "PAES.CIE.BIO",
+   "marco": "paes",
+   "subjectCode": null,
+   "source": "Tabla de especificaciones CSCJ 2026",
+   "metadata": {
+    "variantesObservadas": [
+     "Herencia y evolución"
+    ]
+   }
+  },
+  {
+   "code": "PAES.CIE.BIO.EJE.AMBIENTE",
+   "type": "axis",
+   "name": "Organismo y ambiente",
+   "parentCode": "PAES.CIE.BIO",
+   "marco": "paes",
+   "subjectCode": null,
+   "source": "Tabla de especificaciones CSCJ 2026",
+   "metadata": {
+    "variantesObservadas": [
+     "Organismo y ambiente"
+    ]
+   }
+  },
+  {
+   "code": "PAES.CIE.FIS.EJE.ONDAS",
+   "type": "axis",
+   "name": "Ondas",
+   "parentCode": "PAES.CIE.FIS",
+   "marco": "paes",
+   "subjectCode": null,
+   "source": "Tabla de especificaciones CSCJ 2026",
+   "metadata": {
+    "variantesObservadas": [
+     "Ondas"
+    ]
+   }
+  },
+  {
+   "code": "PAES.CIE.FIS.EJE.MECANICA",
+   "type": "axis",
+   "name": "Mecánica",
+   "parentCode": "PAES.CIE.FIS",
+   "marco": "paes",
+   "subjectCode": null,
+   "source": "Tabla de especificaciones CSCJ 2026",
+   "metadata": {
+    "variantesObservadas": [
+     "Mecánica"
+    ]
+   }
+  },
+  {
+   "code": "PAES.CIE.FIS.EJE.ENERGIA",
+   "type": "axis",
+   "name": "Energía y Tierra",
+   "parentCode": "PAES.CIE.FIS",
+   "marco": "paes",
+   "subjectCode": null,
+   "source": "Tabla de especificaciones CSCJ 2026",
+   "metadata": {
+    "variantesObservadas": [
+     "Energía - Tierra",
+     "Energía–Tierra"
+    ]
+   }
+  },
+  {
+   "code": "PAES.CIE.FIS.EJE.ELECTRICIDAD",
+   "type": "axis",
+   "name": "Electricidad",
+   "parentCode": "PAES.CIE.FIS",
+   "marco": "paes",
+   "subjectCode": null,
+   "source": "Tabla de especificaciones CSCJ 2026",
+   "metadata": {
+    "variantesObservadas": [
+     "Electricidad"
+    ]
+   }
+  },
+  {
+   "code": "PAES.CIE.QUI.EJE.ATOMICA",
+   "type": "axis",
+   "name": "Estructura atómica",
+   "parentCode": "PAES.CIE.QUI",
+   "marco": "paes",
+   "subjectCode": null,
+   "source": "Tabla de especificaciones CSCJ 2026",
+   "metadata": {
+    "variantesObservadas": [
+     "Estructura atómica"
+    ]
+   }
+  },
+  {
+   "code": "PAES.CIE.QUI.EJE.ORGANICA",
+   "type": "axis",
+   "name": "Química orgánica",
+   "parentCode": "PAES.CIE.QUI",
+   "marco": "paes",
+   "subjectCode": null,
+   "source": "Tabla de especificaciones CSCJ 2026",
+   "metadata": {
+    "variantesObservadas": [
+     "Química orgánica"
+    ]
+   }
+  },
+  {
+   "code": "PAES.CIE.QUI.EJE.REACCIONES",
+   "type": "axis",
+   "name": "Reacciones químicas y estequiometría",
+   "parentCode": "PAES.CIE.QUI",
+   "marco": "paes",
+   "subjectCode": null,
+   "source": "Tabla de especificaciones CSCJ 2026",
+   "metadata": {
+    "variantesObservadas": [
+     "Reacciones química y estequiometría",
+     "Reacciones químicas y estequiometría"
+    ]
+   }
+  }
+ ],
+ "mappings": []
+}
