@@ -1,3 +1,5 @@
+'use client';
+
 import type { DocumentContent } from '@soe/types';
 import { cn } from '@/lib/utils';
 import { getBlockDefinition, type DocumentAudience } from './block-registry';

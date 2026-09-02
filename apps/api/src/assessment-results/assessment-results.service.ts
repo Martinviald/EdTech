@@ -18,16 +18,12 @@ import {
   skillResults,
   studentEnrollments,
   students,
-  subjectClasses,
   taxonomyNodes,
-  teacherAssignments,
   withOrgContext,
 } from '@soe/db';
 import {
   CAPABILITY_UNAVAILABLE_CODE,
-  RESULTS_VIEWER_ROLES,
   capabilityUnavailableMessage,
-  userHasAnyRole,
   type AssessmentResultModel,
   type AssessmentResultsListResponse,
   type CalculateAssessmentResultsRequestDto,
@@ -40,7 +36,6 @@ import {
   type SkillResultModel,
   type SkillResultsListResponse,
   type StudentResultDetail,
-  type UserRole,
 } from '@soe/types';
 import type { JwtPayload } from '../auth/jwt-payload.types';
 import { InjectDb, type Database } from '../database/database.types';
@@ -51,20 +46,14 @@ import {
   persistAssessmentResults,
 } from './lib/persist-results';
 import { resolveEffectiveBands } from '../performance-bands/lib/resolve-effective-bands';
+import {
+  resolveClassGroupScope,
+  type ClassGroupScope,
+} from '../common/helpers/class-group-scope.helper';
 
 // Roles "administrativos" — ven todos los cursos de la org. Cualquier otro rol
 // con acceso (teacher, homeroom_teacher) ve sólo los cursos donde tiene
 // teacher_assignments activos.
-const ADMIN_LIKE_ROLES: readonly UserRole[] = [
-  'platform_admin',
-  'school_admin',
-  'academic_director',
-  'cycle_director',
-  'dept_head',
-  'coordinator',
-  'eval_coordinator',
-];
-
 /**
  * Construye la vista de banda para un resultado a partir de las columnas del
  * LEFT JOIN a performance_bands. `null` si el resultado no tiene banda asignada
@@ -575,29 +564,8 @@ export class AssessmentResultsService {
     tx: Database,
     user: JwtPayload,
     assessmentOrgId: string,
-  ): Promise<{ scopeAll: boolean; classGroupIds: string[] }> {
-    if (user.isPlatformAdmin) return { scopeAll: true, classGroupIds: [] };
-
-    const adminLike = userHasAnyRole(user.roles, ADMIN_LIKE_ROLES);
-    if (adminLike) return { scopeAll: true, classGroupIds: [] };
-
-    // Caller no es admin-like — debe tener algún rol de RESULTS_VIEWER_ROLES
-    // que no sea admin (teacher/homeroom_teacher). RolesGuard ya bloqueó si no.
-    if (!userHasAnyRole(user.roles, RESULTS_VIEWER_ROLES)) {
-      return { scopeAll: false, classGroupIds: [] };
-    }
-
-    const rows = await tx
-      .select({ classGroupId: subjectClasses.classGroupId })
-      .from(teacherAssignments)
-      .innerJoin(subjectClasses, eq(subjectClasses.id, teacherAssignments.subjectClassId))
-      .innerJoin(classGroups, eq(classGroups.id, subjectClasses.classGroupId))
-      .where(
-        and(eq(teacherAssignments.userId, user.userId), eq(classGroups.orgId, assessmentOrgId)),
-      );
-
-    const ids = Array.from(new Set(rows.map((r) => r.classGroupId)));
-    return { scopeAll: false, classGroupIds: ids };
+  ): Promise<ClassGroupScope> {
+    return resolveClassGroupScope(tx, user, assessmentOrgId);
   }
 
   /**
@@ -610,7 +578,7 @@ export class AssessmentResultsService {
   private async resolveAccessibleStudentIds(
     tx: Database,
     orgId: string,
-    scope: { scopeAll: boolean; classGroupIds: string[] },
+    scope: ClassGroupScope,
     classGroupId: string | undefined,
   ): Promise<string[] | null> {
     if (scope.scopeAll && !classGroupId) {

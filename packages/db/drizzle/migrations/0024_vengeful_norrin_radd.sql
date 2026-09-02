@@ -29,6 +29,7 @@ CREATE TABLE "sheet_print_runs" (
 	"layout_id" uuid NOT NULL,
 	"class_group_id" uuid,
 	"assessment_id" uuid,
+	"assessment_form_id" uuid,
 	"spare_count" integer DEFAULT 0 NOT NULL,
 	"sheet_count" integer NOT NULL,
 	"pdf_file_id" uuid,
@@ -101,6 +102,7 @@ ALTER TABLE "sheet_print_runs" ADD CONSTRAINT "sheet_print_runs_org_id_organizat
 ALTER TABLE "sheet_print_runs" ADD CONSTRAINT "sheet_print_runs_layout_id_sheet_layouts_id_fk" FOREIGN KEY ("layout_id") REFERENCES "public"."sheet_layouts"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "sheet_print_runs" ADD CONSTRAINT "sheet_print_runs_class_group_id_class_groups_id_fk" FOREIGN KEY ("class_group_id") REFERENCES "public"."class_groups"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "sheet_print_runs" ADD CONSTRAINT "sheet_print_runs_assessment_id_assessments_id_fk" FOREIGN KEY ("assessment_id") REFERENCES "public"."assessments"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "sheet_print_runs" ADD CONSTRAINT "sheet_print_runs_assessment_form_id_assessment_forms_id_fk" FOREIGN KEY ("assessment_form_id") REFERENCES "public"."assessment_forms"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "sheet_print_runs" ADD CONSTRAINT "sheet_print_runs_pdf_file_id_files_id_fk" FOREIGN KEY ("pdf_file_id") REFERENCES "public"."files"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "sheet_print_runs" ADD CONSTRAINT "sheet_print_runs_created_by_id_users_id_fk" FOREIGN KEY ("created_by_id") REFERENCES "public"."users"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "sheet_scan_batches" ADD CONSTRAINT "sheet_scan_batches_org_id_organizations_id_fk" FOREIGN KEY ("org_id") REFERENCES "public"."organizations"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
@@ -119,5 +121,6 @@ ALTER TABLE "sheet_scans" ADD CONSTRAINT "sheet_scans_resolved_student_id_studen
 ALTER TABLE "sheet_scans" ADD CONSTRAINT "sheet_scans_thumb_file_id_files_id_fk" FOREIGN KEY ("thumb_file_id") REFERENCES "public"."files"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 CREATE INDEX "printed_sheets_run_idx" ON "printed_sheets" USING btree ("org_id","print_run_id");--> statement-breakpoint
 CREATE INDEX "sheet_layouts_hash_idx" ON "sheet_layouts" USING btree ("spec_hash");--> statement-breakpoint
+CREATE INDEX "sheet_print_runs_form_idx" ON "sheet_print_runs" USING btree ("assessment_form_id");--> statement-breakpoint
 CREATE INDEX "sheet_scan_marks_review_idx" ON "sheet_scan_marks" USING btree ("org_id","scan_id","state");--> statement-breakpoint
 CREATE INDEX "sheet_scans_batch_idx" ON "sheet_scans" USING btree ("org_id","batch_id");

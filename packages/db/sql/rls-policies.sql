@@ -358,3 +358,27 @@ CREATE POLICY "sheet_scan_marks_tenant_isolation" ON "sheet_scan_marks"
   AS PERMISSIVE FOR ALL
   USING (org_id::text = current_setting('app.current_org_id', true))
   WITH CHECK (org_id::text = current_setting('app.current_org_id', true));
+
+-- ── Telemetría de uso de la plataforma — telemetry_events (org_id directo) ────
+-- Analítica de producto (qué features usa cada colegio). org_id NOT NULL: cada
+-- org ve sólo sus propios eventos. El TelemetryWriterService escribe siempre
+-- dentro de withOrgContext(orgId); los eventos de un actor sin org (platform_admin
+-- sin colegio activo) no se persisten (no se pueden atribuir a un tenant), igual
+-- criterio que mcp_access_logs. NO contiene PII (ver schema/telemetry-events.ts).
+ALTER TABLE "telemetry_events" ENABLE ROW LEVEL SECURITY;
+ALTER TABLE "telemetry_events" FORCE  ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "telemetry_events_tenant_isolation" ON "telemetry_events";
+CREATE POLICY "telemetry_events_tenant_isolation" ON "telemetry_events"
+  AS PERMISSIVE FOR ALL
+  USING (org_id::text = current_setting('app.current_org_id', true));
+
+-- ── Feedback in-app ──────────────────────────────────────────────────────────
+ALTER TABLE "feedback" ENABLE ROW LEVEL SECURITY;
+ALTER TABLE "feedback" FORCE  ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "feedback_tenant_isolation" ON "feedback";
+CREATE POLICY "feedback_tenant_isolation" ON "feedback"
+  AS PERMISSIVE FOR ALL
+  USING (org_id::text = current_setting('app.current_org_id', true))
+  WITH CHECK (org_id::text = current_setting('app.current_org_id', true));

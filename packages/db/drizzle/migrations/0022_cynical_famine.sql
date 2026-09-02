@@ -1,3 +1,0 @@
-ALTER TABLE "sheet_print_runs" ADD COLUMN "assessment_form_id" uuid;--> statement-breakpoint
-ALTER TABLE "sheet_print_runs" ADD CONSTRAINT "sheet_print_runs_assessment_form_id_assessment_forms_id_fk" FOREIGN KEY ("assessment_form_id") REFERENCES "public"."assessment_forms"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
-CREATE INDEX "sheet_print_runs_form_idx" ON "sheet_print_runs" USING btree ("assessment_form_id");

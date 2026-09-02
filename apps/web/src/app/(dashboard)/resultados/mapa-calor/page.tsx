@@ -46,7 +46,13 @@ export default async function MapaCalorPage({
   const params = await searchParams;
   const filters = parseDashboardFilters(params);
   const query = buildDashboardQuery(filters);
-  const isTeacher = userHasAnyRole(session.user.roles, TEACHER_ROLES);
+  // Vista de profesor por ROL ACTIVO, igual que el dashboard: la unión de roles
+  // marcaba `isTeacher` a un usuario admin+profesor aunque estuviera mirando la
+  // plataforma como directivo (docs/diseno-alcance-docente.md §3.3).
+  const isTeacher = userHasAnyRole(
+    session.user.activeRole ? [session.user.activeRole] : session.user.roles,
+    TEACHER_ROLES,
+  );
 
   return (
     <>

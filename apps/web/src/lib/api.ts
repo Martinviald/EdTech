@@ -3,6 +3,9 @@ import { cookies } from 'next/headers';
 import { ApiConnectionError, ApiRequestError } from './errors';
 import { reportServerError } from './observability';
 
+// El env se valida de forma perezosa (en cada llamada), no en el scope del
+// módulo: un `throw` al importar rompe `next build` (que recolecta page-data sin
+// estas variables) aunque en runtime siempre estén. Ver PR #149.
 function apiUrl(): string {
   const base = process.env.API_URL;
   if (!base) throw new Error('API_URL is required');

@@ -39,3 +39,39 @@ export const mcpAccessLogsRelations = relations(mcpAccessLogs, ({ one }) => ({
 
 export type McpAccessLog = typeof mcpAccessLogs.$inferSelect;
 export type NewMcpAccessLog = typeof mcpAccessLogs.$inferInsert;
+
+/**
+ * Organización activa del canal MCP, por usuario. Un usuario multi-org elige
+ * sobre qué colegio operan las tools; se persiste aquí (patrón espejo del
+ * switch-org de la app web). Una sola org activa por usuario (PK en `user_id`),
+ * compartida entre todos sus clientes MCP.
+ *
+ * NO lleva RLS: es preferencia del propio usuario, no dato de tenant. Se
+ * lee/escribe SIEMPRE filtrando por el `user_id` autenticado (sale del token
+ * validado, nunca del input), así que no hay riesgo de leak cross-tenant. La
+ * membresía en la org se RE-VALIDA en cada request contra `org_memberships`.
+ */
+export const mcpUserActiveOrg = pgTable('mcp_user_active_org', {
+  userId: uuid('user_id')
+    .primaryKey()
+    .references(() => users.id, { onDelete: 'cascade' }),
+  orgId: uuid('org_id')
+    .notNull()
+    .references(() => organizations.id, { onDelete: 'cascade' }),
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+  updatedAt: timestamp('updated_at').defaultNow().notNull(),
+});
+
+export const mcpUserActiveOrgRelations = relations(mcpUserActiveOrg, ({ one }) => ({
+  user: one(users, {
+    fields: [mcpUserActiveOrg.userId],
+    references: [users.id],
+  }),
+  org: one(organizations, {
+    fields: [mcpUserActiveOrg.orgId],
+    references: [organizations.id],
+  }),
+}));
+
+export type McpUserActiveOrg = typeof mcpUserActiveOrg.$inferSelect;
+export type NewMcpUserActiveOrg = typeof mcpUserActiveOrg.$inferInsert;

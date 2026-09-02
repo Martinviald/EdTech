@@ -17,27 +17,19 @@ import {
 } from '@soe/db';
 import {
   INSTRUMENT_APPLICATION_PERIOD_LABELS,
-  RESULTS_VIEWER_ROLES,
-  userHasAnyRole,
   type DataGranularity,
   type OfficialReportVariant,
   type UserRole,
 } from '@soe/types';
 import type { JwtPayload } from '../auth/jwt-payload.types';
 import { InjectDb, type Database } from '../database/database.types';
+import {
+  resolveClassGroupScope,
+  type ClassGroupScope,
+} from '../common/helpers/class-group-scope.helper';
 
 // Roles administrativos: ven toda la org. Idéntico a los demás services de
 // resultados (AssessmentResults / Analytics / ItemAnalysis / AssessmentReport).
-const ADMIN_LIKE_ROLES: readonly UserRole[] = [
-  'platform_admin',
-  'school_admin',
-  'academic_director',
-  'cycle_director',
-  'dept_head',
-  'coordinator',
-  'eval_coordinator',
-];
-
 // Palabras clave de un momento "diagnóstico" (para la variante de presentación).
 // Genérico por semántica del período, no hardcodea instrumento.
 const DIAGNOSTIC_PERIOD_KEYS = ['diagn', 'inicial', 'initial'];
@@ -51,7 +43,7 @@ export const DEFAULT_REFLECTION_PROMPTS: readonly string[] = [
   '¿Qué prácticas de aula funcionaron bien y conviene mantener o replicar?',
 ];
 
-export type ReportScope = { scopeAll: boolean; classGroupIds: string[] };
+export type ReportScope = ClassGroupScope;
 
 export type ReportAssessmentInfo = {
   id: string;
@@ -101,21 +93,7 @@ export class ReportSupportService {
     user: JwtPayload,
     orgId: string,
   ): Promise<ReportScope> {
-    if (user.isPlatformAdmin) return { scopeAll: true, classGroupIds: [] };
-    if (userHasAnyRole(user.roles, ADMIN_LIKE_ROLES)) {
-      return { scopeAll: true, classGroupIds: [] };
-    }
-    if (!userHasAnyRole(user.roles, RESULTS_VIEWER_ROLES)) {
-      return { scopeAll: false, classGroupIds: [] };
-    }
-    const rows = await tx
-      .select({ classGroupId: subjectClasses.classGroupId })
-      .from(teacherAssignments)
-      .innerJoin(subjectClasses, eq(subjectClasses.id, teacherAssignments.subjectClassId))
-      .innerJoin(classGroups, eq(classGroups.id, subjectClasses.classGroupId))
-      .where(and(eq(teacherAssignments.userId, user.userId), eq(classGroups.orgId, orgId)));
-    const ids = Array.from(new Set(rows.map((r) => r.classGroupId)));
-    return { scopeAll: false, classGroupIds: ids };
+    return resolveClassGroupScope(tx, user, orgId);
   }
 
   /**

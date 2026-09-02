@@ -63,7 +63,9 @@ import {
 import { loadCohortAchievementByAssessment } from '../common/helpers/cohort-item-stats.helper';
 import {
   ADMIN_LIKE_ROLES,
+  buildAssessmentInScopeExists,
   resolveClassGroupScope,
+  type ClassGroupScope,
 } from '../common/helpers/class-group-scope.helper';
 import { InjectDb, type Database } from '../database/database.types';
 import {
@@ -82,7 +84,8 @@ function toBandView(b: PerformanceBandInput): PerformanceBandView {
 // of truth en @soe/types (no duplicar literales 0.4/0.7/0.85).
 const DEFAULT_THRESHOLDS = DEFAULT_PERFORMANCE_THRESHOLDS;
 
-type Scope = { scopeAll: boolean; classGroupIds: string[] };
+/** Alias local del alcance canónico (`common/helpers/class-group-scope.helper`). */
+type Scope = ClassGroupScope;
 
 /**
  * Agregado por nodo, ya recombinado sobre el scope y antes de clasificar por
@@ -159,7 +162,13 @@ export class DashboardsService {
 
       const cohortClassGroupIds = await this.resolveScopedClassGroupIds(tx, orgId, scope, query);
 
-      const scoped = await this.resolveScopedAssessments(tx, orgId, query, cohortClassGroupIds);
+      const scoped = await this.resolveScopedAssessments(
+        tx,
+        orgId,
+        query,
+        cohortClassGroupIds,
+        scope,
+      );
       const assessmentIds = scoped.ids;
       if (assessmentIds.length === 0) {
         return { ...empty, scope: isTeacherScope ? 'teacher' : 'org' };
@@ -469,7 +478,7 @@ export class DashboardsService {
 
       const classGroupIds = await this.resolveScopedClassGroupIds(tx, orgId, scope, query);
 
-      const scoped = await this.resolveScopedAssessments(tx, orgId, query, classGroupIds);
+      const scoped = await this.resolveScopedAssessments(tx, orgId, query, classGroupIds, scope);
       const assessmentIds = scoped.ids;
       if (assessmentIds.length === 0) {
         return {
@@ -656,7 +665,13 @@ export class DashboardsService {
       const classGroupIds = perStudent ? null : scopedClassGroupIds;
       if (classGroupIds !== null && classGroupIds.length === 0) return empty;
 
-      const scoped = await this.resolveScopedAssessments(tx, orgId, query, scopedClassGroupIds);
+      const scoped = await this.resolveScopedAssessments(
+        tx,
+        orgId,
+        query,
+        scopedClassGroupIds,
+        scope,
+      );
       const assessmentIds = scoped.ids;
       if (assessmentIds.length === 0) return empty;
 
@@ -897,6 +912,7 @@ export class DashboardsService {
         orgId,
         query,
         scopedClassGroupIds,
+        scope,
       );
       if (assessmentIds.length === 0) return empty;
 
@@ -1249,7 +1265,13 @@ export class DashboardsService {
       // passing_grade de la escala aplicable (default 4.0).
       const passingGrade = await this.resolvePassingGrade(tx, orgId, query, courseIds);
 
-      const assessmentIds = await this.resolveScopedAssessmentIds(tx, orgId, query, courseIds);
+      const assessmentIds = await this.resolveScopedAssessmentIds(
+        tx,
+        orgId,
+        query,
+        courseIds,
+        scope,
+      );
 
       const courses: TeacherCourseKpiModel[] = [];
       for (const c of courseRows) {
@@ -1356,7 +1378,7 @@ export class DashboardsService {
       }
 
       const classGroupIds = await this.resolveScopedClassGroupIds(tx, orgId, scope, query);
-      const scoped = await this.resolveScopedAssessments(tx, orgId, query, classGroupIds);
+      const scoped = await this.resolveScopedAssessments(tx, orgId, query, classGroupIds, scope);
       return {
         orgId,
         isTeacherScope,
@@ -1516,8 +1538,9 @@ export class DashboardsService {
     orgId: string,
     query: DashboardFiltersQueryDto,
     classGroupIds: string[] | null,
+    scope?: ClassGroupScope,
   ): Promise<string[]> {
-    return (await this.resolveScopedAssessments(tx, orgId, query, classGroupIds)).ids;
+    return (await this.resolveScopedAssessments(tx, orgId, query, classGroupIds, scope)).ids;
   }
 
   /**
@@ -1538,11 +1561,22 @@ export class DashboardsService {
     orgId: string,
     query: DashboardFiltersQueryDto,
     classGroupIds: string[] | null,
+    scope?: ClassGroupScope,
   ): Promise<ScopedAssessments> {
     if (classGroupIds !== null && classGroupIds.length === 0) return { ids: [], refs: [] };
 
     const conditions = [eq(assessments.orgId, orgId), isNull(instruments.deletedAt)];
     if (classGroupIds !== null) conditions.push(this.inClassGroups(classGroupIds));
+    // Alcance docente en su segunda dimensión: la ASIGNATURA. El filtro por
+    // curso de arriba no basta — sin esto, el profesor de Matemática de 2°A ve
+    // también Lenguaje de 2°A (ver docs/diseno-alcance-docente.md §3).
+    if (scope) {
+      const inScope = buildAssessmentInScopeExists(scope, {
+        assessmentId: assessments.id,
+        subjectId: instruments.subjectId,
+      });
+      if (inScope) conditions.push(inScope);
+    }
     if (query.assessmentId) conditions.push(eq(assessments.id, query.assessmentId));
     if (query.instrumentId) conditions.push(eq(assessments.instrumentId, query.instrumentId));
     if (query.instrumentType?.length) {
@@ -1696,7 +1730,11 @@ export class DashboardsService {
     for (const r of rows) {
       if (r.percentage == null) continue; // sin porcentaje → sin nivel derivable
       const pct = Number(r.percentage) / 100;
-      const level = this.levelForResult(pct, bandsByInstrument.get(r.instrumentId), scaleThresholds);
+      const level = this.levelForResult(
+        pct,
+        bandsByInstrument.get(r.instrumentId),
+        scaleThresholds,
+      );
       countByLevel.set(level, (countByLevel.get(level) ?? 0) + 1);
       total += 1;
     }
@@ -1749,7 +1787,13 @@ export class DashboardsService {
     studentIds: string[] | null,
     classGroupIds: string[] | null,
   ): Promise<{ data: DashboardAssessmentSummary[]; total: number }> {
-    const assessmentIds = await this.resolveScopedAssessmentIds(tx, orgId, query, classGroupIds);
+    const assessmentIds = await this.resolveScopedAssessmentIds(
+      tx,
+      orgId,
+      query,
+      classGroupIds,
+      scope,
+    );
     if (assessmentIds.length === 0) return EMPTY_RECENT_ASSESSMENTS;
 
     // Teacher scoping: si el caller está acotado a un set de alumnos

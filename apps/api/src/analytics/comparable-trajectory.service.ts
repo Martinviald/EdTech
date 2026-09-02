@@ -26,7 +26,10 @@ import {
   type PerformanceBandView,
 } from '@soe/types';
 import type { JwtPayload } from '../auth/jwt-payload.types';
-import { resolveClassGroupScope } from '../common/helpers/class-group-scope.helper';
+import {
+  resolveClassGroupScope,
+  type ClassGroupScope,
+} from '../common/helpers/class-group-scope.helper';
 import {
   ComparableUnitAssembler,
   type BaselineCandidate,
@@ -490,7 +493,7 @@ export class ComparableTrajectoryService {
   private async resolveClassGroupIds(
     tx: Database,
     orgId: string,
-    scope: { scopeAll: boolean; classGroupIds: string[] },
+    scope: ClassGroupScope,
     classGroupId: string | undefined,
   ): Promise<string[] | null> {
     if (!classGroupId) {

@@ -1,6 +1,6 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
-import { APP_FILTER, APP_GUARD } from '@nestjs/core';
+import { APP_FILTER, APP_GUARD, APP_INTERCEPTOR } from '@nestjs/core';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { DatabaseModule } from './database/database.module';
@@ -47,8 +47,11 @@ import { AssistantModule } from './assistant/assistant.module';
 import { OfficialReportsModule } from './official-reports/official-reports.module';
 import { OfficialReportImportModule } from './official-report-import/official-report-import.module';
 import { DocumentsModule } from './documents/documents.module';
+import { FeedbackModule } from './feedback/feedback.module';
 import { McpModule } from './mcp/mcp.module';
 import { SheetScanningModule } from './sheet-scanning/sheet-scanning.module';
+import { TelemetryModule } from './telemetry/telemetry.module';
+import { TelemetryInterceptor } from './telemetry/telemetry.interceptor';
 
 @Module({
   imports: [
@@ -113,9 +116,12 @@ import { SheetScanningModule } from './sheet-scanning/sheet-scanning.module';
     // OfficialReportsModule, que GENERA el informe desde nuestros datos.
     OfficialReportImportModule,
     DocumentsModule,
+    FeedbackModule,
     McpModule,
     // ── E22: lector de marcas (hojas de respuesta propias: layout, impresión, OMR, revisión) ──
     SheetScanningModule,
+    // ── Telemetría de uso (analítica de producto): ingesta + agregación ──
+    TelemetryModule,
   ],
   controllers: [AppController],
   providers: [
@@ -124,6 +130,14 @@ import { SheetScanningModule } from './sheet-scanning/sheet-scanning.module';
       // AuthGuard aplicado globalmente: toda ruta requiere JWT salvo @Public().
       provide: APP_GUARD,
       useClass: AuthGuard,
+    },
+    {
+      // Captura pasiva de cada request autenticada como evento `api.request`
+      // (endpoint, latencia, status). Gateable por env (TELEMETRY_ENABLED) y con
+      // muestreo (TELEMETRY_API_SAMPLE_RATE). Depende de TelemetryService, que
+      // TelemetryModule exporta.
+      provide: APP_INTERCEPTOR,
+      useClass: TelemetryInterceptor,
     },
     {
       // Filtro global: los HttpException (4xx/negocio) pasan tal cual; los
