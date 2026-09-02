@@ -39,7 +39,8 @@ export default async function DashboardLayout({ children }: { children: React.Re
         <Suspense fallback={null}>
           <ListSearchMemory />
         </Suspense>
-        <div className="flex h-screen bg-background">
+        {/* `data-app-shell` marca la raíz que captura el widget de comentarios. */}
+        <div data-app-shell className="flex h-screen bg-background">
           <SkipLink />
           <Sidebar roles={session.user.roles} />
           <div className="flex flex-1 flex-col overflow-hidden">
