@@ -62,7 +62,11 @@ import {
 import type { JwtPayload } from '../auth/jwt-payload.types';
 import { loadCohortAchievementByAssessment } from '../common/helpers/cohort-item-stats.helper';
 import { InjectDb, type Database } from '../database/database.types';
-import { resolveClassGroupScope } from '../common/helpers/class-group-scope.helper';
+import {
+  buildAssessmentScopeCondition,
+  resolveClassGroupScope,
+  type ClassGroupScope,
+} from '../common/helpers/class-group-scope.helper';
 
 // Roles "administrativos" — ven todos los cursos de la org. Cualquier otro rol
 // con acceso (teacher, homeroom_teacher) ve sólo los cursos donde tiene
@@ -72,7 +76,7 @@ import { resolveClassGroupScope } from '../common/helpers/class-group-scope.help
 // ningún instrumento — todo se deriva por el `type` del nodo.
 const CONTENT_NODE_TYPES: readonly string[] = ['content', 'learning_objective'];
 
-type ScopeResult = { scopeAll: boolean; classGroupIds: string[] };
+type ScopeResult = ClassGroupScope;
 
 /** Forma mínima del contenido JSONB de un ítem de selección múltiple. */
 interface ItemAlternative {
@@ -148,7 +152,14 @@ export class ItemAnalysisService {
         conditions.push(eq(classGroups.academicYearId, query.academicYearId));
       }
       if (!scope.scopeAll) {
-        conditions.push(inArray(assessmentCourseAssignments.classGroupId, scope.classGroupIds));
+        // Alcance en sus dos dimensiones: el curso ya está en el join, la
+        // asignatura viene del instrumento. Los cursos de jefatura pasan
+        // completos (docs/diseno-alcance-docente.md §3).
+        const inScope = buildAssessmentScopeCondition(scope, {
+          classGroupId: assessmentCourseAssignments.classGroupId,
+          subjectId: instruments.subjectId,
+        });
+        if (inScope) conditions.push(inScope);
       }
 
       // El join a course_assignments multiplica por curso; group by colapsa a una
@@ -1405,7 +1416,7 @@ export class ItemAnalysisService {
     tx: Database,
     user: JwtPayload,
     orgId: string,
-  ): Promise<{ scopeAll: boolean; classGroupIds: string[] }> {
+  ): Promise<ClassGroupScope> {
     return resolveClassGroupScope(tx, user, orgId);
   }
 

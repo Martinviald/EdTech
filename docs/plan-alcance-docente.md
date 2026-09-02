@@ -1,5 +1,9 @@
 # Plan de desarrollo — Alcance de datos por docente
 
+> **Estado: ejecutado** en la rama `feat/alcance-docente`. Cada fase quedó en su
+> propio commit; las desviaciones respecto de lo planificado están anotadas al
+> final, en «Desviaciones de ejecución».
+>
 > Ejecución del diseño en [`diseno-alcance-docente.md`](./diseno-alcance-docente.md).
 > Cinco fases con orden, entregables, archivos y criterio de cierre.
 > Cada fase es un commit atómico o una PR propia; ninguna mezcla refactor con
@@ -190,3 +194,41 @@ Prueba manual de cierre, sobre la demo con la planta cargada: entrar como un
 profesor de una sola asignatura, como un profesor jefe y como un usuario de rol
 mixto, y confirmar los tres alcances contra los criterios de aceptación del
 diseño.
+
+---
+
+## Desviaciones de ejecución
+
+Lo que cambió respecto del plan, y por qué.
+
+1. **Dónde vive la jefatura de curso.** El plan daba por hecho que el rol
+   `homeroom_teacher` bastaba para derivar el acceso transversal. No bastaba: el
+   rol no identifica el curso. Se resolvió con
+   `org_memberships.scope.classGroupIds` (§3.1.1 del diseño), sin migración. El
+   importador escribe ese scope y lo actualiza en cada corrida, para que una
+   jefatura del año pasado no quede vigente.
+
+2. **`import_jobs` no registra la corrida del importador.** El enum
+   `import_job_type` no tiene un valor para planta docente y agregarlo exige una
+   migración. Se omitió el registro antes que reusar un tipo que miente
+   (`student_roster`). Queda pendiente si se quiere trazabilidad de la carga.
+
+3. **Electivos de III°/IV° fuera del alcance.** 33 filas de la planta usan
+   `elect` o `TALLER` como sección: son grupos que cruzan las secciones del
+   nivel y no tienen `class_group`, así que no pueden modelarse como
+   `subject_class`. Se clasifican como descarte estructural esperado. Por eso el
+   total final es de 200 asignaciones y 44 docentes, no las 243/47 estimadas al
+   leer el Excel.
+
+4. **`resolvePassingGrade` no recibe el alcance.** Resuelve la escala de
+   calificación aplicable, no datos de alumnos; se dejó sin acotar a propósito.
+
+5. **Dos specs preexistentes se tocaron en la Fase 1**, no en la 0:
+   `report-support.service.spec.ts` (el tipo del alcance creció con campos
+   requeridos) y `student-comparisons.service.spec.ts` (su fixture de matrícula
+   debía traer `classGroupId` para el filtro por asignatura). Son ajustes de
+   fixture a la semántica nueva, no cambios de aserción.
+
+6. **Los scripts de la Fase 3 quedaron dentro del commit de la Fase 0.** El
+   `git add -A` los arrastró por ser archivos nuevos. No afecta al contenido,
+   pero rompe la correspondencia una-fase-un-commit.

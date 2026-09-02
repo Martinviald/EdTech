@@ -13,21 +13,25 @@
  *  - `scopeAll = true`  → admin-like / platform_admin: ve todos los cursos de la org.
  *  - `scopeAll = false` → profesor puro: ve sólo los `class_groups` donde tiene
  *    una asignación activa (`teacher_assignments`).
- * Se decide por la UNIÓN de roles del JWT (`user.roles`): un usuario
- * teacher + academic_director ve toda la org (admin-like gana).
+ * Se decide por el ROL ACTIVO del JWT (`user.activeRole`), no por la unión:
+ * un usuario teacher + academic_director ve toda la org mientras su rol activo
+ * sea el directivo, y sólo sus cursos cuando cambia a profesor. La unión sigue
+ * gobernando la AUTORIZACIÓN de endpoints (`RolesGuard`).
  */
 import { ForbiddenException } from '@nestjs/common';
-import { and, eq, inArray, isNull } from 'drizzle-orm';
+import { and, eq, inArray, isNull, or, sql, type SQL } from 'drizzle-orm';
 import {
   assessmentCourseAssignments,
   classGroups,
+  orgMemberships,
   studentEnrollments,
   students,
   subjectClasses,
   teacherAssignments,
 } from '@soe/db';
-import { RESULTS_VIEWER_ROLES, userHasAnyRole, type UserRole } from '@soe/types';
+import { RESULTS_VIEWER_ROLES, userHasAnyRole, userHasRole, type UserRole } from '@soe/types';
 import type { JwtPayload } from '../../auth/jwt-payload.types';
+import type { AnyColumn } from 'drizzle-orm';
 import type { Database } from '../../database/database.types';
 
 /**
@@ -45,7 +49,33 @@ export const ADMIN_LIKE_ROLES: readonly UserRole[] = [
   'eval_coordinator',
 ];
 
-export type ClassGroupScope = { scopeAll: boolean; classGroupIds: string[] };
+/** Par (curso, asignatura) donde el usuario dicta. */
+export type ScopePair = { classGroupId: string; subjectId: string };
+
+export type ClassGroupScope = {
+  scopeAll: boolean;
+  /**
+   * Unión de los cursos alcanzables (dicta o es jefe). Alcance por CURSO: se
+   * usa para la visibilidad de personas (un alumno es visible si está en un
+   * curso del alcance) y para las queries que aún no distinguen asignatura.
+   */
+  classGroupIds: string[];
+  /** Pares (curso, asignatura) donde dicta. Vacío para admin-like. */
+  pairs: ScopePair[];
+  /**
+   * Cursos donde es profesor jefe: acceso TRANSVERSAL a todas sus asignaturas.
+   * Se leen de `org_memberships.scope.classGroupIds` del membership
+   * `homeroom_teacher` (el rol por sí solo no dice de qué curso es jefe).
+   */
+  homeroomClassGroupIds: string[];
+};
+
+/** Campos vacíos del alcance. Función (no constante) para no compartir arreglos. */
+const emptyScopeFields = (): Omit<ClassGroupScope, 'scopeAll'> => ({
+  classGroupIds: [],
+  pairs: [],
+  homeroomClassGroupIds: [],
+});
 
 /**
  * Resuelve el alcance por curso del caller dentro de una org. Corre bajo
@@ -56,26 +86,91 @@ export async function resolveClassGroupScope(
   user: JwtPayload,
   orgId: string,
 ): Promise<ClassGroupScope> {
-  if (user.isPlatformAdmin) return { scopeAll: true, classGroupIds: [] };
+  if (user.isPlatformAdmin) return { scopeAll: true, ...emptyScopeFields() };
 
-  const adminLike = userHasAnyRole(user.roles, ADMIN_LIKE_ROLES);
-  if (adminLike) return { scopeAll: true, classGroupIds: [] };
+  // Fase 4: el ALCANCE se decide por el rol ACTIVO, no por la unión de roles.
+  //
+  // `RolesGuard` sigue autorizando por unión (quién ENTRA al endpoint); esto
+  // responde la otra pregunta, qué FILAS ve. Son dos cosas distintas y conviene
+  // que quede escrito: un usuario teacher + dept_head entra a las mismas
+  // pantallas siempre, pero con rol activo `teacher` ve sólo sus cursos y al
+  // cambiar a `dept_head` ve la organización. Sin esto el selector de rol no
+  // cambia nada y no se puede mostrar a un directivo lo que ve un profesor.
+  const effectiveRoles: UserRole[] = user.activeRole ? [user.activeRole] : user.roles;
+
+  if (userHasAnyRole(effectiveRoles, ADMIN_LIKE_ROLES)) {
+    return { scopeAll: true, ...emptyScopeFields() };
+  }
 
   // Caller no admin-like — debe tener algún rol de RESULTS_VIEWER_ROLES que no
   // sea admin (teacher/homeroom_teacher). El RolesGuard ya bloqueó si no.
-  if (!userHasAnyRole(user.roles, RESULTS_VIEWER_ROLES)) {
-    return { scopeAll: false, classGroupIds: [] };
+  if (!userHasAnyRole(effectiveRoles, RESULTS_VIEWER_ROLES)) {
+    return { scopeAll: false, ...emptyScopeFields() };
   }
 
   const rows = await tx
-    .select({ classGroupId: subjectClasses.classGroupId })
+    .select({
+      classGroupId: subjectClasses.classGroupId,
+      subjectId: subjectClasses.subjectId,
+    })
     .from(teacherAssignments)
     .innerJoin(subjectClasses, eq(subjectClasses.id, teacherAssignments.subjectClassId))
     .innerJoin(classGroups, eq(classGroups.id, subjectClasses.classGroupId))
     .where(and(eq(teacherAssignments.userId, user.userId), eq(classGroups.orgId, orgId)));
 
-  const ids = Array.from(new Set(rows.map((r) => r.classGroupId)));
-  return { scopeAll: false, classGroupIds: ids };
+  const pairs: ScopePair[] = [];
+  const seenPair = new Set<string>();
+  for (const r of rows) {
+    const key = `${r.classGroupId}|${r.subjectId}`;
+    if (seenPair.has(key)) continue;
+    seenPair.add(key);
+    pairs.push({ classGroupId: r.classGroupId, subjectId: r.subjectId });
+  }
+
+  const homeroomClassGroupIds = await resolveHomeroomClassGroupIds(tx, user, orgId);
+
+  const classGroupIds = Array.from(
+    new Set([...pairs.map((p) => p.classGroupId), ...homeroomClassGroupIds]),
+  );
+  return { scopeAll: false, classGroupIds, pairs, homeroomClassGroupIds };
+}
+
+/**
+ * Cursos donde el usuario es profesor jefe. El rol `homeroom_teacher` por sí
+ * solo no identifica el curso: la jefatura concreta vive en
+ * `org_memberships.scope.classGroupIds` (campo declarado en el schema para
+ * acotar un membership). Se valida contra `class_groups` de la org para no
+ * confiar en un JSONB con ids de otro tenant.
+ */
+async function resolveHomeroomClassGroupIds(
+  tx: Database,
+  user: JwtPayload,
+  orgId: string,
+): Promise<string[]> {
+  // La jefatura acompaña al docente aunque su rol activo sea `teacher`: son dos
+  // facetas del mismo trabajo de aula, no dos niveles de acceso.
+  if (!userHasRole(user.roles, 'homeroom_teacher')) return [];
+
+  const memberships = await tx
+    .select({ scope: orgMemberships.scope })
+    .from(orgMemberships)
+    .where(
+      and(
+        eq(orgMemberships.userId, user.userId),
+        eq(orgMemberships.orgId, orgId),
+        eq(orgMemberships.role, 'homeroom_teacher'),
+        eq(orgMemberships.isActive, true),
+      ),
+    );
+
+  const declared = Array.from(new Set(memberships.flatMap((m) => m.scope?.classGroupIds ?? [])));
+  if (declared.length === 0) return [];
+
+  const valid = await tx
+    .select({ id: classGroups.id })
+    .from(classGroups)
+    .where(and(eq(classGroups.orgId, orgId), inArray(classGroups.id, declared)));
+  return valid.map((c) => c.id);
 }
 
 /**
@@ -158,4 +253,129 @@ export async function assertTargetInScope(
 
   if (courses.length === 0) throw denied;
   if (!courses.every((c) => isClassGroupInScope(scope, c.classGroupId))) throw denied;
+}
+
+/**
+ * Condición SQL que acota una query de evaluaciones al alcance del caller, en
+ * sus DOS dimensiones (curso y asignatura).
+ *
+ * `assessments` no tiene asignatura ni curso propios: el curso llega por
+ * `assessment_course_assignments` y la asignatura por `instruments.subject_id`.
+ * Por eso la condición se arma sobre las columnas que la query ya tiene
+ * joineadas y se pasa como parámetro — el helper no impone la forma del join.
+ *
+ * Semántica:
+ *  - `scopeAll` → sin condición (`undefined`, se omite del `and()`).
+ *  - Curso de jefatura → TODAS sus asignaturas (mirada transversal del jefe).
+ *  - Resto → sólo los pares (curso, asignatura) donde dicta.
+ *  - Alcance vacío → `false` (ninguna fila), nunca "sin filtro".
+ */
+export function buildAssessmentScopeCondition(
+  scope: ClassGroupScope,
+  columns: { classGroupId: AnyColumn; subjectId: AnyColumn },
+): SQL | undefined {
+  if (scope.scopeAll) return undefined;
+
+  const terms: SQL[] = [];
+  if (scope.homeroomClassGroupIds.length > 0) {
+    terms.push(inArray(columns.classGroupId, scope.homeroomClassGroupIds));
+  }
+  for (const pair of scope.pairs) {
+    // Un par del profesor jefe ya está cubierto por el término transversal.
+    if (scope.homeroomClassGroupIds.includes(pair.classGroupId)) continue;
+    terms.push(
+      and(
+        eq(columns.classGroupId, pair.classGroupId),
+        eq(columns.subjectId, pair.subjectId),
+      ) as SQL,
+    );
+  }
+
+  if (terms.length === 0) return sql`false`;
+  return terms.length === 1 ? terms[0] : (or(...terms) as SQL);
+}
+
+/**
+ * ¿La evaluación cae dentro del alcance? Variante en memoria de
+ * `buildAssessmentScopeCondition`, para cuando ya se cargaron los cursos de la
+ * evaluación y su asignatura (p. ej. antes de servir un recurso por id).
+ */
+export function isAssessmentInScope(
+  scope: ClassGroupScope,
+  assessment: { classGroupIds: string[]; subjectId: string | null },
+): boolean {
+  if (scope.scopeAll) return true;
+  if (assessment.classGroupIds.length === 0) return false;
+
+  return assessment.classGroupIds.some((cg) => {
+    if (scope.homeroomClassGroupIds.includes(cg)) return true;
+    if (!assessment.subjectId) return false;
+    return scope.pairs.some((p) => p.classGroupId === cg && p.subjectId === assessment.subjectId);
+  });
+}
+
+/**
+ * Predicado correlacionado "esta evaluación está en el alcance del caller",
+ * listo para usarse en el `where` de una query sobre `assessments` que ya tenga
+ * `instruments` joineado.
+ *
+ * Se resuelve como un `EXISTS` sobre `assessment_course_assignments`: una
+ * evaluación entra si ALGUNO de sus cursos cae en el alcance (con la asignatura
+ * del instrumento, salvo en los cursos de jefatura, que son transversales).
+ *
+ * A diferencia del filtro por curso a secas, aquí NO se deja pasar la
+ * evaluación sin cursos asignados: sin curso no se puede afirmar que sea del
+ * profesor. Para un caller `scopeAll` devuelve `undefined` y el `and()` la omite.
+ */
+export function buildAssessmentInScopeExists(
+  scope: ClassGroupScope,
+  columns: { assessmentId: AnyColumn; subjectId: AnyColumn },
+): SQL | undefined {
+  if (scope.scopeAll) return undefined;
+
+  const condition = buildAssessmentScopeCondition(scope, {
+    classGroupId: assessmentCourseAssignments.classGroupId,
+    subjectId: columns.subjectId,
+  });
+  if (condition === undefined) return undefined;
+
+  return sql`exists (select 1 from ${assessmentCourseAssignments} where ${eq(
+    assessmentCourseAssignments.assessmentId,
+    columns.assessmentId,
+  )} and ${condition})`;
+}
+
+/**
+ * Asignaturas que el caller puede ver DE UN ALUMNO concreto.
+ *
+ * La visibilidad de la persona ya se resolvió por curso
+ * (`isStudentVisibleInScope`); esto responde la segunda pregunta: de ese alumno,
+ * ¿qué asignaturas? Es la regla de jefatura aplicada a las vistas centradas en
+ * el alumno (vista 360, panorama, señales):
+ *  - `scopeAll`, o el alumno está en un curso de JEFATURA del caller → `null`
+ *    (sin filtro: mirada transversal, que es justamente lo que necesita un
+ *    profesor jefe para orientar).
+ *  - Profesor de asignatura → sólo las asignaturas que dicta en los cursos donde
+ *    ese alumno está matriculado.
+ *
+ * Corre bajo `withOrgContext` (usa `tx`).
+ */
+export async function resolveStudentSubjectFilter(
+  tx: Database,
+  scope: ClassGroupScope,
+  studentId: string,
+): Promise<Set<string> | null> {
+  if (scope.scopeAll) return null;
+
+  const enrollments = await tx
+    .select({ classGroupId: studentEnrollments.classGroupId })
+    .from(studentEnrollments)
+    .where(eq(studentEnrollments.studentId, studentId));
+  const studentCourses = new Set(enrollments.map((e) => e.classGroupId));
+
+  if (scope.homeroomClassGroupIds.some((cg) => studentCourses.has(cg))) return null;
+
+  return new Set(
+    scope.pairs.filter((p) => studentCourses.has(p.classGroupId)).map((p) => p.subjectId),
+  );
 }

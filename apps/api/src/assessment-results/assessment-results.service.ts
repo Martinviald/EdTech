@@ -51,7 +51,10 @@ import {
   persistAssessmentResults,
 } from './lib/persist-results';
 import { resolveEffectiveBands } from '../performance-bands/lib/resolve-effective-bands';
-import { resolveClassGroupScope } from '../common/helpers/class-group-scope.helper';
+import {
+  resolveClassGroupScope,
+  type ClassGroupScope,
+} from '../common/helpers/class-group-scope.helper';
 
 // Roles "administrativos" — ven todos los cursos de la org. Cualquier otro rol
 // con acceso (teacher, homeroom_teacher) ve sólo los cursos donde tiene
@@ -566,7 +569,7 @@ export class AssessmentResultsService {
     tx: Database,
     user: JwtPayload,
     assessmentOrgId: string,
-  ): Promise<{ scopeAll: boolean; classGroupIds: string[] }> {
+  ): Promise<ClassGroupScope> {
     return resolveClassGroupScope(tx, user, assessmentOrgId);
   }
 
@@ -580,7 +583,7 @@ export class AssessmentResultsService {
   private async resolveAccessibleStudentIds(
     tx: Database,
     orgId: string,
-    scope: { scopeAll: boolean; classGroupIds: string[] },
+    scope: ClassGroupScope,
     classGroupId: string | undefined,
   ): Promise<string[] | null> {
     if (scope.scopeAll && !classGroupId) {

@@ -10,6 +10,7 @@
 import type { Database } from '@soe/db';
 import type { JwtPayload } from '../../auth/jwt-payload.types';
 import type { UserRole } from '@soe/types';
+import type { ClassGroupScope } from './class-group-scope.helper';
 
 export function makeScopedUser(overrides: Partial<JwtPayload> = {}): JwtPayload {
   const role: UserRole = overrides.activeRole ?? overrides.role ?? 'teacher';
@@ -23,6 +24,25 @@ export function makeScopedUser(overrides: Partial<JwtPayload> = {}): JwtPayload 
     activeRole: role,
     role,
     ...overrides,
+  };
+}
+
+/** Construye un `ClassGroupScope` completo desde lo mínimo que el test declara. */
+export function makeScope(partial: {
+  scopeAll?: boolean;
+  classGroupIds?: string[];
+  pairs?: Array<{ classGroupId: string; subjectId: string }>;
+  homeroomClassGroupIds?: string[];
+}): ClassGroupScope {
+  const pairs = partial.pairs ?? [];
+  const homeroomClassGroupIds = partial.homeroomClassGroupIds ?? [];
+  return {
+    scopeAll: partial.scopeAll ?? false,
+    classGroupIds:
+      partial.classGroupIds ??
+      Array.from(new Set([...pairs.map((p) => p.classGroupId), ...homeroomClassGroupIds])),
+    pairs,
+    homeroomClassGroupIds,
   };
 }
 

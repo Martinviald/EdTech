@@ -25,7 +25,10 @@ import {
 } from '@soe/types';
 import type { JwtPayload } from '../auth/jwt-payload.types';
 import { InjectDb, type Database } from '../database/database.types';
-import { resolveClassGroupScope } from '../common/helpers/class-group-scope.helper';
+import {
+  resolveClassGroupScope,
+  type ClassGroupScope,
+} from '../common/helpers/class-group-scope.helper';
 
 // Roles administrativos: ven toda la org. Idéntico a los demás services de
 // resultados (AssessmentResults / Analytics / ItemAnalysis / AssessmentReport).
@@ -42,7 +45,7 @@ export const DEFAULT_REFLECTION_PROMPTS: readonly string[] = [
   '¿Qué prácticas de aula funcionaron bien y conviene mantener o replicar?',
 ];
 
-export type ReportScope = { scopeAll: boolean; classGroupIds: string[] };
+export type ReportScope = ClassGroupScope;
 
 export type ReportAssessmentInfo = {
   id: string;

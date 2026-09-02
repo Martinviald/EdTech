@@ -69,7 +69,10 @@ import {
 import { InjectDb, type Database } from '../database/database.types';
 import { resolveEffectiveBands } from '../performance-bands/lib/resolve-effective-bands';
 import { hydrateBandForStudent } from '../performance-bands/lib/hydrate-band-level';
-import { resolveClassGroupScope } from '../common/helpers/class-group-scope.helper';
+import {
+  resolveClassGroupScope,
+  type ClassGroupScope,
+} from '../common/helpers/class-group-scope.helper';
 
 /** PerformanceBandInput (con thresholds) → vista mínima para la respuesta. */
 function toBandView(b: PerformanceBandInput): PerformanceBandView {
@@ -96,7 +99,7 @@ const AT_RISK_LEVELS: readonly PerformanceLevel[] = ['insufficient', 'elementary
 const ACHIEVEMENT_CRITICAL = 40; // < 40% de logro → contenido no logrado
 const ACHIEVEMENT_HIGH = 85; // >= 85% de logro → contenido logrado por casi todos
 
-type ScopeResult = { scopeAll: boolean; classGroupIds: string[] };
+type ScopeResult = ClassGroupScope;
 
 interface ItemAlternative {
   key?: unknown;
@@ -1305,7 +1308,7 @@ export class AssessmentReportService {
     tx: Database,
     user: JwtPayload,
     orgId: string,
-  ): Promise<{ scopeAll: boolean; classGroupIds: string[] }> {
+  ): Promise<ClassGroupScope> {
     return resolveClassGroupScope(tx, user, orgId);
   }
 

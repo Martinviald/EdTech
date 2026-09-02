@@ -93,6 +93,21 @@ Es una decisión de producto, no una concesión técnica:
 El acceso del jefe de curso es **transversal en asignaturas pero acotado a sus
 cursos**: sigue sin ver otros cursos de la organización.
 
+### 3.1.1 Dónde vive la jefatura
+
+El rol `homeroom_teacher` es un `org_memberships.role` y **no identifica el
+curso**: saber que alguien es profesor jefe no dice de qué curso lo es. El
+modelo no tenía dónde guardarlo.
+
+La jefatura concreta se guarda en **`org_memberships.scope.classGroupIds`** — el
+campo JSONB ya declarado en el schema (`packages/db/src/schema/users.ts:32`) para
+acotar un membership, hasta ahora sin uso. No requiere migración y no sobrecarga
+`teacher_assignments.role`, cuyo enum Zod es `primary | assistant` y describe otra
+cosa (titular o ayudante de una asignatura).
+
+Como es un JSONB, los ids se validan contra `class_groups` de la organización
+antes de usarlos: un scope manipulado con ids de otro tenant no concede nada.
+
 ### 3.2 Composición de roles
 
 Un usuario acumula alcance por unión de sus asignaciones, nunca por sustitución.
@@ -130,18 +145,25 @@ antes de cambiar la semántica: modificar la regla en cinco lugares es la forma
 más probable de introducir una fuga.
 
 ```ts
-type TeacherScope =
-  | { scopeAll: true }
-  | {
-      scopeAll: false;
-      /** Pares (curso, asignatura) donde el usuario dicta. */
-      pairs: Array<{ classGroupId: string; subjectId: string }>;
-      /** Cursos donde el usuario es profesor jefe: acceso transversal. */
-      homeroomClassGroupIds: string[];
-      /** Unión de ambos. Para queries que aún no distinguen asignatura. */
-      classGroupIds: string[];
-    };
+type ClassGroupScope = {
+  scopeAll: boolean;
+  /** Unión de cursos alcanzables. Visibilidad de PERSONAS (por curso). */
+  classGroupIds: string[];
+  /** Pares (curso, asignatura) donde dicta. Vacío para admin-like. */
+  pairs: Array<{ classGroupId: string; subjectId: string }>;
+  /** Cursos de jefatura: acceso transversal a todas sus asignaturas. */
+  homeroomClassGroupIds: string[];
+};
 ```
+
+Sobre ese tipo, el helper expone cuatro predicados:
+
+| Predicado                       | Para qué                                                                                 |
+| ------------------------------- | ---------------------------------------------------------------------------------------- |
+| `buildAssessmentScopeCondition` | condición SQL curso × asignatura, sobre las columnas que la query ya tiene joineadas     |
+| `buildAssessmentInScopeExists`  | la misma condición como `EXISTS` correlacionado, cuando la query no joinea los cursos    |
+| `isAssessmentInScope`           | variante en memoria, para recursos ya cargados                                           |
+| `resolveStudentSubjectFilter`   | qué asignaturas de un alumno visible puede ver el caller (`null` = todas, caso jefatura) |
 
 Predicados derivados, también en el helper:
 

@@ -21,7 +21,7 @@
 import { config } from 'dotenv';
 import { resolve } from 'path';
 import { readFileSync } from 'fs';
-import { and, eq, inArray, isNull } from 'drizzle-orm';
+import { and, eq, inArray, isNull, sql } from 'drizzle-orm';
 import { createDbClient } from '../client';
 import { academicYears } from '../schema/organizations';
 import { classGroups, grades, subjectClasses, subjects } from '../schema/academic';
@@ -200,11 +200,27 @@ async function main() {
   const homeroomEmails = new Set(art.homerooms.map((h) => h.email).filter((e): e is string => !!e));
   const teacherEmails = new Set(art.assignments.map((a) => a.email));
 
+  // Cursos de jefatura por docente: el rol `homeroom_teacher` NO dice de qué
+  // curso es jefe — eso vive en `org_memberships.scope.classGroupIds`, que es lo
+  // que lee el alcance transversal del profesor jefe
+  // (apps/api/src/common/helpers/class-group-scope.helper.ts).
+  const homeroomCoursesByEmail = new Map<string, Set<string>>();
+  for (const h of art.homerooms) {
+    if (!h.email) continue;
+    const key = classGroupKey(h);
+    const classGroupId = key ? cgIdByKey.get(key) : undefined;
+    if (!classGroupId) continue;
+    const set = homeroomCoursesByEmail.get(h.email) ?? new Set<string>();
+    set.add(classGroupId);
+    homeroomCoursesByEmail.set(h.email, set);
+  }
+
   const memberships: Array<{
     userId: string | null;
     orgId: string;
     role: 'teacher' | 'homeroom_teacher';
     email: string | null;
+    scope?: { classGroupIds: string[] };
   }> = [];
   for (const email of teacherEmails) {
     const userId = userIdByEmail.get(email) ?? null;
@@ -217,11 +233,13 @@ async function main() {
   }
   for (const email of homeroomEmails) {
     const userId = userIdByEmail.get(email) ?? null;
+    const courses = [...(homeroomCoursesByEmail.get(email) ?? [])];
     memberships.push({
       userId,
       orgId: ORG_ID,
       role: 'homeroom_teacher',
       email: userId ? null : email,
+      scope: { classGroupIds: courses },
     });
   }
   // La unique es (user_id, org_id, role): sólo aplica a memberships con usuario.
@@ -240,7 +258,12 @@ async function main() {
     await db
       .insert(orgMemberships)
       .values(toInsert.map((m) => ({ ...m, invitedAt: m.userId ? null : new Date() })))
-      .onConflictDoNothing();
+      // El scope de jefatura debe reflejar el curso VIGENTE: si el membership ya
+      // existía con otra jefatura, se actualiza (no se conserva la del año pasado).
+      .onConflictDoUpdate({
+        target: [orgMemberships.userId, orgMemberships.orgId, orgMemberships.role],
+        set: { scope: sql`excluded.scope`, isActive: true },
+      });
   }
   console.log(
     `org_memberships procesados: ${toInsert.length} (teacher: ${teacherEmails.size}, homeroom_teacher: ${homeroomEmails.size})`,

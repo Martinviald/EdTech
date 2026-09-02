@@ -41,6 +41,7 @@ import type { JwtPayload } from '../auth/jwt-payload.types';
 import {
   resolveClassGroupScope,
   type ClassGroupScope,
+  buildAssessmentScopeCondition,
 } from '../common/helpers/class-group-scope.helper';
 import { InjectDb, type Database } from '../database/database.types';
 import {
@@ -124,7 +125,13 @@ export class MasterBoardService {
 
       const conditions: SQL[] = [eq(assessments.orgId, orgId), isNull(instruments.deletedAt)];
       if (!scope.scopeAll) {
-        conditions.push(inArray(assessmentItemStats.classGroupId, scope.classGroupIds));
+        // Curso × asignatura: `assessment_item_stats` ya trae el curso y el
+        // instrumento la asignatura. Jefatura → curso completo.
+        const inScope = buildAssessmentScopeCondition(scope, {
+          classGroupId: assessmentItemStats.classGroupId,
+          subjectId: instruments.subjectId,
+        });
+        if (inScope) conditions.push(inScope);
       }
       if (query.academicYearId) {
         conditions.push(eq(classGroups.academicYearId, query.academicYearId));
@@ -366,7 +373,11 @@ export class MasterBoardService {
       conditions.push(eq(classGroups.academicYearId, query.academicYearId));
     }
     if (!scope.scopeAll) {
-      conditions.push(inArray(assessmentItemStats.classGroupId, scope.classGroupIds));
+      const inScope = buildAssessmentScopeCondition(scope, {
+        classGroupId: assessmentItemStats.classGroupId,
+        subjectId: instruments.subjectId,
+      });
+      if (inScope) conditions.push(inScope);
     }
 
     const rows = await tx
