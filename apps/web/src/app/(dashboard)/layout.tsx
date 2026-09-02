@@ -13,6 +13,7 @@ import { ListSearchMemory } from '@/components/shared';
 import { Toaster } from '@/components/ui/sonner';
 import { AssistantProvider, AssistantWidget } from '@/components/assistant';
 import { PageViewTracker } from '@/lib/telemetry';
+import { FeedbackWidget } from '@/components/feedback';
 
 export default async function DashboardLayout({ children }: { children: React.ReactNode }) {
   const session = await auth();
@@ -60,6 +61,8 @@ export default async function DashboardLayout({ children }: { children: React.Re
           </div>
           <Toaster position="top-right" richColors closeButton />
           {assistantEnabled && <AssistantWidget />}
+          {/* Comentarios in-app: disponible para todo rol, en todas las vistas. */}
+          <FeedbackWidget offset={assistantEnabled} />
         </div>
       </PageTitleProvider>
     </AssistantProvider>

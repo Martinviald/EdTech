@@ -296,3 +296,18 @@ export const documentVisibilityEnum = pgEnum('document_visibility', [
   'network',
   'platform',
 ]);
+
+// ── Feedback in-app (widget de comentarios) ──
+export const feedbackTypeEnum = pgEnum('feedback_type', [
+  'bug', // "Algo no funciona"
+  'idea', // "Idea de mejora"
+  'confusion', // "Me costó entender"
+]);
+
+export const feedbackStatusEnum = pgEnum('feedback_status', [
+  'new',
+  'triaged',
+  'planned',
+  'done',
+  'discarded',
+]);
