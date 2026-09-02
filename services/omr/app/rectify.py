@@ -6,10 +6,8 @@ casi-identidad (D2): un solo camino de codigo. Menos de 4 fiduciales =>
 
 La busqueda es por cuadrante de esquina: en cada uno se buscan contornos
 cuadrados y OSCUROS en el gris original. Un finder pattern del QR se descarta
-por su estructura anillo-hueco-centro (nieto en la jerarquia RETR_TREE); un
-fiducial ahuecado por el threshold adaptativo (cuadrado grande y solido: el
-interior queda sobre la media local) solo tiene un hueco vacio, sin nieto, y
-se acepta. Se elige el candidato cuya esquina exterior queda mas cerca de la
+por su estructura anillo-hueco-centro: en la jerarquia RETR_TREE tiene un
+NIETO. Se elige el candidato cuya esquina exterior queda mas cerca de la
 esquina de la imagen. La homografia mapea los CENTROIDES de los
 cuadrados (CD-5: el marco fiducial son los centros); la esquina exterior solo
 se usa para elegir candidato y detectar recorte.
@@ -68,6 +66,36 @@ por claro. Ademas el papel no siempre es blanco — su mediana local fue de 173 
 distintas en cada pagina sin razon. El clasificador de marcas (C21) ya deriva su
 umbral del papel de cada pagina; este era el unico criterio que no lo hacia.
 
+`QR_CENTER_MIN_AREA_RATIO` es lo que distingue ese finder pattern de un
+fiducial AHUECADO. El criterio era binario —"tiene nieto, afuera"— y a alta
+resolucion rechazaba fiduciales verdaderos: `adaptiveThreshold` usa un
+`blockSize` fijo en PIXELES (51), asi que cuanto mas grande sale el cuadrado en
+la captura, mas de su interior queda sobre la media local y mas se ahueca; el
+ruido que queda dentro de ese hueco es un nieto y basta para descartarlo. En
+una foto de 2339x3308 px el detector veia 1 de 4 esquinas (las anteriores eran
+de 1655 px de ancho y no llegaban a ahuecarse), y los cuadrados rechazados eran
+impecables: solidez 0.92-0.95, compacidad 16.7-17.8, interior 64-85 sobre papel
+blanco, a 286-443 px de la esquina.
+
+La diferencia real no es tener nieto sino QUE nieto. En un QR el centro es de
+3x3 modulos dentro de 7x7 (~18% del area del anillo); dentro de un fiducial
+ahuecado solo hay motas. Medido el nieto MAYOR de cada candidato, como fraccion
+del area de su contorno raiz:
+
+                                      area nieto/padre   px del nieto
+    finder pattern de QR real         0.148 - 0.161      360 - 782   (8 casos)
+    fiducial ahuecado (2339 px)       0.0002 - 0.0048      0 -  14   (5 casos)
+
+Dos ordenes de magnitud de separacion. El corte en 0.06 esta 12x por encima del
+peor ruido medido y 2.5x por debajo del centro de QR mas chico: hay margen en
+los dos sentidos. No se agrega concentricidad ni solidez del nieto como
+condicion: el centro del QR ademas sale concentrico (centroide a 0.001-0.032
+lados del padre) y solido (0.87-0.99), pero exigirlo ADEMAS del area solo
+podria dejar entrar un finder pattern, y la relacion de area ya separa las dos
+poblaciones sola. Un nieto grande que no sea un QR tambien se rechaza, y ese es
+el lado seguro del error: perder una esquina cuesta una pagina rechazada,
+coronar un finder pattern cuesta una lectura MALA con confianza.
+
 Ojo al tocarlo: el tope de distancia y `CORNER_REGION_FRACTION` acotan lo mismo y
 se mueven juntos. Una captura con MUCHO fondo alrededor de la hoja empuja los
 fiduciales verdaderos lejos de la esquina de la imagen; si algun dia hay que
@@ -95,6 +123,7 @@ MAX_DARKNESS_RATIO = 0.55
 BORDER_TOUCH_PX = 2
 MIN_CLIPPED_INK_AREA_PX = 200
 MAX_CORNER_DISTANCE_FRACTION = 0.22
+QR_CENTER_MIN_AREA_RATIO = 0.06
 
 
 @dataclass(frozen=True)
@@ -286,7 +315,7 @@ def _best_square(
     for idx, (contour, node) in enumerate(zip(contours, hier, strict=True)):
         if node[3] != -1:
             continue
-        if _has_grandchild(hier, idx):
+        if _has_qr_center(contours, hier, idx, cv2.contourArea(contour)):
             continue
         candidate = _square_candidate(contour, page_area)
         if candidate is None:
@@ -308,11 +337,25 @@ def _best_square(
     return None if best is None else best[1]
 
 
-def _has_grandchild(hier: np.ndarray, idx: int) -> bool:
+def _has_qr_center(
+    contours: list[np.ndarray], hier: np.ndarray, idx: int, area: float
+) -> bool:
+    """El contorno es el anillo de un finder pattern de QR, no un fiducial.
+
+    Se mide la relacion de area del nieto MAYOR contra la del contorno raiz. Ver
+    la nota de `QR_CENTER_MIN_AREA_RATIO` en el docstring del modulo: el centro
+    de un finder pattern ocupa ~15% del anillo; lo que el threshold deja dentro
+    de un fiducial ahuecado no llega al 0.5%.
+    """
+    if area <= 0:
+        return False
     child = hier[idx][2]
     while child != -1:
-        if hier[child][2] != -1:
-            return True
+        grandchild = hier[child][2]
+        while grandchild != -1:
+            if cv2.contourArea(contours[grandchild]) / area >= QR_CENTER_MIN_AREA_RATIO:
+                return True
+            grandchild = hier[grandchild][0]
         child = hier[child][0]
     return False
 
