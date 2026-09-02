@@ -1,8 +1,8 @@
 'use client';
 
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { toast } from 'sonner';
-import { AlertCircle, HelpCircle, ImagePlus, Lightbulb, Loader2, X } from 'lucide-react';
+import { AlertCircle, Camera, HelpCircle, ImagePlus, Lightbulb, Loader2, X } from 'lucide-react';
 import { FEEDBACK_TYPE_LABELS, type FeedbackType } from '@soe/types';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
@@ -14,6 +14,7 @@ import {
   SheetHeader,
   SheetTitle,
 } from '@/components/ui/sheet';
+import { captureAppScreenshot } from './capture-screen';
 import { submitFeedback, uploadFeedbackScreenshot } from './feedback-api';
 import { useFeedbackContext } from './use-feedback-context';
 
@@ -48,8 +49,22 @@ export function FeedbackPanel({
   const [message, setMessage] = useState('');
   const [screenshot, setScreenshot] = useState<File | null>(null);
   const [sending, setSending] = useState(false);
+  const [capturing, setCapturing] = useState(false);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const buildContext = useFeedbackContext();
+
+  // La vista previa es un object URL: hay que revocarlo al cambiar de captura o
+  // al desmontar, o el navegador retiene el blob completo en memoria.
+  useEffect(() => {
+    if (!screenshot) {
+      setPreviewUrl(null);
+      return;
+    }
+    const url = URL.createObjectURL(screenshot);
+    setPreviewUrl(url);
+    return () => URL.revokeObjectURL(url);
+  }, [screenshot]);
 
   const reset = () => {
     setType('bug');
@@ -72,6 +87,20 @@ export function FeedbackPanel({
       return;
     }
     setScreenshot(file);
+  };
+
+  const handleCapture = async () => {
+    setCapturing(true);
+    try {
+      const file = await captureAppScreenshot();
+      if (!file) {
+        toast.error('No pudimos capturar la pantalla. Puedes adjuntar una captura manual.');
+        return;
+      }
+      setScreenshot(file);
+    } finally {
+      setCapturing(false);
+    }
   };
 
   const handleSubmit = async () => {
@@ -107,7 +136,7 @@ export function FeedbackPanel({
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent side="right" className="flex w-full flex-col gap-6 sm:max-w-md">
+      <SheetContent side="right" className="flex w-full flex-col gap-6 overflow-y-auto sm:max-w-xl">
         <SheetHeader>
           <SheetTitle>Enviar un comentario</SheetTitle>
           <SheetDescription>
@@ -164,32 +193,67 @@ export function FeedbackPanel({
             onChange={(e) => handleFile(e.target.files?.[0] ?? null)}
           />
           {screenshot ? (
-            <div className="flex items-center justify-between gap-2 rounded-lg border border-border p-2 text-sm">
-              <span className="truncate text-muted-foreground">{screenshot.name}</span>
-              <button
-                type="button"
-                onClick={() => handleFile(null)}
-                aria-label="Quitar la captura"
-                className="shrink-0 rounded p-1 text-muted-foreground hover:bg-muted"
-              >
-                <X className="size-4" aria-hidden />
-              </button>
-            </div>
+            <figure className="space-y-2 rounded-lg border border-border p-2">
+              <div className="flex items-center justify-between gap-2 text-sm">
+                <span className="truncate text-muted-foreground">{screenshot.name}</span>
+                <button
+                  type="button"
+                  onClick={() => handleFile(null)}
+                  aria-label="Quitar la captura"
+                  className="shrink-0 rounded p-1 text-muted-foreground hover:bg-muted"
+                >
+                  <X className="size-4" aria-hidden />
+                </button>
+              </div>
+              {previewUrl && (
+                /* La miniatura confirma QUÉ se va a enviar. Sin ella la persona
+                   no sabe si la captura salió de la pantalla correcta. */
+                // eslint-disable-next-line @next/next/no-img-element
+                <img
+                  src={previewUrl}
+                  alt="Vista previa de la captura adjunta"
+                  className="max-h-48 w-full rounded border border-border object-contain object-top"
+                />
+              )}
+            </figure>
           ) : (
-            <Button
-              type="button"
-              variant="outline"
-              className="w-full"
-              disabled={sending}
-              onClick={() => fileInputRef.current?.click()}
-            >
-              <ImagePlus className="mr-2 size-4" aria-hidden />
-              Adjuntar una captura (opcional)
-            </Button>
+            <div className="grid gap-2 sm:grid-cols-2">
+              <Button
+                type="button"
+                variant="secondary"
+                disabled={sending || capturing}
+                onClick={handleCapture}
+              >
+                {capturing ? (
+                  <Loader2 className="mr-2 size-4 animate-spin" aria-hidden />
+                ) : (
+                  <Camera className="mr-2 size-4" aria-hidden />
+                )}
+                {capturing ? 'Capturando…' : 'Capturar esta pantalla'}
+              </Button>
+              <Button
+                type="button"
+                variant="outline"
+                disabled={sending || capturing}
+                onClick={() => fileInputRef.current?.click()}
+              >
+                <ImagePlus className="mr-2 size-4" aria-hidden />
+                Subir una imagen
+              </Button>
+            </div>
+          )}
+          {!screenshot && (
+            <p className="text-xs text-muted-foreground">
+              Opcional. La captura toma la vista completa, sin el panel de comentarios.
+            </p>
           )}
         </div>
 
-        <Button type="button" onClick={handleSubmit} disabled={sending || !message.trim()}>
+        <Button
+          type="button"
+          onClick={handleSubmit}
+          disabled={sending || capturing || !message.trim()}
+        >
           {sending && <Loader2 className="mr-2 size-4 animate-spin" aria-hidden />}
           {sending ? 'Enviando…' : 'Enviar comentario'}
         </Button>

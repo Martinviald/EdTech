@@ -13,6 +13,9 @@ import { FeedbackPanel } from './feedback-panel';
  *
  * `offset` sube el botón cuando el asistente IA también está montado, para que
  * los dos flotantes no se pisen en la esquina inferior derecha.
+ *
+ * `data-feedback-ui` excluye el botón de la captura automática de pantalla: no
+ * aporta al reporte y confunde sobre dónde estaba la persona.
  */
 export function FeedbackWidget({ offset = false }: { offset?: boolean }) {
   const [open, setOpen] = useState(false);
@@ -23,6 +26,7 @@ export function FeedbackWidget({ offset = false }: { offset?: boolean }) {
         type="button"
         onClick={() => setOpen(true)}
         aria-label="Enviar un comentario"
+        data-feedback-ui=""
         title="Enviar un comentario"
         className={cn(
           'fixed right-6 z-40 flex size-12 items-center justify-center rounded-full border border-border bg-background text-muted-foreground shadow-md transition hover:scale-105 hover:text-foreground hover:shadow-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2',
