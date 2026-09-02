@@ -86,15 +86,37 @@ Reemplaza al QR como canal crítico.
 | Código corto de hoja | 24 | Identifica la `printed_sheet` (16,7 M por org) |
 | Prefijo del hash del diseño | 16 | Gate G1: detectar hojas de un diseño viejo |
 | Índice de página | 4 | Hojas multipágina |
-| Total de páginas | 4 | Validación cruzada |
-| CRC-8 | 8 | Descarta lecturas corruptas |
+| CRC-12 | 12 | Descarta lecturas corruptas |
+
+No se codifica el total de páginas: el spec congelado ya lo declara, así que era redundancia
+débil. Esos 4 bits van al CRC — un CRC-8 deja pasar una lectura corrupta 1 de cada 256 veces, y
+una identidad equivocada aceptada con confianza es exactamente el error que el MVP prohíbe.
+
+**Regla de aceptación** (las tres condiciones, no alcanza el CRC solo):
+
+1. El CRC-12 valida.
+2. El código corto existe en `printed_sheets` **de la tirada del lote** — el lote se crea sobre
+   una tirada, así que la base es un validador externo con probabilidad de colisión ínfima.
+3. El prefijo de hash coincide con el diseño de la tirada (si no: gate G1, lote rechazado).
+
+Si las dos filas pasan el CRC pero decodifican distinto → **sin resolver**, jamás elegir una.
+Con las tres condiciones, la probabilidad de aceptar una identidad falsa por corrupción aleatoria
+es ~1/4096 × (hojas de la tirada / 2²⁴): despreciable.
 
 **Geometría:** celdas de **3,2 mm** sobre ~190 mm de ancho útil = 59 celdas por fila. 56 de datos
-más 3 de trama (arranque, fin, paridad de orientación).
+más 3 de trama asimétrica (patrón de arranque ≠ patrón de cierre, para que una lectura invertida
+falle la trama antes que el CRC).
 
-**Redundancia:** la misma fila arriba y abajo. Alcanza con que una pase el CRC.
+**Redundancia:** la misma fila arriba y abajo. No es adorno: en las capturas reales el lavado del
+escáner se concentró en la banda inferior de la hoja (fiduciales inferiores con interior 126–183
+sobre papel 255) — la fila de arriba sobrevive exactamente cuando la de abajo se lava, y viceversa.
 
 **Ubicación:** fuera del área de respuestas, rotulada **NO MARCAR**, como hace GradeCam.
+
+**Asignación del código corto:** aleatorio con reintento sobre índice único por org. Con 24 bits,
+la paradoja del cumpleaños da ~50 % de probabilidad de colisión al llegar a ~4.800 hojas — el
+reintento es parte del diseño, no un caso raro. No usar secuencial: filtra volumen de impresión
+entre tiradas.
 
 ### 5.2 Identidad del alumno: burbujas
 
@@ -102,10 +124,26 @@ El modo `rut_bubbles` del V1 ya lo resuelve y su resolver es conservador: RUT il
 inválido, sin match o duplicado en el curso → confirmación humana, nunca decide. No hay que
 construir nada.
 
-### 5.3 El QR queda como atajo oportunista
+### 5.3 El QR queda como atajo oportunista — pero hoy cumple dos roles más
 
 Si decodifica, ahorra trabajo. Si no, no importa: deja de estar en el camino crítico. No se quita
 para no invalidar las hojas ya impresas.
+
+⚠️ **El QR no es solo identidad.** En el pipeline actual valida dos cosas más, y la fila de celdas
+tiene que heredarlas o la robustez ganada se pierde por otro lado:
+
+1. **Orientación.** Una rotación 90/180/270 solo se acepta si el QR decodifica desde la región del
+   spec (`_orientation_confirmed`). Con el QR degradado a atajo, la confirmación pasa a ser: la
+   fila de celdas en su posición esperada, con trama y CRC válidos. Una hoja invertida lee la
+   trama al revés y falla antes del CRC.
+2. **Reconstrucción de la 4ª esquina.** Rectificar con 3 fiduciales solo se acepta si algo
+   independiente confirma la homografía; hoy ese algo es el QR. Pasa a serlo la fila de celdas:
+   si la esquina estimada está corrida, las celdas no caen en su grilla y el CRC falla. Es un
+   validador **mejor** que el QR — 59 puntos de muestreo a lo ancho de la página contra un
+   símbolo en una esquina.
+
+Sin este traspaso explícito, demora el QR habría dejado al pipeline sin confirmación de
+orientación ni de reconstrucción: dos regresiones silenciosas.
 
 ### 5.4 Código corto también en texto legible
 
@@ -139,9 +177,11 @@ rectificador ni el clasificador.
 | Un alumno marca sobre la fila | CRC + redundancia arriba/abajo + rótulo NO MARCAR |
 | "Ajustar a página" achica las celdas | 3,2 mm tiene margen sobre el piso de 3,1 mm, pero conviene medirlo |
 | El tamaño de celda es de una sola cadena de captura | Confirmar contra el conjunto de oro antes de fijarlo |
+| «Ajustar a página» al 90 % deja la celda en 2,88 mm, bajo el piso de 3,1 | Medirlo en F0 con la maqueta impresa; si falla, la geometría admite crecer quitando bits al código corto |
+| Una fila pasa el CRC con datos corruptos | Regla de aceptación de 3 condiciones (§5.1); dos filas válidas que difieren → sin resolver |
 
-**Decisiones abiertas:** tamaño final de celda; si el código corto es secuencial u opaco; si se
-mantiene el QR a largo plazo.
+**Decisiones abiertas:** tamaño final de celda (se fija en F0 con papel real); si se mantiene el
+QR a largo plazo. La asignación del código quedó decidida: aleatoria con reintento (§5.1).
 
 ## 9. Qué NO resuelve
 
