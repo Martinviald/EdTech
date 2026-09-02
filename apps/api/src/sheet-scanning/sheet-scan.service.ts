@@ -1,10 +1,4 @@
-import {
-  BadRequestException,
-  Inject,
-  Injectable,
-  Logger,
-  NotFoundException,
-} from '@nestjs/common';
+import { BadRequestException, Inject, Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { randomUUID } from 'node:crypto';
 import { and, desc, eq, inArray, isNull, ne, sql } from 'drizzle-orm';
 import {
@@ -52,6 +46,7 @@ import {
   OMR_CLIENT,
   OmrPageTimeoutError,
   OmrServiceUnavailableError,
+  OmrSourceUnreadableError,
   type OmrClient,
 } from './omr-client.types';
 import { SheetIdentityResolverRegistry } from './identity/identity-resolver.registry';
@@ -68,6 +63,9 @@ const ALLOWED_SOURCE_MIME_TYPES = new Set([
 
 const RETRYABLE_FAILURE_MESSAGE =
   'El servicio de lectura de hojas no está disponible o excedió el tiempo límite. Reintenta el procesamiento del lote; no es necesario volver a subir los archivos.';
+
+const SOURCE_UNREADABLE_FAILURE_MESSAGE =
+  'El servicio de lectura de hojas respondió correctamente, pero no pudo descargar ni abrir los archivos subidos. El servicio NO está caído: revisa que los archivos del lote sigan disponibles y sean PDF o imágenes válidas. Reintentar sin corregir el archivo dará el mismo resultado.';
 
 const UNEXPECTED_FAILURE_MESSAGE =
   'Ocurrió un error inesperado al procesar el lote. Reintenta el procesamiento; si el problema persiste, contacta a soporte.';
@@ -456,10 +454,7 @@ export class SheetScanService {
     return sheet ?? null;
   }
 
-  private async calibratedProfile(
-    orgId: string,
-    profile: CaptureProfile,
-  ): Promise<CaptureProfile> {
+  private async calibratedProfile(orgId: string, profile: CaptureProfile): Promise<CaptureProfile> {
     if (profile.ambiguityMargin !== null) return profile;
     const { calibration } = await this.omrCalibrationService.getCalibration(orgId);
     return { ...profile, ambiguityMargin: calibration.ambiguityMargin ?? null };
@@ -479,6 +474,14 @@ export class SheetScanService {
       }
       await this.finalizeBatch(orgId, batchId, outcome.pagesTotal);
     } catch (err) {
+      if (err instanceof OmrSourceUnreadableError) {
+        reportServerError(err, { batchId, orgId, userId });
+        await this.updateBatch(orgId, batchId, {
+          status: 'failed',
+          failureReason: SOURCE_UNREADABLE_FAILURE_MESSAGE,
+        });
+        return;
+      }
       if (err instanceof OmrServiceUnavailableError || err instanceof OmrPageTimeoutError) {
         await this.updateBatch(orgId, batchId, {
           status: 'failed',
