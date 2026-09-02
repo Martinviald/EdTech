@@ -1,0 +1,2577 @@
+{
+ "instrument": {
+  "name": "PAES CIE mención Física — Ensayo 4 (Tanda 4) · IV° Medio 2026",
+  "subject": "Ciencias — mención Física",
+  "subjectCode": "SCI",
+  "grade": "IV° Medio",
+  "gradeCode": "4TH_MEDIO",
+  "year": 2026,
+  "applicationPeriod": null,
+  "type": "paes",
+  "isOfficial": false,
+  "paes": {
+   "prueba": "CIE",
+   "tanda": "Tanda 4",
+   "mencion": "Física",
+   "appliedOn": "2026-08-07",
+   "basadoEn": "Selección DEMRE ADM REG 2026 + Complemento DEPTO CIE"
+  }
+ },
+ "sections": [
+  {
+   "order": 1,
+   "name": "Prueba completa",
+   "type": "multiple_choice",
+   "instructions": null,
+   "passage": null,
+   "items": [
+    {
+     "position": 1,
+     "type": "multiple_choice",
+     "stem": "Un equipo de investigación cultivó distintos tipos de células humanas con una sustancia que, al entrar a estas, se unía de manera persistente y específica al ADN que constituye parte del nucléolo, afectando el proceso de expresión génica. Ante este resultado es posible especular acerca de potenciales efectos de esta sustancia sobre las células tratadas. A partir de lo anterior, ¿cuál de las siguientes inferencias es correcta respecto a un efecto directo de la sustancia sobre las células tratadas?",
+     "correctKey": "B",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "figureNote": null,
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "Aumento progresivo del volumen citoplasmático en las células tratadas.",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "Disminución en la cantidad de ribosomas producidos por unidad de tiempo.",
+       "isCorrect": true
+      },
+      {
+       "key": "C",
+       "text": "Aumento de la cantidad de material genético presente en el núcleo de las células tratadas.",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "Disminución en la velocidad de transporte de sustancias a través de los poros nucleares.",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 2,
+     "type": "multiple_choice",
+     "stem": "En un experimento escolar se dispone de una planta con flores blancas y una solución acuosa con colorante azul para repostería. Luego, se corta un tallo con flor y se introduce en un vaso de precipitados que contiene la solución coloreada. Tras unos minutos puede observarse el cambio de color de la flor a azul. Finalmente, el profesor les pide a los estudiantes que realicen un corte a los pétalos azules, para observarlos en el microscopio e identificar cuáles son las estructuras celulares que contienen el colorante. Considerando lo anterior, ¿en cuál de las siguientes estructuras se debería encontrar el colorante mencionado?",
+     "correctKey": "B",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "figureNote": null,
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "En las mitocondrias.",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "En la vacuola.",
+       "isCorrect": true
+      },
+      {
+       "key": "C",
+       "text": "En los peroxisomas.",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "En el núcleo.",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 3,
+     "type": "multiple_choice",
+     "stem": "La científica estadounidense Lynn Margulis propuso la teoría endosimbiótica, para explicar el origen de algunos organelos celulares. Su propuesta consiste en que, hace unos 2500 millones de 𝑎ñ𝑜𝑠, la atmósfera terrestre ya poseía bastante oxígeno y algunos procariontes lo habrían utilizado para sus procesos metabólicos. En algún momento, estos organismos habrían sido ingeridos por células de mayor tamaño sin ser digeridos, dando origen a estructuras celulares y estableciéndose una relación de beneficio mutuo. En relación con lo anterior, ¿cuál de las siguientes opciones corresponde a la estructura celular que hacía referencia Lynn Margulis?",
+     "correctKey": "C",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "figureNote": null,
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "Ribosoma.",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "Peroxisoma.",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "Mitocondria.",
+       "isCorrect": true
+      },
+      {
+       "key": "D",
+       "text": "Lisosoma",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 4,
+     "type": "multiple_choice",
+     "stem": "Un grupo de investigadores evaluó el efecto de un nuevo fármaco M sobre la permeabilidad que presentan los enterocitos a la glucosa. El grupo reportó que el fármaco M disminuye la permeabilidad de los enterocitos a la glucosa, provocando una disminución de su flujo desde el intestino hacia los vasos sanguíneos, tal como se indica a continuación: Una comisión evaluó esta investigación y señaló que existe una deficiencia metodológica que es necesaria mejorar para una correcta interpretación de los resultados, por lo que recomiendan replantear el diseño experimental. En relación con estos antecedentes, ¿cuál de las siguientes opciones corresponde a un error del diseño que afecta los resultados presentados por el grupo de investigación?",
+     "correctKey": "A",
+     "responseFormat": "choice",
+     "hasFigure": true,
+     "figureNote": "Figura no transcrita (hueco en el cuadernillo)",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "Faltó evaluar un grupo donde no se aplique el fármaco.",
+       "isCorrect": true
+      },
+      {
+       "key": "B",
+       "text": "Faltó evaluar el fármaco a mayores concentraciones.",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "Faltó evaluar el fármaco a menores concentraciones.",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "Faltó evaluar un grupo con el fármaco en dosis crecientes.",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 5,
+     "type": "multiple_choice",
+     "stem": "Una mujer consume un fármaco X que genera la incapacidad de proliferación endometrial a medida que progresa su ciclo ovárico. En relación con lo anterior, ¿cuál de las siguientes opciones señala correctamente el efecto más probable que generaría la aplicación del fármaco X en esta mujer?",
+     "correctKey": "B",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "figureNote": null,
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "El proceso de ovulación no ocurriría.",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "El proceso de menstruación no ocurriría.",
+       "isCorrect": true
+      },
+      {
+       "key": "C",
+       "text": "La fase secretora del ciclo menstrual se extendería.",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "La fase proliferativa del ciclo menstrual se extendería.",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 6,
+     "type": "multiple_choice",
+     "stem": "En la segunda mitad del siglo XVIII, se desconocía cómo se efectuaba la fecundación. Se proponía que el esperma desprendía un gas que al evaporarse entraba en contacto con el ovocito. El científico Lazzaro Spallanzani realizó múltiples experimentos que contribuyeron a la comprensión de este fenómeno, uno de los cuales se resume a continuación: Tratamiento Resultados Huevos de rana adheridos por consistencia natural 1 de 13 huevos con esperma alejada desarrolla renacuajos. (contacto indirecto). Huevos de rana embebidos 12 de 13 huevos por esperma cercana desarrolla renacuajos. (contacto directo). Según el experimento presentado, ¿qué demostró Spallanzani sobre el proceso de fecundación?",
+     "correctKey": "B",
+     "responseFormat": "choice",
+     "hasFigure": true,
+     "figureNote": "Figura no transcrita (hueco en el cuadernillo)",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "Que la participación directa de los espermatozoides garantiza la reproducción.",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "Que la fecundación depende de la cercanía a la cual se encuentran los gametos.",
+       "isCorrect": true
+      },
+      {
+       "key": "C",
+       "text": "Que el desarrollo de organismos se asegura con la participación de ovocitos.",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "Que la fecundación requiere una interacción química entre espermatozoides y ovocitos.",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 7,
+     "type": "multiple_choice",
+     "stem": "Un equipo de investigadores está interesado en conocer si existe una relación entre la duración del ciclo ovárico y la fertilidad en mujeres de entre 20 y 35 años. Los investigadores plantean la siguiente hipótesis: “mujeres con una duración promedio de 28 días del ciclo ovárico presentan un alto porcentaje de fertilidad”. Al respecto, ¿cuál de las siguientes opciones corresponde a una evidencia que valida la hipótesis presentada?",
+     "correctKey": "C",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "figureNote": null,
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "Un estudio previo reportó que mujeres que tienen ciclos ováricos de 28 días presentan igual fertilidad que aquellas que poseen ciclos más cortos.",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "Una investigación reciente indicó que las mujeres con ciclo ovárico de 35 días tienen la misma probabilidad de embarazo que aquellas con un ciclo ovárico de 28 días.",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "Un estudio realizado en un grupo de mujeres encontró que aquellas con un ciclo ovárico de 28 días tienen una tasa de fertilidad del 90 %.",
+       "isCorrect": true
+      },
+      {
+       "key": "D",
+       "text": "Una investigación reportó una correlación positiva entre la duración de la menstruación y la fertilidad en mujeres con ciclos ováricos de 28 días.",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 8,
+     "type": "multiple_choice",
+     "stem": "Un laboratorio farmacéutico está evaluando dos vías de administración de un nuevo anticonceptivo en animales de experimentación. Una de estas vías es la oral por medio de pastillas, mientras que la otra es a través de un anillo vaginal. La concentración plasmática del fármaco, según la vía de administración, se presenta en el siguiente gráfico: Concentración Vía oral plasmática (u.a.) Vía vaginal Tiempo (días) En relación con lo anterior, ¿cuál de las siguientes preguntas de investigación pudo haber guiado el estudio realizado por el laboratorio que originó estos resultados?",
+     "correctKey": "D",
+     "responseFormat": "choice",
+     "hasFigure": true,
+     "figureNote": "Figura no transcrita (hueco en el cuadernillo)",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "¿Qué vía de administración confiere la mayor eficacia para el anticonceptivo?",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "¿Cuál vía de administración permite mantener por más tiempo el anticonceptivo en el organismo?",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "¿Qué concentración plasmática del anticonceptivo presenta menores efectos secundarios?",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "¿Cuál es la concentración plasmática del anticonceptivo en el tiempo para dos vías de administración?",
+       "isCorrect": true
+      }
+     ]
+    },
+    {
+     "position": 9,
+     "type": "multiple_choice",
+     "stem": "En el siguiente gráfico se representan las variaciones de la concentración sanguínea de la hormona luteinizante (LH) a lo largo del ciclo ovárico en dos mujeres, una sin método anticonceptivo (M1) y otra que utiliza un método anticonceptivo (M2). A partir de estos antecedentes, ¿cuál de las siguientes opciones podría corresponder al método anticonceptivo utilizado por M2?",
+     "correctKey": "C",
+     "responseFormat": "choice",
+     "hasFigure": true,
+     "figureNote": "Figura no transcrita (hueco en el cuadernillo)",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "T de cobre",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "Método del ritmo",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "Anovulatorio oral",
+       "isCorrect": true
+      },
+      {
+       "key": "D",
+       "text": "Método de barrera",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 10,
+     "type": "multiple_choice",
+     "stem": "Un investigador está desarrollando un fármaco para reducir la proliferación celular en tumores malignos. El fármaco tiene como objetivo limitar la duplicación del ADN para evitar la posterior división celular. ¿En cuál de las etapas del ciclo celular debería actuar el fármaco para evitar la duplicación del material genético?",
+     "correctKey": "B",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "figureNote": null,
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "G1",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "S",
+       "isCorrect": true
+      },
+      {
+       "key": "C",
+       "text": "G2",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "M",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 11,
+     "type": "multiple_choice",
+     "stem": "La mitosis presenta distintos puntos de control que permiten que este proceso se lleve a cabo correctamente. Uno de estos puntos de control se encuentra en la metafase mitótica, en donde se verifica que los cromosomas se unan correctamente al huso mitótico. Al respecto, ¿cuál de las siguientes evidencias valida que este punto de control está funcionando correctamente?",
+     "correctKey": "B",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "figureNote": null,
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "Las células que presenten anomalías luego de la replicación del material genético detendrán la progresión de la mitosis.",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "Las células que tengan cromosomas fuera del ecuador de la célula detendrán la progresión de la mitosis.",
+       "isCorrect": true
+      },
+      {
+       "key": "C",
+       "text": "Las células que presenten daño del ADN detendrán la progresión de la mitosis.",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "Las células que presenten un volumen celular alterado expresarán proteínas que detendrán la progresión de la mitosis.",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 12,
+     "type": "multiple_choice",
+     "stem": "En el contexto de una investigación sobre la disyunción cromosómica y sus alteraciones, una científica está estudiando un compuesto que bloquea el proceso de separación de las cromátidas hermanas. Considerando que se aplicó la molécula a cultivos de células germinales, ¿en cuál de las siguientes etapas hará efecto?",
+     "correctKey": "D",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "figureNote": null,
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "Profase I.",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "Anafase I.",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "Profase II.",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "Anafase II.",
+       "isCorrect": true
+      }
+     ]
+    },
+    {
+     "position": 13,
+     "type": "multiple_choice",
+     "stem": "La trombosis o formación de coágulos de sangre constituye una complicación permanente durante las estadías hospitalarias debido a sus secuelas. En este contexto, un grupo de científicos ha conseguido producir en el laboratorio una proteína transgénica, la cual originalmente es secretada por sanguijuelas evitando la coagulación de sangre cuando estos animales se alimentan. A partir de los antecedentes presentados, ¿cuál de las siguientes hipótesis es coherente con las variables de este estudio?",
+     "correctKey": "A",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "figureNote": null,
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "La proteína transgénica es un potencial fármaco que previene la trombosis en personas hospitalizadas.",
+       "isCorrect": true
+      },
+      {
+       "key": "B",
+       "text": "La proteína transgénica es un anticoagulante más efectivo para tratar trombosis que aquella producida por las sanguijuelas.",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "Las personas con trombosis tratadas con la proteína transgénica tienen una reducción en su tiempo de estadía hospitalaria.",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "Las personas con trombosis tratadas con la proteína transgénica presentan secuelas menos graves que aquellos no tratados.",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 14,
+     "type": "multiple_choice",
+     "stem": "Las poblaciones bacterianas pueden evolucionar rápidamente, respondiendo ante la presencia de antibióticos, utilizados como una presión de selección. En la siguiente tabla, se resumen los resultados de un estudio en el que se expusieron cultivos de una bacteria X, a la misma temperatura y a diferentes antibióticos: Tiempo de muestreo Respuesta ante la presencia de antibiótico (horas) Antibiótico 1 Antibiótico 2 Antibiótico 3 Antibiótico 4 Inicial - - - - 15 - - + - 20 - - + - 25 - + + + 30 - + + + 35 + + + + 40 + + + + + = Resistencia al antibiótico - = Sensibilidad al antibiótico Considerando los resultados de la tabla, ¿cuál de las siguientes opciones pudo ser la pregunta de investigación que pudo haber guiado este estudio?",
+     "correctKey": "B",
+     "responseFormat": "choice",
+     "hasFigure": true,
+     "figureNote": "Figura no transcrita (hueco en el cuadernillo)",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "¿Qué mecanismo desarrolla la bacteria X para volverse resistente frente a la acción de los antibióticos?",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "¿Cuánto tiempo demora la bacteria X en generar resistencia a los antibióticos?",
+       "isCorrect": true
+      },
+      {
+       "key": "C",
+       "text": "¿Qué tipo de antibiótico resulta ser más efectivo en función del tiempo para el tratamiento contra las enfermedades bacterianas?",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "¿Cómo influye la temperatura en el crecimiento de una población bacteriana sometida a diferentes tratamientos con antibióticos?",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 15,
+     "type": "multiple_choice",
+     "stem": "Un grupo de científicos se encuentra realizando estudios de biología molecular de un fósil encontrado en el Parque Nacional Torres del Paine. Para ello realizaron una comparación de las secuencias genéticas de este fósil con restos de 4 especies de interés presentes en otras áreas geográficas de similares características. Los investigadores presentaron los resultados del porcentaje de coincidencia entre las secuencias analizadas (similitud), en la siguiente tabla: Especie Similitud (%) 1 41 2 38 3 95 4 0 En este contexto, ¿cuál de las siguientes conclusiones es correcta?",
+     "correctKey": "B",
+     "responseFormat": "choice",
+     "hasFigure": true,
+     "figureNote": "Figura no transcrita (hueco en el cuadernillo)",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "El fósil encontrado es de una especie antigua que posee un ancestro común con la especie 4.",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "El fósil encontrado es de una especie que se encuentra estrechamente relacionada con la especie 3.",
+       "isCorrect": true
+      },
+      {
+       "key": "C",
+       "text": "El fósil encontrado es de una especie que habitó junto con las especies 1 y 2 en un área geográfica distinta de donde fue hallado.",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "El fósil encontrado es de una especie extinta sin relación evolutiva alguna con las especies comparadas.",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 16,
+     "type": "multiple_choice",
+     "stem": "Al estudiar la influencia de distintas variables sobre la fotosíntesis de las plantas terrestres, fue posible establecer una relación entre el rendimiento fotosintético en función de la concentración de oxígeno en el estroma del cloroplasto, la cual se representa en el siguiente gráfico: Rendimiento fotosintético (u.a.) Concentración de oxígeno en el estroma (u.a.) Considerando lo anterior, ¿cuál de las siguientes opciones corresponde a una inferencia correcta?",
+     "correctKey": "C",
+     "responseFormat": "choice",
+     "hasFigure": true,
+     "figureNote": "Figura no transcrita (hueco en el cuadernillo)",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "Las plantas que viven en ambientes altamente oxigenados presentarán un crecimiento acelerado.",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "La mayor producción de oxígeno asociada a la fotosíntesis se logrará en plantas de rendimiento fotosintético óptimo.",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "Las plantas que eliminan mayores niveles de oxígeno en las hojas presentarán rendimientos fotosintéticos superiores.",
+       "isCorrect": true
+      },
+      {
+       "key": "D",
+       "text": "Las plantas que habitan ambientes con bajas concentraciones de oxígeno presentarán rendimientos fotosintéticos menores.",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 17,
+     "type": "multiple_choice",
+     "stem": "En el esquema se representan tres cadenas tróficas hipotéticas. Considerando que el nivel correspondiente a los productores es equivalente en biomasa y energía en las tres cadenas, ¿cuál(es) de las cadenas presenta(n) la mayor disponibilidad de energía para los omnívoros?",
+     "correctKey": "A",
+     "responseFormat": "choice",
+     "hasFigure": true,
+     "figureNote": "Figura no transcrita (hueco en el cuadernillo)",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "Solo 1",
+       "isCorrect": true
+      },
+      {
+       "key": "B",
+       "text": "Solo 2",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "Solo 3",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "Solo 1 y 3",
+       "isCorrect": false
+      },
+      {
+       "key": "E",
+       "text": "Solo 2 y 3",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 18,
+     "type": "multiple_choice",
+     "stem": "Para una determinada cuenca, se ha estudiado parte de su trama trófica dulceacuícola representada por dos especies de peces (X e Y) y una especie Z de ninfa herbívora (estado larval de insectos adultos) por un periodo de 6 años, mediante la estimación de la biomasa, medida en unidades arbitrarias (u.a.), y su respectivo rol trófico. Los resultados se presentan en la siguiente tabla: Al respecto, ¿cuál de las siguientes opciones corresponde a una tendencia que se puede extraer de los datos reportados?",
+     "correctKey": "C",
+     "responseFormat": "choice",
+     "hasFigure": true,
+     "figureNote": "Figura no transcrita (hueco en el cuadernillo)",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "La biomasa de la trama trófica en estudio disminuye a medida que pasan los años.",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "La energía disponible en esta trama trófica aumenta a medida que pasan los años.",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "Los consumidores terciarios aumentan a medida que los consumidores secundarios disminuyen.",
+       "isCorrect": true
+      },
+      {
+       "key": "D",
+       "text": "Los consumidores secundarios disminuyen a medida que los consumidores primarios aumentan.",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 19,
+     "type": "multiple_choice",
+     "stem": "A continuación se presenta el perfil temporal de dos ondas electromagnéticas que se propagan a través del vacío. Si la onda 1 pertenece al espectro visible ¿Cuál de las siguientes opciones indica el tipo de onda electromagnética que podría ser la onda 2?",
+     "correctKey": "D",
+     "responseFormat": "choice",
+     "hasFigure": true,
+     "figureNote": "Figura no transcrita (hueco en el cuadernillo)",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "Microondas",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "Ondas de radio",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "Infrarrojo",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "Ultravioleta",
+       "isCorrect": true
+      }
+     ]
+    },
+    {
+     "position": 20,
+     "type": "multiple_choice",
+     "stem": "En el espectro electromagnético, entre el intervalo de frecuencias correspondientes a radiación infrarroja y ultravioleta, se encuentran las frecuencias referidas a",
+     "correctKey": "B",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "figureNote": null,
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "los rayos X.",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "la luz visible.",
+       "isCorrect": true
+      },
+      {
+       "key": "C",
+       "text": "las microondas.",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "las radiofrecuencias.",
+       "isCorrect": false
+      },
+      {
+       "key": "E",
+       "text": "las radiaciones gamma.",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 21,
+     "type": "multiple_choice",
+     "stem": "En el contexto de una actividad escolar, un grupo de estudiantes hace pasar luz blanca hacia prismas cuadrados de iguales dimensiones, pero de distinto tipo: uno transparente, uno translúcido verde y uno translúcido rojo. En el lado opuesto del cual incide la luz, ubican una pantalla blanca a una distancia fija del prisma transparente, y registran los colores observados en ella. Luego, repiten el procedimiento utilizando los prismas translúcidos, uno a la vez. Considerando lo anterior, ¿cuál de las siguientes hipótesis es acorde con el procedimiento realizado por el grupo de estudiantes?",
+     "correctKey": "D",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "figureNote": null,
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "La distancia de la pantalla a los prismas afecta a la luz que incide en estos.",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "El material del prisma influye en la incidencia de la luz en él.",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "La luz blanca está compuesta por rayos monocromáticos.",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "El color del prisma influye en la luz que este transmite.",
+       "isCorrect": true
+      }
+     ]
+    },
+    {
+     "position": 22,
+     "type": "multiple_choice",
+     "stem": "Bluetooth es una tecnología inalámbrica de corto alcance, funciona en un rango de 10m aproximadamente, y permite la comunicación inalámbrica de datos entre dispositivos digitales, por ejemplo, entre un teléfono celular y un parlante. Los datos se transmiten a través de ondas de radio de, aproximadamente, 2,4 GHz. Respecto a la radiación que utiliza Bluetooth para su funcionamiento es correcto afirmar que:",
+     "correctKey": "C",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "figureNote": null,
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "es la de mayor frecuencia del espectro electromagnético.",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "es parte del espectro electromagnético que es visible para el ser humano.",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "corresponde a una radiación de mayor longitud de onda que la longitud de onda del infrarrojo.",
+       "isCorrect": true
+      },
+      {
+       "key": "D",
+       "text": "forma parte de las ondas que pueden ser percibidas por el oído humano.",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 23,
+     "type": "multiple_choice",
+     "stem": "La lente delgada L forma la imagen I del objeto O. La imagen se ubica en el punto Q cuando el objeto se coloca en el punto P, como indica la figura. I P Q O L Si se usa la misma lente, y ahora el objeto O se ubica en el punto Q, el esquema que mejor muestra la imagen I que formará la lente es O",
+     "correctKey": "B",
+     "responseFormat": "choice",
+     "hasFigure": true,
+     "figureNote": "Figura no transcrita (hueco en el cuadernillo)",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "P Q I L O",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "P Q I L I O",
+       "isCorrect": true
+      },
+      {
+       "key": "C",
+       "text": "P Q L I O",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "Q P L O",
+       "isCorrect": false
+      },
+      {
+       "key": "E",
+       "text": "I P Q L",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 24,
+     "type": "multiple_choice",
+     "stem": "En un laboratorio de óptica se hace incidir un conjunto de tres haces paralelos de luz láser de potencia fija sobre un arreglo de lentes, tal como se representa en la siguiente figura: Respecto del patrón de haces de luz observado, ¿cuál de las siguientes opciones señala correctamente el objetivo que se pretende lograr con el experimento descrito?",
+     "correctKey": "C",
+     "responseFormat": "choice",
+     "hasFigure": true,
+     "figureNote": "Figura no transcrita (hueco en el cuadernillo)",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "Cambiar el ángulo de incidencia del conjunto de láseres en ambos lentes.",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "Aumentar la amplitud del conjunto de láseres en ambos lentes.",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "Aumentar la separación entre los distintos haces de luz láser.",
+       "isCorrect": true
+      },
+      {
+       "key": "D",
+       "text": "Focalizar los distintos haces de luz láser en un único punto.",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 25,
+     "type": "multiple_choice",
+     "stem": "Un estudiante observa el gráfico velocidad versus tiempo de un repartidor en bicicleta que avanza por una calle recta después de partir desde el reposo. El gráfico muestra que la velocidad del ciclista aumenta de manera uniforme con el tiempo, por lo que el movimiento puede modelarse como un MRUA. A partir del análisis del gráfico, el estudiante desea proponer una pregunta de investigación coherente con la información representada ¿Cuál de las siguientes opciones corresponde a la pregunta de investigación más coherente que surge directamente a partir del gráfico?",
+     "correctKey": "A",
+     "responseFormat": "choice",
+     "hasFigure": true,
+     "figureNote": "Figura no transcrita (hueco en el cuadernillo)",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "¿Qué relación existe entre el tiempo transcurrido y la velocidad del ciclista durante su movimiento?",
+       "isCorrect": true
+      },
+      {
+       "key": "B",
+       "text": "¿Cómo se podría determinar la distancia recorrida por el ciclista a partir del gráfico presentado?",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "¿De qué manera la aceleración del ciclista se representa en la pendiente del gráfico velocidad versus tiempo?",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "¿Qué cambios se observarían en el movimiento si el ciclista continuara avanzando con velocidad constante después de los 10s?",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 26,
+     "type": "multiple_choice",
+     "stem": "Un estudiante ubica un bloque en la parte más alta de un plano inclinado muy largo, lo empuja brevemente, con una fuerza paralela a la superficie, midiendo cuánto tarda en llegar hasta la base del plano. Luego repite el procedimiento varias veces, con las mismas condiciones iniciales, pero recubriendo la superficie del plano inclinado con un material diferente cada vez. Al respecto, ¿cuál de las siguientes fuerzas se asocia directamente con la variable independiente del procedimiento descrito?",
+     "correctKey": "C",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "figureNote": null,
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "La fuerza peso.",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "La fuerza normal.",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "La fuerza de roce.",
+       "isCorrect": true
+      },
+      {
+       "key": "D",
+       "text": "La fuerza aplicada.",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 27,
+     "type": "multiple_choice",
+     "stem": "En una clase de física, se analizan las fuerzas que actúan sobre un cuerpo que está en reposo sobre una superficie horizontal. Los estudiantes P, Q, R y S, entregan diferentes afirmaciones para explicar cuáles son las fuerzas que actúan sobre el cuerpo y sus características. Al respecto, ¿cuál de las siguientes opciones indica una afirmación correcta entregada por uno de los estudiantes?",
+     "correctKey": "B",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "figureNote": null,
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "El estudiante P afirma que actúan la fuerza peso y la fuerza normal, ambas con igual módulo y diferente dirección.",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "El estudiante Q afirma que actúan la fuerza peso y la fuerza normal, ambas con igual módulo y dirección, pero sentido contrario.",
+       "isCorrect": true
+      },
+      {
+       "key": "C",
+       "text": "El estudiante R afirma que actúan la fuerza peso y la fuerza normal, y que ambas son un par de fuerzas acción y reacción.",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "El estudiante S afirma que actúan la fuerza peso, la fuerza normal y la fuerza de roce, todas estas con igual módulo y sentido. 28. Un carro es tirado por una cuerda ideal sobre una superficie lisa moviéndose hacia la derecha como se muestra en la imagen ¿Cuál de las opciones indica el vector que representa la fuerza neta sobre el carro?",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 28,
+     "type": "multiple_choice",
+     "stem": "Un carro es tirado por una cuerda ideal sobre una superficie lisa moviéndose hacia la derecha como se muestra en la imagen ¿Cuál de las opciones indica el vector que representa la fuerza neta sobre el carro?",
+     "correctKey": null,
+     "responseFormat": "choice",
+     "hasFigure": true,
+     "figureNote": "Alternativas solo gráficas: no hay rótulos en la capa de texto · alternativas reconstruidas como figuras sin transcribir",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "(alternativa A: figura no extraída del cuadernillo)",
+       "isCorrect": false,
+       "isImage": true
+      },
+      {
+       "key": "B",
+       "text": "(alternativa B: figura no extraída del cuadernillo)",
+       "isCorrect": false,
+       "isImage": true
+      },
+      {
+       "key": "C",
+       "text": "(alternativa C: figura no extraída del cuadernillo)",
+       "isCorrect": false,
+       "isImage": true
+      },
+      {
+       "key": "D",
+       "text": "(alternativa D: figura no extraída del cuadernillo)",
+       "isCorrect": false,
+       "isImage": true
+      }
+     ]
+    },
+    {
+     "position": 29,
+     "type": "multiple_choice",
+     "stem": "Una persona aplica una fuerza de magnitud 30 N a un resorte ideal, logrando que se estire 20 cm, quedando en equilibrio. Al respecto, ¿cuál es la fuerza que habrá que aplicarle para que se estire 45 cm?",
+     "correctKey": "B",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "figureNote": null,
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "97,5 N",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "67,5 N",
+       "isCorrect": true
+      },
+      {
+       "key": "C",
+       "text": "43,5 N",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "37,5 N",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 30,
+     "type": "multiple_choice",
+     "stem": "Una empresa que fabrica resortes para amortiguadores, debe pegar en las cajas contenedoras un rótulo con información sobre sus características dependiendo de las necesidades de sus clientes. A continuación, se muestran los cuatro rótulos que dispone la empresa: Rótulo 1 Rótulo 2 Longitud natural 45 cm Rótulo 3 Rótulo 4 Fuerza Deformación aplicada (N) (cm) 0 0 5000 5 10000 10 15000 15 20000 20 Si un cliente solicitara información sobre un amortiguador que sea capaz de resistir una cantidad de carga específica y comprimirse hasta una cierta parte de su largo inicial, ¿qué rótulo debería pegar la empresa en las cajas contenedoras para satisfacer la solicitud del cliente?",
+     "correctKey": "C",
+     "responseFormat": "choice",
+     "hasFigure": true,
+     "figureNote": "Figura no transcrita (hueco en el cuadernillo)",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "Rótulo 1.",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "Rótulo 2.",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "Rótulo 3.",
+       "isCorrect": true
+      },
+      {
+       "key": "D",
+       "text": "Rótulo 4.",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 31,
+     "type": "multiple_choice",
+     "stem": "En el año 2008 hizo erupción el volcán Chaitén en la región de Los Lagos. La erupción consistió en la liberación de material piroclástico y, un mes después de finalizada la erupción, unos científicos exploraron la zona para estudiar la presencia de material liberado por el volcán en dicho evento. Al respecto, ¿cuál de las siguientes hipótesis podrían someter a prueba los científicos en su exploración?",
+     "correctKey": "C",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "figureNote": null,
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "El ritmo de subducción en la región ha aumentado.",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "Las grietas en el suelo se forman en los alrededores del volcán.",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "El tamaño de las rocas volcánicas es mayor en las cercanías del volcán que en lugares alejados.",
+       "isCorrect": true
+      },
+      {
+       "key": "D",
+       "text": "La temperatura de la cámara magmática del volcán es mayor que la de otros volcanes del mismo borde tectónico.",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 32,
+     "type": "multiple_choice",
+     "stem": "Un grupo de personas estudia el comportamiento de ciertas placas tectónicas, R, V, J, T y H, las cuales presentan un movimiento que está representado con flechas, tal como se muestra en la siguiente figura: R H T V J En relación con el análisis de la figura, ¿cuál de las siguientes inferencias es correcta?",
+     "correctKey": "C",
+     "responseFormat": "choice",
+     "hasFigure": true,
+     "figureNote": "Figura no transcrita (hueco en el cuadernillo)",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "En el límite entre H y J podría existir subducción.",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "En el límite entre V y J podría existir subducción.",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "En el límite entre V y R podría existir una dorsal oceánica.",
+       "isCorrect": true
+      },
+      {
+       "key": "D",
+       "text": "En el límite entre T y V podría existir una dorsal oceánica.",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 33,
+     "type": "multiple_choice",
+     "stem": "Un grupo de investigadores viaja a la Antártica para indagar sobre el pasado geológico de nuestro planeta. En el desarrollo de su investigación descubren bajo una profunda capa de hielo, fósiles que indican la presencia de grandes zonas boscosas en el pasado. Al respecto, ¿cuál de las siguientes opciones relaciona el descubrimiento con la teoría de la deriva continental?",
+     "correctKey": "A",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "figureNote": null,
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "Los continentes cambian sus posiciones a lo largo del tiempo.",
+       "isCorrect": true
+      },
+      {
+       "key": "B",
+       "text": "Los bordes de los continentes encajan entre sí.",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "Existen cordilleras con la misma edad y clase de rocas.",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "Existen rocas con la misma orientación magnética en distintos continentes.",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 34,
+     "type": "multiple_choice",
+     "stem": "Para un experimento se dispone de diez barras de grafito de igual ancho y distinta longitud. Se mide la resistencia eléctrica de dichas barras para establecer una relación entre ella y la longitud de cada barra. Además del instrumento que mide la resistencia eléctrica, ¿cuál de los siguientes materiales es suficiente y necesario para establecer la relación entre ambas variables?",
+     "correctKey": "A",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "figureNote": null,
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "Una regla",
+       "isCorrect": true
+      },
+      {
+       "key": "B",
+       "text": "Una batería",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "Una ampolleta",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "Un amperímetro",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 35,
+     "type": "multiple_choice",
+     "stem": "Un grupo de estudiantes realiza un experimento en clases y determina la potencia eléctrica de tres circuitos compuestos por varias resistencias, conectados a una misma fuente de poder de voltaje constante. Los resultados se presentan en la siguiente tabla: Considerando lo anterior, ¿qué inferencia correcta puede plantear el grupo de estudiantes?",
+     "correctKey": "D",
+     "responseFormat": "choice",
+     "hasFigure": true,
+     "figureNote": "Figura no transcrita (hueco en el cuadernillo)",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "El voltaje en cada resistencia es el mismo.",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "Los circuitos tienen el mismo tipo de conexión.",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "Los circuitos tienen igual cantidad de resistencias.",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "La resistencia equivalente es la misma para todos los circuitos.",
+       "isCorrect": true
+      }
+     ]
+    },
+    {
+     "position": 36,
+     "type": "multiple_choice",
+     "stem": "Una familia desea reducir la energía eléctrica que requiere para extraer agua desde un pozo profundo mediante un motor eléctrico. Para ello, pueden conseguir en su comunidad cuatro tipos de motores, los que dependiendo de su fabricación deben funcionar cierto tiempo al día: Motor A: 900 W durante 2 horas. Motor B: 700 W durante 3 horas. Motor C: 600 W durante 3,5 horas. Motor D: 800 W durante 2,5 horas. Si todas las combinaciones de motor y tiempo le permiten a la familia asegurar su consumo de agua al día, ¿cuál de los motores es la mejor alternativa para ahorrar en la cuenta de la luz?",
+     "correctKey": "A",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "figureNote": null,
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "El motor A.",
+       "isCorrect": true
+      },
+      {
+       "key": "B",
+       "text": "El motor B.",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "El motor C.",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "El motor D.",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 37,
+     "type": "multiple_choice",
+     "stem": "En una historia de ciencia ficción, una persona explorando un planeta encuentra una extraña sustancia que brilla intensamente. Al analizarla, descubre que tiene diversas propiedades. En relación con lo anterior y considerando que el planeta presenta los mismos elementos químicos y condiciones de la Tierra, ¿cuál de las siguientes opciones señala un procedimiento resumido que debería implementar la persona para determinar si la sustancia encontrada es una mezcla o una sustancia pura?",
+     "correctKey": "B",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "figureNote": null,
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "Determinar si la sustancia tiene nuevas propiedades físicas.",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "Determinar si la sustancia se puede separar por medios físicos.",
+       "isCorrect": true
+      },
+      {
+       "key": "C",
+       "text": "Determinar si la sustancia es capaz de disolverse en agua.",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "Determinar si la sustancia es conductora de electricidad.",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 38,
+     "type": "multiple_choice",
+     "stem": "El petróleo es un líquido viscoso de color negro resultante de la descomposición bacteriana de la materia orgánica que por millones de años se acumuló en las profundidades de la corteza terrestre. Una técnica utilizada para separar los compuestos que forman parte del petróleo consiste en aplicar un aumento de la temperatura para ir colectando los diferentes compuestos en base a su temperatura de ebullición. Al respecto, ¿cuál de las siguientes opciones corresponde a la técnica que permite separar y colectar los compuestos derivados del petróleo?",
+     "correctKey": "D",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "figureNote": null,
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "Filtración",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "Tamizado",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "Decantación",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "Destilación fraccionada",
+       "isCorrect": true
+      }
+     ]
+    },
+    {
+     "position": 39,
+     "type": "multiple_choice",
+     "stem": "Se presentan las siguientes especies químicas: ¿Cuál de las siguientes características tienen en común estas tres especies?",
+     "correctKey": "C",
+     "responseFormat": "choice",
+     "hasFigure": true,
+     "figureNote": "Figura no transcrita (hueco en el cuadernillo)",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "Poseen el mismo número de protones.",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "Poseen el mismo número de neutrones.",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "Poseen el mismo número de electrones.",
+       "isCorrect": true
+      },
+      {
+       "key": "D",
+       "text": "Poseen el mismo número másico.",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 40,
+     "type": "multiple_choice",
+     "stem": "Un científico propuso lo siguiente para la estructura del átomo: sugiere la existencia de dos áreas separadas en él. Un núcleo de pequeño volumen, comparado con el volumen del átomo, que contiene un determinado número de partículas con carga positiva (protones), y que concentra la mayor parte de la masa del átomo y una zona distante, alrededor de este núcleo, donde se encontraría un número igual de partículas con carga negativa (electrones) girando a alta velocidad, en trayectorias denominadas órbitas. La atracción entre cargas eléctricas positivas y negativas mantendría unidas ambas áreas del átomo. Al respecto, ¿cuál de las siguientes opciones es una inferencia correcta a partir de lo propuesto por el científico?",
+     "correctKey": "A",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "figureNote": null,
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "Los electrones tienen una masa mucho menor que la de los protones.",
+       "isCorrect": true
+      },
+      {
+       "key": "B",
+       "text": "La masa total del átomo está dada por los electrones.",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "Los protones y los electrones se repelen.",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "Los átomos son indivisibles.",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 41,
+     "type": "multiple_choice",
+     "stem": "Un estudiante planteó lo siguiente: “El KMnO4 sirve para diferenciar alquenos de aldehídos”, para ello preparó 6 tubos de ensayo y añadió a cada tubo 5 mL de 6 muestras de aldehídos diferentes y conocidos. Luego agregó 1 mL de KMnO4, anotando los datos obtenidos. Estos se muestran en la tabla a continuación: Tubo Compuestos orgánicos Reacción con KMnO4 1 Metanal (+) 2 Pentanal (+) 3 Benzaldehído (+) 4 2-etilbutanal (+) 5 2,3,4-trimetilpentanal (+) 6 Etanal (+) (+): Hay reacción (–): No hay reacción En relación a lo planteado en el enunciado y a los datos obtenidos, ¿cuál de las siguientes opciones es correcta?",
+     "correctKey": "A",
+     "responseFormat": "choice",
+     "hasFigure": true,
+     "figureNote": "Figura no transcrita (hueco en el cuadernillo)",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "El procedimiento experimental está planteado incorrectamente debido a que solo utiliza aldehídos.",
+       "isCorrect": true
+      },
+      {
+       "key": "B",
+       "text": "Los datos obtenidos son consistentes con lo planteado por el estudiante, ya que permiten diferenciar entre alquenos y aldehídos.",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "El procedimiento experimental está planteado incorrectamente por lo que los datos obtenidos presentan errores.",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "El procedimiento experimental permite comprobar el objetivo planteado por el estudiante diferenciando alquenos y aldehídos.",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 42,
+     "type": "multiple_choice",
+     "stem": "Con respecto a la siguiente molécula: O OH O CH3 O ¿Cuál de los siguientes grupos funcionales se encuentra presente en ella?",
+     "correctKey": "D",
+     "responseFormat": "choice",
+     "hasFigure": true,
+     "figureNote": "Figura no transcrita (hueco en el cuadernillo)",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "Aldehído",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "Cetona",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "Alcohol",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "Éster",
+       "isCorrect": true
+      },
+      {
+       "key": "E",
+       "text": "Éter",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 43,
+     "type": "multiple_choice",
+     "stem": "Un grupo de estudiantes determina experimentalmente la temperatura de ebullición de cuatro alcoholes de cadena lineal. Los resultados obtenidos se presentan a continuación: Alcohol N° de átomos de Carbono T° de ebullición Butan-1-ol 4 118°C Pentan-1-ol 5 138°C Hexan-1-ol 6 157°C Heptan-1-ol 7 176°C Para comunicar la relación entre el número de átomos de carbono y la temperatura de ebullición, ¿cuál de los siguientes recursos es el más adecuado?",
+     "correctKey": "B",
+     "responseFormat": "choice",
+     "hasFigure": true,
+     "figureNote": "Figura no transcrita (hueco en el cuadernillo)",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "Un gráfico circular que muestre el porcentaje correspondiente a cada alcohol.",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "Un gráfico que ubique el número de átomos de carbono en el eje horizontal y la temperatura de ebullición en el eje vertical.",
+       "isCorrect": true
+      },
+      {
+       "key": "C",
+       "text": "Un esquema que muestre únicamente las estructuras moleculares de los cuatro alcoholes.",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "Un texto que describa el orden en que se realizaron las mediciones experimentales.",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 44,
+     "type": "multiple_choice",
+     "stem": "Una docente presenta a sus estudiantes la siguiente estructura: De acuerdo con las reglas de nomenclatura orgánica, ¿cuál es el nombre correcto del compuesto?",
+     "correctKey": "A",
+     "responseFormat": "choice",
+     "hasFigure": true,
+     "figureNote": "Figura no transcrita (hueco en el cuadernillo)",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "3-metilpent-2-eno",
+       "isCorrect": true
+      },
+      {
+       "key": "B",
+       "text": "3-metilpent-3-eno",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "2-etilbut–1-eno",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "3-metilpentano",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 45,
+     "type": "multiple_choice",
+     "stem": "En el contexto de un experimento escolar, un grupo de estudiantes hace reaccionar completamente dos reactivos (X e Y) con el fin de obtener un producto X nYm. Las cantidades específicas de X e Y, para dos ensayos de formación de X nYm, se presentan en el siguiente gráfico: En relación con el análisis del gráfico, ¿cuál de las siguientes conclusiones es correcta para la formación del producto XnYm?",
+     "correctKey": "D",
+     "responseFormat": "choice",
+     "hasFigure": true,
+     "figureNote": "Figura no transcrita (hueco en el cuadernillo)",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "La cantidad de sustancia de X y de Y que se combinan deben ser iguales.",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "La proporción de la cantidad de sustancia en que los reactivos X e Y se combinan es variable.",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "La cantidad de sustancia obtenida es igual a la suma de la cantidad de sustancia de los reactivos X e Y.",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "Los reactivos X e Y se combinan en la misma proporción en mol, en ambos ensayos.",
+       "isCorrect": true
+      }
+     ]
+    },
+    {
+     "position": 46,
+     "type": "multiple_choice",
+     "stem": "La combustión del metano se representa por la ecuación ¿Qué masa de CO2 se produce por la combustión completa de 32 g de metano?",
+     "correctKey": "A",
+     "responseFormat": "choice",
+     "hasFigure": true,
+     "figureNote": "Figura no transcrita (hueco en el cuadernillo)",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "88 g",
+       "isCorrect": true
+      },
+      {
+       "key": "B",
+       "text": "44 g",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "32 g",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "22 g",
+       "isCorrect": false
+      },
+      {
+       "key": "E",
+       "text": "16 g",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 47,
+     "type": "multiple_choice",
+     "stem": "¿Qué masa de oxígeno hay en 200 g de SO3?",
+     "correctKey": "E",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "figureNote": null,
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "16 g",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "32 g",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "48 g",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "80 g",
+       "isCorrect": false
+      },
+      {
+       "key": "E",
+       "text": "120 g",
+       "isCorrect": true
+      }
+     ]
+    },
+    {
+     "position": 48,
+     "type": "multiple_choice",
+     "stem": "Al analizar una muestra de un compuesto formado únicamente por carbono, hidrógeno y oxígeno, se determina que contiene: - 24 g de carbono - 4 g de hidrógeno - 32 g de oxígeno Considerando las masas molares C=12 g/mol, H=1 g/mol y O=16 g/mol, ¿cuál es la fórmula empírica del compuesto?",
+     "correctKey": "B",
+     "responseFormat": "choice",
+     "hasFigure": true,
+     "figureNote": "Figura no transcrita (hueco en el cuadernillo)",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "CHO",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "CH2O",
+       "isCorrect": true
+      },
+      {
+       "key": "C",
+       "text": "C2H4O2",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "CH4O",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 49,
+     "type": "multiple_choice",
+     "stem": "Un grupo de estudiantes estudia la reacción entre carbonato de calcio y ácido clorhídrico: 𝐶𝑎𝐶𝑂! ($) + 2 𝐻𝐶𝑙 (&') → 𝐶𝑎𝐶𝑙( (&') + 𝐶𝑂( ()) + 𝐻( 𝑂 (*) En cada ensayo utilizan una masa diferente de carbonato de calcio y una cantidad de ácido clorhídrico suficiente para que este último se encuentre en exceso. El volumen de dióxido de carbono producido se mide bajo las mismas condiciones de temperatura y presión. ¿Cuál de las siguientes hipótesis es coherente con el procedimiento descrito?",
+     "correctKey": "B",
+     "responseFormat": "choice",
+     "hasFigure": true,
+     "figureNote": "Figura no transcrita (hueco en el cuadernillo)",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "Al aumentar la temperatura del sistema, aumentará la masa de carbonato de calcio utilizada.",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "Si se duplica la masa de carbonato de calcio, se duplicará el volumen de dióxido de carbono producido.",
+       "isCorrect": true
+      },
+      {
+       "key": "C",
+       "text": "Al aumentar la concentración de ácido clorhídrico, disminuirá la masa molar del dióxido de carbono.",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "El volumen de dióxido de carbono producido será independiente de la masa de carbonato de calcio.",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 50,
+     "type": "multiple_choice",
+     "stem": "Un grupo de estudiantes mezcla una disolución de ácido clorhídrico con carbonato de calcio en un matraz abierto. Antes de realizar la reacción, determinan la masa total del sistema. Luego de que finaliza la reacción, vuelven a medirla y observan que la masa registrada es menor. A partir de estos resultados, concluyen que “durante la reacción química se destruyó una parte de la materia”. ¿Cuál de las siguientes opciones corresponde a una evaluación correcta del procedimiento y de la conclusión?",
+     "correctKey": "C",
+     "responseFormat": "choice",
+     "hasFigure": true,
+     "figureNote": "Figura no transcrita (hueco en el cuadernillo)",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "La conclusión es correcta, porque las sustancias gaseosas no poseen masa.",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "La conclusión es correcta, porque los productos de una reacción siempre tienen menor masa que los reactivos.",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "La conclusión no está respaldada, porque el dióxido de carbono pudo escapar del matraz; la reacción debería repetirse en un sistema cerrado.",
+       "isCorrect": true
+      },
+      {
+       "key": "D",
+       "text": "La conclusión no está respaldada, porque la masa de una reacción química no puede medirse utilizando una balanza.",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 51,
+     "type": "multiple_choice",
+     "stem": "Un grupo de bioquímicos se encuentra realizando una investigación sobre una sustancia orgánica presente en los cítricos. En su estudio desean obtener esta sustancia orgánica a partir de diversos tipos de especies vegetales: limón, pomelo, naranja y mandarina, para lo cual realizan un procedimiento experimental de extracción. Para ello, colocan la misma masa de cáscaras y realizan por separado en cada especie de cítricos el proceso de extracción por el mismo período de tiempo y bajo las mismas condiciones de temperatura y presión. Luego, cuantifican la cantidad de sustancia orgánica obtenida. En base a lo anterior, ¿cuál de las siguientes opciones corresponde a la variable independiente utilizada por los bioquímicos en su investigación?",
+     "correctKey": "B",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "figureNote": null,
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "Tiempo de extracción",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "Especies de cítricos",
+       "isCorrect": true
+      },
+      {
+       "key": "C",
+       "text": "Temperatura de extracción",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "Masa de cáscaras de cítricos",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 52,
+     "type": "multiple_choice",
+     "stem": "Un grupo de científicos se propuso realizar un análisis comparativo entre muestras provenientes de distintos océanos. Mediante los análisis adecuados, determinaron que “las muestras de agua del mar Rojo alcanzaron una concentración de iones entre 42 y 46 g/L, las del mar Mediterráneo entre 36 y 39 g/L y las del Atlántico entre 33 y 36 g/L”. A partir de lo anterior, ¿a qué componente de la investigación científica se asocia la frase entre comillas?",
+     "correctKey": "B",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "figureNote": null,
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "A una hipótesis",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "A un resultado",
+       "isCorrect": true
+      },
+      {
+       "key": "C",
+       "text": "A una inferencia",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "A un procedimiento",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 53,
+     "type": "multiple_choice",
+     "stem": "En el laboratorio un grupo de estudiantes prepara diferentes diluciones a partir de una solución de sulfato de cobre 1 mol/L que se encuentra en un vaso de precipitados de 500 mL. Las nuevas diluciones tienen una concentración de 0,5, 0,25 y 0,1 mol/L en un volumen final de 100 mL cada una. Para ello, tomaron 50, 25 y 10 mL respectivamente. Finalmente, guardan el resto de la solución de sulfato de cobre inicial en una botella de 250 mL a 4 °C. Considerando que el procedimiento experimental se realizó correctamente, ¿cuál de las opciones señala el material indispensable para medir una variable controlada en este proceso?",
+     "correctKey": "C",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "figureNote": null,
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "Vaso de precipitados de 500 mL.",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "Probeta graduada de 50 mL.",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "Matraz de aforo de 100 mL.",
+       "isCorrect": true
+      },
+      {
+       "key": "D",
+       "text": "Botella de vidrio de 250 mL.",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 54,
+     "type": "multiple_choice",
+     "stem": "En un laboratorio se requiere preparar 250 mL de una disolución acuosa de NaCl de concentración 0,10 mol/L. La masa molar del NaCl es 58,5 g/mol. ¿Cuál de los siguientes procedimientos permite preparar correctamente la disolución?",
+     "correctKey": "C",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "figureNote": null,
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "Pesar 2,93 g de NaCl, disolverlos en una pequeña cantidad de agua, transferir la disolución a un matraz de aforo de 250 mL y completar con agua hasta la marca.",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "Pesar 5,85 g de NaCl, depositarlos en un vaso de precipitados y agregar exactamente 250 mL de agua.",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "Pesar 5,85 g de NaCl, disolverlos y completar con agua hasta un volumen final de 250 mL.",
+       "isCorrect": true
+      },
+      {
+       "key": "D",
+       "text": "Pesar 2,93 g de NaCl, disolverlos y completar con agua hasta un volumen final de 500 mL. 55. Un lápiz de 17 cm de altura se coloca a 50 cm de un espejo plano de 100 cm de altura y 60 cm de ancho, que se ubica sobre una pared, registrándose la altura de la imagen formada. Luego, el lápiz se acerca 5 cm hacia el espejo y se repite la medición. El procedimiento se repite 8 veces, acercando el lápiz al espejo 5 cm en cada oportunidad. De acuerdo con la información dada, ¿cuál de las siguientes opciones presenta correctamente las variables del experimento?",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 55,
+     "type": "multiple_choice",
+     "stem": "Un lápiz de 17 cm de altura se coloca a 50 cm de un espejo plano de 100 cm de altura y 60 cm de ancho, que se ubica sobre una pared, registrándose la altura de la imagen formada. Luego, el lápiz se acerca 5 cm hacia el espejo y se repite la medición. El procedimiento se repite 8 veces, acercando el lápiz al espejo 5 cm en cada oportunidad. De acuerdo con la información dada, ¿cuál de las siguientes opciones presenta correctamente las variables del experimento?",
+     "correctKey": "D",
+     "responseFormat": "choice",
+     "hasFigure": true,
+     "figureNote": "Alternativas solo gráficas: no hay rótulos en la capa de texto · alternativas reconstruidas como figuras sin transcribir",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "(alternativa A: figura no extraída del cuadernillo)",
+       "isCorrect": false,
+       "isImage": true
+      },
+      {
+       "key": "B",
+       "text": "(alternativa B: figura no extraída del cuadernillo)",
+       "isCorrect": false,
+       "isImage": true
+      },
+      {
+       "key": "C",
+       "text": "(alternativa C: figura no extraída del cuadernillo)",
+       "isCorrect": false,
+       "isImage": true
+      },
+      {
+       "key": "D",
+       "text": "(alternativa D: figura no extraída del cuadernillo)",
+       "isCorrect": true,
+       "isImage": true
+      }
+     ]
+    },
+    {
+     "position": 56,
+     "type": "multiple_choice",
+     "stem": "Un grupo de estudiantes tiene como proyecto escolar demostrar que las lentes convergentes son capaces de generar imágenes reales, si el objeto se ubica en alguna posición determinada. Para llevar a cabo el proyecto, ¿cuál de las siguientes opciones considera el mejor montaje experimental?",
+     "correctKey": "C",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "figureNote": null,
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "Elegir distintos tipos de lentes divergentes y convergentes para ver qué tipo de imagen forma un objeto puesto a iguales distancias de ellas.",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "En alguna lente divergente colocar un objeto a diferentes distancias de ella para ver qué tipo de imagen forma.",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "En una lente convergente colocar un objeto a diferentes distancias de ella, para ver qué tipo de imagen forma.",
+       "isCorrect": true
+      },
+      {
+       "key": "D",
+       "text": "En lentes divergentes de distintas distancias focales, colocar un objeto a una misma distancia de cada una, para ver qué imagen forma.",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 57,
+     "type": "multiple_choice",
+     "stem": "En verano, se recomienda utilizar protector solar incluso si se va a estar bajo el agua, como ocurre al bañarse en una piscina o en el mar. ¿Cuál es la fundamentación de la recomendación anterior?",
+     "correctKey": "B",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "figureNote": null,
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "El agua refleja luz solar.",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "El agua transmite parte de la luz solar.",
+       "isCorrect": true
+      },
+      {
+       "key": "C",
+       "text": "En el agua, la luz solar cambia su rapidez.",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "Una parte de la luz solar es absorbida por el agua.",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 58,
+     "type": "multiple_choice",
+     "stem": "Tres estaciones espaciales 𝑃, 𝑄 y 𝑅 están constantemente comunicadas mediante ondas de radio emitidas con una misma frecuencia 𝑓. En cierto momento, las tres estaciones se desplazan con la misma rapidez 𝑣, pero en los sentidos indicados en la siguiente figura: 𝑣 𝑣 𝑣 𝑃 𝑄 𝑅 ¿Cuál de las siguientes opciones corresponde a una predicción que debiese cumplirse para la frecuencia de la onda de radio captada en las estaciones espaciales?",
+     "correctKey": "C",
+     "responseFormat": "choice",
+     "hasFigure": true,
+     "figureNote": "Figura no transcrita (hueco en el cuadernillo)",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "𝑃 capta de 𝑄 una señal de frecuencia mayor que 𝑓.",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "𝑅 capta de 𝑃 una señal de frecuencia menor que 𝑓.",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "𝑄 capta de 𝑅 una señal de frecuencia mayor que 𝑓.",
+       "isCorrect": true
+      },
+      {
+       "key": "D",
+       "text": "𝑄 capta de 𝑃 una señal de frecuencia menor que 𝑓.",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 59,
+     "type": "multiple_choice",
+     "stem": "Un grupo de estudiantes desea observar los patrones de interferencia generados al ubicar una fuente puntual de luz láser frente a un papel con dos rendijas muy finas y muy juntas entre sí. Si luego desean modificar el experimento e igualmente observar un patrón de interferencia, ¿de qué es indispensable que se aseguren?",
+     "correctKey": "A",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "figureNote": null,
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "De que la distancia entre las rendijas sea similar.",
+       "isCorrect": true
+      },
+      {
+       "key": "B",
+       "text": "De utilizar una fuente de luz láser de la misma intensidad.",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "De utilizar una fuente de luz láser del mismo color original.",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "De ubicar el láser a la misma distancia del papel con las rendijas.",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 60,
+     "type": "multiple_choice",
+     "stem": "En un laboratorio se comparan cuatro fuentes luminosas que emiten radiación electromagnética. Se sabe que, en todas ellas, solo el 6% de la potencia total se transforma en luz visible, mientras que el resto se emite como radiación no visible. Para cada fuente se registró la potencia total y el radio de la superficie emisora, como se muestra en la siguiente tabla: Potencia Radio de la superficie Fuente total (W) emisora (cm) M 80 2 N 180 3 P 200 4 Q 120 2 Considerando que la intensidad de luz visible sobre la superficie emisora depende de la potencia visible emitida y del área de dicha superficie, se puede afirmar que la intensidad de luz visible es:",
+     "correctKey": "D",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "figureNote": null,
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "mayor en la fuente P, porque corresponde a la fuente que presenta la mayor potencia total registrada.",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "menor en la fuente M, porque corresponde a la fuente que presenta la menor potencia total registrada.",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "igual en las fuentes M y Q, porque ambas presentan el mismo radio de superficie emisora.",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "mayor en la fuente Q, porque presenta una mayor razón entre potencia visible y superficie emisora.",
+       "isCorrect": true
+      }
+     ]
+    },
+    {
+     "position": 61,
+     "type": "multiple_choice",
+     "stem": "Una guitarra se encuentra a 2 m de una lente divergente y sobre la línea del eje óptico. Al respecto, ¿cuál de los siguientes pares de características posee la imagen de la guitarra formada por la lente?",
+     "correctKey": "B",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "figureNote": null,
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "Es real y más pequeña que la guitarra.",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "Es virtual y más pequeña que la guitarra.",
+       "isCorrect": true
+      },
+      {
+       "key": "C",
+       "text": "Es real y de igual tamaño que la guitarra.",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "Es virtual y de igual tamaño que la guitarra. 62. Un objeto se coloca frente a un espejo cóncavo de foco F y vértice V, como se representa en la siguiente figura: ¿En cuál de las siguientes opciones se presenta correctamente un par de rayos incidentes y sus respectivos rayos reflejados?",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 62,
+     "type": "multiple_choice",
+     "stem": "Un objeto se coloca frente a un espejo cóncavo de foco F y vértice V, como se representa en la siguiente figura: ¿En cuál de las siguientes opciones se presenta correctamente un par de rayos incidentes y sus respectivos rayos reflejados?",
+     "correctKey": "A",
+     "responseFormat": "choice",
+     "hasFigure": true,
+     "figureNote": "Alternativas solo gráficas: no hay rótulos en la capa de texto · alternativas reconstruidas como figuras sin transcribir",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "(alternativa A: figura no extraída del cuadernillo)",
+       "isCorrect": true,
+       "isImage": true
+      },
+      {
+       "key": "B",
+       "text": "(alternativa B: figura no extraída del cuadernillo)",
+       "isCorrect": false,
+       "isImage": true
+      },
+      {
+       "key": "C",
+       "text": "(alternativa C: figura no extraída del cuadernillo)",
+       "isCorrect": false,
+       "isImage": true
+      },
+      {
+       "key": "D",
+       "text": "(alternativa D: figura no extraída del cuadernillo)",
+       "isCorrect": false,
+       "isImage": true
+      }
+     ]
+    },
+    {
+     "position": 63,
+     "type": "multiple_choice",
+     "stem": "Un grupo de personas realiza una investigación para verificar si se cumple la ley de la reflexión de la luz en el agua. Para esto, utilizarán un puntero láser y un espejo plano que ubican dentro de un recipiente transparente lleno de agua. Al respecto, ¿cuál de los siguientes elementos es más adecuado que el grupo incluya en el montaje para cumplir con su objetivo de investigación?",
+     "correctKey": "B",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "figureNote": null,
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "Un segundo espejo plano.",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "Un transportador.",
+       "isCorrect": true
+      },
+      {
+       "key": "C",
+       "text": "Un cronómetro.",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "Una regla.",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 64,
+     "type": "multiple_choice",
+     "stem": "Una caja se coloca sobre una cinta transportadora de goma que la traslada con rapidez constante, como se representa en la siguiente figura. Al respecto, ¿cuál de las siguientes fuerzas es la principal causante de que la caja se mueva con la misma rapidez que la cinta transportadora?",
+     "correctKey": "A",
+     "responseFormat": "choice",
+     "hasFigure": true,
+     "figureNote": "Figura no transcrita (hueco en el cuadernillo)",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "La fuerza de roce estático",
+       "isCorrect": true
+      },
+      {
+       "key": "B",
+       "text": "La fuerza de tensión",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "La fuerza elástica",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "La fuerza normal",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 65,
+     "type": "multiple_choice",
+     "stem": "Una persona toma dos cuerpos de distinta masa, material y dimensiones, pone uno sobre el otro y los empuja sobre una superficie horizontal. Luego, los intercambia de posición y vuelve a empujar el conjunto de cuerpos sobre la misma superficie asegurándose de que la velocidad inicial sea la misma en ambos casos. La persona observa que en las dos situaciones recorren distintas distancias antes de detenerse. En relación con lo anterior, ¿cuál de las siguientes opciones señala la variable responsable de lo observado por la persona?",
+     "correctKey": "C",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "figureNote": null,
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "Las dimensiones de los cuerpos.",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "Las masas de los cuerpos.",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "Los materiales de los cuerpos.",
+       "isCorrect": true
+      },
+      {
+       "key": "D",
+       "text": "La superficie en la que se mueven los cuerpos.",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 66,
+     "type": "multiple_choice",
+     "stem": "Una persona mueve un mueble de su hogar mediante una fuerza 𝐹⃗ horizontal constante, desde un punto P hacia un punto Q, sobre una superficie de roce despreciable, excepto cuando pasa sobre una alfombra, sobre la cual la fuerza de roce 𝐹⃗𝑅 es de igual magnitud que la fuerza 𝐹⃗ . Esta situación se representa en la siguiente figura: 𝐹⃗ 𝐹⃗𝑅 𝐹⃗ 𝐹⃗ P Alfombra Q ሬሬሬ ሬሬሬ Al respecto, ¿cómo es la aceleración del mueble durante el trayecto descrito?",
+     "correctKey": "A",
+     "responseFormat": "choice",
+     "hasFigure": true,
+     "figureNote": "Figura no transcrita (hueco en el cuadernillo)",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "De igual valor antes y después de pasar por la alfombra.",
+       "isCorrect": true
+      },
+      {
+       "key": "B",
+       "text": "De menor valor después de pasar por la alfombra que antes de pasar por ella.",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "Creciente durante todo el trayecto, excepto en su paso por la alfombra, donde es constante.",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "Creciente durante todo el trayecto, excepto en su paso por la alfombra, donde es decreciente.",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 67,
+     "type": "multiple_choice",
+     "stem": "Un grupo de estudiantes desea estudiar las fuerzas que están actuando sobre una persona mientras se desliza por un tobogán, tal como se representa en la siguiente figura: Si durante la caída la persona se desliza con aceleración constante y su ropa en contacto con el tobogán experimenta un aumento en la temperatura, ¿cuál de los siguientes diagramas indica la dirección de la fuerza directamente responsable del aumento de temperatura de su ropa?",
+     "correctKey": "D",
+     "responseFormat": "choice",
+     "hasFigure": true,
+     "figureNote": "Alternativas gráficas en grilla; las figuras no están en la capa de texto",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "(figura A)",
+       "isCorrect": false,
+       "isImage": true
+      },
+      {
+       "key": "B",
+       "text": "(figura B)",
+       "isCorrect": false,
+       "isImage": true
+      },
+      {
+       "key": "C",
+       "text": "(figura C)",
+       "isCorrect": false,
+       "isImage": true
+      },
+      {
+       "key": "D",
+       "text": "(figura D)",
+       "isCorrect": true,
+       "isImage": true
+      }
+     ]
+    },
+    {
+     "position": 68,
+     "type": "multiple_choice",
+     "stem": "Un equipo realiza una investigación sobre la fuerza de roce entre un bloque y una superficie horizontal y rugosa. Durante el experimento, el bloque es desplazado aplicándole una fuerza horizontal, cuya magnitud se representa en el siguiente gráfico. Magnitud de la 20 fuerza (N) 0 5 7 8 Tiempo (s) Considerando que a los 5 s el bloque comienza a moverse y a los 8 s se detiene, ¿qué instrumentos de medición son suficientes para obtener los datos graficados?",
+     "correctKey": "B",
+     "responseFormat": "choice",
+     "hasFigure": true,
+     "figureNote": "Figura no transcrita (hueco en el cuadernillo)",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "Una balanza y un dinamómetro.",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "Un dinamómetro y un cronómetro.",
+       "isCorrect": true
+      },
+      {
+       "key": "C",
+       "text": "Un sensor de movimiento y una balanza.",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "Un cronómetro y un sensor de movimiento.",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 69,
+     "type": "multiple_choice",
+     "stem": "La unidad de ingeniería de una empresa constructora realiza pruebas de los cables de acero que utilizan en sus grúas. Para ello, cuelgan verticalmente objetos de distinta masa al cable y miden su elongación en cada caso. Luego, con los datos obtenidos, la unidad de ingeniería realiza el siguiente gráfico entre el peso de los objetos colgados y la elongación experimentada por el cable: 6 5 4 Elongación (cm) 3 2 1 0 0 500 1000 1500 2000 2500 3000 3500 4000 4500 Peso (N) A partir de los resultados que obtuvo la unidad de ingeniería, ¿cuál de las siguientes conclusiones es correcta?",
+     "correctKey": "A",
+     "responseFormat": "choice",
+     "hasFigure": true,
+     "figureNote": "Figura no transcrita (hueco en el cuadernillo)",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "El límite elástico del cable es desconocido.",
+       "isCorrect": true
+      },
+      {
+       "key": "B",
+       "text": "La constante de elasticidad del cable es desconocida.",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "El cable se romperá cuando la fuerza sea mayor que 4000 N.",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "La constante de elasticidad para elongaciones mayores que 5 cm es nula.",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 70,
+     "type": "multiple_choice",
+     "stem": "Un resorte ideal en su estado natural mide 15 cm de longitud. Este resorte se cuelga verticalmente de uno de sus extremos y se suspende de él un bloque de 3 kg, alcanzando una longitud de 20 cm. Si la magnitud de la aceleración de m gravedad del lugar es 10 2 , ¿cuál es la constante elástica del resorte? s N",
+     "correctKey": "D",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "figureNote": null,
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "1,50 cm N",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "2,00 cm N",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "2,25 cm N",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "6,00 cm",
+       "isCorrect": true
+      }
+     ]
+    },
+    {
+     "position": 71,
+     "type": "multiple_choice",
+     "stem": "La actividad de un volcán está provocando una preocupación creciente en la población de una pequeña comunidad, la cual nunca ha presenciado una erupción volcánica. Debido a esto, la autoridad local quiere crear un afiche informativo sobre el tema para educar a la población local. ¿Cuál de las siguientes opciones presenta un tema adecuado para incluir en el afiche?",
+     "correctKey": "D",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "figureNote": null,
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "Tipos de erupciones volcánicas",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "Ranking de erupciones volcánicas con más víctimas",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "Mecanismos de formación de volcanes",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "Recomendaciones ante una erupción volcánica",
+       "isCorrect": true
+      }
+     ]
+    },
+    {
+     "position": 72,
+     "type": "multiple_choice",
+     "stem": "A un grupo de geólogas les llama la atención que la cordillera de los Andes en el norte chico de Chile es notoriamente más alta que en la zona sur del país, por lo que quieren enfocarse en el estudio de las razones de esta característica. A partir de lo anterior, ¿cuál de las siguientes opciones es una hipótesis que podría explicar adecuadamente la diferencia mencionada?",
+     "correctKey": "C",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "figureNote": null,
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "Existen lagunas sísmicas en el norte chico de Chile.",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "Existe una mayor cantidad de volcanes activos en la zona sur de Chile.",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "El ángulo de subducción de la placa de Nazca es menor en el norte chico de Chile.",
+       "isCorrect": true
+      },
+      {
+       "key": "D",
+       "text": "La divergencia entre la placa de Nazca y la placa del Pacífico es mayor en la zona sur de Chile.",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 73,
+     "type": "multiple_choice",
+     "stem": "La figura representa seis placas tectónicas, P, Q, R, S, T y U, cuyos bordes se mueven en las direcciones indicadas mediante flechas. En base a la teoría de la tectónica de placas, ¿cuál de las siguientes opciones presenta pares de placas asociadas correctamente al tipo de borde que existe entre ellas? Límite Límite Límite divergente convergente transformante",
+     "correctKey": "D",
+     "responseFormat": "choice",
+     "hasFigure": true,
+     "figureNote": "Figura no transcrita (hueco en el cuadernillo)",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "P-S S-U S-T",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "R-U S-T P-S",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "S-T P-S S-U",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "S-U P-S Q-R",
+       "isCorrect": true
+      }
+     ]
+    },
+    {
+     "position": 74,
+     "type": "multiple_choice",
+     "stem": "Se han extraído rocas del suelo oceánico, en las posiciones representadas en la imagen, a distancias similares de una dorsal. Así, las rocas extraídas del sector 3 están a igual distancia de la dorsal que las rocas sacadas del sector 4, pero al doble de distancia que las extraídas de los sectores 1 y 2. A partir de los procesos que ocurren en una dorsal, ¿cuál de las siguientes afirmaciones es correcta con respecto a las rocas de los distintos sectores?",
+     "correctKey": "D",
+     "responseFormat": "choice",
+     "hasFigure": true,
+     "figureNote": "Figura no transcrita (hueco en el cuadernillo)",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "Las rocas de los sectores 2 y 5 tienen temperatura similar.",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "Las rocas de los sectores 1 y 6 tienen igual densidad.",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "Las rocas de los sectores 3 y 4 están a igual profundidad.",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "Las rocas de los sectores 5 y 6 tienen edad similar.",
+       "isCorrect": true
+      }
+     ]
+    },
+    {
+     "position": 75,
+     "type": "multiple_choice",
+     "stem": "Se dispone de una fuente de poder conectada a un circuito eléctrico con una única resistencia eléctrica. Al ir variando de forma manual el voltaje de la fuente se obtienen los siguientes datos: Respecto de los datos anteriores ¿Cuáles son las variables dependiente e independiente en la experiencia? Variable independiente Variable dependiente",
+     "correctKey": "C",
+     "responseFormat": "choice",
+     "hasFigure": true,
+     "figureNote": "Figura no transcrita (hueco en el cuadernillo)",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "Voltaje Resistencia eléctrica",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "Resistencia eléctrica Intensidad de corriente",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "Voltaje Intensidad de corriente",
+       "isCorrect": true
+      },
+      {
+       "key": "D",
+       "text": "Intensidad de corriente Resistencia eléctrica",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 76,
+     "type": "multiple_choice",
+     "stem": "En una actividad experimental, en cierto circuito eléctrico compuesto por varias pilas conectadas en serie, dos interruptores y un resistor, circula un determinado flujo de cargas en un tiempo conocido. Si se requiere que el flujo de cargas por unidad de tiempo en el circuito aumente, ¿cuál de las siguientes acciones es la que lo permite?",
+     "correctKey": "A",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "figureNote": null,
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "Aumentar la diferencia de potencial del circuito.",
+       "isCorrect": true
+      },
+      {
+       "key": "B",
+       "text": "Aumentar la resistencia del circuito.",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "Disminuir el número de pilas.",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "Disminuir el número de interruptores.",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 77,
+     "type": "multiple_choice",
+     "stem": "Un electricista quiere instalar el circuito eléctrico en una casa, para lo que necesita la información suministrada por la ingeniera a cargo. ¿Cuál de los siguientes recursos contiene la información necesaria para realizar la instalación?",
+     "correctKey": "C",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "figureNote": null,
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "Un inventario con los artefactos eléctricos que se utilizarán en la casa.",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "Un cuadro con la cantidad de luminarias requeridas para cada habitación.",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "Un plano de la casa indicando los tipos de conexiones requeridas para cada habitación.",
+       "isCorrect": true
+      },
+      {
+       "key": "D",
+       "text": "Un folleto que describa las características de los enchufes requeridos para cada habitación de la casa.",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 78,
+     "type": "multiple_choice",
+     "stem": "Una estudiante quiere comprobar que la red domiciliaria efectivamente corresponde a un circuito en paralelo. ¿Cuál de las siguientes mediciones permite a la estudiante lograr su objetivo?",
+     "correctKey": "B",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "figureNote": null,
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "La lectura que marca el medidor de la casa.",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "La diferencia de potencial en cada enchufe de la casa.",
+       "isCorrect": true
+      },
+      {
+       "key": "C",
+       "text": "La intensidad de corriente que circula por los artefactos de la casa.",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "La resistencia eléctrica de los cables que forman el circuito de la casa.",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 79,
+     "type": "multiple_choice",
+     "stem": "El equipo técnico de una empresa de tecnología que construye aparatos eléctricos se encuentra en la fase de diseño e investigación para el desarrollo del primer modelo de televisor de la empresa. Para ello, se les ha encargado asegurarse de que el modelo que diseñarán cumpla con estándares de eficiencia energética, pero además desean que el modelo desarrollado se posicione como líder en eficiencia en relación con los modelos de otras marcas. ¿Cuál de las siguientes preguntas de investigación podría guiar la fase de diseño considerando los requerimientos de la empresa?",
+     "correctKey": "C",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "figureNote": null,
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "¿De qué depende la eficiencia energética de un televisor?",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "¿En qué consiste la eficiencia energética en el caso de un televisor?",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "¿Qué características tienen los televisores más eficientes del mercado?",
+       "isCorrect": true
+      },
+      {
+       "key": "D",
+       "text": "¿Qué componentes de un televisor influyen en su eficiencia energética?",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 80,
+     "type": "multiple_choice",
+     "stem": "Una persona investiga acerca de la eficiencia energética de algunos tipos de ampolletas. Lee que, a diferencia de una ampolleta incandescente, la cual transforma alrededor de un 5 % de su consumo eléctrico en luz, una ampolleta LED emite cerca del 50 % de la energía consumida en forma de radiación electromagnética visible. En relación con lo anterior, ¿cuál de las siguientes opciones es una conclusión coherente con la información recopilada?",
+     "correctKey": "C",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "figureNote": null,
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "El uso de ampolletas LED permite una mayor iluminación en un hogar que el uso de ampolletas incandescentes.",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "El consumo eléctrico de una ampolleta LED es mayor que el consumo de una ampolleta incandescente de similar luminosidad.",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "El cambio de las ampolletas incandescentes de similar luminosidad a LED significa un ahorro en el consumo eléctrico destinado a iluminación.",
+       "isCorrect": true
+      },
+      {
+       "key": "D",
+       "text": "El cambiar las ampolletas incandescentes de una casa por ampolletas LED de similar potencia, resulta en un ahorro del consumo eléctrico en el corto plazo.",
+       "isCorrect": false
+      }
+     ]
+    }
+   ]
+  }
+ ],
+ "pauta": {
+  "source": {
+   "instrumentJson": "CIE-E4-FIS-con-pauta.json"
+  }
+ },
+ "extraction": {
+  "itemCount": 80,
+  "warnings": [
+   "#28: recuperado sin alternativas (son imágenes)",
+   "#55: recuperado sin alternativas (son imágenes)",
+   "#62: recuperado sin alternativas (son imágenes)",
+   "#28: 0 alternativas",
+   "#55: 0 alternativas",
+   "#62: 0 alternativas",
+   "sin entrada en la tabla de especificaciones: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54]",
+   "pauta del común recuperada por emparejamiento de texto (53 ítems); la tabla de especificaciones no numeró esta mención"
+  ],
+  "needsHumanReview": true,
+  "itemsConClave": 79
+ }
+}

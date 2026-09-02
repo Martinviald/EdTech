@@ -1,0 +1,2652 @@
+{
+ "instrument": {
+  "name": "PAES CIE mención Química — Ensayo 3 (Tanda 3) · IV° Medio 2026",
+  "subject": "Ciencias — mención Química",
+  "subjectCode": "SCI",
+  "grade": "IV° Medio",
+  "gradeCode": "4TH_MEDIO",
+  "year": 2026,
+  "applicationPeriod": null,
+  "type": "paes",
+  "isOfficial": false,
+  "paes": {
+   "prueba": "CIE",
+   "tanda": "Tanda 3",
+   "mencion": "Química",
+   "appliedOn": "2026-05-29",
+   "basadoEn": "Demre Invierno Admisión 2024 (Ajustados a temario)"
+  }
+ },
+ "sections": [
+  {
+   "order": 1,
+   "name": "Prueba completa",
+   "type": "multiple_choice",
+   "instructions": null,
+   "passage": null,
+   "items": [
+    {
+     "position": 1,
+     "type": "multiple_choice",
+     "stem": "Un profesor solicita a sus estudiantes observar al microscopio una célula desconocida e identificar a qué tipo de célula corresponde. Pasado un tiempo los estudiantes afirman que es una célula eucarionte vegetal. ¿Cuál de las siguientes opciones presenta las observaciones que permitieron a los estudiantes afirmar inequívocamente lo anterior? Presencia de Presencia de una",
+     "correctKey": "A",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "figureNote": null,
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "Presencia de pared celular núcleo gran vacuola Presencia de membrana Ausencia de Presencia de",
+       "isCorrect": true
+      },
+      {
+       "key": "B",
+       "text": "plasmática núcleo cloroplastos Ausencia de Presencia de",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "Presencia de pared celular núcleo cloroplastos Presencia de membrana Presencia de Presencia de",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "plasmática núcleo mitocondrias",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 2,
+     "type": "multiple_choice",
+     "stem": "El esquema representa la situación inicial de dos células (M y K), permeables a un tipo de molécula X ( ) que se moviliza por difusión simple. Además, las células M y K se encuentran en dos medios con diferentes temperaturas. Célula M Célula K (25 °C) (38 °C) A partir de estos antecedentes, ¿cuál de las siguientes afirmaciones con respecto a la molécula X es esperable observar inmediatamente después de la situación del esquema?",
+     "correctKey": "D",
+     "responseFormat": "choice",
+     "hasFigure": true,
+     "figureNote": "Figura no transcrita (hueco en el cuadernillo)",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "Que las moléculas X difundan más rápido hacia afuera de K que de M.",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "Que las moléculas X difundan más rápido hacia afuera de M que de K.",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "Que las moléculas X difundan más rápido hacia adentro de K que de M.",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "Que las moléculas X difundan más rápido hacia adentro de M que de K.",
+       "isCorrect": true
+      }
+     ]
+    },
+    {
+     "position": 3,
+     "type": "multiple_choice",
+     "stem": "En un experimento se cultivó un grupo de células intestinales del colon humano sobre una membrana semipermeable, bajo las condiciones que se presentan en las siguientes figuras: A partir del análisis de estos antecedentes, ¿cuál de las siguientes opciones corresponde a un objetivo pertinente al experimento realizado?",
+     "correctKey": "C",
+     "responseFormat": "choice",
+     "hasFigure": true,
+     "figureNote": "Figura no transcrita (hueco en el cuadernillo)",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "Cuantificar la absorción del fármaco a través de las vellosidades intestinales.",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "Establecer el tipo de mecanismo de transporte del fármaco a través de las vellosidades intestinales.",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "Determinar la función de las vellosidades presentes en las células intestinales.",
+       "isCorrect": true
+      },
+      {
+       "key": "D",
+       "text": "Determinar la respuesta de las células intestinales al ser expuestas a un medio con mayor concentración de un tipo de soluto.",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 4,
+     "type": "multiple_choice",
+     "stem": "Los peroxisomas contienen enzimas que contribuyen a la detoxificación del peróxido de hidrógeno. Una investigadora estudia el efecto de la temperatura en eficiencia detoxificadora debido a la desnaturalización de las enzimas muestras de peroxisomas sometidas a diferentes temperaturas para luego evaluar la actividad enzimática en cada muestra. Al respecto, ¿a qué componente de la investigación científica corresponde la frase entre comillas?",
+     "correctKey": "B",
+     "responseFormat": "choice",
+     "hasFigure": true,
+     "figureNote": "Figura no transcrita (hueco en el cuadernillo)",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "A un objetivo",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "A una hipótesis",
+       "isCorrect": true
+      },
+      {
+       "key": "C",
+       "text": "A un resultado",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "A un experimento",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 5,
+     "type": "multiple_choice",
+     "stem": "En un experimento, se colocan miocitos indiferenciados en un medio de cultivo ideal (control), para facilitar que estas células se diferencien en fibras musculares normales. A un grupo experimental se le agregó una sustancia que inhibe la síntesis de las proteínas actina y miosina. Los datos obtenidos del grupo experimental están aún en proceso de análisis. En relación con lo anterior, ¿cuál de las siguientes opciones corresponde a una hipótesis pertinente a la metodología experimental descrita?",
+     "correctKey": "B",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "figureNote": null,
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "La diferenciación de células mediante la manipulación del medio de cultivo es posible solamente con la utilización de miocitos indiferenciados.",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "Si a un cultivo de miocitos indiferenciados puestos en un medio ideal se le adiciona un inhibidor de la síntesis de actina y miosina, la cantidad de fibras musculares que se obtenga será menor que la del grupo control.",
+       "isCorrect": true
+      },
+      {
+       "key": "C",
+       "text": "Los miocitos indiferenciados que están en un medio ideal serán incapaces de diferenciarse, mientras no se les adicione un inhibidor para la síntesis de actina y miosina.",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "Los miocitos indiferenciados que crecen en un cultivo donde el medio y las condiciones son ideales, originarán toda una variedad de células especializadas.",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 6,
+     "type": "multiple_choice",
+     "stem": "¿Qué efecto provocará la mantención del cuerpo lúteo por un tiempo superior a la duración de un ciclo ovárico normal?",
+     "correctKey": "C",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "figureNote": null,
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "Un ciclo menstrual de menos de 20 días",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "Una menstruación más prolongada",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "Un retraso de la menstruación",
+       "isCorrect": true
+      },
+      {
+       "key": "D",
+       "text": "Una ovulación prematura",
+       "isCorrect": false
+      },
+      {
+       "key": "E",
+       "text": "Una ovulación múltiple",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 7,
+     "type": "multiple_choice",
+     "stem": "Una clínica de inseminación artificial humana está optimizando un método que aumente la eficiencia de la fecundación in vitro. Para ello, co-cultivan en la misma placa, X cantidad de espermatozoides con Y cantidad de ovocitos. Para evaluar la eficiencia de la fecundación, una vez terminado el procedimiento, ¿cuál de las siguientes opciones corresponde al parámetro que se debería cuantificar?",
+     "correctKey": "B",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "figureNote": null,
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "Ovocitos y espermatozoides que hay en la placa.",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "Células con 46 cromosomas.",
+       "isCorrect": true
+      },
+      {
+       "key": "C",
+       "text": "Espermatozoides que rodean a cada ovocito.",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "Espermatozoides que quedan en la placa.",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 8,
+     "type": "multiple_choice",
+     "stem": "En un artículo científico, un investigador ha reportado que la administración de una molécula X en ratas inhibe la secreción de cierta hormona, la cual induce la maduración de las células foliculares y, a partir de ello, concluye que esta molécula puede ser utilizada como método anticonceptivo en mamíferos. Los datos recopilados por el investigador se presentan en la siguiente tabla: Concentración de la % de inhibición en la Número de ratas molécula X (u.a.) secreción de la hormona testeadas 20,0 95 1 10,0 92 1 5,0 87 1 2,5 80 1 A partir de los antecedentes presentados, ¿cuál de las siguientes variables es la que invalida la conclusión propuesta por el investigador?",
+     "correctKey": "D",
+     "responseFormat": "choice",
+     "hasFigure": true,
+     "figureNote": "Figura no transcrita (hueco en el cuadernillo)",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "La concentración de X",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "El modelo animal utilizado",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "La efectividad anticonceptiva de X",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "El tamaño de la muestra analizada",
+       "isCorrect": true
+      }
+     ]
+    },
+    {
+     "position": 9,
+     "type": "multiple_choice",
+     "stem": "La progesterona es una hormona esteroidal involucrada en el ciclo ovárico. Al principio del ciclo, esta hormona presenta niveles muy bajos, los cuales se incrementan posterior a la ovulación. De acuerdo a esta descripción, ¿cuál de los siguientes gráficos representa las variaciones en los niveles de progesterona a lo largo del ciclo ovárico?",
+     "correctKey": "B",
+     "responseFormat": "choice",
+     "hasFigure": true,
+     "figureNote": "Alternativas gráficas en grilla; las figuras no están en la capa de texto",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "(figura A)",
+       "isCorrect": false,
+       "isImage": true
+      },
+      {
+       "key": "B",
+       "text": "(figura B)",
+       "isCorrect": true,
+       "isImage": true
+      },
+      {
+       "key": "C",
+       "text": "(figura C)",
+       "isCorrect": false,
+       "isImage": true
+      },
+      {
+       "key": "D",
+       "text": "(figura D)",
+       "isCorrect": false,
+       "isImage": true
+      }
+     ]
+    },
+    {
+     "position": 10,
+     "type": "multiple_choice",
+     "stem": "¿Cuál de las siguientes figuras corresponde a una célula animal en citocinesis?",
+     "correctKey": null,
+     "responseFormat": "choice",
+     "hasFigure": true,
+     "figureNote": "Alternativas gráficas en fila; las figuras no están en la capa de texto",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "(figura A)",
+       "isCorrect": false,
+       "isImage": true
+      },
+      {
+       "key": "B",
+       "text": "(figura B)",
+       "isCorrect": false,
+       "isImage": true
+      },
+      {
+       "key": "C",
+       "text": "(figura C)",
+       "isCorrect": false,
+       "isImage": true
+      }
+     ]
+    },
+    {
+     "position": 11,
+     "type": "multiple_choice",
+     "stem": "A un cultivo de células se le agrega colchicina y después de un tiempo se observan células poliploides. Al respecto, ¿en cuál de las etapas del ciclo celular actúa la colchicina para producir este efecto?",
+     "correctKey": "D",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "figureNote": null,
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "G1",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "S",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "Profase",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "Metafase",
+       "isCorrect": true
+      },
+      {
+       "key": "E",
+       "text": "Citocinesis",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 12,
+     "type": "multiple_choice",
+     "stem": "La tabla siguiente presenta los datos de un estudio comparativo de la duración de algunas etapas de la mitosis en diferentes tejidos de organismos pluricelulares: Tiempo (minutos) Etapas Mosca Pollo Avena (Drosophila melanogaster) (Gallus gallus) (Avena sativa) Profase 3,6 30-60 36-45 Metafase 0,5 2-10 7-10 Anafase 1,2 2-3 15-20 Telofase 0,9 3-12 20-35 Al respecto, ¿cuál de las siguientes opciones corresponde a la pregunta que esta investigación buscaba responder?",
+     "correctKey": "A",
+     "responseFormat": "choice",
+     "hasFigure": true,
+     "figureNote": "Figura no transcrita (hueco en el cuadernillo)",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "¿Cómo varía la duración de las etapas de la mitosis en diversos grupos de pluricelulares?",
+       "isCorrect": true
+      },
+      {
+       "key": "B",
+       "text": "¿Qué factores determinan la duración de las etapas de la mitosis en organismos pluricelulares?",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "¿Cuál es la diferencia en la duración del ciclo celular en función de la presencia de pared celular?",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "¿Qué características tiene el ciclo celular en los organismos a medida que aumenta el tamaño y el número de células?",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 13,
+     "type": "multiple_choice",
+     "stem": "En una investigación sobre el índice mitótico de células tumorales del mismo tipo, se aplicó a tres cultivos sincronizados en etapa G1, que tienen el mismo medio de cultivo, distintas concentraciones de una sustancia X, a una temperatura de 36 °C. Con respecto a este procedimiento, ¿cuál de las siguientes hipótesis es pertinente?",
+     "correctKey": "B",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "figureNote": null,
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "La temperatura del cultivo afecta la cantidad de nutrientes del cultivo celular.",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "La concentración de la sustancia X en los medios de cultivo afecta el índice mitótico.",
+       "isCorrect": true
+      },
+      {
+       "key": "C",
+       "text": "La etapa del ciclo celular en la que se encuentran las células del cultivo afecta la concentración de la sustancia X.",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "El índice mitótico del cultivo afecta la etapa del ciclo celular en la que se encuentran las células tumorales.",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 14,
+     "type": "multiple_choice",
+     "stem": "En la tabla siguiente se presenta el flujo de energía de cuatro ecosistemas terrestres de Chile: Porcentaje de energía Consumidores Consumidores Consumidores Ecosistema Productores primarios secundarios terciarios Matorral 100 9,5 0,9 0,09 Desierto 100 9,0 0,9 0,09 Bosque 100 9,8 1,1 0,10 Pastizal 100 10,5 1,3 0,10 Dados estos antecedentes, ¿cuál de las siguientes opciones permitiría explicar las diferencias en la energía dentro de cada ecosistema?",
+     "correctKey": "D",
+     "responseFormat": "choice",
+     "hasFigure": true,
+     "figureNote": "Figura no transcrita (hueco en el cuadernillo)",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "La cantidad de energía presente en la base de la trama trófica.",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "La variabilidad de las condiciones existentes entre los ecosistemas.",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "La cantidad de niveles tróficos presentes en los ecosistemas.",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "La transferencia de un porcentaje similar de energía entre niveles tróficos.",
+       "isCorrect": true
+      }
+     ]
+    },
+    {
+     "position": 15,
+     "type": "multiple_choice",
+     "stem": "Un grupo de bacterias del género Rhizobium habita los nódulos de las raíces de las leguminosas, realizando la fijación del nitrógeno atmosférico, a la vez que se alimenta de nutrientes generados por la planta. Al respecto, ¿qué tipo de relación se establece entre las bacterias del género Rhizobium y las leguminosas?",
+     "correctKey": "C",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "figureNote": null,
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "Mutualismo",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "Parasitismo",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "Comensalismo",
+       "isCorrect": true
+      },
+      {
+       "key": "D",
+       "text": "Depredación",
+       "isCorrect": false
+      },
+      {
+       "key": "E",
+       "text": "Competencia",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 16,
+     "type": "multiple_choice",
+     "stem": "Daniel Janzen, un ecólogo estadounidense, vio un escarabajo volador posarse sobre un árbol espinoso (acacia) y ser rápidamente ahuyentado de él por una hormiga. Al acercarse, vio que la acacia estaba cubierta de hormigas que habitaban en la parte interna de las espinas de la planta. En uno de sus experimentos, Janzen utilizó un insecticida para eliminar todas las hormigas de un gran grupo de acacias. El veneno dejó intactas las acacias y todas las hormigas murieron. Menos de un año después de rociar el insecticida, todas las acacias habían muerto, consumidas por los insectos y otros herbívoros y por falta de sol debido a la sombra producida por otras plantas competidoras. En el terreno alrededor de los árboles, que normalmente las hormigas mantenían podado, la vegetación había crecido demasiado. Al parecer, las acacias dependían de las hormigas residentes en ellas para su supervivencia. En relación con lo anterior, ¿cuál de las siguientes opciones corresponde a una pregunta de investigación que habría guiado el experimento realizado por Janzen?",
+     "correctKey": "D",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "figureNote": null,
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "¿Cómo afecta la falta de sol a la sobrevivencia de las acacias?",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "¿Qué estructura de las acacias utilizan las hormigas como refugio?",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "¿Cómo afecta la utilización del insecticida a la población de acacias?",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "¿Qué relación entre especies se establece entre las hormigas y las acacias?",
+       "isCorrect": true
+      }
+     ]
+    },
+    {
+     "position": 17,
+     "type": "multiple_choice",
+     "stem": "Se realizó un estudio comparativo entre la cantidad de materia orgánica (biomasa) disponible en árboles de un bosque ubicado en una zona con alta tasa de precipitaciones (bosque 1) versus otro localizado en una zona con déficit de precipitaciones (bosque 2). Los datos muestran que el bosque 2 presenta una elevada tolerancia al déficit de lluvias, pero menor biomasa que el bosque 1. Lo anterior, posiblemente se deba al gasto diferencial de energía generado por mecanismos de adaptación a la falta de agua. Teniendo en cuenta estos antecedentes, ¿cuál de las siguientes preguntas pudo orientar la investigación anterior?",
+     "correctKey": "B",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "figureNote": null,
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "¿Cuál es la tasa de precipitación anual en los bosques 1 y 2?",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "¿Cómo influyen las lluvias en la acumulación de biomasa en los bosques?",
+       "isCorrect": true
+      },
+      {
+       "key": "C",
+       "text": "¿Cuáles son los procesos de adaptación al estrés hídrico de los bosques?",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "¿Cuánta energía destinan los bosques en la producción de materia orgánica?",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 18,
+     "type": "multiple_choice",
+     "stem": "La euglena es un organismo unicelular flagelado que realiza fotosíntesis, debido a la presencia de cloroplastos en su citoplasma. En este contexto, una científica está estudiando el desplazamiento de estos microorganismos en dos placas de vidrio que contienen el mismo medio de cultivo a igual pH y temperatura, pero variando la ubicación de la fuente lumínica. El siguiente esquema resume el diseño experimental realizado por la científica: luz Luz luz Luz Euglena Placas de vidrio Según los antecedentes presentados en el esquema, ¿cuál de las siguientes opciones contiene tres materiales indispensables para que la científica lleve a cabo este experimento?",
+     "correctKey": "B",
+     "responseFormat": "choice",
+     "hasFigure": true,
+     "figureNote": "Figura no transcrita (hueco en el cuadernillo)",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "Lámpara, cloroplasto, cultivo de euglenas",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "Microscopio, lámpara, cultivo de euglenas",
+       "isCorrect": true
+      },
+      {
+       "key": "C",
+       "text": "Medios con distintos pH, lámpara, microscopio",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "Cultivo de euglenas, lámpara, balanza digital",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 19,
+     "type": "multiple_choice",
+     "stem": "Usando una guitarra y un piano, se solicita ejecutar consecutivamente tres notas de la misma octava, de modo que la primera con la segunda difieran solo en altura, mientras que la segunda con la tercera difieran solo en el timbre. ¿Cuál de las siguientes opciones presenta el conjunto de acciones que permite realizar lo solicitado? Nota 1 Nota 2 Nota 3 Tocar en la guitarra Tocar en el piano Tocar en el piano",
+     "correctKey": "D",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "figureNote": null,
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "una nota Mi una nota Mi una nota Sol Tocar en el piano Tocar en la guitarra Tocar en el piano",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "una nota Mi una nota Sol una nota Sol Tocar en la guitarra Tocar en la guitarra Tocar en el piano",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "una nota Mi una nota Sol una nota Mi Tocar en el piano Tocar en el piano Tocar en la guitarra",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "una nota Mi una nota Sol una nota Sol Tocar en el piano Tocar en la guitarra Tocar en el piano",
+       "isCorrect": true
+      },
+      {
+       "key": "E",
+       "text": "una nota Mi una nota Mi una nota Sol",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 20,
+     "type": "multiple_choice",
+     "stem": "Un grupo de estudiantes tiene como objetivo determinar si el tiempo que tarda en reventarse un globo expuesto a la luz depende de su tonalidad y plantean que globos de tonalidad oscura absorben más luz que los de tonalidad clara, por lo que debiesen reventarse antes. Para ello inflan con aire globos de las mismas características a su máxima capacidad y hacen incidir luz solar sobre ellos. Los datos y resultados registrados se resumen en la siguiente tabla. Tonalidad Volumen de Reventado a los Reventado a los del globo gas (mL) 2 min 5 min Oscura 100 No Sí Clara 100 No No En relación con lo anterior, ¿cuál de las siguientes opciones señala correctamente las variables involucradas en el experimento? Variable independiente Variable dependiente Variable controlada Tiempo en que se",
+     "correctKey": "C",
+     "responseFormat": "choice",
+     "hasFigure": true,
+     "figureNote": "Figura no transcrita (hueco en el cuadernillo)",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "Tonalidad del globo Volumen de gas revienta el globo Tiempo en que se",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "Volumen de gas Tonalidad del globo revienta el globo Tiempo en que se",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "Tonalidad del globo Volumen de gas revienta el globo Tiempo en que se",
+       "isCorrect": true
+      },
+      {
+       "key": "D",
+       "text": "Tonalidad del globo Volumen de gas revienta el globo",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 21,
+     "type": "multiple_choice",
+     "stem": "Una persona mira su imagen en una bandeja metálica y se da cuenta de que dicha bandeja funciona como un espejo. Luego, la persona cubre esta bandeja con una lámina delgada, plana, transparente y uniforme, de un material con un índice de refracción igual que el del aire, conservando su distancia a la bandeja. Al respecto, ¿cuál de las siguientes características posee la imagen de la persona formada por la bandeja tras poner la lámina transparente?",
+     "correctKey": "D",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "figureNote": null,
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "Mantiene su distancia a la bandeja y es de mayor tamaño que la inicial.",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "Es más cercana a la bandeja y del mismo tamaño que la inicial.",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "Es más cercana a la bandeja y de mayor tamaño que la inicial.",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "Mantiene su distancia a la bandeja y su tamaño inicial.",
+       "isCorrect": true
+      }
+     ]
+    },
+    {
+     "position": 22,
+     "type": "multiple_choice",
+     "stem": "La figura siguiente representa la fotografía del perfil de una onda que se propaga cm en una cuerda, moviéndose hacia la derecha con una rapidez de 24 . La s fotografía incluye una regla graduada en centímetros. ¿Cuál es la frecuencia de esta onda?",
+     "correctKey": "B",
+     "responseFormat": "choice",
+     "hasFigure": true,
+     "figureNote": "Figura no transcrita (hueco en el cuadernillo)",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "0,5 Hz",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "2,0 Hz",
+       "isCorrect": true
+      },
+      {
+       "key": "C",
+       "text": "4,0 Hz",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "6,0 Hz",
+       "isCorrect": false
+      },
+      {
+       "key": "E",
+       "text": "12,0 Hz",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 23,
+     "type": "multiple_choice",
+     "stem": "¿Cuál de las siguientes opciones respecto de la imagen de un objeto ubicado en el foco de un espejo cóncavo es correcta?",
+     "correctKey": "A",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "figureNote": null,
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "No se produce imagen del objeto.",
+       "isCorrect": true
+      },
+      {
+       "key": "B",
+       "text": "Es real y derecha respecto al objeto.",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "Es real e invertida respecto al objeto.",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "Es virtual y derecha respecto al objeto.",
+       "isCorrect": false
+      },
+      {
+       "key": "E",
+       "text": "Es virtual e invertida respecto al objeto.",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 24,
+     "type": "multiple_choice",
+     "stem": "De acuerdo con las leyes de Newton, ¿cuál de las siguientes opciones es una característica de las fuerzas de acción y reacción?",
+     "correctKey": "D",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "figureNote": null,
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "Son aplicadas sobre un mismo cuerpo.",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "Son aplicadas en el mismo sentido.",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "Una se aplica antes que la otra.",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "Tienen igual magnitud.",
+       "isCorrect": true
+      },
+      {
+       "key": "E",
+       "text": "Se anulan entre sí.",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 25,
+     "type": "multiple_choice",
+     "stem": "Dos personas P y R, cuyas respectivas masas son 100 kg y 50 kg, se encuentran de pie y en reposo sobre una superficie horizontal que carece de rugosidad. Si P ejerce sobre R una fuerza de magnitud igual a 300 N, ¿cuál es la m magnitud de la aceleración, medida en , sobre cada una de estas personas? s2 P R",
+     "correctKey": "A",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "figureNote": null,
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "3,0 6,0",
+       "isCorrect": true
+      },
+      {
+       "key": "B",
+       "text": "3,0 3,0",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "6,0 6,0",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "1,5 3,0",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 26,
+     "type": "multiple_choice",
+     "stem": "Un estudiante intenta determinar el coeficiente de roce de distintas superficies, sabiendo que este corresponde al cuociente entre la fuerza de roce y la fuerza normal. Para lograr su objetivo desliza por superficies horizontales bloques de madera de distinta masa con velocidad constante. El experimento lo realiza con tres superficies distintas. A continuación se muestran los gráficos de la fuerza de roce, FR, en función de la fuerza normal, FN, que obtiene para cada superficie: ¿Cuál de las siguientes opciones ordena correctamente los coeficientes de roce 1, 2 y 3 medidos en las superficies 1, 2 y 3, respectivamente?",
+     "correctKey": "C",
+     "responseFormat": "choice",
+     "hasFigure": true,
+     "figureNote": "Figura no transcrita (hueco en el cuadernillo)",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "1 2 3",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "1 3 2",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "2 1 3",
+       "isCorrect": true
+      },
+      {
+       "key": "D",
+       "text": "2 3 1",
+       "isCorrect": false
+      },
+      {
+       "key": "E",
+       "text": "3 2 1",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 27,
+     "type": "multiple_choice",
+     "stem": "Cuando un alambre se somete a un esfuerzo (fuerza por unidad de área), se produce en él una deformación . Existe un modelo en que el esfuerzo es directamente proporcional a la deformación , es decir, K , donde K es una constante. El siguiente gráfico representa el esfuerzo en función de la deformación para cierto alambre, desde la deformación cero hasta que se corta en las condiciones del punto R. ¿En cuál de los siguientes intervalos de deformación el modelo K es válido?",
+     "correctKey": "E",
+     "responseFormat": "choice",
+     "hasFigure": true,
+     "figureNote": "Figura no transcrita (hueco en el cuadernillo)",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "Entre 3 y 5",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "Entre 2 y 4",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "Entre 0 y 4",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "Entre 0 y 2",
+       "isCorrect": false
+      },
+      {
+       "key": "E",
+       "text": "Entre 0 y 1",
+       "isCorrect": true
+      }
+     ]
+    },
+    {
+     "position": 28,
+     "type": "multiple_choice",
+     "stem": "A un grupo de personas se les encarga realizar un experimento para comprobar si la magnitud de la aceleración que adquiere un carro es directamente proporcional a la magnitud de la fuerza neta aplicada sobre él. Para aquello utilizan un carro con las ruedas trabadas, distintas pesas de peso P, un sensor S que mide aceleraciones, una polea e hilos inextensibles. Con estos materiales se instala el montaje que muestra la figura y obtienen los datos que se presentan en el gráfico, donde P corresponde al peso de las distintas pesas y a corresponde a la aceleración del carrito. Considerando los resultados obtenidos, ¿cuál de las siguientes opciones corresponde al principal error cometido por estas personas?",
+     "correctKey": "B",
+     "responseFormat": "choice",
+     "hasFigure": true,
+     "figureNote": "Figura no transcrita (hueco en el cuadernillo)",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "Suponer que la magnitud de la fuerza P es constante durante cada medición.",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "Suponer que la magnitud de la fuerza neta aplicada al carro es igual a la de P.",
+       "isCorrect": true
+      },
+      {
+       "key": "C",
+       "text": "No tener en cuenta la diferencia de masa entre el carro y las pesas.",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "No tener en cuenta la longitud de los hilos durante las mediciones.",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 29,
+     "type": "multiple_choice",
+     "stem": "Un grupo de estudiantes realizó un experimento relacionado con la transferencia de energía térmica en un laboratorio, donde la temperatura ambiente es de 25 °C. Para ello, utilizaron tres frascos de vidrio de iguales características. Envolvieron los tres frascos con papel de distinto material e igual espesor. Posteriormente, a cada uno de los frascos adicionaron el mismo volumen de agua a 80 °C. Luego de 10 minutos registraron la temperatura de cada uno de los frascos. Según lo anterior, ¿cuál de las siguientes opciones señala la hipótesis que pudo haber dado origen al experimento diseñado por el grupo de estudiantes?",
+     "correctKey": "A",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "figureNote": null,
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "El espesor del papel influye en la transferencia de energía térmica.",
+       "isCorrect": true
+      },
+      {
+       "key": "B",
+       "text": "La temperatura ambiental influye en la transferencia de energía térmica.",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "El tipo de material del papel influye en la transferencia de energía térmica.",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "La temperatura inicial del agua influye en la transferencia de energía térmica.",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 30,
+     "type": "multiple_choice",
+     "stem": "En condiciones normales de presión, ¿cuánta es la diferencia entre la temperatura de fusión del hielo y la temperatura de ebullición del agua?",
+     "correctKey": "C",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "figureNote": null,
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "273 °C",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "273 K",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "173 K",
+       "isCorrect": true
+      },
+      {
+       "key": "D",
+       "text": "100 K",
+       "isCorrect": false
+      },
+      {
+       "key": "E",
+       "text": "0 °C",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 31,
+     "type": "multiple_choice",
+     "stem": "Un grupo de estudiantes calienta 50 mL de un líquido puro en un vaso de precipitados y con un termómetro miden la temperatura del líquido cada minuto. Una vez finalizado el experimento, el análisis de los datos obtenidos por los estudiantes muestra un aumento rápido y sostenido de la temperatura del líquido hasta el minuto ocho, en que esta se estabilizó en 78 °C mientras seguía en contacto con la fuente de calor. A partir de lo anterior, ¿cuál de las siguientes opciones corresponde a una explicación correcta de lo observado?",
+     "correctKey": "B",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "figureNote": null,
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "El vidrio del vaso de precipitados es suficientemente grueso para aislar térmicamente al líquido en su interior.",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "La fuente de calor no entrega energía térmica suficiente para aumentar la temperatura del líquido por sobre los 78 °C.",
+       "isCorrect": true
+      },
+      {
+       "key": "C",
+       "text": "La energía térmica entregada al líquido, una vez alcanzados los 78 °C, se consume en el cambio de fase de líquido a gas.",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "La condensación del líquido evaporado desde el vaso de precipitados absorbe el exceso de energía térmica, impidiendo el aumento de la temperatura del líquido.",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 32,
+     "type": "multiple_choice",
+     "stem": "El cinturón de fuego del Pacífico recibe su nombre por la presencia casi continua alrededor del Océano Pacífico de volcanes, cuyo origen es principalmente asociado al proceso de subducción, concentrando la mayor parte de la sismicidad a nivel mundial. Por ello, el casi nulo volcanismo y la escasa sismicidad alrededor del Océano Atlántico son indicativos de la ausencia de subducción. No obstante, existe una serie de zonas en el mundo que presentan volcanismo y sismicidad sin estar relacionados al proceso de subducción. En relación con lo anterior, ¿cuál de las siguientes opciones es una inferencia correcta con la información entregada?",
+     "correctKey": "A",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "figureNote": null,
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "La interacción convergente de placas suele producir volcanismo y sismicidad.",
+       "isCorrect": true
+      },
+      {
+       "key": "B",
+       "text": "El volcanismo y la sismicidad están siempre asociados con el proceso de subducción.",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "El volcanismo en zonas de subducción solo se produce en zonas continentales.",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "La interacción divergente de placas es la responsable del volcanismo y la sismicidad en el cinturón de fuego del Pacífico.",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 33,
+     "type": "multiple_choice",
+     "stem": "Una estudiante se encuentra investigando sobre la electrificación causada por frotamiento con otro material. Basada en un libro de física, centra su análisis en la materiales dispuestos en un orden determinado e indica que, al frotar dos materiales de la secuencia, el que esté en la posición más alta se cargará positivamente, mientras que el que esté en una posición más baja se cargará negativamente. La estudiante recopila los datos de su investigación en la siguiente tabla: Mayor carga + Vidrio Cabello Lana Papel Madera Poliéster PVC Mayor carga Teflón Asumiendo que existen todas las condiciones para que se produzca la electrificación por frotamiento y basándose en el análisis de la tabla, ¿cuál de las siguientes conclusiones es correcta?",
+     "correctKey": "D",
+     "responseFormat": "choice",
+     "hasFigure": true,
+     "figureNote": "Figura no transcrita (hueco en el cuadernillo)",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "Al frotar vidrio con teflón, el vidrio se cargará negativamente.",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "Al frotar lana con poliéster, la lana se cargará positivamente.",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "Al frotar madera con papel, ambos se cargarán negativamente.",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "Al frotar cabello con PVC, ambos se cargarán positivamente.",
+       "isCorrect": true
+      }
+     ]
+    },
+    {
+     "position": 34,
+     "type": "multiple_choice",
+     "stem": "Una estudiante está preparando su examen de física y en su texto de estudio se eléctrica es directamente proporcional al número de cargas que atraviesan un conductor e inversamente proporcional al tiempo que esas cargas demo ran en correctamente a la relación descrita en la cita?",
+     "correctKey": "D",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "figureNote": null,
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "Si las mismas cargas demoran el doble de tiempo en atravesar un conductor, entonces la intensidad de la corriente aumenta al doble.",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "Si la intensidad de la corriente se duplica, entonces la cantidad de carga por segundo que atraviesa un conductor disminuye a la mitad.",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "Si la cantidad de carga por segundo que atraviesa un conductor se duplica, entonces la intensidad de la corriente disminuye a la mitad.",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "Si la intensidad de la corriente disminuye a la mitad, entonces el tiempo que demora la misma carga en atravesar un conductor aumenta al doble.",
+       "isCorrect": true
+      }
+     ]
+    },
+    {
+     "position": 35,
+     "type": "multiple_choice",
+     "stem": "Para un proyecto escolar, un grupo de estudiantes construye un modelo a escala de un generador eólico con una turbina de cuatro aspas. Para ello, utilizan un ventilador para impulsar, a distintas velocidades, el aire a temperatura ambiente de una habitación, el cual pone en movimiento las aspas y miden la corriente eléctrica que produce el generador. Al respecto, ¿cuál de las siguientes opciones es una hipótesis pertinente al diseño experimental descrito?",
+     "correctKey": "A",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "figureNote": null,
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "La electricidad generada por un generador eólico depende de la velocidad del viento.",
+       "isCorrect": true
+      },
+      {
+       "key": "B",
+       "text": "La electricidad generada por un generador eólico depende de la temperatura del viento.",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "La electricidad generada por un generador eólico depende del número de aspas.",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "La electricidad generada por un generador eólico depende del tamaño de las aspas.",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 36,
+     "type": "multiple_choice",
+     "stem": "En el contexto de una investigación escolar para una feria científica, un grupo de estudiantes coloca la misma cantidad de alimentos en el interior de dos refrigeradores idénticos y se organizan para abrir uno de ellos dos veces al día y el otro diez veces al día. En ambos casos, medirán el consumo de energía del refrigerador al cabo de una semana. Al respecto, ¿a qué componente de la investigación científica corresponde la descripción anterior?",
+     "correctKey": "D",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "figureNote": null,
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "A un modelo",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "A una hipótesis",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "A un resultado",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "A un procedimiento",
+       "isCorrect": true
+      }
+     ]
+    },
+    {
+     "position": 37,
+     "type": "multiple_choice",
+     "stem": "Dos localidades costeras presentan las mismas condiciones de temperatura y humedad ambiental. La localidad 1 está ubicada en una zona cercana a un polo industrial. La localidad 2, en cambio, se encuentra alejada de cualquier fuente de contaminación ambiental. Un grupo de estudiantes observa que varias estructuras metálicas, especialmente las de hierro, se corroen más rápidamente en la localidad 1 que en la localidad 2. En relación con los antecedentes presentados, ¿cuál de las siguientes opciones corresponde a una pregunta de investigación coherente con el fenómeno descrito?",
+     "correctKey": "C",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "figureNote": null,
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "¿Qué efecto tiene la distancia al mar en el proceso de corrosión de las estructuras metálicas?",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "¿Qué efecto tiene la humedad ambiental en el proceso de corrosión de las estructuras metálicas?",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "¿Qué efecto tienen los gases contaminantes en el proceso de corrosión de las estructuras metálicas?",
+       "isCorrect": true
+      },
+      {
+       "key": "D",
+       "text": "¿Qué efecto tiene la temperatura ambiental en el proceso de corrosión de las estructuras metálicas?",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 38,
+     "type": "multiple_choice",
+     "stem": "El isótopo 89 38 Sr está constituido por",
+     "correctKey": "B",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "figureNote": null,
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "89 protones, 89 electrones y 38 neutrones.",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "38 protones, 38 electrones y 51 neutrones.",
+       "isCorrect": true
+      },
+      {
+       "key": "C",
+       "text": "51 protones, 51 electrones y 38 neutrones.",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "38 protones, 38 electrones y 89 neutrones.",
+       "isCorrect": false
+      },
+      {
+       "key": "E",
+       "text": "89 protones, 51 electrones y 51 neutrones.",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 39,
+     "type": "multiple_choice",
+     "stem": "Se sabe que un átomo es la unidad básica de un elemento y está formado por partículas positivas, negativas y neutras. ¿Cuál de las siguientes opciones explica correctamente que un átomo tenga carga positiva o negativa?",
+     "correctKey": "D",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "figureNote": null,
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "Las cantidades de partículas positivas, negativas y neutras son iguales.",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "Las cantidades de partículas neutras y positivas son diferentes.",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "Las cantidades de partículas neutras y negativas son iguales.",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "Las cantidades de partículas positivas y negativas son diferentes.",
+       "isCorrect": true
+      }
+     ]
+    },
+    {
+     "position": 40,
+     "type": "multiple_choice",
+     "stem": "Un estudiante investiga acerca de la estructura del átomo, encontrando la siguiente información: a fines del siglo XIX J. J. Thomson, realizó diversos experimentos empleando un tubo de rayos catódicos, lo que sumado a sus conocimientos acerca de la teoría electromagnética, le permitió determinar la relación existente entre la carga eléctrica y la masa de un electrón. En 1906, recibió el Premio Nobel de Física por el descubrimiento del electrón. Posteriormente, el investigador estadounidense R. A. Millikan, en base a los estudios de Thomson y su conocido experimento de la electrones, poseen una carga idéntica, con un valor de 1,6022 × 10 19 C. Considerando la información entregada, ¿cuál de las siguientes opciones muestra el impacto de este conocimiento en la Ciencia?",
+     "correctKey": "A",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "figureNote": null,
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "El desarrollo de experimentos para determinar valores de constantes físicas de los componentes del átomo.",
+       "isCorrect": true
+      },
+      {
+       "key": "B",
+       "text": "El desarrollo de instrumentos para realizar mediciones experimentales en materiales como el aceite.",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "(alternativa C: notación no transcrita del cuadernillo)",
+       "isCorrect": false,
+       "isImage": true
+      },
+      {
+       "key": "D",
+       "text": "El desarrollo de experimentos que permitieron construir el instrumento",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 41,
+     "type": "multiple_choice",
+     "stem": "¿Cuál de los siguientes pares de elementos forman un compuesto covalente?",
+     "correctKey": "C",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "figureNote": null,
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "Na y F",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "Li y O",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "OyF",
+       "isCorrect": true
+      },
+      {
+       "key": "D",
+       "text": "Na y O",
+       "isCorrect": false
+      },
+      {
+       "key": "E",
+       "text": "Li y Na",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 42,
+     "type": "multiple_choice",
+     "stem": "Con respecto a la siguiente estructura molecular: X Y Z ¿Cuál de las siguientes opciones presenta la hibridación correcta de los átomos de carbono señalados en X, Y y Z? X Y Z",
+     "correctKey": "D",
+     "responseFormat": "choice",
+     "hasFigure": true,
+     "figureNote": "Figura no transcrita (hueco en el cuadernillo)",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "sp2 sp sp3",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "sp3 sp2 sp",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "sp sp2 sp3",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "sp sp3 sp2",
+       "isCorrect": true
+      },
+      {
+       "key": "E",
+       "text": "sp3 sp sp2",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 43,
+     "type": "multiple_choice",
+     "stem": "En un estudio se comparan hidrocarburos lineales y cíclicos, considerando las propiedades físicas de temperatura de fusión (Tf) y de ebullición (Teb), obteniendo los datos que se presentan en las siguientes tablas: Hidrocarburos Hidrocarburos Tf (°C) Teb (°C) Tf (°C) Teb (°C) lineales cíclicos C3H8 187,0 42,0 C3H6 127,0 32,7 C4H10 138,0 0 C4H8 50,0 12,5 C5H12 130,0 36,0 C5H10 93,0 49,3 C6H14 95,0 69,0 C6H12 6,6 80,7 En relación con lo anterior, ¿cuál de las siguientes opciones representa una conclusión correcta según los datos obtenidos?",
+     "correctKey": "D",
+     "responseFormat": "choice",
+     "hasFigure": true,
+     "figureNote": "Figura no transcrita (hueco en el cuadernillo)",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "Los hidrocarburos cíclicos presentan menores temperaturas de ebullición y de fusión que los hidrocarburos lineales a igual número de átomos de carbono.",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "A igual cantidad de átomos de carbono, las temperaturas de ebullición y fusión se mantienen constantes tanto en los hidrocarburos cíclicos como lineales.",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "Los hidrocarburos cíclicos presentan menores temperaturas de ebullición y similares temperaturas de fusión que los hidrocarburos lineales a igual número de átomos de carbono.",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "A mayor cantidad de átomos de carbono, aumenta la temperatura de ebullición tanto en hidrocarburos lineales como cíclicos.",
+       "isCorrect": true
+      }
+     ]
+    },
+    {
+     "position": 44,
+     "type": "multiple_choice",
+     "stem": "Un grupo de estudiantes de 2° medio, preocupados por el efecto del cambio climático, diseñaron un estudio enfocado en la aceleración del crecimiento de árboles. Para ello, sintetizaron un compuesto orgánico para ser utilizado como abono. Con la finalidad de verificar la efectividad de este, seleccionaron 10 árboles de la misma especie, de idéntico tamaño y características. A uno de ellos no se le administró abono y a los 9 restantes se les administró abono en diversas cantidades. Luego, bajo las mismas condiciones, observaron el crecimiento de los árboles durante 75 días. En relación con lo descrito, ¿cuál de las siguientes opciones señala correctamente el gráfico con las variables que permitiría reportar los resultados obtenidos del estudio? Tamaño del árbol (cm) Edad del árbol (días)",
+     "correctKey": "A",
+     "responseFormat": "choice",
+     "hasFigure": true,
+     "figureNote": "Alternativas gráficas en grilla; las figuras no están en la capa de texto",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "(figura A)",
+       "isCorrect": true,
+       "isImage": true
+      },
+      {
+       "key": "B",
+       "text": "(figura B)",
+       "isCorrect": false,
+       "isImage": true
+      },
+      {
+       "key": "C",
+       "text": "(figura C)",
+       "isCorrect": false,
+       "isImage": true
+      },
+      {
+       "key": "D",
+       "text": "(figura D)",
+       "isCorrect": false,
+       "isImage": true
+      }
+     ]
+    },
+    {
+     "position": 45,
+     "type": "multiple_choice",
+     "stem": "¿Cuántos carbonos terciarios se encuentran en el biciclononano?",
+     "correctKey": "A",
+     "responseFormat": "choice",
+     "hasFigure": true,
+     "figureNote": "Figura no transcrita (hueco en el cuadernillo)",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "2",
+       "isCorrect": true
+      },
+      {
+       "key": "B",
+       "text": "3",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "4",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "5",
+       "isCorrect": false
+      },
+      {
+       "key": "E",
+       "text": "9",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 46,
+     "type": "multiple_choice",
+     "stem": "Un grupo de estudiantes de primer año medio llevan a cabo el siguiente experimento: masan 10 cm de cinta de magnesio (Mg); luego, en un sistema cerrado, toman la cinta con una pinza acercándola a la llama de un mechero. Cuando entra en contacto con la llama, la cinta comienza a combustionar, observándose una luz blanca intensa. Cuando se consume toda la cinta, se observa un polvo blanco el cual es depositado en un vidrio de reloj. Al producto obtenido le determinan la masa y establecen que corresponde a óxido de magnesio (MgO). Finalmente, restan la masa de producto obtenido con la masa inicial de cinta de magnesio. En relación con lo anterior, ¿cuál de las siguientes opciones señala correctamente el objetivo de este último paso experimental?",
+     "correctKey": "C",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "figureNote": null,
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "Determinar la masa de producto.",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "Determinar el tipo de compuesto formado.",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "Determinar la masa de oxígeno en la reacción.",
+       "isCorrect": true
+      },
+      {
+       "key": "D",
+       "text": "Determinar la cantidad de cinta de magnesio que queda sin reaccionar.",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 47,
+     "type": "multiple_choice",
+     "stem": "Un grupo de investigadores de una universidad ha desarrollado, bajo condiciones específicas, una transformación química que consiste en dos etapas consecutivas, tal como se describe en las siguientes ecuaciones: Etapa 1: C (diamante) + O2 (g) CO2 (g) Etapa 2: 2 Mg (s) + CO2 (g) 2 MgO (s) + C (grafito) El grupo de difusión de la universidad desea presentar estos resultados en su página web, con el objetivo de visibilizar el trabajo científico en la sociedad. En este contexto, ¿cuál de los siguientes enunciados presenta un titular correcto para informar el trabajo descrito anteriormente?",
+     "correctKey": "A",
+     "responseFormat": "choice",
+     "hasFigure": true,
+     "figureNote": "Figura no transcrita (hueco en el cuadernillo)",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "Investigadores de la universidad han desarrollado un método que permite convertir el diamante en grafito.",
+       "isCorrect": true
+      },
+      {
+       "key": "B",
+       "text": "Investigadores de la universidad han desarrollado un método que permite convertir el CO2 en diamante utilizando MgO.",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "Investigadores de la universidad han desarrollado un método que produce diamante a partir de grafito.",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "Investigadores de la universidad han desarrollado un método que produce diamante a partir de CO2.",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 48,
+     "type": "multiple_choice",
+     "stem": "Con respecto a la siguiente ecuación: 2 NO (g) + O2 (g) 2 NO2 (g) Al reaccionar 10,0 mol de NO con 6,0 mol de O2, ¿cuál es la cantidad máxima de NO2 formada?",
+     "correctKey": "C",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "figureNote": null,
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "2,0 mol",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "6,0 mol",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "10,0 mol",
+       "isCorrect": true
+      },
+      {
+       "key": "D",
+       "text": "16,0 mol",
+       "isCorrect": false
+      },
+      {
+       "key": "E",
+       "text": "32,0 mol",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 49,
+     "type": "multiple_choice",
+     "stem": "Una estudiante colocó tres pastillas efervescentes, de 5 g cada una, en tres vasos de precipitados. Luego, agregó el mismo volumen de agua destilada a diferentes temperaturas a cada vaso y cronometró el tiempo de efervescencia de cada pastilla, que representa el tiempo que demoró en disolverse completamente. Los resultados obtenidos por la estudiante se presentan en la siguiente tabla: Masa Cantidad Tiempo de Vaso de Temperatura pastilla de agua efervescencia precipitados (ºC) (g) (mL) (s) 1 5 200 25 90 2 5 200 70 60 3 5 200 90 45 En relación con lo anterior, ¿cuál de las siguientes opciones señala correctamente las variables dependiente e independiente para este experimento? Variable dependiente Variable independiente",
+     "correctKey": "B",
+     "responseFormat": "choice",
+     "hasFigure": true,
+     "figureNote": "Figura no transcrita (hueco en el cuadernillo)",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "Temperatura del agua Tiempo de efervescencia",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "Tiempo de efervescencia Temperatura del agua",
+       "isCorrect": true
+      },
+      {
+       "key": "C",
+       "text": "Masa pastilla Temperatura del agua",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "Tiempo de efervescencia Cantidad de agua",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 50,
+     "type": "multiple_choice",
+     "stem": "La vitamina C es reconocida por sus múltiples funciones en el organismo. A continuación se presenta un gráfico con el contenido de vitamina C en algunas frutas y verduras. 160 Contenido de vitamina C 140 120 100 80 60 (mg/100 g) 40 20 0 Con respecto a la información del gráfico, ¿cuál de las siguientes opciones es una conclusión correcta?",
+     "correctKey": "C",
+     "responseFormat": "choice",
+     "hasFigure": true,
+     "figureNote": "Figura no transcrita (hueco en el cuadernillo)",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "100 mg de pimentón rojo aportan la misma cantidad de vitamina C que 200 g de fresas.",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "Una ensalada con 50 g de repollo morado, 50 g de pimentón rojo y 50 g de cebollín contiene más vitamina C que 200 g de pimentón rojo.",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "200 g de melón aportan la misma cantidad de vitamina C que 100 g de pimentón verde.",
+       "isCorrect": true
+      },
+      {
+       "key": "D",
+       "text": "Un postre con 100 g de melón y 100 g de kiwi aportan la misma cantidad de vitamina C que 100 g de pimentón verde.",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 51,
+     "type": "multiple_choice",
+     "stem": "En un vaso de precipitados que contiene 50 g de agua se agregan 18 g de NaCl a temperatura ambiente y la mezcla se calienta hasta la disolución completa de los cristales. Al disminuir la temperatura se registra el valor al que aparecen los primeros cristales, lo que corresponde a la máxima cantidad de NaCl que se disuelve a esa temperatura. Se repite el procedimiento anterior aumentando 0,2 g de sal en cada medida, hasta una temperatura máxima de 90 °C. Respecto a la información anterior, ¿cuál de las siguientes opciones es una hipótesis que pudo dar origen al experimento?",
+     "correctKey": "A",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "figureNote": null,
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "La solubilidad del NaCl depende del aumento de la temperatura.",
+       "isCorrect": true
+      },
+      {
+       "key": "B",
+       "text": "La temperatura de ebullición del agua aumenta con la masa de NaCl.",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "La solubilidad de distintas sales aumenta con la temperatura.",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "El NaCl se disuelve más rápido a temperaturas altas.",
+       "isCorrect": false
+      },
+      {
+       "key": "E",
+       "text": "La solubilidad del NaCl depende del solvente en el que se disuelve.",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 52,
+     "type": "multiple_choice",
+     "stem": "En la construcción de las paredes de una casa es necesario usar un tipo de hormigón que contiene un volumen de cemento, por tres volúmenes de arena, cuatro volúmenes de grava y agua necesaria para obtener una consistencia que permita trabajar con la mezcla. Si es la primera vez que está trabajando con esta preparación y no sabe qué cantidad de agua se necesita, ¿cuál de las siguientes acciones experimentales le puede ayudar a establecer la cantidad de agua que se debiese utilizar?",
+     "correctKey": "A",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "figureNote": null,
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "Se mezcla media cucharada de cemento, con una y media cucharada de arena, dos cucharadas de grava y se va agregando de a media cucharada de agua a la vez, hasta que la mezcla tenga la consistencia adecuada.",
+       "isCorrect": true
+      },
+      {
+       "key": "B",
+       "text": "A una cucharada de arena se le agrega la misma medida de agua hasta que se disuelva, después se le agregan dos cucharadas de cemento y se establece si se necesita más agua.",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "A una taza de cemento se le agrega una taza de agua, se disuelve todo y se va agregando lentamente arena y grava hasta lograr una consistencia adecuada en la mezcla.",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "Se mezcla una taza de cemento, una taza de arena, una taza de grava y una taza de agua hasta que la mezcla presente la consistencia esperada.",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 53,
+     "type": "multiple_choice",
+     "stem": "En una actividad experimental se obtiene el siguiente gráfico de solubilidad versus temperatura: Solubilidad 74 57 (g soluto/100 g agua) 40 20 10 30 37 40 Temperatura (°C) Al respecto y considerando que se tiene una solución saturada a 37 °C, ¿qué masa de soluto precipitará, si la temperatura disminuye de 37 ºC a 10 ºC?",
+     "correctKey": "D",
+     "responseFormat": "choice",
+     "hasFigure": true,
+     "figureNote": "Figura no transcrita (hueco en el cuadernillo)",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "20 g",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "27 g",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "30 g",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "37 g",
+       "isCorrect": true
+      },
+      {
+       "key": "E",
+       "text": "47 g",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 54,
+     "type": "multiple_choice",
+     "stem": "Un vaso contiene 100 mL de solución acuosa de HCl 1 mol/L. De este vaso 1, se sacan 50 mL y se distribuyen 25 mL en el vaso 2 y 25 mL en el vaso 3. Posteriormente, se procede del siguiente modo: Solución 1: vaso 1 tenía 50 mL de solución y se agregan 50 mL de agua. Solución 2: vaso 2 tenía 25 mL de solución y se agregan 25 mL de agua. Solución 3: vaso 3 tenía 25 mL de solución y no se le agrega agua. Solución 1 Solución 2 Solución 3 ¿Cuál es la concentración molar final de la solución de HCl contenida en cada uno de los vasos? Solución 1 Solución 2 Solución 3 (mol/L) (mol/L) (mol/L)",
+     "correctKey": "E",
+     "responseFormat": "choice",
+     "hasFigure": true,
+     "figureNote": "Figura no transcrita (hueco en el cuadernillo)",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "1,0 0,5 1,00",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "2,0 1,0 0,25",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "2,0 2,0 0,50",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "1,0 1,0 0,25",
+       "isCorrect": false
+      },
+      {
+       "key": "E",
+       "text": "0,5 0,5 1,00",
+       "isCorrect": true
+      }
+     ]
+    },
+    {
+     "position": 55,
+     "type": "multiple_choice",
+     "stem": "La siguiente figura representa equipos de laboratorio para separar mezclas que una profesora de química presenta a sus estudiantes. Equipo 1 Equipo 2 Papel filtro Refrigerante Embudo Balón Considerando los equipos 1 y 2, con respecto a los materiales presentes en cada uno, ¿cuál de las siguientes opciones relaciona correctamente cada uno de los equipos con una mezcla que se puede separar en ellos? Equipo 1 Equipo 2",
+     "correctKey": "C",
+     "responseFormat": "choice",
+     "hasFigure": true,
+     "figureNote": "Figura no transcrita (hueco en el cuadernillo)",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "Agua con acetona Arena con agua",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "Vinagre con agua Parafina con arena",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "Grava con agua Agua con alcohol",
+       "isCorrect": true
+      },
+      {
+       "key": "D",
+       "text": "Parafina con arena Agua con harina 56. En el laboratorio se dispone de tres compuestos (X, Y y Z), los cuales están en estado líquido, a temperatura ambiente. El compuesto X es coloreado, presenta la menor densidad y no se mezcla con ninguno de los otros compuestos ni con la mezcla de ellos. En cambio Y y Z son incoloros y se mezclan completamente entre ellos. Si se agregan a un tubo de ensayo los tres compuestos en igual proporción, ¿cuál de los siguientes tubos representa mejor el resultado final?",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 56,
+     "type": "multiple_choice",
+     "stem": "En el laboratorio se dispone de tres compuestos (X, Y y Z), los cuales están en estado líquido, a temperatura ambiente. El compuesto X es coloreado, presenta la menor densidad y no se mezcla con ninguno de los otros compuestos ni con la mezcla de ellos. En cambio Y y Z son incoloros y se mezclan completamente entre ellos. Si se agregan a un tubo de ensayo los tres compuestos en igual proporción, ¿cuál de los siguientes tubos representa mejor el resultado final?",
+     "correctKey": "A",
+     "responseFormat": "choice",
+     "hasFigure": true,
+     "figureNote": "Alternativas solo gráficas: no hay rótulos en la capa de texto · alternativas reconstruidas como figuras sin transcribir",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "(alternativa A: figura no extraída del cuadernillo)",
+       "isCorrect": true,
+       "isImage": true
+      },
+      {
+       "key": "B",
+       "text": "(alternativa B: figura no extraída del cuadernillo)",
+       "isCorrect": false,
+       "isImage": true
+      },
+      {
+       "key": "C",
+       "text": "(alternativa C: figura no extraída del cuadernillo)",
+       "isCorrect": false,
+       "isImage": true
+      },
+      {
+       "key": "D",
+       "text": "(alternativa D: figura no extraída del cuadernillo)",
+       "isCorrect": false,
+       "isImage": true
+      }
+     ]
+    },
+    {
+     "position": 57,
+     "type": "multiple_choice",
+     "stem": "Una docente representa el siguiente modelo atómico en la pizarra: Posteriormente, solicita a sus estudiantes: Anaís, Isaac, Tamara y Felipe, que escriban una conclusión correcta en relación al modelo atómico presentado. Al respecto, ¿cuál de los estudiantes presenta una conclusión correcta?",
+     "correctKey": "C",
+     "responseFormat": "choice",
+     "hasFigure": true,
+     "figureNote": "Figura no transcrita (hueco en el cuadernillo)",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "Anaís: el número atómico del átomo representado es 18, pues presenta 18 neutrones.",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "Isaac: el átomo representado tiene un número másico igual a 36, porque corresponde a la suma de electrones y neutrones.",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "Tamara: el átomo representado corresponde a un anión, debido a que presenta 18 electrones.",
+       "isCorrect": true
+      },
+      {
+       "key": "D",
+       "text": "Felipe: el átomo representado es erróneo, pues presenta diferente cantidad de protones y electrones.",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 58,
+     "type": "multiple_choice",
+     "stem": "En la siguiente tabla periódica reducida se muestra la posición del elemento Z. Con respecto a cuatro elementos X, R, T y Q, de los cuales se sabe que X tiene 2 protones menos que Z, R tiene 3 protones más que Z, T tiene 9 protones más que Z, y Q tiene 12 protones más que Z. ¿Cuál de las siguientes opciones muestra la posición correcta del elemento al que alude?",
+     "correctKey": "A",
+     "responseFormat": "choice",
+     "hasFigure": true,
+     "figureNote": "Figura no transcrita (hueco en el cuadernillo)",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "X se ubica en el grupo 1 (I A), período 1.",
+       "isCorrect": true
+      },
+      {
+       "key": "B",
+       "text": "R se ubica en el grupo 2 (II A), período 3.",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "T se ubica en el grupo 13 (III A), período 3.",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "Q se ubica en el grupo 14 (IV A), período 3.",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 59,
+     "type": "multiple_choice",
+     "stem": "Un estudiante analiza qué ocurre cuando el sodio y el cloro se unen para formar un enlace químico. Al respecto, ¿cuál de las siguientes opciones es correcta respecto de este enlace químico?",
+     "correctKey": "A",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "figureNote": null,
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "El sodio transfiere un electrón al cloro.",
+       "isCorrect": true
+      },
+      {
+       "key": "B",
+       "text": "El cloro transfiere un electrón al sodio.",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "El cloro aporta un par electrónico al sodio.",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "El sodio y el cloro comparten un par de electrones.",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 60,
+     "type": "multiple_choice",
+     "stem": "En una clase de química se presenta la siguiente estructura dibujada en la pizarra: O OH Con respecto a la estructura, ¿cuántos átomos de carbono e hidrógeno tiene el compuesto dibujado?",
+     "correctKey": "C",
+     "responseFormat": "choice",
+     "hasFigure": true,
+     "figureNote": "Figura no transcrita (hueco en el cuadernillo)",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "9 átomos de carbono y 12 átomos de hidrógeno.",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "10 átomos de carbono y 1 átomo de hidrógeno.",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "10 átomos de carbono y 12 átomos de hidrógeno.",
+       "isCorrect": true
+      },
+      {
+       "key": "D",
+       "text": "12 átomos de carbono y 1 átomo de hidrógeno.",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 61,
+     "type": "multiple_choice",
+     "stem": "¿Cuántos enlaces sigma (σ) tiene el 2-buteno?",
+     "correctKey": "D",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "figureNote": null,
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "2",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "4",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "10",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "11",
+       "isCorrect": true
+      }
+     ]
+    },
+    {
+     "position": 62,
+     "type": "multiple_choice",
+     "stem": "Una docente de química presenta a sus estudiantes la siguiente estructura orgánica, que corresponde a un neurotransmisor natural que se produce en pequeñas cantidades en las células del sistema nervioso central. O HO OH Luego les solicita presenten, en su informe, esta estructura mediante otra fórmula. Al respecto, ¿cuál de las siguientes opciones corresponde a la fórmula molecular de dicha estructura?",
+     "correctKey": "D",
+     "responseFormat": "choice",
+     "hasFigure": true,
+     "figureNote": "Figura no transcrita (hueco en el cuadernillo)",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "C3H2O3",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "C3H8O3",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "C4H2O3",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "C4H8O3",
+       "isCorrect": true
+      }
+     ]
+    },
+    {
+     "position": 63,
+     "type": "multiple_choice",
+     "stem": "El propano es un gas que proviene del petróleo, principalmente se utiliza licuado y mezclado con butano, en balones de uso doméstico. El propano está compuesto por tres átomos de carbono y ocho átomos de hidrógeno, unidos entre sí mediante enlaces simples. Considerando esto, un estudiante quiere elaborar una infografía para comunicar los beneficios del propano en nuestra vida cotidiana. De acuerdo con el propósito del estudiante, ¿qué información debe presentar la infografía?",
+     "correctKey": "B",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "figureNote": null,
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "El proceso de obtención del propano licuado.",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "Las propiedades y los usos del gas propano.",
+       "isCorrect": true
+      },
+      {
+       "key": "C",
+       "text": "Los átomos y enlaces en las moléculas de propano.",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "El tipo de hibridación de cada átomo de carbono que forma parte del propano.",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 64,
+     "type": "multiple_choice",
+     "stem": "Una docente dibuja la siguiente representación en la pizarra: Luego, pregunta a sus estudiantes cuál es el nombre del grupo sustituyente que más se repite en la molécula, considerando las reglas de la IUPAC. Al respecto, ¿cuál de las siguientes respuestas dadas por algunos de sus estudiantes es correcta?",
+     "correctKey": "A",
+     "responseFormat": "choice",
+     "hasFigure": true,
+     "figureNote": "Figura no transcrita (hueco en el cuadernillo)",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "Metilo",
+       "isCorrect": true
+      },
+      {
+       "key": "B",
+       "text": "Etilo",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "Propilo",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "Isobutilo",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 65,
+     "type": "multiple_choice",
+     "stem": "En una clase de química se presenta la siguiente molécula, correspondiente a un medicamento antiinflamatorio: H3C OH CH C O H3C O Al respecto, ¿cuáles son los grupos funcionales que contiene la molécula del medicamento?",
+     "correctKey": "D",
+     "responseFormat": "choice",
+     "hasFigure": true,
+     "figureNote": "Figura no transcrita (hueco en el cuadernillo)",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "Aldehído y éster",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "Alcohol y cetona",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "Ácido carboxílico y amina",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "Éter y ácido carboxílico",
+       "isCorrect": true
+      }
+     ]
+    },
+    {
+     "position": 66,
+     "type": "multiple_choice",
+     "stem": "Un estudiante encuentra la siguiente tabla, que informa sobre cuatro experimentos que se realizan al hacer reaccionar, completamente, diferentes masas de dos elementos (X e Y). X Y Experimento (g) (g) 1 9 12 2 9 24 3 6 8 4 3 8 Considerando la proporción en que se combinan los elementos en cada experimento, ¿cuál de las siguientes opciones es correcta en cuanto a la formación de compuestos entre X e Y?",
+     "correctKey": "D",
+     "responseFormat": "choice",
+     "hasFigure": true,
+     "figureNote": "Figura no transcrita (hueco en el cuadernillo)",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "En los experimentos 1 y 2 se forma el mismo compuesto.",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "En los experimentos 1 y 4 se forma el mismo compuesto.",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "En los experimentos 2 y 4 se forman compuestos diferentes.",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "En los experimentos 3 y 4 se forman compuestos diferentes.",
+       "isCorrect": true
+      }
+     ]
+    },
+    {
+     "position": 67,
+     "type": "multiple_choice",
+     "stem": "Una analista química se encuentra realizando experiencias en el laboratorio con la siguiente reacción química: 2 NaOH + CuSO4 Cu(OH)2 + Na2SO4 En su trabajo, utilizó diferentes masas de reactantes e hizo mediciones de masas de los productos, que luego ordenó en la siguiente tabla: Experiencia NaOH (g) CuSO4 (g) Cu(OH)2 (g) Na2SO4 (g) 1 40 80 49 71 2 80 160 98 142 3 160 320 196 284 Si la analista química siguiera la misma relación en masas de reactantes, que se presenta en la tabla, al realizar una quinta experiencia, ¿cuál sería la masa total de los reactantes que necesitaría?",
+     "correctKey": "C",
+     "responseFormat": "choice",
+     "hasFigure": true,
+     "figureNote": "Figura no transcrita (hueco en el cuadernillo)",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "640 g",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "1280 g",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "1920 g",
+       "isCorrect": true
+      },
+      {
+       "key": "D",
+       "text": "2560 g",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 68,
+     "type": "multiple_choice",
+     "stem": "En una empresa productora de vinagre se toman muestras para un control de calidad del producto, las muestras deben cumplir con una norma interna que indica que un volumen de 250 mL de vinagre debe contener, como máximo, 100,0 g de ácido acético, CH 3COOH, (masa molar = 60,0 g/mol). Si se toma una muestra de 250 mL de vinagre y se detectan 1,84 mol de ácido acético, ¿cuál de las siguientes opciones es una conclusión correcta?",
+     "correctKey": "B",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "figureNote": null,
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "La muestra presenta 60 g de ácido acético, lo cual es menor a los 100,0 g que indica la norma.",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "La muestra presenta 110,4 g de ácido acético, lo cual es mayor a los 100,0 g que indica la norma.",
+       "isCorrect": true
+      },
+      {
+       "key": "C",
+       "text": "La muestra presenta 32,6 g de ácido acético, lo cual es menor a los 100,0 g que indica la norma.",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "La muestra presenta 250 g de ácido acético, lo cual es mayor a los 100,0 g que indica la norma.",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 69,
+     "type": "multiple_choice",
+     "stem": "En el siguiente modelo se representa una reacción química entre X eY : En base al modelo, ¿cuál de las siguientes opciones representa correctamente su ecuación química?",
+     "correctKey": "D",
+     "responseFormat": "choice",
+     "hasFigure": true,
+     "figureNote": "Figura no transcrita (hueco en el cuadernillo)",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "X2 + Y6 2 XY3",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "2 X + 3 Y2 XY3",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "X2 + 3 Y2 3 X3Y3",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "X2 + 3 Y2 2 XY3",
+       "isCorrect": true
+      }
+     ]
+    },
+    {
+     "position": 70,
+     "type": "multiple_choice",
+     "stem": "Dada la siguiente reacción: u Li (s) + 2 H 2O () w LiOH (ac) + H 2 (g) ¿Cuáles deben ser los coeficientes estequiométricos para que cumpla con la Ley de Lavoisier? u w",
+     "correctKey": "A",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "figureNote": null,
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "2 2",
+       "isCorrect": true
+      },
+      {
+       "key": "B",
+       "text": "2 1",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "1 2",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "1 1",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 71,
+     "type": "multiple_choice",
+     "stem": "Si reaccionan 10 g de CuCl (masa molar = 99 g/mol) con un exceso de H 2S de acuerdo con la siguiente ecuación: 2 CuCl + H2S Cu2S + 2 HCl ¿Qué masa de Cu2S (masa molar = 159 g/mol) se obtiene aproximadamente?",
+     "correctKey": "B",
+     "responseFormat": "choice",
+     "hasFigure": true,
+     "figureNote": "Figura no transcrita (hueco en el cuadernillo)",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "5g",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "8g",
+       "isCorrect": true
+      },
+      {
+       "key": "C",
+       "text": "10 g",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "16 g",
+       "isCorrect": false
+      },
+      {
+       "key": "E",
+       "text": "20 g",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 72,
+     "type": "multiple_choice",
+     "stem": "Un docente escribe en la pizarra la siguiente representación de una reacción química: + Luego, pide a sus estudiantes que dibujen la representación que corresponde al reactivo limitante. Al respecto, ¿cuál de las siguientes opciones corresponde a la representación que deben dibujar los estudiantes?",
+     "correctKey": "B",
+     "responseFormat": "choice",
+     "hasFigure": true,
+     "figureNote": "Figura no transcrita (hueco en el cuadernillo)",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "(alternativa A: notación no transcrita del cuadernillo)",
+       "isCorrect": false,
+       "isImage": true
+      },
+      {
+       "key": "B",
+       "text": "(alternativa B: notación no transcrita del cuadernillo)",
+       "isCorrect": true,
+       "isImage": true
+      },
+      {
+       "key": "C",
+       "text": "(alternativa C: notación no transcrita del cuadernillo)",
+       "isCorrect": false,
+       "isImage": true
+      },
+      {
+       "key": "D",
+       "text": "(alternativa D: notación no transcrita del cuadernillo)",
+       "isCorrect": false,
+       "isImage": true
+      }
+     ]
+    },
+    {
+     "position": 73,
+     "type": "multiple_choice",
+     "stem": "Un grupo de estudiantes se dispone a analizar la molécula de colesterol, para ello deben recolectar todos los antecedentes de su estructura, antes de comenzar la investigación. Hasta el momento conocen la fórmula molecular, C27H46O y las masas atómicas de cada elemento que la forma. A partir de estos datos, ¿cuál de las siguientes conclusiones respecto de la composición porcentual, aproximada, es correcta?",
+     "correctKey": "C",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "figureNote": null,
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "El porcentaje de hidrógeno en la molécula es 46 %.",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "El porcentaje de oxígeno en la molécula es 16 %.",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "El porcentaje de carbono en la molécula es 84 %.",
+       "isCorrect": true
+      },
+      {
+       "key": "D",
+       "text": "El porcentaje de carbono y oxígeno en la molécula es 28 %.",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 74,
+     "type": "multiple_choice",
+     "stem": "Un grupo de estudiantes realiza el siguiente experimento, a temperatura ambiente y 1 atm, para conocer la tendencia de una propiedad (P) de una solución, cuando varía la cantidad de materia. En vasos de precipitados individuales, preparan cinco soluciones homogéneas de concentración X % m/v, 5X % m/v, 10X % m/v, 15X % m/v y 20X % m/v, respectivamente. Posteriormente, a cada una de ellas les miden la propiedad P, obteniendo los siguientes resultados: 1P, 1,5P, 2P, 2,5P y 3P, respectivamente. Al respecto, ¿cuál es la forma correcta de presentar los resultados según el objetivo experimental?",
+     "correctKey": "B",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "figureNote": null,
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "Gráfico de torta de % m/v y de P",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "Gráfico de dispersión de P en función de % m/v",
+       "isCorrect": true
+      },
+      {
+       "key": "C",
+       "text": "Gráfico lineal de temperatura en función de P",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "Tabla de temperatura y % m/v",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 75,
+     "type": "multiple_choice",
+     "stem": "En un laboratorio se realiza el siguiente proceso: 1 L NaOH NaOH 2 mol/L X mol/L Al respecto, es correcto afirmar que",
+     "correctKey": "E",
+     "responseFormat": "choice",
+     "hasFigure": true,
+     "figureNote": "Figura no transcrita (hueco en el cuadernillo)",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "en 1 mL de la solución final hay 0,1 mol de NaOH.",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "en los 100 mL de solución final, hay 0,2 mol de NaOH.",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "en los 10 mL de la solución inicial, hay 2 mol de NaOH.",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "la concentración X, es 100 veces menor que la concentración inicial.",
+       "isCorrect": false
+      },
+      {
+       "key": "E",
+       "text": "la concentración final de la solución de NaOH, es 0,2 mol/L.",
+       "isCorrect": true
+      }
+     ]
+    },
+    {
+     "position": 76,
+     "type": "multiple_choice",
+     "stem": "Se mezclan 100 g de la sustancia X en recipientes que contienen 200 g de agua a diferentes temperaturas, quedando en todos los casos una masa de X sin disolver, la que fue filtrada, secada y masada. Con las masas obtenidas se realizó el siguiente gráfico en función de la temperatura inicial del agua. 100 Masa de X no disuelta (g) 90 80 70 60 50 40 30 20 10 0 20 30 40 50 60 70 80 Temperatura inicial del agua (°C) Respecto del gráfico, ¿cuál de las siguientes opciones es una conclusión correcta?",
+     "correctKey": "D",
+     "responseFormat": "choice",
+     "hasFigure": true,
+     "figureNote": "Figura no transcrita (hueco en el cuadernillo)",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "A medida que aumenta la temperatura, disminuye la cantidad de X disuelto.",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "A 20 °C la sustancia X presentará su mayor solubilidad.",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "La sustancia X se disuelve solo entre los 10 °C y los 90 °C.",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "A 80 °C se disuelven 70 g de X en 200 g de agua.",
+       "isCorrect": true
+      }
+     ]
+    },
+    {
+     "position": 77,
+     "type": "multiple_choice",
+     "stem": "Una persona prepara una mezcla con 50 mL de una solución acuosa de mol concentración 0,1 de NaOH con 50 mL de otra solución acuosa de NaOH, de L mol concentración 0,05 , ¿cuál es la concentración de la solución resultante? L mol",
+     "correctKey": "C",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "figureNote": null,
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "0,010 L mol",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "0,050 L mol",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "0,075 L mol",
+       "isCorrect": true
+      },
+      {
+       "key": "D",
+       "text": "0,105 L",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 78,
+     "type": "multiple_choice",
+     "stem": "En la etiqueta de un frasco de venta comercial aparece una descripción que dice “32 % en masa de ácido clorhídrico”. Al respecto, ¿cuál de las siguientes opciones corresponde al significado de la descripción que aparece en el frasco?",
+     "correctKey": "A",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "figureNote": null,
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "Que contiene 32 g de ácido clorhídrico en 100 g de solución.",
+       "isCorrect": true
+      },
+      {
+       "key": "B",
+       "text": "Que contiene 32 g de ácido clorhídrico en 68 g de solución.",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "Que contiene 68 g de ácido clorhídrico en 32 mL de solvente.",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "Que contiene 68 g de ácido clorhídrico en 100 mL de solución.",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 79,
+     "type": "multiple_choice",
+     "stem": "¿Cuál es el volumen de agua que se necesita agregar a 200 mL de una solución mol acuosa 1 para que su concentración disminuya en un 20 %? L",
+     "correctKey": "B",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "figureNote": null,
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "20 mL",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "50 mL",
+       "isCorrect": true
+      },
+      {
+       "key": "C",
+       "text": "200 mL",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "250 mL",
+       "isCorrect": false
+      },
+      {
+       "key": "E",
+       "text": "400 mL",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 80,
+     "type": "multiple_choice",
+     "stem": "El cemento es un material que por sus características químicas puede ser dañino para la piel de las personas, que por su trabajo, están en constante contacto con él. Se han observado quemaduras de distinto grado en la piel de las manos. La composición del cemento es, en términos generales, la siguiente: Óxido de calcio \"cal\" (CaO) 60 a 69 % Óxido de silicio \"sílice\" (SiO2) 18 a 24 % Óxido de aluminio \"alúmina\" (Al2O3) 4a8% Óxido de hierro (Fe2O3) 1a8% Sabiendo que los óxidos de metales alcalinos y alcalinotérreos, grupos 1 y 2 (I A y II A), reaccionan enérgicamente con el agua según: M2Om + H2O M(OH)m + calor Y que los hidróxidos de los metales alcalinos y alcalinotérreos son altamente corrosivos. ¿Cuál de las siguientes opciones explica químicamente las quemaduras en las manos de personas que están en constante contacto con cemento?",
+     "correctKey": "D",
+     "responseFormat": "choice",
+     "hasFigure": true,
+     "figureNote": "Figura no transcrita (hueco en el cuadernillo)",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "Se producen, principalmente, por la reacción de la sílice con la humedad de las manos.",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "Se producen, principalmente, por la reacción del óxido de hierro con la humedad de las manos.",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "Se producen, principalmente, por la reacción de la alúmina con la humedad de las manos.",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "Se producen, principalmente, por la reacción de la cal con la humedad de las manos.",
+       "isCorrect": true
+      }
+     ]
+    }
+   ]
+  }
+ ],
+ "pauta": {
+  "source": {
+   "instrumentJson": "CIE-E3-QUI-con-pauta.json"
+  }
+ },
+ "extraction": {
+  "itemCount": 80,
+  "warnings": [
+   "#56: recuperado sin alternativas (son imágenes)",
+   "#10: 3 alternativas",
+   "#25: notación matemática partida en líneas",
+   "#40: notación matemática partida en líneas",
+   "#56: 0 alternativas",
+   "#70: notación matemática partida en líneas",
+   "#72: notación matemática partida en líneas",
+   "sin entrada en la tabla de especificaciones: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54]",
+   "pauta del común recuperada por emparejamiento de texto (53 ítems); la tabla de especificaciones no numeró esta mención"
+  ],
+  "needsHumanReview": true,
+  "itemsConClave": 79
+ }
+}
