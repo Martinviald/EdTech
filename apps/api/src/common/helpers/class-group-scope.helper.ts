@@ -16,8 +16,10 @@
  * Se decide por la UNIÓN de roles del JWT (`user.roles`): un usuario
  * teacher + academic_director ve toda la org (admin-like gana).
  */
+import { ForbiddenException } from '@nestjs/common';
 import { and, eq, inArray, isNull } from 'drizzle-orm';
 import {
+  assessmentCourseAssignments,
   classGroups,
   studentEnrollments,
   students,
@@ -107,4 +109,53 @@ export async function isStudentVisibleInScope(
     )
     .limit(1);
   return !!enrollment;
+}
+
+/**
+ * ¿El curso está dentro del alcance del caller?
+ */
+export function isClassGroupInScope(scope: ClassGroupScope, classGroupId: string): boolean {
+  if (scope.scopeAll) return true;
+  return scope.classGroupIds.includes(classGroupId);
+}
+
+/**
+ * Verifica que un recurso derivado de datos de alumnos (análisis IA, material
+ * remedial) caiga dentro del alcance del caller, y lanza `ForbiddenException`
+ * si no.
+ *
+ * El recurso se ancla por curso explícito y/o por la evaluación de la que
+ * deriva. Reglas para un caller sin `scopeAll`:
+ *  - Con `classGroupId` → ese curso debe estar en su alcance.
+ *  - Sin `classGroupId` pero con `assessmentId` → TODOS los cursos de la
+ *    evaluación deben estar en su alcance (un recurso sin curso explícito es
+ *    agregado sobre la evaluación completa; si abarca cursos ajenos, filtra
+ *    datos de esos cursos).
+ *  - Sin ninguno de los dos → se rechaza: no hay forma de acotarlo.
+ *
+ * Corre bajo `withOrgContext` (usa `tx`).
+ */
+export async function assertTargetInScope(
+  tx: Database,
+  scope: ClassGroupScope,
+  target: { assessmentId?: string | null; classGroupId?: string | null },
+): Promise<void> {
+  if (scope.scopeAll) return;
+
+  const denied = new ForbiddenException('No tienes acceso a los datos de este curso');
+
+  if (target.classGroupId) {
+    if (!isClassGroupInScope(scope, target.classGroupId)) throw denied;
+    return;
+  }
+
+  if (!target.assessmentId) throw denied;
+
+  const courses = await tx
+    .select({ classGroupId: assessmentCourseAssignments.classGroupId })
+    .from(assessmentCourseAssignments)
+    .where(eq(assessmentCourseAssignments.assessmentId, target.assessmentId));
+
+  if (courses.length === 0) throw denied;
+  if (!courses.every((c) => isClassGroupInScope(scope, c.classGroupId))) throw denied;
 }
