@@ -285,7 +285,7 @@
      "correctKey": "B",
      "responseFormat": "choice",
      "hasFigure": true,
-     "figureNote": "Alternativas gráficas en grilla; las figuras no están en la capa de texto",
+     "figureNote": "Alternativas gráficas; el recorte de cada una está en S3 (altImageRefs)",
      "alternatives": [
       {
        "key": "A",
@@ -317,7 +317,7 @@
      "position": 10,
      "type": "multiple_choice",
      "stem": "¿Cuál de las siguientes figuras corresponde a una célula animal en citocinesis?",
-     "correctKey": null,
+     "correctKey": "D",
      "responseFormat": "choice",
      "hasFigure": true,
      "figureNote": "Alternativas gráficas en fila; las figuras no están en la capa de texto",
@@ -337,6 +337,18 @@
       {
        "key": "C",
        "text": "(figura C)",
+       "isCorrect": false,
+       "isImage": true
+      },
+      {
+       "key": "D",
+       "text": "(figura D)",
+       "isCorrect": true,
+       "isImage": true
+      },
+      {
+       "key": "E",
+       "text": "(figura E)",
        "isCorrect": false,
        "isImage": true
       }
@@ -1433,7 +1445,7 @@
      "correctKey": "A",
      "responseFormat": "choice",
      "hasFigure": true,
-     "figureNote": "Alternativas gráficas en grilla; las figuras no están en la capa de texto",
+     "figureNote": "Alternativas gráficas; el recorte de cada una está en S3 (altImageRefs)",
      "alternatives": [
       {
        "key": "A",
@@ -1923,20 +1935,20 @@
     {
      "position": 59,
      "type": "multiple_choice",
-     "stem": "Un Algunos parásitos soluto S, intracelulares abundante permanecenacuático, en un ecosistema dentro de los compartimentos difunde pasivamente a de las de través células eucariontes. la membrana Estos de un plasmática patógenos han unicelular. organismo desarrolladoInicialmente, mecanismos las concentraciones de manipulaciónextra e intracelular molecular, de S eran modificando 100 mM y 0 mM, y aprovechando respectivamente. algunos procesos Considerando que se alcanzó el equilibrio a los 50 segundos, ¿cuál de los de síntesisgráficos siguientes de la célula parasitada representa que facilitan correctamente su proliferación. Basándose lo descrito? en estos antecedentes, ¿qué organelos participarían directamente en la producción de proteínas de un parásito intracelular?",
+     "stem": "Algunos parásitos intracelulares permanecen dentro de los compartimentos de las células eucariontes. Estos patógenos han desarrollado mecanismos de manipulación molecular, modificando y aprovechando algunos procesos de síntesis de la célula parasitada que facilitan su proliferación. Basándose en estos antecedentes, ¿qué organelos participarían directamente en la producción de proteínas de un parásito intracelular?",
      "correctKey": "D",
      "responseFormat": "choice",
-     "hasFigure": true,
-     "figureNote": "Alternativas gráficas en grilla; las figuras no están en la capa de texto",
+     "hasFigure": false,
+     "figureNote": null,
      "alternatives": [
       {
        "key": "A",
-       "text": "B) Extracelular Extracelular A) Retículo endoplasmático liso y lisosomas",
+       "text": "Retículo endoplasmático liso y lisosomas",
        "isCorrect": false
       },
       {
        "key": "B",
-       "text": "Retículo 100 100 endoplasmático liso y mitocondrias Concentración del Concentración del",
+       "text": "Retículo endoplasmático liso y mitocondrias",
        "isCorrect": false
       },
       {
@@ -1946,8 +1958,8 @@
       },
       {
        "key": "D",
-       "text": "Retículo endoplasmático rugoso y complejo de Golgi soluto (u.a.) Intracelular Intracelular soluto (u.a.) 0 0 0 50 0 50 Tiempo (s) Tiempo (s) C) D) Extracelular Extracelular 100 100 Concentración del Concentración del Intracelular soluto (u.a.) soluto (u.a.) Intracelular 0 0 0 50 0 50 Tiempo (s) Tiempo (s)",
-       "isCorrect": false
+       "text": "Retículo endoplasmático rugoso y complejo de Golgi",
+       "isCorrect": true
       }
      ]
     },
@@ -2118,7 +2130,7 @@
      "correctKey": "A",
      "responseFormat": "choice",
      "hasFigure": true,
-     "figureNote": "Alternativas gráficas en grilla; las figuras no están en la capa de texto",
+     "figureNote": "Alternativas gráficas; el recorte de cada una está en S3 (altImageRefs)",
      "alternatives": [
       {
        "key": "A",
@@ -2642,13 +2654,11 @@
   "itemCount": 80,
   "warnings": [
    "#67: recuperado sin alternativas (son imágenes)",
-   "#10: 3 alternativas",
    "#25: notación matemática partida en líneas",
    "#40: notación matemática partida en líneas",
-   "#67: 0 alternativas",
-   "#10: clave D fuera de ['A', 'B', 'C']"
+   "#67: 0 alternativas"
   ],
   "needsHumanReview": true,
-  "itemsConClave": 79
+  "itemsConClave": 80
  }
 }

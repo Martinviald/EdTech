@@ -1984,29 +1984,29 @@
      "correctKey": "D",
      "responseFormat": "choice",
      "hasFigure": true,
-     "figureNote": "Figura no transcrita (hueco en el cuadernillo)",
+     "figureNote": "Alternativas gráficas; el recorte de cada una está en S3 (altImageRefs)",
      "alternatives": [
       {
        "key": "A",
-       "text": "(alternativa A: notación no transcrita del cuadernillo)",
+       "text": "(figura A)",
        "isCorrect": false,
        "isImage": true
       },
       {
        "key": "B",
-       "text": "(alternativa B: notación no transcrita del cuadernillo)",
+       "text": "(figura B)",
        "isCorrect": false,
        "isImage": true
       },
       {
        "key": "C",
-       "text": "(alternativa C: notación no transcrita del cuadernillo)",
+       "text": "(figura C)",
        "isCorrect": false,
        "isImage": true
       },
       {
        "key": "D",
-       "text": "(alternativa D: notación no transcrita del cuadernillo)",
+       "text": "(figura D)",
        "isCorrect": true,
        "isImage": true
       }

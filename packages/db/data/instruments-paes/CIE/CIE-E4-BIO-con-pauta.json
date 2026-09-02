@@ -1986,30 +1986,40 @@
      "position": 65,
      "type": "multiple_choice",
      "stem": "Si durante la división celular las células de la raíz de una planta, se aplica una sustancia X que destruye el complejo de Golgi de estas células, ¿cuál será el efecto esperado en dicho tejido?",
-     "correctKey": null,
+     "correctKey": "E",
      "responseFormat": "choice",
      "hasFigure": false,
      "figureNote": null,
      "alternatives": [
       {
        "key": "A",
-       "text": "La mitosis se detendrá en metafase.",
-       "isCorrect": false
+       "text": "(figura A)",
+       "isCorrect": false,
+       "isImage": true
       },
       {
        "key": "B",
-       "text": "Se obtendrán células con dos núcleos.",
-       "isCorrect": false
+       "text": "(figura B)",
+       "isCorrect": false,
+       "isImage": true
       },
       {
        "key": "C",
-       "text": "Las células resultantes serán más pequeñas.",
-       "isCorrect": false
+       "text": "(figura C)",
+       "isCorrect": false,
+       "isImage": true
       },
       {
        "key": "D",
-       "text": "Las células resultantes tendrán la mitad del material genético.",
-       "isCorrect": false
+       "text": "(figura D)",
+       "isCorrect": false,
+       "isImage": true
+      },
+      {
+       "key": "E",
+       "text": "(figura E)",
+       "isCorrect": true,
+       "isImage": true
       }
      ]
     },
@@ -2361,7 +2371,7 @@
      "correctKey": "A",
      "responseFormat": "choice",
      "hasFigure": true,
-     "figureNote": "Alternativas gráficas en grilla; las figuras no están en la capa de texto",
+     "figureNote": "Alternativas gráficas; el recorte de cada una está en S3 (altImageRefs)",
      "alternatives": [
       {
        "key": "A",
@@ -2458,7 +2468,7 @@
      "correctKey": "B",
      "responseFormat": "choice",
      "hasFigure": true,
-     "figureNote": "Alternativas gráficas en grilla; las figuras no están en la capa de texto",
+     "figureNote": "Alternativas gráficas; el recorte de cada una está en S3 (altImageRefs)",
      "alternatives": [
       {
        "key": "A",

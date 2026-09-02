@@ -285,7 +285,7 @@
      "correctKey": "B",
      "responseFormat": "choice",
      "hasFigure": true,
-     "figureNote": "Alternativas gráficas en grilla; las figuras no están en la capa de texto",
+     "figureNote": "Alternativas gráficas; el recorte de cada una está en S3 (altImageRefs)",
      "alternatives": [
       {
        "key": "A",
@@ -317,7 +317,7 @@
      "position": 10,
      "type": "multiple_choice",
      "stem": "¿Cuál de las siguientes figuras corresponde a una célula animal en citocinesis?",
-     "correctKey": null,
+     "correctKey": "D",
      "responseFormat": "choice",
      "hasFigure": true,
      "figureNote": "Alternativas gráficas en fila; las figuras no están en la capa de texto",
@@ -337,6 +337,18 @@
       {
        "key": "C",
        "text": "(figura C)",
+       "isCorrect": false,
+       "isImage": true
+      },
+      {
+       "key": "D",
+       "text": "(figura D)",
+       "isCorrect": true,
+       "isImage": true
+      },
+      {
+       "key": "E",
+       "text": "(figura E)",
        "isCorrect": false,
        "isImage": true
       }
@@ -1433,7 +1445,7 @@
      "correctKey": "A",
      "responseFormat": "choice",
      "hasFigure": true,
-     "figureNote": "Alternativas gráficas en grilla; las figuras no están en la capa de texto",
+     "figureNote": "Alternativas gráficas; el recorte de cada una está en S3 (altImageRefs)",
      "alternatives": [
       {
        "key": "A",
@@ -2148,29 +2160,29 @@
      "correctKey": "B",
      "responseFormat": "choice",
      "hasFigure": false,
-     "figureNote": null,
+     "figureNote": "Alternativas gráficas; el recorte de cada una está en S3 (altImageRefs)",
      "alternatives": [
       {
        "key": "A",
-       "text": "(alternativa A: notación no transcrita del cuadernillo)",
+       "text": "(figura A)",
        "isCorrect": false,
        "isImage": true
       },
       {
        "key": "B",
-       "text": "(alternativa B: notación no transcrita del cuadernillo)",
+       "text": "(figura B)",
        "isCorrect": true,
        "isImage": true
       },
       {
        "key": "C",
-       "text": "(alternativa C: notación no transcrita del cuadernillo)",
+       "text": "(figura C)",
        "isCorrect": false,
        "isImage": true
       },
       {
        "key": "D",
-       "text": "(alternativa D: notación no transcrita del cuadernillo)",
+       "text": "(figura D)",
        "isCorrect": false,
        "isImage": true
       }
@@ -2682,14 +2694,13 @@
  "extraction": {
   "itemCount": 80,
   "warnings": [
-   "#10: 3 alternativas",
    "#25: notación matemática partida en líneas",
    "#40: notación matemática partida en líneas",
    "#65: notación matemática partida en líneas",
    "sin entrada en la tabla de especificaciones: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54]",
-   "pauta del común recuperada por emparejamiento de texto (53 ítems); la tabla de especificaciones no numeró esta mención"
+   "pauta del común recuperada por emparejamiento de texto (54 ítems); la tabla de especificaciones no numeró esta mención"
   ],
   "needsHumanReview": true,
-  "itemsConClave": 79
+  "itemsConClave": 80
  }
 }

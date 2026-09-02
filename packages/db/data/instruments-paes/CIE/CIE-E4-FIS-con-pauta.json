@@ -2120,7 +2120,7 @@
      "correctKey": "D",
      "responseFormat": "choice",
      "hasFigure": true,
-     "figureNote": "Alternativas gráficas en grilla; las figuras no están en la capa de texto",
+     "figureNote": "Alternativas gráficas; el recorte de cada una está en S3 (altImageRefs)",
      "alternatives": [
       {
        "key": "A",
