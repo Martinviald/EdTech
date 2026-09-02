@@ -92,6 +92,7 @@ const STATIC_TITLES: Record<string, PageTitle> = {
   // Panel de plataforma (route group `(admin)`).
   [ROUTES.admin]: { title: 'Panel de plataforma' },
   [ROUTES.adminTelemetria]: { title: 'Telemetría de plataforma' },
+  [ROUTES.adminFeedback]: { title: 'Comentarios de usuarios' },
   [ROUTES.adminColegios]: { title: 'Colegios' },
   [ROUTES.adminEquipo]: { title: 'Equipo plataforma' },
   [ROUTES.adminInstrumentos]: { title: 'Instrumentos oficiales' },
