@@ -152,6 +152,10 @@ def _reflow() -> Callable[[Page, np.random.Generator], Page]:
     return lambda gray, _rng: syn.reflow(gray, A4_ASPECT)
 
 
+def _alias_resample(scale: float) -> Callable[[Page, np.random.Generator], Page]:
+    return lambda gray, rng: syn.alias_resample(gray, scale, int(rng.integers(0, 3)))
+
+
 RECIPES: tuple[Recipe, ...] = (
     Recipe("plano", "scanner-adf", page_width=SCANNER_WIDTH, paper_gray=250),
     Recipe(
@@ -186,6 +190,13 @@ RECIPES: tuple[Recipe, ...] = (
         "scanner-adf",
         page_width=HIGH_RESOLUTION_WIDTH,
         paper_gray=252,
+    ),
+    Recipe(
+        "remuestreo-240dpi",
+        "scanner-adf",
+        page_width=HIGH_RESOLUTION_WIDTH,
+        paper_gray=252,
+        post=(_alias_resample(0.62),),
     ),
     Recipe("rotacion-leve", "phone-good", post=(_rotate(1.6),)),
     Recipe("perspectiva-leve", "phone-good", post=(_perspective(0.012),)),

@@ -127,16 +127,44 @@ def test_upside_down_rut_sheet_is_reoriented_by_corner_qr(
     assert marked == BUBBLE_MARKS
 
 
-def test_rut_sheet_without_corner_qr_is_quality_rejected(
+def test_rut_sheet_without_corner_qr_is_read_and_resolved_by_bubbles(
     rut_spec: dict, profile: dict
 ) -> None:
+    """Regresion F1: el modo pensado para no depender del QR dependia del QR.
+
+    Antes del arreglo, un QR de esquina ilegible rechazaba la pagina entera
+    (no_separable_marks) aunque la grilla RUT y las marcas fueran legibles. La
+    orientacion la confirma ahora la firma de la grilla; el QR queda como via
+    rapida. Verificado contra el codigo sin el arreglo: ahi este test falla con
+    quality.ok False.
+    """
     page = read_rut_page(
         rut_spec, profile, identity_marks=syn.rut_marks(RUT), qr_text=None
     )
 
-    assert page["quality"]["ok"] is False
-    assert page["quality"]["rejectReason"] == "no_separable_marks"
-    assert page["identity"]["raw"] is None
+    assert page["quality"]["ok"] is True
+    assert page["identity"]["raw"] == RUT
     assert page["identity"]["qrRaw"] is None
-    assert page["marks"] == []
-    assert page["pageThumbJpegBase64"] is not None
+    marked = {m["fieldId"]: m["value"] for m in page["marks"] if m["state"] == "marked"}
+    assert marked == BUBBLE_MARKS
+
+
+def test_upside_down_rut_sheet_without_corner_qr_is_reoriented_by_grid(
+    rut_spec: dict, profile: dict
+) -> None:
+    gray = syn.render_page(
+        rut_spec,
+        0,
+        marks=dict(BUBBLE_MARKS),
+        identity_marks=syn.rut_marks(RUT),
+        qr_text=None,
+        rng=np.random.default_rng(15),
+    )
+    rotated = cv2.rotate(gray, cv2.ROTATE_180)
+    page = process_page(syn.to_bgr(rotated), 0, rut_spec, profile)
+
+    assert page["quality"]["ok"] is True
+    assert page["identity"]["raw"] == RUT
+    assert page["identity"]["qrRaw"] is None
+    marked = {m["fieldId"]: m["value"] for m in page["marks"] if m["state"] == "marked"}
+    assert marked == BUBBLE_MARKS

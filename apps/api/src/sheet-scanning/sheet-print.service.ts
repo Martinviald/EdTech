@@ -1,10 +1,11 @@
+import { randomInt } from 'node:crypto';
 import {
   BadRequestException,
   ConflictException,
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { and, asc, desc, eq, isNull, sql, type SQL } from 'drizzle-orm';
+import { and, asc, desc, eq, inArray, isNull, sql, type SQL } from 'drizzle-orm';
 import {
   assessmentCourseAssignments,
   assessmentForms,
@@ -132,12 +133,14 @@ export class SheetPrintService {
         });
       if (!run) throw new Error('sheet_print_runs insert returned no row');
 
+      const shortCodes = await this.pickShortCodes(tx, orgId, sheetCount);
       const sheetValues = genericSheets
         ? Array.from({ length: sheetCount }, (_, index) => ({
             orgId,
             printRunId: run.id,
             studentId: null,
             sequence: index + 1,
+            shortCode: shortCodes[index],
           }))
         : [
             ...roster.map((student, index) => ({
@@ -145,12 +148,14 @@ export class SheetPrintService {
               printRunId: run.id,
               studentId: student.id,
               sequence: index + 1,
+              shortCode: shortCodes[index],
             })),
             ...Array.from({ length: dto.spareCount }, (_, index) => ({
               orgId,
               printRunId: run.id,
               studentId: null,
               sequence: roster.length + index + 1,
+              shortCode: shortCodes[roster.length + index],
             })),
           ];
       await tx.insert(printedSheets).values(sheetValues);
@@ -396,6 +401,7 @@ export class SheetPrintService {
         .select({
           id: printedSheets.id,
           sequence: printedSheets.sequence,
+          shortCode: printedSheets.shortCode,
           firstName: students.firstName,
           lastName: students.lastName,
         })
@@ -407,6 +413,7 @@ export class SheetPrintService {
       const printable: PrintableSheetInfo[] = sheetRows.map((sheet) => ({
         printedSheetId: sheet.id,
         sequence: sheet.sequence,
+        shortCode: sheet.shortCode,
         studentName:
           sheet.lastName !== null && sheet.firstName !== null
             ? `${sheet.lastName}, ${sheet.firstName}`
@@ -423,6 +430,35 @@ export class SheetPrintService {
 
     const bytes = await renderSheetsPdf(spec, specHash, sheets);
     return Buffer.from(bytes);
+  }
+
+  private async pickShortCodes(tx: Database, orgId: string, count: number): Promise<number[]> {
+    const picked = new Set<number>();
+    for (let attempt = 0; attempt < 5 && picked.size < count; attempt += 1) {
+      const candidates = new Set<number>();
+      while (candidates.size < count - picked.size) {
+        candidates.add(randomInt(1, 0x1_0000_0000));
+      }
+      const taken = await tx
+        .select({ shortCode: printedSheets.shortCode })
+        .from(printedSheets)
+        .where(
+          and(
+            eq(printedSheets.orgId, orgId),
+            inArray(printedSheets.shortCode, [...candidates]),
+          ),
+        );
+      const takenSet = new Set(taken.map((row) => row.shortCode));
+      for (const candidate of candidates) {
+        if (!takenSet.has(candidate) && picked.size < count) picked.add(candidate);
+      }
+    }
+    if (picked.size < count) {
+      throw new ConflictException(
+        'No se pudieron asignar códigos únicos a las hojas. Vuelve a intentar la tirada.',
+      );
+    }
+    return [...picked];
   }
 
   private async requireRunForm(

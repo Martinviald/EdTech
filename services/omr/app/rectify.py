@@ -105,6 +105,7 @@ reabre exactamente este agujero.
 
 from __future__ import annotations
 
+from collections.abc import Callable
 from dataclasses import dataclass
 from typing import Any
 
@@ -124,6 +125,9 @@ BORDER_TOUCH_PX = 2
 MIN_CLIPPED_INK_AREA_PX = 200
 MAX_CORNER_DISTANCE_FRACTION = 0.22
 QR_CENTER_MIN_AREA_RATIO = 0.06
+REFINE_PITCH_FRACTION = 0.35
+REFINE_WORKSPACE_FRACTION = 0.025
+REFINE_MIN_STEP_PX = 1.0
 
 
 @dataclass(frozen=True)
@@ -133,6 +137,7 @@ class RectifiedPage:
     fiducials_found: int
     touches_border: bool
     reconstructed: bool = False
+    reconstructed_corner: int | None = None
 
 
 @dataclass(frozen=True)
@@ -150,21 +155,161 @@ def rectify(
     found = sum(1 for d in detections if d is not None)
     touches = _any_touches_border([d[1] for d in detections if d is not None], gray.shape)
 
-    reconstructed = False
+    reconstructed_corner: int | None = None
     if found == 3 and allow_reconstruction:
+        reconstructed_corner = next(i for i, d in enumerate(detections) if d is None)
         detections = _complete_parallelogram(detections)
-        reconstructed = True
     elif found < 4:
         return FiducialFailure(
             fiducials_found=found, touches_border=touches, clipped_corners=clipped
         )
 
+    return _warp(
+        gray,
+        [d for d in detections if d is not None],
+        spec,
+        found=found,
+        touches=touches,
+        corner=reconstructed_corner,
+    )
+
+
+def leave_one_out_rectifications(
+    page_bgr: np.ndarray, spec: dict[str, Any]
+) -> list[RectifiedPage]:
+    """Las 4 rectificaciones que descartan una esquina y la reconstruyen de las otras.
+
+    Existen para el falso fiducial: una mancha con forma de cuadrado dentro del
+    tope de distancia gana la esquina, el detector reporta 4/4 y la homografia
+    sale corrida — la captura N2 del banco real tenia la esquina falsa a 0.131
+    del borde contra 0.047-0.051 de las tres verdaderas, y sus fills salian de
+    papel (mediana 0.005 contra 0.313-0.395 de las capturas sanas). Reconstruir
+    la esquina enferma desde las otras tres recupero la pagina con firma 1.000.
+
+    Ninguna de estas rectificaciones vale por si sola: el pipeline las acepta
+    solo si algo independiente la confirma (QR o firma de la grilla), la misma
+    prueba que una reconstruccion normal de 3 fiduciales.
+    """
+    gray = cv2.cvtColor(page_bgr, cv2.COLOR_BGR2GRAY)
+    detections, _ = _find_fiducials_with_clipping(gray)
+    if sum(1 for d in detections if d is not None) != 4:
+        return []
+    touches = _any_touches_border([d[1] for d in detections if d is not None], gray.shape)
+    pages = []
+    for drop in range(4):
+        partial = [d if i != drop else None for i, d in enumerate(detections)]
+        completed = _complete_parallelogram(partial)
+        pages.append(_warp(gray, completed, spec, found=4, touches=touches, corner=drop))
+    return pages
+
+
+def refine_reconstruction(
+    page_bgr: np.ndarray,
+    spec: dict[str, Any],
+    corner: int,
+    score: Callable[[RectifiedPage], float],
+) -> RectifiedPage | None:
+    """Afina la esquina reconstruida buscando el offset que maximiza `score`.
+
+    Cerrar el paralelogramo asume perspectiva nula: en una foto la esquina
+    estimada queda corrida y el muestreo descentrado. La captura L0 del banco
+    real (foto con la esquina BR fuera de cuadro) paso de brecha 0.354 —no
+    separable— a 0.717 con un offset de ~(23,-25) px de workspace, los mismos
+    numeros que su gemela L1 con 4 fiduciales.
+
+    La busqueda mueve el punto DESTINO de esa esquina en el workspace, no el
+    origen: el desplazamiento de cualquier burbuja queda acotado por el offset
+    mismo, y el radio se acota a REFINE_PITCH_FRACTION del paso minimo entre
+    burbujas del spec — topologicamente imposible que una marca se muestree en
+    la burbuja vecina. El puntaje lo pone el pipeline (la brecha de separacion
+    de la pagina); este modulo no importa readers/classify. Descenso por
+    vecindad de 8 con paso que se parte a la mitad: ~30-50 warps solo en el
+    camino raro (esquina reconstruida ya confirmada).
+    """
+    gray = cv2.cvtColor(page_bgr, cv2.COLOR_BGR2GRAY)
+    detections, _ = _find_fiducials_with_clipping(gray)
+    kept = [d if i != corner else None for i, d in enumerate(detections)]
+    if sum(1 for d in kept if d is not None) != 3:
+        return None
+    touches = _any_touches_border([d[1] for d in kept if d is not None], gray.shape)
+    completed = _complete_parallelogram(kept)
+    radius = _refine_radius(spec)
+
+    def build(offset: tuple[float, float]) -> RectifiedPage:
+        return _warp(
+            gray, completed, spec, found=3, touches=touches, corner=corner, nudge=offset
+        )
+
+    best_offset = (0.0, 0.0)
+    best_page = build(best_offset)
+    best_score = score(best_page)
+    step = radius / 2
+    while step >= REFINE_MIN_STEP_PX:
+        improved = False
+        for dx, dy in ((-1, -1), (0, -1), (1, -1), (-1, 0), (1, 0), (-1, 1), (0, 1), (1, 1)):
+            offset = (
+                min(radius, max(-radius, best_offset[0] + dx * step)),
+                min(radius, max(-radius, best_offset[1] + dy * step)),
+            )
+            if offset == best_offset:
+                continue
+            page = build(offset)
+            page_score = score(page)
+            if page_score > best_score:
+                best_offset, best_page, best_score = offset, page, page_score
+                improved = True
+        if not improved:
+            step /= 2
+    return best_page
+
+
+def _refine_radius(spec: dict[str, Any]) -> float:
+    size = workspace_size(spec)
+    return min(
+        REFINE_PITCH_FRACTION * _min_bubble_pitch(spec, size),
+        REFINE_WORKSPACE_FRACTION * min(size),
+    )
+
+
+def _min_bubble_pitch(spec: dict[str, Any], size: tuple[int, int]) -> float:
+    width, height = size
+    centers = [
+        (bubble["center"]["x"] * width, bubble["center"]["y"] * height)
+        for field in spec["fields"]
+        for bubble in (field.get("bubbles") or [])
+    ]
+    identity_bubbles = spec["identity"].get("bubbles") or []
+    centers.extend(
+        (bubble["center"]["x"] * width, bubble["center"]["y"] * height)
+        for bubble in identity_bubbles
+    )
+    if len(centers) < 2:
+        return float("inf")
+    points = np.array(centers)
+    deltas = points[:, None, :] - points[None, :, :]
+    distances = np.sqrt((deltas**2).sum(axis=2))
+    np.fill_diagonal(distances, np.inf)
+    return float(distances.min())
+
+
+def _warp(
+    gray: np.ndarray,
+    detections: list[tuple[tuple[float, float], tuple[float, float]]],
+    spec: dict[str, Any],
+    *,
+    found: int,
+    touches: bool,
+    corner: int | None = None,
+    nudge: tuple[float, float] = (0.0, 0.0),
+) -> RectifiedPage:
     size = workspace_size(spec)
     width, height = size
     src = np.array([d[0] for d in detections], dtype=np.float32)
     dst = np.array(
         [[0, 0], [width - 1, 0], [width - 1, height - 1], [0, height - 1]], dtype=np.float32
     )
+    if corner is not None:
+        dst[corner] += np.array(nudge, dtype=np.float32)
     homography = cv2.getPerspectiveTransform(src, dst)
     warped = cv2.warpPerspective(gray, homography, size, flags=cv2.INTER_LINEAR)
     return RectifiedPage(
@@ -172,7 +317,8 @@ def rectify(
         size=size,
         fiducials_found=found,
         touches_border=touches,
-        reconstructed=reconstructed,
+        reconstructed=corner is not None,
+        reconstructed_corner=corner,
     )
 
 
@@ -184,9 +330,10 @@ def _complete_parallelogram(
     Las esquinas van en orden TL, TR, BR, BL, asi que la que falta es la suma de
     sus dos vecinas menos la opuesta. Con perspectiva leve el error es de pocos
     pixeles; con perspectiva fuerte se corre, y por eso la reconstruccion NUNCA
-    se acepta sola: el pipeline la valida decodificando el QR desde la region que
-    dice el spec (misma prueba que usa para confirmar orientacion). Si la esquina
-    estimada estuviera mal, la homografia se corre y el QR no cae donde deberia.
+    se acepta sola: el pipeline la valida con el QR decodificando desde la
+    region del spec o con la firma de la grilla (las burbujas del spec calzando
+    sobre sus anillos impresos). Si la esquina estimada estuviera mal, la
+    homografia se corre y ninguna de las dos pruebas pasa.
     """
     missing = next(i for i, d in enumerate(detections) if d is None)
     left = detections[(missing - 1) % 4]

@@ -341,7 +341,10 @@ export class SheetScanService {
       pageThumbJpegBase64: null,
     };
     const resolver = this.identityResolvers.forMode(identityModeOf(run.spec));
-    const candidate = await resolver.resolve(orgId, page, { printRunId: dto.printRunId });
+    const candidate = await resolver.resolve(orgId, page, {
+      printRunId: dto.printRunId,
+      specHash: run.specHash,
+    });
     const { identity, belongsToRun } = await this.buildAssessIdentity(
       orgId,
       dto.printRunId,
@@ -547,6 +550,7 @@ export class SheetScanService {
         }
         const candidate = await resolver.resolve(orgId, page, {
           printRunId: context.printRunId,
+          specHash: context.specHash,
         });
         if (candidate.batchRejection !== null) {
           return { rejectionReason: candidate.batchRejection.reason, pagesTotal };
@@ -564,7 +568,7 @@ export class SheetScanService {
 
   private detectBatchLayoutMismatch(context: JobContext, page: ScannedPage): string | null {
     const payload = this.qrPayloadOf(page.identity);
-    if (payload === null) return null;
+    if (payload === null || payload.kind === 'short') return null;
     if (payload.layoutHash === context.specHash.toLowerCase()) return null;
     return `El diseño impreso en las hojas (hash ${payload.layoutHash}) no coincide con el diseño de la tirada de este lote (hash ${context.specHash}). El instrumento fue editado o las hojas pertenecen a otra tirada: reimprime las hojas o crea el lote sobre la tirada correcta. Ninguna hoja de este lote fue corregida.`;
   }

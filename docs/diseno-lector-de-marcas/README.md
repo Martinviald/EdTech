@@ -68,6 +68,8 @@ ingeniería resuelta hace décadas. El riesgo real no está en el algoritmo sino
 | [04-componentes.md](04-componentes.md) | Inventario C1–C21 y diseño individual de cada uno |
 | [05-sistema.md](05-sistema.md) | Flujo end-to-end, límites transaccionales, multi-tenancy, modos de falla |
 | [06-plan-mvp-v1.md](06-plan-mvp-v1.md) | Olas del MVP con criterio medible, incrementos de v1, riesgos vivos |
+| [07-identidad-qr-robusta.md](07-identidad-qr-robusta.md) | Diagnóstico cerrado del QR (aliasing de remuestreo) y estrategia: payload corto, ECC Q, desacoplar roles |
+| [08-plan-identidad-qr-robusta.md](08-plan-identidad-qr-robusta.md) | Plan por fases de la estrategia 07, con gates medibles |
 
 ## Orden de lectura para implementar
 

@@ -144,12 +144,14 @@ describe('renderSheetsPdf', () => {
     {
       printedSheetId: '9f2c1a44-3b7e-4c11-9a0d-5e8f7b2c1d33',
       sequence: 1,
+      shortCode: 0x0a1b2c3d,
       studentName: 'Pérez, Ana',
       classGroupName: '3° Básico A',
     },
     {
       printedSheetId: '8e1b0933-2a6d-4b00-8c9c-4d7e6a1b0c22',
       sequence: 2,
+      shortCode: 0x0a1b2c3e,
       studentName: null,
       classGroupName: '3° Básico A',
     },
@@ -269,6 +271,7 @@ describe('computeDrawPlan — campos digit_grid y crop_region (CD-8/CD-9)', () =
       {
         printedSheetId: '9f2c1a44-3b7e-4c11-9a0d-5e8f7b2c1d33',
         sequence: 1,
+        shortCode: 0x0a1b2c3d,
         studentName: 'Pérez, Ana',
         classGroupName: '3° Básico A',
       },
@@ -324,12 +327,14 @@ describe('computeDrawPlan — hoja genérica con RUT (CD-10)', () => {
       {
         printedSheetId: '9f2c1a44-3b7e-4c11-9a0d-5e8f7b2c1d33',
         sequence: 1,
+        shortCode: 0x0a1b2c3d,
         studentName: null,
         classGroupName: '3° Básico A',
       },
       {
         printedSheetId: '8e1b0933-2a6d-4b00-8c9c-4d7e6a1b0c22',
         sequence: 2,
+        shortCode: 0x0a1b2c3e,
         studentName: null,
         classGroupName: '3° Básico A',
       },

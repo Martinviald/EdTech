@@ -42,3 +42,14 @@ def test_peek_ignores_malformed_or_out_of_range_payloads() -> None:
     assert peek_logical_page_index("otra:cosa", file_page_index=3, page_count=2) == 1
     assert peek_logical_page_index("academos:v1:a:b:no:2", file_page_index=0, page_count=2) == 0
     assert peek_logical_page_index(syn.qr_payload(7, 8), file_page_index=0, page_count=2) == 0
+
+
+def test_peek_uses_the_short_payload_logical_page_index() -> None:
+    assert peek_logical_page_index("AC:0A1B2C3D:1", file_page_index=6, page_count=2) == 1
+    assert peek_logical_page_index("AC:FFFFFFFF:0", file_page_index=3, page_count=2) == 0
+
+
+def test_peek_ignores_malformed_or_out_of_range_short_payloads() -> None:
+    assert peek_logical_page_index("AC:0a1b2c3d:1", file_page_index=0, page_count=2) == 0
+    assert peek_logical_page_index("AC:0A1B2C3D:5", file_page_index=0, page_count=2) == 0
+    assert peek_logical_page_index("AC:0A1B2C:1", file_page_index=0, page_count=2) == 0

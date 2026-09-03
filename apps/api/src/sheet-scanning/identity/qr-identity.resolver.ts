@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { and, eq } from 'drizzle-orm';
+import { and, eq, type SQL } from 'drizzle-orm';
 import {
   printedSheets,
   sheetLayouts,
@@ -13,8 +13,10 @@ import { InjectDb, type Database } from '../../database/database.types';
 import {
   unresolvedIdentityCandidate,
   type IdentityCandidate,
+  type IdentityResolutionContext,
   type SheetIdentityResolver,
 } from './identity-resolver.types';
+import { layoutHashMismatch } from './layout-hash-check.helpers';
 
 interface PrintedSheetLookup {
   printedSheetId: string;
@@ -31,33 +33,34 @@ export class QrIdentityResolver implements SheetIdentityResolver {
 
   constructor(@InjectDb() private readonly db: Database) {}
 
-  async resolve(orgId: string, page: ScannedPage): Promise<IdentityCandidate> {
+  async resolve(
+    orgId: string,
+    page: ScannedPage,
+    context: IdentityResolutionContext,
+  ): Promise<IdentityCandidate> {
     const raw = page.identity.raw;
     const payload = raw === null ? null : parseOmrQrPayload(raw);
     if (raw === null || payload === null) {
       return unresolvedIdentityCandidate({ motivo: 'qr_ilegible', qr: raw });
     }
 
-    const sheet = await this.findPrintedSheet(orgId, payload.printedSheetId);
+    const sheet =
+      payload.kind === 'short'
+        ? await this.findPrintedSheetByShortCode(orgId, payload.shortCode)
+        : await this.findPrintedSheet(orgId, payload.printedSheetId);
     if (!sheet) {
       return unresolvedIdentityCandidate({
         motivo: 'hoja_no_encontrada',
         qr: raw,
-        printedSheetId: payload.printedSheetId,
+        ...(payload.kind === 'short'
+          ? { shortCode: payload.shortCode }
+          : { printedSheetId: payload.printedSheetId }),
       });
     }
 
-    if (payload.layoutHash !== sheet.specHash.toLowerCase()) {
-      return {
-        printedSheetId: sheet.printedSheetId,
-        studentId: null,
-        confidence: 0,
-        evidence: { qr: raw, qrLayoutHash: payload.layoutHash, layoutSpecHash: sheet.specHash },
-        needsHumanConfirmation: false,
-        batchRejection: {
-          reason: `El instrumento fue editado después de imprimir las hojas: el diseño impreso (hash ${payload.layoutHash}) no coincide con el diseño de la tirada (hash ${sheet.specHash}). Reimprime las hojas con el diseño vigente y vuelve a escanear el lote completo.`,
-        },
-      };
+    const mismatch = layoutHashMismatch(payload, sheet.specHash, context.specHash, raw);
+    if (mismatch !== null) {
+      return { ...mismatch, printedSheetId: sheet.printedSheetId };
     }
 
     if (payload.pageIndex >= sheet.pageCount) {
@@ -90,9 +93,23 @@ export class QrIdentityResolver implements SheetIdentityResolver {
     };
   }
 
-  private async findPrintedSheet(
+  private findPrintedSheet(
     orgId: string,
     printedSheetId: string,
+  ): Promise<PrintedSheetLookup | null> {
+    return this.lookupPrintedSheet(orgId, eq(printedSheets.id, printedSheetId));
+  }
+
+  private findPrintedSheetByShortCode(
+    orgId: string,
+    shortCode: number,
+  ): Promise<PrintedSheetLookup | null> {
+    return this.lookupPrintedSheet(orgId, eq(printedSheets.shortCode, shortCode));
+  }
+
+  private async lookupPrintedSheet(
+    orgId: string,
+    condition: SQL,
   ): Promise<PrintedSheetLookup | null> {
     const rows = await withOrgContext(this.db, orgId, (tx) =>
       tx
@@ -108,7 +125,7 @@ export class QrIdentityResolver implements SheetIdentityResolver {
         .innerJoin(sheetPrintRuns, eq(printedSheets.printRunId, sheetPrintRuns.id))
         .innerJoin(sheetLayouts, eq(sheetPrintRuns.layoutId, sheetLayouts.id))
         .leftJoin(students, eq(printedSheets.studentId, students.id))
-        .where(and(eq(printedSheets.id, printedSheetId), eq(printedSheets.orgId, orgId)))
+        .where(and(condition, eq(printedSheets.orgId, orgId)))
         .limit(1),
     );
 

@@ -176,6 +176,13 @@
       "when": 1788374641660,
       "tag": "0024_vengeful_norrin_radd",
       "breakpoints": true
+    },
+    {
+      "idx": 25,
+      "version": "7",
+      "when": 1788393471466,
+      "tag": "0025_wakeful_jane_foster",
+      "breakpoints": true
     }
   ]
 }

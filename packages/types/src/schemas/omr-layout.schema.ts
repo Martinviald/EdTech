@@ -82,7 +82,7 @@ export type SheetIdentityMode = (typeof SHEET_IDENTITY_MODES)[number];
 
 export const SHEET_QR_IDENTITY_REGION = {
   topLeft: { x: 0.78, y: 0.02 },
-  bottomRight: { x: 0.98, y: 0.16 },
+  bottomRight: { x: 0.98, y: 0.18 },
 } as const;
 
 export const layoutSpecSchema = z.object({
