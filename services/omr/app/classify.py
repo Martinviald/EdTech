@@ -25,6 +25,15 @@ asi que en vez de rechazar la pagina se lee con un umbral bajo el cluster:
 cada campo single sale `multiple` (cola de revision con evidencia, C21) y
 ningun campo se decide mal con confianza.
 
+Hoja en blanco vs hoja ilegible (E22/gate movil): las dos rinden el mismo
+`no_separable_marks` — un solo grupo — pero piden acciones opuestas. Repetir la
+foto de una hoja que el alumno dejo sin marcar no sirve; repetir la de una hoja
+con tinta desparramada por una sombra si. Se distinguen por el MISMO
+razonamiento del caso simetrico de arriba: si NINGUNA burbuja de la pagina
+llega a tinta real (max(fill) < BLANK_SHEET_MAX_FILL) no hay nada que rescatar,
+la hoja esta en blanco; si alguna si llega, hay tinta que la captura no dejo
+leer y la pagina es ilegible. Ver readability_verdict.
+
 margin = |fill - threshold| / threshold (formula congelada en el contrato);
 margin < AMBIGUITY_MARGIN => ambiguous. Ademas, un fill en tierra de nadie
 — lejos de AMBOS grupos (banda `ambiguity_band`) — tambien es ambiguous
@@ -53,6 +62,11 @@ DARK_CONTRAST_RATIO = 0.12
 CLUSTER_BAND_STD_FACTOR = 2.0
 CLUSTER_BAND_MIN_WIDTH = 0.12
 ALL_MARKED_MIN_FILL = 0.5
+BLANK_SHEET_MAX_FILL = 0.5
+
+MARKS_READABLE = "readable"
+MARKS_LIKELY_BLANK = "likely_blank"
+MARKS_UNREADABLE = "unreadable"
 
 
 @dataclass(frozen=True)
@@ -131,6 +145,42 @@ def _all_marked_threshold(values: np.ndarray) -> PageThreshold:
         std_low=0.0,
         std_high=float(values.std()),
     )
+
+
+def readability_verdict(threshold: PageThreshold, fills: list[float]) -> str:
+    """Por que la pagina no se puede leer: en blanco o ilegible (y si se puede, legible).
+
+    Es LA politica compartida: el gate del telefono (POST /v1/assess) y el
+    procesamiento del lote (POST /v1/read) la llaman sobre los mismos fills de
+    la misma pagina rectificada, para que jamas den veredictos distintos sobre
+    la misma foto. Corre DESPUES del reintento con la iluminacion aplanada: una
+    pagina que el aplanado rescata nunca llega aca a que le pregunten nada.
+
+    El discriminador es cuan oscura es la burbuja MAS oscura de la pagina, el
+    mismo razonamiento de ALL_MARKED_MIN_FILL para el caso simetrico (un solo
+    grupo, pero de tinta real). Si ni el maximo llega a tinta real, no hay marca
+    que rescatar: es la hoja, no la captura, y repetir la foto no sirve.
+
+    OJO: BLANK_SHEET_MAX_FILL NO ESTA CALIBRADO. Medidas disponibles al escribir
+    esto (fotos reales de telefono, spec de 57 burbujas):
+
+        hoja en blanco (proxy)      max fill 0.462
+        hoja ilegible con tinta     max fill 0.791
+        otras paginas rechazadas    max fill 0.132 - 0.579
+
+    El unico punto de "en blanco" es un PROXY (las burbujas vacias de una foto
+    buena), no una hoja real sin marcar, y el limite queda apretado. Falta
+    calibrarlo con fotos reales de hojas sin responder. Por eso el valor elegido
+    es el del precedente (0.5 = tinta real) y el empate cae del lado ILEGIBLE:
+    invitar a repetir una foto que no lo necesitaba cuesta 10 segundos, decirle
+    "esta en blanco" a una hoja que si tenia respuestas cuesta la nota del
+    alumno.
+    """
+    if threshold.is_readable():
+        return MARKS_READABLE
+    if fills and max(fills) < BLANK_SHEET_MAX_FILL:
+        return MARKS_LIKELY_BLANK
+    return MARKS_UNREADABLE
 
 
 def margin_of(fill: float, threshold: float) -> float:
