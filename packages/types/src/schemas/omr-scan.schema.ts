@@ -45,6 +45,15 @@ export const pageQualitySchema = z.object({
   glare: z.number().min(0).max(1),
   fiducialsFound: z.number().int().min(0).max(4),
   rejectReason: z.enum(PAGE_REJECT_REASONS).nullable(),
+  /**
+   * La página se leyó reintentando con la iluminación aplanada: el primer pase
+   * se rechazó por `no_separable_marks` y el segundo, sobre la captura sin
+   * gradiente de luz, sí quedó legible. Es evidencia para auditar después qué
+   * lecturas dependieron del reintento; no cambia cómo se interpreta el resto
+   * de `quality`. Optional sin default: `POST /v1/assess` no lo emite y los
+   * payloads previos siguen validando sin cambios (mismo criterio que `qrRaw`).
+   */
+  illuminationFlattened: z.boolean().optional(),
 });
 
 export const scannedPageIdentitySchema = z.object({
