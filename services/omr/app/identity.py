@@ -23,6 +23,7 @@ interpretarlo: hash-check, idempotencia y pageIndex logico son del backend.
 
 from __future__ import annotations
 
+import re
 from typing import Any
 
 import numpy as np
@@ -35,6 +36,7 @@ from .rectify import RectifiedPage
 
 QR_PAYLOAD_PREFIX = "academos"
 QR_PAYLOAD_TOKENS = 6
+QR_SHORT_PAYLOAD_RE = re.compile(r"^AC:[0-9A-F]{8}:(\d{1,2})$")
 IDENTITY_REGION_PAD_RATIO = 0.03
 
 
@@ -85,6 +87,19 @@ def decode_corner_qr(rectified: RectifiedPage) -> str | None:
 
 
 def peek_logical_page_index(raw: str | None, file_page_index: int, page_count: int) -> int:
+    """Pagina logica desde el payload del QR; sin QR, el orden del archivo.
+
+    Espeja el parse minimo de los dos formatos de packages/types/src/utils/omr-qr.ts:
+    corto (AC:<hex8>:<pagina>, el que se imprime desde la identidad robusta) y
+    completo (academos:v1:..., hojas legadas). El servicio sigue sin interpretar
+    identidad: solo necesita saber que campos del spec buscar en el bitmap.
+    """
+    if raw:
+        short = QR_SHORT_PAYLOAD_RE.match(raw.strip())
+        if short:
+            page_index = int(short.group(1))
+            if 0 <= page_index < page_count:
+                return page_index
     tokens = raw.split(":") if raw else []
     if len(tokens) == QR_PAYLOAD_TOKENS and tokens[0] == QR_PAYLOAD_PREFIX:
         try:

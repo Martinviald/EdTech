@@ -1,5 +1,5 @@
 import type { Database } from '@soe/db';
-import { buildOmrQrPayload } from '@soe/types';
+import { buildOmrQrPayload, buildOmrShortQrPayload } from '@soe/types';
 import type { ScannedPage } from '@soe/types';
 import { RutBubbleResolver } from './rut-bubble.resolver';
 
@@ -46,7 +46,7 @@ function makeDb(selectResults: unknown[][]): DbMock {
 const RUN_ID = '66666666-6666-4666-8666-666666666666';
 const SHEET_ID = '77777777-7777-4777-8777-777777777777';
 const LAYOUT_HASH = 'a3f9c1e70b4d2856';
-const CONTEXT = { printRunId: RUN_ID };
+const CONTEXT = { printRunId: RUN_ID, specHash: LAYOUT_HASH };
 const QR_RAW = buildOmrQrPayload({
   printedSheetId: SHEET_ID,
   layoutHash: LAYOUT_HASH,
@@ -117,7 +117,11 @@ describe('RutBubbleResolver', () => {
     expect(candidate.printedSheetId).toBeNull();
     expect(candidate.studentId).toBeNull();
     expect(candidate.needsHumanConfirmation).toBe(true);
-    expect(candidate.evidence).toEqual({ motivo: 'qr_esquina_ilegible', qr: null });
+    expect(candidate.evidence).toEqual({
+      motivo: 'qr_esquina_ilegible',
+      qr: null,
+      rut: '123456785',
+    });
     expect(db.__selectCount()).toBe(0);
   });
 
@@ -266,5 +270,37 @@ describe('RutBubbleResolver', () => {
     const candidate = await resolver.resolve('org-1', makePage('123456785'), CONTEXT);
 
     expect(candidate.studentId).toBe('student-1');
+  });
+
+  it('QR de esquina con payload corto: ancla la hoja por short_code y resuelve el alumno', async () => {
+    const shortQr = buildOmrShortQrPayload({ shortCode: 0x0a1b2c3d, pageIndex: 0 });
+    const resolver = new RutBubbleResolver(makeDb([[sheetRow()], [rosterRow()]]));
+
+    const candidate = await resolver.resolve(
+      'org-1',
+      makePage('123456785', 0.87, shortQr),
+      CONTEXT,
+    );
+
+    expect(candidate.printedSheetId).toBe(SHEET_ID);
+    expect(candidate.studentId).toBe('student-1');
+    expect(candidate.evidence).toMatchObject({ qr: shortQr, rut: '12345678-5' });
+  });
+
+  it('payload corto de una hoja de otro diseño: G1 contra el hash del lote', async () => {
+    const shortQr = buildOmrShortQrPayload({ shortCode: 0x0a1b2c3d, pageIndex: 0 });
+    const resolver = new RutBubbleResolver(
+      makeDb([[sheetRow({ specHash: 'ffff000011112222' })]]),
+    );
+
+    const candidate = await resolver.resolve(
+      'org-1',
+      makePage('123456785', 0.9, shortQr),
+      CONTEXT,
+    );
+
+    expect(candidate.batchRejection).not.toBeNull();
+    expect(candidate.batchRejection?.reason).toContain('ffff000011112222');
+    expect(candidate.batchRejection?.reason).toContain(LAYOUT_HASH);
   });
 });

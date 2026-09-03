@@ -11,6 +11,7 @@ export interface IdentityCandidate {
 
 export interface IdentityResolutionContext {
   printRunId: string;
+  specHash: string;
 }
 
 export interface SheetIdentityResolver {

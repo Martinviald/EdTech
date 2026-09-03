@@ -119,6 +119,25 @@ exactamente esta función** — nunca dos implementaciones.
 
 ## 3.2 · Payload del QR
 
+Dos formatos. El **corto** es el que se imprime desde la identidad robusta
+([07-identidad-qr-robusta.md](07-identidad-qr-robusta.md) §4.1); el **completo** queda para
+siempre como formato de lectura de las hojas ya impresas.
+
+**Corto** (14 caracteres máx., solo charset alfanumérico de QR ⇒ versión 1, 21×21):
+
+```
+AC:<shortCode hex8 MAYÚSCULA>:<pageIndex>
+```
+
+Ejemplo: `AC:0A1B2C3D:0`. El `shortCode` es `printed_sheets.short_code` — entero de 32 bits
+único por org, aleatorio con reintento; no contiene datos personales. El hash del diseño **no
+viaja**: el gate G1 se evalúa al resolver, comparando el layout de la tirada de la hoja (por
+`short_code`) contra el layout de la tirada del lote. El mismo código va impreso en texto
+legible junto al QR (`formatShortCode`, `0A1B-2C3D`) para tipeo humano de último recurso.
+
+**Completo** (legado, 69 caracteres ⇒ versión 5, 37×37 — módulo de ~1 mm, en la zona de
+aliasing del escáner; ver diagnóstico en el doc 07 §2):
+
 ```
 academos:v1:<printedSheetId>:<layoutHash>:<pageIndex>:<pageCount>
 ```
@@ -129,8 +148,10 @@ Ejemplo:
 academos:v1:9f2c1a44-3b7e-4c11-9a0d-5e8f7b2c1d33:a3f9c1e70b4d2856:0:2
 ```
 
-Nivel de corrección de errores **M** (15%), para tolerar una hoja arrugada o una impresión
-gastada. El `printedSheetId` es la PK de `printed_sheets`; no contiene datos personales.
+Ambos formatos se construyen y parsean **solo** con `packages/types/src/utils/omr-qr.ts`; el
+lector Python espeja el parse mínimo que necesita (`peek_logical_page_index` en
+`services/omr/app/identity.py`). El `printedSheetId` es la PK de `printed_sheets`; no contiene
+datos personales.
 
 ---
 

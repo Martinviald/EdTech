@@ -1,5 +1,5 @@
 import type { Database } from '@soe/db';
-import { buildOmrQrPayload } from '@soe/types';
+import { buildOmrQrPayload, buildOmrShortQrPayload } from '@soe/types';
 import type { ScannedPage } from '@soe/types';
 import { QrIdentityResolver } from './qr-identity.resolver';
 
@@ -46,6 +46,8 @@ function makeDb(selectResults: unknown[][]): DbMock {
 const SHEET_ID = '9f2c1a44-3b7e-4c11-9a0d-5e8f7b2c1d33';
 const HASH = 'a3f9c1e70b4d2856';
 const OTHER_HASH = 'ffffffffffffffff';
+const SHORT_CODE = 0x0a1b2c3d;
+const CONTEXT = { printRunId: 'run-1', specHash: HASH };
 
 function qr(overrides: Partial<Parameters<typeof buildOmrQrPayload>[0]> = {}): string {
   return buildOmrQrPayload({
@@ -89,7 +91,7 @@ describe('QrIdentityResolver', () => {
     const raw = qr();
     const resolver = new QrIdentityResolver(makeDb([[sheetRow()]]));
 
-    const candidate = await resolver.resolve('org-1', makePage(raw));
+    const candidate = await resolver.resolve('org-1', makePage(raw), CONTEXT);
 
     expect(candidate).toEqual({
       printedSheetId: SHEET_ID,
@@ -105,7 +107,7 @@ describe('QrIdentityResolver', () => {
     const db = makeDb([]);
     const resolver = new QrIdentityResolver(db);
 
-    const candidate = await resolver.resolve('org-1', makePage(null));
+    const candidate = await resolver.resolve('org-1', makePage(null), CONTEXT);
 
     expect(candidate.printedSheetId).toBeNull();
     expect(candidate.studentId).toBeNull();
@@ -119,7 +121,7 @@ describe('QrIdentityResolver', () => {
     const db = makeDb([]);
     const resolver = new QrIdentityResolver(db);
 
-    const candidate = await resolver.resolve('org-1', makePage('https://example.com/otra-cosa'));
+    const candidate = await resolver.resolve('org-1', makePage('https://example.com/otra-cosa'), CONTEXT);
 
     expect(candidate.studentId).toBeNull();
     expect(candidate.needsHumanConfirmation).toBe(true);
@@ -131,7 +133,7 @@ describe('QrIdentityResolver', () => {
     const raw = qr();
     const resolver = new QrIdentityResolver(makeDb([[]]));
 
-    const candidate = await resolver.resolve('org-1', makePage(raw));
+    const candidate = await resolver.resolve('org-1', makePage(raw), CONTEXT);
 
     expect(candidate.printedSheetId).toBeNull();
     expect(candidate.studentId).toBeNull();
@@ -148,7 +150,7 @@ describe('QrIdentityResolver', () => {
     const raw = qr();
     const resolver = new QrIdentityResolver(makeDb([[]]));
 
-    const candidate = await resolver.resolve('org-ajena', makePage(raw));
+    const candidate = await resolver.resolve('org-ajena', makePage(raw), CONTEXT);
 
     expect(candidate.studentId).toBeNull();
     expect(candidate.needsHumanConfirmation).toBe(true);
@@ -159,7 +161,7 @@ describe('QrIdentityResolver', () => {
     const raw = qr();
     const resolver = new QrIdentityResolver(makeDb([[sheetRow({ specHash: OTHER_HASH })]]));
 
-    const candidate = await resolver.resolve('org-1', makePage(raw));
+    const candidate = await resolver.resolve('org-1', makePage(raw), CONTEXT);
 
     expect(candidate.batchRejection).not.toBeNull();
     expect(candidate.batchRejection?.reason).toContain('editado después de imprimir');
@@ -173,7 +175,7 @@ describe('QrIdentityResolver', () => {
     const raw = qr({ pageIndex: 1, pageCount: 2 });
     const resolver = new QrIdentityResolver(makeDb([[sheetRow({ spec: { pageCount: 1 } })]]));
 
-    const candidate = await resolver.resolve('org-1', makePage(raw));
+    const candidate = await resolver.resolve('org-1', makePage(raw), CONTEXT);
 
     expect(candidate.printedSheetId).toBeNull();
     expect(candidate.studentId).toBeNull();
@@ -193,7 +195,7 @@ describe('QrIdentityResolver', () => {
       makeDb([[sheetRow({ studentId: null, studentFirstName: null, studentLastName: null })]]),
     );
 
-    const candidate = await resolver.resolve('org-1', makePage(raw));
+    const candidate = await resolver.resolve('org-1', makePage(raw), CONTEXT);
 
     expect(candidate).toEqual({
       printedSheetId: SHEET_ID,
@@ -203,5 +205,58 @@ describe('QrIdentityResolver', () => {
       needsHumanConfirmation: true,
       batchRejection: null,
     });
+  });
+
+  it('payload corto: resuelve la hoja por short_code con studentId y confianza 1', async () => {
+    const raw = buildOmrShortQrPayload({ shortCode: SHORT_CODE, pageIndex: 0 });
+    const resolver = new QrIdentityResolver(makeDb([[sheetRow()]]));
+
+    const candidate = await resolver.resolve('org-1', makePage(raw), CONTEXT);
+
+    expect(candidate).toEqual({
+      printedSheetId: SHEET_ID,
+      studentId: 'student-1',
+      confidence: 1,
+      evidence: { qr: raw, alumno: 'Ana Pérez' },
+      needsHumanConfirmation: false,
+      batchRejection: null,
+    });
+  });
+
+  it('payload corto sin hoja en la org: candidato vacío con el shortCode en la evidencia', async () => {
+    const raw = buildOmrShortQrPayload({ shortCode: SHORT_CODE, pageIndex: 0 });
+    const resolver = new QrIdentityResolver(makeDb([[]]));
+
+    const candidate = await resolver.resolve('org-1', makePage(raw), CONTEXT);
+
+    expect(candidate.printedSheetId).toBeNull();
+    expect(candidate.evidence).toEqual({
+      motivo: 'hoja_no_encontrada',
+      qr: raw,
+      shortCode: SHORT_CODE,
+    });
+  });
+
+  it('payload corto de una hoja de otro diseño: batchRejection G1 comparando contra el lote', async () => {
+    const raw = buildOmrShortQrPayload({ shortCode: SHORT_CODE, pageIndex: 0 });
+    const resolver = new QrIdentityResolver(makeDb([[sheetRow({ specHash: OTHER_HASH })]]));
+
+    const candidate = await resolver.resolve('org-1', makePage(raw), CONTEXT);
+
+    expect(candidate.batchRejection).not.toBeNull();
+    expect(candidate.batchRejection?.reason).toContain(OTHER_HASH);
+    expect(candidate.batchRejection?.reason).toContain(HASH);
+    expect(candidate.batchRejection?.reason).toContain('no coincide con el diseño de la tirada de este lote');
+    expect(candidate.printedSheetId).toBe(SHEET_ID);
+  });
+
+  it('payload corto con pageIndex fuera del spec: candidato vacío para revisión', async () => {
+    const raw = buildOmrShortQrPayload({ shortCode: SHORT_CODE, pageIndex: 1 });
+    const resolver = new QrIdentityResolver(makeDb([[sheetRow({ spec: { pageCount: 1 } })]]));
+
+    const candidate = await resolver.resolve('org-1', makePage(raw), CONTEXT);
+
+    expect(candidate.printedSheetId).toBeNull();
+    expect(candidate.evidence.motivo).toBe('page_index_fuera_de_rango');
   });
 });

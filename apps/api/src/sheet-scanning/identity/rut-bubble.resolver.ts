@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { and, eq, isNull } from 'drizzle-orm';
+import { and, eq, isNull, type SQL } from 'drizzle-orm';
 import {
   printedSheets,
   sheetLayouts,
@@ -17,6 +17,7 @@ import {
   type IdentityResolutionContext,
   type SheetIdentityResolver,
 } from './identity-resolver.types';
+import { layoutHashMismatch } from './layout-hash-check.helpers';
 
 interface RosterStudent {
   id: string;
@@ -46,33 +47,38 @@ export class RutBubbleResolver implements SheetIdentityResolver {
   ): Promise<IdentityCandidate> {
     const qrRaw = page.identity.qrRaw ?? null;
     if (qrRaw === null) {
-      return unresolvedIdentityCandidate({ motivo: 'qr_esquina_ilegible', qr: null });
+      return unresolvedIdentityCandidate({
+        motivo: 'qr_esquina_ilegible',
+        qr: null,
+        rut: page.identity.raw,
+      });
     }
     const qrPayload = parseOmrQrPayload(qrRaw);
     if (qrPayload === null) {
-      return unresolvedIdentityCandidate({ motivo: 'qr_esquina_ilegible', qr: qrRaw });
+      return unresolvedIdentityCandidate({
+        motivo: 'qr_esquina_ilegible',
+        qr: qrRaw,
+        rut: page.identity.raw,
+      });
     }
 
-    const sheet = await this.findPrintedSheet(orgId, qrPayload.printedSheetId);
+    const sheet =
+      qrPayload.kind === 'short'
+        ? await this.findPrintedSheetByShortCode(orgId, qrPayload.shortCode)
+        : await this.findPrintedSheet(orgId, qrPayload.printedSheetId);
     if (!sheet) {
       return unresolvedIdentityCandidate({
         motivo: 'hoja_no_encontrada',
         qr: qrRaw,
-        printedSheetId: qrPayload.printedSheetId,
+        ...(qrPayload.kind === 'short'
+          ? { shortCode: qrPayload.shortCode }
+          : { printedSheetId: qrPayload.printedSheetId }),
       });
     }
 
-    if (qrPayload.layoutHash !== sheet.specHash.toLowerCase()) {
-      return {
-        printedSheetId: sheet.printedSheetId,
-        studentId: null,
-        confidence: 0,
-        evidence: { qr: qrRaw, qrLayoutHash: qrPayload.layoutHash, layoutSpecHash: sheet.specHash },
-        needsHumanConfirmation: false,
-        batchRejection: {
-          reason: `El instrumento fue editado después de imprimir las hojas: el diseño impreso (hash ${qrPayload.layoutHash}) no coincide con el diseño de la tirada (hash ${sheet.specHash}). Reimprime las hojas con el diseño vigente y vuelve a escanear el lote completo.`,
-        },
-      };
+    const mismatch = layoutHashMismatch(qrPayload, sheet.specHash, context.specHash, qrRaw);
+    if (mismatch !== null) {
+      return { ...mismatch, printedSheetId: sheet.printedSheetId };
     }
 
     if (qrPayload.pageIndex >= sheet.pageCount) {
@@ -147,9 +153,23 @@ export class RutBubbleResolver implements SheetIdentityResolver {
     };
   }
 
-  private async findPrintedSheet(
+  private findPrintedSheet(
     orgId: string,
     printedSheetId: string,
+  ): Promise<PrintedSheetLookup | null> {
+    return this.lookupPrintedSheet(orgId, eq(printedSheets.id, printedSheetId));
+  }
+
+  private findPrintedSheetByShortCode(
+    orgId: string,
+    shortCode: number,
+  ): Promise<PrintedSheetLookup | null> {
+    return this.lookupPrintedSheet(orgId, eq(printedSheets.shortCode, shortCode));
+  }
+
+  private async lookupPrintedSheet(
+    orgId: string,
+    condition: SQL,
   ): Promise<PrintedSheetLookup | null> {
     const rows = await withOrgContext(this.db, orgId, (tx) =>
       tx
@@ -161,7 +181,7 @@ export class RutBubbleResolver implements SheetIdentityResolver {
         .from(printedSheets)
         .innerJoin(sheetPrintRuns, eq(printedSheets.printRunId, sheetPrintRuns.id))
         .innerJoin(sheetLayouts, eq(sheetPrintRuns.layoutId, sheetLayouts.id))
-        .where(and(eq(printedSheets.id, printedSheetId), eq(printedSheets.orgId, orgId)))
+        .where(and(condition, eq(printedSheets.orgId, orgId)))
         .limit(1),
     );
 

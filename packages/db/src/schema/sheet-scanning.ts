@@ -1,4 +1,16 @@
-import { decimal, index, integer, jsonb, pgTable, text, timestamp, unique, uuid } from 'drizzle-orm/pg-core';
+import {
+  bigint,
+  decimal,
+  index,
+  integer,
+  jsonb,
+  pgTable,
+  text,
+  timestamp,
+  unique,
+  uniqueIndex,
+  uuid,
+} from 'drizzle-orm/pg-core';
 import { relations } from 'drizzle-orm';
 import type { CaptureProfile, LayoutSpec, PageQuality } from '@soe/types';
 import { markStateEnum, sheetScanBatchStatusEnum, sheetScanStateEnum } from './enums';
@@ -73,7 +85,15 @@ export const sheetPrintRuns = pgTable(
   }),
 );
 
-/** Una HOJA FÍSICA. Su id viaja en el QR. studentId NULL = hoja de reserva (G8). */
+/**
+ * Una HOJA FÍSICA. studentId NULL = hoja de reserva (G8).
+ *
+ * shortCode: entero de 32 bits único por org, aleatorio con reintento; viaja en
+ * el QR corto (doc 07 §4.1) en vez del UUID + hash — 14 caracteres alfanuméricos
+ * fuerzan un QR versión 1 con módulos 76% más grandes, fuera de la zona de
+ * aliasing del escáner. NULL solo en hojas impresas antes del formato corto:
+ * esas se resuelven por su QR legado con el id completo.
+ */
 export const printedSheets = pgTable(
   'printed_sheets',
   {
@@ -86,11 +106,13 @@ export const printedSheets = pgTable(
       .references(() => sheetPrintRuns.id),
     studentId: uuid('student_id').references(() => students.id),
     sequence: integer('sequence').notNull(),
+    shortCode: bigint('short_code', { mode: 'number' }),
     createdAt: timestamp('created_at').defaultNow().notNull(),
   },
   (t) => ({
     runIdx: index('printed_sheets_run_idx').on(t.orgId, t.printRunId),
     runSequenceUq: unique('printed_sheets_run_sequence_uq').on(t.printRunId, t.sequence),
+    orgShortCodeUq: uniqueIndex('printed_sheets_org_short_code_uq').on(t.orgId, t.shortCode),
   }),
 );
 

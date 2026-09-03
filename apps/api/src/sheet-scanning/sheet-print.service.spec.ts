@@ -487,12 +487,14 @@ describe('SheetPrintService.renderPdf', () => {
     {
       id: '9f2c1a44-3b7e-4c11-9a0d-5e8f7b2c1d33',
       sequence: 1,
+      shortCode: 0x0a1b2c3d,
       firstName: 'Ana',
       lastName: 'Pérez',
     },
     {
       id: '8e1b0933-2a6d-4b00-8c9c-4d7e6a1b0c22',
       sequence: 2,
+      shortCode: null,
       firstName: null,
       lastName: null,
     },
@@ -663,8 +665,20 @@ describe('SheetPrintService — hoja genérica y formas (v1)', () => {
     const { db } = makeDb([
       [{ id: RUN_ID, spec: rutSpec, specHash: 'a3f9c1e70b4d2856', classGroupName: '3° Básico A' }],
       [
-        { id: '9f2c1a44-3b7e-4c11-9a0d-5e8f7b2c1d33', sequence: 1, firstName: null, lastName: null },
-        { id: '8e1b0933-2a6d-4b00-8c9c-4d7e6a1b0c22', sequence: 2, firstName: null, lastName: null },
+        {
+          id: '9f2c1a44-3b7e-4c11-9a0d-5e8f7b2c1d33',
+          sequence: 1,
+          shortCode: 0x0a1b2c3d,
+          firstName: null,
+          lastName: null,
+        },
+        {
+          id: '8e1b0933-2a6d-4b00-8c9c-4d7e6a1b0c22',
+          sequence: 2,
+          shortCode: 0x0a1b2c3e,
+          firstName: null,
+          lastName: null,
+        },
       ],
     ]);
     const service = new SheetPrintService(db);

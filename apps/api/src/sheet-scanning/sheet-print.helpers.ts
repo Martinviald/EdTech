@@ -1,6 +1,11 @@
 import { PDFDocument, StandardFonts, rgb } from 'pdf-lib';
 import * as QRCode from 'qrcode';
-import { buildOmrQrPayload, type LayoutSpec } from '@soe/types';
+import {
+  buildOmrQrPayload,
+  buildOmrShortQrPayload,
+  formatShortCode,
+  type LayoutSpec,
+} from '@soe/types';
 import { identityModeOf, SHEET_QR_IDENTITY_REGION } from './sheet-layout.helpers';
 
 export const PAPER_SIZES_PT: Record<LayoutSpec['paper'], { width: number; height: number }> = {
@@ -55,8 +60,26 @@ export interface SheetDrawPlan {
 export interface PrintableSheetInfo {
   printedSheetId: string;
   sequence: number;
+  shortCode: number | null;
   studentName: string | null;
   classGroupName: string | null;
+}
+
+export function qrPayloadForSheet(
+  sheet: Pick<PrintableSheetInfo, 'printedSheetId' | 'shortCode'>,
+  specHash: string,
+  pageIndex: number,
+  pageCount: number,
+): string {
+  if (sheet.shortCode !== null) {
+    return buildOmrShortQrPayload({ shortCode: sheet.shortCode, pageIndex });
+  }
+  return buildOmrQrPayload({
+    printedSheetId: sheet.printedSheetId,
+    layoutHash: specHash,
+    pageIndex,
+    pageCount,
+  });
 }
 
 const SYNC_TICK_HEIGHT = 1.6;
@@ -65,6 +88,7 @@ const LABEL_GAP = 6;
 const NAME_FONT_SIZE = 11;
 const COURSE_FONT_SIZE = 9;
 const INSTRUCTION_FONT_SIZE = 7;
+const SHORT_CODE_FONT_SIZE = 7;
 const BLANK_NAME_LINE = '________________________________';
 const RUT_MODE_NAME_LINE = 'Nombre: ____________________________';
 const RUT_INSTRUCTION_LINES = [
@@ -308,12 +332,7 @@ export async function renderSheetsPdf(
         });
       }
 
-      const payload = buildOmrQrPayload({
-        printedSheetId: sheet.printedSheetId,
-        layoutHash: specHash,
-        pageIndex,
-        pageCount: spec.pageCount,
-      });
+      const payload = qrPayloadForSheet(sheet, specHash, pageIndex, spec.pageCount);
       const qrPng = await QRCode.toBuffer(payload, { errorCorrectionLevel: 'M', margin: 0 });
       const qrImage = await doc.embedPng(qrPng);
       page.drawImage(qrImage, {
@@ -322,6 +341,18 @@ export async function renderSheetsPdf(
         width: plan.qr.size,
         height: plan.qr.size,
       });
+
+      if (sheet.shortCode !== null) {
+        const codeText = formatShortCode(sheet.shortCode);
+        const codeWidth = font.widthOfTextAtSize(codeText, SHORT_CODE_FONT_SIZE);
+        page.drawText(codeText, {
+          x: plan.qr.x + (plan.qr.size - codeWidth) / 2,
+          y: plan.qr.y - SHORT_CODE_FONT_SIZE - 2,
+          size: SHORT_CODE_FONT_SIZE,
+          font,
+          color: black,
+        });
+      }
 
       const rutMode = identityModeOf(spec) === 'rut_bubbles';
       const name = rutMode ? RUT_MODE_NAME_LINE : (sheet.studentName ?? BLANK_NAME_LINE);

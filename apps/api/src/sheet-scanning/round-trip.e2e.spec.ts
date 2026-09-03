@@ -4,6 +4,7 @@ import { resolve } from 'node:path';
 import { PDFDocument, degrees, rgb } from 'pdf-lib';
 import {
   buildOmrQrPayload,
+  buildOmrShortQrPayload,
   DEFAULT_CAPTURE_PROFILES,
   layoutHash,
   scanResultSchema,
@@ -25,6 +26,7 @@ const OMR_DIR = resolve(__dirname, '../../../../services/omr');
 const PYTHON_BIN = resolve(OMR_DIR, '.venv/bin/python');
 
 const RUT_RAW = '123456785';
+const SHORT_CODE = 0x0a1b2c3d;
 const DIGIT_FIELD_ID = 'f_031';
 const DIGIT_PRINTED_NUMBER = '31';
 const DIGIT_VALUE = '407';
@@ -286,7 +288,13 @@ describeRoundTrip('ida y vuelta impresión ↔ lectura (gates F3 y V1)', () => {
     answerKey = makeAnswerKey(spec);
 
     const printed = await renderSheetsPdf(spec, specHash, [
-      { printedSheetId: SHEET_ID, sequence: 1, studentName: 'Prueba, Ronda', classGroupName: '4°A' },
+      {
+        printedSheetId: SHEET_ID,
+        sequence: 1,
+        shortCode: SHORT_CODE,
+        studentName: 'Prueba, Ronda',
+        classGroupName: '4°A',
+      },
     ]);
     const filled = await fillPdfAtPrinterCoordinates(printed, spec, { answerKey });
 
@@ -294,6 +302,20 @@ describeRoundTrip('ida y vuelta impresión ↔ lectura (gates F3 y V1)', () => {
     servedPdfs.set('/fit90.pdf', await scaleToFit(filled, 0.9));
     servedPdfs.set('/fit97.pdf', await scaleToFit(filled, 0.97));
     servedPdfs.set('/rot90.pdf', await rotate90(filled));
+
+    const legacyPrinted = await renderSheetsPdf(spec, specHash, [
+      {
+        printedSheetId: SHEET_ID,
+        sequence: 1,
+        shortCode: null,
+        studentName: 'Prueba, Ronda',
+        classGroupName: '4°A',
+      },
+    ]);
+    servedPdfs.set(
+      '/legacy.pdf',
+      await fillPdfAtPrinterCoordinates(legacyPrinted, spec, { answerKey }),
+    );
 
     const rutDraft = deriveLayoutDraft(INSTRUMENT_ID, makeItems(), 'rut_bubbles');
     expect(rutDraft.excludedItems).toHaveLength(0);
@@ -306,7 +328,13 @@ describeRoundTrip('ida y vuelta impresión ↔ lectura (gates F3 y V1)', () => {
     rutAnswerKey.set(DIGIT_FIELD_ID, DIGIT_VALUE);
 
     const rutPrinted = await renderSheetsPdf(rutSpec, rutSpecHash, [
-      { printedSheetId: SHEET_ID, sequence: 1, studentName: null, classGroupName: '4°A' },
+      {
+        printedSheetId: SHEET_ID,
+        sequence: 1,
+        shortCode: SHORT_CODE,
+        studentName: null,
+        classGroupName: '4°A',
+      },
     ]);
     const digitValues = new Map([[DIGIT_FIELD_ID, DIGIT_VALUE]]);
     rutFilled = await fillPdfAtPrinterCoordinates(rutPrinted, rutSpec, {
@@ -384,7 +412,27 @@ describeRoundTrip('ida y vuelta impresión ↔ lectura (gates F3 y V1)', () => {
       const page = result.pages[0]!;
       expect(page.quality.ok).toBe(true);
       expect(page.identity.raw).toBe(
-        buildOmrQrPayload({ printedSheetId: SHEET_ID, layoutHash: specHash, pageIndex: 0, pageCount: spec.pageCount }),
+        buildOmrShortQrPayload({ shortCode: SHORT_CODE, pageIndex: 0 }),
+      );
+
+      const verdict = judge(result, spec, answerKey);
+      expect(verdict.wrongConfident).toEqual([]);
+      expect(verdict.firmCorrect / verdict.total).toBeGreaterThanOrEqual(0.95);
+    });
+
+    it('hoja legada (payload completo): se sigue leyendo idéntica', async () => {
+      const result = await readVariant('/legacy.pdf', spec);
+      expect(result.pages).toHaveLength(1);
+
+      const page = result.pages[0]!;
+      expect(page.quality.ok).toBe(true);
+      expect(page.identity.raw).toBe(
+        buildOmrQrPayload({
+          printedSheetId: SHEET_ID,
+          layoutHash: specHash,
+          pageIndex: 0,
+          pageCount: spec.pageCount,
+        }),
       );
 
       const verdict = judge(result, spec, answerKey);
@@ -409,12 +457,7 @@ describeRoundTrip('ida y vuelta impresión ↔ lectura (gates F3 y V1)', () => {
       expect(page.identity.raw).toBe(RUT_RAW);
       expect(page.identity.confidence).toBeGreaterThan(0);
       expect(page.identity.qrRaw).toBe(
-        buildOmrQrPayload({
-          printedSheetId: SHEET_ID,
-          layoutHash: rutSpecHash,
-          pageIndex: 0,
-          pageCount: rutSpec.pageCount,
-        }),
+        buildOmrShortQrPayload({ shortCode: SHORT_CODE, pageIndex: 0 }),
       );
 
       const digitMark = page.marks.find((m) => m.fieldId === DIGIT_FIELD_ID);

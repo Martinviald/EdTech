@@ -950,7 +950,7 @@ describe('SheetScanService.assessCapture (CD-11)', () => {
     expect(resolve).toHaveBeenCalledWith(
       ORG_ID,
       expect.objectContaining({ imageSha256: 'a'.repeat(64), marks: [] }),
-      { printRunId: RUN_ID },
+      { printRunId: RUN_ID, specHash: LAYOUT_HASH },
     );
   });
 
