@@ -2,12 +2,17 @@
 
 import { useState } from 'react';
 import { toast } from 'sonner';
-import { CheckCircle2, ImageOff, Loader2, Trash2, UserRoundSearch } from 'lucide-react';
 import {
-  discardScanSchema,
-  type ConfirmBatchResponse,
-  type ReviewScanModel,
-} from '@soe/types';
+  CheckCircle2,
+  FileQuestion,
+  ImageOff,
+  Loader2,
+  Maximize2,
+  ScanLine,
+  Trash2,
+  UserRoundSearch,
+} from 'lucide-react';
+import { discardScanSchema, type ConfirmBatchResponse, type ReviewScanModel } from '@soe/types';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Textarea } from '@/components/ui/textarea';
@@ -22,99 +27,81 @@ import {
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
 import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '@/components/ui/dialog';
+import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { AlertCallout, CardSkeleton, EmptyState } from '@/components/shared';
+import { AlertCallout, EmptyState } from '@/components/shared';
 import {
-  isMarkResolved,
   useAssignIdentity,
   useConfirmBatch,
   useDiscardScan,
-  useReviewQueue,
 } from '../../../hooks/use-review-queue';
 import type { StudentOption } from './ReviewShell';
-import { MarkReviewPanel } from './MarkReviewPanel';
 import { REJECT_REASON_LABELS } from './review-labels';
 
-interface ReviewQueuePanelProps {
-  batchId: string;
-  students: StudentOption[];
-  rosterAvailable: boolean;
-  onConfirmed: (result: ConfirmBatchResponse) => void;
+/** Una hoja sin ninguna marca detectada: el alumno probablemente no respondió. */
+export function isLikelyBlankScan(scan: ReviewScanModel): boolean {
+  return scan.marksReadability === 'likely_blank';
 }
 
-export function ReviewQueuePanel({
+export function PagesReviewStep({
   batchId,
+  qualityRejected,
+  identityUnresolved,
   students,
   rosterAvailable,
-  onConfirmed,
-}: ReviewQueuePanelProps) {
-  const { data: queue, isPending } = useReviewQueue(batchId, true);
+}: {
+  batchId: string;
+  qualityRejected: ReviewScanModel[];
+  identityUnresolved: ReviewScanModel[];
+  students: StudentOption[];
+  rosterAvailable: boolean;
+}) {
+  const blankSheets = qualityRejected.filter(isLikelyBlankScan);
+  const unreadablePages = qualityRejected.filter((scan) => !isLikelyBlankScan(scan));
+  const nothingToReview = qualityRejected.length === 0 && identityUnresolved.length === 0;
 
-  if (isPending || !queue) {
+  if (nothingToReview) {
     return (
-      <div className="space-y-6">
-        <CardSkeleton />
-        <CardSkeleton />
-      </div>
+      <EmptyState
+        icon={CheckCircle2}
+        title="No hay páginas por revisar"
+        description="El lector leyó todas las hojas del lote y reconoció a quién pertenece cada una. Continúa con las marcas dudosas."
+      />
     );
   }
 
-  const pendingMarks = queue.ambiguousMarks.filter((mark) => !isMarkResolved(mark)).length;
-  const nothingToReview =
-    queue.qualityRejected.length === 0 &&
-    queue.identityUnresolved.length === 0 &&
-    queue.ambiguousMarks.length === 0;
-
   return (
     <div className="space-y-6">
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <p className="text-sm text-muted-foreground">
-          Resuelve en orden: primero las páginas rechazadas (todavía tienes las hojas a mano),
-          después las identidades y al final las marcas dudosas.
-        </p>
-        <ConfirmBatchDialog
-          batchId={batchId}
-          pendingMarks={pendingMarks}
-          pendingIdentities={queue.identityUnresolved.length}
-          rejectedPages={queue.qualityRejected.length}
-          onConfirmed={onConfirmed}
-        />
-      </div>
-
-      {nothingToReview && (
-        <EmptyState
-          icon={CheckCircle2}
-          title="No queda nada por revisar"
-          description="Todas las lecturas del lote son firmes. Solo falta confirmar para persistir los resultados."
-        />
+      {blankSheets.length > 0 && <BlankSheetsSection batchId={batchId} scans={blankSheets} />}
+      {unreadablePages.length > 0 && (
+        <UnreadablePagesSection batchId={batchId} scans={unreadablePages} />
       )}
-
-      {queue.qualityRejected.length > 0 && (
-        <QualitySection batchId={batchId} scans={queue.qualityRejected} />
-      )}
-
-      {queue.identityUnresolved.length > 0 && (
+      {identityUnresolved.length > 0 && (
         <IdentitySection
           batchId={batchId}
-          scans={queue.identityUnresolved}
+          scans={identityUnresolved}
           students={students}
           rosterAvailable={rosterAvailable}
         />
-      )}
-
-      {queue.ambiguousMarks.length > 0 && (
-        <MarkReviewPanel batchId={batchId} marks={queue.ambiguousMarks} />
       )}
     </div>
   );
 }
 
-function ScanThumb({ scan }: { scan: ReviewScanModel }) {
+function ScanThumb({ scan, interactive }: { scan: ReviewScanModel; interactive?: boolean }) {
   if (!scan.thumbUrl) {
     return (
       <div className="flex h-24 w-20 shrink-0 items-center justify-center rounded-md border bg-muted">
@@ -123,12 +110,19 @@ function ScanThumb({ scan }: { scan: ReviewScanModel }) {
     );
   }
   return (
-    // eslint-disable-next-line @next/next/no-img-element
-    <img
-      src={scan.thumbUrl}
-      alt={`Miniatura de la página ${scan.pageIndex + 1}`}
-      className="h-24 w-20 shrink-0 rounded-md border bg-card object-cover"
-    />
+    <div className="relative h-24 w-20 shrink-0">
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img
+        src={scan.thumbUrl}
+        alt={`Miniatura de la página ${scan.pageIndex + 1}`}
+        className="h-24 w-20 rounded-md border bg-card object-cover"
+      />
+      {interactive && (
+        <span className="pointer-events-none absolute bottom-1 right-1 rounded bg-background/90 p-1 text-muted-foreground">
+          <Maximize2 className="size-3" aria-hidden />
+        </span>
+      )}
+    </div>
   );
 }
 
@@ -138,36 +132,141 @@ function scanOriginLabel(scan: ReviewScanModel): string {
   return parts.join(' · ');
 }
 
-function QualitySection({ batchId, scans }: { batchId: string; scans: ReviewScanModel[] }) {
+function ScanRow({
+  batchId,
+  scan,
+  title,
+  hint,
+}: {
+  batchId: string;
+  scan: ReviewScanModel;
+  title: string;
+  hint: string;
+}) {
+  const [discardOpen, setDiscardOpen] = useState(false);
+
+  return (
+    <li className="flex flex-wrap items-center gap-4 py-3">
+      <ScanPreviewDialog
+        scan={scan}
+        title={title}
+        hint={hint}
+        onDiscardRequested={() => setDiscardOpen(true)}
+      />
+      <div className="min-w-0 flex-1">
+        <p className="text-sm font-medium text-foreground">{title}</p>
+        <p className="text-xs text-muted-foreground">
+          {scanOriginLabel(scan)}
+          {scan.studentName ? ` · ${scan.studentName}` : ''}
+        </p>
+      </div>
+      <DiscardScanDialog
+        batchId={batchId}
+        scan={scan}
+        open={discardOpen}
+        onOpenChange={setDiscardOpen}
+      />
+    </li>
+  );
+}
+
+/**
+ * La miniatura de ~400 px es la única evidencia guardada de la página, y con
+ * ella la persona decide si un alumno no respondió. Verla en grande antes de
+ * confirmar es parte de la decisión, no un adorno.
+ */
+function ScanPreviewDialog({
+  scan,
+  title,
+  hint,
+  onDiscardRequested,
+}: {
+  scan: ReviewScanModel;
+  title: string;
+  hint: string;
+  onDiscardRequested: () => void;
+}) {
+  const [open, setOpen] = useState(false);
+
+  if (!scan.thumbUrl) return <ScanThumb scan={scan} />;
+
+  return (
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogTrigger asChild>
+        <button
+          type="button"
+          className="rounded-md outline-none transition hover:opacity-90 focus-visible:ring-2 focus-visible:ring-ring"
+          aria-label={`Ver en grande la página ${scan.pageIndex + 1}: ${title}`}
+        >
+          <ScanThumb scan={scan} interactive />
+        </button>
+      </DialogTrigger>
+      <DialogContent className="max-w-3xl">
+        <DialogHeader>
+          <DialogTitle>{title}</DialogTitle>
+          <DialogDescription>
+            {scanOriginLabel(scan)}
+            {scan.studentName ? ` · ${scan.studentName}` : ''}. {hint}
+          </DialogDescription>
+        </DialogHeader>
+        <div className="flex max-h-[60vh] justify-center overflow-auto rounded-md border bg-muted/40 p-2">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src={scan.thumbUrl}
+            alt={`Página ${scan.pageIndex + 1} escaneada${scan.studentName ? ` de ${scan.studentName}` : ''}: ${title}`}
+            className="w-full max-w-xl rounded bg-card object-contain"
+          />
+        </div>
+        <p className="text-xs text-muted-foreground">
+          La imagen guardada es una miniatura de la captura: alcanza para ver si hay marcas en la
+          hoja, no para leer letra chica.
+        </p>
+        <DialogFooter>
+          <Button variant="outline" onClick={() => setOpen(false)}>
+            Cerrar y continuar
+          </Button>
+          <Button
+            variant="destructive"
+            onClick={() => {
+              setOpen(false);
+              onDiscardRequested();
+            }}
+          >
+            <Trash2 className="mr-2 size-4" aria-hidden />
+            Descartar página
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+function BlankSheetsSection({ batchId, scans }: { batchId: string; scans: ReviewScanModel[] }) {
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="text-base">
-          Páginas rechazadas <span className="text-muted-foreground">({scans.length})</span>
+        <CardTitle className="flex items-center gap-2 text-base">
+          <FileQuestion className="size-4 text-muted-foreground" aria-hidden />
+          Hojas sin respuestas <span className="text-muted-foreground">({scans.length})</span>
         </CardTitle>
         <CardDescription>
-          El lector no pudo leerlas con seguridad. Vuelve a escanearlas y súbelas en un lote
-          nuevo, o descártalas si no corresponden.
+          El lector no encontró ninguna marca en estas hojas: parece que el alumno no respondió, no
+          que la lectura haya fallado. Mira la miniatura y decide: si la hoja está efectivamente en
+          blanco, déjala así y continúa (queda registrada como no respondida). Si alcanzas a ver
+          marcas en la foto, entonces la lectura sí falló: vuelve a fotografiarla con luz pareja y
+          súbela en un lote nuevo.
         </CardDescription>
       </CardHeader>
       <CardContent>
         <ul className="divide-y">
           {scans.map((scan) => (
-            <li key={scan.scanId} className="flex flex-wrap items-center gap-4 py-3">
-              <ScanThumb scan={scan} />
-              <div className="min-w-0 flex-1">
-                <p className="text-sm font-medium text-foreground">
-                  {scan.rejectReason
-                    ? REJECT_REASON_LABELS[scan.rejectReason]
-                    : 'Página rechazada por calidad'}
-                </p>
-                <p className="text-xs text-muted-foreground">
-                  {scanOriginLabel(scan)}
-                  {scan.studentName ? ` · ${scan.studentName}` : ''}
-                </p>
-              </div>
-              <DiscardScanDialog batchId={batchId} scan={scan} />
-            </li>
+            <ScanRow
+              key={scan.scanId}
+              batchId={batchId}
+              scan={scan}
+              title="Hoja sin marcas detectadas"
+              hint="Si la hoja está en blanco, ciérrala y continúa. Si ves marcas, vuelve a fotografiarla."
+            />
           ))}
         </ul>
       </CardContent>
@@ -175,8 +274,53 @@ function QualitySection({ batchId, scans }: { batchId: string; scans: ReviewScan
   );
 }
 
-function DiscardScanDialog({ batchId, scan }: { batchId: string; scan: ReviewScanModel }) {
-  const [open, setOpen] = useState(false);
+function UnreadablePagesSection({ batchId, scans }: { batchId: string; scans: ReviewScanModel[] }) {
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2 text-base">
+          <ScanLine className="size-4 text-muted-foreground" aria-hidden />
+          Páginas que no se pudieron leer{' '}
+          <span className="text-muted-foreground">({scans.length})</span>
+        </CardTitle>
+        <CardDescription>
+          La foto no permitió distinguir las marcas con seguridad. Repite la captura con luz pareja
+          y sin sombra sobre la hoja, y súbela en un lote nuevo; o descarta la página si no
+          corresponde a este curso.
+        </CardDescription>
+      </CardHeader>
+      <CardContent>
+        <ul className="divide-y">
+          {scans.map((scan) => (
+            <ScanRow
+              key={scan.scanId}
+              batchId={batchId}
+              scan={scan}
+              title={
+                scan.rejectReason
+                  ? REJECT_REASON_LABELS[scan.rejectReason]
+                  : 'Página rechazada por calidad'
+              }
+              hint="Mira si está movida, con sombra o recortada: eso te dice cómo repetir la foto."
+            />
+          ))}
+        </ul>
+      </CardContent>
+    </Card>
+  );
+}
+
+function DiscardScanDialog({
+  batchId,
+  scan,
+  open,
+  onOpenChange,
+}: {
+  batchId: string;
+  scan: ReviewScanModel;
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+}) {
   const [reason, setReason] = useState('');
   const discard = useDiscardScan(batchId);
 
@@ -190,7 +334,7 @@ function DiscardScanDialog({ batchId, scan }: { batchId: string; scan: ReviewSca
       { scanId: scan.scanId, reason: parsed.data.reason },
       {
         onSuccess: () => {
-          setOpen(false);
+          onOpenChange(false);
           setReason('');
           toast.success('Página descartada del lote.');
         },
@@ -199,7 +343,7 @@ function DiscardScanDialog({ batchId, scan }: { batchId: string; scan: ReviewSca
   }
 
   return (
-    <AlertDialog open={open} onOpenChange={setOpen}>
+    <AlertDialog open={open} onOpenChange={onOpenChange}>
       <AlertDialogTrigger asChild>
         <Button variant="outline" size="sm">
           <Trash2 className="mr-2 size-4" aria-hidden />
@@ -251,9 +395,9 @@ function IdentitySection({
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="text-base">
-          Identidades sin resolver{' '}
-          <span className="text-muted-foreground">({scans.length})</span>
+        <CardTitle className="flex items-center gap-2 text-base">
+          <UserRoundSearch className="size-4 text-muted-foreground" aria-hidden />
+          Identidades sin resolver <span className="text-muted-foreground">({scans.length})</span>
         </CardTitle>
         <CardDescription>
           El QR no alcanzó para saber de quién es la hoja (o es una hoja de reserva). Asigna el
@@ -263,8 +407,8 @@ function IdentitySection({
       <CardContent>
         {!rosterAvailable && (
           <AlertCallout tone="warning" title="No se pudo cargar la nómina del curso">
-            Sin la nómina no es posible asignar identidades desde acá. Verifica que la tirada
-            tenga un curso asociado.
+            Sin la nómina no es posible asignar identidades desde acá. Verifica que la tirada tenga
+            un curso asociado.
           </AlertCallout>
         )}
         <ul className="divide-y">
@@ -352,17 +496,21 @@ function IdentityRow({
   );
 }
 
-function ConfirmBatchDialog({
+export function ConfirmBatchDialog({
   batchId,
   pendingMarks,
   pendingIdentities,
-  rejectedPages,
+  blankSheets,
+  unreadablePages,
+  disabled,
   onConfirmed,
 }: {
   batchId: string;
   pendingMarks: number;
   pendingIdentities: number;
-  rejectedPages: number;
+  blankSheets: number;
+  unreadablePages: number;
+  disabled?: boolean;
   onConfirmed: (result: ConfirmBatchResponse) => void;
 }) {
   const [open, setOpen] = useState(false);
@@ -381,17 +529,17 @@ function ConfirmBatchDialog({
   return (
     <AlertDialog open={open} onOpenChange={setOpen}>
       <AlertDialogTrigger asChild>
-        <Button>
+        <Button disabled={disabled}>
           <CheckCircle2 className="mr-2 size-4" aria-hidden />
-          Confirmar lote
+          Finalizar corrección
         </Button>
       </AlertDialogTrigger>
       <AlertDialogContent>
         <AlertDialogHeader>
-          <AlertDialogTitle>Confirmar el lote y persistir los resultados</AlertDialogTitle>
+          <AlertDialogTitle>Finalizar la corrección y persistir los resultados</AlertDialogTitle>
           <AlertDialogDescription asChild>
             <div className="space-y-2">
-              <p>Al confirmar, las lecturas se convierten en respuestas definitivas.</p>
+              <p>Al finalizar, las lecturas se convierten en respuestas definitivas.</p>
               <ul className="list-disc space-y-1 pl-5">
                 <li>
                   {pendingMarks === 0
@@ -404,9 +552,14 @@ function ConfirmBatchDialog({
                     : `${pendingIdentities} ${pendingIdentities === 1 ? 'hoja' : 'hojas'} sin identidad (no generarán respuestas).`}
                 </li>
                 <li>
-                  {rejectedPages === 0
-                    ? 'No quedan páginas rechazadas.'
-                    : `${rejectedPages} ${rejectedPages === 1 ? 'página rechazada' : 'páginas rechazadas'} quedarán como no escaneadas.`}
+                  {blankSheets === 0
+                    ? 'No hay hojas sin respuestas.'
+                    : `${blankSheets} ${blankSheets === 1 ? 'hoja parece' : 'hojas parecen'} sin responder y quedarán como no escaneadas.`}
+                </li>
+                <li>
+                  {unreadablePages === 0
+                    ? 'No quedan páginas ilegibles.'
+                    : `${unreadablePages} ${unreadablePages === 1 ? 'página' : 'páginas'} que no se pudieron leer quedarán como no escaneadas.`}
                 </li>
               </ul>
               {totalPending > 0 && (
@@ -422,7 +575,7 @@ function ConfirmBatchDialog({
           <AlertDialogCancel disabled={confirm.isPending}>Seguir revisando</AlertDialogCancel>
           <Button onClick={handleConfirm} disabled={confirm.isPending}>
             {confirm.isPending && <Loader2 className="mr-2 size-4 animate-spin" aria-hidden />}
-            Confirmar lote
+            Finalizar corrección
           </Button>
         </AlertDialogFooter>
       </AlertDialogContent>

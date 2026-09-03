@@ -8,13 +8,13 @@ import type { Route } from 'next';
 import type { BatchStatusModel, ConfirmBatchResponse, PrintRunAssessmentOption } from '@soe/types';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { AlertCallout, StatusBadge } from '@/components/shared';
+import { AlertCallout } from '@/components/shared';
 import { ROUTES } from '@/lib/routes';
 import { useBatchStatus } from '../../../hooks/use-batch-status';
 import { useRetryBatch } from '../../../hooks/use-review-queue';
-import { BATCH_STATUS_META, SCAN_ROUTES } from '../../../escanear/batch-meta';
+import { SCAN_ROUTES } from '../../../escanear/batch-meta';
 import { AssignAssessmentControl } from '../../../components/AssignAssessmentControl';
-import { ReviewQueuePanel } from './ReviewQueue';
+import { ReviewWizard } from './ReviewWizard';
 
 export type StudentOption = { studentId: string; name: string };
 
@@ -57,7 +57,6 @@ export function ReviewShell({
 
   return (
     <div className="space-y-6">
-      <BatchHeaderCard batch={current} />
       {assessmentGap && current.status !== 'confirmed' && (
         <AssessmentGapCallout gap={assessmentGap} />
       )}
@@ -66,6 +65,7 @@ export function ReviewShell({
         batch={current}
         students={students}
         rosterAvailable={rosterAvailable}
+        confirmDisabled={assessmentGap !== null}
         resultadosHref={resultadosHref}
         onConfirmed={(result) => {
           setConfirmResult(result);
@@ -93,67 +93,6 @@ function AssessmentGapCallout({ gap }: { gap: AssessmentGap }) {
   );
 }
 
-function BatchHeaderCard({ batch }: { batch: BatchStatusModel }) {
-  const meta = BATCH_STATUS_META[batch.status];
-  const processing = batch.status === 'pending' || batch.status === 'processing';
-  const percent =
-    batch.pagesTotal && batch.pagesTotal > 0
-      ? Math.min(100, Math.round((batch.pagesRead / batch.pagesTotal) * 100))
-      : null;
-
-  return (
-    <Card>
-      <CardContent className="space-y-4 pt-6">
-        <div className="flex flex-wrap items-center justify-between gap-3">
-          <div className="flex items-center gap-3">
-            <StatusBadge tone={meta.tone}>{meta.label}</StatusBadge>
-            {processing && (
-              <span className="flex items-center gap-2 text-sm text-muted-foreground">
-                <Loader2 className="size-4 animate-spin" aria-hidden />
-                El lector está procesando las páginas…
-              </span>
-            )}
-          </div>
-          <p className="text-sm text-muted-foreground">
-            {batch.pagesRead} {batch.pagesRead === 1 ? 'página leída' : 'páginas leídas'}
-            {batch.pagesTotal !== null ? ` de ${batch.pagesTotal}` : ''}
-          </p>
-        </div>
-
-        {processing && (
-          <div
-            className="h-2 w-full overflow-hidden rounded-full bg-muted"
-            role="progressbar"
-            aria-valuenow={percent ?? undefined}
-            aria-valuemin={0}
-            aria-valuemax={100}
-            aria-label="Progreso de lectura del lote"
-          >
-            {percent !== null ? (
-              <div
-                className="h-full rounded-full bg-primary transition-all"
-                style={{ width: `${percent}%` }}
-              />
-            ) : (
-              <div className="h-full w-1/3 animate-pulse rounded-full bg-primary" />
-            )}
-          </div>
-        )}
-
-        <dl className="grid grid-cols-2 gap-3 text-sm sm:grid-cols-4">
-          <CounterItem
-            label="Hojas escaneadas"
-            value={`${batch.counters.sheetsScanned} / ${batch.counters.sheetsExpected}`}
-          />
-          <CounterItem label="Marcas dudosas" value={String(batch.counters.marks.ambiguous)} />
-          <CounterItem label="Dobles marcas" value={String(batch.counters.marks.multiple)} />
-          <CounterItem label="Pendientes de revisión" value={String(batch.reviewPending)} />
-        </dl>
-      </CardContent>
-    </Card>
-  );
-}
-
 function CounterItem({ label, value }: { label: string; value: string }) {
   return (
     <div className="rounded-lg border p-3">
@@ -168,6 +107,7 @@ function BatchBody({
   batch,
   students,
   rosterAvailable,
+  confirmDisabled,
   resultadosHref,
   onConfirmed,
 }: {
@@ -175,19 +115,11 @@ function BatchBody({
   batch: BatchStatusModel;
   students: StudentOption[];
   rosterAvailable: boolean;
+  confirmDisabled: boolean;
   resultadosHref: Route;
   onConfirmed: (result: ConfirmBatchResponse) => void;
 }) {
   const retry = useRetryBatch(batchId);
-
-  if (batch.status === 'pending' || batch.status === 'processing') {
-    return (
-      <AlertCallout tone="info" title="Procesando el lote">
-        Esta vista se actualiza sola cada pocos segundos. Cuando termine la lectura vas a ver acá la
-        cola de revisión.
-      </AlertCallout>
-    );
-  }
 
   if (batch.status === 'rejected') {
     return (
@@ -242,10 +174,12 @@ function BatchBody({
   }
 
   return (
-    <ReviewQueuePanel
+    <ReviewWizard
       batchId={batchId}
+      batch={batch}
       students={students}
       rosterAvailable={rosterAvailable}
+      confirmDisabled={confirmDisabled}
       onConfirmed={onConfirmed}
     />
   );

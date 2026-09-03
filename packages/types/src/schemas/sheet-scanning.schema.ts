@@ -8,7 +8,7 @@ import {
   type LayoutSpec,
   type OmrCalibration,
 } from './omr-layout.schema';
-import type { MarkState, PageQuality, PageRejectReason } from './omr-scan.schema';
+import type { MarksReadability, MarkState, PageQuality, PageRejectReason } from './omr-scan.schema';
 
 // ── Lector de marcas (E22) — contrato API ⇄ web del módulo sheet-scanning ────
 // Response Models EXACTOS (lección S2: frontend y backend compilan contra el
@@ -276,6 +276,13 @@ export type ReviewScanModel = {
   scanId: string;
   state: SheetScanState;
   rejectReason: PageRejectReason | null;
+  /**
+   * Por qué no se pudieron leer las marcas, cuando el lector alcanzó a
+   * muestrearlas. `likely_blank` distingue una hoja que PARECE sin responder de
+   * una que no se pudo leer: son dos problemas distintos para quien revisa.
+   * Opcional/`null`: las páginas que no llegaron a muestrear marcas no lo traen.
+   */
+  marksReadability: MarksReadability | null;
   sheetSequence: number | null;
   pageIndex: number;
   studentId: string | null;
