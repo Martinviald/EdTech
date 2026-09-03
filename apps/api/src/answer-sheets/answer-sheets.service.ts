@@ -54,8 +54,10 @@ import { getTemplate, listTemplates } from './lib/templates';
 import type { ParserResult } from './lib/parsers/parser.types';
 import { matchStudents } from './lib/student-matcher';
 import {
+  annulmentEvidence,
   buildPrintedLabelIndex,
   resolveRowAnswers,
+  resolveAnnulledAnswers,
   toScoringAnswer,
 } from './lib/composite-answers';
 
@@ -355,9 +357,13 @@ export class AnswerSheetsService {
       // varias sub-columnas para una sola pregunta (`7B1`…`7B4`). Se resuelve
       // contra los ítems del instrumento antes de corregir.
       const resolvedRow = resolveRowAnswers(labelIndex, row.answers);
+      const annulled = resolveAnnulledAnswers(labelIndex, row.annulledLabels);
 
       for (const item of instrumentItems) {
         const rawAnswer = toScoringAnswer(item, resolvedRow.byPosition.get(item.position));
+        const evidence = annulmentEvidence(annulled, item.position);
+        const answerValue =
+          evidence === null ? { answer: rawAnswer } : { answer: rawAnswer, ...evidence };
         const result = getScoringStrategy(item.type).score({
           item: {
             id: item.id,
@@ -377,7 +383,7 @@ export class AnswerSheetsService {
             assessmentId: '', // se completa una vez creado el assessment
             studentId,
             itemId: item.id,
-            value: { answer: rawAnswer },
+            value: answerValue,
             isCorrect: null,
             rawScore: null,
             maxScore: item.maxScore.toFixed(2),
@@ -395,7 +401,7 @@ export class AnswerSheetsService {
           assessmentId: '', // se completa una vez creado el assessment
           studentId,
           itemId: item.id,
-          value: { answer: rawAnswer },
+          value: answerValue,
           isCorrect: result.isCorrect,
           rawScore: rawScore.toFixed(2),
           maxScore: item.maxScore.toFixed(2),

@@ -198,6 +198,7 @@ function markQueueRow(overrides: Record<string, unknown>) {
     margin: '0.200',
     cropFileId: null,
     reviewedValue: null,
+    reviewDecision: null,
     reviewedById: null,
     ...overrides,
   };
@@ -323,36 +324,54 @@ describe('ScanReviewService.resolveMark', () => {
     const { service, updates } = makeService([[resolveMarkRow()]]);
 
     await expect(
-      service.resolveMark(ORG_ID, USER_ID, MARK_ID, { reviewedValue: 'Z' }),
+      service.resolveMark(ORG_ID, USER_ID, MARK_ID, { decision: 'option', reviewedValue: 'Z' }),
     ).rejects.toBeInstanceOf(BadRequestException);
     expect(updates).toHaveLength(0);
   });
 
-  it('acepta null como decisión humana de "en blanco"', async () => {
-    const { service, updates } = makeService([
-      [resolveMarkRow()],
-      [{ total: 1 }],
-      [{ total: 0 }],
-    ]);
+  it('acepta la decisión humana de "en blanco"', async () => {
+    const { service, updates } = makeService([[resolveMarkRow()], [{ total: 1 }], [{ total: 0 }]]);
 
-    const model = await service.resolveMark(ORG_ID, USER_ID, MARK_ID, { reviewedValue: null });
+    const model = await service.resolveMark(ORG_ID, USER_ID, MARK_ID, { decision: 'blank' });
 
-    expect(updates[0]).toMatchObject({ reviewedValue: null, reviewedById: USER_ID });
+    expect(updates[0]).toMatchObject({
+      reviewedValue: null,
+      reviewDecision: 'blank',
+      reviewedById: USER_ID,
+    });
     expect(updates[0].reviewedAt).toBeInstanceOf(Date);
     expect(model.reviewedValue).toBeNull();
+    expect(model.reviewedDecision).toBe('blank');
     expect(model.reviewedById).toBe(USER_ID);
   });
 
-  it('escribe reviewedValue sin tocar jamás el value de máquina', async () => {
+  it('"anulada" se guarda como decisión propia, distinta de "en blanco"', async () => {
     const { service, updates } = makeService([
-      [resolveMarkRow()],
+      [resolveMarkRow({ state: 'multiple' })],
       [{ total: 0 }],
       [{ total: 0 }],
     ]);
 
-    const model = await service.resolveMark(ORG_ID, USER_ID, MARK_ID, { reviewedValue: 'B' });
+    const model = await service.resolveMark(ORG_ID, USER_ID, MARK_ID, { decision: 'annulled' });
 
-    expect(updates[0]).toMatchObject({ reviewedValue: 'B' });
+    expect(updates[0]).toMatchObject({
+      reviewedValue: null,
+      reviewDecision: 'annulled',
+      reviewedById: USER_ID,
+    });
+    expect(model.reviewedValue).toBeNull();
+    expect(model.reviewedDecision).toBe('annulled');
+  });
+
+  it('escribe reviewedValue sin tocar jamás el value de máquina', async () => {
+    const { service, updates } = makeService([[resolveMarkRow()], [{ total: 0 }], [{ total: 0 }]]);
+
+    const model = await service.resolveMark(ORG_ID, USER_ID, MARK_ID, {
+      decision: 'option',
+      reviewedValue: 'B',
+    });
+
+    expect(updates[0]).toMatchObject({ reviewDecision: 'option', reviewedValue: 'B' });
     expect('value' in updates[0]).toBe(false);
     expect(model.value).toBeNull();
     expect(model.reviewedValue).toBe('B');
@@ -360,13 +379,9 @@ describe('ScanReviewService.resolveMark', () => {
   });
 
   it('recalcula reviewPending del lote recontando pendientes', async () => {
-    const { service, updates } = makeService([
-      [resolveMarkRow()],
-      [{ total: 2 }],
-      [{ total: 3 }],
-    ]);
+    const { service, updates } = makeService([[resolveMarkRow()], [{ total: 2 }], [{ total: 3 }]]);
 
-    await service.resolveMark(ORG_ID, USER_ID, MARK_ID, { reviewedValue: 'A' });
+    await service.resolveMark(ORG_ID, USER_ID, MARK_ID, { decision: 'option', reviewedValue: 'A' });
 
     expect(updates).toHaveLength(2);
     expect(updates[1]).toMatchObject({ reviewPending: 5 });
@@ -376,7 +391,7 @@ describe('ScanReviewService.resolveMark', () => {
     const { service, updates } = makeService([[resolveMarkRow({ batchStatus: 'confirmed' })]]);
 
     await expect(
-      service.resolveMark(ORG_ID, USER_ID, MARK_ID, { reviewedValue: 'A' }),
+      service.resolveMark(ORG_ID, USER_ID, MARK_ID, { decision: 'option', reviewedValue: 'A' }),
     ).rejects.toBeInstanceOf(ConflictException);
     expect(updates).toHaveLength(0);
   });
@@ -553,6 +568,7 @@ const CONFIRM_MARKS = [
     state: 'marked',
     value: 'A',
     reviewedValue: null,
+    reviewDecision: null,
     reviewedAt: null,
   },
   {
@@ -562,6 +578,7 @@ const CONFIRM_MARKS = [
     state: 'multiple',
     value: null,
     reviewedValue: null,
+    reviewDecision: null,
     reviewedAt: null,
   },
   {
@@ -571,6 +588,7 @@ const CONFIRM_MARKS = [
     state: 'ambiguous',
     value: null,
     reviewedValue: 'F',
+    reviewDecision: 'option',
     reviewedAt: new Date('2026-08-28T10:00:00Z'),
   },
   {
@@ -580,6 +598,7 @@ const CONFIRM_MARKS = [
     state: 'marked',
     value: 'B',
     reviewedValue: null,
+    reviewDecision: null,
     reviewedAt: null,
   },
 ];
@@ -658,6 +677,33 @@ describe('ScanReviewService.confirmBatch', () => {
     expect(result.summary.assumedPending).toBe(1);
   });
 
+  it('una marca anulada llega al parser como respuesta nula y etiqueta anulada', async () => {
+    const annulledMarks = CONFIRM_MARKS.map((mark) =>
+      mark.markId === 'm2'
+        ? {
+            ...mark,
+            reviewedValue: null,
+            reviewDecision: 'annulled',
+            reviewedAt: new Date('2026-08-28T10:00:00Z'),
+          }
+        : mark,
+    );
+    const { service, confirmCalls } = makeService([
+      [CONFIRM_BATCH_ROW],
+      CONFIRM_SCANS,
+      annulledMarks,
+      CONFIRM_STUDENTS,
+    ]);
+
+    const result = await service.confirmBatch(ORG_ID, USER, BATCH_ID);
+
+    const rows = confirmCalls[0].input.parserResult.rows;
+    expect(rows[0].answers['2']).toBeNull();
+    expect(rows[0].annulledLabels).toEqual(['2']);
+    expect(rows[0].errors).toEqual([]);
+    expect(result.summary.assumedPending).toBe(0);
+  });
+
   it('excluye de la persistencia la hoja con una página lógica faltante', async () => {
     const { service, confirmCalls } = makeService([
       [CONFIRM_BATCH_ROW],
@@ -674,9 +720,7 @@ describe('ScanReviewService.confirmBatch', () => {
   });
 
   it('rechaza con 400 un lote cuya tirada no tiene evaluación asociada', async () => {
-    const { service, confirmCalls } = makeService([
-      [{ ...CONFIRM_BATCH_ROW, assessmentId: null }],
-    ]);
+    const { service, confirmCalls } = makeService([[{ ...CONFIRM_BATCH_ROW, assessmentId: null }]]);
 
     await expect(service.confirmBatch(ORG_ID, USER, BATCH_ID)).rejects.toBeInstanceOf(
       BadRequestException,
@@ -867,12 +911,7 @@ describe('ScanReviewService.confirmBatch', () => {
   });
 
   it('no agenda corrección de desarrollo si el confirm de answer-sheets falla', async () => {
-    const { db } = makeDb([
-      [CONFIRM_BATCH_ROW],
-      CONFIRM_SCANS,
-      CONFIRM_MARKS,
-      CONFIRM_STUDENTS,
-    ]);
+    const { db } = makeDb([[CONFIRM_BATCH_ROW], CONFIRM_SCANS, CONFIRM_MARKS, CONFIRM_STUDENTS]);
     const gradingCalls: ScheduleConfirmedBatchParams[] = [];
     const failingConfirmer: AnswerSheetConfirmer = {
       confirmParserResult: async () => {

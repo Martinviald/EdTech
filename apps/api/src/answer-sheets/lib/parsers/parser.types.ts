@@ -22,6 +22,7 @@ export interface ParsedAnswerSheetRow {
   studentRut: string | null;
   studentFullName: string | null;
   answers: Record<string, string | null>;
+  annulledLabels?: string[];
   errors: AnswerSheetRowError[];
 }
 

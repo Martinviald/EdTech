@@ -1,4 +1,4 @@
-import type { AnswerSheetRowError, MarkState } from '@soe/types';
+import type { AnswerSheetRowError, MarkReviewDecision, MarkState } from '@soe/types';
 import type { ParsedAnswerSheetRow, ParserResult } from '../answer-sheets/lib/parsers/parser.types';
 
 export interface ConfirmedScanMarkInput {
@@ -6,6 +6,7 @@ export interface ConfirmedScanMarkInput {
   state: MarkState;
   value: string | null;
   reviewedValue?: string | null;
+  reviewDecision?: MarkReviewDecision | null;
 }
 
 export interface ConfirmedScanInput {
@@ -22,6 +23,7 @@ export function toParserResult(scans: ConfirmedScanInput[]): ParserResult {
 
   for (const scan of scans) {
     const answers: Record<string, string | null> = {};
+    const annulledLabels: string[] = [];
     const errors: AnswerSheetRowError[] = [];
 
     for (const mark of scan.marks) {
@@ -32,6 +34,7 @@ export function toParserResult(scans: ConfirmedScanInput[]): ParserResult {
 
       if (mark.reviewedValue !== undefined) {
         answers[mark.printedNumber] = mark.reviewedValue;
+        if (mark.reviewDecision === 'annulled') annulledLabels.push(mark.printedNumber);
         continue;
       }
 
@@ -52,6 +55,7 @@ export function toParserResult(scans: ConfirmedScanInput[]): ParserResult {
       studentRut: scan.studentRut,
       studentFullName: scan.studentFullName,
       answers,
+      ...(annulledLabels.length > 0 ? { annulledLabels } : {}),
       errors,
     });
   }

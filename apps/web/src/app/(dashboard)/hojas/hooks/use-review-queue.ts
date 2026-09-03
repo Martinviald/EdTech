@@ -4,6 +4,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import type {
   BatchStatusModel,
   ConfirmBatchResponse,
+  ReviewMarkDto,
   ReviewMarkModel,
   ReviewQueueModel,
   ReviewScanModel,
@@ -17,7 +18,7 @@ export const reviewQueueKeys = {
 
 const OPTIMISTIC_REVIEWER = 'optimistic';
 
-/** Una marca cuenta como resuelta cuando un humano la tocó — `reviewedValue: null` es "en blanco", no "pendiente" (§8.3). */
+/** Una marca cuenta como resuelta cuando un humano la tocó — "en blanco" y "anulada" son decisiones, no "pendiente" (§8.3). */
 export function isMarkResolved(mark: ReviewMarkModel): boolean {
   return mark.reviewedById !== null;
 }
@@ -41,9 +42,9 @@ export function useResolveMark(batchId: string) {
   const queueKey = reviewQueueKeys.detail(batchId);
 
   return useMutation({
-    mutationFn: ({ markId, reviewedValue }: { markId: string; reviewedValue: string | null }) =>
-      apiClientPatch<ReviewMarkModel>(`/sheet-scan-marks/${markId}`, { reviewedValue }),
-    onMutate: async ({ markId, reviewedValue }) => {
+    mutationFn: ({ markId, decision }: { markId: string; decision: ReviewMarkDto }) =>
+      apiClientPatch<ReviewMarkModel>(`/sheet-scan-marks/${markId}`, decision),
+    onMutate: async ({ markId, decision }) => {
       await queryClient.cancelQueries({ queryKey: queueKey });
       const previous = queryClient.getQueryData<ReviewQueueModel>(queueKey);
       const previousMark = previous?.ambiguousMarks.find((mark) => mark.markId === markId);
@@ -53,7 +54,12 @@ export function useResolveMark(batchId: string) {
               ...old,
               ambiguousMarks: old.ambiguousMarks.map((mark) =>
                 mark.markId === markId
-                  ? { ...mark, reviewedValue, reviewedById: OPTIMISTIC_REVIEWER }
+                  ? {
+                      ...mark,
+                      reviewedValue: decision.decision === 'option' ? decision.reviewedValue : null,
+                      reviewedDecision: decision.decision,
+                      reviewedById: OPTIMISTIC_REVIEWER,
+                    }
                   : mark,
               ),
             }

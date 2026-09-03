@@ -15,6 +15,7 @@ import { relations } from 'drizzle-orm';
 import type { CaptureProfile, CaptureSessionCapture, LayoutSpec, PageQuality } from '@soe/types';
 import {
   captureSessionStatusEnum,
+  markReviewDecisionEnum,
   markStateEnum,
   sheetScanBatchStatusEnum,
   sheetScanStateEnum,
@@ -188,8 +189,11 @@ export const sheetScans = pgTable(
 /**
  * Una marca leída, con su evidencia (D11: fill, threshold, margin y recorte).
  * Disciplina ai/human de CLAUDE.md §8.3: `value` es lo que leyó la máquina y
- * NUNCA se sobrescribe; `reviewedValue` es lo que decidió el humano. El valor
- * efectivo es reviewedValue ?? value.
+ * NUNCA se sobrescribe; `reviewDecision` + `reviewedValue` son lo que decidió el
+ * humano. `reviewDecision` distingue las tres decisiones posibles: `option` (con
+ * su `reviewedValue`), `blank` (el alumno no respondió) y `annulled` (respondió,
+ * pero la respuesta se anula por regla de la prueba). `blank` y `annulled` dejan
+ * `reviewedValue` en NULL: sin la columna de decisión serían indistinguibles.
  */
 export const sheetScanMarks = pgTable(
   'sheet_scan_marks',
@@ -210,6 +214,7 @@ export const sheetScanMarks = pgTable(
     margin: decimal('margin', { precision: 6, scale: 3 }).notNull(),
     cropFileId: uuid('crop_file_id').references(() => files.id),
     reviewedValue: text('reviewed_value'),
+    reviewDecision: markReviewDecisionEnum('review_decision'),
     reviewedById: uuid('reviewed_by_id').references(() => users.id),
     reviewedAt: timestamp('reviewed_at'),
   },

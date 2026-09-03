@@ -108,9 +108,7 @@ describe('toParserResult', () => {
   it('reviewedValue null explícito = el humano decidió blanco, sin error', () => {
     const result = toParserResult([
       scan({
-        marks: [
-          mark({ printedNumber: '6', state: 'ambiguous', value: 'A', reviewedValue: null }),
-        ],
+        marks: [mark({ printedNumber: '6', state: 'ambiguous', value: 'A', reviewedValue: null })],
       }),
     ]);
 
@@ -118,9 +116,70 @@ describe('toParserResult', () => {
     expect(result.rows[0]?.errors).toEqual([]);
   });
 
+  it('una doble marca anulada deja la respuesta en null y la registra en annulledLabels', () => {
+    const result = toParserResult([
+      scan({
+        marks: [
+          mark({
+            printedNumber: '7',
+            state: 'multiple',
+            value: null,
+            reviewedValue: null,
+            reviewDecision: 'annulled',
+          }),
+        ],
+      }),
+    ]);
+
+    expect(result.rows[0]?.answers).toEqual({ '7': null });
+    expect(result.rows[0]?.annulledLabels).toEqual(['7']);
+    expect(result.rows[0]?.errors).toEqual([]);
+  });
+
+  it('una marca decidida en blanco no queda registrada como anulada', () => {
+    const result = toParserResult([
+      scan({
+        marks: [
+          mark({
+            printedNumber: '7',
+            state: 'multiple',
+            value: null,
+            reviewedValue: null,
+            reviewDecision: 'blank',
+          }),
+        ],
+      }),
+    ]);
+
+    expect(result.rows[0]?.answers).toEqual({ '7': null });
+    expect(result.rows[0]?.annulledLabels).toBeUndefined();
+  });
+
+  it('anular una sub-marca registra la sub-etiqueta, no la pregunta completa', () => {
+    const result = toParserResult([
+      scan({
+        marks: [
+          mark({
+            printedNumber: '7B1',
+            state: 'multiple',
+            value: null,
+            reviewedValue: null,
+            reviewDecision: 'annulled',
+          }),
+          mark({ printedNumber: '7B2', state: 'marked', value: 'A' }),
+        ],
+      }),
+    ]);
+
+    expect(result.rows[0]?.answers).toEqual({ '7B1': null, '7B2': 'A' });
+    expect(result.rows[0]?.annulledLabels).toEqual(['7B1']);
+  });
+
   it('reviewedValue también pisa una marca marked', () => {
     const result = toParserResult([
-      scan({ marks: [mark({ printedNumber: '8', state: 'marked', value: 'A', reviewedValue: 'B' })] }),
+      scan({
+        marks: [mark({ printedNumber: '8', state: 'marked', value: 'A', reviewedValue: 'B' })],
+      }),
     ]);
 
     expect(result.rows[0]?.answers).toEqual({ '8': 'B' });
