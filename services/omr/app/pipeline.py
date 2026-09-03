@@ -25,6 +25,14 @@ matchearia al alumno incorrecto con confianza. Con firma confirmada y QR de
 esquina ilegible la pagina SI se lee (qrRaw null): el modo pensado para no
 depender del QR ya no depende del QR.
 
+Reintento con iluminacion aplanada: una pagina rechazada por
+`no_separable_marks` se vuelve a leer COMPLETA sobre la captura con el
+gradiente de luz quitado (app/illumination.py), y el segundo resultado se
+conserva solo si queda legible. Es un reintento y no un preproceso del camino
+feliz a proposito: una hoja que hoy se lee bien no cambia de ruta. Se activa
+con `normalizeIllumination` del CaptureProfile (true en `phone`, false en
+`scanner`). Queda registrado en `quality.illuminationFlattened`.
+
 pageThumbJpegBase64 (~400 px de ancho, sobre la captura ya orientada) SOLO
 cuando quality.ok es false o identity.raw es null (CD-1).
 
@@ -66,6 +74,7 @@ from .identity import (
     peek_logical_page_index,
     read_identity,
 )
+from .illumination import flatten_illumination
 from .quality import assess
 from .readers import READERS, sample_bubble_fills
 from .rectify import (
@@ -166,6 +175,57 @@ def process_page(
 def classify_page_debug(
     bgr: np.ndarray, page_index: int, spec: dict[str, Any], profile: dict[str, Any]
 ) -> tuple[dict[str, Any], dict[str, Any]]:
+    """Lee la pagina y, si se rechazo por `no_separable_marks`, la reintenta aplanada.
+
+    El reintento es un segundo pase COMPLETO sobre la captura con el gradiente
+    de iluminacion quitado (ver app/illumination.py): re-rectifica, vuelve a
+    confirmar la homografia y reclasifica. Va aca y no dentro de `_read_marks`
+    porque la causa medida esta antes de clasificar — en la deteccion de
+    fiduciales — y porque asi cubre los DOS puntos que emiten ese motivo (el de
+    `_read_marks` y el veredicto de orientacion) sin duplicar nada.
+
+    El resultado aplanado solo se conserva si la pagina termina LEGIBLE. Un
+    rechazo sigue siendo un rechazo: el reintento nunca convierte un motivo en
+    otro ni relaja el gate, que corre igual sobre el segundo pase.
+
+    `imageSha256` se conserva el de la captura ORIGINAL: identifica lo que
+    entro, y es la pieza de la idempotencia D13/CD-3. El aplanado es un detalle
+    interno de como se leyo, no otra captura.
+    """
+    page, debug = _classify_once(bgr, page_index, spec, profile, flattened=False)
+    if not _should_retry_flattened(page, profile):
+        return page, debug
+
+    retry_page, retry_debug = _classify_once(
+        flatten_illumination(bgr), page_index, spec, profile, flattened=True
+    )
+    if not retry_page["quality"]["ok"]:
+        return page, debug
+    retry_page["imageSha256"] = page["imageSha256"]
+    return retry_page, retry_debug
+
+
+def _should_retry_flattened(page: dict[str, Any], profile: dict[str, Any]) -> bool:
+    """Solo una pagina rechazada por marcas no separables, y solo si el perfil lo pide.
+
+    `normalizeIllumination` ya existia en el CaptureProfile (D2: los umbrales de
+    captura son datos, no codigo) y esto es exactamente lo que nombraba. El
+    perfil `phone` lo trae en true y el `scanner` en false: un escaneo plano no
+    tiene gradiente que aplanar, y no paga el costo.
+    """
+    return page["quality"]["rejectReason"] == "no_separable_marks" and bool(
+        profile.get("normalizeIllumination", False)
+    )
+
+
+def _classify_once(
+    bgr: np.ndarray,
+    page_index: int,
+    spec: dict[str, Any],
+    profile: dict[str, Any],
+    *,
+    flattened: bool,
+) -> tuple[dict[str, Any], dict[str, Any]]:
     timings_ms: dict[str, float] = {}
     started = time.perf_counter()
     image_sha256 = _canonical_png_sha256(bgr)
@@ -178,6 +238,7 @@ def classify_page_debug(
 
     with _stage(timings_ms, "quality"):
         quality = assess(oriented_gray, rectified, profile)
+    quality["illuminationFlattened"] = flattened
     _apply_orientation_verdict(quality, spec, orientation_confirmed)
 
     with _stage(timings_ms, "identity"):
@@ -213,6 +274,7 @@ def classify_page_debug(
         "glare": quality["glare"],
         "fiducialsFound": quality["fiducialsFound"],
         "rejectReason": quality["rejectReason"],
+        "illuminationFlattened": flattened,
         "stateCounts": {
             state: sum(1 for mark in marks if mark["state"] == state) for state in MARK_STATES
         },
