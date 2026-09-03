@@ -335,3 +335,12 @@ export const feedbackStatusEnum = pgEnum('feedback_status', [
   'done',
   'discarded',
 ]);
+
+// ── Captura remota con teléfono (E22-R) — ver docs/e22-lector-contracts.md ──
+export const captureSessionStatusEnum = pgEnum('capture_session_status', [
+  'pending',
+  'active',
+  'closed',
+  'revoked',
+  'expired',
+]);

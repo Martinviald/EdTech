@@ -8,7 +8,11 @@ export const { auth: middleware } = NextAuth(authConfig);
 
 // Matcher negado: protege TODAS las rutas excepto la home pública (/),
 // /login, /auth/*, /api/*, /styleguide (acceso del equipo de diseño),
+// /movil/* (captura desde el teléfono sin sesión de usuario — CD-22; anclado
+// con "/" para no desproteger rutas futuras tipo /movil-otra-cosa),
 // archivos estáticos de Next y assets con extensión.
 export const config = {
-  matcher: ['/((?!$|login|auth|api|styleguide|_next/static|_next/image|favicon.ico|.*\\..*).*)'],
+  matcher: [
+    '/((?!$|login|auth|api|movil/|styleguide|_next/static|_next/image|favicon.ico|.*\\..*).*)',
+  ],
 };

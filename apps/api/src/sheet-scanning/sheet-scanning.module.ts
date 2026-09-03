@@ -5,6 +5,8 @@ import { AnswerSheetPreviewStore } from '../answer-sheets/lib/preview-store';
 import { FilesModule } from '../files/files.module';
 import { JobsModule } from '../jobs/jobs.module';
 import { LlmModule } from '../llm/llm.module';
+import { CaptureSessionGuard } from './capture-session.guard';
+import { CaptureSessionService } from './capture-session.service';
 import { DevelopmentGradingService } from './development-grading.service';
 import {
   ManualIdentityResolver,
@@ -26,6 +28,8 @@ import {
   createAnswerSheetConfirmer,
   ScanReviewService,
 } from './scan-review.service';
+import { SheetCaptureController } from './sheet-capture.controller';
+import { SheetCaptureSessionsController } from './sheet-capture-sessions.controller';
 import { SheetLayoutService } from './sheet-layout.service';
 import { SheetLayoutsController } from './sheet-layouts.controller';
 import { SheetPrintRunsController } from './sheet-print-runs.controller';
@@ -46,8 +50,12 @@ import { SheetScanService } from './sheet-scan.service';
     ScanReviewBatchesController,
     ScanReviewMarksController,
     ScanReviewScansController,
+    SheetCaptureController,
+    SheetCaptureSessionsController,
   ],
   providers: [
+    CaptureSessionService,
+    CaptureSessionGuard,
     SheetLayoutService,
     SheetPrintService,
     SheetScanService,

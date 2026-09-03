@@ -3,10 +3,11 @@
 import { useEffect, useRef, useState } from 'react';
 import { toast } from 'sonner';
 import { Camera, ImageUp, Loader2, RotateCcw } from 'lucide-react';
-import type { AssessCaptureIdentityModel, PageQuality } from '@soe/types';
+import type { AssessCaptureIdentityModel, CaptureTransport, PageQuality } from '@soe/types';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { AlertCallout } from '@/components/shared';
+import { createAuthenticatedCaptureTransport } from '@/lib/capture-transport';
 import { REJECT_REASON_LABELS } from '../lotes/[batchId]/revisar/review-labels';
 import { assessIdentityLabel } from './capture-identity';
 import {
@@ -23,12 +24,14 @@ type GateState =
   | { phase: 'rejected'; previewUrl: string; reason: string };
 
 type CameraCaptureSectionProps = {
-  printRunId: string;
   expectedSheets: number | null;
   capturedIdentities: AssessCaptureIdentityModel[];
   capturedCount: number;
   onAccepted: (file: File, identity: AssessCaptureIdentityModel | null) => boolean;
-};
+} & (
+  | { printRunId: string; transport?: undefined }
+  | { printRunId?: undefined; transport: Pick<CaptureTransport, 'assess'> }
+);
 
 function rejectionLabel(quality: PageQuality): string {
   return quality.rejectReason
@@ -36,15 +39,14 @@ function rejectionLabel(quality: PageQuality): string {
     : 'La foto no pasó el control de calidad';
 }
 
-export function CameraCaptureSection({
-  printRunId,
-  expectedSheets,
-  capturedIdentities,
-  capturedCount,
-  onAccepted,
-}: CameraCaptureSectionProps) {
+export function CameraCaptureSection(props: CameraCaptureSectionProps) {
+  const { expectedSheets, capturedIdentities, capturedCount, onAccepted } = props;
   const camera = useCameraCapture();
-  const assess = useAssessCapture();
+  const assess = useAssessCapture(
+    props.transport !== undefined
+      ? props.transport.assess
+      : createAuthenticatedCaptureTransport(props.printRunId).assess,
+  );
   const [gate, setGate] = useState<GateState>({ phase: 'live' });
   const [encoding, setEncoding] = useState(false);
   const fallbackInputRef = useRef<HTMLInputElement | null>(null);
@@ -104,7 +106,7 @@ export function CameraCaptureSection({
     const previewUrl = URL.createObjectURL(capture.blob);
     setGate({ phase: 'assessing', previewUrl });
     assess.mutate(
-      { printRunId, imageBase64: capture.imageBase64 },
+      capture.imageBase64,
       {
         onSuccess: (result) => {
           if (!result.accepted) {
