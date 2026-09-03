@@ -31,6 +31,8 @@ interface ReviewShellProps {
   students: StudentOption[];
   rosterAvailable: boolean;
   assessmentGap: AssessmentGap | null;
+  /** Evaluación destino de la tirada. Null cuando la tirada todavía no tiene una asociada. */
+  assessmentId: string | null;
 }
 
 export function ReviewShell({
@@ -39,13 +41,18 @@ export function ReviewShell({
   students,
   rosterAvailable,
   assessmentGap,
+  assessmentId,
 }: ReviewShellProps) {
   const { data: batch } = useBatchStatus(batchId, initialBatch);
   const [confirmResult, setConfirmResult] = useState<ConfirmBatchResponse | null>(null);
   const current = batch ?? initialBatch;
 
+  const resultadosHref = assessmentId
+    ? ROUTES.evaluacionResultados(assessmentId)
+    : ROUTES.resultados;
+
   if (confirmResult) {
-    return <ConfirmedSummary result={confirmResult} />;
+    return <ConfirmedSummary result={confirmResult} resultadosHref={resultadosHref} />;
   }
 
   return (
@@ -59,6 +66,7 @@ export function ReviewShell({
         batch={current}
         students={students}
         rosterAvailable={rosterAvailable}
+        resultadosHref={resultadosHref}
         onConfirmed={(result) => {
           setConfirmResult(result);
           toast.success('Lote confirmado: los resultados quedaron persistidos.');
@@ -160,12 +168,14 @@ function BatchBody({
   batch,
   students,
   rosterAvailable,
+  resultadosHref,
   onConfirmed,
 }: {
   batchId: string;
   batch: BatchStatusModel;
   students: StudentOption[];
   rosterAvailable: boolean;
+  resultadosHref: Route;
   onConfirmed: (result: ConfirmBatchResponse) => void;
 }) {
   const retry = useRetryBatch(batchId);
@@ -221,7 +231,7 @@ function BatchBody({
         <p>Sus resultados están persistidos y disponibles en los dashboards.</p>
         <div className="mt-3 flex flex-wrap gap-2">
           <Button asChild size="sm">
-            <Link href={ROUTES.resultados}>Ver resultados</Link>
+            <Link href={resultadosHref}>Ver resultados</Link>
           </Button>
           <Button asChild variant="outline" size="sm">
             <Link href={SCAN_ROUTES.escanear}>Escanear otro lote</Link>
@@ -241,7 +251,13 @@ function BatchBody({
   );
 }
 
-function ConfirmedSummary({ result }: { result: ConfirmBatchResponse }) {
+function ConfirmedSummary({
+  result,
+  resultadosHref,
+}: {
+  result: ConfirmBatchResponse;
+  resultadosHref: Route;
+}) {
   return (
     <div className="space-y-6">
       <AlertCallout tone="success" icon={CheckCircle2} title="Lote confirmado">
@@ -264,7 +280,7 @@ function ConfirmedSummary({ result }: { result: ConfirmBatchResponse }) {
           </dl>
           <div className="mt-4 flex flex-wrap gap-2">
             <Button asChild>
-              <Link href={ROUTES.resultados}>Ver resultados</Link>
+              <Link href={resultadosHref}>Ver resultados</Link>
             </Button>
             <Button asChild variant="outline">
               <Link href={SCAN_ROUTES.escanear}>Escanear otro lote</Link>
