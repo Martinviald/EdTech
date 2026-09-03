@@ -101,6 +101,40 @@ se mueven juntos. Una captura con MUCHO fondo alrededor de la hoja empuja los
 fiduciales verdaderos lejos de la esquina de la imagen; si algun dia hay que
 admitirla, sube el tope y revalida contra el conjunto de oro, porque aflojarlo
 reabre exactamente este agujero.
+
+Ese "algun dia" llego con las fotos de celular, y por eso existe
+`WIDE_CORNER_DISTANCE_FRACTION`. Una hoja fotografiada de lado, o que no llena
+el encuadre, aleja sus esquinas de las de la imagen y el tope 0.22 empieza a
+cortar fiduciales VERDADEROS. Medido sobre 19 fotos reales (11 de una hoja
+respondida, 1 tomada de lado, 7 de una hoja en blanco con angulos e
+iluminacion distintos, todas a 1650x2200 como las sube la app):
+
+    fiduciales dentro de 0.22          la mayoria de las fotos planas
+    peor fiducial VERDADERO medido     0.316 del lado corto (522 px)
+    todas las fotos llegan a 4/4       en 0.32
+    posiciones estables                identicas de 0.26 a 0.40 en las 19
+
+Esa ultima linea es la que importa: al ampliar el radio el detector no elige
+objetos DISTINTOS, solo deja de descartar los que ya encontraba. El corte en
+0.35 deja 11% de margen sobre el peor verdadero medido.
+
+Ampliar el radio NO es gratis y no se hace siempre: uno de los dos falsos
+positivos historicos estaba a 0.239, o sea DENTRO de 0.35. Por eso la busqueda
+ampliada:
+
+  1. corre solo cuando la busqueda normal encontro MENOS de 4 (el camino feliz
+     no paga nada, ni un warp de mas);
+  2. re-busca unicamente las esquinas que faltaron, dejando intactas las que ya
+     estaban dentro del tope estricto; y
+  3. no la acepta este modulo. `widened_rectification` devuelve una CANDIDATA y
+     el pipeline la toma solo si la firma de la grilla la confirma — nunca el
+     QR, que tolera una homografia torcida (medido: en la foto de lado el QR
+     decodificaba con confianza 1.0 sobre una homografia que la firma
+     rechazaba, y las burbujas no calzaban).
+
+Es la misma red de seguridad que ya protege a `leave_one_out_rectifications`:
+una mancha coronada por error produce una homografia mala, y una homografia
+mala no hace calzar 90% de las burbujas del spec sobre sus anillos impresos.
 """
 
 from __future__ import annotations
@@ -124,6 +158,7 @@ MAX_DARKNESS_RATIO = 0.55
 BORDER_TOUCH_PX = 2
 MIN_CLIPPED_INK_AREA_PX = 200
 MAX_CORNER_DISTANCE_FRACTION = 0.22
+WIDE_CORNER_DISTANCE_FRACTION = 0.35
 QR_CENTER_MIN_AREA_RATIO = 0.06
 REFINE_PITCH_FRACTION = 0.35
 REFINE_WORKSPACE_FRACTION = 0.025
@@ -138,6 +173,7 @@ class RectifiedPage:
     touches_border: bool
     reconstructed: bool = False
     reconstructed_corner: int | None = None
+    widened_corners: tuple[int, ...] = ()
 
 
 @dataclass(frozen=True)
@@ -201,6 +237,44 @@ def leave_one_out_rectifications(
         completed = _complete_parallelogram(partial)
         pages.append(_warp(gray, completed, spec, found=4, touches=touches, corner=drop))
     return pages
+
+
+def widened_rectification(
+    page_bgr: np.ndarray, spec: dict[str, Any]
+) -> RectifiedPage | None:
+    """Rectificacion CANDIDATA que re-busca las esquinas faltantes con radio ampliado.
+
+    Devuelve None si la busqueda normal ya encontro las 4 (el camino feliz no
+    entra aca) o si el radio ampliado tampoco completa las 4. Nunca completa
+    una esquina por geometria: todos los fiduciales que usa son cuadrados
+    detectados en el papel, y esa es justamente la diferencia con
+    `_complete_parallelogram`, cuya estimacion se corre bajo perspectiva fuerte
+    (medido: 296 px de desvio en la foto de lado, 24.5% de la separacion entre
+    fiduciales — demasiado como para siquiera usarla de semilla de busqueda).
+
+    Es una candidata, no un resultado: quien la llama DEBE confirmarla con la
+    firma de la grilla antes de leer marcas. Ver el encabezado del modulo.
+    """
+    gray = cv2.cvtColor(page_bgr, cv2.COLOR_BGR2GRAY)
+    strict, _ = _find_fiducials_with_clipping(gray)
+    missing = frozenset(i for i, d in enumerate(strict) if d is None)
+    if not missing:
+        return None
+
+    wide, _ = _find_fiducials_with_clipping(
+        gray,
+        corner_distance_fraction=WIDE_CORNER_DISTANCE_FRACTION,
+        only_corners=missing,
+    )
+    detections = [wide[i] if i in missing else strict[i] for i in range(4)]
+    if any(d is None for d in detections):
+        return None
+
+    complete = [d for d in detections if d is not None]
+    touches = _any_touches_border([d[1] for d in complete], gray.shape)
+    return _warp(
+        gray, complete, spec, found=4, touches=touches, widened=tuple(sorted(missing))
+    )
 
 
 def refine_reconstruction(
@@ -301,6 +375,7 @@ def _warp(
     touches: bool,
     corner: int | None = None,
     nudge: tuple[float, float] = (0.0, 0.0),
+    widened: tuple[int, ...] = (),
 ) -> RectifiedPage:
     size = workspace_size(spec)
     width, height = size
@@ -319,6 +394,7 @@ def _warp(
         touches_border=touches,
         reconstructed=corner is not None,
         reconstructed_corner=corner,
+        widened_corners=widened,
     )
 
 
@@ -358,7 +434,19 @@ def _find_fiducials(
 
 def _find_fiducials_with_clipping(
     gray: np.ndarray,
+    *,
+    corner_distance_fraction: float = MAX_CORNER_DISTANCE_FRACTION,
+    only_corners: frozenset[int] | None = None,
 ) -> tuple[list[tuple[tuple[float, float], tuple[float, float]] | None], int]:
+    """Busca los 4 fiduciales, uno por region de esquina.
+
+    `only_corners` acota la busqueda a un subconjunto de esquinas (las demas
+    salen None sin mirarlas) y `corner_distance_fraction` afloja el tope de
+    distancia. Los dos existen para el reintento ampliado: re-buscar SOLO lo
+    que falto, sin volver a tocar las esquinas que ya cayeron dentro del tope
+    estricto. En el camino normal ninguno de los dos se pasa y el
+    comportamiento es el de siempre.
+    """
     height, width = gray.shape
     binary = cv2.adaptiveThreshold(
         cv2.GaussianBlur(gray, (5, 5), 0),
@@ -380,11 +468,16 @@ def _find_fiducials_with_clipping(
 
     detections: list[tuple[tuple[float, float], tuple[float, float]] | None] = []
     clipped = 0
-    for (offset_x, offset_y), image_corner in zip(regions, image_corners, strict=True):
+    for index, ((offset_x, offset_y), image_corner) in enumerate(
+        zip(regions, image_corners, strict=True)
+    ):
+        if only_corners is not None and index not in only_corners:
+            detections.append(None)
+            continue
         crop = binary[offset_y : offset_y + region_h, offset_x : offset_x + region_w]
         gray_crop = gray[offset_y : offset_y + region_h, offset_x : offset_x + region_w]
         local_target = (image_corner[0] - offset_x, image_corner[1] - offset_y)
-        max_distance = MAX_CORNER_DISTANCE_FRACTION * min(width, height)
+        max_distance = corner_distance_fraction * min(width, height)
         max_interior = darkness_limit(gray_crop)
         local = _best_square(
             crop, gray_crop, local_target, width * height, max_distance, max_interior
