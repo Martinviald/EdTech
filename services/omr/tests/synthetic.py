@@ -603,6 +603,27 @@ def blur(gray: np.ndarray, sigma: float) -> np.ndarray:
     return cv2.GaussianBlur(gray, (0, 0), sigma)
 
 
+def alias_resample(gray: np.ndarray, scale: float, phase_px: int = 0) -> np.ndarray:
+    """Reduccion sin pasa-bajos: el remuestreo del escaner que voltea modulos.
+
+    INTER_NEAREST descarta filas y columnas enteras, igual que el escaner que
+    captura nativo y reduce a ~240 dpi sin filtrar (doc 07 §2 — la causa raiz
+    del QR erratico). `phase_px` corre la grilla de muestreo para explorar la
+    loteria de fase. Ojo: sobre un simbolo sintetico LIMPIO zxing sobrevive a
+    esto (medido: v5 con dot-gain + blur 3.5 + realce 2.5 + NN 0.40 + JPEG 82
+    decodifica 4/4 fases) — la muerte real necesita la cadena fisica completa;
+    por eso el guardarrail del canal es el piso de 12 px/modulo del impresor y
+    esta receta cubre la LECTURA DE MARCAS bajo remuestreo, no el kill del QR.
+    """
+    shifted = gray[phase_px:, phase_px:]
+    height, width = shifted.shape
+    return cv2.resize(
+        shifted,
+        (max(1, round(width * scale)), max(1, round(height * scale))),
+        interpolation=cv2.INTER_NEAREST,
+    )
+
+
 def wrinkle(gray: np.ndarray, amplitude_px: float, waves: float = 2.5) -> np.ndarray:
     height, width = gray.shape
     xs, ys = np.meshgrid(

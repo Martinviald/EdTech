@@ -245,6 +245,30 @@ existir.
 
 ---
 
+## D19 · Todo elemento decodificable imprime ≥ 12 px/módulo a 240 dpi
+
+Regla de diseño del canal de identidad ([07-identidad-qr-robusta.md](07-identidad-qr-robusta.md) §3),
+vigilada por un test que mide el plan de impresión derivado real
+(`apps/api/src/sheet-scanning/sheet-print.qr-version.spec.ts`): si un cambio de payload, región o
+geometría baja el QR del piso, el test falla sin necesidad de papel.
+
+**Razón.** La causa raíz del QR errático fue aliasing de remuestreo del escáner: el payload de 69
+caracteres forzaba un QR versión 5 con 9,4 px/módulo a 240 dpi, bajo el umbral medido de ~10,8. El
+experimento que sostiene el umbral discrimina (decodificación no monotónica con el tamaño; un
+pasa-bajos previo la recupera). La geometría vigente (payload corto → versión 1, ECC Q, región a
+0,18) imprime 17–20 px/módulo según el modo.
+
+**Medido además.** `PdfPageSource` rasteriza a 200 dpi fijos con pdfium, que remuestrea imágenes
+embebidas **con** suavizado — no reintroduce aliasing propio — y a 200 dpi el QR v1 conserva ~16
+px/módulo: se mantiene el valor fijo. Y el kill del v5 **no es reproducible con sintéticos
+limpios**: zxing decodifica un v5 sintético con dot-gain + blur σ3,5 + realce 2,5 + NN 0,40 + JPEG
+82 en 4/4 fases (medido) — la muerte necesita la cadena física completa; por eso el guardarraíl es
+el piso geométrico del impresor y no una simulación del escáner.
+
+**Deja abierto.** Confirmar el umbral contra el conjunto de oro (O4).
+
+---
+
 ## Tabla resumen
 
 | ID | Decisión | Fase |
@@ -267,3 +291,4 @@ existir.
 | D16 | `org_id` + RLS en las 6 tablas | MVP |
 | D17 | El layout habla en `printedNumber` | MVP |
 | D18 | Retención de imágenes 180 días | v1 |
+| D19 | ≥ 12 px/módulo a 240 dpi, vigilado por test | identidad robusta |
