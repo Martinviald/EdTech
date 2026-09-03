@@ -81,6 +81,9 @@ async function captureProxyPost<T>(path: string, body: unknown, token?: string):
     );
   }
 
-  if (res.status === 204) return undefined as T;
-  return res.json() as Promise<T>;
+  // `confirm` devuelve `void` y Nest responde 201 sin cuerpo: `res.json()` sobre
+  // un cuerpo vacío lanza `SyntaxError` en Safari y en Chrome.
+  if (res.status === 204 || res.status === 205) return undefined as T;
+  const text = await res.text();
+  return text.length > 0 ? (JSON.parse(text) as T) : (undefined as T);
 }
