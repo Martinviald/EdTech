@@ -70,7 +70,8 @@ ingeniería resuelta hace décadas. El riesgo real no está en el algoritmo sino
 | [06-plan-mvp-v1.md](06-plan-mvp-v1.md) | Olas del MVP con criterio medible, incrementos de v1, riesgos vivos |
 | [07-identidad-qr-robusta.md](07-identidad-qr-robusta.md) | Diagnóstico cerrado del QR (aliasing de remuestreo) y estrategia: payload corto, ECC Q, desacoplar roles |
 | [08-plan-identidad-qr-robusta.md](08-plan-identidad-qr-robusta.md) | Plan por fases de la estrategia 07, con gates medibles |
-| [09-robustez-de-encuadre.md](09-robustez-de-encuadre.md) | Pendiente: el tope de distancia de los fiduciales asume que la hoja llena el encuadre; 5 de 7 fotos reales fallan |
+| [09-robustez-de-encuadre.md](09-robustez-de-encuadre.md) | Por qué el detector elige el cuadrado equivocado: `_best_square` prefiere lo más cercano a la esquina de la imagen, no el fiducial |
+| [10-plan-seleccion-de-fiduciales.md](10-plan-seleccion-de-fiduciales.md) | Plan: cerrar el hueco del gate de homografía y elegir los fiduciales por firma de grilla |
 
 ## Orden de lectura para implementar
 
