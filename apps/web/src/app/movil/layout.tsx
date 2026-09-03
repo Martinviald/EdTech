@@ -6,7 +6,7 @@ export const metadata: Metadata = {
   robots: { index: false, follow: false },
 };
 
-const TOAST_OFFSET = { bottom: 'calc(env(safe-area-inset-bottom) + 5.5rem)' };
+const TOAST_OFFSET = { bottom: 'calc(env(safe-area-inset-bottom) + 1rem)' };
 
 export default function MovilLayout({ children }: { children: React.ReactNode }) {
   return (

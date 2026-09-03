@@ -53,8 +53,10 @@ async function BatchSection({ batchId, orgId }: { batchId: string; orgId: string
   let students: StudentOption[] = [];
   let rosterAvailable = false;
   let assessmentGap: AssessmentGap | null = null;
+  let assessmentId: string | null = null;
   try {
     const run = await apiGet<PrintRunModel>(`/sheet-print-runs/${batch.printRunId}`);
+    assessmentId = run.assessmentId ?? null;
     if (!run.assessmentId) {
       assessmentGap = {
         runId: run.id,
@@ -83,6 +85,7 @@ async function BatchSection({ batchId, orgId }: { batchId: string; orgId: string
       students={students}
       rosterAvailable={rosterAvailable}
       assessmentGap={assessmentGap}
+      assessmentId={assessmentId}
     />
   );
 }

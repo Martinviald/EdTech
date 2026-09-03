@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { toast } from 'sonner';
 import { CheckCircle2, Loader2, Send } from 'lucide-react';
 import type { AssessCaptureIdentityModel, CaptureTransport, ScanUploadIntent } from '@soe/types';
@@ -60,6 +60,7 @@ export function MobileCaptureView({ sessionId }: { sessionId: string }) {
   const [capturedCount, setCapturedCount] = useState(0);
   const [uploadingCount, setUploadingCount] = useState(0);
   const [finishPending, setFinishPending] = useState(false);
+  const [gateBusy, setGateBusy] = useState(false);
   const [cameraEpoch, setCameraEpoch] = useState(0);
   const redeemStartedRef = useRef(false);
   const phaseRef = useRef(state.phase);
@@ -126,6 +127,8 @@ export function MobileCaptureView({ sessionId }: { sessionId: string }) {
       confirmFile: guarded(base.confirmFile),
     };
   }, [token]);
+
+  const handleGateBusyChange = useCallback((value: boolean) => setGateBusy(value), []);
 
   function handleAccepted(file: File, identity: AssessCaptureIdentityModel | null): boolean {
     if (!transport) return false;
@@ -213,8 +216,17 @@ export function MobileCaptureView({ sessionId }: { sessionId: string }) {
     );
   }
 
+  const pendingWork = gateBusy || uploadingCount > 0 || finishPending;
+  const busyMessage = gateBusy
+    ? 'Validando la foto…'
+    : uploadingCount > 0
+      ? `Subiendo ${uploadingCount === 1 ? 'una foto' : `${uploadingCount} fotos`}…`
+      : finishPending
+        ? 'Enviando el lote…'
+        : null;
+
   return (
-    <div className="flex flex-1 flex-col gap-4">
+    <div className="flex flex-1 flex-col gap-4" aria-busy={pendingWork}>
       <div className="space-y-1">
         <h1 className="text-lg font-semibold text-foreground">Captura de hojas</h1>
         <p className="text-sm text-muted-foreground">{captureContextLabel(state.context)}</p>
@@ -228,25 +240,30 @@ export function MobileCaptureView({ sessionId }: { sessionId: string }) {
           capturedIdentities={capturedIdentities}
           capturedCount={capturedCount}
           onAccepted={handleAccepted}
+          blocked={pendingWork}
+          onBusyChange={handleGateBusyChange}
         />
       )}
 
-      <div className="sticky bottom-0 -mx-4 -mb-4 mt-auto space-y-2 border-t border-border bg-background/95 px-4 pt-3 pb-[calc(env(safe-area-inset-bottom)+0.75rem)] backdrop-blur supports-[backdrop-filter]:bg-background/80">
-        {uploadingCount > 0 && (
-          <p
-            className="flex items-center justify-center gap-2 text-sm text-muted-foreground"
-            role="status"
-          >
-            <Loader2 className="size-4 animate-spin" aria-hidden />
-            Subiendo {uploadingCount === 1 ? 'una foto' : `${uploadingCount} fotos`}…
-          </p>
-        )}
+      {pendingWork && (
+        <div
+          className="fixed inset-x-0 top-0 z-50 flex items-center justify-center gap-2 border-b border-border bg-background/95 px-4 pt-[calc(env(safe-area-inset-top)+0.5rem)] pb-2 text-sm font-medium text-foreground backdrop-blur supports-[backdrop-filter]:bg-background/80"
+          role="status"
+          aria-live="polite"
+        >
+          <Loader2 className="size-4 animate-spin" aria-hidden />
+          {busyMessage}
+        </div>
+      )}
 
+      <div className="-mx-4 -mb-4 mt-auto space-y-2 border-t border-border bg-background px-4 pt-3 pb-[calc(env(safe-area-inset-bottom)+0.75rem)]">
         <Button
           type="button"
           size="lg"
           className="w-full"
-          disabled={finishPending || uploadingCount > 0 || capturedCount === 0}
+          disabled={pendingWork || capturedCount === 0}
+          aria-disabled={pendingWork || capturedCount === 0}
+          aria-busy={pendingWork}
           onClick={handleFinish}
         >
           {finishPending ? (
