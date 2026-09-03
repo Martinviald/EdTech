@@ -27,7 +27,14 @@ import cv2
 import numpy as np
 import pytest
 
-from app.pipeline import process_page
+from app.geometry import workspace_size
+from app.identity import decode_region_qr
+from app.pipeline import (
+    _grid_signature_confirmed,
+    _homography_confirmed,
+    process_page,
+)
+from app.rectify import RectifiedPage, _find_fiducials_with_clipping
 from tests import synthetic as syn
 
 ROTATION_CODES = {
@@ -153,3 +160,54 @@ def test_multipage_sheet_without_qr_derives_page_from_file_order(
     assert page["quality"]["ok"] is True
     read_numbers = {mark["printedNumber"] for mark in page["marks"]}
     assert read_numbers == {"5", "6", "7", "8"}
+
+
+def _rectified_from_corners(canvas: np.ndarray, corners: np.ndarray, spec: dict) -> RectifiedPage:
+    size = workspace_size(spec)
+    width, height = size
+    dst = np.array(
+        [[0, 0], [width - 1, 0], [width - 1, height - 1], [0, height - 1]],
+        dtype=np.float32,
+    )
+    homography = cv2.getPerspectiveTransform(corners.astype(np.float32), dst)
+    return RectifiedPage(
+        gray=cv2.warpPerspective(canvas, homography, size, flags=cv2.INTER_LINEAR),
+        size=size,
+        fiducials_found=4,
+        touches_border=False,
+    )
+
+
+def test_false_homography_whose_qr_decodes_is_rejected_by_the_gate(
+    spec: dict, marks_abcd: dict
+) -> None:
+    """El QR decodifica sobre una homografia falsa; el gate igual la rechaza.
+
+    Este es el hueco que cerro P1. `_homography_confirmed` aceptaba si el QR
+    decodificaba O la firma validaba, y el QR no mira la geometria: se
+    construye aca una homografia deliberadamente corrida —la esquina inferior
+    izquierda desplazada un 8% de la separacion entre fiduciales, el modo de
+    falla del falso fiducial— que deja el QR legible (esta en la esquina
+    opuesta) y manda las burbujas fuera de sus anillos.
+
+    Las tres aserciones cuentan la historia completa y ninguna sobra: el QR SI
+    decodifica (si no, el caso no probaria nada), la firma NO valida (la
+    geometria esta rota de verdad) y el gate rechaza. Contra el codigo de `dev`
+    este test falla en la ultima linea: ahi el QR bastaba para aceptar.
+    """
+    gray = syn.render_page(spec, 0, marks=marks_abcd, qr_text="auto", rng=np.random.default_rng(42))
+    canvas = syn.on_canvas(gray)
+    detections, _ = _find_fiducials_with_clipping(canvas)
+    corners = np.array([d[0] for d in detections], dtype=np.float32)
+
+    honest = _rectified_from_corners(canvas, corners, spec)
+    assert _homography_confirmed(honest, spec, 0) is True
+
+    span = corners[1][0] - corners[0][0]
+    displaced = corners.copy()
+    displaced[3] += np.array([span * 0.08, -span * 0.08], dtype=np.float32)
+    false_page = _rectified_from_corners(canvas, displaced, spec)
+
+    assert decode_region_qr(false_page, spec) is not None
+    assert _grid_signature_confirmed(false_page, spec, 0) is False
+    assert _homography_confirmed(false_page, spec, 0) is False

@@ -5,25 +5,26 @@ tal como entro (ANTES de rectificar y ANTES de corregir orientacion):
 identifica la captura original, para la idempotencia D13/CD-3.
 
 Orientacion y homografia (F1 de identidad robusta): la rectificacion se
-confirma con una escalera de dos pruebas independientes — el QR decodificando
-desde la region del spec (la via rapida y mas fuerte), o la firma de la
-grilla: en una homografia correcta TODA posicion de burbuja del spec contiene
-al menos su anillo impreso, en una equivocada la mayoria muestrea papel. Los
-4 fiduciales solos no distinguen orientaciones (un cuadrado rotado sigue
-siendo un cuadrado), asi que sin alguna de las dos pruebas jamas se acepta
-una rotacion ni una esquina reconstruida. Si la primera pasada no se
-confirma, se prueban las rotaciones 90/180/270 y despues las rectificaciones
-leave-one-out (falso fiducial: una mancha cuadrada gana una esquina y corre
-la homografia con 4/4 detectados — capturado en papel real, captura N2).
+confirma con UNA sola prueba, la firma de la grilla — en una homografia
+correcta TODA posicion de burbuja del spec contiene al menos su anillo
+impreso, en una equivocada la mayoria muestrea papel. El QR NO confirma
+geometria: decodifica igual sobre una homografia deformada (medido: identidad
+con confianza 1.0 y burbujas fuera de la grilla), asi que es senal de
+IDENTIDAD y no vota aca. Los 4 fiduciales solos tampoco distinguen
+orientaciones (un cuadrado rotado sigue siendo un cuadrado), asi que sin la
+firma jamas se acepta una rotacion ni una esquina reconstruida. Si la primera
+pasada no se confirma, se prueban las rotaciones 90/180/270 y despues las
+rectificaciones leave-one-out (falso fiducial: una mancha cuadrada gana una
+esquina y corre la homografia con 4/4 detectados — capturado en papel real,
+captura N2).
 
-M1/CD-15: en specs rut_bubbles la orientacion se confirma con el QR de esquina
-(cuadrante superior derecho) o con la firma de la grilla — la grilla RUT del
-propio spec es parte de la firma. Si ninguna orientacion se confirma, la
-pagina se rechaza por calidad (no_separable_marks) SIN leer identidad ni
-clasificar marcas: una grilla RUT leida con la correspondencia equivocada
-matchearia al alumno incorrecto con confianza. Con firma confirmada y QR de
-esquina ilegible la pagina SI se lee (qrRaw null): el modo pensado para no
-depender del QR ya no depende del QR.
+M1/CD-15: en specs rut_bubbles la orientacion se confirma con la misma firma
+— la grilla RUT del propio spec es parte de ella. Si ninguna orientacion se
+confirma, la pagina se rechaza por calidad (no_separable_marks) SIN leer
+identidad ni clasificar marcas: una grilla RUT leida con la correspondencia
+equivocada matchearia al alumno incorrecto con confianza. Con firma
+confirmada y QR de esquina ilegible la pagina SI se lee (qrRaw null): el modo
+pensado para no depender del QR ya no depende del QR.
 
 Reintento con iluminacion aplanada: una pagina rechazada por
 `no_separable_marks` se vuelve a leer COMPLETA sobre la captura con el
@@ -79,8 +80,6 @@ from .classify import (
     readability_verdict,
 )
 from .identity import (
-    decode_corner_qr,
-    decode_region_qr,
     peek_logical_page_index,
     read_identity,
 )
@@ -413,8 +412,7 @@ def _rescue_with_wide_radius(
     solo 2 de 4. Con 2 fiduciales no hay siquiera paralelogramo que cerrar, asi
     que el reintento ampliado es la unica via.
 
-    El gate es `_grid_signature_confirmed` y NO `_homography_confirmed`, y esa
-    distincion es todo el punto. Medido sobre la foto de lado:
+    El gate es la firma de la grilla, nunca el QR. Medido sobre la foto de lado:
 
                                          QR decodifica   firma de grilla
         paralelogramo, 3 fiduciales           si               NO
@@ -424,7 +422,9 @@ def _rescue_with_wide_radius(
     burbujas no calzaban y la pagina moria en `no_separable_marks`. Aceptar por
     QR una rectificacion de radio ampliado seria aceptar justo lo que no
     distingue los dos casos. La firma si los separa, y es el mismo validador
-    independiente que ya contiene el riesgo de coronar una mancha.
+    independiente que ya contiene el riesgo de coronar una mancha. Desde que
+    `_homography_confirmed` tambien exige la firma, este camino dejo de ser la
+    excepcion estricta y pasa a ser la regla de toda la rectificacion.
 
     Corre solo cuando la busqueda estricta encontro menos de 4, asi que el
     camino feliz no paga nada.
@@ -445,8 +445,8 @@ def _refine_accepted(
 ) -> RectifiedPage | FiducialFailure:
     """Una esquina reconstruida ya confirmada se afina antes de leer marcas.
 
-    La confirmacion prueba que la homografia es LA correcta (la firma o el QR
-    calzan); el afinado corrige cuanto se corrio la estimacion del paralelogramo
+    La confirmacion prueba que la homografia es LA correcta (la firma de la
+    grilla calza); el afinado corrige cuanto se corrio la estimacion del paralelogramo
     dentro del tope topologico de refine_reconstruction. El puntaje es la brecha
     de separacion de la propia pagina: mas brecha = burbujas mejor centradas,
     jamas un mapeo distinto. Si el resultado afinado dejara de confirmar, se
@@ -475,11 +475,11 @@ def _discard_unconfirmed_reconstruction(
     """Una reconstruccion que nada confirmo vuelve a ser un fallo de fiduciales.
 
     Reconstruir la 4a esquina recupera paginas que antes se perdian, pero solo
-    vale si algo independiente confirma que la homografia quedo bien: el QR
-    decodificando desde la region del spec, o la firma de la grilla. Si ninguna
-    de las dos pruebas paso en ninguna orientacion, la pagina se rechaza como
-    antes: cero lecturas incorrectas confiadas manda sobre recuperar una hoja
-    mas.
+    vale si algo independiente confirma que la homografia quedo bien, y esa
+    prueba es la firma de la grilla (el QR no mira la geometria, ver
+    `_homography_confirmed`). Si la firma no paso en ninguna orientacion, la
+    pagina se rechaza como antes: cero lecturas incorrectas confiadas manda
+    sobre recuperar una hoja mas.
     """
     if not isinstance(rectified, RectifiedPage) or not rectified.reconstructed:
         return rectified
@@ -489,14 +489,36 @@ def _discard_unconfirmed_reconstruction(
 def _homography_confirmed(
     rectified: RectifiedPage | FiducialFailure, spec: dict[str, Any], logical_page: int
 ) -> bool:
+    """Confirma la GEOMETRIA de una homografia, y solo la firma de grilla puede hacerlo.
+
+    Antes este gate aceptaba si el QR decodificaba O la firma validaba. El QR no
+    sirve para eso: confirma la IDENTIDAD de la hoja, no que la homografia haya
+    quedado bien. Se midio en una pagina real con identidad de confianza 1.0
+    cuyas burbujas no calzaban con la grilla, y en la foto de lado (ver
+    `_rescue_with_wide_radius`), donde el QR decodificaba sobre una homografia
+    que la firma rechazaba. El "o" dejaba entonces un camino por el que una
+    homografia falsa se aceptaba SIN comprobar nunca la grilla — el unico error
+    que el criterio de aceptacion del MVP declara inadmisible (una lectura mala
+    decidida con confianza).
+
+    El QR sigue siendo la via primaria de identidad; simplemente ya no vota
+    sobre geometria. Medido sobre las 26 fotos reales antes de endurecerlo: de
+    las 10 paginas que hoy se leen, NINGUNA se apoyaba solo en el QR. Las 2
+    unicas aceptaciones solo-QR del corpus (`superseded__Escobar_Leon__8`,
+    `blanco_1607`) caian igual despues por `no_separable_marks`, que es
+    exactamente el sintoma descrito: homografia torcida, QR legible. Por eso
+    exigir la firma siempre no cuesta ninguna lectura.
+
+    Al pasar por aca, `leave_one_out_rectifications` y las rectificaciones
+    rotadas quedan cubiertas por la misma prueba: ninguna vale por si sola.
+
+    Los modos sin identidad confirmable (`none`) siguen aceptando sin prueba,
+    igual que antes: `_rectify_oriented` ni siquiera reintenta con ellos, asi
+    que aca no hay hueco nuevo que cerrar — pero tampoco lo cierra esta funcion.
+    """
     if not isinstance(rectified, RectifiedPage):
         return False
-    mode = spec["identity"]["mode"]
-    if mode == "qr" and decode_region_qr(rectified, spec) is not None:
-        return True
-    if mode == "rut_bubbles" and decode_corner_qr(rectified) is not None:
-        return True
-    if mode not in ("qr", "rut_bubbles"):
+    if spec["identity"]["mode"] not in ("qr", "rut_bubbles"):
         return True
     return _grid_signature_confirmed(rectified, spec, logical_page)
 
