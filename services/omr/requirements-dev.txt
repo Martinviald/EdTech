@@ -1,3 +1,11 @@
--r requirements.txt
+# Entorno de desarrollo y CI del servicio OMR.
+#
+# Instala el LOCK, no requirements.txt: el conjunto de oro y las calibraciones tienen
+# que correr contra las mismas versiones que la imagen, incluidas las transitivas.
+-r requirements.lock.txt
+
+# Herramientas de desarrollo: quedan en rango a propósito. No entran a la imagen ni
+# tocan el comportamiento del detector, así que fijarlas sólo agregaría roturas de lint
+# sin comprar reproducibilidad de la lectura.
 pytest>=8.3
 ruff>=0.7

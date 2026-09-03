@@ -1,9 +1,23 @@
-fastapi>=0.115,<1
-uvicorn>=0.32,<1
-jsonschema>=4.23,<5
-httpx>=0.27,<1
-numpy>=2.1
-opencv-python-headless>=4.10
-pypdfium2>=4.30
-zxing-cpp>=2.2
-pillow>=10.4
+# Dependencias DIRECTAS del servicio de visión OMR (E22).
+#
+# Este archivo es la ENTRADA del lock: se edita a mano y NO se instala.
+# Lo que se instala (Dockerfile y entorno de desarrollo) es requirements.lock.txt,
+# que además fija las transitivas.
+#
+# ⚠️ Versiones exactas a propósito. Con rangos abiertos (`opencv-python-headless>=4.10`)
+# dos builds de la misma imagen traen detectores distintos: acá se calibran umbrales
+# contra el comportamiento de OpenCV, así que un bump silencioso es una regresión de
+# precisión que ningún test de contrato atrapa. Estas son las versiones contra las que
+# se validaron el conjunto de oro y las calibraciones.
+#
+# Para subir una dependencia: edita la línea acá, regenera el lock (ver la cabecera de
+# requirements.lock.txt) y vuelve a correr el conjunto de oro.
+fastapi==0.141.1
+httpx==0.28.1
+jsonschema==4.26.0
+numpy==2.5.2
+opencv-python-headless==5.0.0.93
+pillow==12.3.0
+pypdfium2==5.13.0
+uvicorn==0.52.4
+zxing-cpp==3.1.1

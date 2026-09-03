@@ -1,0 +1,101 @@
+# LOCK COMPLETO del servicio de visión OMR (E22) — generado, no editar a mano.
+#
+# Esto es lo que instalan el Dockerfile y requirements-dev.txt. Fija también las
+# TRANSITIVAS, que es donde estaba el riesgo real: requirements.txt sólo nombra 9
+# paquetes, pero la imagen instala 26. `pydantic` y `starlette` entran por FastAPI y
+# `jsonschema-specifications` por jsonschema; sin lock, esos tres flotan build a build
+# aunque las directas estén clavadas.
+#
+# Por eso el lock y no una lista más larga en requirements.txt: la transitiva no es una
+# decisión que se tome a mano (pertenece al resolutor), pero sí tiene que quedar
+# reproducible. requirements.txt dice QUÉ queremos; este archivo dice QUÉ se instala.
+#
+# El entorno de desarrollo y CI instalan este mismo archivo, así que el conjunto de oro
+# corre contra las versiones del contenedor y no contra las que quedaron en la laptop.
+#
+# Regenerar (desde services/omr/) tras editar requirements.txt:
+#
+#   uv pip compile requirements.txt \
+#     --python-version 3.12 \
+#     --python-platform x86_64-unknown-linux-gnu \
+#     --no-header -o requirements.lock.txt
+#
+# La plataforma se fija explícitamente porque la imagen es linux/amd64 (arquitectura por
+# defecto de App Runner) y quien regenera suele estar en macOS arm64: sin el flag, el
+# lock saldría resuelto para la máquina equivocada.
+annotated-doc==0.0.5
+    # via fastapi
+annotated-types==0.8.0
+    # via pydantic
+anyio==4.15.0
+    # via
+    #   httpx
+    #   starlette
+attrs==26.1.0
+    # via
+    #   jsonschema
+    #   referencing
+certifi==2026.7.22
+    # via
+    #   httpcore
+    #   httpx
+click==8.5.0
+    # via uvicorn
+fastapi==0.141.1
+    # via -r requirements.txt
+h11==0.16.0
+    # via
+    #   httpcore
+    #   uvicorn
+httpcore==1.0.9
+    # via httpx
+httpx==0.28.1
+    # via -r requirements.txt
+idna==3.19
+    # via
+    #   anyio
+    #   httpx
+jsonschema==4.26.0
+    # via -r requirements.txt
+jsonschema-specifications==2025.9.1
+    # via jsonschema
+numpy==2.5.2
+    # via
+    #   -r requirements.txt
+    #   opencv-python-headless
+opencv-python-headless==5.0.0.93
+    # via -r requirements.txt
+pillow==12.3.0
+    # via -r requirements.txt
+pydantic==2.13.5
+    # via fastapi
+pydantic-core==2.46.5
+    # via pydantic
+pypdfium2==5.13.0
+    # via -r requirements.txt
+referencing==0.37.0
+    # via
+    #   jsonschema
+    #   jsonschema-specifications
+rpds-py==2026.6.3
+    # via
+    #   jsonschema
+    #   referencing
+starlette==1.6.0
+    # via fastapi
+typing-extensions==4.16.0
+    # via
+    #   anyio
+    #   fastapi
+    #   pydantic
+    #   pydantic-core
+    #   starlette
+    #   typing-inspection
+typing-inspection==0.4.4
+    # via
+    #   fastapi
+    #   pydantic
+uvicorn==0.52.4
+    # via -r requirements.txt
+zxing-cpp==3.1.1
+    # via -r requirements.txt

@@ -40,6 +40,10 @@ npx sst secret set InternalApiSecret "$(openssl rand -base64 32)"            --s
 npx sst secret set SoeAppPassword    "$(openssl rand -base64 24 | tr -d '/+=')" --stage production
 npx sst secret set DbMasterPassword  "$(openssl rand -base64 24 | tr -d '/+=')" --stage production
 
+# Token compartido backend → servicio de visión OMR (header X-OMR-Token). Sin este
+# secreto el `sst deploy` falla: no tiene default.
+npx sst secret set OmrServiceToken   "$(openssl rand -base64 32)"            --stage production
+
 # LLM (opcional para la demo de dashboards):
 npx sst secret set LlmProvider gemini   --stage production
 npx sst secret set GeminiApiKey "<key>" --stage production
@@ -76,6 +80,35 @@ aws ecr get-login-password --region us-east-1 \
 docker buildx build --platform linux/amd64 \
   -f apps/api/Dockerfile -t "$ECR_REPO:latest" --push .
 ```
+
+### 3b. Imagen del servicio de visión OMR (E22)
+
+**Son dos imágenes, no una.** El servicio `Omr` de App Runner también se crea apuntando a
+`:latest`, así que si esta imagen no existe el paso 5 falla con `CREATE_FAILED` en `Omr`
+(el backend sí levanta: son servicios independientes).
+
+La forma recomendada es no construirla a mano: correr el workflow **`deploy-omr.yml`** con
+**Run workflow** (`workflow_dispatch`) desde la pestaña Actions. Usa el mismo Dockerfile y
+la misma plataforma que usará el CI de ahí en adelante, así que lo que se despliega es
+exactamente lo que el pipeline va a reproducir.
+
+Si prefieres hacerlo a mano (equivalente):
+
+```bash
+OMR_REPO=$(aws ecr describe-repositories --repository-names edtech-omr-production \
+  --query 'repositories[0].repositoryUri' --output text)
+
+aws ecr get-login-password --region us-east-1 \
+  | docker login --username AWS --password-stdin "${OMR_REPO%/*}"
+
+# Contexto = services/omr (la imagen no necesita nada del monorepo de Node).
+docker buildx build --platform linux/amd64 \
+  -f services/omr/Dockerfile -t "$OMR_REPO:latest" --push services/omr
+```
+
+> Las dependencias del OMR se instalan desde `services/omr/requirements.lock.txt`
+> (versiones exactas, transitivas incluidas). Para subir una dependencia, edita
+> `requirements.txt` y regenera el lock — ver la cabecera de ese archivo.
 
 ---
 
@@ -124,12 +157,20 @@ Abrí la URL `web`. Con `AuthMode=mock` entrás con el dropdown del seed.
 
 ## 6. CI/CD (push a main)
 
-Dos workflows en `.github/workflows/`:
+Tres workflows en `.github/workflows/`:
 
 | Workflow | Dispara con | Hace |
 |---|---|---|
 | `deploy-backend.yml` | cambios en `apps/api`, `packages/db`, `packages/types`, lockfile | **(1) migra el RDS** (port-forward SSM por el bastión — gatea el deploy) → **(2)** build de la imagen → push a ECR `:latest` → App Runner **auto-deploya** |
+| `deploy-omr.yml` | cambios en `services/omr` (o **Run workflow** a mano) | build de la imagen del OMR → push a ECR `:latest` → App Runner **auto-deploya** |
 | `deploy-frontend.yml` | cambios en `apps/web`, `packages`, `sst.config.ts` | `sst deploy` (deploy completo idempotente) |
+
+Los tres comparten el grupo de `concurrency`: nunca corren a la vez, porque el `sst deploy`
+del front reconcilia también los servicios de App Runner y chocaría con un auto-deploy.
+
+El OMR va en su propio workflow y no como un job de `deploy-backend.yml` porque no tiene
+base de datos ni migraciones: colgarlo del job `migrate` haría que una migración rota
+bloquee un arreglo de visión que no toca la BDD.
 
 **Secrets de GitHub** (Settings → Secrets and variables → Actions):
 
