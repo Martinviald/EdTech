@@ -223,8 +223,10 @@ def leave_one_out_rectifications(
     la esquina enferma desde las otras tres recupero la pagina con firma 1.000.
 
     Ninguna de estas rectificaciones vale por si sola: el pipeline las acepta
-    solo si algo independiente la confirma (QR o firma de la grilla), la misma
-    prueba que una reconstruccion normal de 3 fiduciales.
+    solo si la firma de la grilla las confirma, la misma prueba que una
+    reconstruccion normal de 3 fiduciales. El QR NO alcanza — decodifica igual
+    sobre una homografia corrida, que es justo el caso que estas rectificaciones
+    intentan arbitrar (ver `_homography_confirmed` en pipeline.py).
     """
     gray = cv2.cvtColor(page_bgr, cv2.COLOR_BGR2GRAY)
     detections, _ = _find_fiducials_with_clipping(gray)
