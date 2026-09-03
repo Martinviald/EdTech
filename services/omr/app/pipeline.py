@@ -92,7 +92,7 @@ from .rectify import (
     leave_one_out_rectifications,
     rectify,
     refine_reconstruction,
-    widened_rectification,
+    search_rectification,
 )
 from .sources import Fetch, build_page_source, fetch_url
 
@@ -363,20 +363,36 @@ def _rectify_oriented(
 ) -> tuple[np.ndarray, RectifiedPage | FiducialFailure, int, bool]:
     logical_page = file_page_index % spec["pageCount"]
     confirmable = spec["identity"]["mode"] in ("qr", "rut_bubbles")
+    already_searched: set[int] = set()
+
+    def search_once(image: np.ndarray, degrees: int) -> RectifiedPage | None:
+        """La busqueda por firma de una orientacion, a lo sumo una vez.
+
+        Se la llama desde dos lugares —al faltar fiduciales y como ultimo
+        recurso— y es el paso caro del reintento, asi que la segunda vez sobre
+        la misma orientacion daria el mismo resultado por el doble de tiempo.
+        """
+        if degrees in already_searched:
+            return None
+        already_searched.add(degrees)
+        return _rescue_by_signature_search(image, spec, logical_page)
+
     first = rectify(bgr, spec, allow_reconstruction=confirmable)
     if first.fiducials_found < 4:
-        rescued = _rescue_with_wide_radius(bgr, spec, logical_page)
+        rescued = search_once(bgr, 0)
         if rescued is not None:
             return bgr, rescued, 0, True
     if _homography_confirmed(first, spec, logical_page):
         return bgr, _refine_accepted(bgr, spec, first, logical_page), 0, True
     if not confirmable:
         return bgr, first, 0, True
+    oriented: list[tuple[np.ndarray, int]] = [(bgr, 0)]
     for degrees, rotation_code in ORIENTATION_ROTATIONS:
         rotated = cv2.rotate(bgr, rotation_code)
+        oriented.append((rotated, degrees))
         candidate = rectify(rotated, spec, allow_reconstruction=True)
         if candidate.fiducials_found < 4:
-            rescued = _rescue_with_wide_radius(rotated, spec, logical_page)
+            rescued = search_once(rotated, degrees)
             if rescued is not None:
                 return rotated, rescued, degrees, True
         if _homography_confirmed(candidate, spec, logical_page):
@@ -384,55 +400,65 @@ def _rectify_oriented(
     for candidate in leave_one_out_rectifications(bgr, spec):
         if _homography_confirmed(candidate, spec, logical_page):
             return bgr, _refine_accepted(bgr, spec, candidate, logical_page), 0, True
+    for image, degrees in oriented:
+        rescued = search_once(image, degrees)
+        if rescued is not None:
+            return image, rescued, degrees, True
     return bgr, _discard_unconfirmed_reconstruction(bgr, spec, first), 0, False
 
 
-def _rescue_evidence(rectified: RectifiedPage | FiducialFailure) -> list[int] | None:
-    """Que esquinas se recuperaron con radio ampliado, para poder auditarlo despues.
+def _rescue_evidence(rectified: RectifiedPage | FiducialFailure) -> bool | None:
+    """La pagina salio de la busqueda por firma, para poder auditarlo despues.
 
     Va en el payload de debug y no en `quality`, que es contrato cerrado
     (`additionalProperties: false` en scan-result.schema.json) y cambiarlo
     arrastraria al backend. None cuando la pagina no paso por este camino, que
     es el caso normal.
     """
-    if not isinstance(rectified, RectifiedPage) or not rectified.widened_corners:
+    if not isinstance(rectified, RectifiedPage) or not rectified.searched:
         return None
-    return list(rectified.widened_corners)
+    return True
 
 
-def _rescue_with_wide_radius(
+def _rescue_by_signature_search(
     bgr: np.ndarray, spec: dict[str, Any], logical_page: int
 ) -> RectifiedPage | None:
-    """Recupera una pagina a la que el tope de distancia le corto fiduciales VERDADEROS.
+    """Ultimo recurso: elegir los fiduciales por firma de grilla en vez de por cercania.
 
-    Una hoja fotografiada de lado, o que no llena el encuadre, aleja sus
-    esquinas de las de la imagen y `MAX_CORNER_DISTANCE_FRACTION` descarta
-    cuadrados legitimos. Medido sobre 19 fotos reales: la foto de lado perdia
-    una esquina por 61 px, y 5 de 7 fotos de una hoja en blanco encontraban
-    solo 2 de 4. Con 2 fiduciales no hay siquiera paralelogramo que cerrar, asi
-    que el reintento ampliado es la unica via.
+    Recupera dos fallas que el camino estricto no distingue entre si, porque en
+    las dos el detector reporta un fiducial que no es:
 
-    El gate es la firma de la grilla, nunca el QR. Medido sobre la foto de lado:
+        el tope de distancia corto un fiducial VERDADERO (hoja de lado, o que no
+        llena el encuadre): la esquina sale vacia y la pagina muere en
+        `fiducials_missing` o `cropped`;
 
-                                         QR decodifica   firma de grilla
-        paralelogramo, 3 fiduciales           si               NO
-        4 fiduciales reales (radio ampliado)  si               si
+        un objeto del fondo mas cercano al borde que el fiducial verdadero le
+        gano la esquina (una sombra, la junta de la mesa, OTRA hoja del monton):
+        el detector reporta 4/4, la homografia sale corrida y la pagina muere en
+        `no_separable_marks` o `cropped`.
 
-    El QR tolera una homografia torcida — salia con confianza 1.0 mientras las
-    burbujas no calzaban y la pagina moria en `no_separable_marks`. Aceptar por
-    QR una rectificacion de radio ampliado seria aceptar justo lo que no
-    distingue los dos casos. La firma si los separa, y es el mismo validador
-    independiente que ya contiene el riesgo de coronar una mancha. Desde que
-    `_homography_confirmed` tambien exige la firma, este camino dejo de ser la
-    excepcion estricta y pasa a ser la regla de toda la rectificacion.
+    Reemplaza al rescate por radio ampliado, que solo cubria la primera: la
+    busqueda global usa el mismo radio ancho, asi que todo lo que aquel
+    encontraba esta entre estos candidatos, y ademas arbitra cual de ellos es el
+    fiducial en vez de asumir que es el mas cercano. Dejar los dos caminos era
+    dejar dos formas de hacer lo mismo en un rectificador que ya acumula varias.
 
-    Corre solo cuando la busqueda estricta encontro menos de 4, asi que el
-    camino feliz no paga nada.
+    El gate sigue siendo la firma de la grilla y nunca el QR, que decodifica
+    igual sobre una homografia torcida. Aca importa mas que nunca: la firma pasa
+    de VETAR a ELEGIR cual es el fiducial, asi que ademas de maximizarla se le
+    exige llegar al mismo corte que a cualquier otra rectificacion. Una busqueda
+    cuyo mejor puntaje no alcanza el corte se descarta entera.
+
+    Corre solo despues de que fallaron la rectificacion estricta, las rotadas y
+    las leave-one-out, asi que el camino feliz no paga nada.
     """
-    candidate = widened_rectification(bgr, spec)
-    if candidate is None:
+    found = search_rectification(
+        bgr, spec, lambda page: _grid_signature_fraction(page, spec, logical_page)
+    )
+    if found is None:
         return None
-    if not _grid_signature_confirmed(candidate, spec, logical_page):
+    candidate, fraction, _ = found
+    if fraction < GRID_SIGNATURE_MIN_FRACTION:
         return None
     return candidate
 
@@ -553,12 +579,24 @@ def _grid_signature_confirmed(
     CamScanner que lava los anillos da firma baja: por eso la firma es el
     fallback y el QR la via primaria, nunca al reves.
     """
+    return _grid_signature_fraction(rectified, spec, logical_page) >= GRID_SIGNATURE_MIN_FRACTION
+
+
+def _grid_signature_fraction(
+    rectified: RectifiedPage, spec: dict[str, Any], logical_page: int
+) -> float:
+    """La firma como NUMERO, que es lo que la busqueda por firma maximiza.
+
+    El gate compara esta misma fraccion contra el corte: un solo calculo para
+    elegir y para aceptar, para que la busqueda no pueda optimizar algo distinto
+    de lo que despues se le exige.
+    """
     bubbles = _spec_bubbles(spec, logical_page)
     if not bubbles:
-        return False
+        return 0.0
     fills = sample_bubble_fills(rectified, bubbles)
     over = sum(1 for fill in fills if fill > GRID_SIGNATURE_FILL_FLOOR)
-    return over / len(fills) >= GRID_SIGNATURE_MIN_FRACTION
+    return over / len(fills)
 
 
 def _spec_bubbles(spec: dict[str, Any], logical_page: int) -> list[dict[str, Any]]:

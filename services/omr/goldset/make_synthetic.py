@@ -156,6 +156,31 @@ def _alias_resample(scale: float) -> Callable[[Page, np.random.Generator], Page]
     return lambda gray, rng: syn.alias_resample(gray, scale, int(rng.integers(0, 3)))
 
 
+def _distractors(
+    *spots: tuple[int, float],
+) -> Callable[[Page, np.random.Generator], Page]:
+    """Cuadrados oscuros en el fondo, mas cerca de la esquina que el fiducial.
+
+    Va SIEMPRE despues de `_canvas`: sin margen de fondo no hay donde ponerlos, y
+    con la hoja llenando el encuadre este modo de falla no existe. Con
+    `_canvas(0.07)` el fiducial verdadero queda a ~0.12-0.14 del lado corto, asi
+    que cualquier `distance_frac` por debajo de eso le gana la esquina.
+
+    Se pasan VARIOS a proposito. Con un solo distractor la pagina se recupera
+    sola: `leave_one_out_rectifications` descarta esa esquina y la reconstruye
+    cerrando el paralelogramo con las otras tres, asi que una receta de un
+    distractor pasa igual ANTES y DESPUES y no prueba nada. Con dos esquinas
+    robadas no queda paralelogramo que cerrar, que es justamente el caso de las
+    fotos reales: la otra hoja del monton aporta MAS DE UN fiducial propio.
+    """
+    def apply(gray: Page, _rng: np.random.Generator) -> Page:
+        for corner, distance_frac in spots:
+            gray = syn.background_square(gray, corner, distance_frac)
+        return gray
+
+    return apply
+
+
 RECIPES: tuple[Recipe, ...] = (
     Recipe("plano", "scanner-adf", page_width=SCANNER_WIDTH, paper_gray=250),
     Recipe(
@@ -228,6 +253,38 @@ RECIPES: tuple[Recipe, ...] = (
     ),
     Recipe("fiducial-cortado", "dirty", clipped_corner=1, post=(_clip(1),)),
     Recipe("fiducial-ausente", "dirty", dropped_corner=2),
+    # Las tres recetas del distractor: el fiducial verdadero esta y el detector
+    # lo encuentra, pero un cuadrado oscuro del fondo queda mas cerca de la
+    # esquina de la IMAGEN y se la gana. Es el modo de falla medido sobre fotos
+    # reales (3 de 4 hojas respondidas del segundo corpus), y el que el conjunto
+    # de oro no reproducia: sus hojas estan sobre fondo limpio y siempre dan
+    # 4/4, por eso el rescate por radio ampliado salio identico marca por marca
+    # — su codigo nuevo nunca se ejecuto aca.
+    #
+    # Lo que se varia es la POSICION del distractor respecto del fiducial
+    # verdadero (mas cerca, apenas mas cerca, en otra esquina), no la distancia
+    # ni la rotacion de la hoja: calcar una foto solo probaria que sabemos
+    # copiarla.
+    #
+    # Van una por corte y no las tres en el mismo: dentro de un corte las hojas
+    # se reparten rotando entre sus recetas, asi que una receta agregada a un
+    # corte que ya tiene mas recetas que hojas NO SE DIBUJA NUNCA. `phone-bad`
+    # tiene 8 hojas, y ahi las tres juntas dejaban dos sin una sola hoja.
+    Recipe(
+        "distractor-dos-esquinas-superiores",
+        "phone-bad",
+        post=(_canvas(0.07), _distractors((0, 0.035), (1, 0.035))),
+    ),
+    Recipe(
+        "distractor-en-diagonal",
+        "phone-good",
+        post=(_canvas(0.07), _distractors((0, 0.030), (2, 0.045))),
+    ),
+    Recipe(
+        "distractor-tres-esquinas",
+        "dirty",
+        post=(_canvas(0.09), _rotate(1.1), _distractors((0, 0.030), (1, 0.055), (3, 0.040))),
+    ),
 )
 
 
