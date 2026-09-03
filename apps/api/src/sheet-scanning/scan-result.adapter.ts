@@ -55,7 +55,7 @@ export function toParserResult(scans: ConfirmedScanInput[]): ParserResult {
       studentRut: scan.studentRut,
       studentFullName: scan.studentFullName,
       answers,
-      annulledLabels,
+      ...(annulledLabels.length > 0 ? { annulledLabels } : {}),
       errors,
     });
   }

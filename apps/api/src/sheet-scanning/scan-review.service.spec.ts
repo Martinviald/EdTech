@@ -371,7 +371,7 @@ describe('ScanReviewService.resolveMark', () => {
       reviewedValue: 'B',
     });
 
-    expect(updates[0]).toMatchObject({ decision: 'option', reviewedValue: 'B' });
+    expect(updates[0]).toMatchObject({ reviewDecision: 'option', reviewedValue: 'B' });
     expect('value' in updates[0]).toBe(false);
     expect(model.value).toBeNull();
     expect(model.reviewedValue).toBe('B');

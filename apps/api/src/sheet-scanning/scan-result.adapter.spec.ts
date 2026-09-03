@@ -43,7 +43,6 @@ describe('toParserResult', () => {
         studentRut: '12345678-5',
         studentFullName: 'Ana Pérez',
         answers: { '1': 'A', '2': 'C', '3': 'E' },
-        annulledLabels: [],
         errors: [],
       },
     ]);
@@ -153,7 +152,27 @@ describe('toParserResult', () => {
     ]);
 
     expect(result.rows[0]?.answers).toEqual({ '7': null });
-    expect(result.rows[0]?.annulledLabels).toEqual([]);
+    expect(result.rows[0]?.annulledLabels).toBeUndefined();
+  });
+
+  it('anular una sub-marca registra la sub-etiqueta, no la pregunta completa', () => {
+    const result = toParserResult([
+      scan({
+        marks: [
+          mark({
+            printedNumber: '7B1',
+            state: 'multiple',
+            value: null,
+            reviewedValue: null,
+            reviewDecision: 'annulled',
+          }),
+          mark({ printedNumber: '7B2', state: 'marked', value: 'A' }),
+        ],
+      }),
+    ]);
+
+    expect(result.rows[0]?.answers).toEqual({ '7B1': null, '7B2': 'A' });
+    expect(result.rows[0]?.annulledLabels).toEqual(['7B1']);
   });
 
   it('reviewedValue también pisa una marca marked', () => {

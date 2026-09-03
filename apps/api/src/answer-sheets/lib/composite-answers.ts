@@ -142,16 +142,42 @@ export function resolveRowAnswers(
   return { byPosition, unmatchedLabels, unexpectedCompositePositions };
 }
 
-export function resolveAnnulledPositions(
+export interface AnnulledAnswers {
+  wholePositions: Set<number>;
+  subKeysByPosition: Map<number, Set<string>>;
+}
+
+export function resolveAnnulledAnswers(
   index: Map<string, ResolvableItem>,
   annulledLabels: readonly string[] | undefined,
-): Set<number> {
-  const positions = new Set<number>();
+): AnnulledAnswers {
+  const wholePositions = new Set<number>();
+  const subKeysByPosition = new Map<number, Set<string>>();
+
   for (const label of annulledLabels ?? []) {
     const resolved = resolveScanLabel(index, label, null);
-    if (resolved.kind !== 'unmatched') positions.add(resolved.item.position);
+    if (resolved.kind === 'item') {
+      wholePositions.add(resolved.item.position);
+      continue;
+    }
+    if (resolved.kind === 'sub') {
+      const keys = subKeysByPosition.get(resolved.item.position) ?? new Set<string>();
+      keys.add(resolved.subKey);
+      subKeysByPosition.set(resolved.item.position, keys);
+    }
   }
-  return positions;
+
+  return { wholePositions, subKeysByPosition };
+}
+
+export function annulmentEvidence(
+  annulled: AnnulledAnswers,
+  position: number,
+): { annulled: true } | { annulledParts: string[] } | null {
+  if (annulled.wholePositions.has(position)) return { annulled: true };
+  const keys = annulled.subKeysByPosition.get(position);
+  if (keys === undefined || keys.size === 0) return null;
+  return { annulledParts: [...keys].sort() };
 }
 
 /**
