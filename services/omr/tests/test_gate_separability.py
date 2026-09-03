@@ -22,6 +22,7 @@ from fastapi.testclient import TestClient
 
 from app import pipeline
 from app.classify import (
+    BLANK_SHEET_MAX_FILL,
     MARKS_LIKELY_BLANK,
     MARKS_READABLE,
     MARKS_UNREADABLE,
@@ -70,11 +71,59 @@ def test_con_tinta_real_desparramada_la_hoja_es_ilegible() -> None:
 
 def test_el_empate_cae_del_lado_ilegible() -> None:
     """Invitar a repetir una foto cuesta segundos; decir "en blanco" cuesta la nota."""
-    assert readability_verdict(NOT_SEPARABLE, [0.1, 0.5]) == MARKS_UNREADABLE
+    assert readability_verdict(NOT_SEPARABLE, [0.1, BLANK_SHEET_MAX_FILL]) == MARKS_UNREADABLE
 
 
 def test_una_pagina_sin_fills_no_se_declara_en_blanco() -> None:
     assert readability_verdict(NOT_SEPARABLE, []) == MARKS_UNREADABLE
+
+
+# ── Los casos limite medidos, con los numeros de las capturas reales ─────────
+
+BLANCAS_REALES_MAX_FILL = {
+    "blanco_1604": 0.310,
+    "blanco_1605": 0.334,
+    "blanco_1606": 0.432,
+    "blanco_1607": 0.297,
+    "blanco_1608": 0.303,
+    "blanco_1609": 0.440,
+    "blanco_1610": 0.375,
+}
+
+CON_TINTA_MAX_FILL = {
+    "superseded__Escobar_Leon__8": 0.501,
+    "quality_rejected__Escobar_Leon__7": 0.579,
+    "RECHAZADA": 0.791,
+}
+
+
+@pytest.mark.parametrize(("foto", "max_fill"), sorted(BLANCAS_REALES_MAX_FILL.items()))
+def test_las_siete_hojas_en_blanco_reales_se_declaran_en_blanco(
+    foto: str, max_fill: float
+) -> None:
+    """La misma hoja SIN marcar, 7 capturas con distintos angulos e iluminacion."""
+    assert readability_verdict(NOT_SEPARABLE, [0.02, max_fill]) == MARKS_LIKELY_BLANK
+
+
+@pytest.mark.parametrize(("foto", "max_fill"), sorted(CON_TINTA_MAX_FILL.items()))
+def test_las_hojas_con_tinta_medidas_se_declaran_ilegibles(foto: str, max_fill: float) -> None:
+    assert readability_verdict(NOT_SEPARABLE, [0.02, max_fill]) == MARKS_UNREADABLE
+
+
+def test_la_captura_mala_de_la_hoja_en_blanco_cae_del_lado_ilegible() -> None:
+    """0.498: por encima de las 7 blancas reales (max 0.440). El bucle converge.
+
+    Repetir la foto es exactamente lo que el veredicto ilegible pide, y la otra
+    captura de esa MISMA hoja mide 0.424 — o sea, en blanco con el "subir igual".
+    """
+    assert readability_verdict(NOT_SEPARABLE, [0.02, 0.498]) == MARKS_UNREADABLE
+    assert readability_verdict(NOT_SEPARABLE, [0.02, 0.424]) == MARKS_LIKELY_BLANK
+
+
+def test_el_corte_deja_margen_a_los_dos_lados_del_hueco_medido() -> None:
+    """0.440 (peor blanca) < 0.470 < 0.501 (mejor con tinta)."""
+    assert max(BLANCAS_REALES_MAX_FILL.values()) < BLANK_SHEET_MAX_FILL
+    assert BLANK_SHEET_MAX_FILL < min(CON_TINTA_MAX_FILL.values())
 
 
 # ── El gate y el lote comparten criterio ─────────────────────────────────────

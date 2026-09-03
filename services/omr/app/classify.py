@@ -62,7 +62,7 @@ DARK_CONTRAST_RATIO = 0.12
 CLUSTER_BAND_STD_FACTOR = 2.0
 CLUSTER_BAND_MIN_WIDTH = 0.12
 ALL_MARKED_MIN_FILL = 0.5
-BLANK_SHEET_MAX_FILL = 0.5
+BLANK_SHEET_MAX_FILL = 0.47
 
 MARKS_READABLE = "readable"
 MARKS_LIKELY_BLANK = "likely_blank"
@@ -161,20 +161,31 @@ def readability_verdict(threshold: PageThreshold, fills: list[float]) -> str:
     grupo, pero de tinta real). Si ni el maximo llega a tinta real, no hay marca
     que rescatar: es la hoja, no la captura, y repetir la foto no sirve.
 
-    OJO: BLANK_SHEET_MAX_FILL NO ESTA CALIBRADO. Medidas disponibles al escribir
-    esto (fotos reales de telefono, spec de 57 burbujas):
+    BLANK_SHEET_MAX_FILL = 0.47 sale de medir la MISMA hoja en blanco fotografiada
+    7 veces con distintos angulos e iluminacion (2200 px, lo que sube la app;
+    spec de 57 burbujas). Max fill por foto:
 
-        hoja en blanco (proxy)      max fill 0.462
-        hoja ilegible con tinta     max fill 0.791
-        otras paginas rechazadas    max fill 0.132 - 0.579
+        1604  0.310    1607  0.297    1610  0.375
+        1605  0.334    1608  0.303
+        1606  0.432    1609  0.440
 
-    El unico punto de "en blanco" es un PROXY (las burbujas vacias de una foto
-    buena), no una hoja real sin marcar, y el limite queda apretado. Falta
-    calibrarlo con fotos reales de hojas sin responder. Por eso el valor elegido
-    es el del precedente (0.5 = tinta real) y el empate cae del lado ILEGIBLE:
-    invitar a repetir una foto que no lo necesitaba cuesta 10 segundos, decirle
-    "esta en blanco" a una hoja que si tenia respuestas cuesta la nota del
-    alumno.
+    Rango 0.297 - 0.440, las 7 clasificadas en blanco. Del otro lado, las hojas
+    con tinta que la captura no dejo leer arrancan en 0.501 (0.501 / 0.579 /
+    0.791, tres capturas reales). El corte quedo en 0.470, practicamente el punto
+    medio del hueco observado 0.440 - 0.501: +0.030 de margen contra la peor hoja
+    en blanco y -0.031 contra la mejor hoja con tinta.
+
+    La foto que fijo el corte por abajo es una captura mala de esa misma hoja
+    SIN marcar, que mide 0.498 — por encima de las 7 hojas en blanco reales. Cae
+    del lado ILEGIBLE a proposito, y ese es el lado seguro por dos razones: el
+    error caro es decirle "esta en blanco" a una hoja que si tenia respuestas, y
+    ademas el bucle converge — la OTRA captura de esa misma hoja mide 0.424, asi
+    que al repetir la foto (que es lo que el veredicto ilegible pide) la hoja en
+    blanco de verdad termina ofreciendo el "subir igual".
+
+    Pendiente: el corpus son 7 fotos de UNA hoja, un papel y una impresora. Si
+    aparece papel mas gris o una camara con mas ruido, el rango de las blancas
+    sube y hay que volver a medir este numero.
     """
     if threshold.is_readable():
         return MARKS_READABLE
