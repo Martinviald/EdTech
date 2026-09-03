@@ -34,27 +34,22 @@
               "anyOf": [
                 {
                   "type": "string",
-                  "enum": [
-                    "blurry",
-                    "glare",
-                    "fiducials_missing",
-                    "cropped",
-                    "no_separable_marks"
-                  ]
+                  "enum": ["blurry", "glare", "fiducials_missing", "cropped", "no_separable_marks"]
                 },
                 {
                   "type": "null"
                 }
               ]
+            },
+            "illuminationFlattened": {
+              "type": "boolean"
+            },
+            "marksReadability": {
+              "type": "string",
+              "enum": ["readable", "likely_blank", "unreadable"]
             }
           },
-          "required": [
-            "ok",
-            "sharpness",
-            "glare",
-            "fiducialsFound",
-            "rejectReason"
-          ],
+          "required": ["ok", "sharpness", "glare", "fiducialsFound", "rejectReason"],
           "additionalProperties": false
         },
         "identity": {
@@ -62,17 +57,10 @@
           "properties": {
             "mode": {
               "type": "string",
-              "enum": [
-                "qr",
-                "rut_bubbles",
-                "none"
-              ]
+              "enum": ["qr", "rut_bubbles", "none"]
             },
             "raw": {
-              "type": [
-                "string",
-                "null"
-              ]
+              "type": ["string", "null"]
             },
             "confidence": {
               "type": "number",
@@ -80,25 +68,14 @@
               "maximum": 1
             },
             "qrRaw": {
-              "type": [
-                "string",
-                "null"
-              ]
+              "type": ["string", "null"]
             }
           },
-          "required": [
-            "mode",
-            "raw",
-            "confidence"
-          ],
+          "required": ["mode", "raw", "confidence"],
           "additionalProperties": false
         }
       },
-      "required": [
-        "imageSha256",
-        "quality",
-        "identity"
-      ],
+      "required": ["imageSha256", "quality", "identity"],
       "additionalProperties": false
     }
   },

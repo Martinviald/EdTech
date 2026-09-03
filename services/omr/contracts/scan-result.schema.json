@@ -58,15 +58,13 @@
                   },
                   "illuminationFlattened": {
                     "type": "boolean"
+                  },
+                  "marksReadability": {
+                    "type": "string",
+                    "enum": ["readable", "likely_blank", "unreadable"]
                   }
                 },
-                "required": [
-                  "ok",
-                  "sharpness",
-                  "glare",
-                  "fiducialsFound",
-                  "rejectReason"
-                ],
+                "required": ["ok", "sharpness", "glare", "fiducialsFound", "rejectReason"],
                 "additionalProperties": false
               },
               "identity": {
@@ -74,17 +72,10 @@
                 "properties": {
                   "mode": {
                     "type": "string",
-                    "enum": [
-                      "qr",
-                      "rut_bubbles",
-                      "none"
-                    ]
+                    "enum": ["qr", "rut_bubbles", "none"]
                   },
                   "raw": {
-                    "type": [
-                      "string",
-                      "null"
-                    ]
+                    "type": ["string", "null"]
                   },
                   "confidence": {
                     "type": "number",
@@ -92,17 +83,10 @@
                     "maximum": 1
                   },
                   "qrRaw": {
-                    "type": [
-                      "string",
-                      "null"
-                    ]
+                    "type": ["string", "null"]
                   }
                 },
-                "required": [
-                  "mode",
-                  "raw",
-                  "confidence"
-                ],
+                "required": ["mode", "raw", "confidence"],
                 "additionalProperties": false
               },
               "marks": {
@@ -118,18 +102,10 @@
                     },
                     "state": {
                       "type": "string",
-                      "enum": [
-                        "marked",
-                        "blank",
-                        "multiple",
-                        "ambiguous"
-                      ]
+                      "enum": ["marked", "blank", "multiple", "ambiguous"]
                     },
                     "value": {
-                      "type": [
-                        "string",
-                        "null"
-                      ]
+                      "type": ["string", "null"]
                     },
                     "fill": {
                       "type": "number",
@@ -145,10 +121,7 @@
                       "type": "number"
                     },
                     "cropJpegBase64": {
-                      "type": [
-                        "string",
-                        "null"
-                      ]
+                      "type": ["string", "null"]
                     }
                   },
                   "required": [
@@ -165,10 +138,7 @@
                 }
               },
               "pageThumbJpegBase64": {
-                "type": [
-                  "string",
-                  "null"
-                ]
+                "type": ["string", "null"]
               }
             },
             "required": [
@@ -183,9 +153,7 @@
           }
         }
       },
-      "required": [
-        "pages"
-      ],
+      "required": ["pages"],
       "additionalProperties": false
     }
   },

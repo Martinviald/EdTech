@@ -39,6 +39,9 @@ export const PAGE_REJECT_REASONS = [
 ] as const;
 export type PageRejectReason = (typeof PAGE_REJECT_REASONS)[number];
 
+export const MARKS_READABILITY = ['readable', 'likely_blank', 'unreadable'] as const;
+export type MarksReadability = (typeof MARKS_READABILITY)[number];
+
 export const pageQualitySchema = z.object({
   ok: z.boolean(),
   sharpness: z.number().min(0).max(1),
@@ -50,10 +53,23 @@ export const pageQualitySchema = z.object({
    * se rechazó por `no_separable_marks` y el segundo, sobre la captura sin
    * gradiente de luz, sí quedó legible. Es evidencia para auditar después qué
    * lecturas dependieron del reintento; no cambia cómo se interpreta el resto
-   * de `quality`. Optional sin default: `POST /v1/assess` no lo emite y los
-   * payloads previos siguen validando sin cambios (mismo criterio que `qrRaw`).
+   * de `quality`. Optional sin default: los payloads previos siguen validando
+   * sin cambios (mismo criterio que `qrRaw`).
    */
   illuminationFlattened: z.boolean().optional(),
+  /**
+   * Por qué las marcas de la página no se pudieron leer, cuando `rejectReason`
+   * es `no_separable_marks`. `likely_blank` = ninguna burbuja llega a tinta
+   * real: la hoja parece sin responder y repetir la foto NO sirve.
+   * `unreadable` = hay tinta pero desparramada (sombra, luz despareja) y
+   * repetir la foto sí puede servir. `readable` = las marcas se separan.
+   *
+   * El umbral que las separa (`BLANK_SHEET_MAX_FILL` en el servicio) está
+   * PENDIENTE DE CALIBRACIÓN con fotos reales de hojas sin marcar; ante la duda
+   * clasifica como `unreadable`. Optional sin default: sólo lo emiten las
+   * páginas que llegaron a muestrear marcas.
+   */
+  marksReadability: z.enum(MARKS_READABILITY).optional(),
 });
 
 export const scannedPageIdentitySchema = z.object({

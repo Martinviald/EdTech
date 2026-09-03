@@ -25,6 +25,15 @@ asi que en vez de rechazar la pagina se lee con un umbral bajo el cluster:
 cada campo single sale `multiple` (cola de revision con evidencia, C21) y
 ningun campo se decide mal con confianza.
 
+Hoja en blanco vs hoja ilegible (E22/gate movil): las dos rinden el mismo
+`no_separable_marks` — un solo grupo — pero piden acciones opuestas. Repetir la
+foto de una hoja que el alumno dejo sin marcar no sirve; repetir la de una hoja
+con tinta desparramada por una sombra si. Se distinguen por el MISMO
+razonamiento del caso simetrico de arriba: si NINGUNA burbuja de la pagina
+llega a tinta real (max(fill) < BLANK_SHEET_MAX_FILL) no hay nada que rescatar,
+la hoja esta en blanco; si alguna si llega, hay tinta que la captura no dejo
+leer y la pagina es ilegible. Ver readability_verdict.
+
 margin = |fill - threshold| / threshold (formula congelada en el contrato);
 margin < AMBIGUITY_MARGIN => ambiguous. Ademas, un fill en tierra de nadie
 — lejos de AMBOS grupos (banda `ambiguity_band`) — tambien es ambiguous
@@ -53,6 +62,11 @@ DARK_CONTRAST_RATIO = 0.12
 CLUSTER_BAND_STD_FACTOR = 2.0
 CLUSTER_BAND_MIN_WIDTH = 0.12
 ALL_MARKED_MIN_FILL = 0.5
+BLANK_SHEET_MAX_FILL = 0.47
+
+MARKS_READABLE = "readable"
+MARKS_LIKELY_BLANK = "likely_blank"
+MARKS_UNREADABLE = "unreadable"
 
 
 @dataclass(frozen=True)
@@ -131,6 +145,53 @@ def _all_marked_threshold(values: np.ndarray) -> PageThreshold:
         std_low=0.0,
         std_high=float(values.std()),
     )
+
+
+def readability_verdict(threshold: PageThreshold, fills: list[float]) -> str:
+    """Por que la pagina no se puede leer: en blanco o ilegible (y si se puede, legible).
+
+    Es LA politica compartida: el gate del telefono (POST /v1/assess) y el
+    procesamiento del lote (POST /v1/read) la llaman sobre los mismos fills de
+    la misma pagina rectificada, para que jamas den veredictos distintos sobre
+    la misma foto. Corre DESPUES del reintento con la iluminacion aplanada: una
+    pagina que el aplanado rescata nunca llega aca a que le pregunten nada.
+
+    El discriminador es cuan oscura es la burbuja MAS oscura de la pagina, el
+    mismo razonamiento de ALL_MARKED_MIN_FILL para el caso simetrico (un solo
+    grupo, pero de tinta real). Si ni el maximo llega a tinta real, no hay marca
+    que rescatar: es la hoja, no la captura, y repetir la foto no sirve.
+
+    BLANK_SHEET_MAX_FILL = 0.47 sale de medir la MISMA hoja en blanco fotografiada
+    7 veces con distintos angulos e iluminacion (2200 px, lo que sube la app;
+    spec de 57 burbujas). Max fill por foto:
+
+        1604  0.310    1607  0.297    1610  0.375
+        1605  0.334    1608  0.303
+        1606  0.432    1609  0.440
+
+    Rango 0.297 - 0.440, las 7 clasificadas en blanco. Del otro lado, las hojas
+    con tinta que la captura no dejo leer arrancan en 0.501 (0.501 / 0.579 /
+    0.791, tres capturas reales). El corte quedo en 0.470, practicamente el punto
+    medio del hueco observado 0.440 - 0.501: +0.030 de margen contra la peor hoja
+    en blanco y -0.031 contra la mejor hoja con tinta.
+
+    La foto que fijo el corte por abajo es una captura mala de esa misma hoja
+    SIN marcar, que mide 0.498 — por encima de las 7 hojas en blanco reales. Cae
+    del lado ILEGIBLE a proposito, y ese es el lado seguro por dos razones: el
+    error caro es decirle "esta en blanco" a una hoja que si tenia respuestas, y
+    ademas el bucle converge — la OTRA captura de esa misma hoja mide 0.424, asi
+    que al repetir la foto (que es lo que el veredicto ilegible pide) la hoja en
+    blanco de verdad termina ofreciendo el "subir igual".
+
+    Pendiente: el corpus son 7 fotos de UNA hoja, un papel y una impresora. Si
+    aparece papel mas gris o una camara con mas ruido, el rango de las blancas
+    sube y hay que volver a medir este numero.
+    """
+    if threshold.is_readable():
+        return MARKS_READABLE
+    if fills and max(fills) < BLANK_SHEET_MAX_FILL:
+        return MARKS_LIKELY_BLANK
+    return MARKS_UNREADABLE
 
 
 def margin_of(fill: float, threshold: float) -> float:

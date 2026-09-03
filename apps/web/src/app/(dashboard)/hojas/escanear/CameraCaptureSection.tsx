@@ -2,13 +2,16 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { toast } from 'sonner';
-import { Camera, ImageUp, Loader2, RotateCcw } from 'lucide-react';
+import { Camera, ImageUp, Loader2, RotateCcw, Upload } from 'lucide-react';
 import type { AssessCaptureIdentityModel, CaptureTransport, PageQuality } from '@soe/types';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { AlertCallout } from '@/components/shared';
 import { createAuthenticatedCaptureTransport } from '@/lib/capture-transport';
-import { REJECT_REASON_LABELS } from '../lotes/[batchId]/revisar/review-labels';
+import {
+  MARKS_READABILITY_LABELS,
+  REJECT_REASON_LABELS,
+} from '../lotes/[batchId]/revisar/review-labels';
 import { assessIdentityLabel } from './capture-identity';
 import {
   fileToCapturedJpeg,
@@ -21,7 +24,13 @@ import { useAssessCapture } from '../hooks/use-assess-capture';
 type GateState =
   | { phase: 'live' }
   | { phase: 'assessing'; previewUrl: string }
-  | { phase: 'rejected'; previewUrl: string; reason: string };
+  | { phase: 'rejected'; previewUrl: string; reason: string }
+  | {
+      phase: 'blank-confirm';
+      previewUrl: string;
+      blob: Blob;
+      identity: AssessCaptureIdentityModel | null;
+    };
 
 type CameraCaptureSectionProps = {
   expectedSheets: number | null;
@@ -38,9 +47,18 @@ type CameraCaptureSectionProps = {
 );
 
 function rejectionLabel(quality: PageQuality): string {
+  if (quality.rejectReason === 'no_separable_marks' && quality.marksReadability === 'unreadable') {
+    return MARKS_READABILITY_LABELS.unreadable;
+  }
   return quality.rejectReason
     ? REJECT_REASON_LABELS[quality.rejectReason]
     : 'La foto no pasó el control de calidad';
+}
+
+function looksBlank(quality: PageQuality): boolean {
+  return (
+    quality.rejectReason === 'no_separable_marks' && quality.marksReadability === 'likely_blank'
+  );
 }
 
 export function CameraCaptureSection(props: CameraCaptureSectionProps) {
@@ -107,21 +125,34 @@ export function CameraCaptureSection(props: CameraCaptureSectionProps) {
     }
   }
 
+  function upload(blob: Blob, identity: AssessCaptureIdentityModel | null, previewUrl: string) {
+    const file = new File([blob], `captura-${capturedCount + 1}-${Date.now()}.jpg`, {
+      type: 'image/jpeg',
+    });
+    const added = onAccepted(file, identity);
+    if (added) notifyAccepted(identity);
+    backToLive(previewUrl);
+  }
+
   function runGate(capture: CapturedJpeg) {
     const previewUrl = URL.createObjectURL(capture.blob);
     setGate({ phase: 'assessing', previewUrl });
     assess.mutate(capture.imageBase64, {
       onSuccess: (result) => {
+        if (!result.accepted && looksBlank(result.quality)) {
+          setGate({
+            phase: 'blank-confirm',
+            previewUrl,
+            blob: capture.blob,
+            identity: result.identity,
+          });
+          return;
+        }
         if (!result.accepted) {
           setGate({ phase: 'rejected', previewUrl, reason: rejectionLabel(result.quality) });
           return;
         }
-        const file = new File([capture.blob], `captura-${capturedCount + 1}-${Date.now()}.jpg`, {
-          type: 'image/jpeg',
-        });
-        const added = onAccepted(file, result.identity);
-        if (added) notifyAccepted(result.identity);
-        backToLive(previewUrl);
+        upload(capture.blob, result.identity, previewUrl);
       },
       onError: () => backToLive(previewUrl),
     });
@@ -215,6 +246,12 @@ export function CameraCaptureSection(props: CameraCaptureSectionProps) {
               reason={gate.reason}
               onRetake={() => backToLive(gate.previewUrl)}
             />
+          ) : gate.phase === 'blank-confirm' ? (
+            <BlankSheetVerdict
+              previewUrl={gate.previewUrl}
+              onRetake={() => backToLive(gate.previewUrl)}
+              onUploadAnyway={() => upload(gate.blob, gate.identity, gate.previewUrl)}
+            />
           ) : (
             <>
               <input
@@ -291,6 +328,11 @@ export function CameraCaptureSection(props: CameraCaptureSectionProps) {
 
           {gate.phase === 'rejected' ? (
             <RejectedVerdict reason={gate.reason} onRetake={() => backToLive(gate.previewUrl)} />
+          ) : gate.phase === 'blank-confirm' ? (
+            <BlankSheetVerdict
+              onRetake={() => backToLive(gate.previewUrl)}
+              onUploadAnyway={() => upload(gate.blob, gate.identity, gate.previewUrl)}
+            />
           ) : (
             <Button
               type="button"
@@ -310,6 +352,44 @@ export function CameraCaptureSection(props: CameraCaptureSectionProps) {
           )}
         </div>
       )}
+    </div>
+  );
+}
+
+function BlankSheetVerdict({
+  previewUrl,
+  onRetake,
+  onUploadAnyway,
+}: {
+  previewUrl?: string;
+  onRetake: () => void;
+  onUploadAnyway: () => void;
+}) {
+  return (
+    <div className="space-y-3">
+      {previewUrl && (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img
+          src={previewUrl}
+          alt="Foto capturada de la hoja"
+          className="mx-auto max-h-64 rounded-lg border object-contain"
+        />
+      )}
+      <AlertCallout tone="warning" title="Esta hoja parece no tener respuestas marcadas">
+        Si el alumno de verdad no respondió, súbela igual: queda para revisión en el computador y
+        nadie la corrige como hoja en blanco sin mirarla. Si crees que sí respondió, repite la foto
+        con luz más pareja.
+      </AlertCallout>
+      <div className="flex flex-col gap-2 sm:flex-row">
+        <Button type="button" size="lg" className="w-full" onClick={onUploadAnyway}>
+          <Upload className="mr-2 size-5" aria-hidden />
+          Subir igual
+        </Button>
+        <Button type="button" size="lg" variant="outline" className="w-full" onClick={onRetake}>
+          <RotateCcw className="mr-2 size-5" aria-hidden />
+          Repetir foto
+        </Button>
+      </div>
     </div>
   );
 }

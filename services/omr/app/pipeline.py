@@ -47,8 +47,11 @@ motivo honesto para timeout); si TODAS las paginas exceden, `AllPagesTimedOut`
 => 504.
 
 assess_page (CD-11): subset de process_page para POST /v1/assess —
-rectificacion + QualityGate + identidad (QR o grilla RUT), SIN clasificar
-marcas. Presupuesto <1s por imagen.
+rectificacion + QualityGate + identidad (QR o grilla RUT) + separabilidad de
+las marcas (la misma politica del lote, con el mismo reintento aplanado), pero
+SIN clasificar ni devolver marcas. El muestreo de fills se agrego porque el
+gate aceptaba hojas que el lote despues rechazaba por `no_separable_marks`,
+con el alumno ya lejos de la mesa.
 """
 
 from __future__ import annotations
@@ -67,7 +70,14 @@ from typing import Any
 import cv2
 import numpy as np
 
-from .classify import AMBIGUITY_MARGIN, PageThreshold, page_threshold
+from .classify import (
+    AMBIGUITY_MARGIN,
+    MARKS_READABLE,
+    MARKS_UNREADABLE,
+    PageThreshold,
+    page_threshold,
+    readability_verdict,
+)
 from .identity import (
     decode_corner_qr,
     decode_region_qr,
@@ -296,10 +306,42 @@ def _stage(timings_ms: dict[str, float], name: str) -> Iterator[None]:
 def assess_page(
     bgr: np.ndarray, spec: dict[str, Any], profile: dict[str, Any]
 ) -> dict[str, Any]:
+    """Gate de captura: rectificacion + QualityGate + identidad + SEPARABILIDAD.
+
+    Hasta E22 este gate media fiduciales, nitidez, reflejo e identidad pero NO
+    preguntaba si las marcas se iban a poder leer: el telefono decia "foto
+    aceptada" y el PC rechazaba la misma hoja por `no_separable_marks` cuando el
+    alumno ya no estaba para repetirla (3 de 5 hojas en una aplicacion real).
+
+    Por eso el gate corre ahora la MISMA politica del lote (`_marks_readability`
+    -> `readability_verdict`) sobre la misma pagina rectificada, incluido el
+    reintento con la iluminacion aplanada de `_should_retry_flattened`: una hoja
+    que el lote va a rescatar aplanandola tiene que pasar tambien aca.
+
+    NO clasifica marcas ni las devuelve: solo muestrea fills para el veredicto.
+    El costo del muestreo (~57 burbujas) es de orden de una decena de ms; el
+    caro es el reintento aplanado, que solo paga la pagina que ya iba a ser
+    rechazada.
+    """
+    page = _assess_once(bgr, spec, profile, flattened=False)
+    if not _should_retry_flattened(page, profile):
+        return page
+
+    retry = _assess_once(flatten_illumination(bgr), spec, profile, flattened=True)
+    if not retry["quality"]["ok"]:
+        return page
+    retry["imageSha256"] = page["imageSha256"]
+    return retry
+
+
+def _assess_once(
+    bgr: np.ndarray, spec: dict[str, Any], profile: dict[str, Any], *, flattened: bool
+) -> dict[str, Any]:
     image_sha256 = _canonical_png_sha256(bgr)
     oriented_bgr, rectified, _, orientation_confirmed = _rectify_oriented(bgr, spec, 0)
     oriented_gray = cv2.cvtColor(oriented_bgr, cv2.COLOR_BGR2GRAY)
     quality = assess(oriented_gray, rectified, profile)
+    quality["illuminationFlattened"] = flattened
     _apply_orientation_verdict(quality, spec, orientation_confirmed)
     identity = read_identity(
         _identity_rectified(rectified, spec, orientation_confirmed),
@@ -307,6 +349,11 @@ def assess_page(
         spec,
         _ambiguity_margin(profile),
     )
+    if quality["ok"] and isinstance(rectified, RectifiedPage):
+        verdict = _marks_readability(rectified, spec, identity, 0)[4]
+        quality["marksReadability"] = verdict
+        if verdict != MARKS_READABLE:
+            _reject_page(quality, "no_separable_marks")
     return {"imageSha256": image_sha256, "quality": quality, "identity": identity}
 
 
@@ -483,6 +530,42 @@ def _ambiguity_margin(profile: dict[str, Any]) -> float:
     return AMBIGUITY_MARGIN if margin is None else float(margin)
 
 
+def _marks_readability(
+    rectified: RectifiedPage,
+    spec: dict[str, Any],
+    identity: dict[str, Any],
+    file_page_index: int,
+) -> tuple[
+    list[dict[str, Any]], list[list[float]], list[float], PageThreshold | None, str
+]:
+    """Muestrea los fills de la pagina y dictamina si sus marcas se pueden leer.
+
+    Punto UNICO donde se decide la legibilidad: lo llaman `_read_marks` (el
+    lote) y `assess_page` (el gate del telefono), sobre la misma pagina
+    rectificada y con el mismo muestreo por lector. Extraerlo en vez de
+    duplicarlo es el requisito duro: un gate que acepte con un criterio lo que
+    el lote despues rechaza con otro es peor que no tener gate.
+    """
+    logical_page = peek_logical_page_index(identity["raw"], file_page_index, spec["pageCount"])
+    readable = [
+        field
+        for field in spec["fields"]
+        if field["pageIndex"] == logical_page and field["kind"] in READERS
+    ]
+    if not readable:
+        return [], [], [], None, MARKS_UNREADABLE
+    fills_by_field = [
+        READERS[field["kind"]].sample_fills(rectified, field) for field in readable
+    ]
+    all_fills = [fill for fills in fills_by_field for fill in fills]
+    if not all_fills:
+        return readable, fills_by_field, [], None, MARKS_READABLE
+    threshold = page_threshold(all_fills)
+    return readable, fills_by_field, all_fills, threshold, readability_verdict(
+        threshold, all_fills
+    )
+
+
 def _read_marks(
     rectified: RectifiedPage,
     spec: dict[str, Any],
@@ -491,20 +574,14 @@ def _read_marks(
     quality: dict[str, Any],
     ambiguity_margin: float,
 ) -> tuple[list[dict[str, Any]], dict[str, Any]]:
-    logical_page = peek_logical_page_index(identity["raw"], file_page_index, spec["pageCount"])
-    readable = [
-        field
-        for field in spec["fields"]
-        if field["pageIndex"] == logical_page and field["kind"] in READERS
-    ]
+    readable, fills_by_field, all_fills, threshold, verdict = _marks_readability(
+        rectified, spec, identity, file_page_index
+    )
+    quality["marksReadability"] = verdict
     if not readable:
         _reject_page(quality, "no_separable_marks")
         return [], _empty_classify_debug()
 
-    fills_by_field = [
-        READERS[field["kind"]].sample_fills(rectified, field) for field in readable
-    ]
-    all_fills = [fill for fills in fills_by_field for fill in fills]
     if not all_fills:
         marks = [
             READERS[field["kind"]].read(
@@ -515,7 +592,7 @@ def _read_marks(
         ]
         return marks, _empty_classify_debug()
 
-    threshold = page_threshold(all_fills)
+    assert threshold is not None
     histogram, _ = np.histogram(all_fills, bins=FILL_HISTOGRAM_BINS, range=(0.0, 1.0))
     classify_debug = {
         "fillHistogram": [int(count) for count in histogram],
