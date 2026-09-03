@@ -577,6 +577,46 @@ def on_canvas(gray: np.ndarray, pad_frac: float = 0.08, background: int = 210) -
     return canvas
 
 
+def background_square(
+    gray: np.ndarray,
+    corner: int,
+    distance_frac: float,
+    side_frac: float = 0.02,
+    ink: int = INK_GRAY,
+) -> np.ndarray:
+    """Un cuadrado oscuro DISTRACTOR en el fondo, entre la esquina y el fiducial.
+
+    Reproduce el modo de falla medido sobre fotos reales: `_best_square` corona
+    el cuadrado mas cercano a la esquina de la IMAGEN, asi que cualquier objeto
+    del fondo que quede mas cerca del borde que el fiducial verdadero le gana la
+    esquina — una sombra, la junta de una mesa de vidrio o, lo observado en
+    `IMG_1614`, otra hoja de respuestas del monton con sus propios fiduciales.
+    El fiducial verdadero sigue ahi y el detector lo encuentra; simplemente lo
+    descarta.
+
+    La receta correcta NO es "hoja chica y rotada" —eso no reproduce nada, y las
+    hojas del conjunto de oro siempre dieron 4/4 sobre fondo limpio— sino este
+    cuadrado. `distance_frac` es la distancia del distractor a la esquina de la
+    imagen en fracciones del lado corto, y lo que importa es que sea MENOR que
+    la del fiducial verdadero: ahi el detector se equivoca. Se varia para no
+    calcar una foto: el mecanismo es la posicion relativa, no una distancia.
+
+    Se dibuja del tamano de un fiducial a proposito. Un distractor que el gate
+    de forma o de area rechazara no probaria nada: la falla es que el objeto
+    ES un cuadrado oscuro aceptable, y solo la firma de la grilla puede decir
+    que no es el fiducial de ESTA hoja.
+    """
+    height, width = gray.shape
+    short = min(width, height)
+    offset = round(distance_frac * short / (2**0.5))
+    side = max(3, round(side_frac * width / 2))
+    x = offset if corner in (0, 3) else width - 1 - offset
+    y = offset if corner in (0, 1) else height - 1 - offset
+    out = gray.copy()
+    cv2.rectangle(out, (x - side, y - side), (x + side, y + side), ink, thickness=-1)
+    return out
+
+
 def rotate(gray: np.ndarray, degrees: float, border_gray: int = 245) -> np.ndarray:
     height, width = gray.shape
     matrix = cv2.getRotationMatrix2D((width / 2, height / 2), degrees, 1.0)

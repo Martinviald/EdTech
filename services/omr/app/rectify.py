@@ -118,19 +118,28 @@ Esa ultima linea es la que importa: al ampliar el radio el detector no elige
 objetos DISTINTOS, solo deja de descartar los que ya encontraba. El corte en
 0.35 deja 11% de margen sobre el peor verdadero medido.
 
-Ampliar el radio NO es gratis y no se hace siempre: uno de los dos falsos
-positivos historicos estaba a 0.239, o sea DENTRO de 0.35. Por eso la busqueda
-ampliada:
+Ampliar el radio NO es gratis: uno de los dos falsos positivos historicos
+estaba a 0.239, o sea DENTRO de 0.35. Por eso el radio ancho no se usa en el
+camino estricto sino solo en `search_rectification`, donde ademas no basta con
+estar cerca de la esquina — hay que ser la combinacion que hace calzar la
+grilla.
 
-  1. corre solo cuando la busqueda normal encontro MENOS de 4 (el camino feliz
-     no paga nada, ni un warp de mas);
-  2. re-busca unicamente las esquinas que faltaron, dejando intactas las que ya
-     estaban dentro del tope estricto; y
-  3. no la acepta este modulo. `widened_rectification` devuelve una CANDIDATA y
-     el pipeline la toma solo si la firma de la grilla la confirma — nunca el
-     QR, que tolera una homografia torcida (medido: en la foto de lado el QR
-     decodificaba con confianza 1.0 sobre una homografia que la firma
-     rechazaba, y las burbujas no calzaban).
+Y esa es la segunda leccion del corpus, mas cara que la del radio: el tope de
+distancia no era la unica forma de perder un fiducial. `_best_square` elige por
+CERCANIA, y cuando el fondo aporta algo oscuro mas cerca del borde que el
+fiducial verdadero —una sombra, la junta de una mesa, otra hoja de respuestas
+del monton— el detector corona el objeto equivocado teniendo al bueno entre sus
+candidatos. Medido: en `blanco_1604` el fiducial verdadero estaba a 0.209, DENTRO
+del tope de 0.22, y lo desplazo un borron de la mesa; sobre el segundo corpus
+fallaban asi 3 de 4 hojas respondidas. Ningun ajuste del radio arregla eso, en
+ninguno de los dos sentidos. Lo arregla mirar todos los candidatos y dejar que
+la firma de la grilla elija, que es lo que hace `search_rectification`.
+
+Ninguna de esas rectificaciones la acepta este modulo: son CANDIDATAS y el
+pipeline las toma solo si la firma de la grilla las confirma — nunca el QR, que
+tolera una homografia torcida (medido: en la foto de lado el QR decodificaba
+con confianza 1.0 sobre una homografia que la firma rechazaba, y las burbujas
+no calzaban).
 
 Es la misma red de seguridad que ya protege a `leave_one_out_rectifications`:
 una mancha coronada por error produce una homografia mala, y una homografia
@@ -139,6 +148,8 @@ mala no hace calzar 90% de las burbujas del spec sobre sus anillos impresos.
 
 from __future__ import annotations
 
+import itertools
+import math
 from collections.abc import Callable
 from dataclasses import dataclass
 from typing import Any
@@ -163,6 +174,8 @@ QR_CENTER_MIN_AREA_RATIO = 0.06
 REFINE_PITCH_FRACTION = 0.35
 REFINE_WORKSPACE_FRACTION = 0.025
 REFINE_MIN_STEP_PX = 1.0
+SEARCH_CANDIDATES_PER_CORNER = 6
+SEARCH_MAX_COMBINATIONS = 512
 
 
 @dataclass(frozen=True)
@@ -173,7 +186,7 @@ class RectifiedPage:
     touches_border: bool
     reconstructed: bool = False
     reconstructed_corner: int | None = None
-    widened_corners: tuple[int, ...] = ()
+    searched: bool = False
 
 
 @dataclass(frozen=True)
@@ -241,42 +254,118 @@ def leave_one_out_rectifications(
     return pages
 
 
-def widened_rectification(
-    page_bgr: np.ndarray, spec: dict[str, Any]
-) -> RectifiedPage | None:
-    """Rectificacion CANDIDATA que re-busca las esquinas faltantes con radio ampliado.
+def search_rectification(
+    page_bgr: np.ndarray,
+    spec: dict[str, Any],
+    score: Callable[[RectifiedPage], float],
+) -> tuple[RectifiedPage, float, int] | None:
+    """Rectificacion CANDIDATA que elige los fiduciales por firma de grilla, no por cercania.
 
-    Devuelve None si la busqueda normal ya encontro las 4 (el camino feliz no
-    entra aca) o si el radio ampliado tampoco completa las 4. Nunca completa
-    una esquina por geometria: todos los fiduciales que usa son cuadrados
-    detectados en el papel, y esa es justamente la diferencia con
-    `_complete_parallelogram`, cuya estimacion se corre bajo perspectiva fuerte
-    (medido: 296 px de desvio en la foto de lado, 24.5% de la separacion entre
-    fiduciales — demasiado como para siquiera usarla de semilla de busqueda).
+    `_best_square` corona el cuadrado mas cercano a la esquina de la IMAGEN. Con
+    la hoja sobre una mesa despejada eso es el fiducial; sobre un escritorio con
+    una sombra, una junta de la mesa o —lo medido— OTRA hoja de respuestas del
+    monton, el objeto mas cercano al borde no es el fiducial y el verdadero se
+    descarta aunque el detector lo haya encontrado. En `blanco_1604` el fiducial
+    verdadero estaba a 0.209 del lado corto, DENTRO del tope de 0.22: no lo
+    excluyo el filtro de distancia sino un borron mas cercano al borde. En
+    `IMG_1614`, bien encuadrada y limpia, el elegido era el fiducial de otra hoja
+    apilada debajo. Sobre el segundo corpus fallaban asi 3 de 4 hojas
+    respondidas.
 
-    Es una candidata, no un resultado: quien la llama DEBE confirmarla con la
-    firma de la grilla antes de leer marcas. Ver el encabezado del modulo.
+    Por eso la cercania deja de ser el veredicto: se enumeran los candidatos de
+    cada esquina y se elige la COMBINACION cuya homografia maximiza `score` (la
+    firma de la grilla, que la pone el pipeline). La distancia sobrevive como
+    orden de preferencia — se prueban primero los mas cercanos — y como tope de
+    region, ahora con el radio ancho, porque la busqueda global cubre tanto la
+    esquina que el radio estricto corto como la que un borron le robo.
+
+    Es una CANDIDATA: devuelve la mejor combinacion junto con su puntaje y
+    cuantas combinaciones evaluo, y quien la llama decide si el puntaje alcanza.
+    Nunca inventa una esquina por geometria: los 4 puntos son cuadrados
+    detectados en el papel.
+
+    El costo se acota por tres lados: corre SOLO en el camino de reintento (si
+    la rectificacion estricta ya confirmo, esto no se ejecuta y el camino feliz
+    no paga nada), se topea el numero de combinaciones, y se descartan temprano
+    las no convexas — que es barato y poda mucho, porque un cuadrilatero con dos
+    esquinas cruzadas no puede ser una hoja.
     """
     gray = cv2.cvtColor(page_bgr, cv2.COLOR_BGR2GRAY)
-    strict, _ = _find_fiducials_with_clipping(gray)
-    missing = frozenset(i for i, d in enumerate(strict) if d is None)
-    if not missing:
+    candidates = _fiducial_candidates(gray, SEARCH_CANDIDATES_PER_CORNER)
+    if any(not corner for corner in candidates):
         return None
+    candidates = _trim_to_combination_budget(candidates)
 
-    wide, _ = _find_fiducials_with_clipping(
-        gray,
-        corner_distance_fraction=WIDE_CORNER_DISTANCE_FRACTION,
-        only_corners=missing,
-    )
-    detections = [wide[i] if i in missing else strict[i] for i in range(4)]
-    if any(d is None for d in detections):
+    best: tuple[RectifiedPage, float, int] | None = None
+    evaluated = 0
+    for combo in itertools.product(*candidates):
+        quad = np.array([c[0] for c in combo], dtype=np.float32).reshape(-1, 1, 2)
+        if not cv2.isContourConvex(quad):
+            continue
+        evaluated += 1
+        page = _warp(gray, list(combo), spec, found=4, touches=False, searched=True)
+        page_score = score(page)
+        if best is None or page_score > best[1]:
+            best = (page, page_score, evaluated)
+    if best is None:
         return None
+    return (best[0], best[1], evaluated)
 
-    complete = [d for d in detections if d is not None]
-    touches = _any_touches_border([d[1] for d in complete], gray.shape)
-    return _warp(
-        gray, complete, spec, found=4, touches=touches, widened=tuple(sorted(missing))
-    )
+
+def _trim_to_combination_budget(
+    candidates: list[list[tuple[tuple[float, float], tuple[float, float]]]],
+) -> list[list[tuple[tuple[float, float], tuple[float, float]]]]:
+    """Camino de salida cuando el producto cartesiano se pasa del presupuesto.
+
+    Con 6 candidatos por esquina el maximo teorico son 1296 combinaciones y lo
+    observado sobre el corpus fue 15, pero el caso feliz no se promete solo: una
+    foto con mucho ruido de fondo puede llenar las cuatro listas. En vez de
+    abandonar la busqueda —que perderia justo las paginas dificiles— se recorta
+    la esquina con MAS candidatos, que es donde la cercania discrimina menos, y
+    se recorta por el final: los que sobreviven son siempre los mas cercanos a
+    la esquina de la imagen. Peor caso, quedan 1 por esquina y la busqueda
+    degrada a la politica de cercania de siempre.
+    """
+    trimmed = [list(corner) for corner in candidates]
+    while math.prod(len(corner) for corner in trimmed) > SEARCH_MAX_COMBINATIONS:
+        widest = max(range(4), key=lambda i: len(trimmed[i]))
+        if len(trimmed[widest]) == 1:
+            break
+        trimmed[widest].pop()
+    return trimmed
+
+
+def _fiducial_candidates(
+    gray: np.ndarray, limit: int
+) -> list[list[tuple[tuple[float, float], tuple[float, float]]]]:
+    """Los candidatos de cada esquina, con el radio ancho y ordenados por cercania."""
+    binary = _fiducial_binary(gray)
+    region_w, region_h, regions, image_corners = _corner_regions(gray.shape)
+    height, width = gray.shape
+    max_distance = WIDE_CORNER_DISTANCE_FRACTION * min(width, height)
+    page_area = width * height
+
+    per_corner = []
+    for (offset_x, offset_y), image_corner in zip(regions, image_corners, strict=True):
+        crop = binary[offset_y : offset_y + region_h, offset_x : offset_x + region_w]
+        gray_crop = gray[offset_y : offset_y + region_h, offset_x : offset_x + region_w]
+        local_target = (image_corner[0] - offset_x, image_corner[1] - offset_y)
+        local = _square_candidates(
+            crop,
+            gray_crop,
+            local_target,
+            page_area,
+            max_distance,
+            darkness_limit(gray_crop),
+            limit=limit,
+        )
+        per_corner.append(
+            [
+                ((cx + offset_x, cy + offset_y), (ox + offset_x, oy + offset_y))
+                for (cx, cy), (ox, oy) in local
+            ]
+        )
+    return per_corner
 
 
 def refine_reconstruction(
@@ -377,7 +466,7 @@ def _warp(
     touches: bool,
     corner: int | None = None,
     nudge: tuple[float, float] = (0.0, 0.0),
-    widened: tuple[int, ...] = (),
+    searched: bool = False,
 ) -> RectifiedPage:
     size = workspace_size(spec)
     width, height = size
@@ -396,7 +485,7 @@ def _warp(
         touches_border=touches,
         reconstructed=corner is not None,
         reconstructed_corner=corner,
-        widened_corners=widened,
+        searched=searched,
     )
 
 
@@ -436,50 +525,23 @@ def _find_fiducials(
 
 def _find_fiducials_with_clipping(
     gray: np.ndarray,
-    *,
-    corner_distance_fraction: float = MAX_CORNER_DISTANCE_FRACTION,
-    only_corners: frozenset[int] | None = None,
 ) -> tuple[list[tuple[tuple[float, float], tuple[float, float]] | None], int]:
-    """Busca los 4 fiduciales, uno por region de esquina.
+    """Busca los 4 fiduciales, uno por region de esquina, con el tope estricto.
 
-    `only_corners` acota la busqueda a un subconjunto de esquinas (las demas
-    salen None sin mirarlas) y `corner_distance_fraction` afloja el tope de
-    distancia. Los dos existen para el reintento ampliado: re-buscar SOLO lo
-    que falto, sin volver a tocar las esquinas que ya cayeron dentro del tope
-    estricto. En el camino normal ninguno de los dos se pasa y el
-    comportamiento es el de siempre.
+    Es el camino de siempre y no se afloja: el radio ancho y la enumeracion de
+    candidatos viven en `search_rectification`, que corre solo de reintento.
     """
     height, width = gray.shape
-    binary = cv2.adaptiveThreshold(
-        cv2.GaussianBlur(gray, (5, 5), 0),
-        255,
-        cv2.ADAPTIVE_THRESH_GAUSSIAN_C,
-        cv2.THRESH_BINARY_INV,
-        51,
-        10,
-    )
-    region_w = round(width * CORNER_REGION_FRACTION)
-    region_h = round(height * CORNER_REGION_FRACTION)
-    regions = [
-        (0, 0),
-        (width - region_w, 0),
-        (width - region_w, height - region_h),
-        (0, height - region_h),
-    ]
-    image_corners = [(0, 0), (width - 1, 0), (width - 1, height - 1), (0, height - 1)]
+    binary = _fiducial_binary(gray)
+    region_w, region_h, regions, image_corners = _corner_regions(gray.shape)
 
     detections: list[tuple[tuple[float, float], tuple[float, float]] | None] = []
     clipped = 0
-    for index, ((offset_x, offset_y), image_corner) in enumerate(
-        zip(regions, image_corners, strict=True)
-    ):
-        if only_corners is not None and index not in only_corners:
-            detections.append(None)
-            continue
+    for (offset_x, offset_y), image_corner in zip(regions, image_corners, strict=True):
         crop = binary[offset_y : offset_y + region_h, offset_x : offset_x + region_w]
         gray_crop = gray[offset_y : offset_y + region_h, offset_x : offset_x + region_w]
         local_target = (image_corner[0] - offset_x, image_corner[1] - offset_y)
-        max_distance = corner_distance_fraction * min(width, height)
+        max_distance = MAX_CORNER_DISTANCE_FRACTION * min(width, height)
         max_interior = darkness_limit(gray_crop)
         local = _best_square(
             crop, gray_crop, local_target, width * height, max_distance, max_interior
@@ -493,6 +555,39 @@ def _find_fiducials_with_clipping(
             (cx, cy), (ox, oy) = local
             detections.append(((cx + offset_x, cy + offset_y), (ox + offset_x, oy + offset_y)))
     return detections, clipped
+
+
+def _fiducial_binary(gray: np.ndarray) -> np.ndarray:
+    return cv2.adaptiveThreshold(
+        cv2.GaussianBlur(gray, (5, 5), 0),
+        255,
+        cv2.ADAPTIVE_THRESH_GAUSSIAN_C,
+        cv2.THRESH_BINARY_INV,
+        51,
+        10,
+    )
+
+
+def _corner_regions(
+    shape: tuple[int, ...],
+) -> tuple[int, int, list[tuple[int, int]], list[tuple[int, int]]]:
+    """Las 4 ventanas de esquina y la esquina de imagen que le toca a cada una.
+
+    Vive aparte porque la busqueda por firma enumera sobre exactamente las
+    mismas regiones que la busqueda estricta: si se separaran, una podria mirar
+    donde la otra no y el rescate dejaria de ser comparable con lo que fallo.
+    """
+    height, width = shape[:2]
+    region_w = round(width * CORNER_REGION_FRACTION)
+    region_h = round(height * CORNER_REGION_FRACTION)
+    regions = [
+        (0, 0),
+        (width - region_w, 0),
+        (width - region_w, height - region_h),
+        (0, height - region_h),
+    ]
+    image_corners = [(0, 0), (width - 1, 0), (width - 1, height - 1), (0, height - 1)]
+    return region_w, region_h, regions, image_corners
 
 
 def darkness_limit(gray_crop: np.ndarray) -> float:
@@ -549,11 +644,41 @@ def _best_square(
     max_distance: float,
     max_interior: float,
 ) -> tuple[tuple[float, float], tuple[float, float]] | None:
+    """El cuadrado mas cercano a la esquina de la imagen, o None si no hay ninguno.
+
+    Es la politica del camino estricto y sigue siendo la de siempre. Su
+    debilidad conocida —un borron del fondo mas cercano al borde que el fiducial
+    verdadero le gana la esquina— la arbitra `search_rectification`, que mira
+    TODOS los candidatos en vez de solo el primero.
+    """
+    candidates = _square_candidates(
+        binary_crop, gray_crop, target, page_area, max_distance, max_interior
+    )
+    return candidates[0] if candidates else None
+
+
+def _square_candidates(
+    binary_crop: np.ndarray,
+    gray_crop: np.ndarray,
+    target: tuple[int, int],
+    page_area: float,
+    max_distance: float,
+    max_interior: float,
+    limit: int | None = None,
+) -> list[tuple[tuple[float, float], tuple[float, float]]]:
+    """Todos los cuadrados aceptables de la region, ordenados por cercania a la esquina.
+
+    La cercania deja de ser un VEREDICTO y pasa a ser solo un orden de
+    preferencia: quien enumera se queda con los `limit` primeros y deja que la
+    firma de la grilla decida cual era el fiducial. Los gates de forma, area,
+    oscuridad, nieto-de-QR y distancia maxima siguen aplicando igual — esto
+    amplia a quien se considera, no que se acepta.
+    """
     contours, hierarchy = cv2.findContours(binary_crop, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
     if hierarchy is None:
-        return None
+        return []
     hier = hierarchy[0]
-    best: tuple[float, tuple[tuple[float, float], tuple[float, float]]] | None = None
+    found: list[tuple[float, tuple[tuple[float, float], tuple[float, float]]]] = []
     for idx, (contour, node) in enumerate(zip(contours, hier, strict=True)):
         if node[3] != -1:
             continue
@@ -574,9 +699,10 @@ def _best_square(
         distance = (outer[0] - target[0]) ** 2 + (outer[1] - target[1]) ** 2
         if distance > max_distance * max_distance:
             continue
-        if best is None or distance < best[0]:
-            best = (distance, (centroid, outer))
-    return None if best is None else best[1]
+        found.append((distance, (centroid, outer)))
+    found.sort(key=lambda item: item[0])
+    ordered = [item[1] for item in found]
+    return ordered if limit is None else ordered[:limit]
 
 
 def _has_qr_center(
