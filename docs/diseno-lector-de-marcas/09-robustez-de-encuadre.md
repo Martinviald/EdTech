@@ -1,8 +1,9 @@
 # 09 · Robustez de encuadre: el tope de distancia de los fiduciales
 
 > Pendiente identificado el 2026-09-03 probando el lector con fotos de teléfono reales.
-> **No implementar hasta que aterricen y se prueben las PRs #185 (gate de separabilidad) y
-> la del rescate por fiduciales faltantes**, que tocan los mismos archivos.
+> **Actualizado tras mergear #185, #186 y #187**: el rescate por radio ampliado (#187) resolvió
+> la mitad del problema. Lo que queda, y la evidencia nueva, está en
+> [Qué queda después de #187](#que-queda).
 
 ---
 
@@ -131,3 +132,78 @@ vista en todas.
 El conjunto de oro sintético **no cubre este caso**: sus hojas siempre llenan el encuadre. Si
 este arreglo se implementa, vale agregarle recetas con la hoja pequeña y rotada dentro del
 marco — hoy ese modo de falla no lo detecta ninguna prueba automática.
+
+---
+
+<a id="que-queda"></a>
+
+## Qué queda después de #187
+
+`WIDE_CORNER_DISTANCE_FRACTION = 0.35` (PR #187) reintenta las esquinas faltantes con radio
+ampliado y acepta solo lo que la firma de grilla valida. Medido sobre las mismas 19 fotos, ya
+en `dev` con #185 y #187 juntas:
+
+| Conjunto                      | Antes             | Después                                |
+| ----------------------------- | ----------------- | -------------------------------------- |
+| 12 fotos de hojas respondidas | 7 leídas          | **8 leídas** (entra la foto inclinada) |
+| 7 fotos de hoja en blanco     | 2 se rectificaban | **3 se rectifican**                    |
+
+Las dos PRs componen bien: las hojas en blanco que se rectifican salen con
+`marksReadability: likely_blank` y una hoja con tinta ilegible sale `unreadable`.
+
+**Quedan 4 de las 7 fotos en blanco sin rectificar.** No es el tope de distancia: en las cuatro
+el radio ampliado SÍ encuentra cuatro cuadrados, y la firma de grilla los rechaza.
+
+### Por qué las rechaza
+
+El rescate **conserva las detecciones estrictas y solo re-busca las faltantes**. Si una
+detección estricta es incorrecta, el rescate no puede corregirla: la arrastra a la homografía,
+la firma la rechaza —correctamente— y la página vuelve a fallar.
+
+Geometría del cuadrilátero que arma el radio ampliado en las cuatro:
+
+| foto        | dif. lado superior vs inferior | dif. lado izquierdo vs derecho |
+| ----------- | ------------------------------ | ------------------------------ |
+| blanco_1604 | **21%**                        | 6%                             |
+| blanco_1605 | **17%**                        | 10%                            |
+| blanco_1608 | 9%                             | 2%                             |
+| blanco_1610 | 2%                             | **26%**                        |
+
+Tres tienen una asimetría demasiado grande para la perspectiva de la foto: una esquina está en
+el lugar equivocado. `blanco_1608` es la excepción —geometría consistente, firma 0.895 contra
+un corte de 0.90— y es un caso aparte, de calibración del corte, que no se tocó a propósito.
+
+### Modo de falla nuevo: otras hojas en el encuadre
+
+En `blanco_1604` hay **otras hojas de respuesta visibles al borde del encuadre, con sus propios
+fiduciales negros**. La detección estricta ubica una esquina en x=86, a la izquierda del borde
+de la hoja principal.
+
+Es coherente con la asimetría del 21% y con que la firma rechace la homografía, pero **falta
+confirmarlo midiendo** si esa esquina cae dentro o fuera del papel objetivo. Si se confirma, es
+un modo de falla propio: en una sala de clases las hojas se apilan, y fotografiar una con otras
+al lado es lo normal, no lo excepcional.
+
+Refuerza la resolución propuesta: un invariante de consistencia entre los cuatro descarta un
+cuadrado que pertenece a OTRA hoja, porque no encaja en el cuadrilátero. El tope por distancia
+no puede distinguirlos.
+
+### El motivo de rechazo miente
+
+Las cuatro se rechazan con `cropped`. La hoja está entera en las cuatro fotos.
+
+El paso estricto reporta **2 esquinas "que parecen recortadas"** en cada una:
+`_corner_looks_clipped` encuentra tinta oscura tocando el borde de la imagen —el canto de la
+mesa, otra hoja, una sombra— y concluye que la captura cortó la hoja.
+
+Al usuario le dice exactamente lo contrario de lo que necesita: `cropped` invita a encuadrar
+**más cerca**, cuando el problema es que la hoja ya está demasiado lejos y pequeña. Corregir el
+motivo es barato y va junto con este arreglo.
+
+### Composición pendiente
+
+`leave_one_out_rectifications` ya existe para el falso fiducial: prueba las cuatro
+rectificaciones que descartan una esquina y la reconstruyen de las otras. Es justo lo que haría
+falta aquí — pero **hoy no se compone con el rescate por radio ampliado**. Las dos políticas
+corren por caminos separados y ninguna cubre el caso "una detección estricta es falsa Y falta
+otra esquina".
