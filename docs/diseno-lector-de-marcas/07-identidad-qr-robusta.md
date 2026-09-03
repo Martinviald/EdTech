@@ -1,6 +1,8 @@
 # 07 — Identidad robusta: diagnóstico cerrado y estrategia
 
-> **Estado:** diagnóstico **cerrado** con causa raíz verificada. Estrategia aprobada, sin implementar.
+> **Estado:** diagnóstico **cerrado** con causa raíz verificada. F1–F4 del plan
+> ([08-plan-identidad-qr-robusta.md](08-plan-identidad-qr-robusta.md)) **implementadas**; pendiente
+> F5 (validación con papel, incluido el escáner que fallaba a 240 dpi).
 > **Origen:** ocho sesiones de prueba con papel real, 30-ago a 02-sep de 2026.
 > **Reemplaza** a la propuesta de celdas binarias (rama `docs/identificacion-hoja-robusta`, PR #177
 > cerrada): su premisa era falsa y su solución, innecesariamente cara.

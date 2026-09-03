@@ -6,13 +6,22 @@
 
 ## Mapa
 
-| Fase | Qué | Toca | Papel | Días |
+| Fase | Qué | Toca | Papel | Estado |
 |---|---|---|---|---|
-| F1 | Desacoplar los tres roles del QR | `services/omr` | no | 2–3 |
-| F2 | Código corto + payload nuevo | `packages/db`, `packages/types`, `apps/api` | no | 2–3 |
-| F3 | Geometría: ECC Q + región cuadrada | `apps/api` | no | 1 |
-| F4 | Guardarraíl de resolución | `services/omr`, docs | no | 1 |
-| F5 | Validación con papel | todo | **sí** | — |
+| F1 | Desacoplar los tres roles del QR | `services/omr` | no | ✅ gate pasado |
+| F2 | Código corto + payload nuevo | `packages/db`, `packages/types`, `apps/api` | no | ✅ gate pasado |
+| F3 | Geometría: ECC Q + región al techo seguro | `apps/api` | no | ✅ gate pasado (0,18, no 0,20 — ver nota) |
+| F4 | Guardarraíl de resolución | `services/omr`, docs | no | ✅ (D19) |
+| F5 | Validación con papel | todo | **sí** | ⏳ pendiente |
+
+**Notas de ejecución (sep 2026).** F1 sumó dos piezas que el plan no anticipó, ambas medidas sobre
+el banco real: la **firma de la grilla** como criterio de confirmación (correctas 1.000 vs
+equivocadas ≤ 0.632, corte 0.9/piso 0.08) que además arbitra un **falso fiducial** vía
+leave-one-out (captura N2: una mancha ganó la esquina con 4/4 detectados), y el **afinado de la
+esquina reconstruida** maximizando la brecha de separación (captura L0: 0.354 no separable → 0.717
+con las 19 marcas). En F3 la región no pudo llegar a 0,20×0,20: la grilla parte en y=0,18 y la
+columna 3 llega a x=0,985 — el techo seguro es 0,18, y el piso de 12 px/módulo se cumple igual
+(17–20 según modo). La banda lavada de N0 quedó como limitación vigilada (xfail) — ver 07 §6.
 
 **F1 va primero y es independiente:** arregla un defecto presente (hoy un QR ilegible rechaza la
 página en modo `rut_bubbles`) y no depende de nada de lo demás. Si el resto se posterga, F1 igual
