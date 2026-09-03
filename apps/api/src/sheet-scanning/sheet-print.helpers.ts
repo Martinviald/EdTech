@@ -89,6 +89,7 @@ const NAME_FONT_SIZE = 11;
 const COURSE_FONT_SIZE = 9;
 const INSTRUCTION_FONT_SIZE = 7;
 const SHORT_CODE_FONT_SIZE = 7;
+const SHORT_CODE_STRIP_PT = 11;
 const BLANK_NAME_LINE = '________________________________';
 const RUT_MODE_NAME_LINE = 'Nombre: ____________________________';
 const RUT_INSTRUCTION_LINES = [
@@ -97,7 +98,11 @@ const RUT_INSTRUCTION_LINES = [
   'Si tu RUT tiene 7 dígitos, marca 0 en la primera columna.',
 ] as const;
 
-export function computeDrawPlan(spec: LayoutSpec, pageIndex: number): SheetDrawPlan {
+export function computeDrawPlan(
+  spec: LayoutSpec,
+  pageIndex: number,
+  options: { reserveShortCodeStrip?: boolean } = {},
+): SheetDrawPlan {
   const { width: pageWidth, height: pageHeight } = PAPER_SIZES_PT[spec.paper];
   const fiducialSide = spec.fiducials.sizeRatio * pageWidth;
   const fiducialMargin = spec.fiducials.marginRatio * pageWidth;
@@ -183,9 +188,10 @@ export function computeDrawPlan(spec: LayoutSpec, pageIndex: number): SheetDrawP
   const region = identityMode === 'rut_bubbles' ? SHEET_QR_IDENTITY_REGION : spec.identity.region;
   const regionWidth = (region.bottomRight.x - region.topLeft.x) * frameWidth;
   const regionHeight = (region.bottomRight.y - region.topLeft.y) * frameHeight;
-  const qrSize = Math.max(Math.min(regionWidth, regionHeight), 1);
+  const stripPt = options.reserveShortCodeStrip ? SHORT_CODE_STRIP_PT : 0;
+  const qrSize = Math.max(Math.min(regionWidth, regionHeight - stripPt), 1);
   const qrX = toX(region.topLeft.x) + (regionWidth - qrSize) / 2;
-  const qrY = toY(region.bottomRight.y) + (regionHeight - qrSize) / 2;
+  const qrY = toY(region.bottomRight.y) + stripPt + (regionHeight - stripPt - qrSize) / 2;
 
   const rutGridBubbles: DrawPlanBubble[] =
     identityMode === 'rut_bubbles'
@@ -239,9 +245,10 @@ export async function renderSheetsPdf(
   const font = await doc.embedFont(StandardFonts.Helvetica);
   const boldFont = await doc.embedFont(StandardFonts.HelveticaBold);
 
+  const reserveShortCodeStrip = sheets.some((sheet) => sheet.shortCode !== null);
   const plans: SheetDrawPlan[] = [];
   for (let pageIndex = 0; pageIndex < spec.pageCount; pageIndex++) {
-    plans.push(computeDrawPlan(spec, pageIndex));
+    plans.push(computeDrawPlan(spec, pageIndex, { reserveShortCodeStrip }));
   }
 
   const black = rgb(0, 0, 0);
@@ -333,7 +340,10 @@ export async function renderSheetsPdf(
       }
 
       const payload = qrPayloadForSheet(sheet, specHash, pageIndex, spec.pageCount);
-      const qrPng = await QRCode.toBuffer(payload, { errorCorrectionLevel: 'M', margin: 0 });
+      const qrPng = await QRCode.toBuffer(payload, {
+        errorCorrectionLevel: sheet.shortCode !== null ? 'Q' : 'M',
+        margin: 0,
+      });
       const qrImage = await doc.embedPng(qrPng);
       page.drawImage(qrImage, {
         x: plan.qr.x,
