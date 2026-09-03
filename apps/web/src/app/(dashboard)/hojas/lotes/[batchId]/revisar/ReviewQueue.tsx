@@ -7,6 +7,7 @@ import {
   FileQuestion,
   ImageOff,
   Loader2,
+  Maximize2,
   ScanLine,
   Trash2,
   UserRoundSearch,
@@ -25,6 +26,15 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '@/components/ui/dialog';
 import {
   Select,
   SelectContent,
@@ -91,7 +101,7 @@ export function PagesReviewStep({
   );
 }
 
-function ScanThumb({ scan }: { scan: ReviewScanModel }) {
+function ScanThumb({ scan, interactive }: { scan: ReviewScanModel; interactive?: boolean }) {
   if (!scan.thumbUrl) {
     return (
       <div className="flex h-24 w-20 shrink-0 items-center justify-center rounded-md border bg-muted">
@@ -100,12 +110,19 @@ function ScanThumb({ scan }: { scan: ReviewScanModel }) {
     );
   }
   return (
-    // eslint-disable-next-line @next/next/no-img-element
-    <img
-      src={scan.thumbUrl}
-      alt={`Miniatura de la página ${scan.pageIndex + 1}`}
-      className="h-24 w-20 shrink-0 rounded-md border bg-card object-cover"
-    />
+    <div className="relative h-24 w-20 shrink-0">
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img
+        src={scan.thumbUrl}
+        alt={`Miniatura de la página ${scan.pageIndex + 1}`}
+        className="h-24 w-20 rounded-md border bg-card object-cover"
+      />
+      {interactive && (
+        <span className="pointer-events-none absolute bottom-1 right-1 rounded bg-background/90 p-1 text-muted-foreground">
+          <Maximize2 className="size-3" aria-hidden />
+        </span>
+      )}
+    </div>
   );
 }
 
@@ -119,14 +136,23 @@ function ScanRow({
   batchId,
   scan,
   title,
+  hint,
 }: {
   batchId: string;
   scan: ReviewScanModel;
   title: string;
+  hint: string;
 }) {
+  const [discardOpen, setDiscardOpen] = useState(false);
+
   return (
     <li className="flex flex-wrap items-center gap-4 py-3">
-      <ScanThumb scan={scan} />
+      <ScanPreviewDialog
+        scan={scan}
+        title={title}
+        hint={hint}
+        onDiscardRequested={() => setDiscardOpen(true)}
+      />
       <div className="min-w-0 flex-1">
         <p className="text-sm font-medium text-foreground">{title}</p>
         <p className="text-xs text-muted-foreground">
@@ -134,8 +160,84 @@ function ScanRow({
           {scan.studentName ? ` · ${scan.studentName}` : ''}
         </p>
       </div>
-      <DiscardScanDialog batchId={batchId} scan={scan} />
+      <DiscardScanDialog
+        batchId={batchId}
+        scan={scan}
+        open={discardOpen}
+        onOpenChange={setDiscardOpen}
+      />
     </li>
+  );
+}
+
+/**
+ * La miniatura de ~400 px es la única evidencia guardada de la página, y con
+ * ella la persona decide si un alumno no respondió. Verla en grande antes de
+ * confirmar es parte de la decisión, no un adorno.
+ */
+function ScanPreviewDialog({
+  scan,
+  title,
+  hint,
+  onDiscardRequested,
+}: {
+  scan: ReviewScanModel;
+  title: string;
+  hint: string;
+  onDiscardRequested: () => void;
+}) {
+  const [open, setOpen] = useState(false);
+
+  if (!scan.thumbUrl) return <ScanThumb scan={scan} />;
+
+  return (
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogTrigger asChild>
+        <button
+          type="button"
+          className="rounded-md outline-none transition hover:opacity-90 focus-visible:ring-2 focus-visible:ring-ring"
+          aria-label={`Ver en grande la página ${scan.pageIndex + 1}: ${title}`}
+        >
+          <ScanThumb scan={scan} interactive />
+        </button>
+      </DialogTrigger>
+      <DialogContent className="max-w-3xl">
+        <DialogHeader>
+          <DialogTitle>{title}</DialogTitle>
+          <DialogDescription>
+            {scanOriginLabel(scan)}
+            {scan.studentName ? ` · ${scan.studentName}` : ''}. {hint}
+          </DialogDescription>
+        </DialogHeader>
+        <div className="flex max-h-[60vh] justify-center overflow-auto rounded-md border bg-muted/40 p-2">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src={scan.thumbUrl}
+            alt={`Página ${scan.pageIndex + 1} escaneada${scan.studentName ? ` de ${scan.studentName}` : ''}: ${title}`}
+            className="w-full max-w-xl rounded bg-card object-contain"
+          />
+        </div>
+        <p className="text-xs text-muted-foreground">
+          La imagen guardada es una miniatura de la captura: alcanza para ver si hay marcas en la
+          hoja, no para leer letra chica.
+        </p>
+        <DialogFooter>
+          <Button variant="outline" onClick={() => setOpen(false)}>
+            Cerrar y continuar
+          </Button>
+          <Button
+            variant="destructive"
+            onClick={() => {
+              setOpen(false);
+              onDiscardRequested();
+            }}
+          >
+            <Trash2 className="mr-2 size-4" aria-hidden />
+            Descartar página
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   );
 }
 
@@ -163,6 +265,7 @@ function BlankSheetsSection({ batchId, scans }: { batchId: string; scans: Review
               batchId={batchId}
               scan={scan}
               title="Hoja sin marcas detectadas"
+              hint="Si la hoja está en blanco, ciérrala y continúa. Si ves marcas, vuelve a fotografiarla."
             />
           ))}
         </ul>
@@ -198,6 +301,7 @@ function UnreadablePagesSection({ batchId, scans }: { batchId: string; scans: Re
                   ? REJECT_REASON_LABELS[scan.rejectReason]
                   : 'Página rechazada por calidad'
               }
+              hint="Mira si está movida, con sombra o recortada: eso te dice cómo repetir la foto."
             />
           ))}
         </ul>
@@ -206,8 +310,17 @@ function UnreadablePagesSection({ batchId, scans }: { batchId: string; scans: Re
   );
 }
 
-function DiscardScanDialog({ batchId, scan }: { batchId: string; scan: ReviewScanModel }) {
-  const [open, setOpen] = useState(false);
+function DiscardScanDialog({
+  batchId,
+  scan,
+  open,
+  onOpenChange,
+}: {
+  batchId: string;
+  scan: ReviewScanModel;
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+}) {
   const [reason, setReason] = useState('');
   const discard = useDiscardScan(batchId);
 
@@ -221,7 +334,7 @@ function DiscardScanDialog({ batchId, scan }: { batchId: string; scan: ReviewSca
       { scanId: scan.scanId, reason: parsed.data.reason },
       {
         onSuccess: () => {
-          setOpen(false);
+          onOpenChange(false);
           setReason('');
           toast.success('Página descartada del lote.');
         },
@@ -230,7 +343,7 @@ function DiscardScanDialog({ batchId, scan }: { batchId: string; scan: ReviewSca
   }
 
   return (
-    <AlertDialog open={open} onOpenChange={setOpen}>
+    <AlertDialog open={open} onOpenChange={onOpenChange}>
       <AlertDialogTrigger asChild>
         <Button variant="outline" size="sm">
           <Trash2 className="mr-2 size-4" aria-hidden />
