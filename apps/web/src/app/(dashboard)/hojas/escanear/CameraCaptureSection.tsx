@@ -14,6 +14,12 @@ import {
 } from '../lotes/[batchId]/revisar/review-labels';
 import { assessIdentityLabel } from './capture-identity';
 import {
+  CAPTURE_FRAMING_TIP,
+  CLEAR_SURFACE_REASON,
+  CLEAR_SURFACE_TIP,
+  rejectionHint,
+} from './capture-hints';
+import {
   fileToCapturedJpeg,
   isCameraSupported,
   useCameraCapture,
@@ -24,7 +30,7 @@ import { useAssessCapture } from '../hooks/use-assess-capture';
 type GateState =
   | { phase: 'live' }
   | { phase: 'assessing'; previewUrl: string }
-  | { phase: 'rejected'; previewUrl: string; reason: string }
+  | { phase: 'rejected'; previewUrl: string; reason: string; hint: string }
   | {
       phase: 'blank-confirm';
       previewUrl: string;
@@ -149,7 +155,12 @@ export function CameraCaptureSection(props: CameraCaptureSectionProps) {
           return;
         }
         if (!result.accepted) {
-          setGate({ phase: 'rejected', previewUrl, reason: rejectionLabel(result.quality) });
+          setGate({
+            phase: 'rejected',
+            previewUrl,
+            reason: rejectionLabel(result.quality),
+            hint: rejectionHint(result.quality.rejectReason),
+          });
           return;
         }
         upload(capture.blob, result.identity, previewUrl);
@@ -233,6 +244,12 @@ export function CameraCaptureSection(props: CameraCaptureSectionProps) {
         </div>
       )}
 
+      {capturedCount === 0 && gate.phase === 'live' && (
+        <AlertCallout tone="info" title="Antes de la primera foto">
+          {CLEAR_SURFACE_TIP} {CLEAR_SURFACE_REASON}
+        </AlertCallout>
+      )}
+
       {useFallback ? (
         <div className="space-y-3">
           <AlertCallout tone="info" title="Cámara no disponible en este navegador">
@@ -244,6 +261,7 @@ export function CameraCaptureSection(props: CameraCaptureSectionProps) {
             <RejectedVerdict
               previewUrl={gate.previewUrl}
               reason={gate.reason}
+              hint={gate.hint}
               onRetake={() => backToLive(gate.previewUrl)}
             />
           ) : gate.phase === 'blank-confirm' ? (
@@ -322,12 +340,14 @@ export function CameraCaptureSection(props: CameraCaptureSectionProps) {
             )}
           </div>
 
-          <p className="text-center text-xs text-muted-foreground">
-            Encuadra la hoja completa dentro del marco, plana y sin reflejos.
-          </p>
+          <p className="text-center text-xs text-muted-foreground">{CAPTURE_FRAMING_TIP}</p>
 
           {gate.phase === 'rejected' ? (
-            <RejectedVerdict reason={gate.reason} onRetake={() => backToLive(gate.previewUrl)} />
+            <RejectedVerdict
+              reason={gate.reason}
+              hint={gate.hint}
+              onRetake={() => backToLive(gate.previewUrl)}
+            />
           ) : gate.phase === 'blank-confirm' ? (
             <BlankSheetVerdict
               onRetake={() => backToLive(gate.previewUrl)}
@@ -397,10 +417,12 @@ function BlankSheetVerdict({
 function RejectedVerdict({
   previewUrl,
   reason,
+  hint,
   onRetake,
 }: {
   previewUrl?: string;
   reason: string;
+  hint: string;
   onRetake: () => void;
 }) {
   return (
@@ -414,7 +436,7 @@ function RejectedVerdict({
         />
       )}
       <AlertCallout tone="danger" title="Foto rechazada: no entra al lote">
-        {reason}. Vuelve a tomarla con la hoja completa, plana y bien iluminada.
+        {reason}. {hint}
       </AlertCallout>
       <Button type="button" size="lg" variant="outline" className="w-full" onClick={onRetake}>
         <RotateCcw className="mr-2 size-5" aria-hidden />
