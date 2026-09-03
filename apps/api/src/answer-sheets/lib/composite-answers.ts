@@ -142,6 +142,18 @@ export function resolveRowAnswers(
   return { byPosition, unmatchedLabels, unexpectedCompositePositions };
 }
 
+export function resolveAnnulledPositions(
+  index: Map<string, ResolvableItem>,
+  annulledLabels: readonly string[] | undefined,
+): Set<number> {
+  const positions = new Set<number>();
+  for (const label of annulledLabels ?? []) {
+    const resolved = resolveScanLabel(index, label, null);
+    if (resolved.kind !== 'unmatched') positions.add(resolved.item.position);
+  }
+  return positions;
+}
+
 /**
  * Traduce las sub-respuestas de un pareado a `{ leftId: rightId }`.
  *

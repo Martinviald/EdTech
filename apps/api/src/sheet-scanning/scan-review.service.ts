@@ -24,6 +24,7 @@ import type {
   ConfirmBatchResponse,
   DiscardScanDto,
   LayoutSpec,
+  MarkReviewDecision,
   MarkState,
   PageQuality,
   ReviewMarkDto,
@@ -127,6 +128,7 @@ type MarkQueueRow = {
   margin: string;
   cropFileId: string | null;
   reviewedValue: string | null;
+  reviewDecision: MarkReviewDecision | null;
   reviewedById: string | null;
 };
 
@@ -137,6 +139,7 @@ type ConfirmMarkRow = {
   state: MarkState;
   value: string | null;
   reviewedValue: string | null;
+  reviewDecision: MarkReviewDecision | null;
   reviewedAt: Date | null;
 };
 
@@ -258,7 +261,8 @@ export class ScanReviewService {
       }
 
       const options = this.buildOptionsIndex(row.spec).get(row.fieldId) ?? [];
-      if (dto.reviewedValue !== null && !options.includes(dto.reviewedValue)) {
+      const reviewedValue = dto.decision === 'option' ? dto.reviewedValue : null;
+      if (dto.decision === 'option' && !options.includes(dto.reviewedValue)) {
         throw new BadRequestException(
           `"${dto.reviewedValue}" no es una alternativa válida para la pregunta ${row.printedNumber}. Alternativas: ${options.join(', ')}`,
         );
@@ -266,7 +270,12 @@ export class ScanReviewService {
 
       await tx
         .update(sheetScanMarks)
-        .set({ reviewedValue: dto.reviewedValue, reviewedById: userId, reviewedAt: new Date() })
+        .set({
+          reviewedValue,
+          reviewDecision: dto.decision,
+          reviewedById: userId,
+          reviewedAt: new Date(),
+        })
         .where(eq(sheetScanMarks.id, markId));
 
       await this.recountReviewPending(tx, orgId, row.batchId);
@@ -290,7 +299,8 @@ export class ScanReviewService {
         margin: Number(row.margin),
         cropUrl,
         options,
-        reviewedValue: dto.reviewedValue,
+        reviewedValue,
+        reviewedDecision: dto.decision,
         reviewedById: userId,
       };
     });
@@ -475,6 +485,7 @@ export class ScanReviewService {
           state: sheetScanMarks.state,
           value: sheetScanMarks.value,
           reviewedValue: sheetScanMarks.reviewedValue,
+          reviewDecision: sheetScanMarks.reviewDecision,
           reviewedAt: sheetScanMarks.reviewedAt,
         })
         .from(sheetScanMarks)
@@ -568,7 +579,9 @@ export class ScanReviewService {
           printedNumber: mark.printedNumber,
           state: mark.state,
           value: mark.value,
-          ...(reviewed ? { reviewedValue: mark.reviewedValue } : {}),
+          ...(reviewed
+            ? { reviewedValue: mark.reviewedValue, reviewDecision: mark.reviewDecision }
+            : {}),
         });
       }
       confirmedScans.push({
@@ -698,6 +711,7 @@ export class ScanReviewService {
         margin: sheetScanMarks.margin,
         cropFileId: sheetScanMarks.cropFileId,
         reviewedValue: sheetScanMarks.reviewedValue,
+        reviewDecision: sheetScanMarks.reviewDecision,
         reviewedById: sheetScanMarks.reviewedById,
       })
       .from(sheetScanMarks)
@@ -863,6 +877,7 @@ export class ScanReviewService {
       cropUrl,
       options,
       reviewedValue: mark.reviewedValue,
+      reviewedDecision: mark.reviewDecision,
       reviewedById: mark.reviewedById,
     };
   }

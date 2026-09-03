@@ -1,8 +1,8 @@
 'use client';
 
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { ArrowLeft, ArrowRight, CheckCircle2, CircleOff, ImageOff } from 'lucide-react';
-import type { ReviewMarkModel } from '@soe/types';
+import { ArrowLeft, ArrowRight, Ban, CheckCircle2, CircleOff, ImageOff } from 'lucide-react';
+import type { ReviewMarkDto, ReviewMarkModel } from '@soe/types';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { cn } from '@/lib/utils';
@@ -10,7 +10,19 @@ import { AlertCallout } from '@/components/shared';
 import { isMarkResolved, useResolveMark } from '../../../hooks/use-review-queue';
 import { MARK_STATE_LABELS } from './review-labels';
 
-const BLANK_VALUE = null;
+const BLANK_DECISION: ReviewMarkDto = { decision: 'blank' };
+const ANNULLED_DECISION: ReviewMarkDto = { decision: 'annulled' };
+
+/**
+ * Teclas candidatas para "anulada", en orden. Se usa la primera que no sea una
+ * alternativa del campo: en un verdadero/falso las opciones son V y F, pero
+ * nada impide que un instrumento use N o X como alternativa.
+ */
+const ANNUL_KEY_CANDIDATES = ['N', 'X'] as const;
+
+function pickAnnulKey(options: string[]): string | null {
+  return ANNUL_KEY_CANDIDATES.find((key) => !options.includes(key)) ?? null;
+}
 
 function Kbd({ children }: { children: React.ReactNode }) {
   return (
@@ -20,13 +32,7 @@ function Kbd({ children }: { children: React.ReactNode }) {
   );
 }
 
-export function MarkReviewPanel({
-  batchId,
-  marks,
-}: {
-  batchId: string;
-  marks: ReviewMarkModel[];
-}) {
+export function MarkReviewPanel({ batchId, marks }: { batchId: string; marks: ReviewMarkModel[] }) {
   const [index, setIndex] = useState(0);
   const containerRef = useRef<HTMLDivElement>(null);
   const resolveMark = useResolveMark(batchId);
@@ -71,9 +77,9 @@ export function MarkReviewPanel({
   }, [marks.length, focusPanel]);
 
   const resolve = useCallback(
-    (reviewedValue: string | null) => {
+    (decision: ReviewMarkDto) => {
       if (!current) return;
-      resolveMark.mutate({ markId: current.markId, reviewedValue });
+      resolveMark.mutate({ markId: current.markId, decision });
       const next = findNextUnresolved(safeIndex, current.markId);
       if (next !== null) setIndex(next);
       focusPanel();
@@ -100,12 +106,17 @@ export function MarkReviewPanel({
         (upper === 'B' && !current.options.includes('B'))
       ) {
         e.preventDefault();
-        resolve(BLANK_VALUE);
+        resolve(BLANK_DECISION);
+        return;
+      }
+      if (upper === pickAnnulKey(current.options)) {
+        e.preventDefault();
+        resolve(ANNULLED_DECISION);
         return;
       }
       if (current.options.includes(upper)) {
         e.preventDefault();
-        resolve(upper);
+        resolve({ decision: 'option', reviewedValue: upper });
       }
     },
     [current, goNext, goPrev, resolve],
@@ -115,6 +126,9 @@ export function MarkReviewPanel({
 
   const currentResolved = isMarkResolved(current);
   const blankKeyLabel = current.options.includes('B') ? '0' : 'B / 0';
+  const annulKey = pickAnnulKey(current.options);
+  const blankSelected = currentResolved && current.reviewedDecision === 'blank';
+  const annulledSelected = currentResolved && current.reviewedDecision === 'annulled';
 
   return (
     <Card>
@@ -128,7 +142,13 @@ export function MarkReviewPanel({
           </CardTitle>
           <p className="hidden items-center gap-2 text-xs text-muted-foreground sm:flex">
             <Kbd>{current.options.join(' ')}</Kbd> alternativa · <Kbd>{blankKeyLabel}</Kbd> en
-            blanco · <Kbd>Enter</Kbd> siguiente · <Kbd>←</Kbd> anterior
+            blanco ·{' '}
+            {annulKey && (
+              <>
+                <Kbd>{annulKey}</Kbd> anulada ·{' '}
+              </>
+            )}
+            <Kbd>Enter</Kbd> siguiente · <Kbd>←</Kbd> anterior
           </p>
         </div>
         <CardDescription>
@@ -193,7 +213,10 @@ export function MarkReviewPanel({
             <div className="flex flex-col justify-center gap-3">
               <div className="grid grid-cols-3 gap-2 sm:grid-cols-2">
                 {current.options.map((option) => {
-                  const selected = currentResolved && current.reviewedValue === option;
+                  const selected =
+                    currentResolved &&
+                    current.reviewedDecision === 'option' &&
+                    current.reviewedValue === option;
                   return (
                     <Button
                       key={option}
@@ -203,7 +226,7 @@ export function MarkReviewPanel({
                       className="h-14 min-w-16 text-lg font-semibold"
                       aria-label={`Marcar alternativa ${option}`}
                       aria-pressed={selected}
-                      onClick={() => resolve(option)}
+                      onClick={() => resolve({ decision: 'option', reviewedValue: option })}
                     >
                       {option}
                     </Button>
@@ -212,19 +235,33 @@ export function MarkReviewPanel({
               </div>
               <Button
                 type="button"
-                variant={
-                  currentResolved && current.reviewedValue === null ? 'default' : 'outline'
-                }
-                aria-label="Marcar como en blanco"
-                aria-pressed={currentResolved && current.reviewedValue === null}
-                onClick={() => resolve(BLANK_VALUE)}
+                variant={blankSelected ? 'default' : 'outline'}
+                aria-label="Marcar como en blanco: el alumno no respondió"
+                aria-pressed={blankSelected}
+                onClick={() => resolve(BLANK_DECISION)}
               >
                 <CircleOff className="mr-2 size-4" aria-hidden />
                 En blanco
               </Button>
+              <Button
+                type="button"
+                variant={annulledSelected ? 'destructive' : 'outline'}
+                aria-label="Anular la respuesta: el alumno respondió, pero la respuesta se anula por regla de la prueba"
+                aria-pressed={annulledSelected}
+                onClick={() => resolve(ANNULLED_DECISION)}
+              >
+                <Ban className="mr-2 size-4" aria-hidden />
+                Anulada
+              </Button>
               <p className="text-xs text-muted-foreground">
-                Lectura de máquina: {current.value ?? 'sin valor'} · no se sobrescribe, tu
-                decisión queda aparte.
+                Lectura de máquina: {current.value ?? 'sin valor'} · no se sobrescribe, tu decisión
+                queda aparte.
+              </p>
+              <p className="text-xs text-muted-foreground">
+                <strong className="font-medium text-foreground">En blanco</strong>: el alumno no
+                respondió. <strong className="font-medium text-foreground">Anulada</strong>: sí
+                respondió, pero la respuesta se anula por regla de la prueba (por ejemplo, marcó dos
+                alternativas). Ambas puntúan 0; la diferencia queda registrada.
               </p>
             </div>
           </div>

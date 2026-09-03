@@ -321,6 +321,15 @@ export const markStateEnum = pgEnum('mark_state', [
   'ambiguous',
 ]);
 
+// Tipo de decisión del revisor sobre una marca dudosa. `annulled` = el alumno
+// respondió pero la respuesta se anula por regla de la prueba (doble marca);
+// NO es lo mismo que `blank`, aunque ambas puntúen 0.
+export const markReviewDecisionEnum = pgEnum('mark_review_decision', [
+  'option',
+  'blank',
+  'annulled',
+]);
+
 // ── Feedback in-app (widget de comentarios) ──
 export const feedbackTypeEnum = pgEnum('feedback_type', [
   'bug', // "Algo no funciona"

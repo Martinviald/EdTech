@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { and, eq, inArray, isNotNull, ne, sql } from 'drizzle-orm';
+import { and, eq, inArray, isNotNull, ne, or, sql } from 'drizzle-orm';
 import {
   markStateEnum,
   sheetScanBatchStatusEnum,
@@ -57,8 +57,13 @@ export class SheetScanMetricsService {
           and(
             activeScanMarks,
             inArray(sheetScanMarks.state, [...FIRM_MARK_STATES]),
-            isNotNull(sheetScanMarks.reviewedValue),
-            sql`${sheetScanMarks.reviewedValue} IS DISTINCT FROM ${sheetScanMarks.value}`,
+            or(
+              eq(sheetScanMarks.reviewDecision, 'annulled'),
+              and(
+                isNotNull(sheetScanMarks.reviewedValue),
+                sql`${sheetScanMarks.reviewedValue} IS DISTINCT FROM ${sheetScanMarks.value}`,
+              ),
+            ),
           ),
         );
 

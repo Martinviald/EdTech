@@ -56,6 +56,7 @@ import { matchStudents } from './lib/student-matcher';
 import {
   buildPrintedLabelIndex,
   resolveRowAnswers,
+  resolveAnnulledPositions,
   toScoringAnswer,
 } from './lib/composite-answers';
 
@@ -355,9 +356,13 @@ export class AnswerSheetsService {
       // varias sub-columnas para una sola pregunta (`7B1`…`7B4`). Se resuelve
       // contra los ítems del instrumento antes de corregir.
       const resolvedRow = resolveRowAnswers(labelIndex, row.answers);
+      const annulledPositions = resolveAnnulledPositions(labelIndex, row.annulledLabels);
 
       for (const item of instrumentItems) {
         const rawAnswer = toScoringAnswer(item, resolvedRow.byPosition.get(item.position));
+        const answerValue = annulledPositions.has(item.position)
+          ? { answer: rawAnswer, annulled: true }
+          : { answer: rawAnswer };
         const result = getScoringStrategy(item.type).score({
           item: {
             id: item.id,
@@ -377,7 +382,7 @@ export class AnswerSheetsService {
             assessmentId: '', // se completa una vez creado el assessment
             studentId,
             itemId: item.id,
-            value: { answer: rawAnswer },
+            value: answerValue,
             isCorrect: null,
             rawScore: null,
             maxScore: item.maxScore.toFixed(2),
@@ -395,7 +400,7 @@ export class AnswerSheetsService {
           assessmentId: '', // se completa una vez creado el assessment
           studentId,
           itemId: item.id,
-          value: { answer: rawAnswer },
+          value: answerValue,
           isCorrect: result.isCorrect,
           rawScore: rawScore.toFixed(2),
           maxScore: item.maxScore.toFixed(2),

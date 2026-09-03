@@ -86,10 +86,29 @@ export const createScanBatchSchema = z.object({
   sources: z.array(scanBatchSourceSchema).min(1).max(60),
 });
 
-/** `reviewedValue: null` = el humano decidió "en blanco". La lectura de máquina nunca se sobrescribe (§8.3). */
-export const reviewMarkSchema = z.object({
-  reviewedValue: z.string().max(20).nullable(),
-});
+/**
+ * Tipo de decisión del revisor sobre una marca dudosa. Las tres son estados
+ * distintos y NO se pueden representar con un solo `reviewedValue`:
+ *
+ * - `option`   → el humano leyó una alternativa concreta;
+ * - `blank`    → el alumno no respondió;
+ * - `annulled` → el alumno SÍ respondió pero la respuesta se anula por regla de
+ *   la prueba (típicamente doble marca). Puntúa igual que en blanco, pero la
+ *   evidencia de POR QUÉ queda registrada y es distinguible.
+ */
+export const MARK_REVIEW_DECISIONS = ['option', 'blank', 'annulled'] as const;
+export type MarkReviewDecision = (typeof MARK_REVIEW_DECISIONS)[number];
+
+/**
+ * La lectura de máquina nunca se sobrescribe (§8.3): la decisión humana viaja
+ * aparte. Union discriminada para que "anulada" no pueda confundirse con "en
+ * blanco" ni con un centinela dentro de `reviewedValue`.
+ */
+export const reviewMarkSchema = z.discriminatedUnion('decision', [
+  z.object({ decision: z.literal('option'), reviewedValue: z.string().min(1).max(20) }),
+  z.object({ decision: z.literal('blank') }),
+  z.object({ decision: z.literal('annulled') }),
+]);
 
 export const assignScanIdentitySchema = z.object({
   studentId: z.string().uuid(),
@@ -279,6 +298,8 @@ export type ReviewMarkModel = {
   /** Alternativas del campo según el spec, para resolver con una tecla (C16). */
   options: string[];
   reviewedValue: string | null;
+  /** `null` = nadie la revisó todavía. */
+  reviewedDecision: MarkReviewDecision | null;
   reviewedById: string | null;
 };
 
