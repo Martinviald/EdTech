@@ -6,11 +6,19 @@ export const metadata: Metadata = {
   robots: { index: false, follow: false },
 };
 
+const TOAST_OFFSET = { bottom: 'calc(env(safe-area-inset-bottom) + 5.5rem)' };
+
 export default function MovilLayout({ children }: { children: React.ReactNode }) {
   return (
-    <div className="mx-auto flex min-h-screen w-full max-w-md flex-col bg-background px-4 py-6">
+    <div className="mx-auto flex min-h-dvh w-full max-w-md flex-col bg-background px-4 pb-4 pt-6">
       {children}
-      <Toaster position="top-center" richColors closeButton />
+      <Toaster
+        position="bottom-center"
+        richColors
+        closeButton
+        offset={TOAST_OFFSET}
+        mobileOffset={TOAST_OFFSET}
+      />
     </div>
   );
 }

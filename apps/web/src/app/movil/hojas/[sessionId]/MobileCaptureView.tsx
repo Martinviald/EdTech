@@ -3,11 +3,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { toast } from 'sonner';
 import { CheckCircle2, Loader2, Send } from 'lucide-react';
-import type {
-  AssessCaptureIdentityModel,
-  CaptureTransport,
-  ScanUploadIntent,
-} from '@soe/types';
+import type { AssessCaptureIdentityModel, CaptureTransport, ScanUploadIntent } from '@soe/types';
 import { Button } from '@/components/ui/button';
 import { AlertCallout } from '@/components/shared';
 import { CameraCaptureSection } from '@/app/(dashboard)/hojas/escanear/CameraCaptureSection';
@@ -147,9 +143,7 @@ export function MobileCaptureView({ sessionId }: { sessionId: string }) {
       })
       .catch((err: unknown) => {
         if (!isSessionGone(err)) {
-          toast.error(
-            captureErrorMessage(err, 'No se pudo subir la foto. Vuelve a tomarla.'),
-          );
+          toast.error(captureErrorMessage(err, 'No se pudo subir la foto. Vuelve a tomarla.'));
         }
       })
       .finally(() => setUploadingCount((n) => n - 1));
@@ -199,8 +193,7 @@ export function MobileCaptureView({ sessionId }: { sessionId: string }) {
     return (
       <div className="flex flex-1 flex-col justify-center">
         <AlertCallout tone="warning" title="La sesión de captura terminó">
-          {state.message} Las fotos ya subidas quedaron guardadas en el computador.{' '}
-          {ASK_FOR_NEW_QR}
+          {state.message} Las fotos ya subidas quedaron guardadas en el computador. {ASK_FOR_NEW_QR}
         </AlertCallout>
       </div>
     );
@@ -238,30 +231,32 @@ export function MobileCaptureView({ sessionId }: { sessionId: string }) {
         />
       )}
 
-      {uploadingCount > 0 && (
-        <p
-          className="flex items-center justify-center gap-2 text-sm text-muted-foreground"
-          role="status"
-        >
-          <Loader2 className="size-4 animate-spin" aria-hidden />
-          Subiendo {uploadingCount === 1 ? 'una foto' : `${uploadingCount} fotos`}…
-        </p>
-      )}
-
-      <Button
-        type="button"
-        size="lg"
-        className="w-full"
-        disabled={finishPending || uploadingCount > 0 || capturedCount === 0}
-        onClick={handleFinish}
-      >
-        {finishPending ? (
-          <Loader2 className="mr-2 size-5 animate-spin" aria-hidden />
-        ) : (
-          <Send className="mr-2 size-5" aria-hidden />
+      <div className="sticky bottom-0 -mx-4 -mb-4 mt-auto space-y-2 border-t border-border bg-background/95 px-4 pt-3 pb-[calc(env(safe-area-inset-bottom)+0.75rem)] backdrop-blur supports-[backdrop-filter]:bg-background/80">
+        {uploadingCount > 0 && (
+          <p
+            className="flex items-center justify-center gap-2 text-sm text-muted-foreground"
+            role="status"
+          >
+            <Loader2 className="size-4 animate-spin" aria-hidden />
+            Subiendo {uploadingCount === 1 ? 'una foto' : `${uploadingCount} fotos`}…
+          </p>
         )}
-        {finishPending ? 'Enviando el lote…' : 'Terminar y procesar'}
-      </Button>
+
+        <Button
+          type="button"
+          size="lg"
+          className="w-full"
+          disabled={finishPending || uploadingCount > 0 || capturedCount === 0}
+          onClick={handleFinish}
+        >
+          {finishPending ? (
+            <Loader2 className="mr-2 size-5 animate-spin" aria-hidden />
+          ) : (
+            <Send className="mr-2 size-5" aria-hidden />
+          )}
+          {finishPending ? 'Enviando el lote…' : 'Terminar y procesar'}
+        </Button>
+      </div>
     </div>
   );
 }
