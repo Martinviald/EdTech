@@ -83,6 +83,7 @@ from .rectify import (
     leave_one_out_rectifications,
     rectify,
     refine_reconstruction,
+    widened_rectification,
 )
 from .sources import Fetch, build_page_source, fetch_url
 
@@ -275,6 +276,7 @@ def _classify_once(
         "fiducialsFound": quality["fiducialsFound"],
         "rejectReason": quality["rejectReason"],
         "illuminationFlattened": flattened,
+        "fiducialRescue": _rescue_evidence(rectified),
         "stateCounts": {
             state: sum(1 for mark in marks if mark["state"] == state) for state in MARK_STATES
         },
@@ -316,6 +318,10 @@ def _rectify_oriented(
     logical_page = file_page_index % spec["pageCount"]
     confirmable = spec["identity"]["mode"] in ("qr", "rut_bubbles")
     first = rectify(bgr, spec, allow_reconstruction=confirmable)
+    if first.fiducials_found < 4:
+        rescued = _rescue_with_wide_radius(bgr, spec, logical_page)
+        if rescued is not None:
+            return bgr, rescued, 0, True
     if _homography_confirmed(first, spec, logical_page):
         return bgr, _refine_accepted(bgr, spec, first, logical_page), 0, True
     if not confirmable:
@@ -323,12 +329,65 @@ def _rectify_oriented(
     for degrees, rotation_code in ORIENTATION_ROTATIONS:
         rotated = cv2.rotate(bgr, rotation_code)
         candidate = rectify(rotated, spec, allow_reconstruction=True)
+        if candidate.fiducials_found < 4:
+            rescued = _rescue_with_wide_radius(rotated, spec, logical_page)
+            if rescued is not None:
+                return rotated, rescued, degrees, True
         if _homography_confirmed(candidate, spec, logical_page):
             return rotated, _refine_accepted(rotated, spec, candidate, logical_page), degrees, True
     for candidate in leave_one_out_rectifications(bgr, spec):
         if _homography_confirmed(candidate, spec, logical_page):
             return bgr, _refine_accepted(bgr, spec, candidate, logical_page), 0, True
     return bgr, _discard_unconfirmed_reconstruction(bgr, spec, first), 0, False
+
+
+def _rescue_evidence(rectified: RectifiedPage | FiducialFailure) -> list[int] | None:
+    """Que esquinas se recuperaron con radio ampliado, para poder auditarlo despues.
+
+    Va en el payload de debug y no en `quality`, que es contrato cerrado
+    (`additionalProperties: false` en scan-result.schema.json) y cambiarlo
+    arrastraria al backend. None cuando la pagina no paso por este camino, que
+    es el caso normal.
+    """
+    if not isinstance(rectified, RectifiedPage) or not rectified.widened_corners:
+        return None
+    return list(rectified.widened_corners)
+
+
+def _rescue_with_wide_radius(
+    bgr: np.ndarray, spec: dict[str, Any], logical_page: int
+) -> RectifiedPage | None:
+    """Recupera una pagina a la que el tope de distancia le corto fiduciales VERDADEROS.
+
+    Una hoja fotografiada de lado, o que no llena el encuadre, aleja sus
+    esquinas de las de la imagen y `MAX_CORNER_DISTANCE_FRACTION` descarta
+    cuadrados legitimos. Medido sobre 19 fotos reales: la foto de lado perdia
+    una esquina por 61 px, y 5 de 7 fotos de una hoja en blanco encontraban
+    solo 2 de 4. Con 2 fiduciales no hay siquiera paralelogramo que cerrar, asi
+    que el reintento ampliado es la unica via.
+
+    El gate es `_grid_signature_confirmed` y NO `_homography_confirmed`, y esa
+    distincion es todo el punto. Medido sobre la foto de lado:
+
+                                         QR decodifica   firma de grilla
+        paralelogramo, 3 fiduciales           si               NO
+        4 fiduciales reales (radio ampliado)  si               si
+
+    El QR tolera una homografia torcida — salia con confianza 1.0 mientras las
+    burbujas no calzaban y la pagina moria en `no_separable_marks`. Aceptar por
+    QR una rectificacion de radio ampliado seria aceptar justo lo que no
+    distingue los dos casos. La firma si los separa, y es el mismo validador
+    independiente que ya contiene el riesgo de coronar una mancha.
+
+    Corre solo cuando la busqueda estricta encontro menos de 4, asi que el
+    camino feliz no paga nada.
+    """
+    candidate = widened_rectification(bgr, spec)
+    if candidate is None:
+        return None
+    if not _grid_signature_confirmed(candidate, spec, logical_page):
+        return None
+    return candidate
 
 
 def _refine_accepted(
